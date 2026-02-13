@@ -162,3 +162,22 @@ def test_config_app_reads_required_secrets_from_file_env(
 
     assert app.config["SECRET_KEY"] == "file-secret"
     assert app.config["SECURITY_PASSWORD_SALT"] == b"file-salt"
+
+
+def test_config_app_builds_database_uri_from_postgres_password_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    password_path = tmp_path / "postgres_password"
+    password_path.write_text("p@ss\n", encoding="utf-8")
+
+    monkeypatch.setenv("POSTGRES_PASSWORD_FILE", str(password_path))
+    monkeypatch.setenv("POSTGRES_HOST", "db")
+    monkeypatch.setenv("POSTGRES_PORT", "5433")
+    monkeypatch.setenv("POSTGRES_DB", "dbname")
+    monkeypatch.setenv("POSTGRES_USER", "user")
+    monkeypatch.delenv("SQLALCHEMY_DATABASE_URI", raising=False)
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+
+    app = _build_configured_app(monkeypatch)
+
+    assert app.config["SQLALCHEMY_DATABASE_URI"] == "postgresql://user:p%40ss@db:5433/dbname"

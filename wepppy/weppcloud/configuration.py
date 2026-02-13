@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote
 
 import redis
 
@@ -86,6 +87,23 @@ def _resolve_mail_config() -> Dict[str, Any]:
         "MAIL_USERNAME": "noreply@uidaho.edu",
         "SECURITY_EMAIL_SENDER": "cals-wepp@uidaho.edu",
     }
+
+
+def _build_postgres_uri() -> str:
+    """Build a PostgreSQL SQLAlchemy URI from non-secret env + POSTGRES_PASSWORD."""
+
+    host = (os.getenv("POSTGRES_HOST") or "postgres").strip() or "postgres"
+    port = (os.getenv("POSTGRES_PORT") or "5432").strip() or "5432"
+    dbname = (os.getenv("POSTGRES_DB") or "wepppy").strip() or "wepppy"
+    user = (os.getenv("POSTGRES_USER") or "wepppy").strip() or "wepppy"
+    password = get_secret("POSTGRES_PASSWORD")
+
+    user_enc = quote(user, safe="")
+    if password:
+        password_enc = quote(password, safe="")
+        return f"postgresql://{user_enc}:{password_enc}@{host}:{port}/{dbname}"
+
+    return f"postgresql://{user_enc}@{host}:{port}/{dbname}"
 
 
 def _build_oauth_redirect_uri(
@@ -248,7 +266,7 @@ def config_app(app: Any):
     app.config["SQLALCHEMY_DATABASE_URI"] = (
         os.getenv("SQLALCHEMY_DATABASE_URI")
         or os.getenv("DATABASE_URL")
-        or "postgresql://wepppy:c0ff33@postgres/wepppy"
+        or _build_postgres_uri()
     )
     idle_in_tx_timeout = os.getenv("POSTGRES_IDLE_IN_TX_TIMEOUT")
     if idle_in_tx_timeout:

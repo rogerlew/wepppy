@@ -12,20 +12,15 @@ x-wepppy-image: &wepppy-image
 x-wepppy-env: &wepppy-env
   PYTHONUNBUFFERED: "1"
   MPLCONFIGDIR: /tmp/matplotlib
-  REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
   REDIS_HOST: ${REDIS_HOST:-redis}
-  DATABASE_URL: ${DATABASE_URL}
+  REDIS_PASSWORD_FILE: /run/secrets/redis_password
   SITE_PREFIX: ${SITE_PREFIX:-/weppcloud}
-  WEPP_AUTH_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET:?set WEPP_AUTH_JWT_SECRET in docker/.env for production}
-  WEPP_AUTH_JWT_SECRETS: ${WEPP_AUTH_JWT_SECRETS:-}
   EXTERNAL_HOST: ${EXTERNAL_HOST:-}
   EXTERNAL_HOST_DESCRIPTION: ${EXTERNAL_HOST_DESCRIPTION:-}
   WC1_DIR: /wc1
   GEODATA_DIR: /geodata
-  OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
-  CLIMATE_ENGINE_API_KEY: ${CLIMATE_ENGINE_API_KEY}
   DTALE_SERVICE_URL: ${DTALE_SERVICE_URL:-http://dtale:9010}
-  DTALE_INTERNAL_TOKEN: ${DTALE_INTERNAL_TOKEN:?set DTALE_INTERNAL_TOKEN in docker/.env for production}
   GL_DASHBOARD_BATCH_ENABLED: ${GL_DASHBOARD_BATCH_ENABLED:-false}
   PROFILE_PLAYBACK_RUN_ROOT: ${PROFILE_PLAYBACK_RUN_ROOT:-/workdir/wepppy-test-engine-data/playback/runs}
   PROFILE_PLAYBACK_FORK_ROOT: ${PROFILE_PLAYBACK_FORK_ROOT:-/workdir/wepppy-test-engine-data/playback/fork}
@@ -40,9 +35,11 @@ x-wepppy-service: &wepppy-service
   restart: unless-stopped
   working_dir: /workdir/wepppy
   env_file:
-    - ${WEPPPY_ENV_FILE:-.env}
+    - ${WEPPPY_ENV_FILE:-defaults.env}
   environment:
     <<: *wepppy-env
+  secrets:
+    - redis_password
   volumes:
     - /wc1:/wc1
     - /wc1/geodata:/geodata
@@ -77,10 +74,28 @@ services:
       nofile:
         soft: 1000000
         hard: 1000000
+    secrets:
+      - redis_password
+      - postgres_password
+      - flask_secret_key
+      - flask_security_password_salt
+      - wepp_auth_jwt_secrets
+      - agent_jwt_secret
+      - cap_secret
+      - opentopography_api_key
+      - climate_engine_api_key
     environment:
       <<: *wepppy-env
       CONTROLLERS_JS_EXTRA_OUTPUTS: /srv/weppcloud/static/js/controllers-gl.js
       STATIC_ASSET_SYNC_DIR: /srv/weppcloud/static
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
+      AGENT_JWT_SECRET_FILE: /run/secrets/agent_jwt_secret
+      CAP_SECRET_FILE: /run/secrets/cap_secret
+      OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
+      CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
     volumes:
       - /wc1:/wc1
       - /wc1/geodata:/geodata
@@ -118,9 +133,15 @@ services:
       nofile:
         soft: 1000000
         hard: 1000000
+    secrets:
+      - redis_password
+      - wepp_auth_jwt_secrets
+      - dtale_internal_token
     environment:
       <<: *wepppy-env
-      REDIS_URL: ${BROWSE_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
+      REDIS_URL: ${BROWSE_REDIS_URL:-redis://redis:6379/0}
+      WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
+      DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
     command:
       - gunicorn
       - --workers
@@ -145,9 +166,13 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    secrets:
+      - redis_password
+      - dtale_internal_token
     environment:
       <<: *wepppy-env
       DTALE_BASE_URL: http://dtale:9010
+      DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
     command:
       - gunicorn
       - --workers
@@ -289,11 +314,14 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    secrets:
+      - redis_password
+      - wepp_mcp_jwt_secret
     environment:
       <<: *wepppy-env
       EXTERNAL_HOST: ${EXTERNAL_HOST}
       EXTERNAL_HOST_DESCRIPTION: ${EXTERNAL_HOST_DESCRIPTION}
-      WEPP_MCP_JWT_SECRET: ${WEPP_AUTH_JWT_SECRET}
+      WEPP_MCP_JWT_SECRET_FILE: /run/secrets/wepp_mcp_jwt_secret
     command:
       - uvicorn
       - wepppy.query_engine.app.server:create_app
@@ -311,6 +339,16 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    secrets:
+      - redis_password
+      - flask_secret_key
+      - wepp_auth_jwt_secrets
+      - cap_secret
+    environment:
+      <<: *wepppy-env
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
+      CAP_SECRET_FILE: /run/secrets/cap_secret
     command:
       - uvicorn
       - wepppy.microservices.rq_engine:app
@@ -360,29 +398,30 @@ services:
       nofile:
         soft: 1000000
         hard: 1000000
+    secrets:
+      - redis_password
+      - opentopography_api_key
+      - climate_engine_api_key
     environment:
       <<: *wepppy-env
       LOGLEVEL: INFO
       RQ_LOGGING_LEVEL: INFO
       # Prefer explicit RQ_REDIS_URL when running workers on external hosts
-      REDIS_URL: ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
+      REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
       WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
+      OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
+      CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
     volumes:
       - /wc1:/wc1
       - /wc1/geodata:/geodata
       - /var/run/docker.sock:/var/run/docker.sock
     command:
-      - rq
-      - worker-pool
-      - -n
-      - "6"
-      - -u
-      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
-      - --logging-level
-      - INFO
-      - --worker-class
-      - wepppy.rq.WepppyRqWorker
-      - default
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+        redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
+        exec rq worker-pool -n "6" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default
 
   rq-worker-batch:
     <<: *wepppy-service
@@ -391,6 +430,10 @@ services:
       nofile:
         soft: 1000000
         hard: 1000000
+    secrets:
+      - redis_password
+      - opentopography_api_key
+      - climate_engine_api_key
     environment:
       <<: *wepppy-env
       LOGLEVEL: INFO
@@ -398,24 +441,21 @@ services:
       WEPPPY_NCPU: "6"
       PERIDOT_CPU: "12"
       # Prefer explicit RQ_REDIS_URL when running workers on external hosts
-      REDIS_URL: ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
+      REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
       WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
+      OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
+      CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
     volumes:
       - /wc1:/wc1
       - /wc1/geodata:/geodata
       - /var/run/docker.sock:/var/run/docker.sock
     command:
-      - rq
-      - worker-pool
-      - -n
-      - "4"
-      - -u
-      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
-      - --logging-level
-      - INFO
-      - --worker-class
-      - wepppy.rq.WepppyRqWorker
-      - batch
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+        redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
+        exec rq worker-pool -n "4" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch
 
   status:
     image: ${WEPPCLOUD_STATUS_IMAGE:-wepppy-status:latest}
@@ -423,10 +463,13 @@ services:
       context: ..
       dockerfile: services/status2/Dockerfile
     restart: unless-stopped
+    secrets:
+      - redis_password
     env_file:
-      - ${WEPPPY_ENV_FILE:-.env}
+      - ${WEPPPY_ENV_FILE:-defaults.env}
     environment:
-      STATUS_REDIS_URL: ${STATUS_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/2}
+      STATUS_REDIS_URL: ${STATUS_REDIS_URL:-redis://redis:6379/2}
+      STATUS_REDIS_PASSWORD_FILE: /run/secrets/redis_password
       STATUS_LISTEN_ADDR: 0.0.0.0:9002
       STATUS_LOG_LEVEL: info
       STATUS_METRICS_ENABLED: "true"
@@ -444,10 +487,13 @@ services:
       context: ..
       dockerfile: services/preflight2/Dockerfile
     restart: unless-stopped
+    secrets:
+      - redis_password
     env_file:
-      - ${WEPPPY_ENV_FILE:-.env}
+      - ${WEPPPY_ENV_FILE:-defaults.env}
     environment:
-      PREFLIGHT_REDIS_URL: ${PREFLIGHT_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
+      PREFLIGHT_REDIS_URL: ${PREFLIGHT_REDIS_URL:-redis://redis:6379/0}
+      PREFLIGHT_REDIS_PASSWORD_FILE: /run/secrets/redis_password
       PREFLIGHT_LISTEN_ADDR: 0.0.0.0:9001
       PREFLIGHT_LOG_LEVEL: info
       PREFLIGHT_METRICS_ENABLED: "true"
@@ -468,11 +514,13 @@ services:
         CAP_REPO: ${CAP_REPO:-https://github.com/tiagozip/cap}
         CAP_REF: ${CAP_REF:-main}
     restart: unless-stopped
+    secrets:
+      - cap_secret
     env_file:
-      - ${WEPPPY_ENV_FILE:-.env}
+      - ${WEPPPY_ENV_FILE:-defaults.env}
     environment:
       CAP_SITE_KEY: ${CAP_SITE_KEY}
-      CAP_SECRET: ${CAP_SECRET}
+      CAP_SECRET_FILE: /run/secrets/cap_secret
       CAP_CORS_ORIGIN: ${CAP_CORS_ORIGIN:-*}
       CAP_ASSET_ROOT: /opt/cap
       CAP_DATA_DIR: /var/lib/cap
@@ -489,7 +537,7 @@ services:
     ports:
       - "${CADDY_PORT:-8080}:8080"
     volumes:
-      - ${CADDY_FILE:-./docker/caddy/Caddyfile}:/etc/caddy/Caddyfile:ro
+      - ${CADDY_FILE:-./caddy/Caddyfile}:/etc/caddy/Caddyfile:ro
       - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
     depends_on:
       weppcloud:
@@ -527,15 +575,18 @@ services:
   redis:
     image: redis:latest
     restart: unless-stopped
+    secrets:
+      - redis_password
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-    command: ["redis-server", "--notify-keyspace-events", "Kh", "--requirepass", "${REDIS_PASSWORD}"]
+      REDIS_PASSWORD_FILE: /run/secrets/redis_password
+    entrypoint: ["/usr/local/bin/redis-entrypoint.sh"]
     volumes:
       - redis-data:/data
+      - ./redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
     ports:
       - "${REDIS_PORT:-6379}:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "-h", "127.0.0.1", "-p", "6379", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a \"$(cat /run/secrets/redis_password)\" -h 127.0.0.1 -p 6379 ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -546,10 +597,12 @@ services:
   postgres:
     image: postgres:16
     restart: unless-stopped
+    secrets:
+      - postgres_password
     environment:
       POSTGRES_DB: wepppy
       POSTGRES_USER: wepppy
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-c0ff33}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
@@ -566,11 +619,13 @@ services:
   postgres-backup:
     image: postgres:16
     restart: unless-stopped
+    secrets:
+      - postgres_password
     environment:
       PGHOST: postgres
+      PGPORT: "5432"
       PGUSER: wepppy
       PGDATABASE: wepppy
-      PGPASSWORD: ${POSTGRES_PASSWORD:-c0ff33}
       BACKUP_DIR: /backups
       BACKUP_KEEP_DAYS: 7
       BACKUP_INTERVAL_SECONDS: 86400
@@ -593,6 +648,22 @@ services:
       - |
         set -euo pipefail
         mkdir -p "$${BACKUP_DIR:-/backups}"
+
+        if [ ! -f /run/secrets/postgres_password ]; then
+          echo "[postgres-backup] Missing /run/secrets/postgres_password" >&2
+          exit 1
+        fi
+
+        password="$$(cat /run/secrets/postgres_password)"
+        if [ -z "$$password" ]; then
+          echo "[postgres-backup] /run/secrets/postgres_password is empty" >&2
+          exit 1
+        fi
+
+        pgpass_file="/tmp/.pgpass"
+        umask 077
+        printf "%s:%s:%s:%s:%s\\n" "$${PGHOST}" "$${PGPORT:-5432}" "$${PGDATABASE}" "$${PGUSER}" "$$password" > "$$pgpass_file"
+        export PGPASSFILE="$$pgpass_file"
 
         # Run initial backup on startup
         run_backup() {
@@ -668,3 +739,27 @@ volumes:
   weppcloudr-renv-cache:
   postgres-backups:
   cap-data:
+
+secrets:
+  redis_password:
+    file: ./secrets/redis_password
+  postgres_password:
+    file: ./secrets/postgres_password
+  flask_secret_key:
+    file: ./secrets/flask_secret_key
+  flask_security_password_salt:
+    file: ./secrets/flask_security_password_salt
+  wepp_auth_jwt_secrets:
+    file: ./secrets/wepp_auth_jwt_secrets
+  agent_jwt_secret:
+    file: ./secrets/agent_jwt_secret
+  wepp_mcp_jwt_secret:
+    file: ./secrets/wepp_mcp_jwt_secret
+  dtale_internal_token:
+    file: ./secrets/dtale_internal_token
+  cap_secret:
+    file: ./secrets/cap_secret
+  opentopography_api_key:
+    file: ./secrets/opentopography_api_key
+  climate_engine_api_key:
+    file: ./secrets/climate_engine_api_key

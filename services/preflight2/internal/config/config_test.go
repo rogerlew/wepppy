@@ -3,6 +3,7 @@ package config
 import (
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -158,6 +159,63 @@ func TestLoadPreflightRedisURLInjectsPassword(t *testing.T) {
 	}
 }
 
+func TestLoadRedisURLFallbackWithPasswordFile(t *testing.T) {
+	clearPreflightEnv(t)
+
+	secretPath := filepath.Join(t.TempDir(), "redis_password")
+	if err := os.WriteFile(secretPath, []byte("sekret\n"), 0600); err != nil {
+		t.Fatalf("WriteFile() returned error: %v", err)
+	}
+
+	t.Setenv("REDIS_URL", "redis://redis:6379/0")
+	t.Setenv("REDIS_PASSWORD_FILE", secretPath)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() returned error: %v", err)
+	}
+
+	if cfg.RedisURL != "redis://:sekret@redis:6379/0" {
+		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/0", cfg.RedisURL)
+	}
+}
+
+func TestLoadPreflightRedisURLInjectsPasswordFromFile(t *testing.T) {
+	clearPreflightEnv(t)
+
+	secretPath := filepath.Join(t.TempDir(), "redis_password")
+	if err := os.WriteFile(secretPath, []byte("sekret\n"), 0600); err != nil {
+		t.Fatalf("WriteFile() returned error: %v", err)
+	}
+
+	t.Setenv("PREFLIGHT_REDIS_URL", "redis://redis:6379/0")
+	t.Setenv("PREFLIGHT_REDIS_PASSWORD_FILE", secretPath)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() returned error: %v", err)
+	}
+
+	if cfg.RedisURL != "redis://:sekret@redis:6379/0" {
+		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/0", cfg.RedisURL)
+	}
+}
+
+func TestLoadErrorsWhenRedisPasswordFileIsEmpty(t *testing.T) {
+	clearPreflightEnv(t)
+
+	secretPath := filepath.Join(t.TempDir(), "redis_password")
+	if err := os.WriteFile(secretPath, []byte("\n"), 0600); err != nil {
+		t.Fatalf("WriteFile() returned error: %v", err)
+	}
+
+	t.Setenv("REDIS_PASSWORD_FILE", secretPath)
+
+	if _, err := Load(); err == nil {
+		t.Fatalf("Load() expected error for empty REDIS_PASSWORD_FILE, got nil")
+	}
+}
+
 func TestStringRedactsRedisPassword(t *testing.T) {
 	cfg := Config{
 		ListenAddr:   defaultListenAddr,
@@ -185,6 +243,9 @@ func clearPreflightEnv(t *testing.T) {
 		os.Unsetenv(key)
 	}
 	for _, key := range []string{"REDIS_URL", "REDIS_PASSWORD", "REDIS_HOST", "REDIS_PORT"} {
+		os.Unsetenv(key)
+	}
+	for _, key := range []string{"REDIS_PASSWORD_FILE", "PREFLIGHT_REDIS_PASSWORD_FILE"} {
 		os.Unsetenv(key)
 	}
 }

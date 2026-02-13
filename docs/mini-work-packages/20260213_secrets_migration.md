@@ -1,5 +1,5 @@
 # Mini Work Package: Secrets Migration (Env Vars -> Secret Files)
-Status: In Progress (Phase 1 complete)
+Status: In Progress (Phase 2 complete)
 Last Updated: 2026-02-13
 See also: `docs/infrastructure/secrets.md`, `docker/README.md`
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/docker-compose.prod.yml`, `docker/docker-compose.prod.worker.yml`, `docker/docker-compose.prod.wepp1.yml`, `wctl/*`, `wepppy/weppcloud/configuration.py`, `wepppy/weppcloud/utils/auth_tokens.py`, `wepppy/config/redis_settings.py`, `wepppy/microservices/browse/*`
@@ -98,16 +98,16 @@ Review gates:
 - [x] `rg -n \"load_dotenv\\(\" wepppy | wc -l` equals expected post-change baseline.
 
 ### Phase 2: Docker Compose Secrets Wiring (Dev + Prod UI Stacks)
-- [ ] Create `docker/defaults.env` (committed) containing only non-secrets.
-- [ ] Update `docker/.env` guidance: non-secret overrides only (keep file mode `0600` on hosts anyway).
-- [ ] Add `docker/secrets/` directory to `.gitignore` (if not already present).
-- [ ] Update `docker/docker-compose.dev.yml`:
+- [x] Create `docker/defaults.env` (committed) containing only non-secrets.
+- [x] Update `docker/.env` guidance: non-secret overrides only (keep file mode `0600` on hosts anyway).
+- [x] Add `docker/secrets/` directory to `.gitignore` (if not already present).
+- [x] Update `docker/docker-compose.dev.yml`:
   - add top-level `secrets:` definitions (file sources under `docker/secrets/`)
   - mount only required secrets per service
   - replace secret env vars with `*_FILE` env vars
   - remove secret interpolation from URLs/commands where feasible
-- [ ] Update `docker/docker-compose.prod.yml` similarly.
-- [ ] Update `docker/README.md` and any deploy docs that instruct creating secrets in `docker/.env`.
+- [x] Update `docker/docker-compose.prod.yml` similarly.
+- [x] Update `docker/README.md` and any deploy docs that instruct creating secrets in `docker/.env`.
 
 Review gates:
 - [ ] `wctl docker compose config` does not contain secret values (spot-check by searching for known secret keys without values; validate that only `*_FILE` paths remain).

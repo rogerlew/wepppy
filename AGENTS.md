@@ -292,24 +292,37 @@ The repository ships with multi-container development stacks that mirror product
 
 **Development Stack** (`docker/docker-compose.dev.yml`):
 ```bash
-# 1. Create .env file
-SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
-SECURITY_PASSWORD_SALT=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
+# 1. Optional non-secret overrides (gitignored)
 cat > docker/.env <<EOF
 UID=$(id -u)
 GID=$(id -g)
+WC1_DIR=/wc1
+GEODATA_DIR=/wc1/geodata
+CADDY_FILE=./caddy/Caddyfile
 EXTERNAL_HOST=wc.bearhive.duckdns.org
-POSTGRES_PASSWORD=localdev
-SECRET_KEY=$SECRET_KEY
-SECURITY_PASSWORD_SALT=$SECURITY_PASSWORD_SALT
+EXTERNAL_HOST_DESCRIPTION=forest.local
+CAP_SITE_KEY=your-public-site-key
 EOF
+chmod 600 docker/.env
 
-# 2. Bring up the stack
-docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build
+# 2. Secrets as files (gitignored; do not commit)
+install -d -m 700 docker/secrets
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/flask_secret_key
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/flask_security_password_salt
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/wepp_auth_jwt_secrets
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/agent_jwt_secret
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/wepp_mcp_jwt_secret
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/postgres_password
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/redis_password
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/dtale_internal_token
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/cap_secret
+chmod 600 docker/secrets/*
 
-# or install and use wctl utility
+# 3. Bring up the stack (recommended)
+./wctl/install.sh dev
+wctl up -d --build
 
-# 3. Visit http://localhost:8080/weppcloud
+# 4. Visit http://localhost:8080/weppcloud
 ```
 
 Development Server and Test Production are behind pfSense/Haproxy with TLS termination

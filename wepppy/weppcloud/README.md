@@ -54,23 +54,25 @@ The application is built around the Flask web framework and follows a modular st
 ### Running Locally with Docker Compose
 
 ```bash
-# 1. Navigate to the docker directory
-cd docker
+# See docker/README.md + docs/infrastructure/secrets.md for the full secrets contract.
+cd /workdir/wepppy
 
-# 2. Create environment file (if not already present)
-cat > .env <<EOF
-UID=$(id -u)
-GID=$(id -g)
-EXTERNAL_HOST=localhost
-POSTGRES_PASSWORD=localdev
-SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
-SECURITY_PASSWORD_SALT=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
-EOF
+# Create secret files (gitignored; do not commit).
+install -d -m 700 docker/secrets
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/flask_secret_key
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/flask_security_password_salt
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/wepp_auth_jwt_secrets
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/agent_jwt_secret
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/postgres_password
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/redis_password
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/dtale_internal_token
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/cap_secret
+chmod 600 docker/secrets/*
 
-# 3. Start the development stack
-docker compose -f docker-compose.dev.yml up --build
+./wctl/install.sh dev
+wctl up -d --build
 
-# 4. Visit http://localhost:8080/weppcloud
+# Visit http://localhost:8080/weppcloud
 ```
 
 ### Creating a New Run (API Example)
@@ -111,13 +113,17 @@ print(f"Climate mode: {climate.climate_mode}")
 
 ### Environment Variables
 
-The application is configured via environment variables, typically defined in `docker/.env`:
+The application is configured via environment variables plus secret files:
+- Non-secrets: `docker/defaults.env` (committed) + optional `docker/.env` overrides.
+- Secrets: `docker/secrets/<secret_id>` mounted via Compose `secrets:` and consumed via `*_FILE` env vars.
+
+See `docs/infrastructure/secrets.md` for the authoritative inventory.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SECRET_KEY` | *(required)* | Flask secret key for session encryption |
-| `SECURITY_PASSWORD_SALT` | *(required)* | Salt for password hashing |
-| `POSTGRES_PASSWORD` | *(required)* | PostgreSQL database password |
+| `SECRET_KEY_FILE` | *(required)* | Path to the Flask session signing secret file |
+| `SECURITY_PASSWORD_SALT_FILE` | *(required)* | Path to the Flask-Security password salt file |
+| `POSTGRES_PASSWORD_FILE` | *(recommended)* | Path to the Postgres password file used when building the SQLAlchemy URI |
 | `EXTERNAL_HOST` | `localhost` | External hostname for URL generation |
 | `REDIS_HOST` | `redis` | Redis server hostname |
 | `REDIS_PORT` | `6379` | Redis server port |

@@ -45,9 +45,14 @@ const (
 )
 
 func Load() (Config, error) {
+	redisURL, err := resolveRedisURL()
+	if err != nil {
+		return Config{}, err
+	}
+
 	cfg := Config{
 		ListenAddr:          getEnv("LISTEN_ADDR", defaultListenAddr),
-		RedisURL:            resolveRedisURL(),
+		RedisURL:            redisURL,
 		PingInterval:        getDurationEnv("PING_INTERVAL", defaultPingInterval),
 		PongTimeout:         getDurationEnv("PONG_TIMEOUT", defaultPongTimeout),
 		WriteTimeout:        getDurationEnv("WRITE_TIMEOUT", defaultWriteTimeout),
@@ -80,13 +85,16 @@ func envKey(key string) string {
 	return envPrefix + key
 }
 
-func resolveRedisURL() string {
-	password := os.Getenv("REDIS_PASSWORD")
+func resolveRedisURL() (string, error) {
+	password, err := resolveRedisPassword()
+	if err != nil {
+		return "", err
+	}
 	if v := os.Getenv(envKey("REDIS_URL")); v != "" {
-		return applyRedisPassword(v, password)
+		return applyRedisPassword(v, password), nil
 	}
 	if v := os.Getenv("REDIS_URL"); v != "" {
-		return applyRedisPassword(v, password)
+		return applyRedisPassword(v, password), nil
 	}
 	host := os.Getenv("REDIS_HOST")
 	if host == "" {
@@ -96,7 +104,36 @@ func resolveRedisURL() string {
 	if port == "" {
 		port = defaultRedisPort
 	}
-	return buildRedisURL(host, port, password)
+	return buildRedisURL(host, port, password), nil
+}
+
+func resolveRedisPassword() (string, error) {
+	if path := strings.TrimSpace(os.Getenv(envKey("REDIS_PASSWORD_FILE"))); path != "" {
+		return readSecretFile(path, envKey("REDIS_PASSWORD_FILE"))
+	}
+	if path := strings.TrimSpace(os.Getenv("REDIS_PASSWORD_FILE")); path != "" {
+		return readSecretFile(path, "REDIS_PASSWORD_FILE")
+	}
+
+	if v := strings.TrimSpace(os.Getenv(envKey("REDIS_PASSWORD"))); v != "" {
+		return v, nil
+	}
+	if v := strings.TrimSpace(os.Getenv("REDIS_PASSWORD")); v != "" {
+		return v, nil
+	}
+	return "", nil
+}
+
+func readSecretFile(path string, label string) (string, error) {
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("unable to read %s at %s: %w", label, path, err)
+	}
+	value := strings.TrimSpace(string(contents))
+	if value == "" {
+		return "", fmt.Errorf("%s at %s is empty", label, path)
+	}
+	return value, nil
 }
 
 func applyRedisPassword(rawURL string, password string) string {

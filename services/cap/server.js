@@ -5,7 +5,16 @@ const Cap = require("@cap.js/server");
 
 const PORT = Number(process.env.CAP_PORT || process.env.PORT || 3000);
 const SITE_KEY = process.env.CAP_SITE_KEY;
-const SECRET = process.env.CAP_SECRET;
+const SECRET_PATH = process.env.CAP_SECRET_FILE;
+let SECRET = process.env.CAP_SECRET;
+if (!SECRET && SECRET_PATH) {
+  try {
+    SECRET = fs.readFileSync(SECRET_PATH, "utf8").trim();
+  } catch (error) {
+    console.error(`[cap] Failed to read CAP_SECRET_FILE at ${SECRET_PATH}`, error);
+    process.exit(1);
+  }
+}
 const CORS_ORIGIN = process.env.CAP_CORS_ORIGIN || "*";
 const DATA_DIR = process.env.CAP_DATA_DIR || "/var/lib/cap";
 const ASSET_ROOT = process.env.CAP_ASSET_ROOT || "/workdir/cap";
@@ -37,7 +46,7 @@ const requireFile = (label, filePath) => {
 };
 
 requireEnv("CAP_SITE_KEY", SITE_KEY);
-requireEnv("CAP_SECRET", SECRET);
+requireEnv("CAP_SECRET (or CAP_SECRET_FILE)", SECRET);
 
 requireFile("widget.js", WIDGET_PATH);
 requireFile("floating.js", FLOATING_PATH);

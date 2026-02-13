@@ -64,8 +64,7 @@ def _compose_paths(project_dir: Path, compose_relative: str, env: Mapping[str, s
 
 
 def _merge_env(
-    docker_env: Path,
-    host_env: Optional[Path],
+    env_files: Sequence[Path],
     compose_paths: Sequence[Path],
     environ: Mapping[str, str],
 ) -> Tuple[OrderedDict[str, str], Dict[str, str]]:
@@ -77,9 +76,9 @@ def _merge_env(
             raw[key] = value
             merged[key] = value.replace("$", "$$")
 
-    _update_from_file(docker_env)
-    if host_env and host_env.exists():
-        _update_from_file(host_env)
+    for env_file in env_files:
+        if env_file.exists():
+            _update_from_file(env_file)
 
     for compose_path in compose_paths:
         for key in _compose_keys(compose_path):
@@ -138,7 +137,8 @@ class CLIContext:
     compose_file_relative: str
     compose_files: Sequence[Path]
     compose_files_relative: Sequence[str]
-    docker_env_file: Path
+    docker_defaults_env_file: Path
+    docker_overrides_env_file: Optional[Path]
     host_env_file: Optional[Path]
     env_file: Path
     env_mapping: Dict[str, str] = field(default_factory=dict)
@@ -158,9 +158,15 @@ class CLIContext:
         logger = _ensure_logger(log_level)
 
         resolved_project = _resolve_project_dir(project_dir)
-        docker_env = resolved_project / "docker" / ".env"
-        if not docker_env.exists():
-            raise FileNotFoundError(f"Expected docker/.env at {docker_env}")
+        docker_defaults_env = resolved_project / "docker" / "defaults.env"
+        if not docker_defaults_env.exists():
+            raise FileNotFoundError(
+                f"Expected docker/defaults.env at {docker_defaults_env} (did you pull the latest repo changes?)"
+            )
+
+        docker_overrides_env = resolved_project / "docker" / ".env"
+        if not docker_overrides_env.exists():
+            docker_overrides_env = None
 
         host_env = _resolve_host_env(resolved_project, env)
 
@@ -170,7 +176,13 @@ class CLIContext:
             if not compose_path.exists():
                 raise FileNotFoundError(f"Compose file not found: {compose_path}")
 
-        merged, raw = _merge_env(docker_env, host_env, compose_paths, env)
+        env_files: list[Path] = [docker_defaults_env]
+        if docker_overrides_env is not None:
+            env_files.append(docker_overrides_env)
+        if host_env is not None:
+            env_files.append(host_env)
+
+        merged, raw = _merge_env(tuple(env_files), compose_paths, env)
         env_file_path = _write_temp_env(merged)
 
         base_env = dict(env)
@@ -182,7 +194,8 @@ class CLIContext:
             compose_file_relative=str(compose_relatives[0]),
             compose_files=compose_paths,
             compose_files_relative=compose_relatives,
-            docker_env_file=docker_env,
+            docker_defaults_env_file=docker_defaults_env,
+            docker_overrides_env_file=docker_overrides_env,
             host_env_file=host_env,
             env_file=env_file_path,
             env_mapping=dict(base_env),

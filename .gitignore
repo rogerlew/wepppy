@@ -34,6 +34,11 @@ wepppy/wepp/management/tests/
 .coverage
 coverage/
 
+# Docker secrets (keep folder/docs, ignore secret material)
+docker/secrets/*
+!docker/secrets/.gitignore
+!docker/secrets/README.md
+
 # Playwright test artifacts
 wepppy/weppcloud/static-src/test-results/
 wepppy/weppcloud/static-src/playwright-report/

@@ -5,7 +5,7 @@
 `wctl` is now a Typer-powered Python CLI that orchestrates the WEPPcloud Docker Compose stacks and the companion tooling that lives in `tools/wctl2`. The thin shell shim installed by `./wctl/install.sh` simply resolves the project root, pins the desired compose file, exports `PYTHONPATH`/`WCTL_COMPOSE_FILE`, and defers to `python -m wctl2`. Typer’s rich help/auto-completion replaces the legacy Bash wrapper and man page while keeping command names and behavior familiar.
 
 Key design points:
-- A shared `CLIContext` (see `tools/wctl2/context.py`) merges `docker/.env`, optional host overrides (`WCTL_HOST_ENV`), and any shell-provided overrides into a temporary env file that every command reuses.
+- A shared `CLIContext` (see `tools/wctl2/context.py`) merges `docker/defaults.env`, optional `docker/.env` overrides, optional host overrides (`WCTL_HOST_ENV`), and any shell-provided overrides into a temporary env file that every command reuses.
 - All first-class helpers are implemented as Typer subcommands, so `wctl <command> --help` shows usage, defaults, and options without maintaining a separate manual page.
 - Anything that is not recognized as a Typer subcommand is forwarded to `docker compose`, with support for common prefixes (`wctl docker compose ps`, `wctl compose up`, etc.) and INFO-level logging so you can see the exact call.
 
@@ -68,7 +68,7 @@ Each passthrough call is logged (for example, `INFO:wctl2:docker compose ps`) so
 
 ### **Environment Handling**
 
-- The generated temp env file always starts with `docker/.env` and merges an optional host override.
+- The generated temp env file always starts with `docker/defaults.env` and merges optional `docker/.env` + host overrides.
 - Set `WCTL_HOST_ENV` (absolute or project-relative) to point at an additional `.env` file that should be layered on top.
 - Any shell environment variables referenced in the active compose file act as the final overrides – for example export `POSTGRES_PASSWORD` before calling `wctl up`.
 - `WCTL_COMPOSE_FILE` is exported by the shim so Typer can reuse the selected compose file without requiring extra flags on every invocation.
@@ -90,7 +90,7 @@ Because the commands execute inside the running containers (or with the correct 
 
 ### **Host Environment Overrides**
 
-When a project-root `.env` exists, the CLI automatically merges it on top of `docker/.env`. Relative paths provided via `WCTL_HOST_ENV` are resolved against the project directory by `CLIContext`. Temporary overrides can be added by exporting shell variables before running `wctl`.
+When a project-root `.env` exists, the CLI automatically merges it on top of `docker/defaults.env` + `docker/.env`. Relative paths provided via `WCTL_HOST_ENV` are resolved against the project directory by `CLIContext`. Temporary overrides can be added by exporting shell variables before running `wctl`.
 
 ### **Profile Playback Smokes**
 

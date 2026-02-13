@@ -92,23 +92,41 @@ docker logs docker-postgres-backup-1  # Check recent backup status
 ## Prerequisites
 - Docker Desktop or a recent Docker Engine.
 - `docker compose` plugin (v2).
-- A populated `docker/.env` file containing at least `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, and `DATABASE_URL` (plus optional `UID`/`GID`).
+- Secret files under `docker/secrets/` (gitignored) as defined in `docs/infrastructure/secrets.md`.
+- Optional non-secret overrides in `docker/.env` (gitignored). Defaults live in `docker/defaults.env` (committed).
 
 ```bash
+# Non-secret overrides only (optional).
 cat > docker/.env <<EOF
-UID=$(id -u)          # customize to match the user you want inside the containers
+UID=$(id -u)
 GID=$(id -g)
-POSTGRES_PASSWORD=localdev
-DATABASE_URL=postgresql://wepppy:localdev@postgres/wepppy
-SQLALCHEMY_DATABASE_URI=postgresql://wepppy:localdev@postgres/wepppy
-REDIS_PASSWORD=localdev
+WC1_DIR=/wc1
+GEODATA_DIR=/wc1/geodata
+CADDY_FILE=./caddy/Caddyfile
+EXTERNAL_HOST=wc.bearhive.duckdns.org
+EXTERNAL_HOST_DESCRIPTION=forest.local
+CAP_SITE_KEY=your-public-site-key
 EOF
+chmod 600 docker/.env
+
+# Secrets as files (examples; do not commit).
+install -d -m 700 docker/secrets
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/flask_secret_key
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/flask_security_password_salt
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/wepp_auth_jwt_secrets
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/agent_jwt_secret
+python -c 'import secrets; print(secrets.token_urlsafe(64))' > docker/secrets/wepp_mcp_jwt_secret
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/postgres_password
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/redis_password
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/dtale_internal_token
+python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/cap_secret
+chmod 600 docker/secrets/*
 ```
 
 > To run everything as `roger:docker`, set `UID=1000` and `GID=$(getent group docker | cut -d: -f3)` (typically `993`). Ensure the group exists on the host; Compose passes numeric ids straight through.
 
 ## wctl (weppcloud control)
-`wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/.env` plus host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
+`wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/defaults.env` plus optional `docker/.env` + host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
 
 One-time install (pins the default compose file for the host):
 
@@ -159,7 +177,7 @@ mv /tmp/wepppy-rq-worker-batch.env docker/wepppy-rq-worker-batch.env
 
 Start a second batch worker pool:
 ```bash
-# docker/wepppy-rq-worker-batch.env should include REDIS_PASSWORD.
+# docker/wepppy-rq-worker-batch.env should include non-secret env only (no passwords/tokens).
 docker run -d \
   --name wepppy-rq-worker-batch-2 \
   --network wepppy-net \
@@ -169,9 +187,10 @@ docker run -d \
   --user 1000:993 \
   --workdir /workdir/wepppy \
   --env-file docker/wepppy-rq-worker-batch.env \
+  -v "$(pwd)/docker/secrets/redis_password:/run/secrets/redis_password:ro" \
   --volumes-from wepppy-rq-worker-batch \
   --init wepppy-dev \
-  bash -lc 'rq worker-pool -n "4" -u "redis://:${REDIS_PASSWORD}@redis:6379/9" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch'
+  bash -lc 'set -euo pipefail; REDIS_PASSWORD="$(cat /run/secrets/redis_password)"; exec rq worker-pool -n "4" -u "redis://:${REDIS_PASSWORD}@redis:6379/9" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch'
 ```
 
 Inspect and stop:
@@ -229,7 +248,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
   `docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec weppcloud flask db upgrade`
 
 - **Inspect Redis**  
-  `docker compose -f docker/docker-compose.dev.yml exec redis redis-cli`
+  `docker compose -f docker/docker-compose.dev.yml exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)"'`
 
 - **Stop everything**  
   `docker compose -f docker/docker-compose.dev.yml down`
@@ -240,7 +259,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
 - **Permission denied when writing to bind-mounted directories** — double-check `UID`/`GID` in `docker/.env` and recreate containers. Existing files created with old ids may need a `chown`.
 - **`I have no name!` shell prompt** — indicates the uid lacks an `/etc/passwd` entry. Adjust the Dockerfile if cosmetic prompts matter.
 - **Redis connection errors on startup** — the microservices depend on Redis; ensure `redis` comes up cleanly, that keyspace notifications include `Kh`, or restart dependent containers (`docker compose ... restart status preflight browse`).
-- **Worker pools crash trying to connect to `redis:6379`** — `docker-compose.prod.worker.yml` does not run a `redis` service; set `RQ_REDIS_URL=redis://:<password>@<redis_host>:6379/9` in `docker/.env` and recreate `rq-worker`/`rq-worker-batch`. Use `wctl rq-info` to confirm workers registered.
+- **Worker pools crash trying to connect to `redis:6379`** — `docker-compose.prod.worker.yml` does not run a `redis` service. If your worker stack is still env-based (pre-secrets migration), set `RQ_REDIS_URL=redis://:<password>@<redis_host>:6379/9` in `docker/.env`. If the secrets-as-files contract is enabled on the worker host, set `RQ_REDIS_URL=redis://<redis_host>:6379/9` and provide `docker/secrets/redis_password`. Use `wctl rq-info` to confirm workers registered.
 
 Refer back to this document whenever you add services, change ports, or adjust the proxy topology so the Compose stack stays in sync with production expectations.
 
@@ -248,419 +267,42 @@ Refer back to this document whenever you add services, change ports, or adjust t
 
 ## Production Deployment Guide
 
-> **Target Audience:** AI agents and human operators deploying to test/production servers.
+See also: `docs/infrastructure/secrets.md`, `docs/mini-work-packages/20260213_secrets_migration.md`.
 
-This section provides a step-by-step checklist for deploying WEPPcloud to production environments using `docker-compose.prod.yml`.
+This stack uses Docker Compose `secrets:` mounted to `/run/secrets/<secret_id>` with `*_FILE` env vars.
+Do not place secret values in `docker/.env`.
 
 ### Pre-Deployment Checklist
 
-**1. Environment File Setup**
+- Secrets: populate `docker/secrets/` on the host (mode `0600`), one file per secret ID.
+- Non-secrets: keep host-specific overrides in `docker/.env` (optional). Base defaults live in `docker/defaults.env`.
+- Static assets: run `wctl build-static-assets --prod` (or follow the static-src build steps if you are not using `wctl`).
+- Data: verify `/wc1` and `/geodata` exist and are mounted correctly.
 
-Create or verify `docker/.env` with production credentials:
-
-```bash
-# Navigate to docker directory
-cd /workdir/wepppy/docker
-
-# Generate secure secrets
-SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
-SECURITY_PASSWORD_SALT=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
-DTALE_INTERNAL_TOKEN=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
-POSTGRES_PASSWORD=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
-REDIS_PASSWORD=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
-
-# Create .env file
-cat > .env <<EOF
-# User/Group for container runtime
-UID=$(id -u)
-GID=$(id -g)
-
-# External host configuration (use wc-prod for test production)
-EXTERNAL_HOST=wc-prod.bearhive.duckdns.org
-EXTERNAL_HOST_DESCRIPTION="WEPPcloud Test Production Server"
-
-# Database credentials
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-DATABASE_URL=postgresql://wepppy:${POSTGRES_PASSWORD}@postgres/wepppy
-SQLALCHEMY_DATABASE_URI=postgresql://wepppy:${POSTGRES_PASSWORD}@postgres/wepppy
-
-# Redis credentials
-REDIS_PASSWORD=${REDIS_PASSWORD}
-RQ_REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/9
-
-# Flask secrets
-SECRET_KEY=${SECRET_KEY}
-SECURITY_PASSWORD_SALT=${SECURITY_PASSWORD_SALT}
-
-# D-Tale security token
-DTALE_INTERNAL_TOKEN=${DTALE_INTERNAL_TOKEN}
-
-# JWT secret for authentication
-WEPP_AUTH_JWT_SECRET=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
-# Optional: comma-delimited rotation list (first is active).
-# Keep WEPP_AUTH_JWT_SECRET aligned with the first entry for query-engine MCP validation.
-# WEPP_AUTH_JWT_SECRETS=active-secret,previous-secret
-
-# Optional: Zoho SMTP credentials for transactional email.
-# If both are set, weppcloud uses smtp.zoho.com:587 (TLS) and sends as ZOHO_NOREPLY_EMAIL.
-# ZOHO_NOREPLY_EMAIL=noreply@wepp.cloud
-# ZOHO_NOREPLY_EMAIL_PASSWORD=app-password-or-account-password
-
-# WeppcloudR container name (must match actual container name from docker compose)
-WEPPCLOUDR_CONTAINER=weppcloudr
-
-# Optional: Override default ports if needed
-# WEPPCLOUD_PORT=8000
-# REDIS_PORT=6379
-# POSTGRES_PORT=5432
-
-# Optional: Enable GL Dashboard batch route (/batch/_/<batch_name>/gl-dashboard)
-# GL_DASHBOARD_BATCH_ENABLED=false
-EOF
-
-# Secure the .env file
-chmod 600 .env
-```
-
-**2. Critical Secret Handling (`$` Characters)**
-
-`SECRET_KEY` and `SECURITY_PASSWORD_SALT` are authentication-critical values. If
-their raw bytes change, logins and session-cookie validation can fail.
-
-Rules:
-- Prefer `wctl` for deploy/ops commands (recommended). It escapes `$` for Compose interpolation while preserving the literal secret bytes inside containers.
-- If you run `docker compose --env-file docker/.env ...` directly, any literal `$` in `docker/.env` must be written as `$$` so Compose passes a single `$` into containers.
-- Do not hand-edit these values during troubleshooting unless you are rotating
-  secrets intentionally across all auth services at once.
-
-Bad example (direct `docker compose --env-file docker/.env ...` will interpolate `$def` and drop it):
-
-```env
-SECRET_KEY=abc$def
-```
-
-Good example (direct `docker compose --env-file docker/.env ...` preserves a literal `$` in the container):
-
-```env
-SECRET_KEY=abc$$def
-```
-
-Good example (when using `wctl`, keep the secret unescaped in `docker/.env`):
-
-```env
-SECRET_KEY=abc$def
-```
-
-After any deploy/recreate, verify parity between `weppcloud` and `rq-engine`:
-
-```bash
-for c in docker-weppcloud-1 docker-rq-engine-1; do
-  s=$(docker inspect "$c" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^SECRET_KEY=//p')
-  printf '%s len=%s sha16=%s\n' "$c" "${#s}" "$(printf %s "$s" | sha256sum | cut -c1-16)"
-done
-```
-
-Expected: both containers report identical length and hash. If they differ,
-session-token refresh (`/rq-engine/api/runs/.../session-token`) can return
-`401 Invalid session cookie`.
-
-**3. Build Static Assets**
-
-⚠️ **CRITICAL:** Production uses bind mounts for static files. You MUST build assets on the host before deployment.
-
-```bash
-# Navigate to static-src directory
-cd /workdir/wepppy/wepppy/weppcloud/static-src
-
-# Install dependencies (only needed once or when package.json changes)
-npm ci --legacy-peer-deps
-
-# Build production assets (vendor libraries)
-npm run build
-
-# Copy vendor assets to static directory
-cp -r dist/vendor/* ../static/vendor/
-
-# Build controllers-gl.js and unitizer_map.js
-cd /workdir/wepppy/wepppy/weppcloud/controllers_js
-python build_controllers_js.py
-
-# Verify critical files exist
-ls -la /workdir/wepppy/wepppy/weppcloud/static/js/controllers-gl.js
-ls -la /workdir/wepppy/wepppy/weppcloud/static/js/unitizer_map.js
-ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/purecss/pure-min.css
-ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/bootstrap/bootstrap.css
-ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/jquery/jquery.js
-ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/leaflet/leaflet.js
-```
-
-**Expected output:** All vendor directories (bootstrap, bootstrap-toc, datatables, jquery, leaflet, purecss, spin) should exist in `wepppy/weppcloud/static/vendor/`.
-
-**4. Verify Data Directories**
-
-Production requires access to geodata and run storage:
-
-```bash
-# Verify required mounts exist
-ls -ld /geodata
-ls -ld /wc1
-
-# If directories don't exist, create them with proper permissions
-sudo mkdir -p /geodata /wc1
-sudo chown $(id -u):$(id -g) /geodata /wc1
-```
-
-### Deployment Steps
-
-**Step 1: Pull Latest Code**
+### Deploy (Recommended: wctl)
 
 ```bash
 cd /workdir/wepppy
-
-# Fetch latest changes
-git fetch origin
-
-# Check current branch and status
-git status
-
-# Pull updates (or checkout specific tag/commit)
-git pull origin master
-
-# Verify you're on the intended commit
-git log -1 --oneline
+./wctl/install.sh prod
+wctl down
+wctl build
+wctl up -d
+wctl ps
+wctl logs -f weppcloud
 ```
 
-**Step 2: Build Docker Images**
+### Verify
 
 ```bash
-# Build all images (this will take 10-15 minutes on first build)
-docker compose -f docker/docker-compose.prod.yml build
-
-# Check for build errors
-echo "Build exit code: $?"
-
-# Verify images were created
-docker images | grep -E "wepppy|wepppy-status|wepppy-preflight|weppcloudr"
+curl -fsS http://localhost:8000/health
+curl -fsS http://localhost:8080/health
+wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" ping'
+wctl exec postgres pg_isready -U wepppy -d wepppy
 ```
 
-**Expected behavior:**
-- First build: ~10-15 minutes (includes apt packages, Python dependencies, vendor repos)
-- Subsequent builds: 2-5 minutes (Docker layer caching)
-- The `chown` step (step 15/16) takes 5-8 minutes due to ~115K files
-
-**Step 3: Stop Existing Services**
-
-```bash
-# Gracefully stop all containers
-docker compose -f docker/docker-compose.prod.yml down
-
-# Verify all containers are stopped
-docker compose -f docker/docker-compose.prod.yml ps -a
-
-# Optional: Remove old volumes (DATA LOSS WARNING)
-# docker compose -f docker/docker-compose.prod.yml down -v
-```
-
-**Step 4: Start Services**
-
-```bash
-# Start all services in detached mode
-docker compose -f docker/docker-compose.prod.yml up -d
-
-# Monitor startup logs
-docker compose -f docker/docker-compose.prod.yml logs -f
-
-# Wait for services to become healthy (Ctrl+C to exit logs)
-```
-
-**Step 5: Verify Deployment**
-
-```bash
-# Check service status
-docker compose -f docker/docker-compose.prod.yml ps
-
-# Verify critical services are running
-docker compose -f docker/docker-compose.prod.yml ps | grep -E "weppcloud|redis|postgres|caddy|status|preflight"
-
-# Check individual service health
-docker compose -f docker/docker-compose.prod.yml exec weppcloud curl -f http://localhost:8000/health || echo "FAILED"
-docker compose -f docker/docker-compose.prod.yml exec redis redis-cli ping
-docker compose -f docker/docker-compose.prod.yml exec postgres pg_isready -U wepppy
-
-# Verify static assets are accessible through Caddy
-docker compose -f docker/docker-compose.prod.yml exec caddy ls -la /srv/weppcloud/static/vendor/purecss/
-```
-
-**Step 6: Smoke Test**
-
-```bash
-# Test HTTP endpoints (replace with your actual host)
-curl -I http://localhost:8080/health
-curl -I http://localhost:8080/weppcloud/
-curl -I http://localhost:8080/weppcloud/static/vendor/purecss/pure-min.css
-
-# Expected: All should return 200 or 30x (not 404/500)
-```
-
-### Post-Deployment Verification
-
-**Check Application Logs:**
-
-```bash
-# View recent logs from all services
-docker compose -f docker/docker-compose.prod.yml logs --tail=100
-
-# Monitor for errors in specific services
-docker compose -f docker/docker-compose.prod.yml logs -f weppcloud
-docker compose -f docker/docker-compose.prod.yml logs -f rq-worker
-```
-
-**Verify Database Connectivity:**
-
-```bash
-# Check Postgres connection from weppcloud container
-docker compose -f docker/docker-compose.prod.yml exec weppcloud bash -c \
-  "python -c 'from wepppy.weppcloud.app import app; print(\"DB OK\" if app else \"FAILED\")'"
-```
-
-**Check Redis:**
-
-```bash
-# Verify Redis is responding
-docker compose -f docker/docker-compose.prod.yml exec redis redis-cli INFO | grep -E "redis_version|connected_clients"
-
-# Check keyspace notifications are enabled
-docker compose -f docker/docker-compose.prod.yml exec redis redis-cli CONFIG GET notify-keyspace-events
-# Expected: "Kh"
-```
-
-**Monitor Resource Usage:**
-
-```bash
-# Check container resource consumption
-docker stats --no-stream
-
-# Check disk usage
-df -h /wc1
-df -h /geodata
-```
-
-### Rollback Procedure
-
-If deployment fails, rollback to previous version:
-
-```bash
-# Stop new deployment
-docker compose -f docker/docker-compose.prod.yml down
-
-# Revert to previous git commit
-git log --oneline -5  # Find previous commit
-git checkout <previous-commit-hash>
-
-# Rebuild images from previous code
-docker compose -f docker/docker-compose.prod.yml build
-
-# Start services
-docker compose -f docker/docker-compose.prod.yml up -d
-
-# Verify rollback
-docker compose -f docker/docker-compose.prod.yml logs -f
-```
-
-### Common Issues & Solutions
-
-**Issue: 404 for static assets (pure-min.css, controllers-gl.js, etc.)**
-
-**Cause:** Static vendor assets or JavaScript bundles not built on host filesystem.
-
-**Solution:**
-```bash
-# Build vendor assets
-cd /workdir/wepppy/wepppy/weppcloud/static-src
-npm ci --legacy-peer-deps
-npm run build
-cp -r dist/vendor/* ../static/vendor/
-
-# Build controllers-gl.js and unitizer_map.js
-cd /workdir/wepppy/wepppy/weppcloud/controllers_js
-python build_controllers_js.py
-
-# Restart Caddy to pick up changes
-docker compose -f docker/docker-compose.prod.yml restart caddy
-```
-
-**Issue: `ModuleNotFoundError` in elevationquery or other services**
-
-**Cause:** New Python files added but image not rebuilt.
-
-**Solution:**
-```bash
-docker compose -f docker/docker-compose.prod.yml build
-docker compose -f docker/docker-compose.prod.yml up -d
-```
-
-**Issue: Container user permission errors**
-
-**Cause:** `UID`/`GID` in `.env` doesn't match file ownership.
-
-**Solution:**
-```bash
-# Check current ownership
-ls -la /workdir/wepppy/wepppy/weppcloud/static
-
-# Update .env with correct UID/GID
-# Then rebuild
-docker compose -f docker/docker-compose.prod.yml down
-docker compose -f docker/docker-compose.prod.yml build --no-cache
-docker compose -f docker/docker-compose.prod.yml up -d
-```
-
-**Issue: Database migration needed**
-
-**Solution:**
-```bash
-docker compose -f docker/docker-compose.prod.yml exec weppcloud bash -c \
-  "cd /workdir/wepppy && python -m wepppy.weppcloud.migrations.run_migrations"
-```
-
-**Issue: Slow build times (chown step taking >10 minutes)**
-
-**Cause:** Docker processing ~115K files during ownership change.
-
-**Mitigation:**
-- This is normal for first build
-- Subsequent builds use layer caching (much faster)
-- Dockerfile optimization removed `/tmp` from chown (saves ~60s)
-
-### Maintenance Commands
-
-**View container resource usage:**
-```bash
-docker stats
-```
-
-**Clean up old images:**
-```bash
-docker image prune -a --filter "until=720h"  # Remove images >30 days old
-```
-
-**Backup database:**
-```bash
-docker compose -f docker/docker-compose.prod.yml exec postgres \
-  pg_dump -U wepppy -Fc wepppy > backup-$(date +%Y%m%d).dump
-```
-
-**Restore database:**
-```bash
-docker compose -f docker/docker-compose.prod.yml exec -T postgres \
-  pg_restore -U wepppy -d wepppy --clean < backup-20251030.dump
-```
-
-**Update a single service:**
-```bash
-# Rebuild and restart just one service
-docker compose -f docker/docker-compose.prod.yml up -d --build weppcloud
-```
+Notes:
+- `wctl docker compose config` should only show `*_FILE` paths (no secret values).
+- Rotate secrets by updating the underlying files and restarting all dependent services together.
 
 ### Production vs Development Differences
 
@@ -680,7 +322,7 @@ For AI agents performing deployments:
 
 1. **Preflight checks:**
    - Verify git branch/commit
-   - Check `.env` file exists with required secrets
+   - Confirm required secret files exist under `docker/secrets/` (mode `0600`)
    - Confirm static assets are built
    - Verify data directories (`/wc1`, `/geodata`) are accessible
 
@@ -711,7 +353,7 @@ For AI agents performing deployments:
 
 ### Production Checklist Summary
 
-- [ ] Environment file (`docker/.env`) configured with secure secrets
+- [ ] Secret files (`docker/secrets/*`) configured (no secret values in `docker/.env`)
 - [ ] Static assets built on host (`npm run build` + copy to static/)
 - [ ] Latest code pulled from git
 - [ ] Docker images built successfully
