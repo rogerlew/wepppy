@@ -111,7 +111,7 @@ Review gates:
 
 Review gates:
 - [x] `wctl docker compose config` does not contain secret values (spot-check by searching for known secret keys without values; validate that only `*_FILE` paths remain).
-- [ ] `docker inspect <container>` shows no secret values in `.Config.Env` (only `*_FILE` vars).
+- [x] `docker inspect <container>` shows no secret values in `.Config.Env` (only `*_FILE` vars).
 
 ### Phase 3: Worker Stack + wepp1 Overlay
 - [x] Update `docker/docker-compose.prod.worker.yml`:
@@ -199,7 +199,7 @@ Automated:
 
 Manual:
 - [x] `wctl docker compose config | rg -n \"SECRET_KEY=|WEPP_AUTH_JWT_SECRET=|OAUTH_.*_SECRET=\"` returns no matches.
-- [ ] `docker inspect <browse_container>` does not show secret values in env.
+- [x] `docker inspect <browse_container>` does not show secret values in env.
 - [ ] Induce a controlled browse exception and confirm logs do not include environment dumps.
 
 ## Acceptance Criteria

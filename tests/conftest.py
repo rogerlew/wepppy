@@ -1,5 +1,6 @@
 import importlib
 import sys
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -44,6 +45,40 @@ def _clear_secret_file_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "ZOHO_NOREPLY_EMAIL_PASSWORD_FILE",
     ):
         monkeypatch.delenv(key, raising=False)
+
+
+@pytest.fixture(scope="session")
+def _test_required_secret_files(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Path]:
+    """Create deterministic secret files for tests that import WEPPcloud config."""
+
+    root = tmp_path_factory.mktemp("secrets")
+    secret_key_path = root / "flask_secret_key"
+    salt_path = root / "flask_security_password_salt"
+
+    secret_key_path.write_text("pytest-secret-key\n", encoding="utf-8")
+    salt_path.write_text("pytest-security-password-salt\n", encoding="utf-8")
+
+    return {
+        "SECRET_KEY_FILE": secret_key_path,
+        "SECURITY_PASSWORD_SALT_FILE": salt_path,
+    }
+
+
+@pytest.fixture(autouse=True)
+def _install_test_required_secrets(
+    monkeypatch: pytest.MonkeyPatch,
+    _clear_secret_file_env: None,
+    _test_required_secret_files: dict[str, Path],
+) -> None:
+    """Ensure required runtime secrets exist even when host env files are scrubbed."""
+
+    for key, path in _test_required_secret_files.items():
+        monkeypatch.setenv(key, str(path))
+
+    # RQ-engine routes call into auth_tokens.get_jwt_config() for scope parsing.
+    # Provide a deterministic dummy secret, and let tests that need the
+    # misconfiguration path `delenv()` it explicitly.
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "pytest-jwt-secret")
 
 
 @pytest.fixture(scope="session", autouse=True)

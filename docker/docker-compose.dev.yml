@@ -55,6 +55,9 @@ services:
       - wepp_auth_jwt_secrets
       - agent_jwt_secret
       - cap_secret
+      - oauth_github_client_secret
+      - oauth_google_client_secret
+      - zoho_noreply_email_password
       - opentopography_api_key
       - climate_engine_api_key
     ulimits:
@@ -97,6 +100,9 @@ services:
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       AGENT_JWT_SECRET_FILE: /run/secrets/agent_jwt_secret
       CAP_SECRET_FILE: /run/secrets/cap_secret
+      OAUTH_GITHUB_CLIENT_SECRET_FILE: /run/secrets/oauth_github_client_secret
+      OAUTH_GOOGLE_CLIENT_SECRET_FILE: /run/secrets/oauth_google_client_secret
+      ZOHO_NOREPLY_EMAIL_PASSWORD_FILE: /run/secrets/zoho_noreply_email_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
       PLAYWRIGHT_BROWSERS_PATH: /workdir/wepppy/weppcloud/static-src/.playwright-browsers
@@ -197,6 +203,9 @@ services:
   profile-playback:
     <<: *wepppy-service
     container_name: profile-playback
+    secrets:
+      - redis_password
+      - admin_password
     ulimits:
       nofile:
         soft: 65536
@@ -210,6 +219,7 @@ services:
       - "8070"
     environment:
       <<: *wepppy-env
+      ADMIN_PASSWORD_FILE: /run/secrets/admin_password
       PROFILE_PLAYBACK_BASE_URL: ${PROFILE_PLAYBACK_BASE_URL:-http://weppcloud:8000/weppcloud}
       PROFILE_PLAYBACK_ROOT: ${PROFILE_PLAYBACK_ROOT:-/workdir/wepppy-test-engine-data/profiles}
     ports:
@@ -802,7 +812,15 @@ secrets:
     file: ./secrets/dtale_internal_token
   cap_secret:
     file: ./secrets/cap_secret
+  oauth_github_client_secret:
+    file: ./secrets/oauth_github_client_secret
+  oauth_google_client_secret:
+    file: ./secrets/oauth_google_client_secret
+  zoho_noreply_email_password:
+    file: ./secrets/zoho_noreply_email_password
   opentopography_api_key:
     file: ./secrets/opentopography_api_key
   climate_engine_api_key:
     file: ./secrets/climate_engine_api_key
+  admin_password:
+    file: ./secrets/admin_password
