@@ -2,7 +2,6 @@
 Scripts in this directory are meant to be copyable into Culvert_web_app with minimal edits.
 
 ## Pre-Built Test Payload
-
 A ready-to-use Santee payload is available for quick testing:
 ```
 tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip  (~1.5 MB)
@@ -10,10 +9,12 @@ tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip  (~1.5 M
 
 Quick submit to test server:
 ```bash
-WEPPCLOUD_HOST=wc.bearhive.duckdns.org python submit_payload.py \
+# Either export WEPPCLOUD_TOKEN, or set it in scripts/.env (submit_payload.py auto-loads it).
+WEPPCLOUD_HOST=wc.bearhive.duckdns.org \
+WEPPCLOUD_TOKEN=$MY_RQ_ENGINE_TOKEN \
+python submit_payload.py \
   --payload /workdir/wepppy/tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip
 ```
-
 ## build_payload.py - Payload Builder
 
 Creates `payload.zip` from a Culvert_web_app project for submission to wepp.cloud.
@@ -252,7 +253,6 @@ python submit_payload.py --payload payload.zip --token-file /path/to/token.txt
 | 3 | Invalid arguments or payload not found |
 
 ### Example: End-to-End Workflow
-
 ```bash
 # 1. Build the payload
 cd /wc1/culvert_app_instance_dir/user_data
@@ -261,14 +261,22 @@ python /workdir/wepppy/docs/culvert-at-risk-integration/dev-package/scripts/buil
     --output santee_payload.zip
 
 # 2. Submit to test server and wait for completion
+#    NOTE: This uses the rq-engine bearer token (WEPPCLOUD_TOKEN).
 WEPPCLOUD_HOST=wc.bearhive.duckdns.org \
+WEPPCLOUD_TOKEN=$MY_RQ_ENGINE_TOKEN \
 python /workdir/wepppy/docs/culvert-at-risk-integration/dev-package/scripts/submit_payload.py \
     --payload santee_payload.zip
 
-# 3. Results will be available at:
+# 3. Download the skeleton archive
+#    NOTE: This uses the batch-scoped browse/download token (browse_token).
+WEPPCLOUD_HOST=wc.bearhive.duckdns.org \
+WEPPCLOUD_BROWSE_TOKEN=$MY_BROWSE_TOKEN \
+python /workdir/wepppy/docs/culvert-at-risk-integration/dev-package/scripts/download_skeletons.py \
+    --batch-uuid <batch_uuid> \
+    --out /tmp/weppcloud_run_skeletons.zip
+
+# 4. Results will be available at:
 #    https://wc.bearhive.duckdns.org/weppcloud/culverts/<batch_uuid>/browse/   (interactive)
-#    https://wc.bearhive.duckdns.org/weppcloud/culverts/<batch_uuid>/download/weppcloud_run_skeletons.zip
-#    Use Authorization: Bearer <browse_token> from the submit response.
 ```
 
 ### Observability
@@ -304,6 +312,68 @@ The script logs each step with timestamps:
 2026-01-05 10:40:25 [INFO] Batch UUID: xyz-789-uvw
 2026-01-05 10:40:25 [INFO] Final Status: finished
 2026-01-05 10:40:25 [INFO] Browse results: https://wc.bearhive.duckdns.org/weppcloud/culverts/xyz-789-uvw/browse/
+```
+
+## browse_token (download token)
+
+The culvert batch API returns a batch-scoped `browse_token` (JWT) in responses from:
+- `POST /rq-engine/api/culverts-wepp-batch/`
+- `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}`
+- `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/finalize`
+
+Use `browse_token` (not `WEPPCLOUD_TOKEN`) as:
+- `Authorization: Bearer <browse_token>`
+
+For:
+- `GET /weppcloud/culverts/{batch_uuid}/browse/`
+- `GET /weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip`
+
+## download_skeletons.py - Run Skeleton Archive Download
+
+Downloads `weppcloud_run_skeletons.zip` using the batch-scoped `browse_token`.
+
+### Requirements
+
+- Python 3.9+
+- `requests` library (`pip install requests`)
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WEPPCLOUD_HOST` | `wepp.cloud` | Target host (no protocol prefix) |
+| `WEPPCLOUD_BROWSE_TOKEN` | unset | Batch-scoped browse/download token (JWT) |
+
+### Usage
+
+```bash
+# `browse_token` and `culvert_batch_uuid` come from the submit/retry/finalize response JSON.
+export BATCH_UUID=<batch_uuid>
+export WEPPCLOUD_BROWSE_TOKEN=<browse_token>
+
+python download_skeletons.py --batch-uuid "$BATCH_UUID" --out /tmp/weppcloud_run_skeletons.zip
+```
+
+Notes:
+- If the download returns `404`, the archive is not built yet. Poll the batch job until `finished` and retry.
+- After point retries, call `/rq-engine/api/culverts-wepp-batch/{batch_uuid}/finalize` to rebuild `runs_manifest.md` and the skeleton ZIP.
+
+### Integration Reuse
+
+The script exposes a copy/paste-friendly helper (only depends on `requests`).
+It streams to `<out>.part`, validates ZIP magic (`PK`), then atomically renames.
+
+```python
+from pathlib import Path
+
+from download_skeletons import download_run_skeletons_zip
+
+download_run_skeletons_zip(
+    base_url="https://wepp.cloud",
+    batch_uuid=batch_uuid,
+    browse_token=browse_token,
+    out_path=Path("/tmp/weppcloud_run_skeletons.zip"),
+)
 ```
 
 ## Batch Artifacts (Outputs)
