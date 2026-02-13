@@ -1,5 +1,5 @@
 # Mini Work Package: Secrets Migration (Env Vars -> Secret Files)
-Status: In Progress (forest rollout complete; preparing forest1)
+Status: In Progress (forest + forest1 rollout complete; next: wepp1)
 Last Updated: 2026-02-13
 See also: `docs/infrastructure/secrets.md`, `docker/README.md`
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/docker-compose.prod.yml`, `docker/docker-compose.prod.worker.yml`, `docker/docker-compose.prod.wepp1.yml`, `wctl/*`, `tools/wctl2/*`, `wepppy/weppcloud/configuration.py`, `wepppy/weppcloud/utils/auth_tokens.py`, `wepppy/config/redis_settings.py`, `wepppy/microservices/browse/*`
@@ -158,18 +158,21 @@ Rollback:
 
 #### forest1 (test production)
 Preflight:
-- [ ] Snapshot current `docker/.env` (secure location; do not commit).
-- [ ] Confirm `wctl` profile/compose files in use.
-- [ ] Confirm no active migrations require stable worker pools.
+- [x] Snapshot current `docker/.env` (secure location; do not commit).
+- [x] Confirm `wctl` profile/compose files in use.
+- [x] Confirm no active migrations require stable worker pools.
 
 Deploy:
-- [ ] Create `docker/secrets/` and populate from existing values.
-- [ ] Deploy updated compose stack.
-- [ ] Verify:
+- [x] Create `docker/secrets/` and populate from existing values (no rotation).
+- [x] Deploy updated compose stack.
+- [x] Verify:
   - `/health` (weppcloud)
   - websocket bridges (status/preflight)
-  - browse + download paths via caddy routing
-  - rq-engine polling/auth
+  - CAP health
+  - rq-worker connectivity (`wctl rq-info`)
+
+Notes:
+- If `cap`, `status`, or `preflight` were not rebuilt during deploy, they may fail with missing secret env or Redis `NOAUTH`. Fix by rebuilding and recreating those services (`wctl build --no-cache cap status preflight && wctl up -d --no-deps --force-recreate cap status preflight`).
 
 Rollback:
 - [ ] Re-deploy prior compose config and restore env-based secrets.

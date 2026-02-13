@@ -67,6 +67,13 @@ fi
 if [ "${HAS_WEPPCLOUD}" = true ]; then
     DEPLOY_MODE="full"
     BUILD_SERVICES=(weppcloud rq-worker)
+    # These services have their own images/build contexts; include them when present so
+    # a full deploy doesn't accidentally keep stale binaries when compose/env changes.
+    for svc in cap status preflight; do
+        if echo "${COMPOSE_SERVICES}" | grep -q "^${svc}$"; then
+            BUILD_SERVICES+=("${svc}")
+        fi
+    done
 else
     DEPLOY_MODE="worker"
     BUILD_SERVICES=(rq-worker rq-worker-batch weppcloudr)
