@@ -1,4 +1,6 @@
-# Reports Refactor Plan
+# Mini Work Package: Reports Refactor Plan
+Status: Completed
+Last Updated: 2025-10-18
 
 This note outlines a staged refactor to modernize the `wepppy.wepp.stats`
 module by consolidating report logic under `wepppy.wepp.reports`, aligning

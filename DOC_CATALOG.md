@@ -31,7 +31,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/dev-notes/redis_dev_notes.md](docs/dev-notes/redis_dev_notes.md)
 - [docs/dev-notes/reports/report-catalog.md](docs/dev-notes/reports/report-catalog.md)
 - [docs/dev-notes/reports/reportbase-guide.md](docs/dev-notes/reports/reportbase-guide.md)
-- [docs/dev-notes/reports-refactor-plan.md](docs/dev-notes/reports-refactor-plan.md)
+- [docs/mini-work-packages/completed/20251018_reports_refactor_plan.md](docs/mini-work-packages/completed/20251018_reports_refactor_plan.md)
 - [docs/mini-work-packages/completed/20251018_reports_refactor.md](docs/mini-work-packages/completed/20251018_reports_refactor.md)
 - [docs/dev-notes/style-guide.md](docs/dev-notes/style-guide.md)
 - [docs/mini-work-packages/completed/20251103_test_tooling_spec.md](docs/mini-work-packages/completed/20251103_test_tooling_spec.md)
@@ -624,7 +624,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 ---
 
-## docs/dev-notes/reports-refactor-plan.md
+## docs/mini-work-packages/completed/20251018_reports_refactor_plan.md
 
 - [Reports Refactor Plan](#reports-refactor-plan)
   - [Phase 1 – Package Relocation (Wepp Stats → Wepp Reports)](#phase-1-package-relocation-wepp-stats-wepp-reports)
