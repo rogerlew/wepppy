@@ -1549,11 +1549,21 @@ class Wepp(NoDbBase):
         if _exists(loss_pw0) and not self.islocked():
             return True
 
+        # When interchange conversion is configured to delete raw WEPP text outputs
+        # (see `[interchange] delete_after_interchange=true`), `loss_pw0.txt` will be
+        # removed after successful Parquet conversion. Treat the interchange loss
+        # products as equivalent evidence that a watershed run has completed.
+        interchange_loss_out = _join(output_dir, 'interchange', 'loss_pw0.out.parquet')
+        if _exists(interchange_loss_out) and not self.islocked():
+            return True
+
         climate = self.climate_instance
         if climate.ss_batch_storms:
             for d in climate.ss_batch_storms:
                 ss_batch_key = d['ss_batch_key']
                 if _exists(_join(output_dir, f'{ss_batch_key}/loss_pw0.txt')):
+                    return True
+                if _exists(_join(output_dir, ss_batch_key, 'interchange', 'loss_pw0.out.parquet')):
                     return True
 
         return False

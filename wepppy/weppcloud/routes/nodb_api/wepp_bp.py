@@ -64,6 +64,11 @@ def _wepp_outputs_exist(wd: str, climate: Climate) -> bool:
     if _exists(loss_pw0):
         return True
 
+    # Interchange conversion can delete raw text outputs; treat the converted loss parquet
+    # as evidence that watershed results exist.
+    if _exists(_join(output_dir, "interchange", "loss_pw0.out.parquet")):
+        return True
+
     try:
         ss_batch_storms = getattr(climate, "ss_batch_storms", None)
         if ss_batch_storms:
@@ -72,6 +77,8 @@ def _wepp_outputs_exist(wd: str, climate: Climate) -> bool:
                 if not ss_batch_key:
                     continue
                 if _exists(_join(output_dir, f"{ss_batch_key}/loss_pw0.txt")):
+                    return True
+                if _exists(_join(output_dir, ss_batch_key, "interchange", "loss_pw0.out.parquet")):
                     return True
     except Exception:
         return False
@@ -478,6 +485,9 @@ def report_wepp_results(runid, config):
     totalwatsed2_exists = _exists(
         _join(wd, 'wepp', 'output', 'totalwatsed2.parquet')
     )
+    interchange_readme_exists = _exists(
+        _join(wd, 'wepp', 'output', 'interchange', 'README.md')
+    )
 
     try:
         return render_template('controls/wepp_reports.htm',
@@ -489,6 +499,7 @@ def report_wepp_results(runid, config):
                                wepp_results_stale=wepp_results_stale,
                                totalwatsed3_exists=totalwatsed3_exists,
                                totalwatsed2_exists=totalwatsed2_exists,
+                               interchange_readme_exists=interchange_readme_exists,
                                user=current_user)
     except:
         return exception_factory('Error building reports template', runid=runid)

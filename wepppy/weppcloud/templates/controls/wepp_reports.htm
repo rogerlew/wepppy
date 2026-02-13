@@ -51,6 +51,14 @@
                rel="noopener">
               View WEPP Outputs Directory
             </a>
+            {% if interchange_readme_exists|default(false) %}
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/interchange/README.md') }}"
+               target="_blank"
+               rel="noopener">
+              Interchange README (schema + preview)
+            </a>
+            {% endif %}
             {% if not climate.ss_batch_storms %}
             <a class="wc-link wc-link--file"
                href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/loss_pw0.txt') }}"
@@ -120,6 +128,14 @@
                rel="noopener">
               GL Dashboard
             </a>
+            {% if interchange_readme_exists|default(false) %}
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/interchange/README.md') }}"
+               target="_blank"
+               rel="noopener">
+              Interchange README (schema + preview)
+            </a>
+            {% endif %}
             {% if storm_event_analyzer_ready|default(false) %}
             <a class="wc-link wc-link--file"
                href="{{ url_for_run('storm_event_analyzer.storm_event_analyzer', runid=runid, config=config) }}"
