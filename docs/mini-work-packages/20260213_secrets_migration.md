@@ -1,8 +1,8 @@
 # Mini Work Package: Secrets Migration (Env Vars -> Secret Files)
-Status: In Progress (Phase 3 compose wiring complete)
+Status: In Progress (forest rollout complete; preparing forest1)
 Last Updated: 2026-02-13
 See also: `docs/infrastructure/secrets.md`, `docker/README.md`
-Primary Areas: `docker/docker-compose.dev.yml`, `docker/docker-compose.prod.yml`, `docker/docker-compose.prod.worker.yml`, `docker/docker-compose.prod.wepp1.yml`, `wctl/*`, `wepppy/weppcloud/configuration.py`, `wepppy/weppcloud/utils/auth_tokens.py`, `wepppy/config/redis_settings.py`, `wepppy/microservices/browse/*`
+Primary Areas: `docker/docker-compose.dev.yml`, `docker/docker-compose.prod.yml`, `docker/docker-compose.prod.worker.yml`, `docker/docker-compose.prod.wepp1.yml`, `wctl/*`, `tools/wctl2/*`, `wepppy/weppcloud/configuration.py`, `wepppy/weppcloud/utils/auth_tokens.py`, `wepppy/config/redis_settings.py`, `wepppy/microservices/browse/*`
 
 ## Objective
 Migrate secrets from `.env`/Compose interpolation into file-mounted secrets (Docker Compose `secrets:` now; Kubernetes Secret volumes next) to reduce accidental exposure via:
@@ -27,6 +27,7 @@ In-scope:
   - `wepp1` (wepp.cloud): `docker/docker-compose.prod.wepp1.yml` (plus whatever base file `wctl` composes with)
   - `wepp2` (worker prod): `docker/docker-compose.prod.worker.yml` (+ override file if used)
 - Add regression coverage for file-based secret reads and “no secret values in rendered compose” checks.
+- Update operator tooling (`tools/wctl2/*`) so common commands (notably `wctl rq-info`) work with `*_FILE` secrets and do not place credentials in host argv/logs.
 
 Out-of-scope (explicitly):
 - Rotating secrets (keep values identical; migrate storage only).
@@ -118,25 +119,30 @@ Review gates:
   - remove `${REDIS_PASSWORD}` interpolation in URLs/commands (prefer `REDIS_PASSWORD_FILE` + code reading)
   - mount only worker-required secrets (likely JWT + agent auth + redis password if needed)
 - [x] Update `docker/docker-compose.prod.wepp1.yml` (and any `wctl` compose composition rules) so wepp1’s rendered config still uses secrets-as-files.
-- [ ] Ensure per-host UID/GID and secret file readability is correct for:
-  - images built with `APP_UID`/`APP_GID` (prod/worker/wepp1)
-  - dev stack using `user: "${UID}:${GID}"`
+- [x] Ensure dev/prod websocket services can read bind-mounted secret files (`status`, `preflight` run as `${UID}:${GID}`).
+- [ ] Ensure per-host UID/GID and secret file readability is correct for images built with `APP_UID`/`APP_GID` (notably `wepp1` with `APP_UID=1002`).
 
 Review gates:
 - [x] `wctl docker compose config` on each host profile (`dev`, `prod`, `wepp1`, `worker`) contains no secret values.
+
+### Phase 3.5: Operator Tooling (wctl2)
+- [x] Patch `wctl rq-info` to resolve the Redis URL inside the container (supports `REDIS_PASSWORD_FILE`).
+- [x] Ensure `wctl rq-info` does not place Redis credentials into host-side argv/logging.
+- [x] Add unit coverage under `tools/wctl2/tests/*` and update `tools/wctl2/docs/*`.
 
 ### Phase 4: Environment Rollouts (Forest/Fleet)
 Roll out in this order: `forest` -> `forest1` -> `wepp1` -> `wepp2`.
 
 #### forest (dev instance)
-- [ ] Create `docker/secrets/` locally and populate from the current `docker/.env` values (do not regenerate).
-- [ ] Move any remaining secret values out of `docker/.env`.
-- [ ] `wctl down && wctl up -d`
-- [ ] Validate:
+- [x] Create `docker/secrets/` locally and populate from the current `docker/.env` values (do not regenerate).
+- [x] Move any remaining secret values out of `docker/.env`.
+- [x] `wctl down && wctl up -d`
+- [x] Validate:
   - `GET /health`
   - login/session cookie flow
   - browse endpoints for a known run (include a forced error path to ensure stack traces do not include env dumps)
   - rq-engine session-token flow (if applicable)
+  - `wctl rq-info` works (no Redis `Authentication required.` errors)
 
 Rollback:
 - [ ] Restore previous compose + `docker/.env` and recreate containers.
@@ -195,6 +201,7 @@ Rollback:
 ## Test Plan (Automated + Manual)
 Automated:
 - [x] `wctl run-pytest tests --maxfail=1`
+- [x] `wctl run-npm test`
 - [x] `wctl doc-lint --path docs/infrastructure/secrets.md --path docs/mini-work-packages/20260213_secrets_migration.md`
 
 Manual:
