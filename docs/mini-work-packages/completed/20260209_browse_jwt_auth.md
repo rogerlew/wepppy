@@ -1,5 +1,5 @@
 # Mini Work Package: Browse JWT Auth and Session Cookie Bridge
-Status: Implemented
+Status: Completed
 Last Updated: 2026-02-09
 Primary Areas: `wepppy/microservices/rq_engine/session_routes.py`, `wepppy/microservices/browse/browse.py`, `wepppy/microservices/browse/dtale.py`, `wepppy/microservices/browse/files_api.py`, `wepppy/microservices/browse/_download.py`, `wepppy/microservices/_gdalinfo.py`, `wepppy/weppcloud/routes/run_0/run_0_bp.py`, `wepppy/weppcloud/routes/_security/logging.py`, `docs/dev-notes/auth-token.spec.md`
 
