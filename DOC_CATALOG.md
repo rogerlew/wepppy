@@ -23,7 +23,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/dev-notes/endpoint_security_notes.md](docs/dev-notes/endpoint_security_notes.md)
 - [docs/dev-notes/kubernetes-deployment-strategy.md](docs/dev-notes/kubernetes-deployment-strategy.md)
 - [docs/mini-work-packages/completed/20251109_management_rotation_synth.md](docs/mini-work-packages/completed/20251109_management_rotation_synth.md)
-- [docs/dev-notes/mock-factory-spec.md](docs/dev-notes/mock-factory-spec.md)
+- [docs/mini-work-packages/completed/20251022_mock_factory_consolidation.md](docs/mini-work-packages/completed/20251022_mock_factory_consolidation.md)
 - [docs/dev-notes/module_refactor_workflow.md](docs/dev-notes/module_refactor_workflow.md)
 - [docs/dev-notes/qmd-reports-feature.spec.md](docs/dev-notes/qmd-reports-feature.spec.md)
 - [docs/dev-notes/query_engine.spec.md](docs/dev-notes/query_engine.spec.md)
@@ -526,7 +526,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 ---
 
-## docs/dev-notes/mock-factory-spec.md
+## docs/mini-work-packages/completed/20251022_mock_factory_consolidation.md
 
 - [Mock Factory Consolidation Specification](#mock-factory-consolidation-specification)
   - [Background & Motivation](#background-motivation)

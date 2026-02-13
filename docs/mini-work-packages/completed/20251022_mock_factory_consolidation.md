@@ -1,5 +1,8 @@
-# Mock Factory Consolidation Specification
-> Draft plan for centralising recurring Redis/RQ/NoDb stubs across the test suite.
+# Mini Work Package: Mock Factory Consolidation
+Status: Completed
+Last Updated: 2025-10-22
+
+> Centralised recurring Redis/RQ/NoDb stubs across the test suite.
 
 ## 1. Background & Motivation
 Controller and route tests repeatedly hand-roll the same support mocks:
