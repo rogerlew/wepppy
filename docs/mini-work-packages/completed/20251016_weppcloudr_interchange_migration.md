@@ -1,6 +1,8 @@
-# WEPPcloudR Pipeline Migration
+# Mini Work Package: WEPPcloudR Pipeline Migration
+Status: Completed
+Last Updated: 2025-10-16
 
-Notes for moving the WEPPcloudR blueprint and Chinmay’s `new_report.Rmd`
+Notes for moving the WEPPcloudR blueprint and Chinmay's `new_report.Rmd`
 off the legacy Arc export stack and onto the interchange/query-engine
 assets. Captures the technical debt we need to unwind and the platform
 choices for running R workloads.

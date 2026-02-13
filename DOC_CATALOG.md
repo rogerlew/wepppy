@@ -40,7 +40,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/dev-notes/uploads-standard.md](docs/dev-notes/uploads-standard.md)
 - [docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md](docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md)
 - [docs/dev-notes/wepp_interchange.spec.md](docs/dev-notes/wepp_interchange.spec.md)
-- [docs/dev-notes/weppcloudr-interchange-migration.md](docs/dev-notes/weppcloudr-interchange-migration.md)
+- [docs/mini-work-packages/completed/20251016_weppcloudr_interchange_migration.md](docs/mini-work-packages/completed/20251016_weppcloudr_interchange_migration.md)
 - [docs/god-tier-prompting-strategy.md](docs/god-tier-prompting-strategy.md)
 - [docs/mini-work-packages/README.md](docs/mini-work-packages/README.md)
 - [docs/mini-work-packages/completed/nodb_mods_doc_typing.md](docs/mini-work-packages/completed/nodb_mods_doc_typing.md)
@@ -839,7 +839,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 ---
 
-## docs/dev-notes/weppcloudr-interchange-migration.md
+## docs/mini-work-packages/completed/20251016_weppcloudr_interchange_migration.md
 
 - [WEPPcloudR Pipeline Migration](#weppcloudr-pipeline-migration)
   - [Current State (2025-03)](#current-state-2025-03)
