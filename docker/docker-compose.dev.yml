@@ -429,12 +429,16 @@ services:
         hard: 65536
     secrets:
       - redis_password
+      - postgres_password
       - flask_secret_key
+      - flask_security_password_salt
       - wepp_auth_jwt_secrets
       - cap_secret
     environment:
       <<: *wepppy-env
       SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       CAP_SECRET_FILE: /run/secrets/cap_secret
     command:
