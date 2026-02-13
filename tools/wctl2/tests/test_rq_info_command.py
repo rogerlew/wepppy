@@ -15,6 +15,19 @@ class DummyResult:
     returncode = 0
 
 
+def _expected_rq_info_command(extra: str = "") -> str:
+    base = (
+        "set -euo pipefail; "
+        "redis_url=\"$(cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy "
+        "/opt/venv/bin/python -c "
+        "'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')\"; "
+        "exec /opt/venv/bin/rq info -u \"$redis_url\" default batch"
+    )
+    if extra:
+        return f"{base} {extra}"
+    return base
+
+
 def _run_command(monkeypatch: pytest.MonkeyPatch, temp_project, command_args):
     runner = CliRunner()
     recorded: List[Tuple[str, str, bool, bool]] = []
@@ -36,7 +49,7 @@ def test_rq_info_defaults(monkeypatch: pytest.MonkeyPatch, temp_project) -> None
     assert recorded == [
         (
             "rq-worker",
-            "/opt/venv/bin/rq info -u redis://redis:6379/9 default batch",
+            _expected_rq_info_command(),
             True,
             False,
         )
@@ -50,7 +63,7 @@ def test_rq_info_appends_args(monkeypatch: pytest.MonkeyPatch, temp_project) -> 
     assert recorded == [
         (
             "rq-worker",
-            "/opt/venv/bin/rq info -u redis://redis:6379/9 default batch --interval 1",
+            _expected_rq_info_command("--interval 1"),
             True,
             False,
         )
@@ -64,14 +77,8 @@ def test_rq_info_uses_password_from_env(monkeypatch: pytest.MonkeyPatch, temp_pr
     result, recorded = _run_command(monkeypatch, temp_project, ["rq-info"])
 
     assert result.exit_code == 0
-    assert recorded == [
-        (
-            "rq-worker",
-            "/opt/venv/bin/rq info -u redis://:sekret@redis:6379/9 default batch",
-            True,
-            False,
-        )
-    ]
+    assert recorded == [("rq-worker", _expected_rq_info_command(), True, False)]
+    assert "sekret" not in recorded[0][1]
 
 
 def test_rq_info_detail_runs_summary(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
@@ -81,7 +88,7 @@ def test_rq_info_detail_runs_summary(monkeypatch: pytest.MonkeyPatch, temp_proje
     assert recorded == [
         (
             "rq-worker",
-            "/opt/venv/bin/rq info -u redis://redis:6379/9 default batch",
+            _expected_rq_info_command(),
             True,
             False,
         ),

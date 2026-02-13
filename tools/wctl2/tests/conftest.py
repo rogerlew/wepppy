@@ -13,6 +13,9 @@ def pytest_configure(config: pytest.Config) -> None:
 def temp_project(tmp_path: Path) -> Path:
     docker_dir = tmp_path / "docker"
     docker_dir.mkdir(parents=True, exist_ok=True)
+    # wctl2 requires docker/defaults.env to exist (even if empty) so the CLIContext
+    # mirrors the real repo layout.
+    (docker_dir / "defaults.env").write_text("UID=1000\nGID=993\n")
     (docker_dir / ".env").write_text(
         "UID=1000\n"
         "GID=993\n"

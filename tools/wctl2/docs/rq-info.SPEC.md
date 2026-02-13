@@ -8,7 +8,7 @@
 
 1. Provide a single command that always shows both `default` and `batch` queues.
 2. Preserve `rq info` behavior while appending user-provided flags (for example `--interval 1`).
-3. Keep the invocation explicit about Redis DB 9 while honoring optional auth from `docker/.env`.
+3. Keep the invocation explicit about Redis DB 9 while supporting both env-based and secret-file Redis auth.
 
 ## Command Definition
 
@@ -20,12 +20,13 @@ wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
 
 ## Behavior
 
-- Executes: `/opt/venv/bin/rq info -u redis://redis:6379/9 default batch` inside the `rq-worker` container.
-- If `RQ_REDIS_URL` or `REDIS_URL` is defined in `docker/.env`, the command reuses its host and credentials while forcing DB 9.
-- If `REDIS_PASSWORD` is defined (and no password is already embedded in the URL), the command injects it as `redis://:<password>@host:port/9`.
+- Executes `rq info` inside the `rq-worker` container.
+- Resolves the Redis URL *inside the container* via `wepppy.config.redis_settings.redis_url(RedisDB.RQ)` so it can:
+  - force Redis DB 9
+  - inject credentials from `REDIS_PASSWORD_FILE` (preferred) or `REDIS_PASSWORD` (legacy)
 - Appends any extra CLI args after `default batch`.
 - Returns the exit code from the underlying `rq info` command.
-- Logs the full docker compose exec invocation at INFO level.
+- Logs the docker compose exec invocation at INFO level (Redis URLs are redacted if present in the logged command).
 - `--detail` appends a job summary (runid, description, auth actor) using the RQ Python API.
 - `--detail-limit` caps the number of jobs per state and queue (default: 50; 0 = unlimited).
 
