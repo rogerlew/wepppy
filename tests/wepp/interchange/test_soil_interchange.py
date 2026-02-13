@@ -128,6 +128,38 @@ def test_soil_interchange_raises_on_token_mismatch(tmp_path):
         soil_module._parse_soil_file(source)
 
 
+@pytest.mark.unit
+def test_soil_interchange_recovers_when_fixed_width_values_run_together(tmp_path):
+    """
+    Regression guard: WEPP soil output uses fixed-width floats without delimiters (e.g. `f7.2`).
+    When a value fully occupies the field width (ex: Keff >= 1000), whitespace splitting merges
+    adjacent columns (ex: '37.761218.58'). The parser should fall back to fixed-width slicing.
+    """
+    source = tmp_path / "H1.soil.dat"
+    source.write_text(
+        "\n".join(
+            [
+                " Soil properties, daily output",
+                "------------------------------------------------------------------------------------------------",
+                " OFE Day   Y   Poros   Keff  Suct    FC     WP    Rough    Ki     Kr    Tauc    Saturation    TSW",
+                "                 %    mm/hr   mm    mm/mm  mm/mm    mm   adjsmt adjsmt adjsmt   frac          mm",
+                "------------------------------------------------------------------------------------------------",
+                "",
+                # Keff=1218.58 fully occupies `f7.2`, so Poros+Keff can run together with no whitespace.
+                "  1  166     28   37.761218.58   8.25   0.20   0.11  20.00   0.03   0.03   1.11    0.92   34.73",
+            ]
+        )
+        + "\n"
+    )
+
+    table = soil_module._parse_soil_file(source)
+    assert table.num_rows == 1
+    df = table.to_pandas()
+    assert df.loc[0, "Poros"] == pytest.approx(37.76)
+    assert df.loc[0, "Keff"] == pytest.approx(1218.58)
+    assert df.loc[0, "TSW"] == pytest.approx(34.73)
+
+
 def test_soil_interchange_handles_missing_files(tmp_path):
     workdir = tmp_path / "empty_output"
     workdir.mkdir()

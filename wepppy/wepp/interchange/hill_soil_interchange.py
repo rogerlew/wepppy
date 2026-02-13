@@ -118,6 +118,58 @@ SCHEMA = schema_with_version(
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
+def _split_soil_row_fixed_width(raw_line: str, expected_columns: int) -> List[str] | None:
+    """
+    Best-effort fixed-width parser for WEPP soil daily output rows.
+
+    WEPP soil daily output is written with fixed-width numeric formats (for example, `f7.2`)
+    without delimiters between some adjacent floats. When a value fully occupies the field width
+    (for example, Keff >= 1000 with `f7.2`), whitespace splitting merges columns.
+
+    Returns `None` when the expected layout is unknown.
+    """
+    if expected_columns not in {len(LEGACY_HEADER), len(RAW_HEADER), len(TSMF_HEADER)}:
+        return None
+
+    line = raw_line.rstrip("\n")
+    idx = 0
+
+    def _take(n: int) -> str:
+        nonlocal idx
+        chunk = line[idx : idx + n]
+        idx += n
+        return chunk
+
+    tokens: List[str] = []
+
+    # Matches `watbal.for` / `watbal_hourly.for` soil output:
+    #   1x,i2,2x,i3,2x,i5,1x,9f7.2,[1x,f7.2,1x,f7.2,[1x,f7.4]]
+    _take(1)
+    tokens.append(_take(2).strip())  # OFE
+    _take(2)
+    tokens.append(_take(3).strip())  # Day
+    _take(2)
+    tokens.append(_take(5).strip())  # Y
+    _take(1)
+
+    for _ in range(9):
+        tokens.append(_take(7).strip())
+
+    if expected_columns == len(LEGACY_HEADER):
+        return tokens
+
+    _take(1)
+    tokens.append(_take(7).strip())  # Saturation
+    _take(1)
+    tokens.append(_take(7).strip())  # TSW
+
+    if expected_columns == len(RAW_HEADER):
+        return tokens
+
+    _take(1)
+    tokens.append(_take(7).strip())  # TSMF (f7.4)
+    return tokens
+
 
 def _extract_layout(lines: List[str]) -> Tuple[List[str], List[str], List[str]]:
     header_idx: Optional[int] = None
@@ -204,10 +256,14 @@ def _parse_soil_file(
             continue
         tokens = raw_line.split()
         if len(tokens) != expected_columns:
-            raise ValueError(
-                f"Unexpected token count in SOIL row ({len(tokens)} != {expected_columns}) "
-                f"for {path.name}: {raw_line!r}"
-            )
+            recovered = _split_soil_row_fixed_width(raw_line, expected_columns)
+            if recovered is not None and len(recovered) == expected_columns and all(recovered):
+                tokens = recovered
+            else:
+                raise ValueError(
+                    f"Unexpected token count in SOIL row ({len(tokens)} != {expected_columns}) "
+                    f"for {path.name}: {raw_line!r}"
+                )
 
         ofe = int(tokens[0])
         julian = int(tokens[1])
