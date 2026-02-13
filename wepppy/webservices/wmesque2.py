@@ -73,11 +73,14 @@ from fastapi import (
 from fastapi.responses import FileResponse, JSONResponse
 
 from osgeo import gdal, osr
-	import xml.etree.ElementTree as ET
-	import base64, json, hashlib
-	import zlib
 
-	gdal.UseExceptions()
+import base64
+import hashlib
+import json
+import xml.etree.ElementTree as ET
+import zlib
+
+gdal.UseExceptions()
 
 logging.basicConfig(
     level=logging.INFO,

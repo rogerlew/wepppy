@@ -435,7 +435,7 @@ services:
       - |
         set -euo pipefail
         redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
-        exec rq worker-pool -n "6" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default
+        exec /opt/venv/bin/rq worker-pool -n "6" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default
 
   rq-worker-batch:
     <<: *wepppy-service
@@ -469,7 +469,7 @@ services:
       - |
         set -euo pipefail
         redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
-        exec rq worker-pool -n "4" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch
+        exec /opt/venv/bin/rq worker-pool -n "4" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch
 
   status:
     image: ${WEPPCLOUD_STATUS_IMAGE:-wepppy-status:latest}
@@ -477,6 +477,8 @@ services:
       context: ..
       dockerfile: services/status2/Dockerfile
     restart: unless-stopped
+    # Compose secrets are bind-mounted; run as the secret-file owner so 0600 files are readable.
+    user: "${UID:-1000}:${GID:-1000}"
     secrets:
       - redis_password
     env_file:
@@ -501,6 +503,8 @@ services:
       context: ..
       dockerfile: services/preflight2/Dockerfile
     restart: unless-stopped
+    # Compose secrets are bind-mounted; run as the secret-file owner so 0600 files are readable.
+    user: "${UID:-1000}:${GID:-1000}"
     secrets:
       - redis_password
     env_file:
