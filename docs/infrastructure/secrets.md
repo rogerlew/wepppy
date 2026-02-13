@@ -36,7 +36,7 @@ Use stable secret IDs so Compose and Kubernetes mount the same filenames:
 | --- | --- | --- |
 | `flask_secret_key` | `weppcloud`, `rq-engine` | Must match across services that mint/validate session cookies. |
 | `flask_security_password_salt` | `weppcloud`, `rq-engine` | Must match where password hashing/session logic depends on it. |
-| `wepp_auth_jwt_secret` or `wepp_auth_jwt_secrets` | API services that issue/validate JWTs | Prefer `*_secrets` when using rotation lists. |
+| `wepp_auth_jwt_secrets` | API services that issue/validate JWTs | File contains either a single secret or a comma-delimited rotation list (first is active). |
 | `wepp_mcp_jwt_secret` | `query-engine` | Enables MCP routes; can be the same value as `wepp_auth_jwt_secrets` but does not have to be. |
 | `agent_jwt_secret` | agent auth paths | Keep distinct from Flask secret key. |
 | `oauth_github_client_secret` | `weppcloud` | Optional, but treat as secret if enabled. |
@@ -66,8 +66,8 @@ This section is the Phase 0 “inventory” deliverable for the secrets migratio
 | `flask_secret_key` | `SECRET_KEY` | `SECRET_KEY_FILE` | Flask `weppcloud`; FastAPI `rq-engine` session validation | Signs Flask session cookies via `itsdangerous.Signer`. Must be identical between `weppcloud` and `rq-engine` for `/rq-engine/api/.../session-token` flows. |
 | `flask_security_password_salt` | `SECURITY_PASSWORD_SALT` | `SECURITY_PASSWORD_SALT_FILE` | Flask `weppcloud` | Flask-Security password hashing salt/pepper input. Treat as auth-critical and stable. |
 | `wepp_auth_jwt_secrets` | `WEPP_AUTH_JWT_SECRETS`, `WEPP_AUTH_JWT_SECRET` | `WEPP_AUTH_JWT_SECRETS_FILE`, `WEPP_AUTH_JWT_SECRET_FILE` | `weppcloud` token issuance; `rq-engine`/`browse` token validation | Prefer `WEPP_AUTH_JWT_SECRETS` (comma-delimited rotation list; first is active). |
-| `wepp_mcp_jwt_secret` | `WEPP_MCP_JWT_SECRET` | `WEPP_MCP_JWT_SECRET_FILE` | `query-engine` MCP mount | Enables `/mcp` routes when configured. Compose currently wires it from `WEPP_AUTH_JWT_SECRET` in dev/prod. |
-| `agent_jwt_secret` | `AGENT_JWT_SECRET` (dev `.env` also uses `AGENT_JWT_SECRET_KEY`) | `AGENT_JWT_SECRET_FILE` | `weppcloud` agent JWT issuance; `wepppy/mcp/*` tool auth | Code expects `AGENT_JWT_SECRET`. Current Compose maps `AGENT_JWT_SECRET_KEY` -> `AGENT_JWT_SECRET` inside containers. |
+| `wepp_mcp_jwt_secret` | `WEPP_MCP_JWT_SECRET` | `WEPP_MCP_JWT_SECRET_FILE` | `query-engine` MCP mount | Enables `/mcp` routes when configured. Compose mounts `/run/secrets/wepp_mcp_jwt_secret` and sets `WEPP_MCP_JWT_SECRET_FILE`. |
+| `agent_jwt_secret` | `AGENT_JWT_SECRET` (dev `.env` also uses `AGENT_JWT_SECRET_KEY`) | `AGENT_JWT_SECRET_FILE` | `weppcloud` agent JWT issuance; `wepppy/mcp/*` tool auth | Code expects `AGENT_JWT_SECRET`. `AGENT_JWT_SECRET_KEY` is a legacy/dev key name; do not treat it as a runtime env var. |
 | `agent_jwt_token` | `AGENT_JWT_TOKEN` | *(runtime; not file-backed)* | agent session bootstrap (`wepppy/rq/agent_rq.py`, `wepppy/mcp/base.py`) | Short-lived bearer token granted to the agent session. Treat as secret; never log or persist. |
 | `oauth_github_client_secret` | `OAUTH_GITHUB_CLIENT_SECRET`, `GITHUB_OAUTH_CLIENT_SECRET`, `GITHUB_OAUTH_SECRET_KEY` | `OAUTH_GITHUB_CLIENT_SECRET_FILE` | `weppcloud` OAuth | Optional; keep ID/secret pairs aligned with the correct host redirect URI. |
 | `oauth_google_client_secret` | `OAUTH_GOOGLE_CLIENT_SECRET`, `GOOGLE_OAUTH_CLIENT_SECRET` | `OAUTH_GOOGLE_CLIENT_SECRET_FILE` | `weppcloud` OAuth | Optional. |
@@ -78,7 +78,7 @@ This section is the Phase 0 “inventory” deliverable for the secrets migratio
 | `postgres_password` | `POSTGRES_PASSWORD` | `POSTGRES_PASSWORD_FILE` | `postgres` container; app DB URLs | `DATABASE_URL`/`SQLALCHEMY_DATABASE_URI` currently embed the password (treat those as secret-bearing config). |
 | `redis_password` | `REDIS_PASSWORD` | `REDIS_PASSWORD_FILE` | `redis` container; Python + Go clients | Many services accept `*_REDIS_URL` and inject `REDIS_PASSWORD` if the URL lacks auth. |
 | `opentopography_api_key` | `OPENTOPOGRAPHY_API_KEY` | `OPENTOPOGRAPHY_API_KEY_FILE` | DEM downloads (`wepppy/locales/earth/opentopography`) | Used as a query parameter when calling OpenTopography. |
-| `climate_engine_api_key` | `CLIMATE_ENGINE_API_KEY` | `CLIMATE_ENGINE_API_KEY_FILE` | OpenET Climate Engine integration (`wepppy/nodb/mods/openet`) | Current code includes a fallback that scans `docker/.env` for this value (non-canonical). |
+| `climate_engine_api_key` | `CLIMATE_ENGINE_API_KEY` | `CLIMATE_ENGINE_API_KEY_FILE` | OpenET Climate Engine integration (`wepppy/nodb/mods/openet`) | Legacy `docker/.env` scanning has been removed; configure `CLIMATE_ENGINE_API_KEY(_FILE)` explicitly. |
 | `openet_api_key` | `OPENET_API_KEY` | `OPENET_API_KEY_FILE` | OpenET time-series API (`wepppy/locales/conus/openet`) | Different API than ClimateEngine; not interchangeable with `CLIMATE_ENGINE_API_KEY`. |
 | `wc_token` | `WC_TOKEN` | `WC_TOKEN_FILE` | ClimateNA-CA helper (`wepppy/climates/climatena_ca`) | Used as an `Authorization: Bearer ...` token for the external helper service. |
 | `admin_password` | `ADMIN_PASSWORD` | `ADMIN_PASSWORD_FILE` | `wepppy/profile_recorder` | Automation-only credential used by playback harness to log into a WEPPcloud instance. |
@@ -151,6 +151,7 @@ Key rules:
 - Prefer `*_FILE` environment variables that point to `/run/secrets/<secret_id>`.
   - This keeps code paths consistent across Compose and Kubernetes.
   - `*_FILE` values are not secrets; they are paths.
+- Treat setting `*_FILE` as an explicit contract: the file must exist and be non-empty (the app fails fast when a configured secret file is unreadable/empty).
 
 ### Non-Secrets: Keep Using env files
 Continue using `env_file:` for non-secrets (defaults, paths, ports, feature flags).
@@ -199,3 +200,4 @@ This keeps the container contract aligned across:
   - it handles untrusted paths and returns detailed error payloads in some flows.
   - secrets should not be present in its environment, argv, or exception messages.
 - Never accept secrets via query parameters. Use headers/cookies and redact them in logs.
+- Operator guidance: do not pass secrets on command lines (for example credential-bearing URLs). `wctl`/`wctl2` logs `docker compose` invocations; `compose exec` redaction is best-effort and passthrough commands may log args verbatim.

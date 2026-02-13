@@ -47,19 +47,29 @@ Out-of-scope (explicitly):
    - `docker/.env` (gitignored, non-secret overrides only)
 
 ## Canonical Secret IDs (Initial Set)
-Use stable IDs so Compose and Kubernetes mounts match:
+Use stable IDs so Compose and Kubernetes mounts match.
+
+This list reflects what the in-repo Compose files mount today. If a secret ID is listed in a service's `secrets:` block, the file must exist on the host (Compose will refuse to start otherwise).
+
 - `flask_secret_key`
 - `flask_security_password_salt`
 - `wepp_auth_jwt_secrets` (comma-delimited list; first is active)
 - `agent_jwt_secret`
-- `oauth_github_client_secret` (if enabled)
-- `oauth_google_client_secret` (if enabled)
+- `wepp_mcp_jwt_secret` (Compose currently sets `WEPP_MCP_JWT_SECRET_FILE` for `query-engine`)
 - `dtale_internal_token`
 - `cap_secret`
-- `zoho_noreply_email_password` (if enabled)
 - `postgres_password`
 - `redis_password`
+- `opentopography_api_key`
+- `climate_engine_api_key`
+- `admin_password` (used by `profile-playback`)
+- `oauth_github_client_secret` (Compose mounts this by default)
+- `oauth_google_client_secret` (Compose mounts this by default)
+- `zoho_noreply_email_password` (Compose mounts this by default)
 
+Notes:
+- Some of the IDs above are feature-gated in application code, but *not* in Compose. If a `*_FILE` env var is set and the secret file is missing/empty, the service will fail fast.
+- Full inventory (including optional integrations like `openet_api_key`, `wc_token`, etc.): `docs/infrastructure/secrets.md`.
 ## Implementation Plan (Multi-phase)
 
 ### Phase 0: Inventory + Design Lock (No Behavior Change)
@@ -120,11 +130,10 @@ Review gates:
   - mount only worker-required secrets (likely JWT + agent auth + redis password if needed)
 - [x] Update `docker/docker-compose.prod.wepp1.yml` (and any `wctl` compose composition rules) so wepp1’s rendered config still uses secrets-as-files.
 - [x] Ensure dev/prod websocket services can read bind-mounted secret files (`status`, `preflight` run as `${UID}:${GID}`).
-- [ ] Ensure per-host UID/GID and secret file readability is correct for images built with `APP_UID`/`APP_GID` (notably `wepp1` with `APP_UID=1002`).
+- [ ] Ensure per-host UID/GID and secret file readability is correct for images built with `APP_UID`/`APP_GID` (notably `wepp1`/`worker` with `APP_UID=1002`, `APP_GID=130`). Compose `secrets:` are bind-mounts; validate with `docker compose exec <service> sh -lc 'id; ls -l /run/secrets; for f in /run/secrets/*; do test -r "$f" || echo "not readable: $f"; done'` and document the required host ownership/mode.
 
 Review gates:
 - [x] `wctl docker compose config` on each host profile (`dev`, `prod`, `wepp1`, `worker`) contains no secret values.
-
 ### Phase 3.5: Operator Tooling (wctl2)
 - [x] Patch `wctl rq-info` to resolve the Redis URL inside the container (supports `REDIS_PASSWORD_FILE`).
 - [x] Ensure `wctl rq-info` does not place Redis credentials into host-side argv/logging.
