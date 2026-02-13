@@ -1,7 +1,10 @@
-# Test Tooling Specification
+# Mini Work Package: Test Tooling Specification
+Status: Partial
+Last Updated: 2025-11-03
 
-> Specification for additional test infrastructure tooling to improve test reliability, performance, and developer experience.  
-> **Status:** Proposed (October 2025)  
+> Specification for additional test infrastructure tooling to improve test reliability, performance, and developer experience.
+> **Implemented:** `check-test-isolation` (`tools/check_test_isolation.py`)
+> **Not started:** `test-coverage`, `test-profile`, `check-test-markers`
 > **Context:** Following resolution of `test_disturbed_bp.py` import failure caused by incomplete `sys.modules` stubs.
 
 ## Motivation

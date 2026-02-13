@@ -34,7 +34,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/dev-notes/reports-refactor-plan.md](docs/dev-notes/reports-refactor-plan.md)
 - [docs/dev-notes/reports.md](docs/dev-notes/reports.md)
 - [docs/dev-notes/style-guide.md](docs/dev-notes/style-guide.md)
-- [docs/dev-notes/test-tooling-spec.md](docs/dev-notes/test-tooling-spec.md)
+- [docs/mini-work-packages/completed/20251103_test_tooling_spec.md](docs/mini-work-packages/completed/20251103_test_tooling_spec.md)
 - [docs/dev-notes/totalwatsed-interchange.spec.md](docs/dev-notes/totalwatsed-interchange.spec.md)
 - [docs/dev-notes/upgrade_to_2016_3_format.spec.md](docs/dev-notes/upgrade_to_2016_3_format.spec.md)
 - [docs/dev-notes/uploads-standard.md](docs/dev-notes/uploads-standard.md)
@@ -659,7 +659,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 ---
 
-## docs/dev-notes/test-tooling-spec.md
+## docs/mini-work-packages/completed/20251103_test_tooling_spec.md
 
 - [Test Tooling Specification](#test-tooling-specification)
   - [Motivation](#motivation)

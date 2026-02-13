@@ -667,7 +667,7 @@ This section tracks significant work packages that improved agent accessibility:
 **Testing Documentation**:
 - `tests/README.md` - Human testing guide
 - `tests/AGENTS.md` - Agent testing patterns
-- `docs/dev-notes/test-tooling-spec.md` - Tooling specifications
+- `docs/mini-work-packages/completed/20251103_test_tooling_spec.md` - Tooling specifications
 
 **Templates**:
 - `docs/prompt_templates/readme_authoring_template.md` - README guide

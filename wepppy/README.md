@@ -517,7 +517,7 @@ from wepppy.nodb.core import Wepp
 ### Developer Notes
 - [docs/dev-notes/redis_dev_notes.md](../docs/dev-notes/redis_dev_notes.md) - Redis usage patterns
 - [docs/dev-notes/style-guide.md](../docs/dev-notes/style-guide.md) - Coding conventions
-- [docs/dev-notes/test-tooling-spec.md](../docs/dev-notes/test-tooling-spec.md) - Testing infrastructure
+- [docs/mini-work-packages/completed/20251103_test_tooling_spec.md](../docs/mini-work-packages/completed/20251103_test_tooling_spec.md) - Testing infrastructure
 - [docker/README.md](../docker/README.md) - Docker development stack
 
 ### External Projects
