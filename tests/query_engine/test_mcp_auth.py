@@ -47,6 +47,30 @@ def auth_env(monkeypatch):
     return module.get_auth_config()
 
 
+@pytest.fixture
+def auth_file_env(monkeypatch, tmp_path):
+    secret_path = tmp_path / "mcp_secret"
+    secret_path.write_text("file-secret\n", encoding="utf-8")
+
+    monkeypatch.setenv("WEPP_MCP_JWT_SECRET_FILE", str(secret_path))
+    monkeypatch.delenv("WEPP_MCP_JWT_SECRET", raising=False)
+    monkeypatch.setenv("WEPP_MCP_JWT_ALGORITHMS", "HS256")
+    auth_module.get_auth_config.cache_clear()
+    module = reload(auth_module)
+    module.get_auth_config.cache_clear()
+
+    class _NoopRedis:
+        def exists(self, _key: str) -> int:
+            return 0
+
+        def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(module, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(module.redis, "Redis", lambda **_kwargs: _NoopRedis())
+    return module.get_auth_config()
+
+
 def _make_app(config):
     async def handler(request):
         principal = request.state.mcp_principal
@@ -87,6 +111,16 @@ def test_valid_token(auth_env):
     assert payload["subject"] == "user-123"
     assert payload["scopes"] == ["queries:execute", "runs:read"]
     assert payload["runs"] == ["alpha", "beta"]
+
+
+def test_valid_token_from_file_secret(auth_file_env):
+    app = _make_app(auth_file_env)
+    token = _issue_token(auth_file_env, {})
+    client = TestClient(app)
+
+    response = client.get("/mcp/ping", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 200
 
 
 def test_missing_authorization_header(auth_env):

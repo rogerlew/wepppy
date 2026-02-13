@@ -21,6 +21,7 @@ from werkzeug.exceptions import HTTPException
 
 import wepppy
 from wepppy.all_your_base import isint
+from wepppy.config.secrets import get_secret
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import get_configs
 from wepppy.nodb.core import * 
@@ -395,7 +396,7 @@ def _resolve_session_id_from_request() -> str | None:
     if not use_signer:
         return str(raw_cookie)
 
-    secret = current_app.config.get("SECRET_KEY") or os.getenv("SECRET_KEY")
+    secret = current_app.config.get("SECRET_KEY") or get_secret("SECRET_KEY")
     if not secret:
         return None
 

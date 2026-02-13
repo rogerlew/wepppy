@@ -13,6 +13,7 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import RedirectResponse
 
+from wepppy.config.secrets import get_secret
 from wepppy.microservices.browse.auth import (
     RUN_ALLOWED_TOKEN_CLASSES,
     USER_SERVICE_TOKEN_CLASSES,
@@ -29,7 +30,7 @@ from wepppy.microservices.browse.security import (
 )
 
 _DTALE_SERVICE_URL = os.getenv('DTALE_SERVICE_URL', 'http://dtale:9010').rstrip('/')
-_DTALE_INTERNAL_TOKEN = os.getenv('DTALE_INTERNAL_TOKEN', '').strip()
+_DTALE_INTERNAL_TOKEN = (get_secret('DTALE_INTERNAL_TOKEN') or '').strip()
 DTALE_SUPPORTED_SUFFIXES = (
     '.parquet',
     '.pq',

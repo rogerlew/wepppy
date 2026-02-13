@@ -1,15 +1,10 @@
-import os
 from os.path import join as _join
-import dotenv
 import requests
 import pandas as pd
 import duckdb
 from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.config.secrets import require_secret
 
-
-dotenv.load_dotenv()
-
-WC_TOKEN = os.getenv("WC_TOKEN")
 API_BASE = "http://climatena-ca.bearhive.duckdns.org" # os.getenv("API_BASE")
 
 def unpack_csv(csv_txt):
@@ -36,12 +31,11 @@ def query_monthlies(locations, model='na'):
     """
     Query the monthlies for a list of locations.
     """
-
-    global WC_TOKEN
+    wc_token = require_secret("WC_TOKEN")
 
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {WC_TOKEN}'
+        'Authorization': f'Bearer {wc_token}'
     }
     url = f"{API_BASE}/{model}/query"
     payload = {

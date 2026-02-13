@@ -9,15 +9,16 @@ from os.path import split as _split
 from typing import Tuple
 
 import requests
-from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 
 from wepppy.all_your_base.geo import utm_raster_transform
+from wepppy.config.secrets import require_secret
 
 Extent = Tuple[float, float, float, float]
 
-OPENTOPOGRAPHY_API_KEY = os.environ.get('OPENTOPOGRAPHY_API_KEY')
-
 __all__ = ["opentopo_retrieve"]
+
+_OPENTOPOGRAPHY_URL = "https://portal.opentopography.org/API/globaldem"
 
 
 def opentopo_retrieve(
@@ -38,28 +39,31 @@ def opentopo_retrieve(
         resample: GDAL resampling mode passed to ``utm_raster_transform``.
 
     Raises:
-        AssertionError: When ``OPENTOPOGRAPHY_API_KEY`` is unset.
-        HTTPError: If the OpenTopography API returns an error.
-        Exception: When the download succeeds but the file cannot be written.
+        RuntimeError: When ``OPENTOPOGRAPHY_API_KEY`` is unset.
+        RuntimeError: If the OpenTopography API returns an error.
+        OSError: When the download succeeds but the file cannot be written.
     """
 
-    assert OPENTOPOGRAPHY_API_KEY is not None, 'You must set OPENTOPOGRAPHY_API_KEY in .env file'
+    api_key = require_secret("OPENTOPOGRAPHY_API_KEY")
 
     dataset = dataset.replace('opentopo://', '').upper()
 
     data_dir, _ = _split(os.path.abspath(dst_fn))
 
     west, south, east, north = extent
-    url = (
-        'https://portal.opentopography.org/API/globaldem'
-        f'?demtype={dataset}'
-        f'&south={south}&north={north}&west={west}&east={east}'
-        f'&outputFormat=GTiff&API_Key={OPENTOPOGRAPHY_API_KEY}'
-    )
+    params = {
+        "demtype": dataset,
+        "south": south,
+        "north": north,
+        "west": west,
+        "east": east,
+        "outputFormat": "GTiff",
+        "API_Key": api_key,
+    }
 
     src_fn = None
     try:
-        response = requests.get(url)
+        response = requests.get(_OPENTOPOGRAPHY_URL, params=params, timeout=60)
         response.raise_for_status()
 
         cd = response.headers.get('content-disposition')
@@ -72,15 +76,15 @@ def opentopo_retrieve(
         with open(src_fn, 'wb') as file:
             file.write(response.content)
 
-    except HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
-        raise
-    except Exception as err:
-        print(f'An error occurred: {err}')
-        raise
+    except RequestException as exc:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        hint = f" (status={status})" if status is not None else ""
+        # Never chain the original HTTPError: its message typically includes the full URL
+        # (including query params).
+        raise RuntimeError(f"OpenTopography DEM request failed{hint}.") from None
 
     if not _exists(src_fn):
-        raise Exception(response.text)
+        raise RuntimeError("OpenTopography DEM request succeeded but produced no file.")
 
     utm_raster_transform(extent, src_fn, dst_fn, cellsize, resample=resample)
 

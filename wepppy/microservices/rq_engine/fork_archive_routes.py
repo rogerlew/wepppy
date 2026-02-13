@@ -13,6 +13,7 @@ from rq import Queue
 from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.config.secrets import get_secret
 from wepppy.nodb.base import lock_statuses
 from wepppy.nodb.core import Ron
 from wepppy.nodb.redis_prep import RedisPrep
@@ -118,7 +119,7 @@ def _token_class_from_claims(claims: Mapping[str, Any] | None) -> str:
 def _resolve_cap_config(request: Request) -> tuple[str, str, str]:
     base_url = os.getenv("CAP_BASE_URL", "")
     site_key = os.getenv("CAP_SITE_KEY", "")
-    secret = os.getenv("CAP_SECRET", "")
+    secret = get_secret("CAP_SECRET") or ""
 
     if not base_url:
         raise AuthError("CAP_BASE_URL is required for CAPTCHA verification.", status_code=500)

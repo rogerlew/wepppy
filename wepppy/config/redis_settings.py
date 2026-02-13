@@ -16,6 +16,8 @@ from functools import lru_cache
 from typing import Any, Dict, Iterable, Mapping, Optional, Union
 from urllib.parse import ParseResult, quote, urlparse, urlunparse
 
+from wepppy.config.secrets import get_secret
+
 try:
     import redis  # type: ignore
 except Exception:  # pragma: no cover - redis is optional for typing
@@ -43,7 +45,7 @@ def _parse_url(raw_url: str) -> Optional[ParseResult]:
 
 
 def _redis_password() -> Optional[str]:
-    password = os.getenv("REDIS_PASSWORD")
+    password = get_secret("REDIS_PASSWORD")
     if password:
         return password
     return None

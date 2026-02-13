@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from itsdangerous import BadSignature, Signer
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.config.secrets import get_secret
 from wepppy.nodb.base import NoDbBase
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils import auth_tokens
@@ -58,7 +59,7 @@ def _session_use_signer() -> bool:
 
 
 def _secret_key() -> str:
-    secret = os.getenv("SECRET_KEY")
+    secret = get_secret("SECRET_KEY")
     if not secret:
         raise AuthError("SECRET_KEY is required to validate sessions", status_code=500)
     return secret

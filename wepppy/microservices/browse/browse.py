@@ -451,6 +451,21 @@ def _preview_available(path: str) -> bool:
     return lower_path.endswith(_FILES_PREVIEW_EXTENSIONS)
 
 
+def _env_truthy(key: str, *, default: bool = False) -> bool:
+    raw = os.getenv(key)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+# High-exposure service: do not return stack traces (or raw exception messages) by default.
+BROWSE_DEBUG_ERRORS = _env_truthy("BROWSE_DEBUG_ERRORS", default=False)
+
+# When enabled, append traceback text to `<wd>/exceptions.log`. Disabled by default because
+# run trees are browseable/exportable artifacts and should not collect debug payloads.
+BROWSE_WRITE_RUN_EXCEPTIONS_LOG = _env_truthy("BROWSE_WRITE_RUN_EXCEPTIONS_LOG", default=False)
+
+
 _logger = logging.getLogger(__name__)
 
 
@@ -694,6 +709,9 @@ def _format_exception_message(exc: BaseException) -> str:
 
 
 def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
+    if not BROWSE_WRITE_RUN_EXCEPTIONS_LOG:
+        return
+
     timestamp = datetime.now()
 
     if runid:
@@ -712,31 +730,47 @@ def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
                 _logger.warning('Unable to append to run exception log for %s', runid, exc_info=True)
 
 async def browse_exception_handler(request: StarletteRequest, exc: Exception):
-    stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
-    stacktrace_text = ''.join(stacktrace_lines)
-    stacktrace_display = stacktrace_text.strip('\n')
+    stacktrace_text: str | None = None
+    stacktrace_display: str | None = None
+    if BROWSE_DEBUG_ERRORS or BROWSE_WRITE_RUN_EXCEPTIONS_LOG:
+        stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+        stacktrace_text = ''.join(stacktrace_lines)
+        stacktrace_display = stacktrace_text.strip('\n')
 
     runid = request.path_params.get('runid')
     config = request.path_params.get('config')
     diff_runid = request.query_params.get('diff', '')
     subpath = request.path_params.get('subpath') or ''
 
-    _logger.exception('Unhandled exception for %s', request.url)
-    _log_exception_details(stacktrace_text, runid)
+    _logger.exception('Unhandled exception for %s', request.url.path)
+    if stacktrace_text:
+        _log_exception_details(stacktrace_text, runid)
 
     if _is_files_request(request):
         return JSONResponse(
             _build_error_payload(
                 'Internal server error',
                 code='internal_error',
-                details=stacktrace_display,
+                details=stacktrace_display if BROWSE_DEBUG_ERRORS else None,
             ),
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
         )
 
-    message = _format_exception_message(exc)
+    if BROWSE_DEBUG_ERRORS:
+        message = _format_exception_message(exc)
+    else:
+        message = "Internal server error"
     escaped_message = html_escape(message)
-    escaped_stacktrace = html_escape(stacktrace_display)
+
+    if BROWSE_DEBUG_ERRORS and stacktrace_display:
+        escaped_stacktrace = html_escape(stacktrace_display)
+        stacktrace_block = f"""
+    <details open>
+        <summary>Stack Trace</summary>
+        <pre style="white-space: pre-wrap; font-family: monospace;">{escaped_stacktrace}</pre>
+    </details>"""
+    else:
+        stacktrace_block = ""
 
     breadcrumbs = []
     if runid and config:
@@ -764,10 +798,7 @@ async def browse_exception_handler(request: StarletteRequest, exc: Exception):
 <div style="padding: 1em 0 0 2em;">
     <h3 style="color: #d9534f;">500 - Internal Server Error</h3>
     <p>{escaped_message}</p>
-    <details open>
-        <summary>Stack Trace</summary>
-        <pre style="white-space: pre-wrap; font-family: monospace;">{escaped_stacktrace}</pre>
-    </details>
+    {stacktrace_block}
 </div>"""
 
     run_display = runid if runid else 'Browse'

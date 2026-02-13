@@ -27,6 +27,7 @@ from starlette.routing import Route, Mount
 from starlette.templating import Jinja2Templates
 from jinja2 import ChoiceLoader, FileSystemLoader
 
+from wepppy.config.secrets import get_secret
 
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
@@ -612,7 +613,7 @@ def create_app() -> Starlette:
         Exception: query_engine_exception_handler,
     }
 
-    if os.getenv("WEPP_MCP_JWT_SECRET"):
+    if get_secret("WEPP_MCP_JWT_SECRET"):
         try:
             from .mcp import create_mcp_app
 

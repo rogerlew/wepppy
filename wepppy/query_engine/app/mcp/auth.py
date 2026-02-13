@@ -20,6 +20,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.config.secrets import get_secret
 
 
 DEFAULT_SCOPE_SEPARATOR = " "
@@ -476,9 +477,11 @@ def get_auth_config() -> MCPAuthConfig:
     Raises:
         RuntimeError: If the JWT secret is missing.
     """
-    secret = os.getenv(f"{ENV_PREFIX}SECRET")
+    secret = get_secret(f"{ENV_PREFIX}SECRET")
     if not secret:
-        raise RuntimeError("WEPP_MCP_JWT_SECRET environment variable is required for MCP JWT auth")
+        raise RuntimeError(
+            "WEPP_MCP_JWT_SECRET (or WEPP_MCP_JWT_SECRET_FILE) must be configured for MCP JWT auth"
+        )
 
     algorithms_env = os.getenv(f"{ENV_PREFIX}ALGORITHMS")
     algorithms: Sequence[str]

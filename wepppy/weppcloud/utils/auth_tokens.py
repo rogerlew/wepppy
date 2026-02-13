@@ -14,6 +14,8 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Iterable, Mapping, Sequence
 
+from wepppy.config.secrets import get_secret
+
 SUPPORTED_HS_ALGORITHMS = {
     "HS256": hashlib.sha256,
     "HS384": hashlib.sha384,
@@ -91,14 +93,17 @@ def get_jwt_config() -> JWTServiceConfig:
     Raises:
         JWTConfigurationError: If the shared secret cannot be resolved.
     """
-    secret_list = _parse_secrets(os.getenv(f"{ENV_PREFIX}SECRETS"))
-    secret = os.getenv(f"{ENV_PREFIX}SECRET")
+    secret_list = _parse_secrets(get_secret(f"{ENV_PREFIX}SECRETS"))
+    secret = get_secret(f"{ENV_PREFIX}SECRET")
     if secret_list:
         secret = secret_list[0]
         validation_secrets = secret_list
     else:
         if not secret:
-            raise JWTConfigurationError("WEPP_AUTH_JWT_SECRET must be set to issue tokens")
+            raise JWTConfigurationError(
+                "WEPP_AUTH_JWT_SECRET must be set to issue tokens "
+                "(or configure WEPP_AUTH_JWT_SECRETS / *_FILE variants)"
+            )
         validation_secrets = (secret,)
 
     algorithms = _parse_algorithms(os.getenv(f"{ENV_PREFIX}ALGORITHMS"))

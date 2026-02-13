@@ -1,16 +1,14 @@
 import os
-from os.path import join as _join
 import redis
 
 from urllib.parse import urlparse
 
-from dotenv import load_dotenv
-_thisdir = os.path.dirname(__file__)
-load_dotenv(_join(_thisdir, '.env'))
+from wepppy.config.secrets import get_secret
+
 REDIS_URL = os.environ.get('REDIS_URL', '')
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.environ.get('REDIS_PORT', '6379'))
-REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')
+REDIS_PASSWORD = get_secret("REDIS_PASSWORD") or ""
 
 
 class StatusMessenger:

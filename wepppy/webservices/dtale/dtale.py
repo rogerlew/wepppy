@@ -46,6 +46,8 @@ from dtale.views import DtaleData, build_dtypes_state, startup
 from plotly import graph_objs as go
 
 from wepppy.weppcloud.utils.helpers import get_wd
+
+from wepppy.config.secrets import get_secret
 from wepppy.nodb.core.watershed import Watershed
 
 try:
@@ -86,7 +88,7 @@ APP_ROOT = SITE_PREFIX
 IS_PROXY = APP_ROOT is not None
 
 DTALE_BASE_URL = os.getenv("DTALE_BASE_URL", f"http://{HOST}:{PORT}")
-DTALE_INTERNAL_TOKEN = os.getenv("DTALE_INTERNAL_TOKEN", "").strip()
+DTALE_INTERNAL_TOKEN = (get_secret("DTALE_INTERNAL_TOKEN") or "").strip()
 if not DTALE_INTERNAL_TOKEN:
     logger.warning(
         "DTALE_INTERNAL_TOKEN is not set – falling back to in-process requests only."

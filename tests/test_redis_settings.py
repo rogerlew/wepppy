@@ -16,6 +16,7 @@ def reset_redis_env(monkeypatch):
         "REDIS_HOST",
         "REDIS_PORT",
         "REDIS_PASSWORD",
+        "REDIS_PASSWORD_FILE",
     ):
         monkeypatch.delenv(key, raising=False)
 
@@ -112,6 +113,24 @@ def test_password_applies_to_url_override(monkeypatch):
         redis_settings.redis_url(redis_settings.RedisDB.STATUS)
         == "redis://:sekret@redis.internal:6380/2?ssl=true"
     )
+
+
+def test_password_injected_from_file_env(monkeypatch, tmp_path):
+    password_path = tmp_path / "redis_password"
+    password_path.write_text("sekret\n", encoding="utf-8")
+
+    monkeypatch.setenv("REDIS_HOST", "secure-cache")
+    monkeypatch.setenv("REDIS_PORT", "6379")
+    monkeypatch.setenv("REDIS_PASSWORD_FILE", str(password_path))
+    monkeypatch.delenv("REDIS_PASSWORD", raising=False)
+
+    assert (
+        redis_settings.redis_url(redis_settings.RedisDB.WD_CACHE)
+        == "redis://:sekret@secure-cache:6379/11"
+    )
+
+    kwargs = redis_settings.redis_connection_kwargs(redis_settings.RedisDB.LOCK)
+    assert kwargs["password"] == "sekret"
 
 
 def test_connection_kwargs_merge_extra(monkeypatch):

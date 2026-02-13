@@ -6,7 +6,6 @@ import json
 from typing import Dict
 
 import redis
-from dotenv import load_dotenv
 from rq.command import send_stop_job_command
 from rq.exceptions import InvalidJobOperation, NoSuchJobError
 from rq.job import Job
@@ -16,8 +15,6 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
-
-load_dotenv()
 
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)

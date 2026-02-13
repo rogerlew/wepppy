@@ -18,6 +18,34 @@ def pytest_configure(config) -> None:
     config.addinivalue_line("markers", "requires_network: Tests that reach external services")
 
 
+@pytest.fixture(autouse=True)
+def _clear_secret_file_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ensure host-configured `*_FILE` vars do not leak into unit tests."""
+
+    for key in (
+        "ADMIN_PASSWORD_FILE",
+        "AGENT_JWT_SECRET_FILE",
+        "CAP_SECRET_FILE",
+        "CLIMATE_ENGINE_API_KEY_FILE",
+        "DTALE_INTERNAL_TOKEN_FILE",
+        "OAUTH_GITHUB_CLIENT_SECRET_FILE",
+        "OAUTH_GOOGLE_CLIENT_SECRET_FILE",
+        "OAUTH_ORCID_CLIENT_SECRET_FILE",
+        "OPENET_API_KEY_FILE",
+        "OPENTOPOGRAPHY_API_KEY_FILE",
+        "POSTGRES_PASSWORD_FILE",
+        "REDIS_PASSWORD_FILE",
+        "SECRET_KEY_FILE",
+        "SECURITY_PASSWORD_SALT_FILE",
+        "WC_TOKEN_FILE",
+        "WEPP_AUTH_JWT_SECRET_FILE",
+        "WEPP_AUTH_JWT_SECRETS_FILE",
+        "WEPP_MCP_JWT_SECRET_FILE",
+        "ZOHO_NOREPLY_EMAIL_PASSWORD_FILE",
+    ):
+        monkeypatch.delenv(key, raising=False)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _ensure_all_your_base() -> None:
     module = importlib.import_module("wepppy.all_your_base")

@@ -11,6 +11,7 @@
 | Document | Purpose |
 | --- | --- |
 | [deployment-tuning-knowledgebase.md](deployment-tuning-knowledgebase.md) | Primary operations knowledgebase (deployment baselines, tuning knobs, failure signatures, package synthesis). |
+| [secrets.md](secrets.md) | Canonical secrets handling policy (Compose secrets now; Kubernetes worker pools next). |
 | [ui-rcds-nfs-vs-dev-nfs.md](ui-rcds-nfs-vs-dev-nfs.md) | NFS metadata workload benchmark for delete/recreate performance comparisons. |
 
 ## Curation Notes

@@ -8,6 +8,8 @@ import os
 import requests
 from flask import current_app, has_request_context, request
 
+from wepppy.config.secrets import get_secret
+
 
 class CapVerificationError(RuntimeError):
     """Raised when CAPTCHA verification fails or cannot be performed."""
@@ -16,7 +18,7 @@ class CapVerificationError(RuntimeError):
 def _resolve_cap_config() -> Tuple[str, str, str]:
     base_url = current_app.config.get("CAP_BASE_URL") or os.getenv("CAP_BASE_URL")
     site_key = current_app.config.get("CAP_SITE_KEY") or os.getenv("CAP_SITE_KEY")
-    secret = current_app.config.get("CAP_SECRET") or os.getenv("CAP_SECRET")
+    secret = current_app.config.get("CAP_SECRET") or get_secret("CAP_SECRET")
 
     if not base_url:
         raise CapVerificationError("CAP_BASE_URL is required for CAPTCHA verification.")

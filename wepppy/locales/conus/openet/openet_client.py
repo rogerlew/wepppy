@@ -5,8 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from datetime import date
 import json
-import os
-from pathlib import Path
 from typing import Any, Final, TypeAlias
 
 from os.path import exists as _exists
@@ -15,11 +13,9 @@ from os.path import join as _join
 import numpy as np
 import requests
 
-_THISDIR = Path(__file__).resolve().parent
-_API_ENV_PATH = _THISDIR / ".env"
-_API_KEY: str | None = os.getenv("OPENET_API_KEY")
-if _API_KEY is None and _API_ENV_PATH.exists():
-    _API_KEY = _API_ENV_PATH.read_text(encoding="utf-8").strip()
+from wepppy.config.secrets import get_secret
+
+_API_KEY: str | None = get_secret("OPENET_API_KEY")
 
 _OPENET_POINT_URL: Final[str] = "https://openet-api.org/raster/timeseries/point"
 _OPENET_POLYGON_URL: Final[str] = "https://openet-api.org/raster/timeseries/polygon"
@@ -37,8 +33,7 @@ def _get_header() -> dict[str, str]:
     """Return the Authorization header, raising if the API key is missing."""
     if not _API_KEY:
         raise RuntimeError(
-            "OpenET API key is not configured. Set OPENET_API_KEY or provide "
-            "wepppy/locales/conus/openet/.env."
+            "OpenET API key is not configured. Set OPENET_API_KEY or OPENET_API_KEY_FILE."
         )
     return {"Authorization": _API_KEY}
 

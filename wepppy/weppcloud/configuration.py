@@ -4,6 +4,8 @@ from typing import Any, Dict, List, Optional
 
 import redis
 
+from wepppy.config.secrets import get_secret, require_secret
+
 
 def _require_env(name: str) -> str:
     value = os.getenv(name)
@@ -63,7 +65,7 @@ def _normalize_site_prefix(site_prefix: str) -> str:
 
 def _resolve_mail_config() -> Dict[str, Any]:
     zoho_email = (os.getenv("ZOHO_NOREPLY_EMAIL") or "").strip()
-    zoho_password = (os.getenv("ZOHO_NOREPLY_EMAIL_PASSWORD") or "").strip()
+    zoho_password = get_secret("ZOHO_NOREPLY_EMAIL_PASSWORD") or ""
 
     if zoho_email and zoho_password:
         return {
@@ -112,12 +114,8 @@ def _load_oauth_providers(
     github_client_id = _get_env_any(
         ["OAUTH_GITHUB_CLIENT_ID", "GITHUB_OAUTH_CLIENT_ID", "GITHUB_OAUTH_CLIENTID"]
     )
-    github_client_secret = _get_env_any(
-        [
-            "OAUTH_GITHUB_CLIENT_SECRET",
-            "GITHUB_OAUTH_CLIENT_SECRET",
-            "GITHUB_OAUTH_SECRET_KEY",
-        ]
+    github_client_secret = get_secret("OAUTH_GITHUB_CLIENT_SECRET") or _get_env_any(
+        ["GITHUB_OAUTH_CLIENT_SECRET", "GITHUB_OAUTH_SECRET_KEY"]
     )
     github_redirect_override = _get_env_any(
         [
@@ -148,8 +146,8 @@ def _load_oauth_providers(
     google_client_id = _get_env_any(
         ["OAUTH_GOOGLE_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID"]
     )
-    google_client_secret = _get_env_any(
-        ["OAUTH_GOOGLE_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET"]
+    google_client_secret = get_secret("OAUTH_GOOGLE_CLIENT_SECRET") or _get_env_any(
+        ["GOOGLE_OAUTH_CLIENT_SECRET"]
     )
     google_redirect_override = _get_env_any(
         [
@@ -185,8 +183,8 @@ def _load_oauth_providers(
     orcid_client_id = _get_env_any(
         ["OAUTH_ORCID_CLIENT_ID", "ORCID_OAUTH_CLIENT_ID", "ORCID_OAUTH_CLIENTID"]
     )
-    orcid_client_secret = _get_env_any(
-        ["OAUTH_ORCID_CLIENT_SECRET", "ORCID_OAUTH_CLIENT_SECRET", "ORCID_OAUTH_SECRET_KEY"]
+    orcid_client_secret = get_secret("OAUTH_ORCID_CLIENT_SECRET") or _get_env_any(
+        ["ORCID_OAUTH_CLIENT_SECRET", "ORCID_OAUTH_SECRET_KEY"]
     )
     orcid_redirect_override = _get_env_any(
         [
@@ -242,8 +240,8 @@ def config_app(app: Any):
     app.config["TEST_SUPPORT_ENABLED"] = test_support_enabled in {"1", "true", "yes"}
 
     # Flask-Security configuration
-    app.config["SECRET_KEY"] = _require_env("SECRET_KEY")
-    salt = _require_env("SECURITY_PASSWORD_SALT")
+    app.config["SECRET_KEY"] = require_secret("SECRET_KEY")
+    salt = require_secret("SECURITY_PASSWORD_SALT")
     app.config["SECURITY_PASSWORD_SALT"] = salt.encode("utf-8")
     app.config["SECURITY_PASSWORD_HASH"] = "bcrypt"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

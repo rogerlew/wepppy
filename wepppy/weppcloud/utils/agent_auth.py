@@ -9,6 +9,8 @@ from typing import Optional
 from flask import Flask, current_app
 from flask_jwt_extended import JWTManager, create_access_token
 
+from wepppy.config.secrets import get_secret
+
 DEFAULT_AGENT_TOKEN_TTL = timedelta(hours=24)
 AGENT_JWT_SECRET_KEY = "AGENT_JWT_SECRET"
 AGENT_JWT_EXPIRES_KEY = "AGENT_JWT_EXPIRES"
@@ -28,7 +30,7 @@ def init_agent_jwt(app: Flask) -> JWTManager:
     """
     secret = app.config.get(AGENT_JWT_SECRET_KEY)
     if not secret:
-        secret = os.getenv(AGENT_JWT_SECRET_KEY)
+        secret = get_secret(AGENT_JWT_SECRET_KEY)
         if secret:
             app.config[AGENT_JWT_SECRET_KEY] = secret
 

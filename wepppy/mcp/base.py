@@ -6,6 +6,7 @@ import os
 from functools import wraps
 from typing import Any, Callable, Mapping, Sequence, TypeVar, cast
 
+from wepppy.config.secrets import get_secret
 from wepppy.weppcloud.utils.agent_auth import AGENT_JWT_SECRET_KEY
 from wepppy.weppcloud.utils.auth_tokens import JWTDecodeError, decode_jwt
 
@@ -32,7 +33,7 @@ def _load_claims(expected_tier: str) -> Mapping[str, Any]:
     if not token:
         raise PermissionError("Agent token missing from environment")
 
-    secret = os.getenv(AGENT_JWT_SECRET_KEY)
+    secret = get_secret(AGENT_JWT_SECRET_KEY)
     if not secret:
         raise PermissionError("Agent JWT secret missing from environment")
 

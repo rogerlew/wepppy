@@ -3,16 +3,10 @@
 from __future__ import annotations
 
 import logging
-import os
-from os.path import join as _join
 from typing import Optional
 
 import redis
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-
-from dotenv import load_dotenv
-_thisdir = os.path.dirname(__file__)
-load_dotenv(_join(_thisdir, '.env'))
 
 class StatusMessenger:
     """Thin wrapper around Redis pub/sub for status messages."""

@@ -141,3 +141,24 @@ def test_config_app_allows_session_cookie_samesite_env_override(
     monkeypatch.setenv("SESSION_COOKIE_SAMESITE", "Strict")
     app = _build_configured_app(monkeypatch)
     assert app.config["SESSION_COOKIE_SAMESITE"] == "Strict"
+
+
+def test_config_app_reads_required_secrets_from_file_env(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    secret_key_path = tmp_path / "secret_key"
+    secret_key_path.write_text("file-secret\n", encoding="utf-8")
+    salt_path = tmp_path / "security_password_salt"
+    salt_path.write_text("file-salt\n", encoding="utf-8")
+
+    monkeypatch.setenv("SECRET_KEY_FILE", str(secret_key_path))
+    monkeypatch.setenv("SECURITY_PASSWORD_SALT_FILE", str(salt_path))
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    monkeypatch.delenv("SECURITY_PASSWORD_SALT", raising=False)
+    monkeypatch.setattr(configuration, "_build_session_redis", lambda: "redis-client")
+
+    app = _DummyApp()
+    configuration.config_app(app)
+
+    assert app.config["SECRET_KEY"] == "file-secret"
+    assert app.config["SECURITY_PASSWORD_SALT"] == b"file-salt"

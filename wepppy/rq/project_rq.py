@@ -61,11 +61,6 @@ from .wepp_rq import run_wepp_rq
 _hostname = socket.gethostname()
 _logger = logging.getLogger(__name__)
 
-from dotenv import load_dotenv
-_thisdir = os.path.dirname(__file__)
-
-load_dotenv(_join(_thisdir, '.env'))
-
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 

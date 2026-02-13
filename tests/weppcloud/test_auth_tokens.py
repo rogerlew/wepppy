@@ -37,6 +37,20 @@ def _configure_rotation_env(monkeypatch):
     auth_tokens.get_jwt_config.cache_clear()
 
 
+def _configure_secret_file_env(monkeypatch, tmp_path):
+    secret_path = tmp_path / "jwt_secret"
+    secret_path.write_text("file-secret\n", encoding="utf-8")
+
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET_FILE", str(secret_path))
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRET", raising=False)
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRETS", raising=False)
+    monkeypatch.setenv("WEPP_AUTH_JWT_ALGORITHMS", "HS256")
+    monkeypatch.setenv("WEPP_AUTH_JWT_ISSUER", "weppcloud")
+    monkeypatch.setenv("WEPP_AUTH_JWT_DEFAULT_AUDIENCE", "wepp-services")
+    monkeypatch.setenv("WEPP_AUTH_JWT_DEFAULT_TTL_SECONDS", "600")
+    auth_tokens.get_jwt_config.cache_clear()
+
+
 def test_issue_token_includes_claims(monkeypatch):
     _configure_env(monkeypatch)
     now = int(time.time())
@@ -107,3 +121,11 @@ def test_decode_token_accepts_rotated_secret(monkeypatch):
     )
     with pytest.raises(auth_tokens.JWTDecodeError):
         auth_tokens.decode_token(bad_token, audience="wepp-services")
+
+
+def test_issue_token_uses_secret_file_env(monkeypatch, tmp_path):
+    _configure_secret_file_env(monkeypatch, tmp_path)
+    result = auth_tokens.issue_token("user-file")
+
+    decoded = auth_tokens.decode_token(result["token"], audience="wepp-services")
+    assert decoded["sub"] == "user-file"

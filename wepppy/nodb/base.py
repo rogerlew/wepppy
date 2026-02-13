@@ -87,7 +87,6 @@ import sys
 import uuid
 import threading
 from concurrent.futures import ProcessPoolExecutor
-from dotenv import load_dotenv
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
@@ -124,9 +123,6 @@ __all__ = [
     'lock_statuses',
     'clear_nodb_file_cache',
 ]
-
-_thisdir = os.path.dirname(__file__)
-load_dotenv(_join(_thisdir, '.env'))
 
 import ast
 from time import time

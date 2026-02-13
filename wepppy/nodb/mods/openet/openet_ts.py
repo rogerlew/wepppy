@@ -14,6 +14,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Tuple
 import pandas as pd
 import requests
 
+from wepppy.config.secrets import require_secret
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.core import Climate, ClimateMode, Watershed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -51,32 +52,8 @@ class OpenETNoDbLockedException(Exception):
     pass
 
 
-def _find_env_file() -> Optional[Path]:
-    for base in [Path.cwd(), *Path(__file__).resolve().parents]:
-        candidate = base / "docker" / ".env"
-        if candidate.exists():
-            return candidate
-    return None
-
-
 def _load_api_key() -> str:
-    api_key = os.environ.get("CLIMATE_ENGINE_API_KEY")
-    if api_key:
-        return api_key
-
-    env_path = _find_env_file()
-    if env_path:
-        for raw_line in env_path.read_text(encoding="utf-8").splitlines():
-            line = raw_line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, value = line.split("=", 1)
-            if key.strip() == "CLIMATE_ENGINE_API_KEY":
-                return value.strip().strip("'\"")
-
-    raise RuntimeError(
-        "Missing CLIMATE_ENGINE_API_KEY. Export it or add it to docker/.env."
-    )
+    return require_secret("CLIMATE_ENGINE_API_KEY")
 
 
 def _normalize_topaz_id(value: Any) -> Optional[str]:

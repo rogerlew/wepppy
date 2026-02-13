@@ -9,6 +9,7 @@ import requests
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
 
+from wepppy.config.secrets import get_secret
 from wepppy.nodb.core import Ron
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
 from wepppy.weppcloud.utils import auth_tokens
@@ -53,7 +54,7 @@ def _run_url(runid: str, config: str) -> str:
 def _resolve_cap_config(request: Request) -> tuple[str, str, str]:
     base_url = os.getenv("CAP_BASE_URL")
     site_key = os.getenv("CAP_SITE_KEY")
-    secret = os.getenv("CAP_SECRET")
+    secret = get_secret("CAP_SECRET")
 
     if not base_url:
         raise CapVerificationError("CAP_BASE_URL is required for CAPTCHA verification.")
