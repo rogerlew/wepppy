@@ -1,6 +1,8 @@
-# wepp.cloud deploy plan (prod refresh)
+# Mini Work Package: wepp.cloud Deploy Plan (Prod Refresh)
+Status: Completed
+Last Updated: 2026-01-16
 
-> Status: completed. wepp.cloud (wepp1) runs the docker-compose prod stack.
+> wepp.cloud (wepp1) runs the docker-compose prod stack.
 > Historical reference: systemd inventory and bare-metal steps below remain for rollback context.
 
 ## References
