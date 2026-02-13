@@ -1,5 +1,5 @@
 # Mini Work Package: Secrets Migration (Env Vars -> Secret Files)
-Status: In Progress (Phase 2 complete)
+Status: In Progress (Phase 3 compose wiring complete)
 Last Updated: 2026-02-13
 See also: `docs/infrastructure/secrets.md`, `docker/README.md`
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/docker-compose.prod.yml`, `docker/docker-compose.prod.worker.yml`, `docker/docker-compose.prod.wepp1.yml`, `wctl/*`, `wepppy/weppcloud/configuration.py`, `wepppy/weppcloud/utils/auth_tokens.py`, `wepppy/config/redis_settings.py`, `wepppy/microservices/browse/*`
@@ -110,20 +110,20 @@ Review gates:
 - [x] Update `docker/README.md` and any deploy docs that instruct creating secrets in `docker/.env`.
 
 Review gates:
-- [ ] `wctl docker compose config` does not contain secret values (spot-check by searching for known secret keys without values; validate that only `*_FILE` paths remain).
+- [x] `wctl docker compose config` does not contain secret values (spot-check by searching for known secret keys without values; validate that only `*_FILE` paths remain).
 - [ ] `docker inspect <container>` shows no secret values in `.Config.Env` (only `*_FILE` vars).
 
 ### Phase 3: Worker Stack + wepp1 Overlay
-- [ ] Update `docker/docker-compose.prod.worker.yml`:
+- [x] Update `docker/docker-compose.prod.worker.yml`:
   - remove `${REDIS_PASSWORD}` interpolation in URLs/commands (prefer `REDIS_PASSWORD_FILE` + code reading)
   - mount only worker-required secrets (likely JWT + agent auth + redis password if needed)
-- [ ] Update `docker/docker-compose.prod.wepp1.yml` (and any `wctl` compose composition rules) so wepp1’s rendered config still uses secrets-as-files.
+- [x] Update `docker/docker-compose.prod.wepp1.yml` (and any `wctl` compose composition rules) so wepp1’s rendered config still uses secrets-as-files.
 - [ ] Ensure per-host UID/GID and secret file readability is correct for:
   - images built with `APP_UID`/`APP_GID` (prod/worker/wepp1)
   - dev stack using `user: "${UID}:${GID}"`
 
 Review gates:
-- [ ] `wctl docker compose config` on each host profile (`dev`, `prod`, `wepp1`, `worker`) contains no secret values.
+- [x] `wctl docker compose config` on each host profile (`dev`, `prod`, `wepp1`, `worker`) contains no secret values.
 
 ### Phase 4: Environment Rollouts (Forest/Fleet)
 Roll out in this order: `forest` -> `forest1` -> `wepp1` -> `wepp2`.
@@ -198,7 +198,7 @@ Automated:
 - [x] `wctl doc-lint --path docs/infrastructure/secrets.md --path docs/mini-work-packages/20260213_secrets_migration.md`
 
 Manual:
-- [ ] `wctl docker compose config | rg -n \"SECRET_KEY=|WEPP_AUTH_JWT_SECRET=|OAUTH_.*_SECRET=\"` returns no matches.
+- [x] `wctl docker compose config | rg -n \"SECRET_KEY=|WEPP_AUTH_JWT_SECRET=|OAUTH_.*_SECRET=\"` returns no matches.
 - [ ] `docker inspect <browse_container>` does not show secret values in env.
 - [ ] Induce a controlled browse exception and confirm logs do not include environment dumps.
 

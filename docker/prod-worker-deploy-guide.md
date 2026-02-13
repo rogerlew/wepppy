@@ -14,12 +14,10 @@ This guide covers deploying the worker-only stack (`rq-worker`, `rq-worker-batch
 
 ## Redis and UFW Setup
 ### 1) Redis auth
-Set a password in the main host `docker/.env`:
-```
-REDIS_PASSWORD=<strong-password>
-```
+The main host Redis password is configured via the secret file:
+- `docker/secrets/redis_password` (mounted to `/run/secrets/redis_password`)
 
-Ensure Redis is started with auth (already wired in `docker/docker-compose.prod.yml`).
+Ensure Redis is started with auth (wired in `docker/docker-compose.prod.yml`) and that the worker host has the **same** password value in its own `docker/secrets/redis_password` file.
 
 ### 2) UFW rules (on the Redis host)
 Allow only the worker host to reach Redis:
@@ -35,16 +33,21 @@ ufw allow out to <redis_ip> port 6379 proto tcp
 
 ## Environment Variables
 ### Required
-- `RQ_REDIS_URL` (use DB 9):
-  - Local stack: `redis://:<password>@redis:6379/9`
-  - Remote worker: `redis://:<password>@<redis_private_ip>:6379/9`
-- `REDIS_PASSWORD` (keep in `docker/.env` for reuse in other services)
+- `RQ_REDIS_URL` (use DB 9; **do not** embed passwords in the URL):
+  - Local stack (only if Redis is on the same compose network): `redis://redis:6379/9`
+  - Remote worker: `redis://<redis_private_ip>:6379/9`
+
+### Required secret files
+- `docker/secrets/redis_password`
 
 ### Optional
 - `WEPPCLOUDR_CONTAINER` (defaults to `weppcloudr`)
 - `RQ_WORKER_CPUSET` (defaults to `0-47` in worker compose)
 - `WEPPCLOUDR_CPUSET` (defaults to `0-47` in worker compose)
 - `WEPPPY_NCPU`, `PERIDOT_CPU` (batch tuning)
+  - Provider API keys if the worker runs tasks that call those services:
+    - `docker/secrets/opentopography_api_key`
+    - `docker/secrets/climate_engine_api_key`
 
 ## Install wctl for worker stack
 ```
@@ -87,14 +90,14 @@ You should see worker entries for both the main host and the worker node.
 ### Validate Redis auth
 Inside the worker host:
 ```
-redis-cli -h <redis_ip> -a <password> -n 9 ping
+redis-cli -h <redis_ip> -a "$(cat docker/secrets/redis_password)" -n 9 ping
 ```
 
 ## Troubleshooting
 ### Workers show "Authentication required"
-- Confirm `RQ_REDIS_URL` includes `:<password>@`.
-- Confirm `REDIS_PASSWORD` matches the Redis host value.
-- Restart workers after changing env vars.
+- Confirm `docker/secrets/redis_password` matches the Redis host value.
+- Confirm the worker containers have `/run/secrets/redis_password` mounted (Compose `secrets:`).
+- Restart workers after changing secret files (Compose secrets are file-backed but workers only read at startup).
 
 ### Workers appear idle while local host is busy
 RQ is pull-based; lower latency or more local processes can bias job pickup. Options:

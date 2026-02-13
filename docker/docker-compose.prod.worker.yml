@@ -12,12 +12,15 @@ x-wepppy-image: &wepppy-image
 x-worker-env: &worker-env
   PYTHONUNBUFFERED: "1"
   MPLCONFIGDIR: /tmp/matplotlib
-  RQ_REDIS_URL: ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
-  REDIS_URL: ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
+  # Base Redis URL without credentials; password is supplied via REDIS_PASSWORD_FILE.
+  # Prefer setting RQ_REDIS_URL to a reachable host (DB is normalized in the worker command).
+  RQ_REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
+  REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
+  REDIS_PASSWORD_FILE: /run/secrets/redis_password
   WC1_DIR: /wc1
   GEODATA_DIR: /geodata
-  OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
-  CLIMATE_ENGINE_API_KEY: ${CLIMATE_ENGINE_API_KEY}
+  OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
+  CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
   GL_DASHBOARD_BATCH_ENABLED: ${GL_DASHBOARD_BATCH_ENABLED:-false}
   LOGLEVEL: INFO
   RQ_LOGGING_LEVEL: INFO
@@ -29,7 +32,7 @@ x-worker-service: &worker-service
   restart: unless-stopped
   working_dir: /workdir/wepppy
   env_file:
-    - ${WEPPPY_ENV_FILE:-docker/.env}
+    - ${WEPPPY_ENV_FILE:-defaults.env}
   volumes:
     - ${WC1_DIR:-/geodata/wc1}:/wc1
     - ${GEODATA_DIR:-/geodata}:/geodata
@@ -43,20 +46,19 @@ services:
       nofile:
         soft: 1000000
         hard: 1000000
+    secrets:
+      - redis_password
+      - opentopography_api_key
+      - climate_engine_api_key
     environment:
       <<: *worker-env
     command:
-      - rq
-      - worker-pool
-      - -n
-      - "6"
-      - -u
-      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
-      - --logging-level
-      - INFO
-      - --worker-class
-      - wepppy.rq.WepppyRqWorker
-      - default
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+        redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
+        exec rq worker-pool -n "6" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default
 
   rq-worker-batch:
     <<: *worker-service
@@ -65,22 +67,21 @@ services:
       nofile:
         soft: 1000000
         hard: 1000000
+    secrets:
+      - redis_password
+      - opentopography_api_key
+      - climate_engine_api_key
     environment:
       <<: *worker-env
       WEPPPY_NCPU: ${WEPPPY_NCPU:-6}
       PERIDOT_CPU: ${PERIDOT_CPU:-4}
     command:
-      - rq
-      - worker-pool
-      - -n
-      - "4"
-      - -u
-      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
-      - --logging-level
-      - INFO
-      - --worker-class
-      - wepppy.rq.WepppyRqWorker
-      - batch
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+        redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
+        exec rq worker-pool -n "4" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch
 
   weppcloudr:
     image: ${WEPPCLOUDR_IMAGE:-weppcloudr:latest}
@@ -103,3 +104,11 @@ services:
 
 volumes:
   weppcloudr-renv-cache:
+
+secrets:
+  redis_password:
+    file: ./secrets/redis_password
+  opentopography_api_key:
+    file: ./secrets/opentopography_api_key
+  climate_engine_api_key:
+    file: ./secrets/climate_engine_api_key

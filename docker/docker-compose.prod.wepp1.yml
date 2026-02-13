@@ -3,7 +3,6 @@ x-wepp1-volumes: &wepp1-volumes
   - /geodata:/geodata
 
 x-wepppy-env: &wepppy-env
-  CLIMATE_ENGINE_API_KEY: ${CLIMATE_ENGINE_API_KEY}
   GL_DASHBOARD_BATCH_ENABLED: ${GL_DASHBOARD_BATCH_ENABLED:-false}
   WEPPPY_SOURCE_ROOT: ${WEPPPY_SOURCE_ROOT:-/workdir/wepppy}
 
