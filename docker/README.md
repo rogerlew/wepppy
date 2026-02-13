@@ -120,6 +120,11 @@ python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/po
 python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/redis_password
 python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/dtale_internal_token
 python -c 'import secrets; print(secrets.token_urlsafe(32))' > docker/secrets/cap_secret
+
+# Provider-issued API keys (required when using those integrations).
+printf '%s\n' "your-opentopography-key" > docker/secrets/opentopography_api_key
+printf '%s\n' "your-climate-engine-key" > docker/secrets/climate_engine_api_key
+
 chmod 600 docker/secrets/*
 ```
 
