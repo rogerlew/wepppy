@@ -21,7 +21,7 @@ Weppcloud surfaces a fixed-position banner when the HTML expects a newer `contro
 How it works:
 - `controllers_js/templates/controllers.js.j2` stamps the bundle build date and assigns `window.__weppControllersGlBuildId = "<UTC build date>"`.
 - The Flask context processor (`wepppy/weppcloud/_context_processors.py`) parses the `Build date:` line from the on-disk `controllers-gl.js` via `resolve_controllers_gl_build_id` (`wepppy/weppcloud/utils/assets.py`) and injects it into `<body data-controllers-gl-expected-build-id="...">`.
-- `static/js/controllers_gl_stale_check.js` (loaded with `defer` after `controllers-gl.js`) compares expected vs actual on page load and renders: "Update available. Reload to load the latest UI."
+- `static/js/controllers_gl_stale_check.js` (both scripts load with `defer`, with stale-check after `controllers-gl.js`) compares expected vs actual on page load and renders: "Update available. Reload to load the latest UI."
 - Banner stacking listens for `wepp:session-heartbeat-expired` (from `static/js/session_heartbeat.js`) and offsets above the session-expired banner.
 
 Scope (wired pages/templates):

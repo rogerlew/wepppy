@@ -133,8 +133,7 @@ Responsibilities:
 Load order:
 - Include the stale-check script after `controllers-gl.js` on each page in scope.
 - Use `static_url('js/controllers_gl_stale_check.js')` (cache-busted by `ASSET_VERSION`) to reduce "stale checker" issues.
-- Always load `controllers_gl_stale_check.js` with `defer`.
-- If the page loads `controllers-gl.js` with `defer`, the stale-check script must also be `defer` (preserve execution ordering).
+- Load both `controllers-gl.js` and `controllers_gl_stale_check.js` with `defer` (preserves execution ordering).
 - The stale-check script must tolerate `document.body` being null (wait until DOM is ready before reading datasets).
 
 ### Phase 3: Wire Into Templates In Scope
@@ -159,7 +158,7 @@ Add Jest coverage (jsdom) similar to the existing `session_heartbeat` test:
   - renders banner when build id missing
   - renders banner when build ids mismatch
   - renders no banner when expected build id is missing/empty
-  - reload button calls `location.reload`
+  - reload button emits `wepp:controllers-gl-stale-reload` (and attempts `location.reload` in browsers)
   - idempotency (no duplicate banners)
 
 Add minimal Python coverage if server-side build-id parsing is non-trivial:
@@ -169,7 +168,7 @@ Add minimal Python coverage if server-side build-id parsing is non-trivial:
 1. Load a run page that uses `controllers-gl.js` (runs0, fork console, README editor, archive dashboard, reports).
 2. Simulate mismatch:
    - rebuild `controllers-gl.js` (changes build id), but keep browser cached old copy (hard case), OR
-   - temporarily override `window.__weppControllersGlBuildId` in devtools to an older value.
+   - use DevTools Local Overrides to change the served `controllers-gl.js` build id before reloading the page.
 3. Confirm the stale banner appears and matches the session-expired banner styling.
 4. Click "Reload" and confirm the banner disappears after reload (ids now match).
 

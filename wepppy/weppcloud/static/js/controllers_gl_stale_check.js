@@ -96,14 +96,12 @@
       } catch (err) {
         // Best-effort instrumentation; reload remains the primary behavior.
       }
-      var userAgent = window.navigator && window.navigator.userAgent
-        ? String(window.navigator.userAgent).toLowerCase()
-        : "";
-      if (userAgent.indexOf("jsdom") !== -1) {
-        return;
-      }
       if (window.location && typeof window.location.reload === "function") {
-        window.location.reload();
+        try {
+          window.location.reload();
+        } catch (err) {
+          // jsdom/non-browser environments can throw on navigation; ignore.
+        }
       }
     });
 

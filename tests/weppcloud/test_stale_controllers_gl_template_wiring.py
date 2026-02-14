@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -12,13 +13,33 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _find_deferred_static_url_script(contents: str, asset: str) -> int:
+    pattern = re.compile(
+        r"<script[^>]+static_url\('"
+        + re.escape(asset)
+        + r"'\)[^>]*>",
+        re.IGNORECASE,
+    )
+    match = pattern.search(contents)
+    assert match, f"Missing script tag for static_url('{asset}')"
+
+    tag = match.group(0).lower()
+    assert "defer" in tag, f"script tag for static_url('{asset}') must include defer"
+    return match.start()
+
+
+def _assert_deferred_order(contents: str) -> None:
+    controllers_pos = _find_deferred_static_url_script(contents, "js/controllers-gl.js")
+    stale_check_pos = _find_deferred_static_url_script(contents, "js/controllers_gl_stale_check.js")
+    assert controllers_pos < stale_check_pos, "controllers-gl.js must be loaded before controllers_gl_stale_check.js"
+
+
 def test_runs0_pure_wires_stale_check_script() -> None:
     root = Path(__file__).resolve().parents[2]
     template = root / "wepppy" / "weppcloud" / "routes" / "run_0" / "templates" / "runs0_pure.htm"
     contents = _read(template)
 
-    assert "static_url('js/controllers-gl.js')" in contents
-    assert "static_url('js/controllers_gl_stale_check.js')" in contents
+    _assert_deferred_order(contents)
 
 
 def test_fork_console_wires_stale_check_script() -> None:
@@ -34,8 +55,7 @@ def test_fork_console_wires_stale_check_script() -> None:
     )
     contents = _read(template)
 
-    assert "static_url('js/controllers-gl.js')" in contents
-    assert "static_url('js/controllers_gl_stale_check.js')" in contents
+    _assert_deferred_order(contents)
 
 
 def test_archive_dashboard_wires_stale_check_script() -> None:
@@ -51,8 +71,7 @@ def test_archive_dashboard_wires_stale_check_script() -> None:
     )
     contents = _read(template)
 
-    assert "static_url('js/controllers-gl.js')" in contents
-    assert "static_url('js/controllers_gl_stale_check.js')" in contents
+    _assert_deferred_order(contents)
 
 
 def test_readme_editor_wires_stale_check_script() -> None:
@@ -68,8 +87,7 @@ def test_readme_editor_wires_stale_check_script() -> None:
     )
     contents = _read(template)
 
-    assert "static_url('js/controllers-gl.js')" in contents
-    assert "static_url('js/controllers_gl_stale_check.js')" in contents
+    _assert_deferred_order(contents)
 
 
 def test_base_report_wires_stale_check_script() -> None:
@@ -77,8 +95,7 @@ def test_base_report_wires_stale_check_script() -> None:
     template = root / "wepppy" / "weppcloud" / "templates" / "reports" / "_base_report.htm"
     contents = _read(template)
 
-    assert "static_url('js/controllers-gl.js')" in contents
-    assert "static_url('js/controllers_gl_stale_check.js')" in contents
+    _assert_deferred_order(contents)
 
 
 def test_legacy_report_container_wires_stale_check_script() -> None:
@@ -86,8 +103,7 @@ def test_legacy_report_container_wires_stale_check_script() -> None:
     template = root / "wepppy" / "weppcloud" / "templates" / "reports" / "_page_container.htm"
     contents = _read(template)
 
-    assert "static_url('js/controllers-gl.js')" in contents
-    assert "static_url('js/controllers_gl_stale_check.js')" in contents
+    _assert_deferred_order(contents)
     assert "data-controllers-gl-expected-build-id" in contents
 
 
@@ -97,4 +113,3 @@ def test_base_pure_exposes_expected_build_id_dataset() -> None:
     contents = _read(template)
 
     assert "data-controllers-gl-expected-build-id" in contents
-

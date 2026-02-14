@@ -26,6 +26,7 @@ describe("controllers_gl_stale_check", () => {
     });
 
     afterEach(() => {
+        jest.restoreAllMocks();
         if (originalReadyStateDescriptor) {
             Object.defineProperty(document, "readyState", originalReadyStateDescriptor);
         } else {
@@ -90,6 +91,7 @@ describe("controllers_gl_stale_check", () => {
 
         const listener = jest.fn();
         document.addEventListener("wepp:controllers-gl-stale-reload", listener);
+        jest.spyOn(console, "error").mockImplementation(() => {});
 
         await import("../../static/js/controllers_gl_stale_check.js");
         await flushMicrotasks();
@@ -115,6 +117,24 @@ describe("controllers_gl_stale_check", () => {
         button.click();
 
         expect(document.getElementById("wc-stale-client-banner")).toBeNull();
+    });
+
+    test("does not create duplicate banners when loaded twice", async () => {
+        document.body.dataset.controllersGlExpectedBuildId = "expected";
+        window.__weppControllersGlBuildId = "stale";
+
+        await import("../../static/js/controllers_gl_stale_check.js");
+        await flushMicrotasks();
+
+        expect(document.querySelectorAll("#wc-stale-client-banner")).toHaveLength(1);
+
+        delete window.__weppControllersGlStaleCheckLoaded;
+        jest.resetModules();
+
+        await import("../../static/js/controllers_gl_stale_check.js");
+        await flushMicrotasks();
+
+        expect(document.querySelectorAll("#wc-stale-client-banner")).toHaveLength(1);
     });
 
     test("stacks above session-expired banner after heartbeat event", async () => {

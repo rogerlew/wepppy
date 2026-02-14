@@ -84,7 +84,22 @@
   let currentRonScenario = initialRonScenario;
   let invalidated = false;
 
-  const commandProject = window.Project ? window.Project.getInstance() : null;
+  let commandProject = null;
+
+  function resolveCommandProject() {
+    if (commandProject) {
+      return commandProject;
+    }
+    if (!window.Project || typeof window.Project.getInstance !== 'function') {
+      return null;
+    }
+    try {
+      commandProject = window.Project.getInstance();
+    } catch (err) {
+      commandProject = null;
+    }
+    return commandProject;
+  }
 
   function updateDocumentTitle() {
     const suffix = currentRonName ? ` - ${currentRonName}` : '';
@@ -94,8 +109,9 @@
   updateDocumentTitle();
 
   function notify(message) {
-    if (commandProject && typeof commandProject._notifyCommandBar === 'function') {
-      commandProject._notifyCommandBar(message);
+    const project = resolveCommandProject();
+    if (project && typeof project._notifyCommandBar === 'function') {
+      project._notifyCommandBar(message);
     }
   }
 
