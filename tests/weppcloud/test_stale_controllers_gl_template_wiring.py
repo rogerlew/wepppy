@@ -13,6 +13,12 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _strip_template_comments(contents: str) -> str:
+    """Remove HTML + Jinja comments to avoid matching commented-out script tags."""
+    without_html_comments = re.sub(r"<!--.*?-->", "", contents, flags=re.DOTALL)
+    return re.sub(r"{#.*?#}", "", without_html_comments, flags=re.DOTALL)
+
+
 def _find_deferred_static_url_script(contents: str, asset: str) -> int:
     pattern = re.compile(
         r"<script[^>]+static_url\('"
@@ -29,6 +35,7 @@ def _find_deferred_static_url_script(contents: str, asset: str) -> int:
 
 
 def _assert_deferred_order(contents: str) -> None:
+    contents = _strip_template_comments(contents)
     controllers_pos = _find_deferred_static_url_script(contents, "js/controllers-gl.js")
     stale_check_pos = _find_deferred_static_url_script(contents, "js/controllers_gl_stale_check.js")
     assert controllers_pos < stale_check_pos, "controllers-gl.js must be loaded before controllers_gl_stale_check.js"
