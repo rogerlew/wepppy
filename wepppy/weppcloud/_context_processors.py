@@ -3,6 +3,7 @@ from os.path import join as _join
 from glob import glob
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 from typing import Optional, Type
 
@@ -10,6 +11,7 @@ from flask import url_for
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.unitizer import Unitizer
+from wepppy.weppcloud.utils.assets import resolve_controllers_gl_build_id
 from wepppy.weppcloud.utils.helpers import get_wd, url_for_run
 from wepppy.all_your_base import isfloat
 
@@ -123,13 +125,31 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
     def versioned_static_processor():
         version = app.config.get("ASSET_VERSION")
 
+        def controllers_gl_expected_build_id() -> str | None:
+            candidates = []
+            sync_dir = os.getenv("STATIC_ASSET_SYNC_DIR")
+            if sync_dir:
+                candidates.append(os.path.join(sync_dir, "js", "controllers-gl.js"))
+            if app.static_folder:
+                candidates.append(os.path.join(app.static_folder, "js", "controllers-gl.js"))
+
+            for candidate in candidates:
+                value = resolve_controllers_gl_build_id(Path(candidate))
+                if value:
+                    return value
+            return None
+
         def static_url(filename: str):
             params = {"filename": filename}
             if version:
                 params["v"] = version
             return url_for("static", **params)
 
-        return dict(asset_version=version, static_url=static_url)
+        return dict(
+            asset_version=version,
+            static_url=static_url,
+            controllers_gl_expected_build_id=controllers_gl_expected_build_id(),
+        )
         
     @app.context_processor
     def utility_processor():

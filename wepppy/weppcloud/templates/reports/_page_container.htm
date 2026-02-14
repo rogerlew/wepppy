@@ -60,7 +60,7 @@
 </script>
 {% block head_content %}{% endblock %}
 </head>
-<body>
+<body data-controllers-gl-expected-build-id="{{ controllers_gl_expected_build_id | default('', true) }}">
 {% include 'header/header.htm'%}
 <div role="main" class="container-full">
 {% block report_content %}{% endblock %}
