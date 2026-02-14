@@ -132,6 +132,7 @@
 
 {% block script_extras %}
 <script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
 <script src="{{ static_url('js/console_utils.js') }}"></script>
 <script src="{{ static_url('js/status_stream.js') }}"></script>
 {% if not current_user.is_authenticated %}

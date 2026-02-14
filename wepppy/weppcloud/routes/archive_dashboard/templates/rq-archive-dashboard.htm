@@ -21,7 +21,8 @@
 {% endblock %}
 
 {% block script_extras %}
-<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/console_utils.js') }}"></script>
 <script src="{{ url_for('static', filename='js/status_stream.js') }}"></script>
 <script src="{{ url_for('static', filename='js/archive_console.js') }}"></script>

@@ -34,7 +34,8 @@
 <script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"
         onload="window.deck = Object.assign({}, window._deckCore || {}, window.deck || {}); delete window._deckCore;"></script>
 <link rel="stylesheet" href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css">
-<script src="{{ url_for('static', filename='js/controllers-gl.js') }}"></script>
+<script src="{{ static_url('js/controllers-gl.js') }}"></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/preflight.js') }}"></script>
 <script src="{{ url_for('static', filename='js/input-unit-converters.js') }}"></script>
 {% include 'run_page_bootstrap.js.j2' %}

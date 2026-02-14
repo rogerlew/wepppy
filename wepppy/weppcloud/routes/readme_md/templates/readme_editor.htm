@@ -4,7 +4,8 @@
 
 {% block head_extras %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/markdown-theme.css') }}">
-<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
 {% endblock %}
 
 {% from "shared/console_macros.htm" import console_page, console_header %}

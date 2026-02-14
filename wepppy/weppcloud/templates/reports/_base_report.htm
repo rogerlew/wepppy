@@ -177,7 +177,8 @@
 
 {% block head_extras %}
 {{ super() }}
-<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/report_csv.js') }}" defer></script>
 <script src="{{ static_url('js/link_target_pref.js') }}" defer></script>
 {% endblock %}
