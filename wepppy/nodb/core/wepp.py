@@ -2587,6 +2587,56 @@ class Wepp(NoDbBase):
         if climate.climate_mode == ClimateMode.SingleStormBatch:
             self.logger.info('    _prep_climates_ss_batch... ')
             return self._prep_climates_ss_batch(translator)
+
+        # When climate spatial mode is "multiple", climate builds can temporarily
+        # clear `sub_cli_fns` while the per-hillslope climates are being rebuilt
+        # (for example after uploading a user-defined CLI). If WEPP prep starts
+        # during that window, `Climate.sub_summary()` returns None and we would
+        # crash with a TypeError. Instead, wait briefly for the climate build to
+        # finish, or fail with an actionable error.
+        if not climate.has_climate:
+            started = time.time()
+            last_log_time = 0.0
+
+            unlocked_grace_seconds = 30.0
+            locked_wait_seconds = 30.0 * 60.0
+
+            while True:
+                climate = self.climate_instance
+                if climate.has_climate:
+                    break
+
+                now = time.time()
+                locked = False
+                try:
+                    locked = climate.islocked()
+                except Exception:
+                    locked = False
+
+                waited = now - started
+                if locked:
+                    if waited > locked_wait_seconds:
+                        break
+                else:
+                    # If nothing is actively building the climate, don't spin for long.
+                    if waited > unlocked_grace_seconds:
+                        break
+
+                if now - last_log_time > 15.0:
+                    self.logger.info(
+                        "    Waiting for climate build to complete (locked=%s, waited=%.0fs)",
+                        locked,
+                        waited,
+                    )
+                    last_log_time = now
+
+                time.sleep(2)
+
+            if not climate.has_climate:
+                raise ValueError(
+                    "Climate inputs are not ready. Build/upload climate (and wait for it to finish) "
+                    "before running WEPP."
+                )
         
         watershed = self.watershed_instance
         cli_dir = self.cli_dir
@@ -2599,6 +2649,11 @@ class Wepp(NoDbBase):
             dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
 
             cli_summary = climate.sub_summary(topaz_id)
+            if cli_summary is None or cli_summary.get('cli_fn') in (None, ''):
+                raise ValueError(
+                    f"Climate inputs are missing for topaz_id={topaz_id}. "
+                    "Build/upload climate (and wait for it to finish) before running WEPP."
+                )
             src_fn = _join(cli_dir, cli_summary['cli_fn'])
             _copyfile(src_fn, dst_fn) 
             count += 1
