@@ -86,7 +86,7 @@ Match `createSessionExpiredBanner()` in `wepppy/weppcloud/static/js/session_hear
 
 ### Copy
 Message (short, action-oriented):
-- "Update available. Save your work, then reload to load the latest UI."
+- "Update available. Reload to load the latest UI."
 
 Actions:
 - Primary: "Reload" (calls `window.location.reload()`).

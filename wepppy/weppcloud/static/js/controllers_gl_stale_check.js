@@ -71,7 +71,7 @@
     container.style.justifyContent = "space-between";
 
     var message = document.createElement("span");
-    message.textContent = "Update available. Save your work, then reload to load the latest UI.";
+    message.textContent = "Update available. Reload to load the latest UI.";
     message.style.color = "#5f370e";
     message.style.fontWeight = "600";
 
