@@ -7,15 +7,14 @@
 **Started**: 2026-02-14  
 **Current phase**: Discovery  
 **Last updated**: 2026-02-14  
-**Next milestone**: Freeze the NoDir contract (naming, precedence, URL semantics) and inventory all call sites that assume real directories.
+**Next milestone**: Define migration crawler behavior (safety gates + audit logs + resumability) and perf targets.
 
 ## Task Board
 
 ### Ready / Backlog
 - [x] Decide on canonical on-disk naming and precedence rules (`<name>/` vs `<name>.nodir`, and whether both may coexist).
-- [ ] Inventory read/write/mutate call sites for `landuse/`, `soils/`, `climate/`, `watershed/` (Python + Rust + shell-outs).
+- [x] Inventory read/write/mutate call sites for `landuse/`, `soils/`, `climate/`, `watershed/` (Python + Rust + shell-outs). See `docs/work-packages/20260214_nodir_archives/artifacts/touchpoints_inventory.md`.
 - [x] Define browse URL semantics for “entering” an archive (path-based boundary).
-- [ ] Define migration crawler behavior: safety gates, audit logs, resumability, and rollback.
 - [ ] Add perf targets (browse p95 listing time, inode reduction, archive build time).
 - [ ] Specify and implement thaw/modify/freeze state tracking (`WD/.nodir/<root>.json`) and crash recovery rules.
 - [ ] Define symlink dereference size thresholds and audit policy (warn at 1 GiB default; allowlist external roots).
@@ -24,7 +23,7 @@
 - [ ] Lock invalid `.nodir` semantics: admin raw bytes; everyone else 500.
 
 ### In Progress
-- [ ] Freeze NoDir contract decisions (naming, precedence, URL boundary) and update `docs/schemas/nodir-contract-spec.md`.
+- [ ] Define migration crawler behavior: safety gates, audit logs, resumability, and rollback.
 
 ### Blocked
 - [ ] Confirm whether any controllers mutate these trees frequently post-creation (affects archive update strategy).
@@ -32,6 +31,8 @@
 ### Done
 - [x] Create work package scaffold (2026-02-14)
 - [x] Start NoDir contract spec (`docs/schemas/nodir-contract-spec.md`) (2026-02-14)
+- [x] Freeze NoDir contract decisions (naming, precedence, URL boundary) and update `docs/schemas/nodir-contract-spec.md`. (2026-02-14)
+- [x] Inventory touch points for `landuse/soils/climate/watershed` (see `docs/work-packages/20260214_nodir_archives/artifacts/touchpoints_inventory.md`). (2026-02-14)
 - [x] Update infrastructure note with inode/stat pressure context (2026-02-14)
 - [x] Patch omni scenario/contrast shared-input symlinks to prefer `.nodir` when present (2026-02-14)
 
