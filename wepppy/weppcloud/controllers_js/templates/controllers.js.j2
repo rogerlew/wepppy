@@ -8,6 +8,14 @@
  */
 "use strict";
 // globals for JSLint: $, L, polylabel, setTimeout, console
+
+// Bundle identity (changes on every bundle rebuild).
+(function (global) {
+  if (!global) {
+    return;
+  }
+  global.__weppControllersGlBuildId = "[[ build_date ]]";
+})(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : null));
 {% for module in modules %}
 {% include module %}
 {% endfor %}
