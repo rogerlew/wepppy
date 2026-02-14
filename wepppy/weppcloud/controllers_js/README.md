@@ -15,6 +15,32 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
   3. Remaining controllers alphabetically
 - Controllers can assume that `window.WCDom`, `window.WCEvents`, `window.WCForms`, and `window.WCHttp` exist before their module executes.
 
+## Stale Bundle Detection (controllers-gl.js)
+Weppcloud surfaces a fixed-position banner when the HTML expects a newer `controllers-gl.js` bundle than the one currently executing (most commonly a stale cache).
+
+How it works:
+- `controllers_js/templates/controllers.js.j2` stamps the bundle build date and assigns `window.__weppControllersGlBuildId = "<UTC build date>"`.
+- The Flask context processor (`wepppy/weppcloud/_context_processors.py`) parses the `Build date:` line from the on-disk `controllers-gl.js` via `resolve_controllers_gl_build_id` (`wepppy/weppcloud/utils/assets.py`) and injects it into `<body data-controllers-gl-expected-build-id="...">`.
+- `static/js/controllers_gl_stale_check.js` (loaded with `defer` after `controllers-gl.js`) compares expected vs actual on page load and renders: "Update available. Reload to load the latest UI."
+- Banner stacking listens for `wepp:session-heartbeat-expired` (from `static/js/session_heartbeat.js`) and offsets above the session-expired banner.
+
+Scope (wired pages/templates):
+- `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm`
+- `wepppy/weppcloud/routes/fork_console/templates/rq-fork-console.htm`
+- `wepppy/weppcloud/routes/archive_dashboard/templates/rq-archive-dashboard.htm`
+- `wepppy/weppcloud/routes/readme_md/templates/readme_editor.htm`
+- `wepppy/weppcloud/templates/reports/_base_report.htm` (and legacy `wepppy/weppcloud/templates/reports/_page_container.htm`)
+
+Limitations:
+- Page-load only: a tab left open across a deploy/rebuild will not show the banner until it navigates/reloads.
+
+Deployment notes:
+- Production serves `/weppcloud/static/*` from `/srv/weppcloud/static` (Caddy). Keep `STATIC_ASSET_SYNC_DIR=/srv/weppcloud/static` and `CONTROLLERS_JS_EXTRA_OUTPUTS=/srv/weppcloud/static/js/controllers-gl.js` aligned so the expected build id matches what clients download.
+
+Troubleshooting (banner persists after reload):
+- In devtools console, compare `document.body.dataset.controllersGlExpectedBuildId` with `window.__weppControllersGlBuildId`.
+- If `__weppControllersGlBuildId` is missing, rebuild the bundle (restart `weppcloud` or run `python wepppy/weppcloud/controllers_js/build_controllers_js.py`).
+- If the expected id is empty, the server can’t read the bundle header at runtime; check the static asset path/mount and `STATIC_ASSET_SYNC_DIR`.
 ## Dynamic Mod Loading
 **⚠️ Critical for new mod controllers:** When mods are dynamically enabled via the Mods dialogue, the controller's singleton instance may be created *before* the DOM elements exist. This causes null references that persist even after the HTML is inserted.
 
