@@ -52,7 +52,9 @@ following environment variables:
 ### Service token
 - `token_class=service`
 - Required claims: `sub`, `service_groups`, `aud`, `scope`, `iat`, `exp`, `jti`.
-- Authorization: map `service_groups` to scope bundles (for example `culverts`).
+- Authorization:
+  - `runs` scopes the token to explicit run ids.
+  - `batches` scopes the token to Batch Runner batches (wildcard access to all runs inside the named batches).
 
 ### Culvert browse/download service token
 - Token source: `POST /rq-engine/api/culverts-wepp-batch/` and
@@ -73,10 +75,23 @@ following environment variables:
   - Batch archive path (current MVP): `/weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip`
   - Cross-batch use (`runs` scope mismatch) MUST return `403`.
 
+### Batch browse/download service token (Batch Runner `batches` claim)
+- Token source: utility-dashboard (service-to-service) or CLI issuance.
+- Claim contract:
+  - `token_class` MUST be `service`.
+  - `aud` MUST include `rq-engine`.
+  - `batches` MUST include at least one batch name.
+  - `jti` MUST be present (revocation checks are mandatory).
+- Authorization contract:
+  - `batches` grants access to:
+    - `/weppcloud/batch/<batch_name>/browse/...` and `/weppcloud/batch/<batch_name>/download/...` when `<batch_name>` is listed.
+    - `/weppcloud/runs/batch;;<batch_name>;;<suffix>/<config>/browse/...` and `/download/...` when `<batch_name>` is listed.
+  - `batches` MUST NOT authorize non-batch runids (only runids with the `batch;;<batch_name>;;...` prefix are eligible).
+
 ### Session token (anonymous runs)
 - `token_class=session`
 - Required claims: `sub` (session id), `runid`, `session_id`, `aud`, `scope`, `iat`, `exp`, `jti`.
-- Optional authenticated-session claims: `user_id` (int), `roles` (`list[str]`).
+- Optional authenticated-session claims: `user_id` (int), `roles` (`list[str]`) when a numeric user id can be resolved.
 - Authorization: run-scoped access only, optionally validated against the active session store.
 
 ### MCP token (query-engine)
@@ -121,6 +136,7 @@ Issued tokens contain the following fields:
 - `iss`, `iat`, `exp`, `nbf` – Standard JWT time/issuer claims.
 - `jti` – Token identifier required for revocation checks.
 - `runs` – Optional list of run identifiers (service tokens only; avoid on user tokens).
+- `batches` – Optional list of Batch Runner batch names (service tokens only; wildcard access for `batch;;<name>;;...` runids and `/batch/<name>/...` routes).
 - `runid` – Single run identifier (session tokens only).
 - `roles`, `groups` – User token claims.
 - `service_groups` – Service token claim.
@@ -194,7 +210,7 @@ If validation fails a `JWTDecodeError` is raised.
 - Behavior:
   - Requires run authorization (public or owner).
   - Issues a session JWT (`token_class=session`) scoped to the run.
-  - If a Flask login session is present, includes `user_id` and `roles` claims from Redis-backed session data.
+  - If a Flask login session is present and a numeric user id can be resolved, includes `user_id` and `roles` claims from Redis-backed session data.
   - Default session scopes: `rq:status`, `rq:enqueue`, `rq:export`.
   - Stores a Redis marker `auth:session:run:<runid>:<session_id>` (DB 11) with TTL.
   - Sets an HttpOnly cookie (default key `wepp_browse_jwt`, configurable via

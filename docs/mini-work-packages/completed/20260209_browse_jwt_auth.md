@@ -1,6 +1,6 @@
 # Mini Work Package: Browse JWT Auth and Session Cookie Bridge
 Status: Completed
-Last Updated: 2026-02-09
+Last Updated: 2026-02-14
 Primary Areas: `wepppy/microservices/rq_engine/session_routes.py`, `wepppy/microservices/browse/browse.py`, `wepppy/microservices/browse/dtale.py`, `wepppy/microservices/browse/files_api.py`, `wepppy/microservices/browse/_download.py`, `wepppy/microservices/_gdalinfo.py`, `wepppy/weppcloud/routes/run_0/run_0_bp.py`, `wepppy/weppcloud/routes/_security/logging.py`, `docs/dev-notes/auth-token.spec.md`
 
 ## Objective
@@ -10,7 +10,7 @@ Add JWT-based authorization to the Starlette browse service family and align tok
 - `rq-engine` already mints run-scoped session tokens, but browse currently has no JWT auth gate.
 - Browse serves multiple file-access surfaces (`browse`, `files`, `download`, `gdalinfo`, `aria2c.spec`, `dtale`) from one app.
 - Existing frontend helpers still support bearer tokens and should remain compatible.
-- Current session-token cookie flow checks session existence but does not fully enforce private-run ownership on cookie auth path.
+- Current session-token cookie flow checks session existence and enforces private-run ownership on cookie auth path.
 
 ## Decisions Locked (2026-02-09)
 1. Unauthorized browse navigation will redirect through the config resolver route:
@@ -24,8 +24,8 @@ Add JWT-based authorization to the Starlette browse service family and align tok
 
 ## Scope
 - Extend `POST /rq-engine/api/runs/{runid}/{config}/session-token` to include authenticated identity claims:
-  - `user_id` (int) when Flask session is authenticated.
-  - `roles` (`list[str]`) from Flask session role cache.
+  - `user_id` (int) and `roles` (`list[str]`) only when a numeric user id can be resolved from the Flask session payload.
+    - Note: Flask-Security typically stores the session principal as `"_user_id" == User.fs_uniquifier` (string), so session tokens may omit `user_id`.
 - Add Flask-Security signal handling to cache role data in session at login time (database-free use by `rq-engine`).
 - Set the session JWT as an HttpOnly cookie scoped to `/weppcloud/runs/{runid}/{config}/` while preserving the current JSON response contract.
 - Enforce JWT auth and policy checks across browse service endpoints (see matrix below).
@@ -73,7 +73,7 @@ Notes:
 
 ## Session Claim Source (Database-Free)
 - Add a Flask-Security `user_authenticated` signal handler that writes session keys:
-  - `_user_id` as int.
+  - `_user_id` as `User.fs_uniquifier` (string). Legacy sessions may have stored an integer `User.id`.
   - `_roles` as `list[str]`.
 - Optional `user_unauthenticated` cleanup should clear these keys.
 - `rq-engine/session_routes.py` reads those session values from Redis-backed Flask session payload to enrich issued session JWTs.
@@ -116,7 +116,7 @@ Notes:
 - `tests/microservices/test_rq_engine_session_routes.py`
   - session-token JSON unchanged fields still present.
   - cookie is set with expected attributes/path.
-  - `user_id` and `roles` claims present for authenticated session.
+  - `user_id` and `roles` claims present when a numeric user id can be resolved.
   - private-run cookie issuance denied without ownership/auth.
 - New/expanded browse auth tests (`tests/microservices/test_browse_routes.py`, `tests/microservices/test_browse_security.py`)
   - anonymous public browse allowed.

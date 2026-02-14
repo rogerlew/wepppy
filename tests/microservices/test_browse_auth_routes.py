@@ -260,6 +260,55 @@ def test_private_browse_invalid_cookie_without_bearer_still_redirects(
     assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"
 
 
+def test_private_browse_stale_session_cookie_redirects_for_refresh(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-private-stale-session-cookie"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    import wepppy.microservices.rq_engine.auth as rq_auth
+
+    class DummyRedis:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def exists(self, key):
+            return False
+
+    monkeypatch.setattr(rq_auth.redis, "Redis", DummyRedis)
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-cookie",
+        extra_claims={"runid": runid, "session_id": "sid-cookie"},
+    )
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    parsed = urlparse(response.headers["location"])
+    assert parsed.path == f"/weppcloud/runs/{runid}/"
+    next_value = parse_qs(parsed.query).get("next", [""])[0]
+    assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"
+
+
 def test_private_browse_falls_back_to_bearer_when_cookie_invalid(
     tmp_path: Path,
     load_secure_browse,
@@ -1250,6 +1299,59 @@ def test_group_service_token_missing_identifier_scope_is_forbidden(
 
     assert response.status_code == 403
     assert "Token missing run scope" in response.text
+
+
+def test_batch_browse_allows_service_token_scoped_by_batches_claim(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    batch_name = "nasa-roses-2026-sbs"
+    runid = f"batch;;{batch_name};;OR-19"
+    config = "disturbed9002_wbt"
+
+    batch_root_root = tmp_path / "batch-root"
+    batch_root = batch_root_root / batch_name
+    _touch(batch_root / "demo.txt", "hello")
+
+    run_root = tmp_path / "runs" / runid
+    _touch(run_root / "secret.txt", "shh")
+
+    browse = load_secure_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        BATCH_RUNNER_ROOT=str(batch_root_root),
+    )
+    app = browse.create_app()
+
+    token = _issue_token(
+        token_class="service",
+        roles=[],
+        runs=None,
+        extra_claims={
+            "batches": [batch_name],
+            "service_groups": ["utility-dashboard"],
+        },
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/batch/{batch_name}/browse/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "demo.txt" in response.text
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "secret.txt" in response.text
 
 
 @pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])

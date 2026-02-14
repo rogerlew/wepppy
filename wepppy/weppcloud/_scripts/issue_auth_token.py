@@ -39,6 +39,10 @@ def main(argv: list[str] | None = None) -> int:
         help="Comma-separated list of run identifiers to embed in the token",
     )
     parser.add_argument(
+        "--batches",
+        help="Comma-separated list of batch names to embed in the token as the `batches` claim",
+    )
+    parser.add_argument(
         "--audience",
         "-a",
         action="append",
@@ -71,6 +75,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.runs:
 
         runs = [item.strip() for item in args.runs.split(",") if item.strip()]
+    if args.batches:
+        batches = [item.strip() for item in args.batches.split(",") if item.strip()]
+        if batches:
+            extra_claims["batches"] = batches
 
     try:
         result = issue_token(

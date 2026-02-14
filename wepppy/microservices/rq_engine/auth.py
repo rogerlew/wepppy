@@ -67,6 +67,22 @@ def _normalize_list(value: Any) -> list[str]:
     return []
 
 
+def _extract_batch_name_from_runid(runid: str) -> str | None:
+    """Extract the Batch Runner batch name from a batch runid.
+
+    Batch Runner runids use the stable form: `batch;;<batch_name>;;<suffix>`.
+    Returns `None` for non-batch runids.
+    """
+    value = str(runid or "").strip()
+    if not value.startswith("batch;;"):
+        return None
+    parts = value.split(";;", 2)
+    if len(parts) < 2:
+        return None
+    batch_name = parts[1].strip()
+    return batch_name or None
+
+
 def _normalize_roles(raw: Any) -> set[str]:
     if raw is None:
         return set()
@@ -201,8 +217,8 @@ def _check_session_marker(session_id: str, runid: str) -> None:
         if not redis_conn.exists(key):
             raise AuthError(
                 "Session token invalid or expired. Reload the page to continue.",
-                status_code=403,
-                code="forbidden",
+                status_code=401,
+                code="unauthorized",
             )
 
 
@@ -234,9 +250,23 @@ def authorize_run_access(claims: Mapping[str, Any], runid: str) -> None:
         return
 
     run_claims = _normalize_list(claims.get("runs") or claims.get("runid"))
-    if token_class in {"service", "mcp"} and not run_claims:
+    batch_claims: list[str] = []
+    if token_class == "service":
+        batch_claims = _normalize_list(claims.get("batches"))
+
+    if token_class in {"service", "mcp"} and not run_claims and not batch_claims:
         raise AuthError("Token missing run scope", status_code=403, code="forbidden")
-    if run_claims and str(runid) not in run_claims:
+
+    runid_value = str(runid)
+    if run_claims and runid_value in run_claims:
+        return
+
+    if token_class == "service" and batch_claims:
+        batch_name = _extract_batch_name_from_runid(runid_value)
+        if batch_name and batch_name in batch_claims:
+            return
+
+    if run_claims or batch_claims:
         raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
 
 

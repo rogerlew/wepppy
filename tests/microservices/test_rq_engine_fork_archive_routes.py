@@ -73,6 +73,12 @@ class _DummyUserQuery:
                 return None
             return self._user if normalized_id == getattr(self._user, "id", None) else None
 
+        fs_uniquifier = self._filters.get("fs_uniquifier")
+        if fs_uniquifier is not None and str(fs_uniquifier) == str(
+            getattr(self._user, "fs_uniquifier", "")
+        ):
+            return self._user
+
         email = self._filters.get("email")
         if email is not None and str(email) == str(getattr(self._user, "email", "")):
             return self._user
@@ -89,6 +95,68 @@ def _patch_user_model_lookup(monkeypatch: pytest.MonkeyPatch, user, user_datasto
         "get_user_models",
         lambda: (object(), DummyUserModel, user_datastore),
     )
+
+
+def test_resolve_user_from_claims_supports_fs_uniquifier(monkeypatch: pytest.MonkeyPatch) -> None:
+    from flask import Flask
+
+    class DummyUserDatastore:
+        pass
+
+    class DummyUser:
+        def __init__(self) -> None:
+            self.id = 10
+            self.email = "user@example.com"
+            self.fs_uniquifier = "fsu-123"
+
+    user = DummyUser()
+    user_datastore = DummyUserDatastore()
+    _patch_user_model_lookup(monkeypatch, user, user_datastore)
+
+    import wepppy.weppcloud.app as weppcloud_app
+
+    dummy_app = Flask("dummy-test-app")
+    monkeypatch.setattr(weppcloud_app, "app", dummy_app)
+
+    resolved_user, resolved_datastore, resolved_app = fork_archive_routes._resolve_user_from_claims(
+        {"token_class": "user", "sub": "fsu-123"}
+    )
+
+    assert resolved_user is user
+    assert resolved_datastore is user_datastore
+    assert resolved_app is dummy_app
+
+
+def test_resolve_user_from_claims_does_not_treat_session_sub_as_user_identifier(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from flask import Flask
+
+    class DummyUserDatastore:
+        pass
+
+    class DummyUser:
+        def __init__(self) -> None:
+            self.id = 10
+            self.email = "user@example.com"
+            self.fs_uniquifier = "fsu-123"
+
+    user = DummyUser()
+    user_datastore = DummyUserDatastore()
+    _patch_user_model_lookup(monkeypatch, user, user_datastore)
+
+    import wepppy.weppcloud.app as weppcloud_app
+
+    dummy_app = Flask("dummy-test-app")
+    monkeypatch.setattr(weppcloud_app, "app", dummy_app)
+
+    resolved_user, resolved_datastore, resolved_app = fork_archive_routes._resolve_user_from_claims(
+        {"token_class": "session", "sub": "fsu-123"}
+    )
+
+    assert resolved_user is None
+    assert resolved_datastore is user_datastore
+    assert resolved_app is dummy_app
 
 
 def test_fork_requires_cap_for_anonymous(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:

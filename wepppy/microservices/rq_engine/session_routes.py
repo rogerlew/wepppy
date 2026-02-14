@@ -11,7 +11,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from itsdangerous import BadSignature, Signer
 
-from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs, session_redis_url
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.base import NoDbBase
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
@@ -36,6 +36,12 @@ SESSION_KEY_PREFIX = "session:"
 DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
 BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
 DEFAULT_SITE_PREFIX = "/weppcloud"
+
+# Flask-Security stores the authenticated principal in server-side session payloads
+# as `"_user_id" == User.fs_uniquifier` (string). Legacy deployments may have
+# stored integer user IDs; we keep best-effort parsing for those.
+UserDbId = int
+UserIdentifier = str
 
 
 def _bool_env(name: str, *, default: bool) -> bool:
@@ -89,8 +95,9 @@ def _resolve_session_id_from_cookie(request: Request) -> str:
 def _session_exists(session_id: str) -> None:
     key_prefix = os.getenv("SESSION_KEY_PREFIX", SESSION_KEY_PREFIX)
     key = f"{key_prefix}{session_id}"
-    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
-    redis_conn = redis.Redis(**conn_kwargs)
+    # Flask sessions may live on a dedicated Redis URL/DB (SESSION_REDIS_URL/SESSION_REDIS_DB).
+    # Use the same resolution logic as the Flask app so cookie auth works across deployments.
+    redis_conn = redis.from_url(session_redis_url(RedisDB.SESSION))
     try:
         if not redis_conn.exists(key):
             raise AuthError("Session expired or invalid", status_code=401)
@@ -103,8 +110,7 @@ def _session_exists(session_id: str) -> None:
 def _session_payload(session_id: str) -> Mapping[str, Any]:
     key_prefix = os.getenv("SESSION_KEY_PREFIX", SESSION_KEY_PREFIX)
     key = f"{key_prefix}{session_id}"
-    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
-    redis_conn = redis.Redis(**conn_kwargs)
+    redis_conn = redis.from_url(session_redis_url(RedisDB.SESSION))
     try:
         raw_value = redis_conn.get(key)
     finally:
@@ -122,8 +128,13 @@ def _session_payload(session_id: str) -> Mapping[str, Any]:
     return payload
 
 
-def _session_not_authorized_message(request: Request, *, user_id: int | None) -> str:
-    if user_id is None and request.cookies.get("remember_token"):
+def _session_not_authorized_message(
+    request: Request,
+    *,
+    user_id: UserDbId | None,
+    user_identifier: UserIdentifier | None,
+) -> str:
+    if user_id is None and not user_identifier and request.cookies.get("remember_token"):
         return (
             "Session not authorized for run. Your login session is stale. "
             "Log out and sign in again, then retry."
@@ -185,7 +196,7 @@ def _normalize_roles(raw: Any) -> list[str]:
     return normalized
 
 
-def _parse_user_id(raw: Any) -> int | None:
+def _parse_user_id(raw: Any) -> UserDbId | None:
     if raw is None or isinstance(raw, bool):
         return None
     try:
@@ -194,7 +205,14 @@ def _parse_user_id(raw: Any) -> int | None:
         return None
 
 
-def _owner_id_matches(owner: Any, user_id: int) -> bool:
+def _parse_user_identifier(raw: Any) -> UserIdentifier | None:
+    if raw is None or isinstance(raw, bool):
+        return None
+    value = str(raw).strip()
+    return value or None
+
+
+def _owner_id_matches(owner: Any, user_id: UserDbId) -> bool:
     owner_id = getattr(owner, "id", None)
     if owner_id is None:
         return False
@@ -204,15 +222,29 @@ def _owner_id_matches(owner: Any, user_id: int) -> bool:
         return False
 
 
-def _identity_from_session_payload(payload: Mapping[str, Any]) -> tuple[int | None, list[str]]:
-    user_id = _parse_user_id(payload.get("_user_id") or payload.get("user_id"))
+def _owner_identifier_matches(owner: Any, user_identifier: UserIdentifier) -> bool:
+    fs_uniquifier = getattr(owner, "fs_uniquifier", None)
+    if not fs_uniquifier:
+        return False
+    try:
+        return str(fs_uniquifier) == str(user_identifier)
+    except Exception:
+        return False
+
+
+def _identity_from_session_payload(
+    payload: Mapping[str, Any],
+) -> tuple[UserDbId | None, UserIdentifier | None, list[str]]:
+    raw_user_id = payload.get("_user_id") or payload.get("user_id")
+    user_id = _parse_user_id(raw_user_id)
+    user_identifier = _parse_user_identifier(raw_user_id)
     roles = _normalize_roles(
         payload.get("_roles_mask") or payload.get("_roles") or payload.get("roles")
     )
-    return user_id, roles
+    return user_id, user_identifier, roles
 
 
-def _identity_from_claims(claims: Mapping[str, Any]) -> tuple[int | None, list[str]]:
+def _identity_from_claims(claims: Mapping[str, Any]) -> tuple[UserDbId | None, list[str]]:
     user_id = _parse_user_id(claims.get("user_id") or claims.get("sub"))
     roles = _normalize_roles(claims.get("roles"))
     return user_id, roles
@@ -235,7 +267,12 @@ def _run_is_public(runid: str) -> bool:
     return NoDbBase.ispublic(wd)
 
 
-def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: Sequence[str]) -> bool:
+def _session_user_authorized_for_run(
+    runid: str,
+    user_id: UserDbId | None,
+    user_identifier: UserIdentifier | None,
+    roles: Sequence[str],
+) -> bool:
     if _run_is_public(runid):
         return True
 
@@ -247,11 +284,15 @@ def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: Seq
     if "admin" in role_set or "root" in role_set:
         return True
 
-    if user_id is None:
+    if user_id is None and not user_identifier:
         return False
 
     for owner in owners:
-        if _owner_id_matches(owner, user_id):
+        if user_id is not None:
+            if _owner_id_matches(owner, user_id):
+                return True
+            continue
+        if user_identifier and _owner_identifier_matches(owner, user_identifier):
             return True
     return False
 
@@ -354,7 +395,7 @@ def _set_session_jwt_cookie(
 )
 def issue_session_token(runid: str, config: str, request: Request) -> JSONResponse:
     try:
-        user_id: int | None = None
+        user_id: UserDbId | None = None
         roles: list[str] = []
         claims = _resolve_bearer_claims(request)
         if claims is not None:
@@ -367,10 +408,14 @@ def issue_session_token(runid: str, config: str, request: Request) -> JSONRespon
                 session_id = _resolve_session_id_from_cookie(request)
                 _session_exists(session_id)
                 session_payload = _session_payload(session_id)
-                user_id, roles = _identity_from_session_payload(session_payload)
-                if not _session_user_authorized_for_run(runid, user_id, roles):
+                user_id, user_identifier, roles = _identity_from_session_payload(session_payload)
+                if not _session_user_authorized_for_run(runid, user_id, user_identifier, roles):
                     raise AuthError(
-                        _session_not_authorized_message(request, user_id=user_id),
+                        _session_not_authorized_message(
+                            request,
+                            user_id=user_id,
+                            user_identifier=user_identifier,
+                        ),
                         status_code=401,
                         code="unauthorized",
                     )

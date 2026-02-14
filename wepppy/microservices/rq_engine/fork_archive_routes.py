@@ -84,27 +84,51 @@ def _resolve_user_from_claims(
     email = claims.get("email")
 
     with flask_app.app_context():
-        for raw_user_id in (user_id_claim, sub):
+        # Claims may carry a numeric database user id or a Flask-Security `fs_uniquifier` (string).
+        if token_class == "user":
+            identifier_candidates = (sub, user_id_claim)
+        else:
+            # `token_class=session` uses `sub` as the session ID, not a user identifier.
+            identifier_candidates = (user_id_claim,)
+
+        for raw_user_id in identifier_candidates:
+            if raw_user_id is None:
+                continue
+            identifier = str(raw_user_id).strip()
+            if not identifier:
+                continue
+
+            if identifier.isdigit():
+                try:
+                    user = User.query.filter_by(id=int(identifier)).first()
+                except Exception:
+                    logger.exception("rq-engine fork user lookup by id failed")
+                    user = None
+                else:
+                    if user is not None:
+                        break
+
             try:
-                user_id = int(str(raw_user_id))
-            except (TypeError, ValueError):
-                user_id = None
-            if user_id is not None:
-                user = User.query.filter(User.id == user_id).first()
-                if user is not None:
-                    break
+                user = User.query.filter_by(fs_uniquifier=identifier).first()
+            except Exception:
+                logger.exception("rq-engine fork user lookup by fs_uniquifier failed")
+                user = None
+            if user is not None:
+                break
 
         if user is None and email:
             if hasattr(user_datastore, "find_user"):
                 try:
                     user = user_datastore.find_user(email=str(email))
                 except Exception:
+                    logger.exception("rq-engine fork user lookup by email failed")
                     user = None
 
         if user is None and email:
             try:
-                user = User.query.filter(User.email == str(email)).first()
+                user = User.query.filter_by(email=str(email)).first()
             except Exception:
+                logger.exception("rq-engine fork user lookup by email failed")
                 user = None
 
     return user, user_datastore, flask_app

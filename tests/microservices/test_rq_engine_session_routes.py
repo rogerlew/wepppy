@@ -1,10 +1,12 @@
 import hashlib
+import pickle
 
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
+from wepppy.config import redis_settings
 from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import debug_routes, session_routes
 from wepppy.weppcloud.utils import auth_tokens
@@ -168,7 +170,11 @@ def test_session_token_issues_with_cookie(monkeypatch: pytest.MonkeyPatch) -> No
         "_session_payload",
         lambda session_id: {"_user_id": "42", "_roles_mask": ["User", "Root"]},
     )
-    monkeypatch.setattr(session_routes, "_session_user_authorized_for_run", lambda runid, user_id, roles: True)
+    monkeypatch.setattr(
+        session_routes,
+        "_session_user_authorized_for_run",
+        lambda runid, user_id, user_identifier, roles: True,
+    )
     monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
@@ -189,6 +195,66 @@ def test_session_token_issues_with_cookie(monkeypatch: pytest.MonkeyPatch) -> No
     claims = auth_tokens.decode_token(payload["token"], audience="rq-engine")
     assert claims["user_id"] == 42
     assert claims["roles"] == ["User", "Root"]
+
+
+def test_session_token_issues_with_cookie_when_user_id_is_fs_uniquifier(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", lambda request: "sid-1")
+    monkeypatch.setattr(session_routes, "_session_exists", lambda session_id: None)
+    monkeypatch.setattr(
+        session_routes,
+        "_session_payload",
+        lambda session_id: {"_user_id": "fsu-123", "_roles_mask": ["User"]},
+    )
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
+
+    class Owner:
+        id = 999
+        fs_uniquifier = "fsu-123"
+
+    monkeypatch.setattr(session_routes, "get_run_owners_lazy", lambda runid: [Owner()])
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            cookies={"session": "signed"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["token_class"] == "session"
+    assert payload["session_id"] == "sid-1"
+    assert payload["token"]
+    assert "user_id" not in payload
+
+    claims = auth_tokens.decode_token(payload["token"], audience="rq-engine")
+    assert claims["token_class"] == "session"
+    assert claims["session_id"] == "sid-1"
+    assert "user_id" not in claims
+
+
+def test_session_user_authorized_accepts_fs_uniquifier(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
+
+    class Owner:
+        id = 1
+        fs_uniquifier = "fsu-123"
+
+    monkeypatch.setattr(session_routes, "get_run_owners_lazy", lambda runid: [Owner()])
+
+    assert (
+        session_routes._session_user_authorized_for_run(
+            "run-1",
+            None,
+            "fsu-123",
+            [],
+        )
+        is True
+    )
 
 
 def test_session_token_allows_public_run_without_cookie(
@@ -221,7 +287,7 @@ def test_session_token_private_run_requires_authenticated_cookie_session(
     monkeypatch.setattr(
         session_routes,
         "_session_user_authorized_for_run",
-        lambda runid, user_id, roles: False,
+        lambda runid, user_id, user_identifier, roles: False,
     )
     monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
     monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
@@ -248,7 +314,7 @@ def test_session_token_stale_remember_cookie_includes_relogin_guidance(
     monkeypatch.setattr(
         session_routes,
         "_session_user_authorized_for_run",
-        lambda runid, user_id, roles: False,
+        lambda runid, user_id, user_identifier, roles: False,
     )
     monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
     monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
@@ -264,6 +330,49 @@ def test_session_token_stale_remember_cookie_includes_relogin_guidance(
     payload = response.json()
     assert payload["error"]["code"] == "unauthorized"
     assert "Log out and sign in again, then retry." in payload["error"]["message"]
+
+
+def test_cookie_session_lookup_uses_session_redis_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Regression: rq-engine must read Flask sessions from SESSION_REDIS_URL/DB, not the base REDIS_URL."""
+
+    redis_settings._base_url.cache_clear()
+    redis_settings._session_base_url.cache_clear()
+    redis_settings.redis_host.cache_clear()
+    redis_settings.redis_port.cache_clear()
+    redis_settings.redis_url.cache_clear()
+    redis_settings.session_redis_url.cache_clear()
+
+    monkeypatch.setenv("REDIS_URL", "redis://base-host:6379/0")
+    monkeypatch.setenv("SESSION_REDIS_URL", "redis://session-host:6379/5")
+
+    expected_url = redis_settings.session_redis_url(redis_settings.RedisDB.SESSION)
+    called: dict[str, str] = {}
+
+    class DummyRedis:
+        def exists(self, key: str) -> int:
+            called["exists_key"] = key
+            return 1
+
+        def get(self, key: str):
+            called["get_key"] = key
+            return pickle.dumps({"_user_id": "42"})
+
+        def close(self) -> None:
+            called["closed"] = "true"
+
+    def fake_from_url(url: str):
+        called["url"] = url
+        return DummyRedis()
+
+    monkeypatch.setattr(session_routes.redis, "from_url", fake_from_url)
+
+    session_routes._session_exists("sid-1")
+    payload = session_routes._session_payload("sid-1")
+
+    assert called["url"] == expected_url
+    assert called["exists_key"] == "session:sid-1"
+    assert called["get_key"] == "session:sid-1"
+    assert payload["_user_id"] == "42"
 
 
 def test_hello_world_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:

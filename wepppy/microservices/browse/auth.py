@@ -279,6 +279,23 @@ def _run_is_public(runid: str) -> bool:
     return NoDbBase.ispublic(wd)
 
 
+def _extract_batch_name_from_runid(runid: str) -> str | None:
+    """Extract the Batch Runner batch name from a batch runid.
+
+    Batch Runner runids use the stable form: `batch;;<batch_name>;;<suffix>`.
+    Returns `None` for non-batch runids so the `batches` claim cannot be used
+    as a wildcard for arbitrary runs.
+    """
+    value = str(runid or "").strip()
+    if not value.startswith("batch;;"):
+        return None
+    parts = value.split(";;", 2)
+    if len(parts) < 2:
+        return None
+    batch_name = parts[1].strip()
+    return batch_name or None
+
+
 def _require_identifier_claim(
     claims: Mapping[str, Any],
     identifier: str,
@@ -291,7 +308,16 @@ def _require_identifier_claim(
         return
 
     run_claims = _normalize_list(claims.get("runs") or claims.get("runid"))
-    if token_class == "service" and require_service_claim and not run_claims:
+    batch_claims = (
+        _normalize_list(claims.get("batches")) if token_class == "service" else []
+    )
+
+    if (
+        token_class == "service"
+        and require_service_claim
+        and not run_claims
+        and not batch_claims
+    ):
         raise BrowseAuthError(
             "Token missing run scope",
             status_code=403,
@@ -303,7 +329,19 @@ def _require_identifier_claim(
             status_code=403,
             code="forbidden",
         )
-    if run_claims and str(identifier) not in run_claims:
+    identifier_value = str(identifier)
+    authorized = False
+    if run_claims and identifier_value in run_claims:
+        authorized = True
+    elif token_class == "service" and batch_claims:
+        if require_session_claim:
+            batch_name = _extract_batch_name_from_runid(identifier_value)
+            authorized = bool(batch_name and batch_name in batch_claims)
+        else:
+            # Group browse routes pass identifiers directly (for batches that is the batch name).
+            authorized = identifier_value in batch_claims
+
+    if not authorized and (run_claims or batch_claims):
         raise BrowseAuthError(
             "Token not authorized for run",
             status_code=403,
