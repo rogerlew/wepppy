@@ -1219,6 +1219,40 @@ class Climate(NoDbBase):
             normalized = _normalize(candidate)
             if normalized is not None:
                 return normalized
+
+        # Fall back to the active CLI file when available. This is especially
+        # important for user-defined uploads where observed/future start years
+        # are unset but the CLI contains explicit calendar years.
+        cli_fn = getattr(self, "cli_fn", None)
+        cli_dir = getattr(self, "cli_dir", None)
+        if cli_fn and cli_dir:
+            cli_path = Path(str(cli_dir)) / str(cli_fn)
+            try:
+                if cli_path.exists():
+                    seen_header = False
+                    with cli_path.open() as fp:
+                        for line in fp:
+                            stripped = line.strip()
+                            if not stripped:
+                                continue
+                            if not seen_header:
+                                if stripped.lower().startswith("da"):
+                                    seen_header = True
+                                continue
+
+                            tokens = stripped.split()
+                            if len(tokens) < 3:
+                                continue
+                            try:
+                                return int(tokens[2])
+                            except (TypeError, ValueError):
+                                continue
+            except Exception:
+                self.logger.debug(
+                    "Failed inferring calendar_start_year from cli file",
+                    extra={"cli_path": str(cli_path)},
+                    exc_info=True,
+                )
         return None
 
     @property
@@ -2896,6 +2930,15 @@ class Climate(NoDbBase):
 
         if self.climate_spatialmode == ClimateSpatialMode.Multiple:
             self._prism_revision(verbose=verbose)
+
+        # Ensure downstream interchange jobs see the correct calendar lookup for
+        # the newly uploaded CLI. The interchange layer prefers `wepp_cli.parquet`
+        # and will not regenerate it if an older copy exists.
+        parquet_path = self._export_cli_parquet()
+        time.sleep(1)  # ensure parquet write is flushed
+        if parquet_path is not None:
+            self._export_cli_precip_frequency_csv(parquet_path)
+        self._download_noaa_atlas14_intensity()
 
         try:
             prep = RedisPrep.getInstance(self.wd)
