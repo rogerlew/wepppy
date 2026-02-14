@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-02-08  
+**Last Updated**: 2026-02-14  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,6 +78,32 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### NoDir Archives for High-Fanout Project Trees
+**Proposed**: 2026-02-14  
+**Size**: Large (2-4 weeks)  
+**Priority**: High  
+**Status**: Discovery / Scoping  
+**Package**: [docs/work-packages/20260214_nodir_archives/](docs/work-packages/20260214_nodir_archives/)  
+**Description**: Reduce inode and metadata `stat()` pressure on NAS-backed NFS by archiving `landuse/`, `soils/`, `climate/`, and `watershed/` as `.nodir` (zip container) while preserving directory-like semantics in browse and internal code.
+
+**Scope**:
+- Define the NoDir contract (`docs/schemas/nodir-contract-spec.md`) and enforce deterministic precedence rules (`<root>/` vs `<root>.nodir`).
+- Teach browse + files/download endpoints to “enter” archive-backed trees without extracting.
+- Provide a crawler/migrator to archive existing run trees under `/wc1/runs`.
+
+**Strategic Value**:
+- Removes the inode ceiling as a scaling constraint for larger watersheds (10k+ hillslopes).
+- Reduces browse latency driven by metadata round-trips on small-file trees.
+
+**Dependencies**:
+- Agreement on NoDir contract details (naming, URL semantics, security invariants).
+
+**Next Steps**:
+1. Freeze archive boundary semantics for browse/files/download (`.../watershed.nodir/...`).
+2. Inventory all call sites that assume real directories for the targeted roots.
+
+---
 
 ### RQ-Engine Agent Usability and Documentation Hardening
 **Proposed**: 2026-02-08  
@@ -415,7 +441,7 @@ Recently completed work packages. Archived immediately upon completion.
 ### NoDb ACID Transaction Update
 **Completed**: 2025-10-25  
 **Duration**: 1 day (planning only)  
-**Status**: ❌ **CANCELLED - Unviable**  
+**Status**: ❌ **CANCELED - Unviable**  
 **Link**: [docs/work-packages/20251024_nodb_acid_update/](docs/work-packages/20251024_nodb_acid_update/)  
 **Description**: Proposed Redis-backed ACID transactions for NoDb controllers with intelligent event-driven cache invalidation.
 
@@ -492,7 +518,7 @@ Track how long packages take from start to completion:
 
 ### Throughput
 Packages completed per month:
-- **October 2025**: 7 packages completed/closed (6 completed successfully, 1 cancelled as unviable); 1 package advanced to Phase 3 complete (markdown-doc toolkit); 3 packages started (UI Style Guide Refresh, VS Code Theme Integration, markdown-doc toolkit)
+- **October 2025**: 7 packages completed/closed (6 completed successfully, 1 canceled as unviable); 1 package advanced to Phase 3 complete (markdown-doc toolkit); 3 packages started (UI Style Guide Refresh, VS Code Theme Integration, markdown-doc toolkit)
 
 ### Lead Time
 Time from package creation to completion:
@@ -534,7 +560,7 @@ If this tracker format isn't working or you have suggestions:
 - ✅ Smoke Tests & Profile Harness (completed 2025-10-27) - Playwright harness setup with YAML profile support
 - ✅ Frontend Integration & Smoke Automation (completed 2025-10-27) - Pure migration complete, 7 polish items documented
 - ✅ StatusStream Telemetry Cleanup (completed 2025-10-23) - Unified telemetry pipeline, WSClient removed
-- ❌ NoDb ACID Transaction Update (cancelled 2025-10-25) - Unviable architecture, file-first approach retained
+- ❌ NoDb ACID Transaction Update (canceled 2025-10-25) - Unviable architecture, file-first approach retained
 - ✅ Controller Modernization Documentation Backlog (completed 2025-10-23) - Helper-first docs established
 
 ### February 2026

@@ -338,3 +338,25 @@ wepp1:
 
 - For this workload, WEPP1's metadata ops (READDIR/GETATTR) are only modestly slower than forest.local, but small-file create/write and delete are much slower.
 - If a "loading a run" path performs many tiny writes (cache artifacts, log fan-out, JSON rewrites) in addition to metadata traversal, the write amplification on the NAS-backed NFS mount can dominate the wall time even when `stat()`/`readdir()` look reasonable.
+
+## Run-Tree Inode + `stat()` Pressure (Why NoDir)
+
+In addition to latency, the production NAS-backed NFS mount is consuming inodes at scale:
+
+```text
+Filesystem              Inodes     IUsed     IFree IUse% Mounted on
+nas.rocket.net:/wepp 249999994 149273382 100726612   60% /geodata
+```
+
+WEPPcloud project runs create `landuse/`, `soils/`, `climate/`, and `watershed/` trees that can include per-hillslope files (often multiple files per hillslope). As the rest of the stack gets faster and supports larger watersheds, it is normal to see 10k+ hillslopes, which turns these directories into tens of thousands of small files.
+
+The browse service needs per-entry metadata (name/mtime/size and directory child counts) to render the run file tree, which amplifies NFS metadata RTT (`stat()`/`readdir()` costs) even when total bytes are small.
+
+Direction:
+- Archive `landuse/`, `soils/`, `climate/`, and `watershed/` as `.nodir` artifacts (zip container, differentiated from generic/user `.zip` files).
+- Keep `wepp/` as a real directory (WEPP executables require filesystem paths).
+- Treat archive-backed trees as “directory-like” in browse and internal code.
+
+See:
+- Work package: [`docs/work-packages/20260214_nodir_archives/package.md`](../work-packages/20260214_nodir_archives/package.md)
+- Contract: [`docs/schemas/nodir-contract-spec.md`](../schemas/nodir-contract-spec.md)

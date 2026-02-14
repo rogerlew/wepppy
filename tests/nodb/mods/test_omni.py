@@ -1,3 +1,4 @@
+import os
 import importlib
 import json
 import logging
@@ -539,6 +540,25 @@ def test_clear_cache_and_locks_handles_runtime_errors(monkeypatch, omni_module, 
 
     assert "Redis NoDb cache unavailable" in caplog.text
     assert "Redis lock client unavailable" in caplog.text
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_omni_clone_links_nodir_shared_inputs(tmp_path: Path, omni_module) -> None:
+    base_wd = tmp_path / "run"
+    base_wd.mkdir()
+    (base_wd / "dem").mkdir()
+    (base_wd / "climate.nodir").write_text("climate", encoding="utf-8")
+    (base_wd / "watershed.nodir").write_text("watershed", encoding="utf-8")
+
+    scenario_def = {"type": "dummy"}
+    scenario_wd = Path(omni_module._omni_clone(scenario_def, str(base_wd), runid="run-123"))
+
+    assert (scenario_wd / "dem").is_symlink()
+    assert os.readlink(scenario_wd / "dem") == str(base_wd / "dem")
+    assert (scenario_wd / "climate.nodir").is_symlink()
+    assert os.readlink(scenario_wd / "climate.nodir") == str(base_wd / "climate.nodir")
+    assert (scenario_wd / "watershed.nodir").is_symlink()
+    assert os.readlink(scenario_wd / "watershed.nodir") == str(base_wd / "watershed.nodir")
 
 
 def test_contrast_sidecar_roundtrip(tmp_path, omni_module):

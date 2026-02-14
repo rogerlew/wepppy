@@ -38,6 +38,8 @@ MAX_FILE_LIMIT = 100
 
 _logger = logging.getLogger(__name__)
 
+_NODIR_SUFFIX = ".nodir"
+
 
 def _manifest_path(wd: str) -> str:
     return os.path.join(wd, MANIFEST_FILENAME)
@@ -202,6 +204,9 @@ def create_manifest(wd: str) -> str:
                     symlink_is_dir = 1 if os.path.isdir(entry_path) else 0
 
                 sort_rank = 2 if is_dir else 0
+                if not is_dir and name.lower().endswith(_NODIR_SUFFIX):
+                    # Treat NoDir archive containers as directory-like for listing order.
+                    sort_rank = 2
                 batch.append(
                     (
                         rel_dir_norm,
@@ -454,7 +459,7 @@ def _scan_directory_snapshot(
                         "symlink_target": symlink_target,
                         "size_bytes": int(size_bytes),
                         "mtime_ns": int(mtime_ns),
-                        "sort_rank": 2 if is_dir else 0,
+                        "sort_rank": 2 if is_dir else (2 if name.lower().endswith(_NODIR_SUFFIX) else 0),
                     }
                 )
     except OSError:

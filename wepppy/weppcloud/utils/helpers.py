@@ -66,19 +66,33 @@ def _playback_path(env_var: str, subdir: str) -> str:
 
 
 def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
-    """Ensure omni child runs have symlinked shared inputs from their parent."""
+    """Ensure omni child runs have symlinked shared inputs from their parent.
+
+    When shared inputs have been migrated to `.nodir` archives, link the archive
+    files into the child workspace instead of the original directories.
+    """
     if not _exists(run_root):
         return
 
-    for dirname in ("climate", "dem", "watershed"):
-        src = _join(base_root, dirname)
-        dst = _join(run_root, dirname)
-        if _exists(dst) or not _exists(src):
-            continue
+    def _ensure_link(src: str, dst: str) -> None:
+        if os.path.lexists(dst):
+            if _exists(dst):
+                return
+            if os.path.islink(dst):
+                try:
+                    os.unlink(dst)
+                except OSError:
+                    return
+            else:
+                return
+
+        if not _exists(src):
+            return
+
         try:
             os.symlink(src, dst)
         except FileExistsError:
-            continue
+            return
         except OSError as exc:
             logger.warning(
                 "Failed to link omni shared input %s -> %s: %s",
@@ -86,6 +100,24 @@ def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
                 dst,
                 exc,
             )
+
+    for dirname in ("climate", "watershed"):
+        src_dir = _join(base_root, dirname)
+        src_archive = _join(base_root, f"{dirname}.nodir")
+        if os.path.isdir(src_dir):
+            _ensure_link(src_dir, _join(run_root, dirname))
+        elif os.path.isfile(src_archive):
+            legacy_dst = _join(run_root, dirname)
+            if os.path.islink(legacy_dst) and not _exists(legacy_dst):
+                try:
+                    os.unlink(legacy_dst)
+                except OSError:
+                    pass
+            _ensure_link(src_archive, _join(run_root, f"{dirname}.nodir"))
+
+    dem_src = _join(base_root, "dem")
+    if os.path.isdir(dem_src):
+        _ensure_link(dem_src, _join(run_root, "dem"))
 
 
 def is_omni_child_run(

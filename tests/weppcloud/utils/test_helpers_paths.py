@@ -1,3 +1,4 @@
+import os
 import types
 
 import pytest
@@ -201,3 +202,22 @@ def test_get_wd_rejects_malformed_composite_slugs(monkeypatch: pytest.MonkeyPatc
     # Nested omni suffixes are not supported for non-batch composite parents.
     with pytest.raises(ValueError, match="Invalid grouped run identifier"):
         helpers.get_wd("culvert;;6d2a2c2b;;pt-001;;omni;;treated", prefer_active=False)
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_ensure_omni_shared_inputs_links_nodir_archives(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _disable_redis_cache(monkeypatch)
+    base_root = tmp_path / "base"
+    scenario_root = tmp_path / "scenario"
+    base_root.mkdir()
+    scenario_root.mkdir()
+
+    (base_root / "climate.nodir").write_text("archive", encoding="utf-8")
+    (base_root / "watershed.nodir").write_text("archive", encoding="utf-8")
+    (base_root / "dem").mkdir()
+
+    helpers._ensure_omni_shared_inputs(str(base_root), str(scenario_root))
+
+    assert (scenario_root / "climate.nodir").is_symlink()
+    assert (scenario_root / "watershed.nodir").is_symlink()
+    assert (scenario_root / "dem").is_symlink()

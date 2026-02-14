@@ -7,6 +7,7 @@ import os
 from io import BytesIO
 from pathlib import Path
 from typing import Callable
+from urllib.parse import urlsplit
 
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -16,6 +17,7 @@ from starlette.routing import Route
 import pandas as pd
 import pyarrow.parquet as pq
 
+from wepppy.config.secrets import get_secret
 from wepppy.microservices.browse.auth import (
     RUN_ALLOWED_TOKEN_CLASSES,
     USER_SERVICE_TOKEN_CLASSES,
@@ -33,6 +35,55 @@ from wepppy.microservices.browse.security import (
 )
 from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
+
+
+def _normalize_prefix(prefix: str | None) -> str:
+    if not prefix:
+        return ""
+    trimmed = prefix.strip()
+    if not trimmed or trimmed == "/":
+        return ""
+    return "/" + trimmed.strip("/")
+
+
+def _resolve_external_origin(request: Request) -> str:
+    """Return the externally reachable origin (scheme://host[:port])."""
+
+    scheme = (os.getenv("OAUTH_REDIRECT_SCHEME") or request.url.scheme or "https").strip().lower()
+    if not scheme:
+        scheme = "https"
+
+    raw_host = (get_secret("EXTERNAL_HOST") or os.getenv("OAUTH_REDIRECT_HOST") or "").strip()
+    if raw_host:
+        # Accept either "host[:port]" or a full URL like "https://host[:port]/...".
+        if "://" in raw_host:
+            parsed = urlsplit(raw_host)
+            if parsed.scheme and parsed.netloc:
+                return f"{parsed.scheme}://{parsed.netloc}"
+        lowered = raw_host.lower()
+        if lowered.startswith("http://"):
+            scheme = "http"
+            raw_host = raw_host[7:]
+        elif lowered.startswith("https://"):
+            scheme = "https"
+            raw_host = raw_host[8:]
+        host_only = raw_host.split("/")[0].strip()
+        if host_only:
+            return f"{scheme}://{host_only}"
+
+    forwarded_host = (request.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
+    if forwarded_host:
+        forwarded_proto = (request.headers.get("X-Forwarded-Proto") or "").split(",")[0].strip().lower()
+        proto = forwarded_proto or scheme
+        return f"{proto}://{forwarded_host}"
+
+    return f"{request.url.scheme}://{request.url.netloc}"
+
+
+def _resolve_aria2c_base_url(request: Request, runid: str, config: str) -> str:
+    origin = _resolve_external_origin(request)
+    site_prefix = _normalize_prefix(os.getenv("SITE_PREFIX", "/weppcloud"))
+    return f"{origin}{site_prefix}/runs/{runid}/{config}/download"
 
 
 async def aria2c_spec(request: Request) -> PlainTextResponse:
@@ -59,7 +110,7 @@ async def aria2c_spec(request: Request) -> PlainTextResponse:
 
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
-    base_url = f"https://wepp.cloud/weppcloud/runs/{runid}/{config}/download"
+    base_url = _resolve_aria2c_base_url(request, runid, config)
 
     file_specs = await asyncio.to_thread(
         _collect_file_specs,

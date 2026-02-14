@@ -427,6 +427,7 @@ def test_aria2c_spec_excludes_hidden_and_recorder_artifacts(tmp_path: Path, monk
     run_root.mkdir()
 
     _write_file(run_root / "visible.txt", "ok")
+    _write_file(run_root / "watershed.nodir", "archive-bytes")
     _write_file(run_root / "nested" / "table.csv", "a,b\n1,2\n")
     _write_file(run_root / ".secret", "hidden")
     _write_file(run_root / "nested" / ".secret2", "hidden")
@@ -446,11 +447,39 @@ def test_aria2c_spec_excludes_hidden_and_recorder_artifacts(tmp_path: Path, monk
     assert response.status_code == 200
     spec = response.text
     assert "visible.txt" in spec
+    assert "watershed.nodir" in spec
     assert "nested/table.csv" in spec
     assert ".secret" not in spec
     assert "profile.events.jsonl" not in spec
     assert "exceptions.log" not in spec
     assert "exception_factory.log" not in spec
+
+
+def test_aria2c_spec_uses_external_host_and_site_prefix(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-aria2c-host"
+    config = "cfg"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+
+    _write_file(run_root / "visible.txt", "ok")
+
+    browse = load_browse(
+        SITE_PREFIX="/weppcloud-alt",
+        EXTERNAL_HOST="example.test",
+        OAUTH_REDIRECT_SCHEME="https",
+    )
+    import wepppy.microservices.browse._download as download_mod
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud-alt/runs/{runid}/{config}/aria2c.spec")
+
+    assert response.status_code == 200
+    assert (
+        "https://example.test/weppcloud-alt/runs/"
+        f"{runid}/{config}/download/visible.txt"
+    ) in response.text
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")

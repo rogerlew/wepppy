@@ -1,0 +1,276 @@
+# NoDir Contract Spec (Directory vs `.nodir` Project Trees)
+> Contract for representing selected run-scoped project trees as either a real directory or a single-file `.nodir` archive (zip container), while preserving “directory-like” semantics for code and the browse service.
+> **Work package:** `docs/work-packages/20260214_nodir_archives/package.md`
+
+## Scope
+- Applies to run working directories (WDs) returned by `get_wd(runid)` (typically `/wc1/runs/<prefix>/<runid>/`).
+- Targets project trees that are currently “many-small-files” hotspots:
+  - `landuse`
+  - `soils`
+  - `climate`
+  - `watershed`
+- Explicitly out of scope:
+  - `wepp/` (WEPP executables require real filesystem paths).
+  - Arbitrary user-supplied archives (NoDir archives are server-generated artifacts only).
+
+## Definitions
+- **WD**: the run working directory (filesystem root for a run).
+- **NoDir root**: one of the logical roots listed above (e.g., `watershed`).
+- **Directory form**: on-disk tree rooted at `WD/<root>/`.
+- **Archive form**: on-disk archive file at `WD/<root>.nodir`.
+- **Logical path**: a `/`-separated path relative to WD that callers use (e.g., `watershed/hillslopes/h001.slp`).
+  - Logical paths for NoDir roots MUST NOT include `.nodir`; representation is an internal resolution detail.
+- **Mixed state**: both `WD/<root>/` and `WD/<root>.nodir` exist.
+- **Admin** (browse service): JWT `roles` claim includes `admin` or `root` (no explicit opt-in query params).
+- **Archive boundary**: the first path segment ending in `.nodir` (e.g., `watershed.nodir` in `watershed.nodir/hillslopes/h001.slp`).
+- **Inner path**: the remainder of the path inside the archive after the archive boundary (e.g., `hillslopes/h001.slp`).
+
+## On-Disk Layout and Naming
+- Directory form:
+  - `WD/<root>/...` exists as a normal filesystem directory tree.
+- Archive form:
+  - `WD/<root>.nodir` exists as a regular file.
+  - Zip entry names MUST be stored relative to the root (no leading `/`, no drive letters, no `..` segments).
+  - Zip entry names MUST use `/` separators (normalize `\\` to `/` when creating archives).
+  - Archive entries MUST represent regular files/directories only (no symlinks, device nodes, FIFOs, sockets).
+  - Freeze/migration tooling MUST dereference symlinked *files* and store their content as regular file entries in the archive.
+    - Symlink metadata MUST NOT be preserved.
+    - Symlinked directories are invalid input unless explicitly supported by the migrator (default: fail fast).
+
+## Representation Selection and Precedence
+- Whether a NoDir root is directory-backed or archive-backed MUST NOT be serialized into NoDb subclasses or any `.nodb` payloads.
+  - Representation MUST be discovered at time of use via filesystem existence checks.
+  - Rationale: runs may be migrated/archived out-of-band; persisted flags will drift.
+- If `WD/<root>/` exists and `WD/<root>.nodir` does not exist: `<root>` is **Directory form**.
+- If `WD/<root>.nodir` exists and `WD/<root>/` does not exist: `<root>` is **Archive form**.
+- If both exist:
+  - Implementations MUST treat Directory form as the source of truth (writable, authoritative).
+  - Implementations MUST NOT expose two separate logical trees for the same root in non-admin views or public APIs.
+  - Implementations SHOULD log a warning (mixed-state run tree).
+  - Implementations MUST NOT delete either representation as part of discovery/reads.
+    - Cleanup (removing or renaming stale `.nodir`) is a maintenance operation owned by migration tooling after verification.
+- If neither exists: `<root>` is missing.
+
+## Path Semantics (Directory vs Archive)
+- Logical paths for NoDir roots (`<root>/...`) resolve by representation:
+  - Directory form: `WD/<root>/<inner_path>` (filesystem)
+  - Archive form: `WD/<root>.nodir` + `<inner_path>` (zip entry)
+- Archive-boundary paths (`<root>.nodir/<inner_path>`) are an external syntax (browse/files/download URLs) and MUST normalize to the same archive resolution.
+- Archive boundaries MUST NOT be nested (no `a.nodir/b.nodir/...` semantics).
+- Inner path normalization MUST reject:
+  - Null bytes
+  - Absolute paths
+  - Any `..` segment
+
+## Required Behaviors (API-Level)
+
+### Minimal NoDir Interface (Recommended)
+- Implementations SHOULD expose a small “filesystem-like” API so call sites do not branch on directory vs archive:
+  - `listdir(logical_dir)` → immediate children + basic metadata (is_dir, size, mtime)
+  - `open_read(logical_file)` → stream bytes
+  - `stat(logical_path)` → basic metadata (is_dir, size, mtime)
+  - `exists(logical_path)` / `is_dir(logical_path)` helpers
+  - `copy_out(logical_path, dst_fs_path)` for bridging to tools that require real filesystem paths
+  - `rm_tree(<root>)` for run cleanup (directory: `rmtree`, archive: unlink `.nodir`)
+- Per-file mutation primitives (`write_file`, `rm_file`, `mkdir`) SHOULD NOT be the default abstraction for NoDir roots; prefer explicit thaw/freeze workflows.
+
+### Listing
+- Listing a NoDir root MUST return “directory-like” entries:
+  - `(name, is_dir, mtime, size_or_child_count, ...)` for HTML browse.
+  - JSON equivalent for the `/files/` API.
+- For Archive form:
+  - Directory membership is derived from zip entry prefixes.
+  - `size` and `mtime` MUST be populated from zip metadata where available (best-effort).
+  - Listing MUST NOT extract the archive to disk.
+
+### Reads
+- Reading a file within a NoDir root MUST support both forms:
+  - Directory form: read from the filesystem path.
+  - Archive form: stream the zip entry content.
+- Reads MUST enforce the same run-root security invariants as filesystem reads (no escaping WD).
+
+### Writes / Mutations
+- This contract assumes NoDir roots are *mostly immutable* after generation.
+- Any feature that mutates a NoDir root MUST define one of:
+  - **Thaw/Freeze**: materialize to `WD/<root>/`, mutate, then rebuild `WD/<root>.nodir` and remove `WD/<root>/`.
+  - **Directory-only**: require Directory form while editing; Archive form is a post-processing optimization step.
+- Implementations MUST NOT attempt in-place zip mutation as a default behavior (zip updates are rewrite-heavy and failure-prone on NFS).
+
+## Thaw/Modify/Freeze Protocol (Atomic Tracking)
+Thaw/freeze is a stateful workflow that must be crash-safe and must make it obvious when:
+- A thaw is incomplete.
+- The directory is authoritative and the archive is stale.
+- A freeze completed successfully (archive is fresh) and it is safe to remove the directory.
+
+### On-Disk State Files (Required)
+- Each NoDir root MUST have a state file stored under the WD:
+  - `WD/.nodir/<root>.json` (directory is hidden from browse due to leading `.`).
+- State files MUST be updated atomically via write-to-temp + `os.replace()` (or equivalent).
+- The state file MUST include:
+  - `schema_version` (int)
+  - `root` (e.g., `"watershed"`)
+  - `state` (enum): `archived`, `thawing`, `thawed`, `freezing`
+  - `archive_path` (e.g., `"watershed.nodir"`)
+  - `dir_path` (e.g., `"watershed"`)
+  - `archive_fingerprint` (best effort): `{mtime_ns, size_bytes}`
+  - `dirty` (bool): whether the directory is considered modified since last freeze
+  - `updated_at` (UTC ISO string)
+
+### NoDir Maintenance Lock (Required)
+- Thaw/freeze/migration tooling MUST acquire a distributed NoDir maintenance lock for the affected root before writing any temp dirs/files.
+- Lock backend: Redis distributed lock (same infrastructure as NoDb locks; TTL-based crash recovery).
+- Lock key: `nodb-lock:<runid>:nodir/<root>`
+- If acquiring multiple roots, tooling MUST acquire locks in deterministic order (alphabetical by `<root>`).
+- If the lock cannot be acquired, tooling MUST fail fast (no partial extraction/archive writes).
+- Bulk migrators SHOULD also require `WD/READONLY` to be present.
+
+### Thaw (Archive -> Directory)
+Required procedure:
+1. Acquire the NoDir maintenance lock for `<root>`.
+2. Write state: `state="thawing"`, `dirty=true` (conservative), `archive_fingerprint=...`.
+3. Extract to a temporary directory: `WD/<root>.thaw.tmp/` (must not exist).
+   - Enforce zip-slip defenses and entry normalization.
+   - Never create symlinks from archive metadata.
+4. Atomically rename `WD/<root>.thaw.tmp/` -> `WD/<root>/`.
+5. Write state: `state="thawed"`, `dirty=true`.
+
+Crash recovery requirements:
+- If `state="thawing"` and `WD/<root>.thaw.tmp/` exists, tooling SHOULD treat the run as mid-thaw and either resume or clean up the temp directory before proceeding.
+
+### Modify (Directory is Authoritative)
+- While `state="thawed"`, implementations MUST treat the directory form as authoritative.
+- The archive form (if present) MUST be treated as stale and MUST NOT be used for reads/writes.
+- Any code path that mutates the directory SHOULD set `dirty=true` in the state file (best-effort).
+
+### Freeze (Directory -> Archive)
+Required procedure:
+1. Acquire the NoDir maintenance lock for `<root>`.
+2. Write state: `state="freezing"`.
+3. Build a temporary archive: `WD/<root>.nodir.tmp`.
+   - Walk the directory tree.
+   - Follow symlinks to files (dereference and store bytes as regular entries).
+   - Validate resolved symlink targets against an explicit allowlist of roots (default deny).
+     - Allowlist semantics MUST match the browse-service symlink policy for pups/batch/culverts (shared-root safe resolution).
+   - WARN if a dereferenced symlink target exceeds `1 GiB` (configurable threshold); include this in the audit log.
+4. Verify the `.nodir.tmp` archive is readable and entry paths are normalized.
+5. Atomically rename `WD/<root>.nodir.tmp` -> `WD/<root>.nodir`.
+6. Optionally remove the directory tree to reclaim inodes:
+   - Default: remove `WD/<root>/` after successful archive verification (preferred).
+   - If the directory is retained for debugging, the state MUST remain `state="thawed"` with `dirty=false` and the archive fingerprint recorded.
+7. Write final state:
+   - If directory removed: `state="archived"`, `dirty=false`, `archive_fingerprint=...`.
+   - If directory retained: `state="thawed"`, `dirty=false`, `archive_fingerprint=...`.
+
+Crash recovery requirements:
+- If `state="freezing"` and `WD/<root>.nodir.tmp` exists, tooling SHOULD treat the archive build as incomplete and remove/rebuild the temp archive before proceeding.
+
+## Browse / Files / Download Contract
+
+### URL and Routing Semantics
+- Browse paths (`/browse/...`), download paths (`/download/...`), and files API paths (`/files/...`) MUST accept archive boundaries in the `subpath` parameter.
+- The archive boundary is detected by path segment suffix `.nodir`.
+  - Archive boundaries MUST only be recognized for the first `subpath` segment (top-level under the WD).
+  - Services MUST restrict archive boundaries to the known NoDir roots:
+    - `landuse.nodir`
+    - `soils.nodir`
+    - `climate.nodir`
+    - `watershed.nodir`
+  - Any other `*.nodir` file MUST be treated as a regular file (downloadable, not enterable).
+  - Generic `.zip` files MUST be treated as regular files (downloadable) and MUST NOT be interpreted as “enterable” directories.
+    - Rationale: avoid `.zip` recursion, and keep user-provided `.zip` uploads (for example ag fields plant DB zips) on a separate, stricter rule set.
+
+Examples:
+- Browse archive “folder”:
+  - `/weppcloud/runs/<runid>/<config>/browse/watershed.nodir/`
+- Browse file inside archive:
+  - `/weppcloud/runs/<runid>/<config>/browse/watershed.nodir/hillslopes/h001.slp`
+- Download file inside archive:
+  - `/weppcloud/runs/<runid>/<config>/download/watershed.nodir/hillslopes/h001.slp`
+- Download the archive file itself:
+  - `/weppcloud/runs/<runid>/<config>/download/watershed.nodir`
+
+### UI Behavior (Browse HTML)
+- In a directory listing, a recognized NoDir archive file (e.g., `watershed.nodir`) SHOULD be rendered as a directory entry (clickable with trailing `/`) so users can “enter” it.
+- Mixed state (`<root>/` + `<root>.nodir` exist):
+  - Non-admin browse listings MUST hide both representations for that root (neither `<root>/` nor `<root>.nodir` is shown).
+    - Direct navigation to either MUST return `409 Conflict` (`code=NODIR_MIXED_STATE`).
+  - Admin browse MUST expose two explicit views:
+    - Directory view: `/browse/<root>/...`
+    - Archive view: `/browse/<root>/nodir/...` (read-only; maps to `WD/<root>.nodir`)
+      - The path segment `nodir` is reserved for this view under NoDir roots.
+  - In mixed state, `/browse/<root>.nodir/...` SHOULD redirect to `/browse/<root>/nodir/...` for admins.
+  - Below pagination controls, browse HTML MUST render a mixed-state warning block listing affected roots.
+- Browse ordering: NoDir archive roots (`*.nodir`) MUST sort with directories (ahead of regular files) in directory listings.
+
+### JSON Behavior (`/files/`)
+- `/files/...` responses MUST treat archive-backed paths as directories/files with the same shape as directory-backed paths.
+- The API MUST NOT require clients to understand zip internals; the zip boundary is encoded in the URL path only.
+- Mixed-state targets MUST return `409 Conflict` (`code=NODIR_MIXED_STATE`) (observability; no silent precedence).
+
+### aria2c.spec
+- `aria2c.spec` MUST list `.nodir` archives as files (do not expand inner entries).
+- Manifest URLs MUST be site-prefix aware and host-agnostic (no hardcoded `wepp.cloud` assumptions).
+
+### Mixed-State Download Semantics
+- If a NoDir root is in mixed state, raw download of `WD/<root>.nodir` MUST be admin-only.
+  - Non-admin MUST receive `409 Conflict` (`code=NODIR_MIXED_STATE`).
+
+### Invalid `.nodir` Archives
+- For allowlisted NoDir roots, treating `WD/<root>.nodir` as an archive requires validating it as a readable zip with normalized/safe entry names.
+- If validation fails:
+  - Archive-as-directory operations MUST return `500` (`code=NODIR_INVALID_ARCHIVE`).
+  - Raw download of `<root>.nodir` bytes:
+    - Admin MAY stream raw bytes for forensics.
+    - Non-admin MUST return `500` (`code=NODIR_INVALID_ARCHIVE`).
+
+## Archive Format and Compression Strategy
+- `.nodir` is the on-disk extension used for NoDir archives to differentiate them from generic/user `.zip` files.
+  - `.nodir` files are zip containers (PKZIP) and may be inspected by renaming to `.zip` for debugging.
+- Zip is the baseline container because it has a central directory (fast name->offset indexing) and is easy to stream without extraction.
+- Allowed compression methods: `STORE` and `DEFLATE` only (cross-stack compatibility).
+- Compression MUST be selectable per-entry.
+  - Avoid recompressing already-compressed formats (`.parquet`, most rasters) unless there is a measured win.
+  - Query-engine-critical formats that require random access SHOULD be stored uncompressed inside the zip (compression method `STORE`) if they must live in archives.
+
+## Query Engine Implications (Parquet in Archives)
+- Cataloging MUST be able to discover supported datasets inside `*.nodir` without extracting the full tree.
+- Catalog `path` values SHOULD remain in the logical namespace (`climate/...`, not `climate.nodir/...`) so existing queries/presets do not churn.
+- Query execution against Parquet inside a compressed zip entry has an inherent performance hit:
+  - Parquet readers (DuckDB/Arrow) rely on random-access reads; deflated entries are not efficiently seekable.
+  - “Extract to temp then query” is O(file_size) per refresh (or worse, per query) and will dominate latency on large datasets.
+- Default contract:
+  - If Parquet lives inside a `.nodir`, it MUST be stored with zip method `STORE`.
+  - Activation MUST materialize Parquet entries into `_query_engine/cache/` keyed by archive fingerprint.
+  - Query execution MUST NOT “extract to temp” per query.
+
+## Migration / Archival Rules
+- Migration tooling that converts `WD/<root>/` -> `WD/<root>.nodir` MUST:
+  - Acquire the NoDir maintenance lock for `<root>` (and fail fast if not acquired).
+  - Refuse to run if the root is actively being written (bulk migrators SHOULD require `WD/READONLY`).
+  - Build `WD/<root>.nodir.tmp` then atomically rename to `WD/<root>.nodir`.
+  - Validate that every archive entry path is safe and normalized.
+  - Dereference symlinked files and archive their target bytes as regular entries.
+    - Reject symlinks whose targets are missing or not regular files.
+    - Validate resolved targets against an explicit allowlist of roots (default deny) to avoid copying arbitrary host files into run artifacts.
+    - Record resolved source paths in the migration audit log.
+  - Produce an audit record (what was converted, sizes, counts, any skipped files).
+  - Only delete the original directory after successful archive verification.
+
+## Security Requirements
+- Treat archive entry paths as untrusted input even for “server-generated” archives:
+  - Enforce strict normalization and rejection rules on every request.
+- Do not extract archives as part of serving browse/files/download.
+- When extraction is unavoidable (thaw/materialize workflows):
+  - Implement zip-slip defenses (reject absolute paths, `..`, and weird separators).
+  - Enforce bounded output (max entries, max total bytes) to reduce DoS risk.
+    - Limits MUST be configurable; initial defaults SHOULD be generous.
+  - Do not create symlinks from archive metadata.
+
+## Gotchas / Regression Traps
+- **mtime precision**: zip timestamps may be lower precision than filesystem `st_mtime_ns`; ensure UI/tests tolerate this.
+- **Large directories**: current browse listing does `stat()`/`readdir()` and per-directory child counts; archive listing must avoid per-entry filesystem stats.
+- **Mixed state** (`<root>/` + `<root>.nodir`): define deterministic precedence to avoid double trees and confusing UI.
+- **Symlinks**: existing browse code supports symlinks (with root checks). NoDir roots should avoid symlinks to keep archive semantics simple.
+- **Omni child runs**: `_pups/omni/scenarios/*` and `_pups/omni/contrasts/*` share parent inputs via symlinks; when the parent uses `climate.nodir`/`watershed.nodir`, child runs must link the `.nodir` files (not `climate/`/`watershed/`).
+- **Ancillary browse actions**: `/gdalinfo/`, `/dtale/`, `/diff/`, and “annotated” views are implemented assuming filesystem paths; decide per-endpoint behavior for archive entries (disable, materialize, or stream).
+- **DoS surface**: listing huge archives and streaming large entries can become CPU-bound; add timeouts/limits and consider caching of central-directory metadata.

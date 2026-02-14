@@ -390,9 +390,21 @@ def _run_contrast(
     os.makedirs(_join(new_wd, 'soils'), exist_ok=True)
     os.makedirs(_join(new_wd, 'landuse'), exist_ok=True)
 
+    for dirname in ("climate", "watershed"):
+        src_dir = _join(wd, dirname)
+        src_archive = _join(wd, f"{dirname}.nodir")
+        if os.path.isdir(src_dir):
+            src = src_dir
+            dst = _join(new_wd, dirname)
+        elif os.path.isfile(src_archive):
+            src = src_archive
+            dst = _join(new_wd, f"{dirname}.nodir")
+        else:
+            continue
+        if not _exists(dst):
+            os.symlink(src, dst)
+
     symlink_entries = {
-        'climate',
-        'watershed',
         'climate.nodb',
         'watershed.nodb',
         'landuse.nodb',
@@ -514,8 +526,22 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
 
     os.makedirs(new_wd)
 
+    for dirname in ("climate", "watershed"):
+        src_dir = _join(wd, dirname)
+        src_archive = _join(wd, f"{dirname}.nodir")
+        if os.path.isdir(src_dir):
+            src = src_dir
+            dst = _join(new_wd, dirname)
+        elif os.path.isfile(src_archive):
+            src = src_archive
+            dst = _join(new_wd, f"{dirname}.nodir")
+        else:
+            continue
+        if not _exists(dst):
+            os.symlink(src, dst)
+
     for fn in os.listdir(wd):
-        if fn in ['climate', 'dem', 'watershed', 'climate.nodb', 'dem.nodb', 'watershed.nodb']:
+        if fn in ['dem', 'climate.nodb', 'dem.nodb', 'watershed.nodb']:
             src = _join(wd, fn)
             dst = _join(new_wd, fn)
             if not _exists(dst):
