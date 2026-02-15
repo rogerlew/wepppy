@@ -33,8 +33,8 @@ Not started (core remaining scope):
 Deliverables:
 - `docs/schemas/nodir-contract-spec.md`
 - `docs/schemas/nodir-thaw-freeze-contract.md`
+- `docs/schemas/nodir_interface_spec.md`
 - `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`
-- `docs/work-packages/20260214_nodir_archives/artifacts/nodir_interface_spec.md`
 - `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`
 - `docs/work-packages/20260214_nodir_archives/artifacts/touchpoints_inventory.md`
 
@@ -173,4 +173,3 @@ Exit criteria:
 - Materialize(file) wall time for typical raster/shapefile.
 - Archive build time for each root at representative sizes.
 - Inode reduction per run (before/after) and NAS stat pressure notes.
-

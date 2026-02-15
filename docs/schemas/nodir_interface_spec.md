@@ -4,6 +4,7 @@
 >
 > See:
 > - `docs/schemas/nodir-contract-spec.md`
+> - `docs/schemas/nodir-thaw-freeze-contract.md`
 > - `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`
 > - `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`
 
