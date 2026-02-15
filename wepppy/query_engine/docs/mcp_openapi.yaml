@@ -510,10 +510,16 @@ components:
     CatalogEntry:
       type: object
       description: |
-        Catalogue entry describing a dataset available within the run.
+        Catalog entry describing a dataset available within the run.
       properties:
         path:
           type: string
+        fs_path:
+          type: string
+          nullable: true
+          description: |
+            Optional filesystem path for the dataset when `path` is a logical identifier.
+            Relative paths are resolved against the run root; absolute paths may be used for inherited datasets (for example Omni child runs).
         extension:
           type: string
         size_bytes:

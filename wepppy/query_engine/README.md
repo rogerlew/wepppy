@@ -158,6 +158,8 @@ Before querying, a run must be **activated** to generate the `catalog.json` file
 5. **Serialization**: Write `_query_engine/catalog.json` with paths, schemas, sizes, and timestamps
 6. **Duration**: Typically 5-30 seconds depending on run size
 
+Note: For NoDir roots (`landuse`, `soils`, `climate`, `watershed`), activation may keep stable logical dataset ids (for example `landuse/landuse.parquet`) while pointing to WD-level sidecar files via `CatalogEntry.fs_path`.
+
 Once activated, the catalog is cached until the next activation or until files are modified. Repeated calls to `activate_query_engine` reuse the existing `catalog.json` unless `force_refresh=True` is provided (useful after interchange jobs finish).
 
 ### Query Execution Model
@@ -186,7 +188,7 @@ Queries are **stateless** and **ephemeral**:
 
 The query engine operates on **filesystem-backed datasets** within a WEPPcloud run directory:
 
-| Dataset Category | Path Pattern | Format | Description | Example |
+| Dataset Category | Dataset ID Pattern | Format | Description | Example |
 |------------------|--------------|--------|-------------|---------|
 | Landuse | `landuse/*.parquet` | Parquet | Hillslope landuse/management assignments | `landuse/landuse.parquet` |
 | Soils | `soils/*.parquet` | Parquet | Soil properties by hillslope | `soils/soils.parquet` |
@@ -198,6 +200,10 @@ The query engine operates on **filesystem-backed datasets** within a WEPPcloud r
 | WEPP Return Periods | `wepp/output/interchange/return_period_*.parquet` | Parquet | Return period event analysis | See below |
 | Watershed Geometry | `dem/wbt/*.geojson` | GeoJSON | Subcatchments, channels, watershed boundaries | `dem/wbt/subcatchments.geojson` |
 | RAP Timeseries | `rap/*.parquet` | Parquet | Rangeland Analysis Platform remote sensing | `rap/rap_ts.parquet` |
+
+**NoDir parquet sidecars**
+- For NoDir roots (`landuse`, `soils`, `climate`, `watershed`), Parquet files are stored as WD-level sidecars (for example `WD/landuse.parquet`) but catalog paths remain stable logical ids (for example `landuse/landuse.parquet`).
+- When the physical on-disk path differs from the catalog `path`, `CatalogEntry.fs_path` points to the real file (relative to the run root, or absolute for inherited parent-run references).
 
 #### WEPP Output Files
 
@@ -274,7 +280,7 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
 | Resource | Description |
 | --- | --- |
 | `Run` | A WEPPcloud run directory available to the user. |
-| `CatalogEntry` | Filtered dataset metadata (path, schema, units, modified timestamp). |
+| `CatalogEntry` | Filtered dataset metadata (logical `path`, schema, modified timestamp; optional `fs_path` pointer). |
 | `PresetCollection` | Named example payloads grouped by category. |
 | `QueryRequest` | Validated request to `run_query`. |
 | `QueryValidation` | Normalized payload plus warnings returned by the validation endpoint. |

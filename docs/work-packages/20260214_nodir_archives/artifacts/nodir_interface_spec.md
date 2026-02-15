@@ -120,13 +120,15 @@ Parquet sidecar rule:
 - Archive form:
   - MUST be derived from zip central directory; MUST NOT extract to disk.
   - Directory membership is derived from entry-name prefixes.
-- Parquet sidecars SHOULD be surfaced as synthetic entries in the logical directory listing when present (example: listing `landuse/` includes `landuse.parquet` even when the physical file is `WD/landuse.parquet`).
+- Parquet sidecars MUST NOT be synthesized into directory listings for browse/files.
+  - Browse is an observability-first file browser: truth-on-disk is the listing source of truth.
+  - Sidecar parquets remain visible as WD-level files (example: `WD/landuse.parquet`), not as “virtual” `WD/landuse/landuse.parquet` entries.
 
 `stat(target: ResolvedNoDirPath) -> NoDirDirEntry`
 - Archive form:
   - For files: derive from central directory entry metadata.
   - For “virtual directories” (prefix-derived): `size_bytes=None`, `mtime_ns=None` is acceptable.
-- For Parquet sidecars, stat MUST reflect the sidecar filesystem file when present.
+- For Parquet sidecars, stat/open_read MUST target the sidecar filesystem file when present (even though directory listings will not imply membership under `WD/<root>/`).
 
 `open_read(target: ResolvedNoDirPath) -> BinaryIO`
 - Archive form: stream zip entry bytes (no extract-to-disk).

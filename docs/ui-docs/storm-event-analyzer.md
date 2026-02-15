@@ -256,7 +256,7 @@ wepppy/tests/query_engine/
 Phases should be staffed by fresh agents with targeted prompts. Reuse agents only when context is still active and relevant.
 
 ### Phase 0: Discovery and alignment
-- Confirm existing outputs for `wepp_cli_pds_mean_metric.csv`, `atlas14_intensity_pds_mean_metric.csv`, `climate/wepp_cli.parquet`, `H.soil.parquet`, `H.wat.parquet`, `H.ebe.parquet`, `ebe_pw0.parquet`, `tc_out.parquet`.
+- Confirm existing outputs for `wepp_cli_pds_mean_metric.csv`, `atlas14_intensity_pds_mean_metric.csv`, `climate.wepp_cli.parquet` (logical dataset id `climate/wepp_cli.parquet`), `H.soil.parquet`, `H.wat.parquet`, `H.ebe.parquet`, `ebe_pw0.parquet`, `tc_out.parquet`.
 - Record the dual-exponential reference (Fortran in `wepp-forest`) and verify parameter mapping for JS.
 - Confirm route registration and navigation links for `/runs/<runid>/<config>/storm-event-analyzer`.
 - No tests; pure planning.
@@ -277,13 +277,13 @@ Superseded by **Phase 0b Handoff (2026-01-02)** for interchange normalization; r
 | --- | --- | --- | --- |
 | `wepp_cli_pds_mean_metric.csv` | present | `/wc1/runs/ch/chinless-half-hour/climate/wepp_cli_pds_mean_metric.csv` | ARIs 1,2,5,10,25; rows include depth, duration, 10/15/30/60-min intensities; units mm, hours, mm/hour. |
 | `atlas14_intensity_pds_mean_metric.csv` | present | `/wc1/runs/ch/chinless-half-hour/climate/atlas14_intensity_pds_mean_metric.csv` | ARIs 1..1000; durations include 10/15/30/60-min; take ARI intersection with WEPP table. |
-| `climate/wepp_cli.parquet` | present | `/wc1/runs/ch/chinless-half-hour/climate/wepp_cli.parquet` | `sim_day_index` (absolute 1..16437), `julian` (day-of-year), `year`, `month`, `day_of_month`, `prcp` (mm), `dur` (hours), `tp`, `ip`, `peak_intensity_10/15/30/60`, `storm_duration_hours` == `dur`. |
+| `climate/wepp_cli.parquet` | present | `/wc1/runs/ch/chinless-half-hour/climate.wepp_cli.parquet` | `sim_day_index` (absolute 1..16437), `julian` (day-of-year), `year`, `month`, `day_of_month`, `prcp` (mm), `dur` (hours), `tp`, `ip`, `peak_intensity_10/15/30/60`, `storm_duration_hours` == `dur`. Legacy physical path: `climate/wepp_cli.parquet`. |
 | `H.soil.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.soil.parquet` | `sim_day_index` == `julian` (day-of-year, resets each year), `year`, `month`, `day_of_month`, `Saturation` (0..1 fraction). Join via `year + julian` for T-1. |
 | `H.wat.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.wat.parquet` | `sim_day_index` absolute (matches climate), `julian`, `Snow-Water` (mm), `Area` (m^2). Join via `sim_day_index` or `year + julian`. |
 | `H.ebe.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.ebe.parquet` | No `sim_day_index`; has `julian`, `year`, `month`, `day_of_month`, `Precip`, `Runoff`, `Sed.Del`. |
 | `ebe_pw0.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/ebe_pw0.parquet` | No `sim_day_index`; has `julian`, `year`, `month`, `day_of_month`, `precip`, `runoff_volume`, `peak_runoff`, `sediment_yield`, `element_id`. |
 | `tc_out.parquet` | missing | n/a | `tc_out.txt` exists under `/wc1/runs/ch/chinless-half-hour/wepp/output/` and `/wc1/runs/ch/chinless-half-hour/wepp/runs/`, but no parquet emitted into `wepp/output/interchange/`. |
-| `watershed/hillslopes.parquet` | present | `/wc1/runs/ch/chinless-half-hour/watershed/hillslopes.parquet` | `area` and `wepp_id` available for runoff coefficient aggregation. |
+| `watershed/hillslopes.parquet` | present | `/wc1/runs/ch/chinless-half-hour/watershed.hillslopes.parquet` | `area` and `wepp_id` available for runoff coefficient aggregation. Legacy physical path: `watershed/hillslopes.parquet`. |
 
 **Event identity / join notes**
 - Use absolute `sim_day_index` as the canonical event key once interchange normalization is applied.
