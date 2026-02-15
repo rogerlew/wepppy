@@ -15,6 +15,7 @@
 - [x] Decide on canonical on-disk naming and precedence rules (`<name>/` vs `<name>.nodir`, and whether both may coexist).
 - [x] Inventory read/write/mutate call sites for `landuse/`, `soils/`, `climate/`, `watershed/` (Python + Rust + shell-outs). See `docs/work-packages/20260214_nodir_archives/artifacts/touchpoints_inventory.md`.
 - [x] Define browse URL semantics for “entering” an archive (path-based boundary).
+- [x] Lock behavior matrix (dir vs archive vs mixed vs invalid) for all affected surfaces. See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`.
 - [ ] Add perf targets (browse p95 listing time, inode reduction, archive build time).
 - [ ] Specify and implement thaw/modify/freeze state tracking (`WD/.nodir/<root>.json`) and crash recovery rules.
 - [ ] Define symlink dereference size thresholds and audit policy (warn at 1 GiB default; allowlist external roots).
@@ -33,6 +34,7 @@
 - [x] Start NoDir contract spec (`docs/schemas/nodir-contract-spec.md`) (2026-02-14)
 - [x] Freeze NoDir contract decisions (naming, precedence, URL boundary) and update `docs/schemas/nodir-contract-spec.md`. (2026-02-14)
 - [x] Inventory touch points for `landuse/soils/climate/watershed` (see `docs/work-packages/20260214_nodir_archives/artifacts/touchpoints_inventory.md`). (2026-02-14)
+- [x] Lock NoDir behavior matrix (see `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`). (2026-02-15)
 - [x] Update infrastructure note with inode/stat pressure context (2026-02-14)
 - [x] Patch omni scenario/contrast shared-input symlinks to prefer `.nodir` when present (2026-02-14)
 
