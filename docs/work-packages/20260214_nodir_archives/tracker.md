@@ -17,6 +17,7 @@
 - [x] Define browse URL semantics for “entering” an archive (path-based boundary).
 - [x] Lock behavior matrix (dir vs archive vs mixed vs invalid) for all affected surfaces. See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`.
 - [x] Lock materialization contract (cache paths, locks, limits, cleanup). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
+- [x] Lock shared NoDir interface spec (Python). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_interface_spec.md`.
 - [ ] Add perf targets (browse p95 listing time, inode reduction, archive build time).
 - [ ] Specify and implement thaw/modify/freeze state tracking (`WD/.nodir/<root>.json`) and crash recovery rules.
 - [ ] Define symlink dereference size thresholds and audit policy (warn at 1 GiB default; allowlist external roots).
@@ -97,6 +98,11 @@
 
 ### 2026-02-15: Materialization Contract (Cache + Locks + Limits)
 **Decision**: FS-boundary endpoints (dtale/gdalinfo/exports/query-engine) use `materialize(file)` with an internal cache under `WD/.nodir/cache/`, per-entry Redis locks, and explicit failure codes (`NODIR_LOCKED`, `NODIR_LIMIT_EXCEEDED`, `NODIR_INVALID_ARCHIVE`). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
+
+---
+
+### 2026-02-15: Shared NoDir Interface (Python)
+**Decision**: Implement a single shared Python package (`wepppy/nodir/`) that owns representation discovery, boundary parsing, archive-native list/stat/read, and materialization hooks so browse/query-engine/controllers do not diverge. See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_interface_spec.md`.
 
 ## Risks and Issues
 
