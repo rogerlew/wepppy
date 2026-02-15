@@ -265,6 +265,7 @@ Examples:
   - Enforce bounded output (max entries, max total bytes) to reduce DoS risk.
     - Limits MUST be configurable; initial defaults SHOULD be generous.
   - Do not create symlinks from archive metadata.
+  - Materialization cache layout, locks, and limits are specified in `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
 
 ## Gotchas / Regression Traps
 - **mtime precision**: zip timestamps may be lower precision than filesystem `st_mtime_ns`; ensure UI/tests tolerate this.

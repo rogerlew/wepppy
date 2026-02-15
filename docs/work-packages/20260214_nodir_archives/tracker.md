@@ -6,7 +6,7 @@
 
 **Started**: 2026-02-14  
 **Current phase**: Discovery  
-**Last updated**: 2026-02-14  
+**Last updated**: 2026-02-15  
 **Next milestone**: Define migration crawler behavior (safety gates + audit logs + resumability) and perf targets.
 
 ## Task Board
@@ -16,12 +16,13 @@
 - [x] Inventory read/write/mutate call sites for `landuse/`, `soils/`, `climate/`, `watershed/` (Python + Rust + shell-outs). See `docs/work-packages/20260214_nodir_archives/artifacts/touchpoints_inventory.md`.
 - [x] Define browse URL semantics for “entering” an archive (path-based boundary).
 - [x] Lock behavior matrix (dir vs archive vs mixed vs invalid) for all affected surfaces. See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`.
+- [x] Lock materialization contract (cache paths, locks, limits, cleanup). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
 - [ ] Add perf targets (browse p95 listing time, inode reduction, archive build time).
 - [ ] Specify and implement thaw/modify/freeze state tracking (`WD/.nodir/<root>.json`) and crash recovery rules.
 - [ ] Define symlink dereference size thresholds and audit policy (warn at 1 GiB default; allowlist external roots).
-- [ ] Lock mixed-state behavior: non-admin hidden + 409; admin dual browse view + mixed-state warning block.
-- [ ] Lock NoDir maintenance lock contract: Redis key format + ordering + fail-fast semantics.
-- [ ] Lock invalid `.nodir` semantics: admin raw bytes; everyone else 500.
+- [x] Lock mixed-state behavior: non-admin hidden + 409; admin dual browse view + mixed-state warning block.
+- [x] Lock NoDir maintenance lock contract: Redis key format + ordering + fail-fast semantics.
+- [x] Lock invalid `.nodir` semantics: admin raw bytes; everyone else 500.
 
 ### In Progress
 - [ ] Define migration crawler behavior: safety gates, audit logs, resumability, and rollback.
@@ -91,6 +92,11 @@
 
 ### 2026-02-14: Invalid Allowlisted `.nodir` Is 500 (Admin Can Download Raw Bytes)
 **Decision**: For invalid allowlisted `.nodir`, admin can fetch raw bytes; everyone else gets `500`.
+
+---
+
+### 2026-02-15: Materialization Contract (Cache + Locks + Limits)
+**Decision**: FS-boundary endpoints (dtale/gdalinfo/exports/query-engine) use `materialize(file)` with an internal cache under `WD/.nodir/cache/`, per-entry Redis locks, and explicit failure codes (`NODIR_LOCKED`, `NODIR_LIMIT_EXCEEDED`, `NODIR_INVALID_ARCHIVE`). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
 
 ## Risks and Issues
 

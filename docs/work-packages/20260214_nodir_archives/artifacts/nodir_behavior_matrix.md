@@ -89,6 +89,5 @@ Admin deltas (mixed state, `/browse` only):
   - Materialization failures MUST be explicit:
     - lock contention → `503; NODIR_LOCKED`
     - limits exceeded → `413; NODIR_LIMIT_EXCEEDED`
-  - Step 2 (materialization contract) defines cache paths, fingerprinting, TTL/cleanup, and limits.
+  - Step 2 (materialization contract) defines cache paths, fingerprinting, TTL/cleanup, and limits: `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
 - Browse HTML mixed-state warning block: render **below pagination controls** and list affected roots.
-
