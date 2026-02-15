@@ -67,8 +67,8 @@ Admin deltas (mixed state, `/browse` only):
 
 | Surface | Dir form | Archive form | Mixed state | Invalid archive |
 |---|---|---|---|---|
-| Activation: `GET|POST /query-engine/runs/<runid>/activate` (HTTP) / `activate_query_engine(wd)` | `native; 200; —` | `native + materialize(file for parquet); 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `unsupported; 500; NODIR_INVALID_ARCHIVE` |
-| Query execution: `POST /query-engine/runs/<runid>/query` (HTTP) / `run_query(...)` | `native; 200; —` | `materialize(file); 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `unsupported; 500; NODIR_INVALID_ARCHIVE` |
+| Activation: `GET|POST /query-engine/runs/<runid>/activate` (HTTP) / `activate_query_engine(wd)` | `native; 200; —` | `native; 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `unsupported; 500; NODIR_INVALID_ARCHIVE` |
+| Query execution: `POST /query-engine/runs/<runid>/query` (HTTP) / `run_query(...)` | `native; 200; —` | `native; 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `unsupported; 500; NODIR_INVALID_ARCHIVE` |
 
 ### C) Backend Tools / Mutations / Maintenance
 
@@ -85,7 +85,7 @@ Admin deltas (mixed state, `/browse` only):
 
 ## 4) Explicit Notes
 - **Materialization is prohibited** for `/browse`, `/files`, `/download` (must be archive-native streaming).
-- **Materialization is required** for dtale/gdalinfo/exports and query-engine Parquet access.
+- **Materialization is required** for dtale/gdalinfo/exports when the requested object is an archive entry. Parquet under NoDir roots is a WD-level sidecar and remains `native`.
   - Materialization failures MUST be explicit:
     - lock contention → `503; NODIR_LOCKED`
     - limits exceeded → `413; NODIR_LIMIT_EXCEEDED`

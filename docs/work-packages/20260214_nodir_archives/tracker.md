@@ -97,12 +97,17 @@
 ---
 
 ### 2026-02-15: Materialization Contract (Cache + Locks + Limits)
-**Decision**: FS-boundary endpoints (dtale/gdalinfo/exports/query-engine) use `materialize(file)` with an internal cache under `WD/.nodir/cache/`, per-entry Redis locks, and explicit failure codes (`NODIR_LOCKED`, `NODIR_LIMIT_EXCEEDED`, `NODIR_INVALID_ARCHIVE`). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
+**Decision**: FS-boundary endpoints (dtale/gdalinfo/exports) use `materialize(file)` with an internal cache under `WD/.nodir/cache/`, per-entry Redis locks, and explicit failure codes (`NODIR_LOCKED`, `NODIR_LIMIT_EXCEEDED`, `NODIR_INVALID_ARCHIVE`). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
 
 ---
 
 ### 2026-02-15: Shared NoDir Interface (Python)
 **Decision**: Implement a single shared Python package (`wepppy/nodir/`) that owns representation discovery, boundary parsing, archive-native list/stat/read, and materialization hooks so browse/query-engine/controllers do not diverge. See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_interface_spec.md`.
+
+---
+
+### 2026-02-15: Parquet Sidecars (WD-Level)
+**Decision**: `*.parquet` under allowlisted NoDir roots is canonical as WD-level sidecars (for example `landuse/landuse.parquet` → `WD/landuse.parquet`) and MUST NOT be stored inside `*.nodir`. Missing sidecars are a normal “dataset missing” case. See `docs/schemas/nodir-contract-spec.md`.
 
 ## Risks and Issues
 
@@ -115,7 +120,7 @@
 | Data leakage via dereferenced external symlinks | High | Medium | Require explicit allowlist for external roots; audit log includes source realpaths; consider redaction/denylist | Open |
 | Unexpected storage blowup from dereferenced symlinks | Medium | Medium | Warn at 1 GiB per symlink target (default); record totals in audit; allow per-run override | Open |
 | Regression: ancillary browse actions assume FS paths (`/gdalinfo/`, `/dtale/`, `/diff/`) | Medium | High | Decide per-endpoint behavior (disable/materialize/stream); add targeted tests | Open |
-| Query-engine performance collapse if Parquet lives in compressed archive entries | High | Medium | Keep Parquet out of archives or store uncompressed + cache/materialize during activation | Open |
+| Parquet accidentally included in `.nodir` (perf + sync churn) | High | Medium | Contract forbids Parquet-in-archive; normalize to WD sidecars before freeze; add validation checks | Open |
 | Browse listing latency for huge archives | Medium | Medium | Central-directory caching; optional per-archive manifest | Open |
 | Ambiguity when both `<name>/` and `<name>.nodir` exist | Medium | Medium | Define deterministic precedence; log warnings; migration should avoid mixed state | Open |
 

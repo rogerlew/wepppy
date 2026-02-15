@@ -13,7 +13,7 @@ Goals:
   - representation discovery (dir vs archive, never persisted),
   - path parsing (logical vs archive-boundary vs admin-browse view),
   - archive-native list/stat/read (no extract-to-disk),
-  - materialization (dtale/gdalinfo/exports/query-engine bridge).
+  - materialization (dtale/gdalinfo/exports bridge) and Parquet sidecar resolution.
 - Enforce the locked error contract (`409/500/503/413` + codes) deterministically.
 
 Non-goals:
@@ -27,6 +27,8 @@ Non-goals:
 - Archive form: `WD/<root>.nodir` exists and `WD/<root>/` does not (and archive validates).
 - Mixed state: both exist.
 - Invalid archive: allowlisted `WD/<root>.nodir` exists but fails zip validation/path normalization.
+- Parquet sidecar: WD-level `.parquet` file that is logically under a NoDir root but is stored outside the `.nodir` archive (see `docs/schemas/nodir-contract-spec.md`).
+  - Mapping is deterministic (examples): `landuse/landuse.parquet` → `WD/landuse.parquet`, `watershed/hillslopes.parquet` → `WD/watershed.hillslopes.parquet`, `climate/wepp_cli.parquet` → `WD/climate.wepp_cli.parquet`.
 
 Views:
 - `effective`: normal public behavior (enforces mixed-state/invalid errors).
@@ -109,26 +111,32 @@ Rules:
   - `view="dir"` requires `WD/<root>/` exists else behave like normal “missing path” (`None` or a typed not-found error owned by the caller).
   - `view="archive"` requires `WD/<root>.nodir` exists.
 
+Parquet sidecar rule:
+- For logical `*.parquet` paths under NoDir roots, resolution MUST prefer the WD-level sidecar mapping (and MUST NOT fall back to a zip entry in Archive form).
+
 ### 4.4 Directory-Like Operations
 `listdir(target: ResolvedNoDirPath) -> list[NoDirDirEntry]`
 - If `target.inner_path` names a file: caller error (not-a-directory, owned by caller).
 - Archive form:
   - MUST be derived from zip central directory; MUST NOT extract to disk.
   - Directory membership is derived from entry-name prefixes.
+- Parquet sidecars SHOULD be surfaced as synthetic entries in the logical directory listing when present (example: listing `landuse/` includes `landuse.parquet` even when the physical file is `WD/landuse.parquet`).
 
 `stat(target: ResolvedNoDirPath) -> NoDirDirEntry`
 - Archive form:
   - For files: derive from central directory entry metadata.
   - For “virtual directories” (prefix-derived): `size_bytes=None`, `mtime_ns=None` is acceptable.
+- For Parquet sidecars, stat MUST reflect the sidecar filesystem file when present.
 
 `open_read(target: ResolvedNoDirPath) -> BinaryIO`
 - Archive form: stream zip entry bytes (no extract-to-disk).
 - SHOULD enforce a maximum uncompressed size check using central-dir `file_size` before streaming:
   - reject with `413 NODIR_LIMIT_EXCEEDED` when configured max is exceeded.
+- For Parquet sidecars, reads MUST open the sidecar filesystem file when present (no zip streaming).
 
 ### 4.5 FS-Boundary Bridge
 `materialize_file(wd: str, rel: str, *, purpose: str) -> str`
-- Purpose examples: `"dtale"|"gdalinfo"|"export"|"query-engine"`.
+- Purpose examples: `"dtale"|"gdalinfo"|"export"`.
 - MUST implement the Step 2 contract (`nodir_materialization_contract.md`):
   - cache layout under `WD/.nodir/cache/`,
   - per-entry distributed locks (`nodb-lock:<runid>:nodir-materialize/<root>/<entry_id>`),
@@ -159,8 +167,8 @@ Security note:
 - FS-boundary endpoints MUST validate the user-requested logical path, not the internal cache path.
 
 ### 5.3 Query Engine
-- Activation: catalog natively (no full extraction); materialize Parquet to `_query_engine/cache/` keyed by archive fingerprint (see contract spec).
-- Queries: must resolve dataset paths to cache-backed real paths; MUST NOT extract per query.
+- Activation: catalog natively (no full extraction); resolve logical `*.parquet` dataset paths to WD-level sidecars (native filesystem paths).
+- Queries: MUST NOT extract Parquet from `.nodir` or per-query; Parquet access is via sidecars or is “dataset missing” when absent.
 
 ### 5.4 Mutations / Maintenance
 - Mutations targeting NoDir roots (controllers, RQ jobs, migrations) follow the thaw/modify/freeze protocol.
@@ -171,4 +179,3 @@ Security note:
 - Public API above is sufficient to implement browse/files/download + dtale/gdalinfo + query-engine without per-surface “dir vs zip” branching.
 - Mixed-state behavior can only be bypassed by an explicit caller choice (`view="dir"` or `view="archive"`).
 - Materialization contract is referenced, not redefined.
-

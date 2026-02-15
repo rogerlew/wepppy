@@ -1,6 +1,8 @@
 # NoDir Materialization Contract (Step 2)
 
-> Normative contract for `materialize(file)` / cache semantics used by FS-boundary surfaces (dtale, gdalinfo, exports, query-engine) when NoDir roots are archive-backed (`*.nodir`).
+> Normative contract for `materialize(file)` / cache semantics used by FS-boundary surfaces (dtale, gdalinfo, exports) when NoDir roots are archive-backed (`*.nodir`).
+>
+> Note: Query engine Parquet under NoDir roots is a WD-level sidecar (no `.nodir` extraction) per `docs/schemas/nodir-contract-spec.md`.
 >
 > See:
 > - `docs/schemas/nodir-contract-spec.md`
@@ -17,7 +19,7 @@
 
 ## 2) Global Rules (Materialization-Relevant)
 - Materialization is **prohibited** for `/browse`, `/files`, `/download` (must be archive-native streaming).
-- Materialization is **required** for dtale/gdalinfo/exports and query-engine Parquet access (per behavior matrix).
+- Materialization is **required** for dtale/gdalinfo/exports when the requested object is an archive entry (per behavior matrix).
 - Mixed state (`WD/<root>/` and `WD/<root>.nodir` both exist): outside `/browse` MUST fail fast with `409; code=NODIR_MIXED_STATE` before any materialization.
 - Invalid allowlisted `.nodir`: archive-as-directory operations and materialization MUST return `500; code=NODIR_INVALID_ARCHIVE`.
 - Materialization lock contention or “root is transitioning” MUST return `503; code=NODIR_LOCKED`.
@@ -133,6 +135,6 @@ On every materialization attempt, logs SHOULD include:
 - extracted bytes, wall time
 - any limit rejections (`NODIR_LIMIT_EXCEEDED`) and lock contention (`NODIR_LOCKED`)
 
-## 9) Query Engine Special Case (Parquet)
-- Query engine cache root is separate and MUST remain `WD/_query_engine/cache/` (per `docs/schemas/nodir-contract-spec.md`).
-- If Parquet lives inside `.nodir`: the Parquet entry MUST be zip method `STORE`; activation materializes Parquet into `_query_engine/cache/` keyed by archive fingerprint; query execution MUST NOT extract Parquet per query.
+## 9) Query Engine (Parquet)
+- Query engine MUST NOT rely on extracting Parquet from `.nodir`.
+- Parquet datasets under allowlisted NoDir roots are WD-level sidecars per `docs/schemas/nodir-contract-spec.md` and should be consumed via native filesystem paths.

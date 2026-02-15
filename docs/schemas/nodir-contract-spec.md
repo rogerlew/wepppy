@@ -229,19 +229,23 @@ Examples:
 - Zip is the baseline container because it has a central directory (fast name->offset indexing) and is easy to stream without extraction.
 - Allowed compression methods: `STORE` and `DEFLATE` only (cross-stack compatibility).
 - Compression MUST be selectable per-entry.
-  - Avoid recompressing already-compressed formats (`.parquet`, most rasters) unless there is a measured win.
-  - Query-engine-critical formats that require random access SHOULD be stored uncompressed inside the zip (compression method `STORE`) if they must live in archives.
+  - Avoid recompressing already-compressed formats (most rasters) unless there is a measured win.
 
-## Query Engine Implications (Parquet in Archives)
-- Cataloging MUST be able to discover supported datasets inside `*.nodir` without extracting the full tree.
-- Catalog `path` values SHOULD remain in the logical namespace (`climate/...`, not `climate.nodir/...`) so existing queries/presets do not churn.
-- Query execution against Parquet inside a compressed zip entry has an inherent performance hit:
-  - Parquet readers (DuckDB/Arrow) rely on random-access reads; deflated entries are not efficiently seekable.
-  - “Extract to temp then query” is O(file_size) per refresh (or worse, per query) and will dominate latency on large datasets.
-- Default contract:
-  - If Parquet lives inside a `.nodir`, it MUST be stored with zip method `STORE`.
-  - Activation MUST materialize Parquet entries into `_query_engine/cache/` keyed by archive fingerprint.
-  - Query execution MUST NOT “extract to temp” per query.
+## Parquet Sidecars (WD-Level, Canonical)
+Parquet is treated differently from “many-small-files” trees:
+- For allowlisted NoDir roots, `.parquet` files are canonical WD-level sidecars and MUST NOT be stored inside `WD/<root>.nodir`.
+  - Rationale: Parquet readers (DuckDB/Arrow) rely on random-access reads; zip entries (especially deflated) are not efficiently seekable, and “extract-to-temp” creates cache/sync churn.
+- Sidecar mapping (logical → physical):
+  - `landuse/landuse.parquet` → `WD/landuse.parquet`
+  - `soils/soils.parquet` → `WD/soils.parquet`
+  - `climate/<name>.parquet` → `WD/climate.<name>.parquet` (example: `climate/wepp_cli.parquet` → `WD/climate.wepp_cli.parquet`)
+  - `watershed/<name>.parquet` → `WD/watershed.<name>.parquet` (example: `watershed/hillslopes.parquet` → `WD/watershed.hillslopes.parquet`)
+- Sidecars are optional; absence is a normal “dataset missing” case (NOT `NODIR_INVALID_ARCHIVE`).
+- Resolution precedence for logical `*.parquet` paths under NoDir roots:
+  - Prefer the WD-level sidecar if present.
+  - If Dir form and sidecar is absent, implementations MAY fall back to the legacy in-root path for compatibility (example: `WD/landuse/landuse.parquet`).
+  - If Archive form and sidecar is absent, treat as missing (404 / dataset-not-found at the caller surface); MUST NOT fall back to an archive entry for that logical path.
+- Freeze/migration tooling MUST move/rename any in-root parquet to its WD-level sidecar path before archiving and MUST exclude `.parquet` entries from `WD/<root>.nodir`.
 
 ## Migration / Archival Rules
 - Migration tooling that converts `WD/<root>/` -> `WD/<root>.nodir` MUST:
