@@ -8,6 +8,7 @@
 **Current phase**: Discovery  
 **Last updated**: 2026-02-15  
 **Next milestone**: Define migration crawler behavior (safety gates + audit logs + resumability) and perf targets.
+**Implementation plan:** `docs/work-packages/20260214_nodir_archives/notes/implementation_plan.md`
 
 ## Task Board
 
