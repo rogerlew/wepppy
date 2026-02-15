@@ -1,9 +1,9 @@
-from os.path import join as _join
 import requests
 import pandas as pd
 import duckdb
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.config.secrets import require_secret
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 
 API_BASE = "http://climatena-ca.bearhive.duckdns.org" # os.getenv("API_BASE")
 
@@ -56,7 +56,11 @@ def query_monthlies(locations, model='na'):
 
 def query_hillslopes_monthlies(runid, cap=20):
     wd = get_wd(runid)
-    hillslopes_parquet = _join(wd, "watershed/hillslopes.parquet")
+    hillslopes_parquet = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet")
+    if hillslopes_parquet is None:
+        raise FileNotFoundError(
+            "Missing watershed hillslopes parquet (watershed/hillslopes.parquet)"
+        )
 
     hillslopes = []
     with duckdb.connect() as con:

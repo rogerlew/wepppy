@@ -59,6 +59,7 @@ from wepppy.nodb.base import (
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.version import copy_version_for_clone
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.wepp.interchange import (
     run_wepp_hillslope_interchange,
     run_wepp_watershed_tc_out_interchange,
@@ -480,17 +481,38 @@ def _run_contrast(
     if not contrast_topaz_ids and control_scenario_key != contrast_scenario_key:
         raise ValueError(f"No contrast hillslopes detected for {contrast_name}.")
 
+    control_landuse = pick_existing_parquet_path(control_wd, "landuse/landuse.parquet")
+    if control_landuse is None:
+        raise FileNotFoundError(
+            f"Missing landuse parquet (landuse/landuse.parquet) in {control_wd}"
+        )
+    contrast_landuse = pick_existing_parquet_path(contrast_wd, "landuse/landuse.parquet")
+    if contrast_landuse is None:
+        raise FileNotFoundError(
+            f"Missing landuse parquet (landuse/landuse.parquet) in {contrast_wd}"
+        )
+    control_soils = pick_existing_parquet_path(control_wd, "soils/soils.parquet")
+    if control_soils is None:
+        raise FileNotFoundError(
+            f"Missing soils parquet (soils/soils.parquet) in {control_wd}"
+        )
+    contrast_soils = pick_existing_parquet_path(contrast_wd, "soils/soils.parquet")
+    if contrast_soils is None:
+        raise FileNotFoundError(
+            f"Missing soils parquet (soils/soils.parquet) in {contrast_wd}"
+        )
+
     _merge_contrast_parquet(
-        control_parquet_fn=_join(control_wd, "landuse", "landuse.parquet"),
-        contrast_parquet_fn=_join(contrast_wd, "landuse", "landuse.parquet"),
-        output_parquet_fn=_join(new_wd, "landuse", "landuse.parquet"),
+        control_parquet_fn=str(control_landuse),
+        contrast_parquet_fn=str(contrast_landuse),
+        output_parquet_fn=str(Path(new_wd) / "landuse.parquet"),
         contrast_topaz_ids=contrast_topaz_ids,
         label="landuse",
     )
     _merge_contrast_parquet(
-        control_parquet_fn=_join(control_wd, "soils", "soils.parquet"),
-        contrast_parquet_fn=_join(contrast_wd, "soils", "soils.parquet"),
-        output_parquet_fn=_join(new_wd, "soils", "soils.parquet"),
+        control_parquet_fn=str(control_soils),
+        contrast_parquet_fn=str(contrast_soils),
+        output_parquet_fn=str(Path(new_wd) / "soils.parquet"),
         contrast_topaz_ids=contrast_topaz_ids,
         label="soils",
     )
@@ -1718,9 +1740,10 @@ class Omni(NoDbBase):
         return str(value)
 
     def _load_landuse_key_map(self, landuse_wd: str) -> Optional[Dict[int, Optional[str]]]:
-        parquet_fn = _join(landuse_wd, "landuse", "landuse.parquet")
-        if not _exists(parquet_fn):
+        parquet_path = pick_existing_parquet_path(landuse_wd, "landuse/landuse.parquet")
+        if parquet_path is None:
             return None
+        parquet_fn = str(parquet_path)
 
         for id_column in ("topaz_id", "TopazID"):
             try:

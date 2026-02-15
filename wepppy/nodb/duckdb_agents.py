@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from os.path import join as _join
 from typing import Any, Dict, Union, TYPE_CHECKING
 
 import duckdb
+
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 
 if TYPE_CHECKING:  # pragma: no cover - import only for typing
     import pandas as pd
@@ -86,8 +87,10 @@ def _get_subs_summary(
 
 def get_soil_sub_summary(wd: str, topaz_id: Union[int, str]) -> SummaryRow:
     """Return the soils summary for a single hillslope ``topaz_id``."""
-    parquet_fn = _join(wd, 'soils/soils.parquet')
-    return _get_sub_summary(parquet_fn, topaz_id)
+    parquet_path = pick_existing_parquet_path(wd, "soils/soils.parquet")
+    if parquet_path is None:
+        raise FileNotFoundError("Missing soils parquet (soils/soils.parquet)")
+    return _get_sub_summary(str(parquet_path), topaz_id)
 
 
 def get_soil_subs_summary(
@@ -95,14 +98,18 @@ def get_soil_subs_summary(
     return_as_df: bool = False,
 ) -> Union[Dict[Union[int, str], SummaryRow], 'pd.DataFrame']:
     """Return soils summaries keyed by hillslope id or as a DataFrame."""
-    parquet_fn = _join(wd, 'soils/soils.parquet')
-    return _get_subs_summary(parquet_fn, return_as_df=return_as_df)
+    parquet_path = pick_existing_parquet_path(wd, "soils/soils.parquet")
+    if parquet_path is None:
+        raise FileNotFoundError("Missing soils parquet (soils/soils.parquet)")
+    return _get_subs_summary(str(parquet_path), return_as_df=return_as_df)
 
 
 def get_landuse_sub_summary(wd: str, topaz_id: Union[int, str]) -> SummaryRow:
     """Return the landuse summary for a single hillslope ``topaz_id``."""
-    parquet_fn = _join(wd, 'landuse/landuse.parquet')
-    return _get_sub_summary(parquet_fn, topaz_id)
+    parquet_path = pick_existing_parquet_path(wd, "landuse/landuse.parquet")
+    if parquet_path is None:
+        raise FileNotFoundError("Missing landuse parquet (landuse/landuse.parquet)")
+    return _get_sub_summary(str(parquet_path), topaz_id)
 
 
 def get_landuse_subs_summary(
@@ -110,8 +117,10 @@ def get_landuse_subs_summary(
     return_as_df: bool = False,
 ) -> Union[Dict[Union[int, str], SummaryRow], 'pd.DataFrame']:
     """Return landuse summaries keyed by hillslope id or as a DataFrame."""
-    parquet_fn = _join(wd, 'landuse/landuse.parquet')
-    return _get_subs_summary(parquet_fn, return_as_df=return_as_df)
+    parquet_path = pick_existing_parquet_path(wd, "landuse/landuse.parquet")
+    if parquet_path is None:
+        raise FileNotFoundError("Missing landuse parquet (landuse/landuse.parquet)")
+    return _get_subs_summary(str(parquet_path), return_as_df=return_as_df)
         
 
 def get_watershed_subs_summary(
@@ -119,19 +128,25 @@ def get_watershed_subs_summary(
     return_as_df: bool = False,
 ) -> Union[Dict[Union[int, str], SummaryRow], 'pd.DataFrame']:
     """Return watershed hillslope summaries keyed by Topaz ID or DataFrame."""
-    parquet_fn = _join(wd, 'watershed/hillslopes.parquet')
-    return _get_subs_summary(parquet_fn, return_as_df=return_as_df)
+    parquet_path = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet")
+    if parquet_path is None:
+        raise FileNotFoundError("Missing watershed hillslopes parquet (watershed/hillslopes.parquet)")
+    return _get_subs_summary(str(parquet_path), return_as_df=return_as_df)
 
 def get_watershed_sub_summary(wd: str, topaz_id: Union[int, str]) -> SummaryRow:
     """Return the watershed hillslope summary for a single ``topaz_id``."""
-    parquet_fn = _join(wd, 'watershed/hillslopes.parquet')
-    return _get_sub_summary(parquet_fn, topaz_id)
+    parquet_path = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet")
+    if parquet_path is None:
+        raise FileNotFoundError("Missing watershed hillslopes parquet (watershed/hillslopes.parquet)")
+    return _get_sub_summary(str(parquet_path), topaz_id)
 
 
 def get_watershed_chn_summary(wd: str, topaz_id: Union[int, str]) -> SummaryRow:
     """Return the watershed channel summary for a single ``topaz_id``."""
-    parquet_fn = _join(wd, 'watershed/channels.parquet')
-    return _get_sub_summary(parquet_fn, topaz_id)
+    parquet_path = pick_existing_parquet_path(wd, "watershed/channels.parquet")
+    if parquet_path is None:
+        raise FileNotFoundError("Missing watershed channels parquet (watershed/channels.parquet)")
+    return _get_sub_summary(str(parquet_path), topaz_id)
 
 
 def get_watershed_chns_summary(
@@ -139,5 +154,7 @@ def get_watershed_chns_summary(
     return_as_df: bool = False,
 ) -> Union[Dict[Union[int, str], SummaryRow], 'pd.DataFrame']:
     """Return watershed channel summaries keyed by Topaz ID or DataFrame."""
-    parquet_fn = _join(wd, 'watershed/channels.parquet')
-    return _get_subs_summary(parquet_fn, return_as_df=return_as_df)
+    parquet_path = pick_existing_parquet_path(wd, "watershed/channels.parquet")
+    if parquet_path is None:
+        raise FileNotFoundError("Missing watershed channels parquet (watershed/channels.parquet)")
+    return _get_subs_summary(str(parquet_path), return_as_df=return_as_df)

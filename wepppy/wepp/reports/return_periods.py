@@ -111,9 +111,7 @@ def _generate_cli_parquet(base: Path) -> tuple[Path | None, Dict[str, str]]:
         export_df["storm_duration_hours"] = export_df.get("dur")
         export_df["storm_duration"] = export_df.get("dur")
 
-        climate_dir = base / "climate"
-        climate_dir.mkdir(parents=True, exist_ok=True)
-        parquet_path = climate_dir / "wepp_cli.parquet"
+        parquet_path = base / "climate.wepp_cli.parquet"
         export_df.to_parquet(parquet_path, index=False)
 
         LOGGER.info(
@@ -137,13 +135,12 @@ def _generate_cli_parquet(base: Path) -> tuple[Path | None, Dict[str, str]]:
 def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[None, Dict[str, str]]:
     """Return a parquet climate asset plus column mapping if one exists."""
     climate_dir = base / "climate"
-    if not climate_dir.exists():
-        generated_path, generated_mapping = _generate_cli_parquet(base)
-        if generated_path:
-            return generated_path, generated_mapping
-        return None, {}
+    candidates: list[Path] = []
+    candidates.extend(sorted(base.glob("climate.*.parquet")))
+    if climate_dir.exists():
+        candidates.extend(sorted(climate_dir.rglob("*.parquet")))
 
-    for candidate in sorted(climate_dir.rglob("*.parquet")):
+    for candidate in candidates:
         try:
             schema = pq.read_schema(candidate)
         except Exception:  # pragma: no cover - defensive
@@ -164,6 +161,12 @@ def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[N
                 if generated_path:
                     return generated_path, generated_mapping
             return candidate, mapping
+
+    if not climate_dir.exists() and not (base / "climate.wepp_cli.parquet").exists():
+        generated_path, generated_mapping = _generate_cli_parquet(base)
+        if generated_path:
+            return generated_path, generated_mapping
+        return None, {}
 
     generated_path, generated_mapping = _generate_cli_parquet(base)
     if generated_path:

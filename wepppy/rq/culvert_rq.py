@@ -38,6 +38,7 @@ from wepppy.nodb.wepp_nodb_post_utils import (
     ensure_totalwatsed3,
     ensure_watershed_interchange,
 )
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.rq.topo_utils import _prune_stream_order
 from wepppy.topo.watershed_collection import WatershedFeature
 
@@ -1839,13 +1840,13 @@ def _compute_validation_metrics(
     if target_area is not None:
         metrics["target_watershed_area_m2"] = target_area
 
-    hillslope_area = _sum_parquet_column(
-        run_wd / "watershed" / "hillslopes.parquet",
-        "area",
+    hillslopes_parquet = pick_existing_parquet_path(run_wd, "watershed/hillslopes.parquet")
+    channels_parquet = pick_existing_parquet_path(run_wd, "watershed/channels.parquet")
+    hillslope_area = (
+        _sum_parquet_column(hillslopes_parquet, "area") if hillslopes_parquet else None
     )
-    channel_area = _sum_parquet_column(
-        run_wd / "watershed" / "channels.parquet",
-        "area",
+    channel_area = (
+        _sum_parquet_column(channels_parquet, "area") if channels_parquet else None
     )
     if hillslope_area is not None or channel_area is not None:
         metrics["bounds_area_m2"] = float((hillslope_area or 0.0) + (channel_area or 0.0))
@@ -2016,12 +2017,16 @@ def _write_runs_manifest(
             watershed_label = _select_watershed_label(
                 watershed_features.get(str(run_id))
             )
-            subcatchments = _count_parquet_rows(
-                run_wd / "watershed" / "hillslopes.parquet"
+            hillslopes_parquet = pick_existing_parquet_path(
+                run_wd, "watershed/hillslopes.parquet"
             )
-            channels = _count_parquet_rows(
-                run_wd / "watershed" / "channels.parquet"
+            channels_parquet = pick_existing_parquet_path(
+                run_wd, "watershed/channels.parquet"
             )
+            subcatchments = (
+                _count_parquet_rows(hillslopes_parquet) if hillslopes_parquet else None
+            )
+            channels = _count_parquet_rows(channels_parquet) if channels_parquet else None
 
             job_id = record.get("job_id")
             job_status, job_created = _fetch_job_info(

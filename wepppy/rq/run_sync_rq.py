@@ -102,6 +102,10 @@ def _normalize_parquet_paths(run_root: Path) -> int:
     modified_count = 0
     # Known parquet files that may contain path columns
     parquet_locations = [
+        # Canonical WD-level sidecars (preferred).
+        run_root / "soils.parquet",
+        run_root / "landuse.parquet",
+        # Legacy in-tree locations (directory-form runs).
         run_root / "soils" / "soils.parquet",
         run_root / "landuse" / "landuse.parquet",
     ]

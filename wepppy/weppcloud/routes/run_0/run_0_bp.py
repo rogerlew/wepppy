@@ -41,6 +41,7 @@ from wepppy.nodb.mods.omni import Omni, OmniScenario
 import wepppy.nodb.mods.omni as omni_mod
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_relpath
 from wepppy.weppcloud.routes.nodb_api.landuse_bp import build_landuse_report_context
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils import auth_tokens
@@ -580,6 +581,17 @@ def _build_runs0_context(runid, config, playwright_load_all):
     unitizer = Unitizer.getInstance(wd)
     site_prefix = current_app.config['SITE_PREFIX']
 
+    # Browse links should follow truth-on-disk: prefer canonical WD-level sidecars,
+    # fall back to legacy in-tree parquets when present, otherwise hide.
+    browse_watershed_hillslopes_parquet = pick_existing_parquet_relpath(
+        wd, "watershed/hillslopes.parquet"
+    )
+    browse_watershed_channels_parquet = pick_existing_parquet_relpath(
+        wd, "watershed/channels.parquet"
+    )
+    browse_landuse_parquet = pick_existing_parquet_relpath(wd, "landuse/landuse.parquet")
+    browse_soils_parquet = pick_existing_parquet_relpath(wd, "soils/soils.parquet")
+
     if watershed.delineation_backend_is_topaz:
         topaz = Topaz.getInstance(wd)
     else:
@@ -756,7 +768,11 @@ def _build_runs0_context(runid, config, playwright_load_all):
         omni_has_ran_contrasts=omni_has_ran_contrasts,
         mod_visibility=mod_visibility,
         bootstrap_admin_disabled=bootstrap_admin_disabled,
-        bootstrap_is_anonymous=bootstrap_is_anonymous
+        bootstrap_is_anonymous=bootstrap_is_anonymous,
+        browse_watershed_hillslopes_parquet=browse_watershed_hillslopes_parquet,
+        browse_watershed_channels_parquet=browse_watershed_channels_parquet,
+        browse_landuse_parquet=browse_landuse_parquet,
+        browse_soils_parquet=browse_soils_parquet,
     )
     return context
 

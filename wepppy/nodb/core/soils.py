@@ -97,6 +97,7 @@ from wepppy.nodb.duckdb_agents import (
     get_soil_sub_summary,
     get_soil_subs_summary
 )
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 
 from wepppy.query_engine import update_catalog_entry
 
@@ -306,6 +307,14 @@ class Soils(NoDbBase):
         soils_dir = self.soils_dir
         if _exists(soils_dir):
             shutil.rmtree(soils_dir)
+        # Parquet summaries are canonical WD-level sidecars; ensure we don't
+        # leave a stale sidecar behind after clearing the tree.
+        sidecar_fn = _join(self.wd, "soils.parquet")
+        if _exists(sidecar_fn):
+            try:
+                os.remove(sidecar_fn)
+            except OSError:
+                pass
         os.mkdir(soils_dir)
         self._soils_is_vrt = False
         if not self.islocked():
@@ -879,8 +888,9 @@ class Soils(NoDbBase):
     @property
     def bd_d(self) -> Dict:
         """Returns dict of mukey -> bulk density."""
-        parquet_fn = _join(self.soils_dir, 'soils.parquet')
-        if _exists(parquet_fn):
+        parquet_path = pick_existing_parquet_path(self.wd, "soils/soils.parquet")
+        if parquet_path is not None:
+            parquet_fn = str(parquet_path)
             with duckdb.connect() as con:
                 result = con.execute(f"SELECT mukey, bd FROM read_parquet('{parquet_fn}')").fetchall()
                 return {row[0]: row[1] for row in result}
@@ -897,8 +907,9 @@ class Soils(NoDbBase):
     @property
     def clay_d(self) -> Dict:
         """Returns dict of mukey -> clay percentage."""
-        parquet_fn = _join(self.soils_dir, 'soils.parquet')
-        if _exists(parquet_fn):
+        parquet_path = pick_existing_parquet_path(self.wd, "soils/soils.parquet")
+        if parquet_path is not None:
+            parquet_fn = str(parquet_path)
             with duckdb.connect() as con:
                 result = con.execute(f"SELECT mukey, clay FROM read_parquet('{parquet_fn}')").fetchall()
                 return {row[0]: row[1] for row in result}
@@ -915,8 +926,9 @@ class Soils(NoDbBase):
     @property
     def sand_d(self) -> Dict:
         """Returns dict of mukey -> sand percentage."""
-        parquet_fn = _join(self.soils_dir, 'soils.parquet')
-        if _exists(parquet_fn):
+        parquet_path = pick_existing_parquet_path(self.wd, "soils/soils.parquet")
+        if parquet_path is not None:
+            parquet_fn = str(parquet_path)
             with duckdb.connect() as con:
                 result = con.execute(f"SELECT mukey, sand FROM read_parquet('{parquet_fn}')").fetchall()
                 return {row[0]: row[1] for row in result}
@@ -933,8 +945,9 @@ class Soils(NoDbBase):
     @property
     def ll_d(self) -> Dict:
         """Returns dict of mukey -> liquid limit."""
-        parquet_fn = _join(self.soils_dir, 'soils.parquet')
-        if _exists(parquet_fn):
+        parquet_path = pick_existing_parquet_path(self.wd, "soils/soils.parquet")
+        if parquet_path is not None:
+            parquet_fn = str(parquet_path)
             with duckdb.connect() as con:
                 result = con.execute(f"SELECT mukey, ll FROM read_parquet('{parquet_fn}')").fetchall()
                 return {row[0]: row[1] for row in result}
@@ -950,8 +963,9 @@ class Soils(NoDbBase):
 
     @property
     def clay_pct(self):
-        parquet_fn = _join(self.soils_dir, 'soils.parquet')
-        if _exists(parquet_fn):
+        parquet_path = pick_existing_parquet_path(self.wd, "soils/soils.parquet")
+        if parquet_path is not None:
+            parquet_fn = str(parquet_path)
             with duckdb.connect() as con:
                 result = con.execute(f"SELECT topaz_id, clay, area FROM read_parquet('{parquet_fn}')").fetchall()
                 totalarea = sum([row[2] for row in result])
@@ -989,8 +1003,9 @@ class Soils(NoDbBase):
     @property
     def liquid_limit(self):
         # Try parquet first
-        parquet_fn = _join(self.soils_dir, 'soils.parquet')
-        if _exists(parquet_fn):
+        parquet_path = pick_existing_parquet_path(self.wd, "soils/soils.parquet")
+        if parquet_path is not None:
+            parquet_fn = str(parquet_path)
             with duckdb.connect() as con:
                 result = con.execute(f"SELECT topaz_id, ll, area FROM read_parquet('{parquet_fn}') WHERE ll IS NOT NULL").fetchall()
                 if not result:
@@ -1288,7 +1303,7 @@ class Soils(NoDbBase):
 
     def _x_summary(self, topaz_id, abbreviated=False):
 
-        if _exists(_join(self.soils_dir, 'soils.parquet')):
+        if pick_existing_parquet_path(self.wd, "soils/soils.parquet") is not None:
             return get_soil_sub_summary(self.wd, topaz_id)
         
         domsoil_d = self.domsoil_d
@@ -1321,7 +1336,7 @@ class Soils(NoDbBase):
         """
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
-        if _exists(_join(self.soils_dir, 'soils.parquet')):
+        if pick_existing_parquet_path(self.wd, "soils/soils.parquet") is not None:
             return get_soil_subs_summary(self.wd)
             
         return self._subs_summary_gen()
@@ -1398,7 +1413,7 @@ class Soils(NoDbBase):
         remaining = [c for c in df.columns if c not in preferred]
         df = df.loc[:, preferred + remaining]
 
-        df.to_parquet(_join(self.soils_dir, 'soils.parquet'), index=False)
+        df.to_parquet(_join(self.wd, "soils.parquet"), index=False)
         update_catalog_entry(self.wd, 'soils/soils.parquet')
         
     def _post_dump_and_unlock(self):
@@ -1410,7 +1425,7 @@ class Soils(NoDbBase):
         """
         Returns a pandas DataFrame with the hill table.
         """
-        if _exists(_join(self.soils_dir, 'soils.parquet')):
+        if pick_existing_parquet_path(self.wd, "soils/soils.parquet") is not None:
             return get_soil_subs_summary(self.wd, return_as_df=True)
         
         result_dict = self._subs_summary_gen()

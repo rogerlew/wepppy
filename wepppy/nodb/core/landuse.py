@@ -89,6 +89,7 @@ from wepppy.nodb.duckdb_agents import (
     get_landuse_subs_summary,
     get_landuse_sub_summary
 )
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
@@ -522,6 +523,14 @@ class Landuse(NoDbBase):
         lc_dir = self.lc_dir
         if _exists(lc_dir):
             shutil.rmtree(lc_dir)
+        # Parquet summaries are canonical WD-level sidecars; ensure we don't
+        # leave a stale sidecar behind after clearing the tree.
+        sidecar_fn = _join(self.wd, "landuse.parquet")
+        if _exists(sidecar_fn):
+            try:
+                os.remove(sidecar_fn)
+            except OSError:
+                pass
         os.mkdir(lc_dir)
         self._landuse_is_vrt = False
         if not self.islocked():
@@ -1345,7 +1354,7 @@ class Landuse(NoDbBase):
 
     def _x_summary(self, topaz_id: str):
         
-        if _exists(_join(self.lc_dir, 'landuse.parquet')):
+        if pick_existing_parquet_path(self.wd, "landuse/landuse.parquet") is not None:
             return get_landuse_sub_summary(self.wd, topaz_id)
         
         return self._deprecated_x_summary(topaz_id)
@@ -1401,7 +1410,7 @@ class Landuse(NoDbBase):
         """
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
-        if _exists(_join(self.lc_dir, 'landuse.parquet')):
+        if pick_existing_parquet_path(self.wd, "landuse/landuse.parquet") is not None:
             return get_landuse_subs_summary(self.wd)
             
         return self._subs_summary_gen()
@@ -1492,7 +1501,7 @@ class Landuse(NoDbBase):
         remaining = [c for c in df.columns if c not in preferred_order]
         df = df.loc[:, preferred_order + remaining]
 
-        df.to_parquet(_join(self.lc_dir, 'landuse.parquet'), index=False)
+        df.to_parquet(_join(self.wd, "landuse.parquet"), index=False)
         update_catalog_entry(self.wd, 'landuse/landuse.parquet')
 
     @property
@@ -1500,7 +1509,7 @@ class Landuse(NoDbBase):
         """
         Returns a pandas DataFrame with the hill table.
         """
-        if _exists(_join(self.lc_dir, 'landuse.parquet')):
+        if pick_existing_parquet_path(self.wd, "landuse/landuse.parquet") is not None:
             return get_landuse_subs_summary(self.wd, return_as_df=True)
         
         return self._deprecated_hill_table()

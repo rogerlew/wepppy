@@ -14,6 +14,8 @@ from typing import Iterable, List, Mapping, MutableMapping, Optional, Sequence
 import numpy as np
 import pandas as pd
 
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+
 DEFAULT_SEVERITY_MAP = {
     "High": {105, 119, 129},
     "Moderate": {118, 120, 130},
@@ -116,7 +118,12 @@ def load_solver_inputs(
 
     hillslope_df = _read_parquet(omni_dir / "scenarios.hillslope_summaries.parquet")
     outlet_df = _read_parquet_optional(omni_dir / "contrasts.out.parquet", required=False)
-    watershed_df = _read_parquet(wd_path / "watershed" / "hillslopes.parquet")
+    watershed_parquet = pick_existing_parquet_path(wd_path, "watershed/hillslopes.parquet")
+    if watershed_parquet is None:
+        raise PathCEDataError(
+            "Required watershed parquet missing (watershed/hillslopes.parquet)"
+        )
+    watershed_df = _read_parquet(watershed_parquet)
 
     scenario_lookup = {option.label: option.scenario for option in treatment_options}
 

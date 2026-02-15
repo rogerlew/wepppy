@@ -108,6 +108,7 @@ from wepppy.all_your_base.geo import read_raster, haversine
 from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.query_engine import update_catalog_entry
@@ -585,9 +586,13 @@ class Watershed(NoDbBase):
         if self._subs_summary is not None and self._chns_summary is not None:
             return True
         # Fall back to parquet files (post-migration state)
-        hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
-        channels_parquet = _join(self.wat_dir, "channels.parquet")
-        return _exists(hillslopes_parquet) and _exists(channels_parquet)
+        hillslopes_parquet = pick_existing_parquet_path(
+            self.wd, "watershed/hillslopes.parquet"
+        )
+        channels_parquet = pick_existing_parquet_path(
+            self.wd, "watershed/channels.parquet"
+        )
+        return hillslopes_parquet is not None and channels_parquet is not None
 
     @property
     def wepp_chn_type(self) -> str:
@@ -706,8 +711,10 @@ class Watershed(NoDbBase):
     def sub_n(self) -> int:
         if self._subs_summary is None:
             # Try loading count from parquet if available
-            hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
-            if _exists(hillslopes_parquet):
+            hillslopes_parquet = pick_existing_parquet_path(
+                self.wd, "watershed/hillslopes.parquet"
+            )
+            if hillslopes_parquet is not None:
                 import duckdb
                 try:
                     con = duckdb.connect()
@@ -726,8 +733,10 @@ class Watershed(NoDbBase):
             return 0
 
         # use duckdb
-        hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
-        if _exists(hillslopes_parquet):
+        hillslopes_parquet = pick_existing_parquet_path(
+            self.wd, "watershed/hillslopes.parquet"
+        )
+        if hillslopes_parquet is not None:
             import duckdb
 
             try:
@@ -778,8 +787,10 @@ class Watershed(NoDbBase):
     def chn_n(self) -> int:
         if self._chns_summary is None:
             # Try loading count from parquet if available
-            channels_parquet = _join(self.wat_dir, "channels.parquet")
-            if _exists(channels_parquet):
+            channels_parquet = pick_existing_parquet_path(
+                self.wd, "watershed/channels.parquet"
+            )
+            if channels_parquet is not None:
                 import duckdb
                 try:
                     con = duckdb.connect()
@@ -949,10 +960,14 @@ class Watershed(NoDbBase):
             )
         
         # Fall back to loading IDs from parquet files
-        hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
-        channels_parquet = _join(self.wat_dir, "channels.parquet")
+        hillslopes_parquet = pick_existing_parquet_path(
+            self.wd, "watershed/hillslopes.parquet"
+        )
+        channels_parquet = pick_existing_parquet_path(
+            self.wd, "watershed/channels.parquet"
+        )
         
-        if _exists(hillslopes_parquet) and _exists(channels_parquet):
+        if hillslopes_parquet is not None and channels_parquet is not None:
             import duckdb
             con = duckdb.connect()
             sub_ids = con.execute(f"SELECT topaz_id FROM read_parquet('{hillslopes_parquet}')").fetchall()
@@ -1384,8 +1399,10 @@ class Watershed(NoDbBase):
         
         # Fall back to parquet if in-memory summary not available
         if sub_area is None:
-            hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
-            if _exists(hillslopes_parquet):
+            hillslopes_parquet = pick_existing_parquet_path(
+                self.wd, "watershed/hillslopes.parquet"
+            )
+            if hillslopes_parquet is not None:
                 import duckdb
                 try:
                     con = duckdb.connect()
@@ -1406,8 +1423,10 @@ class Watershed(NoDbBase):
         
         # Fall back to parquet if in-memory summary not available
         if chn_area is None:
-            channels_parquet = _join(self.wat_dir, "channels.parquet")
-            if _exists(channels_parquet):
+            channels_parquet = pick_existing_parquet_path(
+                self.wd, "watershed/channels.parquet"
+            )
+            if channels_parquet is not None:
                 import duckdb
                 try:
                     con = duckdb.connect()
@@ -1694,7 +1713,7 @@ class Watershed(NoDbBase):
         return self._centroid
 
     def sub_summary(self, topaz_id: Union[str, int]) -> Union[PeridotHillslope, Dict[str, Any], None]:
-        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+        if pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet") is not None:
             return PeridotHillslope.from_dict(
                 get_watershed_sub_summary(self.wd, topaz_id)
             )
@@ -1730,13 +1749,16 @@ class Watershed(NoDbBase):
 
     @property
     def fps_summary(self) -> Optional[Dict[str, List[str]]]:
-        if _exists(_join(self.wat_dir, "flowpaths.parquet")):
+        flowpaths_parquet = pick_existing_parquet_path(
+            self.wd, "watershed/flowpaths.parquet"
+        )
+        if flowpaths_parquet is not None:
             import duckdb
 
             fps_summary: Dict[str, List[str]] = {}
             with duckdb.connect() as con:
                 result = con.execute(
-                    f"SELECT topaz_id, fp_id FROM read_parquet('{self.wat_dir}/flowpaths.parquet')"
+                    f"SELECT topaz_id, fp_id FROM read_parquet('{flowpaths_parquet}')"
                 ).fetchall()
 
                 for row in result:
@@ -1762,7 +1784,7 @@ class Watershed(NoDbBase):
 
     @property
     def subs_summary(self) -> Dict[str, Union[PeridotHillslope, Dict[str, Any]]]:
-        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+        if pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet") is not None:
 
             summaries = get_watershed_subs_summary(self.wd)
             return {
@@ -1775,7 +1797,7 @@ class Watershed(NoDbBase):
         return {str(k): v.as_dict() for k, v in self._subs_summary.items()}
 
     def chn_summary(self, topaz_id: Union[str, int]) -> Union[PeridotChannel, Dict[str, Any], None]:
-        if _exists(_join(self.wat_dir, "channels.parquet")):
+        if pick_existing_parquet_path(self.wd, "watershed/channels.parquet") is not None:
             return PeridotChannel.from_dict(
                 get_watershed_chn_summary(self.wd, topaz_id)
             )
@@ -1810,7 +1832,7 @@ class Watershed(NoDbBase):
 
     @property
     def chns_summary(self) -> Dict[str, Union[PeridotChannel, Dict[str, Any]]]:
-        if _exists(_join(self.wat_dir, "channels.parquet")):
+        if pick_existing_parquet_path(self.wd, "watershed/channels.parquet") is not None:
 
             summaries = get_watershed_chns_summary(self.wd)
             return {
@@ -1827,11 +1849,11 @@ class Watershed(NoDbBase):
             sub_area_lookup: Dict[str, float] = self._sub_area_lookup  # type: ignore[has-type]
             return sub_area_lookup[str(topaz_id)]
 
-        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
-                parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
                 # lazy load self._sub_area_lookup with duckdb
                 result = con.execute(
                     f"SELECT topaz_id, area FROM read_parquet('{parquet_fn}')"
@@ -1846,11 +1868,11 @@ class Watershed(NoDbBase):
             sub_slope_lookup: Dict[str, float] = self._sub_slope_lookup  # type: ignore[has-type]
             return sub_slope_lookup[str(topaz_id)]
 
-        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
-                parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
                 # lazy load self._sub_area_lookup with duckdb
                 result = con.execute(
                     f"SELECT topaz_id, slope_scalar FROM read_parquet('{parquet_fn}')"
@@ -1865,11 +1887,11 @@ class Watershed(NoDbBase):
             chn_area_lookup: Dict[str, float] = self._chn_area_lookup  # type: ignore[has-type]
             return chn_area_lookup[str(topaz_id)]
 
-        if _exists(_join(self.wat_dir, "channels.parquet")):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/channels.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
-                parquet_fn = _join(self.wat_dir, "channels.parquet")
                 # lazy load self._sub_area_lookup with duckdb
                 result = con.execute(
                     f"SELECT topaz_id, area FROM read_parquet('{parquet_fn}')"
@@ -1894,11 +1916,11 @@ class Watershed(NoDbBase):
             sub_length_lookup: Dict[str, float] = self._sub_length_lookup  # type: ignore[has-type]
             return sub_length_lookup[str(topaz_id)]
 
-        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
-                parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
                 # lazy load self._sub_area_lookup with duckdb
                 result = con.execute(
                     f"SELECT topaz_id, length FROM read_parquet('{parquet_fn}')"
@@ -1910,10 +1932,10 @@ class Watershed(NoDbBase):
 
     def _compute_area_gt30_from_hillslopes(self) -> float:
         """Determine basin area with slopes ≥30% using hillslopes parquet data."""
-        parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
-        if not _exists(parquet_fn):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if parquet_fn is None:
             raise FileNotFoundError(
-                f"hillslopes.parquet not found at {parquet_fn}; cannot compute area_gt30"
+                "hillslopes parquet not found (expected watershed/hillslopes.parquet)"
             )
 
         import duckdb
@@ -1980,11 +2002,11 @@ class Watershed(NoDbBase):
             chn_length_lookup: Dict[str, float] = self._chn_length_lookup  # type: ignore[has-type]
             return chn_length_lookup[str(topaz_id)]
 
-        if _exists(_join(self.wat_dir, "channels.parquet")):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/channels.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
-                parquet_fn = _join(self.wat_dir, "channels.parquet")
                 # lazy load self._chn_area_lookup with duckdb
                 result = con.execute(
                     f"SELECT topaz_id, length FROM read_parquet('{parquet_fn}')"
@@ -2001,8 +2023,8 @@ class Watershed(NoDbBase):
             if topaz_id_str in sub_width_lookup:
                 return sub_width_lookup[topaz_id_str]
 
-        parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
-        if _exists(parquet_fn):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
@@ -2036,8 +2058,8 @@ class Watershed(NoDbBase):
             if topaz_id_str in chn_width_lookup:
                 return chn_width_lookup[topaz_id_str]
 
-        parquet_fn = _join(self.wat_dir, "channels.parquet")
-        if _exists(parquet_fn):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/channels.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
@@ -2103,11 +2125,11 @@ class Watershed(NoDbBase):
             sub_centroid_lookup: Dict[str, Tuple[float, float]] = self._sub_centroid_lookup  # type: ignore[has-type]
             return sub_centroid_lookup[str(topaz_id)]
 
-        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
-                parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
                 # lazy load self._sub_area_lookup with duckdb
                 result = con.execute(
                     f"SELECT topaz_id, centroid_lon, centroid_lat FROM read_parquet('{parquet_fn}')"
@@ -2136,11 +2158,11 @@ class Watershed(NoDbBase):
         return slp_fn
 
     def centroid_hillslope_iter(self) -> Generator[Tuple[Union[str, int], Tuple[float, float]], None, None]:
-        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+        parquet_fn = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if parquet_fn is not None:
             import duckdb
 
             with duckdb.connect() as con:
-                parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
                 # lazy load self._sub_area_lookup with duckdb
                 result = con.execute(
                     f"SELECT topaz_id, centroid_lon, centroid_lat FROM read_parquet('{parquet_fn}')"

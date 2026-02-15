@@ -193,7 +193,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     hill_df['topaz_id'] = pd.to_numeric(hill_df['topaz_id'], errors='raise').astype('Int32')
     hill_df['wepp_id'] = hill_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
 
-    hill_df.to_parquet(_join(wd, 'watershed/hillslopes.parquet'), index=False)
+    hill_df.to_parquet(_join(wd, 'watershed.hillslopes.parquet'), index=False)
     sub_area = float(hill_df['area'].sum())
     lngs = hill_df['centroid_lon'].to_numpy()
     lats = hill_df['centroid_lat'].to_numpy()
@@ -202,7 +202,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     chn_df['wepp_id'] = chn_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
     chn_df['chn_enum'] = chn_df['topaz_id'].apply(lambda top: get_chn_enum(int(top))).astype('Int32')
 
-    chn_df.to_parquet(_join(wd, 'watershed/channels.parquet'), index=False)
+    chn_df.to_parquet(_join(wd, 'watershed.channels.parquet'), index=False)
     chn_area = float(chn_df['area'].sum())
     lngs = np.concatenate((lngs, chn_df['centroid_lon'].to_numpy()))
     lats = np.concatenate((lats, chn_df['centroid_lat'].to_numpy()))
@@ -213,7 +213,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
         fps_df = pd.read_csv(flowpaths_csv)
         fps_df['topaz_id'] = pd.to_numeric(fps_df['topaz_id'], errors='raise').astype('Int32')
         fps_df['fp_id'] = pd.to_numeric(fps_df['fp_id'], errors='raise').astype('Int32')
-        fps_df.to_parquet(_join(wd, 'watershed/flowpaths.parquet'), index=False)
+        fps_df.to_parquet(_join(wd, 'watershed.flowpaths.parquet'), index=False)
         os.remove(flowpaths_csv)
 
     os.remove(_join(wd, 'watershed/hillslopes.csv'))
@@ -221,7 +221,11 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
 
     if _update_catalog_entry is not None:
         try:
-            _update_catalog_entry(wd, 'watershed')
+            _update_catalog_entry(wd, "watershed/hillslopes.parquet")
+            _update_catalog_entry(wd, "watershed/channels.parquet")
+            if _exists(_join(wd, "watershed.flowpaths.parquet")):
+                _update_catalog_entry(wd, "watershed/flowpaths.parquet")
+            _update_catalog_entry(wd, "watershed")
         except Exception:  # pragma: no cover - catalog refresh best effort
             LOGGER.warning("Failed to refresh catalog for watershed outputs in %s", wd, exc_info=True)
 

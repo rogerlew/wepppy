@@ -74,6 +74,37 @@ def test_update_catalog_entry(tmp_path: Path) -> None:
     assert all(item["path"] != rel for item in catalog["files"])
 
 
+def test_activate_query_engine_canonicalizes_parquet_sidecars(tmp_path: Path) -> None:
+    table = pa.table({"topaz_id": [1], "value": ["a"]})
+    sidecar_rel = "landuse.parquet"
+    logical_rel = "landuse/landuse.parquet"
+    _write_parquet(tmp_path / sidecar_rel, table)
+
+    catalog = activate_query_engine(tmp_path, run_interchange=False, force_refresh=True)
+    by_path = {entry["path"]: entry for entry in catalog["files"]}
+
+    assert logical_rel in by_path
+    assert by_path[logical_rel].get("fs_path") == sidecar_rel
+    assert sidecar_rel not in by_path
+
+
+def test_activate_query_engine_scenario_includes_parent_sidecars(tmp_path: Path) -> None:
+    parent = tmp_path / "run"
+    scenario = parent / "_pups" / "omni" / "scenarios" / "child"
+    scenario.mkdir(parents=True)
+
+    table = pa.table({"topaz_id": [1], "value": ["a"]})
+    parent_sidecar = parent / "landuse.parquet"
+    _write_parquet(parent_sidecar, table)
+
+    catalog = activate_query_engine(scenario, run_interchange=False, force_refresh=True)
+    logical_rel = "landuse/landuse.parquet"
+    by_path = {entry["path"]: entry for entry in catalog["files"]}
+
+    assert logical_rel in by_path
+    assert by_path[logical_rel].get("fs_path") == str(parent_sidecar.resolve())
+
+
 def test_update_catalog_entry_allows_parent_assets(tmp_path: Path) -> None:
     parent = tmp_path / "run"
     scenario = parent / "_pups" / "omni" / "scenarios" / "child"

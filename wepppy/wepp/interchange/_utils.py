@@ -132,10 +132,20 @@ def _ensure_cli_parquet(
     cli_file_hint: Optional[str] = None,
     log: Optional[logging.Logger] = None,
 ) -> Optional[Path]:
-    """Create ``wepp_cli.parquet`` in ``cli_dir`` when missing."""
-    parquet_path = Path(cli_dir) / "wepp_cli.parquet"
-    if parquet_path.exists():
-        return parquet_path
+    """Ensure a CLI parquet exists for calendar lookup.
+
+    Canonical location is the WD-level sidecar ``climate.wepp_cli.parquet``.
+    Legacy directory-form runs may still have ``climate/wepp_cli.parquet``.
+    """
+    cli_dir = Path(cli_dir)
+    wd = cli_dir.parent
+    sidecar_path = wd / "climate.wepp_cli.parquet"
+    legacy_path = cli_dir / "wepp_cli.parquet"
+
+    if sidecar_path.exists():
+        return sidecar_path
+    if legacy_path.exists():
+        return legacy_path
 
     cli_path: Optional[Path] = None
     if cli_file_hint:
@@ -181,9 +191,9 @@ def _ensure_cli_parquet(
         export_df["storm_duration_hours"] = export_df.get("dur")
         export_df["storm_duration"] = export_df.get("dur")
 
-        parquet_path.parent.mkdir(parents=True, exist_ok=True)
-        export_df.to_parquet(parquet_path, index=False)
-        return parquet_path
+        sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+        export_df.to_parquet(sidecar_path, index=False)
+        return sidecar_path
     except Exception:
         (log or logger).exception("Failed to materialize CLI parquet", extra={"cli_path": str(cli_path)})
         return None

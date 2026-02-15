@@ -75,6 +75,39 @@ def test_run_query_basic(tmp_path: Path) -> None:
     assert result.schema is None
 
 
+def test_run_query_uses_catalog_fs_path(tmp_path: Path) -> None:
+    physical_rel = "landuse.parquet"
+    logical_rel = "landuse/landuse.parquet"
+    parquet_path = tmp_path / physical_rel
+    _write_parquet(parquet_path)
+
+    catalog = {
+        "version": 1,
+        "generated_at": "2024-01-01T00:00:00Z",
+        "root": str(tmp_path),
+        "files": [
+            {
+                "path": logical_rel,
+                "fs_path": physical_rel,
+                "extension": ".parquet",
+                "size_bytes": parquet_path.stat().st_size,
+                "modified": "2024-01-01T00:00:00Z",
+            }
+        ],
+    }
+    out_dir = tmp_path / "_query_engine"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+    loaded = DatasetCatalog.load(tmp_path / "_query_engine" / "catalog.json")
+    run_context = RunContext(runid=str(tmp_path), base_dir=tmp_path, scenario=None, catalog=loaded)
+
+    payload = QueryRequest(datasets=[logical_rel], columns=["id", "value"], limit=2)
+    result = run_query(run_context, payload)
+
+    assert result.row_count == 2
+
+
 def test_run_query_include_schema(tmp_path: Path) -> None:
     rel = "data/sample.parquet"
     parquet_path = tmp_path / rel

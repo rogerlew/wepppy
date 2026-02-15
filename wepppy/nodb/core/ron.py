@@ -92,6 +92,7 @@ from wepppy.nodb.duckdb_agents import (
     get_soil_subs_summary, 
     get_landuse_subs_summary
 )
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 
 from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
 
@@ -1049,9 +1050,11 @@ class Ron(NoDbBase):
         wd = self.wd
         climate = self.climate_instance
 
-        if  _exists(_join(wd, 'watershed/hillslopes.parquet')) and \
-            _exists(_join(wd, 'soils/soils.parquet')) and \
-            _exists(_join(wd, 'landuse/landuse.parquet')):  
+        has_watershed = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet") is not None
+        has_soils = pick_existing_parquet_path(wd, "soils/soils.parquet") is not None
+        has_landuse = pick_existing_parquet_path(wd, "landuse/landuse.parquet") is not None
+
+        if has_watershed and has_soils and has_landuse:
             
             _watershed_summaries =  get_watershed_subs_summary(wd, return_as_df=False)
             _soils_summaries = get_soil_subs_summary(wd, return_as_df=False)
@@ -1105,7 +1108,7 @@ class Ron(NoDbBase):
 
         _watershed = None
         # use parquet if availablem they are faster and have topaz_id and wepp_id
-        if _exists(_join(wd, 'watershed/hillslopes.parquet')): 
+        if pick_existing_parquet_path(wd, "watershed/hillslopes.parquet") is not None:
             _watershed = get_watershed_sub_summary(wd, topaz_id=topaz_id)
 
             wepp_id = str(_watershed['wepp_id'])
@@ -1137,7 +1140,7 @@ class Ron(NoDbBase):
                 _watershed = watershed.sub_summary(topaz_id)
 
         _soils = None
-        if _exists(_join(wd, 'soils/soils.parquet')):
+        if pick_existing_parquet_path(wd, "soils/soils.parquet") is not None:
             _soils = get_soil_sub_summary(wd, topaz_id=topaz_id)
         else:
             soils = self.soils_instance
@@ -1145,7 +1148,7 @@ class Ron(NoDbBase):
 
 
         _landuse = None
-        if _exists(_join(wd, 'landuse/landuse.parquet')):
+        if pick_existing_parquet_path(wd, "landuse/landuse.parquet") is not None:
             _landuse = get_landuse_sub_summary(wd, topaz_id=topaz_id)
         else:
             landuse = self.landuse_instance
@@ -1168,7 +1171,7 @@ class Ron(NoDbBase):
         wd = self.wd
 
         # use parquet if available, they are faster and have topaz_id and wepp_id
-        if _exists(_join(wd, 'watershed/channels.parquet')):
+        if pick_existing_parquet_path(wd, "watershed/channels.parquet") is not None:
             chns_summary =  get_watershed_chns_summary(wd)
 
             summaries = []
@@ -1213,7 +1216,7 @@ class Ron(NoDbBase):
     ) -> Dict:
         wd = self.wd
         _watershed = None
-        if _exists(_join(wd, 'watershed/channels.parquet')):
+        if pick_existing_parquet_path(wd, "watershed/channels.parquet") is not None:
             _watershed = get_watershed_chn_summary(wd, topaz_id=topaz_id)
             chn_enum = _watershed['chn_enum']
             wepp_id = _watershed['wepp_id']

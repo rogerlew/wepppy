@@ -15,6 +15,10 @@ class CatalogEntry:
     extension: str
     size_bytes: int
     modified: str
+    # Optional on-disk pointer when the catalog path is a logical id (e.g.,
+    # `landuse/landuse.parquet`) but the file lives elsewhere (e.g., WD sidecar
+    # `landuse.parquet`). Relative paths are resolved against `DatasetCatalog.root`.
+    fs_path: str | None = None
     schema: dict[str, object] | None = None
 
 

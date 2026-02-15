@@ -95,7 +95,11 @@ def _dataset_source_sql(root: Path, spec: DatasetSpec, catalog: DatasetCatalog) 
     Returns:
         Tuple of the SQL fragment and whether spatial extension is required.
     """
-    dataset_path = root / Path(spec.path)
+    entry = catalog.get(spec.path)
+    fs_path = entry.fs_path if entry and entry.fs_path else spec.path
+    dataset_path = Path(fs_path)
+    if not dataset_path.is_absolute():
+        dataset_path = root / dataset_path
     source_path = dataset_path.as_posix()
     escaped = _escape_sql_literal(source_path)
     suffix = dataset_path.suffix.lower()

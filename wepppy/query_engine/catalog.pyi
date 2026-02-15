@@ -8,6 +8,7 @@ class CatalogEntry:
     extension: str
     size_bytes: int
     modified: str
+    fs_path: str | None
     schema: dict[str, Any] | None
 
 class DatasetCatalog:

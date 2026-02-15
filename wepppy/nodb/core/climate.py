@@ -1686,7 +1686,8 @@ class Climate(NoDbBase):
             export_df["storm_duration_hours"] = export_df.get("dur")
             export_df["storm_duration"] = export_df.get("dur")
 
-            parquet_path = Path(self.cli_dir) / "wepp_cli.parquet"
+            # Canonical WD-level sidecar (NoDir + migration).
+            parquet_path = Path(self.wd) / "climate.wepp_cli.parquet"
             export_df.to_parquet(parquet_path, index=False)
             self.logger.info("Exported CLI parquet with peak intensities", extra={"parquet": str(parquet_path)})
             return parquet_path

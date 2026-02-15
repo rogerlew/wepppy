@@ -9,6 +9,7 @@ from typing import Sequence
 import duckdb
 
 from wepppy.nodb.core import Ron
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 
 ColumnSpec = tuple[str, str]
 
@@ -79,12 +80,6 @@ _SOIL_COLUMNS: tuple[ColumnSpec, ...] = (
 )
 
 
-def _require_parquet(parquet_path: Path) -> Path:
-    if not parquet_path.exists():
-        raise FileNotFoundError(f"Missing parquet file: {parquet_path}")
-    return parquet_path
-
-
 def _escape_sql_path(path: Path) -> str:
     return str(path).replace("'", "''")
 
@@ -136,9 +131,17 @@ def export_hillslopes_prep_details(wd: str) -> str:
     out_dir = Path(ron.export_dir) / "prep_details"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    hillslopes_parquet = _require_parquet(Path(wd) / "watershed" / "hillslopes.parquet")
-    landuse_parquet = _require_parquet(Path(wd) / "landuse" / "landuse.parquet")
-    soils_parquet = _require_parquet(Path(wd) / "soils" / "soils.parquet")
+    hillslopes_parquet = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet")
+    if hillslopes_parquet is None:
+        raise FileNotFoundError(
+            "Missing watershed hillslopes parquet (watershed/hillslopes.parquet)"
+        )
+    landuse_parquet = pick_existing_parquet_path(wd, "landuse/landuse.parquet")
+    if landuse_parquet is None:
+        raise FileNotFoundError("Missing landuse parquet (landuse/landuse.parquet)")
+    soils_parquet = pick_existing_parquet_path(wd, "soils/soils.parquet")
+    if soils_parquet is None:
+        raise FileNotFoundError("Missing soils parquet (soils/soils.parquet)")
 
     output_path = out_dir / "hillslopes.csv"
 
@@ -191,7 +194,11 @@ def export_channels_prep_details(wd: str) -> str:
     out_dir = Path(ron.export_dir) / "prep_details"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    channels_parquet = _require_parquet(Path(wd) / "watershed" / "channels.parquet")
+    channels_parquet = pick_existing_parquet_path(wd, "watershed/channels.parquet")
+    if channels_parquet is None:
+        raise FileNotFoundError(
+            "Missing watershed channels parquet (watershed/channels.parquet)"
+        )
     output_path = out_dir / "channels.csv"
 
     with duckdb.connect() as con:

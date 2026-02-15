@@ -17,6 +17,7 @@ import pandas as pd
 from pandas.core.series import Series
 
 from wepppy import f_esri
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.nodb.core import Soils
 
 
@@ -123,9 +124,9 @@ def gpkg_export(wd: str) -> None:
     hill_gdf = gpd.read_file(watershed.subwta_shp) # the SUBCATCHMENTS.WGS.JSON file
     hill_gdf.set_crs("EPSG:4326", inplace=True)
 
-    wat_hill_fn = _join(wd, 'watershed/hillslopes.parquet')
-    if _exists(wat_hill_fn):
-        wat_hill_df = pd.read_parquet(wat_hill_fn)
+    wat_hill_path = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet")
+    if wat_hill_path is not None:
+        wat_hill_df = pd.read_parquet(wat_hill_path)
         wat_hill_df = esri_compatible_colnames(wat_hill_df)
         if 'TopazID' in wat_hill_df.columns:
             wat_hill_df['TopazID'] = wat_hill_df['TopazID'].astype('int64')
@@ -134,18 +135,18 @@ def gpkg_export(wd: str) -> None:
         hill_gdf['TopazID'] = hill_gdf['TopazID'].astype('int64')
         hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='TopazID', how='left')
     else:  # deprecated
-        wat_hill_fn = _join(wd, 'watershed/hillslopes.csv')
-        if _exists(wat_hill_fn):  # even more deprecated
-            wat_hill_df = pd.read_csv(wat_hill_fn)
+        wat_hill_csv = _join(wd, 'watershed/hillslopes.csv')
+        if _exists(wat_hill_csv):  # even more deprecated
+            wat_hill_df = pd.read_csv(wat_hill_csv)
             wat_hill_df = esri_compatible_colnames(wat_hill_df)
             wat_hill_df['TopazID'] = wat_hill_df['topaz_id'].astype('int64')
             wat_hill_df = wat_hill_df.drop(columns=['topaz_id'])
             hill_gdf['TopazID'] = hill_gdf['TopazID'].astype('int64')
             hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='TopazID', how='left')
 
-    lc_hill_fn = _join(wd, 'landuse/landuse.parquet')
-    if _exists(lc_hill_fn):
-        lc_hill_df = pd.read_parquet(lc_hill_fn)
+    lc_hill_path = pick_existing_parquet_path(wd, "landuse/landuse.parquet")
+    if lc_hill_path is not None:
+        lc_hill_df = pd.read_parquet(lc_hill_path)
         columns_to_drop = ['man_dir', 'area', 'cancov_override', 'inrcov_override', 'rilcov_override', '_map', 'man_fn', 'pct_coverage', 'WeppID']
         columns_to_drop = [c for c in columns_to_drop if c in lc_hill_df.columns]
         lc_hill_df.drop(columns=columns_to_drop, inplace=True)
@@ -157,10 +158,10 @@ def gpkg_export(wd: str) -> None:
             lc_hill_df['TopazID'] = lc_hill_df['topaz_id'].astype('int64')
         hill_gdf = hill_gdf.merge(lc_hill_df, left_on='TopazID', right_on='TopazID', how='left')
 
-    soils_hill_fn = _join(wd, 'soils/soils.parquet')
     soils_hill_df = None
-    if _exists(soils_hill_fn):
-        soils_hill_df = pd.read_parquet(soils_hill_fn)
+    soils_hill_path = pick_existing_parquet_path(wd, "soils/soils.parquet")
+    if soils_hill_path is not None:
+        soils_hill_df = pd.read_parquet(soils_hill_path)
 
     if soils_hill_df is None:
         soils_hill_df = Soils.getInstance(wd).hill_table
@@ -246,9 +247,9 @@ def gpkg_export(wd: str) -> None:
     chn_gdf = gpd.read_file(watershed.channels_shp)  # the CHANNELS.WGS.JSON file
     chn_gdf.set_crs("EPSG:4326", inplace=True)
 
-    wat_chn_fn = _join(wd, 'watershed/channels.parquet')
-    if _exists(wat_chn_fn):
-        wat_chn_df = pd.read_parquet(wat_chn_fn)
+    wat_chn_path = pick_existing_parquet_path(wd, "watershed/channels.parquet")
+    if wat_chn_path is not None:
+        wat_chn_df = pd.read_parquet(wat_chn_path)
         wat_chn_df = esri_compatible_colnames(wat_chn_df)
         columns_to_drop = ['WeppID', 'order']
         columns_to_drop = [c for c in columns_to_drop if c in wat_chn_df.columns]
@@ -260,9 +261,9 @@ def gpkg_export(wd: str) -> None:
         chn_gdf['TopazID'] = chn_gdf['TopazID'].astype('int64')
         chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='TopazID', how='left')
     else:  # deprecated
-        wat_chn_fn = _join(wd, 'watershed/channels.csv')
-        if _exists(wat_chn_fn):  # even more deprecated
-            wat_chn_df = pd.read_csv(wat_chn_fn)
+        wat_chn_csv = _join(wd, 'watershed/channels.csv')
+        if _exists(wat_chn_csv):  # even more deprecated
+            wat_chn_df = pd.read_csv(wat_chn_csv)
             wat_chn_df = esri_compatible_colnames(wat_chn_df)
             columns_to_drop = ['WeppID']
             columns_to_drop = [c for c in columns_to_drop if c in wat_chn_df.columns]
