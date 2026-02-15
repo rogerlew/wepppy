@@ -83,6 +83,8 @@ jobs:0 prep inputs
 
 Child jobs, dependencies, and file prerequisites:
 
+Note: Parquet prerequisites under NoDir roots are listed as logical ids (for example `watershed/hillslopes.parquet`) and resolve to WD-level sidecars (for example `watershed.hillslopes.parquet`) when present.
+
 | Stage | Child job | `depends_on` | File prerequisites (relative to `wd`) |
 | --- | --- | --- | --- |
 | jobs:0 | `_prep_multi_ofe_rq` | none | `wat_dir/slope_files/hillslopes/hill_<topaz>.mofe.slp`; `soils_dir/hill_<topaz>.mofe.sol`; `lc_dir/*.man`; optional `wepp.kslast_map` raster |
@@ -92,22 +94,22 @@ Child jobs, dependencies, and file prerequisites:
 | jobs:0 | `_prep_climates_rq` | none | `cli_dir/<cli_fn>`; for SS batch writes `runs_dir/p<wepp_id>.<ss_batch_id>.cli` and `runs_dir/pw0.<ss_batch_id>.cli` |
 | jobs:0 | `_prep_remaining_rq` | `jobs0_hillslopes_prep` list | `runs_dir/p*.slp`; `runs_dir/p*.sol`; `runs_dir/p*.man`; `runs_dir/p*.cli` |
 | jobs:1 | `_run_hillslopes_rq` | `_prep_remaining_rq` | `runs_dir/*.run`; `runs_dir/p*.slp`; `runs_dir/p*.sol`; `runs_dir/p*.man`; `runs_dir/p*.cli` |
-| jobs:2 | `_prep_watershed_rq` | `_run_hillslopes_rq` | `wat_dir/structure.json` or `wat_dir/network.txt`; `wat_dir/channels.parquet`; `wat_dir/hillslopes.parquet`; `wat_dir/slope_files/channels.slp` or `wat_dir/channels.slp`; `soils/soils.parquet`; `cli_dir/<cli_fn>` |
+| jobs:2 | `_prep_watershed_rq` | `_run_hillslopes_rq` | `wat_dir/structure.json` or `wat_dir/network.txt`; `watershed/channels.parquet`; `watershed/hillslopes.parquet`; `wat_dir/slope_files/channels.slp` or `wat_dir/channels.slp`; `soils/soils.parquet`; `cli_dir/<cli_fn>` |
 | jobs:2 | `_build_hillslope_interchange_rq` | `_run_hillslopes_rq` (+ `_build_swat_inputs_rq` if SWAT enabled + delete_after_interchange) | `output_dir/H*.pass.dat`; `output_dir/H*.ebe.dat`; `output_dir/H*.element.dat`; `output_dir/H*.loss.dat`; `output_dir/H*.soil.dat`; `output_dir/H*.wat.dat` |
-| jobs:2 | `_build_totalwatsed3_rq` | `_build_hillslope_interchange_rq` | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash/H<wepp_id>_ash.parquet` or `ash/H<wepp_id>.parquet`; optional `ash.nodb`; `wat_dir/hillslopes.parquet` (area lookup when ash is present) |
+| jobs:2 | `_build_totalwatsed3_rq` | `_build_hillslope_interchange_rq` | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash/H<wepp_id>_ash.parquet` or `ash/H<wepp_id>.parquet`; optional `ash.nodb`; `watershed/hillslopes.parquet` (area lookup when ash is present) |
 | jobs:2 | `post_dss_export_rq` | `_build_hillslope_interchange_rq` (+ `_post_run_cleanup_out_rq` if run_watershed) | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash/*.parquet`; `output_dir/chan.out`; `watershed.channels_shp` (GeoJSON); `wat_dir/network.txt` (downstream mapping); `export/dss` dir (created) |
 | jobs:2 | `_run_flowpaths_rq` | `_prep_remaining_rq` | `wat_dir/slope_files/flowpaths/*.slps`; `fp_runs_dir` (created/cleaned by controller) |
-| jobs:2 | `_build_swat_inputs_rq` | `_build_hillslope_interchange_rq` (+ `_prep_watershed_rq` if present); if delete_after_interchange then `_run_hillslopes_rq` (+ `_prep_watershed_rq` if present) | `wepp/output/*` (hillslope outputs); `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `swat_template_dir/*` (config `swat_template_dir`) |
+| jobs:2 | `_build_swat_inputs_rq` | `_build_hillslope_interchange_rq` (+ `_prep_watershed_rq` if present); if delete_after_interchange then `_run_hillslopes_rq` (+ `_prep_watershed_rq` if present) | `wepp/output/*` (hillslope outputs); `watershed/hillslopes.parquet`; `watershed/channels.parquet`; `swat_template_dir/*` (config `swat_template_dir`) |
 | jobs:3 | `_run_swat_rq` | `_build_swat_inputs_rq` | `swat_txtinout_dir/*` |
 | jobs:3 | `run_watershed_rq` / `run_ss_batch_watershed_rq` | `_prep_watershed_rq` | `runs_dir/pw0.str`; `runs_dir/pw0.slp`; `runs_dir/pw0.chn`; `runs_dir/pw0.sol`; `runs_dir/pw0.cli`; `runs_dir/pw0.man`; `runs_dir/chan.inp`; for SS batch `runs_dir/pw0.<ss_batch_id>.cli` |
 | jobs:4 | `_post_run_cleanup_out_rq` | `jobs3_watersheds` or `_prep_watershed_rq` | `runs_dir/*.out`; optional `runs_dir/tc_out.txt` |
-| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
+| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `watershed/hillslopes.parquet`; `watershed/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
 | jobs:4 | `_run_hillslope_watbal_rq` | `post_dependencies` + `_build_hillslope_interchange_rq` | `output_dir/interchange/H.wat.parquet` |
 | jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta` (`wat_dir/SUBWTA.ARC` or `wbt_wd/subwta.tif`); `watershed.discha` (`wat_dir/DISCHA.ARC` or `wbt_wd/discha.tif`); `output_dir/H*` |
 | jobs:4 | `_post_watershed_interchange_rq` | `_post_run_cleanup_out_rq` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
 | jobs:4 | `_analyze_return_periods_rq` | `_post_watershed_interchange_rq` + `_build_totalwatsed3_rq` | `output_dir/interchange/ebe_pw0.parquet` (fallback `output_dir/ebe_pw0.parquet`); `output_dir/interchange/totalwatsed3.parquet`; optional cached `output_dir/return_periods*.json` |
-| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; optional `ash` metadata |
-| jobs:5 | `_post_gpkg_export_rq` | `jobs4_post` | `watershed.subwta_shp` (SUBCATCHMENTS.WGS JSON); `watershed.channels_shp` (CHANNELS.WGS JSON); `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet`; `output_dir/interchange/loss_pw0.hill.parquet`; `output_dir/interchange/loss_pw0.chn.parquet` |
+| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `watershed/hillslopes.parquet`; `watershed/channels.parquet`; optional `ash` metadata |
+| jobs:5 | `_post_gpkg_export_rq` | `jobs4_post` | `watershed.subwta_shp` (SUBCATCHMENTS.WGS JSON); `watershed.channels_shp` (CHANNELS.WGS JSON); `watershed/hillslopes.parquet`; `watershed/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet`; `output_dir/interchange/loss_pw0.hill.parquet`; `output_dir/interchange/loss_pw0.chn.parquet` |
 | jobs:6 | `_log_complete_rq` | `jobs4_post + jobs5_post` | `ron.nodb` |
 
 Audit notes:
@@ -138,30 +140,30 @@ jobs:1 _run_hillslopes_rq
 | --- | --- | --- | --- |
 | jobs:1 | `_run_hillslopes_rq` | none | `runs_dir/*.run`; `runs_dir/p*.slp`; `runs_dir/p*.sol`; `runs_dir/p*.man`; `runs_dir/p*.cli` |
 | jobs:2 | `_build_hillslope_interchange_rq` | `_run_hillslopes_rq` | `output_dir/H*.pass.dat`; `output_dir/H*.ebe.dat`; `output_dir/H*.element.dat`; `output_dir/H*.loss.dat`; `output_dir/H*.soil.dat`; `output_dir/H*.wat.dat` |
-| jobs:2 | `_build_totalwatsed3_rq` | `_build_hillslope_interchange_rq` | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash` parquet; `wat_dir/hillslopes.parquet` |
+| jobs:2 | `_build_totalwatsed3_rq` | `_build_hillslope_interchange_rq` | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash` parquet; `watershed/hillslopes.parquet` |
 | jobs:3 | `run_watershed_rq` / `run_ss_batch_watershed_rq` | `_run_hillslopes_rq` | `runs_dir/pw0.*` as above; SS batch `runs_dir/pw0.<ss_batch_id>.cli` |
 | jobs:4 | `_post_run_cleanup_out_rq` | `jobs3_watersheds` or `_run_hillslopes_rq` | `runs_dir/*.out`; optional `runs_dir/tc_out.txt` |
-| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
+| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `watershed/hillslopes.parquet`; `watershed/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
 | jobs:4 | `_run_hillslope_watbal_rq` | `post_dependencies` + `_build_hillslope_interchange_rq` | `output_dir/interchange/H.wat.parquet` |
 | jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta`; `watershed.discha`; `output_dir/H*` |
 | jobs:4 | `_post_watershed_interchange_rq` | `_post_run_cleanup_out_rq` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
 | jobs:4 | `_analyze_return_periods_rq` | `_post_watershed_interchange_rq` + `_build_totalwatsed3_rq` | `output_dir/interchange/ebe_pw0.parquet`; `output_dir/interchange/totalwatsed3.parquet` |
 | jobs:2 | `post_dss_export_rq` | `_build_hillslope_interchange_rq` (+ `_post_run_cleanup_out_rq` if run_watershed) | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash` parquet; `output_dir/chan.out`; `watershed.channels_shp`; `wat_dir/network.txt`; `export/dss` dir |
-| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; optional `ash` metadata |
-| jobs:5 | `_post_gpkg_export_rq` | `jobs4_post` | `watershed.subwta_shp`; `watershed.channels_shp`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet`; `output_dir/interchange/loss_pw0.hill.parquet`; `output_dir/interchange/loss_pw0.chn.parquet` |
+| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `watershed/hillslopes.parquet`; `watershed/channels.parquet`; optional `ash` metadata |
+| jobs:5 | `_post_gpkg_export_rq` | `jobs4_post` | `watershed.subwta_shp`; `watershed.channels_shp`; `watershed/hillslopes.parquet`; `watershed/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet`; `output_dir/interchange/loss_pw0.hill.parquet`; `output_dir/interchange/loss_pw0.chn.parquet` |
 | jobs:6 | `_log_complete_rq` | `jobs4_post + jobs5_post` | `ron.nodb` |
 
 **`run_wepp_watershed_rq(runid)`**
 
 | Stage | Child job | `depends_on` | File prerequisites (relative to `wd`) |
 | --- | --- | --- | --- |
-| jobs:2 | `_prep_watershed_rq` | none | `wat_dir/structure.json` or `wat_dir/network.txt`; `wat_dir/channels.parquet`; `wat_dir/hillslopes.parquet`; `wat_dir/slope_files/channels.slp` or `wat_dir/channels.slp`; `soils/soils.parquet`; `cli_dir/<cli_fn>` |
+| jobs:2 | `_prep_watershed_rq` | none | `wat_dir/structure.json` or `wat_dir/network.txt`; `watershed/channels.parquet`; `watershed/hillslopes.parquet`; `wat_dir/slope_files/channels.slp` or `wat_dir/channels.slp`; `soils/soils.parquet`; `cli_dir/<cli_fn>` |
 | jobs:3 | `run_watershed_rq` / `run_ss_batch_watershed_rq` | `_prep_watershed_rq` | `runs_dir/pw0.*` as above; SS batch `runs_dir/pw0.<ss_batch_id>.cli` |
 | jobs:4 | `_post_run_cleanup_out_rq` | `jobs3_watersheds` or `_prep_watershed_rq` | `runs_dir/*.out`; optional `runs_dir/tc_out.txt` |
-| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
+| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `watershed/hillslopes.parquet`; `watershed/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
 | jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta`; `watershed.discha`; `output_dir/H*` (job skipped when hillslope outputs are missing) |
 | jobs:4 | `_post_watershed_interchange_rq` | `_post_run_cleanup_out_rq` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
-| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; optional `ash` metadata |
+| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `watershed/hillslopes.parquet`; `watershed/channels.parquet`; optional `ash` metadata |
 | jobs:6 | `_log_complete_rq` | `jobs4_post + jobs5_post` | `ron.nodb` |
 
 Audit notes:
@@ -174,10 +176,10 @@ Audit notes:
 | --- | --- | --- | --- |
 | jobs:3 | `run_watershed_rq` / `run_ss_batch_watershed_rq` | none | `runs_dir/pw0.*` as above; SS batch `runs_dir/pw0.<ss_batch_id>.cli` |
 | jobs:4 | `_post_run_cleanup_out_rq` | `jobs3_watersheds` | `runs_dir/*.out`; optional `runs_dir/tc_out.txt` |
-| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
+| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `watershed/hillslopes.parquet`; `watershed/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
 | jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta`; `watershed.discha`; `output_dir/H*` (job skipped when hillslope outputs are missing) |
 | jobs:4 | `_post_watershed_interchange_rq` | `_post_run_cleanup_out_rq` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
-| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; optional `ash` metadata |
+| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `watershed/hillslopes.parquet`; `watershed/channels.parquet`; optional `ash` metadata |
 | jobs:6 | `_log_complete_rq` | `jobs4_post + jobs5_post` | `ron.nodb` |
 
 **`wepppy/rq/swat_rq.py`**
@@ -186,7 +188,7 @@ Audit notes:
 
 | Stage | Child job | `depends_on` | File prerequisites (relative to `wd`) |
 | --- | --- | --- | --- |
-| jobs:0 | `_build_swat_inputs_rq` | none | `wepp/output/*` (hillslope outputs); `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `swat_template_dir/*` |
+| jobs:0 | `_build_swat_inputs_rq` | none | `wepp/output/*` (hillslope outputs); `watershed/hillslopes.parquet`; `watershed/channels.parquet`; `swat_template_dir/*` |
 | jobs:1 | `_run_swat_rq` | `_build_swat_inputs_rq` | `swat_txtinout_dir/*` |
 
 Audit notes:

@@ -106,9 +106,8 @@ def test_soils_parquet_dry_run_when_built(tmp_path: Path) -> None:
 
 def test_landuse_parquet_normalization_does_not_write_index(tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
-    landuse_dir = run_dir / "landuse"
-    landuse_dir.mkdir(parents=True)
-    landuse_parquet = landuse_dir / "landuse.parquet"
+    run_dir.mkdir()
+    landuse_parquet = run_dir / "landuse.parquet"
     df = pd.DataFrame({"TopazID": [1], "WeppID": [2], "name": ["test"], "area": [123.0]})
     df.to_parquet(landuse_parquet, index=False)
 
@@ -127,9 +126,8 @@ def test_landuse_parquet_normalization_does_not_write_index(tmp_path: Path) -> N
 
 def test_soils_parquet_normalization_does_not_write_index(tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
-    soils_dir = run_dir / "soils"
-    soils_dir.mkdir(parents=True)
-    soils_parquet = soils_dir / "soils.parquet"
+    run_dir.mkdir()
+    soils_parquet = run_dir / "soils.parquet"
     df = pd.DataFrame({"TopazID": [1], "WeppID": [2], "mukey": ["123"], "area": [456.0]})
     df.to_parquet(soils_parquet, index=False)
 
@@ -148,9 +146,8 @@ def test_soils_parquet_normalization_does_not_write_index(tmp_path: Path) -> Non
 
 def test_soils_nodb_meta_detects_legacy_meta_fn(tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
-    soils_dir = run_dir / "soils"
-    soils_dir.mkdir(parents=True)
-    soils_parquet = soils_dir / "soils.parquet"
+    run_dir.mkdir()
+    soils_parquet = run_dir / "soils.parquet"
     pq.write_table(pa.table({"topaz_id": [1], "mukey": ["1"]}), soils_parquet)
 
     soils_nodb = run_dir / "soils.nodb"
@@ -233,7 +230,6 @@ def test_watershed_backfill_creates_parquets(tmp_path: Path) -> None:
     applied, _ = migrate_watersheds(str(run_dir), dry_run=False)
     assert applied is True
 
-    watershed_dir = run_dir / "watershed"
-    assert (watershed_dir / "hillslopes.parquet").exists()
-    assert (watershed_dir / "channels.parquet").exists()
-    assert (watershed_dir / "flowpaths.parquet").exists()
+    assert (run_dir / "watershed.hillslopes.parquet").exists()
+    assert (run_dir / "watershed.channels.parquet").exists()
+    assert (run_dir / "watershed.flowpaths.parquet").exists()

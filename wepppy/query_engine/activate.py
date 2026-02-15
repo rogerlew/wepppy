@@ -50,10 +50,19 @@ def _collect_nodir_parquet_targets(base: Path) -> dict[str, Path]:
     """
     targets: dict[str, Path] = {}
 
+    def _allowed_file(candidate: Path) -> bool:
+        if not candidate.is_file():
+            return False
+        try:
+            resolved = candidate.resolve()
+        except FileNotFoundError:
+            return False
+        return _is_allowed_target(base, resolved)
+
     def choose(logical: str, *, sidecar: Path, legacy: Path) -> None:
-        if sidecar.is_file():
+        if _allowed_file(sidecar):
             targets[logical] = sidecar
-        elif legacy.is_file():
+        elif _allowed_file(legacy):
             targets[logical] = legacy
 
     choose(
@@ -70,12 +79,14 @@ def _collect_nodir_parquet_targets(base: Path) -> dict[str, Path]:
     climate_dir = base / "climate"
     climate_names: set[str] = set()
     for candidate in base.glob("climate.*.parquet"):
+        if not _allowed_file(candidate):
+            continue
         name = _extract_sidecar_name(candidate.name, prefix="climate")
         if name:
             climate_names.add(name)
     if climate_dir.is_dir():
         for candidate in climate_dir.glob("*.parquet"):
-            if candidate.is_file() and candidate.stem:
+            if _allowed_file(candidate) and candidate.stem:
                 climate_names.add(candidate.stem)
     for name in climate_names:
         choose(
@@ -87,12 +98,14 @@ def _collect_nodir_parquet_targets(base: Path) -> dict[str, Path]:
     watershed_dir = base / "watershed"
     watershed_names: set[str] = set()
     for candidate in base.glob("watershed.*.parquet"):
+        if not _allowed_file(candidate):
+            continue
         name = _extract_sidecar_name(candidate.name, prefix="watershed")
         if name:
             watershed_names.add(name)
     if watershed_dir.is_dir():
         for candidate in watershed_dir.glob("*.parquet"):
-            if candidate.is_file() and candidate.stem:
+            if _allowed_file(candidate) and candidate.stem:
                 watershed_names.add(candidate.stem)
     for name in watershed_names:
         choose(

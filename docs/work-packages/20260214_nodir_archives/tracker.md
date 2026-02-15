@@ -19,7 +19,7 @@
 - [x] Lock materialization contract (cache paths, locks, limits, cleanup). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
 - [x] Lock shared NoDir interface spec (Python). See `docs/work-packages/20260214_nodir_archives/artifacts/nodir_interface_spec.md`.
 - [ ] Add perf targets (browse p95 listing time, inode reduction, archive build time).
-- [ ] Specify and implement thaw/modify/freeze state tracking (`WD/.nodir/<root>.json`) and crash recovery rules.
+- [ ] Specify and implement thaw/modify/freeze state tracking (`WD/.nodir/<root>.json`) and crash recovery rules (spec: `docs/schemas/nodir-thaw-freeze-contract.md`).
 - [ ] Define symlink dereference size thresholds and audit policy (warn at 1 GiB default; allowlist external roots).
 - [x] Lock mixed-state behavior: non-admin hidden + 409; admin dual browse view + mixed-state warning block.
 - [x] Lock NoDir maintenance lock contract: Redis key format + ordering + fail-fast semantics.
@@ -69,6 +69,18 @@
 
 ---
 
+### 2026-02-15: Migration Paths (NoDir Preferred, Dir Form First-Class)
+**Context**: Runs will not all be migrated at once. Users, agents, and crawler scripts may touch runs in both directory-backed and archive-backed forms.
+
+**Decision**:
+- NoDir is preferred (new runs should default to `.nodir` for allowlisted roots where safe).
+- Directory form and archive form MUST both provide a first-class experience at runtime (no forced migration on load).
+- Supported migration paths: (1) user loads a run and triggers migrations, (2) crawler script migrates archived/readonly runs in bulk.
+
+**Impact**: Backwards compatibility is preserved while still allowing inode/stat pressure reductions to land incrementally.
+
+---
+
 ### 2026-02-14: Freeze Dereferences Symlinked Files
 **Context**: Some run assets are stored as symlinks (e.g., rasters) and would become broken references if the directory tree is removed.
 
@@ -88,6 +100,7 @@
 - non-admin browse hides both representations for mixed roots and returns `409 Conflict`,
 - admin browse exposes `/browse/<root>/...` (directory) and `/browse/<root>/nodir/...` (archive view),
 - mixed-state roots are called out in the browse UI below pagination.
+- Browse is observability for the error state only; mixed state remains an error outside admin browse.
 
 ---
 

@@ -17,9 +17,10 @@ This package defines and implements a “NoDir” contract: treat selected proje
 
 ### Included
 - Resources: `landuse`, `soils`, `climate`, `watershed` (directory or archive representation).
+- NoDir is preferred (new runs should default to `.nodir` for allowlisted roots where safe), but directory form remains first-class for unmigrated runs.
 - Browse microservice: directory listing + file preview/download for archive-backed trees.
 - A crawler/migrator that can convert existing directory trees to `.nodir` archives (atomic replace, resumable, audit log).
-- Contract doc: `docs/schemas/nodir-contract-spec.md`.
+- Contract docs: `docs/schemas/nodir-contract-spec.md`, `docs/schemas/nodir-thaw-freeze-contract.md`.
 
 ### Explicitly Out of Scope
 - `wepp/` directory (WEPP executables require real file paths).

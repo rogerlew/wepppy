@@ -150,7 +150,10 @@ def main(argv: Iterable[str] | None = None) -> int:
             if args.verbose:
                 print(f"[{total}/{len(run_dirs)}] {run_dir}")
 
-            landuse_fn = run_dir / "landuse" / "landuse.parquet"
+            landuse_fn = run_dir / "landuse.parquet"
+            legacy_landuse_fn = run_dir / "landuse" / "landuse.parquet"
+            if not landuse_fn.exists() and legacy_landuse_fn.exists():
+                landuse_fn = legacy_landuse_fn
             if not landuse_fn.exists():
                 _log(log_fp, run_dir, "missing", 0, {}, None)
                 skipped += 1

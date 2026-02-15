@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from wepppy.nodb.base import redis_lock_client
@@ -80,6 +81,23 @@ def swat_instance(tmp_path):
         except Exception:
             pass
     Swat._instances.clear()
+
+
+def test_build_recall_connections_reads_sidecar_watershed_parquets(swat_instance):
+    wd = Path(swat_instance.wd)
+    hillslopes_parquet = wd / "watershed.hillslopes.parquet"
+    channels_parquet = wd / "watershed.channels.parquet"
+
+    pd.DataFrame(
+        {
+            "topaz_id": [11],
+            "wepp_id": [1],
+            "chn_enum": [1],
+        }
+    ).to_parquet(hillslopes_parquet, index=False)
+    pd.DataFrame({"topaz_id": [14], "chn_enum": [1]}).to_parquet(channels_parquet, index=False)
+
+    assert swat_instance.build_recall_connections() == [(1, 1)]
 
 
 def test_run_swat_persists_interchange_summary(monkeypatch, swat_instance):

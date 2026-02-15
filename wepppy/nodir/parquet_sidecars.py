@@ -21,11 +21,11 @@ __all__ = [
 ]
 
 
-_CLIMATE_LOGICAL_RE = re.compile(r"^climate/([^/]+)\\.parquet$")
-_WATERSHED_LOGICAL_RE = re.compile(r"^watershed/([^/]+)\\.parquet$")
+_CLIMATE_LOGICAL_RE = re.compile(r"^climate/([^/]+)\.parquet$")
+_WATERSHED_LOGICAL_RE = re.compile(r"^watershed/([^/]+)\.parquet$")
 
-_CLIMATE_SIDECAR_RE = re.compile(r"^climate\\.([^/]+)\\.parquet$")
-_WATERSHED_SIDECAR_RE = re.compile(r"^watershed\\.([^/]+)\\.parquet$")
+_CLIMATE_SIDECAR_RE = re.compile(r"^climate\.([^/]+)\.parquet$")
+_WATERSHED_SIDECAR_RE = re.compile(r"^watershed\.([^/]+)\.parquet$")
 
 
 def logical_parquet_to_sidecar_relpath(logical_relpath: str) -> str | None:
@@ -94,4 +94,3 @@ def pick_existing_parquet_path(wd: str | Path, logical_relpath: str) -> Path | N
     if rel is None:
         return None
     return Path(wd) / rel
-

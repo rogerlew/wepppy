@@ -11,33 +11,33 @@
 ## Root: `landuse` (`WD/landuse/` or `WD/landuse.nodir`)
 
 ### Producers (writes/mutates)
-- `wepppy/nodb/core/landuse.py`: owns `Landuse.lc_dir` (`WD/landuse`); `clean()` does `rmtree + mkdir`; `symlink_landuse_map()` creates/updates `nlcd.(tif|vrt)` (+ optional `.prj`) and may create symlinks; writes fractional JSON sidecars under `landuse/fractionals/...`; writes `landuse/landuse.parquet` + calls `update_catalog_entry(wd, "landuse/landuse.parquet")`. (Producer, mixed-state-sensitive)
+- `wepppy/nodb/core/landuse.py`: owns `Landuse.lc_dir` (`WD/landuse`); `clean()` does `rmtree + mkdir`; `symlink_landuse_map()` creates/updates `nlcd.(tif|vrt)` (+ optional `.prj`) and may create symlinks; writes fractional JSON sidecars under `landuse/fractionals/...`; writes canonical parquet sidecar `WD/landuse.parquet` + calls `update_catalog_entry(wd, "landuse/landuse.parquet")` (stable logical id). (Producer, mixed-state-sensitive)
 - `wepppy/microservices/rq_engine/landuse_routes.py`: UserDefined flow saves upload to `WD/landuse/_{filename}` then writes `WD/landuse/nlcd.(tif|vrt)` via `raster_stacker(...)`. (Producer)
 - `wepppy/weppcloud/routes/nodb_api/landuse_bp.py`: mutates controller state; any handler that triggers rebuild will indirectly mutate `WD/landuse/*`. (Producer via controller)
 - `wepppy/nodb/mods/treatments/treatments.py`: writes new management files directly to `WD/landuse/<new_man>.man` via `_join(self.wd, "landuse", ...)` and persists `man_dir = WD/landuse` inside summaries. (Producer, mixed-state-sensitive, **serialized-path hazard**)
-- `wepppy/nodb/mods/omni/omni.py`: clones/copies/removes `WD/landuse/` and rewrites `WD/landuse/landuse.parquet` for contrasts/scenarios. (Producer, mixed-state-sensitive)
-- `wepppy/tools/migrations/landuse.py`, `wepppy/tools/migrations/migrate_landuse_parquet.py`: read/write `WD/landuse/landuse.parquet` and update catalog entries. (Producer, mixed-state-sensitive)
+- `wepppy/nodb/mods/omni/omni.py`: clones/copies/removes `WD/landuse/` and rewrites parquet sidecars (`WD/landuse.parquet`) for contrasts/scenarios. (Producer, mixed-state-sensitive)
+- `wepppy/tools/migrations/landuse.py`, `wepppy/tools/migrations/migrate_landuse_parquet.py`: normalize landuse parquet sidecar (`WD/landuse.parquet`) sidecar-first (legacy fallback `WD/landuse/landuse.parquet`) and update logical catalog entry `landuse/landuse.parquet`. (Producer, mixed-state-sensitive)
 
 ### Consumers (reads/globs/walks)
 - `wepppy/nodb/core/wepp.py`: uses `Landuse.lc_dir` as `ManagementDir` when generating `.man` for `wepp/runs`; consumes `.man` templates and landuse mapping summaries. (Consumer, mixed-state-sensitive)
-- `wepppy/nodb/duckdb_agents.py`: reads `WD/landuse/landuse.parquet` by filesystem path (`_join(wd, "landuse/landuse.parquet")`). (Consumer, mixed-state-sensitive)
-- `wepppy/export/prep_details.py`, `wepppy/export/gpkg_export.py`, `wepppy/wepp/reports/*`: read `WD/landuse/landuse.parquet` by filesystem path. (Consumer, mixed-state-sensitive, FS-boundary for tools that require real files)
+- `wepppy/nodb/duckdb_agents.py`: reads landuse parquet via `pick_existing_parquet_path(wd, "landuse/landuse.parquet")` (sidecar-first, legacy fallback). (Consumer, mixed-state-sensitive)
+- `wepppy/export/prep_details.py`, `wepppy/export/gpkg_export.py`, `wepppy/wepp/reports/*`: read landuse parquet via `pick_existing_parquet_path` (sidecar-first, legacy fallback). (Consumer, mixed-state-sensitive, FS-boundary for tools that require real files)
 - `wepppy/query_engine/*`: catalogs and queries assume discoverable filesystem assets; see **Cross-Cutting**. (Consumer, mixed-state-sensitive)
 - UI strings: `wepppy/weppcloud/templates/*`, `wepppy/weppcloud/static/js/*` refer to logical paths like `landuse/landuse.parquet` (these SHOULD remain stable; still a touchpoint for query-engine + download plumbing). (Consumer)
 
 ## Root: `soils` (`WD/soils/` or `WD/soils.nodir`)
 
 ### Producers (writes/mutates)
-- `wepppy/nodb/core/soils.py`: owns `Soils.soils_dir` (`WD/soils`); `clean()` does `rmtree + mkdir`; `symlink_soils_map()` creates/updates `ssurgo.(tif|vrt)` (+ optional `.prj`) and may create symlinks; generates many `*.sol`; writes `soils/soils.parquet` + calls `update_catalog_entry(wd, "soils/soils.parquet")`. (Producer, mixed-state-sensitive)
+- `wepppy/nodb/core/soils.py`: owns `Soils.soils_dir` (`WD/soils`); `clean()` does `rmtree + mkdir`; `symlink_soils_map()` creates/updates `ssurgo.(tif|vrt)` (+ optional `.prj`) and may create symlinks; generates many `*.sol`; writes canonical parquet sidecar `WD/soils.parquet` + calls `update_catalog_entry(wd, "soils/soils.parquet")` (stable logical id). (Producer, mixed-state-sensitive)
 - `wepppy/nodb/mods/*`: multiple mods create/copy/modify soils artifacts (not exhaustive): `wepppy/nodb/mods/disturbed/disturbed.py`, `wepppy/nodb/mods/baer/baer.py`, `wepppy/nodb/mods/rred/rred.py`, `wepppy/nodb/mods/treatments/treatments.py`, `wepppy/nodb/mods/omni/omni.py`. (Producer, mixed-state-sensitive)
-- `wepppy/tools/migrations/soils.py`, `wepppy/tools/migrations/migrate_soils_parquet.py`: read/write `WD/soils/soils.parquet` and update catalog entries. (Producer, mixed-state-sensitive)
+- `wepppy/tools/migrations/soils.py`, `wepppy/tools/migrations/migrate_soils_parquet.py`: normalize soils parquet sidecar (`WD/soils.parquet`) sidecar-first (legacy fallback `WD/soils/soils.parquet`) and update logical catalog entry `soils/soils.parquet`. (Producer, mixed-state-sensitive)
 - Region builders (called by `Soils`): `wepppy/locales/earth/soils/isric/__init__.py`, `wepppy/eu/soils/*`, `wepppy/au/soils/*`, `wepppy/soils/ssurgo/*` write many files under a passed `soils_dir` (often `WD/soils`). (Producer, FS-boundary)
 
 ### Consumers (reads/globs/walks)
 - `wepppy/nodb/core/wepp.py`: consumes `WD/soils/*.sol` and writes derived soils to `wepp/runs/*.sol` (including MOFE variants). (Consumer, mixed-state-sensitive)
-- `wepppy/nodb/duckdb_agents.py`: reads `WD/soils/soils.parquet` by filesystem path. (Consumer, mixed-state-sensitive)
+- `wepppy/nodb/duckdb_agents.py`: reads soils parquet via `pick_existing_parquet_path(wd, "soils/soils.parquet")` (sidecar-first, legacy fallback). (Consumer, mixed-state-sensitive)
 - `wepppy/export/export.py`: `shutil.copytree(soils.soils_dir, ...)` for WinWEPP export. (Consumer, FS-boundary)
-- `wepppy/export/prep_details.py`, `wepppy/export/gpkg_export.py`, `wepppy/wepp/reports/*`: read `WD/soils/soils.parquet`. (Consumer, mixed-state-sensitive)
+- `wepppy/export/prep_details.py`, `wepppy/export/gpkg_export.py`, `wepppy/wepp/reports/*`: read soils parquet via `pick_existing_parquet_path` (sidecar-first, legacy fallback). (Consumer, mixed-state-sensitive)
 - NoDb payload hazard example: `wepppy/_tests/feverish-lamp/soils.nodb` contains serialized `soils_dir: ".../soils"` inside `SoilSummary` objects; any runtime use of that field must not assume a real directory when archived. (Mixed-state-sensitive, **serialized-path hazard**)
 
 ## Root: `climate` (`WD/climate/` or `WD/climate.nodir`)
@@ -59,18 +59,18 @@
 ### Producers (writes/mutates)
 - `wepppy/nodb/base.py`: `NoDbBase.wat_dir = WD/watershed`. (Mixed-state-sensitive)
 - `wepppy/nodb/core/watershed.py`: primary producer of watershed artifacts (parquets + slope files + structure/network metadata); uses `os.mkdir/os.makedirs/open()` heavily under `wat_dir`. (Producer, mixed-state-sensitive, FS-boundary for many sub-tools)
-- `wepppy/topo/peridot/peridot_runner.py`: reads/writes `WD/watershed/{hillslopes,channels,flowpaths}.{csv,parquet}`; removes CSVs; calls `update_catalog_entry(wd, "watershed")`. (Producer, mixed-state-sensitive)
+- `wepppy/topo/peridot/peridot_runner.py`: reads/writes `WD/watershed/{hillslopes,channels,flowpaths}.csv` (legacy) and writes canonical parquet sidecars `WD/watershed.{hillslopes,channels,flowpaths}.parquet`; removes CSVs; refreshes catalog entries (`watershed/*` logical ids). (Producer, mixed-state-sensitive)
 - `wepppy/topo/watershed_abstraction/watershed_abstraction.py`: reads/writes `wat_dir` artifacts as part of abstraction/migration flows. (Producer/consumer, mixed-state-sensitive)
-- `wepppy/tools/migrations/watershed.py`: migrates/writes watershed parquets (`hillslopes.parquet`, `channels.parquet`, `flowpaths.parquet`) and related files. (Producer, mixed-state-sensitive)
+- `wepppy/tools/migrations/watershed.py`: migrates/writes watershed parquet sidecars (`WD/watershed.{hillslopes,channels,flowpaths}.parquet`) and related files. (Producer, mixed-state-sensitive)
 
 ### Consumers (reads/globs/walks)
 - `wepppy/nodb/core/wepp.py`: consumes slope files and network/structure metadata:
   - peridot: reads `WD/watershed/slope_files/hillslopes/*.slp` and `.../channels.slp`
   - legacy: reads `WD/watershed/hill_<id>.slp` and `WD/watershed/channels.slp`
   - flowpaths: globs `WD/watershed/slope_files/flowpaths/*.slps` (Consumer, mixed-state-sensitive)
-- `wepppy/nodb/duckdb_agents.py`: reads `WD/watershed/{hillslopes,channels}.parquet` by filesystem path. (Consumer, mixed-state-sensitive)
-- `wepppy/export/prep_details.py`, `wepppy/export/gpkg_export.py`, `wepppy/wepp/reports/*`: read `WD/watershed/{hillslopes,channels}.parquet` by filesystem path. (Consumer, mixed-state-sensitive, FS-boundary)
-- Mods: `wepppy/nodb/mods/swat/swat.py` consumes watershed parquets via `_join(self.wd, "watershed", ...)`; `wepppy/nodb/mods/salvage_logging/flowpaths.py` globs `WD/watershed/flowpaths/*.npy`. (Consumer, mixed-state-sensitive)
+- `wepppy/nodb/duckdb_agents.py`: reads watershed parquet via `pick_existing_parquet_path(wd, "watershed/<name>.parquet")` (sidecar-first, legacy fallback). (Consumer, mixed-state-sensitive)
+- `wepppy/export/prep_details.py`, `wepppy/export/gpkg_export.py`, `wepppy/wepp/reports/*`: read watershed parquet via `pick_existing_parquet_path` (sidecar-first, legacy fallback). (Consumer, mixed-state-sensitive, FS-boundary)
+- Mods: `wepppy/nodb/mods/swat/swat.py` consumes watershed parquets via `pick_existing_parquet_path(wd, "watershed/<name>.parquet")`; `wepppy/nodb/mods/salvage_logging/flowpaths.py` globs `WD/watershed/flowpaths/*.npy`. (Consumer, mixed-state-sensitive)
 
 ## Cross-Cutting Touchpoints (all four roots)
 
@@ -84,7 +84,7 @@
 
 ### Query engine + catalogs
 - `wepppy/query_engine/activate.py`: builds catalog by filesystem walk (`os.scandir` + symlink allowlist) and cannot discover assets inside `.nodir` without an archive-aware iterator (or materialize-on-activate). (Consumer, mixed-state-sensitive)
-- Many modules reference logical dataset paths that are currently realized as filesystem paths under `WD/<root>/...`:
+- Many modules reference logical dataset paths under `WD/<root>/...` that are physically stored as WD-level sidecars (sidecar-first, legacy fallback):
   - `wepppy/nodb/duckdb_agents.py`
   - `wepppy/export/prep_details.py`
   - `wepppy/export/gpkg_export.py`
@@ -100,4 +100,3 @@
 - `rg -l '\\bwat_dir\\b' wepppy`
 - `rg -n \"_join\\([^\\n]*'(landuse|soils|climate|watershed)'\" wepppy`
 - `rg -n \"'landuse/|soils/|climate/|watershed/\" wepppy`
-

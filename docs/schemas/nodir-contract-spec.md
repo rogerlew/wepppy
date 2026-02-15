@@ -1,6 +1,7 @@
 # NoDir Contract Spec (Directory vs `.nodir` Project Trees)
 > Contract for representing selected run-scoped project trees as either a real directory or a single-file `.nodir` archive (zip container), while preserving “directory-like” semantics for code and the browse service.
 > **Work package:** `docs/work-packages/20260214_nodir_archives/package.md`
+> **See also:** `docs/schemas/nodir-thaw-freeze-contract.md` (thaw/freeze state tracking + crash recovery)
 
 ## Scope
 - Applies to run working directories (WDs) returned by `get_wd(runid)` (typically `/wc1/runs/<prefix>/<runid>/`).
@@ -97,72 +98,12 @@
 - Implementations MUST NOT attempt in-place zip mutation as a default behavior (zip updates are rewrite-heavy and failure-prone on NFS).
 
 ## Thaw/Modify/Freeze Protocol (Atomic Tracking)
-Thaw/freeze is a stateful workflow that must be crash-safe and must make it obvious when:
-- A thaw is incomplete.
-- The directory is authoritative and the archive is stale.
-- A freeze completed successfully (archive is fresh) and it is safe to remove the directory.
+Thaw/modify/freeze state tracking, locking, and crash recovery are specified in `docs/schemas/nodir-thaw-freeze-contract.md`.
 
-### On-Disk State Files (Required)
-- Each NoDir root MUST have a state file stored under the WD:
-  - `WD/.nodir/<root>.json` (directory is hidden from browse due to leading `.`).
-- State files MUST be updated atomically via write-to-temp + `os.replace()` (or equivalent).
-- The state file MUST include:
-  - `schema_version` (int)
-  - `root` (e.g., `"watershed"`)
-  - `state` (enum): `archived`, `thawing`, `thawed`, `freezing`
-  - `archive_path` (e.g., `"watershed.nodir"`)
-  - `dir_path` (e.g., `"watershed"`)
-  - `archive_fingerprint` (best effort): `{mtime_ns, size_bytes}`
-  - `dirty` (bool): whether the directory is considered modified since last freeze
-  - `updated_at` (UTC ISO string)
-
-### NoDir Maintenance Lock (Required)
-- Thaw/freeze/migration tooling MUST acquire a distributed NoDir maintenance lock for the affected root before writing any temp dirs/files.
-- Lock backend: Redis distributed lock (same infrastructure as NoDb locks; TTL-based crash recovery).
-- Lock key: `nodb-lock:<runid>:nodir/<root>`
-- If acquiring multiple roots, tooling MUST acquire locks in deterministic order (alphabetical by `<root>`).
-- If the lock cannot be acquired, tooling MUST fail fast (no partial extraction/archive writes).
-- Bulk migrators SHOULD also require `WD/READONLY` to be present.
-
-### Thaw (Archive -> Directory)
-Required procedure:
-1. Acquire the NoDir maintenance lock for `<root>`.
-2. Write state: `state="thawing"`, `dirty=true` (conservative), `archive_fingerprint=...`.
-3. Extract to a temporary directory: `WD/<root>.thaw.tmp/` (must not exist).
-   - Enforce zip-slip defenses and entry normalization.
-   - Never create symlinks from archive metadata.
-4. Atomically rename `WD/<root>.thaw.tmp/` -> `WD/<root>/`.
-5. Write state: `state="thawed"`, `dirty=true`.
-
-Crash recovery requirements:
-- If `state="thawing"` and `WD/<root>.thaw.tmp/` exists, tooling SHOULD treat the run as mid-thaw and either resume or clean up the temp directory before proceeding.
-
-### Modify (Directory is Authoritative)
-- While `state="thawed"`, implementations MUST treat the directory form as authoritative.
-- The archive form (if present) MUST be treated as stale and MUST NOT be used for reads/writes.
-- Any code path that mutates the directory SHOULD set `dirty=true` in the state file (best-effort).
-
-### Freeze (Directory -> Archive)
-Required procedure:
-1. Acquire the NoDir maintenance lock for `<root>`.
-2. Write state: `state="freezing"`.
-3. Build a temporary archive: `WD/<root>.nodir.tmp`.
-   - Walk the directory tree.
-   - Follow symlinks to files (dereference and store bytes as regular entries).
-   - Validate resolved symlink targets against an explicit allowlist of roots (default deny).
-     - Allowlist semantics MUST match the browse-service symlink policy for pups/batch/culverts (shared-root safe resolution).
-   - WARN if a dereferenced symlink target exceeds `1 GiB` (configurable threshold); include this in the audit log.
-4. Verify the `.nodir.tmp` archive is readable and entry paths are normalized.
-5. Atomically rename `WD/<root>.nodir.tmp` -> `WD/<root>.nodir`.
-6. Optionally remove the directory tree to reclaim inodes:
-   - Default: remove `WD/<root>/` after successful archive verification (preferred).
-   - If the directory is retained for debugging, the state MUST remain `state="thawed"` with `dirty=false` and the archive fingerprint recorded.
-7. Write final state:
-   - If directory removed: `state="archived"`, `dirty=false`, `archive_fingerprint=...`.
-   - If directory retained: `state="thawed"`, `dirty=false`, `archive_fingerprint=...`.
-
-Crash recovery requirements:
-- If `state="freezing"` and `WD/<root>.nodir.tmp` exists, tooling SHOULD treat the archive build as incomplete and remove/rebuild the temp archive before proceeding.
+Key integration hooks (non-exhaustive):
+- Per-root state file: `WD/.nodir/<root>.json` (atomic updates via temp + `os.replace()`).
+- Maintenance lock: `nodb-lock:<runid>:nodir/<root>` (fail-fast; acquire multiple roots alphabetically).
+- Transitional states (`thawing|freezing`) MUST be treated as locked by FS-boundary materialization workflows (`503; code=NODIR_LOCKED`) per `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`.
 
 ## Browse / Files / Download Contract
 

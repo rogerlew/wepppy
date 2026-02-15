@@ -7,6 +7,8 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+
 __all__ = [
     "migrate_watersheds",
     "migrate_watershed_nodb_slim",
@@ -237,14 +239,20 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
     run_path = Path(wd)
     watershed_dir = run_path / "watershed"
     watershed_nodb = run_path / "watershed.nodb"
-    if not watershed_dir.exists() and not watershed_nodb.exists():
-        return True, "No watershed directory (nothing to migrate)"
+    sidecar_parquets = [
+        run_path / "watershed.hillslopes.parquet",
+        run_path / "watershed.channels.parquet",
+        run_path / "watershed.flowpaths.parquet",
+    ]
+    sidecar_parquets = [path for path in sidecar_parquets if path.is_file()]
+    if not watershed_dir.exists() and not watershed_nodb.exists() and not sidecar_parquets:
+        return True, "No watershed data (nothing to migrate)"
 
     # Check if any parquet OR csv files exist (CSVs are converted to parquet)
     parquet_files = list(watershed_dir.glob("*.parquet"))
     csv_files = list(watershed_dir.glob("*.csv"))
 
-    if not parquet_files and not csv_files:
+    if not parquet_files and not csv_files and not sidecar_parquets:
         if not watershed_nodb.exists():
             return True, "No watershed data files (nothing to migrate)"
         try:
@@ -258,12 +266,10 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
             return True, "No watershed data files (nothing to migrate)"
 
         messages = []
-        if not dry_run:
-            watershed_dir.mkdir(parents=True, exist_ok=True)
         hillslope_rows = _legacy_hillslope_rows(state.get("_subs_summary"))
         applied, message = _write_legacy_parquet(
             hillslope_rows,
-            watershed_dir / "hillslopes.parquet",
+            run_path / "watershed.hillslopes.parquet",
             [
                 "topaz_id",
                 "slope_scalar",
@@ -302,7 +308,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
         channel_rows = _legacy_channel_rows(state.get("_chns_summary"))
         applied, message = _write_legacy_parquet(
             channel_rows,
-            watershed_dir / "channels.parquet",
+            run_path / "watershed.channels.parquet",
             [
                 "topaz_id",
                 "slope_scalar",
@@ -343,7 +349,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
         flowpath_rows = _legacy_flowpath_rows(state.get("_fps_summary"))
         applied, message = _write_legacy_parquet(
             flowpath_rows,
-            watershed_dir / "flowpaths.parquet",
+            run_path / "watershed.flowpaths.parquet",
             [
                 "topaz_id",
                 "fp_id",
@@ -388,11 +394,12 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
     needs_csv_conversion = bool(csv_files)
 
     # Check if parquet files need schema normalization
+    parquet_scan_files = sidecar_parquets or parquet_files
     needs_normalization = False
-    if parquet_files and not needs_csv_conversion:
+    if parquet_scan_files and not needs_csv_conversion:
         try:
             import pyarrow.parquet as pq
-            for pf in parquet_files[:3]:  # Sample first few files
+            for pf in parquet_scan_files[:3]:  # Sample first few files
                 try:
                     schema = pq.read_schema(pf)
                     col_names = [f.name for f in schema]
@@ -420,7 +427,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
         if needs_csv_conversion:
             return True, f"Would convert {len(csv_files)} CSV file(s) to Parquet"
         if needs_normalization:
-            return True, f"Would normalize {len(parquet_files)} watershed parquet file(s)"
+            return True, f"Would normalize {len(parquet_scan_files)} watershed parquet file(s)"
         return True, "Watershed tables already normalized (nothing to migrate)"
 
     try:
@@ -463,8 +470,14 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
         return True, "No watershed.nodb (nothing to migrate)"
 
     # Check that required parquet files exist
-    required_parquets = ["hillslopes.parquet", "flowpaths.parquet", "channels.parquet"]
-    missing_parquets = [p for p in required_parquets if not (watershed_dir / p).exists()]
+    required_parquets = [
+        "watershed/hillslopes.parquet",
+        "watershed/flowpaths.parquet",
+        "watershed/channels.parquet",
+    ]
+    missing_parquets = [
+        logical for logical in required_parquets if pick_existing_parquet_path(run_path, logical) is None
+    ]
 
     if missing_parquets:
         return True, f"Missing parquet files: {', '.join(missing_parquets)} (skipped)"
@@ -539,8 +552,12 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
         import duckdb
         con = duckdb.connect()
 
-        hillslopes_parquet = str(watershed_dir / "hillslopes.parquet")
-        channels_parquet = str(watershed_dir / "channels.parquet")
+        hillslopes_path = pick_existing_parquet_path(run_path, "watershed/hillslopes.parquet")
+        channels_path = pick_existing_parquet_path(run_path, "watershed/channels.parquet")
+        if hillslopes_path is None or channels_path is None:
+            raise FileNotFoundError("Missing required watershed parquet files")
+        hillslopes_parquet = str(hillslopes_path)
+        channels_parquet = str(channels_path)
 
         sub_ids = [
             row[0]

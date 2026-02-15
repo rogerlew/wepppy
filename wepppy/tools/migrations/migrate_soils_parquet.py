@@ -150,7 +150,10 @@ def main(argv: Iterable[str] | None = None) -> int:
             if args.verbose:
                 print(f"[{total}/{len(run_dirs)}] {run_dir}")
 
-            soils_fn = run_dir / "soils" / "soils.parquet"
+            soils_fn = run_dir / "soils.parquet"
+            legacy_soils_fn = run_dir / "soils" / "soils.parquet"
+            if not soils_fn.exists() and legacy_soils_fn.exists():
+                soils_fn = legacy_soils_fn
             if not soils_fn.exists():
                 _log(log_fp, run_dir, "missing", 0, {}, None)
                 skipped += 1
@@ -200,4 +203,3 @@ def main(argv: Iterable[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
