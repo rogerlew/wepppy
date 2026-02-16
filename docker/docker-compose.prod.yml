@@ -100,6 +100,8 @@ services:
       CAP_BASE_URL: ${CAP_BASE_URL:-/cap}
       CAP_ASSET_BASE_URL: ${CAP_ASSET_BASE_URL:-/cap/assets}
       CAP_SITE_KEY: ${CAP_SITE_KEY}
+      OAUTH_GITHUB_CLIENT_ID: ${OAUTH_GITHUB_CLIENT_ID}
+      OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID}
       OAUTH_GITHUB_CLIENT_SECRET_FILE: /run/secrets/oauth_github_client_secret
       OAUTH_GOOGLE_CLIENT_SECRET_FILE: /run/secrets/oauth_google_client_secret
       ZOHO_NOREPLY_EMAIL_PASSWORD_FILE: /run/secrets/zoho_noreply_email_password
