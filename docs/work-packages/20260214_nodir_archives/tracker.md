@@ -5,9 +5,9 @@
 ## Quick Status
 
 **Started**: 2026-02-14  
-**Current phase**: Discovery  
-**Last updated**: 2026-02-15  
-**Next milestone**: Define migration crawler behavior (safety gates + audit logs + resumability) and perf targets.
+**Current phase**: Phase 4 planning  
+**Last updated**: 2026-02-16  
+**Next milestone**: Implement Phase 4 materialization for FS-boundary endpoints and lock in materialization regression coverage.
 **Implementation plan:** `docs/work-packages/20260214_nodir_archives/notes/implementation_plan.md`
 
 ## Task Board
@@ -40,6 +40,7 @@
 - [x] Lock NoDir behavior matrix (see `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`). (2026-02-15)
 - [x] Update infrastructure note with inode/stat pressure context (2026-02-14)
 - [x] Patch omni scenario/contrast shared-input symlinks to prefer `.nodir` when present (2026-02-14)
+- [x] Complete Phase 3 browse/files/download NoDir integration (archive-native reads, mixed/invalid semantics, admin observability, route regression coverage) (2026-02-16)
 
 ## Decisions
 

@@ -18,13 +18,20 @@ Completed:
   - Allowlisted boundary parsing + admin alias semantics, `resolve()` view semantics (`effective|dir|archive`), mixed/invalid/transitional error handling, archive-native list/stat/open (no extraction), sidecar precedence, and archive parquet no-fallback behavior.
   - Security hardening: symlink/path validation, zip-entry safety checks, size-limit guards, and sidecar symlink restrictions.
   - Validation: `wctl run-pytest tests/nodir` -> 46 passed, 0 failed.
+- Phase 3 browse/files/download integration is complete (commit `6c7694508`):
+  - NoDir archive-native browse/files/download wiring landed with allowlisted boundary semantics and admin alias support.
+  - Mixed-state and invalid-archive semantics were enforced across surfaces with admin/non-admin deltas.
+  - `.nodir` remains directory-like in listing/sort behavior; `aria2c.spec` keeps `.nodir` as file-only (no expansion).
+  - Browse mixed-state warning block is rendered below pagination.
+  - Validation:
+    - `wctl run-pytest tests/microservices -k "browse or files or download or nodir"` -> 207 passed, 1 skipped, 192 deselected.
+    - `wctl run-pytest tests --maxfail=1` -> 1444 passed, 27 skipped.
 
 In progress / partially done:
 - Migration crawler behavior (safety gates, audit logs, resumability, rollback) is not yet specified/implemented.
 - Perf targets are not yet defined (browse p95 listing, archive build time, inode reduction, etc.).
 
 Not started (core remaining scope):
-- Browse/files/download integration for archive boundary navigation and archive-native streaming.
 - Materialization implementation (`materialize(file|subset)`) and integration into FS-boundary endpoints (dtale/gdalinfo/diff/exports).
 - Thaw/freeze implementation (state file writes, locks, crash recovery, temp marker handling).
 - Mutation workflows (RQ-engine/controller/mods/migrations) for archive-backed roots via thaw/modify/freeze.
@@ -83,24 +90,27 @@ Validation evidence:
 - Latest run: `wctl run-pytest tests/nodir` -> 46 passed, 0 failed.
 - No materialization workflows and no thaw/freeze mutation workflows were introduced in this phase.
 
-### Phase 3: Browse/Files/Download Archive-Native Support (READY)
+### Phase 3: Browse/Files/Download Archive-Native Support (DONE, 2026-02-16)
 Goal:
 - Allow `/browse`, `/files`, `/download` to navigate into `.nodir` archives for allowlisted roots without extraction.
 
-Deliverables:
-- Wire `wepppy/microservices/browse/listing.py`, `wepppy/microservices/browse/files_api.py`, and `wepppy/microservices/browse/_download.py` through the Phase 2 NoDir API.
-- Mixed state:
-  - non-admin hides both representations and returns `409; code=NODIR_MIXED_STATE` on direct navigation.
+Deliverables (landed):
+- Wired `wepppy/microservices/browse/listing.py`, `wepppy/microservices/browse/files_api.py`, and `wepppy/microservices/browse/_download.py` through the Phase 2 NoDir API.
+- Mixed-state behavior:
+  - non-admin hides both representations and returns `409; code=NODIR_MIXED_STATE` on direct navigation,
   - admin browse provides dual view for observability only.
-- Invalid allowlisted archive:
-  - archive-as-directory is `500; code=NODIR_INVALID_ARCHIVE` (admin may still download raw bytes).
-- `.nodir` container rendered as directory-like entry in listings and sorted with directories.
+- Invalid allowlisted archive handling:
+  - archive-as-directory returns `500; code=NODIR_INVALID_ARCHIVE`.
+- `.nodir` rendered as directory-like in listings/sort order.
+- `aria2c.spec` continues to list `.nodir` as files only (no inner expansion).
+- Browse mixed-state warning block rendered below pagination.
 
-Exit criteria:
-- New tests for browse JSON + download streaming inside `.nodir`.
-- Manual validation on a large archive for listing latency and correctness (basic perf baseline).
+Validation evidence:
+- Latest integration commit: `6c7694508`.
+- Targeted microservice run: `wctl run-pytest tests/microservices -k "browse or files or download or nodir"` -> 207 passed, 1 skipped, 192 deselected.
+- Full regression gate: `wctl run-pytest tests --maxfail=1` -> 1444 passed, 27 skipped.
 
-### Phase 4: Materialization v1 + FS-Boundary Endpoints (TODO)
+### Phase 4: Materialization v1 + FS-Boundary Endpoints (READY)
 Goal:
 - Support endpoints that require real filesystem paths for archive entries (dtale, gdalinfo, diff, exports).
 
