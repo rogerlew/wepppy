@@ -1,7 +1,7 @@
 # NoDir Implementation Plan (Multi-Phase)
 
 **Work package:** `docs/work-packages/20260214_nodir_archives/package.md`  
-**Last updated:** 2026-02-15  
+**Last updated:** 2026-02-16  
 **Primary specs:** `docs/schemas/nodir-contract-spec.md`, `docs/schemas/nodir-thaw-freeze-contract.md`
 
 ## Current State (Snapshot)
@@ -13,13 +13,17 @@ Completed:
   - Query engine path validation now prevents catalog entries from escaping the run boundary (and supports parent-run reads for `_pups/...` layouts).
 - RQ dependency catalog updated to treat NoDir parquet prerequisites as logical ids (physical sidecar resolution is internal).
 - Targeted regression tests added for parquet sidecars and SWAT interchange sidecar reads.
+- Phase 2 shared NoDir core library is complete (two review rounds; see commits `cc8dc214e`, `d559bc8c0`):
+  - `wepppy/nodir/errors.py`, `wepppy/nodir/paths.py`, `wepppy/nodir/fs.py`, `wepppy/nodir/symlinks.py`, `wepppy/nodir/parquet_sidecars.py`, `wepppy/nodir/__init__.py`.
+  - Allowlisted boundary parsing + admin alias semantics, `resolve()` view semantics (`effective|dir|archive`), mixed/invalid/transitional error handling, archive-native list/stat/open (no extraction), sidecar precedence, and archive parquet no-fallback behavior.
+  - Security hardening: symlink/path validation, zip-entry safety checks, size-limit guards, and sidecar symlink restrictions.
+  - Validation: `wctl run-pytest tests/nodir` -> 46 passed, 0 failed.
 
 In progress / partially done:
 - Migration crawler behavior (safety gates, audit logs, resumability, rollback) is not yet specified/implemented.
 - Perf targets are not yet defined (browse p95 listing, archive build time, inode reduction, etc.).
 
 Not started (core remaining scope):
-- Shared NoDir filesystem interface (`wepppy/nodir/`): path parsing, allowlist enforcement, archive-native list/stat/open (no extraction), canonical errors.
 - Browse/files/download integration for archive boundary navigation and archive-native streaming.
 - Materialization implementation (`materialize(file|subset)`) and integration into FS-boundary endpoints (dtale/gdalinfo/diff/exports).
 - Thaw/freeze implementation (state file writes, locks, crash recovery, temp marker handling).
@@ -55,11 +59,11 @@ Deliverables (landed):
 Exit criteria:
 - Targeted pytest passes for sidecar behaviors.
 
-### Phase 2: NoDir Core Library v1 (READY FOR REVIEW)
+### Phase 2: NoDir Core Library v1 (DONE, 2026-02-16)
 Goal:
 - One shared implementation of dir-vs-archive discovery and archive-native read/list/stat for allowlisted `.nodir` roots.
 
-Deliverables:
+Deliverables (landed):
 - `wepppy/nodir/errors.py`: typed errors with stable `{status, code}`.
 - `wepppy/nodir/paths.py`: normalization + boundary parsing (`<root>.nodir/...`, admin alias `<root>/nodir/...`).
 - `wepppy/nodir/fs.py` (or equivalent): `resolve`, `listdir`, `stat`, `open_read` for:
@@ -73,11 +77,13 @@ Deliverables:
 - Transitional sentinel handling:
   - if `WD/<root>.thaw.tmp/` or `WD/<root>.nodir.tmp` exists, treat root as transitioning (locked) for request-serving and materialization.
 
-Exit criteria:
-- Unit tests for parsing/normalization, allowlist behavior, mixed/invalid cases, and basic list/stat/open on a test `.nodir`.
-- No materialization or thaw/freeze side effects in this phase.
+Validation evidence:
+- Latest hardening commits: `cc8dc214e`, `d559bc8c0`.
+- Unit suite: `tests/nodir/` covering paths, resolve, archive fs, archive validation, parquet precedence, and symlink security.
+- Latest run: `wctl run-pytest tests/nodir` -> 46 passed, 0 failed.
+- No materialization workflows and no thaw/freeze mutation workflows were introduced in this phase.
 
-### Phase 3: Browse/Files/Download Archive-Native Support (TODO)
+### Phase 3: Browse/Files/Download Archive-Native Support (READY)
 Goal:
 - Allow `/browse`, `/files`, `/download` to navigate into `.nodir` archives for allowlisted roots without extraction.
 
