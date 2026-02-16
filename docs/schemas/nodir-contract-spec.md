@@ -147,6 +147,9 @@ Examples:
 - `/files/...` responses MUST treat archive-backed paths as directories/files with the same shape as directory-backed paths.
 - The API MUST NOT require clients to understand zip internals; the zip boundary is encoded in the URL path only.
 - Mixed-state targets MUST return `409 Conflict` (`code=NODIR_MIXED_STATE`) (observability; no silent precedence).
+- In mixed state, admin-authenticated `GET /files/` (root listing) MUST expose both representations (`<root>/` and `<root>.nodir`) for debug observability.
+  - This exception applies only to root listing visibility.
+  - Mixed-state target navigation under `/files/<root>/...` and `/files/<root>.nodir/...` remains `409 Conflict` (`code=NODIR_MIXED_STATE`) for all roles.
 
 ### aria2c.spec
 - `aria2c.spec` MUST list `.nodir` archives as files (do not expand inner entries).

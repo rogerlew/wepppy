@@ -51,6 +51,15 @@ const config = "{{ config }}";
     cursor: pointer;
     user-select: none;
   }
+  .mixed-state-warning {
+    display: block;
+    margin-top: 0.75em;
+    padding: 0.5em 0.75em;
+    border: 1px solid #f4c27a;
+    background-color: #fff7e6;
+    color: #8a5200;
+    white-space: normal;
+  }
 </style>
 </head>
 <body>
@@ -61,6 +70,9 @@ const config = "{{ config }}";
 {{ project_href|safe }}{{ breadcrumbs_html|safe }}
 {{ listing_html|safe }}
 {{ pagination_html|safe }}
+{% if mixed_state_roots %}
+<span class="mixed-state-warning"><b>Mixed-state NoDir roots:</b> {{ mixed_state_roots|join(', ') }}</span>
+{% endif %}
 </pre>
 <script>
 (function() {

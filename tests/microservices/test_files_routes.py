@@ -1,5 +1,6 @@
 import importlib
 import os
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -52,6 +53,25 @@ def load_browse(monkeypatch):
 def _write_file(path: Path, contents: str = "demo") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(contents)
+
+
+def _write_nodir_zip(path: Path, entries: dict[str, bytes | str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for name, content in entries.items():
+            data = content.encode("utf-8") if isinstance(content, str) else content
+            zf.writestr(name, data)
+
+
+def _make_auth(roles: tuple[str, ...] = ("user",)):
+    import wepppy.microservices.browse.auth as auth_mod
+
+    normalized_roles = tuple(role.lower() for role in roles)
+    return auth_mod.AuthContext(
+        claims={"token_class": "user", "roles": list(normalized_roles), "sub": "1"},
+        token_class="user",
+        roles=frozenset(normalized_roles),
+    )
 
 
 def _mock_dtale_loader(monkeypatch, *, target_url: str = "/weppcloud/dtale/main/demo") -> dict:
@@ -480,6 +500,454 @@ def test_aria2c_spec_uses_external_host_and_site_prefix(tmp_path: Path, monkeypa
         "https://example.test/weppcloud-alt/runs/"
         f"{runid}/{config}/download/visible.txt"
     ) in response.text
+
+
+def test_files_listing_inside_nodir_archive_boundary(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-files"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_nodir_zip(
+        run_root / "watershed.nodir",
+        {
+            "hillslopes/h001.slp": "alpha",
+            "hillslopes/h002.slp": "beta",
+        },
+    )
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/hillslopes/"
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["path"] == "watershed.nodir/hillslopes"
+    names = {entry["name"] for entry in payload["entries"]}
+    assert names == {"h001.slp", "h002.slp"}
+    first = next(entry for entry in payload["entries"] if entry["name"] == "h001.slp")
+    assert first["type"] == "file"
+    assert first["download_url"].endswith(
+        f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/hillslopes/h001.slp"
+    )
+
+
+def test_download_nodir_archive_entry_returns_bytes(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-download"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_nodir_zip(
+        run_root / "watershed.nodir",
+        {"hillslopes/h001.slp": b"slp-bytes"},
+    )
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/hillslopes/h001.slp"
+        )
+
+    assert response.status_code == 200
+    assert response.content == b"slp-bytes"
+
+
+def test_download_nodir_with_trailing_slash_is_not_raw_archive_download(
+    tmp_path: Path, monkeypatch, load_browse
+):
+    runid = "run-nodir-download-root-slash"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_nodir_zip(
+        run_root / "watershed.nodir",
+        {"hillslopes/h001.slp": b"slp-bytes"},
+    )
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/"
+        )
+
+    assert response.status_code == 404
+
+
+def test_mixed_state_direct_nav_returns_409(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-mixed"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        files_response = client.get(f"/weppcloud/runs/{runid}/{config}/files/watershed/")
+        download_response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
+        )
+        browse_response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed/")
+
+    assert files_response.status_code == 409
+    assert files_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+
+    assert download_response.status_code == 409
+    assert download_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+
+    assert browse_response.status_code == 409
+    assert browse_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+
+
+def test_files_listing_hides_mixed_nodir_forms_for_non_admin(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-hide-mixed"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+    _write_file(run_root / "visible.txt", "ok")
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
+
+    assert response.status_code == 200
+    names = {entry["name"] for entry in response.json()["entries"]}
+    assert "visible.txt" in names
+    assert "watershed" not in names
+    assert "watershed.nodir" not in names
+
+
+def test_files_listing_shows_mixed_nodir_forms_for_admin(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-show-mixed-admin"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+    _write_file(run_root / "visible.txt", "ok")
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse.files_api as files_api_mod
+
+    monkeypatch.setattr(files_api_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
+
+    assert response.status_code == 200
+    names = {entry["name"] for entry in response.json()["entries"]}
+    assert "visible.txt" in names
+    assert "watershed" in names
+    assert "watershed.nodir" in names
+
+
+def test_browse_root_renders_mixed_nodir_warning_block(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-browse-warning"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/")
+
+    assert response.status_code == 200
+    assert "mixed-state-warning" in response.text
+    assert "Mixed-state NoDir roots:" in response.text
+    assert "watershed" in response.text
+
+
+def test_browse_non_slashed_nodir_mixed_state_returns_409(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-mixed-noslash"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir")
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+
+
+def test_browse_non_slashed_nodir_invalid_archive_returns_500(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-invalid-noslash"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed.nodir", "not-a-zip")
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir")
+
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+
+
+def test_admin_mixed_state_non_browse_archive_paths_return_409(
+    tmp_path: Path, monkeypatch, load_browse
+):
+    runid = "run-nodir-admin-mixed-non-browse"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+    import wepppy.microservices.browse.files_api as files_api_mod
+
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    monkeypatch.setattr(download_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
+    monkeypatch.setattr(files_api_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
+
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        files_response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/archive.txt?meta=true"
+        )
+        download_response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
+        )
+
+    assert files_response.status_code == 409
+    assert files_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+    assert download_response.status_code == 409
+    assert download_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+
+
+def test_admin_browse_alias_supports_mixed_archive_view(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-admin-alias"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+
+    monkeypatch.setattr(browse, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        alias_response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/watershed/nodir/"
+        )
+        redirect_response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir/",
+            follow_redirects=False,
+        )
+
+    assert alias_response.status_code == 200
+    assert "archive.txt" in alias_response.text
+    assert redirect_response.status_code in {302, 307}
+    assert redirect_response.headers["location"].endswith(
+        f"/weppcloud/runs/{runid}/{config}/browse/watershed/nodir/"
+    )
+
+
+def test_invalid_nodir_archive_returns_500_for_archive_as_directory(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-nodir-invalid"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed.nodir", "not-a-zip")
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        files_response = client.get(f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/")
+        download_response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
+        )
+
+    assert files_response.status_code == 500
+    assert files_response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+
+    assert download_response.status_code == 500
+    assert download_response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+
+
+def test_files_meta_non_slashed_nodir_mixed_state_returns_409(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-files-meta-mixed-noslash"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir?meta=true"
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+
+
+def test_files_meta_non_slashed_nodir_invalid_archive_returns_500(
+    tmp_path: Path, monkeypatch, load_browse
+):
+    runid = "run-files-meta-invalid-noslash"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed.nodir", "not-a-zip")
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir?meta=true"
+        )
+
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+
+
+def test_raw_nodir_download_mixed_state_admin_allowed_non_admin_blocked(
+    tmp_path: Path, monkeypatch, load_browse
+):
+    runid = "run-nodir-raw-mixed"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        non_admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
+
+    assert non_admin.status_code == 409
+    assert non_admin.json()["error"]["code"] == "NODIR_MIXED_STATE"
+
+    monkeypatch.setattr(download_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
+
+    assert admin.status_code == 200
+    assert admin.content.startswith(b"PK")
+
+
+def test_raw_nodir_download_invalid_archive_admin_allowed_non_admin_blocked(
+    tmp_path: Path, monkeypatch, load_browse
+):
+    runid = "run-nodir-raw-invalid"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    (run_root / "watershed.nodir").write_bytes(b"bad-zip")
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        non_admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
+
+    assert non_admin.status_code == 500
+    assert non_admin.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+
+    monkeypatch.setattr(download_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
+
+    assert admin.status_code == 200
+    assert admin.content == b"bad-zip"
+
+
+def test_aria2c_spec_returns_409_for_mixed_nodir_root(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-aria2c-mixed"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "watershed" / "dir.txt", "dir")
+    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    import wepppy.microservices.browse._download as download_mod
+
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/aria2c.spec")
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")

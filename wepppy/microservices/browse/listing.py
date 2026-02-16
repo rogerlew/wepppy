@@ -14,6 +14,7 @@ from urllib.parse import urlencode
 
 from os.path import exists as _exists
 from os.path import join as _join
+from wepppy.nodir.paths import NODIR_ROOTS
 
 __all__ = [
     "MANIFEST_FILENAME",
@@ -39,6 +40,24 @@ MAX_FILE_LIMIT = 100
 _logger = logging.getLogger(__name__)
 
 _NODIR_SUFFIX = ".nodir"
+_NODIR_ROOTS = frozenset(NODIR_ROOTS)
+
+
+def _allowlisted_nodir_root(name: str) -> str | None:
+    if not name.lower().endswith(_NODIR_SUFFIX):
+        return None
+    root = name[: -len(_NODIR_SUFFIX)]
+    if root in _NODIR_ROOTS:
+        return root
+    return None
+
+
+def _mixed_nodir_roots(wd: str) -> set[str]:
+    mixed: set[str] = set()
+    for root in _NODIR_ROOTS:
+        if os.path.isdir(os.path.join(wd, root)) and os.path.lexists(os.path.join(wd, f"{root}.nodir")):
+            mixed.add(root)
+    return mixed
 
 
 def _manifest_path(wd: str) -> str:
@@ -204,8 +223,8 @@ def create_manifest(wd: str) -> str:
                     symlink_is_dir = 1 if os.path.isdir(entry_path) else 0
 
                 sort_rank = 2 if is_dir else 0
-                if not is_dir and name.lower().endswith(_NODIR_SUFFIX):
-                    # Treat NoDir archive containers as directory-like for listing order.
+                if not is_dir and _allowlisted_nodir_root(name) is not None:
+                    # Treat allowlisted NoDir archive containers as directory-like for listing order.
                     sort_rank = 2
                 batch.append(
                     (
@@ -287,6 +306,7 @@ def _manifest_get_page_entries(
     page_size: int,
     sort_by: str,
     sort_order: str,
+    hide_mixed_nodir: bool = False,
 ):
     manifest_path = _manifest_path(root_wd)
     if not os.path.exists(manifest_path):
@@ -300,6 +320,8 @@ def _manifest_get_page_entries(
     rel_dir = _normalize_rel_path(rel_dir)
     if rel_dir.startswith(".."):
         return None
+
+    mixed_roots = _mixed_nodir_roots(root_wd) if hide_mixed_nodir and rel_dir == "." else set()
 
     conn = sqlite3.connect(manifest_path)
     conn.row_factory = sqlite3.Row
@@ -369,18 +391,30 @@ def _manifest_get_page_entries(
         entries = []
         for row in rows:
             name = row["name"]
-            is_dir = bool(row["is_dir"])
+            nodir_root = _allowlisted_nodir_root(name)
+            if mixed_roots and (
+                name in mixed_roots
+                or (nodir_root is not None and nodir_root in mixed_roots)
+            ):
+                continue
+
+            is_dir = bool(row["is_dir"]) or (
+                nodir_root is not None and not bool(row["is_symlink"]) and not bool(row["symlink_is_dir"])
+            )
             is_symlink = bool(row["is_symlink"])
             symlink_is_dir = bool(row["symlink_is_dir"])
 
             mtime_display = _format_mtime_ns(int(row["mtime_ns"]))
             if is_dir:
-                child_dir = _rel_join(rel_dir, name)
-                child_count = conn.execute(
-                    "SELECT COUNT(*) AS total FROM entries WHERE dir_path = ? AND name NOT LIKE '.%'",
-                    (child_dir,),
-                ).fetchone()["total"]
-                hr_value = f"{child_count} items"
+                if nodir_root is not None and not bool(row["is_dir"]):
+                    hr_value = "0 items"
+                else:
+                    child_dir = _rel_join(rel_dir, name)
+                    child_count = conn.execute(
+                        "SELECT COUNT(*) AS total FROM entries WHERE dir_path = ? AND name NOT LIKE '.%'",
+                        (child_dir,),
+                    ).fetchone()["total"]
+                    hr_value = f"{child_count} items"
             else:
                 hr_value = _format_human_size(int(row["size_bytes"]))
 
@@ -409,13 +443,25 @@ def _scan_directory_snapshot(
     filter_pattern: str,
     sort_by: str,
     sort_order: str,
+    root_wd: str | None = None,
+    hide_mixed_nodir: bool = False,
 ) -> tuple[list[dict], int]:
     entries = []
+    directory_abs = os.path.abspath(directory)
+    mixed_roots: set[str] = set()
+    if hide_mixed_nodir and root_wd is not None and directory_abs == os.path.abspath(root_wd):
+        mixed_roots = _mixed_nodir_roots(root_wd)
     try:
         with os.scandir(directory) as it:
             for entry in it:
                 name = entry.name
                 if name in (".", ".."):
+                    continue
+                nodir_root = _allowlisted_nodir_root(name)
+                if mixed_roots and (
+                    name in mixed_roots
+                    or (nodir_root is not None and nodir_root in mixed_roots)
+                ):
                     continue
                 if _should_hide_entry(name):
                     continue
@@ -449,17 +495,22 @@ def _scan_directory_snapshot(
                     except OSError:
                         symlink_is_dir = False
 
+                is_nodir_dir_like = (
+                    nodir_root is not None and not is_dir and not is_symlink and not symlink_is_dir
+                )
+                effective_is_dir = is_dir or is_nodir_dir_like
+
                 entries.append(
                     {
                         "name": name,
                         "name_casefold": name.casefold(),
-                        "is_dir": is_dir,
+                        "is_dir": effective_is_dir,
                         "is_symlink": is_symlink,
                         "symlink_is_dir": symlink_is_dir,
                         "symlink_target": symlink_target,
                         "size_bytes": int(size_bytes),
                         "mtime_ns": int(mtime_ns),
-                        "sort_rank": 2 if is_dir else (2 if name.lower().endswith(_NODIR_SUFFIX) else 0),
+                        "sort_rank": 2 if effective_is_dir else 0,
                     }
                 )
     except OSError:
@@ -567,13 +618,28 @@ async def _format_page_entries(entries: list[dict], directory: str) -> list[tupl
     return formatted
 
 
-def _count_directory_items(directory: str, filter_pattern: str) -> int:
+def _count_directory_items(
+    directory: str,
+    filter_pattern: str,
+    root_wd: str | None = None,
+    hide_mixed_nodir: bool = False,
+) -> int:
     total = 0
+    directory_abs = os.path.abspath(directory)
+    mixed_roots: set[str] = set()
+    if hide_mixed_nodir and root_wd is not None and directory_abs == os.path.abspath(root_wd):
+        mixed_roots = _mixed_nodir_roots(root_wd)
     try:
         with os.scandir(directory) as it:
             for entry in it:
                 name = entry.name
                 if name in (".", ".."):
+                    continue
+                nodir_root = _allowlisted_nodir_root(name)
+                if mixed_roots and (
+                    name in mixed_roots
+                    or (nodir_root is not None and nodir_root in mixed_roots)
+                ):
                     continue
                 if _should_hide_entry(name):
                     continue
@@ -593,6 +659,8 @@ async def get_entries(
     page_size,
     sort_by: str = "name",
     sort_order: str = "asc",
+    root_wd: str | None = None,
+    hide_mixed_nodir: bool = False,
 ):
     """Retrieve paginated directory entries using deterministic ordering."""
 
@@ -602,16 +670,30 @@ async def get_entries(
         filter_pattern,
         sort_by,
         sort_order,
+        root_wd,
+        hide_mixed_nodir,
     )
     start_index = max(0, start - 1)
     end_index = min(len(entries), end)
     return await _format_page_entries(entries[start_index:end_index], directory)
 
 
-async def get_total_items(directory, filter_pattern: str = ""):
+async def get_total_items(
+    directory,
+    filter_pattern: str = "",
+    *,
+    root_wd: str | None = None,
+    hide_mixed_nodir: bool = False,
+):
     """Count total items in the directory, respecting the filter_pattern."""
 
-    return await asyncio.to_thread(_count_directory_items, directory, filter_pattern)
+    return await asyncio.to_thread(
+        _count_directory_items,
+        directory,
+        filter_pattern,
+        root_wd,
+        hide_mixed_nodir,
+    )
 
 
 async def get_page_entries(
@@ -622,22 +704,31 @@ async def get_page_entries(
     filter_pattern="",
     sort_by: str = "name",
     sort_order: str = "asc",
+    hide_mixed_nodir: bool = False,
 ):
     """List directory contents with pagination and optional filtering."""
+    skip_manifest = False
+    if hide_mixed_nodir:
+        try:
+            skip_manifest = bool(_mixed_nodir_roots(str(wd)))
+        except Exception:
+            skip_manifest = False
 
-    manifest_result = await asyncio.to_thread(
-        _manifest_get_page_entries,
-        wd,
-        directory,
-        filter_pattern,
-        page,
-        page_size,
-        sort_by,
-        sort_order,
-    )
-    if manifest_result is not None:
-        entries, total_items = manifest_result
-        return entries, total_items, True
+    if not skip_manifest:
+        manifest_result = await asyncio.to_thread(
+            _manifest_get_page_entries,
+            wd,
+            directory,
+            filter_pattern,
+            page,
+            page_size,
+            sort_by,
+            sort_order,
+            hide_mixed_nodir,
+        )
+        if manifest_result is not None:
+            entries, total_items = manifest_result
+            return entries, total_items, True
 
     start_index = max(0, (page - 1) * page_size)
     end_index = start_index + page_size
@@ -650,6 +741,8 @@ async def get_page_entries(
         filter_pattern,
         sort_by,
         sort_order,
+        wd,
+        hide_mixed_nodir,
     )
     page_entries = await _format_page_entries(entries[start_index:end_index], directory)
     elapsed = loop.time() - start_time
@@ -679,20 +772,30 @@ async def html_dir_list(
     filter_pattern="",
     sort_by: str = "name",
     sort_order: str = "asc",
+    hide_mixed_nodir: bool = False,
+    page_entries_override: list[tuple] | None = None,
+    total_items_override: int | None = None,
+    using_manifest_override: bool | None = None,
 ):
     _padding = " "
     s = []
 
     base_query = base_query or {}
-    page_entries, total_items, using_manifest = await get_page_entries(
-        wd,
-        _dir,
-        page,
-        page_size,
-        filter_pattern,
-        sort_by,
-        sort_order,
-    )
+    if page_entries_override is not None:
+        page_entries = page_entries_override
+        total_items = total_items_override if total_items_override is not None else len(page_entries_override)
+        using_manifest = bool(using_manifest_override)
+    else:
+        page_entries, total_items, using_manifest = await get_page_entries(
+            wd,
+            _dir,
+            page,
+            page_size,
+            filter_pattern,
+            sort_by,
+            sort_order,
+            hide_mixed_nodir=hide_mixed_nodir,
+        )
 
     original_request_path = request_path
     if filter_pattern:

@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import fnmatch
 import mimetypes
 import os
 import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from functools import cmp_to_key
 from http import HTTPStatus
 from typing import Awaitable, Callable
 from urllib.parse import quote
@@ -29,6 +31,14 @@ from wepppy.microservices.browse.security import (
     validate_resolved_target,
     derive_allowed_symlink_roots,
 )
+from wepppy.nodir import (
+    NoDirError,
+    listdir as nodir_listdir,
+    parse_external_subpath,
+    resolve as nodir_resolve,
+    stat as nodir_stat,
+)
+from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
 
 __all__ = [
     "FILES_DEFAULT_LIMIT",
@@ -43,6 +53,8 @@ FILES_DEFAULT_LIMIT = 1000
 FILES_MAX_LIMIT = 10000
 _SORT_FIELDS = {"name", "date", "size"}
 _SORT_ORDERS = {"asc", "desc"}
+_NODIR_SUFFIX = ".nodir"
+_NODIR_ROOTS = frozenset(NODIR_ROOTS)
 
 
 @dataclass(frozen=True)
@@ -115,6 +127,61 @@ def _raise_files_error(
         status_code=status_code,
         detail=build_error_payload(message, code=code, details=details, errors=errors),
     )
+
+
+def _raise_nodir_error(err: NoDirError) -> None:
+    _raise_files_error(
+        err.http_status,
+        err.message,
+        code=err.code,
+        details=err.message,
+    )
+
+
+def _is_admin_auth_context(auth_context) -> bool:
+    roles = set(getattr(auth_context, "roles", frozenset()))
+    return "admin" in roles or "root" in roles
+
+
+def _allowlisted_nodir_root(name: str) -> str | None:
+    if not name.lower().endswith(_NODIR_SUFFIX):
+        return None
+    root = name[: -len(_NODIR_SUFFIX)]
+    if root in _NODIR_ROOTS:
+        return root
+    return None
+
+
+def _allowlisted_raw_nodir_relpath(rel_path: str) -> str | None:
+    if rel_path in (".", ""):
+        return None
+    if "/" in rel_path:
+        return None
+    return _allowlisted_nodir_root(rel_path)
+
+
+def _is_mixed_nodir_root(wd: str, root: str) -> bool:
+    return os.path.isdir(os.path.join(wd, root)) and os.path.lexists(
+        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
+    )
+
+
+def _mixed_nodir_roots(wd: str) -> set[str]:
+    mixed: set[str] = set()
+    for root in _NODIR_ROOTS:
+        if _is_mixed_nodir_root(wd, root):
+            mixed.add(root)
+    return mixed
+
+
+def _format_iso_mtime_ns(mtime_ns: int | None) -> str | None:
+    if mtime_ns is None:
+        return None
+    try:
+        dt = datetime.fromtimestamp(mtime_ns / 1_000_000_000, tz=timezone.utc)
+    except (OSError, OverflowError, ValueError):
+        dt = datetime.fromtimestamp(0, tz=timezone.utc)
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _display_rel_path(rel_path: str) -> str:
@@ -425,6 +492,95 @@ def _build_files_entry_payload(
     return payload
 
 
+def _build_nodir_entry_payload(
+    *,
+    name: str,
+    rel_dir: str,
+    is_dir: bool,
+    size_bytes: int | None,
+    mtime_ns: int | None,
+    child_count: int | None,
+    runid: str,
+    config: str,
+    include_meta: bool,
+    deps: FilesApiDependencies,
+) -> dict:
+    rel_path = deps.rel_join(rel_dir, name)
+    payload = {
+        "name": name,
+        "path": _display_rel_path(rel_path),
+        "type": "directory" if is_dir else "file",
+    }
+
+    modified_iso = _format_iso_mtime_ns(mtime_ns)
+    if modified_iso:
+        payload["modified_iso"] = modified_iso
+
+    if is_dir:
+        if child_count is not None:
+            payload["child_count"] = child_count
+        return payload
+
+    if size_bytes is not None:
+        payload["size_bytes"] = int(size_bytes)
+
+    payload["download_url"] = deps.prefix_path(
+        f"/runs/{runid}/{config}/download/{quote(rel_path, safe='/')}"
+    )
+
+    if include_meta:
+        content_type, _encoding = mimetypes.guess_type(name)
+        payload["content_type"] = content_type or "application/octet-stream"
+        payload["preview_available"] = deps.preview_available(name)
+
+    return payload
+
+
+def _sort_nodir_entries(entries: list[dict], *, sort_by: str, sort_order: str) -> list[dict]:
+    sort_by = sort_by if sort_by in _SORT_FIELDS else "name"
+    sort_order = sort_order if sort_order in _SORT_ORDERS else "asc"
+
+    def _compare(left: dict, right: dict) -> int:
+        left_rank = 0 if left["is_dir"] else 1
+        right_rank = 0 if right["is_dir"] else 1
+        if left_rank != right_rank:
+            return -1 if left_rank < right_rank else 1
+
+        if sort_by == "date":
+            left_primary = int(left.get("mtime_ns") or 0)
+            right_primary = int(right.get("mtime_ns") or 0)
+        elif sort_by == "size":
+            left_primary = int(left.get("size_bytes") or 0)
+            right_primary = int(right.get("size_bytes") or 0)
+        else:
+            left_primary = left["name"].casefold()
+            right_primary = right["name"].casefold()
+
+        if left_primary != right_primary:
+            if sort_order == "asc":
+                return -1 if left_primary < right_primary else 1
+            return -1 if left_primary > right_primary else 1
+
+        left_name_casefold = left["name"].casefold()
+        right_name_casefold = right["name"].casefold()
+        if left_name_casefold != right_name_casefold:
+            return -1 if left_name_casefold < right_name_casefold else 1
+        if left["name"] != right["name"]:
+            return -1 if left["name"] < right["name"] else 1
+        return 0
+
+    return sorted(entries, key=cmp_to_key(_compare))
+
+
+def _nodir_mixed_conflict() -> None:
+    _raise_files_error(
+        HTTPStatus.CONFLICT,
+        "NoDir root is in mixed state (dir + .nodir present).",
+        code="NODIR_MIXED_STATE",
+        details="NoDir root is in mixed state (dir + .nodir present).",
+    )
+
+
 async def _files_list_response(
     *,
     runid: str,
@@ -437,6 +593,7 @@ async def _files_list_response(
     pattern: str,
     sort_by: str,
     sort_order: str,
+    hide_mixed_nodir: bool,
     deps: FilesApiDependencies,
 ) -> JSONResponse:
     page = (offset // limit) + 1
@@ -450,6 +607,7 @@ async def _files_list_response(
         filter_pattern=pattern,
         sort_by=sort_by,
         sort_order=sort_order,
+        hide_mixed_nodir=hide_mixed_nodir,
     )
 
     if total_items == 0 or offset >= total_items:
@@ -465,21 +623,38 @@ async def _files_list_response(
                 filter_pattern=pattern,
                 sort_by=sort_by,
                 sort_order=sort_order,
+                hide_mixed_nodir=hide_mixed_nodir,
             )
             using_manifest = using_manifest or next_using_manifest
             needed = limit - len(entries)
             if needed > 0:
                 entries.extend(next_entries[:needed])
 
+    hidden_mixed_roots: set[str] = set()
+    if hide_mixed_nodir and rel_path in (".", ""):
+        hidden_mixed_roots = _mixed_nodir_roots(wd)
+
     payload_entries = []
     for entry in entries:
         name, is_dir, _mtime_display, hr_value, is_symlink, _sym_target, symlink_is_dir = entry
+        nodir_root = _allowlisted_nodir_root(name)
+        if (
+            hidden_mixed_roots
+            and (
+                name in hidden_mixed_roots
+                or (nodir_root is not None and nodir_root in hidden_mixed_roots)
+            )
+        ):
+            continue
+        effective_is_dir = is_dir or (
+            nodir_root is not None and not is_symlink and not symlink_is_dir
+        )
         payload_entries.append(
             _build_files_entry_payload(
                 name=name,
                 rel_dir=rel_path,
                 root=wd,
-                is_dir=is_dir,
+                is_dir=effective_is_dir,
                 is_symlink=is_symlink,
                 symlink_is_dir=symlink_is_dir,
                 hr_value=hr_value,
@@ -503,6 +678,141 @@ async def _files_list_response(
     if using_manifest:
         response_payload["cached"] = True
     return JSONResponse(response_payload)
+
+
+async def _files_nodir_list_response(
+    *,
+    runid: str,
+    config: str,
+    rel_path: str,
+    target,
+    limit: int,
+    offset: int,
+    pattern: str,
+    sort_by: str,
+    sort_order: str,
+    deps: FilesApiDependencies,
+) -> JSONResponse:
+    try:
+        target_meta = nodir_stat(target)
+    except FileNotFoundError:
+        path_display = _display_rel_path(rel_path) or "."
+        _raise_files_error(
+            HTTPStatus.NOT_FOUND,
+            f"Directory '{path_display}' does not exist",
+            code="path_not_found",
+            details=f"No entry at {path_display}",
+        )
+    if not target_meta.is_dir:
+        path_display = _display_rel_path(rel_path) or "."
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            f"Path '{path_display}' is not a directory",
+            code="not_a_directory",
+            details="Requested path is not a directory.",
+        )
+
+    entries = nodir_listdir(target)
+    listing_rows: list[dict] = []
+    for item in entries:
+        if item.name.startswith("."):
+            continue
+        if pattern and not fnmatch.fnmatchcase(item.name, pattern):
+            continue
+        listing_rows.append(
+            {
+                "name": item.name,
+                "is_dir": bool(item.is_dir),
+                "size_bytes": None if item.is_dir else int(item.size_bytes or 0),
+                "mtime_ns": item.mtime_ns,
+            }
+        )
+
+    sorted_rows = _sort_nodir_entries(
+        listing_rows,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+    total_items = len(sorted_rows)
+    if offset >= total_items:
+        paged_rows = []
+    else:
+        paged_rows = sorted_rows[offset : offset + limit]
+
+    payload_entries = []
+    for row in paged_rows:
+        payload_entries.append(
+            _build_nodir_entry_payload(
+                name=row["name"],
+                rel_dir=rel_path,
+                is_dir=bool(row["is_dir"]),
+                size_bytes=row["size_bytes"],
+                mtime_ns=row["mtime_ns"],
+                child_count=None,
+                runid=runid,
+                config=config,
+                include_meta=False,
+                deps=deps,
+            )
+        )
+
+    return JSONResponse(
+        {
+            "runid": runid,
+            "config": config,
+            "path": _display_rel_path(rel_path),
+            "entries": payload_entries,
+            "total": total_items,
+            "limit": limit,
+            "offset": offset,
+            "has_more": (offset + len(payload_entries)) < total_items,
+        }
+    )
+
+
+async def _files_nodir_meta_response(
+    *,
+    runid: str,
+    config: str,
+    rel_path: str,
+    target,
+    deps: FilesApiDependencies,
+) -> JSONResponse:
+    try:
+        entry = nodir_stat(target)
+    except FileNotFoundError:
+        path_display = _display_rel_path(rel_path) or "."
+        _raise_files_error(
+            HTTPStatus.NOT_FOUND,
+            f"Path '{path_display}' does not exist",
+            code="path_not_found",
+            details=f"No entry at {path_display}",
+        )
+
+    rel_dir = deps.rel_parent(rel_path)[0] if rel_path not in (".", "") else "."
+    child_count: int | None = None
+    if entry.is_dir:
+        child_count = len(
+            [
+                item
+                for item in nodir_listdir(target)
+                if not item.name.startswith(".")
+            ]
+        )
+
+    payload = _build_nodir_entry_payload(
+        name=entry.name,
+        rel_dir=rel_dir,
+        is_dir=bool(entry.is_dir),
+        size_bytes=entry.size_bytes,
+        mtime_ns=entry.mtime_ns,
+        child_count=child_count,
+        runid=runid,
+        config=config,
+        include_meta=True,
+        deps=deps,
+    )
+    return JSONResponse({"runid": runid, "config": config, **payload})
 
 
 async def _files_meta_response(
@@ -597,6 +907,7 @@ async def _handle_files_request(
         )
 
     allow_recorder = auth_context.is_root
+    is_admin = _is_admin_auth_context(auth_context)
     limit, offset, pattern, sort_by, sort_order, meta = _parse_files_query_params(
         request, validate_filter_pattern=deps.validate_filter_pattern
     )
@@ -626,6 +937,66 @@ async def _handle_files_request(
             raw_violation = None
     if raw_violation is not None:
         _raise_forbidden_path(raw_violation)
+
+    parse_rel_path = rel_path
+    if _allowlisted_raw_nodir_relpath(rel_path) is not None:
+        parse_rel_path = f"{rel_path}/"
+    elif (subpath or "").endswith("/") and rel_path not in (".", ""):
+        parse_rel_path = f"{rel_path}/"
+
+    try:
+        logical_rel_path, nodir_view = parse_external_subpath(
+            parse_rel_path, allow_admin_alias=False
+        )
+    except ValueError as exc:
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            "Invalid path.",
+            code="path_outside_root",
+            details=str(exc),
+        )
+
+    nodir_root, _inner_path = split_nodir_root(logical_rel_path)
+    if nodir_root is not None and nodir_view == "archive" and _is_mixed_nodir_root(wd, nodir_root):
+        _nodir_mixed_conflict()
+
+    nodir_target = None
+    try:
+        nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
+    except NoDirError as err:
+        _raise_nodir_error(err)
+
+    if nodir_target is not None:
+        if meta:
+            return await _files_nodir_meta_response(
+                runid=runid,
+                config=config,
+                rel_path=rel_path,
+                target=nodir_target,
+                deps=deps,
+            )
+        return await _files_nodir_list_response(
+            runid=runid,
+            config=config,
+            rel_path=rel_path,
+            target=nodir_target,
+            limit=limit,
+            offset=offset,
+            pattern=pattern,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            deps=deps,
+        )
+
+    if nodir_root is not None and nodir_view == "archive":
+        path_display = _display_rel_path(rel_path) or "."
+        label = "Path" if meta else "Directory"
+        _raise_files_error(
+            HTTPStatus.NOT_FOUND,
+            f"{label} '{path_display}' does not exist",
+            code="path_not_found",
+            details=f"No entry at {path_display}",
+        )
 
     abs_path = _resolve_files_path(wd, rel_path)
     _enforce_no_symlink_traversal(
@@ -687,6 +1058,7 @@ async def _handle_files_request(
         pattern=pattern,
         sort_by=sort_by,
         sort_order=sort_order,
+        hide_mixed_nodir=not is_admin,
         deps=deps,
     )
 

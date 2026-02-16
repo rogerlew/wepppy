@@ -592,6 +592,14 @@ class _ZipStream(io.RawIOBase):
     def read(self, size: int = -1) -> bytes:
         return self._zef.read(size)
 
+    def readinto(self, b) -> int:
+        data = self._zef.read(len(b))
+        if not data:
+            return 0
+        n = len(data)
+        b[:n] = data
+        return n
+
     def close(self) -> None:
         try:
             self._zef.close()
