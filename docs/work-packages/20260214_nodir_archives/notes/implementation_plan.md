@@ -90,6 +90,60 @@ Validation evidence:
 - Latest run: `wctl run-pytest tests/nodir` -> 46 passed, 0 failed.
 - No materialization workflows and no thaw/freeze mutation workflows were introduced in this phase.
 
+**Phase 2 Handoff Summary**
+
+- Branch: `nodir-thaw-freeze-contract`
+- Latest commits:
+1. `cc8dc214e` `nodir: harden symlink/path validation and archive-native ops`
+2. `d559bc8c0` `nodir: tighten sidecar symlink validation and archive path normalization`
+
+**Implemented Scope (Phase 2)**
+- Shared NoDir core library created under `wepppy/nodir/`:
+1. `wepppy/nodir/errors.py`
+2. `wepppy/nodir/paths.py`
+3. `wepppy/nodir/fs.py`
+4. `wepppy/nodir/parquet_sidecars.py`
+5. `wepppy/nodir/symlinks.py`
+6. `wepppy/nodir/__init__.py` (explicit public exports)
+
+- Required behaviors implemented:
+1. Allowlisted boundary parsing for `.nodir` roots and admin alias handling.
+2. `resolve()` with `effective|dir|archive` view semantics.
+3. Mixed state enforcement (`409 NODIR_MIXED_STATE`) in `effective`.
+4. Invalid archive enforcement (`500 NODIR_INVALID_ARCHIVE`) for archive/effective paths.
+5. Transitional sentinel enforcement (`503 NODIR_LOCKED`) for read paths.
+6. Archive-native `listdir/stat/open_read` via zip central directory only (no extraction).
+7. Parquet sidecar precedence for logical parquet paths.
+8. Archive parquet no-fallback behavior (archive form treats missing sidecar as missing dataset).
+
+**Security/Hardening Landed**
+1. Drive-letter absolute-path bypass fixed in relpath normalization tests.
+2. Unsafe zip entry names/types rejected (`/`, `..`, `\`, drive letters, malformed forms like `a//`, special file types, ambiguity conflicts).
+3. Size-limit guard in archive `open_read()` with `NODIR_LIMIT_EXCEEDED`.
+4. Symlink policy added for NoDir reads, including Omni/shared-root allowlist behavior.
+5. `.nodir` symlink handling now validates allowed roots before target stat/use.
+6. Parquet sidecar symlink handling now requires target regular file within allowed roots.
+7. `resolve(view="dir")` now populates `archive_fp` when archive exists and is fingerprintable.
+
+**Tests Added/Updated**
+- New NoDir unit suite under `tests/nodir/`:
+1. `test_paths.py`
+2. `test_resolve.py`
+3. `test_archive_fs.py`
+4. `test_archive_validation.py`
+5. `test_parquet_precedence_fs.py`
+6. `test_parquet_sidecars.py`
+7. `test_symlink_security.py`
+
+- Latest validation:
+1. `wctl run-pytest tests/nodir`
+2. Result: **46 passed**, **0 failed**, 2 third-party deprecation warnings.
+
+**Out of Scope (Not Implemented in Phase 2)**
+1. Browse/files/download endpoint integration wiring (Phase 3).
+2. Materialization APIs/workflow (Phase 4).
+3. Thaw/freeze mutation workflows beyond read-path transitional lock detection (Phase 5).
+
 ### Phase 3: Browse/Files/Download Archive-Native Support (DONE, 2026-02-16)
 Goal:
 - Allow `/browse`, `/files`, `/download` to navigate into `.nodir` archives for allowlisted roots without extraction.
@@ -110,7 +164,31 @@ Validation evidence:
 - Targeted microservice run: `wctl run-pytest tests/microservices -k "browse or files or download or nodir"` -> 207 passed, 1 skipped, 192 deselected.
 - Full regression gate: `wctl run-pytest tests --maxfail=1` -> 1444 passed, 27 skipped.
 
-### Phase 4: Materialization v1 + FS-Boundary Endpoints (READY)
+**Phase 3 Handoff Summary**
+- Completed browse/files/download NoDir integration with archive-native list/stat/read/download paths using shared NoDir core.
+- Implemented allowlisted archive boundary support for `<root>.nodir/<inner>` and admin browse alias `<root>/nodir/<inner>`.
+- Enforced mixed-state semantics across surfaces, including admin/non-admin deltas and raw `.nodir` download rules.
+- Ensured invalid allowlisted archives return canonical `500 NODIR_INVALID_ARCHIVE` for archive-as-directory operations.
+- Kept `.nodir` directory-like in listings/sort order and kept `aria2c.spec` as file-only for `.nodir` (no expansion).
+- Added browse HTML mixed-state warning block below pagination.
+- Added/updated route-level tests for archive/mixed/invalid/admin behaviors, including non-slashed and trailing-slash edge cases.
+
+**Review Findings And Resolutions**
+1. Non-slashed `.nodir` bypass in `/browse` and `/files` mixed/invalid paths: fixed by forcing allowlisted raw `.nodir` into archive-boundary parse semantics.
+2. `/download/<root>.nodir/` treated as raw archive bytes: fixed by raw-candidate normalization (`lstrip`), so trailing slash no longer hits raw shortcut.
+3. Archive entry download full-buffer memory risk: fixed by chunked streaming response and `readinto()` support in NoDir zip stream.
+4. Test coverage gaps for mixed/admin/non-slashed paths: fixed with new route tests.
+5. Admin `/files/` mixed-state observability ambiguity: resolved per your direction by codifying admin root-list visibility in contract/matrix and enforcing with test.
+6. Contract inconsistency (`interface` vs `contract` docs): fixed by updating `docs/schemas/nodir_interface_spec.md`.
+7. Missing browse mixed-state warning block: implemented in template/render path and covered by test.
+
+**Validation**
+- `wctl run-pytest tests/microservices -k "browse or files or download or nodir"`  
+  - `207 passed, 1 skipped, 192 deselected`
+- `wctl run-pytest tests --maxfail=1`  
+  - `1444 passed, 27 skipped`
+
+### Phase 4: Materialization v1 + FS-Boundary Endpoints (DONE)
 Goal:
 - Support endpoints that require real filesystem paths for archive entries (dtale, gdalinfo, diff, exports).
 
@@ -130,6 +208,51 @@ Deliverables:
 Exit criteria:
 - Tests for cache hit/miss, lock contention behavior, and limit enforcement (no partial files).
 - Manual validation: materialize a raster and a shapefile from a `.nodir` and run dtale/gdalinfo successfully.
+
+**Phase 4 Handoff Summary**
+
+Commit pushed: `f917171b0` on `origin/nodir-thaw-freeze-contract`.
+
+1. **Scope delivered**
+1. In-scope completed: NoDir materialization core + FS-boundary wiring for `dtale`, `gdalinfo`, `diff`, and export paths that need real files.
+2. Out-of-scope remained unchanged: browse/files/download extraction behavior, thaw/freeze mutation workflows, bulk crawler.
+
+2. **Core materialization implementation**
+1. New module: `wepppy/nodir/materialize.py:1`.
+2. Cache layout + entry targeting: `WD/.nodir/cache/<root>/<archive_fp>/<entry_hash>` at `wepppy/nodir/materialize.py:706`.
+3. Archive/entry fingerprints + cache validation metadata at `wepppy/nodir/materialize.py:141`, `wepppy/nodir/materialize.py:150`, `wepppy/nodir/materialize.py:199`.
+4. Per-entry Redis lock acquire/release/renew at `wepppy/nodir/materialize.py:415`, `wepppy/nodir/materialize.py:446`, `wepppy/nodir/materialize.py:477`.
+5. Renew is fail-closed if ownership is lost or atomic renew is unavailable at `wepppy/nodir/materialize.py:495`, `wepppy/nodir/materialize.py:498`.
+6. Sidecar extraction groups for SHP/TIF with case-insensitive matching at `wepppy/nodir/materialize.py:532`, `wepppy/nodir/materialize.py:559`.
+7. Limits enforcement (`max files`, `max bytes`, compression-ratio guard) at `wepppy/nodir/materialize.py:349`.
+8. Atomic extraction (`tmp` + `os.replace`) and cleanup/no partial output at `wepppy/nodir/materialize.py:595`, `wepppy/nodir/materialize.py:637`, `wepppy/nodir/materialize.py:639`.
+
+3. **FS-boundary integrations**
+1. `dtale` archive-boundary preflight with `view="effective"` and archive materialization at `wepppy/microservices/browse/dtale.py:164`, `wepppy/microservices/browse/dtale.py:202`.
+2. `gdalinfo` archive-boundary preflight with `view="effective"` and materialization at `wepppy/microservices/_gdalinfo.py:70`, `wepppy/microservices/_gdalinfo.py:100`.
+3. `diff` route NoDir-aware resolution using effective view at `wepppy/weppcloud/routes/diff/diff.py:75`, `wepppy/weppcloud/routes/diff/diff.py:81`.
+4. ERMiT mixed-state fail-fast guard at `wepppy/export/ermit_input.py:216`.
+5. GeoPackage export real-file materialization for shapefiles at `wepppy/export/gpkg_export.py:125`, `wepppy/export/gpkg_export.py:249`.
+6. Export API NoDir error propagation at `wepppy/microservices/rq_engine/export_routes.py:97`.
+7. Public NoDir exports updated at `wepppy/nodir/__init__.py:10`.
+
+4. **Canonical NoDir errors**
+1. Enforced/propagated as required across materialization + boundary endpoints:
+`409 NODIR_MIXED_STATE`, `500 NODIR_INVALID_ARCHIVE`, `503 NODIR_LOCKED`, `413 NODIR_LIMIT_EXCEEDED`.
+
+5. **Test coverage added**
+1. Materialization contract coverage in `tests/nodir/test_materialize.py:95` through `tests/nodir/test_materialize.py:493`.
+2. Includes cache hit/miss/rebuild, contention→503, limits→413, invalid/unsafe→500, no partial outputs, SHP/TIF sidecars, renewal-loss and no-`eval` fail-closed behavior.
+3. dtale/gdalinfo archive-backed integration + state propagation + 413 route propagation in `tests/microservices/test_files_routes.py:2228`.
+4. Diff archive-backed integration + state propagation in `tests/microservices/test_diff_nodir.py:59`.
+5. Export route NoDir propagation in `tests/microservices/test_rq_engine_export_routes.py:26`.
+
+6. **Validation runs**
+1. `wctl run-pytest tests/nodir -k "materialize or nodir"` → `62 passed`
+2. `wctl run-pytest tests/microservices -k "dtale or gdalinfo or diff or nodir"` → `66 passed, 1 skipped`
+3. `wctl run-pytest tests --maxfail=1` → `1483 passed, 27 skipped`
+
+No JS files were changed, so `wctl run-npm test` was not required for this phase.
 
 ### Phase 5: Thaw/Freeze Implementation + Maintenance Plumbing (TODO)
 Goal:
