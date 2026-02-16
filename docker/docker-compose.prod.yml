@@ -97,6 +97,9 @@ services:
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       AGENT_JWT_SECRET_FILE: /run/secrets/agent_jwt_secret
       CAP_SECRET_FILE: /run/secrets/cap_secret
+      CAP_BASE_URL: ${CAP_BASE_URL:-/cap}
+      CAP_ASSET_BASE_URL: ${CAP_ASSET_BASE_URL:-/cap/assets}
+      CAP_SITE_KEY: ${CAP_SITE_KEY}
       OAUTH_GITHUB_CLIENT_SECRET_FILE: /run/secrets/oauth_github_client_secret
       OAUTH_GOOGLE_CLIENT_SECRET_FILE: /run/secrets/oauth_google_client_secret
       ZOHO_NOREPLY_EMAIL_PASSWORD_FILE: /run/secrets/zoho_noreply_email_password
@@ -363,6 +366,8 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       CAP_SECRET_FILE: /run/secrets/cap_secret
+      CAP_BASE_URL: ${CAP_BASE_URL:-/cap}
+      CAP_SITE_KEY: ${CAP_SITE_KEY}
     command:
       - uvicorn
       - wepppy.microservices.rq_engine:app
