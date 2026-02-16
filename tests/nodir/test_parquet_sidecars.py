@@ -42,3 +42,8 @@ def test_pick_existing_parquet_prefers_sidecar(tmp_path: Path) -> None:
     sidecar.write_text("sidecar", encoding="utf-8")
     assert pick_existing_parquet_relpath(tmp_path, logical) == "watershed.hillslopes.parquet"
 
+
+def test_pick_existing_parquet_relpath_rejects_traversal(tmp_path: Path) -> None:
+    outside = tmp_path.parent / "escape.parquet"
+    outside.write_text("escape", encoding="utf-8")
+    assert pick_existing_parquet_relpath(tmp_path, "../escape.parquet") is None

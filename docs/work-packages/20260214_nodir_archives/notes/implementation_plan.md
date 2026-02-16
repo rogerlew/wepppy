@@ -55,7 +55,7 @@ Deliverables (landed):
 Exit criteria:
 - Targeted pytest passes for sidecar behaviors.
 
-### Phase 2: NoDir Core Library v1 (TODO)
+### Phase 2: NoDir Core Library v1 (READY FOR REVIEW)
 Goal:
 - One shared implementation of dir-vs-archive discovery and archive-native read/list/stat for allowlisted `.nodir` roots.
 
