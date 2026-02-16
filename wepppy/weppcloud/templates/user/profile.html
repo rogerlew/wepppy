@@ -104,6 +104,157 @@ User Profile
     {% endif %}
   </section>
 
+  {% if reset_browser_state_endpoint %}
+  <section
+    class="wc-profile-token"
+    data-browser-reset-root
+    data-reset-endpoint="{{ reset_browser_state_endpoint }}"
+    data-login-url="{{ reset_browser_state_login_url }}">
+    <h3 class="wc-profile__subheading">Browser Session Reset</h3>
+    <p class="wc-profile-token__description">
+      If this browser starts failing archive or token requests, use this reset action.
+      It clears WEPPcloud cookies and local storage for this site, then signs you out.
+    </p>
+
+    <div class="wc-alert wc-alert--info" role="status" aria-live="polite" hidden data-browser-reset-message>
+      <p class="wc-alert__body" data-browser-reset-message-body></p>
+    </div>
+
+    <div class="wc-button-row">
+      <a
+        class="wc-profile__action"
+        href="#"
+        data-browser-reset-action="reset">
+        Reset browser state for this site
+      </a>
+    </div>
+  </section>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    var root = document.querySelector('[data-browser-reset-root]');
+    if (!root) {
+        return;
+    }
+
+    var endpoint = root.getAttribute('data-reset-endpoint');
+    var loginUrl = root.getAttribute('data-login-url') || '/login';
+    var resetAction = root.querySelector('[data-browser-reset-action="reset"]');
+    var message = root.querySelector('[data-browser-reset-message]');
+    var messageBody = root.querySelector('[data-browser-reset-message-body]');
+
+    function setMessage(kind, text) {
+        if (!message || !messageBody) {
+            return;
+        }
+        message.hidden = false;
+        message.className = 'wc-alert wc-alert--' + kind;
+        messageBody.textContent = text;
+    }
+
+    function setBusy(isBusy) {
+        if (!resetAction) {
+            return;
+        }
+        if (isBusy) {
+            resetAction.setAttribute('aria-disabled', 'true');
+            resetAction.style.pointerEvents = 'none';
+            resetAction.style.opacity = '0.7';
+            return;
+        }
+        resetAction.removeAttribute('aria-disabled');
+        resetAction.style.pointerEvents = '';
+        resetAction.style.opacity = '';
+    }
+
+    function clearWeppStorage(storage) {
+        if (!storage || typeof storage.length !== 'number') {
+            return;
+        }
+
+        var keys = [];
+        for (var i = 0; i < storage.length; i += 1) {
+            var key = storage.key(i);
+            if (key) {
+                keys.push(String(key));
+            }
+        }
+
+        keys.forEach(function(key) {
+            var normalized = key.toLowerCase();
+            if (normalized.indexOf('wc-') === 0 || normalized.indexOf('wepp') === 0) {
+                try {
+                    storage.removeItem(key);
+                } catch (_error) {}
+            }
+        });
+    }
+
+    function clearBrowserStorage() {
+        try {
+            clearWeppStorage(window.localStorage);
+        } catch (_error) {}
+
+        try {
+            clearWeppStorage(window.sessionStorage);
+        } catch (_error) {}
+    }
+
+    function parseError(payload, fallback) {
+        if (payload && payload.error && payload.error.message) {
+            return payload.error.message;
+        }
+        return fallback;
+    }
+
+    function runReset() {
+        if (!endpoint) {
+            setMessage('error', 'Browser reset endpoint is not configured.');
+            return;
+        }
+
+        setBusy(true);
+        setMessage('info', 'Resetting browser state...');
+
+        fetch(endpoint, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(function(response) {
+                return response.json().catch(function() { return {}; }).then(function(payload) {
+                    return { ok: response.ok, payload: payload };
+                });
+            })
+            .then(function(result) {
+                if (!result.ok || (result.payload && result.payload.error)) {
+                    throw new Error(parseError(result.payload, 'Browser reset failed.'));
+                }
+
+                clearBrowserStorage();
+                setMessage('success', 'Browser state reset. Redirecting to login...');
+                window.setTimeout(function() {
+                    var redirectTo = result.payload && result.payload.login_url ? result.payload.login_url : loginUrl;
+                    window.location.assign(redirectTo || '/login');
+                }, 300);
+            })
+            .catch(function(error) {
+                setMessage('error', error && error.message ? error.message : 'Browser reset failed.');
+                setBusy(false);
+            });
+    }
+
+    if (resetAction) {
+        resetAction.addEventListener('click', function(event) {
+            event.preventDefault();
+            runReset();
+        });
+    }
+});
+</script>
+  {% endif %}
   {% if can_mint_profile_token %}
   <section
     class="wc-profile-token"

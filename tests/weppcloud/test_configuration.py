@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import timedelta
+
 import pytest
 
 import wepppy.weppcloud.configuration as configuration
@@ -81,6 +83,12 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
         == "Your WEPPcloud password was changed"
     )
     assert app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
+    assert app.config["SESSION_REFRESH_EACH_REQUEST"] is True
+    assert app.config["REMEMBER_COOKIE_DURATION"] == timedelta(days=30)
+    assert app.config["REMEMBER_COOKIE_SECURE"] is True
+    assert app.config["REMEMBER_COOKIE_HTTPONLY"] is True
+    assert app.config["REMEMBER_COOKIE_SAMESITE"] == "Lax"
+    assert app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] is False
 
 
 def test_config_app_uses_uidaho_mail_defaults_when_zoho_password_missing(
@@ -181,3 +189,23 @@ def test_config_app_builds_database_uri_from_postgres_password_file(
     app = _build_configured_app(monkeypatch)
 
     assert app.config["SQLALCHEMY_DATABASE_URI"] == "postgresql://user:p%40ss@db:5433/dbname"
+
+
+def test_config_app_allows_remember_cookie_env_overrides(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("REMEMBER_COOKIE_DAYS", "14")
+    monkeypatch.setenv("REMEMBER_COOKIE_SAMESITE", "Strict")
+    monkeypatch.setenv("REMEMBER_COOKIE_SECURE", "false")
+    monkeypatch.setenv("REMEMBER_COOKIE_HTTPONLY", "false")
+    monkeypatch.setenv("REMEMBER_COOKIE_REFRESH_EACH_REQUEST", "false")
+    monkeypatch.setenv("SESSION_REFRESH_EACH_REQUEST", "false")
+
+    app = _build_configured_app(monkeypatch)
+
+    assert app.config["REMEMBER_COOKIE_DURATION"] == timedelta(days=14)
+    assert app.config["REMEMBER_COOKIE_SAMESITE"] == "Strict"
+    assert app.config["REMEMBER_COOKIE_SECURE"] is False
+    assert app.config["REMEMBER_COOKIE_HTTPONLY"] is False
+    assert app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] is False
+    assert app.config["SESSION_REFRESH_EACH_REQUEST"] is False
