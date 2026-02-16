@@ -28,6 +28,11 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.nodir.fs import stat as nodir_stat
+from wepppy.nodir.materialize import materialize_file
+from wepppy.nodir.paths import parse_external_subpath
 
 _DTALE_SERVICE_URL = os.getenv('DTALE_SERVICE_URL', 'http://dtale:9010').rstrip('/')
 _DTALE_INTERNAL_TOKEN = (get_secret('DTALE_INTERNAL_TOKEN') or '').strip()
@@ -44,6 +49,20 @@ DTALE_SUPPORTED_SUFFIXES = (
     '.pickle',
 )
 _DTALE_HTTP_TIMEOUT = httpx.Timeout(60.0, connect=5.0)
+
+
+def _nodir_error_payload(err: NoDirError) -> dict:
+    return {
+        'error': {
+            'message': err.message,
+            'code': err.code,
+            'details': err.message,
+        }
+    }
+
+
+def _raise_nodir_http_exception(err: NoDirError) -> None:
+    raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
 
 
 def resolve_dtale_base(
@@ -130,10 +149,25 @@ def build_handlers(
                 detail=path_security_detail(raw_violation),
             )
 
+        try:
+            logical_rel_path, nodir_view = parse_external_subpath(
+                rel_path,
+                allow_admin_alias=False,
+            )
+        except ValueError:
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Invalid path.')
+
         wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
-        target = os.path.abspath(os.path.join(wd, rel_path))
-        assert_within_root(wd, target)
-        resolved_violation = validate_resolved_target(wd, target)
+
+        # Enforce mixed/invalid/locked precedence before boundary-specific handling.
+        try:
+            nodir_resolve(wd, logical_rel_path, view='effective')
+        except NoDirError as err:
+            _raise_nodir_http_exception(err)
+
+        requested_target = os.path.abspath(os.path.join(wd, logical_rel_path))
+        assert_within_root(wd, requested_target)
+        resolved_violation = validate_resolved_target(wd, requested_target)
         if resolved_violation is not None:
             if allow_recorder and resolved_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
                 resolved_violation = None
@@ -143,10 +177,47 @@ def build_handlers(
                 detail=path_security_detail(resolved_violation),
             )
 
-        if not os.path.isfile(target):
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
+        try:
+            nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
+        except NoDirError as err:
+            _raise_nodir_http_exception(err)
 
-        rel_lower = rel_path.lower()
+        if nodir_target is None:
+            if not os.path.isfile(requested_target):
+                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
+            dtale_rel_path = logical_rel_path.replace('\\', '/')
+        else:
+            try:
+                nodir_entry = nodir_stat(nodir_target)
+            except NoDirError as err:
+                _raise_nodir_http_exception(err)
+            except (FileNotFoundError, NotADirectoryError):
+                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
+
+            if nodir_entry.is_dir:
+                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
+
+            if nodir_target.form == 'archive':
+                try:
+                    materialized_path = Path(materialize_file(wd, logical_rel_path, purpose='dtale'))
+                except NoDirError as err:
+                    _raise_nodir_http_exception(err)
+                except (FileNotFoundError, IsADirectoryError):
+                    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
+
+                try:
+                    dtale_rel_path = materialized_path.relative_to(Path(wd)).as_posix()
+                except ValueError as exc:
+                    raise HTTPException(
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                        detail='Failed to prepare materialized file path.',
+                    ) from exc
+            else:
+                if not os.path.isfile(requested_target):
+                    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')
+                dtale_rel_path = logical_rel_path.replace('\\', '/')
+
+        rel_lower = dtale_rel_path.lower()
         if not any(rel_lower.endswith(ext) for ext in DTALE_SUPPORTED_SUFFIXES):
             raise HTTPException(
                 status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
@@ -156,7 +227,7 @@ def build_handlers(
         payload = {
             'runid': runid,
             'config': config,
-            'path': rel_path.replace('\\', '/'),
+            'path': dtale_rel_path,
         }
         headers = {}
         if _DTALE_INTERNAL_TOKEN:
@@ -199,7 +270,7 @@ def build_handlers(
                 detail='D-Tale response missing redirect URL.',
             )
 
-        logger.info('Forwarding %s to D-Tale at %s', rel_path, target_url)
+        logger.info('Forwarding %s to D-Tale at %s', logical_rel_path, target_url)
         return RedirectResponse(url=target_url, status_code=HTTPStatus.SEE_OTHER)
 
     async def dtale_open(request: StarletteRequest):

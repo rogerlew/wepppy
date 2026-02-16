@@ -27,6 +27,8 @@ from scipy import stats
 from wepppy.climates.cligen import nullStation
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.ash_transport import Ash
+from wepppy.nodir.materialize import materialize_path_if_archive
+from wepppy.nodir.fs import resolve as nodir_resolve
 
 HillslopeModel = tuple[Sequence[float], Sequence[float]]
 
@@ -210,6 +212,8 @@ def create_ermit_input(wd: str) -> str:
 
     _log = [f'Creating ERMiT input for {wd}']
 
+    # Non-browse surfaces must fail fast on mixed/invalid/locked NoDir states.
+    nodir_resolve(wd, "watershed", view="effective")
     watershed = Watershed.getInstance(wd)
     landuse = Landuse.getInstance(wd)
     translator = watershed.translator_factory()
@@ -301,10 +305,18 @@ def create_ermit_input(wd: str) -> str:
             except KeyError:
                 soil_type = 'clay loam'
 
-        slp_file = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
+        primary_slp = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
+        fallback_slp = _join(wat_dir, 'slope_files', 'hillslopes', 'hill_{}.slp'.format(topaz_id))
+
+        slp_file = primary_slp
+        if not _exists(slp_file):
+            slp_file = fallback_slp
 
         if not _exists(slp_file):
-            slp_file = _join(wat_dir, 'slope_files', 'hillslopes', 'hill_{}.slp'.format(topaz_id))
+            try:
+                slp_file = materialize_path_if_archive(wd, primary_slp, purpose="export")
+            except FileNotFoundError:
+                slp_file = materialize_path_if_archive(wd, fallback_slp, purpose="export")
 
         _log.append(f'    reading {slp_file}')
         v = readSlopeFile(slp_file)

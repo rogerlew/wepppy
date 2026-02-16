@@ -7,6 +7,7 @@ directory-vs-archive conventions in multiple places.
 
 from .errors import NoDirError
 from .fs import NoDirDirEntry, NoDirForm, ResolvedNoDirPath, listdir, open_read, resolve, stat
+from .materialize import materialize_file, materialize_path_if_archive
 from .parquet_sidecars import (
     logical_parquet_to_sidecar_relpath,
     pick_existing_parquet_path,
@@ -28,6 +29,8 @@ __all__ = [
     "listdir",
     "stat",
     "open_read",
+    "materialize_file",
+    "materialize_path_if_archive",
     "logical_parquet_to_sidecar_relpath",
     "sidecar_relpath_to_logical_parquet",
     "pick_existing_parquet_path",
