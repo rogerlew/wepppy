@@ -26,14 +26,23 @@ Completed:
   - Validation:
     - `wctl run-pytest tests/microservices -k "browse or files or download or nodir"` -> 207 passed, 1 skipped, 192 deselected.
     - `wctl run-pytest tests --maxfail=1` -> 1444 passed, 27 skipped.
+- Phase 4 materialization implementation is complete (commit `f917171b0`):
+  - `wepppy/nodir/materialize.py` landed with cache/lock/limit semantics and FS-boundary integrations.
+  - Validation:
+    - `wctl run-pytest tests/nodir -k "materialize or nodir"` -> 62 passed.
+    - `wctl run-pytest tests --maxfail=1` -> 1483 passed, 27 skipped.
+- Phase 5 thaw/freeze state machine and maintenance plumbing is complete (commit `046d57a42` + follow-up hardening):
+  - `wepppy/nodir/state.py` and `wepppy/nodir/thaw_freeze.py` landed with crash-safe transitions, lock enforcement, and maintenance recovery.
+  - Transitional-state behavior was unified in `resolve()` and `materialize_file()`.
+  - Validation:
+    - `wctl run-pytest tests/nodir -k "state or thaw or freeze or materialize or nodir"` -> 85 passed.
+    - `wctl run-pytest tests --maxfail=1` -> 1512 passed, 27 skipped.
 
 In progress / partially done:
 - Migration crawler behavior (safety gates, audit logs, resumability, rollback) is not yet specified/implemented.
 - Perf targets are not yet defined (browse p95 listing, archive build time, inode reduction, etc.).
 
 Not started (core remaining scope):
-- Materialization implementation (`materialize(file|subset)`) and integration into FS-boundary endpoints (dtale/gdalinfo/diff/exports).
-- Thaw/freeze implementation (state file writes, locks, crash recovery, temp marker handling).
 - Mutation workflows (RQ-engine/controller/mods/migrations) for archive-backed roots via thaw/modify/freeze.
 - Bulk migrator / crawler for `/wc1/runs` (and legacy trees) with `WD/READONLY` gating and auditing.
 - Default new-run behavior: prefer `.nodir` for allowlisted roots while keeping Dir form first-class for unmigrated runs.
@@ -254,21 +263,69 @@ Commit pushed: `f917171b0` on `origin/nodir-thaw-freeze-contract`.
 
 No JS files were changed, so `wctl run-npm test` was not required for this phase.
 
-### Phase 5: Thaw/Freeze Implementation + Maintenance Plumbing (TODO)
+### Phase 5: Thaw/Freeze Implementation + Maintenance Plumbing (DONE, 2026-02-16)
 Goal:
-- Implement the crash-safe thaw/freeze state machine and integrate with mutation workflows.
+- Implement the crash-safe thaw/freeze state machine and maintenance lock plumbing for allowlisted NoDir roots.
 
-Deliverables:
-- `wepppy/nodir/state.py` + `wepppy/nodir/thaw_freeze.py` (or equivalent):
-  - atomic state file writes (`WD/.nodir/<root>.json`) including `op_id/host/pid/lock_owner`,
-  - maintenance lock acquisition (`nodb-lock:<runid>:nodir/<root>`),
-  - `thaw(root)`, `freeze(root)`, crash recovery behavior,
-  - strict “mixed state is error” policy (no supported keep-directory mode).
-- Maintenance-only cleanup of temp markers (`*.thaw.tmp/`, `*.nodir.tmp`) under lock.
+Deliverables (landed):
+- New NoDir maintenance-state module: `wepppy/nodir/state.py`.
+  - Per-root state file at `WD/.nodir/<root>.json` with required contract fields.
+  - Atomic state writes via temp + `fsync` + `os.replace`.
+  - Strict payload validation (UUID4 op ids, integer typing, `lock_owner == host:pid`).
+  - Transitional lock detection from both state values and temp sentinels.
+- New thaw/freeze maintenance module: `wepppy/nodir/thaw_freeze.py`.
+  - Maintenance lock key `nodb-lock:<runid>:nodir/<root>` with fail-fast acquisition.
+  - `thaw(root)` implementing `thawing -> thawed` with pre-validation and zip-slip/type defenses.
+  - `freeze(root)` implementing `freezing -> archived` with temp-archive build/verify/replace and required directory removal.
+  - Maintenance-only recovery for stale `.thaw.tmp` and `.nodir.tmp` artifacts.
+  - Crash-recovery finalize path for `state="freezing"` when directory is missing but archive is valid.
+- Transitional-state integration updates:
+  - `wepppy/nodir/fs.py` now uses shared transitional lock checks.
+  - `wepppy/nodir/materialize.py` now uses shared transitional lock checks.
+- Public exports updated in `wepppy/nodir/__init__.py`.
 
-Exit criteria:
-- Tests that simulate crash points (temp dir/archive left behind) and verify safe recovery.
-- Clear operator logs for op id + lock owner, without needing Redis spelunking.
+Validation evidence:
+- Targeted NoDir suite:
+  - `wctl run-pytest tests/nodir -k "state or thaw or freeze or materialize or nodir"` -> `85 passed`.
+- Full regression gate:
+  - `wctl run-pytest tests --maxfail=1` -> `1512 passed, 27 skipped`.
+
+**Phase 5 Handoff Summary**
+
+- Branch: `nodir-thaw-freeze-contract`
+- Primary commit: `046d57a42` (`nodir: implement crash-safe thaw/freeze maintenance state machine`)
+- Follow-up hardening included in the final working tree before handoff:
+1. Case-insensitive parquet sidecar migration during freeze.
+2. Thaw pre-validation of archive structure before extraction.
+3. Freeze crash-recovery finalization when state is `freezing` and directory is missing.
+4. Strict write-path validation for integer-typed fields (including explicit `bool` rejection) and UUID4 `op_id` checks.
+
+**Implemented Scope (Phase 5)**
+1. Canonical NoDir maintenance state model (`schema_version=1`) with required fields and strict validation.
+2. Crash-safe thaw sequence with explicit `thawing` and `thawed` state transitions under maintenance lock.
+3. Crash-safe freeze sequence with explicit `freezing` and `archived` state transitions under maintenance lock.
+4. Maintenance-only cleanup behavior for stale transitional artifacts.
+5. Unified `503 NODIR_LOCKED` behavior for transitional states/sentinels in `resolve()` and `materialize_file()`.
+
+**Review Findings And Resolutions (Phase 5)**
+1. Uppercase/mixed-case parquet sidecar risk during freeze: fixed by case-insensitive parquet detection and sidecar remap.
+2. Thaw validation gap for duplicate/conflicting archive entries: fixed by pre-extraction archive verification.
+3. Freeze crash window leaving roots stuck in `freezing`: fixed by maintenance finalize path when archive is valid.
+4. State validation strictness gaps (UUID and integer typing): fixed with strict validation and added regression coverage.
+
+**Tests Added/Updated (Phase 5)**
+1. New state schema/atomicity coverage in `tests/nodir/test_state.py`.
+2. New thaw/freeze happy-path and crash-recovery coverage in `tests/nodir/test_thaw_freeze.py`.
+3. Transitional lock behavior coverage extended in `tests/nodir/test_materialize.py` and `tests/nodir/test_resolve.py`.
+4. Additional edge-case regressions:
+  - duplicate archive entry rejection,
+  - file/directory prefix conflict rejection,
+  - uppercase parquet sidecar preservation,
+  - write-path bool-as-int rejection for state integers.
+
+Out of scope for Phase 5 (still pending):
+1. Broad root-by-root mutation adoption across all producers/consumers (Phase 6).
+2. Bulk migration crawler and default-to-NoDir rollout (Phase 7).
 
 ### Phase 6: Root-by-Root Mutation Adoption (TODO; Multi-Phase Per Root)
 Goal:
