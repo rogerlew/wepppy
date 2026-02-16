@@ -17,6 +17,7 @@ Culvert_web_app developers and stakeholders integrating with the wepp.cloud culv
 
 ## Layout
 - `README.md` (this file)
+- `weppcloud-wbt-unnest-basins-migration-guide.md` (migration design for sidecar-driven nested watershed delineation)
 - `scripts/` (payload builder and submission tools)
   - `build_payload.py` - Build payload.zip from Culvert_web_app outputs
   - `submit_payload.py` - Submit payload.zip to wepp.cloud over SSL
