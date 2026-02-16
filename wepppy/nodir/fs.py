@@ -156,6 +156,8 @@ def _validate_zip_entry_name(raw_name: str) -> tuple[str, bool]:
     # Windows drive letters are not allowed (even on Linux).
     if len(raw_name) >= 2 and raw_name[1] == ":" and raw_name[0].isalpha():
         raise nodir_invalid_archive("zip entry name must not contain a drive letter")
+    if raw_name.endswith("//"):
+        raise nodir_invalid_archive("zip entry name is not normalized")
 
     is_dir = raw_name.endswith("/")
     name = raw_name.rstrip("/") if is_dir else raw_name
@@ -289,8 +291,18 @@ def _logical_parquet_sidecar_path(wd: Path, logical_rel: str) -> Path | None:
     st = _lstat(candidate)
     if st is None:
         return None
-    if statmod.S_ISREG(st.st_mode) or statmod.S_ISLNK(st.st_mode):
+    if statmod.S_ISREG(st.st_mode):
         return candidate
+    if statmod.S_ISLNK(st.st_mode):
+        allowed_roots = _derive_allowed_symlink_roots(wd)
+        if not _is_within_any_root(candidate, allowed_roots):
+            return None
+        try:
+            target_st = candidate.stat()
+        except OSError:
+            return None
+        if statmod.S_ISREG(target_st.st_mode):
+            return candidate
     return None
 
 
@@ -356,6 +368,14 @@ def resolve(wd: str, rel: str, *, view: NoDirView = "effective") -> ResolvedNoDi
     if view == "dir":
         if not dir_exists:
             return None
+        archive_fp: tuple[int, int] | None = None
+        if archive_present:
+            try:
+                _, archive_st = _archive_real_path_and_stat(wd_path, archive_path, archive_lstat)
+            except NoDirError:
+                archive_fp = None
+            else:
+                archive_fp = (_stat_mtime_ns(archive_st), int(archive_st.st_size))
         return ResolvedNoDirPath(
             wd=str(wd_path),
             root=root,
@@ -363,7 +383,7 @@ def resolve(wd: str, rel: str, *, view: NoDirView = "effective") -> ResolvedNoDi
             form="dir",
             dir_path=str(dir_path),
             archive_path=str(archive_path),
-            archive_fp=None,
+            archive_fp=archive_fp,
         )
 
     if view == "archive":

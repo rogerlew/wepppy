@@ -25,6 +25,7 @@ def _write_zip(wd: Path, *, entries: list[tuple[str, bytes]]) -> None:
         "../evil.txt",
         r"a\b.txt",
         "C:/x.txt",
+        "a//",
     ],
 )
 def test_resolve_rejects_invalid_zip_entry_names(tmp_path: Path, bad_name: str) -> None:

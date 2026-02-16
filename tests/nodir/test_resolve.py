@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -57,3 +58,17 @@ def test_resolve_transitional_sentinel_raises_locked(tmp_path: Path) -> None:
     err = exc.value
     assert err.http_status == 503
     assert err.code == "NODIR_LOCKED"
+
+
+def test_resolve_dir_view_populates_archive_fp_when_archive_exists(tmp_path: Path) -> None:
+    wd = tmp_path
+    (wd / "watershed").mkdir()
+    archive_path = wd / "watershed.nodir"
+    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("a.txt", b"a")
+
+    target = resolve(str(wd), "watershed", view="dir")
+    assert target is not None
+    assert target.form == "dir"
+    assert target.archive_fp is not None
+    assert target.archive_fp[1] == archive_path.stat().st_size

@@ -59,3 +59,20 @@ def test_archive_with_parquet_entries_is_invalid(tmp_path: Path) -> None:
     err = exc.value
     assert err.http_status == 500
     assert err.code == "NODIR_INVALID_ARCHIVE"
+
+
+def test_parquet_sidecar_symlink_to_directory_is_treated_missing(tmp_path: Path) -> None:
+    wd = tmp_path
+    _make_valid_archive(wd)
+
+    sidecar_dir = wd / "sidecar_dir"
+    sidecar_dir.mkdir()
+    (wd / "watershed.hillslopes.parquet").symlink_to(sidecar_dir, target_is_directory=True)
+
+    target = resolve(str(wd), "watershed/hillslopes.parquet", view="archive")
+    assert target is not None
+
+    with pytest.raises(FileNotFoundError):
+        stat(target)
+    with pytest.raises(FileNotFoundError):
+        open_read(target)
