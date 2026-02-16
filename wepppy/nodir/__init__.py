@@ -15,6 +15,29 @@ from .parquet_sidecars import (
     sidecar_relpath_to_logical_parquet,
 )
 from .paths import NoDirRoot, NoDirView, normalize_relpath, parse_external_subpath
+from .state import (
+    NoDirArchiveFingerprint,
+    NoDirStateName,
+    NoDirStatePayload,
+    NODIR_STATE_SCHEMA_VERSION,
+    NODIR_TRANSITION_STATES,
+    archive_fingerprint_from_path,
+    freeze_temp_path,
+    is_transitioning_locked,
+    read_state,
+    state_path,
+    thaw_temp_path,
+    write_state,
+)
+from .thaw_freeze import (
+    NoDirMaintenanceLock,
+    acquire_maintenance_lock,
+    freeze,
+    maintenance_lock,
+    maintenance_lock_key,
+    release_maintenance_lock,
+    thaw,
+)
 
 __all__ = [
     "NoDirError",
@@ -35,4 +58,23 @@ __all__ = [
     "sidecar_relpath_to_logical_parquet",
     "pick_existing_parquet_path",
     "pick_existing_parquet_relpath",
+    "NoDirStateName",
+    "NoDirArchiveFingerprint",
+    "NoDirStatePayload",
+    "NODIR_STATE_SCHEMA_VERSION",
+    "NODIR_TRANSITION_STATES",
+    "state_path",
+    "thaw_temp_path",
+    "freeze_temp_path",
+    "archive_fingerprint_from_path",
+    "read_state",
+    "write_state",
+    "is_transitioning_locked",
+    "NoDirMaintenanceLock",
+    "maintenance_lock_key",
+    "acquire_maintenance_lock",
+    "release_maintenance_lock",
+    "maintenance_lock",
+    "thaw",
+    "freeze",
 ]

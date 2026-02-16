@@ -11,6 +11,7 @@ import pytest
 from wepppy.nodir.errors import NoDirError, nodir_invalid_archive, nodir_locked
 from wepppy.nodir.fs import resolve
 from wepppy.nodir.materialize import materialize_file
+from wepppy.nodir.state import archive_fingerprint_from_path, write_state
 
 pytestmark = pytest.mark.unit
 
@@ -492,3 +493,54 @@ def test_materialize_multiworker_lock_handoff_fails_fast(
 
     entry_dir = _materialized_entry_dir(wd, logical_rel=logical_rel)
     assert not entry_dir.exists()
+
+
+def test_materialize_missing_state_with_temp_sentinel_returns_503(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+    _write_zip(wd / "watershed.nodir", {"a.txt": "hello"})
+    (wd / "watershed.thaw.tmp").mkdir(parents=True, exist_ok=False)
+
+    import wepppy.nodir.materialize as materialize_mod
+
+    monkeypatch.setattr(materialize_mod, "redis_lock_client", _RedisLockStub())
+
+    with pytest.raises(NoDirError) as exc:
+        materialize_file(str(wd), "watershed/a.txt", purpose="test")
+
+    err = exc.value
+    assert err.http_status == 503
+    assert err.code == "NODIR_LOCKED"
+
+
+@pytest.mark.parametrize("state_name", ["thawing", "freezing"])
+def test_materialize_transition_state_returns_503(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    state_name: str,
+) -> None:
+    wd = tmp_path
+    archive_path = wd / "watershed.nodir"
+    _write_zip(archive_path, {"a.txt": "hello"})
+
+    import wepppy.nodir.materialize as materialize_mod
+
+    monkeypatch.setattr(materialize_mod, "redis_lock_client", _RedisLockStub())
+
+    write_state(
+        wd,
+        "watershed",
+        state=state_name,
+        op_id="00000000-0000-4000-8000-000000000021" if state_name == "thawing" else "00000000-0000-4000-8000-000000000022",
+        dirty=True,
+        archive_fingerprint=archive_fingerprint_from_path(archive_path),
+    )
+
+    with pytest.raises(NoDirError) as exc:
+        materialize_file(str(wd), "watershed/a.txt", purpose="test")
+
+    err = exc.value
+    assert err.http_status == 503
+    assert err.code == "NODIR_LOCKED"

@@ -28,6 +28,7 @@ from wepppy.nodb.base import redis_lock_client
 from .errors import nodir_invalid_archive, nodir_limit_exceeded, nodir_locked
 from .fs import ResolvedNoDirPath, _get_zip_index, resolve
 from .paths import normalize_relpath
+from .state import is_transitioning_locked
 
 __all__ = [
     "materialize_file",
@@ -43,8 +44,6 @@ _DEFAULT_LOCK_TTL_SECONDS = 300
 _DEFAULT_RATIO_MIN_BYTES = 64 * 1024**2
 _DEFAULT_RATIO_MAX = 200.0
 _LOCK_RENEWAL_INTERVAL_SECONDS = 30.0
-
-_STATE_LOCKED_VALUES = frozenset({"thawing", "freezing"})
 
 _SHP_REQUIRED_SIDECARS = (".shx", ".dbf")
 _SHP_OPTIONAL_SIDECARS = (
@@ -380,27 +379,6 @@ def _enforce_plan_limits(plans: list[_MaterializePlan]) -> None:
         )
 
 
-def _is_transitioning_locked(wd_path: Path, root: str) -> bool:
-    if (wd_path / f"{root}.thaw.tmp").exists():
-        return True
-    if (wd_path / f"{root}.nodir.tmp").exists():
-        return True
-
-    state_path = wd_path / ".nodir" / f"{root}.json"
-    try:
-        state_payload = json.loads(state_path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
-        return False
-    except json.JSONDecodeError:
-        return False
-    except OSError:
-        return False
-
-    if not isinstance(state_payload, dict):
-        return False
-    state_value = str(state_payload.get("state", "")).strip().lower()
-    return state_value in _STATE_LOCKED_VALUES
-
 
 def _redis_value_text(value: object) -> str | None:
     if value is None:
@@ -691,7 +669,7 @@ def materialize_file(wd: str, rel: str, *, purpose: str = "materialize") -> str:
             candidate = candidate / target.inner_path
         return str(candidate)
 
-    if _is_transitioning_locked(wd_path, target.root):
+    if is_transitioning_locked(wd_path, target.root):
         raise nodir_locked(f"{target.root} is transitioning (thaw/freeze in progress)")
 
     assert target.archive_fp is not None

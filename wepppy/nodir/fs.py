@@ -22,6 +22,7 @@ from .errors import (
 from .parquet_sidecars import logical_parquet_to_sidecar_relpath, pick_existing_parquet_path
 from .paths import NoDirRoot, NoDirView, normalize_relpath, split_nodir_root
 from .symlinks import _derive_allowed_symlink_roots, _is_within_any_root, _resolve_path_safely
+from .state import is_transitioning_locked
 
 __all__ = [
     "NoDirForm",
@@ -128,13 +129,6 @@ class NoDirDirEntry:
     size_bytes: int | None
     mtime_ns: int | None
 
-
-def _is_transitioning(wd: Path, root: NoDirRoot) -> bool:
-    if (wd / f"{root}.thaw.tmp").exists():
-        return True
-    if (wd / f"{root}.nodir.tmp").exists():
-        return True
-    return False
 
 
 def _zip_mtime_ns(info: zipfile.ZipInfo) -> int | None:
@@ -333,7 +327,7 @@ def resolve(wd: str, rel: str, *, view: NoDirView = "effective") -> ResolvedNoDi
     archive_lstat = _lstat(archive_path)
     archive_present = archive_lstat is not None
 
-    if view in ("effective", "archive") and _is_transitioning(wd_path, root):
+    if view in ("effective", "archive") and is_transitioning_locked(wd_path, root):
         raise nodir_locked(f"{root} is transitioning (thaw/freeze in progress)")
 
     if view == "effective":
