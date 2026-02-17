@@ -196,3 +196,53 @@ def test_prep_watershed_uses_all_required_nodir_roots(monkeypatch: pytest.Monkey
 
     assert mutation_calls == [(("climate", "landuse", "soils", "watershed"), "prep-watershed-rq")]
     assert calls == ["prep_watershed"]
+
+
+def test_prep_soils_uses_soils_and_watershed_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_job_context(monkeypatch)
+    calls: list[tuple[str, object]] = []
+
+    class DummyWepp:
+        def _prep_soils(self, translator):
+            calls.append(("prep_soils", translator))
+
+    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
+    monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
+
+    mutation_calls: list[tuple[tuple[str, ...], str]] = []
+
+    def _fake_mutate_roots(wd, roots, callback, *, purpose="nodir-mutation"):
+        mutation_calls.append((tuple(roots), purpose))
+        callback()
+
+    monkeypatch.setattr(wepp_rq, "mutate_roots", _fake_mutate_roots)
+
+    wepp_rq._prep_soils_rq("run-1")
+
+    assert mutation_calls == [(("soils", "watershed"), "prep-soils-rq")]
+    assert calls == [("prep_soils", "translator")]
+
+
+def test_prep_climates_uses_climate_and_watershed_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_job_context(monkeypatch)
+    calls: list[tuple[str, object]] = []
+
+    class DummyWepp:
+        def _prep_climates(self, translator):
+            calls.append(("prep_climates", translator))
+
+    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
+    monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
+
+    mutation_calls: list[tuple[tuple[str, ...], str]] = []
+
+    def _fake_mutate_roots(wd, roots, callback, *, purpose="nodir-mutation"):
+        mutation_calls.append((tuple(roots), purpose))
+        callback()
+
+    monkeypatch.setattr(wepp_rq, "mutate_roots", _fake_mutate_roots)
+
+    wepp_rq._prep_climates_rq("run-1")
+
+    assert mutation_calls == [(("climate", "watershed"), "prep-climates-rq")]
+    assert calls == [("prep_climates", "translator")]
