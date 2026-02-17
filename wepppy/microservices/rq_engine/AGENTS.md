@@ -23,7 +23,7 @@ this service as the canonical async interface for run-scoped operations.
 2. **Enqueue work** with `Authorization: Bearer <token>` using the run-scoped
    routes (climate, watershed, wepp, landuse, soils, etc.).
 3. **Poll jobs**: `GET /api/jobstatus/{job_id}` or `GET /api/jobinfo/{job_id}`.
-4. **Cancel jobs**: `POST /api/canceljob/{job_id}` (requires `rq:status`).
+4. **Cancel jobs**: `POST /api/canceljob/{job_id}` (requires `rq:status` or `culvert:batch:submit`).
 
 ## Auth and Access Control
 - `auth.py` validates JWTs and supports token classes: `user`, `session`,
