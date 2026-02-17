@@ -145,6 +145,31 @@ def test_mutate_root_default_archive_roots_freezes_dir_form(
     assert state["dirty"] is False
 
 
+def test_mutate_root_default_archive_roots_skips_missing_dir(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+
+    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+
+    lock_stub = _RedisLockStub()
+    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    enable_default_archive_roots(wd, roots=("watershed",))
+
+    result = mutate_root(
+        wd,
+        "watershed",
+        lambda: "done",
+        purpose="test-default-nodir-missing-root",
+    )
+
+    assert result == "done"
+    assert not (wd / "watershed").exists()
+    assert not (wd / "watershed.nodir").exists()
+    assert read_state(wd, "watershed") is None
+
+
 def test_mutate_root_malformed_default_archive_marker_fails_fast(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

@@ -197,6 +197,13 @@ def mutate_roots(
             target = resolve(str(wd_path), root, view="effective")
             if target is None or target.form == "archive":
                 continue
+
+            # Effective view can still report dir form when the root path is
+            # absent (no archive + no directory). Only auto-freeze when an
+            # actual directory-form root is present.
+            if resolve(str(wd_path), root, view="dir") is None:
+                continue
+
             freeze_locked(wd_path, root, lock=locks[root])
 
         return result
