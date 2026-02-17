@@ -8,6 +8,7 @@ directory-vs-archive conventions in multiple places.
 from .errors import NoDirError
 from .fs import NoDirDirEntry, NoDirForm, ResolvedNoDirPath, listdir, open_read, resolve, stat
 from .materialize import materialize_file, materialize_path_if_archive
+from .mutations import mutate_root, mutate_roots, preflight_root_forms
 from .parquet_sidecars import (
     logical_parquet_to_sidecar_relpath,
     pick_existing_parquet_path,
@@ -33,10 +34,12 @@ from .thaw_freeze import (
     NoDirMaintenanceLock,
     acquire_maintenance_lock,
     freeze,
+    freeze_locked,
     maintenance_lock,
     maintenance_lock_key,
     release_maintenance_lock,
     thaw,
+    thaw_locked,
 )
 
 __all__ = [
@@ -54,6 +57,9 @@ __all__ = [
     "open_read",
     "materialize_file",
     "materialize_path_if_archive",
+    "preflight_root_forms",
+    "mutate_root",
+    "mutate_roots",
     "logical_parquet_to_sidecar_relpath",
     "sidecar_relpath_to_logical_parquet",
     "pick_existing_parquet_path",
@@ -75,6 +81,8 @@ __all__ = [
     "acquire_maintenance_lock",
     "release_maintenance_lock",
     "maintenance_lock",
+    "thaw_locked",
     "thaw",
+    "freeze_locked",
     "freeze",
 ]

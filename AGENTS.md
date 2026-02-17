@@ -10,6 +10,12 @@
 - **Codex can't compress verbose docs** (bulk loads context, no compression pass). Keep code docs dense/terse—every verbose token reduces code-reading capacity. Claude compresses on-the-fly so tolerates verbosity but it's wasteful. Write for Codex's token budget.
 - Do not add “fallback” wrappers that silently mask missing required dependencies (for example, swallowing ImportError for coverage instrumentation). Prefer explicit failures so debugging stays fast and obvious.
 
+## ExecPlans
+- For complex features, significant refactors, or multi-hour work, execute against the active work-package ExecPlan under `docs/work-packages/*/prompts/active/`.
+- The active ExecPlan is a living document: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current at each stopping point.
+- Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md` and follow its requirements.
+- When a user asks to run a plan, do not ask for next steps between milestones unless blocked by a real external dependency.
+
 ### Change Scope Discipline (Required)
 - Do not add speculative abstractions or generalized code paths for unsupported or hypothetical cases.
 - Match existing data and API contracts first; if a contract change is needed, call it out explicitly before implementation.

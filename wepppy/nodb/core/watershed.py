@@ -283,10 +283,6 @@ class Watershed(NoDbBase):
                 "watershed", "abstraction_backend", "peridot"
             )
 
-            wat_dir = self.wat_dir
-            if not _exists(wat_dir):
-                os.mkdir(wat_dir)
-
             self._mofe_nsegments: Optional[Dict[str, int]] = None
             self._mofe_target_length: float = self.config_get_float(
                 "watershed", "mofe_target_length"
@@ -1380,8 +1376,8 @@ class Watershed(NoDbBase):
                 translator = self.translator_factory()
                 structure = translator.build_structure(network)
                 if structure is not None:
-                    structure_path = self._write_structure_json(structure)
-                    self._structure = structure_path
+                    self._write_structure_json(structure)
+                    self._structure = structure
                 else:
                     self._structure = None
 
@@ -1675,12 +1671,10 @@ class Watershed(NoDbBase):
             structure = _abs.structure
             if structure is not None:
                 try:
-                    structure_path = self._write_structure_json(structure)
+                    self._write_structure_json(structure)
                 except Exception as exc:
                     self.logger.debug("Failed to persist structure.json: %s", exc)
-                    self._structure = structure
-                else:
-                    self._structure = structure_path
+                self._structure = structure
             else:
                 self._structure = None
 

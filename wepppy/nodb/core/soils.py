@@ -181,10 +181,6 @@ class Soils(NoDbBase):
             self._clip_soils_depth = self.config_get_float('soils', 'clip_soils', 1000)
             self._soils_is_vrt = False
 
-            soils_dir = self.soils_dir
-            if not _exists(soils_dir):
-                os.mkdir(soils_dir)
-
             self._soils_map = self.config_get_path('soils', 'soils_map', None)
 
     @property

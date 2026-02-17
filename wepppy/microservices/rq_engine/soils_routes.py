@@ -13,6 +13,8 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Soils, WatershedNotAbstractedError
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.rq.project_rq import build_soils_rq
 from wepppy.soils.ssurgo import NoValidSoilsException
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -69,6 +71,8 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
 
     try:
         wd = get_wd(runid)
+        nodir_resolve(wd, "soils", view="effective")
+
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_soils)
 
@@ -97,6 +101,8 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
             job = q.enqueue_call(build_soils_rq, (runid,), timeout=RQ_TIMEOUT)
             prep.set_rq_job_id("build_soils_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except (NoValidSoilsException, WatershedNotAbstractedError) as exc:
         return error_response(
             exc.__name__ or "Building Soil Failed",

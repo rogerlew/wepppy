@@ -1,7 +1,7 @@
 # NoDir Implementation Plan (Multi-Phase)
 
 **Work package:** `docs/work-packages/20260214_nodir_archives/package.md`  
-**Last updated:** 2026-02-16  
+**Last updated:** 2026-02-17  
 **Primary specs:** `docs/schemas/nodir-contract-spec.md`, `docs/schemas/nodir-thaw-freeze-contract.md`
 
 ## Current State (Snapshot)
@@ -323,11 +323,11 @@ Validation evidence:
   - uppercase parquet sidecar preservation,
   - write-path bool-as-int rejection for state integers.
 
-Out of scope for Phase 5 (still pending):
-1. Broad root-by-root mutation adoption across all producers/consumers (Phase 6).
-2. Bulk migration crawler and default-to-NoDir rollout (Phase 7).
+Out of scope for Phase 5 handoff:
+1. Broad root-by-root mutation adoption across all producers/consumers (Phase 6) - complete as of 2026-02-17.
+2. Bulk migration crawler and default-to-NoDir rollout (Phase 7) - still pending.
 
-### Phase 6: Root-by-Root Mutation Adoption (TODO; Multi-Phase Per Root)
+### Phase 6: Root-by-Root Mutation Adoption (DONE, 2026-02-17)
 Goal:
 - Ensure controller/RQ/migration/mod mutation paths work for both Dir form and Archive form (via thaw/modify/freeze), without persisting representation in `.nodb`.
 
@@ -344,6 +344,169 @@ Subphases (suggested order):
 Exit criteria:
 - Behavior matrix conformance for each root’s producers and FS-boundary consumers.
 - Targeted regression tests for each root’s “archive form” mutation and subsequent browse/download behavior.
+
+### Phase 6a: Watershed Touchpoint Review + Multi-Stage Adoption Plan (DONE, 2026-02-17)
+Goal:
+- Produce a watershed-specific, multi-stage implementation plan for Phase 6 execution based on real touchpoints, mutation risk, and validation depth.
+
+Scope (planning only):
+- Review watershed touchpoints end-to-end (controllers, RQ routes/jobs, exports, query engine, mods, migrations, and FS-boundary endpoints).
+- Confirm exact mutation/read boundaries for `watershed` under Dir form vs Archive form.
+- Define an ordered execution plan with explicit cut lines, risk gates, and test gates.
+
+Planned stages (deliverable of this phase):
+1. Stage A: Touchpoint inventory reconciliation
+  - Reconcile `docs/work-packages/20260214_nodir_archives/artifacts/touchpoints_inventory.md` against current code.
+  - Classify each watershed call site as producer, consumer, FS-boundary, or serialized-path hazard.
+  - Mark each as archive-ready, thaw-required, or blocked.
+2. Stage B: Mutation-surface design
+  - Define the canonical watershed mutation entry points that must run under thaw/modify/freeze.
+  - Specify lock/state boundaries for each mutation class.
+  - Specify no-op/pass-through behavior for pure read paths.
+3. Stage C: Execution waves
+  - Wave 1: low-risk internal migration/migration-tooling call sites.
+  - Wave 2: RQ-engine watershed build flows and peridot-linked producers.
+  - Wave 3: exports/mod integrations with watershed writes.
+  - Wave 4: cleanup of legacy serialized-path assumptions and final hardening.
+4. Stage D: Validation and rollout gates
+  - Define required regression suites per wave.
+  - Define mixed/invalid/transitional state probes.
+  - Define rollback and forensic checks for each wave.
+
+Stage A findings summary (reconciled against current code, 2026-02-16):
+- Touchpoints inventoried: 32 (`docs/work-packages/20260214_nodir_archives/artifacts/watershed_touchpoints_stage_a.md`)
+- Counts by class:
+  - `producer`: 12
+  - `consumer`: 26
+  - `FS-boundary`: 13
+  - `serialized-path hazard`: 1
+- Counts by readiness:
+  - `archive-ready`: 12
+  - `thaw-required`: 16
+  - `blocked`: 4
+- Top blockers:
+  - `wepppy/nodb/core/watershed.py`: `Watershed.__init__` eagerly creates `WD/watershed`, causing mixed-state conflicts when `watershed.nodir` is canonical.
+  - `wepppy/nodb/core/watershed.py`: `_structure` path-string persistence (`structure.json`) is a serialized-path hazard tied to directory form.
+  - `wepppy/topo/peridot/peridot_runner.py`: `migrate_watershed_outputs()` calls `Watershed.getInstance()` and inherits the constructor mixed-state blocker.
+  - `wepppy/export/ermit_input.py`: still depends on `Watershed.getInstance()`, `_subs_summary`, and direct `wat_dir` slope iteration.
+
+Stage B mutation-surface summary (design baseline, 2026-02-16):
+- Canonical mutation entry points (`docs/work-packages/20260214_nodir_archives/artifacts/watershed_mutation_surface_stage_b.md`):
+  - Root-mutating boundaries: `abstract_watershed_rq`, `build_subcatchments_and_abstract_watershed_rq` (abstraction phase), `Watershed.abstract_watershed`, `_peridot_post_abstract_watershed`, `_topaz_abstract_watershed`, `post_abstract_watershed`, and watershed migration utilities when they touch `WD/watershed/*`.
+  - Watershed queue mutations (`build_channels_rq`, `set_outlet_rq`, `build_subcatchments_rq`) are classified as archive-form root mutations (`materialize(root)+freeze`) to match the behavior matrix watershed RQ row.
+- Lock/state boundary rules:
+  - Any root mutation touching `WD/watershed/*`, `WD/watershed.nodir*`, or `WD/.nodir/watershed.json` must run under `nodb-lock:<runid>:nodir/watershed`.
+  - Lock order: NoDir maintenance lock outermost, NoDb lock(s) inside callback.
+  - Archive-form mutation transition: `archived -> thawing -> thawed -> freezing -> archived`; Dir form remains no state transition.
+  - Callback failure after thaw leaves `state=thawed` and `dirty=true` for deterministic retry/recovery (no implicit auto-freeze).
+- Read-path pass-through rules:
+  - Pure read surfaces (`/browse`, `/files`, `/download`) and sidecar parquet consumers remain thaw-free pass-through on NoDir APIs.
+  - FS-boundary read surfaces (`dtale`, `gdalinfo`, selected exports) use file-level materialization only; no root thaw/freeze from request-serving code.
+  - Transitional states (`thawing`/`freezing` or temp sentinels) fail fast with `503 NODIR_LOCKED`.
+- Unresolved decisions:
+  - Remove constructor-time `wat_dir` creation side effect in `Watershed.__init__` for archive-safe controller reads.
+  - Eliminate `_structure` path-string serialized-path hazard (`structure.json`) before freeze-era invariants are finalized.
+  - Choose final strategy for high-fanout watershed slope/network consumers (`wepp.prep_watershed`, `ERMiT`, `RHEM`, `SWAT`, salvage flowpaths): per-file materialization vs bounded read-session helper.
+
+Stage C execution wave summary (rollout baseline, 2026-02-16):
+- Wave 1 (foundation + migration tooling):
+  - Objective: remove watershed archive-form blockers in low-risk internal paths before producer cutover.
+  - Boundary: `wepppy/nodb/core/watershed.py` bootstrap/root-form guard, `wepppy/topo/peridot/peridot_runner.py` migration path, `wepppy/tools/migrations/watershed.py`, `wepppy/query_engine/activate.py`, and `wepppy/nodb/duckdb_agents.py`.
+  - Excludes: RQ mutation flows, exports/mod integrations, and browse/files/download hardening.
+- Wave 2 (RQ build flows + peridot producers):
+  - Objective: apply canonical thaw/modify/freeze orchestration to watershed mutation owners.
+  - Boundary: `wepppy/rq/project_rq.py`, `wepppy/microservices/rq_engine/watershed_routes.py`, `wepppy/nodb/core/watershed.py` abstraction methods, `wepppy/topo/peridot/peridot_runner.py` post-abstraction, and `wepppy/topo/watershed_abstraction/`.
+  - Excludes: export/mod consumer integration and serialized-path cleanup.
+- Wave 3 (exports + mods + WEPP consumer coupling):
+  - Objective: remove archive-form read breakpoints in watershed-dependent consumers.
+  - Boundary: `wepppy/rq/wepp_rq.py`, `wepppy/nodb/core/wepp.py`, watershed exports in `wepppy/export/`, and watershed mods in `wepppy/nodb/mods/*` (`swat`, `rhem`, `path_ce`, `omni`, `salvage_logging`).
+  - Excludes: browse/files/download consistency hardening and final serialized-path remediation.
+- Wave 4 (serialized-path cleanup + consistency hardening):
+  - Objective: clear `_structure` serialized-path hazard and harden watershed NoDir semantics across public read surfaces.
+  - Boundary: `wepppy/nodb/core/watershed.py` (`_structure`/`structure.json` handling) plus watershed checks for `browse`, `files`, `download`, `dtale`, and `gdalinfo` surfaces.
+  - Excludes: new feature work outside watershed NoDir adoption.
+- Dependencies and ordering rationale:
+  - Wave 1 resolves blockers required by all later waves.
+  - Wave 2 depends on Wave 1 to avoid mixed-state bootstrap failures during mutation cutover.
+  - Wave 3 depends on Wave 2 producer stability before consumer integration.
+  - Wave 4 depends on Waves 1-3 and is restricted to cleanup/hardening so final behavior-matrix conformance is measurable.
+- Wave ownership map: `docs/work-packages/20260214_nodir_archives/artifacts/watershed_execution_waves_stage_c.md`.
+
+Stage D validation/rollout summary (gate baseline, 2026-02-17):
+- Per-wave test gates (`docs/work-packages/20260214_nodir_archives/artifacts/watershed_validation_rollout_stage_d.md`):
+  - Wave 1: NoDir state/thaw/resolve + watershed migration/query-engine foundation gates.
+  - Wave 2: watershed producer mutation gates (`rq_engine` watershed routes + dedicated legacy abstraction internals gate + thaw/freeze lock/state regressions).
+  - Wave 3: watershed consumer gates (materialization, exports, mods, WEPP-prep coupling).
+  - Wave 4: browse/files/download hardening gates + transitional lock regression checks.
+  - All waves: docs contract lint gate when Stage artifacts or schemas are touched.
+- Rollout gates:
+  - Wave promotion is blocked unless the wave’s pre-merge and post-merge gate rows all pass with `0 failed` and contract status/code expectations.
+  - Post-merge canary gates use standardized `tests/api/create-run` bootstrap + cleanup and must confirm no browse/files/download extraction side effects for watershed archive paths.
+- Rollback triggers:
+  - Any mixed-state regression in effective public paths (`409` contract drift), invalid-archive contract drift (`500`), transitional-lock drift (`503`), or producer/consumer parity regression on archive form.
+  - Immediate action: stop forward rollout, revert active-wave merge commits, rerun that wave’s gate matrix before redeploy.
+- Forensic requirements:
+  - Capture `WD/.nodir/watershed.json`, temp sentinels, archive fingerprint (`stat WD/watershed.nodir`), gate command outputs, and relevant RQ/log artifacts before cleanup.
+  - Use the Stage D forensics checklist command bundle for run-scoped evidence collection.
+
+Phase 6 all-stages review summary (2026-02-17):
+- Findings by severity:
+  - High: Stage B watershed RQ subgroup thaw classification now explicitly matches the behavior matrix (`materialize(root)+freeze`).
+  - High: Wave 4 post-merge no-extraction canary gate is now executable using standardized canary bootstrap/cleanup flow.
+  - Medium: Wave 4 cross-surface rollback ownership is now explicit (`Browse/NoDir owner`).
+  - Medium: Wave 2 gate set now includes a dedicated legacy abstraction internals command.
+  - Low: Stage D forensic command precedence bug remains corrected.
+- Cross-stage coverage status:
+  - Stage A touchpoints mapped to Stage C waves: `32/32`.
+  - Stage A touchpoints mapped to Stage D gate paths via wave ownership: `32/32`.
+  - Coverage quality: `27 pass`, `5 partial` (partials are limited to known Stage A blocked touchpoints scheduled in Waves 1/3/4).
+  - Full matrix and gate audit: `docs/work-packages/20260214_nodir_archives/artifacts/watershed_phase6_all_stages_review.md`.
+- Unresolved blockers:
+  - None for Phase 6a planning package readiness.
+- Readiness verdict: `ready`.
+  - Phase 6a planning artifacts are execution-ready for watershed implementation waves.
+
+Required outputs:
+- Insert/refresh this Phase 6a section as the watershed planning source of truth.
+- Add a dedicated watershed execution checklist doc under `docs/work-packages/20260214_nodir_archives/artifacts/`.
+- Provide a wave-by-wave test matrix (what runs before merge vs post-merge).
+
+Exit criteria:
+- Every watershed touchpoint has an owner wave and expected behavior (native, thaw-required, or blocked).
+- No unresolved ambiguity remains for watershed mutation ownership.
+- The resulting plan is implementation-ready for Phase 6 watershed execution.
+
+Phase 6 completion summary (2026-02-17):
+- Shared orchestration landed under `wepppy/nodir/mutations.py` and was wired into root mutation owners in `wepppy/rq/project_rq.py` (`watershed`, `soils`, `landuse`, `climate`, and `upload_cli`).
+- Route preflight + canonical NoDir error propagation was applied to root mutation routes:
+  - `wepppy/microservices/rq_engine/watershed_routes.py`
+  - `wepppy/microservices/rq_engine/soils_routes.py`
+  - `wepppy/microservices/rq_engine/landuse_routes.py`
+  - `wepppy/microservices/rq_engine/climate_routes.py`
+  - `wepppy/microservices/rq_engine/upload_climate_routes.py`
+- Root bootstrap blockers were removed by deleting eager constructor-time root directory creation in:
+  - `wepppy/nodb/core/watershed.py`
+  - `wepppy/nodb/core/soils.py`
+  - `wepppy/nodb/core/landuse.py`
+  - `wepppy/nodb/core/climate.py`
+- Watershed serialized-path hazard cleanup completed (`_structure` no longer persists `structure.json` path strings in-memory).
+- Root-specific Stage A-D artifacts are complete for all roots:
+  - Watershed: `watershed_*_stage_*.md`
+  - Soils: `soils_*_stage_*.md`
+  - Landuse: `landuse_*_stage_*.md`
+  - Climate: `climate_*_stage_*.md`
+- Final cross-root review artifact: `docs/work-packages/20260214_nodir_archives/artifacts/phase6_all_roots_review.md`.
+
+Phase 6 root status:
+- `watershed`: complete
+- `soils`: complete
+- `landuse`: complete
+- `climate`: complete
+
+Phase 6 exit criteria status:
+- Behavior-matrix mutation rows (`build-landuse`, `build-soils`, `build-climate`, watershed RQ group, `upload-cli`) are implemented with archive-form `materialize(root)+freeze` semantics through shared root mutation orchestration.
+- Targeted root gate suites passed (see Stage D artifacts and all-roots review).
+- Full-suite and final docs lint evidence is complete (`wctl run-pytest tests --maxfail=1` -> `1531 passed, 27 skipped`; `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `30 files validated, 0 errors, 0 warnings`).
 
 ### Phase 7: Bulk Migration Crawler + Default-to-NoDir Rollout (TODO)
 Goal:

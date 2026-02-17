@@ -294,12 +294,9 @@ class Landuse(NoDbBase):
             self._nlcd_db = self.config_get_path('landuse', 'nlcd_db')
             self._landuse_is_vrt = False
 
-            lc_dir = self.lc_dir
-            if not _exists(lc_dir):
-                os.mkdir(lc_dir)
-
             _landuse_map = self.config_get_path('landuse', 'landuse_map')
             if _landuse_map is not None:
+                os.makedirs(self.lc_dir, exist_ok=True)
                 shutil.copyfile(_landuse_map, self.lc_fn)
                 prj = _landuse_map[:-4] + '.prj'
                 if _exists(prj):

@@ -18,6 +18,9 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Landuse, LanduseMode, Watershed, WatershedNotAbstractedError
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.nodir.mutations import mutate_root
 from wepppy.rq.project_rq import build_landuse_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -39,6 +42,11 @@ def _extract_upload(form: Any, key: str) -> UploadFile | None:
     if isinstance(upload, UploadFile):
         return upload
     return None
+
+
+def _preflight_landuse_mutation_root(wd: str) -> None:
+    # Enforce canonical mixed/invalid/transitional NoDir behavior before any enqueue.
+    nodir_resolve(wd, "landuse", view="effective")
 
 
 @router.post(
@@ -70,6 +78,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
     try:
         wd = get_wd(runid)
+        _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
 
         payload = await parse_request_payload(
@@ -121,44 +130,55 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
             form = await request.form()
             upload = _extract_upload(form, "input_upload_landuse")
-            filename = None
-            user_defined_fn = None
+            filename: str | None = None
+            user_defined_fn: str | None = None
 
-            if upload is not None:
-                if not upload.filename:
-                    return error_response("no filename specified", status_code=400)
+            def _mutate_landuse_user_defined() -> None:
+                nonlocal filename
+                nonlocal user_defined_fn
 
-                try:
+                if upload is not None:
+                    if not upload.filename:
+                        raise ValueError("no filename specified")
+
                     filename = secure_filename(upload.filename)
-                except Exception:
-                    return error_response_with_traceback("Could not obtain filename", status_code=400)
-                if not filename:
-                    return error_response("Could not obtain filename", status_code=400)
+                    if not filename:
+                        raise ValueError("Could not obtain filename")
 
-                user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
-                try:
+                    user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
                     with open(user_defined_fn, "wb") as dest:
                         shutil.copyfileobj(upload.file, dest)
-                except Exception:
-                    return error_response_with_traceback("Could not save file")
-            else:
-                filename = landuse.user_defined_landcover_fn
+                else:
+                    filename = landuse.user_defined_landcover_fn
+                    if filename:
+                        user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
+                    if not filename or not user_defined_fn or not _exists(user_defined_fn):
+                        raise FileNotFoundError("Could not find file")
+
+                raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
+
+                if not _exists(landuse.lc_fn):
+                    raise RuntimeError("Failed creating landuse file")
                 if filename:
-                    user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
-                if not filename or not user_defined_fn or not _exists(user_defined_fn):
-                    return error_response("Could not find file", status_code=400)
+                    landuse.user_defined_landcover_fn = filename
 
             try:
-                raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
+                mutate_root(
+                    wd,
+                    "landuse",
+                    _mutate_landuse_user_defined,
+                    purpose="rq-build-landuse-user-defined",
+                )
+            except ValueError as exc:
+                return error_response(str(exc), status_code=400)
+            except FileNotFoundError as exc:
+                return error_response(str(exc), status_code=400)
+            except NoDirError:
+                raise
             except Exception:
                 return error_response_with_traceback(
                     "Failed validating file", status_code=400
                 )
-
-            if not _exists(landuse.lc_fn):
-                return error_response("Failed creating landuse file", status_code=400)
-            if filename:
-                landuse.user_defined_landcover_fn = filename
 
         if landuse.run_group == "batch":
             return JSONResponse({"message": "Set landuse inputs for batch processing"})
@@ -172,6 +192,8 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             job = q.enqueue_call(build_landuse_rq, (runid,), timeout=RQ_TIMEOUT)
             prep.set_rq_job_id("build_landuse_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except WatershedNotAbstractedError as exc:
         return error_response(
             exc.__name__ or "Watershed Not Abstracted Error",

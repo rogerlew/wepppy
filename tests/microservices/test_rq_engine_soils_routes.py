@@ -4,6 +4,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import soils_routes
+from wepppy.nodir.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
@@ -84,3 +85,19 @@ def test_build_soils_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+
+
+def test_build_soils_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+
+    def _raise_nodir(_wd: str, _rel: str, *, view: str = "effective"):
+        raise NoDirError(http_status=500, code="NODIR_INVALID_ARCHIVE", message="invalid")
+
+    monkeypatch.setattr(soils_routes, "nodir_resolve", _raise_nodir)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-soils", json={"initial_sat": 0.5})
+
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"

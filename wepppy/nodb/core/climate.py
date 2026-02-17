@@ -1045,10 +1045,6 @@ class Climate(NoDbBase):
             self._closest_stations = None
             self._heuristic_stations = None
 
-            cli_dir = self.cli_dir
-            if not _exists(cli_dir):
-                os.mkdir(cli_dir)
-
             self._cligen_db = self.config_get_path('climate', 'cligen_db')
             assert self._cligen_db is not None
 

@@ -625,7 +625,6 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
     """
     from flask_login import current_user
     from flask import abort
-    from wepppy.weppcloud.app import get_run_owners
 
     login_manager = getattr(current_app, "login_manager", None)
     if login_manager is None:
@@ -648,6 +647,7 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
 
     # Always use the parent run path for authorization checks, not scenario paths.
     # Omni scenarios/contrasts inherit their parent run's access permissions.
+    from wepppy.weppcloud.app import get_run_owners
     wd = get_wd(auth_runid, prefer_active=False)
     owners = get_run_owners(auth_runid)
 

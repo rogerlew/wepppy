@@ -37,7 +37,9 @@ __all__ = [
     "acquire_maintenance_lock",
     "release_maintenance_lock",
     "maintenance_lock",
+    "thaw_locked",
     "thaw",
+    "freeze_locked",
     "freeze",
 ]
 
@@ -412,55 +414,31 @@ def _verify_archive(path: Path) -> None:
     )
 
 
-def thaw(wd: str | Path, root: str) -> NoDirStatePayload:
-    wd_path = Path(os.path.abspath(str(wd)))
-    normalized_root = _normalize_root(root)
+
+
+def _thaw_impl(
+    wd_path: Path,
+    normalized_root: NoDirRoot,
+    lock: NoDirMaintenanceLock,
+) -> NoDirStatePayload:
     archive_path = wd_path / f"{normalized_root}.nodir"
     dir_path = wd_path / normalized_root
     thaw_tmp = thaw_temp_path(wd_path, normalized_root)
     freeze_tmp = freeze_temp_path(wd_path, normalized_root)
+    op_id = str(uuid.uuid4())
 
-    with maintenance_lock(wd_path, normalized_root, purpose="nodir-thaw") as lock:
-        op_id = str(uuid.uuid4())
+    if freeze_tmp.exists() or freeze_tmp.is_symlink():
+        _remove_tree_or_file(freeze_tmp)
 
-        if freeze_tmp.exists() or freeze_tmp.is_symlink():
-            _remove_tree_or_file(freeze_tmp)
+    if thaw_tmp.exists() or thaw_tmp.is_symlink():
+        _remove_tree_or_file(thaw_tmp)
 
-        if thaw_tmp.exists() or thaw_tmp.is_symlink():
-            _remove_tree_or_file(thaw_tmp)
+    if not archive_path.exists():
+        raise FileNotFoundError(str(archive_path))
 
-        if not archive_path.exists():
-            raise FileNotFoundError(str(archive_path))
+    archive_fp = archive_fingerprint_from_path(archive_path)
 
-        archive_fp = archive_fingerprint_from_path(archive_path)
-
-        if dir_path.exists():
-            return _write_locked_state(
-                wd_path,
-                normalized_root,
-                state="thawed",
-                op_id=op_id,
-                dirty=True,
-                lock=lock,
-                archive_fingerprint=archive_fp,
-            )
-
-        _verify_archive(archive_path)
-
-        _write_locked_state(
-            wd_path,
-            normalized_root,
-            state="thawing",
-            op_id=op_id,
-            dirty=True,
-            lock=lock,
-            archive_fingerprint=archive_fp,
-        )
-
-        _extract_archive_to_thaw_tmp(archive_path=archive_path, thaw_tmp_path=thaw_tmp)
-        os.replace(thaw_tmp, dir_path)
-
-        final_fp = _best_effort_archive_fingerprint(archive_path, fallback=archive_fp)
+    if dir_path.exists():
         return _write_locked_state(
             wd_path,
             normalized_root,
@@ -468,83 +446,155 @@ def thaw(wd: str | Path, root: str) -> NoDirStatePayload:
             op_id=op_id,
             dirty=True,
             lock=lock,
-            archive_fingerprint=final_fp,
+            archive_fingerprint=archive_fp,
         )
+
+    _verify_archive(archive_path)
+
+    _write_locked_state(
+        wd_path,
+        normalized_root,
+        state="thawing",
+        op_id=op_id,
+        dirty=True,
+        lock=lock,
+        archive_fingerprint=archive_fp,
+    )
+
+    _extract_archive_to_thaw_tmp(archive_path=archive_path, thaw_tmp_path=thaw_tmp)
+    os.replace(thaw_tmp, dir_path)
+
+    final_fp = _best_effort_archive_fingerprint(archive_path, fallback=archive_fp)
+    return _write_locked_state(
+        wd_path,
+        normalized_root,
+        state="thawed",
+        op_id=op_id,
+        dirty=True,
+        lock=lock,
+        archive_fingerprint=final_fp,
+    )
+
+
+def thaw_locked(
+    wd: str | Path,
+    root: str,
+    *,
+    lock: NoDirMaintenanceLock,
+) -> NoDirStatePayload:
+    wd_path = Path(os.path.abspath(str(wd)))
+    normalized_root = _normalize_root(root)
+    if lock.root != normalized_root:
+        raise ValueError(
+            f"maintenance lock root mismatch: expected {normalized_root}, got {lock.root}"
+        )
+    return _thaw_impl(wd_path, normalized_root, lock)
+
+
+def thaw(wd: str | Path, root: str) -> NoDirStatePayload:
+    wd_path = Path(os.path.abspath(str(wd)))
+    normalized_root = _normalize_root(root)
+
+    with maintenance_lock(wd_path, normalized_root, purpose="nodir-thaw") as lock:
+        return _thaw_impl(wd_path, normalized_root, lock)
+
+
+def _freeze_impl(
+    wd_path: Path,
+    normalized_root: NoDirRoot,
+    lock: NoDirMaintenanceLock,
+) -> NoDirStatePayload:
+    archive_path = wd_path / f"{normalized_root}.nodir"
+    dir_path = wd_path / normalized_root
+    thaw_tmp = thaw_temp_path(wd_path, normalized_root)
+    freeze_tmp = freeze_temp_path(wd_path, normalized_root)
+    op_id = str(uuid.uuid4())
+
+    if thaw_tmp.exists() or thaw_tmp.is_symlink():
+        _remove_tree_or_file(thaw_tmp)
+
+    if freeze_tmp.exists() or freeze_tmp.is_symlink():
+        _remove_tree_or_file(freeze_tmp)
+
+    prior_state = read_state(wd_path, normalized_root, strict=False)
+    prior_dirty = True if prior_state is None else bool(prior_state.get("dirty", True))
+    prior_fp = None
+    if prior_state is not None:
+        prior_fp_raw = prior_state.get("archive_fingerprint")
+        if isinstance(prior_fp_raw, dict):
+            prior_fp = {
+                "mtime_ns": int(prior_fp_raw.get("mtime_ns", 0)),
+                "size_bytes": int(prior_fp_raw.get("size_bytes", 0)),
+            }
+
+    if not dir_path.exists():
+        if prior_state is not None and prior_state.get("state") == "freezing" and archive_path.exists():
+            _verify_archive(archive_path)
+            final_fp = archive_fingerprint_from_path(archive_path)
+            return _write_locked_state(
+                wd_path,
+                normalized_root,
+                state="archived",
+                op_id=op_id,
+                dirty=False,
+                lock=lock,
+                archive_fingerprint=final_fp,
+            )
+        raise FileNotFoundError(str(dir_path))
+    if not dir_path.is_dir():
+        raise nodir_invalid_archive(f"NoDir root is not a directory: {dir_path}")
+
+    start_fp = _best_effort_archive_fingerprint(archive_path, fallback=prior_fp)
+    _write_locked_state(
+        wd_path,
+        normalized_root,
+        state="freezing",
+        op_id=op_id,
+        dirty=prior_dirty,
+        lock=lock,
+        archive_fingerprint=start_fp,
+    )
+
+    _move_parquet_sidecars(wd_path, normalized_root, dir_path)
+    _write_archive_from_directory(
+        wd_path=wd_path,
+        root_path=dir_path,
+        tmp_archive=freeze_tmp,
+    )
+    _verify_archive(freeze_tmp)
+    os.replace(freeze_tmp, archive_path)
+    shutil.rmtree(dir_path)
+
+    final_fp = archive_fingerprint_from_path(archive_path)
+    return _write_locked_state(
+        wd_path,
+        normalized_root,
+        state="archived",
+        op_id=op_id,
+        dirty=False,
+        lock=lock,
+        archive_fingerprint=final_fp,
+    )
+
+
+def freeze_locked(
+    wd: str | Path,
+    root: str,
+    *,
+    lock: NoDirMaintenanceLock,
+) -> NoDirStatePayload:
+    wd_path = Path(os.path.abspath(str(wd)))
+    normalized_root = _normalize_root(root)
+    if lock.root != normalized_root:
+        raise ValueError(
+            f"maintenance lock root mismatch: expected {normalized_root}, got {lock.root}"
+        )
+    return _freeze_impl(wd_path, normalized_root, lock)
 
 
 def freeze(wd: str | Path, root: str) -> NoDirStatePayload:
     wd_path = Path(os.path.abspath(str(wd)))
     normalized_root = _normalize_root(root)
-    archive_path = wd_path / f"{normalized_root}.nodir"
-    dir_path = wd_path / normalized_root
-    thaw_tmp = thaw_temp_path(wd_path, normalized_root)
-    freeze_tmp = freeze_temp_path(wd_path, normalized_root)
 
     with maintenance_lock(wd_path, normalized_root, purpose="nodir-freeze") as lock:
-        op_id = str(uuid.uuid4())
-
-        if thaw_tmp.exists() or thaw_tmp.is_symlink():
-            _remove_tree_or_file(thaw_tmp)
-
-        if freeze_tmp.exists() or freeze_tmp.is_symlink():
-            _remove_tree_or_file(freeze_tmp)
-
-        prior_state = read_state(wd_path, normalized_root, strict=False)
-        prior_dirty = True if prior_state is None else bool(prior_state.get("dirty", True))
-        prior_fp = None
-        if prior_state is not None:
-            prior_fp_raw = prior_state.get("archive_fingerprint")
-            if isinstance(prior_fp_raw, dict):
-                prior_fp = {
-                    "mtime_ns": int(prior_fp_raw.get("mtime_ns", 0)),
-                    "size_bytes": int(prior_fp_raw.get("size_bytes", 0)),
-                }
-
-        if not dir_path.exists():
-            if prior_state is not None and prior_state.get("state") == "freezing" and archive_path.exists():
-                _verify_archive(archive_path)
-                final_fp = archive_fingerprint_from_path(archive_path)
-                return _write_locked_state(
-                    wd_path,
-                    normalized_root,
-                    state="archived",
-                    op_id=op_id,
-                    dirty=False,
-                    lock=lock,
-                    archive_fingerprint=final_fp,
-                )
-            raise FileNotFoundError(str(dir_path))
-        if not dir_path.is_dir():
-            raise nodir_invalid_archive(f"NoDir root is not a directory: {dir_path}")
-
-        start_fp = _best_effort_archive_fingerprint(archive_path, fallback=prior_fp)
-        _write_locked_state(
-            wd_path,
-            normalized_root,
-            state="freezing",
-            op_id=op_id,
-            dirty=prior_dirty,
-            lock=lock,
-            archive_fingerprint=start_fp,
-        )
-
-        _move_parquet_sidecars(wd_path, normalized_root, dir_path)
-        _write_archive_from_directory(
-            wd_path=wd_path,
-            root_path=dir_path,
-            tmp_archive=freeze_tmp,
-        )
-        _verify_archive(freeze_tmp)
-        os.replace(freeze_tmp, archive_path)
-        shutil.rmtree(dir_path)
-
-        final_fp = archive_fingerprint_from_path(archive_path)
-        return _write_locked_state(
-            wd_path,
-            normalized_root,
-            state="archived",
-            op_id=op_id,
-            dirty=False,
-            lock=lock,
-            archive_fingerprint=final_fp,
-        )
+        return _freeze_impl(wd_path, normalized_root, lock)

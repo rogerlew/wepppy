@@ -41,6 +41,7 @@ from wepppy.config.redis_settings import (
 from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 
 from wepppy.nodb.base import clear_locks, clear_nodb_file_cache
+from wepppy.nodir.mutations import mutate_root, mutate_roots
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
@@ -717,16 +718,19 @@ def build_channels_rq(
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        watershed = Watershed.getInstance(wd)
-        if watershed.delineation_backend_is_wbt:
-            if wbt_fill_or_breach is not None:
-                StatusMessenger.publish(status_channel, f'Setting wbt_fill_or_breach to {wbt_fill_or_breach}')
-                watershed.wbt_fill_or_breach = wbt_fill_or_breach
-            if wbt_blc_dist is not None:
-                StatusMessenger.publish(status_channel, f'Setting wbt_blc_dist to {wbt_blc_dist}')
-                watershed.wbt_blc_dist = wbt_blc_dist
-        StatusMessenger.publish(status_channel, f'Building channels with csa={csa}, mcl={mcl}')
-        watershed.build_channels(csa, mcl)
+        def _mutate_watershed() -> None:
+            watershed = Watershed.getInstance(wd)
+            if watershed.delineation_backend_is_wbt:
+                if wbt_fill_or_breach is not None:
+                    StatusMessenger.publish(status_channel, f'Setting wbt_fill_or_breach to {wbt_fill_or_breach}')
+                    watershed.wbt_fill_or_breach = wbt_fill_or_breach
+                if wbt_blc_dist is not None:
+                    StatusMessenger.publish(status_channel, f'Setting wbt_blc_dist to {wbt_blc_dist}')
+                    watershed.wbt_blc_dist = wbt_blc_dist
+            StatusMessenger.publish(status_channel, f'Building channels with csa={csa}, mcl={mcl}')
+            watershed.build_channels(csa, mcl)
+
+        mutate_root(wd, "watershed", _mutate_watershed, purpose="build-channels-rq")
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   channel_delineation BUILD_CHANNELS_TASK_COMPLETED')
         
@@ -827,8 +831,12 @@ def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:outlet'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        watershed = Watershed.getInstance(wd)
-        watershed.set_outlet(outlet_lng, outlet_lat)
+        mutate_root(
+            wd,
+            "watershed",
+            lambda: Watershed.getInstance(wd).set_outlet(outlet_lng, outlet_lat),
+            purpose="set-outlet-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   outlet SET_OUTLET_TASK_COMPLETED')
 
@@ -855,26 +863,29 @@ def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) ->
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        watershed = Watershed.getInstance(wd)
-        if updates:
-            with watershed.locked():
-                if 'clip_hillslopes' in updates:
-                    watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
-                if 'walk_flowpaths' in updates:
-                    watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
-                if 'clip_hillslope_length' in updates:
-                    watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
-                if 'mofe_target_length' in updates:
-                    watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
-                if 'mofe_buffer' in updates:
-                    watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
-                if 'mofe_buffer_length' in updates:
-                    watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
-                if 'bieger2015_widths' in updates:
-                    watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
-        watershed.build_subcatchments()
+        def _mutate_watershed() -> None:
+            watershed = Watershed.getInstance(wd)
+            if updates:
+                with watershed.locked():
+                    if 'clip_hillslopes' in updates:
+                        watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
+                    if 'walk_flowpaths' in updates:
+                        watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
+                    if 'clip_hillslope_length' in updates:
+                        watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
+                    if 'mofe_target_length' in updates:
+                        watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
+                    if 'mofe_buffer' in updates:
+                        watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
+                    if 'mofe_buffer_length' in updates:
+                        watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
+                    if 'bieger2015_widths' in updates:
+                        watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
+            watershed.build_subcatchments()
+            wait_for_path(watershed.subwta, logger=watershed.logger)
+
+        mutate_root(wd, "watershed", _mutate_watershed, purpose="build-subcatchments-rq")
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        wait_for_path(watershed.subwta, logger=watershed.logger)
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation BUILD_SUBCATCHMENTS_TASK_COMPLETED')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -897,9 +908,12 @@ def abstract_watershed_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        watershed = Watershed.getInstance(wd)
-        wait_for_path(watershed.subwta, logger=watershed.logger)
-        watershed.abstract_watershed()
+        def _mutate_watershed() -> None:
+            watershed = Watershed.getInstance(wd)
+            wait_for_path(watershed.subwta, logger=watershed.logger)
+            watershed.abstract_watershed()
+
+        mutate_root(wd, "watershed", _mutate_watershed, purpose="abstract-watershed-rq")
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation WATERSHED_ABSTRACTION_TASK_COMPLETED')
 
@@ -995,8 +1009,12 @@ def build_landuse_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:landuse'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        landuse = Landuse.getInstance(wd)
-        landuse.build()
+        mutate_root(
+            wd,
+            "landuse",
+            lambda: Landuse.getInstance(wd).build(),
+            purpose="build-landuse-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   landuse LANDUSE_BUILD_TASK_COMPLETED')
         
@@ -1016,8 +1034,12 @@ def build_treatments_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:treatments'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        treatments = Treatments.getInstance(wd)
-        treatments.build_treatments()
+        mutate_roots(
+            wd,
+            ("landuse", "soils"),
+            lambda: Treatments.getInstance(wd).build_treatments(),
+            purpose="build-treatments-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(
             status_channel,
@@ -1047,8 +1069,12 @@ def build_soils_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:soils'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        soils = Soils.getInstance(wd)
-        soils.build()
+        mutate_root(
+            wd,
+            "soils",
+            lambda: Soils.getInstance(wd).build(),
+            purpose="build-soils-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   soils SOILS_BUILD_TASK_COMPLETED')
         
@@ -1075,8 +1101,12 @@ def build_climate_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:climate'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        climate = Climate.getInstance(wd)
-        climate.build()
+        mutate_root(
+            wd,
+            "climate",
+            lambda: Climate.getInstance(wd).build(),
+            purpose="build-climate-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   climate CLIMATE_BUILD_TASK_COMPLETED')
 
@@ -1096,8 +1126,12 @@ def upload_cli_rq(runid: str, cli_filename: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:climate'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        climate = Climate.getInstance(wd)
-        climate.set_user_defined_cli(cli_filename)
+        mutate_root(
+            wd,
+            "climate",
+            lambda: Climate.getInstance(wd).set_user_defined_cli(cli_filename),
+            purpose="upload-cli-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   climate CLIMATE_BUILD_TASK_COMPLETED')
 

@@ -5,6 +5,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import watershed_routes
+from wepppy.nodir.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
@@ -587,3 +588,91 @@ def test_build_subcatchments_returns_400_for_boundary_touches_edge_exception(
     payload = response.json()
     assert payload["error"]["message"] == "WatershedBoundaryTouchesEdgeError"
     assert "WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM" in payload["error"]["details"]
+
+
+def test_fetch_dem_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        run_group = "default"
+
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    def _raise_nodir(_wd: str) -> None:
+        raise NoDirError(http_status=500, code="NODIR_INVALID_ARCHIVE", message="invalid")
+
+    monkeypatch.setattr(
+        watershed_routes,
+        "_preflight_watershed_mutation_root",
+        _raise_nodir,
+    )
+
+    payload = {
+        "map_center": [-117.52, 46.88],
+        "map_zoom": 13,
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/fetch-dem-and-build-channels", json=payload)
+
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+
+
+def test_set_outlet_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    def _raise_nodir(_wd: str) -> None:
+        raise NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
+
+    monkeypatch.setattr(
+        watershed_routes,
+        "_preflight_watershed_mutation_root",
+        _raise_nodir,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-outlet",
+            json={"latitude": 45.1, "longitude": -120.3},
+        )
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "NODIR_LOCKED"
+
+
+def test_build_subcatchments_propagates_nodir_preflight_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    def _raise_nodir(_wd: str) -> None:
+        raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed")
+
+    monkeypatch.setattr(
+        watershed_routes,
+        "_preflight_watershed_mutation_root",
+        _raise_nodir,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-subcatchments-and-abstract-watershed",
+            json={"clip_hillslopes": True},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
