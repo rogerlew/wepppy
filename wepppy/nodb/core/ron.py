@@ -51,6 +51,8 @@ import os
 import ast
 import json
 import math
+import re
+import time
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -62,9 +64,11 @@ import shutil
 import inspect
 import utm
 import requests
+import redis
 
 from wepppy.nodb.version import read_version
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import (
     RasterDatasetInterpolator,
@@ -97,6 +101,26 @@ from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
 
 DEFAULT_MAP_CENTER = [44.0, -116.0]
+_OPENTOPO_BLOCK_UNTIL_KEY = "opentopo:rate_limit:block_until"
+_OPENTOPO_MINUTE_KEY_PREFIX = "opentopo:rate_limit:minute"
+_OPENTOPO_STATUS_RE = re.compile(r"(?:status(?:[_\s]?code)?\s*[=:]?\s*)(\d{3})", re.IGNORECASE)
+_OPENTOPO_DEFAULT_MAX_REQUESTS_PER_MINUTE = 2
+_OPENTOPO_DEFAULT_BLOCK_SECONDS = 60
+_OPENTOPO_DEFAULT_PENALTY_BLOCK_SECONDS = 600
+_OPENTOPO_THROTTLE_STATUS_CODES = frozenset({401, 429})
+_OPENTOPO_BLOCK_UNTIL_MAX_LUA = """
+local key = KEYS[1]
+local requested = tonumber(ARGV[1]) or 0
+local current_raw = redis.call("GET", key)
+local current = tonumber(current_raw) or 0
+local blocked_until = requested
+if current > blocked_until then
+    blocked_until = current
+end
+local blocked_str = string.format("%.3f", blocked_until)
+redis.call("SET", key, blocked_str)
+return blocked_str
+"""
 
 __all__ = [
     'Map',
@@ -933,11 +957,10 @@ class Ron(NoDbBase):
         self._dem_is_vrt = False
 
         if self.dem_db.startswith('opentopo://'):
-            opentopo_retrieve(self.map.extent, self.dem_fn,
-                self.map.cellsize, dataset=self.dem_db, resample='bilinear')
+            self._fetch_opentopo_dem()
         else:
             wmesque_retrieve(self.dem_db, self.map.extent,
-                             self.dem_fn, self.map.cellsize, 
+                             self.dem_fn, self.map.cellsize,
                              v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
 
         assert _exists(self.dem_fn)
@@ -948,6 +971,179 @@ class Ron(NoDbBase):
             prep.timestamp(TaskEnum.fetch_dem)
         except FileNotFoundError:
             pass
+
+    def _fetch_opentopo_dem(self) -> None:
+        assert self.map is not None
+
+        max_requests_per_minute = self._parse_positive_int_env(
+            "OPENTOPO_MAX_REQUESTS_PER_MINUTE",
+            _OPENTOPO_DEFAULT_MAX_REQUESTS_PER_MINUTE,
+        )
+        base_block_seconds = self._parse_positive_int_env(
+            "OPENTOPO_BLOCK_SECONDS",
+            _OPENTOPO_DEFAULT_BLOCK_SECONDS,
+        )
+        penalty_block_seconds = self._parse_positive_int_env(
+            "OPENTOPO_PENALTY_BLOCK_SECONDS",
+            _OPENTOPO_DEFAULT_PENALTY_BLOCK_SECONDS,
+        )
+
+        conn_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+        redis_conn = redis.Redis(**conn_kwargs)
+        try:
+            self._wait_for_opentopo_slot(
+                redis_conn,
+                max_requests_per_minute=max_requests_per_minute,
+                base_block_seconds=base_block_seconds,
+            )
+            self.logger.info(
+                "OpenTopography rate gate passed (run=%s, dem_db=%s, max_per_min=%s, block_s=%s).",
+                self.wd,
+                self.dem_db,
+                max_requests_per_minute,
+                base_block_seconds,
+            )
+            try:
+                opentopo_retrieve(
+                    self.map.extent,
+                    self.dem_fn,
+                    self.map.cellsize,
+                    dataset=self.dem_db,
+                    resample='bilinear',
+                )
+            except RuntimeError as exc:
+                status_code = self._extract_status_code(exc)
+                # OpenTopography has been observed returning 401 for throttling
+                # responses where 429 would normally be expected.
+                if status_code in _OPENTOPO_THROTTLE_STATUS_CODES:
+                    now_ts = time.time()
+                    blocked_until = self._set_opentopo_block_until(
+                        redis_conn,
+                        requested_until=now_ts + float(penalty_block_seconds),
+                    )
+                    self.logger.error(
+                        "OpenTopography returned status=%s; applying penalty backoff for %.1fs "
+                        "(until=%.3f, run=%s, dem_db=%s, note=401_may_indicate_rate_limit).",
+                        status_code,
+                        max(0.0, blocked_until - now_ts),
+                        blocked_until,
+                        self.wd,
+                        self.dem_db,
+                    )
+                raise
+        finally:
+            close_fn = getattr(redis_conn, "close", None)
+            if callable(close_fn):
+                close_fn()
+
+    def _wait_for_opentopo_slot(
+        self,
+        redis_conn: redis.Redis,
+        *,
+        max_requests_per_minute: int,
+        base_block_seconds: int,
+    ) -> None:
+        while True:
+            now_ts = time.time()
+            blocked_until = self._read_blocked_until(redis_conn)
+            if blocked_until > now_ts:
+                wait_seconds = blocked_until - now_ts
+                self.logger.warning(
+                    "OpenTopography currently blocked for %.1fs (until=%.3f, run=%s).",
+                    wait_seconds,
+                    blocked_until,
+                    self.wd,
+                )
+                time.sleep(min(wait_seconds, 30.0))
+                continue
+
+            minute_key = f"{_OPENTOPO_MINUTE_KEY_PREFIX}:{int(now_ts // 60)}"
+            current_count = int(redis_conn.incr(minute_key))
+            if current_count == 1:
+                redis_conn.expire(minute_key, 180)
+
+            if current_count <= max_requests_per_minute:
+                return
+
+            blocked_until = self._set_opentopo_block_until(
+                redis_conn,
+                requested_until=now_ts + float(base_block_seconds),
+            )
+            self.logger.warning(
+                "OpenTopography request cap exceeded (%s > %s per minute); blocking for %.1fs "
+                "(until=%.3f, run=%s).",
+                current_count,
+                max_requests_per_minute,
+                max(0.0, blocked_until - now_ts),
+                blocked_until,
+                self.wd,
+            )
+
+    def _read_blocked_until(self, redis_conn: redis.Redis) -> float:
+        raw = redis_conn.get(_OPENTOPO_BLOCK_UNTIL_KEY)
+        if raw in (None, ""):
+            return 0.0
+        try:
+            blocked_until = float(raw)
+        except (TypeError, ValueError):
+            return 0.0
+        if not math.isfinite(blocked_until) or blocked_until <= 0.0:
+            return 0.0
+        return blocked_until
+
+    def _set_opentopo_block_until(self, redis_conn: redis.Redis, requested_until: float) -> float:
+        requested = float(requested_until)
+        raw_result = redis_conn.eval(
+            _OPENTOPO_BLOCK_UNTIL_MAX_LUA,
+            1,
+            _OPENTOPO_BLOCK_UNTIL_KEY,
+            f"{requested:.3f}",
+        )
+        try:
+            return float(raw_result)
+        except (TypeError, ValueError) as exc:
+            raise RuntimeError(
+                f"Unexpected Redis response while updating OpenTopography block key: {raw_result!r}"
+            ) from exc
+
+    @staticmethod
+    def _parse_positive_int_env(name: str, default: int) -> int:
+        raw = os.getenv(name)
+        if raw is None:
+            return default
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            return default
+        return value if value > 0 else default
+
+    @staticmethod
+    def _extract_status_code(exc: Exception) -> Optional[int]:
+        def _coerce_http_status(value: Any) -> Optional[int]:
+            try:
+                status_code = int(value)
+            except (TypeError, ValueError):
+                return None
+            if 100 <= status_code <= 599:
+                return status_code
+            return None
+
+        status_code = _coerce_http_status(getattr(exc, "status_code", None))
+        if status_code is not None:
+            return status_code
+
+        response = getattr(exc, "response", None)
+        status_code = _coerce_http_status(getattr(response, "status_code", None))
+        if status_code is not None:
+            return status_code
+
+        match = _OPENTOPO_STATUS_RE.search(str(exc))
+        if not match:
+            return None
+        try:
+            return int(match.group(1))
+        except (TypeError, ValueError):
+            return None
 
     def symlink_dem(
         self,
