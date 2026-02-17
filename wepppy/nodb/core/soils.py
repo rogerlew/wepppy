@@ -1187,6 +1187,7 @@ class Soils(NoDbBase):
         global wepppyo3
 
         soils_dir = self.soils_dir
+        os.makedirs(soils_dir, exist_ok=True)
         failed = True
         with self.locked():
             if initial_sat is not None:
