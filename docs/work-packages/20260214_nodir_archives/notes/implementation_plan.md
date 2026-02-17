@@ -508,27 +508,71 @@ Phase 6 exit criteria status:
 - Targeted root gate suites passed (see Stage D artifacts and all-roots review).
 - Full-suite and final docs lint evidence is complete (`wctl run-pytest tests --maxfail=1` -> `1531 passed, 27 skipped`; `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `30 files validated, 0 errors, 0 warnings`).
 
-### Phase 7: Bulk Migration Crawler + Default-to-NoDir Rollout (TODO)
+### Phase 7: Bulk Migration Crawler + Default-to-NoDir Rollout (DONE, 2026-02-17)
 Goal:
 - Archive high-fanout roots across existing runs safely, and make new runs prefer `.nodir` by default.
 
-Deliverables:
-- Crawler/migrator CLI:
-  - requires `WD/READONLY`,
-  - lock + fail-fast on active roots,
-  - resumable pass with audit logs (jsonl),
-  - `--dry-run`, `--limit`, `--runid`, `--root` filters.
+Deliverables (landed):
+- Bulk migration crawler CLI: `wepppy/tools/migrations/nodir_bulk.py`
+  - enforces `WD/READONLY` for non-dry-run mutation,
+  - fail-fast on active run locks (`lock_statuses(runid)`),
+  - fail-fast on per-root maintenance lock contention (`NODIR_LOCKED`),
+  - resumable JSONL audit logs (default resume; `--no-resume` override),
+  - required filters: `--dry-run`, `--limit`, `--runid`, `--root`.
 - “New runs default nodir” wiring:
-  - build roots normally, then freeze once ready (or build directly into `.nodir` with tmp dir),
-  - avoid creating mixed state.
+  - new-run creation paths seed per-run marker `WD/.nodir/default_archive_roots.json` in:
+    - `wepppy/microservices/rq_engine/project_routes.py`
+    - `wepppy/microservices/rq_engine/upload_huc_fire_routes.py`
+    - `wepppy/weppcloud/routes/test_bp.py`
+  - shared mutation orchestration (`wepppy/nodir/mutations.py`) now auto-freezes configured dir-form roots post-callback, preserving canonical NoDir error behavior and avoiding persistent mixed-state output.
+- Regression coverage added:
+  - `tests/tools/test_migrations_nodir_bulk.py` (dry-run/filters, resume/no-resume, readonly gate, active-run lock fail-fast, root-lock fail-fast, canonical error propagation)
+  - `tests/nodir/test_mutations.py` (default-marker/no-marker/malformed-marker flows)
+  - `tests/microservices/test_rq_engine_project_routes.py` (marker creation on run create)
+  - `tests/microservices/test_rq_engine_upload_huc_fire_routes.py` (marker creation on HUC fire upload create path)
+  - `tests/weppcloud/routes/test_test_bp.py` (test-support create-run marker seeding)
 
-Exit criteria:
-- Documented before/after inode counts and browse p95 improvements on representative runs.
-- Operational runbook: rollback, forensics (admin raw `.nodir` downloads), and audit log interpretation.
+Exit criteria status:
+- Documented before/after perf + inode evidence: complete.
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase7_perf_targets_and_results.md`
+- Operational runbook (rollback, forensics, admin raw `.nodir` download, audit interpretation): complete.
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase7_operational_runbook.md`
+- Final rollout review artifact: complete.
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase7_bulk_migration_rollout_review.md`
 
-## Perf Targets (To Define Early)
-- Browse listing p95 on a large `watershed.nodir` (both HTML and `/files` JSON).
-- Download stream throughput for a large entry (no extract).
-- Materialize(file) wall time for typical raster/shapefile.
-- Archive build time for each root at representative sizes.
-- Inode reduction per run (before/after) and NAS stat pressure notes.
+Validation evidence:
+- `wctl run-pytest tests/nodir` -> `93 passed`
+- `wctl run-pytest tests/microservices/test_browse_routes.py tests/microservices/test_browse_security.py tests/microservices/test_files_routes.py tests/microservices/test_download.py tests/microservices/test_diff_nodir.py` -> `142 passed`
+- `wctl run-pytest tests/microservices/test_rq_engine_migration_routes.py tests/tools/test_migrations_runner.py tests/tools/test_migrations_parquet_backfill.py` -> `13 passed`
+- New/modified Phase 7 tests:
+  - `wctl run-pytest tests/nodir/test_mutations.py tests/tools/test_migrations_nodir_bulk.py tests/microservices/test_rq_engine_project_routes.py tests/microservices/test_rq_engine_upload_huc_fire_routes.py tests/weppcloud/routes/test_test_bp.py` -> `22 passed`
+- Full regression gate:
+  - `wctl run-pytest tests --maxfail=1` -> `1540 passed, 27 skipped`
+
+### Phase 7 Handoff Summary
+- Rollout unit: root-scoped migration over allowlisted roots (`watershed`, `soils`, `landuse`, `climate`) using `wepppy/tools/migrations/nodir_bulk.py`.
+- Safety gates in force for non-dry-run operations:
+  - run must have `WD/READONLY`,
+  - run must have no active NoDb locks,
+  - root maintenance lock must be acquirable (`NODIR_LOCKED` fail-fast otherwise).
+- New-run default NoDir is enabled by default and can be disabled immediately with `WEPP_NODIR_DEFAULT_NEW_RUNS=0` plus service restart.
+- Crawler resume behavior is on by default and keyed by JSONL completion statuses (`archived`, `already_archive`, `missing_root`); use `--no-resume` to force replay.
+- For incident handling and rollback workflows, use:
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase7_operational_runbook.md`
+- For release-readiness and test/perf closure audit, use:
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase7_bulk_migration_rollout_review.md`
+
+### Phase 7 Performance Metrics
+
+| Metric | Target | Before | After / Result | Status |
+|---|---:|---:|---:|---|
+| Browse HTML p95 | <= 150 ms | 183.27 ms | 97.06 ms | pass |
+| `/files` JSON p95 | <= 80 ms | 211.19 ms | 54.03 ms | pass |
+| Download throughput (64 MiB stream) | >= 100 MiB/s | 139.19 MiB/s | 137.73 MiB/s | pass |
+| `materialize(file)` cache miss | <= 300 ms | n/a | 191.78 ms | pass |
+| `materialize(file)` cache hit | <= 10 ms | n/a | 2.31 ms | pass |
+| Archive build overhead (`nodir_bulk` vs direct `freeze`) | <= +15% | baseline | no positive overhead observed (worst root delta: -1.69%) | pass |
+| Inode reduction per large run | >= 95% | 10,313 entries | 11 entries (99.89% reduction) | pass |
+
+Method notes and detailed per-root timings are documented in:
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase7_perf_targets_and_results.md`

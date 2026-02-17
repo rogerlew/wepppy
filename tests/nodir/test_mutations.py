@@ -7,7 +7,12 @@ from pathlib import Path
 import pytest
 
 from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.mutations import mutate_root, mutate_roots
+from wepppy.nodir.mutations import (
+    default_archive_roots_path,
+    enable_default_archive_roots,
+    mutate_root,
+    mutate_roots,
+)
 from wepppy.nodir.state import read_state
 from wepppy.nodir.thaw_freeze import maintenance_lock_key
 
@@ -84,6 +89,79 @@ def test_mutate_root_dir_form_runs_callback_without_thaw(
     assert result == "ok"
     assert called["value"] is True
     assert lock_stub.get(maintenance_lock_key(wd, "watershed")) is None
+
+
+def test_mutate_root_dir_form_keeps_directory_without_default_marker(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+
+    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+
+    lock_stub = _RedisLockStub()
+    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+
+    def _callback() -> str:
+        (wd / "watershed" / "hillslopes").mkdir(parents=True, exist_ok=True)
+        (wd / "watershed" / "hillslopes" / "h001.slp").write_text("alpha", encoding="utf-8")
+        return "ok"
+
+    result = mutate_root(wd, "watershed", _callback, purpose="test-dir-form-dir")
+
+    assert result == "ok"
+    assert (wd / "watershed").exists()
+    assert not (wd / "watershed.nodir").exists()
+
+
+def test_mutate_root_default_archive_roots_freezes_dir_form(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+
+    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+
+    lock_stub = _RedisLockStub()
+    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    enable_default_archive_roots(wd, roots=("watershed",))
+
+    def _callback() -> str:
+        (wd / "watershed" / "hillslopes").mkdir(parents=True, exist_ok=True)
+        (wd / "watershed" / "hillslopes" / "h001.slp").write_text("alpha", encoding="utf-8")
+        return "done"
+
+    result = mutate_root(wd, "watershed", _callback, purpose="test-default-nodir")
+
+    assert result == "done"
+    assert not (wd / "watershed").exists()
+    assert (wd / "watershed.nodir").exists()
+    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+        assert "hillslopes/h001.slp" in set(zf.namelist())
+
+    state = read_state(wd, "watershed")
+    assert state is not None
+    assert state["state"] == "archived"
+    assert state["dirty"] is False
+
+
+def test_mutate_root_malformed_default_archive_marker_fails_fast(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+
+    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+
+    lock_stub = _RedisLockStub()
+    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+
+    marker_path = default_archive_roots_path(wd)
+    marker_path.parent.mkdir(parents=True, exist_ok=True)
+    marker_path.write_text("{broken-json", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="invalid NoDir defaults marker"):
+        mutate_root(wd, "watershed", lambda: None, purpose="test-default-marker-invalid")
 
 
 def test_mutate_root_archive_form_thaws_runs_and_freezes(

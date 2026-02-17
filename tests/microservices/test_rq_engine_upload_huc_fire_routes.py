@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import contextlib
+import json
 from pathlib import Path
 
 import pytest
@@ -72,3 +75,9 @@ def test_huc_fire_upload_sbs_creates_run(monkeypatch: pytest.MonkeyPatch, tmp_pa
     assert response.status_code == 200
     payload = response.json()
     assert payload["runid"] == "new-run"
+
+    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+    assert marker_path.exists()
+    marker_payload = json.loads(marker_path.read_text(encoding="utf-8"))
+    assert marker_payload["schema_version"] == 1
+    assert sorted(marker_payload["roots"]) == ["climate", "landuse", "soils", "watershed"]

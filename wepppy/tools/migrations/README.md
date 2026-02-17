@@ -129,3 +129,8 @@ The following standalone scripts are available for batch processing across multi
   - **Purpose:** migrates hardcoded paths in `.nodb` files from old server locations to new locations (e.g., `/geodata/wc1/` → `/wc1/`).
   - **Behavior:** recursively walks JSON structures to replace path prefixes. Creates `.bak` backups. Optionally clears Redis cache for the run after migration.
   - **Common flags:** `run_dir` positional, `--old-prefix` (default `/geodata/wc1`), `--new-prefix` (default `/wc1`), `--dry-run`, `--no-clear-cache`.
+
+- `nodir_bulk.py`
+  - **Purpose:** bulk-migrates allowlisted NoDir roots (`landuse`, `soils`, `climate`, `watershed`) across many runs with `READONLY` gating, fail-fast lock checks, and resumable JSONL audit logs.
+  - **Behavior:** requires `WD/READONLY` for non-dry-run mutation, fails fast on active run/root locks, writes one JSONL event per run/root, and resumes by skipping already-completed run/root pairs from prior audit logs.
+  - **Common flags:** `--runs-root` (repeatable), `--root` (repeatable NoDir root filter), `--runid` (repeatable), `--limit`, `--dry-run`, `--audit-log`, `--no-resume`, `--verbose`.

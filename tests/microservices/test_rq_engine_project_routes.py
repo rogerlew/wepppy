@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, Tuple
@@ -132,3 +133,30 @@ def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch)
     assert owner_calls["runid"] == RUN_ID
     assert owner_calls["config"] == CONFIG
     assert owner_calls["user_email"] == "tester@example.com"
+
+
+def test_create_enables_default_nodir_roots_marker(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, captured = create_client
+
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda request, token: {"success": True},
+    )
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "cap_token": "good-token"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
+    assert marker_path.exists()
+
+    payload = json.loads(marker_path.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == 1
+    assert sorted(payload["roots"]) == ["climate", "landuse", "soils", "watershed"]
