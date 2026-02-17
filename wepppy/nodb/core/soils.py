@@ -1414,6 +1414,8 @@ class Soils(NoDbBase):
         update_catalog_entry(self.wd, 'soils/soils.parquet')
         
     def _post_dump_and_unlock(self):
+        if not _exists(self.soils_dir):
+            return self
         self.dump_soils_parquet()
         return self
 

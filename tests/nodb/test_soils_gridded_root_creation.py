@@ -54,3 +54,46 @@ def test_build_gridded_creates_soils_dir_before_retrieve(
         soils._build_gridded()
 
     assert expected_soils_dir.is_dir()
+
+
+def test_post_dump_skips_parquet_when_soils_dir_missing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    soils = Soils.__new__(Soils)
+    soils.wd = str(tmp_path / "run")
+    Path(soils.wd).mkdir(parents=True, exist_ok=True)
+
+    called = {"dump": False}
+
+    def _fake_dump(_self):
+        called["dump"] = True
+
+    monkeypatch.setattr(Soils, "dump_soils_parquet", _fake_dump)
+
+    result = soils._post_dump_and_unlock()
+
+    assert result is soils
+    assert called["dump"] is False
+
+
+def test_post_dump_writes_parquet_when_soils_dir_present(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    soils = Soils.__new__(Soils)
+    soils.wd = str(tmp_path / "run")
+    Path(soils.wd).mkdir(parents=True, exist_ok=True)
+    Path(soils.soils_dir).mkdir(parents=True, exist_ok=True)
+
+    called = {"dump": False}
+
+    def _fake_dump(_self):
+        called["dump"] = True
+
+    monkeypatch.setattr(Soils, "dump_soils_parquet", _fake_dump)
+
+    result = soils._post_dump_and_unlock()
+
+    assert result is soils
+    assert called["dump"] is True
