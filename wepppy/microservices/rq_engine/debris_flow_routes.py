@@ -11,6 +11,8 @@ from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.rq.project_rq import run_debris_flow_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -34,6 +36,11 @@ def _first_value(value: Any) -> Any:
                 return candidate
         return None
     return value
+
+
+def _preflight_debris_flow_roots(wd: str) -> None:
+    nodir_resolve(wd, "watershed", view="effective")
+    nodir_resolve(wd, "soils", view="effective")
 
 
 @router.post(
@@ -64,6 +71,9 @@ async def run_debris_flow(runid: str, config: str, request: Request) -> JSONResp
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
+        wd = get_wd(runid)
+        _preflight_debris_flow_roots(wd)
+
         payload = await parse_request_payload(request)
 
         clay_pct = _first_value(payload.get("clay_pct"))
@@ -85,7 +95,6 @@ async def run_debris_flow(runid: str, config: str, request: Request) -> JSONResp
         if datasource is not None:
             datasource = str(datasource).strip() or None
 
-        wd = get_wd(runid)
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_debris)
 
@@ -111,6 +120,8 @@ async def run_debris_flow(runid: str, config: str, request: Request) -> JSONResp
             )
             prep.set_rq_job_id("run_debris_flow_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except Exception:
         logger.exception("rq-engine run-debris-flow enqueue failed")
         return error_response_with_traceback("Error Running Debris Flow")

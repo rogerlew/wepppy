@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import zipfile
 
 import pytest
 
@@ -108,3 +109,75 @@ def test_observed_model_fit_regression(observed_run: None) -> None:
             period_results = group_results[period]
             for metric, expected in expected_metrics.items():
                 assert period_results[metric] == pytest.approx(expected, rel=1e-6, abs=1e-6)
+
+
+
+@pytest.fixture()
+def allowlisted_archive_markers(observed_run: None):
+    created = []
+    for root in ("climate", "watershed", "landuse", "soils"):
+        archive_path = RUN_DIR / f"{root}.nodir"
+        if archive_path.exists():
+            pytest.skip(f"{archive_path} already exists; cannot assert archive-marker closure")
+        archive_path.write_text("not-a-valid-archive", encoding="ascii")
+        created.append(archive_path)
+
+    try:
+        yield
+    finally:
+        for archive_path in created:
+            archive_path.unlink(missing_ok=True)
+
+
+def test_observed_model_fit_with_archive_form_allowlisted_roots(
+    allowlisted_archive_markers: None,
+) -> None:
+    observed = Observed.getInstance(str(RUN_DIR))
+    textdata = OBSERVED_CSV.read_text()
+
+    observed.parse_textdata(textdata)
+    observed.calc_model_fit()
+
+    results = observed.results
+    assert results is not None
+    assert results["Hillslopes"]["Streamflow (mm)"]["Daily"]["nashsutcliffe"] == pytest.approx(
+        EXPECTED_STATS["Hillslopes"]["Daily"]["nashsutcliffe"],
+        rel=1e-6,
+        abs=1e-6,
+    )
+
+
+@pytest.fixture()
+def allowlisted_valid_archives(observed_run: None):
+    created = []
+    for root in ("climate", "watershed", "landuse", "soils"):
+        archive_path = RUN_DIR / f"{root}.nodir"
+        if archive_path.exists():
+            pytest.skip(f"{archive_path} already exists; cannot assert valid-archive closure")
+        with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_STORED) as zf:
+            zf.writestr("placeholder.txt", "placeholder")
+        created.append(archive_path)
+
+    try:
+        yield
+    finally:
+        for archive_path in created:
+            archive_path.unlink(missing_ok=True)
+
+
+def test_observed_model_fit_with_valid_archive_form_allowlisted_roots(
+    allowlisted_valid_archives: None,
+) -> None:
+    observed = Observed.getInstance(str(RUN_DIR))
+    textdata = OBSERVED_CSV.read_text()
+
+    observed.parse_textdata(textdata)
+    observed.calc_model_fit()
+
+    results = observed.results
+    assert results is not None
+    assert results["Hillslopes"]["Streamflow (mm)"]["Daily"]["nashsutcliffe"] == pytest.approx(
+        EXPECTED_STATS["Hillslopes"]["Daily"]["nashsutcliffe"],
+        rel=1e-6,
+        abs=1e-6,
+    )

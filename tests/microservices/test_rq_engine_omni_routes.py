@@ -5,6 +5,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import omni_routes
+from wepppy.nodir.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
@@ -953,3 +954,140 @@ def test_delete_omni_contrasts(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["message"] == "Delete contrasts job submitted."
     assert payload["result"]["job_id"] == "job-77"
     assert payload["result"]["queued"] is True
+
+
+@pytest.mark.parametrize(
+    ("http_status", "code"),
+    [
+        (409, "NODIR_MIXED_STATE"),
+        (500, "NODIR_INVALID_ARCHIVE"),
+        (503, "NODIR_LOCKED"),
+    ],
+)
+def test_run_omni_propagates_nodir_preflight_errors_and_skips_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+    http_status: int,
+    code: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    def _raise_nodir(_wd: str, _root: str, *, view: str = "effective") -> None:
+        raise NoDirError(http_status=http_status, code=code, message="blocked")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used when NoDir preflight fails")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "nodir_resolve", _raise_nodir)
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            json={"scenarios": [{"type": "uniform_low"}]},
+        )
+
+    assert response.status_code == http_status
+    assert response.json()["error"]["code"] == code
+    assert queue_called["called"] is False
+
+
+@pytest.mark.parametrize(
+    ("http_status", "code"),
+    [
+        (409, "NODIR_MIXED_STATE"),
+        (500, "NODIR_INVALID_ARCHIVE"),
+        (503, "NODIR_LOCKED"),
+    ],
+)
+def test_run_omni_contrasts_propagates_nodir_preflight_errors_and_skips_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+    http_status: int,
+    code: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    def _raise_nodir(_wd: str, _root: str, *, view: str = "effective") -> None:
+        raise NoDirError(http_status=http_status, code=code, message="blocked")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used when NoDir preflight fails")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "nodir_resolve", _raise_nodir)
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+        )
+
+    assert response.status_code == http_status
+    assert response.json()["error"]["code"] == code
+    assert queue_called["called"] is False
+
+
+@pytest.mark.parametrize(
+    ("http_status", "code"),
+    [
+        (409, "NODIR_MIXED_STATE"),
+        (500, "NODIR_INVALID_ARCHIVE"),
+        (503, "NODIR_LOCKED"),
+    ],
+)
+def test_run_omni_contrasts_dry_run_propagates_nodir_preflight_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    http_status: int,
+    code: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    def _raise_nodir(_wd: str, _root: str, *, view: str = "effective") -> None:
+        raise NoDirError(http_status=http_status, code=code, message="blocked")
+
+    monkeypatch.setattr(omni_routes, "nodir_resolve", _raise_nodir)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts-dry-run",
+            json={
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+        )
+
+    assert response.status_code == http_status
+    assert response.json()["error"]["code"] == code

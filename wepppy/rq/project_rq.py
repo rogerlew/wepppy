@@ -42,6 +42,7 @@ from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 
 from wepppy.nodb.base import clear_locks, clear_nodb_file_cache
 from wepppy.nodir.mutations import mutate_root, mutate_roots
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
@@ -1166,6 +1167,10 @@ def run_ash_rq(
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:ash'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        for root in ("climate", "watershed", "landuse"):
+            nodir_resolve(wd, root, view="effective")
+
         ash = Ash.getInstance(wd)
         ash.run_ash(fire_date, ini_white_ash_depth_mm, ini_black_ash_depth_mm)
 

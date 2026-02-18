@@ -16,6 +16,8 @@ from werkzeug.utils import secure_filename
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.ash_transport import Ash, AshSpatialMode
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.rq.project_rq import run_ash_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -150,6 +152,12 @@ def _first_value(value: Any) -> Any:
     return value
 
 
+def _preflight_ash_roots(wd: str) -> None:
+    nodir_resolve(wd, "climate", view="effective")
+    nodir_resolve(wd, "watershed", view="effective")
+    nodir_resolve(wd, "landuse", view="effective")
+
+
 @router.post(
     "/runs/{runid}/{config}/run-ash",
     summary="Run ash transport",
@@ -180,6 +188,7 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
 
     try:
         wd = get_wd(runid)
+        _preflight_ash_roots(wd)
         payload = await parse_request_payload(request)
 
         mode_raw = _first_value(payload.get("ash_depth_mode"))
@@ -310,6 +319,8 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
             prep.set_rq_job_id("run_ash_rq", job.id)
 
         return JSONResponse({"job_id": job.id})
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except Exception:
         logger.exception("rq-engine run-ash enqueue failed")
         return error_response_with_traceback("Error Running Ash Transport")

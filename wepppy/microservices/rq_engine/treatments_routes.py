@@ -17,6 +17,8 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Landuse, WatershedNotAbstractedError
 from wepppy.nodb.mods.treatments import Treatments, TreatmentsMode
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.rq.project_rq import build_treatments_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -38,6 +40,11 @@ def _extract_upload(form: Any, key: str) -> UploadFile | None:
     if isinstance(upload, UploadFile):
         return upload
     return None
+
+
+def _preflight_treatments_roots(wd: str) -> None:
+    nodir_resolve(wd, "landuse", view="effective")
+    nodir_resolve(wd, "soils", view="effective")
 
 
 @router.post(
@@ -69,6 +76,7 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
 
     try:
         wd = get_wd(runid)
+        _preflight_treatments_roots(wd)
         treatments = Treatments.getInstance(wd)
         landuse = Landuse.getInstance(wd)
         payload = await parse_request_payload(request)
@@ -135,6 +143,8 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
             job = q.enqueue_call(build_treatments_rq, (runid,), timeout=RQ_TIMEOUT)
             prep.set_rq_job_id("build_treatments_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except WatershedNotAbstractedError as exc:
         return error_response(
             exc.__name__ or "Watershed Not Abstracted Error",

@@ -60,6 +60,8 @@ from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.version import copy_version_for_clone
 from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.nodir.projections import with_root_projection
 from wepppy.wepp.interchange import (
     run_wepp_hillslope_interchange,
     run_wepp_watershed_tc_out_interchange,
@@ -405,6 +407,23 @@ def _run_contrast(
         if not _exists(dst):
             os.symlink(src, dst)
 
+    for root in ("landuse", "soils"):
+        resolved_root = nodir_resolve(wd, root, view="effective")
+        if resolved_root is None or resolved_root.form != "archive":
+            continue
+
+        dst_root = _join(new_wd, root)
+        if _exists(dst_root):
+            shutil.rmtree(dst_root)
+
+        with with_root_projection(
+            wd,
+            root,
+            mode="read",
+            purpose=f"omni-run-contrast-{root}",
+        ) as handle:
+            shutil.copytree(handle.mount_path, dst_root)
+
     symlink_entries = {
         'climate.nodb',
         'watershed.nodb',
@@ -569,7 +588,7 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
             if not _exists(dst):
                 os.symlink(src, dst)
 
-        elif fn in ['disturbed', 'soils', 'rap']:
+        elif fn in ['disturbed', 'rap']:
             src = _join(wd, fn)
             dst = _join(new_wd, fn)
             if not _exists(dst):
@@ -594,6 +613,23 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
                 fp.flush()                 # flush Python’s userspace buffer
                 os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
     
+    soils_root = nodir_resolve(wd, "soils", view="effective")
+    if soils_root is not None and soils_root.form == "archive":
+        dst_soils = _join(new_wd, "soils")
+        if _exists(dst_soils):
+            shutil.rmtree(dst_soils)
+        with with_root_projection(
+            wd,
+            "soils",
+            mode="read",
+            purpose="omni-clone-soils",
+        ) as handle:
+            shutil.copytree(handle.mount_path, dst_soils)
+
+    landuse_root = nodir_resolve(wd, "landuse", view="effective")
+    if landuse_root is not None and landuse_root.form == "archive":
+        os.makedirs(_join(new_wd, "landuse"), exist_ok=True)
+
     for fn in os.listdir(wd):
         if fn == '_pups':
             continue
@@ -628,6 +664,31 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
     return new_wd
 
 
+
+
+def _resolve_sibling_scenario_wd(new_wd: str, sibling_name: str) -> Path:
+    if not isinstance(sibling_name, str):
+        raise ValueError(f"Invalid sibling scenario key: {sibling_name!r}")
+
+    normalized_name = sibling_name.strip()
+    if not normalized_name:
+        raise ValueError("Sibling scenario key cannot be empty")
+    if normalized_name in {".", ".."}:
+        raise ValueError(f"Invalid sibling scenario key: {sibling_name!r}")
+    if "/" in normalized_name or "\\" in normalized_name:
+        raise ValueError(f"Invalid sibling scenario key: {sibling_name!r}")
+
+    scenarios_root = Path(new_wd).resolve().parent
+    sibling_wd = (scenarios_root / normalized_name).resolve()
+    try:
+        sibling_wd.relative_to(scenarios_root)
+    except ValueError as exc:
+        raise ValueError(
+            f"Sibling scenario path escapes scenarios root: {sibling_name!r}"
+        ) from exc
+
+    return sibling_wd
+
 def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, parent_wd: str) -> None:
     """
     after _omni_clone copies watershed, climates, wepp from the base_scenario (parent)
@@ -636,7 +697,8 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, p
     are applied to the correct scenario.
     """
     
-    sibling_wd = _join(new_wd, '..', omni_clone_sibling_name)
+    sibling_wd_path = _resolve_sibling_scenario_wd(new_wd, omni_clone_sibling_name)
+    sibling_wd = str(sibling_wd_path)
     if not _exists(sibling_wd):
         raise FileNotFoundError(f"'{sibling_wd}' not found!")
 
@@ -644,27 +706,51 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, p
 
     copy_version_for_clone(sibling_wd, new_wd)
     
+    def _remove_tree_or_file(path: str) -> None:
+        if os.path.isdir(path) and not os.path.islink(path):
+            shutil.rmtree(path)
+            return
+        if os.path.lexists(path):
+            os.remove(path)
+
     # replace disturbed, landuse, and soils
-    os.remove(_join(new_wd, 'disturbed.nodb'))
-    os.remove(_join(new_wd, 'landuse.nodb'))
-    os.remove(_join(new_wd, 'soils.nodb'))
+    for nodb_name in ('disturbed.nodb', 'landuse.nodb', 'soils.nodb'):
+        _remove_tree_or_file(_join(new_wd, nodb_name))
 
     # clear cached NoDb payloads and locks after removing the existing nodb files
     _clear_nodb_cache_and_locks(runid, pup_relpath)
 
-    shutil.rmtree(_join(new_wd, 'disturbed'))
-    shutil.rmtree(_join(new_wd, 'landuse'))
-    shutil.rmtree(_join(new_wd, 'soils'))
+    for dirname in ('disturbed', 'landuse', 'soils'):
+        _remove_tree_or_file(_join(new_wd, dirname))
+    for archive_name in ('landuse.nodir', 'soils.nodir'):
+        _remove_tree_or_file(_join(new_wd, archive_name))
 
     # copy the sibling scenario
     shutil.copyfile(_join(sibling_wd, 'disturbed.nodb'), _join(new_wd, 'disturbed.nodb'))
     shutil.copyfile(_join(sibling_wd, 'landuse.nodb'), _join(new_wd, 'landuse.nodb'))
     shutil.copyfile(_join(sibling_wd, 'soils.nodb'), _join(new_wd, 'soils.nodb'))
 
-    # copy the sibling directories
     shutil.copytree(_join(sibling_wd, 'disturbed'), _join(new_wd, 'disturbed'))
-    shutil.copytree(_join(sibling_wd, 'landuse'), _join(new_wd, 'landuse'))
-    shutil.copytree(_join(sibling_wd, 'soils'), _join(new_wd, 'soils'))
+
+    for root in ('landuse', 'soils'):
+        resolved_root = nodir_resolve(sibling_wd, root, view='effective')
+        if resolved_root is None:
+            raise FileNotFoundError(f"'{_join(sibling_wd, root)}' not found!")
+
+        dst_root = _join(new_wd, root)
+        if resolved_root.form == 'dir':
+            src_root = Path(resolved_root.dir_path)
+            if resolved_root.inner_path:
+                src_root = src_root / resolved_root.inner_path
+            shutil.copytree(str(src_root), dst_root)
+        else:
+            with with_root_projection(
+                sibling_wd,
+                root,
+                mode='read',
+                purpose=f'omni-clone-sibling-{root}',
+            ) as handle:
+                shutil.copytree(handle.mount_path, dst_root)
 
     # set wd to new_wd for the nodb files that are copied
     for fn in ['disturbed.nodb', 'landuse.nodb', 'soils.nodb']:

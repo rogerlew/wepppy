@@ -46,6 +46,7 @@ from wepppy.wepp.interchange.hill_wat_interchange import load_hill_wat_dataframe
 
 # wepppy submodules
 from wepppy.nodb.base import NoDbBase, nodb_setter, createProcessPoolExecutor
+from wepppy.nodir.wepp_inputs import with_input_file_path
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
 from wepppy.nodb.core import Watershed, Wepp, Climate, Landuse, Ron
 from wepppy.nodb.core.climate import Climate
@@ -627,7 +628,25 @@ class Ash(NoDbBase):
             landuse = Landuse.getInstance(wd)
 
             cli_path = climate.cli_path
-            cli_df = ClimateFile(cli_path).as_dataframe(calc_peak_intensities=False)
+            cli_relpath: Optional[str]
+            try:
+                cli_relpath = os.path.relpath(cli_path, wd)
+            except ValueError:
+                cli_relpath = None
+
+            if cli_relpath is None or cli_relpath == ".." or cli_relpath.startswith(f"..{os.sep}"):
+                self.logger.warning(
+                    "Ash::run_ash climate.cli_path is outside wd; using direct read: %s",
+                    cli_path,
+                )
+                cli_df = ClimateFile(cli_path).as_dataframe(calc_peak_intensities=False)
+            else:
+                with with_input_file_path(
+                    wd,
+                    cli_relpath,
+                    purpose="ash-run-climate-cli",
+                ) as projected_cli_path:
+                    cli_df = ClimateFile(projected_cli_path).as_dataframe(calc_peak_intensities=False)
 
             if self.ash_load_fn is not None:
                 self.logger.info(f"  Reading ash load map {self.ash_load_fn}\n")

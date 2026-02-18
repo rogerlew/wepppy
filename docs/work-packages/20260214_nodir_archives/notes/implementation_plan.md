@@ -1038,3 +1038,130 @@ Closeout verification (2026-02-18):
 Revision cut line:
 - Do not rewrite Phase 6 execution history or test evidence.
 - Apply explicit addenda and contract-language substitutions so historical results remain auditable.
+
+### Phase 10: NoDir Adoption for Treatments/Ash/Debris/Omni/Observed (COMPLETED, 2026-02-18)
+Goal:
+- Close remaining `.nodir` compatibility gaps for workflow surfaces outside the core Phase 9 WEPP/RQ migration path:
+  - treatments,
+  - ash transport (`watar`),
+  - debris flow,
+  - omni scenarios/contrasts,
+  - observed model-fit/report flows.
+
+Scope constraints:
+- Keep NoDir root allowlist unchanged (`landuse`, `soils`, `climate`, `watershed`) unless a contract change is explicitly approved.
+- Prioritize smallest-path fixes for confirmed failures; avoid broad abstractions.
+- Preserve canonical NoDir errors (`409 NODIR_MIXED_STATE`, `500 NODIR_INVALID_ARCHIVE`, `503 NODIR_LOCKED`).
+
+Initial touchpoint review snapshot (2026-02-18):
+- Treatments:
+  - `wepppy/rq/project_rq.py` (`build_treatments_rq`) already owns cross-root mutation via `mutate_roots(..., ("landuse", "soils"), ...)`.
+  - `wepppy/microservices/rq_engine/treatments_routes.py` currently lacks route-level NoDir preflight for `landuse`/`soils`.
+  - `wepppy/nodb/mods/treatments/treatments.py` writes directly under `WD/landuse` and `WD/soils` (must remain owner-wrapped).
+- Ash transport (`watar`):
+  - `wepppy/microservices/rq_engine/ash_routes.py` currently lacks route-level NoDir preflight for read dependencies.
+  - `wepppy/rq/project_rq.py` (`run_ash_rq`) calls `Ash.run_ash(...)` without explicit root preflight.
+  - `wepppy/nodb/mods/ash_transport/ash.py` uses path-heavy `climate.cli_path` reads; candidate for projection-aware file-path helper adoption.
+- Debris flow:
+  - `wepppy/microservices/rq_engine/debris_flow_routes.py` currently lacks route-level NoDir preflight.
+  - `wepppy/rq/project_rq.py` (`run_debris_flow_rq`) and `wepppy/nodb/mods/debris_flow/debris_flow.py` consume `watershed`/`soils`; inventory must confirm path assumptions remain sidecar-safe.
+- Omni scenarios/contrasts:
+  - `wepppy/microservices/rq_engine/omni_routes.py` currently lacks canonical NoDir preflight for dependent roots.
+  - `wepppy/nodb/mods/omni/omni.py` clone/contrast paths (`_omni_clone`, `_omni_clone_sibling`, `_run_contrast`, scenario treatment paths) still assume mixed dir-copy semantics for `landuse`/`soils`.
+  - Existing `.nodir` coverage is partial (shared `climate`/`watershed` archive symlink tests only).
+- Observed:
+  - `wepppy/weppcloud/routes/nodb_api/observed_bp.py` and `wepppy/nodb/mods/observed/observed.py` primarily consume `observed/` + `wepp/output` assets.
+  - Inventory still required to confirm whether any allowlisted-root path assumptions are transitively hit in observed workflows when roots are archive form.
+
+#### Phase 10A: Touchpoint Inventory + Contract Mapping
+Deliverables:
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase10_mod_workflow_touchpoints_stage_a.md`
+  - Per-surface touchpoint table (`route`, `RQ`, `NoDb/controller`, `filesystem boundary`).
+  - Root-dependency classification (`landuse`, `soils`, `climate`, `watershed`) and behavior class (`read`, `mutate`, `FS-boundary`, `serialized-path hazard`).
+  - Readiness classification (`archive-ready`, `projection-helper required`, `owner-wrap required`, `blocked`).
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase10_mod_workflow_contract_notes.md`
+  - Explicit mapping to projection-era semantics for each touchpoint (`read projection`, `mutation projection`, or `no NoDir dependency`).
+
+Exit criteria:
+- Every target workflow path named above is inventoried and assigned an owner wave.
+- Any required contract change is called out explicitly before implementation.
+
+#### Phase 10B: Implementation Waves
+Wave 1 (route/RQ preflight hardening):
+- Add canonical NoDir preflight for dependent allowlisted roots in:
+  - `wepppy/microservices/rq_engine/treatments_routes.py`
+  - `wepppy/microservices/rq_engine/ash_routes.py`
+  - `wepppy/microservices/rq_engine/debris_flow_routes.py`
+  - `wepppy/microservices/rq_engine/omni_routes.py`
+- Ensure canonical status/code propagation at route boundaries (no silent enqueue of mixed/invalid/transitional root states).
+
+Wave 2 (path-heavy read patching):
+- Patch confirmed path-only archive-read consumers to use projection-aware helpers (or explicit materialize fallback only where required), starting with:
+  - `wepppy/nodb/mods/ash_transport/ash.py` climate CLI access path.
+- Keep fallback behavior explicit and logged.
+
+Wave 3 (omni clone/contrast root-form normalization):
+- Make scenario/contrast clone paths robust when source runs are in archive form for allowlisted roots:
+  - `_omni_clone`
+  - `_omni_clone_sibling`
+  - `_run_contrast`
+- Keep scenario-local mutation semantics deterministic (no mutation of shared source roots).
+- Preserve existing symlink security constraints and `_pups` path policy.
+
+Wave 4 (observed closure + final hardening):
+- Validate observed workflow behavior under archive-form allowlisted roots.
+- Apply minimal fixes only if concrete observed-path failures are found.
+- Capture rollback/forensics notes for mod-workflow incidents.
+
+#### Phase 10C: Validation Gates
+Targeted gates (minimum):
+1. `wctl run-pytest tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_debris_flow_routes.py tests/microservices/test_rq_engine_omni_routes.py`
+2. `wctl run-pytest tests/rq/test_project_rq_debris_flow.py`
+3. `wctl run-pytest tests/nodb/mods/test_treatments_build.py tests/nodb/mods/test_omni.py tests/nodb/mods/test_observed_processing.py`
+4. `wctl run-pytest tests/weppcloud/routes/test_treatments_bp.py tests/weppcloud/routes/test_debris_flow_bp.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_observed_bp.py`
+5. `wctl run-pytest tests --maxfail=1`
+6. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives`
+
+Required additions to coverage:
+- New route-level assertions for canonical NoDir error propagation in treatments/ash/debris/omni enqueue surfaces.
+- New omni clone/contrast tests covering archive-form source roots beyond current `climate.nodir`/`watershed.nodir` link checks.
+- Observed workflow regression proving behavior with archive-form allowlisted roots (or documenting no dependency if confirmed).
+
+#### Phase 10D: Completion Criteria
+- Target workflow surfaces are compatible with archive-form allowlisted roots under projection-era contracts.
+- Route/RQ boundaries return canonical NoDir status/code payloads for mixed/invalid/transitional states.
+- Omni scenario/contrast clone flows handle dir/archive source-root forms without unmanaged mixed-state drift.
+- Full validation gates pass and Phase 10 artifacts are published:
+  - `phase10_mod_workflow_touchpoints_stage_a.md`
+  - `phase10_mod_workflow_contract_notes.md`
+  - `phase10_mod_workflow_rollout_review.md`
+
+Operational note:
+- If enqueue edges or dependency relationships change while implementing this phase, update `wepppy/rq/job-dependencies-catalog.md` in the same change.
+
+### Phase 10 Handoff Summary (2026-02-18)
+Delivered scope:
+- Wave 1: Added canonical NoDir preflight + route-boundary canonical error propagation for treatments, ash, debris flow, and omni enqueue/dry-run surfaces.
+- Wave 2: Hardened ash climate CLI reads with projection-aware `with_input_file_path(...)` usage and explicit outside-WD fallback logging; added `run_ash_rq` NoDir preflight for dependent read roots.
+- Wave 3: Normalized omni clone/contrast root-form handling for archive-form `landuse`/`soils`, and enforced `_pups/omni/scenarios` sibling path policy in `_omni_clone_sibling`.
+- Wave 4: Added observed closure regressions demonstrating no transitive dependency on allowlisted roots with both archive-marker and valid-archive `.nodir` forms.
+
+Validation evidence:
+1. `wctl run-pytest tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_debris_flow_routes.py tests/microservices/test_rq_engine_omni_routes.py` -> `55 passed, 3 warnings in 13.18s`.
+2. `wctl run-pytest tests/rq/test_project_rq_debris_flow.py tests/rq/test_project_rq_ash.py` -> `4 passed, 3 warnings in 10.09s`.
+3. `wctl run-pytest tests/nodb/mods/test_ash_transport_run_ash.py tests/nodb/mods/test_treatments_build.py tests/nodb/mods/test_omni.py tests/nodb/mods/test_observed_processing.py` -> `48 passed, 5 warnings in 17.21s`.
+4. `wctl run-pytest tests/weppcloud/routes/test_treatments_bp.py tests/weppcloud/routes/test_debris_flow_bp.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_observed_bp.py` -> `13 passed, 3 warnings in 9.04s`.
+5. `wctl run-pytest tests --maxfail=1` -> `1648 passed, 27 skipped, 54 warnings in 331.15s`.
+
+Completion criteria status:
+- Archive-form compatibility across Phase 10 target surfaces: complete.
+- Canonical NoDir status/code propagation at route/RQ boundaries: complete.
+- Omni clone/contrast dir/archive normalization + scenario isolation: complete.
+- Validation gates: complete.
+- Phase 10 artifacts published:
+  - `phase10_mod_workflow_touchpoints_stage_a.md`
+  - `phase10_mod_workflow_contract_notes.md`
+  - `phase10_mod_workflow_rollout_review.md`
+
+Operational outcomes:
+- No enqueue/dependency edge changes were introduced in this phase; `wepppy/rq/job-dependencies-catalog.md` remained unchanged.

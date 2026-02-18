@@ -2133,3 +2133,198 @@ def test_stream_order_contrasts_grouping_and_skip(tmp_path, omni_module, monkeyp
     skipped = next(item for item in report["items"] if item["contrast_id"] == 5)
     assert skipped["run_status"] == "skipped"
     assert skipped["skip_status"]["reason"] == "no_hillslopes"
+
+
+def test_omni_clone_copies_soils_from_archive_source(tmp_path: Path, omni_module, monkeypatch):
+    base_wd = tmp_path / "run"
+    base_wd.mkdir()
+    (base_wd / "dem").mkdir()
+    (base_wd / "climate").mkdir()
+    (base_wd / "watershed").mkdir()
+    (base_wd / "soils.nodir").write_text("archive", encoding="ascii")
+
+    projected_soils = tmp_path / "projected-soils"
+    projected_soils.mkdir()
+    (projected_soils / "soils.parquet").write_text("soils", encoding="ascii")
+
+    def _resolve(wd: str, rel: str, view: str = "effective"):
+        if wd == str(base_wd) and rel == "soils":
+            return types.SimpleNamespace(form="archive")
+        return None
+
+    @contextmanager
+    def _projection(wd: str, root: str, *, mode: str, purpose: str):
+        assert wd == str(base_wd)
+        assert root == "soils"
+        assert mode == "read"
+        yield types.SimpleNamespace(mount_path=str(projected_soils))
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+    monkeypatch.setattr(omni_module, "with_root_projection", _projection)
+
+    scenario_wd = Path(omni_module._omni_clone({"type": "dummy"}, str(base_wd), runid="run-123"))
+
+    assert (scenario_wd / "soils").is_dir()
+    assert (scenario_wd / "soils" / "soils.parquet").read_text(encoding="ascii") == "soils"
+
+
+def test_omni_clone_sibling_copies_archive_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
+    parent_wd = tmp_path / "run"
+    new_wd = parent_wd / "_pups" / "omni" / "scenarios" / "target"
+    sibling_wd = parent_wd / "_pups" / "omni" / "scenarios" / "sibling"
+    new_wd.mkdir(parents=True)
+    sibling_wd.mkdir(parents=True)
+
+    for name in ("disturbed", "landuse", "soils"):
+        (new_wd / f"{name}.nodb").write_text(json.dumps({"wd": str(new_wd)}), encoding="ascii")
+        (sibling_wd / f"{name}.nodb").write_text(json.dumps({"wd": str(sibling_wd)}), encoding="ascii")
+
+    for dirname in ("disturbed", "landuse", "soils"):
+        (new_wd / dirname).mkdir()
+        (new_wd / dirname / "old.txt").write_text("old", encoding="ascii")
+
+    (sibling_wd / "disturbed").mkdir()
+    (sibling_wd / "disturbed" / "disturbed.txt").write_text("disturbed", encoding="ascii")
+    (sibling_wd / "landuse.nodir").write_text("landuse", encoding="ascii")
+    (sibling_wd / "soils.nodir").write_text("soils", encoding="ascii")
+
+    projected_landuse = tmp_path / "projected-landuse"
+    projected_soils = tmp_path / "projected-soils"
+    projected_landuse.mkdir()
+    projected_soils.mkdir()
+    (projected_landuse / "landuse.txt").write_text("landuse", encoding="ascii")
+    (projected_soils / "soils.txt").write_text("soils", encoding="ascii")
+
+    monkeypatch.setattr(omni_module, "copy_version_for_clone", lambda src, dst: None)
+    monkeypatch.setattr(omni_module, "_clear_nodb_cache_and_locks", lambda runid, pup_relpath=None: None)
+
+    def _resolve(wd: str, rel: str, view: str = "effective"):
+        if Path(wd).resolve() == sibling_wd.resolve() and rel in {"landuse", "soils"}:
+            return types.SimpleNamespace(form="archive")
+        return None
+
+    @contextmanager
+    def _projection(wd: str, root: str, *, mode: str, purpose: str):
+        assert Path(wd).resolve() == sibling_wd.resolve()
+        assert mode == "read"
+        if root == "landuse":
+            yield types.SimpleNamespace(mount_path=str(projected_landuse))
+            return
+        if root == "soils":
+            yield types.SimpleNamespace(mount_path=str(projected_soils))
+            return
+        raise AssertionError(root)
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+    monkeypatch.setattr(omni_module, "with_root_projection", _projection)
+
+    omni_module._omni_clone_sibling(str(new_wd), "sibling", runid="run-123", parent_wd=str(parent_wd))
+
+    assert (new_wd / "disturbed" / "disturbed.txt").read_text(encoding="ascii") == "disturbed"
+    assert (new_wd / "landuse" / "landuse.txt").read_text(encoding="ascii") == "landuse"
+    assert (new_wd / "soils" / "soils.txt").read_text(encoding="ascii") == "soils"
+
+    for name in ("disturbed", "landuse", "soils"):
+        payload = json.loads((new_wd / f"{name}.nodb").read_text(encoding="ascii"))
+        assert payload["wd"] == str(new_wd)
+
+
+def test_run_contrast_copies_archive_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
+    wd = tmp_path / "run"
+    (wd / "climate").mkdir(parents=True)
+    (wd / "watershed").mkdir(parents=True)
+    (wd / "wepp" / "runs").mkdir(parents=True)
+    (wd / "wepp" / "output").mkdir(parents=True)
+    (wd / "wepp" / "runs" / "H1.run").write_text("run", encoding="ascii")
+
+    (wd / "landuse.nodir").write_text("landuse", encoding="ascii")
+    (wd / "soils.nodir").write_text("soils", encoding="ascii")
+
+    projected_landuse = tmp_path / "contrast-projected-landuse"
+    projected_soils = tmp_path / "contrast-projected-soils"
+    projected_landuse.mkdir()
+    projected_soils.mkdir()
+    (projected_landuse / "landuse.txt").write_text("landuse", encoding="ascii")
+    (projected_soils / "soils.txt").write_text("soils", encoding="ascii")
+
+    monkeypatch.setattr(omni_module, "copy_version_for_clone", lambda src, dst: None)
+    monkeypatch.setattr(omni_module, "_clear_nodb_cache_and_locks", lambda runid, pup_relpath=None: None)
+    monkeypatch.setattr(omni_module, "_resolve_base_scenario_key", lambda wd: "undisturbed")
+    monkeypatch.setattr(omni_module, "pick_existing_parquet_path", lambda *_args, **_kwargs: "/tmp/mock.parquet")
+    monkeypatch.setattr(omni_module, "_merge_contrast_parquet", lambda **kwargs: None)
+    monkeypatch.setattr(omni_module, "_apply_contrast_output_triggers", lambda *args, **kwargs: None)
+    monkeypatch.setattr(omni_module, "_post_watershed_run_cleanup", lambda *args, **kwargs: None)
+
+    def _resolve(wd_path: str, rel: str, view: str = "effective"):
+        if wd_path == str(wd) and rel in {"landuse", "soils"}:
+            return types.SimpleNamespace(form="archive")
+        return None
+
+    @contextmanager
+    def _projection(wd_path: str, root: str, *, mode: str, purpose: str):
+        assert wd_path == str(wd)
+        assert mode == "read"
+        if root == "landuse":
+            yield types.SimpleNamespace(mount_path=str(projected_landuse))
+            return
+        if root == "soils":
+            yield types.SimpleNamespace(mount_path=str(projected_soils))
+            return
+        raise AssertionError(root)
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+    monkeypatch.setattr(omni_module, "with_root_projection", _projection)
+
+    class DummyWepp:
+        def __init__(self, run_wd: str):
+            self.runs_dir = str(Path(run_wd) / "wepp" / "runs")
+            self.output_dir = str(Path(run_wd) / "wepp" / "output")
+            self.baseflow_opts = object()
+            self.wepp_interchange_dir = str(Path(run_wd) / "wepp" / "output" / "interchange")
+            self.wepp_bin = None
+
+        def clean(self):
+            Path(self.runs_dir).mkdir(parents=True, exist_ok=True)
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True)
+
+        def make_watershed_run(self, **kwargs):
+            return None
+
+        def run_watershed(self):
+            return None
+
+        def report_loss(self):
+            return None
+
+    import wepppy.nodb.core as nodb_core
+
+    monkeypatch.setattr(nodb_core.Wepp, "getInstance", lambda run_wd: DummyWepp(run_wd))
+
+    new_wd = Path(
+        omni_module._run_contrast(
+            contrast_id="1",
+            contrast_name="demo",
+            contrasts={10: str(wd / "wepp" / "output" / "H1")},
+            wd=str(wd),
+            runid="run-123",
+            control_scenario_key="undisturbed",
+            contrast_scenario_key="undisturbed",
+        )
+    )
+
+    assert (new_wd / "landuse" / "landuse.txt").read_text(encoding="ascii") == "landuse"
+    assert (new_wd / "soils" / "soils.txt").read_text(encoding="ascii") == "soils"
+
+
+def test_omni_clone_sibling_rejects_path_traversal(tmp_path: Path, omni_module):
+    parent_wd = tmp_path / "run"
+    new_wd = parent_wd / "_pups" / "omni" / "scenarios" / "target"
+    new_wd.mkdir(parents=True)
+
+    with pytest.raises(ValueError, match="Invalid sibling scenario key"):
+        omni_module._omni_clone_sibling(
+            str(new_wd),
+            "../escape",
+            runid="run-123",
+            parent_wd=str(parent_wd),
+        )
