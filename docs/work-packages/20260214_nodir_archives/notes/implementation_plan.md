@@ -1173,3 +1173,19 @@ Phase 10C execution refresh (2026-02-18, post-valid-archive observed closure tes
 - `wctl run-pytest tests/weppcloud/routes/test_treatments_bp.py tests/weppcloud/routes/test_debris_flow_bp.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_observed_bp.py` -> `13 passed, 3 warnings in 9.05s`.
 - `wctl run-pytest tests --maxfail=1` -> `1649 passed, 27 skipped, 54 warnings in 333.13s`.
 - `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `52 files validated, 0 errors, 0 warnings`.
+
+Phase 10C follow-up hardening refresh (2026-02-18, missed callsites closure):
+- Added explicit non-route Omni preflight in `wepppy/rq/omni_rq.py` (`climate`, `watershed`, `landuse`, `soils`).
+- Added explicit PATH CE preflight in `wepppy/rq/path_ce_rq.py` before `omni.run_omni_scenarios()`.
+- Added explicit debris-flow RQ preflight parity in `wepppy/rq/project_rq.py` (`watershed`, `soils`).
+- Updated legacy ash hillslope route `wepppy/weppcloud/routes/nodb_api/watar_bp.py` to use projection-aware CLI reads (`with_input_file_path`) with canonical `NoDirError` propagation.
+- Added regression suites:
+  - `tests/rq/test_omni_rq.py`
+  - `tests/rq/test_path_ce_rq.py`
+  - `tests/weppcloud/routes/test_watar_bp.py`
+  - expanded `tests/rq/test_project_rq_debris_flow.py`
+- Validation evidence:
+  1. `wctl run-pytest tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_debris_flow_routes.py tests/microservices/test_rq_engine_omni_routes.py` -> `55 passed, 3 warnings in 13.83s`.
+  2. `wctl run-pytest tests/rq/test_project_rq_ash.py tests/rq/test_project_rq_debris_flow.py tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py` -> `9 passed, 6 warnings in 10.60s`.
+  3. `wctl run-pytest tests/weppcloud/routes/test_treatments_bp.py tests/weppcloud/routes/test_debris_flow_bp.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_observed_bp.py tests/weppcloud/routes/test_watar_bp.py` -> `15 passed, 3 warnings in 10.15s`.
+  4. `wctl run-pytest tests --maxfail=1` -> `1656 passed, 27 skipped, 57 warnings in 330.44s`.

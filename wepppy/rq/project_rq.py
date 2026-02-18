@@ -1208,6 +1208,10 @@ def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = Non
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:debris_flow'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        for root in ("watershed", "soils"):
+            nodir_resolve(wd, root, view="effective")
+
         debris = DebrisFlow.getInstance(wd)
 
         options = payload or {}

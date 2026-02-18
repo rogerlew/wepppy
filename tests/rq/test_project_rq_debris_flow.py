@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from tests.factories.singleton import singleton_factory
+from wepppy.nodir.errors import NoDirError
 
 pytestmark = pytest.mark.unit
 
@@ -42,26 +43,47 @@ def debris_flow_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     return project, debris_flow_cls, redis_prep_cls, published, tmp_path
 
 
-def test_run_debris_flow_rq_passes_payload(debris_flow_rq_environment):
+def test_run_debris_flow_rq_passes_payload(
+    debris_flow_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+):
     project, debris_cls, redis_cls, published, base_path = debris_flow_rq_environment
+
+    preflight_calls = []
+
+    def _resolve(wd: str, root: str, view: str = "effective"):
+        preflight_calls.append((wd, root, view))
+
+    monkeypatch.setattr(project, "nodir_resolve", _resolve)
 
     project.run_debris_flow_rq(
         "demo",
         payload={"clay_pct": 5.1, "liquid_limit": 12.3, "datasource": "Holden"},
     )
 
-    debris_instance = debris_cls.getInstance(str(base_path / "demo"))
+    run_wd = str(base_path / "demo")
+    assert preflight_calls == [
+        (run_wd, "watershed", "effective"),
+        (run_wd, "soils", "effective"),
+    ]
+
+    debris_instance = debris_cls.getInstance(run_wd)
     assert debris_instance.calls == [(5.1, 12.3, "Holden")]
 
-    prep_instance = redis_cls.getInstance(str(base_path / "demo"))
+    prep_instance = redis_cls.getInstance(run_wd)
     assert project.TaskEnum.run_debris in prep_instance.timestamps
     assert project.TaskEnum.run_watar in prep_instance.timestamps
 
     assert any("TRIGGER   debris_flow DEBRIS_FLOW_RUN_TASK_COMPLETED" in message for _, message in published)
 
 
-def test_run_debris_flow_rq_defaults_to_none(debris_flow_rq_environment):
-    project, debris_cls, redis_cls, published, base_path = debris_flow_rq_environment
+def test_run_debris_flow_rq_defaults_to_none(
+    debris_flow_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    project, debris_cls, redis_cls, _published, base_path = debris_flow_rq_environment
+
+    monkeypatch.setattr(project, "nodir_resolve", lambda wd, root, view="effective": None)
 
     project.run_debris_flow_rq("demo")
 
@@ -71,3 +93,29 @@ def test_run_debris_flow_rq_defaults_to_none(debris_flow_rq_environment):
     prep_instance = redis_cls.getInstance(str(base_path / "demo"))
     assert project.TaskEnum.run_debris in prep_instance.timestamps
     assert project.TaskEnum.run_watar in prep_instance.timestamps
+
+
+def test_run_debris_flow_rq_stops_on_nodir_preflight_error(
+    debris_flow_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    project, debris_cls, _redis_cls, published, base_path = debris_flow_rq_environment
+
+    def _raise_on_watershed(wd: str, root: str, view: str = "effective"):
+        if root == "watershed":
+            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+        return None
+
+    monkeypatch.setattr(project, "nodir_resolve", _raise_on_watershed)
+
+    with pytest.raises(NoDirError) as exc_info:
+        project.run_debris_flow_rq("demo")
+
+    assert exc_info.value.code == "NODIR_MIXED_STATE"
+
+    run_wd = str(base_path / "demo")
+    if run_wd in debris_cls._instances:
+        debris_instance = debris_cls.getInstance(run_wd)
+        assert debris_instance.calls == []
+
+    assert any("EXCEPTION run_debris_flow_rq(demo)" in message for _, message in published)
