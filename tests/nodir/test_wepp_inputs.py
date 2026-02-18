@@ -328,6 +328,37 @@ def test_with_input_file_path_projection_disabled_requires_explicit_fallback(
             pass
 
 
+def test_with_input_file_path_projection_disabled_fallback_logs_warning(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    wd = tmp_path
+    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+
+    import wepppy.nodir.wepp_inputs as wepp_inputs_mod
+
+    def _fake_materialize(wd_arg: str, rel_arg: str, *, purpose: str) -> str:
+        dst = Path(wd_arg) / "fallback-disabled" / "h001.slp"
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text("fallback", encoding="utf-8")
+        return str(dst)
+
+    monkeypatch.setattr(wepp_inputs_mod, "materialize_input_file", _fake_materialize)
+
+    with caplog.at_level("WARNING", logger=wepp_inputs_mod.__name__):
+        with with_input_file_path(
+            str(wd),
+            "watershed/hillslopes/h001.slp",
+            purpose="test-projection-disabled-fallback",
+            use_projection=False,
+            allow_materialize_fallback=True,
+        ) as src_fn:
+            assert Path(src_fn).read_text(encoding="utf-8") == "fallback"
+
+    assert "fallback to materialize (projection disabled)" in caplog.text
+
+
 def test_with_input_file_path_mixed_state_preserves_canonical_error(
     tmp_path: Path,
 ) -> None:
@@ -356,3 +387,39 @@ def test_with_input_file_path_invalid_archive_preserves_canonical_error(
 
     assert exc.value.http_status == 500
     assert exc.value.code == "NODIR_INVALID_ARCHIVE"
+
+
+def test_with_input_file_path_projection_error_fallback_logs_warning(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    wd = tmp_path
+    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+
+    import wepppy.nodir.wepp_inputs as wepp_inputs_mod
+
+    @contextmanager
+    def _fail_projection(*_args, **_kwargs):
+        raise nodir_locked("projection lock is held")
+        yield  # pragma: no cover
+
+    def _fake_materialize(wd_arg: str, rel_arg: str, *, purpose: str) -> str:
+        dst = Path(wd_arg) / "fallback" / "h001.slp"
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text("fallback", encoding="utf-8")
+        return str(dst)
+
+    monkeypatch.setattr(wepp_inputs_mod, "with_root_projection", _fail_projection)
+    monkeypatch.setattr(wepp_inputs_mod, "materialize_input_file", _fake_materialize)
+
+    with caplog.at_level("WARNING", logger=wepp_inputs_mod.__name__):
+        with with_input_file_path(
+            str(wd),
+            "watershed/hillslopes/h001.slp",
+            purpose="test-fallback-log",
+            allow_materialize_fallback=True,
+        ) as src_fn:
+            assert Path(src_fn).read_text(encoding="utf-8") == "fallback"
+
+    assert "fallback to materialize (projection error)" in caplog.text

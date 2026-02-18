@@ -76,6 +76,10 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.io_wait import wait_for_path, wait_for_paths
 
+from wepppy.nodir.errors import nodir_mixed_state
+from wepppy.nodir.fs import resolve
+from wepppy.nodir.projections import with_root_projection
+
 from wepppy.export.prep_details import (
     export_channels_prep_details,
     export_hillslopes_prep_details
@@ -148,6 +152,26 @@ def _assert_supported_climate(climate: Climate) -> None:
     if climate.is_single_storm:
         raise ValueError(_SINGLE_STORM_DEPRECATED_MESSAGE)
 
+
+@contextlib.contextmanager
+def _with_stage_read_projections(
+    wd: str,
+    *,
+    roots: tuple[str, ...],
+    purpose: str,
+):
+    with contextlib.ExitStack() as stack:
+        for root in roots:
+            target = resolve(wd, root, view="archive")
+            if target is None:
+                continue
+
+            mount_path = Path(wd) / root
+            if mount_path.exists() and not mount_path.is_symlink():
+                raise nodir_mixed_state(f"{root} is in mixed state (dir + .nodir present)")
+
+            stack.enter_context(with_root_projection(wd, root, mode="read", purpose=purpose))
+        yield
 
 
 def _safe_int(value: Any) -> int | None:
@@ -1329,7 +1353,12 @@ def _prep_multi_ofe_rq(runid: str) -> None:
         wepp = Wepp.getInstance(wd)
         watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
-        wepp._prep_multi_ofe(translator)
+        with _with_stage_read_projections(
+            wd,
+            roots=("watershed", "soils", "landuse"),
+            purpose=f"{func_name}:{runid}",
+        ):
+            wepp._prep_multi_ofe(translator)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -1355,7 +1384,12 @@ def _prep_slopes_rq(runid: str) -> None:
         wepp = Wepp.getInstance(wd)
         watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
-        wepp._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
+        with _with_stage_read_projections(
+            wd,
+            roots=("watershed",),
+            purpose=f"{func_name}:{runid}",
+        ):
+            wepp._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -1403,7 +1437,12 @@ def _run_flowpaths_rq(runid: str) -> None:
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
-        wepp.prep_and_run_flowpaths()
+        with _with_stage_read_projections(
+            wd,
+            roots=("watershed",),
+            purpose=f"{func_name}:{runid}",
+        ):
+            wepp.prep_and_run_flowpaths()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -1571,7 +1610,12 @@ def _prep_watershed_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
 
-        wepp.prep_watershed()
+        with _with_stage_read_projections(
+            wd,
+            roots=("watershed",),
+            purpose=f"{func_name}:{runid}",
+        ):
+            wepp.prep_watershed()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

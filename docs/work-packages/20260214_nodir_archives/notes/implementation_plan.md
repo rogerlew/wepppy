@@ -779,7 +779,7 @@ Completion criteria status:
 - Perf + reliability evidence documented: complete.
 - Required regression and docs gates passing: complete.
 
-### Phase 9: Canonical Root Projection Sessions (PLANNED)
+### Phase 9: Canonical Root Projection Sessions (DONE, 2026-02-18)
 Goal:
 - Make `WD/<root>` the canonical runtime path for allowlisted roots by projecting `WD/<root>.nodir` through managed mount sessions.
 - Eliminate high-fanout per-file extraction as the default read path and preserve archive authority.
@@ -916,6 +916,53 @@ Exit criteria:
 - Read-only WEPP prep stages remain non-mutating and thaw-free.
 - Per-file materialization calls in migrated stages are fallback-only.
 
+Phase 9D completion summary (2026-02-18):
+1. Migrated WEPP path-heavy read consumers in `wepppy/nodb/core/wepp.py`:
+  - `_prep_slopes_peridot` now resolves slope source paths through projection-aware `with_input_file_path(...)` when native dir paths are not present.
+  - `_prep_multi_ofe` now resolves soils/management path-only inputs through `with_input_file_path(...)` contexts.
+  - `prep_and_run_flowpaths` now keeps projection-backed flowpath slope source paths alive for threaded extraction via scoped context management.
+  - `_prep_channel_slopes` preserves mixed-tolerant archive streaming semantics while remaining projection-safe under stage-scoped sessions.
+2. Added stage-scoped read projection lifecycle wrappers in `wepppy/rq/wepp_rq.py`:
+  - `_prep_multi_ofe_rq` (`watershed`, `soils`, `landuse`)
+  - `_prep_slopes_rq` (`watershed`)
+  - `_run_flowpaths_rq` (`watershed`)
+  - `_prep_watershed_rq` (`watershed`)
+  - Wrappers are context-managed and release on both success and exception paths.
+3. Added/updated regression coverage:
+  - `tests/rq/test_wepp_rq_nodir.py` now validates projection session acquire/release and exception-path cleanup for migrated read stages.
+  - `tests/nodb/test_wepp_nodir_read_paths.py` updated for migrated helper signatures and projection-aware consumer behavior.
+
+Validation evidence (Phase 9D gates):
+1. `wctl run-pytest tests/nodir/test_projections.py tests/nodir/test_wepp_inputs.py` -> `37 passed`
+2. `wctl run-pytest tests/nodb/test_wepp_nodir_read_paths.py tests/rq/test_wepp_rq_nodir.py` -> `27 passed`
+3. `wctl run-pytest tests/rq tests/microservices/test_rq_engine_wepp_routes.py` -> `52 passed`
+4. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `43 files validated, 0 errors, 0 warnings`
+
+Completion criteria status:
+- WEPP path-heavy read consumers migrated to projection-aware path access for required stages: complete.
+- RQ read-stage projection boundaries are explicit and exception-safe: complete.
+- Read-only stages remain non-mutating and thaw-free: complete.
+- Canonical NoDir status/code behavior preserved in required gates: complete.
+
+Post-review hardening (2026-02-18):
+- `wepppy/rq/wepp_rq.py` stage projection helper now raises canonical `409 NODIR_MIXED_STATE` when archive-form root also has unmanaged `WD/<root>/` directory presence instead of silently bypassing projection.
+- Added regression `tests/rq/test_wepp_rq_nodir.py::test_stage_projection_wrapper_raises_mixed_state_when_unmanaged_root_exists`.
+- Validation: `wctl run-pytest tests/rq/test_wepp_rq_nodir.py tests/nodb/test_wepp_nodir_read_paths.py` -> `26 passed`.
+- Added low-severity observability coverage: `tests/nodir/test_wepp_inputs.py::test_with_input_file_path_projection_disabled_fallback_logs_warning`.
+- Validation: `wctl run-pytest tests/nodir/test_wepp_inputs.py` -> `22 passed`.
+
+Phase 9D handoff summary (2026-02-18):
+- Read-stage projection boundaries in `wepppy/rq/wepp_rq.py` are strict: unmanaged mixed root state now fails fast as canonical `409 NODIR_MIXED_STATE` (no silent projection bypass).
+- WEPP path-heavy migrated consumers remain projection-first with explicit fallback-only materialization in `wepppy/nodb/core/wepp.py` (`_prep_slopes_peridot`, `_prep_multi_ofe`, `prep_and_run_flowpaths`).
+- `_prep_channel_slopes` remains mixed-tolerant archive streaming and is compatible with stage-scoped projection sessions.
+- Fallback observability is explicit in `wepppy/nodir/wepp_inputs.py`; warnings are emitted for both projection-disabled and projection-error materialization fallback paths.
+- Regression coverage includes strict mixed-state wrapper behavior and fallback-warning observability tests.
+- Latest Phase 9D rerun gate evidence:
+  1. `wctl run-pytest tests/nodir/test_projections.py tests/nodir/test_wepp_inputs.py` -> `37 passed`
+  2. `wctl run-pytest tests/nodb/test_wepp_nodir_read_paths.py tests/rq/test_wepp_rq_nodir.py` -> `27 passed`
+  3. `wctl run-pytest tests/rq tests/microservices/test_rq_engine_wepp_routes.py` -> `52 passed`
+  4. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `43 files validated, 0 errors, 0 warnings`
+
 #### Phase 9E: Validation, Perf, and Runbook
 Validation gates (minimum):
 1. `wctl run-pytest tests/nodir/test_projections.py tests/nodir/test_wepp_inputs.py`
@@ -933,6 +980,29 @@ Completion criteria:
 - Projection sessions are canonical for path-heavy archive-backed reads and mutations.
 - `.nodir/cache` growth for WEPP prep declines materially versus Phase 8 baseline.
 - No regression in canonical NoDir status/code behavior.
+
+Phase 9E completion summary (2026-02-18):
+1. Executed all required Phase 9E validation gates with green results, including full-suite and docs lint closure.
+2. Published projection-session closeout artifacts:
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase9_projection_sessions_perf_results.md`
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase9_projection_sessions_reliability_runbook.md`
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase9_projection_sessions_rollout_review.md`
+3. Quantified `.nodir/cache` growth against a Phase 8-style materialization baseline for an 851-path WEPP-style workload: cache growth dropped from `1702` files / `424804` bytes to `0` / `0` under projection sessions.
+4. Verified Phase 6 revision-assessment addenda targets are present across all listed artifacts; no additional patching required in 9E.
+
+Validation evidence (Phase 9E gates):
+1. `wctl run-pytest tests/nodir/test_projections.py tests/nodir/test_wepp_inputs.py` -> `38 passed`
+2. `wctl run-pytest tests/nodb/test_wepp_nodir_read_paths.py tests/rq/test_wepp_rq_nodir.py` -> `27 passed`
+3. `wctl run-pytest tests/rq tests/microservices/test_rq_engine_wepp_routes.py` -> `52 passed`
+4. `wctl run-pytest tests --maxfail=1` -> `1619 passed, 27 skipped`
+5. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `47 files validated, 0 errors, 0 warnings`
+
+Completion criteria status:
+- Projection sessions are canonical for path-heavy archive-backed reads and mutations: complete.
+- `.nodir/cache` growth for WEPP prep declines materially versus Phase 8 baseline: complete.
+- No regression in canonical NoDir status/code behavior: complete.
+
+Phase 9 overall status: complete.
 
 ### Phase 6 Revision Assessment For Phase 9
 Assessment outcome:

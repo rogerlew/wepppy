@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -493,10 +494,16 @@ def test_prep_and_run_flowpaths_globs_archive_flowpath_slps(
 ) -> None:
     wepp = _wepp_stub(tmp_path)
 
-    calls: list[tuple[str, str]] = []
+    calls: list[tuple[str, str, bool, str]] = []
 
-    def _fake_glob(wd: str, pattern: str) -> list[str]:
-        calls.append((wd, pattern))
+    def _fake_glob(
+        wd: str,
+        pattern: str,
+        *,
+        tolerate_mixed: bool = False,
+        mixed_prefer: str = "archive",
+    ) -> list[str]:
+        calls.append((wd, pattern, tolerate_mixed, mixed_prefer))
         raise _StopPath("stop after path check")
 
     monkeypatch.setattr(wepp_module, "glob_input_files", _fake_glob)
@@ -504,7 +511,7 @@ def test_prep_and_run_flowpaths_globs_archive_flowpath_slps(
     with pytest.raises(_StopPath, match="stop after path check"):
         wepp.prep_and_run_flowpaths(clean_after_run=False)
 
-    assert calls == [(wepp.wd, "watershed/slope_files/flowpaths/*.slps")]
+    assert calls == [(wepp.wd, "watershed/slope_files/flowpaths/*.slps", True, "archive")]
 
 
 def test_prep_multi_ofe_reads_watershed_soils_landuse_roots(
@@ -537,7 +544,7 @@ def test_prep_multi_ofe_reads_watershed_soils_landuse_roots(
     monkeypatch.setattr(wepp_module, "Management", _DummyManagement)
 
     copied: list[tuple[str, str, str]] = []
-    materialized: list[tuple[str, str, str]] = []
+    path_contexts: list[tuple[str, str, str]] = []
 
     def _fake_copy(wd: str, src_rel: str, dst_fn: str) -> str:
         copied.append((wd, src_rel, dst_fn))
@@ -545,21 +552,31 @@ def test_prep_multi_ofe_reads_watershed_soils_landuse_roots(
         Path(dst_fn).write_text("slope\n", encoding="utf-8")
         return dst_fn
 
-    def _fake_materialize(wd: str, rel: str, *, purpose: str) -> str:
-        materialized.append((wd, rel, purpose))
+    @contextmanager
+    def _fake_with_input_file_path(
+        wd: str,
+        rel: str,
+        *,
+        purpose: str,
+        tolerate_mixed: bool = False,
+        mixed_prefer: str = "archive",
+        use_projection: bool = True,
+        allow_materialize_fallback: bool = False,
+    ):
+        path_contexts.append((wd, rel, purpose))
         fn = Path(tmp_path) / rel.replace("/", "_")
         fn.parent.mkdir(parents=True, exist_ok=True)
-        fn.write_text("materialized\n", encoding="utf-8")
-        return str(fn)
+        fn.write_text("projected\n", encoding="utf-8")
+        yield str(fn)
 
     monkeypatch.setattr(wepp_module, "copy_input_file", _fake_copy)
-    monkeypatch.setattr(wepp_module, "materialize_input_file", _fake_materialize)
+    monkeypatch.setattr(wepp_module, "with_input_file_path", _fake_with_input_file_path)
 
     wepp._prep_multi_ofe(_Translator())
 
     assert copied[0][1] == "watershed/slope_files/hillslopes/hill_11.mofe.slp"
-    assert any(rel == "soils/hill_11.mofe.sol" for _, rel, _ in materialized)
-    assert any(rel == "landuse/hill_11.mofe.man" for _, rel, _ in materialized)
+    assert any(rel == "soils/hill_11.mofe.sol" for _, rel, _ in path_contexts)
+    assert any(rel == "landuse/hill_11.mofe.man" for _, rel, _ in path_contexts)
 
 
 def test_prep_soils_materializes_archive_input_before_worker_submit(

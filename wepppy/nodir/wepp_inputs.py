@@ -10,6 +10,7 @@ This module intentionally covers only the read patterns used by WEPP prep:
 from __future__ import annotations
 
 import fnmatch
+import logging
 import io
 import os
 import shutil
@@ -21,6 +22,8 @@ from .errors import NoDirError
 from .fs import listdir, open_read, resolve, stat
 from .paths import normalize_relpath
 from .projections import with_root_projection
+
+_LOGGER = logging.getLogger(__name__)
 
 __all__ = [
     "open_input_binary",
@@ -176,11 +179,22 @@ def copy_input_file(
     return str(dst)
 
 
-def list_input_files(wd: str, dir_rel: str) -> list[str]:
+def list_input_files(
+    wd: str,
+    dir_rel: str,
+    *,
+    tolerate_mixed: bool = False,
+    mixed_prefer: str = "archive",
+) -> list[str]:
     """List immediate file names under a logical directory."""
 
     wd_path, dir_rel_norm = _normalize_wd_and_rel(wd, dir_rel)
-    target = _resolve_effective(wd_path, dir_rel_norm)
+    target = _resolve_for_read(
+        wd_path,
+        dir_rel_norm,
+        tolerate_mixed=tolerate_mixed,
+        mixed_prefer=mixed_prefer,
+    )
 
     names: list[str] = []
     if target is None:
@@ -200,7 +214,13 @@ def list_input_files(wd: str, dir_rel: str) -> list[str]:
     return names
 
 
-def glob_input_files(wd: str, pattern: str) -> list[str]:
+def glob_input_files(
+    wd: str,
+    pattern: str,
+    *,
+    tolerate_mixed: bool = False,
+    mixed_prefer: str = "archive",
+) -> list[str]:
     """Glob logical input files with wildcards only in the final segment.
 
     This intentionally supports only the WEPP prep usage pattern where the parent
@@ -214,13 +234,23 @@ def glob_input_files(wd: str, pattern: str) -> list[str]:
         raise ValueError("glob_input_files only supports wildcards in the final segment")
 
     if not any(token in basename_pattern for token in ("*", "?", "[", "]")):
-        if input_exists(wd, pattern_rel_norm):
+        if input_exists(
+            wd,
+            pattern_rel_norm,
+            tolerate_mixed=tolerate_mixed,
+            mixed_prefer=mixed_prefer,
+        ):
             return [pattern_rel_norm]
         return []
 
     matches = [
         _as_relpath(parent_rel, name)
-        for name in list_input_files(wd, parent_rel)
+        for name in list_input_files(
+            wd,
+            parent_rel,
+            tolerate_mixed=tolerate_mixed,
+            mixed_prefer=mixed_prefer,
+        )
         if fnmatch.fnmatch(name, basename_pattern)
     ]
     matches.sort(key=lambda value: (value.lower(), value))
@@ -295,6 +325,12 @@ def with_input_file_path(
     if not use_projection:
         if not allow_materialize_fallback:
             raise ValueError("archive-form input paths require projection or explicit materialize fallback")
+        _LOGGER.warning(
+            "NoDir input path fallback to materialize (projection disabled): wd=%s rel=%s purpose=%s",
+            str(wd_path),
+            rel_norm,
+            purpose,
+        )
         yield materialize_input_file(str(wd_path), rel_norm, purpose=purpose)
         return
 
@@ -310,9 +346,17 @@ def with_input_file_path(
                 projected_path = projected_path / target.inner_path
             yield str(projected_path)
             return
-    except NoDirError:
+    except NoDirError as exc:
         if not allow_materialize_fallback:
             raise
+        _LOGGER.warning(
+            "NoDir input path fallback to materialize (projection error): wd=%s rel=%s purpose=%s status=%s code=%s",
+            str(wd_path),
+            rel_norm,
+            purpose,
+            exc.http_status,
+            exc.code,
+        )
 
     yield materialize_input_file(str(wd_path), rel_norm, purpose=purpose)
 

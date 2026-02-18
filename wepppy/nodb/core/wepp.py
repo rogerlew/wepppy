@@ -68,6 +68,7 @@ Warning:
 import os
 import subprocess
 from datetime import date
+from contextlib import ExitStack
 from enum import IntEnum
 from pathlib import Path
 from os.path import join as _join
@@ -191,6 +192,7 @@ from wepppy.nodir.wepp_inputs import (
     input_exists,
     materialize_input_file,
     open_input_text,
+    with_input_file_path,
 )
 
 def _copyfile(src_fn: str, dst_fn: str) -> None:
@@ -1995,41 +1997,57 @@ class Wepp(NoDbBase):
     def prep_and_run_flowpaths(self, clean_after_run: bool = True) -> None:
         self.logger.info('  Prepping _prep_flowpaths... ')
 
-        fp_slps_rels = glob_input_files(self.wd, 'watershed/slope_files/flowpaths/*.slps')
-        fp_slps_fns = [
-            materialize_input_file(self.wd, rel, purpose='wepp-prep-flowpath-slps')
-            for rel in fp_slps_rels
-        ]
+        fp_slps_rels = glob_input_files(
+            self.wd,
+            'watershed/slope_files/flowpaths/*.slps',
+            tolerate_mixed=True,
+            mixed_prefer='archive',
+        )
 
         flowpath_workers = 10
         if os.getenv("WEPPPY_NCPU"):
             flowpath_workers = min(flowpath_workers, NCPU)
         
         futures = []
-        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
-            for fp_slps_fn in fp_slps_fns:
-                futures.append(pool.submit(extract_slps_fn, fp_slps_fn, self.fp_runs_dir))
+        with ExitStack() as input_paths:
+            fp_slps_fns = [
+                input_paths.enter_context(
+                    with_input_file_path(
+                        self.wd,
+                        rel,
+                        purpose='wepp-prep-flowpath-slps',
+                        tolerate_mixed=True,
+                        mixed_prefer='archive',
+                        allow_materialize_fallback=True,
+                    )
+                )
+                for rel in fp_slps_rels
+            ]
 
-            futures_n = len(futures)
-            count = 0
-            pending = set(futures)
-            while pending:
-                done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+            with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
+                for fp_slps_fn in fp_slps_fns:
+                    futures.append(pool.submit(extract_slps_fn, fp_slps_fn, self.fp_runs_dir))
 
-                if not done:
-                    self.logger.error('  Flowpath slope extraction still running after 5 seconds.')
-                    continue
+                futures_n = len(futures)
+                count = 0
+                pending = set(futures)
+                while pending:
+                    done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
 
-                for future in done:
-                    try:
-                        future.result()
-                        count += 1
-                        self.logger.info(f'  ({count}/{futures_n}) flowpath slopes prep complete')
-                    except Exception as exc:
-                        for remaining in pending:
-                            remaining.cancel()
-                        self.logger.error(f'  Flowpath slope extraction failed with an error: {exc}')
-                        raise
+                    if not done:
+                        self.logger.error('  Flowpath slope extraction still running after 5 seconds.')
+                        continue
+
+                    for future in done:
+                        try:
+                            future.result()
+                            count += 1
+                            self.logger.info(f'  ({count}/{futures_n}) flowpath slopes prep complete')
+                        except Exception as exc:
+                            for remaining in pending:
+                                remaining.cancel()
+                            self.logger.error(f'  Flowpath slope extraction failed with an error: {exc}')
+                            raise
             
 
         watershed = self.watershed_instance
@@ -2145,26 +2163,36 @@ class Wepp(NoDbBase):
                 f"watershed/slope_files/hillslopes/hill_{topaz_id}.slp",
                 f"watershed/hill_{topaz_id}.slp",
             )
-            mixed_watershed = _exists(_join(self.wd, "watershed")) and _exists(_join(self.wd, "watershed.nodir"))
             src_rel = src_candidates[0]
             for rel in src_candidates:
                 if _exists(_join(self.wd, rel)):
                     src_rel = rel
                     break
-                if mixed_watershed:
-                    continue
-                if input_exists(self.wd, rel):
+                if input_exists(self.wd, rel, tolerate_mixed=True, mixed_prefer='archive'):
                     src_rel = rel
                     break
 
             dst_fn = _join(runs_dir, "p%i.slp" % wepp_id)
-            if clip_hillslopes:
-                src_fn = str(Path(self.wd) / src_rel)
-                if not _exists(src_fn):
-                    src_fn = materialize_input_file(self.wd, src_rel, purpose="wepp-prep-slopes")
-                clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
-            else:
-                copy_input_file(self.wd, src_rel, dst_fn)
+            src_fn = str(Path(self.wd) / src_rel)
+            if _exists(src_fn):
+                if clip_hillslopes:
+                    clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
+                else:
+                    shutil.copyfile(src_fn, dst_fn)
+                continue
+
+            with with_input_file_path(
+                self.wd,
+                src_rel,
+                purpose='wepp-prep-slopes',
+                tolerate_mixed=True,
+                mixed_prefer='archive',
+                allow_materialize_fallback=True,
+            ) as projected_src_fn:
+                if clip_hillslopes:
+                    clip_slope_file_length(projected_src_fn, dst_fn, clip_hillslope_length)
+                else:
+                    shutil.copyfile(projected_src_fn, dst_fn)
 
     def _prep_slopes(self, translator, clip_hillslopes, clip_hillslope_length):
         self.logger.info('    Prepping _prep_slopes... ')
@@ -2180,13 +2208,26 @@ class Wepp(NoDbBase):
 
             src_rel = f'watershed/hill_{topaz_id}.slp'
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            if clip_hillslopes:
-                src_fn = str(Path(self.wd) / src_rel)
-                if not _exists(src_fn):
-                    src_fn = materialize_input_file(self.wd, src_rel, purpose='wepp-prep-slopes')
-                clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
-            else:
-                copy_input_file(self.wd, src_rel, dst_fn)
+            src_fn = str(Path(self.wd) / src_rel)
+            if _exists(src_fn):
+                if clip_hillslopes:
+                    clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
+                else:
+                    shutil.copyfile(src_fn, dst_fn)
+                continue
+
+            with with_input_file_path(
+                self.wd,
+                src_rel,
+                purpose='wepp-prep-slopes',
+                tolerate_mixed=True,
+                mixed_prefer='archive',
+                allow_materialize_fallback=True,
+            ) as projected_src_fn:
+                if clip_hillslopes:
+                    clip_slope_file_length(projected_src_fn, dst_fn, clip_hillslope_length)
+                else:
+                    shutil.copyfile(projected_src_fn, dst_fn)
 
     def _prep_multi_ofe(self, translator):
         from wepppy.topo.watershed_abstraction import HillSummary as WatHillSummary
@@ -2229,11 +2270,6 @@ class Wepp(NoDbBase):
             copy_input_file(self.wd, src_rel, dst_fn)
 
             # soils
-            src_fn = materialize_input_file(
-                self.wd,
-                f'soils/hill_{topaz_id}.mofe.sol',
-                purpose='wepp-prep-multi-ofe-soils',
-            )
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
 
             _kslast = None
@@ -2257,34 +2293,45 @@ class Wepp(NoDbBase):
             elif kslast is not None:
                 _kslast = kslast
 
-            soilu = WeppSoilUtil(src_fn)
-            soilu.modify_initial_sat(initial_sat)
+            with with_input_file_path(
+                self.wd,
+                f'soils/hill_{topaz_id}.mofe.sol',
+                purpose='wepp-prep-multi-ofe-soils',
+                tolerate_mixed=True,
+                mixed_prefer='archive',
+                allow_materialize_fallback=True,
+            ) as src_fn:
+                soilu = WeppSoilUtil(src_fn)
+                soilu.modify_initial_sat(initial_sat)
 
-            if _kslast is not None:
-                soilu.modify_kslast(_kslast)
+                if _kslast is not None:
+                    soilu.modify_kslast(_kslast)
 
-            if clip_soils:
-                soilu.clip_soil_depth(clip_soils_depth)
+                if clip_soils:
+                    soilu.clip_soil_depth(clip_soils_depth)
 
-            soilu.write(dst_fn)
+                soilu.write(dst_fn)
 
             # managements
             man_fn = f'hill_{topaz_id}.mofe.man'
-            man_src = materialize_input_file(
+            with with_input_file_path(
                 self.wd,
                 f'landuse/{man_fn}',
                 purpose='wepp-prep-multi-ofe-management',
-            )
-            man = Management(Key=f'hill_{topaz_id}',
-                             ManagementFile=Path(man_src).name,
-                             ManagementDir=str(Path(man_src).parent),
-                             Description=f"hill_{topaz_id} Multiple OFE",
-                             Color=(0, 0, 0, 255))
+                tolerate_mixed=True,
+                mixed_prefer='archive',
+                allow_materialize_fallback=True,
+            ) as man_src:
+                man = Management(Key=f'hill_{topaz_id}',
+                                 ManagementFile=Path(man_src).name,
+                                 ManagementDir=str(Path(man_src).parent),
+                                 Description=f"hill_{topaz_id} Multiple OFE",
+                                 Color=(0, 0, 0, 255))
 
-            man = man.build_multiple_year_man(years)
-            dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
-            with open(dst_fn, 'w') as pf:
-                pf.write(str(man))
+                man = man.build_multiple_year_man(years)
+                dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
+                with open(dst_fn, 'w') as pf:
+                    pf.write(str(man))
 
 
     def _prep_managements(self, translator):
