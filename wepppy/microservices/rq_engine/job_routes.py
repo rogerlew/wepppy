@@ -27,10 +27,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 POLL_SCOPE = "rq:status"
+CANCELJOB_SCOPES = ("rq:status", "culvert:batch:submit")
 POLL_AUTH_MODE_ENV = "RQ_ENGINE_POLL_AUTH_MODE"
 POLL_AUTH_MODES = {"open", "token_optional", "required"}
 POLL_RATE_LIMIT_COUNT_ENV = "RQ_ENGINE_POLL_RATE_LIMIT_COUNT"
 POLL_RATE_LIMIT_WINDOW_ENV = "RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS"
+SCOPE_MISSING_PREFIX = "Token missing required scope(s):"
 
 _POLL_RATE_LIMIT_LOCK = threading.Lock()
 _POLL_RATE_LIMIT_BUCKETS: dict[str, deque[float]] = {}
@@ -114,6 +116,30 @@ def _authorize_polling_request(request: Request) -> Mapping[str, Any] | None:
         return None
 
     return require_jwt(request, required_scopes=[POLL_SCOPE])
+
+
+def _is_scope_missing_error(exc: AuthError) -> bool:
+    return (
+        exc.status_code == status.HTTP_403_FORBIDDEN
+        and exc.code == "forbidden"
+        and exc.message.startswith(SCOPE_MISSING_PREFIX)
+    )
+
+
+def _authorize_cancel_request(request: Request) -> Mapping[str, Any]:
+    for scope in CANCELJOB_SCOPES:
+        try:
+            return require_jwt(request, required_scopes=[scope])
+        except AuthError as exc:
+            if _is_scope_missing_error(exc):
+                continue
+            raise
+
+    raise AuthError(
+        f"Token missing required scope(s): {' or '.join(CANCELJOB_SCOPES)}",
+        status_code=403,
+        code="forbidden",
+    )
 
 
 def _is_poll_rate_limited(endpoint: str, *, request: Request, claims: Mapping[str, Any] | None) -> tuple[bool, int, int]:
@@ -386,7 +412,7 @@ async def jobinfo_batch(request: Request):
     "/canceljob/{job_id}",
     summary="Cancel a queued or running job",
     description=(
-        "Requires JWT Bearer scope `rq:status`. If job metadata contains a run ID, "
+        "Requires JWT Bearer scope `rq:status` or `culvert:batch:submit`. If job metadata contains a run ID, "
         "enforces session marker access for that run. Synchronously cancels existing job(s); no enqueue."
     ),
     tags=["rq-engine", "jobs"],
@@ -401,7 +427,7 @@ async def jobinfo_batch(request: Request):
 )
 def canceljob(job_id: str, request: Request):
     try:
-        claims = require_jwt(request, required_scopes=["rq:status"])
+        claims = _authorize_cancel_request(request)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:

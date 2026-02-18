@@ -16,6 +16,8 @@ from wepppy.nodb.core import (
     WatershedNotAbstractedError,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.rq.project_rq import build_climate_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -60,11 +62,14 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     wd = get_wd(runid)
-    climate = Climate.getInstance(wd)
 
     try:
+        nodir_resolve(wd, "climate", view="effective")
+        climate = Climate.getInstance(wd)
         payload = await parse_request_payload(request)
         climate.parse_inputs(payload)
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except Exception:
         return error_response_with_traceback("Error parsing climate inputs", status_code=400)
 

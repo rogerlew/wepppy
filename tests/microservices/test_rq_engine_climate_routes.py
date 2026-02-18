@@ -4,6 +4,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import climate_routes
+from wepppy.nodir.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
@@ -94,3 +95,19 @@ def test_build_climate_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-88"
+
+
+def test_build_climate_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+
+    def _raise_nodir(_wd: str, _rel: str, *, view: str = "effective"):
+        raise NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
+
+    monkeypatch.setattr(climate_routes, "nodir_resolve", _raise_nodir)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-climate", json={})
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "NODIR_LOCKED"

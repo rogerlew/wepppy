@@ -24,6 +24,8 @@ from wepppy.rq.omni_rq import (
     run_omni_contrasts_rq,
     run_omni_scenarios_rq,
 )
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -272,6 +274,13 @@ def _coerce_optional_bool(value: Any, field_name: str) -> bool | None:
     raise ValueError(f"{field_name} must be a boolean")
 
 
+def _preflight_omni_roots(wd: str) -> None:
+    nodir_resolve(wd, "climate", view="effective")
+    nodir_resolve(wd, "watershed", view="effective")
+    nodir_resolve(wd, "landuse", view="effective")
+    nodir_resolve(wd, "soils", view="effective")
+
+
 def _prepare_omni_scenarios(
     payload: dict[str, Any],
     raw_json: Any,
@@ -479,6 +488,7 @@ async def _run_omni(
     request: Request,
 ) -> JSONResponse:
     wd = get_wd(runid)
+    _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
     payload = await parse_request_payload(request)
@@ -544,6 +554,7 @@ async def _run_omni_contrasts(
     request: Request,
 ) -> JSONResponse:
     wd = get_wd(runid)
+    _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
     payload = await parse_request_payload(request)
@@ -658,6 +669,7 @@ async def _dry_run_omni_contrasts(
     request: Request,
 ) -> JSONResponse:
     wd = get_wd(runid)
+    _preflight_omni_roots(wd)
     omni = Omni.getInstance(wd)
 
     payload = await parse_request_payload(request)
@@ -809,7 +821,10 @@ async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
         logger.exception("rq-engine run-omni auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
-    return await _run_omni(runid, config, request)
+    try:
+        return await _run_omni(runid, config, request)
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
 
 
 @router.post(
@@ -843,7 +858,10 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
         logger.exception("rq-engine run-omni-contrasts auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
-    return await _run_omni_contrasts(runid, config, request)
+    try:
+        return await _run_omni_contrasts(runid, config, request)
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
 
 
 @router.post(
@@ -873,7 +891,10 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
         logger.exception("rq-engine run-omni-contrasts-dry-run auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
-    return await _dry_run_omni_contrasts(runid, config, request)
+    try:
+        return await _dry_run_omni_contrasts(runid, config, request)
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
 
 
 @router.post(

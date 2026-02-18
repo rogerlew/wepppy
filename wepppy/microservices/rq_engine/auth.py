@@ -201,8 +201,8 @@ def _check_session_marker(session_id: str, runid: str) -> None:
         if not redis_conn.exists(key):
             raise AuthError(
                 "Session token invalid or expired. Reload the page to continue.",
-                status_code=403,
-                code="forbidden",
+                status_code=401,
+                code="unauthorized",
             )
 
 

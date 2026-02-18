@@ -422,6 +422,15 @@ def _store_session_marker(runid: str, session_id: str) -> None:
 
 def _set_run_session_jwt_cookie(response, *, runid: str, config: str) -> bool:
     user_id, roles = _session_identity_claims()
+    fallback_user_id: int | None = None
+    fallback_roles: set[str] = set()
+    if user_id is None or not roles:
+        fallback_user_id, fallback_roles = _request_current_user_identity()
+        if user_id is None and fallback_user_id is not None:
+            user_id = fallback_user_id
+        if fallback_roles:
+            roles = _normalize_role_names([*roles, *sorted(fallback_roles)])
+
     session_id = _resolve_session_id_from_request()
     if not session_id:
         if _session_user_authorized_for_run(runid, user_id, roles):
@@ -441,6 +450,7 @@ def _set_run_session_jwt_cookie(response, *, runid: str, config: str) -> bool:
     }
     if user_id is not None:
         extra_claims["user_id"] = user_id
+    if roles:
         extra_claims["roles"] = roles
 
     token_payload = auth_tokens.issue_token(

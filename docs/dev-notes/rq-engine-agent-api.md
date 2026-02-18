@@ -67,7 +67,7 @@ Core scopes used by agent-facing routes:
 | `bootstrap:token:mint` | Bootstrap token mint endpoint. |
 | `bootstrap:read` | Bootstrap read endpoints (`commits`, `current-ref`). |
 | `bootstrap:checkout` | Bootstrap checkout endpoint. |
-| `culvert:batch:submit` | Culvert batch submit endpoint. |
+| `culvert:batch:submit` | Culvert batch submit endpoint; also accepted for `/api/canceljob/{job_id}`. |
 | `culvert:batch:retry` | Culvert batch retry endpoint. |
 
 Bootstrap routes do not accept `rq:enqueue` as a substitute for `bootstrap:*`.
@@ -134,7 +134,7 @@ table below is the practical family map used by agent clients.
 
 | Family | Paths | Typical Execution | Primary Scope |
 |---|---|---|---|
-| Job control | `/api/jobstatus/{job_id}`, `/api/jobinfo/{job_id}`, `/api/jobinfo`, `/api/canceljob/{job_id}` | Polling is sync/read-only; cancel is sync mutation | `rq:status` |
+| Job control | `/api/jobstatus/{job_id}`, `/api/jobinfo/{job_id}`, `/api/jobinfo`, `/api/canceljob/{job_id}` | Polling is sync/read-only; cancel is sync mutation | `rq:status` (cancel also accepts `culvert:batch:submit`) |
 | Bootstrap | `/api/runs/{runid}/{config}/bootstrap/*` plus `run-*-noprep` endpoints | Mix of sync no-queue (`checkout`, reads, mint) and async (`enable`, no-prep runs) | `bootstrap:*` and `rq:enqueue` |
 | Build/prep | `/api/runs/{runid}/{config}/build-*`, `fetch-dem-and-build-channels`, `set-outlet` | Mostly async enqueue | `rq:enqueue` |
 | Model runs | `/api/runs/{runid}/{config}/run-*` (`wepp`, `wepp-watershed`, `swat`, `rhem`, `ash`, `debris-flow`, `omni`) | Mostly async enqueue; some sync dry-run paths | `rq:enqueue` |

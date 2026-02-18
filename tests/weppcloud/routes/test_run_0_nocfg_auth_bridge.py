@@ -404,3 +404,44 @@ def test_runs0_nocfg_rejects_encoded_dot_segment_traversal_next(
     assert response.status_code == 302
     assert response.headers["Location"] == f"/weppcloud/runs/{runid}/cfg/"
     assert called is False
+
+
+def test_set_run_session_jwt_cookie_adds_fallback_admin_roles_to_claims(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+
+    captured: dict[str, object] = {}
+
+    class _CurrentUser:
+        is_authenticated = True
+        id = 7
+
+        @staticmethod
+        def get_id() -> str:
+            return "7"
+
+        @staticmethod
+        def has_role(role: str) -> bool:
+            return role in {"Admin", "Root"}
+
+    monkeypatch.setattr(module, "_session_identity_claims", lambda: (None, []))
+    monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: "sid-1")
+    monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
+    monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(module, "current_user", _CurrentUser())
+
+    def _issue_token(_subject, *, scopes, audience, expires_in, extra_claims):
+        captured["extra_claims"] = extra_claims
+        return {"token": "session-token"}
+
+    monkeypatch.setattr(module.auth_tokens, "issue_token", _issue_token)
+
+    with app.test_request_context(f"/runs/{runid}/", headers={"X-Forwarded-Proto": "https"}):
+        response = app.make_response(("ok", 200))
+        assert module._set_run_session_jwt_cookie(response, runid=runid, config="cfg") is True
+
+    claims = captured["extra_claims"]
+    assert claims["user_id"] == 7
+    assert set(claims["roles"]) == {"admin", "root"}

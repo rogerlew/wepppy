@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import json
 from flask import send_from_directory, session
 from flask_security import current_user
+from werkzeug.routing import BuildError
 
 from ._common import *  # noqa: F401,F403
 from wepppy.weppcloud.utils import auth_tokens
@@ -140,6 +141,177 @@ def session_heartbeat():
     session["_heartbeat_ts"] = heartbeat_at
     session.modified = True
     return jsonify({"ok": True, "heartbeat_at": heartbeat_at})
+
+
+def _normalized_cookie_path(value: Optional[str]) -> str:
+    path = str(value or "").strip()
+    if not path:
+        return "/"
+    if not path.startswith("/"):
+        path = f"/{path}"
+    if len(path) > 1 and path.endswith("/"):
+        path = path.rstrip("/")
+    return path or "/"
+
+
+def _path_variants(value: Optional[str]) -> list[str]:
+    candidates: list[str] = []
+    raw = str(value or "").strip()
+    if raw:
+        candidates.append(raw)
+    normalized = _normalized_cookie_path(value)
+    candidates.append(normalized)
+    if normalized != "/":
+        candidates.append(f"{normalized}/")
+
+    variants: list[str] = []
+    for candidate in candidates:
+        normalized_candidate = _normalized_cookie_path(candidate)
+        if normalized_candidate not in variants:
+            variants.append(normalized_candidate)
+        if (
+            normalized_candidate != "/"
+            and not normalized_candidate.endswith("/")
+            and f"{normalized_candidate}/" not in variants
+        ):
+            variants.append(f"{normalized_candidate}/")
+    return variants
+
+
+def _normalized_cookie_domain(value: Optional[str]) -> Optional[str]:
+    token = str(value or "").strip().lower()
+    if not token:
+        return None
+    if ":" in token:
+        token = token.split(":", 1)[0].strip()
+    if not token:
+        return None
+    return token
+
+
+def _domain_variants(configured_domain: Optional[str]) -> list[Optional[str]]:
+    variants: list[Optional[str]] = []
+
+    def _add(value: Optional[str]) -> None:
+        normalized = _normalized_cookie_domain(value)
+        if not normalized:
+            return
+        base = normalized.lstrip(".")
+        for candidate in (base, f".{base}"):
+            if candidate and candidate not in variants:
+                variants.append(candidate)
+
+    _add(configured_domain)
+    _add(request.host)
+    _add(current_app.config.get("OAUTH_REDIRECT_HOST"))
+    _add(current_app.config.get("EXTERNAL_HOST"))
+
+    variants.append(None)
+    return variants
+
+
+def _cookie_clear_targets(
+    configured_path: Optional[str],
+    configured_domain: Optional[str],
+) -> list[tuple[str, Optional[str]]]:
+    targets: list[tuple[str, Optional[str]]] = []
+    path_values = [
+        configured_path,
+        current_app.config.get("APPLICATION_ROOT"),
+        "/",
+    ]
+
+    path_variants: list[str] = []
+    for path_value in path_values:
+        for variant in _path_variants(path_value):
+            if variant not in path_variants:
+                path_variants.append(variant)
+
+    for path in path_variants:
+        for domain in _domain_variants(configured_domain):
+            target = (path, domain)
+            if target not in targets:
+                targets.append(target)
+    return targets
+
+
+def _clear_reset_browser_state_cookies(response) -> list[dict[str, Optional[str]]]:
+    session_cookie_name = current_app.config.get("SESSION_COOKIE_NAME", "session")
+    remember_cookie_name = current_app.config.get("REMEMBER_COOKIE_NAME", "remember_token")
+    cookie_specs = [
+        (
+            session_cookie_name,
+            current_app.config.get("SESSION_COOKIE_PATH"),
+            current_app.config.get("SESSION_COOKIE_DOMAIN"),
+        ),
+        (
+            remember_cookie_name,
+            current_app.config.get("REMEMBER_COOKIE_PATH"),
+            current_app.config.get("REMEMBER_COOKIE_DOMAIN")
+            or current_app.config.get("SESSION_COOKIE_DOMAIN"),
+        ),
+        (
+            "csrf_token",
+            current_app.config.get("SESSION_COOKIE_PATH"),
+            current_app.config.get("SESSION_COOKIE_DOMAIN"),
+        ),
+        (
+            "csrftoken",
+            current_app.config.get("SESSION_COOKIE_PATH"),
+            current_app.config.get("SESSION_COOKIE_DOMAIN"),
+        ),
+    ]
+
+    cleared: list[dict[str, Optional[str]]] = []
+    seen_names: set[str] = set()
+    for cookie_name, cookie_path, cookie_domain in cookie_specs:
+        normalized_name = str(cookie_name or "").strip()
+        if not normalized_name or normalized_name in seen_names:
+            continue
+        seen_names.add(normalized_name)
+        for path, domain in _cookie_clear_targets(cookie_path, cookie_domain):
+            response.delete_cookie(normalized_name, path=path, domain=domain)
+            cleared.append(
+                {
+                    "name": normalized_name,
+                    "path": path,
+                    "domain": domain,
+                }
+            )
+    return cleared
+
+@weppcloud_site_bp.route('/api/auth/reset-browser-state', methods=['POST'])
+def reset_browser_state():
+    if current_user.is_anonymous:
+        response = error_factory('Authentication required.')
+        response.status_code = 401
+        return response
+    if not _is_same_origin_post():
+        response = error_factory('Cross-origin request blocked.')
+        response.status_code = 403
+        return response
+
+    session_key_count = len(list(session.keys()))
+    session.clear()
+    session.modified = True
+
+    try:
+        login_url = url_for('security.login')
+    except BuildError:
+        login_url = '/login'
+
+    response = jsonify(
+        {
+            "ok": True,
+            "login_url": login_url,
+            "cleared_session_keys": session_key_count,
+            "message": "Browser state reset. Continue by signing in again.",
+        }
+    )
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Pragma"] = "no-cache"
+    _clear_reset_browser_state_cookies(response)
+    return response
 
 
 def _resolve_access_log_path() -> Path:

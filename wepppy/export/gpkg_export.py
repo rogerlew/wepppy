@@ -17,6 +17,7 @@ import pandas as pd
 from pandas.core.series import Series
 
 from wepppy import f_esri
+from wepppy.nodir.materialize import materialize_path_if_archive
 from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.nodb.core import Soils
 
@@ -121,7 +122,8 @@ def gpkg_export(wd: str) -> None:
     if _exists(gdb_zip_fn):
         os.remove(gdb_zip_fn)
     
-    hill_gdf = gpd.read_file(watershed.subwta_shp) # the SUBCATCHMENTS.WGS.JSON file
+    hill_source = materialize_path_if_archive(wd, watershed.subwta_shp, purpose="export")
+    hill_gdf = gpd.read_file(hill_source) # the SUBCATCHMENTS.WGS.JSON file
     hill_gdf.set_crs("EPSG:4326", inplace=True)
 
     wat_hill_path = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet")
@@ -244,7 +246,8 @@ def gpkg_export(wd: str) -> None:
 #    hill_gdf.to_file(_join(wd, 'export/subcatchments.geojson'), driver='GeoJSON')
     hill_gdf.to_file(gpkg_fn, driver='GPKG', layer='subcatchments')
 
-    chn_gdf = gpd.read_file(watershed.channels_shp)  # the CHANNELS.WGS.JSON file
+    chn_source = materialize_path_if_archive(wd, watershed.channels_shp, purpose="export")
+    chn_gdf = gpd.read_file(chn_source)  # the CHANNELS.WGS.JSON file
     chn_gdf.set_crs("EPSG:4326", inplace=True)
 
     wat_chn_path = pick_existing_parquet_path(wd, "watershed/channels.parquet")

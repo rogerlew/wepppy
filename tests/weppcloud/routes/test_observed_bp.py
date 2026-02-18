@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Tuple
 
 import pytest
@@ -155,3 +156,27 @@ def test_submit_run_model_fit_handles_processing_errors(observed_app):
 
     instance = observed_cls.getInstance(run_dir)
     assert instance.calc_calls == 0
+
+
+def test_submit_run_model_fit_with_archive_form_allowlisted_roots(observed_app):
+    app, observed_cls, run_dir = observed_app
+
+    run_path = Path(run_dir)
+    for root in ("climate", "watershed", "landuse", "soils"):
+        (run_path / f"{root}.nodir").write_text("archive", encoding="ascii")
+
+    payload = "Date,Streamflow (mm)\n01/01/2020,12\n"
+
+    with app.test_client() as client:
+        response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/run_model_fit/",
+            data=json.dumps({"data": payload}),
+            content_type="application/json",
+        )
+
+    assert response.status_code == 200
+    assert response.get_json() == {}
+
+    instance = observed_cls.getInstance(run_dir)
+    assert instance.parse_calls == [payload]
+    assert instance.calc_calls == 1

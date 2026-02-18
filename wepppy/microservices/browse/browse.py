@@ -48,6 +48,7 @@ import os
 import re
 import math
 import json
+import fnmatch
 import logging
 import html
 import traceback
@@ -108,6 +109,8 @@ from wepppy.microservices.browse.listing import (
     MANIFEST_FILENAME,
     MAX_FILE_LIMIT,
     _manifest_path,
+    _format_human_size,
+    _format_mtime_ns,
     _normalize_rel_path,
     _rel_join,
     _rel_parent,
@@ -124,6 +127,15 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.nodir import (
+    NoDirError,
+    listdir as nodir_listdir,
+    open_read as nodir_open_read,
+    parse_external_subpath,
+    resolve as nodir_resolve,
+    stat as nodir_stat,
+)
+from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
 from wepppy.microservices._gdalinfo import create_routes as create_gdalinfo_routes
 from wepppy.microservices.dss_preview import build_preview as build_dss_preview
 
@@ -221,6 +233,104 @@ def _resolve_browse_paths(request_path: str, runid: str, config: str) -> tuple[s
     browse_base = _prefix_path(f'/runs/{runid}/{config}/browse/')
     home_href = _prefix_path(f'/runs/{runid}/{config}')
     return browse_base, home_href
+
+
+_NODIR_SUFFIX = ".nodir"
+_NODIR_ROOTS = frozenset(NODIR_ROOTS)
+
+
+def _is_admin_context(context: AuthContext | None) -> bool:
+    if context is None:
+        return False
+    roles = set(context.roles)
+    return "admin" in roles or "root" in roles
+
+
+def _is_mixed_nodir_root(wd: str, root: str) -> bool:
+    return os.path.isdir(os.path.join(wd, root)) and os.path.lexists(
+        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
+    )
+
+
+def _mixed_nodir_roots(wd: str) -> list[str]:
+    mixed: list[str] = []
+    for root in _NODIR_ROOTS:
+        if _is_mixed_nodir_root(wd, root):
+            mixed.append(root)
+    return sorted(mixed)
+
+
+def _allowlisted_raw_nodir_path(rel_path: str) -> str | None:
+    if rel_path in (".", ""):
+        return None
+    if "/" in rel_path:
+        return None
+    if not rel_path.lower().endswith(_NODIR_SUFFIX):
+        return None
+    root = rel_path[: -len(_NODIR_SUFFIX)]
+    if root in _NODIR_ROOTS:
+        return root
+    return None
+
+
+def _raise_nodir_http_exception(err: NoDirError) -> None:
+    raise HTTPException(
+        status_code=err.http_status,
+        detail=_build_error_payload(err.message, code=err.code, details=err.message),
+    )
+
+
+def _normalize_nodir_subpath(subpath: str) -> str:
+    if not subpath:
+        return "."
+    return "/".join(part for part in subpath.replace("\\", "/").split("/") if part not in ("", ".")) or "."
+
+
+def _extract_nodir_filter(subpath: str, *, default: str = "") -> tuple[str, str]:
+    if not subpath:
+        return ".", default
+    normalized = _normalize_nodir_subpath(subpath)
+    if not normalized or normalized == ".":
+        return ".", default
+    if subpath.endswith("/"):
+        return f"{normalized}/", default
+    parts = normalized.split("/")
+    if parts and "*" in parts[-1]:
+        parent = "/".join(parts[:-1]) or "."
+        return parent, parts[-1]
+    return normalized, default
+
+
+def _nodir_entries_to_page(entries: list, *, filter_pattern: str, page: int, page_size: int) -> tuple[list[tuple], int]:
+    rows = []
+    for entry in entries:
+        if entry.name.startswith("."):
+            continue
+        if filter_pattern and not fnmatch.fnmatchcase(entry.name, filter_pattern):
+            continue
+        mtime_ns = int(entry.mtime_ns) if entry.mtime_ns is not None else 0
+        if entry.is_dir:
+            hr_value = "0 items"
+        else:
+            hr_value = _format_human_size(int(entry.size_bytes or 0))
+        rows.append(
+            (
+                entry.name,
+                bool(entry.is_dir),
+                _format_mtime_ns(mtime_ns),
+                hr_value,
+                False,
+                "",
+                False,
+            )
+        )
+
+    rows.sort(key=lambda item: (0 if item[1] else 1, item[0].casefold(), item[0]))
+    total_items = len(rows)
+    start = max(0, (page - 1) * page_size)
+    end = start + page_size
+    return rows[start:end], total_items
+
 
 def _resolve_culvert_batch_root(batch_uuid: str) -> Path:
     culverts_root = Path(os.getenv('CULVERTS_ROOT', '/wc1/culverts')).resolve()
@@ -825,51 +935,187 @@ async def _browse_tree_helper(
     config,
     *,
     allow_recorder: bool,
+    is_admin: bool,
     filter_pattern_default='',
 ):
     """
     Helper function to handle common browse tree logic.
     Returns the response for a file or directory browse request.
     """
+    nodir_rel_path, nodir_filter = _extract_nodir_filter(subpath, default=filter_pattern_default)
+    if _allowlisted_raw_nodir_path(nodir_rel_path) is not None and not nodir_rel_path.endswith("/"):
+        nodir_rel_path = f"{nodir_rel_path}/"
+    try:
+        logical_rel_path, nodir_view = parse_external_subpath(
+            nodir_rel_path,
+            allow_admin_alias=is_admin,
+        )
+    except ValueError:
+        abort(400, "Invalid path.")
+
+    nodir_root, _nodir_inner = split_nodir_root(logical_rel_path)
+    if nodir_root is not None:
+        mixed_state = _is_mixed_nodir_root(wd, nodir_root)
+        if mixed_state and not is_admin:
+            _raise_nodir_http_exception(
+                NoDirError(
+                    http_status=HTTPStatus.CONFLICT,
+                    code="NODIR_MIXED_STATE",
+                    message=f"{nodir_root} is in mixed state (dir + .nodir present)",
+                )
+            )
+
+        effective_view = nodir_view
+        if mixed_state and is_admin and nodir_view == "effective":
+            effective_view = "dir"
+        if mixed_state and is_admin and nodir_view == "archive":
+            normalized_subpath = _normalize_nodir_subpath(subpath)
+            if normalized_subpath.startswith(f"{nodir_root}{_NODIR_SUFFIX}"):
+                alias_rel = f"{nodir_root}/nodir"
+                if _nodir_inner:
+                    alias_rel = f"{alias_rel}/{_nodir_inner}"
+                if subpath.endswith("/") and not alias_rel.endswith("/"):
+                    alias_rel = f"{alias_rel}/"
+                browse_prefix = request.path.split("/browse/", 1)[0] + "/browse/"
+                redirect_url = f"{browse_prefix}{alias_rel}"
+                query_string = str(request.query_params)
+                if query_string:
+                    redirect_url = f"{redirect_url}?{query_string}"
+                return RedirectResponse(redirect_url, status_code=307)
+
+        try:
+            nodir_target = nodir_resolve(wd, logical_rel_path, view=effective_view)
+        except NoDirError as err:
+            _raise_nodir_http_exception(err)
+
+        if nodir_target is None:
+            return _path_not_found_response(runid, subpath, wd, request, config)
+
+        try:
+            nodir_meta = nodir_stat(nodir_target)
+        except FileNotFoundError:
+            return _path_not_found_response(runid, subpath, wd, request, config)
+        except NoDirError as err:
+            _raise_nodir_http_exception(err)
+
+        if nodir_meta.is_dir:
+            if not _validate_filter_pattern(nodir_filter):
+                abort(400, f"Invalid filter pattern: {nodir_filter}")
+            try:
+                nodir_entries = nodir_listdir(nodir_target)
+            except NoDirError as err:
+                _raise_nodir_http_exception(err)
+            page = request.args.get('page', 1, type=int)
+            page_entries, total_items = _nodir_entries_to_page(
+                nodir_entries,
+                filter_pattern=nodir_filter,
+                page=page,
+                page_size=MAX_FILE_LIMIT,
+            )
+            virtual_path = os.path.abspath(os.path.join(wd, nodir_rel_path))
+            return await browse_response(
+                virtual_path,
+                runid,
+                wd,
+                request,
+                config,
+                filter_pattern=nodir_filter,
+                force_directory=True,
+                hide_mixed_nodir=not is_admin,
+                page_entries_override=page_entries,
+                total_items_override=total_items,
+                using_manifest_override=False,
+            )
+
+        try:
+            with nodir_open_read(nodir_target) as fp:
+                file_bytes = fp.read()
+        except FileNotFoundError:
+            return _path_not_found_response(runid, subpath, wd, request, config)
+        except NoDirError as err:
+            _raise_nodir_http_exception(err)
+
+        args = request.args
+        headers = request.headers
+        filename = nodir_meta.name
+        if 'download' in args or 'Download' in headers:
+            download_response = Response(
+                response=file_bytes,
+                status=200,
+                mimetype="application/octet-stream",
+            )
+            download_response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+            return download_response
+        if 'raw' in args or 'Raw' in headers:
+            try:
+                text = file_bytes.decode("utf-8")
+            except UnicodeDecodeError:
+                return Response(response=file_bytes, status=200, mimetype="application/octet-stream")
+            raw_response = Response(response=text, status=200, mimetype="text/plain")
+            raw_response.headers["Content-Type"] = "text/plain; charset=utf-8"
+            return raw_response
+        try:
+            text = file_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            return Response(response=file_bytes, status=200, mimetype="application/octet-stream")
+        return Response(response=text, status=200, mimetype="text/plain")
+
     full_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, full_path)
     _assert_target_within_allowed_roots(wd, full_path, allow_recorder=allow_recorder)
 
     if os.path.isfile(full_path):
-        # If subpath points to a file, serve it
         return await browse_response(full_path, runid, wd, request, config)
+
+    if subpath.endswith('/'):
+        filter_pattern = filter_pattern_default
+        dir_path = subpath
     else:
-        # Parse subpath for directory and filter
-        if subpath.endswith('/'):
-            filter_pattern = filter_pattern_default
-            dir_path = subpath
+        components = subpath.split('/')
+        if '*' in components[-1]:
+            filter_pattern = components[-1]
+            dir_components = components[:-1]
         else:
-            components = subpath.split('/')
-            if '*' in components[-1]:
-                filter_pattern = components[-1]
-                dir_components = components[:-1]
-            else:
-                filter_pattern = filter_pattern_default
-                dir_components = components
+            filter_pattern = filter_pattern_default
+            dir_components = components
 
-            dir_path = '/'.join(dir_components) if dir_components else '.'
-            
-        dir_path = os.path.abspath(os.path.join(wd, dir_path))
-        
-        # Security and existence checks
-        _assert_within_root(wd, dir_path)
-        _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
-            
-        if not os.path.isdir(dir_path):
-            return _path_not_found_response(runid, subpath, wd, request, config)
-            
-        if not _validate_filter_pattern(filter_pattern):
-            abort(400, f"Invalid filter pattern: {filter_pattern}")
-            
-        return await browse_response(dir_path, runid, wd, request, config, filter_pattern=filter_pattern)
+        dir_path = '/'.join(dir_components) if dir_components else '.'
+
+    dir_path = os.path.abspath(os.path.join(wd, dir_path))
+    _assert_within_root(wd, dir_path)
+    _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
+
+    if not os.path.isdir(dir_path):
+        return _path_not_found_response(runid, subpath, wd, request, config)
+
+    if not _validate_filter_pattern(filter_pattern):
+        abort(400, f"Invalid filter pattern: {filter_pattern}")
+
+    return await browse_response(
+        dir_path,
+        runid,
+        wd,
+        request,
+        config,
+        filter_pattern=filter_pattern,
+        hide_mixed_nodir=not is_admin,
+    )
 
 
-async def browse_response(path, runid, wd, request, config, filter_pattern=''):
+async def browse_response(
+    path,
+    runid,
+    wd,
+    request,
+    config,
+    filter_pattern='',
+    *,
+    force_directory: bool = False,
+    hide_mixed_nodir: bool = False,
+    page_entries_override: list[tuple] | None = None,
+    total_items_override: int | None = None,
+    using_manifest_override: bool | None = None,
+):
     args = request.args
     headers = request.headers
     
@@ -892,7 +1138,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
     query_suffix = f'?{urlencode(base_query)}' if base_query else ''
     
-    if not _exists(path):
+    if not force_directory and not _exists(path):
         return jsonify({'error': {'message': 'path does not exist'}}), 404
     
     path_lower = path.lower()
@@ -902,7 +1148,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
     base_browse_url, home_href = _resolve_browse_paths(request.path, runid, config)
 
-    if os.path.isdir(path):
+    if force_directory or os.path.isdir(path):
         # build breadcrumb links and clickable separators that expose absolute paths
         root_href = f'{base_browse_url}{query_suffix}'
         breadcrumb_items = [(f'<a href="{root_href}"><b>{runid}</b></a>', os.path.abspath(wd))]
@@ -952,6 +1198,10 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
             path, runid, wd, request.path, diff_wd, base_query,
             page=page, page_size=MAX_FILE_LIMIT, filter_pattern=filter_pattern,
             sort_by=sort_by, sort_order=sort_order,
+            hide_mixed_nodir=hide_mixed_nodir,
+            page_entries_override=page_entries_override,
+            total_items_override=total_items_override,
+            using_manifest_override=using_manifest_override,
         )
         
         # Calculate total pages and validate page number
@@ -1016,6 +1266,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         listing_markup = Markup(listing_html)
         pagination_markup = Markup(pagination_html)
         showing_markup = Markup(showing_text)
+        mixed_state_roots = _mixed_nodir_roots(wd)
 
         return render_template(
             'browse/directory.htm',
@@ -1028,6 +1279,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
             pagination_html=pagination_markup,
             showing_text=showing_markup,
             using_manifest=using_manifest,
+            mixed_state_roots=mixed_state_roots,
         )
 
     else:
@@ -1285,6 +1537,7 @@ async def _handle_browse_request(
             )
 
     allow_recorder = bool(context and context.is_root)
+    is_admin = _is_admin_context(context)
     violation = validate_raw_subpath(subpath_value)
     if violation is not None:
         if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
@@ -1304,6 +1557,7 @@ async def _handle_browse_request(
         flask_request,
         config,
         allow_recorder=allow_recorder,
+        is_admin=is_admin,
     )
     return ensure_response(result)
 

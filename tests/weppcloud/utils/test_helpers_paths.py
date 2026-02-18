@@ -214,6 +214,9 @@ def test_ensure_omni_shared_inputs_links_nodir_archives(tmp_path, monkeypatch: p
 
     (base_root / "climate.nodir").write_text("archive", encoding="utf-8")
     (base_root / "watershed.nodir").write_text("archive", encoding="utf-8")
+    (base_root / "climate.wepp_cli.parquet").write_text("climate-sidecar", encoding="utf-8")
+    (base_root / "watershed.hillslopes.parquet").write_text("hillslope-sidecar", encoding="utf-8")
+    (base_root / "watershed.channels.parquet").write_text("channel-sidecar", encoding="utf-8")
     (base_root / "dem").mkdir()
 
     helpers._ensure_omni_shared_inputs(str(base_root), str(scenario_root))
@@ -221,3 +224,6 @@ def test_ensure_omni_shared_inputs_links_nodir_archives(tmp_path, monkeypatch: p
     assert (scenario_root / "climate.nodir").is_symlink()
     assert (scenario_root / "watershed.nodir").is_symlink()
     assert (scenario_root / "dem").is_symlink()
+    assert (scenario_root / "climate.wepp_cli.parquet").is_symlink()
+    assert (scenario_root / "watershed.hillslopes.parquet").is_symlink()
+    assert (scenario_root / "watershed.channels.parquet").is_symlink()

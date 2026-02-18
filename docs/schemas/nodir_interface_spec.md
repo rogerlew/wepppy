@@ -4,6 +4,7 @@
 >
 > See:
 > - `docs/schemas/nodir-contract-spec.md`
+> - `docs/schemas/nodir-thaw-freeze-contract.md`
 > - `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`
 > - `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`
 
@@ -153,9 +154,12 @@ Note: materialized paths are internal (`WD/.nodir/...`) and MUST NOT be exposed 
 - `/browse`, `/files`, `/download` MUST use `resolve()+listdir/stat/open_read` for NoDir roots.
 - They MUST NOT call `materialize_*` for these surfaces (matrix).
 - Mixed state (non-admin): hide both in listings; direct nav returns `409 NODIR_MIXED_STATE`.
-- Mixed state (admin browse only): caller selects view explicitly:
+- Mixed state (admin browse): caller selects view explicitly:
   - directory view: `view="dir"`
   - archive view: `view="archive"` via `<root>/nodir/...` or `<root>.nodir/...` alias
+- Mixed state (admin `/files/` root listing): expose both `<root>/` and `<root>.nodir` for debug observability.
+  - This visibility exception is limited to `GET /files/` root listing.
+  - Mixed-state target navigation under `/files/<root>/...` and `/files/<root>.nodir/...` remains `409 NODIR_MIXED_STATE`.
 
 ### 5.2 D-Tale / GDALInfo / Exports
 - These endpoints MUST:

@@ -1083,6 +1083,7 @@ class Disturbed(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}()')
 
         from wepppy.nodb.core import Wepp
+        from wepppy.nodir.wepp_inputs import materialize_input_file
         _land_soil_replacements_d = self.land_soil_replacements_d
 
         wd = self.wd
@@ -1098,6 +1099,7 @@ class Disturbed(NoDbBase):
             domlc_d[topaz_id] = dom
 
         n = len(domlc_d)
+        soil_texture_d: Dict[str, Tuple[Any, Any]] = {}
 
         with open(_join(wepp.runs_dir, 'pmetpara.txt'), 'w') as fp:
             fp.write('{n}\n'.format(n=n))
@@ -1109,9 +1111,34 @@ class Disturbed(NoDbBase):
                 man = man_summary.get_management()
 
                 mukey = soils.domsoil_d[topaz_id]
-                _soil = soils.soils[mukey]
-                clay = _soil.clay
-                sand = _soil.sand
+                if mukey in soil_texture_d:
+                    clay, sand = soil_texture_d[mukey]
+                else:
+                    _soil = soils.soils[mukey]
+                    clay = None
+                    sand = None
+
+                    soil_fname = getattr(_soil, 'fname', None)
+                    if isinstance(soil_fname, str) and soil_fname:
+                        try:
+                            soil_src = materialize_input_file(
+                                wd,
+                                f'soils/{soil_fname}',
+                                purpose='disturbed-pmet-soil-texture',
+                            )
+                            soilu = WeppSoilUtil(soil_src)
+                            clay = soilu.clay
+                            sand = soilu.sand
+                        except Exception as exc:
+                            self.logger.warning(
+                                f'      failed archive-first soil texture for {mukey} ({soil_fname}): {exc}'
+                            )
+
+                    if not (isfloat(clay) and isfloat(sand)):
+                        clay = _soil.clay
+                        sand = _soil.sand
+
+                    soil_texture_d[mukey] = (clay, sand)
 
                 assert isfloat(clay), clay
                 assert isfloat(sand), sand

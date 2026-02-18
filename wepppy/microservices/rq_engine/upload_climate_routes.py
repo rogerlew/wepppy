@@ -13,6 +13,8 @@ from starlette.datastructures import UploadFile
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Climate, Ron
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.mutations import mutate_root
 from wepppy.rq.project_rq import upload_cli_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -73,13 +75,20 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         if upload is None:
             return upload_failure("Could not find file")
 
-        saved_path = save_upload_file(
-            upload,
-            allowed_extensions=("cli",),
-            dest_dir=Path(climate.cli_dir),
-            filename_transform=lambda value: value,
-            overwrite=True,
+        saved_path = mutate_root(
+            wd,
+            "climate",
+            lambda: save_upload_file(
+                upload,
+                allowed_extensions=("cli",),
+                dest_dir=Path(climate.cli_dir),
+                filename_transform=lambda value: value,
+                overwrite=True,
+            ),
+            purpose="rq-upload-cli-save",
         )
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except UploadError as exc:
         return upload_failure(str(exc))
     except Exception:

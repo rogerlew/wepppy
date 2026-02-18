@@ -15,6 +15,53 @@ from wepppy.query_engine.payload import DatasetSpec, JoinSpec, QueryPlan, QueryR
 _GEO_READ_EXTENSIONS = {".geojson", ".fgb", ".gpkg", ".shp"}
 
 
+def _find_parent_run_root(base: Path) -> Path | None:
+    """Best-effort inference of the run root for `_pups` child directories."""
+    parts = base.parts
+    try:
+        idx = parts.index("_pups")
+    except ValueError:
+        return None
+    if idx == 0:
+        return None
+    return Path(*parts[:idx])
+
+
+def _resolve_dataset_path(root: Path, fs_path: str, logical_path: str) -> Path:
+    """Resolve and validate a catalog dataset filesystem path.
+
+    Catalog logical ids remain stable, but `CatalogEntry.fs_path` may point at a
+    physical sidecar or parent-run asset. We must ensure the effective path stays
+    within the run boundary (base run root + optional parent for `_pups`).
+    """
+    dataset_path = Path(fs_path)
+
+    if not dataset_path.is_absolute():
+        # Reject traversal in relative fs_path values so joins cannot escape the run root.
+        if any(part == ".." for part in dataset_path.parts):
+            raise ValueError(f"Invalid fs_path for '{logical_path}': relative paths cannot contain '..'")
+        dataset_path = root / dataset_path
+
+    resolved_root = root.resolve(strict=False)
+    allowed_roots = [resolved_root]
+    parent_root = _find_parent_run_root(resolved_root)
+    if parent_root is not None:
+        allowed_roots.append(parent_root.resolve(strict=False))
+
+    resolved_dataset = dataset_path.resolve(strict=False)
+    for allowed_root in allowed_roots:
+        try:
+            resolved_dataset.relative_to(allowed_root)
+        except ValueError:
+            continue
+        return resolved_dataset
+
+    allowed = ", ".join(str(path) for path in allowed_roots)
+    raise ValueError(
+        f"Dataset path for '{logical_path}' escapes allowed roots ({allowed}): '{resolved_dataset}'"
+    )
+
+
 def _escape_sql_literal(value: str) -> str:
     """Escape single quotes within `value` for use inside SQL string literals.
 
@@ -97,9 +144,7 @@ def _dataset_source_sql(root: Path, spec: DatasetSpec, catalog: DatasetCatalog) 
     """
     entry = catalog.get(spec.path)
     fs_path = entry.fs_path if entry and entry.fs_path else spec.path
-    dataset_path = Path(fs_path)
-    if not dataset_path.is_absolute():
-        dataset_path = root / dataset_path
+    dataset_path = _resolve_dataset_path(root, fs_path, spec.path)
     source_path = dataset_path.as_posix()
     escaped = _escape_sql_literal(source_path)
     suffix = dataset_path.suffix.lower()

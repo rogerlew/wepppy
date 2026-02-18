@@ -160,6 +160,14 @@ def test_standard_watershed_enqueue_sets_autocommit(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
     monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
     monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    recovery_calls: list[tuple[str, tuple[str, ...]]] = []
+    warnings: list[str] = []
+
+    def _fake_recover(wd: str, *, roots: tuple[str, ...] = ()) -> tuple[str, ...]:
+        recovery_calls.append((wd, tuple(roots)))
+        return ("watershed",)
+
+    monkeypatch.setattr(wepp_rq, "_recover_mixed_nodir_roots", _fake_recover)
     monkeypatch.setattr(
         wepp_rq.Wepp,
         "getInstance",
@@ -167,13 +175,19 @@ def test_standard_watershed_enqueue_sets_autocommit(monkeypatch: pytest.MonkeyPa
             islocked=lambda: False,
             ensure_bootstrap_main=lambda: None,
             run_wepp_watershed=False,
-            logger=SimpleNamespace(info=lambda *args, **kwargs: None),
+            logger=SimpleNamespace(
+                info=lambda *args, **kwargs: None,
+                warning=lambda message, *_args: warnings.append(str(message)),
+            ),
         ),
     )
     calls = _stub_rq_queue(monkeypatch, wepp_rq)
 
     wepp_rq.run_wepp_watershed_rq("ab-run")
 
+    assert recovery_calls == [("/tmp/run", ("watershed",))]
+    assert warnings
+    assert warnings[-1] == "Recovered mixed NoDir roots before run_wepp_watershed_rq(ab-run): watershed"
     assert len(calls) == 1
     assert calls[0]["func"] is wepp_rq._log_complete_rq
     assert calls[0]["kwargs"] == {

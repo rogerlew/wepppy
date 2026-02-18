@@ -11,6 +11,7 @@ from fastapi.responses import RedirectResponse, Response
 
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.core import Ron
+from wepppy.nodir.mutations import enable_default_archive_roots
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -318,6 +319,7 @@ async def create(request: Request) -> Response:
 
         try:
             Ron(wd, cfg)
+            enable_default_archive_roots(wd)
         except Exception:
             logger.exception("rq-engine create Ron failed")
             return error_response("Could not create run")

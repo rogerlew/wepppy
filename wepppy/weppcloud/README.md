@@ -133,6 +133,12 @@ See `docs/infrastructure/secrets.md` for the authoritative inventory.
 | `TEST_SUPPORT_ENABLED` | `false` | Enable test support endpoints |
 | `DTALE_INTERNAL_TOKEN` | *(optional)* | Token for D-Tale integration |
 | `SESSION_COOKIE_SAMESITE` | `Lax` | Flask session cookie SameSite policy (`Lax`, `Strict`, or `None`) |
+| `SESSION_REFRESH_EACH_REQUEST` | `true` | Refresh Flask session expiry on each request |
+| `REMEMBER_COOKIE_DAYS` | `30` | Flask remember-me cookie lifetime in days |
+| `REMEMBER_COOKIE_SAMESITE` | `Lax` | Flask remember-me cookie SameSite policy |
+| `REMEMBER_COOKIE_SECURE` | `true` | Require HTTPS for remember-me cookie |
+| `REMEMBER_COOKIE_HTTPONLY` | `true` | Mark remember-me cookie as HttpOnly |
+| `REMEMBER_COOKIE_REFRESH_EACH_REQUEST` | `false` | Refresh remember-me cookie expiry on each request |
 | `ZOHO_NOREPLY_EMAIL` | *(optional)* | Zoho SMTP sender account; when paired with `ZOHO_NOREPLY_EMAIL_PASSWORD`, Flask-Mail uses Zoho (`smtp.zoho.com:587` with TLS) |
 | `ZOHO_NOREPLY_EMAIL_PASSWORD` | *(optional)* | Password or app password for `ZOHO_NOREPLY_EMAIL`; both Zoho vars must be non-empty to enable Zoho SMTP |
 
@@ -148,7 +154,8 @@ See `docs/infrastructure/secrets.md` for the authoritative inventory.
 - Authoritative session contract: `docs/schemas/weppcloud-session-contract.md`.
 - Session lifecycle implementation spec: `docs/dev-notes/weppcloud-session-lifecycle.spec.md`.
 - Flask sessions are stored in Redis with a 12-hour lifetime.
-- Session cookie defaults are `Secure=True` and `SameSite=Lax` (override with `SESSION_COOKIE_SAMESITE`).
+- Session cookie defaults are `Secure=True` and `SameSite=Lax` with per-request refresh enabled (override with `SESSION_COOKIE_SAMESITE` and `SESSION_REFRESH_EACH_REQUEST`).
+- Remember-me cookie defaults are `Secure=True`, `HttpOnly=True`, `SameSite=Lax`, 30-day duration, with refresh disabled unless explicitly enabled (override with `REMEMBER_COOKIE_*` env vars).
 - Pages rendered from `templates/base_pure.htm` (including run subpages such as fork/archive/readme/reports) load `static/js/session_heartbeat.js`, which sends a periodic heartbeat while the tab is open.
 - Heartbeat endpoint: `POST /weppcloud/api/auth/session-heartbeat`
   - Requires authenticated user + same-origin POST

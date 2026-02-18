@@ -346,3 +346,146 @@ def test_session_heartbeat_blocks_missing_origin_and_referer(
     assert response.status_code == 403
     payload = response.get_json()
     assert payload["error"]["message"] == "Cross-origin request blocked."
+
+def test_reset_browser_state_requires_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/reset-browser-state",
+            headers={"Origin": "http://localhost"},
+        )
+
+    assert response.status_code == 401
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Authentication required."
+
+
+def test_reset_browser_state_blocks_cross_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/reset-browser-state",
+            headers={"Origin": "https://evil.example"},
+        )
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
+def test_reset_browser_state_blocks_missing_origin_and_referer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        response = client.post("/weppcloud/api/auth/reset-browser-state")
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
+def test_reset_browser_state_accepts_same_origin_referer_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess["custom"] = "present"
+
+        response = client.post(
+            "/weppcloud/api/auth/reset-browser-state",
+            headers={"Referer": "http://localhost/weppcloud/profile"},
+        )
+
+        assert response.status_code == 200
+        with client.session_transaction() as sess:
+            assert len(sess.keys()) == 0
+
+
+def test_reset_browser_state_clears_session_and_auth_cookies(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    app.config["SESSION_COOKIE_NAME"] = "wc_session"
+    app.config["SESSION_COOKIE_PATH"] = "/weppcloud/"
+    app.config["SESSION_COOKIE_DOMAIN"] = None
+    app.config["REMEMBER_COOKIE_NAME"] = "remember_me"
+    app.config["REMEMBER_COOKIE_PATH"] = "/weppcloud"
+    app.config["REMEMBER_COOKIE_DOMAIN"] = ".example.com"
+
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess["_user_id"] = "123"
+            sess["custom"] = "present"
+
+        response = client.post(
+            "/weppcloud/api/auth/reset-browser-state",
+            headers={"Origin": "http://localhost"},
+        )
+
+        assert response.status_code == 200
+        payload = response.get_json()
+        assert payload["ok"] is True
+        assert payload["login_url"] == "/login"
+        assert payload["cleared_session_keys"] >= 1
+
+        with client.session_transaction() as sess:
+            assert len(sess.keys()) == 0
+
+    assert response.headers.get("Cache-Control") == "no-store"
+    assert response.headers.get("Pragma") == "no-cache"
+    set_cookie_headers = response.headers.getlist("Set-Cookie")
+
+    assert any(header.startswith("wc_session=;") for header in set_cookie_headers)
+    assert any(header.startswith("remember_me=;") for header in set_cookie_headers)
+
+    wc_session_headers = [
+        header for header in set_cookie_headers if header.startswith("wc_session=;")
+    ]
+    assert any("Path=/weppcloud" in header for header in wc_session_headers)
+    assert any("Path=/weppcloud/" in header for header in wc_session_headers)
+    remember_headers = [
+        header for header in set_cookie_headers if header.startswith("remember_me=;")
+    ]
+    assert any("Domain=example.com" in header for header in remember_headers)
+    assert any("Path=/weppcloud" in header for header in remember_headers)
+    assert any("Path=/weppcloud/" in header for header in remember_headers)
+    assert len(remember_headers) >= 2

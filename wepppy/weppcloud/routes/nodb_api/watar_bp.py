@@ -17,6 +17,8 @@ from wepppy.nodb.base import *
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.mods.ash_transport import Ash, AshPost
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.wepp_inputs import with_input_file_path
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize, parse_rec_intervals
 from wepppy.wepp.interchange.hill_wat_interchange import load_hill_wat_dataframe
 
@@ -90,7 +92,21 @@ def hillslope0_ash(runid, config, topaz_id):
         ash = Ash.getInstance(wd)
     
         cli_path = climate.cli_path
-        cli_df = ClimateFile(cli_path).as_dataframe()
+        cli_relpath = None
+        try:
+            cli_relpath = os.path.relpath(cli_path, wd)
+        except ValueError:
+            cli_relpath = None
+
+        if cli_relpath is None or cli_relpath == ".." or cli_relpath.startswith(f"..{os.sep}"):
+            cli_df = ClimateFile(cli_path).as_dataframe()
+        else:
+            with with_input_file_path(
+                wd,
+                cli_relpath,
+                purpose="ash-hillslope-climate-cli",
+            ) as projected_cli_path:
+                cli_df = ClimateFile(projected_cli_path).as_dataframe()
 
         hill_wat_df = load_hill_wat_dataframe(
             wepp.output_dir, wepp_id, collapse="daily"
@@ -131,6 +147,8 @@ def hillslope0_ash(runid, config, topaz_id):
                                ron=ron,
                                user=current_user)
 
+    except NoDirError as exc:
+        return error_factory(exc.message, status_code=exc.http_status, code=exc.code)
     except:
         return exception_factory('Error loading ash hillslope results', runid=runid)
 

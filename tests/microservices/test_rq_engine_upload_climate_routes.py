@@ -6,6 +6,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import upload_climate_routes
+from wepppy.nodir.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
@@ -66,6 +67,11 @@ def test_upload_cli_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
 
     climate = DummyClimate(cli_dir)
     monkeypatch.setattr(upload_climate_routes.Climate, "getInstance", lambda wd: climate)
+    monkeypatch.setattr(
+        upload_climate_routes,
+        "mutate_root",
+        lambda wd, root, callback, purpose="nodir-mutation": callback(),
+    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -76,3 +82,38 @@ def test_upload_cli_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+
+
+def test_upload_cli_propagates_nodir_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    cli_dir = run_dir / "cli"
+    cli_dir.mkdir(parents=True)
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(upload_climate_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(upload_climate_routes.Ron, "getInstance", lambda wd: object())
+
+    class DummyClimate:
+        def __init__(self, cli_dir: Path) -> None:
+            self.cli_dir = str(cli_dir)
+
+    climate = DummyClimate(cli_dir)
+    monkeypatch.setattr(upload_climate_routes.Climate, "getInstance", lambda wd: climate)
+
+    def _raise_nodir(wd, root, callback, purpose="nodir-mutation"):
+        raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed")
+
+    monkeypatch.setattr(upload_climate_routes, "mutate_root", _raise_nodir)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-cli/",
+            files={"input_upload_cli": ("demo.cli", b"data")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"

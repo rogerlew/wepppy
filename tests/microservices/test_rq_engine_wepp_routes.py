@@ -321,3 +321,33 @@ def test_run_wepp_watershed_base_project_context_returns_input_message_without_e
     assert response.status_code == 200
     assert response.json()["message"] == "Set wepp inputs for batch processing"
     assert queue_called["called"] is False
+
+
+def test_run_wepp_setup_failure_returns_canonical_error_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_wepp_stack(monkeypatch)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class ExplodingSoils:
+        @property
+        def clip_soils(self):
+            return False
+
+        @clip_soils.setter
+        def clip_soils(self, value):
+            raise RuntimeError("soil write failed")
+
+    monkeypatch.setattr(wepp_routes.Soils, "getInstance", lambda wd: ExplodingSoils())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={"clip_soils": True},
+        )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["error"]["message"] == "Error preparing WEPP run request"
+    assert "RuntimeError: soil write failed" in payload["error"]["details"]

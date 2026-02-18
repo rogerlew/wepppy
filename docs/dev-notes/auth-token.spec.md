@@ -306,14 +306,14 @@ If validation fails a `JWTDecodeError` is raised.
 | `queries:validate` | Validate payloads against dataset schema. |
 | `queries:execute` | Execute queries (POST to `/query`). |
 | `runs:activate` | Trigger query-engine catalog activation via MCP. |
-| `rq:status` | Poll job status/info. |
+| `rq:status` | Poll job status/info and cancel jobs. |
 | `rq:enqueue` | Submit run-scoped RQ jobs. |
 | `rq:export` | Request rq-engine export artifacts. |
 | `bootstrap:enable` | Enqueue Bootstrap enable for eligible runs. |
 | `bootstrap:token:mint` | Mint Bootstrap git access token URLs. |
 | `bootstrap:read` | Read Bootstrap commit history and current ref metadata. |
 | `bootstrap:checkout` | Checkout a Bootstrap commit under run lock. |
-| `culvert:batch:submit` | Submit culvert batch payloads. |
+| `culvert:batch:submit` | Submit culvert batch payloads; also accepted for `/api/canceljob/{job_id}`. |
 | `culvert:batch:retry` | Retry culvert runs and enqueue batch finalizers. |
 | `culvert:batch:read` | Read culvert batch/job metadata. |
 

@@ -25,6 +25,7 @@ import duckdb
 
 from wepppy.nodb.mods.swat.print_prt import PRINT_PRT_DAILY, PrintPrtConfig, load_print_prt
 from wepppy.nodb.base import NoDbBase
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.topo.peridot.peridot_runner import read_network
 from wepppy.wepp.interchange._rust_interchange import resolve_cli_calendar_path, version_args
 from wepppy.wepp.interchange._utils import CalendarLookup, _build_cli_calendar_lookup, _julian_to_calendar
@@ -293,12 +294,15 @@ class Swat(NoDbBase):
         return _join(self.swat_dir, 'outputs')
 
     def build_recall_connections(self) -> List[Tuple[int, int]]:
-        hillslopes_parquet = _join(self.wd, 'watershed', 'hillslopes.parquet')
-        channels_parquet = _join(self.wd, 'watershed', 'channels.parquet')
-        if not _exists(hillslopes_parquet):
-            raise FileNotFoundError(f"Missing hillslopes parquet: {hillslopes_parquet}")
-        if not _exists(channels_parquet):
-            raise FileNotFoundError(f"Missing channels parquet: {channels_parquet}")
+        hillslopes_path = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        channels_path = pick_existing_parquet_path(self.wd, "watershed/channels.parquet")
+        if hillslopes_path is None:
+            raise FileNotFoundError("Missing hillslopes parquet (watershed/hillslopes.parquet)")
+        if channels_path is None:
+            raise FileNotFoundError("Missing channels parquet (watershed/channels.parquet)")
+
+        hillslopes_parquet = str(hillslopes_path)
+        channels_parquet = str(channels_path)
 
         with duckdb.connect() as con:
             hills_cols = _read_parquet_columns(con, hillslopes_parquet)
@@ -1327,9 +1331,10 @@ class Swat(NoDbBase):
                 handle.write("\n".join(lines) + "\n")
 
     def _load_hillslope_areas(self) -> Dict[int, float]:
-        hillslopes_parquet = _join(self.wd, "watershed", "hillslopes.parquet")
-        if not _exists(hillslopes_parquet):
+        hillslopes_path = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if hillslopes_path is None:
             return {}
+        hillslopes_parquet = str(hillslopes_path)
         with duckdb.connect() as con:
             cols = _read_parquet_columns(con, hillslopes_parquet)
             wepp_col = _resolve_column(cols, ("wepp_id", "WeppID"), hillslopes_parquet)
@@ -1794,9 +1799,10 @@ class Swat(NoDbBase):
             handle.write(f"{timestamp} {message}\n")
 
     def _estimate_total_area_ha(self) -> Optional[float]:
-        hillslopes_parquet = _join(self.wd, 'watershed', 'hillslopes.parquet')
-        if not _exists(hillslopes_parquet):
+        hillslopes_path = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+        if hillslopes_path is None:
             return None
+        hillslopes_parquet = str(hillslopes_path)
         with duckdb.connect() as con:
             cols = _read_parquet_columns(con, hillslopes_parquet)
             area_col = _resolve_column_optional(cols, ('area', 'area_m2', 'area_m', 'area_sq_m'))
@@ -2027,9 +2033,10 @@ class Swat(NoDbBase):
         return first[0], first[1], last[0], last[1]
 
     def _load_channels(self) -> List[Dict[str, Any]]:
-        channels_parquet = _join(self.wd, 'watershed', 'channels.parquet')
-        if not _exists(channels_parquet):
-            raise FileNotFoundError(f"Missing channels parquet: {channels_parquet}")
+        channels_path = pick_existing_parquet_path(self.wd, "watershed/channels.parquet")
+        if channels_path is None:
+            raise FileNotFoundError("Missing channels parquet (watershed/channels.parquet)")
+        channels_parquet = str(channels_path)
 
         with duckdb.connect() as con:
             cols = _read_parquet_columns(con, channels_parquet)

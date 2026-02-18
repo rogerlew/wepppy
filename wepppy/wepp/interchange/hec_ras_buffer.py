@@ -24,6 +24,7 @@ import pandas as pd
 from wepppy.all_your_base.geo import shapefile
 from wepppy.all_your_base.geo.geo import read_raster
 from wepppy.all_your_base.geo.geo_transformer import GeoTransformer
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 
 if TYPE_CHECKING:  # pragma: no cover
     from wepppy.nodb.core.watershed import Watershed
@@ -94,7 +95,11 @@ def write_hec_buffer_gml(
 
     width_multiplier = max(width_multiplier, 0.01)
     kernel_cache: dict[_KernelSpec, np.ndarray] = {}
-    order_lookup = _load_channel_orders(Path(watershed.wat_dir) / "channels.parquet")
+    wd = getattr(watershed, "wd", None)
+    channels_parquet = (
+        pick_existing_parquet_path(wd, "watershed/channels.parquet") if wd else None
+    )
+    order_lookup = _load_channel_orders(channels_parquet) if channels_parquet else {}
     selected_ids = sorted({int(chn) for chn in channel_ids if int(chn) > 0})
     buffer_accum = np.zeros_like(subwta, dtype=np.int32)
     order_counter: Counter[str] = Counter()

@@ -804,16 +804,25 @@ class SoilSummary(object):
     @property
     def path(self):
         path = _join(self.soils_dir, self.fname)
-        if not _exists(path):
-            # soils_dir may be relative like "runid/soils" - extract runid and use get_wd
-            from wepppy.weppcloud.utils.helpers import get_wd
-            parts = self.soils_dir.split(os.sep)
-            if parts:
-                runid = parts[0]
-                rest = os.sep.join(parts[1:]) if len(parts) > 1 else ''
-                wd = get_wd(runid)
-                path = _join(wd, rest, self.fname)
-        return path
+        if _exists(path):
+            return path
+
+        soils_dir = self.soils_dir
+        if not isinstance(soils_dir, str) or not soils_dir or os.path.isabs(soils_dir):
+            return path
+
+        # Legacy payloads may store soils_dir as relative runid path (e.g. runid/soils).
+        # Resolve that format through get_wd without treating absolute paths as runids.
+        from wepppy.weppcloud.utils.helpers import get_wd
+
+        parts = [part for part in soils_dir.split(os.sep) if part]
+        if not parts:
+            return path
+
+        runid = parts[0]
+        rest = os.sep.join(parts[1:]) if len(parts) > 1 else ""
+        wd = get_wd(runid)
+        return _join(wd, rest, self.fname)
 
     @property
     def meta_fn(self):

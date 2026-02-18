@@ -29,6 +29,7 @@ from wepppy.nodb.mods.omni.omni import (
     _scenario_name_from_scenario_definition,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.nodb.status_messenger import StatusMessenger
 
 try:
@@ -256,6 +257,9 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        for root in ('climate', 'watershed', 'landuse', 'soils'):
+            nodir_resolve(wd, root, view='effective')
 
         omni = Omni.getInstance(wd)
 

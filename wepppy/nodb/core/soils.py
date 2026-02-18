@@ -181,11 +181,29 @@ class Soils(NoDbBase):
             self._clip_soils_depth = self.config_get_float('soils', 'clip_soils', 1000)
             self._soils_is_vrt = False
 
-            soils_dir = self.soils_dir
-            if not _exists(soils_dir):
-                os.mkdir(soils_dir)
-
             self._soils_map = self.config_get_path('soils', 'soils_map', None)
+
+    @classmethod
+    def _post_instance_loaded(cls, instance: "Soils") -> "Soils":
+        instance = super()._post_instance_loaded(instance)
+
+        soils = getattr(instance, "soils", None)
+        if not isinstance(soils, dict):
+            return instance
+
+        canonical_soils_dir = instance.soils_dir
+        for summary in soils.values():
+            if summary is None:
+                continue
+            if hasattr(summary, "soils_dir"):
+                summary.soils_dir = canonical_soils_dir
+            if hasattr(summary, "_weppsoilutil"):
+                try:
+                    delattr(summary, "_weppsoilutil")
+                except AttributeError:
+                    pass
+
+        return instance
 
     @property
     def clip_soils(self) -> bool:
@@ -1191,6 +1209,7 @@ class Soils(NoDbBase):
         global wepppyo3
 
         soils_dir = self.soils_dir
+        os.makedirs(soils_dir, exist_ok=True)
         failed = True
         with self.locked():
             if initial_sat is not None:
@@ -1417,6 +1436,8 @@ class Soils(NoDbBase):
         update_catalog_entry(self.wd, 'soils/soils.parquet')
         
     def _post_dump_and_unlock(self):
+        if not _exists(self.soils_dir):
+            return self
         self.dump_soils_parquet()
         return self
 

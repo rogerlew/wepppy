@@ -1,140 +1,114 @@
-# NoDir Materialization Contract (Step 2)
+# NoDir Canonical Root Projection Contract (Step 2A Revision)
 
-> Normative contract for `materialize(file)` / cache semantics used by FS-boundary surfaces (dtale, gdalinfo, exports) when NoDir roots are archive-backed (`*.nodir`).
+> Normative contract for archive-backed roots projected at canonical in-run paths (`WD/<root>`).
 >
-> Note: Query engine Parquet under NoDir roots is a WD-level sidecar (no `.nodir` extraction) per `docs/schemas/nodir-contract-spec.md`.
+> Canonical policy: path-heavy consumers use projected mount sessions, not ad hoc per-file extraction.
 >
 > See:
 > - `docs/schemas/nodir-contract-spec.md`
+> - `docs/schemas/nodir-thaw-freeze-contract.md`
 > - `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`
-> - `docs/work-packages/20260214_nodir_archives/artifacts/touchpoints_inventory.md`
 
-## 1) Terms
-- `native`: no extraction to disk; list/stat/read via filesystem (Dir form) or zip central-dir + streamed entry reads (Archive form).
-- `materialize(file)`: extract one archive entry (plus required sidecars) to an internal on-disk path and return a real filesystem path to hand to a tool/library.
-- `materialize(root-subset)`: extract a bounded set of entries into a temporary directory preserving relative paths; used by exports that require multiple real files.
-- `materialize(root)`: thaw entire root to `WD/<root>/` (see `docs/schemas/nodir-contract-spec.md`).
+## 1) Objective
+- Keep `WD/<root>.nodir` as authoritative persisted data.
+- Present `WD/<root>` as the canonical runtime filesystem view so legacy path-based code can read with minimal touchpoint changes.
+- Replace most `materialize(file)` usage with run-scoped mount sessions.
+
+## 2) Terms
+- `projected root`: mounted view at `WD/<root>`.
+- `read session`: read-only projection over archive content.
+- `mutation session`: writable projection where writes land in an upper layer and are committed to archive only at explicit finalize.
 - `archive fingerprint`: `{mtime_ns, size_bytes}` from `stat(WD/<root>.nodir)`.
-- `entry fingerprint`: `(inner_path, crc32, file_size, compress_size, method)` from zip central directory.
+- `projection key`: `(runid, root, archive_fingerprint, mode)`.
 
-## 2) Global Rules (Materialization-Relevant)
-- Materialization is **prohibited** for `/browse`, `/files`, `/download` (must be archive-native streaming).
-- Materialization is **required** for dtale/gdalinfo/exports when the requested object is an archive entry (per behavior matrix).
-- Mixed state (`WD/<root>/` and `WD/<root>.nodir` both exist): outside `/browse` MUST fail fast with `409; code=NODIR_MIXED_STATE` before any materialization.
-- Invalid allowlisted `.nodir`: archive-as-directory operations and materialization MUST return `500; code=NODIR_INVALID_ARCHIVE`.
-- Materialization lock contention or “root is transitioning” MUST return `503; code=NODIR_LOCKED`.
-- Materialization limits MUST return `413; code=NODIR_LIMIT_EXCEEDED`.
+## 3) Canonical Policy
+- For path-based consumers (`open`, `glob`, `walk`, legacy helpers), projection is canonical.
+- `materialize(file)` is compatibility fallback only and must not be default for high-fanout reads.
+- `/browse`, `/files`, `/download` remain archive-native streaming and do not depend on projection sessions.
+- `landuse`, `soils`, `watershed`, `climate` all follow the same projection contract.
 
-## 3) Cache Layout (On Disk)
+## 4) Projection Modes
 
-### 3.1 Cache Root (Per Run)
-- `WD/.nodir/` is the internal NoDir working directory (hidden from browse due to leading `.`, and MUST NOT be addressable via browse/files/download path resolution).
-- Materialization cache root: `WD/.nodir/cache/`.
+### 4.1 Read Session
+- Backing: archive-mounted lower layer, read-only.
+- Writes to `WD/<root>` are disallowed.
+- Intended for WEPP prep/read flows and other read-only stages.
 
-### 3.2 Cache Keying
-- `archive_fp := "<mtime_ns>-<size_bytes>"`.
-- `entry_id := sha256(inner_path).hexdigest()[0:32]`.
+### 4.2 Mutation Session
+- Backing: read-only archive lower layer plus writable upper/work layers.
+- Runtime writes go to upper layer only.
+- Commit path explicitly converts upper-layer results to refreshed `WD/<root>.nodir` atomically.
+- Abort path discards upper/work layers without archive changes.
 
-### 3.3 materialize(file) Paths
-- Entry directory: `WD/.nodir/cache/<root>/<archive_fp>/<entry_id>/`
-- Extracted primary path: `WD/.nodir/cache/<root>/<archive_fp>/<entry_id>/<basename>`
-- Metadata sidecar: `WD/.nodir/cache/<root>/<archive_fp>/<entry_id>/meta.json`
+Note:
+- Mutation sessions replace ad hoc thawed-dir persistence while preserving explicit mutation boundaries and lock semantics.
+- Archive writes are never direct-in-place writes to zip content.
 
-Notes:
-- `<basename>` MUST be `posixpath.basename(inner_path)` and MUST NOT contain path separators.
-- Implementations MUST NOT embed raw `inner_path` segments into cache directories (hash only) to avoid path traversal and path-length blowups.
+## 5) Required Utility API
+- `acquire_root_projection(wd, root, *, mode, purpose) -> ProjectionHandle`
+- `release_root_projection(handle) -> None`
+- `with_root_projection(wd, root, *, mode, purpose)` context manager
+- `commit_mutation_projection(handle) -> None` (mode=`mutate` only)
+- `abort_mutation_projection(handle) -> None` (mode=`mutate` only)
 
-### 3.4 materialize(root-subset) Paths
-- Temporary extraction directory (unique per request): `WD/.nodir/tmp/<root>/<archive_fp>/<uuid4>/`
-- `materialize(root-subset)` MUST preserve relative paths under that temp dir (safe-joined).
-- Implementations MUST delete the temp dir on success and failure (best-effort).
+`ProjectionHandle` must include:
+- `wd`, `root`, `mode`, `archive_fingerprint`
+- `mount_path` (canonical `WD/<root>`)
+- `backend` (for example `fuse+overlay`)
+- `token`, `acquired_at`
 
-## 4) materialize(file) Contract (Algorithm)
+## 6) Locking and Idempotency
+- Acquire must lock on `nodb-lock:<runid>:nodir-project/<root>/<archive_fp>/<mode>`.
+- Acquire is fail-fast; contention returns `503; code=NODIR_LOCKED`.
+- Existing live projection with identical key must be reused with refcount increment.
+- Refcount reaching zero must unmount and clean stale state for that key.
 
-### 4.1 Preconditions (Fail Fast)
-- Representation MUST already be resolved to Archive form by the caller.
-- If `WD/<root>/` exists: do not materialize (caller should use native FS paths).
-- If root is in `state in {"thawing","freezing"}` (from `WD/.nodir/<root>.json` when present): return `503; NODIR_LOCKED`.
+## 7) Mixed-State Semantics (Revised)
+- Legacy mixed state (`real dir + .nodir`) is replaced by projection-aware checks:
+  - `WD/<root>.nodir` exists and `WD/<root>` is a managed mountpoint: valid.
+  - `WD/<root>.nodir` exists and `WD/<root>` is a plain directory with unmanaged files: `409; code=NODIR_MIXED_STATE`.
+- Recovery policy remains archive-authoritative unless an explicit mutation commit is in progress.
 
-### 4.2 Cache Hit Rules (Idempotency)
-Treat as cache hit and return the extracted path if all are true:
-- `meta.json` exists and parses.
-- `meta.archive_fingerprint == stat(WD/<root>.nodir)` and `meta.inner_path == inner_path`.
-- `meta.zip` matches current central-dir entry fingerprint (crc32, sizes, method).
-- All required extracted files exist and sizes match `meta.extracted`.
+## 8) Error Contract
+- Invalid archive or projection backend failure: `500; code=NODIR_INVALID_ARCHIVE`.
+- Lock contention or transitioning projection state: `503; code=NODIR_LOCKED`.
+- Invalid mixed unmanaged directory state: `409; code=NODIR_MIXED_STATE`.
+- Limit/resource guard violations: `413; code=NODIR_LIMIT_EXCEEDED`.
 
-If any mismatch:
-- Treat as cache miss.
-- Remove the entry directory (best-effort) before re-extracting.
+## 9) On-Disk Runtime Layout
+- Internal control root: `WD/.nodir/`
+- Projection metadata: `WD/.nodir/projections/<root>/<archive_fp>/<mode>.json`
+- Lower mounts: `WD/.nodir/lower/<root>/<archive_fp>/`
+- Upper layers (mutation mode): `WD/.nodir/upper/<root>/<session_id>/`
+- Work layers (mutation mode): `WD/.nodir/work/<root>/<session_id>/`
+- Compatibility cache (legacy only): `WD/.nodir/cache/...`
 
-### 4.3 Locking (Per Entry)
-- Before extracting on cache miss, acquire a distributed lock with key `nodb-lock:<runid>:nodir-materialize/<root>/<entry_id>`; if not acquired immediately (fail-fast), return `503; NODIR_LOCKED`.
-- Under the lock, MUST re-check cache-hit to avoid duplicate work.
+## 10) Security and Validation
+- Mount options must enforce least privilege (`nosuid`, `nodev`, `noexec` where compatible).
+- Archive entries are untrusted input; traversal forms must be rejected.
+- Projection control paths under `WD/.nodir/*` are never browse-addressable.
+- Symlink handling must not escape run-scoped allowed roots.
 
-### 4.4 Extraction and Atomicity
-Extraction MUST be crash-safe and never yield partial files:
-- Create entry directory (parents first).
-- Write each extracted file to a temp path under the same entry directory (pattern: `<name>.tmp.<pid>.<rand>`).
-- Stream the zip entry bytes to the temp path while enforcing limits.
-- Verify extracted byte count matches expected `file_size` (central dir).
-- Verify CRC32 when available (zip central dir).
-- Install via `os.replace(tmp_path, final_path)`.
-- Write `meta.json` via temp + `os.replace()`.
+## 11) Observability
+Per acquire/release/commit/abort, logs should include:
+- `runid`, `root`, `mode`, `purpose`, `backend`
+- `archive_fingerprint`, `token`
+- outcome: `reuse|mount|release|unmount|commit|abort|fallback_materialize`
+- lock status, wall time, and canonical error code
 
-### 4.5 Sidecar Groups (Required)
-`materialize(file)` MAY need to extract multiple files so downstream tools see a coherent dataset.
+## 12) Performance Expectations
+- Repeated prep stages on stable archive fingerprint should be dominated by projection reuse.
+- `.nodir/cache` growth should materially decline versus per-file materialization baseline.
+- Full-root copy churn should be limited to explicit mutation commit boundaries.
 
-Sidecar rules:
-- `.shp` request: MUST also extract these same-directory sidecars when present: `.shx`, `.dbf`, `.prj`, `.cpg`, `.qix`, `.sbn`, `.sbx`, `.fix`, `.shp.xml`; missing `.shx` or `.dbf` MUST be treated as `500; NODIR_INVALID_ARCHIVE`.
-- `.tif`/`.tiff` request: SHOULD also extract these same-directory sidecars when present: `.ovr`, `.aux.xml`, `.tif.aux.xml`, `.tfw`.
+## 13) Phase 6 Compatibility and Revisions
+- Phase 6 mutation-owner boundaries remain valid.
+- Phase 6 archive-form mutation mechanism (`materialize(root)+freeze`) is superseded by `mutation session + commit`.
+- Existing Phase 6 artifacts must be revised where they prescribe thaw/freeze wrappers for read-only or path-heavy consumers.
 
-## 5) Limits (Defaults Are Initial and Configurable)
-
-Materialization MUST enforce bounded output (zip-bomb and runaway extraction defenses).
-
-Defaults (initial; tune later):
-| Limit | Default | Error |
-|---|---:|---|
-| Max uncompressed bytes per extracted file | 16 GiB | `413; NODIR_LIMIT_EXCEEDED` |
-| Max total uncompressed bytes per `materialize(file)` request (including sidecars) | 20 GiB | `413; NODIR_LIMIT_EXCEEDED` |
-| Max files extracted per `materialize(file)` request | 32 | `413; NODIR_LIMIT_EXCEEDED` |
-| Max uncompressed bytes per `materialize(root-subset)` request | 40 GiB | `413; NODIR_LIMIT_EXCEEDED` |
-| Max files extracted per `materialize(root-subset)` request | 2048 | `413; NODIR_LIMIT_EXCEEDED` |
-
-Compression-ratio guard (optional but recommended):
-- If `file_size >= 64 MiB` and `compress_size > 0` and `(file_size / compress_size) > 200`: reject as `413; NODIR_LIMIT_EXCEEDED`.
-
-## 6) Validation and Security Requirements
-
-### 6.1 Path and Entry Validation
-- Inner path normalization MUST reject: any `..` segment, absolute paths, and null bytes.
-- Zip entries MUST be treated as untrusted input: reject symlink entries and non-regular file types; reject names that normalize outside the archive root.
-
-### 6.2 Zip-Slip / Traversal Defense (Extraction)
-- Extraction destinations MUST be computed from the cache layout only (no raw `inner_path` joins).
-- When writing temp files, implementations SHOULD use `O_NOFOLLOW` / equivalent to avoid symlink-clobber attacks.
-
-### 6.3 Permissions
-- Do not preserve zip permission bits.
-- Extracted files SHOULD be mode `0644` (or stricter) and directories `0755` (or stricter), subject to process umask.
-
-## 7) Cleanup and Invalidation
-- Cache directories are disposable: it MUST be safe to delete `WD/.nodir/cache/` and `WD/.nodir/tmp/` at any time (best-effort); code MUST NOT treat caches as source-of-truth.
-- Fingerprint invalidation: a new `archive_fp` MUST create a new cache subtree; old `archive_fp` subtrees SHOULD be pruned opportunistically.
-
-Pruning defaults (initial; tune later):
-- Keep at most 2 `archive_fp` directories per `<root>`.
-- Remove `WD/.nodir/tmp/` entries older than 24 hours.
-
-## 8) Observability (Required Fields)
-On every materialization attempt, logs SHOULD include:
-- `runid`, `<root>`, `inner_path`
-- cache outcome: `hit|miss|rebuild`
-- archive fingerprint: `mtime_ns`, `size_bytes`
-- zip method, compressed size, uncompressed size
-- extracted bytes, wall time
-- any limit rejections (`NODIR_LIMIT_EXCEEDED`) and lock contention (`NODIR_LOCKED`)
-
-## 9) Query Engine (Parquet)
-- Query engine MUST NOT rely on extracting Parquet from `.nodir`.
-- Parquet datasets under allowlisted NoDir roots are WD-level sidecars per `docs/schemas/nodir-contract-spec.md` and should be consumed via native filesystem paths.
+## 14) Migration Policy
+Migration sequence is utility-first:
+1. Implement projection utilities and lifecycle controls.
+2. Adopt projection APIs in helper layer (`wepp_inputs` and peers).
+3. Migrate WEPP and other high-fanout path-heavy consumers.
+4. Retain `materialize(file)` as explicit fallback only.

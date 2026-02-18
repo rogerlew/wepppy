@@ -535,9 +535,9 @@ class WhiteboxToolsTopazEmulator:
         if fill_or_breach == "fill":
             ret = self.wbt.fill_depressions(dem=self.dem, output=relief_fn)
         elif fill_or_breach == "breach":
-            ret = self.wbt.breach_depressions(dem=self.dem, output=relief_fn)
+            ret = self.wbt.breach_depressions(dem=self.dem, output=relief_fn, fill_pits=True)
         elif fill_or_breach == "breach_least_cost":
-            ret = self.wbt.breach_depressions_least_cost(dem=self.dem, output=relief_fn, dist=int(blc_dist))
+            ret = self.wbt.breach_depressions_least_cost(dem=self.dem, output=relief_fn, dist=int(blc_dist), fill=True)
         else:
             raise ValueError("fill_or_breach must be either 'fill', 'breach' or 'breach_least_cost'")
 

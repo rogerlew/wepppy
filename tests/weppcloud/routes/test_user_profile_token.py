@@ -228,6 +228,8 @@ def test_profile_hides_token_controls_without_privileged_role(
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "token-controls-hidden"
     assert captured_context.get("can_mint_profile_token") is False
+    assert captured_context.get("reset_browser_state_endpoint") is None
+    assert captured_context.get("reset_browser_state_login_url") == "/login"
 
 
 def test_profile_shows_token_controls_for_privileged_role(
@@ -254,3 +256,5 @@ def test_profile_shows_token_controls_for_privileged_role(
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "data-profile-token-root"
     assert captured_context.get("can_mint_profile_token") is True
+    assert captured_context.get("reset_browser_state_endpoint") is None
+    assert captured_context.get("reset_browser_state_login_url") == "/login"

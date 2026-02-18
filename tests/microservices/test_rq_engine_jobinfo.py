@@ -302,6 +302,27 @@ def test_canceljob_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.json() == {"status": "ok", "job_id": "job-3"}
 
 
+def test_canceljob_accepts_culvert_submit_scope(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    token = _issue_rq_token(monkeypatch, scopes=["culvert:batch:submit"])
+
+    monkeypatch.setattr(
+        job_routes,
+        "get_wepppy_rq_job_info",
+        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
+    )
+    monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id: {"status": "ok", "job_id": job_id})
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/canceljob/job-culvert",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "job_id": "job-culvert"}
+
+
 def test_canceljob_rejects_revoked_token(monkeypatch: pytest.MonkeyPatch) -> None:
     def revoked(_: str) -> None:
         raise rq_auth.AuthError("Token has been revoked", status_code=403, code="forbidden")

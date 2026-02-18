@@ -30,7 +30,9 @@ Canonical error codes (JSON where applicable; echoed in HTML/plaintext otherwise
 - **Mixed state**:
   - Non-admin `/browse`: hide both; direct nav is `409; NODIR_MIXED_STATE`.
   - Admin `/browse`: dual view (`/browse/<root>/...` and `/browse/<root>/nodir/...`).
-  - Outside `/browse`: always `409; NODIR_MIXED_STATE` for admin and non-admin, except admin raw download of `<root>.nodir` bytes.
+  - Outside `/browse`: `409; NODIR_MIXED_STATE` for admin and non-admin, except:
+    - admin raw download of `<root>.nodir` bytes.
+    - admin `GET /files/` root listing, which keeps both `<root>/` and `<root>.nodir` visible for debugging observability.
 - **Invalid allowlisted `.nodir`**:
   - Archive-as-directory ops: `500; NODIR_INVALID_ARCHIVE` (all roles).
   - Raw download of `<root>.nodir`:
@@ -46,6 +48,7 @@ Cell format: `<mode>; <status>; <code>` where `<code>` is `—` on success.
 |---|---|---|---|---|
 | `GET /weppcloud/runs/<runid>/<config>/browse/<dir>/` (HTML listing) | `native; 200; —` | `native; 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `native; 500; NODIR_INVALID_ARCHIVE` |
 | `GET /weppcloud/runs/<runid>/<config>/browse/<file>` (HTML preview/render) | `native; 200; —` | `native; 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `native; 500; NODIR_INVALID_ARCHIVE` |
+| `GET /weppcloud/runs/<runid>/<config>/files/` (JSON root listing) | `native; 200; —` | `native; 200; —` | `native; 200; —` (non-admin hides mixed roots, admin shows both forms) | `native; 200; —` |
 | `GET /weppcloud/runs/<runid>/<config>/files/<dir>?…` (JSON listing) | `native; 200; —` | `native; 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `native; 500; NODIR_INVALID_ARCHIVE` |
 | `GET /weppcloud/runs/<runid>/<config>/files/<path>?meta=1` (JSON meta/stat) | `native; 200; —` | `native; 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `native; 500; NODIR_INVALID_ARCHIVE` |
 | `GET /weppcloud/runs/<runid>/<config>/download/<path>` (raw download) | `native; 200; —` | `native; 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `native; 500; NODIR_INVALID_ARCHIVE` |
@@ -55,10 +58,11 @@ Cell format: `<mode>; <status>; <code>` where `<code>` is `—` on success.
 | `GET /weppcloud/runs/<runid>/<config>/gdalinfo/<path>` (JSON) | `native; 200; —` | `materialize(file); 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `unsupported; 500; NODIR_INVALID_ARCHIVE` |
 | `GET /weppcloud/runs/<runid>/<config>/diff/<path>?diff=<runid>` (HTML bootstrap; Flask) | `native; 200; —` | `native; 200; —` | `unsupported; 409; NODIR_MIXED_STATE` | `native; 500; NODIR_INVALID_ARCHIVE` |
 
-Admin deltas (mixed state, `/browse` only):
+Admin deltas (mixed state):
 - Directory view: `GET /weppcloud/runs/<runid>/<config>/browse/<root>/...` → `native; 200; —`
 - Archive view: `GET /weppcloud/runs/<runid>/<config>/browse/<root>/nodir/...` → `native; 200; —`
 - Alias: `GET /weppcloud/runs/<runid>/<config>/browse/<root>.nodir/...` → `redirect (302/307); —; —` to `/browse/<root>/nodir/...`
+- Root listing observability: `GET /weppcloud/runs/<runid>/<config>/files/` keeps both `<root>/` and `<root>.nodir` visible.
 - Raw `<root>.nodir` download in mixed state:
   - admin: `native; 200; —`
   - non-admin: `unsupported; 409; NODIR_MIXED_STATE`

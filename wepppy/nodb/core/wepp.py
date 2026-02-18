@@ -68,6 +68,7 @@ Warning:
 import os
 import subprocess
 from datetime import date
+from contextlib import ExitStack
 from enum import IntEnum
 from pathlib import Path
 from os.path import join as _join
@@ -185,6 +186,14 @@ from wepppy.wepp.interchange.dss_dates import (
     parse_dss_date,
 )
 from wepppy.wepp.interchange.versioning import Version, read_version_manifest
+from wepppy.nodir.wepp_inputs import (
+    copy_input_file,
+    glob_input_files,
+    input_exists,
+    materialize_input_file,
+    open_input_text,
+    with_input_file_path,
+)
 
 def _copyfile(src_fn: str, dst_fn: str) -> None:
     if _exists(dst_fn):
@@ -1987,39 +1996,58 @@ class Wepp(NoDbBase):
 
     def prep_and_run_flowpaths(self, clean_after_run: bool = True) -> None:
         self.logger.info('  Prepping _prep_flowpaths... ')
-        wat_dir = self.wat_dir
 
-        fp_slps_fns = glob(_join(self.wat_dir, 'slope_files/flowpaths/*.slps'))
+        fp_slps_rels = glob_input_files(
+            self.wd,
+            'watershed/slope_files/flowpaths/*.slps',
+            tolerate_mixed=True,
+            mixed_prefer='archive',
+        )
 
         flowpath_workers = 10
         if os.getenv("WEPPPY_NCPU"):
             flowpath_workers = min(flowpath_workers, NCPU)
         
         futures = []
-        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
-            for fp_slps_fn in fp_slps_fns:
-                futures.append(pool.submit(extract_slps_fn, fp_slps_fn, self.fp_runs_dir))
+        with ExitStack() as input_paths:
+            fp_slps_fns = [
+                input_paths.enter_context(
+                    with_input_file_path(
+                        self.wd,
+                        rel,
+                        purpose='wepp-prep-flowpath-slps',
+                        tolerate_mixed=True,
+                        mixed_prefer='archive',
+                        allow_materialize_fallback=True,
+                    )
+                )
+                for rel in fp_slps_rels
+            ]
 
-            futures_n = len(futures)
-            count = 0
-            pending = set(futures)
-            while pending:
-                done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
+            with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
+                for fp_slps_fn in fp_slps_fns:
+                    futures.append(pool.submit(extract_slps_fn, fp_slps_fn, self.fp_runs_dir))
 
-                if not done:
-                    self.logger.error('  Flowpath slope extraction still running after 5 seconds.')
-                    continue
+                futures_n = len(futures)
+                count = 0
+                pending = set(futures)
+                while pending:
+                    done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
 
-                for future in done:
-                    try:
-                        future.result()
-                        count += 1
-                        self.logger.info(f'  ({count}/{futures_n}) flowpath slopes prep complete')
-                    except Exception as exc:
-                        for remaining in pending:
-                            remaining.cancel()
-                        self.logger.error(f'  Flowpath slope extraction failed with an error: {exc}')
-                        raise
+                    if not done:
+                        self.logger.error('  Flowpath slope extraction still running after 5 seconds.')
+                        continue
+
+                    for future in done:
+                        try:
+                            future.result()
+                            count += 1
+                            self.logger.info(f'  ({count}/{futures_n}) flowpath slopes prep complete')
+                        except Exception as exc:
+                            for remaining in pending:
+                                remaining.cancel()
+                            self.logger.error(f'  Flowpath slope extraction failed with an error: {exc}')
+                            raise
             
 
         watershed = self.watershed_instance
@@ -2126,19 +2154,45 @@ class Wepp(NoDbBase):
 
     def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
         self.logger.info('    Prepping _prep_slopes_peridot... ')
-        wat_dir = self.wat_dir
         runs_dir = self.runs_dir
-        fp_runs_dir = self.fp_runs_dir
 
         for topaz_id in watershed._subs_summary:
             wepp_id = translator.wepp(top=int(topaz_id))
 
-            src_fn = _join(wat_dir, 'slope_files/hillslopes/hill_{}.slp'.format(topaz_id))
-            dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            if clip_hillslopes:
-                clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
-            else:
-                _copyfile(src_fn, dst_fn)
+            src_candidates = (
+                f"watershed/slope_files/hillslopes/hill_{topaz_id}.slp",
+                f"watershed/hill_{topaz_id}.slp",
+            )
+            src_rel = src_candidates[0]
+            for rel in src_candidates:
+                if _exists(_join(self.wd, rel)):
+                    src_rel = rel
+                    break
+                if input_exists(self.wd, rel, tolerate_mixed=True, mixed_prefer='archive'):
+                    src_rel = rel
+                    break
+
+            dst_fn = _join(runs_dir, "p%i.slp" % wepp_id)
+            src_fn = str(Path(self.wd) / src_rel)
+            if _exists(src_fn):
+                if clip_hillslopes:
+                    clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
+                else:
+                    shutil.copyfile(src_fn, dst_fn)
+                continue
+
+            with with_input_file_path(
+                self.wd,
+                src_rel,
+                purpose='wepp-prep-slopes',
+                tolerate_mixed=True,
+                mixed_prefer='archive',
+                allow_materialize_fallback=True,
+            ) as projected_src_fn:
+                if clip_hillslopes:
+                    clip_slope_file_length(projected_src_fn, dst_fn, clip_hillslope_length)
+                else:
+                    shutil.copyfile(projected_src_fn, dst_fn)
 
     def _prep_slopes(self, translator, clip_hillslopes, clip_hillslope_length):
         self.logger.info('    Prepping _prep_slopes... ')
@@ -2147,19 +2201,33 @@ class Wepp(NoDbBase):
         if watershed.abstraction_backend == 'peridot':
             return self._prep_slopes_peridot(watershed, translator, clip_hillslopes, clip_hillslope_length)
 
-        wat_dir = self.wat_dir
         runs_dir = self.runs_dir
-        fp_runs_dir = self.fp_runs_dir
 
         for topaz_id in watershed._subs_summary:
             wepp_id = translator.wepp(top=int(topaz_id))
 
-            src_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
+            src_rel = f'watershed/hill_{topaz_id}.slp'
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            if clip_hillslopes:
-                clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
-            else:
-                _copyfile(src_fn, dst_fn)
+            src_fn = str(Path(self.wd) / src_rel)
+            if _exists(src_fn):
+                if clip_hillslopes:
+                    clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
+                else:
+                    shutil.copyfile(src_fn, dst_fn)
+                continue
+
+            with with_input_file_path(
+                self.wd,
+                src_rel,
+                purpose='wepp-prep-slopes',
+                tolerate_mixed=True,
+                mixed_prefer='archive',
+                allow_materialize_fallback=True,
+            ) as projected_src_fn:
+                if clip_hillslopes:
+                    clip_slope_file_length(projected_src_fn, dst_fn, clip_hillslope_length)
+                else:
+                    shutil.copyfile(projected_src_fn, dst_fn)
 
     def _prep_multi_ofe(self, translator):
         from wepppy.topo.watershed_abstraction import HillSummary as WatHillSummary
@@ -2183,11 +2251,7 @@ class Wepp(NoDbBase):
 
         years = climate.input_years
 
-        wat_dir = self.wat_dir
-        soils_dir = soils.soils_dir
-        lc_dir = landuse.lc_dir
         runs_dir = self.runs_dir
-        fp_runs_dir = self.fp_runs_dir
 
         kslast = self.kslast
 
@@ -2201,12 +2265,11 @@ class Wepp(NoDbBase):
             lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
 
             # slope files
-            src_fn = _join(wat_dir, f'slope_files/hillslopes/hill_{topaz_id}.mofe.slp')
+            src_rel = f'watershed/slope_files/hillslopes/hill_{topaz_id}.mofe.slp'
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            _copyfile(src_fn, dst_fn)
+            copy_input_file(self.wd, src_rel, dst_fn)
 
             # soils
-            src_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
 
             _kslast = None
@@ -2230,29 +2293,45 @@ class Wepp(NoDbBase):
             elif kslast is not None:
                 _kslast = kslast
 
-            soilu = WeppSoilUtil(src_fn)
-            soilu.modify_initial_sat(initial_sat)
+            with with_input_file_path(
+                self.wd,
+                f'soils/hill_{topaz_id}.mofe.sol',
+                purpose='wepp-prep-multi-ofe-soils',
+                tolerate_mixed=True,
+                mixed_prefer='archive',
+                allow_materialize_fallback=True,
+            ) as src_fn:
+                soilu = WeppSoilUtil(src_fn)
+                soilu.modify_initial_sat(initial_sat)
 
-            if _kslast is not None:
-                soilu.modify_kslast(_kslast)
+                if _kslast is not None:
+                    soilu.modify_kslast(_kslast)
 
-            if clip_soils:
-                soilu.clip_soil_depth(clip_soils_depth)
+                if clip_soils:
+                    soilu.clip_soil_depth(clip_soils_depth)
 
-            soilu.write(dst_fn)
+                soilu.write(dst_fn)
 
             # managements
             man_fn = f'hill_{topaz_id}.mofe.man'
-            man = Management(Key=f'hill_{topaz_id}',
-                             ManagementFile=man_fn,
-                             ManagementDir=lc_dir,
-                             Description=f"hill_{topaz_id} Multiple OFE",
-                             Color=(0, 0, 0, 255))
+            with with_input_file_path(
+                self.wd,
+                f'landuse/{man_fn}',
+                purpose='wepp-prep-multi-ofe-management',
+                tolerate_mixed=True,
+                mixed_prefer='archive',
+                allow_materialize_fallback=True,
+            ) as man_src:
+                man = Management(Key=f'hill_{topaz_id}',
+                                 ManagementFile=Path(man_src).name,
+                                 ManagementDir=str(Path(man_src).parent),
+                                 Description=f"hill_{topaz_id} Multiple OFE",
+                                 Color=(0, 0, 0, 255))
 
-            man = man.build_multiple_year_man(years)
-            dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
-            with open(dst_fn, 'w') as pf:
-                pf.write(str(man))
+                man = man.build_multiple_year_man(years)
+                dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
+                with open(dst_fn, 'w') as pf:
+                    pf.write(str(man))
 
 
     def _prep_managements(self, translator):
@@ -2283,6 +2362,7 @@ class Wepp(NoDbBase):
         bd_d = soils.bd_d
 
         build_d = {}
+        soil_texture_d = {}
 
         for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
             if (int(topaz_id) - 4) % 10 == 0:
@@ -2310,7 +2390,69 @@ class Wepp(NoDbBase):
                 self.logger.info(f"     copying build_d['{meoization_key}'] -> {dst_fn}")
 
             else:
-                management = man_summary.get_management()
+                management = None
+                if hasattr(man_summary, "get_management"):
+                    try:
+                        # Keep canonical summary behavior (override application)
+                        # when source files are directly accessible.
+                        management = man_summary.get_management()
+                    except FileNotFoundError:
+                        management = None
+
+                if management is None and all(
+                    hasattr(man_summary, attr)
+                    for attr in ("man_fn", "key", "desc", "color")
+                ):
+                    # Archive-first fallback for summaries whose man_dir points at
+                    # a logical root that is only present as <root>.nodir.
+                    man_src = materialize_input_file(
+                        wd,
+                        f"landuse/{man_summary.man_fn}",
+                        purpose="wepp-prep-managements",
+                    )
+                    management = Management.load(
+                        key=man_summary.key,
+                        man_fn=Path(man_src).name,
+                        man_dir=str(Path(man_src).parent),
+                        desc=man_summary.desc,
+                        color=man_summary.color,
+                    )
+
+                    cancov_override = getattr(man_summary, "cancov_override", None)
+                    inrcov_override = getattr(man_summary, "inrcov_override", None)
+                    rilcov_override = getattr(man_summary, "rilcov_override", None)
+
+                    if (
+                        cancov_override is not None
+                        or inrcov_override is not None
+                        or rilcov_override is not None
+                    ):
+                        for ini in getattr(management, "inis", []):
+                            if getattr(ini, "landuse", None) != 1:
+                                continue
+                            data = getattr(ini, "data", None)
+                            if data is None:
+                                continue
+
+                            if cancov_override is not None and hasattr(data, "cancov"):
+                                data.cancov = cancov_override
+                            if inrcov_override is not None and hasattr(data, "inrcov"):
+                                data.inrcov = inrcov_override
+                            if rilcov_override is not None and hasattr(data, "rilcov"):
+                                data.rilcov = rilcov_override
+
+                        if cancov_override is not None:
+                            for plant in getattr(management, "plants", []):
+                                plant_data = getattr(plant, "data", None)
+                                if plant_data is not None and hasattr(plant_data, "xmxlai"):
+                                    plant_data.xmxlai *= cancov_override
+
+                if management is None:
+                    raise AttributeError(
+                        "Management summary must expose get_management() or "
+                        "man_fn/key/desc/color attributes"
+                    )
+
                 sol_key = soils.domsoil_d[topaz_id]
                 management.set_bdtill(bd_d[sol_key])
 
@@ -2328,13 +2470,56 @@ class Wepp(NoDbBase):
                         assert rap_ts is None, 'project has rap and rap_ts'
                         management.set_cancov(hillslope_cancovs[str(topaz_id)])
 
-                    _soil = soils.soils[mukey]
-                    clay = _soil.clay
-                    sand = _soil.sand
-                    texid = simple_texture(clay=clay, sand=sand)
+                    if mukey in soil_texture_d:
+                        clay, sand = soil_texture_d[mukey]
+                    else:
+                        clay = None
+                        sand = None
+                        _soil = soils.soils.get(mukey)
 
-                    key = (texid, disturbed_class)
-                    replacements = _land_soil_replacements_d.get(key)
+                        soil_fname = getattr(_soil, 'fname', None) if _soil is not None else None
+                        if isinstance(soil_fname, str) and soil_fname:
+                            try:
+                                soil_src = materialize_input_file(
+                                    wd,
+                                    f'soils/{soil_fname}',
+                                    purpose='wepp-prep-managements-soil-texture',
+                                )
+                                soilu = WeppSoilUtil(soil_src)
+                                clay = soilu.clay
+                                sand = soilu.sand
+                            except Exception as exc:
+                                self.logger.debug(
+                                    '     _prep_managements: archive soil texture read failed for mukey=%s, fname=%s: %s',
+                                    mukey,
+                                    soil_fname,
+                                    exc,
+                                    exc_info=True,
+                                )
+
+                        if not (isfloat(clay) and isfloat(sand)) and _soil is not None:
+                            try:
+                                clay = _soil.clay
+                                sand = _soil.sand
+                            except Exception as exc:
+                                self.logger.warning(
+                                    '     _prep_managements: unable to resolve soil texture for mukey=%s; '
+                                    'skipping texture-based disturbed overrides (%s)',
+                                    mukey,
+                                    exc,
+                                )
+                                clay = None
+                                sand = None
+
+                        soil_texture_d[mukey] = (clay, sand)
+
+                    texid = None
+                    replacements = None
+                    if isfloat(clay) and isfloat(sand):
+                        texid = simple_texture(clay=clay, sand=sand)
+                        key = (texid, disturbed_class)
+                        replacements = _land_soil_replacements_d.get(key)
+
                     if replacements is None:
                         self.logger.info(f'     _prep_managements: {texid}:{disturbed_class} not in replacements_d')
 
@@ -2417,7 +2602,6 @@ class Wepp(NoDbBase):
         self.logger.info(f'  Using max_workers={max_workers} for soil prep')
 
         soils = self.soils_instance
-        soils_dir = soils.soils_dir
         watershed = self.watershed_instance
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
@@ -2432,7 +2616,11 @@ class Wepp(NoDbBase):
         task_args_list = []
         for topaz_id, soil in soils.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
-            src_fn = _join(soils_dir, soil.fname)
+            src_fn = materialize_input_file(
+                self.wd,
+                f'soils/{soil.fname}',
+                purpose='wepp-prep-soils',
+            )
             dst_fn = _join(runs_dir, f'p{wepp_id}.sol')
 
             _kslast = None
@@ -2639,7 +2827,6 @@ class Wepp(NoDbBase):
                 )
         
         watershed = self.watershed_instance
-        cli_dir = self.cli_dir
         runs_dir = self.runs_dir
 
         sub_n = watershed.sub_n
@@ -2654,17 +2841,16 @@ class Wepp(NoDbBase):
                     f"Climate inputs are missing for topaz_id={topaz_id}. "
                     "Build/upload climate (and wait for it to finish) before running WEPP."
                 )
-            src_fn = _join(cli_dir, cli_summary['cli_fn'])
-            _copyfile(src_fn, dst_fn) 
+            src_rel = f"climate/{cli_summary['cli_fn']}"
+            copy_input_file(self.wd, src_rel, dst_fn)
             count += 1
-            self.logger.info(f' ({count}/{sub_n}) topaz_id: {topaz_id} | {src_fn} -> {dst_fn}')
+            self.logger.info(f' ({count}/{sub_n}) topaz_id: {topaz_id} | {src_rel} -> {dst_fn}')
 
     def _prep_climates_ss_batch(self, translator):
         climate = self.climate_instance
 
         self.logger.info('    _prep_climates_ss_batch... ')
         watershed = self.watershed_instance
-        cli_dir = self.cli_dir
         runs_dir = self.runs_dir
 
         for d in climate.ss_batch_storms:
@@ -2678,12 +2864,12 @@ class Wepp(NoDbBase):
                 wepp_id = translator.wepp(top=int(topaz_id))
                 dst_fn = _join(runs_dir, f'p{wepp_id}.{ss_batch_id}.cli')
 
-                src_fn = _join(cli_dir, cli_fn)
-                _copyfile(src_fn, dst_fn)
+                src_rel = f'climate/{cli_fn}'
+                copy_input_file(self.wd, src_rel, dst_fn)
 
             dst_fn = _join(runs_dir, f'pw0.{ss_batch_id}.cli')
-            src_fn = _join(cli_dir, cli_fn)
-            _copyfile(src_fn, dst_fn)
+            src_rel = f'climate/{cli_fn}'
+            copy_input_file(self.wd, src_rel, dst_fn)
 
     def _make_hillslope_runs(self, translator, reveg=False,
                   man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
@@ -2895,7 +3081,7 @@ class Wepp(NoDbBase):
 
         # Handle minimal watershed case: 1 hillslope, 1 channel, no network.txt
         if watershed.abstraction_backend == 'peridot' and \
-           not _exists(_join(watershed.wat_dir, 'network.txt')) and \
+           not input_exists(self.wd, 'watershed/network.txt', tolerate_mixed=True, mixed_prefer='archive') and \
            watershed.sub_n == 1 and \
            watershed.chn_n == 1:
             self.logger.info('    Writing minimal structure (1 hillslope, 1 channel)')
@@ -2941,27 +3127,24 @@ class Wepp(NoDbBase):
 
     def _prep_channel_slopes(self):
         minimum_channel_width_m = self.minimum_channel_width_m
-        wat_dir = self.wat_dir
         runs_dir = self.runs_dir
 
-        src_fn = _join(wat_dir, 'slope_files/channels.slp')
-        if not _exists(src_fn):
-            src_fn = _join(wat_dir, 'channels.slp')
+        src_rel = 'watershed/slope_files/channels.slp'
+        if not input_exists(self.wd, src_rel, tolerate_mixed=True, mixed_prefer='archive'):
+            src_rel = 'watershed/channels.slp'
 
-
-        with open(src_fn) as f:
-            lines = f.readlines()
-            version = float(lines[0].strip())
+        with open_input_text(self.wd, src_rel, tolerate_mixed=True, mixed_prefer='archive') as fp:
+            version_line = fp.readline().strip()
+            version = float(version_line)
 
             if version >= 2023.1:
-                with open(_join(runs_dir, 'pw0.slp'), 'w') as f:
-                    f.write('99.1\n')
-                    n_chns = int(lines[1].strip())
-                    f.write(f'{n_chns}\n')
+                with open(_join(runs_dir, 'pw0.slp'), 'w') as out_fp:
+                    out_fp.write('99.1\n')
+                    n_chns = int(fp.readline().strip())
+                    out_fp.write(f'{n_chns}\n')
 
-                    i = 2
-                    for j in range(n_chns):
-                        aspect, width, elevation, order = lines[i].strip().split()
+                    for _ in range(n_chns):
+                        aspect, width, elevation, order = fp.readline().strip().split()
 
                         aspect = float(aspect)
                         if aspect < 0.0:
@@ -2971,20 +3154,20 @@ class Wepp(NoDbBase):
                         if width < minimum_channel_width_m:
                             width = minimum_channel_width_m
 
-                        f.write(f'{aspect} {width}\n')
-                        f.write(lines[i + 1])
-                        f.write(lines[i + 2])
-
-                        i += 3
+                        out_fp.write(f'{aspect} {width}\n')
+                        out_fp.write(fp.readline())
+                        out_fp.write(fp.readline())
             elif version >= 2023.0:
                 # this version produces suspiciously small channel widths
                 raise ValueError(
-                    f'Unsupported channel slope file version {version} in {src_fn}. '
+                    f'Unsupported channel slope file version {version} in {src_rel}. '
                     'Please update the PERIDOT to compatible version.'
                 )
             else:
                 dst_fn = _join(runs_dir, 'pw0.slp')
-                _copyfile(src_fn, dst_fn)
+                with open(dst_fn, 'w') as out_fp:
+                    out_fp.write(version_line + "\n")
+                    out_fp.write(fp.read())
 
     def _prep_channel_chn(self, translator, erodibility, critical_shear,
                           channel_routing_method=ChannelRoutingMethod.MuskingumCunge,
@@ -3242,8 +3425,8 @@ class Wepp(NoDbBase):
         runs_dir = self.runs_dir
         climate = self.climate_instance
         dst_fn = _join(runs_dir, 'pw0.cli')
-        src_fn = _join(self.cli_dir, climate.cli_fn)
-        _copyfile(src_fn, dst_fn)
+        src_rel = f'climate/{climate.cli_fn}'
+        copy_input_file(self.wd, src_rel, dst_fn)
 
     def make_watershed_run(self, wepp_id_paths=None, output_options: Optional[Dict[str, Any]] = None):
         translator = self.watershed_instance.translator_factory()

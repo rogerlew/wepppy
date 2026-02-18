@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import shlex
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -27,8 +28,85 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.nodir.fs import stat as nodir_stat
+from wepppy.nodir.materialize import materialize_file
+from wepppy.nodir.paths import parse_external_subpath
 from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
+
+
+def _nodir_error_payload(err: NoDirError) -> dict:
+    return {
+        "error": {
+            "message": err.message,
+            "code": err.code,
+            "details": err.message,
+        }
+    }
+
+
+def _raise_nodir_http_exception(err: NoDirError) -> None:
+    raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
+
+
+def _resolve_gdalinfo_target_path(
+    *,
+    wd: str,
+    subpath: str,
+    allow_recorder: bool,
+) -> str:
+    try:
+        logical_rel_path, nodir_view = parse_external_subpath(
+            subpath,
+            allow_admin_alias=False,
+        )
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid path.")
+
+    # Enforce mixed/invalid/locked precedence before boundary-specific handling.
+    try:
+        nodir_resolve(wd, logical_rel_path, view="effective")
+    except NoDirError as err:
+        _raise_nodir_http_exception(err)
+
+    requested_target = os.path.abspath(os.path.join(wd, logical_rel_path))
+    _assert_within_root(wd, requested_target)
+    _assert_target_within_allowed_roots(wd, requested_target, allow_recorder=allow_recorder)
+
+    try:
+        nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
+    except NoDirError as err:
+        _raise_nodir_http_exception(err)
+
+    if nodir_target is None:
+        if not os.path.exists(requested_target) or os.path.isdir(requested_target):
+            raise HTTPException(status_code=404)
+        return requested_target
+
+    try:
+        entry = nodir_stat(nodir_target)
+    except NoDirError as err:
+        _raise_nodir_http_exception(err)
+    except (FileNotFoundError, NotADirectoryError):
+        raise HTTPException(status_code=404)
+
+    if entry.is_dir:
+        raise HTTPException(status_code=404)
+
+    if nodir_target.form == "archive":
+        try:
+            return materialize_file(wd, logical_rel_path, purpose="gdalinfo")
+        except NoDirError as err:
+            _raise_nodir_http_exception(err)
+        except (FileNotFoundError, IsADirectoryError):
+            raise HTTPException(status_code=404)
+
+    if not os.path.exists(requested_target) or os.path.isdir(requested_target):
+        raise HTTPException(status_code=404)
+    return requested_target
+
 
 async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
     runid = request.path_params['runid']
@@ -63,14 +141,13 @@ async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
 
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
-    target_path = os.path.abspath(os.path.join(wd, subpath))
+    target_path = _resolve_gdalinfo_target_path(
+        wd=wd,
+        subpath=subpath,
+        allow_recorder=allow_recorder,
+    )
 
-    _assert_within_root(wd, target_path)
-    _assert_target_within_allowed_roots(wd, target_path, allow_recorder=allow_recorder)
-    if not os.path.exists(target_path) or os.path.isdir(target_path):
-        raise HTTPException(status_code=404)
-
-    command = f'gdalinfo -json {target_path}'
+    command = f"gdalinfo -json {shlex.quote(target_path)}"
     returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(target_path) or None)
     if returncode != 0:
         raise HTTPException(status_code=500, detail=f'gdalinfo failed: {stderr.strip()}')
@@ -106,13 +183,13 @@ async def gdalinfo_culvert_with_subpath(request: Request) -> JSONResponse:
     if not os.path.isdir(wd):
         raise HTTPException(status_code=404, detail=f"Culvert batch '{batch_uuid}' not found")
 
-    target_path = os.path.abspath(os.path.join(wd, subpath))
-    _assert_within_root(wd, target_path)
-    _assert_target_within_allowed_roots(wd, target_path, allow_recorder=allow_recorder)
-    if not os.path.exists(target_path) or os.path.isdir(target_path):
-        raise HTTPException(status_code=404)
+    target_path = _resolve_gdalinfo_target_path(
+        wd=wd,
+        subpath=subpath,
+        allow_recorder=allow_recorder,
+    )
 
-    command = f'gdalinfo -json {target_path}'
+    command = f"gdalinfo -json {shlex.quote(target_path)}"
     returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(target_path) or None)
     if returncode != 0:
         raise HTTPException(status_code=500, detail=f'gdalinfo failed: {stderr.strip()}')
@@ -148,13 +225,13 @@ async def gdalinfo_batch_with_subpath(request: Request) -> JSONResponse:
     if not os.path.isdir(wd):
         raise HTTPException(status_code=404, detail=f"Batch '{batch_name}' not found")
 
-    target_path = os.path.abspath(os.path.join(wd, subpath))
-    _assert_within_root(wd, target_path)
-    _assert_target_within_allowed_roots(wd, target_path, allow_recorder=allow_recorder)
-    if not os.path.exists(target_path) or os.path.isdir(target_path):
-        raise HTTPException(status_code=404)
+    target_path = _resolve_gdalinfo_target_path(
+        wd=wd,
+        subpath=subpath,
+        allow_recorder=allow_recorder,
+    )
 
-    command = f'gdalinfo -json {target_path}'
+    command = f"gdalinfo -json {shlex.quote(target_path)}"
     returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(target_path) or None)
     if returncode != 0:
         raise HTTPException(status_code=500, detail=f'gdalinfo failed: {stderr.strip()}')
@@ -163,6 +240,7 @@ async def gdalinfo_batch_with_subpath(request: Request) -> JSONResponse:
         return JSONResponse(json.loads(stdout))
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=500, detail=f'gdalinfo returned invalid JSON: {exc}')
+
 
 async def _run_shell_command(command: str, cwd: Optional[str]) -> tuple[int, str, str]:
     process = await asyncio.create_subprocess_shell(

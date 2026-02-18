@@ -6,12 +6,12 @@ import asyncio
 import os
 from io import BytesIO
 from pathlib import Path
-from typing import Callable
+from typing import BinaryIO, Callable
 from urllib.parse import urlsplit
 
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
-from starlette.responses import FileResponse, PlainTextResponse, Response
+from starlette.responses import FileResponse, PlainTextResponse, Response, StreamingResponse
 from starlette.routing import Route
 
 import pandas as pd
@@ -33,8 +33,19 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.nodir import (
+    NoDirError,
+    open_read as nodir_open_read,
+    parse_external_subpath,
+    resolve as nodir_resolve,
+    stat as nodir_stat,
+)
+from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
 from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
+
+_NODIR_SUFFIX = ".nodir"
+_NODIR_ROOTS = frozenset(NODIR_ROOTS)
 
 
 def _normalize_prefix(prefix: str | None) -> str:
@@ -84,6 +95,57 @@ def _resolve_aria2c_base_url(request: Request, runid: str, config: str) -> str:
     origin = _resolve_external_origin(request)
     site_prefix = _normalize_prefix(os.getenv("SITE_PREFIX", "/weppcloud"))
     return f"{origin}{site_prefix}/runs/{runid}/{config}/download"
+
+
+def _nodir_error_payload(err: NoDirError) -> dict:
+    return {
+        "error": {
+            "message": err.message,
+            "code": err.code,
+            "details": err.message,
+        }
+    }
+
+
+def _raise_nodir_error(err: NoDirError) -> None:
+    raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
+
+
+def _is_admin_context(auth_context) -> bool:
+    roles = set(getattr(auth_context, "roles", frozenset()))
+    return "admin" in roles or "root" in roles
+
+
+def _is_mixed_nodir_root(wd: str, root: str) -> bool:
+    return os.path.isdir(os.path.join(wd, root)) and os.path.lexists(
+        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
+    )
+
+
+def _allowlisted_raw_nodir_root(rel_path: str) -> str | None:
+    if rel_path.lower().endswith(_NODIR_SUFFIX):
+        root = rel_path[: -len(_NODIR_SUFFIX)]
+        if root in _NODIR_ROOTS and "/" not in root:
+            return root
+    return None
+
+
+def _stream_binary_download(fp: BinaryIO, filename: str) -> StreamingResponse:
+    def _iter_chunks():
+        try:
+            while True:
+                chunk = fp.read(65536)
+                if not chunk:
+                    break
+                yield chunk
+        finally:
+            fp.close()
+
+    return StreamingResponse(
+        _iter_chunks(),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 async def aria2c_spec(request: Request) -> PlainTextResponse:
@@ -146,6 +208,7 @@ async def download_with_subpath(request: Request) -> Response:
         )
 
     allow_recorder = auth_context.is_root
+    is_admin = _is_admin_context(auth_context)
     violation = validate_raw_subpath(subpath)
     if violation is not None:
         if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
@@ -155,14 +218,79 @@ async def download_with_subpath(request: Request) -> Response:
 
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
-    dir_path = os.path.abspath(os.path.join(wd, subpath))
 
-    _assert_within_root(wd, dir_path)
-    _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
+    raw_candidate = (subpath or "").replace("\\", "/").lstrip("/")
+    raw_root = _allowlisted_raw_nodir_root(raw_candidate)
+    if raw_root is not None:
+        archive_path = os.path.abspath(os.path.join(wd, f"{raw_root}{_NODIR_SUFFIX}"))
+        if not os.path.exists(archive_path):
+            raise HTTPException(status_code=404)
+        if _is_mixed_nodir_root(wd, raw_root) and not is_admin:
+            _raise_nodir_error(
+                NoDirError(
+                    http_status=409,
+                    code="NODIR_MIXED_STATE",
+                    message=f"{raw_root} is in mixed state (dir + .nodir present)",
+                )
+            )
+        if not is_admin:
+            try:
+                nodir_resolve(wd, raw_root, view="archive")
+            except NoDirError as err:
+                _raise_nodir_error(err)
+        _assert_within_root(wd, archive_path)
+        _assert_target_within_allowed_roots(wd, archive_path, allow_recorder=allow_recorder)
+        return await download_response_file(archive_path, query_params=request.query_params)
 
-    if not os.path.exists(dir_path):
+    rel_subpath = subpath or "."
+    try:
+        logical_rel_path, nodir_view = parse_external_subpath(
+            rel_subpath,
+            allow_admin_alias=False,
+        )
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid path.")
+
+    nodir_root, _inner = split_nodir_root(logical_rel_path)
+    if nodir_root is not None and nodir_view == "archive" and _is_mixed_nodir_root(wd, nodir_root):
+        _raise_nodir_error(
+            NoDirError(
+                http_status=409,
+                code="NODIR_MIXED_STATE",
+                message=f"{nodir_root} is in mixed state (dir + .nodir present)",
+            )
+        )
+
+    nodir_target = None
+    try:
+        nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
+    except NoDirError as err:
+        _raise_nodir_error(err)
+
+    if nodir_target is not None:
+        try:
+            entry = nodir_stat(nodir_target)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404)
+        if entry.is_dir:
+            raise HTTPException(status_code=404)
+        try:
+            fp = nodir_open_read(nodir_target)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404)
+        except NoDirError as err:
+            _raise_nodir_error(err)
+        filename = entry.name
+        return _stream_binary_download(fp, filename)
+
+    if nodir_root is not None and nodir_view == "archive":
         raise HTTPException(status_code=404)
 
+    dir_path = os.path.abspath(os.path.join(wd, subpath))
+    _assert_within_root(wd, dir_path)
+    _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
+    if not os.path.exists(dir_path):
+        raise HTTPException(status_code=404)
     return await download_response_file(dir_path, query_params=request.query_params)
 
 
@@ -360,6 +488,19 @@ def _assert_target_within_allowed_roots(
 
 
 def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool) -> list[str]:
+    for root in _NODIR_ROOTS:
+        if _is_mixed_nodir_root(wd, root):
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error": {
+                        "message": f"{root} is in mixed state (dir + .nodir present)",
+                        "code": "NODIR_MIXED_STATE",
+                        "details": f"{root} is in mixed state (dir + .nodir present)",
+                    }
+                },
+            )
+
     specs: list[str] = []
     for root, _dirs, files in os.walk(wd):
         for file in files:

@@ -51,6 +51,20 @@ def _get_env_bool(name: str, default: bool) -> bool:
     return default
 
 
+def _get_env_int(name: str, default: int, *, minimum: int | None = None) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        value = default
+    else:
+        try:
+            value = int(raw.strip())
+        except (TypeError, ValueError):
+            value = default
+    if minimum is not None:
+        value = max(minimum, value)
+    return value
+
+
 def _normalize_site_prefix(site_prefix: str) -> str:
     if not site_prefix:
         return ""
@@ -308,6 +322,25 @@ def config_app(app: Any):
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=12)
     app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
     app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_REFRESH_EACH_REQUEST"] = _get_env_bool(
+        "SESSION_REFRESH_EACH_REQUEST", True
+    )
+    remember_cookie_samesite = os.getenv(
+        "REMEMBER_COOKIE_SAMESITE", app.config["SESSION_COOKIE_SAMESITE"]
+    )
+    app.config["REMEMBER_COOKIE_DURATION"] = timedelta(
+        days=_get_env_int("REMEMBER_COOKIE_DAYS", 30, minimum=1)
+    )
+    app.config["REMEMBER_COOKIE_SECURE"] = _get_env_bool(
+        "REMEMBER_COOKIE_SECURE", True
+    )
+    app.config["REMEMBER_COOKIE_HTTPONLY"] = _get_env_bool(
+        "REMEMBER_COOKIE_HTTPONLY", True
+    )
+    app.config["REMEMBER_COOKIE_SAMESITE"] = remember_cookie_samesite
+    app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = _get_env_bool(
+        "REMEMBER_COOKIE_REFRESH_EACH_REQUEST", False
+    )
 
     redirect_scheme_raw = os.getenv("OAUTH_REDIRECT_SCHEME") or "https"
     oauth_redirect_scheme = redirect_scheme_raw.strip() or "https"

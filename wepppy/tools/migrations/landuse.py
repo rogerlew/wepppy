@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any, Tuple
 
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+
 __all__ = ["migrate_landuse_parquet"]
 
 
@@ -45,9 +47,9 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
     """
     run_path = Path(wd)
     landuse_dir = run_path / "landuse"
-    landuse_parquet = landuse_dir / "landuse.parquet"
+    landuse_parquet = pick_existing_parquet_path(run_path, "landuse/landuse.parquet")
 
-    if not landuse_parquet.exists():
+    if landuse_parquet is None:
         landuse_csv = landuse_dir / "landuse.csv"
         if landuse_csv.exists():
             return True, "Legacy landuse.csv present (nothing to migrate)"
@@ -77,10 +79,11 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         except Exception as exc:
             return False, f"Failed to generate landuse parquet: {exc}"
 
-        if landuse_parquet.exists():
+        landuse_parquet = pick_existing_parquet_path(run_path, "landuse/landuse.parquet")
+        if landuse_parquet is not None:
             return True, "Generated landuse parquet from landuse.nodb"
 
-        return True, "Landuse nodb has no summaries (nothing to migrate)"
+        return False, "Landuse parquet missing after generation attempt"
 
     try:
         import pyarrow.parquet as pq

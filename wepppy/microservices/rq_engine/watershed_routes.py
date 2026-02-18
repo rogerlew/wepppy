@@ -26,6 +26,8 @@ from wepppy.nodb.core import (
     WatershedBoundaryTouchesEdgeError,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.rq.project_rq import (
     build_subcatchments_and_abstract_watershed_rq,
     fetch_dem_and_build_channels_rq,
@@ -48,6 +50,9 @@ RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 UPLOAD_DEM_MAX_DIMENSION = 1024
 UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif",)
 
+
+def _preflight_watershed_mutation_root(wd: str) -> None:
+    nodir_resolve(wd, "watershed", view="effective")
 
 def _is_base_project_context(runid: str, config: str) -> bool:
     runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
@@ -555,6 +560,7 @@ async def fetch_dem_and_build_channels(
         ) = args
 
         wd = get_wd(runid)
+        _preflight_watershed_mutation_root(wd)
         watershed = Watershed.getInstance(wd)
         if watershed.run_group == "batch" or _is_base_project_context(runid, config):
             with watershed.locked():
@@ -609,6 +615,8 @@ async def fetch_dem_and_build_channels(
             )
             prep.set_rq_job_id("fetch_dem_and_build_channels_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except MinimumChannelLengthTooShortError as exc:
         return error_response(
             exc.__class__.__name__ or "Minimum Channel Length TooShort Error",
@@ -683,6 +691,7 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
 
     try:
         wd = get_wd(runid)
+        _preflight_watershed_mutation_root(wd)
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.set_outlet)
 
@@ -696,6 +705,8 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
             )
             prep.set_rq_job_id("set_outlet_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except Exception:
         logger.exception("rq-engine set-outlet enqueue failed")
         return error_response_with_traceback("Could not set outlet")
@@ -785,6 +796,7 @@ async def build_subcatchments_and_abstract_watershed(
 
     try:
         wd = get_wd(runid)
+        _preflight_watershed_mutation_root(wd)
         watershed = Watershed.getInstance(wd)
 
         updates: dict[str, Any] = {}
@@ -843,6 +855,8 @@ async def build_subcatchments_and_abstract_watershed(
             )
             prep.set_rq_job_id("build_subcatchments_and_abstract_watershed_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except WatershedBoundaryTouchesEdgeError as exc:
         return error_response(
             exc.__class__.__name__ or "Watershed Boundary Touches Edge Error",

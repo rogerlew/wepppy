@@ -4,6 +4,8 @@ import math
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from werkzeug.routing import BuildError
+
 import wepppy
 from ._common import *  # noqa: F401,F403
 
@@ -378,10 +380,22 @@ def _resolve_runs_user_id(raw_alias: Optional[str]) -> tuple[Optional[int], Opti
 def profile():
     try:
         role_names = _current_user_roles()
+        try:
+            reset_browser_state_endpoint = url_for('weppcloud_site.reset_browser_state')
+        except BuildError:
+            reset_browser_state_endpoint = None
+
+        try:
+            login_url = url_for('security.login')
+        except BuildError:
+            login_url = '/login'
+
         return render_template(
             'user/profile.html',
             user=current_user,
             can_mint_profile_token=_can_mint_profile_user_token(role_names),
+            reset_browser_state_endpoint=reset_browser_state_endpoint,
+            reset_browser_state_login_url=login_url,
         )
     except:
         return exception_factory()

@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any, Tuple
 
+from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+
 __all__ = [
     "migrate_soils_parquet",
     "migrate_soils_nodb_meta",
@@ -49,9 +51,9 @@ def migrate_soils_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
     """
     run_path = Path(wd)
     soils_dir = run_path / "soils"
-    soils_parquet = soils_dir / "soils.parquet"
+    soils_parquet = pick_existing_parquet_path(run_path, "soils/soils.parquet")
 
-    if not soils_parquet.exists():
+    if soils_parquet is None:
         soils_csv = soils_dir / "soils.csv"
         if soils_csv.exists():
             return True, "Legacy soils.csv present (nothing to migrate)"
@@ -81,10 +83,11 @@ def migrate_soils_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
         except Exception as exc:
             return False, f"Failed to generate soils parquet: {exc}"
 
-        if soils_parquet.exists():
+        soils_parquet = pick_existing_parquet_path(run_path, "soils/soils.parquet")
+        if soils_parquet is not None:
             return True, "Generated soils parquet from soils.nodb"
 
-        return True, "Soils nodb has no summaries (nothing to migrate)"
+        return False, "Soils parquet missing after generation attempt"
 
     try:
         import pyarrow.parquet as pq
@@ -164,11 +167,11 @@ def migrate_soils_nodb_meta(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         (applied, message) tuple
     """
     run_path = Path(wd)
-    soils_parquet = run_path / "soils" / "soils.parquet"
+    soils_parquet = pick_existing_parquet_path(run_path, "soils/soils.parquet")
     soils_nodb = run_path / "soils.nodb"
 
     # Only migrate if soils.parquet exists (new format is available)
-    if not soils_parquet.exists():
+    if soils_parquet is None:
         return True, "No soils.parquet (legacy meta files may still be needed)"
 
     if not soils_nodb.exists():

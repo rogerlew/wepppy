@@ -8,6 +8,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse
 
 from wepppy.nodb.core import Ron
+from wepppy.nodir.errors import NoDirError
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -93,6 +94,8 @@ async def export_ermit(runid: str, config: str, request: Request):
         fn = await _run_sync(create_ermit_input, wd)
         file_path = _require_file(Path(fn), label="ERMiT export")
         return FileResponse(path=file_path, filename=file_path.name)
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception:
@@ -139,6 +142,8 @@ async def export_geopackage(runid: str, config: str, request: Request):
 
         _require_file(gpkg_path, label="GeoPackage export")
         return FileResponse(path=gpkg_path, filename=gpkg_path.name)
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception:
@@ -185,6 +190,8 @@ async def export_geodatabase(runid: str, config: str, request: Request):
 
         _require_file(gdb_path, label="Geodatabase export")
         return FileResponse(path=gdb_path, filename=gdb_path.name)
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception:
@@ -257,6 +264,8 @@ async def export_prep_details(runid: str, config: str, request: Request):
             path=archive_file,
             filename=f"{runid}_prep_details.zip",
         )
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception:

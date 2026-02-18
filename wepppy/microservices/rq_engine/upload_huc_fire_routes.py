@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodir.mutations import enable_default_archive_roots
 
 from .auth import AuthError, require_jwt
 from .responses import error_response, error_response_with_traceback
@@ -100,6 +101,7 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         cfg = f"{config}.cfg"
 
         Ron(wd, cfg)
+        enable_default_archive_roots(wd)
 
         try:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl

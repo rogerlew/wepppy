@@ -1,15 +1,12 @@
 import os
-import json
-
-from os.path import join as _join
-from os.path import split as _split
-from os.path import exists as _exists
-from subprocess import check_output
-
 import difflib
 
 from .._common import *  # noqa: F401,F403
 
+from wepppy.nodir.errors import NoDirError
+from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.nodir.fs import stat as nodir_stat
+from wepppy.nodir.paths import parse_external_subpath
 from wepppy.weppcloud.utils.helpers import get_wd, error_factory, url_for_run
 
 from .._run_context import load_run_context
@@ -20,38 +17,93 @@ diff_bp = Blueprint('diff', __name__,
     static_folder='static',
     static_url_path='/diff/static')
 
+
+def _nodir_error_response(err: NoDirError):
+    return error_factory(
+        err.message,
+        status_code=err.http_status,
+        code=err.code,
+        details=err.message,
+    )
+
+
+def _resolve_diff_target_path(wd_root: str, logical_rel_path: str, *, nodir_view: str) -> str | None:
+    try:
+        nodir_target = nodir_resolve(wd_root, logical_rel_path, view=nodir_view)
+    except NoDirError:
+        raise
+
+    if nodir_target is None:
+        dir_path = os.path.abspath(os.path.join(wd_root, logical_rel_path))
+        if not dir_path.startswith(wd_root + os.sep) and dir_path != wd_root:
+            abort(403)
+
+        if not os.path.exists(dir_path):
+            return None
+        if os.path.isdir(dir_path):
+            abort(404)
+
+        return os.path.relpath(dir_path, wd_root).replace(os.sep, "/")
+
+    try:
+        nodir_entry = nodir_stat(nodir_target)
+    except FileNotFoundError:
+        return None
+    except NotADirectoryError:
+        return None
+
+    if nodir_entry.is_dir:
+        abort(404)
+
+    if logical_rel_path in (".", ""):
+        abort(404)
+
+    return logical_rel_path.replace(os.sep, "/")
+
+
 @diff_bp.route('/runs/<string:runid>/<config>/diff/<path:subpath>', strict_slashes=False)
 @authorize_and_handle_with_exception_factory
 def diff_comparer(runid, config, subpath):
     ctx = load_run_context(runid, config)
     wd_root = os.path.abspath(str(ctx.active_root))
-    dir_path = os.path.abspath(os.path.join(wd_root, subpath))
 
     diff_runid = request.args.get('diff', None)
     if diff_runid is None:
         abort(403)
 
-    # Do not resolve symlinks here: critical functionality for browsing batch,
-    # culverts, omni scenarios, and omni-contrast projects.
-    if not dir_path.startswith(wd_root + os.sep) and dir_path != wd_root:
+    try:
+        logical_subpath, _parsed_view = parse_external_subpath(subpath, allow_admin_alias=False)
+        nodir_view = "effective"
+    except ValueError:
         abort(403)
 
-    if not os.path.exists(dir_path):
-        return error_factory(f'path: `{dir_path}` does not exist')
+    try:
+        safe_subpath = _resolve_diff_target_path(
+            wd_root,
+            logical_subpath,
+            nodir_view=nodir_view,
+        )
+    except NoDirError as err:
+        return _nodir_error_response(err)
 
-    if os.path.isdir(dir_path):
-        abort(404)
+    if safe_subpath is None:
+        missing_left = os.path.abspath(os.path.join(wd_root, logical_subpath))
+        return error_factory(f'path: `{missing_left}` does not exist')
 
-    relative_subpath = os.path.relpath(dir_path, wd_root)
     diff_root = os.path.abspath(get_wd(diff_runid))
-    diff_path = os.path.abspath(os.path.join(diff_root, relative_subpath))
-    if not diff_path.startswith(diff_root + os.sep) and diff_path != diff_root:
-        abort(403)
+    try:
+        diff_subpath = _resolve_diff_target_path(
+            diff_root,
+            safe_subpath,
+            nodir_view=nodir_view,
+        )
+    except NoDirError as err:
+        return _nodir_error_response(err)
 
-    if not os.path.exists(diff_path):
-        return error_factory(f'path: `{diff_path}` does not exist')
+    if diff_subpath is None:
+        missing_right = os.path.abspath(os.path.join(diff_root, safe_subpath))
+        return error_factory(f'path: `{missing_right}` does not exist')
 
-    safe_subpath = relative_subpath.replace(os.sep, "/")
     left_download_url = url_for_run(
                     'download.download_with_subpath',
                     runid=runid,
@@ -74,6 +126,7 @@ def diff_comparer(runid, config, subpath):
                             left_download_url=left_download_url,
                             right_download_url=right_download_url
                            )
+
 
 # this goes away this was old approach that was slow
 def diff_response(path, diff_path, runid, diff_runid):

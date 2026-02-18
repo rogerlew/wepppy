@@ -104,8 +104,10 @@ def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
     for dirname in ("climate", "watershed"):
         src_dir = _join(base_root, dirname)
         src_archive = _join(base_root, f"{dirname}.nodir")
+        root_linked = False
         if os.path.isdir(src_dir):
             _ensure_link(src_dir, _join(run_root, dirname))
+            root_linked = True
         elif os.path.isfile(src_archive):
             legacy_dst = _join(run_root, dirname)
             if os.path.islink(legacy_dst) and not _exists(legacy_dst):
@@ -114,6 +116,18 @@ def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
                 except OSError:
                     pass
             _ensure_link(src_archive, _join(run_root, f"{dirname}.nodir"))
+            root_linked = True
+
+        if root_linked:
+            sidecar_prefix = f"{dirname}."
+            for sidecar_name in sorted(
+                fn
+                for fn in os.listdir(base_root)
+                if fn.startswith(sidecar_prefix)
+                and fn.endswith(".parquet")
+                and os.path.isfile(_join(base_root, fn))
+            ):
+                _ensure_link(_join(base_root, sidecar_name), _join(run_root, sidecar_name))
 
     dem_src = _join(base_root, "dem")
     if os.path.isdir(dem_src):
@@ -625,7 +639,6 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
     """
     from flask_login import current_user
     from flask import abort
-    from wepppy.weppcloud.app import get_run_owners
 
     login_manager = getattr(current_app, "login_manager", None)
     if login_manager is None:
@@ -633,11 +646,20 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
             return
         abort(403)
 
-    try:
-        if current_user.has_role("Admin") or current_user.has_role("Root"):
-            return
-    except Exception:
-        abort(403)
+    has_role = getattr(current_user, "has_role", None)
+    if callable(has_role):
+        try:
+            if has_role("Admin") or has_role("Root"):
+                return
+        except Exception:
+            # Keep explicit failure for authenticated users when role backends
+            # are broken; anonymous/public access should still evaluate run-level
+            # permissions below.
+            try:
+                if bool(getattr(current_user, "is_authenticated", False)):
+                    abort(403)
+            except Exception:
+                abort(403)
 
     auth_runid = _strip_omni_suffix_runid(runid)
 
@@ -648,6 +670,7 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
 
     # Always use the parent run path for authorization checks, not scenario paths.
     # Omni scenarios/contrasts inherit their parent run's access permissions.
+    from wepppy.weppcloud.app import get_run_owners
     wd = get_wd(auth_runid, prefer_active=False)
     owners = get_run_owners(auth_runid)
 
