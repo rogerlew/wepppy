@@ -13,36 +13,61 @@ The visible proof is that projection utility tests pass, a read session can proj
 ## Progress
 
 - [x] (2026-02-18 03:24Z) Authored Phase 9A implementation ExecPlan under `docs/work-packages/20260214_nodir_archives/prompts/active/phase9a_canonical_root_projection_utility_foundation.md`.
-- [ ] Implement `wepppy/nodir/projections.py` with acquire/release and commit/abort APIs.
-- [ ] Add `tests/nodir/test_projections.py` for reuse, locking, lifecycle, and canonical error behavior.
-- [ ] Integrate projection preflight with existing NoDir state/error contracts without broad call-site migration.
-- [ ] Run Phase 9A minimum validation gates and publish initial evidence.
+- [x] (2026-02-18 16:04Z) Implemented `wepppy/nodir/projections.py` with projection handle model, read/mutate acquire/release lifecycle, stale metadata sweep, and explicit `commit`/`abort` mutation APIs.
+- [x] (2026-02-18 16:12Z) Added `tests/nodir/test_projections.py` covering reuse/refcount, lock contention, mixed-state rejection, invalid archive/transition lock errors, mutate commit/abort, context-manager release, and stale sweep behavior.
+- [x] (2026-02-18 16:14Z) Integrated projection utility exports in `wepppy/nodir/__init__.py` without broad helper/RQ consumer migration.
+- [x] (2026-02-18 16:30Z) Ran Phase 9A validation gates and captured green evidence in this ExecPlan.
+- [x] (2026-02-18 17:05Z) Closed initial post-review correctness gaps: cross-mode contention now returns `503 NODIR_LOCKED`, reuse refcount updates are serialized via a reuse lock, and duplicate release is token-idempotent.
+- [x] (2026-02-18 18:02Z) Completed second-review hardening: mutation commit/abort now enforce live lock+session ownership, release uses reuse-lock serialization, stale sweep is fail-closed on Redis uncertainty with run-root path guards, and regression coverage expanded.
 
 ## Surprises & Discoveries
 
-- Observation: Mixed-state failures in Phase 8 came from partial directory remnants colliding with archive-first readers, not from missing read helpers alone.
-  Evidence: Runtime failures included repeated `NODIR_MIXED_STATE` and missing slope file fallout after mixed-state recovery events.
+- Observation: Existing `resolve(..., view="archive")` already preserved canonical `503 NODIR_LOCKED` and `500 NODIR_INVALID_ARCHIVE` preflight behavior for projection acquire.
+  Evidence: `tests/nodir/test_projections.py` includes transition lock and invalid archive assertions; both passed.
 
-- Observation: Direct writable zip-mount semantics would weaken deterministic recovery because writes are not naturally bounded by explicit commit phases.
-  Evidence: Phase 8 reliability incidents already showed that partially mutated filesystem surfaces are operationally fragile under retries.
+- Observation: Safe stale cleanup needed lock-value parity checks before metadata reuse.
+  Evidence: Added stale sweep regression (`test_projection_acquire_sweeps_stale_metadata_and_orphan_mount`) with orphan metadata + orphan mount fixtures; acquire succeeded only after sweep.
+
+- Observation: Opposite-mode contention was originally surfaced as `409 NODIR_MIXED_STATE` because managed mount conflicts were treated like unmanaged mixed directories.
+  Evidence: Added `test_projection_cross_mode_conflict_returns_locked`; behavior now returns `503 NODIR_LOCKED`.
+
+- Observation: Stale sweep needed stricter fail-closed behavior; Redis read errors must not trigger destructive cleanup, and metadata paths must be bounded to the run root before deletion.
+  Evidence: Added `test_stale_sweep_fails_closed_on_redis_error`; stale metadata remains and acquire returns `503` under simulated Redis get failure.
 
 ## Decision Log
 
-- Decision: Phase 9A will introduce projection lifecycle utilities first, with no broad consumer rewrites in the same milestone.
-  Rationale: Utility-first scope keeps contract risk bounded and aligns with change-scope discipline.
+- Decision: Phase 9A remains utility-first with no broad WEPP/RQ call-site migration.
+  Rationale: Keeps scope aligned with the cut line and minimizes contract risk.
   Date/Author: 2026-02-18 / Codex.
 
-- Decision: `materialize(file)` remains supported but is explicitly fallback-only, not default path-heavy behavior.
-  Rationale: Preserves compatibility while reducing cache churn and call-site complexity.
+- Decision: Implement managed projection roots using symlink mountpoints at `WD/<root>` backed by extracted runtime layers under `WD/.nodir/(lower|upper|work)`.
+  Rationale: Provides deterministic lifecycle behavior without introducing speculative FUSE dependencies in this phase.
   Date/Author: 2026-02-18 / Codex.
 
-- Decision: Mutation projections require explicit `commit`/`abort` APIs and cannot imply auto-commit on release.
-  Rationale: Explicit transaction boundaries are required for deterministic failure handling and forensics.
+- Decision: Reuse existing freeze-side safety helpers for mutation commit and enforce fail-safe release semantics by auto-aborting active mutation sessions.
+  Rationale: Preserves archive validation/parquet sidecar policy and guarantees release never implies commit.
+  Date/Author: 2026-02-18 / Codex.
+
+- Decision: Managed projection mount conflicts should map to lock contention (`503 NODIR_LOCKED`) rather than mixed unmanaged state (`409`).
+  Rationale: Conflicts between active managed sessions are coordination failures, not mixed-state filesystem corruption.
+  Date/Author: 2026-02-18 / Codex.
+
+- Decision: Post-review hardening must enforce live lock/session ownership for mutation commit/abort and serialize release updates with the same reuse lock as acquire.
+  Rationale: Prevents stale-handle mutation and acquire/release race windows that can drop session accounting.
   Date/Author: 2026-02-18 / Codex.
 
 ## Outcomes & Retrospective
 
-Phase 9A planning is now implementation-ready. Runtime code is not changed yet by this document; this plan defines the utility-first cut line, interfaces, and validation path so implementation can proceed without revisiting architecture decisions.
+Phase 9A implementation is complete for the utility foundation cut line. New projection APIs now provide deterministic read/mutate projection lifecycle management with canonical NoDir error propagation and explicit mutation commit/abort controls.
+
+Validation outcome:
+- `wctl run-pytest tests/nodir -k "state or thaw_freeze or resolve"` -> `43 passed, 81 deselected`
+- `wctl run-pytest tests/nodir/test_projections.py` -> `16 passed`
+- `wctl run-pytest tests/nodir/test_projections.py tests/nodir/test_wepp_inputs.py` -> `30 passed`
+- `wctl run-pytest tests/rq/test_wepp_rq_nodir.py tests/microservices/test_rq_engine_wepp_routes.py` -> `18 passed`
+- `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `40 files validated, 0 errors, 0 warnings`
+
+Remaining for later phases: helper-layer projection adoption, mutation-orchestrator transition, and WEPP/RQ consumer migration.
 
 ## Context and Orientation
 
@@ -83,13 +108,13 @@ Run from `/workdir/wepppy`.
 
     wctl run-pytest tests/nodir -k "state or thaw_freeze or resolve"
 
-Expected: baseline NoDir state/lock tests remain green.
+Observed: `43 passed, 77 deselected`.
 
 2. Add and iterate projection tests.
 
     wctl run-pytest tests/nodir/test_projections.py
 
-Expected: new utility lifecycle tests pass and validate canonical errors.
+Observed: `12 passed`.
 
 3. Run Phase 9A minimum gates.
 
@@ -97,7 +122,7 @@ Expected: new utility lifecycle tests pass and validate canonical errors.
     wctl run-pytest tests/rq/test_wepp_rq_nodir.py tests/microservices/test_rq_engine_wepp_routes.py
     wctl doc-lint --path docs/work-packages/20260214_nodir_archives
 
-Expected: all commands exit `0` with no docs lint errors.
+Observed: all commands exit `0`.
 
 ## Validation and Acceptance
 
@@ -160,3 +185,6 @@ Dependencies:
 
 ---
 Revision Note (2026-02-18, Codex): Initial Phase 9A utility-first ExecPlan authored to implement canonical root projection lifecycle APIs and tests before broad consumer migration.
+Revision Note (2026-02-18, Codex): Implemented Phase 9A utility foundation, landed projection lifecycle/tests, and updated living sections with validation evidence.
+Revision Note (2026-02-18, Codex): Addressed review findings for contention status mapping, refcount update serialization, and release token idempotence; expanded projection tests for these regressions.
+Revision Note (2026-02-18, Codex): Completed second-review hardening for mutation ownership checks, release/acquire serialization, stale-sweep fail-closed behavior, and added targeted regression coverage.

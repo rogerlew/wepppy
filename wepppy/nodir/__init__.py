@@ -16,6 +16,15 @@ from .parquet_sidecars import (
     sidecar_relpath_to_logical_parquet,
 )
 from .paths import NoDirRoot, NoDirView, normalize_relpath, parse_external_subpath
+from .projections import (
+    ProjectionHandle,
+    ProjectionMode,
+    abort_mutation_projection,
+    acquire_root_projection,
+    commit_mutation_projection,
+    release_root_projection,
+    with_root_projection,
+)
 from .state import (
     NoDirArchiveFingerprint,
     NoDirStateName,
@@ -60,6 +69,13 @@ __all__ = [
     "preflight_root_forms",
     "mutate_root",
     "mutate_roots",
+    "ProjectionMode",
+    "ProjectionHandle",
+    "acquire_root_projection",
+    "release_root_projection",
+    "with_root_projection",
+    "commit_mutation_projection",
+    "abort_mutation_projection",
     "logical_parquet_to_sidecar_relpath",
     "sidecar_relpath_to_logical_parquet",
     "pick_existing_parquet_path",
