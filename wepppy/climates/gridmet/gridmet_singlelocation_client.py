@@ -124,7 +124,7 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     url = f"https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&"\
           f"lat={lat}&lon={lon}&positive-east-longitude=False&"\
           f"data-path=PATH_TO_DODS/agg_met_pr_1979_CurrentYear_CONUS.nc&variable=precipitation_amount&variable-name=pr&start-date={start_year}-01-01&end-date={end_date}&"\
-          f"data-path=PATH_TO_DODS/agg_met_srad_1979_CurrentYear_CONUS.nc&variable=daily_mean_shortwave_radiation_at_surface&variable-name=srad&start-date={end_date}-01-01&end-date={end_date}&"\
+          f"data-path=PATH_TO_DODS/agg_met_srad_1979_CurrentYear_CONUS.nc&variable=daily_mean_shortwave_radiation_at_surface&variable-name=srad&start-date={start_year}-01-01&end-date={end_date}&"\
           f"data-path=PATH_TO_DODS/agg_met_tmmx_1979_CurrentYear_CONUS.nc&variable=daily_maximum_temperature&variable-name=tmmx&start-date={start_year}-01-01&end-date={end_date}&"\
           f"data-path=PATH_TO_DODS/agg_met_tmmn_1979_CurrentYear_CONUS.nc&variable=daily_minimum_temperature&variable-name=tmmn&start-date={start_year}-01-01&end-date={end_date}&"\
           f"data-path=PATH_TO_DODS/agg_met_vs_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_speed&variable-name=vs&start-date={start_year}-01-01&end-date={end_date}&"\
