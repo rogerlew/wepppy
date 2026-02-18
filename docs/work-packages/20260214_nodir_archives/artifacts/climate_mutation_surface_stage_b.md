@@ -24,3 +24,15 @@ Scope: define and record canonical climate mutation ownership, lock/state bounda
 - Climate mutation ownership is centralized in `build_climate_rq` and `upload_cli_rq` with shared NoDir mutation orchestration.
 - Upload route writes are now root-owner-safe in archive form (`mutate_root`), eliminating direct archive-form write drift.
 - Build and upload routes enforce canonical NoDir preflight semantics before enqueue or mutation.
+
+## Phase 9 Contract Transition Addendum (2026-02-18)
+
+This Stage B artifact remains a historical record of Phase 6 climate mutation ownership under thaw/freeze semantics.
+
+Forward contract update:
+- Archive-form climate mutation ownership remains at the same RQ and upload-owned mutation boundaries.
+- Archive-form mutation mechanism is superseded from `materialize(root)+freeze` to `projection(mode=mutate)+commit`.
+- Read-only path-heavy climate consumers should migrate toward read-session projection before using per-file materialization fallback.
+
+Interpretation guidance:
+- `Requires Thaw` in this document should be treated as `Requires Mutation Session` for Phase 9+ implementation.

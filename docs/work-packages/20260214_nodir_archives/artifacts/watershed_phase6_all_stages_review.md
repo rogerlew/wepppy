@@ -124,3 +124,15 @@ Execution evidence:
 Final watershed Phase 6a verdict:
 - `complete`: yes.
 - `validated`: yes (wave-targeted gates passed with canonical NoDir status/code expectations preserved).
+
+## Phase 9 Contract Transition Addendum (2026-02-18)
+
+This all-stages review remains valid for Phase 6a execution and validation under the thaw/freeze-era contract.
+
+Superseded assumptions for Phase 9+ work:
+- Stage B mutation lifecycle wording (`thaw/modify/freeze`) is replaced by projection mutation-session lifecycle (`acquire -> callback -> commit|abort -> release`).
+- Stage C wave sequencing must now include projection utility delivery before broad consumer migration.
+- Stage D validation should include projection metadata and projection lifecycle failure probes in addition to canonical status-code checks.
+
+Historical integrity note:
+- Coverage findings, severity ordering, and completion verdicts in this document should remain unchanged as the historical Phase 6a record.

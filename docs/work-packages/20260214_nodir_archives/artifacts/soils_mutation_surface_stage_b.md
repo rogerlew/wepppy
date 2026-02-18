@@ -24,3 +24,15 @@ Scope: define and record canonical soils mutation ownership, lock/state boundari
 - Soils root mutation ownership is centralized in RQ mutation owners (`build_soils_rq`, `build_treatments_rq`) through shared `mutate_root`/`mutate_roots`.
 - Route layer stays preflight/enqueue only; it does not own thaw/freeze.
 - Callback failures after thaw intentionally preserve thawed/dirty state for deterministic recovery and forensics.
+
+## Phase 9 Contract Transition Addendum (2026-02-18)
+
+This Stage B artifact remains a historical record of Phase 6 soils mutation ownership under thaw/freeze semantics.
+
+Forward contract update:
+- Archive-form soils mutation ownership remains at the same RQ boundaries.
+- Archive-form mutation mechanism is superseded from `materialize(root)+freeze` to `projection(mode=mutate)+commit`.
+- Read-only path-heavy soils consumers should migrate toward read-session projection before using per-file materialization fallback.
+
+Interpretation guidance:
+- `Requires Thaw` in this document should be treated as `Requires Mutation Session` for Phase 9+ implementation.

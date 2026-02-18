@@ -67,3 +67,21 @@ Proposed sequence (single root: `watershed`):
 - Resolve `Watershed.__init__` eager `wat_dir` creation so archive-form read paths can instantiate controller state without mixed-state side effects.
 - Resolve `_structure` serialized-path hazard (`structure.json` path-string persistence) before finalizing freeze-era invariants.
 - Decide high-fanout slope/network read strategy for `wepp.prep_watershed` and mod consumers: per-file materialization vs bounded read-session helper.
+
+## Phase 9 Contract Transition Addendum (2026-02-18)
+
+This Stage B document remains historically correct for Phase 6 execution evidence under the thaw/freeze contract in effect at that time.
+
+Contract-version update for forward implementation work:
+- Archive-form mutation semantics are superseded from `materialize(root)+freeze` to `projection(mode=mutate)+commit`.
+- Read-only path-heavy consumers should prefer `projection(mode=read)` rather than per-file materialization when full path semantics are needed.
+- `wepp.prep_watershed` remains classified as a read-only consumer and should migrate to read-session projection behavior, not mutation-session wrappers.
+
+Phase 9 mapping notes for this Stage B table:
+- `Requires Thaw` should be interpreted as `Requires Mutation Session` for mutation owners.
+- `State Transition` should be interpreted as projection lifecycle (`acquire -> callback -> commit|abort -> release`) for archive form.
+- Existing Phase 6 lock ownership and canonical error semantics remain normative unless explicitly superseded by the Phase 9 projection contract.
+
+Cut line:
+- Do not reinterpret or rewrite Phase 6 pass/fail evidence in this document.
+- Apply projection-session semantics only for Phase 9+ implementation and validation updates.

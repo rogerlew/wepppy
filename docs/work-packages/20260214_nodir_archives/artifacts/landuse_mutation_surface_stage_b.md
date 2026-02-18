@@ -24,3 +24,15 @@ Scope: define and record canonical landuse mutation ownership, lock/state bounda
 - Landuse mutation ownership is centralized in `build_landuse_rq` and `build_treatments_rq` through the shared `mutate_root`/`mutate_roots` contract.
 - User-defined landuse upload + raster stack writes now execute in the same root mutation boundary to prevent archive-form drift.
 - Route handlers remain strict preflight/enqueue boundaries with canonical NoDir error propagation.
+
+## Phase 9 Contract Transition Addendum (2026-02-18)
+
+This Stage B artifact remains a historical record of Phase 6 landuse mutation ownership under thaw/freeze semantics.
+
+Forward contract update:
+- Archive-form landuse mutation ownership remains at the same RQ and route-owned mutation boundaries.
+- Archive-form mutation mechanism is superseded from `materialize(root)+freeze` to `projection(mode=mutate)+commit`.
+- Read-only path-heavy landuse consumers should migrate toward read-session projection before using per-file materialization fallback.
+
+Interpretation guidance:
+- `Requires Thaw` in this document should be treated as `Requires Mutation Session` for Phase 9+ implementation.

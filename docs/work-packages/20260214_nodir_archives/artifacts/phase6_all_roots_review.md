@@ -72,3 +72,16 @@ Scope: final cross-root conformance review for NoDir Phase 6 mutation adoption (
 
 - No open Phase 6 blockers remain for mutation-surface conformance.
 - Existing deprecation warnings observed in full-suite output are preexisting platform/dependency warnings and were not introduced by this phase.
+
+## Phase 9 Contract-Version Addendum (2026-02-18)
+
+Contract version note:
+- Phase 6 is complete and validated under the thaw/freeze mutation contract active on 2026-02-17.
+- Beginning with Phase 9 implementation, operational mutation semantics are superseded to projection-session lifecycle (`projection(mode=mutate)+commit`).
+
+What is unchanged:
+- Phase 6 mutation-owner boundaries remain valid.
+- Phase 6 validation evidence and pass/fail outcomes remain historically correct.
+
+What is superseded:
+- Behavior-matrix interpretation of archive-form root mutation for future implementation phases should map to projection-session commit semantics rather than thaw/freeze wording, once Phase 9 artifacts are ratified.

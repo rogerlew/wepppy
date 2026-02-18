@@ -88,3 +88,22 @@ Recommended command bundle (run-scoped):
 ## Open Decision Log
 
 No open blockers as of 2026-02-17.
+
+## Phase 9 Contract Transition Addendum (2026-02-18)
+
+This Stage D gate set remains the historical validation baseline for Phase 6a thaw/freeze rollout.
+
+For Phase 9+ rollout, replace thaw/freeze-centric checks with projection lifecycle gates:
+- Read session lifecycle checks: acquire/reuse/release/unmount.
+- Mutation session lifecycle checks: acquire/mutate/commit/release and acquire/mutate/abort/release.
+- Projection lock-contention checks under canonical `503 NODIR_LOCKED` behavior.
+- Projection mixed unmanaged directory rejection under canonical `409 NODIR_MIXED_STATE` behavior.
+
+Forensics additions required in Phase 9+ incident response:
+- Capture projection metadata under `WD/.nodir/projections/<root>/...`.
+- Capture projection lower/upper/work layout state where applicable.
+- Correlate projection token/session metadata with RQ job IDs for mutation-session failures.
+
+Cut line:
+- Keep existing Phase 6 gate results unchanged.
+- Add parallel Phase 9 validation rows rather than rewriting historical Phase 6 gate outcomes.

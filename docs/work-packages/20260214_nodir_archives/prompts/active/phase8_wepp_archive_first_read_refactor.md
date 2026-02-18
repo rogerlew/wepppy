@@ -35,6 +35,7 @@ Visible proof:
 - [x] (2026-02-18 02:24Z) Mixed-state read hardening: added opt-in mixed-tolerant archive-preferred reads in `wepp_inputs` and applied them to `_prep_channel_slopes`/`_prep_structure`; changed legacy channel slope branch to stream from the already-open source handle (no second mixed-state reopen), added regression tests, and re-ran RQ + route + NoDir suites (`37 passed`; `48 passed`).
 - [x] (2026-02-18 02:40Z) Strategy pivot docs update: revised NoDir materialization contract to mount-first (FUSE zip canonical) and authored Phase 9 utility-first implementation phases in `implementation_plan.md`, including guidance to avoid blanket `wepp.py` revert.
 - [x] (2026-02-18 03:05Z) Contract revision follow-up: replaced mount-first wording with canonical root projection sessions (`WD/<root>` projected runtime path, overlay-backed mutation commits), updated Phase 9 plan milestones, and added explicit Phase 6 artifact revision assessment in `implementation_plan.md`.
+- [x] (2026-02-18 03:30Z) Follow-on planning package drafted: created active Phase 9A utility-first ExecPlan and applied Phase 9 contract-transition addenda to Phase 6 watershed/soils/landuse/climate Stage B/C/D review artifacts plus completed Phase 6 ExecPlan note.
 
 ## Surprises & Discoveries
 
@@ -107,6 +108,10 @@ Visible proof:
 
 - Decision: For next implementation wave, make canonical root projection sessions (`WD/<root>`) the default for path-heavy archive-backed consumers, with file-level materialization retained as explicit compatibility fallback.
   Rationale: Projection sessions keep legacy path semantics while preserving archive authority and explicit commit boundaries; this avoids direct writable zip risks and reduces per-file cache churn.
+  Date/Author: 2026-02-18 / Codex.
+
+- Decision: Apply Phase 6 document updates as contract-transition addenda instead of rewriting historical execution evidence.
+  Rationale: Preserves auditability of Phase 6 results while clearly marking superseded thaw/freeze wording for Phase 9+ implementation.
   Date/Author: 2026-02-18 / Codex.
 
 ## Outcomes & Retrospective

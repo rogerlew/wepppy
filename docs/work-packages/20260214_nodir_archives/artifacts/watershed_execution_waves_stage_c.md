@@ -83,3 +83,21 @@ Scope: implementation-ready rollout waves for watershed NoDir adoption, derived 
 | Wave 2 | Canonical watershed mutation producers are mapped to thaw/modify/freeze behavior with deterministic lock/state transitions; no unresolved producer ownership ambiguity remains. | Wave 3 receives verified producer artifacts plus a precise consumer integration backlog. |
 | Wave 3 | Export/mod/WEPP watershed consumers no longer rely on unsafe archive-form path assumptions; blocked consumer touchpoints are cleared or explicitly deferred with bounded rationale. | Wave 4 receives only hardening/serialized-path cleanup scope (no new producer or broad integration work). |
 | Wave 4 | Serialized-path hazard is resolved and watershed read-surface semantics match NoDir contracts for mixed/invalid/locked states; touchpoint-to-wave plan has no unresolved ownership gaps. | Stage C handoff to Stage D validation gates is complete. |
+
+## Phase 9 Contract Transition Addendum (2026-02-18)
+
+This Stage C wave plan remains a valid historical execution record for Phase 6a under thaw/freeze-era mutation semantics.
+
+Contract-version update for future work:
+- Projection utility adoption is now required before additional watershed consumer migration work.
+- Wave ordering for Phase 9+ should explicitly include utility-first projection lifecycle delivery prior to broad WEPP/export/mod read-path rewrites.
+
+Superseding sequencing guidance:
+1. Projection utility foundation (`projections.py` + tests).
+2. Helper-layer adoption (`wepp_inputs` projection-aware path resolution).
+3. Consumer migration (WEPP/export/mod path-heavy touchpoints).
+4. Validation and hardening.
+
+Interpretation guidance for existing wave labels:
+- References to `thaw/modify/freeze` in Wave 2 and Wave 3 should be read as historical Phase 6 behavior, not Phase 9 implementation guidance.
+- Mutation-owner boundaries remain valid and should be reused with projection mutation sessions.
