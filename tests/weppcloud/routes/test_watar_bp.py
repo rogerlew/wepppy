@@ -12,10 +12,7 @@ from flask import Flask
 from tests.factories.singleton import singleton_factory
 from wepppy.nodir.errors import NoDirError
 
-try:
-    import wepppy.weppcloud.routes.nodb_api.watar_bp as watar_module
-except ImportError:
-    pytest.skip("Watar blueprint dependencies missing", allow_module_level=True)
+import wepppy.weppcloud.routes.nodb_api.watar_bp as watar_module
 
 import wepppy.climates.cligen as cligen_module
 import wepppy.nodb.mods.ash_transport.ash_multi_year_model as ash_models

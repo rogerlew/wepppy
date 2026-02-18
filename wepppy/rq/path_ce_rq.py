@@ -87,11 +87,12 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
             pass
 
     controller = PathCostEffective.getInstance(wd)
-    omni = Omni.getInstance(wd)
 
     try:
         for root in ("climate", "watershed", "landuse", "soils"):
             nodir_resolve(wd, root, view="effective")
+
+        omni = Omni.getInstance(wd)
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} STATUS Provisioning Omni scenarios for PATH")
 
