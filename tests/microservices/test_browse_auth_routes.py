@@ -1932,3 +1932,53 @@ def test_group_routes_reject_session_token_class(
         )
 
     assert response.status_code == 403
+
+
+def test_private_browse_stale_session_cookie_redirects_for_reauth(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-private-stale-session"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    import wepppy.microservices.rq_engine.auth as rq_auth
+
+    class MissingMarkerRedis:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def exists(self, key: str) -> bool:
+            return False
+
+    monkeypatch.setattr(rq_auth.redis, "Redis", lambda **kwargs: MissingMarkerRedis())
+
+    token = _issue_token(
+        token_class="session",
+        subject="sid-stale",
+        runs=[runid],
+        extra_claims={"runid": runid, "session_id": "sid-stale"},
+    )
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    parsed = urlparse(response.headers["location"])
+    assert parsed.path == f"/weppcloud/runs/{runid}/"
+    next_value = parse_qs(parsed.query).get("next", [""])[0]
+    assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"

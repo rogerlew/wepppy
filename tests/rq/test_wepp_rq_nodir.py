@@ -23,8 +23,36 @@ class _DummyWatershed:
         return "translator"
 
 
-def test_prep_slopes_uses_watershed_mutation_guard(monkeypatch: pytest.MonkeyPatch) -> None:
+def _assert_no_mutate_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+    def _should_not_mutate(*_args, **_kwargs):
+        raise AssertionError("read-only stage should not call mutate_roots")
+
+    monkeypatch.setattr(wepp_rq, "mutate_roots", _should_not_mutate, raising=False)
+
+
+def test_recover_mixed_nodir_roots_discards_dir_and_keeps_archive(tmp_path) -> None:
+    wd = tmp_path
+    mixed_root = wd / "watershed"
+    (mixed_root / "slope_files" / "hillslopes").mkdir(parents=True, exist_ok=True)
+    (mixed_root / "slope_files" / "hillslopes" / "hill_22.slp").write_text("partial\n", encoding="utf-8")
+    (wd / "watershed.nodir").write_text("archive", encoding="utf-8")
+
+    # Non-mixed roots should be ignored.
+    (wd / "climate").mkdir(parents=True, exist_ok=True)
+    (wd / "soils.nodir").write_text("archive", encoding="utf-8")
+
+    recovered = wepp_rq._recover_mixed_nodir_roots(str(wd))
+
+    assert recovered == ("watershed",)
+    assert not mixed_root.exists()
+    assert (wd / "watershed.nodir").exists()
+
+
+def test_prep_slopes_calls_wepp_directly_without_mutation_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     _stub_job_context(monkeypatch)
+    _assert_no_mutate_roots(monkeypatch)
     calls: list[tuple[object, ...]] = []
 
     class DummyWepp:
@@ -34,22 +62,16 @@ def test_prep_slopes_uses_watershed_mutation_guard(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
     monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
 
-    mutation_calls: list[tuple[str, str]] = []
-
-    def _fake_mutate_root(wd, root, callback, *, purpose="nodir-mutation"):
-        mutation_calls.append((root, purpose))
-        callback()
-
-    monkeypatch.setattr(wepp_rq, "mutate_root", _fake_mutate_root)
-
     wepp_rq._prep_slopes_rq("run-1")
 
-    assert mutation_calls == [("watershed", "prep-slopes-rq")]
     assert calls == [("prep_slopes", "translator", True, 42.0)]
 
 
-def test_run_flowpaths_uses_watershed_mutation_guard(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_flowpaths_calls_wepp_directly_without_mutation_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     _stub_job_context(monkeypatch)
+    _assert_no_mutate_roots(monkeypatch)
     calls: list[str] = []
 
     class DummyWepp:
@@ -58,22 +80,16 @@ def test_run_flowpaths_uses_watershed_mutation_guard(monkeypatch: pytest.MonkeyP
 
     monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
 
-    mutation_calls: list[tuple[str, str]] = []
-
-    def _fake_mutate_root(wd, root, callback, *, purpose="nodir-mutation"):
-        mutation_calls.append((root, purpose))
-        callback()
-
-    monkeypatch.setattr(wepp_rq, "mutate_root", _fake_mutate_root)
-
     wepp_rq._run_flowpaths_rq("run-1")
 
-    assert mutation_calls == [("watershed", "run-flowpaths-rq")]
     assert calls == ["flowpaths"]
 
 
-def test_prep_multi_ofe_uses_all_required_nodir_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_prep_multi_ofe_calls_wepp_directly_without_mutation_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     _stub_job_context(monkeypatch)
+    _assert_no_mutate_roots(monkeypatch)
     calls: list[tuple[str, object]] = []
 
     class DummyWepp:
@@ -83,22 +99,16 @@ def test_prep_multi_ofe_uses_all_required_nodir_roots(monkeypatch: pytest.Monkey
     monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
     monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
 
-    mutation_calls: list[tuple[tuple[str, ...], str]] = []
-
-    def _fake_mutate_roots(wd, roots, callback, *, purpose="nodir-mutation"):
-        mutation_calls.append((tuple(roots), purpose))
-        callback()
-
-    monkeypatch.setattr(wepp_rq, "mutate_roots", _fake_mutate_roots)
-
     wepp_rq._prep_multi_ofe_rq("run-1")
 
-    assert mutation_calls == [(("climate", "landuse", "soils", "watershed"), "prep-multi-ofe-rq")]
     assert calls == [("prep_multi_ofe", "translator")]
 
 
-def test_prep_managements_uses_all_required_nodir_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_prep_managements_calls_wepp_directly_without_mutation_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     _stub_job_context(monkeypatch)
+    _assert_no_mutate_roots(monkeypatch)
     calls: list[tuple[str, object]] = []
 
     class DummyWepp:
@@ -108,22 +118,54 @@ def test_prep_managements_uses_all_required_nodir_roots(monkeypatch: pytest.Monk
     monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
     monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
 
-    mutation_calls: list[tuple[tuple[str, ...], str]] = []
-
-    def _fake_mutate_roots(wd, roots, callback, *, purpose="nodir-mutation"):
-        mutation_calls.append((tuple(roots), purpose))
-        callback()
-
-    monkeypatch.setattr(wepp_rq, "mutate_roots", _fake_mutate_roots)
-
     wepp_rq._prep_managements_rq("run-1")
 
-    assert mutation_calls == [(("climate", "landuse", "soils", "watershed"), "prep-managements-rq")]
     assert calls == [("prep_managements", "translator")]
 
 
-def test_prep_remaining_uses_climate_and_watershed_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_prep_soils_calls_wepp_directly_without_mutation_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     _stub_job_context(monkeypatch)
+    _assert_no_mutate_roots(monkeypatch)
+    calls: list[tuple[str, object]] = []
+
+    class DummyWepp:
+        def _prep_soils(self, translator):
+            calls.append(("prep_soils", translator))
+
+    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
+    monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
+
+    wepp_rq._prep_soils_rq("run-1")
+
+    assert calls == [("prep_soils", "translator")]
+
+
+def test_prep_climates_calls_wepp_directly_without_mutation_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_job_context(monkeypatch)
+    _assert_no_mutate_roots(monkeypatch)
+    calls: list[tuple[str, object]] = []
+
+    class DummyWepp:
+        def _prep_climates(self, translator):
+            calls.append(("prep_climates", translator))
+
+    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
+    monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
+
+    wepp_rq._prep_climates_rq("run-1")
+
+    assert calls == [("prep_climates", "translator")]
+
+
+def test_prep_remaining_calls_wepp_directly_without_mutation_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_job_context(monkeypatch)
+    _assert_no_mutate_roots(monkeypatch)
     calls: list[tuple[object, ...]] = []
 
     class DummyWepp:
@@ -159,23 +201,17 @@ def test_prep_remaining_uses_climate_and_watershed_roots(monkeypatch: pytest.Mon
     monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
     monkeypatch.setattr(wepp_rq.Disturbed, "getInstance", lambda wd, allow_nonexistent=False: None)
 
-    mutation_calls: list[tuple[tuple[str, ...], str]] = []
-
-    def _fake_mutate_roots(wd, roots, callback, *, purpose="nodir-mutation"):
-        mutation_calls.append((tuple(roots), purpose))
-        callback()
-
-    monkeypatch.setattr(wepp_rq, "mutate_roots", _fake_mutate_roots)
-
     wepp_rq._prep_remaining_rq("run-1")
 
-    assert mutation_calls == [(("climate", "watershed"), "prep-remaining-rq")]
     assert calls[0] == ("make_hillslope_runs", "translator", False)
     assert ("prep_phosphorus",) in calls
 
 
-def test_prep_watershed_uses_all_required_nodir_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_prep_watershed_calls_wepp_directly_without_mutation_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     _stub_job_context(monkeypatch)
+    _assert_no_mutate_roots(monkeypatch)
     calls: list[str] = []
 
     class DummyWepp:
@@ -184,65 +220,6 @@ def test_prep_watershed_uses_all_required_nodir_roots(monkeypatch: pytest.Monkey
 
     monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
 
-    mutation_calls: list[tuple[tuple[str, ...], str]] = []
-
-    def _fake_mutate_roots(wd, roots, callback, *, purpose="nodir-mutation"):
-        mutation_calls.append((tuple(roots), purpose))
-        callback()
-
-    monkeypatch.setattr(wepp_rq, "mutate_roots", _fake_mutate_roots)
-
     wepp_rq._prep_watershed_rq("run-1")
 
-    assert mutation_calls == [(("climate", "landuse", "soils", "watershed"), "prep-watershed-rq")]
     assert calls == ["prep_watershed"]
-
-
-def test_prep_soils_uses_soils_and_watershed_roots(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_job_context(monkeypatch)
-    calls: list[tuple[str, object]] = []
-
-    class DummyWepp:
-        def _prep_soils(self, translator):
-            calls.append(("prep_soils", translator))
-
-    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
-    monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
-
-    mutation_calls: list[tuple[tuple[str, ...], str]] = []
-
-    def _fake_mutate_roots(wd, roots, callback, *, purpose="nodir-mutation"):
-        mutation_calls.append((tuple(roots), purpose))
-        callback()
-
-    monkeypatch.setattr(wepp_rq, "mutate_roots", _fake_mutate_roots)
-
-    wepp_rq._prep_soils_rq("run-1")
-
-    assert mutation_calls == [(("soils", "watershed"), "prep-soils-rq")]
-    assert calls == [("prep_soils", "translator")]
-
-
-def test_prep_climates_uses_climate_and_watershed_roots(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_job_context(monkeypatch)
-    calls: list[tuple[str, object]] = []
-
-    class DummyWepp:
-        def _prep_climates(self, translator):
-            calls.append(("prep_climates", translator))
-
-    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda wd: DummyWepp())
-    monkeypatch.setattr(wepp_rq.Watershed, "getInstance", lambda wd: _DummyWatershed())
-
-    mutation_calls: list[tuple[tuple[str, ...], str]] = []
-
-    def _fake_mutate_roots(wd, roots, callback, *, purpose="nodir-mutation"):
-        mutation_calls.append((tuple(roots), purpose))
-        callback()
-
-    monkeypatch.setattr(wepp_rq, "mutate_roots", _fake_mutate_roots)
-
-    wepp_rq._prep_climates_rq("run-1")
-
-    assert mutation_calls == [(("climate", "watershed"), "prep-climates-rq")]
-    assert calls == [("prep_climates", "translator")]

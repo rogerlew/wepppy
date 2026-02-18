@@ -813,15 +813,70 @@ Exit criteria:
 - Canonical lock/error behavior remains contract-correct (`409/500/503/413`).
 - Crash recovery can sweep stale projection metadata and clean orphaned mounts.
 
-#### Phase 9B: Helper-Layer Projection Adoption
-Deliverables:
-- Extend `wepppy/nodir/wepp_inputs.py` with projection-aware path helpers for path-heavy consumers.
-- Keep `materialize_input_file(...)` as explicit compatibility fallback.
-- Add/update tests validating projection-first behavior with fallback controls.
 
-Exit criteria:
-- High-fanout WEPP read-path helpers resolve via projected `WD/<root>` paths.
-- Archive-native browse/files/download behavior remains unchanged.
+**Phase 9A Author Handoff Summary**
+
+- Branch: `nodir-thaw-freeze-contract`
+- Latest Phase 9A hardening commit: `c292e4360` (`nodir: harden projection lifecycle ownership and race safety`)
+
+Implemented scope (Phase 9A utility-first cut line):
+1. Added projection lifecycle utility module `wepppy/nodir/projections.py` with required API surface:
+   - `acquire_root_projection(...)`
+   - `release_root_projection(...)`
+   - `with_root_projection(...)`
+   - `commit_mutation_projection(...)`
+   - `abort_mutation_projection(...)`
+2. Added projection API exports in `wepppy/nodir/__init__.py`.
+3. Added focused lifecycle regression coverage in `tests/nodir/test_projections.py`.
+
+Post-review fixes included in the handoff commit:
+1. Managed cross-mode projection conflicts now surface canonical lock contention (`503 NODIR_LOCKED`) instead of mixed unmanaged state.
+2. Reuse-path and release-path metadata updates are serialized with a shared `/reuse` lock domain to avoid acquire/release RMW races.
+3. Mutation `commit`/`abort` now enforce live session + lock ownership before state mutation.
+4. Stale projection sweep now fails closed on Redis uncertainty and validates metadata-derived cleanup paths stay within the run root.
+5. Commit workflow now stages parquet sidecar movement in a commit workspace before archive replace and sidecar publish.
+
+Validation evidence (latest rerun):
+1. `wctl run-pytest tests/nodir/test_projections.py` -> `16 passed`
+2. `wctl run-pytest tests/nodir -k "state or thaw_freeze or resolve"` -> `43 passed, 81 deselected`
+3. `wctl run-pytest tests/nodir/test_projections.py tests/nodir/test_wepp_inputs.py` -> `30 passed`
+4. `wctl run-pytest tests/rq/test_wepp_rq_nodir.py tests/microservices/test_rq_engine_wepp_routes.py` -> `18 passed`
+5. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `40 files validated, 0 errors, 0 warnings`
+#### Phase 9B: Helper-Layer Projection Adoption (DONE, 2026-02-18)
+Deliverables (landed):
+- Extended `wepppy/nodir/wepp_inputs.py` with projection-aware path helper `with_input_file_path(...)` for path-heavy consumers that require filesystem paths.
+- Kept `materialize_input_file(...)` as explicit compatibility fallback (`allow_materialize_fallback=True`).
+- Added regression tests validating projection-first behavior and fallback controls in `tests/nodir/test_wepp_inputs.py`.
+
+Exit criteria status:
+- High-fanout WEPP read-path helpers can resolve via projected `WD/<root>` paths at helper layer: complete.
+- Archive-native browse/files/download behavior remains unchanged: complete.
+
+Phase 9B completion summary (2026-02-18):
+1. Added `with_input_file_path(...)` context manager that:
+   - resolves logical input paths via existing NoDir effective-read semantics,
+   - yields direct filesystem paths for non-NoDir/Dir form inputs,
+   - acquires read projection sessions for archive-form inputs,
+   - preserves canonical NoDir error semantics by default, and
+   - uses explicit per-file materialization fallback only when enabled.
+2. `materialize_input_file(...)` remains present and unchanged as the compatibility fallback path.
+3. Added tests for:
+   - projection-first archive path resolution (no cache-path default),
+   - projection-error fallback to materialization when explicitly enabled,
+   - projection-error canonical lock propagation when fallback is disabled.
+
+Validation evidence (Phase 9B gates):
+1. `wctl run-pytest tests/nodir/test_projections.py tests/nodir/test_wepp_inputs.py` -> `36 passed`
+2. `wctl run-pytest tests/nodb/test_wepp_nodir_read_paths.py` -> `14 passed`
+3. `wctl run-pytest tests/rq/test_wepp_rq_nodir.py tests/microservices/test_rq_engine_wepp_routes.py` -> `18 passed`
+4. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `41 files validated, 0 errors, 0 warnings`
+
+
+Phase 9B handoff summary (2026-02-18):
+1. Added helper-layer projection-first path context API in `wepppy/nodir/wepp_inputs.py` and kept explicit materialization fallback semantics.
+2. Added regression coverage for projection-first success, projection lock fallback control, explicit fallback gating, and canonical `409/500/503` propagation through `with_input_file_path(...)`.
+3. Completed Phase 9B-required validation gates with all green outcomes and docs lint clean.
+4. Phase 9B remains helper-layer scoped; broad WEPP/RQ consumer migration remains deferred to Phase 9C/9D per plan cut line.
 
 #### Phase 9C: Mutation Orchestration Contract Transition (Phase 6 Delta)
 Deliverables:

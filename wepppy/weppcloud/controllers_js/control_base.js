@@ -720,6 +720,13 @@ function controlBase() {
         return parsedSeconds * 1000;
     }
 
+    function shouldFailOpenOnJobStatusError(errorParts) {
+        if (!errorParts || errorParts.statusCode === undefined || errorParts.statusCode === null) {
+            return false;
+        }
+        return String(errorParts.statusCode).trim() === "502";
+    }
+
     return {
         command_btn_id: null,
         rq_job_id: null,
@@ -865,6 +872,9 @@ function controlBase() {
             }
 
             if (!self.rq_job_status || !self.rq_job_status.status) {
+                if (shouldFailOpenOnJobStatusError(self._job_status_error_parts)) {
+                    return false;
+                }
                 return true;
             }
 
@@ -1032,6 +1042,8 @@ function controlBase() {
             } else {
                 self.stop_job_status_polling(self);
             }
+
+            self.update_command_button_state(self);
         },
 
         render_job_status: function render_job_status(self) {
