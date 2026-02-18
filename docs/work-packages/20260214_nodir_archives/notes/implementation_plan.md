@@ -1165,3 +1165,11 @@ Completion criteria status:
 
 Operational outcomes:
 - No enqueue/dependency edge changes were introduced in this phase; `wepppy/rq/job-dependencies-catalog.md` remained unchanged.
+
+Phase 10C execution refresh (2026-02-18, post-valid-archive observed closure test):
+- `wctl run-pytest tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_debris_flow_routes.py tests/microservices/test_rq_engine_omni_routes.py` -> `55 passed, 3 warnings in 13.62s`.
+- `wctl run-pytest tests/rq/test_project_rq_debris_flow.py` -> `2 passed, 2 warnings in 10.31s`.
+- `wctl run-pytest tests/nodb/mods/test_treatments_build.py tests/nodb/mods/test_omni.py tests/nodb/mods/test_observed_processing.py` -> `46 passed, 5 warnings in 20.34s`.
+- `wctl run-pytest tests/weppcloud/routes/test_treatments_bp.py tests/weppcloud/routes/test_debris_flow_bp.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_observed_bp.py` -> `13 passed, 3 warnings in 9.05s`.
+- `wctl run-pytest tests --maxfail=1` -> `1649 passed, 27 skipped, 54 warnings in 333.13s`.
+- `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `52 files validated, 0 errors, 0 warnings`.
