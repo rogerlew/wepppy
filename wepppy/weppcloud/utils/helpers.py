@@ -632,11 +632,20 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
             return
         abort(403)
 
-    try:
-        if current_user.has_role("Admin") or current_user.has_role("Root"):
-            return
-    except Exception:
-        abort(403)
+    has_role = getattr(current_user, "has_role", None)
+    if callable(has_role):
+        try:
+            if has_role("Admin") or has_role("Root"):
+                return
+        except Exception:
+            # Keep explicit failure for authenticated users when role backends
+            # are broken; anonymous/public access should still evaluate run-level
+            # permissions below.
+            try:
+                if bool(getattr(current_user, "is_authenticated", False)):
+                    abort(403)
+            except Exception:
+                abort(403)
 
     auth_runid = _strip_omni_suffix_runid(runid)
 

@@ -16,8 +16,9 @@ pytestmark = pytest.mark.unit
 
 
 class DummyUser:
-    def __init__(self, roles: set[str] | None = None) -> None:
+    def __init__(self, roles: set[str] | None = None, *, is_authenticated: bool = True) -> None:
         self._roles = roles or set()
+        self.is_authenticated = is_authenticated
 
     def has_role(self, role: str) -> bool:
         return role in self._roles
@@ -111,8 +112,63 @@ def test_authorize_rejects_when_login_manager_missing(monkeypatch: pytest.Monkey
             helpers.authorize("decimal-pleasing", "cfg")
 
 
+def test_authorize_allows_public_runs_for_anonymous_user_without_role_backend(monkeypatch: pytest.MonkeyPatch) -> None:
+    class AnonymousUser:
+        is_authenticated = False
+
+    app = Flask(__name__)
+    app.login_manager = SimpleNamespace()
+
+    monkeypatch.setattr(flask_login, "current_user", AnonymousUser())
+    monkeypatch.setattr(helpers, "get_wd", lambda *_args, **_kwargs: "/tmp/decimal-pleasing")
+
+    import wepppy.weppcloud.app as app_module
+
+    monkeypatch.setattr(app_module, "get_run_owners", lambda *_args, **_kwargs: ["owner"])
+
+    class RonStub:
+        @staticmethod
+        def ispublic(_wd: str) -> bool:
+            return True
+
+    monkeypatch.setattr("wepppy.nodb.core.Ron", RonStub)
+
+    with app.test_request_context("/"):
+        helpers.authorize("decimal-pleasing", "cfg")
+
+
+def test_authorize_rejects_non_public_runs_for_anonymous_user_without_role_backend(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class AnonymousUser:
+        is_authenticated = False
+
+    app = Flask(__name__)
+    app.login_manager = SimpleNamespace()
+
+    monkeypatch.setattr(flask_login, "current_user", AnonymousUser())
+    monkeypatch.setattr(helpers, "get_wd", lambda *_args, **_kwargs: "/tmp/decimal-pleasing")
+
+    import wepppy.weppcloud.app as app_module
+
+    monkeypatch.setattr(app_module, "get_run_owners", lambda *_args, **_kwargs: ["owner"])
+
+    class RonStub:
+        @staticmethod
+        def ispublic(_wd: str) -> bool:
+            return False
+
+    monkeypatch.setattr("wepppy.nodb.core.Ron", RonStub)
+
+    with app.test_request_context("/"):
+        with pytest.raises(Forbidden):
+            helpers.authorize("decimal-pleasing", "cfg")
+
+
 def test_authorize_rejects_when_role_lookup_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     class BrokenUser:
+        is_authenticated = True
+
         def has_role(self, _role: str) -> bool:
             raise RuntimeError("broken role backend")
 

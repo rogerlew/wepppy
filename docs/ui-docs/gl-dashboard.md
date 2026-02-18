@@ -2,12 +2,13 @@
 > WebGL-accelerated geospatial dashboard for WEPPcloud runs using deck.gl, providing interactive maps, timeseries graphs, and multi-scenario comparison
 
 **Version:** 1.0  
-**Last Updated:** 2026-02-XX  
+**Last Updated:** 2026-02-18  
 **Status:** Production
 
 ## Table of Contents
 - [Overview](#overview)
 - [Architecture](#architecture)
+- [Access Control](#access-control)
 - [Component Map](#component-map)
 - [UI Structure](#ui-structure)
 - [Data Flow](#data-flow)
@@ -41,6 +42,14 @@ The GL Dashboard is a WebGL-powered visualization tool that provides real-time e
 - **Legends Panel:** Floating, collapsible panel showing active layer colormaps
 - **Omni Graph Integration:** Boxplot/bar chart visualizations for scenario + contrast analysis
 - **OpenET Yearly Graph:** Full-size ET graph with dataset radios + water year controls
+
+## Access Control
+
+- Route: `/runs/<runid>/<config>/gl-dashboard` uses shared `authorize()` checks.
+- Public runs (`PUBLIC` marker on disk; `Ron.ispublic(wd) == True`) are readable without ownership.
+- Non-public runs still require ownership or elevated role (`Admin`|`Root`).
+- Omni child slugs inherit parent run access policy because authorization resolves against the parent run id.
+
 
 ## Architecture
 
