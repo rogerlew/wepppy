@@ -888,6 +888,23 @@ Exit criteria:
 - Producer mutation flows still enforce root lock ordering and canonical error payloads.
 - No persistent unmanaged `WD/<root>/` directory state is introduced.
 
+
+Phase 9C completion summary (2026-02-18):
+1. Transitioned archive-form mutation orchestration in `wepppy/nodir/mutations.py` from thaw/freeze lifecycle to projection mutation sessions (`acquire mode=mutate -> callback -> commit|abort -> release`).
+2. Preserved Phase 6 mutation ownership map (`wepppy/rq/project_rq.py` mutation owners unchanged) and kept route-level wrappers/preflight behavior unchanged except for inherited orchestrator semantics.
+3. Preserved canonical lock ordering and NoDir error payload semantics by retaining sorted maintenance-lock acquisition and reusing projection contract errors.
+4. Added/updated mutation regression coverage in `tests/nodir/test_mutations.py` for projection commit success and callback-failure abort semantics (no persistent thawed root directory state).
+
+Validation evidence (Phase 9C gates):
+1. `wctl run-pytest tests/nodir/test_mutations.py tests/nodir/test_projections.py` -> `25 passed`
+2. `wctl run-pytest tests/microservices/test_rq_engine_watershed_routes.py tests/microservices/test_rq_engine_soils_routes.py tests/microservices/test_rq_engine_landuse_routes.py tests/microservices/test_rq_engine_climate_routes.py tests/microservices/test_rq_engine_upload_climate_routes.py` -> `32 passed`
+3. `wctl run-pytest tests/rq/test_bootstrap_autocommit_rq.py tests/rq/test_wepp_rq_nodir.py` -> `15 passed`
+4. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `42 files validated, 0 errors, 0 warnings`
+
+Completion criteria status:
+- Mutation orchestration contract is projection-session based for archive-form root mutations: complete.
+- Root mutation ownership map remains unchanged from Phase 6/9B: complete.
+- Canonical NoDir status/code behavior preserved in required gates: complete.
 #### Phase 9D: WEPP + RQ Consumer Migration
 Deliverables:
 - Migrate WEPP path-heavy stages to projection sessions where file paths are required:

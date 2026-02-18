@@ -67,16 +67,22 @@ def _write_zip(path: Path, entries: dict[str, bytes | str]) -> None:
             zf.writestr(name, data)
 
 
+def _patch_lock_clients(monkeypatch: pytest.MonkeyPatch, lock_stub: _RedisLockStub) -> None:
+    import wepppy.nodir.projections as projections_mod
+    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+
+    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    monkeypatch.setattr(projections_mod, "redis_lock_client", lock_stub)
+
+
 def test_mutate_root_dir_form_runs_callback_without_thaw(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     wd = tmp_path
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
     lock_stub = _RedisLockStub()
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    _patch_lock_clients(monkeypatch, lock_stub)
 
     called = {"value": False}
 
@@ -97,10 +103,8 @@ def test_mutate_root_dir_form_keeps_directory_without_default_marker(
 ) -> None:
     wd = tmp_path
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
     lock_stub = _RedisLockStub()
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    _patch_lock_clients(monkeypatch, lock_stub)
 
     def _callback() -> str:
         (wd / "watershed" / "hillslopes").mkdir(parents=True, exist_ok=True)
@@ -120,10 +124,8 @@ def test_mutate_root_default_archive_roots_freezes_dir_form(
 ) -> None:
     wd = tmp_path
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
     lock_stub = _RedisLockStub()
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    _patch_lock_clients(monkeypatch, lock_stub)
     enable_default_archive_roots(wd, roots=("watershed",))
 
     def _callback() -> str:
@@ -151,10 +153,8 @@ def test_mutate_root_default_archive_roots_skips_missing_dir(
 ) -> None:
     wd = tmp_path
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
     lock_stub = _RedisLockStub()
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    _patch_lock_clients(monkeypatch, lock_stub)
     enable_default_archive_roots(wd, roots=("watershed",))
 
     result = mutate_root(
@@ -176,10 +176,8 @@ def test_mutate_root_malformed_default_archive_marker_fails_fast(
 ) -> None:
     wd = tmp_path
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
     lock_stub = _RedisLockStub()
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    _patch_lock_clients(monkeypatch, lock_stub)
 
     marker_path = default_archive_roots_path(wd)
     marker_path.parent.mkdir(parents=True, exist_ok=True)
@@ -189,17 +187,15 @@ def test_mutate_root_malformed_default_archive_marker_fails_fast(
         mutate_root(wd, "watershed", lambda: None, purpose="test-default-marker-invalid")
 
 
-def test_mutate_root_archive_form_thaws_runs_and_freezes(
+def test_mutate_root_archive_form_uses_projection_commit(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     wd = tmp_path
     _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
     lock_stub = _RedisLockStub()
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    _patch_lock_clients(monkeypatch, lock_stub)
 
     def _callback() -> str:
         assert (wd / "watershed" / "hillslopes" / "h001.slp").exists()
@@ -214,23 +210,16 @@ def test_mutate_root_archive_form_thaws_runs_and_freezes(
     with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
         assert set(zf.namelist()) >= {"hillslopes/h001.slp", "hillslopes/h002.slp"}
 
-    state = read_state(wd, "watershed")
-    assert state is not None
-    assert state["state"] == "archived"
-    assert state["dirty"] is False
 
-
-def test_mutate_root_failure_after_thaw_preserves_thawed_state(
+def test_mutate_root_failure_aborts_projection_without_thawed_state(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     wd = tmp_path
     _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
     lock_stub = _RedisLockStub()
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    _patch_lock_clients(monkeypatch, lock_stub)
 
     def _callback() -> None:
         (wd / "watershed" / "hillslopes" / "h002.slp").write_text("beta", encoding="utf-8")
@@ -239,13 +228,14 @@ def test_mutate_root_failure_after_thaw_preserves_thawed_state(
     with pytest.raises(RuntimeError, match="boom"):
         mutate_root(wd, "watershed", _callback, purpose="test-failure")
 
-    assert (wd / "watershed").exists()
+    assert not (wd / "watershed").exists()
     assert (wd / "watershed.nodir").exists()
+    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+        names = set(zf.namelist())
+        assert "hillslopes/h001.slp" in names
+        assert "hillslopes/h002.slp" not in names
 
-    state = read_state(wd, "watershed")
-    assert state is not None
-    assert state["state"] == "thawed"
-    assert state["dirty"] is True
+    assert read_state(wd, "watershed") is None
 
 
 def test_mutate_root_mixed_state_fails_fast(
@@ -256,9 +246,8 @@ def test_mutate_root_mixed_state_fails_fast(
     (wd / "watershed").mkdir(parents=True, exist_ok=False)
     _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", _RedisLockStub())
+    lock_stub = _RedisLockStub()
+    _patch_lock_clients(monkeypatch, lock_stub)
 
     with pytest.raises(NoDirError) as exc:
         mutate_root(wd, "watershed", lambda: None, purpose="test-mixed")
@@ -275,10 +264,8 @@ def test_mutate_roots_acquires_locks_in_sorted_order(
     _write_zip(wd / "landuse.nodir", {"nlcd.tif": "a"})
     _write_zip(wd / "soils.nodir", {"soilscov.asc": "b"})
 
-    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
-
     lock_stub = _RedisLockStub()
-    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", lock_stub)
+    _patch_lock_clients(monkeypatch, lock_stub)
 
     def _callback() -> str:
         (wd / "landuse" / "new.txt").write_text("x", encoding="utf-8")

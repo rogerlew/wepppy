@@ -11,7 +11,14 @@ from typing import Callable, Iterable, TypeVar
 
 from .fs import resolve
 from .paths import NODIR_ROOTS, NoDirRoot
-from .thaw_freeze import NoDirMaintenanceLock, freeze_locked, maintenance_lock, thaw_locked
+from .projections import (
+    ProjectionHandle,
+    abort_mutation_projection,
+    acquire_root_projection,
+    commit_mutation_projection,
+    release_root_projection,
+)
+from .thaw_freeze import NoDirMaintenanceLock, freeze_locked, maintenance_lock
 
 __all__ = [
     "default_archive_roots_path",
@@ -147,13 +154,13 @@ def mutate_roots(
     *,
     purpose: str = "nodir-mutation",
 ) -> T:
-    """Run ``callback`` with canonical NoDir lock/thaw/freeze orchestration.
+    """Run ``callback`` with canonical NoDir lock + mutation-session orchestration.
 
     Behavior:
     - Mixed/invalid/transitional states fail with canonical NoDir errors.
     - NoDir maintenance locks are held around callback execution.
-    - Archive roots are thawed before callback and frozen after successful callback.
-    - Callback failures after thaw preserve thawed/dirty state (no implicit freeze).
+    - Archive roots are projected in ``mode="mutate"`` before callback and committed on success.
+    - Callback failures abort active mutation projections (no implicit archive commit).
     """
 
     wd_path = Path(os.path.abspath(str(wd)))
@@ -174,39 +181,54 @@ def mutate_roots(
         # Re-check after lock acquisition so form decisions are race-safe.
         forms = preflight_root_forms(wd_path, normalized_roots)
 
-        thawed: list[NoDirRoot] = []
+        mutation_sessions: list[tuple[NoDirRoot, ProjectionHandle]] = []
         freeze_after_callback: list[NoDirRoot] = []
         for root in normalized_roots:
+            mutation_purpose = purpose if len(normalized_roots) == 1 else f"{purpose}/{root}"
             if forms[root] == "archive":
-                thaw_locked(wd_path, root, lock=locks[root])
-                thawed.append(root)
+                handle = acquire_root_projection(
+                    wd_path,
+                    root,
+                    mode="mutate",
+                    purpose=mutation_purpose,
+                )
+                mutation_sessions.append((root, handle))
             elif root in default_archive_roots:
                 freeze_after_callback.append(root)
 
         try:
             result = callback()
         except Exception:
+            for _root, handle in reversed(mutation_sessions):
+                try:
+                    abort_mutation_projection(handle)
+                except Exception:
+                    # Preserve original callback failure; release still runs in finally.
+                    pass
             raise
+        else:
+            for _root, handle in reversed(mutation_sessions):
+                commit_mutation_projection(handle)
 
-        for root in reversed(thawed):
-            freeze_locked(wd_path, root, lock=locks[root])
+            # New-run default NoDir policy: directory-form roots configured via
+            # marker are archived after successful mutation callbacks.
+            for root in reversed(freeze_after_callback):
+                target = resolve(str(wd_path), root, view="effective")
+                if target is None or target.form == "archive":
+                    continue
 
-        # New-run default NoDir policy: directory-form roots configured via
-        # marker are archived after successful mutation callbacks.
-        for root in reversed(freeze_after_callback):
-            target = resolve(str(wd_path), root, view="effective")
-            if target is None or target.form == "archive":
-                continue
+                # Effective view can still report dir form when the root path is
+                # absent (no archive + no directory). Only auto-freeze when an
+                # actual directory-form root is present.
+                if resolve(str(wd_path), root, view="dir") is None:
+                    continue
 
-            # Effective view can still report dir form when the root path is
-            # absent (no archive + no directory). Only auto-freeze when an
-            # actual directory-form root is present.
-            if resolve(str(wd_path), root, view="dir") is None:
-                continue
+                freeze_locked(wd_path, root, lock=locks[root])
 
-            freeze_locked(wd_path, root, lock=locks[root])
-
-        return result
+            return result
+        finally:
+            for _root, handle in reversed(mutation_sessions):
+                release_root_projection(handle)
 
 
 def mutate_root(
