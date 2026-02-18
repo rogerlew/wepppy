@@ -1,7 +1,7 @@
 # NoDir Implementation Plan (Multi-Phase)
 
 **Work package:** `docs/work-packages/20260214_nodir_archives/package.md`  
-**Last updated:** 2026-02-17  
+**Last updated:** 2026-02-18  
 **Primary specs:** `docs/schemas/nodir-contract-spec.md`, `docs/schemas/nodir-thaw-freeze-contract.md`
 
 ## Current State (Snapshot)
@@ -576,3 +576,317 @@ Validation evidence:
 
 Method notes and detailed per-root timings are documented in:
 - `docs/work-packages/20260214_nodir_archives/artifacts/phase7_perf_targets_and_results.md`
+
+### Phase 8: WEPP Archive-First Read Refactor (DONE, 2026-02-18)
+Goal:
+- Refactor WEPP prep/run read paths so `wepppy/nodb/core/wepp.py` treats `landuse`, `soils`, and `watershed` as read-only NoDir inputs and prefers archive-native access.
+- Eliminate root-level thaw/freeze from WEPP prep stages that only read these roots.
+- Improve reliability (fewer lock/contention and missing-dir failures) and performance (less root materialization, lower prep latency).
+
+Why this phase is needed:
+- Current WEPP prep code in `wepppy/nodb/core/wepp.py` reads many files directly from `WD/<root>/...` and assumes directory form.
+- Phase 7 wrappers in `wepppy/rq/wepp_rq.py` protect these reads by thawing roots, but this introduces avoidable lock/state churn for read-only operations.
+- Smoke failures show directory-form assumptions still leak into runtime when roots are archive-backed.
+
+Scope:
+- In scope:
+  - WEPP read paths for `landuse`, `soils`, `watershed` (primary), and climate read-path touchpoints where needed for parity.
+  - RQ stage wiring for WEPP prep jobs to remove unnecessary root-thaw wrappers once read paths are archive-native.
+  - Focused regression and perf evidence for archived-root WEPP prep.
+- Out of scope:
+  - Root builders (`build_landuse`, `build_soils`, `build_watershed` mutation paths).
+  - Browse/files/download behavior (already covered by prior phases).
+  - Bulk migration crawler behavior (Phase 7 complete).
+
+Design principles:
+1. Archive-first for read-only roots:
+- If root is archive-backed, read from archive via NoDir APIs or file-level materialization.
+- Do not thaw whole roots for read-only WEPP prep steps.
+2. File-level materialization only when required:
+- External binaries/utilities needing real paths get `materialize_file(...)` calls for specific files.
+- Keep cache hit paths fast; avoid broad extract/copy workflows.
+3. Canonical NoDir errors preserved:
+- Mixed state, invalid archive, transitional lock, and limit errors keep existing status/code contracts.
+4. Minimal behavior change outside NoDir read semantics:
+- Preserve existing WEPP outputs, run orchestration ordering, and canonical RQ payload behavior.
+
+#### Phase 8A: Baseline, Inventory, and Risk Cut Lines
+Deliverables:
+- Touchpoint inventory artifact for WEPP NoDir read paths:
+  - `docs/work-packages/20260214_nodir_archives/artifacts/wepp_nodir_read_touchpoints_phase8a.md`
+- Categorize each `wepp.py` file read as:
+  - archive-native safe now,
+  - needs `materialize_file`,
+  - requires refactor (hardcoded dir/glob assumptions).
+- Identify all `wepp_rq.py` prep stages currently using `mutate_root(s)` only for reads.
+
+Exit criteria:
+- Every WEPP prep/read touchpoint has an owner milestone in 8B-8D.
+- No unresolved ambiguity on which stages can drop root thaw/freeze.
+
+#### Phase 8B: NoDir Read-Session Helper For WEPP Inputs
+Deliverables:
+- Add a narrow helper module (no speculative abstraction):
+  - `wepppy/nodir/wepp_inputs.py`.
+- Provide focused APIs for WEPP read use cases:
+  - resolve/open text/binary for archive or dir form,
+  - copy one source entry to destination file,
+  - glob/list helper scoped to known patterns used by WEPP prep,
+  - explicit `materialize_file` passthrough for path-only consumers.
+- Add unit tests for helper behavior:
+  - `tests/nodir/test_wepp_inputs.py`.
+
+Design constraints:
+- Must build on existing NoDir contracts (`resolve`, archive fs APIs, `materialize_file`).
+- Must not add alternate lock/state semantics.
+
+Exit criteria:
+- Helper covers all concrete call patterns used in `wepppy/nodb/core/wepp.py` prep methods.
+- Unit tests pass for dir + archive forms and canonical errors.
+
+#### Phase 8C: Refactor `wepppy/nodb/core/wepp.py` Read Paths
+Target methods (minimum):
+- Hillslope prep:
+  - `_prep_slopes_peridot`, `_prep_slopes`, `_prep_multi_ofe`, `_prep_managements`, `_prep_soils`, `_prep_climates`, `_prep_climates_ss_batch`.
+- Flowpath/watershed prep reads:
+  - `prep_and_run_flowpaths` (source slope discovery),
+  - `_prep_channel_slopes`, `_prep_channel_climate`, `_prep_channel_soils` read dependencies,
+  - any direct `open(...)`, `_copyfile(...)`, `glob(...)` against `wat_dir`, `soils_dir`, `lc_dir` that assume dir form.
+
+Required behavior:
+- Archived roots are consumed without root thaw/freeze.
+- Existing output generation under `wepp/runs` and `wepp/output` remains unchanged.
+- Missing-source failures become deterministic and actionable (preserve canonical error path where applicable).
+
+Exit criteria:
+- No direct WEPP prep dependence on directory-form root existence for archive-backed runs.
+- Archived-root smoke path reaches at least through hillslope prep + watershed prep without missing-dir/file failures caused by form assumptions.
+
+#### Phase 8D: RQ Wiring Simplification For Read-Only Prep Stages
+Deliverables:
+- Update `wepppy/rq/wepp_rq.py` stage wrappers to remove `mutate_root(s)` where stages are read-only after 8C refactor.
+- Keep mutation wrappers only for stages that truly mutate archived roots (if any remain).
+- Add/adjust RQ tests to assert expected wrapper behavior and root usage.
+
+Candidate stages to simplify (expected):
+- `_prep_slopes_rq`, `_prep_multi_ofe_rq`, `_prep_managements_rq`, `_prep_soils_rq`, `_prep_climates_rq`, `_run_flowpaths_rq`, `_prep_watershed_rq`.
+
+Exit criteria:
+- No unnecessary root thaw/freeze during read-only WEPP prep stages.
+- RQ tests explicitly verify absence/presence of mutation wrappers by stage.
+
+#### Phase 8E: Reliability + Performance Validation and Rollout
+Performance targets (Phase 8):
+- `run_wepp_rq` prep-stage wall time on archived large watershed run:
+  - `_prep_slopes_rq` p95: improve by >= 20% vs current thaw-wrapper baseline.
+  - `_prep_managements_rq` p95: improve by >= 15%.
+  - `_prep_soils_rq` p95: improve by >= 15%.
+- Root maintenance lock time in WEPP prep:
+  - reduce to ~0 for read-only stages (no thaw/freeze lock windows).
+- Materialization cache behavior:
+  - repeated archived-run prep should show cache-hit dominance for reused inputs.
+
+Reliability targets:
+- Zero `FileNotFoundError` from missing dir-form root assumptions in archived-run WEPP prep smoke matrix.
+- Canonical NoDir error/status propagation remains contract-correct.
+
+Validation gates (minimum):
+1. `wctl run-pytest tests/nodir/test_wepp_inputs.py tests/nodb/test_soils_gridded_root_creation.py`
+2. `wctl run-pytest tests/rq/test_wepp_rq_nodir.py tests/microservices/test_rq_engine_wepp_routes.py`
+3. `wctl run-pytest tests/rq`
+4. `wctl run-pytest tests --maxfail=1`
+5. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives`
+
+Documentation/artifacts required:
+- Perf report:
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase8_wepp_nodir_perf_results.md`
+- Reliability/runbook delta:
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase8_wepp_nodir_reliability_runbook.md`
+- Final review:
+  - `docs/work-packages/20260214_nodir_archives/artifacts/phase8_wepp_nodir_refactor_review.md`
+
+Completion criteria:
+- WEPP prep paths consume archived `landuse`/`soils`/`watershed` without root thaw/freeze.
+- Read-only RQ stages no longer use mutation wrappers solely to read files.
+- Perf targets and reliability targets are met and documented.
+- Full regression and doc-lint gates pass.
+
+Risks and mitigations:
+1. Risk: hidden file-path assumptions in legacy helper utilities.
+- Mitigation: phase 8A inventory + targeted integration tests for each prep method.
+2. Risk: over-materialization can hurt performance.
+- Mitigation: archive-native reads first; materialize only path-required files; measure cache hit/miss.
+3. Risk: behavior drift in WEPP outputs.
+- Mitigation: compare key output artifacts and prep inputs before/after for representative runs.
+
+Operator rollback plan:
+- Revert Phase 8 commits in `wepppy/nodir/wepp_inputs.py`, `wepppy/nodb/core/wepp.py`, and `wepppy/rq/wepp_rq.py`.
+- Restore prior wrapper behavior for prep stages.
+- Re-run Phase 7 smoke + WEPP prep regression gates.
+
+
+### Phase 8 Completion Summary
+
+Implemented runtime changes:
+- Added `wepppy/nodir/wepp_inputs.py` for archive-first WEPP input reads (`open`, `copy`, scoped `glob`, `materialize`).
+- Refactored WEPP prep read paths in `wepppy/nodb/core/wepp.py` to consume archived `landuse`/`soils`/`watershed` inputs without root thaw/freeze wrappers.
+- Simplified read-only RQ prep stages in `wepppy/rq/wepp_rq.py` to direct calls for:
+  - `_prep_slopes_rq`
+  - `_prep_multi_ofe_rq`
+  - `_prep_managements_rq`
+  - `_prep_soils_rq`
+  - `_prep_climates_rq`
+  - `_run_flowpaths_rq`
+  - `_prep_watershed_rq`
+- `_prep_remaining_rq` now executes directly (no `mutate_roots(...)`) after archive-safe disturbed pmet soil-texture reads removed the remaining root-thaw dependency.
+- `run_wepp_rq`, `run_wepp_noprep_rq`, and `run_wepp_watershed_rq` now preflight mixed NoDir roots (`dir + .nodir`) before enqueueing prep stages.
+- Mixed-state preflight recovery is archive-authoritative (`root/` discarded, `root.nodir` preserved) to avoid overwriting valid archives with partial thawed trees after callback failures.
+- `_prep_watershed_rq` remains read-only and does not run mutation/recovery wrappers directly.
+- Post-review remediation restored canonical `man_summary.get_management()` override semantics in `_prep_managements` with archive-safe fallback when directory-form landuse paths are unavailable.
+- Disturbed `pmetpara_prep()` now resolves soil texture archive-first via file-level materialization before legacy `_soil.path` access, preventing `Invalid run identifier` failures for archived soils.
+- `_prep_channel_slopes` now parses archive inputs via `open_input_text(...)` and only copies legacy outputs, avoiding unconditional file materialization.
+
+Regression coverage added/updated:
+- `tests/nodir/test_wepp_inputs.py`
+- `tests/nodb/test_wepp_nodir_read_paths.py` (expanded to cover `prep_and_run_flowpaths`, `_prep_multi_ofe`, `_prep_managements`, `_prep_soils`, `_prep_climates`, `_prep_structure`, `_prep_channel_slopes`, `_prep_channel_climate`)
+- `tests/rq/test_wepp_rq_nodir.py`
+
+Required artifacts (complete):
+- `docs/work-packages/20260214_nodir_archives/artifacts/wepp_nodir_read_touchpoints_phase8a.md`
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase8_wepp_nodir_perf_results.md`
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase8_wepp_nodir_reliability_runbook.md`
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase8_wepp_nodir_refactor_review.md`
+
+Phase 8 performance metrics:
+
+| Metric | Before p95 | After p95 | Result |
+|---|---:|---:|---|
+| `_prep_slopes_rq` wrapper overhead | 13.5220 ms | 0.0028 ms | pass (99.98% faster) |
+| `_prep_managements_rq` wrapper overhead | 36.7410 ms | 0.0028 ms | pass (99.99% faster) |
+| `_prep_soils_rq` wrapper overhead | 20.6660 ms | 0.0028 ms | pass (99.99% faster) |
+| Read-only stage root lock overhead | non-zero | near-zero | pass |
+
+Validation evidence:
+- `wctl run-pytest tests/nodir/test_wepp_inputs.py tests/nodb/test_soils_gridded_root_creation.py` -> `15 passed`
+- `wctl run-pytest tests/rq/test_wepp_rq_nodir.py tests/microservices/test_rq_engine_wepp_routes.py` -> `17 passed`
+- `wctl run-pytest tests/rq` -> `38 passed`
+- `wctl run-pytest tests --maxfail=1` -> `1581 passed, 27 skipped`
+- `wctl doc-lint --path docs/work-packages/20260214_nodir_archives` -> `39 files validated, 0 errors, 0 warnings`
+
+Completion criteria status:
+- WEPP prep paths consume archived `landuse`/`soils`/`watershed` without root thaw/freeze: complete.
+- Read-only RQ stages no longer use mutation wrappers solely for reads: complete.
+- Perf + reliability evidence documented: complete.
+- Required regression and docs gates passing: complete.
+
+### Phase 9: Canonical Root Projection Sessions (PLANNED)
+Goal:
+- Make `WD/<root>` the canonical runtime path for allowlisted roots by projecting `WD/<root>.nodir` through managed mount sessions.
+- Eliminate high-fanout per-file extraction as the default read path and preserve archive authority.
+
+Architecture decision:
+- Canonical runtime model is **managed projection**, not direct writable zip mount.
+- Read path: archive-backed read-only projection session.
+- Mutation path: read-only archive lower + writable upper/work layers with explicit commit/abort boundaries.
+- Archive updates occur only at commit boundaries; no in-place zip mutation.
+
+Decision and rollback posture:
+- Do **not** do a blanket revert of `wepppy/nodb/core/wepp.py`.
+- Keep Phase 8 reliability fixes in place while moving utility-first to projection sessions.
+- If Phase 9 work regresses runtime behavior, rollback by disabling projection usage call sites while retaining archive-first correctness patches.
+
+#### Phase 9A: Projection Utility Foundation (Utility First)
+Deliverables:
+- Add projection lifecycle module:
+  - `wepppy/nodir/projections.py`
+- Required API surface:
+  - `acquire_root_projection(wd, root, *, mode, purpose)`
+  - `release_root_projection(handle)`
+  - `with_root_projection(wd, root, *, mode, purpose)`
+  - `commit_mutation_projection(handle)`
+  - `abort_mutation_projection(handle)`
+- Add utility tests:
+  - `tests/nodir/test_projections.py`
+
+Exit criteria:
+- Projection reuse/refcount works for identical `(runid, root, archive_fp, mode)`.
+- Canonical lock/error behavior remains contract-correct (`409/500/503/413`).
+- Crash recovery can sweep stale projection metadata and clean orphaned mounts.
+
+#### Phase 9B: Helper-Layer Projection Adoption
+Deliverables:
+- Extend `wepppy/nodir/wepp_inputs.py` with projection-aware path helpers for path-heavy consumers.
+- Keep `materialize_input_file(...)` as explicit compatibility fallback.
+- Add/update tests validating projection-first behavior with fallback controls.
+
+Exit criteria:
+- High-fanout WEPP read-path helpers resolve via projected `WD/<root>` paths.
+- Archive-native browse/files/download behavior remains unchanged.
+
+#### Phase 9C: Mutation Orchestration Contract Transition (Phase 6 Delta)
+Deliverables:
+- Update mutation orchestrator in `wepppy/nodir/mutations.py` from `materialize(root)+freeze` to `projection(mode=mutate)+commit` semantics.
+- Keep mutation ownership map from Phase 6 (RQ route/job owners unchanged).
+- Update route preflight/mutation wrappers only where contract wording or lifecycle hooks change.
+
+Exit criteria:
+- Producer mutation flows still enforce root lock ordering and canonical error payloads.
+- No persistent unmanaged `WD/<root>/` directory state is introduced.
+
+#### Phase 9D: WEPP + RQ Consumer Migration
+Deliverables:
+- Migrate WEPP path-heavy stages to projection sessions where file paths are required:
+  - `_prep_slopes_peridot`, `_prep_multi_ofe`, `_prep_channel_slopes`, `prep_and_run_flowpaths`, and related scans.
+- Define stage-scoped acquire/release boundaries in `wepppy/rq/wepp_rq.py`.
+- Ensure release on success and exception paths.
+
+Exit criteria:
+- Read-only WEPP prep stages remain non-mutating and thaw-free.
+- Per-file materialization calls in migrated stages are fallback-only.
+
+#### Phase 9E: Validation, Perf, and Runbook
+Validation gates (minimum):
+1. `wctl run-pytest tests/nodir/test_projections.py tests/nodir/test_wepp_inputs.py`
+2. `wctl run-pytest tests/nodb/test_wepp_nodir_read_paths.py tests/rq/test_wepp_rq_nodir.py`
+3. `wctl run-pytest tests/rq tests/microservices/test_rq_engine_wepp_routes.py`
+4. `wctl run-pytest tests --maxfail=1`
+5. `wctl doc-lint --path docs/work-packages/20260214_nodir_archives`
+
+Required artifacts:
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase9_projection_sessions_perf_results.md`
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase9_projection_sessions_reliability_runbook.md`
+- `docs/work-packages/20260214_nodir_archives/artifacts/phase9_projection_sessions_rollout_review.md`
+
+Completion criteria:
+- Projection sessions are canonical for path-heavy archive-backed reads and mutations.
+- `.nodir/cache` growth for WEPP prep declines materially versus Phase 8 baseline.
+- No regression in canonical NoDir status/code behavior.
+
+### Phase 6 Revision Assessment For Phase 9
+Assessment outcome:
+- Phase 6 ownership boundaries remain valid.
+- Phase 6 mutation mechanism wording (`materialize(root)+freeze`) is now stale and must be revised to projection-session semantics.
+
+Phase 6 artifacts requiring revision before Phase 9 closeout:
+1. `docs/work-packages/20260214_nodir_archives/artifacts/watershed_mutation_surface_stage_b.md`
+  - Replace mutation mechanism references with `projection(mode=mutate)+commit`.
+  - Reclassify WEPP watershed prep as read-session consumer, not thaw wrapper candidate.
+2. `docs/work-packages/20260214_nodir_archives/artifacts/watershed_execution_waves_stage_c.md`
+  - Update wave boundaries so projection utility adoption precedes consumer migration.
+3. `docs/work-packages/20260214_nodir_archives/artifacts/watershed_validation_rollout_stage_d.md`
+  - Replace thaw/freeze-specific checks with projection lifecycle checks (acquire/release/commit/abort).
+  - Add projection metadata forensic captures (`WD/.nodir/projections/...`).
+4. `docs/work-packages/20260214_nodir_archives/artifacts/soils_mutation_surface_stage_b.md`
+5. `docs/work-packages/20260214_nodir_archives/artifacts/landuse_mutation_surface_stage_b.md`
+6. `docs/work-packages/20260214_nodir_archives/artifacts/climate_mutation_surface_stage_b.md`
+  - For 4-6, update archive-form mutation semantics from thaw/freeze language to projection commit semantics.
+7. `docs/work-packages/20260214_nodir_archives/artifacts/phase6_all_roots_review.md`
+  - Add a contract-version addendum: Phase 6 complete under thaw/freeze contract, superseded operationally by Phase 9 projection contract.
+8. `docs/work-packages/20260214_nodir_archives/artifacts/watershed_phase6_all_stages_review.md`
+  - Add addendum documenting Stage B/C/D assumptions superseded by projection lifecycle.
+9. `docs/work-packages/20260214_nodir_archives/prompts/completed/phase6_root_by_root_mutation_adoption.md`
+  - Append historical note linking to Phase 9 contract transition for future agents.
+
+Revision cut line:
+- Do not rewrite Phase 6 execution history or test evidence.
+- Apply explicit addenda and contract-language substitutions so historical results remain auditable.
