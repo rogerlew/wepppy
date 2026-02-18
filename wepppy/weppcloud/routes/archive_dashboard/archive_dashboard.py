@@ -6,10 +6,15 @@ import zipfile
 from datetime import datetime
 from glob import glob
 
+import redis
+
 from flask import Blueprint, jsonify, render_template
 from flask_login import login_required
 from flask_security import current_user
+from rq.exceptions import NoSuchJobError
+from rq.job import Job
 
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.weppcloud.utils.helpers import authorize, exception_factory, url_for_run
 
@@ -17,6 +22,32 @@ from .._run_context import load_run_context
 
 
 archive_bp = Blueprint('archive', __name__, template_folder='templates')
+
+
+_RUNNING_ARCHIVE_JOB_STATUSES = {'queued', 'started', 'deferred', 'scheduled'}
+
+
+def _resolve_archive_job_state(prep: RedisPrep) -> tuple[bool, str | None]:
+    archive_job_id = prep.get_archive_job_id()
+    if not archive_job_id:
+        return False, None
+
+    status = None
+    try:
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            job = Job.fetch(archive_job_id, connection=redis_conn)
+            status = job.get_status(refresh=True)
+    except NoSuchJobError:
+        status = None
+    except Exception:
+        return True, archive_job_id
+
+    if status in _RUNNING_ARCHIVE_JOB_STATUSES:
+        return True, archive_job_id
+
+    prep.clear_archive_job_id()
+    return False, None
 
 
 @archive_bp.route('/runs/<string:runid>/<string:config>/rq-archive-dashboard', strict_slashes=False)
@@ -72,11 +103,11 @@ def rq_archive_list(runid, config):
             })
 
         prep = RedisPrep.getInstance(wd)
-        archive_job_id = prep.get_archive_job_id()
+        in_progress, archive_job_id = _resolve_archive_job_state(prep)
 
         return jsonify({
             'archives': entries,
-            'in_progress': archive_job_id is not None,
+            'in_progress': in_progress,
             'job_id': archive_job_id,
         })
     except Exception as e:

@@ -10,6 +10,7 @@ import redis
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
+from rq.exceptions import NoSuchJobError
 from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
@@ -53,6 +54,37 @@ def has_archive(runid: str) -> bool:
     for entry in os.scandir(archives_dir):
         if entry.is_file() and entry.name.endswith(".zip"):
             return True
+    return False
+
+
+_RUNNING_ARCHIVE_JOB_STATUSES = {"queued", "started", "deferred", "scheduled"}
+_ARCHIVE_JOB_STATUS_ERROR = "__status_lookup_error__"
+
+
+def _archive_job_status(job_id: str) -> str | None:
+    try:
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            job = Job.fetch(job_id, connection=redis_conn)
+            return job.get_status(refresh=True)
+    except NoSuchJobError:
+        return None
+    except Exception:
+        return _ARCHIVE_JOB_STATUS_ERROR
+
+
+def _archive_job_in_progress(prep: Any) -> bool:
+    existing_job_id = prep.get_archive_job_id()
+    if not existing_job_id:
+        return False
+
+    status = _archive_job_status(existing_job_id)
+    if status in _RUNNING_ARCHIVE_JOB_STATUSES:
+        return True
+    if status == _ARCHIVE_JOB_STATUS_ERROR:
+        return True
+
+    prep.clear_archive_job_id()
     return False
 
 
@@ -437,23 +469,11 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
             )
 
         prep = RedisPrep.getInstance(wd)
-        existing_job_id = prep.get_archive_job_id()
-        if existing_job_id:
-            status = None
-            try:
-                conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-                with redis.Redis(**conn_kwargs) as redis_conn:
-                    job = Job.fetch(existing_job_id, connection=redis_conn)
-                    status = job.get_status(refresh=True)
-            except Exception:
-                status = None
-
-            if status in {"queued", "started", "deferred"}:
-                return error_response(
-                    "An archive job is already running for this project",
-                    status_code=400,
-                )
-            prep.clear_archive_job_id()
+        if _archive_job_in_progress(prep):
+            return error_response(
+                "An archive job is already running for this project",
+                status_code=400,
+            )
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
@@ -520,23 +540,11 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
             return error_response(f"Archive {archive_name} not found", status_code=404)
 
         prep = RedisPrep.getInstance(wd)
-        existing_job_id = prep.get_archive_job_id()
-        if existing_job_id:
-            status = None
-            try:
-                conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-                with redis.Redis(**conn_kwargs) as redis_conn:
-                    job = Job.fetch(existing_job_id, connection=redis_conn)
-                    status = job.get_status(refresh=True)
-            except Exception:
-                status = None
-
-            if status in {"queued", "started", "deferred"}:
-                return error_response(
-                    "An archive job is already running for this project",
-                    status_code=400,
-                )
-            prep.clear_archive_job_id()
+        if _archive_job_in_progress(prep):
+            return error_response(
+                "An archive job is already running for this project",
+                status_code=400,
+            )
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
@@ -611,23 +619,11 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
             return error_response(f"Archive {archive_name} not found", status_code=404)
 
         prep = RedisPrep.getInstance(wd)
-        existing_job_id = prep.get_archive_job_id()
-        if existing_job_id:
-            status = None
-            try:
-                conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-                with redis.Redis(**conn_kwargs) as redis_conn:
-                    job = Job.fetch(existing_job_id, connection=redis_conn)
-                    status = job.get_status(refresh=True)
-            except Exception:
-                status = None
-
-            if status in {"queued", "started", "deferred"}:
-                return error_response(
-                    "An archive job is already running for this project",
-                    status_code=400,
-                )
-            prep.clear_archive_job_id()
+        if _archive_job_in_progress(prep):
+            return error_response(
+                "An archive job is already running for this project",
+                status_code=400,
+            )
 
         os.remove(archive_path)
         StatusMessenger.publish(f"{runid}:archive", f"Archive deleted: {archive_name}")

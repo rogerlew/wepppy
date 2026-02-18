@@ -1,6 +1,7 @@
 import contextlib
 
 import pytest
+from rq.exceptions import NoSuchJobError
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -38,21 +39,32 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
     monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **kwargs: DummyRedis())
 
 
-def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
+def _stub_prep(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    archive_job_id: str | None = None,
+):
     class DummyPrep:
+        def __init__(self) -> None:
+            self.archive_job_id = archive_job_id
+            self.clear_calls = 0
+
         def set_rq_job_id(self, *args, **kwargs) -> None:
             return None
 
         def get_archive_job_id(self) -> str | None:
-            return None
+            return self.archive_job_id
 
-        def set_archive_job_id(self, *args, **kwargs) -> None:
-            return None
+        def set_archive_job_id(self, job_id: str, *args, **kwargs) -> None:
+            self.archive_job_id = job_id
 
         def clear_archive_job_id(self) -> None:
-            return None
+            self.clear_calls += 1
+            self.archive_job_id = None
 
-    monkeypatch.setattr(fork_archive_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+    prep = DummyPrep()
+    monkeypatch.setattr(fork_archive_routes.RedisPrep, "getInstance", lambda wd: prep)
+    return prep
 
 
 class _DummyUserQuery:
@@ -693,3 +705,140 @@ def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None
     assert response.status_code == 200
     payload = response.json()
     assert payload["job_id"] == "job-99"
+
+
+def test_archive_clears_stale_job_id_when_lookup_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
+    monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda *args, **kwargs: (_ for _ in ()).throw(NoSuchJobError("missing")))
+
+    _stub_queue(monkeypatch, job_id="job-100")
+    prep = _stub_prep(monkeypatch, archive_job_id="stale-job")
+    monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/archive",
+            headers={"Authorization": "Bearer token"},
+            json={"comment": "demo"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["job_id"] == "job-100"
+    assert prep.clear_calls == 1
+    assert prep.archive_job_id == "job-100"
+
+
+def test_archive_returns_conflict_when_existing_job_is_running(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
+
+    class RunningJob:
+        def get_status(self, refresh: bool = False):
+            return "started"
+
+    monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda *args, **kwargs: RunningJob())
+
+    _stub_queue(monkeypatch, job_id="job-unused")
+    prep = _stub_prep(monkeypatch, archive_job_id="active-job")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/archive",
+            headers={"Authorization": "Bearer token"},
+            json={"comment": "demo"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "An archive job is already running for this project"
+    assert prep.clear_calls == 0
+    assert prep.archive_job_id == "active-job"
+
+
+def test_archive_preserves_job_id_when_status_lookup_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
+    monkeypatch.setattr(
+        fork_archive_routes.Job,
+        "fetch",
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("redis unavailable")),
+    )
+
+    _stub_queue(monkeypatch, job_id="job-unused")
+    prep = _stub_prep(monkeypatch, archive_job_id="active-job")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/archive",
+            headers={"Authorization": "Bearer token"},
+            json={"comment": "demo"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "An archive job is already running for this project"
+    assert prep.clear_calls == 0
+    assert prep.archive_job_id == "active-job"
+
+
+def test_restore_clears_stale_job_id_before_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    archives_dir = run_dir / "archives"
+    archives_dir.mkdir(parents=True)
+    (archives_dir / "snapshot.zip").write_bytes(b"PK\x05\x06" + (b"\x00" * 18))
+
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
+    monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda *args, **kwargs: (_ for _ in ()).throw(NoSuchJobError("missing")))
+
+    _stub_queue(monkeypatch, job_id="job-restore")
+    prep = _stub_prep(monkeypatch, archive_job_id="stale-restore")
+    monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/restore-archive",
+            headers={"Authorization": "Bearer token"},
+            json={"archive_name": "snapshot.zip"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["job_id"] == "job-restore"
+    assert prep.clear_calls == 1
+    assert prep.archive_job_id == "job-restore"

@@ -40,7 +40,7 @@ from wepppy.config.redis_settings import (
 
 from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 
-from wepppy.nodb.base import clear_locks, clear_nodb_file_cache
+from wepppy.nodb.base import clear_locks, clear_nodb_file_cache, lock_statuses
 from wepppy.nodir.mutations import mutate_root, mutate_roots
 from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.nodb.core import *
@@ -1577,6 +1577,109 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
 
 # Archive Backend Functions
 # see docs/ui-docs/weppcloud-project-archiving.md for archive architecture
+_ARCHIVE_DISK_HEADROOM_RATIO = 0.02
+_ARCHIVE_MIN_HEADROOM_BYTES = 64 * 1024 * 1024
+_ARCHIVE_PER_FILE_OVERHEAD_BYTES = 1024
+
+
+def _estimate_archive_required_bytes(payload_bytes: int, file_count: int) -> int:
+    headroom = max(
+        _ARCHIVE_MIN_HEADROOM_BYTES,
+        int(payload_bytes * _ARCHIVE_DISK_HEADROOM_RATIO),
+        file_count * _ARCHIVE_PER_FILE_OVERHEAD_BYTES,
+    )
+    return max(payload_bytes, 0) + headroom
+
+
+def _assert_sufficient_disk_space(
+    base_path: Path,
+    *,
+    required_bytes: int,
+    purpose: str,
+    reclaimable_bytes: int = 0,
+) -> None:
+    usage = shutil.disk_usage(base_path)
+    available_bytes = int(usage.free) + max(int(reclaimable_bytes), 0)
+    if available_bytes < int(required_bytes):
+        raise OSError(
+            errno.ENOSPC,
+            (
+                f'Insufficient disk space to {purpose}: '
+                f'required={int(required_bytes)}B available={available_bytes}B '
+                f'(includes reclaimable={max(int(reclaimable_bytes), 0)}B)'
+            ),
+        )
+
+
+def _calculate_run_payload_bytes(wd: Path) -> tuple[int, int]:
+    total_bytes = 0
+    file_count = 0
+
+    for root, dirs, files in os.walk(wd):
+        rel_root = os.path.relpath(root, wd)
+        if rel_root == '.':
+            rel_root = ''
+
+        if rel_root.startswith('archives'):
+            dirs[:] = []
+            continue
+
+        dirs[:] = [
+            d
+            for d in dirs
+            if not os.path.relpath(os.path.join(root, d), wd).startswith('archives')
+        ]
+
+        for filename in files:
+            abs_path = Path(root) / filename
+            rel_path = os.path.relpath(abs_path, wd)
+            if rel_path.startswith('archives'):
+                continue
+            try:
+                total_bytes += abs_path.stat().st_size
+                file_count += 1
+            except FileNotFoundError:
+                continue
+
+    return total_bytes, file_count
+
+
+def _collect_restore_members(
+    zf: zipfile.ZipFile,
+    wd: Path,
+) -> tuple[list[tuple[zipfile.ZipInfo, Path, Path]], int, int]:
+    members: list[tuple[zipfile.ZipInfo, Path, Path]] = []
+    total_bytes = 0
+    file_count = 0
+
+    for member in zf.infolist():
+        arcname = member.filename
+        if not arcname:
+            continue
+
+        # Normalize name to avoid traversal attempts.
+        target_path = (wd / arcname).resolve()
+        if wd not in target_path.parents and target_path != wd:
+            raise ValueError(f'Unsafe archive member path: {arcname}')
+
+        try:
+            relative_target = target_path.relative_to(wd)
+        except ValueError as exc:
+            raise ValueError(f'Unsafe archive member path: {arcname}') from exc
+
+        # Skip anything targeting the archives directory to avoid overwriting archives.
+        if relative_target.parts and relative_target.parts[0] == 'archives':
+            continue
+
+        if not member.is_dir():
+            total_bytes += int(member.file_size)
+            file_count += 1
+
+        members.append((member, target_path, relative_target))
+
+    return members, total_bytes, file_count
+
+
 @with_exception_logging
 def archive_rq(runid: str, comment: Optional[str] = None) -> None:
     """Create a zip archive of the run directory.
@@ -1598,6 +1701,19 @@ def archive_rq(runid: str, comment: Optional[str] = None) -> None:
     try:
         prep = RedisPrep.getInstanceFromRunID(runid)
         wd = get_wd(runid)
+        wd_path = Path(wd)
+
+        locked = [name for name, state in lock_statuses(runid).items() if name.endswith('.nodb') and state]
+        if locked:
+            raise RuntimeError('Cannot archive while files are locked: ' + ', '.join(locked))
+
+        payload_bytes, payload_file_count = _calculate_run_payload_bytes(wd_path)
+        required_bytes = _estimate_archive_required_bytes(payload_bytes, payload_file_count)
+        _assert_sufficient_disk_space(
+            wd_path,
+            required_bytes=required_bytes,
+            purpose=f'create archive for {runid}',
+        )
 
         archives_dir = os.path.join(wd, 'archives')
         os.makedirs(archives_dir, exist_ok=True)
@@ -1701,41 +1817,39 @@ def restore_archive_rq(runid: str, archive_name: str) -> None:
 
         StatusMessenger.publish(status_channel, f'Preparing to restore from {archive_name}')
 
-        # Remove all existing contents except the archives directory itself.
-        for entry in sorted(wd.iterdir()):
-            if entry.name == 'archives':
-                continue
-
-            try:
-                if entry.is_dir() and not entry.is_symlink():
-                    StatusMessenger.publish(status_channel, f'Removing directory {entry.relative_to(wd)}')
-                    shutil.rmtree(entry)
-                else:
-                    StatusMessenger.publish(status_channel, f'Removing file {entry.relative_to(wd)}')
-                    entry.unlink()
-            except FileNotFoundError:
-                continue
-
         with zipfile.ZipFile(archive_path, mode='r') as zf:
-            for member in zf.infolist():
-                arcname = member.filename
-                if not arcname:
+            failed_member = zf.testzip()
+            if failed_member:
+                raise zipfile.BadZipFile(
+                    f'Archive integrity check failed for member: {failed_member}'
+                )
+
+            restore_members, restore_bytes, restore_file_count = _collect_restore_members(zf, wd)
+            reclaimable_bytes, _ = _calculate_run_payload_bytes(wd)
+            required_bytes = _estimate_archive_required_bytes(restore_bytes, restore_file_count)
+            _assert_sufficient_disk_space(
+                wd,
+                required_bytes=required_bytes,
+                reclaimable_bytes=reclaimable_bytes,
+                purpose=f'restore archive {archive_name}',
+            )
+
+            # Remove all existing contents except the archives directory itself.
+            for entry in sorted(wd.iterdir()):
+                if entry.name == 'archives':
                     continue
 
-                # Normalize name to avoid traversal attempts
-                target_path = (wd / arcname).resolve()
-                if wd not in target_path.parents and target_path != wd:
-                    raise ValueError(f'Unsafe archive member path: {arcname}')
-
-                # Skip anything targeting the archives directory to avoid overwriting archives
                 try:
-                    relative_target = target_path.relative_to(wd)
-                except ValueError:
-                    raise ValueError(f'Unsafe archive member path: {arcname}')
-
-                if relative_target.parts and relative_target.parts[0] == 'archives':
+                    if entry.is_dir() and not entry.is_symlink():
+                        StatusMessenger.publish(status_channel, f'Removing directory {entry.relative_to(wd)}')
+                        shutil.rmtree(entry)
+                    else:
+                        StatusMessenger.publish(status_channel, f'Removing file {entry.relative_to(wd)}')
+                        entry.unlink()
+                except FileNotFoundError:
                     continue
 
+            for member, target_path, relative_target in restore_members:
                 if member.is_dir():
                     target_path.mkdir(parents=True, exist_ok=True)
                     StatusMessenger.publish(status_channel, f'Restored directory {relative_target}')
@@ -1757,12 +1871,12 @@ def restore_archive_rq(runid: str, archive_name: str) -> None:
         try:
             cleared_entries = clear_nodb_file_cache(runid)
         except Exception as exc:
-            StatusMessenger.publish(status_channel, f'Warning: failed to clear NoDb cache after restore ({exc})')
-        else:
-            StatusMessenger.publish(
-                status_channel,
-                f'Cleared NoDb cache entries after restore ({len(cleared_entries)})'
-            )
+            StatusMessenger.publish(status_channel, f'Failed to clear NoDb cache after restore ({exc})')
+            raise
+        StatusMessenger.publish(
+            status_channel,
+            f'Cleared NoDb cache entries after restore ({len(cleared_entries)})'
+        )
 
         StatusMessenger.publish(status_channel, f'Restore complete: {archive_name}')
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
