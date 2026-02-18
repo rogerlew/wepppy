@@ -104,8 +104,10 @@ def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
     for dirname in ("climate", "watershed"):
         src_dir = _join(base_root, dirname)
         src_archive = _join(base_root, f"{dirname}.nodir")
+        root_linked = False
         if os.path.isdir(src_dir):
             _ensure_link(src_dir, _join(run_root, dirname))
+            root_linked = True
         elif os.path.isfile(src_archive):
             legacy_dst = _join(run_root, dirname)
             if os.path.islink(legacy_dst) and not _exists(legacy_dst):
@@ -114,6 +116,18 @@ def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
                 except OSError:
                     pass
             _ensure_link(src_archive, _join(run_root, f"{dirname}.nodir"))
+            root_linked = True
+
+        if root_linked:
+            sidecar_prefix = f"{dirname}."
+            for sidecar_name in sorted(
+                fn
+                for fn in os.listdir(base_root)
+                if fn.startswith(sidecar_prefix)
+                and fn.endswith(".parquet")
+                and os.path.isfile(_join(base_root, fn))
+            ):
+                _ensure_link(_join(base_root, sidecar_name), _join(run_root, sidecar_name))
 
     dem_src = _join(base_root, "dem")
     if os.path.isdir(dem_src):

@@ -62,6 +62,7 @@ from wepppy.nodb.version import copy_version_for_clone
 from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.nodir.projections import with_root_projection
+from wepppy.nodir.errors import NoDirError
 from wepppy.wepp.interchange import (
     run_wepp_hillslope_interchange,
     run_wepp_watershed_tc_out_interchange,
@@ -366,6 +367,100 @@ def _merge_contrast_parquet(
     merged.to_parquet(output_parquet_fn, index=False)
 
 
+def _iter_shared_root_sidecars(base_wd: str, root: str) -> List[str]:
+    if root not in ("climate", "watershed"):
+        return []
+
+    prefix = f"{root}."
+    return sorted(
+        fn
+        for fn in os.listdir(base_wd)
+        if fn.startswith(prefix)
+        and fn.endswith(".parquet")
+        and _isfile(_join(base_wd, fn))
+    )
+
+
+def _link_shared_root_sidecars(base_wd: str, clone_wd: str, root: str) -> None:
+    for sidecar_name in _iter_shared_root_sidecars(base_wd, root):
+        src = _join(base_wd, sidecar_name)
+        dst = _join(clone_wd, sidecar_name)
+        if os.path.lexists(dst):
+            continue
+        try:
+            os.symlink(src, dst)
+        except OSError as exc:
+            LOGGER.warning(
+                "Failed to link %s sidecar for omni clone %s -> %s: %s",
+                root,
+                src,
+                dst,
+                exc,
+            )
+
+
+def _copy_mutable_root_sidecar(source_wd: str, clone_wd: str, root: str) -> None:
+    if root not in ("landuse", "soils"):
+        return
+
+    sidecar_name = f"{root}.parquet"
+    src = _join(source_wd, sidecar_name)
+    if not _isfile(src):
+        return
+
+    dst = _join(clone_wd, sidecar_name)
+    try:
+        shutil.copyfile(src, dst)
+    except OSError as exc:
+        LOGGER.warning(
+            "Failed to copy %s sidecar for omni clone %s -> %s: %s",
+            root,
+            src,
+            dst,
+            exc,
+        )
+
+
+def _copy_archive_root_with_projection_retry(
+    wd: str,
+    clone_wd: str,
+    root: str,
+    *,
+    purpose: str,
+    lock_timeout_seconds: float = 30.0,
+) -> None:
+    dst_root = _join(clone_wd, root)
+    if _exists(dst_root):
+        shutil.rmtree(dst_root)
+
+    deadline = time.monotonic() + max(lock_timeout_seconds, 0.0)
+    attempt = 0
+    while True:
+        attempt += 1
+        try:
+            with with_root_projection(
+                wd,
+                root,
+                mode="read",
+                purpose=purpose,
+            ) as handle:
+                shutil.copytree(handle.mount_path, dst_root)
+            return
+        except NoDirError as exc:
+            if exc.code != "NODIR_LOCKED":
+                raise
+            if time.monotonic() >= deadline:
+                raise
+            backoff_seconds = min(0.25 * attempt, 2.0)
+            LOGGER.debug(
+                "Projection lock contention for %s while preparing omni clone; retrying in %.2fs (attempt %d)",
+                root,
+                backoff_seconds,
+                attempt,
+            )
+            sleep(backoff_seconds)
+
+
 def _run_contrast(
     contrast_id: str,
     contrast_name: str,
@@ -406,23 +501,20 @@ def _run_contrast(
             continue
         if not _exists(dst):
             os.symlink(src, dst)
+        _link_shared_root_sidecars(wd, new_wd, dirname)
 
     for root in ("landuse", "soils"):
         resolved_root = nodir_resolve(wd, root, view="effective")
         if resolved_root is None or resolved_root.form != "archive":
             continue
 
-        dst_root = _join(new_wd, root)
-        if _exists(dst_root):
-            shutil.rmtree(dst_root)
-
-        with with_root_projection(
+        _copy_archive_root_with_projection_retry(
             wd,
+            new_wd,
             root,
-            mode="read",
             purpose=f"omni-run-contrast-{root}",
-        ) as handle:
-            shutil.copytree(handle.mount_path, dst_root)
+        )
+        _copy_mutable_root_sidecar(wd, new_wd, root)
 
     symlink_entries = {
         'climate.nodb',
@@ -580,6 +672,7 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
             continue
         if not _exists(dst):
             os.symlink(src, dst)
+        _link_shared_root_sidecars(wd, new_wd, dirname)
 
     for fn in os.listdir(wd):
         if fn in ['dem', 'climate.nodb', 'dem.nodb', 'watershed.nodb']:
@@ -615,20 +708,18 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
     
     soils_root = nodir_resolve(wd, "soils", view="effective")
     if soils_root is not None and soils_root.form == "archive":
-        dst_soils = _join(new_wd, "soils")
-        if _exists(dst_soils):
-            shutil.rmtree(dst_soils)
-        with with_root_projection(
+        _copy_archive_root_with_projection_retry(
             wd,
+            new_wd,
             "soils",
-            mode="read",
             purpose="omni-clone-soils",
-        ) as handle:
-            shutil.copytree(handle.mount_path, dst_soils)
+        )
+        _copy_mutable_root_sidecar(wd, new_wd, "soils")
 
     landuse_root = nodir_resolve(wd, "landuse", view="effective")
     if landuse_root is not None and landuse_root.form == "archive":
         os.makedirs(_join(new_wd, "landuse"), exist_ok=True)
+        _copy_mutable_root_sidecar(wd, new_wd, "landuse")
 
     for fn in os.listdir(wd):
         if fn == '_pups':
@@ -724,6 +815,8 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, p
         _remove_tree_or_file(_join(new_wd, dirname))
     for archive_name in ('landuse.nodir', 'soils.nodir'):
         _remove_tree_or_file(_join(new_wd, archive_name))
+    for sidecar_name in ("landuse.parquet", "soils.parquet"):
+        _remove_tree_or_file(_join(new_wd, sidecar_name))
 
     # copy the sibling scenario
     shutil.copyfile(_join(sibling_wd, 'disturbed.nodb'), _join(new_wd, 'disturbed.nodb'))
@@ -744,13 +837,14 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, p
                 src_root = src_root / resolved_root.inner_path
             shutil.copytree(str(src_root), dst_root)
         else:
-            with with_root_projection(
+            _copy_archive_root_with_projection_retry(
                 sibling_wd,
+                new_wd,
                 root,
-                mode='read',
-                purpose=f'omni-clone-sibling-{root}',
-            ) as handle:
-                shutil.copytree(handle.mount_path, dst_root)
+                purpose=f"omni-clone-sibling-{root}",
+            )
+
+        _copy_mutable_root_sidecar(sibling_wd, new_wd, root)
 
     # set wd to new_wd for the nodb files that are copied
     for fn in ['disturbed.nodb', 'landuse.nodb', 'soils.nodb']:

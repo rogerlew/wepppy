@@ -97,3 +97,55 @@ def test_post_dump_writes_parquet_when_soils_dir_present(
 
     assert result is soils
     assert called["dump"] is True
+
+
+def test_post_instance_loaded_rebinds_soil_summary_soils_dir(tmp_path: Path) -> None:
+    from wepppy.soils.ssurgo import SoilSummary
+
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    stale_soils_dir = tmp_path / "stale" / "soils"
+    stale_soils_dir.mkdir(parents=True, exist_ok=True)
+
+    summary = SoilSummary(
+        mukey="123",
+        fname="123.sol",
+        soils_dir=str(stale_soils_dir),
+        build_date="2026-02-18",
+        desc="stale",
+    )
+    summary._weppsoilutil = object()
+
+    instance = Soils.__new__(Soils)
+    instance.wd = str(wd)
+    instance.soils = {"123": summary}
+
+    result = Soils._post_instance_loaded(instance)
+
+    assert result is instance
+    assert summary.soils_dir == str(wd / "soils")
+    assert not hasattr(summary, "_weppsoilutil")
+
+
+def test_soil_summary_path_skips_runid_resolution_for_absolute_soils_dir(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.soils.ssurgo import SoilSummary
+
+    absolute_soils_dir = tmp_path / "missing" / "soils"
+    summary = SoilSummary(
+        mukey="123",
+        fname="123.sol",
+        soils_dir=str(absolute_soils_dir),
+        build_date="2026-02-18",
+        desc="stale",
+    )
+
+    def _unexpected_get_wd(_runid: str) -> str:
+        raise AssertionError("get_wd should not be used for absolute soils_dir")
+
+    monkeypatch.setattr("wepppy.weppcloud.utils.helpers.get_wd", _unexpected_get_wd)
+
+    assert summary.path == str(absolute_soils_dir / "123.sol")

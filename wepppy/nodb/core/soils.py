@@ -183,6 +183,28 @@ class Soils(NoDbBase):
 
             self._soils_map = self.config_get_path('soils', 'soils_map', None)
 
+    @classmethod
+    def _post_instance_loaded(cls, instance: "Soils") -> "Soils":
+        instance = super()._post_instance_loaded(instance)
+
+        soils = getattr(instance, "soils", None)
+        if not isinstance(soils, dict):
+            return instance
+
+        canonical_soils_dir = instance.soils_dir
+        for summary in soils.values():
+            if summary is None:
+                continue
+            if hasattr(summary, "soils_dir"):
+                summary.soils_dir = canonical_soils_dir
+            if hasattr(summary, "_weppsoilutil"):
+                try:
+                    delattr(summary, "_weppsoilutil")
+                except AttributeError:
+                    pass
+
+        return instance
+
     @property
     def clip_soils(self) -> bool:
         return getattr(self, '_clip_soils', False)
