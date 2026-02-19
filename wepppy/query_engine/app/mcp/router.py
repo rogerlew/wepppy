@@ -27,6 +27,7 @@ from .auth import (
     require_scope,
 )
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
+from wepppy.query_engine.catalog import resolve_dataset_path_alias
 from wepppy.query_engine.payload import QueryRequest
 
 LOGGER = logging.getLogger(__name__)
@@ -98,14 +99,14 @@ def _normalise_leading_slash(path: str) -> str:
 
 
 def _join_path(root_path: str, suffix: str) -> str:
-    """Join a root_path with a suffix while normalising slashes.
+    """Join a root_path with a suffix while normalizing slashes.
 
     Args:
         root_path: Base prefix (e.g., proxy root path).
         suffix: Path fragment to append.
 
     Returns:
-        Normalised combined path.
+        Normalized combined path.
     """
     if not root_path:
         return _normalise_leading_slash(suffix)
@@ -188,7 +189,7 @@ def _load_prompt_template() -> str:
 
 
 def _build_schema_summary(raw_entries: Iterable[Mapping[str, Any]]) -> str:
-    """Build a concise bullet list summarising catalog schema coverage.
+    """Build a concise bullet list summarizing catalog schema coverage.
 
     Args:
         raw_entries: Catalog entries loaded from disk.
@@ -293,6 +294,7 @@ def _prepare_query_request(
             path = entry.get("path")
             if isinstance(path, str):
                 catalog_index[path] = entry
+    catalog_paths = set(catalog_index)
 
     datasets_value = payload.get("datasets")
     if not isinstance(datasets_value, Sequence) or isinstance(datasets_value, (str, bytes)):
@@ -315,8 +317,11 @@ def _prepare_query_request(
             raise QueryValidationException(400, "invalid_request", "Dataset entries must be strings or objects")
 
         path_str = str(path)
-        if path_str not in catalog_index:
+        resolved_path = resolve_dataset_path_alias(path_str, available_paths=catalog_paths)
+        if resolved_path is None:
             missing.append(path_str)
+        else:
+            sanitized["path"] = resolved_path
 
         sanitized_datasets.append(sanitized)
 
@@ -777,7 +782,7 @@ async def validate_query(request: Request) -> JSONResponse:
         request: Starlette request holding the runid and payload.
 
     Returns:
-        JSONResponse summarising the normalized payload and catalog metadata.
+        JSONResponse summarizing the normalized payload and catalog metadata.
     """
     runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")

@@ -475,6 +475,43 @@ def test_validate_query_success(monkeypatch, tmp_path):
     assert "trace_id" in body["meta"]
 
 
+def test_validate_query_accepts_legacy_nodir_sidecar_alias(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "validate-alias"
+    files = [
+        {
+            "path": "landuse/landuse.parquet",
+            "extension": ".parquet",
+            "size_bytes": 1,
+            "modified": "2024-01-01T00:00:00Z",
+        }
+    ]
+    app, _ = _make_client(monkeypatch, tmp_path, runid, files=files)
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import auth
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid, scopes="runs:read queries:validate")
+    payload = {
+        "datasets": ["landuse.parquet"],
+        "limit": 5,
+        "include_schema": True,
+    }
+    response = client.post(
+        f"/mcp/runs/{runid}/queries/validate",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload,
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    attrs = body["data"]["attributes"]
+    assert attrs["missing_datasets"] == []
+    normalized = attrs["normalized_payload"]
+    assert normalized["datasets"][0]["path"] == "landuse/landuse.parquet"
+
+
 def test_validate_query_missing_dataset(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
     runid = "validate-missing"

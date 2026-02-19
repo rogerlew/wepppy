@@ -7,7 +7,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from wepppy.query_engine.catalog import DatasetCatalog
+from wepppy.query_engine.catalog import DatasetCatalog, resolve_dataset_path_alias
 from wepppy.query_engine.context import RunContext
 from wepppy.query_engine.core import run_query, build_query_plan
 from wepppy.query_engine.payload import QueryRequest
@@ -58,6 +58,32 @@ def _write_catalog_entries(root: Path, rel_paths: list[str]) -> None:
     (out_dir / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
 
 
+@pytest.mark.parametrize(
+    ("logical_rel", "legacy_rel"),
+    [
+        ("landuse/landuse.parquet", "landuse.parquet"),
+        ("soils/soils.parquet", "soils.parquet"),
+        ("watershed/hillslopes.parquet", "watershed.hillslopes.parquet"),
+        ("watershed/channels.parquet", "watershed.channels.parquet"),
+        ("watershed/flowpaths.parquet", "watershed.flowpaths.parquet"),
+        ("climate/wepp_cli.parquet", "climate.wepp_cli.parquet"),
+    ],
+)
+def test_resolve_dataset_path_alias_supports_legacy_sidecar_pairs(
+    logical_rel: str,
+    legacy_rel: str,
+) -> None:
+    # Canonical catalog layout: logical path keyed in catalog.
+    logical_only = {logical_rel}
+    assert resolve_dataset_path_alias(logical_rel, available_paths=logical_only) == logical_rel
+    assert resolve_dataset_path_alias(legacy_rel, available_paths=logical_only) == logical_rel
+
+    # Legacy catalog layout: sidecar path keyed in catalog.
+    legacy_only = {legacy_rel}
+    assert resolve_dataset_path_alias(logical_rel, available_paths=legacy_only) == legacy_rel
+    assert resolve_dataset_path_alias(legacy_rel, available_paths=legacy_only) == legacy_rel
+
+
 def test_run_query_basic(tmp_path: Path) -> None:
     rel = "data/sample.parquet"
     parquet_path = tmp_path / rel
@@ -105,6 +131,43 @@ def test_run_query_uses_catalog_fs_path(tmp_path: Path) -> None:
     payload = QueryRequest(datasets=[logical_rel], columns=["id", "value"], limit=2)
     result = run_query(run_context, payload)
 
+    assert result.row_count == 2
+
+
+def test_run_query_accepts_legacy_sidecar_dataset_alias(tmp_path: Path) -> None:
+    physical_rel = "landuse.parquet"
+    logical_rel = "landuse/landuse.parquet"
+    parquet_path = tmp_path / physical_rel
+    _write_parquet(parquet_path)
+
+    catalog = {
+        "version": 1,
+        "generated_at": "2024-01-01T00:00:00Z",
+        "root": str(tmp_path),
+        "files": [
+            {
+                "path": logical_rel,
+                "fs_path": physical_rel,
+                "extension": ".parquet",
+                "size_bytes": parquet_path.stat().st_size,
+                "modified": "2024-01-01T00:00:00Z",
+            }
+        ],
+    }
+    out_dir = tmp_path / "_query_engine"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+    loaded = DatasetCatalog.load(tmp_path / "_query_engine" / "catalog.json")
+    run_context = RunContext(runid=str(tmp_path), base_dir=tmp_path, scenario=None, catalog=loaded)
+
+    # Legacy callers may still use WD-level sidecar names.
+    payload = QueryRequest(datasets=[physical_rel], columns=["id", "value"], limit=2)
+    result = run_query(run_context, payload)
+
+    assert loaded.has(physical_rel)
+    assert loaded.get(physical_rel) is not None
+    assert loaded.get(physical_rel).path == logical_rel
     assert result.row_count == 2
 
 

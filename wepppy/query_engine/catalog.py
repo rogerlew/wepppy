@@ -6,6 +6,45 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+# Canonical logical dataset ids and their legacy WD-level sidecar aliases.
+_DATASET_PATH_ALIASES: dict[str, str] = {
+    "landuse/landuse.parquet": "landuse.parquet",
+    "soils/soils.parquet": "soils.parquet",
+    "watershed/hillslopes.parquet": "watershed.hillslopes.parquet",
+    "watershed/channels.parquet": "watershed.channels.parquet",
+    "watershed/flowpaths.parquet": "watershed.flowpaths.parquet",
+    "climate/wepp_cli.parquet": "climate.wepp_cli.parquet",
+}
+_DATASET_PATH_ALIAS_LOOKUP: dict[str, str] = {
+    **_DATASET_PATH_ALIASES,
+    **{legacy: logical for logical, legacy in _DATASET_PATH_ALIASES.items()},
+}
+
+
+def _normalize_catalog_path(path: str) -> str:
+    return path.replace("\\", "/").lstrip("/")
+
+
+def resolve_dataset_path_alias(rel_path: str, *, available_paths: set[str]) -> str | None:
+    """Resolve a dataset path to a catalog key, honoring legacy aliases.
+
+    Args:
+        rel_path: Requested dataset path.
+        available_paths: Catalog keys currently available.
+
+    Returns:
+        Matching catalog key, or None when no exact/alias match exists.
+    """
+    normalized = _normalize_catalog_path(rel_path)
+    if normalized in available_paths:
+        return normalized
+
+    alias = _DATASET_PATH_ALIAS_LOOKUP.get(normalized)
+    if alias is not None and alias in available_paths:
+        return alias
+
+    return None
+
 
 @dataclass(slots=True)
 class CatalogEntry:
@@ -29,6 +68,7 @@ class DatasetCatalog:
         self.root = root
         self._entries = entries
         self._by_path = {entry.path: entry for entry in entries}
+        self._available_paths = set(self._by_path)
 
     @classmethod
     def load(cls, catalog_path: Path) -> "DatasetCatalog":
@@ -54,7 +94,10 @@ class DatasetCatalog:
         Returns:
             The CatalogEntry if the path exists, otherwise None.
         """
-        return self._by_path.get(rel_path)
+        resolved_path = resolve_dataset_path_alias(rel_path, available_paths=self._available_paths)
+        if resolved_path is None:
+            return None
+        return self._by_path.get(resolved_path)
 
     def entries(self) -> list[CatalogEntry]:
         """Return a copy of the catalog entries.
@@ -71,15 +114,15 @@ class DatasetCatalog:
             rel_path: File path relative to `self.root`.
 
         Returns:
-            True when the path is catalogued, False otherwise.
+            True when the path is cataloged, False otherwise.
         """
-        return rel_path in self._by_path
+        return resolve_dataset_path_alias(rel_path, available_paths=self._available_paths) is not None
 
     def get_column_type(self, rel_path: str, column: str) -> str | None:
         """Return the stringified column type for the requested dataset path.
 
         Args:
-            rel_path: Catalogued dataset relative path.
+            rel_path: Cataloged dataset relative path.
             column: Column name to look up.
 
         Returns:

@@ -8,6 +8,7 @@ class CatalogEntry:
     extension: str
     size_bytes: int
     modified: str
+    fs_path: str | None
     schema: dict[str, Any] | None
 
 class DatasetCatalog:
@@ -21,4 +22,5 @@ class DatasetCatalog:
     def has(self, rel_path: str) -> bool: ...
     def get_column_type(self, rel_path: str, column: str) -> str | None: ...
 
+def resolve_dataset_path_alias(rel_path: str, *, available_paths: set[str]) -> str | None: ...
 def load_catalog(base: Path) -> DatasetCatalog: ...
