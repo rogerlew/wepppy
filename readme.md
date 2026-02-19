@@ -254,51 +254,29 @@ See [AGENTIC_AI_SYSTEMS_MANIFESTO.md](AGENTIC_AI_SYSTEMS_MANIFESTO.md) for compr
 
 ### Development Stack (Docker Compose - Recommended)
 
-1. **Generate secrets and create environment file**:
+1. **Install/use the `wctl` wrapper** (preferred):
 ```bash
-SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
-SECURITY_PASSWORD_SALT=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
-
-cat > docker/.env <<EOF
-UID=$(id -u)
-GID=$(id -g)
-POSTGRES_PASSWORD=localdev
-SECRET_KEY=$SECRET_KEY
-SECURITY_PASSWORD_SALT=$SECURITY_PASSWORD_SALT
-EOF
+./wctl/install.sh dev
+wctl up -d --build
 ```
 
-2. **Start the stack**:
-```bash
-docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build
-```
-
-3. **Access the application**:
+2. **Access the application**:
    - Web UI: http://localhost:8080/weppcloud
    - Query Engine: http://localhost:8080/query-engine
    - D-Tale Explorer: http://localhost:8080/weppcloud/dtale
 
-4. **Common tasks**:
+3. **Common tasks**:
 ```bash
-# Tail logs
-docker compose -f docker/docker-compose.dev.yml logs -f weppcloud
-
-# Shell into container
-docker compose --env-file docker/.env -f docker/docker-compose.dev.yml exec weppcloud bash
-
-# Rebuild single service
-docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build weppcloud
+wctl logs -f weppcloud
+wctl exec weppcloud bash
+wctl restart weppcloud
+wctl down
 ```
 
-**Preferred: Use the `wctl` wrapper** (installed at `/workdir/wepppy/wctl`):
-```bash
-wctl up            # Start stack
-wctl logs weppcloud # Tail logs
-wctl exec weppcloud bash  # Shell into container
-wctl restart weppcloud    # Restart service
-```
+For full `.env`/Compose details, see [Docker Compose Dev Stack (Recommended)](#docker-compose-dev-stack-recommended).
 
 Note: The compose stack includes a `scheduler` sidecar that reads `docker/scheduled-tasks.yml` and enqueues scheduled RQ jobs (for example the TTL GC).
+
 ### Example: Creating a WEPP Run Programmatically
 
 ```python
@@ -306,7 +284,9 @@ from pathlib import Path
 from wepppy.nodb.core import Watershed, Climate, Landuse, Soils, Wepp
 
 # Initialize run directory
-wd = Path("/geodata/weppcloud_runs/my-run/CurCond")
+runid = "ab123example"
+config = "CurCond"
+wd = Path(f"/wc1/runs/{runid[:2]}/{runid}/{config}")
 wd.mkdir(parents=True, exist_ok=True)
 
 # Set up watershed from DEM
@@ -320,7 +300,8 @@ climate.climate_mode = 9  # OBSERVED_DAYMET
 climate.input_years = (2015, 2020)
 climate.build_climate()
 
-**Single-storm climate modes are deprecated and unsupported.** Use continuous or multi-year climate datasets for WEPP runs. If you need event-scale analysis, use observed data or an event-based modeling workflow instead of single-storm WEPP.
+# Single-storm climate modes are deprecated and unsupported.
+# Use continuous or multi-year climate datasets for WEPP runs.
 
 # Set landuse and soils
 landuse = Landuse.getInstance(wd, "config.cfg")
@@ -394,37 +375,6 @@ NoDb subclass logger
 - Legacy `.nodb` payloads still deserialize because `wepppy.nodb.base` builds `_LEGACY_MODULE_REDIRECTS` by walking the package tree and binding old module paths (for example `wepppy.nodb.wepp`) to their new homes (`wepppy.nodb.core.wepp`). The `NoDbBase._ensure_legacy_module_imports()` hook loads those modules on demand before jsonpickle decodes
 - If a refactor moves or renames a module, update the redirect map by ensuring the file still lives under `wepppy/nodb/` (the scanner picks up new paths automatically). For one-off overrides, call `NoDbBase._import_mod_module('mod_name')` to pre-load the replacement prior to deserialization
 - Best practice: keep module-level side effects lightweight, prefer absolute imports (`from wepppy.nodb.core.climate import Climate`), and treat anything underscored as private so it stays out of `__all__`
-
-## Architecture at a Glance
-
-Each run lives in a working directory ("wd") seeded by RedisPrep. The Flask layer hands off tasks to Redis Queue (RQ); long-running jobs mutate the NoDb structures and emit telemetry; Go microservices watch Redis for new signals and stream them to the browser so operators see progress in real time.
-
-## High Performance Scalable Telemetry Pipeline
-```text
-NoDb subclass logger
-  ↓ QueueHandler + QueueListener (async fan-out)
-  ↓ StatusMessengerHandler pushes to Redis DB 2 Pub/Sub
-  ↓ services/status2 Go WebSocket service
-  ↓ StatusStream helper (controlBase.attach_status_stream) fan-out to controller panels
-  ↓ controlBase panels update logs, checklists, charts
-```
-- `wepppy.nodb.base` wires every NoDb instance with a `QueueHandler`, pushing log records through `StatusMessengerHandler` into Redis channels like `<runid>:wepp`.
-- `services/status2` is a Go WebSocket proxy that subscribes to the channels and fans out JSON frames to browsers, complete with heartbeat pings and exponential backoff reconnects.
-- `controllers_js/status_stream.js`, orchestrated by `controlBase.attach_status_stream`, mixes the stream into each controller so task panels render live stdout, RQ job states, and exception traces without page refreshes.
-
-## NoDb Singletons + Redis Caching
-- `NoDbBase.getInstance(wd)` guarantees a singleton per working directory. Instances are serialized to disk and mirrored into Redis DB 13 for 72 hours so hot runs rebuild instantly.
-- Locking is implemented via Redis hashes in DB 0 (`locked:*.nodb`) to prevent concurrent writers during multi-process jobs. Context managers like `with watershed.locked()` guard critical sections.
-- Log verbosity goes through Redis DB 15. Operators can dial runs to DEBUG without touching config files, and every handler respects the remote setting on init.
-- `RedisPrep` time-stamps milestones (`timestamps:run_wepp_watershed`, `timestamps:abstract_watershed`) and stores RQ job IDs, giving `preflight2` enough context to render readiness checklists.
-
-## NoDb Module Exports & Legacy Imports
-- Every NoDb controller module now declares an explicit `__all__` that captures the public surface (the primary `NoDbBase` subclass, its companion enums/exceptions, and any helper utilities used outside the module). When you add new public functions or classes, update the module’s `__all__` immediately.
-- Package aggregators (`wepppy.nodb.core`, `wepppy.nodb.mods`) build their own `__all__` from the per-module lists, keeping the top-level namespace tidy while preserving ergonomic imports such as `from wepppy.nodb.core import Wepp` or `from wepppy.nodb.mods import Disturbed`.
-- The `__getattr__` hook in `wepppy.nodb.mods` lazily imports mod packages. This keeps fresh projects fast to hydrate and allows optional dependencies (e.g. `geopandas`, `utm`) to remain truly optional until the mod is touched.
-- Legacy `.nodb` payloads still deserialize because `wepppy.nodb.base` builds `_LEGACY_MODULE_REDIRECTS` by walking the package tree and binding old module paths (for example `wepppy.nodb.wepp`) to their new homes (`wepppy.nodb.core.wepp`). The `NoDbBase._ensure_legacy_module_imports()` hook loads those modules on demand before jsonpickle decodes.
-- If a refactor moves or renames a module, update the redirect map by ensuring the file still lives under `wepppy/nodb/` (the scanner picks up new paths automatically). For one-off overrides, call `NoDbBase._import_mod_module('mod_name')` to pre-load the replacement prior to deserialization.
-- Best practice: keep module-level side effects lightweight, prefer absolute imports (`from wepppy.nodb.core.climate import Climate`), and treat anything underscored as private so it stays out of `__all__`.
 
 ## Rust-Powered Geospatial Acceleration
 - [`wepppyo3`](https://github.com/wepp-in-the-woods/wepppyo3) exposes Rust bindings for climate interpolation, raster mode lookups, and soil loss grids. Python falls back gracefully when the crate is absent, but production boxes pin the wheel for SIMD speedups.
@@ -521,14 +471,14 @@ WEPPCLOUD_IMAGE=registry.example.com/wepppy:2025.02 docker compose -f docker/doc
 - wepp.cloud production runs this Docker Compose stack; systemd services are retired.
 
 ## Bare-metal (legacy, not recommended)
-- Provision Python 3.10 + Poetry/conda (see `install/` and `wepppy/weppcloud/_baremetal/` for reference scripts).
+- Provision a local Python environment (venv/Poetry/conda) using the legacy scripts in `install/` and `wepppy/weppcloud/_baremetal/`.
 - Prefer the Docker stacks (`docker/docker-compose.*`) plus the `docker/weppcloud-entrypoint.sh` bootstrapper; legacy systemd snippets remain in `_scripts/` if you absolutely must run without containers.
 
 ## Further Reading
 - `docs/dev-notes/redis_dev_notes.md` — deep dive into Redis usage, DB allocations, and debugging recipes.
 - `wepppy/weppcloud/controllers_js/README.md` — controller bundling, singleton contracts, and WS client expectations.
 - `wepppy/nodb/base.py` — the canonical NoDb implementation with logging, caching, and locking primitives.
-- `wepppy/topo/peridot/runner.py` — how Rust binaries integrate with WEPP abstractions.
+- `wepppy/topo/peridot/peridot_runner.py` — how Rust binaries integrate with WEPP abstractions.
 
 ## Credits
 University of Idaho 2015-Present, Swansea University 2019-Present (Wildfire Ash Transport And Risk estimation tool, WATAR).
