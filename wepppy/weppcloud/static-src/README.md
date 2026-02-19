@@ -3,11 +3,11 @@
 > **See also:** [AGENTS.md](../../../AGENTS.md) for Static Assets section and build command reference.
 
 ## Overview
-- All third-party browser libraries (Leaflet, Bootstrap, PureCSS, etc.) are now pulled in via `npm` from `wepppy/weppcloud/static-src`.
+- Third-party browser libraries (Leaflet, Bootstrap, PureCSS, etc.) are managed from `wepppy/weppcloud/static-src` via `npm` plus a small `vendor-sources/` fallback for assets that are not published on npm.
 - `npm run build:dev` produces readable development assets under `static-src/dist/`; `npm run build` produces minified production assets.
-- `npm run smoke` runs the Playwright smoke suite (requires the backend running and test support endpoints). Useful environment variables:
-  - `TEST_SUPPORT_ENABLED=true` on the backend to expose `/tests/api/*` endpoints.
-  - `SMOKE_CREATE_RUN` (`true` by default) to auto-provision a run via `/tests/api/create-run`.
+- `npm run smoke` runs the Playwright smoke suite (backend must be reachable at `SMOKE_BASE_URL`; test-support endpoints are only required when auto-provisioning runs). Useful environment variables:
+  - `TEST_SUPPORT_ENABLED=true` on the backend to expose `/weppcloud/tests/api/*` endpoints for run provisioning.
+  - `SMOKE_CREATE_RUN` (`true` by default) to auto-provision a run via the test-support create-run endpoint.
   - `SMOKE_RUN_CONFIG` (default `dev_unit_1`) selects the configuration used when provisioning.
   - `SMOKE_RUN_OVERRIDES` optional JSON for config query params (e.g., `{ "general:dem_db": "ned1/2016" }`).
   - `SMOKE_RUN_PATH` to point at an existing run (skips provisioning).
@@ -15,8 +15,15 @@
   - `SMOKE_BASE_URL` and `SMOKE_HEADLESS=false` adjust backend origin and browser mode.
 - GL dashboard smoke specs skip RAP or comparison assertions automatically when the target run lacks those datasets; expect occasional `skipped` results rather than failures.
 - Some runs legitimately lack RAP or comparison data; skips in those specs are expected and not treated as failures.
-- `npm run smoke:theme-metrics` runs the Theme Lab contrast harness. It only needs the UI showcase route (`/ui/components/#theme-lab`) online, so no run provisioning is required. Reports land in `test-results/theme-metrics/` as both JSON and Markdown (consumed by CI and reviewers). You can drive the same run through `wctl2 run-playwright --suite theme-metrics --env local`.
+- `npm run smoke:theme-metrics` runs the Theme Lab contrast harness. It only needs the UI showcase route (`/ui/components/#theme-lab`) online, so no run provisioning is required. Reports land in `test-results/theme-metrics/` as both JSON and Markdown (consumed by CI and reviewers). You can drive the same run through `wctl run-playwright --suite theme-metrics --env local`.
 - Docker builds copy the production bundle into `wepppy/weppcloud/static/vendor/` so images ship with everything baked in. The app entrypoint mirrors the bundle to `/srv/weppcloud/static` when `STATIC_ASSET_SYNC_DIR` is set (Compose prod does this for Caddy).
+
+Common host-side commands (from repo root):
+- `wctl run-npm install --legacy-peer-deps`
+- `wctl run-npm build:dev` or `wctl run-npm build`
+- `wctl run-npm lint`
+- `wctl run-npm test`
+- `wctl run-npm smoke`
 
 ## Local Development
 1. Install Node 20 or newer.
@@ -26,11 +33,11 @@
    - `wctl build-static-assets --prod` for the minified bundle (automatically implied when wctl is configured for prod).
    - Script lives at `./wepppy/weppcloud/static-src/build-static-assets.sh` if you need to invoke it directly (supports `--prod`, `--force-install`, and `--skip-controllers`).
    - Controllers bundle (`controllers-gl.js`) is rebuilt by default; pass `--skip-controllers` to bypass it.
-   - The script automatically rsyncs into `wepppy/weppcloud/static/vendor/`, which is `.gitignore`d so dev builds stay local.
+   - The script syncs `dist/vendor/` into `wepppy/weppcloud/static/vendor/` (gitignored) and copies `dist/js/archive_console.js` into `wepppy/weppcloud/static/js/archive_console.js`.
 
 ## Docker / Production
 - `docker/Dockerfile` contains a `static-builder` stage (`node:20-alpine`) that runs `npm ci --legacy-peer-deps` and `npm run build`.
-- The Python runtime stage copies `/app/dist/` into `/workdir/wepppy/wepppy/weppcloud/static/vendor/`.
+- The Python runtime stage copies `/app/dist/vendor/` into `/workdir/wepppy/wepppy/weppcloud/static/vendor/` and `/app/dist/js/archive_console.js` into `/workdir/wepppy/wepppy/weppcloud/static/js/archive_console.js`.
 - `docker/docker-compose.prod.yml` sets:
   - `entrypoint: ./docker/weppcloud-entrypoint.sh`
   - `STATIC_ASSET_SYNC_DIR=/srv/weppcloud/static`
