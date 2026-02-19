@@ -21,11 +21,57 @@
         return value ? value.replace(/^\/+/, "") : "";
     }
 
+    function normalizeSitePrefix(value) {
+        if (!value) {
+            return "";
+        }
+        var text = String(value).trim();
+        if (!text || text === "/") {
+            return "";
+        }
+        if (text.charAt(0) !== "/") {
+            text = "/" + text;
+        }
+        return text.replace(/\/+$/, "");
+    }
+
+    function deriveSitePrefix(pathname) {
+        var path = typeof pathname === "string" ? pathname : "";
+        if (!path) {
+            return "";
+        }
+        var runsIndex = path.indexOf("/runs/");
+        if (runsIndex !== -1) {
+            return normalizeSitePrefix(path.slice(0, runsIndex));
+        }
+        if (path.indexOf("/weppcloud/") === 0 || path === "/weppcloud") {
+            return "/weppcloud";
+        }
+        return "";
+    }
+
+    function resolveSitePrefix() {
+        var configured = normalizeSitePrefix(typeof global.site_prefix === "string" ? global.site_prefix : "");
+        if (configured) {
+            return configured;
+        }
+        if (doc && doc.body && doc.body.dataset) {
+            var bodyPrefix = normalizeSitePrefix(doc.body.dataset.sitePrefix);
+            if (bodyPrefix) {
+                return bodyPrefix;
+            }
+        }
+        if (global.location && typeof global.location.pathname === "string") {
+            return deriveSitePrefix(global.location.pathname);
+        }
+        return "";
+    }
+
     function applySitePrefix(url) {
         if (!url) {
             throw new Error("WCHttp.request requires a URL.");
         }
-        var prefix = typeof global.site_prefix === "string" ? global.site_prefix : "";
+        var prefix = resolveSitePrefix();
         if (url === "/rq-engine" || url.indexOf("/rq-engine/") === 0) {
             return url;
         }

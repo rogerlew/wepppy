@@ -101,6 +101,25 @@ describe("WCHttp helpers", () => {
         expect(url).toBe("/rq-engine/api/jobstatus/job-1");
     });
 
+    test("getRqEngineToken uses body site prefix when window.site_prefix is unset", async () => {
+        document.body.dataset.sitePrefix = "/weppcloud";
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: "OK",
+            headers: {
+                get: () => "application/json"
+            },
+            text: () => Promise.resolve(JSON.stringify({ token: "user-token" }))
+        });
+
+        const token = await window.WCHttp.getRqEngineToken();
+
+        expect(token).toBe("user-token");
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        expect(global.fetch.mock.calls[0][0]).toBe("/weppcloud/api/auth/rq-engine-token");
+    });
+
     test("postForm serializes payloads, propagates CSRF, and throws HttpError", async () => {
         document.head.innerHTML = `<meta name="csrf-token" content="token-head">`;
         global.fetch = jest.fn().mockResolvedValue({
