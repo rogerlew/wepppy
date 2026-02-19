@@ -2,7 +2,7 @@
 
 This directory groups long-running initiatives into self-contained "work packages". Each package bundles the brief, tracker, prompts, and supporting notes so agents can jump in without hunting across the repository.
 
-**When to create a work package:** Multi-step features, high-risk migrations, cross-cutting concerns, or any initiative requiring coordination across multiple PRs or agents. See `AGENTS.md` ("Creating a Work Package") for detailed criteria.
+**When to create a work package:** Multi-step features, high-risk migrations, cross-cutting concerns, or any initiative requiring coordination across multiple PRs or agents. See root `AGENTS.md` (`ExecPlans (Required)`) for global planning guardrails, and use the criteria in this guide for package-level decisions.
 
 **Quick links:**
 - [`PROJECT_TRACKER.md`](../../PROJECT_TRACKER.md) (root) — Kanban board showing active/backlog/completed packages

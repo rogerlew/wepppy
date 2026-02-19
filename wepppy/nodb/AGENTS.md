@@ -3,6 +3,20 @@
 This file captures the operational quirks of `NoDbBase` so debugging (and test
 harnesses) stay consistent across agents.
 
+## Task Start: `nodb/core` Bugfixes
+
+* First-hop files:
+  * `wepppy/nodb/base.py` (locking, serialization, cache behavior)
+  * `wepppy/nodb/core/*.py` (controller-specific behavior)
+  * `tests/nodb/` (unit/integration expectations for NoDb flows)
+* Iteration checks:
+  * `wctl run-pytest tests/nodb --maxfail=1`
+  * `wctl run-pytest tests/nodb/test_base_unit.py tests/nodb/test_base_misc.py --maxfail=1`
+* Handoff checks:
+  * `wctl run-pytest tests --maxfail=1` (or document why not run)
+* For shared fixtures, markers, and stub isolation expectations, read
+  `tests/AGENTS.md`.
+
 ## Locking & TTL Overrides
 
 * Every NoDb controller serializes state to `<wd>/<controller>.nodb` and keeps a

@@ -5,6 +5,22 @@
 ## Why this exists
 Caddy fronts the app with `handle_path /weppcloud*`, which **strips the `/weppcloud` prefix** before requests hit Flask. We have regressed a few times by keeping a `url_prefix="/weppcloud"` inside the blueprint, which makes Flask look for `/weppcloud/...` while it actually receives `/...`. Use this checklist every time you touch a blueprint to stay aligned.
 
+If your change touches `wepppy/weppcloud/controllers_js/*`, read
+`wepppy/weppcloud/controllers_js/AGENTS.md` first. This file is route-blueprint
+focused and does not replace controller-specific guidance.
+
+## Task Start: Route or Blueprint Changes
+- First-hop files:
+  - `wepppy/weppcloud/routes/__init__.py`
+  - `wepppy/weppcloud/routes/_blueprints_context.py`
+  - Target blueprint module under `wepppy/weppcloud/routes/`
+- Iteration check:
+  - `wctl run-pytest tests/weppcloud --maxfail=1`
+- Handoff check:
+  - `wctl run-pytest tests --maxfail=1` (or document why skipped)
+- If your change also touches `controllers_js/*`, run the controller checks from
+  `wepppy/weppcloud/controllers_js/AGENTS.md` in addition to route tests.
+
 ## Blueprint creation
 - [ ] Define the blueprint with **no URL prefix** unless the route intentionally lives outside the main app: `Blueprint("your_name", __name__)`.
 - [ ] For run-scoped routes, use the canonical pattern: `/runs/<runid>/<config>/...`.

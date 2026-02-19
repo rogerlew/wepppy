@@ -5,6 +5,9 @@ on:
     paths:
     - '**/*.md'
     - wctl/**
+    - tools/check_agents_size.sh
+    - .github/forest_workflows/docs-quality.yml
+    - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
     - .github/workflows/docs-quality.yml
   push:
@@ -13,6 +16,9 @@ on:
     paths:
     - '**/*.md'
     - wctl/**
+    - tools/check_agents_size.sh
+    - .github/forest_workflows/docs-quality.yml
+    - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
     - .github/workflows/docs-quality.yml
 jobs:
@@ -81,7 +87,7 @@ jobs:
           --path docs
           --path docs/work-packages
           --path AGENTS.md
-          --path README.md
+          --path readme.md
           --path PROJECT_TRACKER.md
           --path CONTRIBUTING_AGENTS.md
           --path TYPE_HINTS_SUMMARY.md
@@ -107,6 +113,10 @@ jobs:
 
         echo "LINT_STATUS=${status}" >> "${GITHUB_ENV}"
         exit 0
+    - name: Enforce root AGENTS size budget
+      run: |
+        set -euo pipefail
+        tools/check_agents_size.sh AGENTS.md
     - name: Run markdown-doc Rust checks
       run: |
         set -euo pipefail
