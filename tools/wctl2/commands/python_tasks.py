@@ -104,6 +104,13 @@ def register(app: typer.Typer) -> None:
         result = compose_exec(context, "weppcloud", command, check=False)
         _exit_from_result(result)
 
+    @app.command("check-rq-graph")
+    def check_rq_graph(ctx: typer.Context) -> None:
+        context = _context(ctx)
+        command = "cd /workdir/wepppy && /opt/venv/bin/python tools/check_rq_dependency_graph.py"
+        result = compose_exec(context, "weppcloud", command, check=False)
+        _exit_from_result(result)
+
     @app.command(
         "check-test-isolation",
         context_settings={"allow_extra_args": True, "ignore_unknown_options": True},

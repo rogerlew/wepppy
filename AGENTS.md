@@ -22,12 +22,15 @@
 - Prefer explicit failures over hidden recovery paths for easier debugging.
 
 ## ExecPlans (Required)
-- For complex features, significant refactors, or multi-hour work, execute against the active ExecPlan under `docs/work-packages/*/prompts/active/`.
+- For complex features, significant refactors, or multi-hour work, execute against an active ExecPlan.
+- Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
+- Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
+- Current ad hoc active ExecPlan: none designated.
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.
 - If multiple active ExecPlans exist, explicitly identify which plan you are executing before edits.
-- Update both the active ExecPlan and `docs/work-packages/*/tracker.md` before handoff.
+- If the active plan is under `docs/work-packages/*/prompts/active/`, update both the active ExecPlan and `docs/work-packages/*/tracker.md` before handoff.
 
 ## Change Scope Discipline (Required)
 - Do not add speculative abstractions for unsupported or hypothetical cases.
@@ -42,6 +45,7 @@
   - `wepppy/rq/*.py`
   - `wepppy/microservices/rq_engine/*`
   - rq-initiated route handlers
+- Run `wctl check-rq-graph` after queue wiring edits; if drift is reported, regenerate with `python tools/check_rq_dependency_graph.py --write`.
 - After queue wiring changes, manually validate against live job trees via `wepppy/rq/job_info.py` or the job dashboard.
 
 ## Environment Baseline
@@ -55,6 +59,7 @@
 - Pre-handoff sanity: `wctl run-pytest tests --maxfail=1`
 - Frontend changes: `wctl run-npm lint` and `wctl run-npm test`
 - Stub/API surface changes: `wctl run-stubtest <module>` and `wctl check-test-stubs`
+- RQ queue wiring changes: `wctl check-rq-graph`
 - Docs changes: `wctl doc-lint --path <file>`; preview spelling normalization with `diff -u <file> <(uk2us <file>)`
 - Root onboarding size gate: `tools/check_agents_size.sh AGENTS.md`
 
