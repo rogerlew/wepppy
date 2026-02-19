@@ -47,6 +47,11 @@
   - Run at least one pre-handoff sanity gate for the touched surface, or document why it was skipped.
 - For exact command forms, use root `AGENTS.md` (`Validation Entry Points`).
 
+## Code Quality Review Component
+- Review the code-quality observability report for changed-file deltas (`improved`, `unchanged`, `worsened`).
+- Treat severity bands as non-blocking telemetry; do not stall delivery solely on threshold crossings.
+- If a touched file worsens materially, include a short rationale or follow-up cleanup note in handoff text.
+
 ## Exception Handling Policy
 - Avoid broad handlers (`except Exception` or bare `except`) in normal code paths.
 - Catch specific exception types when possible; keep error translation explicit and contract-compliant.

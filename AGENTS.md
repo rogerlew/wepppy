@@ -66,8 +66,14 @@
 - Frontend changes: `wctl run-npm lint` and `wctl run-npm test`
 - Stub/API surface changes: `wctl run-stubtest <module>` and `wctl check-test-stubs`
 - RQ queue wiring changes: `wctl check-rq-graph`
+- Code quality observability (non-blocking): `python3 tools/code_quality_observability.py --base-ref origin/master`
 - Docs changes: `wctl doc-lint --path <file>`; preview spelling normalization with `diff -u <file> <(uk2us <file>)`
 - Root onboarding size gate: `tools/check_agents_size.sh AGENTS.md`
+
+## Code Quality Observability (Observe-Only)
+- Treat complexity/LOC bands as triage telemetry, not merge blockers.
+- Prefer changed-file deltas first; use hotspot tables to plan opportunistic cleanup.
+- When a touched file worsens materially, capture a brief rationale or follow-up note in review artifacts.
 
 ## Documentation Map
 - Architecture overview: `ARCHITECTURE.md`
