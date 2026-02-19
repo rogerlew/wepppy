@@ -32,7 +32,7 @@ from flask_security import (
     UserMixin, RoleMixin
 )
 
-from wtforms.validators import DataRequired as Required
+from wtforms.validators import DataRequired as Required, ValidationError
 from flask_mail import Mail
 from flask_session import Session
 from flask_session.sessions import RedisSessionInterface
@@ -377,9 +377,17 @@ class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
 user_datastore = WeppCloudUserDatastore(db, User, Role, Run)
 
 # flask-security extended form
+def _reject_url_like_name(form, field):
+    value = field.data or ''
+    if ':' in value or '/' in value:
+        raise ValidationError(
+            f"{field.label.text} cannot contain ':' or '/' characters."
+        )
+
+
 class ExtendedRegisterForm(RegisterForm):
-    first_name = StringField('First Name', [Required()])
-    last_name = StringField('Last Name', [Required()])
+    first_name = StringField('First Name', [Required(), _reject_url_like_name])
+    last_name = StringField('Last Name', [Required(), _reject_url_like_name])
 
 migrate = Migrate(app, db, directory='/workdir/wepppy/wepppy/weppcloud/migrations')
 
