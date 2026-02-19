@@ -51,6 +51,25 @@ def _configure_secret_file_env(monkeypatch, tmp_path):
     auth_tokens.get_jwt_config.cache_clear()
 
 
+def _issue_time_claim_token(claim_overrides: dict[str, object], *, now: int | None = None) -> str:
+    config = auth_tokens.get_jwt_config()
+    issued_at = int(time.time()) if now is None else int(now)
+    claims = {
+        "sub": "time-claims-user",
+        "jti": "time-claims-jti",
+        "iat": issued_at,
+        "exp": issued_at + 300,
+        "iss": config.issuer,
+        "aud": config.default_audience,
+    }
+    claims.update(claim_overrides)
+    return auth_tokens.encode_jwt(
+        claims,
+        config.secret,
+        algorithm=config.algorithms[0],
+    )
+
+
 def test_issue_token_includes_claims(monkeypatch):
     _configure_env(monkeypatch)
     now = int(time.time())
@@ -129,3 +148,54 @@ def test_issue_token_uses_secret_file_env(monkeypatch, tmp_path):
 
     decoded = auth_tokens.decode_token(result["token"], audience="wepp-services")
     assert decoded["sub"] == "user-file"
+
+
+def test_decode_token_rejects_expired_token(monkeypatch):
+    _configure_env(monkeypatch)
+    now = int(time.time())
+    token = _issue_time_claim_token({"exp": now - 5}, now=now - 120)
+
+    with pytest.raises(auth_tokens.JWTDecodeError, match="expired"):
+        auth_tokens.decode_token(token, audience="wepp-services")
+
+
+def test_decode_token_rejects_not_before_in_future(monkeypatch):
+    _configure_env(monkeypatch)
+    now = int(time.time())
+    token = _issue_time_claim_token({"nbf": now + 60}, now=now)
+
+    with pytest.raises(auth_tokens.JWTDecodeError, match="not yet valid"):
+        auth_tokens.decode_token(token, audience="wepp-services")
+
+
+def test_decode_token_rejects_issued_at_in_future(monkeypatch):
+    _configure_env(monkeypatch)
+    now = int(time.time())
+    token = _issue_time_claim_token({"iat": now + 60, "exp": now + 120}, now=now)
+
+    with pytest.raises(auth_tokens.JWTDecodeError, match="future"):
+        auth_tokens.decode_token(token, audience="wepp-services")
+
+
+def test_decode_token_allows_time_claims_with_leeway(monkeypatch):
+    _configure_env(monkeypatch)
+    monkeypatch.setenv("WEPP_AUTH_JWT_LEEWAY", "15")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    now = int(time.time())
+    token = _issue_time_claim_token(
+        {"exp": now - 5, "nbf": now + 5, "iat": now + 5},
+        now=now,
+    )
+    decoded = auth_tokens.decode_token(token, audience="wepp-services")
+
+    assert decoded["sub"] == "time-claims-user"
+
+
+@pytest.mark.parametrize("claim", ["exp", "nbf", "iat"])
+def test_decode_token_rejects_non_numeric_time_claims(monkeypatch, claim):
+    _configure_env(monkeypatch)
+    token = _issue_time_claim_token({claim: "invalid"})
+
+    with pytest.raises(auth_tokens.JWTDecodeError, match=f"'{claim}' claim must be numeric"):
+        auth_tokens.decode_token(token, audience="wepp-services")

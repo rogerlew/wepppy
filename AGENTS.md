@@ -15,6 +15,9 @@
 - The active ExecPlan is a living document: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current at each stopping point.
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md` and follow its requirements.
 - When a user asks to run a plan, do not ask for next steps between milestones unless blocked by a real external dependency.
+- Treat `docs/prompt_templates/codex_exec_plans.md` as the repository PLANS contract: ExecPlans and execution prompts must satisfy its requirements, formatting, milestone, validation, and revision-note rules.
+- If more than one active ExecPlan exists, explicitly identify which plan is being executed before making edits.
+- When asked to "execute/carry out/run" an ExecPlan end-to-end, proceed milestone by milestone to completion, run the plan's validation gates, and update both the ExecPlan and package tracker (`docs/work-packages/*/tracker.md`) before handoff.
 
 ### Change Scope Discipline (Required)
 - Do not add speculative abstractions or generalized code paths for unsupported or hypothetical cases.

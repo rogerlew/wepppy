@@ -67,3 +67,121 @@ def test_require_session_marker_returns_unauthorized_when_marker_missing(
     assert exc_info.value.status_code == 401
     assert exc_info.value.code == "unauthorized"
     assert "session token invalid or expired" in exc_info.value.message.lower()
+
+
+def test_require_roles_accepts_mixed_role_shapes() -> None:
+    claims = {"roles": ["Admin", {"name": "PowerUser"}, "Dev"]}
+
+    auth.require_roles(claims, ["admin"])
+    auth.require_roles(claims, ["PowerUser"])
+
+
+def test_require_roles_rejects_when_required_role_missing() -> None:
+    claims = {"roles": ["User", {"name": "Dev"}]}
+
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth.require_roles(claims, ["Admin"])
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.code == "forbidden"
+    assert "required role" in exc_info.value.message.lower()
+
+
+def test_authorize_user_claims_allows_admin_without_owner_lookup(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(auth, "get_wd", lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("unused")))
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: (_ for _ in ()).throw(AssertionError("unused")))
+
+    auth._authorize_user_claims({"roles": ["Admin"], "sub": "42"}, "run-1")
+
+
+def test_authorize_user_claims_allows_root_without_owner_lookup(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(auth, "get_wd", lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("unused")))
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: (_ for _ in ()).throw(AssertionError("unused")))
+
+    auth._authorize_user_claims({"roles": ["root"], "sub": "42"}, "run-1")
+
+
+def test_authorize_user_claims_allows_public_run_for_non_owner(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Owner:
+        id = 99
+        email = "owner@example.com"
+
+    monkeypatch.setattr(auth, "get_wd", lambda _runid, **_kwargs: "/tmp/run-1")
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: [Owner()])
+    monkeypatch.setattr(auth.Ron, "ispublic", staticmethod(lambda _wd: True))
+
+    auth._authorize_user_claims({"roles": [], "sub": "12", "email": "other@example.com"}, "run-1")
+
+
+def test_authorize_user_claims_allows_owner_match_by_subject(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Owner:
+        id = 42
+        email = "owner@example.com"
+
+    monkeypatch.setattr(auth, "get_wd", lambda _runid, **_kwargs: "/tmp/run-1")
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: [Owner()])
+    monkeypatch.setattr(auth.Ron, "ispublic", staticmethod(lambda _wd: False))
+
+    auth._authorize_user_claims({"roles": [], "sub": "42"}, "run-1")
+
+
+def test_authorize_user_claims_allows_owner_match_by_email(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Owner:
+        id = 77
+        email = "owner@example.com"
+
+    monkeypatch.setattr(auth, "get_wd", lambda _runid, **_kwargs: "/tmp/run-1")
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: [Owner()])
+    monkeypatch.setattr(auth.Ron, "ispublic", staticmethod(lambda _wd: False))
+
+    auth._authorize_user_claims({"roles": [], "sub": "55", "email": "owner@example.com"}, "run-1")
+
+
+def test_authorize_user_claims_rejects_non_owner_private_run(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Owner:
+        id = 77
+        email = "owner@example.com"
+
+    monkeypatch.setattr(auth, "get_wd", lambda _runid, **_kwargs: "/tmp/run-1")
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: [Owner()])
+    monkeypatch.setattr(auth.Ron, "ispublic", staticmethod(lambda _wd: False))
+
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth._authorize_user_claims({"roles": [], "sub": "55", "email": "other@example.com"}, "run-1")
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.code == "forbidden"
+
+
+@pytest.mark.parametrize(
+    ("claims", "expected"),
+    [
+        ({"token_class": "user", "sub": "42"}, {"token_class": "user", "user_id": 42}),
+        (
+            {"token_class": "session", "session_id": "sid-1"},
+            {"token_class": "session", "session_id": "sid-1"},
+        ),
+        (
+            {"token_class": "service", "sub": "svc-1", "service_groups": ["alpha", "beta"]},
+            {"token_class": "service", "sub": "svc-1", "service_groups": ["alpha", "beta"]},
+        ),
+        ({"token_class": "mcp", "sub": "mcp-1"}, {"token_class": "mcp", "sub": "mcp-1"}),
+    ],
+)
+def test_sanitize_auth_actor_normalizes_supported_classes(claims, expected) -> None:
+    assert auth._sanitize_auth_actor(claims) == expected
+
+
+@pytest.mark.parametrize(
+    "claims",
+    [
+        {},
+        {"token_class": "user", "sub": "not-an-int"},
+        {"token_class": "session"},
+        {"token_class": "service"},
+        {"token_class": "mcp"},
+        {"token_class": "unknown", "sub": "x"},
+    ],
+)
+def test_sanitize_auth_actor_rejects_malformed_claims(claims) -> None:
+    assert auth._sanitize_auth_actor(claims) is None
