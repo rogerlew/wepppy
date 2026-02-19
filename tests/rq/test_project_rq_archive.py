@@ -80,6 +80,49 @@ def test_archive_rq_checks_disk_headroom_before_writing_archive(
     assert not (run_dir / "archives").exists()
 
 
+def test_archive_rq_excludes_nodir_cache_entries(
+    archive_rq_environment,
+) -> None:
+    project, tmp_path, _published, prep_by_run = archive_rq_environment
+    run_dir = tmp_path / "demo"
+    run_dir.mkdir(parents=True)
+
+    (run_dir / "input.txt").write_text("input", encoding="utf-8")
+    (run_dir / ".nodir" / "cache" / "watershed" / "123").mkdir(parents=True)
+    (run_dir / ".nodir" / "cache" / "watershed" / "123" / "entry.bin").write_bytes(b"cache")
+    (run_dir / ".nodir" / "projections").mkdir(parents=True)
+    (run_dir / ".nodir" / "projections" / "read.json").write_text("{}", encoding="utf-8")
+
+    project.archive_rq("demo", comment="snapshot")
+
+    archive_paths = sorted((run_dir / "archives").glob("*.zip"))
+    assert len(archive_paths) == 1
+
+    with zipfile.ZipFile(archive_paths[0], mode="r") as zf:
+        names = set(zf.namelist())
+
+    assert "input.txt" in names
+    assert ".nodir/projections/read.json" in names
+    assert ".nodir/cache/watershed/123/entry.bin" not in names
+    assert prep_by_run["demo"].cleared == 1
+
+
+def test_calculate_run_payload_bytes_excludes_nodir_cache(
+    archive_rq_environment,
+) -> None:
+    project, tmp_path, _published, _prep_by_run = archive_rq_environment
+    run_dir = tmp_path / "demo"
+    run_dir.mkdir(parents=True)
+
+    (run_dir / "included.txt").write_bytes(b"abc")
+    (run_dir / ".nodir" / "cache" / "watershed" / "123").mkdir(parents=True)
+    (run_dir / ".nodir" / "cache" / "watershed" / "123" / "ignored.bin").write_bytes(b"x" * 100)
+
+    total_bytes, file_count = project._calculate_run_payload_bytes(run_dir)
+    assert total_bytes == 3
+    assert file_count == 1
+
+
 def test_restore_archive_rq_validates_zip_integrity_before_removing_existing_files(
     archive_rq_environment,
     monkeypatch: pytest.MonkeyPatch,
@@ -103,6 +146,26 @@ def test_restore_archive_rq_validates_zip_integrity_before_removing_existing_fil
 
     assert current_file.exists()
     assert current_file.read_text(encoding="utf-8") == "keep-me"
+    assert prep_by_run["demo"].cleared == 1
+
+
+def test_restore_archive_rq_skips_nodir_cache_entries(
+    archive_rq_environment,
+) -> None:
+    project, tmp_path, _published, prep_by_run = archive_rq_environment
+    run_dir = tmp_path / "demo"
+    archives_dir = run_dir / "archives"
+    archives_dir.mkdir(parents=True)
+
+    archive_path = archives_dir / "demo.20260218T000000Z.zip"
+    with zipfile.ZipFile(archive_path, mode="w") as zf:
+        zf.writestr("restored.txt", "value")
+        zf.writestr(".nodir/cache/watershed/123/entry.bin", "cache")
+
+    project.restore_archive_rq("demo", archive_path.name)
+
+    assert (run_dir / "restored.txt").read_text(encoding="utf-8") == "value"
+    assert not (run_dir / ".nodir" / "cache" / "watershed" / "123" / "entry.bin").exists()
     assert prep_by_run["demo"].cleared == 1
 
 

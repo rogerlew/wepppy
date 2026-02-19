@@ -1392,9 +1392,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
             StatusMessenger.publish(status_channel, error_msg)
             raise FileNotFoundError(error_msg)
 
-        cmd = ['rsync', '-av', '--progress', '.', run_right]
-        if undisturbify:
-            cmd.extend(['--exclude', 'wepp/runs', '--exclude', 'wepp/output'])
+        cmd = _build_fork_rsync_cmd(run_right, undisturbify=undisturbify)
 
         _cmd = ' '.join(cmd)
         StatusMessenger.publish(status_channel, f'Running cmd: {_cmd}')
@@ -1580,6 +1578,34 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
 _ARCHIVE_DISK_HEADROOM_RATIO = 0.02
 _ARCHIVE_MIN_HEADROOM_BYTES = 64 * 1024 * 1024
 _ARCHIVE_PER_FILE_OVERHEAD_BYTES = 1024
+_ARCHIVE_EXCLUDE_PREFIXES: tuple[str, ...] = ("archives", ".nodir/cache")
+
+
+def _normalize_relpath(relpath: str) -> str:
+    rel = relpath.replace("\\", "/")
+    if rel == ".":
+        return ""
+    while rel.startswith("./"):
+        rel = rel[2:]
+    return rel.rstrip("/")
+
+
+def _is_archive_excluded_relpath(relpath: str) -> bool:
+    rel = _normalize_relpath(relpath)
+    if not rel:
+        return False
+    return any(rel == prefix or rel.startswith(f"{prefix}/") for prefix in _ARCHIVE_EXCLUDE_PREFIXES)
+
+
+def _build_fork_rsync_cmd(run_right: str, *, undisturbify: bool) -> list[str]:
+    cmd = ['rsync', '-av', '--progress']
+    # `.nodir/cache` materialization artifacts are ephemeral and should never
+    # be synced into forked runs.
+    cmd.extend(['--exclude', '.nodir/cache/***'])
+    if undisturbify:
+        cmd.extend(['--exclude', 'wepp/runs', '--exclude', 'wepp/output'])
+    cmd.extend(['.', run_right])
+    return cmd
 
 
 def _estimate_archive_required_bytes(payload_bytes: int, file_count: int) -> int:
@@ -1620,20 +1646,20 @@ def _calculate_run_payload_bytes(wd: Path) -> tuple[int, int]:
         if rel_root == '.':
             rel_root = ''
 
-        if rel_root.startswith('archives'):
+        if _is_archive_excluded_relpath(rel_root):
             dirs[:] = []
             continue
 
         dirs[:] = [
             d
             for d in dirs
-            if not os.path.relpath(os.path.join(root, d), wd).startswith('archives')
+            if not _is_archive_excluded_relpath(os.path.relpath(os.path.join(root, d), wd))
         ]
 
         for filename in files:
             abs_path = Path(root) / filename
             rel_path = os.path.relpath(abs_path, wd)
-            if rel_path.startswith('archives'):
+            if _is_archive_excluded_relpath(rel_path):
                 continue
             try:
                 total_bytes += abs_path.stat().st_size
@@ -1667,8 +1693,8 @@ def _collect_restore_members(
         except ValueError as exc:
             raise ValueError(f'Unsafe archive member path: {arcname}') from exc
 
-        # Skip anything targeting the archives directory to avoid overwriting archives.
-        if relative_target.parts and relative_target.parts[0] == 'archives':
+        # Skip archive outputs and ephemeral NoDir cache paths.
+        if _is_archive_excluded_relpath(relative_target.as_posix()):
             continue
 
         if not member.is_dir():
@@ -1737,17 +1763,20 @@ def archive_rq(runid: str, comment: Optional[str] = None) -> None:
                 if rel_root == '.':
                     rel_root = ''
 
-                # Skip the archives directory entirely
-                if rel_root.startswith('archives'):
+                if _is_archive_excluded_relpath(rel_root):
                     dirs[:] = []
                     continue
 
-                dirs[:] = [d for d in dirs if not os.path.relpath(os.path.join(root, d), wd).startswith('archives')]
+                dirs[:] = [
+                    d
+                    for d in dirs
+                    if not _is_archive_excluded_relpath(os.path.relpath(os.path.join(root, d), wd))
+                ]
 
                 for filename in files:
                     abs_path = os.path.join(root, filename)
                     arcname = os.path.relpath(abs_path, wd)
-                    if arcname.startswith('archives'):
+                    if _is_archive_excluded_relpath(arcname):
                         continue
 
                     StatusMessenger.publish(status_channel, f'Adding {arcname}')
