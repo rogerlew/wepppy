@@ -2,6 +2,7 @@
 > Contract for representing selected run-scoped project trees as either a real directory or a single-file `.nodir` archive (zip container), while preserving “directory-like” semantics for code and the browse service.
 > **Work package:** `docs/work-packages/20260214_nodir_archives/package.md`
 > **See also:** `docs/schemas/nodir-thaw-freeze-contract.md` (thaw/freeze state tracking + crash recovery)
+> **See also:** `docs/schemas/nodir-touchpoints-reference.md` (consolidated module-level projection/mutation/materialization audit matrix)
 
 ## Scope
 - Applies to run working directories (WDs) returned by `get_wd(runid)` (typically `/wc1/runs/<prefix>/<runid>/`).
