@@ -21,6 +21,12 @@
 - Do not add fallback wrappers that silently mask missing required dependencies.
 - Prefer explicit failures over hidden recovery paths for easier debugging.
 
+## Exception Handling (Required)
+- Do not introduce bare `except:` or broad `except Exception` handlers in production paths unless the block is a deliberate boundary.
+- Prefer narrow, expected exception types and preserve canonical error contracts when translating errors.
+- Never swallow exceptions silently; log with context and either re-raise or return an explicit, contract-compliant error response.
+- If a broad catch is unavoidable (for example, boundary cleanup/telemetry), document why in a short comment and keep the protected block minimal.
+
 ## ExecPlans (Required)
 - For complex features, significant refactors, or multi-hour work, execute against an active ExecPlan.
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.

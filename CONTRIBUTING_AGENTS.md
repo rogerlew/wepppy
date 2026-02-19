@@ -47,6 +47,11 @@
   - Run at least one pre-handoff sanity gate for the touched surface, or document why it was skipped.
 - For exact command forms, use root `AGENTS.md` (`Validation Entry Points`).
 
+## Exception Handling Policy
+- Avoid broad handlers (`except Exception` or bare `except`) in normal code paths.
+- Catch specific exception types when possible; keep error translation explicit and contract-compliant.
+- If a boundary must use a broad catch, keep the block tight, log context, and document the rationale inline.
+
 ## Handoff Hygiene
 - Summarize exactly what changed and why (file-level scope).
 - List validations run and any validations not run.
