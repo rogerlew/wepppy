@@ -72,6 +72,140 @@ def orchestrate(runid):
     assert all(edge["queue_name"] == "default" for edge in edges)
 
 
+def test_dependency_graph_extractor_handles_enqueue_wrapper_calls(tmp_path: Path) -> None:
+    source_file = tmp_path / "wepppy" / "rq" / "sample_wrapper.py"
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text(
+        """
+from rq import Queue
+
+
+def _enqueue(q, parent_job, *, key, func, args=(), depends_on=None):
+    child_job = q.enqueue_call(func=func, args=args, depends_on=depends_on)
+    parent_job.meta[key] = child_job.id
+    parent_job.save()
+    return child_job
+
+
+def orchestrate(runid):
+    q = Queue(connection=redis_conn)
+    parent_job = object()
+    prep_job = _enqueue(q, parent_job, key="jobs:0,func:_prep_rq", func=_prep_rq, args=(runid,))
+    _enqueue(
+        q,
+        parent_job,
+        key="jobs:1,func:_run_rq",
+        func=_run_rq,
+        args=(runid,),
+        depends_on=[prep_job],
+    )
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    edges = extract_dependency_edges(repo_root=tmp_path, source_files=[source_file])
+    assert [edge["enqueue_target"] for edge in edges] == ["_prep_rq", "_run_rq"]
+    assert [edge["job_meta_stage"] for edge in edges] == ["jobs:0", "jobs:1"]
+    assert edges[1]["depends_on"] == ["_prep_rq"]
+    assert all(edge["source_function"] == "orchestrate" for edge in edges)
+
+
+def test_dependency_graph_extractor_handles_nested_append_and_return_wrapper_calls(tmp_path: Path) -> None:
+    source_file = tmp_path / "wepppy" / "rq" / "sample_nested_wrapper.py"
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text(
+        """
+from rq import Queue
+
+
+def _enqueue(q, parent_job, *, key, func, args=(), depends_on=None):
+    child_job = q.enqueue_call(func=func, args=args, depends_on=depends_on)
+    parent_job.meta[key] = child_job.id
+    parent_job.save()
+    return child_job
+
+
+def orchestrate(runid):
+    q = Queue(connection=redis_conn)
+    parent_job = object()
+    deps = []
+    deps.append(_enqueue(q, parent_job, key="jobs:0,func:_prep_rq", func=_prep_rq, args=(runid,)))
+    return _enqueue(
+        q,
+        parent_job,
+        key="jobs:6,func:_log_complete_rq",
+        func=_log_complete_rq,
+        args=(runid,),
+        depends_on=deps,
+    )
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    edges = extract_dependency_edges(repo_root=tmp_path, source_files=[source_file])
+    assert [edge["enqueue_target"] for edge in edges] == ["_prep_rq", "_log_complete_rq"]
+    assert [edge["job_meta_stage"] for edge in edges] == ["jobs:0", "jobs:6"]
+    assert edges[1]["depends_on"] == ["_prep_rq"]
+
+
+def test_dependency_graph_extractor_handles_qualified_wrapper_calls(tmp_path: Path) -> None:
+    source_file = tmp_path / "wepppy" / "rq" / "sample_qualified_wrapper.py"
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text(
+        """
+from rq import Queue
+
+
+def orchestrate(runid):
+    q = Queue(connection=redis_conn)
+    parent_job = object()
+    prep_job = _pipeline._enqueue(
+        q,
+        parent_job,
+        key="jobs:0,func:_prep_rq",
+        func=_prep_rq,
+        args=(runid,),
+    )
+    return _pipeline.enqueue_log_complete(
+        q,
+        parent_job,
+        runid,
+        tasks=tasks,
+        depends_on=[prep_job],
+    )
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    edges = extract_dependency_edges(repo_root=tmp_path, source_files=[source_file])
+    assert [edge["enqueue_target"] for edge in edges] == ["_prep_rq", "tasks._log_complete_rq"]
+    assert [edge["job_meta_stage"] for edge in edges] == ["jobs:0", "jobs:6"]
+    assert edges[1]["depends_on"] == ["_prep_rq"]
+
+
+def test_dependency_graph_extractor_includes_jobs6_edges_for_wepp_pipeline_module() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    source_file = repo_root / "wepppy" / "rq" / "wepp_rq_pipeline.py"
+
+    edges = extract_dependency_edges(repo_root=repo_root, source_files=[source_file])
+
+    assert any(
+        edge["source_function"] == "enqueue_wepp_pipeline"
+        and edge["job_meta_stage"] == "jobs:6"
+        and edge["enqueue_target"] == "tasks._log_complete_rq"
+        for edge in edges
+    )
+    assert any(
+        edge["source_function"] == "enqueue_watershed_noprep_pipeline"
+        and edge["job_meta_stage"] == "jobs:6"
+        and edge["enqueue_target"] == "tasks._log_complete_rq"
+        for edge in edges
+    )
+
+
 def test_dependency_graph_extractor_normalizes_dynamic_stage_keys(tmp_path: Path) -> None:
     source_file = tmp_path / "wepppy" / "rq" / "sample_dynamic.py"
     source_file.parent.mkdir(parents=True)

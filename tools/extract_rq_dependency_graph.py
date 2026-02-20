@@ -21,6 +21,7 @@ SOURCE_GLOBS: tuple[str, ...] = (
     "wepppy/weppcloud/bootstrap/*.py",
 )
 ENQUEUE_METHODS = {"enqueue", "enqueue_call"}
+ENQUEUE_WRAPPER_FUNCTIONS = {"_enqueue", "enqueue_log_complete"}
 _JOBS_STAGE_RE = re.compile(r"jobs:([^,]+)")
 
 
@@ -107,6 +108,7 @@ def _collect_dep_refs(
     *,
     job_bindings: dict[str, str],
     list_bindings: dict[str, list[str]],
+    aliases: dict[str, set[str]] | None = None,
 ) -> list[str]:
     if node is None:
         return []
@@ -126,28 +128,82 @@ def _collect_dep_refs(
     if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
         refs: list[str] = []
         for elt in node.elts:
-            refs.extend(_collect_dep_refs(elt, job_bindings=job_bindings, list_bindings=list_bindings))
+            refs.extend(
+                _collect_dep_refs(
+                    elt,
+                    job_bindings=job_bindings,
+                    list_bindings=list_bindings,
+                    aliases=aliases,
+                )
+            )
         return _dedupe(refs)
 
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-        refs = _collect_dep_refs(node.left, job_bindings=job_bindings, list_bindings=list_bindings)
-        refs.extend(_collect_dep_refs(node.right, job_bindings=job_bindings, list_bindings=list_bindings))
+        refs = _collect_dep_refs(
+            node.left,
+            job_bindings=job_bindings,
+            list_bindings=list_bindings,
+            aliases=aliases,
+        )
+        refs.extend(
+            _collect_dep_refs(
+                node.right,
+                job_bindings=job_bindings,
+                list_bindings=list_bindings,
+                aliases=aliases,
+            )
+        )
         return _dedupe(refs)
 
     if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or):
         refs: list[str] = []
         for value in node.values:
-            refs.extend(_collect_dep_refs(value, job_bindings=job_bindings, list_bindings=list_bindings))
+            refs.extend(
+                _collect_dep_refs(
+                    value,
+                    job_bindings=job_bindings,
+                    list_bindings=list_bindings,
+                    aliases=aliases,
+                )
+            )
         return _dedupe(refs)
 
     if isinstance(node, ast.IfExp):
-        refs = _collect_dep_refs(node.body, job_bindings=job_bindings, list_bindings=list_bindings)
-        refs.extend(_collect_dep_refs(node.orelse, job_bindings=job_bindings, list_bindings=list_bindings))
+        refs = _collect_dep_refs(
+            node.body,
+            job_bindings=job_bindings,
+            list_bindings=list_bindings,
+            aliases=aliases,
+        )
+        refs.extend(
+            _collect_dep_refs(
+                node.orelse,
+                job_bindings=job_bindings,
+                list_bindings=list_bindings,
+                aliases=aliases,
+            )
+        )
         return _dedupe(refs)
 
     if isinstance(node, ast.Call):
         if isinstance(node.func, ast.Name) and node.func.id == "list" and node.args:
-            return _collect_dep_refs(node.args[0], job_bindings=job_bindings, list_bindings=list_bindings)
+            return _collect_dep_refs(
+                node.args[0],
+                job_bindings=job_bindings,
+                list_bindings=list_bindings,
+                aliases=aliases,
+            )
+        enqueue_data = _extract_enqueue_event_data(node)
+        if enqueue_data is not None:
+            target_expr = enqueue_data.get("target_expr")
+            if isinstance(target_expr, ast.Name):
+                alias_values = (aliases or {}).get(target_expr.id)
+                if alias_values:
+                    if len(alias_values) == 1:
+                        return [next(iter(alias_values))]
+                    return ["/".join(sorted(alias_values))]
+            if target_expr is not None:
+                return [_expr_text(target_expr)]
         return [_expr_text(node)]
 
     return [_expr_text(node)]
@@ -170,10 +226,34 @@ def _queue_ref_from_enqueue_call(call: ast.Call) -> str | None:
     return None
 
 
+def _queue_ref_from_enqueue_wrapper(call: ast.Call) -> str | None:
+    if call.args and isinstance(call.args[0], ast.Name):
+        return call.args[0].id
+    explicit = _keyword_value(call, "q")
+    if isinstance(explicit, ast.Name):
+        return explicit.id
+    return None
+
+
+def _enqueue_log_complete_target_expr(call: ast.Call) -> ast.AST:
+    tasks_expr = _keyword_value(call, "tasks")
+    if tasks_expr is None:
+        return ast.Constant("_log_complete_rq")
+    return ast.Constant(f"{_expr_text(tasks_expr)}._log_complete_rq")
+
+
 def _keyword_value(call: ast.Call, name: str) -> ast.AST | None:
     for keyword in call.keywords:
         if keyword.arg == name:
             return keyword.value
+    return None
+
+
+def _call_function_name(call: ast.Call) -> str | None:
+    if isinstance(call.func, ast.Name):
+        return call.func.id
+    if isinstance(call.func, ast.Attribute):
+        return call.func.attr
     return None
 
 
@@ -216,6 +296,27 @@ def _target_label(target_expr: ast.AST | None, aliases: dict[str, set[str]]) -> 
 
 
 def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
+    function_name = _call_function_name(call)
+
+    if function_name == "_enqueue":
+        key_expr = _keyword_value(call, "key")
+        stage = _extract_stage_from_meta_key(key_expr) if key_expr is not None else None
+        return {
+            "queue_ref": _queue_ref_from_enqueue_wrapper(call),
+            "target_expr": _keyword_value(call, "func"),
+            "depends_on_expr": _keyword_value(call, "depends_on"),
+            "method": "enqueue_wrapper",
+            "job_meta_stage": stage,
+        }
+    if function_name == "enqueue_log_complete":
+        return {
+            "queue_ref": _queue_ref_from_enqueue_wrapper(call),
+            "target_expr": _enqueue_log_complete_target_expr(call),
+            "depends_on_expr": _keyword_value(call, "depends_on"),
+            "method": "enqueue_log_complete_wrapper",
+            "job_meta_stage": "jobs:6",
+        }
+
     if not isinstance(call.func, ast.Attribute) or call.func.attr not in ENQUEUE_METHODS:
         return None
 
@@ -225,6 +326,7 @@ def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
         "target_expr": target_expr,
         "depends_on_expr": _keyword_value(call, "depends_on"),
         "method": call.func.attr,
+        "job_meta_stage": None,
     }
 
 
@@ -265,10 +367,20 @@ def _assign_name_target(node: ast.Assign | ast.AnnAssign) -> str | None:
     return None
 
 
+def _call_position_key(call: ast.Call) -> tuple[int, int, int | None, int | None]:
+    return (
+        call.lineno,
+        call.col_offset,
+        getattr(call, "end_lineno", None),
+        getattr(call, "end_col_offset", None),
+    )
+
+
 class _Collector(ast.NodeVisitor):
     def __init__(self) -> None:
         self._function_stack: list[str] = ["<module>"]
         self._counter = 0
+        self._seen_enqueue_calls: set[tuple[int, int, int | None, int | None]] = set()
         self.events: list[_Event] = []
 
     def _emit(self, *, kind: str, lineno: int, data: dict[str, Any]) -> None:
@@ -308,27 +420,41 @@ class _Collector(ast.NodeVisitor):
     def visit_Expr(self, node: ast.Expr) -> Any:
         value = node.value
         if isinstance(value, ast.Call):
-            enqueue_data = _extract_enqueue_event_data(value)
-            if enqueue_data is not None:
-                self._emit(kind="enqueue", lineno=node.lineno, data={**enqueue_data, "job_var": None})
+            self._emit_enqueue_call(value, job_var=None)
             append_data = _extract_append_event_data(value)
             if append_data is not None:
                 self._emit(kind="list_append", lineno=node.lineno, data=append_data)
         self.generic_visit(node)
         return None
 
+    def visit_Call(self, node: ast.Call) -> Any:
+        self._emit_enqueue_call(node, job_var=None)
+        self.generic_visit(node)
+        return None
+
+    def _emit_enqueue_call(self, call: ast.Call, *, job_var: str | None) -> bool:
+        enqueue_data = _extract_enqueue_event_data(call)
+        if enqueue_data is None:
+            return False
+
+        position_key = _call_position_key(call)
+        if position_key in self._seen_enqueue_calls:
+            return True
+        self._seen_enqueue_calls.add(position_key)
+
+        self._emit(
+            kind="enqueue",
+            lineno=call.lineno,
+            data={**enqueue_data, "job_var": job_var},
+        )
+        return True
+
     def _collect_assignment(self, node: ast.Assign | ast.AnnAssign) -> None:
         name_target = _assign_name_target(node)
         value = node.value
 
         if isinstance(value, ast.Call):
-            enqueue_data = _extract_enqueue_event_data(value)
-            if enqueue_data is not None:
-                self._emit(
-                    kind="enqueue",
-                    lineno=node.lineno,
-                    data={**enqueue_data, "job_var": name_target},
-                )
+            if self._emit_enqueue_call(value, job_var=name_target):
                 return
 
             if name_target and _is_queue_constructor(value):
@@ -448,6 +574,7 @@ def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRe
                     event.data["value"],
                     job_bindings=job_bindings,
                     list_bindings=list_bindings,
+                    aliases=aliases,
                 )
                 list_bindings[event.data["var_name"]] = refs
                 continue
@@ -457,6 +584,7 @@ def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRe
                     event.data["value"],
                     job_bindings=job_bindings,
                     list_bindings=list_bindings,
+                    aliases=aliases,
                 )
                 existing = list_bindings.setdefault(event.data["var_name"], [])
                 if event.data["op"] == "append":
@@ -467,16 +595,24 @@ def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRe
                 continue
 
             if event.kind == "enqueue":
+                if function_name in ENQUEUE_WRAPPER_FUNCTIONS:
+                    # Wrapper implementation internals are represented by
+                    # wrapper callsites in parent orchestration functions.
+                    continue
+
+                target_expr = event.data.get("target_expr")
+
                 queue_name = "unknown"
                 queue_ref = event.data.get("queue_ref")
                 if queue_ref is not None:
                     queue_name = queue_bindings.get(queue_ref, "default")
 
-                target, target_notes = _target_label(event.data.get("target_expr"), aliases)
+                target, target_notes = _target_label(target_expr, aliases)
                 depends_on = _collect_dep_refs(
                     event.data.get("depends_on_expr"),
                     job_bindings=job_bindings,
                     list_bindings=list_bindings,
+                    aliases=aliases,
                 )
 
                 edge = _EdgeRecord(
@@ -485,7 +621,7 @@ def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRe
                     source_lineno=event.lineno,
                     enqueue_target=target,
                     depends_on=_dedupe(depends_on),
-                    job_meta_stage=None,
+                    job_meta_stage=event.data.get("job_meta_stage"),
                     queue_name=queue_name,
                     notes=target_notes,
                     job_var=event.data.get("job_var"),

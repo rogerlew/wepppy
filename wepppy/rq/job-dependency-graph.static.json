@@ -543,806 +543,806 @@
   },
   {
     "depends_on": [],
-    "enqueue_target": "_run_hillslopes_rq",
-    "job_meta_stage": "jobs:1",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 814,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_run_hillslopes_rq"
-    ],
-    "enqueue_target": "_build_hillslope_interchange_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 818,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_build_hillslope_interchange_rq"
-    ],
-    "enqueue_target": "_build_totalwatsed3_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 829,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_run_hillslopes_rq"
-    ],
-    "enqueue_target": "run_ss_batch_watershed_rq",
-    "job_meta_stage": "jobs:3",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 847,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_run_hillslopes_rq"
-    ],
-    "enqueue_target": "run_watershed_rq",
-    "job_meta_stage": "jobs:3",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 858,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_run_hillslopes_rq"
-    ],
-    "enqueue_target": "_post_run_cleanup_out_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 871,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_run_hillslopes_rq"
-    ],
-    "enqueue_target": "_post_prep_details_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 882,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_run_hillslopes_rq",
-      "_build_hillslope_interchange_rq"
-    ],
-    "enqueue_target": "_run_hillslope_watbal_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 895,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_run_hillslopes_rq"
-    ],
-    "enqueue_target": "_post_make_loss_grid_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 906,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq"
-    ],
-    "enqueue_target": "_post_watershed_interchange_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 916,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_watershed_interchange_rq",
-      "_build_totalwatsed3_rq"
-    ],
-    "enqueue_target": "_analyze_return_periods_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 928,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_build_hillslope_interchange_rq",
-      "_post_run_cleanup_out_rq"
-    ],
-    "enqueue_target": "post_dss_export_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 942,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_run_hillslope_watbal_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq",
-      "_analyze_return_periods_rq"
-    ],
-    "enqueue_target": "_post_legacy_arc_export_rq",
-    "job_meta_stage": "jobs:5",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 953,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_run_hillslope_watbal_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq",
-      "_analyze_return_periods_rq"
-    ],
-    "enqueue_target": "_post_gpkg_export_rq",
-    "job_meta_stage": "jobs:5",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 964,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_run_hillslope_watbal_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq",
-      "_analyze_return_periods_rq",
-      "_post_legacy_arc_export_rq",
-      "_post_gpkg_export_rq",
-      "_build_hillslope_interchange_rq",
-      "_build_totalwatsed3_rq",
-      "post_dss_export_rq"
-    ],
-    "enqueue_target": "_log_complete_rq",
+    "enqueue_target": "sys.modules[__name__]._log_complete_rq",
     "job_meta_stage": "jobs:6",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_noprep_rq",
-    "source_lineno": 983,
+    "source_function": "run_wepp_watershed_noprep_rq",
+    "source_lineno": 656,
     "source_module": "wepppy/rq/wepp_rq.py"
   },
   {
     "depends_on": [],
-    "enqueue_target": "_prep_multi_ofe_rq",
-    "job_meta_stage": "jobs:0",
+    "enqueue_target": "sys.modules[__name__]._log_complete_rq",
+    "job_meta_stage": "jobs:6",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 491,
+    "source_function": "run_wepp_watershed_rq",
+    "source_lineno": 583,
     "source_module": "wepppy/rq/wepp_rq.py"
   },
   {
     "depends_on": [],
-    "enqueue_target": "_prep_slopes_rq",
-    "job_meta_stage": "jobs:0",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 496,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [],
-    "enqueue_target": "_prep_managements_rq",
-    "job_meta_stage": "jobs:0",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 501,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [],
-    "enqueue_target": "_prep_soils_rq",
-    "job_meta_stage": "jobs:0",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 506,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [],
-    "enqueue_target": "_prep_climates_rq",
-    "job_meta_stage": "jobs:0",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 511,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_prep_multi_ofe_rq",
-      "_prep_slopes_rq",
-      "_prep_managements_rq",
-      "_prep_soils_rq",
-      "_prep_climates_rq"
-    ],
-    "enqueue_target": "_prep_remaining_rq",
-    "job_meta_stage": "jobs:0",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 516,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_prep_remaining_rq"
-    ],
-    "enqueue_target": "_run_hillslopes_rq",
-    "job_meta_stage": "jobs:1",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 522,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_run_hillslopes_rq"
-    ],
-    "enqueue_target": "_prep_watershed_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 530,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_run_hillslopes_rq",
-      "_prep_watershed_rq"
-    ],
-    "enqueue_target": "_build_swat_inputs_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 554,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_build_swat_inputs_rq"
-    ],
-    "enqueue_target": "_run_swat_rq",
+    "enqueue_target": "tasks.run_ss_batch_watershed_rq",
     "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 563,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_watershed_noprep_pipeline",
+    "source_lineno": 783,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
-    "depends_on": [
-      "_run_hillslopes_rq",
-      "_build_swat_inputs_rq"
-    ],
-    "enqueue_target": "_build_hillslope_interchange_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 575,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_build_hillslope_interchange_rq"
-    ],
-    "enqueue_target": "_build_totalwatsed3_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 585,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_prep_remaining_rq"
-    ],
-    "enqueue_target": "_run_flowpaths_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 592,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_build_hillslope_interchange_rq",
-      "_prep_watershed_rq"
-    ],
-    "enqueue_target": "_build_swat_inputs_rq",
-    "job_meta_stage": "jobs:2",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 600,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_build_swat_inputs_rq"
-    ],
-    "enqueue_target": "_run_swat_rq",
+    "depends_on": [],
+    "enqueue_target": "tasks.run_watershed_rq",
     "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 609,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_watershed_noprep_pipeline",
+    "source_lineno": 795,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_prep_watershed_rq"
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq"
     ],
-    "enqueue_target": "run_ss_batch_watershed_rq",
+    "enqueue_target": "tasks._post_run_cleanup_out_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_watershed_noprep_pipeline",
+    "source_lineno": 808,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq"
+    ],
+    "enqueue_target": "tasks._post_prep_details_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_watershed_noprep_pipeline",
+    "source_lineno": 821,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq"
+    ],
+    "enqueue_target": "tasks._post_make_loss_grid_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_watershed_noprep_pipeline",
+    "source_lineno": 835,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq"
+    ],
+    "enqueue_target": "tasks._post_watershed_interchange_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_watershed_noprep_pipeline",
+    "source_lineno": 848,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq"
+    ],
+    "enqueue_target": "tasks._post_legacy_arc_export_rq",
+    "job_meta_stage": "jobs:5",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_watershed_noprep_pipeline",
+    "source_lineno": 862,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq",
+      "tasks._post_legacy_arc_export_rq"
+    ],
+    "enqueue_target": "tasks._log_complete_rq",
+    "job_meta_stage": "jobs:6",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_watershed_noprep_pipeline",
+    "source_lineno": 874,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "tasks._prep_watershed_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_watershed_pipeline",
+    "source_lineno": 646,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._prep_watershed_rq"
+    ],
+    "enqueue_target": "tasks.run_ss_batch_watershed_rq",
     "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 629,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_watershed_pipeline",
+    "source_lineno": 660,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_prep_watershed_rq"
+      "tasks._prep_watershed_rq"
     ],
-    "enqueue_target": "run_watershed_rq",
+    "enqueue_target": "tasks.run_watershed_rq",
     "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 640,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_watershed_pipeline",
+    "source_lineno": 673,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_prep_watershed_rq"
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._prep_watershed_rq"
     ],
-    "enqueue_target": "_post_run_cleanup_out_rq",
+    "enqueue_target": "tasks._post_run_cleanup_out_rq",
     "job_meta_stage": "jobs:4",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 652,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_watershed_pipeline",
+    "source_lineno": 687,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_prep_watershed_rq"
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._prep_watershed_rq"
     ],
-    "enqueue_target": "_post_prep_details_rq",
+    "enqueue_target": "tasks._post_prep_details_rq",
     "job_meta_stage": "jobs:4",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 663,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_prep_watershed_rq",
-      "_build_hillslope_interchange_rq"
-    ],
-    "enqueue_target": "_run_hillslope_watbal_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 672,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_prep_watershed_rq"
-    ],
-    "enqueue_target": "_post_make_loss_grid_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 683,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq"
-    ],
-    "enqueue_target": "_post_watershed_interchange_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 688,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_watershed_interchange_rq",
-      "_build_totalwatsed3_rq"
-    ],
-    "enqueue_target": "_analyze_return_periods_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
+    "source_function": "enqueue_watershed_pipeline",
     "source_lineno": 700,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_build_hillslope_interchange_rq",
-      "_post_run_cleanup_out_rq"
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._prep_watershed_rq"
     ],
-    "enqueue_target": "post_dss_export_rq",
-    "job_meta_stage": "jobs:2",
+    "enqueue_target": "tasks._post_make_loss_grid_rq",
+    "job_meta_stage": "jobs:4",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
+    "source_function": "enqueue_watershed_pipeline",
     "source_lineno": 714,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_run_hillslope_watbal_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq",
-      "_analyze_return_periods_rq"
+      "tasks._post_run_cleanup_out_rq"
     ],
-    "enqueue_target": "_post_legacy_arc_export_rq",
+    "enqueue_target": "tasks._post_watershed_interchange_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_watershed_pipeline",
+    "source_lineno": 727,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq"
+    ],
+    "enqueue_target": "tasks._post_legacy_arc_export_rq",
     "job_meta_stage": "jobs:5",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 725,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_watershed_pipeline",
+    "source_lineno": 741,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_run_hillslope_watbal_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq",
-      "_analyze_return_periods_rq"
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq",
+      "tasks._post_legacy_arc_export_rq"
     ],
-    "enqueue_target": "_post_gpkg_export_rq",
-    "job_meta_stage": "jobs:5",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 731,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_run_hillslope_watbal_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq",
-      "_analyze_return_periods_rq",
-      "_post_legacy_arc_export_rq",
-      "_post_gpkg_export_rq",
-      "_build_hillslope_interchange_rq",
-      "_build_totalwatsed3_rq",
-      "post_dss_export_rq",
-      "_run_swat_rq"
-    ],
-    "enqueue_target": "_log_complete_rq",
+    "enqueue_target": "tasks._log_complete_rq",
     "job_meta_stage": "jobs:6",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_rq",
-    "source_lineno": 754,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_watershed_pipeline",
+    "source_lineno": 753,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [],
-    "enqueue_target": "_log_complete_rq",
-    "job_meta_stage": "jobs:6",
+    "enqueue_target": "tasks._run_hillslopes_rq",
+    "job_meta_stage": "jobs:1",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1217,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [],
-    "enqueue_target": "run_ss_batch_watershed_rq",
-    "job_meta_stage": "jobs:3",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1236,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [],
-    "enqueue_target": "run_watershed_rq",
-    "job_meta_stage": "jobs:3",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1246,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 433,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq"
+      "tasks._run_hillslopes_rq"
     ],
-    "enqueue_target": "_post_run_cleanup_out_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1259,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq"
-    ],
-    "enqueue_target": "_post_prep_details_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1270,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq"
-    ],
-    "enqueue_target": "_post_make_loss_grid_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1283,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq"
-    ],
-    "enqueue_target": "_post_watershed_interchange_rq",
-    "job_meta_stage": "jobs:4",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1298,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq"
-    ],
-    "enqueue_target": "_post_legacy_arc_export_rq",
-    "job_meta_stage": "jobs:5",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1310,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq",
-      "_post_legacy_arc_export_rq"
-    ],
-    "enqueue_target": "_log_complete_rq",
-    "job_meta_stage": "jobs:6",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1321,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [],
-    "enqueue_target": "_log_complete_rq",
-    "job_meta_stage": "jobs:6",
-    "notes": [],
-    "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1043,
-    "source_module": "wepppy/rq/wepp_rq.py"
-  },
-  {
-    "depends_on": [],
-    "enqueue_target": "_prep_watershed_rq",
+    "enqueue_target": "tasks._build_hillslope_interchange_rq",
     "job_meta_stage": "jobs:2",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1077,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 442,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_prep_watershed_rq"
+      "tasks._build_hillslope_interchange_rq"
     ],
-    "enqueue_target": "run_ss_batch_watershed_rq",
+    "enqueue_target": "tasks._build_totalwatsed3_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 454,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._run_hillslopes_rq"
+    ],
+    "enqueue_target": "tasks.run_ss_batch_watershed_rq",
     "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1092,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 475,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_prep_watershed_rq"
+      "tasks._run_hillslopes_rq"
     ],
-    "enqueue_target": "run_watershed_rq",
+    "enqueue_target": "tasks.run_watershed_rq",
     "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1103,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 488,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_prep_watershed_rq"
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._run_hillslopes_rq"
     ],
-    "enqueue_target": "_post_run_cleanup_out_rq",
+    "enqueue_target": "tasks._post_run_cleanup_out_rq",
     "job_meta_stage": "jobs:4",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1118,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 501,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_prep_watershed_rq"
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._run_hillslopes_rq"
     ],
-    "enqueue_target": "_post_prep_details_rq",
+    "enqueue_target": "tasks._post_prep_details_rq",
     "job_meta_stage": "jobs:4",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1129,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 514,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "run_ss_batch_watershed_rq",
-      "run_watershed_rq",
-      "_prep_watershed_rq"
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._run_hillslopes_rq",
+      "tasks._build_hillslope_interchange_rq"
     ],
-    "enqueue_target": "_post_make_loss_grid_rq",
+    "enqueue_target": "tasks._run_hillslope_watbal_rq",
     "job_meta_stage": "jobs:4",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1137,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 529,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_post_run_cleanup_out_rq"
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._run_hillslopes_rq"
     ],
-    "enqueue_target": "_post_watershed_interchange_rq",
+    "enqueue_target": "tasks._post_make_loss_grid_rq",
     "job_meta_stage": "jobs:4",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1152,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 542,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq"
+      "tasks._post_run_cleanup_out_rq"
     ],
-    "enqueue_target": "_post_legacy_arc_export_rq",
+    "enqueue_target": "tasks._post_watershed_interchange_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 553,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_watershed_interchange_rq",
+      "tasks._build_totalwatsed3_rq"
+    ],
+    "enqueue_target": "tasks._analyze_return_periods_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 566,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._build_hillslope_interchange_rq",
+      "tasks._post_run_cleanup_out_rq"
+    ],
+    "enqueue_target": "tasks.post_dss_export_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 581,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._run_hillslope_watbal_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq",
+      "tasks._analyze_return_periods_rq"
+    ],
+    "enqueue_target": "tasks._post_legacy_arc_export_rq",
     "job_meta_stage": "jobs:5",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1164,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 594,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "_post_run_cleanup_out_rq",
-      "_post_prep_details_rq",
-      "_post_make_loss_grid_rq",
-      "_post_watershed_interchange_rq",
-      "_post_legacy_arc_export_rq"
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._run_hillslope_watbal_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq",
+      "tasks._analyze_return_periods_rq"
     ],
-    "enqueue_target": "_log_complete_rq",
+    "enqueue_target": "tasks._post_gpkg_export_rq",
+    "job_meta_stage": "jobs:5",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 607,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._run_hillslope_watbal_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq",
+      "tasks._analyze_return_periods_rq",
+      "tasks._post_legacy_arc_export_rq",
+      "tasks._post_gpkg_export_rq",
+      "tasks._build_hillslope_interchange_rq",
+      "tasks._build_totalwatsed3_rq",
+      "tasks.post_dss_export_rq"
+    ],
+    "enqueue_target": "tasks._log_complete_rq",
     "job_meta_stage": "jobs:6",
     "notes": [],
     "queue_name": "default",
-    "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 1172,
-    "source_module": "wepppy/rq/wepp_rq.py"
+    "source_function": "enqueue_wepp_noprep_pipeline",
+    "source_lineno": 625,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "tasks._prep_multi_ofe_rq",
+    "job_meta_stage": "jobs:0",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 69,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "tasks._prep_slopes_rq",
+    "job_meta_stage": "jobs:0",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 80,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "tasks._prep_managements_rq",
+    "job_meta_stage": "jobs:0",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 90,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "tasks._prep_soils_rq",
+    "job_meta_stage": "jobs:0",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 99,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "tasks._prep_climates_rq",
+    "job_meta_stage": "jobs:0",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 110,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._prep_multi_ofe_rq",
+      "tasks._prep_slopes_rq",
+      "tasks._prep_managements_rq",
+      "tasks._prep_soils_rq",
+      "tasks._prep_climates_rq"
+    ],
+    "enqueue_target": "tasks._prep_remaining_rq",
+    "job_meta_stage": "jobs:0",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 120,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._prep_remaining_rq"
+    ],
+    "enqueue_target": "tasks._run_hillslopes_rq",
+    "job_meta_stage": "jobs:1",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 130,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._run_hillslopes_rq"
+    ],
+    "enqueue_target": "tasks._prep_watershed_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 143,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._run_hillslopes_rq",
+      "tasks._prep_watershed_rq"
+    ],
+    "enqueue_target": "tasks._build_swat_inputs_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 169,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._build_swat_inputs_rq"
+    ],
+    "enqueue_target": "tasks._run_swat_rq",
+    "job_meta_stage": "jobs:3",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 178,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._run_hillslopes_rq",
+      "tasks._build_swat_inputs_rq"
+    ],
+    "enqueue_target": "tasks._build_hillslope_interchange_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 191,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._build_hillslope_interchange_rq"
+    ],
+    "enqueue_target": "tasks._build_totalwatsed3_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 202,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._prep_remaining_rq"
+    ],
+    "enqueue_target": "tasks._run_flowpaths_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 214,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._build_hillslope_interchange_rq",
+      "tasks._prep_watershed_rq"
+    ],
+    "enqueue_target": "tasks._build_swat_inputs_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 228,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._build_swat_inputs_rq"
+    ],
+    "enqueue_target": "tasks._run_swat_rq",
+    "job_meta_stage": "jobs:3",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 237,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._prep_watershed_rq"
+    ],
+    "enqueue_target": "tasks.run_ss_batch_watershed_rq",
+    "job_meta_stage": "jobs:3",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 254,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._prep_watershed_rq"
+    ],
+    "enqueue_target": "tasks.run_watershed_rq",
+    "job_meta_stage": "jobs:3",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 267,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._prep_watershed_rq"
+    ],
+    "enqueue_target": "tasks._post_run_cleanup_out_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 280,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._prep_watershed_rq"
+    ],
+    "enqueue_target": "tasks._post_prep_details_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 293,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._prep_watershed_rq",
+      "tasks._build_hillslope_interchange_rq"
+    ],
+    "enqueue_target": "tasks._run_hillslope_watbal_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 309,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks.run_ss_batch_watershed_rq",
+      "tasks.run_watershed_rq",
+      "tasks._prep_watershed_rq"
+    ],
+    "enqueue_target": "tasks._post_make_loss_grid_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 322,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq"
+    ],
+    "enqueue_target": "tasks._post_watershed_interchange_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 333,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_watershed_interchange_rq",
+      "tasks._build_totalwatsed3_rq"
+    ],
+    "enqueue_target": "tasks._analyze_return_periods_rq",
+    "job_meta_stage": "jobs:4",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 346,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._build_hillslope_interchange_rq",
+      "tasks._post_run_cleanup_out_rq"
+    ],
+    "enqueue_target": "tasks.post_dss_export_rq",
+    "job_meta_stage": "jobs:2",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 361,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._run_hillslope_watbal_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq",
+      "tasks._analyze_return_periods_rq"
+    ],
+    "enqueue_target": "tasks._post_legacy_arc_export_rq",
+    "job_meta_stage": "jobs:5",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 374,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._run_hillslope_watbal_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq",
+      "tasks._analyze_return_periods_rq"
+    ],
+    "enqueue_target": "tasks._post_gpkg_export_rq",
+    "job_meta_stage": "jobs:5",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 387,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
+  },
+  {
+    "depends_on": [
+      "tasks._post_run_cleanup_out_rq",
+      "tasks._post_prep_details_rq",
+      "tasks._run_hillslope_watbal_rq",
+      "tasks._post_make_loss_grid_rq",
+      "tasks._post_watershed_interchange_rq",
+      "tasks._analyze_return_periods_rq",
+      "tasks._post_legacy_arc_export_rq",
+      "tasks._post_gpkg_export_rq",
+      "tasks._build_hillslope_interchange_rq",
+      "tasks._build_totalwatsed3_rq",
+      "tasks.post_dss_export_rq",
+      "tasks._run_swat_rq"
+    ],
+    "enqueue_target": "tasks._log_complete_rq",
+    "job_meta_stage": "jobs:6",
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue_wepp_pipeline",
+    "source_lineno": 410,
+    "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
     "depends_on": [],
