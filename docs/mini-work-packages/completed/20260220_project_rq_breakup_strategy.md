@@ -22,7 +22,7 @@ User-visible proof is behavioral parity: the existing archive/fork/delete/debris
 - [x] (2026-02-20 02:40Z) Added targeted regression tests: `tests/rq/test_project_rq_archive_helpers.py`, extra non-retryable delete branch assertion in `tests/rq/test_project_rq_delete_run.py`, and env-sanitization coverage in `tests/rq/test_project_rq_fork.py`.
 - [x] (2026-02-20 02:42Z) Completed required test/gate suite, including targeted pytest runs, `wctl run-pytest tests/rq --maxfail=1`, `wctl check-rq-graph` + artifact regeneration, `wctl check-test-stubs`, and doc-lint checks.
 - [x] (2026-02-20 02:43Z) Moved this mini work package to `docs/mini-work-packages/completed/` after validation gates passed.
-- [ ] Commit and push branch.
+- [x] (2026-02-20 02:44Z) Committed refactor (`5f3c97eaa`) and pushed `master` to `origin`.
 
 ## Surprises & Discoveries
 
@@ -65,6 +65,7 @@ User-visible proof is behavioral parity: the existing archive/fork/delete/debris
   - `wctl doc-lint --path wepppy/rq/job-dependencies-catalog.md`
 
 - (2026-02-20 02:42Z) Retrospective: Remaining work is operational closeout only (move plan to completed, commit, push). No functional regressions were observed in the RQ-focused test suite.
+- (2026-02-20 02:44Z) Retrospective: Closeout is complete (plan moved, commit created, branch pushed). Residual risk is limited to broader non-RQ integration surfaces not exercised in this focused validation set.
 
 ## Context and Orientation
 
@@ -158,3 +159,4 @@ No change is planned to external queue task names or route contracts. If extract
 Revision Note (2026-02-20 02:32Z, Codex): Created this ExecPlan from scratch for the `project_rq.py` breakup request and initialized living sections before implementation.
 Revision Note (2026-02-20 02:42Z, Codex): Updated living sections after implementation to capture completed extraction milestones, validation outcomes, dependency-graph drift handling, and remaining closeout work.
 Revision Note (2026-02-20 02:43Z, Codex): Moved this ExecPlan to `docs/mini-work-packages/completed/` and marked the closeout move step complete.
+Revision Note (2026-02-20 02:44Z, Codex): Finalized this completed ExecPlan after commit/push and marked closeout fully complete.
