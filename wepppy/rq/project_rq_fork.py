@@ -125,6 +125,13 @@ def prepare_fork_run(
     soils_cls: Any,
     initialize_ttl: Callable[[str], None] | None,
     format_ttl_failure: Callable[[Exception], str] | None = None,
+    build_rsync_cmd: Callable[[str, bool], list[str]] = (
+        lambda run_right, undisturbify: _build_fork_rsync_cmd(
+            run_right,
+            undisturbify=undisturbify,
+        )
+    ),
+    clean_env_for_system_tools: Callable[[], dict[str, str]] = _clean_env_for_system_tools,
 ) -> str:
     # 1. Verify rsync exists
     rsync_path = shutil.which("rsync")
@@ -155,13 +162,13 @@ def prepare_fork_run(
         publish_status(status_channel, error_msg)
         raise FileNotFoundError(error_msg)
 
-    cmd = _build_fork_rsync_cmd(run_right, undisturbify=undisturbify)
+    cmd = build_rsync_cmd(run_right, undisturbify)
 
     _cmd = " ".join(cmd)
     publish_status(status_channel, f"Running cmd: {_cmd}")
     publish_status(status_channel, f"In directory: {run_left}")
 
-    env = _clean_env_for_system_tools()
+    env = clean_env_for_system_tools()
     _run_rsync_with_live_output(
         cmd=cmd,
         run_left=run_left,

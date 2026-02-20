@@ -23,4 +23,6 @@ def prepare_fork_run(
     soils_cls: Any,
     initialize_ttl: Callable[[str], None] | None,
     format_ttl_failure: Callable[[Exception], str] | None = ...,
+    build_rsync_cmd: Callable[[str, bool], list[str]] = ...,
+    clean_env_for_system_tools: Callable[[], dict[str, str]] = ...,
 ) -> str: ...

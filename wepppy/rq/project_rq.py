@@ -1128,10 +1128,9 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
         )
         StatusMessenger.publish(status_channel, f'undisturbify: {undisturbify}')
 
-        try:
+        def _initialize_ttl(wd: str) -> None:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
-        except Exception:
-            initialize_ttl = None
+            initialize_ttl(wd)
 
         _fork_helpers.prepare_fork_run(
             runid,
@@ -1146,8 +1145,13 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
             disturbed_cls=Disturbed,
             landuse_cls=Landuse,
             soils_cls=Soils,
-            initialize_ttl=initialize_ttl,
+            initialize_ttl=_initialize_ttl,
             format_ttl_failure=lambda exc: f'rq:{job.id} STATUS TTL initialization failed ({exc})',
+            build_rsync_cmd=lambda run_right, _undisturbify: _build_fork_rsync_cmd(
+                run_right,
+                undisturbify=_undisturbify,
+            ),
+            clean_env_for_system_tools=_clean_env_for_system_tools,
         )
 
         if undisturbify:
