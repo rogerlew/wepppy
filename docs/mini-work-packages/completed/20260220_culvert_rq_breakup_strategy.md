@@ -21,7 +21,7 @@ The user-visible proof is that culvert queue orchestration still enqueues the sa
 - [x] (2026-02-20 01:25Z) Added focused unit tests under `tests/rq/` for extracted pipeline/helpers/manifest modules and dependency-graph regression coverage.
 - [x] (2026-02-20 01:26Z) Re-ran required gates: `tests/rq/test_dependency_graph_tools.py`, `tests/rq --maxfail=1`, `check-rq-graph`, `check-test-stubs`, and doc-lint on touched docs.
 - [x] (2026-02-20 01:26Z) Detected graph drift after wiring changes, regenerated `wepppy/rq/job-dependency-graph.static.json` plus `wepppy/rq/job-dependencies-catalog.md`, re-linted catalog docs, and re-verified `wctl check-rq-graph`.
-- [ ] (2026-02-20 01:28Z) Finalize this plan with timestamped outcomes, move to `docs/mini-work-packages/completed/`, commit, and push (completed: moved plan to `docs/mini-work-packages/completed/`; remaining: commit + push).
+- [x] (2026-02-20 01:28Z) Finalized this plan with timestamped outcomes, moved it to `docs/mini-work-packages/completed/`, committed changes (`964de73fe`), and pushed to `origin/master`.
 
 ## Surprises & Discoveries
 
@@ -50,6 +50,7 @@ The user-visible proof is that culvert queue orchestration still enqueues the sa
 - (2026-02-20 01:26Z) Outcome: `culvert_rq.py` now delegates queue orchestration, payload/config helper logic, and manifest/report helpers to focused sibling modules while keeping public entrypoints stable.
 - (2026-02-20 01:26Z) Outcome: New deterministic unit suites (`tests/rq/test_culvert_rq_pipeline.py`, `tests/rq/test_culvert_rq_helpers.py`, `tests/rq/test_culvert_rq_manifest.py`) provide direct coverage for extracted logic and high-risk branches.
 - (2026-02-20 01:26Z) Outcome: Required quality gates are green, RQ graph artifacts were regenerated after drift, and additional culvert integration regressions passed.
+- (2026-02-20 01:28Z) Outcome: Changes were committed and pushed (`964de73fe`) after moving this plan to the completed mini-work-package directory.
 - (2026-02-20 01:26Z) Retrospective: The remaining large surface in `culvert_rq.py` is the topology + run execution path; it can be split in a follow-on once monkeypatch contracts are narrowed or migrated.
 
 ## Context and Orientation
@@ -171,4 +172,4 @@ Public interface remains in `wepppy/rq/culvert_rq.py`:
 
 New internal modules will expose helper functions consumed by `culvert_rq.py`, and companion stubs will encode signatures for static checks. Queue orchestration should use explicit enqueue metadata keys that keep dependency graph extraction observable.
 
-Revision Note (2026-02-20 01:28Z, Codex): Moved this completed plan to `docs/mini-work-packages/completed/` and updated closeout progress status (commit/push pending).
+Revision Note (2026-02-20 01:28Z, Codex): Updated closeout status to completed with commit/push evidence after publishing commit `964de73fe`.
