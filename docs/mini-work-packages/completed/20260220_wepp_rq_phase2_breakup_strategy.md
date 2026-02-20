@@ -23,7 +23,7 @@ A maintainer should be able to run WEPP RQ tests and observe that pipeline edges
 - [x] (2026-02-20 03:50Z) Added/updated stubs: `wepppy/rq/wepp_rq_stage_helpers.pyi`, `wepppy/rq/wepp_rq_stage_prep.pyi`, `wepppy/rq/wepp_rq_stage_post.pyi`, `wepppy/rq/wepp_rq_stage_finalize.pyi`, and refreshed `wepppy/rq/wepp_rq.pyi`.
 - [x] (2026-02-20 03:50Z) Expanded WEPP RQ test coverage for extracted modules by updating monkeypatch targets to stage modules in `tests/rq/test_wepp_rq_nodir.py` and `tests/rq/test_bootstrap_autocommit_rq.py`, while preserving public wrapper invocation.
 - [x] (2026-02-20 03:50Z) Ran required validation gates: `wctl run-pytest tests/rq --maxfail=1`, `wctl check-test-stubs`, `wctl check-rq-graph`, `wctl doc-lint --path docs/mini-work-packages/20260220_wepp_rq_phase2_breakup_strategy.md`, and `wctl doc-lint --path wepppy/rq/job-dependencies-catalog.md`.
-- [ ] (2026-02-20 03:51Z) Closeout in progress (completed: moved this mini work package to `docs/mini-work-packages/completed/`; remaining: commit and push all changes).
+- [x] (2026-02-20 03:52Z) Closed out mini work package: moved this document to `docs/mini-work-packages/completed/`, committed all refactor artifacts, and pushed branch updates.
 
 ## Surprises & Discoveries
 
@@ -121,4 +121,4 @@ Expected primary artifacts:
 
 Public API expectations remain anchored to `wepppy/rq/wepp_rq.py`. Queue orchestration remains in `wepppy/rq/wepp_rq_pipeline.py` and should continue targeting functions exported by `wepp_rq.py`. Extracted stage modules are internal siblings and must preserve the same runtime side effects and exception behavior currently enforced by tests and RQ integration.
 
-Revision Note (2026-02-20 03:50Z, Codex): Updated this living ExecPlan to completed implementation status, recorded validation evidence (tests/stubs/graph/doc lint), and captured graph drift handling plus final module split decisions.
+Revision Note (2026-02-20 03:52Z, Codex): Finalized closeout state after relocation to `completed/`, commit creation, and push handoff readiness.
