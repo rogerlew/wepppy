@@ -129,7 +129,7 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
     assert east > west
     assert south < north
 
-    url = 'http://thredds.northwestknowledge.net:8080/thredds/ncss/MET/{abbrv}/{abbrv}_{year}.nc?' \
+    url = 'https://thredds.northwestknowledge.net/thredds/ncss/MET/{abbrv}/{abbrv}_{year}.nc?' \
           'var={variable_name}&' \
           'north={north}&west={west}&east={east}&south={south}&' \
           'disableProjSubset=on&horizStride=1&' \
