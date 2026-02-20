@@ -359,6 +359,14 @@ Developer barrier: a developer cannot inspect project state from a REPL, databas
 
 - `culvert_app/app.py` contains `70` routes and `89` function definitions.
 - Route, background task, and model orchestration logic are tightly mixed.
+  - Concrete example (watershed delineation):
+    - The route `ws_deln_results` handles auth/session checks, filesystem cleanup/rebuild, form normalization/persistence, and task wiring in one place (`culvert_app/app.py:3833`, `culvert_app/app.py:3851`, `culvert_app/app.py:3876`, `culvert_app/app.py:3901`, `culvert_app/app.py:4051`).
+    - The task `run_watershed_delineation_task` reparses those inputs and performs branch-heavy orchestration (`culvert_app/tasks/watershed_delineation_task.py:233`, `culvert_app/tasks/watershed_delineation_task.py:330`, `culvert_app/tasks/watershed_delineation_task.py:385`, `culvert_app/tasks/watershed_delineation_task.py:434`).
+    - The downstream model utility consumes a very large path-parameter surface (`culvert_app/utils/subroutine_nested_watershed_delineation.py:1980`).
+  - Why this impedes maintainability:
+    - Adding or renaming one input requires synchronized changes across route parsing, task payload/call-site wiring, and model signatures; any miss becomes a runtime failure.
+    - Unit testing is expensive because HTTP concerns, queue concerns, and model orchestration are not isolated behind clean interfaces.
+    - Ownership boundaries are unclear, so refactors have large blast radius and regressions are harder to localize.
 - Debug/control-path noise is high in production code:
   - `print(...)` in `app.py`: `307`
   - `except Exception as e` in `app.py`: `119`
@@ -381,10 +389,10 @@ Evidence:
 
 - Typed-structure patterns are largely absent in reviewed Python (`culvert_app`):
   - no `@dataclass`, `TypedDict`, `Protocol`, or Pydantic model usage found.
-- Concurrency exists operationally, but is localized rather than architectural:
+- Concurrency exists operationally (RQ workers), but active culvert workflows execute synchronously inside each job:
   - queue/background runtime is present (`culvert_app/app.py:221`, `culvert_app/app.py:946`)
-  - async/thread-pool usage is concentrated in WEPP utility flow (`culvert_app/utils/subroutine_run_WEPP_model.py:327`, `culvert_app/utils/subroutine_run_WEPP_model.py:895`, `culvert_app/utils/subroutine_run_WEPP_model.py:1900`)
-  - only `4` async functions out of `599` total functions in `culvert_app` (AST scan used in this audit)
+  - core task entrypoints are synchronous procedural functions (`culvert_app/tasks/watershed_delineation_task.py:233`, `culvert_app/tasks/hydro_vuln_analysis_task.py:414`, `culvert_app/tasks/hydrogeo_vuln_analysis_task.py:251`)
+  - only `4` async functions out of `599` total functions in `culvert_app`; 3 are in the abandoned WEPP utility module and 1 is a lightweight helper in `app.py` (AST/grep scan used in this audit)
 - Core model workflows remain branch-heavy, manually wired, and path-parameter driven:
   - watershed branch-call pattern (`culvert_app/tasks/watershed_delineation_task.py:330`, `culvert_app/tasks/watershed_delineation_task.py:385`, `culvert_app/tasks/watershed_delineation_task.py:434`)
   - hardcoded method-control flow in hydrologic vulnerability task (`culvert_app/tasks/hydro_vuln_analysis_task.py:571`)
@@ -518,6 +526,13 @@ Developer barrier: adding a new model requires coordinated changes in at minimum
   - `culvert_app/test_concurrency_job.py::test_concurrent_job`
 - warning signal:
   - multiple tests return bool instead of assertions in `test_dash_startup.py`
+- collected suite scope is infrastructure/devops focused:
+  - `test_dash_startup.py` validates dependency imports, file presence, port/process startup, and Dash HTTP reachability.
+  - `culvert_app/test_concurrency_job.py` validates RQ concurrency timing/Redis write behavior.
+- no collected tests exercise core domain/data-processing flows:
+  - no pytest coverage found for watershed/hydro/hydrogeo analysis paths in `culvert_app/tasks/*.py`.
+  - no pytest coverage found for core geospatial/model utilities in `culvert_app/utils/subroutine_*.py`.
+  - practical effect: domain logic change risk is largely unmanaged by automated tests.
 
 ### 7.2 Error-handling style metrics (non-junk Python)
 
@@ -526,7 +541,7 @@ Developer barrier: adding a new model requires coordinated changes in at minimum
 - `print(...)`: `2,219`
 - structured logger calls: `422`
 
-Developer barrier: `8` tests for `~28,000` SLOC means a developer has no safety net for refactoring. Any change beyond a trivial fix requires manual end-to-end testing through the browser UI. `25` bare `except:` blocks (which also catch `KeyboardInterrupt` and `SystemExit`) mask the real cause of failures — a developer debugging a production issue sees "Error" in logs but not what error or where. `2,219` print statements versus `422` structured logger calls mean log output cannot be filtered, searched, or alerted on by severity level. No CI gate means a developer can push broken code directly to production without any automated check.
+Developer barrier: `8` tests for `~28,000` SLOC means a developer has no safety net for refactoring, and those tests are mostly infrastructure checks rather than model/data correctness checks. Any change beyond a trivial fix requires manual end-to-end testing through the browser UI. `25` bare `except:` blocks (which also catch `KeyboardInterrupt` and `SystemExit`) mask the real cause of failures — a developer debugging a production issue sees "Error" in logs but not what error or where. `2,219` print statements versus `422` structured logger calls mean log output cannot be filtered, searched, or alerted on by severity level. No CI gate means a developer can push broken code directly to production without any automated check.
 
 ### 7.3 CI gating
 
