@@ -3,6 +3,16 @@
 This file captures the operational quirks of `NoDbBase` so debugging (and test
 harnesses) stay consistent across agents.
 
+## Facade + Collaborator Standard
+
+* Canonical Option-2 extraction guidance lives at
+  `docs/standards/nodb-facade-collaborator-pattern.md`.
+* Use that standard when refactoring a NoDb controller into collaborators while
+  preserving facade contracts.
+* Keep the extraction order consistent: input parser -> build
+  router/orchestrator -> mode-specific builders -> scaling -> artifact export ->
+  station/catalog resolution.
+
 ## Task Start: `nodb/core` Bugfixes
 
 * First-hop files:

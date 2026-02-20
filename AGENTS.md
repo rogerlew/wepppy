@@ -82,6 +82,7 @@
 - Full work package process: `docs/work-packages/README.md`
 - Mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
+- NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
 
 ## Subsystem Maps (Nearest AGENTS Wins)
 - NoDb controllers and module contracts: `wepppy/nodb/AGENTS.md`
