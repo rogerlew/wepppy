@@ -110,13 +110,21 @@ All five are still exploitable from code review.
 
 As of 2026-02-20, GitHub issue `#103` remains open and the traversal condition is still reachable in current code paths.
 
-| Vulnerability | Submitted (issue opened) | Status | Evidence |
+| Vulnerability | Submitted (issue opened) | Status | Evidence Ref |
 | --- | --- | --- | --- |
-| RCE via `eval()` (`#177`) | `2026-02-06` | Still present | `culvert_app/tasks/hydro_vuln_analysis_task.py:576` |
-| Zip-Slip path traversal (`#178`, `#182`) | `2026-02-06` (`#178`), `2026-02-18` (`#182`) | Still present | `culvert_app/utils/subroutine_zipshapefile_with_GDAL.py:16-18` uses `extract` with archive names; no canonical path enforcement |
-| Zip bomb/no size limits (`#182`) | `2026-02-18` | Still present | Upload endpoints save ZIPs directly and process them; no archive size/member count thresholds |
-| Missing `MAX_CONTENT_LENGTH` (`#182`) | `2026-02-18` | Still present | No `MAX_CONTENT_LENGTH` config found in `culvert_app` |
-| Download path traversal (`#103`) | `2025-09-22` | Still present (bypassable) | User-controlled file list enters via `request.json` (`culvert_app/app.py:5199`), then worker checks `os.path.join(base, filename).startswith(base)` (`culvert_app/tasks/download_output_files_task.py:97`, `culvert_app/tasks/download_output_files_task.py:104`) without canonical normalization (`realpath`/`commonpath`) |
+| RCE via `eval()` (`#177`) | `2026-02-06` | Still present | `E1` |
+| Zip-Slip path traversal (`#178`, `#182`) | `2026-02-06` (`#178`), `2026-02-18` (`#182`) | Still present | `E2` |
+| Zip bomb/no size limits (`#182`) | `2026-02-18` | Still present | `E3` |
+| Missing `MAX_CONTENT_LENGTH` (`#182`) | `2026-02-18` | Still present | `E4` |
+| Download path traversal (`#103`) | `2025-09-22` | Still present (bypassable) | `E5` |
+
+Evidence reference key:
+
+- `E1`: `culvert_app/tasks/hydro_vuln_analysis_task.py:576`
+- `E2`: `culvert_app/utils/subroutine_zipshapefile_with_GDAL.py:16-18` uses `extract` with archive names; no canonical path enforcement.
+- `E3`: Upload endpoints save ZIPs directly and process them; no archive size/member count thresholds.
+- `E4`: No `MAX_CONTENT_LENGTH` config found in `culvert_app`.
+- `E5`: User-controlled file list enters via `request.json` (`culvert_app/app.py:5199`), then worker checks `os.path.join(base, filename).startswith(base)` (`culvert_app/tasks/download_output_files_task.py:97`, `culvert_app/tasks/download_output_files_task.py:104`) without canonical normalization (`realpath`/`commonpath`).
 
 `#103` exploitability note:
 
@@ -834,4 +842,3 @@ Developer barrier: a new developer's first hours are spent discovering the docs 
 ## Final assessment for sponsor conversation
 
 Codebase maturity currently dominates both operational risk and model scaling risk. Infrastructure tuning can help throughput, but without targeted codebase hardening/modularization, each new model integration will remain high-cost and high-regression-risk.
-
