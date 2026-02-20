@@ -125,6 +125,31 @@ def test_delete_run_rq_marks_ttl_when_rmtree_fails(
     assert not any("delete failed" in message for message in published)
 
 
+def test_delete_run_rq_reports_non_retryable_delete_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    runid = "test-run-hard-fail"
+    run_dir = tmp_path / runid
+    run_dir.mkdir(parents=True)
+    (run_dir / "ron.nodb").write_text("nodb", encoding="utf-8")
+
+    published, mark_calls, user_datastore = _stub_delete_environment(
+        monkeypatch,
+        runid=runid,
+        job_id="job-1b",
+        errno_value=project_rq.errno.EPERM,
+    )
+
+    project_rq.delete_run_rq(runid, wd=str(run_dir), delete_files=True)
+
+    assert len(user_datastore.deleted) == 1
+    assert run_dir.exists()
+    assert any(call["touched_by"] == "delete_failed" for call in mark_calls)
+    assert any("delete failed" in message for message in published)
+    assert any("delete deferred" in message for message in published)
+
+
 def test_gc_runs_rq_deferred_delete_suppresses_messages(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

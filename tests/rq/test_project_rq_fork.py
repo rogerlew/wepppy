@@ -32,3 +32,17 @@ def test_build_fork_rsync_cmd_adds_undisturbify_excludes() -> None:
     assert "wepp/output" in excludes
     assert cmd[-2:] == [".", "/tmp/target/"]
 
+
+def test_clean_env_for_system_tools_uses_sanitized_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    import wepppy.rq.project_rq as project
+
+    monkeypatch.setenv("LANG", "en_US.UTF-8")
+    monkeypatch.setenv("LC_ALL", "C")
+    monkeypatch.setenv("PATH", "/custom/bin")
+
+    env = project._clean_env_for_system_tools()
+
+    assert env["PATH"] == "/usr/sbin:/usr/bin:/bin"
+    assert env["LANG"] == "en_US.UTF-8"
+    assert env["LC_ALL"] == "C"
+    assert "/custom/bin" not in env["PATH"]
