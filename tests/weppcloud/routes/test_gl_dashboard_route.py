@@ -113,3 +113,48 @@ def test_gl_dashboard_context_respects_disabled_batch_flag(gl_dashboard_client) 
     assert response.status_code == 200
     kwargs = captured["kwargs"]
     assert kwargs["batch_mode_enabled"] is False
+
+
+def test_get_omni_contrasts_returns_only_completed_readme_entries(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir()
+    (wd / "omni.nodb").write_text("{}", encoding="ascii")
+    contrasts_root = wd / "_pups" / "omni" / "contrasts"
+    (contrasts_root / "1" / "wepp" / "output" / "interchange").mkdir(parents=True)
+    (contrasts_root / "2" / "wepp" / "output" / "interchange").mkdir(parents=True)
+    (contrasts_root / "3" / "wepp" / "output" / "interchange").mkdir(parents=True)
+    (contrasts_root / "1" / "wepp" / "output" / "interchange" / "README.md").write_text(
+        "done",
+        encoding="ascii",
+    )
+
+    class DummyOmni:
+        contrast_names = ["contrast-a", None, "contrast-c"]
+
+    monkeypatch.setattr(gl_dashboard_module.Omni, "getInstance", lambda _wd: DummyOmni())
+
+    result = gl_dashboard_module._get_omni_contrasts(str(wd))
+
+    assert result == [
+        {"id": 1, "name": "contrast-a", "path": "_pups/omni/contrasts/1"},
+    ]
+
+
+def test_get_omni_contrasts_returns_none_when_omni_load_fails(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir()
+    (wd / "omni.nodb").write_text("{}", encoding="ascii")
+    (wd / "_pups" / "omni" / "contrasts").mkdir(parents=True)
+
+    def _raise(_wd: str):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(gl_dashboard_module.Omni, "getInstance", _raise)
+
+    assert gl_dashboard_module._get_omni_contrasts(str(wd)) is None

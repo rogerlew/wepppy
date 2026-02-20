@@ -1,0 +1,262 @@
+from __future__ import annotations
+
+import logging
+from contextlib import contextmanager
+from pathlib import Path
+
+import pytest
+
+import wepppy.nodb.mods.omni.omni as omni_module
+from wepppy.nodb.mods.omni.omni_mode_build_services import OmniModeBuildServices
+
+pytestmark = pytest.mark.unit
+
+
+class _DummyOmni:
+    def __init__(self, tmp_path: Path) -> None:
+        self.wd = str(tmp_path / "run")
+        Path(self.wd).mkdir(parents=True, exist_ok=True)
+        self.runid = "demo"
+        self.logger = logging.getLogger("tests.omni.mode_services")
+        self._has_sbs = True
+
+    @property
+    def has_sbs(self) -> bool:
+        return self._has_sbs
+
+    @property
+    def rq_job_pool_max_worker_per_scenario_task(self) -> int:
+        return 2
+
+    @contextmanager
+    def timed(self, _label: str):
+        yield
+
+
+def test_build_contrasts_for_selection_mode_dispatches() -> None:
+    service = OmniModeBuildServices()
+
+    class DummyOmni:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        def _build_contrasts_user_defined_areas(self) -> None:
+            self.calls.append("areas")
+
+        def _build_contrasts_user_defined_hillslope_groups(self) -> None:
+            self.calls.append("groups")
+
+        def _build_contrasts_stream_order(self) -> None:
+            self.calls.append("stream")
+
+    omni = DummyOmni()
+
+    assert service.build_contrasts_for_selection_mode(omni, "user_defined_areas") is True
+    assert service.build_contrasts_for_selection_mode(omni, "user_defined_hillslope_groups") is True
+    assert service.build_contrasts_for_selection_mode(omni, "stream_order") is True
+    assert service.build_contrasts_for_selection_mode(omni, "cumulative") is False
+    assert omni.calls == ["areas", "groups", "stream"]
+
+
+def test_apply_scenario_mode_uniform_runs_expected_build_steps(tmp_path: Path) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+
+    class DisturbedStub:
+        def __init__(self) -> None:
+            self.uniform_calls: list[int] = []
+            self.validate_calls: list[tuple[str, int, int]] = []
+
+        def build_uniform_sbs(self, severity: int) -> str:
+            self.uniform_calls.append(severity)
+            return f"uniform-{severity}.tif"
+
+        def validate(self, sbs_fn: str, mode: int, uniform_severity: int | None = None) -> None:
+            self.validate_calls.append((sbs_fn, mode, int(uniform_severity or 0)))
+
+    class LanduseStub:
+        def __init__(self) -> None:
+            self.build_calls = 0
+
+        def build(self) -> None:
+            self.build_calls += 1
+
+    class SoilsStub:
+        def __init__(self) -> None:
+            self.calls: list[int] = []
+
+        def build(self, max_workers: int | None = None) -> None:
+            self.calls.append(int(max_workers or 0))
+
+    disturbed = DisturbedStub()
+    landuse = LanduseStub()
+    soils = SoilsStub()
+
+    service.apply_scenario_mode(
+        omni,
+        scenario_name="uniform_low",
+        scenario=omni_module.OmniScenario.UniformLow,
+        scenario_def={"type": "uniform_low"},
+        new_wd=omni.wd,
+        disturbed=disturbed,
+        landuse=landuse,
+        soils=soils,
+        omni_base_scenario_name=None,
+    )
+
+    assert disturbed.uniform_calls == [1]
+    assert disturbed.validate_calls == [("uniform-1.tif", 1, 1)]
+    assert landuse.build_calls == 1
+    assert soils.calls == [2]
+
+
+def test_apply_scenario_mode_undisturbed_enforces_sbs_guard(tmp_path: Path) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+    omni._has_sbs = False
+
+    class DisturbedStub:
+        def remove_sbs(self) -> None:
+            return None
+
+    class LanduseStub:
+        def build(self) -> None:
+            return None
+
+    class SoilsStub:
+        def build(self, max_workers: int | None = None) -> None:
+            return None
+
+    with pytest.raises(Exception, match="Undisturbed scenario requires a base scenario with sbs"):
+        service.apply_scenario_mode(
+            omni,
+            scenario_name="undisturbed",
+            scenario=omni_module.OmniScenario.Undisturbed,
+            scenario_def={"type": "undisturbed"},
+            new_wd=omni.wd,
+            disturbed=DisturbedStub(),
+            landuse=LanduseStub(),
+            soils=SoilsStub(),
+            omni_base_scenario_name=None,
+        )
+
+
+def test_apply_scenario_mode_prescribed_fire_requires_treatment_mapping(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+
+    class DisturbedStub:
+        has_sbs = False
+
+    class LanduseStub:
+        domlc_d = {10: "A"}
+        managements = {"A": type("Summary", (), {"disturbed_class": "forest mature"})()}
+
+    class SoilsStub:
+        def build(self, max_workers: int | None = None) -> None:
+            return None
+
+    class TreatmentsStub:
+        treatments_lookup = {}
+
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.treatments.Treatments.getInstance",
+        lambda wd: TreatmentsStub(),
+    )
+
+    with pytest.raises(ValueError, match="Prescribed fire scenario requires a treatment mapping"):
+        service.apply_scenario_mode(
+            omni,
+            scenario_name="prescribed_fire",
+            scenario=omni_module.OmniScenario.PrescribedFire,
+            scenario_def={"type": "prescribed_fire"},
+            new_wd=omni.wd,
+            disturbed=DisturbedStub(),
+            landuse=LanduseStub(),
+            soils=SoilsStub(),
+            omni_base_scenario_name=None,
+        )
+
+
+def test_run_omni_scenario_delegates_mode_specific_branch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    scenario_dir = run_dir / "_pups" / "omni" / "scenarios" / "uniform_low"
+    scenario_dir.mkdir(parents=True)
+    (run_dir / "wepp" / "runs").mkdir(parents=True)
+    (scenario_dir / "wepp" / "runs").mkdir(parents=True)
+    (scenario_dir / "wepp" / "output").mkdir(parents=True)
+
+    omni.wd = str(run_dir)
+    omni.logger = logging.getLogger("tests.omni.mode_services.delegate")
+
+    monkeypatch.setattr(omni_module, "_omni_clone", lambda *args, **kwargs: str(scenario_dir))
+    monkeypatch.setattr(omni_module, "_post_watershed_run_cleanup", lambda *args, **kwargs: None)
+    monkeypatch.setattr(omni_module, "run_wepp_hillslope_interchange", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "delete_after_interchange",
+        property(lambda self: False),
+        raising=False,
+    )
+
+    class DisturbedStub:
+        has_sbs = False
+
+    class LanduseStub:
+        def build_managements(self) -> None:
+            return None
+
+    class SoilsStub:
+        pass
+
+    class WeppStub:
+        def __init__(self, wd: str) -> None:
+            self.runs_dir = str(Path(wd) / "wepp" / "runs")
+            self.output_dir = str(Path(wd) / "wepp" / "output")
+
+        def prep_hillslopes(self, **kwargs) -> None:
+            return None
+
+        def run_hillslopes(self, **kwargs) -> None:
+            return None
+
+        def prep_watershed(self) -> None:
+            return None
+
+        def run_watershed(self) -> None:
+            return None
+
+    class ClimateStub:
+        observed_start_year = None
+        future_start_year = None
+
+    import wepppy.nodb.core as nodb_core
+    import wepppy.nodb.mods.disturbed as disturbed_mod
+
+    monkeypatch.setattr(disturbed_mod.Disturbed, "getInstance", lambda wd: DisturbedStub())
+    monkeypatch.setattr(nodb_core.Landuse, "getInstance", lambda wd: LanduseStub())
+    monkeypatch.setattr(nodb_core.Soils, "getInstance", lambda wd: SoilsStub())
+    monkeypatch.setattr(nodb_core.Wepp, "getInstance", lambda wd: WeppStub(wd))
+    monkeypatch.setattr(nodb_core.Climate, "getInstance", lambda wd: ClimateStub())
+
+    captured: dict[str, object] = {}
+
+    def _fake_apply(*args, **kwargs):
+        captured.update(kwargs)
+
+    monkeypatch.setattr(omni_module._OMNI_MODE_BUILD_SERVICES, "apply_scenario_mode", _fake_apply)
+
+    scenario_wd, scenario_name = omni.run_omni_scenario({"type": "uniform_low"})
+
+    assert scenario_wd == str(scenario_dir)
+    assert scenario_name == "uniform_low"
+    assert captured["scenario_name"] == "uniform_low"
+    assert captured["new_wd"] == str(scenario_dir)

@@ -69,6 +69,12 @@ from wepppy.wepp.interchange import (
 )
 from wepppy.wepp.reports import refresh_return_period_events
 from wepppy.rq.topo_utils import _prune_stream_order
+from wepppy.nodb.mods.omni.omni_build_router import OmniBuildRouter
+from wepppy.nodb.mods.omni.omni_input_parser import OmniInputParsingService
+from wepppy.nodb.mods.omni.omni_mode_build_services import OmniModeBuildServices
+from wepppy.nodb.mods.omni.omni_scaling_service import OmniScalingService
+from wepppy.nodb.mods.omni.omni_artifact_export_service import OmniArtifactExportService
+from wepppy.nodb.mods.omni.omni_station_catalog_service import OmniStationCatalogService
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
@@ -87,6 +93,12 @@ OMNI_REL_DIR = '_pups/omni'
 USER_DEFINED_CONTRAST_LIMIT = 200
 
 LOGGER = logging.getLogger(__name__)
+_OMNI_INPUT_PARSER = OmniInputParsingService()
+_OMNI_MODE_BUILD_SERVICES = OmniModeBuildServices()
+_OMNI_SCALING_SERVICE = OmniScalingService()
+_OMNI_ARTIFACT_EXPORT_SERVICE = OmniArtifactExportService()
+_OMNI_STATION_CATALOG_SERVICE = OmniStationCatalogService()
+_OMNI_BUILD_ROUTER = OmniBuildRouter()
 
 CoverValues = Dict[str, float]
 RhemRunResult = Tuple[bool, str, float]
@@ -1072,51 +1084,7 @@ class Omni(NoDbBase):
         self._scenario_run_state = value
 
     def parse_scenarios(self, parsed_inputs: Iterable[Tuple[OmniScenario, ScenarioDef]]) -> None:
-        """
-        Parse the scenarios and their parameters into the NoDb structure.
-        :param parsed_inputs: List of (scenario_enum, params) tuples
-        """
-        with self.locked():
-            self._scenarios = []  # Reset scenarios
-
-            for scenario_enum, params in parsed_inputs:
-                scenario_type = params.get('type')
-                
-                # Handle scenarios with parameters
-                if scenario_enum == OmniScenario.Thinning:
-                    canopy_cover = params.get('canopy_cover')
-                    ground_cover = params.get('ground_cover')
-                    if not canopy_cover or not ground_cover:
-                        raise ValueError('Thinning requires canopy_cover and ground_cover')
-                    self._scenarios.append({
-                        'type': scenario_type,
-                        'canopy_cover': canopy_cover,
-                        'ground_cover': ground_cover
-                    })
-                elif scenario_enum == OmniScenario.Mulch:
-                    ground_cover_increase = params.get('ground_cover_increase')
-                    base_scenario = params.get('base_scenario')
-                    if not ground_cover_increase or not base_scenario:
-                        raise ValueError('Mulching requires ground_cover_increase and base_scenario')
-                    
-                    self._scenarios.append({
-                        'type': scenario_type,
-                        'ground_cover_increase': ground_cover_increase,
-                        'base_scenario': base_scenario
-                    })
-                elif scenario_enum == OmniScenario.SBSmap:
-                    sbs_file_path = params.get('sbs_file_path')
-                    if not sbs_file_path:
-                        raise ValueError('SBS Map requires a file path')
-                    self._scenarios.append({
-                        'type': scenario_type,
-                        'sbs_file_path': sbs_file_path
-                    })
-                else:
-                    # Scenarios without parameters (UniformLow, UniformModerate, etc.)
-                    self._scenarios.append({
-                        'type': scenario_type
-                    })
+        _OMNI_INPUT_PARSER.parse_scenarios(self, parsed_inputs)
 
     def delete_scenarios(self, scenario_names: Iterable[str]) -> Dict[str, List[str]]:
         """
@@ -1185,150 +1153,10 @@ class Omni(NoDbBase):
         return {'removed': removed, 'missing': missing}
 
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
-        """
-        this is called from the web backend to set the parameters in the nodb
-        """
-        def normalize_scenario_value(value: Any) -> Optional[str]:
-            if value is None:
-                return None
-            if isinstance(value, OmniScenario):
-                return str(value)
-            if isinstance(value, int):
-                try:
-                    return str(OmniScenario(value))
-                except ValueError:
-                    return str(value)
-            return str(value)
-
-        def normalize_bool(value: Any) -> Optional[bool]:
-            if value in (None, ""):
-                return None
-            if isinstance(value, bool):
-                return value
-            if isinstance(value, (int, float)):
-                return bool(value)
-            if isinstance(value, str):
-                token = value.strip().lower()
-                if token in {"1", "true", "yes", "on"}:
-                    return True
-                if token in {"0", "false", "no", "off"}:
-                    return False
-            return None
-
-        with self.locked():
-            control_scenario = kwds.get('omni_control_scenario', None)
-            if control_scenario is not None:
-                self._control_scenario = normalize_scenario_value(control_scenario)
-
-            contrast_scenario = kwds.get('omni_contrast_scenario', None)
-            if contrast_scenario is not None:
-                self._contrast_scenario = normalize_scenario_value(contrast_scenario)
-
-            omni_contrast_objective_parameter = kwds.get('omni_contrast_objective_parameter', None)
-            if omni_contrast_objective_parameter is not None:
-                self._contrast_object_param = omni_contrast_objective_parameter
-
-            contrast_cumulative_obj_param_threshold_fraction = kwds.get('omni_contrast_cumulative_obj_param_threshold_fraction', None)
-            if contrast_cumulative_obj_param_threshold_fraction is not None:
-                self._contrast_cumulative_obj_param_threshold_fraction = contrast_cumulative_obj_param_threshold_fraction
-                
-            contrast_hillslope_limit = kwds.get('omni_contrast_hillslope_limit', None)
-            if contrast_hillslope_limit is not None:
-                self._contrast_hillslope_limit = contrast_hillslope_limit
-                
-            hill_min_slope = kwds.get('omni_contrast_hill_min_slope', None)
-            if hill_min_slope is not None:
-                self._contrast_hill_min_slope = hill_min_slope
-
-            hill_max_slope = kwds.get('omni_contrast_hill_max_slope', None)
-            if hill_max_slope is not None:
-                self._contrast_hill_max_slope = hill_max_slope
-                
-            select_burn_severities = kwds.get('omni_contrast_select_burn_severities', None)
-            if select_burn_severities is not None:
-                self._contrast_select_burn_severities = select_burn_severities
-            
-            select_topaz_ids = kwds.get('omni_contrast_select_topaz_ids', None)
-            if select_topaz_ids is not None:
-                self._contrast_select_topaz_ids = select_topaz_ids
-
-            contrast_selection_mode = kwds.get('omni_contrast_selection_mode', None)
-            if contrast_selection_mode is not None:
-                self._contrast_selection_mode = str(contrast_selection_mode)
-
-            contrast_geojson_path = kwds.get('omni_contrast_geojson_path', None)
-            if contrast_geojson_path is not None:
-                self._contrast_geojson_path = str(contrast_geojson_path)
-
-            contrast_geojson_name_key = kwds.get('omni_contrast_geojson_name_key', None)
-            if contrast_geojson_name_key is not None:
-                self._contrast_geojson_name_key = str(contrast_geojson_name_key)
-
-            contrast_hillslope_groups = kwds.get("omni_contrast_hillslope_groups", None)
-            if contrast_hillslope_groups is not None:
-                self._contrast_hillslope_groups = contrast_hillslope_groups
-
-            order_reduction_passes = kwds.get('order_reduction_passes', None)
-            if order_reduction_passes is not None:
-                self._contrast_order_reduction_passes = order_reduction_passes
-
-            contrast_pairs = kwds.get("omni_contrast_pairs", None)
-            if contrast_pairs is None:
-                contrast_pairs = kwds.get("contrast_pairs", None)
-            if contrast_pairs is not None:
-                self._contrast_pairs = self._normalize_contrast_pairs(contrast_pairs)
-
-            if "omni_contrast_output_chan_out" in kwds:
-                value = normalize_bool(kwds.get("omni_contrast_output_chan_out"))
-                self._contrast_output_chan_out = value if value is not None else False
-            if "omni_contrast_output_tcr_out" in kwds:
-                value = normalize_bool(kwds.get("omni_contrast_output_tcr_out"))
-                self._contrast_output_tcr_out = value if value is not None else False
-            if "omni_contrast_output_chnwb" in kwds:
-                value = normalize_bool(kwds.get("omni_contrast_output_chnwb"))
-                self._contrast_output_chnwb = value if value is not None else False
-            if "omni_contrast_output_soil_pw0" in kwds:
-                value = normalize_bool(kwds.get("omni_contrast_output_soil_pw0"))
-                self._contrast_output_soil_pw0 = value if value is not None else False
-            if "omni_contrast_output_plot_pw0" in kwds:
-                value = normalize_bool(kwds.get("omni_contrast_output_plot_pw0"))
-                self._contrast_output_plot_pw0 = value if value is not None else False
-            if "omni_contrast_output_ebe_pw0" in kwds:
-                value = normalize_bool(kwds.get("omni_contrast_output_ebe_pw0"))
-                self._contrast_output_ebe_pw0 = value if value is not None else True
+        _OMNI_INPUT_PARSER.parse_inputs(self, kwds)
 
     def _normalize_contrast_pairs(self, value: Any) -> List[Dict[str, str]]:
-        if value in (None, ""):
-            return []
-        if isinstance(value, dict):
-            candidates = [value]
-        elif isinstance(value, (list, tuple)):
-            candidates = list(value)
-        else:
-            return []
-
-        normalized: List[Dict[str, str]] = []
-        seen: Set[str] = set()
-        for entry in candidates:
-            if not isinstance(entry, dict):
-                continue
-            control_raw = entry.get("control_scenario")
-            contrast_raw = entry.get("contrast_scenario")
-            if control_raw in (None, "") or contrast_raw in (None, ""):
-                continue
-            control_key = self._normalize_scenario_key(control_raw)
-            contrast_key = self._normalize_scenario_key(contrast_raw)
-            pair_key = f"{control_key}::{contrast_key}"
-            if pair_key in seen:
-                continue
-            normalized.append(
-                {
-                    "control_scenario": control_key,
-                    "contrast_scenario": contrast_key,
-                }
-            )
-            seen.add(pair_key)
-        return normalized
+        return _OMNI_INPUT_PARSER.normalize_contrast_pairs(self, value)
 
     @property
     def contrasts(self) -> Optional[List[ContrastMapping]]:
@@ -1908,6 +1736,9 @@ class Omni(NoDbBase):
                 self.logger.debug("Failed to remove contrast status %s: %s", path, exc)
 
     def _normalize_landuse_key(self, value: Any) -> Optional[str]:
+        return _OMNI_STATION_CATALOG_SERVICE.normalize_landuse_key(self, value)
+
+    def _normalize_landuse_key_impl(self, value: Any) -> Optional[str]:
         if value is None or pd.isna(value):
             return None
         if isinstance(value, (int, float)) and not isinstance(value, bool):
@@ -1920,6 +1751,9 @@ class Omni(NoDbBase):
         return str(value)
 
     def _load_landuse_key_map(self, landuse_wd: str) -> Optional[Dict[int, Optional[str]]]:
+        return _OMNI_STATION_CATALOG_SERVICE.load_landuse_key_map(self, landuse_wd)
+
+    def _load_landuse_key_map_impl(self, landuse_wd: str) -> Optional[Dict[int, Optional[str]]]:
         parquet_path = pick_existing_parquet_path(landuse_wd, "landuse/landuse.parquet")
         if parquet_path is None:
             return None
@@ -1947,6 +1781,20 @@ class Omni(NoDbBase):
         return None
 
     def _contrast_landuse_skip_reason(
+        self,
+        contrast_id: int,
+        contrast_name: str,
+        *,
+        landuse_cache: Optional[Dict[str, Optional[Dict[int, Optional[str]]]]] = None,
+    ) -> Optional[str]:
+        return _OMNI_STATION_CATALOG_SERVICE.contrast_landuse_skip_reason(
+            self,
+            contrast_id,
+            contrast_name,
+            landuse_cache=landuse_cache,
+        )
+
+    def _contrast_landuse_skip_reason_impl(
         self,
         contrast_id: int,
         contrast_name: str,
@@ -2058,6 +1906,9 @@ class Omni(NoDbBase):
         return self._redisprep_snapshot(redisprep_path)
 
     def _contrast_scenario_keys(self, contrast_name: str) -> Tuple[str, str]:
+        return _OMNI_STATION_CATALOG_SERVICE.contrast_scenario_keys(self, contrast_name)
+
+    def _contrast_scenario_keys_impl(self, contrast_name: str) -> Tuple[str, str]:
         control_part, target_part = contrast_name.split('__to__')
         control_scenario_raw = control_part.split(',')[0]
         control_key = self._normalize_scenario_key(control_scenario_raw)
@@ -2195,6 +2046,33 @@ class Omni(NoDbBase):
         select_topaz_ids: Optional[List[int]] = None,
         contrast_pairs: Optional[List[Dict[str, str]]] = None,
     ) -> None:
+        _OMNI_BUILD_ROUTER.build_contrasts(
+            self,
+            control_scenario_def=control_scenario_def,
+            contrast_scenario_def=contrast_scenario_def,
+            obj_param=obj_param,
+            contrast_cumulative_obj_param_threshold_fraction=contrast_cumulative_obj_param_threshold_fraction,
+            contrast_hillslope_limit=contrast_hillslope_limit,
+            hill_min_slope=hill_min_slope,
+            hill_max_slope=hill_max_slope,
+            select_burn_severities=select_burn_severities,
+            select_topaz_ids=select_topaz_ids,
+            contrast_pairs=contrast_pairs,
+        )
+
+    def _build_contrasts_router_impl(
+        self,
+        control_scenario_def: Optional[ScenarioDef],
+        contrast_scenario_def: Optional[ScenarioDef],
+        obj_param: str = 'Runoff_mm',
+        contrast_cumulative_obj_param_threshold_fraction: float = 0.8,
+        contrast_hillslope_limit: Optional[int] = None,
+        hill_min_slope: Optional[float] = None,
+        hill_max_slope: Optional[float] = None,
+        select_burn_severities: Optional[List[int]] = None,
+        select_topaz_ids: Optional[List[int]] = None,
+        contrast_pairs: Optional[List[Dict[str, str]]] = None,
+    ) -> None:
         """
         Extracts the specified objective parameter from the specified GeoPackage file.
 
@@ -2227,12 +2105,9 @@ class Omni(NoDbBase):
 
         self.logger.info('build_contrasts')
 
-        selection_mode_value = getattr(self, "_contrast_selection_mode", None)
-        selection_mode = (selection_mode_value or "cumulative").strip().lower()
-        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
-            selection_mode = "stream_order"
-        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
-            selection_mode = "user_defined_hillslope_groups"
+        selection_mode = _OMNI_SCALING_SERVICE.normalize_selection_mode(
+            getattr(self, "_contrast_selection_mode", None)
+        )
 
         control_scenario = (
             _scenario_name_from_scenario_definition(control_scenario_def)
@@ -2276,23 +2151,13 @@ class Omni(NoDbBase):
     def _build_contrasts(self) -> None:
         global OMNI_REL_DIR
 
-        selection_mode_value = getattr(self, "_contrast_selection_mode", None)
-        selection_mode = (selection_mode_value or 'cumulative').strip().lower()
-        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
-            selection_mode = "stream_order"
-        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
-            selection_mode = "user_defined_hillslope_groups"
+        selection_mode = _OMNI_SCALING_SERVICE.normalize_selection_mode(
+            getattr(self, "_contrast_selection_mode", None)
+        )
 
         self._reset_contrast_build_state()
 
-        if selection_mode == "user_defined_areas":
-            self._build_contrasts_user_defined_areas()
-            return
-        if selection_mode == "user_defined_hillslope_groups":
-            self._build_contrasts_user_defined_hillslope_groups()
-            return
-        if selection_mode == "stream_order":
-            self._build_contrasts_stream_order()
+        if _OMNI_MODE_BUILD_SERVICES.build_contrasts_for_selection_mode(self, selection_mode):
             return
 
         obj_param = self._contrast_object_param
@@ -2312,7 +2177,7 @@ class Omni(NoDbBase):
             control_scenario = None
 
         from wepppy.nodb.core import Watershed
-        apply_advanced_filters = selection_mode == 'cumulative'
+        apply_advanced_filters = selection_mode == "cumulative"
         if not apply_advanced_filters:
             if any(
                 value is not None
@@ -2338,77 +2203,26 @@ class Omni(NoDbBase):
                 )
                 contrast_hillslope_limit = None
 
-        contrast_hillslope_limit_max = 100 if selection_mode == 'cumulative' else None
-
-        if contrast_hillslope_limit is not None:
-            try:
-                contrast_hillslope_limit = int(contrast_hillslope_limit)
-            except (TypeError, ValueError) as exc:
-                raise ValueError("omni_contrast_hillslope_limit must be an integer") from exc
-            if contrast_hillslope_limit <= 0:
-                raise ValueError("omni_contrast_hillslope_limit must be >= 1")
-            if contrast_hillslope_limit_max is not None and contrast_hillslope_limit > contrast_hillslope_limit_max:
-                self.logger.warning(
-                    "omni_contrast_hillslope_limit capped at %d (requested %d).",
-                    contrast_hillslope_limit_max,
-                    contrast_hillslope_limit,
-                )
-                contrast_hillslope_limit = contrast_hillslope_limit_max
-
-        def _normalize_int_set(value: Any, label: str) -> Optional[Set[int]]:
-            if value is None or value == "":
-                return None
-            if isinstance(value, str):
-                raw_items = [item.strip() for item in value.split(",") if item.strip()]
-            elif isinstance(value, (list, tuple, set)):
-                raw_items = list(value)
-            else:
-                raw_items = [value]
-            parsed: Set[int] = set()
-            for item in raw_items:
-                if item is None or item == "":
-                    continue
-                try:
-                    parsed.add(int(item))
-                except (TypeError, ValueError) as exc:
-                    raise ValueError(f"{label} entries must be integers") from exc
-            return parsed or None
-
-        def _normalize_slope(value: Any, label: str) -> Optional[float]:
-            if value is None or value == "":
-                return None
-            try:
-                slope = float(value)
-            except (TypeError, ValueError) as exc:
-                raise ValueError(f"{label} must be a number") from exc
-            if slope < 0:
-                raise ValueError(f"{label} must be >= 0")
-            if slope > 1.0:
-                slope = slope / 100.0
-            return slope
+        (
+            contrast_hillslope_limit,
+            contrast_hillslope_limit_max,
+        ) = _OMNI_SCALING_SERVICE.normalize_hillslope_limit(
+            self,
+            selection_mode=selection_mode,
+            contrast_hillslope_limit=contrast_hillslope_limit,
+        )
 
         if apply_advanced_filters:
-            contrast_hill_min_slope = _normalize_slope(
+            (
                 contrast_hill_min_slope,
-                "omni_contrast_hill_min_slope",
-            )
-            contrast_hill_max_slope = _normalize_slope(
                 contrast_hill_max_slope,
-                "omni_contrast_hill_max_slope",
-            )
-            if (
-                contrast_hill_min_slope is not None
-                and contrast_hill_max_slope is not None
-                and contrast_hill_min_slope > contrast_hill_max_slope
-            ):
-                raise ValueError("omni_contrast_hill_min_slope must be <= omni_contrast_hill_max_slope")
-            contrast_select_burn_severities = _normalize_int_set(
                 contrast_select_burn_severities,
-                "omni_contrast_select_burn_severities",
-            )
-            contrast_select_topaz_ids = _normalize_int_set(
                 contrast_select_topaz_ids,
-                "omni_contrast_select_topaz_ids",
+            ) = _OMNI_SCALING_SERVICE.normalize_filter_inputs(
+                contrast_hill_min_slope=contrast_hill_min_slope,
+                contrast_hill_max_slope=contrast_hill_max_slope,
+                contrast_select_burn_severities=contrast_select_burn_severities,
+                contrast_select_topaz_ids=contrast_select_topaz_ids,
             )
 
         wd = self.wd
@@ -2433,74 +2247,15 @@ class Omni(NoDbBase):
                 contrast_select_topaz_ids,
             )
         ):
-            original_count = len(obj_param_descending)
-            topaz_filter = None
-            if contrast_select_topaz_ids is not None:
-                topaz_filter = {str(topaz_id) for topaz_id in contrast_select_topaz_ids}
-
-            slope_lookup: Dict[str, float] = {}
-            burn_lookup: Dict[str, int] = {}
-            burn_set = contrast_select_burn_severities
-            landuse = None
-            if burn_set is not None:
-                burn_set = set(burn_set)
-                invalid = [val for val in burn_set if val not in {0, 1, 2, 3}]
-                if invalid:
-                    raise ValueError(
-                        f"omni_contrast_select_burn_severities must be 0-3; got {sorted(invalid)}"
-                    )
-                from wepppy.nodb.core import Landuse
-
-                control_wd = self.wd if control_scenario is None else _join(
-                    self.wd,
-                    OMNI_REL_DIR,
-                    'scenarios',
-                    control_scenario,
-                )
-                landuse = Landuse.getInstance(control_wd)
-
-            def _burn_value(label: Optional[str]) -> int:
-                name = (label or "Unburned").strip().lower()
-                mapping = {
-                    "unburned": 0,
-                    "low": 1,
-                    "moderate": 2,
-                    "mod": 2,
-                    "high": 3,
-                }
-                if name not in mapping:
-                    raise ValueError(f"Unknown burn class '{label}' while filtering contrasts")
-                return mapping[name]
-
-            filtered: List[ObjectiveParameter] = []
-            for item in obj_param_descending:
-                topaz_id = str(item.topaz_id)
-                if topaz_filter is not None and topaz_id not in topaz_filter:
-                    continue
-                if contrast_hill_min_slope is not None or contrast_hill_max_slope is not None:
-                    slope = slope_lookup.get(topaz_id)
-                    if slope is None:
-                        slope = watershed.hillslope_slope(topaz_id)
-                        slope_lookup[topaz_id] = slope
-                    if contrast_hill_min_slope is not None and slope < contrast_hill_min_slope:
-                        continue
-                    if contrast_hill_max_slope is not None and slope > contrast_hill_max_slope:
-                        continue
-                if burn_set is not None and landuse is not None:
-                    burn_class = burn_lookup.get(topaz_id)
-                    if burn_class is None:
-                        burn_class = _burn_value(landuse.identify_burn_class(topaz_id))
-                        burn_lookup[topaz_id] = burn_class
-                    if burn_class not in burn_set:
-                        continue
-                filtered.append(item)
-
-            obj_param_descending = filtered
-            total_erosion_kg = float(sum(item.value for item in obj_param_descending))
-            self.logger.info(
-                "  contrast filters reduced candidates from %d to %d",
-                original_count,
-                len(obj_param_descending),
+            obj_param_descending, total_erosion_kg = _OMNI_SCALING_SERVICE.apply_advanced_filters(
+                self,
+                watershed=watershed,
+                control_scenario=control_scenario,
+                obj_param_descending=obj_param_descending,
+                contrast_hill_min_slope=contrast_hill_min_slope,
+                contrast_hill_max_slope=contrast_hill_max_slope,
+                contrast_select_burn_severities=contrast_select_burn_severities,
+                contrast_select_topaz_ids=contrast_select_topaz_ids,
             )
 
         if not obj_param_descending:
@@ -2606,6 +2361,9 @@ class Omni(NoDbBase):
             self._contrast_names = contrast_names
 
     def _build_contrast_ids_geojson(self) -> Optional[str]:
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.build_contrast_ids_geojson(self)
+
+    def _build_contrast_ids_geojson_impl(self) -> Optional[str]:
         selection_mode = (getattr(self, "_contrast_selection_mode", None) or "cumulative").strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
             selection_mode = "stream_order"
@@ -2960,18 +2718,7 @@ class Omni(NoDbBase):
         return output_path
 
     def _resolve_order_reduction_passes(self) -> int:
-        raw_value = getattr(self, "_contrast_order_reduction_passes", None)
-        if raw_value in (None, ""):
-            raw_value = self.config_get_int("omni", "order_reduction_passes", 1)
-        try:
-            passes = int(raw_value)
-        except (TypeError, ValueError) as exc:
-            raise ValueError("order_reduction_passes must be an integer") from exc
-        if passes == 0:
-            return 1
-        if passes < 0:
-            raise ValueError("order_reduction_passes must be >= 1")
-        return passes
+        return _OMNI_SCALING_SERVICE.resolve_order_reduction_passes(self)
 
     def _build_contrasts_stream_order(self) -> None:
         global OMNI_REL_DIR
@@ -3783,6 +3530,33 @@ class Omni(NoDbBase):
         select_topaz_ids: Optional[List[int]] = None,
         contrast_pairs: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
+        return _OMNI_BUILD_ROUTER.build_contrasts_dry_run_report(
+            self,
+            control_scenario_def=control_scenario_def,
+            contrast_scenario_def=contrast_scenario_def,
+            obj_param=obj_param,
+            contrast_cumulative_obj_param_threshold_fraction=contrast_cumulative_obj_param_threshold_fraction,
+            contrast_hillslope_limit=contrast_hillslope_limit,
+            hill_min_slope=hill_min_slope,
+            hill_max_slope=hill_max_slope,
+            select_burn_severities=select_burn_severities,
+            select_topaz_ids=select_topaz_ids,
+            contrast_pairs=contrast_pairs,
+        )
+
+    def _build_contrasts_dry_run_report_impl(
+        self,
+        control_scenario_def: Optional[ScenarioDef],
+        contrast_scenario_def: Optional[ScenarioDef],
+        obj_param: str = 'Runoff_mm',
+        contrast_cumulative_obj_param_threshold_fraction: float = 0.8,
+        contrast_hillslope_limit: Optional[int] = None,
+        hill_min_slope: Optional[float] = None,
+        hill_max_slope: Optional[float] = None,
+        select_burn_severities: Optional[List[int]] = None,
+        select_topaz_ids: Optional[List[int]] = None,
+        contrast_pairs: Optional[List[Dict[str, str]]] = None,
+    ) -> Dict[str, Any]:
         self.build_contrasts(
             control_scenario_def=control_scenario_def,
             contrast_scenario_def=contrast_scenario_def,
@@ -3799,6 +3573,9 @@ class Omni(NoDbBase):
         return self.contrast_status_report()
 
     def contrast_status_report(self) -> Dict[str, Any]:
+        return _OMNI_BUILD_ROUTER.contrast_status_report(self)
+
+    def _contrast_status_report_impl(self) -> Dict[str, Any]:
         selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
             selection_mode = "stream_order"
@@ -4245,6 +4022,9 @@ class Omni(NoDbBase):
         return omni_wd
 
     def contrasts_report(self) -> pd.DataFrame:
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.contrasts_report(self)
+
+    def _contrasts_report_impl(self) -> pd.DataFrame:
         global OMNI_REL_DIR
 
         def _resolve_loss_out_parquet(output_dir: str) -> str:
@@ -4371,6 +4151,9 @@ class Omni(NoDbBase):
         return combined
     
     def _normalize_scenario_key(self, name: Optional[Any]) -> str:
+        return _OMNI_STATION_CATALOG_SERVICE.normalize_scenario_key(self, name)
+
+    def _normalize_scenario_key_impl(self, name: Optional[Any]) -> str:
         if isinstance(name, OmniScenario):
             name = str(name)
         if name in (None, 'None'):
@@ -4378,6 +4161,9 @@ class Omni(NoDbBase):
         return str(name)
 
     def _loss_pw0_path_for_scenario(self, scenario_name: Optional[Any]) -> str:
+        return _OMNI_STATION_CATALOG_SERVICE.loss_pw0_path_for_scenario(self, scenario_name)
+
+    def _loss_pw0_path_for_scenario_impl(self, scenario_name: Optional[Any]) -> str:
         global OMNI_REL_DIR
         scenario_key = self._normalize_scenario_key(scenario_name)
 
@@ -4390,6 +4176,9 @@ class Omni(NoDbBase):
         return scenario_path if _exists(scenario_path) else (base_path if scenario_key == str(self.base_scenario) else scenario_path)
 
     def _interchange_class_data_path_for_scenario(self, scenario_name: Optional[Any]) -> str:
+        return _OMNI_STATION_CATALOG_SERVICE.interchange_class_data_path_for_scenario(self, scenario_name)
+
+    def _interchange_class_data_path_for_scenario_impl(self, scenario_name: Optional[Any]) -> str:
         global OMNI_REL_DIR
         scenario_key = self._normalize_scenario_key(scenario_name)
 
@@ -4402,6 +4191,9 @@ class Omni(NoDbBase):
         return scenario_path if _exists(scenario_path) else (base_path if scenario_key == str(self.base_scenario) else scenario_path)
 
     def _year_set_for_scenario(self, scenario_name: Optional[Any]) -> Optional[Set[int]]:
+        return _OMNI_STATION_CATALOG_SERVICE.year_set_for_scenario(self, scenario_name)
+
+    def _year_set_for_scenario_impl(self, scenario_name: Optional[Any]) -> Optional[Set[int]]:
         path = self._interchange_class_data_path_for_scenario(scenario_name)
         if not os.path.isfile(path):
             return None
@@ -4422,6 +4214,9 @@ class Omni(NoDbBase):
             return None
 
     def _scenario_signature(self, scenario_def: ScenarioDef) -> str:
+        return _OMNI_STATION_CATALOG_SERVICE.scenario_signature(self, scenario_def)
+
+    def _scenario_signature_impl(self, scenario_def: ScenarioDef) -> str:
         sanitized: Dict[str, Any] = {}
         for key, value in scenario_def.items():
             if key == 'type' and isinstance(value, OmniScenario):
@@ -4431,11 +4226,17 @@ class Omni(NoDbBase):
         return json.dumps(sanitized, sort_keys=True, default=str)
 
     def _scenario_dependency_target(self, scenario: OmniScenario, scenario_def: ScenarioDef) -> Optional[str]:
+        return _OMNI_STATION_CATALOG_SERVICE.scenario_dependency_target(self, scenario, scenario_def)
+
+    def _scenario_dependency_target_impl(self, scenario: OmniScenario, scenario_def: ScenarioDef) -> Optional[str]:
         if scenario == OmniScenario.Mulch:
             return scenario_def.get('base_scenario')
         return str(self.base_scenario)
 
     def _contrast_dependencies(self, contrast_name: str) -> ContrastDependencies:
+        return _OMNI_STATION_CATALOG_SERVICE.contrast_dependencies(self, contrast_name)
+
+    def _contrast_dependencies_impl(self, contrast_name: str) -> ContrastDependencies:
         control_part, target_part = contrast_name.split('__to__')
         control_scenario_raw = control_part.split(',')[0]
         control_key = self._normalize_scenario_key(control_scenario_raw)
@@ -4795,7 +4596,6 @@ class Omni(NoDbBase):
     def run_omni_scenario(self, scenario_def: ScenarioDef) -> Tuple[str, str]:
         from wepppy.nodb.core import Landuse, Soils, Wepp
         from wepppy.nodb.mods.disturbed import Disturbed
-        from wepppy.nodb.mods.treatments import Treatments
             
         wd = self.wd
         base_scenario = self.base_scenario
@@ -4829,161 +4629,17 @@ class Omni(NoDbBase):
         landuse = Landuse.getInstance(new_wd)
         soils = Soils.getInstance(new_wd)
 
-        # handle uniform burn severity cases
-        if scenario == OmniScenario.UniformLow or \
-            scenario == OmniScenario.UniformModerate or \
-            scenario == OmniScenario.UniformHigh:
-
-            # identify burn class
-            sbs = None
-            if scenario == OmniScenario.UniformLow:
-                sbs = 1
-            elif scenario == OmniScenario.UniformModerate:
-                sbs = 2
-            elif scenario == OmniScenario.UniformHigh:
-                sbs = 3
-
-            self.logger.info(f' {scenario_name}: scenario == uniform burn severity -> {sbs}')
-
-            with self.timed(f'  {scenario_name}: build uniform sbs {sbs}'):
-                sbs_fn = disturbed.build_uniform_sbs(int(sbs))
-            with self.timed(f'  {scenario_name}: validate sbs {sbs_fn}'):
-                disturbed.validate(sbs_fn, mode=1, uniform_severity=int(sbs))
-            with self.timed(f'  {scenario_name}: build landuse and soils'):
-                landuse.build()
-            with self.timed(f'  {scenario_name}: build soils'):
-                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
-
-        elif scenario == OmniScenario.Undisturbed:
-            self.logger.info(f' {scenario_name}: scenario == undisturbed')
-
-            runid_leaf = str(self.runid).split(';;')[-1] if self.runid else ''
-            wd_leaf = os.path.basename(os.path.normpath(self.wd))
-            is_base_project = runid_leaf == '_base' or wd_leaf == '_base'
-
-            if not self.has_sbs and not is_base_project:
-                raise Exception('Undisturbed scenario requires a base scenario with sbs')
-            if not self.has_sbs and is_base_project:
-                self.logger.info(
-                    f'  {scenario_name}: skipping sbs guard for _base project context'
-                )
-
-            with self.timed(f'  {scenario_name}: remove sbs'):
-                disturbed.remove_sbs()
-            with self.timed(f'  {scenario_name}: build landuse'):
-                landuse.build()
-            with self.timed(f'  {scenario_name}: build soils'):
-                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
-
-        elif scenario == OmniScenario.SBSmap:
-            self.logger.info(f' {scenario_name}: scenario == sbs')
-
-            sbs_file_path = scenario_def.get('sbs_file_path')
-            if not _exists(sbs_file_path):
-                raise FileNotFoundError(f"'{sbs_file_path}' not found!")
-            
-            with self.timed(f'  {scenario_name}: copy sbs to disturbed dir from _limbo'):
-                sbs_fn = _split(sbs_file_path)[-1]
-                new_sbs_file_path = _join(disturbed.disturbed_dir, sbs_fn)
-                shutil.copyfile(sbs_file_path, new_sbs_file_path)
-                os.remove(sbs_file_path)
-
-            with self.timed(f'  {scenario_name}: validate sbs {sbs_fn}'):
-                disturbed.validate(sbs_fn, mode=0)
-            with self.timed(f'  {scenario_name}: build landuse and soils'):
-                landuse.build()
-            with self.timed(f'  {scenario_name}: build soils'):
-                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
-
-        elif scenario == OmniScenario.Mulch:
-            self.logger.info(f'  {scenario_name}: scenario == mulch')
-
-            assert omni_base_scenario_name is not None, \
-                'Mulching scenario requires a base scenario'
-
-            with self.timed(f'  {scenario_name}: applying treatments'):
-                treatments = Treatments.getInstance(new_wd)
-                ground_cover_increase = scenario_def.get('ground_cover_increase')
-                treatment_key = treatments.treatments_lookup[f'mulch_{ground_cover_increase}'.replace('%', '')]
-
-                treatments_domlc_d = {}
-                for topaz_id, dom in landuse.domlc_d.items():
-                    if str(topaz_id).endswith('4'):
-                        continue
-
-                    # treat burned forest, shrub, and grass with mulching by increasing cover
-                    man_summary = landuse.managements[dom]
-                    disturbed_class = getattr(man_summary, 'disturbed_class', '')
-                    if isinstance(disturbed_class, str) and 'fire' in disturbed_class:
-                        treatments_domlc_d[topaz_id] = treatment_key
-
-                treatments.treatments_domlc_d = treatments_domlc_d
-                treatments.build_treatments()
-            
-            with self.timed(f'  {scenario_name}: build soils'):
-                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
-
-        elif scenario == OmniScenario.PrescribedFire:
-            self.logger.info(f'  {scenario_name}: scenario == prescribed fire')
-
-            # should have cloned undisturbed
-            if disturbed.has_sbs:
-                raise Exception('Cloned omni scenario should be undisturbed')
-
-            with self.timed(f'  {scenario_name}: build soils'):
-                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
-            
-            with self.timed(f'  {scenario_name}: applying treatments'):
-                treatments = Treatments.getInstance(new_wd)
-                treatments_lookup = treatments.treatments_lookup
-                treatment_key = treatments_lookup.get(str(scenario))
-                if treatment_key is None:
-                    available = ", ".join(sorted(treatments_lookup)) if treatments_lookup else "none"
-                    raise ValueError(
-                        "Prescribed fire scenario requires a treatment mapping for 'prescribed_fire', "
-                        "but the current landuse mapping does not define it. "
-                        f"Available treatment keys: {available}."
-                    )
-
-                treatments_domlc_d = {}
-                for topaz_id, dom in landuse.domlc_d.items():
-                    if str(topaz_id).endswith('4'):
-                        continue
-
-                    man_summary = landuse.managements[dom]
-                    disturbed_class = getattr(man_summary, 'disturbed_class', '')
-                    if 'forest' in disturbed_class and 'young' not in disturbed_class:
-                        treatments_domlc_d[topaz_id] = treatment_key
-
-                treatments.treatments_domlc_d = treatments_domlc_d
-                treatments.build_treatments()
-
-        elif scenario == OmniScenario.Thinning:
-            self.logger.info(f'  {scenario_name}: scenario == thinning')
-
-            # should have cloned undisturbed
-            if disturbed.has_sbs:
-                raise Exception('Cloned omni scenario should be undisturbed')
-
-            with self.timed(f'  {scenario_name}: build soils'):
-                soils.build(max_workers=self.rq_job_pool_max_worker_per_scenario_task)
-            
-            with self.timed(f'  {scenario_name}: applying treatments'):
-                treatments = Treatments.getInstance(new_wd)
-                treatment_key = treatments.treatments_lookup[scenario_name]
-
-                treatments_domlc_d = {}
-                for topaz_id, dom in landuse.domlc_d.items():
-                    if str(topaz_id).endswith('4'):
-                        continue
-                        
-                    man_summary = landuse.managements[dom]
-                    disturbed_class = getattr(man_summary, 'disturbed_class', '')
-                    if 'forest' in disturbed_class and 'young' not in disturbed_class:
-                        treatments_domlc_d[topaz_id] = treatment_key
-
-                treatments.treatments_domlc_d = treatments_domlc_d
-                treatments.build_treatments()
+        _OMNI_MODE_BUILD_SERVICES.apply_scenario_mode(
+            self,
+            scenario_name=scenario_name,
+            scenario=scenario,
+            scenario_def=scenario_def,
+            new_wd=new_wd,
+            disturbed=disturbed,
+            landuse=landuse,
+            soils=soils,
+            omni_base_scenario_name=omni_base_scenario_name,
+        )
 
         landuse.build_managements()
         wepp = Wepp.getInstance(new_wd)
@@ -5095,6 +4751,9 @@ class Omni(NoDbBase):
         return False
 
     def scenarios_report(self) -> pd.DataFrame:
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.scenarios_report(self)
+
+    def _scenarios_report_impl(self) -> pd.DataFrame:
         """
         compiles the loss_pw0.out.parquet across the scenarios
         """
@@ -5139,6 +4798,9 @@ class Omni(NoDbBase):
         return combined
     
     def compile_hillslope_summaries(self) -> pd.DataFrame:
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.compile_hillslope_summaries(self)
+
+    def _compile_hillslope_summaries_impl(self) -> pd.DataFrame:
         global OMNI_REL_DIR
         from wepppy.wepp.reports import HillSummaryReport
 
@@ -5219,6 +4881,9 @@ class Omni(NoDbBase):
         return combined
 
     def compile_channel_summaries(self) -> pd.DataFrame:
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.compile_channel_summaries(self)
+
+    def _compile_channel_summaries_impl(self) -> pd.DataFrame:
         global OMNI_REL_DIR
         from wepppy.wepp.reports import ChannelSummaryReport
 
