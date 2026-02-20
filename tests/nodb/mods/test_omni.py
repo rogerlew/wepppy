@@ -2,6 +2,7 @@ import os
 import importlib
 import json
 import logging
+import time
 import sys
 import types
 from collections import Counter
@@ -1738,6 +1739,41 @@ def test_contrast_run_status_needs_run_when_redisprep_missing_watershed_timestam
     assert omni._contrast_run_status(1, contrast_name) == "needs_run"
 
 
+def test_contrast_run_status_needs_run_when_order_reduction_passes_change(
+    tmp_path,
+    monkeypatch,
+    omni_module,
+):
+    monkeypatch.setattr(omni_module.NoDbBase, "has_sbs", property(lambda self: False))
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.order_reduction_status")
+    omni._contrast_selection_mode = "stream_order"
+    omni._contrast_order_reduction_passes = 2
+
+    contrast_name = "None,10__to__undisturbed"
+    sidecar_path = Path(omni._contrast_sidecar_path(1))
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_path.write_text("10\t/tmp/H1\n", encoding="ascii")
+    readme_path = Path(omni._contrast_run_readme_path(1))
+    readme_path.parent.mkdir(parents=True, exist_ok=True)
+    readme_path.write_text("done", encoding="ascii")
+
+    snapshot = {"timestamps:run_wepp_watershed": 123}
+    (tmp_path / "redisprep.dump").write_text(json.dumps(snapshot), encoding="utf-8")
+
+    omni._contrast_dependency_tree = {
+        contrast_name: {
+            "sidecar_sha1": omni_module._hash_file_sha1(str(sidecar_path)),
+            "control_redisprep": snapshot,
+            "contrast_redisprep": snapshot,
+            "order_reduction_passes": 1,
+        }
+    }
+
+    assert omni._contrast_run_status(1, contrast_name) == "needs_run"
+
+
 def test_run_omni_contrasts_cleans_stale_runs(tmp_path, monkeypatch, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
@@ -2142,6 +2178,165 @@ def test_stream_order_contrasts_grouping_and_skip(tmp_path, omni_module, monkeyp
     skipped = next(item for item in report["items"] if item["contrast_id"] == 5)
     assert skipped["run_status"] == "skipped"
     assert skipped["skip_status"]["reason"] == "no_hillslopes"
+
+
+@pytest.mark.parametrize(
+    ("build_subcatchments_ts", "expect_prune", "expect_wbt"),
+    [
+        (10_000_000_000.0, True, True),
+        (0.0, False, False),
+    ],
+)
+def test_build_contrasts_stream_order_stale_rebuild_decisions(
+    tmp_path,
+    omni_module,
+    monkeypatch,
+    build_subcatchments_ts,
+    expect_prune,
+    expect_wbt,
+):
+    wbt_dir = tmp_path / "dem" / "wbt"
+    wbt_dir.mkdir(parents=True)
+
+    required = {}
+    for stem in ("flovec", "netful", "relief", "chnjnt", "bound", "subwta"):
+        path = wbt_dir / f"{stem}.tif"
+        path.write_text("", encoding="ascii")
+        required[stem] = path
+    (wbt_dir / "outlet.geojson").write_text("{}", encoding="ascii")
+
+    strahler_path = wbt_dir / "netful.strahler.tif"
+    pruned_streams_path = wbt_dir / "netful.pruned_1.tif"
+    order_pruned_path = wbt_dir / "netful.strahler_pruned_1.tif"
+    chnjnt_pruned_path = wbt_dir / "chnjnt.strahler_pruned_1.tif"
+    subwta_pruned_path = wbt_dir / "subwta.strahler_pruned_1.tif"
+    netw_pruned_path = wbt_dir / "netw.strahler_pruned_1.tsv"
+    for path in (
+        strahler_path,
+        pruned_streams_path,
+        order_pruned_path,
+        chnjnt_pruned_path,
+        subwta_pruned_path,
+        netw_pruned_path,
+    ):
+        path.write_text("", encoding="ascii")
+
+    now = time.time()
+    for path in (
+        strahler_path,
+        pruned_streams_path,
+        order_pruned_path,
+        chnjnt_pruned_path,
+        subwta_pruned_path,
+        netw_pruned_path,
+    ):
+        os.utime(path, (now, now))
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return np.ma.array([[1]], mask=False)
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    _ensure_package("wepppyo3", tmp_path)
+    rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
+    rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 1}
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
+    sys.modules["wepppyo3"].raster_characteristics = rc_stub
+
+    class DummyTranslator:
+        top2wepp = {"10": "1"}
+
+    class DummyWatershed:
+        delineation_backend_is_wbt = True
+        wbt_wd = str(wbt_dir)
+
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        omni_module,
+        "_resolve_base_scenario_key",
+        lambda wd: str(omni_module.OmniScenario.Undisturbed),
+    )
+
+    prune_calls = []
+
+    def _fake_prune(*args, **kwargs):
+        prune_calls.append((args, kwargs))
+        strahler_path.write_text("", encoding="ascii")
+        pruned_streams_path.write_text("", encoding="ascii")
+        os.utime(strahler_path, None)
+        os.utime(pruned_streams_path, None)
+
+    monkeypatch.setattr(omni_module, "_prune_stream_order", _fake_prune)
+
+    wbt_calls = {"strahler_stream_order": 0, "stream_junction_identifier": 0, "hillslopes_topaz": 0}
+
+    class DummyWhiteboxTools:
+        def __init__(self, *args, **kwargs) -> None:
+            self._working_dir = str(wbt_dir)
+
+        def set_working_dir(self, working_dir: str) -> None:
+            self._working_dir = working_dir
+
+        def strahler_stream_order(self, **kwargs):
+            wbt_calls["strahler_stream_order"] += 1
+            Path(kwargs["output"]).write_text("", encoding="ascii")
+            return 0
+
+        def stream_junction_identifier(self, **kwargs):
+            wbt_calls["stream_junction_identifier"] += 1
+            Path(kwargs["output"]).write_text("", encoding="ascii")
+            return 0
+
+        def hillslopes_topaz(self, **kwargs):
+            wbt_calls["hillslopes_topaz"] += 1
+            Path(kwargs["subwta"]).write_text("", encoding="ascii")
+            Path(kwargs["netw"]).write_text("", encoding="ascii")
+            return 0
+
+    whitebox_tools_stub = types.ModuleType("whitebox_tools")
+    whitebox_tools_stub.WhiteboxTools = DummyWhiteboxTools
+    monkeypatch.setitem(sys.modules, "whitebox_tools", whitebox_tools_stub)
+
+    class DummyPrep:
+        def __getitem__(self, key):
+            return build_subcatchments_ts
+
+    monkeypatch.setattr(omni_module.RedisPrep, "getInstance", lambda wd: DummyPrep())
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.stream_order_rebuild")
+    omni._contrast_selection_mode = "stream_order"
+    omni._contrast_pairs = [{"control_scenario": "uniform_low", "contrast_scenario": "mulch"}]
+    omni._contrast_order_reduction_passes = 1
+
+    omni._build_contrasts()
+
+    assert bool(prune_calls) is expect_prune
+    assert bool(wbt_calls["hillslopes_topaz"]) is expect_wbt
+    assert bool(wbt_calls["strahler_stream_order"]) is expect_wbt
+    assert bool(wbt_calls["stream_junction_identifier"]) is expect_wbt
 
 
 def test_omni_clone_copies_soils_from_archive_source(tmp_path: Path, omni_module, monkeypatch):

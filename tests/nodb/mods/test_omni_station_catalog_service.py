@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import json
+import logging
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 import wepppy.nodb.mods.omni.omni as omni_module
@@ -10,68 +13,272 @@ from wepppy.nodb.mods.omni.omni_station_catalog_service import OmniStationCatalo
 pytestmark = pytest.mark.unit
 
 
-class _DummyOmni:
-    def _normalize_landuse_key_impl(self, value):
-        return f"key:{value}"
+class _StationOmniStub:
+    def __init__(
+        self,
+        wd: Path,
+        *,
+        base_scenario: omni_module.OmniScenario = omni_module.OmniScenario.Undisturbed,
+    ) -> None:
+        self.wd = str(wd)
+        self._base_scenario = base_scenario
+        self.logger = logging.getLogger("tests.omni.station_catalog")
+        self.sidecars: dict[int, dict[int | str, str]] = {}
 
-    def _load_landuse_key_map_impl(self, landuse_wd: str):
-        return {1: landuse_wd}
+    @property
+    def base_scenario(self) -> omni_module.OmniScenario:
+        return self._base_scenario
 
-    def _contrast_landuse_skip_reason_impl(self, contrast_id, contrast_name, *, landuse_cache=None):
-        return f"{contrast_id}:{contrast_name}:{bool(landuse_cache)}"
-
-    def _normalize_scenario_key_impl(self, name):
-        return f"scenario:{name}"
-
-    def _loss_pw0_path_for_scenario_impl(self, scenario_name):
-        return f"/tmp/{scenario_name}/loss_pw0.txt"
-
-    def _interchange_class_data_path_for_scenario_impl(self, scenario_name):
-        return f"/tmp/{scenario_name}/loss_pw0.all_years.class_data.parquet"
-
-    def _year_set_for_scenario_impl(self, scenario_name):
-        if scenario_name == "missing":
-            return None
-        return {2001, 2002}
-
-    def _scenario_signature_impl(self, scenario_def):
-        return f"sig:{scenario_def['type']}"
-
-    def _scenario_dependency_target_impl(self, scenario, scenario_def):
-        return scenario_def.get("base_scenario", str(scenario))
-
-    def _contrast_dependencies_impl(self, contrast_name):
-        return {"c1": {"loss_path": f"/tmp/{contrast_name}.txt", "sha1": "abc"}}
-
-    def _contrast_scenario_keys_impl(self, contrast_name):
-        return ("undisturbed", contrast_name)
+    def _load_contrast_sidecar(self, contrast_id: int):
+        if contrast_id not in self.sidecars:
+            raise FileNotFoundError(contrast_id)
+        return self.sidecars[contrast_id]
 
 
-def test_station_catalog_service_routes_to_impl_methods() -> None:
+def test_normalize_landuse_key_handles_null_and_numeric_values(tmp_path: Path) -> None:
     service = OmniStationCatalogService()
-    omni = _DummyOmni()
+    omni = _StationOmniStub(tmp_path)
 
-    assert service.normalize_landuse_key(omni, 4) == "key:4"
-    assert service.load_landuse_key_map(omni, "/run") == {1: "/run"}
-    assert service.contrast_landuse_skip_reason(omni, 2, "c2", landuse_cache={}) == "2:c2:False"
-    assert service.normalize_scenario_key(omni, "uniform_low") == "scenario:uniform_low"
-    assert service.loss_pw0_path_for_scenario(omni, "uniform_low") == "/tmp/uniform_low/loss_pw0.txt"
-    assert service.interchange_class_data_path_for_scenario(
+    assert service.normalize_landuse_key(omni, None) is None
+    assert service.normalize_landuse_key(omni, float("nan")) is None
+    assert service.normalize_landuse_key(omni, 7) == "7"
+    assert service.normalize_landuse_key(omni, 7.0) == "7"
+    assert service.normalize_landuse_key(omni, 7.5) == "7.5"
+    assert service.normalize_landuse_key(omni, "forest") == "forest"
+
+
+def test_load_landuse_key_map_reads_topaz_id_column(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    parquet_path = tmp_path / "landuse" / "landuse.parquet"
+    parquet_path.parent.mkdir(parents=True, exist_ok=True)
+    parquet_path.write_text("", encoding="ascii")
+
+    monkeypatch.setattr(
+        pd,
+        "read_parquet",
+        lambda path, columns: pd.DataFrame(
+            [
+                {"topaz_id": 1, "key": 10.0},
+                {"topaz_id": 2, "key": "A"},
+                {"topaz_id": "bad", "key": "B"},
+                {"topaz_id": None, "key": "C"},
+            ]
+        ),
+    )
+
+    assert service.load_landuse_key_map(omni, str(tmp_path)) == {1: "10", 2: "A"}
+
+
+def test_load_landuse_key_map_falls_back_to_topazid_column(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    parquet_path = tmp_path / "landuse" / "landuse.parquet"
+    parquet_path.parent.mkdir(parents=True, exist_ok=True)
+    parquet_path.write_text("", encoding="ascii")
+
+    read_calls: list[tuple[str, tuple[str, str]]] = []
+
+    def _fake_read_parquet(path, columns):
+        read_calls.append((str(path), tuple(columns)))
+        if columns[0] == "topaz_id":
+            raise ValueError("missing topaz_id")
+        return pd.DataFrame(
+            [
+                {"TopazID": 9, "key": "forest"},
+                {"TopazID": 10.0, "key": 2.0},
+            ]
+        )
+
+    monkeypatch.setattr(pd, "read_parquet", _fake_read_parquet)
+
+    assert service.load_landuse_key_map(omni, str(tmp_path)) == {9: "forest", 10: "2"}
+    assert len(read_calls) == 2
+    assert read_calls[0][1] == ("topaz_id", "key")
+    assert read_calls[1][1] == ("TopazID", "key")
+
+
+def test_load_landuse_key_map_logs_and_returns_none_on_read_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    parquet_path = tmp_path / "landuse" / "landuse.parquet"
+    parquet_path.parent.mkdir(parents=True, exist_ok=True)
+    parquet_path.write_text("", encoding="ascii")
+
+    monkeypatch.setattr(pd, "read_parquet", lambda path, columns: (_ for _ in ()).throw(OSError("read failed")))
+
+    with caplog.at_level(logging.WARNING):
+        assert service.load_landuse_key_map(omni, str(tmp_path)) is None
+
+    assert "Failed to read landuse key parquet" in caplog.text
+    assert str(tmp_path) in caplog.text
+
+
+def test_contrast_landuse_skip_reason_reports_unchanged_when_maps_match(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    contrast_wd = tmp_path / omni_module.OMNI_REL_DIR / "scenarios" / "mulch" / "wepp" / "output"
+    contrast_wd.mkdir(parents=True, exist_ok=True)
+    contrast_wepp_path = contrast_wd / "H10"
+    contrast_wepp_path.write_text("", encoding="ascii")
+
+    omni.sidecars[1] = {10: str(contrast_wepp_path)}
+    monkeypatch.setattr(omni_module, "_resolve_base_scenario_key", lambda wd: "undisturbed")
+    monkeypatch.setattr(
+        service,
+        "load_landuse_key_map",
+        lambda _omni, landuse_wd: {10: "forest"} if "mulch" in landuse_wd else {10: "forest"},
+    )
+
+    cache: dict[str, dict[int, str] | None] = {}
+    reason = service.contrast_landuse_skip_reason(
         omni,
-        "uniform_low",
-    ) == "/tmp/uniform_low/loss_pw0.all_years.class_data.parquet"
-    assert service.year_set_for_scenario(omni, "uniform_low") == {2001, 2002}
-    assert service.year_set_for_scenario(omni, "missing") is None
-    assert service.scenario_signature(omni, {"type": "uniform_low"}) == "sig:uniform_low"
+        1,
+        "undisturbed,10__to__mulch",
+        landuse_cache=cache,
+    )
+
+    assert reason == "landuse_unchanged"
+    assert "undisturbed" in cache
+    assert "mulch" in cache
+
+
+def test_contrast_landuse_skip_reason_returns_none_on_landuse_mismatch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    contrast_wd = tmp_path / omni_module.OMNI_REL_DIR / "scenarios" / "mulch" / "wepp" / "output"
+    contrast_wd.mkdir(parents=True, exist_ok=True)
+    contrast_wepp_path = contrast_wd / "H10"
+    contrast_wepp_path.write_text("", encoding="ascii")
+
+    omni.sidecars[2] = {10: str(contrast_wepp_path)}
+    monkeypatch.setattr(omni_module, "_resolve_base_scenario_key", lambda wd: "undisturbed")
+    monkeypatch.setattr(
+        service,
+        "load_landuse_key_map",
+        lambda _omni, landuse_wd: {10: "grass"} if "mulch" in landuse_wd else {10: "forest"},
+    )
+
+    assert service.contrast_landuse_skip_reason(omni, 2, "undisturbed,10__to__mulch") is None
+
+
+def test_normalize_and_path_helpers_resolve_base_and_scenario_paths(tmp_path: Path) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    base_loss_path = tmp_path / "wepp" / "output" / "loss_pw0.txt"
+    base_loss_path.parent.mkdir(parents=True, exist_ok=True)
+    base_loss_path.write_text("", encoding="ascii")
+
+    assert service.normalize_scenario_key(omni, None) == "undisturbed"
+    assert service.normalize_scenario_key(omni, omni_module.OmniScenario.UniformLow) == "uniform_low"
+    assert service.contrast_scenario_keys(omni, "None,1__to__mulch") == ("undisturbed", "mulch")
+
+    assert service.loss_pw0_path_for_scenario(omni, None) == str(base_loss_path)
+    assert service.loss_pw0_path_for_scenario(omni, "mulch").endswith(
+        "_pups/omni/scenarios/mulch/wepp/output/loss_pw0.txt"
+    )
+
+    base_interchange_path = (
+        tmp_path
+        / "wepp"
+        / "output"
+        / "interchange"
+        / "loss_pw0.all_years.class_data.parquet"
+    )
+    base_interchange_path.parent.mkdir(parents=True, exist_ok=True)
+    base_interchange_path.write_text("", encoding="ascii")
+
+    assert service.interchange_class_data_path_for_scenario(omni, None) == str(base_interchange_path)
+    assert service.interchange_class_data_path_for_scenario(omni, "mulch").endswith(
+        "_pups/omni/scenarios/mulch/wepp/output/interchange/loss_pw0.all_years.class_data.parquet"
+    )
+
+
+def test_year_set_for_scenario_reads_and_normalizes_years(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    class_data_path = tmp_path / "class_data.parquet"
+    class_data_path.write_text("", encoding="ascii")
+
+    monkeypatch.setattr(
+        service,
+        "interchange_class_data_path_for_scenario",
+        lambda _omni, _scenario_name: str(class_data_path),
+    )
+    monkeypatch.setattr(
+        pd,
+        "read_parquet",
+        lambda path, columns: pd.DataFrame({"year": [2001, 2002.0, 2002, None]}),
+    )
+
+    assert service.year_set_for_scenario(omni, "mulch") == {2001, 2002}
+
+
+def test_signature_and_dependency_helpers_are_stable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    signature = service.scenario_signature(
+        omni,
+        {"value": 2, "type": omni_module.OmniScenario.UniformLow},
+    )
+    parsed_signature = json.loads(signature)
+    assert parsed_signature["type"] == "uniform_low"
+    assert parsed_signature["value"] == 2
+
     assert service.scenario_dependency_target(
         omni,
         omni_module.OmniScenario.Mulch,
         {"base_scenario": "uniform_low"},
     ) == "uniform_low"
-    assert service.contrast_dependencies(omni, "undisturbed__to__mulch") == {
-        "c1": {"loss_path": "/tmp/undisturbed__to__mulch.txt", "sha1": "abc"}
+    assert service.scenario_dependency_target(
+        omni,
+        omni_module.OmniScenario.UniformLow,
+        {},
+    ) == "undisturbed"
+
+    monkeypatch.setattr(
+        service,
+        "loss_pw0_path_for_scenario",
+        lambda _omni, scenario_name: f"/loss/{scenario_name}.txt",
+    )
+    monkeypatch.setattr(omni_module, "_hash_file_sha1", lambda path: f"sha:{path}")
+
+    dependencies = service.contrast_dependencies(omni, "None,10__to__mulch")
+
+    assert dependencies == {
+        "undisturbed": {"loss_path": "/loss/undisturbed.txt", "sha1": "sha:/loss/undisturbed.txt"},
+        "mulch": {"loss_path": "/loss/mulch.txt", "sha1": "sha:/loss/mulch.txt"},
     }
-    assert service.contrast_scenario_keys(omni, "mulch") == ("undisturbed", "mulch")
 
 
 def _new_detached_omni(tmp_path: Path) -> omni_module.Omni:
@@ -143,13 +350,30 @@ def test_facade_station_catalog_methods_delegate_to_service(
     )
 
     assert omni._normalize_landuse_key(1) == "delegated-key:1"
+    assert omni._normalize_landuse_key_impl(2) == "delegated-key:2"
     assert omni._load_landuse_key_map("/run") == {7: "/run"}
+    assert omni._load_landuse_key_map_impl("/run-impl") == {7: "/run-impl"}
     assert omni._contrast_landuse_skip_reason(1, "c1") == "landuse_unchanged"
+    assert omni._contrast_landuse_skip_reason_impl(2, "c2") == "landuse_unchanged"
     assert omni._normalize_scenario_key("uniform_low") == "delegated-scenario:uniform_low"
+    assert omni._normalize_scenario_key_impl("uniform_high") == "delegated-scenario:uniform_high"
     assert omni._loss_pw0_path_for_scenario("uniform_low") == "/delegated/uniform_low/loss_pw0.txt"
-    assert omni._interchange_class_data_path_for_scenario("uniform_low") == "/delegated/uniform_low/class_data.parquet"
+    assert omni._loss_pw0_path_for_scenario_impl("uniform_high") == "/delegated/uniform_high/loss_pw0.txt"
+    assert (
+        omni._interchange_class_data_path_for_scenario("uniform_low")
+        == "/delegated/uniform_low/class_data.parquet"
+    )
+    assert (
+        omni._interchange_class_data_path_for_scenario_impl("uniform_high")
+        == "/delegated/uniform_high/class_data.parquet"
+    )
     assert omni._year_set_for_scenario("uniform_low") == {1999}
+    assert omni._year_set_for_scenario_impl("uniform_low") == {1999}
     assert omni._scenario_signature({"type": "uniform_low"}) == "delegated-signature"
+    assert omni._scenario_signature_impl({"type": "uniform_low"}) == "delegated-signature"
     assert omni._scenario_dependency_target(omni_module.OmniScenario.UniformLow, {}) == "delegated-target"
+    assert omni._scenario_dependency_target_impl(omni_module.OmniScenario.UniformLow, {}) == "delegated-target"
     assert omni._contrast_dependencies("u__to__m") == {"x": {"loss_path": "/tmp/x", "sha1": "1"}}
+    assert omni._contrast_dependencies_impl("u__to__m") == {"x": {"loss_path": "/tmp/x", "sha1": "1"}}
     assert omni._contrast_scenario_keys("u__to__m") == ("a", "b")
+    assert omni._contrast_scenario_keys_impl("u__to__m") == ("a", "b")

@@ -105,6 +105,146 @@ def test_run_omni_scenarios_rq_stops_on_nodir_preflight_error(
     assert any("EXCEPTION run_omni_scenarios_rq(demo)" in message for _, message in published)
 
 
+def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_metadata(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
+
+    parent_job = SimpleNamespace(id="job-31", meta={}, saves=0)
+
+    def _save() -> None:
+        parent_job.saves += 1
+
+    parent_job.save = _save  # type: ignore[attr-defined]
+
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
+    monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    monkeypatch.setattr(omni_rq, "nodir_resolve", lambda wd, root, view="effective": None)
+    monkeypatch.setattr(omni_rq, "_hash_file_sha1", lambda path: f"sha:{path}")
+
+    class _RedisCtx:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_rq.redis, "Redis", lambda **kwargs: _RedisCtx(**kwargs))
+    monkeypatch.setattr(omni_rq, "redis_connection_kwargs", lambda db: {"db": int(db)})
+
+    enqueue_calls: list[dict] = []
+
+    class _QueueStub:
+        def __init__(self, name: str, connection=None) -> None:
+            assert name == "batch"
+            self.connection = connection
+
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
+            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+            enqueue_calls.append(
+                {
+                    "func": func,
+                    "args": args,
+                    "kwargs": kwargs or {},
+                    "timeout": timeout,
+                    "depends_on": depends_on,
+                    "job": job,
+                }
+            )
+            return job
+
+    monkeypatch.setattr(omni_rq, "Queue", _QueueStub)
+
+    class OmniStub:
+        _instances: dict[str, "OmniStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.logger = logging.getLogger("tests.rq.omni.scenarios.concurrency")
+            self.use_rq_job_pool_concurrency = True
+            self.scenario_dependency_tree: dict[str, dict] = {}
+            self.scenario_run_state: list[dict] = []
+            self.scenarios = [
+                {"type": "uniform_low"},
+                {"type": "mulch", "base_scenario": "uniform_low"},
+            ]
+            self.base_scenario = omni_rq.OmniScenario.Undisturbed
+            self.helper_calls: list[tuple[str, object]] = []
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "OmniStub":
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+        def _scenario_dependency_target(self, scenario_enum, scenario_payload):
+            self.helper_calls.append(("dependency_target", scenario_enum))
+            if scenario_enum == omni_rq.OmniScenario.Mulch:
+                return scenario_payload.get("base_scenario")
+            return "undisturbed"
+
+        def _loss_pw0_path_for_scenario(self, scenario_name):
+            self.helper_calls.append(("loss_path", scenario_name))
+            return f"/dep/{scenario_name}/loss_pw0.txt"
+
+        def _scenario_signature(self, scenario_payload):
+            self.helper_calls.append(("signature", dict(scenario_payload)))
+            return f"sig:{scenario_payload['type']}"
+
+        def _normalize_scenario_key(self, scenario_name):
+            self.helper_calls.append(("normalize_key", scenario_name))
+            return f"key:{scenario_name}"
+
+    monkeypatch.setattr(omni_rq, "Omni", OmniStub)
+
+    result = omni_rq.run_omni_scenarios_rq("demo")
+
+    run_wd = str(tmp_path / "demo")
+    omni = OmniStub.getInstance(run_wd)
+
+    assert result.id == "child-4"
+    assert len(enqueue_calls) == 4
+
+    stage1 = enqueue_calls[0]
+    assert stage1["func"] is omni_rq.run_omni_scenario_rq
+    assert stage1["args"][0] == "demo"
+    assert stage1["kwargs"]["dependency_target"] == "key:undisturbed"
+    assert stage1["kwargs"]["dependency_path"] == "/dep/undisturbed/loss_pw0.txt"
+    assert stage1["kwargs"]["signature"] == "sig:uniform_low"
+
+    stage2 = enqueue_calls[1]
+    assert stage2["func"] is omni_rq.run_omni_scenario_rq
+    assert stage2["kwargs"]["dependency_target"] == "key:uniform_low"
+    assert stage2["kwargs"]["dependency_path"] == "/dep/uniform_low/loss_pw0.txt"
+    assert stage2["kwargs"]["signature"] == "sig:mulch"
+    assert isinstance(stage2["depends_on"], list)
+    assert stage2["depends_on"][0].id == stage1["job"].id
+
+    compile_job = enqueue_calls[2]
+    assert compile_job["func"] is omni_rq._compile_hillslope_summaries_rq
+    assert isinstance(compile_job["depends_on"], list)
+    assert compile_job["depends_on"][0].id == stage2["job"].id
+
+    finalize_job = enqueue_calls[3]
+    assert finalize_job["func"] is omni_rq._finalize_omni_scenarios_rq
+    assert isinstance(finalize_job["depends_on"], list)
+    assert finalize_job["depends_on"][0].id == compile_job["job"].id
+
+    assert any(kind == "dependency_target" for kind, _ in omni.helper_calls)
+    assert any(kind == "loss_path" for kind, _ in omni.helper_calls)
+    assert any(kind == "signature" for kind, _ in omni.helper_calls)
+    assert any(kind == "normalize_key" for kind, _ in omni.helper_calls)
+    assert parent_job.saves == 4
+    assert any("COMPLETED run_omni_scenarios_rq(demo)" in message for _, message in published)
+
+
 def test_run_omni_scenario_rq_updates_dependency_state_with_supplied_metadata(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -327,6 +467,85 @@ def test_run_omni_contrasts_rq_clears_dependency_tree_when_no_contrasts(
     assert result is None
     assert omni.contrast_dependency_tree == {}
     assert omni.cleaned_ids == [[]]
+    assert any("TRIGGER omni_contrasts END_BROADCAST" in message for _, message in published)
+
+
+def test_run_omni_contrasts_rq_landuse_skip_prunes_dependency_entries(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-62", meta={}, save=lambda: None))
+    monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+
+    class OmniStub:
+        _instances: dict[str, "OmniStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.logger = logging.getLogger("tests.rq.omni.contrasts.landuse")
+            self.contrast_names = [
+                "undisturbed,1__to__mulch",
+                "undisturbed,2__to__mulch",
+                None,
+            ]
+            self.contrast_dependency_tree = {
+                "undisturbed,1__to__mulch": {"signature": "old-a"},
+                "stale,3__to__mulch": {"signature": "old-b"},
+            }
+            self.cleaned_stale_ids: list[list[int]] = []
+            self.cleaned_contrast_ids: list[int] = []
+            self.landuse_cache_ids: list[int] = []
+            self.status_calls: list[int] = []
+            self.sidecar_paths = {
+                2: str(tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "2" / "sidecar.json"),
+            }
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "OmniStub":
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+        def _contrast_landuse_skip_reason(self, contrast_id, contrast_name, *, landuse_cache=None):
+            self.landuse_cache_ids.append(id(landuse_cache))
+            if contrast_id == 1:
+                return "landuse_unchanged"
+            return None
+
+        def _clean_contrast_run(self, contrast_id: int) -> None:
+            self.cleaned_contrast_ids.append(contrast_id)
+
+        def _contrast_sidecar_path(self, contrast_id: int) -> str:
+            return self.sidecar_paths.get(int(contrast_id), "")
+
+        def _contrast_run_status(self, contrast_id: int, contrast_name: str) -> str:
+            self.status_calls.append(int(contrast_id))
+            return "up_to_date"
+
+        def _clean_stale_contrast_runs(self, active_ids):
+            self.cleaned_stale_ids.append(list(active_ids))
+
+    monkeypatch.setattr(omni_rq, "Omni", OmniStub)
+
+    sidecar_path = tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "2" / "sidecar.json"
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_path.write_text("{}", encoding="ascii")
+
+    result = omni_rq.run_omni_contrasts_rq("demo")
+
+    run_wd = str(tmp_path / "demo")
+    omni = OmniStub.getInstance(run_wd)
+
+    assert result is None
+    assert omni.cleaned_contrast_ids == [1]
+    assert omni.cleaned_stale_ids == [[1, 2]]
+    assert omni.status_calls == [2]
+    assert len(set(omni.landuse_cache_ids)) == 1
+    assert omni.contrast_dependency_tree == {}
     assert any("TRIGGER omni_contrasts END_BROADCAST" in message for _, message in published)
 
 

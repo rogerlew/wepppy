@@ -321,6 +321,40 @@ def test_run_omni_requires_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["error"]["message"] == "Missing scenarios data"
 
 
+def test_run_omni_rejects_non_object_scenarios_entry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            json={"scenarios": ["uniform_low"]},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "Scenarios data must be valid JSON"
+
+
+def test_run_omni_rejects_scenarios_without_type(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            json={"scenarios": [{}]},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "Scenario 0 is missing type"
+
+
 def test_run_omni_contrasts_requires_geojson_in_user_defined_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_omni(monkeypatch)

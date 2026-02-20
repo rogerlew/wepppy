@@ -141,6 +141,175 @@ def test_apply_scenario_mode_undisturbed_enforces_sbs_guard(tmp_path: Path) -> N
         )
 
 
+def test_apply_scenario_mode_undisturbed_allows_base_context_without_sbs(tmp_path: Path) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+    omni._has_sbs = False
+    omni.wd = str(tmp_path / "_base")
+    Path(omni.wd).mkdir(parents=True, exist_ok=True)
+
+    class DisturbedStub:
+        def __init__(self) -> None:
+            self.remove_calls = 0
+
+        def remove_sbs(self) -> None:
+            self.remove_calls += 1
+
+    class LanduseStub:
+        def __init__(self) -> None:
+            self.build_calls = 0
+
+        def build(self) -> None:
+            self.build_calls += 1
+
+    class SoilsStub:
+        def __init__(self) -> None:
+            self.calls: list[int] = []
+
+        def build(self, max_workers: int | None = None) -> None:
+            self.calls.append(int(max_workers or 0))
+
+    disturbed = DisturbedStub()
+    landuse = LanduseStub()
+    soils = SoilsStub()
+
+    service.apply_scenario_mode(
+        omni,
+        scenario_name="undisturbed",
+        scenario=omni_module.OmniScenario.Undisturbed,
+        scenario_def={"type": "undisturbed"},
+        new_wd=omni.wd,
+        disturbed=disturbed,
+        landuse=landuse,
+        soils=soils,
+        omni_base_scenario_name=None,
+    )
+
+    assert disturbed.remove_calls == 1
+    assert landuse.build_calls == 1
+    assert soils.calls == [2]
+
+
+def test_apply_scenario_mode_mulch_maps_fire_landuse_to_treatment(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+
+    class DisturbedStub:
+        pass
+
+    class LanduseStub:
+        domlc_d = {101: "A", 102: "B", 104: "C"}
+        managements = {
+            "A": type("Summary", (), {"disturbed_class": "fire low"})(),
+            "B": type("Summary", (), {"disturbed_class": "forest mature"})(),
+            "C": type("Summary", (), {"disturbed_class": "fire high"})(),
+        }
+
+    class SoilsStub:
+        def __init__(self) -> None:
+            self.calls: list[int] = []
+
+        def build(self, max_workers: int | None = None) -> None:
+            self.calls.append(int(max_workers or 0))
+
+    class TreatmentsStub:
+        def __init__(self) -> None:
+            self.treatments_lookup = {"mulch_30": "M30"}
+            self.treatments_domlc_d = {}
+            self.build_calls = 0
+
+        def build_treatments(self) -> None:
+            self.build_calls += 1
+
+    treatments = TreatmentsStub()
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.treatments.Treatments.getInstance",
+        lambda wd: treatments,
+    )
+
+    soils = SoilsStub()
+    service.apply_scenario_mode(
+        omni,
+        scenario_name="mulch_30_uniform_low",
+        scenario=omni_module.OmniScenario.Mulch,
+        scenario_def={
+            "type": "mulch",
+            "ground_cover_increase": "30%",
+            "base_scenario": "uniform_low",
+        },
+        new_wd=omni.wd,
+        disturbed=DisturbedStub(),
+        landuse=LanduseStub(),
+        soils=soils,
+        omni_base_scenario_name="uniform_low",
+    )
+
+    assert treatments.treatments_domlc_d == {101: "M30"}
+    assert treatments.build_calls == 1
+    assert soils.calls == [2]
+
+
+def test_apply_scenario_mode_thinning_maps_mature_forest_landuse_to_treatment(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+
+    class DisturbedStub:
+        has_sbs = False
+
+    class LanduseStub:
+        domlc_d = {201: "A", 202: "B", 204: "C"}
+        managements = {
+            "A": type("Summary", (), {"disturbed_class": "forest mature"})(),
+            "B": type("Summary", (), {"disturbed_class": "forest young"})(),
+            "C": type("Summary", (), {"disturbed_class": "forest mature"})(),
+        }
+
+    class SoilsStub:
+        def __init__(self) -> None:
+            self.calls: list[int] = []
+
+        def build(self, max_workers: int | None = None) -> None:
+            self.calls.append(int(max_workers or 0))
+
+    class TreatmentsStub:
+        def __init__(self) -> None:
+            self.treatments_lookup = {"thinning_70_40": "THIN"}
+            self.treatments_domlc_d = {}
+            self.build_calls = 0
+
+        def build_treatments(self) -> None:
+            self.build_calls += 1
+
+    treatments = TreatmentsStub()
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.treatments.Treatments.getInstance",
+        lambda wd: treatments,
+    )
+
+    soils = SoilsStub()
+    service.apply_scenario_mode(
+        omni,
+        scenario_name="thinning_70_40",
+        scenario=omni_module.OmniScenario.Thinning,
+        scenario_def={"type": "thinning", "canopy_cover": "70", "ground_cover": "40"},
+        new_wd=omni.wd,
+        disturbed=DisturbedStub(),
+        landuse=LanduseStub(),
+        soils=soils,
+        omni_base_scenario_name=None,
+    )
+
+    assert treatments.treatments_domlc_d == {201: "THIN"}
+    assert treatments.build_calls == 1
+    assert soils.calls == [2]
+
+
 def test_apply_scenario_mode_prescribed_fire_requires_treatment_mapping(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

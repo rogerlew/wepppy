@@ -1739,46 +1739,13 @@ class Omni(NoDbBase):
         return _OMNI_STATION_CATALOG_SERVICE.normalize_landuse_key(self, value)
 
     def _normalize_landuse_key_impl(self, value: Any) -> Optional[str]:
-        if value is None or pd.isna(value):
-            return None
-        if isinstance(value, (int, float)) and not isinstance(value, bool):
-            try:
-                numeric_value = float(value)
-            except (TypeError, ValueError):
-                return str(value)
-            if numeric_value.is_integer():
-                return str(int(numeric_value))
-        return str(value)
+        return _OMNI_STATION_CATALOG_SERVICE.normalize_landuse_key(self, value)
 
     def _load_landuse_key_map(self, landuse_wd: str) -> Optional[Dict[int, Optional[str]]]:
         return _OMNI_STATION_CATALOG_SERVICE.load_landuse_key_map(self, landuse_wd)
 
     def _load_landuse_key_map_impl(self, landuse_wd: str) -> Optional[Dict[int, Optional[str]]]:
-        parquet_path = pick_existing_parquet_path(landuse_wd, "landuse/landuse.parquet")
-        if parquet_path is None:
-            return None
-        parquet_fn = str(parquet_path)
-
-        for id_column in ("topaz_id", "TopazID"):
-            try:
-                df = pd.read_parquet(parquet_fn, columns=[id_column, "key"])
-            except Exception:
-                continue
-            if id_column not in df.columns or "key" not in df.columns:
-                continue
-            key_map: Dict[int, Optional[str]] = {}
-            for row in df.itertuples(index=False):
-                topaz_value = getattr(row, id_column, None)
-                if topaz_value is None or pd.isna(topaz_value):
-                    continue
-                try:
-                    topaz_id = int(topaz_value)
-                except (TypeError, ValueError):
-                    continue
-                key_map[topaz_id] = self._normalize_landuse_key(getattr(row, "key", None))
-            if key_map:
-                return key_map
-        return None
+        return _OMNI_STATION_CATALOG_SERVICE.load_landuse_key_map(self, landuse_wd)
 
     def _contrast_landuse_skip_reason(
         self,
@@ -1801,52 +1768,12 @@ class Omni(NoDbBase):
         *,
         landuse_cache: Optional[Dict[str, Optional[Dict[int, Optional[str]]]]] = None,
     ) -> Optional[str]:
-        if not contrast_name:
-            return None
-
-        try:
-            contrast_payload = self._load_contrast_sidecar(contrast_id)
-        except FileNotFoundError:
-            return None
-
-        control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
-        if control_key == contrast_key:
-            return "landuse_unchanged"
-
-        base_key = _resolve_base_scenario_key(self.wd)
-        try:
-            contrast_wd = _resolve_contrast_scenario_wd(self.wd, contrast_key, base_key)
-        except FileNotFoundError:
-            return None
-
-        contrast_topaz_ids = _contrast_topaz_ids_from_mapping(contrast_payload, contrast_wd)
-        if not contrast_topaz_ids:
-            return None
-
-        cache = landuse_cache if landuse_cache is not None else {}
-        if control_key not in cache:
-            try:
-                control_wd = _resolve_contrast_scenario_wd(self.wd, control_key, base_key)
-            except FileNotFoundError:
-                return None
-            cache[control_key] = self._load_landuse_key_map(control_wd)
-        if contrast_key not in cache:
-            cache[contrast_key] = self._load_landuse_key_map(contrast_wd)
-
-        control_map = cache.get(control_key)
-        contrast_map = cache.get(contrast_key)
-        if not control_map or not contrast_map:
-            return None
-
-        for topaz_id in contrast_topaz_ids:
-            control_value = control_map.get(int(topaz_id))
-            contrast_value = contrast_map.get(int(topaz_id))
-            if control_value is None or contrast_value is None:
-                return None
-            if control_value != contrast_value:
-                return None
-
-        return "landuse_unchanged"
+        return _OMNI_STATION_CATALOG_SERVICE.contrast_landuse_skip_reason(
+            self,
+            contrast_id,
+            contrast_name,
+            landuse_cache=landuse_cache,
+        )
 
     def _scenario_run_readme_path(self, scenario_name: Optional[Any]) -> str:
         scenario_key = self._normalize_scenario_key(scenario_name)
@@ -1909,11 +1836,7 @@ class Omni(NoDbBase):
         return _OMNI_STATION_CATALOG_SERVICE.contrast_scenario_keys(self, contrast_name)
 
     def _contrast_scenario_keys_impl(self, contrast_name: str) -> Tuple[str, str]:
-        control_part, target_part = contrast_name.split('__to__')
-        control_scenario_raw = control_part.split(',')[0]
-        control_key = self._normalize_scenario_key(control_scenario_raw)
-        target_key = self._normalize_scenario_key(target_part)
-        return control_key, target_key
+        return _OMNI_STATION_CATALOG_SERVICE.contrast_scenario_keys(self, contrast_name)
 
     def _contrast_run_status(self, contrast_id: int, contrast_name: str) -> str:
         run_marker = self._contrast_run_readme_path(contrast_id)
@@ -2073,74 +1996,19 @@ class Omni(NoDbBase):
         select_topaz_ids: Optional[List[int]] = None,
         contrast_pairs: Optional[List[Dict[str, str]]] = None,
     ) -> None:
-        """
-        Extracts the specified objective parameter from the specified GeoPackage file.
-
-        Parameters
-        ----------
-        control_scenario : OmniScenario
-            The control scenario to use for the contrast. Must be one of the following:
-            'uniform_low', 'uniform_moderate', 'uniform_high', 'thinning', 'mulching30', 'mulching60', None
-        contrast_scenario : OmniScenario
-            The contrast scenario to use for the contrast. Must be one of the following:
-            'uniform_low', 'uniform_moderate', 'uniform_high', 'thinning', 'mulching30', 'mulching60', None
-        obj_param : str
-            The objective parameter to extract. Must be one of the following:
-            'Soil_Loss_kg', 'Runoff_mm', 'Runoff_Volume_m3', 'Subrunoff_mm', 'Subrunoff_Volume_m3', 'Total_Phosphorus_kg'
-        cumulative_obj_param_threshold_fraction : float
-            The fraction of the total objective parameter to use as a threshold for the cumulative objective parameter.
-            No more contrasts are created after this threshold is reached.
-        contrast_hillslope_limit : int
-            The maximum number of hillslopes to use for the contrast. If None, all hillslopes are selected.
-        hill_min_slope : float
-            The minimum slope of the hillslope to use for the contrast. If None, all hillslopes are selected.
-        hill_max_slope : float
-            The maximum slope of the hillslope to use for the contrast. If None, all hillslopes are selected.
-        select_burn_severities : list
-            A list of burn severities to use for the contrast. If None, all burn severities are selected.
-            The burn severities must be one of the following: 1, 2, 3
-        select_topaz_ids : list
-            A list of topaz_ids to use for the contrast. If None, all topaz_ids are selected.
-        """
-
-        self.logger.info('build_contrasts')
-
-        selection_mode = _OMNI_SCALING_SERVICE.normalize_selection_mode(
-            getattr(self, "_contrast_selection_mode", None)
+        _OMNI_BUILD_ROUTER.build_contrasts(
+            self,
+            control_scenario_def=control_scenario_def,
+            contrast_scenario_def=contrast_scenario_def,
+            obj_param=obj_param,
+            contrast_cumulative_obj_param_threshold_fraction=contrast_cumulative_obj_param_threshold_fraction,
+            contrast_hillslope_limit=contrast_hillslope_limit,
+            hill_min_slope=hill_min_slope,
+            hill_max_slope=hill_max_slope,
+            select_burn_severities=select_burn_severities,
+            select_topaz_ids=select_topaz_ids,
+            contrast_pairs=contrast_pairs,
         )
-
-        control_scenario = (
-            _scenario_name_from_scenario_definition(control_scenario_def)
-            if control_scenario_def is not None
-            else None
-        )
-        contrast_scenario = (
-            _scenario_name_from_scenario_definition(contrast_scenario_def)
-            if contrast_scenario_def is not None
-            else None
-        )
-        if selection_mode not in {"user_defined_areas", "stream_order", "user_defined_hillslope_groups"} and (
-            control_scenario is None
-            or contrast_scenario is None
-        ):
-            raise ValueError("control_scenario_def and contrast_scenario_def are required for contrast builds")
-
-        # save parameters for defining contrasts
-        with self.locked():
-            self._contrast_scenario = contrast_scenario
-            self._control_scenario = control_scenario
-            self._contrast_object_param = obj_param
-            self._contrast_cumulative_obj_param_threshold_fraction = contrast_cumulative_obj_param_threshold_fraction
-            self._contrast_hillslope_limit = contrast_hillslope_limit
-            self._contrast_hill_min_slope = hill_min_slope
-            self._contrast_hill_max_slope = hill_max_slope
-            self._contrast_select_burn_severities = select_burn_severities
-            self._contrast_select_topaz_ids = select_topaz_ids
-            if contrast_pairs is not None:
-                self._contrast_pairs = self._normalize_contrast_pairs(contrast_pairs)
-
-        self._build_contrasts()
-        self._build_contrast_ids_geojson()
 
     @property
     def base_scenario(self) -> OmniScenario:
@@ -3557,7 +3425,8 @@ class Omni(NoDbBase):
         select_topaz_ids: Optional[List[int]] = None,
         contrast_pairs: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
-        self.build_contrasts(
+        return _OMNI_BUILD_ROUTER.build_contrasts_dry_run_report(
+            self,
             control_scenario_def=control_scenario_def,
             contrast_scenario_def=contrast_scenario_def,
             obj_param=obj_param,
@@ -3570,289 +3439,11 @@ class Omni(NoDbBase):
             contrast_pairs=contrast_pairs,
         )
 
-        return self.contrast_status_report()
-
     def contrast_status_report(self) -> Dict[str, Any]:
         return _OMNI_BUILD_ROUTER.contrast_status_report(self)
 
     def _contrast_status_report_impl(self) -> Dict[str, Any]:
-        selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
-        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
-            selection_mode = "stream_order"
-        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
-            selection_mode = "user_defined_hillslope_groups"
-        if selection_mode not in {"cumulative", "user_defined_areas", "user_defined_hillslope_groups", "stream_order"}:
-            raise ValueError(f'Contrast selection mode "{selection_mode}" is not implemented yet.')
-        contrast_names = self.contrast_names or []
-        landuse_cache: Dict[str, Optional[Dict[int, Optional[str]]]] = {}
-
-        if selection_mode == "user_defined_areas":
-            report_entries = {}
-            for entry in self._load_contrast_build_report():
-                if entry.get("selection_mode") != "user_defined_areas":
-                    continue
-                contrast_id = entry.get("contrast_id")
-                if isinstance(contrast_id, str):
-                    try:
-                        contrast_id = int(contrast_id)
-                    except ValueError:
-                        continue
-                if isinstance(contrast_id, int):
-                    report_entries[contrast_id] = entry
-
-            control_scenario = self._normalize_scenario_key(self._control_scenario)
-            contrast_scenario = self._normalize_scenario_key(self._contrast_scenario)
-            contrast_labels = getattr(self, "_contrast_labels", None) or {}
-
-            items: List[Dict[str, Any]] = []
-            max_id = max(report_entries.keys(), default=0)
-            if len(contrast_names) > max_id:
-                max_id = len(contrast_names)
-            for contrast_id in range(1, max_id + 1):
-                contrast_name = contrast_names[contrast_id - 1] if contrast_id - 1 < len(contrast_names) else None
-                report_entry = report_entries.get(contrast_id, {})
-                label = report_entry.get("area_label")
-                if not label:
-                    label = contrast_labels.get(contrast_id) or contrast_labels.get(str(contrast_id))
-                if not label:
-                    label = str(contrast_id)
-
-                raw_count = report_entry.get("n_hillslopes")
-                if raw_count is None:
-                    topaz_ids = report_entry.get("topaz_ids")
-                    if isinstance(topaz_ids, list):
-                        raw_count = len(topaz_ids)
-                try:
-                    n_hillslopes = int(raw_count) if raw_count is not None else 0
-                except (TypeError, ValueError):
-                    n_hillslopes = 0
-
-                skipped = (
-                    not contrast_name
-                    or report_entry.get("status") == "skipped"
-                    or n_hillslopes == 0
-                )
-                if skipped:
-                    run_status = "skipped"
-                    skip_status = {"skipped": True, "reason": "no_hillslopes"}
-                else:
-                    skip_reason = self._contrast_landuse_skip_reason(
-                        contrast_id,
-                        contrast_name,
-                        landuse_cache=landuse_cache,
-                    )
-                    if skip_reason:
-                        run_status = "skipped"
-                        skip_status = {"skipped": True, "reason": skip_reason}
-                    else:
-                        run_status = self._contrast_run_status(contrast_id, contrast_name)
-                        skip_status = {"skipped": False, "reason": None}
-
-                items.append(
-                    {
-                        "contrast_id": contrast_id,
-                        "control_scenario": report_entry.get("control_scenario") or control_scenario,
-                        "contrast_scenario": report_entry.get("contrast_scenario") or contrast_scenario,
-                        "area_label": label,
-                        "n_hillslopes": n_hillslopes,
-                        "skip_status": skip_status,
-                        "run_status": run_status,
-                    }
-                )
-
-            return {"selection_mode": selection_mode, "items": items}
-
-        if selection_mode == "user_defined_hillslope_groups":
-            report_entries = {}
-            for entry in self._load_contrast_build_report():
-                if entry.get("selection_mode") != "user_defined_hillslope_groups":
-                    continue
-                contrast_id = entry.get("contrast_id")
-                if isinstance(contrast_id, str):
-                    try:
-                        contrast_id = int(contrast_id)
-                    except ValueError:
-                        continue
-                if isinstance(contrast_id, int):
-                    report_entries[contrast_id] = entry
-
-            contrast_labels = getattr(self, "_contrast_labels", None) or {}
-
-            items: List[Dict[str, Any]] = []
-            max_id = max(report_entries.keys(), default=0)
-            if len(contrast_names) > max_id:
-                max_id = len(contrast_names)
-            for contrast_id in range(1, max_id + 1):
-                contrast_name = contrast_names[contrast_id - 1] if contrast_id - 1 < len(contrast_names) else None
-                report_entry = report_entries.get(contrast_id, {})
-
-                control_scenario = report_entry.get("control_scenario")
-                contrast_scenario = report_entry.get("contrast_scenario")
-                if (control_scenario is None or contrast_scenario is None) and contrast_name:
-                    try:
-                        control_part, target_part = contrast_name.split("__to__", maxsplit=1)
-                        control_scenario = control_part.split(",", maxsplit=1)[0]
-                        contrast_scenario = target_part
-                    except ValueError:
-                        control_scenario = control_scenario or None
-                        contrast_scenario = contrast_scenario or None
-
-                group_index = report_entry.get("group_index")
-                if group_index in (None, ""):
-                    group_index = contrast_labels.get(contrast_id) or contrast_labels.get(str(contrast_id))
-
-                raw_count = report_entry.get("n_hillslopes")
-                if raw_count is None:
-                    topaz_ids = report_entry.get("topaz_ids")
-                    if isinstance(topaz_ids, list):
-                        raw_count = len(topaz_ids)
-                try:
-                    n_hillslopes = int(raw_count) if raw_count is not None else 0
-                except (TypeError, ValueError):
-                    n_hillslopes = 0
-
-                skipped = (
-                    not contrast_name
-                    or report_entry.get("status") == "skipped"
-                    or n_hillslopes == 0
-                )
-                if skipped:
-                    run_status = "skipped"
-                    skip_status = {"skipped": True, "reason": "no_hillslopes"}
-                else:
-                    skip_reason = self._contrast_landuse_skip_reason(
-                        contrast_id,
-                        contrast_name,
-                        landuse_cache=landuse_cache,
-                    )
-                    if skip_reason:
-                        run_status = "skipped"
-                        skip_status = {"skipped": True, "reason": skip_reason}
-                    else:
-                        run_status = self._contrast_run_status(contrast_id, contrast_name)
-                        skip_status = {"skipped": False, "reason": None}
-
-                items.append(
-                    {
-                        "contrast_id": contrast_id,
-                        "control_scenario": control_scenario,
-                        "contrast_scenario": contrast_scenario,
-                        "group_index": group_index,
-                        "n_hillslopes": n_hillslopes,
-                        "skip_status": skip_status,
-                        "run_status": run_status,
-                    }
-                )
-
-            return {"selection_mode": selection_mode, "items": items}
-
-        if selection_mode == "stream_order":
-            report_entries = {}
-            for entry in self._load_contrast_build_report():
-                if entry.get("selection_mode") != "stream_order":
-                    continue
-                contrast_id = entry.get("contrast_id")
-                if isinstance(contrast_id, str):
-                    try:
-                        contrast_id = int(contrast_id)
-                    except ValueError:
-                        continue
-                if isinstance(contrast_id, int):
-                    report_entries[contrast_id] = entry
-
-            items: List[Dict[str, Any]] = []
-            max_id = max(report_entries.keys(), default=0)
-            if len(contrast_names) > max_id:
-                max_id = len(contrast_names)
-            for contrast_id in range(1, max_id + 1):
-                contrast_name = contrast_names[contrast_id - 1] if contrast_id - 1 < len(contrast_names) else None
-                report_entry = report_entries.get(contrast_id, {})
-
-                control_scenario = report_entry.get("control_scenario")
-                contrast_scenario = report_entry.get("contrast_scenario")
-                if (control_scenario is None or contrast_scenario is None) and contrast_name:
-                    try:
-                        control_part, target_part = contrast_name.split("__to__", maxsplit=1)
-                        control_scenario = control_part.split(",", maxsplit=1)[0]
-                        contrast_scenario = target_part
-                    except ValueError:
-                        control_scenario = control_scenario or None
-                        contrast_scenario = contrast_scenario or None
-
-                raw_count = report_entry.get("n_hillslopes")
-                try:
-                    n_hillslopes = int(raw_count) if raw_count is not None else 0
-                except (TypeError, ValueError):
-                    n_hillslopes = 0
-
-                skipped = (
-                    not contrast_name
-                    or report_entry.get("status") == "skipped"
-                    or n_hillslopes == 0
-                )
-                if skipped:
-                    run_status = "skipped"
-                    skip_status = {"skipped": True, "reason": "no_hillslopes"}
-                else:
-                    skip_reason = self._contrast_landuse_skip_reason(
-                        contrast_id,
-                        contrast_name,
-                        landuse_cache=landuse_cache,
-                    )
-                    if skip_reason:
-                        run_status = "skipped"
-                        skip_status = {"skipped": True, "reason": skip_reason}
-                    else:
-                        run_status = self._contrast_run_status(contrast_id, contrast_name)
-                        skip_status = {"skipped": False, "reason": None}
-
-                items.append(
-                    {
-                        "contrast_id": contrast_id,
-                        "control_scenario": control_scenario,
-                        "contrast_scenario": contrast_scenario,
-                        "subcatchments_group": report_entry.get("subcatchments_group"),
-                        "n_hillslopes": n_hillslopes,
-                        "skip_status": skip_status,
-                        "run_status": run_status,
-                    }
-                )
-
-            return {"selection_mode": selection_mode, "items": items}
-
-        items = []
-        for contrast_id, contrast_name in enumerate(contrast_names, start=1):
-            topaz_id = None
-            if contrast_name:
-                try:
-                    control_part, _ = contrast_name.split("__to__", maxsplit=1)
-                    _, topaz_id = control_part.split(",", maxsplit=1)
-                except ValueError:
-                    topaz_id = None
-                skip_reason = self._contrast_landuse_skip_reason(
-                    contrast_id,
-                    contrast_name,
-                    landuse_cache=landuse_cache,
-                )
-                if skip_reason:
-                    run_status = "skipped"
-                    skip_status = {"skipped": True, "reason": skip_reason}
-                else:
-                    run_status = self._contrast_run_status(contrast_id, contrast_name)
-                    skip_status = {"skipped": False, "reason": None}
-            else:
-                run_status = "skipped"
-                skip_status = {"skipped": True, "reason": "no_hillslopes"}
-            items.append(
-                {
-                    "contrast_id": contrast_id,
-                    "topaz_id": str(topaz_id) if topaz_id is not None else None,
-                    "skip_status": skip_status,
-                    "run_status": run_status,
-                }
-            )
-
-        return {"selection_mode": selection_mode, "items": items}
+        return _OMNI_BUILD_ROUTER.contrast_status_report(self)
 
     def run_omni_contrasts(self) -> None:
         global OMNI_REL_DIR
@@ -4025,232 +3616,49 @@ class Omni(NoDbBase):
         return _OMNI_ARTIFACT_EXPORT_SERVICE.contrasts_report(self)
 
     def _contrasts_report_impl(self) -> pd.DataFrame:
-        global OMNI_REL_DIR
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.contrasts_report(self)
 
-        def _resolve_loss_out_parquet(output_dir: str) -> str:
-            interchange_path = _join(output_dir, 'interchange', 'loss_pw0.out.parquet')
-            legacy_path = _join(output_dir, 'loss_pw0.out.parquet')
-            return interchange_path if _exists(interchange_path) else legacy_path
-
-        def _ensure_value_columns(frame: pd.DataFrame) -> pd.DataFrame:
-            needs_v = 'v' not in frame.columns and 'value' in frame.columns
-            needs_value = 'value' not in frame.columns and 'v' in frame.columns
-            if not (needs_v or needs_value):
-                return frame
-            frame = frame.copy()
-            if needs_v:
-                frame['v'] = frame['value']
-            if needs_value:
-                frame['value'] = frame['v']
-            return frame
-
-        parquet_entries: List[Tuple[int, str, str]] = []
-
-        if not self.contrast_names:
-            return pd.DataFrame(columns=['key', 'value', 'v', 'units', 'control_scenario', 'contrast_topaz_id', 'contrast'])
-
-        for contrast_id, contrast_name in enumerate(self.contrast_names or [], start=1):
-            if not contrast_name:
-                continue
-            output_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts', str(contrast_id), 'wepp', 'output')
-            parquet_entries.append((contrast_id, contrast_name, _resolve_loss_out_parquet(output_dir)))
-
-        dfs = []
-        selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
-        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
-            selection_mode = "stream_order"
-        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
-            selection_mode = "user_defined_hillslope_groups"
-        contrast_labels = getattr(self, "_contrast_labels", None) or {}
-        for contrast_id, contrast_name, path in parquet_entries:
-            if not os.path.isfile(path):
-                continue
-
-            try:
-                control_part, contrast_scenario = contrast_name.split('__to__')
-                control_scenario, topaz_id = control_part.split(',', maxsplit=1)
-            except ValueError:
-                continue
-
-            df = _ensure_value_columns(pd.read_parquet(path))
-            base_control = control_scenario == 'None'
-            if base_control:
-                control_scenario = str(self.base_scenario)
-            df['control_scenario'] = control_scenario
-            if selection_mode == "cumulative":
-                df['contrast_topaz_id'] = topaz_id
-            if selection_mode == "user_defined_areas":
-                label = contrast_labels.get(contrast_id)
-                if label is None:
-                    label = contrast_labels.get(str(contrast_id))
-                df['contrast'] = label or str(contrast_id)
-            elif selection_mode == "user_defined_hillslope_groups":
-                label = contrast_labels.get(contrast_id)
-                if label is None:
-                    label = contrast_labels.get(str(contrast_id))
-                label_value = label or str(contrast_id)
-                df["contrast"] = label_value
-                try:
-                    df["group_index"] = int(label_value)
-                except (TypeError, ValueError):
-                    df["group_index"] = label_value
-            else:
-                df['contrast'] = contrast_name
-            df['_contrast_name'] = str(contrast_name)
-            df['contrast_id'] = contrast_id
-
-            if selection_mode == "stream_order":
-                ctrl_df = df[["key", "v", "units"]].drop_duplicates(subset=["key"])
-            else:
-                if base_control:
-                    ctrl_output_dir = _join(self.wd, 'wepp', 'output')
-                else:
-                    ctrl_output_dir = _join(
-                        self.wd,
-                        OMNI_REL_DIR,
-                        'scenarios',
-                        control_scenario,
-                        'wepp',
-                        'output',
-                    )
-                ctrl_parquet = _resolve_loss_out_parquet(ctrl_output_dir)
-                if not _exists(ctrl_parquet):
-                    raise FileNotFoundError(
-                        f"Control scenario parquet file '{ctrl_parquet}' does not exist!"
-                    )
-                ctrl_df = _ensure_value_columns(pd.read_parquet(ctrl_parquet))
-
-            # Join control metrics by 'key' and add difference (control - contrast)
-            _ctrl = (
-                ctrl_df[['key', 'v', 'units']]
-                .drop_duplicates(subset=['key'])
-                .rename(columns={'v': 'control_v', 'units': 'control_units'})
-            )
-
-            df = df.merge(_ctrl, on='key', how='left')
-
-            # Sanity check: units should match between control and contrast
-            _bad = df[df['control_units'].notna() & (df['units'] != df['control_units'])]
-            if not _bad.empty:
-                self.logger.info(f"WARNING[contrasts_report]: units mismatch for keys -> {sorted(_bad['key'].unique())}\n")
-
-            # Requested measure: control - contrast
-            df['control-contrast_v'] = df['control_v'] - df['v']
-
-            dfs.append(df)
-
-        if not dfs:
-            # nothing to do
-            return pd.DataFrame(columns=['key', 'value', 'v', 'units', 'contrast'])
-
-        combined = pd.concat(dfs, ignore_index=True)
-        out_path = _join(self.omni_dir, 'contrasts.out.parquet')
-        combined.to_parquet(out_path)
-        self._refresh_catalog(os.path.relpath(out_path, self.wd))
-
-        return combined
-    
     def _normalize_scenario_key(self, name: Optional[Any]) -> str:
         return _OMNI_STATION_CATALOG_SERVICE.normalize_scenario_key(self, name)
 
     def _normalize_scenario_key_impl(self, name: Optional[Any]) -> str:
-        if isinstance(name, OmniScenario):
-            name = str(name)
-        if name in (None, 'None'):
-            return str(self.base_scenario)
-        return str(name)
+        return _OMNI_STATION_CATALOG_SERVICE.normalize_scenario_key(self, name)
 
     def _loss_pw0_path_for_scenario(self, scenario_name: Optional[Any]) -> str:
         return _OMNI_STATION_CATALOG_SERVICE.loss_pw0_path_for_scenario(self, scenario_name)
 
     def _loss_pw0_path_for_scenario_impl(self, scenario_name: Optional[Any]) -> str:
-        global OMNI_REL_DIR
-        scenario_key = self._normalize_scenario_key(scenario_name)
-
-        base_path = _join(self.wd, 'wepp', 'output', 'loss_pw0.txt')
-        scenario_path = _join(self.wd, OMNI_REL_DIR, 'scenarios', scenario_key, 'wepp', 'output', 'loss_pw0.txt')
-
-        if scenario_key == str(self.base_scenario) and not _exists(scenario_path):
-            return base_path
-
-        return scenario_path if _exists(scenario_path) else (base_path if scenario_key == str(self.base_scenario) else scenario_path)
+        return _OMNI_STATION_CATALOG_SERVICE.loss_pw0_path_for_scenario(self, scenario_name)
 
     def _interchange_class_data_path_for_scenario(self, scenario_name: Optional[Any]) -> str:
         return _OMNI_STATION_CATALOG_SERVICE.interchange_class_data_path_for_scenario(self, scenario_name)
 
     def _interchange_class_data_path_for_scenario_impl(self, scenario_name: Optional[Any]) -> str:
-        global OMNI_REL_DIR
-        scenario_key = self._normalize_scenario_key(scenario_name)
-
-        base_path = _join(self.wd, 'wepp', 'output', 'interchange', 'loss_pw0.all_years.class_data.parquet')
-        scenario_path = _join(self.wd, OMNI_REL_DIR, 'scenarios', scenario_key, 'wepp', 'output', 'interchange', 'loss_pw0.all_years.class_data.parquet')
-
-        if scenario_key == str(self.base_scenario) and not _exists(scenario_path):
-            return base_path
-
-        return scenario_path if _exists(scenario_path) else (base_path if scenario_key == str(self.base_scenario) else scenario_path)
+        return _OMNI_STATION_CATALOG_SERVICE.interchange_class_data_path_for_scenario(self, scenario_name)
 
     def _year_set_for_scenario(self, scenario_name: Optional[Any]) -> Optional[Set[int]]:
         return _OMNI_STATION_CATALOG_SERVICE.year_set_for_scenario(self, scenario_name)
 
     def _year_set_for_scenario_impl(self, scenario_name: Optional[Any]) -> Optional[Set[int]]:
-        path = self._interchange_class_data_path_for_scenario(scenario_name)
-        if not os.path.isfile(path):
-            return None
-
-        try:
-            df = pd.read_parquet(path, columns=['year'])
-        except Exception as exc:
-            self.logger.debug('Failed to read years for scenario %s from %s: %s', scenario_name, path, exc)
-            return None
-
-        if 'year' not in df:
-            return None
-
-        try:
-            return set(int(y) for y in df['year'].dropna().unique().tolist())
-        except Exception as exc:
-            self.logger.debug('Failed to normalize years for scenario %s from %s: %s', scenario_name, path, exc)
-            return None
+        return _OMNI_STATION_CATALOG_SERVICE.year_set_for_scenario(self, scenario_name)
 
     def _scenario_signature(self, scenario_def: ScenarioDef) -> str:
         return _OMNI_STATION_CATALOG_SERVICE.scenario_signature(self, scenario_def)
 
     def _scenario_signature_impl(self, scenario_def: ScenarioDef) -> str:
-        sanitized: Dict[str, Any] = {}
-        for key, value in scenario_def.items():
-            if key == 'type' and isinstance(value, OmniScenario):
-                sanitized[key] = str(value)
-            else:
-                sanitized[key] = value
-        return json.dumps(sanitized, sort_keys=True, default=str)
+        return _OMNI_STATION_CATALOG_SERVICE.scenario_signature(self, scenario_def)
 
     def _scenario_dependency_target(self, scenario: OmniScenario, scenario_def: ScenarioDef) -> Optional[str]:
         return _OMNI_STATION_CATALOG_SERVICE.scenario_dependency_target(self, scenario, scenario_def)
 
     def _scenario_dependency_target_impl(self, scenario: OmniScenario, scenario_def: ScenarioDef) -> Optional[str]:
-        if scenario == OmniScenario.Mulch:
-            return scenario_def.get('base_scenario')
-        return str(self.base_scenario)
+        return _OMNI_STATION_CATALOG_SERVICE.scenario_dependency_target(self, scenario, scenario_def)
 
     def _contrast_dependencies(self, contrast_name: str) -> ContrastDependencies:
         return _OMNI_STATION_CATALOG_SERVICE.contrast_dependencies(self, contrast_name)
 
     def _contrast_dependencies_impl(self, contrast_name: str) -> ContrastDependencies:
-        control_part, target_part = contrast_name.split('__to__')
-        control_scenario_raw = control_part.split(',')[0]
-        control_key = self._normalize_scenario_key(control_scenario_raw)
-        target_key = self._normalize_scenario_key(target_part)
-
-        scenarios = {control_key, target_key}
-        dependencies: ContrastDependencies = {}
-        for scenario_name in scenarios:
-            loss_path = self._loss_pw0_path_for_scenario(scenario_name)
-            dependencies[scenario_name] = {
-                'loss_path': loss_path,
-                'sha1': _hash_file_sha1(loss_path)
-            }
-        return dependencies
+        return _OMNI_STATION_CATALOG_SERVICE.contrast_dependencies(self, contrast_name)
 
     def _contrast_signature(self, contrast_name: str, contrast_payload: ContrastMapping) -> str:
         payload_serializable = {
@@ -4754,180 +4162,19 @@ class Omni(NoDbBase):
         return _OMNI_ARTIFACT_EXPORT_SERVICE.scenarios_report(self)
 
     def _scenarios_report_impl(self) -> pd.DataFrame:
-        """
-        compiles the loss_pw0.out.parquet across the scenarios
-        """
-        global OMNI_REL_DIR
-        parquet_files = {}
-        _legacy_path = _join(self.wd, 'wepp', 'output', 'loss_pw0.out.parquet')
-        if _exists(_legacy_path):
-            parquet_files = {str(self.base_scenario): _legacy_path}
-        _interchange_path = _join(self.wd, 'wepp', 'output', 'interchange', 'loss_pw0.out.parquet')
-        if _exists(_interchange_path):
-            parquet_files = {str(self.base_scenario): _interchange_path}
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.scenarios_report(self)
 
-        for scenario_def in self.scenarios:
-            scenario = scenario_def.get('type')
-            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            _legacy_path =  _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name, 'wepp', 'output', 'loss_pw0.out.parquet')
-            if _exists(_legacy_path):
-                parquet_files[_scenario_name] = _legacy_path
-                continue
-            _interchange_path =  _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name, 'wepp', 'output', 'interchange', 'loss_pw0.out.parquet')
-            if _exists(_interchange_path):
-                parquet_files[_scenario_name] = _interchange_path
-                continue
-            
-        dfs = []
-        for scenario, path in parquet_files.items():
-            if not os.path.isfile(path):
-                continue
-            df = pd.read_parquet(path)         # expects columns: key, v, units
-            df['scenario'] = str(scenario)
-            dfs.append(df)
-
-        if not dfs:
-            # nothing to do
-            return pd.DataFrame(columns=['key', 'v', 'units', 'scenario'])
-
-        combined = pd.concat(dfs, ignore_index=True)
-        out_path = _join(self.omni_dir, 'scenarios.out.parquet')
-        combined.to_parquet(out_path)
-        self._refresh_catalog(os.path.relpath(out_path, self.wd))
-
-        return combined
-    
     def compile_hillslope_summaries(self) -> pd.DataFrame:
         return _OMNI_ARTIFACT_EXPORT_SERVICE.compile_hillslope_summaries(self)
 
     def _compile_hillslope_summaries_impl(self) -> pd.DataFrame:
-        global OMNI_REL_DIR
-        from wepppy.wepp.reports import HillSummaryReport
-
-        scenario_wds = {str(self.base_scenario): self.wd}
-
-        for scenario_def in self.scenarios:
-            scenario = scenario_def.get('type')
-            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            scenario_wds[_scenario_name] = _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
-
-        readonly_rons: List[Ron] = []
-        try:
-            # HillSummaryReport activates the query engine; temporarily allow writes.
-            for wd in scenario_wds.values():
-                ron = Ron.getInstance(wd)
-                if ron.readonly:
-                    ron.readonly = False
-                    readonly_rons.append(ron)
-
-            dfs = []
-            for scenario, wd in scenario_wds.items():
-                loss = Wepp.getInstance(wd).report_loss()
-                hill_rpt = HillSummaryReport(loss)
-                df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
-                df['scenario'] = scenario
-                dfs.append(df)
-        finally:
-            for ron in readonly_rons:
-                try:
-                    ron.readonly = True
-                except Exception as exc:  # pragma: no cover - best-effort restore
-                    self.logger.warning('Failed to restore readonly flag for %s: %s', ron.wd, exc)
-
-        combined = pd.concat(dfs, ignore_index=True)
-
-        # Data columns (total 20 columns):
-        #  #   Column                                  Non-Null Count  Dtype  
-        # ---  ------                                  --------------  -----  
-        #  0   Wepp ID                                 2936 non-null   int64  
-        #  1   Topaz ID                                2936 non-null   int64  
-        #  2   Landuse Key                             2936 non-null   int64  
-        #  3   Landuse Description                     2936 non-null   object 
-        #  4   Soil Key                                2936 non-null   object 
-        #  5   Soil Description                        2936 non-null   object 
-        #  6   Length (m)                              2936 non-null   float64
-        #  7   Width (m)                               2936 non-null   float64
-        #  8   Slope                                   2936 non-null   float64
-        #  9   Landuse Area (ha)                       2936 non-null   float64
-        #  10  Runoff Depth (mm/yr)                    2936 non-null   float64
-        #  11  Lateral Flow Depth (mm/yr)              2936 non-null   float64
-        #  12  Baseflow Depth (mm/yr)                  2936 non-null   float64
-        #  13  Soil Loss (kg/yr)                       2936 non-null   float64
-        #  14  Soil Loss Density (kg/ha/yr)            2936 non-null   float64
-        #  15  Sediment Deposition (kg/yr)             2936 non-null   float64
-        #  16  Sediment Deposition Density (kg/ha/yr)  2936 non-null   float64
-        #  17  Sediment Yield (kg/yr)                  2936 non-null   float64
-        #  18  Sediment Yield Density (kg/ha/yr)       2936 non-null   float64
-        #  19  scenario                                2936 non-null   object 
-        # dtypes: float64(13), int64(3), object(4)
-
-        # 1. Convert depths (mm) over area (ha) → volumes in m³:
-        combined['Runoff (m^3)']       = combined['Runoff Depth (mm/yr)']       * combined['Landuse Area (ha)'] * 10
-        combined['Lateral Flow (m^3)'] = combined['Lateral Flow Depth (mm/yr)'] * combined['Landuse Area (ha)'] * 10
-        combined['Baseflow (m^3)']     = combined['Baseflow Depth (mm/yr)']     * combined['Landuse Area (ha)'] * 10
-
-        # 2. Convert per‐area masses (kg/ha) over area (ha) → total mass in tonnes:
-        combined['Soil Loss (t)']           = combined['Soil Loss Density (kg/ha/yr)']            * combined['Landuse Area (ha)'] / 1_000
-        combined['Sediment Deposition (t)'] = combined['Sediment Deposition Density (kg/ha/yr)']  * combined['Landuse Area (ha)'] / 1_000
-        combined['Sediment Yield (t)']      = combined['Sediment Yield Density (kg/ha/yr)']       * combined['Landuse Area (ha)'] / 1_000
-
-        # Calculate NTU in g/L (combined['Sediment Yield (t)'] * 1_000_000) / (combined['Runoff (m^3)'] * 1_000)
-        combined['NTU (g/L)'] = (combined['Sediment Yield (t)'] * 1_000) / (combined['Runoff (m^3)'] + combined['Baseflow (m^3)'] )
-
-        out_path = _join(self.omni_dir, 'scenarios.hillslope_summaries.parquet')
-        combined.to_parquet(out_path)
-        self._refresh_catalog(os.path.relpath(out_path, self.wd))
-
-        return combined
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.compile_hillslope_summaries(self)
 
     def compile_channel_summaries(self) -> pd.DataFrame:
         return _OMNI_ARTIFACT_EXPORT_SERVICE.compile_channel_summaries(self)
 
     def _compile_channel_summaries_impl(self) -> pd.DataFrame:
-        global OMNI_REL_DIR
-        from wepppy.wepp.reports import ChannelSummaryReport
-
-        scenario_wds = {str(self.base_scenario): self.wd}
-
-        for scenario_def in self.scenarios:
-            scenario = scenario_def.get('type')
-            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            scenario_wds[_scenario_name] = _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
-
-        readonly_rons: List[Ron] = []
-        try:
-            # ChannelSummaryReport activates the query engine; temporarily allow writes.
-            for wd in scenario_wds.values():
-                ron = Ron.getInstance(wd)
-                if ron.readonly:
-                    ron.readonly = False
-                    readonly_rons.append(ron)
-
-            dfs = []
-            for scenario, wd in scenario_wds.items():
-                loss = Wepp.getInstance(wd).report_loss()
-                channel_rpt = ChannelSummaryReport(loss)
-                df = channel_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
-                df['scenario'] = scenario
-                dfs.append(df)
-        finally:
-            for ron in readonly_rons:
-                try:
-                    ron.readonly = True
-                except Exception as exc:  # pragma: no cover - best-effort restore
-                    self.logger.warning('Failed to restore readonly flag for %s: %s', ron.wd, exc)
-
-        if not dfs:
-            return pd.DataFrame()
-
-        combined = pd.concat(dfs, ignore_index=True)
-
-
-        out_path = _join(self.omni_dir, 'scenarios.channel_summaries.parquet')
-        combined.to_parquet(out_path)
-        self._refresh_catalog(os.path.relpath(out_path, self.wd))
-
-        return combined
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.compile_channel_summaries(self)
 
 # [x] add NTU
 # [ ] add NTU for outlet

@@ -143,3 +143,20 @@ def test_normalize_contrast_pairs_coerces_and_deduplicates_entries() -> None:
             "contrast_scenario": "thinning",
         },
     ]
+
+
+def test_normalize_scenario_value_handles_enum_and_integer_edges() -> None:
+    parser = OmniInputParsingService()
+
+    assert parser._normalize_scenario_value(OmniScenario.UniformLow) == "uniform_low"
+    assert parser._normalize_scenario_value(OmniScenario.Mulch.value) == "mulch"
+    assert parser._normalize_scenario_value(999) == "999"
+    assert parser._normalize_scenario_value(None) is None
+
+
+def test_normalize_bool_returns_none_for_invalid_tokens() -> None:
+    parser = OmniInputParsingService()
+
+    assert parser._normalize_bool("definitely-not-bool") is None
+    assert parser._normalize_bool("TRUE") is True
+    assert parser._normalize_bool("off") is False

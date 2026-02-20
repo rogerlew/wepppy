@@ -1,4 +1,4 @@
-# ExecPlan: Option-2 Refactor of Omni into a Stable Facade + Internal Collaborators
+# ExecPlan: Option-2 Omni Facade/Collaborator Refactor with Regression Controls
 
 This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept current as work proceeds.
 
@@ -6,576 +6,809 @@ This plan must be maintained in accordance with `docs/prompt_templates/codex_exe
 
 ## Purpose / Big Picture
 
-After this work, the Omni controller keeps a stable public facade contract while internal logic is extracted into focused collaborators in the required Option-2 order. The user-visible outcome is lower regression risk for Omni scenario/contrast workflows across Flask routes, RQ jobs, and rq-engine API routes, while preserving current lock/mutation/persistence behavior.
+Refactor Omni to an Option-2 shape (stable facade + internal collaborators) without changing route/RQ/test-facing contracts, while closing the highest-risk regression gaps before and during extraction. The outcome should be maintainable Omni internals that still behave exactly the same for all public and quasi-public callers.
 
-Success is demonstrated by contract characterization tests added before extraction, milestone-specific regression tests for each extracted path, milestone review gates, and a final full-suite pre-handoff gate.
+This plan is milestone-driven, requires targeted deterministic tests per extracted path, and uses severity-based go/no-go review gates with explicit rollback strategy.
 
 ## Progress
 
 Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for every entry.
 
-- [x] (2026-02-20 17:58Z) Read required guidance: `AGENTS.md`, `wepppy/nodb/AGENTS.md`, `tests/AGENTS.md`, `docs/prompt_templates/codex_exec_plans.md`, and `docs/standards/nodb-facade-collaborator-pattern.md`.
-- [x] (2026-02-20 17:58Z) Characterized Omni source, public API surface, route/RQ callsites, and existing Omni-related tests.
-- [x] (2026-02-20 17:58Z) Authored this ad hoc ExecPlan with milestone sequencing, explicit test-gap closures, review gates, and rollback strategy.
-- [x] (2026-02-20 18:04Z) Executed Milestone 0 baseline characterization tests and established route/RQ/facade contract safety net.
-- [x] (2026-02-20 18:08Z) Executed Milestone 1 extraction (`omni_input_parser.py`) with facade delegation and parser regression tests.
-- [x] (2026-02-20 18:10Z) Executed Milestone 2 extraction (`omni_build_router.py`) with facade orchestration delegation tests.
-- [x] (2026-02-20 18:12Z) Executed Milestone 3 extraction (`omni_mode_build_services.py`) with mode dispatch regression tests.
-- [x] (2026-02-20 18:14Z) Executed Milestone 4 extraction (`omni_scaling_service.py`) with scaling/filter normalization regression tests.
-- [x] (2026-02-20 18:16Z) Executed Milestone 5 extraction (`omni_artifact_export_service.py`) with report/export delegation tests.
-- [x] (2026-02-20 18:23Z) Executed Milestone 6 extraction (`omni_station_catalog_service.py`) and extended RQ dependency metadata stability tests.
-- [x] (2026-02-20 18:40Z) Executed Milestone 7 final facade cleanup (`omni.pyi` seam alignment), targeted validation gates, full test suite, and doc lint gate.
-- [x] (2026-02-20 19:44Z) Integrated post-implementation review findings (SEV3 indirection debt in router/artifact/station collaborators) into this ExecPlan with explicit follow-up direction and residual-risk updates.
+- [x] (2026-02-20 20:32Z) Read required guidance and standards: `AGENTS.md`, `wepppy/nodb/AGENTS.md`, `tests/AGENTS.md`, `docs/prompt_templates/codex_exec_plans.md`, `docs/standards/nodb-facade-collaborator-pattern.md`.
+- [x] (2026-02-20 20:32Z) Read cross-plan context: `docs/mini-work-packages/20260220_nodb_climate_option2_facade_execplan.md`.
+- [x] (2026-02-20 20:32Z) Mapped Omni facade entrypoints, route/RQ callsites, and existing Omni tests.
+- [x] (2026-02-20 20:32Z) Authored this planning-only ExecPlan with required milestone sequencing, gates, and risk controls.
+- [x] (2026-02-20 20:41Z) Milestone 0 complete: baseline characterization suites passed; existing deterministic coverage already satisfied planned facade/RQ/route safety-net targets.
+- [x] (2026-02-20 20:44Z) Milestone 1 complete: added parser coercion/invalid-bool regressions and rq-engine malformed-scenarios 400 regressions; milestone gate passed after a single expectation correction retry.
+- [x] (2026-02-20 20:50Z) Milestone 2 complete: moved contrast router/dry-run/status orchestration into `OmniBuildRouter`, preserved facade seam compatibility, and added deterministic selection-mode status matrix tests.
+- [x] (2026-02-20 20:53Z) Milestone 3 complete: expanded mode-service scenario branch regressions (mulch/thinning/undisturbed `_base`) and added deterministic stream-order stale-vs-fresh rebuild decision coverage.
+- [x] (2026-02-20 20:54Z) Milestone 4 complete: added scaling regressions for malformed numeric inputs, unknown burn classes, and stream-order order-reduction mismatch rerun status semantics.
+- [x] (2026-02-20 20:59Z) Milestone 5 complete: moved scenarios/contrasts/hillslope/channel report compilation logic into `OmniArtifactExportService`, retained geojson seam compatibility, and replaced delegation-only artifact tests with deterministic behavior coverage.
+- [x] (2026-02-20 21:06Z) Milestone 6 complete: moved station/catalog helper `_..._impl` bodies to collaborator ownership via service delegation and added deterministic station + RQ helper-output regressions.
+- [x] (2026-02-20 21:14Z) Milestone 7 complete: finalized facade wiring, resolved one milestone-local router expectation mismatch, and passed all Omni + cross-layer + full-suite gates.
+- [x] (2026-02-20 21:14Z) Program continuity follow-up complete: climate legacy-retirement status verified and continuity handoff captured against `docs/mini-work-packages/20260220_nodb_climate_option2_facade_execplan.md`.
+- [x] (2026-02-20 22:03Z) Post-review remediation complete: restored scaling singleton seam usage in router collaborator and replaced broad silent station parquet catch with narrow logged handling plus deterministic regressions.
 
 ## Surprises & Discoveries
 
 Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
 
-- (2026-02-20 17:58Z) Observation: The objective references `wepppy/nodb/core/omni.py`, but the active Omni implementation is `wepppy/nodb/mods/omni/omni.py` and exports via `wepppy/nodb/mods/omni/__init__.py`.
-  Evidence: `rg --files | rg '/omni.py$'`, `ls wepppy/nodb/mods/omni`.
+- (2026-02-20 20:32Z) Observation: `wepppy/nodb/core/omni.py` does not exist in this tree; active Omni implementation is `wepppy/nodb/mods/omni/omni.py` with collaborators in `wepppy/nodb/mods/omni/*.py`.
+  Evidence: `rg --files | rg '/omni\.py$'`.
 
-- (2026-02-20 17:58Z) Observation: Omni facade usage includes both public and quasi-public methods; RQ orchestration currently depends on internal helpers (`_scenario_signature`, `_loss_pw0_path_for_scenario`, `_contrast_run_status`, etc.).
-  Evidence: `wepppy/rq/omni_rq.py`, `wepppy/rq/path_ce_rq.py`, `wepppy/microservices/rq_engine/omni_routes.py`.
+- (2026-02-20 20:32Z) Observation: Option-2 collaborator modules exist, but major orchestration logic still resides in `omni.py` `_..._impl` methods for router/artifact/station concerns.
+  Evidence: `wepppy/nodb/mods/omni/omni_build_router.py`, `wepppy/nodb/mods/omni/omni_artifact_export_service.py`, `wepppy/nodb/mods/omni/omni_station_catalog_service.py`.
 
-- (2026-02-20 17:58Z) Observation: Current Omni tests are strong for contrast mode builders and clone helpers, but thin for facade contracts used by routes/RQ (parse/delete/run-state/report/lock boundary behaviors).
-  Evidence: `tests/nodb/mods/test_omni.py` (high `_build_contrasts` focus), `tests/rq/test_omni_rq.py` (2 tests), `tests/weppcloud/routes/test_omni_bp.py` (helper-only tests).
+- (2026-02-20 20:32Z) Observation: Service tests for router/artifact/station are mostly delegation seams; high-risk behavior coverage remains concentrated in `tests/nodb/mods/test_omni.py` and leaves orchestration branches weakly characterized at collaborator boundaries.
+  Evidence: `tests/nodb/mods/test_omni_build_router_service.py`, `tests/nodb/mods/test_omni_artifact_export_service.py`, `tests/nodb/mods/test_omni_station_catalog_service.py`.
 
-- (2026-02-20 18:03Z) Observation: Workspace started with unrelated dirty state (`AGENTS.md` modified, active ExecPlan untracked); work proceeded without reverting user-owned changes.
-  Evidence: `git status --short`.
+- (2026-02-20 20:32Z) Observation: RQ workers depend on Omni quasi-public helpers (`_scenario_signature`, `_loss_pw0_path_for_scenario`, `_contrast_run_status`, `_contrast_landuse_skip_reason`) that must be treated as contract surfaces.
+  Evidence: `wepppy/rq/omni_rq.py`, `wepppy/rq/path_ce_rq.py`.
 
-- (2026-02-20 18:06Z) Observation: Existing `delete_scenarios()` behavior duplicates missing scenario names when the same missing name is requested multiple times.
-  Evidence: `tests/nodb/mods/test_omni_facade_contracts.py:189`.
+- (2026-02-20 20:32Z) Observation: `wepppy/nodb/core/climate.py` still contains substantial legacy mode/orchestration branches despite collaborator seams, creating cross-controller consistency risk if Omni refactor completes while climate remains partially legacy.
+  Evidence: `wepppy/nodb/core/climate.py`, `wepppy/nodb/core/climate_mode_build_services.py`, `wepppy/nodb/core/climate_build_router.py`.
 
-- (2026-02-20 18:21Z) Observation: `omni_station_catalog_service.py` existed as a skeleton before Milestone 6 but Omni facade methods were not yet delegated to it.
-  Evidence: `wepppy/nodb/mods/omni/omni_station_catalog_service.py`, `wepppy/nodb/mods/omni/omni.py`.
+- (2026-02-20 20:41Z) Observation: Milestone 0 characterization expectations were already present in current tests (`delete_scenarios`, `scenario_run_markers`, output-option normalization, RQ dependency/trigger checks, route scenario-state payload shape); baseline gate required no new code.
+  Evidence: `tests/nodb/mods/test_omni_facade_contracts.py`, `tests/rq/test_omni_rq.py`, `tests/weppcloud/routes/test_omni_bp_routes.py`.
 
-- (2026-02-20 19:44Z) Observation: Post-implementation review classified router/artifact/station collaborators as mostly pass-through seams because primary logic remains in `Omni` `_..._impl` methods.
-  Evidence: `wepppy/nodb/mods/omni/omni_build_router.py:12`, `wepppy/nodb/mods/omni/omni_artifact_export_service.py:14`, `wepppy/nodb/mods/omni/omni_station_catalog_service.py:12`.
+- (2026-02-20 20:44Z) Observation: rq-engine malformed-scenarios JSON path currently returns `"Scenarios data must be valid JSON"` (not `"Scenario 0 must be an object"`), so Milestone 1 route regression had to align with existing contract after first gate attempt.
+  Evidence: `tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_rejects_non_object_scenarios_entry`, `wctl run-pytest ... -k "run_omni and scenarios"` failure transcript.
+
+- (2026-02-20 20:50Z) Observation: Dry-run orchestration must continue to invoke `omni.build_contrasts(...)` (facade seam), not router-internal `build_contrasts(...)`, because existing tests and monkeypatch hooks rely on the facade call point.
+  Evidence: initial Milestone 2 gate failure in `tests/nodb/mods/test_omni.py::test_build_contrasts_dry_run_report_cumulative_statuses`.
+
+- (2026-02-20 20:53Z) Observation: `_build_contrasts_stream_order` rebuild behavior can be tested deterministically by controlling `RedisPrep[TaskEnum.build_subcatchments]` timestamps plus stubbed `whitebox_tools` and prune outputs; no external binaries are required.
+  Evidence: `tests/nodb/mods/test_omni.py::test_build_contrasts_stream_order_stale_rebuild_decisions`.
+
+- (2026-02-20 20:54Z) Observation: stream-order rerun semantics are correctly coupled to `order_reduction_passes`; changing passes from prior dependency metadata deterministically forces `needs_run` even when sidecar/hash snapshots are unchanged.
+  Evidence: `tests/nodb/mods/test_omni.py::test_contrast_run_status_needs_run_when_order_reduction_passes_change`.
+
+- (2026-02-20 20:59Z) Observation: `build_contrast_ids_geojson` can safely return an empty FeatureCollection for stream-order reports with only skipped/no-hillslope groups without importing optional GIS dependencies.
+  Evidence: `tests/nodb/mods/test_omni_artifact_export_service.py::test_build_contrast_ids_geojson_stream_order_empty_fallback_without_gis_deps`.
+
+- (2026-02-20 21:06Z) Observation: Milestone 6 `-k "scenario_key or dependency or landuse_skip"` characterization currently executes only service-focused station tests (3 selected), so RQ helper-output contracts required dedicated explicit tests in `tests/rq/test_omni_rq.py`.
+  Evidence: Milestone 6 validation output (`3 passed, 51 deselected`) plus new tests `test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_metadata` and `test_run_omni_contrasts_rq_landuse_skip_prunes_dependency_entries`.
+
+- (2026-02-20 21:14Z) Observation: Milestone 7 full-gate pass required a milestone-local correction to a router test expectation to match canonical scenario-name normalization (`mulch` -> `mulch_None_None`) for sparse mulch definitions.
+  Evidence: initial Milestone 7 failure in `tests/nodb/mods/test_omni_build_router_service.py::test_build_router_sets_contrast_inputs_inside_lock_scope`, followed by helper-aligned assertion update and successful rerun (`100 passed`).
+
+- (2026-02-20 22:03Z) Observation: Router seam fidelity regression was valid; collaborator directly instantiated `OmniScalingService`, bypassing facade singleton monkeypatch seams used in contract tests.
+  Evidence: `wepppy/nodb/mods/omni/omni_build_router.py` pre-remediation import/instantiation (`from ...omni_scaling_service import OmniScalingService`, `scaling_service = OmniScalingService()`), replaced with `_OMNI_SCALING_SERVICE` seam and covered by `test_build_router_uses_scaling_singleton_seam`.
+
+- (2026-02-20 22:03Z) Observation: Station landuse parquet fallback previously swallowed non-schema exceptions silently, reducing failure-path observability for landuse-equality skip decisions.
+  Evidence: prior `except Exception: continue` in `wepppy/nodb/mods/omni/omni_station_catalog_service.py`, now narrowed to schema fallback + logged non-schema failure with `test_load_landuse_key_map_logs_and_returns_none_on_read_failure`.
 
 ## Decision Log
 
 Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
 
-- Decision: Treat `wepppy/nodb/mods/omni/omni.py` as the implementation target while preserving all existing import paths and facade contracts.
-  Rationale: Current production callsites import from `wepppy.nodb.mods.omni`; path relocation is out of scope for this risk-reduction refactor.
-  Date/Author: 2026-02-20 17:58Z / Codex
+- Decision: Execute Option-2 refactor against the active Omni module path (`wepppy/nodb/mods/omni/omni.py`) while preserving all existing import/usage contracts.
+  Rationale: No `wepppy/nodb/core/omni.py` implementation exists in this branch; contract-preserving refactor must target the live module.
+  Date/Author: 2026-02-20 20:32Z / Codex
 
-- Decision: Use Option-2 collaborator extraction with the exact required sequence: input parser -> build router -> mode services -> scaling -> artifact export -> station/catalog resolution.
-  Rationale: This keeps changes incremental and reversible while matching repository standard.
-  Date/Author: 2026-02-20 17:58Z / Codex
+- Decision: Preserve all route/RQ/test-facing Omni behavior, including quasi-public helper semantics consumed by worker code.
+  Rationale: Dependency metadata, skip logic, and run-state behavior are externally observable in RQ and UI flows.
+  Date/Author: 2026-02-20 20:32Z / Codex
 
-- Decision: Add contract characterization tests before any production extraction.
-  Rationale: Existing coverage gaps in facade contracts and RQ integration are a primary regression risk.
-  Date/Author: 2026-02-20 17:58Z / Codex
+- Decision: Use strict Option-2 extraction order and require targeted deterministic regressions before/at each milestone gate.
+  Rationale: Incremental isolation minimizes rollback scope and makes regressions attributable.
+  Date/Author: 2026-02-20 20:32Z / Codex
 
-- Decision: Preserve the observed `delete_scenarios()` duplicate-missing-name quirk during this refactor and capture it as characterization.
-  Rationale: ExecPlan scope is Option-2 extraction with behavior stability; changing this quirk would be a behavior change outside scope.
-  Date/Author: 2026-02-20 18:06Z / Codex
+- Decision: Treat all six required Option-2 stages as applicable to Omni; no stage is marked N/A.
+  Rationale: Omni contains all six concern areas (parse, orchestration, mode build, scaling/filtering, artifact export, station/catalog/dependency resolution).
+  Date/Author: 2026-02-20 20:32Z / Codex
 
-- Decision: For Milestone 6, keep helper names on the `Omni` facade and move logic into `_..._impl` bodies delegated through `OmniStationCatalogService`.
-  Rationale: This preserves route/RQ monkeypatch seams and quasi-public helper contracts while reducing Omni class complexity.
-  Date/Author: 2026-02-20 18:22Z / Codex
+- Decision: Add explicit program continuity follow-up for climate legacy branch retirement after Omni milestone completion.
+  Rationale: Mixed facade maturity across controllers increases long-term regression and reviewer burden.
+  Date/Author: 2026-02-20 20:32Z / Codex
 
-- Decision: Update `omni.pyi` to include new `_..._impl` station/catalog seam signatures in Milestone 7.
-  Rationale: Keep typed Omni surface coherent with runtime collaborator extraction and prevent drift for future stub/type gates.
-  Date/Author: 2026-02-20 18:26Z / Codex
+- Decision: Mark Milestone 0 as complete without test edits because all required characterization checks were already deterministic and passing.
+  Rationale: Existing suites already enforce the requested baseline behavior contracts; additional duplicate tests would be redundant and add maintenance noise.
+  Date/Author: 2026-02-20 20:41Z / Codex
 
-- Decision: Accept reviewer SEV3 findings as non-blocking for this milestone set and preserve `GO`, while tracking deeper logic relocation as follow-up refactor debt.
-  Rationale: Contracts, tests, and gates are green; findings concern decomposition completeness and maintainability rather than correctness/regression risk.
-  Date/Author: 2026-02-20 19:44Z / Codex
+- Decision: Preserve the existing malformed-scenarios error contract (`"Scenarios data must be valid JSON"`) in rq-engine route tests.
+  Rationale: Milestone 1 is contract-hardening, not behavior change; route regression tests must encode the current public 400 payload.
+  Date/Author: 2026-02-20 20:44Z / Codex
+
+- Decision: In `OmniBuildRouter.build_contrasts_dry_run_report`, call `omni.build_contrasts(...)` to preserve facade monkeypatch seams before producing status payloads.
+  Rationale: This keeps dry-run orchestration contract-compatible with existing tests and downstream expectations while still moving orchestration ownership to router collaborator methods.
+  Date/Author: 2026-02-20 20:50Z / Codex
+
+- Decision: Keep undisturbed `_base` no-SBS bypass as a contract and add direct collaborator-level regression coverage for it.
+  Rationale: `_base` projects are a known special-case execution context; preserving this branch avoids false-positive failures during base-context scenario orchestration.
+  Date/Author: 2026-02-20 20:53Z / Codex
+
+- Decision: Encode unknown burn classes and malformed numeric filter inputs as explicit `ValueError` contracts in scaling collaborator tests.
+  Rationale: These are high-signal operator errors; explicit failures prevent silent contrast-selection drift.
+  Date/Author: 2026-02-20 20:54Z / Codex
+
+- Decision: Keep `build_contrast_ids_geojson` routed through the artifact collaborator seam while preserving the existing facade implementation body for now.
+  Rationale: This maintains current optional-dependency behavior and minimizes migration risk while still relocating the high-volume report compilation logic to the collaborator.
+  Date/Author: 2026-02-20 20:59Z / Codex
+
+- Decision: Repoint all station/catalog facade `_..._impl` methods to delegate directly to `OmniStationCatalogService` methods while preserving existing method names/signatures.
+  Rationale: This completes Option-2 station collaborator ownership without contract drift and avoids duplicate logic maintenance in facade internals.
+  Date/Author: 2026-02-20 21:06Z / Codex
+
+- Decision: Add explicit RQ helper-output regression coverage for concurrent scenario orchestration and landuse-skip contrast orchestration paths.
+  Rationale: These worker paths consume station/catalog helper outputs and are quasi-public behavior surfaces for dependency metadata and skip semantics.
+  Date/Author: 2026-02-20 21:06Z / Codex
+
+- Decision: Align router-service lock-scope test expectations with `_scenario_name_from_scenario_definition(...)` instead of hardcoded short labels.
+  Rationale: Mulch scenario naming depends on payload shape; helper-aligned assertions preserve contract intent while avoiding false-negative test drift.
+  Date/Author: 2026-02-20 21:14Z / Codex
+
+- Decision: Route router selection-mode normalization through `_OMNI_SCALING_SERVICE` seam instead of directly instantiating `OmniScalingService`.
+  Rationale: Preserves Option-2 singleton seam compatibility for monkeypatch/injection tests and avoids collaborator seam drift.
+  Date/Author: 2026-02-20 22:03Z / Codex
+
+- Decision: Replace broad catch in station landuse loader with explicit schema-fallback (`KeyError`/`ValueError`) and logged non-schema boundary handling (`ImportError`/`OSError`).
+  Rationale: Enforces exception policy (no silent broad catches) while preserving existing column-fallback behavior.
+  Date/Author: 2026-02-20 22:03Z / Codex
 
 ## Outcomes & Retrospective
 
 Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
 
-- (2026-02-20 18:40Z) Outcome: Milestones 0-7 completed in required Option-2 order with facade behavior preserved across route, rq-engine, and RQ callsites.
-- (2026-02-20 18:40Z) Outcome: Added targeted regressions for each extracted path, including new station/catalog service coverage and RQ dependency metadata derivation checks.
-- (2026-02-20 18:40Z) Outcome: Validation gates are green: milestone-targeted commands, `wctl run-pytest tests --maxfail=1` (1863 passed, 27 skipped), and doc lint (2 files, 0 issues).
-- (2026-02-20 18:40Z) Retrospective: Characterization-first sequencing materially reduced risk; wrapper+`_impl` seams preserved compatibility while making collaborator boundaries explicit.
-- (2026-02-20 19:44Z) Outcome: External review re-validated `GO` and identified three SEV3 maintainability findings (router/artifact/station indirection without full logic relocation).
-- (2026-02-20 19:44Z) Retrospective: Option-2 sequence is satisfied at the seam/delegation level; full collaborator ownership of logic remains an explicit next-step refactor.
+- (2026-02-20 20:32Z) Outcome: Planning-only pass complete; no Omni/climate production code changed in this turn.
+- (2026-02-20 20:32Z) Outcome: Milestone map, regression controls, test-gap closures, and rollback strategy are fully defined.
+- (2026-02-20 20:32Z) Retrospective: Highest risk is not missing collaborator files; it is remaining legacy orchestration inside facade `_..._impl` branches and under-tested worker/route contract edges.
+- (2026-02-20 20:41Z) Outcome: Milestone 0 gate completed with all baseline suites green (`9 passed`, `9 passed`, `56 passed`).
+- (2026-02-20 20:41Z) Retrospective: Baseline is stable; primary remaining work is deeper collaborator ownership (router/artifact/station) plus targeted deterministic regressions in later milestones.
+- (2026-02-20 20:44Z) Outcome: Milestone 1 parser hardening completed with added deterministic parser and route regressions (`15 passed`, `4 passed` for milestone commands).
+- (2026-02-20 20:44Z) Retrospective: Milestone-local gate retry validated the expected rollback discipline; contract-aligned expectation fix restored `GO` without production behavior drift.
+- (2026-02-20 20:50Z) Outcome: Milestone 2 router/orchestrator extraction hardening completed; router now owns build, dry-run, and status payload assembly paths with passing mode-matrix regressions.
+- (2026-02-20 20:50Z) Retrospective: collaborator ownership improved while preserving facade seam contracts required by legacy tests; one milestone-local retry was needed to restore dry-run seam parity.
+- (2026-02-20 20:53Z) Outcome: Milestone 3 mode-service hardening completed with targeted treatment-mapping and stream-order rebuild path regressions (`20 passed`, `7 passed` for milestone commands).
+- (2026-02-20 20:53Z) Retrospective: mode-service contracts are now explicitly characterized at collaborator level; stream-order stale/fresh branch behavior is deterministic under test stubs.
+- (2026-02-20 20:54Z) Outcome: Milestone 4 scaling hardening completed with deterministic edge/failure coverage (`8 passed`, `4 passed` for milestone commands).
+- (2026-02-20 20:54Z) Retrospective: scaling/rerun invariants are now explicitly guarded; stream-order dependency metadata changes are regression-tested without integration dependencies.
+- (2026-02-20 20:59Z) Outcome: Milestone 5 artifact hardening completed with collaborator-owned report/summary compilation and deterministic artifact behavior tests (`13 passed`, `6 passed` for milestone commands).
+- (2026-02-20 20:59Z) Retrospective: largest artifact logic now lives in collaborator service; geojson generation remains a seam-preserved facade implementation and is covered by explicit empty-fallback regression.
+- (2026-02-20 21:06Z) Outcome: Milestone 6 station/catalog hardening completed with collaborator-owned helper implementations and deterministic station/RQ regressions (`3 passed`, `11 passed` for milestone commands).
+- (2026-02-20 21:06Z) Retrospective: facade still exposes compatibility helpers, but logic ownership is now centralized in collaborator service; RQ orchestration helper contracts are directly characterized for both scenario and contrast pipelines.
+- (2026-02-20 21:14Z) Outcome: Milestone 7 finalization completed with all milestone and pre-handoff gates green (`100 passed`, `72 passed`, `1894 passed, 27 skipped`) plus doc-lint gate success.
+- (2026-02-20 21:14Z) Retrospective: milestone-local rollback discipline held at closeout (single failing expectation corrected and rerun), and full contract-preservation confidence now comes from deterministic collaborator + RQ + route characterization.
+- (2026-02-20 22:03Z) Outcome: Post-review SEV2 follow-ups completed with seam restoration + logged exception handling and focused regression gates green (`21 passed`; milestone-targeted `16 passed` and `3 passed` characterization reruns).
+- (2026-02-20 22:03Z) Retrospective: review-driven fixes were isolated to collaborator seam/failure observability and did not require route/RQ contract changes.
 
 ## Context and Orientation
 
-Primary module and contracts:
+Primary Omni implementation and collaborators:
 
-1. Implementation module: `wepppy/nodb/mods/omni/omni.py` (~5.2k LOC) with typed surface in `wepppy/nodb/mods/omni/omni.pyi`.
-2. Export surface: `wepppy/nodb/mods/omni/__init__.py`.
-3. NoDb contract constraints: preserve `with self.locked()`, `nodb_setter` behavior, mutation/persistence boundaries, and `dump_and_unlock` semantics where currently used by facade methods.
+1. `wepppy/nodb/mods/omni/omni.py` (facade + substantial `_..._impl` logic).
+2. `wepppy/nodb/mods/omni/omni_input_parser.py`.
+3. `wepppy/nodb/mods/omni/omni_build_router.py`.
+4. `wepppy/nodb/mods/omni/omni_mode_build_services.py`.
+5. `wepppy/nodb/mods/omni/omni_scaling_service.py`.
+6. `wepppy/nodb/mods/omni/omni_artifact_export_service.py`.
+7. `wepppy/nodb/mods/omni/omni_station_catalog_service.py`.
+8. Typed surface: `wepppy/nodb/mods/omni/omni.pyi`.
 
-Current external Omni callsites that define behavior contracts:
+External callsites that define contracts:
 
-1. Flask routes:
-   `wepppy/weppcloud/routes/nodb_api/omni_bp.py` uses `scenarios`, `scenario_run_state`, `scenario_dependency_tree`, `scenario_run_markers()`, `delete_scenarios()`, `scenarios_report()`, `contrast_selection_mode`, `contrasts_report()`, `contrast_status_report()`.
-2. Dashboard/run routes:
-   `wepppy/weppcloud/routes/gl_dashboard.py` uses `contrast_names`; `wepppy/weppcloud/routes/run_0/run_0_bp.py` uses `has_ran_scenarios` and `has_ran_contrasts`.
-3. rq-engine API routes:
-   `wepppy/microservices/rq_engine/omni_routes.py` uses `parse_scenarios()`, `parse_inputs()`, `build_contrasts()`, `build_contrasts_dry_run_report()`.
-4. RQ workers:
-   `wepppy/rq/omni_rq.py` and `wepppy/rq/path_ce_rq.py` use both facade and quasi-public helpers (`run_omni_scenarios()`, `run_omni_contrast()`, `clear_contrasts()`, `scenario_dependency_tree`, `contrast_dependency_tree`, `_scenario_signature()`, `_loss_pw0_path_for_scenario()`, `_contrast_run_status()`, `_contrast_sidecar_path()`, `_clean_stale_contrast_runs()`, etc.).
+1. rq-engine API: `wepppy/microservices/rq_engine/omni_routes.py`.
+2. Flask routes: `wepppy/weppcloud/routes/nodb_api/omni_bp.py`, `wepppy/weppcloud/routes/gl_dashboard.py`.
+3. RQ workers: `wepppy/rq/omni_rq.py`, `wepppy/rq/path_ce_rq.py`.
 
-## Test-Gap Analysis
+Invariants that must remain true throughout the plan:
 
-### Current Coverage Map
+1. Preserve public Omni facade contracts and quasi-public helper behavior used by routes/RQ/tests.
+2. Preserve NoDb lock/mutation/persistence boundaries (`with self.locked()`, `nodb_setter`, `dump_and_unlock`, boundary ownership).
+3. No silent exception swallowing; boundary catches must log with context.
+4. No speculative abstractions or unsupported behavior expansions.
 
-1. `tests/nodb/mods/test_omni.py`: strong coverage for contrast sidecars, user-defined area/group/stream-order contrast construction, clone helpers, and selected contrast-run status paths.
-2. `tests/microservices/test_rq_engine_omni_routes.py`: strong request payload and enqueue behavior coverage using `DummyOmni` stubs.
-3. `tests/rq/test_omni_rq.py`: currently only preflight smoke checks for `run_omni_scenarios_rq`.
-4. `tests/rq/test_path_ce_rq.py`: preflight + orchestration smoke with Omni stubs.
-5. `tests/weppcloud/routes/test_omni_bp.py`: only report summarization helper behavior, not route-facade integration.
+## Option-2 Sequence Mapping for Omni
 
-### Uncovered / High-Risk Behaviors
+1. Input parsing/validation service: `OmniInputParsingService` (`parse_inputs`, `parse_scenarios`, contrast pair normalization).
+2. Build router/orchestrator: `OmniBuildRouter` (`build_contrasts`, dry-run report, status report orchestration).
+3. Mode-specific build services: `OmniModeBuildServices` (selection-mode and scenario-mode build branches).
+4. Scaling service: `OmniScalingService` (selection-mode aliases, limits, slope/burn/topaz filters, order-reduction normalization).
+5. Artifact export service: `OmniArtifactExportService` (reports/summaries/geojson export seams).
+6. Station/catalog resolution service: `OmniStationCatalogService` (scenario key/path/dependency resolution and landuse skip helpers).
 
-1. Facade parsing contracts are largely uncharacterized (`parse_inputs`, `parse_scenarios`, `_normalize_contrast_pairs`, boolean normalization defaults, scenario coercion).
-2. Facade mutation/persistence boundaries are uncharacterized for `delete_scenarios`, `scenario_run_state`, and dependency tree updates.
-3. `run_omni_scenarios` dependency/skip/year-set behavior has limited direct regression protection.
-4. Reporting and artifact surface (`scenarios_report`, `compile_hillslope_summaries`, `compile_channel_summaries`, `_build_contrast_ids_geojson`) is weakly covered as a facade contract.
-5. RQ orchestration flows in `wepppy/rq/omni_rq.py` (scenario/contrast run orchestration, lock retries, dependency metadata updates) are under-tested.
-6. Route-level Omni facade contract tests are thin for Flask `omni_bp` endpoints and dashboard contrast retrieval behaviors.
-
-### Exact Tests to Add (Path + Intent)
-
-1. `tests/nodb/mods/test_omni_facade_contracts.py`
-   Intent: characterization tests for facade entrypoints used by routes/RQ (`parse_inputs`, `parse_scenarios`, `delete_scenarios`, `scenario_run_markers`, `has_ran_scenarios`, `has_ran_contrasts`, `contrast_batch_size`, `contrast_output_options`).
-2. `tests/nodb/mods/test_omni_input_parser_service.py`
-   Intent: parser service unit tests for payload coercion/validation, pair normalization, scenario coercion, and lock-boundary behavior.
-3. `tests/nodb/mods/test_omni_build_router_service.py`
-   Intent: orchestrator dispatch tests for `build_contrasts`, dry-run route, run-status assembly, and trigger/report sequencing without mode internals.
-4. `tests/nodb/mods/test_omni_mode_build_services.py`
-   Intent: mode-specific scenario and contrast builder dispatch tests (`cumulative`, `user_defined_areas`, `user_defined_hillslope_groups`, `stream_order`; scenario types `uniform_*`, `sbs_map`, `undisturbed`, `mulch`, `thinning`, `prescribed_fire`).
-5. `tests/nodb/mods/test_omni_scaling_service.py`
-   Intent: objective-threshold accumulation, hillslope limit clamping, slope/burn/topaz filter normalization, and order-reduction pass normalization.
-6. `tests/nodb/mods/test_omni_artifact_export_service.py`
-   Intent: deterministic non-skipped tests for `scenarios_report`, `contrasts_report`, `compile_hillslope_summaries`, `compile_channel_summaries`, and `contrast_ids` geojson generation using stubs (no optional dependency skips).
-7. `tests/nodb/mods/test_omni_station_catalog_service.py`
-   Intent: scenario/contrast path and catalog resolution checks (`_loss_pw0_path_for_scenario`, `_scenario_dependency_target`, `_contrast_scenario_keys`, `_contrast_landuse_skip_reason`, translator/topaz mapping).
-8. `tests/rq/test_omni_rq.py`
-   Intent: add lock-retry, dependency-entry mutation, enqueue sequencing, and finalization timestamp tests for `run_omni_scenario_rq`, `run_omni_contrast_rq`, `run_omni_contrasts_rq`, `_finalize_omni_*`.
-9. `tests/weppcloud/routes/test_omni_bp_routes.py`
-   Intent: route-level Omni facade integration tests for `get_scenarios`, `get_scenario_run_state`, `delete_scenarios`, and report endpoints with `Omni` stubs asserting expected facade calls/response contracts.
-10. `tests/weppcloud/routes/test_gl_dashboard_route.py`
-    Intent: add `_get_omni_contrasts` contract tests to ensure contrast-name + README gating behavior is preserved when Omni returns mixed entries.
+All six stages are applicable; no N/A stage is required.
 
 ## Milestone Plan
 
-### Milestone 0: Baseline, Contract Characterization, and Safety Net
+### Milestone 0: Baseline Characterization and Safety Net
 
-Scope: lock current Omni external behavior before extraction.
+Scope: freeze current behavior for facade, route, and RQ contracts before deeper extraction.
 
-File targets:
+Files/modules touched:
 
-1. `tests/nodb/mods/test_omni_facade_contracts.py` (new).
-2. `tests/rq/test_omni_rq.py` (expand existing).
-3. `tests/weppcloud/routes/test_omni_bp_routes.py` (new).
-4. `tests/weppcloud/routes/test_gl_dashboard_route.py` (extend existing).
+1. `tests/nodb/mods/test_omni_facade_contracts.py`.
+2. `tests/rq/test_omni_rq.py`.
+3. `tests/weppcloud/routes/test_omni_bp_routes.py`.
+4. `tests/weppcloud/routes/test_gl_dashboard_route.py`.
 
-Behavior invariants:
+Invariants to preserve:
 
-1. No production behavior changes.
-2. Characterization tests reflect current behavior, including quirks, unless a behavior is clearly invalid and explicitly recorded.
-3. New characterization tests must be deterministic and non-skipped.
+1. No production code changes in this milestone.
+2. Characterization tests must encode existing behavior (including known quirks) unless explicitly approved to change.
+
+Tests to add/update:
+
+1. Add deterministic checks for `delete_scenarios`, `scenario_run_markers`, and output-option normalization.
+2. Expand RQ tests for dependency-state mutation and trigger emissions.
+3. Expand route contract checks for scenario state payload structure.
 
 Validation commands:
 
-    wctl run-pytest tests/nodb/mods/test_omni.py tests/nodb/mods/test_omni_facade_contracts.py --maxfail=1
+    wctl run-pytest tests/nodb/mods/test_omni_facade_contracts.py --maxfail=1
     wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py --maxfail=1
-    wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_omni_bp_routes.py tests/weppcloud/routes/test_gl_dashboard_route.py --maxfail=1
+    wctl run-pytest tests/weppcloud/routes/test_omni_bp_routes.py tests/weppcloud/routes/test_gl_dashboard_route.py tests/microservices/test_rq_engine_omni_routes.py --maxfail=1
 
-Review checkpoint:
+Go/No-Go review gate:
 
-1. Record findings in severity format:
-   `- [SEVx] <title> | <path:line> | <impact> | <required fix>`.
-2. Go/No-Go gate:
-   `GO` only if characterization tests are green and no SEV0/SEV1 regressions are introduced.
+1. Severity review required (`SEV0`..`SEV3`) with findings format:
+   `[SEVx] <title> | <path:line> | <impact> | <required fix>`.
+2. `NO-GO` if unresolved `SEV0`/`SEV1` or any baseline command fails.
 
-Rollback plan:
+Rollback strategy:
 
-1. Revert only Milestone 0 test additions that incorrectly codify unintended behavior.
-2. Re-run the same Milestone 0 commands until characterization baseline is trusted.
+1. Revert only newly added characterization tests that are proven incorrect.
+2. Re-run Milestone 0 commands until baseline is trusted.
 
-### Milestone 1: Extract Input Parsing/Validation Service
+### Milestone 1: Input Parsing/Validation Service Hardening
 
-Required sequence step: `1. input parsing/validation service`.
+Scope: keep facade thin and ensure parser service owns input normalization/validation behavior.
 
-File targets:
+Files/modules touched:
 
-1. `wepppy/nodb/mods/omni/omni_input_parser.py` (new).
-2. `wepppy/nodb/mods/omni/omni.py` (facade delegation via module singleton, no contract changes).
-3. `tests/nodb/mods/test_omni_input_parser_service.py` (new).
-4. `tests/nodb/mods/test_omni_facade_contracts.py` (extend delegation assertions).
+1. `wepppy/nodb/mods/omni/omni.py`.
+2. `wepppy/nodb/mods/omni/omni_input_parser.py`.
+3. `tests/nodb/mods/test_omni_input_parser_service.py`.
+4. `tests/nodb/mods/test_omni_facade_contracts.py`.
 
-Behavior invariants:
+Invariants to preserve:
 
-1. Preserve signatures and side effects of `parse_inputs` and `parse_scenarios`.
-2. Preserve lock/mutation semantics around parser writes.
-3. No silent exception swallowing; keep explicit `ValueError` paths.
+1. `parse_inputs` and `parse_scenarios` signatures and side effects remain stable.
+2. Mutations remain lock-scoped and contract-compatible.
+3. No broad catches that hide malformed payload errors.
+
+Tests to add/update:
+
+1. Add parser tests for scenario coercion edge cases and invalid boolean tokens.
+2. Add lock-scope assertions for parser mutation boundaries.
+3. Add rq-engine route regression for parser-related 400 responses.
 
 Validation commands:
 
     wctl run-pytest tests/nodb/mods/test_omni_input_parser_service.py tests/nodb/mods/test_omni_facade_contracts.py --maxfail=1
-    wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py --maxfail=1
+    wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py -k "run_omni and scenarios" --maxfail=1
 
-Review checkpoint:
+Go/No-Go review gate:
 
-1. Apply severity format and classify any parser contract drift.
-2. Go/No-Go gate:
-   `GO` only if parser service tests and rq-engine Omni route tests pass with unchanged route contracts.
+1. `NO-GO` if parser contract drift is detected in route payload handling.
+2. `NO-GO` if unresolved `SEV0`/`SEV1` findings.
 
-Rollback plan:
+Rollback strategy:
 
-1. Revert parser service wiring in `wepppy/nodb/mods/omni/omni.py`.
-2. Keep characterization tests; adjust parser extraction until green.
+1. Re-point facade calls to previous parser wiring if needed.
+2. Keep parser tests; fix implementation until green.
 
-### Milestone 2: Extract Build Router/Orchestrator
+### Milestone 2: Build Router/Orchestrator Hardening
 
-Required sequence step: `2. build router/orchestrator`.
+Scope: move and stabilize orchestration logic now living in facade `_build_contrasts_router_impl`/dry-run/status branches.
 
-File targets:
+Files/modules touched:
 
-1. `wepppy/nodb/mods/omni/omni_build_router.py` (new).
-2. `wepppy/nodb/mods/omni/omni.py` (delegate `build_contrasts`, `build_contrasts_dry_run_report`, `contrast_status_report` orchestration shell).
-3. `tests/nodb/mods/test_omni_build_router_service.py` (new).
+1. `wepppy/nodb/mods/omni/omni.py`.
+2. `wepppy/nodb/mods/omni/omni_build_router.py`.
+3. `tests/nodb/mods/test_omni_build_router_service.py`.
+4. `tests/nodb/mods/test_omni.py` (targeted status/build report cases).
 
-Behavior invariants:
+Invariants to preserve:
 
-1. Preserve selection-mode normalization aliases and branch routing.
-2. Preserve lock boundaries for persisted contrast metadata.
-3. Preserve sidecar/report generation boundaries and existing error contracts.
+1. Selection-mode routing and validation behavior must remain identical.
+2. Lock/persistence boundaries for stored contrast inputs remain unchanged.
+3. Dry-run report and status payload schemas remain route-compatible.
 
-Validation commands:
+Tests to add/update:
 
-    wctl run-pytest tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni.py -k "build_contrasts or contrast_status_report or dry_run" --maxfail=1
-    wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py --maxfail=1
-
-Review checkpoint:
-
-1. Review for orchestration-only extraction; mode logic must remain behavior-identical.
-2. Go/No-Go gate:
-   `GO` only if no SEV0/SEV1 findings on contrast-building contracts.
-
-Rollback plan:
-
-1. Re-point facade methods to pre-router in-class orchestration.
-2. Keep new router tests as guardrail.
-
-### Milestone 3: Extract Mode-Specific Build Services
-
-Required sequence step: `3. mode-specific build services`.
-
-File targets:
-
-1. `wepppy/nodb/mods/omni/omni_mode_build_services.py` (new).
-2. `wepppy/nodb/mods/omni/omni.py` (delegate mode-specific scenario and contrast build branches).
-3. `tests/nodb/mods/test_omni_mode_build_services.py` (new).
-4. `tests/nodb/mods/test_omni.py` (targeted updates to existing mode tests if seams move).
-
-Behavior invariants:
-
-1. Preserve all scenario mode effects (`uniform_*`, `sbs_map`, `undisturbed`, `mulch`, `thinning`, `prescribed_fire`).
-2. Preserve contrast mode effects (`cumulative`, `user_defined_areas`, `user_defined_hillslope_groups`, `stream_order`).
-3. Preserve existing monkeypatch seams currently relied on by tests (`_omni_clone`, `_run_contrast`, `_post_watershed_run_cleanup`, etc.).
+1. Add deterministic router tests for cumulative vs user-defined vs stream-order status outputs.
+2. Add dry-run regression for report item schema and selection-mode normalization aliases.
 
 Validation commands:
 
-    wctl run-pytest tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni.py --maxfail=1
-    wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py --maxfail=1
+    wctl run-pytest tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni.py -k "dry_run or contrast_status_report or build_contrasts" --maxfail=1
+    wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py -k "run_omni_contrasts" --maxfail=1
 
-Review checkpoint:
+Go/No-Go review gate:
 
-1. Explicitly verify mode dispatch map and branch outputs did not drift.
-2. Go/No-Go gate:
-   `GO` only if all mode service tests are deterministic and no branch contracts regress.
+1. `NO-GO` if status/dry-run payload contracts regress.
+2. `NO-GO` if unresolved `SEV0`/`SEV1` findings.
 
-Rollback plan:
+Rollback strategy:
 
-1. Revert mode service delegation while leaving router extraction intact.
-2. Re-run Milestone 3 validation until mode parity is restored.
+1. Revert router-orchestration extraction only.
+2. Retain new tests to guard parity on reattempt.
 
-### Milestone 4: Extract Scaling Service
+### Milestone 3: Mode-Specific Build Services Hardening
 
-Required sequence step: `4. scaling service`.
+Scope: isolate selection-mode and scenario-mode build branches behind `OmniModeBuildServices`.
 
-File targets:
+Files/modules touched:
 
-1. `wepppy/nodb/mods/omni/omni_scaling_service.py` (new).
-2. `wepppy/nodb/mods/omni/omni.py` (delegate objective scaling/filter/threshold/order-reduction logic).
-3. `tests/nodb/mods/test_omni_scaling_service.py` (new).
+1. `wepppy/nodb/mods/omni/omni.py`.
+2. `wepppy/nodb/mods/omni/omni_mode_build_services.py`.
+3. `tests/nodb/mods/test_omni_mode_build_services.py`.
+4. `tests/nodb/mods/test_omni.py`.
 
-Behavior invariants:
+Invariants to preserve:
 
-1. Preserve cumulative objective threshold and hillslope limit behavior.
-2. Preserve slope normalization and filter semantics.
-3. Preserve `order_reduction_passes` normalization and stream-order guard behavior.
+1. Scenario mode behavior (`uniform_*`, `undisturbed`, `sbs_map`, `mulch`, `prescribed_fire`, `thinning`) remains unchanged.
+2. Contrast mode behavior (`cumulative`, `user_defined_areas`, `user_defined_hillslope_groups`, `stream_order`) remains unchanged.
+3. Existing monkeypatch seams used by tests/workers remain valid.
 
-Validation commands:
+Tests to add/update:
 
-    wctl run-pytest tests/nodb/mods/test_omni_scaling_service.py tests/nodb/mods/test_omni.py -k "contrast_limit or filters or stream_order" --maxfail=1
-    wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py -k "stream_order or limit_error" --maxfail=1
-
-Review checkpoint:
-
-1. Verify no numerical selection drift in ranking/filter outputs.
-2. Go/No-Go gate:
-   `GO` only if scaling tests pass and no SEV1 findings on contrast selection results.
-
-Rollback plan:
-
-1. Revert scaling delegation only.
-2. Retain tests and re-implement extraction with narrower boundaries.
-
-### Milestone 5: Extract Artifact Export Service
-
-Required sequence step: `5. artifact export service`.
-
-File targets:
-
-1. `wepppy/nodb/mods/omni/omni_artifact_export_service.py` (new).
-2. `wepppy/nodb/mods/omni/omni.py` (delegate reports/parquet/geojson exports and catalog refresh triggers).
-3. `tests/nodb/mods/test_omni_artifact_export_service.py` (new).
-
-Behavior invariants:
-
-1. Preserve report output paths and expected columns (`v`/`value`, scenario/contrast labels).
-2. Preserve deterministic geojson artifact behavior for contrast IDs.
-3. Preserve explicit failures for missing required artifacts; no silent fallbacks.
+1. Expand mode-service tests for mulch/thinning treatment mapping and `_base` undisturbed exceptions.
+2. Add deterministic stream-order branch tests with WBT stubs for stale/rebuild decision paths.
 
 Validation commands:
 
-    wctl run-pytest tests/nodb/mods/test_omni_artifact_export_service.py tests/nodb/mods/test_omni.py -k "scenarios_report or contrasts_report or contrast_ids_geojson or compile_" --maxfail=1
+    wctl run-pytest tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni.py -k "scenario_mode or stream_order or user_defined" --maxfail=1
+    wctl run-pytest tests/rq/test_omni_rq.py --maxfail=1
+
+Go/No-Go review gate:
+
+1. `NO-GO` if mode dispatch map or output naming contracts change.
+2. `NO-GO` if unresolved `SEV0`/`SEV1` findings.
+
+Rollback strategy:
+
+1. Revert mode-service extraction independently.
+2. Keep mode regressions to enforce parity.
+
+### Milestone 4: Scaling Service Hardening
+
+Scope: consolidate limit/filter/order-reduction normalization and advanced candidate filtering in scaling collaborator.
+
+Files/modules touched:
+
+1. `wepppy/nodb/mods/omni/omni.py`.
+2. `wepppy/nodb/mods/omni/omni_scaling_service.py`.
+3. `tests/nodb/mods/test_omni_scaling_service.py`.
+4. `tests/nodb/mods/test_omni.py`.
+
+Invariants to preserve:
+
+1. Hillslope limit clamp/default behavior remains stable.
+2. Slope/topaz/burn filters preserve semantics and error contracts.
+3. Stream-order pass normalization remains compatible with RQ dependency checks.
+
+Tests to add/update:
+
+1. Add edge tests for invalid burn classes and malformed numeric inputs.
+2. Add deterministic tests for order-reduction mismatch forcing rerun status.
+
+Validation commands:
+
+    wctl run-pytest tests/nodb/mods/test_omni_scaling_service.py tests/nodb/mods/test_omni.py -k "hillslope_limit or filters or order_reduction" --maxfail=1
+    wctl run-pytest tests/rq/test_omni_rq.py -k "dependency or contrast" --maxfail=1
+
+Go/No-Go review gate:
+
+1. `NO-GO` if contrast candidate selection drifts unexpectedly.
+2. `NO-GO` if unresolved `SEV0`/`SEV1` findings.
+
+Rollback strategy:
+
+1. Revert scaling extraction only.
+2. Keep added scaling tests to verify reimplementation.
+
+### Milestone 5: Artifact Export Service Hardening
+
+Scope: shift report/export logic from facade `_..._impl` methods into artifact collaborator with deterministic coverage.
+
+Files/modules touched:
+
+1. `wepppy/nodb/mods/omni/omni.py`.
+2. `wepppy/nodb/mods/omni/omni_artifact_export_service.py`.
+3. `tests/nodb/mods/test_omni_artifact_export_service.py`.
+4. `tests/weppcloud/routes/test_omni_bp.py`.
+5. `tests/weppcloud/test_omni_report_templates.py`.
+
+Invariants to preserve:
+
+1. Output schema expectations (`v`/`value`, scenario/contrast labels, contrast ids) stay stable.
+2. Artifact path naming and catalog refresh behavior remain stable.
+3. Missing-artifact failures remain explicit and observable.
+
+Tests to add/update:
+
+1. Replace delegation-only artifact service tests with deterministic behavior tests for scenarios/contrasts/hillslope/channel summaries.
+2. Add deterministic non-skipped tests for `_build_contrast_ids_geojson` fallbacks when optional GIS deps are absent (stub-based fallback assertions).
+
+Validation commands:
+
+    wctl run-pytest tests/nodb/mods/test_omni_artifact_export_service.py tests/nodb/mods/test_omni.py -k "report or compile or contrast_ids_geojson" --maxfail=1
     wctl run-pytest tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/test_omni_report_templates.py --maxfail=1
 
-Review checkpoint:
+Go/No-Go review gate:
 
-1. Ensure new artifact tests are non-skipped and deterministic even without optional GIS binaries.
-2. Go/No-Go gate:
-   `GO` only if artifact contracts hold and no SEV0/SEV1 findings remain.
+1. `NO-GO` if report templates/routes observe schema drift.
+2. `NO-GO` if unresolved `SEV0`/`SEV1` findings.
 
-Rollback plan:
+Rollback strategy:
 
-1. Revert artifact service delegation while keeping prior milestones intact.
-2. Re-run artifact-focused test commands before reattempt.
+1. Revert artifact extraction only.
+2. Keep deterministic artifact tests as acceptance guardrails.
 
-### Milestone 6: Extract Station/Catalog Resolution Service
+### Milestone 6: Station/Catalog Resolution Service Hardening
 
-Required sequence step: `6. station/catalog resolution service`.
+Scope: move path/dependency/landuse-resolution helpers out of facade `_..._impl` methods into station/catalog collaborator.
 
-Omni adaptation: this service encapsulates scenario/catalog/path resolution and translator-driven lookup behavior used by contrast dependency logic.
+Files/modules touched:
 
-File targets:
+1. `wepppy/nodb/mods/omni/omni.py`.
+2. `wepppy/nodb/mods/omni/omni_station_catalog_service.py`.
+3. `tests/nodb/mods/test_omni_station_catalog_service.py`.
+4. `tests/rq/test_omni_rq.py`.
 
-1. `wepppy/nodb/mods/omni/omni_station_catalog_service.py` (new).
-2. `wepppy/nodb/mods/omni/omni.py` (delegate scenario/path/dependency/landuse resolution helpers).
-3. `tests/nodb/mods/test_omni_station_catalog_service.py` (new).
-4. `tests/rq/test_omni_rq.py` (extend for dependency-path and signature stability).
+Invariants to preserve:
 
-Behavior invariants:
+1. Scenario key normalization and dependency target/path/signature behavior remain stable.
+2. Landuse equivalence skip behavior for contrasts remains stable.
+3. RQ helper compatibility remains stable for dependency metadata and rerun logic.
 
-1. Preserve scenario key normalization and dependency target resolution.
-2. Preserve contrast skip reasons based on landuse map equivalence.
-3. Preserve RQ-dependent helper behavior currently consumed by `wepppy/rq/omni_rq.py`.
+Tests to add/update:
+
+1. Expand station service tests beyond delegation to real behavior fixtures (temporary parquet/path fixtures).
+2. Add RQ regressions covering helper outputs consumed by `run_omni_scenarios_rq` and `run_omni_contrasts_rq`.
 
 Validation commands:
 
-    wctl run-pytest tests/nodb/mods/test_omni_station_catalog_service.py tests/nodb/mods/test_omni.py --maxfail=1
+    wctl run-pytest tests/nodb/mods/test_omni_station_catalog_service.py tests/nodb/mods/test_omni.py -k "scenario_key or dependency or landuse_skip" --maxfail=1
     wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py --maxfail=1
 
-Review checkpoint:
+Go/No-Go review gate:
 
-1. Explicitly review all helper methods imported/used by `wepppy/rq/omni_rq.py` for compatibility.
-2. Go/No-Go gate:
-   `GO` only if dependency metadata and path-resolution tests remain stable.
+1. `NO-GO` if helper output changes break RQ dependency metadata semantics.
+2. `NO-GO` if unresolved `SEV0`/`SEV1` findings.
 
-Rollback plan:
+Rollback strategy:
 
-1. Revert station/catalog service delegation only.
-2. Keep helper characterization tests to enforce parity on re-implementation.
+1. Revert station/catalog extraction only.
+2. Retain helper regressions for parity verification.
 
-### Milestone 7: Final Facade Cleanup and Full Gates
+### Milestone 7: Facade Finalization and Full Gates
 
-Scope: finalize facade wiring, preserve contracts, and complete pre-handoff validation.
+Scope: complete facade slimming, ensure collaborator ownership is coherent, and pass full validation gates.
 
-File targets:
+Files/modules touched:
 
-1. `wepppy/nodb/mods/omni/omni.py` (facade-only cleanup, collaborator singleton wiring, comments for boundary catches where required).
-2. `wepppy/nodb/mods/omni/omni.pyi` (update signatures if needed without public contract drift).
-3. `tests/nodb/mods/test_omni*.py`, `tests/rq/test_omni_rq.py`, and route tests (final alignment).
-4. `docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md` (living updates + evidence).
+1. `wepppy/nodb/mods/omni/omni.py`.
+2. `wepppy/nodb/mods/omni/omni.pyi`.
+3. Omni-related tests under `tests/nodb/mods/`, `tests/rq/`, `tests/microservices/`, and `tests/weppcloud/routes/`.
+4. `docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md` (living updates).
 
-Behavior invariants:
+Invariants to preserve:
 
-1. Public Omni facade contracts unchanged for all route/RQ/test consumers.
+1. All public/quasi-public contracts unchanged unless explicitly approved.
 2. Lock/mutation/persistence semantics unchanged.
-3. No new broad exception swallows in production paths unless explicit boundary with rationale + logging.
+3. No silent exception swallowing introduced.
+
+Tests to add/update:
+
+1. Final alignment updates for all touched Omni tests.
+2. Any missing deterministic tests discovered during review.
 
 Validation commands:
 
     wctl run-pytest tests/nodb/mods/test_omni.py tests/nodb/mods/test_omni_facade_contracts.py tests/nodb/mods/test_omni_input_parser_service.py tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni_scaling_service.py tests/nodb/mods/test_omni_artifact_export_service.py tests/nodb/mods/test_omni_station_catalog_service.py --maxfail=1
     wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_omni_bp_routes.py tests/weppcloud/routes/test_gl_dashboard_route.py --maxfail=1
     wctl run-pytest tests --maxfail=1
-    wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md
 
-Review checkpoint:
+Go/No-Go review gate:
 
-1. Run full severity-based review, resolve all SEV0/SEV1 before handoff.
-2. Go/No-Go gate:
-   `GO` only when all milestone gates and the final full-suite gate pass.
+1. `NO-GO` if any unresolved `SEV0`/`SEV1` finding remains.
+2. `NO-GO` if any milestone validation or full-suite command fails.
 
-Rollback plan:
+Rollback strategy:
 
-1. Revert only the latest milestone commit(s) that introduced regression.
-2. Re-run Milestone 7 and full-suite gates before handoff.
+1. Revert only the latest failing milestone diff.
+2. Re-run Milestone 7 gates after correction.
+
+## Test-Gap Analysis
+
+### Current Coverage Map
+
+1. `tests/nodb/mods/test_omni.py` provides broad behavior coverage for many contrast/scenario paths.
+2. `tests/nodb/mods/test_omni_facade_contracts.py` covers key facade contract surfaces.
+3. `tests/nodb/mods/test_omni_input_parser_service.py` and `tests/nodb/mods/test_omni_scaling_service.py` exercise service-level logic.
+4. `tests/nodb/mods/test_omni_build_router_service.py`, `tests/nodb/mods/test_omni_artifact_export_service.py`, and `tests/nodb/mods/test_omni_station_catalog_service.py` now include deterministic collaborator behavior checks (not only facade delegation seams).
+5. `tests/rq/test_omni_rq.py` now includes deterministic helper-output coverage for concurrent scenario dependency orchestration and landuse-skip contrast pruning.
+6. `tests/microservices/test_rq_engine_omni_routes.py` covers request validation/enqueue contracts extensively.
+7. `tests/weppcloud/routes/test_omni_bp_routes.py` and `tests/weppcloud/routes/test_gl_dashboard_route.py` cover route facade interactions for selected endpoints.
+
+### Uncovered High-Risk Behaviors
+
+1. Router/artifact/station collaborator ownership is weakly tested where `_..._impl` logic remains in facade.
+2. `run_omni_scenarios` two-pass dependency/year-set rerun behavior is under-characterized in direct RQ tests.
+3. `run_omni_contrasts_rq` queue batching/dependency updates/skip-reasons need richer deterministic assertions.
+4. Stream-order branches rely on filesystem/WBT state and need deterministic tests that do not depend on external binaries.
+5. Report/artifact schema guarantees (`v` vs `value`, labels, IDs) across all selection modes need stronger service-level assertions.
+6. Landuse-based contrast skip and dependency helper semantics need more fixture-based coverage.
+
+### Deterministic Tests to Add (Exact Targets + Intent)
+
+1. `tests/nodb/mods/test_omni_build_router_service.py`:
+   Add status payload matrix tests across `cumulative`, `user_defined_areas`, `user_defined_hillslope_groups`, and `stream_order`.
+2. `tests/nodb/mods/test_omni_artifact_export_service.py`:
+   Replace delegation-only checks with deterministic fixture tests for scenarios/contrasts reports, summary compile outputs, and contrast-ids geojson fallback behavior.
+3. `tests/nodb/mods/test_omni_station_catalog_service.py`:
+   Add fixture-backed tests for scenario-key normalization, dependency-target/path/signature generation, and landuse-skip reasoning.
+4. `tests/nodb/mods/test_omni_mode_build_services.py`:
+   Add stream-order stale/rebuild branch tests and mulch/thinning/prescribed-fire edge contracts.
+5. `tests/rq/test_omni_rq.py`:
+   Add deterministic tests for contrast queue batching, dependency-tree updates/removals, lock retry paths, and finalization job sequencing.
+6. `tests/weppcloud/routes/test_omni_bp_routes.py`:
+   Add route tests for report endpoints to validate facade call contracts and response schema assumptions.
+7. `tests/weppcloud/routes/test_gl_dashboard_route.py`:
+   Add contrast-name edge-case tests (gaps/missing directories/readme gating).
 
 ## Regression-Risk Controls
 
-1. Characterization-first: add/green contract tests before extraction milestones.
-2. Lock/race boundary checks: explicit tests for `with self.locked()` mutation sites and RQ lock-retry paths.
-3. Persistence boundary checks: ensure in-memory updates that must persist still use `nodb_setter`/lock semantics and route/RQ mutation boundaries remain unchanged.
-4. Deterministic acceptance tests: for branches that often rely on optional GIS/tooling, use deterministic stubs/fixtures in service tests so acceptance does not rely on env-gated skips.
-5. Incremental rollback: each milestone is isolated and reversible without discarding prior validated milestones.
+1. Characterization-first: expand baseline coverage before refactor movement; never move logic without path-specific regression tests.
+2. Lock/race protections: verify all moved mutating paths retain original `with self.locked()` and `nodb_setter` boundaries; add lock retry tests where RQ writes dependency state.
+3. Persistence boundary protections: ensure any changes keep persistence ownership at current facade boundaries and do not move `dump_and_unlock` responsibilities across route/RQ layers.
+4. Env-gated skip mitigation: for paths typically gated by optional GIS/binary availability, add deterministic stub-backed non-skipped tests to prove behavior even when integration suites skip.
+5. Rollback discipline: each milestone remains independently reversible; revert only the failing milestone and rerun its gate before proceeding.
 
-## Review Process and Severity Format
+## Program Continuity: Climate Legacy Orchestration Retirement
 
-Findings format for every milestone review:
+Concrete follow-up after Omni milestones complete:
 
-- `[SEV0]` Blocker: data corruption, lock/persistence boundary break, or public facade contract break.
-- `[SEV1]` High: user-visible behavior regression in route/RQ/test contracts.
-- `[SEV2]` Medium: missing regression coverage in changed path, non-deterministic tests, or maintainability risk likely to regress.
-- `[SEV3]` Low: clarity/refactor debt without immediate behavioral risk.
+1. Retire remaining legacy orchestration branches still in `wepppy/nodb/core/climate.py` by moving mode/orchestration behavior from facade `_build_climate_*` and related `_..._impl` methods into existing collaborators:
+   `climate_build_router.py`, `climate_mode_build_services.py`, `climate_scaling_service.py`, `climate_artifact_export_service.py`, `climate_station_catalog_service.py`.
+2. Keep `Climate` facade public contracts stable for routes/RQ/tests exactly as done for Omni.
+3. Require deterministic collaborator behavior tests, not only delegation tests, for climate router/artifact/station modules.
 
-Required review artifact entry format:
+Risk if deferred:
 
-- `[SEVx] <title> | <path:line> | <observed impact> | <required fix>`.
+1. Omni and Climate drift into inconsistent facade patterns.
+2. Legacy climate branch complexity continues to hide regressions and increases change-review risk.
+3. Cross-controller maintenance remains asymmetric, slowing future NoDb controller refactors.
 
-Milestone go/no-go rule:
+Validation expectations for that cleanup:
 
-1. `NO-GO` if any unresolved SEV0/SEV1 findings.
-2. `NO-GO` if milestone validation commands fail.
-3. `NO-GO` if newly added milestone tests are env-skipped for acceptance paths that can be deterministic.
-4. `GO` only when all above are satisfied.
+    wctl run-pytest tests/nodb/test_climate_input_parser_service.py tests/nodb/test_climate_build_router_services.py tests/nodb/test_climate_scaling_service.py tests/nodb/test_climate_artifact_export_service.py tests/nodb/test_climate_station_catalog_service.py --maxfail=1
+    wctl run-pytest tests/microservices/test_rq_engine_climate_routes.py tests/microservices/test_rq_engine_upload_climate_routes.py tests/weppcloud/routes/test_climate_bp.py --maxfail=1
+    wctl run-pytest tests --maxfail=1
 
-## Concrete Steps
+Follow-up completed in this Omni plan (2026-02-20 21:14Z):
 
-Run all commands from `/workdir/wepppy`.
+1. Verified that climate continuity target work is already completed in `docs/mini-work-packages/20260220_nodb_climate_option2_facade_execplan.md` (Milestones 0-7 complete plus post-review deterministic hardening at `2026-02-20 16:19Z`).
+2. Verified that the climate plan records deterministic non-skipped collaborator evidence and full-suite validation transcripts.
+3. Recorded this Omni closeout linkage so future controller refactors can treat both Omni and Climate as Option-2-pattern-aligned baselines.
 
-1. Execute Milestone 0 characterization additions and validations.
-2. Implement Milestones 1-6 strictly in required Option-2 order.
-3. At each milestone stop, update `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective`.
-4. Execute Milestone 7 final gates, including full test suite and doc lint.
+## Review Process and Severity Gates
+
+Severity rubric:
+
+1. `SEV0`: data corruption, lock/persistence boundary break, or incompatible facade contract break.
+2. `SEV1`: route/RQ user-visible regression or broken dependency orchestration semantics.
+3. `SEV2`: missing regression tests in changed path, flaky/non-deterministic behavior, maintainability risk likely to regress.
+4. `SEV3`: non-blocking clarity/decomposition debt.
+
+Gate rule for each milestone:
+
+1. `NO-GO` on any unresolved `SEV0` or `SEV1`.
+2. `NO-GO` on failed milestone validation command.
+3. `NO-GO` when acceptance relies only on env-skipped tests for behaviors that can be deterministic.
+4. `GO` only when all above conditions pass.
 
 ## Validation and Acceptance
 
 Overall acceptance requires all of the following:
 
-1. Public Omni facade behavior remains stable across route, rq-engine, and RQ worker callsites.
+1. Public and quasi-public Omni contracts remain stable for route/RQ/test callsites.
 2. NoDb lock/mutation/persistence semantics remain unchanged.
-3. Each extracted/fixed path has targeted regression tests.
-4. Milestone go/no-go gates pass with no unresolved SEV0/SEV1 findings.
-5. Final pre-handoff gate passes:
+3. Every extracted path has targeted deterministic regression tests.
+4. Milestone severity gates pass with no unresolved `SEV0`/`SEV1` findings.
+5. Final suite gate passes:
 
-       wctl run-pytest tests --maxfail=1
+    wctl run-pytest tests --maxfail=1
 
-6. Changed docs lint gate is green:
+6. Doc lint gate passes:
 
-       wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md
+    wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md
 
 ## Idempotence and Recovery
 
-1. Milestones are intentionally incremental and independently repeatable.
-2. If a milestone fails, rollback only that milestone’s changes, keep characterization tests, and retry.
-3. Avoid multi-milestone merges without passing each milestone gate first.
+1. Milestones are intentionally incremental and independently retryable.
+2. If a milestone fails, revert only that milestone’s changes, keep characterization tests, and rerun the same gate.
+3. Do not batch multiple milestone refactors without passing each gate.
 
-## Evidence / Transcript Scaffold
+## Milestone Evidence
 
-Populate this section during execution with concise command transcripts.
+### Milestone 0 (2026-02-20 20:41Z)
 
-### Milestone 0 Evidence
+Validation:
 
-- Command: `wctl run-pytest tests/nodb/mods/test_omni.py tests/nodb/mods/test_omni_facade_contracts.py --maxfail=1`; `wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py --maxfail=1`; `wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_omni_bp_routes.py tests/weppcloud/routes/test_gl_dashboard_route.py --maxfail=1`.
-- Output summary: All commands green; characterization coverage added for facade routes/RQ/dashboard contracts.
-- Review decision (`GO`/`NO-GO`): `GO` (2026-02-20 18:04Z).
-- Findings: `[SEV2] delete_scenarios duplicate missing-name behavior preserved as characterization | tests/nodb/mods/test_omni_facade_contracts.py:189 | Existing quirk remains and could surprise callers if deduping is expected | Track separate behavior-change ticket if product wants dedupe semantics.`
-- Rollback action: Revert Milestone 0 characterization additions only if they codify unintended behavior.
+    wctl run-pytest tests/nodb/mods/test_omni_facade_contracts.py --maxfail=1
+    -> 9 passed
 
-### Milestone 1 Evidence
+    wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py --maxfail=1
+    -> 9 passed
 
-- Command: `wctl run-pytest tests/nodb/mods/test_omni_input_parser_service.py tests/nodb/mods/test_omni_facade_contracts.py --maxfail=1`; `wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py --maxfail=1`.
-- Output summary: Commands green; `parse_inputs`, `parse_scenarios`, and `_normalize_contrast_pairs` now delegate via `OmniInputParsingService` without route contract drift.
-- Review decision (`GO`/`NO-GO`): `GO` (2026-02-20 18:08Z).
-- Findings: No SEV0-SEV3 regression findings.
-- Rollback action: Revert parser delegation in `wepppy/nodb/mods/omni/omni.py` and rerun Milestone 1 validations.
+    wctl run-pytest tests/weppcloud/routes/test_omni_bp_routes.py tests/weppcloud/routes/test_gl_dashboard_route.py tests/microservices/test_rq_engine_omni_routes.py --maxfail=1
+    -> 56 passed
 
-### Milestone 2 Evidence
+Severity gate findings:
 
-- Command: `wctl run-pytest tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni.py -k "build_contrasts or contrast_status_report or dry_run" --maxfail=1`; `wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py --maxfail=1`.
-- Output summary: Commands green; facade orchestration methods delegate through `OmniBuildRouter` with unchanged build/dry-run/status contracts.
-- Review decision (`GO`/`NO-GO`): `GO` (2026-02-20 18:10Z).
-- Findings: No SEV0-SEV3 regression findings.
-- Rollback action: Re-point facade methods to in-class orchestration and keep new router tests as guardrails.
+1. None (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
 
-### Milestone 3 Evidence
+Gate decision:
 
-- Command: `wctl run-pytest tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni.py --maxfail=1`; `wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py --maxfail=1`.
-- Output summary: Commands green; mode-specific contrast and scenario branches moved into `OmniModeBuildServices` with parity retained.
-- Review decision (`GO`/`NO-GO`): `GO` (2026-02-20 18:12Z).
-- Findings: No SEV0-SEV3 regression findings.
-- Rollback action: Revert mode-service delegation while preserving Milestones 0-2.
+1. `GO` (all baseline commands passed; no unresolved `SEV0`/`SEV1`).
 
-### Milestone 4 Evidence
+### Milestone 1 (2026-02-20 20:44Z)
 
-- Command: `wctl run-pytest tests/nodb/mods/test_omni_scaling_service.py tests/nodb/mods/test_omni.py -k "contrast_limit or filters or stream_order" --maxfail=1`; `wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py -k "stream_order or limit_error" --maxfail=1`.
-- Output summary: Commands green; scaling/normalization logic delegates through `OmniScalingService` with stream-order and filter semantics intact.
-- Review decision (`GO`/`NO-GO`): `GO` (2026-02-20 18:14Z).
-- Findings: No SEV0-SEV3 regression findings.
-- Rollback action: Revert scaling delegation only and rerun milestone filters/stream-order tests.
+Validation:
 
-### Milestone 5 Evidence
+    wctl run-pytest tests/nodb/mods/test_omni_input_parser_service.py tests/nodb/mods/test_omni_facade_contracts.py --maxfail=1
+    -> 15 passed
 
-- Command: `wctl run-pytest tests/nodb/mods/test_omni_artifact_export_service.py tests/nodb/mods/test_omni.py -k "scenarios_report or contrasts_report or contrast_ids_geojson or compile_" --maxfail=1`; `wctl run-pytest tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/test_omni_report_templates.py --maxfail=1`.
-- Output summary: Commands green; report/export methods now route through `OmniArtifactExportService` with unchanged artifact contracts.
-- Review decision (`GO`/`NO-GO`): `GO` (2026-02-20 18:16Z).
-- Findings: No SEV0-SEV3 regression findings.
-- Rollback action: Revert artifact delegation and keep prior milestones/tests in place.
+    wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py -k "run_omni and scenarios" --maxfail=1
+    -> initial run failed (contract expectation mismatch in new malformed-scenarios test)
+    -> rerun after milestone-local test expectation rollback/fix: 4 passed
 
-### Milestone 6 Evidence
+Severity gate findings:
 
-- Command: `wctl run-pytest tests/nodb/mods/test_omni_station_catalog_service.py tests/nodb/mods/test_omni.py --maxfail=1`; `wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py --maxfail=1`.
-- Output summary: Commands green; station/catalog helper delegation completed in `Omni` with new service tests and RQ dependency metadata derivation regression (`tests/rq/test_omni_rq.py:171`).
-- Review decision (`GO`/`NO-GO`): `GO` (2026-02-20 18:23Z).
-- Findings: No SEV0-SEV3 regression findings.
-- Rollback action: Revert station/catalog delegation seams only (`omni_station_catalog_service.py` + `omni.py` helper wrappers) and rerun Milestone 6 validations.
+1. None (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
 
-### Milestone 7 Evidence
+Gate decision:
 
-- Command: `wctl run-pytest tests/nodb/mods/test_omni.py tests/nodb/mods/test_omni_facade_contracts.py tests/nodb/mods/test_omni_input_parser_service.py tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni_scaling_service.py tests/nodb/mods/test_omni_artifact_export_service.py tests/nodb/mods/test_omni_station_catalog_service.py --maxfail=1`; `wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_omni_bp_routes.py tests/weppcloud/routes/test_gl_dashboard_route.py --maxfail=1`.
-- Output summary: Both targeted final-gate command groups passed (`73 passed`, `68 passed`); final seam alignment included `wepppy/nodb/mods/omni/omni.pyi` updates for `_..._impl` helpers.
-- Review decision (`GO`/`NO-GO`): `GO` (2026-02-20 18:30Z).
-- Findings: `[SEV3] Build-router extraction is mostly indirection, not logic relocation | wepppy/nodb/mods/omni/omni_build_router.py:12 | Orchestration logic remains in Omni `_..._impl` methods, limiting maintainability gains | Follow-up: move orchestration bodies into `OmniBuildRouter` (or remove wrapper layer).`; `[SEV3] Artifact-export collaborator is a pass-through seam | wepppy/nodb/mods/omni/omni_artifact_export_service.py:14 | Export/report logic remains in Omni `_..._impl` methods | Follow-up: relocate export/report implementations into `OmniArtifactExportService`.`; `[SEV3] Station/catalog collaborator is a pass-through seam | wepppy/nodb/mods/omni/omni_station_catalog_service.py:12 | Scenario/path/dependency logic remains in Omni `_..._impl` methods | Follow-up: relocate station/catalog resolution implementations into `OmniStationCatalogService`.`
-- Rollback action: Revert Milestone 7-only cleanup (`omni.pyi` seam additions) if any downstream type/stub tool reports drift.
+1. `GO` (all milestone commands passing after milestone-local correction; no unresolved `SEV0`/`SEV1`).
 
-### Final Handoff Evidence
+### Milestone 2 (2026-02-20 20:50Z)
 
-- Full suite command: `wctl run-pytest tests --maxfail=1`.
-- Full suite output summary: `1863 passed, 27 skipped, 62 warnings in 328.79s (0:05:28)`.
-- Doc lint output summary: `wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md` -> `✅ 2 files validated, 0 errors, 0 warnings`.
-- Residual risks: Existing broad exception boundaries and deprecated-datetime warnings remain in untouched modules; no new SEV0/SEV1 issues introduced by this Omni Option-2 extraction. Additional SEV3 design debt remains: collaborator router/artifact/station modules are delegation seams rather than full logic owners.
+Validation:
 
-## Interfaces and Dependencies
+    wctl run-pytest tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni.py -k "dry_run or contrast_status_report or build_contrasts" --maxfail=1
+    -> initial run failed (dry-run seam regression bypassed facade monkeypatch hook)
+    -> rerun after milestone-local router fix: 14 passed
 
-Planned collaborator modules (internal only) under `wepppy/nodb/mods/omni/`:
+    wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py -k "run_omni_contrasts" --maxfail=1
+    -> 25 passed
 
-1. `omni_input_parser.py` -> `OmniInputParsingService`.
-2. `omni_build_router.py` -> `OmniBuildRouter`.
-3. `omni_mode_build_services.py` -> `OmniModeBuildServices`.
-4. `omni_scaling_service.py` -> `OmniScalingService`.
-5. `omni_artifact_export_service.py` -> `OmniArtifactExportService`.
-6. `omni_station_catalog_service.py` -> `OmniStationCatalogService`.
+Severity gate findings:
 
-Facade wiring convention in `wepppy/nodb/mods/omni/omni.py`:
+1. None (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
 
-1. Keep `Omni` class as public entrypoint.
-2. Add module-level collaborator singletons (mirroring the climate Option-2 pattern) to preserve monkeypatch seams and avoid API churn.
-3. Keep failures explicit and logged; avoid silent fallback wrappers.
+Gate decision:
 
-Revision Note (2026-02-20 17:58Z, Codex): Created ad hoc ExecPlan for the Omni Option-2 facade refactor with required extraction sequence, test-gap closure plan, per-milestone review/rollback gates, final full-suite gate, doc-lint gate, and evidence scaffold.
-Revision Note (2026-02-20 18:40Z, Codex): Executed Milestones 0-7 end-to-end; updated living sections (`Progress`, `Surprises & Discoveries`, `Decision Log`, `Outcomes & Retrospective`) and populated evidence, severity gates, go/no-go outcomes, and rollback actions for each milestone.
-Revision Note (2026-02-20 19:44Z, Codex): Integrated external review findings and assumptions; preserved `GO` with explicit SEV3 collaborator-decomposition follow-up notes in Milestone 7 and residual risk tracking.
+1. `GO` (all milestone commands passing after seam-compatibility correction; no unresolved `SEV0`/`SEV1`).
+
+### Milestone 3 (2026-02-20 20:53Z)
+
+Validation:
+
+    wctl run-pytest tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni.py -k "scenario_mode or stream_order or user_defined" --maxfail=1
+    -> 20 passed
+
+    wctl run-pytest tests/rq/test_omni_rq.py --maxfail=1
+    -> 7 passed
+
+Severity gate findings:
+
+1. None (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
+
+Gate decision:
+
+1. `GO` (all milestone commands passed; no unresolved `SEV0`/`SEV1`).
+
+### Milestone 4 (2026-02-20 20:54Z)
+
+Validation:
+
+    wctl run-pytest tests/nodb/mods/test_omni_scaling_service.py tests/nodb/mods/test_omni.py -k "hillslope_limit or filters or order_reduction" --maxfail=1
+    -> 8 passed
+
+    wctl run-pytest tests/rq/test_omni_rq.py -k "dependency or contrast" --maxfail=1
+    -> 4 passed
+
+Severity gate findings:
+
+1. None (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
+
+Gate decision:
+
+1. `GO` (all milestone commands passed; no unresolved `SEV0`/`SEV1`).
+
+### Milestone 5 (2026-02-20 20:59Z)
+
+Validation:
+
+    wctl run-pytest tests/nodb/mods/test_omni_artifact_export_service.py tests/nodb/mods/test_omni.py -k "report or compile or contrast_ids_geojson" --maxfail=1
+    -> 13 passed
+
+    wctl run-pytest tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/test_omni_report_templates.py --maxfail=1
+    -> 6 passed
+
+Severity gate findings:
+
+1. None (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
+
+Gate decision:
+
+1. `GO` (all milestone commands passed; no unresolved `SEV0`/`SEV1`).
+
+### Milestone 6 (2026-02-20 21:06Z)
+
+Validation:
+
+    wctl run-pytest tests/nodb/mods/test_omni_station_catalog_service.py tests/nodb/mods/test_omni.py -k "scenario_key or dependency or landuse_skip" --maxfail=1
+    -> 3 passed, 51 deselected
+
+    wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py --maxfail=1
+    -> 11 passed
+
+Severity gate findings:
+
+1. None (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
+
+Gate decision:
+
+1. `GO` (all milestone commands passed; no unresolved `SEV0`/`SEV1`).
+
+### Milestone 7 (2026-02-20 21:14Z)
+
+Validation:
+
+    wctl run-pytest tests/nodb/mods/test_omni.py tests/nodb/mods/test_omni_facade_contracts.py tests/nodb/mods/test_omni_input_parser_service.py tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni_scaling_service.py tests/nodb/mods/test_omni_artifact_export_service.py tests/nodb/mods/test_omni_station_catalog_service.py --maxfail=1
+    -> initial run failed (`test_build_router_sets_contrast_inputs_inside_lock_scope` expectation mismatch)
+    -> rerun after milestone-local test correction: 100 passed
+
+    wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_path_ce_rq.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_omni_bp_routes.py tests/weppcloud/routes/test_gl_dashboard_route.py --maxfail=1
+    -> 72 passed
+
+    wctl run-pytest tests --maxfail=1
+    -> 1894 passed, 27 skipped
+
+    wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md
+    -> 2 files validated, 0 errors, 0 warnings
+
+Severity gate findings:
+
+1. None (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
+
+Gate decision:
+
+1. `GO` (all milestone and pre-handoff validation commands passed after milestone-local correction; no unresolved `SEV0`/`SEV1`).
+
+### Post-Review Remediation (2026-02-20 22:03Z)
+
+Validation:
+
+    wctl run-pytest tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni.py -k "dry_run or contrast_status_report or build_contrasts" --maxfail=1
+    -> 16 passed, 40 deselected
+
+    wctl run-pytest tests/nodb/mods/test_omni_station_catalog_service.py tests/nodb/mods/test_omni.py -k "scenario_key or dependency or landuse_skip" --maxfail=1
+    -> 3 passed, 52 deselected
+
+    wctl run-pytest tests/nodb/mods/test_omni_build_router_service.py tests/nodb/mods/test_omni_station_catalog_service.py --maxfail=1
+    -> 21 passed
+
+Severity gate findings:
+
+1. No remaining review SEV2 findings in targeted paths (`SEV0`: none, `SEV1`: none, `SEV2`: none, `SEV3`: none).
+
+Gate decision:
+
+1. `GO` (all remediation validation commands passed; seam and exception-observability regressions closed).
+
+Revision Note (2026-02-20 20:32Z, Codex): Replaced prior completed-state Omni plan with a fresh planning-only ExecPlan per request, including required Option-2 milestone mapping, test-gap closure plan, severity gates, rollback strategy, and climate continuity follow-up guidance.
+Revision Note (2026-02-20 20:41Z, Codex): Completed Milestone 0 baseline execution, recorded gate evidence/GO decision, and updated living sections to reflect current execution state.
+Revision Note (2026-02-20 20:44Z, Codex): Completed Milestone 1 parser regression hardening, including milestone-local gate retry and final GO evidence.
+Revision Note (2026-02-20 20:50Z, Codex): Completed Milestone 2 router/orchestrator hardening with collaborator-owned status matrix coverage and seam-preserving dry-run behavior.
+Revision Note (2026-02-20 20:53Z, Codex): Completed Milestone 3 mode-service hardening with deterministic treatment-mapping and stream-order rebuild-path tests.
+Revision Note (2026-02-20 20:54Z, Codex): Completed Milestone 4 scaling hardening with explicit malformed-input and order-reduction rerun regressions.
+Revision Note (2026-02-20 20:59Z, Codex): Completed Milestone 5 artifact hardening with collaborator-owned report compilation logic and deterministic artifact regression coverage.
+Revision Note (2026-02-20 21:06Z, Codex): Completed Milestone 6 station/catalog extraction hardening with collaborator-owned helper implementations plus targeted RQ helper-output regressions.
+Revision Note (2026-02-20 21:14Z, Codex): Completed Milestone 7 final gates, recorded milestone-local correction evidence, and completed climate continuity follow-up linkage.
+Revision Note (2026-02-20 22:03Z, Codex): Applied review follow-ups for singleton seam fidelity and station loader exception observability, with deterministic regression coverage and passing targeted gates.

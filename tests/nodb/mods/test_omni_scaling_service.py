@@ -134,3 +134,59 @@ def test_apply_advanced_filters_applies_topaz_slope_and_burn_filters(
 
     assert [item.topaz_id for item in filtered] == ["102", "103"]
     assert total == 17.0
+
+
+def test_apply_advanced_filters_rejects_unknown_burn_class(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniScalingService()
+    omni = _DummyOmni(tmp_path)
+
+    class DummyWatershed:
+        @staticmethod
+        def hillslope_slope(topaz_id: str) -> float:
+            return 0.4
+
+    class DummyLanduse:
+        @staticmethod
+        def identify_burn_class(topaz_id: str) -> str:
+            return "Extreme"
+
+    import wepppy.nodb.core as nodb_core
+
+    monkeypatch.setattr(nodb_core.Landuse, "getInstance", lambda wd: DummyLanduse())
+
+    records = [omni_module.ObjectiveParameter("101", "201", 10.0)]
+
+    with pytest.raises(ValueError, match="Unknown burn class"):
+        service.apply_advanced_filters(
+            omni,
+            watershed=DummyWatershed(),
+            control_scenario="uniform_high",
+            obj_param_descending=records,
+            contrast_hill_min_slope=None,
+            contrast_hill_max_slope=None,
+            contrast_select_burn_severities={1},
+            contrast_select_topaz_ids=None,
+        )
+
+
+def test_normalize_filter_inputs_rejects_malformed_numeric_values() -> None:
+    service = OmniScalingService()
+
+    with pytest.raises(ValueError, match="must be a number"):
+        service.normalize_filter_inputs(
+            contrast_hill_min_slope="not-a-number",
+            contrast_hill_max_slope=None,
+            contrast_select_burn_severities=None,
+            contrast_select_topaz_ids=None,
+        )
+
+    with pytest.raises(ValueError, match="entries must be integers"):
+        service.normalize_filter_inputs(
+            contrast_hill_min_slope=None,
+            contrast_hill_max_slope=None,
+            contrast_select_burn_severities="1,2,bad",
+            contrast_select_topaz_ids=None,
+        )
