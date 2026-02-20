@@ -235,6 +235,10 @@ def _queue_ref_from_enqueue_wrapper(call: ast.Call) -> str | None:
     return None
 
 
+def _queue_name_expr_from_enqueue_wrapper(call: ast.Call) -> ast.AST | None:
+    return _keyword_value(call, "queue_name")
+
+
 def _enqueue_log_complete_target_expr(call: ast.Call) -> ast.AST:
     tasks_expr = _keyword_value(call, "tasks")
     if tasks_expr is None:
@@ -303,6 +307,7 @@ def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
         stage = _extract_stage_from_meta_key(key_expr) if key_expr is not None else None
         return {
             "queue_ref": _queue_ref_from_enqueue_wrapper(call),
+            "queue_name_expr": _queue_name_expr_from_enqueue_wrapper(call),
             "target_expr": _keyword_value(call, "func"),
             "depends_on_expr": _keyword_value(call, "depends_on"),
             "method": "enqueue_wrapper",
@@ -311,6 +316,7 @@ def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
     if function_name == "enqueue_log_complete":
         return {
             "queue_ref": _queue_ref_from_enqueue_wrapper(call),
+            "queue_name_expr": _queue_name_expr_from_enqueue_wrapper(call),
             "target_expr": _enqueue_log_complete_target_expr(call),
             "depends_on_expr": _keyword_value(call, "depends_on"),
             "method": "enqueue_log_complete_wrapper",
@@ -533,6 +539,14 @@ def _extract_append_event_data(call: ast.Call) -> dict[str, Any] | None:
     }
 
 
+def _queue_name_from_expr(node: ast.AST, queue_bindings: dict[str, str]) -> str:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.Name):
+        return queue_bindings.get(node.id, node.id)
+    return _expr_text(node)
+
+
 def _group_events(events: list[_Event]) -> dict[str, list[_Event]]:
     grouped: dict[str, list[_Event]] = {}
     for event in events:
@@ -604,7 +618,10 @@ def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRe
 
                 queue_name = "unknown"
                 queue_ref = event.data.get("queue_ref")
-                if queue_ref is not None:
+                queue_name_expr = event.data.get("queue_name_expr")
+                if isinstance(queue_name_expr, ast.AST):
+                    queue_name = _queue_name_from_expr(queue_name_expr, queue_bindings)
+                elif queue_ref is not None:
                     queue_name = queue_bindings.get(queue_ref, "default")
 
                 target, target_notes = _target_label(target_expr, aliases)

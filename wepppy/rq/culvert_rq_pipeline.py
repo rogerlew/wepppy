@@ -30,7 +30,9 @@ def _enqueue(
     timeout: Any = None,
     depends_on: Any = None,
     child_meta: Optional[dict[str, Any]] = None,
+    queue_name: str | None = None,
 ) -> Job:
+    del queue_name
     child_job = q.enqueue_call(
         func=func,
         args=args,
@@ -67,6 +69,7 @@ def enqueue_culvert_batch_jobs(
             func=tasks.run_culvert_run_rq,
             args=(runid, culvert_batch_uuid, run_id),
             timeout=timeout,
+            queue_name="batch",
             child_meta={
                 "runid": runid,
                 "culvert_batch_uuid": culvert_batch_uuid,
@@ -84,8 +87,8 @@ def enqueue_culvert_batch_jobs(
         func=tasks._final_culvert_batch_complete_rq,
         args=(culvert_batch_uuid,),
         timeout=timeout,
+        queue_name="batch",
         depends_on=child_jobs if child_jobs else None,
         child_meta={"culvert_batch_uuid": culvert_batch_uuid},
     )
     return final_job, queued_jobs
-

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
@@ -7,6 +8,8 @@ import redis
 
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.topo.watershed_collection import WatershedFeature
+
+logger: logging.Logger
 
 def _write_run_metadata(path: Path, payload: dict[str, Any]) -> None: ...
 
@@ -50,4 +53,3 @@ def _write_runs_manifest(
 ) -> Path: ...
 
 def _write_run_skeletons_zip(batch_root: Path) -> Path: ...
-

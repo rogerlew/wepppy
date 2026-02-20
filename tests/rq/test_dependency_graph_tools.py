@@ -212,6 +212,23 @@ def test_dependency_graph_extractor_includes_culvert_batch_edges_for_pipeline_mo
 
     edges = extract_dependency_edges(repo_root=repo_root, source_files=[source_file])
 
+    run_edge = next(
+        edge
+        for edge in edges
+        if edge["source_function"] == "enqueue_culvert_batch_jobs"
+        and edge["job_meta_stage"] == "jobs:0"
+        and edge["enqueue_target"] == "tasks.run_culvert_run_rq"
+    )
+    final_edge = next(
+        edge
+        for edge in edges
+        if edge["source_function"] == "enqueue_culvert_batch_jobs"
+        and edge["job_meta_stage"] == "jobs:1"
+        and edge["enqueue_target"] == "tasks._final_culvert_batch_complete_rq"
+    )
+
+    assert run_edge["queue_name"] == "batch"
+    assert final_edge["queue_name"] == "batch"
     assert any(
         edge["source_function"] == "enqueue_culvert_batch_jobs"
         and edge["job_meta_stage"] == "jobs:0"
