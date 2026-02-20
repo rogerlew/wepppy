@@ -355,25 +355,25 @@
   },
   {
     "depends_on": [],
-    "enqueue_target": "run_culvert_run_rq",
+    "enqueue_target": "tasks.run_culvert_run_rq",
     "job_meta_stage": "jobs:0",
     "notes": [],
-    "queue_name": "batch",
-    "source_function": "run_culvert_batch_rq",
-    "source_lineno": 284,
-    "source_module": "wepppy/rq/culvert_rq.py"
+    "queue_name": "default",
+    "source_function": "enqueue_culvert_batch_jobs",
+    "source_lineno": 63,
+    "source_module": "wepppy/rq/culvert_rq_pipeline.py"
   },
   {
     "depends_on": [
-      "run_culvert_run_rq"
+      "tasks.run_culvert_run_rq"
     ],
-    "enqueue_target": "_final_culvert_batch_complete_rq",
+    "enqueue_target": "tasks._final_culvert_batch_complete_rq",
     "job_meta_stage": "jobs:1",
     "notes": [],
-    "queue_name": "batch",
-    "source_function": "run_culvert_batch_rq",
-    "source_lineno": 301,
-    "source_module": "wepppy/rq/culvert_rq.py"
+    "queue_name": "default",
+    "source_function": "enqueue_culvert_batch_jobs",
+    "source_lineno": 80,
+    "source_module": "wepppy/rq/culvert_rq_pipeline.py"
   },
   {
     "depends_on": [],

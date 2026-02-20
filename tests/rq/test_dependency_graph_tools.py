@@ -206,6 +206,26 @@ def test_dependency_graph_extractor_includes_jobs6_edges_for_wepp_pipeline_modul
     )
 
 
+def test_dependency_graph_extractor_includes_culvert_batch_edges_for_pipeline_module() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    source_file = repo_root / "wepppy" / "rq" / "culvert_rq_pipeline.py"
+
+    edges = extract_dependency_edges(repo_root=repo_root, source_files=[source_file])
+
+    assert any(
+        edge["source_function"] == "enqueue_culvert_batch_jobs"
+        and edge["job_meta_stage"] == "jobs:0"
+        and edge["enqueue_target"] == "tasks.run_culvert_run_rq"
+        for edge in edges
+    )
+    assert any(
+        edge["source_function"] == "enqueue_culvert_batch_jobs"
+        and edge["job_meta_stage"] == "jobs:1"
+        and edge["enqueue_target"] == "tasks._final_culvert_batch_complete_rq"
+        for edge in edges
+    )
+
+
 def test_dependency_graph_extractor_normalizes_dynamic_stage_keys(tmp_path: Path) -> None:
     source_file = tmp_path / "wepppy" / "rq" / "sample_dynamic.py"
     source_file.parent.mkdir(parents=True)
