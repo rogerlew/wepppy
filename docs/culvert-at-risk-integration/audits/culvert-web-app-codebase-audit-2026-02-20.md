@@ -1,9 +1,9 @@
 # Culvert_web_app Codebase Audit (Dev Clone)
 
 Date: 2026-02-20  
-Repository reviewed: `https://github.com/SouravDSGit/Culvert_web_app/`
-Author: Roger Lew, GPT-5.3-codex, Claude Opus 4.6
-Audit target: barriers/challenges to scaling and incorporating new models
+Repository reviewed: `https://github.com/SouravDSGit/Culvert_web_app/`  
+Author: Roger Lew, GPT-5.3-codex, Claude Opus 4.6  
+Audit target: barriers/challenges to scaling and incorporating new models. 
 
 ## Executive conclusion
 
