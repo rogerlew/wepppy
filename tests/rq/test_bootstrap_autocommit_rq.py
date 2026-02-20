@@ -7,26 +7,29 @@ import pytest
 
 import wepppy.rq.swat_rq as swat_rq
 import wepppy.rq.wepp_rq as wepp_rq
-import wepppy.rq.wepp_rq_stage_finalize as stage_finalize
 
 pytestmark = pytest.mark.unit
 
 
 def _stub_log_complete_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(stage_finalize, "get_current_job", lambda: SimpleNamespace(id="job-1"))
-    monkeypatch.setattr(stage_finalize, "get_wd", lambda runid: "/tmp/run")
-    monkeypatch.setattr(stage_finalize.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(wepp_rq, "get_current_job", lambda: SimpleNamespace(id="job-1"))
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
     monkeypatch.setattr(
-        stage_finalize.RedisPrep,
+        wepp_rq.RedisPrep,
         "getInstance",
         lambda wd: SimpleNamespace(timestamp=lambda task: None),
     )
     monkeypatch.setattr(
-        stage_finalize.Ron,
+        wepp_rq.Ron,
         "getInstance",
         lambda wd: SimpleNamespace(name="", scenario="", config_stem="cfg"),
     )
     monkeypatch.setattr(wepp_rq, "send_discord_message", None)
+
+
+def _stub_log_complete_dependencies_via_wepp_rq(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_log_complete_dependencies(monkeypatch)
 
 
 def _stub_rq_queue(monkeypatch: pytest.MonkeyPatch, module) -> list[dict[str, object]]:
@@ -90,7 +93,7 @@ def test_log_complete_skips_autocommit_by_default(monkeypatch: pytest.MonkeyPatc
     def _unexpected_get_instance(_wd: str):
         raise AssertionError("Wepp.getInstance should not be called when auto-commit is disabled")
 
-    monkeypatch.setattr(stage_finalize.Wepp, "getInstance", _unexpected_get_instance)
+    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", _unexpected_get_instance)
 
     wepp_rq._log_complete_rq("ab-run")
 
@@ -100,22 +103,22 @@ def test_log_complete_autocommits_when_enabled(monkeypatch: pytest.MonkeyPatch) 
     stages: list[str] = []
     released_tokens: list[str] = []
     monkeypatch.setattr(
-        stage_finalize.Wepp,
+        wepp_rq.Wepp,
         "getInstance",
         lambda wd: SimpleNamespace(
             bootstrap_commit_inputs=lambda stage: stages.append(stage),
             logger=SimpleNamespace(warning=lambda *args, **kwargs: None),
         ),
     )
-    monkeypatch.setattr(stage_finalize, "redis_connection_kwargs", lambda _db: {})
-    monkeypatch.setattr(stage_finalize.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **kwargs: DummyRedis())
     monkeypatch.setattr(
-        stage_finalize,
+        wepp_rq,
         "acquire_bootstrap_git_lock",
         lambda *args, **kwargs: SimpleNamespace(token="lock-1"),
     )
     monkeypatch.setattr(
-        stage_finalize,
+        wepp_rq,
         "release_bootstrap_git_lock",
         lambda _redis_conn, *, runid, token: released_tokens.append(token) or True,
     )
@@ -135,16 +138,16 @@ def test_log_complete_skips_autocommit_when_git_lock_busy(monkeypatch: pytest.Mo
     stages: list[str] = []
     warnings: list[str] = []
     monkeypatch.setattr(
-        stage_finalize.Wepp,
+        wepp_rq.Wepp,
         "getInstance",
         lambda wd: SimpleNamespace(
             bootstrap_commit_inputs=lambda stage: stages.append(stage),
             logger=SimpleNamespace(warning=lambda message, *_args: warnings.append(str(message))),
         ),
     )
-    monkeypatch.setattr(stage_finalize, "redis_connection_kwargs", lambda _db: {})
-    monkeypatch.setattr(stage_finalize.redis, "Redis", lambda **kwargs: DummyRedis())
-    monkeypatch.setattr(stage_finalize, "acquire_bootstrap_git_lock", lambda *args, **kwargs: None)
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(wepp_rq, "acquire_bootstrap_git_lock", lambda *args, **kwargs: None)
 
     wepp_rq._log_complete_rq(
         "ab-run",
@@ -155,6 +158,67 @@ def test_log_complete_skips_autocommit_when_git_lock_busy(monkeypatch: pytest.Mo
     assert stages == []
     assert warnings
     assert "bootstrap lock busy" in warnings[-1].lower()
+
+
+def test_log_complete_autocommit_legacy_wepp_rq_patch_points_remain_compatible(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_log_complete_dependencies_via_wepp_rq(monkeypatch)
+    stages: list[str] = []
+    released_tokens: list[str] = []
+    monkeypatch.setattr(
+        wepp_rq.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            bootstrap_commit_inputs=lambda stage: stages.append(stage),
+            logger=SimpleNamespace(warning=lambda *args, **kwargs: None),
+        ),
+    )
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **_kwargs: DummyRedis())
+    monkeypatch.setattr(
+        wepp_rq,
+        "acquire_bootstrap_git_lock",
+        lambda *args, **kwargs: SimpleNamespace(token="lock-1"),
+    )
+    monkeypatch.setattr(
+        wepp_rq,
+        "release_bootstrap_git_lock",
+        lambda _redis_conn, *, runid, token: released_tokens.append(token) or True,
+    )
+
+    wepp_rq._log_complete_rq(
+        "ab-run",
+        auto_commit_inputs=True,
+        commit_stage="WEPP pipeline",
+    )
+
+    assert stages == ["WEPP pipeline"]
+    assert released_tokens == ["lock-1"]
+
+
+def test_log_complete_logs_when_redisprep_is_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_log_complete_dependencies(monkeypatch)
+    log_messages: list[str] = []
+    monkeypatch.setattr(
+        wepp_rq.RedisPrep,
+        "getInstance",
+        lambda _wd: (_ for _ in ()).throw(FileNotFoundError("missing prep")),
+    )
+    monkeypatch.setattr(
+        wepp_rq._stage_finalize._LOGGER,
+        "info",
+        lambda message, *_args: log_messages.append(str(message)),
+    )
+    monkeypatch.setattr(
+        wepp_rq.Ron,
+        "getInstance",
+        lambda _wd: SimpleNamespace(name="", scenario="", config_stem="cfg"),
+    )
+
+    wepp_rq._log_complete_rq("ab-run")
+
+    assert any("Skipping run_wepp_watershed prep timestamp" in msg for msg in log_messages)
 
 
 def test_standard_watershed_enqueue_sets_autocommit(monkeypatch: pytest.MonkeyPatch) -> None:

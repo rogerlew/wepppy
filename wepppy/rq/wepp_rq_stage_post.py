@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 import os
 import shutil
 import time
@@ -36,6 +37,7 @@ from . import wepp_rq_dss as _dss_helpers
 _cleanup_dss_export_dir = _dss_helpers._cleanup_dss_export_dir
 _copy_dss_readme = _dss_helpers._copy_dss_readme
 _write_dss_channel_geojson = _dss_helpers._write_dss_channel_geojson
+_LOGGER = logging.getLogger(__name__)
 
 
 def _post_run_cleanup_out_rq(runid: str) -> None:
@@ -401,7 +403,10 @@ def post_dss_export_rq(runid: str) -> None:
             prep = RedisPrep.getInstance(wd)
             prep.timestamp(TaskEnum.dss_export)
         except FileNotFoundError:
-            pass
+            _LOGGER.info(
+                "Skipping dss_export prep timestamp for %s: RedisPrep is unavailable",
+                runid,
+            )
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   dss_export DSS_EXPORT_TASK_COMPLETED')
 

@@ -26,6 +26,22 @@ from wepppy.config.redis_settings import (
 )
 
 from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.io_wait import wait_for_path, wait_for_paths
+from wepppy.nodir.errors import nodir_mixed_state
+from wepppy.nodir.fs import resolve
+from wepppy.nodir.projections import with_root_projection
+from wepppy.export.prep_details import (
+    export_channels_prep_details,
+    export_hillslopes_prep_details,
+)
+from wepppy.query_engine.activate import activate_query_engine
+from wepppy.wepp.interchange import (
+    generate_interchange_documentation,
+    run_wepp_hillslope_interchange,
+    run_wepp_watershed_interchange,
+    run_wepp_watershed_tc_out_interchange,
+)
+from wepppy.wepp.interchange.dss_dates import parse_dss_date
 
 try:
     from wepp_runner import (
@@ -53,6 +69,8 @@ else:
     _WEPP_RUNNER_IMPORT_ERROR = None
 
 from wepppy.nodb.core import *
+from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.exception_logging import with_exception_logging
@@ -64,6 +82,7 @@ from . import wepp_rq_stage_post as _stage_post
 from . import wepp_rq_stage_prep as _stage_prep
 from wepppy.rq.swat_rq import _build_swat_inputs_rq, _run_swat_rq
 from wepppy.weppcloud.bootstrap.git_lock import (
+    acquire_bootstrap_git_lock,
     clear_bootstrap_enable_job_id,
     release_bootstrap_git_lock,
 )
@@ -92,15 +111,71 @@ _SINGLE_STORM_DEPRECATED_MESSAGE = _stage_helpers.SINGLE_STORM_DEPRECATED_MESSAG
 _NODIR_RECOVERY_ROOTS = _stage_helpers.NODIR_RECOVERY_ROOTS
 
 
+def _sync_stage_helpers_compat() -> None:
+    # Preserve monkeypatch compatibility for legacy tests/callers patching
+    # `wepp_rq` internals directly.
+    _stage_helpers.nodir_mixed_state = nodir_mixed_state
+    _stage_helpers.resolve = resolve
+    _stage_helpers.with_root_projection = with_root_projection
+
+
+def _sync_stage_prep_compat() -> None:
+    _sync_stage_helpers_compat()
+    _stage_prep.get_current_job = get_current_job
+    _stage_prep.get_wd = get_wd
+    _stage_prep.StatusMessenger = StatusMessenger
+    _stage_prep.Wepp = Wepp
+    _stage_prep.Watershed = Watershed
+    _stage_prep.Disturbed = Disturbed
+
+
+def _sync_stage_post_compat() -> None:
+    _stage_post.get_current_job = get_current_job
+    _stage_post.get_wd = get_wd
+    _stage_post.StatusMessenger = StatusMessenger
+    _stage_post.wait_for_path = wait_for_path
+    _stage_post.wait_for_paths = wait_for_paths
+    _stage_post.Climate = Climate
+    _stage_post.ClimateMode = ClimateMode
+    _stage_post.Wepp = Wepp
+    _stage_post.RedisPrep = RedisPrep
+    _stage_post.TaskEnum = TaskEnum
+    _stage_post.activate_query_engine = activate_query_engine
+    _stage_post.generate_interchange_documentation = generate_interchange_documentation
+    _stage_post.run_wepp_hillslope_interchange = run_wepp_hillslope_interchange
+    _stage_post.run_wepp_watershed_interchange = run_wepp_watershed_interchange
+    _stage_post.run_wepp_watershed_tc_out_interchange = run_wepp_watershed_tc_out_interchange
+    _stage_post.parse_dss_date = parse_dss_date
+    _stage_post._cleanup_dss_export_dir = _cleanup_dss_export_dir
+    _stage_post._copy_dss_readme = _copy_dss_readme
+    _stage_post._write_dss_channel_geojson = _write_dss_channel_geojson
+
+
+def _sync_stage_finalize_compat() -> None:
+    _stage_finalize.get_current_job = get_current_job
+    _stage_finalize.get_wd = get_wd
+    _stage_finalize.StatusMessenger = StatusMessenger
+    _stage_finalize.RedisPrep = RedisPrep
+    _stage_finalize.TaskEnum = TaskEnum
+    _stage_finalize.Ron = Ron
+    _stage_finalize.Wepp = Wepp
+    _stage_finalize.redis_connection_kwargs = redis_connection_kwargs
+    _stage_finalize.redis = redis
+    _stage_finalize.acquire_bootstrap_git_lock = acquire_bootstrap_git_lock
+    _stage_finalize.release_bootstrap_git_lock = release_bootstrap_git_lock
+
+
 def _recover_mixed_nodir_roots(
     wd: str,
     *,
     roots: Iterable[str] = _NODIR_RECOVERY_ROOTS,
 ) -> tuple[str, ...]:
+    _sync_stage_helpers_compat()
     return _stage_helpers.recover_mixed_nodir_roots(wd, roots=roots)
 
 
 def _assert_supported_climate(climate: Climate) -> None:
+    _sync_stage_helpers_compat()
     _stage_helpers.assert_supported_climate(climate)
 
 
@@ -110,6 +185,7 @@ def _with_stage_read_projections(
     roots: tuple[str, ...],
     purpose: str,
 ):
+    _sync_stage_helpers_compat()
     return _stage_helpers.with_stage_read_projections(
         wd,
         roots=roots,
@@ -615,98 +691,118 @@ def run_wepp_watershed_noprep_rq(runid: str) -> Job:
 
 @with_exception_logging
 def _prep_multi_ofe_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._prep_multi_ofe_rq(runid)
 
 
 @with_exception_logging
 def _prep_slopes_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._prep_slopes_rq(runid)
 
 
 @with_exception_logging
 def _run_hillslopes_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._run_hillslopes_rq(runid)
 
 
 @with_exception_logging
 def _run_flowpaths_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._run_flowpaths_rq(runid)
 
 
 @with_exception_logging
 def _prep_managements_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._prep_managements_rq(runid)
 
 
 @with_exception_logging
 def _prep_soils_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._prep_soils_rq(runid)
 
 
 @with_exception_logging
 def _prep_climates_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._prep_climates_rq(runid)
 
 
 @with_exception_logging
 def _prep_remaining_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._prep_remaining_rq(runid)
 
 
 @with_exception_logging
 def _prep_watershed_rq(runid: str) -> None:
+    _sync_stage_prep_compat()
     return _stage_prep._prep_watershed_rq(runid)
 
 @with_exception_logging
 def _post_run_cleanup_out_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._post_run_cleanup_out_rq(runid)
 
 
 @with_exception_logging
 def _analyze_return_periods_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._analyze_return_periods_rq(runid)
 
 @with_exception_logging
 def _build_hillslope_interchange_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._build_hillslope_interchange_rq(runid)
 
 @with_exception_logging
 def _build_totalwatsed3_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._build_totalwatsed3_rq(runid)
 
 
 @with_exception_logging
 def _run_hillslope_watbal_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._run_hillslope_watbal_rq(runid)
 
 
 @with_exception_logging
 def _post_prep_details_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._post_prep_details_rq(runid)
 
 @with_exception_logging
 def _post_watershed_interchange_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._post_watershed_interchange_rq(runid)
 
 
 @with_exception_logging
 def _post_legacy_arc_export_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._post_legacy_arc_export_rq(runid)
 
 
 @with_exception_logging
 def _post_gpkg_export_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._post_gpkg_export_rq(runid)
 
 
 @with_exception_logging
 def post_dss_export_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post.post_dss_export_rq(runid)
 
 
 
 @with_exception_logging
 def _post_make_loss_grid_rq(runid: str) -> None:
+    _sync_stage_post_compat()
     return _stage_post._post_make_loss_grid_rq(runid)
 
 
@@ -716,6 +812,7 @@ def _log_complete_rq(
     auto_commit_inputs: bool = False,
     commit_stage: str = "WEPP pipeline",
 ) -> None:
+    _sync_stage_finalize_compat()
     return _stage_finalize._log_complete_rq(
         runid,
         auto_commit_inputs=auto_commit_inputs,

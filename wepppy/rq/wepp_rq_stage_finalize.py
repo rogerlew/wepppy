@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 from typing import Callable
 
 import redis
@@ -21,6 +22,8 @@ try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
 except (ModuleNotFoundError, ImportError):
     send_discord_message = None
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _bootstrap_autocommit_actor(job: Job | None) -> str:
@@ -67,7 +70,10 @@ def _log_complete_rq(
             prep = RedisPrep.getInstance(wd)
             prep.timestamp(TaskEnum.run_wepp_watershed)
         except FileNotFoundError:
-            pass
+            _LOGGER.info(
+                "Skipping run_wepp_watershed prep timestamp for %s: RedisPrep is unavailable",
+                runid,
+            )
 
         if auto_commit_inputs:
             wepp = Wepp.getInstance(wd)
