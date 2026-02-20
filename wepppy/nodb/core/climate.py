@@ -128,6 +128,13 @@ from wepppyo3.climate import rust_cli_p_scale as pyo3_cli_p_scale
 from wepppyo3.climate import rust_cli_p_scale_monthlies as pyo3_cli_p_scale_monthlies
 from wepppyo3.climate import rust_cli_p_scale_annual_monthlies as pyo3_cli_p_scale_annual_monthlies
 
+from wepppy.nodb.core.climate_artifact_export_service import ClimateArtifactExportService
+from wepppy.nodb.core.climate_build_router import ClimateBuildRouter
+from wepppy.nodb.core.climate_input_parser import ClimateInputParsingService
+from wepppy.nodb.core.climate_mode_build_services import ClimateModeBuildServices
+from wepppy.nodb.core.climate_scaling_service import ClimateScalingService
+from wepppy.nodb.core.climate_station_catalog_service import ClimateStationCatalogService
+
 __all__ = [
     'lng_lat_to_pixel_center',
     'daymet_pixel_center',
@@ -250,6 +257,17 @@ CLIMATE_MAX_YEARS = 1000
 
 if NCPU > 24:
     NCPU = 24
+
+_CLIMATE_INPUT_PARSER = ClimateInputParsingService()
+_CLIMATE_MODE_BUILD_SERVICES = ClimateModeBuildServices()
+_CLIMATE_SCALING_SERVICE = ClimateScalingService()
+_CLIMATE_ARTIFACT_EXPORT_SERVICE = ClimateArtifactExportService()
+_CLIMATE_STATION_CATALOG_SERVICE = ClimateStationCatalogService()
+_CLIMATE_BUILD_ROUTER = ClimateBuildRouter(
+    mode_build_services=_CLIMATE_MODE_BUILD_SERVICES,
+    scaling_service=_CLIMATE_SCALING_SERVICE,
+    artifact_export_service=_CLIMATE_ARTIFACT_EXPORT_SERVICE,
+)
 
 
 def _format_par_line(label: str, values: List[float]) -> str:
@@ -1332,32 +1350,17 @@ class Climate(NoDbBase):
         return json.dumps(self.climatestation_mode is not ClimateStationMode.FindClosestAtRuntime)
 
     def available_catalog_datasets(self, include_hidden: bool = False) -> List[Any]:
-        from wepppy.nodb.locales import available_climate_datasets
-
-        locales = self.locales or ()
-        mods = self.ron_instance.mods or []
-        datasets = available_climate_datasets(locales, mods, include_hidden=include_hidden)
-        return datasets
+        return _CLIMATE_STATION_CATALOG_SERVICE.available_catalog_datasets(
+            self, include_hidden=include_hidden
+        )
 
     def catalog_datasets_payload(self, include_hidden: bool = False) -> List[Dict[str, Any]]:
         return [dataset.to_mapping() for dataset in self.available_catalog_datasets(include_hidden=include_hidden)]
 
     def _resolve_catalog_dataset(self, catalog_id: str, include_hidden: bool = False) -> Optional[Any]:
-        from wepppy.nodb.locales import get_climate_dataset
-
-        if catalog_id is None:
-            return None
-
-        dataset = get_climate_dataset(catalog_id)
-        if dataset is None:
-            return None
-
-        locales = self.locales or ()
-        mods = self.ron_instance.mods or []
-        if not dataset.is_allowed_for(locales, mods, include_hidden=include_hidden):
-            return None
-
-        return dataset
+        return _CLIMATE_STATION_CATALOG_SERVICE.resolve_catalog_dataset(
+            self, catalog_id, include_hidden=include_hidden
+        )
 
     @property
     def year0(self) -> Optional[int]:
@@ -1405,23 +1408,7 @@ class Climate(NoDbBase):
 
     @property
     def climatestation_meta(self) -> Any:
-        user_station_meta = getattr(self, "_user_station_meta", None)
-        if user_station_meta is not None and (
-            self.catalog_id == "user_defined_cli"
-            or self._climate_mode in (ClimateMode.UserDefined, ClimateMode.UserDefinedSingleStorm)
-        ):
-            return user_station_meta
-
-        climatestation = self.climatestation
-
-        if climatestation is None:
-            return None
-
-        station_manager = CligenStationsManager(version=self.cligen_db)
-        station_meta = station_manager.get_station_fromid(climatestation)
-        assert station_meta is not None
-
-        return station_meta
+        return _CLIMATE_STATION_CATALOG_SERVICE.climatestation_meta(self)
 
     @property
     def climatestation_par_contents(self) -> str:
@@ -1512,26 +1499,7 @@ class Climate(NoDbBase):
     # station search
     #
     def find_closest_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
-
-        if self.islocked() and self._closest_stations is not None:
-            return self.closest_stations
-        
-        with self.locked():
-            watershed = self.watershed_instance
-            centroid = watershed.centroid
-            
-            if centroid is None:
-                self.logger.warning("Cannot find closest stations: watershed centroid is not set")
-                return None
-            
-            lng, lat = centroid
-            station_manager = CligenStationsManager(version=self.cligen_db)
-            results = station_manager.get_closest_stations((lng, lat), num_stations)
-            self._closest_stations = results
-            self._climatestation_mode = ClimateStationMode.Closest
-
-            self._climatestation = results[0].id
-            return self.closest_stations
+        return _CLIMATE_STATION_CATALOG_SERVICE.find_closest_stations(self, num_stations=num_stations)
         
     @property
     def closest_stations(self) -> Optional[List[Dict[str, Any]]]:
@@ -1544,58 +1512,17 @@ class Climate(NoDbBase):
         return [s.as_dict() for s in self._closest_stations]
 
     def find_heuristic_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
-
-        if self.islocked() and self._heuristic_stations is not None:
-            return self.heuristic_stations
-        
-        if 'eu' in self.locales:
-            return self.find_eu_heuristic_stations(num_stations=num_stations)
-        if 'au' in self.locales:
-            return self.find_au_heuristic_stations(num_stations=num_stations)
-
-        with self.locked():
-            watershed = self.watershed_instance
-            lng, lat = watershed.centroid
-            station_manager = CligenStationsManager(version=self.cligen_db)
-            results = station_manager\
-                .get_stations_heuristic_search((lng, lat), num_stations)
-            self._heuristic_stations = results
-            self._climatestation = results[0].id
-            return self.heuristic_stations
+        return _CLIMATE_STATION_CATALOG_SERVICE.find_heuristic_stations(self, num_stations=num_stations)
 
     def find_eu_heuristic_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
-        with self.locked():
-            watershed = self.watershed_instance
-            lng, lat = watershed.centroid
-            ron = self.ron_instance
-
-            rdi = RasterDatasetInterpolator(ron.dem_fn)
-            elev = rdi.get_location_info(lng, lat, method='near')
-
-            station_manager = CligenStationsManager(version=self.cligen_db)
-            results = station_manager\
-                .get_stations_eu_heuristic_search((lng, lat), elev, num_stations)
-            self._heuristic_stations = results
-
-            self._climatestation = results[0].id
-            return self.heuristic_stations
+        return _CLIMATE_STATION_CATALOG_SERVICE.find_eu_heuristic_stations(
+            self, num_stations=num_stations
+        )
 
     def find_au_heuristic_stations(self, num_stations: Optional[int] = None) -> Optional[List[Dict[str, Any]]]:
-        with self.locked():
-            watershed = self.watershed_instance
-            lng, lat = watershed.centroid
-            ron = self.ron_instance
-
-            rdi = RasterDatasetInterpolator(ron.dem_fn)
-            elev = rdi.get_location_info(lng, lat, method='near')
-
-            station_manager = CligenStationsManager(version=self.cligen_db)
-            results = station_manager\
-                .get_stations_au_heuristic_search((lng, lat), elev, num_stations)
-            self._heuristic_stations = results
-
-            self._climatestation = results[0].id
-            return self.heuristic_stations
+        return _CLIMATE_STATION_CATALOG_SERVICE.find_au_heuristic_stations(
+            self, num_stations=num_stations
+        )
         
     @property
     def heuristic_stations(self) -> Optional[List[Dict[str, Any]]]:
@@ -1642,426 +1569,16 @@ class Climate(NoDbBase):
             return self.cli_fn is not None
 
     def _export_cli_parquet(self) -> Path | None:
-        """Persist the active CLI file to parquet with peak intensities for reports."""
-        cli_fn = self.cli_fn
-        if not cli_fn:
-            return None
-
-        cli_path = Path(self.cli_dir) / cli_fn
-        if not cli_path.exists():
-            return None
-
-        try:
-            cli_df = ClimateFile(str(cli_path)).as_dataframe(calc_peak_intensities=True)
-            export_df = cli_df.copy()
-            export_df["year"] = export_df.get("year")
-            export_df["month"] = export_df.get("mo")
-            export_df["day_of_month"] = export_df.get("da")
-            if {"year", "month", "day_of_month"}.issubset(export_df.columns):
-                date_df = export_df[["year", "month", "day_of_month"]].copy()
-                for col in ("year", "month", "day_of_month"):
-                    date_df[col] = pd.to_numeric(date_df[col], errors="coerce")
-                date_df = date_df.dropna()
-                if not date_df.empty:
-                    date_df["year"] = date_df["year"].astype(int)
-                    date_df["month"] = date_df["month"].astype(int)
-                    date_df["day_of_month"] = date_df["day_of_month"].astype(int)
-                    ordered = date_df.sort_values(["year", "month", "day_of_month"])
-                    ordered["julian"] = ordered.groupby("year").cumcount() + 1
-                    year_counts = ordered.groupby("year")["julian"].max().sort_index()
-                    offsets = year_counts.cumsum().shift(fill_value=0)
-                    ordered["sim_day_index"] = ordered["julian"] + ordered["year"].map(offsets)
-                    export_df["julian"] = ordered["julian"].reindex(export_df.index).astype("Int64")
-                    export_df["sim_day_index"] = ordered["sim_day_index"].reindex(export_df.index).astype("Int64")
-
-            export_df["peak_intensity_10"] = export_df.get("10-min Peak Rainfall Intensity (mm/hour)")
-            export_df["peak_intensity_15"] = export_df.get("15-min Peak Rainfall Intensity (mm/hour)")
-            export_df["peak_intensity_30"] = export_df.get("30-min Peak Rainfall Intensity (mm/hour)")
-            export_df["peak_intensity_60"] = export_df.get("60-min Peak Rainfall Intensity (mm/hour)")
-
-            export_df["storm_duration_hours"] = export_df.get("dur")
-            export_df["storm_duration"] = export_df.get("dur")
-
-            # Canonical WD-level sidecar (NoDir + migration).
-            parquet_path = Path(self.wd) / "climate.wepp_cli.parquet"
-            export_df.to_parquet(parquet_path, index=False)
-            self.logger.info("Exported CLI parquet with peak intensities", extra={"parquet": str(parquet_path)})
-            return parquet_path
-        except Exception:
-            self.logger.exception(
-                "Failed exporting CLI parquet with peak intensities",
-                extra={"cli_path": str(cli_path)},
-            )
-            return None
+        return _CLIMATE_ARTIFACT_EXPORT_SERVICE.export_cli_parquet(self)
 
     def _export_cli_precip_frequency_csv(self, parquet_path: Path) -> Optional[Path]:
-        """Write NOAA-style PDS frequency stats derived from ``wepp_cli.parquet``."""
-        start_time = time.time()
-        if not parquet_path.exists():
-            return None
-
-        try:
-            df = pd.read_parquet(parquet_path)
-        except Exception:
-            self.logger.exception(
-                "Failed reading CLI parquet for precip frequency stats",
-                extra={"parquet": str(parquet_path)},
-            )
-            return None
-        if df.empty:
-            self.logger.info(
-                "CLI parquet is empty; skipping precip frequency export",
-                extra={"parquet": str(parquet_path)},
-            )
-            return None
-
-        def _pick_column(candidates: Tuple[str, ...]) -> Optional[str]:
-            for name in candidates:
-                if name in df.columns:
-                    return name
-            return None
-
-        precip_column = _pick_column(("prcp", "precip_mm", "precip", "precipitation"))
-        if precip_column is None:
-            self.logger.warning(
-                "CLI parquet missing precipitation column; skipping precip frequency export",
-                extra={"parquet": str(parquet_path)},
-            )
-            return None
-
-        df = df[df[precip_column] > 0].copy()
-        if df.empty:
-            self.logger.info(
-                "No precipitation events found; skipping precip frequency export",
-                extra={"parquet": str(parquet_path)},
-            )
-            return None
-
-        year_column = _pick_column(("year", "calendar_year"))
-        if year_column is None:
-            self.logger.warning(
-                "CLI parquet missing year column; skipping precip frequency export",
-                extra={"parquet": str(parquet_path)},
-            )
-            return None
-
-        years_count = int(pd.to_numeric(df[year_column], errors="coerce").dropna().nunique())
-        if years_count <= 0:
-            self.logger.warning(
-                "Unable to determine years for precip frequency export",
-                extra={"parquet": str(parquet_path)},
-            )
-            return None
-
-        base_recurrence = [1, 2, 5, 10, 25, 50, 100]
-        recurrence = [r for r in base_recurrence if r <= years_count]
-        if not recurrence:
-            self.logger.info(
-                "No recurrence intervals are <= climate years; skipping precip frequency export",
-                extra={"years_count": years_count, "parquet": str(parquet_path)},
-            )
-            return None
-        rec_map = weibull_series(recurrence, years_count, method="pds")
-
-        def _format_value(value: float) -> str:
-            if value == 0 or np.isnan(value):
-                return "0"
-            formatted = f"{value:.2f}"
-            return formatted.rstrip("0").rstrip(".")
-
-        def _values_for(candidates: Tuple[str, ...]) -> List[float]:
-            column = _pick_column(candidates)
-            if column is None:
-                self.logger.info(
-                    "CLI parquet missing precip frequency column",
-                    extra={"column": candidates[0], "parquet": str(parquet_path)},
-                )
-                return [0.0] * len(recurrence)
-
-            series = pd.to_numeric(df[column], errors="coerce")
-            series = series[series > 0].dropna().sort_values(ascending=False).reset_index(drop=True)
-            if series.empty:
-                return [0.0] * len(recurrence)
-
-            values: List[float] = []
-            for target in recurrence:
-                idx = rec_map.get(float(target), 0)
-                if idx >= len(series):
-                    idx = len(series) - 1
-                values.append(float(series.iloc[idx]))
-            return values
-
-        rows = [
-            ("Precipitation depth (mm)", _values_for((precip_column,))),
-            ("Storm duration (hours)", _values_for(("storm_duration_hours", "storm_duration", "dur"))),
-            ("10-min intensity (mm/hour)", _values_for(("peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)", "i10"))),
-            ("15-min intensity (mm/hour)", _values_for(("peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)", "i15"))),
-            ("30-min intensity (mm/hour)", _values_for(("peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)", "i30"))),
-            ("60-min intensity (mm/hour)", _values_for(("peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)", "i60"))),
-        ]
-
-        monthly_medians: List[float] = [0.0] * 12
-        monthly_p75s: List[float] = [0.0] * 12
-        monthly_p90s: List[float] = [0.0] * 12
-        month_column = _pick_column(("month", "mo"))
-        intensity_column = _pick_column(("peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)", "i30"))
-        if month_column is None or intensity_column is None:
-            self.logger.info(
-                "CLI parquet missing monthly median intensity columns",
-                extra={"month_column": month_column, "intensity_column": intensity_column, "parquet": str(parquet_path)},
-            )
-        else:
-            monthly_df = df[[month_column, intensity_column]].copy()
-            monthly_df[month_column] = pd.to_numeric(monthly_df[month_column], errors="coerce")
-            monthly_df[intensity_column] = pd.to_numeric(monthly_df[intensity_column], errors="coerce")
-            monthly_df = monthly_df.dropna(subset=[month_column, intensity_column])
-            if not monthly_df.empty:
-                monthly_df[month_column] = monthly_df[month_column].astype(int)
-                medians = monthly_df.groupby(month_column)[intensity_column].median()
-                p75s = monthly_df.groupby(month_column)[intensity_column].quantile(0.75)
-                p90s = monthly_df.groupby(month_column)[intensity_column].quantile(0.9)
-                monthly_medians = [float(medians.get(m, 0.0)) for m in range(1, 13)]
-                monthly_p75s = [float(p75s.get(m, 0.0)) for m in range(1, 13)]
-                monthly_p90s = [float(p90s.get(m, 0.0)) for m in range(1, 13)]
-
-        lat_text = "None"
-        lng_text = "None"
-        station_name = self.climatestation or "None"
-        try:
-            watershed = self.watershed_instance
-            if watershed and watershed.centroid:
-                lng, lat = watershed.centroid
-                lng_text = f"{float(lng):.4f} Degree"
-                lat_text = f"{float(lat):.4f} Degree"
-        except Exception:
-            self.logger.debug("Unable to resolve watershed centroid for precip frequency export", exc_info=True)
-
-        output_path = parquet_path.with_name("wepp_cli_pds_mean_metric.csv")
-        timestamp = datetime.utcnow().strftime("%a %b %d %H:%M:%S %Y")
-        runtime = time.time() - start_time
-
-        lines = [
-            "Point precipitation frequency estimates (mm, hours, mm/hour)",
-            "WEPP CLI derived precipitation frequency statistics",
-            "Data type: Precipitation depth, storm duration, peak intensities",
-            "Time series type: Partial duration",
-            f"Project area: {self.runid}",
-            f"Location name (WEPP): {self.runid}",
-            f"Station Name: {station_name}",
-            f"Latitude: {lat_text}",
-            f"Longitude: {lng_text}",
-            "Elevation (WEPP): None",
-            "",
-            "",
-            "PRECIPITATION FREQUENCY ESTIMATES",
-            "by metric for ARI (years):, " + ",".join(str(r) for r in recurrence),
-        ]
-
-        for label, values in rows:
-            line_values = ",".join(_format_value(value) for value in values)
-            lines.append(f"{label}:, {line_values}")
-
-        lines.extend(
-            [
-                "",
-                "MONTHLY MODELED MX .5 P",
-                "Month:, 1,2,3,4,5,6,7,8,9,10,11,12",
-                "Median (mm/hour):, " + ",".join(_format_value(value) for value in monthly_medians),
-                "75th percentile (mm/hour):, " + ",".join(_format_value(value) for value in monthly_p75s),
-                "90th percentile(mm/hour):, " + ",".join(_format_value(value) for value in monthly_p90s),
-            ]
-        )
-
-        lines.extend(
-            [
-                "",
-                f"Date/time (GMT):  {timestamp}",
-                f"pyRunTime:  {runtime:.6f}",
-            ]
-        )
-
-        try:
-            output_path.write_text("\n".join(lines) + "\n")
-            self.logger.info(
-                "Exported CLI precip frequency stats",
-                extra={"csv": str(output_path)},
-            )
-            return output_path
-        except Exception:
-            self.logger.exception(
-                "Failed writing CLI precip frequency stats",
-                extra={"csv": str(output_path)},
-            )
-            return None
+        return _CLIMATE_ARTIFACT_EXPORT_SERVICE.export_cli_precip_frequency_csv(self, parquet_path)
 
     def _download_noaa_atlas14_intensity(self) -> Optional[Path]:
-        """Download NOAA Atlas 14 PDS mean metric intensity data for comparison."""
-        cligen_db = str(self.cligen_db or "").lower()
-        if "2015" not in cligen_db and "legacy" not in cligen_db:
-            return None
-
-        output_path = Path(self.cli_dir) / "atlas14_intensity_pds_mean_metric.csv"
-        if output_path.exists():
-            return output_path
-
-        try:
-            watershed = self.watershed_instance
-            if not watershed or not watershed.centroid:
-                self.logger.info(
-                    "Watershed centroid unavailable; skipping NOAA Atlas 14 download",
-                    extra={"cligen_db": self.cligen_db},
-                )
-                return None
-            lng, lat = watershed.centroid
-        except Exception:
-            self.logger.exception("Failed resolving watershed centroid for NOAA Atlas 14")
-            return None
-
-        try:
-            from pfdf.data.noaa import atlas14
-        except Exception:
-            self.logger.exception("Failed importing pfdf NOAA Atlas 14 client")
-            return None
-
-        try:
-            result = atlas14.download(
-                lat=float(lat),
-                lon=float(lng),
-                parent=str(output_path.parent),
-                name=output_path.name,
-                statistic="mean",
-                data="intensity",
-                series="pds",
-                units="metric",
-                timeout=30,
-                overwrite=True,
-            )
-            if result is None:
-                return None
-            result_path = Path(result)
-            if result_path.exists():
-                self.logger.info(
-                    "Downloaded NOAA Atlas 14 intensity data",
-                    extra={"csv": str(result_path)},
-                )
-                return result_path
-        except ValueError as exc:
-            self.logger.info(
-                "NOAA Atlas 14 data unavailable for location",
-                extra={"error": str(exc), "lat": lat, "lon": lng},
-            )
-            return None
-        except Exception:
-            self.logger.exception(
-                "Failed downloading NOAA Atlas 14 intensity data",
-                extra={"lat": lat, "lon": lng},
-            )
-            return None
-
-        return None
+        return _CLIMATE_ARTIFACT_EXPORT_SERVICE.download_noaa_atlas14_intensity(self)
 
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
-        with self.locked():
-            raw_climate_mode = kwds.get('climate_mode')
-            catalog_id = kwds.get('climate_catalog_id') or kwds.get('catalog_id')
-            catalog_dataset = None
-            if catalog_id:
-                catalog_dataset = self._resolve_catalog_dataset(str(catalog_id))
-                if catalog_dataset is None:
-                    raise ValueError(f'Unknown or unavailable climate catalog id: {catalog_id}')
-                climate_mode = ClimateMode(int(catalog_dataset.climate_mode))
-                self._catalog_id = catalog_dataset.catalog_id
-            else:
-                if raw_climate_mode is None:
-                    raise ValueError('climate_mode not provided')
-                climate_mode = ClimateMode(int(raw_climate_mode))
-                self._catalog_id = None
-            _assert_supported_climate_mode(climate_mode)
-
-            climate_spatialmode = kwds.get('climate_spatialmode', ClimateSpatialMode.Single)
-            if catalog_dataset is not None:
-                if climate_spatialmode in (None, '', 'None'):
-                    climate_spatialmode = catalog_dataset.default_spatial_mode
-                spatialmode_value = int(climate_spatialmode)
-                if catalog_dataset.spatial_modes and spatialmode_value not in catalog_dataset.spatial_modes:
-                    raise ValueError(f'Unsupported spatial mode {spatialmode_value} for catalog dataset {catalog_dataset.catalog_id}')
-                climate_spatialmode = ClimateSpatialMode(spatialmode_value)
-            else:
-                climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
-
-            if climate_mode == ClimateMode.SingleStorm:
-                climate_spatialmode = ClimateSpatialMode.Single
-
-            input_years = kwds.get('input_years', None)
-            if isint(input_years):
-                input_years = int(input_years)
-
-            if climate_mode in [ClimateMode.Vanilla]:
-                assert isint(input_years)
-                assert input_years > 0
-                assert input_years <= CLIMATE_MAX_YEARS
-
-            if climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
-                if climate_mode == ClimateMode.ObservedDb:
-                    cli_path = kwds['climate_observed_selection']
-                else:
-                    cli_path = kwds['climate_future_selection']
-                assert _exists(cli_path)
-                self._orig_cli_fn = cli_path
-
-            self._climate_mode = climate_mode
-            self._climate_spatialmode = climate_spatialmode
-            self._input_years = input_years
-
-            self._climate_daily_temp_ds = kwds.get('climate_daily_temp_ds', None)
-
-            if kwds.get('precip_scaling_mode', None) is not None:
-                self._precip_scaling_mode = ClimatePrecipScalingMode(int(kwds['precip_scaling_mode']))
-
-            if kwds.get('precip_scale_factor', None) is not None:
-                if isfloat(kwds['precip_scale_factor']):
-                    self._precip_scale_factor = float(kwds['precip_scale_factor'])
-                                    
-            if kwds.get('precip_monthly_scale_factors_7', None) is not None:
-                precip_monthly_scale_factors = []
-                for i in range(12):
-                     
-                    v = None
-                    try:
-                        v = float(kwds.get('precip_monthly_scale_factors_%d' % i))
-
-                        if v < 0.0:
-                            v = 0.0
-                    except ValueError:
-                        pass
-                    if v is not None:
-                        precip_monthly_scale_factors.append(float(v))
-
-                self._precip_monthly_scale_factors = precip_monthly_scale_factors
-
-            if kwds.get('precip_scale_reference', None) is not None:
-                self._precip_scaling_reference = kwds['precip_scale_reference']
-
-            if kwds.get('precip_scale_factor_map', None) is not None:
-                self._precip_scale_factor_map = kwds['precip_scale_factor_map']
-
-        # mode 2: observed
-        self.set_observed_pars(
-            **dict(start_year=kwds['observed_start_year'],
-                   end_year=kwds['observed_end_year']))
-
-        # mode 3: future
-        self.set_future_pars(
-            **dict(start_year=kwds['future_start_year'],
-                   end_year=kwds['future_end_year']))
-
-        # mode 4: single storm (deprecated)
-        if climate_mode in (
-            ClimateMode.SingleStorm,
-            ClimateMode.SingleStormBatch,
-            ClimateMode.UserDefinedSingleStorm,
-        ):
-            self.set_single_storm_pars(**kwds)
+        _CLIMATE_INPUT_PARSER.parse_inputs(self, kwds)
 
     def set_observed_pars(self, **kwds: Any) -> None:
         with self.locked():
@@ -2191,362 +1708,16 @@ class Climate(NoDbBase):
             self._ss_batch = ss_batch
 
     def build(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
-        self.logger.info('Build Climates')
-        self.logger.info('  assert not self.islocked()')
-        assert not self.islocked()
-
-        with self.locked():
-            self.cli_fn = None
-            self.par_fn = None
-            self.sub_cli_fns = None
-            self.sub_par_fns = None
-
-        wd = self.wd
-        watershed = self.watershed_instance
-        if not watershed.is_abstracted:
-            self.logger.info('  watershed is not abstracted, raising error')
-            from wepppy.nodb.core.watershed import WatershedNotAbstractedError
-            raise WatershedNotAbstractedError()
-
-        if self.climatestation is None and self.orig_cli_fn is None:
-            self.logger.info('  no climate station selected, assigning closest station')
-            self.find_closest_stations()
-
-        cli_dir = self.cli_dir
-        if _exists(cli_dir):
-            self.logger.info('  cli_dir exists, attempting to remove')
-            try:
-                shutil.rmtree(cli_dir)
-            except:
-                pass
-
-        if not _exists(cli_dir):
-            self.logger.info('  cli_dir does not exist, creating')
-            os.mkdir(cli_dir)
-
-        climate_mode = self.climate_mode
-        self.logger.info(f'  climate_mode: {climate_mode}')
-        _assert_supported_climate_mode(climate_mode)
-
-        if climate_mode == ClimateMode.Undefined:
-            self.logger.info('  climate_mode is Undefined, raising error')
-            raise ClimateModeIsUndefinedError()
-        
-        # precip scaling mode validation
-        
-        precip_scaling_mode  = self.precip_scaling_mode
-        self.logger.info(f'  precip_scaling_mode: {precip_scaling_mode}')
-        if precip_scaling_mode == ClimatePrecipScalingMode.Scalar:
-            self.logger.info('  precip_scaling_mode is Scalar, validating')
-            if self.precip_scale_factor is None:
-                raise ValueError('precip_scale_factor is None')
-
-        elif precip_scaling_mode == ClimatePrecipScalingMode.Spatial:
-            self.logger.info('  precip_scaling_mode is Spatial, validating')
-            if self.precip_scale_factor_map is None:
-                raise ValueError('precip_scale_factor_map is None')
-
-        elif precip_scaling_mode == ClimatePrecipScalingMode.Monthlies:
-            self.logger.info('  precip_scaling_mode is Monthlies, validating')
-            if self.precip_monthly_scale_factors is None:
-                raise ValueError('precip_monthly_scale_factors is None')
-            
-            if len(self.precip_monthly_scale_factors) != 12:
-                raise ValueError('precip_monthly_scale_factors length is not 12')
-            
-            for v in self.precip_monthly_scale_factors:
-                if not isfloat(v):
-                    raise ValueError('precip_monthly_scale_factors contains non-floats')
-                
-        elif precip_scaling_mode == ClimatePrecipScalingMode.AnnualMonthlies:
-            self.logger.info('  precip_scaling_mode is AnnualMonthlies, validating')
-            if self.precip_scaling_reference is None:
-                raise ValueError('precip_scaling_reference is None')
-            
-            if self.precip_scaling_reference not in ['prism', 'daymet', 'gridmet']:
-                raise ValueError('precip_scaling_reference is not prism, daymet, or gridmet')
-            
-            if self.precip_scaling_reference == 'prism':
-                self.logger.info('  precip_scaling_reference is prism')
-                if self.observed_start_year < 1981:
-                    raise ValueError('prism only available 1981 to present')
-
-        self.logger.info('  precip_scaling_mode validation passed')
-
-        if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
-            self.logger.info('  climate_spatialmode is MultipleInterpolated, validating climate_mode')
-            # check climate mode is observedprism or gridmetprism
-            if self.climate_mode not in [ClimateMode.ObservedPRISM, ClimateMode.GridMetPRISM]:
-                raise ValueError('climate_spatialmode is MultipleInterpolated but climate_mode is not ObservedPRISM or GridMetPRISM')
-            self.logger.info('  climate_mode validated for MultipleInterpolated')
-
-        self.logger.info('  routing by climate_mode')
-        # vanilla Cligen
-        if climate_mode == ClimateMode.Vanilla:
-            self.logger.info('  climate_mode is Vanilla')
-            self._build_climate_vanilla(verbose=verbose, attrs=attrs)
-            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
-                self._prism_revision(verbose=verbose)
-
-        # observed
-        elif climate_mode == ClimateMode.ObservedPRISM:
-            self.logger.info('  climate_mode is ObservedPRISM')
-            if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
-                self.logger.info('  climate_spatialmode is MultipleInterpolated, running _build_climate_observed_daymet_multiple')
-                # the climate_mode naming is kind of shitty, this doesn't use prism at all
-                # but kind of stuck with it for backwards compatibility
-                self._build_climate_observed_daymet_multiple(verbose=verbose, attrs=attrs) 
-            else:
-                self.logger.info('  running _build_climate_observed_daymet')
-                self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
-                if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                    self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
-                    self._prism_revision(verbose=verbose)
-
-        # future
-        elif climate_mode == ClimateMode.Future:
-            self.logger.info('  climate_mode is Future')
-            self._build_climate_future(verbose=verbose, attrs=attrs)
-
-        # single storm
-        elif climate_mode == ClimateMode.SingleStorm:
-            self.logger.info('  climate_mode is SingleStorm')
-            self._build_climate_single_storm(verbose=verbose, attrs=attrs)
-
-        # single storm batch
-        elif climate_mode == ClimateMode.SingleStormBatch:
-            self.logger.info('  climate_mode is SingleStormBatch')
-            self._build_climate_single_storm_batch(verbose=verbose, attrs=attrs)
-
-        # PRISM
-        elif climate_mode == ClimateMode.PRISM:
-            self.logger.info('  climate_mode is PRISM')
-            self._build_climate_prism(verbose=verbose, attrs=attrs)
-            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
-                self._prism_revision(verbose=verbose)
-
-        # NEXRAD
-        elif climate_mode == ClimateMode.DepNexrad:
-            self.logger.info('  climate_mode is DepNexrad')
-            self._build_climate_depnexrad(verbose=verbose, attrs=attrs)
-
-        elif climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
-            self.logger.info('  climate_mode is ObservedDb or FutureDb')
-            assert self.orig_cli_fn is not None
-            self._post_defined_climate(verbose=verbose, attrs=attrs)
-            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
-                self._prism_revision(verbose=verbose)
-
-        # EOBS
-        elif climate_mode == ClimateMode.EOBS:
-            self.logger.info('  climate_mode is EOBS')
-            self._build_climate_mod(mod_function=eobs_mod, verbose=verbose, attrs=attrs)
-
-        elif climate_mode == ClimateMode.AGDC:
-            self.logger.info('  climate_mode is AGDC')
-            self._build_climate_mod(mod_function=agdc_mod, verbose=verbose, attrs=attrs)
-
-        elif climate_mode == ClimateMode.GridMetPRISM:
-            self.logger.info('  climate_mode is GridMetPRISM')
-            if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
-                self.logger.info('  climate_spatialmode is MultipleInterpolated, running _build_climate_observed_gridmet_multiple')
-                self._build_climate_observed_gridmet_multiple(verbose=verbose, attrs=attrs)
-            else:
-                self.logger.info('  running _build_climate_observed_gridmet')
-                self._build_climate_observed_gridmet(verbose=verbose, attrs=attrs)
-                if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                    self.logger.info('  climate_spatialmode is Multiple, running _prism_revision')
-                    self._prism_revision(verbose=verbose)
-
-        self.logger.info('  routing by precip_scaling_mode...')
-        if self.precip_scaling_mode == ClimatePrecipScalingMode.Scalar:
-            self.logger.info('  precip_scaling_mode is Scalar, running _scale_precip')
-            assert self.precip_scale_factor is not None
-            self._scale_precip(self.precip_scale_factor)
-        
-        elif self.precip_scaling_mode == ClimatePrecipScalingMode.Spatial:
-            self.logger.info('  precip_scaling_mode is Spatial, running _spatial_scale_precip')
-            assert self.precip_scale_factor_map is not None
-            self._spatial_scale_precip(self.precip_scale_factor_map)
-        
-        elif self.precip_scaling_mode == ClimatePrecipScalingMode.Monthlies:
-            self.logger.info('  precip_scaling_mode is Monthlies, running _scale_precip_monthlies')
-            assert self.precip_monthly_scale_factors is not None
-            self._scale_precip_monthlies(self.precip_monthly_scale_factors, pyo3_cli_p_scale_monthlies)
-            
-        elif self.precip_scaling_mode == ClimatePrecipScalingMode.AnnualMonthlies:
-            self.logger.info('  precip_scaling_mode is AnnualMonthlies')
-            assert self.precip_scaling_reference in ['prism', 'daymet', 'gridmet']
-            
-            ws_lng, ws_lat = watershed.centroid
-            start_year, end_year = self.observed_start_year, self.observed_end_year
-            self.logger.info(f'    reference: {self.precip_scaling_reference}, years: {start_year}-{end_year}')
-            
-            og_annual_monthlies = pyo3_cli_calculate_annual_monthlies(_join(cli_dir, self.cli_fn))
-            if self.precip_scaling_reference == 'prism':
-                self.logger.info('    getting prism reference data')
-                reference_annual_monthlies = get_prism_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
-            elif self.precip_scaling_reference == 'daymet':
-                self.logger.info('    getting daymet reference data')
-                reference_annual_monthlies = get_daymet_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
-            elif self.precip_scaling_reference == 'gridmet':
-                self.logger.info('    getting gridmet reference data')
-                reference_annual_monthlies = get_gridmet_p_annual_monthlies(ws_lng, ws_lat, start_year, end_year)
-                
-            assert len(og_annual_monthlies) == len(reference_annual_monthlies), (len(og_annual_monthlies), len(reference_annual_monthlies))
-            
-            monthly_scale_factors = []
-            self.logger.info('    calculating monthly scale factors')
-            for ref, og in zip(reference_annual_monthlies, og_annual_monthlies):
-                if og == 0:
-                    monthly_scale_factors.append(1.0)
-                else:
-                    monthly_scale_factors.append(ref / og)
-
-            self.logger.info('    writing reference_annual_monthlies.csv')
-            with open(_join(cli_dir, 'reference_annual_monthlies.csv'), 'w') as fp:
-                writer = csv.writer(fp)
-                # Write header 
-                writer.writerow(['Year', 'Month', 'Reference', 'Scale_Factor'])
-                # Write data
-                year = start_year
-                for i, (ref, og, scale) in enumerate(zip(reference_annual_monthlies, og_annual_monthlies, monthly_scale_factors)):
-                    month = (i % 12) + 1
-                    if i > 0 and i % 12 == 0:
-                        year += 1
-                    writer.writerow([year, month, ref, scale])
-
-            self.logger.info('    running _scale_precip_monthlies with annual factors')
-            self._scale_precip_monthlies(monthly_scale_factors, pyo3_cli_p_scale_annual_monthlies)
-
-        parquet_path = self._export_cli_parquet()
-        time.sleep(1)  # ensure parquet write is flushed
-        if parquet_path is not None:
-            self._export_cli_precip_frequency_csv(parquet_path)
-        self._download_noaa_atlas14_intensity()
-
-        try:
-            self.logger.info('  timestamping build_climate task')
-            prep = RedisPrep.getInstance(self.wd)
-            prep.timestamp(TaskEnum.build_climate)
-        except FileNotFoundError:
-            self.logger.info('  RedisPrep not found, skipping timestamp')
-            pass
-
-        self.logger.info('Climate Build Successful.')
-        self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
+        _CLIMATE_BUILD_ROUTER.build(self, verbose=verbose, attrs=attrs)
         
     def _scale_precip(self, scale_factor: float) -> None:
-        """
-        scalar scaling of precipitation
-        """
-        with self.locked():
-            self.logger.info('  running _scale_precip... ')
-
-            cli_dir = os.path.abspath(self.cli_dir)
-            
-            pyo3_cli_p_scale(
-                _join(cli_dir, self.cli_fn), 
-                _join(cli_dir, f'scale_{self.cli_fn}' ),
-                scale_factor)
-            self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'scale_{self.cli_fn}'))
-            self.cli_fn = f'scale_{self.cli_fn}'
-                    
-            if self.sub_cli_fns is not None:
-                sub_cli_fns = {}
-                for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
-                    pyo3_cli_p_scale( 
-                        _join(cli_dir, sub_cli_fn), 
-                        _join(cli_dir, f'scale_{sub_cli_fn}' ),
-                        scale_factor)
-                    sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
-                    
-                self.sub_cli_fns = sub_cli_fns
+        _CLIMATE_SCALING_SERVICE.scale_precip(self, scale_factor)
 
     def _scale_precip_monthlies(self, monthly_scale_factors: List[float], scale_func: Any) -> None:
-        """
-        monthly scaling of precipitation
-        """
-        
-        with self.locked():
-            self.logger.info('  running _scale_precip... ')
-
-            cli_dir = os.path.abspath(self.cli_dir)
-            
-            scale_func(
-                _join(cli_dir, self.cli_fn), 
-                _join(cli_dir, f'scale_{self.cli_fn}' ),
-                monthly_scale_factors)
-            self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'scale_{self.cli_fn}'))
-            self.cli_fn = f'scale_{self.cli_fn}'
-                    
-            if self.sub_cli_fns is not None:
-                sub_cli_fns = {}
-                for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
-                    scale_func(
-                        _join(cli_dir, sub_cli_fn), 
-                        _join(cli_dir, f'scale_{sub_cli_fn}' ),
-                        monthly_scale_factors)
-                    sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
-                    
-                self.sub_cli_fns = sub_cli_fns
+        _CLIMATE_SCALING_SERVICE.scale_precip_monthlies(self, monthly_scale_factors, scale_func)
 
     def _spatial_scale_precip(self, scale_factor_map: str) -> None:
-        self.logger.info(f'  running _spatial_scale_precip with {scale_factor_map} ')
-
-        with self.locked():
-            cli_dir = os.path.abspath(self.cli_dir)
-
-            assert _exists(scale_factor_map), scale_factor_map
-            rdi = RasterDatasetInterpolator(scale_factor_map)
-            wd = self.wd
-
-            watershed = self.watershed_instance
-            ws_lng, ws_lat = watershed.centroid
-            scale_factor = rdi.get_location_info(ws_lng, ws_lat)
-
-            self.logger.info(f'    Scaling {self.cli_fn}')
-            self.logger.info(f'      RasterDatasetInterpolator({scale_factor_map}).({ws_lng}, {ws_lat}) -> {scale_factor} ')
-            if scale_factor is not None:
-                if scale_factor > 0.1 and scale_factor < 10.0:
-                    self.logger.info(f'    pyo3_cli_p_scale() ')
-                    pyo3_cli_p_scale(
-                        _join(cli_dir, self.cli_fn), 
-                        _join(cli_dir, f'scale_{self.cli_fn}' ),
-                        scale_factor)
-                    self.monthlies = pyo3_cli_calculate_monthlies(_join(cli_dir, f'scale_{self.cli_fn}'))
-                    self.cli_fn = f'scale_{self.cli_fn}'
-                else:
-                    self.logger.info(f'    scale factor {scale_factor} out of range, skipping for {self.cli_fn}')
-        
-
-            if self.sub_cli_fns is not None:
-                sub_cli_fns = {}
-                for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
-                    lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                    scale_factor = rdi.get_location_info(lng, lat)
-
-                    self.logger.info(f'    RasterDatasetInterpolator({scale_factor_map}).({lng}, {lat}) -> {scale_factor} ')
-                    if scale_factor is not None:
-                        self.logger.info(f'    scaling {sub_cli_fn} ({lng}, {lat}) -> {scale_factor} ')
-                        if scale_factor > 0.1 and scale_factor < 10.0:
-                            self.logger.info(f'    pyo3_cli_p_scale() ')
-                            pyo3_cli_p_scale( 
-                                _join(cli_dir, sub_cli_fn), 
-                                _join(cli_dir, f'scale_{sub_cli_fn}' ),
-                                scale_factor)
-                        else:
-                            self.logger.info(f'    scale factor {scale_factor} out of range, skipping for {sub_cli_fn}')
-
-                    if _exists(_join(cli_dir, f'scale_{sub_cli_fn}')):
-                        sub_cli_fns[topaz_id] = f'scale_{sub_cli_fn}'
-                    else:
-                        sub_cli_fns[topaz_id] = sub_cli_fn
-
-                self.sub_cli_fns = sub_cli_fns
+        _CLIMATE_SCALING_SERVICE.spatial_scale_precip(self, scale_factor_map)
 
     def _build_climate_depnexrad(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         self.logger.info('  running _build_climate_depnexrad... ')
@@ -2931,11 +2102,7 @@ class Climate(NoDbBase):
         # Ensure downstream interchange jobs see the correct calendar lookup for
         # the newly uploaded CLI. The interchange layer prefers `wepp_cli.parquet`
         # and will not regenerate it if an older copy exists.
-        parquet_path = self._export_cli_parquet()
-        time.sleep(1)  # ensure parquet write is flushed
-        if parquet_path is not None:
-            self._export_cli_precip_frequency_csv(parquet_path)
-        self._download_noaa_atlas14_intensity()
+        _CLIMATE_ARTIFACT_EXPORT_SERVICE.export_post_build_artifacts(self)
 
         try:
             prep = RedisPrep.getInstance(self.wd)
