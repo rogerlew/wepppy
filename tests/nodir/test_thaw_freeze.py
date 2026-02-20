@@ -263,3 +263,21 @@ def test_maintenance_lock_contention_fails_fast(tmp_path: Path, monkeypatch: pyt
 
     assert exc.value.http_status == 503
     assert exc.value.code == "NODIR_LOCKED"
+
+
+def test_maintenance_lock_explicit_none_override_disables_backend(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+
+    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+
+    monkeypatch.setattr("wepppy.nodb.base.redis_lock_client", _RedisLockStub(), raising=False)
+    monkeypatch.setattr(thaw_freeze_mod, "redis_lock_client", None)
+
+    with pytest.raises(NoDirError) as exc:
+        thaw_freeze_mod.acquire_maintenance_lock(wd, "watershed")
+
+    assert exc.value.http_status == 503
+    assert exc.value.code == "NODIR_LOCKED"

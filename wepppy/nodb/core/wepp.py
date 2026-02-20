@@ -117,7 +117,7 @@ __all__ = [
 
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
-except:
+except ImportError:
     send_discord_message = None
 
 
@@ -194,6 +194,11 @@ from wepppy.nodir.wepp_inputs import (
     open_input_text,
     with_input_file_path,
 )
+from wepppy.nodb.core.wepp_bootstrap_service import WeppBootstrapService
+from wepppy.nodb.core.wepp_input_parser import WeppInputParser
+from wepppy.nodb.core.wepp_postprocess_service import WeppPostprocessService
+from wepppy.nodb.core.wepp_prep_service import WeppPrepService
+from wepppy.nodb.core.wepp_run_service import WeppRunService
 
 def _copyfile(src_fn: str, dst_fn: str) -> None:
     if _exists(dst_fn):
@@ -204,6 +209,12 @@ def _copyfile(src_fn: str, dst_fn: str) -> None:
 
 STORM_EVENT_ANALYZER_MIN_INTERCHANGE_VERSION = Version(major=1, minor=2)
 BOOTSTRAP_JWT_EXPIRES_SECONDS = 180 * 24 * 60 * 60
+
+_WEPP_INPUT_PARSER = WeppInputParser()
+_WEPP_PREP_SERVICE = WeppPrepService()
+_WEPP_RUN_SERVICE = WeppRunService()
+_WEPP_POSTPROCESS_SERVICE = WeppPostprocessService()
+_WEPP_BOOTSTRAP_SERVICE = WeppBootstrapService()
 
 
 class ChannelRoutingMethod(IntEnum):
@@ -639,7 +650,7 @@ class Wepp(NoDbBase):
                 gwstorage=self.config_get_float('baseflow_opts', 'gwstorage'),
                 bfcoeff = self.config_get_float('baseflow_opts', 'bfcoeff'),
                 dscoeff = self.config_get_float('baseflow_opts', 'dscoeff'),
-                bfthreshold = self.config_get_float('baseflows_opts', 'bfthreshold'))
+                bfthreshold = self.config_get_float('baseflow_opts', 'bfthreshold'))
 
             self.baseflow_gwstorage_map = self.config_get_path('baseflow_opts', 'gwstorage_map')
             self.baseflow_bfcoeff_map = self.config_get_path('baseflow_opts', 'bfcoeff_map')
@@ -725,75 +736,16 @@ class Wepp(NoDbBase):
         return _join(self._bootstrap_git_dir(), "bootstrap", "push-log.ndjson")
 
     def _load_bootstrap_push_log(self) -> dict[str, str]:
-        log_path = self._bootstrap_push_log_path()
-        if not _exists(log_path):
-            return {}
-
-        mapping: dict[str, str] = {}
-        with open(log_path, "r") as handle:
-            for line_no, line in enumerate(handle, start=1):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    payload = json.loads(line)
-                except json.JSONDecodeError as exc:
-                    raise RuntimeError(f"Invalid bootstrap push log entry at line {line_no}") from exc
-                sha = payload.get("sha")
-                user = payload.get("user")
-                if not isinstance(sha, str) or not isinstance(user, str):
-                    raise RuntimeError(f"Invalid bootstrap push log entry at line {line_no}")
-                mapping[sha] = user
-        return mapping
+        return _WEPP_BOOTSTRAP_SERVICE.load_bootstrap_push_log(self)
 
     def _run_git(self, args: list[str]) -> subprocess.CompletedProcess[str]:
-        result = subprocess.run(
-            ["git", *args],
-            cwd=self.wd,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        if result.returncode != 0:
-            raise RuntimeError(
-                f"git {' '.join(args)} failed: {result.stdout.strip()} {result.stderr.strip()}".strip()
-            )
-        return result
+        return _WEPP_BOOTSTRAP_SERVICE.run_git(self, args)
 
     def _write_bootstrap_gitignore(self) -> None:
-        lines = [
-            "# Bootstrap-managed inputs only",
-            "*",
-            "!.gitignore",
-            "!wepp/",
-            "!wepp/runs/",
-            "!wepp/runs/**",
-            "!swat/",
-            "!swat/TxtInOut/",
-            "!swat/TxtInOut/**",
-            "wepp/runs/tc_out.txt",
-            "",
-        ]
-        gitignore_path = _join(self.wd, ".gitignore")
-        with open(gitignore_path, "w") as handle:
-            handle.write("\n".join(lines))
+        _WEPP_BOOTSTRAP_SERVICE.write_bootstrap_gitignore(self)
 
     def _install_bootstrap_hook(self) -> None:
-        hooks_dir = _join(self._bootstrap_git_dir(), "hooks")
-        os.makedirs(hooks_dir, exist_ok=True)
-        hook_path = _join(hooks_dir, "pre-receive")
-        hook_lines = [
-            "#!/usr/bin/env bash",
-            "set -euo pipefail",
-            'if [[ -n "${WEPPPY_SOURCE_ROOT:-}" ]]; then',
-            '  export PYTHONPATH="${WEPPPY_SOURCE_ROOT}${PYTHONPATH:+:$PYTHONPATH}"',
-            "fi",
-            "exec python3 -m wepppy.weppcloud.bootstrap.pre_receive",
-            "",
-        ]
-        with open(hook_path, "w") as handle:
-            handle.write("\n".join(hook_lines))
-        os.chmod(hook_path, 0o755)
+        _WEPP_BOOTSTRAP_SERVICE.install_bootstrap_hook(self)
 
     @property
     def bootstrap_enabled(self) -> bool:
@@ -805,115 +757,27 @@ class Wepp(NoDbBase):
         self._bootstrap_enabled = bool(value)
 
     def init_bootstrap(self) -> None:
-        if not self._bootstrap_repo_exists():
-            try:
-                self._run_git(["init", "-b", "main"])
-            except RuntimeError:
-                self._run_git(["init"])
-                self._run_git(["checkout", "-b", "main"])
-
-        self._run_git(["config", "receive.denyCurrentBranch", "updateInstead"])
-        self._run_git(["config", "receive.denyNonFastForwards", "true"])
-        self._run_git(["config", "http.receivepack", "true"])
-        self._run_git(["config", "user.name", "WEPPcloud"])
-        self._run_git(["config", "user.email", "noreply@wepp.cloud"])
-
-        self._write_bootstrap_gitignore()
-
-        add_paths: list[str] = [".gitignore"]
-        if _exists(_join(self.wd, "wepp", "runs")):
-            add_paths.append("wepp/runs")
-        if _exists(_join(self.wd, "swat", "TxtInOut")):
-            add_paths.append("swat/TxtInOut")
-
-        self._run_git(["add", "--"] + add_paths)
-        self._run_git(["commit", "--allow-empty", "-m", "Bootstrap: initial input state"])
-
-        self._install_bootstrap_hook()
-
-        self.bootstrap_enabled = True
+        _WEPP_BOOTSTRAP_SERVICE.init_bootstrap(self)
 
     def mint_bootstrap_jwt(self, user_email: str, user_id: str) -> str:
-        from wepppy.weppcloud.utils import auth_tokens
-
-        external_host = os.getenv("EXTERNAL_HOST") or os.getenv("OAUTH_REDIRECT_HOST")
-        if not external_host:
-            raise RuntimeError("EXTERNAL_HOST must be set to mint bootstrap tokens")
-
-        issued = auth_tokens.issue_token(
+        return _WEPP_BOOTSTRAP_SERVICE.mint_bootstrap_jwt(
+            self,
             user_email,
-            audience=external_host,
-            expires_in=BOOTSTRAP_JWT_EXPIRES_SECONDS,
-            extra_claims={"runid": self.runid},
+            user_id,
+            expires_seconds=BOOTSTRAP_JWT_EXPIRES_SECONDS,
         )
-        token = issued["token"]
-        prefix = self.runid[:2]
-        return f"https://{user_id}:{token}@{external_host}/git/{prefix}/{self.runid}/.git"
 
     def get_bootstrap_commits(self) -> list[dict]:
-        if not self._bootstrap_repo_exists():
-            return []
-        result = self._run_git(
-            [
-                "log",
-                "main",
-                "--pretty=format:%H%x1f%an%x1f%ad%x1f%s%x1e",
-                "--date=iso",
-            ]
-        )
-        entries: list[dict] = []
-        for chunk in result.stdout.strip("\n\x1e").split("\x1e"):
-            if not chunk.strip():
-                continue
-            parts = chunk.strip().split("\x1f")
-            if len(parts) != 4:
-                continue
-            sha, author, date_str, message = parts
-            entries.append(
-                {
-                    "sha": sha,
-                    "short_sha": sha[:7],
-                    "message": message,
-                    "author": author,
-                    "date": date_str,
-                }
-            )
-
-        pusher_map = self._load_bootstrap_push_log()
-        for entry in entries:
-            pusher = pusher_map.get(entry["sha"])
-            entry["pusher"] = pusher
-            entry["git_author"] = entry["author"]
-            entry["author"] = pusher or "unknown"
-        return entries
+        return _WEPP_BOOTSTRAP_SERVICE.get_bootstrap_commits(self)
 
     def checkout_bootstrap_commit(self, sha: str) -> bool:
-        if not self._bootstrap_repo_exists():
-            return False
-        try:
-            self._run_git(["checkout", sha])
-        except RuntimeError:
-            return False
-        return True
+        return _WEPP_BOOTSTRAP_SERVICE.checkout_bootstrap_commit(self, sha)
 
     def get_bootstrap_current_ref(self) -> str:
-        if not self._bootstrap_repo_exists():
-            return ""
-        try:
-            result = self._run_git(["symbolic-ref", "--short", "HEAD"])
-            return result.stdout.strip()
-        except RuntimeError:
-            result = self._run_git(["rev-parse", "--short", "HEAD"])
-            return result.stdout.strip()
+        return _WEPP_BOOTSTRAP_SERVICE.get_bootstrap_current_ref(self)
 
     def ensure_bootstrap_main(self) -> None:
-        if not self.bootstrap_enabled:
-            return
-        if not self._bootstrap_repo_exists():
-            raise RuntimeError("Bootstrap repo not initialized")
-        if self.get_bootstrap_current_ref() == "main":
-            return
-        self._run_git(["checkout", "main"])
+        _WEPP_BOOTSTRAP_SERVICE.ensure_bootstrap_main(self)
 
     def _bootstrap_managed_paths(self) -> list[str]:
         paths: list[str] = []
@@ -924,36 +788,10 @@ class Wepp(NoDbBase):
         return paths
 
     def bootstrap_commit_inputs(self, stage: str) -> str | None:
-        if not self.bootstrap_enabled:
-            return None
-        if not self._bootstrap_repo_exists():
-            raise RuntimeError("Bootstrap repo not initialized")
-
-        self.ensure_bootstrap_main()
-        managed_paths = self._bootstrap_managed_paths()
-        if not managed_paths:
-            return None
-
-        status = self._run_git(["status", "--porcelain", "--"] + managed_paths)
-        if not status.stdout.strip():
-            return None
-
-        self._run_git(["add", "--"] + managed_paths)
-
-        stage_label = " ".join(str(stage).split()) or "inputs"
-        self._run_git(["commit", "-m", f"Pipeline: rebuilt {stage_label}"])
-        sha = self._run_git(["rev-parse", "HEAD"]).stdout.strip()
-        self.logger.info(f"Bootstrap auto-commit created {sha[:7]} for {stage_label}")
-        return sha
+        return _WEPP_BOOTSTRAP_SERVICE.bootstrap_commit_inputs(self, stage)
 
     def disable_bootstrap(self) -> None:
-        from wepppy.weppcloud.app import Run, db
-
-        run = Run.query.filter(Run.runid == self.runid).first()
-        if run is None:
-            raise RuntimeError(f"Run record not found for {self.runid}")
-        run.bootstrap_disabled = True
-        db.session.commit()
+        _WEPP_BOOTSTRAP_SERVICE.disable_bootstrap(self)
 
     @property
     def dss_export_mode(self) -> int:
@@ -1455,100 +1293,7 @@ class Wepp(NoDbBase):
 
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
-            self.baseflow_opts.parse_inputs(kwds)
-            self.phosphorus_opts.parse_inputs(kwds)
-            if hasattr(self, 'tcr_opts'):
-                self.tcr_opts.parse_inputs(kwds)
-
-            if hasattr(self, 'snow_opts'):
-                self.snow_opts.parse_inputs(kwds)
-
-            if hasattr(self, 'frost_opts'):
-                self.frost_opts.parse_inputs(kwds)
-            else:
-                self.frost_opts = FrostOpts()
-
-            self._guard_unitized_bounds()
-
-            _channel_critical_shear = kwds.get('channel_critical_shear', None)
-            if isfloat(_channel_critical_shear):
-                self._channel_critical_shear = float(_channel_critical_shear)
-
-            _channel_erodibility = kwds.get('channel_erodibility', None)
-            if isfloat(_channel_erodibility):
-                self._channel_erodibility = float(_channel_erodibility)
-
-            _channel_manning_roughness_coefficient_bare = kwds.get('channel_manning_roughness_coefficient_bare', None)
-            if isfloat(_channel_manning_roughness_coefficient_bare):
-                self._channel_manning_roughness_coefficient_bare = float(_channel_manning_roughness_coefficient_bare)
-
-            _channel_manning_roughness_coefficient_veg = kwds.get('channel_manning_roughness_coefficient_veg', None)
-            if isfloat(_channel_manning_roughness_coefficient_veg):
-                self._channel_manning_roughness_coefficient_veg = float(_channel_manning_roughness_coefficient_veg)
-
-            _minimum_channel_width_m = kwds.get('minimum_channel_width_m', None)
-            if isfloat(_minimum_channel_width_m):
-                self._minimum_channel_width_m = float(_minimum_channel_width_m)
-
-            _pmet_kcb = kwds.get('pmet_kcb', None)
-            if isfloat(_pmet_kcb):
-                self._pmet_kcb = float(_pmet_kcb)
-
-            _pmet_rawp = kwds.get('pmet_rawp', None)
-            if isfloat(_pmet_rawp):
-                self._pmet_rawp = float(_pmet_rawp)
-
-            _kslast = kwds.get('kslast', '')
-            if isinstance(_kslast, (list, tuple, set)):
-                _kslast = next((item for item in _kslast if item not in (None, '')), '')
-            if isfloat(_kslast):
-                self._kslast = float(_kslast)
-            else:
-                if _kslast in (None, ''):
-                    self._kslast = None
-                elif isinstance(_kslast, str) and _kslast.strip().lower().startswith('none'):
-                    self._kslast = None
-
-            _wepp_bin = kwds.get('wepp_bin', None)
-            if _wepp_bin is not None:
-                self._wepp_bin = _wepp_bin
-
-            _dtchr_override = kwds.get('dtchr_override', None)
-            if isfloat(_dtchr_override):
-                _dtchr_override = int(_dtchr_override)
-                if _dtchr_override < 60:
-                    raise ValueError("dtchr_override must be at least 60")
-                self._dtchr_override = _dtchr_override
-
-            _ichout_override = kwds.get('ichout_override', None)
-            if _ichout_override is not None:
-                if _ichout_override == '':
-                    self._ichout_override = None
-                elif isint(_ichout_override):
-                    _ichout_value = int(_ichout_override)
-                    if _ichout_value not in (1, 3):
-                        raise ValueError("ichout_override must be 1 (peak only) or 3 (full timestep hydrograph)")
-                    self._ichout_override = _ichout_value
-
-            _chn_topaz_ids_of_interest = kwds.get('chn_topaz_ids_of_interest', None)
-            if _chn_topaz_ids_of_interest is not None:
-                values: List[int] = []
-                if isinstance(_chn_topaz_ids_of_interest, (list, tuple, set)):
-                    for entry in _chn_topaz_ids_of_interest:
-                        if entry in (None, ''):
-                            continue
-                        values.append(int(entry))
-                else:
-                    tokens = str(_chn_topaz_ids_of_interest)
-                    if ',' in tokens:
-                        values = [int(v.strip()) for v in tokens.split(',') if v.strip()]
-                    elif ' ' in tokens:
-                        values = [int(v.strip()) for v in tokens.split(' ') if v.strip()]
-                    else:
-                        tokens = tokens.strip()
-                        if tokens:
-                            values = [int(tokens)]
-                self._chn_topaz_ids_of_interest = values
+            _WEPP_INPUT_PARSER.parse(self, kwds)
 
 
     @property
@@ -1590,67 +1335,19 @@ class Wepp(NoDbBase):
                         wepp_ui: Optional[bool] = None, pmet: Optional[bool] = None, snow: Optional[bool] = None,
                         man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
                         max_workers: Optional[int] = None) -> None:
-        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
-        self.logger.info(f'{self.class_name}.{func_name}(frost={frost}, baseflow={baseflow}, wepp_ui={wepp_ui}, pmet={pmet}, snow={snow}, man_relpath={man_relpath}, cli_relpath={cli_relpath}, slp_relpath={slp_relpath}, sol_relpath={sol_relpath})')
-
-        # get translator
-        watershed = self.watershed_instance
-        translator = watershed.translator_factory()
-
-        reveg = False
-        disturbed = Disturbed.getInstance(self.wd, allow_nonexistent=True)
-        if disturbed is not None:
-            if disturbed.sol_ver == 9005.0:
-                reveg = True
-
-        if self.multi_ofe:
-            self._prep_multi_ofe(translator)
-        else:
-            if slp_relpath == '':
-                self._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
-            self._prep_managements(translator)
-            self._prep_soils(translator, max_workers=max_workers)
-
-        if cli_relpath == '':
-            self._prep_climates(translator)
-
-        self._make_hillslope_runs(translator, reveg=reveg,
-                                  man_relpath=man_relpath, 
-                                  cli_relpath=cli_relpath, 
-                                  slp_relpath=slp_relpath, 
-                                  sol_relpath=sol_relpath)
-
-        if (frost is None and self.run_frost) or frost:
-            self._prep_frost()
-        else:
-            self._remove_frost()
-
-        self._check_and_set_phosphorus_map() # this locks
-        self._prep_phosphorus()
-
-        if (baseflow is None and self.run_baseflow) or baseflow:
-            self._check_and_set_baseflow_map() # this locks
-            self._prep_baseflow()
-        else:
-            self._remove_baseflow()
-
-        if (wepp_ui is None and self.run_wepp_ui) or wepp_ui:
-            self._prep_wepp_ui()
-        else:
-            self._remove_wepp_ui()
-
-        if (pmet is None and self.run_pmet) or pmet:
-            self._prep_pmet()
-        else:
-            self._remove_pmet()
-
-        if (snow is None and self.run_snow) or snow:
-            self._prep_snow()
-        else:
-            self._remove_snow()
-
-        if reveg:
-            self._prep_revegetation()
+        _WEPP_PREP_SERVICE.prep_hillslopes(
+            self,
+            frost=frost,
+            baseflow=baseflow,
+            wepp_ui=wepp_ui,
+            pmet=pmet,
+            snow=snow,
+            man_relpath=man_relpath,
+            cli_relpath=cli_relpath,
+            slp_relpath=slp_relpath,
+            sol_relpath=sol_relpath,
+            max_workers=max_workers,
+        )
 
 
     def _prep_revegetation(self) -> None:
@@ -1831,7 +1528,7 @@ class Wepp(NoDbBase):
 
 
     def _remove_pmet(self) -> None:
-        fn = _join(self.runs_dir, 'pmet.txt')
+        fn = _join(self.runs_dir, 'pmetpara.txt')
         if _exists(fn):
             os.remove(fn)
 
@@ -1995,162 +1692,7 @@ class Wepp(NoDbBase):
                     os.makedirs(ss_batch_dir)
 
     def prep_and_run_flowpaths(self, clean_after_run: bool = True) -> None:
-        self.logger.info('  Prepping _prep_flowpaths... ')
-
-        fp_slps_rels = glob_input_files(
-            self.wd,
-            'watershed/slope_files/flowpaths/*.slps',
-            tolerate_mixed=True,
-            mixed_prefer='archive',
-        )
-
-        flowpath_workers = 10
-        if os.getenv("WEPPPY_NCPU"):
-            flowpath_workers = min(flowpath_workers, NCPU)
-        
-        futures = []
-        with ExitStack() as input_paths:
-            fp_slps_fns = [
-                input_paths.enter_context(
-                    with_input_file_path(
-                        self.wd,
-                        rel,
-                        purpose='wepp-prep-flowpath-slps',
-                        tolerate_mixed=True,
-                        mixed_prefer='archive',
-                        allow_materialize_fallback=True,
-                    )
-                )
-                for rel in fp_slps_rels
-            ]
-
-            with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
-                for fp_slps_fn in fp_slps_fns:
-                    futures.append(pool.submit(extract_slps_fn, fp_slps_fn, self.fp_runs_dir))
-
-                futures_n = len(futures)
-                count = 0
-                pending = set(futures)
-                while pending:
-                    done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
-
-                    if not done:
-                        self.logger.error('  Flowpath slope extraction still running after 5 seconds.')
-                        continue
-
-                    for future in done:
-                        try:
-                            future.result()
-                            count += 1
-                            self.logger.info(f'  ({count}/{futures_n}) flowpath slopes prep complete')
-                        except Exception as exc:
-                            for remaining in pending:
-                                remaining.cancel()
-                            self.logger.error(f'  Flowpath slope extraction failed with an error: {exc}')
-                            raise
-            
-
-        watershed = self.watershed_instance
-        translator = watershed.translator_factory()
-        sim_years = self.climate_instance.input_years
-
-        fps_summary = watershed.fps_summary
-
-        futures = []
-        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
-            for topaz_id in fps_summary:
-                wepp_id = translator.wepp(top=int(topaz_id))
-                for fp_enum  in fps_summary[topaz_id]:
-                    fp_id = f'fp_{wepp_id}_{fp_enum}'
-                    self.logger.info(f'  Creating {fp_id}.run... ')
-                    futures.append(pool.submit(make_flowpath_run, fp_id, wepp_id, sim_years, self.fp_runs_dir))
-
-            futures_n = len(futures)
-            count = 0
-            pending = set(futures)
-            while pending:
-                done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
-
-                if not done:
-                    self.logger.error('  Flowpath runfile creation still running after 5 seconds.')
-                    continue
-
-                for future in done:
-                    try:
-                        future.result()
-                        count += 1
-                        self.logger.info(f'  ({count}/{futures_n}) flowpath run files complete')
-                    except Exception as exc:
-                        for remaining in pending:
-                            remaining.cancel()
-                        self.logger.error(f'  Flowpath runfile creation failed with an error: {exc}')
-                        raise
-
-        self.logger.info('  Running _run_flowpaths... ')
-
-        futures = []
-        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
-            for topaz_id in fps_summary:
-                wepp_id = translator.wepp(top=int(topaz_id))
-                for fp_enum  in fps_summary[topaz_id]:
-                    fp_id = f'fp_{wepp_id}_{fp_enum}'
-                    self.logger.info(f'  Running {fp_id}... ')
-                    futures.append(pool.submit(run_flowpath, fp_id, wepp_id, self.runs_dir, self.fp_runs_dir, self.wepp_bin))
-
-            futures_n = len(futures)
-            count = 0
-            pending = set(futures)
-            while pending:
-                done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
-
-                if not done:
-                    # Flowpath simulations can legitimately run for a long time; warn rather than error.
-                    self.logger.warning('  Flowpath simulation still running after 60 seconds; continuing to wait.')
-                    continue
-
-                for future in done:
-                    try:
-                        future.result()
-                        count += 1
-                        self.logger.info(f'  ({count}/{futures_n}) flowpaths ran')
-                    except Exception as exc:
-                        for remaining in pending:
-                            remaining.cancel()
-                        self.logger.error(f'  Flowpath simulation failed with an error: {exc}')
-                        raise
-
-        with self.timed('  Generating flowpath loss grid'):
-            loss_grid_path = _join(self.plot_dir, 'flowpaths_loss.tif')
-
-            if _exists(loss_grid_path):
-                os.remove(loss_grid_path)
-                time.sleep(1)
-
-            make_soil_loss_grid_fps(watershed.discha, self.fp_runs_dir, loss_grid_path)
-    
-            assert _exists(loss_grid_path)
-
-            loss_grid_wgs = _join(self.plot_dir, 'flowpaths_loss.WGS.tif')
-
-            if _exists(loss_grid_wgs):
-                os.remove(loss_grid_wgs)
-                time.sleep(1)
-
-            cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
-                '-srcnodata', '-9999', '-dstnodata', '-9999',
-                '-r', 'near', loss_grid_path, loss_grid_wgs]
-            p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            p.wait()
-
-            assert _exists(loss_grid_wgs)
-
-        if clean_after_run:
-            self.logger.info('  Cleaning up flowpath run files... ')
-            shutil.rmtree(self.fp_runs_dir)
-            shutil.rmtree(self.fp_output_dir)
-
-            os.makedirs(self.fp_runs_dir)
-            os.makedirs(self.fp_output_dir)
+        _WEPP_RUN_SERVICE.prep_and_run_flowpaths(self, clean_after_run=clean_after_run)
 
     def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
         self.logger.info('    Prepping _prep_slopes_peridot... ')
@@ -2244,10 +1786,7 @@ class Wepp(NoDbBase):
         clip_soils_depth = soils.clip_soils_depth
         initial_sat = soils.initial_sat
 
-        try:
-            disturbed = Disturbed.getInstance(wd)
-        except:
-            disturbed = None
+        disturbed = Disturbed.tryGetInstance(wd)
 
         years = climate.input_years
 
@@ -2335,700 +1874,42 @@ class Wepp(NoDbBase):
 
 
     def _prep_managements(self, translator):
-        self.logger.info('    _prep_managements... ')
-        from wepppy.nodb.mods import RAP_TS
-
-        wd = self.wd
-
-        landuse = self.landuse_instance
-        hillslope_cancovs = landuse.hillslope_cancovs
-
-        climate = self.climate_instance
-        watershed = self.watershed_instance
-        soils = self.soils_instance
-        disturbed = Disturbed.tryGetInstance(wd)
-        if disturbed is not None:
-            _land_soil_replacements_d = disturbed.land_soil_replacements_d
-        else:
-            _land_soil_replacements_d = None
-
-        rap_ts = RAP_TS.tryGetInstance(wd)
-
-        years = climate.input_years
-        year0 = climate.year0
-
-        runs_dir = self.runs_dir
-        fp_runs_dir = self.fp_runs_dir
-        bd_d = soils.bd_d
-
-        build_d = {}
-        soil_texture_d = {}
-
-        for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
-            if (int(topaz_id) - 4) % 10 == 0:
-                continue
-            dom = landuse.domlc_d[topaz_id]
-
-            self.logger.info(f'    _prep_managements:{topaz_id}:{mukey} - {dom}... ')
-
-            man_summary = landuse.managements[dom]
-
-            wepp_id = translator.wepp(top=int(topaz_id))
-            dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
-            
-            meoization_key = (mukey, dom)
-            if disturbed:
-                disturbed_class = man_summary.disturbed_class
-                meoization_key = (mukey, dom, disturbed_class)
-
-            if rap_ts is not None:
-                meoization_key = (topaz_id, mukey, dom)
-
-            if meoization_key in build_d:
-                shutil.copyfile(build_d[meoization_key], dst_fn)
-
-                self.logger.info(f"     copying build_d['{meoization_key}'] -> {dst_fn}")
-
-            else:
-                management = None
-                if hasattr(man_summary, "get_management"):
-                    try:
-                        # Keep canonical summary behavior (override application)
-                        # when source files are directly accessible.
-                        management = man_summary.get_management()
-                    except FileNotFoundError:
-                        management = None
-
-                if management is None and all(
-                    hasattr(man_summary, attr)
-                    for attr in ("man_fn", "key", "desc", "color")
-                ):
-                    # Archive-first fallback for summaries whose man_dir points at
-                    # a logical root that is only present as <root>.nodir.
-                    man_src = materialize_input_file(
-                        wd,
-                        f"landuse/{man_summary.man_fn}",
-                        purpose="wepp-prep-managements",
-                    )
-                    management = Management.load(
-                        key=man_summary.key,
-                        man_fn=Path(man_src).name,
-                        man_dir=str(Path(man_src).parent),
-                        desc=man_summary.desc,
-                        color=man_summary.color,
-                    )
-
-                    cancov_override = getattr(man_summary, "cancov_override", None)
-                    inrcov_override = getattr(man_summary, "inrcov_override", None)
-                    rilcov_override = getattr(man_summary, "rilcov_override", None)
-
-                    if (
-                        cancov_override is not None
-                        or inrcov_override is not None
-                        or rilcov_override is not None
-                    ):
-                        for ini in getattr(management, "inis", []):
-                            if getattr(ini, "landuse", None) != 1:
-                                continue
-                            data = getattr(ini, "data", None)
-                            if data is None:
-                                continue
-
-                            if cancov_override is not None and hasattr(data, "cancov"):
-                                data.cancov = cancov_override
-                            if inrcov_override is not None and hasattr(data, "inrcov"):
-                                data.inrcov = inrcov_override
-                            if rilcov_override is not None and hasattr(data, "rilcov"):
-                                data.rilcov = rilcov_override
-
-                        if cancov_override is not None:
-                            for plant in getattr(management, "plants", []):
-                                plant_data = getattr(plant, "data", None)
-                                if plant_data is not None and hasattr(plant_data, "xmxlai"):
-                                    plant_data.xmxlai *= cancov_override
-
-                if management is None:
-                    raise AttributeError(
-                        "Management summary must expose get_management() or "
-                        "man_fn/key/desc/color attributes"
-                    )
-
-                sol_key = soils.domsoil_d[topaz_id]
-                management.set_bdtill(bd_d[sol_key])
-
-                # probably isn't the right location for this code. should be in nodb.disturbed
-                if disturbed is not None:
-                    disturbed_class_str = disturbed_class if isinstance(disturbed_class, str) else ''
-                    if isinstance(disturbed_class, str):  # occured with No Data class with c3s-disturbed map
-                        if 'mulch' in disturbed_class:
-                            disturbed_class = 'mulch'
-                        elif 'thinning' in disturbed_class:
-                            disturbed_class = 'thinning'
-                        disturbed_class_str = disturbed_class
-
-                    if hillslope_cancovs is not None and 'mulch' not in disturbed_class_str and 'thinning' not in disturbed_class_str:
-                        assert rap_ts is None, 'project has rap and rap_ts'
-                        management.set_cancov(hillslope_cancovs[str(topaz_id)])
-
-                    if mukey in soil_texture_d:
-                        clay, sand = soil_texture_d[mukey]
-                    else:
-                        clay = None
-                        sand = None
-                        _soil = soils.soils.get(mukey)
-
-                        soil_fname = getattr(_soil, 'fname', None) if _soil is not None else None
-                        if isinstance(soil_fname, str) and soil_fname:
-                            try:
-                                soil_src = materialize_input_file(
-                                    wd,
-                                    f'soils/{soil_fname}',
-                                    purpose='wepp-prep-managements-soil-texture',
-                                )
-                                soilu = WeppSoilUtil(soil_src)
-                                clay = soilu.clay
-                                sand = soilu.sand
-                            except Exception as exc:
-                                self.logger.debug(
-                                    '     _prep_managements: archive soil texture read failed for mukey=%s, fname=%s: %s',
-                                    mukey,
-                                    soil_fname,
-                                    exc,
-                                    exc_info=True,
-                                )
-
-                        if not (isfloat(clay) and isfloat(sand)) and _soil is not None:
-                            try:
-                                clay = _soil.clay
-                                sand = _soil.sand
-                            except Exception as exc:
-                                self.logger.warning(
-                                    '     _prep_managements: unable to resolve soil texture for mukey=%s; '
-                                    'skipping texture-based disturbed overrides (%s)',
-                                    mukey,
-                                    exc,
-                                )
-                                clay = None
-                                sand = None
-
-                        soil_texture_d[mukey] = (clay, sand)
-
-                    texid = None
-                    replacements = None
-                    if isfloat(clay) and isfloat(sand):
-                        texid = simple_texture(clay=clay, sand=sand)
-                        key = (texid, disturbed_class)
-                        replacements = _land_soil_replacements_d.get(key)
-
-                    if replacements is None:
-                        self.logger.info(f'     _prep_managements: {texid}:{disturbed_class} not in replacements_d')
-
-                    if disturbed_class is None or disturbed_class == '' or ('developed' in disturbed_class_str):
-                        rdmax = None
-                        xmxlai = None
-                    elif replacements is None:
-                        rdmax = None
-                        xmxlai = None
-                    else:
-                        rdmax = replacements.get('rdmax', None)
-                        if man_summary.cancov_override is None:
-                            xmxlai = replacements.get('xmxlai', None)
-                        else:
-                            rdmax = None
-                            xmxlai = None
-
-                    if isfloat(rdmax):
-                        management.set_rdmax(float(rdmax))
-
-                    if isfloat(xmxlai):
-                        management.set_xmxlai(float(xmxlai))
-
-                    if replacements is not None:
-                        apply_disturbed_management_overrides(
-                            management,
-                            replacements,
-                        )
-
-                    meoization_key = (mukey, dom, disturbed_class)
-
-                if rap_ts is not None:
-                    apply_rap_ts_cover = True
-                    if disturbed is not None:
-                        disturbed_class_lc = disturbed_class.lower().strip() if isinstance(disturbed_class, str) else ''
-                        apply_rap_ts_cover = disturbed_class_lc in {'forest', 'shrub', 'tall grass'}
-
-                    if apply_rap_ts_cover and year0 >= rap_ts.rap_start_year and year0 <= rap_ts.rap_end_year:
-                        cover = rap_ts.get_cover(topaz_id, year0, fallback=True)
-                        management.set_cancov(cover)
-
-                multi = management.build_multiple_year_man(years)
-
-                fn_contents = str(multi)
-
-                with open(dst_fn, 'w') as fp:
-                    fp.write(fn_contents)
-
-                build_d[meoization_key] = dst_fn
-                self.logger.info(f'     meoization_key: {meoization_key} -> {dst_fn}')
-
-        if 'emapr_ts' in self.mods:
-            self.logger.info('    _prep_managements:emapr_ts.analyze... ')
-            from wepppy.nodb.mods import OSUeMapR_TS
-            assert climate.observed_start_year is not None
-            assert climate.observed_end_year is not None
-
-            emapr_ts = OSUeMapR_TS.getInstance(wd)
-            emapr_ts.acquire_rasters(start_year=climate.observed_start_year,
-                                     end_year=climate.observed_end_year)
-            emapr_ts.analyze()
+        _WEPP_PREP_SERVICE.prep_managements(self, translator)
 
     def _prep_soils(self, translator, max_workers=None):
-        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
-        self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
-    
-        cpu_count = os.cpu_count() or 1
-        ncpu_override = os.getenv("WEPPPY_NCPU")
-        if max_workers is None:
-            max_workers = NCPU if ncpu_override else cpu_count
-
-        if max_workers < 1:
-            max_workers = 1
-        if ncpu_override:
-            if max_workers > NCPU:
-                max_workers = NCPU
-        elif max_workers > max(cpu_count, 20):
-            max_workers = max(cpu_count, 20)
-
-        self.logger.info(f'  Using max_workers={max_workers} for soil prep')
-
-        soils = self.soils_instance
-        watershed = self.watershed_instance
-        runs_dir = self.runs_dir
-        fp_runs_dir = self.fp_runs_dir
-        kslast = self.kslast
-        clip_soils = soils.clip_soils
-        clip_soils_depth = soils.clip_soils_depth
-        initial_sat = soils.initial_sat
-
-        kslast_map_fn = self.kslast_map
-        kslast_map = RasterDatasetInterpolator(kslast_map_fn) if kslast_map_fn is not None else None
-
-        task_args_list = []
-        for topaz_id, soil in soils.sub_iter():
-            wepp_id = translator.wepp(top=int(topaz_id))
-            src_fn = materialize_input_file(
-                self.wd,
-                f'soils/{soil.fname}',
-                purpose='wepp-prep-soils',
-            )
-            dst_fn = _join(runs_dir, f'p{wepp_id}.sol')
-
-            _kslast = None
-            modify_kslast_pars = None
-
-            if kslast_map is not None:
-                lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                try:
-                    sampled_kslast = kslast_map.get_location_info(lng, lat, method='nearest')
-                except RDIOutOfBoundsException:
-                    sampled_kslast = None
-
-                if isfloat(sampled_kslast) and float(sampled_kslast) > 0.0:
-                    _kslast = float(sampled_kslast)
-                    modify_kslast_pars = dict(
-                        map_fn=kslast_map_fn,
-                        lng=lng,
-                        lat=lat,
-                        map_value=_kslast,
-                    )
-                elif kslast is not None:
-                    _kslast = kslast
-            elif kslast is not None:
-                _kslast = kslast
-
-            task_args_list.append(
-                (
-                    topaz_id,
-                    src_fn,
-                    dst_fn,
-                    _kslast,
-                    modify_kslast_pars,
-                    initial_sat,
-                    clip_soils,
-                    clip_soils_depth,
-                )
-            )
-
-        if not task_args_list:
-            self.logger.info('  No soils require preparation.')
-            return
-
-        run_concurrent = 1
-
-        def _run_soil_prep_pool(prefer_spawn: bool):
-            try:
-                with createProcessPoolExecutor(
-                    max_workers=max_workers,
-                    logger=self.logger,
-                    prefer_spawn=prefer_spawn,
-                ) as executor:
-                    futures = [executor.submit(prep_soil, args) for args in task_args_list]
-
-                    futures_n = len(futures)
-                    count = 0
-                    pending_futures = set(futures)
-                    last_progress_time = time.time()
-
-                    while pending_futures:
-                        done, pending_futures = wait(pending_futures, timeout=5, return_when=FIRST_COMPLETED)
-
-                        if not done:
-                            since_progress = time.time() - last_progress_time
-                            pending_count = len(pending_futures)
-
-                            if since_progress >= 60:
-                                self.logger.error(
-                                    '  Soil prep tasks still pending after %.1fs; %s tasks waiting.',
-                                    round(since_progress, 1), pending_count,
-                                )
-                            else:
-                                self.logger.info(
-                                    '  Waiting on soil prep tasks (pending=%s, %.1fs since last completion).',
-                                    pending_count,
-                                    round(since_progress, 1),
-                                )
-                            continue
-
-                        for future in done:
-                            try:
-                                topaz_id, elapsed_time = future.result()
-                                count += 1
-                                self.logger.info(
-                                    f'  ({count}/{futures_n}) Completed soil prep for {topaz_id} in {elapsed_time}s'
-                                )
-                                last_progress_time = time.time()
-                            except BrokenProcessPool as exc:
-                                self.logger.error(
-                                    '  Soil prep process pool terminated unexpectedly: %s', exc
-                                )
-                                for pending_future in pending_futures:
-                                    pending_future.cancel()
-                                return False, exc
-                            except Exception as exc:
-                                self.logger.error(
-                                    f'  A soil prep task failed with an error: {exc}'
-                                )
-                                for pending_future in pending_futures:
-                                    pending_future.cancel()
-                                return False, exc
-
-                    return True, None
-            except BrokenProcessPool as exc:
-                self.logger.error(
-                    '  Failed to initialize soil prep process pool: %s', exc
-                )
-                return False, exc
-            except Exception as exc:
-                self.logger.error(
-                    '  Unexpected error during soil prep pool execution: %s', exc
-                )
-                return False, exc
-
-        def _run_soil_prep_sequential():
-            total = len(task_args_list)
-            self.logger.warning('  Running soil prep sequentially')
-            for idx, task_args in enumerate(task_args_list, start=1):
-                topaz_id, elapsed_time = prep_soil(task_args)
-                self.logger.info(
-                    f'  ({idx}/{total}) Completed soil prep for {topaz_id} in {elapsed_time}s [sequential]'
-                )
-
-        self.logger.info(f'  run_concurrent={run_concurrent}')
-        if run_concurrent:
-            self.logger.info('  Submitting soils for `prep_soil` to ProcessPoolExecutor')
-            success, failure_exc = _run_soil_prep_pool(prefer_spawn=True)
-
-            if not success and isinstance(failure_exc, BrokenProcessPool):
-                self.logger.warning(
-                    '  Retrying soil prep with fork-based executor after spawn failure'
-                )
-                success, failure_exc = _run_soil_prep_pool(prefer_spawn=False)
-
-            if not success:
-                if isinstance(failure_exc, BrokenProcessPool):
-                    self.logger.warning(
-                        '  Falling back to sequential soil prep after process pool failures'
-                    )
-                    _run_soil_prep_sequential()
-                else:
-                    raise failure_exc
-        else:
-            _run_soil_prep_sequential()
+        _WEPP_PREP_SERVICE.prep_soils(self, translator, max_workers=max_workers)
 
 
     @nodb_timed
     def _prep_climates(self, translator):
-        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
-        self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
-
-        climate = self.climate_instance
-        if climate.climate_mode == ClimateMode.SingleStormBatch:
-            self.logger.info('    _prep_climates_ss_batch... ')
-            return self._prep_climates_ss_batch(translator)
-
-        # When climate spatial mode is "multiple", climate builds can temporarily
-        # clear `sub_cli_fns` while the per-hillslope climates are being rebuilt
-        # (for example after uploading a user-defined CLI). If WEPP prep starts
-        # during that window, `Climate.sub_summary()` returns None and we would
-        # crash with a TypeError. Instead, wait briefly for the climate build to
-        # finish, or fail with an actionable error.
-        if not climate.has_climate:
-            started = time.time()
-            last_log_time = 0.0
-
-            unlocked_grace_seconds = 30.0
-            locked_wait_seconds = 30.0 * 60.0
-
-            while True:
-                climate = self.climate_instance
-                if climate.has_climate:
-                    break
-
-                now = time.time()
-                locked = False
-                try:
-                    locked = climate.islocked()
-                except Exception:
-                    locked = False
-
-                waited = now - started
-                if locked:
-                    if waited > locked_wait_seconds:
-                        break
-                else:
-                    # If nothing is actively building the climate, don't spin for long.
-                    if waited > unlocked_grace_seconds:
-                        break
-
-                if now - last_log_time > 15.0:
-                    self.logger.info(
-                        "    Waiting for climate build to complete (locked=%s, waited=%.0fs)",
-                        locked,
-                        waited,
-                    )
-                    last_log_time = now
-
-                time.sleep(2)
-
-            if not climate.has_climate:
-                raise ValueError(
-                    "Climate inputs are not ready. Build/upload climate (and wait for it to finish) "
-                    "before running WEPP."
-                )
-        
-        watershed = self.watershed_instance
-        runs_dir = self.runs_dir
-
-        sub_n = watershed.sub_n
-        count = 0
-        for topaz_id in watershed._subs_summary:
-            wepp_id = translator.wepp(top=int(topaz_id))
-            dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
-
-            cli_summary = climate.sub_summary(topaz_id)
-            if cli_summary is None or cli_summary.get('cli_fn') in (None, ''):
-                raise ValueError(
-                    f"Climate inputs are missing for topaz_id={topaz_id}. "
-                    "Build/upload climate (and wait for it to finish) before running WEPP."
-                )
-            src_rel = f"climate/{cli_summary['cli_fn']}"
-            copy_input_file(self.wd, src_rel, dst_fn)
-            count += 1
-            self.logger.info(f' ({count}/{sub_n}) topaz_id: {topaz_id} | {src_rel} -> {dst_fn}')
+        _WEPP_PREP_SERVICE.prep_climates(self, translator)
 
     def _prep_climates_ss_batch(self, translator):
-        climate = self.climate_instance
-
-        self.logger.info('    _prep_climates_ss_batch... ')
-        watershed = self.watershed_instance
-        runs_dir = self.runs_dir
-
-        for d in climate.ss_batch_storms:
-            ss_batch_id = d['ss_batch_id']
-            ss_batch_key = d['ss_batch_key']
-            cli_fn = d['cli_fn']
-
-            for topaz_id in watershed._subs_summary:
-                self.logger.info(f'    _prep_climates:{topaz_id}... ')
-
-                wepp_id = translator.wepp(top=int(topaz_id))
-                dst_fn = _join(runs_dir, f'p{wepp_id}.{ss_batch_id}.cli')
-
-                src_rel = f'climate/{cli_fn}'
-                copy_input_file(self.wd, src_rel, dst_fn)
-
-            dst_fn = _join(runs_dir, f'pw0.{ss_batch_id}.cli')
-            src_rel = f'climate/{cli_fn}'
-            copy_input_file(self.wd, src_rel, dst_fn)
+        _WEPP_PREP_SERVICE.prep_climates_ss_batch(self, translator)
 
     def _make_hillslope_runs(self, translator, reveg=False,
                   man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
-        self.logger.info('    Prepping _make_hillslope_runs... ')
-        watershed = self.watershed_instance
-        runs_dir = self.runs_dir
-        fp_runs_dir = self.fp_runs_dir
-        climate = self.climate_instance
-        years = climate.input_years
-
-        if climate.climate_mode in [ClimateMode.SingleStorm, ClimateMode.UserDefinedSingleStorm]:
-            for topaz_id in watershed._subs_summary:
-                wepp_id = translator.wepp(top=int(topaz_id))
-
-                make_ss_hillslope_run(wepp_id, runs_dir,
-                                      man_relpath=man_relpath,
-                                      cli_relpath=cli_relpath,
-                                      slp_relpath=slp_relpath,
-                                      sol_relpath=sol_relpath)
-
-        elif climate.climate_mode == ClimateMode.SingleStormBatch:
-            for topaz_id in watershed._subs_summary:
-                wepp_id = translator.wepp(top=int(topaz_id))
-
-                for d in climate.ss_batch_storms:
-                    ss_batch_id = d['ss_batch_id']
-                    ss_batch_key = d['ss_batch_key']
-                    make_ss_batch_hillslope_run(wepp_id, 
-                                                runs_dir, 
-                                                ss_batch_id=ss_batch_id, 
-                                                ss_batch_key=ss_batch_key,
-                                                man_relpath=man_relpath,
-                                                cli_relpath=cli_relpath,
-                                                slp_relpath=slp_relpath,
-                                                sol_relpath=sol_relpath)
-        else:
-            for topaz_id in watershed._subs_summary:
-                wepp_id = translator.wepp(top=int(topaz_id))
-                make_hillslope_run(wepp_id, 
-                                   years, 
-                                   runs_dir, 
-                                   reveg=reveg,
-                                   man_relpath=man_relpath,
-                                   cli_relpath=cli_relpath,
-                                   slp_relpath=slp_relpath,
-                                   sol_relpath=sol_relpath)
+        _WEPP_PREP_SERVICE.make_hillslope_runs(
+            self,
+            translator,
+            reveg=reveg,
+            man_relpath=man_relpath,
+            cli_relpath=cli_relpath,
+            slp_relpath=slp_relpath,
+            sol_relpath=sol_relpath,
+        )
 
     def run_hillslopes(self,
                   man_relpath: str = '', cli_relpath: str = '', slp_relpath: str = '', sol_relpath: str = '',
                   max_workers: Optional[int] = None) -> None:
-        func_name = inspect.currentframe().f_code.co_name  # type: ignore[union-attr]
-        self.logger.info(f'{self.class_name}.{func_name}()')
-
-        cpu_count = os.cpu_count() or 1
-        ncpu_override = os.getenv("WEPPPY_NCPU")
-        if max_workers is None:
-            max_workers = NCPU if ncpu_override else cpu_count
-        if max_workers < 1:
-            max_workers = 1
-        if ncpu_override:
-            if max_workers > NCPU:
-                max_workers = NCPU
-        elif max_workers > max(cpu_count, 16):
-            max_workers = max(cpu_count, 16)
-
-        self.logger.info(f'Running Hillslopes with max_workers={max_workers}')
-        watershed = self.watershed_instance
-        translator = watershed.translator_factory()
-        climate = self.climate_instance
-        landuse = self.landuse_instance
-        runs_dir = os.path.abspath(self.runs_dir)
-        fp_runs_dir = self.fp_runs_dir
-        wepp_bin = self.wepp_bin
-
-        self.logger.info(f'    wepp_bin:{wepp_bin}')
-
-        sub_n = watershed.sub_n
-
-        with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            futures = []
-            if climate.climate_mode == ClimateMode.SingleStormBatch:
-                self.logger.info(f'  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - SS batch')
-                for i, topaz_id in enumerate(watershed._subs_summary):
-                    self.logger.info(f'  submitting {topaz_id} to executor')
-
-                    dom = landuse.domlc_d[topaz_id]
-                    man = landuse.managements[dom]
-                    if man.disturbed_class in ["agriculture crops"]:
-                        wepp_bin = "wepp_dcc52a6"
-                    self.logger.info(f'  using {wepp_bin} for {topaz_id} ({man.disturbed_class})')
-                        
-                    ss_n = len(climate.ss_batch_storms)
-                    for d in climate.ss_batch_storms:
-                        ss_batch_id = d['ss_batch_id']
-                        ss_batch_key = d['ss_batch_key']
-
-                        wepp_id = translator.wepp(top=int(topaz_id))
-                        futures.append(pool.submit(
-                            run_ss_batch_hillslope,
-                            wepp_id=wepp_id,
-                            runs_dir=runs_dir,
-                            wepp_bin=wepp_bin,
-                            ss_batch_id=ss_batch_id,
-                            man_relpath=man_relpath,
-                            cli_relpath=cli_relpath,
-                            slp_relpath=slp_relpath,
-                            sol_relpath=sol_relpath
-                        ))
-
-            else:
-                self.logger.info(f'  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - no SS batch')
-                for i, topaz_id in enumerate(watershed._subs_summary):
-                    self.logger.info(f'  submitting {topaz_id} to executor')
-
-                    dom = landuse.domlc_d[topaz_id]
-                    man = landuse.managements[dom]
-                    if man.disturbed_class in ["agriculture crops"]:
-                        wepp_bin = "wepp_dcc52a6"
-                    self.logger.info(f'  using {wepp_bin} for {topaz_id} ({man.disturbed_class})')
-
-                    wepp_id = translator.wepp(top=int(topaz_id))
-                    futures.append(pool.submit(
-                        run_hillslope,
-                        wepp_id=wepp_id,
-                        runs_dir=runs_dir,
-                        wepp_bin=wepp_bin,
-                        man_relpath=man_relpath,
-                        cli_relpath=cli_relpath,
-                        slp_relpath=slp_relpath,
-                        sol_relpath=sol_relpath
-                    ))
-
-            futures_n = len(futures)
-            count = 0
-            pending = set(futures)
-            while pending:
-                done, pending = wait(pending, timeout=30, return_when=FIRST_COMPLETED)
-
-                if not done:
-                    # Hillslope runs can legitimately extend well beyond 30s; this warning is purely observational.
-                    self.logger.warning('  Hillslope simulations still running after 30 seconds; continuing to wait.')
-                    continue
-
-                for future in done:
-                    try:
-                        status, _id, elapsed_time = future.result()
-                        count += 1
-                        self.logger.info(f'  ({count}/{futures_n})  wepp hillslope {_id} completed in {elapsed_time}s with status={status}')
-                    except Exception as exc:
-                        for remaining in pending:
-                            remaining.cancel()
-                        self.logger.error(f'  Hillslope simulation failed with an error: {exc}')
-                        raise
-
-        try:
-            prep = RedisPrep.getInstance(self.wd)
-            prep.timestamp(TaskEnum.run_wepp_hillslopes)
-        except FileNotFoundError:
-            pass
+        _WEPP_RUN_SERVICE.run_hillslopes(
+            self,
+            man_relpath=man_relpath,
+            cli_relpath=cli_relpath,
+            slp_relpath=slp_relpath,
+            sol_relpath=sol_relpath,
+            max_workers=max_workers,
+        )
 
     #
     # watershed
@@ -3037,41 +1918,15 @@ class Wepp(NoDbBase):
                        tcr: Optional[bool] = None, avke: Optional[float] = None,
                        channel_manning_roughness_coefficient_bare: Optional[float] = None,
                        channel_manning_roughness_coefficient_veg: Optional[float] = None) -> None:
-        self.logger.info('Prepping Watershed... ')
-
-        watershed = self.watershed_instance
-        translator = watershed.translator_factory()
-
-        if critical_shear is None:
-            crit_shear_map = getattr(self, 'channel_critical_shear_map', None)
-
-            if crit_shear_map is not None:
-                lng, lat = watershed.centroid
-                rdi = RasterDatasetInterpolator(crit_shear_map)
-                critical_shear = rdi.get_location_info(lng, lat, method='nearest')
-                self.logger.info(f'critical_shear from map {crit_shear_map} at {watershed.centroid} ={critical_shear}... ')
-
-        if critical_shear is None:
-            critical_shear = self.channel_critical_shear
-
-        self._prep_structure(translator)
-        self._prep_channel_slopes()
-        self._prep_channel_chn(translator, erodibility, critical_shear, 
-                               channel_manning_roughness_coefficient_bare=channel_manning_roughness_coefficient_bare, 
-                               channel_manning_roughness_coefficient_veg=channel_manning_roughness_coefficient_veg)
-        self._prep_impoundment()
-        self._prep_channel_soils(translator, erodibility, critical_shear, avke)
-        self._prep_channel_climate(translator)
-        self._prep_channel_input()
-        self._prep_tc()
-
-        if (tcr is None and self.run_tcr) or tcr:
-            self._prep_tcr()
-
-        self._prep_watershed_managements(translator)
-        self._make_watershed_run(translator)
-
-        self.trigger(TriggerEvents.WEPP_PREP_WATERSHED_COMPLETE)
+        _WEPP_PREP_SERVICE.prep_watershed(
+            self,
+            erodibility=erodibility,
+            critical_shear=critical_shear,
+            tcr=tcr,
+            avke=avke,
+            channel_manning_roughness_coefficient_bare=channel_manning_roughness_coefficient_bare,
+            channel_manning_roughness_coefficient_veg=channel_manning_roughness_coefficient_veg,
+        )
 
     def _prep_structure(self, translator):
         self.logger.info('    Prepping _prep_structure... ')
@@ -3455,117 +2310,7 @@ class Wepp(NoDbBase):
             make_watershed_run(years, wepp_ids, runs_dir)
 
     def run_watershed(self) -> None:
-        from wepppy.export.prep_details import (
-            export_channels_prep_details,
-            export_hillslopes_prep_details
-        )
-        if not self.run_wepp_watershed:
-            self.logger.info('Skipping WEPP watershed run (wepp.run_wepp_watershed=False)')
-            return
-        wd = self.wd
-        climate = self.climate_instance
-        wepp_bin = self.wepp_bin
-
-        if 'wepp_50k' in wepp_bin:
-            wepp_bin = 'wepp_dcc52a6'
-
-        self.logger.info(f'Running Watershed wepp_bin:{self.wepp_bin}')
-        self.logger.info(f'    climate_mode:{climate.climate_mode.name}')
-        self.logger.info(f'    output_dir:{self.output_dir}')
-        self.logger.info(f'    runs_dir:{self.runs_dir}')
-
-        runs_dir = self.runs_dir
-
-        if climate.climate_mode == ClimateMode.SingleStormBatch:
-            with self.timed('  Running watershed ss batch runs'):
-                for d in climate.ss_batch_storms:
-                    ss_batch_key = d['ss_batch_key']
-                    ss_batch_id = d['ss_batch_id']
-                    run_ss_batch_watershed(runs_dir, wepp_bin, ss_batch_id)
-
-                    self.logger.info('    moving .out files...')
-                    for fn in glob(_join(self.runs_dir, '*.out')):
-                        dst_path = _join(self.output_dir, ss_batch_key, _split(fn)[1])
-                        shutil.move(fn, dst_path)
-
-        else:
-            with self.timed('  Running watershed run'):
-                assert run_watershed(runs_dir, wepp_bin=wepp_bin, status_channel=self._status_channel)
-
-                self.logger.info('    moving .out files...')
-                for fn in glob(_join(self.runs_dir, '*.out')):
-                    dst_path = _join(self.output_dir, _split(fn)[1])
-                    shutil.move(fn, dst_path)
-
-        if not self.is_omni_contrasts_run:
-            self.logger.info('  Not omni contrasts run, running post processing... ')
-
-            if self.prep_details_on_run_completion:
-                with self.timed('  Exporting prep details'):
-                    export_channels_prep_details(wd)
-                    export_hillslopes_prep_details(wd)
-
-            climate = self.climate_instance
-
-            if not climate.is_single_storm:
-                with self.timed('  running totalwatsed3'):
-                    self._build_totalwatsed3()
-
-                with self.timed('  running hillslope_watbal'):
-                    self._run_hillslope_watbal()
-
-                if self.legacy_arc_export_on_run_completion:
-                    with self.timed('  running legacy_arc_export'):
-                        from wepppy.export import  legacy_arc_export
-                        legacy_arc_export(self.wd)
-
-            with self.timed('  generating loss report'):
-                _ = self.loss_report # make the .parquet files for loss report
-
-            if self.arc_export_on_run_completion:
-                with self.timed('  running gpkg_export'):
-                    from wepppy.export.gpkg_export import gpkg_export
-                    gpkg_export(self.wd)
-
-                    self.make_loss_grid()
-
-        self.logger.info('Watershed Run Complete')
-
-        try:
-            prep = RedisPrep.getInstance(self.wd)
-            prep.timestamp(TaskEnum.run_wepp_watershed)
-        except FileNotFoundError:
-            pass
-
-        from wepppy.wepp.interchange.watershed_interchange import run_wepp_watershed_interchange
-        from wepppy.wepp.interchange.interchange_documentation import generate_interchange_documentation
-    
-        climate = self.climate_instance.getInstance(self.wd)
-        start_year = climate.calendar_start_year
-        is_single_storm = climate.is_single_storm
-
-        output_options = getattr(self, "_contrast_output_options", None)
-        if self.is_omni_contrasts_run and isinstance(output_options, dict):
-            run_ebe_interchange = bool(output_options.get("ebe_pw0", True))
-            run_chan_out_interchange = bool(output_options.get("chan_out", False))
-            run_chnwb_interchange = bool(output_options.get("chnwb", False)) and not is_single_storm
-            run_soil_interchange = bool(output_options.get("soil_pw0", False)) and not is_single_storm
-        else:
-            run_ebe_interchange = True
-            run_chan_out_interchange = True
-            run_chnwb_interchange = not is_single_storm
-            run_soil_interchange = not is_single_storm
-
-        run_wepp_watershed_interchange(
-            self.output_dir,
-            start_year=start_year,
-            run_ebe_interchange=run_ebe_interchange,
-            run_chan_out_interchange=run_chan_out_interchange,
-            run_soil_interchange=run_soil_interchange,
-            run_chnwb_interchange=run_chnwb_interchange,
-            delete_after_interchange=self.delete_after_interchange,
-        )
-        generate_interchange_documentation(self.wepp_interchange_dir)
+        _WEPP_RUN_SERVICE.run_watershed(self)
 
     def post_discord_wepp_run_complete(self):
         if send_discord_message is not None:
@@ -3633,68 +2378,17 @@ class Wepp(NoDbBase):
                               exclude_months: Optional[List[int]] = None,
                               chn_topaz_id_of_interest: Optional[int] = None,
                               wait_for_inputs: bool = True) -> ReturnPeriods:
-
-        output_dir = self.output_dir
-
-        return_periods_fn = None
-        cached_report: ReturnPeriods | None = None
-        rep_yrs = None
-        rep_mos = None
-        if meoization:
-            req_yrs = None if not exclude_yr_indxs else tuple(sorted({int(x) for x in exclude_yr_indxs}))
-            req_mos = None if not exclude_months else tuple(sorted({int(x) for x in exclude_months}))
-
-            parts = []
-            if req_yrs:
-                parts.append("exclude_yr_indxs=" + ",".join(map(str, req_yrs)))
-            if req_mos:
-                parts.append("exclude_months=" + ",".join(map(str, req_mos)))
-            if gringorten_correction:
-                parts.append("gringorten=True")
-            if chn_topaz_id_of_interest is not None:
-                parts.append("chn_topaz_id=" + str(chn_topaz_id_of_interest))
-            suffix = ("__" + "__".join(parts)) if parts else ""
-            return_periods_fn = _join(output_dir, f"return_periods{suffix}.json")
-
-            if _exists(return_periods_fn):
-                with open(return_periods_fn) as fp:
-                    cached_report = ReturnPeriods.from_dict(json.load(fp))
-
-                rep_yrs = getattr(cached_report, "exclude_yr_indxs", None)
-                rep_mos = getattr(cached_report, "exclude_months", None)
-                rep_yrs = None if not rep_yrs else tuple(sorted({int(x) for x in rep_yrs}))
-                rep_mos = None if not rep_mos else tuple(sorted({int(x) for x in rep_mos}))
-
-            if cached_report and req_yrs == rep_yrs and req_mos == rep_mos:
-                has_calendar_year = any(
-                    ("calendar_year" in row or "display_year" in row)
-                    for measure_rows in cached_report.return_periods.values()
-                    for row in measure_rows.values()
-                )
-                if has_calendar_year:
-                    return cached_report
-                cached_report = None
-
-        readonly = _exists(_join(self.wd, 'READONLY'))
-        dataset = ReturnPeriodDataset(
-            self.wd,
-            auto_refresh=not readonly,
-            wait_for_inputs=wait_for_inputs,
-        )
-        return_periods = dataset.create_report(
-            rec_intervals,
+        return _WEPP_POSTPROCESS_SERVICE.report_return_periods(
+            self,
+            rec_intervals=rec_intervals,
             exclude_yr_indxs=exclude_yr_indxs,
-            exclude_months=exclude_months,
             method=method,
             gringorten_correction=gringorten_correction,
-            topaz_id=chn_topaz_id_of_interest,
+            meoization=meoization,
+            exclude_months=exclude_months,
+            chn_topaz_id_of_interest=chn_topaz_id_of_interest,
+            wait_for_inputs=wait_for_inputs,
         )
-
-        if return_periods_fn is not None:
-            with open(return_periods_fn, 'w') as fp:
-                json.dump(return_periods.to_dict(), fp, cls=NumpyEncoder)
-
-        return return_periods
 
     def export_return_periods_tsv_summary(self, rec_intervals: Tuple[int, ...] = (50, 25, 20, 10, 5, 2), 
                            exclude_yr_indxs: Optional[List[int]] = None, 
@@ -3788,108 +2482,10 @@ class Wepp(NoDbBase):
         return self._loss_report
 
     def query_sub_val(self, measure: str) -> Optional[Dict[str, Dict[str, Any]]]:
-        wd = self.wd
-        report = self.loss_report
-        if report is None:
-            return None
-
-        translator = self.watershed_instance.translator_factory()
-
-        def _resolve_identifier(row, *candidates):
-            for key in candidates:
-                if key not in row:
-                    continue
-                value = row.get(key)
-                if value is None:
-                    continue
-                invalid = False
-                try:
-                    if value != value:
-                        invalid = True
-                except TypeError:
-                    invalid = True
-                if invalid:
-                    continue
-                try:
-                    return int(value)
-                except (TypeError, ValueError):
-                    try:
-                        return int(float(value))
-                    except (TypeError, ValueError):
-                        continue
-            raise KeyError(f"Missing identifier columns {candidates} in loss hill record: {row}")
-
-        d = {}
-        for row in report.hill_tbl:
-            wepp_id = _resolve_identifier(row, "wepp_id")
-            topaz_id = translator.top(wepp=wepp_id)
-
-            v = row.get(measure, None)
-            if isnan(v) or isinf(v):
-                v = None
-
-            d[str(topaz_id)] = dict(
-                topaz_id=topaz_id,
-                value=v
-            )
-
-        return d
+        return _WEPP_POSTPROCESS_SERVICE.query_sub_val(self, measure)
 
     def query_chn_val(self, measure: str) -> Optional[Dict[str, Dict[str, Any]]]:
-        from wepppy.wepp.interchange.watershed_loss import Loss
-        wd = self.wd
-
-        translator = self.watershed_instance.translator_factory()
-        output_dir = self.output_dir
-        loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-
-        if not _exists(loss_pw0):
-            return None
-
-        if not hasattr(self, '_loss_report'):
-            self._loss_report = Loss(loss_pw0, self.has_phosphorus, self.wd)
-
-        report = self._loss_report
-
-        def _resolve_identifier(row, *candidates):
-            for key in candidates:
-                if key not in row:
-                    continue
-                value = row.get(key)
-                if value is None:
-                    continue
-                invalid = False
-                try:
-                    if value != value:
-                        invalid = True
-                except TypeError:
-                    invalid = True
-                if invalid:
-                    continue
-                try:
-                    return int(value)
-                except (TypeError, ValueError):
-                    try:
-                        return int(float(value))
-                    except (TypeError, ValueError):
-                        continue
-            raise KeyError(f"Missing identifier columns {candidates} in loss channel record: {row}")
-
-        d = {}
-        for row in report.chn_tbl:
-            chn_enum = _resolve_identifier(row, "chn_enum")
-            topaz_id = translator.top(chn_enum=chn_enum)
-
-            v = row.get(measure, None)
-            if isnan(v) or isinf(v):
-                v = None
-
-            d[str(topaz_id)] = dict(
-                topaz_id=topaz_id,
-                value=v
-            )
-
-        return d
+        return _WEPP_POSTPROCESS_SERVICE.query_chn_val(self, measure)
 
     def make_loss_grid(self) -> None:
         watershed = self.watershed_instance

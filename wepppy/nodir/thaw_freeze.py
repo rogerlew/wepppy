@@ -13,8 +13,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from time import time
 
-from wepppy.nodb.base import LOCK_DEFAULT_TTL, redis_lock_client
-
 from .errors import nodir_invalid_archive, nodir_locked
 from .fs import _load_zip_index, _stat_ctime_ns, _stat_mtime_ns, _validate_zip_entry_name, _validate_zip_info
 from .parquet_sidecars import logical_parquet_to_sidecar_relpath
@@ -45,6 +43,10 @@ __all__ = [
 
 
 _BUFFER_SIZE = 1024 * 1024
+
+# Test harnesses monkeypatch this module attribute directly.
+_REDIS_LOCK_CLIENT_UNSET = object()
+redis_lock_client = _REDIS_LOCK_CLIENT_UNSET
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,6 +85,19 @@ def _redis_value_text(value: object) -> str | None:
     return str(value)
 
 
+def _maintenance_lock_backend() -> tuple[int, object | None]:
+    override = globals().get("redis_lock_client", _REDIS_LOCK_CLIENT_UNSET)
+    if override is not _REDIS_LOCK_CLIENT_UNSET:
+        from wepppy.nodb.base import LOCK_DEFAULT_TTL
+
+        return LOCK_DEFAULT_TTL, override
+
+    # Delay import to avoid query-engine bootstrap cycles during module import.
+    from wepppy.nodb.base import LOCK_DEFAULT_TTL, redis_lock_client
+
+    return LOCK_DEFAULT_TTL, redis_lock_client
+
+
 def maintenance_lock_key(wd: str | Path, root: str) -> str:
     wd_path = Path(os.path.abspath(str(wd)))
     normalized_root = _normalize_root(root)
@@ -102,10 +117,11 @@ def acquire_maintenance_lock(
     runid = _runid_from_wd(wd_path)
     key = maintenance_lock_key(wd_path, normalized_root)
 
-    if redis_lock_client is None:
+    lock_default_ttl, redis_client = _maintenance_lock_backend()
+    if redis_client is None:
         raise nodir_locked("NoDir maintenance lock backend unavailable")
 
-    ttl = max(1, int(ttl_seconds if ttl_seconds is not None else LOCK_DEFAULT_TTL))
+    ttl = max(1, int(ttl_seconds if ttl_seconds is not None else lock_default_ttl))
     host = socket.gethostname()
     pid = os.getpid()
     owner = _lock_owner(host, pid)
@@ -122,7 +138,7 @@ def acquire_maintenance_lock(
     )
 
     try:
-        acquired = redis_lock_client.set(key, value, nx=True, ex=ttl)
+        acquired = redis_client.set(key, value, nx=True, ex=ttl)
     except Exception as exc:
         raise nodir_locked("failed to acquire NoDir maintenance lock") from exc
     if not acquired:
@@ -141,7 +157,8 @@ def acquire_maintenance_lock(
 
 
 def release_maintenance_lock(lock: NoDirMaintenanceLock) -> None:
-    if redis_lock_client is None:
+    _, redis_client = _maintenance_lock_backend()
+    if redis_client is None:
         return
 
     release_lua = (
@@ -151,14 +168,14 @@ def release_maintenance_lock(lock: NoDirMaintenanceLock) -> None:
     )
 
     try:
-        if hasattr(redis_lock_client, "eval"):
-            redis_lock_client.eval(release_lua, 1, lock.key, lock.value)
+        if hasattr(redis_client, "eval"):
+            redis_client.eval(release_lua, 1, lock.key, lock.value)
             return
     except Exception:
         pass
 
     try:
-        current = redis_lock_client.get(lock.key)
+        current = redis_client.get(lock.key)
     except Exception:
         return
 
@@ -166,7 +183,7 @@ def release_maintenance_lock(lock: NoDirMaintenanceLock) -> None:
         return
 
     try:
-        redis_lock_client.delete(lock.key)
+        redis_client.delete(lock.key)
     except Exception:
         pass
 

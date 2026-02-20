@@ -144,6 +144,21 @@ def test_projection_lock_contention_without_metadata_returns_locked(
     release_root_projection(probe)
 
 
+def test_projection_explicit_none_override_disables_backend(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import wepppy.nodir.projections as projections_mod
+
+    monkeypatch.setattr("wepppy.nodb.base.redis_lock_client", _RedisLockStub(), raising=False)
+    monkeypatch.setattr(projections_mod, "redis_lock_client", None)
+
+    with pytest.raises(NoDirError) as exc:
+        projections_mod._acquire_lock("nodb-lock:test:key", purpose="unit-test")
+
+    assert exc.value.http_status == 503
+    assert exc.value.code == "NODIR_LOCKED"
+
+
 def test_projection_rejects_unmanaged_mixed_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     wd = tmp_path
     (wd / "watershed").mkdir(parents=True, exist_ok=True)

@@ -15,8 +15,6 @@ from pathlib import Path
 from time import time
 from typing import Iterator, Literal
 
-from wepppy.nodb.base import LOCK_DEFAULT_TTL, redis_lock_client
-
 from .errors import NoDirError, nodir_invalid_archive, nodir_locked, nodir_mixed_state
 from .fs import _get_zip_index, resolve
 from .paths import NODIR_ROOTS, NoDirRoot
@@ -36,6 +34,10 @@ ProjectionMode = Literal["read", "mutate"]
 _SCHEMA_VERSION = 1
 _MANAGED_BACKEND = "symlink+archive-projection"
 _REUSE_LOCK_TTL_SECONDS = 30
+
+# Test harnesses monkeypatch this module attribute directly.
+_REDIS_LOCK_CLIENT_UNSET = object()
+redis_lock_client = _REDIS_LOCK_CLIENT_UNSET
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,11 +112,25 @@ def _redis_value_text(value: object) -> str | None:
     return str(value)
 
 
+def _projection_lock_backend() -> tuple[int, object | None]:
+    override = globals().get("redis_lock_client", _REDIS_LOCK_CLIENT_UNSET)
+    if override is not _REDIS_LOCK_CLIENT_UNSET:
+        from wepppy.nodb.base import LOCK_DEFAULT_TTL
+
+        return LOCK_DEFAULT_TTL, override
+
+    # Delay import to avoid query-engine bootstrap cycles during module import.
+    from wepppy.nodb.base import LOCK_DEFAULT_TTL, redis_lock_client
+
+    return LOCK_DEFAULT_TTL, redis_lock_client
+
+
 def _acquire_lock(lock_key: str, *, purpose: str, ttl_seconds: int | None = None) -> str:
-    if redis_lock_client is None:
+    lock_default_ttl, redis_client = _projection_lock_backend()
+    if redis_client is None:
         raise nodir_locked("NoDir projection lock backend unavailable")
 
-    ttl = max(1, int(ttl_seconds if ttl_seconds is not None else LOCK_DEFAULT_TTL))
+    ttl = max(1, int(ttl_seconds if ttl_seconds is not None else lock_default_ttl))
     token = uuid.uuid4().hex
     lock_value = json.dumps(
         {
@@ -127,7 +143,7 @@ def _acquire_lock(lock_key: str, *, purpose: str, ttl_seconds: int | None = None
         separators=(",", ":"),
     )
     try:
-        acquired = redis_lock_client.set(lock_key, lock_value, nx=True, ex=ttl)
+        acquired = redis_client.set(lock_key, lock_value, nx=True, ex=ttl)
     except Exception as exc:
         raise nodir_locked("failed to acquire NoDir projection lock") from exc
     if not acquired:
@@ -136,7 +152,8 @@ def _acquire_lock(lock_key: str, *, purpose: str, ttl_seconds: int | None = None
 
 
 def _release_lock(lock_key: str, lock_value: str) -> None:
-    if redis_lock_client is None:
+    _, redis_client = _projection_lock_backend()
+    if redis_client is None:
         return
 
     release_lua = (
@@ -145,20 +162,20 @@ def _release_lock(lock_key: str, lock_value: str) -> None:
         "else return 0 end"
     )
     try:
-        if hasattr(redis_lock_client, "eval"):
-            redis_lock_client.eval(release_lua, 1, lock_key, lock_value)
+        if hasattr(redis_client, "eval"):
+            redis_client.eval(release_lua, 1, lock_key, lock_value)
             return
     except Exception:
         pass
 
     try:
-        current = redis_lock_client.get(lock_key)
+        current = redis_client.get(lock_key)
     except Exception:
         return
     if _redis_value_text(current) != lock_value:
         return
     try:
-        redis_lock_client.delete(lock_key)
+        redis_client.delete(lock_key)
     except Exception:
         pass
 
@@ -379,11 +396,12 @@ def _assert_active_ownership(metadata: dict, handle: ProjectionHandle) -> None:
     if lock_key != handle.lock_key or lock_value != handle.lock_value:
         raise nodir_locked("projection lock ownership lost")
 
-    if redis_lock_client is None:
+    _, redis_client = _projection_lock_backend()
+    if redis_client is None:
         raise nodir_locked("NoDir projection lock backend unavailable")
 
     try:
-        current = _redis_value_text(redis_lock_client.get(lock_key))
+        current = _redis_value_text(redis_client.get(lock_key))
     except Exception as exc:
         raise nodir_locked("failed to verify NoDir projection lock ownership") from exc
     if current != lock_value:
@@ -396,7 +414,8 @@ def _sweep_stale_projection_metadata(*, wd_path: Path, root: NoDirRoot) -> None:
         return
 
     # Fail closed when we cannot verify lock ownership.
-    if redis_lock_client is None:
+    _, redis_client = _projection_lock_backend()
+    if redis_client is None:
         return
 
     for metadata_file in projections_root.glob("*/*.json"):
@@ -411,7 +430,7 @@ def _sweep_stale_projection_metadata(*, wd_path: Path, root: NoDirRoot) -> None:
             continue
 
         try:
-            lock_live = _redis_value_text(redis_lock_client.get(lock_key)) == lock_value
+            lock_live = _redis_value_text(redis_client.get(lock_key)) == lock_value
         except Exception:
             continue
 
@@ -489,9 +508,10 @@ def acquire_root_projection(
             raise nodir_locked("NoDir projection lock is currently held")
 
         existing_lock_value = str(metadata.get("lock_value", ""))
-        if redis_lock_client is not None:
+        _, redis_client = _projection_lock_backend()
+        if redis_client is not None:
             try:
-                current = _redis_value_text(redis_lock_client.get(lock_key))
+                current = _redis_value_text(redis_client.get(lock_key))
             except Exception:
                 current = None
             if current != existing_lock_value:
@@ -504,9 +524,10 @@ def acquire_root_projection(
                 raise nodir_locked("NoDir projection metadata is stale")
 
             existing_lock_value = str(metadata.get("lock_value", ""))
-            if redis_lock_client is not None:
+            _, redis_client = _projection_lock_backend()
+            if redis_client is not None:
                 try:
-                    current = _redis_value_text(redis_lock_client.get(lock_key))
+                    current = _redis_value_text(redis_client.get(lock_key))
                 except Exception:
                     current = None
                 if current != existing_lock_value:

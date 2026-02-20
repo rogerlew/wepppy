@@ -149,6 +149,21 @@ def test_materialize_lock_contention_returns_503(tmp_path: Path, monkeypatch: py
     assert err.code == "NODIR_LOCKED"
 
 
+def test_materialize_explicit_none_override_disables_backend(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import wepppy.nodir.materialize as materialize_mod
+
+    monkeypatch.setattr("wepppy.nodb.base.redis_lock_client", _RedisLockStub(), raising=False)
+    monkeypatch.setattr(materialize_mod, "redis_lock_client", None)
+
+    with pytest.raises(NoDirError) as exc:
+        materialize_mod._acquire_materialize_lock("nodb-lock:test:key", purpose="unit-test")
+
+    assert exc.value.http_status == 503
+    assert exc.value.code == "NODIR_LOCKED"
+
+
 def test_materialize_limit_exceeded_returns_413(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     wd = tmp_path
     _write_zip(wd / "watershed.nodir", {"a.txt": b"1234567890"})

@@ -538,7 +538,7 @@ def test_prep_multi_ofe_reads_watershed_soils_landuse_roots(
     monkeypatch.setattr(
         wepp_module,
         "Disturbed",
-        type("DisturbedStub", (), {"getInstance": staticmethod(lambda _wd: (_ for _ in ()).throw(RuntimeError()))}),
+        type("DisturbedStub", (), {"tryGetInstance": staticmethod(lambda _wd: None)}),
     )
     monkeypatch.setattr(wepp_module, "WeppSoilUtil", _DummySoilUtil)
     monkeypatch.setattr(wepp_module, "Management", _DummyManagement)
@@ -577,6 +577,34 @@ def test_prep_multi_ofe_reads_watershed_soils_landuse_roots(
     assert copied[0][1] == "watershed/slope_files/hillslopes/hill_11.mofe.slp"
     assert any(rel == "soils/hill_11.mofe.sol" for _, rel, _ in path_contexts)
     assert any(rel == "landuse/hill_11.mofe.man" for _, rel, _ in path_contexts)
+
+
+def test_prep_multi_ofe_propagates_unexpected_disturbed_errors(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wepp = _wepp_stub(tmp_path)
+
+    climate = SimpleNamespace(input_years=[2015, 2016])
+    watershed = SimpleNamespace(subs_summary={}, hillslope_centroid_lnglat=lambda _topaz_id: (-116.1, 47.2))
+    soils = SimpleNamespace(clip_soils=False, clip_soils_depth=10.0, initial_sat=0.3)
+
+    monkeypatch.setattr(Wepp, "landuse_instance", property(lambda _self: SimpleNamespace()))
+    monkeypatch.setattr(Wepp, "climate_instance", property(lambda _self: climate))
+    monkeypatch.setattr(Wepp, "watershed_instance", property(lambda _self: watershed))
+    monkeypatch.setattr(Wepp, "soils_instance", property(lambda _self: soils))
+
+    def _raise_disturbed(_wd: str):
+        raise RuntimeError("disturbed-corrupt")
+
+    monkeypatch.setattr(
+        wepp_module,
+        "Disturbed",
+        type("DisturbedStub", (), {"tryGetInstance": staticmethod(_raise_disturbed)}),
+    )
+
+    with pytest.raises(RuntimeError, match="disturbed-corrupt"):
+        wepp._prep_multi_ofe(_Translator())
 
 
 def test_prep_soils_materializes_archive_input_before_worker_submit(

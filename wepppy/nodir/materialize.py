@@ -23,8 +23,6 @@ from time import monotonic
 from typing import Callable
 from zipfile import ZipFile, ZipInfo
 
-from wepppy.nodb.base import redis_lock_client
-
 from .errors import nodir_invalid_archive, nodir_limit_exceeded, nodir_locked
 from .fs import ResolvedNoDirPath, _get_zip_index, resolve
 from .paths import normalize_relpath
@@ -54,6 +52,10 @@ _SHP_OPTIONAL_SIDECARS = (
     ".sbx",
     ".fix",
 )
+
+# Test harnesses monkeypatch this module attribute directly.
+_REDIS_LOCK_CLIENT_UNSET = object()
+redis_lock_client = _REDIS_LOCK_CLIENT_UNSET
 
 
 @dataclass(frozen=True, slots=True)
@@ -390,8 +392,20 @@ def _redis_value_text(value: object) -> str | None:
     return str(value)
 
 
+def _redis_lock_client():
+    override = globals().get("redis_lock_client", _REDIS_LOCK_CLIENT_UNSET)
+    if override is not _REDIS_LOCK_CLIENT_UNSET:
+        return override
+
+    # Delay import to avoid query-engine bootstrap cycles during module import.
+    from wepppy.nodb.base import redis_lock_client
+
+    return redis_lock_client
+
+
 def _acquire_materialize_lock(lock_key: str, *, purpose: str) -> str:
-    if redis_lock_client is None:
+    redis_client = _redis_lock_client()
+    if redis_client is None:
         raise nodir_locked("materialization lock backend unavailable")
 
     ttl_seconds = _lock_ttl_seconds()
@@ -406,7 +420,7 @@ def _acquire_materialize_lock(lock_key: str, *, purpose: str) -> str:
     lock_value = json.dumps(payload, separators=(",", ":"))
 
     try:
-        acquired = redis_lock_client.set(
+        acquired = redis_client.set(
             lock_key,
             lock_value,
             nx=True,
@@ -422,7 +436,8 @@ def _acquire_materialize_lock(lock_key: str, *, purpose: str) -> str:
 
 
 def _release_materialize_lock(lock_key: str, lock_value: str) -> None:
-    if redis_lock_client is None:
+    redis_client = _redis_lock_client()
+    if redis_client is None:
         return
 
     release_lua = (
@@ -432,14 +447,14 @@ def _release_materialize_lock(lock_key: str, lock_value: str) -> None:
     )
 
     try:
-        if hasattr(redis_lock_client, "eval"):
-            redis_lock_client.eval(release_lua, 1, lock_key, lock_value)
+        if hasattr(redis_client, "eval"):
+            redis_client.eval(release_lua, 1, lock_key, lock_value)
             return
     except Exception:
         pass
 
     try:
-        stored = redis_lock_client.get(lock_key)
+        stored = redis_client.get(lock_key)
     except Exception:
         return
 
@@ -447,13 +462,14 @@ def _release_materialize_lock(lock_key: str, lock_value: str) -> None:
         return
 
     try:
-        redis_lock_client.delete(lock_key)
+        redis_client.delete(lock_key)
     except Exception:
         pass
 
 
 def _renew_materialize_lock(lock_key: str, lock_value: str) -> None:
-    if redis_lock_client is None:
+    redis_client = _redis_lock_client()
+    if redis_client is None:
         raise nodir_locked("materialization lock backend unavailable")
 
     ttl_seconds = _lock_ttl_seconds()
@@ -463,9 +479,9 @@ def _renew_materialize_lock(lock_key: str, lock_value: str) -> None:
         "else return 0 end"
     )
 
-    if hasattr(redis_lock_client, "eval"):
+    if hasattr(redis_client, "eval"):
         try:
-            renewed = redis_lock_client.eval(renew_lua, 1, lock_key, lock_value, ttl_seconds)
+            renewed = redis_client.eval(renew_lua, 1, lock_key, lock_value, ttl_seconds)
         except Exception as exc:
             raise nodir_locked("failed to renew materialization lock") from exc
 
