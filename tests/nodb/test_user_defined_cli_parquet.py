@@ -103,3 +103,57 @@ def test_set_user_defined_cli_refreshes_cli_parquet(monkeypatch: pytest.MonkeyPa
     climate.set_user_defined_cli(cli_path.name)
 
     assert calls["export"] == 1
+
+
+def test_set_user_defined_cli_delegates_station_meta_builder(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    cli_dir = tmp_path / "climate"
+    cli_dir.mkdir()
+    cli_path = cli_dir / "user.cli"
+    _write_minimal_cli(cli_path)
+
+    climate = Climate.__new__(Climate)
+    climate.logger = logging.getLogger("test")
+    climate.wd = str(tmp_path)
+    climate._climate_mode = ClimateMode.UserDefined
+    climate._climate_spatialmode = ClimateSpatialMode.Single
+
+    @contextlib.contextmanager
+    def _noop_locked(_self, *args, **kwargs):
+        yield
+
+    climate.locked = types.MethodType(_noop_locked, climate)
+    climate._post_defined_climate = lambda *args, **kwargs: None
+    climate._prism_revision = lambda *args, **kwargs: None
+    climate._export_cli_parquet = lambda: cli_dir / "wepp_cli.parquet"
+    climate._export_cli_precip_frequency_csv = lambda *_args, **_kwargs: None
+    climate._download_noaa_atlas14_intensity = lambda *_args, **_kwargs: None
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.climate.RedisPrep.getInstance",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(FileNotFoundError()),
+    )
+
+    sentinel_meta = object()
+    captured: dict[str, object] = {}
+
+    def _fake_build_station_meta_from_cli(*, cli, cli_filename, cli_dir, monthlies):
+        captured["cli"] = cli
+        captured["cli_filename"] = cli_filename
+        captured["cli_dir"] = cli_dir
+        captured["monthlies"] = monthlies
+        return sentinel_meta
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.climate._CLIMATE_USER_DEFINED_STATION_META_SERVICE.build_station_meta_from_cli",
+        _fake_build_station_meta_from_cli,
+    )
+
+    climate.set_user_defined_cli(cli_path.name)
+
+    assert climate._user_station_meta is sentinel_meta
+    assert captured["cli_filename"] == cli_path.name
+    assert captured["cli_dir"] == str(cli_dir)
+    assert isinstance(captured["monthlies"], dict)

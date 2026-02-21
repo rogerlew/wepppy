@@ -47,7 +47,6 @@ Note:
 
 # standard library
 import csv
-import re
 import time
 from pathlib import Path
 import os
@@ -97,7 +96,6 @@ from wepppy.climates.cligen import (
     ClimateFile, 
     Cligen,
     df_to_prn,
-    StationMeta,
 )
 from wepppy.climates.cligen.single_storm import (
     SingleStormResult,
@@ -130,10 +128,16 @@ from wepppyo3.climate import rust_cli_p_scale_annual_monthlies as pyo3_cli_p_sca
 
 from wepppy.nodb.core.climate_artifact_export_service import ClimateArtifactExportService
 from wepppy.nodb.core.climate_build_router import ClimateBuildRouter
+from wepppy.nodb.core.climate_gridmet_multiple_build_service import (
+    ClimateGridmetMultipleBuildService,
+)
 from wepppy.nodb.core.climate_input_parser import ClimateInputParsingService
 from wepppy.nodb.core.climate_mode_build_services import ClimateModeBuildServices
 from wepppy.nodb.core.climate_scaling_service import ClimateScalingService
 from wepppy.nodb.core.climate_station_catalog_service import ClimateStationCatalogService
+from wepppy.nodb.core.climate_user_defined_station_meta_service import (
+    ClimateUserDefinedStationMetaService,
+)
 
 __all__ = [
     'lng_lat_to_pixel_center',
@@ -263,155 +267,13 @@ _CLIMATE_MODE_BUILD_SERVICES = ClimateModeBuildServices()
 _CLIMATE_SCALING_SERVICE = ClimateScalingService()
 _CLIMATE_ARTIFACT_EXPORT_SERVICE = ClimateArtifactExportService()
 _CLIMATE_STATION_CATALOG_SERVICE = ClimateStationCatalogService()
+_CLIMATE_USER_DEFINED_STATION_META_SERVICE = ClimateUserDefinedStationMetaService()
+_CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE = ClimateGridmetMultipleBuildService()
 _CLIMATE_BUILD_ROUTER = ClimateBuildRouter(
     mode_build_services=_CLIMATE_MODE_BUILD_SERVICES,
     scaling_service=_CLIMATE_SCALING_SERVICE,
     artifact_export_service=_CLIMATE_ARTIFACT_EXPORT_SERVICE,
 )
-
-
-def _format_par_line(label: str, values: List[float]) -> str:
-    values = list(values)
-    if len(values) < 12:
-        values.extend([0.0] * (12 - len(values)))
-    elif len(values) > 12:
-        values = values[:12]
-    values_str = "".join(f"{value:6.2f}" for value in values)
-    return f"{label:<8}{values_str}\n"
-
-
-def _write_user_defined_par_stub(
-    par_path: Path,
-    desc: str,
-    station_id: str,
-    lat: float,
-    lng: float,
-    elevation_ft: Optional[float],
-    years: Optional[int],
-    monthlies_override: Optional[Dict[str, List[float]]],
-) -> None:
-    if par_path.exists():
-        return
-
-    ppts = monthlies_override.get("ppts", []) if monthlies_override else []
-    tmaxs = monthlies_override.get("tmaxs", []) if monthlies_override else []
-    tmins = monthlies_override.get("tmins", []) if monthlies_override else []
-    zeros = [0.0] * 12
-
-    elev_ft = elevation_ft if elevation_ft is not None else 0.0
-    years_val = int(years or 0)
-    desc_line = f"{desc} {station_id} 0".strip()
-
-    lines = [
-        f"{desc_line}\n",
-        f" LATT= {lat:7.2f} LONG={lng:7.2f} YEARS= {years_val:2d}. TYPE= 0\n",
-        f" ELEVATION = {elev_ft:.0f}. TP5 = 0.00 TP6= 0.00\n",
-        _format_par_line("MEAN P", ppts),
-        _format_par_line("S DEV P", zeros),
-        _format_par_line("SKEW  P", zeros),
-        _format_par_line("P(W/W)", zeros),
-        _format_par_line("P(W/D)", zeros),
-        _format_par_line("TMAX AV", tmaxs),
-        _format_par_line("TMIN AV", tmins),
-    ]
-    par_path.write_text("".join(lines))
-
-
-def _build_user_defined_station_meta_from_cli(
-    cli: ClimateFile,
-    cli_filename: str,
-    cli_dir: str,
-    monthlies: Optional[Dict[str, List[float]]],
-) -> StationMeta:
-    desc = None
-    for line in cli.header:
-        if re.match(r"\s*Station\s*:", line, re.IGNORECASE):
-            desc = line.split(":", 1)[1].strip()
-            if "CLIGEN VER." in desc:
-                desc = desc.split("CLIGEN VER.", 1)[0].strip()
-            break
-    if not desc:
-        desc = "User defined climate"
-
-    station_id = None
-    for line in cli.header:
-        match = re.search(r"([A-Za-z0-9._/\\\\-]+\\.par)", line, re.IGNORECASE)
-        if match:
-            token = match.group(1).strip()
-            if token.startswith("-"):
-                token = token.lstrip("-")
-                if token.lower().startswith("i") and token[1:].lower().endswith(".par"):
-                    token = token[1:]
-            station_id = Path(token).stem
-            break
-    if not station_id:
-        station_id = Path(cli_filename).stem
-
-    station_id = re.sub(r"[^A-Za-z0-9_-]+", "", station_id) or "user_defined"
-
-    state = None
-    if len(station_id) >= 2 and station_id[:2].isalpha():
-        state = station_id[:2].upper()
-    else:
-        tokens = desc.split()
-        if tokens and len(tokens[-1]) == 2 and tokens[-1].isalpha():
-            state = tokens[-1].upper()
-    if not state:
-        state = "NA"
-
-    elevation_ft = None
-    if cli.elevation is not None:
-        elevation_ft = round(cli.elevation / 0.3048, 2)
-
-    monthlies_override = None
-    annual_ppt = None
-    if monthlies:
-        monthly_ppts = [float(v) for v in monthlies.get("ppts", [])]
-        nwds = [float(v) for v in monthlies.get("nwds", [])]
-        tmaxs = [float(v) for v in monthlies.get("tmaxs", [])]
-        tmins = [float(v) for v in monthlies.get("tmins", [])]
-        ppts_per_wet_day: List[float] = []
-        for ppt, nwd in zip(monthly_ppts, nwds):
-            if nwd:
-                ppts_per_wet_day.append(ppt / nwd)
-            else:
-                ppts_per_wet_day.append(0.0)
-        monthlies_override = {
-            "ppts": ppts_per_wet_day,
-            "nwds": nwds,
-            "tmaxs": tmaxs,
-            "tmins": tmins,
-        }
-        annual_ppt = float(sum(monthly_ppts))
-
-    par_path = Path(cli_dir) / f"{station_id}.par"
-    _write_user_defined_par_stub(
-        par_path=par_path,
-        desc=desc,
-        station_id=station_id,
-        lat=cli.lat,
-        lng=cli.lng,
-        elevation_ft=elevation_ft,
-        years=cli.input_years,
-        monthlies_override=monthlies_override,
-    )
-
-    station_meta = StationMeta(
-        state,
-        desc,
-        str(par_path),
-        cli.lat,
-        cli.lng,
-        cli.input_years,
-        0,
-        elevation_ft,
-        None,
-        None,
-        annual_ppt,
-    )
-    if monthlies_override is not None:
-        station_meta._monthlies_override = monthlies_override
-    return station_meta
 
 class ClimateSummary(object):
     def __init__(self) -> None:
@@ -2087,7 +1949,7 @@ class Climate(NoDbBase):
             self.monthlies = monthlies
             # Avoid nodb_setter recursion while already holding the lock.
             self._catalog_id = 'user_defined_cli'
-            self._user_station_meta = _build_user_defined_station_meta_from_cli(
+            self._user_station_meta = _CLIMATE_USER_DEFINED_STATION_META_SERVICE.build_station_meta_from_cli(
                 cli=cli,
                 cli_filename=cli_fn,
                 cli_dir=self.cli_dir,
@@ -2170,244 +2032,14 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
 
     def _build_climate_observed_gridmet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
-        from wepppy.climates.gridmet.client import (
-            GridMetVariable,
-            retrieve_nc,
-            read_nc,
-            interpolate_daily_timeseries_for_location,
-            read_nc_longlat
-        )
-
-        import xarray as xr
-
-        measures = [
-            GridMetVariable.Precipitation,
-            GridMetVariable.MinimumTemperature,
-            GridMetVariable.MaximumTemperature,
-            GridMetVariable.SurfaceRadiation,
-            GridMetVariable.WindDirection,
-            GridMetVariable.WindSpeed,
-            GridMetVariable.MinimumRelativeHumidity,
-            GridMetVariable.MaximumRelativeHumidity
-        ]
-
-        interpolation_spec = {
-            'pr(mm)': {
-                'method': 'cubic',
-                'a_min': 0.0, # clip to 0.0
-            },
-            'tmmx(degc)':{
-                'method': 'cubic',
-            },
-            'tmmn(degc)':{
-                'method': 'cubic',
-            },
-            'rmin(%)':{
-                'method': 'linear',
-            },
-            'rmax(%)':{
-                'method': 'linear',
-            },
-            'srad(Wm-2)':{
-                'method': 'linear',
-                'a_min': 0.0, # clip to 0.0
-            },
-            'vs(m/s)':{
-                'method': 'linear',
-                'a_min': 0.0, # clip to 0.0
-            },
-            'th(DegreesClockwisefromnorth)':{
-                'method': 'nearest'
-            }
-        }
-
         with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_gridmet_multiple')
-
-            watershed = self.watershed_instance
-            ws_lng, ws_lat = watershed.centroid
-
-            cli_dir = self.cli_dir
-            start_year, end_year = self._observed_start_year, self._observed_end_year
-
-            self._input_years = end_year - start_year + 1
-
-            stationManager = CligenStationsManager(version=self.cligen_db)
-            climatestation = self.climatestation
-            stationMeta = stationManager.get_station_fromid(climatestation)
-
-            par_fn = stationMeta.par
-            cligen = Cligen(stationMeta, wd=cli_dir)
-
-            hillslope_locations = {'ws': {'longitude': ws_lng, 'latitude': ws_lat}}
-            for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
-                _lng, _lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                hillslope_locations[topaz_id] = {'longitude': _lng, 'latitude': _lat}
-
-            extent = self.ron_instance.extent
-            cellsize = 0.04166601298087771
-            pad = cellsize * 3
-            extent = [extent[0] - pad, extent[1] - pad, extent[2] + pad, extent[3] + pad]
-            dates = pd.date_range(f'{start_year}-01-01', f'{end_year}-12-31')
-            ndates = len(dates)
-
-            # bbox = west, north, east, south
-            bbox = [extent[0], extent[3], extent[2], extent[1]]
-
-            gridmet_fetch_workers = 12
-            if os.getenv("WEPPPY_NCPU"):
-                gridmet_fetch_workers = min(gridmet_fetch_workers, NCPU)
-            with ProcessPoolExecutor(max_workers=gridmet_fetch_workers) as executor:
-                futures = []
-                for measure in measures:
-                    for year in range(start_year, end_year + 1):
-                        futures.append(
-                            executor.submit(
-                                retrieve_nc, measure, bbox, year, cli_dir, _id=f'{measure}_{year}'))
-
-                pending = set(futures)
-                try:
-                    while pending:
-                        done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
-
-                        if not done:
-                            # Retrievals can be slow depending on network/IO; warn so slowdowns are visible.
-                            self.logger.warning('  GridMET retrieval still running after 60 seconds; continuing to wait.')
-                            continue
-
-                        for future in done:
-                            future.result()
-                except Exception:
-                    # Cancel all pending futures.
-                    for f in futures:
-                        if not f.done():
-                            f.cancel()
-                    executor.shutdown(wait=False, cancel_futures=True)
-                    raise
-
-
-            # load into raw_data
-            raw_data = {}
-            columns = {}
-
-            for measure in measures:
-                for year in range(start_year, end_year + 1):
-                    ts, abbrv, units = read_nc(_join(cli_dir, f'{measure}_{year}.nc'), measure)
-                    ts = ts.transpose(2, 1, 0) # reorder dimensions to longs, lats, dates
-                    ts_len = ts.shape[2]
-
-                    if year == start_year:
-                        ncols = ts.shape[0]
-                        nrows = ts.shape[1]
-                        raw_data[measure] = np.zeros((ncols, nrows, ndates))
-                        indx = 0
-
-                        columns[measure] = f'{abbrv}({units})'
-
-                    raw_data[measure][:, :, indx: indx+ts_len] = ts
-                    indx += ts_len
-                    
-            raw_data = {columns[k]: v for k, v in raw_data.items()}
-
-            longitudes, latitudes = read_nc_longlat(_join(cli_dir, f'{measure}_{year}.nc'))
-
-            # need to reverse latitudes and raw_data latitudes
-            # would be good to revise wepppyo3 interpolator so this isn't neccessary
-            latitudes = latitudes[::-1]
-            raw_data = {k: v[:, ::-1, :] for k, v in raw_data.items()}
-
-            gridmet_interp_workers = 28
-            if os.getenv("WEPPPY_NCPU"):
-                gridmet_interp_workers = min(gridmet_interp_workers, NCPU)
-            with ProcessPoolExecutor(max_workers=gridmet_interp_workers) as executor:
-                futures = []
-
-                for topaz_id, loc in hillslope_locations.items():
-                    self.logger.info(f'  interpolating topaz_id {topaz_id}...')
-                        
-                    # this interpolates the 3d grid using rust pyo3 and builds prn to be used by cligen
-                    futures.append(
-                        executor.submit(interpolate_daily_timeseries_for_location, 
-                                        topaz_id, loc, dates, 
-                                        longitudes, latitudes, raw_data, interpolation_spec, 
-                                        self.cli_dir, start_year, end_year))
-                    
-                pending = set(futures)
-                try:
-                    while pending:
-                        done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
-
-                        if not done:
-                            self.logger.warning('  GridMET interpolation still running after 60 seconds; continuing to wait.')
-                            continue
-
-                        for future in done:
-                            topaz_id = future.result()
-                            self.logger.info(f'  interpolated {topaz_id} done.')
-                except Exception:
-                    for f in futures:
-                        if not f.done():
-                            f.cancel()
-                    executor.shutdown(wait=False, cancel_futures=True)
-                    raise
-
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            with ProcessPoolExecutor(max_workers=NCPU) as executor:
-                futures = []
-                for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
-
-                    _lng, _lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                    _prn_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.prn'
-                    _cli_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.cli'
-                    
-                    self.logger.info(f'submitting climate build for {topaz_id} ...')
-
-                    futures.append(
-                        executor.submit(
-                            build_observed_gridmet_interpolated, 
-                            cligen, topaz_id, _lng, _lat, start_year, end_year, cli_dir, _cli_fn, _prn_fn,
-                            adjust_mx_pt5=self.adjust_mx_pt5))
-                
-                    sub_par_fns[topaz_id] = _prn_fn
-                    sub_cli_fns[topaz_id] = _cli_fn
-
-                ws_topaz_id = 'ws'
-                prn_fn = f'gridmet_observed_{ws_topaz_id}_{start_year}-{end_year}.prn'
-                cli_fn = 'wepp.cli'
-                futures.append(
-                    executor.submit(
-                        build_observed_gridmet_interpolated, 
-                        cligen, ws_topaz_id, ws_lng, ws_lat, start_year, end_year, cli_dir, cli_fn, prn_fn,
-                        adjust_mx_pt5=self.adjust_mx_pt5))
-
-                pending = set(futures)
-                try:
-                    while pending:
-                        done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
-
-                        if not done:
-                            self.logger.warning('  GridMET climate build still running after 60 seconds; continuing to wait.')
-                            continue
-
-                        for future in done:
-                            completed_topaz = future.result()
-                            self.logger.info(f'  climate for {completed_topaz} done.')
-                except Exception:
-                    for f in futures:
-                        if not f.done():
-                            f.cancel()
-                    executor.shutdown(wait=False, cancel_futures=True)
-                    raise
-                
-            climate = ClimateFile(_join(cli_dir, cli_fn))
-            self.monthlies = climate.calc_monthlies()
-            self.cli_fn = cli_fn
-            self.par_fn = par_fn
-
-            self.sub_par_fns = sub_par_fns
-            self.sub_cli_fns = sub_cli_fns
+            _CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE.build(
+                self,
+                build_observed_gridmet_interpolated_fn=build_observed_gridmet_interpolated,
+                ncpu=NCPU,
+            )
 
     def _build_climate_observed_daymet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         from wepppy.climates.daymet.daymet_singlelocation_client import interpolate_daily_timeseries

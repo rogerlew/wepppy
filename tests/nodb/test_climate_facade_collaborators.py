@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import contextlib
 import logging
+import types
 from pathlib import Path
 
 import pytest
@@ -165,3 +167,39 @@ def test_scaling_and_artifact_wrappers_delegate(
     assert ("scale_spatial", "scale-map.tif") in captured
     assert ("export_freq", Path("p.parquet")) in captured
     assert ("atlas14", None) in captured
+
+
+def test_gridmet_multiple_build_delegates_to_service(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.gridmet_multiple")
+    captured: dict[str, object] = {}
+
+    @contextlib.contextmanager
+    def _noop_locked(_self):
+        yield
+
+    def _set_attrs(attrs):
+        captured["attrs"] = attrs
+
+    def _fake_build(
+        instance: Climate,
+        *,
+        build_observed_gridmet_interpolated_fn,
+        ncpu: int,
+    ) -> None:
+        captured["instance"] = instance
+        captured["build_fn"] = build_observed_gridmet_interpolated_fn
+        captured["ncpu"] = ncpu
+
+    climate.locked = types.MethodType(_noop_locked, climate)
+    climate.set_attrs = _set_attrs
+    monkeypatch.setattr(climate_module._CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE, "build", _fake_build)
+
+    climate._build_climate_observed_gridmet_multiple(attrs={"mode": "gridmet"})
+
+    assert captured["instance"] is climate
+    assert captured["attrs"] == {"mode": "gridmet"}
+    assert captured["build_fn"] is climate_module.build_observed_gridmet_interpolated
+    assert captured["ncpu"] == climate_module.NCPU
