@@ -25,7 +25,7 @@ The browse microservice currently works, but high-complexity browse flow logic r
 - [x] (2026-02-21 16:39Z) Addressed review-requested browse contract test gaps by adding route tests for `raw/download/repr`, pagination clamping with `diff/sort/order` preservation, and markdown renderer fallback.
 - [x] (2026-02-21 16:39Z) Removed unconditional module-level skip in `test_browse_dtale.py` and repaired stale test patch points to target `browse.dtale.httpx` and flexible `dtale_custom_geojson` module resolution.
 - [x] (2026-02-21 16:39Z) Revalidated browse suites after test fixes; D-Tale suite now executes (`2 passed, 3 skipped`) instead of whole-module skip.
-- [ ] Commit and push `flow.py` quality refactor on `master`.
+- [x] (2026-02-21 16:40Z) Committed and pushed follow-up `flow.py`/tests/plan refactor on `master` (`fe34efe3d`).
 
 ## Surprises & Discoveries
 
@@ -73,7 +73,7 @@ Initial refactor achieved the quality closure target for `browse.py` while prese
 
 A follow-up decomposition pass closed quality risk in `flow.py`: SLOC `459 -> 775`, max function length `339 -> 86`, max CC `84 -> 14`, broad catches `1 -> 1` (intentional markdown rendering boundary). Additional browse test coverage was added for query/content-type/pagination/markdown fallback branches, and D-Tale tests now run instead of a blanket module skip.
 
-Pending step: commit and push this follow-up refactor.
+All implementation, validation, and push steps are complete.
 
 ## Context and Orientation
 
