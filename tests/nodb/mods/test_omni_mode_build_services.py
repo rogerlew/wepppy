@@ -25,6 +25,10 @@ class _DummyOmni:
         return self._has_sbs
 
     @property
+    def base_scenario(self):
+        return omni_module.OmniScenario.Undisturbed
+
+    @property
     def rq_job_pool_max_worker_per_scenario_task(self) -> int:
         return 2
 
@@ -56,6 +60,46 @@ def test_build_contrasts_for_selection_mode_dispatches() -> None:
     assert service.build_contrasts_for_selection_mode(omni, "stream_order") is True
     assert service.build_contrasts_for_selection_mode(omni, "cumulative") is False
     assert omni.calls == ["areas", "groups", "stream"]
+
+
+def test_build_contrasts_stream_order_mapping_helper_preserves_name_labels(tmp_path: Path) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+    top2wepp = {"10": "1", "20": "2"}
+
+    contrast_name, contrast = service.build_contrast_mapping(
+        omni,
+        top2wepp=top2wepp,
+        selected_topaz_ids={"10"},
+        control_scenario=None,
+        contrast_scenario="mulch",
+        contrast_id=3,
+        control_label="uniform_low",
+        contrast_label="mulch",
+    )
+
+    assert contrast_name == "uniform_low,3__to__mulch"
+    assert contrast["10"].endswith("/_pups/omni/scenarios/mulch/wepp/output/H1")
+    assert contrast["20"].endswith("/wepp/output/H2")
+
+
+def test_build_contrasts_user_defined_areas_mapping_helper_uses_base_default_target(tmp_path: Path) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+    top2wepp = {"10": "1", "20": "2"}
+
+    contrast_name, contrast = service.build_contrast_mapping(
+        omni,
+        top2wepp=top2wepp,
+        selected_topaz_ids={"20"},
+        control_scenario="uniform_low",
+        contrast_scenario=None,
+        contrast_id=20,
+    )
+
+    assert contrast_name == "uniform_low,20__to__undisturbed"
+    assert contrast["10"].endswith("/_pups/omni/scenarios/uniform_low/wepp/output/H1")
+    assert contrast["20"].endswith("/wepp/output/H2")
 
 
 def test_apply_scenario_mode_uniform_runs_expected_build_steps(tmp_path: Path) -> None:

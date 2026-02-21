@@ -74,11 +74,12 @@ from wepppy.nodb.mods.omni.omni_input_parser import OmniInputParsingService
 from wepppy.nodb.mods.omni.omni_mode_build_services import OmniModeBuildServices
 from wepppy.nodb.mods.omni.omni_scaling_service import OmniScalingService
 from wepppy.nodb.mods.omni.omni_artifact_export_service import OmniArtifactExportService
+from wepppy.nodb.mods.omni.omni_run_orchestration_service import OmniRunOrchestrationService
 from wepppy.nodb.mods.omni.omni_station_catalog_service import OmniStationCatalogService
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except Exception:  # pragma: no cover - optional dependency
+except ImportError:  # pragma: no cover - optional dependency
     _update_catalog_entry = None
 
 __all__ = [
@@ -97,6 +98,7 @@ _OMNI_INPUT_PARSER = OmniInputParsingService()
 _OMNI_MODE_BUILD_SERVICES = OmniModeBuildServices()
 _OMNI_SCALING_SERVICE = OmniScalingService()
 _OMNI_ARTIFACT_EXPORT_SERVICE = OmniArtifactExportService()
+_OMNI_RUN_ORCHESTRATION_SERVICE = OmniRunOrchestrationService()
 _OMNI_STATION_CATALOG_SERVICE = OmniStationCatalogService()
 _OMNI_BUILD_ROUTER = OmniBuildRouter()
 
@@ -172,7 +174,7 @@ def _clear_nodb_cache_and_locks(runid: str, pup_relpath: Optional[str] = None) -
             LOGGER.debug('Redis NoDb cache unavailable while clearing cache for %s (scope=%s)', runid, pup_relpath)
         else:
             LOGGER.warning('Failed to clear NoDb cache for %s (scope=%s): %s', runid, pup_relpath, exc)
-    except Exception as exc:
+    except Exception as exc:  # Boundary: cache cleanup should not break clone teardown.
         LOGGER.warning('Failed to clear NoDb cache for %s (scope=%s): %s', runid, pup_relpath, exc)
 
     try:
@@ -182,7 +184,7 @@ def _clear_nodb_cache_and_locks(runid: str, pup_relpath: Optional[str] = None) -
             LOGGER.debug('Redis lock client unavailable while clearing locks for %s', runid)
         else:
             LOGGER.warning('Failed to clear NoDb locks for %s: %s', runid, exc)
-    except Exception as exc:
+    except Exception as exc:  # Boundary: lock cleanup should not break clone teardown.
         LOGGER.warning('Failed to clear NoDb locks for %s: %s', runid, exc)
 
 
@@ -751,10 +753,20 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
                             dst_dir = _join(dst, rel_path)
                             if not _exists(dst_dir):
                                 os.makedirs(dst_dir, exist_ok=True)
-                except PermissionError as e:
-                    print(f"Permission denied creating directory: {e}")
-                except OSError as e:
-                    print(f"Error creating directory: {e}")
+                except PermissionError as exc:
+                    LOGGER.warning(
+                        "Permission denied while creating Omni clone directory tree from %s to %s: %s",
+                        src,
+                        dst,
+                        exc,
+                    )
+                except OSError as exc:
+                    LOGGER.warning(
+                        "Error creating Omni clone directory tree from %s to %s: %s",
+                        src,
+                        dst,
+                        exc,
+                    )
 
             if not _exists(dst):
                 os.makedirs(dst, exist_ok=True)
@@ -886,7 +898,7 @@ def _scenario_name_from_scenario_definition(scenario_def: Dict[str, Any]) -> str
     scenario_enum: Optional[OmniScenario]
     try:
         scenario_enum = OmniScenario.parse(_scenario) if _scenario is not None else None
-    except Exception:
+    except (TypeError, ValueError, KeyError):
         scenario_enum = None
 
     if scenario_enum == OmniScenario.Thinning:
@@ -1135,7 +1147,7 @@ class Omni(NoDbBase):
                     shutil.rmtree(scenario_dir)
                     pup_relpath = os.path.relpath(scenario_dir, self.wd)
                     _clear_nodb_cache_and_locks(self.runid, pup_relpath)
-                except Exception as exc:
+                except OSError as exc:
                     self.logger.debug('Failed to remove scenario directory %s: %s', scenario_dir, exc)
                 if name not in removed:
                     removed.append(name)
@@ -1146,7 +1158,7 @@ class Omni(NoDbBase):
         if _exists(aggregated):
             try:
                 os.remove(aggregated)
-            except Exception as exc:
+            except OSError as exc:
                 self.logger.debug('Failed to remove aggregated scenario summary %s: %s', aggregated, exc)
 
         self._refresh_catalog(OMNI_REL_DIR)
@@ -1538,13 +1550,13 @@ class Omni(NoDbBase):
         if _exists(report_path):
             try:
                 os.remove(report_path)
-            except Exception as exc:
+            except OSError as exc:
                 self.logger.debug('Failed to remove contrast build report %s: %s', report_path, exc)
         contrasts_report = _join(self.omni_dir, 'contrasts.out.parquet')
         if _exists(contrasts_report):
             try:
                 os.remove(contrasts_report)
-            except Exception as exc:
+            except OSError as exc:
                 self.logger.debug('Failed to remove contrast summary %s: %s', contrasts_report, exc)
 
     def _reset_contrast_build_state(self) -> None:
@@ -2093,8 +2105,6 @@ class Omni(NoDbBase):
                 contrast_select_topaz_ids=contrast_select_topaz_ids,
             )
 
-        wd = self.wd
-
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
         top2wepp = {k: v for k, v in translator.top2wepp.items() if not (str(k).endswith('4') or int(k) == 0)}
@@ -2104,7 +2114,7 @@ class Omni(NoDbBase):
         obj_param_descending, total_erosion_kg = self.get_objective_parameter_from_gpkg(obj_param, scenario=control_scenario)
 
         if len(obj_param_descending) == 0:
-            raise Exception('No soil erosion data found!')
+            raise ValueError('No soil erosion data found!')
 
         if apply_advanced_filters and any(
             value is not None
@@ -2165,44 +2175,16 @@ class Omni(NoDbBase):
 
             topaz_id = d.topaz_id
             wepp_id = d.wepp_id
-            if contrast_scenario is None:
-                contrast_name = f'{control_scenario},{topaz_id}__to__{self.base_scenario}'
-            else:
-                contrast_name = f'{control_scenario},{topaz_id}__to__{contrast_scenario}'
             contrast_id = existing_contrast_count + len(contrasts) + 1
             report_control_scenario = control_scenario or str(self.base_scenario)
-            
-            contrast = {}
-            for _topaz_id, _wepp_id in top2wepp.items():
-
-                # need to do it this way so the wepp_ids stay ordered.
-                if str(_topaz_id) == str(topaz_id):
-                    if contrast_scenario is None:
-                        wepp_id_path = _join(wd, f'wepp/output/H{wepp_id}')   
-                    else: 
-                        wepp_id_path = _join(
-                            wd,
-                            OMNI_REL_DIR,
-                            'scenarios',
-                            contrast_scenario,
-                            'wepp',
-                            'output',
-                            f'H{wepp_id}',
-                        )
-                else:
-                    if control_scenario is None:
-                        wepp_id_path = _join(wd, f'wepp/output/H{_wepp_id}')
-                    else:
-                        wepp_id_path = _join(
-                            wd,
-                            OMNI_REL_DIR,
-                            'scenarios',
-                            control_scenario,
-                            'wepp',
-                            'output',
-                            f'H{_wepp_id}',
-                        )
-                contrast[_topaz_id] = wepp_id_path  # os.path.relpath(wepp_id_path, contrast_dir)
+            contrast_name, contrast = _OMNI_MODE_BUILD_SERVICES.build_contrast_mapping(
+                self,
+                top2wepp=top2wepp,
+                selected_topaz_ids={topaz_id},
+                control_scenario=control_scenario,
+                contrast_scenario=contrast_scenario,
+                contrast_id=topaz_id,
+            )
 
             contrasts.append(contrast)
             contrast_names.append(contrast_name)
@@ -2232,358 +2214,7 @@ class Omni(NoDbBase):
         return _OMNI_ARTIFACT_EXPORT_SERVICE.build_contrast_ids_geojson(self)
 
     def _build_contrast_ids_geojson_impl(self) -> Optional[str]:
-        selection_mode = (getattr(self, "_contrast_selection_mode", None) or "cumulative").strip().lower()
-        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
-            selection_mode = "stream_order"
-        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
-            selection_mode = "user_defined_hillslope_groups"
-
-        report_entries = self._load_contrast_build_report()
-
-        def _sorted_keys(values: Iterable[Any]) -> List[Any]:
-            try:
-                return sorted(values, key=lambda item: int(item))
-            except (TypeError, ValueError):
-                return sorted(values, key=lambda item: str(item))
-
-        selections: List[Tuple[str, Set[str], Dict[str, Any]]] = []
-        stream_groups: Dict[int, Dict[str, Any]] = {}
-
-        if selection_mode == "user_defined_areas":
-            feature_map: Dict[Any, Tuple[str, Set[str], Dict[str, Any]]] = {}
-            for entry in report_entries:
-                if entry.get("selection_mode") != "user_defined_areas":
-                    continue
-                feature_index = entry.get("feature_index")
-                if feature_index in (None, ""):
-                    continue
-                try:
-                    feature_key: Any = int(feature_index)
-                except (TypeError, ValueError):
-                    feature_key = str(feature_index)
-                if feature_key in feature_map:
-                    continue
-                topaz_ids = entry.get("topaz_ids") or []
-                topaz_set = {str(item) for item in topaz_ids if item not in (None, "")}
-                if not topaz_set:
-                    continue
-                label = str(feature_key)
-                feature_map[feature_key] = (label, topaz_set, {"feature_index": feature_key})
-            for key in _sorted_keys(feature_map.keys()):
-                selections.append(feature_map[key])
-        elif selection_mode == "user_defined_hillslope_groups":
-            group_map: Dict[Any, Tuple[str, Set[str], Dict[str, Any]]] = {}
-            for entry in report_entries:
-                if entry.get("selection_mode") != "user_defined_hillslope_groups":
-                    continue
-                group_index = entry.get("group_index")
-                if group_index in (None, ""):
-                    continue
-                try:
-                    group_key: Any = int(group_index)
-                except (TypeError, ValueError):
-                    group_key = str(group_index)
-                if group_key in group_map:
-                    continue
-                topaz_ids = entry.get("topaz_ids") or []
-                topaz_set = {str(item) for item in topaz_ids if item not in (None, "")}
-                if not topaz_set:
-                    continue
-                label = str(group_key)
-                group_map[group_key] = (label, topaz_set, {"group_index": group_key})
-            for key in _sorted_keys(group_map.keys()):
-                selections.append(group_map[key])
-        elif selection_mode == "stream_order":
-            group_map: Dict[Any, Dict[str, Any]] = {}
-            for entry in report_entries:
-                if entry.get("selection_mode") != "stream_order":
-                    continue
-                group_value = entry.get("subcatchments_group")
-                if group_value in (None, ""):
-                    continue
-                try:
-                    group_key: Any = int(group_value)
-                except (TypeError, ValueError):
-                    group_key = str(group_value)
-                if group_key in group_map:
-                    continue
-                if entry.get("status") == "skipped" or entry.get("n_hillslopes") in (None, 0, 0.0):
-                    continue
-                group_map[group_key] = entry
-            for key in _sorted_keys(group_map.keys()):
-                stream_groups[int(key)] = group_map[key]
-        else:
-            seen: Set[str] = set()
-            for entry in report_entries:
-                entry_mode = entry.get("selection_mode")
-                if entry_mode not in (None, "", "cumulative"):
-                    continue
-                topaz_id = entry.get("topaz_id")
-                if topaz_id in (None, ""):
-                    continue
-                label = str(topaz_id)
-                if label in seen:
-                    continue
-                seen.add(label)
-                try:
-                    topaz_value: Any = int(topaz_id)
-                except (TypeError, ValueError):
-                    topaz_value = label
-                selections.append((label, {label}, {"topaz_id": topaz_value}))
-
-        output_path = self._contrast_ids_geojson_path()
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        if selection_mode == "stream_order":
-            if not stream_groups:
-                with open(output_path, "w", encoding="ascii", newline="\n") as fp:
-                    json.dump({"type": "FeatureCollection", "features": []}, fp, ensure_ascii=True)
-                return output_path
-            try:
-                import rasterio
-                from rasterio.features import shapes
-            except ImportError as exc:  # pragma: no cover - optional dependency
-                raise ImportError("rasterio is required for stream-order contrast overlay GeoJSON.") from exc
-            try:
-                from shapely.geometry import shape
-                from shapely.ops import unary_union
-            except ImportError as exc:  # pragma: no cover - optional dependency
-                raise ImportError("shapely is required for stream-order contrast overlay GeoJSON.") from exc
-
-            watershed = Watershed.getInstance(self.wd)
-            order_reduction_passes = self._resolve_order_reduction_passes()
-            wbt_dir = Path(getattr(watershed, "wbt_wd", _join(self.wd, "dem", "wbt")))
-            subwta_pruned_path = wbt_dir / f"subwta.strahler_pruned_{order_reduction_passes}.tif"
-            if not subwta_pruned_path.exists():
-                raise FileNotFoundError(f"Missing stream-order subwta raster: {subwta_pruned_path}")
-
-            group_values: Dict[int, int] = {}
-            for group_id in _sorted_keys(stream_groups.keys()):
-                try:
-                    group_id_int = int(group_id)
-                except (TypeError, ValueError):
-                    continue
-                raw_value = group_id_int // 10 if group_id_int % 10 == 0 else group_id_int
-                if raw_value <= 0:
-                    continue
-                group_values[raw_value] = group_id_int
-            if not group_values:
-                with open(output_path, "w", encoding="ascii", newline="\n") as fp:
-                    json.dump({"type": "FeatureCollection", "features": []}, fp, ensure_ascii=True)
-                return output_path
-
-            geometries: Dict[int, List[Any]] = {key: [] for key in group_values}
-            crs = None
-            with rasterio.open(subwta_pruned_path) as dataset:
-                data = dataset.read(1, masked=True)
-                transform = dataset.transform
-                crs = dataset.crs
-                mask = None
-                if hasattr(data, "mask"):
-                    mask = ~data.mask
-                for geom, value in shapes(data, mask=mask, transform=transform):
-                    try:
-                        value_int = int(value)
-                    except (TypeError, ValueError):
-                        continue
-                    if value_int not in group_values:
-                        continue
-                    geometries[value_int].append(shape(geom))
-
-            features: List[Dict[str, Any]] = []
-            for raw_value in _sorted_keys(group_values.keys()):
-                geoms = geometries.get(raw_value, [])
-                if not geoms:
-                    continue
-                merged = unary_union(geoms)
-                if merged is None or getattr(merged, "is_empty", False):
-                    continue
-                group_id = group_values[raw_value]
-                label = str(group_id)
-                features.append(
-                    {
-                        "type": "Feature",
-                        "properties": {
-                            "contrast_label": label,
-                            "label": label,
-                            "selection_mode": selection_mode,
-                            "subcatchments_group": group_id,
-                        },
-                        "geometry": merged.__geo_interface__,
-                    }
-                )
-
-            utm_path = output_path.replace(".wgs.geojson", ".utm.geojson")
-            geojson = {"type": "FeatureCollection", "features": features}
-            if crs:
-                geojson["crs"] = {"type": "name", "properties": {"name": str(crs)}}
-            with open(utm_path, "w", encoding="ascii", newline="\n") as fp:
-                json.dump(geojson, fp, ensure_ascii=True)
-            from wepppy.topo.watershed_abstraction.support import json_to_wgs
-            wgs_path = json_to_wgs(utm_path, s_srs=str(crs) if crs else None)
-            if wgs_path != output_path:
-                os.replace(wgs_path, output_path)
-            return output_path
-
-        if selection_mode == "user_defined_areas":
-            if not selections:
-                with open(output_path, "w", encoding="ascii", newline="\n") as fp:
-                    json.dump({"type": "FeatureCollection", "features": []}, fp, ensure_ascii=True)
-                return output_path
-            try:
-                import numpy as np
-                import rasterio
-                from rasterio.features import shapes
-            except ImportError as exc:  # pragma: no cover - optional dependency
-                raise ImportError("rasterio is required for user-defined contrast overlay GeoJSON.") from exc
-            try:
-                from shapely.geometry import shape
-                from shapely.ops import unary_union
-            except ImportError as exc:  # pragma: no cover - optional dependency
-                raise ImportError("shapely is required for user-defined contrast overlay GeoJSON.") from exc
-
-            watershed = Watershed.getInstance(self.wd)
-            subwta_path = getattr(watershed, "subwta", None)
-            if not subwta_path or not _exists(subwta_path):
-                raise FileNotFoundError("Hillslope raster not found for user-defined contrast overlay GeoJSON.")
-
-            with rasterio.open(subwta_path) as dataset:
-                data = dataset.read(1, masked=True)
-                transform = dataset.transform
-                crs = dataset.crs
-                data_array = data
-                base_mask = None
-                if hasattr(data, "mask"):
-                    base_mask = ~data.mask
-                    data_array = data.data
-
-            features: List[Dict[str, Any]] = []
-            for label, topaz_ids, extra in selections:
-                topaz_values: List[int] = []
-                for topaz_id in topaz_ids:
-                    try:
-                        topaz_values.append(int(topaz_id))
-                    except (TypeError, ValueError):
-                        continue
-                if not topaz_values:
-                    continue
-                mask = np.isin(data_array, topaz_values)
-                if base_mask is not None:
-                    mask = mask & base_mask
-                if not mask.any():
-                    continue
-                geoms = [shape(geom) for geom, _ in shapes(data_array, mask=mask, transform=transform)]
-                if not geoms:
-                    continue
-                merged = unary_union(geoms)
-                if merged is None or getattr(merged, "is_empty", False):
-                    continue
-                props = {"contrast_label": label, "label": label, "selection_mode": selection_mode}
-                props.update(extra)
-                features.append(
-                    {
-                        "type": "Feature",
-                        "properties": props,
-                        "geometry": merged.__geo_interface__,
-                    }
-                )
-
-            utm_path = output_path.replace(".wgs.geojson", ".utm.geojson")
-            geojson = {"type": "FeatureCollection", "features": features}
-            if crs:
-                geojson["crs"] = {"type": "name", "properties": {"name": str(crs)}}
-            with open(utm_path, "w", encoding="ascii", newline="\n") as fp:
-                json.dump(geojson, fp, ensure_ascii=True)
-            from wepppy.topo.watershed_abstraction.support import json_to_wgs
-            wgs_path = json_to_wgs(utm_path, s_srs=str(crs) if crs else None)
-            if wgs_path != output_path:
-                os.replace(wgs_path, output_path)
-            return output_path
-
-        if not selections:
-            with open(output_path, "w", encoding="ascii", newline="\n") as fp:
-                json.dump({"type": "FeatureCollection", "features": []}, fp, ensure_ascii=True)
-            return output_path
-
-        try:
-            import geopandas as gpd
-        except ImportError as exc:  # pragma: no cover - optional dependency
-            raise ImportError("geopandas is required for contrast overlay GeoJSON.") from exc
-
-        watershed = Watershed.getInstance(self.wd)
-        hillslope_path = getattr(watershed, "subwta_shp", None)
-        if not hillslope_path or not _exists(hillslope_path):
-            raise FileNotFoundError("Hillslope polygons not found for contrast overlay GeoJSON.")
-
-        hillslope_gdf = gpd.read_file(hillslope_path)
-        if hillslope_gdf.empty:
-            raise ValueError("No hillslope polygons available for contrast overlay GeoJSON.")
-
-        id_column = None
-        for candidate in ("TopazID", "topaz_id", "TOPAZ_ID"):
-            if candidate in hillslope_gdf.columns:
-                id_column = candidate
-                break
-        if id_column is None:
-            raise ValueError("Hillslope polygons missing a TopazID field.")
-
-        hillslope_lookup: Dict[str, Any] = {}
-        for _, row in hillslope_gdf.iterrows():
-            topaz_raw = row.get(id_column)
-            if topaz_raw in (None, ""):
-                continue
-            topaz_id = str(topaz_raw)
-            if topaz_id == "0" or topaz_id.endswith("4"):
-                continue
-            geom = row.geometry
-            if geom is None or getattr(geom, "is_empty", False):
-                continue
-            hillslope_lookup[topaz_id] = geom
-
-        if not hillslope_lookup:
-            raise ValueError("No valid hillslope polygons available for contrast overlay GeoJSON.")
-
-        from shapely.geometry import mapping
-        from shapely.ops import unary_union
-
-        features: List[Dict[str, Any]] = []
-        missing_topaz: Set[str] = set()
-        for label, topaz_ids, extra in selections:
-            geoms = []
-            for topaz_id in topaz_ids:
-                geom = hillslope_lookup.get(topaz_id)
-                if geom is None:
-                    missing_topaz.add(topaz_id)
-                    continue
-                geoms.append(geom)
-            if not geoms:
-                continue
-            merged = unary_union(geoms)
-            if merged is None or getattr(merged, "is_empty", False):
-                continue
-            props = {"contrast_label": label, "label": label, "selection_mode": selection_mode}
-            props.update(extra)
-            features.append(
-                {
-                    "type": "Feature",
-                    "properties": props,
-                    "geometry": mapping(merged),
-                }
-            )
-
-        if missing_topaz:
-            self.logger.info(
-                "Contrast overlay GeoJSON skipped %d hillslopes missing geometry.",
-                len(missing_topaz),
-            )
-
-        with open(output_path, "w", encoding="ascii", newline="\n") as fp:
-            json.dump(
-                {"type": "FeatureCollection", "features": features},
-                fp,
-                ensure_ascii=True,
-            )
-
-        return output_path
+        return _OMNI_ARTIFACT_EXPORT_SERVICE.build_contrast_ids_geojson(self)
 
     def _resolve_order_reduction_passes(self) -> int:
         return _OMNI_SCALING_SERVICE.resolve_order_reduction_passes(self)
@@ -2854,37 +2485,16 @@ class Omni(NoDbBase):
                         report_fp.write(json.dumps(report_entry) + "\n")
                         continue
 
-                    contrast_name = f"{control_key},{contrast_id}__to__{contrast_key}"
-
-                    contrast: ContrastMapping = {}
-                    for topaz_key, wepp_id in top2wepp.items():
-                        if topaz_key in topaz_set:
-                            if contrast_scenario is None:
-                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
-                            else:
-                                wepp_id_path = _join(
-                                    self.wd,
-                                    OMNI_REL_DIR,
-                                    "scenarios",
-                                    contrast_scenario,
-                                    "wepp",
-                                    "output",
-                                    f"H{wepp_id}",
-                                )
-                        else:
-                            if control_scenario is None:
-                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
-                            else:
-                                wepp_id_path = _join(
-                                    self.wd,
-                                    OMNI_REL_DIR,
-                                    "scenarios",
-                                    control_scenario,
-                                    "wepp",
-                                    "output",
-                                    f"H{wepp_id}",
-                                )
-                        contrast[topaz_key] = wepp_id_path
+                    contrast_name, contrast = _OMNI_MODE_BUILD_SERVICES.build_contrast_mapping(
+                        self,
+                        top2wepp=top2wepp,
+                        selected_topaz_ids=topaz_set,
+                        control_scenario=control_scenario,
+                        contrast_scenario=contrast_scenario,
+                        contrast_id=contrast_id,
+                        control_label=control_key,
+                        contrast_label=contrast_key,
+                    )
 
                     contrast_names[contrast_id - 1] = contrast_name
                     self._write_contrast_sidecar(contrast_id, contrast)
@@ -3066,40 +2676,14 @@ class Omni(NoDbBase):
                         report_fp.write(json.dumps(report_entry) + "\n")
                         continue
 
-                    if contrast_scenario is None:
-                        contrast_name = f"{control_scenario},{contrast_id}__to__{self.base_scenario}"
-                    else:
-                        contrast_name = f"{control_scenario},{contrast_id}__to__{contrast_scenario}"
-
-                    contrast: ContrastMapping = {}
-                    for topaz_id, wepp_id in top2wepp.items():
-                        if topaz_id in selected_topaz:
-                            if contrast_scenario is None:
-                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
-                            else:
-                                wepp_id_path = _join(
-                                    self.wd,
-                                    OMNI_REL_DIR,
-                                    "scenarios",
-                                    contrast_scenario,
-                                    "wepp",
-                                    "output",
-                                    f"H{wepp_id}",
-                                )
-                        else:
-                            if control_scenario is None:
-                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
-                            else:
-                                wepp_id_path = _join(
-                                    self.wd,
-                                    OMNI_REL_DIR,
-                                    "scenarios",
-                                    control_scenario,
-                                    "wepp",
-                                    "output",
-                                    f"H{wepp_id}",
-                                )
-                        contrast[topaz_id] = wepp_id_path
+                    contrast_name, contrast = _OMNI_MODE_BUILD_SERVICES.build_contrast_mapping(
+                        self,
+                        top2wepp=top2wepp,
+                        selected_topaz_ids=selected_topaz,
+                        control_scenario=control_scenario,
+                        contrast_scenario=contrast_scenario,
+                        contrast_id=contrast_id,
+                    )
 
                     contrast_names[contrast_id - 1] = contrast_name
                     self._write_contrast_sidecar(contrast_id, contrast)
@@ -3312,7 +2896,7 @@ class Omni(NoDbBase):
                                 inter_area = float(geom.intersection(hill["geometry"]).area)
                                 if inter_area / hill_area >= 0.5:
                                     selected_topaz.add(hill["topaz_id"])
-                        except Exception as exc:
+                        except Exception as exc:  # Boundary: malformed user geometry should not abort all features.
                             self.logger.info(
                                 "Failed to evaluate contrast feature %s: %s",
                                 feature_index,
@@ -3341,40 +2925,14 @@ class Omni(NoDbBase):
                         report_fp.write(json.dumps(report_entry) + "\n")
                         continue
 
-                    if contrast_scenario is None:
-                        contrast_name = f"{control_scenario},{contrast_id}__to__{self.base_scenario}"
-                    else:
-                        contrast_name = f"{control_scenario},{contrast_id}__to__{contrast_scenario}"
-
-                    contrast: ContrastMapping = {}
-                    for topaz_id, wepp_id in top2wepp.items():
-                        if topaz_id in selected_topaz:
-                            if contrast_scenario is None:
-                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
-                            else:
-                                wepp_id_path = _join(
-                                    self.wd,
-                                    OMNI_REL_DIR,
-                                    "scenarios",
-                                    contrast_scenario,
-                                    "wepp",
-                                    "output",
-                                    f"H{wepp_id}",
-                                )
-                        else:
-                            if control_scenario is None:
-                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
-                            else:
-                                wepp_id_path = _join(
-                                    self.wd,
-                                    OMNI_REL_DIR,
-                                    "scenarios",
-                                    control_scenario,
-                                    "wepp",
-                                    "output",
-                                    f"H{wepp_id}",
-                                )
-                        contrast[topaz_id] = wepp_id_path
+                    contrast_name, contrast = _OMNI_MODE_BUILD_SERVICES.build_contrast_mapping(
+                        self,
+                        top2wepp=top2wepp,
+                        selected_topaz_ids=selected_topaz,
+                        control_scenario=control_scenario,
+                        contrast_scenario=contrast_scenario,
+                        contrast_id=contrast_id,
+                    )
 
                     contrast_names[contrast_id - 1] = contrast_name
                     self._write_contrast_sidecar(contrast_id, contrast)
@@ -3446,171 +3004,14 @@ class Omni(NoDbBase):
         return _OMNI_BUILD_ROUTER.contrast_status_report(self)
 
     def run_omni_contrasts(self) -> None:
-        global OMNI_REL_DIR
-
-        self.logger.info('run_omni_contrasts')
-
-        def _set_dependency_tree_with_retry(tree: ContrastDependency) -> None:
-            max_tries = 5
-            for attempt in range(max_tries):
-                try:
-                    with self.locked():
-                        self._contrast_dependency_tree = tree
-                except NoDbAlreadyLockedError:
-                    if attempt + 1 == max_tries:
-                        raise
-                    time.sleep(1.0)
-                else:
-                    break
-
-        if not self.contrast_names:
-            self.logger.info('  run_omni_contrasts: No contrasts to run')
-            if self.contrast_dependency_tree:
-                _set_dependency_tree_with_retry({})
-            self._clean_stale_contrast_runs([])
-            return
-
-        dependency_tree: ContrastDependency = dict(self.contrast_dependency_tree)
-        active_contrasts: Set[str] = set()
-        landuse_cache: Dict[str, Optional[Dict[int, Optional[str]]]] = {}
-
-        contrast_names: List[Optional[str]] = self.contrast_names or []
-        active_ids = [
-            contrast_id
-            for contrast_id, contrast_name in enumerate(contrast_names, start=1)
-            if contrast_name
-        ]
-        total_contrasts = len(active_ids)
-        output_options = self.contrast_output_options()
-
-        if total_contrasts == 0:
-            self.logger.info("  run_omni_contrasts: No contrasts to run")
-            if dependency_tree:
-                dependency_tree.clear()
-                _set_dependency_tree_with_retry(dependency_tree)
-            self._clean_stale_contrast_runs(active_ids)
-            return
-
-        for ordinal, contrast_id in enumerate(active_ids, start=1):
-            contrast_name = contrast_names[contrast_id - 1]
-            if not contrast_name:
-                continue
-            active_contrasts.add(contrast_name)
-            skip_reason = self._contrast_landuse_skip_reason(
-                contrast_id,
-                contrast_name,
-                landuse_cache=landuse_cache,
-            )
-            if skip_reason:
-                self.logger.info(
-                    "  run_omni_contrasts: %s skipped (%s)",
-                    contrast_name,
-                    skip_reason,
-                )
-                self._clean_contrast_run(contrast_id)
-                dependency_tree.pop(contrast_name, None)
-                continue
-            run_status = self._contrast_run_status(contrast_id, contrast_name)
-            if run_status == 'up_to_date':
-                self.logger.info('  run_omni_contrasts: %s up-to-date, skipping', contrast_name)
-                continue
-            if run_status == "in_progress":
-                self.logger.info("  run_omni_contrasts: %s already running, skipping", contrast_name)
-                continue
-
-            try:
-                _contrasts = self._load_contrast_sidecar(contrast_id)
-            except FileNotFoundError:
-                self.logger.info(
-                    "  run_omni_contrasts: Missing sidecar for contrast_id=%s, skipping.",
-                    contrast_id,
-                )
-                continue
-
-            self.logger.info(
-                "  run_omni_contrasts: Running contrast %s of %s (id=%s): %s",
-                ordinal,
-                total_contrasts,
-                contrast_id,
-                contrast_name,
-            )
-            control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
-            omni_wd = _run_contrast(
-                str(contrast_id),
-                contrast_name,
-                _contrasts,
-                self.wd,
-                self.runid,
-                control_key,
-                contrast_key,
-                output_options=output_options,
-            )
-            self._post_omni_run(omni_wd, contrast_name)
-
-            dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)
-            dependency_tree[contrast_name] = dependency_entry
-            _set_dependency_tree_with_retry(dependency_tree)
-
-        stale = set(dependency_tree.keys()) - active_contrasts
-        for contrast_name in stale:
-            dependency_tree.pop(contrast_name, None)
-        _set_dependency_tree_with_retry(dependency_tree)
-        self._clean_stale_contrast_runs(active_ids)
+        _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_contrasts(self)
 
     def run_omni_contrast(self, contrast_id: int, *, rq_job_id: Optional[str] = None) -> str:
-        self.logger.info(f'run_omni_contrast {contrast_id}')
-        contrast_names = self.contrast_names or []
-        if contrast_id < 1 or contrast_id > len(contrast_names):
-            raise ValueError(f"Contrast id {contrast_id} is out of range")
-        contrast_name = contrast_names[contrast_id - 1]
-        if not contrast_name:
-            raise ValueError(f"Contrast id {contrast_id} is skipped")
-        skip_reason = self._contrast_landuse_skip_reason(contrast_id, contrast_name)
-        if skip_reason:
-            self.logger.info("run_omni_contrast: %s skipped (%s)", contrast_name, skip_reason)
-            self._clean_contrast_run(contrast_id)
-            self._remove_contrast_dependency_entry(contrast_name)
-            self._clear_contrast_run_status(contrast_id)
-            return _join(self.wd, OMNI_REL_DIR, "contrasts", str(contrast_id))
-        _contrasts = self._load_contrast_sidecar(contrast_id)
-        control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
-        output_options = self.contrast_output_options()
-        self._write_contrast_run_status(
+        return _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_contrast(
+            self,
             contrast_id,
-            contrast_name,
-            "started",
-            job_id=rq_job_id,
+            rq_job_id=rq_job_id,
         )
-        try:
-            omni_wd = _run_contrast(
-                str(contrast_id),
-                contrast_name,
-                _contrasts,
-                self.wd,
-                self.runid,
-                control_key,
-                contrast_key,
-                output_options=output_options,
-            )
-            self._post_omni_run(omni_wd, contrast_name)
-            dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)
-            self._update_contrast_dependency_tree(contrast_name, dependency_entry)
-        except Exception as exc:
-            self._write_contrast_run_status(
-                contrast_id,
-                contrast_name,
-                "failed",
-                job_id=rq_job_id,
-                error=str(exc),
-            )
-            raise
-        self._write_contrast_run_status(
-            contrast_id,
-            contrast_name,
-            "completed",
-            job_id=rq_job_id,
-        )
-        return omni_wd
 
     def contrasts_report(self) -> pd.DataFrame:
         return _OMNI_ARTIFACT_EXPORT_SERVICE.contrasts_report(self)
@@ -3753,7 +3154,7 @@ class Omni(NoDbBase):
         ron = Ron.getInstance(omni_wd)
         try:
             refresh_return_period_events(omni_wd)
-        except Exception:
+        except Exception:  # Boundary: return-period refresh should not block run finalization.
             ron.logger.warning("omni: failed to refresh return-period assets", exc_info=True)
         with ron.locked():
             ron._mods = [mod for mod in ron._mods if mod != 'omni']
@@ -3808,198 +3209,7 @@ class Omni(NoDbBase):
 
 
     def run_omni_scenarios(self) -> None:
-        """
-        Runs all the scenarios in two passes to ensure dependencies are met.
-        has dependency checking and skips scenarios that are up-to-date.
-        1st pass: runs scenarios thar are only dependent on base_scenario (Undisturbed, SBSmap, Uniform*)
-        2nd pass: runs scenarios dependent on 1st pass scenarios (Thinning, Mulching)
-
-        Intended as a development hook for testing scenario running without the additional
-        complexties of having rq as seperate jobs.
-        """
-        self.logger.info('run_omni_scenarios')
-
-        if not self.scenarios:
-            self.logger.info('  run_omni_scenarios: No scenarios to run')
-            raise Exception('No scenarios to run')
-
-        dependency_tree: ScenarioDependency = dict(self.scenario_dependency_tree)
-
-        run_states: List[Dict[str, Any]] = []
-        self.scenario_run_state = run_states
-
-        active_scenarios = set()
-        processed_scenarios = set()
-        base_scenario_key = str(self.base_scenario)
-
-        def dependency_info(scenario_enum: OmniScenario, scenario_def: ScenarioDef):
-            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            active_scenarios.add(scenario_name)
-            dependency_target = self._scenario_dependency_target(scenario_enum, scenario_def)
-            dependency_path = self._loss_pw0_path_for_scenario(dependency_target)
-            dependency_hash = _hash_file_sha1(dependency_path)
-            signature = self._scenario_signature(scenario_def)
-            base_years = self._year_set_for_scenario(base_scenario_key)
-            scenario_years = self._year_set_for_scenario(scenario_name)
-            years_match = (
-                base_years is not None and
-                scenario_years is not None and
-                scenario_years == base_years
-            )
-            prev_entry = dependency_tree.get(scenario_name)
-            up_to_date = (
-                prev_entry is not None and
-                prev_entry.get('dependency_sha1') == dependency_hash and
-                prev_entry.get('signature') == signature
-            )
-            return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match
-
-        # pass 1 scenarios: dependent on base_scenario
-        for scenario_def in self.scenarios:
-            scenario_enum = OmniScenario.parse(scenario_def.get('type'))
-            if scenario_enum == OmniScenario.Mulch:
-                continue
-
-            if self.base_scenario != OmniScenario.Undisturbed and \
-               scenario_enum in [OmniScenario.Thinning, OmniScenario.PrescribedFire]:
-                # defer thinning/prescribed fire until after dependent scenarios build
-                continue
-
-            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match = \
-                dependency_info(scenario_enum, scenario_def)
-            processed_scenarios.add(scenario_name)
-
-            target_key = self._normalize_scenario_key(dependency_target)
-
-            if up_to_date and years_match:
-                self.logger.info(f'  run_omni_scenarios: {scenario_name} dependency unchanged, skipping')
-                ts = time.time()
-                dependency_tree[scenario_name] = {
-                    'dependency_target': target_key,
-                    'dependency_path': dependency_path,
-                    'dependency_sha1': dependency_hash,
-                    'signature': signature,
-                    'timestamp': ts
-                }
-                self.scenario_dependency_tree = dependency_tree
-                run_states.append({
-                    'scenario': scenario_name,
-                    'status': 'skipped',
-                    'reason': 'dependency_unchanged',
-                    'dependency_target': target_key,
-                    'dependency_path': dependency_path,
-                    'dependency_sha1': dependency_hash,
-                    'timestamp': ts
-                })
-                self.scenario_run_state = run_states
-                continue
-
-            run_reason = 'dependency_changed'
-            if up_to_date and not years_match:
-                run_reason = 'year_set_mismatch'
-                self.logger.info(f'  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning')
-            else:
-                self.logger.info(f'  run_omni_scenarios: {scenario_name}')
-            omni_dir, scenario_name = self.run_omni_scenario(scenario_def)
-            self._post_omni_run(omni_dir, scenario_name)
-
-            updated_hash = _hash_file_sha1(dependency_path)
-            ts = time.time()
-            dependency_tree[scenario_name] = {
-                'dependency_target': target_key,
-                'dependency_path': dependency_path,
-                'dependency_sha1': updated_hash,
-                'signature': signature,
-                'timestamp': ts
-            }
-            self.scenario_dependency_tree = dependency_tree
-            run_states.append({
-                'scenario': scenario_name,
-                'status': 'executed',
-                'reason': run_reason,
-                'dependency_target': target_key,
-                'dependency_path': dependency_path,
-                'dependency_sha1': updated_hash,
-                'timestamp': ts
-            })
-            self.scenario_run_state = run_states
-
-        # pass 2 scenarios: dependent on pass 1
-        for scenario_def in self.scenarios:
-            scenario_enum = OmniScenario.parse(scenario_def.get('type'))
-            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            if scenario_name in processed_scenarios:
-                continue
-
-            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match = dependency_info(scenario_enum, scenario_def)
-            processed_scenarios.add(scenario_name)
-
-            target_key = self._normalize_scenario_key(dependency_target)
-
-            if up_to_date and years_match:
-                self.logger.info(f'  run_omni_scenarios: {scenario_name} dependency unchanged, skipping')
-                ts = time.time()
-                dependency_tree[scenario_name] = {
-                    'dependency_target': target_key,
-                    'dependency_path': dependency_path,
-                    'dependency_sha1': dependency_hash,
-                    'signature': signature,
-                    'timestamp': ts
-                }
-                self.scenario_dependency_tree = dependency_tree
-                run_states.append({
-                    'scenario': scenario_name,
-                    'status': 'skipped',
-                    'reason': 'dependency_unchanged',
-                    'dependency_target': target_key,
-                    'dependency_path': dependency_path,
-                    'dependency_sha1': dependency_hash,
-                    'timestamp': ts
-                })
-                self.scenario_run_state = run_states
-                continue
-
-            run_reason = 'dependency_changed'
-            if up_to_date and not years_match:
-                run_reason = 'year_set_mismatch'
-                self.logger.info(f'  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning')
-            else:
-                self.logger.info(f'  run_omni_scenarios: {scenario_name}')
-            omni_dir, scenario_name = self.run_omni_scenario(scenario_def)
-            self._post_omni_run(omni_dir, scenario_name)
-            
-            updated_hash = _hash_file_sha1(dependency_path)
-            ts = time.time()
-            dependency_tree[scenario_name] = {
-                'dependency_target': target_key,
-                'dependency_path': dependency_path,
-                'dependency_sha1': updated_hash,
-                'signature': signature,
-                'timestamp': ts
-            }
-            self.scenario_dependency_tree = dependency_tree
-            run_states.append({
-                'scenario': scenario_name,
-                'status': 'executed',
-                'reason': run_reason,
-                'dependency_target': target_key,
-                'dependency_path': dependency_path,
-                'dependency_sha1': updated_hash,
-                'timestamp': ts
-            })
-            self.scenario_run_state = run_states
-
-        stale = set(dependency_tree.keys()) - active_scenarios
-        for scenario_name in stale:
-            dependency_tree.pop(scenario_name, None)
-        self.scenario_dependency_tree = dependency_tree
-
-        self.logger.info('  run_omni_scenarios: compiling hillslope summaries')
-        self.compile_hillslope_summaries()
-        self.logger.info('  run_omni_scenarios: compiling channel summaries')
-        self.compile_channel_summaries()
-        self.logger.info('  run_omni_scenarios: compiling scenario report')
-        self.scenarios_report()
+        _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenarios(self)
 
     def run_omni_scenario(self, scenario_def: ScenarioDef) -> Tuple[str, str]:
         from wepppy.nodb.core import Landuse, Soils, Wepp

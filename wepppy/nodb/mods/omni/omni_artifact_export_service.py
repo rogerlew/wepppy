@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 import os
 from os.path import exists as _exists
 from os.path import join as _join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import pandas as pd
 
@@ -15,8 +17,410 @@ class OmniArtifactExportService:
     """Own Omni artifact/report exports while preserving facade call contracts."""
 
     def build_contrast_ids_geojson(self, omni: "Omni") -> Optional[str]:
-        # GeoJSON build remains in facade helpers for now; keep collaborator seam stable.
-        return omni._build_contrast_ids_geojson_impl()
+        from wepppy.nodb.core import Watershed
+
+        selection_mode = self._normalize_selection_mode(getattr(omni, "_contrast_selection_mode", None))
+        report_entries = omni._load_contrast_build_report()
+        selections, stream_groups = self._collect_geojson_sources(selection_mode, report_entries)
+
+        output_path = omni._contrast_ids_geojson_path()
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+        if selection_mode == "stream_order":
+            return self._build_stream_order_contrast_geojson(
+                omni,
+                watershed_cls=Watershed,
+                output_path=output_path,
+                stream_groups=stream_groups,
+                selection_mode=selection_mode,
+            )
+
+        if selection_mode == "user_defined_areas":
+            return self._build_user_defined_area_contrast_geojson(
+                omni,
+                watershed_cls=Watershed,
+                output_path=output_path,
+                selections=selections,
+                selection_mode=selection_mode,
+            )
+
+        if not selections:
+            self._write_feature_collection(output_path, [])
+            return output_path
+
+        try:
+            import geopandas as gpd
+        except ImportError as exc:  # pragma: no cover - optional dependency
+            raise ImportError("geopandas is required for contrast overlay GeoJSON.") from exc
+
+        watershed = Watershed.getInstance(omni.wd)
+        hillslope_path = getattr(watershed, "subwta_shp", None)
+        if not hillslope_path or not _exists(hillslope_path):
+            raise FileNotFoundError("Hillslope polygons not found for contrast overlay GeoJSON.")
+
+        hillslope_gdf = gpd.read_file(hillslope_path)
+        if hillslope_gdf.empty:
+            raise ValueError("No hillslope polygons available for contrast overlay GeoJSON.")
+
+        id_column = None
+        for candidate in ("TopazID", "topaz_id", "TOPAZ_ID"):
+            if candidate in hillslope_gdf.columns:
+                id_column = candidate
+                break
+        if id_column is None:
+            raise ValueError("Hillslope polygons missing a TopazID field.")
+
+        hillslope_lookup: Dict[str, Any] = {}
+        for _, row in hillslope_gdf.iterrows():
+            topaz_raw = row.get(id_column)
+            if topaz_raw in (None, ""):
+                continue
+            topaz_id = str(topaz_raw)
+            if topaz_id == "0" or topaz_id.endswith("4"):
+                continue
+            geom = row.geometry
+            if geom is None or getattr(geom, "is_empty", False):
+                continue
+            hillslope_lookup[topaz_id] = geom
+
+        if not hillslope_lookup:
+            raise ValueError("No valid hillslope polygons available for contrast overlay GeoJSON.")
+
+        from shapely.geometry import mapping
+        from shapely.ops import unary_union
+
+        features: List[Dict[str, Any]] = []
+        missing_topaz: Set[str] = set()
+        for label, topaz_ids, extra in selections:
+            geoms = []
+            for topaz_id in topaz_ids:
+                geom = hillslope_lookup.get(topaz_id)
+                if geom is None:
+                    missing_topaz.add(topaz_id)
+                    continue
+                geoms.append(geom)
+            if not geoms:
+                continue
+            merged = unary_union(geoms)
+            if merged is None or getattr(merged, "is_empty", False):
+                continue
+            props = {"contrast_label": label, "label": label, "selection_mode": selection_mode}
+            props.update(extra)
+            features.append(
+                {
+                    "type": "Feature",
+                    "properties": props,
+                    "geometry": mapping(merged),
+                }
+            )
+
+        if missing_topaz:
+            omni.logger.info(
+                "Contrast overlay GeoJSON skipped %d hillslopes missing geometry.",
+                len(missing_topaz),
+            )
+
+        self._write_feature_collection(output_path, features)
+        return output_path
+
+    def _build_stream_order_contrast_geojson(
+        self,
+        omni: "Omni",
+        *,
+        watershed_cls: Any,
+        output_path: str,
+        stream_groups: Dict[int, Dict[str, Any]],
+        selection_mode: str,
+    ) -> str:
+        if not stream_groups:
+            self._write_feature_collection(output_path, [])
+            return output_path
+
+        try:
+            import rasterio
+            from rasterio.features import shapes
+        except ImportError as exc:  # pragma: no cover - optional dependency
+            raise ImportError("rasterio is required for stream-order contrast overlay GeoJSON.") from exc
+        try:
+            from shapely.geometry import shape
+            from shapely.ops import unary_union
+        except ImportError as exc:  # pragma: no cover - optional dependency
+            raise ImportError("shapely is required for stream-order contrast overlay GeoJSON.") from exc
+
+        watershed = watershed_cls.getInstance(omni.wd)
+        order_reduction_passes = omni._resolve_order_reduction_passes()
+        wbt_dir = Path(getattr(watershed, "wbt_wd", _join(omni.wd, "dem", "wbt")))
+        subwta_pruned_path = wbt_dir / f"subwta.strahler_pruned_{order_reduction_passes}.tif"
+        if not subwta_pruned_path.exists():
+            raise FileNotFoundError(f"Missing stream-order subwta raster: {subwta_pruned_path}")
+
+        group_values: Dict[int, int] = {}
+        for group_id in self._sorted_keys(stream_groups.keys()):
+            try:
+                group_id_int = int(group_id)
+            except (TypeError, ValueError):
+                continue
+            raw_value = group_id_int // 10 if group_id_int % 10 == 0 else group_id_int
+            if raw_value <= 0:
+                continue
+            group_values[raw_value] = group_id_int
+        if not group_values:
+            self._write_feature_collection(output_path, [])
+            return output_path
+
+        geometries: Dict[int, List[Any]] = {key: [] for key in group_values}
+        crs = None
+        with rasterio.open(subwta_pruned_path) as dataset:
+            data = dataset.read(1, masked=True)
+            transform = dataset.transform
+            crs = dataset.crs
+            mask = None
+            if hasattr(data, "mask"):
+                mask = ~data.mask
+            for geom, value in shapes(data, mask=mask, transform=transform):
+                try:
+                    value_int = int(value)
+                except (TypeError, ValueError):
+                    continue
+                if value_int not in group_values:
+                    continue
+                geometries[value_int].append(shape(geom))
+
+        features: List[Dict[str, Any]] = []
+        for raw_value in self._sorted_keys(group_values.keys()):
+            geoms = geometries.get(raw_value, [])
+            if not geoms:
+                continue
+            merged = unary_union(geoms)
+            if merged is None or getattr(merged, "is_empty", False):
+                continue
+            group_id = group_values[raw_value]
+            label = str(group_id)
+            features.append(
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "contrast_label": label,
+                        "label": label,
+                        "selection_mode": selection_mode,
+                        "subcatchments_group": group_id,
+                    },
+                    "geometry": merged.__geo_interface__,
+                }
+            )
+
+        self._write_projected_feature_collection(output_path, features, crs=crs)
+        return output_path
+
+    def _build_user_defined_area_contrast_geojson(
+        self,
+        omni: "Omni",
+        *,
+        watershed_cls: Any,
+        output_path: str,
+        selections: List[Tuple[str, Set[str], Dict[str, Any]]],
+        selection_mode: str,
+    ) -> str:
+        if not selections:
+            self._write_feature_collection(output_path, [])
+            return output_path
+
+        try:
+            import numpy as np
+            import rasterio
+            from rasterio.features import shapes
+        except ImportError as exc:  # pragma: no cover - optional dependency
+            raise ImportError("rasterio is required for user-defined contrast overlay GeoJSON.") from exc
+        try:
+            from shapely.geometry import shape
+            from shapely.ops import unary_union
+        except ImportError as exc:  # pragma: no cover - optional dependency
+            raise ImportError("shapely is required for user-defined contrast overlay GeoJSON.") from exc
+
+        watershed = watershed_cls.getInstance(omni.wd)
+        subwta_path = getattr(watershed, "subwta", None)
+        if not subwta_path or not _exists(subwta_path):
+            raise FileNotFoundError("Hillslope raster not found for user-defined contrast overlay GeoJSON.")
+
+        with rasterio.open(subwta_path) as dataset:
+            data = dataset.read(1, masked=True)
+            transform = dataset.transform
+            crs = dataset.crs
+            data_array = data
+            base_mask = None
+            if hasattr(data, "mask"):
+                base_mask = ~data.mask
+                data_array = data.data
+
+        features: List[Dict[str, Any]] = []
+        for label, topaz_ids, extra in selections:
+            topaz_values: List[int] = []
+            for topaz_id in topaz_ids:
+                try:
+                    topaz_values.append(int(topaz_id))
+                except (TypeError, ValueError):
+                    continue
+            if not topaz_values:
+                continue
+            mask = np.isin(data_array, topaz_values)
+            if base_mask is not None:
+                mask = mask & base_mask
+            if not mask.any():
+                continue
+            geoms = [shape(geom) for geom, _ in shapes(data_array, mask=mask, transform=transform)]
+            if not geoms:
+                continue
+            merged = unary_union(geoms)
+            if merged is None or getattr(merged, "is_empty", False):
+                continue
+            props = {"contrast_label": label, "label": label, "selection_mode": selection_mode}
+            props.update(extra)
+            features.append(
+                {
+                    "type": "Feature",
+                    "properties": props,
+                    "geometry": merged.__geo_interface__,
+                }
+            )
+
+        self._write_projected_feature_collection(output_path, features, crs=crs)
+        return output_path
+
+    def _collect_geojson_sources(
+        self,
+        selection_mode: str,
+        report_entries: List[Dict[str, Any]],
+    ) -> Tuple[List[Tuple[str, Set[str], Dict[str, Any]]], Dict[int, Dict[str, Any]]]:
+        selections: List[Tuple[str, Set[str], Dict[str, Any]]] = []
+        stream_groups: Dict[int, Dict[str, Any]] = {}
+
+        if selection_mode == "user_defined_areas":
+            feature_map: Dict[Any, Tuple[str, Set[str], Dict[str, Any]]] = {}
+            for entry in report_entries:
+                if entry.get("selection_mode") != "user_defined_areas":
+                    continue
+                feature_index = entry.get("feature_index")
+                if feature_index in (None, ""):
+                    continue
+                try:
+                    feature_key: Any = int(feature_index)
+                except (TypeError, ValueError):
+                    feature_key = str(feature_index)
+                if feature_key in feature_map:
+                    continue
+                topaz_ids = entry.get("topaz_ids") or []
+                topaz_set = {str(item) for item in topaz_ids if item not in (None, "")}
+                if not topaz_set:
+                    continue
+                label = str(feature_key)
+                feature_map[feature_key] = (label, topaz_set, {"feature_index": feature_key})
+            for key in self._sorted_keys(feature_map.keys()):
+                selections.append(feature_map[key])
+            return selections, stream_groups
+
+        if selection_mode == "user_defined_hillslope_groups":
+            group_map: Dict[Any, Tuple[str, Set[str], Dict[str, Any]]] = {}
+            for entry in report_entries:
+                if entry.get("selection_mode") != "user_defined_hillslope_groups":
+                    continue
+                group_index = entry.get("group_index")
+                if group_index in (None, ""):
+                    continue
+                try:
+                    group_key: Any = int(group_index)
+                except (TypeError, ValueError):
+                    group_key = str(group_index)
+                if group_key in group_map:
+                    continue
+                topaz_ids = entry.get("topaz_ids") or []
+                topaz_set = {str(item) for item in topaz_ids if item not in (None, "")}
+                if not topaz_set:
+                    continue
+                label = str(group_key)
+                group_map[group_key] = (label, topaz_set, {"group_index": group_key})
+            for key in self._sorted_keys(group_map.keys()):
+                selections.append(group_map[key])
+            return selections, stream_groups
+
+        if selection_mode == "stream_order":
+            group_map: Dict[Any, Dict[str, Any]] = {}
+            for entry in report_entries:
+                if entry.get("selection_mode") != "stream_order":
+                    continue
+                group_value = entry.get("subcatchments_group")
+                if group_value in (None, ""):
+                    continue
+                try:
+                    group_key: Any = int(group_value)
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(f"Invalid subcatchments_group: {group_value!r}") from exc
+                if group_key in group_map:
+                    continue
+                if entry.get("status") == "skipped" or entry.get("n_hillslopes") in (None, 0, 0.0):
+                    continue
+                group_map[group_key] = entry
+            for key in self._sorted_keys(group_map.keys()):
+                stream_groups[int(key)] = group_map[key]
+            return selections, stream_groups
+
+        seen: Set[str] = set()
+        for entry in report_entries:
+            entry_mode = entry.get("selection_mode")
+            if entry_mode not in (None, "", "cumulative"):
+                continue
+            topaz_id = entry.get("topaz_id")
+            if topaz_id in (None, ""):
+                continue
+            label = str(topaz_id)
+            if label in seen:
+                continue
+            seen.add(label)
+            try:
+                topaz_value: Any = int(topaz_id)
+            except (TypeError, ValueError):
+                topaz_value = label
+            selections.append((label, {label}, {"topaz_id": topaz_value}))
+        return selections, stream_groups
+
+    @staticmethod
+    def _normalize_selection_mode(raw_selection_mode: Optional[str]) -> str:
+        selection_mode = (raw_selection_mode or "cumulative").strip().lower()
+        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+            return "stream_order"
+        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+            return "user_defined_hillslope_groups"
+        return selection_mode
+
+    @staticmethod
+    def _sorted_keys(values: Iterable[Any]) -> List[Any]:
+        try:
+            return sorted(values, key=lambda item: int(item))
+        except (TypeError, ValueError):
+            return sorted(values, key=lambda item: str(item))
+
+    @staticmethod
+    def _write_feature_collection(output_path: str, features: List[Dict[str, Any]]) -> None:
+        with open(output_path, "w", encoding="ascii", newline="\n") as fp:
+            json.dump({"type": "FeatureCollection", "features": features}, fp, ensure_ascii=True)
+
+    def _write_projected_feature_collection(
+        self,
+        output_path: str,
+        features: List[Dict[str, Any]],
+        *,
+        crs: Any,
+    ) -> None:
+        utm_path = output_path.replace(".wgs.geojson", ".utm.geojson")
+        payload: Dict[str, Any] = {"type": "FeatureCollection", "features": features}
+        if crs:
+            payload["crs"] = {"type": "name", "properties": {"name": str(crs)}}
+        with open(utm_path, "w", encoding="ascii", newline="\n") as fp:
+            json.dump(payload, fp, ensure_ascii=True)
+        from wepppy.topo.watershed_abstraction.support import json_to_wgs
+
+        wgs_path = json_to_wgs(utm_path, s_srs=str(crs) if crs else None)
+        if wgs_path != output_path:
+            os.replace(wgs_path, output_path)
 
     def scenarios_report(self, omni: "Omni") -> pd.DataFrame:
         from wepppy.nodb.mods.omni.omni import OMNI_REL_DIR

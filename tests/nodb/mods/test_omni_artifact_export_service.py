@@ -244,6 +244,65 @@ def test_build_contrast_ids_geojson_stream_order_empty_fallback_without_gis_deps
     assert payload == {"type": "FeatureCollection", "features": []}
 
 
+def test_build_contrast_ids_geojson_stream_order_rejects_invalid_group_id(
+    tmp_path: Path,
+) -> None:
+    service = OmniArtifactExportService()
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.artifacts.geojson.invalid_group")
+    omni._contrast_selection_mode = "stream_order"
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        json.dumps(
+            {
+                "selection_mode": "stream_order",
+                "contrast_id": 1,
+                "subcatchments_group": "bad-group",
+                "n_hillslopes": 2,
+            }
+        )
+        + "\n",
+        encoding="ascii",
+    )
+
+    with pytest.raises(ValueError, match="Invalid subcatchments_group"):
+        service.build_contrast_ids_geojson(omni)
+
+
+def test_build_contrast_ids_geojson_user_defined_areas_empty_fallback_without_gis_deps(
+    tmp_path: Path,
+) -> None:
+    service = OmniArtifactExportService()
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.artifacts.geojson.user_defined")
+    omni._contrast_selection_mode = "user_defined_areas"
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        json.dumps(
+            {
+                "selection_mode": "user_defined_areas",
+                "contrast_id": 1,
+                "feature_index": 1,
+                "status": "skipped",
+                "topaz_ids": [],
+                "n_hillslopes": 0,
+            }
+        )
+        + "\n",
+        encoding="ascii",
+    )
+
+    output_path = service.build_contrast_ids_geojson(omni)
+    payload = json.loads(Path(output_path).read_text(encoding="ascii"))
+    assert payload == {"type": "FeatureCollection", "features": []}
+
+
 def _new_detached_omni(tmp_path: Path) -> omni_module.Omni:
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
@@ -276,8 +335,15 @@ def test_facade_artifact_methods_delegate_to_service(
         "compile_channel_summaries",
         lambda instance: pd.DataFrame([{"Channel ID": 2}]),
     )
+    monkeypatch.setattr(
+        omni_module._OMNI_ARTIFACT_EXPORT_SERVICE,
+        "build_contrast_ids_geojson",
+        lambda instance: str(Path(instance.wd) / "omni" / "contrasts.overlay.wgs.geojson"),
+    )
 
     assert list(omni.scenarios_report()["scenario"]) == ["s1"]
     assert list(omni.contrasts_report()["contrast"]) == ["c1"]
     assert list(omni.compile_hillslope_summaries()["Topaz ID"]) == [20]
     assert list(omni.compile_channel_summaries()["Channel ID"]) == [2]
+    assert omni._build_contrast_ids_geojson().endswith("contrasts.overlay.wgs.geojson")
+    assert omni._build_contrast_ids_geojson_impl().endswith("contrasts.overlay.wgs.geojson")

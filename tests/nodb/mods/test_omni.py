@@ -571,6 +571,35 @@ def test_omni_clone_links_nodir_shared_inputs(tmp_path: Path, omni_module) -> No
     assert os.readlink(scenario_wd / "watershed.channels.parquet") == str(base_wd / "watershed.channels.parquet")
 
 
+def test_omni_clone_logs_directory_copy_permission_errors(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    omni_module,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    base_wd = tmp_path / "run"
+    source_dir = base_wd / "problem-dir"
+    nested_dir = source_dir / "nested"
+    nested_dir.mkdir(parents=True)
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", lambda *args, **kwargs: None)
+
+    original_walk = omni_module.os.walk
+
+    def _walk_with_permission_error(path: str):
+        if str(path) == str(source_dir):
+            raise PermissionError("blocked")
+        return original_walk(path)
+
+    monkeypatch.setattr(omni_module.os, "walk", _walk_with_permission_error)
+
+    with caplog.at_level(logging.WARNING, logger=omni_module.LOGGER.name):
+        scenario_wd = Path(omni_module._omni_clone({"type": "dummy"}, str(base_wd), runid="run-123"))
+
+    assert scenario_wd.exists()
+    assert "Permission denied while creating Omni clone directory tree" in caplog.text
+
+
 def test_contrast_sidecar_roundtrip(tmp_path, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
@@ -626,6 +655,35 @@ def test_clear_contrasts_removes_runs_and_sidecars(tmp_path, omni_module):
     assert (contrasts_dir / "_uploads").exists()
     assert not (contrasts_dir / "1").exists()
     assert not (contrasts_dir / "2").exists()
+
+
+def test_clear_contrasts_propagates_non_oserror_from_report_cleanup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    omni_module,
+) -> None:
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni._contrast_names = ["existing"]
+    omni._contrasts = [{"1": "/tmp/H1"}]
+    omni._contrast_dependency_tree = {}
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text("{}", encoding="ascii")
+
+    original_remove = omni_module.os.remove
+
+    def _remove_with_non_oserror(path: str) -> None:
+        if path == str(report_path):
+            raise ValueError("simulated-remove-error")
+        original_remove(path)
+
+    monkeypatch.setattr(omni_module.os, "remove", _remove_with_non_oserror)
+
+    with pytest.raises(ValueError, match="simulated-remove-error"):
+        omni.clear_contrasts()
 
 
 def test_user_defined_areas_contrast_builds_sidecars_with_overlap(tmp_path, omni_module, monkeypatch):
@@ -1060,6 +1118,49 @@ def test_build_contrasts_ignores_filters_when_not_cumulative(tmp_path, monkeypat
         "uniform_high,101__to__undisturbed",
         "uniform_high,102__to__undisturbed",
     ]
+
+
+def test_build_contrasts_raises_value_error_when_no_soil_data(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.no_soil_data")
+    omni._contrast_object_param = "Runoff_mm"
+    omni._contrast_cumulative_obj_param_threshold_fraction = 1.0
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+    omni._contrast_selection_mode = "cumulative"
+    omni._control_scenario = "uniform_high"
+    omni._contrast_scenario = None
+    omni._contrast_names = []
+    omni._contrasts = None
+    omni._contrast_dependency_tree = {}
+    omni.locked = _noop_lock
+
+    class DummyTranslator:
+        top2wepp = {101: 201}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "get_objective_parameter_from_gpkg",
+        lambda self, objective_parameter, scenario=None: ([], 0.0),
+    )
+
+    with pytest.raises(ValueError, match="No soil erosion data found!"):
+        omni._build_contrasts()
 
 
 def _install_json_to_wgs_stub(monkeypatch):
@@ -1548,6 +1649,65 @@ def test_build_contrasts_caps_when_no_limit(tmp_path, monkeypatch, omni_module, 
 
     assert len(omni._contrast_names) == 100
     assert "Contrast selection reached cap of 100 hillslopes" in caplog.text
+
+
+def test_run_omni_scenarios_delegates_to_run_orchestration_service(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    captured: dict[str, object] = {}
+
+    def _fake_run(instance):
+        captured["instance"] = instance
+
+    monkeypatch.setattr(omni_module._OMNI_RUN_ORCHESTRATION_SERVICE, "run_omni_scenarios", _fake_run)
+
+    omni.run_omni_scenarios()
+
+    assert captured["instance"] is omni
+
+
+def test_run_omni_contrasts_delegates_to_run_orchestration_service(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    captured: dict[str, object] = {}
+
+    def _fake_run(instance):
+        captured["instance"] = instance
+
+    monkeypatch.setattr(omni_module._OMNI_RUN_ORCHESTRATION_SERVICE, "run_omni_contrasts", _fake_run)
+
+    omni.run_omni_contrasts()
+
+    assert captured["instance"] is omni
+
+
+def test_run_omni_contrast_delegates_to_run_orchestration_service(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    captured: dict[str, object] = {}
+
+    def _fake_run(instance, contrast_id, *, rq_job_id=None):
+        captured["instance"] = instance
+        captured["contrast_id"] = contrast_id
+        captured["rq_job_id"] = rq_job_id
+        return str(tmp_path / "_pups" / "omni" / "contrasts" / str(contrast_id))
+
+    monkeypatch.setattr(omni_module._OMNI_RUN_ORCHESTRATION_SERVICE, "run_omni_contrast", _fake_run)
+
+    result = omni.run_omni_contrast(3, rq_job_id="job-123")
+
+    assert captured == {"instance": omni, "contrast_id": 3, "rq_job_id": "job-123"}
+    assert result.endswith("/_pups/omni/contrasts/3")
+
+
+def test_run_omni_scenarios_raises_exception_when_no_scenarios(tmp_path, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.run_scenarios.empty")
+    omni._scenarios = []
+
+    with pytest.raises(Exception, match="No scenarios to run"):
+        omni.run_omni_scenarios()
 
 
 def test_run_omni_contrasts_skips_up_to_date(tmp_path, monkeypatch, omni_module):

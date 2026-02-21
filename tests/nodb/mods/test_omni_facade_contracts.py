@@ -198,6 +198,34 @@ def test_delete_scenarios_prunes_state_and_artifacts(
     assert refreshed == [omni_module.OMNI_REL_DIR]
 
 
+def test_delete_scenarios_propagates_non_oserror_cleanup_failures(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    omni = _new_detached_omni(tmp_path, "tests.omni.facade.delete.non_oserror")
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+    omni._scenarios = [{"type": "uniform_low"}]
+    omni._scenario_dependency_tree = {"uniform_low": {"sha1": "a"}}
+    omni._scenario_run_state = [{"scenario": "uniform_low", "status": "executed"}]
+
+    scenario_dir = tmp_path / "_pups" / "omni" / "scenarios" / "uniform_low"
+    scenario_dir.mkdir(parents=True)
+
+    monkeypatch.setattr(
+        omni_module.shutil,
+        "rmtree",
+        lambda path: (_ for _ in ()).throw(ValueError("simulated-rmtree-error")),
+    )
+
+    with pytest.raises(ValueError, match="simulated-rmtree-error"):
+        omni.delete_scenarios(["uniform_low"])
+
+
 def test_scenario_run_markers_always_include_base_scenario(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

@@ -5,10 +5,10 @@ import shutil
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple
 
 if TYPE_CHECKING:
-    from wepppy.nodb.mods.omni.omni import Omni, OmniScenario, ScenarioDef
+    from wepppy.nodb.mods.omni.omni import ContrastMapping, Omni, OmniScenario, ScenarioDef
 
 
 class OmniModeBuildServices:
@@ -25,6 +25,49 @@ class OmniModeBuildServices:
             omni._build_contrasts_stream_order()
             return True
         return False
+
+    def build_contrast_mapping(
+        self,
+        omni: "Omni",
+        *,
+        top2wepp: Dict[Any, Any],
+        selected_topaz_ids: Set[Any],
+        control_scenario: Optional[str],
+        contrast_scenario: Optional[str],
+        contrast_id: Any,
+        control_label: Optional[Any] = None,
+        contrast_label: Optional[Any] = None,
+    ) -> Tuple[str, "ContrastMapping"]:
+        from wepppy.nodb.mods.omni.omni import OMNI_REL_DIR
+
+        name_control = control_label if control_label is not None else control_scenario
+        if contrast_label is not None:
+            name_contrast = contrast_label
+        elif contrast_scenario is None:
+            name_contrast = omni.base_scenario
+        else:
+            name_contrast = contrast_scenario
+        contrast_name = f"{name_control},{contrast_id}__to__{name_contrast}"
+
+        selected_topaz_tokens = {str(value) for value in selected_topaz_ids}
+        contrast: "ContrastMapping" = {}
+        for topaz_id, wepp_id in top2wepp.items():
+            scenario_name = contrast_scenario if str(topaz_id) in selected_topaz_tokens else control_scenario
+            if scenario_name is None:
+                wepp_id_path = _join(omni.wd, f"wepp/output/H{wepp_id}")
+            else:
+                wepp_id_path = _join(
+                    omni.wd,
+                    OMNI_REL_DIR,
+                    "scenarios",
+                    str(scenario_name),
+                    "wepp",
+                    "output",
+                    f"H{wepp_id}",
+                )
+            contrast[topaz_id] = wepp_id_path
+
+        return contrast_name, contrast
 
     def apply_scenario_mode(
         self,
