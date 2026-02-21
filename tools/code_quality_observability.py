@@ -11,6 +11,7 @@ import argparse
 import ast
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import fnmatch
 import json
 from pathlib import Path
 import re
@@ -68,6 +69,7 @@ THRESHOLDS: dict[str, dict[str, float]] = {
 
 SEVERITY_ORDER = {"green": 0, "yellow": 1, "red": 2, "unknown": -1, "n/a": -1}
 COMPLEXITY_RE = re.compile(r"complexity of (\d+)")
+DEFAULT_EXCEPTIONS_FILE = ".code-quality-observability-exceptions.json"
 
 
 @dataclass(frozen=True)
@@ -75,6 +77,15 @@ class ChangedPath:
     path: str
     base_path: str
     status: str
+
+
+@dataclass(frozen=True)
+class ChangedMetricException:
+    path: str
+    metric: str
+    reason: str
+    owner: str | None = None
+    expires_on: str | None = None
 
 
 def _run_git(args: list[str], *, check: bool = True) -> str:
@@ -88,6 +99,92 @@ def _run_git(args: list[str], *, check: bool = True) -> str:
     if check and proc.returncode != 0:
         raise RuntimeError(f"git {' '.join(args)} failed: {proc.stderr.strip()}")
     return proc.stdout
+
+
+def _resolve_exceptions_path(path_value: str) -> Path:
+    path = Path(path_value)
+    if path.is_absolute():
+        return path
+    return REPO_ROOT / path
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path.resolve())
+
+
+def load_changed_metric_exceptions(exceptions_file: str | None) -> tuple[list[ChangedMetricException], str | None]:
+    if exceptions_file:
+        config_path = _resolve_exceptions_path(exceptions_file)
+    else:
+        config_path = REPO_ROOT / DEFAULT_EXCEPTIONS_FILE
+
+    if not config_path.exists():
+        if exceptions_file:
+            raise FileNotFoundError(f"Exceptions file not found: {config_path}")
+        return [], None
+
+    raw = json.loads(config_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("Exceptions file must be a JSON object.")
+
+    entries = raw.get("changed_file_metric_exceptions")
+    if entries is None:
+        entries = []
+    if not isinstance(entries, list):
+        raise ValueError("'changed_file_metric_exceptions' must be a list.")
+
+    parsed: list[ChangedMetricException] = []
+    for idx, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            raise ValueError(f"Exception entry at index {idx} must be a JSON object.")
+
+        path = entry.get("path")
+        metric = entry.get("metric")
+        reason = entry.get("reason")
+        owner = entry.get("owner")
+        expires_on = entry.get("expires_on")
+
+        if not isinstance(path, str) or not path:
+            raise ValueError(f"Exception entry at index {idx} must include non-empty string 'path'.")
+        if not isinstance(metric, str) or metric not in THRESHOLDS:
+            valid = ", ".join(sorted(THRESHOLDS))
+            raise ValueError(
+                f"Exception entry at index {idx} has invalid 'metric': {metric!r}. Valid metrics: {valid}."
+            )
+        if not isinstance(reason, str) or not reason:
+            raise ValueError(f"Exception entry at index {idx} must include non-empty string 'reason'.")
+        if owner is not None and not isinstance(owner, str):
+            raise ValueError(f"Exception entry at index {idx} has non-string 'owner'.")
+        if expires_on is not None and not isinstance(expires_on, str):
+            raise ValueError(f"Exception entry at index {idx} has non-string 'expires_on'.")
+
+        parsed.append(
+            ChangedMetricException(
+                path=path,
+                metric=metric,
+                reason=reason,
+                owner=owner,
+                expires_on=expires_on,
+            )
+        )
+
+    return parsed, _display_path(config_path)
+
+
+def match_changed_metric_exception(
+    path: str,
+    metric: str,
+    exceptions: list[ChangedMetricException],
+) -> ChangedMetricException | None:
+    for exception in exceptions:
+        if exception.metric != metric:
+            continue
+        if fnmatch.fnmatch(path, exception.path):
+            return exception
+    return None
 
 
 def git_ls_files(pattern: str) -> list[str]:
@@ -390,7 +487,13 @@ def highest_severity(values: list[str]) -> str:
     return best
 
 
-def build_report(base_ref: str | None) -> dict[str, Any]:
+def build_report(
+    base_ref: str | None,
+    *,
+    metric_exceptions: list[ChangedMetricException] | None = None,
+    exceptions_source: str | None = None,
+) -> dict[str, Any]:
+    metric_exceptions = metric_exceptions or []
     python_files = [path for path in git_ls_files("**/*.py") if is_python_scope(path)]
     js_files = [path for path in git_ls_files("**/*.js") if is_js_scope(path)]
 
@@ -440,6 +543,9 @@ def build_report(base_ref: str | None) -> dict[str, Any]:
     ]
     js_source_cc_values: list[float] = [value for value in js_cc_map.values() if value is not None]
 
+    applied_exceptions: list[dict[str, str | None]] = []
+    applied_exception_keys: set[tuple[str, str]] = set()
+
     changed_report: list[dict[str, Any]] = []
     if base_ref:
         for changed in collect_changed_files(base_ref):
@@ -471,6 +577,27 @@ def build_report(base_ref: str | None) -> dict[str, Any]:
                         "trend": trend_from_values(base_value, current_value),
                         "severity": classify_severity(key, current_value if current_value is not None else None),
                     }
+                    exception = match_changed_metric_exception(changed.path, key, metric_exceptions)
+                    if metric["trend"] == "worsened" and exception is not None:
+                        metric["exception"] = {
+                            "path_pattern": exception.path,
+                            "reason": exception.reason,
+                            "owner": exception.owner,
+                            "expires_on": exception.expires_on,
+                        }
+                        dedupe_key = (changed.path, key)
+                        if dedupe_key not in applied_exception_keys:
+                            applied_exception_keys.add(dedupe_key)
+                            applied_exceptions.append(
+                                {
+                                    "path": changed.path,
+                                    "metric": key,
+                                    "reason": exception.reason,
+                                    "owner": exception.owner,
+                                    "expires_on": exception.expires_on,
+                                    "path_pattern": exception.path,
+                                }
+                            )
                     entry["metrics"].append(metric)
             else:
                 base_metrics = analyze_js_text(base_text) if base_text is not None else {}
@@ -490,6 +617,27 @@ def build_report(base_ref: str | None) -> dict[str, Any]:
                         "trend": trend_from_values(base_value, current_value),
                         "severity": classify_severity(key, current_value if current_value is not None else None),
                     }
+                    exception = match_changed_metric_exception(changed.path, key, metric_exceptions)
+                    if metric["trend"] == "worsened" and exception is not None:
+                        metric["exception"] = {
+                            "path_pattern": exception.path,
+                            "reason": exception.reason,
+                            "owner": exception.owner,
+                            "expires_on": exception.expires_on,
+                        }
+                        dedupe_key = (changed.path, key)
+                        if dedupe_key not in applied_exception_keys:
+                            applied_exception_keys.add(dedupe_key)
+                            applied_exceptions.append(
+                                {
+                                    "path": changed.path,
+                                    "metric": key,
+                                    "reason": exception.reason,
+                                    "owner": exception.owner,
+                                    "expires_on": exception.expires_on,
+                                    "path_pattern": exception.path,
+                                }
+                            )
                     entry["metrics"].append(metric)
 
             entry["highest_severity"] = highest_severity([metric["severity"] for metric in entry["metrics"]])
@@ -530,6 +678,12 @@ def build_report(base_ref: str | None) -> dict[str, Any]:
             "radon_available": cc_visit is not None,
             "eslint_available": eslint_available,
             "python_version": _python_version(),
+        },
+        "exceptions": {
+            "source_file": exceptions_source,
+            "configured_count": len(metric_exceptions),
+            "applied_count": len(applied_exceptions),
+            "applied": applied_exceptions,
         },
         "overall": {
             "python_prod_file_sloc": summarize_distribution(python_prod_file_sloc),
@@ -585,6 +739,11 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines.append(f"- `radon` available: `{report['tooling']['radon_available']}`")
     lines.append(f"- `eslint` available: `{report['tooling']['eslint_available']}`")
     lines.append(f"- Python runtime: `{report['tooling']['python_version']}`")
+    exceptions = report.get("exceptions") or {}
+    source_file = exceptions.get("source_file")
+    lines.append(f"- Exception rules source: `{source_file}`" if source_file else "- Exception rules source: _none_")
+    lines.append(f"- Exception rules configured: `{exceptions.get('configured_count', 0)}`")
+    lines.append(f"- Exception rules applied: `{exceptions.get('applied_count', 0)}`")
     lines.append("")
     lines.append("## Overall Baseline")
     lines.append("")
@@ -608,9 +767,17 @@ def render_markdown(report: dict[str, Any]) -> str:
         worsened_count = sum(
             1 for entry in changed_files for metric in entry["metrics"] if metric.get("trend") == "worsened"
         )
+        worsened_exception_count = sum(
+            1
+            for entry in changed_files
+            for metric in entry["metrics"]
+            if metric.get("trend") == "worsened" and metric.get("exception")
+        )
+        worsened_actionable = worsened_count - worsened_exception_count
         lines.append(
             f"- Files analyzed: `{len(changed_files)}`; highest severity red: `{red_count}`, "
-            f"yellow: `{yellow_count}`; worsened metric entries: `{worsened_count}`"
+            f"yellow: `{yellow_count}`; worsened metric entries: `{worsened_count}` "
+            f"(exceptions: `{worsened_exception_count}`, actionable: `{worsened_actionable}`)"
         )
         lines.append("")
         lines.append("| File | Lang | Highest | Key Metric Deltas |")
@@ -618,14 +785,33 @@ def render_markdown(report: dict[str, Any]) -> str:
         for entry in changed_files:
             metric_bits: list[str] = []
             for metric in entry["metrics"]:
-                metric_bits.append(
+                bit = (
                     f"{metric['name']} {_format_number(metric['base'])}->{_format_number(metric['current'])} "
                     f"({metric['trend']}, {metric['severity']})"
                 )
+                if metric.get("exception"):
+                    reason = str(metric["exception"].get("reason", "")).replace("|", "/")
+                    bit += f" [exception: {reason}]"
+                metric_bits.append(bit)
             delta_text = "<br>".join(metric_bits) if metric_bits else "n/a"
             lines.append(
                 f"| `{entry['path']}` | `{entry['language']}` | `{entry['highest_severity']}` | {delta_text} |"
             )
+        applied = exceptions.get("applied") or []
+        if applied:
+            lines.append("")
+            lines.append("### Applied Exceptions")
+            lines.append("")
+            lines.append("| File | Metric | Reason | Owner | Expires | Pattern |")
+            lines.append("| --- | --- | --- | --- | --- | --- |")
+            for item in applied:
+                reason = str(item.get("reason") or "").replace("|", "/")
+                owner = str(item.get("owner") or "-").replace("|", "/")
+                expires_on = str(item.get("expires_on") or "-").replace("|", "/")
+                pattern = str(item.get("path_pattern") or "-").replace("|", "/")
+                lines.append(
+                    f"| `{item.get('path')}` | `{item.get('metric')}` | {reason} | {owner} | {expires_on} | `{pattern}` |"
+                )
 
     lines.append("")
     lines.append("## Hotspots (Current Tree)")
@@ -657,16 +843,31 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-ref", default=None, help="Optional git base ref for changed-file delta analysis.")
     parser.add_argument("--json-out", default="code-quality-report.json", help="Path to write JSON report.")
     parser.add_argument("--md-out", default="code-quality-summary.md", help="Path to write Markdown summary.")
+    parser.add_argument(
+        "--exceptions-file",
+        default=None,
+        help=(
+            "Optional JSON file containing changed-file metric exceptions. "
+            f"If omitted and {DEFAULT_EXCEPTIONS_FILE} exists at repo root, it is loaded automatically."
+        ),
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    report = build_report(args.base_ref)
+    metric_exceptions, exceptions_source = load_changed_metric_exceptions(args.exceptions_file)
+    report = build_report(
+        args.base_ref,
+        metric_exceptions=metric_exceptions,
+        exceptions_source=exceptions_source,
+    )
     json_path = Path(args.json_out)
     md_path = Path(args.md_out)
     json_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     md_path.write_text(render_markdown(report), encoding="utf-8")
+    if exceptions_source:
+        print(f"Loaded exception rules from {exceptions_source} ({len(metric_exceptions)} configured).")
     print(f"Wrote JSON report to {json_path}")
     print(f"Wrote Markdown summary to {md_path}")
     print("Observe-only mode: no threshold-based failure.")

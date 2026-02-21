@@ -43,6 +43,37 @@ python3 tools/code_quality_observability.py \
 
 - `--base-ref` enables changed-file deltas (`improved`, `unchanged`, `worsened`).
 - Outputs are always generated in observe-only mode.
+- Optional: annotate accepted changed-file worsenings with exception rules:
+  ```bash
+  python3 tools/code_quality_observability.py \
+    --base-ref origin/master \
+    --exceptions-file .code-quality-observability-exceptions.json \
+    --json-out /tmp/code-quality-report.json \
+    --md-out /tmp/code-quality-summary.md
+  ```
+- If `--exceptions-file` is omitted and `.code-quality-observability-exceptions.json` exists in repo root, it is auto-loaded.
+
+### Exception file format
+
+Use this for explicit, reported maintainability exceptions in changed-file metrics:
+
+```json
+{
+  "changed_file_metric_exceptions": [
+    {
+      "path": "wepppy/nodb/core/watershed.py",
+      "metric": "python_cc",
+      "reason": "Further decomposition harms readability without reducing risk.",
+      "owner": "nodb",
+      "expires_on": "2026-06-01"
+    }
+  ]
+}
+```
+
+- `path` supports glob matching (for example `wepppy/nodb/core/*.py`).
+- `metric` must be one of: `python_file_sloc`, `python_function_len`, `python_cc`, `js_file_sloc`, `js_cc`.
+- Exceptions are annotations, not hard gates. Report each exception in human-facing review/handoff notes.
 
 ## CI Workflow
 
