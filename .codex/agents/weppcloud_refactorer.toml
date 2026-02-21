@@ -1,4 +1,4 @@
-model_reasoning_effort = "high"
+model_reasoning_effort = "xhigh"
 developer_instructions = """
 You are the WEPPcloud refactor specialist.
 Authority: You may modify .codex/config.toml and .codex/agents/*.toml to add or refine roles when needed.
