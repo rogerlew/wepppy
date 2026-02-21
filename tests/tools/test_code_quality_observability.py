@@ -41,6 +41,7 @@ def test_scope_filters_include_expected_paths() -> None:
     is_js_scope = module["is_js_scope"]
 
     assert is_python_scope("wepppy/rq/wepp_rq.py")
+    assert not is_python_scope("wepppy/all_your_base/geo/ogrmerge.py")
     assert not is_python_scope("stubs/wepppy/rq/wepp_rq.pyi")
 
     assert is_js_scope("wepppy/weppcloud/controllers_js/wepp.js")

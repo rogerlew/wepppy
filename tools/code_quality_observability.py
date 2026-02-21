@@ -36,6 +36,10 @@ PYTHON_INCLUDE_PREFIXES = (
     "docker/",
 )
 
+PYTHON_EXCLUDED_PATHS = {
+    "wepppy/all_your_base/geo/ogrmerge.py",
+}
+
 JS_INCLUDE_PREFIXES = (
     "wepppy/weppcloud/controllers_js/",
     "wepppy/weppcloud/static-src/",
@@ -94,6 +98,8 @@ def git_ls_files(pattern: str) -> list[str]:
 
 
 def is_python_scope(path: str) -> bool:
+    if path in PYTHON_EXCLUDED_PATHS:
+        return False
     return path.endswith(".py") and any(path.startswith(prefix) for prefix in PYTHON_INCLUDE_PREFIXES)
 
 
