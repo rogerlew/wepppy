@@ -12,6 +12,7 @@
 
 ### Workflow Templates
 - `module_documentation_workflow.prompt.md` — Process for improving docstrings, type hints, and `.pyi` coverage
+- `module_code_quality_refactor_workflow.md` — Multi-agent, closure-required flow for behavior-preserving module quality refactors
 
 ### Work Package Templates
 - `package_template.md` — Structure for work package brief (scope, objectives, success criteria)
