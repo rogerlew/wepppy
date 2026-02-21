@@ -18,7 +18,7 @@ The browse microservice currently works, but `wepppy/microservices/browse/browse
 - [x] (2026-02-21 07:13Z) Ran regression coverage for touched behavior (`test_browse_routes.py`, `test_browse_security.py`, `test_browse_auth_routes.py`) plus `test_files_routes.py` as additional browse-adjacent validation.
 - [x] (2026-02-21 07:13Z) Ran required targeted browse suites; `test_browse_dtale.py` is module-skipped by design in this environment (0 collected / 1 skipped).
 - [x] (2026-02-21 07:13Z) Ran `python3 tools/code_quality_observability.py --base-ref origin/master` and captured post-change metrics.
-- [ ] Commit and push all changes on `master`.
+- [x] (2026-02-21 07:17Z) Committed and pushed refactor to `master` (`ce21cda83`), then updated this plan to reflect final state.
 
 ## Surprises & Discoveries
 
@@ -50,7 +50,7 @@ The browse microservice currently works, but `wepppy/microservices/browse/browse
 
 The refactor achieved the quality closure target for `browse.py` while preserving route behavior in required suites. `browse.py` now delegates large flow functions to `flow.py`, reducing hotspot pressure in the entrypoint module: SLOC `1476 -> 1086`, max function length `341 -> 93`, max CC `84 -> 21`, broad catches `8 -> 5`.
 
-Remaining gap before full closure is commit/push execution.
+All requested implementation, validation, and push steps are complete.
 
 ## Context and Orientation
 
@@ -125,6 +125,23 @@ Required final artifact updates in this plan before handoff:
 - Test command transcript summary and outcomes.
 - Residual risks/follow-ups.
 
+Final metrics table:
+
+| Metric | Before | After |
+| --- | ---: | ---: |
+| SLOC | 1476 | 1086 |
+| Max function length | 341 | 93 |
+| Max cyclomatic complexity | 84 | 21 |
+| Broad catches | 8 | 5 |
+
+Validation summary:
+
+- `wctl run-pytest tests/microservices/test_browse_routes.py` -> passed (`2 passed`).
+- `wctl run-pytest tests/microservices/test_browse_security.py` -> passed (`13 passed`).
+- `wctl run-pytest tests/microservices/test_browse_auth_routes.py` -> passed (`82 passed`).
+- `wctl run-pytest tests/microservices/test_browse_dtale.py` -> module skipped in this environment (`0 collected / 1 skipped`, pytest exit `5`).
+- `wctl run-pytest tests/microservices/test_files_routes.py` -> passed (`117 passed`).
+
 ## Interfaces and Dependencies
 
 The route entrypoints in `wepppy/microservices/browse/browse.py` must retain their current signatures and behavior:
@@ -140,3 +157,4 @@ Update log:
 
 - 2026-02-21: Initial plan authored and activated to execute browse code-quality closure requested by user.
 - 2026-02-21: Updated after implementation/testing with extraction details, validation outcomes, and post-change metrics.
+- 2026-02-21: Marked commit/push completion and captured final metrics/validation summary.
