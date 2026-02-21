@@ -4,6 +4,8 @@ This ExecPlan is a living document. The sections `Progress`, `Surprises & Discov
 
 This plan must be maintained in accordance with `docs/prompt_templates/codex_exec_plans.md`.
 
+Status: Completed on 2026-02-21 (UTC). Archived under `docs/mini-work-packages/completed/`.
+
 This plan is a follow-on to `docs/mini-work-packages/completed/20260221_nodb_omni_quality_refactor_execplan.md`; it keeps the same contract-preserving facade/collaborator approach and narrows scope to the two remaining high-CC builder methods now isolated in `wepppy/nodb/mods/omni/omni_contrast_build_service.py`.
 
 ## Purpose / Big Picture
@@ -303,3 +305,4 @@ Record concise evidence as work proceeds:
 Revision Note (2026-02-21 01:54Z, Codex): Created this follow-on mini ExecPlan to continue the completed Omni hotspot program by targeting the two remaining high-CC methods isolated in `OmniContrastBuildService`.
 Revision Note (2026-02-21 01:58Z, Codex): Updated living sections with Milestone 0 baseline telemetry and characterization evidence so the plan reflects current executable state before new refactor edits.
 Revision Note (2026-02-21 02:09Z, Codex): Updated the plan through Milestone 4 completion with helper-decomposition outcomes, expanded regression coverage, telemetry deltas, and full validation results.
+Revision Note (2026-02-21 02:10Z, Codex): Marked plan complete and prepared archival move to `docs/mini-work-packages/completed/`.
