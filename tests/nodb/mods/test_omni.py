@@ -1742,13 +1742,13 @@ def test_run_omni_contrast_delegates_to_run_orchestration_service(tmp_path, monk
     assert result.endswith("/_pups/omni/contrasts/3")
 
 
-def test_run_omni_scenarios_raises_exception_when_no_scenarios(tmp_path, omni_module):
+def test_run_omni_scenarios_raises_runtime_error_when_no_scenarios(tmp_path, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
     omni.logger = logging.getLogger("tests.omni.run_scenarios.empty")
     omni._scenarios = []
 
-    with pytest.raises(Exception, match="No scenarios to run"):
+    with pytest.raises(RuntimeError, match="No scenarios to run"):
         omni.run_omni_scenarios()
 
 

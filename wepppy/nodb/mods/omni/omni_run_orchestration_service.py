@@ -190,6 +190,134 @@ class OmniRunOrchestrationService:
         )
         return omni_wd
 
+    @staticmethod
+    def _normalize_start_year(value: Any) -> Optional[int]:
+        try:
+            if value is None:
+                return None
+            if isinstance(value, str) and value.strip() == "":
+                return None
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    def run_omni_scenario(
+        self,
+        omni: "Omni",
+        scenario_def: "ScenarioDef",
+    ) -> tuple[str, str]:
+        import os
+
+        from wepppy.nodb.core import Climate, Landuse, Soils, Wepp
+        from wepppy.nodb.mods.disturbed import Disturbed
+        from wepppy.nodb.mods.omni.omni import (
+            OmniScenario,
+            _OMNI_MODE_BUILD_SERVICES,
+            _omni_clone,
+            _omni_clone_sibling,
+            _post_watershed_run_cleanup,
+            _scenario_name_from_scenario_definition,
+            run_wepp_hillslope_interchange,
+        )
+
+        wd = omni.wd
+        base_scenario = omni.base_scenario
+        scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+
+        scenario = OmniScenario.parse(scenario_def.get("type"))
+        omni_base_scenario_name = scenario_def.get("base_scenario", None)
+
+        if scenario in [OmniScenario.PrescribedFire, OmniScenario.Thinning]:
+            if base_scenario != OmniScenario.Undisturbed:
+                omni_base_scenario_name = "undisturbed"
+                omni.logger.info(f"  {scenario_name}: omni_base_scenario_name:{omni_base_scenario_name}")
+
+        os.chdir(wd)
+
+        if not isinstance(scenario, OmniScenario):
+            raise TypeError(f"Invalid omni scenario type: {scenario!r}")
+        with omni.timed(f"  {scenario_name}: _omni_clone({scenario_def}, {wd}, {omni.runid})"):
+            new_wd = _omni_clone(scenario_def, wd, omni.runid)
+
+        if omni_base_scenario_name is not None:
+            if not omni_base_scenario_name == str(base_scenario):
+                with omni.timed(
+                    f"  {scenario_name}: _omni_clone_sibling({new_wd}, {omni_base_scenario_name}, {omni.runid}, {omni.wd})"
+                ):
+                    _omni_clone_sibling(new_wd, omni_base_scenario_name, omni.runid, omni.wd)
+
+        disturbed = Disturbed.getInstance(new_wd)
+        landuse = Landuse.getInstance(new_wd)
+        soils = Soils.getInstance(new_wd)
+
+        _OMNI_MODE_BUILD_SERVICES.apply_scenario_mode(
+            omni,
+            scenario_name=scenario_name,
+            scenario=scenario,
+            scenario_def=scenario_def,
+            new_wd=new_wd,
+            disturbed=disturbed,
+            landuse=landuse,
+            soils=soils,
+            omni_base_scenario_name=omni_base_scenario_name,
+        )
+
+        landuse.build_managements()
+        wepp = Wepp.getInstance(new_wd)
+
+        man_relpath = ""
+        cli_relpath = os.path.relpath(omni.runs_dir, wepp.runs_dir)
+        slp_relpath = os.path.relpath(omni.runs_dir, wepp.runs_dir)
+        sol_relpath = ""
+
+        if not cli_relpath.endswith("/"):
+            cli_relpath += "/"
+        if not slp_relpath.endswith("/"):
+            slp_relpath += "/"
+
+        with omni.timed(f"  {scenario_name}: prep hillslopes"):
+            wepp.prep_hillslopes(
+                man_relpath=man_relpath,
+                cli_relpath=cli_relpath,
+                slp_relpath=slp_relpath,
+                sol_relpath=sol_relpath,
+                max_workers=omni.rq_job_pool_max_worker_per_scenario_task,
+            )
+        with omni.timed(f"  {scenario_name}: run hillslopes"):
+            wepp.run_hillslopes(
+                man_relpath=man_relpath,
+                cli_relpath=cli_relpath,
+                slp_relpath=slp_relpath,
+                sol_relpath=sol_relpath,
+                max_workers=omni.rq_job_pool_max_worker_per_scenario_task,
+            )
+
+        with omni.timed(f"  {scenario_name}: run hillslope interchange"):
+            start_year = None
+            climate = Climate.getInstance(new_wd)
+            for candidate in (
+                getattr(climate, "observed_start_year", None),
+                getattr(climate, "future_start_year", None),
+            ):
+                normalized = self._normalize_start_year(candidate)
+                if normalized is not None:
+                    start_year = normalized
+                    break
+            run_wepp_hillslope_interchange(
+                wepp.output_dir,
+                start_year=start_year,
+                delete_after_interchange=omni.delete_after_interchange,
+            )
+
+        with omni.timed(f"  {scenario_name}: prep watershed"):
+            wepp.prep_watershed()
+
+        with omni.timed(f"  {scenario_name}: run watershed"):
+            wepp.run_watershed()
+            _post_watershed_run_cleanup(wepp)
+
+        return new_wd, scenario_name
+
     def run_omni_scenarios(self, omni: "Omni") -> None:
         from wepppy.nodb.mods.omni.omni import (
             OmniScenario,
@@ -202,7 +330,7 @@ class OmniRunOrchestrationService:
 
         if not omni.scenarios:
             omni.logger.info("  run_omni_scenarios: No scenarios to run")
-            raise Exception("No scenarios to run")
+            raise RuntimeError("No scenarios to run")
 
         dependency_tree: ScenarioDependency = dict(omni.scenario_dependency_tree)
 

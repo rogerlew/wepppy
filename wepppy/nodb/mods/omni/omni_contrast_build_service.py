@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 from os.path import exists as _exists
 from os.path import join as _join
@@ -551,6 +552,203 @@ class OmniContrastBuildService:
             omni._contrasts = None
             omni._contrast_names = contrast_names
 
+    def _build_contrasts_contract_refs(self) -> Tuple[str, Any, Any]:
+        from wepppy.nodb.mods.omni.omni import (
+            OMNI_REL_DIR,
+            _OMNI_MODE_BUILD_SERVICES,
+            _OMNI_SCALING_SERVICE,
+        )
+
+        return OMNI_REL_DIR, _OMNI_MODE_BUILD_SERVICES, _OMNI_SCALING_SERVICE
+
+    def build_contrasts_cumulative_default(self, omni: "Omni") -> None:
+        omni_rel_dir, mode_build_services, scaling_service = self._build_contrasts_contract_refs()
+
+        selection_mode = scaling_service.normalize_selection_mode(
+            getattr(omni, "_contrast_selection_mode", None)
+        )
+
+        omni._reset_contrast_build_state()
+        if mode_build_services.build_contrasts_for_selection_mode(omni, selection_mode):
+            return
+
+        obj_param = omni._contrast_object_param
+        contrast_cumulative_obj_param_threshold_fraction = (
+            omni._contrast_cumulative_obj_param_threshold_fraction
+        )
+        contrast_hillslope_limit = omni._contrast_hillslope_limit
+        contrast_hill_min_slope = omni._contrast_hill_min_slope
+        contrast_hill_max_slope = omni._contrast_hill_max_slope
+        contrast_select_burn_severities = omni._contrast_select_burn_severities
+        contrast_select_topaz_ids = omni._contrast_select_topaz_ids
+        contrast_scenario = omni._contrast_scenario
+        control_scenario = omni._control_scenario
+
+        if contrast_scenario == str(omni.base_scenario):
+            contrast_scenario = None
+        if control_scenario == str(omni.base_scenario):
+            control_scenario = None
+
+        apply_advanced_filters = selection_mode == "cumulative"
+        if not apply_advanced_filters:
+            if any(
+                value is not None
+                for value in (
+                    contrast_hill_min_slope,
+                    contrast_hill_max_slope,
+                    contrast_select_burn_severities,
+                    contrast_select_topaz_ids,
+                )
+            ):
+                omni.logger.info(
+                    "Contrast selection mode '%s' ignores advanced filters; apply cumulative mode to use them.",
+                    selection_mode,
+                )
+            contrast_hill_min_slope = None
+            contrast_hill_max_slope = None
+            contrast_select_burn_severities = None
+            contrast_select_topaz_ids = None
+            if contrast_hillslope_limit is not None:
+                omni.logger.info(
+                    "Contrast selection mode '%s' ignores omni_contrast_hillslope_limit.",
+                    selection_mode,
+                )
+                contrast_hillslope_limit = None
+
+        (
+            contrast_hillslope_limit,
+            contrast_hillslope_limit_max,
+        ) = scaling_service.normalize_hillslope_limit(
+            omni,
+            selection_mode=selection_mode,
+            contrast_hillslope_limit=contrast_hillslope_limit,
+        )
+
+        if apply_advanced_filters:
+            (
+                contrast_hill_min_slope,
+                contrast_hill_max_slope,
+                contrast_select_burn_severities,
+                contrast_select_topaz_ids,
+            ) = scaling_service.normalize_filter_inputs(
+                contrast_hill_min_slope=contrast_hill_min_slope,
+                contrast_hill_max_slope=contrast_hill_max_slope,
+                contrast_select_burn_severities=contrast_select_burn_severities,
+                contrast_select_topaz_ids=contrast_select_topaz_ids,
+            )
+
+        watershed = Watershed.getInstance(omni.wd)
+        translator = watershed.translator_factory()
+        top2wepp = {
+            k: v
+            for k, v in translator.top2wepp.items()
+            if not (str(k).endswith("4") or int(k) == 0)
+        }
+
+        obj_param_descending, total_erosion_kg = omni.get_objective_parameter_from_gpkg(
+            obj_param,
+            scenario=control_scenario,
+        )
+        if len(obj_param_descending) == 0:
+            raise ValueError("No soil erosion data found!")
+
+        if apply_advanced_filters and any(
+            value is not None
+            for value in (
+                contrast_hill_min_slope,
+                contrast_hill_max_slope,
+                contrast_select_burn_severities,
+                contrast_select_topaz_ids,
+            )
+        ):
+            obj_param_descending, total_erosion_kg = scaling_service.apply_advanced_filters(
+                omni,
+                watershed=watershed,
+                control_scenario=control_scenario,
+                obj_param_descending=obj_param_descending,
+                contrast_hill_min_slope=contrast_hill_min_slope,
+                contrast_hill_max_slope=contrast_hill_max_slope,
+                contrast_select_burn_severities=contrast_select_burn_severities,
+                contrast_select_topaz_ids=contrast_select_topaz_ids,
+            )
+
+        if not obj_param_descending:
+            raise ValueError("No hillslopes matched contrast filters.")
+        if total_erosion_kg <= 0:
+            raise ValueError("Contrast objective parameter total is zero after filtering.")
+
+        with omni.locked():
+            omni._contrasts = None
+            omni._contrast_names = []
+
+        report_fn = self._prepare_report_paths(omni, omni_rel_dir)
+
+        contrasts: List[Dict[Any, Any]] = []
+        contrast_names: List[str] = []
+        existing_contrast_count = 0
+
+        running_obj_param = 0.0
+        with open(report_fn, "w", encoding="ascii") as report_fp:
+            for data_row in obj_param_descending:
+                if contrast_hillslope_limit is not None:
+                    if len(contrasts) >= contrast_hillslope_limit:
+                        break
+                elif (
+                    contrast_hillslope_limit_max is not None
+                    and len(contrasts) >= contrast_hillslope_limit_max
+                ):
+                    omni.logger.warning(
+                        "Contrast selection reached cap of %d hillslopes without an explicit limit; stopping.",
+                        contrast_hillslope_limit_max,
+                    )
+                    break
+
+                running_obj_param += data_row.value
+
+                topaz_id = data_row.topaz_id
+                wepp_id = data_row.wepp_id
+                contrast_id = existing_contrast_count + len(contrasts) + 1
+                report_control_scenario = control_scenario or str(omni.base_scenario)
+
+                contrast_name, contrast = mode_build_services.build_contrast_mapping(
+                    omni,
+                    top2wepp=top2wepp,
+                    selected_topaz_ids={topaz_id},
+                    control_scenario=control_scenario,
+                    contrast_scenario=contrast_scenario,
+                    contrast_id=topaz_id,
+                )
+
+                contrasts.append(contrast)
+                contrast_names.append(contrast_name)
+                omni._write_contrast_sidecar(contrast_id, contrast)
+
+                report_fp.write(
+                    json.dumps(
+                        {
+                            "contrast_id": contrast_id,
+                            "control_scenario": report_control_scenario,
+                            "contrast_scenario": contrast_scenario,
+                            "wepp_id": wepp_id,
+                            "topaz_id": topaz_id,
+                            "obj_param": data_row.value,
+                            "running_obj_param": running_obj_param,
+                            "pct_cumulative": running_obj_param / total_erosion_kg * 100,
+                        }
+                    )
+                    + "\n"
+                )
+
+                if (
+                    running_obj_param / total_erosion_kg
+                    >= contrast_cumulative_obj_param_threshold_fraction
+                ):
+                    break
+
+        with omni.locked():
+            omni._contrasts = None
+            omni._contrast_names = contrast_names
+
     def _user_defined_contract_refs(
         self,
     ) -> Tuple[str, Any, Callable[..., Any]]:
@@ -561,6 +759,239 @@ class OmniContrastBuildService:
         )
 
         return OMNI_REL_DIR, _OMNI_MODE_BUILD_SERVICES, _enforce_user_defined_contrast_limit
+
+    @staticmethod
+    def _parse_hillslope_groups(value: Any) -> List[List[str]]:
+        if value in (None, ""):
+            return []
+        if isinstance(value, (list, tuple)):
+            rows = list(value)
+        else:
+            rows = str(value).splitlines()
+
+        groups: List[List[str]] = []
+        for row in rows:
+            if row is None:
+                continue
+            if isinstance(row, (list, tuple, set)):
+                tokens = [str(item) for item in row if item not in (None, "")]
+            else:
+                line = str(row).strip()
+                if not line:
+                    continue
+                line = line.rstrip(";")
+                tokens = [token for token in re.split(r"[,\s;]+", line) if token]
+            if not tokens:
+                continue
+
+            group: List[str] = []
+            for token in tokens:
+                value_str = str(token).strip()
+                if not value_str:
+                    continue
+                try:
+                    parsed = int(value_str)
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(
+                        "omni_contrast_hillslope_groups entries must be integers"
+                    ) from exc
+                group.append(str(parsed))
+            if group:
+                groups.append(group)
+        return groups
+
+    @staticmethod
+    def _require_hillslope_group_inputs(omni: "Omni") -> Tuple[List[List[str]], List[Dict[str, Any]]]:
+        contrast_groups_raw = getattr(omni, "_contrast_hillslope_groups", None)
+        group_rows = OmniContrastBuildService._parse_hillslope_groups(contrast_groups_raw)
+        if not group_rows:
+            raise ValueError(
+                "omni_contrast_hillslope_groups is required for user_defined_hillslope_groups mode"
+            )
+
+        contrast_pairs = omni._normalize_contrast_pairs(getattr(omni, "_contrast_pairs", None))
+        if not contrast_pairs:
+            raise ValueError(
+                "omni_contrast_pairs is required for user_defined_hillslope_groups mode"
+            )
+
+        return group_rows, contrast_pairs
+
+    @staticmethod
+    def _select_hillslope_group_topaz(
+        *,
+        raw_group: List[str],
+        valid_topaz: Set[str],
+        missing_topaz: Set[str],
+    ) -> Set[str]:
+        selected_topaz: Set[str] = set()
+        for topaz_key in raw_group:
+            if topaz_key in (None, ""):
+                continue
+            if topaz_key == "0" or str(topaz_key).endswith("4"):
+                continue
+            if topaz_key not in valid_topaz:
+                missing_topaz.add(str(topaz_key))
+                continue
+            selected_topaz.add(topaz_key)
+        return selected_topaz
+
+    @staticmethod
+    def _hillslope_group_report_entry(
+        *,
+        contrast_id: int,
+        control_key: str,
+        contrast_key: str,
+        group_index: int,
+        n_hillslopes: int,
+        topaz_ids: List[str],
+        pair_index: int,
+    ) -> Dict[str, Any]:
+        return {
+            "contrast_id": contrast_id,
+            "control_scenario": control_key,
+            "contrast_scenario": contrast_key,
+            "wepp_id": None,
+            "topaz_id": None,
+            "obj_param": None,
+            "running_obj_param": None,
+            "pct_cumulative": None,
+            "selection_mode": "user_defined_hillslope_groups",
+            "group_index": group_index,
+            "n_hillslopes": n_hillslopes,
+            "topaz_ids": topaz_ids,
+            "pair_index": pair_index,
+        }
+
+    def _write_hillslope_group_report(
+        self,
+        *,
+        omni: "Omni",
+        report_fn: str,
+        contrast_pairs: List[Dict[str, Any]],
+        group_rows: List[List[str]],
+        top2wepp: Dict[str, str],
+        mode_build_services: Any,
+        existing_signature_map: Dict[str, int],
+        next_id: int,
+    ) -> Tuple[List[Optional[str]], Dict[int, str], Set[str]]:
+        contrast_names: List[Optional[str]] = []
+        contrast_labels: Dict[int, str] = {}
+        missing_topaz: Set[str] = set()
+        valid_topaz = set(top2wepp.keys())
+
+        with open(report_fn, "w", encoding="ascii") as report_fp:
+            for group_index, raw_group in enumerate(group_rows, start=1):
+                selected_topaz = self._select_hillslope_group_topaz(
+                    raw_group=raw_group,
+                    valid_topaz=valid_topaz,
+                    missing_topaz=missing_topaz,
+                )
+                topaz_ids = self._sorted_values(selected_topaz)
+                n_hillslopes = len(selected_topaz)
+
+                for pair_index, pair in enumerate(contrast_pairs, start=1):
+                    control_key = omni._normalize_scenario_key(pair.get("control_scenario"))
+                    contrast_key = omni._normalize_scenario_key(pair.get("contrast_scenario"))
+                    control_scenario = None if control_key == str(omni.base_scenario) else control_key
+                    contrast_scenario = None if contrast_key == str(omni.base_scenario) else contrast_key
+
+                    signature = omni._contrast_pair_signature(
+                        control_key,
+                        contrast_key,
+                        str(group_index),
+                    )
+                    contrast_id, next_id = self._resolve_or_create_contrast_id(
+                        existing_signature_map,
+                        signature,
+                        next_id,
+                    )
+
+                    contrast_labels[contrast_id] = str(group_index)
+                    self._append_contrast_name_slot(contrast_names, contrast_id)
+
+                    report_entry = self._hillslope_group_report_entry(
+                        contrast_id=contrast_id,
+                        control_key=control_key,
+                        contrast_key=contrast_key,
+                        group_index=group_index,
+                        n_hillslopes=n_hillslopes,
+                        topaz_ids=topaz_ids,
+                        pair_index=pair_index,
+                    )
+
+                    if not selected_topaz:
+                        report_entry["status"] = "skipped"
+                        report_fp.write(json.dumps(report_entry) + "\n")
+                        continue
+
+                    contrast_name, contrast = mode_build_services.build_contrast_mapping(
+                        omni,
+                        top2wepp=top2wepp,
+                        selected_topaz_ids=selected_topaz,
+                        control_scenario=control_scenario,
+                        contrast_scenario=contrast_scenario,
+                        contrast_id=contrast_id,
+                    )
+                    contrast_names[contrast_id - 1] = contrast_name
+                    omni._write_contrast_sidecar(contrast_id, contrast)
+                    report_fp.write(json.dumps(report_entry) + "\n")
+
+        return contrast_names, contrast_labels, missing_topaz
+
+    def build_contrasts_user_defined_hillslope_groups(self, omni: "Omni") -> None:
+        (
+            omni_rel_dir,
+            mode_build_services,
+            enforce_user_defined_contrast_limit,
+        ) = self._user_defined_contract_refs()
+
+        group_rows, contrast_pairs = self._require_hillslope_group_inputs(omni)
+        enforce_user_defined_contrast_limit(
+            "user_defined_hillslope_groups",
+            len(contrast_pairs),
+            len(group_rows),
+            group_label="hillslope groups",
+        )
+
+        ignored_fields = self._ignored_user_defined_filters(omni)
+        if ignored_fields:
+            omni.logger.info(
+                "User-defined hillslope groups ignore filters: %s",
+                ", ".join(ignored_fields),
+            )
+
+        watershed = Watershed.getInstance(omni.wd)
+        translator = watershed.translator_factory()
+        top2wepp = self._build_top2wepp_mapping(translator)
+
+        self._reset_user_defined_build_state(omni)
+        report_fn = self._prepare_report_paths(omni, omni_rel_dir)
+
+        existing_signature_map = omni._load_user_defined_hillslope_group_signature_map()
+        next_id = max(existing_signature_map.values(), default=0) + 1
+
+        contrast_names, contrast_labels, missing_topaz = self._write_hillslope_group_report(
+            omni=omni,
+            report_fn=report_fn,
+            contrast_pairs=contrast_pairs,
+            group_rows=group_rows,
+            top2wepp=top2wepp,
+            mode_build_services=mode_build_services,
+            existing_signature_map=existing_signature_map,
+            next_id=next_id,
+        )
+
+        if missing_topaz:
+            omni.logger.info(
+                "Skipped %d hillslopes missing from translator during group parsing.",
+                len(missing_topaz),
+            )
+
+        with omni.locked():
+            omni._contrasts = None
+            omni._contrast_names = contrast_names
+            omni._contrast_labels = contrast_labels
 
     @staticmethod
     def _require_user_defined_inputs(omni: "Omni") -> Tuple[str, List[Dict[str, Any]]]:

@@ -258,6 +258,45 @@ def test_scenario_run_markers_always_include_base_scenario(
     assert markers[str(omni_module.OmniScenario.Undisturbed)] is False
 
 
+def test_run_omni_scenario_delegates_to_run_orchestration_service(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    omni = _new_detached_omni(tmp_path, "tests.omni.facade.run_omni_scenario.delegate")
+    captured: dict[str, object] = {}
+    payload = {"type": "uniform_low"}
+    expected = (str(tmp_path / "_pups" / "omni" / "scenarios" / "uniform_low"), "uniform_low")
+
+    def _fake_run(instance: omni_module.Omni, scenario_def: dict[str, object]) -> tuple[str, str]:
+        captured["instance"] = instance
+        captured["scenario_def"] = scenario_def
+        return expected
+
+    monkeypatch.setattr(omni_module._OMNI_RUN_ORCHESTRATION_SERVICE, "run_omni_scenario", _fake_run)
+
+    result = omni.run_omni_scenario(payload)
+
+    assert captured["instance"] is omni
+    assert captured["scenario_def"] is payload
+    assert result == expected
+
+
+def test_run_omni_scenario_raises_type_error_for_non_enum_parse_result(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    omni = _new_detached_omni(tmp_path, "tests.omni.facade.run_omni_scenario.invalid")
+
+    monkeypatch.setattr(
+        omni_module.OmniScenario,
+        "parse",
+        staticmethod(lambda value: object()),
+    )
+
+    with pytest.raises(TypeError, match="Invalid omni scenario type"):
+        omni.run_omni_scenario({"type": "uniform_low"})
+
+
 def test_run_completion_properties_and_output_options(tmp_path: Path) -> None:
     omni = _new_detached_omni(tmp_path, "tests.omni.facade.flags")
     omni._scenarios = [{"type": "uniform_low"}]

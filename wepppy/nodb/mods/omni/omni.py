@@ -25,7 +25,6 @@ import os
 import hashlib
 import time
 import logging
-import re
 from pathlib import Path
 
 from os.path import exists as _exists
@@ -75,6 +74,7 @@ from wepppy.nodb.mods.omni.omni_input_parser import OmniInputParsingService
 from wepppy.nodb.mods.omni.omni_mode_build_services import OmniModeBuildServices
 from wepppy.nodb.mods.omni.omni_scaling_service import OmniScalingService
 from wepppy.nodb.mods.omni.omni_artifact_export_service import OmniArtifactExportService
+from wepppy.nodb.mods.omni.omni_clone_contrast_service import OmniCloneContrastService
 from wepppy.nodb.mods.omni.omni_run_orchestration_service import OmniRunOrchestrationService
 from wepppy.nodb.mods.omni.omni_station_catalog_service import OmniStationCatalogService
 
@@ -100,6 +100,7 @@ _OMNI_MODE_BUILD_SERVICES = OmniModeBuildServices()
 _OMNI_SCALING_SERVICE = OmniScalingService()
 _OMNI_ARTIFACT_EXPORT_SERVICE = OmniArtifactExportService()
 _OMNI_CONTRAST_BUILD_SERVICE = OmniContrastBuildService()
+_OMNI_CLONE_CONTRAST_SERVICE = OmniCloneContrastService()
 _OMNI_RUN_ORCHESTRATION_SERVICE = OmniRunOrchestrationService()
 _OMNI_STATION_CATALOG_SERVICE = OmniStationCatalogService()
 _OMNI_BUILD_ROUTER = OmniBuildRouter()
@@ -488,297 +489,25 @@ def _run_contrast(
     wepp_bin: str = 'wepp_dcc52a6',
     output_options: Optional[Dict[str, bool]] = None,
 ) -> str:
-    from wepppy.nodb.core import Landuse, Soils, Wepp
-    global OMNI_REL_DIR
-
-    new_wd = _join(wd, OMNI_REL_DIR, 'contrasts', contrast_id)
-    pup_relpath = os.path.relpath(new_wd, wd)
-
-    if _exists(new_wd):
-        shutil.rmtree(new_wd)
-        _clear_nodb_cache_and_locks(runid, pup_relpath)
-
-    os.makedirs(new_wd)
-    copy_version_for_clone(wd, new_wd)
-
-    os.makedirs(_join(new_wd, 'soils'), exist_ok=True)
-    os.makedirs(_join(new_wd, 'landuse'), exist_ok=True)
-
-    for dirname in ("climate", "watershed"):
-        src_dir = _join(wd, dirname)
-        src_archive = _join(wd, f"{dirname}.nodir")
-        if os.path.isdir(src_dir):
-            src = src_dir
-            dst = _join(new_wd, dirname)
-        elif os.path.isfile(src_archive):
-            src = src_archive
-            dst = _join(new_wd, f"{dirname}.nodir")
-        else:
-            continue
-        if not _exists(dst):
-            os.symlink(src, dst)
-        _link_shared_root_sidecars(wd, new_wd, dirname)
-
-    for root in ("landuse", "soils"):
-        resolved_root = nodir_resolve(wd, root, view="effective")
-        if resolved_root is None or resolved_root.form != "archive":
-            continue
-
-        _copy_archive_root_with_projection_retry(
-            wd,
-            new_wd,
-            root,
-            purpose=f"omni-run-contrast-{root}",
-        )
-        _copy_mutable_root_sidecar(wd, new_wd, root)
-
-    symlink_entries = {
-        'climate.nodb',
-        'watershed.nodb',
-        'landuse.nodb',
-        'soils.nodb',
-        'unitizer.nodb',
-        'treatments.nodb',
-    }
-    symlink_nodb_files = {entry for entry in symlink_entries if entry.endswith('.nodb')}
-
-    for fn in os.listdir(wd):
-        if fn in symlink_entries:
-            src = _join(wd, fn)
-            dst = _join(new_wd, fn)
-            if not _exists(dst):
-                os.symlink(src, dst)
-
-    for nodb_fn in os.listdir(wd):
-        if not nodb_fn.endswith('.nodb'):
-            continue
-        if nodb_fn in symlink_nodb_files:
-            continue
-        src = _join(wd, nodb_fn)
-        if not _isfile(src):
-            continue
-        dst = _join(new_wd, nodb_fn)
-        if not _exists(dst):
-            shutil.copy(src, dst)
-
-        with open(dst, 'r') as f:
-            d = json.load(f)
-
-        _update_nodb_wd(d, new_wd, parent_wd=wd)
-
-        with open(dst, 'w') as fp:
-            json.dump(d, fp)
-            fp.flush()                 # flush Python’s userspace buffer
-            os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
-
-    wepp = Wepp.getInstance(new_wd)
-    wepp.wepp_bin = wepp_bin
-    wepp.clean()  # this creates the directories in the {omni_dir}/wepp
-
-    # symlink the other wepp watershed input files
-    og_runs_dir = _join(wd, 'wepp', 'runs/')
-    omni_runs_dir = _join(new_wd, 'wepp', 'runs/')
-    for fn in os.listdir(og_runs_dir):
-        _fn = _split(fn)[-1]
-        if _fn in ('pw0.run', 'pw0.err'):
-            continue
-        src = _join(og_runs_dir, fn)
-        if not _isfile(src):
-            continue
-        dst = _join(omni_runs_dir, fn)
-        if not _exists(dst):
-            os.symlink(src, dst)
-
-    old_prefix = _join(wd, 'omni')
-    new_prefix = _join(wd, OMNI_REL_DIR)
-    normalized_contrasts: Dict[int | str, str] = {}
-    for topaz_id, wepp_id_path in contrasts.items():
-        normalized_path = wepp_id_path
-        if isinstance(wepp_id_path, str) and wepp_id_path.startswith(old_prefix):
-            candidate = new_prefix + wepp_id_path[len(old_prefix):]
-            if _exists(f"{candidate}.pass.dat"):
-                LOGGER.info('Updating contrast path %s -> %s', wepp_id_path, candidate)
-                normalized_path = candidate
-        normalized_contrasts[topaz_id] = normalized_path
-
-    base_key = _resolve_base_scenario_key(wd)
-    control_wd = _resolve_contrast_scenario_wd(wd, control_scenario_key, base_key)
-    contrast_wd = _resolve_contrast_scenario_wd(wd, contrast_scenario_key, base_key)
-    contrast_topaz_ids = _contrast_topaz_ids_from_mapping(normalized_contrasts, contrast_wd)
-    if not contrast_topaz_ids and control_scenario_key != contrast_scenario_key:
-        raise ValueError(f"No contrast hillslopes detected for {contrast_name}.")
-
-    control_landuse = pick_existing_parquet_path(control_wd, "landuse/landuse.parquet")
-    if control_landuse is None:
-        raise FileNotFoundError(
-            f"Missing landuse parquet (landuse/landuse.parquet) in {control_wd}"
-        )
-    contrast_landuse = pick_existing_parquet_path(contrast_wd, "landuse/landuse.parquet")
-    if contrast_landuse is None:
-        raise FileNotFoundError(
-            f"Missing landuse parquet (landuse/landuse.parquet) in {contrast_wd}"
-        )
-    control_soils = pick_existing_parquet_path(control_wd, "soils/soils.parquet")
-    if control_soils is None:
-        raise FileNotFoundError(
-            f"Missing soils parquet (soils/soils.parquet) in {control_wd}"
-        )
-    contrast_soils = pick_existing_parquet_path(contrast_wd, "soils/soils.parquet")
-    if contrast_soils is None:
-        raise FileNotFoundError(
-            f"Missing soils parquet (soils/soils.parquet) in {contrast_wd}"
-        )
-
-    _merge_contrast_parquet(
-        control_parquet_fn=str(control_landuse),
-        contrast_parquet_fn=str(contrast_landuse),
-        output_parquet_fn=str(Path(new_wd) / "landuse.parquet"),
-        contrast_topaz_ids=contrast_topaz_ids,
-        label="landuse",
-    )
-    _merge_contrast_parquet(
-        control_parquet_fn=str(control_soils),
-        contrast_parquet_fn=str(contrast_soils),
-        output_parquet_fn=str(Path(new_wd) / "soils.parquet"),
-        contrast_topaz_ids=contrast_topaz_ids,
-        label="soils",
-    )
-
-    if output_options is None:
-        output_options = {}
-    wepp._contrast_output_options = dict(output_options)
-    wepp.make_watershed_run(
-        wepp_id_paths=list(normalized_contrasts.values()),
+    return _OMNI_CLONE_CONTRAST_SERVICE.run_contrast(
+        contrast_id=contrast_id,
+        contrast_name=contrast_name,
+        contrasts=contrasts,
+        wd=wd,
+        runid=runid,
+        control_scenario_key=control_scenario_key,
+        contrast_scenario_key=contrast_scenario_key,
+        wepp_bin=wepp_bin,
         output_options=output_options,
     )
-    _apply_contrast_output_triggers(wepp, output_options)
-    wepp.run_watershed()
-    _post_watershed_run_cleanup(wepp)
-    wepp.report_loss()
-
-    return new_wd
 
 
 def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
-    global OMNI_REL_DIR
-    
-    scenario = scenario_def.get('type')
-    _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-    new_wd = _join(wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
-    pup_relpath = os.path.relpath(new_wd, wd)
-
-    if _exists(new_wd):
-        shutil.rmtree(new_wd)
-        # clear cached NoDb payloads and locks for the previous scenario clone
-        _clear_nodb_cache_and_locks(runid, pup_relpath)
-
-
-    os.makedirs(new_wd)
-
-    for dirname in ("climate", "watershed"):
-        src_dir = _join(wd, dirname)
-        src_archive = _join(wd, f"{dirname}.nodir")
-        if os.path.isdir(src_dir):
-            src = src_dir
-            dst = _join(new_wd, dirname)
-        elif os.path.isfile(src_archive):
-            src = src_archive
-            dst = _join(new_wd, f"{dirname}.nodir")
-        else:
-            continue
-        if not _exists(dst):
-            os.symlink(src, dst)
-        _link_shared_root_sidecars(wd, new_wd, dirname)
-
-    for fn in os.listdir(wd):
-        if fn in ['dem', 'climate.nodb', 'dem.nodb', 'watershed.nodb']:
-            src = _join(wd, fn)
-            dst = _join(new_wd, fn)
-            if not _exists(dst):
-                os.symlink(src, dst)
-
-        elif fn in ['disturbed', 'rap']:
-            src = _join(wd, fn)
-            dst = _join(new_wd, fn)
-            if not _exists(dst):
-                shutil.copytree(src, dst)
-
-        elif fn.endswith('.nodb'):
-            if fn == 'omni.nodb':
-                continue
-
-            src = _join(wd, fn)
-            dst = _join(new_wd, fn)
-            if not _exists(dst):
-                shutil.copy(src, dst)
-
-            with open(dst, 'r') as f:
-                d = json.load(f)
-                
-            _update_nodb_wd(d, new_wd, parent_wd=wd)
-
-            with open(dst, 'w') as fp:
-                json.dump(d, fp)
-                fp.flush()                 # flush Python’s userspace buffer
-                os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
-    
-    soils_root = nodir_resolve(wd, "soils", view="effective")
-    if soils_root is not None and soils_root.form == "archive":
-        _copy_archive_root_with_projection_retry(
-            wd,
-            new_wd,
-            "soils",
-            purpose="omni-clone-soils",
-        )
-        _copy_mutable_root_sidecar(wd, new_wd, "soils")
-
-    landuse_root = nodir_resolve(wd, "landuse", view="effective")
-    if landuse_root is not None and landuse_root.form == "archive":
-        os.makedirs(_join(new_wd, "landuse"), exist_ok=True)
-        _copy_mutable_root_sidecar(wd, new_wd, "landuse")
-
-    for fn in os.listdir(wd):
-        if fn == '_pups':
-            continue
-
-        src = _join(wd, fn)
-        if os.path.isdir(src):
-            dst = _join(new_wd, fn)
-
-            if not _exists(dst):
-                try:
-                    # Create directory structure without copying files
-                    for root, dirs, _ in os.walk(src):
-                        for dir_name in dirs:
-                            src_dir = _join(root, dir_name)
-                            rel_path = os.path.relpath(src_dir, src)
-                            dst_dir = _join(dst, rel_path)
-                            if not _exists(dst_dir):
-                                os.makedirs(dst_dir, exist_ok=True)
-                except PermissionError as exc:
-                    LOGGER.warning(
-                        "Permission denied while creating Omni clone directory tree from %s to %s: %s",
-                        src,
-                        dst,
-                        exc,
-                    )
-                except OSError as exc:
-                    LOGGER.warning(
-                        "Error creating Omni clone directory tree from %s to %s: %s",
-                        src,
-                        dst,
-                        exc,
-                    )
-
-            if not _exists(dst):
-                os.makedirs(dst, exist_ok=True)
-
-
-    # remove READONLY file flag if present
-    if _exists(_join(new_wd, 'READONLY')):
-        os.remove(_join(new_wd, 'READONLY'))
-
-    return new_wd
+    return _OMNI_CLONE_CONTRAST_SERVICE.omni_clone(
+        scenario_def=scenario_def,
+        wd=wd,
+        runid=runid,
+    )
 
 
 
@@ -1143,18 +872,7 @@ class Omni(NoDbBase):
         self.scenario_run_state = run_state
 
         for name in target_names:
-            scenario_dir = _join(self.wd, OMNI_REL_DIR, 'scenarios', name)
-            if _exists(scenario_dir):
-                try:
-                    shutil.rmtree(scenario_dir)
-                    pup_relpath = os.path.relpath(scenario_dir, self.wd)
-                    _clear_nodb_cache_and_locks(self.runid, pup_relpath)
-                except OSError as exc:
-                    self.logger.debug('Failed to remove scenario directory %s: %s', scenario_dir, exc)
-                if name not in removed:
-                    removed.append(name)
-            elif name not in removed:
-                missing.append(name)
+            self._remove_scenario_artifacts(name, removed, missing)
 
         aggregated = _join(self.omni_dir, 'scenarios.out.parquet')
         if _exists(aggregated):
@@ -1165,6 +883,27 @@ class Omni(NoDbBase):
 
         self._refresh_catalog(OMNI_REL_DIR)
         return {'removed': removed, 'missing': missing}
+
+    def _remove_scenario_artifacts(
+        self,
+        name: str,
+        removed: List[str],
+        missing: List[str],
+    ) -> None:
+        scenario_dir = _join(self.wd, OMNI_REL_DIR, 'scenarios', name)
+        if _exists(scenario_dir):
+            try:
+                shutil.rmtree(scenario_dir)
+                pup_relpath = os.path.relpath(scenario_dir, self.wd)
+                _clear_nodb_cache_and_locks(self.runid, pup_relpath)
+            except OSError as exc:
+                self.logger.debug('Failed to remove scenario directory %s: %s', scenario_dir, exc)
+            if name not in removed:
+                removed.append(name)
+            return
+
+        if name not in removed:
+            missing.append(name)
 
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         _OMNI_INPUT_PARSER.parse_inputs(self, kwds)
@@ -2031,186 +1770,7 @@ class Omni(NoDbBase):
         return OmniScenario.Undisturbed
 
     def _build_contrasts(self) -> None:
-        global OMNI_REL_DIR
-
-        selection_mode = _OMNI_SCALING_SERVICE.normalize_selection_mode(
-            getattr(self, "_contrast_selection_mode", None)
-        )
-
-        self._reset_contrast_build_state()
-
-        if _OMNI_MODE_BUILD_SERVICES.build_contrasts_for_selection_mode(self, selection_mode):
-            return
-
-        obj_param = self._contrast_object_param
-        contrast_cumulative_obj_param_threshold_fraction = self._contrast_cumulative_obj_param_threshold_fraction
-        contrast_hillslope_limit = self._contrast_hillslope_limit
-        contrast_hill_min_slope = self._contrast_hill_min_slope
-        contrast_hill_max_slope = self._contrast_hill_max_slope
-        contrast_select_burn_severities = self._contrast_select_burn_severities
-        contrast_select_topaz_ids = self._contrast_select_topaz_ids
-        contrast_scenario = self._contrast_scenario
-        control_scenario = self._control_scenario
-
-        if contrast_scenario == str(self.base_scenario):
-            contrast_scenario = None
-
-        if control_scenario == str(self.base_scenario):
-            control_scenario = None
-
-        from wepppy.nodb.core import Watershed
-        apply_advanced_filters = selection_mode == "cumulative"
-        if not apply_advanced_filters:
-            if any(
-                value is not None
-                for value in (
-                    contrast_hill_min_slope,
-                    contrast_hill_max_slope,
-                    contrast_select_burn_severities,
-                    contrast_select_topaz_ids,
-                )
-            ):
-                self.logger.info(
-                    "Contrast selection mode '%s' ignores advanced filters; apply cumulative mode to use them.",
-                    selection_mode,
-                )
-            contrast_hill_min_slope = None
-            contrast_hill_max_slope = None
-            contrast_select_burn_severities = None
-            contrast_select_topaz_ids = None
-            if contrast_hillslope_limit is not None:
-                self.logger.info(
-                    "Contrast selection mode '%s' ignores omni_contrast_hillslope_limit.",
-                    selection_mode,
-                )
-                contrast_hillslope_limit = None
-
-        (
-            contrast_hillslope_limit,
-            contrast_hillslope_limit_max,
-        ) = _OMNI_SCALING_SERVICE.normalize_hillslope_limit(
-            self,
-            selection_mode=selection_mode,
-            contrast_hillslope_limit=contrast_hillslope_limit,
-        )
-
-        if apply_advanced_filters:
-            (
-                contrast_hill_min_slope,
-                contrast_hill_max_slope,
-                contrast_select_burn_severities,
-                contrast_select_topaz_ids,
-            ) = _OMNI_SCALING_SERVICE.normalize_filter_inputs(
-                contrast_hill_min_slope=contrast_hill_min_slope,
-                contrast_hill_max_slope=contrast_hill_max_slope,
-                contrast_select_burn_severities=contrast_select_burn_severities,
-                contrast_select_topaz_ids=contrast_select_topaz_ids,
-            )
-
-        watershed = Watershed.getInstance(self.wd)
-        translator = watershed.translator_factory()
-        top2wepp = {k: v for k, v in translator.top2wepp.items() if not (str(k).endswith('4') or int(k) == 0)}
-
-        # find hillslopes with the most erosion from the control scenario
-        # soils_erosion_descending is a list of ObjectiveParameter named_tuples with fields: topaz_id, wepp_id, and value
-        obj_param_descending, total_erosion_kg = self.get_objective_parameter_from_gpkg(obj_param, scenario=control_scenario)
-
-        if len(obj_param_descending) == 0:
-            raise ValueError('No soil erosion data found!')
-
-        if apply_advanced_filters and any(
-            value is not None
-            for value in (
-                contrast_hill_min_slope,
-                contrast_hill_max_slope,
-                contrast_select_burn_severities,
-                contrast_select_topaz_ids,
-            )
-        ):
-            obj_param_descending, total_erosion_kg = _OMNI_SCALING_SERVICE.apply_advanced_filters(
-                self,
-                watershed=watershed,
-                control_scenario=control_scenario,
-                obj_param_descending=obj_param_descending,
-                contrast_hill_min_slope=contrast_hill_min_slope,
-                contrast_hill_max_slope=contrast_hill_max_slope,
-                contrast_select_burn_severities=contrast_select_burn_severities,
-                contrast_select_topaz_ids=contrast_select_topaz_ids,
-            )
-
-        if not obj_param_descending:
-            raise ValueError("No hillslopes matched contrast filters.")
-        if total_erosion_kg <= 0:
-            raise ValueError("Contrast objective parameter total is zero after filtering.")
-        
-        with self.locked():
-            self._contrasts = None
-            self._contrast_names = []
-
-        sidecar_dir = self._contrast_sidecar_dir()
-        if _exists(sidecar_dir):
-            shutil.rmtree(sidecar_dir)
-        os.makedirs(sidecar_dir, exist_ok=True)
-
-        contrasts: List[ContrastMapping] = []
-        contrast_names: List[str] = []
-        existing_contrast_count = 0
-
-        contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
-        os.makedirs(contrasts_dir, exist_ok=True)
-        report_fn = _join(contrasts_dir, 'build_report.ndjson')
-        report_fp = open(report_fn, 'w')
-
-        running_obj_param = 0.0
-        for d in obj_param_descending:
-            if contrast_hillslope_limit is not None:
-                if len(contrasts) >= contrast_hillslope_limit:
-                    break
-            elif contrast_hillslope_limit_max is not None and len(contrasts) >= contrast_hillslope_limit_max:
-                self.logger.warning(
-                    "Contrast selection reached cap of %d hillslopes without an explicit limit; stopping.",
-                    contrast_hillslope_limit_max,
-                )
-                break
-
-            running_obj_param += d.value
-
-            topaz_id = d.topaz_id
-            wepp_id = d.wepp_id
-            contrast_id = existing_contrast_count + len(contrasts) + 1
-            report_control_scenario = control_scenario or str(self.base_scenario)
-            contrast_name, contrast = _OMNI_MODE_BUILD_SERVICES.build_contrast_mapping(
-                self,
-                top2wepp=top2wepp,
-                selected_topaz_ids={topaz_id},
-                control_scenario=control_scenario,
-                contrast_scenario=contrast_scenario,
-                contrast_id=topaz_id,
-            )
-
-            contrasts.append(contrast)
-            contrast_names.append(contrast_name)
-            self._write_contrast_sidecar(contrast_id, contrast)
-            
-            report_fp.write(json.dumps({
-                'contrast_id': contrast_id,
-                'control_scenario': report_control_scenario,
-                'contrast_scenario': contrast_scenario,
-                'wepp_id': wepp_id,
-                'topaz_id': topaz_id,
-                'obj_param': d.value,
-                'running_obj_param': running_obj_param,
-                'pct_cumulative': running_obj_param / total_erosion_kg * 100
-            }) + '\n')
-
-            if running_obj_param / total_erosion_kg >= contrast_cumulative_obj_param_threshold_fraction:
-                break
-
-        report_fp.close()
-
-        with self.locked():
-            self._contrasts = None
-            self._contrast_names = contrast_names
+        _OMNI_CONTRAST_BUILD_SERVICE.build_contrasts_cumulative_default(self)
 
     def _build_contrast_ids_geojson(self) -> Optional[str]:
         return _OMNI_ARTIFACT_EXPORT_SERVICE.build_contrast_ids_geojson(self)
@@ -2225,200 +1785,7 @@ class Omni(NoDbBase):
         _OMNI_CONTRAST_BUILD_SERVICE.build_contrasts_stream_order(self)
 
     def _build_contrasts_user_defined_hillslope_groups(self) -> None:
-        global OMNI_REL_DIR
-
-        contrast_groups_raw = getattr(self, "_contrast_hillslope_groups", None)
-
-        def _parse_groups(value: Any) -> List[List[str]]:
-            if value in (None, ""):
-                return []
-            if isinstance(value, (list, tuple)):
-                rows = list(value)
-            else:
-                rows = str(value).splitlines()
-            groups: List[List[str]] = []
-            for row in rows:
-                if row is None:
-                    continue
-                if isinstance(row, (list, tuple, set)):
-                    tokens = [str(item) for item in row if item not in (None, "")]
-                else:
-                    line = str(row).strip()
-                    if not line:
-                        continue
-                    line = line.rstrip(";")
-                    tokens = [token for token in re.split(r"[,\s;]+", line) if token]
-                if not tokens:
-                    continue
-                group: List[str] = []
-                for token in tokens:
-                    value_str = str(token).strip()
-                    if not value_str:
-                        continue
-                    try:
-                        parsed = int(value_str)
-                    except (TypeError, ValueError) as exc:
-                        raise ValueError(
-                            "omni_contrast_hillslope_groups entries must be integers"
-                        ) from exc
-                    group.append(str(parsed))
-                if group:
-                    groups.append(group)
-            return groups
-
-        group_rows = _parse_groups(contrast_groups_raw)
-        if not group_rows:
-            raise ValueError(
-                "omni_contrast_hillslope_groups is required for user_defined_hillslope_groups mode"
-            )
-
-        contrast_pairs = self._normalize_contrast_pairs(getattr(self, "_contrast_pairs", None))
-        if not contrast_pairs:
-            raise ValueError(
-                "omni_contrast_pairs is required for user_defined_hillslope_groups mode"
-            )
-        _enforce_user_defined_contrast_limit(
-            "user_defined_hillslope_groups",
-            len(contrast_pairs),
-            len(group_rows),
-            group_label="hillslope groups",
-        )
-
-        ignored_fields = []
-        if self._contrast_hillslope_limit is not None:
-            ignored_fields.append("omni_contrast_hillslope_limit")
-        if self._contrast_hill_min_slope is not None:
-            ignored_fields.append("omni_contrast_hill_min_slope")
-        if self._contrast_hill_max_slope is not None:
-            ignored_fields.append("omni_contrast_hill_max_slope")
-        if self._contrast_select_burn_severities is not None:
-            ignored_fields.append("omni_contrast_select_burn_severities")
-        if self._contrast_select_topaz_ids is not None:
-            ignored_fields.append("omni_contrast_select_topaz_ids")
-        if ignored_fields:
-            self.logger.info(
-                "User-defined hillslope groups ignore filters: %s",
-                ", ".join(ignored_fields),
-            )
-
-        watershed = Watershed.getInstance(self.wd)
-        translator = watershed.translator_factory()
-        top2wepp = {
-            str(k): str(v)
-            for k, v in translator.top2wepp.items()
-            if not (str(k).endswith("4") or int(k) == 0)
-        }
-        valid_topaz = set(top2wepp.keys())
-
-        def _sorted_topaz_ids(values: Set[str]) -> List[str]:
-            try:
-                return sorted(values, key=lambda item: int(item))
-            except (TypeError, ValueError):
-                return sorted(values)
-
-        missing_topaz: Set[str] = set()
-
-        with self.locked():
-            self._contrasts = None
-            self._contrast_names = []
-            self._contrast_labels = {}
-
-        sidecar_dir = self._contrast_sidecar_dir()
-        if _exists(sidecar_dir):
-            shutil.rmtree(sidecar_dir)
-        os.makedirs(sidecar_dir, exist_ok=True)
-
-        contrasts_dir = _join(self.wd, OMNI_REL_DIR, "contrasts")
-        os.makedirs(contrasts_dir, exist_ok=True)
-        report_fn = _join(contrasts_dir, "build_report.ndjson")
-
-        existing_signature_map = self._load_user_defined_hillslope_group_signature_map()
-        next_id = max(existing_signature_map.values(), default=0) + 1
-
-        contrast_names: List[Optional[str]] = []
-        contrast_labels: Dict[int, str] = {}
-
-        with open(report_fn, "w", encoding="ascii") as report_fp:
-            for group_index, raw_group in enumerate(group_rows, start=1):
-                selected_topaz: Set[str] = set()
-                for topaz_key in raw_group:
-                    if topaz_key in (None, ""):
-                        continue
-                    if topaz_key == "0" or str(topaz_key).endswith("4"):
-                        continue
-                    if topaz_key not in valid_topaz:
-                        missing_topaz.add(str(topaz_key))
-                        continue
-                    selected_topaz.add(topaz_key)
-
-                topaz_ids = _sorted_topaz_ids(selected_topaz)
-                n_hillslopes = len(selected_topaz)
-
-                for pair_index, pair in enumerate(contrast_pairs, start=1):
-                    control_key = self._normalize_scenario_key(pair.get("control_scenario"))
-                    contrast_key = self._normalize_scenario_key(pair.get("contrast_scenario"))
-                    control_scenario = None if control_key == str(self.base_scenario) else control_key
-                    contrast_scenario = None if contrast_key == str(self.base_scenario) else contrast_key
-
-                    signature = self._contrast_pair_signature(
-                        control_key,
-                        contrast_key,
-                        str(group_index),
-                    )
-                    contrast_id = existing_signature_map.get(signature)
-                    if contrast_id is None:
-                        contrast_id = next_id
-                        next_id += 1
-                        existing_signature_map[signature] = contrast_id
-
-                    contrast_labels[contrast_id] = str(group_index)
-                    while len(contrast_names) < contrast_id:
-                        contrast_names.append(None)
-
-                    report_entry = {
-                        "contrast_id": contrast_id,
-                        "control_scenario": control_key,
-                        "contrast_scenario": contrast_key,
-                        "wepp_id": None,
-                        "topaz_id": None,
-                        "obj_param": None,
-                        "running_obj_param": None,
-                        "pct_cumulative": None,
-                        "selection_mode": "user_defined_hillslope_groups",
-                        "group_index": group_index,
-                        "n_hillslopes": n_hillslopes,
-                        "topaz_ids": topaz_ids,
-                        "pair_index": pair_index,
-                    }
-
-                    if not selected_topaz:
-                        report_entry["status"] = "skipped"
-                        report_fp.write(json.dumps(report_entry) + "\n")
-                        continue
-
-                    contrast_name, contrast = _OMNI_MODE_BUILD_SERVICES.build_contrast_mapping(
-                        self,
-                        top2wepp=top2wepp,
-                        selected_topaz_ids=selected_topaz,
-                        control_scenario=control_scenario,
-                        contrast_scenario=contrast_scenario,
-                        contrast_id=contrast_id,
-                    )
-
-                    contrast_names[contrast_id - 1] = contrast_name
-                    self._write_contrast_sidecar(contrast_id, contrast)
-                    report_fp.write(json.dumps(report_entry) + "\n")
-
-        if missing_topaz:
-            self.logger.info(
-                "Skipped %d hillslopes missing from translator during group parsing.",
-                len(missing_topaz),
-            )
-
-        with self.locked():
-            self._contrasts = None
-            self._contrast_names = contrast_names
-            self._contrast_labels = contrast_labels
+        _OMNI_CONTRAST_BUILD_SERVICE.build_contrasts_user_defined_hillslope_groups(self)
 
     def _build_contrasts_user_defined_areas(self) -> None:
         _OMNI_CONTRAST_BUILD_SERVICE.build_contrasts_user_defined_areas(self)
@@ -2692,125 +2059,7 @@ class Omni(NoDbBase):
         _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenarios(self)
 
     def run_omni_scenario(self, scenario_def: ScenarioDef) -> Tuple[str, str]:
-        from wepppy.nodb.core import Landuse, Soils, Wepp
-        from wepppy.nodb.mods.disturbed import Disturbed
-            
-        wd = self.wd
-        base_scenario = self.base_scenario
-        scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-
-        scenario = OmniScenario.parse(scenario_def.get('type'))
-        _scenario = str(scenario)
-        omni_base_scenario_name = scenario_def.get('base_scenario', None)
-
-        if scenario in [OmniScenario.PrescribedFire, OmniScenario.Thinning]:  # prescribed fire and thining has to be applied to undisturbed
-            if base_scenario != OmniScenario.Undisturbed:  # if the base scenario is SBSmap, we need to clone it from the undisturbed sibling
-                omni_base_scenario_name = 'undisturbed'
-                self.logger.info(f'  {scenario_name}: omni_base_scenario_name:{omni_base_scenario_name}')
-
-        # change to working dir of parent weppcloud project
-        os.chdir(wd)
-        
-        # assert we know how to handle the scenario
-        assert isinstance(scenario, OmniScenario)
-        with self.timed(f'  {scenario_name}: _omni_clone({scenario_def}, {wd}, {self.runid})'):
-            new_wd = _omni_clone(scenario_def, wd, self.runid)
-
-        if omni_base_scenario_name is not None:
-            if not omni_base_scenario_name == str(base_scenario):  # base scenario is either sbs_map or undisturbed
-                # e.g. scenario is mulch and omni_base_scenario is uniform_low, uniform_moderate, uniform_high, or sbs_map
-                with self.timed(f'  {scenario_name}: _omni_clone_sibling({new_wd}, {omni_base_scenario_name}, {self.runid}, {self.wd})'):
-                    _omni_clone_sibling(new_wd, omni_base_scenario_name, self.runid, self.wd)
-                
-        # get disturbed and landuse instances
-        disturbed = Disturbed.getInstance(new_wd)
-        landuse = Landuse.getInstance(new_wd)
-        soils = Soils.getInstance(new_wd)
-
-        _OMNI_MODE_BUILD_SERVICES.apply_scenario_mode(
-            self,
-            scenario_name=scenario_name,
-            scenario=scenario,
-            scenario_def=scenario_def,
-            new_wd=new_wd,
-            disturbed=disturbed,
-            landuse=landuse,
-            soils=soils,
-            omni_base_scenario_name=omni_base_scenario_name,
-        )
-
-        landuse.build_managements()
-        wepp = Wepp.getInstance(new_wd)
-
-        # use the climate and slope from the parent project's wepp/run directory
-                
-        # these specify path's relative to the wepp.runs_dir
-        # e.g.
-        # > runs_dir = '/wc1/runs/lo/looking-glass/_pups/omni/scenarios/undisturbed/wepp/runs'
-        # > base_runs_dir = '/wc1/runs/lo/looking-glass/wepp/runs'
-        # > os.path.relpath(base_runs_dir, runs_dir)
-        # '../../../../../../wepp/runs'
-
-        man_relpath = ''
-        cli_relpath = os.path.relpath(self.runs_dir, wepp.runs_dir)  # self is Omni instance in parent. _pups do not have Omni
-        slp_relpath = os.path.relpath(self.runs_dir, wepp.runs_dir)
-        sol_relpath = ''
-
-        if not cli_relpath.endswith('/'):
-            cli_relpath += '/'
-        if not slp_relpath.endswith('/'):
-            slp_relpath += '/'
-
-        with self.timed(f'  {scenario_name}: prep hillslopes'):
-            wepp.prep_hillslopes(man_relpath=man_relpath,
-                                cli_relpath=cli_relpath,
-                                slp_relpath=slp_relpath,
-                                sol_relpath=sol_relpath,
-                                max_workers=self.rq_job_pool_max_worker_per_scenario_task)
-        with self.timed(f'  {scenario_name}: run hillslopes'):
-            wepp.run_hillslopes(man_relpath=man_relpath,
-                                cli_relpath=cli_relpath,
-                                slp_relpath=slp_relpath,
-                                sol_relpath=sol_relpath,
-                                max_workers=self.rq_job_pool_max_worker_per_scenario_task)
-
-        with self.timed(f'  {scenario_name}: run hillslope interchange'):
-                
-            def _normalize_start_year(value):
-                try:
-                    if value is None:
-                        return None
-                    if isinstance(value, str) and value.strip() == '':
-                        return None
-                    return int(value)
-                except (TypeError, ValueError):
-                    return None
-
-            start_year = None
-            climate = Climate.getInstance(new_wd)
-            for candidate in (
-                getattr(climate, "observed_start_year", None),
-                getattr(climate, "future_start_year", None),
-            ):
-                normalized = _normalize_start_year(candidate)
-                if normalized is not None:
-                    start_year = normalized
-                    break
-            run_wepp_hillslope_interchange(
-                wepp.output_dir,
-                start_year=start_year,
-                delete_after_interchange=self.delete_after_interchange,
-            )
-
-        with self.timed(f'  {scenario_name}: prep watershed'):
-            wepp.prep_watershed()
-
-        with self.timed(f'  {scenario_name}: run watershed'):
-            wepp.run_watershed()
-            # run_wepp_watershed_interchange and generate_interchange_documentation is at end of wepp.run_watershed()
-            _post_watershed_run_cleanup(wepp)
-
-        return new_wd, scenario_name
+        return _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenario(self, scenario_def)
 
     @property
     def has_ran_scenarios(self) -> bool:
