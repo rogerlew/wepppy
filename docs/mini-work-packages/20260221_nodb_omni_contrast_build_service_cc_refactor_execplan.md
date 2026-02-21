@@ -22,11 +22,11 @@ Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for every entry.
 - [x] (2026-02-21 01:54Z) Reviewed governing guidance and template references (`AGENTS.md`, `wepppy/nodb/AGENTS.md`, `docs/prompt_templates/codex_exec_plans.md`).
 - [x] (2026-02-21 01:54Z) Archived previous completed Omni quality ExecPlan and repointed active ad hoc ExecPlan in `AGENTS.md`.
 - [x] (2026-02-21 01:54Z) Captured current baseline context for `omni_contrast_build_service.py` hotspot concentration and authored this follow-on mini package.
-- [ ] Milestone 0 complete: refresh baseline telemetry and reconfirm current deterministic Omni contract suite status before further decomposition.
-- [ ] Milestone 1 complete: decompose `build_contrasts_stream_order` into cohesive private helpers while preserving all observable behavior and seams.
-- [ ] Milestone 2 complete: decompose `build_contrasts_user_defined_areas` into cohesive private helpers while preserving all observable behavior and schemas.
-- [ ] Milestone 3 complete: fill deterministic collaborator tests for extracted helper boundaries and retained error contracts.
-- [ ] Milestone 4 complete: capture final telemetry deltas and run full validation closeout.
+- [x] (2026-02-21 01:58Z) Milestone 0 complete: refreshed baseline telemetry and reconfirmed deterministic Omni collaborator + cross-layer contract suites before decomposition edits.
+- [x] (2026-02-21 02:01Z) Milestone 1 complete: decomposed `build_contrasts_stream_order` into phase helpers for path validation, stale/prune decisions, hillslope rebuild, grouping, and report emission.
+- [x] (2026-02-21 02:02Z) Milestone 2 complete: decomposed `build_contrasts_user_defined_areas` into helper phases for input/CRS checks, lookup construction, feature selection, and report emission.
+- [x] (2026-02-21 02:03Z) Milestone 3 complete: added deterministic regression tests for malformed-geometry skip boundary, CRS fallback logging, and missing TopazID contract.
+- [x] (2026-02-21 02:09Z) Milestone 4 complete: captured final telemetry deltas and executed Omni-focused + full-suite validation closeout gates.
 
 ## Surprises & Discoveries
 
@@ -40,6 +40,18 @@ Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
 
 - (2026-02-21 01:54Z) Observation: broad catch remains in a deliberate boundary where malformed user geometry should not abort all feature rows.
   Evidence: `wepppy/nodb/mods/omni/omni_contrast_build_service.py` uses `except Exception as exc` with explicit boundary comment and logger emission inside feature evaluation loop.
+
+- (2026-02-21 01:58Z) Observation: baseline characterization gates are currently green before Milestone 1 extraction.
+  Evidence: `wctl run-pytest tests/nodb/mods/test_omni_contrast_build_service.py tests/nodb/mods/test_omni.py -k "build_contrasts_stream_order or build_contrasts_user_defined_areas" --maxfail=1` passed (`6 passed`); cross-layer suite command passed (`64 passed`).
+
+- (2026-02-21 02:02Z) Observation: target entry methods dropped out of hotspot concern once orchestration was split into private phases.
+  Evidence: post-refactor `radon cc -s wepppy/nodb/mods/omni/omni_contrast_build_service.py` reports `build_contrasts_stream_order - A (1)` and `build_contrasts_user_defined_areas - A (2)` instead of `F`.
+
+- (2026-02-21 02:04Z) Observation: reducing method-level complexity increased collaborator file size because logic was redistributed into explicit helpers.
+  Evidence: `radon raw` moved from `LOC/SLOC 553/484` baseline to `943/818` after decomposition.
+
+- (2026-02-21 02:03Z) Observation: deterministic CRS fallback coverage required test stubs to support configurable CRS and project SRID inputs.
+  Evidence: `_stub_user_defined_geodata(...)` in `tests/nodb/mods/test_omni_contrast_build_service.py` was expanded with `hillslope_crs`, `user_crs`, and `project_srid` parameters to exercise fallback branches.
 
 ## Decision Log
 
@@ -57,12 +69,40 @@ Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
   Rationale: stream-order method has stronger coupling to filesystem/raster rebuild control flow and benefits most from early extraction of independent phases.
   Date/Author: 2026-02-21 01:54Z / Codex
 
+- Decision: Use phase-oriented private helpers and a shared report-path reset helper instead of introducing new collaborator classes.
+  Rationale: this kept call signatures and seams stable while cutting entry-method CC with minimal contract risk.
+  Date/Author: 2026-02-21 02:01Z / Codex
+
+- Decision: Expand collaborator test fixtures to allow CRS/SRID parameterization rather than duplicating geo-stub scaffolding per test.
+  Rationale: this enables deterministic branch coverage for fallback behavior with lower test maintenance overhead.
+  Date/Author: 2026-02-21 02:03Z / Codex
+
+- Decision: Accept increased SLOC in `omni_contrast_build_service.py` as a tradeoff for lower per-method complexity and clearer phase boundaries.
+  Rationale: current observability is non-blocking and this package targets hotspot risk reduction over line-count minimization.
+  Date/Author: 2026-02-21 02:04Z / Codex
+
 ## Outcomes & Retrospective
 
 Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
 
 - (2026-02-21 01:54Z) Outcome: planning/setup phase completed; no additional production refactor edits beyond prior extraction set were made in this authoring step.
 - (2026-02-21 01:54Z) Retrospective: current risk has shifted to collaborator internals rather than facade orchestration, so next improvement should focus on internal helper structure and deterministic seam tests.
+- (2026-02-21 01:58Z) Outcome: Milestone 0 baseline metrics captured for collaborator file.
+  Evidence: `radon raw wepppy/nodb/mods/omni/omni_contrast_build_service.py` -> `LOC 553`, `SLOC 484`; `radon cc -s ...` -> `build_contrasts_user_defined_areas F (55)`, `build_contrasts_stream_order F (50)`.
+- (2026-02-21 01:58Z) Outcome: Milestone 0 characterization suite summary.
+  Evidence: collaborator/facade-targeted baseline command -> PASS (`6 passed`, `50 deselected`); cross-layer Omni contracts command -> PASS (`64 passed`).
+- (2026-02-21 02:01Z) Outcome: Milestone 1 stream-order decomposition completed with seam-preserving orchestration.
+  Evidence: `build_contrasts_stream_order` now delegates through helper phases (`_stream_order_*`) and milestone command `wctl run-pytest ... -k "stream_order"` passed (`7 passed`).
+- (2026-02-21 02:02Z) Outcome: Milestone 2 user-defined-area decomposition completed with boundary behavior retained.
+  Evidence: `build_contrasts_user_defined_areas` now delegates through helper phases (`_require_user_defined_inputs`, `_resolve_target_crs`, `_write_user_defined_report`, etc.) and milestone command `wctl run-pytest ... -k "user_defined_areas"` passed (`5 passed`).
+- (2026-02-21 02:03Z) Outcome: Milestone 3 regression-gap tests added and passing.
+  Evidence: new tests cover malformed geometry skip/log boundary, CRS fallback logs, and missing TopazID contract; milestone command `wctl run-pytest tests/nodb/mods/test_omni_contrast_build_service.py tests/nodb/mods/test_omni.py tests/nodb/mods/test_omni_facade_contracts.py --maxfail=1` passed (`69 passed`).
+- (2026-02-21 02:09Z) Outcome: Milestone 4 telemetry delta summary.
+  Evidence: `radon cc -s` shows target methods reduced from `F (55/F 50)` to `A (2/A 1)`; file max method CC is now `C (12)`; observability report (`/tmp/omni-contrast-build-followup.md`) reports changed-file `python_function_len` at `77` and `python_cc` at `12` for `omni_contrast_build_service.py`.
+- (2026-02-21 02:09Z) Outcome: Milestone 4 validation command summary.
+  Evidence: Omni-focused cross-layer command passed (`123 passed`); full suite command `wctl run-pytest tests --maxfail=1` passed (`1919 passed`, `27 skipped`).
+- (2026-02-21 02:09Z) Retrospective: hotspot risk for the two target entry methods is resolved, but collaborator-local maintainability still benefits from keeping helper boundaries coherent as future edits land.
+  Evidence: top complexity after refactor is helper-level (`_build_hillslope_lookup C 12`) rather than entrypoint-level red-band methods.
 
 ## Context and Orientation
 
@@ -261,3 +301,5 @@ Record concise evidence as work proceeds:
 3. Any contract-preservation decision affecting seams or exception boundaries.
 
 Revision Note (2026-02-21 01:54Z, Codex): Created this follow-on mini ExecPlan to continue the completed Omni hotspot program by targeting the two remaining high-CC methods isolated in `OmniContrastBuildService`.
+Revision Note (2026-02-21 01:58Z, Codex): Updated living sections with Milestone 0 baseline telemetry and characterization evidence so the plan reflects current executable state before new refactor edits.
+Revision Note (2026-02-21 02:09Z, Codex): Updated the plan through Milestone 4 completion with helper-decomposition outcomes, expanded regression coverage, telemetry deltas, and full validation results.

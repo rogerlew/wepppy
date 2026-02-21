@@ -49,6 +49,11 @@ class Rect:
         return Rect(xmin, ymin, xmax, ymax)
 
 
+class RaisingRect(Rect):
+    def intersection(self, other):
+        raise ValueError("malformed geometry")
+
+
 class DummyRow(dict):
     @property
     def geometry(self):
@@ -122,14 +127,17 @@ def _stub_user_defined_geodata(
     *,
     hillslope_rows,
     user_rows,
+    hillslope_crs="EPSG:32611",
+    user_crs=None,
+    project_srid="32611",
 ) -> Path:
     hillslope_path = tmp_path / "subwta.geojson"
     user_geojson_path = tmp_path / "areas.geojson"
     hillslope_path.write_text("{}", encoding="ascii")
     user_geojson_path.write_text("{}", encoding="ascii")
 
-    hillslope_gdf = DummyGeoDataFrame(hillslope_rows, crs="EPSG:32611")
-    user_gdf = DummyGeoDataFrame(user_rows, crs=None)
+    hillslope_gdf = DummyGeoDataFrame(hillslope_rows, crs=hillslope_crs)
+    user_gdf = DummyGeoDataFrame(user_rows, crs=user_crs)
 
     geopandas_stub = types.ModuleType("geopandas")
     geopandas_stub.read_file = lambda path: hillslope_gdf if str(path) == str(hillslope_path) else user_gdf
@@ -145,7 +153,7 @@ def _stub_user_defined_geodata(
             return DummyTranslator()
 
     class DummyRon:
-        srid = "32611"
+        srid = project_srid
 
     monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
     monkeypatch.setattr(omni_module.Ron, "getInstance", lambda wd: DummyRon())
@@ -281,3 +289,135 @@ def test_build_contrasts_user_defined_areas_service_builds_sidecars(
     assert Path(omni._contrast_sidecar_path(1)).exists()
     assert Path(omni._contrast_sidecar_path(2)).exists()
     assert not Path(omni._contrast_sidecar_path(3)).exists()
+
+
+def test_build_contrasts_user_defined_areas_service_logs_and_skips_malformed_geometry(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    service = OmniContrastBuildService()
+    hillslope_rows = [{"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)}]
+    user_rows = [
+        {"name": "Broken", "geometry": RaisingRect(0.0, 0.0, 10.0, 10.0)},
+        {"name": "Good", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+    ]
+    user_geojson_path = _stub_user_defined_geodata(
+        monkeypatch,
+        tmp_path,
+        hillslope_rows=hillslope_rows,
+        user_rows=user_rows,
+    )
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.contrast_build_service.malformed")
+    omni._contrast_geojson_path = str(user_geojson_path)
+    omni._contrast_geojson_name_key = "name"
+    omni._contrast_pairs = [{"control_scenario": "uniform_low", "contrast_scenario": "mulch"}]
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+
+    with caplog.at_level(logging.INFO):
+        service.build_contrasts_user_defined_areas(omni)
+
+    assert "Failed to evaluate contrast feature 1: malformed geometry" in caplog.text
+    assert omni.contrast_names == [None, "uniform_low,2__to__mulch"]
+    assert not Path(omni._contrast_sidecar_path(1)).exists()
+    assert Path(omni._contrast_sidecar_path(2)).exists()
+
+
+def test_build_contrasts_user_defined_areas_service_applies_crs_fallbacks(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    service = OmniContrastBuildService()
+    hillslope_rows = [{"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)}]
+    user_rows = [{"name": None, "geometry": Rect(0.0, 0.0, 10.0, 10.0)}]
+    user_geojson_path = _stub_user_defined_geodata(
+        monkeypatch,
+        tmp_path,
+        hillslope_rows=hillslope_rows,
+        user_rows=user_rows,
+        hillslope_crs=None,
+        user_crs=None,
+        project_srid="32611",
+    )
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.contrast_build_service.crs")
+    omni._contrast_geojson_path = str(user_geojson_path)
+    omni._contrast_geojson_name_key = "name"
+    omni._contrast_pairs = [{"control_scenario": "uniform_low", "contrast_scenario": "mulch"}]
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+
+    with caplog.at_level(logging.INFO):
+        service.build_contrasts_user_defined_areas(omni)
+
+    assert "Hillslope GeoJSON missing CRS; setting to project CRS EPSG:32611" in caplog.text
+    assert "Contrast GeoJSON missing CRS; assuming WGS84 (EPSG:4326)." in caplog.text
+    assert omni.contrast_names == ["uniform_low,1__to__mulch"]
+    assert omni._contrast_labels == {1: "1"}
+
+
+def test_build_contrasts_user_defined_areas_service_requires_topaz_id_field(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniContrastBuildService()
+    hillslope_rows = [{"bad_field": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)}]
+    user_rows = [{"name": "Only", "geometry": Rect(0.0, 0.0, 10.0, 10.0)}]
+    user_geojson_path = _stub_user_defined_geodata(
+        monkeypatch,
+        tmp_path,
+        hillslope_rows=hillslope_rows,
+        user_rows=user_rows,
+    )
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.contrast_build_service.topaz")
+    omni._contrast_geojson_path = str(user_geojson_path)
+    omni._contrast_geojson_name_key = "name"
+    omni._contrast_pairs = [{"control_scenario": "uniform_low", "contrast_scenario": "mulch"}]
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+
+    with pytest.raises(ValueError, match="Hillslope polygons missing a TopazID field."):
+        service.build_contrasts_user_defined_areas(omni)
