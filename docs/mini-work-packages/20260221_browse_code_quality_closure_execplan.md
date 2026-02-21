@@ -6,7 +6,7 @@ This plan follows `docs/prompt_templates/codex_exec_plans.md` from the repositor
 
 ## Purpose / Big Picture
 
-The browse microservice currently works, but `wepppy/microservices/browse/browse.py` is above the repository’s red-band quality thresholds for file size, longest function length, and cyclomatic complexity. The goal is to keep all existing browse route behavior and contracts intact while decomposing that file into focused collaborators and tightening broad exception boundaries. After this change, the same browse routes and tests should continue to pass, and observability should show `browse.py` below red-band thresholds.
+The browse microservice currently works, but high-complexity browse flow logic required code-quality closure work. The goal is to keep existing browse route behavior and contracts intact while decomposing hotspots into focused helpers and tightening broad exception boundaries. After this change, browse routes and tests should continue to pass, and both `browse.py` and `flow.py` should sit below red-band thresholds.
 
 ## Progress
 
@@ -19,6 +19,13 @@ The browse microservice currently works, but `wepppy/microservices/browse/browse
 - [x] (2026-02-21 07:13Z) Ran required targeted browse suites; `test_browse_dtale.py` is module-skipped by design in this environment (0 collected / 1 skipped).
 - [x] (2026-02-21 07:13Z) Ran `python3 tools/code_quality_observability.py --base-ref origin/master` and captured post-change metrics.
 - [x] (2026-02-21 07:17Z) Committed and pushed refactor to `master` (`ce21cda83`), then updated this plan to reflect final state.
+- [x] (2026-02-21 16:20Z) Assessed `wepppy/microservices/browse/flow.py` quality baseline: SLOC `459`, max function length `339`, max CC `84`, broad catches `1`.
+- [x] (2026-02-21 16:20Z) Decomposed `flow.py` into focused helpers for nodir flow, directory rendering, and file rendering while preserving route behavior.
+- [x] (2026-02-21 16:20Z) Re-ran browse regression suites after `flow.py` refactor (`test_browse_routes.py`, `test_browse_security.py`, `test_browse_auth_routes.py`, `test_browse_dtale.py`, `test_files_routes.py`).
+- [x] (2026-02-21 16:39Z) Addressed review-requested browse contract test gaps by adding route tests for `raw/download/repr`, pagination clamping with `diff/sort/order` preservation, and markdown renderer fallback.
+- [x] (2026-02-21 16:39Z) Removed unconditional module-level skip in `test_browse_dtale.py` and repaired stale test patch points to target `browse.dtale.httpx` and flexible `dtale_custom_geojson` module resolution.
+- [x] (2026-02-21 16:39Z) Revalidated browse suites after test fixes; D-Tale suite now executes (`2 passed, 3 skipped`) instead of whole-module skip.
+- [ ] Commit and push `flow.py` quality refactor on `master`.
 
 ## Surprises & Discoveries
 
@@ -27,6 +34,12 @@ The browse microservice currently works, but `wepppy/microservices/browse/browse
 
 - Observation: `tests/microservices/test_browse_dtale.py` is intentionally skipped at module import in this environment, which yields pytest exit code `5` (`0 collected, 1 skipped`) even though behavior is expected.
   Evidence: `wctl run-pytest tests/microservices/test_browse_dtale.py` output on 2026-02-21.
+
+- Observation: Moving hotspot logic from `browse.py` to `flow.py` initially transferred red-band function length/complexity to the new file (`339` length / `84` CC), requiring a second decomposition pass.
+  Evidence: Local metrics run against `wepppy/microservices/browse/flow.py` on 2026-02-21.
+
+- Observation: Unskipping the D-Tale suite exposed stale test assumptions (patching `browse.httpx`, strict root-module attribute access for `dtale_custom_geojson`) that were previously hidden by unconditional module skip.
+  Evidence: `wctl run-pytest tests/microservices/test_browse_dtale.py` failures observed on 2026-02-21 before test fixes.
 
 ## Decision Log
 
@@ -46,11 +59,21 @@ The browse microservice currently works, but `wepppy/microservices/browse/browse
   Rationale: Preserves fallback behavior while reducing broad catch usage in active browse paths.
   Date/Author: 2026-02-21 / Codex.
 
+- Decision: Refactor `flow.py` in-place into many helper functions instead of creating additional modules.
+  Rationale: Keeps browse flow discoverable in one file while reducing per-function complexity and limiting import-surface churn.
+  Date/Author: 2026-02-21 / Codex.
+
+- Decision: Keep D-Tale tests active but environment-tolerant (targeted `skip` on unavailable optional runtime paths) rather than module-level unconditional skip.
+  Rationale: Restores meaningful execution and regression value in CI-compatible environments while avoiding false failures when optional dependencies are absent.
+  Date/Author: 2026-02-21 / Codex.
+
 ## Outcomes & Retrospective
 
-The refactor achieved the quality closure target for `browse.py` while preserving route behavior in required suites. `browse.py` now delegates large flow functions to `flow.py`, reducing hotspot pressure in the entrypoint module: SLOC `1476 -> 1086`, max function length `341 -> 93`, max CC `84 -> 21`, broad catches `8 -> 5`.
+Initial refactor achieved the quality closure target for `browse.py` while preserving route behavior in required suites. `browse.py` now delegates large flow functions to `flow.py`, reducing hotspot pressure in the entrypoint module: SLOC `1476 -> 1086`, max function length `341 -> 93`, max CC `84 -> 21`, broad catches `8 -> 5`.
 
-All requested implementation, validation, and push steps are complete.
+A follow-up decomposition pass closed quality risk in `flow.py`: SLOC `459 -> 775`, max function length `339 -> 86`, max CC `84 -> 14`, broad catches `1 -> 1` (intentional markdown rendering boundary). Additional browse test coverage was added for query/content-type/pagination/markdown fallback branches, and D-Tale tests now run instead of a blanket module skip.
+
+Pending step: commit and push this follow-up refactor.
 
 ## Context and Orientation
 
@@ -105,6 +128,10 @@ Acceptance is met when:
   - `python_function_len < 150`
   - `python_cc < 30`
 - Broad catches in browse execution paths are reduced and any unavoidable broad boundary has a short justification comment.
+- `wepppy/microservices/browse/flow.py` metrics satisfy:
+  - `python_file_sloc < 1200`
+  - `python_function_len < 150`
+  - `python_cc < 30`
 
 ## Idempotence and Recovery
 
@@ -136,11 +163,20 @@ Final metrics table:
 
 Validation summary:
 
-- `wctl run-pytest tests/microservices/test_browse_routes.py` -> passed (`2 passed`).
+- `wctl run-pytest tests/microservices/test_browse_routes.py` -> passed (`7 passed`).
 - `wctl run-pytest tests/microservices/test_browse_security.py` -> passed (`13 passed`).
 - `wctl run-pytest tests/microservices/test_browse_auth_routes.py` -> passed (`82 passed`).
-- `wctl run-pytest tests/microservices/test_browse_dtale.py` -> module skipped in this environment (`0 collected / 1 skipped`, pytest exit `5`).
+- `wctl run-pytest tests/microservices/test_browse_dtale.py` -> passed/skip mix (`2 passed, 3 skipped`).
 - `wctl run-pytest tests/microservices/test_files_routes.py` -> passed (`117 passed`).
+
+Flow follow-up metrics table:
+
+| Metric | Before | After |
+| --- | ---: | ---: |
+| SLOC | 459 | 775 |
+| Max function length | 339 | 86 |
+| Max cyclomatic complexity | 84 | 14 |
+| Broad catches | 1 | 1 |
 
 ## Interfaces and Dependencies
 
@@ -158,3 +194,4 @@ Update log:
 - 2026-02-21: Initial plan authored and activated to execute browse code-quality closure requested by user.
 - 2026-02-21: Updated after implementation/testing with extraction details, validation outcomes, and post-change metrics.
 - 2026-02-21: Marked commit/push completion and captured final metrics/validation summary.
+- 2026-02-21: Added `flow.py` quality assessment/refactor progress, outcomes, and remaining commit step.
