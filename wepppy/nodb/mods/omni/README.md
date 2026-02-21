@@ -307,7 +307,8 @@ Omni follows the NoDb singleton pattern. The controller persists state in `omni.
 
 ```
 wepppy/nodb/mods/omni/
-├── omni.py              # Core Omni controller and scenario/contrast logic
+├── omni.py              # Core Omni orchestration facade
+├── omni_state_contrast_mixin.py  # Extracted state/contrast facade methods
 ├── omni.pyi             # Type stubs for IDE/mypy support
 ├── __init__.py          # Public exports (Omni, OmniScenario, OmniNoDbLockedException)
 └── README.md            # This document
