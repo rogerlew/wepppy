@@ -1666,6 +1666,48 @@ def test_run_omni_scenarios_delegates_to_run_orchestration_service(tmp_path, mon
     assert captured["instance"] is omni
 
 
+def test_build_contrasts_stream_order_delegates_to_contrast_build_service(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    captured: dict[str, object] = {}
+
+    def _fake_build(instance):
+        captured["instance"] = instance
+
+    monkeypatch.setattr(
+        omni_module._OMNI_CONTRAST_BUILD_SERVICE,
+        "build_contrasts_stream_order",
+        _fake_build,
+    )
+
+    omni._build_contrasts_stream_order()
+
+    assert captured["instance"] is omni
+
+
+def test_build_contrasts_user_defined_areas_delegates_to_contrast_build_service(
+    tmp_path,
+    monkeypatch,
+    omni_module,
+):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    captured: dict[str, object] = {}
+
+    def _fake_build(instance):
+        captured["instance"] = instance
+
+    monkeypatch.setattr(
+        omni_module._OMNI_CONTRAST_BUILD_SERVICE,
+        "build_contrasts_user_defined_areas",
+        _fake_build,
+    )
+
+    omni._build_contrasts_user_defined_areas()
+
+    assert captured["instance"] is omni
+
+
 def test_run_omni_contrasts_delegates_to_run_orchestration_service(tmp_path, monkeypatch, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)

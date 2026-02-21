@@ -24,6 +24,7 @@ Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for every entry.
 - [x] (2026-02-21 00:44Z) Milestone 4 complete: extracted scenario/contrast run orchestration into `OmniRunOrchestrationService` and preserved facade entrypoints.
 - [x] (2026-02-21 00:45Z) Milestone 5 complete: deterministic regression gaps addressed and full Omni-focused gate suites passed.
 - [x] (2026-02-21 00:51Z) Milestone 6 complete: captured final telemetry deltas, ran full-suite validation, and documented residual risks/deferred work.
+- [x] (2026-02-21 01:26Z) Deferred follow-on extraction complete: moved `_build_contrasts_user_defined_areas` and `_build_contrasts_stream_order` out of `omni.py` into `OmniContrastBuildService`, preserved facade delegators/contracts, and re-ran targeted + full validation gates.
 
 ## Surprises & Discoveries
 
@@ -80,6 +81,12 @@ Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
 - (2026-02-21 00:51Z) Observation: facade hotspot reduction is material but user-defined/stream-order builders still dominate remaining `omni.py` complexity.
   Evidence: final `radon cc` top methods are `_build_contrasts_user_defined_areas (F 55)` and `_build_contrasts_stream_order (F 50)`.
 
+- (2026-02-21 01:11Z) Observation: stream-order rebuild tests depend on monkeypatching the module-level `_prune_stream_order` seam on `omni.py`.
+  Evidence: `tests/nodb/mods/test_omni.py::test_build_contrasts_stream_order_stale_rebuild_decisions` initially failed after extraction with `AttributeError` when `_prune_stream_order` was imported directly in the collaborator.
+
+- (2026-02-21 01:26Z) Observation: after extracting the two remaining heavy contrast builders, `omni.py` dropped out of the global max-function-length and max-CC hotspot lists.
+  Evidence: `/tmp/omni-quality-followup.md` no longer lists `wepppy/nodb/mods/omni/omni.py` under `python_max_function_len_top20` or `python_max_cc_top20`; `radon cc -s wepppy/nodb/mods/omni/omni.py` now tops at `_run_contrast - E (34)`.
+
 ## Decision Log
 
 Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
@@ -128,6 +135,14 @@ Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
   Rationale: current contract-safe extraction already met hotspot reduction goals and all validation gates; additional deep surgery would add late-stage regression risk.
   Date/Author: 2026-02-21 00:51Z / Codex
 
+- Decision: Execute deferred extraction by introducing `OmniContrastBuildService` and reducing `Omni._build_contrasts_stream_order` / `Omni._build_contrasts_user_defined_areas` to facade delegators.
+  Rationale: isolates remaining high-complexity contrast builders while keeping facade signatures, lock/persistence ownership, and monkeypatch seams stable.
+  Date/Author: 2026-02-21 01:05Z / Codex
+
+- Decision: Preserve module-level `_prune_stream_order` compatibility seam during collaborator extraction.
+  Rationale: existing deterministic regression tests patch this symbol on `omni.py`; preserving it avoids behavioral drift in stale-rebuild paths.
+  Date/Author: 2026-02-21 01:11Z / Codex
+
 ## Outcomes & Retrospective
 
 Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
@@ -164,6 +179,21 @@ Use UTC timestamps in `YYYY-MM-DD HH:MMZ` format for new entries.
   Evidence: `python3 tools/code_quality_observability.py --base-ref origin/master --json-out /tmp/omni-quality-after.json --md-out /tmp/omni-quality-after.md` -> PASS; `radon raw wepppy/nodb/mods/omni/omni.py` -> PASS; `radon cc -s wepppy/nodb/mods/omni/omni.py` -> PASS; `wctl run-pytest tests --maxfail=1` -> PASS (`1907 passed`, `27 skipped`).
 - (2026-02-21 00:51Z) Retrospective: residual risks and deferred work.
   Evidence: Remaining high-complexity builders (`_build_contrasts_user_defined_areas`, `_build_contrasts_stream_order`) should be split into collaborator methods in a follow-on package; deprecation-warning cleanup and optional GIS dependency-path hardening were intentionally deferred because they are orthogonal to Omni facade contract preservation.
+
+- (2026-02-21 01:12Z) Outcome: deferred collaborator extraction delivered with contract-preserving facade seams.
+  Evidence: `wepppy/nodb/mods/omni/omni_contrast_build_service.py` now owns `build_contrasts_stream_order` and `build_contrasts_user_defined_areas`; `wepppy/nodb/mods/omni/omni.py` methods delegate via `_OMNI_CONTRAST_BUILD_SERVICE`.
+
+- (2026-02-21 01:26Z) Outcome: deferred extraction validation command summary.
+  Evidence: `wctl run-pytest tests/nodb/mods/test_omni_contrast_build_service.py tests/nodb/mods/test_omni.py tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni_artifact_export_service.py --maxfail=1` -> PASS (`74 passed`); `wctl run-pytest tests/nodb/mods/test_omni_facade_contracts.py tests/rq/test_omni_rq.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_omni_bp_routes.py --maxfail=1` -> PASS (`64 passed`); `wctl run-pytest tests --maxfail=1` -> PASS (`1916 passed`, `27 skipped`).
+
+- (2026-02-21 01:26Z) Outcome: post-extraction `omni.py` telemetry delta versus Milestone 6 closeout baseline.
+  Evidence: `python3 tools/code_quality_observability.py --base-ref origin/master --json-out /tmp/omni-quality-followup.json --md-out /tmp/omni-quality-followup.md` and `radon` show `python_file_sloc` hotspot value improved `2887 -> 2429` (`-458`), `radon raw` improved `LOC/SLOC 3400/2787 -> 2880/2329` (`-520/-458`), and max method CC in `omni.py` improved from `55 -> 34`.
+
+- (2026-02-21 01:26Z) Retrospective: residual complexity risk shifted from contrast builders to clone/build orchestration internals.
+  Evidence: current `radon cc` leaders in `omni.py` are `_run_contrast (E 34)`, `_omni_clone (D 29)`, `_build_contrasts (D 26)`, and `_build_contrasts_user_defined_hillslope_groups (D 26)`; further extraction remains optional follow-on work.
+
+- (2026-02-21 01:26Z) Retrospective: extracted builders still need internal decomposition, but risk is now isolated to the collaborator boundary instead of the Omni facade.
+  Evidence: `radon cc -s wepppy/nodb/mods/omni/omni_contrast_build_service.py` reports `build_contrasts_user_defined_areas (F 55)` and `build_contrasts_stream_order (F 50)` in the new service.
 
 ## Context and Orientation
 
