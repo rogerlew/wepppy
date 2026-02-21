@@ -483,7 +483,7 @@ Files/modules touched:
 1. `wepppy/nodb/mods/omni/omni.py`.
 2. `wepppy/nodb/mods/omni/omni.pyi`.
 3. Omni-related tests under `tests/nodb/mods/`, `tests/rq/`, `tests/microservices/`, and `tests/weppcloud/routes/`.
-4. `docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md` (living updates).
+4. `docs/mini-work-packages/completed/20260220_nodb_omni_option2_facade_execplan.md` (living updates).
 
 Invariants to preserve:
 
@@ -615,7 +615,7 @@ Overall acceptance requires all of the following:
 
 6. Doc lint gate passes:
 
-    wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md
+    wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/completed/20260220_nodb_omni_option2_facade_execplan.md
 
 ## Idempotence and Recovery
 
@@ -770,7 +770,7 @@ Validation:
     wctl run-pytest tests --maxfail=1
     -> 1894 passed, 27 skipped
 
-    wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/20260220_nodb_omni_option2_facade_execplan.md
+    wctl doc-lint --path AGENTS.md --path docs/mini-work-packages/completed/20260220_nodb_omni_option2_facade_execplan.md
     -> 2 files validated, 0 errors, 0 warnings
 
 Severity gate findings:
