@@ -194,4 +194,5 @@ Update log:
 - 2026-02-21: Initial plan authored and activated to execute browse code-quality closure requested by user.
 - 2026-02-21: Updated after implementation/testing with extraction details, validation outcomes, and post-change metrics.
 - 2026-02-21: Marked commit/push completion and captured final metrics/validation summary.
-- 2026-02-21: Added `flow.py` quality assessment/refactor progress, outcomes, and remaining commit step.
+- 2026-02-21: Added `flow.py` quality assessment/refactor progress and final outcomes.
+- 2026-02-21: Work-package closed out, moved to `docs/mini-work-packages/completed/`, and deactivated in root `AGENTS.md`.
