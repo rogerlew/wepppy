@@ -1,0 +1,49 @@
+# Project-level Codex configuration for WEPPpy.
+# Governance: Agents are explicitly authorized to modify this file and add/update
+# role files under `.codex/agents/` when repository workflows evolve.
+
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 12
+
+[agents.default]
+description = "General WEPPpy orchestrator; may delegate and update/add role configs."
+config_file = "agents/default.toml"
+
+[agents.explorer]
+description = "Read-focused explorer for fast parallel codebase discovery and impact mapping."
+config_file = "agents/explorer.toml"
+
+[agents.worker]
+description = "Implementation worker for focused code changes and validation runs."
+config_file = "agents/worker.toml"
+
+[agents.reviewer]
+description = "Risk-focused code reviewer for correctness, regressions, and missing tests."
+config_file = "agents/reviewer.toml"
+
+[agents.code_quality_refactorer]
+description = "Refactors a bounded module for complexity/readability while preserving behavior."
+config_file = "agents/code_quality_refactorer.toml"
+
+[agents.nodb_refactorer]
+description = "NoDb specialist for locking/cache-safe refactors under wepppy/nodb."
+config_file = "agents/nodb_refactorer.toml"
+
+[agents.rq_refactorer]
+description = "RQ and rq-engine specialist for queue wiring and async contract safety."
+config_file = "agents/rq_refactorer.toml"
+
+[agents.weppcloud_refactorer]
+description = "WEPPcloud specialist for Flask routes, templates, and controller integration."
+config_file = "agents/weppcloud_refactorer.toml"
+
+[agents.query_engine_refactorer]
+description = "Query-engine specialist for DuckDB/MCP route refactors."
+config_file = "agents/query_engine_refactorer.toml"
+
+[agents.test_guardian]
+description = "Validation specialist for pytest targeting, stub hygiene, and regression coverage."
+config_file = "agents/test_guardian.toml"
