@@ -910,27 +910,14 @@ def _generate_masked_stream_junctions(
             fallback_chnjnt_src = chnjnt_path
 
     if not _raster_has_stream_cells(masked_netful):
-        if fallback_chnjnt_src is not None and fallback_chnjnt_src.exists():
-            logger.info(
-                "masked netful has no stream cells; clipping junctions from %s",
-                fallback_chnjnt_src,
-            )
-            masked_chnjnt = chnjnt_path.with_name("chnjnt.masked.tif")
-            _clip_raster_to_raster_with_retry(
-                wbt=wbt,
-                input_path=fallback_chnjnt_src,
-                mask_path=watershed_mask_path,
-                output_path=masked_chnjnt,
-            )
-            if chnjnt_path.exists():
-                chnjnt_path.unlink()
-            os.replace(masked_chnjnt, chnjnt_path)
-            if chnjnt_vrt.exists():
-                chnjnt_vrt.unlink()
+        if _try_generate_masked_stream_junctions_from_fallback(
+            wbt=wbt,
+            fallback_chnjnt_src=fallback_chnjnt_src,
+            watershed_mask_path=watershed_mask_path,
+            chnjnt_path=chnjnt_path,
+            chnjnt_vrt=chnjnt_vrt,
+        ):
             return
-        logger.warning(
-            "masked netful has no stream cells and no fallback junction source"
-        )
 
     if chnjnt_path.exists():
         chnjnt_path.unlink()
@@ -946,6 +933,39 @@ def _generate_masked_stream_junctions(
         )
     if chnjnt_vrt.exists():
         chnjnt_vrt.unlink()
+
+
+def _try_generate_masked_stream_junctions_from_fallback(
+    *,
+    wbt: WhiteboxTools,
+    fallback_chnjnt_src: Optional[Path],
+    watershed_mask_path: Path,
+    chnjnt_path: Path,
+    chnjnt_vrt: Path,
+) -> bool:
+    if fallback_chnjnt_src is None or not fallback_chnjnt_src.exists():
+        logger.warning(
+            "masked netful has no stream cells and no fallback junction source"
+        )
+        return False
+
+    logger.info(
+        "masked netful has no stream cells; clipping junctions from %s",
+        fallback_chnjnt_src,
+    )
+    masked_chnjnt = chnjnt_path.with_name("chnjnt.masked.tif")
+    _clip_raster_to_raster_with_retry(
+        wbt=wbt,
+        input_path=fallback_chnjnt_src,
+        mask_path=watershed_mask_path,
+        output_path=masked_chnjnt,
+    )
+    if chnjnt_path.exists():
+        chnjnt_path.unlink()
+    os.replace(masked_chnjnt, chnjnt_path)
+    if chnjnt_vrt.exists():
+        chnjnt_vrt.unlink()
+    return True
 
 
 def _is_nodata_value(value: Any, nodata: Optional[float]) -> bool:
