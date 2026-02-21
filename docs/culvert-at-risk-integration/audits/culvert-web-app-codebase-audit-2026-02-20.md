@@ -375,6 +375,146 @@ Developer barrier: a developer cannot inspect project state from a REPL, databas
 
 Developer barrier: a developer can fix a local bug in minutes, but any change that crosses route/task/utility boundaries is high-risk. `307` print statements in `app.py` mean production logs are noisy — filtering signal from noise during debugging requires reading through output that mixes debug chatter with actual errors. `119` broad `except Exception` blocks mean errors are caught and logged but not typed or propagated, so failures present as silent wrong behavior rather than clear stack traces.
 
+### 3.1 Route architecture audit
+
+Full route inventory: `70` HTTP routes and `3` Socket.IO event handlers in `culvert_app/app.py`. No Flask Blueprints; all routes defined directly on the app instance. Cross-referenced against all frontend call sites (`fetch()`, `XMLHttpRequest`, `window.location.href`, `url_for()`, form `action=` attributes) across `12` JavaScript files and `8` HTML templates.
+
+#### 3.1.1 HTTP method semantic violations
+
+Critical:
+
+| Route | Line | Issue |
+| --- | ---: | --- |
+| `GET /logout` | `5735` | Logout via GET is a security anti-pattern. Any page or email can embed `<img src="/logout">` or a cross-origin link to force-log a user out. Should be `POST` only. |
+| `GET /report_generate/<user_id>/<project_name>` | `5662` | Triggers a background RQ job (side effect) via GET. GET must be safe and idempotent per HTTP spec. This enqueues work, mutates Redis state, and emits socket events. Should be `POST`. |
+| `GET /test-smtp` | `341` | Exposes SMTP credential status and attempts live Zoho authentication on a GET with no `@login_required`. Should be removed in production or at minimum `POST` + admin-only gated. |
+
+Moderate:
+
+| Route | Line | Issue |
+| --- | ---: | --- |
+| `GET,POST /ws_deln/<int:user_id>/<project_name>` | `1887` | Accepts POST but the handler only uses GET logic (page rendering). The POST path is never hit by any frontend call site. Dead method declaration. |
+| `GET,POST /hydrologic_vuln/<int:user_id>/<project_name>` | `2034` | Same: both methods do identical page-load logic. POST serves no purpose. |
+| `GET,POST /hydrogeo_vuln/<int:user_id>/<project_name>` | `2204` | Same: both methods do identical page-load logic. POST serves no purpose. |
+| `GET,POST /reset_hydro_vuln/<int:user_id>/<project_name>` | `4641` | **Bug:** only the `POST` branch has a return statement. A `GET` request falls through the `if request.method == 'POST'` block and the function returns `None`, which Flask converts to a `500 Internal Server Error`. |
+| `POST,GET /hydro_vul_analysis/<int:user_id>/<project_name>` | `4184` | GET and POST do completely different things (GET renders analysis page with gauging station lookup; POST saves flagged-watershed decision and renders a template). These are two distinct operations sharing one route and should be split. |
+
+Inconsistent URL naming convention (hyphens vs underscores vs nesting):
+
+- Hyphens: `/cancel-bound`, `/reset-boundary`, `/cancel-dem`, `/check-file-existence`
+- Underscores: `/upload_streamflow`, `/reset_precip`, `/delete_road_path`, `/check_streams_exist`
+- Nested path: `/upload/boundary`, `/upload/dem`, `/upload/roaddata`, `/upload/pourpoint`
+- Flat path: `/upload_streamflow`, `/upload_precip`
+
+No consistent convention is documented or enforced. A developer choosing a URL for a new route has no pattern to follow and will add to the drift.
+
+#### 3.1.2 Dead and suspect routes
+
+| Route | Line | Evidence | Recommendation |
+| --- | ---: | --- | --- |
+| `GET /async` | `115` | Zero frontend references. Test harness for RQ queue (`q.enqueue(handle_request_sync, ...)`). | Remove. |
+| `GET /test-smtp` | `341` | Zero frontend references. Debug-only. Leaks credential status without auth check. | Remove from production. |
+| `GET /get_usa_bounds` | `2662` | Zero frontend references. Source comment says "Optional." Returns a hardcoded bounding box. | Remove or wire up. |
+
+Infrastructure routes (not dead, but not user-facing):
+
+| Route | Line | Notes |
+| --- | ---: | --- |
+| `GET /health` | `1192` | Used by proxy/infra only. Keep, but document as internal. |
+| `GET /static-dashboard` | `1200` | Redirect glue for Caddy-served path. Keep. |
+
+#### 3.1.3 Routes that should be consolidated or split
+
+**A. Three near-identical project-delete routes**
+
+```
+POST /dashboard_delete_project     (line 1670)
+POST /delete_project               (line 1736)
+POST /delete_active_project        (line 1796)
+```
+
+All three perform the same operation: read `project_name` from JSON body, delete `{user_id}_{inputs,outputs,logs,temp}/{project_name}` directories, clear session. The only differences:
+
+- `/delete_project` has `@log_route` decorator.
+- `/delete_active_project` returns a `redirect_url` field in the JSON response.
+- `/delete_active_project` is missing `@login_required` (`culvert_app/app.py:1796`), which is an authorization gap.
+
+These should be consolidated into one `POST /delete_project` with an optional `redirect` flag in the request body.
+
+**B. Cancel / Reset / Delete triplication per data type**
+
+Each data type (boundary, DEM, road, pour point, streamflow, precipitation) has 2-3 near-identical route handlers:
+
+| Data type | `cancel-*` | `reset-*` | `delete-*` |
+| --- | --- | --- | --- |
+| Boundary | `/cancel-bound` (`2806`) | `/reset-boundary` (`2852`) | — |
+| DEM | `/cancel-dem` (`3107`) | `/reset-dem` (`3154`) | — |
+| Road data | `/cancel-roaddata` (`3364`) | `/reset-roaddata` (`3408`) | `/delete_road_path` (`3470`) |
+| Pour point | `/cancel-pour` (`3628`) | `/reset-pour` (`3673`) | — |
+| Streamflow | — | `/reset_streamflow` (`4414`) | `/delete_streamflow_file` (`4445`) |
+| Precipitation | — | `/reset_precip` (`4524`) | `/delete_precip_file` (`4555`) |
+
+Total: `14` routes. The "cancel" handlers delete a single file. The "reset" handlers delete a file and optionally regenerate a map. The "delete" handlers delete a file. Structural overlap is very high.
+
+These `14` routes could be reduced to `~3` parameterized routes (e.g. `POST /data/<data_type>/cancel`, `POST /data/<data_type>/reset`, `POST /data/<data_type>/delete`) with shared auth/session/logging boilerplate and a data-type dispatch table.
+
+**C. `hydrologic_vuln` and `hydrogeo_vuln` are 95% duplicated**
+
+`hydrologic_vuln` (`culvert_app/app.py:2034-2199`, `~167` lines) and `hydrogeo_vuln` (`culvert_app/app.py:2204-2369`, `~167` lines) are near-copy-paste of each other. Both:
+
+1. Validate session user ID.
+2. Construct directory paths.
+3. Read `user_ws_deln_responses.txt` and check for `FlagKeepOptionSelect`.
+4. Read gauging station names from shapefile.
+5. Check WS delineation map existence.
+6. Load map HTML (vulnerability map with WS delineation fallback).
+7. Render a template.
+
+The only differences are the template name (`hydro_vuln_analysis.html` vs `hydrogeo_vuln.html`) and some variable naming. A shared `_load_vulnerability_page(user_id, project_name, template_name, logger)` helper would eliminate `~160` lines of duplication.
+
+Similarly, the gauging station name loading logic (read shapefile, filter by `Flag_Gst==1`, regex-sort by `GWS_ID`) is duplicated in `4` route handlers:
+
+- `ws_deln` (`culvert_app/app.py:1956-1966`)
+- `hydrologic_vuln` (`culvert_app/app.py:2077-2083`)
+- `hydrogeo_vuln` (`culvert_app/app.py:2246-2252`)
+- `hydro_vul_analysis` GET branch (`culvert_app/app.py:4312-4331`)
+
+This should be a single helper function.
+
+**D. `hydro_vul_analysis` GET vs POST should be separate routes**
+
+The `POST` branch (`culvert_app/app.py:4209-4279`) saves a flagged-watershed decision to a text file and renders a template. The `GET` branch (`culvert_app/app.py:4281-4351`) reads a response file, conditionally loads gauging station names based on flag/pour-point state, selects a map, and renders the same template with different data. These are two distinct operations with no shared logic beyond auth checking.
+
+Split into:
+
+- `GET /hydro_vul_analysis/<int:user_id>/<project_name>` — load the analysis page.
+- `POST /hydro_vul_analysis/<int:user_id>/<project_name>/accept_decision` — save the flagged-watershed decision.
+
+**E. `hydrogeo_vuln_input_form` and `hydro_vul_analysis` share the same map/gauging-station loading pattern**
+
+`hydrogeo_vuln_input_form` (`culvert_app/app.py:4802-4890`) duplicates the response-file parsing + flag-decision branching + gauging-station loading + map selection logic from `hydro_vul_analysis` GET. This pattern appears in at least `3` route handlers and should be extracted.
+
+Interpretation:
+
+- Route consolidation opportunities fall into three categories: identical logic behind different URLs (project delete: `3` routes → `1`), structurally identical CRUD operations per data type (cancel/reset/delete: `14` routes → `~3`), and copy-pasted page-load orchestration (vulnerability pages: `~330` duplicated lines across `2` routes, gauging-station loading duplicated across `4` routes).
+- Combined, these `5` consolidation targets account for `~21` of the `70` routes (`30%`) and an estimated `~900` lines of duplicated or near-duplicated handler code.
+- The duplication is not just a size concern — it is a correctness multiplier. A bug fix or behavior change in any shared pattern (session validation, map loading, file deletion, gauging-station sorting) must be applied to every copy independently, with no compile-time or test-time check that all copies were updated.
+- The missing `@login_required` on `/delete_active_project` (`culvert_app/app.py:1796`) is a concrete example of duplication-induced defect: two of the three delete routes have the decorator, one does not, and nothing enforces consistency.
+
+### 3.2 Route complexity assessment
+
+Estimated cyclomatic complexity and line counts for the highest-complexity route handlers in `culvert_app/app.py`:
+
+| Route handler | Lines | Est. CC | Primary pain points |
+| --- | ---: | ---: | --- |
+| `ws_deln_results` (`3830-4083`) | `253` | `~18` | 4-level nested conditionals for hydro/non-hydro parameter extraction; multiple form data parsing strategies (JSON embedded in FormData, raw JSON, plain FormData); directory cleanup; RQ enqueue. Should be split into form parsing, validation, and job dispatch. |
+| `draw_boundary` (`2404-2627`) | `223` | `~15` | Entire geospatial pipeline in one handler: JSON validation, polygon construction, dual USA bounds checking (shapefile with coordinate fallback), UTM zone selection, area calculation, shapefile creation, zip packaging, map generation. Should be extracted to a service layer. |
+| `send_support_email` (`614-837`) | `223` | `~12` | `30+` `print("DEBUG: ...")` statements. Inline HTML email template (`~40` lines). Two separate SMTP sends (support team + user confirmation). Debug logging accounts for roughly half the line count. |
+| `hydro_vul_analysis` (`4184-4355`) | `171` | `~14` | Mixed GET/POST with completely different logic. GET path has nested conditionals for `flag_ws_decision` x `pourDataAvailibility` (`4` branches). Response file parsing done independently per method. |
+| `upload_roaddata` (`3202-3359`) | `157` | `~11` | Boundary validation, shapefile read, geometry type filtering, UTM projection, 2500m buffering, clip, map generation — all inline. Geospatial processing should be a utility function. |
+| `hydrologic_vuln` + `hydrogeo_vuln` (`2034-2369`) | `167` each | `~10` each | Nearly identical. Combined `~330` lines of duplicated code. `50+` debug print statements with emoji prefixes. |
+| `generate_dashboard_content` (`5509-5655`) | `146` | `~8` | `12` file path constructions, conditional file selection, external function delegation. Moderate complexity; would benefit from a file-path config object. |
+
 ## 4. Best practices and modernity
 
 Positive:
