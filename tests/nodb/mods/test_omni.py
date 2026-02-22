@@ -600,6 +600,35 @@ def test_omni_clone_logs_directory_copy_permission_errors(
     assert "Permission denied while creating Omni clone directory tree" in caplog.text
 
 
+def test_omni_clone_logs_directory_copy_oserror(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    omni_module,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    base_wd = tmp_path / "run"
+    source_dir = base_wd / "problem-dir"
+    nested_dir = source_dir / "nested"
+    nested_dir.mkdir(parents=True)
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", lambda *args, **kwargs: None)
+
+    original_walk = omni_module.os.walk
+
+    def _walk_with_oserror(path: str):
+        if str(path) == str(source_dir):
+            raise OSError("boom")
+        return original_walk(path)
+
+    monkeypatch.setattr(omni_module.os, "walk", _walk_with_oserror)
+
+    with caplog.at_level(logging.WARNING, logger=omni_module.LOGGER.name):
+        scenario_wd = Path(omni_module._omni_clone({"type": "dummy"}, str(base_wd), runid="run-123"))
+
+    assert scenario_wd.exists()
+    assert "Error creating Omni clone directory tree" in caplog.text
+
+
 def test_contrast_sidecar_roundtrip(tmp_path, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
@@ -2744,6 +2773,86 @@ def test_run_contrast_copies_archive_landuse_and_soils(tmp_path: Path, omni_modu
     assert os.readlink(new_wd / "watershed.hillslopes.parquet") == str(wd / "watershed.hillslopes.parquet")
     assert (new_wd / "watershed.channels.parquet").is_symlink()
     assert os.readlink(new_wd / "watershed.channels.parquet") == str(wd / "watershed.channels.parquet")
+
+
+def test_run_contrast_rewrites_legacy_omni_prefix_when_pass_dat_exists(
+    tmp_path: Path,
+    omni_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    (wd / "climate").mkdir(parents=True)
+    (wd / "watershed").mkdir(parents=True)
+    (wd / "wepp" / "runs").mkdir(parents=True)
+    (wd / "wepp" / "output").mkdir(parents=True)
+
+    monkeypatch.setattr(omni_module, "copy_version_for_clone", lambda src, dst: None)
+    monkeypatch.setattr(omni_module, "_clear_nodb_cache_and_locks", lambda runid, pup_relpath=None: None)
+    monkeypatch.setattr(omni_module, "nodir_resolve", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(omni_module, "_resolve_base_scenario_key", lambda wd: "undisturbed")
+    monkeypatch.setattr(omni_module, "_resolve_contrast_scenario_wd", lambda wd, *_args, **_kwargs: wd)
+    monkeypatch.setattr(omni_module, "_contrast_topaz_ids_from_mapping", lambda mapping, _wd: list(mapping.keys()))
+
+    landuse_parquet = tmp_path / "landuse.parquet"
+    soils_parquet = tmp_path / "soils.parquet"
+    landuse_parquet.write_text("landuse", encoding="ascii")
+    soils_parquet.write_text("soils", encoding="ascii")
+
+    def _pick_parquet(_wd: str, rel: str):
+        if rel.startswith("landuse/"):
+            return landuse_parquet
+        if rel.startswith("soils/"):
+            return soils_parquet
+        raise AssertionError(rel)
+
+    monkeypatch.setattr(omni_module, "pick_existing_parquet_path", _pick_parquet)
+    monkeypatch.setattr(omni_module, "_merge_contrast_parquet", lambda **_kwargs: None)
+    monkeypatch.setattr(omni_module, "_apply_contrast_output_triggers", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(omni_module, "_post_watershed_run_cleanup", lambda *_args, **_kwargs: None)
+
+    old_path = str(wd / "omni" / "scenarios" / "uniform_low" / "wepp" / "output" / "H1")
+    candidate = str(wd / "_pups" / "omni" / "scenarios" / "uniform_low" / "wepp" / "output" / "H1")
+    Path(candidate).parent.mkdir(parents=True, exist_ok=True)
+    Path(f"{candidate}.pass.dat").write_text("pass", encoding="ascii")
+
+    captured: dict[str, object] = {}
+
+    class DummyWepp:
+        def __init__(self, run_wd: str):
+            self.runs_dir = str(Path(run_wd) / "wepp" / "runs")
+            self.output_dir = str(Path(run_wd) / "wepp" / "output")
+            self.wepp_bin = None
+
+        def clean(self):
+            Path(self.runs_dir).mkdir(parents=True, exist_ok=True)
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True)
+
+        def make_watershed_run(self, *, wepp_id_paths, output_options):
+            captured["wepp_id_paths"] = list(wepp_id_paths)
+            captured["output_options"] = dict(output_options)
+
+        def run_watershed(self):
+            return None
+
+        def report_loss(self):
+            return None
+
+    import wepppy.nodb.core as nodb_core
+
+    monkeypatch.setattr(nodb_core.Wepp, "getInstance", lambda run_wd: DummyWepp(run_wd))
+
+    omni_module._run_contrast(
+        contrast_id="1",
+        contrast_name="demo",
+        contrasts={10: old_path},
+        wd=str(wd),
+        runid="run-123",
+        control_scenario_key="uniform_low",
+        contrast_scenario_key="uniform_low",
+        output_options={},
+    )
+
+    assert captured["wepp_id_paths"] == [candidate]
 
 
 def test_omni_clone_sibling_rejects_path_traversal(tmp_path: Path, omni_module):

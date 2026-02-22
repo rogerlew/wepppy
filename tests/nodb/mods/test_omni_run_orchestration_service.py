@@ -269,6 +269,49 @@ def test_run_omni_scenarios_skip_and_execute_persist_state(
     assert omni.compiles == {"hillslope": 1, "channel": 1, "report": 1}
 
 
+def test_run_omni_scenarios_executes_year_set_mismatch_when_dependency_up_to_date(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniRunOrchestrationService()
+    dep_path = tmp_path / "dep" / "loss_pw0.out.parquet"
+    dep_path.parent.mkdir(parents=True)
+    dep_path.write_text("ok", encoding="ascii")
+
+    def _unused_run(*_args, **_kwargs):
+        return str(tmp_path / "unused")
+
+    _install_omni_module_stub(monkeypatch, run_contrast=_unused_run)
+
+    class _ScenarioOmniYearMismatchStub(_ScenarioOmniStub):
+        def _year_set_for_scenario(self, scenario_name):
+            scenario_key = str(scenario_name)
+            if scenario_key == str(self.base_scenario):
+                return {2020}
+            if scenario_key == "uniform_low":
+                return {2021}
+            return {2020}
+
+    omni = _ScenarioOmniYearMismatchStub(tmp_path)
+    omni.scenarios = [{"type": "uniform_low"}]
+
+    dep_sha = hashlib.sha1(dep_path.read_bytes()).hexdigest()
+    omni.scenario_dependency_tree = {
+        "uniform_low": {
+            "dependency_sha1": dep_sha,
+            "signature": "sig:uniform_low",
+        }
+    }
+
+    service.run_omni_scenarios(omni)
+
+    states = {entry["scenario"]: entry for entry in omni.scenario_run_state}
+    assert states["uniform_low"]["status"] == "executed"
+    assert states["uniform_low"]["reason"] == "year_set_mismatch"
+    assert omni.run_calls == ["uniform_low"]
+    assert omni.compiles == {"hillslope": 1, "channel": 1, "report": 1}
+
+
 def test_run_omni_contrast_writes_started_completed_and_updates_dependency(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
