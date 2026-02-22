@@ -26,7 +26,7 @@ When asked to write or edit code, defer to Codex unless the user explicitly asks
 When writing developer-facing documentation, use Codex's preferred terse style to conserve context window. Avoid code examples in docs — Codex treats them as contractual obligations and will conform to them rigidly. Describe behavior and conventions in prose; let Codex discover implementation patterns from the source. Operational command references (wctl, redis-cli, docker) for Claude Code's own use are fine.
 
 ### Codex MCP
-Claude Code can invoke Codex via MCP (`mcp__codex__codex` / `mcp__codex__codex-reply`) at its discretion — to delegate implementation tasks, run validation commands, or have Codex make targeted code changes as part of a broader debugging or troubleshooting workflow.
+Claude Code can invoke Codex via MCP (`mcp__codex__codex` / `mcp__codex__codex-reply`) at its discretion — to delegate implementation tasks, run validation commands, or have Codex make targeted code changes as part of a broader debugging or troubleshooting workflow. Use `sandbox: "danger-full-access"` when Codex needs to write files to disk; without it, writes may silently fail to persist.
 
 ## Project at a Glance
 
@@ -62,7 +62,7 @@ Route (Flask or rq-engine) → enqueue to Redis DB 9 → `WepppyRqWorker` execut
 
 ## Configuration Surface
 
-Configuration is scattered across multiple files. When troubleshooting config issues, check all of these:
+Full reference: `docs/configuration-reference.md`. When troubleshooting config issues, check these primary sources:
 
 | Source | Path | What it covers |
 |--------|------|----------------|
