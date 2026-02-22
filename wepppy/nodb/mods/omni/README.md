@@ -14,6 +14,13 @@ Omni helps land managers and hydrologists answer critical post-fire planning que
 
 Instead of manually creating separate WEPPcloud projects for each treatment scenario, Omni automates the process: it clones your base project, applies different burn severities or treatments, runs WEPP simulations, and compiles results into side-by-side comparisons.
 
+## Developer Routing Notes
+
+The contrast-build facade/router now keeps responsibilities split by concern:
+
+- `wepppy/nodb/mods/omni/omni_build_router.py`: facade routing for build and dry-run entry points, lock-scoped persistence, and facade contract seams.
+- `wepppy/nodb/mods/omni/omni_contrast_status_report_service.py`: contrast status payload assembly and selection-mode-specific report shaping.
+
 ### Key Capabilities
 
 | Capability | Description |
