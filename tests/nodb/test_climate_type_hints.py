@@ -58,13 +58,12 @@ def test_climate_module_imports():
 
 
 def test_climate_helper_functions_typed():
-    """Validate that helper functions have type hints."""
-    climate_path = Path(__file__).parent.parent.parent / 'wepppy' / 'nodb' / 'core' / 'climate.py'
-    
-    with open(climate_path) as f:
-        code = f.read()
-    
-    tree = ast.parse(code)
+    """Validate that helper functions exposed by climate have type hints."""
+    core_dir = Path(__file__).parent.parent.parent / 'wepppy' / 'nodb' / 'core'
+    module_paths = [
+        core_dir / 'climate.py',
+        core_dir / 'climate_build_helpers.py',
+    ]
     
     # Find specific helper functions and check they have type hints
     helper_functions = [
@@ -83,14 +82,19 @@ def test_climate_helper_functions_typed():
     
     found_functions = {}
     
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name in helper_functions:
-            has_return_type = node.returns is not None
-            has_param_types = any(arg.annotation for arg in node.args.args)
-            found_functions[node.name] = {
-                'has_return_type': has_return_type,
-                'has_param_types': has_param_types
-            }
+    for module_path in module_paths:
+        with open(module_path) as f:
+            code = f.read()
+
+        tree = ast.parse(code)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name in helper_functions:
+                has_return_type = node.returns is not None
+                has_param_types = any(arg.annotation for arg in node.args.args)
+                found_functions[node.name] = {
+                    'has_return_type': has_return_type,
+                    'has_param_types': has_param_types
+                }
     
     for func_name in helper_functions:
         assert func_name in found_functions, f"Function {func_name} not found"

@@ -203,3 +203,98 @@ def test_gridmet_multiple_build_delegates_to_service(
     assert captured["attrs"] == {"mode": "gridmet"}
     assert captured["build_fn"] is climate_module.build_observed_gridmet_interpolated
     assert captured["ncpu"] == climate_module.NCPU
+
+
+def test_depnexrad_build_delegates_to_helper(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.depnexrad")
+    captured: dict[str, object] = {}
+
+    def _fake_run(instance: Climate, *, verbose: bool = False, attrs=None) -> None:
+        captured["instance"] = instance
+        captured["verbose"] = verbose
+        captured["attrs"] = attrs
+
+    monkeypatch.setattr(climate_module, "run_depnexrad_build", _fake_run)
+
+    climate._build_climate_depnexrad(verbose=True, attrs={"mode": "depnexrad"})
+
+    assert captured == {
+        "instance": climate,
+        "verbose": True,
+        "attrs": {"mode": "depnexrad"},
+    }
+
+
+def test_prism_revision_delegates_to_helper(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.prism_revision")
+    captured: dict[str, object] = {}
+
+    def _fake_run(instance: Climate, *, verbose: bool = False) -> None:
+        captured["instance"] = instance
+        captured["verbose"] = verbose
+
+    monkeypatch.setattr(climate_module, "run_prism_revision", _fake_run)
+
+    climate._prism_revision(verbose=True)
+
+    assert captured == {
+        "instance": climate,
+        "verbose": True,
+    }
+
+
+def test_mod_build_delegates_to_helper(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.mod_build")
+    captured: dict[str, object] = {}
+
+    def _fake_mod_function(**_kwargs):
+        return {"ppts": [1.0]}
+
+    def _fake_run(instance: Climate, mod_function, *, verbose: bool = False, attrs=None) -> None:
+        captured["instance"] = instance
+        captured["mod_function"] = mod_function
+        captured["verbose"] = verbose
+        captured["attrs"] = attrs
+
+    monkeypatch.setattr(climate_module, "run_mod_build", _fake_run)
+
+    climate._build_climate_mod(_fake_mod_function, verbose=True, attrs={"mode": "mod"})
+
+    assert captured == {
+        "instance": climate,
+        "mod_function": _fake_mod_function,
+        "verbose": True,
+        "attrs": {"mode": "mod"},
+    }
+
+
+def test_daymet_multiple_build_delegates_to_helper(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.daymet_multiple")
+    captured: dict[str, object] = {}
+
+    def _fake_run(instance: Climate, *, verbose: bool = False, attrs=None) -> None:
+        captured["instance"] = instance
+        captured["verbose"] = verbose
+        captured["attrs"] = attrs
+
+    monkeypatch.setattr(climate_module, "run_observed_daymet_multiple_build", _fake_run)
+
+    climate._build_climate_observed_daymet_multiple(verbose=True, attrs={"mode": "daymet"})
+
+    assert captured == {
+        "instance": climate,
+        "verbose": True,
+        "attrs": {"mode": "daymet"},
+    }
