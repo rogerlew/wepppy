@@ -183,3 +183,52 @@ def test_run_path_cost_effective_rq_stops_on_nodir_preflight_error(
     assert controller.run_calls == 0
     assert any(status == "failed" for status, _message, _progress in controller.status_updates)
     assert any("EXCEPTION run_path_cost_effective_rq(demo)" in message for _, message in published)
+
+
+def test_run_path_cost_effective_rq_marks_failed_on_controller_error(
+    path_ce_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    published, base_path = path_ce_rq_environment
+
+    preflight_calls: list[tuple[str, str, str]] = []
+
+    def _resolve(wd: str, root: str, view: str = "effective"):
+        preflight_calls.append((wd, root, view))
+
+    monkeypatch.setattr(path_ce_rq, "nodir_resolve", _resolve)
+
+    def _raise_controller_error(self: PathCeStub):
+        self.run_calls += 1
+        raise RuntimeError("controller run failed")
+
+    monkeypatch.setattr(PathCeStub, "run", _raise_controller_error)
+
+    with pytest.raises(RuntimeError) as exc_info:
+        path_ce_rq.run_path_cost_effective_rq("demo")
+
+    assert str(exc_info.value) == "controller run failed"
+
+    run_wd = str(base_path / "demo")
+    assert preflight_calls == [
+        (run_wd, "climate", "effective"),
+        (run_wd, "watershed", "effective"),
+        (run_wd, "landuse", "effective"),
+        (run_wd, "soils", "effective"),
+    ]
+
+    controller = PathCeStub.getInstance(run_wd)
+    omni = OmniStub.getInstance(run_wd)
+    prep = RedisPrepStub.tryGetInstance(run_wd)
+
+    assert omni.run_calls == 1
+    assert controller.run_calls == 1
+
+    assert any(
+        status == "failed" and message == "controller run failed"
+        for status, message, _progress in controller.status_updates
+    )
+    assert path_ce_rq.TaskEnum.run_omni_scenarios in prep.timestamps
+    assert path_ce_rq.TaskEnum.run_path_cost_effective not in prep.timestamps
+    assert any("EXCEPTION run_path_cost_effective_rq(demo)" in message for _, message in published)
+    assert not any("TRIGGER path_ce PATH_CE_RUN_COMPLETE" in message for _, message in published)

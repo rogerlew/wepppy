@@ -244,3 +244,130 @@ def test_ce_select_sites_2_returns_expected_tuple_and_readds_filtered_hillslopes
     assert treatment_hillslopes[1] == []
     assert len(hillslopes_sdyd) == 1
     assert list(sdyd_df["wepp_id"]) == [101, 102]
+
+
+def test_ce_select_sites_2_secondary_path_returns_expected_tuple(monkeypatch):
+    import wepppy.nodb.mods.path_ce_model as path_ce_model
+
+    data = pd.DataFrame(
+        {
+            "wepp_id": [101],
+            "slope_deg": [5.0],
+            "Burn severity": ["High"],
+            "NTU post-fire": [10.0],
+            "Sdyd post-fire": [5.0],
+            "area": [1.0],
+            "NTU reduction 0.5 tons/acre": [3.0],
+            "NTU reduction 1 tons/acre": [4.0],
+            "Sdyd reduction 0.5 tons/acre": [4.0],
+            "Sdyd reduction 1 tons/acre": [1.0],
+            "Sdyd post-treat 0.5 tons/acre": [1.0],
+            "Sdyd post-treat 1 tons/acre": [4.0],
+        }
+    )
+
+    solve_calls: list[str] = []
+
+    def _fake_solve(self, *args, **kwargs):
+        solve_calls.append(getattr(self, "name", ""))
+        for var in self.variables():
+            var.varValue = 0
+
+        if self.name == "Select_Sites":
+            self.status = 0  # Not solved / non-optimal: force secondary
+            return self.status
+
+        if self.name == "Select_Sites_Secondary":
+            self.status = 1  # Optimal
+            secondary_x_vars = [
+                var for var in self.variables() if var.name.startswith("x_2_") and var.name.endswith("_0")
+            ]
+            assert secondary_x_vars, "Expected secondary x variables for site 0"
+            min(secondary_x_vars, key=lambda var: var.name).varValue = 1
+            for var in self.variables():
+                if var.name.startswith("B_2_"):
+                    var.varValue = 1
+            return self.status
+
+        raise AssertionError(f"Unexpected LP model name: {self.name!r}")
+
+    monkeypatch.setattr(path_ce_model.LpProblem, "solve", _fake_solve, raising=True)
+
+    result = ce_select_sites_2(
+        data=data,
+        treatments=["0.5 tons/acre", "1 tons/acre"],
+        treatment_cost=[100.0, 50.0],
+        treatment_quantity=[1.0, 1.0],
+        fixed_cost=[10.0, 5.0],
+        sdyd_threshold=1.0,
+        sddc_threshold=5.0,
+        slope_range=(0.0, 10.0),
+        bs_threshold=["High"],
+    )
+
+    assert solve_calls == ["Select_Sites", "Select_Sites_Secondary"]
+    assert result is not None
+    assert len(result) == 11
+
+    (
+        treatment_cost_vectors,
+        _sediment_yield_reduction_thresholds,
+        selected_hillslopes,
+        treatment_hillslopes,
+        _total_sddc_reduction,
+        _final_sddc,
+        hillslopes_sdyd,
+        sdyd_df,
+        _untreatable_sdyd,
+        _total_cost,
+        _total_fixed_cost,
+    ) = result
+
+    assert set(treatment_cost_vectors.keys()) == {"0.5 tons/acre", "1 tons/acre"}
+    assert selected_hillslopes == [101]
+    assert treatment_hillslopes.count([101]) == 1
+    assert treatment_hillslopes.count([]) == 1
+    assert hillslopes_sdyd[0][0] == 101
+    assert float(sdyd_df.loc[sdyd_df["wepp_id"] == 101, "final_Sdyd"].iloc[0]) in {1.0, 4.0}
+
+
+def test_ce_select_sites_2_returns_none_on_solver_error(monkeypatch):
+    import wepppy.nodb.mods.path_ce_model as path_ce_model
+    from pulp import PulpSolverError
+
+    data = pd.DataFrame(
+        {
+            "wepp_id": [101],
+            "slope_deg": [5.0],
+            "Burn severity": ["High"],
+            "NTU post-fire": [10.0],
+            "Sdyd post-fire": [5.0],
+            "area": [1.0],
+            "NTU reduction 0.5 tons/acre": [3.0],
+            "NTU reduction 1 tons/acre": [4.0],
+            "Sdyd reduction 0.5 tons/acre": [4.0],
+            "Sdyd reduction 1 tons/acre": [1.0],
+            "Sdyd post-treat 0.5 tons/acre": [1.0],
+            "Sdyd post-treat 1 tons/acre": [4.0],
+        }
+    )
+
+    def _raise_solver_error(self, *args, **kwargs):
+        raise PulpSolverError("boom")
+
+    monkeypatch.setattr(path_ce_model.LpProblem, "solve", _raise_solver_error, raising=True)
+
+    assert (
+        ce_select_sites_2(
+            data=data,
+            treatments=["0.5 tons/acre", "1 tons/acre"],
+            treatment_cost=[100.0, 50.0],
+            treatment_quantity=[1.0, 1.0],
+            fixed_cost=[10.0, 5.0],
+            sdyd_threshold=1.0,
+            sddc_threshold=5.0,
+            slope_range=(0.0, 10.0),
+            bs_threshold=["High"],
+        )
+        is None
+    )

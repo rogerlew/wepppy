@@ -156,6 +156,23 @@ def test_status_endpoint_handles_missing_instance(path_ce_client):
     }
 
 
+def test_status_endpoint_propagates_failed_state(path_ce_client):
+    client, PathCEStub, *_unused, run_dir = path_ce_client
+    controller = PathCEStub.getInstance(run_dir)
+    controller.status = "failed"
+    controller.status_message = "controller exploded"
+    controller.progress = 0.42
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/path_ce/status")
+
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "status": "failed",
+        "status_message": "controller exploded",
+        "progress": 0.42,
+    }
+
+
 def test_run_enqueues_job(path_ce_client):
     client, PathCEStub, RonStub, DisturbedStub, rq_environment, run_dir = path_ce_client
     PathCEStub.getInstance(run_dir)  # ensure controller exists
