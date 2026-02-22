@@ -8,70 +8,26 @@ var MapController = (function () {
 
     var instance;
 
-    var EVENT_NAMES = [
-        "map:ready",
-        "map:center:requested",
-        "map:center:changed",
-        "map:search:requested",
-        "map:elevation:requested",
-        "map:elevation:loaded",
-        "map:elevation:error",
-        "map:drilldown:requested",
-        "map:drilldown:loaded",
-        "map:drilldown:error",
-        "map:layer:toggled",
-        "map:layer:refreshed",
-        "map:layer:error",
-        "baer:map:opacity"
-    ];
+    function getMapGlShared() {
+        if (!window.WCMapGlShared) {
+            throw new Error("Map GL controller requires WCMapGlShared helpers.");
+        }
+        return window.WCMapGlShared;
+    }
 
-    var DEFAULT_VIEW = { lat: 44.0, lng: -116.0, zoom: 6 };
-    var FLY_TO_DURATION_MS = 4000;
-    var FLY_TO_BOUNDS_PADDING_PX = 48;
-    var SENSOR_LAYER_MIN_ZOOM = 9;
-    var MAP_MIN_ZOOM = 0;
-    var MAP_MAX_ZOOM = 19;
-    var USGS_LAYER_NAME = "USGS Gage Locations";
-    var SNOTEL_LAYER_NAME = "SNOTEL Locations";
-    var NHD_LAYER_NAME = "NHD Flowlines";
-    var NHD_LAYER_MIN_ZOOM = 11;
-    var NHD_LAYER_HR_MIN_ZOOM = 14;
-    var NHD_SMALL_SCALE_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/query";
-    var NHD_HR_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/query";
-    var SUBCATCHMENT_LAYER_ENDPOINT = "resources/subcatchments.json";
-    var CHANNEL_LAYER_ENDPOINT = "resources/channels.json";
-    var SBS_LAYER_NAME = "Burn Severity Map";
-    var SBS_QUERY_ENDPOINT = "query/baer_wgs_map/";
-    var SBS_DEFAULT_OPACITY = 0.3;
-    var SBS_COLOR_MODES = {
-        STANDARD: "standard",
-        SHIFTED: "shifted"
-    };
-    var SBS_LEGEND_ITEMS_STANDARD = [
-        { key: 130, label: "No Burn", color: "#00734A" },
-        { key: 131, label: "Low Severity Burn", color: "#4DE600" },
-        { key: 132, label: "Moderate Severity Burn", color: "#FFFF00" },
-        { key: 133, label: "High Severity Burn", color: "#FF0000" }
-    ];
-    var SBS_LEGEND_ITEMS_SHIFTED = [
-        { key: 130, label: "No Burn", color: "#009E73" },
-        { key: 131, label: "Low Severity Burn", color: "#56B4E9" },
-        { key: 132, label: "Moderate Severity Burn", color: "#F0E442" },
-        { key: 133, label: "High Severity Burn", color: "#CC79A7" }
-    ];
-    var SBS_STANDARD_TO_SHIFTED_RGB = {
-        "0_115_74": [0, 158, 115],
-        "77_230_0": [86, 180, 233],
-        "255_255_0": [240, 228, 66],
-        "255_0_0": [204, 121, 167]
-    };
-    var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
-    var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
-    var DEFAULT_ELEVATION_COOLDOWN_MS = 200;
-    var MOUSE_ELEVATION_HIDE_DELAY_MS = 2000;
-    var FIND_FLASH_LAYER_PREFIX = "wc-find-flash";
-    var FIND_FLASH_DURATION_MS = 1200;
-    var FIND_FLASH_PULSE_INTERVAL_MS = 200;
+    function getMapGlLayerControlHelpers() {
+        if (!window.WCMapGlLayerControl) {
+            throw new Error("Map GL controller requires WCMapGlLayerControl helpers.");
+        }
+        return window.WCMapGlLayerControl;
+    }
+
+    function getMapGlFeatureUiHelpers() {
+        if (!window.WCMapGlFeatureUi) {
+            throw new Error("Map GL controller requires WCMapGlFeatureUi helpers.");
+        }
+        return window.WCMapGlFeatureUi;
+    }
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -98,489 +54,8 @@ var MapController = (function () {
         }
     }
 
-    function createLegacyAdapter(element) {
-        if (!element) {
-            return {
-                element: element,
-                length: 0,
-                show: function () { return this; },
-                hide: function () { return this; },
-                text: function () { return arguments.length === 0 ? "" : this; },
-                html: function () { return arguments.length === 0 ? "" : this; },
-                append: function () { return this; },
-                empty: function () { return this; }
-            };
-        }
-
-        return {
-            element: element,
-            length: 1,
-            show: function () {
-                element.hidden = false;
-                if (element.style && element.style.display === "none") {
-                    element.style.removeProperty("display");
-                }
-                return this;
-            },
-            hide: function () {
-                element.hidden = true;
-                if (element.style) {
-                    element.style.display = "none";
-                }
-                return this;
-            },
-            text: function (value) {
-                if (arguments.length === 0) {
-                    return element.textContent;
-                }
-                element.textContent = value === undefined || value === null ? "" : String(value);
-                return this;
-            },
-            html: function (value) {
-                if (arguments.length === 0) {
-                    return element.innerHTML;
-                }
-                element.innerHTML = value === undefined || value === null ? "" : String(value);
-                return this;
-            },
-            append: function (content) {
-                if (content === undefined || content === null) {
-                    return this;
-                }
-                if (typeof content === "string") {
-                    element.insertAdjacentHTML("beforeend", content);
-                    return this;
-                }
-                if (content instanceof window.Node) {
-                    element.appendChild(content);
-                }
-                return this;
-            },
-            empty: function () {
-                element.textContent = "";
-                return this;
-            }
-        };
-    }
-
-    function createTabset(root) {
-        if (!root) {
-            return null;
-        }
-
-        var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
-        var panels = Array.prototype.slice.call(root.querySelectorAll('[role="tabpanel"]'));
-
-        if (tabs.length === 0 || panels.length === 0) {
-            return null;
-        }
-
-        function getTarget(tab) {
-            return tab ? tab.getAttribute("data-tab-target") : null;
-        }
-
-        function setActive(panelId, focusTab) {
-            tabs.forEach(function (tab) {
-                var target = getTarget(tab);
-                var isActive = target === panelId;
-                tab.classList.toggle("is-active", isActive);
-                tab.setAttribute("aria-selected", isActive ? "true" : "false");
-                tab.setAttribute("tabindex", isActive ? "0" : "-1");
-                if (isActive && focusTab) {
-                    tab.focus();
-                }
-            });
-
-            panels.forEach(function (panel) {
-                var isActive = panel.id === panelId;
-                panel.classList.toggle("is-active", isActive);
-                if (isActive) {
-                    panel.removeAttribute("hidden");
-                } else {
-                    panel.setAttribute("hidden", "");
-                }
-            });
-
-            root.dispatchEvent(new CustomEvent("wc-tabset:change", {
-                detail: { panelId: panelId },
-                bubbles: true
-            }));
-        }
-
-        var current = tabs.find(function (tab) {
-            return tab.getAttribute("aria-selected") === "true" || tab.classList.contains("is-active");
-        });
-        var initialPanel = getTarget(current) || getTarget(tabs[0]);
-        setActive(initialPanel, false);
-
-        tabs.forEach(function (tab) {
-            tab.addEventListener("click", function () {
-                setActive(getTarget(tab), false);
-            });
-
-            tab.addEventListener("keydown", function (event) {
-                var key = event.key;
-                if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") {
-                    return;
-                }
-
-                event.preventDefault();
-                var currentIndex = tabs.indexOf(tab);
-                if (key === "ArrowLeft" || key === "ArrowRight") {
-                    var offset = key === "ArrowRight" ? 1 : -1;
-                    var nextIndex = (currentIndex + offset + tabs.length) % tabs.length;
-                    setActive(getTarget(tabs[nextIndex]), true);
-                } else if (key === "Home") {
-                    setActive(getTarget(tabs[0]), true);
-                } else if (key === "End") {
-                    setActive(getTarget(tabs[tabs.length - 1]), true);
-                }
-            });
-        });
-
-        return {
-            activate: function (panelId, focusTab) {
-                if (!panelId) {
-                    return;
-                }
-                setActive(panelId, focusTab === true);
-            }
-        };
-    }
-
-    function sanitizeLocationInput(value) {
-        if (!value) {
-            return [];
-        }
-        var sanitized = String(value).replace(/[a-zA-Z{}\[\]\\|\/<>';:\u00b0]/g, "");
-        return sanitized.split(/[\s,]+/).filter(function (item) {
-            return item !== "";
-        });
-    }
-
-    function parseLocationInput(value) {
-        var tokens = sanitizeLocationInput(value);
-        if (tokens.length < 2) {
-            return null;
-        }
-        var lng = Number(tokens[0]);
-        var lat = Number(tokens[1]);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-            return null;
-        }
-        var zoom = null;
-        if (tokens.length > 2) {
-            var parsedZoom = Number(tokens[2]);
-            if (Number.isFinite(parsedZoom)) {
-                zoom = parsedZoom;
-            }
-        }
-        return { lat: lat, lng: lng, zoom: zoom };
-    }
-
-    function normalizeUrlPayload(input) {
-        if (!input) {
-            return null;
-        }
-        if (Array.isArray(input)) {
-            return input.length ? normalizeUrlPayload(input[0]) : null;
-        }
-        return String(input);
-    }
-
-    function normalizeErrorValue(value) {
-        if (value === undefined || value === null) {
-            return null;
-        }
-        if (typeof value === "string") {
-            return value;
-        }
-        if (Array.isArray(value)) {
-            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
-        }
-        if (typeof value === "object") {
-            if (typeof value.message === "string") {
-                return value.message;
-            }
-            if (typeof value.detail === "string") {
-                return value.detail;
-            }
-            if (typeof value.details === "string") {
-                return value.details;
-            }
-            if (value.details !== undefined) {
-                return normalizeErrorValue(value.details);
-            }
-            try {
-                return JSON.stringify(value);
-            } catch (err) {
-                return String(value);
-            }
-        }
-        return String(value);
-    }
-
-    function formatErrorList(errors) {
-        if (!Array.isArray(errors)) {
-            return null;
-        }
-        var parts = [];
-        errors.forEach(function (entry) {
-            if (entry === undefined || entry === null) {
-                return;
-            }
-            if (typeof entry === "string") {
-                parts.push(entry);
-                return;
-            }
-            if (typeof entry.message === "string") {
-                parts.push(entry.message);
-                return;
-            }
-            if (typeof entry.detail === "string") {
-                parts.push(entry.detail);
-                return;
-            }
-            if (typeof entry.code === "string") {
-                parts.push(entry.code);
-                return;
-            }
-            try {
-                parts.push(JSON.stringify(entry));
-            } catch (err) {
-                parts.push(String(entry));
-            }
-        });
-        return parts.length ? parts.join("\n") : null;
-    }
-
-    function resolveErrorMessage(payload, fallback) {
-        if (!payload) {
-            return fallback || null;
-        }
-        if (payload.error !== undefined) {
-            var message = normalizeErrorValue(payload.error);
-            if (message) {
-                return message;
-            }
-        }
-        if (payload.errors) {
-            var errorList = formatErrorList(payload.errors);
-            if (errorList) {
-                return errorList;
-            }
-        }
-        if (payload.message !== undefined) {
-            return normalizeErrorValue(payload.message);
-        }
-        if (payload.detail !== undefined) {
-            return normalizeErrorValue(payload.detail);
-        }
-        return fallback || null;
-    }
-
-    function isValidLatLng(lat, lng) {
-        return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
-    }
-
-    function buildNhdFlowlinesUrl(bbox, zoom) {
-        if (!bbox) {
-            return null;
-        }
-        var queryUrl = zoom >= NHD_LAYER_HR_MIN_ZOOM ? NHD_HR_QUERY_URL : NHD_SMALL_SCALE_QUERY_URL;
-        return queryUrl
-            + "?where=1%3D1"
-            + "&outFields=OBJECTID"
-            + "&geometry=" + encodeURIComponent(bbox)
-            + "&geometryType=esriGeometryEnvelope"
-            + "&inSR=4326&outSR=4326"
-            + "&spatialRel=esriSpatialRelIntersects"
-            + "&returnGeometry=true"
-            + "&resultRecordCount=2000"
-            + "&f=geojson";
-    }
-
-    function toOverlayId(name) {
-        var base = String(name || "overlay").toLowerCase();
-        var slug = base.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-        return "map-gl-" + (slug || "overlay");
-    }
-
-    function hexToRgba(hex, alpha) {
-        if (!hex) {
-            return [0, 0, 0, Math.round((alpha === undefined ? 1 : alpha) * 255)];
-        }
-        var normalized = String(hex).trim().replace("#", "");
-        if (normalized.length === 3) {
-            normalized = normalized[0] + normalized[0] + normalized[1] + normalized[1] + normalized[2] + normalized[2];
-        }
-        var intVal = parseInt(normalized, 16);
-        if (!Number.isFinite(intVal)) {
-            return [0, 0, 0, Math.round((alpha === undefined ? 1 : alpha) * 255)];
-        }
-        var r = (intVal >> 16) & 255;
-        var g = (intVal >> 8) & 255;
-        var b = intVal & 255;
-        var a = Math.round((alpha === undefined ? 1 : alpha) * 255);
-        return [r, g, b, a];
-    }
-
-    function isAbsoluteUrl(url) {
-        return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(String(url || ""));
-    }
-
-    function clampOpacity(value) {
-        var parsed = parseFloat(value);
-        if (!Number.isFinite(parsed)) {
-            return SBS_DEFAULT_OPACITY;
-        }
-        return Math.max(0, Math.min(1, parsed));
-    }
-
-    function normalizeSbsColorMode(value) {
-        return value === SBS_COLOR_MODES.SHIFTED ? SBS_COLOR_MODES.SHIFTED : SBS_COLOR_MODES.STANDARD;
-    }
-
-    function getSbsLegendItemsForMode(mode) {
-        return normalizeSbsColorMode(mode) === SBS_COLOR_MODES.SHIFTED
-            ? SBS_LEGEND_ITEMS_SHIFTED
-            : SBS_LEGEND_ITEMS_STANDARD;
-    }
-
-    function getSbsColorShiftKey(r, g, b) {
-        return [r, g, b].join("_");
-    }
-
-    function mapSbsRgbForMode(r, g, b, mode) {
-        if (normalizeSbsColorMode(mode) !== SBS_COLOR_MODES.SHIFTED) {
-            return [r, g, b];
-        }
-        var mapped = SBS_STANDARD_TO_SHIFTED_RGB[getSbsColorShiftKey(r, g, b)];
-        return mapped || [r, g, b];
-    }
-
-    function drawSbsImageToCanvas(imageSource) {
-        if (!imageSource || typeof document === "undefined") {
-            return null;
-        }
-        var width = Number(imageSource.width);
-        var height = Number(imageSource.height);
-        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
-            return null;
-        }
-        var canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        var context = canvas.getContext("2d");
-        if (!context) {
-            return null;
-        }
-        try {
-            context.drawImage(imageSource, 0, 0);
-        } catch (error) {
-            return null;
-        }
-        return canvas;
-    }
-
-    function buildShiftedSbsImage(imageSource) {
-        var baseCanvas = drawSbsImageToCanvas(imageSource);
-        if (!baseCanvas) {
-            return imageSource;
-        }
-        var context = baseCanvas.getContext("2d");
-        if (!context) {
-            return imageSource;
-        }
-        var imageData = context.getImageData(0, 0, baseCanvas.width, baseCanvas.height);
-        var data = imageData.data;
-        for (var i = 0; i < data.length; i += 4) {
-            var alpha = data[i + 3];
-            if (alpha === 0) {
-                continue;
-            }
-            var mapped = mapSbsRgbForMode(data[i], data[i + 1], data[i + 2], SBS_COLOR_MODES.SHIFTED);
-            data[i] = mapped[0];
-            data[i + 1] = mapped[1];
-            data[i + 2] = mapped[2];
-        }
-        context.putImageData(imageData, 0, 0);
-        return baseCanvas;
-    }
-
-    function normalizeSbsBounds(bounds) {
-        if (!Array.isArray(bounds) || bounds.length < 2) {
-            return null;
-        }
-        var sw = bounds[0];
-        var ne = bounds[1];
-        if (!Array.isArray(sw) || !Array.isArray(ne) || sw.length < 2 || ne.length < 2) {
-            return null;
-        }
-        var south = Number(sw[0]);
-        var west = Number(sw[1]);
-        var north = Number(ne[0]);
-        var east = Number(ne[1]);
-        if (![south, west, north, east].every(Number.isFinite)) {
-            return null;
-        }
-        return [west, south, east, north];
-    }
-
-    function normalizeCenter(center) {
-        if (Array.isArray(center) && center.length >= 2) {
-            var lat = Number(center[0]);
-            var lng = Number(center[1]);
-            if (Number.isFinite(lat) && Number.isFinite(lng)) {
-                return { lat: lat, lng: lng };
-            }
-        }
-        if (center && typeof center === "object") {
-            var cLat = Number(center.lat);
-            var cLng = Number(center.lng);
-            if (Number.isFinite(cLat) && Number.isFinite(cLng)) {
-                return { lat: cLat, lng: cLng };
-            }
-        }
-        return null;
-    }
-
-    function buildBoundsFallback(center, zoom) {
-        var lat = center.lat;
-        var lng = center.lng;
-        var zoomValue = Number.isFinite(zoom) ? zoom : DEFAULT_VIEW.zoom;
-        var delta = Math.max(0.05, 1 / Math.max(zoomValue, 1));
-        return {
-            getSouthWest: function () { return { lat: lat - delta, lng: lng - delta }; },
-            getNorthEast: function () { return { lat: lat + delta, lng: lng + delta }; },
-            toBBoxString: function () {
-                return [lng - delta, lat - delta, lng + delta, lat + delta].join(",");
-            }
-        };
-    }
-
-    function calculateDistanceMeters(a, b) {
-        if (!a || !b) {
-            return 0;
-        }
-        var lat1 = Number(a.lat);
-        var lat2 = Number(b.lat);
-        var lon1 = Number(a.lng);
-        var lon2 = Number(b.lng);
-        if (!Number.isFinite(lat1) || !Number.isFinite(lat2) || !Number.isFinite(lon1) || !Number.isFinite(lon2)) {
-            return 0;
-        }
-        var toRad = Math.PI / 180;
-        var dLat = (lat2 - lat1) * toRad;
-        var dLon = (lon2 - lon1) * toRad;
-        var sinLat = Math.sin(dLat / 2);
-        var sinLon = Math.sin(dLon / 2);
-        var aHarv = sinLat * sinLat + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * sinLon * sinLon;
-        var cHarv = 2 * Math.atan2(Math.sqrt(aHarv), Math.sqrt(1 - aHarv));
-        return 6371000 * cHarv;
-    }
-
     function createInstance() {
+
         var helpers = ensureHelpers();
         var dom = helpers.dom;
         var http = helpers.http;
@@ -589,6 +64,56 @@ var MapController = (function () {
         var coordRound = (typeof window.coordRound === "function")
             ? window.coordRound
             : function (value) { return Math.round(value * 1000) / 1000; };
+
+        var shared = getMapGlShared();
+        var layerControlHelpers = getMapGlLayerControlHelpers();
+        var featureUiHelpers = getMapGlFeatureUiHelpers();
+
+        var EVENT_NAMES = shared.EVENT_NAMES;
+        var DEFAULT_VIEW = shared.DEFAULT_VIEW;
+        var FLY_TO_DURATION_MS = shared.FLY_TO_DURATION_MS;
+        var FLY_TO_BOUNDS_PADDING_PX = shared.FLY_TO_BOUNDS_PADDING_PX;
+        var SENSOR_LAYER_MIN_ZOOM = shared.SENSOR_LAYER_MIN_ZOOM;
+        var MAP_MIN_ZOOM = shared.MAP_MIN_ZOOM;
+        var MAP_MAX_ZOOM = shared.MAP_MAX_ZOOM;
+        var USGS_LAYER_NAME = shared.USGS_LAYER_NAME;
+        var SNOTEL_LAYER_NAME = shared.SNOTEL_LAYER_NAME;
+        var NHD_LAYER_NAME = shared.NHD_LAYER_NAME;
+        var NHD_LAYER_MIN_ZOOM = shared.NHD_LAYER_MIN_ZOOM;
+        var NHD_LAYER_HR_MIN_ZOOM = shared.NHD_LAYER_HR_MIN_ZOOM;
+        var SUBCATCHMENT_LAYER_ENDPOINT = shared.SUBCATCHMENT_LAYER_ENDPOINT;
+        var CHANNEL_LAYER_ENDPOINT = shared.CHANNEL_LAYER_ENDPOINT;
+        var SBS_LAYER_NAME = shared.SBS_LAYER_NAME;
+        var SBS_QUERY_ENDPOINT = shared.SBS_QUERY_ENDPOINT;
+        var SBS_DEFAULT_OPACITY = shared.SBS_DEFAULT_OPACITY;
+        var SBS_COLOR_MODES = shared.SBS_COLOR_MODES;
+        var LEGEND_OPACITY_CONTAINER_ID = shared.LEGEND_OPACITY_CONTAINER_ID;
+        var LEGEND_OPACITY_INPUT_ID = shared.LEGEND_OPACITY_INPUT_ID;
+        var DEFAULT_ELEVATION_COOLDOWN_MS = shared.DEFAULT_ELEVATION_COOLDOWN_MS;
+        var MOUSE_ELEVATION_HIDE_DELAY_MS = shared.MOUSE_ELEVATION_HIDE_DELAY_MS;
+        var FIND_FLASH_LAYER_PREFIX = shared.FIND_FLASH_LAYER_PREFIX;
+        var FIND_FLASH_DURATION_MS = shared.FIND_FLASH_DURATION_MS;
+        var FIND_FLASH_PULSE_INTERVAL_MS = shared.FIND_FLASH_PULSE_INTERVAL_MS;
+
+        var createLegacyAdapter = shared.createLegacyAdapter;
+        var createTabset = shared.createTabset;
+        var parseLocationInput = shared.parseLocationInput;
+        var normalizeUrlPayload = shared.normalizeUrlPayload;
+        var resolveErrorMessage = shared.resolveErrorMessage;
+        var isValidLatLng = shared.isValidLatLng;
+        var buildNhdFlowlinesUrl = shared.buildNhdFlowlinesUrl;
+        var toOverlayId = shared.toOverlayId;
+        var hexToRgba = shared.hexToRgba;
+        var isAbsoluteUrl = shared.isAbsoluteUrl;
+        var clampOpacity = shared.clampOpacity;
+        var normalizeSbsColorMode = shared.normalizeSbsColorMode;
+        var getSbsLegendItemsForMode = shared.getSbsLegendItemsForMode;
+        var drawSbsImageToCanvas = shared.drawSbsImageToCanvas;
+        var buildShiftedSbsImage = shared.buildShiftedSbsImage;
+        var normalizeSbsBounds = shared.normalizeSbsBounds;
+        var normalizeCenter = shared.normalizeCenter;
+        var buildBoundsFallback = shared.buildBoundsFallback;
+        var calculateDistanceMeters = shared.calculateDistanceMeters;
 
         ensureDeck();
 
@@ -1542,322 +1067,78 @@ var MapController = (function () {
         }
 
         function ensureLayerControl() {
-            if (layerControl || !mapCanvasElement || typeof document === "undefined") {
-                return layerControl;
-            }
-            var host = mapCanvasElement.closest ? mapCanvasElement.closest(".wc-map") : null;
-            if (!host) {
-                host = mapCanvasElement.parentElement;
-            }
-            if (!host) {
-                return null;
-            }
-
-            var root = document.createElement("div");
-            root.className = "wc-map-layer-control";
-            root.setAttribute("data-map-layer-control", "true");
-
-            var toggle = document.createElement("button");
-            toggle.type = "button";
-            toggle.className = "wc-map-layer-control__toggle";
-            toggle.setAttribute("aria-expanded", "false");
-            toggle.setAttribute("aria-label", "Layers");
-            toggle.setAttribute("title", "Layers");
-            toggle.innerHTML = '<svg class="wc-map-layer-control__icon" aria-hidden="true" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg" width="26" height="26"><path fill="#b9b9b9" d="m.032 17.056 13-8 13 8-13 8z"/><path fill="#737373" d="m.032 17.056-.032.93 13 8 13-8 .032-.93-13 8z"/><path fill="#cdcdcd" d="m0 13.076 13-8 13 8-13 8z"/><path fill="#737373" d="M0 13.076v.91l13 8 13-8v-.91l-13 8z"/><path fill="#e9e9e9" fill-opacity=".585" stroke="#797979" stroke-width=".1" d="m0 8.986 13-8 13 8-13 8-13-8"/><path fill="#737373" d="M0 8.986v1l13 8 13-8v-1l-13 8z"/></svg><span class="wc-sr-only">Layers</span>';
-
-            var panel = document.createElement("div");
-            panel.className = "wc-map-layer-control__panel";
-            panel.hidden = true;
-
-            var baseSection = document.createElement("div");
-            baseSection.className = "wc-map-layer-control__section";
-            var baseTitle = document.createElement("div");
-            baseTitle.className = "wc-map-layer-control__title";
-            baseTitle.textContent = "Base Layers";
-            var baseList = document.createElement("div");
-            baseList.className = "wc-map-layer-control__list";
-            baseSection.appendChild(baseTitle);
-            baseSection.appendChild(baseList);
-
-            var overlaySection = document.createElement("div");
-            overlaySection.className = "wc-map-layer-control__section";
-            var overlayTitle = document.createElement("div");
-            overlayTitle.className = "wc-map-layer-control__title";
-            overlayTitle.textContent = "Overlays";
-            var overlayList = document.createElement("div");
-            overlayList.className = "wc-map-layer-control__list";
-            overlaySection.appendChild(overlayTitle);
-            overlaySection.appendChild(overlayList);
-
-            panel.appendChild(baseSection);
-            panel.appendChild(overlaySection);
-            root.appendChild(toggle);
-            root.appendChild(panel);
-            host.appendChild(root);
-
-            function setExpanded(expanded) {
-                if (!layerControl) {
-                    return;
-                }
-                layerControl.toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
-                layerControl.root.classList.toggle("is-expanded", expanded);
-                layerControl.panel.hidden = !expanded;
-            }
-
-            function collapsePanel() {
-                setExpanded(false);
-            }
-
-            toggle.addEventListener("click", function () {
-                var expanded = toggle.getAttribute("aria-expanded") === "true";
-                setExpanded(!expanded);
+            layerControl = layerControlHelpers.ensureLayerControl({
+                layerControl: layerControl,
+                mapCanvasElement: mapCanvasElement
             });
-
-            root.addEventListener("keydown", function (event) {
-                if (event.key === "Escape") {
-                    setExpanded(false);
-                }
-            });
-
-            if (mapCanvasElement) {
-                mapCanvasElement.addEventListener("pointerdown", collapsePanel);
-                mapCanvasElement.addEventListener("wheel", collapsePanel);
-            }
-
-            layerControl = {
-                root: root,
-                toggle: toggle,
-                panel: panel,
-                baseSection: baseSection,
-                baseList: baseList,
-                overlaySection: overlaySection,
-                overlayList: overlayList,
-                overlayInputs: typeof Map === "function" ? new Map() : null,
-                collapse: collapsePanel
-            };
-
             return layerControl;
         }
 
         function renderBaseLayerControl() {
             var control = ensureLayerControl();
-            if (!control) {
-                return;
-            }
-            var baseMaps = map.baseMaps || {};
-            var names = Object.keys(baseMaps);
-            control.baseList.textContent = "";
-            if (!names.length) {
-                control.baseSection.hidden = true;
-                return;
-            }
-            control.baseSection.hidden = false;
-            names.forEach(function (name, index) {
-                var def = baseMaps[name];
-                var key = def && def.key ? def.key : name;
-                var label = def && def.label ? def.label : name;
-                var inputId = "wc-map-basemap-" + index;
-                var wrapper = document.createElement("label");
-                wrapper.className = "wc-map-layer-control__item";
-                var input = document.createElement("input");
-                input.type = "radio";
-                input.name = "wc-map-basemap";
-                input.value = key;
-                input.id = inputId;
-                input.checked = key === baseLayerKey;
-                input.addEventListener("change", function () {
-                    if (input.checked) {
-                        map.setBaseLayer(key);
-                    }
-                });
-                var text = document.createElement("span");
-                text.className = "wc-map-layer-control__text";
-                text.textContent = label;
-                wrapper.appendChild(input);
-                wrapper.appendChild(text);
-                control.baseList.appendChild(wrapper);
+            layerControlHelpers.renderBaseLayerControl({
+                control: control,
+                map: map,
+                baseLayerKey: baseLayerKey
             });
         }
 
         function syncBaseLayerControlSelection() {
-            if (!layerControl) {
-                return;
-            }
-            var inputs = layerControl.baseList.querySelectorAll('input[type="radio"][name="wc-map-basemap"]');
-            Array.prototype.forEach.call(inputs, function (input) {
-                input.checked = input.value === baseLayerKey;
+            layerControlHelpers.syncBaseLayerControlSelection({
+                control: layerControl,
+                baseLayerKey: baseLayerKey
             });
         }
 
         function overlaySortIndex(name) {
-            if (!name) {
-                return 99;
-            }
-            if (name.indexOf(USGS_LAYER_NAME) !== -1) {
-            return 0;
+            return layerControlHelpers.overlaySortIndex(name, {
+                usgsLayerName: USGS_LAYER_NAME,
+                snotelLayerName: SNOTEL_LAYER_NAME,
+                sbsLayerName: SBS_LAYER_NAME
+            });
         }
-        if (name.indexOf(SNOTEL_LAYER_NAME) !== -1) {
-            return 1;
-        }
-        if (name.indexOf("NHD") !== -1) {
-            return 2;
-        }
-        if (name.indexOf(SBS_LAYER_NAME) !== -1) {
-            return 3;
-        }
-        return 99;
-    }
 
         function overlayRenderIndex(name) {
-            if (!name) {
-                return 99;
-            }
-            var label = String(name);
-            if (label.indexOf(SBS_LAYER_NAME) !== -1) {
-                return 10;
-            }
-            if (label.indexOf("NHD") !== -1) {
-                return 20;
-            }
-            if (label.indexOf("Subcatchment Labels") !== -1) {
-                return 80;
-            }
-            if (label.indexOf("Contrast ID Labels") !== -1) {
-                return 85;
-            }
-            if (label.indexOf("Channel Labels") !== -1) {
-                return 90;
-            }
-            if (label.indexOf("Subcatchments") !== -1) {
-                return 30;
-            }
-            if (label.indexOf("Contrast IDs") !== -1) {
-                return 35;
-            }
-            if (label.indexOf("Channels") !== -1) {
-                return 40;
-            }
-            if (label.indexOf(USGS_LAYER_NAME) !== -1) {
-                return 50;
-            }
-            if (label.indexOf(SNOTEL_LAYER_NAME) !== -1) {
-                return 60;
-            }
-            if (label.indexOf("Outlet") !== -1) {
-                return 70;
-            }
-            return 99;
+            return layerControlHelpers.overlayRenderIndex(name, {
+                usgsLayerName: USGS_LAYER_NAME,
+                snotelLayerName: SNOTEL_LAYER_NAME,
+                sbsLayerName: SBS_LAYER_NAME
+            });
         }
 
         function rebuildOverlayLayer(name, layer) {
-            if (!layer || typeof layer.__wcRebuild !== "function") {
-                return layer;
-            }
-            var nextLayer = layer.__wcRebuild();
-            if (!nextLayer || nextLayer === layer) {
-                return layer;
-            }
-            if (overlayRegistry) {
-                overlayRegistry.delete(layer);
-                overlayRegistry.set(nextLayer, name);
-            }
-            if (overlayNameRegistry) {
-                overlayNameRegistry.set(name, nextLayer);
-            }
-            if (map.overlayMaps) {
-                map.overlayMaps[name] = nextLayer;
-            }
-            return nextLayer;
+            return layerControlHelpers.rebuildOverlayLayer({
+                name: name,
+                layer: layer,
+                overlayRegistry: overlayRegistry,
+                overlayNameRegistry: overlayNameRegistry,
+                overlayMaps: map.overlayMaps
+            });
         }
 
         function renderOverlayLayerControl() {
             var control = ensureLayerControl();
-            if (!control || !overlayNameRegistry) {
-                return;
-            }
-            control.overlayList.textContent = "";
-            if (control.overlayInputs && typeof control.overlayInputs.clear === "function") {
-                control.overlayInputs.clear();
-            }
-            var entries = Array.from(overlayNameRegistry.entries())
-                .filter(function (entry) {
-                    return shouldRenderOverlay(entry[0]);
-                })
-                .map(function (entry, index) {
-                    return {
-                        entry: entry,
-                        index: index,
-                        order: overlaySortIndex(entry[0])
-                    };
-                });
-            if (!entries.length) {
-                control.overlaySection.hidden = true;
-                return;
-            }
-            control.overlaySection.hidden = false;
-            entries.sort(function (a, b) {
-                if (a.order !== b.order) {
-                    return a.order - b.order;
-                }
-                return a.index - b.index;
-            });
-            entries.forEach(function (item, index) {
-                var name = item.entry[0];
-                var layer = item.entry[1];
-                var inputId = "wc-map-overlay-" + index;
-                var wrapper = document.createElement("label");
-                wrapper.className = "wc-map-layer-control__item";
-                var input = document.createElement("input");
-                input.type = "checkbox";
-                input.name = "wc-map-overlay";
-                input.value = name;
-                input.id = inputId;
-                input.checked = map.hasLayer(layer);
-                input.addEventListener("change", function () {
-                    var activeLayer = overlayNameRegistry && overlayNameRegistry.get(name)
-                        ? overlayNameRegistry.get(name)
-                        : layer;
-                    if (input.checked) {
-                        activeLayer = rebuildOverlayLayer(name, activeLayer);
-                        map.addLayer(activeLayer);
-                    } else {
-                        map.removeLayer(activeLayer);
-                    }
-                    emit("map:layer:toggled", {
-                        name: name,
-                        layer: activeLayer,
-                        visible: input.checked,
-                        type: "overlay"
-                    });
-                });
-                var text = document.createElement("span");
-                text.className = "wc-map-layer-control__text";
-                text.textContent = name;
-                wrapper.appendChild(input);
-                wrapper.appendChild(text);
-                control.overlayList.appendChild(wrapper);
-                if (control.overlayInputs && typeof control.overlayInputs.set === "function") {
-                    control.overlayInputs.set(name, input);
-                }
+            layerControlHelpers.renderOverlayLayerControl({
+                control: control,
+                map: map,
+                overlayNameRegistry: overlayNameRegistry,
+                shouldRenderOverlay: shouldRenderOverlay,
+                overlaySortIndex: overlaySortIndex,
+                rebuildOverlayLayer: rebuildOverlayLayer,
+                emit: emit
             });
         }
 
         function syncOverlayLayerControlSelection() {
-            if (!layerControl || !overlayNameRegistry || !layerControl.overlayInputs) {
-                return;
-            }
-            layerControl.overlayInputs.forEach(function (input, name) {
-                var layer = overlayNameRegistry.get(name);
-                if (!layer) {
-                    input.disabled = true;
-                    return;
-                }
-                input.disabled = false;
-                input.checked = map.hasLayer(layer);
+            layerControlHelpers.syncOverlayLayerControlSelection({
+                control: layerControl,
+                overlayNameRegistry: overlayNameRegistry,
+                map: map
             });
         }
 
         var map = {
+
             events: mapEvents,
             drilldown: createLegacyAdapter(drilldownElement),
             sub_legend: createLegacyAdapter(subLegendElement),
@@ -2905,250 +2186,26 @@ var MapController = (function () {
             }
         }
 
-        function createHoverTooltip() {
-            if (typeof document === "undefined") {
-                return null;
-            }
-            var tooltip = document.createElement("div");
-            tooltip.className = "wc-map-hover-info";
-            tooltip.style.position = "fixed";
-            tooltip.style.pointerEvents = "none";
-            tooltip.style.zIndex = "1000";
-            tooltip.style.padding = "6px 8px";
-            tooltip.style.borderRadius = "6px";
-            tooltip.style.background = "rgba(10, 10, 10, 0.85)";
-            tooltip.style.color = "#f5f5f5";
-            tooltip.style.fontSize = "14px";
-            tooltip.style.lineHeight = "1.4";
-            tooltip.style.maxWidth = "280px";
-            tooltip.style.boxShadow = "0 8px 18px rgba(0, 0, 0, 0.25)";
-            tooltip.style.display = "none";
-            tooltip.style.transform = "translate(-50%, -120%)";
-            document.body.appendChild(tooltip);
-
-            return {
-                show: function (text, x, y) {
-                    tooltip.textContent = text;
-                    tooltip.style.left = x + "px";
-                    tooltip.style.top = y + "px";
-                    tooltip.style.display = "block";
-                },
-                hide: function () {
-                    tooltip.style.display = "none";
-                }
-            };
-        }
-
-        var hoverTooltip = createHoverTooltip();
-
-        function sanitizeInfoHtml(html) {
-            if (!html || typeof document === "undefined") {
-                return "";
-            }
-            var container = document.createElement("div");
-            container.innerHTML = String(html);
-
-            var blocked = container.querySelectorAll("script, style, iframe, object, embed, link");
-            Array.prototype.forEach.call(blocked, function (node) {
-                node.remove();
-            });
-
-            var nodes = container.querySelectorAll("*");
-            Array.prototype.forEach.call(nodes, function (node) {
-                if (!node.attributes) {
-                    return;
-                }
-                Array.prototype.slice.call(node.attributes).forEach(function (attr) {
-                    var name = attr.name.toLowerCase();
-                    var value = String(attr.value || "").toLowerCase();
-                    if (name.indexOf("on") === 0) {
-                        node.removeAttribute(attr.name);
-                        return;
-                    }
-                    if ((name === "href" || name === "src") && value.indexOf("javascript:") === 0) {
-                        node.removeAttribute(attr.name);
-                    }
-                });
-            });
-
-            return container.innerHTML;
-        }
-
-        function extractFeatureDescription(feature) {
-            if (!feature || !feature.properties) {
-                return null;
-            }
-            if (feature.properties.Description) {
-                return String(feature.properties.Description);
-            }
-            if (feature.properties.description) {
-                return String(feature.properties.description);
-            }
-            return null;
-        }
-
-        function extractFeatureName(feature) {
-            if (!feature || !feature.properties) {
-                return null;
-            }
-            var props = feature.properties;
-            var candidates = [
-                "Name",
-                "name",
-                "StationName",
-                "station_name",
-                "SiteName",
-                "site_name",
-                "LocationName",
-                "location_name",
-                "StationID",
-                "station_id",
-                "ID",
-                "id"
-            ];
-            for (var i = 0; i < candidates.length; i += 1) {
-                var value = props[candidates[i]];
-                if (value !== undefined && value !== null) {
-                    var text = String(value).trim();
-                    if (text) {
-                        return text;
-                    }
-                }
-            }
-            var description = extractFeatureDescription(feature);
-            if (description) {
-                var container = document.createElement("div");
-                container.innerHTML = description;
-                var content = container.textContent || "";
-                var firstLine = content.split(/\n+/)[0] || "";
-                var trimmed = firstLine.trim();
-                if (trimmed) {
-                    return trimmed;
-                }
-            }
-            return null;
-        }
+        var featureUi = featureUiHelpers.create({
+            mapCanvasElement: mapCanvasElement
+        });
 
         function updateHoverTooltip(info) {
-            if (!hoverTooltip) {
+            if (!featureUi || typeof featureUi.updateHoverTooltip !== "function") {
                 return;
             }
-            if (!info || !info.object) {
-                hoverTooltip.hide();
-                return;
-            }
-            var name = extractFeatureName(info.object);
-            if (!name) {
-                hoverTooltip.hide();
-                return;
-            }
-            var rect = mapCanvasElement ? mapCanvasElement.getBoundingClientRect() : { left: 0, top: 0 };
-            var x = rect.left + (info.x || 0);
-            var y = rect.top + (info.y || 0);
-            hoverTooltip.show(name, x, y);
+            featureUi.updateHoverTooltip(info);
         }
-
-        function createFeatureModal() {
-            if (typeof document === "undefined") {
-                return null;
-            }
-            var modal = document.createElement("div");
-            modal.className = "wc-modal";
-            modal.id = "wc-map-feature-modal";
-            modal.setAttribute("data-modal", "");
-            modal.setAttribute("hidden", "hidden");
-
-            var overlay = document.createElement("div");
-            overlay.className = "wc-modal__overlay";
-            overlay.setAttribute("data-modal-dismiss", "");
-
-            var dialog = document.createElement("div");
-            dialog.className = "wc-modal__dialog";
-            dialog.setAttribute("role", "dialog");
-            dialog.setAttribute("aria-modal", "true");
-
-            var header = document.createElement("div");
-            header.className = "wc-modal__header";
-
-            var title = document.createElement("h2");
-            title.className = "wc-modal__title";
-            title.textContent = "";
-
-            var close = document.createElement("button");
-            close.type = "button";
-            close.className = "wc-modal__close";
-            close.setAttribute("aria-label", "Close");
-            close.setAttribute("data-modal-dismiss", "");
-            close.textContent = "×";
-
-            var body = document.createElement("div");
-            body.className = "wc-modal__body";
-
-            header.appendChild(title);
-            header.appendChild(close);
-            dialog.appendChild(header);
-            dialog.appendChild(body);
-            modal.appendChild(overlay);
-            modal.appendChild(dialog);
-            document.body.appendChild(modal);
-
-            function openModal() {
-                if (window.ModalManager && typeof window.ModalManager.open === "function") {
-                    window.ModalManager.open(modal);
-                    return;
-                }
-                modal.removeAttribute("hidden");
-                modal.setAttribute("data-modal-open", "true");
-                modal.classList.add("is-visible");
-                document.body.classList.add("wc-modal-open");
-            }
-
-            function closeModal() {
-                if (window.ModalManager && typeof window.ModalManager.close === "function") {
-                    window.ModalManager.close(modal);
-                    return;
-                }
-                modal.classList.remove("is-visible");
-                modal.removeAttribute("data-modal-open");
-                modal.setAttribute("hidden", "hidden");
-                document.body.classList.remove("wc-modal-open");
-            }
-
-            overlay.addEventListener("click", function () {
-                closeModal();
-            });
-            close.addEventListener("click", function () {
-                closeModal();
-            });
-
-            return {
-                show: function (name, html) {
-                    title.textContent = name || "Location";
-                    if (html) {
-                        body.innerHTML = sanitizeInfoHtml(html);
-                    } else {
-                        body.textContent = "No additional details available.";
-                    }
-                    openModal();
-                },
-                hide: function () {
-                    closeModal();
-                }
-            };
-        }
-
-        var featureModal = createFeatureModal();
 
         function openFeatureModal(feature) {
-            if (!featureModal) {
+            if (!featureUi || typeof featureUi.openFeatureModal !== "function") {
                 return;
             }
-            var name = extractFeatureName(feature) || "Location";
-            var description = extractFeatureDescription(feature);
-            featureModal.show(name, description);
+            featureUi.openFeatureModal(feature);
         }
 
         var overlayRefreshTimer = null;
+
         function scheduleOverlayRefresh() {
             if (overlayRefreshTimer) {
                 clearTimeout(overlayRefreshTimer);

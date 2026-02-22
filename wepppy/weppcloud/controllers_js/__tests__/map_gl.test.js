@@ -142,6 +142,9 @@ describe("Map GL controller", () => {
             FlyToInterpolator: FlyToInterpolator,
         };
 
+        await import("../map_gl_shared.js");
+        await import("../map_gl_layer_control.js");
+        await import("../map_gl_feature_ui.js");
         await import("../map_gl.js");
     });
 
@@ -162,7 +165,13 @@ describe("Map GL controller", () => {
         delete global.createImageBitmap;
         if (global.window) {
             delete global.window.createImageBitmap;
+            delete global.window.WCMapGlShared;
+            delete global.window.WCMapGlLayerControl;
+            delete global.window.WCMapGlFeatureUi;
         }
+        delete global.WCMapGlShared;
+        delete global.WCMapGlLayerControl;
+        delete global.WCMapGlFeatureUi;
         emittedEvents = [];
     });
 
