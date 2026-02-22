@@ -24,6 +24,12 @@ run_wepp_watershed = true
 
 ## Developer notes
 - Build/run logic is implemented in `Swat.build_inputs()` and `Swat.run_swat()`.
+- Internal code layout:
+  - `swat.py`: facade/controller entrypoints (`build_inputs`, `run_swat`, interchange orchestration, config/state wiring).
+  - `swat_txtinout_mixin.py`: TxtInOut preparation plus climate/recall file normalization helpers.
+  - `swat_recall_mixin.py`: recall conversion/alignment and `time.sim`/object-count patching helpers.
+  - `swat_connectivity_mixin.py`: channel loading and SWAT-DEG connectivity writers.
+  - `_helpers.py`: shared internal utility helpers.
 - `print.prt` is managed via `Swat.print_prt` (template-seeded `PrintPrtConfig`) and rendered during build; defaults enable daily `basin_wb`, `channel_sd`, and `hyd` with `recall` off unless explicitly enabled.
 - Outputs are archived under `swat/outputs/run_<timestamp>/` with an `index.json` summary.
 - When `swat_interchange_enabled=true`, SWAT output files are converted to Parquet in `swat/outputs/run_<timestamp>/interchange/` and the summary is added to `index.json` as `interchange_summary`.

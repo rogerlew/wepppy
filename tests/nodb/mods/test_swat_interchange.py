@@ -239,3 +239,7 @@ def test_interchange_manifest_fallback_skips_historical_run(monkeypatch, swat_in
 
     swat_instance.run_swat_interchange(run_dir=str(old_run_dir))
     assert not (old_run_dir / "files_out.out").exists()
+
+
+def test_estimate_total_area_returns_none_without_hillslope_parquet(swat_instance):
+    assert swat_instance._estimate_total_area_ha() is None
