@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-02-22T17:25:00Z`
+- Generated (UTC): `2026-02-22T20:41:18Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -27,9 +27,9 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 749 | 100.0 | 238.0 | 504.6 | 773.6 | 1290.52 | 2244.0 |
-| `python_prod_max_function_len` | 584 | 56.0 | 102.0 | 153.4 | 213.85 | 286.89 | 381.0 |
-| `python_prod_max_cc` | 593 | 10.0 | 18.0 | 29.0 | 37.4 | 57.32 | 81.0 |
+| `python_prod_file_sloc` | 755 | 100.0 | 243.0 | 505.8 | 773.3 | 1216.94 | 2214.0 |
+| `python_prod_max_function_len` | 589 | 56.0 | 102.0 | 148.4 | 210.6 | 276.96 | 381.0 |
+| `python_prod_max_cc` | 599 | 10.0 | 18.0 | 29.0 | 37.0 | 56.02 | 67.0 |
 | `js_source_file_sloc` | 150 | 257.0 | 556.0 | 1122.4 | 1318.2 | 2130.81 | 2500.0 |
 | `js_source_max_cc` | 150 | 7.0 | 21.0 | 33.1 | 43.65 | 75.61 | 155.0 |
 
@@ -43,8 +43,7 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 
 | Path | Value |
 | --- | ---: |
-| `tests/nodb/mods/test_omni.py` | 2296 |
-| `wepppy/nodb/mods/swat/swat.py` | 2244 |
+| `tests/nodb/mods/test_omni.py` | 2380 |
 | `wepppy/wepp/management/managements.py` | 2214 |
 | `wepppy/nodb/core/wepp.py` | 2024 |
 | `tests/microservices/test_files_routes.py` | 2003 |
@@ -53,6 +52,7 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 | `wepppy/nodb/base.py` | 1702 |
 | `tests/microservices/test_browse_auth_routes.py` | 1651 |
 | `wepppy/rq/culvert_rq.py` | 1421 |
+| `wepppy/topo/wbt/wbt_topaz_emulator.py` | 1339 |
 
 ### `python_max_function_len_top20`
 
@@ -61,20 +61,18 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 | `wepppy/nodb/mods/ash_transport/neris_ash_model.py` | 381 |
 | `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py` | 368 |
 | `wepppy/rq/wepp_rq_pipeline.py` | 365 |
-| `wepppy/nodb/mods/path_ce_model.py` | 342 |
 | `wepppy/export/arc_export.py` | 332 |
 | `wepppy/nodb/mods/ash_transport/ashpost.py` | 301 |
 | `wepppy/export/ermit_input.py` | 284 |
-| `wepppy/nodb/mods/omni/omni_build_router.py` | 283 |
 | `wepppy/climates/cligen/cligen.py` | 276 |
 | `wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py` | 272 |
+| `wepppy/wepp/management/utils/downgrade_to_98_4_format.py` | 262 |
+| `wepppy/nodb/mods/ash_transport/ash.py` | 258 |
 
 ### `python_max_cc_top20`
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/nodb/mods/omni/omni_build_router.py` | 81 |
-| `wepppy/nodb/mods/path_ce_model.py` | 81 |
 | `wepppy/nodb/core/wepp_prep_service.py` | 67 |
 | `wepppy/export/gpkg_export.py` | 65 |
 | `wepppy/microservices/rq_engine/fork_archive_routes.py` | 64 |
@@ -83,6 +81,8 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 | `wepppy/weppcloud/utils/helpers.py` | 57 |
 | `wepppy/nodb/mods/path_ce/path_ce_solver.py` | 56 |
 | `wepppy/nodb/mods/ash_transport/ashpost.py` | 53 |
+| `wepppy/climates/cligen/cligen.py` | 51 |
+| `wepppy/topo/peridot/peridot_runner.py` | 50 |
 
 ### `js_file_sloc_top20`
 

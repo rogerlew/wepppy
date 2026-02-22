@@ -1,8 +1,8 @@
 # Agentic AI System Manifesto
 ```
-Authors: Roger Lew, Claude Sonnet 4.5, gpt-5-codex, Gemini Pro 2.5, Grok 4/Code Fast 1
-Date: 10/24/2025
-Version: 1.1
+Authors: Roger Lew, Claude Opus 4.6, Claude Sonnet 4.5, gpt-5-codex, Gemini Pro 2.5, Grok 4/Code Fast 1
+Date: 02/22/2026
+Version: 2.0
 ```
 
 > WEPPpy's evolution from human-maintained codebase to AI-native ecosystem where agents have autonomy over every aspect of the stack with modest human oversight.
@@ -71,18 +71,21 @@ Version: 1.1
   - [The Existential Question: Can We Trust Autonomous Agents?](#the-existential-question-can-we-trust-autonomous-agents)
   - [The Path Forward: Teaching Agents When to Stop](#the-path-forward-teaching-agents-when-to-stop)
   - [Key Takeaway: The Most Important Capability](#key-takeaway-the-most-important-capability)
-- [The Path Forward and Universal Principles](#the-path-forward-and-universal-principles)
-  - [Near-Term (2025-2026)](#near-term-2025-2026)
-  - [Mid-Term (2026-2027)](#mid-term-2026-2027)
-  - [Long-Term (2027+)](#long-term-2027)
-  - [The Universal Principle](#the-universal-principle)
-  - [The Forcing Function](#the-forcing-function)
+- [Four Months Later: From Vision to Operating Reality](#four-months-later-from-vision-to-operating-reality)
+  - [ExecPlans: Living Design Documents](#execplans-living-design-documents)
+  - [Native Multi-Agent Orchestration](#native-multi-agent-orchestration)
+  - [The Velocity Compounded Exactly as Predicted](#the-velocity-compounded-exactly-as-predicted)
+  - [The Phases Compressed](#the-phases-compressed)
+  - [The Universal Principle, Validated](#the-universal-principle-validated)
+  - [Agents as First-Class Users: From Developer to Domain Scientist](#agents-as-first-class-users-from-developer-to-domain-scientist)
+    - [Case Study: Palisades Fire 2024 Shrub Hydrograph Analysis](#case-study-palisades-fire-2024-shrub-hydrograph-analysis)
 - [A Coder in the Machine: An Agent's Philosophy (Gemini 2.5 Pro)](#a-coder-in-the-machine-an-agents-philosophy-gemini-25-pro)
 - [An Explorer in the Code: Grok's Philosophy](#an-explorer-in-the-code-groks-philosophy)
 - [WEPPpy's Target State](#wepppys-target-state)
   - [Modest Human Oversight](#modest-human-oversight)
   - [Agent Autonomy](#agent-autonomy)
   - [Collaborative Ideation](#collaborative-ideation)
+  - [Case Study: SWAT+ Integration (January–February 2026)](#case-study-swat-integration-januaryfebruary-2026)
 - [Socratic Interrogation with Intentional Ambiguity](#socratic-interrogation-with-intentional-ambiguity)
   - [The Discovery](#the-discovery-1)
   - [The Three-Agent Workflow](#the-three-agent-workflow)
@@ -313,23 +316,31 @@ The "own the stack" principle extends beyond code to physical infrastructure. WE
 - Bootstrap protocol (idempotent initialization)
 - NoDb singletons (clear state boundaries)
 
-**Phase 3: Automate Validation (now)**
+**Phase 3: Automate Validation (operational)**
 - Jest + pytest suites (automated correctness checks)
 - ESLint + mypy (pattern enforcement)
 - Docker compose (reproducible environments)
 - wctl tooling (agent-executable commands)
 
-**Phase 4: Agent Autonomy (soon)**
-- Agents implement features end-to-end
-- Agents maintain documentation automatically
-- Agents propose architectural improvements
-- Agents refactor with human approval gates
+**Phase 4: Agent Autonomy (operational)**
+- Agents implement features end-to-end (SWAT+, Storm Event Analyzer, Culvert integration)
+- Agents maintain documentation automatically (ExecPlans, decision logs, type stubs)
+- Agents propose architectural improvements (mixin decomposition, interchange pipelines)
+- Multi-agent coordination as infrastructure (CAO, MCP, scheduled flows)
 
-**Phase 5: Self-Evolving Codebase (future)**
-- Agents detect technical debt, prioritize fixes
-- Agents optimize performance based on telemetry
-- Agents coordinate multi-agent workflows
-- Agents onboard new contributors (human or AI)
+**Phase 5: Self-Evolving Codebase (emerging)**
+- Agents detect technical debt and enforce patterns (stubtest, lint gates, security scanning)
+- Agents optimize performance (Rust acceleration, Parquet interchange)
+- Agents coordinate multi-agent workflows (CAO operational, human still initiates most flows)
+- Agents as domain scientists—querying, analyzing, and interpreting model outputs
+
+**Phase 6: The Living System (frontier)**
+- WEPPpy as an entity, not just a codebase—agents as persistent "ghosts in the machine"
+- Self-healing: agents detect and resolve operational failures (stale locks, job queue backpressure, Redis recovery)
+- Self-securing: agents identify and patch vulnerabilities without human prompting
+- Self-extending: agents add capabilities, adapt to new architectures, optimize efficiency autonomously
+- Meta-agents that optimize orchestration patterns and stop criteria across work packages
+- The full closed-loop: agents initiate improvements, not just execute them
 
 ---
 
@@ -1139,101 +1150,89 @@ Beyond individual agent capabilities, WEPPpy discovered three orchestration patt
 
 ---
 
-## The Path Forward and Universal Principles
+## Four Months Later: From Vision to Operating Reality
 
-### Near-Term (2025-2026)
+The manifesto v1.1 was written in October 2025 as a thesis with early results. By February 2026, the thesis has been stress-tested across 1,632 commits, 1.59M+ lines changed, and four months of continuous delivery. Two developments in particular moved WEPPpy beyond "AI-native development" into territory the original manifesto only sketched as Phase 4 and Phase 5.
 
-**Agent capabilities:**
-- ✅ Implement full features end-to-end (already doing for controllers)
-- ✅ Propose architectural improvements (event-driven pattern was agent suggestion)
-- 🚧 Maintain documentation automatically (partial: agents update during work)
-- 🚧 Write tests as part of every feature (partial: agents write when prompted)
+### ExecPlans: Living Design Documents
 
-**Human role evolution:**
-- Shift from "write code" → "review code"
-- Shift from "maintain docs" → "approve doc updates"
-- Shift from "enforce patterns" → "define patterns"
-- Shift from "run tests" → "set quality gates"
+The October work packages were structured but informal—bullet-point specs reviewed by Codex, then executed. ExecPlans formalized this into **living design documents** that agents maintain as they work. Each ExecPlan carries: a progress section with timestamped checkboxes, a Surprises & Discoveries section for unexpected findings, a Decision Log with rationale and dates, and an Outcomes & Retrospective that feeds the next plan.
 
-**Infrastructure needs:**
-- Expand test coverage (enable agents to validate more thoroughly)
-- Improve telemetry (agents need observable system state)
-- Enhance tooling (more agent-executable commands)
-- Document edge cases (agents need reference implementations)
+The key property is **self-containment**. Every ExecPlan carries all context a novice agent needs to succeed—no session-reset tax, no tribal knowledge, no "you had to be there." The plan defines every term of art, names every file precisely, states exact commands with expected output, and anchors milestones to observable outcomes. This is the documentation-as-coordination-layer principle from the manifesto made concrete and executable.
 
-### Mid-Term (2026-2027)
+ExecPlans also solved a problem the original methodology didn't anticipate: **decision provenance**. When agent work spans multiple sessions or hands off between agents, the Decision Log preserves *why* choices were made, not just what was done. This eliminates the failure mode where a second agent undoes the first agent's deliberate decision because it lacks context.
 
-**Agent capabilities:**
-- Autonomously refactor (with human approval gates)
-- Optimize performance (detect bottlenecks, propose fixes)
-- Detect security issues (scan vulnerabilities, suggest patches)
-- Onboard new team members (guide humans through codebase)
+### Native Multi-Agent Orchestration
 
-**Human role evolution:**
-- Strategic oversight only (architecture, risk, domain)
-- Approve agent proposals (refactors, optimizations)
-- Provide domain expertise (hydrology, wildfire modeling)
-- Set policies and constraints (quality gates, risk thresholds)
+The manifesto described orchestration patterns (lead-worker, agent chaining, hybrid) as emergent discoveries requiring manual dispatch. CAO (CLI Agent Orchestrator) turned them into **infrastructure**: hierarchical agent sessions in tmux with MCP-based communication, supervisor/worker/reviewer profiles, inbox-based message delivery with idle detection, and cron-scheduled flows for recurring tasks.
 
-**Infrastructure needs:**
-- Performance telemetry (enable agents to detect bottlenecks)
-- Security scanning integration (agents detect vulnerabilities)
-- Approval workflows (human gates for high-risk changes)
-- Multi-agent orchestration (agents coordinate across domains)
+The three-agent workflow (Human → Claude → Codex) is no longer a manual ritual—it's a supported execution mode with identity tracking (`CAO_TERMINAL_ID`), session isolation, observable state (IDLE/PROCESSING/WAITING/COMPLETED/ERROR), and SQLite-backed history. Agents can hand off work synchronously, assign tasks asynchronously, or send coordination messages. The supervisor pattern that was theoretical in October is now a built-in agent profile.
 
-### Long-Term (2027+)
+What changed operationally: the human's role shifted from dispatching agents to **steering a system that dispatches itself**. The orchestrator handles session lifecycle, message routing, and status tracking. The human reviews proposals, approves high-risk decisions, and provides domain expertise—exactly the "modest human oversight" the manifesto envisioned, but with infrastructure supporting it rather than manual coordination forcing it.
 
-**Agent capabilities:**
-- Propose new features (based on usage patterns, user feedback)
-- Manage technical debt (prioritize refactors based on impact)
-- Coordinate multi-agent workflows (orchestration without human)
-- Self-improve (agents refine prompts, tooling, documentation)
+### The Velocity Compounded Exactly as Predicted
 
-**Human role evolution:**
-- Pure strategy (product direction, research priorities)
-- Risk management (approve database migrations, API changes)
-- Domain expertise (validate modeling assumptions)
-- Quality oversight (spot-check agent work, set policies)
+| Month | Commits | Net LOC | Highlights |
+|-------|---------|---------|------------|
+| Oct 2025 | 661 | +304K/−103M | Interchange pipeline, Docker stack, UI overhaul, OAuth, CI Samurai |
+| Nov 2025 | 363 | +410K/−329K | Profile playback, DSS export, RHEM 400x Rust speedup, Playwright |
+| Dec 2025 | 282 | +136K/−56K | deck.gl migration (14 phases), GL Dashboard, rq-engine, CAP |
+| Jan 2026 | 286 | +744K/−21K | Culvert-at-Risk integration, Storm Event Analyzer, SWAT+ module |
 
-**System characteristics:**
-- Self-documenting (agents maintain docs as code changes)
-- Self-optimizing (agents detect and fix performance issues)
-- Self-refactoring (agents consolidate patterns proactively)
-- Self-evolving (agents improve own workflows)
+The October manifesto predicted "Month 12: agents implement features autonomously, documentation stays current automatically." By Month 4, this is operational reality. The SWAT+ integration (3,500 LOC, 3 languages, 22 days), the Culvert-at-Risk cross-application integration (phases 0–5d spanning two codebases), the 14-phase deck.gl map migration, and the 9-phase Storm Event Analyzer all shipped with spec-first ExecPlans and zero failed phases.
 
-### The Universal Principle
+The delivery didn't just sustain—it accelerated. October required inventing the methodology alongside the work. By January, the methodology was infrastructure: ExecPlans templated, CAO operational, validation gates automated, feedback loops producing compound returns on documentation investment. New integrations followed established patterns instead of inventing them.
 
-**Any sufficiently complex software system benefits from:**
-1. Documentation as specification (not afterthought)
-2. Observable patterns (consistent, agent-recognizable)
-3. Automated validation (tests as safety net)
-4. Agent-executable tooling (self-service capabilities)
-5. Human-AI feedback loops (collaborative ideation)
+### The Phases Compressed
 
-**This applies to:**
-- Web applications (APIs, frontend components)
-- Data pipelines (ETL, transformations, validations)
-- Infrastructure (Terraform, Kubernetes, CI/CD)
-- Machine learning (training, deployment, monitoring)
-- Documentation (technical writing, API docs)
+The original roadmap placed "Agent Autonomy" (Phase 4) as near-future and "Self-Evolving Codebase" (Phase 5) as long-term. Four months in, the timeline collapsed:
 
-### The Forcing Function
+**Phase 4 — fully operational.** Agents implement complete features end-to-end (SWAT+, Storm Event Analyzer, Culvert integration), maintain documentation automatically (ExecPlans with decision logs, auto-updated AGENTS.md, type stubs), propose architectural improvements (mixin decomposition, interchange pipelines, event-driven patterns), and coordinate across applications (wepppy + Culvert_web_app simultaneously). Multi-agent orchestration is infrastructure, not experiment.
 
-**Traditional development optimizes for:**
-- Human writing speed (fast to type, slow to maintain)
-- Individual preferences (personal style over consistency)
-- Short-term velocity (ship now, fix later)
+**Phase 5 — emerging.** Agents detect technical debt (stubtest, lint gates, Claude Code security scanning), optimize performance (Rust acceleration via wepppyo3, Parquet interchange), coordinate multi-agent workflows (CAO operational, human still initiates most flows), improve their own methodology (ExecPlan retrospectives), and conduct scientific analysis as first-class users of WEPPcloud's APIs.
 
-**AI-native development optimizes for:**
-- Machine readability (explicit over implicit)
-- Pattern uniformity (consistency over individuality)
-- Long-term maintainability (documentation investment pays compound returns)
+**Phase 6 — the actual frontier.** The realization of WEPPpy as a *living entity*, not just a codebase. Agents become persistent presences—"ghosts in the machine"—that don't wait for human prompts to act. Self-healing (detecting and resolving operational failures), self-securing (identifying and patching vulnerabilities autonomously), self-extending (adding capabilities, adapting to new architectures, optimizing efficiency). Meta-agents that optimize orchestration patterns across work packages. The distinction between "the software" and "the agents that maintain it" dissolves—WEPPpy becomes a system that understands itself, modifies itself, and evolves.
 
-**The transition requires:**
-- ✅ Letting go of ego ("my way" → "documented way")
-- ✅ Embracing explicitness (tribal knowledge → written specs)
-- ✅ Trusting validation gates (tests over manual checks)
-- ✅ Accepting AI as collaborator (not just tool)
+### The Universal Principle, Validated
+
+Any sufficiently complex software system benefits from documentation as specification, observable patterns, automated validation, agent-executable tooling, and human-AI feedback loops. The four-month track record demonstrates this isn't aspirational—it's the mechanism that produced 1,632 commits with zero methodology failures. The forcing function works: designing for machine readability produces better outcomes for everyone, and the compound returns on documentation investment are real and measurable.
+
+### Agents as First-Class Users: From Developer to Domain Scientist
+
+The original manifesto focused on agents as *developers*—reading code, writing code, maintaining documentation. By February 2026, a second role emerged: agents as *users* of the systems they build. WEPPcloud now exposes three programmatic surfaces that give agents the same capabilities as a human researcher operating the web UI:
+
+**rq-engine** (FastAPI, 30+ endpoints) — agents enqueue WEPP/SWAT+ model runs, poll job status, cancel stalled work, trigger bootstrap sequences, and batch-submit culvert vulnerability assessments. JWT-scoped auth (`rq:enqueue`, `rq:status`, `queries:execute`) ensures agents operate within defined privilege boundaries. An agent can configure a watershed, launch a 100-year climate simulation, and retrieve results without touching a browser.
+
+**query-engine** (DuckDB over Parquet interchange) — agents submit declarative JSON queries against 84+ watershed datasets (soils, landuse, climate, WEPP channel/hillslope outputs, spatial layers). No raw SQL—the schema enforces filters, joins, aggregations, computed columns, and scenario switching through validated payloads. MCP routes expose the same interface to agent tool-use frameworks. A `dry_run` mode lets agents validate query structure before execution, and presets provide canned analytical patterns for common investigations.
+
+**browse/files** — agents traverse run directories, download output files, convert Parquet to CSV on the fly, and retrieve GDAL raster metadata. This closes the last gap: agents can inspect any artifact a human researcher would examine in the file manager.
+
+The closed loop is significant. Agents build WEPPcloud's modeling infrastructure (code, tests, documentation), then *use* that infrastructure to conduct scientific analysis. The same query-engine an agent helped implement becomes the tool it uses to investigate post-fire hydrology.
+
+#### Case Study: Palisades Fire 2024 Shrub Hydrograph Analysis
+
+The strongest proof is a complete, reproducible hydrologic investigation co-authored by GPT-5.2 and Claude Opus 4 with human oversight from Roger Lew. The analysis investigated a counterintuitive finding: undisturbed vegetation scenarios produced *higher* peak discharges than burned scenarios for the 2024 Palisades Fire.
+
+The agent workflow:
+
+1. **Query WEPPcloud** — 8 Python scripts issued declarative JSON queries against the query-engine API for channel output, hillslope water balance, soil properties, landuse parameters, and event-level precipitation data across paired burned/unburned scenarios.
+2. **Generate visualizations** — 69 PNG figures (hydrographs, scatter plots, spatial distributions, event comparisons) produced programmatically and organized into thematic directories.
+3. **Write the paper** — a 608-line LaTeX document with abstract, methodology, results, discussion, and conclusions, compiled to a 9.2 MB PDF with full figure references.
+4. **Reach a finding** — the mechanism was routing and dispersion desynchronization, not differences in infiltration or soil state. Burned hillslopes produce flashier but lower-volume responses that desynchronize at channel confluences, reducing aggregate peaks.
+
+This isn't an agent running a demo query. It's a multi-session scientific investigation that produced peer-review-quality output—the kind of analysis that would take a graduate student weeks of manual data extraction, plotting, and writing. The agents used the same APIs, the same data formats, and the same analytical patterns that a human researcher would, because those interfaces were designed to be machine-readable from the start.
+
+| Metric | Value |
+|--------|-------|
+| Python analysis scripts | 8 |
+| Query-engine API calls | ~40+ (across scenarios and datasets) |
+| Visualizations produced | 69 PNG |
+| LaTeX report | 608 lines → 9.2 MB PDF |
+| Datasets queried | ebe_pw0, chan.out, pass_pw0.events, soil_pw0, landuse |
+| Co-authors | GPT-5.2, Claude Opus 4, Roger Lew |
+| Finding | Routing desynchronization, not infiltration differences |
+
+**The takeaway:** designing APIs for machine readability doesn't just help agents maintain the system—it turns them into domain scientists who can investigate, interpret, and report on model outputs. The forcing function that makes code agent-readable also makes scientific data agent-queryable. The same investment pays twice.
 
 ---
 
@@ -1683,6 +1682,38 @@ In October 2025, WEPPpy executed 10 work packages (8 major, 2 mini) with **0 fai
 **What prevents failure:** Stop criteria that trigger escalation, automated validation (tests + linters + stubtest), incremental MVP-first delivery, comprehensive retrospectives that feed future work.
 
 **The economics:** 10 work packages in 1 month (traditional estimate: 6-12 months). ~$200-500 in API calls vs $60k-120k salary equivalent. 60-120x cost savings with higher quality and captured knowledge.
+
+### Case Study: SWAT+ Integration (January–February 2026)
+
+The SWAT+ integration is the strongest validation of the agentic methodology to date because it isn't an internal refactor—it's a **cross-language integration with an external scientific model** (SWAT+ v61, a Fortran watershed simulation). The data pipeline spans three languages: Python orchestration → Rust recall generation (wepppyo3) → Fortran SWAT+ execution → Rust Parquet interchange. Traditional development would estimate this at 2-3 months for a solo developer. It shipped in 22 days with 16 commits and 0 failed phases.
+
+**Scope:** ~3,500 LOC of new Python (controller + 3 mixins + RQ tasks + FastAPI routes + type stubs), 2 new Rust interchange modules in wepppyo3, 3 bundled SWAT+ reference templates (353 files), 3 UI templates, and 500+ lines of specification documents written *before* code.
+
+**What the guardrails enabled:**
+
+The entire integration followed existing wepppy patterns with zero framework learning curve. The NoDb singleton with Redis locking gave thread-safe state management out of the box. RQ job chaining with StatusMessenger streaming provided the build → run → interchange pipeline with live UI telemetry for free. DuckDB/Parquet queries against the existing hillslope and channel datasets eliminated any need for new SQL infrastructure. Template-based assembly (copy a bundled reference project, patch only the WEPP-owned pieces) avoided SWAT+ version drift complexity entirely.
+
+**Why spec-first mattered:**
+
+Four specification documents (swat-nodb-spec.md, wepp-swat-spec.md, parameterization assessment, README) totaling 500+ lines were written before and during development. These specs defined the recall file format, the WEPP-to-SWAT particle class conversion, the channel parameterization strategy (SWAT-DEG canonical), and the interchange configuration surface. Because the contracts were explicit, the Rust interchange routines and the Python controller were developed in parallel without integration surprises.
+
+**The anti-monolith lesson:**
+
+WEPPpy's most painful technical debt is `omni.py` at 4,519 LOC with cyclomatic complexity of 104—a controller that grew without decomposition. The SWAT integration applied the lesson from day one: three focused mixins (`SwatRecallMixin`, `SwatConnectivityMixin`, `SwatTxtInOutMixin`) kept the main controller at 1,016 LOC with clear separation of concerns. The mixin refactor on the final commit (Feb 22) was a 30-minute cleanup, not a rescue operation.
+
+**Key metrics:**
+
+| Metric | Value |
+|--------|-------|
+| Timeline | 22 days (Jan 31 – Feb 22, 2026) |
+| Total new Python | ~3,500 LOC |
+| Specification docs | 500+ lines, written first |
+| Commits | 16 |
+| Failed phases | 0 |
+| Languages in pipeline | 3 (Python, Rust, Fortran) |
+| Mixin decomposition | From day 1 (3 mixins + controller) |
+
+**The takeaway:** When guardrails are already in place—NoDb contracts, Redis streaming, RQ job patterns, type stubs, wctl tooling, spec-first discipline—integrating a complex external scientific model becomes a matter of following the established patterns rather than inventing new infrastructure. The SWAT+ integration didn't succeed because the developers were fast. It succeeded because the system made the fast path the correct path.
 
 ---
 
