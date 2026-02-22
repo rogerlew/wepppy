@@ -26,6 +26,7 @@ See `docs/dev-notes/controller_foundations.md` for the canonical vision. Key pil
 - Tests: `__tests__/` directory (Jest, jsdom environment).
 
 ## Standard Workflow
+See also: `docs/dev-notes/frontend-change-checklist.md` (unified end-to-end checklist for controller JS changes).
 Follow `docs/dev-notes/module_refactor_workflow.md` for end-to-end instructions. Highlights:
 1. **Scope**: audit jQuery usage, templates, backend routes, and domain documentation before editing.
 2. **Plan**: decide which helpers (`WCDom`, `WCForms`, `WCHttp`, `WCEvents`, `controlBase`) you need and whether payloads switch to JSON.
