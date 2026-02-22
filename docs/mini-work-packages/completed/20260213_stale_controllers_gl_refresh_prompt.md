@@ -1,5 +1,5 @@
 # Mini Work Package: Stale `controllers-gl.js` Refresh Prompt For Run Pages
-Status: Draft
+Status: Complete
 Last Updated: 2026-02-13
 Primary Areas: `wepppy/weppcloud/controllers_js/build_controllers_js.py`, `wepppy/weppcloud/controllers_js/templates/controllers.js.j2`, `wepppy/weppcloud/_context_processors.py`, `wepppy/weppcloud/static/js/controllers_gl_stale_check.js`, `wepppy/weppcloud/static/js/session_heartbeat.js`, `wepppy/weppcloud/templates/base_pure.htm`, `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm`, `wepppy/weppcloud/routes/fork_console/templates/rq-fork-console.htm`, `wepppy/weppcloud/routes/archive_dashboard/templates/rq-archive-dashboard.htm`, `wepppy/weppcloud/routes/readme_md/templates/readme_editor.htm`, `wepppy/weppcloud/templates/reports/_base_report.htm`, `wepppy/weppcloud/templates/reports/_page_container.htm`, `wepppy/weppcloud/controllers_js/__tests__/*`
 
