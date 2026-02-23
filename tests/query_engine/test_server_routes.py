@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from types import SimpleNamespace
 from typing import Any, Dict, List
 
@@ -10,6 +11,9 @@ pytest.importorskip("starlette")
 from starlette.testclient import TestClient
 
 from wepppy.query_engine.formatter import QueryResult
+
+_CORRELATION_HEADER = "X-Correlation-ID"
+_CORRELATION_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 
 
 @pytest.mark.unit
@@ -71,10 +75,17 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
     client = TestClient(app)
 
     # GET console renders without and with trailing slash
+    correlation_id = "cid-query-console-1"
     response_no_slash_get = client.get(f"/runs/{runid}/query")
-    response_trailing_slash_get = client.get(f"/runs/{runid}/query/")
+    response_trailing_slash_get = client.get(
+        f"/runs/{runid}/query/",
+        headers={_CORRELATION_HEADER: correlation_id},
+    )
     assert response_no_slash_get.status_code == 200
     assert response_trailing_slash_get.status_code == 200
+    assert _CORRELATION_HEADER in response_no_slash_get.headers
+    assert _CORRELATION_ID_PATTERN.match(response_no_slash_get.headers[_CORRELATION_HEADER])
+    assert response_trailing_slash_get.headers[_CORRELATION_HEADER] == correlation_id
 
     payload: Dict[str, Any] = {
         "datasets": ["datasets/example.parquet"],
@@ -82,12 +93,21 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
         "limit": 1,
     }
 
-    response_no_slash_post = client.post(f"/runs/{runid}/query", json=payload)
-    response_trailing_slash_post = client.post(f"/runs/{runid}/query/", json=payload)
+    response_no_slash_post = client.post(
+        f"/runs/{runid}/query",
+        json=payload,
+        headers={_CORRELATION_HEADER: correlation_id},
+    )
+    response_trailing_slash_post = client.post(
+        f"/runs/{runid}/query/",
+        json=payload,
+        headers={_CORRELATION_HEADER: correlation_id},
+    )
 
     assert response_no_slash_post.status_code == 200
     assert response_trailing_slash_post.status_code == 200
     assert response_trailing_slash_post.json() == response_no_slash_post.json()
+    assert response_trailing_slash_post.headers[_CORRELATION_HEADER] == correlation_id
 
 
 @pytest.mark.unit
@@ -127,6 +147,8 @@ def test_query_endpoint_rejects_garbage_paths_with_pups(monkeypatch, tmp_path):
             f"GET {garbage_path} should return 400, got {response_get.status_code}"
         )
         assert "scenario" in response_get.text.lower() or "_pups" in response_get.text.lower()
+        assert _CORRELATION_HEADER in response_get.headers
+        assert _CORRELATION_ID_PATTERN.match(response_get.headers[_CORRELATION_HEADER])
 
         # POST request should also fail with 400
         response_post = client.post(garbage_path, json={"datasets": ["test.parquet"]})
@@ -136,6 +158,8 @@ def test_query_endpoint_rejects_garbage_paths_with_pups(monkeypatch, tmp_path):
         data = response_post.json()
         assert "error" in data
         assert "scenario" in data["error"].lower() or "body" in data["error"].lower()
+        assert _CORRELATION_HEADER in response_post.headers
+        assert _CORRELATION_ID_PATTERN.match(response_post.headers[_CORRELATION_HEADER])
 
 
 @pytest.mark.unit
@@ -205,6 +229,8 @@ def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
 
     response = client.post(f"/runs/{runid}/query", json=payload)
     assert response.status_code == 200
+    assert _CORRELATION_HEADER in response.headers
+    assert _CORRELATION_ID_PATTERN.match(response.headers[_CORRELATION_HEADER])
 
     # Verify scenario was passed to resolve_run_context
     assert len(captured_scenario) == 1
@@ -247,9 +273,31 @@ def test_query_endpoint_invalid_payload_returns_422_with_expected_envelope(monke
 
     response = client.post(f"/runs/{runid}/query", json={"datasets": ["test.parquet"]})
     assert response.status_code == 422
+    assert _CORRELATION_HEADER in response.headers
+    assert _CORRELATION_ID_PATTERN.match(response.headers[_CORRELATION_HEADER])
 
     data = response.json()
     assert set(data.keys()) == {"error", "stacktrace", "exc_info", "status_code"}
     assert data["status_code"] == 422
     assert data["stacktrace"] == data["exc_info"]
     assert "Invalid query payload:" in data["error"]
+
+
+@pytest.mark.unit
+def test_query_engine_preflight_emits_correlation_id_header() -> None:
+    from wepppy.query_engine.app import server
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    response = client.options(
+        "/runs/demo/query",
+        headers={
+            "Origin": "https://example.test",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+
+    assert response.status_code == 200
+    assert _CORRELATION_HEADER in response.headers
+    assert _CORRELATION_ID_PATTERN.match(response.headers[_CORRELATION_HEADER])

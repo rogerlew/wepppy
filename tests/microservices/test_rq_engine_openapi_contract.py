@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -21,6 +22,8 @@ MAX_OPENAPI_CANONICAL_BYTES = 90_000
 MAX_FROZEN_SUMMARY_CHARS = 72
 MAX_FROZEN_DESCRIPTION_CHARS = 280
 MAX_FROZEN_METADATA_TOTAL_CHARS = 12_000
+_CORRELATION_HEADER = "X-Correlation-ID"
+_CORRELATION_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 
 
 def _strip_markdown_code(text: str) -> str:
@@ -192,6 +195,30 @@ def test_openapi_document_size_budget(_openapi_doc: dict) -> None:
         "OpenAPI document exceeded size budget. "
         f"size_bytes={size_bytes} budget_bytes={MAX_OPENAPI_CANONICAL_BYTES}"
     )
+
+
+def test_openapi_response_emits_correlation_header() -> None:
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+    correlation_id = response.headers.get(_CORRELATION_HEADER)
+    assert correlation_id is not None
+    assert _CORRELATION_ID_PATTERN.match(correlation_id)
+
+
+def test_openapi_response_replaces_invalid_correlation_header() -> None:
+    with TestClient(rq_engine.app) as client:
+        response = client.get(
+            "/openapi.json",
+            headers={_CORRELATION_HEADER: "invalid id with spaces"},
+        )
+
+    assert response.status_code == 200
+    correlation_id = response.headers.get(_CORRELATION_HEADER)
+    assert correlation_id is not None
+    assert correlation_id != "invalid id with spaces"
+    assert _CORRELATION_ID_PATTERN.match(correlation_id)
 
 
 def test_frozen_agent_metadata_size_budgets(

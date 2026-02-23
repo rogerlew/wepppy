@@ -55,6 +55,7 @@ See `docs/weppcloud-bootstrap-spec.md` for implementation and deployment details
 - **[AGENTS.md](AGENTS.md)** - AI agent coding guide and conventions
 - **[CONTRIBUTING_AGENTS.md](CONTRIBUTING_AGENTS.md)** - Contributing guide for AI coding assistants
 - **[docs/schemas/rq-response-contract.md](docs/schemas/rq-response-contract.md)** - RQ and rq-engine response contract (canonical keys and error shape)
+- **[docs/dev-notes/correlation-id-debugging.md](docs/dev-notes/correlation-id-debugging.md)** - End-to-end correlation ID debugging workflow (header echo, logs, enqueue metadata, worker continuity)
 - **[docs/README_AUDIT.md](docs/README_AUDIT.md)** - README.md quality audit and improvement recommendations
 - **[docs/prompt_templates/readme_authoring_template.md](docs/prompt_templates/readme_authoring_template.md)** - Standard template for authoring README.md files
 - **[docs/schemas/](docs/schemas/)** - JSON schemas for data structures
@@ -476,6 +477,7 @@ WEPPCLOUD_IMAGE=registry.example.com/wepppy:2025.02 docker compose -f docker/doc
 
 ## Further Reading
 - `docs/dev-notes/redis_dev_notes.md` — deep dive into Redis usage, DB allocations, and debugging recipes.
+- `docs/dev-notes/correlation-id-debugging.md` — practical request-to-worker correlation tracing with `X-Correlation-ID`.
 - `wepppy/weppcloud/controllers_js/README.md` — controller bundling, singleton contracts, and WS client expectations.
 - `wepppy/nodb/base.py` — the canonical NoDb implementation with logging, caching, and locking primitives.
 - `wepppy/topo/peridot/peridot_runner.py` — how Rust binaries integrate with WEPP abstractions.

@@ -1,6 +1,6 @@
 # RQ-Engine Agent API Contract
 > Canonical contract for agent clients using the WEPPcloud rq-engine.
-> **See also:** `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`, and user-facing `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`.
+> **See also:** `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/dev-notes/correlation-id-debugging.md`, `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`, and user-facing `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`.
 
 ## Purpose
 This document defines how agents should call rq-engine safely and predictably.
@@ -109,6 +109,13 @@ Common route-level status requirements are enforced by
 3. If response includes `job_id`, poll `GET /api/jobstatus/{job_id}`.
 4. On failure/debug needs, fetch `GET /api/jobinfo/{job_id}`.
 5. Optionally cancel with `POST /api/canceljob/{job_id}`.
+
+## Correlation ID Debugging
+
+- Send `X-Correlation-ID` on submission requests to make cross-service tracing deterministic.
+- Confirm `X-Correlation-ID` is echoed on rq-engine responses.
+- Use `GET /api/jobinfo/{job_id}` together with worker logs to validate enqueue metadata continuity.
+- For end-to-end commands and troubleshooting patterns, use `docs/dev-notes/correlation-id-debugging.md`.
 
 ## Browser Renewal Contract (UI clients)
 For WEPPcloud browser traffic using `WCHttp.requestWithSessionToken(...)`, token

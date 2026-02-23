@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-02-20T05:14:31Z",
+  "generated_at_utc": "2026-02-23T19:20:42Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -29,66 +29,64 @@
     "eslint_available": true,
     "python_version": "Python 3.12.3"
   },
+  "exceptions": {
+    "source_file": null,
+    "configured_count": 0,
+    "applied_count": 0,
+    "applied": []
+  },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 724.0,
-      "p50": 95.5,
-      "p75": 233.0,
-      "p90": 483.5,
-      "p95": 750.1,
-      "p99": 1745.12,
-      "max": 4519.0
+      "count": 756.0,
+      "p50": 101.0,
+      "p75": 245.5,
+      "p90": 508.0,
+      "p95": 773.25,
+      "p99": 1228.15,
+      "max": 2214.0
     },
     "python_prod_max_function_len": {
-      "count": 559.0,
-      "p50": 55.0,
-      "p75": 101.0,
-      "p90": 150.4,
-      "p95": 215.1,
-      "p99": 341.42,
-      "max": 394.0
+      "count": 590.0,
+      "p50": 57.0,
+      "p75": 102.75,
+      "p90": 149.1,
+      "p95": 210.55,
+      "p99": 276.88,
+      "max": 381.0
     },
     "python_prod_max_cc": {
-      "count": 568.0,
-      "p50": 9.0,
-      "p75": 17.25,
+      "count": 600.0,
+      "p50": 10.0,
+      "p75": 18.0,
       "p90": 29.0,
-      "p95": 39.0,
-      "p99": 63.33,
-      "max": 119.0
+      "p95": 37.0,
+      "p99": 56.01,
+      "max": 67.0
     },
     "js_source_file_sloc": {
-      "count": 147.0,
+      "count": 150.0,
       "p50": 257.0,
-      "p75": 554.0,
-      "p90": 1150.6,
-      "p95": 1324.8,
-      "p99": 2229.06,
-      "max": 3222.0
+      "p75": 556.0,
+      "p90": 1122.4,
+      "p95": 1318.2,
+      "p99": 2130.81,
+      "max": 2500.0
     },
     "js_source_max_cc": {
-      "count": 147.0,
+      "count": 150.0,
       "p50": 7.0,
-      "p75": 22.5,
-      "p90": 33.4,
-      "p95": 44.1,
-      "p99": 75.94,
+      "p75": 21.0,
+      "p90": 33.1,
+      "p95": 43.65,
+      "p99": 75.61,
       "max": 155.0
     }
   },
   "hotspots": {
     "python_file_sloc_top20": [
       {
-        "path": "wepppy/nodb/mods/omni/omni.py",
-        "value": 4519.0
-      },
-      {
-        "path": "wepppy/nodb/core/climate.py",
-        "value": 2773.0
-      },
-      {
-        "path": "wepppy/nodb/mods/swat/swat.py",
-        "value": 2244.0
+        "path": "tests/nodb/mods/test_omni.py",
+        "value": 2380.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -96,7 +94,7 @@
       },
       {
         "path": "wepppy/nodb/core/wepp.py",
-        "value": 2024.0
+        "value": 2029.0
       },
       {
         "path": "tests/microservices/test_files_routes.py",
@@ -107,32 +105,20 @@
         "value": 1994.0
       },
       {
-        "path": "tests/nodb/mods/test_omni.py",
-        "value": 1988.0
+        "path": "wepppy/nodb/base.py",
+        "value": 1828.0
       },
       {
         "path": "wepppy/soils/ssurgo/ssurgo.py",
-        "value": 1784.0
-      },
-      {
-        "path": "wepppy/nodb/core/watershed.py",
-        "value": 1758.0
-      },
-      {
-        "path": "wepppy/nodb/base.py",
-        "value": 1702.0
+        "value": 1785.0
       },
       {
         "path": "tests/microservices/test_browse_auth_routes.py",
         "value": 1651.0
       },
       {
-        "path": "wepppy/microservices/browse/browse.py",
-        "value": 1476.0
-      },
-      {
         "path": "wepppy/rq/culvert_rq.py",
-        "value": 1404.0
+        "value": 1426.0
       },
       {
         "path": "wepppy/topo/wbt/wbt_topaz_emulator.py",
@@ -140,11 +126,19 @@
       },
       {
         "path": "wepppy/nodb/core/landuse.py",
-        "value": 1238.0
+        "value": 1254.0
       },
       {
         "path": "wepppy/nodb/core/soils.py",
-        "value": 1187.0
+        "value": 1207.0
+      },
+      {
+        "path": "wepppy/nodb/mods/omni/omni_contrast_build_service.py",
+        "value": 1199.0
+      },
+      {
+        "path": "wepppy/nodb/core/climate.py",
+        "value": 1183.0
       },
       {
         "path": "wepppy/nodb/core/ron.py",
@@ -157,13 +151,21 @@
       {
         "path": "wepppy/all_your_base/geo/shapefile.py",
         "value": 1099.0
+      },
+      {
+        "path": "wepppy/nodb/mods/omni/omni.py",
+        "value": 1094.0
+      },
+      {
+        "path": "wepppy/microservices/browse/browse.py",
+        "value": 1086.0
+      },
+      {
+        "path": "wepppy/rq/project_rq.py",
+        "value": 1078.0
       }
     ],
     "python_max_function_len_top20": [
-      {
-        "path": "wepppy/all_your_base/geo/ogrmerge.py",
-        "value": 394.0
-      },
       {
         "path": "wepppy/nodb/mods/ash_transport/neris_ash_model.py",
         "value": 381.0
@@ -175,18 +177,6 @@
       {
         "path": "wepppy/rq/wepp_rq_pipeline.py",
         "value": 365.0
-      },
-      {
-        "path": "wepppy/nodb/mods/omni/omni.py",
-        "value": 353.0
-      },
-      {
-        "path": "wepppy/nodb/mods/path_ce_model.py",
-        "value": 342.0
-      },
-      {
-        "path": "wepppy/microservices/browse/browse.py",
-        "value": 341.0
       },
       {
         "path": "wepppy/export/arc_export.py",
@@ -214,23 +204,23 @@
       },
       {
         "path": "wepppy/nodb/mods/ash_transport/ash.py",
-        "value": 258.0
+        "value": 261.0
       },
       {
         "path": "wepppy/export/gpkg_export.py",
         "value": 253.0
       },
       {
+        "path": "wepppy/nodb/core/wepp_prep_service.py",
+        "value": 252.0
+      },
+      {
         "path": "wepppy/webservices/wmesque.py",
         "value": 249.0
       },
       {
-        "path": "wepppy/nodb/core/climate.py",
-        "value": 248.0
-      },
-      {
         "path": "wepppy/rq/omni_rq.py",
-        "value": 243.0
+        "value": 245.0
       },
       {
         "path": "tools/wctl2/commands/playwright.py",
@@ -239,40 +229,44 @@
       {
         "path": "tests/wepp/reports/test_channel_watbal.py",
         "value": 237.0
+      },
+      {
+        "path": "wepppy/nodb/unitizer.py",
+        "value": 235.0
+      },
+      {
+        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+        "value": 233.0
+      },
+      {
+        "path": "wepppy/nodb/mods/ash_transport/ash_multi_year_model.py",
+        "value": 226.0
+      },
+      {
+        "path": "wepppy/microservices/browse/dtale.py",
+        "value": 221.0
       }
     ],
     "python_max_cc_top20": [
       {
-        "path": "wepppy/all_your_base/geo/ogrmerge.py",
-        "value": 119.0
+        "path": "wepppy/nodb/core/wepp_prep_service.py",
+        "value": 67.0
       },
       {
-        "path": "wepppy/nodb/mods/omni/omni.py",
-        "value": 104.0
-      },
-      {
-        "path": "wepppy/microservices/browse/browse.py",
-        "value": 84.0
-      },
-      {
-        "path": "wepppy/nodb/mods/path_ce_model.py",
-        "value": 81.0
+        "path": "wepppy/microservices/rq_engine/fork_archive_routes.py",
+        "value": 66.0
       },
       {
         "path": "wepppy/export/gpkg_export.py",
         "value": 65.0
       },
       {
-        "path": "wepppy/microservices/rq_engine/fork_archive_routes.py",
-        "value": 64.0
-      },
-      {
-        "path": "wepppy/nodb/core/climate.py",
-        "value": 63.0
-      },
-      {
         "path": "wepppy/export/arc_export.py",
         "value": 61.0
+      },
+      {
+        "path": "tools/code_quality_observability.py",
+        "value": 57.0
       },
       {
         "path": "wepppy/weppcloud/utils/helpers.py",
@@ -289,10 +283,6 @@
       {
         "path": "wepppy/climates/cligen/cligen.py",
         "value": 51.0
-      },
-      {
-        "path": "tools/code_quality_observability.py",
-        "value": 50.0
       },
       {
         "path": "wepppy/topo/peridot/peridot_runner.py",
@@ -321,16 +311,32 @@
       {
         "path": "wepppy/wepp/reports/return_periods.py",
         "value": 44.0
+      },
+      {
+        "path": "tests/disturbed/analyze_matrix.py",
+        "value": 43.0
+      },
+      {
+        "path": "wepppy/nodb/batch_runner.py",
+        "value": 43.0
+      },
+      {
+        "path": "wepppy/nodb/core/landuse.py",
+        "value": 43.0
+      },
+      {
+        "path": "wepppy/all_your_base/geo/geo.py",
+        "value": 42.0
       }
     ],
     "js_file_sloc_top20": [
       {
-        "path": "wepppy/weppcloud/controllers_js/map_gl.js",
-        "value": 3222.0
-      },
-      {
         "path": "wepppy/weppcloud/controllers_js/omni.js",
         "value": 2500.0
+      },
+      {
+        "path": "wepppy/weppcloud/controllers_js/map_gl.js",
+        "value": 2342.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/batch_runner.js",

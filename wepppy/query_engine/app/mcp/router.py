@@ -10,13 +10,21 @@ from collections import OrderedDict
 from pathlib import Path
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
-from uuid import uuid4
 
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
+from wepppy.observability.correlation import (
+    CORRELATION_ID_HEADER,
+    bind_correlation_id,
+    current_correlation_id,
+    generate_correlation_id,
+    install_correlation_log_record_factory,
+    reset_correlation_id,
+    select_inbound_correlation_id,
+)
 from ..helpers import resolve_run_path
 from ..query_presets import QUERY_PRESETS
 from .auth import (
@@ -31,6 +39,7 @@ from wepppy.query_engine.catalog import resolve_dataset_path_alias
 from wepppy.query_engine.payload import QueryRequest
 
 LOGGER = logging.getLogger(__name__)
+install_correlation_log_record_factory()
 SERVICE_NAME = "weppcloud-query-engine"
 SERVICE_VERSION = os.getenv("WEPP_MCP_SERVICE_VERSION") or os.getenv("WEPP_RELEASE") or "unknown"
 IGNORED_CATALOG_PREFIXES = (".mypy_cache/", ".mypy_cache", "_query_engine/", "_query_engine")
@@ -53,16 +62,18 @@ class QueryValidationException(Exception):
 
 
 def _with_trace_id(meta: Mapping[str, Any] | None = None) -> dict[str, Any]:
-    """Attach a random trace identifier to metadata payloads.
+    """Attach correlation-compatible trace metadata to response payloads.
 
     Args:
         meta: Optional metadata dictionary.
 
     Returns:
-        Dictionary containing the original metadata plus a `trace_id`.
+        Dictionary containing metadata plus `trace_id` and `correlation_id`.
     """
     payload = dict(meta or {})
-    payload.setdefault("trace_id", uuid4().hex)
+    correlation_id = current_correlation_id() or generate_correlation_id()
+    payload.setdefault("trace_id", correlation_id)
+    payload.setdefault("correlation_id", correlation_id)
     return payload
 
 
@@ -1133,4 +1144,20 @@ def create_mcp_app() -> Starlette:
     app = Starlette(debug=False, routes=routes)
     config = get_auth_config()
     app.add_middleware(MCPAuthMiddleware, config=config, path_prefix="")
+
+    @app.middleware("http")
+    async def correlation_id_middleware(request: Request, call_next):
+        inbound_id = select_inbound_correlation_id(
+            request.headers.get(CORRELATION_ID_HEADER),
+            prefer_current_context=True,
+        )
+        correlation_id, token = bind_correlation_id(inbound_id)
+        request.state.correlation_id = correlation_id
+        try:
+            response = await call_next(request)
+            response.headers[CORRELATION_ID_HEADER] = correlation_id
+            return response
+        finally:
+            reset_correlation_id(token)
+
     return app

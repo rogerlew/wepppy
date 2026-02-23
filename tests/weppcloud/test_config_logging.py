@@ -78,3 +78,43 @@ def test_config_logging_applies_filter_and_level():
             logger = logging.getLogger(name)
             logger.setLevel(level)
             logger.filters[:] = filters
+
+
+def test_config_logging_installs_correlation_log_fields():
+    logger_names = [
+        "gunicorn.error",
+        "gunicorn.access",
+        "weppcloud.security",
+        "weppcloud.app",
+    ]
+    backups = {}
+    try:
+        for name in logger_names:
+            logger = logging.getLogger(name)
+            backups[name] = (logger.level, list(logger.filters))
+            logger.filters.clear()
+            logger.setLevel(logging.NOTSET)
+
+        config_logging(level=logging.INFO)
+        logger = logging.getLogger("weppcloud.app")
+        record = logger.makeRecord(
+            logger.name,
+            logging.INFO,
+            __file__,
+            1,
+            "correlation smoke",
+            (),
+            None,
+        )
+        assert getattr(record, "correlation_id", None) == "-"
+        assert getattr(record, "trace_id", None) == "-"
+        formatted = logging.Formatter(
+            "%(levelname)s %(correlation_id)s %(trace_id)s %(message)s"
+        ).format(record)
+        assert " correlation smoke" in formatted
+        assert " - - " in formatted
+    finally:
+        for name, (level, filters) in backups.items():
+            logger = logging.getLogger(name)
+            logger.setLevel(level)
+            logger.filters[:] = filters

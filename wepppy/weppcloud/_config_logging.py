@@ -1,6 +1,9 @@
 
 import logging
 
+from wepppy.observability.correlation import install_correlation_log_record_factory
+
+
 class HealthFilter(logging.Filter):
     def filter(self, record):
         msg = record.getMessage()
@@ -9,6 +12,7 @@ class HealthFilter(logging.Filter):
 _loggers = ["gunicorn.error", "gunicorn.access", "weppcloud.security", "weppcloud.app"]
 
 def config_logging(level=logging.INFO):
+    install_correlation_log_record_factory()
     # make sure the health filter is applied to all relevant loggers
     filter_type = HealthFilter
     for logger_name in _loggers:

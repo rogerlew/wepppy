@@ -340,6 +340,25 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Correlation ID Structured Logging End-to-End
+**Completed**: 2026-02-23
+**Duration**: 1 day
+**Status**: ✅ **COMPLETE**
+**Owner**: Codex
+**Link**: [docs/work-packages/20260224_correlation_id_structured_logging/](docs/work-packages/20260224_correlation_id_structured_logging/)
+**Description**: Implemented canonical `correlation_id` propagation across `weppcloud`, `rq_engine`, `query_engine`, and `rq` with `X-Correlation-ID` ingress/egress behavior, queue metadata continuity, and trace compatibility retention.
+
+**Outcome**: Correlation ID is generated/accepted at ingress, returned in responses, propagated via enqueue/worker metadata, and mapped into query-engine `trace_id` without contract breakage. Final explorer review surfaced a Flask direct-enqueue gap that was fixed before closure.
+
+**Deliverables**:
+- ✅ Shared utility module: `wepppy/observability/correlation.py`
+- ✅ Required artifacts: baseline inventory, final flow matrix, validation summary, sample log lines
+- ✅ Required orchestration: baseline explorer, workers A-D, final explorer review
+- ✅ Gate results: targeted suites PASS, broad-exception changed-file enforcement PASS, code-quality observability PASS
+- ✅ Validation: `wctl run-pytest tests --maxfail=1` PASS (`2086 passed, 29 skipped`), `wctl check-rq-graph` PASS
+
+---
+
 ### Top Modules Broad-Exception Closure
 **Completed**: 2026-02-23  
 **Duration**: 1 day  
@@ -606,7 +625,7 @@ Track how long packages take from start to completion:
 - **Current average**: [Calculate from recent completions]
 
 ### Work in Progress
-- **Current**: 3 packages
+- **Current**: 2 packages
 - **Target**: 2-4 packages
 - **Status**: ✅ **Within target**
 

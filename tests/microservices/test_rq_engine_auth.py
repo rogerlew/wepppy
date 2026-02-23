@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from wepppy.microservices.rq_engine import auth
 
 
 pytestmark = pytest.mark.microservice
+_CORRELATION_HEADER = "X-Correlation-ID"
+_CORRELATION_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 
 
 def test_authorize_run_access_rejects_service_without_run_scope() -> None:
@@ -15,6 +19,31 @@ def test_authorize_run_access_rejects_service_without_run_scope() -> None:
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "forbidden"
     assert "run scope" in exc_info.value.message.lower()
+
+
+def test_rq_engine_health_emits_correlation_id_header() -> None:
+    testclient = pytest.importorskip("fastapi.testclient")
+    from wepppy.microservices import rq_engine
+
+    with testclient.TestClient(rq_engine.app) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    correlation_id = response.headers.get(_CORRELATION_HEADER)
+    assert correlation_id is not None
+    assert _CORRELATION_ID_PATTERN.match(correlation_id)
+
+
+def test_rq_engine_health_echoes_valid_correlation_id_header() -> None:
+    testclient = pytest.importorskip("fastapi.testclient")
+    from wepppy.microservices import rq_engine
+
+    inbound_correlation_id = "cid-rq-engine-auth-01"
+    with testclient.TestClient(rq_engine.app) as client:
+        response = client.get("/health", headers={_CORRELATION_HEADER: inbound_correlation_id})
+
+    assert response.status_code == 200
+    assert response.headers.get(_CORRELATION_HEADER) == inbound_correlation_id
 
 
 def test_authorize_run_access_rejects_mcp_without_run_scope() -> None:

@@ -22,6 +22,12 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
+from wepppy.observability.correlation import (
+    install_correlation_log_record_factory,
+    normalize_correlation_id,
+    reset_correlation_id,
+    set_correlation_id,
+)
 
 import rq
 from rq import Worker, Queue
@@ -57,6 +63,7 @@ RQ_DB = int(RedisDB.RQ)
 DEFAULT_RESULT_TTL = 604_800  # 1 week
 
 LOGGER = logging.getLogger(__name__)
+install_correlation_log_record_factory()
 PROFILE_COVERAGE_SETTINGS = load_settings_from_env()
 if PROFILE_COVERAGE_SETTINGS.enabled and Coverage is not None:
     PROFILE_COVERAGE_SETTINGS.ensure_data_root(LOGGER)
@@ -143,10 +150,16 @@ class WepppyRqWorker(Worker):
         job.save()
 
         auth_token = None
+        correlation_token = None
         if isinstance(job.meta, dict):
             auth_actor = job.meta.get("auth_actor")
             if isinstance(auth_actor, dict) and auth_actor:
                 auth_token = set_auth_actor(auth_actor)
+            raw_correlation_id = job.meta.get("correlation_id")
+            if isinstance(raw_correlation_id, str):
+                correlation_id = normalize_correlation_id(raw_correlation_id)
+                if correlation_id:
+                    correlation_token = set_correlation_id(correlation_id)
 
         wd = None
         if runid is not None:
@@ -174,6 +187,8 @@ class WepppyRqWorker(Worker):
                 self._stop_job_coverage(coverage_state)
             if auth_token is not None:
                 reset_auth_actor(auth_token)
+            if correlation_token is not None:
+                reset_correlation_id(correlation_token)
             if file_handler:
                 self.log.removeHandler(file_handler)
                 

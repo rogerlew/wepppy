@@ -11,6 +11,8 @@ from typing import Any, Mapping
 import redis
 from rq import Queue, get_current_job
 
+from wepppy.observability.correlation import current_correlation_id, normalize_correlation_id
+
 _LOGGER = logging.getLogger(__name__)
 _AUTH_ACTOR: ContextVar[dict[str, Any] | None] = ContextVar("auth_actor", default=None)
 _ENQUEUE_TRACE_DEPTH: ContextVar[int] = ContextVar("enqueue_trace_depth", default=0)
@@ -123,7 +125,7 @@ def reset_auth_actor(token: Token) -> None:
 
 
 def install_rq_auth_actor_hook() -> None:
-    """Patch rq queues so enqueued jobs capture the active auth actor."""
+    """Patch rq queues so enqueued jobs capture auth actor and correlation metadata."""
     if getattr(Queue, "_auth_actor_wrapped", False):
         return
 
@@ -133,20 +135,31 @@ def install_rq_auth_actor_hook() -> None:
             try:
                 job = func(self, *args, **kwargs)
                 actor = _AUTH_ACTOR.get()
-                if actor and job is not None:
+                correlation_id = normalize_correlation_id(current_correlation_id())
+                if job is not None:
                     try:
                         meta = dict(job.meta or {})
                     except AttributeError:  # pragma: no cover - defensive guard
                         meta = None
                     if isinstance(meta, dict):
-                        if "auth_actor" not in meta:
+                        should_save_meta = False
+                        if actor and "auth_actor" not in meta:
                             meta["auth_actor"] = actor
+                            should_save_meta = True
+                        if correlation_id:
+                            existing_correlation = normalize_correlation_id(meta.get("correlation_id"))
+                            if existing_correlation is None:
+                                meta["correlation_id"] = correlation_id
+                                should_save_meta = True
+                        if should_save_meta:
                             job.meta = meta
                             try:
                                 job.save_meta()
                             except (redis.exceptions.RedisError, OSError) as exc:  # pragma: no cover - logging only
                                 _LOGGER.debug(
-                                    "Unable to persist auth actor for job %s: %s", getattr(job, "id", "?"), exc
+                                    "Unable to persist enqueue metadata for job %s: %s",
+                                    getattr(job, "id", "?"),
+                                    exc,
                                 )
                 if job is None:
                     return job

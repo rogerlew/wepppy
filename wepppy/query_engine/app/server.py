@@ -27,6 +27,13 @@ from starlette.routing import Route, Mount
 from starlette.templating import Jinja2Templates
 from jinja2 import ChoiceLoader, FileSystemLoader
 
+from wepppy.observability.correlation import (
+    CORRELATION_ID_HEADER,
+    bind_correlation_id,
+    install_correlation_log_record_factory,
+    reset_correlation_id,
+    select_inbound_correlation_id,
+)
 from wepppy.config.secrets import get_secret
 
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
@@ -44,6 +51,7 @@ if SHARED_TEMPLATES_DIR.exists():
     loaders.append(FileSystemLoader(str(SHARED_TEMPLATES_DIR)))
 TEMPLATES.env.loader = ChoiceLoader(loaders)
 LOGGER = logging.getLogger(__name__)
+install_correlation_log_record_factory()
 DOCS_ROOT = Path(__file__).resolve().parent.parent / "docs"
 MCP_OPENAPI_PATH = DOCS_ROOT / "mcp_openapi.yaml"
 ASSET_VERSION = resolve_asset_version()
@@ -627,7 +635,7 @@ def create_app() -> Starlette:
         LOGGER.info("WEPP_MCP_JWT_SECRET not configured; MCP API disabled")
 
     app = Starlette(debug=False, routes=routes, exception_handlers=exception_handlers)
-    
+
     # Add CORS middleware to allow cross-origin requests
     app.add_middleware(
         CORSMiddleware,
@@ -636,5 +644,17 @@ def create_app() -> Starlette:
         allow_methods=["*"],  # Allow all methods (GET, POST, OPTIONS, etc.)
         allow_headers=["*"],  # Allow all headers
     )
-    
+
+    @app.middleware("http")
+    async def correlation_id_middleware(request: StarletteRequest, call_next):
+        inbound_id = select_inbound_correlation_id(request.headers.get(CORRELATION_ID_HEADER))
+        correlation_id, token = bind_correlation_id(inbound_id)
+        request.state.correlation_id = correlation_id
+        try:
+            response = await call_next(request)
+            response.headers[CORRELATION_ID_HEADER] = correlation_id
+            return response
+        finally:
+            reset_correlation_id(token)
+
     return app

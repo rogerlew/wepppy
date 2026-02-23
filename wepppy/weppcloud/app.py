@@ -20,7 +20,7 @@ import awesome_codename
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from flask import (
-    Flask, jsonify, request, render_template
+    Flask, jsonify, g, request, render_template
 )
 
 from sqlalchemy import func
@@ -41,6 +41,14 @@ from flask_migrate import Migrate
 from wtforms import StringField
 
 from wepppy.nodb.core import Ron
+from wepppy.observability.correlation import (
+    CORRELATION_ID_HEADER,
+    bind_correlation_id,
+    current_correlation_id,
+    generate_correlation_id,
+    reset_correlation_id,
+)
+from wepppy.rq.auth_actor import install_rq_auth_actor_hook
 from wepppy.weppcloud.utils.assets import resolve_asset_version
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.utils.agent_auth import init_agent_jwt
@@ -60,6 +68,7 @@ app = Flask(__name__)
 config_app(app)
 init_agent_jwt(app)
 init_profile_coverage(app)
+install_rq_auth_actor_hook()
 asset_version = resolve_asset_version()
 app.config.setdefault("ASSET_VERSION", asset_version)
 os.environ.setdefault("ASSET_VERSION", str(app.config["ASSET_VERSION"]))
@@ -80,6 +89,35 @@ if not hasattr(app, "session_cookie_name"):
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1
 )
+
+_CORRELATION_TOKEN_KEY = "_correlation_token"
+
+
+@app.before_request
+def _bind_request_correlation_id() -> None:
+    correlation_id, token = bind_correlation_id(request.headers.get(CORRELATION_ID_HEADER))
+    g.correlation_id = correlation_id
+    setattr(g, _CORRELATION_TOKEN_KEY, token)
+
+
+@app.after_request
+def _emit_request_correlation_id(response):
+    correlation_id = (
+        getattr(g, "correlation_id", None)
+        or current_correlation_id()
+        or generate_correlation_id()
+    )
+    response.headers[CORRELATION_ID_HEADER] = correlation_id
+    return response
+
+
+@app.teardown_request
+def _reset_request_correlation_id(_exception: BaseException | None) -> None:
+    token = getattr(g, _CORRELATION_TOKEN_KEY, None)
+    if token is None:
+        return
+    reset_correlation_id(token)
+    setattr(g, _CORRELATION_TOKEN_KEY, None)
 
 # Setup Flask-Security
 # Create database connection object

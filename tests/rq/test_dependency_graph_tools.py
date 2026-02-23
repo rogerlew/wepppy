@@ -502,3 +502,79 @@ def test_dependency_graph_auth_actor_trace_dedupes_enqueue_delegate(
     queue.enqueue(lambda: None)
 
     assert recorded == ["enqueue"]
+
+
+def test_dependency_graph_auth_actor_hook_persists_correlation_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    auth_actor = _load_auth_actor_module()
+    from wepppy.observability.correlation import reset_correlation_id, set_correlation_id
+
+    class _FakeJob:
+        def __init__(self, job_id: str) -> None:
+            self.id = job_id
+            self.meta: dict[str, str] = {}
+            self.save_meta_calls = 0
+
+        def save_meta(self) -> None:
+            self.save_meta_calls += 1
+
+    class _FakeQueue:
+        name = "default"
+
+        def enqueue_call(self, *args, **kwargs):
+            return _FakeJob("child-job")
+
+        def enqueue(self, *args, **kwargs):
+            return self.enqueue_call(*args, **kwargs)
+
+    monkeypatch.setattr(auth_actor, "Queue", _FakeQueue)
+    auth_actor.install_rq_auth_actor_hook()
+
+    token = set_correlation_id("cid-rq-propagation-01")
+    try:
+        queue = _FakeQueue()
+        child_job = queue.enqueue_call(lambda: None)
+    finally:
+        reset_correlation_id(token)
+
+    assert child_job.meta["correlation_id"] == "cid-rq-propagation-01"
+    assert child_job.save_meta_calls == 1
+
+
+def test_dependency_graph_auth_actor_hook_replaces_invalid_correlation_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    auth_actor = _load_auth_actor_module()
+    from wepppy.observability.correlation import reset_correlation_id, set_correlation_id
+
+    class _FakeJob:
+        def __init__(self, job_id: str) -> None:
+            self.id = job_id
+            self.meta: dict[str, str] = {"correlation_id": "invalid correlation id !!!"}
+            self.save_meta_calls = 0
+
+        def save_meta(self) -> None:
+            self.save_meta_calls += 1
+
+    class _FakeQueue:
+        name = "default"
+
+        def enqueue_call(self, *args, **kwargs):
+            return _FakeJob("child-job")
+
+        def enqueue(self, *args, **kwargs):
+            return self.enqueue_call(*args, **kwargs)
+
+    monkeypatch.setattr(auth_actor, "Queue", _FakeQueue)
+    auth_actor.install_rq_auth_actor_hook()
+
+    token = set_correlation_id("cid-rq-propagation-02")
+    try:
+        queue = _FakeQueue()
+        child_job = queue.enqueue_call(lambda: None)
+    finally:
+        reset_correlation_id(token)
+
+    assert child_job.meta["correlation_id"] == "cid-rq-propagation-02"
+    assert child_job.save_meta_calls == 1

@@ -105,6 +105,8 @@ NoDb logger / RQ task logger
             -> panel logs, progress, checklist updates
 ```
 
+Correlation request tracing and debug workflow: `docs/dev-notes/correlation-id-debugging.md`.
+
 ## Repository Development Map
 
 ```text

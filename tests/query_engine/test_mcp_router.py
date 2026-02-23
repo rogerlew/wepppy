@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from importlib import reload
 from types import SimpleNamespace
 from typing import Any, Sequence
@@ -12,6 +13,9 @@ pytest.importorskip("starlette")
 from starlette.applications import Starlette
 
 pytestmark = pytest.mark.unit
+
+_CORRELATION_HEADER = "X-Correlation-ID"
+_CORRELATION_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 
 
 def _clear_auth_cache():
@@ -172,11 +176,70 @@ def test_get_run_success(monkeypatch, tmp_path):
     )
 
     assert response.status_code == 200
+    assert _CORRELATION_HEADER in response.headers
+    assert _CORRELATION_ID_PATTERN.match(response.headers[_CORRELATION_HEADER])
     payload = response.json()
     assert payload["data"]["id"] == runid
     assert payload["meta"]["catalog"]["activated"] is True
     assert payload["meta"]["catalog"]["dataset_count"] == 1
     assert "trace_id" in payload["meta"]
+    assert payload["meta"]["trace_id"] == payload["meta"]["correlation_id"]
+    assert payload["meta"]["trace_id"] == response.headers[_CORRELATION_HEADER]
+
+
+def test_get_run_echoes_valid_correlation_id(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "sample-run"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import auth
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid)
+    correlation_id = "cid-unit-test-123"
+
+    response = client.get(
+        f"/mcp/runs/{runid}",
+        headers={
+            "Authorization": f"Bearer {token}",
+            _CORRELATION_HEADER: correlation_id,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers[_CORRELATION_HEADER] == correlation_id
+    payload = response.json()
+    assert payload["meta"]["trace_id"] == correlation_id
+    assert payload["meta"]["correlation_id"] == correlation_id
+
+
+def test_get_run_replaces_invalid_correlation_id(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "sample-run"
+    app, _ = _make_client(monkeypatch, tmp_path, runid)
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import auth
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid)
+
+    response = client.get(
+        f"/mcp/runs/{runid}",
+        headers={
+            "Authorization": f"Bearer {token}",
+            _CORRELATION_HEADER: "invalid header value!!!",
+        },
+    )
+
+    assert response.status_code == 200
+    correlation_id = response.headers[_CORRELATION_HEADER]
+    assert correlation_id != "invalid header value!!!"
+    assert _CORRELATION_ID_PATTERN.match(correlation_id)
+    payload = response.json()
+    assert payload["meta"]["trace_id"] == correlation_id
+    assert payload["meta"]["correlation_id"] == correlation_id
 
 
 def test_catalog_supports_parameter_aliases(monkeypatch, tmp_path):
@@ -238,6 +301,23 @@ def test_catalog_supports_parameter_aliases(monkeypatch, tmp_path):
     for entry in payload["data"]:
         fields = entry["schema"]["fields"]
         assert len(fields) <= 1
+
+
+def test_with_trace_id_maps_to_active_correlation_context(monkeypatch):
+    _set_auth_env(monkeypatch)
+
+    from wepppy.observability.correlation import reset_correlation_id, set_correlation_id
+    from wepppy.query_engine.app.mcp import router
+
+    token = set_correlation_id("cid-mcp-trace-map-01")
+    try:
+        meta = router._with_trace_id({"kind": "test"})
+    finally:
+        reset_correlation_id(token)
+
+    assert meta["kind"] == "test"
+    assert meta["trace_id"] == "cid-mcp-trace-map-01"
+    assert meta["correlation_id"] == "cid-mcp-trace-map-01"
 
 
 def test_get_run_catalog(monkeypatch, tmp_path):

@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-02-20T05:14:31Z`
+- Generated (UTC): `2026-02-23T19:20:42Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -19,16 +19,19 @@
 - `radon` available: `True`
 - `eslint` available: `True`
 - Python runtime: `Python 3.12.3`
+- Exception rules source: _none_
+- Exception rules configured: `0`
+- Exception rules applied: `0`
 
 ## Overall Baseline
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 724 | 95.5 | 233.0 | 483.5 | 750.1 | 1745.12 | 4519.0 |
-| `python_prod_max_function_len` | 559 | 55.0 | 101.0 | 150.4 | 215.1 | 341.42 | 394.0 |
-| `python_prod_max_cc` | 568 | 9.0 | 17.25 | 29.0 | 39.0 | 63.33 | 119.0 |
-| `js_source_file_sloc` | 147 | 257.0 | 554.0 | 1150.6 | 1324.8 | 2229.06 | 3222.0 |
-| `js_source_max_cc` | 147 | 7.0 | 22.5 | 33.4 | 44.1 | 75.94 | 155.0 |
+| `python_prod_file_sloc` | 756 | 101.0 | 245.5 | 508.0 | 773.25 | 1228.15 | 2214.0 |
+| `python_prod_max_function_len` | 590 | 57.0 | 102.75 | 149.1 | 210.55 | 276.88 | 381.0 |
+| `python_prod_max_cc` | 600 | 10.0 | 18.0 | 29.0 | 37.0 | 56.01 | 67.0 |
+| `js_source_file_sloc` | 150 | 257.0 | 556.0 | 1122.4 | 1318.2 | 2130.81 | 2500.0 |
+| `js_source_max_cc` | 150 | 7.0 | 21.0 | 33.1 | 43.65 | 75.61 | 155.0 |
 
 ## Changed Files
 
@@ -40,53 +43,53 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/nodb/mods/omni/omni.py` | 4519 |
-| `wepppy/nodb/core/climate.py` | 2773 |
-| `wepppy/nodb/mods/swat/swat.py` | 2244 |
+| `tests/nodb/mods/test_omni.py` | 2380 |
 | `wepppy/wepp/management/managements.py` | 2214 |
-| `wepppy/nodb/core/wepp.py` | 2024 |
+| `wepppy/nodb/core/wepp.py` | 2029 |
 | `tests/microservices/test_files_routes.py` | 2003 |
 | `wepppy/climates/cligen/cligen.py` | 1994 |
-| `tests/nodb/mods/test_omni.py` | 1988 |
-| `wepppy/soils/ssurgo/ssurgo.py` | 1784 |
-| `wepppy/nodb/core/watershed.py` | 1758 |
+| `wepppy/nodb/base.py` | 1828 |
+| `wepppy/soils/ssurgo/ssurgo.py` | 1785 |
+| `tests/microservices/test_browse_auth_routes.py` | 1651 |
+| `wepppy/rq/culvert_rq.py` | 1426 |
+| `wepppy/topo/wbt/wbt_topaz_emulator.py` | 1339 |
 
 ### `python_max_function_len_top20`
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/all_your_base/geo/ogrmerge.py` | 394 |
 | `wepppy/nodb/mods/ash_transport/neris_ash_model.py` | 381 |
 | `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py` | 368 |
 | `wepppy/rq/wepp_rq_pipeline.py` | 365 |
-| `wepppy/nodb/mods/omni/omni.py` | 353 |
-| `wepppy/nodb/mods/path_ce_model.py` | 342 |
-| `wepppy/microservices/browse/browse.py` | 341 |
 | `wepppy/export/arc_export.py` | 332 |
 | `wepppy/nodb/mods/ash_transport/ashpost.py` | 301 |
 | `wepppy/export/ermit_input.py` | 284 |
+| `wepppy/climates/cligen/cligen.py` | 276 |
+| `wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py` | 272 |
+| `wepppy/wepp/management/utils/downgrade_to_98_4_format.py` | 262 |
+| `wepppy/nodb/mods/ash_transport/ash.py` | 261 |
 
 ### `python_max_cc_top20`
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/all_your_base/geo/ogrmerge.py` | 119 |
-| `wepppy/nodb/mods/omni/omni.py` | 104 |
-| `wepppy/microservices/browse/browse.py` | 84 |
-| `wepppy/nodb/mods/path_ce_model.py` | 81 |
+| `wepppy/nodb/core/wepp_prep_service.py` | 67 |
+| `wepppy/microservices/rq_engine/fork_archive_routes.py` | 66 |
 | `wepppy/export/gpkg_export.py` | 65 |
-| `wepppy/microservices/rq_engine/fork_archive_routes.py` | 64 |
-| `wepppy/nodb/core/climate.py` | 63 |
 | `wepppy/export/arc_export.py` | 61 |
+| `tools/code_quality_observability.py` | 57 |
 | `wepppy/weppcloud/utils/helpers.py` | 57 |
 | `wepppy/nodb/mods/path_ce/path_ce_solver.py` | 56 |
+| `wepppy/nodb/mods/ash_transport/ashpost.py` | 53 |
+| `wepppy/climates/cligen/cligen.py` | 51 |
+| `wepppy/topo/peridot/peridot_runner.py` | 50 |
 
 ### `js_file_sloc_top20`
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/weppcloud/controllers_js/map_gl.js` | 3222 |
 | `wepppy/weppcloud/controllers_js/omni.js` | 2500 |
+| `wepppy/weppcloud/controllers_js/map_gl.js` | 2342 |
 | `wepppy/weppcloud/controllers_js/batch_runner.js` | 1911 |
 | `wepppy/weppcloud/controllers_js/channel_gl.js` | 1780 |
 | `wepppy/weppcloud/controllers_js/subcatchment_delineation.js` | 1736 |
