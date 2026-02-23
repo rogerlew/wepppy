@@ -31,6 +31,10 @@ from wepppy.nodb.mods.omni.omni import (
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.rq.wepp_rq_stage_helpers import (
+    NODIR_RECOVERY_ROOTS as _NODIR_RECOVERY_ROOTS,
+    recover_mixed_nodir_roots as _recover_mixed_nodir_roots_impl,
+)
 
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
@@ -44,6 +48,14 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
+
+
+def _recover_mixed_nodir_roots(
+    wd: str,
+    *,
+    roots: tuple[str, ...] = _NODIR_RECOVERY_ROOTS,
+) -> tuple[str, ...]:
+    return _recover_mixed_nodir_roots_impl(wd, roots=roots)
 
 
 def _scenario_payload_for_job(scenario_def: Dict[str, Any]) -> Dict[str, Any]:
@@ -263,6 +275,14 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        recovered_roots = _recover_mixed_nodir_roots(wd)
+        if recovered_roots:
+            recovered_txt = ", ".join(recovered_roots)
+            StatusMessenger.publish(
+                status_channel,
+                f"Recovered mixed NoDir roots before {func_name}({runid}): {recovered_txt}",
+            )
 
         for root in ('climate', 'watershed', 'landuse', 'soils'):
             nodir_resolve(wd, root, view='effective')
@@ -511,6 +531,14 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni_contrasts'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        recovered_roots = _recover_mixed_nodir_roots(wd)
+        if recovered_roots:
+            recovered_txt = ", ".join(recovered_roots)
+            StatusMessenger.publish(
+                status_channel,
+                f"Recovered mixed NoDir roots before {func_name}({runid}): {recovered_txt}",
+            )
 
         omni = Omni.getInstance(wd)
         contrast_names = omni.contrast_names or []

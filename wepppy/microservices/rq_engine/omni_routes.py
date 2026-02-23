@@ -24,6 +24,7 @@ from wepppy.rq.omni_rq import (
     run_omni_contrasts_rq,
     run_omni_scenarios_rq,
 )
+from wepppy.rq.wepp_rq_stage_helpers import recover_mixed_nodir_roots
 from wepppy.nodir.errors import NoDirError
 from wepppy.nodir.fs import resolve as nodir_resolve
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -275,6 +276,14 @@ def _coerce_optional_bool(value: Any, field_name: str) -> bool | None:
 
 
 def _preflight_omni_roots(wd: str) -> None:
+    recovered_roots = recover_mixed_nodir_roots(wd, roots=("climate", "watershed", "landuse", "soils"))
+    if recovered_roots:
+        logger.warning(
+            "Recovered mixed NoDir roots before omni preflight for wd=%s: %s",
+            wd,
+            ", ".join(recovered_roots),
+        )
+
     nodir_resolve(wd, "climate", view="effective")
     nodir_resolve(wd, "watershed", view="effective")
     nodir_resolve(wd, "landuse", view="effective")

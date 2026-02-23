@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
@@ -92,6 +93,36 @@ def _make_pairs(count: int) -> list[dict[str, str]]:
     return [
         {"control_scenario": f"control_{idx}", "contrast_scenario": f"contrast_{idx}"}
         for idx in range(1, count + 1)
+    ]
+
+
+def test_preflight_omni_roots_recovers_mixed_soils_before_resolve(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+    (wd / "soils").mkdir()
+    (wd / "soils.nodir").write_bytes(b"placeholder archive")
+
+    resolve_calls: list[tuple[str, str]] = []
+
+    def _resolve(_wd: str, root: str, *, view: str = "effective") -> None:
+        resolve_calls.append((root, view))
+        if root == "soils" and (Path(_wd) / "soils").exists() and (Path(_wd) / "soils.nodir").exists():
+            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+
+    monkeypatch.setattr(omni_routes, "nodir_resolve", _resolve)
+
+    omni_routes._preflight_omni_roots(str(wd))
+
+    assert (wd / "soils.nodir").exists()
+    assert not (wd / "soils").exists()
+    assert resolve_calls == [
+        ("climate", "effective"),
+        ("watershed", "effective"),
+        ("landuse", "effective"),
+        ("soils", "effective"),
     ]
 
 

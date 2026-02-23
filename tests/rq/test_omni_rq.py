@@ -79,6 +79,39 @@ def test_run_omni_scenarios_rq_preflights_roots_before_execution(
     assert any("TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED" in message for _, message in published)
 
 
+def test_run_omni_scenarios_rq_recovers_mixed_soils_before_preflight(
+    omni_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _redis_cls, omni_cls, published, base_path = omni_rq_environment
+
+    run_wd = base_path / "demo"
+    run_wd.mkdir(parents=True, exist_ok=True)
+    (run_wd / "soils").mkdir()
+    (run_wd / "soils.nodir").write_bytes(b"placeholder archive")
+
+    preflight_calls: list[tuple[str, str, str]] = []
+
+    def _resolve(wd: str, root: str, view: str = "effective"):
+        preflight_calls.append((wd, root, view))
+        if root == "soils" and (Path(wd) / "soils").exists() and (Path(wd) / "soils.nodir").exists():
+            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+        return None
+
+    monkeypatch.setattr(omni_rq, "nodir_resolve", _resolve)
+
+    result = omni_rq.run_omni_scenarios_rq("demo")
+
+    assert result is None
+    assert (run_wd / "soils.nodir").exists()
+    assert not (run_wd / "soils").exists()
+    assert any("Recovered mixed NoDir roots before run_omni_scenarios_rq(demo): soils" in message for _, message in published)
+    assert preflight_calls[-1] == (str(run_wd), "soils", "effective")
+
+    omni_instance = omni_cls.getInstance(str(run_wd))
+    assert omni_instance.run_calls == 1
+
+
 def test_run_omni_scenarios_rq_stops_on_nodir_preflight_error(
     omni_rq_environment,
     monkeypatch: pytest.MonkeyPatch,
