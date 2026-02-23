@@ -1,5 +1,6 @@
 """BC Soil Information Finder Tool (SIFT) soil extraction helpers."""
 
+import logging
 import os
 from os.path import join as _join
 from os.path import split as _split
@@ -14,6 +15,7 @@ from wepppy.all_your_base.geo import GeoTransformer
 import json
 
 _datadir = '/geodata/ca/env.gov.bc.ca/BC_Soil_Map.gdb/'
+_LOG = logging.getLogger(__name__)
 
 _proj4 = '+proj=aea +datum=NAD83 +ellps=GRS80 +a=6378137.0 +rf=298.257222101 '\
          '+pm=0 +x_0=1000000.0 +y_0=0.0 +lon_0=-126.0 +lat_1=50.0 +lat_2=58.5 +lat_0=45.0 '\
@@ -26,7 +28,7 @@ def _float_try_parse(v):
     """Best-effort float conversion that preserves ``None``/``null`` tokens."""
     try:
         v = float(v)
-    except:
+    except (TypeError, ValueError):
         pass
     if isinstance(v, str):
         if 'null' in v:
@@ -128,23 +130,23 @@ class SIFT(object):
       
             try:
                 horizon._rosettaPredict()
-            except:
-                pass
+            except Exception:
+                _LOG.debug("SIFT: horizon._rosettaPredict failed", exc_info=True)
 
             try:
                 horizon._computeConductivity()
-            except:
-                pass
+            except Exception:
+                _LOG.debug("SIFT: horizon._computeConductivity failed", exc_info=True)
 
             try:
                 horizon._computeErodibility()
-            except:
-                pass
+            except Exception:
+                _LOG.debug("SIFT: horizon._computeErodibility failed", exc_info=True)
 
             try:
                 horizon._computeAnisotropy()
-            except:
-                pass
+            except Exception:
+                _LOG.debug("SIFT: horizon._computeAnisotropy failed", exc_info=True)
 
             soil.append(horizon)
 

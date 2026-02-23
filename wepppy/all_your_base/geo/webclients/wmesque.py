@@ -16,7 +16,7 @@ from deprecated import deprecated
 def isfloat(x: object) -> bool:
     try:
         float(x)
-    except:
+    except (TypeError, ValueError):
         return False
     return True
 

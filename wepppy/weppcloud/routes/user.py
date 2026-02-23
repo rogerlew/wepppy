@@ -405,6 +405,7 @@ def profile():
             reset_browser_state_login_url=login_url,
         )
     except Exception:
+        logger.exception("user.profile failed")
         return exception_factory()
 
 
@@ -454,8 +455,16 @@ def mint_profile_token():
         )
         response.headers['Cache-Control'] = 'no-store'
         return response
-    except Exception as exc:
+    except auth_tokens.JWTConfigurationError as exc:
+        logger.exception("mint_profile_token failed due to JWT configuration")
         return error_factory(str(exc), status_code=500)
+    except Exception:
+        logger.exception(
+            "mint_profile_token failed user_id=%s email=%s",
+            getattr(current_user, "id", None),
+            getattr(current_user, "email", None),
+        )
+        return error_factory("Internal server error.", status_code=500)
 
 
 @user_bp.route("/runs/users", strict_slashes=False)
@@ -495,6 +504,7 @@ def runs_users():
 
         return jsonify(users=records, total=len(records))
     except Exception:
+        logger.exception("user.runs_users failed")
         return exception_factory()
     finally:
         db.session.remove()
@@ -672,6 +682,7 @@ def runs():
             current_user_alias=str(getattr(current_user, 'id', '')) if getattr(current_user, 'id', None) is not None else '',
         )
     except Exception:
+        logger.exception("user.runs failed")
         return exception_factory()
 
 
@@ -697,6 +708,7 @@ def runs_catalog():
             total=len(metas),
         )
     except Exception:
+        logger.exception("user.runs_catalog failed")
         return exception_factory()
 
 @user_bp.route("/runs/map-data", strict_slashes=False)
@@ -716,4 +728,5 @@ def runs_map_data():
         metas = _collect_map_metas_for_runs(run_rows)
         return jsonify(runs=metas)
     except Exception:
+        logger.exception("user.runs_map_data failed")
         return exception_factory()

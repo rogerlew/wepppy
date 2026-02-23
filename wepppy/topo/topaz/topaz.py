@@ -133,7 +133,7 @@ def _cp_chmod(src, dst, mode):
 
     try:
         os.chmod(dst, mode)
-    except:
+    except OSError:
         pass
 
 class TopazUnexpectedTermination(Exception):

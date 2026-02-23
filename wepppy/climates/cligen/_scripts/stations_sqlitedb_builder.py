@@ -20,7 +20,7 @@ def isfloat(v):
     try:
         float(v)
         return 1
-    except:
+    except (TypeError, ValueError):
         return 0
 
 

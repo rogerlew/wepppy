@@ -70,7 +70,11 @@ def stats():
         if _exists('/geodata/weppcloud_runs/runs_counter.json'):
             with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
                 runs_counter = json.load(fp)
-    except:
+    except (OSError, json.JSONDecodeError) as exc:
+        current_app.logger.debug("Failed to load runs_counter.json: %s", exc)
+        runs_counter = {}
+    except Exception:
+        current_app.logger.exception("Unexpected error loading runs_counter.json")
         runs_counter = {}
 
     try:
@@ -88,7 +92,11 @@ def stats_key(key):
         if _exists('/geodata/weppcloud_runs/runs_counter.json'):
             with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
                 runs_counter = json.load(fp)
-    except:
+    except (OSError, json.JSONDecodeError) as exc:
+        current_app.logger.debug("Failed to load runs_counter.json: %s", exc)
+        runs_counter = {}
+    except Exception:
+        current_app.logger.exception("Unexpected error loading runs_counter.json")
         runs_counter = {}
 
     try:
@@ -96,4 +104,3 @@ def stats_key(key):
 
     except Exception:
         return exception_factory()
-

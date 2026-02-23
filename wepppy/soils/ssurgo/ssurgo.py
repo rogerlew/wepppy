@@ -2090,8 +2090,8 @@ class SurgoSoilCollection(object):
         query = "INSERT INTO {table} VALUES ({nqs})".format(table=table, nqs=nqs)
         try:
             cur.executemany(query, data)
-        except:
-            warnings.warn("Error syncing {} ({})".format(keyname, keys))
+        except sqlite3.Error as exc:
+            warnings.warn("Error syncing {} ({}): {}".format(keyname, keys, exc))
 
         conn.commit()
 
@@ -2102,22 +2102,22 @@ class SurgoSoilCollection(object):
         query = "DROP TABLE IF EXISTS {bad_tbl}".format(bad_tbl=bad_tbl)
         try:
             cur.execute(query)
-        except:
-            pass
+        except sqlite3.Error:
+            _LOG.debug("Failed dropping bad table %s", bad_tbl, exc_info=True)
 
         query = "CREATE TABLE {bad_tbl} ({keyname} INTEGER)".format(
             bad_tbl=bad_tbl, keyname=keyname
         )
         try:
             cur.execute(query)
-        except:
-            pass
+        except sqlite3.Error:
+            _LOG.debug("Failed creating bad table %s", bad_tbl, exc_info=True)
 
         query = "INSERT INTO {bad_tbl} VALUES (?)".format(bad_tbl=bad_tbl)
         try:
             cur.executemany(query, [[int(v)] for v in sorted(bad)])
-        except:
-            pass
+        except sqlite3.Error:
+            _LOG.debug("Failed inserting into bad table %s", bad_tbl, exc_info=True)
 
         conn.commit()
 

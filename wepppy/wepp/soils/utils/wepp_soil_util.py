@@ -67,7 +67,7 @@ class WeppSoilUtil(object):
         if fn.endswith('.sol'):
             try:
                 self._parse_sol(fn)
-            except:
+            except Exception:
                 raise Exception(f"Error opening {fn}")
         elif fn.endswith('.yaml'):
             raise ValueError("YAML soil serialization is no longer supported. Use .sol or .bson.")
@@ -210,15 +210,14 @@ class WeppSoilUtil(object):
             res_lyr = None
             if solwpv >= 2006:
                 try:
-                    res_lyr = lines[i].split()
-                    i += 1
-
-                    if len(res_lyr) == 4:
-                        res_lyr = [res_lyr[0], res_lyr[2], res_lyr[3]]
-                    if len(res_lyr) != 3:
-                        raise
-                except:
+                    res_lyr_tokens = lines[i].split()
+                except IndexError:
                     res_lyr = None
+                else:
+                    i += 1
+                    if len(res_lyr_tokens) == 4:
+                        res_lyr_tokens = [res_lyr_tokens[0], res_lyr_tokens[2], res_lyr_tokens[3]]
+                    res_lyr = res_lyr_tokens if len(res_lyr_tokens) == 3 else None
 
 
             if res_lyr is not None:

@@ -48,7 +48,8 @@ def _get_log_tail(terminal_id: str, lines: int = 5) -> str:
             timeout=1
         )
         return result.stdout
-    except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, UnicodeDecodeError):
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, UnicodeDecodeError) as exc:
+        logger.debug("Failed to tail terminal log %s; returning empty tail.", log_path, exc_info=exc)
         return ""
 
 
@@ -185,8 +186,13 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
         update_message_status(message.id, MessageStatus.DELIVERED)
         logger.info(f"Delivered message {message.id} to terminal {terminal_id}")
         return True
-    except Exception as e:
-        logger.error(f"Failed to send message {message.id} to {terminal_id}: {e}")
+    except Exception as exc:
+        logger.error(
+            "Failed to send message %s to terminal %s.",
+            message.id,
+            terminal_id,
+            exc_info=exc,
+        )
         update_message_status(message.id, MessageStatus.FAILED)
         raise
 

@@ -311,7 +311,8 @@ def readme_editor(runid, config):
             editor_client_uuid=client_uuid,
             **context,
         )
-    except:
+    except Exception:
+        logger.exception("Could not load README editor runid=%s config=%s", runid, config)
         return exception_factory("Could not load README editor")
 
 @readme_bp.route("/runs/<string:runid>/<config>/readme/raw")
@@ -321,7 +322,8 @@ def readme_raw(runid, config):
         ctx = load_run_context(runid, config)
         markdown = _load_markdown(ctx)
         return jsonify({"markdown": markdown})
-    except:
+    except Exception:
+        logger.exception("Could not load README raw runid=%s config=%s", runid, config)
         return exception_factory("Could not load README raw")
 
 @readme_bp.route("/runs/<string:runid>/<config>/readme/save", methods=["POST"])
@@ -363,7 +365,8 @@ def readme_save(runid, config):
         if ron_update:
             response["ronUpdate"] = ron_update
         return jsonify(response)
-    except:
+    except Exception:
+        logger.exception("Could not save README runid=%s config=%s", runid, config)
         return exception_factory("Could not save README")
 
 
@@ -379,7 +382,8 @@ def readme_preview(runid, config):
         context = _template_context(ctx)
         html = _render_markdown(markdown, context)
         return jsonify({"html": html})
-    except:
+    except Exception:
+        logger.exception("Could not render README preview runid=%s config=%s", runid, config)
         return exception_factory("Could not render README preview")
 
 
@@ -398,5 +402,6 @@ def readme_render(runid, config):
             can_edit=_can_edit(runid),
             **context
         )
-    except:
+    except Exception:
+        logger.exception("Could not load README viewer runid=%s config=%s", runid, config)
         return exception_factory("Could not load README viewer")

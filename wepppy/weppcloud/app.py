@@ -54,6 +54,7 @@ from wepppy.weppcloud._config_app import config_app
 from wepppy.weppcloud._config_logging import config_logging
 
 config_logging(logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 config_app(app)
@@ -153,7 +154,10 @@ class Run(db.Model):
         wd = self.wd
         try:
             ron = Ron.getInstance(wd)
-        except:
+        except (FileNotFoundError, OSError, ValueError):
+            return None
+        except Exception:
+            logger.exception("Unexpected error loading Ron for Run.meta wd=%s", wd)
             return None
 
         return dict(owner=self.owner,

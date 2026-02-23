@@ -245,7 +245,7 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
                         #d['{}-{}-{}'.format(abbrv, year, key)] = (ts, desc, units)
 
                 os.remove(fn)
-            except:
+            except Exception:
                 os.remove(fn)
                 raise
     #return d

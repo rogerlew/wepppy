@@ -148,7 +148,7 @@ class WatershedBoundaryDataset:
             topaz.set_outlet(px, py, pixelcoords=True)
             try:
                 topaz.build_subcatchments()
-            except:
+            except Exception:
                 fails += 1
                 raise
 
@@ -158,4 +158,3 @@ class WatershedBoundaryDataset:
 if __name__ == "__main__":
 
     wbd = WatershedBoundaryDataset("/geodata/wbd/WBD_17_HU2_Shape/Shape/WBDHU12")
-

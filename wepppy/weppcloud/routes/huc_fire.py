@@ -61,7 +61,8 @@ def huc_fire():
     except auth_tokens.JWTConfigurationError as exc:
         current_app.logger.exception("Failed to issue rq-engine token for huc-fire")
         return exception_factory(f"JWT configuration error: {exc}")
-    except:
+    except Exception:
+        current_app.logger.exception("Failed to render huc-fire page")
         return exception_factory()
 
 

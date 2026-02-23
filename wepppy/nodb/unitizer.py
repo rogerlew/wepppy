@@ -455,7 +455,7 @@ class Unitizer(NoDbBase):
                     return str(int(_v))
 
                 return str(_v)
-            except:
+            except Exception:
                 return str(v)
 
         def determine_unitclass(in_units):
@@ -534,7 +534,7 @@ class Unitizer(NoDbBase):
                     try:
                         if float(int(value)) == float(value):
                             precision = 0
-                    except:
+                    except Exception:
                         pass
 
                 if isfloat(value):
@@ -585,7 +585,7 @@ class Unitizer(NoDbBase):
                 p = precisions[unitclass][u]
                 try:
                     v = tostring(f(value), p)
-                except:
+                except Exception:
                     v = '<i>%s</i>' % str(value)
 
                 if parentheses:
@@ -612,7 +612,7 @@ class Unitizer(NoDbBase):
                     try:
                         if float(int(value)) == float(value):
                             precision = 0
-                    except:
+                    except Exception:
                         pass
 
                 if isfloat(value):
@@ -654,7 +654,7 @@ class Unitizer(NoDbBase):
                 p = precisions[unitclass][u]
                 try:
                     v = tostring(f(value), p)
-                except:
+                except Exception:
                     v = '<i>%s</i>' % str(value)
 
                 if parentheses:

@@ -437,8 +437,10 @@ def interfaces():
         if _exists('/geodata/weppcloud_runs/runs_counter.json'):
             with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
                 runs_counter = Counter(json.load(fp))
-    except:
-        pass
+    except (OSError, json.JSONDecodeError) as exc:
+        current_app.logger.debug("Failed to load runs_counter.json for interfaces: %s", exc)
+    except Exception:
+        current_app.logger.exception("Unexpected error loading runs_counter.json for interfaces")
 
     try:
         cap_base_url = (current_app.config.get('CAP_BASE_URL') or os.getenv('CAP_BASE_URL', '/cap')).rstrip('/')

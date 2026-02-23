@@ -43,7 +43,7 @@ def has_arc_export(wd: str) -> bool:
         assert _exists(sub_json)
         assert _exists(_join(export_dir, 'subcatchments.shp'))
         assert _exists(_join(export_dir, 'channels.shp'))
-    except:
+    except AssertionError:
         return False
 
     return True
@@ -82,7 +82,7 @@ def legacy_arc_export(wd: str, verbose: bool = False) -> None:
     if ash_post is not None:
         try:
             ash_out = ash_post.ash_out
-        except:
+        except AttributeError:
             ash_out = None
 
     name = ron.name
@@ -316,19 +316,19 @@ def legacy_arc_export(wd: str, verbose: bool = False) -> None:
         try:
             f['properties']['Disch(m3)'] = weppout['Discharge Volume'][topaz_id]['value']
             f['properties']['Disch(m3)'] = round(f['properties']['Disch(m3)'], 3)
-        except:
+        except (KeyError, TypeError):
             f['properties']['Disch(m3)'] = -9999
 
         try:
             f['properties']['SdYd(tn/h)'] = weppout['Sediment Yield'][topaz_id]['value'] / _area
             f['properties']['SdYd(tn/h)'] = round(f['properties']['SdYd(tn/h)'], 3)
-        except:
+        except (KeyError, TypeError):
             f['properties']['SdYd(tn/h)'] = -9999
 
         try:
             f['properties']['SlLs(kg/h)'] = weppout['Soil Loss'][topaz_id]['value'] / _area
             f['properties']['SlLs(kg/h)'] = round(f['properties']['SlLs(kg/h)'], 3)
-        except:
+        except (KeyError, TypeError):
             f['properties']['SlLs(kg/h)'] = -9999
 
         if weppout['Total P Density'] is not None:
@@ -342,12 +342,12 @@ def legacy_arc_export(wd: str, verbose: bool = False) -> None:
 
         try:
             f['properties']['landuse'] = ss['landuse']['desc']
-        except:
+        except (KeyError, TypeError):
             pass
 
         try:
             f['properties']['soil'] = ss['soil']['desc']
-        except:
+        except (KeyError, TypeError):
             pass
 
         for k, v in f['properties'].items():
@@ -413,7 +413,7 @@ def arc_export(wd: str, verbose: bool = False) -> None:
     if ash_post is not None:
         try:
             ash_out = ash_post.ash_out
-        except:
+        except AttributeError:
             ash_out = None
 
     rhempost = RhemPost.tryGetInstance(wd)
@@ -633,19 +633,19 @@ def arc_export(wd: str, verbose: bool = False) -> None:
         try:
             f['properties']['Discharge Volume (m3)'] = weppout['Discharge Volume'][topaz_id]['value']
             f['properties']['Discharge Volume (m3)'] = round(f['properties']['Discharge Volume (m3)'], 3)
-        except:
+        except (KeyError, TypeError):
             f['properties']['Discharge Volume (m3)'] = -9999
 
         try:
             f['properties']['Sediment Yield (tn/h)'] = weppout['Sediment Yield'][topaz_id]['value'] / _area
             f['properties']['Sediment Yield (tn/h)'] = round(f['properties']['Sediment Yield (tn/h)'], 3)
-        except:
+        except (KeyError, TypeError):
             f['properties']['SdYd(tn/h)'] = -9999
 
         try:
             f['properties']['Soil Loss (kg/h)'] = weppout['Soil Loss'][topaz_id]['value'] / _area
             f['properties']['Soil Loss (kg/h)'] = round(f['properties']['Soil Loss (kg/h)'], 3)
-        except:
+        except (KeyError, TypeError):
             f['properties']['Soil Loss (kg/h)'] = -9999
 
         if weppout['Total P Density'] is not None:
@@ -660,13 +660,13 @@ def arc_export(wd: str, verbose: bool = False) -> None:
         try:
             desc = ss['landuse']['desc']
             f['properties']['landuse'] = desc
-        except:
+        except (KeyError, TypeError):
             pass
 
         try:
             desc = ss['soil']['desc']
             f['properties']['soil'] = desc
-        except:
+        except (KeyError, TypeError):
             pass
 
         for k, v in f['properties'].items():

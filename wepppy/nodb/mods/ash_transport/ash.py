@@ -822,8 +822,11 @@ class Ash(NoDbBase):
             self.meta = meta
             try:
                 self.fire_years = climate.input_years - 1
-            except:
-                pass
+            except Exception:
+                self.logger.debug(
+                    "Unable to infer ash fire_years from climate.input_years",
+                    exc_info=True,
+                )
 
         from wepppy.nodb.mods.ash_transport import AshPost
 

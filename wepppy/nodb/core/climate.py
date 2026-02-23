@@ -780,7 +780,7 @@ class Climate(NoDbBase):
             years = cli.years
 
             return years[0]
-        except:
+        except Exception:
             return None
 
     @property
@@ -796,7 +796,7 @@ class Climate(NoDbBase):
             years = cli.years
 
             return all(yr > 1900 for yr in years)
-        except:
+        except Exception:
             return None
 
     #

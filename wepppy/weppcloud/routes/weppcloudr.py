@@ -99,7 +99,14 @@ def viz_r(runid, config, r_format, routine):
         with io.open(rpt_fn, encoding='utf8') as fp:
             return fp.read()
 
-    except:
+    except Exception:
+        current_app.logger.exception(
+            "viz_r failed runid=%s config=%s r_format=%s routine=%s",
+            runid,
+            config,
+            r_format,
+            routine,
+        )
         return exception_factory('Error running script', runid=runid)
 
 
@@ -255,7 +262,14 @@ def weppcloudr_runner(runid, config, routine, user, ctx: Optional[RunContext] = 
         with io.open(rpt_fn, encoding='utf8') as fp:
             return fp.read()
 
-    except:
+    except Exception:
+        current_app.logger.exception(
+            "weppcloudr_runner failed runid=%s config=%s routine=%s user=%s",
+            runid,
+            config,
+            routine,
+            user,
+        )
         return exception_factory('Error running script')
 
 
@@ -504,8 +518,8 @@ def weppcloudr_proxy(routine):
                 ron = Ron.getInstance(wd)
                 wepp = Wepp.getInstance(wd)
                 watershed = Watershed.getInstance(wd)
-            except:
-                raise Exception('Error acquiring nodb instances from ' + wd)
+            except Exception as exc:
+                raise RuntimeError(f"Error acquiring nodb instances from {wd}") from exc
 
             name = ron.name
             scenario = ron.scenario
@@ -515,7 +529,13 @@ def weppcloudr_proxy(routine):
         
         js = json.dumps(ws)
 
-    except:
+    except Exception:
+        current_app.logger.exception(
+            "weppcloudr_proxy setup failed routine=%s user=%s runids=%s",
+            routine,
+            user,
+            runids,
+        )
         return exception_factory('Error running script')
 
     wd = get_wd(runids[0]) 
@@ -549,7 +569,13 @@ def weppcloudr_proxy(routine):
         with io.open(rpt_fn, encoding='utf8') as fp:
             return fp.read()
 
-    except:
+    except Exception:
+        current_app.logger.exception(
+            "weppcloudr_proxy request failed routine=%s user=%s runids=%s",
+            routine,
+            user,
+            runids,
+        )
         return exception_factory('Error processing request')
     
 #  R -e 'library("rmarkdown"); rmarkdown::render("03_Rmarkdown_to_generate_reports.Rmd", params=list(proj_runid="lt_202012_26_Bliss_Creek_CurCond"), output_file="rmd_rpt.htm")'

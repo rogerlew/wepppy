@@ -91,7 +91,7 @@ def upgrade():
 
         try:
             last_accessed = _get_last_accessed(runid)
-        except:
+        except Exception as e:
             print(f"Error getting last_accessed for run {runid}: {e}")
             last_accessed = None
 

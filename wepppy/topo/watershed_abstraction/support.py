@@ -670,12 +670,12 @@ class SummaryBase(object):
 
         try:
             d['order'] = self.order
-        except:
+        except AttributeError:
             pass
 
         try:
             d['channel_type'] = self.channel_type
-        except:
+        except AttributeError:
             pass
 
         if hasattr(self, 'chn_wepp_width'):
@@ -687,7 +687,7 @@ class SummaryBase(object):
         try:
             d['slopes'] = self.slopes
             d['coords'] = self.coords
-        except:
+        except AttributeError:
             pass
 
         if hasattr(self, 'fp_longest'):

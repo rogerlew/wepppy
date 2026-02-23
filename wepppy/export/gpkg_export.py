@@ -115,7 +115,7 @@ def gpkg_export(wd: str) -> None:
     if _exists(gdb_fn):
         try:
             shutil.rmtree(gdb_fn)
-        except:
+        except OSError:
             pass
 
     gdb_zip_fn = gpkg_fn.replace('.gpkg', '.gdb.zip')

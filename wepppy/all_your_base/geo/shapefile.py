@@ -635,7 +635,7 @@ class Reader:
                     try:
                         y, m, d = int(value[:4]), int(value[4:6]), int(value[6:8])
                         value = date(y, m, d)
-                    except:
+                    except (TypeError, ValueError):
                         value = value.strip()
             elif typ == 'L':
                 # logical: 1 byte - initialized to 0x20 (space) otherwise T or F.

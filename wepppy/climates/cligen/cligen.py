@@ -903,7 +903,7 @@ class ClimateFile(object):
 
         try:
             prcp = df.prcp.to_numpy()
-        except:
+        except AttributeError:
             prcp = df.prcp.values
 
         prcp = offset + prcp * scale

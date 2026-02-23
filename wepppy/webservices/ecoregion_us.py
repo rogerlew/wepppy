@@ -66,7 +66,8 @@ def query_ecoregion() -> Response:
             geo_transformer = GeoTransformer(src_proj4=srs,
                                              dst_proj4=wgs84_proj4)
             lng, lat = geo_transformer.transform(lng, lat)
-        except:
+        except Exception:
+            app.logger.exception("Ecoregion query: failed to transform lng/lat to WGS84")
             return jsonify({'Error': 'Could not transform lng, lat to wgs'})
 
     shapefile = _join(geodata_dir, "ecoregions/us_eco_l3/us_eco_l3.shp")

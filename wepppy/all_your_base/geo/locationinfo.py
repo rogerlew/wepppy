@@ -219,7 +219,7 @@ class RasterDatasetInterpolator:
                 try:
                     func = interpolate.interp2d(_x, _y, _data, kind='cubic')
                     z.append(func(x, y)[0])
-                except:
+                except Exception:
                     return self.get_location_info(lng, lat, method='near')
         else:
             x, y = int(round(x)), int(round(y))

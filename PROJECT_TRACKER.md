@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-02-22  
+**Last Updated**: 2026-02-23  
 **Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -339,6 +339,24 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Bare Exception Zero Closure and Boundary Safety
+**Completed**: 2026-02-23  
+**Duration**: 1 day  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260223_bare_exception_zero/](docs/work-packages/20260223_bare_exception_zero/)  
+**Description**: Executed an end-to-end work-package that removed every production `bare except:` in scanner scope while preserving boundary contracts and tightening logging for remaining broad catches.
+
+**Outcome**: Hard bare-exception closure achieved with `--no-allowlist` (`82 -> 0`), changed-file enforcement passed, deferred hotspots (`user.py`, `inbox_service.py`) were refactored first, and full-suite regression validation passed.
+
+**Deliverables**:
+- ✅ Baseline/after scanner artifacts for allowlist and no-allowlist modes
+- ✅ Sub-agent inventory + 4 disjoint parallel worker slices + dedicated test worker + final explorer review pass
+- ✅ Allowlist line/rationale synchronization for deliberate NoDb and WEPPcloud boundaries
+- ✅ Required validation gates including `wctl run-pytest tests --maxfail=1` (`2057 passed, 29 skipped`)
+
+---
 
 ### Broad Exception Elimination and Boundary Contract Hardening
 **Completed**: 2026-02-23  

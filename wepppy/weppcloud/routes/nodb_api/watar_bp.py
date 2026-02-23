@@ -149,7 +149,8 @@ def hillslope0_ash(runid, config, topaz_id):
 
     except NoDirError as exc:
         return error_factory(exc.message, status_code=exc.http_status, code=exc.code)
-    except:
+    except Exception:
+        current_app.logger.exception("Unexpected error loading ash hillslope results runid=%s config=%s", runid, config)
         return exception_factory('Error loading ash hillslope results', runid=runid)
 
 
@@ -214,8 +215,11 @@ def report_ash(runid, config):
         disturbed = None
         try:
             disturbed = Disturbed.getInstance(wd)
-        except:
-            pass
+        except NoDirError:
+            disturbed = None
+        except Exception:
+            current_app.logger.exception("Unexpected error loading Disturbed instance runid=%s config=%s", runid, config)
+            disturbed = None
 
 
         burn_class_summary = ash.burn_class_summary()

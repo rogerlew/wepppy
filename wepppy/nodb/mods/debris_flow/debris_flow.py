@@ -215,9 +215,9 @@ class DebrisFlow(NoDbBase):
             A_pct = 100 * A / watershed.wsarea
             A /= 1000 * 1000  # to km^2
 
-            try:
+            if 'baer' in ron.mods:
                 sbs_coverage = baer.sbs_coverage
-            except:
+            else:
                 sbs_coverage = disturbed.sbs_coverage
 
             if sbs_coverage is None:

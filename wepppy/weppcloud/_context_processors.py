@@ -2,12 +2,14 @@ from os.path import exists as _exists
 from os.path import join as _join
 from glob import glob
 import os
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
 from typing import Optional, Type
 
 from flask import url_for
+from sqlalchemy.exc import SQLAlchemyError
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.unitizer import Unitizer
@@ -15,6 +17,7 @@ from wepppy.weppcloud.utils.assets import resolve_controllers_gl_build_id
 from wepppy.weppcloud.utils.helpers import get_wd, url_for_run
 from wepppy.all_your_base import isfloat
 
+logger = logging.getLogger(__name__)
 
 RunModel: Optional[Type] = None
 UserModel: Optional[Type] = None
@@ -23,7 +26,11 @@ def _get_run_name(runid):
     try:
         ron = Ron.load_detached_from_runid(runid)
         return ron.name
-    except:
+    except (FileNotFoundError, OSError, ValueError) as exc:
+        logger.debug("Run name unavailable for runid=%s: %s", runid, exc)
+        return '-'
+    except Exception:
+        logger.exception("Unexpected error loading run name for runid=%s", runid)
         return '-'
 
 
@@ -62,7 +69,11 @@ def _get_run_owner(runid):
         if row.owner_id is None:
             return 'anonymous'
         return row.owner_email or '-'
-    except:
+    except (ImportError, SQLAlchemyError, OSError, ValueError) as exc:
+        logger.debug("Run owner unavailable for runid=%s: %s", runid, exc)
+        return '-'
+    except Exception:
+        logger.exception("Unexpected error resolving run owner for runid=%s", runid)
         return '-'
 
 
@@ -166,7 +177,10 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
         def commafy(v):
             try:
                 return "{:,}".format(int(v))
-            except:
+            except (TypeError, ValueError, OverflowError):
+                return v
+            except Exception:
+                logger.exception("Unexpected error commafying value=%r", v)
                 return v
 
         return dict(commafy=commafy)

@@ -886,7 +886,11 @@ class NoDbBase(object):
                         # Set a timeout for stopping to prevent hanging
                         try:
                             listener.stop()
-                        except:
+                        except Exception:
+                            logging.getLogger(__name__).debug(
+                                "NoDbBase._safe_stop_queue_listener: listener.stop() failed; forcing thread cleanup",
+                                exc_info=True,
+                            )
                             # If normal stop fails, try to forcibly end the thread
                             if hasattr(listener, '_thread'):
                                 listener._thread = None
@@ -899,14 +903,19 @@ class NoDbBase(object):
             if handler is not None:
                 try:
                     handler.close()
-                except:
-                    pass
+                except Exception:
+                    logging.getLogger(__name__).debug(
+                        "NoDbBase._safe_stop_queue_listener: handler.close() failed during cleanup",
+                        exc_info=True,
+                    )
                 self._run_file_handler = None
                 
-        except (AttributeError, TypeError, KeyboardInterrupt, Exception):
-            # Silently ignore cleanup errors during process shutdown
-            # This includes any exception that might occur during cleanup
-            pass
+        except Exception:
+            # Cleanup boundary: never fail the caller due to shutdown/cleanup issues.
+            logging.getLogger(__name__).debug(
+                "NoDbBase._safe_stop_queue_listener: cleanup failed",
+                exc_info=True,
+            )
 
     @classmethod
     def _hydrate_instance(
@@ -1188,7 +1197,11 @@ class NoDbBase(object):
                         instance._safe_stop_queue_listener()
                         cleaned += 1
                     except Exception:
-                        pass
+                        logging.getLogger(__name__).debug(
+                            "cleanup_instances_for_wd: _safe_stop_queue_listener failed for %s",
+                            nodb_cls.__name__,
+                            exc_info=True,
+                        )
         
         return cleaned
     
@@ -1285,15 +1298,23 @@ class NoDbBase(object):
         if redis_nodb_cache_client is not None:
             try:
                 redis_nodb_cache_client.set(self._nodb, js, ex=REDIS_NODB_EXPIRY) 
-            except Exception as e:
+            except Exception:
                 # Cache mirror writes are best-effort and must not block dump/unlock.
-                print(f'Error caching NoDb instance to Redis: {e}')
+                logging.getLogger(__name__).debug(
+                    "NoDbBase.dump: cache mirror write failed for %s",
+                    self._nodb,
+                    exc_info=True,
+                )
 
         try:
             from wepppy.weppcloud.db_api import update_last_modified
             update_last_modified(self.runid)
         except Exception:
-            pass
+            logging.getLogger(__name__).debug(
+                "NoDbBase.dump: update_last_modified failed for runid=%s",
+                self.runid,
+                exc_info=True,
+            )
         try:
             if redis_lock_client is not None:
                 ts = self._nodb_mtime if self._nodb_mtime is not None else time()
@@ -1301,7 +1322,11 @@ class NoDbBase(object):
                 redis_lock_client.hset(self.runid, "last_modified", str(rounded_ts))
         except Exception:
             # last_modified mirror is best-effort and must not block dump/unlock.
-            pass
+            logging.getLogger(__name__).debug(
+                "NoDbBase.dump: redis last_modified mirror failed for runid=%s",
+                self.runid,
+                exc_info=True,
+            )
 
     @classmethod
     def _get_nodb_path(cls, wd: str) -> str:
@@ -1417,15 +1442,21 @@ class NoDbBase(object):
             disturbed = Disturbed.getInstance(self.wd)
             if disturbed.has_map:
                 return True
-        except:
+        except FileNotFoundError:
             pass
+        except Exception:
+            self._init_logging()
+            self.logger.debug("has_sbs: failed to load disturbed instance", exc_info=True)
 
         try:
             baer = Baer.getInstance(self.wd)
             if baer.has_map:
                 return True
-        except:
+        except FileNotFoundError:
             pass
+        except Exception:
+            self._init_logging()
+            self.logger.debug("has_sbs: failed to load baer instance", exc_info=True)
 
         return False
 
@@ -2232,12 +2263,19 @@ def cleanup_all_nodb_instances() -> None:
         for controller_class in [NoDbBase, Climate, Wepp, Watershed, Landuse, Soils, Disturbed]:
             try:
                 controller_class.cleanup_all_instances()
-            except:
-                # Ignore cleanup errors
-                pass
-    except:
-        # Ignore import or other errors during cleanup
-        pass
+            except Exception:
+                # Cleanup boundary: ignore errors, but keep a breadcrumb for debugging.
+                logging.getLogger(__name__).debug(
+                    "cleanup_all_nodb_instances: cleanup failed for %s",
+                    getattr(controller_class, "__name__", str(controller_class)),
+                    exc_info=True,
+                )
+    except Exception:
+        # Cleanup boundary: ignore errors, but keep a breadcrumb for debugging.
+        logging.getLogger(__name__).debug(
+            "cleanup_all_nodb_instances: cleanup failed",
+            exc_info=True,
+        )
 
 
 # Register global cleanup with atexit (runs after individual instance cleanups)

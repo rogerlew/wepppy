@@ -1453,13 +1453,13 @@ class Ron(NoDbBase):
 def _try_str(x: Any) -> str:
     try:
         return str(x)
-    except:
+    except Exception:
         return ''
 
 def _try_bool(x: Any) -> bool:
     try:
         return bool(int(x))
-    except:
+    except Exception:
         return False
 
 # for jinja views

@@ -21,7 +21,7 @@ def compare_tokens(x, y):
 
         return _x * 0.8 < _y < _x * 1.2
 
-    except:
+    except (TypeError, ValueError):
         return x == y
 
 

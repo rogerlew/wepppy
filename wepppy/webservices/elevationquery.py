@@ -65,7 +65,8 @@ def query_elevation() -> Response:
             geo_transformer = GeoTransformer(src_proj4=srs,
                                              dst_proj4=wgs84_proj4)
             lng, lat = geo_transformer.transform(lng, lat)
-        except:
+        except Exception:
+            app.logger.exception("Elevation query: failed to transform lng/lat to WGS84")
             return jsonify({'Error': 'Could not transform lng, lat to wgs'})
 
     img = 'n%02iw%03i' % (int(math.ceil(lat)), int(math.ceil(abs(lng))))
@@ -81,7 +82,7 @@ def query_elevation() -> Response:
 
     try:
         elev = float(p.stdout.read().strip())
-    except:
+    except ValueError:
         elev = float('nan')
 
     return jsonify({'Elevation': elev,

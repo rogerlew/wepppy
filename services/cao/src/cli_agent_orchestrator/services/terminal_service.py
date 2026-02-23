@@ -97,12 +97,16 @@ def create_terminal(provider: str, agent_profile: str, session_name: str = None,
         return terminal
         
     except Exception as e:
-        logger.error(f"Failed to create terminal: {e}")
-        if new_session:
+        logger.error("Failed to create terminal.", exc_info=e)
+        if new_session and session_name:
             try:
                 tmux_client.kill_session(session_name)
-            except:
-                pass
+            except Exception as cleanup_exc:
+                logger.warning(
+                    "Failed to kill tmux session %s during terminal create rollback.",
+                    session_name,
+                    exc_info=cleanup_exc,
+                )
         raise
 
 

@@ -43,5 +43,6 @@ def combined_ws_viewer_url_gen():
 
         return render_template('combined_ws_viewer_url_gen.htm',
             url=url, user=current_user, title=title, runids=', '.join(runids))
-    except:
+    except Exception:
+        current_app.logger.exception("combined_ws_viewer_url_gen failed")
         return exception_factory('Error processing request')
