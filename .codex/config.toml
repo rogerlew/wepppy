@@ -24,6 +24,10 @@ config_file = "agents/worker.toml"
 description = "Risk-focused code reviewer for correctness, regressions, and missing tests."
 config_file = "agents/reviewer.toml"
 
+[agents.qa_reviewer]
+description = "Secondary QA reviewer for maintainability, readability, and test quality after correctness review."
+config_file = "agents/qa_reviewer.toml"
+
 [agents.code_quality_refactorer]
 description = "Refactors a bounded module for complexity/readability while preserving behavior."
 config_file = "agents/code_quality_refactorer.toml"
