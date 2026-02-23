@@ -19,11 +19,11 @@ import zlib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from time import monotonic
+from time import monotonic, sleep
 from typing import Callable
 from zipfile import ZipFile, ZipInfo
 
-from .errors import nodir_invalid_archive, nodir_limit_exceeded, nodir_locked
+from .errors import NoDirError, nodir_invalid_archive, nodir_limit_exceeded, nodir_locked
 from .fs import ResolvedNoDirPath, _get_zip_index, resolve
 from .paths import normalize_relpath
 from .state import is_transitioning_locked
@@ -39,6 +39,7 @@ _DEFAULT_MAX_FILE_BYTES = 16 * 1024**3
 _DEFAULT_MAX_REQUEST_BYTES = 20 * 1024**3
 _DEFAULT_MAX_REQUEST_FILES = 32
 _DEFAULT_LOCK_TTL_SECONDS = 300
+_DEFAULT_LOCK_WAIT_SECONDS = 1.0
 _DEFAULT_RATIO_MIN_BYTES = 64 * 1024**2
 _DEFAULT_RATIO_MAX = 200.0
 _LOCK_RENEWAL_INTERVAL_SECONDS = 30.0
@@ -99,6 +100,10 @@ def _env_positive_float(name: str, default: float) -> float:
 
 def _lock_ttl_seconds() -> int:
     return _env_positive_int("NODIR_MATERIALIZE_LOCK_TTL_SECONDS", _DEFAULT_LOCK_TTL_SECONDS)
+
+
+def _lock_wait_seconds() -> float:
+    return _env_positive_float("NODIR_MATERIALIZE_LOCK_WAIT_SECONDS", _DEFAULT_LOCK_WAIT_SECONDS)
 
 
 def _max_file_bytes() -> int:
@@ -713,7 +718,30 @@ def materialize_file(wd: str, rel: str, *, purpose: str = "materialize") -> str:
             outcome = "hit"
             return str(primary_path)
 
-        lock_value = _acquire_materialize_lock(lock_key, purpose=purpose)
+        lock_deadline = monotonic() + _lock_wait_seconds()
+        lock_attempt = 0
+        while True:
+            try:
+                lock_value = _acquire_materialize_lock(lock_key, purpose=purpose)
+                break
+            except NoDirError as exc:
+                # Contention is expected when multiple readers materialize the
+                # same archive entry concurrently; wait briefly for peer fill.
+                is_lock_contention = (
+                    exc.code == "NODIR_LOCKED"
+                    and exc.message == "materialization lock is currently held"
+                )
+                if not is_lock_contention:
+                    raise
+                if _cache_hit(entry_dir, target, plans):
+                    outcome = "hit"
+                    return str(primary_path)
+                if monotonic() >= lock_deadline:
+                    raise
+                lock_attempt += 1
+                backoff_seconds = min(0.05 * lock_attempt, 0.5)
+                sleep(backoff_seconds)
+
         try:
             if _cache_hit(entry_dir, target, plans):
                 outcome = "hit"

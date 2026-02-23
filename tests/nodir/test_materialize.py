@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import threading
+import time
 import zipfile
 from pathlib import Path
 
@@ -147,6 +148,61 @@ def test_materialize_lock_contention_returns_503(tmp_path: Path, monkeypatch: py
     err = exc.value
     assert err.http_status == 503
     assert err.code == "NODIR_LOCKED"
+
+
+def test_materialize_lock_contention_waits_for_peer_cache_fill(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+    logical_rel = "watershed/big.bin"
+    _write_zip(wd / "watershed.nodir", {"big.bin": b"x" * (3 * 1024 * 1024)})
+
+    import wepppy.nodir.materialize as materialize_mod
+
+    monkeypatch.setattr(materialize_mod, "redis_lock_client", _RedisLockStub())
+    monkeypatch.setenv("NODIR_MATERIALIZE_LOCK_WAIT_SECONDS", "2")
+    monkeypatch.setattr(materialize_mod, "_LOCK_RENEWAL_INTERVAL_SECONDS", 0.0)
+
+    started = threading.Event()
+    release = threading.Event()
+    original_extract = materialize_mod._extract_file
+
+    def _blocking_extract(*args, **kwargs):
+        started.set()
+        assert release.wait(timeout=5)
+        return original_extract(*args, **kwargs)
+
+    monkeypatch.setattr(materialize_mod, "_extract_file", _blocking_extract)
+
+    worker_result: dict[str, object] = {}
+
+    def _worker() -> None:
+        try:
+            worker_result["path"] = materialize_file(str(wd), logical_rel, purpose="test")
+        except BaseException as exc:  # pragma: no cover - captured assertion path
+            worker_result["exc"] = exc
+
+    worker_thread = threading.Thread(target=_worker)
+    worker_thread.start()
+    assert started.wait(timeout=5)
+
+    def _release_later() -> None:
+        time.sleep(0.2)
+        release.set()
+
+    release_thread = threading.Thread(target=_release_later)
+    release_thread.start()
+
+    peer_path = materialize_file(str(wd), logical_rel, purpose="test")
+
+    release_thread.join(timeout=5)
+    assert not release_thread.is_alive()
+    worker_thread.join(timeout=10)
+    assert not worker_thread.is_alive()
+
+    assert "exc" not in worker_result
+    assert worker_result["path"] == peer_path
 
 
 def test_materialize_explicit_none_override_disables_backend(
