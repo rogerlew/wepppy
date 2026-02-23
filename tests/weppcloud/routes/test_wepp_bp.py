@@ -130,6 +130,29 @@ def test_set_run_wepp_routine_requires_known_routine(wepp_client):
     assert "routine not in" in payload["error"]["message"]
 
 
+def test_query_subcatchments_summary_returns_500_when_controller_raises(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+
+    class DummyRon:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return cls()
+
+        def subs_summary(self):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/subcatchments_summary/")
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Error building summary"
+
+
 def _touch_wepp_results(run_dir: str) -> None:
     output_dir = Path(run_dir) / "wepp" / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -232,3 +255,58 @@ def test_report_wepp_results_not_stale_when_current(wepp_client, monkeypatch: py
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/results/")
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "Run Results"
+
+
+def test_report_wepp_results_returns_500_when_template_render_raises(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("ClimateInstance", (), {"is_single_storm": False, "ss_batch_storms": None})()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+
+    def _raise_file_not_found(_wd: str):
+        raise FileNotFoundError()
+
+    monkeypatch.setattr(wepp_module.RedisPrep, "getInstance", _raise_file_not_found)
+
+    def _explode(*_args: Any, **_kwargs: Any) -> str:
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(wepp_module, "render_template", _explode)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/results/")
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Error building reports template"
+
+
+def test_query_channels_summary_returns_500_when_controller_raises(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+
+    class DummyRon:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return cls()
+
+        def chns_summary(self):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/channels_summary/")
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Error building summary"

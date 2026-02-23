@@ -209,3 +209,47 @@ def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
     # Verify scenario was passed to resolve_run_context
     assert len(captured_scenario) == 1
     assert captured_scenario[0] == "mulch_30_sbs_map"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("exc_cls", [ValueError, TypeError])
+def test_query_endpoint_invalid_payload_returns_422_with_expected_envelope(monkeypatch, tmp_path, exc_cls):
+    from wepppy.query_engine.app import server
+
+    runid = "sample-run"
+    run_dir = tmp_path / runid
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    def fake_resolve_run_path(runid_param: str):
+        if runid_param != runid:
+            raise FileNotFoundError(runid_param)
+        return run_dir
+
+    def fake_resolve_context(
+        runid_path: str,
+        *,
+        scenario=None,
+        auto_activate: bool = True,
+        run_interchange: bool = True,
+        force_refresh: bool = False,
+    ):
+        return SimpleNamespace(runid=runid_path, base_dir=run_dir, scenario=scenario)
+
+    def fake_query_request(**_body):
+        raise exc_cls("boom")
+
+    monkeypatch.setattr(server, "resolve_run_path", fake_resolve_run_path)
+    monkeypatch.setattr(server, "resolve_run_context", fake_resolve_context)
+    monkeypatch.setattr(server, "QueryRequest", fake_query_request)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    response = client.post(f"/runs/{runid}/query", json={"datasets": ["test.parquet"]})
+    assert response.status_code == 422
+
+    data = response.json()
+    assert set(data.keys()) == {"error", "stacktrace", "exc_info", "status_code"}
+    assert data["status_code"] == 422
+    assert data["stacktrace"] == data["exc_info"]
+    assert "Invalid query payload:" in data["error"]

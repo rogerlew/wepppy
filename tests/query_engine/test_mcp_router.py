@@ -803,3 +803,43 @@ def test_execute_query_requires_scope(monkeypatch, tmp_path):
     assert response.status_code == 403
     payload = response.json()
     assert "trace_id" in payload.get("meta", {})
+
+
+def test_execute_query_context_resolution_exception_returns_500(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "execute-context-unavailable"
+    app, _ = _make_client(
+        monkeypatch,
+        tmp_path,
+        runid,
+        files=[
+            {
+                "path": "datasets/one.parquet",
+                "extension": ".parquet",
+                "size_bytes": 1,
+                "modified": "2024-01-01T00:00:00Z",
+            }
+        ],
+    )
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import router, auth
+
+    monkeypatch.setattr(
+        router,
+        "resolve_run_context",
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid, scopes=["runs:read", "queries:execute"])
+    response = client.post(
+        f"/mcp/runs/{runid}/queries/execute",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"datasets": ["datasets/one.parquet"], "limit": 5},
+    )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["errors"][0]["code"] == "context_unavailable"
+    assert "trace_id" in payload.get("meta", {})

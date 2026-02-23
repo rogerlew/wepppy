@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import logging
 import types
 import uuid
 from datetime import datetime, timedelta
@@ -178,6 +179,7 @@ def runs_scope_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             "owner_id": owner_id,
             "other_id": other_id,
             "admin_id": admin_id,
+            "module": user_module,
         }
 
 
@@ -244,3 +246,103 @@ def test_runs_map_data_applies_alias_for_admin(runs_scope_client) -> None:
     payload = response.get_json()
     runids = {run["runid"] for run in payload["runs"]}
     assert runids == {"other-run"}
+
+
+def test_runs_catalog_skips_missing_run_metadata_and_logs_boundary(
+    runs_scope_client,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    client = runs_scope_client["client"]
+    module = runs_scope_client["module"]
+    _login(client, runs_scope_client["admin_id"])
+
+    class _MissingRon:
+        @classmethod
+        def load_detached(cls, _wd: str):
+            raise FileNotFoundError("ron.nodb missing")
+
+    monkeypatch.setattr(module, "Ron", _MissingRon)
+    caplog.set_level(logging.INFO, logger=module.logger.name)
+
+    response = client.get(f"/runs/catalog?alias={runs_scope_client['other_id']}")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["runs"] == []
+    assert "ron.nodb missing" in caplog.text
+
+
+def test_runs_map_data_skips_missing_run_metadata_and_logs_boundary(
+    runs_scope_client,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    client = runs_scope_client["client"]
+    module = runs_scope_client["module"]
+    _login(client, runs_scope_client["admin_id"])
+
+    class _MissingRon:
+        @classmethod
+        def load_detached(cls, _wd: str):
+            raise FileNotFoundError("ron.nodb missing")
+
+    monkeypatch.setattr(module, "Ron", _MissingRon)
+    caplog.set_level(logging.INFO, logger=module.logger.name)
+
+    response = client.get(f"/runs/map-data?alias={runs_scope_client['other_id']}")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["runs"] == []
+    assert "ron.nodb missing" in caplog.text
+
+
+def test_runs_catalog_skips_run_metadata_load_errors_and_logs_warning_boundary(
+    runs_scope_client,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    client = runs_scope_client["client"]
+    module = runs_scope_client["module"]
+    _login(client, runs_scope_client["admin_id"])
+
+    class _ExplodingRon:
+        @classmethod
+        def load_detached(cls, _wd: str):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(module, "Ron", _ExplodingRon)
+    caplog.set_level(logging.WARNING, logger=module.logger.name)
+
+    response = client.get(f"/runs/catalog?alias={runs_scope_client['other_id']}")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["runs"] == []
+    assert "failed to load Ron" in caplog.text
+
+
+def test_runs_map_data_skips_run_metadata_load_errors_and_logs_warning_boundary(
+    runs_scope_client,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    client = runs_scope_client["client"]
+    module = runs_scope_client["module"]
+    _login(client, runs_scope_client["admin_id"])
+
+    class _ExplodingRon:
+        @classmethod
+        def load_detached(cls, _wd: str):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(module, "Ron", _ExplodingRon)
+    caplog.set_level(logging.WARNING, logger=module.logger.name)
+
+    response = client.get(f"/runs/map-data?alias={runs_scope_client['other_id']}")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["runs"] == []
+    assert "failed to load Ron" in caplog.text

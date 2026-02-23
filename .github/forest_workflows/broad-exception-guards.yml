@@ -1,0 +1,71 @@
+name: Broad Exception Guards
+on:
+  pull_request:
+    paths:
+      - "**/*.py"
+      - docs/standards/broad-exception-boundary-allowlist.md
+      - docs/dev-notes/code-quality-observability.md
+      - tools/check_broad_exceptions.py
+      - tests/tools/test_check_broad_exceptions.py
+      - .github/forest_workflows/broad-exception-guards.yml
+      - .github/forest_workflows/bootstrap.yml
+      - .github/workflows/broad-exception-guards.yml
+  push:
+    branches:
+      - master
+    paths:
+      - "**/*.py"
+      - docs/standards/broad-exception-boundary-allowlist.md
+      - docs/dev-notes/code-quality-observability.md
+      - tools/check_broad_exceptions.py
+      - tests/tools/test_check_broad_exceptions.py
+      - .github/forest_workflows/broad-exception-guards.yml
+      - .github/forest_workflows/bootstrap.yml
+      - .github/workflows/broad-exception-guards.yml
+  workflow_dispatch:
+
+jobs:
+  broad-exception-guards:
+    runs-on: [self-hosted, Linux, X64, homelab]
+    timeout-minutes: 20
+    steps:
+      - name: Verify checker runtime
+        run: |
+          set -euo pipefail
+          command -v python3 >/dev/null || {
+            echo "python3 binary not found on the runner." >&2
+            exit 127
+          }
+          python3 --version
+
+      - name: Run broad exception changed-file enforcement
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          BASE_REF=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_REF="${PR_BASE_SHA:-}"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            BASE_REF="${PUSH_BEFORE_SHA:-}"
+          fi
+          if [ -z "${BASE_REF}" ] || [ "${BASE_REF}" = "0000000000000000000000000000000000000000" ]; then
+            BASE_REF="origin/master"
+          fi
+
+          set +e
+          python3 tools/check_broad_exceptions.py --enforce-changed --base-ref "${BASE_REF}" | tee broad-exception-enforcement.txt
+          status=${PIPESTATUS[0]}
+          set -e
+
+          cat broad-exception-enforcement.txt >> "${GITHUB_STEP_SUMMARY}"
+          exit "${status}"
+
+      - name: Upload broad exception guard artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: broad-exception-guard
+          path: broad-exception-enforcement.txt
+          if-no-files-found: warn

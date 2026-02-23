@@ -283,6 +283,24 @@ def test_bootstrap_checkout_requires_sha(monkeypatch: pytest.MonkeyPatch) -> Non
     assert response.json()["error"]["message"] == "sha required"
 
 
+def test_bootstrap_checkout_invalid_json_payload_falls_back_to_missing_sha(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(
+        monkeypatch,
+        claims={"sub": "7", "email": "user@example.com", "scope": bootstrap_routes.BOOTSTRAP_CHECKOUT_SCOPE},
+    )
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/bootstrap/checkout",
+            data="{not-json}",
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "sha required"
+
+
 def test_bootstrap_checkout_rejects_when_lock_busy(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch, claims={"sub": "7", "email": "user@example.com", "scope": bootstrap_routes.BOOTSTRAP_CHECKOUT_SCOPE})
 

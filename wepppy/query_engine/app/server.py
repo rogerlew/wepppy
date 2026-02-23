@@ -432,7 +432,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
 
     try:
         payload = QueryRequest(**body)
-    except Exception as exc:  # pragma: no cover - simple validation error reporting
+    except (TypeError, ValueError) as exc:  # pragma: no cover - simple validation error reporting
         stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.debug("Invalid query payload for %s: %s", run_path, exc, exc_info=True)
         return JSONResponse(

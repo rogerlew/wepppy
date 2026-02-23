@@ -96,3 +96,18 @@ Code review should include a code-quality pass:
    - capture a short deferred cleanup note in the PR.
 
 The objective is steady trend improvement without blocking feature delivery.
+
+## Broad Exception Telemetry
+
+Canonical broad-exception inventory and changed-file enforcement are handled by:
+
+```bash
+python3 tools/check_broad_exceptions.py
+python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
+```
+
+- This tool reports `bare-except`, `except-Exception`, and `except-BaseException` counts.
+- Canonical allowlist source is `docs/standards/broad-exception-boundary-allowlist.md`.
+- Allowlist suppression is automatic by default; disable with `--no-allowlist` or override with `--allowlist-file <path>`.
+- Keep allowlist entries explicit and time-bound (owner + rationale + expiry).
+- CI enforcement workflow: `.github/workflows/broad-exception-guards.yml` (generated from `.github/forest_workflows/broad-exception-guards.yml`) runs `--enforce-changed` on PRs.

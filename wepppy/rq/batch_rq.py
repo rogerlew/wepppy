@@ -43,7 +43,7 @@ from wepppy.rq.omni_rq import run_omni_scenarios_rq
 from wepppy.topo.watershed_collection import WatershedFeature
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
-except Exception:
+except ImportError:
     send_discord_message = None
 
 

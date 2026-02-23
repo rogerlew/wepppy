@@ -10,6 +10,9 @@ import pytest
 import wepppy
 
 
+pytestmark = pytest.mark.unit
+
+
 def _load_base_module():
     if 'wepppy.nodb.base' in sys.modules:
         return sys.modules['wepppy.nodb.base']
@@ -96,6 +99,81 @@ def test_try_redis_set_log_level_updates_client(monkeypatch):
         logger.setLevel(previous_level)
 
 
+def test_try_redis_set_log_level_swallows_redis_errors(monkeypatch):
+    class _StubRedis:
+        def __init__(self):
+            self.calls = []
+
+        def set(self, key, value):
+            self.calls.append((key, value))
+            raise base.redis.exceptions.RedisError("boom")
+
+    client = _StubRedis()
+    monkeypatch.setattr(base, "redis_log_level_client", client, raising=False)
+
+    logger_name = "wepppy.run.unit-test"
+    logger = logging.getLogger(logger_name)
+    previous_level = logger.level
+
+    try:
+        base.try_redis_set_log_level("unit-test", "DEBUG")
+        assert client.calls == [("loglevel:unit-test", str(logging.DEBUG))]
+        assert logger.level == logging.DEBUG
+    finally:
+        logger.setLevel(previous_level)
+
+
+def test_try_redis_set_log_level_swallows_logger_setlevel_failures(monkeypatch):
+    class _StubRedis:
+        def __init__(self):
+            self.calls = []
+
+        def set(self, key, value):
+            self.calls.append((key, value))
+
+    client = _StubRedis()
+    monkeypatch.setattr(base, "redis_log_level_client", client, raising=False)
+
+    class _StubLogger:
+        def setLevel(self, level):  # noqa: N802 - matches logging API
+            raise TypeError("boom")
+
+    original_get_logger = base.logging.getLogger
+
+    def _fake_get_logger(name=None):
+        if name == "wepppy.run.unit-test":
+            return _StubLogger()
+        return original_get_logger(name) if name is not None else original_get_logger()
+
+    monkeypatch.setattr(base.logging, "getLogger", _fake_get_logger)
+
+    base.try_redis_set_log_level("unit-test", "DEBUG")
+    assert client.calls == [("loglevel:unit-test", str(logging.DEBUG))]
+
+
+def test_try_redis_set_log_level_invalid_level_falls_back_to_info(monkeypatch):
+    class _StubRedis:
+        def __init__(self):
+            self.calls = []
+
+        def set(self, key, value):
+            self.calls.append((key, value))
+
+    client = _StubRedis()
+    monkeypatch.setattr(base, "redis_log_level_client", client, raising=False)
+
+    logger_name = "wepppy.run.unit-test"
+    logger = logging.getLogger(logger_name)
+    previous_level = logger.level
+
+    try:
+        base.try_redis_set_log_level("unit-test", "not-a-log-level")
+        assert client.calls == [("loglevel:unit-test", str(logging.INFO))]
+        assert logger.level == logging.INFO
+    finally:
+        logger.setLevel(previous_level)
+
+
 def test_try_redis_get_log_level_missing_value_returns_default(monkeypatch):
     class _StubRedis:
         def get(self, key):
@@ -106,6 +184,169 @@ def test_try_redis_get_log_level_missing_value_returns_default(monkeypatch):
 
     level = base.try_redis_get_log_level('unit-test', default=logging.WARNING)
     assert level == logging.WARNING
+
+
+def test_try_redis_get_log_level_swallows_redis_errors(monkeypatch):
+    class _StubRedis:
+        def get(self, key):
+            raise base.redis.exceptions.RedisError("boom")
+
+    client = _StubRedis()
+    monkeypatch.setattr(base, "redis_log_level_client", client, raising=False)
+
+    level = base.try_redis_get_log_level("unit-test", default=logging.WARNING)
+    assert level == logging.WARNING
+
+
+def test_try_redis_log_level_round_trip_with_numeric_storage(monkeypatch):
+    class _StubRedis:
+        def __init__(self):
+            self.store = {}
+
+        def set(self, key, value):
+            self.store[key] = value
+
+        def get(self, key):
+            return self.store.get(key)
+
+    client = _StubRedis()
+    monkeypatch.setattr(base, "redis_log_level_client", client, raising=False)
+
+    base.try_redis_set_log_level("unit-test", "DEBUG")
+    level = base.try_redis_get_log_level("unit-test", default=logging.WARNING)
+    assert level == logging.DEBUG
+
+
+@pytest.mark.parametrize(
+    ("stored", "expected"),
+    [
+        ("debug", logging.DEBUG),
+        ("DEBUG", logging.DEBUG),
+        (" info ", logging.INFO),
+        ("warning", logging.WARNING),
+        ("error", logging.ERROR),
+        ("critical", logging.CRITICAL),
+        (str(logging.DEBUG), logging.DEBUG),
+        (f" {logging.INFO} ", logging.INFO),
+    ],
+)
+def test_try_redis_get_log_level_parses_valid_values(monkeypatch, stored, expected):
+    class _StubRedis:
+        def __init__(self, value):
+            self.value = value
+
+        def get(self, key):
+            return self.value
+
+    monkeypatch.setattr(base, "redis_log_level_client", _StubRedis(stored), raising=False)
+
+    level = base.try_redis_get_log_level("unit-test", default=logging.WARNING)
+    assert level == expected
+
+
+@pytest.mark.parametrize("stored", ["verbose", "15", "-1", "0", "9999"])
+def test_try_redis_get_log_level_invalid_values_return_default(monkeypatch, stored):
+    class _StubRedis:
+        def __init__(self, value):
+            self.value = value
+
+        def get(self, key):
+            return self.value
+
+    monkeypatch.setattr(base, "redis_log_level_client", _StubRedis(stored), raising=False)
+
+    level = base.try_redis_get_log_level("unit-test", default=logging.WARNING)
+    assert level == logging.WARNING
+
+
+def test_try_redis_get_log_level_str_coercion_failures_return_default(monkeypatch):
+    class _BadStr:
+        def __str__(self):
+            raise TypeError("boom")
+
+    class _StubRedis:
+        def get(self, key):
+            return _BadStr()
+
+    monkeypatch.setattr(base, "redis_log_level_client", _StubRedis(), raising=False)
+
+    level = base.try_redis_get_log_level("unit-test", default=logging.WARNING)
+    assert level == logging.WARNING
+
+
+def test_try_redis_get_log_level_unexpected_errors_propagate(monkeypatch):
+    class _StubRedis:
+        def get(self, key):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(base, "redis_log_level_client", _StubRedis(), raising=False)
+
+    with pytest.raises(RuntimeError, match="boom"):
+        base.try_redis_get_log_level("unit-test", default=logging.WARNING)
+
+
+def test_try_redis_set_log_level_unexpected_redis_set_errors_propagate(monkeypatch):
+    class _StubRedis:
+        def set(self, key, value):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(base, "redis_log_level_client", _StubRedis(), raising=False)
+
+    with pytest.raises(RuntimeError, match="boom"):
+        base.try_redis_set_log_level("unit-test", "DEBUG")
+
+
+def test_try_redis_set_log_level_unexpected_logger_errors_propagate(monkeypatch):
+    class _StubRedis:
+        def __init__(self):
+            self.calls = []
+
+        def set(self, key, value):
+            self.calls.append((key, value))
+
+    client = _StubRedis()
+    monkeypatch.setattr(base, "redis_log_level_client", client, raising=False)
+
+    class _StubLogger:
+        def setLevel(self, level):  # noqa: N802 - matches logging API
+            raise RuntimeError("boom")
+
+    original_get_logger = base.logging.getLogger
+
+    def _fake_get_logger(name=None):
+        if name == "wepppy.run.unit-test":
+            return _StubLogger()
+        return original_get_logger(name) if name is not None else original_get_logger()
+
+    monkeypatch.setattr(base.logging, "getLogger", _fake_get_logger)
+
+    with pytest.raises(RuntimeError, match="boom"):
+        base.try_redis_set_log_level("unit-test", "DEBUG")
+
+    assert client.calls == [("loglevel:unit-test", str(logging.DEBUG))]
+
+
+def test_cleanup_all_instances_does_not_swallow_keyboard_interrupt():
+    class _Controller(base.NoDbBase):
+        filename = "cleanup.nodb"
+
+        def _init_logging(self) -> None:
+            return
+
+    class _StubInstance:
+        def _safe_stop_queue_listener(self) -> None:
+            raise KeyboardInterrupt()
+
+    with _Controller._instances_lock:
+        _Controller._instances.clear()
+        _Controller._instances["boom"] = _StubInstance()
+
+    try:
+        with pytest.raises(KeyboardInterrupt):
+            _Controller.cleanup_all_instances()
+    finally:
+        with _Controller._instances_lock:
+            _Controller._instances.clear()
 
 
 def test_create_process_pool_executor_prefers_spawn_but_falls_back(monkeypatch):

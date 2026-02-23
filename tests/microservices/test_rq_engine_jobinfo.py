@@ -143,6 +143,21 @@ def test_jobinfo_error_returns_500_payload(monkeypatch: pytest.MonkeyPatch) -> N
     assert isinstance(payload["error"]["message"], str)
 
 
+def test_jobstatus_unexpected_exception_returns_500_with_traceback(monkeypatch: pytest.MonkeyPatch) -> None:
+    def explode(job_id: str) -> dict[str, str]:
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", explode)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/jobstatus/job-boom")
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert isinstance(payload["error"]["message"], str)
+    assert "RuntimeError: boom" in payload["error"]["details"]
+
+
 def test_polling_mode_required_rejects_without_token(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(job_routes.POLL_AUTH_MODE_ENV, "required")
     monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", lambda job_id: {"status": "ok", "job_id": job_id})
@@ -418,3 +433,21 @@ def test_canceljob_accepts_session_with_marker(monkeypatch: pytest.MonkeyPatch) 
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_canceljob_auth_unexpected_exception_returns_401_with_traceback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def explode(_request) -> dict[str, str]:
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(job_routes, "_authorize_cancel_request", explode)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/canceljob/job-auth-boom")
+
+    assert response.status_code == 401
+    payload = response.json()
+    assert payload["error"]["message"] == "Failed to authorize request"
+    assert "Traceback" in payload["error"]["details"]
+    assert "RuntimeError: boom" in payload["error"]["details"]

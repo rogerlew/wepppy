@@ -412,11 +412,33 @@ def try_redis_get_log_level(runid: str, default: int | LogLevel = logging.INFO) 
         if level is None:
             return default
         try:
-            return int(LogLevel.parse(level))
+            level_str = str(level).strip()
+        except (TypeError, ValueError):
+            logging.error('Invalid log level in Redis (unstringifiable payload)')
+            return default
+
+        normalized = level_str.lower()
+        if normalized in {"debug", "info", "warning", "error", "critical"}:
+            return int(LogLevel.parse(normalized))
+
+        try:
+            numeric_level = int(level_str)
         except ValueError:
             logging.error(f'Invalid log level in Redis: {level}')
             return default
-    except Exception as e:
+
+        if numeric_level in {
+            int(LogLevel.DEBUG),
+            int(LogLevel.INFO),
+            int(LogLevel.WARNING),
+            int(LogLevel.ERROR),
+            int(LogLevel.CRITICAL),
+        }:
+            return numeric_level
+
+        logging.error(f'Invalid log level in Redis: {level}')
+        return default
+    except redis.exceptions.RedisError as e:
         logging.error(f'Error getting log level from Redis: {e}')
         return default
 
@@ -430,13 +452,15 @@ def try_redis_set_log_level(runid: str, level: str | LogLevel) -> None:
     parsed = LogLevel.INFO
     try:
         parsed = LogLevel.parse(str(level))
+    except ValueError as e:
+        logging.error(f'Invalid log level for Redis/logging update: {e}')
+    try:
         redis_log_level_client.set(f'loglevel:{runid}', str(int(parsed)))
-    except Exception as e:
+    except redis.exceptions.RedisError as e:
         logging.error(f'Error setting log level in Redis: {e}')
-
     try:
         logging.getLogger(f'wepppy.run.{runid}').setLevel(int(parsed))
-    except Exception as e:
+    except (TypeError, ValueError) as e:
         logging.error(f'Error setting log level for logger: {e}')
 
 
@@ -1114,7 +1138,7 @@ class NoDbBase(object):
             for instance in cls._instances.values():
                 try:
                     instance._safe_stop_queue_listener()
-                except:
+                except Exception:
                     # Ignore any cleanup errors
                     pass
             # Clear the instances dict
@@ -1163,7 +1187,7 @@ class NoDbBase(object):
                     try:
                         instance._safe_stop_queue_listener()
                         cleaned += 1
-                    except:
+                    except Exception:
                         pass
         
         return cleaned
@@ -1262,6 +1286,7 @@ class NoDbBase(object):
             try:
                 redis_nodb_cache_client.set(self._nodb, js, ex=REDIS_NODB_EXPIRY) 
             except Exception as e:
+                # Cache mirror writes are best-effort and must not block dump/unlock.
                 print(f'Error caching NoDb instance to Redis: {e}')
 
         try:
@@ -1275,6 +1300,7 @@ class NoDbBase(object):
                 rounded_ts = int(round(ts))
                 redis_lock_client.hset(self.runid, "last_modified", str(rounded_ts))
         except Exception:
+            # last_modified mirror is best-effort and must not block dump/unlock.
             pass
 
     @classmethod

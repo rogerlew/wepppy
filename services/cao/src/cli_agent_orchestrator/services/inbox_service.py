@@ -48,7 +48,7 @@ def _get_log_tail(terminal_id: str, lines: int = 5) -> str:
             timeout=1
         )
         return result.stdout
-    except Exception:
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, UnicodeDecodeError):
         return ""
 
 
@@ -61,8 +61,29 @@ def _has_idle_pattern(terminal_id: str) -> bool:
     try:
         provider = provider_manager.get_provider(terminal_id)
         idle_pattern = provider.get_idle_pattern_for_log()
+    except (ValueError, RuntimeError) as exc:
+        logger.debug(
+            "Unable to resolve provider/idle pattern for terminal %s; treating as not idle.",
+            terminal_id,
+            exc_info=exc,
+        )
+        return False
+    except AttributeError as exc:
+        logger.error(
+            "Provider for terminal %s does not support idle detection; treating as not idle.",
+            terminal_id,
+            exc_info=exc,
+        )
+        return False
+
+    try:
         return bool(re.search(idle_pattern, tail))
-    except Exception:
+    except (re.error, TypeError) as exc:
+        logger.error(
+            "Invalid idle regex pattern for terminal %s; treating as not idle.",
+            terminal_id,
+            exc_info=exc,
+        )
         return False
 
 
@@ -93,12 +114,14 @@ def check_and_send_pending_messages(terminal_id: str) -> bool:
     try:
         from cli_agent_orchestrator.providers.codex import CodexProvider  # local import to avoid cycles
         is_codex = isinstance(provider, CodexProvider)
-    except Exception:
+    except (ImportError, ModuleNotFoundError) as exc:
+        logger.debug("Codex provider import unavailable; treating as non-codex.", exc_info=exc)
         is_codex = False
     try:
         from cli_agent_orchestrator.providers.gemini import GeminiProvider  # local import to avoid cycles
         is_gemini = isinstance(provider, GeminiProvider)
-    except Exception:
+    except (ImportError, ModuleNotFoundError) as exc:
+        logger.debug("Gemini provider import unavailable; treating as non-gemini.", exc_info=exc)
         is_gemini = False
 
     if not (is_codex or is_gemini):
@@ -197,4 +220,5 @@ class LogFileHandler(FileSystemEventHandler):
             check_and_send_pending_messages(terminal_id)
                 
         except Exception as e:
-            logger.error(f"Error handling log change for {terminal_id}: {e}")
+            # Boundary: watchdog callback should not crash on one terminal's transient failure.
+            logger.error(f"Error handling log change for {terminal_id}: {e}", exc_info=True)

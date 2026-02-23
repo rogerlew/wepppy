@@ -103,7 +103,7 @@ def _resolve_bootstrap_actor(claims: Mapping[str, Any]) -> str:
 async def _safe_json(request: Request) -> dict[str, Any]:
     try:
         payload = await request.json()
-    except Exception:
+    except (ValueError, UnicodeDecodeError):
         return {}
     if isinstance(payload, dict):
         return payload

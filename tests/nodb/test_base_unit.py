@@ -201,6 +201,62 @@ def test_locked_context_round_trip(controller: DummyController, redis_env: Simpl
     assert reloaded.values == {"answer": 42}
 
 
+def test_dump_swallows_last_modified_side_effect_failures(
+    controller: DummyController,
+    redis_env: SimpleNamespace,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Characterize dump swallow behavior for last_modified side-effects."""
+    import sys
+    import types
+
+    stub_db_api = types.ModuleType("wepppy.weppcloud.db_api")
+
+    def _explode(_runid: str, timestamp=None) -> None:  # noqa: ARG001 - signature matches production usage
+        raise RuntimeError("boom")
+
+    stub_db_api.update_last_modified = _explode
+    monkeypatch.setitem(sys.modules, "wepppy.weppcloud.db_api", stub_db_api)
+
+    original_hset = redis_env.lock.hset
+
+    def _flaky_hset(name: str, key: str, value: Any) -> int:
+        if name == controller.runid and key == "last_modified":
+            raise base.redis.exceptions.RedisError("boom")
+        return original_hset(name, key, value)
+
+    monkeypatch.setattr(redis_env.lock, "hset", _flaky_hset)
+
+    with controller.locked():
+        controller.values["answer"] = 7
+
+    assert not controller.islocked()
+    assert redis_env.lock.get(controller._distributed_lock_key) is None
+
+
+def test_dump_swallows_redis_cache_side_effect_failures(
+    controller: DummyController,
+    redis_env: SimpleNamespace,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Characterize dump swallow behavior for Redis cache mirror writes."""
+    calls: list[tuple[str, str]] = []
+
+    def _explode(key: str, value: str, *args: Any, **kwargs: Any) -> bool:
+        calls.append((key, value))
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(redis_env.cache, "set", _explode)
+
+    with controller.locked():
+        controller.values["answer"] = 8
+
+    assert calls
+    assert Path(controller._nodb).exists()
+    assert not controller.islocked()
+    assert redis_env.lock.get(controller._distributed_lock_key) is None
+
+
 def test_lock_conflict_raises(controller: DummyController) -> None:
     """Validates that a second lock attempt raises when already locked."""
     controller.lock()

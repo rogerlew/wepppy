@@ -641,6 +641,67 @@ def test_fork_target_runid_rejects_invalid_identifier(
     assert payload["error"]["code"] == "validation_error"
 
 
+def test_fork_target_runid_runtime_error_returns_500(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_resolve_bearer_claims",
+        lambda request: {"token_class": "service"},
+    )
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+
+    def _fake_get_wd(runid: str, prefer_active: bool = True) -> str:
+        if runid == "run-1":
+            return str(run_dir)
+        raise RuntimeError("get_wd failed")
+
+    monkeypatch.setattr(fork_archive_routes, "get_wd", _fake_get_wd)
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: str(path) == str(run_dir))
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/fork",
+            headers={"Authorization": "Bearer token"},
+            data={"target_runid": "custom-fork", "undisturbify": "false"},
+        )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["error"]["message"] == "Error forking project"
+
+
+def test_fork_target_runid_rejects_non_string_value(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_resolve_bearer_claims",
+        lambda request: {"token_class": "service"},
+    )
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid, prefer_active=True: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: str(path) == str(run_dir))
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/fork",
+            headers={"Authorization": "Bearer token"},
+            json={"target_runid": 123, "undisturbify": False},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "Invalid target_runid"
+    assert payload["error"]["code"] == "validation_error"
+
+
 def test_fork_target_runid_refuses_overwrite_for_non_profile_run(
     monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:

@@ -167,7 +167,7 @@ def _resolve_user_from_claims(claims: Mapping[str, Any] | None) -> Any | None:
 
     try:
         from wepppy.weppcloud.app import User, app as flask_app
-    except Exception:
+    except ImportError:
         logger.exception("Unable to import weppcloud app for user lookup")
         return None
 
@@ -190,7 +190,7 @@ def _register_run_owner(runid: str, config: str, user: Any | None) -> None:
         return
     try:
         from wepppy.weppcloud.app import user_datastore, app as flask_app
-    except Exception:
+    except ImportError:
         logger.exception("Unable to import weppcloud app for run ownership")
         return
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 import threading
@@ -167,7 +168,7 @@ def _is_poll_rate_limited(endpoint: str, *, request: Request, claims: Mapping[st
 async def _safe_json(request: Request) -> Any:
     try:
         return await request.json()
-    except Exception:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return None
 
 

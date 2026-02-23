@@ -501,7 +501,7 @@ def report_wepp_results(runid, config):
                                totalwatsed2_exists=totalwatsed2_exists,
                                interchange_readme_exists=interchange_readme_exists,
                                user=current_user)
-    except:
+    except Exception:
         return exception_factory('Error building reports template', runid=runid)
 
 
@@ -517,7 +517,7 @@ def query_subcatchments_summary(runid, config):
         subcatchments_summary = ron.subs_summary()
 
         return jsonify(subcatchments_summary)
-    except:
+    except Exception:
         return exception_factory('Error building summary', runid=runid)
 
 
@@ -533,7 +533,7 @@ def query_channels_summary(runid, config):
         channels_summary = ron.chns_summary()
 
         return jsonify(channels_summary)
-    except:
+    except Exception:
         return exception_factory('Error building summary', runid=runid)
 
 
@@ -687,7 +687,7 @@ def report_wepp_yearly_watbal(runid, config):
             if isint(yr):
                 exclude_yr_indxs.append(int(yr))
 
-    except:
+    except Exception:
         exclude_yr_indxs = [0, 1]
 
     wd = get_wd(runid)
@@ -904,7 +904,7 @@ def report_wepp_return_periods(runid, config):
         for yr in res.split(','):
             if isint(yr):
                 exclude_yr_indxs.append(int(yr))
-    except:
+    except Exception:
         exclude_yr_indxs = None
 
     try:
@@ -913,7 +913,7 @@ def report_wepp_return_periods(runid, config):
         for month in res.split(','):
             if isint(month):
                 exclude_months.append(int(month))
-    except:
+    except Exception:
         exclude_months = None
 
     # get method and gringorten_correction

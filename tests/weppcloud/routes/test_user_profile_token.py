@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import logging
 import uuid
 
 import pytest
@@ -258,3 +259,39 @@ def test_profile_shows_token_controls_for_privileged_role(
     assert captured_context.get("can_mint_profile_token") is True
     assert captured_context.get("reset_browser_state_endpoint") is None
     assert captured_context.get("reset_browser_state_login_url") == "/login"
+
+
+def test_profile_returns_500_json_error_when_template_render_raises(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+
+    def _explode(*_args, **_kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(module, "render_template", _explode)
+
+    client.get(f"/test-login/{user_id}")
+    response = client.get("/profile")
+
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Error Handling Request"
+
+
+def test_claim_names_logs_and_degrades_on_sqlalchemy_error(
+    profile_auth_client,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    module = profile_auth_client["module"]
+
+    class _ExplodingClaims:
+        def all(self):
+            raise module.SQLAlchemyError("db down")
+
+    caplog.set_level(logging.WARNING, logger=module.logger.name)
+    assert module._claim_names(_ExplodingClaims()) == []
+    assert "failed to evaluate dynamic relationship via .all()" in caplog.text

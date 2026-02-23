@@ -34,7 +34,7 @@ from wepppy.nodb.status_messenger import StatusMessenger
 
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
-except Exception:
+except ImportError:
     send_discord_message = None
 
 

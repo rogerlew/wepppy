@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-02-19  
-**Active Packages**: 2  
+**Last Updated**: 2026-02-22  
+**Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -339,6 +339,26 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Broad Exception Elimination and Boundary Contract Hardening
+**Completed**: 2026-02-23  
+**Duration**: 2 days  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260222_broad_exception_elimination/](docs/work-packages/20260222_broad_exception_elimination/)  
+**Description**: Phased elimination of broad exception handlers in runtime-critical production paths with subagent-driven refactoring/review/testing and contract-safe regression controls.
+
+**Outcome**: Package completed through Milestone 7 with changed-file broad-catch guard activation, documented approved boundaries, and full-suite validation.
+
+**Deliverables**:
+- ✅ Broad-catch reduction from `1120` to `1103` (`bare-except`: `96` to `82`)
+- ✅ Milestone artifacts for phases 0-6 plus final closeout summary
+- ✅ Changed-file enforcement mode in `tools/check_broad_exceptions.py` (`--enforce-changed`, `--base-ref`)
+- ✅ Checker regression coverage including `except*`/`TryStar` handling
+- ✅ Required full gate: `wctl run-pytest tests --maxfail=1` (`2048 passed, 29 skipped`)
+- ✅ Boundary allowlist with owner/rationale/expiry in package artifacts
+
+---
 
 ### Cross-Service Auth Token Integration Hardening
 **Completed**: 2026-02-19  

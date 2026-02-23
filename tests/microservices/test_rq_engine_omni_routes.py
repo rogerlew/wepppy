@@ -321,6 +321,22 @@ def test_run_omni_requires_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["error"]["message"] == "Missing scenarios data"
 
 
+def test_run_omni_invalid_json_returns_400(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            data="{invalid-json}",
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 400
+    assert "error" in response.json()
+
+
 def test_run_omni_rejects_non_object_scenarios_entry(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -704,6 +720,22 @@ def test_run_omni_contrasts_batch_returns_input_message_without_enqueue(
     assert build_called["called"] is False
 
 
+def test_run_omni_contrasts_invalid_json_returns_400(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            data="{invalid-json}",
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 400
+    assert "error" in response.json()
+
+
 def test_run_omni_contrasts_base_project_context_returns_input_message_without_enqueue(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -905,6 +937,24 @@ def test_run_omni_contrasts_dry_run_stream_order(monkeypatch: pytest.MonkeyPatch
     assert result["items"][0]["subcatchments_group"] == 10
     assert result["items"][0]["skip_status"]["reason"] == "no_hillslopes"
     assert result["items"][0]["run_status"] == "skipped"
+
+
+def test_run_omni_contrasts_dry_run_invalid_json_returns_400(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+    _stub_omni(monkeypatch)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts-dry-run",
+            data="{bad-json}",
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 400
+    assert "error" in response.json()
 
 
 @pytest.mark.parametrize(

@@ -261,13 +261,15 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         requested_runid = payload.get("target_runid")
         if isinstance(requested_runid, list):
             requested_runid = requested_runid[0] if requested_runid else None
+        if requested_runid is not None and not isinstance(requested_runid, str):
+            return error_response("Invalid target_runid", status_code=400, code="validation_error")
         if isinstance(requested_runid, str):
             requested_runid = requested_runid.strip() or None
         requested_wd = None
         if requested_runid:
             try:
                 requested_wd = get_wd(requested_runid, prefer_active=False)
-            except Exception:
+            except ValueError:
                 return error_response("Invalid target_runid", status_code=400, code="validation_error")
 
         if claims is None or is_anonymous_session:

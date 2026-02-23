@@ -297,14 +297,14 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
     previous_state = ron.readonly
     prep = RedisPrep.tryGetInstance(wd)
 
-    if prep is not None:
-        try:
-            prep.set_rq_job_id('set_readonly', job.id)
-            prep.remove_timestamp(TaskEnum.set_readonly)
-        except Exception:
-            pass
-
     try:
+        if prep is not None:
+            try:
+                prep.set_rq_job_id('set_readonly', job.id)
+                prep.remove_timestamp(TaskEnum.set_readonly)
+            except (redis.exceptions.RedisError, OSError, json.JSONDecodeError, ValueError, TypeError):
+                pass
+
         if readonly:
             if not previous_state:
                 ron.readonly = True
@@ -352,7 +352,7 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
         if prep is not None:
             try:
                 prep.timestamp(TaskEnum.set_readonly)
-            except Exception:
+            except (redis.exceptions.RedisError, OSError, json.JSONDecodeError, ValueError, TypeError):
                 pass
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, readonly={readonly})')

@@ -1,9 +1,11 @@
 """Routes for user blueprint extracted from app.py."""
 
+import logging
 import math
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.routing import BuildError
 
 import wepppy
@@ -26,6 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 user_bp = Blueprint('user', __name__)
+logger = logging.getLogger(__name__)
 
 DEFAULT_SORT_FIELD = 'last_modified'
 DEFAULT_SORT_DIRECTION = 'desc'
@@ -309,7 +312,11 @@ def _claim_names(raw_values: Any) -> List[str]:
     if hasattr(raw_values, 'all') and callable(raw_values.all):
         try:
             raw_values = raw_values.all()
-        except Exception:
+        except SQLAlchemyError:
+            logger.warning(
+                "user._claim_names: failed to evaluate dynamic relationship via .all(); defaulting to empty list",
+                exc_info=True,
+            )
             raw_values = []
 
     names: List[str] = []
@@ -397,7 +404,7 @@ def profile():
             reset_browser_state_endpoint=reset_browser_state_endpoint,
             reset_browser_state_login_url=login_url,
         )
-    except:
+    except Exception:
         return exception_factory()
 
 
@@ -494,41 +501,77 @@ def runs_users():
 
 
 def _build_meta(wd, attrs: dict):
-        try:
-            ron = Ron.load_detached(wd)
-        except:
-            return None
+    try:
+        ron = Ron.load_detached(wd)
+    except FileNotFoundError:
+        # Boundary: keep list endpoints stable when runs are partially created.
+        logger.info(
+            "user._build_meta: ron.nodb missing for runid=%s config=%s wd=%s; skipping run",
+            attrs.get("runid"),
+            attrs.get("config"),
+            wd,
+        )
+        return None
+    except Exception:
+        # Boundary: never 500 runs list endpoints for per-run load failures.
+        logger.warning(
+            "user._build_meta: failed to load Ron for runid=%s config=%s wd=%s; skipping run",
+            attrs.get("runid"),
+            attrs.get("config"),
+            wd,
+            exc_info=True,
+        )
+        return None
 
-        meta = dict(name=ron.name,
-                    scenario=ron.scenario,
-                    readonly=ron.readonly)
-        meta.update(attrs)
+    meta = dict(
+        name=ron.name,
+        scenario=ron.scenario,
+        readonly=ron.readonly,
+    )
+    meta.update(attrs)
 
-        return meta
+    return meta
 
 
 def _build_map_meta(wd, attrs: dict):
-        try:
-            ron = Ron.load_detached(wd)
-        except:
-            return None
-
-        map_center = None
-        map_zoom = None
-        if ron.map is not None:
-            map_center = ron.map.center
-            map_zoom = ron.map.zoom
-
-        meta = dict(
-            runid=attrs.get("runid"),
-            config=attrs.get("config"),
-            name=ron.name,
-            scenario=ron.scenario,
-            readonly=ron.readonly,
-            map_center=map_center,
-            map_zoom=map_zoom,
+    try:
+        ron = Ron.load_detached(wd)
+    except FileNotFoundError:
+        # Boundary: keep list endpoints stable when runs are partially created.
+        logger.info(
+            "user._build_map_meta: ron.nodb missing for runid=%s config=%s wd=%s; skipping run",
+            attrs.get("runid"),
+            attrs.get("config"),
+            wd,
         )
-        return meta
+        return None
+    except Exception:
+        # Boundary: never 500 runs list endpoints for per-run load failures.
+        logger.warning(
+            "user._build_map_meta: failed to load Ron for runid=%s config=%s wd=%s; skipping run",
+            attrs.get("runid"),
+            attrs.get("config"),
+            wd,
+            exc_info=True,
+        )
+        return None
+
+    map_center = None
+    map_zoom = None
+    if ron.map is not None:
+        map_center = ron.map.center
+        map_zoom = ron.map.zoom
+
+    meta = dict(
+        runid=attrs.get("runid"),
+        config=attrs.get("config"),
+        name=ron.name,
+        scenario=ron.scenario,
+        readonly=ron.readonly,
+        map_center=map_center,
+        map_zoom=map_zoom,
+    )
+    return meta
 
 
 def _collect_map_metas_for_runs(runs) -> List[dict]:
@@ -628,7 +671,7 @@ def runs():
             selected_alias=_normalize_alias(requested_alias),
             current_user_alias=str(getattr(current_user, 'id', '')) if getattr(current_user, 'id', None) is not None else '',
         )
-    except:
+    except Exception:
         return exception_factory()
 
 
@@ -653,7 +696,7 @@ def runs_catalog():
             direction=direction_param,
             total=len(metas),
         )
-    except:
+    except Exception:
         return exception_factory()
 
 @user_bp.route("/runs/map-data", strict_slashes=False)
@@ -672,5 +715,5 @@ def runs_map_data():
         run_rows = _collect_run_rows(query)
         metas = _collect_map_metas_for_runs(run_rows)
         return jsonify(runs=metas)
-    except:
+    except Exception:
         return exception_factory()

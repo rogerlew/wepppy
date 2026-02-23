@@ -494,7 +494,7 @@ async def _run_omni(
     payload = await parse_request_payload(request)
     try:
         raw_json = await request.json()
-    except Exception:
+    except (ValueError, UnicodeDecodeError):
         raw_json = None
     form = await request.form()
 
@@ -560,7 +560,7 @@ async def _run_omni_contrasts(
     payload = await parse_request_payload(request)
     try:
         raw_json = await request.json()
-    except Exception:
+    except (ValueError, UnicodeDecodeError):
         raw_json = None
     form = await request.form()
 
@@ -675,7 +675,7 @@ async def _dry_run_omni_contrasts(
     payload = await parse_request_payload(request)
     try:
         raw_json = await request.json()
-    except Exception:
+    except (ValueError, UnicodeDecodeError):
         raw_json = None
     form = await request.form()
 
