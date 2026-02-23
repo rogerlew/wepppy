@@ -319,8 +319,9 @@ async def create(request: Request) -> Response:
             )
 
         try:
-            Ron(wd, cfg)
-            enable_default_archive_roots(wd)
+            ron = Ron(wd, cfg)
+            if ron.config_get_bool("nodb", "apply_nodir", False):
+                enable_default_archive_roots(wd)
         except Exception:
             logger.exception("rq-engine create Ron failed")
             return error_response("Could not create run")

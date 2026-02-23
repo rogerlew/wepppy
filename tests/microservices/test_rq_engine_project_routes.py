@@ -49,10 +49,27 @@ def create_client(
         def __init__(self, wd: str, cfg: str) -> None:
             captured["wd"] = wd
             captured["cfg"] = cfg
+            self._cfg = cfg
+
+        def config_get_bool(self, section: str, option: str, default: bool | None = None) -> bool:
+            if section != "nodb" or option != "apply_nodir":
+                return bool(default)
+            if "?" not in self._cfg:
+                return False if default is None else bool(default)
+            _, query = self._cfg.split("?", 1)
+            for pair in query.split("&"):
+                if "=" not in pair:
+                    continue
+                key, value = pair.split("=", 1)
+                if key != "nodb:apply_nodir":
+                    continue
+                return value.strip().lower().startswith("true")
+            return False if default is None else bool(default)
 
     monkeypatch.setattr(project_routes, "_create_run_dir", fake_create_run_dir)
     monkeypatch.setattr(project_routes, "Ron", DummyRon)
     monkeypatch.setattr(project_routes, "ensure_readme_on_create", lambda runid, config: None)
+    monkeypatch.delenv("WEPP_NODIR_DEFAULT_NEW_RUNS", raising=False)
     monkeypatch.setenv("SITE_PREFIX", "/weppcloud")
 
     with TestClient(rq_engine.app) as client:
@@ -135,7 +152,7 @@ def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch)
     assert owner_calls["user_email"] == "tester@example.com"
 
 
-def test_create_enables_default_nodir_roots_marker(
+def test_create_does_not_enable_default_nodir_roots_marker_without_opt_in(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
 ):
@@ -155,8 +172,55 @@ def test_create_enables_default_nodir_roots_marker(
 
     assert response.status_code == 303
     marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
+    assert not marker_path.exists()
+
+
+def test_create_enables_default_nodir_roots_marker_with_opt_in_override(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, captured = create_client
+
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda request, token: {"success": True},
+    )
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "cap_token": "good-token", "nodb:apply_nodir": "true"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
     assert marker_path.exists()
 
     payload = json.loads(marker_path.read_text(encoding="utf-8"))
     assert payload["schema_version"] == 1
     assert sorted(payload["roots"]) == ["climate", "landuse", "soils", "watershed"]
+
+
+def test_create_opt_in_respects_global_nodir_env_gate(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, captured = create_client
+
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda request, token: {"success": True},
+    )
+    monkeypatch.setenv("WEPP_NODIR_DEFAULT_NEW_RUNS", "0")
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "cap_token": "good-token", "nodb:apply_nodir": "true"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
+    assert not marker_path.exists()

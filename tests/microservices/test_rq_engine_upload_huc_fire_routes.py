@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -15,10 +16,21 @@ from wepppy.microservices.rq_engine import upload_huc_fire_routes
 pytestmark = pytest.mark.microservice
 
 
-def test_huc_fire_upload_sbs_creates_run(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def _post_upload_sbs(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    *,
+    apply_nodir: bool,
+    global_nodir_default: str | None = None,
+) -> tuple[Any, Path]:
     run_dir = tmp_path / "run"
     disturbed_dir = run_dir / "disturbed"
     disturbed_dir.mkdir(parents=True)
+
+    if global_nodir_default is None:
+        monkeypatch.delenv("WEPP_NODIR_DEFAULT_NEW_RUNS", raising=False)
+    else:
+        monkeypatch.setenv("WEPP_NODIR_DEFAULT_NEW_RUNS", global_nodir_default)
 
     monkeypatch.setattr(
         upload_huc_fire_routes,
@@ -51,7 +63,13 @@ def test_huc_fire_upload_sbs_creates_run(monkeypatch: pytest.MonkeyPatch, tmp_pa
 
     class DummyRon:
         def __init__(self, wd: str, cfg: str) -> None:
-            return None
+            self.wd = wd
+            self.cfg = cfg
+
+        def config_get_bool(self, section: str, option: str, default: bool | None = None) -> bool:
+            if section == "nodb" and option == "apply_nodir":
+                return apply_nodir
+            return False if default is None else bool(default)
 
     monkeypatch.setattr(upload_huc_fire_routes, "Ron", DummyRon)
 
@@ -72,6 +90,29 @@ def test_huc_fire_upload_sbs_creates_run(monkeypatch: pytest.MonkeyPatch, tmp_pa
             headers={"Authorization": "Bearer token"},
         )
 
+    return response, run_dir
+
+
+def test_huc_fire_upload_sbs_creates_run_without_nodir_marker_by_default(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    response, run_dir = _post_upload_sbs(monkeypatch, tmp_path, apply_nodir=False)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["runid"] == "new-run"
+
+    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+    assert not marker_path.exists()
+
+
+def test_huc_fire_upload_sbs_creates_nodir_marker_when_config_opted_in(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    response, run_dir = _post_upload_sbs(monkeypatch, tmp_path, apply_nodir=True)
+
     assert response.status_code == 200
     payload = response.json()
     assert payload["runid"] == "new-run"
@@ -81,3 +122,22 @@ def test_huc_fire_upload_sbs_creates_run(monkeypatch: pytest.MonkeyPatch, tmp_pa
     marker_payload = json.loads(marker_path.read_text(encoding="utf-8"))
     assert marker_payload["schema_version"] == 1
     assert sorted(marker_payload["roots"]) == ["climate", "landuse", "soils", "watershed"]
+
+
+def test_huc_fire_upload_sbs_opt_in_respects_global_nodir_env_gate(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    response, run_dir = _post_upload_sbs(
+        monkeypatch,
+        tmp_path,
+        apply_nodir=True,
+        global_nodir_default="0",
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["runid"] == "new-run"
+
+    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+    assert not marker_path.exists()

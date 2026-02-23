@@ -184,6 +184,8 @@ Consolidated configuration surfaces discovered from:
 | Variable / Surface | Default | Used by | Description |
 |---|---:|---|---|
 | `WEPPPY_LOCK_TTL_SECONDS` | `python: 21600` | `wepppy.nodb.base` | Default distributed lock TTL in seconds (applies to NoDb locking). |
+| `WEPP_NODIR_DEFAULT_NEW_RUNS` | `python: true` | `wepppy.nodir.mutations` | Global gate for seeding `WD/.nodir/default_archive_roots.json`; false disables marker creation even when config opts in. |
+| `[nodb].apply_nodir` (`wepppy/nodb/configs/*.cfg`) | `_defaults.toml: false` | `wepppy.microservices.rq_engine.project_routes`; `wepppy.microservices.rq_engine.upload_huc_fire_routes`; `wepppy.weppcloud.routes.test_bp` | Per-config opt-in for default NoDir marker seeding during run creation. |
 | `wepppy/nodb/configs/*.cfg` | — | `wepppy.nodb.base` | NoDb controller configuration basenames (`get_configs()`). |
 | `wepppy/nodb/configs/_defaults.toml` | — | `wepppy.nodb.base` | Default configuration seed path (`get_default_config_path()`). |
 | `wepppy/nodb/configs/legacy/*.toml` | — | `wepppy.nodb.base` | Legacy configuration basenames (`get_legacy_configs()`). |

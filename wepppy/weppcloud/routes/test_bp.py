@@ -49,8 +49,9 @@ def _spawn_run(config: str, overrides: Dict[str, Any]) -> Dict[str, Any]:
     wd_path = Path(wd)
 
     try:
-        Ron(wd, cfg_with_params)
-        enable_default_archive_roots(wd)
+        ron = Ron(wd, cfg_with_params)
+        if ron.config_get_bool("nodb", "apply_nodir", False):
+            enable_default_archive_roots(wd)
         try:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
 

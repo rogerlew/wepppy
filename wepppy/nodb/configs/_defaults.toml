@@ -24,6 +24,7 @@ abstraction_backend = "peridot"
 
 [nodb]
 default_wepp_type = "granitic"
+apply_nodir=false
 
 [landuse]
 nlcd_db = "nlcd/2019"

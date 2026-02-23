@@ -104,8 +104,9 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         config = "disturbed9002"
         cfg = f"{config}.cfg"
 
-        Ron(wd, cfg)
-        enable_default_archive_roots(wd)
+        ron = Ron(wd, cfg)
+        if ron.config_get_bool("nodb", "apply_nodir", False):
+            enable_default_archive_roots(wd)
 
         try:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
