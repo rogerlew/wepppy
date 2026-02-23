@@ -51,6 +51,8 @@ def _get_dem_cellsize_m(
             res_x, res_y = src.res
             cellsize = abs(res_x) if res_x else abs(res_y)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_helpers.py:53", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None
     if cellsize <= 0:
         return None

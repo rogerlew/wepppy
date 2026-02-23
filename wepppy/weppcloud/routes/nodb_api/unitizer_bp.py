@@ -26,6 +26,8 @@ def task_set_unit_preferences(runid, config):
         res = unitizer.set_preferences(preferences, strict=False)
         return success_factory({'preferences': res})
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/unitizer_bp.py:28", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting unit preferences', runid=runid)
 
 
@@ -47,6 +49,8 @@ def unitizer_route(runid, config):
         return success_factory(contents)
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/unitizer_bp.py:49", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
 
 
@@ -67,4 +71,6 @@ def unitizer_units_route(runid, config):
         return success_factory(contents)
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/unitizer_bp.py:69", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)

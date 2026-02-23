@@ -32,7 +32,7 @@ def _resolve_log_path(app) -> Path:
     if not path.is_absolute():
         try:
             start = Path(app.root_path).resolve()
-        except Exception:
+        except (OSError, RuntimeError, TypeError):
             start = Path.cwd()
 
         candidate_bases = [start] + list(start.parents)
@@ -54,7 +54,7 @@ def _configure_security_file_logging(app) -> Optional[Path]:
 
     try:
         log_path.parent.mkdir(parents=True, exist_ok=True)
-    except Exception as exc:
+    except OSError as exc:
         logging.getLogger("gunicorn.error").warning(
             "Security logging: unable to create log directory %s: %s",
             log_path.parent,
@@ -155,17 +155,12 @@ def _extract_identity(user, login_form, extra: Dict[str, Any]):
         for field_name in ('email', 'username', 'identity'):
             field = getattr(login_form, field_name, None)
             if field is not None:
-                try:
-                    value = field.data
-                except Exception:
-                    value = None
+                value = getattr(field, "data", None)
                 if value:
                     return value
 
-        try:
-            data = dict(getattr(login_form, 'data', {}) or {})
-        except Exception:
-            data = {}
+        data_attr = getattr(login_form, "data", None) or {}
+        data = dict(data_attr) if isinstance(data_attr, dict) else {}
 
         for key in ('email', 'username', 'identity'):
             value = data.get(key)
@@ -179,10 +174,10 @@ def _sanitize_form(login_form):
     if login_form is None:
         return None
 
-    try:
-        data = dict(getattr(login_form, 'data', {}) or {})
-    except Exception:
-        return '<unavailable>'
+    data_attr = getattr(login_form, "data", None) or {}
+    if not isinstance(data_attr, dict):
+        return "<unavailable>"
+    data = dict(data_attr)
 
     for sensitive in ('password', 'csrf_token'):
         data.pop(sensitive, None)
@@ -195,10 +190,7 @@ def _sanitize_extra(extra: Dict[str, Any]):
     for key, value in extra.items():
         if key in {'app', 'user', 'login_form'}:
             continue
-        try:
-            sanitized[key] = repr(value)
-        except Exception:
-            sanitized[key] = '<unrepr>'
+        sanitized[key] = object.__repr__(value)
     return sanitized
 
 
@@ -279,7 +271,7 @@ def _log_login_response(response):
     endpoint = None
     try:
         endpoint = request.endpoint
-    except Exception:
+    except RuntimeError:
         endpoint = None
 
     logger = _get_security_logger()

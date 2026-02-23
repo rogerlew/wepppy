@@ -31,6 +31,8 @@ def report_rhem_results(runid, config):
                                runid=runid,
                                config=config)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:33", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building reports template', runid=runid)
 
 
@@ -55,6 +57,8 @@ def report_rhem_run_summary(runid, config):
             ron=ron,
         )
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:57", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building reports template', runid=runid)
 
 
@@ -81,6 +85,8 @@ def report_rhem_avg_annuals(runid, config):
             user=current_user,
         )
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:83", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error running report_rhem_avg_annuals', runid=runid)
 
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/return_periods')
@@ -107,6 +113,8 @@ def report_rhem_return_periods(runid, config):
             user=current_user,
         )
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:109", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error running report_rhem_return_periods', runid=runid)
 
 
@@ -120,6 +128,8 @@ def query_rhem_sub_runoff(runid, config):
         return jsonify(rhempost.query_sub_val('runoff'))
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:122", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error querying RHEM subcatchments runoff', runid=runid)
 
 @rhem_bp.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments')

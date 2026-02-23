@@ -140,6 +140,8 @@ def get_scenarios(runid, config):
         wd = get_wd(runid)
         return jsonify(Omni.getInstance(wd).scenarios)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/omni_bp.py:142", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error Getting Scenarios', runid=runid)
 
 
@@ -155,6 +157,8 @@ def get_scenario_run_state(runid, config):
             'run_markers': omni.scenario_run_markers(),
         })
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/omni_bp.py:157", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error Getting Scenario Run State', runid=runid)
 
 
@@ -174,6 +178,8 @@ def delete_scenarios(runid, config):
         result = omni.delete_scenarios(scenario_names)
         return success_factory(result)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/omni_bp.py:176", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error deleting scenarios', runid=runid)
 
 
@@ -186,6 +192,8 @@ def omni_migration(runid, config):
     except ValueError as exc:
         return error_factory(str(exc))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/omni_bp.py:188", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
 
 

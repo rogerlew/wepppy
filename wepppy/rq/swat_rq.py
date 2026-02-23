@@ -85,6 +85,8 @@ def run_swat_rq(runid: str) -> Job:
             f"rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job_run.id}",
         )
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/swat_rq.py:87", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise
 
@@ -121,6 +123,8 @@ def run_swat_noprep_rq(runid: str) -> Job:
             f"rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job_run.id}",
         )
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/swat_rq.py:123", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise
 
@@ -155,6 +159,8 @@ def _build_swat_inputs_rq(runid: str) -> None:
             f"rq:{job.id} TRIGGER   swat SWAT_RUN_TASK_COMPLETED",
         )
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/swat_rq.py:157", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise
 
@@ -176,6 +182,8 @@ def _run_swat_rq(runid: str) -> None:
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/swat_rq.py:178", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise
 
@@ -197,5 +205,7 @@ def run_swat_interchange_rq(runid: str) -> None:
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/swat_rq.py:199", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise

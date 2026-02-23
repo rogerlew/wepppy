@@ -43,6 +43,8 @@ def submit_task_run_model_fit(runid, config):
     try:
         observed.parse_textdata(textdata)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/observed_bp.py:45", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error parsing text', runid=runid)
     # TODO refactor as RQ task?
     try:

@@ -41,6 +41,8 @@ def _resolve_archive_job_state(prep: RedisPrep) -> tuple[bool, str | None]:
     except NoSuchJobError:
         status = None
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py:43", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return True, archive_job_id
 
     if status in _RUNNING_ARCHIVE_JOB_STATUSES:
@@ -58,6 +60,8 @@ def rq_archive_dashboard(runid, config):
         load_run_context(runid, config)
         return render_template('rq-archive-dashboard.htm', runid=runid, config=config, user=current_user)
     except Exception as e:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py:60", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(e)
 
 
@@ -111,4 +115,6 @@ def rq_archive_list(runid, config):
             'job_id': archive_job_id,
         })
     except Exception as e:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py:113", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(e)

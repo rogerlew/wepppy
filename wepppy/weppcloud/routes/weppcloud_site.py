@@ -463,6 +463,8 @@ def interfaces():
         current_app.logger.exception("Failed to issue rq-engine token for interfaces")
         return exception_factory(f"JWT configuration error: {exc}")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloud_site.py:465", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory()
 
 

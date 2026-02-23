@@ -44,6 +44,8 @@ def recorder_events(runid: str, config: str) -> Response:
         if ron is not None:
             assembler_override = ron.profile_recorder_assembler_enabled
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/recorder_bp.py:46", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         assembler_override = None
 
     for event in events:

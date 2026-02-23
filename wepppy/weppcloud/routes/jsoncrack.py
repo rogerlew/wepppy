@@ -126,6 +126,8 @@ def jsoncrack_response(path, subpath):
         else:
             return error_factory('file is not a JSON, GEOJSON or NODB file')
     except Exception as e:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/jsoncrack.py:128", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return error_factory(f'failed to read data: {e}')
 
     json_payload = json.dumps(json_str).replace("</", "<\\/")

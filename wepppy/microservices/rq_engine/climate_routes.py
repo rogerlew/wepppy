@@ -71,6 +71,8 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
     except NoDirError as exc:
         return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except Exception:
+        # API boundary: translate unexpected parse failures into canonical error payload.
+        logger.exception("rq-engine build-climate payload parse failed", extra={"runid": runid, "config": config})
         return error_response_with_traceback("Error parsing climate inputs", status_code=400)
 
     if climate.run_group == "batch":

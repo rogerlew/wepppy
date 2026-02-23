@@ -34,10 +34,7 @@ def _build_cfg(config: str, overrides: Dict[str, Any]) -> str:
 
 
 def _cleanup_run_directory(path: Path) -> None:
-    try:
-        shutil.rmtree(path, ignore_errors=True)
-    except Exception:
-        pass
+    shutil.rmtree(path, ignore_errors=True)
 
 
 def _spawn_run(config: str, overrides: Dict[str, Any]) -> Dict[str, Any]:
@@ -58,10 +55,11 @@ def _spawn_run(config: str, overrides: Dict[str, Any]) -> Dict[str, Any]:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
 
             initialize_ttl(wd)
-        except Exception:
+        except (ImportError, OSError, RuntimeError, ValueError):
             current_app.logger.exception("Failed to initialize TTL for test run")
         ensure_readme_on_create(runid, config)
-    except Exception as exc:  # clean up directory and re-raise
+    except (OSError, RuntimeError, TypeError, ValueError) as exc:  # clean up directory and re-raise
+        current_app.logger.exception("Failed to create test run runid=%s config=%s wd=%s", runid, config, wd)
         _cleanup_run_directory(wd_path)
         raise BadRequest(str(exc)) from exc
 

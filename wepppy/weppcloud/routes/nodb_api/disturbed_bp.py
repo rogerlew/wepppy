@@ -222,6 +222,8 @@ def resources_baer_sbs(runid: str, config: str) -> Response:
 
         return send_file(baer.baer_rgb_png, mimetype='image/png')
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/disturbed_bp.py:224", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
 
 
@@ -238,6 +240,8 @@ def set_firedate(runid: str, config: str) -> Response:
         disturbed.fire_date = fire_date
         return success_factory()
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/disturbed_bp.py:240", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory("failed to set firedate", runid=runid)
 
 
@@ -295,12 +299,16 @@ def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = None)
         try:
             baer.validate(disturbed.disturbed_fn, mode=1, uniform_severity=severity)
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/disturbed_bp.py:297", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             # Fall back to direct assignments if validation fails on legacy runs
             baer.sbs_mode = 1
             baer.uniform_severity = severity
             try:
                 baer._baer_fn = disturbed.disturbed_fn  # type: ignore[attr-defined]
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/disturbed_bp.py:303", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 pass
 
     return success_factory({'disturbed_fn': disturbed.disturbed_fn})

@@ -38,10 +38,13 @@ def _redis_conn():
     try:
         yield conn
     finally:
+        close = getattr(conn, "close", None)
+        if not callable(close):
+            return
         try:
-            conn.close()
-        except Exception:
-            pass
+            close()
+        except (OSError, redis.exceptions.RedisError) as exc:
+            logger.debug("rq-engine failed to close Redis connection", exc_info=exc)
 
 
 def _as_iso(value: datetime | None) -> str | None:
@@ -154,8 +157,9 @@ async def run_sync(request: Request) -> JSONResponse:
             request,
             boolean_fields={"run_migrations", "archive_before"},
         )
-    except Exception:
-        return error_response_with_traceback("Invalid payload", status_code=400)
+    except (UnicodeDecodeError, ValueError, RuntimeError) as exc:
+        logger.info("rq-engine run-sync invalid payload: %s", exc)
+        return error_response("Invalid payload", status_code=400, code="validation_error", details=str(exc))
 
     runid = payload.get("runid")
     if not runid:

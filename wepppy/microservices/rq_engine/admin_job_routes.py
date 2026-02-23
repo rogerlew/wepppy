@@ -34,10 +34,13 @@ def _redis_conn():
     try:
         yield conn
     finally:
+        close = getattr(conn, "close", None)
+        if not callable(close):
+            return
         try:
-            conn.close()
-        except Exception:
-            pass
+            close()
+        except (OSError, redis.exceptions.RedisError) as exc:
+            logger.debug("rq-engine failed to close Redis connection", exc_info=exc)
 
 
 def _parse_queues(raw: str | None) -> Sequence[str]:
@@ -102,6 +105,7 @@ def _hydrate_submitter_fields(jobs: list[dict[str, Any]]) -> None:
 
     try:
         from flask import has_app_context
+        from sqlalchemy.exc import SQLAlchemyError
         from wepppy.weppcloud.app import User, app as flask_app, get_run_owners
     except Exception:
         logger.exception("Unable to import Flask app/user models for submitter hydration")
@@ -129,7 +133,8 @@ def _hydrate_submitter_fields(jobs: list[dict[str, Any]]) -> None:
                 return run_owner_cache[runid]
             try:
                 owners = get_run_owners(runid)
-            except Exception:
+            except SQLAlchemyError as exc:
+                logger.exception("rq-engine submitter hydration owner lookup failed", extra={"runid": runid})
                 owners = []
             owner = owners[0] if owners else None
             run_owner_cache[runid] = owner

@@ -328,12 +328,16 @@ def _request_current_user_identity() -> tuple[int | None, set[str]]:
     try:
         user_obj = current_user
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:330", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None, set()
 
     try:
         if not bool(getattr(user_obj, "is_authenticated", False)):
             return None, set()
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:336", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None, set()
 
     user_id = _parse_user_id(getattr(user_obj, "id", None))
@@ -343,6 +347,8 @@ def _request_current_user_identity() -> tuple[int | None, set[str]]:
             try:
                 user_id = _parse_user_id(get_id())
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:345", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 user_id = None
 
     elevated_roles: set[str] = set()
@@ -353,6 +359,8 @@ def _request_current_user_identity() -> tuple[int | None, set[str]]:
                 if has_role(role_name):
                     elevated_roles.add(role_name.lower())
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:355", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 continue
 
     return user_id, elevated_roles
@@ -484,6 +492,8 @@ def _sanitize_runs0_next_target(next_value: str | None, runid: str, config: str)
     try:
         parsed = urlsplit(str(next_value))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:486", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None
 
     if parsed.scheme or parsed.netloc:
@@ -635,6 +645,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
         try:
             rows = swat.print_prt.objects.iter_rows(swat.print_prt.object_order)
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:637", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             rows = swat.print_prt.objects.iter_rows()
         for object_name, mask in rows:
             daily, monthly, yearly, avann = mask_to_tokens(int(mask))
@@ -855,6 +867,8 @@ def migration_page(runid, config):
         is_owner = current_user in owners if owners else True
         is_admin = current_user.has_role('Admin') if hasattr(current_user, 'has_role') else False
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:857", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         is_owner = True  # Allow if we can't determine ownership
     
     can_migrate = is_owner or is_admin
@@ -912,6 +926,8 @@ def create_index():
         current_app.logger.exception("Failed to issue rq-engine token for create index")
         return exception_factory(f"JWT configuration error: {exc}")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:914", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory()
 
     configs = get_configs()

@@ -108,6 +108,8 @@ class WepppyRqWorker(Worker):
                 pass
             cov.start()
         except Exception as exc:  # pragma: no cover - defensive logging
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/rq_worker.py:110", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             reset_profile_trace_slug(ctx_token)
             LOGGER.warning(
                 "Failed to start profile coverage for job %s (slug=%s): %s",
@@ -126,6 +128,8 @@ class WepppyRqWorker(Worker):
         except CoverageException as exc:  # pragma: no cover - logging only
             LOGGER.warning("Profile coverage save failed for slug %s: %s", slug, exc)
         except Exception as exc:  # pragma: no cover - defensive logging
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/rq_worker.py:128", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             LOGGER.exception("Unexpected error while saving coverage for slug %s: %s", slug, exc)
         finally:
             reset_profile_trace_slug(ctx_token)
@@ -149,6 +153,8 @@ class WepppyRqWorker(Worker):
             try:
                 wd = get_wd(runid)
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/rq_worker.py:151", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 wd = None
 
         file_handler = None

@@ -193,6 +193,8 @@ def task_modify_rangeland_cover(runid, config):
             message = f'Topaz ID {invalid_id} is not available.'
         return exception_factory(message, runid=runid)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rangeland_bp.py:195", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Failed to modify rangeland cover.', runid=runid)
 
     return success_factory()
@@ -236,6 +238,8 @@ def task_build_rangeland_cover(runid, config):
     try:
         RangelandCover.getInstance(wd)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rangeland_bp.py:238", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building RangelandCover Failed', runid=runid)
 
     try:
@@ -252,6 +256,8 @@ def task_build_rangeland_cover(runid, config):
             )
         prep.set_rq_job_id('build_rangeland_cover_rq', job.id)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rangeland_bp.py:254", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building RangelandCover Failed', runid=runid)
 
     return jsonify({'job_id': job.id})

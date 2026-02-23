@@ -17,6 +17,7 @@ from flask_wtf.csrf import validate_csrf
 from sqlalchemy import func
 from typing import TYPE_CHECKING
 from wtforms.validators import ValidationError
+from requests.exceptions import RequestException
 
 from .._common import (
     Blueprint,
@@ -137,7 +138,7 @@ def _sanitize_next_url(next_url: Optional[str]) -> Optional[str]:
 
     try:
         parsed = urlsplit(str(next_url))
-    except Exception:
+    except (TypeError, ValueError):
         return None
 
     if parsed.scheme or parsed.netloc:
@@ -265,7 +266,7 @@ def _fetch_primary_verified_email(client, provider_settings: Dict, profile: Dict
         endpoint = emails_endpoint or "user/emails"
         try:
             response = client.get(endpoint)
-        except Exception as exc:  # pragma: no cover - network failure paths
+        except RequestException as exc:  # pragma: no cover - network failure paths
             logger.warning("OAuth email fetch failed for provider=%s: %s", provider, exc)
             return _normalize_email(email), bool(email and verified)
 
@@ -319,14 +320,14 @@ def _token_expiry_from_token(token: Dict[str, Any]) -> Optional[datetime]:
     if expires_at:
         try:
             return datetime.fromtimestamp(int(expires_at), tz=timezone.utc)
-        except Exception:
+        except (OSError, OverflowError, TypeError, ValueError):
             logger.debug("Unable to parse expires_at %r", expires_at)
 
     expires_in = token.get("expires_in")
     if expires_in:
         try:
             return utc_now() + timedelta(seconds=int(expires_in))
-        except Exception:
+        except (OverflowError, TypeError, ValueError):
             logger.debug("Unable to parse expires_in %r", expires_in)
 
     return None
@@ -421,7 +422,7 @@ def oauth_login(provider: str):
             code_challenge=code_challenge,
             code_challenge_method="S256",
         )
-    except Exception as exc:  # pragma: no cover - network errors
+    except RequestException as exc:  # pragma: no cover - network errors
         logger.error("Failed to initiate OAuth flow for provider=%s: %s", provider, exc)
         flash("Unable to start OAuth login. Please try again later.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
@@ -444,7 +445,7 @@ def callback(provider: str):
 
     try:
         token = client.authorize_access_token(code_verifier=code_verifier)
-    except Exception as exc:
+    except (RequestException, TypeError, ValueError) as exc:
         logger.warning("OAuth callback token exchange failed for provider=%s: %s", provider, exc)
         flash("Login failed while contacting the identity provider.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
@@ -455,7 +456,7 @@ def callback(provider: str):
         if provider.lower() == "orcid":
             headers["Accept"] = "application/json"
         response = client.get(userinfo_endpoint, headers=headers)
-    except Exception as exc:
+    except RequestException as exc:
         logger.warning("OAuth userinfo request failed for provider=%s: %s", provider, exc)
         flash("Login failed while retrieving profile information.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))

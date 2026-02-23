@@ -90,6 +90,8 @@ def set_rangeland_cover_mode(runid, config):
         rangeland_cover.mode = RangelandCoverMode(mode)
         rangeland_cover.rap_year = rap_year
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rangeland_cover_bp.py:92", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('error setting mode or rap_year', runid=runid)
 
     return success_factory()

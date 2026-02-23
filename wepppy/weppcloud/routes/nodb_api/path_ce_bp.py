@@ -109,6 +109,8 @@ def enable_path_cost_effective(runid: str, config: str):
     except ValueError as exc:
         return error_factory(str(exc))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/path_ce_bp.py:111", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(
             "Error enabling PATH cost-effective module", runid=runid
         )

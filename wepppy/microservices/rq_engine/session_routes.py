@@ -115,7 +115,8 @@ def _session_payload(session_id: str) -> Mapping[str, Any]:
         raise AuthError("Session expired or invalid", status_code=401)
     try:
         payload = pickle.loads(raw_value)
-    except Exception as exc:
+    except (AttributeError, EOFError, ImportError, IndexError, ValueError, pickle.UnpicklingError) as exc:
+        logger.exception("rq-engine invalid session payload", extra={"session_id": session_id})
         raise AuthError("Invalid session payload", status_code=401) from exc
     if not isinstance(payload, Mapping):
         raise AuthError("Invalid session payload", status_code=401)
@@ -230,7 +231,7 @@ def _session_id_from_claims(claims: Mapping[str, Any]) -> str:
 def _run_is_public(runid: str) -> bool:
     try:
         wd = get_wd(runid, prefer_active=False)
-    except Exception:
+    except ValueError:
         return False
     return NoDbBase.ispublic(wd)
 

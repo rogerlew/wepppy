@@ -115,7 +115,7 @@ def _maybe_log_exception(exc: Exception) -> None:
         ]
         with target.open("a", encoding="utf-8") as handle:
             handle.write("\n".join(stream))
-    except Exception:
+    except (OSError, RuntimeError, ValueError):
         # Never interfere with Flask's exception propagation
         return
 

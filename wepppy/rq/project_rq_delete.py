@@ -46,6 +46,8 @@ def _try_mark_delete_state(
         )
         return True
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:48", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         _publish(
             runtime,
             status_channel,
@@ -158,6 +160,8 @@ def delete_run_rq(runid: str, wd: str | None = None, *, delete_files: bool = Fal
                 f"rq:{job_id} STATUS cleared {len(cleared)} NoDb cache entries",
             )
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:160", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         _publish(
             runtime,
             status_channel,
@@ -167,6 +171,8 @@ def delete_run_rq(runid: str, wd: str | None = None, *, delete_files: bool = Fal
     try:
         runtime.clear_locks(runid)
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:169", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         _publish(
             runtime,
             status_channel,
@@ -183,6 +189,8 @@ def delete_run_rq(runid: str, wd: str | None = None, *, delete_files: bool = Fal
             with flask_app.app_context():
                 _delete_db_record(runid)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:185", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         _publish(runtime, status_channel, f"rq:{job_id} EXCEPTION {func_name}({runid})")
         raise
 
@@ -229,6 +237,8 @@ def gc_runs_rq(
     try:
         from wepppy.weppcloud.utils.run_ttl import collect_gc_candidates, mark_delete_state
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:231", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         _publish(
             runtime,
             status_channel,
@@ -266,6 +276,8 @@ def gc_runs_rq(
             else:
                 deleted += 1
         except Exception as exc:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:268", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             errors.append({"runid": str(runid), "error": str(exc)})
             _publish(
                 runtime,
@@ -310,6 +322,8 @@ def compile_dot_logs_rq(
     try:
         from wepppy.weppcloud._scripts.compile_dot_logs import compile_dot_logs
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:312", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         _publish(
             runtime,
             status_channel,

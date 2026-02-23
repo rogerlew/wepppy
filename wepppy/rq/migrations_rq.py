@@ -175,6 +175,8 @@ def migrations_rq(
                 ron.readonly = True
                 file_logger.info("Readonly state restored after exception")
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/migrations_rq.py:177", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 pass
         publish_and_log("EXCEPTION", str(e))
         file_logger.error(f"Migration exception: {e}", exc_info=True)

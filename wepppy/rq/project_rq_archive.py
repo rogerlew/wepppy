@@ -147,12 +147,16 @@ def _clear_archive_job_id(runtime: ArchiveRuntime, prep: Any | None, runid: str)
         try:
             prep = runtime.get_prep_from_runid(runid)
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_archive.py:149", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             prep = None
 
     if prep is not None:
         try:
             prep.clear_archive_job_id()
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_archive.py:155", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             pass
 
 
@@ -232,6 +236,8 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
         runtime.publish_status(status_channel, f"rq:{job_id} COMPLETED {func_name}({runid})")
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive ARCHIVE_COMPLETE")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_archive.py:234", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         runtime.publish_status(status_channel, f"rq:{job_id} EXCEPTION {func_name}({runid})")
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive ARCHIVE_FAILED")
         raise
@@ -323,6 +329,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         try:
             cleared_entries = runtime.clear_nodb_file_cache(runid)
         except Exception as exc:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_archive.py:325", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             runtime.publish_status(status_channel, f"Failed to clear NoDb cache after restore ({exc})")
             raise
         runtime.publish_status(
@@ -334,6 +342,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         runtime.publish_status(status_channel, f"rq:{job_id} COMPLETED {func_name}({runid})")
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive RESTORE_COMPLETE")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_archive.py:336", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         runtime.publish_status(status_channel, f"rq:{job_id} EXCEPTION {func_name}({runid})")
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive RESTORE_FAILED")
         raise

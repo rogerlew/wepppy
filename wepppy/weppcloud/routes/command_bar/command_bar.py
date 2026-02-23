@@ -69,6 +69,8 @@ def set_log_level(runid, config):
         try_redis_set_log_level(runid, level_key)
         effective_value = try_redis_get_log_level(runid)
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/command_bar/command_bar.py:71", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         logging.error('Unexpected error setting log level for %s: %s', runid, exc)
         return jsonify({'error': {'message': 'Failed to update log level. Please try again.'}}), 500
 
@@ -129,6 +131,8 @@ def _build_mcp_markdown(
         try:
             expires_at_iso = datetime.fromtimestamp(expires_at, tz=timezone.utc).isoformat()
         except Exception:  # pragma: no cover - defensive
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/command_bar/command_bar.py:131", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             expires_at_iso = None
 
     scope_text = ", ".join(scopes or [])
@@ -231,6 +235,8 @@ def issue_query_engine_mcp_token(runid, config):
         instructions_path.parent.mkdir(parents=True, exist_ok=True)
         instructions_path.write_text(markdown_body, encoding="utf-8")
     except Exception as exc:  # pragma: no cover - defensive logging
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/command_bar/command_bar.py:233", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         logging.warning(
             "Failed to write MCP instructions for run %s at %s: %s",
             runid,

@@ -123,6 +123,8 @@ def _write_dss_channel_geojson(
     try:
         watershed = Watershed.getInstance(wd)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_dss.py:125", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return
 
     channels_geojson = getattr(watershed, "channels_shp", None)
@@ -138,6 +140,8 @@ def _write_dss_channel_geojson(
     try:
         network = watershed.network
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_dss.py:140", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         network = None
 
     include_ids: set[int]

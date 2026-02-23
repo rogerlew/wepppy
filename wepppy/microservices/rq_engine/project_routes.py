@@ -243,6 +243,7 @@ async def create(request: Request) -> Response:
     try:
         payload = await parse_request_payload(request)
     except Exception:
+        logger.exception("rq-engine create payload parse failed")
         return error_response_with_traceback("Invalid payload", status_code=400)
 
     config = str(payload.get("config") or "").strip()

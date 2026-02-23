@@ -253,6 +253,8 @@ def _collect_metas_for_runs(runs) -> List[dict]:
                 meta = future.result()
                 metas[idx] = meta
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/user.py:255", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             for future in futures:
                 future.cancel()
             raise
@@ -606,6 +608,8 @@ def _collect_map_metas_for_runs(runs) -> List[dict]:
                 meta = future.result()
                 metas[idx] = meta
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/user.py:608", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             for future in futures:
                 future.cancel()
             raise

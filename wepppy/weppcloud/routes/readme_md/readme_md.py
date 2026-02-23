@@ -47,7 +47,7 @@ try:
     redis_readme_pool = redis.ConnectionPool(**pool_kwargs)
     redis_readme_client = redis.StrictRedis(connection_pool=redis_readme_pool)
     redis_readme_client.ping()
-except Exception as e:
+except (redis.exceptions.RedisError, OSError, ValueError) as e:
     redis_readme_client = None
 
 
@@ -73,12 +73,12 @@ def _collect_nodb_context(wd):
             continue
         try:
             instance = getter(wd)
-        except Exception:
+        except (FileNotFoundError, OSError, TypeError, ValueError):
             continue
         try:
             context[cls.__name__] = instance.stub
-        except Exception:
-            pass
+        except (AttributeError, TypeError, ValueError):
+            continue
     return context
 
 

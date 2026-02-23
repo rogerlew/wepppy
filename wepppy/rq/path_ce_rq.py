@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import inspect
+import logging
 from collections import OrderedDict
 from typing import Any, Dict, Iterable, List, Tuple
 
+import redis
 from rq import get_current_job
 
 from wepppy.nodb.mods.omni.omni import Omni, OmniScenario, _scenario_name_from_scenario_definition
@@ -18,6 +20,8 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.rq.exception_logging import with_exception_logging
 
 TIMEOUT: int = 43_200
+
+logger = logging.getLogger(__name__)
 
 
 def _hydrate_existing_scenarios(omni: Omni) -> List[Tuple[OmniScenario, Dict[str, Any]]]:
@@ -52,7 +56,12 @@ def _merge_scenario_sets(
         scenario_enum, payload = entry
         try:
             scenario_name = _scenario_name_from_scenario_definition(payload)
-        except Exception:
+        except (KeyError, TypeError, ValueError) as exc:
+            logger.warning(
+                "path_ce: skipping scenario with invalid definition (%s): %s",
+                scenario_enum,
+                exc,
+            )
             continue
         merged[scenario_name] = (scenario_enum, payload)
     for entry in required:
@@ -83,8 +92,13 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
         try:
             prep.set_rq_job_id("run_path_ce", job.id)
             prep.remove_timestamp(TaskEnum.run_path_cost_effective)
-        except Exception:
-            pass
+        except (redis.exceptions.RedisError, OSError, ValueError, TypeError) as exc:
+            logger.warning(
+                "path_ce: failed to persist prep job metadata (runid=%s job_id=%s): %s",
+                runid,
+                job.id,
+                exc,
+            )
 
     controller = PathCostEffective.getInstance(wd)
 
@@ -99,8 +113,14 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
         if prep is not None:
             try:
                 prep.remove_timestamp(TaskEnum.run_omni_scenarios)
-            except Exception:
-                pass
+            except (redis.exceptions.RedisError, OSError, ValueError, TypeError) as exc:
+                logger.warning(
+                    "path_ce: failed to remove prep timestamp (runid=%s job_id=%s task=%s): %s",
+                    runid,
+                    job.id,
+                    TaskEnum.run_omni_scenarios,
+                    exc,
+                )
 
         controller.set_status("running", message="Provisioning Omni scenarios", progress=0.05)
         base_scenario = str(controller.config.get("post_fire_scenario") or PATH_CE_BASELINE_SCENARIO)
@@ -117,8 +137,14 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
         if prep is not None:
             try:
                 prep.timestamp(TaskEnum.run_omni_scenarios)
-            except Exception:
-                pass
+            except (redis.exceptions.RedisError, OSError, ValueError, TypeError) as exc:
+                logger.warning(
+                    "path_ce: failed to record prep timestamp (runid=%s job_id=%s task=%s): %s",
+                    runid,
+                    job.id,
+                    TaskEnum.run_omni_scenarios,
+                    exc,
+                )
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} STATUS Preparing PATH Cost-Effective inputs")
         result = controller.run()
@@ -126,8 +152,14 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
         if prep is not None:
             try:
                 prep.timestamp(TaskEnum.run_path_cost_effective)
-            except Exception:
-                pass
+            except (redis.exceptions.RedisError, OSError, ValueError, TypeError) as exc:
+                logger.warning(
+                    "path_ce: failed to record prep timestamp (runid=%s job_id=%s task=%s): %s",
+                    runid,
+                    job.id,
+                    TaskEnum.run_path_cost_effective,
+                    exc,
+                )
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
         StatusMessenger.publish(status_channel, f"rq:{job.id} TRIGGER path_ce PATH_CE_RUN_COMPLETE")
@@ -135,7 +167,13 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
     except Exception as exc:
         try:
             controller.set_status("failed", message=str(exc))
-        except Exception:
-            pass
+        except Exception as status_exc:  # pragma: no cover - best-effort cleanup only
+            logger.warning(
+                "path_ce: failed to update controller status after exception (runid=%s job_id=%s): %s",
+                runid,
+                job.id,
+                status_exc,
+                exc_info=True,
+            )
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise

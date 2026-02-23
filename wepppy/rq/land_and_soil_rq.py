@@ -114,6 +114,8 @@ def land_and_soil_rq(
         return str(tar_path), elapsed
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/land_and_soil_rq.py:116", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(
             status_channel,
             f"rq:{job_id} EXCEPTION {func_name}({job_id})",

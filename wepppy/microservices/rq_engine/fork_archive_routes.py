@@ -70,6 +70,8 @@ def _archive_job_status(job_id: str) -> str | None:
     except NoSuchJobError:
         return None
     except Exception:
+        # API boundary: treat status lookup failures as "in progress" to avoid double-enqueue.
+        logger.exception("rq-engine archive job status lookup failed", extra={"job_id": job_id})
         return _ARCHIVE_JOB_STATUS_ERROR
 
 
@@ -131,12 +133,16 @@ def _resolve_user_from_claims(
                 try:
                     user = user_datastore.find_user(email=str(email))
                 except Exception:
+                    # Best-effort user lookup: failures should not block fork flow.
+                    logger.exception("rq-engine fork user_datastore lookup failed")
                     user = None
 
         if user is None and email:
             try:
                 user = User.query.filter(User.email == str(email)).first()
             except Exception:
+                # Best-effort user lookup: failures should not block fork flow.
+                logger.exception("rq-engine fork user query by email failed")
                 user = None
 
     return user, user_datastore, flask_app

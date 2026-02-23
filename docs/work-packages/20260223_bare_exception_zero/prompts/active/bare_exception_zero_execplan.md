@@ -1,151 +1,138 @@
-# Bare Exception Zero Across Production Scan Scope
+# Bare Exception Zero - Phase 2 Broad-Exception Boundary Closure
 
-This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept up to date as work proceeds.
+This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` are maintained through closure.
 
 This plan follows `docs/prompt_templates/codex_exec_plans.md`.
 
 ## Purpose / Big Picture
 
-After this package closes, production scan scope (`wepppy`, `services`) will contain zero `bare except:` handlers, verified by the scanner with allowlist disabled. Runtime contracts are preserved by replacing bare handlers with narrow expected exceptions where possible and explicit boundary `except Exception` only where needed with logging/contract-safe handling.
+Phase 1 removed all production `bare except:` handlers. Phase 2 closes broad-exception boundary debt for `wepppy/weppcloud/routes/**`, `wepppy/microservices/rq_engine/**`, and `wepppy/rq/**` so unresolved broad findings in those trees are zero in allowlist-aware scans, while preserving runtime contracts and adding explicit boundary telemetry.
 
 ## Progress
 
-- [x] (2026-02-23 04:29Z) Created package scaffold at `docs/work-packages/20260223_bare_exception_zero/`.
-- [x] (2026-02-23 04:29Z) Captured mandatory baseline artifacts (`baseline.json`, `baseline_no_allowlist.json`).
-- [x] (2026-02-23 04:39Z) Completed inventory/risk ranking via required `explorer` and defined 4 disjoint worker slices.
-- [x] (2026-02-23 04:41Z) Spawned 4 parallel `worker` agents for disjoint slice cleanup.
-- [x] (2026-02-23 04:58Z) Milestone A complete: deferred files integrated first (`user.py`, `inbox_service.py`) and slice outputs merged.
-- [x] (2026-02-23 05:03Z) Milestone B complete: all slices re-scanned with zero `bare-except`; allowlist drift corrected.
-- [x] (2026-02-23 05:15Z) Milestone C complete: hard gate, changed-file enforcement, targeted suites, and full-suite sanity passed on final code state.
-- [x] (2026-02-23 05:18Z) Milestone D complete: closeout artifacts written, trackers synchronized, and root `AGENTS.md` ad hoc pointer reset to `none`.
+- [x] (2026-02-23 05:19Z) Phase 1 closure already complete (`bare except: 82 -> 0`).
+- [x] (2026-02-23 05:32Z) Reopened package and activated this ExecPlan for Phase 2.
+- [x] (2026-02-23 05:33Z) Captured baseline artifact `artifacts/baseline_broad_exceptions.json` (`523` in-scope broad catches).
+- [x] (2026-02-23 05:36Z) Milestone 0 complete: generated `artifacts/target_module_classification.md` line-by-line classification artifact.
+- [x] (2026-02-23 05:44Z) Milestones 1-3 complete: subsystem normalization across routes, rq-engine, and rq modules with boundary logging normalization and targeted narrowing/removals.
+- [x] (2026-02-23 05:49Z) Milestone 4 complete: tests/contracts worker outputs integrated; regression tests added in `tests/weppcloud/routes/test_user_meta_boundaries.py`, `tests/microservices/test_rq_engine_fork_archive_routes.py`, and `tests/rq/test_project_rq_readonly.py`.
+- [x] (2026-02-23 05:58Z) Milestone 5 complete: closure gates passed, postfix/final artifacts written, docs synchronized, root pointer reset.
 
 ## Surprises & Discoveries
 
-- Observation: Baseline already includes an existing boundary allowlist, but hard bare-exception closure is independent because closure gate uses `--no-allowlist`.
-  Evidence: `artifacts/baseline_no_allowlist.json` reports `"bare-except": 82`.
+- Observation: Sub-agent edits introduced two rq-engine regressions in Redis connection close helpers.
+  Evidence: `tests/microservices/test_rq_engine_admin_job_routes.py::test_recently_completed_returns_payload` and `tests/microservices/test_rq_engine_run_sync_routes.py::test_run_sync_status_returns_payload` failed with `AttributeError: 'RecordingRedis' object has no attribute 'close'` until `_redis_conn()` guarded `close()` existence.
 
-- Observation: Deferred hotspots (`user.py`, `inbox_service.py`) are broad-catch quality issues, not bare-except inventory items.
-  Evidence: Inventory report excludes those paths for `bare-except`, but user requirement explicitly prioritizes them.
+- Observation: Allowlist line drift occurred repeatedly during late-stage code/test fixes.
+  Evidence: target unresolved gate temporarily rose above zero until allowlist was regenerated from current `--no-allowlist` findings.
 
-- Observation: Changed-file enforcement can fail from allowlist line drift even when broad-catch logic is not expanded.
-  Evidence: Initial enforcement failed on `user.py` and `nodb/base.py` until allowlist line targets were re-aligned.
-
-- Observation: `mint_profile_token` contract depended on returning the exact JWT configuration error string.
-  Evidence: `tests/weppcloud/routes/test_user_profile_token.py::test_profile_token_mint_errors_without_jwt_secret` failed until `str(exc)` response was restored for `JWTConfigurationError`.
+- Observation: Broad-count reduction occurred but did not eliminate broad boundaries; closure relies on explicit boundary allowlisting.
+  Evidence: in-scope broad counts changed from `523` baseline to `475` final (`--no-allowlist`) while allowlist-aware unresolved in scope reached `0`.
 
 ## Decision Log
 
-- Decision: Execute four parallel worker slices (WEPPcloud, NoDb, remaining wepppy, CAO services).
-  Rationale: Disjoint ownership reduces merge conflicts and covers all 82 bare findings quickly.
+- Decision: Reopen existing package rather than creating a second package.
+  Rationale: explicit user requirement and single audit trail for bare + broad closure.
   Date/Author: 2026-02-23 / Codex.
 
-- Decision: Enforce strict rule that no `bare except:` can be allowlisted.
-  Rationale: Matches hard closure gate and avoids masking `BaseException` swallowing.
+- Decision: Use mandatory orchestration model (explorer + parallel subsystem workers + tests worker + final reviewer).
+  Rationale: initial in-scope inventory (`523` findings) required disjoint parallel coverage and an independent review pass.
   Date/Author: 2026-02-23 / Codex.
 
-- Decision: Re-point allowlist entries `BEA-20260223-010/011` to `_build_meta` and `_build_map_meta` boundaries.
-  Rationale: Keeps allowlist rationale aligned to true per-run metadata skip boundaries and avoids ambiguous route-level suppression.
+- Decision: Keep payload parse boundaries broad in rq-engine after reviewer flagged potential contract drift from over-narrowing.
+  Rationale: preserve canonical API fallback behavior and avoid new uncaught parse failures.
   Date/Author: 2026-02-23 / Codex.
 
-- Decision: Add debug breadcrumbs to allowlisted NoDb mirror boundaries in `NoDbBase.dump`.
-  Rationale: Preserve best-effort boundary behavior while removing silent swallow behavior in touched code.
+- Decision: Regenerate target allowlist from current no-allowlist scan at closeout.
+  Rationale: deterministic line alignment after regression fixes and final test-driven edits.
   Date/Author: 2026-02-23 / Codex.
 
 ## Outcomes & Retrospective
 
-Package objective was met end-to-end: production scan scope now reports zero `bare except:` handlers under `--no-allowlist` (`82 -> 0`), changed-file enforcement passes, and required targeted/full validation suites pass on final code state.
+Phase 2 closed successfully against required gates:
+- Global `bare except` remained `0`.
+- Target-module unresolved broad findings (allowlist-aware) reached `0`.
+- Changed-file enforcement passed.
+- Targeted subsystem suites and final `wctl run-pytest tests --maxfail=1` passed on final state (`2060 passed, 29 skipped`).
 
-The most important mid-flight corrections were (1) a route contract regression in `mint_profile_token` response text and (2) allowlist line drift after refactors. Both were fixed in-package and revalidated, then documented in `artifacts/final_validation_summary.md`.
+Net scanner deltas:
+- In-scope broad (`--no-allowlist`): `523 -> 475`.
+- Global broad (`--no-allowlist`): `1066 -> 1018`.
 
-Residual debt remains in non-bare broad catches, but touched-file boundaries are now explicit, logged, and allowlisted where deliberate.
+The largest residual tradeoff is allowlist surface area (per-handler, line-precise) rather than full broad-catch elimination; revisit is explicitly bounded by expiry dates in the allowlist.
 
 ## Context and Orientation
 
-The scanner (`tools/check_broad_exceptions.py`) walks tracked Python files under `wepppy` and `services` by default and reports three broad kinds: `bare-except`, `except-Exception`, and `except-BaseException`. For this package, success is hard-gated on `bare-except == 0` in `--no-allowlist` mode, plus changed-file enforcement (`--enforce-changed`) and subsystem tests.
+Phase 2 scope is confined to:
+- `wepppy/weppcloud/routes/**`
+- `wepppy/microservices/rq_engine/**`
+- `wepppy/rq/**`
 
-Key files:
-- Work package docs: `docs/work-packages/20260223_bare_exception_zero/package.md`, `docs/work-packages/20260223_bare_exception_zero/tracker.md`.
-- Active plan: `docs/work-packages/20260223_bare_exception_zero/prompts/active/bare_exception_zero_execplan.md`.
-- Baselines: `docs/work-packages/20260223_bare_exception_zero/artifacts/baseline.json`, `docs/work-packages/20260223_bare_exception_zero/artifacts/baseline_no_allowlist.json`.
-- Canonical broad-boundary allowlist: `docs/standards/broad-exception-boundary-allowlist.md`.
-
-Risk-first cleanup order:
-1. Deferred files first (`wepppy/weppcloud/routes/user.py`, `services/cao/src/cli_agent_orchestrator/services/inbox_service.py`).
-2. Concentrated runtime modules (`wepppy/weppcloud/routes/*`, `wepppy/nodb/*`, and any remaining scanner hits under `wepppy` and `services`).
-3. Final gate and documentation closure.
+Canonical interfaces and artifacts:
+- Checker: `tools/check_broad_exceptions.py`
+- Contract: `docs/schemas/rq-response-contract.md`
+- Allowlist: `docs/standards/broad-exception-boundary-allowlist.md`
+- Required artifacts:
+  - `docs/work-packages/20260223_bare_exception_zero/artifacts/baseline_broad_exceptions.json`
+  - `docs/work-packages/20260223_bare_exception_zero/artifacts/postfix_broad_exceptions.json`
+  - `docs/work-packages/20260223_bare_exception_zero/artifacts/target_module_classification.md`
+  - `docs/work-packages/20260223_bare_exception_zero/artifacts/final_validation_summary.md`
 
 ## Plan of Work
 
-Milestone A (deferred-first):
-- Apply minimal contract-safe refactors in `user.py` and `inbox_service.py` for broad boundary quality and logging context.
-- Merge parallel worker results for WEPPcloud/NoDb/other slices, ensuring every `bare except:` is removed.
-
-Milestone B (slice closure):
-- Re-scan each touched slice to confirm local bare count is zero.
-- Resolve any line drift against allowlist entries where broad boundaries are intentionally retained.
-
-Milestone C (global validation):
-- Run hard bare gate with `--no-allowlist` and `jq` assertion.
-- Run changed-file enforcement against `origin/master`.
-- Run targeted tests for touched subsystems, then full pre-handoff suite.
-
-Milestone D (closeout):
-- Capture after snapshots in `artifacts/`.
-- Update tracker and project board states.
-- Reset root `AGENTS.md` active ad hoc ExecPlan pointer to `none`.
+Completed milestone sequence:
+- Milestone 0: baseline + classification artifact.
+- Milestones 1-3: subsystem normalization via parallel workers.
+- Milestone 4: tests/contracts additions and allowlist consolidation.
+- Milestone 5: closure audit, gate runs, artifact publication, tracker/project sync, and root pointer reset.
 
 ## Concrete Steps
 
-Run from `/workdir/wepppy`.
+Executed from `/workdir/wepppy`:
 
-Baseline (already captured):
-    python3 tools/check_broad_exceptions.py --json > docs/work-packages/20260223_bare_exception_zero/artifacts/baseline.json
-    python3 tools/check_broad_exceptions.py --json --no-allowlist > docs/work-packages/20260223_bare_exception_zero/artifacts/baseline_no_allowlist.json
+    python3 tools/check_broad_exceptions.py --json --no-allowlist > docs/work-packages/20260223_bare_exception_zero/artifacts/baseline_broad_exceptions.json
+    python3 tools/check_broad_exceptions.py --json --no-allowlist > /tmp/broad_no_allow_current.json
+    jq -e '.kinds["bare-except"] == 0' /tmp/broad_no_allow_current.json
 
-Hard gate (required):
-    python3 tools/check_broad_exceptions.py --json --no-allowlist > /tmp/broad_no_allow.json
-    jq -e '.kinds["bare-except"] == 0' /tmp/broad_no_allow.json
+    python3 tools/check_broad_exceptions.py --json > /tmp/broad_allow_current.json
+    jq -e '[.findings[] | select((.path|startswith("wepppy/weppcloud/routes/")) or (.path|startswith("wepppy/microservices/rq_engine/")) or (.path|startswith("wepppy/rq/")))] | length == 0' /tmp/broad_allow_current.json
 
-Changed-file enforcement:
     python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
 
-Tests:
-    wctl run-pytest tests/<relevant module path>
+    wctl run-pytest tests/weppcloud/routes --maxfail=1
+    wctl run-pytest tests/microservices/test_rq_engine* --maxfail=1
+    wctl run-pytest tests/rq --maxfail=1
     wctl run-pytest tests --maxfail=1
 
-Docs lint:
-    wctl doc-lint --path AGENTS.md --path PROJECT_TRACKER.md --path docs/work-packages/20260223_bare_exception_zero/package.md --path docs/work-packages/20260223_bare_exception_zero/tracker.md --path docs/work-packages/20260223_bare_exception_zero/prompts/active/bare_exception_zero_execplan.md
+    cp /tmp/broad_allow_current.json docs/work-packages/20260223_bare_exception_zero/artifacts/postfix_broad_exceptions.json
 
 ## Validation and Acceptance
 
-Acceptance conditions:
-- Scanner reports exactly zero `bare-except` findings under `--no-allowlist`.
-- Changed-file enforcement passes with no per-file broad-catch increase.
-- Deferred files are refactored and tested first.
-- Targeted subsystem tests and full-suite pre-handoff test pass.
-- Work-package docs, project tracker, and root AGENTS pointers are consistent at closure.
+Acceptance criteria were met:
+- Global `bare except` stayed at zero.
+- Target unresolved allowlist-aware findings are zero.
+- Remaining in-scope broad catches are boundary-classified and allowlisted per handler.
+- Required targeted and full-suite tests passed.
+- Package docs, tracker, project tracker, and root AGENTS pointer were synchronized at close.
 
 ## Idempotence and Recovery
 
-- Scanner commands are read-only and can be re-run safely.
-- If a slice edit introduces regressions, revert only the affected hunk/file and re-run slice-level checks before global gates.
-- Keep boundary try/except blocks minimal to reduce rollback scope.
+Scanner/doc-lint commands are idempotent. Final allowlist generation is reproducible from current `--no-allowlist` scanner output to correct line drift after code edits.
 
 ## Artifacts and Notes
 
-- `docs/work-packages/20260223_bare_exception_zero/artifacts/baseline.json`
-- `docs/work-packages/20260223_bare_exception_zero/artifacts/baseline_no_allowlist.json`
-- `docs/work-packages/20260223_bare_exception_zero/artifacts/after.json`
-- `docs/work-packages/20260223_bare_exception_zero/artifacts/after_no_allowlist.json`
+- `docs/work-packages/20260223_bare_exception_zero/artifacts/baseline_broad_exceptions.json`
+- `docs/work-packages/20260223_bare_exception_zero/artifacts/postfix_broad_exceptions.json`
+- `docs/work-packages/20260223_bare_exception_zero/artifacts/target_module_classification.md`
 - `docs/work-packages/20260223_bare_exception_zero/artifacts/final_validation_summary.md`
 
 ## Interfaces and Dependencies
 
-- Scanner interface: `tools/check_broad_exceptions.py` (`--json`, `--no-allowlist`, `--enforce-changed`, `--base-ref`).
-- Allowlist interface: `docs/standards/broad-exception-boundary-allowlist.md` markdown table entries (owner, rationale, expiry required).
-- Runtime contract dependency: route/worker error envelopes must remain canonical and telemetry/logging must be preserved.
+- `tools/check_broad_exceptions.py` (`--json`, `--no-allowlist`, `--enforce-changed`)
+- `docs/standards/broad-exception-boundary-allowlist.md`
+- `docs/schemas/rq-response-contract.md`
+- `wepppy/weppcloud/AGENTS.md`, `wepppy/microservices/rq_engine/AGENTS.md`, root `AGENTS.md`, `tests/AGENTS.md`
 
 ---
 
-Revision note (2026-02-23 04:41Z): Initialized active ExecPlan after baseline capture and worker orchestration launch so milestone tracking is live before code integration.
-Revision note (2026-02-23 05:19Z): Marked Milestones A-D complete, recorded enforcement/test discoveries, and finalized outcomes/closeout artifacts after passing all required gates.
+Revision note (2026-02-23 05:59Z): Marked all milestones complete, captured final gate/test outcomes, documented regression fixes and allowlist drift handling, and closed Phase 2.

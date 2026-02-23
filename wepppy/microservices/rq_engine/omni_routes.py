@@ -523,6 +523,8 @@ async def _run_omni(
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
     except Exception as exc:
+        # API boundary: translate unexpected parse failures into canonical error payload.
+        logger.exception("rq-engine run-omni scenario parse failed", extra={"runid": runid, "config": config})
         return error_response_with_traceback(f"Error parsing omni inputs: {exc}")
 
     if is_batch_run:
@@ -576,6 +578,11 @@ async def _run_omni_contrasts(
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
     except Exception as exc:
+        # API boundary: translate unexpected parse failures into canonical error payload.
+        logger.exception(
+            "rq-engine run-omni-contrasts input parse failed",
+            extra={"runid": runid, "config": config},
+        )
         return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
@@ -641,6 +648,8 @@ async def _run_omni_contrasts(
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
     except Exception as exc:
+        # API boundary: translate unexpected build failures into canonical error payload.
+        logger.exception("rq-engine run-omni-contrasts build failed", extra={"runid": runid, "config": config})
         return error_response_with_traceback(f"Error building omni contrasts: {exc}")
 
     try:
@@ -691,6 +700,8 @@ async def _dry_run_omni_contrasts(
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
     except Exception as exc:
+        # API boundary: translate unexpected parse failures into canonical error payload.
+        logger.exception("rq-engine dry-run-omni-contrasts input parse failed", extra={"runid": runid, "config": config})
         return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
@@ -751,6 +762,11 @@ async def _dry_run_omni_contrasts(
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
     except Exception as exc:
+        # API boundary: translate unexpected build failures into canonical error payload.
+        logger.exception(
+            "rq-engine dry-run-omni-contrasts report build failed",
+            extra={"runid": runid, "config": config},
+        )
         return error_response_with_traceback(f"Error building omni contrast dry-run: {exc}")
 
     report = dict(report)

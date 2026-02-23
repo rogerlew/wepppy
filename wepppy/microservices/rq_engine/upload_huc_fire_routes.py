@@ -54,12 +54,16 @@ def _resolve_user_from_claims(claims: dict[str, object]) -> tuple[object | None,
                 try:
                     user = user_datastore.find_user(email=str(email))
                 except Exception:
+                    # Boundary catch: preserve contract behavior while logging unexpected failures.
+                    __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:56", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                     user = None
 
         if user is None and email:
             try:
                 user = User.query.filter(User.email == str(email)).first()
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:62", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 user = None
 
     return user, user_datastore, flask_app
@@ -121,6 +125,8 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         try:
             disturbed.validate(filename, mode=0)
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:123", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             os.remove(file_path)
             return error_response_with_traceback("Failed validating file", status_code=500)
 

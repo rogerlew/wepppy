@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-02-23  
-**Active Packages**: 3  
+**Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -340,21 +340,21 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
-### Bare Exception Zero Closure and Boundary Safety
+### Bare Exception Zero Closure and Boundary Safety (Phase 2)
 **Completed**: 2026-02-23  
-**Duration**: 1 day  
+**Duration**: 1 day (Phase 2 closure window)  
 **Status**: ✅ **COMPLETE**  
 **Owner**: Codex  
 **Link**: [docs/work-packages/20260223_bare_exception_zero/](docs/work-packages/20260223_bare_exception_zero/)  
-**Description**: Executed an end-to-end work-package that removed every production `bare except:` in scanner scope while preserving boundary contracts and tightening logging for remaining broad catches.
+**Description**: Reopened and completed broad-exception boundary closure for `weppcloud/routes`, `rq_engine`, and `rq` after the original bare-exception closure.
 
-**Outcome**: Hard bare-exception closure achieved with `--no-allowlist` (`82 -> 0`), changed-file enforcement passed, deferred hotspots (`user.py`, `inbox_service.py`) were refactored first, and full-suite regression validation passed.
+**Outcome**: Target-module unresolved broad findings in allowlist-aware mode reached zero, global bare-exception count remained zero, and final full-suite validation passed on post-fix state.
 
 **Deliverables**:
-- ✅ Baseline/after scanner artifacts for allowlist and no-allowlist modes
-- ✅ Sub-agent inventory + 4 disjoint parallel worker slices + dedicated test worker + final explorer review pass
-- ✅ Allowlist line/rationale synchronization for deliberate NoDb and WEPPcloud boundaries
-- ✅ Required validation gates including `wctl run-pytest tests --maxfail=1` (`2057 passed, 29 skipped`)
+- ✅ Required Phase 2 artifacts: baseline/postfix scanner JSON, classification report, final validation summary
+- ✅ Required sub-agent orchestration: baseline explorer, 3 subsystem workers, tests/contracts worker, final explorer review
+- ✅ Gate results: hard bare gate PASS, target unresolved gate PASS, changed-file enforcement PASS
+- ✅ Validation: `wctl run-pytest tests --maxfail=1` PASS (`2060 passed, 29 skipped`)
 
 ---
 

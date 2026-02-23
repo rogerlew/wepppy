@@ -115,8 +115,8 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
 
             try:
                 filename = secure_filename(upload.filename)
-            except Exception:
-                return error_response_with_traceback("Could not obtain filename", status_code=400)
+            except TypeError as exc:
+                return error_response(f"Could not obtain filename: {exc}", status_code=400)
             if not filename:
                 return error_response("Could not obtain filename", status_code=400)
 
@@ -124,15 +124,14 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
             try:
                 with open(user_defined_fn, "wb") as dest:
                     shutil.copyfileobj(upload.file, dest)
-            except Exception:
+            except OSError:
+                logger.exception("rq-engine build-treatments failed to save file", extra={"runid": runid, "config": config})
                 return error_response_with_traceback("Could not save file")
 
             try:
                 treatments.validate(user_defined_fn)
-            except Exception:
-                return error_response_with_traceback(
-                    "Failed validating file", status_code=400
-                )
+            except ValueError as exc:
+                return error_response(str(exc), status_code=400)
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_treatments)

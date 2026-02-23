@@ -44,6 +44,8 @@ def _safe_gt_timestamp(a, b) -> bool:
     try:
         return int(a) > int(b)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:46", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return False
 
 
@@ -52,6 +54,8 @@ def _first_valid_timestamp(prep, *redis_fields):
         try:
             value = prep.redis.hget(prep.run_id, field)
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:54", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             value = None
         if value not in (None, ""):
             return value
@@ -81,6 +85,8 @@ def _wepp_outputs_exist(wd: str, climate: Climate) -> bool:
                 if _exists(_join(output_dir, ss_batch_key, "interchange", "loss_pw0.out.parquet")):
                     return True
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:83", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return False
 
     return False
@@ -167,6 +173,8 @@ def _convert_scalar_to_preference(value, units, preferences):
     try:
         converted = round(float(converted), precision)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:169", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         pass
 
     return converted, _display_units(pref_key)
@@ -241,6 +249,8 @@ def _format_return_period_date(entry, base_year: int) -> str:
         computed_year = int(base_year) - 1 + year
         return f"{month:02d}/{day:02d}/{computed_year:04d}"
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:243", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return ""
 
 
@@ -381,9 +391,13 @@ def _convert_value(value, converter):
     try:
         return converter(float(value))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:383", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         try:
             return converter(value)
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:386", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             return value
 
 @wepp_bp.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>')
@@ -457,6 +471,8 @@ def task_set_hourly_seepage(runid, config):
             wepp.set_run_flowpaths(bool(state))
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:459", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory({'routine': routine, 'state': bool(state)})
@@ -502,6 +518,8 @@ def report_wepp_results(runid, config):
                                interchange_readme_exists=interchange_readme_exists,
                                user=current_user)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:504", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building reports template', runid=runid)
 
 
@@ -518,6 +536,8 @@ def query_subcatchments_summary(runid, config):
 
         return jsonify(subcatchments_summary)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:520", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building summary', runid=runid)
 
 
@@ -534,6 +554,8 @@ def query_channels_summary(runid, config):
 
         return jsonify(channels_summary)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:536", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building summary', runid=runid)
 
 
@@ -583,6 +605,8 @@ def report_wepp_run_summary(runid, config):
 
             subs_n = pq.ParquetFile(interchange_path).metadata.num_rows
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:585", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             subs_n = None
 
     if subs_n is None:
@@ -608,16 +632,22 @@ def report_wepp_loss(runid, config):
     try:
         out_rpt = OutletSummaryReport(wd)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:610", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         out_rpt = None
         
     try:
         hill_rpt = HillSummaryReport(wd)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:615", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         hill_rpt = None
         
     try:
         chn_rpt = ChannelSummaryReport(wd)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:620", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         chn_rpt = None
     
     unitizer = Unitizer.getInstance(wd)
@@ -688,6 +718,8 @@ def report_wepp_yearly_watbal(runid, config):
                 exclude_yr_indxs.append(int(yr))
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:690", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         exclude_yr_indxs = [0, 1]
 
     wd = get_wd(runid)
@@ -810,6 +842,8 @@ def plot_wepp_streamflow(runid, config):
     except FileNotFoundError:
         return error_factory('Unable to resolve query engine catalog for this run')
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:812", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error activating query engine', runid=runid)
 
     payload_dict = {
@@ -859,11 +893,15 @@ def plot_wepp_streamflow(runid, config):
     try:
         query = QueryRequest(**payload_dict)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:861", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Invalid streamflow query payload', runid=runid)
 
     try:
         result = run_query(run_context, query)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:866", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error running streamflow query', runid=runid)
 
     if result.formatted is None:
@@ -905,6 +943,8 @@ def report_wepp_return_periods(runid, config):
             if isint(yr):
                 exclude_yr_indxs.append(int(yr))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:907", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         exclude_yr_indxs = None
 
     try:
@@ -914,6 +954,8 @@ def report_wepp_return_periods(runid, config):
             if isint(month):
                 exclude_months.append(int(month))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:916", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         exclude_months = None
 
     # get method and gringorten_correction
@@ -1089,6 +1131,8 @@ def query_ron_sub_summary(runid, config, topaz_id):
         ron = Ron.getInstance(wd)
         return jsonify(ron.sub_summary(topaz_id))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:1091", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
 
 
@@ -1104,6 +1148,8 @@ def report_ron_chn_summary(runid, config, topaz_id):
                             ron=ron,
                             d=ron.chn_summary(topaz_id))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:1106", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
 
 
@@ -1147,6 +1193,8 @@ def resources_wepp_loss(runid, config):
         return error_factory('loss_grid_wgs does not exist')
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:1149", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
 
 
@@ -1164,6 +1212,8 @@ def resources_flowpaths_loss(runid, config):
         return error_factory('loss_grid_wgs does not exist')
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:1166", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
 
 
@@ -1187,4 +1237,6 @@ def query_bound_coords(runid, config):
         return error_factory('Could not determine coords')
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:1189", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)

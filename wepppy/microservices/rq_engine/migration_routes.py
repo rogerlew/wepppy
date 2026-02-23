@@ -8,6 +8,7 @@ import redis
 from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 from rq import Queue
+from rq.exceptions import NoSuchJobError
 from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
@@ -69,7 +70,7 @@ def _ensure_run_access(claims: Mapping[str, Any], runid: str) -> None:
 async def _safe_json(request: Request) -> dict[str, Any]:
     try:
         payload = await request.json()
-    except Exception:
+    except (UnicodeDecodeError, ValueError, RuntimeError):
         return {}
     if isinstance(payload, dict):
         return payload
@@ -115,7 +116,7 @@ async def migrate_run(runid: str, config: str, request: Request) -> JSONResponse
                 with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
                     job = Job.fetch(existing_job_id, connection=redis_conn)
                     status_value = job.get_status(refresh=True)
-            except Exception:
+            except (NoSuchJobError, OSError, redis.exceptions.RedisError):
                 status_value = None
 
             if status_value in {"queued", "started", "deferred", "scheduled"}:
@@ -131,7 +132,8 @@ async def migrate_run(runid: str, config: str, request: Request) -> JSONResponse
         if was_readonly:
             try:
                 ron.readonly = False
-            except Exception as exc:
+            except (AttributeError, TypeError, ValueError) as exc:
+                logger.exception("rq-engine migrate-run failed to remove readonly", extra={"runid": runid, "config": config})
                 return error_response_with_traceback(
                     f"Failed to remove readonly state: {exc}",
                     status_code=500,
@@ -166,11 +168,16 @@ async def migrate_run(runid: str, config: str, request: Request) -> JSONResponse
                 status_code=status.HTTP_202_ACCEPTED,
             )
         except Exception as exc:
+            # API boundary: enqueue failure must return canonical rq-engine error payload.
+            logger.exception("rq-engine migrate-run enqueue failed", extra={"runid": runid, "config": config})
             if was_readonly:
                 try:
                     ron.readonly = True
-                except Exception:
-                    pass
+                except (AttributeError, TypeError, ValueError) as restore_exc:
+                    logger.exception(
+                        "rq-engine migrate-run failed to restore readonly",
+                        extra={"runid": runid, "config": config},
+                    )
             return error_response_with_traceback(
                 f"Failed to enqueue migration job: {exc}",
                 status_code=500,

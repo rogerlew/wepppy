@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import json
 import sys
 import types
 from pathlib import Path
@@ -98,6 +99,19 @@ def test_set_run_readonly_rq_swallow_expected_prep_bookkeeping_errors(
 
     assert any("COMPLETED set_run_readonly_rq(demo, readonly=True)" in message for _, message in published)
     assert any("manifest.json skipped (child run)" in message for _, message in published_commands)
+    assert not any("EXCEPTION set_run_readonly_rq(demo, readonly=True)" in message for _, message in published)
+
+
+def test_set_run_readonly_rq_swallow_expected_prep_json_decode_error(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    prep = _PrepStub(remove_exc=json.JSONDecodeError("bad json", "{}", 0))
+    published, _published_commands = _configure_readonly_env(monkeypatch, tmp_path, prep)
+
+    project_rq.set_run_readonly_rq("demo", readonly=True)
+
+    assert any("COMPLETED set_run_readonly_rq(demo, readonly=True)" in message for _, message in published)
     assert not any("EXCEPTION set_run_readonly_rq(demo, readonly=True)" in message for _, message in published)
 
 

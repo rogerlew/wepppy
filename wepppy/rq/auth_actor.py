@@ -8,6 +8,7 @@ from pathlib import Path
 from contextvars import ContextVar, Token
 from typing import Any, Mapping
 
+import redis
 from rq import Queue, get_current_job
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,10 +81,7 @@ def _append_enqueue_trace(
     if not _trace_enabled() or child_job is None:
         return
 
-    try:
-        parent_job = get_current_job()
-    except Exception:  # pragma: no cover - defensive guard
-        parent_job = None
+    parent_job = get_current_job()
 
     record = {
         "child_job_id": _to_job_id(child_job),
@@ -102,7 +100,7 @@ def _append_enqueue_trace(
         with trace_path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, sort_keys=True))
             handle.write("\n")
-    except Exception as exc:  # pragma: no cover - logging only
+    except (OSError, TypeError, ValueError) as exc:  # pragma: no cover - logging only
         _LOGGER.debug("Unable to write RQ enqueue trace record: %s", exc, exc_info=True)
 
 
@@ -146,7 +144,7 @@ def install_rq_auth_actor_hook() -> None:
                             job.meta = meta
                             try:
                                 job.save_meta()
-                            except Exception as exc:  # pragma: no cover - logging only
+                            except (redis.exceptions.RedisError, OSError) as exc:  # pragma: no cover - logging only
                                 _LOGGER.debug(
                                     "Unable to persist auth actor for job %s: %s", getattr(job, "id", "?"), exc
                                 )

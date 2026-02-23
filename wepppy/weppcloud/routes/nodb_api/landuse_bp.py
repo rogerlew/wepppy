@@ -133,6 +133,8 @@ def set_landuse_mode(runid: str, config: str) -> Response:
         landuse.mode = LanduseMode(mode)
         landuse.single_selection = str(single_selection)
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/landuse_bp.py:135", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         del exc  # explicit discard to silence linters while preserving behaviour
         return exception_factory('error setting landuse mode', runid=runid)
 
@@ -155,6 +157,8 @@ def set_landuse_db(runid: str, config: str) -> Response:
     try:
         landuse.nlcd_db = db
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/landuse_bp.py:157", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('error setting landuse mode', runid=runid)
 
     return success_factory()
@@ -178,6 +182,8 @@ def modify_landuse_coverage(runid: str, config: str) -> Response:
     try:
         Landuse.getInstance(wd).modify_coverage(str(dom), str(cover), float(value))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/landuse_bp.py:180", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Failed to modify landuse coverage', runid=runid)
 
     return success_factory()
@@ -200,6 +206,8 @@ def task_modify_landuse_mapping(runid: str, config: str) -> Response:
     try:
         landuse.modify_mapping(str(dom), str(newdom))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/landuse_bp.py:202", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Failed to modify landuse mapping', runid=runid)
 
     return success_factory()
@@ -258,6 +266,8 @@ def report_landuse(runid: str, config: str) -> Response:
         )
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/landuse_bp.py:260", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Reporting landuse failed', runid=runid)
 
 
@@ -273,6 +283,8 @@ def task_modify_landuse(runid: str, config: str) -> Response:
         topaz_ids = _coerce_topaz_ids(payload.get('topaz_ids'))
         lccode = _coerce_landuse_code(payload.get('landuse'))
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/landuse_bp.py:275", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         message = 'Unpacking Modify Landuse Args Failed'
         detail = str(exc).strip()
         if detail:
@@ -282,6 +294,8 @@ def task_modify_landuse(runid: str, config: str) -> Response:
     try:
         landuse.modify(topaz_ids, lccode)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/landuse_bp.py:284", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Modifying Landuse Failed', runid=runid)
 
     return success_factory()

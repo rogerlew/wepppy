@@ -187,6 +187,8 @@ def set_climatestation_mode(runid: str, config: str) -> Response:
     try:
         climate.climatestation_mode = ClimateStationMode(int(mode))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:189", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building setting climate station mode', runid=runid)
 
     return success_factory()
@@ -214,6 +216,8 @@ def set_climatestation(runid: str, config: str) -> Response:
     try:
         climate.climatestation = station
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:216", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building setting climate station mode', runid=runid)
 
     return success_factory()
@@ -260,6 +264,8 @@ def query_climate_catalog(runid: str, config: str) -> Response:
     try:
         payload = climate.catalog_datasets_payload()
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:262", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error loading climate catalog', runid=runid)
     return jsonify(payload)
 
@@ -325,6 +331,8 @@ def set_climate_mode(runid: str, config: str) -> Response:
                 return exception_factory('Unknown climate catalog id', runid=runid)
             climate.catalog_id = dataset.catalog_id
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:327", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building setting climate mode', runid=runid)
 
     return success_factory()
@@ -354,6 +362,8 @@ def set_climate_spatialmode(runid: str, config: str) -> Response:
     try:
         climate.climate_spatialmode = spatialmode
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:356", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building setting climate spatial mode', runid=runid)
 
     return success_factory()
@@ -379,6 +389,8 @@ def view_closest_stations(runid: str, config: str) -> Response:
         try:
             results = climate.find_closest_stations()
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:381", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             return exception_factory('Error finding closest stations', runid=runid)
 
     if results is None:
@@ -414,6 +426,8 @@ def view_heuristic_stations(runid: str, config: str) -> Response:
         try:
             results = climate.find_heuristic_stations()
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:416", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             return exception_factory('Error finding heuristic stations', runid=runid)
 
     if results is None:
@@ -470,6 +484,8 @@ def view_eu_heuristic_stations(runid: str, config: str) -> Response:
     try:
         results: Sequence[StationOption] | None = climate.find_eu_heuristic_stations()
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:472", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error finding heuristic stations', runid=runid)
 
     if results is None:
@@ -502,6 +518,8 @@ def view_au_heuristic_stations(runid: str, config: str) -> Response:
     try:
         results: Sequence[StationOption] | None = climate.find_au_heuristic_stations()
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:504", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error finding heuristic stations', runid=runid)
 
     if results is None:
@@ -538,6 +556,8 @@ def view_climate_monthlies(runid: str, config: str) -> Response:
     try:
         station_meta: StationMeta | None = climate.climatestation_meta
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:540", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Could not find climatestation_meta', runid=runid)
 
     if station_meta is None:
@@ -565,6 +585,8 @@ def task_set_use_gridmet_wind_when_applicable(runid: str, config: str) -> Respon
     try:
         state = request.json.get('state', None)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:567", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
@@ -576,6 +598,8 @@ def task_set_use_gridmet_wind_when_applicable(runid: str, config: str) -> Respon
         climate.use_gridmet_wind_when_applicable = state
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:578", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
@@ -603,6 +627,8 @@ def task_set_adjust_mx_pt5(runid: str, config: str) -> Response:
         climate = Climate.getInstance(wd)
         climate.adjust_mx_pt5 = state
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:605", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory()

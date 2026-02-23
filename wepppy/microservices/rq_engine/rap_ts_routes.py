@@ -104,7 +104,7 @@ async def acquire_rap_ts(runid: str, config: str, request: Request) -> JSONRespo
         raw_json = None
         try:
             raw_json = await request.json()
-        except Exception:
+        except (UnicodeDecodeError, ValueError, RuntimeError):
             raw_json = None
 
         payload = await parse_request_payload(

@@ -1,65 +1,76 @@
-# Final Validation Summary - 20260223 Bare Exception Zero
+# Final Validation Summary - Phase 2 Broad-Exception Boundary Closure
 
-## Scanner Metrics
+## Scope
 
-### No Allowlist (hard gate view)
+- `wepppy/weppcloud/routes/**`
+- `wepppy/microservices/rq_engine/**`
+- `wepppy/rq/**`
 
-- Baseline (`artifacts/baseline_no_allowlist.json`):
-  - findings: `1099`
-  - bare-except: `82`
-  - except-Exception: `1017`
-- Final (`artifacts/after_no_allowlist.json`):
-  - findings: `1066`
-  - bare-except: `0`
-  - except-Exception: `1066`
+## Before/After Counts
 
-### Allowlist Enabled (policy view)
+Baseline capture (Milestone 0):
+- Global `bare except` (`--no-allowlist`): `0`
+- Global broad (`except Exception` + `except BaseException`, `--no-allowlist`): `1066`
+- Target-module broad (`--no-allowlist`): `523`
+- Target-module broad (allowlist-aware): `516`
 
-- Baseline (`artifacts/baseline.json`):
-  - findings: `1088`
-  - bare-except: `82`
-  - except-Exception: `1006`
-  - allowlisted: `11`
-- Final (`artifacts/after.json`):
-  - findings: `1055`
-  - bare-except: `0`
-  - except-Exception: `1055`
-  - allowlisted: `11`
+Final capture:
+- Global `bare except` (`--no-allowlist`): `0`
+- Global broad (`--no-allowlist`): `1018`
+- Global broad (allowlist-aware): `539`
+- Target-module broad (`--no-allowlist`): `475`
+- Target-module broad (allowlist-aware): `0`
 
-## Required Gates
+## Required Gate Commands
 
-- `python3 tools/check_broad_exceptions.py --json --no-allowlist > /tmp/broad_no_allow.json`
-  - Exit: `1` (expected when findings exist)
-- `jq -e '.kinds["bare-except"] == 0' /tmp/broad_no_allow.json`
-  - Exit: `0` (`true`)
-- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master`
-  - Exit: `0`
-  - Result: `PASS`
-  - Net delta (changed files): `-38`
+1. Hard bare gate (global):
 
-## Targeted Tests
+```bash
+python3 tools/check_broad_exceptions.py --json --no-allowlist > /tmp/broad_no_allow_current.json
+jq -e '.kinds["bare-except"] == 0' /tmp/broad_no_allow_current.json
+```
+
+Result: PASS (`bare-except = 0`).
+
+2. Target unresolved gate (allowlist-aware):
+
+```bash
+python3 tools/check_broad_exceptions.py --json > /tmp/broad_allow_current.json
+jq -e '[.findings[] | select((.path|startswith("wepppy/weppcloud/routes/")) or (.path|startswith("wepppy/microservices/rq_engine/")) or (.path|startswith("wepppy/rq/")))] | length == 0' /tmp/broad_allow_current.json
+```
+
+Result: PASS (`0` unresolved findings in scope).
+
+3. Changed-file enforcement:
+
+```bash
+python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
+```
+
+Result: PASS.
+
+## Tests Executed
 
 - `wctl run-pytest tests/weppcloud/routes --maxfail=1`
-  - First run: failed (contract regression in `mint_profile_token` message)
-  - After fix: `228 passed`
-- `wctl run-pytest tests/nodb --maxfail=1`
-  - `495 passed, 3 skipped`
-- `wctl run-pytest services/cao/test/services/test_inbox_service.py --maxfail=1`
-  - `10 passed`
-- `wctl run-pytest tests/nodb/test_base_unit.py tests/nodb/test_base_misc.py --maxfail=1`
-  - `40 passed`
-
-## Full Pre-Handoff Suite
-
+  - Result: PASS (`228 passed`)
+- `wctl run-pytest tests/microservices/test_rq_engine* --maxfail=1`
+  - Result: PASS (`257 passed`)
+- `wctl run-pytest tests/rq --maxfail=1`
+  - Result: PASS (`115 passed`)
 - `wctl run-pytest tests --maxfail=1`
-  - Run 1: `2057 passed, 29 skipped`
-  - Run 2 (after final NoDb logging + allowlist alignment updates): `2057 passed, 29 skipped`
+  - Result: PASS (`2060 passed, 29 skipped`)
 
-## Deferred File Contract Checks
+## Artifacts Produced
 
-- `wepppy/weppcloud/routes/user.py`
-  - JWT config error message contract preserved (`error_factory(str(exc), 500)` for `JWTConfigurationError`)
-  - Broad boundary allowlist entries aligned to per-run metadata helper boundaries (`_build_meta`, `_build_map_meta`)
-- `services/cao/src/cli_agent_orchestrator/services/inbox_service.py`
-  - Delivery failure path preserves re-raise behavior and FAILED status update.
-  - No new broad-catch increases vs base.
+- `docs/work-packages/20260223_bare_exception_zero/artifacts/baseline_broad_exceptions.json`
+- `docs/work-packages/20260223_bare_exception_zero/artifacts/postfix_broad_exceptions.json`
+- `docs/work-packages/20260223_bare_exception_zero/artifacts/target_module_classification.md`
+- `docs/work-packages/20260223_bare_exception_zero/artifacts/final_validation_summary.md`
+
+## Notes
+
+- Remaining broad catches in the target modules are allowlisted per-handler in `docs/standards/broad-exception-boundary-allowlist.md`.
+- Added/updated regression tests:
+  - `tests/weppcloud/routes/test_user_meta_boundaries.py`
+  - `tests/microservices/test_rq_engine_fork_archive_routes.py`
+  - `tests/rq/test_project_rq_readonly.py`

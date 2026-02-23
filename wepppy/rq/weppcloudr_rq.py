@@ -48,6 +48,8 @@ def _write_command_logs(output_dir: Path, job_id: str, stdout: str, stderr: str)
         (output_dir / f"render_deval_{job_id}.stdout").write_text(stdout, encoding="utf-8")
         (output_dir / f"render_deval_{job_id}.stderr").write_text(stderr, encoding="utf-8")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:50", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         # Best effort logging; avoid masking the main error path.
         pass
 
@@ -108,6 +110,8 @@ def render_deval_details_rq(
             try:
                 output_path.unlink()
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:110", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 # If removal fails we'll let the R renderer overwrite the file.
                 pass
 
@@ -168,6 +172,8 @@ def render_deval_details_rq(
         )
         return str(output_path)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:170", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(
             status_channel,
             f"rq:{job_id} EXCEPTION {func_name}({runid}, config={config}, skip_cache={skip_cache})",

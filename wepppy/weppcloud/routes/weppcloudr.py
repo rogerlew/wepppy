@@ -329,6 +329,8 @@ def _clear_tracked_job(prep: RedisPrep, job_key: str) -> None:
         prep.redis.hdel(prep.run_id, f"rq:{job_key}")
         prep.dump()
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:331", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         # Clearing the cached metadata is best-effort; failures shouldn't break the request flow.
         pass
 
@@ -352,6 +354,8 @@ def _enqueue_deval_job(
             try:
                 existing_job_id = prep.get_rq_job_id(job_key)
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:354", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 existing_job_id = None
 
         if existing_job_id:
@@ -386,6 +390,8 @@ def _enqueue_deval_job(
             try:
                 prep.set_rq_job_id(job_key, job.id)
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:388", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 # Persisting job metadata is best-effort.
                 pass
 
@@ -411,6 +417,8 @@ def _determine_job(
             try:
                 job_id = prep.get_rq_job_id(job_key)
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:413", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 job_id = None
 
         if job_id:
@@ -459,6 +467,8 @@ def deval_details(runid, config):
     try:
         _ensure_interchange(ctx)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:461", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error preparing interchange assets', runid=runid)
 
     skip_cache = 'no-cache' in request.args
@@ -519,6 +529,8 @@ def weppcloudr_proxy(routine):
                 wepp = Wepp.getInstance(wd)
                 watershed = Watershed.getInstance(wd)
             except Exception as exc:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:521", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 raise RuntimeError(f"Error acquiring nodb instances from {wd}") from exc
 
             name = ron.name

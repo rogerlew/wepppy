@@ -74,7 +74,7 @@ def _get_omni_contrasts(wd: str):
     try:
         omni = Omni.getInstance(wd)
         contrast_names = omni.contrast_names or []
-    except Exception:
+    except (OSError, RuntimeError, ValueError):
         logger.warning("gl_dashboard: failed to load omni contrasts for %s", wd, exc_info=True)
         return None
 
@@ -132,7 +132,7 @@ def gl_dashboard(runid: str, config: str):
             map_extent = ron.map.extent  # [west, south, east, north]
             map_center = ron.map.center  # [longitude, latitude]
             map_zoom = ron.map.zoom
-    except Exception:
+    except (OSError, RuntimeError, ValueError):
         pass
 
     # Get climate context for year slider
@@ -164,7 +164,7 @@ def gl_dashboard(runid: str, config: str):
             'startYear': start_year,
             'endYear': end_year,
         }
-    except Exception:
+    except (OSError, RuntimeError, TypeError, ValueError):
         pass
 
     return render_template(

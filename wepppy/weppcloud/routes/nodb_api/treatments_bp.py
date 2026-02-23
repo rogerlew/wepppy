@@ -35,6 +35,8 @@ def set_treatments_mode(runid: str, config: str):
     try:
         treatments.mode = TreatmentsMode(mode_value)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/treatments_bp.py:37", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('error setting treatments mode', runid=runid)
 
     return success_factory()

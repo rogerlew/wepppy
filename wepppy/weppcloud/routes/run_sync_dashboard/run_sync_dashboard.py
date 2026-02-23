@@ -63,4 +63,6 @@ def run_sync_dashboard():
         current_app.logger.exception("Failed to issue rq-engine token for run sync dashboard")
         return exception_factory(f"JWT configuration error: {exc}")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_sync_dashboard/run_sync_dashboard.py:65", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory()

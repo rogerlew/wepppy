@@ -411,6 +411,8 @@ def run_culvert_run_rq(
             culvert_points_path
         )
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq.py:413", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         error_payload = {
             "type": "CulvertPointsLoadError",
             "message": str(exc),
@@ -516,6 +518,8 @@ def run_culvert_run_rq(
         try:
             job_status = job.get_status()
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq.py:518", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             job_status = None
         if job_status == "started":
             job_status = "finished"
@@ -592,6 +596,8 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         try:
             payload_metadata = _load_payload_json(batch_root / "metadata.json")
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq.py:594", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             payload_metadata = None
 
     culvert_points: Dict[str, Tuple[float, float]] = {}
@@ -836,6 +842,8 @@ def _clip_raster_to_raster_with_retry(
                 output=str(output_path),
             )
         except Exception as exc:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq.py:838", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             clip_error = exc
         else:
             if output_path.exists():
@@ -1595,6 +1603,8 @@ def _sum_d8_neighbor_mask(
             )
             data = src.read(1, window=window)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq.py:1597", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None
 
     offset_row = row - row_start

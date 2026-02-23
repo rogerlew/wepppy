@@ -75,6 +75,8 @@ def _normalize_nodb_paths(run_root: Path, runid: str) -> int:
                     fp.write(content)
                 modified_count += 1
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/run_sync_rq.py:77", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             # Skip files that can't be read/written (binary, permissions, etc.)
             continue
 
@@ -132,6 +134,8 @@ def _normalize_parquet_paths(run_root: Path) -> int:
                 df.to_parquet(parquet_path, index=False)
                 modified_count += 1
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/run_sync_rq.py:134", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             # Skip files that can't be read/written
             continue
 

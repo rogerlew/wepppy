@@ -59,6 +59,8 @@ def set_soil_mode(runid: str, config: str) -> Response:
             soils.single_selection = single_selection
         soils.single_dbselection = single_dbselection
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:61", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('error setting soils mode', runid=runid)
 
     return success_factory()
@@ -102,6 +104,8 @@ def report_soils(runid: str, config: str) -> Response:
             report=Soils.getInstance(wd).report,
         )
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:104", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building Soil Failed', runid=runid)
 
 
@@ -120,6 +124,8 @@ def task_set_soils_ksflag(runid: str, config: str) -> Response:
         soils = Soils.getInstance(wd)
         soils.ksflag = bool(state)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:122", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
@@ -145,6 +151,8 @@ def task_set_disturbed_sol_ver(runid: str, config: str) -> Response:
         disturbed = Disturbed.getInstance(wd)
         disturbed.sol_ver = state
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:147", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory()

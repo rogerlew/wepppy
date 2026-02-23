@@ -215,6 +215,8 @@ def prepare_fork_run(
         try:
             initialize_ttl(new_wd)
         except Exception as exc:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_fork.py:217", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             if format_ttl_failure is not None:
                 message = format_ttl_failure(exc)
             else:

@@ -92,6 +92,8 @@ def save_upload_file(
         destination.unlink(missing_ok=True)
         raise
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_helpers.py:94", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         destination.unlink(missing_ok=True)
         raise exc
 

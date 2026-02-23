@@ -162,6 +162,8 @@ def task_set_ash_wind_transport(runid, config):
     try:
         state = request.json.get('run_wind_transport', None)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:164", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
@@ -172,6 +174,8 @@ def task_set_ash_wind_transport(runid, config):
         ash = Ash.getInstance(wd)
         ash.run_wind_transport = state
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:174", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
@@ -189,6 +193,8 @@ def report_run_ash(runid, config):
                                ash=ash)
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:191", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error', runid=runid)
 
 
@@ -245,6 +251,8 @@ def report_ash(runid, config):
                                user=current_user)
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:247", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error', runid=runid)
 
 
@@ -260,6 +268,8 @@ def query_ash_out(runid, config):
         return jsonify(ash_out)
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:262", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
 
 
@@ -322,4 +332,6 @@ def report_contaminant(runid, config):
                                user=current_user)
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:324", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error', runid=runid)

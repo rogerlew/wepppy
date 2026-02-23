@@ -231,6 +231,8 @@ def delete_run(runid, config):
             queue = Queue(connection=redis_conn)
             job = queue.enqueue_call(delete_run_rq, (runid, wd), timeout=TIMEOUT)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:233", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error queuing delete task', runid=runid)
 
     return success_factory({'job_id': job.id})
@@ -280,12 +282,16 @@ def task_adduser(runid, config):
             try:
                 user = user_datastore.find_user(email=email)
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:282", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 user = None
 
         if user is None:
             try:
                 user = User.query.filter(func.lower(User.email) == email.lower()).first()
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:288", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 user = None
 
         if user is None:
@@ -294,6 +300,8 @@ def task_adduser(runid, config):
         try:
             run = Run.query.filter(Run.runid == runid).first()
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:296", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             run = None
 
         if run is None:
@@ -316,6 +324,8 @@ def task_adduser(runid, config):
             'email': getattr(user, 'email', email)
         })
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:318", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(f'Error adding user: {email}', runid=runid)
 
 
@@ -346,6 +356,8 @@ def task_removeuser(runid, config):
         try:
             user = User.query.filter(User.id == user_id).first()
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:348", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             user = None
 
         if user is None:
@@ -354,6 +366,8 @@ def task_removeuser(runid, config):
         try:
             run = Run.query.filter(Run.runid == runid).first()
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:356", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             run = None
 
         if run is None:
@@ -372,6 +386,8 @@ def task_removeuser(runid, config):
 
         return success_factory({'user_id': user_id})
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:374", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(f'Error removing user: {user_id}', runid=runid)
 
 
@@ -495,6 +511,8 @@ def task_set_public(runid, config):
         ctx = load_run_context(runid, config)
         Ron.getInstance(str(ctx.active_root)).public = bool(state)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:497", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory({'public': bool(state)})
@@ -528,6 +546,8 @@ def task_set_ttl_disabled(runid, config):
 
         ttl_state = set_user_ttl_disabled(wd, bool(state), str(user_id))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:530", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting TTL state', runid=runid)
 
     return success_factory({'ttl_disabled': bool(state), 'ttl': ttl_state})
@@ -557,6 +577,8 @@ def task_set_readonly(runid, config):
             queue = Queue(connection=redis_conn)
             job = queue.enqueue_call(set_run_readonly_rq, (runid, desired_state), timeout=TIMEOUT)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:559", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error queuing readonly task', runid=runid)
 
     return success_factory({'readonly': desired_state, 'job_id': job.id})
@@ -581,6 +603,8 @@ def task_set_mod(runid, config):
     except ValueError as exc:
         return error_factory(str(exc))
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:583", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error updating module state', runid=runid)
 
     return success_factory(state)

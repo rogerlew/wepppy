@@ -29,7 +29,7 @@ LANDUSE_ARCHIVE_ROOTS = (
 async def _safe_json(request: Request) -> dict[str, Any]:
     try:
         payload = await request.json()
-    except Exception:
+    except (UnicodeDecodeError, ValueError, RuntimeError):
         return {}
     return payload if isinstance(payload, dict) else {}
 

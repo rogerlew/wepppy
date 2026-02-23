@@ -182,6 +182,8 @@ def _active_batch_job_summaries(
                 try:
                     job = Job.fetch(job_id, connection=connection)
                 except Exception:
+                    # Boundary catch: preserve contract behavior while logging unexpected failures.
+                    __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/batch_rq.py:184", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                     continue
                 if job is None:
                     continue
@@ -278,6 +280,8 @@ def delete_batch_rq(batch_name: str) -> dict[str, Any]:
         return {'batch_name': batch_name, 'deleted': True}
 
     except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/batch_rq.py:280", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job_id} EXCEPTION {func_name}({batch_name})')
         StatusMessenger.publish(status_channel, f'rq:{job_id} STATUS delete batch failed ({exc})')
         StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_FAILED')
@@ -362,6 +366,8 @@ def run_batch_rq(batch_name: str) -> Job:
         return final_job
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/batch_rq.py:364", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job_id} EXCEPTION {func_name}({batch_name})')
         raise
 
@@ -502,6 +508,8 @@ def _final_batch_complete_rq(batch_name: str) -> None:
             try:
                 send_discord_message(f':herb: Batch {batch_name} completed on {_hostname}')
             except Exception:
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/batch_rq.py:504", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 pass
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({batch_name})')
@@ -510,5 +518,7 @@ def _final_batch_complete_rq(batch_name: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni END_BROADCAST')
 
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/batch_rq.py:512", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({batch_name})')
         raise

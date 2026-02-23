@@ -104,6 +104,8 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
                 results[job_id] = {"job_id": job_id, "status": "not_found"}
                 continue
             except Exception as exc:  # pragma: no cover - defensive guard
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/job_info.py:106", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 results[job_id] = {
                     "job_id": job_id,
                     "status": "error",
@@ -118,6 +120,8 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
             try:
                 results[job_id] = recursive_get_job_details(job, redis_conn, now)
             except Exception as exc:  # pragma: no cover - defensive guard
+                # Boundary catch: preserve contract behavior while logging unexpected failures.
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/job_info.py:120", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 results[job_id] = {
                     "job_id": job_id,
                     "status": "error",

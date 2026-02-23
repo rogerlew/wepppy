@@ -143,6 +143,33 @@ def test_fork_requires_cap_for_anonymous_session_claims(
     assert payload["error"]["message"] == "CAPTCHA token is required."
 
 
+def test_fork_rejects_non_string_target_runid(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+
+    monkeypatch.setattr(fork_archive_routes, "_resolve_bearer_claims", lambda request: {"token_class": "user"})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "_resolve_user_from_claims", lambda claims: (None, None, None))
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/fork",
+            headers={"Authorization": "Bearer token"},
+            json={"target_runid": 123},
+        )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "error": {
+            "message": "Invalid target_runid",
+            "code": "validation_error",
+            "details": "Invalid target_runid",
+        }
+    }
+
+
 def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()

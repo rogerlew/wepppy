@@ -101,6 +101,8 @@ def _sum_parquet_column(parquet_path: Path, column: str) -> Optional[float]:
         if result and result[0] is not None:
             return float(result[0])
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:103", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         pass
     try:
         import pyarrow.compute as pc
@@ -111,6 +113,8 @@ def _sum_parquet_column(parquet_path: Path, column: str) -> Optional[float]:
         if total is not None:
             return float(total)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:113", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None
     return None
 
@@ -166,6 +170,8 @@ def _count_parquet_rows(parquet_path: Path) -> Optional[int]:
         if metadata is not None:
             return int(metadata.num_rows)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:168", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         pass
     try:
         import duckdb
@@ -179,6 +185,8 @@ def _count_parquet_rows(parquet_path: Path) -> Optional[int]:
         if result:
             return int(result[0])
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:181", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None
     return None
 
@@ -198,6 +206,8 @@ def _get_rq_connection() -> Optional[redis.Redis]:
         conn.ping()
         return conn
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:200", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None
 
 
@@ -211,10 +221,14 @@ def _fetch_job_info(
     try:
         job = Job.fetch(job_id, connection=redis_conn)
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:213", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None, None
     try:
         status = job.get_status()
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:217", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         status = None
     created_at = job.created_at.isoformat() if job.created_at else None
     return str(status) if status is not None else None, created_at
@@ -232,6 +246,8 @@ def _write_runs_manifest(
         try:
             payload_metadata = _helpers._load_payload_json(batch_root / "metadata.json")
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq_manifest.py:234", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             payload_metadata = None
 
     watershed_features: dict[str, WatershedFeature] = {}

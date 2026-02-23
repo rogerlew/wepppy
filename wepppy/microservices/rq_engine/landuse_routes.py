@@ -175,10 +175,8 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                 return error_response(str(exc), status_code=400)
             except NoDirError:
                 raise
-            except Exception:
-                return error_response_with_traceback(
-                    "Failed validating file", status_code=400
-                )
+            except RuntimeError as exc:
+                return error_response(str(exc), status_code=400)
 
         if landuse.run_group == "batch":
             return JSONResponse({"message": "Set landuse inputs for batch processing"})

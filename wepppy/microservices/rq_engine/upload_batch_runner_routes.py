@@ -35,6 +35,8 @@ def _geojson_max_bytes() -> int:
 
         raw_limit = flask_app.config.get("BATCH_GEOJSON_MAX_MB")
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_batch_runner_routes.py:37", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         raw_limit = None
 
     try:
@@ -169,6 +171,8 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
         try:
             upload.file.seek(0)
         except Exception:
+            # Boundary catch: preserve contract behavior while logging unexpected failures.
+            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_batch_runner_routes.py:171", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             pass
         with open(dest_path, "wb") as dest:
             shutil.copyfileobj(upload.file, dest)

@@ -141,6 +141,8 @@ def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = N
         )
         return True
     except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/interchange_rq.py:143", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(
             status_channel,
             f"rq:{job_id} EXCEPTION {func_name}({runid}, wepp_output_subpath={wepp_output_subpath})",
