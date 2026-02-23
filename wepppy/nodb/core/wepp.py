@@ -881,7 +881,12 @@ class Wepp(NoDbBase):
             if pq is not None:
                 try:
                     parquet_file = pq.ParquetFile(str(events_path))
-                except Exception:
+                except (OSError, ValueError, TypeError):
+                    self.logger.debug(
+                        "WEPP DSS date range: unable to open events parquet at %s",
+                        events_path,
+                        exc_info=True,
+                    )
                     parquet_file = None
 
                 if (
@@ -915,7 +920,7 @@ class Wepp(NoDbBase):
             month = int(data["month"][index])
             day = int(data["day_of_month"][index])
             return date(year, month, day)
-        except Exception:
+        except (KeyError, IndexError, TypeError, ValueError):
             return None
 
     @property
@@ -1668,18 +1673,18 @@ class Wepp(NoDbBase):
             if _exists(_dir):
                 try:
                     shutil.rmtree(_dir)
-                except Exception as exc:
+                except OSError as exc:
                     self.logger.warning(f'Cleanup unable to remove {_dir} on first attempt: {exc}', exc_info=True)
                     sleep(1.0)
                     try:
                         shutil.rmtree(_dir)
-                    except Exception as retry_exc:
+                    except OSError as retry_exc:
                         self.logger.error(f'Cleanup failed to remove {_dir} after retry: {retry_exc}', exc_info=True)
                         raise RuntimeError(f"Failed to clean directory '{_dir}'") from retry_exc
 
             try:
                 os.makedirs(_dir, exist_ok=True)
-            except Exception as exc:
+            except OSError as exc:
                 self.logger.error(f'Cleanup failed to recreate {_dir}: {exc}', exc_info=True)
                 raise
 

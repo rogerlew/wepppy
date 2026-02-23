@@ -22,7 +22,7 @@ import pyarrow.parquet as pq
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except Exception:  # pragma: no cover - optional dependency
+except ImportError:  # pragma: no cover - optional dependency
     _update_catalog_entry = None
 
 from wepppy.wepp.interchange.schema_utils import pa_field
@@ -274,7 +274,7 @@ class PathCostEffective(NoDbBase):
         elif raw_value is not None:
             try:
                 fallback = dict(raw_value)  # type: ignore[arg-type]
-            except Exception:
+            except (TypeError, ValueError):
                 fallback = {}
         self._config = _normalize_config(fallback)
 

@@ -550,7 +550,7 @@ class CulvertsRunner(NoDbBase):
                 pad=0.0,
                 output_crs="EPSG:4326",
             )
-        except Exception as exc:
+        except (OSError, ValueError, RuntimeError) as exc:
             self.logger.warning(
                 "culvert_run %s: failed to derive map extent from watershed feature - %s",
                 watershed_feature.runid if watershed_feature else "?",

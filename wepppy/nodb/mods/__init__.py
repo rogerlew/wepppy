@@ -53,7 +53,7 @@ EXTENDED_MODS_DATA = _resolve_extended_mods_data()
 
 try:
     from wepppy.nodb.base import _LEGACY_MODULE_REDIRECTS
-except Exception:  # pragma: no cover - fallback during partial imports
+except ImportError:  # pragma: no cover - fallback during partial imports
     _LEGACY_MODULE_REDIRECTS = {}
 
 if not _LEGACY_MODULE_REDIRECTS:  # pragma: no cover - defensive rebuild

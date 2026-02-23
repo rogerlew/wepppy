@@ -133,7 +133,7 @@ def _get_gdal_open_probe(logger: Optional[logging.Logger]) -> Optional[Callable[
 
         _GDAL_OPEN_PROBE = _probe
         return _GDAL_OPEN_PROBE
-    except Exception:
+    except (ImportError, ModuleNotFoundError, OSError):
         pass
 
     try:
@@ -159,7 +159,7 @@ def _get_gdal_open_probe(logger: Optional[logging.Logger]) -> Optional[Callable[
 
         _GDAL_OPEN_PROBE = _probe
         return _GDAL_OPEN_PROBE
-    except Exception as exc:
+    except (FileNotFoundError, OSError, AttributeError, ImportError, ModuleNotFoundError) as exc:
         if logger is not None:
             logger.warning(
                 'GDAL open probe unavailable (%s); waiting only for filesystem visibility for %s',
@@ -1453,9 +1453,17 @@ class Landuse(NoDbBase):
 
         translator = None
         try:
-            translator = self.watershed_instance.translator_factory()
-        except Exception:
-            translator = None
+            import duckdb  # type: ignore[import-not-found]
+        except ModuleNotFoundError:
+            try:
+                translator = self.watershed_instance.translator_factory()
+            except (RuntimeError, FileNotFoundError, ValueError):
+                translator = None
+        else:
+            try:
+                translator = self.watershed_instance.translator_factory()
+            except (RuntimeError, FileNotFoundError, ValueError, duckdb.Error):
+                translator = None
 
         if 'wepp_id' in df.columns:
             df['wepp_id'] = pd.to_numeric(df['wepp_id'], errors='coerce').astype('Int32')
@@ -1468,7 +1476,7 @@ class Landuse(NoDbBase):
                     else:
                         try:
                             value = translator.wepp(top=int(top))
-                        except Exception:
+                        except (KeyError, TypeError, ValueError):
                             value = None
                         wepp_values.append(value if value is not None else pd.NA)
                 df['wepp_id'] = pd.Series(pd.array(wepp_values, dtype='Int32'))
@@ -1522,9 +1530,17 @@ class Landuse(NoDbBase):
 
         translator = None
         try:
-            translator = self.watershed_instance.translator_factory()
-        except Exception:
-            translator = None
+            import duckdb  # type: ignore[import-not-found]
+        except ModuleNotFoundError:
+            try:
+                translator = self.watershed_instance.translator_factory()
+            except (RuntimeError, FileNotFoundError, ValueError):
+                translator = None
+        else:
+            try:
+                translator = self.watershed_instance.translator_factory()
+            except (RuntimeError, FileNotFoundError, ValueError, duckdb.Error):
+                translator = None
 
         if translator is not None:
             wepp_values = []
@@ -1534,7 +1550,7 @@ class Landuse(NoDbBase):
                 else:
                     try:
                         value = translator.wepp(top=int(top))
-                    except Exception:
+                    except (KeyError, TypeError, ValueError):
                         value = None
                     wepp_values.append(value if value is not None else pd.NA)
             df['wepp_id'] = pd.Series(pd.array(wepp_values, dtype='Int32'))

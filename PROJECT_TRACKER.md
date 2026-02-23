@@ -340,6 +340,24 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### NoDb Broad-Exception Boundary Closure
+**Completed**: 2026-02-23  
+**Duration**: 1 day  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260223_nodb_broad_exception_boundary_closure/](docs/work-packages/20260223_nodb_broad_exception_boundary_closure/)  
+**Description**: Comprehensive broad-exception closure for `wepppy/nodb/**` with required sub-agent orchestration, tests-first characterization, narrowing/removal of non-boundary broad catches, and residual boundary allowlist synchronization.
+
+**Outcome**: NoDb unresolved broad findings in allowlist-aware mode reached zero, NoDb `bare except` stayed zero, required NoDb/full-suite gates passed, and closure artifacts were published.
+
+**Deliverables**:
+- ✅ Required artifacts: baseline/final scanner JSON, full resolution matrix, final validation summary
+- ✅ Required sub-agent orchestration: baseline explorer, workers A/B/C, final explorer review
+- ✅ Gate results: hard bare gate PASS, allowlist-aware unresolved gate PASS, changed-file enforcement PASS
+- ✅ Validation: `wctl run-pytest tests/nodb` PASS (`501 passed, 3 skipped`), `wctl run-pytest tests/nodir` PASS (`135 passed`), `wctl run-pytest tests --maxfail=1` PASS (`2066 passed, 29 skipped`)
+
+---
+
 ### Bare Exception Zero Closure and Boundary Safety (Phase 2)
 **Completed**: 2026-02-23  
 **Duration**: 1 day (Phase 2 closure window)  

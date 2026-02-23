@@ -815,7 +815,7 @@ class Swat(SwatTxtInOutMixin, SwatRecallMixin, SwatConnectivityMixin, NoDbBase):
                 status = version.get("status")
                 if isinstance(status, str) and status:
                     return status
-            except Exception:
+            except (OSError, ValueError, TypeError):
                 self.logger.warning(
                     "SWAT interchange: unable to read interchange_version.json at %s",
                     version_path,
@@ -897,7 +897,7 @@ class Swat(SwatTxtInOutMixin, SwatRecallMixin, SwatConnectivityMixin, NoDbBase):
             return None
         try:
             return load_print_prt(template_path)
-        except Exception as exc:
+        except (OSError, ValueError, TypeError) as exc:
             self.logger.warning(
                 "SWAT build: failed to parse template print.prt (%s); using defaults",
                 exc,
@@ -992,11 +992,11 @@ class Swat(SwatTxtInOutMixin, SwatRecallMixin, SwatConnectivityMixin, NoDbBase):
 def _load_rust_swat_utils() -> Tuple[Optional[object], Optional[Exception]]:
     try:
         return importlib.import_module("wepppyo3.swat_utils"), None
-    except Exception as exc:
+    except ImportError as exc:
         for module_name in ("wepppyo3.swat_utils_rust", "wepppyo3.swat_utils.swat_utils_rust"):
             try:
                 return importlib.import_module(module_name), None
-            except Exception:
+            except ImportError:
                 continue
         return None, exc
 
@@ -1004,13 +1004,13 @@ def _load_rust_swat_utils() -> Tuple[Optional[object], Optional[Exception]]:
 def _load_rust_swat_interchange() -> Tuple[Optional[object], Optional[Exception]]:
     try:
         return importlib.import_module("wepppyo3.swat_interchange"), None
-    except Exception as exc:
+    except ImportError as exc:
         for module_name in (
             "wepppyo3.swat_interchange_rust",
             "wepppyo3.swat_interchange.swat_interchange_rust",
         ):
             try:
                 return importlib.import_module(module_name), None
-            except Exception:
+            except ImportError:
                 continue
         return None, exc

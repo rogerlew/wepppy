@@ -1,0 +1,19 @@
+{
+  "allowlist_source": "/home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md",
+  "allowlisted_count": 93,
+  "findings": [],
+  "findings_count": 0,
+  "kinds": {
+    "bare-except": 0,
+    "except-BaseException": 0,
+    "except-Exception": 0
+  },
+  "parse_errors": [],
+  "parse_errors_count": 0,
+  "scan_prefixes": [
+    "wepppy/nodb"
+  ],
+  "scanned_files": 146,
+  "suppressed_count": 0,
+  "top_files": []
+}

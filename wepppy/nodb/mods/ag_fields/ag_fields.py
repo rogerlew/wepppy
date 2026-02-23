@@ -46,7 +46,7 @@ from os.path import split as _split
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except Exception:  # pragma: no cover - optional dependency
+except ImportError:  # pragma: no cover - optional dependency
     _update_catalog_entry = None
 
 __all__ = [

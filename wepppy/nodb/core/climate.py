@@ -666,7 +666,7 @@ class Climate(NoDbBase):
                                 return int(tokens[2])
                             except (TypeError, ValueError):
                                 continue
-            except Exception:
+            except OSError:
                 self.logger.debug(
                     "Failed inferring calendar_start_year from cli file",
                     extra={"cli_path": str(cli_path)},
@@ -780,7 +780,7 @@ class Climate(NoDbBase):
             years = cli.years
 
             return years[0]
-        except Exception:
+        except (OSError, ValueError, IndexError, TypeError):
             return None
 
     @property
@@ -796,7 +796,7 @@ class Climate(NoDbBase):
             years = cli.years
 
             return all(yr > 1900 for yr in years)
-        except Exception:
+        except (OSError, ValueError, TypeError):
             return None
 
     #

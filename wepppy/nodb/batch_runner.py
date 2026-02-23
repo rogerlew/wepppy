@@ -261,7 +261,7 @@ class BatchRunner(NoDbBase):
                         ron._boundary_color = 'blue'
                         ron._boundary_name = 'target_watershed'
 
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 logger.error(f"Failed to save GeoJSON: {e}")
 
         logger.info('getting RedisPrep instance')

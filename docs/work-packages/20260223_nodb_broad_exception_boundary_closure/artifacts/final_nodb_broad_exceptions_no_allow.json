@@ -1,0 +1,752 @@
+{
+  "allowlist_source": null,
+  "allowlisted_count": 0,
+  "findings": [
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:  # pragma: no cover - unexpected spawn errors",
+      "lineno": 525,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 798,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 24,
+      "kind": "except-Exception",
+      "line": "                        except Exception:",
+      "lineno": 915,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 933,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 941,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 980,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 1021,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 1149,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 1218,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception:",
+      "lineno": 1271,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 1324,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 1379,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 1390,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 1401,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 1525,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 1536,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 2346,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 2353,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 74,
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 90,
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 238,
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 293,
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 320,
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 327,
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 360,
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:",
+      "lineno": 765,
+      "path": "wepppy/nodb/core/climate_build_helpers.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:",
+      "lineno": 899,
+      "path": "wepppy/nodb/core/climate_build_helpers.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 1101,
+      "path": "wepppy/nodb/core/climate_build_helpers.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 402,
+      "path": "wepppy/nodb/core/climate_gridmet_multiple_build_service.py"
+    },
+    {
+      "col": 24,
+      "kind": "except-Exception",
+      "line": "                        except Exception as exc:",
+      "lineno": 585,
+      "path": "wepppy/nodb/core/soils.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 369,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 391,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 399,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 722,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 798,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 839,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 845,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 851,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception as exc:",
+      "lineno": 863,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:",
+      "lineno": 879,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as e:",
+      "lineno": 978,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:",
+      "lineno": 1030,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 1052,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 1076,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception as exc:",
+      "lineno": 1168,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "col": 28,
+      "kind": "except-Exception",
+      "line": "                            except Exception as exc:",
+      "lineno": 263,
+      "path": "wepppy/nodb/core/wepp_prep_service.py"
+    },
+    {
+      "col": 28,
+      "kind": "except-Exception",
+      "line": "                            except Exception as exc:",
+      "lineno": 276,
+      "path": "wepppy/nodb/core/wepp_prep_service.py"
+    },
+    {
+      "col": 28,
+      "kind": "except-Exception",
+      "line": "                            except Exception as exc:",
+      "lineno": 501,
+      "path": "wepppy/nodb/core/wepp_prep_service.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:",
+      "lineno": 511,
+      "path": "wepppy/nodb/core/wepp_prep_service.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 571,
+      "path": "wepppy/nodb/core/wepp_prep_service.py"
+    },
+    {
+      "col": 24,
+      "kind": "except-Exception",
+      "line": "                        except Exception as exc:",
+      "lineno": 87,
+      "path": "wepppy/nodb/core/wepp_run_service.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception as exc:",
+      "lineno": 125,
+      "path": "wepppy/nodb/core/wepp_run_service.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception as exc:",
+      "lineno": 161,
+      "path": "wepppy/nodb/core/wepp_run_service.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception as exc:",
+      "lineno": 322,
+      "path": "wepppy/nodb/core/wepp_run_service.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:  # pragma: no cover - best effort",
+      "lineno": 200,
+      "path": "wepppy/nodb/mods/ag_fields/ag_fields.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception as e:",
+      "lineno": 601,
+      "path": "wepppy/nodb/mods/ag_fields/ag_fields.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception as e:",
+      "lineno": 614,
+      "path": "wepppy/nodb/mods/ag_fields/ag_fields.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception as exc:",
+      "lineno": 766,
+      "path": "wepppy/nodb/mods/ag_fields/ag_fields.py"
+    },
+    {
+      "col": 24,
+      "kind": "except-Exception",
+      "line": "                        except Exception as exc:",
+      "lineno": 808,
+      "path": "wepppy/nodb/mods/ash_transport/ash.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 825,
+      "path": "wepppy/nodb/mods/ash_transport/ash.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 144,
+      "path": "wepppy/nodb/mods/baer/sbs_map.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 167,
+      "path": "wepppy/nodb/mods/baer/sbs_map.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 190,
+      "path": "wepppy/nodb/mods/baer/sbs_map.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 227,
+      "path": "wepppy/nodb/mods/baer/sbs_map.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 264,
+      "path": "wepppy/nodb/mods/baer/sbs_map.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 434,
+      "path": "wepppy/nodb/mods/disturbed/disturbed.py"
+    },
+    {
+      "col": 24,
+      "kind": "except-Exception",
+      "line": "                        except Exception as exc:",
+      "lineno": 1132,
+      "path": "wepppy/nodb/mods/disturbed/disturbed.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 623,
+      "path": "wepppy/nodb/mods/observed/observed.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 684,
+      "path": "wepppy/nodb/mods/observed/observed.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:  # Boundary: cache cleanup should not break clone teardown.",
+      "lineno": 181,
+      "path": "wepppy/nodb/mods/omni/omni.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:  # Boundary: lock cleanup should not break clone teardown.",
+      "lineno": 191,
+      "path": "wepppy/nodb/mods/omni/omni.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:",
+      "lineno": 231,
+      "path": "wepppy/nodb/mods/omni/omni.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:  # pragma: no cover - catalog refresh best effort",
+      "lineno": 795,
+      "path": "wepppy/nodb/mods/omni/omni.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:  # Boundary: return-period refresh should not block run finalization.",
+      "lineno": 1181,
+      "path": "wepppy/nodb/mods/omni/omni.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception as exc:  # pragma: no cover - best effort restore",
+      "lineno": 634,
+      "path": "wepppy/nodb/mods/omni/omni_artifact_export_service.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception as exc:  # pragma: no cover - best effort restore",
+      "lineno": 691,
+      "path": "wepppy/nodb/mods/omni/omni_artifact_export_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:  # Boundary: malformed user geometry should not abort all features.",
+      "lineno": 1197,
+      "path": "wepppy/nodb/mods/omni/omni_contrast_build_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:  # Boundary: status tracking must record any run failure before re-raising.",
+      "lineno": 176,
+      "path": "wepppy/nodb/mods/omni/omni_run_orchestration_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 191,
+      "path": "wepppy/nodb/mods/omni/omni_station_catalog_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 200,
+      "path": "wepppy/nodb/mods/omni/omni_station_catalog_service.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 287,
+      "path": "wepppy/nodb/mods/openet/openet_ts.py"
+    },
+    {
+      "col": 28,
+      "kind": "except-Exception",
+      "line": "                            except Exception as exc:",
+      "lineno": 468,
+      "path": "wepppy/nodb/mods/openet/openet_ts.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:  # pragma: no cover - pandas/pyarrow exceptions are diverse",
+      "lineno": 78,
+      "path": "wepppy/nodb/mods/path_ce/data_loader.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:  # pragma: no cover - filesystem errors",
+      "lineno": 395,
+      "path": "wepppy/nodb/mods/path_ce/path_cost_effective.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:  # pragma: no cover - best effort",
+      "lineno": 434,
+      "path": "wepppy/nodb/mods/path_ce/path_cost_effective.py"
+    },
+    {
+      "col": 24,
+      "kind": "except-Exception",
+      "line": "                        except Exception as exc:",
+      "lineno": 247,
+      "path": "wepppy/nodb/mods/rap/rap_ts.py"
+    },
+    {
+      "col": 24,
+      "kind": "except-Exception",
+      "line": "                        except Exception as exc:",
+      "lineno": 354,
+      "path": "wepppy/nodb/mods/rap/rap_ts.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception as exc:",
+      "lineno": 215,
+      "path": "wepppy/nodb/mods/rhem/rhem.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception as exc:",
+      "lineno": 281,
+      "path": "wepppy/nodb/mods/rhem/rhem.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:  # pragma: no cover - catalog refresh best effort",
+      "lineno": 361,
+      "path": "wepppy/nodb/mods/skid_trails/skid_trails.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 771,
+      "path": "wepppy/nodb/mods/swat/swat.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 796,
+      "path": "wepppy/nodb/mods/swat/swat.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 161,
+      "path": "wepppy/nodb/mods/treatments/treatments.py"
+    }
+  ],
+  "findings_count": 93,
+  "kinds": {
+    "bare-except": 0,
+    "except-BaseException": 0,
+    "except-Exception": 93
+  },
+  "parse_errors": [],
+  "parse_errors_count": 0,
+  "scan_prefixes": [
+    "wepppy/nodb"
+  ],
+  "scanned_files": 146,
+  "suppressed_count": 0,
+  "top_files": [
+    {
+      "count": 18,
+      "path": "wepppy/nodb/base.py"
+    },
+    {
+      "count": 15,
+      "path": "wepppy/nodb/core/watershed.py"
+    },
+    {
+      "count": 7,
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py"
+    },
+    {
+      "count": 5,
+      "path": "wepppy/nodb/core/wepp_prep_service.py"
+    },
+    {
+      "count": 5,
+      "path": "wepppy/nodb/mods/baer/sbs_map.py"
+    },
+    {
+      "count": 5,
+      "path": "wepppy/nodb/mods/omni/omni.py"
+    },
+    {
+      "count": 4,
+      "path": "wepppy/nodb/core/wepp_run_service.py"
+    },
+    {
+      "count": 4,
+      "path": "wepppy/nodb/mods/ag_fields/ag_fields.py"
+    },
+    {
+      "count": 3,
+      "path": "wepppy/nodb/core/climate_build_helpers.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/ash_transport/ash.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/disturbed/disturbed.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/observed/observed.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/omni/omni_artifact_export_service.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/omni/omni_station_catalog_service.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/openet/openet_ts.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/path_ce/path_cost_effective.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/rap/rap_ts.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/rhem/rhem.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/nodb/mods/swat/swat.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/nodb/core/climate_gridmet_multiple_build_service.py"
+    }
+  ]
+}

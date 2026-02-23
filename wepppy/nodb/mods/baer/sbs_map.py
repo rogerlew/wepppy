@@ -83,7 +83,7 @@ _SBS_4CLASS_EXPORT_COLORS_BY_MODE: dict[ExportPaletteMode, dict[int, tuple[int, 
 
 try:
     from wepppyo3 import sbs_map as _rust_sbs_map
-except Exception:
+except (ImportError, OSError):
     _rust_sbs_map = None
 
 _RUST_SUMMARY_LOGGED = False
@@ -120,7 +120,7 @@ def _load_sbs_color_map(path: str | None = None) -> dict[RGBColor, str]:
         mapping = {tuple(entry["rgb"]): entry["severity"] for entry in colors}
         if mapping:
             return mapping
-    except Exception:
+    except (OSError, ValueError, TypeError, KeyError):
         pass
     return dict(_DEFAULT_COLOR_TO_SEVERITY)
 

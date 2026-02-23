@@ -102,15 +102,20 @@ class WatershedOperationsMixin:
         
         if hillslopes_parquet is not None and channels_parquet is not None:
             import duckdb
-            con = duckdb.connect()
-            sub_ids = con.execute(f"SELECT topaz_id FROM read_parquet('{hillslopes_parquet}')").fetchall()
-            chn_ids = con.execute(f"SELECT topaz_id FROM read_parquet('{channels_parquet}')").fetchall()
-            con.close()
+            with duckdb.connect() as con:
+                sub_ids = con.execute(
+                    f"SELECT topaz_id FROM read_parquet('{hillslopes_parquet}')"
+                ).fetchall()
+                chn_ids = con.execute(
+                    f"SELECT topaz_id FROM read_parquet('{channels_parquet}')"
+                ).fetchall()
             return WeppTopTranslator(
                 (row[0] for row in sub_ids), (row[0] for row in chn_ids)
             )
         
-        raise Exception("No sub_ids/chn_ids available for translator (no summaries or parquet files)")
+        raise RuntimeError(
+            "No sub_ids/chn_ids available for translator (no summaries or parquet files)"
+        )
 
     #
     # build channels

@@ -331,8 +331,13 @@ try:
     redis_nodb_cache_pool = redis.ConnectionPool(**pool_kwargs)
     redis_nodb_cache_client = redis.StrictRedis(connection_pool=redis_nodb_cache_pool)
     redis_nodb_cache_client.ping()
-except Exception as e:
-    logging.critical(f'Error connecting to Redis with pool: {e}')
+except (redis.exceptions.RedisError, OSError, ValueError) as exc:
+    # Redis boundary: NoDb can run without Redis, but we emit a high-signal error for operators.
+    logging.critical(
+        "Error connecting to Redis (NODB_CACHE) with pool: %s",
+        exc,
+        exc_info=True,
+    )
     redis_nodb_cache_client = None
 
 try:
@@ -344,8 +349,13 @@ try:
     redis_status_pool = redis.ConnectionPool(**pool_kwargs)
     redis_status_client = redis.StrictRedis(connection_pool=redis_status_pool)
     redis_status_client.ping()
-except Exception as e:
-    logging.critical(f'Error connecting to Redis with pool: {e}')
+except (redis.exceptions.RedisError, OSError, ValueError) as exc:
+    # Redis boundary: status streaming is optional; disable it if Redis is unavailable.
+    logging.critical(
+        "Error connecting to Redis (STATUS) with pool: %s",
+        exc,
+        exc_info=True,
+    )
     redis_status_client = None
 
 try:
@@ -357,8 +367,13 @@ try:
     redis_lock_pool = redis.ConnectionPool(**pool_kwargs)
     redis_lock_client = redis.StrictRedis(connection_pool=redis_lock_pool)
     redis_lock_client.ping()
-except Exception as e:
-    logging.critical(f'Error connecting to Redis with pool: {e}')
+except (redis.exceptions.RedisError, OSError, ValueError) as exc:
+    # Redis boundary: locking requires Redis. Keep the client unset so callers fail explicitly.
+    logging.critical(
+        "Error connecting to Redis (LOCK) with pool: %s",
+        exc,
+        exc_info=True,
+    )
     redis_lock_client = None
 
 try:
@@ -370,8 +385,13 @@ try:
     redis_log_level_pool = redis.ConnectionPool(**pool_kwargs)
     redis_log_level_client = redis.StrictRedis(connection_pool=redis_log_level_pool)
     redis_log_level_client.ping()
-except Exception as e:
-    logging.critical(f'Error connecting to Redis with pool: {e}')
+except (redis.exceptions.RedisError, OSError, ValueError) as exc:
+    # Redis boundary: log level overrides are optional; default to INFO when unavailable.
+    logging.critical(
+        "Error connecting to Redis (LOG_LEVEL) with pool: %s",
+        exc,
+        exc_info=True,
+    )
     redis_log_level_client = None
 
 class LogLevel(IntEnum):
@@ -505,7 +525,9 @@ def createProcessPoolExecutor(
             except Exception as exc:  # pragma: no cover - unexpected spawn errors
                 log.warning(
                     'Spawn start method failed for ProcessPoolExecutor (%s); using default context instead.',
-                    exc)
+                    exc,
+                    exc_info=True,
+                )
 
     return ProcessPoolExecutor(max_workers=max_workers)
 
@@ -774,7 +796,11 @@ class NoDbBase(object):
                 try:
                     handler.close()
                 except Exception:
-                    pass
+                    # Cleanup boundary: stale file handler close must not break controller rehydration.
+                    logging.getLogger(__name__).debug(
+                        "NoDbBase._init_logging: stale handler.close() failed",
+                        exc_info=True,
+                    )
                 self._run_file_handler = None
 
             # Initialize queue and queue handler
@@ -887,6 +913,7 @@ class NoDbBase(object):
                         try:
                             listener.stop()
                         except Exception:
+                            # Cleanup boundary: shutdown should not fail callers or hang tests.
                             logging.getLogger(__name__).debug(
                                 "NoDbBase._safe_stop_queue_listener: listener.stop() failed; forcing thread cleanup",
                                 exc_info=True,
@@ -904,6 +931,7 @@ class NoDbBase(object):
                 try:
                     handler.close()
                 except Exception:
+                    # Cleanup boundary: closing log files must never fail the caller.
                     logging.getLogger(__name__).debug(
                         "NoDbBase._safe_stop_queue_listener: handler.close() failed during cleanup",
                         exc_info=True,
@@ -949,9 +977,21 @@ class NoDbBase(object):
                             filepath,
                         )
                         return db
-                except Exception as e:
-                    print(f'Error decoding cached data for {filepath}: {e}')
-                    redis_nodb_cache_client.delete(filepath)
+                except Exception:
+                    # Cache boundary: corrupt Redis payloads must not block loading from disk.
+                    logging.getLogger(__name__).warning(
+                        "Error decoding cached NoDb data; dropping cache entry",
+                        extra={"filepath": filepath, "runid": getattr(cls, "runid", None)},
+                        exc_info=True,
+                    )
+                    try:
+                        redis_nodb_cache_client.delete(filepath)
+                    except redis.exceptions.RedisError:
+                        logging.getLogger(__name__).debug(
+                            "Failed deleting corrupt NoDb cache entry",
+                            extra={"filepath": filepath},
+                            exc_info=True,
+                        )
 
         if not _exists(filepath):
             if allow_nonexistent:
@@ -967,9 +1007,24 @@ class NoDbBase(object):
 
         if redis_nodb_cache_client:
             try:
-                redis_nodb_cache_client.set(filepath, jsonpickle.encode(db), ex=REDIS_NODB_EXPIRY)
-            except Exception as e:
-                print(f"Warning: Could not update Redis cache for {filepath}: {e}")
+                encoded = jsonpickle.encode(db)
+            except (TypeError, ValueError):
+                # Cache boundary: Redis cache updates are best-effort; never block instance hydration.
+                logging.getLogger(__name__).debug(
+                    "Could not encode NoDb instance for Redis cache",
+                    extra={"filepath": filepath},
+                    exc_info=True,
+                )
+            else:
+                try:
+                    redis_nodb_cache_client.set(filepath, encoded, ex=REDIS_NODB_EXPIRY)
+                except Exception:
+                    # Cache boundary: Redis cache updates are best-effort; never block instance hydration.
+                    logging.getLogger(__name__).debug(
+                        "Warning: Could not update Redis cache for NoDb instance",
+                        extra={"filepath": filepath},
+                        exc_info=True,
+                    )
 
         if not isinstance(db, cls):
             decoded_type = type(db)
@@ -1092,7 +1147,20 @@ class NoDbBase(object):
                         db.wd = abs_wd
                         return db
                 except Exception:
-                    redis_nodb_cache_client.delete(filepath)
+                    # Cache boundary: corrupt Redis payloads must not block loading from disk.
+                    logging.getLogger(__name__).debug(
+                        "Error decoding cached NoDb data in load_detached; dropping cache entry",
+                        extra={"filepath": filepath},
+                        exc_info=True,
+                    )
+                    try:
+                        redis_nodb_cache_client.delete(filepath)
+                    except redis.exceptions.RedisError:
+                        logging.getLogger(__name__).debug(
+                            "Failed deleting corrupt NoDb cache entry in load_detached",
+                            extra={"filepath": filepath},
+                            exc_info=True,
+                        )
 
         if not _exists(filepath):
             if allow_nonexistent:
@@ -1148,8 +1216,12 @@ class NoDbBase(object):
                 try:
                     instance._safe_stop_queue_listener()
                 except Exception:
-                    # Ignore any cleanup errors
-                    pass
+                    # Cleanup boundary: never fail test cleanup due to shutdown/close errors.
+                    logging.getLogger(__name__).debug(
+                        "NoDbBase.cleanup_all_instances: _safe_stop_queue_listener failed",
+                        extra={"class_name": getattr(instance, "class_name", type(instance).__name__)},
+                        exc_info=True,
+                    )
             # Clear the instances dict
             cls._instances.clear()
 
@@ -1250,6 +1322,12 @@ class NoDbBase(object):
         try:
             yield
         except Exception:
+            # Lock boundary: always release the lock before surfacing the caller exception.
+            getattr(self, "logger", logging.getLogger(__name__)).debug(
+                "NoDbBase.locked: exception inside locked context; unlocking",
+                extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
+                exc_info=True,
+            )
             self.unlock()
             raise
         self.dump_and_unlock()
@@ -1445,6 +1523,7 @@ class NoDbBase(object):
         except FileNotFoundError:
             pass
         except Exception:
+            # Feature-detection boundary: inability to load a sub-controller should not fail the caller.
             self._init_logging()
             self.logger.debug("has_sbs: failed to load disturbed instance", exc_info=True)
 
@@ -1455,6 +1534,7 @@ class NoDbBase(object):
         except FileNotFoundError:
             pass
         except Exception:
+            # Feature-detection boundary: inability to load a sub-controller should not fail the caller.
             self._init_logging()
             self.logger.debug("has_sbs: failed to load baer instance", exc_info=True)
 

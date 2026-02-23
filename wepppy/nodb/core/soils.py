@@ -583,7 +583,12 @@ class Soils(NoDbBase):
                             count += 1
                             self.logger.info(f'  {count}/{futures_n} ISRIC soil building completed, mukey={mukey}')
                         except Exception as exc:
-                            self.logger.error(f'  ISRIC soil building failed with an error: {exc}')
+                            # Concurrency boundary: surface worker failures after canceling outstanding futures.
+                            self.logger.error(
+                                "  ISRIC soil building failed with an error: %s",
+                                exc,
+                                exc_info=True,
+                            )
                             for remaining in pending:
                                 remaining.cancel()
                             raise
@@ -1402,9 +1407,17 @@ class Soils(NoDbBase):
 
         translator = None
         try:
-            translator = self.watershed_instance.translator_factory()
-        except Exception:
-            translator = None
+            import duckdb  # type: ignore[import-not-found]
+        except ModuleNotFoundError:
+            try:
+                translator = self.watershed_instance.translator_factory()
+            except (RuntimeError, FileNotFoundError, ValueError):
+                translator = None
+        else:
+            try:
+                translator = self.watershed_instance.translator_factory()
+            except (RuntimeError, FileNotFoundError, ValueError, duckdb.Error):
+                translator = None
 
         if 'wepp_id' in df.columns:
             df['wepp_id'] = pd.to_numeric(df['wepp_id'], errors='coerce').astype('Int32')
@@ -1417,7 +1430,7 @@ class Soils(NoDbBase):
                     else:
                         try:
                             value = translator.wepp(top=int(top))
-                        except Exception:
+                        except (KeyError, TypeError, ValueError):
                             value = None
                         wepp_values.append(value if value is not None else pd.NA)
                 df['wepp_id'] = pd.Series(pd.array(wepp_values, dtype='Int32'))
@@ -1458,9 +1471,17 @@ class Soils(NoDbBase):
 
         translator = None
         try:
-            translator = self.watershed_instance.translator_factory()
-        except Exception:
-            translator = None
+            import duckdb  # type: ignore[import-not-found]
+        except ModuleNotFoundError:
+            try:
+                translator = self.watershed_instance.translator_factory()
+            except (RuntimeError, FileNotFoundError, ValueError):
+                translator = None
+        else:
+            try:
+                translator = self.watershed_instance.translator_factory()
+            except (RuntimeError, FileNotFoundError, ValueError, duckdb.Error):
+                translator = None
 
         if translator is not None:
             wepp_values = []
@@ -1470,7 +1491,7 @@ class Soils(NoDbBase):
                 else:
                     try:
                         value = translator.wepp(top=int(top))
-                    except Exception:
+                    except (KeyError, TypeError, ValueError):
                         value = None
                     wepp_values.append(value if value is not None else pd.NA)
             df['wepp_id'] = pd.Series(pd.array(wepp_values, dtype='Int32'))
