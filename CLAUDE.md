@@ -137,24 +137,20 @@ When proactively scanning for vulnerabilities, check:
 - [ ] **Secrets in code**: grep for hardcoded passwords, API keys, JWT secrets (test files use `pytest-secret-key` / `pytest-jwt-secret` — acceptable for tests only)
 - [ ] **CORS configuration**: `CAP_CORS_ORIGIN` defaults to `*` in both dev and prod Compose files
 - [ ] **Input validation on upload routes**: no file type validation, no size limits, no sandbox in current upload handlers
-- [ ] **Exception handling**: broad `except Exception` and bare `except:` are pervasive (baseline ~950 and ~38 respectively) — these can mask security-relevant errors
+- [ ] **Exception handling**: broad exceptions are managed via `docs/standards/broad-exception-boundary-allowlist.md` and enforced by `tools/check_broad_exceptions.py --enforce-changed`. Verify new routes don't introduce unallowlisted broad handlers.
 - [ ] **Auth bypass paths**: run-scoped endpoints must call `authorize_run_access(claims, runid)` in rq-engine; verify new routes follow this pattern
 - [ ] **Redis ACLs**: single shared password across all services, no per-service ACL
-- [ ] **Dependency CVEs**: no `pip-audit` or `safety` in CI; 256 direct deps including unpinned (`>=`) and git-branch deps without SHA pinning
+- [ ] **Dependency CVEs**: no `pip-audit` or `safety` in CI; many deps use unpinned (`>=`) versions and git-branch deps without SHA pinning
 - [ ] **Docker image tags**: prod Compose defaults to `:latest` — verify pinned tags before deployment
 
 ## Known Technical Debt
 
-Active hotspot refactors underway (Codex handles these):
-- `wepppy/nodb/mods/omni/omni.py` — 4,519 SLOC, CC=104
-- `wepppy/nodb/core/climate.py` — 2,773 SLOC, CC=63
-- `wepppy/weppcloud/controllers_js/map_gl.js` — 3,222 SLOC, CC=155
+For current hotspot metrics, run `python3 tools/code_quality_observability.py`. Active refactors are tracked in `PROJECT_TRACKER.md`.
 
 Structural risks to monitor:
 - Redis has no persistence — restart loses all state
 - No dead-letter queue for failed RQ jobs
 - No structured logging or correlation IDs across services
-- 16 `nodb/mods/` directories lack README documentation
 - Type checking is globally lenient (`disallow_untyped_defs = False` in `mypy.ini`)
 - `sys.modules` stub management in tests is fragile (documented in `tests/AGENTS.md`)
 
