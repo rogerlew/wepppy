@@ -9,6 +9,7 @@
 1. Provide a single command that always shows both `default` and `batch` queues.
 2. Preserve `rq info` behavior while appending user-provided flags (for example `--interval 1`).
 3. Keep the invocation explicit about Redis DB 9 while supporting both env-based and secret-file Redis auth.
+4. In interval mode, avoid stale worker state by deriving status from registry/job ownership and by discovering active queues automatically.
 
 ## Command Definition
 
@@ -20,7 +21,13 @@ wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
 
 ## Behavior
 
-- Executes `rq info` inside the `rq-worker` container.
+- Executes `rq info` inside the `rq-worker` container for default one-shot usage.
+- When arguments are exactly `--interval <seconds>`, executes the registry-backed
+  snapshot loop (`python -m wepppy.rq.info_snapshot`) inside `rq-worker` instead
+  of `rq info` so worker busy/idle status is derived from active job ownership
+  rather than stale worker state.
+  - Interval snapshots inspect all currently discovered queues by default
+    (falling back to `default,batch` when queue discovery is empty).
 - Resolves the Redis URL *inside the container* via `wepppy.config.redis_settings.redis_url(RedisDB.RQ)` so it can:
   - force Redis DB 9
   - inject credentials from `REDIS_PASSWORD_FILE` (preferred) or `REDIS_PASSWORD` (legacy)

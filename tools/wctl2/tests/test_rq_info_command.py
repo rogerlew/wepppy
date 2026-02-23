@@ -28,6 +28,15 @@ def _expected_rq_info_command(extra: str = "") -> str:
     return base
 
 
+def _expected_snapshot_command(interval_seconds: str = "1.0") -> str:
+    return (
+        "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy "
+        "/opt/venv/bin/python -u -m wepppy.rq.info_snapshot "
+        "--interval "
+        f"{interval_seconds}"
+    )
+
+
 def _run_command(monkeypatch: pytest.MonkeyPatch, temp_project, command_args):
     runner = CliRunner()
     recorded: List[Tuple[str, str, bool, bool]] = []
@@ -63,7 +72,45 @@ def test_rq_info_appends_args(monkeypatch: pytest.MonkeyPatch, temp_project) -> 
     assert recorded == [
         (
             "rq-worker",
-            _expected_rq_info_command("--interval 1"),
+            _expected_snapshot_command("1.0"),
+            True,
+            False,
+        )
+    ]
+
+
+def test_rq_info_interval_equals_syntax_uses_snapshot(
+    monkeypatch: pytest.MonkeyPatch,
+    temp_project,
+) -> None:
+    result, recorded = _run_command(monkeypatch, temp_project, ["rq-info", "--interval=2"])
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "rq-worker",
+            _expected_snapshot_command("2.0"),
+            True,
+            False,
+        )
+    ]
+
+
+def test_rq_info_interval_with_extra_args_falls_back_to_rq_info(
+    monkeypatch: pytest.MonkeyPatch,
+    temp_project,
+) -> None:
+    result, recorded = _run_command(
+        monkeypatch,
+        temp_project,
+        ["rq-info", "--interval", "1", "--raw"],
+    )
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "rq-worker",
+            _expected_rq_info_command("--interval 1 --raw"),
             True,
             False,
         )

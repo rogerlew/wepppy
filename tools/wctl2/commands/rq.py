@@ -13,6 +13,7 @@ _RQ_BINARY = "/opt/venv/bin/rq"
 _RQ_DEFAULT_QUEUES = ("default", "batch")
 _PYTHON_BIN = "/opt/venv/bin/python"
 _RQ_DETAIL_MODULE = "wepppy.rq.job_summary"
+_RQ_SNAPSHOT_MODULE = "wepppy.rq.info_snapshot"
 _RQ_REDIS_URL_SNIPPET = (
     "from wepppy.config.redis_settings import redis_url, RedisDB; "
     "print(redis_url(RedisDB.RQ))"
@@ -58,6 +59,40 @@ def _compose_rq_info_command(extra_args: List[str]) -> str:
     )
 
 
+def _parse_interval_only(extra_args: List[str]) -> float | None:
+    """Return interval seconds when args are exactly ``--interval <seconds>``."""
+
+    if not extra_args:
+        return None
+
+    if len(extra_args) == 2 and extra_args[0] == "--interval":
+        raw_value = extra_args[1]
+    elif len(extra_args) == 1 and extra_args[0].startswith("--interval="):
+        raw_value = extra_args[0].split("=", 1)[1]
+    else:
+        return None
+
+    try:
+        interval = float(raw_value)
+    except ValueError:
+        return None
+    if interval <= 0:
+        return None
+    return interval
+
+
+def _compose_snapshot_command(interval_seconds: float) -> str:
+    args = [
+        _PYTHON_BIN,
+        "-u",
+        "-m",
+        _RQ_SNAPSHOT_MODULE,
+        "--interval",
+        str(interval_seconds),
+    ]
+    return _compose_python_command(args)
+
+
 def register(app: typer.Typer) -> None:
     @app.command(
         "rq-info",
@@ -78,10 +113,21 @@ def register(app: typer.Typer) -> None:
         ),
     ) -> None:
         context = _context(ctx)
-        command = _compose_rq_info_command(list(ctx.args))
+        extra_args = list(ctx.args)
+        interval_seconds = _parse_interval_only(extra_args)
+
+        if interval_seconds is not None:
+            command = _compose_snapshot_command(interval_seconds)
+        else:
+            command = _compose_rq_info_command(extra_args)
+
         result = compose_exec(context, "rq-worker", command, check=False)
         if result.returncode != 0:
             _exit_from_result(result)
+
+        if interval_seconds is not None:
+            _exit_from_result(result)
+
         if detail:
             detail_args = [
                 _PYTHON_BIN,
