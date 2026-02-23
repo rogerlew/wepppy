@@ -19,7 +19,7 @@
 ## Session Artifacts
 | Artifact | Authority | Storage | Primary Purpose |
 | --- | --- | --- | --- |
-| Flask login session (`session` cookie by default) | Flask + Flask-Session | Redis DB 11 (`session:<sid>`) | Authenticated browse state and server session data |
+| Flask login session (`session` cookie by default) | Flask + Flask-Session | Redis DB 11 (`session:<sid>`), persisted by default in stacks that run Redis | Authenticated browse state and server session data |
 | Flask-Security remember-me token (`remember_token`) | Flask-Security | Browser cookie | Rehydrate login after Flask session expiry |
 | rq-engine browse JWT (`wepp_browse_jwt` by default) | rq-engine session endpoint | Browser HttpOnly cookie | Run-scoped JWT for browse/rq-engine interactions |
 | CAP verification marker (`cap_verified_at`) | WEPPcloud CAP guard | Flask session payload | Anonymous CAPTCHA gate cooldown window |
@@ -38,6 +38,15 @@
 Source-of-truth implementation:
 - `wepppy/weppcloud/configuration.py`
 - `wepppy/weppcloud/routes/_security/oauth.py`
+
+## Session Durability Expectations (Redis)
+
+- Deployments that include a Redis service MUST enable Redis persistence by default so Redis-backed sessions survive routine redeploys and host restarts (subject to normal TTL expiry).
+- Deploy automation MAY intentionally clear RQ state, but MUST scope any flush to the RQ DB only (DB 9). Session storage (DB 11) MUST NOT be flushed as part of normal deploys.
+- Changing the session DB index (default DB 11) invalidates all active sessions:
+  - Existing session cookies will continue presenting the old session id, but the server will not find that id in the new DB index.
+  - Result: users will be treated as logged out and must re-authenticate (remember-me may still rehydrate later depending on cookie state).
+  - Any session DB index change MUST update this contract and MUST be coordinated across all session consumers (WEPPcloud + rq-engine marker paths).
 
 ## rq-engine Session JWT Cookie Contract
 - Endpoint `POST /rq-engine/api/runs/{runid}/{config}/session-token` MUST:

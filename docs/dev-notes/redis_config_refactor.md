@@ -45,5 +45,43 @@ def session_redis_url(db_default: RedisDB = RedisDB.SESSION) -> str:
 - `SESSION_REDIS_URL` takes precedence; if omitted, session URLs inherit host/credentials from `REDIS_URL` (or `RQ_REDIS_URL`) while swapping in the session DB.
 - Weppcloud session storage uses `session_redis_url()` to avoid `REDIS_URL` path drift.
 
-## Follow-up Ideas
-- Add a doc blurb in deployment notes listing `SESSION_REDIS_URL` and `SESSION_REDIS_DB` as supported overrides.
+## Env knobs and precedence
+
+### Client connection knobs (WEPPcloud + workers)
+
+Prefer setting one “top-level” URL where possible:
+
+- `RQ_REDIS_URL` is the primary deployment-level knob for RQ and is expected to point at DB 9 (example: `redis://:password@redis:6379/9`).
+- `REDIS_URL` is the primary URL for async Redis consumers (microservices). In the docker stacks it commonly defaults to `RQ_REDIS_URL` so host/credentials remain consistent; DB selection is then done per feature.
+- `SESSION_REDIS_URL` and `SESSION_REDIS_DB` override where Flask sessions are stored. Precedence is:
+  1) `SESSION_REDIS_URL` + `SESSION_REDIS_DB`,
+  2) `SESSION_REDIS_URL` alone (DB defaults to `RedisDB.SESSION` / 11),
+  3) derive from `REDIS_URL` / `RQ_REDIS_URL` and force DB 11.
+  Do not change `SESSION_REDIS_DB` in isolation: rq-engine and session-marker consumers still assume DB 11 unless migrated together.
+- `REDIS_HOST` / `REDIS_PORT` are used by synchronous Redis clients. In containerized deployments, keep these consistent with URL-based knobs to avoid different components talking to different Redis endpoints.
+
+### Redis persistence knobs (Redis server container only)
+
+Stacks that define a `redis` service configure durability via `docker/redis-entrypoint.sh` using env vars (defaults shown):
+
+- `REDIS_APPENDONLY=yes`
+- `REDIS_APPENDFSYNC=everysec`
+- `REDIS_AOF_USE_RDB_PREAMBLE=yes`
+- `REDIS_SAVE_SCHEDULE="900 1 300 10 60 10000"`
+
+Precedence is “explicit env in compose” → “entrypoint defaults” → “Redis server defaults”.
+
+### Deploy-time RQ DB9 flush policy
+
+Deploy automation includes an explicit “flush only DB 9 (RQ)” step. The host-side helper is `scripts/redis_flush_rq_db.sh`:
+
+- Always flushes DB 9 only (`FLUSHDB` on DB 9), never `FLUSHALL`.
+- Fails closed if `REDIS_DB` is provided and is not `9`.
+- Best-effort skip by default when Redis is unreachable; use `--require-redis` to fail instead.
+
+`scripts/redis_flush_rq_db.sh` supports these env overrides (subset):
+
+- `REDIS_HOST`, `REDIS_PORT` (or infer from `RQ_REDIS_URL` / `REDIS_URL`)
+- `REDIS_PASSWORD_FILE` (preferred) or `REDIS_PASSWORD` (discouraged)
+- `REDIS_TIMEOUT_SECONDS`, `REDIS_PING_ATTEMPTS`, `REDIS_PING_DELAY_SECONDS`
+- `RQ_REDIS_URL`, `REDIS_URL` (used only to infer host/port; DB is still forced to 9)

@@ -70,6 +70,61 @@ docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --buil
 | **Code** | Bind-mounted (live reload) | Baked into image |
 | **Container names** | `wepppy-*` prefix | `docker-*-1` (compose default) |
 
+## Redis durability policy + RQ DB9 deploy flush policy
+
+WEPPcloud uses a single Redis instance with multiple logical databases (DBs). Stacks that run a `redis` service enable Redis persistence by default so non-RQ state (especially Flask sessions in DB 11) survives routine redeploys and host restarts. Separately, deploy automation can intentionally clear only the RQ database (DB 9) during a deploy to drop queued/active jobs without wiping other Redis DBs.
+
+### Behavior by environment
+
+| Environment | Redis service? | Persistence | DB9 flush-on-deploy | Notes |
+|---|---:|---|---|---|
+| Dev (`docker-compose.dev.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (manual) | Use a manual DB9 flush when you want a clean local RQ slate. |
+| Test-prod (`docker-compose.prod.yml`) | Yes | Enabled by default (entrypoint env knobs) | On by default (opt-out) | `./scripts/deploy-production.sh` flushes DB9 unless `--no-flush-rq-db` is passed. |
+| Prod (`docker-compose.prod.yml` + host overrides) | Yes | Enabled by default (entrypoint env knobs) | On by default (opt-out) | DB9 flush is always scoped to RQ only; never a full Redis wipe. |
+| Worker host (`docker-compose.prod.worker.yml`) | No | N/A (external Redis) | Applies when using deploy tooling on the worker host | Worker-only stacks must set `RQ_REDIS_URL` and do not manage Redis durability. |
+
+### Redis persistence knobs (Redis server container only)
+
+Stacks that define a `redis` service configure durability via `docker/redis-entrypoint.sh` using env vars (defaults shown):
+
+- `REDIS_APPENDONLY=yes`
+- `REDIS_APPENDFSYNC=everysec`
+- `REDIS_AOF_USE_RDB_PREAMBLE=yes`
+- `REDIS_SAVE_SCHEDULE="900 1 300 10 60 10000"`
+
+Keyspace notifications remain enabled (`notify-keyspace-events Kh`, required by preflight), and Redis auth remains enabled via the `redis_password` secret.
+
+### Operator verification commands
+
+Inspect durability settings (inside the Redis container):
+
+```bash
+wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" CONFIG GET appendonly'
+wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" CONFIG GET appendfsync'
+wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" CONFIG GET aof-use-rdb-preamble'
+wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" CONFIG GET save'
+wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" INFO persistence'
+```
+
+Verify DB9 contents (before a flush):
+
+```bash
+wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" -n 9 DBSIZE'
+wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" -n 9 --scan --pattern "rq:*" | head'
+```
+
+Run the deploy-policy flush (DB 9 only):
+
+```bash
+# Recommended: stop workers first to avoid races.
+wctl down rq-worker rq-worker-batch
+
+# Dry-run / require-redis controls are supported.
+./scripts/redis_flush_rq_db.sh --dry-run
+./scripts/redis_flush_rq_db.sh --require-redis
+./scripts/redis_flush_rq_db.sh
+```
+
 ### Production Backup Location
 
 On the production host, postgres backups are stored in the Docker named volume:

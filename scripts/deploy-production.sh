@@ -1,6 +1,6 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
-# Usage: ./scripts/deploy-production.sh [--skip-pull] [--skip-build] [--skip-themes]
+# Usage: ./scripts/deploy-production.sh [--skip-pull] [--skip-build] [--skip-themes] [--no-flush-rq-db]
 
 set -euo pipefail
 
@@ -32,6 +32,8 @@ read_env_value() {
 SKIP_PULL=false
 SKIP_BUILD=false
 SKIP_THEMES=false
+FLUSH_RQ_DB=true
+REQUIRE_RQ_REDIS=false
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 
 while [[ $# -gt 0 ]]; do
@@ -48,9 +50,21 @@ while [[ $# -gt 0 ]]; do
             SKIP_THEMES=true
             shift
             ;;
+        --flush-rq-db)
+            FLUSH_RQ_DB=true
+            shift
+            ;;
+        --no-flush-rq-db)
+            FLUSH_RQ_DB=false
+            shift
+            ;;
+        --require-rq-redis)
+            REQUIRE_RQ_REDIS=true
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--skip-pull] [--skip-build] [--skip-themes]"
+            echo "Usage: $0 [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis]"
             exit 1
             ;;
     esac
@@ -115,6 +129,59 @@ fi
 echo ">>> Step 3: Stopping services..."
 wctl  down
 echo ""
+
+# Flush RQ Redis DB 9 (optional, default on)
+if [ "${FLUSH_RQ_DB}" = true ]; then
+    echo ">>> Step 3b: Flushing Redis DB 9 (RQ)..."
+
+    REQUIRE_FLUSH_REDIS="${REQUIRE_RQ_REDIS}"
+
+    # Ensure redis is reachable locally when running a full stack with a redis service.
+    # On worker-only hosts, redis may be absent and/or remote; the flush script will best-effort skip when unreachable.
+    if echo "${COMPOSE_SERVICES}" | grep -q "^redis$"; then
+        echo "    Bringing up redis service for RQ flush..."
+        wctl up -d redis
+        echo ""
+
+        if [ -z "${REDIS_PORT:-}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
+            REDIS_PORT_FROM_ENV="$(read_env_value "REDIS_PORT" "${PROJECT_ROOT}/docker/.env")"
+            if [ -n "${REDIS_PORT_FROM_ENV}" ]; then
+                export REDIS_PORT="${REDIS_PORT_FROM_ENV}"
+            fi
+        fi
+
+        export REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
+        export REDIS_PORT="${REDIS_PORT:-6379}"
+        REQUIRE_FLUSH_REDIS=true
+    fi
+
+    if [ -z "${RQ_REDIS_URL:-}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
+        RQ_REDIS_URL="$(read_env_value "RQ_REDIS_URL" "${PROJECT_ROOT}/docker/.env")"
+        if [ -n "${RQ_REDIS_URL}" ]; then
+            export RQ_REDIS_URL
+        fi
+    fi
+
+    if [ -z "${REDIS_PASSWORD_FILE:-}" ]; then
+        if [ -f "/run/secrets/redis_password" ]; then
+            export REDIS_PASSWORD_FILE="/run/secrets/redis_password"
+        elif [ -f "${PROJECT_ROOT}/docker/secrets/redis_password" ]; then
+            echo "    Using compose secrets file for Redis auth: ${PROJECT_ROOT}/docker/secrets/redis_password"
+            export REDIS_PASSWORD_FILE="${PROJECT_ROOT}/docker/secrets/redis_password"
+        fi
+    fi
+
+    FLUSH_ARGS=()
+    if [ "${REQUIRE_FLUSH_REDIS}" = true ]; then
+        FLUSH_ARGS+=(--require-redis)
+    fi
+
+    "${SCRIPT_DIR}/redis_flush_rq_db.sh" "${FLUSH_ARGS[@]}"
+    echo ""
+else
+    echo ">>> Step 3b: Skipping Redis DB 9 flush (--no-flush-rq-db)"
+    echo ""
+fi
 
 # Build static assets (controllers and themes)
 if [ "${HAS_WEPPCLOUD}" = true ]; then

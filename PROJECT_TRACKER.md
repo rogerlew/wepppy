@@ -340,6 +340,25 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Redis Persistence Session Durability and RQ DB9 Deploy Flush
+**Completed**: 2026-02-23
+**Duration**: 1 day
+**Status**: ✅ **COMPLETE**
+**Owner**: Codex
+**Link**: [docs/work-packages/20260224_redis_persistence_session_durability/](docs/work-packages/20260224_redis_persistence_session_durability/)
+**Description**: Enabled durable Redis defaults in stacks with Redis and introduced explicit deploy-time RQ DB9 flush controls with docs/contract updates for session durability.
+
+**Outcome**: Redis persistence is now durable by default in dev/prod stacks, RQ job resets are explicit and scoped to DB 9 via deploy controls, and session durability expectations/migration implications are documented.
+
+**Deliverables**:
+- ✅ Runtime durability defaults + env knobs (`redis-entrypoint`, compose dev/prod wiring)
+- ✅ Explicit DB9 flush tooling (`scripts/redis_flush_rq_db.sh`) + deploy flags (`--no-flush-rq-db`, `--require-rq-redis`)
+- ✅ Required artifacts: baseline/postfix runtime, deploy flush policy runbook, final validation summary
+- ✅ Validation gates: compose renders PASS, targeted pytest PASS, broad-exception enforcement PASS, docs lint PASS
+- ✅ Final explorer verification: no remaining high/medium issues
+
+---
+
 ### Correlation ID Structured Logging End-to-End
 **Completed**: 2026-02-23
 **Duration**: 1 day

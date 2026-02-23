@@ -44,6 +44,47 @@ Redis underpins WEPPcloud's run orchestration, caching, and collaborative toolin
 | 14 | README editor session coordination and distributed locks | `wepppy.weppcloud.routes.readme_md` blueprint | README editor SPA, admin pages | Keys such as `readme:lock:<runid>:<config>` and `readme:client:<runid>:<config>:<uuid>` carry TTLs to clean up abandoned sessions. |
 | 15 | Per-run log level configuration | Command bar endpoints, debugging utilities | NoDb logger initialization, file handlers | Keys formatted as `loglevel:<runid>` store string values (debug, info, warning, error, critical) that control logging verbosity for specific runs. No TTL—levels persist until explicitly changed.
 
+## Persistence config (durability) and rationale
+
+Redis is a core dependency for WEPPcloud orchestration (locks, timestamps, sessions, and RQ queues). Deployments that run a Redis service (dev / test-prod / prod) enable Redis persistence by default so:
+
+- Flask-backed sessions in DB 11 survive routine container restarts and redeploys (subject to TTL expiry).
+- Run-scoped orchestration state (DB 0) survives host restarts.
+- Deploys no longer depend on “Redis restart cleared everything” as an implicit job reset.
+
+Durability is controlled by env-driven knobs in `docker/redis-entrypoint.sh` (stacks that define a `redis` service):
+
+- `REDIS_APPENDONLY=yes`
+- `REDIS_APPENDFSYNC=everysec` (bounded loss window on hard power loss)
+- `REDIS_AOF_USE_RDB_PREAMBLE=yes`
+- `REDIS_SAVE_SCHEDULE="900 1 300 10 60 10000"`
+
+Keyspace notifications remain enabled (`notify-keyspace-events Kh`) and Redis auth remains required (`requirepass` via the `redis_password` secret).
+
+Worker-only stacks (`docker/docker-compose.prod.worker.yml`) do not run a Redis service and therefore do not manage Redis persistence; they must point at an external Redis via `RQ_REDIS_URL`.
+
+## DB9 flush-on-deploy pattern (RQ only)
+
+RQ uses Redis DB 9. Deploy automation includes an explicit “flush DB 9” step (enabled by default with an opt-out) to intentionally drop queued/active jobs without wiping other Redis DBs (sessions, locks, caches, etc.).
+
+Operational rules:
+
+- Only flush DB 9 (`FLUSHDB` on DB 9).
+- Never use `FLUSHALL` as a deploy mechanism.
+- Stop worker pools first to avoid races and partial job mutations during the flush.
+
+Operator usage (host-side script, safe-guarded to DB 9):
+
+```bash
+./scripts/redis_flush_rq_db.sh --dry-run
+./scripts/redis_flush_rq_db.sh
+```
+
+Notes:
+
+- By default the flush script is best-effort: if Redis is unreachable it will warn and skip. Use `--require-redis` when you want a hard failure.
+- The script refuses to run if `REDIS_DB` is provided and is not `9`.
+
 Most synchronous modules read the host from `REDIS_HOST` (default `localhost`). The async microservices rely on `REDIS_URL` (default `redis://localhost`). When in doubt, prefer these helpers so deployments can override endpoints without touching code.
 
 ```python
