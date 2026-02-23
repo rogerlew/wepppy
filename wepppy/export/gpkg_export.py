@@ -207,7 +207,7 @@ def gpkg_export(wd: str) -> None:
                         if pd.isna(value):
                             return pd.NA
                         return translator.top(wepp=int(value))
-                    except Exception:
+                    except (TypeError, ValueError, KeyError):
                         return pd.NA
                 hill_df['TopazID'] = hill_df[wepp_col].map(_map_wepp_to_topaz).astype('Int64')
         overlap_cols = [c for c in hill_df.columns if c != 'TopazID' and c in hill_gdf.columns]
@@ -302,7 +302,7 @@ def gpkg_export(wd: str) -> None:
                     if pd.isna(value):
                         return pd.NA
                     return translator.top(chn_enum=int(value))
-                except Exception:
+                except (TypeError, ValueError, KeyError):
                     return pd.NA
             chn_df['TopazID'] = chn_df['chn_enum'].map(_map_chn_to_topaz).astype('Int64')
         overlap_cols = [c for c in chn_df.columns if c != 'TopazID' and c in chn_gdf.columns]

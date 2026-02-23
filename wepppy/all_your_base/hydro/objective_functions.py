@@ -296,7 +296,12 @@ def calculate_all_functions(
     for func in _ALL_FUNCTIONS:
         try:
             value = func(evaluation, simulation)
-        except Exception:  # pragma: no cover - guard against unexpected errors
+        except Exception:  # pragma: no cover - true boundary: per-metric best-effort evaluation
+            logger.debug(
+                "Objective function %s failed; returning NaN.",
+                func.__name__,
+                exc_info=True,
+            )
             value = float('nan')
         results.append((func.__name__, float(value)))
     return results

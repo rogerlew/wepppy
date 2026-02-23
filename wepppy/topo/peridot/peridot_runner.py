@@ -22,7 +22,7 @@ from wepppy.io_wait import (
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
-except Exception:  # pragma: no cover - optional catalog support
+except ImportError:  # pragma: no cover - optional catalog support
     _update_catalog_entry = None
 
 LOGGER = logging.getLogger(__name__)
@@ -226,7 +226,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
             if _exists(_join(wd, "watershed.flowpaths.parquet")):
                 _update_catalog_entry(wd, "watershed/flowpaths.parquet")
             _update_catalog_entry(wd, "watershed")
-        except Exception:  # pragma: no cover - catalog refresh best effort
+        except Exception:  # broad-except: catalog refresh best effort  # pragma: no cover
             LOGGER.warning("Failed to refresh catalog for watershed outputs in %s", wd, exc_info=True)
 
     ws_centroid = float(np.mean(lngs)), float(np.mean(lats))
@@ -309,7 +309,7 @@ def post_abstract_sub_fields(wd: str, verbose: bool = True):
     if _update_catalog_entry is not None:
         try:
             _update_catalog_entry(wd, 'ag_fields/sub_fields')
-        except Exception:  # pragma: no cover - catalog refresh best effort
+        except Exception:  # broad-except: catalog refresh best effort  # pragma: no cover
             LOGGER.warning("Failed to refresh catalog for ag_fields/sub_fields in %s", wd, exc_info=True)
 
     return len(field_df), len(fps_df)
@@ -509,7 +509,7 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
             if (root / "watershed.flowpaths.parquet").exists():
                 _update_catalog_entry(wd, "watershed/flowpaths.parquet")
             _update_catalog_entry(wd, "watershed")
-        except Exception:  # pragma: no cover - catalog refresh best effort
+        except Exception:  # broad-except: catalog refresh best effort  # pragma: no cover
             LOGGER.warning("Failed to refresh catalog for watershed outputs in %s", wd, exc_info=True)
 
     if verbose:

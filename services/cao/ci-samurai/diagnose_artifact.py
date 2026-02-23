@@ -5,6 +5,7 @@ import argparse
 import io
 import os
 import re
+import sys
 import tarfile
 import tempfile
 from pathlib import Path
@@ -67,8 +68,8 @@ def main() -> int:
             print(f"\ntriage_nodb.txt head (20 lines): {triage_nodb}")
             try:
                 print("".join(triage_nodb.read_text(encoding="utf-8", errors="ignore").splitlines(True)[:20]))
-            except Exception:
-                pass
+            except OSError as exc:
+                print(f"Warn: unable to read triage head from {triage_nodb}: {exc}", file=sys.stderr)
             fails = iter_failures(triage_nodb.read_text(encoding="utf-8", errors="ignore").splitlines())
             # Also show raw FAILED/ERROR counts to help diagnose
             print(f"Parsed failures: {len(fails)}")
@@ -109,8 +110,8 @@ def main() -> int:
                     for name in dirs:
                         Path(root, name).rmdir()
                 workdir.rmdir()
-            except Exception:
-                pass
+            except OSError as exc:
+                print(f"Warn: unable to cleanup extracted artifact directory {workdir}: {exc}", file=sys.stderr)
 
     return 0
 

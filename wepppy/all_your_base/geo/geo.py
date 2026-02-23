@@ -633,7 +633,7 @@ def get_utm_zone(srs: osr.SpatialReference | PathType) -> int | None:
     # noinspection PyBroadException
     try:
         utm_zone = int(''.join([k for k in utm_token if k in '0123456789']))
-    except Exception:
+    except ValueError:
         return None
 
     if utm_zone < 0 or utm_zone > 60:

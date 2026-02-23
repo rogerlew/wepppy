@@ -115,6 +115,7 @@ class RangelandAnalysisPlatform(object):
         
     def validate_raster(self, filename):
         """Return True when ``filename`` exists and includes non-zero values."""
+        dataset = None
         try:
             dataset = gdal.Open(filename, gdal.GA_ReadOnly)
             if not dataset:
@@ -132,8 +133,8 @@ class RangelandAnalysisPlatform(object):
                 return True
             else:
                 return False
-        except Exception as e:
-            print(f"Error validating raster {filename}: {e}")
+        except (OSError, RuntimeError, ValueError) as exc:
+            print(f"Error validating raster {filename}: {exc}")
             return False
         finally:
             if dataset:

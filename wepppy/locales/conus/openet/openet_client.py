@@ -177,12 +177,13 @@ def fetch_monthly_multipolygon_timeseries(
             result = fetch_monthly_polygon_timeseries(
                 coordinates, start_date, end_date, variable
             )
-            results[feature_id] = result
-
-            with open(out_fn, "w", encoding="utf-8") as fp:
-                json.dump(result, fp)
-        except Exception as exc:  # pragma: no cover - API/network errors
+        except (requests.exceptions.RequestException, ValueError) as exc:  # pragma: no cover - API/network errors
             print(f"Error fetching {feature_id}: {exc}")
+            continue
+
+        results[feature_id] = result
+        with open(out_fn, "w", encoding="utf-8") as fp:
+            json.dump(result, fp)
 
     with open(_join(outdir, "openet.json"), "w", encoding="utf-8") as fp:
         json.dump(results, fp)

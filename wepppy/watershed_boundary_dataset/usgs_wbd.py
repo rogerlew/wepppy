@@ -146,11 +146,7 @@ class WatershedBoundaryDataset:
 
             print('building subcatchments')
             topaz.set_outlet(px, py, pixelcoords=True)
-            try:
-                topaz.build_subcatchments()
-            except Exception:
-                fails += 1
-                raise
+            topaz.build_subcatchments()
 
             print(fails, i+1)
 

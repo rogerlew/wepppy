@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import json
 import shutil
 import socket
@@ -63,8 +64,8 @@ def _wmesque1_retrieve(
         output = urlopen(url, timeout=60)
         with open(fname, 'wb') as fp:
             fp.write(output.read())
-    except Exception:
-        raise Exception("Error retrieving: %s" % url)
+    except (HTTPError, URLError, socket.timeout, OSError, ValueError) as e:
+        raise RuntimeError(f"Error retrieving: {url}") from e
 
     return 1
 
@@ -153,7 +154,7 @@ def wmesque_retrieve(
             if meta_b64:
                 try:
                     meta.update(json.loads(_b64url_to_bytes(meta_b64).decode("utf-8")))
-                except Exception as e:
+                except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError, ValueError) as e:
                     meta.update({"_meta_header_decode_error": str(e), "_raw": meta_b64})
 
             # stream body to file
@@ -173,7 +174,7 @@ def wmesque_retrieve(
         ct = (e.headers or {}).get("Content-Type", "")
         try:
             err_json = json.loads(text) if "json" in ct or text.strip().startswith("{") else None
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             err_json = None
         details = f" body={err_json}" if err_json is not None else f" body={text[:2000]}"
         raise RuntimeError(f"HTTPError {e.code} {e.reason} for {e.url};{details}") from e

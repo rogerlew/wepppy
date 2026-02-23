@@ -1216,7 +1216,7 @@ class WhiteboxToolsTopazEmulator:
                     pour_pts=self.outlet_geojson,
                     output=self.bound,
                 )
-            except Exception as exc:
+            except Exception as exc:  # broad-except: WhiteboxTools failures vary; retry transient errors
                 if attempt + 1 == max_retries:
                     raise
                 delay = base_delay * (2**attempt)
@@ -1235,7 +1235,7 @@ class WhiteboxToolsTopazEmulator:
                 break
 
             if attempt + 1 == max_retries:
-                raise Exception(f"bound file was not created: {bound_fn}")
+                raise RuntimeError(f"bound file was not created: {bound_fn}")
 
             delay = base_delay * (2**attempt)
             if logger is not None:

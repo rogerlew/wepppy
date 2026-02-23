@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import json
 import os
 import subprocess
@@ -157,7 +158,7 @@ def _decode_system_prompt(env: dict[str, Any]) -> str | None:
         return None
     try:
         return base64.b64decode(encoded).decode("utf-8")
-    except Exception:
+    except (binascii.Error, UnicodeDecodeError):
         return None
 
 

@@ -258,10 +258,9 @@ def isint(x: Any) -> bool:
     Returns:
         True when ``x`` coerces to an integer without changing magnitude.
     """
-    # noinspection PyBroadException
     try:
         return float(int(x)) == float(x)
-    except Exception:
+    except (TypeError, ValueError, OverflowError):
         return False
 
 
@@ -274,11 +273,10 @@ def isfloat(f: Any) -> bool:
     Returns:
         True when ``f`` coerces to :class:`float`.
     """
-    # noinspection PyBroadException
     try:
         float(f)
         return True
-    except Exception:
+    except (TypeError, ValueError, OverflowError):
         return False
 
 
@@ -335,16 +333,14 @@ def try_parse(f: Any) -> Any:
     if isinstance(f, (int, float)):
         return f
 
-    # noinspection PyBroadException
     try:
         ff = float(f)
-        # noinspection PyBroadException
         try:
             fi = int(f)
             return fi
-        except Exception:
+        except (TypeError, ValueError, OverflowError):
             return ff
-    except Exception:
+    except (TypeError, ValueError, OverflowError):
         return f
 
 
@@ -358,10 +354,9 @@ def try_parse_float(f: Any, default: float = 0.0) -> float:
     Returns:
         The converted float value or ``default``.
     """
-    # noinspection PyBroadException
     try:
         return float(f)
-    except Exception:
+    except (TypeError, ValueError, OverflowError):
         return default
 
 

@@ -1,0 +1,459 @@
+{
+  "allowlist_source": "/home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md",
+  "allowlisted_count": 923,
+  "findings": [
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 70,
+      "path": "services/cao/ci-samurai/diagnose_artifact.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 112,
+      "path": "services/cao/ci-samurai/diagnose_artifact.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 46,
+      "path": "services/cao/ci-samurai/run_fixer_loop.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 127,
+      "path": "services/cao/ci-samurai/run_fixer_loop.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 158,
+      "path": "services/cao/ci-samurai/run_fixer_loop.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 174,
+      "path": "services/cao/ci-samurai/run_fixer_loop.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as e:",
+      "lineno": 360,
+      "path": "services/cao/ci-samurai/run_fixer_loop.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as e:",
+      "lineno": 422,
+      "path": "services/cao/ci-samurai/run_fixer_loop.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 160,
+      "path": "services/cao/scripts/wojak_bootstrap.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:  # Broad by design to avoid extra deps",
+      "lineno": 102,
+      "path": "services/cao/wepppy/cli_agent_orchestrator/services/flow_service.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:  # pragma: no cover - defensive logging",
+      "lineno": 237,
+      "path": "services/profile_playback/app.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:  # pragma: no cover - defensive logging",
+      "lineno": 602,
+      "path": "services/profile_playback/app.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 629,
+      "path": "services/profile_playback/app.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 829,
+      "path": "services/profile_playback/app.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:  # pragma: no cover - defensive logging",
+      "lineno": 895,
+      "path": "services/profile_playback/app.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception as cleanup_exc:",
+      "lineno": 904,
+      "path": "services/profile_playback/app.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 264,
+      "path": "wepppy/all_your_base/all_your_base.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 281,
+      "path": "wepppy/all_your_base/all_your_base.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 345,
+      "path": "wepppy/all_your_base/all_your_base.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 347,
+      "path": "wepppy/all_your_base/all_your_base.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 364,
+      "path": "wepppy/all_your_base/all_your_base.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 636,
+      "path": "wepppy/all_your_base/geo/geo.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 222,
+      "path": "wepppy/all_your_base/geo/locationinfo.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 66,
+      "path": "wepppy/all_your_base/geo/webclients/wmesque.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception as e:",
+      "lineno": 156,
+      "path": "wepppy/all_your_base/geo/webclients/wmesque.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 176,
+      "path": "wepppy/all_your_base/geo/webclients/wmesque.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:  # pragma: no cover - guard against unexpected errors",
+      "lineno": 299,
+      "path": "wepppy/all_your_base/hydro/objective_functions.py"
+    },
+    {
+      "col": 0,
+      "kind": "except-Exception",
+      "line": "except Exception:  # pragma: no cover - redis is optional for typing",
+      "lineno": 23,
+      "path": "wepppy/config/redis_settings.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception:",
+      "lineno": 210,
+      "path": "wepppy/export/gpkg_export.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 305,
+      "path": "wepppy/export/gpkg_export.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as e:",
+      "lineno": 135,
+      "path": "wepppy/landcover/rap/rangeland_analysis_platform.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 133,
+      "path": "wepppy/locales/canada/bc/soils/sift/sift.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 138,
+      "path": "wepppy/locales/canada/bc/soils/sift/sift.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 143,
+      "path": "wepppy/locales/canada/bc/soils/sift/sift.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 148,
+      "path": "wepppy/locales/canada/bc/soils/sift/sift.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:  # pragma: no cover - API/network errors",
+      "lineno": 184,
+      "path": "wepppy/locales/conus/openet/openet_client.py"
+    },
+    {
+      "col": 16,
+      "kind": "except-Exception",
+      "line": "                except Exception:",
+      "lineno": 245,
+      "path": "wepppy/locales/earth/soils/isric/__init__.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:  # pragma: no cover - logging only",
+      "lineno": 71,
+      "path": "wepppy/profile_coverage/runtime.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 77,
+      "path": "wepppy/soils/ssurgo/ssurgo.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 99,
+      "path": "wepppy/soils/ssurgo/ssurgo.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 107,
+      "path": "wepppy/soils/ssurgo/ssurgo.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:  # pragma: no cover - unexpected spawn errors",
+      "lineno": 175,
+      "path": "wepppy/soils/ssurgo/ssurgo.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 1827,
+      "path": "wepppy/soils/ssurgo/ssurgo.py"
+    },
+    {
+      "col": 20,
+      "kind": "except-Exception",
+      "line": "                    except Exception:",
+      "lineno": 2010,
+      "path": "wepppy/soils/ssurgo/ssurgo.py"
+    },
+    {
+      "col": 0,
+      "kind": "except-Exception",
+      "line": "except Exception:  # pragma: no cover - optional catalog support",
+      "lineno": 25,
+      "path": "wepppy/topo/peridot/peridot_runner.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:  # pragma: no cover - catalog refresh best effort",
+      "lineno": 229,
+      "path": "wepppy/topo/peridot/peridot_runner.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:  # pragma: no cover - catalog refresh best effort",
+      "lineno": 312,
+      "path": "wepppy/topo/peridot/peridot_runner.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:  # pragma: no cover - catalog refresh best effort",
+      "lineno": 512,
+      "path": "wepppy/topo/peridot/peridot_runner.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 694,
+      "path": "wepppy/topo/topaz/topaz.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception as exc:",
+      "lineno": 1219,
+      "path": "wepppy/topo/wbt/wbt_topaz_emulator.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 151,
+      "path": "wepppy/watershed_boundary_dataset/usgs_wbd.py"
+    }
+  ],
+  "findings_count": 51,
+  "kinds": {
+    "bare-except": 0,
+    "except-BaseException": 0,
+    "except-Exception": 51
+  },
+  "parse_errors": [],
+  "parse_errors_count": 0,
+  "scan_prefixes": [
+    "wepppy",
+    "services"
+  ],
+  "scanned_files": 705,
+  "suppressed_count": 6,
+  "top_files": [
+    {
+      "count": 6,
+      "path": "services/cao/ci-samurai/run_fixer_loop.py"
+    },
+    {
+      "count": 6,
+      "path": "services/profile_playback/app.py"
+    },
+    {
+      "count": 6,
+      "path": "wepppy/soils/ssurgo/ssurgo.py"
+    },
+    {
+      "count": 5,
+      "path": "wepppy/all_your_base/all_your_base.py"
+    },
+    {
+      "count": 4,
+      "path": "wepppy/locales/canada/bc/soils/sift/sift.py"
+    },
+    {
+      "count": 4,
+      "path": "wepppy/topo/peridot/peridot_runner.py"
+    },
+    {
+      "count": 3,
+      "path": "wepppy/all_your_base/geo/webclients/wmesque.py"
+    },
+    {
+      "count": 2,
+      "path": "services/cao/ci-samurai/diagnose_artifact.py"
+    },
+    {
+      "count": 2,
+      "path": "wepppy/export/gpkg_export.py"
+    },
+    {
+      "count": 1,
+      "path": "services/cao/scripts/wojak_bootstrap.py"
+    },
+    {
+      "count": 1,
+      "path": "services/cao/wepppy/cli_agent_orchestrator/services/flow_service.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/all_your_base/geo/geo.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/all_your_base/geo/locationinfo.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/all_your_base/hydro/objective_functions.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/config/redis_settings.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/landcover/rap/rangeland_analysis_platform.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/locales/conus/openet/openet_client.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/locales/earth/soils/isric/__init__.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/profile_coverage/runtime.py"
+    },
+    {
+      "count": 1,
+      "path": "wepppy/topo/topaz/topaz.py"
+    }
+  ]
+}

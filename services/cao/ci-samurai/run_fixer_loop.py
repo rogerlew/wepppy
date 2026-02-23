@@ -43,7 +43,7 @@ def read_failures(path: Path) -> List[Failure]:
         try:
             obj = json.loads(line)
             out.append(Failure(kind=obj.get("kind", "failed"), test=obj["test"], error=obj.get("error", "")))
-        except Exception:
+        except (json.JSONDecodeError, KeyError, TypeError):
             continue
     return out
 
@@ -124,7 +124,7 @@ def _extract_text_from_codex_json(output: str) -> str:
             continue
         try:
             evt = json.loads(raw)
-        except Exception:
+        except json.JSONDecodeError:
             continue
         et = evt.get("type")
         if et == "item.completed":
@@ -155,7 +155,7 @@ def parse_result_and_patch(output: str) -> tuple[Optional[Dict[str, Any]], Optio
         if json_blob:
             try:
                 result_json = json.loads(json_blob)
-            except Exception:
+            except json.JSONDecodeError:
                 result_json = None
     m2 = PATCH_RE.search(output)
     if m2:
@@ -171,7 +171,7 @@ def parse_result_and_patch(output: str) -> tuple[Optional[Dict[str, Any]], Optio
             if m:
                 try:
                     result_json = json.loads(m.group(1))
-                except Exception:
+                except json.JSONDecodeError:
                     result_json = None
             m2 = PATCH_RE.search(extracted)
             if m2:
@@ -357,7 +357,7 @@ def main() -> int:
                 base = f"{session_full_name}-{terminal_id}-{slug}-noresult"
                 full_out = get_output_full(args.cao_base, terminal_id)
                 (agent_logs_dir / f"{base}.log").write_text(full_out, encoding="utf-8")
-            except Exception as e:
+            except (OSError, requests.RequestException) as e:
                 print(f"Warn: failed to persist agent logs (noresult): {e}")
             continue
 
@@ -419,7 +419,7 @@ def main() -> int:
             # Patch copy if present
             if patch_text:
                 (agent_logs_dir / f"{base}.patch").write_text(patch_text, encoding="utf-8")
-        except Exception as e:
+        except (OSError, TypeError, ValueError, requests.RequestException) as e:
             print(f"Warn: failed to persist agent logs: {e}")
 
         processed += 1

@@ -340,6 +340,25 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Top Modules Broad-Exception Closure
+**Completed**: 2026-02-23  
+**Duration**: 1 day  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260224_top_modules_broad_exception_closure/](docs/work-packages/20260224_top_modules_broad_exception_closure/)  
+**Description**: Closed broad-exception debt for the top remaining module trees, then completed Milestone 6 residual closure to eliminate the remaining global allowlist-aware findings.
+
+**Outcome**: Initial package scope reached zero unresolved (`354 -> 0`), and Milestone 6 closed residual global unresolved findings to zero (`51 -> 0`). Global bare-exception remained zero and full-suite sanity passed after the Milestone 6 refactor pass.
+
+**Deliverables**:
+- ✅ Required artifacts: baseline/post scanner JSON, full module resolution matrix, final validation summary
+- ✅ Required orchestration: baseline explorer, Workers A-E with ownership split, final explorer regression review
+- ✅ Milestone 6 artifacts: `milestone_6_residual_baseline.json`, `milestone_6_resolution_matrix.md`, `milestone_6_postfix.json`, `milestone_6_final_validation_summary.md`
+- ✅ Gate results: hard bare gate PASS, target/global unresolved gates PASS, changed-file enforcement PASS
+- ✅ Validation: `wctl run-pytest tests --maxfail=1` PASS (`2066 passed, 29 skipped`)
+
+---
+
 ### NoDb Broad-Exception Boundary Closure
 **Completed**: 2026-02-23  
 **Duration**: 1 day  

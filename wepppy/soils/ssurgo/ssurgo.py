@@ -58,6 +58,7 @@ def _decode_jsonpickle_safe(json_text: str) -> Any:
     """
     import json
     import base64
+    import binascii
     import struct
 
     try:
@@ -74,7 +75,7 @@ def _decode_jsonpickle_safe(json_text: str) -> Any:
     def _from_b64_f64(b64):
         try:
             return struct.unpack("<d", base64.b64decode(b64))[0]
-        except Exception:
+        except (binascii.Error, struct.error, TypeError, ValueError):
             return None
 
     def _decode_numpy_scalar_from_reduce(red):
@@ -96,7 +97,7 @@ def _decode_jsonpickle_safe(json_text: str) -> Any:
         # sometimes value is already numeric/stringy
         try:
             return float(val_spec), True
-        except Exception:
+        except (TypeError, ValueError):
             return val_spec, True
 
     def _maybe_cast_int(v):
@@ -104,7 +105,7 @@ def _decode_jsonpickle_safe(json_text: str) -> Any:
         try:
             fv = float(v)
             return int(fv) if fv.is_integer() else fv
-        except Exception:
+        except (TypeError, ValueError):
             return v
 
     def fix(o):

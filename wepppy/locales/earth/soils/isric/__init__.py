@@ -242,7 +242,8 @@ def fetch_isric_soil_layers(
             for future in done:
                 try:
                     future.result()
-                except Exception:
+                except Exception:  # Boundary: cancel pending WMS tasks and re-raise to avoid partial datasets.
+                    _logger.exception("ISRIC layer retrieval failed; cancelling pending tasks")
                     for remaining in pending:
                         remaining.cancel()
                     raise

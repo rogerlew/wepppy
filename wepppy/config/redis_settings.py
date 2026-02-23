@@ -20,7 +20,7 @@ from wepppy.config.secrets import get_secret
 
 try:
     import redis  # type: ignore
-except Exception:  # pragma: no cover - redis is optional for typing
+except ImportError:  # pragma: no cover - redis is optional for typing
     redis = None  # type: ignore
 
 

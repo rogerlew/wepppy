@@ -14,6 +14,7 @@ python version of gdal's locationinfo with resampling:
 from __future__ import annotations
 
 # standard library
+import logging
 from math import ceil, floor
 # 3rd party modules
 from scipy import interpolate
@@ -29,6 +30,8 @@ import utm
 from .geo_transformer import GeoTransformer
 
 wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+
+logger = logging.getLogger(__name__)
 
 
 class RDIOutOfBoundsException(Exception):
@@ -219,7 +222,12 @@ class RasterDatasetInterpolator:
                 try:
                     func = interpolate.interp2d(_x, _y, _data, kind='cubic')
                     z.append(func(x, y)[0])
-                except Exception:
+                except Exception:  # true boundary: SciPy interpolation can fail; fall back to nearest
+                    logger.debug(
+                        "Cubic interpolation failed for %s; falling back to nearest.",
+                        self.fname,
+                        exc_info=True,
+                    )
                     return self.get_location_info(lng, lat, method='near')
         else:
             x, y = int(round(x)), int(round(y))

@@ -68,9 +68,13 @@ def install_rq_hooks() -> None:
             job.meta = meta
             try:
                 job.save_meta()
-            except Exception as exc:  # pragma: no cover - logging only
+            except Exception as exc:  # broad-except: telemetry must not break enqueue  # pragma: no cover
                 _LOGGER.debug(
-                    "Unable to persist profile trace slug for job %s: %s", job.id, exc
+                    "Unable to persist profile trace slug for job %s (slug=%s): %s",
+                    job.id,
+                    slug,
+                    exc,
+                    exc_info=True,
                 )
             else:
                 _LOGGER.info(

@@ -13,6 +13,7 @@ from uuid import uuid4
 from urllib.parse import urljoin
 
 import requests
+import redis
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
@@ -234,7 +235,7 @@ def _combine_profile_coverage(slug: str, config_override: Optional[str], logger:
     except CoverageException as exc:
         logger.error("Failed to combine coverage for %s: %s", slug, exc)
         return None
-    except Exception as exc:  # pragma: no cover - defensive logging
+    except (OSError, TypeError, ValueError) as exc:  # pragma: no cover - defensive logging
         logger.exception("Unexpected coverage error for %s: %s", slug, exc)
         return None
 
@@ -599,7 +600,7 @@ def _clear_sandbox_locks(runid: str, logger: logging.Logger, extra_runids: Optio
             total_cleared += len(cleared)
             if cleared:
                 logger.info("Cleared %d lock(s) for %s", len(cleared), candidate)
-    except Exception as exc:  # pragma: no cover - defensive logging
+    except (RuntimeError, redis.exceptions.RedisError) as exc:  # pragma: no cover - defensive logging
         logger.warning("Unable to clear locks for %s: %s", ", ".join(sorted(targets)), exc)
         return
     if total_cleared == 0:
@@ -626,7 +627,7 @@ def _ensure_session(base_url: str, cookie: Optional[str], *, logger: logging.Log
         logger.info("Authenticating playback session against %s", login_base_url)
         try:
             _perform_login(session, login_base_url, ADMIN_EMAIL, ADMIN_PASSWORD)
-        except Exception as exc:
+        except (requests.RequestException, RuntimeError) as exc:
             raise ProfileOperationError(f"Login failed: {exc}") from exc
         _log_auth_success("playback", login_base_url)
         _mirror_cookies(session, login_base_url, base_url)
@@ -826,7 +827,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
         try:
             _RUNNER_LOGGER.info("Authenticating playback session for %s", profile)
             _perform_login(session, login_base_url, ADMIN_EMAIL, ADMIN_PASSWORD)
-        except Exception as exc:
+        except (requests.RequestException, RuntimeError) as exc:
             _RUNNER_LOGGER.exception("Playback authentication failed for %s", profile)
             raise HTTPException(status_code=502, detail=f"Login failed: {exc}") from exc
         else:
@@ -892,7 +893,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
             )
             result_path = _store_result(session_token, result)
             session_logger.info("result token=%s stored at %s", session_token, result_path)
-        except Exception:  # pragma: no cover - defensive logging
+        except Exception:  # pragma: no cover - boundary: keep playback streaming alive
             session_logger.exception("Playback error token=%s", session_token)
         finally:
             # Clean up NoDb instances to release file descriptors
@@ -901,7 +902,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
                     cleaned = NoDbBase.cleanup_run_instances(str(sandbox_run_dir))
                     if cleaned > 0:
                         session_logger.debug("Cleaned up %d NoDb instances for %s", cleaned, sandbox_run_dir)
-                except Exception as cleanup_exc:
+                except Exception as cleanup_exc:  # boundary: cleanup should never abort response
                     session_logger.warning("Error cleaning up NoDb instances: %s", cleanup_exc)
             log_queue.put(None)
             session_logger.removeHandler(handler)

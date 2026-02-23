@@ -691,7 +691,7 @@ class TopazRunner:
                 if str(self.dem).lower().endswith(".vrt"):
                     raise ValueError("VRT requires GDAL reader")
                 data = imread(self.dem)
-            except Exception:
+            except (ValueError, OSError, RuntimeError):
                 ds = gdal.Open(self.dem)
                 if ds is None:
                     raise
