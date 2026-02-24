@@ -78,6 +78,11 @@ from wepppy.all_your_base.geo import (
 )
 from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 
+from wepppy.locales.earth.copernicus import (
+    CopernicusConfigurationError,
+    CopernicusRetryableError,
+    copernicus_retrieve,
+)
 from wepppy.locales.earth.opentopography import opentopo_retrieve
 
 from wepppy.nodb.base import (
@@ -101,6 +106,7 @@ from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
 from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
 
 DEFAULT_MAP_CENTER = [44.0, -116.0]
+_COPERNICUS_DEFAULT_OPENTOPO_FALLBACK_DATASET = "srtmgl1_e"
 _OPENTOPO_BLOCK_UNTIL_KEY = "opentopo:rate_limit:block_until"
 _OPENTOPO_MINUTE_KEY_PREFIX = "opentopo:rate_limit:minute"
 _OPENTOPO_STATUS_RE = re.compile(r"(?:status(?:[_\s]?code)?\s*[=:]?\s*)(\d{3})", re.IGNORECASE)
@@ -956,7 +962,12 @@ class Ron(NoDbBase):
         assert self.map is not None
         self._dem_is_vrt = False
 
-        if self.dem_db.startswith('opentopo://'):
+        dem_db = self.dem_db.strip()
+        dem_db_l = dem_db.lower()
+
+        if dem_db_l.startswith("copernicus://"):
+            self._fetch_copernicus_dem()
+        elif dem_db_l.startswith('opentopo://'):
             self._fetch_opentopo_dem()
         else:
             wmesque_retrieve(self.dem_db, self.map.extent,
@@ -972,8 +983,51 @@ class Ron(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def _fetch_opentopo_dem(self) -> None:
+    def _fetch_copernicus_dem(self) -> None:
         assert self.map is not None
+
+        copernicus_error_message: Optional[str] = None
+
+        try:
+            copernicus_retrieve(
+                self.map.extent,
+                self.dem_fn,
+                self.map.cellsize,
+                dataset=self.dem_db,
+                resample='bilinear',
+            )
+            return
+        except CopernicusConfigurationError:
+            raise
+        except CopernicusRetryableError as exc:
+            fallback_dataset = self._parse_nonempty_str_env(
+                "COPERNICUS_OPENTOPO_FALLBACK_DATASET",
+                _COPERNICUS_DEFAULT_OPENTOPO_FALLBACK_DATASET,
+            )
+            fallback_dem_db = f"opentopo://{fallback_dataset}"
+            copernicus_error_message = str(exc)
+            self.logger.warning(
+                "Copernicus DEM retrieval failed for dem_db=%s (run=%s, error=%s). "
+                "Falling back to OpenTopography dataset=%s.",
+                self.dem_db,
+                self.wd,
+                exc,
+                fallback_dem_db,
+            )
+
+        try:
+            self._fetch_opentopo_dem(dem_db_override=fallback_dem_db)
+        except (RuntimeError, AssertionError, OSError) as fallback_exc:
+            raise RuntimeError(
+                "Copernicus DEM retrieval failed and OpenTopography fallback failed "
+                f"(copernicus_error={copernicus_error_message}, "
+                f"fallback_dem_db={fallback_dem_db}, fallback_error={fallback_exc})."
+            ) from fallback_exc
+
+    def _fetch_opentopo_dem(self, dem_db_override: Optional[str] = None) -> None:
+        assert self.map is not None
+
+        effective_dem_db = dem_db_override or self.dem_db
 
         max_requests_per_minute = self._parse_positive_int_env(
             "OPENTOPO_MAX_REQUESTS_PER_MINUTE",
@@ -999,7 +1053,7 @@ class Ron(NoDbBase):
             self.logger.info(
                 "OpenTopography rate gate passed (run=%s, dem_db=%s, max_per_min=%s, block_s=%s).",
                 self.wd,
-                self.dem_db,
+                effective_dem_db,
                 max_requests_per_minute,
                 base_block_seconds,
             )
@@ -1008,7 +1062,7 @@ class Ron(NoDbBase):
                     self.map.extent,
                     self.dem_fn,
                     self.map.cellsize,
-                    dataset=self.dem_db,
+                    dataset=effective_dem_db,
                     resample='bilinear',
                 )
             except RuntimeError as exc:
@@ -1028,7 +1082,7 @@ class Ron(NoDbBase):
                         max(0.0, blocked_until - now_ts),
                         blocked_until,
                         self.wd,
-                        self.dem_db,
+                        effective_dem_db,
                     )
                 raise
         finally:
@@ -1116,6 +1170,14 @@ class Ron(NoDbBase):
         except (TypeError, ValueError):
             return default
         return value if value > 0 else default
+
+    @staticmethod
+    def _parse_nonempty_str_env(name: str, default: str) -> str:
+        raw = os.getenv(name)
+        if raw is None:
+            return default
+        value = raw.strip()
+        return value if value else default
 
     @staticmethod
     def _extract_status_code(exc: Exception) -> Optional[int]:
