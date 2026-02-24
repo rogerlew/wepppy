@@ -135,6 +135,14 @@ class OmniCloneContrastService:
                 if resolved_root.inner_path:
                     src_root = src_root / resolved_root.inner_path
 
+                if not src_root.is_dir():
+                    logger.warning(
+                        "Skipping %s copy for contrast clone; source directory missing: %s",
+                        root,
+                        src_root,
+                    )
+                    continue
+
                 dst_root = Path(new_wd) / root
                 if dst_root.exists():
                     shutil.rmtree(dst_root)
@@ -373,11 +381,17 @@ class OmniCloneContrastService:
                 if soils_root.inner_path:
                     src_root = src_root / soils_root.inner_path
 
-                dst_root = Path(new_wd) / "soils"
-                if dst_root.exists():
-                    shutil.rmtree(dst_root)
-                shutil.copytree(str(src_root), str(dst_root))
-                copy_mutable_root_sidecar(wd, new_wd, "soils")
+                if not src_root.is_dir():
+                    logger.warning(
+                        "Skipping soils copy for omni clone; source directory missing: %s",
+                        src_root,
+                    )
+                else:
+                    dst_root = Path(new_wd) / "soils"
+                    if dst_root.exists():
+                        shutil.rmtree(dst_root)
+                    shutil.copytree(str(src_root), str(dst_root))
+                    copy_mutable_root_sidecar(wd, new_wd, "soils")
 
         landuse_root = nodir_resolve(wd, "landuse", view="effective")
         if landuse_root is not None:
@@ -389,11 +403,17 @@ class OmniCloneContrastService:
                 if landuse_root.inner_path:
                     src_root = src_root / landuse_root.inner_path
 
-                dst_root = Path(new_wd) / "landuse"
-                if dst_root.exists():
-                    shutil.rmtree(dst_root)
-                shutil.copytree(str(src_root), str(dst_root))
-                copy_mutable_root_sidecar(wd, new_wd, "landuse")
+                if not src_root.is_dir():
+                    logger.warning(
+                        "Skipping landuse copy for omni clone; source directory missing: %s",
+                        src_root,
+                    )
+                else:
+                    dst_root = Path(new_wd) / "landuse"
+                    if dst_root.exists():
+                        shutil.rmtree(dst_root)
+                    shutil.copytree(str(src_root), str(dst_root))
+                    copy_mutable_root_sidecar(wd, new_wd, "landuse")
 
         for fn in os.listdir(wd):
             if fn == "_pups":
