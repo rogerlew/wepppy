@@ -139,7 +139,7 @@ def _patch_fetch_dem_dependencies(
     monkeypatch.setattr(ron_module, "update_catalog_entry", lambda *_args, **_kwargs: None)
 
 
-def test_fetch_dem_uses_default_60_second_block_when_rate_cap_hit(
+def test_fetch_dem_uses_default_150_second_block_when_rate_cap_hit(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -172,8 +172,8 @@ def test_fetch_dem_uses_default_60_second_block_when_rate_cap_hit(
     ron.fetch_dem()
 
     blocked_until = float(fake_redis.values[ron_module._OPENTOPO_BLOCK_UNTIL_KEY])
-    assert blocked_until == pytest.approx(1060.0, abs=0.01)
-    assert sum(clock.sleeps) == pytest.approx(60.0, abs=0.01)
+    assert blocked_until == pytest.approx(1150.0, abs=0.01)
+    assert sum(clock.sleeps) == pytest.approx(150.0, abs=0.01)
     assert fake_redis.eval_calls >= 1
     assert Path(ron.dem_fn).exists()
 
