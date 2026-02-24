@@ -143,17 +143,6 @@ When proactively scanning for vulnerabilities, check:
 - [ ] **Dependency CVEs**: no `pip-audit` or `safety` in CI; many deps use unpinned (`>=`) versions and git-branch deps without SHA pinning
 - [ ] **Docker image tags**: prod Compose defaults to `:latest` — verify pinned tags before deployment
 
-## Known Technical Debt
-
-For current hotspot metrics, run `python3 tools/code_quality_observability.py`. Active refactors are tracked in `PROJECT_TRACKER.md`.
-
-Structural risks to monitor:
-- Redis has no persistence — restart loses all state
-- No dead-letter queue for failed RQ jobs
-- No structured logging or correlation IDs across services
-- Type checking is globally lenient (`disallow_untyped_defs = False` in `mypy.ini`)
-- `sys.modules` stub management in tests is fragile (documented in `tests/AGENTS.md`)
-
 ## Document Map
 
 | Document | Audience | Purpose |
