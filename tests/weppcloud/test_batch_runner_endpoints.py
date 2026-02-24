@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import importlib
+import jsonpickle
 
 import pytest
 from flask import Flask
@@ -120,6 +122,38 @@ def test_validate_template_success_path(client, app):
     assert payload["stored"]["status"] == "ok"
     state = _read_state(app)
     assert state["runid_template"] == "{slug(properties['HucName'])}-{zfill(one_based_index, 3)}"
+
+
+def test_validate_template_refreshes_after_external_geojson_update_same_mtime(client, app):
+    with app.app_context():
+        root = Path(app.config["BATCH_RUNNER_ROOT"])
+        runner = BatchRunner.getInstance(str(root / "demo"))
+        nodb_path = root / "demo" / BatchRunner.filename
+        original_mtime = os.path.getmtime(nodb_path)
+        original_size = os.path.getsize(nodb_path)
+
+        detached_runner = BatchRunner.load_detached(str(root / "demo"))
+        collection = WatershedCollection(str(DATA_DIR / "simple.geojson"))
+        detached_runner._geojson_state = dict(collection.analysis_results)
+        detached_runner._geojson_state["_size_probe"] = "x" * 4096
+
+        encoded = jsonpickle.encode(detached_runner)
+        with nodb_path.open("w", encoding="utf-8") as fp:
+            fp.write(encoded)
+            fp.flush()
+            os.fsync(fp.fileno())
+        assert os.path.getsize(nodb_path) != original_size
+        os.utime(nodb_path, (original_mtime, original_mtime))
+        runner._nodb_mtime = original_mtime
+
+    response = client.post(
+        "/batch/_/demo/validate-template",
+        json={"template": "{slug(properties['HucName'])}-{zfill(one_based_index, 3)}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["validation"]["summary"]["is_valid"] is True
 
 
 def test_update_run_directives_accepts_booleans(client, app):

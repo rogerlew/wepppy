@@ -204,6 +204,10 @@ _LEGACY_MODULE_REDIRECTS = _discover_legacy_module_redirects()
 redis_nodb_cache_client = None
 redis_status_client = None
 redis_log_level_client = None
+redis_nodb_cache_pool = None
+redis_status_pool = None
+redis_lock_pool = None
+redis_log_level_pool = None
 REDIS_HOST = redis_host()
 REDIS_PORT = redis_port()
 REDIS_NODB_CACHE_DB = int(RedisDB.NODB_CACHE)
@@ -393,6 +397,35 @@ except (redis.exceptions.RedisError, OSError, ValueError) as exc:
         exc_info=True,
     )
     redis_log_level_client = None
+
+
+def _ensure_redis_lock_client() -> redis.StrictRedis:
+    """Return a lock Redis client, reconnecting once if startup init failed."""
+
+    global redis_lock_client, redis_lock_pool
+
+    if redis_lock_client is not None:
+        return redis_lock_client
+
+    try:
+        pool_kwargs = redis_connection_kwargs(
+            RedisDB.LOCK,
+            decode_responses=True,
+            extra={"max_connections": 50},
+        )
+        redis_lock_pool = redis.ConnectionPool(**pool_kwargs)
+        redis_lock_client = redis.StrictRedis(connection_pool=redis_lock_pool)
+        redis_lock_client.ping()
+    except (redis.exceptions.RedisError, OSError, ValueError) as exc:
+        logging.critical(
+            "Error reconnecting to Redis (LOCK): %s",
+            exc,
+            exc_info=True,
+        )
+        raise RuntimeError('Redis lock client is unavailable') from exc
+
+    return redis_lock_client
+
 
 class LogLevel(IntEnum):
     """Enumerate supported logging levels mirrored into Redis."""
@@ -952,6 +985,7 @@ class NoDbBase(object):
         allow_nonexistent: bool,
         ignore_lock: bool,
         readonly: bool,
+        use_redis_cache: bool = True,
     ) -> Optional['NoDbBase']:
         """Load a controller instance from Redis cache or disk."""
         global redis_nodb_cache_client
@@ -961,7 +995,7 @@ class NoDbBase(object):
         if not readonly and _exists(filepath):
             ensure_version(abs_wd)
 
-        if redis_nodb_cache_client is not None:
+        if use_redis_cache and redis_nodb_cache_client is not None:
             cached_data = redis_nodb_cache_client.get(filepath)
             if cached_data is not None:
                 try:
@@ -1062,10 +1096,15 @@ class NoDbBase(object):
             db.wd = abs_wd
 
         db._init_logging()
+        db._nodb_mtime = None
+        db._nodb_size = None
         try:
-            db._nodb_mtime = os.path.getmtime(filepath)
+            stat_result = os.stat(filepath)
         except OSError:
-            db._nodb_mtime = None
+            stat_result = None
+        if stat_result is not None:
+            db._nodb_mtime = stat_result.st_mtime
+            db._nodb_size = stat_result.st_size
         return db
 
     @classmethod
@@ -1087,19 +1126,31 @@ class NoDbBase(object):
         if cached is not None and not ignore_lock:
             refresh_needed = False
             if not readonly:
+                file_mtime = None
+                file_size = None
                 try:
-                    file_mtime = os.path.getmtime(filepath)
+                    stat_result = os.stat(filepath)
                 except OSError:
-                    file_mtime = None
+                    stat_result = None
+                if stat_result is not None:
+                    file_mtime = stat_result.st_mtime
+                    file_size = stat_result.st_size
                 cached_mtime = getattr(cached, '_nodb_mtime', None)
-                if file_mtime is not None and cached_mtime != file_mtime:
+                cached_size = getattr(cached, '_nodb_size', None)
+                if file_mtime is not None and (cached_mtime != file_mtime or cached_size != file_size):
                     refresh_needed = True
             if not refresh_needed:
                 cached._init_logging()
                 return cached
             stale_cached_instance = cached
 
-        instance = cls._hydrate_instance(abs_wd, allow_nonexistent, ignore_lock, readonly)
+        instance = cls._hydrate_instance(
+            abs_wd,
+            allow_nonexistent,
+            ignore_lock,
+            readonly,
+            use_redis_cache=stale_cached_instance is None,
+        )
         if instance is None:
             return None
 
@@ -1367,9 +1418,12 @@ class NoDbBase(object):
             fp.flush()                 # flush Python’s userspace buffer
             os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
             try:
-                self._nodb_mtime = os.fstat(fp.fileno()).st_mtime
+                stat_result = os.fstat(fp.fileno())
+                self._nodb_mtime = stat_result.st_mtime
+                self._nodb_size = stat_result.st_size
             except OSError:
                 self._nodb_mtime = None
+                self._nodb_size = None
 
         write_version(self.wd, CURRENT_VERSION)
 
@@ -1691,38 +1745,36 @@ class NoDbBase(object):
         return obj
 
     def islocked(self):
-        if redis_lock_client is None:
-            raise RuntimeError('Redis lock client is unavailable')
+        lock_client = _ensure_redis_lock_client()
 
         lock_key = self._distributed_lock_key
-        payload = redis_lock_client.get(lock_key)
+        payload = lock_client.get(lock_key)
         if payload is not None:
             return True
 
         # No active distributed lock—normalize legacy flags if needed.
-        v = redis_lock_client.hget(self.runid, self._file_lock_key)
+        v = lock_client.hget(self.runid, self._file_lock_key)
         if v is None:
             return False
 
         if v != 'false':
-            redis_lock_client.hset(self.runid, self._file_lock_key, 'false')
+            lock_client.hset(self.runid, self._file_lock_key, 'false')
         return False
 
     def lock(self, ttl: Optional[int] = None):
         if self.readonly:
             raise Exception('lock() called on readonly project')
 
-        if redis_lock_client is None:
-            raise RuntimeError('Redis lock client is unavailable')
+        lock_client = _ensure_redis_lock_client()
 
         ttl_seconds = LOCK_DEFAULT_TTL if ttl is None else max(1, int(ttl))
         lock_key = self._distributed_lock_key
 
         token = uuid.uuid4().hex
         payload = _serialize_lock_payload(token, ttl_seconds)
-        acquired = redis_lock_client.set(lock_key, payload, nx=True, ex=ttl_seconds)
+        acquired = lock_client.set(lock_key, payload, nx=True, ex=ttl_seconds)
         if not acquired:
-            existing_payload = redis_lock_client.get(lock_key)
+            existing_payload = lock_client.get(lock_key)
             existing_data = _parse_lock_payload(existing_payload) if existing_payload else {}
             message = 'lock() called on an already locked nodb'
             owner = existing_data.get('owner')
@@ -1734,22 +1786,21 @@ class NoDbBase(object):
                     message += f' (token={existing_token})'
             raise NoDbAlreadyLockedError(message)
 
-        redis_lock_client.hset(self.runid, self._file_lock_key, 'true')
+        lock_client.hset(self.runid, self._file_lock_key, 'true')
         _set_local_lock_token(self, token)
 
     def unlock(self, flag=None):
-        if redis_lock_client is None:
-            raise RuntimeError('Redis lock client is unavailable')
+        lock_client = _ensure_redis_lock_client()
 
         lock_key = self._distributed_lock_key
-        stored_payload = redis_lock_client.get(lock_key)
+        stored_payload = lock_client.get(lock_key)
         stored_token = _extract_token(stored_payload)
         local_token = _get_local_lock_token(self)
 
         force = flag in ('-f', '--force')
 
         if stored_payload is None:
-            redis_lock_client.hset(self.runid, self._file_lock_key, 'false')
+            lock_client.hset(self.runid, self._file_lock_key, 'false')
             _set_local_lock_token(self, None)
             return
 
@@ -1759,8 +1810,8 @@ class NoDbBase(object):
             if stored_token is not None and stored_token != local_token:
                 raise RuntimeError('unlock() called with non-matching token; use flag "-f" to force release')
 
-        redis_lock_client.delete(lock_key)
-        redis_lock_client.hset(self.runid, self._file_lock_key, 'false')
+        lock_client.delete(lock_key)
+        lock_client.hset(self.runid, self._file_lock_key, 'false')
         _set_local_lock_token(self, None)
 
     @property
