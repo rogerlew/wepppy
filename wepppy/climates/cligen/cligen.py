@@ -15,6 +15,7 @@ from collections.abc import Iterable
 
 import json
 import warnings
+import logging
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -68,6 +69,8 @@ _thisdir = os.path.dirname(__file__)
 _db = _join(_thisdir, '2015_stations.db')
 _stations_dir = _join(_thisdir, '2015_par_files')
 _bin_dir = _join(_thisdir, 'bin')
+
+_LOGGER = logging.getLogger(__name__)
 
 
 _rowfmt = lambda x: '\t'.join(['%0.2f' % v for v in x])
@@ -1702,7 +1705,18 @@ class CligenStationsManager:
                      for i, s in enumerate(stations)]
         lat_ranks = sorted(lat_ranks, key=lambda x: x[1])
 
-        elev = elevationquery(*location)
+        try:
+            elev = elevationquery(*location)
+        except RuntimeError as exc:
+            _LOGGER.warning(
+                "Heuristic station search continuing without query elevation "
+                "because elevation lookup failed for (%s, %s): %s",
+                location[0],
+                location[1],
+                exc,
+            )
+            elev = np.nan
+
         stations_elevs = np.array(
             [self._resolve_station_elevation(s) for s in stations],
             dtype=float
