@@ -1,7 +1,7 @@
 from = "_defaults"
 
 [general]
-dem_db = "opentopo://srtmgl1_e"
+dem_db = "copernicus://dem_cop_30"
 name = "disturbed"
 cellsize=30
 locales=["earth",]
