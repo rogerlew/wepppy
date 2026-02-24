@@ -102,6 +102,16 @@ def _bootstrap_run(tmp_path, runid: str, files: list[dict[str, Any]] | None = No
     return run_dir
 
 
+def _write_malformed_catalog(run_dir):
+    catalog_path = run_dir / "_query_engine" / "catalog.json"
+    catalog_path.write_text("{", encoding="utf-8")
+
+
+def _write_catalog_payload(run_dir, payload: Any):
+    catalog_path = run_dir / "_query_engine" / "catalog.json"
+    catalog_path.write_text(json.dumps(payload), encoding="utf-8")
+
+
 def _issue_token(auth_module, runid: str | None = None, scopes: Sequence[str] | str = ("runs:read",), runs: list[str] | None = None):
     runs_payload: list[str]
     if runs is not None:
@@ -240,6 +250,30 @@ def test_get_run_replaces_invalid_correlation_id(monkeypatch, tmp_path):
     payload = response.json()
     assert payload["meta"]["trace_id"] == correlation_id
     assert payload["meta"]["correlation_id"] == correlation_id
+
+
+def test_get_run_malformed_catalog_keeps_activation_fallback(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "run-malformed-catalog"
+    app, run_dir = _make_client(monkeypatch, tmp_path, runid)
+    _write_malformed_catalog(run_dir)
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import auth
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid)
+    response = client.get(
+        f"/mcp/runs/{runid}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["meta"]["catalog"]["activated"] is True
+    assert payload["meta"]["catalog"]["dataset_count"] == 0
+    assert payload["meta"]["catalog"]["generated_at"] is None
+    assert "trace_id" in payload["meta"]
 
 
 def test_catalog_supports_parameter_aliases(monkeypatch, tmp_path):
@@ -515,6 +549,50 @@ def test_get_run_catalog_missing(monkeypatch, tmp_path):
     assert "trace_id" in payload["meta"]
 
 
+def test_get_run_catalog_invalid_when_catalog_malformed(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "catalog-invalid"
+    app, run_dir = _make_client(monkeypatch, tmp_path, runid)
+    _write_malformed_catalog(run_dir)
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import auth
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid)
+    response = client.get(
+        f"/mcp/runs/{runid}/catalog",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["errors"][0]["code"] == "catalog_invalid"
+    assert "trace_id" in payload["meta"]
+
+
+def test_get_run_catalog_invalid_when_catalog_shape_is_not_object(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "catalog-invalid-shape"
+    app, run_dir = _make_client(monkeypatch, tmp_path, runid)
+    _write_catalog_payload(run_dir, [])
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import auth
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid)
+    response = client.get(
+        f"/mcp/runs/{runid}/catalog",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["errors"][0]["code"] == "catalog_invalid"
+    assert "trace_id" in payload["meta"]
+
+
 def test_validate_query_success(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
     runid = "validate-run"
@@ -656,6 +734,29 @@ def test_validate_query_invalid_json(monkeypatch, tmp_path):
     assert "trace_id" in payload.get("meta", {})
 
 
+def test_validate_query_catalog_invalid_when_catalog_malformed(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "validate-catalog-invalid"
+    app, run_dir = _make_client(monkeypatch, tmp_path, runid)
+    _write_malformed_catalog(run_dir)
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import auth
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid, scopes="runs:read queries:validate")
+    response = client.post(
+        f"/mcp/runs/{runid}/queries/validate",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"datasets": ["datasets/one.parquet"], "limit": 5},
+    )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["errors"][0]["code"] == "catalog_invalid"
+    assert "trace_id" in payload.get("meta", {})
+
+
 def test_get_run_forbidden(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
     runid = "accessible-run"
@@ -767,6 +868,36 @@ def test_get_prompt_template(monkeypatch, tmp_path):
     body = response.json()
     markdown = body["data"]["attributes"]["markdown"]
     assert "{{" not in markdown
+    assert "trace_id" in body["meta"]
+
+
+def test_get_prompt_template_malformed_catalog_uses_safe_defaults(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "prompt-catalog-invalid"
+    app, run_dir = _make_client(monkeypatch, tmp_path, runid)
+    _write_malformed_catalog(run_dir)
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import router, auth
+
+    monkeypatch.setattr(
+        router,
+        "_load_prompt_template",
+        lambda: "Schema\\n{{SCHEMA_SUMMARY}}\\nPayload\\n{{SAMPLE_PAYLOAD}}",
+    )
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid, scopes="runs:read")
+    response = client.get(
+        f"/mcp/runs/{runid}/prompt-template",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["meta"]["catalog"]["dataset_count"] == 0
+    assert body["meta"]["catalog"]["generated_at"] is None
+    assert "_No catalog schema available._" in body["data"]["attributes"]["markdown"]
     assert "trace_id" in body["meta"]
 
 
@@ -922,4 +1053,41 @@ def test_execute_query_context_resolution_exception_returns_500(monkeypatch, tmp
     assert response.status_code == 500
     payload = response.json()
     assert payload["errors"][0]["code"] == "context_unavailable"
+    assert "trace_id" in payload.get("meta", {})
+
+
+def test_execute_query_run_query_runtime_error_returns_500(monkeypatch, tmp_path):
+    _set_auth_env(monkeypatch)
+    runid = "execute-runtime-error"
+    app, _ = _make_client(
+        monkeypatch,
+        tmp_path,
+        runid,
+        files=[
+            {
+                "path": "datasets/one.parquet",
+                "extension": ".parquet",
+                "size_bytes": 1,
+                "modified": "2024-01-01T00:00:00Z",
+            }
+        ],
+    )
+
+    from starlette.testclient import TestClient  # type: ignore
+    from wepppy.query_engine.app.mcp import router, auth
+
+    monkeypatch.setattr(router, "resolve_run_context", lambda *args, **kwargs: SimpleNamespace())
+    monkeypatch.setattr(router, "run_query", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("boom")))
+
+    client = TestClient(app)
+    token = _issue_token(auth, runid, scopes=["runs:read", "queries:execute"])
+    response = client.post(
+        f"/mcp/runs/{runid}/queries/execute",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"datasets": ["datasets/one.parquet"], "limit": 5},
+    )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["errors"][0]["code"] == "execution_failed"
     assert "trace_id" in payload.get("meta", {})

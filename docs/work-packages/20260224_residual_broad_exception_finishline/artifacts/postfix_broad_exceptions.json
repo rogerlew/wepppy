@@ -1,0 +1,273 @@
+{
+  "allowlist_source": "/home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md",
+  "allowlisted_count": 899,
+  "findings": [
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:",
+      "lineno": 534,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 551,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:",
+      "lineno": 589,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:",
+      "lineno": 659,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 673,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:",
+      "lineno": 711,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:",
+      "lineno": 773,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:",
+      "lineno": 808,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 845,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 882,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 915,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 945,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 325,
+      "path": "wepppy/microservices/rq_engine/project_routes.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 333,
+      "path": "wepppy/microservices/rq_engine/project_routes.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 338,
+      "path": "wepppy/microservices/rq_engine/project_routes.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 343,
+      "path": "wepppy/microservices/rq_engine/project_routes.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 115,
+      "path": "wepppy/microservices/rq_engine/upload_huc_fire_routes.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 128,
+      "path": "wepppy/microservices/rq_engine/upload_huc_fire_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 135,
+      "path": "wepppy/microservices/rq_engine/upload_huc_fire_routes.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:",
+      "lineno": 434,
+      "path": "wepppy/nodir/materialize.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 463,
+      "path": "wepppy/nodir/materialize.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 471,
+      "path": "wepppy/nodir/materialize.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception as exc:",
+      "lineno": 490,
+      "path": "wepppy/nodir/materialize.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 637,
+      "path": "wepppy/nodir/materialize.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 773,
+      "path": "wepppy/nodir/materialize.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception as exc:",
+      "lineno": 202,
+      "path": "wepppy/rq/omni_rq.py"
+    },
+    {
+      "col": 8,
+      "kind": "except-Exception",
+      "line": "        except Exception:",
+      "lineno": 219,
+      "path": "wepppy/rq/omni_rq.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 262,
+      "path": "wepppy/rq/omni_rq.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 518,
+      "path": "wepppy/rq/omni_rq.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 659,
+      "path": "wepppy/rq/omni_rq.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 713,
+      "path": "wepppy/rq/omni_rq.py"
+    },
+    {
+      "col": 12,
+      "kind": "except-Exception",
+      "line": "            except Exception:",
+      "lineno": 764,
+      "path": "wepppy/rq/omni_rq.py"
+    },
+    {
+      "col": 4,
+      "kind": "except-Exception",
+      "line": "    except Exception:",
+      "lineno": 773,
+      "path": "wepppy/rq/omni_rq.py"
+    }
+  ],
+  "findings_count": 33,
+  "kinds": {
+    "bare-except": 0,
+    "except-BaseException": 0,
+    "except-Exception": 33
+  },
+  "parse_errors": [],
+  "parse_errors_count": 0,
+  "scan_prefixes": [
+    "wepppy",
+    "services"
+  ],
+  "scanned_files": 707,
+  "suppressed_count": 11,
+  "top_files": [
+    {
+      "count": 12,
+      "path": "wepppy/microservices/rq_engine/omni_routes.py"
+    },
+    {
+      "count": 8,
+      "path": "wepppy/rq/omni_rq.py"
+    },
+    {
+      "count": 6,
+      "path": "wepppy/nodir/materialize.py"
+    },
+    {
+      "count": 4,
+      "path": "wepppy/microservices/rq_engine/project_routes.py"
+    },
+    {
+      "count": 3,
+      "path": "wepppy/microservices/rq_engine/upload_huc_fire_routes.py"
+    }
+  ]
+}

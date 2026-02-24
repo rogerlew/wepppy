@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-02-23  
+**Last Updated**: 2026-02-24  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -339,6 +339,24 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Residual Broad-Exception Closure Finish Line
+**Completed**: 2026-02-24
+**Duration**: 1 day
+**Status**: ✅ **COMPLETE**
+**Owner**: Codex
+**Link**: [docs/work-packages/20260224_residual_broad_exception_finishline/](docs/work-packages/20260224_residual_broad_exception_finishline/)
+**Description**: Closed Debt Project #1 residual broad-exception findings for `wepppy/query_engine/app/mcp/router.py` and `wepppy/weppcloud/app.py` with required sub-agent orchestration and validation gates.
+
+**Outcome**: In-scope unresolved findings reached zero (`8 -> 0`) while preserving boundary behavior. Non-boundary query-engine parse catches were narrowed, true boundaries were retained and allowlist-synchronized, and required targeted/full pytest gates passed.
+
+**Deliverables**:
+- ✅ Required artifacts: baseline/postfix scanner JSON, baseline inventory, scope resolution matrix, final validation summary
+- ✅ Required orchestration: baseline explorer, query-engine worker, weppcloud worker, reviewer, test_guardian
+- ✅ Gate results: changed-file broad-exception enforcement PASS (`router.py` delta `-7`)
+- ✅ Validation: targeted suites PASS (`36 passed`, `18 passed`), full-suite sanity PASS (`2107 passed, 29 skipped`)
+
+---
 
 ### Redis Persistence Session Durability and RQ DB9 Deploy Flush
 **Completed**: 2026-02-23

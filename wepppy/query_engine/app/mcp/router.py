@@ -155,6 +155,8 @@ def _load_catalog_data(run_path: os.PathLike[str]) -> tuple[list[dict[str, Any]]
     if not catalog_path.exists():
         raise FileNotFoundError(catalog_path)
     data = json.loads(catalog_path.read_text(encoding="utf-8"))
+    if not isinstance(data, Mapping):
+        raise ValueError(f"Catalog payload at {catalog_path} must be a JSON object")
     files = data.get("files")
     entries = files if isinstance(files, list) else []
     generated_at = data.get("generated_at") or data.get("generatedAt")
@@ -174,7 +176,7 @@ def _load_catalog_metadata(run_path: os.PathLike[str]) -> tuple[bool, str | None
         entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError:
         return False, None, 0
-    except Exception:  # pragma: no cover - malformed catalog files
+    except (OSError, ValueError):  # pragma: no cover - malformed catalog files
         LOGGER.warning("Failed to parse catalog for %s", run_path, exc_info=True)
         return True, None, 0
     dataset_count = len(entries)
@@ -295,7 +297,7 @@ def _prepare_query_request(
         raw_entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError as exc:
         raise QueryValidationException(404, "catalog_missing", f"Catalog for run '{runid}' not found") from exc
-    except Exception as exc:  # pragma: no cover - defensive logging
+    except (OSError, ValueError) as exc:  # pragma: no cover - defensive logging
         LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
         raise QueryValidationException(500, "catalog_invalid", f"Catalog for run '{runid}' is invalid") from exc
 
@@ -697,7 +699,7 @@ async def get_catalog(request: Request) -> JSONResponse:
         raw_entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError:
         return _error_response(404, "catalog_missing", f"Catalog for run '{runid}' not found")
-    except Exception as exc:  # pragma: no cover - malformed catalog files
+    except (OSError, ValueError) as exc:  # pragma: no cover - malformed catalog files
         LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
         return _error_response(500, "catalog_invalid", f"Catalog for run '{runid}' is invalid")
 
@@ -1081,7 +1083,7 @@ async def get_prompt_template(request: Request) -> JSONResponse:
         raw_entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError:
         raw_entries, generated_at = [], None
-    except Exception as exc:  # pragma: no cover - defensive logging
+    except (OSError, ValueError) as exc:  # pragma: no cover - defensive logging
         LOGGER.warning("Failed to parse catalog for %s", runid, exc_info=True)
         raw_entries, generated_at = [], None
 
