@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import shutil
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -143,6 +144,71 @@ def test_build_router_raises_for_undefined_mode(tmp_path: Path) -> None:
 
     with pytest.raises(Exception):
         router.build(climate)
+
+
+def test_build_router_preserves_managed_projection_cli_symlink(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _DummyClimate(tmp_path)
+    cli_root = tmp_path / "cli"
+    if cli_root.is_symlink():
+        cli_root.unlink()
+    elif cli_root.exists():
+        shutil.rmtree(cli_root)
+    managed_target = tmp_path / ".nodir" / "upper" / "climate" / "token" / "data"
+    managed_target.mkdir(parents=True, exist_ok=True)
+    (managed_target / "stale.cli").write_text("old")
+    cli_root.symlink_to(managed_target, target_is_directory=True)
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.climate_build_router.RedisPrep.getInstance",
+        lambda _wd: (_ for _ in ()).throw(FileNotFoundError()),
+    )
+
+    router = ClimateBuildRouter(
+        mode_build_services=_DummyModeService(),
+        scaling_service=_DummyScalingService(),
+        artifact_export_service=_DummyArtifactService(),
+    )
+    router.build(climate)
+
+    assert cli_root.is_symlink()
+    assert managed_target.is_dir()
+    assert list(managed_target.iterdir()) == []
+
+
+def test_build_router_unlinks_unmanaged_cli_symlink_without_deleting_target(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _DummyClimate(tmp_path)
+    cli_root = tmp_path / "cli"
+    if cli_root.is_symlink():
+        cli_root.unlink()
+    elif cli_root.exists():
+        shutil.rmtree(cli_root)
+    external_target = tmp_path / "external-cli"
+    external_target.mkdir(parents=True, exist_ok=True)
+    external_file = external_target / "stale.cli"
+    external_file.write_text("old")
+    cli_root.symlink_to(external_target, target_is_directory=True)
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.climate_build_router.RedisPrep.getInstance",
+        lambda _wd: (_ for _ in ()).throw(FileNotFoundError()),
+    )
+
+    router = ClimateBuildRouter(
+        mode_build_services=_DummyModeService(),
+        scaling_service=_DummyScalingService(),
+        artifact_export_service=_DummyArtifactService(),
+    )
+    router.build(climate)
+
+    assert not cli_root.is_symlink()
+    assert cli_root.is_dir()
+    assert external_file.exists()
 
 
 def _mode_service_climate(mode: ClimateMode, spatial_mode: ClimateSpatialMode):

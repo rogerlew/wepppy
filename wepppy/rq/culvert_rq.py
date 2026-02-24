@@ -36,6 +36,7 @@ from wepppy.nodb.wepp_nodb_post_utils import (
     ensure_totalwatsed3,
     ensure_watershed_interchange,
 )
+from wepppy.nodir.mutations import mutate_root, mutate_roots
 from wepppy.rq.topo_utils import _prune_stream_order
 from wepppy.topo.watershed_collection import WatershedFeature
 from . import culvert_rq_helpers as _helpers
@@ -1322,116 +1323,125 @@ def _process_culvert_run(
         if nlcd_db_override is not None:
             landuse.nlcd_db = nlcd_db_override
 
-        wbt = watershed._ensure_wbt()
+        def _mutate_watershed() -> None:
+            wbt = watershed._ensure_wbt()
 
-        # Try find_outlet; if it fails due to no streams, seed and retry
-        outlet_pixel: Optional[Tuple[int, int]] = None
-        try:
-            watershed.find_outlet(watershed_feature=watershed_feature)
-            area_error = _minimum_watershed_area_error(
-                run_id=run_id,
-                watershed_feature=watershed_feature,
-                minimum_watershed_area_m2=minimum_watershed_area_m2,
-            )
-            if area_error is not None:
-                raise WatershedAreaBelowMinimumError(area_error["message"])
-        except NoOutletFoundError as e:
-            # Parse error to find where all candidates converge
-            seed_loc = _parse_outlet_candidates_from_error(str(e))
-            if seed_loc is None:
-                # Candidates don't converge - can't seed
-                raise
+            # Try find_outlet; if it fails due to no streams, seed and retry.
+            outlet_pixel: Optional[Tuple[int, int]] = None
+            try:
+                watershed.find_outlet(watershed_feature=watershed_feature)
+                area_error = _minimum_watershed_area_error(
+                    run_id=run_id,
+                    watershed_feature=watershed_feature,
+                    minimum_watershed_area_m2=minimum_watershed_area_m2,
+                )
+                if area_error is not None:
+                    raise WatershedAreaBelowMinimumError(area_error["message"])
+            except NoOutletFoundError as e:
+                # Parse error to find where all candidates converge.
+                seed_loc = _parse_outlet_candidates_from_error(str(e))
+                if seed_loc is None:
+                    # Candidates don't converge - can't seed.
+                    raise
 
-            candidate_row, candidate_col = seed_loc
-            target_mask = Path(watershed.target_watershed_path)
-            if not target_mask.exists():
-                logger.info(
-                    "culvert_run %s/%s: rebuilding target watershed mask at %s",
-                    culvert_batch_uuid,
-                    run_id,
+                candidate_row, candidate_col = seed_loc
+                target_mask = Path(watershed.target_watershed_path)
+                if not target_mask.exists():
+                    logger.info(
+                        "culvert_run %s/%s: rebuilding target watershed mask at %s",
+                        culvert_batch_uuid,
+                        run_id,
+                        target_mask,
+                    )
+                    ron = watershed.ron_instance
+                    watershed_feature.build_raster_mask(
+                        template_filepath=ron.dem_fn,
+                        dst_filepath=str(target_mask),
+                    )
+
+                area_error = _minimum_watershed_area_error(
+                    run_id=run_id,
+                    watershed_feature=watershed_feature,
+                    minimum_watershed_area_m2=minimum_watershed_area_m2,
+                )
+                if area_error is not None:
+                    raise WatershedAreaBelowMinimumError(area_error["message"])
+
+                if not _extend_watershed_mask_to_candidate(
                     target_mask,
-                )
-                ron = watershed.ron_instance
-                watershed_feature.build_raster_mask(
-                    template_filepath=ron.dem_fn,
-                    dst_filepath=str(target_mask),
-                )
+                    (candidate_row, candidate_col),
+                ):
+                    logger.warning(
+                        "culvert_run %s/%s: candidate (%s, %s) outside watershed mask",
+                        culvert_batch_uuid,
+                        run_id,
+                        candidate_row,
+                        candidate_col,
+                    )
+                    raise
 
-            area_error = _minimum_watershed_area_error(
-                run_id=run_id,
-                watershed_feature=watershed_feature,
-                minimum_watershed_area_m2=minimum_watershed_area_m2,
-            )
-            if area_error is not None:
-                raise WatershedAreaBelowMinimumError(area_error["message"])
-
-            if not _extend_watershed_mask_to_candidate(
-                target_mask,
-                (candidate_row, candidate_col),
-            ):
-                logger.warning(
-                    "culvert_run %s/%s: candidate (%s, %s) outside watershed mask",
+                row, col = candidate_row, candidate_col
+                logger.info(
+                    "culvert_run %s/%s: no streams in watershed, seeding at (%s, %s) "
+                    "from candidate (%s, %s)",
                     culvert_batch_uuid,
                     run_id,
+                    row,
+                    col,
                     candidate_row,
                     candidate_col,
                 )
-                raise
 
-            row, col = candidate_row, candidate_col
-            logger.info(
-                "culvert_run %s/%s: no streams in watershed, seeding at (%s, %s) "
-                "from candidate (%s, %s)",
-                culvert_batch_uuid,
-                run_id,
-                row,
-                col,
-                candidate_row,
-                candidate_col,
-            )
+                _seed_outlet_pixel(
+                    row=row,
+                    col=col,
+                    netful_path=Path(wbt.netful),
+                    flovec_path=Path(wbt.flovec),
+                )
 
-            _seed_outlet_pixel(
-                row=row,
-                col=col,
-                netful_path=Path(wbt.netful),
-                flovec_path=Path(wbt.flovec),
-            )
+                # Retry find_outlet with seeded stream.
+                watershed.find_outlet(watershed_feature=None)  # mask already built
+            outlet = watershed.outlet
+            if outlet is not None:
+                outlet_pixel = outlet.pixel_coords
+            if outlet_pixel is not None:
+                target_mask = Path(watershed.target_watershed_path)
+                if target_mask.exists():
+                    col, row = outlet_pixel
+                    if not _extend_watershed_mask_to_candidate(target_mask, (row, col)):
+                        logger.warning(
+                            "culvert_run %s/%s: outlet pixel (%s, %s) out of bounds for %s",
+                            culvert_batch_uuid,
+                            run_id,
+                            row,
+                            col,
+                            target_mask,
+                        )
 
-            # Retry find_outlet with seeded stream
-            watershed.find_outlet(watershed_feature=None)  # mask already built
-        outlet = watershed.outlet
-        if outlet is not None:
-            outlet_pixel = outlet.pixel_coords
-        if outlet_pixel is not None:
-            target_mask = Path(watershed.target_watershed_path)
-            if target_mask.exists():
-                col, row = outlet_pixel
-                if not _extend_watershed_mask_to_candidate(target_mask, (row, col)):
-                    logger.warning(
-                        "culvert_run %s/%s: outlet pixel (%s, %s) out of bounds for %s",
-                        culvert_batch_uuid,
-                        run_id,
-                        row,
-                        col,
-                        target_mask,
-                    )
-
-        _generate_masked_stream_junctions(
-            Path(wbt.flovec),
-            Path(wbt.netful),
-            Path(watershed.target_watershed_path),
-            Path(wbt.chnjnt),
-        )
-        if outlet_pixel is not None:
-            _ensure_outlet_junction(
-                Path(wbt.chnjnt),
-                outlet_pixel,
+            _generate_masked_stream_junctions(
+                Path(wbt.flovec),
+                Path(wbt.netful),
                 Path(watershed.target_watershed_path),
+                Path(wbt.chnjnt),
             )
+            if outlet_pixel is not None:
+                _ensure_outlet_junction(
+                    Path(wbt.chnjnt),
+                    outlet_pixel,
+                    Path(watershed.target_watershed_path),
+                )
 
-        watershed.build_subcatchments()
-        watershed.representative_flowpath = True  # Reduce per-hillslope cost for batch processing
-        watershed.abstract_watershed()
+            watershed.build_subcatchments()
+            # Reduce per-hillslope cost for batch processing.
+            watershed.representative_flowpath = True
+            watershed.abstract_watershed()
+
+        mutate_root(
+            wd,
+            "watershed",
+            _mutate_watershed,
+            purpose="culvert-run-watershed",
+        )
         batch_root = _resolve_batch_root(culvert_batch_uuid)
         nlcd_map = batch_root / "landuse" / "nlcd.tif"
         ssurgo_map = batch_root / "soils" / "ssurgo.tif"
@@ -1439,13 +1449,28 @@ def _process_culvert_run(
             raise FileNotFoundError(f"Batch NLCD map does not exist: {nlcd_map}")
         if not ssurgo_map.exists():
             raise FileNotFoundError(f"Batch SSURGO map does not exist: {ssurgo_map}")
-        landuse.clean()
-        soils.clean()
-        landuse.symlink_landuse_map(str(nlcd_map), as_cropped_vrt=True)
-        soils.symlink_soils_map(str(ssurgo_map), as_cropped_vrt=True)
-        landuse.build(retrieve_nlcd=False)
-        soils.build(retrieve_gridded_ssurgo=False)
-        climate.build()
+
+        def _mutate_landuse_and_soils() -> None:
+            landuse.clean()
+            soils.clean()
+            landuse.symlink_landuse_map(str(nlcd_map), as_cropped_vrt=True)
+            soils.symlink_soils_map(str(ssurgo_map), as_cropped_vrt=True)
+            landuse.build(retrieve_nlcd=False)
+            soils.build(retrieve_gridded_ssurgo=False)
+
+        mutate_roots(
+            wd,
+            ("landuse", "soils"),
+            _mutate_landuse_and_soils,
+            purpose="culvert-run-landuse-soils",
+        )
+
+        mutate_root(
+            wd,
+            "climate",
+            lambda: climate.build(),
+            purpose="culvert-run-climate",
+        )
 
         wepp.clean()
         wepp.prep_hillslopes()

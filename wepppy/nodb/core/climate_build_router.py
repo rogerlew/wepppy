@@ -16,6 +16,49 @@ if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
 
 
+def _clear_directory_preserving_symlink_mount(path: str) -> None:
+    if not os.path.lexists(path):
+        return
+
+    if os.path.islink(path):
+        resolved = os.path.realpath(path)
+        if not os.path.isdir(resolved):
+            raise NotADirectoryError(f"Expected climate root symlink target to be a directory: {path}")
+        run_root = os.path.dirname(os.path.abspath(path))
+        managed_projection_roots = (
+            os.path.join(run_root, ".nodir", "lower", "climate"),
+            os.path.join(run_root, ".nodir", "upper", "climate"),
+        )
+
+        def _is_managed_projection_target() -> bool:
+            for managed_root in managed_projection_roots:
+                managed_abs = os.path.abspath(managed_root)
+                try:
+                    if os.path.commonpath([resolved, managed_abs]) == managed_abs:
+                        return True
+                except ValueError:
+                    continue
+            return False
+
+        if not _is_managed_projection_target():
+            # Unmanaged symlink: drop only the link and preserve target contents.
+            os.unlink(path)
+            return
+
+        for name in os.listdir(resolved):
+            candidate = os.path.join(resolved, name)
+            if os.path.isdir(candidate) and not os.path.islink(candidate):
+                shutil.rmtree(candidate)
+            else:
+                os.unlink(candidate)
+        return
+
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+    else:
+        os.unlink(path)
+
+
 class ClimateBuildRouter:
     """Coordinate full climate builds while keeping ``Climate`` facade stable."""
 
@@ -60,21 +103,21 @@ class ClimateBuildRouter:
             climate.find_closest_stations()
 
         cli_dir = climate.cli_dir
-        if _exists(cli_dir):
-            climate.logger.info("  cli_dir exists, attempting to remove")
+        if _exists(cli_dir) or os.path.lexists(cli_dir):
+            climate.logger.info("  cli_dir exists, attempting to clear")
             try:
-                shutil.rmtree(cli_dir)
+                _clear_directory_preserving_symlink_mount(cli_dir)
             # Cleanup boundary: stale files should not block a rebuild.
             except OSError:
                 climate.logger.warning(
-                    "  failed to remove existing cli_dir; continuing rebuild",
+                    "  failed to clear existing cli_dir; continuing rebuild",
                     extra={"cli_dir": cli_dir},
                     exc_info=True,
                 )
 
         if not _exists(cli_dir):
             climate.logger.info("  cli_dir does not exist, creating")
-            os.mkdir(cli_dir)
+        os.makedirs(cli_dir, exist_ok=True)
 
         climate_mode = climate.climate_mode
         climate.logger.info(f"  climate_mode: {climate_mode}")

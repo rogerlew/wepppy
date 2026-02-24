@@ -249,6 +249,50 @@ class LanduseMode(IntEnum):
 _COVERAGE_PERCENTAGES: Tuple[float, ...] = tuple(i / 100.0 for i in range(0, 103))
 
 
+def _clear_directory_preserving_symlink_mount(path: str) -> None:
+    """Clear directory contents without deleting an active NoDir projection symlink."""
+    if not os.path.lexists(path):
+        return
+
+    if os.path.islink(path):
+        resolved = os.path.realpath(path)
+        if not os.path.isdir(resolved):
+            raise NotADirectoryError(f"Expected directory symlink target for landuse root: {path}")
+        run_root = os.path.dirname(os.path.abspath(path))
+        managed_projection_roots = (
+            os.path.join(run_root, ".nodir", "lower", "landuse"),
+            os.path.join(run_root, ".nodir", "upper", "landuse"),
+        )
+
+        def _is_managed_projection_target() -> bool:
+            for managed_root in managed_projection_roots:
+                managed_abs = os.path.abspath(managed_root)
+                try:
+                    if os.path.commonpath([resolved, managed_abs]) == managed_abs:
+                        return True
+                except ValueError:
+                    continue
+            return False
+
+        if not _is_managed_projection_target():
+            # Unmanaged symlink: drop only the link and preserve target contents.
+            os.unlink(path)
+            return
+
+        for name in os.listdir(resolved):
+            candidate = os.path.join(resolved, name)
+            if os.path.isdir(candidate) and not os.path.islink(candidate):
+                shutil.rmtree(candidate)
+            else:
+                os.unlink(candidate)
+        return
+
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+    else:
+        os.unlink(path)
+
+
 def read_cover_defaults(fn: str) -> Dict[str, Dict]:
     with open(fn) as fp:
         d = {}
@@ -518,8 +562,7 @@ class Landuse(NoDbBase):
     def clean(self) -> None:
 
         lc_dir = self.lc_dir
-        if _exists(lc_dir):
-            shutil.rmtree(lc_dir)
+        _clear_directory_preserving_symlink_mount(lc_dir)
         # Parquet summaries are canonical WD-level sidecars; ensure we don't
         # leave a stale sidecar behind after clearing the tree.
         sidecar_fn = _join(self.wd, "landuse.parquet")
@@ -528,7 +571,7 @@ class Landuse(NoDbBase):
                 os.remove(sidecar_fn)
             except OSError:
                 pass
-        os.mkdir(lc_dir)
+        os.makedirs(lc_dir, exist_ok=True)
         self._landuse_is_vrt = False
         if not self.islocked():
             with self.locked():
@@ -744,6 +787,7 @@ class Landuse(NoDbBase):
     def build(self, retrieve_nlcd: bool = True) -> None:
         assert not self.islocked()
         self.logger.info('Building landuse')
+        os.makedirs(self.lc_dir, exist_ok=True)
 
         wd = self.wd
 

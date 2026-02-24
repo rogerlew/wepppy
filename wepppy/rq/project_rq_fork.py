@@ -125,6 +125,7 @@ def prepare_fork_run(
     soils_cls: Any,
     initialize_ttl: Callable[[str], None] | None,
     format_ttl_failure: Callable[[Exception], str] | None = None,
+    mutate_root_fn: Callable[..., Any] | None = None,
     build_rsync_cmd: Callable[[str, bool], list[str]] = (
         lambda run_right, undisturbify: _build_fork_rsync_cmd(
             run_right,
@@ -133,6 +134,9 @@ def prepare_fork_run(
     ),
     clean_env_for_system_tools: Callable[[], dict[str, str]] = _clean_env_for_system_tools,
 ) -> str:
+    if mutate_root_fn is None:
+        from wepppy.nodir.mutations import mutate_root as mutate_root_fn
+
     # 1. Verify rsync exists
     rsync_path = shutil.which("rsync")
     publish_status(status_channel, "Checking for rsync...")
@@ -249,12 +253,22 @@ def prepare_fork_run(
 
         publish_status(status_channel, "Rebuilding Landuse...\n")
         landuse = landuse_cls.getInstance(new_wd)
-        landuse.build()
+        mutate_root_fn(
+            new_wd,
+            "landuse",
+            lambda: landuse.build(),
+            purpose="fork-undisturbify-build-landuse",
+        )
         publish_status(status_channel, "Rebuilding Landuse... done.\n")
 
         publish_status(status_channel, "Rebuilding Soils...\n")
         soils = soils_cls.getInstance(new_wd)
-        soils.build()
+        mutate_root_fn(
+            new_wd,
+            "soils",
+            lambda: soils.build(),
+            purpose="fork-undisturbify-build-soils",
+        )
         publish_status(status_channel, "Rebuilding Soils... done.\n")
 
     return new_wd

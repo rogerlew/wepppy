@@ -7,6 +7,8 @@ from os.path import join as _join
 from os.path import split as _split
 from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple
 
+from wepppy.nodir.mutations import mutate_root, mutate_roots
+
 if TYPE_CHECKING:
     from wepppy.nodb.mods.omni.omni import ContrastMapping, Omni, OmniScenario, ScenarioDef
 
@@ -84,6 +86,12 @@ class OmniModeBuildServices:
     ) -> None:
         scenario_key = str(scenario)
 
+        def _mutate_landuse_and_soils(callback: Any, *, purpose: str) -> None:
+            mutate_roots(new_wd, ("landuse", "soils"), callback, purpose=purpose)
+
+        def _mutate_soils(callback: Any, *, purpose: str) -> None:
+            mutate_root(new_wd, "soils", callback, purpose=purpose)
+
         if scenario_key in {"uniform_low", "uniform_moderate", "uniform_high"}:
             sbs = None
             if scenario_key == "uniform_low":
@@ -100,9 +108,13 @@ class OmniModeBuildServices:
             with omni.timed(f"  {scenario_name}: validate sbs {sbs_fn}"):
                 disturbed.validate(sbs_fn, mode=1, uniform_severity=int(sbs))
             with omni.timed(f"  {scenario_name}: build landuse and soils"):
-                landuse.build()
-            with omni.timed(f"  {scenario_name}: build soils"):
-                soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task)
+                _mutate_landuse_and_soils(
+                    lambda: (
+                        landuse.build(),
+                        soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
+                    ),
+                    purpose=f"omni-{scenario_key}-build-landuse-soils",
+                )
             return
 
         if scenario_key == "undisturbed":
@@ -119,10 +131,14 @@ class OmniModeBuildServices:
 
             with omni.timed(f"  {scenario_name}: remove sbs"):
                 disturbed.remove_sbs()
-            with omni.timed(f"  {scenario_name}: build landuse"):
-                landuse.build()
-            with omni.timed(f"  {scenario_name}: build soils"):
-                soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task)
+            with omni.timed(f"  {scenario_name}: build landuse and soils"):
+                _mutate_landuse_and_soils(
+                    lambda: (
+                        landuse.build(),
+                        soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
+                    ),
+                    purpose=f"omni-{scenario_key}-build-landuse-soils",
+                )
             return
 
         if scenario_key == "sbs_map":
@@ -141,9 +157,13 @@ class OmniModeBuildServices:
             with omni.timed(f"  {scenario_name}: validate sbs {sbs_fn}"):
                 disturbed.validate(sbs_fn, mode=0)
             with omni.timed(f"  {scenario_name}: build landuse and soils"):
-                landuse.build()
-            with omni.timed(f"  {scenario_name}: build soils"):
-                soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task)
+                _mutate_landuse_and_soils(
+                    lambda: (
+                        landuse.build(),
+                        soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
+                    ),
+                    purpose=f"omni-{scenario_key}-build-landuse-soils",
+                )
             return
 
         if scenario_key == "mulch":
@@ -153,25 +173,34 @@ class OmniModeBuildServices:
             from wepppy.nodb.mods.treatments import Treatments
 
             with omni.timed(f"  {scenario_name}: applying treatments"):
-                treatments = Treatments.getInstance(new_wd)
-                ground_cover_increase = scenario_def.get("ground_cover_increase")
-                treatment_key = treatments.treatments_lookup[f"mulch_{ground_cover_increase}".replace("%", "")]
+                def _apply_treatments() -> None:
+                    treatments = Treatments.getInstance(new_wd)
+                    ground_cover_increase = scenario_def.get("ground_cover_increase")
+                    treatment_key = treatments.treatments_lookup[f"mulch_{ground_cover_increase}".replace("%", "")]
 
-                treatments_domlc_d = {}
-                for topaz_id, dom in landuse.domlc_d.items():
-                    if str(topaz_id).endswith("4"):
-                        continue
+                    treatments_domlc_d = {}
+                    for topaz_id, dom in landuse.domlc_d.items():
+                        if str(topaz_id).endswith("4"):
+                            continue
 
-                    man_summary = landuse.managements[dom]
-                    disturbed_class = getattr(man_summary, "disturbed_class", "")
-                    if isinstance(disturbed_class, str) and "fire" in disturbed_class:
-                        treatments_domlc_d[topaz_id] = treatment_key
+                        man_summary = landuse.managements[dom]
+                        disturbed_class = getattr(man_summary, "disturbed_class", "")
+                        if isinstance(disturbed_class, str) and "fire" in disturbed_class:
+                            treatments_domlc_d[topaz_id] = treatment_key
 
-                treatments.treatments_domlc_d = treatments_domlc_d
-                treatments.build_treatments()
+                    treatments.treatments_domlc_d = treatments_domlc_d
+                    treatments.build_treatments()
+
+                _mutate_landuse_and_soils(
+                    _apply_treatments,
+                    purpose=f"omni-{scenario_key}-apply-treatments",
+                )
 
             with omni.timed(f"  {scenario_name}: build soils"):
-                soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task)
+                _mutate_soils(
+                    lambda: soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
+                    purpose=f"omni-{scenario_key}-build-soils",
+                )
             return
 
         if scenario_key == "prescribed_fire":
@@ -183,32 +212,41 @@ class OmniModeBuildServices:
             from wepppy.nodb.mods.treatments import Treatments
 
             with omni.timed(f"  {scenario_name}: build soils"):
-                soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task)
+                _mutate_soils(
+                    lambda: soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
+                    purpose=f"omni-{scenario_key}-build-soils",
+                )
 
             with omni.timed(f"  {scenario_name}: applying treatments"):
-                treatments = Treatments.getInstance(new_wd)
-                treatments_lookup = treatments.treatments_lookup
-                treatment_key = treatments_lookup.get(scenario_key)
-                if treatment_key is None:
-                    available = ", ".join(sorted(treatments_lookup)) if treatments_lookup else "none"
-                    raise ValueError(
-                        "Prescribed fire scenario requires a treatment mapping for 'prescribed_fire', "
-                        "but the current landuse mapping does not define it. "
-                        f"Available treatment keys: {available}."
-                    )
+                def _apply_treatments() -> None:
+                    treatments = Treatments.getInstance(new_wd)
+                    treatments_lookup = treatments.treatments_lookup
+                    treatment_key = treatments_lookup.get(scenario_key)
+                    if treatment_key is None:
+                        available = ", ".join(sorted(treatments_lookup)) if treatments_lookup else "none"
+                        raise ValueError(
+                            "Prescribed fire scenario requires a treatment mapping for 'prescribed_fire', "
+                            "but the current landuse mapping does not define it. "
+                            f"Available treatment keys: {available}."
+                        )
 
-                treatments_domlc_d = {}
-                for topaz_id, dom in landuse.domlc_d.items():
-                    if str(topaz_id).endswith("4"):
-                        continue
+                    treatments_domlc_d = {}
+                    for topaz_id, dom in landuse.domlc_d.items():
+                        if str(topaz_id).endswith("4"):
+                            continue
 
-                    man_summary = landuse.managements[dom]
-                    disturbed_class = getattr(man_summary, "disturbed_class", "")
-                    if "forest" in disturbed_class and "young" not in disturbed_class:
-                        treatments_domlc_d[topaz_id] = treatment_key
+                        man_summary = landuse.managements[dom]
+                        disturbed_class = getattr(man_summary, "disturbed_class", "")
+                        if "forest" in disturbed_class and "young" not in disturbed_class:
+                            treatments_domlc_d[topaz_id] = treatment_key
 
-                treatments.treatments_domlc_d = treatments_domlc_d
-                treatments.build_treatments()
+                    treatments.treatments_domlc_d = treatments_domlc_d
+                    treatments.build_treatments()
+
+                _mutate_landuse_and_soils(
+                    _apply_treatments,
+                    purpose=f"omni-{scenario_key}-apply-treatments",
+                )
             return
 
         if scenario_key == "thinning":
@@ -220,21 +258,30 @@ class OmniModeBuildServices:
             from wepppy.nodb.mods.treatments import Treatments
 
             with omni.timed(f"  {scenario_name}: build soils"):
-                soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task)
+                _mutate_soils(
+                    lambda: soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
+                    purpose=f"omni-{scenario_key}-build-soils",
+                )
 
             with omni.timed(f"  {scenario_name}: applying treatments"):
-                treatments = Treatments.getInstance(new_wd)
-                treatment_key = treatments.treatments_lookup[scenario_name]
+                def _apply_treatments() -> None:
+                    treatments = Treatments.getInstance(new_wd)
+                    treatment_key = treatments.treatments_lookup[scenario_name]
 
-                treatments_domlc_d = {}
-                for topaz_id, dom in landuse.domlc_d.items():
-                    if str(topaz_id).endswith("4"):
-                        continue
+                    treatments_domlc_d = {}
+                    for topaz_id, dom in landuse.domlc_d.items():
+                        if str(topaz_id).endswith("4"):
+                            continue
 
-                    man_summary = landuse.managements[dom]
-                    disturbed_class = getattr(man_summary, "disturbed_class", "")
-                    if "forest" in disturbed_class and "young" not in disturbed_class:
-                        treatments_domlc_d[topaz_id] = treatment_key
+                        man_summary = landuse.managements[dom]
+                        disturbed_class = getattr(man_summary, "disturbed_class", "")
+                        if "forest" in disturbed_class and "young" not in disturbed_class:
+                            treatments_domlc_d[topaz_id] = treatment_key
 
-                treatments.treatments_domlc_d = treatments_domlc_d
-                treatments.build_treatments()
+                    treatments.treatments_domlc_d = treatments_domlc_d
+                    treatments.build_treatments()
+
+                _mutate_landuse_and_soils(
+                    _apply_treatments,
+                    purpose=f"omni-{scenario_key}-apply-treatments",
+                )

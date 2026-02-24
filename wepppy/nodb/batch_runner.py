@@ -30,6 +30,7 @@ from wepppy.nodb.wepp_nodb_post_utils import (
     ensure_totalwatsed3,
     ensure_watershed_interchange,
 )
+from wepppy.nodir.mutations import mutate_root
 
 
 from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks
@@ -292,31 +293,66 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
             logger.info(f'building channels')
-            watershed.build_channels()
+            mutate_root(
+                runid_wd,
+                "watershed",
+                lambda: watershed.build_channels(),
+                purpose="batch-run-build-channels",
+            )
 
         if self.is_task_enabled(TaskEnum.find_outlet) and prep[str(TaskEnum.find_outlet)] is None:
             logger.info(f'finding outlet')
-            watershed.find_outlet(watershed_feature)
+            mutate_root(
+                runid_wd,
+                "watershed",
+                lambda: watershed.find_outlet(watershed_feature),
+                purpose="batch-run-find-outlet",
+            )
 
         if self.is_task_enabled(TaskEnum.build_subcatchments) and prep[str(TaskEnum.build_subcatchments)] is None:
             logger.info(f'building subcatchments')
-            watershed.build_subcatchments()
+            mutate_root(
+                runid_wd,
+                "watershed",
+                lambda: watershed.build_subcatchments(),
+                purpose="batch-run-build-subcatchments",
+            )
 
         if self.is_task_enabled(TaskEnum.abstract_watershed) and prep[str(TaskEnum.abstract_watershed)] is None:
             logger.info(f'abstracting watershed')
-            watershed.abstract_watershed()
+            mutate_root(
+                runid_wd,
+                "watershed",
+                lambda: watershed.abstract_watershed(),
+                purpose="batch-run-abstract-watershed",
+            )
 
         if self.is_task_enabled(TaskEnum.build_landuse) and prep[str(TaskEnum.build_landuse)] is None:
             logger.info(f'building landuse')
-            landuse.build()
+            mutate_root(
+                runid_wd,
+                "landuse",
+                lambda: landuse.build(),
+                purpose="batch-run-build-landuse",
+            )
 
         if self.is_task_enabled(TaskEnum.build_soils) and prep[str(TaskEnum.build_soils)] is None:
             logger.info(f'building soils')
-            soils.build()
+            mutate_root(
+                runid_wd,
+                "soils",
+                lambda: soils.build(),
+                purpose="batch-run-build-soils",
+            )
 
         if self.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
             logger.info(f'building climate')
-            climate.build()
+            mutate_root(
+                runid_wd,
+                "climate",
+                lambda: climate.build(),
+                purpose="batch-run-build-climate",
+            )
 
         rap_ts = RAP_TS.tryGetInstance(runid_wd)
         logger.info(f'rap_ts: {rap_ts}')

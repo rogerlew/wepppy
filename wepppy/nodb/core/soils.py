@@ -131,6 +131,50 @@ class SoilsMode(IntEnum):
     SpatialAPI = 9
 
 
+def _clear_directory_preserving_symlink_mount(path: str) -> None:
+    """Clear directory contents without deleting an active NoDir projection symlink."""
+    if not os.path.lexists(path):
+        return
+
+    if os.path.islink(path):
+        resolved = os.path.realpath(path)
+        if not os.path.isdir(resolved):
+            raise NotADirectoryError(f"Expected directory symlink target for soils root: {path}")
+        run_root = os.path.dirname(os.path.abspath(path))
+        managed_projection_roots = (
+            os.path.join(run_root, ".nodir", "lower", "soils"),
+            os.path.join(run_root, ".nodir", "upper", "soils"),
+        )
+
+        def _is_managed_projection_target() -> bool:
+            for managed_root in managed_projection_roots:
+                managed_abs = os.path.abspath(managed_root)
+                try:
+                    if os.path.commonpath([resolved, managed_abs]) == managed_abs:
+                        return True
+                except ValueError:
+                    continue
+            return False
+
+        if not _is_managed_projection_target():
+            # Unmanaged symlink: drop only the link and preserve target contents.
+            os.unlink(path)
+            return
+
+        for name in os.listdir(resolved):
+            candidate = os.path.join(resolved, name)
+            if os.path.isdir(candidate) and not os.path.islink(candidate):
+                shutil.rmtree(candidate)
+            else:
+                os.unlink(candidate)
+        return
+
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+    else:
+        os.unlink(path)
+
+
 # noinspection PyPep8Naming
 class Soils(NoDbBase):
     """
@@ -323,8 +367,7 @@ class Soils(NoDbBase):
     def clean(self) -> None:
 
         soils_dir = self.soils_dir
-        if _exists(soils_dir):
-            shutil.rmtree(soils_dir)
+        _clear_directory_preserving_symlink_mount(soils_dir)
         # Parquet summaries are canonical WD-level sidecars; ensure we don't
         # leave a stale sidecar behind after clearing the tree.
         sidecar_fn = _join(self.wd, "soils.parquet")
@@ -333,7 +376,7 @@ class Soils(NoDbBase):
                 os.remove(sidecar_fn)
             except OSError:
                 pass
-        os.mkdir(soils_dir)
+        os.makedirs(soils_dir, exist_ok=True)
         self._soils_is_vrt = False
         if not self.islocked():
             with self.locked():
@@ -845,6 +888,7 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
         self.logger.info(f' SoilsMode: {self._mode}')
+        os.makedirs(self.soils_dir, exist_ok=True)
         with self.locked():
             self.domsoil_d = None
             self.ssurgo_domsoil_d = None

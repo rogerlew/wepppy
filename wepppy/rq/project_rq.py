@@ -194,34 +194,69 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         if TaskStub.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
             StatusMessenger.publish(status_channel, f'building channels')
-            watershed.build_channels()
+            mutate_root(
+                runid_wd,
+                "watershed",
+                lambda: watershed.build_channels(),
+                purpose="test-run-build-channels",
+            )
 
         if TaskStub.is_task_enabled(TaskEnum.find_outlet) and prep[str(TaskEnum.find_outlet)] is None:
             StatusMessenger.publish(status_channel, f'setting outlet')
-            watershed.set_outlet(
-                lng=watershed.outlet.requested_loc.lng, 
-                lat=watershed.outlet.requested_loc.lat
+            mutate_root(
+                runid_wd,
+                "watershed",
+                lambda: watershed.set_outlet(
+                    lng=watershed.outlet.requested_loc.lng,
+                    lat=watershed.outlet.requested_loc.lat,
+                ),
+                purpose="test-run-set-outlet",
             )
 
         if TaskStub.is_task_enabled(TaskEnum.build_subcatchments) and prep[str(TaskEnum.build_subcatchments)] is None:
             StatusMessenger.publish(status_channel, f'building subcatchments')
-            watershed.build_subcatchments()
+            mutate_root(
+                runid_wd,
+                "watershed",
+                lambda: watershed.build_subcatchments(),
+                purpose="test-run-build-subcatchments",
+            )
 
         if TaskStub.is_task_enabled(TaskEnum.abstract_watershed) and prep[str(TaskEnum.abstract_watershed)] is None:
             StatusMessenger.publish(status_channel, f'abstracting watershed')
-            watershed.abstract_watershed()
+            mutate_root(
+                runid_wd,
+                "watershed",
+                lambda: watershed.abstract_watershed(),
+                purpose="test-run-abstract-watershed",
+            )
 
         if TaskStub.is_task_enabled(TaskEnum.build_landuse) and prep[str(TaskEnum.build_landuse)] is None:
             StatusMessenger.publish(status_channel, f'building landuse')
-            landuse.build()
+            mutate_root(
+                runid_wd,
+                "landuse",
+                lambda: landuse.build(),
+                purpose="test-run-build-landuse",
+            )
 
         if TaskStub.is_task_enabled(TaskEnum.build_soils) and prep[str(TaskEnum.build_soils)] is None:
             StatusMessenger.publish(status_channel, f'building soils')
-            soils.build()
+            mutate_root(
+                runid_wd,
+                "soils",
+                lambda: soils.build(),
+                purpose="test-run-build-soils",
+            )
 
         if TaskStub.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
             StatusMessenger.publish(status_channel, f'building climate')
-            climate.build()
+            mutate_root(
+                runid_wd,
+                "climate",
+                lambda: climate.build(),
+                purpose="test-run-build-climate",
+            )
 
         rap_ts = RAP_TS.tryGetInstance(runid_wd)
         StatusMessenger.publish(status_channel, f'rap_ts: {rap_ts}')

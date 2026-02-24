@@ -15,6 +15,7 @@ from wepppy.config.redis_settings import (
     RedisDB,
     redis_host,
 )
+from wepppy.nodir.mutations import mutate_root
 
 from wepppy.nodb.core import Landuse, LanduseMode, Ron, Soils, SoilsMode
 from wepppy.nodb.status_messenger import StatusMessenger
@@ -84,14 +85,24 @@ def land_and_soil_rq(
         landuse.mode = LanduseMode.SpatialAPI
         if nlcd_db is not None:
             landuse.nlcd_db = nlcd_db
-        landuse.build()
+        mutate_root(
+            str(wd),
+            "landuse",
+            lambda: landuse.build(),
+            purpose="land-and-soil-rq-build-landuse",
+        )
 
         StatusMessenger.publish(status_channel, "Building soils")
         soils = Soils.getInstance(str(wd))
         soils.mode = SoilsMode.SpatialAPI
         if ssurgo_db is not None:
             soils.ssurgo_db = ssurgo_db
-        soils.build()
+        mutate_root(
+            str(wd),
+            "soils",
+            lambda: soils.build(),
+            purpose="land-and-soil-rq-build-soils",
+        )
 
         tar_path = wd.with_suffix(".tar.gz")
         if tar_path.exists():
