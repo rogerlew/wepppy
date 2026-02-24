@@ -1,0 +1,12 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+  <p class="wc-text-muted">
+    Manage retention of raw WEPP text outputs after interchange parquet products are generated.
+  </p>
+  {{ ui.checkbox_field(
+       "delete_after_interchange",
+       "Delete raw WEPP outputs after successful interchange conversion",
+       checked=wepp.delete_after_interchange,
+       help="Keeps only interchange artifacts in wepp/output/interchange.",
+       attrs={"class": "disable-readonly"}
+     ) }}

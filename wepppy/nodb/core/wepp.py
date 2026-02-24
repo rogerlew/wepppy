@@ -665,6 +665,9 @@ class Wepp(NoDbBase):
             self._run_baseflow = self.config_get_bool('wepp', 'baseflow')
             self._run_snow = self.config_get_bool('wepp', 'snow')
             self._wepp_bin = self.config_get_str('wepp', 'bin')
+            self._delete_after_interchange = self.config_get_bool(
+                'interchange', 'delete_after_interchange', False
+            )
             self._channel_erodibility =  self.config_get_float('wepp', 'channel_erodibility')
             self._channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
             self._channel_manning_roughness_coefficient_bare = self.config_get_float('wepp', 'channel_manning_roughness_coefficient_bare')
@@ -710,6 +713,12 @@ class Wepp(NoDbBase):
 
         if not hasattr(instance, '_bootstrap_enabled'):
             instance._bootstrap_enabled = False
+        if not hasattr(instance, "_delete_after_interchange"):
+            instance._delete_after_interchange = instance.config_get_bool(
+                "interchange",
+                "delete_after_interchange",
+                False,
+            )
         if not hasattr(instance, 'frost_opts') or instance.frost_opts is None:
             instance.frost_opts = FrostOpts(
                 wintRed=instance.config_get_int('frost_opts', 'wintRed'),
@@ -944,6 +953,21 @@ class Wepp(NoDbBase):
         if stored is None:
             return False
         return (stored.major, stored.minor) >= (minimum.major, minimum.minor)
+
+    @property
+    def delete_after_interchange(self) -> bool:
+        return bool(
+            getattr(
+                self,
+                "_delete_after_interchange",
+                self.config_get_bool("interchange", "delete_after_interchange", False),
+            )
+        )
+
+    @delete_after_interchange.setter
+    @nodb_setter
+    def delete_after_interchange(self, value: bool) -> None:
+        self._delete_after_interchange = bool(value)
 
     @property
     def multi_ofe(self) -> bool:

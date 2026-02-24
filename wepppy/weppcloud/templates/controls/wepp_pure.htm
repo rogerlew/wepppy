@@ -56,6 +56,9 @@
       {% call ui.card("Export Configuration", attrs={"id": "wepp_export_configuration"}) %}
       {% include "controls/wepp_pure_advanced_options/prep_details.htm" %}
       {% endcall %}
+      {% call ui.card("Interchange", attrs={"id": "wepp_interchange_options"}) %}
+      {% include "controls/wepp_pure_advanced_options/interchange.htm" %}
+      {% endcall %}
       {% call ui.card("WEPP Exec", attrs={"id": "wepp_binary_selection"}) %}
       {% include "controls/wepp_pure_advanced_options/wepp_bin.htm" %}
       {% endcall %}

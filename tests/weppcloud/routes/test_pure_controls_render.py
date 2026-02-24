@@ -152,3 +152,14 @@ def test_frost_advanced_template_renders_wepp_variable_labels(jinja_env: Environ
         match = re.search(rf'id="{field_id}"[^>]*>', rendered)
         assert match is not None
         assert "min=" not in match.group(0)
+
+
+def test_interchange_advanced_template_renders_delete_after_interchange_checkbox(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/wepp_pure_advanced_options/interchange.htm")
+    rendered = template.render(wepp=SimpleNamespace(delete_after_interchange=True))
+
+    assert "Delete raw WEPP outputs after successful interchange conversion" in rendered
+    assert 'id="delete_after_interchange"' in rendered
+    assert "checked" in rendered

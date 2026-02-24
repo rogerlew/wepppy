@@ -8,6 +8,24 @@ if TYPE_CHECKING:
     from wepppy.nodb.core.wepp import Wepp
 
 
+_TRUE_TOKENS = {"1", "true", "yes", "on"}
+_FALSE_TOKENS = {"0", "false", "no", "off"}
+
+
+def _coerce_optional_bool(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token in _TRUE_TOKENS:
+            return True
+        if token in _FALSE_TOKENS:
+            return False
+    return None
+
+
 class WeppInputParser:
     def parse(self, wepp: "Wepp", kwds: dict[str, Any]) -> None:
         wepp.baseflow_opts.parse_inputs(kwds)
@@ -116,3 +134,19 @@ class WeppInputParser:
                     if tokens:
                         values = [int(tokens)]
             wepp._chn_topaz_ids_of_interest = values
+
+        _delete_after_interchange = kwds.get("delete_after_interchange", None)
+        if isinstance(_delete_after_interchange, (list, tuple, set)):
+            _delete_after_interchange = next(
+                (
+                    item
+                    for item in _delete_after_interchange
+                    if item not in (None, "")
+                ),
+                None,
+            )
+        delete_after_interchange = _coerce_optional_bool(_delete_after_interchange)
+        if delete_after_interchange is not None:
+            # parse_inputs runs inside Wepp.parse_inputs() lock scope.
+            # Setting the @nodb_setter property here would attempt to re-lock.
+            wepp._delete_after_interchange = bool(delete_after_interchange)
