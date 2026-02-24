@@ -174,6 +174,46 @@ def test_try_redis_set_log_level_invalid_level_falls_back_to_info(monkeypatch):
         logger.setLevel(previous_level)
 
 
+def test_ensure_redis_lock_client_reconnects_when_unset(monkeypatch):
+    class _StubRedisClient:
+        def __init__(self, connection_pool):
+            self.connection_pool = connection_pool
+            self.ping_calls = 0
+
+        def ping(self):
+            self.ping_calls += 1
+            return True
+
+    pool_calls = []
+
+    def _fake_pool(**kwargs):
+        pool_calls.append(kwargs)
+        return {"kwargs": kwargs}
+
+    monkeypatch.setattr(base, "redis_lock_client", None, raising=False)
+    monkeypatch.setattr(base.redis, "ConnectionPool", _fake_pool)
+    monkeypatch.setattr(base.redis, "StrictRedis", _StubRedisClient)
+
+    client = base._ensure_redis_lock_client()
+
+    assert isinstance(client, _StubRedisClient)
+    assert client.ping_calls == 1
+    assert base.redis_lock_client is client
+    assert pool_calls
+
+
+def test_ensure_redis_lock_client_raises_when_reconnect_fails(monkeypatch):
+    monkeypatch.setattr(base, "redis_lock_client", None, raising=False)
+
+    def _fail_pool(**kwargs):
+        raise base.redis.exceptions.RedisError("redis down")
+
+    monkeypatch.setattr(base.redis, "ConnectionPool", _fail_pool)
+
+    with pytest.raises(RuntimeError, match="Redis lock client is unavailable"):
+        base._ensure_redis_lock_client()
+
+
 def test_try_redis_get_log_level_missing_value_returns_default(monkeypatch):
     class _StubRedis:
         def get(self, key):
