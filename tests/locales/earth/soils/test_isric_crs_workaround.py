@@ -14,10 +14,13 @@ import pytest
 from osgeo import gdal
 
 from wepppy.locales.earth.soils.isric import (
+    ISRICSoilData,
     fetch_isric_wrb,
     fetch_layer,
     soil_grid_proj4,
 )
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
@@ -125,6 +128,36 @@ class TestFetchLayerCRSWorkaround:
         
         assert len(wkt) > 0, "WKT should be populated after injection"
         assert 'Interrupted_Goode_Homolosine' in wkt or 'igh' in wkt.lower()
+
+    def test_creates_output_directory_when_missing(
+        self,
+        tmp_path: Path,
+        mock_wms_response_no_crs: bytes,
+    ) -> None:
+        """Verify fetch_layer creates soils_dir if it does not exist."""
+        missing_soils_dir = tmp_path / "missing" / "soils"
+        assert not missing_soils_dir.exists()
+
+        mock_response = MagicMock()
+        mock_response.read.return_value = mock_wms_response_no_crs
+
+        mock_wms = MagicMock()
+        mock_wms.getmap.return_value = mock_response
+
+        with patch("wepppy.locales.earth.soils.isric.WebMapService", return_value=mock_wms):
+            fetch_layer(
+                wms_url="https://test.example/map",
+                layer="test_0-5cm_Q0.5",
+                crs="EPSG:152160",
+                adj_bbox=(-12774700, 5511400, -12767800, 5516600),
+                size=(69, 52),
+                format="image/tiff",
+                soils_dir=str(missing_soils_dir),
+                status_channel=None,
+            )
+
+        output_file = missing_soils_dir / "test_0-5cm_Q0.5.tif"
+        assert output_file.exists()
     
     def test_preserves_existing_crs_epsg152160(
         self,
@@ -351,3 +384,15 @@ class TestCRSWorkaroundIntegration:
         assert interpolator.wkt_text is not None
         assert len(interpolator.wkt_text) > 0
         # RasterDatasetInterpolator successfully created without error
+
+
+def test_extract_soil_data_raises_when_layer_is_missing(tmp_path: Path) -> None:
+    """Verify missing layer files surface as FileNotFoundError."""
+    soils_dir = tmp_path / "soils"
+    soils_dir.mkdir()
+
+    soil_data = ISRICSoilData(str(soils_dir))
+    soil_data.wgs_bbox = (0.0, 0.0, 1.0, 1.0)
+
+    with pytest.raises(FileNotFoundError, match="bdod_0-5cm_Q0.5.tif"):
+        soil_data.extract_soil_data(lng=0.5, lat=0.5)

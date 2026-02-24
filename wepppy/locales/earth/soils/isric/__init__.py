@@ -175,6 +175,7 @@ def fetch_layer(
                           size=size,
                           format=format)
     filename = f'{layer}.tif'
+    os.makedirs(soils_dir, exist_ok=True)
     file_path = os.path.join(soils_dir, filename)
     with open(file_path, 'wb') as out:
         out.write(response.read())
@@ -210,6 +211,8 @@ def fetch_isric_soil_layers(
          StatusMessenger.publish(status_channel, f'  fetch_isric_soil_layers({wgs_bbox})')
 
     global isric_maps
+
+    os.makedirs(soils_dir, exist_ok=True)
 
     adj_bbox, size = adjust_to_grid(wgs_bbox)
 
@@ -282,6 +285,7 @@ def fetch_isric_wrb(
 
     # Save the response to a file
     filename = 'wrb_MostProbable.tif'
+    os.makedirs(soils_dir, exist_ok=True)
     file_path = _join(soils_dir, filename)
     with open(file_path, 'wb') as out:
         out.write(response.read())
@@ -378,8 +382,10 @@ class ISRICSoilData:
             soil_data[depth] = {}
             for measure in isric_measures:
                 file_path = _join(self.soils_dir, f'{measure}_{depth}_Q0.5.tif')
-                if not file_path:
-                    raise ValueError(f'File {file_path} does not exist. Please call the fetch method first.')
+                if not os.path.exists(file_path):
+                    raise FileNotFoundError(
+                        f'File {file_path} does not exist. Please call the fetch method first.'
+                    )
 
                 interpolator = RasterDatasetInterpolator(file_path)
                 value = interpolator.get_location_info(lng, lat, method='nearest')
