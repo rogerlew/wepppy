@@ -12,6 +12,7 @@ pytestmark = pytest.mark.microservice
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(openet_ts_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(openet_ts_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(openet_ts_routes, "require_roles", lambda claims, required_roles: None)
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
@@ -63,3 +64,19 @@ def test_acquire_openet_ts_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None
     payload = response.json()
     assert payload["job_id"] == "job-66"
     assert payload["payload"] == {"force_refresh": True}
+
+
+def test_acquire_openet_ts_requires_admin_role(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(openet_ts_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(openet_ts_routes, "authorize_run_access", lambda claims, runid: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/acquire-openet-ts",
+            json={"force_refresh": True},
+        )
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+    assert "required role" in payload["error"]["message"].lower()

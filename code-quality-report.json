@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-02-23T19:20:42Z",
+  "generated_at_utc": "2026-02-24T18:54:47Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -37,30 +37,30 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 756.0,
-      "p50": 101.0,
-      "p75": 245.5,
-      "p90": 508.0,
-      "p95": 773.25,
-      "p99": 1228.15,
+      "count": 762.0,
+      "p50": 104.0,
+      "p75": 243.5,
+      "p90": 508.8,
+      "p95": 772.75,
+      "p99": 1261.33,
       "max": 2214.0
     },
     "python_prod_max_function_len": {
-      "count": 590.0,
+      "count": 595.0,
       "p50": 57.0,
-      "p75": 102.75,
-      "p90": 149.1,
-      "p95": 210.55,
-      "p99": 276.88,
+      "p75": 103.0,
+      "p90": 149.2,
+      "p95": 214.0,
+      "p99": 276.48,
       "max": 381.0
     },
     "python_prod_max_cc": {
-      "count": 600.0,
+      "count": 605.0,
       "p50": 10.0,
       "p75": 18.0,
-      "p90": 29.0,
-      "p95": 37.0,
-      "p99": 56.01,
+      "p90": 28.0,
+      "p95": 37.8,
+      "p99": 55.88,
       "max": 67.0
     },
     "js_source_file_sloc": {
@@ -86,7 +86,7 @@
     "python_file_sloc_top20": [
       {
         "path": "tests/nodb/mods/test_omni.py",
-        "value": 2380.0
+        "value": 2494.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -94,19 +94,19 @@
       },
       {
         "path": "wepppy/nodb/core/wepp.py",
-        "value": 2029.0
+        "value": 2051.0
+      },
+      {
+        "path": "wepppy/climates/cligen/cligen.py",
+        "value": 2006.0
       },
       {
         "path": "tests/microservices/test_files_routes.py",
         "value": 2003.0
       },
       {
-        "path": "wepppy/climates/cligen/cligen.py",
-        "value": 1994.0
-      },
-      {
         "path": "wepppy/nodb/base.py",
-        "value": 1828.0
+        "value": 1872.0
       },
       {
         "path": "wepppy/soils/ssurgo/ssurgo.py",
@@ -118,7 +118,7 @@
       },
       {
         "path": "wepppy/rq/culvert_rq.py",
-        "value": 1426.0
+        "value": 1446.0
       },
       {
         "path": "wepppy/topo/wbt/wbt_topaz_emulator.py",
@@ -126,11 +126,15 @@
       },
       {
         "path": "wepppy/nodb/core/landuse.py",
-        "value": 1254.0
+        "value": 1290.0
       },
       {
         "path": "wepppy/nodb/core/soils.py",
-        "value": 1207.0
+        "value": 1243.0
+      },
+      {
+        "path": "wepppy/nodb/core/ron.py",
+        "value": 1217.0
       },
       {
         "path": "wepppy/nodb/mods/omni/omni_contrast_build_service.py",
@@ -141,12 +145,12 @@
         "value": 1183.0
       },
       {
-        "path": "wepppy/nodb/core/ron.py",
-        "value": 1162.0
-      },
-      {
         "path": "wepppy/nodb/mods/disturbed/disturbed.py",
         "value": 1114.0
+      },
+      {
+        "path": "wepppy/rq/project_rq.py",
+        "value": 1113.0
       },
       {
         "path": "wepppy/all_your_base/geo/shapefile.py",
@@ -159,10 +163,6 @@
       {
         "path": "wepppy/microservices/browse/browse.py",
         "value": 1086.0
-      },
-      {
-        "path": "wepppy/rq/project_rq.py",
-        "value": 1078.0
       }
     ],
     "python_max_function_len_top20": [
@@ -211,6 +211,10 @@
         "value": 253.0
       },
       {
+        "path": "wepppy/rq/omni_rq.py",
+        "value": 253.0
+      },
+      {
         "path": "wepppy/nodb/core/wepp_prep_service.py",
         "value": 252.0
       },
@@ -219,7 +223,7 @@
         "value": 249.0
       },
       {
-        "path": "wepppy/rq/omni_rq.py",
+        "path": "wepppy/rq/culvert_rq.py",
         "value": 245.0
       },
       {
@@ -236,15 +240,11 @@
       },
       {
         "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
-        "value": 233.0
+        "value": 235.0
       },
       {
         "path": "wepppy/nodb/mods/ash_transport/ash_multi_year_model.py",
         "value": 226.0
-      },
-      {
-        "path": "wepppy/microservices/browse/dtale.py",
-        "value": 221.0
       }
     ],
     "python_max_cc_top20": [

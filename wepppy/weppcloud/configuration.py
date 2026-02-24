@@ -65,6 +65,17 @@ def _get_env_int(name: str, default: int, *, minimum: int | None = None) -> int:
     return value
 
 
+def _get_env_optional_int(name: str, *, minimum: int = 0) -> Optional[int]:
+    raw = os.getenv(name)
+    if raw is None:
+        return None
+    try:
+        value = int(raw.strip())
+    except (TypeError, ValueError):
+        return None
+    return max(minimum, value)
+
+
 def _normalize_site_prefix(site_prefix: str) -> str:
     if not site_prefix:
         return ""
@@ -341,6 +352,12 @@ def config_app(app: Any):
     app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = _get_env_bool(
         "REMEMBER_COOKIE_REFRESH_EACH_REQUEST", False
     )
+    app.config["WTF_CSRF_ENABLED"] = _get_env_bool("WTF_CSRF_ENABLED", True)
+    app.config["WTF_CSRF_HEADERS"] = ["X-CSRFToken", "X-CSRF-Token"]
+    csrf_time_limit = _get_env_optional_int("WTF_CSRF_TIME_LIMIT_SECONDS")
+    if csrf_time_limit is None:
+        csrf_time_limit = _get_env_optional_int("WTF_CSRF_TIME_LIMIT")
+    app.config["WTF_CSRF_TIME_LIMIT"] = csrf_time_limit
 
     redirect_scheme_raw = os.getenv("OAUTH_REDIRECT_SCHEME") or "https"
     oauth_redirect_scheme = redirect_scheme_raw.strip() or "https"

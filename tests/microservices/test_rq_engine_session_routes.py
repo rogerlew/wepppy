@@ -178,6 +178,7 @@ def test_session_token_issues_with_cookie(monkeypatch: pytest.MonkeyPatch) -> No
         response = client.post(
             "/api/runs/run-1/cfg/session-token",
             cookies={"session": "signed"},
+            headers={"Origin": "http://testserver"},
         )
 
     assert response.status_code == 200
@@ -204,7 +205,10 @@ def test_session_token_allows_public_run_without_cookie(
     auth_tokens.get_jwt_config.cache_clear()
 
     with TestClient(rq_engine.app) as client:
-        response = client.post("/api/runs/run-1/cfg/session-token")
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={"Origin": "http://testserver"},
+        )
 
     assert response.status_code == 200
     payload = response.json()
@@ -231,6 +235,7 @@ def test_session_token_private_run_requires_authenticated_cookie_session(
         response = client.post(
             "/api/runs/run-1/cfg/session-token",
             cookies={"session": "signed"},
+            headers={"Origin": "http://testserver"},
         )
 
     assert response.status_code == 401
@@ -258,12 +263,183 @@ def test_session_token_stale_remember_cookie_includes_relogin_guidance(
         response = client.post(
             "/api/runs/run-1/cfg/session-token",
             cookies={"session": "signed", "remember_token": "remembered"},
+            headers={"Origin": "http://testserver"},
         )
 
     assert response.status_code == 401
     payload = response.json()
     assert payload["error"]["code"] == "unauthorized"
     assert "Log out and sign in again, then retry." in payload["error"]["message"]
+
+
+def test_session_token_cookie_path_blocks_missing_origin_and_referer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/session-token")
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
+def test_session_token_cookie_path_allows_same_origin_fetch_metadata_without_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={"Sec-Fetch-Site": "same-origin"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["token_class"] == "session"
+    assert payload["runid"] == "run-1"
+
+
+def test_session_token_cookie_path_blocks_cross_site_fetch_metadata_without_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={"Sec-Fetch-Site": "cross-site"},
+        )
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
+def test_session_token_cookie_path_blocks_cross_origin_header(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={"Origin": "https://evil.example"},
+        )
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
+def test_session_token_cookie_path_rejects_untrusted_forwarded_origin_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={
+                "Origin": "https://external.example",
+                "X-Forwarded-Proto": "https",
+                "X-Forwarded-Host": "external.example",
+            },
+        )
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
+def test_session_token_cookie_path_can_opt_in_to_forwarded_origin_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    monkeypatch.setenv(session_routes.TRUST_FORWARDED_ORIGIN_HEADERS_ENV, "true")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={
+                "Origin": "https://external.example",
+                "X-Forwarded-Proto": "https",
+                "X-Forwarded-Host": "external.example",
+            },
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["token_class"] == "session"
+    assert payload["runid"] == "run-1"
+
+
+def test_session_token_cookie_path_allows_configured_external_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    monkeypatch.setenv("OAUTH_REDIRECT_HOST", "external.example")
+    monkeypatch.setenv("OAUTH_REDIRECT_SCHEME", "https")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={"Origin": "https://external.example"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["token_class"] == "session"
+    assert payload["runid"] == "run-1"
+
+
+def test_session_token_bearer_path_ignores_cross_origin_headers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+
+    token = _issue_token(monkeypatch, runs=["run-1"])
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Origin": "https://evil.example",
+                "X-Forwarded-Proto": "https",
+                "X-Forwarded-Host": "evil.example",
+            },
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["token_class"] == "session"
+    assert payload["runid"] == "run-1"
 
 
 def test_hello_world_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:

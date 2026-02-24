@@ -1,6 +1,6 @@
 # RQ-Engine Agent API Contract
 > Canonical contract for agent clients using the WEPPcloud rq-engine.
-> **See also:** `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/dev-notes/correlation-id-debugging.md`, `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`, and user-facing `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`.
+> **See also:** `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/correlation-id-debugging.md`, `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`, and user-facing `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`.
 
 ## Purpose
 This document defines how agents should call rq-engine safely and predictably.
@@ -134,6 +134,8 @@ Notes:
 - Fallback token scopes are `rq:enqueue`, `rq:status`, `rq:export`.
 - Client-side fallback token cache is short-lived; callers should still treat
   401/403 responses as authoritative when both primary and fallback paths fail.
+- CSRF/same-origin behavior for this bridge is governed by
+  `docs/schemas/weppcloud-csrf-contract.md`.
 
 ## Endpoint Families (Agent-Facing)
 For the exact 51-route frozen list, use the contract checklist artifact. The

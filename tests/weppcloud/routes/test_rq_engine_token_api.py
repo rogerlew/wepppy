@@ -329,6 +329,60 @@ def test_issue_rq_engine_token_blocks_missing_origin_and_referer(
     assert payload["error"]["message"] == "Cross-origin request blocked."
 
 
+def test_issue_rq_engine_token_allows_same_origin_fetch_metadata_without_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "_issue_rq_engine_token",
+        lambda: "rq-user-token",
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-token",
+            headers={"Sec-Fetch-Site": "same-origin"},
+        )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload == {"token": "rq-user-token"}
+
+
+def test_issue_rq_engine_token_blocks_cross_site_fetch_metadata_without_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "_issue_rq_engine_token",
+        lambda: "rq-user-token",
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-token",
+            headers={"Sec-Fetch-Site": "cross-site"},
+        )
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
 def test_session_heartbeat_blocks_missing_origin_and_referer(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -340,6 +340,27 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### WEPPcloud CSRF Rollout with rq-engine API Compatibility
+**Completed**: 2026-02-24
+**Duration**: 1 day
+**Status**: ✅ **COMPLETE**
+**Owner**: Codex
+**Link**: [docs/work-packages/20260224_weppcloud_csrf_rollout/](docs/work-packages/20260224_weppcloud_csrf_rollout/)
+**Description**: Implemented global CSRF protection for WEPPcloud cookie-auth mutation routes while preserving bearer-token compatibility for rq-engine/browse/files third-party and agent clients.
+
+**Outcome**: Browser mutation routes are CSRF-protected by default with template-driven token propagation, bootstrap forward-auth verify remains explicitly exempt, and rq-engine cookie-path session-token issuance now enforces same-origin while bearer flows remain unchanged.
+
+**Deliverables**:
+- ✅ Artifacts: route classification, exemption register, reviewer findings, code quality review, final validation summary
+- ✅ Runtime changes: global CSRFProtect wiring, config toggles, base template CSRF propagation, OAuth disconnect migration, bootstrap exemption wiring
+- ✅ Frontend hardening: CSRF bootstrap moved to `static/js/csrf_bootstrap.js` with dedicated Jest coverage
+- ✅ Compatibility hardening: rq-engine session-token same-origin checks for cookie path only
+- ✅ Proxy hardening: rq-engine forwarded-origin aliases now require explicit opt-in (`RQ_ENGINE_TRUST_FORWARDED_ORIGIN_HEADERS=true`)
+- ✅ Validation gates executed: required pytest slices, npm `http` suite, npm `csrf_bootstrap` suite, code-quality observability, doc-lint
+- ✅ `check_broad_exceptions --enforce-changed` PASS after allowlist line-position synchronization
+
+---
+
 ### Residual Broad-Exception Closure Finish Line
 **Completed**: 2026-02-24
 **Duration**: 1 day

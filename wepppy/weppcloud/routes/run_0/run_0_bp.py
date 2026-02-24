@@ -104,6 +104,15 @@ TOC_TASK_ANCHOR_TO_TASK = {
 
 TOC_TASK_EMOJI_MAP = {anchor: task.emoji() for anchor, task in TOC_TASK_ANCHOR_TO_TASK.items()}
 
+
+def _current_user_has_role(role: str) -> bool:
+    has_role = getattr(current_user, "has_role", None)
+    return bool(callable(has_role) and has_role(role))
+
+
+def _openet_admin_enabled(*, playwright_load_all: bool) -> bool:
+    return bool(playwright_load_all) or _current_user_has_role("Admin")
+
 MOD_UI_DEFINITIONS = OrderedDict([
     ('rap_ts', {
         'label': 'RAP Time Series',
@@ -617,10 +626,14 @@ def _build_runs0_context(runid, config, playwright_load_all):
     else:
         topaz = None
 
+    mods_list = ron.mods or []
+    openet_admin_enabled = _openet_admin_enabled(playwright_load_all=playwright_load_all)
+    show_openet_ts = openet_admin_enabled and ('openet_ts' in mods_list or playwright_load_all)
+
     observed = Observed.tryGetInstance(wd)
     rangeland_cover = RangelandCover.tryGetInstance(wd)
     rhem = Rhem.tryGetInstance(wd)
-    openet_ts = OpenET_TS.tryGetInstance(wd)
+    openet_ts = OpenET_TS.tryGetInstance(wd) if show_openet_ts else None
     disturbed = Disturbed.tryGetInstance(wd)
     baer = Baer.tryGetInstance(wd) if 'baer' in ron.mods else None
     ash = Ash.tryGetInstance(wd)
@@ -687,9 +700,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
     db.session.commit()
 
-    mods_list = ron.mods or []
     show_rap_ts = 'rap_ts' in mods_list or playwright_load_all
-    show_openet_ts = 'openet_ts' in mods_list or playwright_load_all
     show_treatments = 'treatments' in mods_list or playwright_load_all
     show_ash = 'ash' in mods_list or playwright_load_all
     is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
@@ -895,6 +906,8 @@ def view_mod_section(runid, config, mod_name):
     mod_info = MOD_UI_DEFINITIONS.get(mod_name)
     if not mod_info:
         return error_factory('Unknown module')
+    if mod_name == 'openet_ts' and not _openet_admin_enabled(playwright_load_all=False):
+        return error_factory('OpenET Time Series is restricted to Admin users')
 
     context = _build_runs0_context(runid, config, playwright_load_all=False)
     if 'redirect' in context:

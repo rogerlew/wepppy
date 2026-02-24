@@ -1,6 +1,6 @@
 # WEPPcloud Session Contract
 > Authoritative contract for WEPPcloud browser sessions, session cookies, heartbeat refresh, and stale-tab UX.
-> **See also:** `docs/dev-notes/auth-token.spec.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/weppcloud-session-lifecycle.spec.md`
+> **See also:** `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/weppcloud-session-lifecycle.spec.md`
 
 ## Normative Status
 - This document is normative and authoritative for WEPPcloud session behavior.
@@ -13,6 +13,7 @@
 - Covers browser-facing WEPPcloud session lifecycle and cookies.
 - Covers Flask-side session refresh APIs and client heartbeat behavior.
 - Covers rq-engine session-token minting when sourced from Flask session cookies.
+- Defers route-level CSRF policy and classification to `docs/schemas/weppcloud-csrf-contract.md`.
 - Does not redefine JWT claim rules; those remain in `docs/dev-notes/auth-token.spec.md`.
 - Does not redefine canonical error payloads; those remain in `docs/schemas/rq-response-contract.md`.
 
@@ -95,6 +96,8 @@ Source-of-truth implementation:
 ## Same-Origin and Security Contract
 - `POST /weppcloud/api/auth/session-heartbeat` and `POST /weppcloud/api/auth/rq-engine-token` MUST use same-origin checks (`Origin` or `Referer`), compared against the effective WEPPcloud origin (request host plus trusted forwarded/configured external host aliases).
 - Requests missing both `Origin` and `Referer` headers MUST be rejected for these endpoints.
+- `POST /rq-engine/api/runs/{runid}/{config}/session-token` (cookie-auth path) MUST ignore forwarded-origin aliases (`X-Forwarded-Proto`, `X-Forwarded-Host`) unless `RQ_ENGINE_TRUST_FORWARDED_ORIGIN_HEADERS=true`.
+- Deployments that need external-origin aliases for rq-engine cookie-path checks SHOULD prefer explicit host/scheme config (`OAUTH_REDIRECT_HOST`, `OAUTH_REDIRECT_SCHEME`, `EXTERNAL_HOST`, `EXTERNAL_SCHEME`) over forwarded-header trust.
 - Anonymous or stale session-token claims MUST NOT bypass CAPTCHA/public-run gates in anonymous flows.
 - Private-run session-token issuance via cookie-auth path MUST enforce run authorization from server-side owner/role state.
 

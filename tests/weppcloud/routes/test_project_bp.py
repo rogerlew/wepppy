@@ -220,6 +220,41 @@ def test_set_mod_enables_simple_module(project_client):
     assert "rap_ts" in controller.mods
 
 
+def test_set_mod_openet_requires_admin(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    assert controller.mods == []
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "openet_ts", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "restricted to Admin users" in payload["error"]["message"]
+    assert controller.mods == []
+
+
+def test_set_mod_openet_allows_admin(project_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, RonStub, _, run_dir, _ = project_client
+    monkeypatch.setattr(project_module, "_openet_admin_enabled", lambda: True)
+
+    controller = RonStub.getInstance(run_dir)
+    assert controller.mods == []
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "openet_ts", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["mod"] == "openet_ts"
+    assert payload["Content"]["enabled"] is True
+    assert "openet_ts" in controller.mods
+
+
 def test_set_mod_disables_module_when_no_guards(project_client):
     client, RonStub, _, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)

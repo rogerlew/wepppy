@@ -110,6 +110,13 @@ def load_run_context(
 def register_run_context_preprocessor(bp):
     """Attach a url value preprocessor that resolves run context lazily."""
 
+    if getattr(bp, "_wepp_run_context_preprocessor_registered", False):
+        return bp
+    if getattr(bp, "_got_registered_once", False):
+        # In tests, a blueprint may already be attached to a temporary app
+        # before this helper runs again via global app import.
+        return bp
+
     module_name = bp.import_name
 
     @bp.url_value_preprocessor
@@ -138,4 +145,5 @@ def register_run_context_preprocessor(bp):
 
         load_run_context(runid, config, get_wd_fn=override_get_wd)
 
+    setattr(bp, "_wepp_run_context_preprocessor_registered", True)
     return bp

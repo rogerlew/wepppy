@@ -13,10 +13,8 @@ import re
 from flask import flash, session
 from flask_security import current_user
 from flask_security.utils import login_user, hash_password
-from flask_wtf.csrf import validate_csrf
 from sqlalchemy import func
 from typing import TYPE_CHECKING
-from wtforms.validators import ValidationError
 from requests.exceptions import RequestException
 
 from .._common import (
@@ -536,19 +534,6 @@ def callback_alias(provider: str):
 def disconnect(provider: str):
     if not current_user.is_authenticated:
         abort(403)
-
-    token = request.form.get("csrf_token", "")
-    try:
-        validate_csrf(token)
-    except ValidationError as exc:
-        logger.warning(
-            "OAuth disconnect CSRF validation failed for user_id=%s provider=%s: %s",
-            getattr(current_user, "id", None),
-            provider,
-            exc,
-        )
-        flash("Your session expired. Please refresh the page and try again.", "warning")
-        return redirect(url_for("user.profile"))
 
     OAuthAccount = _get_oauth_account_model()
     datastore = _get_user_datastore()

@@ -81,6 +81,12 @@ def _allowed_origin_set() -> set[tuple[str, str, int]]:
 
 
 def _is_same_origin_post() -> bool:
+    fetch_site = (request.headers.get("Sec-Fetch-Site") or "").strip().lower()
+    if fetch_site == "same-origin":
+        return True
+    if fetch_site in {"cross-site"}:
+        return False
+
     allowed_origins = _allowed_origin_set()
     origin = request.headers.get("Origin", "").strip()
     if origin:

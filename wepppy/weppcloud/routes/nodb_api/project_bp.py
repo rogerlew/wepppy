@@ -48,6 +48,15 @@ MOD_DISABLE_GUARDS = {
 }
 
 
+def _current_user_has_role(role: str) -> bool:
+    has_role = getattr(current_user, "has_role", None)
+    return bool(callable(has_role) and has_role(role))
+
+
+def _openet_admin_enabled() -> bool:
+    return _current_user_has_role("Admin")
+
+
 def _mod_state_paths(wd: str, mod_name: str) -> tuple[str, str]:
     nodb_path = os.path.join(wd, f'{mod_name}.nodb')
     backup_path = os.path.join(wd, f'{mod_name}.bak')
@@ -598,6 +607,9 @@ def task_set_mod(runid, config):
         return error_factory('enabled must be boolean')
 
     mod_key = str(mod_name).strip()
+    if mod_key == 'openet_ts' and not _openet_admin_enabled():
+        return error_factory('OpenET Time Series is restricted to Admin users')
+
     try:
         state = set_project_mod_state(runid, config, mod_key, bool(enabled))
     except ValueError as exc:

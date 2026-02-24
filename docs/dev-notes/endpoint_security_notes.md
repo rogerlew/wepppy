@@ -1,6 +1,6 @@
 # Endpoint Security Notes
 
-> **See also:** [AGENTS.md](../../AGENTS.md) for Security Considerations and Input Validation sections.
+> **See also:** [AGENTS.md](../../AGENTS.md), `docs/schemas/weppcloud-csrf-contract.md`, and `docs/dev-notes/auth-token.spec.md`.
 
 ## High-Risk Endpoints (run/RQ management)
 - rq-engine run-scoped POST routes under `wepppy/microservices/rq_engine/` (fetch-dem-and-build-channels, set-outlet, build-landuse/soils/climate, run-wepp/omni/ash/debris/rhem, fork, archive, etc.) mutate run state and enqueue jobs. Ensure every route enforces JWT and run access checks before accepting work.

@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-02-23T19:20:42Z`
+- Generated (UTC): `2026-02-24T18:54:47Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -27,9 +27,9 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 756 | 101.0 | 245.5 | 508.0 | 773.25 | 1228.15 | 2214.0 |
-| `python_prod_max_function_len` | 590 | 57.0 | 102.75 | 149.1 | 210.55 | 276.88 | 381.0 |
-| `python_prod_max_cc` | 600 | 10.0 | 18.0 | 29.0 | 37.0 | 56.01 | 67.0 |
+| `python_prod_file_sloc` | 762 | 104.0 | 243.5 | 508.8 | 772.75 | 1261.33 | 2214.0 |
+| `python_prod_max_function_len` | 595 | 57.0 | 103.0 | 149.2 | 214.0 | 276.48 | 381.0 |
+| `python_prod_max_cc` | 605 | 10.0 | 18.0 | 28.0 | 37.8 | 55.88 | 67.0 |
 | `js_source_file_sloc` | 150 | 257.0 | 556.0 | 1122.4 | 1318.2 | 2130.81 | 2500.0 |
 | `js_source_max_cc` | 150 | 7.0 | 21.0 | 33.1 | 43.65 | 75.61 | 155.0 |
 
@@ -43,15 +43,15 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 
 | Path | Value |
 | --- | ---: |
-| `tests/nodb/mods/test_omni.py` | 2380 |
+| `tests/nodb/mods/test_omni.py` | 2494 |
 | `wepppy/wepp/management/managements.py` | 2214 |
-| `wepppy/nodb/core/wepp.py` | 2029 |
+| `wepppy/nodb/core/wepp.py` | 2051 |
+| `wepppy/climates/cligen/cligen.py` | 2006 |
 | `tests/microservices/test_files_routes.py` | 2003 |
-| `wepppy/climates/cligen/cligen.py` | 1994 |
-| `wepppy/nodb/base.py` | 1828 |
+| `wepppy/nodb/base.py` | 1872 |
 | `wepppy/soils/ssurgo/ssurgo.py` | 1785 |
 | `tests/microservices/test_browse_auth_routes.py` | 1651 |
-| `wepppy/rq/culvert_rq.py` | 1426 |
+| `wepppy/rq/culvert_rq.py` | 1446 |
 | `wepppy/topo/wbt/wbt_topaz_emulator.py` | 1339 |
 
 ### `python_max_function_len_top20`

@@ -4,6 +4,7 @@
 
 (function () {
     {% set mods_list = ron.mods or [] %}
+    {% set openet_admin_enabled = current_user.has_role('Admin') or playwright_load_all %}
     {% if ron.boundary %}
     {% set boundary = {
         "url": site_prefix ~ "/" ~ ron.boundary,
@@ -96,7 +97,7 @@
                 "path_ce": 'path_ce' in mods_list,
                 "debris_flow": 'debris_flow' in mods_list,
                 "rap_ts": 'rap_ts' in mods_list,
-                "openet_ts": 'openet_ts' in mods_list,
+                "openet_ts": ('openet_ts' in mods_list) and openet_admin_enabled,
                 "treatments": 'treatments' in mods_list,
                 "observed": 'observed' in mods_list
             }

@@ -20,7 +20,7 @@ import awesome_codename
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from flask import (
-    Flask, jsonify, g, request, render_template
+    Flask, flash, jsonify, g, redirect, request, url_for
 )
 
 from sqlalchemy import func
@@ -37,6 +37,7 @@ from flask_mail import Mail
 from flask_session import Session
 from flask_session.sessions import RedisSessionInterface
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFError, CSRFProtect
 
 from wtforms import StringField
 
@@ -66,6 +67,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 config_app(app)
+csrf = CSRFProtect(app)
 init_agent_jwt(app)
 init_profile_coverage(app)
 install_rq_auth_actor_hook()
@@ -118,6 +120,34 @@ def _reset_request_correlation_id(_exception: BaseException | None) -> None:
         return
     reset_correlation_id(token)
     setattr(g, _CORRELATION_TOKEN_KEY, None)
+
+
+@app.errorhandler(CSRFError)
+def _handle_csrf_error(exc: CSRFError):
+    if request.endpoint == "security_oauth.disconnect":
+        flash("Your session expired. Please refresh the page and try again.", "warning")
+        return redirect(url_for("user.profile"))
+
+    wants_json = (
+        request.path.startswith("/api/")
+        or request.path.startswith("/runs/")
+        or request.is_json
+        or request.accept_mimetypes.best == "application/json"
+    )
+    if wants_json:
+        response = jsonify(
+            {
+                "error": {
+                    "message": "CSRF token missing or invalid.",
+                    "code": "csrf_failed",
+                    "details": exc.description,
+                }
+            }
+        )
+        response.status_code = 400
+        return response
+
+    return exc
 
 # Setup Flask-Security
 # Create database connection object
@@ -467,4 +497,8 @@ if isinstance(app.session_interface, RedisSessionInterface):
 
 register_jinja_filters(app)
 register_blueprints(app)
+# forward_auth boundary endpoint is non-browser infrastructure traffic.
+from wepppy.weppcloud.routes.bootstrap import register_csrf_exemptions as register_bootstrap_csrf_exemptions
+
+register_bootstrap_csrf_exemptions(csrf)
 register_context_processors(app, get_all_runs, User, Run)

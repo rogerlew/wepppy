@@ -4,6 +4,7 @@ This document is the authoritative contract for WEPPcloud JWTs, including token
 classes, required claims, and validation expectations. Response payloads and
 error shapes must follow `docs/schemas/rq-response-contract.md`. Browser/session
 lifecycle behavior must follow `docs/schemas/weppcloud-session-contract.md`.
+CSRF policy must follow `docs/schemas/weppcloud-csrf-contract.md`.
 
 ## Normative status (strict and authoritative)
 - This specification is normative, strict, and authoritative for JWT/auth behavior.
@@ -214,7 +215,7 @@ If validation fails a `JWTDecodeError` is raised.
   session-token minting without forcing logout/login.
 - Caller requirements:
   - Existing authenticated WEPPcloud login session (`current_user` not anonymous).
-  - Same-origin request with CSRF protection (handled by `WCHttp`).
+  - Same-origin request with CSRF protection as defined in `docs/schemas/weppcloud-csrf-contract.md`.
 - Issued token shape:
   - `token_class=user`
   - `aud=rq-engine`

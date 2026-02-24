@@ -254,6 +254,86 @@ function controlBase() {
         return payload;
     }
 
+    function resolveHttpErrorStatus(error) {
+        if (!error || error.status === undefined || error.status === null) {
+            return null;
+        }
+        const parsed = Number(error.status);
+        if (!Number.isFinite(parsed)) {
+            return null;
+        }
+        return parsed;
+    }
+
+    function isAuthError(error) {
+        const status = resolveHttpErrorStatus(error);
+        return status === 401 || status === 403;
+    }
+
+    function isMissingRunContextError(error) {
+        return Boolean(
+            error
+            && typeof error.message === "string"
+            && error.message.indexOf("Run ID and config are required for session tokens") !== -1
+        );
+    }
+
+    function fetchJobJson(self, http, url, params) {
+        function fetchWithoutToken() {
+            if (typeof http.getJson === "function") {
+                return http.getJson(url, { params: params });
+            }
+            return http.request(url, { params: params }).then(normalizeJobInfoPayload);
+        }
+
+        function fetchWithToken() {
+            if (typeof http.requestWithSessionToken !== "function") {
+                return fetchWithoutToken();
+            }
+            return http.requestWithSessionToken(url, {
+                method: "GET",
+                params: params
+            }).then(normalizeJobInfoPayload);
+        }
+
+        if (self && self._job_status_poll_use_auth === true && typeof http.requestWithSessionToken === "function") {
+            return fetchWithToken().catch(function (error) {
+                if (!isMissingRunContextError(error)) {
+                    throw error;
+                }
+                self._job_status_poll_use_auth = false;
+                return fetchWithoutToken();
+            });
+        }
+
+        return fetchWithoutToken()
+            .then(function (payload) {
+                if (self && self._job_status_poll_use_auth !== false) {
+                    self._job_status_poll_use_auth = false;
+                }
+                return payload;
+            })
+            .catch(function (error) {
+                if (!isAuthError(error) || typeof http.requestWithSessionToken !== "function") {
+                    throw error;
+                }
+                return fetchWithToken()
+                    .then(function (payload) {
+                        if (self) {
+                            self._job_status_poll_use_auth = true;
+                        }
+                        return payload;
+                    })
+                    .catch(function (authError) {
+                        if (self && isMissingRunContextError(authError)) {
+                            self._job_status_poll_use_auth = false;
+                            throw error;
+                        }
+                        throw authError;
+                    });
+            });
+    }
+
     function maybeDispatchCompletion(self, statusObj, source) {
         if (!self || self._job_completion_dispatched) {
             return;
@@ -330,9 +410,7 @@ function controlBase() {
         }
 
         const jobInfoPrimaryUrl = `/rq-engine/api/jobinfo/${encodeURIComponent(jobId)}`;
-        const fetchJobInfo = typeof http.getJson === "function"
-            ? http.getJson(jobInfoPrimaryUrl)
-            : http.request(jobInfoPrimaryUrl).then(normalizeJobInfoPayload);
+        const fetchJobInfo = fetchJobJson(self, http, jobInfoPrimaryUrl);
 
         Promise.resolve(fetchJobInfo)
             .then(function (payload) {
@@ -738,6 +816,7 @@ function controlBase() {
         _job_status_fetch_inflight: false,
         _job_status_error: null,
         _job_status_error_parts: null,
+        _job_status_poll_use_auth: null,
         _job_status_stacktrace_from_poll: false,
         _job_failure_dispatched: false,
         statusStream: null,
@@ -959,9 +1038,7 @@ function controlBase() {
             self._job_status_fetch_inflight = true;
             const http = ensureHttp();
             const primaryUrl = `/rq-engine/api/jobstatus/${encodeURIComponent(self.rq_job_id)}`;
-            const fetchJobStatus = typeof http.getJson === "function"
-                ? http.getJson(primaryUrl, { params: { _: Date.now() } })
-                : http.request(primaryUrl, { params: { _: Date.now() } }).then(normalizeJobInfoPayload);
+            const fetchJobStatus = fetchJobJson(self, http, primaryUrl, { _: Date.now() });
 
             fetchJobStatus
                 .then(function (data) {
@@ -1082,6 +1159,11 @@ function controlBase() {
 
             if (self._job_status_error) {
                 parts.push(`<div class="text-danger small">${escapeHtml(self._job_status_error)}</div>`);
+            }
+
+            const errorDetail = self._job_status_error_parts && self._job_status_error_parts.detail;
+            if (errorDetail !== undefined && errorDetail !== null && String(errorDetail).trim()) {
+                parts.push(`<div class="text-danger small">${escapeHtml(String(errorDetail))}</div>`);
             }
 
             setHtmlContent(self.rq_job, parts.join(""));

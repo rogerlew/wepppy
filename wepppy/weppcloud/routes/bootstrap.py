@@ -44,6 +44,8 @@ def _bootstrap_actor_for_current_user() -> str:
 
 @bootstrap_bp.route("/api/bootstrap/verify-token", methods=["GET", "POST"])
 def verify_token():
+    # CSRF exemption is applied in app bootstrap wiring because this endpoint
+    # is consumed by Caddy forward_auth/git clients, not browser form posts.
     forwarded_path = request.headers.get("X-Forwarded-Uri") or request.headers.get("X-Original-Uri")
 
     try:
@@ -179,4 +181,8 @@ def bootstrap_disable(runid: str, config: str):
         return error_factory("Error Handling Request", status_code=500)
 
 
-__all__ = ["bootstrap_bp"]
+def register_csrf_exemptions(csrf) -> None:
+    csrf.exempt(verify_token)
+
+
+__all__ = ["bootstrap_bp", "register_csrf_exemptions"]

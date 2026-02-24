@@ -5,6 +5,7 @@ import os
 import pickle
 import uuid
 from typing import Any, Mapping, Sequence
+from urllib.parse import urlparse
 
 import redis
 from fastapi import APIRouter, Request
@@ -36,6 +37,7 @@ SESSION_KEY_PREFIX = "session:"
 DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
 BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
 DEFAULT_SITE_PREFIX = "/weppcloud"
+TRUST_FORWARDED_ORIGIN_HEADERS_ENV = "RQ_ENGINE_TRUST_FORWARDED_ORIGIN_HEADERS"
 
 
 def _bool_env(name: str, *, default: bool) -> bool:
@@ -56,6 +58,10 @@ def _session_cookie_name() -> str:
 
 def _session_use_signer() -> bool:
     return _bool_env("SESSION_USE_SIGNER", default=True)
+
+
+def _trust_forwarded_origin_headers() -> bool:
+    return _bool_env(TRUST_FORWARDED_ORIGIN_HEADERS_ENV, default=False)
 
 
 def _secret_key() -> str:
@@ -148,6 +154,108 @@ def _resolve_bearer_claims(request: Request) -> Mapping[str, Any] | None:
     if "authorization" not in {key.lower() for key in request.headers.keys()}:
         return None
     return require_jwt(request, required_scopes=SESSION_TOKEN_REQUIRED_SCOPES)
+
+
+def _normalized_origin(value: str) -> tuple[str, str, int] | None:
+    candidate = str(value or "").strip()
+    if not candidate:
+        return None
+    parsed = urlparse(candidate)
+    scheme = (parsed.scheme or "").strip().lower()
+    host = (parsed.hostname or "").strip().lower()
+    if not scheme or not host:
+        return None
+    port = parsed.port
+    if port is None:
+        if scheme == "https":
+            port = 443
+        elif scheme == "http":
+            port = 80
+        else:
+            return None
+    return scheme, host, int(port)
+
+
+def _request_origin(request: Request) -> str:
+    url = request.url
+    if not url:
+        return ""
+    scheme = (url.scheme or "").strip().lower()
+    host = (url.hostname or "").strip().lower()
+    port = url.port
+    if not scheme or not host:
+        return ""
+    if port is None:
+        if scheme == "https":
+            port = 443
+        elif scheme == "http":
+            port = 80
+        else:
+            return ""
+    return f"{scheme}://{host}:{int(port)}"
+
+
+def _external_origin_scheme(request: Request) -> str:
+    for env_key in ("OAUTH_REDIRECT_SCHEME", "EXTERNAL_SCHEME"):
+        token = (os.getenv(env_key) or "").strip().lower()
+        if token in {"https", "http"}:
+            return token
+    return (request.url.scheme or "").strip().lower() or "https"
+
+
+def _allowed_origin_set(request: Request) -> set[tuple[str, str, int]]:
+    origins: set[tuple[str, str, int]] = set()
+
+    def _add(candidate: str) -> None:
+        normalized = _normalized_origin(candidate)
+        if normalized is not None:
+            origins.add(normalized)
+
+    _add(_request_origin(request))
+
+    host_header = (request.headers.get("host") or "").strip()
+    if host_header:
+        scheme = (request.url.scheme or "").strip().lower() or "https"
+        _add(f"{scheme}://{host_header}")
+
+    forwarded_proto = ""
+    if _trust_forwarded_origin_headers():
+        forwarded_proto = (request.headers.get("X-Forwarded-Proto") or "").split(",")[0].strip().lower()
+        forwarded_host = (request.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
+        if forwarded_proto and host_header:
+            _add(f"{forwarded_proto}://{host_header}")
+        if forwarded_host:
+            _add(f"{forwarded_proto or request.url.scheme}://{forwarded_host}")
+
+    for env_key in ("OAUTH_REDIRECT_HOST", "EXTERNAL_HOST"):
+        host_value = (os.getenv(env_key) or "").strip()
+        if host_value:
+            _add(f"{_external_origin_scheme(request)}://{host_value}")
+
+    return origins
+
+
+def _is_same_origin_cookie_request(request: Request) -> bool:
+    fetch_site = (request.headers.get("Sec-Fetch-Site") or "").strip().lower()
+    if fetch_site == "same-origin":
+        return True
+    if fetch_site in {"cross-site"}:
+        return False
+
+    allowed_origins = _allowed_origin_set(request)
+    origin = (request.headers.get("Origin") or "").strip()
+    if origin:
+        normalized_origin = _normalized_origin(origin)
+        return normalized_origin in allowed_origins
+
+    referer = (request.headers.get("Referer") or "").strip()
+    if not referer:
+        return False
+    parsed = urlparse(referer)
+    if not parsed.scheme or not parsed.netloc:
+        return False
+    normalized_referer_origin = _normalized_origin(f"{parsed.scheme}://{parsed.netloc}")
+    return normalized_referer_origin in allowed_origins
 
 
 def _normalize_list(value: Any) -> list[str]:
@@ -364,6 +472,12 @@ def issue_session_token(runid: str, config: str, request: Request) -> JSONRespon
             session_id = _session_id_from_claims(claims)
             user_id, roles = _identity_from_claims(claims)
         else:
+            if not _is_same_origin_cookie_request(request):
+                raise AuthError(
+                    "Cross-origin request blocked.",
+                    status_code=403,
+                    code="forbidden",
+                )
             try:
                 session_id = _resolve_session_id_from_cookie(request)
                 _session_exists(session_id)
