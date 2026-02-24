@@ -70,6 +70,13 @@ def _normalize_root(root: str) -> NoDirRoot:
 
 
 def _runid_from_wd(wd_path: Path) -> str:
+    # Mirror NoDbBase.runid semantics for pup workspaces so distributed lock
+    # keys stay run-scoped instead of colliding on scenario leaf names.
+    parts = str(wd_path).split(os.sep)
+    if "_pups" in parts:
+        pups_idx = parts.index("_pups")
+        if pups_idx > 0:
+            return parts[pups_idx - 1]
     return wd_path.name
 
 

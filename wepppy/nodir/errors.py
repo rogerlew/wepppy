@@ -18,8 +18,14 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class NoDirError(Exception):
+    """Structured NoDir error payload.
+
+    Keep this exception mutable so contextlib can set ``__traceback__`` when
+    exceptions cross generator-based context managers.
+    """
+
     http_status: int
     code: str
     message: str
@@ -42,4 +48,3 @@ def nodir_locked(message: str) -> NoDirError:
 
 def nodir_limit_exceeded(message: str) -> NoDirError:
     return NoDirError(http_status=413, code="NODIR_LIMIT_EXCEEDED", message=message)
-
