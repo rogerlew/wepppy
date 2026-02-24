@@ -117,15 +117,29 @@ class OmniCloneContrastService:
 
         for root in ("landuse", "soils"):
             resolved_root = nodir_resolve(wd, root, view="effective")
-            if resolved_root is None or resolved_root.form != "archive":
+            if resolved_root is None:
                 continue
-            copy_archive_root_with_projection_retry(
-                wd,
-                new_wd,
-                root,
-                purpose=f"omni-run-contrast-{root}",
-            )
-            copy_mutable_root_sidecar(wd, new_wd, root)
+
+            if resolved_root.form == "archive":
+                copy_archive_root_with_projection_retry(
+                    wd,
+                    new_wd,
+                    root,
+                    purpose=f"omni-run-contrast-{root}",
+                )
+                copy_mutable_root_sidecar(wd, new_wd, root)
+                continue
+
+            if resolved_root.form == "dir":
+                src_root = Path(resolved_root.dir_path)
+                if resolved_root.inner_path:
+                    src_root = src_root / resolved_root.inner_path
+
+                dst_root = Path(new_wd) / root
+                if dst_root.exists():
+                    shutil.rmtree(dst_root)
+                shutil.copytree(str(src_root), str(dst_root))
+                copy_mutable_root_sidecar(wd, new_wd, root)
 
         symlink_entries = {
             "climate.nodb",
@@ -345,19 +359,41 @@ class OmniCloneContrastService:
                     os.fsync(fp.fileno())
 
         soils_root = nodir_resolve(wd, "soils", view="effective")
-        if soils_root is not None and soils_root.form == "archive":
-            copy_archive_root_with_projection_retry(
-                wd,
-                new_wd,
-                "soils",
-                purpose="omni-clone-soils",
-            )
-            copy_mutable_root_sidecar(wd, new_wd, "soils")
+        if soils_root is not None:
+            if soils_root.form == "archive":
+                copy_archive_root_with_projection_retry(
+                    wd,
+                    new_wd,
+                    "soils",
+                    purpose="omni-clone-soils",
+                )
+                copy_mutable_root_sidecar(wd, new_wd, "soils")
+            elif soils_root.form == "dir":
+                src_root = Path(soils_root.dir_path)
+                if soils_root.inner_path:
+                    src_root = src_root / soils_root.inner_path
+
+                dst_root = Path(new_wd) / "soils"
+                if dst_root.exists():
+                    shutil.rmtree(dst_root)
+                shutil.copytree(str(src_root), str(dst_root))
+                copy_mutable_root_sidecar(wd, new_wd, "soils")
 
         landuse_root = nodir_resolve(wd, "landuse", view="effective")
-        if landuse_root is not None and landuse_root.form == "archive":
-            os.makedirs(_join(new_wd, "landuse"), exist_ok=True)
-            copy_mutable_root_sidecar(wd, new_wd, "landuse")
+        if landuse_root is not None:
+            if landuse_root.form == "archive":
+                os.makedirs(_join(new_wd, "landuse"), exist_ok=True)
+                copy_mutable_root_sidecar(wd, new_wd, "landuse")
+            elif landuse_root.form == "dir":
+                src_root = Path(landuse_root.dir_path)
+                if landuse_root.inner_path:
+                    src_root = src_root / landuse_root.inner_path
+
+                dst_root = Path(new_wd) / "landuse"
+                if dst_root.exists():
+                    shutil.rmtree(dst_root)
+                shutil.copytree(str(src_root), str(dst_root))
+                copy_mutable_root_sidecar(wd, new_wd, "landuse")
 
         for fn in os.listdir(wd):
             if fn == "_pups":

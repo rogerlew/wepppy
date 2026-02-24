@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import pytest
 
 import wepppy.nodb.mods.treatments.treatments as treatments_module
+from wepppy.soils.ssurgo import SoilSummary
 
 
 class DummyWatershed:
@@ -184,3 +185,102 @@ def test_modify_soil_does_not_strip_isric_composite_mukey(tmp_path):
 
     with soils.locked():
         treatments._modify_soil(landuse, soils, disturbed, "101")
+
+
+@pytest.mark.unit
+def test_modify_soil_uses_parent_soil_file_when_clone_file_missing(monkeypatch, tmp_path):
+    class DummySoils:
+        def __init__(self, base_soil, parent_wd, soils_dir):
+            self._locked = False
+            self.parent_wd = parent_wd
+            self.soils_dir = soils_dir
+            self.domsoil_d = {"101": "763002"}
+            self.soils = {"763002": base_soil}
+
+        @contextmanager
+        def locked(self):
+            self._locked = True
+            try:
+                yield
+            finally:
+                self._locked = False
+
+        def islocked(self):
+            return self._locked
+
+    class DummyDisturbed:
+        sol_ver = 9005.0
+        h0_max_om = 0.15
+        land_soil_replacements_d = {("mock-texture", "forest high sev fire"): {"ki": 1.0}}
+
+    parent_wd = tmp_path / "parent"
+    parent_soils_dir = parent_wd / "soils"
+    parent_soils_dir.mkdir(parents=True)
+    (parent_soils_dir / "763002.sol").write_text("placeholder", encoding="utf-8")
+
+    child_wd = tmp_path / "child"
+    child_soils_dir = child_wd / "soils"
+    child_soils_dir.mkdir(parents=True)
+
+    base_soil = SoilSummary(
+        mukey="763002",
+        fname="763002.sol",
+        soils_dir=str(child_soils_dir),
+        build_date="2026-01-01T00:00:00",
+        desc="base soil",
+    )
+    soils = DummySoils(base_soil, str(parent_wd), str(child_soils_dir))
+
+    landuse = FakeLanduse(
+        domlc_d={"101": "41"},
+        managements={"41": DummyManagementSummary("forest high sev fire")},
+        mapping={},
+    )
+    disturbed = DummyDisturbed()
+
+    class _FakeWriter:
+        def __init__(self, write_paths):
+            self._write_paths = write_paths
+
+        def write(self, fn):
+            self._write_paths.append(fn)
+
+    call_paths = []
+    write_paths = []
+    to_over9000_kwargs = {}
+
+    class FakeWeppSoilUtil:
+        def __init__(self, fn):
+            call_paths.append(fn)
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(self, replacements, h0_max_om=None, version=None):
+            to_over9000_kwargs.update(
+                replacements=replacements,
+                h0_max_om=h0_max_om,
+                version=version,
+            )
+            return _FakeWriter(write_paths)
+
+    monkeypatch.setattr(treatments_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(treatments_module, "WeppSoilUtil", FakeWeppSoilUtil)
+
+    treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.wd = str(child_wd)
+    treatments.logger = logging.getLogger("test.treatments.modify_soil.parent_fallback")
+
+    with soils.locked():
+        treatments._modify_soil(landuse, soils, disturbed, "101")
+
+    expected_source = str(parent_soils_dir / "763002.sol")
+    expected_mukey = "763002-mock-texture-forest high sev fire"
+    expected_output = str(child_soils_dir / f"{expected_mukey}.sol")
+
+    assert call_paths == [expected_source]
+    assert write_paths == [expected_output]
+    assert soils.domsoil_d["101"] == expected_mukey
+    assert expected_mukey in soils.soils
+    assert to_over9000_kwargs["replacements"] == {"ki": 1.0}
+    assert to_over9000_kwargs["h0_max_om"] == disturbed.h0_max_om
+    assert to_over9000_kwargs["version"] == disturbed.sol_ver

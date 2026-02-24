@@ -2610,6 +2610,66 @@ def test_omni_clone_copies_soils_from_archive_source(tmp_path: Path, omni_module
     assert not (scenario_wd / "landuse.parquet").is_symlink()
 
 
+def test_omni_clone_copies_soils_from_directory_source(tmp_path: Path, omni_module, monkeypatch):
+    base_wd = tmp_path / "run"
+    base_wd.mkdir()
+    (base_wd / "dem").mkdir()
+    (base_wd / "climate").mkdir()
+    (base_wd / "watershed").mkdir()
+    soils_src = base_wd / "soils"
+    soils_src.mkdir()
+    (soils_src / "763002.sol").write_text("soil-data", encoding="ascii")
+    (base_wd / "soils.parquet").write_text("soils-sidecar", encoding="ascii")
+
+    def _resolve(wd: str, rel: str, view: str = "effective"):
+        if wd == str(base_wd) and rel == "soils":
+            return types.SimpleNamespace(
+                form="dir",
+                dir_path=str(base_wd),
+                inner_path="soils",
+            )
+        return None
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+
+    scenario_wd = Path(omni_module._omni_clone({"type": "dummy"}, str(base_wd), runid="run-123"))
+
+    assert (scenario_wd / "soils").is_dir()
+    assert (scenario_wd / "soils" / "763002.sol").read_text(encoding="ascii") == "soil-data"
+    assert (scenario_wd / "soils.parquet").read_text(encoding="ascii") == "soils-sidecar"
+    assert not (scenario_wd / "soils.parquet").is_symlink()
+
+
+def test_omni_clone_copies_landuse_from_directory_source(tmp_path: Path, omni_module, monkeypatch):
+    base_wd = tmp_path / "run"
+    base_wd.mkdir()
+    (base_wd / "dem").mkdir()
+    (base_wd / "climate").mkdir()
+    (base_wd / "watershed").mkdir()
+    landuse_src = base_wd / "landuse"
+    landuse_src.mkdir()
+    (landuse_src / "custom.man").write_text("management-data", encoding="ascii")
+    (base_wd / "landuse.parquet").write_text("landuse-sidecar", encoding="ascii")
+
+    def _resolve(wd: str, rel: str, view: str = "effective"):
+        if wd == str(base_wd) and rel == "landuse":
+            return types.SimpleNamespace(
+                form="dir",
+                dir_path=str(base_wd),
+                inner_path="landuse",
+            )
+        return None
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+
+    scenario_wd = Path(omni_module._omni_clone({"type": "dummy"}, str(base_wd), runid="run-123"))
+
+    assert (scenario_wd / "landuse").is_dir()
+    assert (scenario_wd / "landuse" / "custom.man").read_text(encoding="ascii") == "management-data"
+    assert (scenario_wd / "landuse.parquet").read_text(encoding="ascii") == "landuse-sidecar"
+    assert not (scenario_wd / "landuse.parquet").is_symlink()
+
+
 def test_omni_clone_sibling_copies_archive_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
     parent_wd = tmp_path / "run"
     new_wd = parent_wd / "_pups" / "omni" / "scenarios" / "target"
@@ -2773,6 +2833,87 @@ def test_run_contrast_copies_archive_landuse_and_soils(tmp_path: Path, omni_modu
     assert os.readlink(new_wd / "watershed.hillslopes.parquet") == str(wd / "watershed.hillslopes.parquet")
     assert (new_wd / "watershed.channels.parquet").is_symlink()
     assert os.readlink(new_wd / "watershed.channels.parquet") == str(wd / "watershed.channels.parquet")
+
+
+def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
+    wd = tmp_path / "run"
+    (wd / "climate").mkdir(parents=True)
+    (wd / "watershed").mkdir(parents=True)
+    (wd / "wepp" / "runs").mkdir(parents=True)
+    (wd / "wepp" / "output").mkdir(parents=True)
+    (wd / "wepp" / "runs" / "H1.run").write_text("run", encoding="ascii")
+
+    landuse_src = wd / "landuse"
+    soils_src = wd / "soils"
+    landuse_src.mkdir()
+    soils_src.mkdir()
+    (landuse_src / "landuse.txt").write_text("landuse", encoding="ascii")
+    (soils_src / "soils.txt").write_text("soils", encoding="ascii")
+    (wd / "landuse.parquet").write_text("landuse-sidecar", encoding="ascii")
+    (wd / "soils.parquet").write_text("soils-sidecar", encoding="ascii")
+
+    monkeypatch.setattr(omni_module, "copy_version_for_clone", lambda src, dst: None)
+    monkeypatch.setattr(omni_module, "_clear_nodb_cache_and_locks", lambda runid, pup_relpath=None: None)
+    monkeypatch.setattr(omni_module, "_resolve_base_scenario_key", lambda wd: "undisturbed")
+    monkeypatch.setattr(omni_module, "pick_existing_parquet_path", lambda *_args, **_kwargs: "/tmp/mock.parquet")
+    monkeypatch.setattr(omni_module, "_merge_contrast_parquet", lambda **kwargs: None)
+    monkeypatch.setattr(omni_module, "_apply_contrast_output_triggers", lambda *args, **kwargs: None)
+    monkeypatch.setattr(omni_module, "_post_watershed_run_cleanup", lambda *args, **kwargs: None)
+
+    def _resolve(wd_path: str, rel: str, view: str = "effective"):
+        if wd_path == str(wd) and rel in {"landuse", "soils"}:
+            return types.SimpleNamespace(
+                form="dir",
+                dir_path=str(wd),
+                inner_path=rel,
+            )
+        return None
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+
+    class DummyWepp:
+        def __init__(self, run_wd: str):
+            self.runs_dir = str(Path(run_wd) / "wepp" / "runs")
+            self.output_dir = str(Path(run_wd) / "wepp" / "output")
+            self.baseflow_opts = object()
+            self.wepp_interchange_dir = str(Path(run_wd) / "wepp" / "output" / "interchange")
+            self.wepp_bin = None
+
+        def clean(self):
+            Path(self.runs_dir).mkdir(parents=True, exist_ok=True)
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True)
+
+        def make_watershed_run(self, **kwargs):
+            return None
+
+        def run_watershed(self):
+            return None
+
+        def report_loss(self):
+            return None
+
+    import wepppy.nodb.core as nodb_core
+
+    monkeypatch.setattr(nodb_core.Wepp, "getInstance", lambda run_wd: DummyWepp(run_wd))
+
+    new_wd = Path(
+        omni_module._run_contrast(
+            contrast_id="1",
+            contrast_name="demo",
+            contrasts={10: str(wd / "wepp" / "output" / "H1")},
+            wd=str(wd),
+            runid="run-123",
+            control_scenario_key="undisturbed",
+            contrast_scenario_key="undisturbed",
+        )
+    )
+
+    assert (new_wd / "landuse" / "landuse.txt").read_text(encoding="ascii") == "landuse"
+    assert (new_wd / "soils" / "soils.txt").read_text(encoding="ascii") == "soils"
+    assert (new_wd / "landuse.parquet").read_text(encoding="ascii") == "landuse-sidecar"
+    assert not (new_wd / "landuse.parquet").is_symlink()
+    assert (new_wd / "soils.parquet").read_text(encoding="ascii") == "soils-sidecar"
+    assert not (new_wd / "soils.parquet").is_symlink()
 
 
 def test_run_contrast_rewrites_legacy_omni_prefix_when_pass_dat_exists(

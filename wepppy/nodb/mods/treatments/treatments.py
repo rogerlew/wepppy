@@ -556,6 +556,54 @@ class Treatments(NoDbBase):
 
         return treatment_dom if disturbed_class in ['forest'] else None
 
+    def _resolve_source_soil_path(
+        self,
+        soils_instance: Soils,
+        soil_fname: str,
+        *,
+        topaz_id: str,
+        mukey: str,
+        soil_summary_dir: Optional[str] = None,
+    ) -> str:
+        local_soil_path = _join(soils_instance.soils_dir, soil_fname)
+        if _exists(local_soil_path):
+            return local_soil_path
+
+        checked_paths = [local_soil_path]
+
+        if isinstance(soil_summary_dir, str) and soil_summary_dir:
+            summary_soil_path = _join(soil_summary_dir, soil_fname)
+            if summary_soil_path not in checked_paths:
+                checked_paths.append(summary_soil_path)
+                if _exists(summary_soil_path):
+                    self.logger.info(
+                        "Using summary soil path for topaz_id=%s mukey=%s: %s",
+                        topaz_id,
+                        mukey,
+                        summary_soil_path,
+                    )
+                    return summary_soil_path
+
+        parent_wd = getattr(soils_instance, "parent_wd", None)
+        if isinstance(parent_wd, str) and parent_wd:
+            parent_soil_path = _join(parent_wd, "soils", soil_fname)
+            if parent_soil_path not in checked_paths:
+                checked_paths.append(parent_soil_path)
+                if _exists(parent_soil_path):
+                    self.logger.info(
+                        "Using parent soil path for topaz_id=%s mukey=%s: %s",
+                        topaz_id,
+                        mukey,
+                        parent_soil_path,
+                    )
+                    return parent_soil_path
+
+        checked = ", ".join(checked_paths)
+        raise FileNotFoundError(
+            f"Missing source soil file for topaz_id={topaz_id!r}, mukey={mukey!r}. "
+            f"Checked: {checked}"
+        )
+
     def _modify_soil(self, 
                      landuse_instance: Landuse, 
                      soils_instance: Soils,
@@ -590,8 +638,26 @@ class Treatments(NoDbBase):
             )
 
         _soil = soils_instance.soils[lookup_mukey]
-        clay = _soil.clay
-        sand = _soil.sand
+        soil_u = None
+        source_soil_path = None
+
+        # SoilSummary properties (`clay`, `sand`) parse from on-disk .sol files.
+        # Scenario clones can carry soils.nodb without local .sol payloads, so
+        # resolve the source path explicitly with parent-run fallback.
+        if isinstance(_soil, SoilSummary):
+            source_soil_path = self._resolve_source_soil_path(
+                soils_instance,
+                _soil.fname,
+                topaz_id=str(topaz_id),
+                mukey=str(mukey),
+                soil_summary_dir=getattr(_soil, "soils_dir", None),
+            )
+            soil_u = WeppSoilUtil(source_soil_path)
+            clay = soil_u.clay
+            sand = soil_u.sand
+        else:
+            clay = getattr(_soil, "clay", None)
+            sand = getattr(_soil, "sand", None)
 
         assert isfloat(clay), clay
         assert isfloat(sand), sand
@@ -635,7 +701,21 @@ class Treatments(NoDbBase):
             else:
                 _h0_max_om = None
 
-            soil_u = WeppSoilUtil(_join(soils_instance.soils_dir, _soil.fname))
+            if soil_u is None:
+                soil_fname = getattr(_soil, "fname", None)
+                if not isinstance(soil_fname, str) or not soil_fname:
+                    raise FileNotFoundError(
+                        f"Cannot resolve source soil file for topaz_id={topaz_id!r}, mukey={mukey!r}"
+                    )
+                source_soil_path = self._resolve_source_soil_path(
+                    soils_instance,
+                    soil_fname,
+                    topaz_id=str(topaz_id),
+                    mukey=str(mukey),
+                    soil_summary_dir=getattr(_soil, "soils_dir", None),
+                )
+                soil_u = WeppSoilUtil(source_soil_path)
+
             if sol_ver == 7778.0:
                 new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
             else:
