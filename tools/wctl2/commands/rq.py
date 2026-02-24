@@ -13,20 +13,88 @@ _RQ_BINARY = "/opt/venv/bin/rq"
 _RQ_DEFAULT_QUEUES = ("default", "batch")
 _PYTHON_BIN = "/opt/venv/bin/python"
 _RQ_DETAIL_MODULE = "wepppy.rq.job_summary"
-_RQ_REGISTRY_SYNC_SNIPPET = (
-    "from rq import Worker, worker_registration; "
-    "import redis; "
-    "from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs; "
-    "conn = redis.Redis(**redis_connection_kwargs(RedisDB.RQ)); "
-    "prefix = Worker.redis_worker_namespace_prefix; "
-    "queue_prefix = worker_registration.WORKERS_BY_QUEUE_KEY.split('%s', 1)[0]; "
-    "decode = lambda v: v.decode('utf-8', errors='replace') if isinstance(v, bytes) else str(v); "
-    "worker_keys = sorted({decode(key).strip() for key in conn.scan_iter(match=f'{prefix}*') if key}); "
-    "queue_set_keys = sorted({decode(key).strip() for key in conn.scan_iter(match=f'{queue_prefix}*') if key}); "
-    "conn.delete(Worker.redis_workers_keys, *queue_set_keys); "
-    "[worker_registration.register(worker) "
-    "for worker in (Worker.find_by_key(key, connection=conn) for key in worker_keys) if worker is not None]"
-)
+_RQ_REGISTRY_SYNC_SNIPPET = """
+import inspect
+import re
+
+import redis
+from rq import Queue, Worker, worker_registration
+from rq.job import Job
+from rq.utils import utcformat, utcnow
+
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+
+queue_names = ("default", "batch")
+conn = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+prefix = Worker.redis_worker_namespace_prefix
+queue_prefix = worker_registration.WORKERS_BY_QUEUE_KEY.split("%s", 1)[0]
+
+
+def _decode(value):
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value)
+
+
+def _scan(pattern):
+    return sorted({_decode(key).strip() for key in conn.scan_iter(match=pattern) if key})
+
+
+def _get_started_job_ids(registry):
+    params = inspect.signature(registry.get_job_ids).parameters
+    if "cleanup" in params:
+        return registry.get_job_ids(start=0, end=-1, cleanup=False)
+    return registry.get_job_ids(start=0, end=-1)
+
+
+worker_keys = _scan(f"{prefix}*")
+queue_set_keys = _scan(f"{queue_prefix}*")
+conn.delete(Worker.redis_workers_keys, *queue_set_keys)
+for key in worker_keys:
+    worker = Worker.find_by_key(key, connection=conn)
+    if worker is None:
+        continue
+    worker_registration.register(worker)
+
+if conn.scard(Worker.redis_workers_keys) == 0:
+    now = utcformat(utcnow())
+    uuid_pattern = re.compile(r"^[0-9a-f]{32}$")
+    recovered = set()
+    for queue_name in queue_names:
+        queue = Queue(queue_name, connection=conn)
+        job_ids = list(_get_started_job_ids(queue.started_job_registry))
+        if not job_ids:
+            continue
+        jobs = Job.fetch_many(job_ids, connection=conn)
+        for job in jobs:
+            if job is None:
+                continue
+            worker_name = _decode(getattr(job, "worker_name", "")).strip()
+            if not worker_name or not uuid_pattern.match(worker_name):
+                continue
+            recovered.add(worker_name)
+
+    for worker_name in sorted(recovered):
+        worker_key = f"{prefix}{worker_name}"
+        if not conn.exists(worker_key):
+            conn.hset(
+                worker_key,
+                mapping={
+                    "birth": now,
+                    "last_heartbeat": now,
+                    "queues": ",".join(queue_names),
+                    "state": "busy",
+                    "hostname": "unknown",
+                    "ip_address": "unknown",
+                    "pid": "0",
+                    "version": "unknown",
+                    "python_version": "unknown",
+                },
+            )
+        conn.sadd(Worker.redis_workers_keys, worker_key)
+        for queue_name in queue_names:
+            conn.sadd(worker_registration.WORKERS_BY_QUEUE_KEY % queue_name, worker_key)
+"""
 _RQ_REDIS_URL_SNIPPET = (
     "from wepppy.config.redis_settings import redis_url, RedisDB; "
     "print(redis_url(RedisDB.RQ))"
