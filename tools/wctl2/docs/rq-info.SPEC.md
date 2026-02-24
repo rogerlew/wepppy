@@ -21,8 +21,8 @@ wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
 ## Behavior
 
 - Executes `rq info` inside the `rq-worker` container.
-- Runs a lightweight preflight sync (`python -m tools.wctl2.rq_worker_registry_sync`) to rebuild
-  RQ worker registry set indexes from live worker hash keys before invoking `rq info`.
+- Runs a lightweight inline Python preflight sync to rebuild RQ worker registry set indexes
+  from live worker hash keys before invoking `rq info`.
 - Resolves the Redis URL *inside the container* via `wepppy.config.redis_settings.redis_url(RedisDB.RQ)` so it can:
   - force Redis DB 9
   - inject credentials from `REDIS_PASSWORD_FILE` (preferred) or `REDIS_PASSWORD` (legacy)

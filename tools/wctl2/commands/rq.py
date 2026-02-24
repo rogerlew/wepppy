@@ -13,7 +13,20 @@ _RQ_BINARY = "/opt/venv/bin/rq"
 _RQ_DEFAULT_QUEUES = ("default", "batch")
 _PYTHON_BIN = "/opt/venv/bin/python"
 _RQ_DETAIL_MODULE = "wepppy.rq.job_summary"
-_RQ_REGISTRY_SYNC_MODULE = "tools.wctl2.rq_worker_registry_sync"
+_RQ_REGISTRY_SYNC_SNIPPET = (
+    "from rq import Worker, worker_registration; "
+    "import redis; "
+    "from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs; "
+    "conn = redis.Redis(**redis_connection_kwargs(RedisDB.RQ)); "
+    "prefix = Worker.redis_worker_namespace_prefix; "
+    "queue_prefix = worker_registration.WORKERS_BY_QUEUE_KEY.split('%s', 1)[0]; "
+    "decode = lambda v: v.decode('utf-8', errors='replace') if isinstance(v, bytes) else str(v); "
+    "worker_keys = sorted({decode(key).strip() for key in conn.scan_iter(match=f'{prefix}*') if key}); "
+    "queue_set_keys = sorted({decode(key).strip() for key in conn.scan_iter(match=f'{queue_prefix}*') if key}); "
+    "conn.delete(Worker.redis_workers_keys, *queue_set_keys); "
+    "[worker_registration.register(worker) "
+    "for worker in (Worker.find_by_key(key, connection=conn) for key in worker_keys) if worker is not None]"
+)
 _RQ_REDIS_URL_SNIPPET = (
     "from wepppy.config.redis_settings import redis_url, RedisDB; "
     "print(redis_url(RedisDB.RQ))"
@@ -50,7 +63,7 @@ def _compose_rq_redis_url_command() -> str:
 
 
 def _compose_rq_registry_sync_command() -> str:
-    args = [_PYTHON_BIN, "-m", _RQ_REGISTRY_SYNC_MODULE]
+    args = [_PYTHON_BIN, "-c", _RQ_REGISTRY_SYNC_SNIPPET]
     return _compose_python_command(args)
 
 

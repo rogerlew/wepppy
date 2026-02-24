@@ -6,6 +6,7 @@ import pytest
 from typer.testing import CliRunner
 
 from tools.wctl2.__main__ import app
+from tools.wctl2.commands import rq as rq_command
 
 
 pytestmark = pytest.mark.unit
@@ -18,11 +19,8 @@ class DummyResult:
 def _expected_rq_info_command(extra: str = "") -> str:
     base = (
         "set -euo pipefail; "
-        "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy "
-        "/opt/venv/bin/python -m tools.wctl2.rq_worker_registry_sync; "
-        "redis_url=\"$(cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy "
-        "/opt/venv/bin/python -c "
-        "'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')\"; "
+        f"{rq_command._compose_rq_registry_sync_command()}; "
+        f'redis_url="$({rq_command._compose_rq_redis_url_command()})"; '
         "exec /opt/venv/bin/rq info -u \"$redis_url\" default batch"
     )
     if extra:
