@@ -29,6 +29,10 @@ x-wepppy-env: &wepppy-env
   ENABLE_LOCAL_LOGIN: ${ENABLE_LOCAL_LOGIN:-false}
   WEPPPY_SOURCE_ROOT: ${WEPPPY_SOURCE_ROOT:-/workdir/wepppy}
 
+x-discord-bot-token-secret: &discord-bot-token-secret
+  source: discord_bot_token
+  target: /opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token
+
 x-wepppy-service: &wepppy-service
   <<: *wepppy-image
   init: true
@@ -40,6 +44,7 @@ x-wepppy-service: &wepppy-service
     <<: *wepppy-env
   secrets:
     - redis_password
+    - *discord-bot-token-secret
   volumes:
     - /wc1:/wc1
     - /wc1/geodata:/geodata
@@ -76,6 +81,7 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - postgres_password
       - flask_secret_key
       - flask_security_password_salt
@@ -146,6 +152,7 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - wepp_auth_jwt_secrets
       - dtale_internal_token
     environment:
@@ -179,6 +186,7 @@ services:
         hard: 65536
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - dtale_internal_token
     environment:
       <<: *wepppy-env
@@ -208,6 +216,7 @@ services:
         hard: 65536
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - admin_password
     command:
       - uvicorn
@@ -331,6 +340,7 @@ services:
         hard: 65536
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - wepp_mcp_jwt_secret
     environment:
       <<: *wepppy-env
@@ -356,6 +366,7 @@ services:
         hard: 65536
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - postgres_password
       - flask_secret_key
       - flask_security_password_salt
@@ -421,6 +432,7 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - opentopography_api_key
       - climate_engine_api_key
     environment:
@@ -453,6 +465,7 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - opentopography_api_key
       - climate_engine_api_key
     environment:
@@ -772,6 +785,8 @@ volumes:
 secrets:
   redis_password:
     file: ./secrets/redis_password
+  discord_bot_token:
+    file: ${DISCORD_BOT_TOKEN_FILE:-/dev/null}
   postgres_password:
     file: ./secrets/postgres_password
   flask_secret_key:

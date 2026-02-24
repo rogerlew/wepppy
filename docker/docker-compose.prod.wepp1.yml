@@ -166,3 +166,7 @@ volumes:
   caddy-data:
   caddy-config:
   weppcloudr-renv-cache:
+
+secrets:
+  discord_bot_token:
+    file: /workdir/weppcloud2/weppcloud2/discord_bot/.bot_token

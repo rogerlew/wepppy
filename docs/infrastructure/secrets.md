@@ -49,6 +49,7 @@ Use stable secret IDs so Compose and Kubernetes mount the same filenames:
 | `redis_password` | `redis`, app services | Lower priority if Redis is network-isolated, but still a secret. |
 | `opentopography_api_key` | NoDb controllers / workers | OpenTopography API key used to download DEMs. |
 | `climate_engine_api_key` | NoDb controllers / workers | ClimateEngine API key used by the OpenET Climate Engine integration. |
+| `discord_bot_token` | `weppcloud`, `rq-worker`, `rq-worker-batch` | Mounted directly to `/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token` for vendorized Discord notifications. |
 | `openet_api_key` | NoDb controllers / workers | OpenET API key used by the OpenET monthly time-series API. Not the same as ClimateEngine. |
 | `wc_token` | dev tooling / integrations | Bearer token used by the `climatena_ca` helper (if used). |
 | `admin_password` | test tooling | Automation credential for `profile_recorder` playback. Not needed for core runtime. |
@@ -79,6 +80,7 @@ This section is the Phase 0 “inventory” deliverable for the secrets migratio
 | `redis_password` | `REDIS_PASSWORD` | `REDIS_PASSWORD_FILE` | `redis` container; Python + Go clients | Many services accept `*_REDIS_URL` and inject `REDIS_PASSWORD` if the URL lacks auth. |
 | `opentopography_api_key` | `OPENTOPOGRAPHY_API_KEY` | `OPENTOPOGRAPHY_API_KEY_FILE` | DEM downloads (`wepppy/locales/earth/opentopography`) | Used as a query parameter when calling OpenTopography. |
 | `climate_engine_api_key` | `CLIMATE_ENGINE_API_KEY` | `CLIMATE_ENGINE_API_KEY_FILE` | OpenET Climate Engine integration (`wepppy/nodb/mods/openet`) | Legacy `docker/.env` scanning has been removed; configure `CLIMATE_ENGINE_API_KEY(_FILE)` explicitly. |
+| `discord_bot_token` | *(none; vendor reads file path directly)* | *(none; mounted at fixed vendor path)* | Discord notifications (`weppcloud2.discord_bot.discord_client`) | Compose mounts this secret at `/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token` to satisfy vendor import-time token loading. |
 | `openet_api_key` | `OPENET_API_KEY` | `OPENET_API_KEY_FILE` | OpenET time-series API (`wepppy/locales/conus/openet`) | Different API than ClimateEngine; not interchangeable with `CLIMATE_ENGINE_API_KEY`. |
 | `wc_token` | `WC_TOKEN` | `WC_TOKEN_FILE` | ClimateNA-CA helper (`wepppy/climates/climatena_ca`) | Used as an `Authorization: Bearer ...` token for the external helper service. |
 | `admin_password` | `ADMIN_PASSWORD` | `ADMIN_PASSWORD_FILE` | `wepppy/profile_recorder` | Automation-only credential used by playback harness to log into a WEPPcloud instance. |
