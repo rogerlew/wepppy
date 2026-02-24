@@ -21,10 +21,12 @@ wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
 ## Behavior
 
 - Executes `rq info` inside the `rq-worker` container.
+- Runs a lightweight preflight sync (`python -m tools.wctl2.rq_worker_registry_sync`) to rebuild
+  RQ worker registry set indexes from live worker hash keys before invoking `rq info`.
 - Resolves the Redis URL *inside the container* via `wepppy.config.redis_settings.redis_url(RedisDB.RQ)` so it can:
   - force Redis DB 9
   - inject credentials from `REDIS_PASSWORD_FILE` (preferred) or `REDIS_PASSWORD` (legacy)
-- Appends any extra CLI args after `default batch`.
+- Always targets the `default batch` queue args, then appends any extra CLI args.
 - Returns the exit code from the underlying `rq info` command.
 - Logs the docker compose exec invocation at INFO level (Redis URLs are redacted if present in the logged command).
 - `--detail` appends a job summary (runid, description, auth actor) using the RQ Python API.

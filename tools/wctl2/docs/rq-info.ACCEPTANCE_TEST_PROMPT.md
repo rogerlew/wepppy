@@ -25,7 +25,9 @@
 ## Pass Criteria
 
 - The command exits successfully and displays queue + worker stats for both queues.
-- Extra args (like `--interval 1`) are honored without changing the default queue set.
+- Extra args (like `--interval 1`) are honored.
+- Interval mode (`--interval ...`) preserves native `rq info` refresh behavior.
+- Worker visibility is correct even if Redis worker registry set indexes were stale prior to running the command.
 - `--detail` appends job metadata without breaking the base `rq info` output.
 
 ---

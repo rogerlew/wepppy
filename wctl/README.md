@@ -50,7 +50,7 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl check-rq-contracts` – runs rq-engine route/checklist drift guards (`tools/check_endpoint_inventory.py` and `tools/check_route_contract_checklist.py`) inside the container.
 - `wctl migrate-run` – run run-level migrations by run id (or `--wd` path) and skip already-migrated runs by default.
 - `wctl run-test-profile` / `run-fork-profile` / `run-archive-profile` – drive the profile playback FastAPI service, defaulting to the canonical `backed-globule` smoke profile when no overrides are supplied.
-- `wctl rq-info`: shows RQ stats for the default and batch queues (extra `rq info` args are appended).
+- `wctl rq-info`: shows RQ stats for the default and batch queues (worker registry indexes are auto-healed before `rq info` runs).
 
 Every command supports `--help`, so discovery is as simple as `wctl run-pytest --help`.
 

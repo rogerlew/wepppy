@@ -13,6 +13,7 @@ _RQ_BINARY = "/opt/venv/bin/rq"
 _RQ_DEFAULT_QUEUES = ("default", "batch")
 _PYTHON_BIN = "/opt/venv/bin/python"
 _RQ_DETAIL_MODULE = "wepppy.rq.job_summary"
+_RQ_REGISTRY_SYNC_MODULE = "tools.wctl2.rq_worker_registry_sync"
 _RQ_REDIS_URL_SNIPPET = (
     "from wepppy.config.redis_settings import redis_url, RedisDB; "
     "print(redis_url(RedisDB.RQ))"
@@ -48,11 +49,18 @@ def _compose_rq_redis_url_command() -> str:
     return _compose_python_command(args)
 
 
+def _compose_rq_registry_sync_command() -> str:
+    args = [_PYTHON_BIN, "-m", _RQ_REGISTRY_SYNC_MODULE]
+    return _compose_python_command(args)
+
+
 def _compose_rq_info_command(extra_args: List[str]) -> str:
+    registry_sync_command = _compose_rq_registry_sync_command()
     redis_url_command = _compose_rq_redis_url_command()
     rq_args = quote_args([*_RQ_DEFAULT_QUEUES, *extra_args])
     return (
         "set -euo pipefail; "
+        f"{registry_sync_command}; "
         f'redis_url="$({redis_url_command})"; '
         f'exec {_RQ_BINARY} info -u "$redis_url" {rq_args}'
     )

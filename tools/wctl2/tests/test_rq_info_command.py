@@ -18,6 +18,8 @@ class DummyResult:
 def _expected_rq_info_command(extra: str = "") -> str:
     base = (
         "set -euo pipefail; "
+        "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy "
+        "/opt/venv/bin/python -m tools.wctl2.rq_worker_registry_sync; "
         "redis_url=\"$(cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy "
         "/opt/venv/bin/python -c "
         "'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')\"; "
@@ -64,6 +66,44 @@ def test_rq_info_appends_args(monkeypatch: pytest.MonkeyPatch, temp_project) -> 
         (
             "rq-worker",
             _expected_rq_info_command("--interval 1"),
+            True,
+            False,
+        )
+    ]
+
+
+def test_rq_info_interval_equals_syntax(
+    monkeypatch: pytest.MonkeyPatch,
+    temp_project,
+) -> None:
+    result, recorded = _run_command(monkeypatch, temp_project, ["rq-info", "--interval=2"])
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "rq-worker",
+            _expected_rq_info_command("--interval=2"),
+            True,
+            False,
+        )
+    ]
+
+
+def test_rq_info_interval_with_extra_args(
+    monkeypatch: pytest.MonkeyPatch,
+    temp_project,
+) -> None:
+    result, recorded = _run_command(
+        monkeypatch,
+        temp_project,
+        ["rq-info", "--interval", "1", "--raw"],
+    )
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "rq-worker",
+            _expected_rq_info_command("--interval 1 --raw"),
             True,
             False,
         )
