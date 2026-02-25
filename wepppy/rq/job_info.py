@@ -19,6 +19,18 @@ from wepppy.config.redis_settings import (
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
+def _extract_exc_info(job: Job) -> str | None:
+    meta = job.meta if isinstance(job.meta, dict) else {}
+    exc_info = meta.get("exc_string")
+    if isinstance(exc_info, str) and exc_info.strip():
+        return exc_info
+
+    fallback = getattr(job, "exc_info", None)
+    if isinstance(fallback, str) and fallback.strip():
+        return fallback
+
+    return None
+
 
 def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) -> Dict[str, Any]:
     """Recursively fetch job details including any children jobs."""
@@ -39,7 +51,7 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
         "ended_at": str(job.ended_at) if job.ended_at else None,
         "description": job.description,
         "elapsed_s": elapsed_s,
-        "exc_info": job.meta.get('exc_string'),
+        "exc_info": _extract_exc_info(job),
         "auth_actor": auth_actor if isinstance(auth_actor, dict) else None,
         "children": {}
     }
