@@ -1,14 +1,64 @@
 from __future__ import annotations
 
+import errno
 import json
 import os
 import shutil
+import time
 from os.path import exists as _exists
 from os.path import isfile as _isfile
 from os.path import join as _join
 from os.path import split as _split
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+
+def _rmtree_with_retry(
+    path: str | Path,
+    *,
+    retries: int = 3,
+    delay_seconds: float = 0.25,
+) -> None:
+    path_obj = Path(path)
+    for attempt in range(1, max(1, retries) + 1):
+        try:
+            shutil.rmtree(path_obj)
+            return
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            retryable = exc.errno in {errno.ENOTEMPTY, errno.EBUSY}
+            if not retryable or attempt >= retries:
+                raise
+            time.sleep(delay_seconds * attempt)
+
+
+def _reset_workspace(path: str | Path, *, logger: Any) -> None:
+    target = Path(path)
+    if not target.exists():
+        return
+
+    stale_dir = target.with_name(
+        f"{target.name}.stale.{int(time.time() * 1000)}.{os.getpid()}"
+    )
+    try:
+        os.replace(target, stale_dir)
+    except FileNotFoundError:
+        return
+    except OSError as exc:
+        raise RuntimeError(
+            f"omni clone workspace reset rename failed for {target}: {exc}"
+        ) from exc
+
+    try:
+        _rmtree_with_retry(stale_dir)
+    except OSError as exc:
+        # Boundary catch: stale workspace cleanup should not fail clone startup.
+        logger.warning(
+            "omni clone workspace reset: deferred cleanup failed for %s (%s); leaving stale dir in place",
+            stale_dir,
+            exc,
+        )
 
 
 class OmniCloneContrastService:
@@ -91,7 +141,7 @@ class OmniCloneContrastService:
         pup_relpath = os.path.relpath(new_wd, wd)
 
         if _exists(new_wd):
-            shutil.rmtree(new_wd)
+            _reset_workspace(new_wd, logger=logger)
             clear_nodb_cache_and_locks(runid, pup_relpath)
 
         os.makedirs(new_wd)
@@ -316,7 +366,7 @@ class OmniCloneContrastService:
         pup_relpath = os.path.relpath(new_wd, wd)
 
         if _exists(new_wd):
-            shutil.rmtree(new_wd)
+            _reset_workspace(new_wd, logger=logger)
             clear_nodb_cache_and_locks(runid, pup_relpath)
 
         os.makedirs(new_wd)

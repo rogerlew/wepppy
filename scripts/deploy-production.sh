@@ -1,6 +1,6 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
-# Usage: ./scripts/deploy-production.sh [--skip-pull] [--skip-build] [--skip-themes] [--no-flush-rq-db]
+# Usage: ./scripts/deploy-production.sh [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db]
 
 set -euo pipefail
 
@@ -32,7 +32,7 @@ read_env_value() {
 SKIP_PULL=false
 SKIP_BUILD=false
 SKIP_THEMES=false
-FLUSH_RQ_DB=true
+FLUSH_RQ_DB=false
 FLUSH_RQ_DB_EXPLICIT=false
 REQUIRE_RQ_REDIS=false
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
@@ -76,14 +76,9 @@ done
 cd "${PROJECT_ROOT}"
 
 COMPOSE_SERVICES="$(wctl docker compose config --services)"
-COMPOSE_RENDERED="$(wctl docker compose config)"
 HAS_WEPPCLOUD=false
 if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
     HAS_WEPPCLOUD=true
-fi
-IS_WEPP1_PROFILE=false
-if echo "${COMPOSE_RENDERED}" | grep -q "Caddyfile\\.wepp1"; then
-    IS_WEPP1_PROFILE=true
 fi
 
 if [ "${HAS_WEPPCLOUD}" = true ]; then
@@ -99,17 +94,6 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
 else
     DEPLOY_MODE="worker"
     BUILD_SERVICES=(rq-worker rq-worker-batch weppcloudr)
-fi
-
-# Worker-only production deploys should not clear RQ queue state unless
-# explicitly requested.
-if [ "${DEPLOY_MODE}" = "worker" ] && [ "${FLUSH_RQ_DB_EXPLICIT}" = false ]; then
-    FLUSH_RQ_DB=false
-fi
-
-# wepp1 deploys preserve DB9 queue state by default unless explicitly requested.
-if [ "${IS_WEPP1_PROFILE}" = true ] && [ "${FLUSH_RQ_DB_EXPLICIT}" = false ]; then
-    FLUSH_RQ_DB=false
 fi
 
 echo "============================================"
@@ -149,7 +133,7 @@ echo ">>> Step 3: Stopping services..."
 wctl  down
 echo ""
 
-# Flush RQ Redis DB 9 (optional, default on)
+# Flush RQ Redis DB 9 (optional, default off)
 if [ "${FLUSH_RQ_DB}" = true ]; then
     echo ">>> Step 3b: Flushing Redis DB 9 (RQ)..."
 
@@ -200,7 +184,7 @@ if [ "${FLUSH_RQ_DB}" = true ]; then
     "${SCRIPT_DIR}/redis_flush_rq_db.sh" "${FLUSH_ARGS[@]}"
     echo ""
 else
-    echo ">>> Step 3b: Skipping Redis DB 9 flush (--no-flush-rq-db)"
+    echo ">>> Step 3b: Skipping Redis DB 9 flush (default policy; pass --flush-rq-db to enable)"
     echo ""
 fi
 

@@ -1,3 +1,4 @@
+import errno
 import os
 import importlib
 import json
@@ -569,6 +570,45 @@ def test_omni_clone_links_nodir_shared_inputs(tmp_path: Path, omni_module) -> No
     assert os.readlink(scenario_wd / "watershed.hillslopes.parquet") == str(base_wd / "watershed.hillslopes.parquet")
     assert (scenario_wd / "watershed.channels.parquet").is_symlink()
     assert os.readlink(scenario_wd / "watershed.channels.parquet") == str(base_wd / "watershed.channels.parquet")
+
+
+def test_omni_clone_survives_enotempty_on_existing_workspace_cleanup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    omni_module,
+) -> None:
+    import wepppy.nodb.mods.omni.omni_clone_contrast_service as clone_service_mod
+
+    base_wd = tmp_path / "run"
+    base_wd.mkdir()
+    (base_wd / "dem").mkdir()
+    (base_wd / "climate").mkdir()
+    (base_wd / "watershed").mkdir()
+
+    existing_wd = base_wd / "_pups" / "omni" / "scenarios" / "dummy"
+    (existing_wd / "wepp" / "runs").mkdir(parents=True)
+    (existing_wd / "wepp" / "runs" / "old.run").write_text("old", encoding="ascii")
+
+    monkeypatch.setattr(omni_module, "nodir_resolve", lambda *args, **kwargs: None)
+
+    real_rmtree = clone_service_mod.shutil.rmtree
+    calls = {"enotempty_raised": 0}
+
+    def _flaky_rmtree(path: str | Path, *args: object, **kwargs: object) -> None:
+        path_obj = Path(path)
+        if path_obj.name.startswith("dummy.stale.") and calls["enotempty_raised"] == 0:
+            calls["enotempty_raised"] += 1
+            raise OSError(errno.ENOTEMPTY, "Directory not empty", str(path_obj))
+        real_rmtree(path, *args, **kwargs)
+
+    monkeypatch.setattr(clone_service_mod.shutil, "rmtree", _flaky_rmtree)
+
+    scenario_wd = Path(omni_module._omni_clone({"type": "dummy"}, str(base_wd), runid="run-123"))
+
+    assert calls["enotempty_raised"] == 1
+    assert scenario_wd.is_dir()
+    stale_dirs = list((base_wd / "_pups" / "omni" / "scenarios").glob("dummy.stale.*"))
+    assert stale_dirs == []
 
 
 def test_omni_clone_logs_directory_copy_permission_errors(
