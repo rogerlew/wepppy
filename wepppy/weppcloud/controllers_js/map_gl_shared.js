@@ -235,9 +235,9 @@ var WCMapGlShared = (function () {
         if (tokens.length < 2) {
             return null;
         }
-        var lng = Number(tokens[0]);
-        var lat = Number(tokens[1]);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        var first = Number(tokens[0]);
+        var second = Number(tokens[1]);
+        if (!Number.isFinite(first) || !Number.isFinite(second)) {
             return null;
         }
         var zoom = null;
@@ -247,7 +247,17 @@ var WCMapGlShared = (function () {
                 zoom = parsedZoom;
             }
         }
-        return { lat: lat, lng: lng, zoom: zoom };
+        var lonLatCandidate = { lat: second, lng: first, zoom: zoom };
+        if (isValidLatLng(lonLatCandidate.lat, lonLatCandidate.lng)) {
+            return lonLatCandidate;
+        }
+
+        var latLonCandidate = { lat: first, lng: second, zoom: zoom };
+        if (isValidLatLng(latLonCandidate.lat, latLonCandidate.lng)) {
+            return latLonCandidate;
+        }
+
+        return lonLatCandidate;
     }
 
     function normalizeUrlPayload(input) {
