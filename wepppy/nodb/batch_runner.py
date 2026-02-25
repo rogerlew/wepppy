@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import errno
 from glob import glob
 import hashlib
 import json
@@ -14,7 +15,9 @@ from os.path import split as _split
 
 import re
 from copy import deepcopy
+from pathlib import Path
 import shutil
+import time
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar
 
 from wepppy.all_your_base.geo import raster_stacker
@@ -54,6 +57,60 @@ def _coerce_bool(value: Any) -> bool:
         if lowered in {"false", "0", "no", "off"}:
             return False
     raise ValueError(f"Invalid boolean value: {value!r}")
+
+
+def _rmtree_with_retry(
+    path: str | Path,
+    *,
+    retries: int = 3,
+    delay_seconds: float = 0.25,
+) -> None:
+    path_obj = Path(path)
+    for attempt in range(1, max(1, retries) + 1):
+        try:
+            shutil.rmtree(path_obj)
+            return
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            retryable = exc.errno in {errno.ENOTEMPTY, errno.EBUSY}
+            if not retryable or attempt >= retries:
+                raise
+            time.sleep(delay_seconds * attempt)
+
+
+def _reset_run_workspace(runid_wd: str | Path, logger: logging.Logger) -> None:
+    """Move an existing run workspace aside, then clean it up best-effort.
+
+    Renaming first avoids partially deleting the active target path when
+    concurrent background writers recreate files during recursive cleanup.
+    """
+
+    run_dir = Path(runid_wd)
+    if not run_dir.exists():
+        return
+
+    stale_dir = run_dir.with_name(
+        f"{run_dir.name}.stale.{int(time.time() * 1000)}.{os.getpid()}"
+    )
+    try:
+        os.replace(run_dir, stale_dir)
+    except FileNotFoundError:
+        return
+    except OSError as exc:
+        raise RuntimeError(
+            f"workspace reset rename failed for {run_dir}: {exc}"
+        ) from exc
+
+    try:
+        _rmtree_with_retry(stale_dir)
+    except OSError as exc:
+        # Boundary catch: stale workspace cleanup should not fail the new run.
+        logger.warning(
+            "workspace reset: deferred cleanup failed for %s (%s); leaving stale dir in place",
+            stale_dir,
+            exc,
+        )
 
 
 class BatchRunner(NoDbBase):
@@ -216,9 +273,9 @@ class BatchRunner(NoDbBase):
         base_wd = self.base_wd
         logger.info(f'base_wd: {base_wd}')
         init_required = False
-        if os.path.exists(runid_wd) and self.is_task_enabled(TaskEnum.fetch_dem):
+        if os.path.exists(runid_wd) and self.is_task_enabled(TaskEnum.if_exists_rmtree):
             logger.info(f'removing existing runid_wd: {runid_wd}')
-            shutil.rmtree(runid_wd)
+            _reset_run_workspace(runid_wd, logger)
             init_required = True
 
         if not os.path.exists(runid_wd):
