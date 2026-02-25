@@ -80,8 +80,9 @@ WEPPcloud uses a single Redis instance with multiple logical databases (DBs). St
 |---|---:|---|---|---|
 | Dev (`docker-compose.dev.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (manual) | Use a manual DB9 flush when you want a clean local RQ slate. |
 | Test-prod (`docker-compose.prod.yml`) | Yes | Enabled by default (entrypoint env knobs) | On by default (opt-out) | `./scripts/deploy-production.sh` flushes DB9 unless `--no-flush-rq-db` is passed. |
+| wepp1 (`docker-compose.prod.yml` + `docker-compose.prod.wepp1.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (opt-in) | `./scripts/deploy-production.sh` preserves DB9 unless `--flush-rq-db` is passed. |
 | Prod (`docker-compose.prod.yml` + host overrides) | Yes | Enabled by default (entrypoint env knobs) | On by default (opt-out) | DB9 flush is always scoped to RQ only; never a full Redis wipe. |
-| Worker host (`docker-compose.prod.worker.yml`) | No | N/A (external Redis) | Applies when using deploy tooling on the worker host | Worker-only stacks must set `RQ_REDIS_URL` and do not manage Redis durability. |
+| Worker host (`docker-compose.prod.worker.yml`) | No | N/A (external Redis) | Off by default (opt-in) | Worker-only stacks must set `RQ_REDIS_URL` and do not manage Redis durability. |
 
 ### Redis persistence knobs (Redis server container only)
 

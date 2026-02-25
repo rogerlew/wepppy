@@ -76,9 +76,14 @@ done
 cd "${PROJECT_ROOT}"
 
 COMPOSE_SERVICES="$(wctl docker compose config --services)"
+COMPOSE_RENDERED="$(wctl docker compose config)"
 HAS_WEPPCLOUD=false
 if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
     HAS_WEPPCLOUD=true
+fi
+IS_WEPP1_PROFILE=false
+if echo "${COMPOSE_RENDERED}" | grep -q "Caddyfile\\.wepp1"; then
+    IS_WEPP1_PROFILE=true
 fi
 
 if [ "${HAS_WEPPCLOUD}" = true ]; then
@@ -99,6 +104,11 @@ fi
 # Worker-only production deploys should not clear RQ queue state unless
 # explicitly requested.
 if [ "${DEPLOY_MODE}" = "worker" ] && [ "${FLUSH_RQ_DB_EXPLICIT}" = false ]; then
+    FLUSH_RQ_DB=false
+fi
+
+# wepp1 deploys preserve DB9 queue state by default unless explicitly requested.
+if [ "${IS_WEPP1_PROFILE}" = true ] && [ "${FLUSH_RQ_DB_EXPLICIT}" = false ]; then
     FLUSH_RQ_DB=false
 fi
 
