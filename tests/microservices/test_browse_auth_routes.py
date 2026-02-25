@@ -1379,11 +1379,11 @@ def test_group_user_token_with_privileged_role_is_allowed(
     assert response.status_code == 200
 
 
-def test_culvert_download_rejects_user_token_even_with_privileged_role(
+def test_culvert_download_allows_user_token_with_privileged_role(
     tmp_path: Path,
     load_secure_browse,
 ) -> None:
-    identifier = "culverts-user-download-forbidden"
+    identifier = "culverts-user-download-allowed"
     culverts_root = tmp_path / "culverts"
     _touch(culverts_root / identifier / "runs" / "1001" / "shared.txt", "ok")
 
@@ -1402,8 +1402,35 @@ def test_culvert_download_rejects_user_token_even_with_privileged_role(
             follow_redirects=False,
         )
 
+    assert response.status_code == 200
+    assert response.text == "ok"
+
+
+def test_culvert_download_rejects_user_token_without_privileged_role(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    identifier = "culverts-user-download-role-forbidden"
+    culverts_root = tmp_path / "culverts"
+    _touch(culverts_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", CULVERTS_ROOT=str(culverts_root))
+    app = browse.create_app()
+    token = _issue_token(
+        token_class="user",
+        roles=["User"],
+        subject="42",
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/culverts/{identifier}/download/runs/1001/shared.txt",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
     assert response.status_code == 403
-    assert "Token class is not allowed" in response.text
+    assert "User token requires Admin, PowerUser, Dev, or Root role" in response.text
 
 
 def test_culvert_download_requires_service_group_claim(

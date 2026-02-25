@@ -20,7 +20,7 @@
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/*` | Allowed only for public runs and non-root-only paths | `session`, `user`, `service` | Root-only paths require `Root` role. |
 | `/weppcloud/runs/{runid}/{config}/dtale/*` | Not allowed | `session`, `user`, `service` | Root-only paths require `Root` role. |
 | `/weppcloud/runs/{runid}/{config}/files/*` | Not allowed | `session`, `user`, `service` | Root-only paths require `Root` role. |
-| `/weppcloud/culverts/{uuid}/browse|download|gdalinfo|dtale/*` | Not allowed | `user`, `service` | `download` requires `service` token with `service_groups` containing `culverts`. |
+| `/weppcloud/culverts/{uuid}/browse|download|gdalinfo|dtale/*` | Not allowed | `user`, `service` | `download` accepts privileged `user` tokens (`Admin|PowerUser|Dev|Root`); `service` tokens must include `service_groups=culverts`. |
 | `/weppcloud/batch/{batch_name}/browse|download|gdalinfo|dtale/*` | Allowed only when base run is public and path is non-root-only | `session`, `user`, `service` | `session` claims may be scoped to batch base run alias (`batch;;{batch_name};;_base`). |
 
 ## Group Route Identifier Rules

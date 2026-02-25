@@ -71,7 +71,7 @@ Successful submissions return a short-lived, **batch-scoped** bearer token (curr
 
 Use `browse_token` as `Authorization: Bearer <browse_token>` for:
 - `GET /weppcloud/culverts/{batch_uuid}/browse/*` (interactive browse)
-- `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` (programmatic download; requires `token_class=service` with `service_groups` including `culverts`)
+- `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` (programmatic download via `browse_token`; WEPPcloud also allows privileged `user` tokens for admin browse/download workflows)
 
 ## Payload preparation for wepp.cloud
 

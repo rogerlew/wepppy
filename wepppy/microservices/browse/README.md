@@ -57,6 +57,7 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
 - Canonical policy: [`docs/schemas/weppcloud-browse-auth-contract.md`](../../../docs/schemas/weppcloud-browse-auth-contract.md).
 - Run routes (`/runs/...`) support public-run anonymous browse for non-sensitive paths.
 - Group routes (`/batch/...`, `/culverts/...`) enforce token-based auth and claim scoping.
+- Culvert downloads (`/weppcloud/culverts/{uuid}/download/*`) allow privileged user tokens (`Admin`, `PowerUser`, `Dev`, `Root`) and culvert-scoped service tokens (`service_groups` includes `culverts`).
 - Batch browse re-auth uses a bridge redirect via `/weppcloud/runs/batch;;<batch_name>;;_base/?next=...` to mint browse session cookies for browser flows.
 - Root-only paths (`_logs`, exception logs) require `Root` role on all route families.
 

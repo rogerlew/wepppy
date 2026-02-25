@@ -69,6 +69,7 @@ following environment variables:
   - `jti` MUST be present (revocation checks are mandatory).
 - Access contract:
   - Bearer usage: `Authorization: Bearer <browse_token>`.
+  - Culvert browse/download also accepts privileged `user` tokens (`Admin`, `PowerUser`, `Dev`, `Root`) for WEPPcloud admin workflows.
   - Browse: `/weppcloud/culverts/{batch_uuid}/browse/...`
   - Download: `/weppcloud/culverts/{batch_uuid}/download/{subpath}`
   - Batch archive path (current MVP): `/weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip`

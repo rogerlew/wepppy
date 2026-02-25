@@ -47,7 +47,7 @@
   - `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` requires JWT scope `culvert:batch:retry`.
   - Successful submit/retry responses include `browse_token` + `browse_token_expires_at` for batch-scoped browse/download access.
   - `GET /rq-engine/api/jobstatus/{job_id}` and `/jobinfo/{job_id}` are open only when `RQ_ENGINE_POLL_AUTH_MODE=open`; in `token_optional` or `required`, scope `rq:status` is required.
-  - `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` requires browse authentication; token class must be `service` with `service_groups` including `culverts`.
+  - `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` requires browse authentication; accepts privileged `user` tokens for admin workflows and `service` tokens with `service_groups` including `culverts`.
   - Browse auth checks also require `aud` compatible with `rq-engine` and a `jti` claim (revocation lookup).
   - For culvert downloads, `runs`/`runid` must include the specific `batch_uuid`; otherwise download is denied.
 - Current integration gaps (as of 2026-02-09 review):
