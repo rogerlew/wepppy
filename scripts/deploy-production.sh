@@ -33,6 +33,7 @@ SKIP_PULL=false
 SKIP_BUILD=false
 SKIP_THEMES=false
 FLUSH_RQ_DB=true
+FLUSH_RQ_DB_EXPLICIT=false
 REQUIRE_RQ_REDIS=false
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 
@@ -52,10 +53,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         --flush-rq-db)
             FLUSH_RQ_DB=true
+            FLUSH_RQ_DB_EXPLICIT=true
             shift
             ;;
         --no-flush-rq-db)
             FLUSH_RQ_DB=false
+            FLUSH_RQ_DB_EXPLICIT=true
             shift
             ;;
         --require-rq-redis)
@@ -91,6 +94,12 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
 else
     DEPLOY_MODE="worker"
     BUILD_SERVICES=(rq-worker rq-worker-batch weppcloudr)
+fi
+
+# Worker-only production deploys should not clear RQ queue state unless
+# explicitly requested.
+if [ "${DEPLOY_MODE}" = "worker" ] && [ "${FLUSH_RQ_DB_EXPLICIT}" = false ]; then
+    FLUSH_RQ_DB=false
 fi
 
 echo "============================================"
