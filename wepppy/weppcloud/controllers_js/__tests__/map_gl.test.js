@@ -518,12 +518,12 @@ describe("Map GL controller", () => {
         expect(mapInstance.getZoom()).toBe(6);
     });
 
-    test("goToEnteredLocation accepts lat/lon with degree symbols and zoom", () => {
+    test("goToEnteredLocation accepts lon/lat with degree symbols and zoom", () => {
         const mapInstance = global.MapController.getInstance();
         mapInstance.setView([44.0, -116.0], 6);
 
         const input = document.getElementById("input_centerloc");
-        input.value = "44.0782\u00b0, -122.5714\u00b0, 14";
+        input.value = "-122.5714\u00b0, 44.0782\u00b0, 14";
 
         mapInstance.goToEnteredLocation();
 
@@ -531,6 +531,24 @@ describe("Map GL controller", () => {
         expect(center.lat).toBeCloseTo(44.0782);
         expect(center.lng).toBeCloseTo(-122.5714);
         expect(mapInstance.getZoom()).toBe(14);
+    });
+
+    test("goToEnteredLocation does not auto-swap lat/lon ordering", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.setView([44.0, -116.0], 6);
+
+        const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+        const input = document.getElementById("input_centerloc");
+        input.value = "44.0782\u00b0, -122.5714\u00b0, 14";
+
+        mapInstance.goToEnteredLocation();
+
+        const center = mapInstance.getCenter();
+        expect(center.lat).toBeCloseTo(44.0);
+        expect(center.lng).toBeCloseTo(-116.0);
+        expect(mapInstance.getZoom()).toBe(6);
+        expect(warnSpy).toHaveBeenCalled();
+        warnSpy.mockRestore();
     });
 
     test("enter key emits map:center:requested and keeps zoom when omitted", () => {
