@@ -198,7 +198,7 @@ def create_batch_project():
    
     context = {'feature_enabled': True, 'geojson_limit_mb': _GEOJSON_MAX_MB}
 
-    available_configs = get_configs()
+    available_configs = sorted(get_configs(), key=lambda cfg: cfg.casefold())
     context['available_configs'] = available_configs
 
     errors = []
