@@ -49,5 +49,5 @@ description = "Query-engine specialist for DuckDB/MCP route refactors."
 config_file = "agents/query_engine_refactorer.toml"
 
 [agents.test_guardian]
-description = "Validation specialist for pytest targeting, stub hygiene, and regression coverage."
+description = "Validation specialist for pytest targeting, stub hygiene, and regression coverage. (config_file is out of repo)"
 config_file = "agents/test_guardian.toml"

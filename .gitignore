@@ -62,3 +62,6 @@ tests/wepp/interchange/fixtures/*
 !tests/wepp/interchange/fixtures/decimal-pleasing/**
 
 *.md.bak
+
+# Local-only Codex operator roles (may contain sensitive hostnames/network details)
+.codex/agents/*_operator.toml

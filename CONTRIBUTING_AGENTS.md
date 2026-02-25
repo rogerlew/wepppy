@@ -53,9 +53,11 @@
 - If a touched file worsens materially, include a short rationale or follow-up cleanup note in handoff text.
 
 ## Exception Handling Policy
+- Exception observability is a **canonical requirement**: failures must be diagnosable via logs and surfaced error payloads (for example `error.details` / stack traces) unless doing so would leak PII or secrets.
 - Avoid broad handlers (`except Exception` or bare `except`) in normal code paths.
 - Catch specific exception types when possible; keep error translation explicit and contract-compliant.
 - If a boundary must use a broad catch, keep the block tight, log context, and document the rationale inline.
+- When withholding details for safety, still return a contract-compliant error with a non-sensitive summary, and log the full details to a protected sink.
 
 ## Handoff Hygiene
 - Summarize exactly what changed and why (file-level scope).
