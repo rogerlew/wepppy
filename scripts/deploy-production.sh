@@ -174,6 +174,8 @@ if [ "${FLUSH_RQ_DB}" = true ]; then
     FLUSH_ARGS=()
     if [ "${REQUIRE_FLUSH_REDIS}" = true ]; then
         FLUSH_ARGS+=(--require-redis)
+        export REDIS_PING_ATTEMPTS="${REDIS_PING_ATTEMPTS:-120}"
+        export REDIS_PING_DELAY_SECONDS="${REDIS_PING_DELAY_SECONDS:-1}"
     fi
 
     "${SCRIPT_DIR}/redis_flush_rq_db.sh" "${FLUSH_ARGS[@]}"

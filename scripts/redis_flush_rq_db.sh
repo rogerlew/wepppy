@@ -147,6 +147,10 @@ is_unreachable_error() {
   grep -qiE 'Could not connect|Connection refused|No route to host|Name or service not known|Temporary failure in name resolution|Connection timed out'
 }
 
+is_loading_error() {
+  grep -qiE 'LOADING|BUSYLOADING|Redis is loading the dataset in memory'
+}
+
 REDIS_PING_ATTEMPTS="${REDIS_PING_ATTEMPTS:-}"
 if [[ -z "${REDIS_PING_ATTEMPTS}" ]]; then
   if [[ "${REQUIRE_REDIS}" = true ]]; then
@@ -182,6 +186,19 @@ while true; do
 
     log "WARN" "Redis unreachable at ${REDIS_HOST}:${REDIS_PORT}; skipping Redis DB 9 flush."
     exit 0
+  fi
+
+  if echo "${ping_out}" | is_loading_error; then
+    if [[ "${attempt}" -lt "${REDIS_PING_ATTEMPTS}" ]]; then
+      log "INFO" "Redis is still loading at ${REDIS_HOST}:${REDIS_PORT}; retrying (${attempt}/${REDIS_PING_ATTEMPTS})..."
+      attempt=$((attempt + 1))
+      sleep "${REDIS_PING_DELAY_SECONDS}"
+      unset ping_rc
+      continue
+    fi
+
+    log "ERROR" "Redis remained in LOADING state after ${REDIS_PING_ATTEMPTS} attempts at ${REDIS_HOST}:${REDIS_PORT}."
+    exit 1
   fi
 
   log "ERROR" "Redis PING failed for ${REDIS_HOST}:${REDIS_PORT} (db 9): ${ping_out}"
