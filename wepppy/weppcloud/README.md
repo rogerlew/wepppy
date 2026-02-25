@@ -152,6 +152,7 @@ See `docs/infrastructure/secrets.md` for the authoritative inventory.
 ### Session Lifecycle
 
 - Authoritative session contract: `docs/schemas/weppcloud-session-contract.md`.
+- Authoritative browse-route auth contract: `docs/schemas/weppcloud-browse-auth-contract.md`.
 - Session lifecycle implementation spec: `docs/dev-notes/weppcloud-session-lifecycle.spec.md`.
 - Flask sessions are stored in Redis with a 12-hour lifetime.
 - Session cookie defaults are `Secure=True` and `SameSite=Lax` with per-request refresh enabled (override with `SESSION_COOKIE_SAMESITE` and `SESSION_REFRESH_EACH_REQUEST`).
@@ -161,6 +162,7 @@ See `docs/infrastructure/secrets.md` for the authoritative inventory.
   - Requires authenticated user + same-origin POST
   - Updates Flask session state so Redis TTL is refreshed during long-running rq-engine workflows
 - RQ-engine token minting endpoint: `POST /weppcloud/api/auth/rq-engine-token`
+- Batch browse URLs (`/weppcloud/batch/<batch_name>/browse/...`) may redirect through `/weppcloud/runs/batch;;<batch_name>;;_base/?next=...` to mint browse-session JWT cookies for authenticated browser sessions.
 
 ### URL Structure
 

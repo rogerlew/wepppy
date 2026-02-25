@@ -282,6 +282,39 @@ def test_set_run_session_jwt_cookie_scopes_grouped_run_cookie_without_semicolon_
     assert "%3B" not in set_cookie
 
 
+def test_set_run_session_jwt_cookie_sets_batch_compat_cookie_for_group_routes(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, _runid, _url_for_calls = run0_app
+    batch_runid = "batch;;victoria-ca-2026-sbs;;_base"
+    config = "canada-wbt"
+
+    monkeypatch.setattr(module, "_session_identity_claims", lambda: (42, ["Admin"]))
+    monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: "sid-1")
+    monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
+    monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(module.auth_tokens, "issue_token", lambda *_args, **_kwargs: {"token": "session-token"})
+
+    with app.test_request_context(f"/runs/{batch_runid}/", headers={"X-Forwarded-Proto": "https"}):
+        response = app.make_response(("ok", 200))
+        assert module._set_run_session_jwt_cookie(response, runid=batch_runid, config=config) is True
+
+    cookie_headers = response.headers.getlist("Set-Cookie")
+    digest = hashlib.sha256(f"{batch_runid}\n{config}".encode("utf-8")).hexdigest()[:16]
+    scoped_key = f"{module.DEFAULT_BROWSE_JWT_COOKIE_NAME}_{digest}"
+
+    assert any(
+        header.startswith(f"{scoped_key}=session-token;") and "Path=/weppcloud/runs/" in header
+        for header in cookie_headers
+    )
+    assert any(
+        header.startswith(f"{module.DEFAULT_BROWSE_JWT_COOKIE_NAME}=session-token;")
+        and "Path=/weppcloud;" in header
+        for header in cookie_headers
+    )
+
+
 def test_set_run_session_jwt_cookie_uses_current_user_fallback_when_session_identity_missing(
     run0_app,
     monkeypatch: pytest.MonkeyPatch,

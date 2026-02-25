@@ -46,8 +46,20 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 | `/weppcloud/runs/{runid}/{config}/dtale/{subpath}` | Loads parquet/CSV/TSV/feather/pickle into the D-Tale service and redirects to the D-Tale dataset URL. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/aria2c.spec` | Generates an aria2c manifest for pulling the entire run. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/{subpath}` | Returns `gdalinfo -json` for a raster file. | *(no additional options)* |
+| `/weppcloud/culverts/{uuid}/browse/{subpath}` | Browse culvert grouped-run artifacts. | *(same viewer params as run browse)* |
+| `/weppcloud/culverts/{uuid}/download/{subpath}` | Download culvert grouped-run artifacts. | `as_csv=1` for parquet conversion. |
+| `/weppcloud/batch/{batch_name}/browse/{subpath}` | Browse batch grouped-run artifacts. | *(same viewer params as run browse)* |
+| `/weppcloud/batch/{batch_name}/download/{subpath}` | Download batch grouped-run artifacts. | `as_csv=1` for parquet conversion. |
 
 All routes honor the site prefix automatically (default `/weppcloud`). If the service is deployed behind another prefix, set `SITE_PREFIX` in the environment.
+
+## Auth policy
+- Canonical policy: [`docs/schemas/weppcloud-browse-auth-contract.md`](../../../docs/schemas/weppcloud-browse-auth-contract.md).
+- Run routes (`/runs/...`) support public-run anonymous browse for non-sensitive paths.
+- Group routes (`/batch/...`, `/culverts/...`) enforce token-based auth and claim scoping.
+- Batch browse re-auth uses a bridge redirect via `/weppcloud/runs/batch;;<batch_name>;;_base/?next=...` to mint browse session cookies for browser flows.
+- Root-only paths (`_logs`, exception logs) require `Root` role on all route families.
+
 ## Behavior details
 - **Security**
   - Path traversal is blocked by comparing real paths against the resolved run directory.

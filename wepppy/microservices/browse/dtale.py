@@ -6,7 +6,7 @@ import logging
 import os
 from http import HTTPStatus
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Sequence
 
 import httpx
 from starlette.exceptions import HTTPException
@@ -100,6 +100,10 @@ def build_handlers(
         config: str,
         auth_mode: str,
         wd_override: str | Path | None = None,
+        group_allowed_token_classes: Sequence[str] = USER_SERVICE_TOKEN_CLASSES,
+        group_identifier_claim_aliases: Sequence[str] | None = None,
+        group_allow_public_without_token: bool = False,
+        group_public_runid: str | None = None,
     ):
         if not _DTALE_SERVICE_URL:
             raise HTTPException(
@@ -133,7 +137,10 @@ def build_handlers(
                     request,
                     identifier=runid,
                     subpath=rel_path,
-                    allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+                    allowed_token_classes=group_allowed_token_classes,
+                    identifier_claim_aliases=group_identifier_claim_aliases,
+                    allow_public_without_token=group_allow_public_without_token,
+                    public_runid=group_public_runid,
                 )
             except BrowseAuthError as exc:
                 raise HTTPException(status_code=exc.status_code, detail=exc.message)
@@ -297,12 +304,17 @@ def build_handlers(
     async def dtale_batch_open(request: StarletteRequest):
         batch_name = request.path_params['batch_name']
         batch_root = resolve_batch_root(batch_name)
+        base_runid = f"batch;;{batch_name};;_base"
         return await _dtale_open_for_root(
             request,
             runid=batch_name,
             config='batch',
             auth_mode='group',
             wd_override=batch_root,
+            group_allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+            group_identifier_claim_aliases=(base_runid,),
+            group_allow_public_without_token=True,
+            group_public_runid=base_runid,
         )
 
     return dtale_open, dtale_culvert_open, dtale_batch_open

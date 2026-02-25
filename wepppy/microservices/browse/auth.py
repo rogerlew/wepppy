@@ -294,10 +294,17 @@ def _require_identifier_claim(
     *,
     require_service_claim: bool = True,
     require_session_claim: bool = True,
+    identifier_aliases: Sequence[str] | None = None,
 ) -> None:
     token_class = _normalize_token_class(claims)
     if token_class not in {"service", "session"}:
         return
+
+    allowed_identifiers = {str(identifier)}
+    if identifier_aliases:
+        allowed_identifiers.update(
+            str(alias).strip() for alias in identifier_aliases if str(alias).strip()
+        )
 
     run_claims = _normalize_list(claims.get("runs") or claims.get("runid"))
     if token_class == "service" and require_service_claim and not run_claims:
@@ -312,7 +319,7 @@ def _require_identifier_claim(
             status_code=403,
             code="forbidden",
         )
-    if run_claims and str(identifier) not in run_claims:
+    if run_claims and allowed_identifiers.isdisjoint(run_claims):
         raise BrowseAuthError(
             "Token not authorized for run",
             status_code=403,
@@ -388,15 +395,27 @@ def authorize_group_request(
     subpath: str,
     allowed_token_classes: Sequence[str] = tuple(USER_SERVICE_TOKEN_CLASSES),
     required_service_groups: Sequence[str] | None = None,
+    allow_public_without_token: bool = False,
+    public_runid: str | None = None,
+    identifier_claim_aliases: Sequence[str] | None = None,
 ) -> AuthContext:
+    allowed_token_classes_lower = {item.lower() for item in allowed_token_classes}
+
     def _evaluate_context(context: AuthContext) -> AuthContext:
         root_only = is_root_only_path(subpath)
 
         if not context.is_authenticated:
+            if (
+                allow_public_without_token
+                and not root_only
+                and public_runid
+                and _run_is_public(public_runid)
+            ):
+                return context
             raise BrowseAuthError("Authentication required")
 
         token_class = context.token_class
-        if token_class not in {item.lower() for item in allowed_token_classes}:
+        if token_class not in allowed_token_classes_lower:
             raise BrowseAuthError(
                 "Token class is not allowed for this endpoint",
                 status_code=403,
@@ -408,7 +427,8 @@ def authorize_group_request(
             context.claims,
             identifier,
             require_service_claim=True,
-            require_session_claim=False,
+            require_session_claim="session" in allowed_token_classes_lower,
+            identifier_aliases=identifier_claim_aliases,
         )
         if context.token_class == "user" and not (
             context.roles & GROUP_USER_TOKEN_ALLOWED_ROLES

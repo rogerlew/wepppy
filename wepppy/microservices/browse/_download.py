@@ -332,12 +332,16 @@ async def download_culvert_with_subpath(request: Request) -> Response:
 async def download_batch_with_subpath(request: Request) -> Response:
     subpath = request.path_params.get('subpath', '')
     batch_name = request.path_params['batch_name']
+    base_runid = f"batch;;{batch_name};;_base"
     try:
         auth_context = authorize_group_request(
             request,
             identifier=batch_name,
             subpath=subpath,
-            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+            allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+            identifier_claim_aliases=(base_runid,),
+            allow_public_without_token=True,
+            public_runid=base_runid,
         )
     except BrowseAuthError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.message)

@@ -347,6 +347,10 @@ def _resolve_batch_root(batch_name: str) -> Path:
     return _resolve_root_child(batch_root, batch_name, "batch")
 
 
+def _batch_base_runid(batch_name: str) -> str:
+    return f"batch;;{batch_name};;_base"
+
+
 def _resolve_root_child(root: Path, value: str, label: str) -> Path:
     if not value or value in (".", ".."):
         raise HTTPException(
@@ -1155,15 +1159,24 @@ async def browse_culvert_subpath(request: StarletteRequest):
 
 async def browse_batch_root(request: StarletteRequest):
     batch_name = request.path_params['batch_name']
+    base_runid = _batch_base_runid(batch_name)
     try:
         auth_context = authorize_group_request(
             request,
             identifier=batch_name,
             subpath='',
-            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+            allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+            identifier_claim_aliases=(base_runid,),
+            allow_public_without_token=True,
+            public_runid=base_runid,
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        return handle_auth_error(
+            request,
+            runid=base_runid,
+            error=exc,
+            redirect_on_401=True,
+        )
     batch_root = _resolve_batch_root(batch_name)
     return await _handle_browse_request(
         request,
@@ -1178,15 +1191,24 @@ async def browse_batch_root(request: StarletteRequest):
 async def browse_batch_subpath(request: StarletteRequest):
     batch_name = request.path_params['batch_name']
     subpath = request.path_params.get('subpath', '')
+    base_runid = _batch_base_runid(batch_name)
     try:
         auth_context = authorize_group_request(
             request,
             identifier=batch_name,
             subpath=subpath,
-            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+            allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+            identifier_claim_aliases=(base_runid,),
+            allow_public_without_token=True,
+            public_runid=base_runid,
         )
     except BrowseAuthError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+        return handle_auth_error(
+            request,
+            runid=base_runid,
+            error=exc,
+            redirect_on_401=True,
+        )
     batch_root = _resolve_batch_root(batch_name)
     return await _handle_browse_request(
         request,

@@ -259,6 +259,11 @@ def _browse_jwt_cookie_path(runid: str, config: str) -> str:
     return browse_cookie_path(_site_prefix(), runid, config)
 
 
+def _batch_browse_compat_cookie_path() -> str:
+    prefix = _site_prefix()
+    return prefix or "/"
+
+
 def _cookie_samesite() -> str:
     value = (os.getenv("WEPP_AUTH_SESSION_COOKIE_SAMESITE") or "lax").strip().lower()
     if value in {"lax", "strict", "none"}:
@@ -500,6 +505,16 @@ def _set_run_session_jwt_cookie(response, *, runid: str, config: str) -> bool:
         samesite=_cookie_samesite(),
         path=_browse_jwt_cookie_path(runid, config),
     )
+    if str(runid).startswith("batch;;"):
+        response.set_cookie(
+            key=_browse_jwt_cookie_name(),
+            value=token_value,
+            max_age=SESSION_TOKEN_TTL_SECONDS,
+            httponly=True,
+            secure=_session_cookie_secure(),
+            samesite=_cookie_samesite(),
+            path=_batch_browse_compat_cookie_path(),
+        )
     return True
 
 

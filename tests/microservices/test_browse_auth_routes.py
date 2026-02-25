@@ -1280,6 +1280,14 @@ def test_group_routes_require_auth(
     with TestClient(app) as client:
         response = client.get(f"/weppcloud/{base}/{identifier}/{suffix}", follow_redirects=False)
 
+    if base == "batch" and suffix == "browse/":
+        assert response.status_code == 302
+        parsed = urlparse(response.headers["location"])
+        assert parsed.path == f"/weppcloud/runs/batch;;{identifier};;_base/"
+        next_value = parse_qs(parsed.query).get("next", [""])[0]
+        assert next_value == f"/weppcloud/batch/{identifier}/browse/"
+        return
+
     assert response.status_code == 401
 
 
@@ -1449,6 +1457,14 @@ def test_group_routes_ignore_invalid_cookie_and_still_require_auth(
             f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
             follow_redirects=False,
         )
+
+    if base == "batch":
+        assert response.status_code == 302
+        parsed = urlparse(response.headers["location"])
+        assert parsed.path == f"/weppcloud/runs/batch;;{identifier};;_base/"
+        next_value = parse_qs(parsed.query).get("next", [""])[0]
+        assert next_value == f"/weppcloud/batch/{identifier}/browse/runs/1001/"
+        return
 
     assert response.status_code == 401
 
@@ -1965,18 +1981,15 @@ def test_group_service_token_identifier_mismatch_is_forbidden(
     assert response.status_code == 403
 
 
-@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
-def test_group_routes_reject_session_token_class(
+def test_culvert_group_routes_reject_session_token_class(
     tmp_path: Path,
     load_secure_browse,
-    base: str,
-    root_env: str,
 ) -> None:
     identifier = "group-99"
-    group_root_root = tmp_path / base
+    group_root_root = tmp_path / "culverts"
     _touch(group_root_root / identifier / "runs" / "1001" / "shared.txt", "ok")
 
-    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", **{root_env: str(group_root_root)})
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", CULVERTS_ROOT=str(group_root_root))
     app = browse.create_app()
     token = _issue_token(
         token_class="session",
@@ -1986,12 +1999,40 @@ def test_group_routes_reject_session_token_class(
 
     with TestClient(app) as client:
         response = client.get(
-            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            f"/weppcloud/culverts/{identifier}/browse/runs/1001/",
             headers={"Authorization": f"Bearer {token}"},
             follow_redirects=False,
         )
 
     assert response.status_code == 403
+
+
+def test_batch_group_routes_accept_session_token_scoped_to_base_run(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    identifier = "group-session-allowed"
+    group_root_root = tmp_path / "batch"
+    _touch(group_root_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", BATCH_RUNNER_ROOT=str(group_root_root))
+    app = browse.create_app()
+    base_runid = f"batch;;{identifier};;_base"
+    token = _issue_token(
+        token_class="session",
+        runs=[base_runid],
+        subject="sid-123",
+        extra_claims={"runid": base_runid, "session_id": "sid-123"},
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/batch/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
 
 
 def test_private_browse_stale_session_cookie_redirects_for_reauth(

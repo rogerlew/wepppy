@@ -1,6 +1,6 @@
 # WEPPcloud Session Contract
 > Authoritative contract for WEPPcloud browser sessions, session cookies, heartbeat refresh, and stale-tab UX.
-> **See also:** `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/weppcloud-session-lifecycle.spec.md`
+> **See also:** `docs/schemas/weppcloud-csrf-contract.md`, `docs/schemas/weppcloud-browse-auth-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/weppcloud-session-lifecycle.spec.md`
 
 ## Normative Status
 - This document is normative and authoritative for WEPPcloud session behavior.
@@ -13,6 +13,7 @@
 - Covers browser-facing WEPPcloud session lifecycle and cookies.
 - Covers Flask-side session refresh APIs and client heartbeat behavior.
 - Covers rq-engine session-token minting when sourced from Flask session cookies.
+- Defers browse-route auth and grouped-route policy to `docs/schemas/weppcloud-browse-auth-contract.md`.
 - Defers route-level CSRF policy and classification to `docs/schemas/weppcloud-csrf-contract.md`.
 - Does not redefine JWT claim rules; those remain in `docs/dev-notes/auth-token.spec.md`.
 - Does not redefine canonical error payloads; those remain in `docs/schemas/rq-response-contract.md`.
