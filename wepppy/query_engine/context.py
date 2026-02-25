@@ -21,6 +21,60 @@ class RunContext:
     catalog: DatasetCatalog
 
 
+def _normalize_relative_scenario_parts(raw_scenario: str) -> tuple[str, ...]:
+    scenario_value = str(raw_scenario).strip()
+    if not scenario_value:
+        raise FileNotFoundError("Scenario path is empty")
+
+    scenario_path = Path(scenario_value)
+    if scenario_path.is_absolute():
+        raise FileNotFoundError(scenario_path)
+
+    normalized_parts: list[str] = []
+    for part in scenario_path.parts:
+        if part in ("", "."):
+            continue
+        if part == "..":
+            raise FileNotFoundError(scenario_path)
+        normalized_parts.append(part)
+
+    if not normalized_parts:
+        raise FileNotFoundError(scenario_path)
+    return tuple(normalized_parts)
+
+
+def _resolve_scenario_dir(base: Path, scenario: str | None) -> Path:
+    if scenario is None:
+        return base
+    if str(scenario).strip() == "":
+        return base
+
+    parts = _normalize_relative_scenario_parts(scenario)
+    candidates: list[Path] = []
+
+    def _add_candidate(path: Path) -> None:
+        if path not in candidates:
+            candidates.append(path)
+
+    if len(parts) == 1:
+        scenario_name = parts[0]
+        # Preserve legacy behaviour for bare names.
+        _add_candidate(base / "_pups" / "omni" / "scenarios" / scenario_name)
+        # Support RHESSys scenario directories under the run root.
+        _add_candidate(base / "rhessys" / "scenarios" / scenario_name)
+    else:
+        explicit_path = base.joinpath(*parts)
+        _add_candidate(explicit_path)
+        if len(parts) >= 2 and parts[0] == "omni" and parts[1] == "scenarios":
+            _add_candidate(base / "_pups" / explicit_path.relative_to(base))
+
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+
+    raise FileNotFoundError(candidates[0] if candidates else base)
+
+
 def resolve_run_context(
     runid: str,
     *,
@@ -33,7 +87,10 @@ def resolve_run_context(
 
     Args:
         runid: Path or slug to the WEPP run directory.
-        scenario: Optional scenario slug, relative to the run root.
+        scenario: Optional scenario selector. Supports:
+            - bare scenario names (e.g., ``mulch_30_sbs_map`` or ``S1``)
+            - explicit relative paths (e.g., ``_pups/omni/scenarios/mulch_30_sbs_map`` or
+              ``rhessys/scenarios/S1``)
         auto_activate: When True, trigger `activate_query_engine` if needed.
         run_interchange: When auto-activating, whether to generate interchange outputs.
         force_refresh: When auto-activating, force a catalog rebuild.
@@ -48,11 +105,7 @@ def resolve_run_context(
     if not base.exists():
         raise FileNotFoundError(base)
 
-    scenario_dir = base
-    if scenario:
-        scenario_dir = base / "_pups" / "omni" / "scenarios" / scenario
-        if not scenario_dir.exists():
-            raise FileNotFoundError(scenario_dir)
+    scenario_dir = _resolve_scenario_dir(base, scenario)
 
     catalog: DatasetCatalog | None = None
     try:
