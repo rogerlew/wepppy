@@ -325,6 +325,122 @@ def test_set_run_session_jwt_cookie_uses_current_user_fallback_when_session_iden
     assert "session-token" in set_cookie
 
 
+def test_session_user_authorized_for_grouped_run_uses_parent_public_flag(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _app, module, _runid, _url_for_calls = run0_app
+    wd_calls: list[str] = []
+
+    def fake_get_wd(runid: str, **_kwargs):
+        wd_calls.append(runid)
+        return f"/tmp/{runid}"
+
+    class _AuthRon:
+        @staticmethod
+        def ispublic(wd: str) -> bool:
+            return wd.endswith("/decimal-pleasing")
+
+    monkeypatch.setattr(module, "get_wd", fake_get_wd)
+    monkeypatch.setattr(module, "Ron", _AuthRon)
+    monkeypatch.setattr(
+        module,
+        "get_run_owners_lazy",
+        lambda _runid: pytest.fail("owner lookup should not run for public parent runs"),
+    )
+
+    assert module._session_user_authorized_for_run("decimal-pleasing;;omni;;treated", None, []) is True
+    assert wd_calls == ["decimal-pleasing"]
+
+
+def test_session_user_authorized_for_grouped_batch_run_uses_parent_public_flag(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _app, module, _runid, _url_for_calls = run0_app
+    wd_calls: list[str] = []
+
+    def fake_get_wd(runid: str, **_kwargs):
+        wd_calls.append(runid)
+        return f"/tmp/{runid}"
+
+    class _AuthRon:
+        @staticmethod
+        def ispublic(wd: str) -> bool:
+            return wd.endswith("/batch;;spring-2025;;run-001")
+
+    monkeypatch.setattr(module, "get_wd", fake_get_wd)
+    monkeypatch.setattr(module, "Ron", _AuthRon)
+    monkeypatch.setattr(
+        module,
+        "get_run_owners_lazy",
+        lambda _runid: pytest.fail("owner lookup should not run for public parent runs"),
+    )
+
+    assert (
+        module._session_user_authorized_for_run(
+            "batch;;spring-2025;;run-001;;omni;;treated",
+            None,
+            [],
+        )
+        is True
+    )
+    assert wd_calls == ["batch;;spring-2025;;run-001"]
+
+
+def test_session_user_authorized_for_private_grouped_batch_run_without_owners_is_false(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _app, module, _runid, _url_for_calls = run0_app
+
+    monkeypatch.setattr(module, "get_wd", lambda *_args, **_kwargs: "/tmp/private")
+    monkeypatch.setattr(module, "Ron", type("RonStub", (), {"ispublic": staticmethod(lambda _wd: False)}))
+    monkeypatch.setattr(module, "get_run_owners_lazy", lambda _runid: [])
+    monkeypatch.setattr(module, "_request_current_user_identity", lambda: (None, set()))
+
+    assert (
+        module._session_user_authorized_for_run(
+            "batch;;spring-2025;;run-001;;omni;;treated",
+            None,
+            [],
+        )
+        is False
+    )
+
+
+def test_session_user_authorized_for_grouped_run_uses_parent_owner_lookup(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _app, module, _runid, _url_for_calls = run0_app
+
+    class _Owner:
+        id = 42
+
+    owner_calls: list[str] = []
+
+    monkeypatch.setattr(module, "get_wd", lambda *_args, **_kwargs: "/tmp/private")
+    monkeypatch.setattr(module, "Ron", type("RonStub", (), {"ispublic": staticmethod(lambda _wd: False)}))
+
+    def fake_get_run_owners(runid: str):
+        owner_calls.append(runid)
+        return [_Owner()]
+
+    monkeypatch.setattr(module, "get_run_owners_lazy", fake_get_run_owners)
+    monkeypatch.setattr(module, "_request_current_user_identity", lambda: (None, set()))
+
+    assert (
+        module._session_user_authorized_for_run(
+            "decimal-pleasing;;omni;;treated",
+            42,
+            ["User"],
+        )
+        is True
+    )
+    assert owner_calls == ["decimal-pleasing"]
+
+
 def test_composite_browse_redirect_chain_terminates_after_cookie_mint(
     run0_prefixed_grouped_app,
     monkeypatch: pytest.MonkeyPatch,

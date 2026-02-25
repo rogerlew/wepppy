@@ -145,17 +145,28 @@ def require_roles(claims: Mapping[str, Any], required_roles: Sequence[str]) -> N
         )
 
 
+def _authorization_runid(runid: str) -> str:
+    raw = str(runid or "")
+    parts = raw.split(";;")
+    if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"} and parts[-1]:
+        return ";;".join(parts[:-2])
+    return raw
+
+
 def _authorize_user_claims(claims: Mapping[str, Any], runid: str) -> None:
+    auth_runid = _authorization_runid(runid)
     roles = _normalize_roles(claims.get("roles"))
     if "admin" in roles or "root" in roles:
         return
 
-    wd = get_wd(runid, prefer_active=False)
-    owners = get_run_owners_lazy(runid)
-    if not owners:
+    wd = get_wd(auth_runid, prefer_active=False)
+    owners = get_run_owners_lazy(auth_runid)
+    if Ron.ispublic(wd):
         return
 
-    if Ron.ispublic(wd):
+    if not owners:
+        if auth_runid.startswith("batch;;"):
+            raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
         return
 
     token_sub = str(claims.get("sub") or "").strip()

@@ -336,25 +336,35 @@ def _session_id_from_claims(claims: Mapping[str, Any]) -> str:
     return uuid.uuid4().hex
 
 
+def _authorization_runid(runid: str) -> str:
+    raw = str(runid or "")
+    parts = raw.split(";;")
+    if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"} and parts[-1]:
+        return ";;".join(parts[:-2])
+    return raw
+
+
 def _run_is_public(runid: str) -> bool:
+    auth_runid = _authorization_runid(runid)
     try:
-        wd = get_wd(runid, prefer_active=False)
+        wd = get_wd(auth_runid, prefer_active=False)
     except ValueError:
         return False
     return NoDbBase.ispublic(wd)
 
 
 def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: Sequence[str]) -> bool:
+    auth_runid = _authorization_runid(runid)
     if _run_is_public(runid):
-        return True
-
-    owners = get_run_owners_lazy(runid)
-    if not owners:
         return True
 
     role_set = {role.lower() for role in roles}
     if "admin" in role_set or "root" in role_set:
         return True
+
+    owners = get_run_owners_lazy(auth_runid)
+    if not owners:
+        return not auth_runid.startswith("batch;;")
 
     if user_id is None:
         return False

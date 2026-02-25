@@ -55,25 +55,66 @@ def test_authorize_strips_omni_suffix_for_parent_ownership_checks(monkeypatch: p
     assert wd_calls == ["decimal-pleasing"]
 
 
-def test_authorize_rejects_batch_runids_for_non_admin(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_authorize_rejects_private_batch_runids_for_non_admin(monkeypatch: pytest.MonkeyPatch) -> None:
     app = Flask(__name__)
     app.login_manager = SimpleNamespace()
 
     monkeypatch.setattr(flask_login, "current_user", DummyUser())
+    wd_calls: list[str] = []
 
-    # Ensure we fail before any WD/DB lookups.
-    monkeypatch.setattr(helpers, "get_wd", lambda *_args, **_kwargs: pytest.fail("get_wd should not be called"))
+    def fake_get_wd(runid: str, **_kwargs: object) -> str:
+        wd_calls.append(runid)
+        return f"/tmp/{runid}"
+
+    monkeypatch.setattr(helpers, "get_wd", fake_get_wd)
     import wepppy.weppcloud.app as app_module
 
-    monkeypatch.setattr(
-        app_module,
-        "get_run_owners",
-        lambda *_args, **_kwargs: pytest.fail("get_run_owners should not be called"),
-    )
+    monkeypatch.setattr(app_module, "get_run_owners", lambda *_args, **_kwargs: [])
+
+    class RonStub:
+        @staticmethod
+        def ispublic(_wd: str) -> bool:
+            return False
+
+    monkeypatch.setattr("wepppy.nodb.core.Ron", RonStub)
 
     with app.test_request_context("/"):
         with pytest.raises(Forbidden):
             helpers.authorize("batch;;spring-2025;;run-001", "cfg")
+
+    assert wd_calls == ["batch;;spring-2025;;run-001"]
+
+
+def test_authorize_allows_public_batch_runs_for_anonymous_user(monkeypatch: pytest.MonkeyPatch) -> None:
+    class AnonymousUser:
+        is_authenticated = False
+
+    app = Flask(__name__)
+    app.login_manager = SimpleNamespace()
+
+    monkeypatch.setattr(flask_login, "current_user", AnonymousUser())
+    wd_calls: list[str] = []
+
+    def fake_get_wd(runid: str, **_kwargs: object) -> str:
+        wd_calls.append(runid)
+        return f"/tmp/{runid}"
+
+    monkeypatch.setattr(helpers, "get_wd", fake_get_wd)
+    import wepppy.weppcloud.app as app_module
+
+    monkeypatch.setattr(app_module, "get_run_owners", lambda *_args, **_kwargs: [])
+
+    class RonStub:
+        @staticmethod
+        def ispublic(_wd: str) -> bool:
+            return True
+
+    monkeypatch.setattr("wepppy.nodb.core.Ron", RonStub)
+
+    with app.test_request_context("/"):
+        helpers.authorize("batch;;spring-2025;;run-001", "cfg")
+
+    assert wd_calls == ["batch;;spring-2025;;run-001"]
 
 
 def test_authorize_allows_batch_runids_for_admin(monkeypatch: pytest.MonkeyPatch) -> None:

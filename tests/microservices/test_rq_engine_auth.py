@@ -182,6 +182,102 @@ def test_authorize_user_claims_rejects_non_owner_private_run(monkeypatch: pytest
     assert exc_info.value.code == "forbidden"
 
 
+def test_authorize_user_claims_grouped_omni_runid_uses_parent_run_acl(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Owner:
+        id = 77
+        email = "owner@example.com"
+
+    wd_calls: list[str] = []
+    owner_calls: list[str] = []
+
+    def fake_get_wd(runid: str, **_kwargs: object) -> str:
+        wd_calls.append(runid)
+        return f"/tmp/{runid}"
+
+    def fake_get_run_owners(runid: str):
+        owner_calls.append(runid)
+        return [Owner()]
+
+    monkeypatch.setattr(auth, "get_wd", fake_get_wd)
+    monkeypatch.setattr(auth, "get_run_owners_lazy", fake_get_run_owners)
+    monkeypatch.setattr(auth.Ron, "ispublic", staticmethod(lambda _wd: False))
+
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth._authorize_user_claims(
+            {"roles": [], "sub": "55", "email": "other@example.com"},
+            "decimal-pleasing;;omni;;treated",
+        )
+
+    assert exc_info.value.status_code == 403
+    assert wd_calls == ["decimal-pleasing"]
+    assert owner_calls == ["decimal-pleasing"]
+
+
+def test_authorize_user_claims_grouped_batch_omni_runid_uses_parent_run_acl(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Owner:
+        id = 77
+        email = "owner@example.com"
+
+    wd_calls: list[str] = []
+    owner_calls: list[str] = []
+
+    def fake_get_wd(runid: str, **_kwargs: object) -> str:
+        wd_calls.append(runid)
+        return f"/tmp/{runid}"
+
+    def fake_get_run_owners(runid: str):
+        owner_calls.append(runid)
+        return [Owner()]
+
+    monkeypatch.setattr(auth, "get_wd", fake_get_wd)
+    monkeypatch.setattr(auth, "get_run_owners_lazy", fake_get_run_owners)
+    monkeypatch.setattr(auth.Ron, "ispublic", staticmethod(lambda _wd: False))
+
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth._authorize_user_claims(
+            {"roles": [], "sub": "55", "email": "other@example.com"},
+            "batch;;spring-2025;;run-001;;omni;;treated",
+        )
+
+    assert exc_info.value.status_code == 403
+    assert wd_calls == ["batch;;spring-2025;;run-001"]
+    assert owner_calls == ["batch;;spring-2025;;run-001"]
+
+
+def test_authorize_user_claims_rejects_private_batch_run_without_owners(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(auth, "get_wd", lambda _runid, **_kwargs: "/tmp/private-batch")
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: [])
+    monkeypatch.setattr(auth.Ron, "ispublic", staticmethod(lambda _wd: False))
+
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth._authorize_user_claims(
+            {"roles": [], "sub": "55", "email": "other@example.com"},
+            "batch;;spring-2025;;run-001",
+        )
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.code == "forbidden"
+
+
+def test_authorize_user_claims_allows_public_batch_run_without_owners(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(auth, "get_wd", lambda _runid, **_kwargs: "/tmp/public-batch")
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: [])
+    monkeypatch.setattr(auth.Ron, "ispublic", staticmethod(lambda _wd: True))
+
+    auth._authorize_user_claims(
+        {"roles": [], "sub": "55", "email": "other@example.com"},
+        "batch;;spring-2025;;run-001",
+    )
+
+
 @pytest.mark.parametrize(
     ("claims", "expected"),
     [

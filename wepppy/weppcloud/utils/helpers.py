@@ -663,15 +663,22 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
 
     auth_runid = _strip_omni_suffix_runid(runid)
 
-    # Batch runs are admin-facing and are not tracked in the Run ownership table.
-    # Treat any batch-prefixed runid (including nested batch+omni) as Admin/Root-only.
-    if auth_runid.startswith("batch;;"):
-        abort(403)
-
     # Always use the parent run path for authorization checks, not scenario paths.
     # Omni scenarios/contrasts inherit their parent run's access permissions.
     from wepppy.weppcloud.app import get_run_owners
     wd = get_wd(auth_runid, prefer_active=False)
+    from wepppy.nodb.core import Ron
+
+    # Batch runs may not be represented in the Run ownership table. For batch
+    # runids, require explicit PUBLIC on disk when no owner metadata exists.
+    if auth_runid.startswith("batch;;"):
+        owners = get_run_owners(auth_runid)
+        if owners and current_user in owners:
+            return
+        if Ron.ispublic(wd):
+            return
+        abort(403)
+
     owners = get_run_owners(auth_runid)
 
     if not owners:
@@ -679,9 +686,8 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
     
     if current_user in owners:
         return
-    
-    from wepppy.nodb.core import Ron
-    if  Ron.ispublic(wd):
+
+    if Ron.ispublic(wd):
         return
 
     abort(403)

@@ -165,6 +165,66 @@ def test_browse_allows_public_run_without_token(tmp_path: Path, load_secure_brow
     assert "demo.txt" in response.text
 
 
+def test_browse_grouped_omni_run_uses_parent_public_flag(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    parent_runid = "run-parent"
+    grouped_runid = f"{parent_runid};;omni;;treated"
+    config = "cfg"
+
+    parent_root = tmp_path / parent_runid
+    child_root = tmp_path / grouped_runid
+
+    _touch(parent_root / "PUBLIC", "")
+    _touch(child_root / "demo.txt", "hello")
+
+    browse = load_secure_browse(
+        {parent_runid: parent_root, grouped_runid: child_root},
+        SITE_PREFIX="/weppcloud",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{grouped_runid}/{config}/browse/demo.txt",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "hello" in response.text
+
+
+def test_browse_grouped_batch_omni_run_uses_parent_public_flag(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    parent_runid = "batch;;spring-2025;;run-001"
+    grouped_runid = f"{parent_runid};;omni;;treated"
+    config = "cfg"
+
+    parent_root = tmp_path / "batch-parent"
+    child_root = tmp_path / "batch-child"
+
+    _touch(parent_root / "PUBLIC", "")
+    _touch(child_root / "demo.txt", "hello")
+
+    browse = load_secure_browse(
+        {parent_runid: parent_root, grouped_runid: child_root},
+        SITE_PREFIX="/weppcloud",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{grouped_runid}/{config}/browse/demo.txt",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "hello" in response.text
+
+
 def test_public_browse_ignores_invalid_cookie_without_bearer(
     tmp_path: Path,
     load_secure_browse,

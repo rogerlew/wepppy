@@ -271,9 +271,18 @@ def resolve_bearer_context(request: StarletteRequest) -> AuthContext | None:
     return _context_from_claims(_decode_token(bearer_token), source="bearer")
 
 
+def _authorization_runid(runid: str) -> str:
+    raw = str(runid or "")
+    parts = raw.split(";;")
+    if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"} and parts[-1]:
+        return ";;".join(parts[:-2])
+    return raw
+
+
 def _run_is_public(runid: str) -> bool:
+    auth_runid = _authorization_runid(runid)
     try:
-        wd = get_wd(runid, prefer_active=False)
+        wd = get_wd(auth_runid, prefer_active=False)
     except Exception:
         return False
     return NoDbBase.ispublic(wd)

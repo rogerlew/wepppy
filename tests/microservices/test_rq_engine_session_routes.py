@@ -216,6 +216,92 @@ def test_session_token_allows_public_run_without_cookie(
     assert payload["runid"] == "run-1"
 
 
+def test_run_is_public_uses_parent_run_for_grouped_omni_runid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd_calls: list[str] = []
+
+    def fake_get_wd(runid: str, **_kwargs: object) -> str:
+        wd_calls.append(runid)
+        return f"/tmp/{runid}"
+
+    monkeypatch.setattr(session_routes, "get_wd", fake_get_wd)
+    monkeypatch.setattr(
+        session_routes.NoDbBase,
+        "ispublic",
+        staticmethod(lambda wd: wd.endswith("/decimal-pleasing")),
+    )
+
+    assert session_routes._run_is_public("decimal-pleasing;;omni;;treated") is True
+    assert wd_calls == ["decimal-pleasing"]
+
+
+def test_run_is_public_uses_batch_parent_for_grouped_batch_omni_runid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd_calls: list[str] = []
+
+    def fake_get_wd(runid: str, **_kwargs: object) -> str:
+        wd_calls.append(runid)
+        return f"/tmp/{runid}"
+
+    monkeypatch.setattr(session_routes, "get_wd", fake_get_wd)
+    monkeypatch.setattr(
+        session_routes.NoDbBase,
+        "ispublic",
+        staticmethod(lambda wd: wd.endswith("/batch;;spring-2025;;run-001")),
+    )
+
+    assert (
+        session_routes._run_is_public("batch;;spring-2025;;run-001;;omni;;treated")
+        is True
+    )
+    assert wd_calls == ["batch;;spring-2025;;run-001"]
+
+
+def test_session_user_authorized_uses_parent_owner_list_for_grouped_omni_runid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Owner:
+        id = 42
+
+    owner_calls: list[str] = []
+
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda _runid: False)
+
+    def fake_get_run_owners(runid: str):
+        owner_calls.append(runid)
+        return [Owner()]
+
+    monkeypatch.setattr(session_routes, "get_run_owners_lazy", fake_get_run_owners)
+
+    assert (
+        session_routes._session_user_authorized_for_run(
+            "decimal-pleasing;;omni;;treated",
+            user_id=7,
+            roles=["User"],
+        )
+        is False
+    )
+    assert owner_calls == ["decimal-pleasing"]
+
+
+def test_session_user_authorized_rejects_private_batch_run_without_owners(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda _runid: False)
+    monkeypatch.setattr(session_routes, "get_run_owners_lazy", lambda _runid: [])
+
+    assert (
+        session_routes._session_user_authorized_for_run(
+            "batch;;spring-2025;;run-001",
+            user_id=None,
+            roles=[],
+        )
+        is False
+    )
+
+
 def test_session_token_private_run_requires_authenticated_cookie_session(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

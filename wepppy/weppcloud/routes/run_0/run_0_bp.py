@@ -375,13 +375,18 @@ def _request_current_user_identity() -> tuple[int | None, set[str]]:
     return user_id, elevated_roles
 
 
-def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: list[str]) -> bool:
-    wd = get_wd(runid, prefer_active=False)
-    if Ron.ispublic(wd):
-        return True
+def _authorization_runid(runid: str) -> str:
+    raw = str(runid or "")
+    parts = raw.split(";;")
+    if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"} and parts[-1]:
+        return ";;".join(parts[:-2])
+    return raw
 
-    owners = get_run_owners_lazy(runid)
-    if not owners:
+
+def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: list[str]) -> bool:
+    auth_runid = _authorization_runid(runid)
+    wd = get_wd(auth_runid, prefer_active=False)
+    if Ron.ispublic(wd):
         return True
 
     role_set = {role.lower() for role in roles}
@@ -393,6 +398,10 @@ def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: lis
 
     if "admin" in role_set or "root" in role_set:
         return True
+
+    owners = get_run_owners_lazy(auth_runid)
+    if not owners:
+        return not auth_runid.startswith("batch;;")
 
     effective_user_id = user_id if user_id is not None else fallback_user_id
     if effective_user_id is None:
