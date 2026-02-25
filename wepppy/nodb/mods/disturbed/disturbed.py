@@ -640,6 +640,10 @@ class Disturbed(NoDbBase):
 
                 self._bounds = sbs.export_wgs_map(self.disturbed_wgs)
                 sbs.export_rgb_map(self.disturbed_wgs, self.disturbed_rgb, self.disturbed_rgb_png)
+                sbs_4class_path = self.sbs_4class_path
+                if _exists(sbs_4class_path):
+                    os.remove(sbs_4class_path)
+                sbs.export_4class_map(sbs_4class_path)
 
             self._ct = sbs.ct
             self._is256 = sbs.is256
