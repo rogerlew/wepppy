@@ -7,8 +7,10 @@ import os
 from contextlib import ExitStack
 from datetime import datetime, timezone
 from pathlib import Path
+from time import monotonic, sleep
 from typing import Callable, Iterable, TypeVar
 
+from .errors import NoDirError
 from .fs import resolve
 from .paths import NODIR_ROOTS, NoDirRoot
 from .projections import (
@@ -34,6 +36,7 @@ T = TypeVar("T")
 _DEFAULT_ARCHIVE_ROOTS_FILENAME = ".nodir/default_archive_roots.json"
 _DEFAULT_ARCHIVE_ROOTS_SCHEMA_VERSION = 1
 _DEFAULT_ARCHIVE_ROOTS_ENV = "WEPP_NODIR_DEFAULT_NEW_RUNS"
+_MIN_LOCK_RETRY_INTERVAL_SECONDS = 0.01
 
 
 def default_archive_roots_path(wd: str | Path) -> Path:
@@ -153,6 +156,8 @@ def mutate_roots(
     callback: Callable[[], T],
     *,
     purpose: str = "nodir-mutation",
+    lock_wait_seconds: float = 0.0,
+    lock_retry_interval_seconds: float = 0.25,
 ) -> T:
     """Run ``callback`` with canonical NoDir lock + mutation-session orchestration.
 
@@ -166,6 +171,8 @@ def mutate_roots(
     wd_path = Path(os.path.abspath(str(wd)))
     normalized_roots = _normalize_roots(roots)
     default_archive_roots = read_default_archive_roots(wd_path)
+    lock_wait_budget = max(0.0, float(lock_wait_seconds))
+    lock_retry_interval = max(_MIN_LOCK_RETRY_INTERVAL_SECONDS, float(lock_retry_interval_seconds))
 
     # Fail fast on mixed/invalid/transitional states before lock attempts.
     preflight_root_forms(wd_path, normalized_roots)
@@ -174,9 +181,25 @@ def mutate_roots(
         locks: dict[NoDirRoot, NoDirMaintenanceLock] = {}
         for root in normalized_roots:
             lock_purpose = purpose if len(normalized_roots) == 1 else f"{purpose}/{root}"
-            locks[root] = stack.enter_context(
-                maintenance_lock(wd_path, root, purpose=lock_purpose)
-            )
+            wait_deadline = monotonic() + lock_wait_budget
+            while True:
+                try:
+                    locks[root] = stack.enter_context(
+                        maintenance_lock(wd_path, root, purpose=lock_purpose)
+                    )
+                    break
+                except NoDirError as exc:
+                    if (
+                        exc.code != "NODIR_LOCKED"
+                        or "currently held:" not in exc.message
+                        or lock_wait_budget <= 0.0
+                    ):
+                        raise
+
+                    now = monotonic()
+                    if now >= wait_deadline:
+                        raise
+                    sleep(min(lock_retry_interval, wait_deadline - now))
 
         # Re-check after lock acquisition so form decisions are race-safe.
         forms = preflight_root_forms(wd_path, normalized_roots)
@@ -237,7 +260,16 @@ def mutate_root(
     callback: Callable[[], T],
     *,
     purpose: str = "nodir-mutation",
+    lock_wait_seconds: float = 0.0,
+    lock_retry_interval_seconds: float = 0.25,
 ) -> T:
     """Single-root wrapper around :func:`mutate_roots`."""
 
-    return mutate_roots(wd, (root,), callback, purpose=purpose)
+    return mutate_roots(
+        wd,
+        (root,),
+        callback,
+        purpose=purpose,
+        lock_wait_seconds=lock_wait_seconds,
+        lock_retry_interval_seconds=lock_retry_interval_seconds,
+    )

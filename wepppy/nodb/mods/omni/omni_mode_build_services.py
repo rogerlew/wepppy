@@ -12,6 +12,9 @@ from wepppy.nodir.mutations import mutate_root, mutate_roots
 if TYPE_CHECKING:
     from wepppy.nodb.mods.omni.omni import ContrastMapping, Omni, OmniScenario, ScenarioDef
 
+_OMNI_MUTATION_LOCK_WAIT_SECONDS = 300.0
+_OMNI_MUTATION_LOCK_RETRY_INTERVAL_SECONDS = 0.25
+
 
 class OmniModeBuildServices:
     """Dispatch Omni scenario/contrast builds by selection and scenario mode."""
@@ -87,10 +90,24 @@ class OmniModeBuildServices:
         scenario_key = str(scenario)
 
         def _mutate_landuse_and_soils(callback: Any, *, purpose: str) -> None:
-            mutate_roots(new_wd, ("landuse", "soils"), callback, purpose=purpose)
+            mutate_roots(
+                new_wd,
+                ("landuse", "soils"),
+                callback,
+                purpose=purpose,
+                lock_wait_seconds=_OMNI_MUTATION_LOCK_WAIT_SECONDS,
+                lock_retry_interval_seconds=_OMNI_MUTATION_LOCK_RETRY_INTERVAL_SECONDS,
+            )
 
         def _mutate_soils(callback: Any, *, purpose: str) -> None:
-            mutate_root(new_wd, "soils", callback, purpose=purpose)
+            mutate_root(
+                new_wd,
+                "soils",
+                callback,
+                purpose=purpose,
+                lock_wait_seconds=_OMNI_MUTATION_LOCK_WAIT_SECONDS,
+                lock_retry_interval_seconds=_OMNI_MUTATION_LOCK_RETRY_INTERVAL_SECONDS,
+            )
 
         if scenario_key in {"uniform_low", "uniform_moderate", "uniform_high"}:
             sbs = None

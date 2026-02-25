@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 import wepppy.nodb.mods.omni.omni as omni_module
+import wepppy.nodb.mods.omni.omni_mode_build_services as mode_services_module
 from wepppy.nodb.mods.omni.omni_mode_build_services import OmniModeBuildServices
 
 pytestmark = pytest.mark.unit
@@ -152,6 +153,61 @@ def test_apply_scenario_mode_uniform_runs_expected_build_steps(tmp_path: Path) -
     assert disturbed.validate_calls == [("uniform-1.tif", 1, 1)]
     assert landuse.build_calls == 1
     assert soils.calls == [2]
+
+
+def test_apply_scenario_mode_uniform_passes_mutation_lock_wait(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+    captured: dict[str, object] = {}
+
+    def _fake_mutate_roots(wd, roots, callback, *, purpose, lock_wait_seconds, lock_retry_interval_seconds):
+        captured["wd"] = wd
+        captured["roots"] = tuple(roots)
+        captured["purpose"] = purpose
+        captured["lock_wait_seconds"] = lock_wait_seconds
+        captured["lock_retry_interval_seconds"] = lock_retry_interval_seconds
+        return callback()
+
+    monkeypatch.setattr(mode_services_module, "mutate_roots", _fake_mutate_roots)
+
+    class DisturbedStub:
+        def build_uniform_sbs(self, severity: int) -> str:
+            return f"uniform-{severity}.tif"
+
+        def validate(self, sbs_fn: str, mode: int, uniform_severity: int | None = None) -> None:
+            return None
+
+    class LanduseStub:
+        def build(self) -> None:
+            return None
+
+    class SoilsStub:
+        def build(self, max_workers: int | None = None) -> None:
+            return None
+
+    service.apply_scenario_mode(
+        omni,
+        scenario_name="uniform_low",
+        scenario=omni_module.OmniScenario.UniformLow,
+        scenario_def={"type": "uniform_low"},
+        new_wd=omni.wd,
+        disturbed=DisturbedStub(),
+        landuse=LanduseStub(),
+        soils=SoilsStub(),
+        omni_base_scenario_name=None,
+    )
+
+    assert captured["wd"] == omni.wd
+    assert captured["roots"] == ("landuse", "soils")
+    assert captured["purpose"] == "omni-uniform_low-build-landuse-soils"
+    assert captured["lock_wait_seconds"] == mode_services_module._OMNI_MUTATION_LOCK_WAIT_SECONDS
+    assert (
+        captured["lock_retry_interval_seconds"]
+        == mode_services_module._OMNI_MUTATION_LOCK_RETRY_INTERVAL_SECONDS
+    )
 
 
 def test_apply_scenario_mode_undisturbed_enforces_sbs_guard(tmp_path: Path) -> None:

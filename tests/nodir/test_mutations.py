@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import threading
+import time
 import zipfile
 from pathlib import Path
 
@@ -57,6 +58,10 @@ class _RedisLockStub:
                     return 1
                 return 0
         raise AssertionError(f"unexpected eval script: {script}")
+
+    def force_set(self, key: str, value: str) -> None:
+        with self._lock:
+            self._store[key] = value
 
 
 def _write_zip(path: Path, entries: dict[str, bytes | str]) -> None:
@@ -288,3 +293,63 @@ def test_mutate_roots_acquires_locks_in_sorted_order(
         maintenance_lock_key(wd, "soils"),
     ]
     assert lock_stub.history[:2] == expected_prefix
+
+
+def test_mutate_root_waits_for_transient_lock_contention(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+
+    lock_stub = _RedisLockStub()
+    _patch_lock_clients(monkeypatch, lock_stub)
+
+    key = maintenance_lock_key(wd, "watershed")
+    lock_stub.force_set(key, "held-by-peer")
+
+    def _release_lock() -> None:
+        time.sleep(0.05)
+        lock_stub.delete(key)
+
+    releaser = threading.Thread(target=_release_lock)
+    releaser.start()
+    try:
+        result = mutate_root(
+            wd,
+            "watershed",
+            lambda: "ok",
+            purpose="test-lock-wait-success",
+            lock_wait_seconds=1.0,
+            lock_retry_interval_seconds=0.01,
+        )
+    finally:
+        releaser.join(timeout=1.0)
+
+    assert result == "ok"
+    assert lock_stub.get(key) is None
+
+
+def test_mutate_root_lock_wait_timeout_raises_nodir_locked(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+
+    lock_stub = _RedisLockStub()
+    _patch_lock_clients(monkeypatch, lock_stub)
+
+    key = maintenance_lock_key(wd, "watershed")
+    lock_stub.force_set(key, "held-by-peer")
+
+    with pytest.raises(NoDirError) as exc:
+        mutate_root(
+            wd,
+            "watershed",
+            lambda: "ok",
+            purpose="test-lock-wait-timeout",
+            lock_wait_seconds=0.05,
+            lock_retry_interval_seconds=0.01,
+        )
+
+    assert exc.value.http_status == 503
+    assert exc.value.code == "NODIR_LOCKED"
