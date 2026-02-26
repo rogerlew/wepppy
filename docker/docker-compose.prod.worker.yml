@@ -26,6 +26,10 @@ x-worker-env: &worker-env
   RQ_LOGGING_LEVEL: INFO
   WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
 
+x-discord-bot-token-secret: &discord-bot-token-secret
+  source: discord_bot_token
+  target: /workdir/weppcloud2/weppcloud2/discord_bot/.bot_token
+
 x-worker-service: &worker-service
   <<: *wepppy-image
   init: true
@@ -48,6 +52,7 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - opentopography_api_key
       - climate_engine_api_key
     environment:
@@ -69,6 +74,7 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - *discord-bot-token-secret
       - opentopography_api_key
       - climate_engine_api_key
     environment:
@@ -108,6 +114,8 @@ volumes:
 secrets:
   redis_password:
     file: ./secrets/redis_password
+  discord_bot_token:
+    file: ${DISCORD_BOT_TOKEN_FILE:-/dev/null}
   opentopography_api_key:
     file: ./secrets/opentopography_api_key
   climate_engine_api_key:

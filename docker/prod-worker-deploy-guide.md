@@ -39,6 +39,8 @@ ufw allow out to <redis_ip> port 6379 proto tcp
 
 ### Required secret files
 - `docker/secrets/redis_password`
+- `DISCORD_BOT_TOKEN_FILE` should point to a token file (for example `docker/secrets/discord_bot_token`) when Discord notifications are enabled.
+  - If `DISCORD_BOT_TOKEN_FILE` is unset, the worker compose defaults to `/dev/null` so worker startup does not fail on missing `.bot_token`.
 
 ### Optional
 - `WEPPCLOUDR_CONTAINER` (defaults to `weppcloudr`)
@@ -87,6 +89,12 @@ wctl rq-info
 ```
 You should see worker entries for both the main host and the worker node.
 
+Important:
+- `rq-info` shows RQ worker `hostname` values, which are typically Docker container IDs (for example `9a0f1116bfe1`), not host FQDNs like `wepp2.tail305ec9.ts.net`.
+- To map a reported hostname/container id back to the host:
+  - On each host, run `docker ps --format '{{.ID}} {{.Names}}'`.
+  - Match the ID prefix from `rq-info` to the container list.
+
 ### Validate Redis auth
 Inside the worker host:
 ```
@@ -112,6 +120,21 @@ RQ is pull-based; lower latency or more local processes can bias job pickup. Opt
 - Verify UFW rules and private NIC routing.
 - Validate Redis is bound to the private interface.
 - Use `redis-cli` from the worker host to confirm connectivity.
+
+### Worker host missing from `wepp1 wctl rq-info`
+Use this checklist when workers do not appear in `wepp1` `rq-info` output:
+1. On the worker host, verify compose env and token path:
+   - `grep -nE '^(RQ_REDIS_URL|DISCORD_BOT_TOKEN_FILE)=' docker/.env`
+2. Verify required files exist and are readable:
+   - `ls -l docker/secrets/redis_password docker/secrets/discord_bot_token`
+3. Recreate worker services:
+   - `wctl up -d --force-recreate rq-worker rq-worker-batch`
+4. Confirm no restart loop:
+   - `wctl docker compose ps rq-worker rq-worker-batch`
+   - `wctl logs --tail 100 rq-worker rq-worker-batch`
+5. Re-check registration:
+   - On worker host: `wctl rq-info`
+   - On wepp1 host: `wctl rq-info`
 
 ## Common Commands
 - Tail logs: `wctl logs -f rq-worker`
