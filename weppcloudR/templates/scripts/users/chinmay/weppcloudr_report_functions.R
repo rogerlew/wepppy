@@ -197,8 +197,56 @@ resolve_active_root <- function(runid, pup = NULL) {
   candidate
 }
 
-run_path <- function(runid, ..., pup = NULL) {
-  file.path(resolve_active_root(runid, pup), ...)
+logical_parquet_to_sidecar_relpath <- function(logical_relpath) {
+  rel <- gsub("^/+", "", logical_relpath)
+  if (identical(rel, "landuse/landuse.parquet")) {
+    return("landuse.parquet")
+  }
+  if (identical(rel, "soils/soils.parquet")) {
+    return("soils.parquet")
+  }
+  if (grepl("^climate/[^/]+\\.parquet$", rel)) {
+    return(sub("^climate/([^/]+\\.parquet)$", "climate.\\1", rel))
+  }
+  if (grepl("^watershed/[^/]+\\.parquet$", rel)) {
+    return(sub("^watershed/([^/]+\\.parquet)$", "watershed.\\1", rel))
+  }
+  NULL
+}
+
+run_path <- function(runid, ..., pup = NULL, prefer_existing = TRUE) {
+  root <- resolve_active_root(runid, pup)
+  rel_parts <- list(...)
+  if (!length(rel_parts)) {
+    return(root)
+  }
+
+  rel_path <- do.call(file.path, rel_parts)
+  canonical <- file.path(root, rel_path)
+  if (!prefer_existing) {
+    return(canonical)
+  }
+
+  parquet_overrides <- getOption("weppcloudr_parquet_overrides", NULL)
+  if (!is.null(parquet_overrides) && !is.null(parquet_overrides[[rel_path]])) {
+    override_path <- parquet_overrides[[rel_path]]
+    if (is.character(override_path) && length(override_path) == 1 && file.exists(override_path)) {
+      return(override_path)
+    }
+  }
+
+  sidecar_rel <- logical_parquet_to_sidecar_relpath(rel_path)
+  if (!is.null(sidecar_rel)) {
+    sidecar <- file.path(root, sidecar_rel)
+    if (file.exists(sidecar)) {
+      return(sidecar)
+    }
+  }
+
+  if (file.exists(canonical)) {
+    return(canonical)
+  }
+  canonical
 }
 
 run_title_anchor <- function(runid, config = NULL) {

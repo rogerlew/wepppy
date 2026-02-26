@@ -225,12 +225,15 @@ build_error_diagnostics <- function(err) {
   ))
 }
 
-render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE) {
+render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, parquet_overrides = NULL) {
   template_path <- DEFAULT_TEMPLATE
   if (!file.exists(template_path)) {
     log_warn("Template {template_path} not found; returning placeholder HTML")
     return("<html><body><h3>DEVAL report template missing</h3></body></html>")
   }
+  previous_overrides <- getOption("weppcloudr_parquet_overrides", NULL)
+  options(weppcloudr_parquet_overrides = parquet_overrides)
+  on.exit(options(weppcloudr_parquet_overrides = previous_overrides), add = TRUE)
   output_dir <- file.path(run_path, "export", "WEPPcloudR")
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   output_file <- file.path(output_dir, glue("deval_{runid}.htm"))

@@ -5,6 +5,7 @@ from __future__ import annotations
 import inspect
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -19,6 +20,9 @@ from wepppy.rq.exception_logging import with_exception_logging
 
 DEFAULT_CONTAINER_NAME = os.getenv("WEPPCLOUDR_CONTAINER", "weppcloudr")
 DEFAULT_TIMEOUT = int(os.getenv("WEPPCLOUDR_COMMAND_TIMEOUT", "1800"))
+
+_CLIMATE_SIDECAR_RE = re.compile(r"^climate\.([^/]+)\.parquet$")
+_WATERSHED_SIDECAR_RE = re.compile(r"^watershed\.([^/]+)\.parquet$")
 
 
 class WeppcloudRError(RuntimeError):
@@ -52,6 +56,40 @@ def _write_command_logs(output_dir: Path, job_id: str, stdout: str, stderr: str)
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:50", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         # Best effort logging; avoid masking the main error path.
         pass
+
+
+def _sidecar_to_logical_parquet(name: str) -> Optional[str]:
+    """Translate WD-level NoDir parquet sidecar names into logical parquet ids."""
+    if name == "landuse.parquet":
+        return "landuse/landuse.parquet"
+    if name == "soils.parquet":
+        return "soils/soils.parquet"
+    climate_match = _CLIMATE_SIDECAR_RE.match(name)
+    if climate_match:
+        return f"climate/{climate_match.group(1)}.parquet"
+    watershed_match = _WATERSHED_SIDECAR_RE.match(name)
+    if watershed_match:
+        return f"watershed/{watershed_match.group(1)}.parquet"
+    return None
+
+
+def _discover_nodir_parquet_overrides(active_path: Path) -> dict[str, str]:
+    """Return logical parquet ids mapped to existing WD-level sidecar paths."""
+    overrides: dict[str, str] = {}
+    try:
+        entries = list(active_path.iterdir())
+    except OSError:
+        return overrides
+
+    for entry in entries:
+        if not entry.is_file():
+            continue
+        logical_path = _sidecar_to_logical_parquet(entry.name)
+        if logical_path is None:
+            continue
+        overrides[logical_path] = str(entry)
+
+    return dict(sorted(overrides.items()))
 
 
 @with_exception_logging
@@ -120,6 +158,7 @@ def render_deval_details_rq(
             "runid": runid,
             "config": config,
             "skip_cache": bool(skip_cache_flag),
+            "parquet_overrides": _discover_nodir_parquet_overrides(active_path),
         }
         payload_json = json.dumps(payload, ensure_ascii=False)
         escaped_payload = payload_json.replace("\\", "\\\\").replace("'", "\\'")
@@ -128,7 +167,8 @@ def render_deval_details_rq(
             "suppressPackageStartupMessages(library(jsonlite));"
             f"payload <- jsonlite::fromJSON('{escaped_payload}');"
             "source('/srv/weppcloudr/plumber.R');"
-            "render_deval(payload$run_path, payload$runid, payload$config, skip_cache = payload$skip_cache);"
+            "render_deval(payload$run_path, payload$runid, payload$config, "
+            "skip_cache = payload$skip_cache, parquet_overrides = payload$parquet_overrides);"
         )
 
         exec_container = container_name or DEFAULT_CONTAINER_NAME
