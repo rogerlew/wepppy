@@ -63,6 +63,26 @@ nodata_value     {no_data}
 _TIMEOUT = 60
 
 
+def _get_env_int(name, default):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+
+    try:
+        parsed = int(value)
+    except ValueError:
+        return default
+
+    if parsed <= 0:
+        return default
+
+    return parsed
+
+
+_MAX_SUBPROCESS_OUTPUT_LINES = _get_env_int('TOPAZ_MAX_SUBPROCESS_OUTPUT_LINES', 20000)
+_MAX_SUBPROCESS_AUTO_RESPONSES = _get_env_int('TOPAZ_MAX_SUBPROCESS_AUTO_RESPONSES', 25)
+
+
 def _read_chn_order_from_netw_tab(subwta_fn, netw_tab_fn) -> dict[str, int]:
     """
     read the channel order from the NETW.TAB file
@@ -205,6 +225,14 @@ class RasforCrashedException(Exception):
     """
 
     __name__ = 'Rasfor Crashed Exception'
+
+
+class TopazSubprocessGuardError(Exception):
+    """
+    topaz subprocess hit a protective guard and was terminated
+    """
+
+    __name__ = 'Topaz Subprocess Guard Error'
 
 
 class TopazRunner:
@@ -821,63 +849,89 @@ class TopazRunner:
         if verbose:
             print('cmd: %s\ncwd: %s\n' % (cmd, self.topaz_wd))
 
-        # need to use try catch to make sure we have a chance to switch the
-        # working directory back
-        lines = []
+        lines = deque(maxlen=_MAX_SUBPROCESS_OUTPUT_LINES)
+        dropped_line_count = 0
+        auto_response_count = 0
+        auto_response_markers = (
+            'OR  0 TO STOP PROGRAM EXECUTION.',
+            'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES',
+            'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.',
+        )
 
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd)
 
-        # on pass 2 we need to write '1' to standard input
-        if stdin is not None:
-            p.stdin.write(stdin.encode("utf-8"))
-            p.stdin.flush()
+        try:
+            # on pass 2 we need to write '1' to standard input
+            if stdin is not None:
+                p.stdin.write(stdin.encode("utf-8"))
+                p.stdin.flush()
 
-        abort_count = 0
+            while p.poll() is None:
+                raw_output = p.stdout.readline()
+                if raw_output == b'':
+                    time.sleep(0.01)
+                    continue
 
-        while p.poll() is None:
-            output = p.stdout.readline().decode("utf-8")
-            output = output.strip()
+                output = raw_output.decode("utf-8", errors="replace").strip()
 
-            if output != '':
+                if output != '':
+                    if len(lines) == lines.maxlen:
+                        dropped_line_count += 1
+                    lines.append(output)
+
+                if verbose:
+                    sys.stdout.write(output + '\n')
+                    sys.stdout.flush()
+
+                if any(marker in output for marker in auto_response_markers):
+                    auto_response_count += 1
+                    if auto_response_count > _MAX_SUBPROCESS_AUTO_RESPONSES:
+                        p.kill()
+                        raise TopazSubprocessGuardError(
+                            'Exceeded %s auto-responses while running %s'
+                            % (_MAX_SUBPROCESS_AUTO_RESPONSES, cmd)
+                        )
+
+                    p.stdin.write(b'1\n')
+                    p.stdin.flush()
+
+            # Drain any buffered stdout emitted right before process exit.
+            while True:
+                raw_output = p.stdout.readline()
+                if raw_output == b'':
+                    break
+
+                output = raw_output.decode("utf-8", errors="replace").strip()
+                if output == '':
+                    continue
+
+                if len(lines) == lines.maxlen:
+                    dropped_line_count += 1
                 lines.append(output)
 
-            if verbose:
-                sys.stdout.write(output + '\n')
-                sys.stdout.flush()
-
-            # If the input dem is large it give a warning and prompts whether or not it should continue
-            if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
-                p.stdin.write(b'1\n')
-                p.stdin.flush()
-
-
-            # This comes up if the outlet isn't a channel and we are trying to build
-            # subcatchments. The build_subcatchments method preprocesses the outlet
-            # to find a channel, so this shouldn't happen (unless something else breaks)
-            #
-            # It comes up once even if the outlet is a hillslope that is why we write '1'
-            # to the stdin if we are on pass 2.
-            if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
-                p.stdin.write(b'1\n')
-                p.stdin.flush()
-
-            # This occurs if the watershed extends beyond the dem. There isn't a way
-            # of checking that, and novice users have a hard time recognizing this
-            # condition from the channel map
-            if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
-                p.stdin.write(b'1\n')
-                p.stdin.flush()
-                abort_count += 1
-
-            # if the abort count is greater than 2, then abort
-            if abort_count > 10:
+                if verbose:
+                    sys.stdout.write(output + '\n')
+                    sys.stdout.flush()
+        finally:
+            if p.poll() is None:
                 p.kill()
 
-        p.stdin.close()
-        p.stdout.close()
+            if p.stdin is not None and not p.stdin.closed:
+                p.stdin.close()
+
+            if p.stdout is not None and not p.stdout.closed:
+                p.stdout.close()
+
+        output_lines = [line for line in lines if line != '']
+        if dropped_line_count:
+            output_lines.insert(
+                0,
+                '[topaz output truncated: dropped %s lines to cap memory]'
+                % dropped_line_count,
+            )
 
         # return output as list of strings
-        return [line for line in lines if line != '']
+        return output_lines
 
     def _run_dednm(self, _pass=1, verbose=False):
         topaz_wd = self.topaz_wd
