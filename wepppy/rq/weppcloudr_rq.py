@@ -92,6 +92,22 @@ def _discover_nodir_parquet_overrides(active_path: Path) -> dict[str, str]:
     return dict(sorted(overrides.items()))
 
 
+def _build_render_deval_expression(escaped_payload: str) -> str:
+    """Build an R expression that invokes render_deval with version-safe args."""
+    return (
+        "suppressPackageStartupMessages(library(jsonlite));"
+        f"payload <- jsonlite::fromJSON('{escaped_payload}');"
+        "source('/srv/weppcloudr/plumber.R');"
+        "render_args <- list(payload$run_path, payload$runid, payload$config, "
+        "skip_cache = payload$skip_cache);"
+        "supports_parquet_overrides <- 'parquet_overrides' %in% names(formals(render_deval));"
+        "if (supports_parquet_overrides) {"
+        "render_args$parquet_overrides <- payload$parquet_overrides;"
+        "};"
+        "do.call(render_deval, render_args);"
+    )
+
+
 @with_exception_logging
 def render_deval_details_rq(
     runid: str,
@@ -162,14 +178,7 @@ def render_deval_details_rq(
         }
         payload_json = json.dumps(payload, ensure_ascii=False)
         escaped_payload = payload_json.replace("\\", "\\\\").replace("'", "\\'")
-
-        r_expression = (
-            "suppressPackageStartupMessages(library(jsonlite));"
-            f"payload <- jsonlite::fromJSON('{escaped_payload}');"
-            "source('/srv/weppcloudr/plumber.R');"
-            "render_deval(payload$run_path, payload$runid, payload$config, "
-            "skip_cache = payload$skip_cache, parquet_overrides = payload$parquet_overrides);"
-        )
+        r_expression = _build_render_deval_expression(escaped_payload)
 
         exec_container = container_name or DEFAULT_CONTAINER_NAME
         exec_timeout = timeout if timeout is not None else DEFAULT_TIMEOUT

@@ -25,7 +25,7 @@
 | `path_ce_rq.py / path_ce_rq.pyi` | `run_path_cost_effective_rq` | Runs the PATH cost-effective optimization flow and timestamps the result in `RedisPrep`. |
 | `land_and_soil_rq.py / land_and_soil_rq.pyi` | `land_and_soil_rq` | Builds landuse/soils extracts for arbitrary extents, bundles them via `tar -I pigz`, returns the archive path. |
 | `interchange_rq.py / interchange_rq.pyi` | `run_interchange_migration` | Generates WEPP interchange products (hillslope + watershed) and TotalWatSed summaries once the required outputs exist. |
-| `weppcloudr_rq.py / weppcloudr_rq.pyi` | `render_deval_details_rq` | Bridges WEPPcloud runs to the R-based reporting container, handling caching, docker exec orchestration, and log capture. |
+| `weppcloudr_rq.py / weppcloudr_rq.pyi` | `render_deval_details_rq` | Bridges WEPPcloud runs to the R-based reporting container, handling NoDir parquet sidecar discovery, signature-compatible `render_deval(...)` invocation across container versions, caching, docker exec orchestration, and log capture. |
 | `agent_rq.py / agent_rq.pyi` | `spawn_wojak_session` | Starts CAO/Ash (Codex Agent Orchestrator) sessions for Wojak, stores JWT/environment metadata in Redis, and kicks off bootstrap scripts. |
 | `job_info.py / job_info.pyi` | `get_wepppy_rq_job_info`, `get_wepppy_rq_job_status` | Recursively inspects job trees for UI diagnostics (elapsed time, child states, aggregated status). |
 | `cancel_job.py / cancel_job.pyi` | `cancel_jobs` | Stops a job plus all descendants by replaying the stored `job.meta["jobs:*"]` hierarchy. |
