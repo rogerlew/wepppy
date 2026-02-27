@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict
@@ -209,6 +210,77 @@ def test_task_modify_disturbed_writes_lookup(disturbed_client):
     assert data == payload["rows"]
 
 
+def test_modify_disturbed_page_emits_csrf_token_for_save(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    pytest.importorskip("flask_wtf")
+    from flask import jsonify
+    from flask_wtf.csrf import CSRFError, CSRFProtect
+
+    template_dir = Path(__file__).resolve().parents[3] / "wepppy" / "weppcloud" / "templates"
+    app = Flask(__name__, template_folder=str(template_dir))
+    app.config["TESTING"] = True
+    app.secret_key = "csrf-test-secret"
+    CSRFProtect(app)
+    app.register_blueprint(disturbed_module.disturbed_bp)
+
+    @app.errorhandler(CSRFError)
+    def csrf_error(_exc):
+        return jsonify({"error": {"message": "csrf failed"}}), 400
+
+    run_dir = tmp_path / RUN_ID
+    run_dir.mkdir()
+    lookup_csv = run_dir / "lookup.csv"
+    lookup_csv.write_text("")
+    context = SimpleNamespace(active_root=run_dir)
+    monkeypatch.setattr(disturbed_module, "load_run_context", lambda runid, config: context)
+
+    disturbed_instance = SimpleNamespace(lookup_fn=str(lookup_csv))
+
+    class DisturbedStub:
+        @classmethod
+        def getInstance(cls, wd: str):
+            return disturbed_instance
+
+    monkeypatch.setattr(disturbed_module, "Disturbed", DisturbedStub)
+
+    captured: Dict[str, Any] = {}
+
+    def fake_write_lookup(path: str, rows: Any) -> None:
+        captured["path"] = path
+        captured["rows"] = rows
+
+    monkeypatch.setattr(disturbed_module, "write_disturbed_land_soil_lookup", fake_write_lookup)
+
+    with app.test_client() as client:
+        page_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/modify_disturbed")
+        assert page_response.status_code == 200
+        html = page_response.get_data(as_text=True)
+        token_match = re.search(r'<meta name="csrf-token" content="([^"]+)"', html)
+        assert token_match is not None
+        token = token_match.group(1)
+        assert token
+        assert "X-CSRFToken" in html
+
+        rejected_response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+            json=[["forest", "loam"]],
+        )
+        assert rejected_response.status_code == 400
+
+        accepted_response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+            json=[["forest", "loam"]],
+            headers={"X-CSRFToken": token},
+        )
+        assert accepted_response.status_code == 200
+        assert accepted_response.get_json() == {}
+
+    assert captured["path"] == str(lookup_csv)
+    assert captured["rows"] == [["forest", "loam"]]
+
+
 def test_query_baer_wgs_map_returns_metadata(disturbed_client):
     client, *_ = disturbed_client
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/baer_wgs_map")
@@ -332,4 +404,3 @@ def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
     baer_controller = BaerStub.getInstance(run_dir)
     assert baer_controller.sbs_mode == 1
     assert baer_controller.uniform_severity == 9
-
