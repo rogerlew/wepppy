@@ -334,6 +334,16 @@
     return out;
   }
 
+  function csrfHeaders(baseHeaders = {}) {
+    const headers = { ...baseHeaders };
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    const token = meta ? String(meta.getAttribute("content") || "").trim() : "";
+    if (token && !headers["X-CSRFToken"] && !headers["X-CSRF-Token"]) {
+      headers["X-CSRFToken"] = token;
+    }
+    return headers;
+  }
+
   // ---- core helpers ----
   async function ensureRegistration() {
     const reg = await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE });
@@ -359,7 +369,7 @@
     const payload = { subscription: sub.toJSON ? sub.toJSON() : { endpoint: sub.endpoint, keys: sub.keys || {} }, run_id: RUN_ID };
     const res = await fetch(`${WEBPUSH_BASE}/subscriptions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: csrfHeaders({ "Content-Type": "application/json" }),
       credentials: "same-origin",
       body: JSON.stringify(payload)
     });
@@ -399,7 +409,7 @@
     if (!runId || !subId) return;
     const r = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: csrfHeaders({ "Content-Type": "application/json" }),
       credentials: "same-origin",
       body: JSON.stringify({ run_id: runId, enabled: true, ttl_days: 7 })
     });
@@ -410,7 +420,7 @@
     if (!runId || !subId) return;
     const r = await fetch(`${WEBPUSH_BASE}/subscriptions/${encodeURIComponent(subId)}/runs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: csrfHeaders({ "Content-Type": "application/json" }),
       credentials: "same-origin",
       body: JSON.stringify({ run_id: runId, enabled: false })
     });

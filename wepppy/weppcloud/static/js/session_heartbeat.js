@@ -82,6 +82,14 @@
     return (context.sitePrefix || "") + "/login?next=" + encodeURIComponent(currentPath);
   }
 
+  function readCsrfToken() {
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    if (!meta) {
+      return "";
+    }
+    return String(meta.getAttribute("content") || "").trim();
+  }
+
   function createSessionExpiredBanner(context) {
     if (document.getElementById("wc-session-expired-banner")) {
       return;
@@ -176,12 +184,17 @@
       return;
     }
     inFlight = true;
+    var headers = {
+      Accept: "application/json"
+    };
+    var csrfToken = readCsrfToken();
+    if (csrfToken) {
+      headers["X-CSRFToken"] = csrfToken;
+    }
     fetch(url, {
       method: "POST",
       credentials: "same-origin",
-      headers: {
-        Accept: "application/json"
-      }
+      headers: headers
     })
       .then(function (response) {
         if (!response.ok) {

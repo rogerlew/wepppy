@@ -207,6 +207,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return fallback;
     }
 
+    function csrfHeaders(baseHeaders) {
+        var headers = Object.assign({}, baseHeaders || {});
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        var token = meta ? String(meta.getAttribute('content') || '').trim() : '';
+        if (token && !headers['X-CSRFToken'] && !headers['X-CSRF-Token']) {
+            headers['X-CSRFToken'] = token;
+        }
+        return headers;
+    }
+
     function runReset() {
         if (!endpoint) {
             setMessage('error', 'Browser reset endpoint is not configured.');
@@ -219,9 +229,9 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(endpoint, {
             method: 'POST',
             credentials: 'same-origin',
-            headers: {
+            headers: csrfHeaders({
                 'Accept': 'application/json'
-            }
+            })
         })
             .then(function(response) {
                 return response.json().catch(function() { return {}; }).then(function(payload) {
@@ -344,6 +354,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return fallback;
     }
 
+    function csrfHeaders(baseHeaders) {
+        var headers = Object.assign({}, baseHeaders || {});
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        var token = meta ? String(meta.getAttribute('content') || '').trim() : '';
+        if (token && !headers['X-CSRFToken'] && !headers['X-CSRF-Token']) {
+            headers['X-CSRFToken'] = token;
+        }
+        return headers;
+    }
+
     function updateTokenViews(payloadContent) {
         var token = payloadContent && payloadContent.token ? String(payloadContent.token) : '';
         var expiresAt = payloadContent ? payloadContent.expires_at : null;
@@ -408,9 +428,9 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(mintEndpoint, {
             method: 'POST',
             credentials: 'same-origin',
-            headers: {
+            headers: csrfHeaders({
                 'Accept': 'application/json'
-            }
+            })
         })
             .then(function(response) {
                 return response.json().catch(function() { return {}; }).then(function(payload) {
@@ -469,6 +489,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
+    function csrfHeaders(baseHeaders) {
+        var headers = Object.assign({}, baseHeaders || {});
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        var token = meta ? String(meta.getAttribute('content') || '').trim() : '';
+        if (token && !headers['X-CSRFToken'] && !headers['X-CSRF-Token']) {
+            headers['X-CSRFToken'] = token;
+        }
+        return headers;
+    }
+
     document.querySelectorAll("input[name^='usermod_']").forEach(function(input) {
         input.addEventListener('change', function() {
             var res = this.name.split("_");
@@ -479,9 +509,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             fetch("/tasks/usermod/", {
                 method: "POST",
-                headers: {
+                headers: csrfHeaders({
                     "Content-Type": "application/json; charset=utf-8"
-                },
+                }),
                 body: JSON.stringify({
                     user_id: user_id,
                     role: role,

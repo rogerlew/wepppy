@@ -566,6 +566,16 @@
     return null;
   }
 
+  function csrfHeaders(baseHeaders = {}) {
+    const headers = { ...baseHeaders };
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    const token = meta ? String(meta.getAttribute("content") || "").trim() : '';
+    if (token && !headers['X-CSRFToken'] && !headers['X-CSRF-Token']) {
+      headers['X-CSRFToken'] = token;
+    }
+    return headers;
+  }
+
   async function pollDeleteJob(jobId, runid, attempt = 0) {
     const maxAttempts = 120;
     const delayMs = Math.min(2000 + attempt * 500, 8000);
@@ -613,7 +623,10 @@
 
   async function deleteRun(runid) {
     try {
-      const response = await fetch(`${sitePrefix}/runs/${runid}/0/tasks/delete/`, { method: 'POST' });
+      const response = await fetch(`${sitePrefix}/runs/${runid}/0/tasks/delete/`, {
+        method: 'POST',
+        headers: csrfHeaders(),
+      });
       const payload = await response.json().catch(() => null);
       if (!response.ok || (payload && payload.error)) {
         throw new Error(payload?.error?.message || 'Failed to enqueue delete');

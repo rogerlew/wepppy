@@ -74,6 +74,16 @@
 </section>
 
 <script type="module">
+function csrfHeaders(baseHeaders = {}) {
+  const headers = { ...baseHeaders };
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const token = meta ? String(meta.getAttribute('content') || '').trim() : '';
+  if (token && !headers['X-CSRFToken'] && !headers['X-CSRF-Token']) {
+    headers['X-CSRFToken'] = token;
+  }
+  return headers;
+}
+
 document.querySelectorAll('input[name^="usermod_"]').forEach(checkbox => {
   checkbox.addEventListener('change', async function() {
     const parts = this.name.split('_');
@@ -84,9 +94,9 @@ document.querySelectorAll('input[name^="usermod_"]').forEach(checkbox => {
     try {
       const response = await fetch('{{ url_for("admin.task_usermod") }}', {
         method: 'POST',
-        headers: {
+        headers: csrfHeaders({
           'Content-Type': 'application/json'
-        },
+        }),
         body: JSON.stringify({
           user_id: userId,
           role: role,
@@ -115,4 +125,3 @@ document.querySelectorAll('input[name^="usermod_"]').forEach(checkbox => {
 </section>
 {% endif %}
 {% endblock %}
-

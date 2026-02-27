@@ -93,6 +93,16 @@
         setStatus(message, true);
       }
 
+      function csrfHeaders(baseHeaders) {
+        var headers = Object.assign({}, baseHeaders || {});
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        var token = meta ? String(meta.getAttribute("content") || "").trim() : "";
+        if (token && !headers["X-CSRFToken"] && !headers["X-CSRF-Token"]) {
+          headers["X-CSRFToken"] = token;
+        }
+        return headers;
+      }
+
       function solve() {
         if (isBusy) {
           return;
@@ -113,7 +123,7 @@
             }
             return fetch(verifyUrl, {
               method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              headers: csrfHeaders({ "Content-Type": "application/x-www-form-urlencoded" }),
               body: "cap_token=" + encodeURIComponent(token)
             });
           })
