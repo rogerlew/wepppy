@@ -33,19 +33,20 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
-from wepppy.nodir import (
+from wepppy.runtime_paths import (
     NoDirError,
     open_read as nodir_open_read,
     parse_external_subpath,
     resolve as nodir_resolve,
     stat as nodir_stat,
 )
-from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
+from wepppy.runtime_paths.paths import NODIR_ROOTS, split_nodir_root
 from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
 
 _NODIR_SUFFIX = ".nodir"
 _NODIR_ROOTS = frozenset(NODIR_ROOTS)
+_RETIRED_NODIR_ARCHIVE_FILES = frozenset({f"{root}{_NODIR_SUFFIX}" for root in _NODIR_ROOTS})
 
 
 def _normalize_prefix(prefix: str | None) -> str:
@@ -117,16 +118,12 @@ def _is_admin_context(auth_context) -> bool:
 
 
 def _is_mixed_nodir_root(wd: str, root: str) -> bool:
-    return os.path.isdir(os.path.join(wd, root)) and os.path.lexists(
-        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
-    )
+    _ = (wd, root)
+    return False
 
 
 def _allowlisted_raw_nodir_root(rel_path: str) -> str | None:
-    if rel_path.lower().endswith(_NODIR_SUFFIX):
-        root = rel_path[: -len(_NODIR_SUFFIX)]
-        if root in _NODIR_ROOTS and "/" not in root:
-            return root
+    _ = rel_path
     return None
 
 
@@ -208,7 +205,6 @@ async def download_with_subpath(request: Request) -> Response:
         )
 
     allow_recorder = auth_context.is_root
-    is_admin = _is_admin_context(auth_context)
     violation = validate_raw_subpath(subpath)
     if violation is not None:
         if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
@@ -218,29 +214,6 @@ async def download_with_subpath(request: Request) -> Response:
 
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
-
-    raw_candidate = (subpath or "").replace("\\", "/").lstrip("/")
-    raw_root = _allowlisted_raw_nodir_root(raw_candidate)
-    if raw_root is not None:
-        archive_path = os.path.abspath(os.path.join(wd, f"{raw_root}{_NODIR_SUFFIX}"))
-        if not os.path.exists(archive_path):
-            raise HTTPException(status_code=404)
-        if _is_mixed_nodir_root(wd, raw_root) and not is_admin:
-            _raise_nodir_error(
-                NoDirError(
-                    http_status=409,
-                    code="NODIR_MIXED_STATE",
-                    message=f"{raw_root} is in mixed state (dir + .nodir present)",
-                )
-            )
-        if not is_admin:
-            try:
-                nodir_resolve(wd, raw_root, view="archive")
-            except NoDirError as err:
-                _raise_nodir_error(err)
-        _assert_within_root(wd, archive_path)
-        _assert_target_within_allowed_roots(wd, archive_path, allow_recorder=allow_recorder)
-        return await download_response_file(archive_path, query_params=request.query_params)
 
     rel_subpath = subpath or "."
     try:
@@ -510,6 +483,8 @@ def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool) -> list[st
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, wd)
+            if os.path.basename(relative_path) in _RETIRED_NODIR_ARCHIVE_FILES:
+                continue
             if is_root_only_path(relative_path) and not allow_recorder:
                 continue
             violation = validate_raw_subpath(relative_path)

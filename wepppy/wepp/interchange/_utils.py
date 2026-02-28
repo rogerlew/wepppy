@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta
-from os.path import exists as _exists
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
 
 from wepppy.io_wait import wait_for_path
+from wepppy.runtime_paths.errors import nodir_migration_required
 
 logger = logging.getLogger(__name__)
 
@@ -134,18 +134,20 @@ def _ensure_cli_parquet(
 ) -> Optional[Path]:
     """Ensure a CLI parquet exists for calendar lookup.
 
-    Canonical location is the WD-level sidecar ``climate.wepp_cli.parquet``.
-    Legacy directory-form runs may still have ``climate/wepp_cli.parquet``.
+    Canonical location is ``climate/wepp_cli.parquet``.
     """
     cli_dir = Path(cli_dir)
     wd = cli_dir.parent
-    sidecar_path = wd / "climate.wepp_cli.parquet"
-    legacy_path = cli_dir / "wepp_cli.parquet"
+    canonical_path = cli_dir / "wepp_cli.parquet"
+    retired_root_path = wd / "climate.wepp_cli.parquet"
 
-    if sidecar_path.exists():
-        return sidecar_path
-    if legacy_path.exists():
-        return legacy_path
+    if canonical_path.exists():
+        return canonical_path
+    if retired_root_path.exists():
+        raise nodir_migration_required(
+            "Retired root resource 'climate.wepp_cli.parquet' detected; "
+            "migration to 'climate/wepp_cli.parquet' is required."
+        )
 
     cli_path: Optional[Path] = None
     if cli_file_hint:
@@ -191,9 +193,9 @@ def _ensure_cli_parquet(
         export_df["storm_duration_hours"] = export_df.get("dur")
         export_df["storm_duration"] = export_df.get("dur")
 
-        sidecar_path.parent.mkdir(parents=True, exist_ok=True)
-        export_df.to_parquet(sidecar_path, index=False)
-        return sidecar_path
+        canonical_path.parent.mkdir(parents=True, exist_ok=True)
+        export_df.to_parquet(canonical_path, index=False)
+        return canonical_path
     except Exception:
         (log or logger).exception("Failed to materialize CLI parquet", extra={"cli_path": str(cli_path)})
         return None

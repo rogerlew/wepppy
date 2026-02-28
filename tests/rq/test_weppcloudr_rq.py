@@ -1,50 +1,53 @@
 from __future__ import annotations
 
+import inspect
 from pathlib import Path
 
 import pytest
 
 from wepppy.rq.weppcloudr_rq import (
+    WeppcloudRError,
+    _assert_no_retired_root_resources,
     _build_render_deval_expression,
-    _discover_nodir_parquet_overrides,
-    _sidecar_to_logical_parquet,
+    render_deval_details_rq,
 )
 
 pytestmark = pytest.mark.unit
 
 
-def test_sidecar_to_logical_parquet_maps_known_nodir_sidecars() -> None:
-    assert _sidecar_to_logical_parquet("landuse.parquet") == "landuse/landuse.parquet"
-    assert _sidecar_to_logical_parquet("soils.parquet") == "soils/soils.parquet"
-    assert (
-        _sidecar_to_logical_parquet("watershed.hillslopes.parquet")
-        == "watershed/hillslopes.parquet"
-    )
-    assert _sidecar_to_logical_parquet("climate.wepp_cli.parquet") == "climate/wepp_cli.parquet"
-    assert _sidecar_to_logical_parquet("totals.parquet") is None
+def test_render_deval_details_rq_accepts_legacy_parquet_overrides_kwarg() -> None:
+    signature = inspect.signature(render_deval_details_rq)
+    assert "parquet_overrides" in signature.parameters
 
 
-def test_discover_nodir_parquet_overrides_collects_existing_sidecars(tmp_path: Path) -> None:
+def test_assert_no_retired_root_resources_allows_clean_directory(tmp_path: Path) -> None:
+    (tmp_path / "landuse").mkdir()
+    _assert_no_retired_root_resources(tmp_path)
+
+
+def test_assert_no_retired_root_resources_rejects_retired_sidecars(tmp_path: Path) -> None:
     (tmp_path / "landuse.parquet").write_text("x", encoding="utf-8")
-    (tmp_path / "soils.parquet").write_text("x", encoding="utf-8")
-    (tmp_path / "watershed.hillslopes.parquet").write_text("x", encoding="utf-8")
     (tmp_path / "climate.wepp_cli.parquet").write_text("x", encoding="utf-8")
-    (tmp_path / "notes.txt").write_text("x", encoding="utf-8")
-    (tmp_path / "watershed").mkdir()
 
-    overrides = _discover_nodir_parquet_overrides(tmp_path)
-
-    assert overrides == {
-        "climate/wepp_cli.parquet": str(tmp_path / "climate.wepp_cli.parquet"),
-        "landuse/landuse.parquet": str(tmp_path / "landuse.parquet"),
-        "soils/soils.parquet": str(tmp_path / "soils.parquet"),
-        "watershed/hillslopes.parquet": str(tmp_path / "watershed.hillslopes.parquet"),
-    }
+    with pytest.raises(WeppcloudRError, match="Migration required"):
+        _assert_no_retired_root_resources(tmp_path)
 
 
-def test_build_render_deval_expression_gates_parquet_overrides_by_signature() -> None:
+def test_assert_no_retired_root_resources_rejects_mixed_canonical_and_sidecar_state(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "landuse").mkdir()
+    (tmp_path / "landuse" / "landuse.parquet").write_text("canonical", encoding="utf-8")
+    (tmp_path / "landuse.parquet").write_text("retired", encoding="utf-8")
+
+    with pytest.raises(WeppcloudRError, match="Migration required"):
+        _assert_no_retired_root_resources(tmp_path)
+
+
+def test_build_render_deval_expression_uses_stable_render_signature() -> None:
     expression = _build_render_deval_expression("{}")
 
-    assert "'parquet_overrides' %in% names(formals(render_deval))" in expression
-    assert "render_args$parquet_overrides <- payload$parquet_overrides;" in expression
-    assert "do.call(render_deval, render_args);" in expression
+    assert "render_deval(payload$run_path, payload$runid, payload$config," in expression
+    assert "skip_cache = payload$skip_cache" in expression
+    assert "parquet_overrides" not in expression
+    assert "do.call(" not in expression

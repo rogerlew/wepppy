@@ -1,10 +1,11 @@
 import pytest
+from types import SimpleNamespace
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import climate_routes
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
@@ -111,3 +112,37 @@ def test_build_climate_propagates_nodir_preflight_errors(monkeypatch: pytest.Mon
 
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "NODIR_LOCKED"
+
+
+def test_build_climate_rejects_archive_form_root(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        climate_routes,
+        "nodir_resolve",
+        lambda _wd, _rel, view="effective": SimpleNamespace(form="archive"),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-climate", json={})
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "NODIR_ARCHIVE_ACTIVE"
+
+
+def test_build_climate_runtime_preflight_error_uses_generic_parse_boundary(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        climate_routes,
+        "nodir_resolve",
+        lambda _wd, _rel, view="effective": (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-climate", json={})
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "Error parsing climate inputs"

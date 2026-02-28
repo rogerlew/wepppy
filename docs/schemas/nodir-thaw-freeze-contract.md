@@ -1,4 +1,6 @@
 # NoDir Thaw/Freeze Contract (Maintenance State)
+> **Archived / Deprecated (Historical, 2026-02-27):** This NoDir specification is retired from active contract flow after the directory-only reversal. It is retained only for historical/audit reference.
+
 > Authoritative contract for the NoDir per-root maintenance state file (`WD/.nodir/<root>.json`) and the crash-safe thaw/modify/freeze workflow.
 >
 > **See also:** `docs/schemas/nodir-contract-spec.md`, `docs/work-packages/20260214_nodir_archives/artifacts/nodir_behavior_matrix.md`, `docs/work-packages/20260214_nodir_archives/artifacts/nodir_materialization_contract.md`, `docs/schemas/rq-response-contract.md`

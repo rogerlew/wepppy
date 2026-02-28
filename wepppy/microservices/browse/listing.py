@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 
 from os.path import exists as _exists
 from os.path import join as _join
-from wepppy.nodir.paths import NODIR_ROOTS
+from wepppy.runtime_paths.paths import NODIR_ROOTS
 
 __all__ = [
     "MANIFEST_FILENAME",
@@ -44,20 +44,13 @@ _NODIR_ROOTS = frozenset(NODIR_ROOTS)
 
 
 def _allowlisted_nodir_root(name: str) -> str | None:
-    if not name.lower().endswith(_NODIR_SUFFIX):
-        return None
-    root = name[: -len(_NODIR_SUFFIX)]
-    if root in _NODIR_ROOTS:
-        return root
+    _ = name
     return None
 
 
 def _mixed_nodir_roots(wd: str) -> set[str]:
-    mixed: set[str] = set()
-    for root in _NODIR_ROOTS:
-        if os.path.isdir(os.path.join(wd, root)) and os.path.lexists(os.path.join(wd, f"{root}.nodir")):
-            mixed.add(root)
-    return mixed
+    _ = wd
+    return set()
 
 
 def _manifest_path(wd: str) -> str:
@@ -263,10 +256,10 @@ def create_manifest(wd: str) -> str:
             ("generated_at", generated_at),
         )
         conn.commit()
-    except Exception:
+    except (sqlite3.Error, OSError, ValueError, TypeError):
         try:
             conn.rollback()
-        except Exception:
+        except sqlite3.Error:
             pass
         raise
     finally:
@@ -709,10 +702,7 @@ async def get_page_entries(
     """List directory contents with pagination and optional filtering."""
     skip_manifest = False
     if hide_mixed_nodir:
-        try:
-            skip_manifest = bool(_mixed_nodir_roots(str(wd)))
-        except Exception:
-            skip_manifest = False
+        skip_manifest = bool(_mixed_nodir_roots(str(wd)))
 
     if not skip_manifest:
         manifest_result = await asyncio.to_thread(

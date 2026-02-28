@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 import wepppy.rq.path_ce_rq as path_ce_rq
 

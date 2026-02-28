@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-02-24  
+**Last Updated**: 2026-02-27  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,32 +78,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### NoDir Archives for High-Fanout Project Trees
-**Proposed**: 2026-02-14  
-**Size**: Large (2-4 weeks)  
-**Priority**: High  
-**Status**: Discovery / Scoping  
-**Package**: [docs/work-packages/20260214_nodir_archives/](docs/work-packages/20260214_nodir_archives/)  
-**Description**: Reduce inode and metadata `stat()` pressure on NAS-backed NFS by archiving `landuse/`, `soils/`, `climate/`, and `watershed/` as `.nodir` (zip container) while preserving directory-like semantics in browse and internal code.
-
-**Scope**:
-- Define the NoDir contract (`docs/schemas/nodir-contract-spec.md`) and enforce deterministic precedence rules (`<root>/` vs `<root>.nodir`).
-- Teach browse + files/download endpoints to “enter” archive-backed trees without extracting.
-- Provide a crawler/migrator to archive existing run trees under `/wc1/runs`.
-
-**Strategic Value**:
-- Removes the inode ceiling as a scaling constraint for larger watersheds (10k+ hillslopes).
-- Reduces browse latency driven by metadata round-trips on small-file trees.
-
-**Dependencies**:
-- Agreement on NoDir contract details (naming, URL semantics, security invariants).
-
-**Next Steps**:
-1. Freeze archive boundary semantics for browse/files/download (`.../watershed.nodir/...`).
-2. Inventory all call sites that assume real directories for the targeted roots.
-
----
 
 ### RQ-Engine Agent Usability and Documentation Hardening
 **Proposed**: 2026-02-08  
@@ -272,6 +246,7 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
+
 ### markdown-doc Toolkit Integration
 **Started**: 2025-10-25  
 **Status**: Phase 3 Complete — Integration Active (Phase 4 pending telemetry + RFC decisions)  
@@ -339,6 +314,23 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### NoDir Full Reversal (Abandonment Program)
+**Completed**: 2026-02-27
+**Duration**: 1 day (multi-phase closeout day)
+**Status**: ✅ **COMPLETE**
+**Owner**: Codex
+**Link**: [docs/work-packages/20260227_nodir_full_reversal/](docs/work-packages/20260227_nodir_full_reversal/)
+**Description**: Abandoned NoDir runtime/test/contract surfaces and returned active WEPPpy/WEPPcloud behavior to directory-only semantics with full closeout evidence.
+
+**Outcome**: Phase 6 closeout completed with full validation gates, final rollback verification mapping all package success criteria, and mandatory subagent high/medium findings closure to zero unresolved.
+
+**Deliverables**:
+- ✅ Phase 6 closeout artifacts published (`phase6_closeout_scope.md`, `phase6_nodir_import_scan.txt`, `phase6_structural_assertions.md`, `phase6_validation_log.md`, `phase6_final_rollback_verification.md`, `phase6_subagent_review.md`, `phase6_findings_resolution.md`)
+- ✅ Required gates: `wctl run-pytest tests --maxfail=1` PASS (`2069 passed, 29 skipped`), `check_broad_exceptions` PASS, `code_quality_observability` observe-only PASS, `wctl check-rq-graph` PASS, required `wctl doc-lint` paths PASS
+- ✅ Package/tracker/project surfaces synchronized to completed state
+
+---
 
 ### WEPPcloud CSRF Rollout with rq-engine API Compatibility
 **Completed**: 2026-02-24

@@ -41,7 +41,7 @@ from wepppy.nodb.mods.omni import Omni, OmniScenario
 import wepppy.nodb.mods.omni as omni_mod
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_relpath
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_relpath
 from wepppy.weppcloud.routes.nodb_api.landuse_bp import build_landuse_report_context
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils import auth_tokens

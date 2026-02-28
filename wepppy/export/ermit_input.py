@@ -27,8 +27,8 @@ from scipy import stats
 from wepppy.climates.cligen import nullStation
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.ash_transport import Ash
-from wepppy.nodir.materialize import materialize_path_if_archive
-from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.materialize import materialize_path_if_archive
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
 
 HillslopeModel = tuple[Sequence[float], Sequence[float]]
 

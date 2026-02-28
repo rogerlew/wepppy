@@ -18,7 +18,7 @@ def test_normalize_relpath_and_exclusion_rules() -> None:
 
     assert archive_helpers._is_archive_excluded_relpath("archives")
     assert archive_helpers._is_archive_excluded_relpath("archives/demo.zip")
-    assert archive_helpers._is_archive_excluded_relpath(".nodir/cache/watershed/123")
+    assert not archive_helpers._is_archive_excluded_relpath(".nodir/cache/watershed/123")
     assert not archive_helpers._is_archive_excluded_relpath(".nodir/projections/read.json")
 
 

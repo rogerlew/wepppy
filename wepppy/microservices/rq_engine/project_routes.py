@@ -11,7 +11,6 @@ from fastapi.responses import RedirectResponse, Response
 
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.core import Ron
-from wepppy.nodir.mutations import enable_default_archive_roots
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -242,7 +241,7 @@ def _collect_overrides(payload: Mapping[str, Any], query_params: Mapping[str, An
 async def create(request: Request) -> Response:
     try:
         payload = await parse_request_payload(request)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine create payload parse failed")
         return error_response_with_traceback("Invalid payload", status_code=400)
 
@@ -272,7 +271,7 @@ async def create(request: Request) -> Response:
             )
         except AuthError as exc:
             return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create auth failed")
             return error_response_with_traceback("Failed to authorize request", status_code=401)
     else:
@@ -300,7 +299,7 @@ async def create(request: Request) -> Response:
         user = None
         try:
             user = _resolve_user_from_claims(claims)
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create user lookup failed")
 
         try:
@@ -311,7 +310,7 @@ async def create(request: Request) -> Response:
                 "Could not create run directory. NAS may be down.",
                 details=str(exc),
             )
-        except Exception as exc:
+        except Exception as exc:  # broad-except: boundary contract
             logger.exception("rq-engine create run directory failed")
             return error_response(
                 "Could not create run directory.",
@@ -319,10 +318,8 @@ async def create(request: Request) -> Response:
             )
 
         try:
-            ron = Ron(wd, cfg)
-            if ron.config_get_bool("nodb", "apply_nodir", False):
-                enable_default_archive_roots(wd)
-        except Exception:
+            Ron(wd, cfg)
+        except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create Ron failed")
             return error_response("Could not create run")
 
@@ -330,17 +327,17 @@ async def create(request: Request) -> Response:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
 
             initialize_ttl(wd)
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create TTL initialization failed")
 
         try:
             _register_run_owner(runid, config, user)
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create run owner failed")
 
         try:
             ensure_readme_on_create(runid, config)
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create README failed")
 
         return runid

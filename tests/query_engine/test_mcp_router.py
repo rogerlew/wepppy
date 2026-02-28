@@ -633,7 +633,7 @@ def test_validate_query_success(monkeypatch, tmp_path):
     assert "trace_id" in body["meta"]
 
 
-def test_validate_query_accepts_legacy_nodir_sidecar_alias(monkeypatch, tmp_path):
+def test_validate_query_rejects_legacy_nodir_sidecar_alias(monkeypatch, tmp_path):
     _set_auth_env(monkeypatch)
     runid = "validate-alias"
     files = [
@@ -662,12 +662,10 @@ def test_validate_query_accepts_legacy_nodir_sidecar_alias(monkeypatch, tmp_path
         json=payload,
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 422
     body = response.json()
-    attrs = body["data"]["attributes"]
-    assert attrs["missing_datasets"] == []
-    normalized = attrs["normalized_payload"]
-    assert normalized["datasets"][0]["path"] == "landuse/landuse.parquet"
+    assert body["errors"][0]["code"] == "dataset_missing"
+    assert "landuse.parquet" in body["errors"][0].get("meta", {}).get("missing", [])
 
 
 def test_validate_query_missing_dataset(monkeypatch, tmp_path):

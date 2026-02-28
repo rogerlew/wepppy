@@ -4,24 +4,39 @@ import argparse
 import json
 import os
 import sys
+import zipfile
 from contextlib import suppress
 from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Iterable
+from typing import Any, Iterable, Literal
 
 from wepppy.nodb.base import lock_statuses
-from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.fs import resolve as nodir_resolve
-from wepppy.nodir.paths import NODIR_ROOTS, NoDirRoot
-from wepppy.nodir.thaw_freeze import freeze_locked, maintenance_lock
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.paths import NODIR_ROOTS, NoDirRoot
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock, thaw_locked
 
 __all__ = [
     "crawl_runs",
     "main",
 ]
 
-_COMPLETE_STATUSES = frozenset({"archived", "already_archive", "missing_root"})
+MigrationMode = Literal["archive", "restore"]
+
+_COMPLETE_STATUSES = frozenset(
+    {
+        "archived",
+        "already_archive",
+        "restored",
+        "already_directory",
+        "missing_root",
+    }
+)
+_MODE_COMPLETE_STATUSES: dict[MigrationMode, frozenset[str]] = {
+    "archive": frozenset({"archived", "already_archive", "missing_root"}),
+    "restore": frozenset({"restored", "already_directory", "missing_root"}),
+}
 _FAILURE_STATUSES = frozenset(
     {
         "active_run_locked",
@@ -30,6 +45,15 @@ _FAILURE_STATUSES = frozenset(
         "nodir_error",
         "exception",
     }
+)
+_RECOVERABLE_EXCEPTIONS = (
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    LookupError,
+    AssertionError,
+    zipfile.BadZipFile,
 )
 
 
@@ -86,10 +110,12 @@ def _discover_run_dirs(scan_roots: Iterable[Path]) -> list[Path]:
     return sorted(discovered)
 
 
-def _load_resume_pairs(audit_log: Path) -> set[tuple[str, str]]:
+def _load_resume_pairs(audit_log: Path, *, mode: MigrationMode) -> set[tuple[str, str]]:
     completed: set[tuple[str, str]] = set()
     if not audit_log.exists():
         return completed
+
+    allowed_statuses = _MODE_COMPLETE_STATUSES[mode]
 
     with audit_log.open("r", encoding="utf-8") as handle:
         for raw_line in handle:
@@ -104,13 +130,20 @@ def _load_resume_pairs(audit_log: Path) -> set[tuple[str, str]]:
                 continue
             if payload.get("dry_run"):
                 continue
+
             status = payload.get("status")
-            if status not in _COMPLETE_STATUSES:
+            if status not in allowed_statuses:
                 continue
+
+            payload_mode = payload.get("mode")
+            if payload_mode is not None and payload_mode != mode:
+                continue
+
             runid = payload.get("runid")
             root = payload.get("root")
             if isinstance(runid, str) and isinstance(root, str):
                 completed.add((runid, root))
+
     return completed
 
 
@@ -126,12 +159,22 @@ def _active_run_lock_keys(runid: str) -> list[str]:
     return sorted(name for name, locked in statuses.items() if locked)
 
 
+def _remove_archive_after_restore(archive_path: Path) -> bool:
+    if not archive_path.exists():
+        return False
+    if archive_path.is_dir():
+        raise RuntimeError(f"expected archive file at {archive_path}, found directory")
+    archive_path.unlink()
+    return True
+
+
 def _base_event(
     *,
     runid: str,
     wd: Path,
     root: str,
     dry_run: bool,
+    mode: MigrationMode,
 ) -> dict[str, Any]:
     return {
         "ts": _now_iso(),
@@ -139,6 +182,7 @@ def _base_event(
         "wd": str(wd),
         "root": root,
         "dry_run": dry_run,
+        "mode": mode,
     }
 
 
@@ -146,6 +190,8 @@ def _process_run(
     *,
     wd: Path,
     roots: tuple[NoDirRoot, ...],
+    mode: MigrationMode,
+    remove_archive_on_restore: bool,
     dry_run: bool,
     resume_pairs: set[tuple[str, str]],
     resume_enabled: bool,
@@ -165,9 +211,9 @@ def _process_run(
     if not dry_run:
         try:
             active_locks = _active_run_lock_keys(runid)
-        except Exception as exc:
+        except _RECOVERABLE_EXCEPTIONS as exc:
             for root in roots:
-                event = _base_event(runid=runid, wd=wd, root=root, dry_run=dry_run)
+                event = _base_event(runid=runid, wd=wd, root=root, dry_run=dry_run, mode=mode)
                 event.update(
                     {
                         "status": "exception",
@@ -183,7 +229,7 @@ def _process_run(
 
         if active_locks:
             for root in roots:
-                event = _base_event(runid=runid, wd=wd, root=root, dry_run=dry_run)
+                event = _base_event(runid=runid, wd=wd, root=root, dry_run=dry_run, mode=mode)
                 event.update(
                     {
                         "status": "active_run_locked",
@@ -199,7 +245,7 @@ def _process_run(
 
     for root in roots:
         if resume_enabled and not dry_run and (runid, root) in resume_pairs:
-            event = _base_event(runid=runid, wd=wd, root=root, dry_run=dry_run)
+            event = _base_event(runid=runid, wd=wd, root=root, dry_run=dry_run, mode=mode)
             event.update(
                 {
                     "status": "resume_skipped",
@@ -213,7 +259,7 @@ def _process_run(
             continue
 
         started = perf_counter()
-        event = _base_event(runid=runid, wd=wd, root=root, dry_run=dry_run)
+        event = _base_event(runid=runid, wd=wd, root=root, dry_run=dry_run, mode=mode)
 
         if not readonly and not dry_run:
             event.update(
@@ -235,11 +281,11 @@ def _process_run(
                     event.update(
                         {
                             "status": "missing_root",
-                            "message": "root is missing; nothing to archive",
+                            "message": "root is missing; nothing to migrate",
                         }
                     )
                     counters["completed"] += 1
-                elif target.form == "archive":
+                elif mode == "archive" and target.form == "archive":
                     event.update(
                         {
                             "status": "already_archive",
@@ -247,11 +293,26 @@ def _process_run(
                         }
                     )
                     counters["completed"] += 1
+                elif mode == "archive":
+                    event.update(
+                        {
+                            "status": "archive_mode_retired",
+                            "message": "archive mode is retired in directory-only runtime; no mutation will run",
+                        }
+                    )
+                elif target.form == "dir":
+                    event.update(
+                        {
+                            "status": "already_directory",
+                            "message": "root already in directory form",
+                        }
+                    )
+                    counters["completed"] += 1
                 else:
                     event.update(
                         {
-                            "status": "would_archive",
-                            "message": "root is in directory form and would be archived",
+                            "status": "would_restore",
+                            "message": "root is archived and would be restored to directory form",
                         }
                     )
             else:
@@ -261,11 +322,11 @@ def _process_run(
                         event.update(
                             {
                                 "status": "missing_root",
-                                "message": "root is missing; nothing to archive",
+                                "message": "root is missing; nothing to migrate",
                             }
                         )
                         counters["completed"] += 1
-                    elif target.form == "archive":
+                    elif mode == "archive" and target.form == "archive":
                         event.update(
                             {
                                 "status": "already_archive",
@@ -273,14 +334,43 @@ def _process_run(
                             }
                         )
                         counters["completed"] += 1
-                    else:
-                        freeze_locked(str(wd), root, lock=lock)
+                    elif mode == "archive":
+                        raise NoDirError(
+                            http_status=409,
+                            code="NODIR_ARCHIVE_RETIRED",
+                            message=(
+                                "archive mode is retired in directory-only runtime; "
+                                "no mutation was performed"
+                            ),
+                        )
+                    elif target.form == "dir":
                         event.update(
                             {
-                                "status": "archived",
-                                "message": "root archived successfully",
+                                "status": "already_directory",
+                                "message": "root already in directory form",
                             }
                         )
+                        counters["completed"] += 1
+                        resume_pairs.add((runid, root))
+                    else:
+                        thaw_locked(str(wd), root, lock=lock)
+                        archive_path = wd / f"{root}.nodir"
+                        archive_removed = False
+                        if remove_archive_on_restore:
+                            archive_removed = _remove_archive_after_restore(archive_path)
+
+                        event.update(
+                            {
+                                "status": "restored",
+                                "message": (
+                                    "root restored to directory form and archive removed"
+                                    if remove_archive_on_restore and archive_removed
+                                    else "root restored to directory form"
+                                ),
+                            }
+                        )
+                        if remove_archive_on_restore:
+                            event["archive_removed"] = archive_removed
                         counters["completed"] += 1
                         resume_pairs.add((runid, root))
         except NoDirError as err:
@@ -303,7 +393,7 @@ def _process_run(
                     }
                 )
             counters["failed"] += 1
-        except Exception as exc:
+        except _RECOVERABLE_EXCEPTIONS as exc:
             event.update(
                 {
                     "status": "exception",
@@ -330,6 +420,8 @@ def crawl_runs(
     *,
     scan_roots: Iterable[Path],
     roots: Iterable[str],
+    mode: MigrationMode = "archive",
+    remove_archive_on_restore: bool = False,
     runids: Iterable[str] = (),
     limit: int | None = None,
     dry_run: bool = False,
@@ -337,6 +429,9 @@ def crawl_runs(
     resume: bool = True,
     verbose: bool = False,
 ) -> dict[str, Any]:
+    if remove_archive_on_restore and mode != "restore":
+        raise ValueError("--remove-archive-on-restore requires mode=restore")
+
     selected_roots = _normalize_roots(roots)
     runid_filter = {value for value in runids if value}
 
@@ -347,7 +442,7 @@ def crawl_runs(
     if limit is not None:
         run_dirs = run_dirs[: max(0, limit)]
 
-    resume_pairs = _load_resume_pairs(audit_log) if resume and not dry_run else set()
+    resume_pairs = _load_resume_pairs(audit_log, mode=mode) if resume and not dry_run else set()
 
     totals = {
         "runs": len(run_dirs),
@@ -361,6 +456,8 @@ def crawl_runs(
         run_counts = _process_run(
             wd=run_dir,
             roots=selected_roots,
+            mode=mode,
+            remove_archive_on_restore=remove_archive_on_restore,
             dry_run=dry_run,
             resume_pairs=resume_pairs,
             resume_enabled=resume,
@@ -375,6 +472,8 @@ def crawl_runs(
     totals["audit_log"] = str(audit_log)
     totals["dry_run"] = dry_run
     totals["roots"] = list(selected_roots)
+    totals["mode"] = mode
+    totals["remove_archive_on_restore"] = bool(remove_archive_on_restore)
     return totals
 
 
@@ -396,6 +495,17 @@ def _build_parser() -> argparse.ArgumentParser:
         default=[],
         choices=sorted(NODIR_ROOTS),
         help="NoDir root name to migrate (repeatable). Defaults to all allowlisted roots.",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=("archive", "restore"),
+        default="archive",
+        help="Migration direction: archive directory roots or restore archives to directories.",
+    )
+    parser.add_argument(
+        "--remove-archive-on-restore",
+        action="store_true",
+        help="After successful restore, delete `<root>.nodir` archive (restore mode only).",
     )
     parser.add_argument(
         "--runid",
@@ -436,6 +546,8 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: Iterable[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
+    if args.remove_archive_on_restore and args.mode != "restore":
+        parser.error("--remove-archive-on-restore requires --mode restore")
 
     roots = args.roots or list(NODIR_ROOTS)
     scan_roots = [Path(value) for value in args.runs_roots if value]
@@ -446,6 +558,8 @@ def main(argv: Iterable[str] | None = None) -> int:
         summary = crawl_runs(
             scan_roots=scan_roots,
             roots=roots,
+            mode=args.mode,
+            remove_archive_on_restore=args.remove_archive_on_restore,
             runids=args.runid,
             limit=args.limit,
             dry_run=args.dry_run,
@@ -453,7 +567,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             resume=not args.no_resume,
             verbose=args.verbose,
         )
-    except Exception as exc:  # pragma: no cover - CLI safety
+    except _RECOVERABLE_EXCEPTIONS as exc:  # pragma: no cover - CLI safety
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 

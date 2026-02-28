@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 
 import duckdb
 
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 from ._helpers import (
     _escape_sql_path,

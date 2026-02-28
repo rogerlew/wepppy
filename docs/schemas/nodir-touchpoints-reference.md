@@ -1,4 +1,6 @@
 # NoDir Touchpoints Consolidated Reference
+> **Archived / Deprecated (Historical, 2026-02-27):** This NoDir specification is retired from active contract flow after the directory-only reversal. It is retained only for historical/audit reference.
+
 > Authoritative module-by-module audit reference for NoDb/NoDir touchpoints across mutation sessions, read projections, and materialization boundaries.
 >
 > Historical implementation evidence remains under `docs/work-packages/20260214_nodir_archives/artifacts/`.

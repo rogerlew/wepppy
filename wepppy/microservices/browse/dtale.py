@@ -28,11 +28,11 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
-from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.fs import resolve as nodir_resolve
-from wepppy.nodir.fs import stat as nodir_stat
-from wepppy.nodir.materialize import materialize_file
-from wepppy.nodir.paths import parse_external_subpath
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.fs import stat as nodir_stat
+from wepppy.runtime_paths.materialize import materialize_file
+from wepppy.runtime_paths.paths import parse_external_subpath
 
 _DTALE_SERVICE_URL = os.getenv('DTALE_SERVICE_URL', 'http://dtale:9010').rstrip('/')
 _DTALE_INTERNAL_TOKEN = (get_secret('DTALE_INTERNAL_TOKEN') or '').strip()

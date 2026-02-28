@@ -186,7 +186,7 @@ from wepppy.wepp.interchange.dss_dates import (
     parse_dss_date,
 )
 from wepppy.wepp.interchange.versioning import Version, read_version_manifest
-from wepppy.nodir.wepp_inputs import (
+from wepppy.runtime_paths.wepp_inputs import (
     copy_input_file,
     glob_input_files,
     input_exists,

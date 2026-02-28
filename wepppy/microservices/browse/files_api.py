@@ -31,14 +31,14 @@ from wepppy.microservices.browse.security import (
     validate_resolved_target,
     derive_allowed_symlink_roots,
 )
-from wepppy.nodir import (
+from wepppy.runtime_paths import (
     NoDirError,
     listdir as nodir_listdir,
     parse_external_subpath,
     resolve as nodir_resolve,
     stat as nodir_stat,
 )
-from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
+from wepppy.runtime_paths.paths import NODIR_ROOTS, split_nodir_root
 
 __all__ = [
     "FILES_DEFAULT_LIMIT",
@@ -144,11 +144,7 @@ def _is_admin_auth_context(auth_context) -> bool:
 
 
 def _allowlisted_nodir_root(name: str) -> str | None:
-    if not name.lower().endswith(_NODIR_SUFFIX):
-        return None
-    root = name[: -len(_NODIR_SUFFIX)]
-    if root in _NODIR_ROOTS:
-        return root
+    _ = name
     return None
 
 
@@ -161,17 +157,13 @@ def _allowlisted_raw_nodir_relpath(rel_path: str) -> str | None:
 
 
 def _is_mixed_nodir_root(wd: str, root: str) -> bool:
-    return os.path.isdir(os.path.join(wd, root)) and os.path.lexists(
-        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
-    )
+    _ = (wd, root)
+    return False
 
 
 def _mixed_nodir_roots(wd: str) -> set[str]:
-    mixed: set[str] = set()
-    for root in _NODIR_ROOTS:
-        if _is_mixed_nodir_root(wd, root):
-            mixed.add(root)
-    return mixed
+    _ = wd
+    return set()
 
 
 def _format_iso_mtime_ns(mtime_ns: int | None) -> str | None:
@@ -410,7 +402,7 @@ def _parse_files_query_params(
 def _resolve_files_root(runid: str, deps: FilesApiDependencies) -> str:
     try:
         wd = os.path.abspath(deps.get_wd(runid))
-    except Exception as exc:
+    except (TypeError, ValueError, OSError) as exc:
         _raise_files_error(
             HTTPStatus.NOT_FOUND,
             f"Run '{runid}' not found",
@@ -712,7 +704,16 @@ async def _files_nodir_list_response(
             details="Requested path is not a directory.",
         )
 
-    entries = nodir_listdir(target)
+    try:
+        entries = nodir_listdir(target)
+    except (FileNotFoundError, NotADirectoryError):
+        path_display = _display_rel_path(rel_path) or "."
+        _raise_files_error(
+            HTTPStatus.NOT_FOUND,
+            f"Directory '{path_display}' does not exist",
+            code="path_not_found",
+            details=f"No entry at {path_display}",
+        )
     listing_rows: list[dict] = []
     for item in entries:
         if item.name.startswith("."):
@@ -792,13 +793,22 @@ async def _files_nodir_meta_response(
     rel_dir = deps.rel_parent(rel_path)[0] if rel_path not in (".", "") else "."
     child_count: int | None = None
     if entry.is_dir:
-        child_count = len(
-            [
-                item
-                for item in nodir_listdir(target)
-                if not item.name.startswith(".")
-            ]
-        )
+        try:
+            child_count = len(
+                [
+                    item
+                    for item in nodir_listdir(target)
+                    if not item.name.startswith(".")
+                ]
+            )
+        except (FileNotFoundError, NotADirectoryError):
+            path_display = _display_rel_path(rel_path) or "."
+            _raise_files_error(
+                HTTPStatus.NOT_FOUND,
+                f"Path '{path_display}' does not exist",
+                code="path_not_found",
+                details=f"No entry at {path_display}",
+            )
 
     payload = _build_nodir_entry_payload(
         name=entry.name,

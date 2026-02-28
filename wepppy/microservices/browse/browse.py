@@ -132,7 +132,7 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
-from wepppy.nodir import (
+from wepppy.runtime_paths import (
     NoDirError,
     listdir as nodir_listdir,
     open_read as nodir_open_read,
@@ -140,7 +140,7 @@ from wepppy.nodir import (
     resolve as nodir_resolve,
     stat as nodir_stat,
 )
-from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
+from wepppy.runtime_paths.paths import NODIR_ROOTS, split_nodir_root
 from wepppy.microservices._gdalinfo import create_routes as create_gdalinfo_routes
 from wepppy.microservices.dss_preview import build_preview as build_dss_preview
 
@@ -252,17 +252,13 @@ def _is_admin_context(context: AuthContext | None) -> bool:
 
 
 def _is_mixed_nodir_root(wd: str, root: str) -> bool:
-    return os.path.isdir(os.path.join(wd, root)) and os.path.lexists(
-        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
-    )
+    _ = (wd, root)
+    return False
 
 
 def _mixed_nodir_roots(wd: str) -> list[str]:
-    mixed: list[str] = []
-    for root in _NODIR_ROOTS:
-        if _is_mixed_nodir_root(wd, root):
-            mixed.append(root)
-    return sorted(mixed)
+    _ = wd
+    return []
 
 
 def _allowlisted_raw_nodir_path(rel_path: str) -> str | None:

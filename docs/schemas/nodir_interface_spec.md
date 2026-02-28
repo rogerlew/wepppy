@@ -1,4 +1,6 @@
 # NoDir Shared Interface Spec (Python)
+> **Archived / Deprecated (Historical, 2026-02-27):** This NoDir specification is retired from active contract flow after the directory-only reversal. It is retained only for historical/audit reference.
+
 
 > Normative spec for a shared Python implementation of the NoDir interface so browse/files/download/query-engine/controllers do not each re-implement “dir vs `.nodir`” rules.
 >

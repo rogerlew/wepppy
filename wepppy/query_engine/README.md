@@ -158,7 +158,7 @@ Before querying, a run must be **activated** to generate the `catalog.json` file
 5. **Serialization**: Write `_query_engine/catalog.json` with paths, schemas, sizes, and timestamps
 6. **Duration**: Typically 5-30 seconds depending on run size
 
-Note: For NoDir roots (`landuse`, `soils`, `climate`, `watershed`), activation may keep stable logical dataset ids (for example `landuse/landuse.parquet`) while pointing to WD-level sidecar files via `CatalogEntry.fs_path`.
+Note: Activation enforces a directory-only contract for root resources. Legacy WD-root sidecars (for example `landuse.parquet`, `soils.parquet`, `climate.<name>.parquet`, `watershed.<name>.parquet`) are treated as migration-required and are not cataloged as queryable datasets.
 
 Once activated, the catalog is cached until the next activation or until files are modified. Repeated calls to `activate_query_engine` reuse the existing `catalog.json` unless `force_refresh=True` is provided (useful after interchange jobs finish).
 
@@ -202,9 +202,9 @@ The query engine operates on **filesystem-backed datasets** within a WEPPcloud r
 | RAP Timeseries | `rap/*.parquet` | Parquet | Rangeland Analysis Platform remote sensing | `rap/rap_ts.parquet` |
 | Scenario Roots | `_pups/omni/scenarios/*`, `rhessys/scenarios/*` | mixed | Scenario-scoped datasets queried via body `scenario` parameter | `_pups/omni/scenarios/undisturbed/...`, `rhessys/scenarios/S1/...` |
 
-**NoDir parquet sidecars**
-- For NoDir roots (`landuse`, `soils`, `climate`, `watershed`), Parquet files are stored as WD-level sidecars (for example `WD/landuse.parquet`) but catalog paths remain stable logical ids (for example `landuse/landuse.parquet`).
-- When the physical on-disk path differs from the catalog `path`, `CatalogEntry.fs_path` points to the real file (relative to the run root, or absolute for inherited parent-run references).
+**Directory-only parquet resources**
+- Query-engine dataset ids and on-disk paths are canonical directory paths (for example `landuse/landuse.parquet`, `soils/soils.parquet`, `climate/wepp_cli.parquet`, `watershed/hillslopes.parquet`).
+- Retired WD-root sidecars (for example `WD/landuse.parquet`, `WD/soils.parquet`, `WD/climate.<name>.parquet`, `WD/watershed.<name>.parquet`) are not resolved by catalog activation and require explicit migration before query execution.
 
 #### WEPP Output Files
 

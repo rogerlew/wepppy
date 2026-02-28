@@ -1087,7 +1087,7 @@ class Disturbed(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}()')
 
         from wepppy.nodb.core import Wepp
-        from wepppy.nodir.wepp_inputs import materialize_input_file
+        from wepppy.runtime_paths.wepp_inputs import materialize_input_file
         _land_soil_replacements_d = self.land_soil_replacements_d
 
         wd = self.wd

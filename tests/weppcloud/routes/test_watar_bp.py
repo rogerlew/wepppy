@@ -10,7 +10,7 @@ pytest.importorskip("flask")
 from flask import Flask
 
 from tests.factories.singleton import singleton_factory
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 import wepppy.weppcloud.routes.nodb_api.watar_bp as watar_module
 

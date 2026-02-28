@@ -44,7 +44,7 @@ try:
     redis_wd_cache_pool = redis.ConnectionPool(**pool_kwargs)
     redis_wd_cache_client = redis.StrictRedis(connection_pool=redis_wd_cache_pool)
     redis_wd_cache_client.ping()
-except Exception as e:
+except Exception as e:  # broad-except: boundary contract
     print(f'Error connecting to Redis: {e}')
     redis_wd_cache_client = None
 
@@ -104,10 +104,8 @@ def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
     for dirname in ("climate", "watershed"):
         src_dir = _join(base_root, dirname)
         src_archive = _join(base_root, f"{dirname}.nodir")
-        root_linked = False
         if os.path.isdir(src_dir):
             _ensure_link(src_dir, _join(run_root, dirname))
-            root_linked = True
         elif os.path.isfile(src_archive):
             legacy_dst = _join(run_root, dirname)
             if os.path.islink(legacy_dst) and not _exists(legacy_dst):
@@ -116,18 +114,6 @@ def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
                 except OSError:
                     pass
             _ensure_link(src_archive, _join(run_root, f"{dirname}.nodir"))
-            root_linked = True
-
-        if root_linked:
-            sidecar_prefix = f"{dirname}."
-            for sidecar_name in sorted(
-                fn
-                for fn in os.listdir(base_root)
-                if fn.startswith(sidecar_prefix)
-                and fn.endswith(".parquet")
-                and os.path.isfile(_join(base_root, fn))
-            ):
-                _ensure_link(_join(base_root, sidecar_name), _join(run_root, sidecar_name))
 
     dem_src = _join(base_root, "dem")
     if os.path.isdir(dem_src):
@@ -651,14 +637,14 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
         try:
             if has_role("Admin") or has_role("Root"):
                 return
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             # Keep explicit failure for authenticated users when role backends
             # are broken; anonymous/public access should still evaluate run-level
             # permissions below.
             try:
                 if bool(getattr(current_user, "is_authenticated", False)):
                     abort(403)
-            except Exception:
+            except Exception:  # broad-except: boundary contract
                 abort(403)
 
     auth_runid = _strip_omni_suffix_runid(runid)
@@ -745,7 +731,7 @@ def authorize_and_handle_with_exception_factory(
         except HTTPException:
             # Preserve Flask/Werkzeug HTTP errors such as abort(403).
             raise
-        except Exception as exc:
+        except Exception as exc:  # broad-except: boundary contract
             # For unexpected errors, return the standard exception payload with details.
             stacktrace = traceback.format_exc()
             return exception_factory(
@@ -777,7 +763,7 @@ def handle_with_exception_factory(
             try:
                 bound = inspect.signature(func).bind_partial(*args, **kwargs)
                 runid = bound.arguments.get('runid')
-            except Exception:
+            except Exception:  # broad-except: boundary contract
                 runid = None
 
         try:
@@ -787,7 +773,7 @@ def handle_with_exception_factory(
         except HTTPException:
             # Preserve deliberate HTTP errors such as abort(404) / abort(403).
             raise
-        except Exception as exc:
+        except Exception as exc:  # broad-except: boundary contract
             # Anything else becomes our standard error response, optionally tagged with runid.
             stacktrace = traceback.format_exc()
             return exception_factory(

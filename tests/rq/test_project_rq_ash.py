@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 from tests.factories.singleton import singleton_factory
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 pytestmark = pytest.mark.unit
 
@@ -72,8 +72,11 @@ def test_run_ash_rq_preflights_roots_before_execution(ash_rq_environment, monkey
     run_wd = str(base_path / "demo")
     assert preflight_calls == [
         (run_wd, "climate", "effective"),
-        (run_wd, "watershed", "effective"),
         (run_wd, "landuse", "effective"),
+        (run_wd, "watershed", "effective"),
+        (run_wd, "climate", "effective"),
+        (run_wd, "landuse", "effective"),
+        (run_wd, "watershed", "effective"),
     ]
 
     ash_instance = ash_cls.getInstance(run_wd)
@@ -104,6 +107,29 @@ def test_run_ash_rq_stops_on_nodir_preflight_error(ash_rq_environment, monkeypat
         project.run_ash_rq("demo", "8/4", 3.0, 5.0)
 
     assert exc_info.value.code == "NODIR_MIXED_STATE"
+    assert run_total_calls == []
+
+    run_wd = str(base_path / "demo")
+    if run_wd in ash_cls._instances:
+        ash_instance = ash_cls.getInstance(run_wd)
+        assert ash_instance.calls == []
+
+    assert any("EXCEPTION run_ash_rq(demo)" in message for _, message in published)
+
+
+def test_run_ash_rq_rejects_archive_form_roots(ash_rq_environment, monkeypatch: pytest.MonkeyPatch):
+    project, ash_cls, _wepp_cls, _redis_cls, published, run_total_calls, base_path = ash_rq_environment
+
+    monkeypatch.setattr(
+        project,
+        "nodir_resolve",
+        lambda _wd, _root, view="effective": SimpleNamespace(form="archive"),
+    )
+
+    with pytest.raises(NoDirError) as exc_info:
+        project.run_ash_rq("demo", "8/4", 3.0, 5.0)
+
+    assert exc_info.value.code == "NODIR_ARCHIVE_ACTIVE"
     assert run_total_calls == []
 
     run_wd = str(base_path / "demo")

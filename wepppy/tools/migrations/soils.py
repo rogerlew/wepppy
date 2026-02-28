@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, Tuple
 
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.tools.migrations.parquet_paths import pick_existing_parquet_path
 
 __all__ = [
     "migrate_soils_parquet",

@@ -72,9 +72,6 @@ class OmniCloneContrastService:
             _apply_contrast_output_triggers,
             _clear_nodb_cache_and_locks,
             _contrast_topaz_ids_from_mapping,
-            _copy_archive_root_with_projection_retry,
-            _copy_mutable_root_sidecar,
-            _link_shared_root_sidecars,
             _merge_contrast_parquet,
             _post_watershed_run_cleanup,
             _resolve_base_scenario_key,
@@ -92,9 +89,6 @@ class OmniCloneContrastService:
             nodir_resolve,
             pick_existing_parquet_path,
             _clear_nodb_cache_and_locks,
-            _link_shared_root_sidecars,
-            _copy_archive_root_with_projection_retry,
-            _copy_mutable_root_sidecar,
             _update_nodb_wd,
             _resolve_base_scenario_key,
             _resolve_contrast_scenario_wd,
@@ -125,9 +119,6 @@ class OmniCloneContrastService:
             nodir_resolve,
             pick_existing_parquet_path,
             clear_nodb_cache_and_locks,
-            link_shared_root_sidecars,
-            copy_archive_root_with_projection_retry,
-            copy_mutable_root_sidecar,
             update_nodb_wd,
             resolve_base_scenario_key,
             resolve_contrast_scenario_wd,
@@ -152,32 +143,15 @@ class OmniCloneContrastService:
 
         for dirname in ("climate", "watershed"):
             src_dir = _join(wd, dirname)
-            src_archive = _join(wd, f"{dirname}.nodir")
-            if os.path.isdir(src_dir):
-                src = src_dir
-                dst = _join(new_wd, dirname)
-            elif os.path.isfile(src_archive):
-                src = src_archive
-                dst = _join(new_wd, f"{dirname}.nodir")
-            else:
+            if not os.path.isdir(src_dir):
                 continue
+            dst = _join(new_wd, dirname)
             if not _exists(dst):
-                os.symlink(src, dst)
-            link_shared_root_sidecars(wd, new_wd, dirname)
+                os.symlink(src_dir, dst)
 
         for root in ("landuse", "soils"):
             resolved_root = nodir_resolve(wd, root, view="effective")
             if resolved_root is None:
-                continue
-
-            if resolved_root.form == "archive":
-                copy_archive_root_with_projection_retry(
-                    wd,
-                    new_wd,
-                    root,
-                    purpose=f"omni-run-contrast-{root}",
-                )
-                copy_mutable_root_sidecar(wd, new_wd, root)
                 continue
 
             if resolved_root.form == "dir":
@@ -197,7 +171,6 @@ class OmniCloneContrastService:
                 if dst_root.exists():
                     shutil.rmtree(dst_root)
                 shutil.copytree(str(src_root), str(dst_root))
-                copy_mutable_root_sidecar(wd, new_wd, root)
 
         symlink_entries = {
             "climate.nodb",
@@ -296,14 +269,14 @@ class OmniCloneContrastService:
         merge_contrast_parquet(
             control_parquet_fn=str(control_landuse),
             contrast_parquet_fn=str(contrast_landuse),
-            output_parquet_fn=str(Path(new_wd) / "landuse.parquet"),
+            output_parquet_fn=str(Path(new_wd) / "landuse" / "landuse.parquet"),
             contrast_topaz_ids=contrast_topaz_ids,
             label="landuse",
         )
         merge_contrast_parquet(
             control_parquet_fn=str(control_soils),
             contrast_parquet_fn=str(contrast_soils),
-            output_parquet_fn=str(Path(new_wd) / "soils.parquet"),
+            output_parquet_fn=str(Path(new_wd) / "soils" / "soils.parquet"),
             contrast_topaz_ids=contrast_topaz_ids,
             label="soils",
         )
@@ -328,9 +301,6 @@ class OmniCloneContrastService:
             LOGGER,
             OMNI_REL_DIR,
             _clear_nodb_cache_and_locks,
-            _copy_archive_root_with_projection_retry,
-            _copy_mutable_root_sidecar,
-            _link_shared_root_sidecars,
             _scenario_name_from_scenario_definition,
             _update_nodb_wd,
             nodir_resolve,
@@ -342,10 +312,7 @@ class OmniCloneContrastService:
             nodir_resolve,
             _scenario_name_from_scenario_definition,
             _clear_nodb_cache_and_locks,
-            _link_shared_root_sidecars,
             _update_nodb_wd,
-            _copy_archive_root_with_projection_retry,
-            _copy_mutable_root_sidecar,
         )
 
     def omni_clone(self, scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
@@ -355,10 +322,7 @@ class OmniCloneContrastService:
             nodir_resolve,
             scenario_name_from_scenario_definition,
             clear_nodb_cache_and_locks,
-            link_shared_root_sidecars,
             update_nodb_wd,
-            copy_archive_root_with_projection_retry,
-            copy_mutable_root_sidecar,
         ) = self._omni_clone_contract_refs()
 
         scenario_name = scenario_name_from_scenario_definition(scenario_def)
@@ -373,18 +337,11 @@ class OmniCloneContrastService:
 
         for dirname in ("climate", "watershed"):
             src_dir = _join(wd, dirname)
-            src_archive = _join(wd, f"{dirname}.nodir")
-            if os.path.isdir(src_dir):
-                src = src_dir
-                dst = _join(new_wd, dirname)
-            elif os.path.isfile(src_archive):
-                src = src_archive
-                dst = _join(new_wd, f"{dirname}.nodir")
-            else:
+            if not os.path.isdir(src_dir):
                 continue
+            dst = _join(new_wd, dirname)
             if not _exists(dst):
-                os.symlink(src, dst)
-            link_shared_root_sidecars(wd, new_wd, dirname)
+                os.symlink(src_dir, dst)
 
         for fn in os.listdir(wd):
             if fn in ["dem", "climate.nodb", "dem.nodb", "watershed.nodb"]:
@@ -418,15 +375,7 @@ class OmniCloneContrastService:
 
         soils_root = nodir_resolve(wd, "soils", view="effective")
         if soils_root is not None:
-            if soils_root.form == "archive":
-                copy_archive_root_with_projection_retry(
-                    wd,
-                    new_wd,
-                    "soils",
-                    purpose="omni-clone-soils",
-                )
-                copy_mutable_root_sidecar(wd, new_wd, "soils")
-            elif soils_root.form == "dir":
+            if soils_root.form == "dir":
                 src_root = Path(soils_root.dir_path)
                 if soils_root.inner_path:
                     src_root = src_root / soils_root.inner_path
@@ -441,14 +390,10 @@ class OmniCloneContrastService:
                     if dst_root.exists():
                         shutil.rmtree(dst_root)
                     shutil.copytree(str(src_root), str(dst_root))
-                    copy_mutable_root_sidecar(wd, new_wd, "soils")
 
         landuse_root = nodir_resolve(wd, "landuse", view="effective")
         if landuse_root is not None:
-            if landuse_root.form == "archive":
-                os.makedirs(_join(new_wd, "landuse"), exist_ok=True)
-                copy_mutable_root_sidecar(wd, new_wd, "landuse")
-            elif landuse_root.form == "dir":
+            if landuse_root.form == "dir":
                 src_root = Path(landuse_root.dir_path)
                 if landuse_root.inner_path:
                     src_root = src_root / landuse_root.inner_path
@@ -463,7 +408,6 @@ class OmniCloneContrastService:
                     if dst_root.exists():
                         shutil.rmtree(dst_root)
                     shutil.copytree(str(src_root), str(dst_root))
-                    copy_mutable_root_sidecar(wd, new_wd, "landuse")
 
         for fn in os.listdir(wd):
             if fn == "_pups":

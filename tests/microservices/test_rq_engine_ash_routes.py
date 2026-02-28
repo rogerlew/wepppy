@@ -6,7 +6,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import ash_routes
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice

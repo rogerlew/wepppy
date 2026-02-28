@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import json
 from pathlib import Path
 from typing import Any
 
@@ -107,7 +106,7 @@ def test_huc_fire_upload_sbs_creates_run_without_nodir_marker_by_default(
     assert not marker_path.exists()
 
 
-def test_huc_fire_upload_sbs_creates_nodir_marker_when_config_opted_in(
+def test_huc_fire_upload_sbs_does_not_create_nodir_marker_when_config_opted_in(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -118,10 +117,7 @@ def test_huc_fire_upload_sbs_creates_nodir_marker_when_config_opted_in(
     assert payload["runid"] == "new-run"
 
     marker_path = run_dir / ".nodir" / "default_archive_roots.json"
-    assert marker_path.exists()
-    marker_payload = json.loads(marker_path.read_text(encoding="utf-8"))
-    assert marker_payload["schema_version"] == 1
-    assert sorted(marker_payload["roots"]) == ["climate", "landuse", "soils", "watershed"]
+    assert not marker_path.exists()
 
 
 def test_huc_fire_upload_sbs_opt_in_respects_global_nodir_env_gate(

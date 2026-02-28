@@ -308,7 +308,7 @@ Pre-fire treatments reduce fire severity:
 
 ### Architecture
 
-Omni follows the NoDb singleton pattern. The controller persists state in `omni.nodb` and uses Redis DB 13 for 72-hour caching. Contrast mappings are stored as ASCII sidecar TSVs under `omni/contrasts/` to avoid bloating the NoDb payload. All scenario workspaces live under `<parent_wd>/_pups/omni/scenarios/<scenario_name>` and are themselves valid WEPPcloud projects (symlinked climate/watershed, including `.nodir` archives when present; copied disturbed/landuse/soils).
+Omni follows the NoDb singleton pattern. The controller persists state in `omni.nodb` and uses Redis DB 13 for 72-hour caching. Contrast mappings are stored as ASCII sidecar TSVs under `omni/contrasts/` to avoid bloating the NoDb payload. All scenario workspaces live under `<parent_wd>/_pups/omni/scenarios/<scenario_name>` and are themselves valid WEPPcloud projects (symlinked climate/watershed directories; copied disturbed/landuse/soils).
 
 ### Components
 
@@ -338,7 +338,7 @@ wepppy/weppcloud/templates/controls/
 ### Scenario Execution Flow
 
 1. **Definition**: User selects scenarios via UI or programmatically (`omni.parse_scenarios([...])`)
-2. **Cloning**: `_omni_clone()` creates `_pups/omni/scenarios/<scenario_name>`, symlinks shared inputs (directory or `.nodir`), copies mutable state
+2. **Cloning**: `_omni_clone()` creates `_pups/omni/scenarios/<scenario_name>`, symlinks shared directory inputs, copies mutable state
 3. **Treatment Application**: For thinning/mulching/prescribed fire, `Treatments.getInstance(scenario_wd)` modifies landuse/soils
 4. **WEPP Execution**: Scenario workspace calls `Wepp.prep_hillslopes()`, `Wepp.run_hillslopes()`, `Wepp.run_watershed()`
 5. **Reporting**: `Omni.scenarios_report()` concatenates per-scenario output files into a unified DataFrame

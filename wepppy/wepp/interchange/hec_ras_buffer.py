@@ -24,7 +24,7 @@ import pandas as pd
 from wepppy.all_your_base.geo import shapefile
 from wepppy.all_your_base.geo.geo import read_raster
 from wepppy.all_your_base.geo.geo_transformer import GeoTransformer
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 if TYPE_CHECKING:  # pragma: no cover
     from wepppy.nodb.core.watershed import Watershed

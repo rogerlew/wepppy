@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple
 
 import pandas as pd
 
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.omni.omni import ContrastDependencies, Omni, OmniScenario, ScenarioDef

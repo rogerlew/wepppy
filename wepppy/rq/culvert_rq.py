@@ -5,6 +5,7 @@ import logging
 import os
 import shutil
 import sys
+from contextlib import ExitStack
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -36,7 +37,9 @@ from wepppy.nodb.wepp_nodb_post_utils import (
     ensure_totalwatsed3,
     ensure_watershed_interchange,
 )
-from wepppy.nodir.mutations import mutate_root, mutate_roots
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 from wepppy.rq.topo_utils import _prune_stream_order
 from wepppy.topo.watershed_collection import WatershedFeature
 from . import culvert_rq_helpers as _helpers
@@ -110,6 +113,48 @@ _get_rq_connection = _manifest._get_rq_connection
 _fetch_job_info = _manifest._fetch_job_info
 _write_runs_manifest = _manifest._write_runs_manifest
 _write_run_skeletons_zip = _manifest._write_run_skeletons_zip
+
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
+
+
+def _run_with_directory_root_lock(
+    wd: str,
+    root: str,
+    callback,
+    *,
+    purpose: str,
+):
+    _require_directory_root(wd, root)
+    with nodir_maintenance_lock(wd, root, purpose=purpose):
+        _require_directory_root(wd, root)
+        return callback()
+
+
+def _run_with_directory_roots_lock(
+    wd: str,
+    roots: tuple[str, ...],
+    callback,
+    *,
+    purpose: str,
+):
+    lock_roots = tuple(sorted({str(root) for root in roots}))
+    for root in lock_roots:
+        _require_directory_root(wd, root)
+
+    with ExitStack() as stack:
+        for root in lock_roots:
+            stack.enter_context(nodir_maintenance_lock(wd, root, purpose=f"{purpose}/{root}"))
+        for root in lock_roots:
+            _require_directory_root(wd, root)
+        return callback()
 
 
 def _attach_batch_logger(runner: CulvertsRunner) -> None:
@@ -1436,7 +1481,7 @@ def _process_culvert_run(
             watershed.representative_flowpath = True
             watershed.abstract_watershed()
 
-        mutate_root(
+        _run_with_directory_root_lock(
             wd,
             "watershed",
             _mutate_watershed,
@@ -1458,14 +1503,14 @@ def _process_culvert_run(
             landuse.build(retrieve_nlcd=False)
             soils.build(retrieve_gridded_ssurgo=False)
 
-        mutate_roots(
+        _run_with_directory_roots_lock(
             wd,
             ("landuse", "soils"),
             _mutate_landuse_and_soils,
             purpose="culvert-run-landuse-soils",
         )
 
-        mutate_root(
+        _run_with_directory_root_lock(
             wd,
             "climate",
             lambda: climate.build(),

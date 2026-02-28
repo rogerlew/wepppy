@@ -3,10 +3,10 @@ import difflib
 
 from .._common import *  # noqa: F401,F403
 
-from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.fs import resolve as nodir_resolve
-from wepppy.nodir.fs import stat as nodir_stat
-from wepppy.nodir.paths import parse_external_subpath
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.fs import stat as nodir_stat
+from wepppy.runtime_paths.paths import parse_external_subpath
 from wepppy.weppcloud.utils.helpers import get_wd, error_factory, url_for_run
 
 from .._run_context import load_run_context

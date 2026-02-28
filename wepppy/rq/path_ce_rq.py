@@ -13,7 +13,7 @@ from rq import get_current_job
 from wepppy.nodb.mods.omni.omni import Omni, OmniScenario, _scenario_name_from_scenario_definition
 from wepppy.nodb.mods.path_ce import PathCostEffective
 from wepppy.nodb.mods.path_ce.presets import PATH_CE_BASELINE_SCENARIO, build_path_omni_scenarios
-from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.weppcloud.utils.helpers import get_wd

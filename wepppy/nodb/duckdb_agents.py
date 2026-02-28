@@ -6,7 +6,7 @@ from typing import Any, Dict, Union, TYPE_CHECKING
 
 import duckdb
 
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 if TYPE_CHECKING:  # pragma: no cover - import only for typing
     import pandas as pd

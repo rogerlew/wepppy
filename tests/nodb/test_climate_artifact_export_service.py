@@ -81,7 +81,7 @@ def test_export_cli_parquet_writes_expected_sidecar(tmp_path: Path) -> None:
 
     parquet_path = service.export_cli_parquet(climate)
 
-    assert parquet_path == tmp_path / "climate.wepp_cli.parquet"
+    assert parquet_path == tmp_path / "climate" / "wepp_cli.parquet"
     assert parquet_path.exists()
 
     df = pd.read_parquet(parquet_path)
@@ -91,7 +91,8 @@ def test_export_cli_parquet_writes_expected_sidecar(tmp_path: Path) -> None:
 def test_export_cli_precip_frequency_csv_writes_recurrence_limited_by_years(tmp_path: Path) -> None:
     service = ClimateArtifactExportService()
 
-    parquet_path = tmp_path / "climate.wepp_cli.parquet"
+    parquet_path = tmp_path / "climate" / "wepp_cli.parquet"
+    parquet_path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(
         {
             "year": [1980, 1980, 1981, 1981],

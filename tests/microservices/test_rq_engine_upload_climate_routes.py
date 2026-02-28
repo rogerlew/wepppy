@@ -1,4 +1,5 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -6,7 +7,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import upload_climate_routes
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
@@ -117,3 +118,43 @@ def test_upload_cli_propagates_nodir_errors(
 
     assert response.status_code == 409
     assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+
+
+def test_upload_cli_rejects_archive_form_root(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    cli_dir = run_dir / "cli"
+    cli_dir.mkdir(parents=True)
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(upload_climate_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(upload_climate_routes.Ron, "getInstance", lambda wd: object())
+    monkeypatch.setattr(
+        upload_climate_routes,
+        "nodir_resolve",
+        lambda _wd, _root, view="effective": SimpleNamespace(form="archive"),
+    )
+
+    class DummyClimate:
+        def __init__(self, cli_dir: Path) -> None:
+            self.cli_dir = str(cli_dir)
+
+    climate = DummyClimate(cli_dir)
+    monkeypatch.setattr(upload_climate_routes.Climate, "getInstance", lambda wd: climate)
+    monkeypatch.setattr(
+        upload_climate_routes,
+        "mutate_root",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("mutate_root should not run")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-cli/",
+            files={"input_upload_cli": ("demo.cli", b"data")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "NODIR_ARCHIVE_ACTIVE"

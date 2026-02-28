@@ -80,7 +80,7 @@ def test_archive_rq_checks_disk_headroom_before_writing_archive(
     assert not (run_dir / "archives").exists()
 
 
-def test_archive_rq_excludes_nodir_cache_entries(
+def test_archive_rq_preserves_nodir_cache_entries(
     archive_rq_environment,
 ) -> None:
     project, tmp_path, _published, prep_by_run = archive_rq_environment
@@ -103,11 +103,11 @@ def test_archive_rq_excludes_nodir_cache_entries(
 
     assert "input.txt" in names
     assert ".nodir/projections/read.json" in names
-    assert ".nodir/cache/watershed/123/entry.bin" not in names
+    assert ".nodir/cache/watershed/123/entry.bin" in names
     assert prep_by_run["demo"].cleared == 1
 
 
-def test_calculate_run_payload_bytes_excludes_nodir_cache(
+def test_calculate_run_payload_bytes_includes_nodir_cache(
     archive_rq_environment,
 ) -> None:
     project, tmp_path, _published, _prep_by_run = archive_rq_environment
@@ -119,8 +119,8 @@ def test_calculate_run_payload_bytes_excludes_nodir_cache(
     (run_dir / ".nodir" / "cache" / "watershed" / "123" / "ignored.bin").write_bytes(b"x" * 100)
 
     total_bytes, file_count = project._calculate_run_payload_bytes(run_dir)
-    assert total_bytes == 3
-    assert file_count == 1
+    assert total_bytes == 103
+    assert file_count == 2
 
 
 def test_restore_archive_rq_validates_zip_integrity_before_removing_existing_files(
@@ -149,7 +149,7 @@ def test_restore_archive_rq_validates_zip_integrity_before_removing_existing_fil
     assert prep_by_run["demo"].cleared == 1
 
 
-def test_restore_archive_rq_skips_nodir_cache_entries(
+def test_restore_archive_rq_restores_nodir_cache_entries(
     archive_rq_environment,
 ) -> None:
     project, tmp_path, _published, prep_by_run = archive_rq_environment
@@ -165,7 +165,7 @@ def test_restore_archive_rq_skips_nodir_cache_entries(
     project.restore_archive_rq("demo", archive_path.name)
 
     assert (run_dir / "restored.txt").read_text(encoding="utf-8") == "value"
-    assert not (run_dir / ".nodir" / "cache" / "watershed" / "123" / "entry.bin").exists()
+    assert (run_dir / ".nodir" / "cache" / "watershed" / "123" / "entry.bin").read_text(encoding="utf-8") == "cache"
     assert prep_by_run["demo"].cleared == 1
 
 

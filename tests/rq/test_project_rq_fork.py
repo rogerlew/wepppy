@@ -14,13 +14,13 @@ def _extract_excludes(cmd: list[str]) -> list[str]:
     return [cmd[index + 1] for index, token in enumerate(cmd[:-1]) if token == "--exclude"]
 
 
-def test_build_fork_rsync_cmd_always_excludes_nodir_cache() -> None:
+def test_build_fork_rsync_cmd_directory_mode_has_no_nodir_cache_exclude() -> None:
     import wepppy.rq.project_rq as project
 
     cmd = project._build_fork_rsync_cmd("/tmp/target/", undisturbify=False)
     excludes = _extract_excludes(cmd)
 
-    assert ".nodir/cache/***" in excludes
+    assert ".nodir/cache/***" not in excludes
     assert "wepp/runs" not in excludes
     assert "wepp/output" not in excludes
     assert cmd[-2:] == [".", "/tmp/target/"]
@@ -32,7 +32,7 @@ def test_build_fork_rsync_cmd_adds_undisturbify_excludes() -> None:
     cmd = project._build_fork_rsync_cmd("/tmp/target/", undisturbify=True)
     excludes = _extract_excludes(cmd)
 
-    assert ".nodir/cache/***" in excludes
+    assert ".nodir/cache/***" not in excludes
     assert "wepp/runs" in excludes
     assert "wepp/output" in excludes
     assert cmd[-2:] == [".", "/tmp/target/"]

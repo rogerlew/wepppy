@@ -6,7 +6,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import omni_routes
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
@@ -96,8 +96,7 @@ def _make_pairs(count: int) -> list[dict[str, str]]:
     ]
 
 
-def test_preflight_omni_roots_recovers_mixed_soils_before_resolve(
-    monkeypatch: pytest.MonkeyPatch,
+def test_preflight_omni_roots_rejects_mixed_soils_root(
     tmp_path: Path,
 ) -> None:
     wd = tmp_path / "run"
@@ -105,25 +104,14 @@ def test_preflight_omni_roots_recovers_mixed_soils_before_resolve(
     (wd / "soils").mkdir()
     (wd / "soils.nodir").write_bytes(b"placeholder archive")
 
-    resolve_calls: list[tuple[str, str]] = []
+    with pytest.raises(NoDirError) as exc_info:
+        omni_routes._preflight_omni_roots(str(wd))
 
-    def _resolve(_wd: str, root: str, *, view: str = "effective") -> None:
-        resolve_calls.append((root, view))
-        if root == "soils" and (Path(_wd) / "soils").exists() and (Path(_wd) / "soils.nodir").exists():
-            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
-
-    monkeypatch.setattr(omni_routes, "nodir_resolve", _resolve)
-
-    omni_routes._preflight_omni_roots(str(wd))
-
+    assert exc_info.value.code == "NODIR_MIXED_STATE"
+    assert exc_info.value.http_status == 409
+    assert "mixed state" in exc_info.value.message
     assert (wd / "soils.nodir").exists()
-    assert not (wd / "soils").exists()
-    assert resolve_calls == [
-        ("climate", "effective"),
-        ("watershed", "effective"),
-        ("landuse", "effective"),
-        ("soils", "effective"),
-    ]
+    assert (wd / "soils").exists()
 
 
 def test_run_omni_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -144,6 +132,26 @@ def test_run_omni_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["job_id"] == "job-11"
     assert payload["message"] == "Job enqueued."
     assert payload["status_url"] == "/rq-engine/api/jobstatus/job-11"
+
+
+def test_run_omni_rejects_archive_form_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        omni_routes,
+        "nodir_resolve",
+        lambda _wd, _root, view="effective": type("Resolved", (), {"form": "archive"})(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            json={"scenarios": [{"type": "uniform_low"}]},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "NODIR_ARCHIVE_ACTIVE"
 
 
 def test_run_omni_batch_returns_input_message_without_enqueue(monkeypatch: pytest.MonkeyPatch) -> None:

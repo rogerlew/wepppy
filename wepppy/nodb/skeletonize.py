@@ -31,16 +31,11 @@ RUN_SKELETON_ALLOWLIST: tuple[str, ...] = (
     "climate/*",
     "dem/wbt/*.geojson",
     "disturbed/disturbed_land_soil_lookup.csv",
-    # Canonical WD-level parquet sidecars (NoDir + migration).
-    "landuse.parquet",
-    "soils.parquet",
-    "watershed.hillslopes.parquet",
-    "watershed.channels.parquet",
-    "watershed.flowpaths.parquet",
-    "climate.*.parquet",
-    # Legacy in-tree parquet locations (directory-form runs).
+    # Canonical directory parquet locations.
     "landuse/landuse.parquet",
     "soils/soils.parquet",
+    "climate/wepp_cli.parquet",
+    "climate/wepp_cli_pds_mean_metric.csv",
     "watershed/channels.parquet",
     "watershed/hillslopes.parquet",
     "watershed/flowpaths.parquet",

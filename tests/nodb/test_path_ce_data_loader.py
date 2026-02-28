@@ -77,7 +77,7 @@ def _build_run_dir(
     *,
     hillslope_df: pd.DataFrame,
     watershed_df: pd.DataFrame,
-    watershed_layout: str = "legacy",
+    watershed_layout: str = "canonical",
     outlet_df: pd.DataFrame | None = None,
 ) -> Path:
     wd = tmp_path
@@ -87,10 +87,8 @@ def _build_run_dir(
     if outlet_df is not None:
         _write_parquet(omni_dir / "contrasts.out.parquet", outlet_df)
 
-    if watershed_layout == "legacy":
+    if watershed_layout == "canonical":
         _write_parquet(wd / "watershed" / "hillslopes.parquet", watershed_df)
-    elif watershed_layout == "sidecar":
-        _write_parquet(wd / "watershed.hillslopes.parquet", watershed_df)
     else:
         raise ValueError(f"Unknown watershed_layout={watershed_layout!r}")
 
@@ -111,8 +109,7 @@ def test_resolve_omni_raises_when_missing(tmp_path):
         _resolve_omni_dir(tmp_path)
 
 
-@pytest.mark.parametrize("watershed_layout", ["legacy", "sidecar"])
-def test_load_solver_inputs_happy_path_with_outlet_contrasts(tmp_path, watershed_layout):
+def test_load_solver_inputs_happy_path_with_outlet_contrasts(tmp_path):
     hillslope_df = _hillslope_summaries_df(
         scenarios={
             "post_fire": [
@@ -147,7 +144,7 @@ def test_load_solver_inputs_happy_path_with_outlet_contrasts(tmp_path, watershed
         tmp_path,
         hillslope_df=hillslope_df,
         watershed_df=watershed_df,
-        watershed_layout=watershed_layout,
+        watershed_layout="canonical",
         outlet_df=outlet_df,
     )
 

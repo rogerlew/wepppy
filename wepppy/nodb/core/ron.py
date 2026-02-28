@@ -101,7 +101,7 @@ from wepppy.nodb.duckdb_agents import (
     get_soil_subs_summary, 
     get_landuse_subs_summary
 )
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
 

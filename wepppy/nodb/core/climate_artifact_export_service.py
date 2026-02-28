@@ -66,7 +66,8 @@ class ClimateArtifactExportService:
             export_df["storm_duration_hours"] = export_df.get("dur")
             export_df["storm_duration"] = export_df.get("dur")
 
-            parquet_path = Path(climate.wd) / "climate.wepp_cli.parquet"
+            parquet_path = Path(climate.wd) / "climate" / "wepp_cli.parquet"
+            parquet_path.parent.mkdir(parents=True, exist_ok=True)
             export_df.to_parquet(parquet_path, index=False)
             climate.logger.info("Exported CLI parquet with peak intensities", extra={"parquet": str(parquet_path)})
             return parquet_path

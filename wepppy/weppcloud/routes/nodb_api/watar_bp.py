@@ -17,8 +17,8 @@ from wepppy.nodb.base import *
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.mods.ash_transport import Ash, AshPost
 from wepppy.nodb.mods.disturbed import Disturbed
-from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.wepp_inputs import with_input_file_path
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.wepp_inputs import with_input_file_path
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize, parse_rec_intervals
 from wepppy.wepp.interchange.hill_wat_interchange import load_hill_wat_dataframe
 

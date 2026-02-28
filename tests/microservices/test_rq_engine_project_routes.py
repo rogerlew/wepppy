@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, Tuple
@@ -175,7 +174,7 @@ def test_create_does_not_enable_default_nodir_roots_marker_without_opt_in(
     assert not marker_path.exists()
 
 
-def test_create_enables_default_nodir_roots_marker_with_opt_in_override(
+def test_create_does_not_enable_default_nodir_roots_marker_with_opt_in_override(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
 ):
@@ -194,12 +193,9 @@ def test_create_enables_default_nodir_roots_marker_with_opt_in_override(
     )
 
     assert response.status_code == 303
+    assert captured["cfg"] == f"{CONFIG}.cfg?nodb:apply_nodir=true"
     marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
-    assert marker_path.exists()
-
-    payload = json.loads(marker_path.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == 1
-    assert sorted(payload["roots"]) == ["climate", "landuse", "soils", "watershed"]
+    assert not marker_path.exists()
 
 
 def test_create_opt_in_respects_global_nodir_env_gate(
@@ -222,5 +218,6 @@ def test_create_opt_in_respects_global_nodir_env_gate(
     )
 
     assert response.status_code == 303
+    assert captured["cfg"] == f"{CONFIG}.cfg?nodb:apply_nodir=true"
     marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
     assert not marker_path.exists()

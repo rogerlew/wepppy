@@ -29,7 +29,7 @@ from wepppy.nodb.mods.omni.omni import (
     _scenario_name_from_scenario_definition,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.wepp_rq_stage_helpers import (
     NODIR_RECOVERY_ROOTS as _NODIR_RECOVERY_ROOTS,

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -30,11 +29,13 @@ def _configure_create_run_test_app(
         raising=False,
     )
     monkeypatch.setattr(test_bp_module, "create_run_dir", lambda user: ("ab-run", str(run_dir)))
+    captured_cfg: list[str] = []
 
     class DummyRon:
         def __init__(self, wd: str, cfg: str) -> None:
             self.wd = wd
             self.cfg = cfg
+            captured_cfg.append(cfg)
 
         def config_get_bool(self, section: str, option: str, default: bool | None = None) -> bool:
             if section != "nodb" or option != "apply_nodir":
@@ -58,6 +59,7 @@ def _configure_create_run_test_app(
         "url_for_run",
         lambda endpoint, runid, config: f"/weppcloud/runs/{runid}/{config}",
     )
+    app.config["_captured_ron_cfg"] = captured_cfg
     return app
 
 
@@ -86,7 +88,7 @@ def test_create_run_endpoint_does_not_seed_default_nodir_marker_without_opt_in(
     assert not marker_path.exists()
 
 
-def test_create_run_endpoint_seeds_default_nodir_marker_with_opt_in_override(
+def test_create_run_endpoint_does_not_seed_default_nodir_marker_with_opt_in_override(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -106,13 +108,10 @@ def test_create_run_endpoint_seeds_default_nodir_marker_with_opt_in_override(
     payload = response.get_json()
     assert payload is not None
     assert payload["run"]["runid"] == "ab-run"
+    assert app.config["_captured_ron_cfg"][-1] == "dev_unit_1.cfg?nodb:apply_nodir=true"
 
     marker_path = run_dir / ".nodir" / "default_archive_roots.json"
-    assert marker_path.exists()
-
-    marker_payload = json.loads(marker_path.read_text(encoding="utf-8"))
-    assert marker_payload["schema_version"] == 1
-    assert sorted(marker_payload["roots"]) == ["climate", "landuse", "soils", "watershed"]
+    assert not marker_path.exists()
 
 
 def test_create_run_endpoint_opt_in_respects_global_nodir_env_gate(
@@ -135,6 +134,7 @@ def test_create_run_endpoint_opt_in_respects_global_nodir_env_gate(
     payload = response.get_json()
     assert payload is not None
     assert payload["run"]["runid"] == "ab-run"
+    assert app.config["_captured_ron_cfg"][-1] == "dev_unit_1.cfg?nodb:apply_nodir=true"
 
     marker_path = run_dir / ".nodir" / "default_archive_roots.json"
     assert not marker_path.exists()

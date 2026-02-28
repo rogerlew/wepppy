@@ -1,20 +1,79 @@
 from __future__ import annotations
 
+from contextlib import ExitStack
 import os
 import shutil
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
+from time import monotonic, sleep
 from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple
 
-from wepppy.nodir.mutations import mutate_root, mutate_roots
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.omni.omni import ContrastMapping, Omni, OmniScenario, ScenarioDef
 
-_OMNI_MUTATION_LOCK_WAIT_SECONDS = 300.0
-_OMNI_MUTATION_LOCK_RETRY_INTERVAL_SECONDS = 0.25
+_OMNI_LOCK_WAIT_SECONDS = 300.0
+_OMNI_LOCK_RETRY_INTERVAL_SECONDS = 0.25
 
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
+
+
+def _run_with_directory_root_lock(
+    wd: str,
+    root: str,
+    callback,
+    *,
+    purpose: str,
+):
+    _require_directory_root(wd, root)
+    deadline = monotonic() + _OMNI_LOCK_WAIT_SECONDS
+    while True:
+        try:
+            with nodir_maintenance_lock(wd, root, purpose=purpose):
+                _require_directory_root(wd, root)
+                return callback()
+        except NoDirError as exc:
+            if exc.code != "NODIR_LOCKED" or monotonic() >= deadline:
+                raise
+            sleep(min(_OMNI_LOCK_RETRY_INTERVAL_SECONDS, max(0.0, deadline - monotonic())))
+
+
+def _run_with_directory_roots_lock(
+    wd: str,
+    roots: tuple[str, ...],
+    callback,
+    *,
+    purpose: str,
+):
+    lock_roots = tuple(sorted({str(root) for root in roots}))
+    for root in lock_roots:
+        _require_directory_root(wd, root)
+    with ExitStack() as stack:
+        for root in lock_roots:
+            deadline = monotonic() + _OMNI_LOCK_WAIT_SECONDS
+            while True:
+                try:
+                    stack.enter_context(nodir_maintenance_lock(wd, root, purpose=f"{purpose}/{root}"))
+                    break
+                except NoDirError as exc:
+                    if exc.code != "NODIR_LOCKED" or monotonic() >= deadline:
+                        raise
+                    sleep(min(_OMNI_LOCK_RETRY_INTERVAL_SECONDS, max(0.0, deadline - monotonic())))
+        for root in lock_roots:
+            _require_directory_root(wd, root)
+        return callback()
 
 class OmniModeBuildServices:
     """Dispatch Omni scenario/contrast builds by selection and scenario mode."""
@@ -89,24 +148,20 @@ class OmniModeBuildServices:
     ) -> None:
         scenario_key = str(scenario)
 
-        def _mutate_landuse_and_soils(callback: Any, *, purpose: str) -> None:
-            mutate_roots(
+        def _run_landuse_and_soils(callback: Any) -> None:
+            _run_with_directory_roots_lock(
                 new_wd,
                 ("landuse", "soils"),
                 callback,
-                purpose=purpose,
-                lock_wait_seconds=_OMNI_MUTATION_LOCK_WAIT_SECONDS,
-                lock_retry_interval_seconds=_OMNI_MUTATION_LOCK_RETRY_INTERVAL_SECONDS,
+                purpose=f"omni-{scenario_key}-landuse-soils",
             )
 
-        def _mutate_soils(callback: Any, *, purpose: str) -> None:
-            mutate_root(
+        def _run_soils(callback: Any) -> None:
+            _run_with_directory_root_lock(
                 new_wd,
                 "soils",
                 callback,
-                purpose=purpose,
-                lock_wait_seconds=_OMNI_MUTATION_LOCK_WAIT_SECONDS,
-                lock_retry_interval_seconds=_OMNI_MUTATION_LOCK_RETRY_INTERVAL_SECONDS,
+                purpose=f"omni-{scenario_key}-soils",
             )
 
         if scenario_key in {"uniform_low", "uniform_moderate", "uniform_high"}:
@@ -125,12 +180,11 @@ class OmniModeBuildServices:
             with omni.timed(f"  {scenario_name}: validate sbs {sbs_fn}"):
                 disturbed.validate(sbs_fn, mode=1, uniform_severity=int(sbs))
             with omni.timed(f"  {scenario_name}: build landuse and soils"):
-                _mutate_landuse_and_soils(
+                _run_landuse_and_soils(
                     lambda: (
                         landuse.build(),
                         soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
                     ),
-                    purpose=f"omni-{scenario_key}-build-landuse-soils",
                 )
             return
 
@@ -149,12 +203,11 @@ class OmniModeBuildServices:
             with omni.timed(f"  {scenario_name}: remove sbs"):
                 disturbed.remove_sbs()
             with omni.timed(f"  {scenario_name}: build landuse and soils"):
-                _mutate_landuse_and_soils(
+                _run_landuse_and_soils(
                     lambda: (
                         landuse.build(),
                         soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
                     ),
-                    purpose=f"omni-{scenario_key}-build-landuse-soils",
                 )
             return
 
@@ -174,12 +227,11 @@ class OmniModeBuildServices:
             with omni.timed(f"  {scenario_name}: validate sbs {sbs_fn}"):
                 disturbed.validate(sbs_fn, mode=0)
             with omni.timed(f"  {scenario_name}: build landuse and soils"):
-                _mutate_landuse_and_soils(
+                _run_landuse_and_soils(
                     lambda: (
                         landuse.build(),
                         soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
                     ),
-                    purpose=f"omni-{scenario_key}-build-landuse-soils",
                 )
             return
 
@@ -208,15 +260,13 @@ class OmniModeBuildServices:
                     treatments.treatments_domlc_d = treatments_domlc_d
                     treatments.build_treatments()
 
-                _mutate_landuse_and_soils(
+                _run_landuse_and_soils(
                     _apply_treatments,
-                    purpose=f"omni-{scenario_key}-apply-treatments",
                 )
 
             with omni.timed(f"  {scenario_name}: build soils"):
-                _mutate_soils(
+                _run_soils(
                     lambda: soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
-                    purpose=f"omni-{scenario_key}-build-soils",
                 )
             return
 
@@ -229,9 +279,8 @@ class OmniModeBuildServices:
             from wepppy.nodb.mods.treatments import Treatments
 
             with omni.timed(f"  {scenario_name}: build soils"):
-                _mutate_soils(
+                _run_soils(
                     lambda: soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
-                    purpose=f"omni-{scenario_key}-build-soils",
                 )
 
             with omni.timed(f"  {scenario_name}: applying treatments"):
@@ -260,9 +309,8 @@ class OmniModeBuildServices:
                     treatments.treatments_domlc_d = treatments_domlc_d
                     treatments.build_treatments()
 
-                _mutate_landuse_and_soils(
+                _run_landuse_and_soils(
                     _apply_treatments,
-                    purpose=f"omni-{scenario_key}-apply-treatments",
                 )
             return
 
@@ -275,9 +323,8 @@ class OmniModeBuildServices:
             from wepppy.nodb.mods.treatments import Treatments
 
             with omni.timed(f"  {scenario_name}: build soils"):
-                _mutate_soils(
+                _run_soils(
                     lambda: soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
-                    purpose=f"omni-{scenario_key}-build-soils",
                 )
 
             with omni.timed(f"  {scenario_name}: applying treatments"):
@@ -298,7 +345,4 @@ class OmniModeBuildServices:
                     treatments.treatments_domlc_d = treatments_domlc_d
                     treatments.build_treatments()
 
-                _mutate_landuse_and_soils(
-                    _apply_treatments,
-                    purpose=f"omni-{scenario_key}-apply-treatments",
-                )
+                _run_landuse_and_soils(_apply_treatments)

@@ -9,10 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from collections.abc import Iterable
 
-from wepppy.nodir.parquet_sidecars import (
-    logical_parquet_to_sidecar_relpath,
-    sidecar_relpath_to_logical_parquet,
-)
+from wepppy.runtime_paths.parquet_sidecars import list_existing_retired_root_resources
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,21 +30,20 @@ GEO_SCHEMA_EXTENSIONS: tuple[str, ...] = (
 READONLY_SENTINEL = "READONLY"
 
 
-def _extract_sidecar_name(rel_path: str, *, prefix: str) -> str | None:
-    """Return the `<name>` portion of `<prefix>.<name>.parquet` if it matches."""
-    rel_path = rel_path.replace("\\", "/").lstrip("/")
-    needle = f"{prefix}."
-    if not rel_path.startswith(needle) or not rel_path.endswith(".parquet"):
-        return None
-    name = rel_path[len(needle) : -len(".parquet")]
-    return name or None
+def _raise_if_retired_root_resources(base: Path) -> None:
+    retired = list_existing_retired_root_resources(base)
+    if not retired:
+        return
+
+    retired_list = ", ".join(retired)
+    raise ValueError(
+        "Migration required before query-engine activation: retired WD-root resources detected "
+        f"({retired_list}). Move them to canonical directory paths first."
+    )
 
 
 def _collect_nodir_parquet_targets(base: Path) -> dict[str, Path]:
-    """Return logical parquet ids -> physical filesystem paths under ``base``.
-
-    Preference order is sidecar first, then legacy in-tree.
-    """
+    """Return canonical NoDir parquet logical ids present under directory roots."""
     targets: dict[str, Path] = {}
 
     def _allowed_file(candidate: Path) -> bool:
@@ -59,60 +55,25 @@ def _collect_nodir_parquet_targets(base: Path) -> dict[str, Path]:
             return False
         return _is_allowed_target(base, resolved)
 
-    def choose(logical: str, *, sidecar: Path, legacy: Path) -> None:
-        if _allowed_file(sidecar):
-            targets[logical] = sidecar
-        elif _allowed_file(legacy):
-            targets[logical] = legacy
-
-    choose(
-        "landuse/landuse.parquet",
-        sidecar=base / "landuse.parquet",
-        legacy=base / "landuse" / "landuse.parquet",
-    )
-    choose(
-        "soils/soils.parquet",
-        sidecar=base / "soils.parquet",
-        legacy=base / "soils" / "soils.parquet",
-    )
+    canonical_targets = {
+        "landuse/landuse.parquet": base / "landuse" / "landuse.parquet",
+        "soils/soils.parquet": base / "soils" / "soils.parquet",
+    }
+    for logical, candidate in canonical_targets.items():
+        if _allowed_file(candidate):
+            targets[logical] = candidate
 
     climate_dir = base / "climate"
-    climate_names: set[str] = set()
-    for candidate in base.glob("climate.*.parquet"):
-        if not _allowed_file(candidate):
-            continue
-        name = _extract_sidecar_name(candidate.name, prefix="climate")
-        if name:
-            climate_names.add(name)
     if climate_dir.is_dir():
-        for candidate in climate_dir.glob("*.parquet"):
-            if _allowed_file(candidate) and candidate.stem:
-                climate_names.add(candidate.stem)
-    for name in climate_names:
-        choose(
-            f"climate/{name}.parquet",
-            sidecar=base / f"climate.{name}.parquet",
-            legacy=climate_dir / f"{name}.parquet",
-        )
+        for candidate in sorted(climate_dir.glob("*.parquet")):
+            if _allowed_file(candidate):
+                targets[f"climate/{candidate.name}"] = candidate
 
     watershed_dir = base / "watershed"
-    watershed_names: set[str] = set()
-    for candidate in base.glob("watershed.*.parquet"):
-        if not _allowed_file(candidate):
-            continue
-        name = _extract_sidecar_name(candidate.name, prefix="watershed")
-        if name:
-            watershed_names.add(name)
     if watershed_dir.is_dir():
-        for candidate in watershed_dir.glob("*.parquet"):
-            if _allowed_file(candidate) and candidate.stem:
-                watershed_names.add(candidate.stem)
-    for name in watershed_names:
-        choose(
-            f"watershed/{name}.parquet",
-            sidecar=base / f"watershed.{name}.parquet",
-            legacy=watershed_dir / f"{name}.parquet",
-        )
+        for candidate in sorted(watershed_dir.glob("*.parquet")):
+            if _allowed_file(candidate):
+                targets[f"watershed/{candidate.name}"] = candidate
 
     return targets
 
@@ -131,20 +92,12 @@ def _attach_fs_path(entry: dict[str, object], *, base: Path, physical_path: Path
 
 
 def _canonicalize_nodir_parquets(base: Path, entries: list[dict[str, object]]) -> list[dict[str, object]]:
-    """Ensure NoDir-root parquets are catalogued under logical ids.
-
-    If sidecar parquets exist, the catalog exposes stable logical ids like
-    `landuse/landuse.parquet` while pointing at the physical WD-level file via
-    `fs_path`.
-    """
+    """Ensure NoDir-root parquets are catalogued under canonical logical ids."""
     by_path: dict[str, dict[str, object]] = {entry["path"]: entry for entry in entries if "path" in entry}
 
     # Canonicalize the current root first (scenario overrides win).
     targets = _collect_nodir_parquet_targets(base)
     for logical, physical in targets.items():
-        sidecar_rel = logical_parquet_to_sidecar_relpath(logical)
-        if sidecar_rel is not None:
-            by_path.pop(sidecar_rel, None)
         by_path.pop(logical, None)
 
         entry = _build_entry(base, physical, catalog_path=logical)
@@ -196,6 +149,8 @@ def activate_query_engine(
     query_engine_dir = base / "_query_engine"
     catalog_path = query_engine_dir / "catalog.json"
     readonly = (base / READONLY_SENTINEL).exists()
+
+    _raise_if_retired_root_resources(base)
 
     if not force_refresh and catalog_path.exists():
         try:
@@ -271,6 +226,7 @@ def update_catalog_entry(
     if not base.exists():
         raise FileNotFoundError(base)
 
+    _raise_if_retired_root_resources(base)
     _raise_if_readonly(base)
 
     rel_path_obj = Path(asset_path)
@@ -291,44 +247,6 @@ def update_catalog_entry(
             raise ValueError(f"Path '{asset_path}' is outside working directory '{base}'")
         catalog_entry_path = "/".join(normalized_parts)
 
-    # NoDir parquet sidecars: keep logical ids stable in the catalog and use
-    # fs_path to point at the WD-level sidecar when present.
-    requested_rel = catalog_entry_path
-    logical_rel = requested_rel
-    physical_target = target
-
-    if requested_rel is not None:
-        sidecar_logical = sidecar_relpath_to_logical_parquet(requested_rel)
-        if sidecar_logical is not None:
-            logical_rel = sidecar_logical
-            physical_target = base / requested_rel
-        else:
-            sidecar_rel = logical_parquet_to_sidecar_relpath(requested_rel)
-            if sidecar_rel is not None:
-                logical_rel = requested_rel
-                candidate = base / sidecar_rel
-                if candidate.is_file():
-                    physical_target = candidate
-                elif physical_target.exists():
-                    physical_target = physical_target
-                else:
-                    parent_root = _find_parent_run_root(base)
-                    if parent_root is not None:
-                        parent_sidecar = parent_root / sidecar_rel
-                        parent_legacy = parent_root / requested_rel
-                        if parent_sidecar.is_file():
-                            physical_target = parent_sidecar
-                        elif parent_legacy.is_file():
-                            physical_target = parent_legacy
-
-    if logical_rel is not None and physical_target is not None:
-        try:
-            resolved_physical = physical_target.resolve()
-        except FileNotFoundError:
-            resolved_physical = physical_target
-        if not _is_allowed_target(base, resolved_physical):
-            raise ValueError(f"Path '{asset_path}' is outside working directory '{base}'")
-
     catalog_path = base / "_query_engine" / "catalog.json"
     if not catalog_path.exists():
         # fall back to full activation
@@ -338,38 +256,10 @@ def update_catalog_entry(
     files: list[dict[str, object]] = catalog.get("files", [])
     files_by_path = {entry["path"]: entry for entry in files}
 
+
     updated_entry: dict[str, object] | None = None
 
-    # Special-case: canonicalize logical parquet ids so callers can continue to
-    # reference `landuse/landuse.parquet` even when the file lives at WD root.
-    parquet_sidecar_key = requested_rel if requested_rel else ""
-    parquet_logical_key = logical_rel if logical_rel else ""
-    is_special_parquet = bool(
-        (requested_rel and sidecar_relpath_to_logical_parquet(requested_rel))
-        or (requested_rel and logical_parquet_to_sidecar_relpath(requested_rel))
-    )
-
-    if is_special_parquet:
-        # Drop any stale physical-key entry (e.g., landuse.parquet) so the
-        # logical id remains the sole canonical dataset path.
-        if parquet_sidecar_key:
-            files_by_path.pop(parquet_sidecar_key, None)
-        if parquet_logical_key:
-            sidecar_rel = logical_parquet_to_sidecar_relpath(parquet_logical_key)
-            if sidecar_rel is not None:
-                files_by_path.pop(sidecar_rel, None)
-
-        if physical_target.exists() and physical_target.is_file():
-            entry = _build_entry(base, physical_target, catalog_path=parquet_logical_key)
-            if entry is None:
-                raise ValueError(f"Unsupported asset type for '{physical_target}'")
-            _attach_fs_path(entry, base=base, physical_path=physical_target)
-            files_by_path[entry["path"]] = entry
-            updated_entry = entry
-        else:
-            files_by_path.pop(parquet_logical_key, None)
-            updated_entry = None
-    elif target.exists():
+    if target.exists():
         if target.is_dir():
             new_entries = _build_catalog_subset(base, target)
             for entry in new_entries:

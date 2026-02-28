@@ -14,7 +14,6 @@ from wepppy.weppcloud.utils.helpers import url_for_run, get_wd
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
 from wepppy.weppcloud.utils.runid import generate_runid
 from wepppy.nodb.core.ron import Ron
-from wepppy.nodir.mutations import enable_default_archive_roots
 
 
 def _require_enabled() -> None:
@@ -50,8 +49,6 @@ def _spawn_run(config: str, overrides: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         ron = Ron(wd, cfg_with_params)
-        if ron.config_get_bool("nodb", "apply_nodir", False):
-            enable_default_archive_roots(wd)
         try:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
 

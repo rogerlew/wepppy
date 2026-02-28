@@ -89,7 +89,8 @@ def test_soils_clean_preserves_managed_projection_symlink_mount(tmp_path: Path) 
     assert soils_root.is_symlink()
     assert mount_target.is_dir()
     assert list(mount_target.iterdir()) == []
-    assert not sidecar.exists()
+    assert sidecar.exists()
+    assert sidecar.read_text(encoding="utf-8") == "stale"
     assert soils._soils_is_vrt is False
 
 
@@ -141,7 +142,8 @@ def test_landuse_clean_preserves_managed_projection_symlink_mount(tmp_path: Path
     assert landuse_root.is_symlink()
     assert mount_target.is_dir()
     assert list(mount_target.iterdir()) == []
-    assert not sidecar.exists()
+    assert sidecar.exists()
+    assert sidecar.read_text(encoding="utf-8") == "stale"
     assert landuse._landuse_is_vrt is False
 
 

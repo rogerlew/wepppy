@@ -13,8 +13,9 @@ from starlette.datastructures import UploadFile
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Climate, Ron
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.mutations import mutate_root
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as _nodir_resolve
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 from wepppy.rq.project_rq import upload_cli_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -31,11 +32,44 @@ RQ_UPLOAD_SCOPES = ["rq:enqueue"]
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 
 
+def _maybe_nodir_error_response(exc: Exception):
+    if isinstance(exc, NoDirError):
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    return None
+
+
 def _extract_upload(form, key: str) -> UploadFile | None:
     upload = form.get(key)
     if isinstance(upload, UploadFile):
         return upload
     return None
+
+
+def mutate_root(
+    wd: str,
+    root: str,
+    callback,
+    *,
+    purpose: str = "rq-upload",
+):
+    _require_directory_root(wd, root)
+    with nodir_maintenance_lock(wd, root, purpose=purpose):
+        _require_directory_root(wd, root)
+        return callback()
+
+
+def nodir_resolve(wd: str, root: str, *, view: str = "effective"):
+    return _nodir_resolve(wd, root, view=view)
+
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
 
 
 @router.post(
@@ -61,12 +95,13 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cli auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
         wd = get_wd(runid)
+        _require_directory_root(wd, "climate")
         Ron.getInstance(wd)
         climate = Climate.getInstance(wd)
 
@@ -87,11 +122,12 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
             ),
             purpose="rq-upload-cli-save",
         )
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except UploadError as exc:
         return upload_failure(str(exc))
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine upload-cli save failed")
         return error_response_with_traceback("Could not save file", status_code=500)
 
@@ -107,7 +143,7 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         return upload_success(job_id=job.id)
     except UploadError as exc:
         return upload_failure(str(exc))
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cli enqueue failed")
         return error_response_with_traceback("Failed validating file", status_code=500)
 

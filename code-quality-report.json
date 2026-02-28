@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-02-24T18:54:47Z",
+  "generated_at_utc": "2026-02-28T04:03:12Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -37,48 +37,48 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 762.0,
+      "count": 750.0,
       "p50": 104.0,
-      "p75": 243.5,
-      "p90": 508.8,
-      "p95": 772.75,
-      "p99": 1261.33,
+      "p75": 240.75,
+      "p90": 498.2,
+      "p95": 774.1,
+      "p99": 1260.97,
       "max": 2214.0
     },
     "python_prod_max_function_len": {
-      "count": 595.0,
-      "p50": 57.0,
-      "p75": 103.0,
-      "p90": 149.2,
-      "p95": 214.0,
-      "p99": 276.48,
+      "count": 584.0,
+      "p50": 56.5,
+      "p75": 102.0,
+      "p90": 151.4,
+      "p95": 213.85,
+      "p99": 277.36,
       "max": 381.0
     },
     "python_prod_max_cc": {
-      "count": 605.0,
+      "count": 594.0,
       "p50": 10.0,
       "p75": 18.0,
       "p90": 28.0,
-      "p95": 37.8,
-      "p99": 55.88,
+      "p95": 37.35,
+      "p99": 56.07,
       "max": 67.0
     },
     "js_source_file_sloc": {
-      "count": 150.0,
+      "count": 151.0,
       "p50": 257.0,
-      "p75": 556.0,
-      "p90": 1122.4,
-      "p95": 1318.2,
-      "p99": 2130.81,
+      "p75": 553.0,
+      "p90": 1113.0,
+      "p95": 1316.0,
+      "p99": 2126.5,
       "max": 2500.0
     },
     "js_source_max_cc": {
-      "count": 150.0,
+      "count": 151.0,
       "p50": 7.0,
       "p75": 21.0,
-      "p90": 33.1,
-      "p95": 43.65,
-      "p99": 75.61,
+      "p90": 33.0,
+      "p95": 43.5,
+      "p99": 75.5,
       "max": 155.0
     }
   },
@@ -86,7 +86,7 @@
     "python_file_sloc_top20": [
       {
         "path": "tests/nodb/mods/test_omni.py",
-        "value": 2494.0
+        "value": 2417.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -101,10 +101,6 @@
         "value": 2006.0
       },
       {
-        "path": "tests/microservices/test_files_routes.py",
-        "value": 2003.0
-      },
-      {
         "path": "wepppy/nodb/base.py",
         "value": 1872.0
       },
@@ -114,11 +110,15 @@
       },
       {
         "path": "tests/microservices/test_browse_auth_routes.py",
-        "value": 1651.0
+        "value": 1753.0
+      },
+      {
+        "path": "tests/microservices/test_files_routes.py",
+        "value": 1517.0
       },
       {
         "path": "wepppy/rq/culvert_rq.py",
-        "value": 1446.0
+        "value": 1484.0
       },
       {
         "path": "wepppy/topo/wbt/wbt_topaz_emulator.py",
@@ -126,11 +126,11 @@
       },
       {
         "path": "wepppy/nodb/core/landuse.py",
-        "value": 1290.0
+        "value": 1284.0
       },
       {
         "path": "wepppy/nodb/core/soils.py",
-        "value": 1243.0
+        "value": 1237.0
       },
       {
         "path": "wepppy/nodb/core/ron.py",
@@ -145,24 +145,24 @@
         "value": 1183.0
       },
       {
-        "path": "wepppy/nodb/mods/disturbed/disturbed.py",
-        "value": 1114.0
+        "path": "wepppy/rq/project_rq.py",
+        "value": 1172.0
       },
       {
-        "path": "wepppy/rq/project_rq.py",
-        "value": 1113.0
+        "path": "wepppy/nodb/mods/disturbed/disturbed.py",
+        "value": 1118.0
+      },
+      {
+        "path": "wepppy/microservices/browse/browse.py",
+        "value": 1102.0
       },
       {
         "path": "wepppy/all_your_base/geo/shapefile.py",
         "value": 1099.0
       },
       {
-        "path": "wepppy/nodb/mods/omni/omni.py",
-        "value": 1094.0
-      },
-      {
-        "path": "wepppy/microservices/browse/browse.py",
-        "value": 1086.0
+        "path": "wepppy/profile_recorder/playback.py",
+        "value": 1030.0
       }
     ],
     "python_max_function_len_top20": [
@@ -243,8 +243,8 @@
         "value": 235.0
       },
       {
-        "path": "wepppy/nodb/mods/ash_transport/ash_multi_year_model.py",
-        "value": 226.0
+        "path": "wepppy/microservices/browse/dtale.py",
+        "value": 233.0
       }
     ],
     "python_max_cc_top20": [
@@ -285,12 +285,12 @@
         "value": 51.0
       },
       {
-        "path": "wepppy/topo/peridot/peridot_runner.py",
-        "value": 50.0
-      },
-      {
         "path": "wepppy/nodb/mods/ash_transport/neris_ash_model.py",
         "value": 48.0
+      },
+      {
+        "path": "wepppy/topo/peridot/peridot_runner.py",
+        "value": 47.0
       },
       {
         "path": "wepppy/query_engine/payload.py",
@@ -356,7 +356,7 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/control_base.js",
-        "value": 1458.0
+        "value": 1532.0
       },
       {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/map/layers.js",

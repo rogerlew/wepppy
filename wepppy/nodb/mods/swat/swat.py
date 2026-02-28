@@ -23,7 +23,7 @@ import duckdb
 
 from wepppy.nodb.mods.swat.print_prt import PRINT_PRT_DAILY, PrintPrtConfig, load_print_prt
 from wepppy.nodb.base import NoDbBase
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 from wepppy.nodb.mods.swat._helpers import (
     _escape_sql_path,
     _quote_ident,

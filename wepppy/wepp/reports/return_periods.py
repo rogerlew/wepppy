@@ -19,6 +19,7 @@ from wepppy.climates.cligen import ClimateFile
 from wepppy.io_wait import wait_for_path
 from wepppy.query_engine import activate_query_engine, resolve_run_context, update_catalog_entry
 from wepppy.query_engine.activate import READONLY_SENTINEL
+from wepppy.runtime_paths.errors import nodir_migration_required
 LOGGER = logging.getLogger(__name__)
 
 EVENTS_REL_PATH = Path("wepp/output/interchange/return_period_events.parquet")
@@ -111,7 +112,8 @@ def _generate_cli_parquet(base: Path) -> tuple[Path | None, Dict[str, str]]:
         export_df["storm_duration_hours"] = export_df.get("dur")
         export_df["storm_duration"] = export_df.get("dur")
 
-        parquet_path = base / "climate.wepp_cli.parquet"
+        parquet_path = base / "climate" / "wepp_cli.parquet"
+        parquet_path.parent.mkdir(parents=True, exist_ok=True)
         export_df.to_parquet(parquet_path, index=False)
 
         LOGGER.info(
@@ -134,9 +136,16 @@ def _generate_cli_parquet(base: Path) -> tuple[Path | None, Dict[str, str]]:
 
 def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[None, Dict[str, str]]:
     """Return a parquet climate asset plus column mapping if one exists."""
+    retired_root_candidates = sorted(path for path in base.glob("climate.*.parquet") if path.is_file())
+    if retired_root_candidates:
+        retired_names = ", ".join(path.name for path in retired_root_candidates)
+        raise nodir_migration_required(
+            "Retired root climate parquet resources detected "
+            f"({retired_names}); migration to climate/*.parquet is required."
+        )
+
     climate_dir = base / "climate"
     candidates: list[Path] = []
-    candidates.extend(sorted(base.glob("climate.*.parquet")))
     if climate_dir.exists():
         candidates.extend(sorted(climate_dir.rglob("*.parquet")))
 
@@ -162,7 +171,7 @@ def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[N
                     return generated_path, generated_mapping
             return candidate, mapping
 
-    if not climate_dir.exists() and not (base / "climate.wepp_cli.parquet").exists():
+    if not climate_dir.exists():
         generated_path, generated_mapping = _generate_cli_parquet(base)
         if generated_path:
             return generated_path, generated_mapping

@@ -1,9 +1,4 @@
-"""NoDir helpers.
-
-This package is intentionally small and dependency-light. It hosts shared logic
-needed across browse/query-engine/controllers without re-implementing
-directory-vs-archive conventions in multiple places.
-"""
+"""Directory-only runtime path helpers replacing legacy NoDir package."""
 
 from .errors import NoDirError
 from .fs import NoDirDirEntry, NoDirForm, ResolvedNoDirPath, listdir, open_read, resolve, stat
@@ -15,7 +10,7 @@ from .parquet_sidecars import (
     pick_existing_parquet_relpath,
     sidecar_relpath_to_logical_parquet,
 )
-from .paths import NoDirRoot, NoDirView, normalize_relpath, parse_external_subpath
+from .paths import NODIR_ROOTS, NoDirRoot, NoDirView, normalize_relpath, parse_external_subpath, split_nodir_root
 from .projections import (
     ProjectionHandle,
     ProjectionMode,
@@ -24,20 +19,6 @@ from .projections import (
     commit_mutation_projection,
     release_root_projection,
     with_root_projection,
-)
-from .state import (
-    NoDirArchiveFingerprint,
-    NoDirStateName,
-    NoDirStatePayload,
-    NODIR_STATE_SCHEMA_VERSION,
-    NODIR_TRANSITION_STATES,
-    archive_fingerprint_from_path,
-    freeze_temp_path,
-    is_transitioning_locked,
-    read_state,
-    state_path,
-    thaw_temp_path,
-    write_state,
 )
 from .thaw_freeze import (
     NoDirMaintenanceLock,
@@ -58,8 +39,10 @@ __all__ = [
     "ResolvedNoDirPath",
     "NoDirRoot",
     "NoDirView",
+    "NODIR_ROOTS",
     "normalize_relpath",
     "parse_external_subpath",
+    "split_nodir_root",
     "resolve",
     "listdir",
     "stat",
@@ -80,18 +63,6 @@ __all__ = [
     "sidecar_relpath_to_logical_parquet",
     "pick_existing_parquet_path",
     "pick_existing_parquet_relpath",
-    "NoDirStateName",
-    "NoDirArchiveFingerprint",
-    "NoDirStatePayload",
-    "NODIR_STATE_SCHEMA_VERSION",
-    "NODIR_TRANSITION_STATES",
-    "state_path",
-    "thaw_temp_path",
-    "freeze_temp_path",
-    "archive_fingerprint_from_path",
-    "read_state",
-    "write_state",
-    "is_transitioning_locked",
     "NoDirMaintenanceLock",
     "maintenance_lock_key",
     "acquire_maintenance_lock",

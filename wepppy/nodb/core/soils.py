@@ -97,7 +97,7 @@ from wepppy.nodb.duckdb_agents import (
     get_soil_sub_summary,
     get_soil_subs_summary
 )
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 from wepppy.query_engine import update_catalog_entry
 
@@ -368,14 +368,6 @@ class Soils(NoDbBase):
 
         soils_dir = self.soils_dir
         _clear_directory_preserving_symlink_mount(soils_dir)
-        # Parquet summaries are canonical WD-level sidecars; ensure we don't
-        # leave a stale sidecar behind after clearing the tree.
-        sidecar_fn = _join(self.wd, "soils.parquet")
-        if _exists(sidecar_fn):
-            try:
-                os.remove(sidecar_fn)
-            except OSError:
-                pass
         os.makedirs(soils_dir, exist_ok=True)
         self._soils_is_vrt = False
         if not self.islocked():
@@ -1489,7 +1481,7 @@ class Soils(NoDbBase):
         remaining = [c for c in df.columns if c not in preferred]
         df = df.loc[:, preferred + remaining]
 
-        df.to_parquet(_join(self.wd, "soils.parquet"), index=False)
+        df.to_parquet(_join(self.soils_dir, "soils.parquet"), index=False)
         update_catalog_entry(self.wd, 'soils/soils.parquet')
         
     def _post_dump_and_unlock(self):

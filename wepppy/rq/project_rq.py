@@ -9,6 +9,7 @@ emitting status updates for the front-end while coordinating NoDb controllers.
 """
 
 import errno
+from contextlib import ExitStack
 import inspect
 import logging
 import json
@@ -35,8 +36,9 @@ from wepppy.config.redis_settings import (
 from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 
 from wepppy.nodb.base import clear_locks, clear_nodb_file_cache, lock_statuses
-from wepppy.nodir.mutations import mutate_root, mutate_roots
-from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
@@ -101,6 +103,50 @@ def _archive_runtime() -> _archive_helpers.ArchiveRuntime:
         disk_usage=shutil.disk_usage,
         zip_file_cls=zipfile.ZipFile,
     )
+
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
+
+
+def _require_directory_roots(wd: str, roots: Sequence[str]) -> None:
+    for root in roots:
+        _require_directory_root(wd, root)
+
+
+def _run_with_directory_root_lock(
+    wd: str,
+    root: str,
+    callback,
+    *,
+    purpose: str,
+):
+    _require_directory_root(wd, root)
+    with nodir_maintenance_lock(wd, root, purpose=purpose):
+        _require_directory_root(wd, root)
+        return callback()
+
+
+def _run_with_directory_roots_lock(
+    wd: str,
+    roots: Sequence[str],
+    callback,
+    *,
+    purpose: str,
+):
+    lock_roots = tuple(sorted({str(root) for root in roots}))
+    _require_directory_roots(wd, lock_roots)
+    with ExitStack() as stack:
+        for root in lock_roots:
+            stack.enter_context(nodir_maintenance_lock(wd, root, purpose=f"{purpose}/{root}"))
+        _require_directory_roots(wd, lock_roots)
+        return callback()
 
 
 @with_exception_logging
@@ -194,7 +240,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         if TaskStub.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
             StatusMessenger.publish(status_channel, f'building channels')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "watershed",
                 lambda: watershed.build_channels(),
@@ -203,7 +249,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         if TaskStub.is_task_enabled(TaskEnum.find_outlet) and prep[str(TaskEnum.find_outlet)] is None:
             StatusMessenger.publish(status_channel, f'setting outlet')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "watershed",
                 lambda: watershed.set_outlet(
@@ -215,7 +261,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         if TaskStub.is_task_enabled(TaskEnum.build_subcatchments) and prep[str(TaskEnum.build_subcatchments)] is None:
             StatusMessenger.publish(status_channel, f'building subcatchments')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "watershed",
                 lambda: watershed.build_subcatchments(),
@@ -224,7 +270,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         if TaskStub.is_task_enabled(TaskEnum.abstract_watershed) and prep[str(TaskEnum.abstract_watershed)] is None:
             StatusMessenger.publish(status_channel, f'abstracting watershed')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "watershed",
                 lambda: watershed.abstract_watershed(),
@@ -233,7 +279,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         if TaskStub.is_task_enabled(TaskEnum.build_landuse) and prep[str(TaskEnum.build_landuse)] is None:
             StatusMessenger.publish(status_channel, f'building landuse')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "landuse",
                 lambda: landuse.build(),
@@ -242,7 +288,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         if TaskStub.is_task_enabled(TaskEnum.build_soils) and prep[str(TaskEnum.build_soils)] is None:
             StatusMessenger.publish(status_channel, f'building soils')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "soils",
                 lambda: soils.build(),
@@ -251,7 +297,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         if TaskStub.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
             StatusMessenger.publish(status_channel, f'building climate')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "climate",
                 lambda: climate.build(),
@@ -578,7 +624,12 @@ def build_channels_rq(
             StatusMessenger.publish(status_channel, f'Building channels with csa={csa}, mcl={mcl}')
             watershed.build_channels(csa, mcl)
 
-        mutate_root(wd, "watershed", _mutate_watershed, purpose="build-channels-rq")
+        _run_with_directory_root_lock(
+            wd,
+            "watershed",
+            _mutate_watershed,
+            purpose="build-channels-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   channel_delineation BUILD_CHANNELS_TASK_COMPLETED')
         
@@ -683,7 +734,7 @@ def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:outlet'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        mutate_root(
+        _run_with_directory_root_lock(
             wd,
             "watershed",
             lambda: Watershed.getInstance(wd).set_outlet(outlet_lng, outlet_lat),
@@ -738,7 +789,12 @@ def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) ->
             watershed.build_subcatchments()
             wait_for_path(watershed.subwta, logger=watershed.logger)
 
-        mutate_root(wd, "watershed", _mutate_watershed, purpose="build-subcatchments-rq")
+        _run_with_directory_root_lock(
+            wd,
+            "watershed",
+            _mutate_watershed,
+            purpose="build-subcatchments-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation BUILD_SUBCATCHMENTS_TASK_COMPLETED')
     except Exception:
@@ -769,7 +825,12 @@ def abstract_watershed_rq(runid: str) -> None:
             wait_for_path(watershed.subwta, logger=watershed.logger)
             watershed.abstract_watershed()
 
-        mutate_root(wd, "watershed", _mutate_watershed, purpose="abstract-watershed-rq")
+        _run_with_directory_root_lock(
+            wd,
+            "watershed",
+            _mutate_watershed,
+            purpose="abstract-watershed-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation WATERSHED_ABSTRACTION_TASK_COMPLETED')
 
@@ -871,7 +932,7 @@ def build_landuse_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:landuse'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        mutate_root(
+        _run_with_directory_root_lock(
             wd,
             "landuse",
             lambda: Landuse.getInstance(wd).build(),
@@ -898,7 +959,7 @@ def build_treatments_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:treatments'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        mutate_roots(
+        _run_with_directory_roots_lock(
             wd,
             ("landuse", "soils"),
             lambda: Treatments.getInstance(wd).build_treatments(),
@@ -935,7 +996,7 @@ def build_soils_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:soils'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        mutate_root(
+        _run_with_directory_root_lock(
             wd,
             "soils",
             lambda: Soils.getInstance(wd).build(),
@@ -969,7 +1030,7 @@ def build_climate_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:climate'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        mutate_root(
+        _run_with_directory_root_lock(
             wd,
             "climate",
             lambda: Climate.getInstance(wd).build(),
@@ -996,7 +1057,7 @@ def upload_cli_rq(runid: str, cli_filename: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:climate'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        mutate_root(
+        _run_with_directory_root_lock(
             wd,
             "climate",
             lambda: Climate.getInstance(wd).set_user_defined_cli(cli_filename),
@@ -1039,11 +1100,13 @@ def run_ash_rq(
         status_channel = f'{runid}:ash'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
-        for root in ("climate", "watershed", "landuse"):
-            nodir_resolve(wd, root, view="effective")
-
         ash = Ash.getInstance(wd)
-        ash.run_ash(fire_date, ini_white_ash_depth_mm, ini_black_ash_depth_mm)
+        _run_with_directory_roots_lock(
+            wd,
+            ("climate", "watershed", "landuse"),
+            lambda: ash.run_ash(fire_date, ini_white_ash_depth_mm, ini_black_ash_depth_mm),
+            purpose="run-ash-rq",
+        )
 
         wepp = Wepp.getInstance(wd)
         run_totalwatsed3(
@@ -1082,9 +1145,6 @@ def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = Non
         status_channel = f'{runid}:debris_flow'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
-        for root in ("watershed", "soils"):
-            nodir_resolve(wd, root, view="effective")
-
         debris = DebrisFlow.getInstance(wd)
 
         options = payload or {}
@@ -1092,7 +1152,12 @@ def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = Non
         ll = options.get("liquid_limit")
         req_datasource = options.get("datasource")
 
-        debris.run_debris_flow(cc=cc, ll=ll, req_datasource=req_datasource)
+        _run_with_directory_roots_lock(
+            wd,
+            ("watershed", "soils"),
+            lambda: debris.run_debris_flow(cc=cc, ll=ll, req_datasource=req_datasource),
+            purpose="run-debris-flow-rq",
+        )
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   debris_flow DEBRIS_FLOW_RUN_TASK_COMPLETED')

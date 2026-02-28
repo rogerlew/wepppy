@@ -33,7 +33,9 @@ from wepppy.nodb.wepp_nodb_post_utils import (
     ensure_totalwatsed3,
     ensure_watershed_interchange,
 )
-from wepppy.nodir.mutations import mutate_root
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 
 
 from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks
@@ -111,6 +113,29 @@ def _reset_run_workspace(runid_wd: str | Path, logger: logging.Logger) -> None:
             stale_dir,
             exc,
         )
+
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
+
+
+def _run_with_directory_root_lock(
+    wd: str,
+    root: str,
+    callback,
+    *,
+    purpose: str,
+):
+    _require_directory_root(wd, root)
+    with nodir_maintenance_lock(wd, root, purpose=purpose):
+        _require_directory_root(wd, root)
+        return callback()
 
 
 class BatchRunner(NoDbBase):
@@ -350,7 +375,7 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
             logger.info(f'building channels')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "watershed",
                 lambda: watershed.build_channels(),
@@ -359,7 +384,7 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.find_outlet) and prep[str(TaskEnum.find_outlet)] is None:
             logger.info(f'finding outlet')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "watershed",
                 lambda: watershed.find_outlet(watershed_feature),
@@ -368,7 +393,7 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.build_subcatchments) and prep[str(TaskEnum.build_subcatchments)] is None:
             logger.info(f'building subcatchments')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "watershed",
                 lambda: watershed.build_subcatchments(),
@@ -377,7 +402,7 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.abstract_watershed) and prep[str(TaskEnum.abstract_watershed)] is None:
             logger.info(f'abstracting watershed')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "watershed",
                 lambda: watershed.abstract_watershed(),
@@ -386,7 +411,7 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.build_landuse) and prep[str(TaskEnum.build_landuse)] is None:
             logger.info(f'building landuse')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "landuse",
                 lambda: landuse.build(),
@@ -395,7 +420,7 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.build_soils) and prep[str(TaskEnum.build_soils)] is None:
             logger.info(f'building soils')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "soils",
                 lambda: soils.build(),
@@ -404,7 +429,7 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
             logger.info(f'building climate')
-            mutate_root(
+            _run_with_directory_root_lock(
                 runid_wd,
                 "climate",
                 lambda: climate.build(),

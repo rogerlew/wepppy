@@ -46,7 +46,7 @@ from wepppy.wepp.interchange.hill_wat_interchange import load_hill_wat_dataframe
 
 # wepppy submodules
 from wepppy.nodb.base import NoDbBase, nodb_setter, createProcessPoolExecutor
-from wepppy.nodir.wepp_inputs import with_input_file_path
+from wepppy.runtime_paths.wepp_inputs import with_input_file_path
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
 from wepppy.nodb.core import Watershed, Wepp, Climate, Landuse, Ron
 from wepppy.nodb.core.climate import Climate

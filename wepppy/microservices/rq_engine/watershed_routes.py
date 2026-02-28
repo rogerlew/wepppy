@@ -26,8 +26,9 @@ from wepppy.nodb.core import (
     WatershedBoundaryTouchesEdgeError,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as _nodir_resolve
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 from wepppy.rq.project_rq import (
     build_subcatchments_and_abstract_watershed_rq,
     fetch_dem_and_build_channels_rq,
@@ -51,8 +52,36 @@ UPLOAD_DEM_MAX_DIMENSION = 1024
 UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif",)
 
 
+def _maybe_nodir_error_response(exc: Exception):
+    if isinstance(exc, NoDirError):
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    return None
+
+
+def nodir_resolve(_wd: str, _root: str, *, view: str = "effective") -> None:
+    return _nodir_resolve(_wd, _root, view=view)
+
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
+
+
 def _preflight_watershed_mutation_root(wd: str) -> None:
-    nodir_resolve(wd, "watershed", view="effective")
+    _require_directory_root(wd, "watershed")
+
+
+def _run_with_watershed_lock(wd: str, callback, *, purpose: str):
+    _preflight_watershed_mutation_root(wd)
+    with nodir_maintenance_lock(wd, "watershed", purpose=purpose):
+        _preflight_watershed_mutation_root(wd)
+        return callback()
+
 
 def _is_base_project_context(runid: str, config: str) -> bool:
     runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
@@ -472,14 +501,13 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-dem auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
         wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
+        _preflight_watershed_mutation_root(wd)
 
         form = await request.form()
         upload = _extract_upload(form, "input_upload_dem")
@@ -490,23 +518,31 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         if not filename:
             return upload_failure("input_upload_dem must have a valid filename")
 
-        saved_path = save_upload_file(
-            upload,
-            allowed_extensions=UPLOAD_DEM_ALLOWED_EXTENSIONS,
-            dest_dir=Path(ron.dem_dir),
-            filename_transform=lambda value: filename,
-            overwrite=True,
-        )
+        def _mutate_upload_dem():
+            ron = Ron.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
+            saved_path = save_upload_file(
+                upload,
+                allowed_extensions=UPLOAD_DEM_ALLOWED_EXTENSIONS,
+                dest_dir=Path(ron.dem_dir),
+                filename_transform=lambda value: filename,
+                overwrite=True,
+            )
+            return _install_uploaded_dem(
+                ron=ron,
+                watershed=watershed,
+                saved_path=saved_path,
+            )
 
-        result = _install_uploaded_dem(
-            ron=ron,
-            watershed=watershed,
-            saved_path=saved_path,
+        result = _run_with_watershed_lock(
+            wd,
+            _mutate_upload_dem,
+            purpose="rq-upload-dem",
         )
         return upload_success(result=result)
     except UploadError as exc:
         return upload_failure(str(exc))
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-dem failed")
         return error_response_with_traceback("Failed validating DEM", status_code=500)
 
@@ -536,7 +572,7 @@ async def fetch_dem_and_build_channels(
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine channel delineation auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -615,15 +651,16 @@ async def fetch_dem_and_build_channels(
             )
             prep.set_rq_job_id("fetch_dem_and_build_channels_rq", job.id)
         return JSONResponse({"job_id": job.id})
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except MinimumChannelLengthTooShortError as exc:
         return error_response(
             exc.__class__.__name__ or "Minimum Channel Length TooShort Error",
             status_code=400,
             details=exc.__doc__,
         )
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine channel delineation enqueue failed")
         return error_response_with_traceback("fetch_dem_and_build_channels Failed")
 
@@ -651,7 +688,7 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine set-outlet auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -705,9 +742,10 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
             )
             prep.set_rq_job_id("set_outlet_rq", job.id)
         return JSONResponse({"job_id": job.id})
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine set-outlet enqueue failed")
         return error_response_with_traceback("Could not set outlet")
 
@@ -737,7 +775,7 @@ async def build_subcatchments_and_abstract_watershed(
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine subcatchments auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -855,15 +893,16 @@ async def build_subcatchments_and_abstract_watershed(
             )
             prep.set_rq_job_id("build_subcatchments_and_abstract_watershed_rq", job.id)
         return JSONResponse({"job_id": job.id})
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except WatershedBoundaryTouchesEdgeError as exc:
         return error_response(
             exc.__class__.__name__ or "Watershed Boundary Touches Edge Error",
             status_code=400,
             details=exc.__doc__,
         )
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine subcatchments enqueue failed")
         return error_response_with_traceback("Building Subcatchments Failed")
 

@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 import duckdb
 
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 from wepppy.topo.peridot.peridot_runner import read_network
 
 from ._helpers import (

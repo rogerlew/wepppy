@@ -11,8 +11,8 @@ from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.rq.project_rq import run_debris_flow_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -29,6 +29,26 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
 
+def _maybe_nodir_error_response(exc: Exception):
+    if isinstance(exc, NoDirError):
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    return None
+
+
+def nodir_resolve(_wd: str, _root: str, *, view: str = "effective") -> None:
+    return _nodir_resolve(_wd, _root, view=view)
+
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
+
+
 def _first_value(value: Any) -> Any:
     if isinstance(value, (list, tuple, set)):
         for candidate in value:
@@ -39,8 +59,8 @@ def _first_value(value: Any) -> Any:
 
 
 def _preflight_debris_flow_roots(wd: str) -> None:
-    nodir_resolve(wd, "watershed", view="effective")
-    nodir_resolve(wd, "soils", view="effective")
+    _require_directory_root(wd, "watershed")
+    _require_directory_root(wd, "soils")
 
 
 @router.post(
@@ -66,7 +86,7 @@ async def run_debris_flow(runid: str, config: str, request: Request) -> JSONResp
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-debris-flow auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -120,9 +140,10 @@ async def run_debris_flow(runid: str, config: str, request: Request) -> JSONResp
             )
             prep.set_rq_job_id("run_debris_flow_rq", job.id)
         return JSONResponse({"job_id": job.id})
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine run-debris-flow enqueue failed")
         return error_response_with_traceback("Error Running Debris Flow")
 

@@ -15,7 +15,9 @@ from wepppy.config.redis_settings import (
     RedisDB,
     redis_host,
 )
-from wepppy.nodir.mutations import mutate_root
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as nodir_resolve
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 
 from wepppy.nodb.core import Landuse, LanduseMode, Ron, Soils, SoilsMode
 from wepppy.nodb.status_messenger import StatusMessenger
@@ -26,6 +28,29 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
+
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
+
+
+def _run_with_directory_root_lock(
+    wd: str,
+    root: str,
+    callback,
+    *,
+    purpose: str,
+):
+    _require_directory_root(wd, root)
+    with nodir_maintenance_lock(wd, root, purpose=purpose):
+        _require_directory_root(wd, root)
+        return callback()
 
 
 @with_exception_logging
@@ -85,7 +110,7 @@ def land_and_soil_rq(
         landuse.mode = LanduseMode.SpatialAPI
         if nlcd_db is not None:
             landuse.nlcd_db = nlcd_db
-        mutate_root(
+        _run_with_directory_root_lock(
             str(wd),
             "landuse",
             lambda: landuse.build(),
@@ -97,7 +122,7 @@ def land_and_soil_rq(
         soils.mode = SoilsMode.SpatialAPI
         if ssurgo_db is not None:
             soils.ssurgo_db = ssurgo_db
-        mutate_root(
+        _run_with_directory_root_lock(
             str(wd),
             "soils",
             lambda: soils.build(),

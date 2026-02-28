@@ -12,6 +12,8 @@ from wepppy.query_engine.context import RunContext
 from wepppy.query_engine.core import run_query, build_query_plan
 from wepppy.query_engine.payload import QueryRequest
 
+pytestmark = pytest.mark.unit
+
 
 def _write_parquet(path: Path, table: pa.Table | None = None) -> None:
     if table is None:
@@ -59,29 +61,45 @@ def _write_catalog_entries(root: Path, rel_paths: list[str]) -> None:
 
 
 @pytest.mark.parametrize(
-    ("logical_rel", "legacy_rel"),
+    "rel_path",
     [
-        ("landuse/landuse.parquet", "landuse.parquet"),
-        ("soils/soils.parquet", "soils.parquet"),
-        ("watershed/hillslopes.parquet", "watershed.hillslopes.parquet"),
-        ("watershed/channels.parquet", "watershed.channels.parquet"),
-        ("watershed/flowpaths.parquet", "watershed.flowpaths.parquet"),
-        ("climate/wepp_cli.parquet", "climate.wepp_cli.parquet"),
+        "landuse/landuse.parquet",
+        "soils/soils.parquet",
+        "watershed/hillslopes.parquet",
+        "watershed/channels.parquet",
+        "watershed/flowpaths.parquet",
+        "climate/wepp_cli.parquet",
     ],
 )
-def test_resolve_dataset_path_alias_supports_legacy_sidecar_pairs(
-    logical_rel: str,
-    legacy_rel: str,
-) -> None:
-    # Canonical catalog layout: logical path keyed in catalog.
-    logical_only = {logical_rel}
-    assert resolve_dataset_path_alias(logical_rel, available_paths=logical_only) == logical_rel
-    assert resolve_dataset_path_alias(legacy_rel, available_paths=logical_only) == logical_rel
+def test_resolve_dataset_path_alias_requires_exact_catalog_key(rel_path: str) -> None:
+    available = {rel_path}
+    assert resolve_dataset_path_alias(rel_path, available_paths=available) == rel_path
 
-    # Legacy catalog layout: sidecar path keyed in catalog.
-    legacy_only = {legacy_rel}
-    assert resolve_dataset_path_alias(logical_rel, available_paths=legacy_only) == legacy_rel
-    assert resolve_dataset_path_alias(legacy_rel, available_paths=legacy_only) == legacy_rel
+
+def test_resolve_dataset_path_alias_rejects_legacy_sidecar_key() -> None:
+    available = {"landuse/landuse.parquet"}
+    assert resolve_dataset_path_alias("landuse.parquet", available_paths=available) is None
+
+
+@pytest.mark.parametrize(
+    "retired_alias",
+    [
+        "soils.parquet",
+        "climate.wepp_cli.parquet",
+        "watershed.hillslopes.parquet",
+        "watershed.channels.parquet",
+        "watershed.flowpaths.parquet",
+    ],
+)
+def test_resolve_dataset_path_alias_rejects_all_retired_root_aliases(retired_alias: str) -> None:
+    available = {
+        "soils/soils.parquet",
+        "climate/wepp_cli.parquet",
+        "watershed/hillslopes.parquet",
+        "watershed/channels.parquet",
+        "watershed/flowpaths.parquet",
+    }
+    assert resolve_dataset_path_alias(retired_alias, available_paths=available) is None
 
 
 def test_run_query_basic(tmp_path: Path) -> None:
@@ -102,7 +120,7 @@ def test_run_query_basic(tmp_path: Path) -> None:
 
 
 def test_run_query_uses_catalog_fs_path(tmp_path: Path) -> None:
-    physical_rel = "landuse.parquet"
+    physical_rel = "external/landuse.parquet"
     logical_rel = "landuse/landuse.parquet"
     parquet_path = tmp_path / physical_rel
     _write_parquet(parquet_path)
@@ -134,7 +152,7 @@ def test_run_query_uses_catalog_fs_path(tmp_path: Path) -> None:
     assert result.row_count == 2
 
 
-def test_run_query_accepts_legacy_sidecar_dataset_alias(tmp_path: Path) -> None:
+def test_run_query_rejects_legacy_sidecar_dataset_alias(tmp_path: Path) -> None:
     physical_rel = "landuse.parquet"
     logical_rel = "landuse/landuse.parquet"
     parquet_path = tmp_path / physical_rel
@@ -161,14 +179,9 @@ def test_run_query_accepts_legacy_sidecar_dataset_alias(tmp_path: Path) -> None:
     loaded = DatasetCatalog.load(tmp_path / "_query_engine" / "catalog.json")
     run_context = RunContext(runid=str(tmp_path), base_dir=tmp_path, scenario=None, catalog=loaded)
 
-    # Legacy callers may still use WD-level sidecar names.
     payload = QueryRequest(datasets=[physical_rel], columns=["id", "value"], limit=2)
-    result = run_query(run_context, payload)
-
-    assert loaded.has(physical_rel)
-    assert loaded.get(physical_rel) is not None
-    assert loaded.get(physical_rel).path == logical_rel
-    assert result.row_count == 2
+    with pytest.raises(FileNotFoundError, match="landuse.parquet"):
+        run_query(run_context, payload)
 
 
 def test_run_query_include_schema(tmp_path: Path) -> None:

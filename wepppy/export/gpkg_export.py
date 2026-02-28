@@ -17,8 +17,8 @@ import pandas as pd
 from pandas.core.series import Series
 
 from wepppy import f_esri
-from wepppy.nodir.materialize import materialize_path_if_archive
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.materialize import materialize_path_if_archive
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 from wepppy.nodb.core import Soils
 
 

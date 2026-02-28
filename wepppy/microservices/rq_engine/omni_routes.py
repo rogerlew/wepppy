@@ -19,14 +19,14 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.runtime_paths.errors import NoDirError
+from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.rq.omni_rq import (
     delete_omni_contrasts_rq,
     run_omni_contrasts_rq,
     run_omni_scenarios_rq,
 )
-from wepppy.rq.wepp_rq_stage_helpers import recover_mixed_nodir_roots
-from wepppy.nodir.errors import NoDirError
-from wepppy.nodir.fs import resolve as nodir_resolve
+from wepppy.rq.wepp_rq_stage_helpers import recover_mixed_nodir_roots as _recover_mixed_nodir_roots
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -45,6 +45,30 @@ SBS_MAX_BYTES = 100 * 1024 * 1024
 GEOJSON_ALLOWED_EXTENSIONS = ("geojson", "json")
 GEOJSON_MAX_BYTES = 100 * 1024 * 1024
 CONTRAST_SELECTION_MODE_DEFAULT = "cumulative"
+
+
+def _maybe_nodir_error_response(exc: Exception):
+    if isinstance(exc, NoDirError):
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    return None
+
+
+def recover_mixed_nodir_roots(_wd: str, *, roots: tuple[str, ...]) -> tuple[str, ...]:
+    return _recover_mixed_nodir_roots(_wd, roots=roots)
+
+
+def nodir_resolve(_wd: str, _root: str, *, view: str = "effective") -> None:
+    return _nodir_resolve(_wd, _root, view=view)
+
+
+def _require_directory_root(wd: str, root: str) -> None:
+    resolved = nodir_resolve(wd, root, view="effective")
+    if resolved is not None and getattr(resolved, "form", "dir") != "dir":
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_ACTIVE",
+            message=f"{root} root is archive-backed; directory root required",
+        )
 
 
 def _is_base_project_context(runid: str, config: str) -> bool:
@@ -276,7 +300,10 @@ def _coerce_optional_bool(value: Any, field_name: str) -> bool | None:
 
 
 def _preflight_omni_roots(wd: str) -> None:
-    recovered_roots = recover_mixed_nodir_roots(wd, roots=("climate", "watershed", "landuse", "soils"))
+    recovered_roots = recover_mixed_nodir_roots(
+        wd,
+        roots=("climate", "watershed", "landuse", "soils"),
+    )
     if recovered_roots:
         logger.warning(
             "Recovered mixed NoDir roots before omni preflight for wd=%s: %s",
@@ -284,10 +311,10 @@ def _preflight_omni_roots(wd: str) -> None:
             ", ".join(recovered_roots),
         )
 
-    nodir_resolve(wd, "climate", view="effective")
-    nodir_resolve(wd, "watershed", view="effective")
-    nodir_resolve(wd, "landuse", view="effective")
-    nodir_resolve(wd, "soils", view="effective")
+    _require_directory_root(wd, "climate")
+    _require_directory_root(wd, "watershed")
+    _require_directory_root(wd, "landuse")
+    _require_directory_root(wd, "soils")
 
 
 def _prepare_omni_scenarios(
@@ -531,7 +558,7 @@ async def _run_omni(
         omni.parse_scenarios(parsed_inputs)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception as exc:
+    except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception("rq-engine run-omni scenario parse failed", extra={"runid": runid, "config": config})
         return error_response_with_traceback(f"Error parsing omni inputs: {exc}")
@@ -548,7 +575,7 @@ async def _run_omni(
             q = Queue("batch", connection=redis_conn)
             job = q.enqueue_call(run_omni_scenarios_rq, (runid,), timeout=RQ_TIMEOUT)
             prep.set_rq_job_id("run_omni_rq", job.id)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni enqueue failed")
         return error_response_with_traceback("Error Handling Request")
 
@@ -586,7 +613,7 @@ async def _run_omni_contrasts(
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception as exc:
+    except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception(
             "rq-engine run-omni-contrasts input parse failed",
@@ -656,7 +683,7 @@ async def _run_omni_contrasts(
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception as exc:
+    except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected build failures into canonical error payload.
         logger.exception("rq-engine run-omni-contrasts build failed", extra={"runid": runid, "config": config})
         return error_response_with_traceback(f"Error building omni contrasts: {exc}")
@@ -670,7 +697,7 @@ async def _run_omni_contrasts(
             q = Queue("batch", connection=redis_conn)
             job = q.enqueue_call(run_omni_contrasts_rq, (runid,), timeout=RQ_TIMEOUT)
             prep.set_rq_job_id("run_omni_contrasts_rq", job.id)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni-contrasts enqueue failed")
         return error_response_with_traceback("Error Handling Request")
 
@@ -708,7 +735,7 @@ async def _dry_run_omni_contrasts(
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception as exc:
+    except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception("rq-engine dry-run-omni-contrasts input parse failed", extra={"runid": runid, "config": config})
         return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
@@ -770,7 +797,7 @@ async def _dry_run_omni_contrasts(
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception as exc:
+    except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected build failures into canonical error payload.
         logger.exception(
             "rq-engine dry-run-omni-contrasts report build failed",
@@ -805,7 +832,7 @@ async def _delete_omni_contrasts(runid: str, config: str) -> JSONResponse:
             job = q.enqueue_call(delete_omni_contrasts_rq, (runid,), timeout=RQ_TIMEOUT)
             if prep is not None:
                 prep.set_rq_job_id("delete_omni_contrasts_rq", job.id)
-    except Exception as exc:
+    except Exception as exc:  # broad-except: boundary contract
         logger.exception("rq-engine delete-omni-contrasts enqueue failed")
         return error_response_with_traceback(f"Error deleting omni contrasts: {exc}")
 
@@ -842,14 +869,18 @@ async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
         return await _run_omni(runid, config, request)
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.exception("rq-engine run-omni failed")
+        return error_response_with_traceback("Error Handling Request")
 
 
 @router.post(
@@ -879,14 +910,18 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni-contrasts auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
         return await _run_omni_contrasts(runid, config, request)
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.exception("rq-engine run-omni-contrasts failed")
+        return error_response_with_traceback("Error Handling Request")
 
 
 @router.post(
@@ -912,14 +947,18 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni-contrasts-dry-run auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
         return await _dry_run_omni_contrasts(runid, config, request)
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.exception("rq-engine run-omni-contrasts-dry-run failed")
+        return error_response_with_traceback("Error Handling Request")
 
 
 @router.post(
@@ -942,7 +981,7 @@ async def delete_omni_contrasts(runid: str, config: str, request: Request) -> JS
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine delete-omni-contrasts auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 

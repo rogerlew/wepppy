@@ -193,7 +193,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     hill_df['topaz_id'] = pd.to_numeric(hill_df['topaz_id'], errors='raise').astype('Int32')
     hill_df['wepp_id'] = hill_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
 
-    hill_df.to_parquet(_join(wd, 'watershed.hillslopes.parquet'), index=False)
+    hill_df.to_parquet(_join(wd, 'watershed/hillslopes.parquet'), index=False)
     sub_area = float(hill_df['area'].sum())
     lngs = hill_df['centroid_lon'].to_numpy()
     lats = hill_df['centroid_lat'].to_numpy()
@@ -202,7 +202,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     chn_df['wepp_id'] = chn_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
     chn_df['chn_enum'] = chn_df['topaz_id'].apply(lambda top: get_chn_enum(int(top))).astype('Int32')
 
-    chn_df.to_parquet(_join(wd, 'watershed.channels.parquet'), index=False)
+    chn_df.to_parquet(_join(wd, 'watershed/channels.parquet'), index=False)
     chn_area = float(chn_df['area'].sum())
     lngs = np.concatenate((lngs, chn_df['centroid_lon'].to_numpy()))
     lats = np.concatenate((lats, chn_df['centroid_lat'].to_numpy()))
@@ -213,7 +213,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
         fps_df = pd.read_csv(flowpaths_csv)
         fps_df['topaz_id'] = pd.to_numeric(fps_df['topaz_id'], errors='raise').astype('Int32')
         fps_df['fp_id'] = pd.to_numeric(fps_df['fp_id'], errors='raise').astype('Int32')
-        fps_df.to_parquet(_join(wd, 'watershed.flowpaths.parquet'), index=False)
+        fps_df.to_parquet(_join(wd, 'watershed/flowpaths.parquet'), index=False)
         os.remove(flowpaths_csv)
 
     os.remove(_join(wd, 'watershed/hillslopes.csv'))
@@ -223,7 +223,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
         try:
             _update_catalog_entry(wd, "watershed/hillslopes.parquet")
             _update_catalog_entry(wd, "watershed/channels.parquet")
-            if _exists(_join(wd, "watershed.flowpaths.parquet")):
+            if _exists(_join(wd, "watershed/flowpaths.parquet")):
                 _update_catalog_entry(wd, "watershed/flowpaths.parquet")
             _update_catalog_entry(wd, "watershed")
         except Exception:  # broad-except: catalog refresh best effort  # pragma: no cover
@@ -320,14 +320,10 @@ def _load_watershed_table(watershed_dir, stem: str):
 
     csv_path = Path(watershed_dir, f"{stem}.csv")
     parquet_path = Path(watershed_dir, f"{stem}.parquet")
-    sidecar_path = Path(watershed_dir).parent / f"watershed.{stem}.parquet"
-
     if csv_path.exists():
         return pd.read_csv(csv_path), csv_path
     if parquet_path.exists():
         return pd.read_parquet(parquet_path), parquet_path
-    if sidecar_path.exists():
-        return pd.read_parquet(sidecar_path), sidecar_path
     return None, None
 
 
@@ -387,12 +383,12 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
 
     root = Path(wd).expanduser()
     watershed_dir = root / "watershed"
-    sidecar_candidates = [
-        root / "watershed.hillslopes.parquet",
-        root / "watershed.channels.parquet",
-        root / "watershed.flowpaths.parquet",
+    canonical_candidates = [
+        watershed_dir / "hillslopes.parquet",
+        watershed_dir / "channels.parquet",
+        watershed_dir / "flowpaths.parquet",
     ]
-    if not watershed_dir.exists() and not any(path.exists() for path in sidecar_candidates):
+    if not watershed_dir.exists() and not any(path.exists() for path in canonical_candidates):
         if verbose:
             print(f"[migrate_watershed_outputs] Skipping {wd}: watershed directory missing")
         return False
@@ -439,11 +435,8 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
     for legacy_col in ("TopazID", "WeppID"):
         if legacy_col in hill_df.columns:
             hill_df.drop(columns=[legacy_col], inplace=True)
-    hill_target = root / "watershed.hillslopes.parquet"
+    hill_target = watershed_dir / "hillslopes.parquet"
     hill_df.to_parquet(hill_target, index=False)
-    legacy_hill_target = watershed_dir / "hillslopes.parquet"
-    if legacy_hill_target.exists():
-        hill_df.to_parquet(legacy_hill_target, index=False)
     modified = True
     if remove_csv and hill_source is not None and hill_source.suffix.lower() == ".csv":
         try:
@@ -472,11 +465,8 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
             if legacy_col in chn_df.columns:
                 chn_df.drop(columns=[legacy_col], inplace=True)
 
-        chn_target = root / "watershed.channels.parquet"
+        chn_target = watershed_dir / "channels.parquet"
         chn_df.to_parquet(chn_target, index=False)
-        legacy_chn_target = watershed_dir / "channels.parquet"
-        if legacy_chn_target.exists():
-            chn_df.to_parquet(legacy_chn_target, index=False)
         modified = True
         if remove_csv and chn_source is not None and chn_source.suffix.lower() == ".csv":
             try:
@@ -489,11 +479,8 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
         fp_df["topaz_id"] = _extract_int32_column(fp_df, "topaz_id", ("TopazID",))
         fp_df["fp_id"] = _extract_int32_column(fp_df, "fp_id", (), allow_missing=False)
 
-        fp_target = root / "watershed.flowpaths.parquet"
+        fp_target = watershed_dir / "flowpaths.parquet"
         fp_df.to_parquet(fp_target, index=False)
-        legacy_fp_target = watershed_dir / "flowpaths.parquet"
-        if legacy_fp_target.exists():
-            fp_df.to_parquet(legacy_fp_target, index=False)
         modified = True
         if remove_csv and fp_source is not None and fp_source.suffix.lower() == ".csv":
             try:
@@ -504,9 +491,9 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
     if modified and _update_catalog_entry is not None:
         try:
             _update_catalog_entry(wd, "watershed/hillslopes.parquet")
-            if (root / "watershed.channels.parquet").exists():
+            if (watershed_dir / "channels.parquet").exists():
                 _update_catalog_entry(wd, "watershed/channels.parquet")
-            if (root / "watershed.flowpaths.parquet").exists():
+            if (watershed_dir / "flowpaths.parquet").exists():
                 _update_catalog_entry(wd, "watershed/flowpaths.parquet")
             _update_catalog_entry(wd, "watershed")
         except Exception:  # broad-except: catalog refresh best effort  # pragma: no cover

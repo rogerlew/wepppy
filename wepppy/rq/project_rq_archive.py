@@ -12,7 +12,7 @@ from typing import Any, Callable, Mapping, Sequence
 _ARCHIVE_DISK_HEADROOM_RATIO = 0.02
 _ARCHIVE_MIN_HEADROOM_BYTES = 64 * 1024 * 1024
 _ARCHIVE_PER_FILE_OVERHEAD_BYTES = 1024
-_ARCHIVE_EXCLUDE_PREFIXES: tuple[str, ...] = ("archives", ".nodir/cache")
+_ARCHIVE_EXCLUDE_PREFIXES: tuple[str, ...] = ("archives",)
 
 
 @dataclass(frozen=True)

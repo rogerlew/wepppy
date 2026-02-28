@@ -177,8 +177,13 @@ def grouped_integration_run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def _install_run_context(monkeypatch: pytest.MonkeyPatch, *, runid: str, run_root: Path) -> None:
+    allowed_runids = {runid}
+    parts = runid.split(";;")
+    if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"} and parts[-1]:
+        allowed_runids.add(";;".join(parts[:-2]))
+
     def _get_wd(requested_runid: str, **_kwargs: Any) -> str:
-        if requested_runid != runid:
+        if requested_runid not in allowed_runids:
             raise FileNotFoundError(requested_runid)
         return str(run_root)
 

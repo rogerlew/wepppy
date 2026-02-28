@@ -27,9 +27,9 @@ from wepppy.config.redis_settings import (
 
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.io_wait import wait_for_path, wait_for_paths
-from wepppy.nodir.errors import nodir_mixed_state
-from wepppy.nodir.fs import resolve
-from wepppy.nodir.projections import with_root_projection
+from wepppy.runtime_paths.errors import nodir_mixed_state
+from wepppy.runtime_paths.fs import resolve
+from wepppy.runtime_paths.projections import with_root_projection
 from wepppy.export.prep_details import (
     export_channels_prep_details,
     export_hillslopes_prep_details,

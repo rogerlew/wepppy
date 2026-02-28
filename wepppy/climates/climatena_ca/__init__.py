@@ -3,7 +3,7 @@ import pandas as pd
 import duckdb
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.config.secrets import require_secret
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 API_BASE = "http://climatena-ca.bearhive.duckdns.org" # os.getenv("API_BASE")
 

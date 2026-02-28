@@ -12,6 +12,7 @@ from wepppy.tools.migrations.landuse import migrate_landuse_parquet
 from wepppy.tools.migrations.runner import check_migrations_needed
 from wepppy.tools.migrations.soils import migrate_soils_nodb_meta, migrate_soils_parquet
 from wepppy.tools.migrations.watershed import migrate_watersheds
+from wepppy.tools.migrations.parquet_paths import pick_existing_parquet_path
 
 pytestmark = pytest.mark.integration
 
@@ -107,7 +108,8 @@ def test_soils_parquet_dry_run_when_built(tmp_path: Path) -> None:
 def test_landuse_parquet_normalization_does_not_write_index(tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()
-    landuse_parquet = run_dir / "landuse.parquet"
+    (run_dir / "landuse").mkdir(parents=True)
+    landuse_parquet = run_dir / "landuse" / "landuse.parquet"
     df = pd.DataFrame({"TopazID": [1], "WeppID": [2], "name": ["test"], "area": [123.0]})
     df.to_parquet(landuse_parquet, index=False)
 
@@ -127,7 +129,8 @@ def test_landuse_parquet_normalization_does_not_write_index(tmp_path: Path) -> N
 def test_soils_parquet_normalization_does_not_write_index(tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()
-    soils_parquet = run_dir / "soils.parquet"
+    (run_dir / "soils").mkdir(parents=True)
+    soils_parquet = run_dir / "soils" / "soils.parquet"
     df = pd.DataFrame({"TopazID": [1], "WeppID": [2], "mukey": ["123"], "area": [456.0]})
     df.to_parquet(soils_parquet, index=False)
 
@@ -147,7 +150,8 @@ def test_soils_parquet_normalization_does_not_write_index(tmp_path: Path) -> Non
 def test_soils_nodb_meta_detects_legacy_meta_fn(tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()
-    soils_parquet = run_dir / "soils.parquet"
+    (run_dir / "soils").mkdir(parents=True)
+    soils_parquet = run_dir / "soils" / "soils.parquet"
     pq.write_table(pa.table({"topaz_id": [1], "mukey": ["1"]}), soils_parquet)
 
     soils_nodb = run_dir / "soils.nodb"
@@ -230,6 +234,73 @@ def test_watershed_backfill_creates_parquets(tmp_path: Path) -> None:
     applied, _ = migrate_watersheds(str(run_dir), dry_run=False)
     assert applied is True
 
-    assert (run_dir / "watershed.hillslopes.parquet").exists()
-    assert (run_dir / "watershed.channels.parquet").exists()
-    assert (run_dir / "watershed.flowpaths.parquet").exists()
+    assert (run_dir / "watershed" / "hillslopes.parquet").exists()
+    assert (run_dir / "watershed" / "channels.parquet").exists()
+    assert (run_dir / "watershed" / "flowpaths.parquet").exists()
+
+
+def test_landuse_parquet_normalizes_canonical_directory_path(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    (run_dir / "landuse").mkdir(parents=True)
+
+    legacy = run_dir / "landuse" / "landuse.parquet"
+
+    pd.DataFrame({"TopazID": [11], "WeppID": [12], "name": ["legacy"], "area": [1.0]}).to_parquet(
+        legacy,
+        index=False,
+    )
+    applied, _ = migrate_landuse_parquet(str(run_dir), dry_run=False)
+    assert applied is True
+
+    legacy_df = pd.read_parquet(legacy)
+    assert "topaz_id" in legacy_df.columns
+    assert "TopazID" not in legacy_df.columns
+
+
+def test_soils_parquet_normalizes_canonical_directory_path(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    (run_dir / "soils").mkdir(parents=True)
+
+    legacy = run_dir / "soils" / "soils.parquet"
+
+    pd.DataFrame({"TopazID": [11], "WeppID": [12], "mukey": ["legacy"], "area": [1.0]}).to_parquet(
+        legacy,
+        index=False,
+    )
+    applied, _ = migrate_soils_parquet(str(run_dir), dry_run=False)
+    assert applied is True
+
+    legacy_df = pd.read_parquet(legacy)
+    assert "topaz_id" in legacy_df.columns
+    assert "TopazID" not in legacy_df.columns
+
+
+def test_parquet_path_helper_requires_canonical_directory_path(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    (run_dir / "landuse").mkdir(parents=True)
+    canonical = run_dir / "landuse" / "landuse.parquet"
+    pd.DataFrame({"topaz_id": [1]}).to_parquet(canonical, index=False)
+
+    resolved = pick_existing_parquet_path(run_dir, "landuse/landuse.parquet")
+
+    assert resolved == canonical
+
+
+def test_parquet_path_helper_does_not_fallback_to_root_sidecars(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    sidecar = run_dir / "watershed.hillslopes.parquet"
+    pd.DataFrame({"topaz_id": [1]}).to_parquet(sidecar, index=False)
+
+    resolved = pick_existing_parquet_path(run_dir, "watershed/hillslopes.parquet")
+
+    assert resolved is None
+
+
+def test_parquet_path_helper_rejects_nested_logical_sidecar_mapping(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+
+    resolved = pick_existing_parquet_path(run_dir, "climate/nested/name.parquet")
+
+    assert resolved is None

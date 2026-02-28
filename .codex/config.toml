@@ -6,7 +6,7 @@
 multi_agent = true
 
 [agents]
-max_threads = 12
+max_threads = 20
 
 [agents.default]
 description = "General WEPPpy orchestrator; may delegate and update/add role configs."

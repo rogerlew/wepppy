@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -155,23 +156,61 @@ def test_apply_scenario_mode_uniform_runs_expected_build_steps(tmp_path: Path) -
     assert soils.calls == [2]
 
 
-def test_apply_scenario_mode_uniform_passes_mutation_lock_wait(
+def test_apply_scenario_mode_uniform_runs_without_mutation_wrapper(tmp_path: Path) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+
+    class DisturbedStub:
+        def build_uniform_sbs(self, severity: int) -> str:
+            return f"uniform-{severity}.tif"
+
+        def validate(self, sbs_fn: str, mode: int, uniform_severity: int | None = None) -> None:
+            return None
+
+    class LanduseStub:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def build(self) -> None:
+            self.calls += 1
+
+    class SoilsStub:
+        def __init__(self) -> None:
+            self.calls: list[int] = []
+
+        def build(self, max_workers: int | None = None) -> None:
+            self.calls.append(int(max_workers or 0))
+
+    landuse = LanduseStub()
+    soils = SoilsStub()
+
+    service.apply_scenario_mode(
+        omni,
+        scenario_name="uniform_low",
+        scenario=omni_module.OmniScenario.UniformLow,
+        scenario_def={"type": "uniform_low"},
+        new_wd=omni.wd,
+        disturbed=DisturbedStub(),
+        landuse=landuse,
+        soils=soils,
+        omni_base_scenario_name=None,
+    )
+
+    assert landuse.calls == 1
+    assert soils.calls == [2]
+
+
+def test_apply_scenario_mode_uniform_rejects_archive_form_roots(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     service = OmniModeBuildServices()
     omni = _DummyOmni(tmp_path)
-    captured: dict[str, object] = {}
-
-    def _fake_mutate_roots(wd, roots, callback, *, purpose, lock_wait_seconds, lock_retry_interval_seconds):
-        captured["wd"] = wd
-        captured["roots"] = tuple(roots)
-        captured["purpose"] = purpose
-        captured["lock_wait_seconds"] = lock_wait_seconds
-        captured["lock_retry_interval_seconds"] = lock_retry_interval_seconds
-        return callback()
-
-    monkeypatch.setattr(mode_services_module, "mutate_roots", _fake_mutate_roots)
+    monkeypatch.setattr(
+        mode_services_module,
+        "nodir_resolve",
+        lambda _wd, _root, view="effective": SimpleNamespace(form="archive"),
+    )
 
     class DisturbedStub:
         def build_uniform_sbs(self, severity: int) -> str:
@@ -182,32 +221,65 @@ def test_apply_scenario_mode_uniform_passes_mutation_lock_wait(
 
     class LanduseStub:
         def build(self) -> None:
-            return None
+            raise AssertionError("landuse.build should not be called")
 
     class SoilsStub:
         def build(self, max_workers: int | None = None) -> None:
-            return None
+            raise AssertionError("soils.build should not be called")
 
-    service.apply_scenario_mode(
-        omni,
-        scenario_name="uniform_low",
-        scenario=omni_module.OmniScenario.UniformLow,
-        scenario_def={"type": "uniform_low"},
-        new_wd=omni.wd,
-        disturbed=DisturbedStub(),
-        landuse=LanduseStub(),
-        soils=SoilsStub(),
-        omni_base_scenario_name=None,
+    with pytest.raises(mode_services_module.NoDirError) as exc_info:
+        service.apply_scenario_mode(
+            omni,
+            scenario_name="uniform_low",
+            scenario=omni_module.OmniScenario.UniformLow,
+            scenario_def={"type": "uniform_low"},
+            new_wd=omni.wd,
+            disturbed=DisturbedStub(),
+            landuse=LanduseStub(),
+            soils=SoilsStub(),
+            omni_base_scenario_name=None,
+        )
+
+    assert exc_info.value.code == "NODIR_ARCHIVE_ACTIVE"
+
+
+def test_apply_scenario_mode_prescribed_fire_rejects_archive_form_soils_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniModeBuildServices()
+    omni = _DummyOmni(tmp_path)
+    monkeypatch.setattr(
+        mode_services_module,
+        "nodir_resolve",
+        lambda _wd, _root, view="effective": SimpleNamespace(form="archive"),
     )
 
-    assert captured["wd"] == omni.wd
-    assert captured["roots"] == ("landuse", "soils")
-    assert captured["purpose"] == "omni-uniform_low-build-landuse-soils"
-    assert captured["lock_wait_seconds"] == mode_services_module._OMNI_MUTATION_LOCK_WAIT_SECONDS
-    assert (
-        captured["lock_retry_interval_seconds"]
-        == mode_services_module._OMNI_MUTATION_LOCK_RETRY_INTERVAL_SECONDS
-    )
+    class DisturbedStub:
+        has_sbs = False
+
+    class LanduseStub:
+        domlc_d = {}
+        managements = {}
+
+    class SoilsStub:
+        def build(self, max_workers: int | None = None) -> None:
+            raise AssertionError("soils.build should not be called")
+
+    with pytest.raises(mode_services_module.NoDirError) as exc_info:
+        service.apply_scenario_mode(
+            omni,
+            scenario_name="prescribed_fire",
+            scenario=omni_module.OmniScenario.PrescribedFire,
+            scenario_def={"type": "prescribed_fire"},
+            new_wd=omni.wd,
+            disturbed=DisturbedStub(),
+            landuse=LanduseStub(),
+            soils=SoilsStub(),
+            omni_base_scenario_name=None,
+        )
+
+    assert exc_info.value.code == "NODIR_ARCHIVE_ACTIVE"
 
 
 def test_apply_scenario_mode_undisturbed_enforces_sbs_guard(tmp_path: Path) -> None:
@@ -529,3 +601,46 @@ def test_run_omni_scenario_delegates_mode_specific_branch(
     assert scenario_name == "uniform_low"
     assert captured["scenario_name"] == "uniform_low"
     assert captured["new_wd"] == str(scenario_dir)
+
+
+def test_run_with_directory_roots_lock_sorts_order_and_rechecks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    resolve_calls: list[tuple[str, str]] = []
+    lock_events: list[tuple[str, str, str]] = []
+
+    def _resolve(_wd: str, root: str, view: str = "effective"):
+        resolve_calls.append((root, view))
+        return SimpleNamespace(form="dir")
+
+    @contextmanager
+    def _lock(_wd: str, root: str, *, purpose: str):
+        lock_events.append(("enter", root, purpose))
+        yield
+        lock_events.append(("exit", root, purpose))
+
+    monkeypatch.setattr(mode_services_module, "nodir_resolve", _resolve)
+    monkeypatch.setattr(mode_services_module, "nodir_maintenance_lock", _lock)
+
+    callback_calls: list[str] = []
+    result = mode_services_module._run_with_directory_roots_lock(
+        "/tmp/run",
+        ("soils", "landuse", "soils"),
+        lambda: callback_calls.append("called") or "ok",
+        purpose="omni-unit",
+    )
+
+    assert result == "ok"
+    assert callback_calls == ["called"]
+    assert resolve_calls == [
+        ("landuse", "effective"),
+        ("soils", "effective"),
+        ("landuse", "effective"),
+        ("soils", "effective"),
+    ]
+    assert lock_events == [
+        ("enter", "landuse", "omni-unit/landuse"),
+        ("enter", "soils", "omni-unit/soils"),
+        ("exit", "soils", "omni-unit/soils"),
+        ("exit", "landuse", "omni-unit/landuse"),
+    ]

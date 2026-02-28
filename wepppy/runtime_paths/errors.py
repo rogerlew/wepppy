@@ -1,9 +1,4 @@
-"""Canonical NoDir errors.
-
-This package intentionally does not shape HTTP/JSON responses; it only raises
-typed exceptions with stable `{http_status, code, message}` fields so callers
-(browse/files/download/query-engine/etc.) can render consistent payloads.
-"""
+"""Structured runtime path errors for directory-only execution."""
 
 from __future__ import annotations
 
@@ -15,22 +10,19 @@ __all__ = [
     "nodir_invalid_archive",
     "nodir_locked",
     "nodir_limit_exceeded",
+    "nodir_migration_required",
 ]
 
 
 @dataclass(slots=True)
 class NoDirError(Exception):
-    """Structured NoDir error payload.
-
-    Keep this exception mutable so contextlib can set ``__traceback__`` when
-    exceptions cross generator-based context managers.
-    """
+    """Structured error payload retained for compatibility."""
 
     http_status: int
     code: str
     message: str
 
-    def __str__(self) -> str:  # pragma: no cover (trivial)
+    def __str__(self) -> str:  # pragma: no cover - trivial
         return f"{self.code} ({self.http_status}): {self.message}"
 
 
@@ -48,3 +40,7 @@ def nodir_locked(message: str) -> NoDirError:
 
 def nodir_limit_exceeded(message: str) -> NoDirError:
     return NoDirError(http_status=413, code="NODIR_LIMIT_EXCEEDED", message=message)
+
+
+def nodir_migration_required(message: str) -> NoDirError:
+    return NoDirError(http_status=409, code="NODIR_MIGRATION_REQUIRED", message=message)

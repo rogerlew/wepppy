@@ -7,7 +7,7 @@ import types
 
 import pytest
 
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 pytestmark = pytest.mark.unit
 

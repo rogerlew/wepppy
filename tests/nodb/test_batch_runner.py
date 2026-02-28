@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import errno
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -151,3 +152,16 @@ def test_run_batch_project_fails_fast_when_workspace_rename_fails(
 
     assert runid_wd.is_dir()
     assert marker.read_text(encoding="utf-8") == "keep"
+
+
+def test_require_directory_root_rejects_archive_form(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        batch_runner_mod,
+        "nodir_resolve",
+        lambda _wd, _root, view="effective": SimpleNamespace(form="archive"),
+    )
+
+    with pytest.raises(batch_runner_mod.NoDirError) as exc_info:
+        batch_runner_mod._require_directory_root("/tmp/run", "watershed")
+
+    assert exc_info.value.code == "NODIR_ARCHIVE_ACTIVE"

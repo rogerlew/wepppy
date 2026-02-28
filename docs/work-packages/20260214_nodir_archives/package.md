@@ -1,6 +1,12 @@
 # NoDir: Archive-Backed Project Resources (`.nodir`)
 
-**Status**: Open (2026-02-14)
+**Status**: Closed - Canceled (2026-02-27)
+
+## Cancellation Notice
+This package is canceled and superseded by the full rollback package:
+`docs/work-packages/20260227_nodir_full_reversal/`.
+
+No further implementation should be scheduled under this package. Historical artifacts are retained for audit/reference only.
 
 ## Overview
 WEPPcloud run trees on NFS accumulate a crippling number of small files (notably in `landuse/`, `soils/`, `climate/`, `watershed/`). This drives inode consumption and browse latency (metadata `stat()`/`readdir()`), blocking larger watershed support (10k+ hillslopes).
@@ -73,3 +79,8 @@ This package defines and implements a “NoDir” contract: treat selected proje
 
 ## Deliverables
 - NoDir contract + implementation + migration tooling + regression tests.
+
+## Closure Notes
+**Closed**: 2026-02-27 (Canceled)
+
+**Summary**: The initiative direction changed from NoDir rollout to NoDir abandonment. Ownership moved to `docs/work-packages/20260227_nodir_full_reversal/`, which defines the phased rollback back to directory-only behavior.

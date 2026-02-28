@@ -21,9 +21,7 @@ def _clean_env_for_system_tools() -> dict[str, str]:
 
 def _build_fork_rsync_cmd(run_right: str, *, undisturbify: bool) -> list[str]:
     cmd = ["rsync", "-av", "--progress"]
-    # `.nodir/cache` materialization artifacts are ephemeral and should never
-    # be synced into forked runs.
-    cmd.extend(["--exclude", ".nodir/cache/***"])
+    # Archive staging artifacts are ephemeral and should not be synced into forked runs.
     if undisturbify:
         cmd.extend(["--exclude", "wepp/runs", "--exclude", "wepp/output"])
     cmd.extend([".", run_right])
@@ -135,7 +133,7 @@ def prepare_fork_run(
     clean_env_for_system_tools: Callable[[], dict[str, str]] = _clean_env_for_system_tools,
 ) -> str:
     if mutate_root_fn is None:
-        from wepppy.nodir.mutations import mutate_root as mutate_root_fn
+        from wepppy.runtime_paths.mutations import mutate_root as mutate_root_fn
 
     # 1. Verify rsync exists
     rsync_path = shutil.which("rsync")

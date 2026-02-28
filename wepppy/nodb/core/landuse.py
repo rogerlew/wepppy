@@ -89,7 +89,7 @@ from wepppy.nodb.duckdb_agents import (
     get_landuse_subs_summary,
     get_landuse_sub_summary
 )
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
@@ -563,14 +563,6 @@ class Landuse(NoDbBase):
 
         lc_dir = self.lc_dir
         _clear_directory_preserving_symlink_mount(lc_dir)
-        # Parquet summaries are canonical WD-level sidecars; ensure we don't
-        # leave a stale sidecar behind after clearing the tree.
-        sidecar_fn = _join(self.wd, "landuse.parquet")
-        if _exists(sidecar_fn):
-            try:
-                os.remove(sidecar_fn)
-            except OSError:
-                pass
         os.makedirs(lc_dir, exist_ok=True)
         self._landuse_is_vrt = False
         if not self.islocked():
@@ -1550,7 +1542,7 @@ class Landuse(NoDbBase):
         remaining = [c for c in df.columns if c not in preferred_order]
         df = df.loc[:, preferred_order + remaining]
 
-        df.to_parquet(_join(self.wd, "landuse.parquet"), index=False)
+        df.to_parquet(_join(self.lc_dir, "landuse.parquet"), index=False)
         update_catalog_entry(self.wd, 'landuse/landuse.parquet')
 
     @property

@@ -1,4 +1,6 @@
 # NoDir Contract Spec (Directory vs `.nodir` Project Trees)
+> **Archived / Deprecated (Historical, 2026-02-27):** This NoDir specification is retired from active contract flow after the directory-only reversal. It is retained only for historical/audit reference.
+
 > Contract for representing selected run-scoped project trees as either a real directory or a single-file `.nodir` archive (zip container), while preserving “directory-like” semantics for code and the browse service.
 > **Work package:** `docs/work-packages/20260214_nodir_archives/package.md`
 > **See also:** `docs/schemas/nodir-thaw-freeze-contract.md` (thaw/freeze state tracking + crash recovery)

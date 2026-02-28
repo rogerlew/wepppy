@@ -86,8 +86,9 @@ def _normalize_nodb_paths(run_root: Path, runid: str) -> int:
 def _normalize_parquet_paths(run_root: Path) -> int:
     """Normalize paths in parquet files containing path columns.
 
-    Parquet files like soils.parquet and landuse.parquet contain columns
-    with absolute paths (e.g., soils_dir). This function updates those
+    Canonical parquet files (for example soils/soils.parquet and
+    landuse/landuse.parquet) may contain absolute path columns. This
+    function updates those
     paths to match the local server's path structure.
 
     Args:
@@ -104,10 +105,6 @@ def _normalize_parquet_paths(run_root: Path) -> int:
     modified_count = 0
     # Known parquet files that may contain path columns
     parquet_locations = [
-        # Canonical WD-level sidecars (preferred).
-        run_root / "soils.parquet",
-        run_root / "landuse.parquet",
-        # Legacy in-tree locations (directory-form runs).
         run_root / "soils" / "soils.parquet",
         run_root / "landuse" / "landuse.parquet",
     ]

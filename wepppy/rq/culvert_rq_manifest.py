@@ -14,7 +14,7 @@ from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.culverts_runner import CulvertsRunner
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 from wepppy.topo.watershed_collection import WatershedFeature
 
 from . import culvert_rq_helpers as _helpers

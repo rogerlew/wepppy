@@ -11,7 +11,6 @@ from werkzeug.utils import secure_filename
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
-from wepppy.nodir.mutations import enable_default_archive_roots
 
 from .auth import AuthError, require_jwt
 from .responses import error_response, error_response_with_traceback
@@ -53,7 +52,7 @@ def _resolve_user_from_claims(claims: dict[str, object]) -> tuple[object | None,
             if hasattr(user_datastore, "find_user"):
                 try:
                     user = user_datastore.find_user(email=str(email))
-                except Exception:
+                except Exception:  # broad-except: boundary contract
                     # Boundary catch: preserve contract behavior while logging unexpected failures.
                     __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:56", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                     user = None
@@ -61,7 +60,7 @@ def _resolve_user_from_claims(claims: dict[str, object]) -> tuple[object | None,
         if user is None and email:
             try:
                 user = User.query.filter(User.email == str(email)).first()
-            except Exception:
+            except Exception:  # broad-except: boundary contract
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:62", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 user = None
@@ -77,7 +76,7 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
             return error_response("Session token not allowed for this endpoint", status_code=403)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine huc-fire upload auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -104,15 +103,13 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         config = "disturbed9002"
         cfg = f"{config}.cfg"
 
-        ron = Ron(wd, cfg)
-        if ron.config_get_bool("nodb", "apply_nodir", False):
-            enable_default_archive_roots(wd)
+        Ron(wd, cfg)
 
         try:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
 
             initialize_ttl(wd)
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine huc-fire TTL initialization failed")
 
         with flask_app.app_context():
@@ -125,14 +122,14 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
 
         try:
             disturbed.validate(filename, mode=0)
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             # Boundary catch: preserve contract behavior while logging unexpected failures.
             __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:123", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             os.remove(file_path)
             return error_response_with_traceback("Failed validating file", status_code=500)
 
         return JSONResponse({"runid": runid})
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine huc-fire upload failed")
         return error_response_with_traceback("Could not save file", status_code=500)
 

@@ -7,7 +7,7 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.tools.migrations.parquet_paths import pick_existing_parquet_path
 
 __all__ = [
     "migrate_watersheds",
@@ -240,9 +240,9 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
     watershed_dir = run_path / "watershed"
     watershed_nodb = run_path / "watershed.nodb"
     sidecar_parquets = [
-        run_path / "watershed.hillslopes.parquet",
-        run_path / "watershed.channels.parquet",
-        run_path / "watershed.flowpaths.parquet",
+        watershed_dir / "hillslopes.parquet",
+        watershed_dir / "channels.parquet",
+        watershed_dir / "flowpaths.parquet",
     ]
     sidecar_parquets = [path for path in sidecar_parquets if path.is_file()]
     if not watershed_dir.exists() and not watershed_nodb.exists() and not sidecar_parquets:
@@ -265,11 +265,14 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
         if not isinstance(state, dict):
             return True, "No watershed data files (nothing to migrate)"
 
+        if not dry_run:
+            watershed_dir.mkdir(parents=True, exist_ok=True)
+
         messages = []
         hillslope_rows = _legacy_hillslope_rows(state.get("_subs_summary"))
         applied, message = _write_legacy_parquet(
             hillslope_rows,
-            run_path / "watershed.hillslopes.parquet",
+            watershed_dir / "hillslopes.parquet",
             [
                 "topaz_id",
                 "slope_scalar",
@@ -308,7 +311,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
         channel_rows = _legacy_channel_rows(state.get("_chns_summary"))
         applied, message = _write_legacy_parquet(
             channel_rows,
-            run_path / "watershed.channels.parquet",
+            watershed_dir / "channels.parquet",
             [
                 "topaz_id",
                 "slope_scalar",
@@ -349,7 +352,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
         flowpath_rows = _legacy_flowpath_rows(state.get("_fps_summary"))
         applied, message = _write_legacy_parquet(
             flowpath_rows,
-            run_path / "watershed.flowpaths.parquet",
+            watershed_dir / "flowpaths.parquet",
             [
                 "topaz_id",
                 "fp_id",

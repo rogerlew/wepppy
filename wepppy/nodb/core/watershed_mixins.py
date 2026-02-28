@@ -56,7 +56,7 @@ from wepppy.all_your_base.geo import read_raster
 from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
-from wepppy.nodir.parquet_sidecars import (
+from wepppy.runtime_paths.parquet_sidecars import (
     pick_existing_parquet_path as _default_pick_existing_parquet_path,
 )
 from wepppy.nodb.base import nodb_setter

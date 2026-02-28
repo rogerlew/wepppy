@@ -205,6 +205,34 @@ def test_get_wd_rejects_malformed_composite_slugs(monkeypatch: pytest.MonkeyPatc
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_ensure_omni_shared_inputs_links_directory_roots(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _disable_redis_cache(monkeypatch)
+    base_root = tmp_path / "base"
+    scenario_root = tmp_path / "scenario"
+    base_root.mkdir()
+    scenario_root.mkdir()
+
+    (base_root / "climate").mkdir()
+    (base_root / "watershed").mkdir()
+    (base_root / "dem").mkdir()
+    (base_root / "climate.wepp_cli.parquet").write_text("retired", encoding="utf-8")
+    (base_root / "watershed.hillslopes.parquet").write_text("retired", encoding="utf-8")
+    (base_root / "watershed.channels.parquet").write_text("retired", encoding="utf-8")
+
+    helpers._ensure_omni_shared_inputs(str(base_root), str(scenario_root))
+    helpers._ensure_omni_shared_inputs(str(base_root), str(scenario_root))
+
+    assert (scenario_root / "climate").is_symlink()
+    assert (scenario_root / "watershed").is_symlink()
+    assert (scenario_root / "dem").is_symlink()
+    assert os.readlink(scenario_root / "climate") == str(base_root / "climate")
+    assert os.readlink(scenario_root / "watershed") == str(base_root / "watershed")
+    assert not (scenario_root / "climate.wepp_cli.parquet").exists()
+    assert not (scenario_root / "watershed.hillslopes.parquet").exists()
+    assert not (scenario_root / "watershed.channels.parquet").exists()
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
 def test_ensure_omni_shared_inputs_links_nodir_archives(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
     _disable_redis_cache(monkeypatch)
     base_root = tmp_path / "base"
@@ -214,16 +242,42 @@ def test_ensure_omni_shared_inputs_links_nodir_archives(tmp_path, monkeypatch: p
 
     (base_root / "climate.nodir").write_text("archive", encoding="utf-8")
     (base_root / "watershed.nodir").write_text("archive", encoding="utf-8")
-    (base_root / "climate.wepp_cli.parquet").write_text("climate-sidecar", encoding="utf-8")
-    (base_root / "watershed.hillslopes.parquet").write_text("hillslope-sidecar", encoding="utf-8")
-    (base_root / "watershed.channels.parquet").write_text("channel-sidecar", encoding="utf-8")
     (base_root / "dem").mkdir()
 
+    helpers._ensure_omni_shared_inputs(str(base_root), str(scenario_root))
     helpers._ensure_omni_shared_inputs(str(base_root), str(scenario_root))
 
     assert (scenario_root / "climate.nodir").is_symlink()
     assert (scenario_root / "watershed.nodir").is_symlink()
     assert (scenario_root / "dem").is_symlink()
-    assert (scenario_root / "climate.wepp_cli.parquet").is_symlink()
-    assert (scenario_root / "watershed.hillslopes.parquet").is_symlink()
-    assert (scenario_root / "watershed.channels.parquet").is_symlink()
+    assert os.readlink(scenario_root / "climate.nodir") == str(base_root / "climate.nodir")
+    assert os.readlink(scenario_root / "watershed.nodir") == str(base_root / "watershed.nodir")
+    assert not (scenario_root / "climate.wepp_cli.parquet").exists()
+    assert not (scenario_root / "watershed.hillslopes.parquet").exists()
+    assert not (scenario_root / "watershed.channels.parquet").exists()
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_ensure_omni_shared_inputs_preserves_existing_directory_conflicts(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _disable_redis_cache(monkeypatch)
+    base_root = tmp_path / "base"
+    scenario_root = tmp_path / "scenario"
+    base_root.mkdir()
+    scenario_root.mkdir()
+
+    (base_root / "climate").mkdir()
+    (base_root / "watershed").mkdir()
+    (base_root / "dem").mkdir()
+
+    # Simulate an existing non-symlink destination that should not be replaced.
+    (scenario_root / "climate").mkdir()
+
+    helpers._ensure_omni_shared_inputs(str(base_root), str(scenario_root))
+
+    assert (scenario_root / "climate").is_dir()
+    assert not (scenario_root / "climate").is_symlink()
+    assert (scenario_root / "watershed").is_symlink()
+    assert (scenario_root / "dem").is_symlink()

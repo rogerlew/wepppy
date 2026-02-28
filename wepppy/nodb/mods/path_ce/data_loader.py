@@ -14,7 +14,7 @@ from typing import Iterable, List, Mapping, MutableMapping, Optional, Sequence
 import numpy as np
 import pandas as pd
 
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 DEFAULT_SEVERITY_MAP = {
     "High": {105, 119, 129},

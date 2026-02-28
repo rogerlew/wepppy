@@ -5,7 +5,6 @@ from __future__ import annotations
 import inspect
 import json
 import os
-import re
 import shlex
 import shutil
 import subprocess
@@ -16,13 +15,11 @@ from rq import get_current_job
 
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.exception_logging import with_exception_logging
+from wepppy.runtime_paths.parquet_sidecars import list_existing_retired_root_resources
 
 
 DEFAULT_CONTAINER_NAME = os.getenv("WEPPCLOUDR_CONTAINER", "weppcloudr")
 DEFAULT_TIMEOUT = int(os.getenv("WEPPCLOUDR_COMMAND_TIMEOUT", "1800"))
-
-_CLIMATE_SIDECAR_RE = re.compile(r"^climate\.([^/]+)\.parquet$")
-_WATERSHED_SIDECAR_RE = re.compile(r"^watershed\.([^/]+)\.parquet$")
 
 
 class WeppcloudRError(RuntimeError):
@@ -53,58 +50,31 @@ def _write_command_logs(output_dir: Path, job_id: str, stdout: str, stderr: str)
         (output_dir / f"render_deval_{job_id}.stderr").write_text(stderr, encoding="utf-8")
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:50", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:45", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         # Best effort logging; avoid masking the main error path.
         pass
 
 
-def _sidecar_to_logical_parquet(name: str) -> Optional[str]:
-    """Translate WD-level NoDir parquet sidecar names into logical parquet ids."""
-    if name == "landuse.parquet":
-        return "landuse/landuse.parquet"
-    if name == "soils.parquet":
-        return "soils/soils.parquet"
-    climate_match = _CLIMATE_SIDECAR_RE.match(name)
-    if climate_match:
-        return f"climate/{climate_match.group(1)}.parquet"
-    watershed_match = _WATERSHED_SIDECAR_RE.match(name)
-    if watershed_match:
-        return f"watershed/{watershed_match.group(1)}.parquet"
-    return None
+def _assert_no_retired_root_resources(active_path: Path) -> None:
+    retired = list_existing_retired_root_resources(active_path)
+    if not retired:
+        return
 
-
-def _discover_nodir_parquet_overrides(active_path: Path) -> dict[str, str]:
-    """Return logical parquet ids mapped to existing WD-level sidecar paths."""
-    overrides: dict[str, str] = {}
-    try:
-        entries = list(active_path.iterdir())
-    except OSError:
-        return overrides
-
-    for entry in entries:
-        if not entry.is_file():
-            continue
-        logical_path = _sidecar_to_logical_parquet(entry.name)
-        if logical_path is None:
-            continue
-        overrides[logical_path] = str(entry)
-
-    return dict(sorted(overrides.items()))
+    retired_list = ", ".join(retired)
+    raise WeppcloudRError(
+        "Migration required before rendering DEVAL report: "
+        f"retired WD-root resources detected ({retired_list})."
+    )
 
 
 def _build_render_deval_expression(escaped_payload: str) -> str:
-    """Build an R expression that invokes render_deval with version-safe args."""
+    """Build an R expression that invokes render_deval with stable arguments."""
     return (
         "suppressPackageStartupMessages(library(jsonlite));"
         f"payload <- jsonlite::fromJSON('{escaped_payload}');"
         "source('/srv/weppcloudr/plumber.R');"
-        "render_args <- list(payload$run_path, payload$runid, payload$config, "
+        "render_deval(payload$run_path, payload$runid, payload$config, "
         "skip_cache = payload$skip_cache);"
-        "supports_parquet_overrides <- 'parquet_overrides' %in% names(formals(render_deval));"
-        "if (supports_parquet_overrides) {"
-        "render_args$parquet_overrides <- payload$parquet_overrides;"
-        "};"
-        "do.call(render_deval, render_args);"
     )
 
 
@@ -117,6 +87,7 @@ def render_deval_details_rq(
     skip_cache: bool = False,
     container_name: Optional[str] = None,
     timeout: Optional[int] = None,
+    parquet_overrides: Optional[dict[str, str]] = None,
 ) -> str:
     """Render the DEVAL Details report inside the weppcloudR container.
 
@@ -148,11 +119,16 @@ def render_deval_details_rq(
     )
 
     try:
+        # Backward-compatibility shim: older queued jobs may still include
+        # parquet_overrides; Phase 7 ignores this retired sidecar path override.
+        _ = parquet_overrides
         _ensure_docker_client()
 
         active_path = Path(active_root).resolve()
         if not active_path.is_dir():
             raise FileNotFoundError(f"Active run directory not found: {active_path}")
+
+        _assert_no_retired_root_resources(active_path)
 
         export_dir = active_path / "export" / "WEPPcloudR"
         export_dir.mkdir(parents=True, exist_ok=True)
@@ -165,7 +141,7 @@ def render_deval_details_rq(
                 output_path.unlink()
             except Exception:
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
-                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:110", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:109", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 # If removal fails we'll let the R renderer overwrite the file.
                 pass
 
@@ -174,7 +150,6 @@ def render_deval_details_rq(
             "runid": runid,
             "config": config,
             "skip_cache": bool(skip_cache_flag),
-            "parquet_overrides": _discover_nodir_parquet_overrides(active_path),
         }
         payload_json = json.dumps(payload, ensure_ascii=False)
         escaped_payload = payload_json.replace("\\", "\\\\").replace("'", "\\'")
@@ -222,7 +197,7 @@ def render_deval_details_rq(
         return str(output_path)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:170", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/weppcloudr_rq.py:169", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(
             status_channel,
             f"rq:{job_id} EXCEPTION {func_name}({runid}, config={config}, skip_cache={skip_cache})",

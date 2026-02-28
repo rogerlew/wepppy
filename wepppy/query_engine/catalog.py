@@ -6,43 +6,20 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-# Canonical logical dataset ids and their legacy WD-level sidecar aliases.
-_DATASET_PATH_ALIASES: dict[str, str] = {
-    "landuse/landuse.parquet": "landuse.parquet",
-    "soils/soils.parquet": "soils.parquet",
-    "watershed/hillslopes.parquet": "watershed.hillslopes.parquet",
-    "watershed/channels.parquet": "watershed.channels.parquet",
-    "watershed/flowpaths.parquet": "watershed.flowpaths.parquet",
-    "climate/wepp_cli.parquet": "climate.wepp_cli.parquet",
-}
-_DATASET_PATH_ALIAS_LOOKUP: dict[str, str] = {
-    **_DATASET_PATH_ALIASES,
-    **{legacy: logical for logical, legacy in _DATASET_PATH_ALIASES.items()},
-}
-
 
 def _normalize_catalog_path(path: str) -> str:
     return path.replace("\\", "/").lstrip("/")
 
 
 def resolve_dataset_path_alias(rel_path: str, *, available_paths: set[str]) -> str | None:
-    """Resolve a dataset path to a catalog key, honoring legacy aliases.
+    """Resolve a dataset path to an exact catalog key.
 
-    Args:
-        rel_path: Requested dataset path.
-        available_paths: Catalog keys currently available.
-
-    Returns:
-        Matching catalog key, or None when no exact/alias match exists.
+    Phase 7 retires WD-root NoDir parquet aliases; catalog lookups only accept
+    canonical dataset paths.
     """
     normalized = _normalize_catalog_path(rel_path)
     if normalized in available_paths:
         return normalized
-
-    alias = _DATASET_PATH_ALIAS_LOOKUP.get(normalized)
-    if alias is not None and alias in available_paths:
-        return alias
-
     return None
 
 
@@ -54,9 +31,8 @@ class CatalogEntry:
     extension: str
     size_bytes: int
     modified: str
-    # Optional on-disk pointer when the catalog path is a logical id (e.g.,
-    # `landuse/landuse.parquet`) but the file lives elsewhere (e.g., WD sidecar
-    # `landuse.parquet`). Relative paths are resolved against `DatasetCatalog.root`.
+    # Optional on-disk pointer for entries that resolve outside the run root,
+    # for example parent-run assets referenced by child `_pups` scenarios.
     fs_path: str | None = None
     schema: dict[str, object] | None = None
 

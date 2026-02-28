@@ -8,7 +8,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse
 
 from wepppy.nodb.core import Ron
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 EXPORT_SCOPES = ["rq:export"]
+
+
+def _maybe_nodir_error_response(exc: Exception):
+    if isinstance(exc, NoDirError):
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    return None
 
 
 async def _run_sync(func, *args, **kwargs):
@@ -83,7 +89,7 @@ async def export_ermit(runid: str, config: str, request: Request):
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine export_ermit auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -94,11 +100,12 @@ async def export_ermit(runid: str, config: str, request: Request):
         fn = await _run_sync(create_ermit_input, wd)
         file_path = _require_file(Path(fn), label="ERMiT export")
         return FileResponse(path=file_path, filename=file_path.name)
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine export_ermit failed")
         return error_response_with_traceback("Error exporting ERMiT")
 
@@ -126,7 +133,7 @@ async def export_geopackage(runid: str, config: str, request: Request):
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine export_geopackage auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -142,11 +149,12 @@ async def export_geopackage(runid: str, config: str, request: Request):
 
         _require_file(gpkg_path, label="GeoPackage export")
         return FileResponse(path=gpkg_path, filename=gpkg_path.name)
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine export_geopackage failed")
         return error_response_with_traceback("Error exporting geopackage")
 
@@ -174,7 +182,7 @@ async def export_geodatabase(runid: str, config: str, request: Request):
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine export_geodatabase auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -190,11 +198,12 @@ async def export_geodatabase(runid: str, config: str, request: Request):
 
         _require_file(gdb_path, label="Geodatabase export")
         return FileResponse(path=gdb_path, filename=gdb_path.name)
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine export_geodatabase failed")
         return error_response_with_traceback("Error exporting geodatabase")
 
@@ -239,7 +248,7 @@ async def export_prep_details(runid: str, config: str, request: Request):
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine export_prep_details auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -264,11 +273,12 @@ async def export_prep_details(runid: str, config: str, request: Request):
             path=archive_file,
             filename=f"{runid}_prep_details.zip",
         )
-    except NoDirError as exc:
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
-    except Exception:
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
         logger.exception("rq-engine export_prep_details failed")
         return error_response_with_traceback("Error exporting prep details")
 

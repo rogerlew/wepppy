@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 from tests.factories.singleton import singleton_factory
-from wepppy.nodir.errors import NoDirError
+from wepppy.runtime_paths.errors import NoDirError
 
 pytestmark = pytest.mark.unit
 
@@ -63,8 +63,10 @@ def test_run_debris_flow_rq_passes_payload(
 
     run_wd = str(base_path / "demo")
     assert preflight_calls == [
+        (run_wd, "soils", "effective"),
         (run_wd, "watershed", "effective"),
         (run_wd, "soils", "effective"),
+        (run_wd, "watershed", "effective"),
     ]
 
     debris_instance = debris_cls.getInstance(run_wd)
@@ -112,6 +114,30 @@ def test_run_debris_flow_rq_stops_on_nodir_preflight_error(
         project.run_debris_flow_rq("demo")
 
     assert exc_info.value.code == "NODIR_MIXED_STATE"
+
+    run_wd = str(base_path / "demo")
+    if run_wd in debris_cls._instances:
+        debris_instance = debris_cls.getInstance(run_wd)
+        assert debris_instance.calls == []
+
+    assert any("EXCEPTION run_debris_flow_rq(demo)" in message for _, message in published)
+
+
+def test_run_debris_flow_rq_rejects_archive_form_roots(
+    debris_flow_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    project, debris_cls, _redis_cls, published, base_path = debris_flow_rq_environment
+    monkeypatch.setattr(
+        project,
+        "nodir_resolve",
+        lambda _wd, _root, view="effective": SimpleNamespace(form="archive"),
+    )
+
+    with pytest.raises(NoDirError) as exc_info:
+        project.run_debris_flow_rq("demo")
+
+    assert exc_info.value.code == "NODIR_ARCHIVE_ACTIVE"
 
     run_wd = str(base_path / "demo")
     if run_wd in debris_cls._instances:

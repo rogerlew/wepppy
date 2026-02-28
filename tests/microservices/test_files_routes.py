@@ -467,7 +467,7 @@ def test_aria2c_spec_excludes_hidden_and_recorder_artifacts(tmp_path: Path, monk
     assert response.status_code == 200
     spec = response.text
     assert "visible.txt" in spec
-    assert "watershed.nodir" in spec
+    assert "watershed.nodir" not in spec
     assert "nested/table.csv" in spec
     assert ".secret" not in spec
     assert "profile.events.jsonl" not in spec
@@ -502,454 +502,117 @@ def test_aria2c_spec_uses_external_host_and_site_prefix(tmp_path: Path, monkeypa
     ) in response.text
 
 
-def test_files_listing_inside_nodir_archive_boundary(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-files"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_nodir_zip(
-        run_root / "watershed.nodir",
-        {
-            "hillslopes/h001.slp": "alpha",
-            "hillslopes/h002.slp": "beta",
-        },
-    )
 
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/hillslopes/"
-        )
-
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["path"] == "watershed.nodir/hillslopes"
-    names = {entry["name"] for entry in payload["entries"]}
-    assert names == {"h001.slp", "h002.slp"}
-    first = next(entry for entry in payload["entries"] if entry["name"] == "h001.slp")
-    assert first["type"] == "file"
-    assert first["download_url"].endswith(
-        f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/hillslopes/h001.slp"
-    )
-
-
-def test_download_nodir_archive_entry_returns_bytes(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-download"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_nodir_zip(
-        run_root / "watershed.nodir",
-        {"hillslopes/h001.slp": b"slp-bytes"},
-    )
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    import wepppy.microservices.browse._download as download_mod
-
-    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/hillslopes/h001.slp"
-        )
-
-    assert response.status_code == 200
-    assert response.content == b"slp-bytes"
-
-
-def test_download_nodir_with_trailing_slash_is_not_raw_archive_download(
-    tmp_path: Path, monkeypatch, load_browse
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "files/watershed.nodir/hillslopes/",
+        "files/watershed.nodir?meta=true",
+        "download/watershed.nodir/hillslopes/h001.slp",
+        "download/watershed.nodir",
+    ],
+)
+def test_archive_boundary_paths_rejected_in_directory_mode(
+    tmp_path: Path,
+    monkeypatch,
+    load_browse,
+    endpoint: str,
 ):
-    runid = "run-nodir-download-root-slash"
+    runid = "run-nodir-retired"
     config = "disturbed9002_wbt"
     run_root = tmp_path / "run"
     run_root.mkdir()
-    _write_nodir_zip(
-        run_root / "watershed.nodir",
-        {"hillslopes/h001.slp": b"slp-bytes"},
-    )
+    _write_nodir_zip(run_root / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
 
     browse = load_browse(SITE_PREFIX="/weppcloud")
     monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+
     import wepppy.microservices.browse._download as download_mod
 
     monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
     app = browse.create_app()
 
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/{endpoint}")
+
+    assert response.status_code == 400
+    if endpoint.startswith("files/"):
+        payload = response.json()
+        assert payload["error"]["code"] == "path_outside_root"
+        assert "archive boundary paths are retired" in payload["error"]["details"]
+    else:
+        content_type = response.headers.get("content-type", "")
+        if "application/json" in content_type:
+            assert response.json()["detail"] == "Invalid path."
+        else:
+            assert response.text == "Invalid path."
+
+
+def test_dtale_archive_boundary_rejected_in_directory_mode(
+    tmp_path: Path,
+    monkeypatch,
+    load_browse,
+):
+    runid = "run-nodir-dtale-retired"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_nodir_zip(run_root / "watershed.nodir", {"maps/table.csv": "a,b\n1,2\n"})
+
+    browse = load_browse(
+        SITE_PREFIX="/weppcloud",
+        DTALE_SERVICE_URL="http://dtale-service",
+    )
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+
+    app = browse.create_app()
     with TestClient(app) as client:
         response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/"
-        )
-
-    assert response.status_code == 404
-
-
-def test_mixed_state_direct_nav_returns_409(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-mixed"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    import wepppy.microservices.browse._download as download_mod
-
-    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        files_response = client.get(f"/weppcloud/runs/{runid}/{config}/files/watershed/")
-        download_response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
-        )
-        browse_response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed/")
-
-    assert files_response.status_code == 409
-    assert files_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-    assert download_response.status_code == 409
-    assert download_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-    assert browse_response.status_code == 409
-    assert browse_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-
-def test_files_listing_hides_mixed_nodir_forms_for_non_admin(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-hide-mixed"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-    _write_file(run_root / "visible.txt", "ok")
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
-
-    assert response.status_code == 200
-    names = {entry["name"] for entry in response.json()["entries"]}
-    assert "visible.txt" in names
-    assert "watershed" not in names
-    assert "watershed.nodir" not in names
-
-
-def test_files_listing_shows_mixed_nodir_forms_for_admin(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-show-mixed-admin"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-    _write_file(run_root / "visible.txt", "ok")
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    import wepppy.microservices.browse.files_api as files_api_mod
-
-    monkeypatch.setattr(files_api_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
-
-    assert response.status_code == 200
-    names = {entry["name"] for entry in response.json()["entries"]}
-    assert "visible.txt" in names
-    assert "watershed" in names
-    assert "watershed.nodir" in names
-
-
-def test_browse_root_renders_mixed_nodir_warning_block(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-browse-warning"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/")
-
-    assert response.status_code == 200
-    assert "mixed-state-warning" in response.text
-    assert "Mixed-state NoDir roots:" in response.text
-    assert "watershed" in response.text
-
-
-def test_browse_non_slashed_nodir_mixed_state_returns_409(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-mixed-noslash"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir")
-
-    assert response.status_code == 409
-    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-
-def test_browse_non_slashed_nodir_invalid_archive_returns_500(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-invalid-noslash"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed.nodir", "not-a-zip")
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir")
-
-    assert response.status_code == 500
-    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
-
-
-def test_admin_mixed_state_non_browse_archive_paths_return_409(
-    tmp_path: Path, monkeypatch, load_browse
-):
-    runid = "run-nodir-admin-mixed-non-browse"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    import wepppy.microservices.browse._download as download_mod
-    import wepppy.microservices.browse.files_api as files_api_mod
-
-    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-    monkeypatch.setattr(download_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
-    monkeypatch.setattr(files_api_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
-
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        files_response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/archive.txt?meta=true"
-        )
-        download_response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
-        )
-
-    assert files_response.status_code == 409
-    assert files_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-    assert download_response.status_code == 409
-    assert download_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-
-def test_admin_browse_alias_supports_mixed_archive_view(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-admin-alias"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-
-    monkeypatch.setattr(browse, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        alias_response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/browse/watershed/nodir/"
-        )
-        redirect_response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir/",
+            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
             follow_redirects=False,
         )
 
-    assert alias_response.status_code == 200
-    assert "archive.txt" in alias_response.text
-    assert redirect_response.status_code in {302, 307}
-    assert redirect_response.headers["location"].endswith(
-        f"/weppcloud/runs/{runid}/{config}/browse/watershed/nodir/"
-    )
+    assert response.status_code == 400
+    if "application/json" in response.headers.get("content-type", ""):
+        assert response.json()["detail"] == "Invalid path."
+    else:
+        assert response.text == "Invalid path."
 
 
-def test_invalid_nodir_archive_returns_500_for_archive_as_directory(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-invalid"
+def test_gdalinfo_archive_boundary_rejected_in_directory_mode(
+    tmp_path: Path,
+    monkeypatch,
+    load_browse,
+):
+    runid = "run-nodir-gdalinfo-retired"
     config = "disturbed9002_wbt"
     run_root = tmp_path / "run"
     run_root.mkdir()
-    _write_file(run_root / "watershed.nodir", "not-a-zip")
+    _write_nodir_zip(run_root / "watershed.nodir", {"raster/dem.tif": b"abc"})
 
     browse = load_browse(SITE_PREFIX="/weppcloud")
     monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    import wepppy.microservices.browse._download as download_mod
 
-    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    import wepppy.microservices._gdalinfo as gdalinfo_mod
+
+    monkeypatch.setattr(gdalinfo_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+
+    async def _should_not_run(*args, **kwargs):  # noqa: ARG001
+        raise AssertionError("gdalinfo shell command should not run for retired archive-boundary paths")
+
+    monkeypatch.setattr(gdalinfo_mod, "_run_shell_command", _should_not_run)
+
     app = browse.create_app()
-
-    with TestClient(app) as client:
-        files_response = client.get(f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/")
-        download_response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
-        )
-
-    assert files_response.status_code == 500
-    assert files_response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
-
-    assert download_response.status_code == 500
-    assert download_response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
-
-
-def test_files_meta_non_slashed_nodir_mixed_state_returns_409(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-files-meta-mixed-noslash"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    app = browse.create_app()
-
     with TestClient(app) as client:
         response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir?meta=true"
+            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
         )
 
-    assert response.status_code == 409
-    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-
-def test_files_meta_non_slashed_nodir_invalid_archive_returns_500(
-    tmp_path: Path, monkeypatch, load_browse
-):
-    runid = "run-files-meta-invalid-noslash"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed.nodir", "not-a-zip")
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir?meta=true"
-        )
-
-    assert response.status_code == 500
-    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
-
-
-def test_raw_nodir_download_mixed_state_admin_allowed_non_admin_blocked(
-    tmp_path: Path, monkeypatch, load_browse
-):
-    runid = "run-nodir-raw-mixed"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    import wepppy.microservices.browse._download as download_mod
-
-    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        non_admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
-
-    assert non_admin.status_code == 409
-    assert non_admin.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-    monkeypatch.setattr(download_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
-
-    assert admin.status_code == 200
-    assert admin.content.startswith(b"PK")
-
-
-def test_raw_nodir_download_invalid_archive_admin_allowed_non_admin_blocked(
-    tmp_path: Path, monkeypatch, load_browse
-):
-    runid = "run-nodir-raw-invalid"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    (run_root / "watershed.nodir").write_bytes(b"bad-zip")
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    import wepppy.microservices.browse._download as download_mod
-
-    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        non_admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
-
-    assert non_admin.status_code == 500
-    assert non_admin.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
-
-    monkeypatch.setattr(download_mod, "authorize_run_request", lambda *args, **kwargs: _make_auth(("admin",)))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
-
-    assert admin.status_code == 200
-    assert admin.content == b"bad-zip"
-
-
-def test_aria2c_spec_returns_409_for_mixed_nodir_root(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-aria2c-mixed"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_file(run_root / "watershed" / "dir.txt", "dir")
-    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    import wepppy.microservices.browse._download as download_mod
-
-    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(f"/weppcloud/runs/{runid}/{config}/aria2c.spec")
-
-    assert response.status_code == 409
-    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-
+    assert response.status_code == 400
+    if "application/json" in response.headers.get("content-type", ""):
+        assert response.json()["detail"] == "Invalid path."
+    else:
+        assert response.text == "Invalid path."
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
 def test_files_symlink_target_outside_root(tmp_path: Path, monkeypatch, load_browse):
     runid = "run-321"
@@ -2225,321 +1888,31 @@ def test_browse_error_with_files_segment_stays_html(tmp_path: Path, monkeypatch,
     assert "Directory Not Found" in response.text
 
 
-def test_dtale_archive_entry_materializes_under_nodir_cache(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-dtale"
+def test_files_nodir_list_handles_listdir_file_not_found_as_404(
+    tmp_path: Path,
+    monkeypatch,
+    load_browse,
+):
+    runid = "run-nodir-list-race"
     config = "disturbed9002_wbt"
     run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_nodir_zip(
-        run_root / "watershed.nodir",
-        {
-            "maps/table.csv": "a,b\n1,2\n",
-        },
-    )
-
-    browse = load_browse(
-        SITE_PREFIX="/weppcloud",
-        DTALE_SERVICE_URL="http://dtale-service",
-        DTALE_INTERNAL_TOKEN="internal-token",
-    )
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    captured = _mock_dtale_loader(monkeypatch)
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
-            follow_redirects=False,
-        )
-
-    assert response.status_code == 303
-    assert captured["json"]["runid"] == runid
-    assert captured["json"]["config"] == config
-
-    materialized_rel = captured["json"]["path"]
-    assert materialized_rel.startswith(".nodir/cache/watershed/")
-    assert materialized_rel.endswith("/table.csv")
-    assert (run_root / materialized_rel).is_file()
-
-
-def test_gdalinfo_archive_entry_materializes_under_nodir_cache(tmp_path: Path, monkeypatch, load_browse):
-    import shlex
-
-    runid = "run-nodir-gdalinfo"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_nodir_zip(
-        run_root / "watershed.nodir",
-        {
-            "raster/dem.tif": b"not-a-real-tif",
-        },
-    )
+    (run_root / "landuse").mkdir(parents=True, exist_ok=True)
 
     browse = load_browse(SITE_PREFIX="/weppcloud")
     monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
 
-    import wepppy.microservices._gdalinfo as gdalinfo_mod
-    monkeypatch.setattr(gdalinfo_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    import wepppy.microservices.browse.files_api as files_api_mod
 
-    captured: dict[str, str] = {}
-
-    async def _fake_run_shell_command(command: str, cwd: str | None):
-        captured["command"] = command
-        captured["cwd"] = cwd or ""
-        return 0, '{"driver":"GTiff"}', ""
-
-    monkeypatch.setattr(gdalinfo_mod, "_run_shell_command", _fake_run_shell_command)
-
-    app = browse.create_app()
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
-        )
-
-    assert response.status_code == 200
-    assert response.json()["driver"] == "GTiff"
-
-    command_target = shlex.split(captured["command"])[-1]
-    assert "/.nodir/cache/watershed/" in command_target
-    assert command_target.endswith("/dem.tif")
-    assert Path(command_target).is_file()
-
-
-@pytest.mark.parametrize(
-    ("state", "expected_status", "expected_code"),
-    [
-        ("mixed", 409, "NODIR_MIXED_STATE"),
-        ("invalid", 500, "NODIR_INVALID_ARCHIVE"),
-        ("locked", 503, "NODIR_LOCKED"),
-    ],
-)
-def test_dtale_nodir_state_errors_propagate(
-    tmp_path: Path,
-    monkeypatch,
-    load_browse,
-    state: str,
-    expected_status: int,
-    expected_code: str,
-):
-    runid = f"run-nodir-dtale-{state}"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-
-    if state == "mixed":
-        (run_root / "watershed").mkdir()
-        _write_nodir_zip(run_root / "watershed.nodir", {"maps/table.csv": "x"})
-    elif state == "invalid":
-        (run_root / "watershed.nodir").write_bytes(b"bad-archive")
-    else:
-        _write_nodir_zip(run_root / "watershed.nodir", {"maps/table.csv": "x"})
-        (run_root / "watershed.thaw.tmp").mkdir()
-
-    browse = load_browse(
-        SITE_PREFIX="/weppcloud",
-        DTALE_SERVICE_URL="http://dtale-service",
-    )
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-    app = browse.create_app()
-
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
-            follow_redirects=False,
-        )
-
-    assert response.status_code == expected_status
-    assert response.json()["error"]["code"] == expected_code
-
-
-@pytest.mark.parametrize(
-    ("state", "expected_status", "expected_code"),
-    [
-        ("mixed", 409, "NODIR_MIXED_STATE"),
-        ("invalid", 500, "NODIR_INVALID_ARCHIVE"),
-        ("locked", 503, "NODIR_LOCKED"),
-    ],
-)
-def test_gdalinfo_nodir_state_errors_propagate(
-    tmp_path: Path,
-    monkeypatch,
-    load_browse,
-    state: str,
-    expected_status: int,
-    expected_code: str,
-):
-    runid = f"run-nodir-gdalinfo-{state}"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-
-    if state == "mixed":
-        (run_root / "watershed").mkdir()
-        _write_nodir_zip(run_root / "watershed.nodir", {"raster/dem.tif": b"x"})
-    elif state == "invalid":
-        (run_root / "watershed.nodir").write_bytes(b"bad-archive")
-    else:
-        _write_nodir_zip(run_root / "watershed.nodir", {"raster/dem.tif": b"x"})
-        (run_root / "watershed.thaw.tmp").mkdir()
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-
-    import wepppy.microservices._gdalinfo as gdalinfo_mod
-    monkeypatch.setattr(gdalinfo_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-
-    async def _should_not_run(*args, **kwargs):  # noqa: ARG001
-        raise AssertionError("gdalinfo shell command should not run for NoDir state errors")
-
-    monkeypatch.setattr(gdalinfo_mod, "_run_shell_command", _should_not_run)
-
-    app = browse.create_app()
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
-        )
-
-    assert response.status_code == expected_status
-    assert response.json()["error"]["code"] == expected_code
-
-
-@pytest.mark.parametrize("archive_mode", ["invalid", "missing_entry"])
-def test_dtale_mixed_state_precedence_wins_for_archive_boundary(
-    tmp_path: Path,
-    monkeypatch,
-    load_browse,
-    archive_mode: str,
-):
-    runid = f"run-nodir-dtale-mixed-{archive_mode}"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-
-    _write_file(run_root / "watershed" / "maps" / "table.csv", "a,b\n1,2\n")
-    if archive_mode == "invalid":
-        (run_root / "watershed.nodir").write_bytes(b"bad-archive")
-    else:
-        _write_nodir_zip(run_root / "watershed.nodir", {"maps/other.csv": "x"})
-
-    browse = load_browse(
-        SITE_PREFIX="/weppcloud",
-        DTALE_SERVICE_URL="http://dtale-service",
-    )
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-
-    app = browse.create_app()
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
-            follow_redirects=False,
-        )
-
-    assert response.status_code == 409
-    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-
-@pytest.mark.parametrize("archive_mode", ["invalid", "missing_entry"])
-def test_gdalinfo_mixed_state_precedence_wins_for_archive_boundary(
-    tmp_path: Path,
-    monkeypatch,
-    load_browse,
-    archive_mode: str,
-):
-    runid = f"run-nodir-gdalinfo-mixed-{archive_mode}"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-
-    _write_file(run_root / "watershed" / "raster" / "dem.tif", "placeholder")
-    if archive_mode == "invalid":
-        (run_root / "watershed.nodir").write_bytes(b"bad-archive")
-    else:
-        _write_nodir_zip(run_root / "watershed.nodir", {"raster/other.tif": b"x"})
-
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-
-    import wepppy.microservices._gdalinfo as gdalinfo_mod
-
-    monkeypatch.setattr(gdalinfo_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-
-    async def _should_not_run(*args, **kwargs):  # noqa: ARG001
-        raise AssertionError("gdalinfo shell command should not run for mixed-state precedence checks")
-
-    monkeypatch.setattr(gdalinfo_mod, "_run_shell_command", _should_not_run)
-
-    app = browse.create_app()
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
-        )
-
-    assert response.status_code == 409
-    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
-
-
-def test_dtale_materialize_limit_exceeded_returns_413(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-dtale-limit"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_nodir_zip(
-        run_root / "watershed.nodir",
-        {
-            "maps/table.csv": "a,b\n1234567890,2\n",
-        },
+    monkeypatch.setattr(
+        files_api_mod,
+        "nodir_listdir",
+        lambda _target: (_ for _ in ()).throw(FileNotFoundError("gone")),
     )
 
-    monkeypatch.setenv("NODIR_MATERIALIZE_MAX_FILE_BYTES", "8")
-    browse = load_browse(
-        SITE_PREFIX="/weppcloud",
-        DTALE_SERVICE_URL="http://dtale-service",
-    )
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-
     app = browse.create_app()
     with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
-            follow_redirects=False,
-        )
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/landuse/")
 
-    assert response.status_code == 413
-    assert response.json()["error"]["code"] == "NODIR_LIMIT_EXCEEDED"
-
-
-
-def test_gdalinfo_materialize_limit_exceeded_returns_413(tmp_path: Path, monkeypatch, load_browse):
-    runid = "run-nodir-gdalinfo-limit"
-    config = "disturbed9002_wbt"
-    run_root = tmp_path / "run"
-    run_root.mkdir()
-    _write_nodir_zip(
-        run_root / "watershed.nodir",
-        {
-            "raster/dem.tif": b"0123456789ABCDEF",
-        },
-    )
-
-    monkeypatch.setenv("NODIR_MATERIALIZE_MAX_FILE_BYTES", "8")
-    browse = load_browse(SITE_PREFIX="/weppcloud")
-    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
-
-    import wepppy.microservices._gdalinfo as gdalinfo_mod
-
-    monkeypatch.setattr(gdalinfo_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
-
-    async def _should_not_run(*args, **kwargs):  # noqa: ARG001
-        raise AssertionError("gdalinfo shell command should not run when materialize limits are exceeded")
-
-    monkeypatch.setattr(gdalinfo_mod, "_run_shell_command", _should_not_run)
-
-    app = browse.create_app()
-    with TestClient(app) as client:
-        response = client.get(
-            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
-        )
-
-    assert response.status_code == 413
-    assert response.json()["error"]["code"] == "NODIR_LIMIT_EXCEEDED"
+    assert response.status_code == 404
+    payload = response.json()
+    assert payload["error"]["code"] == "path_not_found"

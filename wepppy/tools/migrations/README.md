@@ -2,6 +2,8 @@
 
 Utilities for in-place standardization of legacy run assets. All scripts are executable via `python -m wepppy.tools.migrations.<module>`.
 
+> **Directory-only status (2026-02-27):** NoDir bulk migration tooling is retired from active use. Active migration flows target directory-backed run assets only.
+
 ## Unified Migration Runner
 
 The recommended way to run migrations is via the unified runner which executes all applicable migrations on a single working directory:
@@ -130,7 +132,6 @@ The following standalone scripts are available for batch processing across multi
   - **Behavior:** recursively walks JSON structures to replace path prefixes. Creates `.bak` backups. Optionally clears Redis cache for the run after migration.
   - **Common flags:** `run_dir` positional, `--old-prefix` (default `/geodata/wc1`), `--new-prefix` (default `/wc1`), `--dry-run`, `--no-clear-cache`.
 
-- `nodir_bulk.py`
-  - **Purpose:** bulk-migrates allowlisted NoDir roots (`landuse`, `soils`, `climate`, `watershed`) across many runs with `READONLY` gating, fail-fast lock checks, and resumable JSONL audit logs.
-  - **Behavior:** requires `WD/READONLY` for non-dry-run mutation, fails fast on active run/root locks, writes one JSONL event per run/root, and resumes by skipping already-completed run/root pairs from prior audit logs.
-  - **Common flags:** `--runs-root` (repeatable), `--root` (repeatable NoDir root filter), `--runid` (repeatable), `--limit`, `--dry-run`, `--audit-log`, `--no-resume`, `--verbose`.
+- `nodir_bulk.py` (historical)
+  - **Status:** retired from active migration flow after the NoDir reversal.
+  - **Location:** retained for rollback evidence in historical work-package artifacts only.

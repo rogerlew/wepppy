@@ -85,8 +85,9 @@ def swat_instance(tmp_path):
 
 def test_build_recall_connections_reads_sidecar_watershed_parquets(swat_instance):
     wd = Path(swat_instance.wd)
-    hillslopes_parquet = wd / "watershed.hillslopes.parquet"
-    channels_parquet = wd / "watershed.channels.parquet"
+    hillslopes_parquet = wd / "watershed" / "hillslopes.parquet"
+    channels_parquet = wd / "watershed" / "channels.parquet"
+    hillslopes_parquet.parent.mkdir(parents=True, exist_ok=True)
 
     pd.DataFrame(
         {

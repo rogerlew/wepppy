@@ -9,7 +9,7 @@ from typing import Sequence
 import duckdb
 
 from wepppy.nodb.core import Ron
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 ColumnSpec = tuple[str, str]
 

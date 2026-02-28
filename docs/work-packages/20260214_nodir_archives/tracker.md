@@ -2,12 +2,15 @@
 
 > Living document tracking progress, decisions, risks, and communication for this work package.
 
+**Status**: Closed - Canceled (2026-02-27)  
+**Superseded by**: `docs/work-packages/20260227_nodir_full_reversal/`
+
 ## Quick Status
 
 **Started**: 2026-02-14  
-**Current phase**: Phase 4 planning  
-**Last updated**: 2026-02-16  
-**Next milestone**: Implement Phase 4 materialization for FS-boundary endpoints and lock in materialization regression coverage.
+**Current phase**: Canceled / superseded  
+**Last updated**: 2026-02-27 (Phase 5 prompt retirement applied)  
+**Next milestone**: None (execution ownership moved to rollback package).
 **Implementation plan:** `docs/work-packages/20260214_nodir_archives/notes/implementation_plan.md`
 
 ## Task Board
@@ -33,6 +36,8 @@
 - [ ] Confirm whether any controllers mutate these trees frequently post-creation (affects archive update strategy).
 
 ### Done
+- [x] Package canceled and superseded by NoDir full reversal package (`docs/work-packages/20260227_nodir_full_reversal/`) (2026-02-27)
+- [x] Retired superseded active prompts by moving `prompts/active/*.md` into `prompts/completed/canceled_*.md` (2026-02-27)
 - [x] Create work package scaffold (2026-02-14)
 - [x] Start NoDir contract spec (`docs/schemas/nodir-contract-spec.md`) (2026-02-14)
 - [x] Freeze NoDir contract decisions (naming, precedence, URL boundary) and update `docs/schemas/nodir-contract-spec.md`. (2026-02-14)
@@ -43,6 +48,15 @@
 - [x] Complete Phase 3 browse/files/download NoDir integration (archive-native reads, mixed/invalid semantics, admin observability, route regression coverage) (2026-02-16)
 
 ## Decisions
+
+### 2026-02-27: Cancel NoDir rollout and supersede with full reversal
+**Context**: Product direction changed to abandon all NoDir work and return to directory-only behavior.
+
+**Decision**: Close this package and transfer ownership to `docs/work-packages/20260227_nodir_full_reversal/`.
+
+**Impact**: This tracker becomes historical record only; no new execution should be scheduled here.
+
+---
 
 ### 2026-02-14: NoDir resources are server-generated (not user-supplied)
 **Context**: Treating generic/user `.zip` files as enterable “directories” expands the attack surface (zip bombs, unexpected paths) and creates confusing recursion questions (`.zip` inside `.zip`).

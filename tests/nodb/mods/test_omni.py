@@ -13,6 +13,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+from wepppy.runtime_paths.errors import NoDirError
 
 pytestmark = pytest.mark.unit
 
@@ -545,31 +546,27 @@ def test_clear_cache_and_locks_handles_runtime_errors(monkeypatch, omni_module, 
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
-def test_omni_clone_links_nodir_shared_inputs(tmp_path: Path, omni_module) -> None:
+def test_omni_clone_links_directory_shared_inputs(tmp_path: Path, omni_module) -> None:
     base_wd = tmp_path / "run"
     base_wd.mkdir()
     (base_wd / "dem").mkdir()
-    (base_wd / "climate.nodir").write_text("climate", encoding="utf-8")
-    (base_wd / "watershed.nodir").write_text("watershed", encoding="utf-8")
-    (base_wd / "climate.wepp_cli.parquet").write_text("climate-sidecar", encoding="utf-8")
-    (base_wd / "watershed.hillslopes.parquet").write_text("hillslope-sidecar", encoding="utf-8")
-    (base_wd / "watershed.channels.parquet").write_text("channel-sidecar", encoding="utf-8")
+    (base_wd / "climate").mkdir()
+    (base_wd / "watershed").mkdir()
 
     scenario_def = {"type": "dummy"}
     scenario_wd = Path(omni_module._omni_clone(scenario_def, str(base_wd), runid="run-123"))
 
     assert (scenario_wd / "dem").is_symlink()
     assert os.readlink(scenario_wd / "dem") == str(base_wd / "dem")
-    assert (scenario_wd / "climate.nodir").is_symlink()
-    assert os.readlink(scenario_wd / "climate.nodir") == str(base_wd / "climate.nodir")
-    assert (scenario_wd / "watershed.nodir").is_symlink()
-    assert os.readlink(scenario_wd / "watershed.nodir") == str(base_wd / "watershed.nodir")
-    assert (scenario_wd / "climate.wepp_cli.parquet").is_symlink()
-    assert os.readlink(scenario_wd / "climate.wepp_cli.parquet") == str(base_wd / "climate.wepp_cli.parquet")
-    assert (scenario_wd / "watershed.hillslopes.parquet").is_symlink()
-    assert os.readlink(scenario_wd / "watershed.hillslopes.parquet") == str(base_wd / "watershed.hillslopes.parquet")
-    assert (scenario_wd / "watershed.channels.parquet").is_symlink()
-    assert os.readlink(scenario_wd / "watershed.channels.parquet") == str(base_wd / "watershed.channels.parquet")
+    assert (scenario_wd / "climate").is_symlink()
+    assert os.readlink(scenario_wd / "climate") == str(base_wd / "climate")
+    assert (scenario_wd / "watershed").is_symlink()
+    assert os.readlink(scenario_wd / "watershed") == str(base_wd / "watershed")
+    assert not (scenario_wd / "climate.nodir").exists()
+    assert not (scenario_wd / "watershed.nodir").exists()
+    assert not (scenario_wd / "climate.wepp_cli.parquet").exists()
+    assert not (scenario_wd / "watershed.hillslopes.parquet").exists()
+    assert not (scenario_wd / "watershed.channels.parquet").exists()
 
 
 def test_omni_clone_survives_enotempty_on_existing_workspace_cleanup(
@@ -2610,7 +2607,7 @@ def test_build_contrasts_stream_order_stale_rebuild_decisions(
     assert bool(wbt_calls["stream_junction_identifier"]) is expect_wbt
 
 
-def test_omni_clone_copies_soils_from_archive_source(tmp_path: Path, omni_module, monkeypatch):
+def test_omni_clone_skips_archive_only_soils_source(tmp_path: Path, omni_module, monkeypatch):
     base_wd = tmp_path / "run"
     base_wd.mkdir()
     (base_wd / "dem").mkdir()
@@ -2618,37 +2615,20 @@ def test_omni_clone_copies_soils_from_archive_source(tmp_path: Path, omni_module
     (base_wd / "watershed").mkdir()
     (base_wd / "soils.nodir").write_text("archive", encoding="ascii")
     (base_wd / "landuse.nodir").write_text("archive", encoding="ascii")
-    (base_wd / "soils.parquet").write_text("soils-sidecar", encoding="ascii")
-    (base_wd / "landuse.parquet").write_text("landuse-sidecar", encoding="ascii")
-
-    projected_soils = tmp_path / "projected-soils"
-    projected_soils.mkdir()
-    (projected_soils / "soils.parquet").write_text("soils", encoding="ascii")
 
     def _resolve(wd: str, rel: str, view: str = "effective"):
         if wd == str(base_wd) and rel in {"soils", "landuse"}:
             return types.SimpleNamespace(form="archive")
         return None
 
-    @contextmanager
-    def _projection(wd: str, root: str, *, mode: str, purpose: str):
-        assert wd == str(base_wd)
-        assert root == "soils"
-        assert mode == "read"
-        yield types.SimpleNamespace(mount_path=str(projected_soils))
-
     monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
-    monkeypatch.setattr(omni_module, "with_root_projection", _projection)
 
     scenario_wd = Path(omni_module._omni_clone({"type": "dummy"}, str(base_wd), runid="run-123"))
 
-    assert (scenario_wd / "soils").is_dir()
-    assert (scenario_wd / "soils" / "soils.parquet").read_text(encoding="ascii") == "soils"
-    assert (scenario_wd / "soils.parquet").read_text(encoding="ascii") == "soils-sidecar"
-    assert not (scenario_wd / "soils.parquet").is_symlink()
-    assert (scenario_wd / "landuse.parquet").read_text(encoding="ascii") == "landuse-sidecar"
-    assert not (scenario_wd / "landuse.parquet").is_symlink()
-
+    assert not (scenario_wd / "soils").exists()
+    assert not (scenario_wd / "landuse").exists()
+    assert not (scenario_wd / "soils.parquet").exists()
+    assert not (scenario_wd / "landuse.parquet").exists()
 
 def test_omni_clone_copies_soils_from_directory_source(tmp_path: Path, omni_module, monkeypatch):
     base_wd = tmp_path / "run"
@@ -2659,7 +2639,6 @@ def test_omni_clone_copies_soils_from_directory_source(tmp_path: Path, omni_modu
     soils_src = base_wd / "soils"
     soils_src.mkdir()
     (soils_src / "763002.sol").write_text("soil-data", encoding="ascii")
-    (base_wd / "soils.parquet").write_text("soils-sidecar", encoding="ascii")
 
     def _resolve(wd: str, rel: str, view: str = "effective"):
         if wd == str(base_wd) and rel == "soils":
@@ -2676,8 +2655,6 @@ def test_omni_clone_copies_soils_from_directory_source(tmp_path: Path, omni_modu
 
     assert (scenario_wd / "soils").is_dir()
     assert (scenario_wd / "soils" / "763002.sol").read_text(encoding="ascii") == "soil-data"
-    assert (scenario_wd / "soils.parquet").read_text(encoding="ascii") == "soils-sidecar"
-    assert not (scenario_wd / "soils.parquet").is_symlink()
 
 
 def test_omni_clone_copies_landuse_from_directory_source(tmp_path: Path, omni_module, monkeypatch):
@@ -2689,7 +2666,6 @@ def test_omni_clone_copies_landuse_from_directory_source(tmp_path: Path, omni_mo
     landuse_src = base_wd / "landuse"
     landuse_src.mkdir()
     (landuse_src / "custom.man").write_text("management-data", encoding="ascii")
-    (base_wd / "landuse.parquet").write_text("landuse-sidecar", encoding="ascii")
 
     def _resolve(wd: str, rel: str, view: str = "effective"):
         if wd == str(base_wd) and rel == "landuse":
@@ -2706,11 +2682,9 @@ def test_omni_clone_copies_landuse_from_directory_source(tmp_path: Path, omni_mo
 
     assert (scenario_wd / "landuse").is_dir()
     assert (scenario_wd / "landuse" / "custom.man").read_text(encoding="ascii") == "management-data"
-    assert (scenario_wd / "landuse.parquet").read_text(encoding="ascii") == "landuse-sidecar"
-    assert not (scenario_wd / "landuse.parquet").is_symlink()
 
 
-def test_omni_clone_sibling_copies_archive_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
+def test_omni_clone_sibling_rejects_archive_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
     parent_wd = tmp_path / "run"
     new_wd = parent_wd / "_pups" / "omni" / "scenarios" / "target"
     sibling_wd = parent_wd / "_pups" / "omni" / "scenarios" / "sibling"
@@ -2724,22 +2698,9 @@ def test_omni_clone_sibling_copies_archive_landuse_and_soils(tmp_path: Path, omn
     for dirname in ("disturbed", "landuse", "soils"):
         (new_wd / dirname).mkdir()
         (new_wd / dirname / "old.txt").write_text("old", encoding="ascii")
-    (new_wd / "landuse.parquet").write_text("old-landuse-sidecar", encoding="ascii")
-    (new_wd / "soils.parquet").write_text("old-soils-sidecar", encoding="ascii")
 
     (sibling_wd / "disturbed").mkdir()
     (sibling_wd / "disturbed" / "disturbed.txt").write_text("disturbed", encoding="ascii")
-    (sibling_wd / "landuse.nodir").write_text("landuse", encoding="ascii")
-    (sibling_wd / "soils.nodir").write_text("soils", encoding="ascii")
-    (sibling_wd / "landuse.parquet").write_text("landuse-sidecar", encoding="ascii")
-    (sibling_wd / "soils.parquet").write_text("soils-sidecar", encoding="ascii")
-
-    projected_landuse = tmp_path / "projected-landuse"
-    projected_soils = tmp_path / "projected-soils"
-    projected_landuse.mkdir()
-    projected_soils.mkdir()
-    (projected_landuse / "landuse.txt").write_text("landuse", encoding="ascii")
-    (projected_soils / "soils.txt").write_text("soils", encoding="ascii")
 
     monkeypatch.setattr(omni_module, "copy_version_for_clone", lambda src, dst: None)
     monkeypatch.setattr(omni_module, "_clear_nodb_cache_and_locks", lambda runid, pup_relpath=None: None)
@@ -2749,37 +2710,17 @@ def test_omni_clone_sibling_copies_archive_landuse_and_soils(tmp_path: Path, omn
             return types.SimpleNamespace(form="archive")
         return None
 
-    @contextmanager
-    def _projection(wd: str, root: str, *, mode: str, purpose: str):
-        assert Path(wd).resolve() == sibling_wd.resolve()
-        assert mode == "read"
-        if root == "landuse":
-            yield types.SimpleNamespace(mount_path=str(projected_landuse))
-            return
-        if root == "soils":
-            yield types.SimpleNamespace(mount_path=str(projected_soils))
-            return
-        raise AssertionError(root)
-
     monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
-    monkeypatch.setattr(omni_module, "with_root_projection", _projection)
 
-    omni_module._omni_clone_sibling(str(new_wd), "sibling", runid="run-123", parent_wd=str(parent_wd))
+    with pytest.raises(NoDirError) as exc_info:
+        omni_module._omni_clone_sibling(str(new_wd), "sibling", runid="run-123", parent_wd=str(parent_wd))
 
-    assert (new_wd / "disturbed" / "disturbed.txt").read_text(encoding="ascii") == "disturbed"
-    assert (new_wd / "landuse" / "landuse.txt").read_text(encoding="ascii") == "landuse"
-    assert (new_wd / "soils" / "soils.txt").read_text(encoding="ascii") == "soils"
-    assert (new_wd / "landuse.parquet").read_text(encoding="ascii") == "landuse-sidecar"
-    assert not (new_wd / "landuse.parquet").is_symlink()
-    assert (new_wd / "soils.parquet").read_text(encoding="ascii") == "soils-sidecar"
-    assert not (new_wd / "soils.parquet").is_symlink()
-
-    for name in ("disturbed", "landuse", "soils"):
-        payload = json.loads((new_wd / f"{name}.nodb").read_text(encoding="ascii"))
-        assert payload["wd"] == str(new_wd)
+    assert exc_info.value.code == "NODIR_MIGRATION_REQUIRED"
+    assert exc_info.value.http_status == 409
+    assert "migration" in exc_info.value.message.lower()
 
 
-def test_run_contrast_copies_archive_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
+def test_run_contrast_skips_archive_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
     wd = tmp_path / "run"
     (wd / "climate").mkdir(parents=True)
     (wd / "watershed").mkdir(parents=True)
@@ -2789,16 +2730,6 @@ def test_run_contrast_copies_archive_landuse_and_soils(tmp_path: Path, omni_modu
 
     (wd / "landuse.nodir").write_text("landuse", encoding="ascii")
     (wd / "soils.nodir").write_text("soils", encoding="ascii")
-    (wd / "climate.wepp_cli.parquet").write_text("climate-sidecar", encoding="ascii")
-    (wd / "watershed.hillslopes.parquet").write_text("hillslope-sidecar", encoding="ascii")
-    (wd / "watershed.channels.parquet").write_text("channel-sidecar", encoding="ascii")
-
-    projected_landuse = tmp_path / "contrast-projected-landuse"
-    projected_soils = tmp_path / "contrast-projected-soils"
-    projected_landuse.mkdir()
-    projected_soils.mkdir()
-    (projected_landuse / "landuse.txt").write_text("landuse", encoding="ascii")
-    (projected_soils / "soils.txt").write_text("soils", encoding="ascii")
 
     monkeypatch.setattr(omni_module, "copy_version_for_clone", lambda src, dst: None)
     monkeypatch.setattr(omni_module, "_clear_nodb_cache_and_locks", lambda runid, pup_relpath=None: None)
@@ -2813,20 +2744,7 @@ def test_run_contrast_copies_archive_landuse_and_soils(tmp_path: Path, omni_modu
             return types.SimpleNamespace(form="archive")
         return None
 
-    @contextmanager
-    def _projection(wd_path: str, root: str, *, mode: str, purpose: str):
-        assert wd_path == str(wd)
-        assert mode == "read"
-        if root == "landuse":
-            yield types.SimpleNamespace(mount_path=str(projected_landuse))
-            return
-        if root == "soils":
-            yield types.SimpleNamespace(mount_path=str(projected_soils))
-            return
-        raise AssertionError(root)
-
     monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
-    monkeypatch.setattr(omni_module, "with_root_projection", _projection)
 
     class DummyWepp:
         def __init__(self, run_wd: str):
@@ -2865,15 +2783,10 @@ def test_run_contrast_copies_archive_landuse_and_soils(tmp_path: Path, omni_modu
         )
     )
 
-    assert (new_wd / "landuse" / "landuse.txt").read_text(encoding="ascii") == "landuse"
-    assert (new_wd / "soils" / "soils.txt").read_text(encoding="ascii") == "soils"
-    assert (new_wd / "climate.wepp_cli.parquet").is_symlink()
-    assert os.readlink(new_wd / "climate.wepp_cli.parquet") == str(wd / "climate.wepp_cli.parquet")
-    assert (new_wd / "watershed.hillslopes.parquet").is_symlink()
-    assert os.readlink(new_wd / "watershed.hillslopes.parquet") == str(wd / "watershed.hillslopes.parquet")
-    assert (new_wd / "watershed.channels.parquet").is_symlink()
-    assert os.readlink(new_wd / "watershed.channels.parquet") == str(wd / "watershed.channels.parquet")
-
+    assert (new_wd / "landuse").is_dir()
+    assert list((new_wd / "landuse").iterdir()) == []
+    assert (new_wd / "soils").is_dir()
+    assert list((new_wd / "soils").iterdir()) == []
 
 def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
     wd = tmp_path / "run"
@@ -2889,8 +2802,6 @@ def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_mo
     soils_src.mkdir()
     (landuse_src / "landuse.txt").write_text("landuse", encoding="ascii")
     (soils_src / "soils.txt").write_text("soils", encoding="ascii")
-    (wd / "landuse.parquet").write_text("landuse-sidecar", encoding="ascii")
-    (wd / "soils.parquet").write_text("soils-sidecar", encoding="ascii")
 
     monkeypatch.setattr(omni_module, "copy_version_for_clone", lambda src, dst: None)
     monkeypatch.setattr(omni_module, "_clear_nodb_cache_and_locks", lambda runid, pup_relpath=None: None)
@@ -2950,10 +2861,6 @@ def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_mo
 
     assert (new_wd / "landuse" / "landuse.txt").read_text(encoding="ascii") == "landuse"
     assert (new_wd / "soils" / "soils.txt").read_text(encoding="ascii") == "soils"
-    assert (new_wd / "landuse.parquet").read_text(encoding="ascii") == "landuse-sidecar"
-    assert not (new_wd / "landuse.parquet").is_symlink()
-    assert (new_wd / "soils.parquet").read_text(encoding="ascii") == "soils-sidecar"
-    assert not (new_wd / "soils.parquet").is_symlink()
 
 
 def test_run_contrast_rewrites_legacy_omni_prefix_when_pass_dat_exists(
@@ -3050,13 +2957,11 @@ def test_omni_clone_sibling_rejects_path_traversal(tmp_path: Path, omni_module):
         )
 
 
-def test_run_contrast_retries_archive_projection_lock_contention(
+def test_run_contrast_skips_projection_lock_retry_in_directory_only_mode(
     tmp_path: Path,
     omni_module,
     monkeypatch,
 ):
-    from wepppy.nodir.errors import nodir_locked
-
     wd = tmp_path / "run"
     (wd / "climate").mkdir(parents=True)
     (wd / "watershed").mkdir(parents=True)
@@ -3067,13 +2972,6 @@ def test_run_contrast_retries_archive_projection_lock_contention(
     (wd / "landuse.nodir").write_text("landuse", encoding="ascii")
     (wd / "soils.nodir").write_text("soils", encoding="ascii")
 
-    projected_landuse = tmp_path / "retry-projected-landuse"
-    projected_soils = tmp_path / "retry-projected-soils"
-    projected_landuse.mkdir()
-    projected_soils.mkdir()
-    (projected_landuse / "landuse.txt").write_text("landuse", encoding="ascii")
-    (projected_soils / "soils.txt").write_text("soils", encoding="ascii")
-
     monkeypatch.setattr(omni_module, "copy_version_for_clone", lambda src, dst: None)
     monkeypatch.setattr(omni_module, "_clear_nodb_cache_and_locks", lambda runid, pup_relpath=None: None)
     monkeypatch.setattr(omni_module, "_resolve_base_scenario_key", lambda wd: "undisturbed")
@@ -3081,32 +2979,13 @@ def test_run_contrast_retries_archive_projection_lock_contention(
     monkeypatch.setattr(omni_module, "_merge_contrast_parquet", lambda **kwargs: None)
     monkeypatch.setattr(omni_module, "_apply_contrast_output_triggers", lambda *args, **kwargs: None)
     monkeypatch.setattr(omni_module, "_post_watershed_run_cleanup", lambda *args, **kwargs: None)
-    monkeypatch.setattr(omni_module, "sleep", lambda _seconds: None)
 
     def _resolve(wd_path: str, rel: str, view: str = "effective"):
         if wd_path == str(wd) and rel in {"landuse", "soils"}:
             return types.SimpleNamespace(form="archive")
         return None
 
-    projection_failures = {"landuse": 1, "soils": 1}
-
-    @contextmanager
-    def _projection(wd_path: str, root: str, *, mode: str, purpose: str):
-        assert wd_path == str(wd)
-        assert mode == "read"
-        if projection_failures[root] > 0:
-            projection_failures[root] -= 1
-            raise nodir_locked("NoDir projection lock is currently held")
-        if root == "landuse":
-            yield types.SimpleNamespace(mount_path=str(projected_landuse))
-            return
-        if root == "soils":
-            yield types.SimpleNamespace(mount_path=str(projected_soils))
-            return
-        raise AssertionError(root)
-
     monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
-    monkeypatch.setattr(omni_module, "with_root_projection", _projection)
 
     class DummyWepp:
         def __init__(self, run_wd: str):
@@ -3145,6 +3024,7 @@ def test_run_contrast_retries_archive_projection_lock_contention(
         )
     )
 
-    assert projection_failures == {"landuse": 0, "soils": 0}
-    assert (new_wd / "landuse" / "landuse.txt").read_text(encoding="ascii") == "landuse"
-    assert (new_wd / "soils" / "soils.txt").read_text(encoding="ascii") == "soils"
+    assert (new_wd / "landuse").is_dir()
+    assert list((new_wd / "landuse").iterdir()) == []
+    assert (new_wd / "soils").is_dir()
+    assert list((new_wd / "soils").iterdir()) == []

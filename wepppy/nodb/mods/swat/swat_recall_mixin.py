@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Tuple
 
 import duckdb
 
-from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 from wepppy.wepp.interchange._utils import CalendarLookup, _build_cli_calendar_lookup, _julian_to_calendar
 
 from ._helpers import _escape_sql_path, _read_parquet_columns, _resolve_column_optional
