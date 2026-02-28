@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 redis_wd_cache_client: Optional[redis.Redis] = None
 REDIS_HOST = redis_host()
 REDIS_WD_CACHE_DB = int(RedisDB.WD_CACHE)
+PRIMARY_RUNS_ROOT = "/wc1/runs"
+LEGACY_RUNS_ROOT = "/geodata/weppcloud_runs"
 try:
     pool_kwargs = redis_connection_kwargs(
         RedisDB.WD_CACHE,
@@ -68,8 +70,9 @@ def _playback_path(env_var: str, subdir: str) -> str:
 def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
     """Ensure omni child runs have symlinked shared inputs from their parent.
 
-    When shared inputs have been migrated to `.nodir` archives, link the archive
-    files into the child workspace instead of the original directories.
+    Legacy compatibility note:
+    if parent roots still contain retired `*.nodir` archives, link those archives
+    into child runs so read-only legacy projects continue to open.
     """
     if not _exists(run_root):
         return
@@ -159,6 +162,45 @@ def _strip_omni_suffix_runid(runid: str) -> str:
     if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"}:
         return ";;".join(parts[:-2])
     return raw
+
+
+def _run_prefix(runid: str) -> str:
+    return runid[:2]
+
+
+def _primary_run_wd(runid: str) -> str:
+    return _join(PRIMARY_RUNS_ROOT, _run_prefix(runid), runid)
+
+
+def _legacy_run_wd(runid: str) -> str:
+    return _join(LEGACY_RUNS_ROOT, runid)
+
+
+def _resolve_primary_or_legacy_run_wd(runid: str) -> str:
+    primary_path = _primary_run_wd(runid)
+    legacy_path = _legacy_run_wd(runid)
+
+    if _exists(primary_path):
+        return primary_path
+    if _exists(legacy_path):
+        return legacy_path
+    return primary_path
+
+
+def _resolve_omni_child_path(parent_runid: str, omni_kind: str, leaf: str) -> tuple[str, str]:
+    scenario_dir = "scenarios" if omni_kind == "omni" else "contrasts"
+
+    base_root = _primary_run_wd(parent_runid)
+    scenario_path = _join(base_root, "_pups", "omni", scenario_dir, leaf)
+    if _exists(scenario_path):
+        return base_root, scenario_path
+
+    legacy_base_root = _legacy_run_wd(parent_runid)
+    legacy_candidate = _join(legacy_base_root, "_pups", "omni", scenario_dir, leaf)
+    if _exists(legacy_candidate):
+        return legacy_base_root, legacy_candidate
+
+    return base_root, scenario_path
 
 
 def get_wd(runid: str, *, prefer_active: bool = True) -> str:
@@ -251,29 +293,13 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
                 culverts_root = os.getenv("CULVERTS_ROOT", "/wc1/culverts")
                 path = _join(culverts_root, _name, "runs", _runid)
             elif _name == 'omni':
-                _name, _group = _group, _name
                 # Omni scenarios live under the parent run's _pups directory.
-                base_root = get_primary_wd(_name)
-                scenario_path = _join(base_root, '_pups', 'omni', 'scenarios', _runid)
-                if not _exists(scenario_path):
-                    legacy_base_root = _join('/geodata/weppcloud_runs', _name)
-                    legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'scenarios', _runid)
-                    if _exists(legacy_candidate):
-                        base_root = legacy_base_root
-                        scenario_path = legacy_candidate
+                base_root, scenario_path = _resolve_omni_child_path(_group, "omni", _runid)
                 path = scenario_path
                 _ensure_omni_shared_inputs(base_root, scenario_path)
             elif _name == 'omni-contrast':
-                _name, _group = _group, _name
                 # Omni contrasts live under the parent run's _pups directory.
-                base_root = get_primary_wd(_name)
-                scenario_path = _join(base_root, '_pups', 'omni', 'contrasts', _runid)
-                if not _exists(scenario_path):
-                    legacy_base_root = _join('/geodata/weppcloud_runs', _name)
-                    legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'contrasts', _runid)
-                    if _exists(legacy_candidate):
-                        base_root = legacy_base_root
-                        scenario_path = legacy_candidate
+                base_root, scenario_path = _resolve_omni_child_path(_group, "omni-contrast", _runid)
                 path = scenario_path
                 _ensure_omni_shared_inputs(base_root, scenario_path)
             else:
@@ -286,18 +312,7 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
                 path = playback_candidate
 
     if path is None:
-        # Primary location: /wc1/runs/<prefix>/<runid> (current)
-        prefix = runid[:2]
-        primary_path = _join('/wc1/runs', prefix, runid)
-        legacy_path = _join('/geodata/weppcloud_runs', runid)
-
-        if _exists(primary_path):
-            path = primary_path
-        elif _exists(legacy_path):
-            path = legacy_path
-        else:
-            # Prefer primary even if it does not exist yet (for new runs)
-            path = primary_path
+        path = _resolve_primary_or_legacy_run_wd(runid)
 
     if context_override:
         path = context_override
@@ -317,8 +332,7 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
 def get_primary_wd(runid: str) -> str:
     """Return the canonical /wc1/runs path for the given runid."""
-    prefix = runid[:2]
-    return _join('/wc1/runs', prefix, runid)
+    return _primary_run_wd(runid)
 
     
 def get_batch_wd(batch_name: str) -> str:

@@ -24,6 +24,20 @@ __all__ = [
 ]
 
 
+def _consume_legacy_input_flags(*, tolerate_mixed: bool, mixed_prefer: str) -> None:
+    """Accept retired mixed/archive flags for backward-compatible call signatures."""
+    _ = (tolerate_mixed, mixed_prefer)
+
+
+def _consume_legacy_projection_flags(
+    *,
+    allow_materialize_fallback: bool,
+    use_projection: bool,
+) -> None:
+    """Accept retired projection/materialization flags for compatibility."""
+    _ = (allow_materialize_fallback, use_projection)
+
+
 def _normalize_wd_and_rel(wd: str, rel: str) -> tuple[Path, str]:
     wd_path = Path(os.path.abspath(wd))
     rel_norm = normalize_relpath(rel)
@@ -48,7 +62,7 @@ def open_input_binary(
     tolerate_mixed: bool = False,
     mixed_prefer: str = "archive",
 ) -> BinaryIO:
-    _ = (tolerate_mixed, mixed_prefer)
+    _consume_legacy_input_flags(tolerate_mixed=tolerate_mixed, mixed_prefer=mixed_prefer)
     abs_path = Path(materialize_input_file(wd, rel))
     return abs_path.open("rb")
 
@@ -103,7 +117,7 @@ def list_input_files(
     tolerate_mixed: bool = False,
     mixed_prefer: str = "archive",
 ) -> list[str]:
-    _ = (tolerate_mixed, mixed_prefer)
+    _consume_legacy_input_flags(tolerate_mixed=tolerate_mixed, mixed_prefer=mixed_prefer)
     wd_path, dir_rel_norm = _normalize_wd_and_rel(wd, dir_rel)
     abs_dir = wd_path / dir_rel_norm
     if not abs_dir.exists():
@@ -123,7 +137,7 @@ def glob_input_files(
     tolerate_mixed: bool = False,
     mixed_prefer: str = "archive",
 ) -> list[str]:
-    _ = (tolerate_mixed, mixed_prefer)
+    _consume_legacy_input_flags(tolerate_mixed=tolerate_mixed, mixed_prefer=mixed_prefer)
     _, pattern_rel_norm = _normalize_wd_and_rel(wd, pattern)
     parent_rel, basename_pattern = pattern_rel_norm.rsplit("/", 1)
 
@@ -151,7 +165,7 @@ def input_exists(
     tolerate_mixed: bool = False,
     mixed_prefer: str = "archive",
 ) -> bool:
-    _ = (tolerate_mixed, mixed_prefer)
+    _consume_legacy_input_flags(tolerate_mixed=tolerate_mixed, mixed_prefer=mixed_prefer)
     wd_path, rel_norm = _normalize_wd_and_rel(wd, rel)
     return (wd_path / rel_norm).is_file()
 
@@ -167,5 +181,9 @@ def with_input_file_path(
     allow_materialize_fallback: bool = False,
     use_projection: bool = False,
 ) -> Iterator[str]:
-    _ = (tolerate_mixed, mixed_prefer, allow_materialize_fallback, use_projection)
+    _consume_legacy_input_flags(tolerate_mixed=tolerate_mixed, mixed_prefer=mixed_prefer)
+    _consume_legacy_projection_flags(
+        allow_materialize_fallback=allow_materialize_fallback,
+        use_projection=use_projection,
+    )
     yield materialize_input_file(wd, rel, purpose=purpose)

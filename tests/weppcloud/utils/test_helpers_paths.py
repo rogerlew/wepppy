@@ -121,6 +121,42 @@ def test_get_wd_resolves_omni_scenario_slug(monkeypatch: pytest.MonkeyPatch) -> 
     assert resolved == "/wc1/runs/de/decimal-pleasing/_pups/omni/scenarios/burned"
 
 
+def test_get_wd_resolves_omni_scenario_slug_primary_hit(monkeypatch: pytest.MonkeyPatch) -> None:
+    _disable_redis_cache(monkeypatch)
+    primary_candidate = "/wc1/runs/de/decimal-pleasing/_pups/omni/scenarios/burned"
+    ensured: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(helpers, "_exists", lambda path: path == primary_candidate)
+    monkeypatch.setattr(
+        helpers,
+        "_ensure_omni_shared_inputs",
+        lambda base_root, run_root: ensured.append((base_root, run_root)),
+    )
+
+    resolved = helpers.get_wd("decimal-pleasing;;omni;;burned", prefer_active=False)
+
+    assert resolved == primary_candidate
+    assert ensured == [("/wc1/runs/de/decimal-pleasing", primary_candidate)]
+
+
+def test_get_wd_resolves_omni_scenario_slug_legacy_hit(monkeypatch: pytest.MonkeyPatch) -> None:
+    _disable_redis_cache(monkeypatch)
+    legacy_candidate = "/geodata/weppcloud_runs/decimal-pleasing/_pups/omni/scenarios/burned"
+    ensured: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(helpers, "_exists", lambda path: path == legacy_candidate)
+    monkeypatch.setattr(
+        helpers,
+        "_ensure_omni_shared_inputs",
+        lambda base_root, run_root: ensured.append((base_root, run_root)),
+    )
+
+    resolved = helpers.get_wd("decimal-pleasing;;omni;;burned", prefer_active=False)
+
+    assert resolved == legacy_candidate
+    assert ensured == [("/geodata/weppcloud_runs/decimal-pleasing", legacy_candidate)]
+
+
 def test_get_wd_resolves_omni_contrast_slug(monkeypatch: pytest.MonkeyPatch) -> None:
     _disable_redis_cache(monkeypatch)
     monkeypatch.setattr(helpers, "_exists", lambda _path: False)

@@ -1,4 +1,4 @@
-"""Directory-only runtime path helpers replacing legacy NoDir package."""
+"""Directory-only runtime path helpers."""
 
 from .errors import NoDirError
 from .fs import NoDirDirEntry, NoDirForm, ResolvedNoDirPath, listdir, open_read, resolve, stat

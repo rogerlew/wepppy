@@ -1,4 +1,4 @@
-"""Directory-only filesystem helpers with NoDir-compatible signatures."""
+"""Directory-only filesystem helpers for runtime path access."""
 
 from __future__ import annotations
 

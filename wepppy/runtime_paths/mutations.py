@@ -1,4 +1,4 @@
-"""Directory-only mutation wrappers with lock compatibility."""
+"""Directory-only mutation helpers with maintenance locking."""
 
 from __future__ import annotations
 

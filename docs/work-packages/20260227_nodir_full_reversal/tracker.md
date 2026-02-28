@@ -5,10 +5,10 @@
 ## Quick Status
 
 **Started**: 2026-02-27  
-**Current phase**: Phase 8 complete (Phases 1-7 complete)  
-**Last updated**: 2026-02-28 04:52Z  
-**Next milestone**: none (Phase 8 closeout complete).
-**Implementation plan**: `docs/work-packages/20260227_nodir_full_reversal/prompts/completed/phase8_root_resource_unroll_batch_migration_execplan.md`
+**Current phase**: Phase 9 complete (post-closeout cleanup)  
+**Last updated**: 2026-02-28 06:15Z  
+**Next milestone**: none (work-package complete).
+**Implementation plan**: `docs/work-packages/20260227_nodir_full_reversal/prompts/completed/phase9_vestigial_complexity_cleanup_execplan.md`
 
 ## Task Board
 
@@ -22,6 +22,7 @@
 - [ ] (none)
 
 ### Done
+- [x] Phase 9: completed behavior-preserving vestigial complexity cleanup (centralized legacy run/omni path resolution, consolidated runtime-path compatibility no-op flags, added omni branch regression tests), passed validation gates, and closed subagent loop with unresolved high/medium = 0 (`phase9_*` artifacts) (2026-02-28)
 - [x] Phase 8 (Phase 7): completed closeout/documentation updates, published final verification artifact, and closed mandatory subagent loop with unresolved high/medium = 0 (2026-02-28)
 - [x] Phase 8 (Phase 6): executed approved wepp1 apply in container context (`--roots /wc1/runs,/wc1/batch`), copied `/tmp` apply artifacts to package artifacts, and published conflict/error verification report (`phase8_wepp1_apply_*`) (2026-02-28)
 - [x] Phase 8 (Phase 5): explicit human approval recorded for wepp1 apply (`phase8_wepp1_approval.md`) (2026-02-28)
@@ -67,6 +68,7 @@
 - **2026-02-28** – Phase 8 Phase 4 completed after confirming container path mapping (`/wc1 -> /geodata/wc1`) and executing wepp1 dry-run with real inventory outputs and approval packet updates.
 - **2026-02-28** – Phase 8 Phase 6 completed: wepp1 apply executed with approval gate artifact, apply audit/summary copied from container `/tmp`, conflict/error ledgers verified, and Phase 6 status advanced while leaving Phase 7 closeout pending.
 - **2026-02-28** – Phase 8 Phase 7 closeout completed: active ExecPlan and tracker marked complete, Phase 8 final verification artifact published, and subagent closeout loop revalidated with unresolved high/medium = 0.
+- **2026-02-28** – Phase 9 post-closeout cleanup completed: behavior-preserving vestigial complexity refactor landed with new omni branch tests, validation gates passed, and subagent unresolved high/medium revalidated at zero.
 
 ## Decisions
 
@@ -115,6 +117,23 @@
 - [x] Runtime browse/files/download and related active paths validated directory-only after NoDir package removal (`phase6_structural_assertions.md`, `phase6_nodir_import_scan.txt`, `phase6_validation_log.md`).
 
 ## Progress Notes
+
+### 2026-02-28: Phase 9 vestigial complexity cleanup complete
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Refactored `wepppy/weppcloud/utils/helpers.py` to centralize primary/legacy run root and omni child path resolution while preserving existing fallback behavior.
+- Consolidated runtime-path compatibility no-op flag handling in `wepppy/runtime_paths/wepp_inputs.py` and aligned runtime-path module framing text to directory-only semantics.
+- Added omni path branch-coverage tests (`primary-hit` + `legacy-hit`) in `tests/weppcloud/utils/test_helpers_paths.py` to close subagent-identified medium risk.
+- Published Phase 9 artifacts:
+  - `phase9_cleanup_report.md`
+  - `phase9_validation_log.md`
+  - `phase9_subagent_review.md`
+  - `phase9_findings_resolution.md`
+- Passed validation and closure gates with unresolved high/medium = 0.
+
+**Next steps**:
+- None; Phase 9 cleanup complete.
 
 ### 2026-02-28: Post-closeout documentation hygiene
 **Agent/Contributor**: Codex

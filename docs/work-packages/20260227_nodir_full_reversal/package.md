@@ -43,9 +43,10 @@ This package intentionally prioritizes complete reversal over compatibility rete
 
 ## Completion Summary
 - Final package closeout verification artifact: `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_final_verification.md`
-- Final validation evidence: `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_validation_log.md`
-- Mandatory subagent closure evidence: `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_subagent_review.md`, `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_findings_resolution.md`
-- Final execution plan record: `docs/work-packages/20260227_nodir_full_reversal/prompts/completed/phase8_root_resource_unroll_batch_migration_execplan.md`
+- Final rollback validation evidence: `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_validation_log.md`
+- Final rollback subagent closure evidence: `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_subagent_review.md`, `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_findings_resolution.md`
+- Post-closeout cleanup evidence: `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase9_cleanup_report.md`, `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase9_validation_log.md`, `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase9_subagent_review.md`, `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase9_findings_resolution.md`
+- Final execution plan records: `docs/work-packages/20260227_nodir_full_reversal/prompts/completed/phase8_root_resource_unroll_batch_migration_execplan.md`, `docs/work-packages/20260227_nodir_full_reversal/prompts/completed/phase9_vestigial_complexity_cleanup_execplan.md`
 
 ## Dependencies
 
@@ -76,3 +77,4 @@ This package intentionally prioritizes complete reversal over compatibility rete
 - Rollback ExecPlan with phase-by-phase execution and validation gates.
 - Updated package/tracker docs marking NoDir abandoned and superseded.
 - Final package verification artifact published at `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_final_verification.md`.
+- Post-closeout Phase 9 cleanup artifact published at `docs/work-packages/20260227_nodir_full_reversal/artifacts/phase9_cleanup_report.md`.

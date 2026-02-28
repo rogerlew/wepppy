@@ -1,4 +1,4 @@
-"""Directory-only projection compatibility wrappers."""
+"""Directory-only projection helpers."""
 
 from __future__ import annotations
 
