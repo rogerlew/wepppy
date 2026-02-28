@@ -1,0 +1,23 @@
+# NoDir Reference Counts
+
+## Total Files
+130 docs/work-packages/20260227_nodir_full_reversal/artifacts/nodir_reference_files.txt
+
+## Top Buckets
+     21 wepppy/nodb
+     19 wepppy/microservices
+     15 tests/nodir
+     14 tests/microservices
+     12 wepppy/rq
+     11 wepppy/nodir
+     10 tests/rq
+      6 tests/nodb
+      5 wepppy/weppcloud
+      5 wepppy/tools
+      4 tests/weppcloud
+      3 wepppy/export
+      1 wepppy/wepp
+      1 wepppy/query_engine
+      1 wepppy/climates
+      1 tests/tools
+      1 tests/query_engine

@@ -1,0 +1,41 @@
+file_path,subsystem,action,target_phase,priority,blocking_decision,tests_to_run,notes
+wepppy/climates/climatena_ca/__init__.py,wepppy/climates,replace,4,medium,,wctl run-pytest tests/nodb/test_climate_build_router_services.py,replace_sidecar_lookup_with_directory_files
+wepppy/export/ermit_input.py,wepppy/export,replace,4,medium,,wctl run-pytest tests/nodb tests/rq,replace_archive_materialization_calls
+wepppy/export/gpkg_export.py,wepppy/export,replace,4,medium,,wctl run-pytest tests/nodb tests/rq,replace_archive_materialization_calls
+wepppy/export/prep_details.py,wepppy/export,replace,4,medium,,wctl run-pytest tests/nodb tests/rq,replace_archive_materialization_calls
+wepppy/nodb/core/climate_build_router.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/landuse.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/ron.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/core/soils.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/watershed.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/watershed_mixins.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/wepp.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/duckdb_agents.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/ash_transport/ash.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/disturbed/disturbed.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/omni/omni.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/omni/omni_station_catalog_service.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/path_ce/data_loader.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/swat/swat.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/swat/swat_recall_mixin.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodir/__init__.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/errors.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/fs.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/materialize.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/mutations.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/parquet_sidecars.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/paths.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/projections.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/state.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/thaw_freeze.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/wepp_inputs.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/query_engine/activate.py,wepppy/query_engine,replace,4,medium,,wctl run-pytest tests/query_engine/test_mcp_router.py,remove_nodir_parquet_override_logic
+wepppy/rq/culvert_rq_manifest.py,wepppy/rq,replace,4,medium,,wctl run-pytest tests/rq,replace_archive_path_resolution_helpers
+wepppy/rq/path_ce_rq.py,wepppy/rq,replace,4,medium,,wctl run-pytest tests/rq,replace_archive_path_resolution_helpers
+wepppy/rq/wepp_rq_stage_helpers.pyi,wepppy/rq,replace,4,medium,,wctl run-pytest tests/rq,replace_archive_path_resolution_helpers
+wepppy/rq/weppcloudr_rq.py,wepppy/rq,replace,4,medium,,wctl run-pytest tests/rq,replace_archive_path_resolution_helpers
+wepppy/wepp/interchange/hec_ras_buffer.py,wepppy/wepp,replace,4,medium,,wctl run-pytest tests/rq,replace_parquet_sidecar_resolution
+wepppy/weppcloud/routes/nodb_api/watar_bp.py,wepppy/weppcloud,replace,4,medium,,wctl run-pytest tests/weppcloud/routes/test_watar_bp.py tests/weppcloud/routes/test_observed_bp.py,replace_input_resolution_with_directory_paths
+wepppy/weppcloud/routes/run_0/run_0_bp.py,wepppy/weppcloud,replace,4,medium,,wctl run-pytest tests/weppcloud/routes/test_watar_bp.py tests/weppcloud/routes/test_observed_bp.py,replace_input_resolution_with_directory_paths

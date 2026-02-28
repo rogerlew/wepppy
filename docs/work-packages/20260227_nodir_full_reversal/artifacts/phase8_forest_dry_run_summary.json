@@ -1,0 +1,60 @@
+{
+  "audit_jsonl": "/home/workdir/wepppy/docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_forest_dry_run_audit.jsonl",
+  "duration_seconds": 167.665,
+  "ended_utc": "2026-02-27T23:26:45Z",
+  "file_action_counts": {
+    "conflict": 2,
+    "planned": 1022,
+    "skipped": 2577
+  },
+  "host": "forest",
+  "mode": "dry-run",
+  "resource_action_counts": {
+    "climate": {
+      "planned": 178
+    },
+    "climate_metric_csv": {
+      "planned": 45
+    },
+    "landuse": {
+      "planned": 163
+    },
+    "soils": {
+      "conflict": 2,
+      "planned": 159
+    },
+    "watershed": {
+      "planned": 477
+    }
+  },
+  "roots": [
+    "/wc1/runs",
+    "/wc1/batch"
+  ],
+  "run_status_counts": {
+    "dry_run": 164,
+    "error": 3,
+    "skipped": 2577
+  },
+  "started_utc": "2026-02-27T23:23:58Z",
+  "status": "error",
+  "totals": {
+    "files_conflict": 2,
+    "files_dedup_deleted": 0,
+    "files_discovered": 1024,
+    "files_error": 3,
+    "files_moved": 0,
+    "runs_conflict": 0,
+    "runs_discovered": 2744,
+    "runs_dry_run": 164,
+    "runs_eligible": 164,
+    "runs_error": 3,
+    "runs_ok": 0,
+    "runs_processed": 2744,
+    "runs_skipped": 2577
+  },
+  "valid_roots": [
+    "/wc1/runs",
+    "/wc1/batch"
+  ]
+}

@@ -1,0 +1,19 @@
+file_path,subsystem,action,target_phase,priority,blocking_decision,tests_to_run,notes
+wepppy/microservices/_gdalinfo.py,wepppy/microservices,guard,3,medium,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,temporary_archive_access_boundary
+wepppy/microservices/browse/_download.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/browse.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/dtale.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/files_api.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/flow.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/listing.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py,wepppy/nodb,guard,3,high,decide_clone_support_for_legacy_archive_runs,wctl run-pytest tests/nodb/mods/test_omni.py,temporary_clone_compatibility_boundary
+wepppy/rq/omni_rq.py,wepppy/rq,guard,3,high,decide_mixed_state_recovery_cutoff,wctl run-pytest tests/rq,retain_or_remove_mixed_state_recovery_boundary
+wepppy/rq/project_rq_archive.py,wepppy/rq,guard,3,high,decide_nodir_cache_handling_during_cutover,wctl run-pytest tests/rq/test_project_rq_archive.py tests/rq/test_project_rq_fork.py,cache_exclusion_boundary_for_legacy_runs
+wepppy/rq/project_rq_fork.py,wepppy/rq,guard,3,high,decide_nodir_cache_handling_during_cutover,wctl run-pytest tests/rq/test_project_rq_archive.py tests/rq/test_project_rq_fork.py,cache_exclusion_boundary_for_legacy_runs
+wepppy/rq/wepp_rq.py,wepppy/rq,guard,3,high,decide_mixed_state_recovery_cutoff,wctl run-pytest tests/rq,retain_or_remove_mixed_state_recovery_boundary
+wepppy/rq/wepp_rq_stage_helpers.py,wepppy/rq,guard,3,high,decide_mixed_state_recovery_cutoff,wctl run-pytest tests/rq,retain_or_remove_mixed_state_recovery_boundary
+wepppy/tools/migrations/landuse.py,wepppy/tools,replace,3,medium,,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,retool_migration_helpers_for_directory_roots
+wepppy/tools/migrations/nodir_bulk.py,wepppy/tools,guard,3,high,decide_cli_retention_for_one_time_migration,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,temporary_boundary_for_data_rollback_only
+wepppy/tools/migrations/soils.py,wepppy/tools,replace,3,medium,,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,retool_migration_helpers_for_directory_roots
+wepppy/tools/migrations/watershed.py,wepppy/tools,replace,3,medium,,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,retool_migration_helpers_for_directory_roots
+wepppy/weppcloud/routes/diff/diff.py,wepppy/weppcloud,guard,3,medium,decide_legacy_archive_browse_window,wctl run-pytest tests/weppcloud/routes/test_test_bp.py,temporary_diff_archive_boundary

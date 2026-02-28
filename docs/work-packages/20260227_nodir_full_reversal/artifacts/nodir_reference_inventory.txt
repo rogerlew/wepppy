@@ -1,0 +1,1281 @@
+tests/microservices/test_diff_nodir.py:100:        _write_nodir_zip(left_root / "watershed.nodir", {"hillslopes/h001.slp": "left"})
+tests/microservices/test_diff_nodir.py:104:        "/runs/run-left/cfg/diff/watershed.nodir/hillslopes/h001.slp?diff=run-right"
+tests/microservices/test_diff_nodir.py:115:        ("mixed", 409, "NODIR_MIXED_STATE"),
+tests/microservices/test_diff_nodir.py:116:        ("invalid", 500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_diff_nodir.py:117:        ("locked", 503, "NODIR_LOCKED"),
+tests/microservices/test_diff_nodir.py:120:def test_diff_nodir_state_errors_propagate_from_right_run(
+tests/microservices/test_diff_nodir.py:128:    _write_nodir_zip(left_root / "watershed.nodir", {"hillslopes/h001.slp": "left"})
+tests/microservices/test_diff_nodir.py:132:        _write_nodir_zip(right_root / "watershed.nodir", {"hillslopes/h001.slp": "right"})
+tests/microservices/test_diff_nodir.py:134:        (right_root / "watershed.nodir").write_bytes(b"bad-archive")
+tests/microservices/test_diff_nodir.py:136:        _write_nodir_zip(right_root / "watershed.nodir", {"hillslopes/h001.slp": "right"})
+tests/microservices/test_diff_nodir.py:140:        "/runs/run-left/cfg/diff/watershed.nodir/hillslopes/h001.slp?diff=run-right"
+tests/microservices/test_diff_nodir.py:18:def _write_nodir_zip(path: Path, entries: dict[str, bytes | str]) -> None:
+tests/microservices/test_diff_nodir.py:62:    _write_nodir_zip(left_root / "watershed.nodir", {"hillslopes/h001.slp": "left"})
+tests/microservices/test_diff_nodir.py:63:    _write_nodir_zip(right_root / "watershed.nodir", {"hillslopes/h001.slp": "right"})
+tests/microservices/test_diff_nodir.py:66:        "/runs/run-left/cfg/diff/watershed.nodir/hillslopes/h001.slp?diff=run-right"
+tests/microservices/test_diff_nodir.py:79:        ("mixed", 409, "NODIR_MIXED_STATE"),
+tests/microservices/test_diff_nodir.py:80:        ("invalid", 500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_diff_nodir.py:81:        ("locked", 503, "NODIR_LOCKED"),
+tests/microservices/test_diff_nodir.py:84:def test_diff_nodir_state_errors_propagate_from_left_run(
+tests/microservices/test_diff_nodir.py:92:    _write_nodir_zip(right_root / "watershed.nodir", {"hillslopes/h001.slp": "right"})
+tests/microservices/test_diff_nodir.py:96:        _write_nodir_zip(left_root / "watershed.nodir", {"hillslopes/h001.slp": "left"})
+tests/microservices/test_diff_nodir.py:98:        (left_root / "watershed.nodir").write_bytes(b"bad-archive")
+tests/microservices/test_files_routes.py:2228:def test_dtale_archive_entry_materializes_under_nodir_cache(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:2233:    _write_nodir_zip(
+tests/microservices/test_files_routes.py:2234:        run_root / "watershed.nodir",
+tests/microservices/test_files_routes.py:2251:            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
+tests/microservices/test_files_routes.py:2260:    assert materialized_rel.startswith(".nodir/cache/watershed/")
+tests/microservices/test_files_routes.py:2265:def test_gdalinfo_archive_entry_materializes_under_nodir_cache(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:2272:    _write_nodir_zip(
+tests/microservices/test_files_routes.py:2273:        run_root / "watershed.nodir",
+tests/microservices/test_files_routes.py:2297:            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
+tests/microservices/test_files_routes.py:2304:    assert "/.nodir/cache/watershed/" in command_target
+tests/microservices/test_files_routes.py:2312:        ("mixed", 409, "NODIR_MIXED_STATE"),
+tests/microservices/test_files_routes.py:2313:        ("invalid", 500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_files_routes.py:2314:        ("locked", 503, "NODIR_LOCKED"),
+tests/microservices/test_files_routes.py:2317:def test_dtale_nodir_state_errors_propagate(
+tests/microservices/test_files_routes.py:2332:        _write_nodir_zip(run_root / "watershed.nodir", {"maps/table.csv": "x"})
+tests/microservices/test_files_routes.py:2334:        (run_root / "watershed.nodir").write_bytes(b"bad-archive")
+tests/microservices/test_files_routes.py:2336:        _write_nodir_zip(run_root / "watershed.nodir", {"maps/table.csv": "x"})
+tests/microservices/test_files_routes.py:2348:            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
+tests/microservices/test_files_routes.py:2359:        ("mixed", 409, "NODIR_MIXED_STATE"),
+tests/microservices/test_files_routes.py:2360:        ("invalid", 500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_files_routes.py:2361:        ("locked", 503, "NODIR_LOCKED"),
+tests/microservices/test_files_routes.py:2364:def test_gdalinfo_nodir_state_errors_propagate(
+tests/microservices/test_files_routes.py:2379:        _write_nodir_zip(run_root / "watershed.nodir", {"raster/dem.tif": b"x"})
+tests/microservices/test_files_routes.py:2381:        (run_root / "watershed.nodir").write_bytes(b"bad-archive")
+tests/microservices/test_files_routes.py:2383:        _write_nodir_zip(run_root / "watershed.nodir", {"raster/dem.tif": b"x"})
+tests/microservices/test_files_routes.py:2400:            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
+tests/microservices/test_files_routes.py:2421:        (run_root / "watershed.nodir").write_bytes(b"bad-archive")
+tests/microservices/test_files_routes.py:2423:        _write_nodir_zip(run_root / "watershed.nodir", {"maps/other.csv": "x"})
+tests/microservices/test_files_routes.py:2434:            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
+tests/microservices/test_files_routes.py:2439:    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:2456:        (run_root / "watershed.nodir").write_bytes(b"bad-archive")
+tests/microservices/test_files_routes.py:2458:        _write_nodir_zip(run_root / "watershed.nodir", {"raster/other.tif": b"x"})
+tests/microservices/test_files_routes.py:2475:            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
+tests/microservices/test_files_routes.py:2479:    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:2487:    _write_nodir_zip(
+tests/microservices/test_files_routes.py:2488:        run_root / "watershed.nodir",
+tests/microservices/test_files_routes.py:2494:    monkeypatch.setenv("NODIR_MATERIALIZE_MAX_FILE_BYTES", "8")
+tests/microservices/test_files_routes.py:2504:            f"/weppcloud/runs/{runid}/{config}/dtale/watershed.nodir/maps/table.csv",
+tests/microservices/test_files_routes.py:2509:    assert response.json()["error"]["code"] == "NODIR_LIMIT_EXCEEDED"
+tests/microservices/test_files_routes.py:2518:    _write_nodir_zip(
+tests/microservices/test_files_routes.py:2519:        run_root / "watershed.nodir",
+tests/microservices/test_files_routes.py:2525:    monkeypatch.setenv("NODIR_MATERIALIZE_MAX_FILE_BYTES", "8")
+tests/microservices/test_files_routes.py:2541:            f"/weppcloud/runs/{runid}/{config}/gdalinfo/watershed.nodir/raster/dem.tif"
+tests/microservices/test_files_routes.py:2545:    assert response.json()["error"]["code"] == "NODIR_LIMIT_EXCEEDED"
+tests/microservices/test_files_routes.py:450:    _write_file(run_root / "watershed.nodir", "archive-bytes")
+tests/microservices/test_files_routes.py:470:    assert "watershed.nodir" in spec
+tests/microservices/test_files_routes.py:505:def test_files_listing_inside_nodir_archive_boundary(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:510:    _write_nodir_zip(
+tests/microservices/test_files_routes.py:511:        run_root / "watershed.nodir",
+tests/microservices/test_files_routes.py:524:            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/hillslopes/"
+tests/microservices/test_files_routes.py:529:    assert payload["path"] == "watershed.nodir/hillslopes"
+tests/microservices/test_files_routes.py:535:        f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/hillslopes/h001.slp"
+tests/microservices/test_files_routes.py:539:def test_download_nodir_archive_entry_returns_bytes(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:544:    _write_nodir_zip(
+tests/microservices/test_files_routes.py:545:        run_root / "watershed.nodir",
+tests/microservices/test_files_routes.py:558:            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/hillslopes/h001.slp"
+tests/microservices/test_files_routes.py:565:def test_download_nodir_with_trailing_slash_is_not_raw_archive_download(
+tests/microservices/test_files_routes.py:572:    _write_nodir_zip(
+tests/microservices/test_files_routes.py:573:        run_root / "watershed.nodir",
+tests/microservices/test_files_routes.py:586:            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/"
+tests/microservices/test_files_routes.py:58:def _write_nodir_zip(path: Path, entries: dict[str, bytes | str]) -> None:
+tests/microservices/test_files_routes.py:598:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:610:            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
+tests/microservices/test_files_routes.py:615:    assert files_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:618:    assert download_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:621:    assert browse_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:624:def test_files_listing_hides_mixed_nodir_forms_for_non_admin(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:630:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:644:    assert "watershed.nodir" not in names
+tests/microservices/test_files_routes.py:647:def test_files_listing_shows_mixed_nodir_forms_for_admin(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:653:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:670:    assert "watershed.nodir" in names
+tests/microservices/test_files_routes.py:673:def test_browse_root_renders_mixed_nodir_warning_block(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:679:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:694:def test_browse_non_slashed_nodir_mixed_state_returns_409(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:700:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:707:        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir")
+tests/microservices/test_files_routes.py:710:    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:713:def test_browse_non_slashed_nodir_invalid_archive_returns_500(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:718:    _write_file(run_root / "watershed.nodir", "not-a-zip")
+tests/microservices/test_files_routes.py:725:        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir")
+tests/microservices/test_files_routes.py:728:    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+tests/microservices/test_files_routes.py:739:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:754:            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/archive.txt?meta=true"
+tests/microservices/test_files_routes.py:757:            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
+tests/microservices/test_files_routes.py:761:    assert files_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:763:    assert download_response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:772:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:785:            f"/weppcloud/runs/{runid}/{config}/browse/watershed.nodir/",
+tests/microservices/test_files_routes.py:797:def test_invalid_nodir_archive_returns_500_for_archive_as_directory(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:802:    _write_file(run_root / "watershed.nodir", "not-a-zip")
+tests/microservices/test_files_routes.py:812:        files_response = client.get(f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir/")
+tests/microservices/test_files_routes.py:814:            f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir/archive.txt"
+tests/microservices/test_files_routes.py:818:    assert files_response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+tests/microservices/test_files_routes.py:821:    assert download_response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+tests/microservices/test_files_routes.py:824:def test_files_meta_non_slashed_nodir_mixed_state_returns_409(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:830:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:838:            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir?meta=true"
+tests/microservices/test_files_routes.py:842:    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:845:def test_files_meta_non_slashed_nodir_invalid_archive_returns_500(
+tests/microservices/test_files_routes.py:852:    _write_file(run_root / "watershed.nodir", "not-a-zip")
+tests/microservices/test_files_routes.py:860:            f"/weppcloud/runs/{runid}/{config}/files/watershed.nodir?meta=true"
+tests/microservices/test_files_routes.py:864:    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+tests/microservices/test_files_routes.py:867:def test_raw_nodir_download_mixed_state_admin_allowed_non_admin_blocked(
+tests/microservices/test_files_routes.py:875:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:885:        non_admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
+tests/microservices/test_files_routes.py:888:    assert non_admin.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_files_routes.py:894:        admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
+tests/microservices/test_files_routes.py:900:def test_raw_nodir_download_invalid_archive_admin_allowed_non_admin_blocked(
+tests/microservices/test_files_routes.py:907:    (run_root / "watershed.nodir").write_bytes(b"bad-zip")
+tests/microservices/test_files_routes.py:917:        non_admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
+tests/microservices/test_files_routes.py:920:    assert non_admin.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+tests/microservices/test_files_routes.py:926:        admin = client.get(f"/weppcloud/runs/{runid}/{config}/download/watershed.nodir")
+tests/microservices/test_files_routes.py:932:def test_aria2c_spec_returns_409_for_mixed_nodir_root(tmp_path: Path, monkeypatch, load_browse):
+tests/microservices/test_files_routes.py:938:    _write_nodir_zip(run_root / "watershed.nodir", {"archive.txt": "zip"})
+tests/microservices/test_files_routes.py:950:    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_rq_engine_ash_routes.py:284:        (409, "NODIR_MIXED_STATE"),
+tests/microservices/test_rq_engine_ash_routes.py:285:        (500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_rq_engine_ash_routes.py:286:        (503, "NODIR_LOCKED"),
+tests/microservices/test_rq_engine_ash_routes.py:289:def test_run_ash_propagates_nodir_preflight_errors_and_skips_enqueue(
+tests/microservices/test_rq_engine_ash_routes.py:316:    monkeypatch.setattr(ash_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_ash_routes.py:9:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_climate_routes.py:100:def test_build_climate_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+tests/microservices/test_rq_engine_climate_routes.py:105:        raise NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
+tests/microservices/test_rq_engine_climate_routes.py:107:    monkeypatch.setattr(climate_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_climate_routes.py:113:    assert response.json()["error"]["code"] == "NODIR_LOCKED"
+tests/microservices/test_rq_engine_climate_routes.py:7:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_debris_flow_routes.py:117:    monkeypatch.setattr(debris_flow_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_debris_flow_routes.py:7:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_debris_flow_routes.py:85:        (409, "NODIR_MIXED_STATE"),
+tests/microservices/test_rq_engine_debris_flow_routes.py:86:        (500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_rq_engine_debris_flow_routes.py:87:        (503, "NODIR_LOCKED"),
+tests/microservices/test_rq_engine_debris_flow_routes.py:90:def test_run_debris_flow_propagates_nodir_preflight_errors_and_skips_enqueue(
+tests/microservices/test_rq_engine_export_routes.py:11:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_export_routes.py:26:def test_export_geopackage_propagates_nodir_errors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+tests/microservices/test_rq_engine_export_routes.py:43:            NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
+tests/microservices/test_rq_engine_export_routes.py:52:    assert payload["error"]["code"] == "NODIR_LOCKED"
+tests/microservices/test_rq_engine_export_routes.py:55:def test_export_ermit_propagates_nodir_errors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+tests/microservices/test_rq_engine_export_routes.py:71:                code="NODIR_INVALID_ARCHIVE",
+tests/microservices/test_rq_engine_export_routes.py:82:    assert payload["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+tests/microservices/test_rq_engine_landuse_routes.py:153:def test_build_landuse_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+tests/microservices/test_rq_engine_landuse_routes.py:158:        raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed")
+tests/microservices/test_rq_engine_landuse_routes.py:160:    monkeypatch.setattr(landuse_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_landuse_routes.py:166:    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_rq_engine_landuse_routes.py:169:def test_build_landuse_user_defined_propagates_mutation_nodir_errors(
+tests/microservices/test_rq_engine_landuse_routes.py:205:        raise NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
+tests/microservices/test_rq_engine_landuse_routes.py:216:    assert response.json()["error"]["code"] == "NODIR_LOCKED"
+tests/microservices/test_rq_engine_landuse_routes.py:7:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_omni_routes.py:106:    (wd / "soils.nodir").write_bytes(b"placeholder archive")
+tests/microservices/test_rq_engine_omni_routes.py:1077:        (409, "NODIR_MIXED_STATE"),
+tests/microservices/test_rq_engine_omni_routes.py:1078:        (500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_rq_engine_omni_routes.py:1079:        (503, "NODIR_LOCKED"),
+tests/microservices/test_rq_engine_omni_routes.py:1082:def test_run_omni_propagates_nodir_preflight_errors_and_skips_enqueue(
+tests/microservices/test_rq_engine_omni_routes.py:1109:    monkeypatch.setattr(omni_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_omni_routes.py:1127:        (409, "NODIR_MIXED_STATE"),
+tests/microservices/test_rq_engine_omni_routes.py:1128:        (500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_rq_engine_omni_routes.py:1129:        (503, "NODIR_LOCKED"),
+tests/microservices/test_rq_engine_omni_routes.py:112:        if root == "soils" and (Path(_wd) / "soils").exists() and (Path(_wd) / "soils.nodir").exists():
+tests/microservices/test_rq_engine_omni_routes.py:1132:def test_run_omni_contrasts_propagates_nodir_preflight_errors_and_skips_enqueue(
+tests/microservices/test_rq_engine_omni_routes.py:113:            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+tests/microservices/test_rq_engine_omni_routes.py:1159:    monkeypatch.setattr(omni_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_omni_routes.py:115:    monkeypatch.setattr(omni_routes, "nodir_resolve", _resolve)
+tests/microservices/test_rq_engine_omni_routes.py:1180:        (409, "NODIR_MIXED_STATE"),
+tests/microservices/test_rq_engine_omni_routes.py:1181:        (500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_rq_engine_omni_routes.py:1182:        (503, "NODIR_LOCKED"),
+tests/microservices/test_rq_engine_omni_routes.py:1185:def test_run_omni_contrasts_dry_run_propagates_nodir_preflight_errors(
+tests/microservices/test_rq_engine_omni_routes.py:1196:    monkeypatch.setattr(omni_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_omni_routes.py:119:    assert (wd / "soils.nodir").exists()
+tests/microservices/test_rq_engine_omni_routes.py:9:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_project_routes.py:155:def test_create_does_not_enable_default_nodir_roots_marker_without_opt_in(
+tests/microservices/test_rq_engine_project_routes.py:174:    marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
+tests/microservices/test_rq_engine_project_routes.py:178:def test_create_enables_default_nodir_roots_marker_with_opt_in_override(
+tests/microservices/test_rq_engine_project_routes.py:197:    marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
+tests/microservices/test_rq_engine_project_routes.py:205:def test_create_opt_in_respects_global_nodir_env_gate(
+tests/microservices/test_rq_engine_project_routes.py:216:    monkeypatch.setenv("WEPP_NODIR_DEFAULT_NEW_RUNS", "0")
+tests/microservices/test_rq_engine_project_routes.py:225:    marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
+tests/microservices/test_rq_engine_project_routes.py:72:    monkeypatch.delenv("WEPP_NODIR_DEFAULT_NEW_RUNS", raising=False)
+tests/microservices/test_rq_engine_soils_routes.py:103:    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+tests/microservices/test_rq_engine_soils_routes.py:7:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_soils_routes.py:90:def test_build_soils_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+tests/microservices/test_rq_engine_soils_routes.py:95:        raise NoDirError(http_status=500, code="NODIR_INVALID_ARCHIVE", message="invalid")
+tests/microservices/test_rq_engine_soils_routes.py:97:    monkeypatch.setattr(soils_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_treatments_routes.py:115:        (409, "NODIR_MIXED_STATE"),
+tests/microservices/test_rq_engine_treatments_routes.py:116:        (500, "NODIR_INVALID_ARCHIVE"),
+tests/microservices/test_rq_engine_treatments_routes.py:117:        (503, "NODIR_LOCKED"),
+tests/microservices/test_rq_engine_treatments_routes.py:120:def test_build_treatments_propagates_nodir_preflight_errors_and_skips_enqueue(
+tests/microservices/test_rq_engine_treatments_routes.py:147:    monkeypatch.setattr(treatments_routes, "nodir_resolve", _raise_nodir)
+tests/microservices/test_rq_engine_treatments_routes.py:7:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_upload_climate_routes.py:107:        raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed")
+tests/microservices/test_rq_engine_upload_climate_routes.py:119:    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_rq_engine_upload_climate_routes.py:87:def test_upload_cli_propagates_nodir_errors(
+tests/microservices/test_rq_engine_upload_climate_routes.py:9:from wepppy.nodir.errors import NoDirError
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:106:    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:110:def test_huc_fire_upload_sbs_creates_nodir_marker_when_config_opted_in(
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:120:    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:127:def test_huc_fire_upload_sbs_opt_in_respects_global_nodir_env_gate(
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:135:        global_nodir_default="0",
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:142:    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:24:    global_nodir_default: str | None = None,
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:30:    if global_nodir_default is None:
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:31:        monkeypatch.delenv("WEPP_NODIR_DEFAULT_NEW_RUNS", raising=False)
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:33:        monkeypatch.setenv("WEPP_NODIR_DEFAULT_NEW_RUNS", global_nodir_default)
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py:96:def test_huc_fire_upload_sbs_creates_run_without_nodir_marker_by_default(
+tests/microservices/test_rq_engine_watershed_routes.py:593:def test_fetch_dem_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+tests/microservices/test_rq_engine_watershed_routes.py:609:        raise NoDirError(http_status=500, code="NODIR_INVALID_ARCHIVE", message="invalid")
+tests/microservices/test_rq_engine_watershed_routes.py:630:    assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+tests/microservices/test_rq_engine_watershed_routes.py:633:def test_set_outlet_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+tests/microservices/test_rq_engine_watershed_routes.py:638:        raise NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
+tests/microservices/test_rq_engine_watershed_routes.py:653:    assert response.json()["error"]["code"] == "NODIR_LOCKED"
+tests/microservices/test_rq_engine_watershed_routes.py:656:def test_build_subcatchments_propagates_nodir_preflight_errors(
+tests/microservices/test_rq_engine_watershed_routes.py:663:        raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed")
+tests/microservices/test_rq_engine_watershed_routes.py:678:    assert response.json()["error"]["code"] == "NODIR_MIXED_STATE"
+tests/microservices/test_rq_engine_watershed_routes.py:8:from wepppy.nodir.errors import NoDirError
+tests/nodb/mods/test_ash_transport_run_ash.py:10:from wepppy.nodir.errors import NoDirError
+tests/nodb/mods/test_ash_transport_run_ash.py:132:    projected_cli = str(wd / ".nodir" / "mount" / "climate" / "inputs" / "example.cli")
+tests/nodb/mods/test_ash_transport_run_ash.py:168:def test_run_ash_propagates_projection_nodir_errors(ash_runtime, monkeypatch: pytest.MonkeyPatch):
+tests/nodb/mods/test_ash_transport_run_ash.py:188:        raise NoDirError(http_status=503, code="NODIR_LOCKED", message="projection locked")
+tests/nodb/mods/test_ash_transport_run_ash.py:196:    assert exc_info.value.code == "NODIR_LOCKED"
+tests/nodb/mods/test_observed_processing.py:119:        archive_path = RUN_DIR / f"{root}.nodir"
+tests/nodb/mods/test_observed_processing.py:154:        archive_path = RUN_DIR / f"{root}.nodir"
+tests/nodb/mods/test_omni.py:2619:    (base_wd / "soils.nodir").write_text("archive", encoding="ascii")
+tests/nodb/mods/test_omni.py:2620:    (base_wd / "landuse.nodir").write_text("archive", encoding="ascii")
+tests/nodb/mods/test_omni.py:2640:    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+tests/nodb/mods/test_omni.py:2673:    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+tests/nodb/mods/test_omni.py:2703:    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+tests/nodb/mods/test_omni.py:2732:    (sibling_wd / "landuse.nodir").write_text("landuse", encoding="ascii")
+tests/nodb/mods/test_omni.py:2733:    (sibling_wd / "soils.nodir").write_text("soils", encoding="ascii")
+tests/nodb/mods/test_omni.py:2764:    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+tests/nodb/mods/test_omni.py:2790:    (wd / "landuse.nodir").write_text("landuse", encoding="ascii")
+tests/nodb/mods/test_omni.py:2791:    (wd / "soils.nodir").write_text("soils", encoding="ascii")
+tests/nodb/mods/test_omni.py:2828:    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+tests/nodb/mods/test_omni.py:2912:    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+tests/nodb/mods/test_omni.py:2972:    monkeypatch.setattr(omni_module, "nodir_resolve", lambda *_args, **_kwargs: None)
+tests/nodb/mods/test_omni.py:3058:    from wepppy.nodir.errors import nodir_locked
+tests/nodb/mods/test_omni.py:3067:    (wd / "landuse.nodir").write_text("landuse", encoding="ascii")
+tests/nodb/mods/test_omni.py:3068:    (wd / "soils.nodir").write_text("soils", encoding="ascii")
+tests/nodb/mods/test_omni.py:3099:            raise nodir_locked("NoDir projection lock is currently held")
+tests/nodb/mods/test_omni.py:3108:    monkeypatch.setattr(omni_module, "nodir_resolve", _resolve)
+tests/nodb/mods/test_omni.py:548:def test_omni_clone_links_nodir_shared_inputs(tmp_path: Path, omni_module) -> None:
+tests/nodb/mods/test_omni.py:552:    (base_wd / "climate.nodir").write_text("climate", encoding="utf-8")
+tests/nodb/mods/test_omni.py:553:    (base_wd / "watershed.nodir").write_text("watershed", encoding="utf-8")
+tests/nodb/mods/test_omni.py:563:    assert (scenario_wd / "climate.nodir").is_symlink()
+tests/nodb/mods/test_omni.py:564:    assert os.readlink(scenario_wd / "climate.nodir") == str(base_wd / "climate.nodir")
+tests/nodb/mods/test_omni.py:565:    assert (scenario_wd / "watershed.nodir").is_symlink()
+tests/nodb/mods/test_omni.py:566:    assert os.readlink(scenario_wd / "watershed.nodir") == str(base_wd / "watershed.nodir")
+tests/nodb/mods/test_omni.py:592:    monkeypatch.setattr(omni_module, "nodir_resolve", lambda *args, **kwargs: None)
+tests/nodb/mods/test_omni.py:625:    monkeypatch.setattr(omni_module, "nodir_resolve", lambda *args, **kwargs: None)
+tests/nodb/mods/test_omni.py:654:    monkeypatch.setattr(omni_module, "nodir_resolve", lambda *args, **kwargs: None)
+tests/nodb/test_climate_build_router_services.py:159:    managed_target = tmp_path / ".nodir" / "upper" / "climate" / "token" / "data"
+tests/nodb/test_root_dir_materialization.py:125:    mount_target = wd / ".nodir" / "upper" / "landuse" / "token" / "data"
+tests/nodb/test_root_dir_materialization.py:73:    mount_target = wd / ".nodir" / "upper" / "soils" / "token" / "data"
+tests/nodb/test_wepp_nodir_read_paths.py:129:        wd / "watershed.nodir",
+tests/nodb/test_wepp_nodir_read_paths.py:147:        wd / "watershed.nodir",
+tests/nodb/test_wepp_nodir_read_paths.py:170:    (wd / "watershed.nodir").write_text("archive", encoding="utf-8")
+tests/nodb/test_wepp_nodir_read_paths.py:198:        wd / "watershed.nodir",
+tests/nodb/test_wepp_nodir_read_paths.py:222:        wd / "watershed.nodir",
+tests/nodb/test_wepp_nodir_read_paths.py:240:        wd / "watershed.nodir",
+tests/nodir/test_archive_fs.py:14:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_archive_fs.py:56:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_archive_fs.py:8:from wepppy.nodir.fs import listdir, open_read, resolve, stat
+tests/nodir/test_archive_validation.py:15:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_archive_validation.py:40:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_archive_validation.py:52:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_archive_validation.py:59:    monkeypatch.setenv("NODIR_MAX_OPEN_READ_BYTES", "5")
+tests/nodir/test_archive_validation.py:69:    assert err.code == "NODIR_LIMIT_EXCEEDED"
+tests/nodir/test_archive_validation.py:76:    monkeypatch.setenv("NODIR_MAX_OPEN_READ_BYTES", "5MB")
+tests/nodir/test_archive_validation.py:87:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_archive_validation.py:8:from wepppy.nodir.errors import NoDirError
+tests/nodir/test_archive_validation.py:98:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_archive_validation.py:9:from wepppy.nodir.fs import open_read, resolve
+tests/nodir/test_errors.py:17:def test_nodir_error_survives_generator_contextmanager_throw() -> None:
+tests/nodir/test_errors.py:20:            raise nodir_locked("lock is held")
+tests/nodir/test_errors.py:23:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_errors.py:7:from wepppy.nodir.errors import NoDirError, nodir_locked
+tests/nodir/test_lock_runid_scoping.py:10:def test_nodir_lock_runid_uses_parent_for_pup_workspaces() -> None:
+tests/nodir/test_lock_runid_scoping.py:13:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_lock_runid_scoping.py:14:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_lock_runid_scoping.py:15:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_materialize.py:101:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:118:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_materialize.py:120:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:12:from wepppy.nodir.errors import NoDirError, nodir_invalid_archive, nodir_locked
+tests/nodir/test_materialize.py:139:    _write_zip(wd / "watershed.nodir", {"a.txt": "hello"})
+tests/nodir/test_materialize.py:13:from wepppy.nodir.fs import resolve
+tests/nodir/test_materialize.py:141:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:14:from wepppy.nodir.materialize import materialize_file
+tests/nodir/test_materialize.py:150:    assert err.code == "NODIR_LOCKED"
+tests/nodir/test_materialize.py:159:    _write_zip(wd / "watershed.nodir", {"big.bin": b"x" * (3 * 1024 * 1024)})
+tests/nodir/test_materialize.py:15:from wepppy.nodir.state import archive_fingerprint_from_path, write_state
+tests/nodir/test_materialize.py:161:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:164:    monkeypatch.setenv("NODIR_MATERIALIZE_LOCK_WAIT_SECONDS", "2")
+tests/nodir/test_materialize.py:211:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:220:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_materialize.py:225:    _write_zip(wd / "watershed.nodir", {"a.txt": b"1234567890"})
+tests/nodir/test_materialize.py:227:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:230:    monkeypatch.setenv("NODIR_MATERIALIZE_MAX_FILE_BYTES", "4")
+tests/nodir/test_materialize.py:237:    assert err.code == "NODIR_LIMIT_EXCEEDED"
+tests/nodir/test_materialize.py:242:    with zipfile.ZipFile(wd / "watershed.nodir", "w", compression=zipfile.ZIP_DEFLATED) as zf:
+tests/nodir/test_materialize.py:245:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:254:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_materialize.py:259:    _write_zip(wd / "watershed.nodir", {"a.txt": "hello"})
+tests/nodir/test_materialize.py:261:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:268:        raise nodir_invalid_archive("simulated extraction failure")
+tests/nodir/test_materialize.py:275:    assert exc.value.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_materialize.py:284:        wd / "watershed.nodir",
+tests/nodir/test_materialize.py:293:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:309:        wd / "watershed.nodir",
+tests/nodir/test_materialize.py:316:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:325:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_materialize.py:331:        wd / "watershed.nodir",
+tests/nodir/test_materialize.py:340:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:359:        wd / "watershed.nodir",
+tests/nodir/test_materialize.py:368:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:383:    _write_zip(wd / "watershed.nodir", {"big.bin": b"x" * (3 * 1024 * 1024)})
+tests/nodir/test_materialize.py:385:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:408:    _write_zip(wd / "watershed.nodir", {"placeholder.txt": "x"})
+tests/nodir/test_materialize.py:415:    assert err.code == "NODIR_MIXED_STATE"
+tests/nodir/test_materialize.py:424:        wd / "watershed.nodir",
+tests/nodir/test_materialize.py:433:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:448:    _write_zip(wd / "watershed.nodir", {"big.bin": b"x" * (3 * 1024 * 1024)})
+tests/nodir/test_materialize.py:450:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:456:        raise nodir_locked("simulated lock ownership loss")
+tests/nodir/test_materialize.py:465:    assert err.code == "NODIR_LOCKED"
+tests/nodir/test_materialize.py:476:    _write_zip(wd / "watershed.nodir", {"big.bin": b"x" * (3 * 1024 * 1024)})
+tests/nodir/test_materialize.py:478:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:504:    assert err.code == "NODIR_LOCKED"
+tests/nodir/test_materialize.py:516:    _write_zip(wd / "watershed.nodir", {"big.bin": b"x" * (3 * 1024 * 1024)})
+tests/nodir/test_materialize.py:518:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:552:    assert peer_exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_materialize.py:563:    assert worker_result["exc"].code == "NODIR_LOCKED"
+tests/nodir/test_materialize.py:574:    _write_zip(wd / "watershed.nodir", {"a.txt": "hello"})
+tests/nodir/test_materialize.py:577:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:586:    assert err.code == "NODIR_LOCKED"
+tests/nodir/test_materialize.py:596:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_materialize.py:599:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_materialize.py:617:    assert err.code == "NODIR_LOCKED"
+tests/nodir/test_materialize.py:86:    return wd / ".nodir" / "cache" / target.root / archive_fp / entry_id
+tests/nodir/test_materialize.py:99:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_mutations.py:10:from wepppy.nodir.errors import NoDirError
+tests/nodir/test_mutations.py:11:from wepppy.nodir.mutations import (
+tests/nodir/test_mutations.py:123:    assert not (wd / "watershed.nodir").exists()
+tests/nodir/test_mutations.py:145:    assert (wd / "watershed.nodir").exists()
+tests/nodir/test_mutations.py:146:    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+tests/nodir/test_mutations.py:174:    assert not (wd / "watershed.nodir").exists()
+tests/nodir/test_mutations.py:17:from wepppy.nodir.state import read_state
+tests/nodir/test_mutations.py:18:from wepppy.nodir.thaw_freeze import maintenance_lock_key
+tests/nodir/test_mutations.py:200:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_mutations.py:214:    assert (wd / "watershed.nodir").exists()
+tests/nodir/test_mutations.py:215:    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+tests/nodir/test_mutations.py:224:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_mutations.py:237:    assert (wd / "watershed.nodir").exists()
+tests/nodir/test_mutations.py:238:    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+tests/nodir/test_mutations.py:252:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_mutations.py:261:    assert exc.value.code == "NODIR_MIXED_STATE"
+tests/nodir/test_mutations.py:269:    _write_zip(wd / "landuse.nodir", {"nlcd.tif": "a"})
+tests/nodir/test_mutations.py:270:    _write_zip(wd / "soils.nodir", {"soilscov.asc": "b"})
+tests/nodir/test_mutations.py:332:def test_mutate_root_lock_wait_timeout_raises_nodir_locked(
+tests/nodir/test_mutations.py:355:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_mutations.py:76:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_mutations.py:77:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_parquet_precedence_fs.py:15:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_parquet_precedence_fs.py:50:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_parquet_precedence_fs.py:61:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_parquet_precedence_fs.py:8:from wepppy.nodir.errors import NoDirError
+tests/nodir/test_parquet_precedence_fs.py:9:from wepppy.nodir.fs import open_read, resolve, stat
+tests/nodir/test_parquet_sidecars.py:7:from wepppy.nodir.parquet_sidecars import (
+tests/nodir/test_paths.py:3:from wepppy.nodir.paths import normalize_relpath, parse_external_subpath
+tests/nodir/test_paths.py:42:    rel, view = parse_external_subpath("watershed.nodir/a/b", allow_admin_alias=False)
+tests/nodir/test_paths.py:47:def test_parse_external_subpath_watershed_nodir_is_not_boundary_without_trailing_slash() -> None:
+tests/nodir/test_paths.py:48:    rel, view = parse_external_subpath("watershed.nodir", allow_admin_alias=False)
+tests/nodir/test_paths.py:49:    assert rel == "watershed.nodir"
+tests/nodir/test_paths.py:53:def test_parse_external_subpath_watershed_nodir_trailing_slash_enters_archive_root() -> None:
+tests/nodir/test_paths.py:54:    rel, view = parse_external_subpath("watershed.nodir/", allow_admin_alias=False)
+tests/nodir/test_paths.py:60:    rel, view = parse_external_subpath("foo.nodir/a", allow_admin_alias=False)
+tests/nodir/test_paths.py:61:    assert rel == "foo.nodir/a"
+tests/nodir/test_projections.py:107:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:109:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:10:from wepppy.nodir.errors import NoDirError
+tests/nodir/test_projections.py:11:from wepppy.nodir.projections import (
+tests/nodir/test_projections.py:127:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:129:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:142:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_projections.py:150:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:159:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_projections.py:165:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:167:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:175:    assert exc.value.code == "NODIR_MIXED_STATE"
+tests/nodir/test_projections.py:180:    (wd / "watershed.nodir").write_bytes(b"not-a-zip")
+tests/nodir/test_projections.py:182:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:190:    assert exc.value.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_projections.py:195:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:198:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:206:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_projections.py:211:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:213:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:224:    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+tests/nodir/test_projections.py:231:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:233:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:244:    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+tests/nodir/test_projections.py:255:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:257:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:262:    stale_lower = wd / ".nodir" / "lower" / "watershed" / "1-1" / "data"
+tests/nodir/test_projections.py:267:    stale_meta = wd / ".nodir" / "projections" / "watershed" / "1-1" / "read.json"
+tests/nodir/test_projections.py:299:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:301:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:311:        assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_projections.py:322:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:324:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:347:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:349:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:363:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_projections.py:373:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:375:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:387:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_projections.py:395:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:397:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:409:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_projections.py:417:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:419:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:446:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:448:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_projections.py:453:    stale_lower = wd / ".nodir" / "lower" / "watershed" / "1-1" / "data"
+tests/nodir/test_projections.py:458:    stale_meta = wd / ".nodir" / "projections" / "watershed" / "1-1" / "read.json"
+tests/nodir/test_projections.py:483:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_projections.py:80:    _write_zip(wd / "watershed.nodir", {"a.txt": "alpha"})
+tests/nodir/test_projections.py:82:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_resolve.py:10:from wepppy.nodir.state import archive_fingerprint_from_path, write_state
+tests/nodir/test_resolve.py:18:    (wd / "watershed.nodir").write_bytes(b"not used")
+tests/nodir/test_resolve.py:25:    assert err.code == "NODIR_MIXED_STATE"
+tests/nodir/test_resolve.py:30:    (wd / "watershed.nodir").write_bytes(b"not a zip")
+tests/nodir/test_resolve.py:37:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_resolve.py:40:def test_resolve_archive_view_existing_nodir_not_regular_file_is_invalid(tmp_path: Path) -> None:
+tests/nodir/test_resolve.py:42:    (wd / "watershed.nodir").mkdir()
+tests/nodir/test_resolve.py:49:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_resolve.py:61:    assert err.code == "NODIR_LOCKED"
+tests/nodir/test_resolve.py:67:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_resolve.py:80:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_resolve.py:8:from wepppy.nodir.errors import NoDirError
+tests/nodir/test_resolve.py:98:    assert err.code == "NODIR_LOCKED"
+tests/nodir/test_resolve.py:9:from wepppy.nodir.fs import resolve
+tests/nodir/test_state.py:113:    import wepppy.nodir.state as state_mod
+tests/nodir/test_state.py:116:    archive = wd / "watershed.nodir"
+tests/nodir/test_state.py:148:    archive = wd / "watershed.nodir"
+tests/nodir/test_state.py:32:        "archive_path": "watershed.nodir",
+tests/nodir/test_state.py:41:    archive = wd / "watershed.nodir"
+tests/nodir/test_state.py:7:from wepppy.nodir.state import (
+tests/nodir/test_symlink_security.py:33:def test_archive_form_rejects_nodir_symlink_escape(tmp_path: Path) -> None:
+tests/nodir/test_symlink_security.py:36:    outside_archive = tmp_path.parent / "watershed.nodir"
+tests/nodir/test_symlink_security.py:40:    (wd / "watershed.nodir").symlink_to(outside_archive)
+tests/nodir/test_symlink_security.py:47:    assert err.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_symlink_security.py:69:def test_archive_form_allows_omni_child_run_nodir_symlink_into_parent_run_root(tmp_path: Path) -> None:
+tests/nodir/test_symlink_security.py:74:    archive_path = parent / "watershed.nodir"
+tests/nodir/test_symlink_security.py:78:    (wd / "watershed.nodir").symlink_to(archive_path)
+tests/nodir/test_symlink_security.py:8:from wepppy.nodir.errors import NoDirError
+tests/nodir/test_symlink_security.py:9:from wepppy.nodir.fs import listdir, open_read, resolve, stat
+tests/nodir/test_thaw_freeze.py:100:    assert exc.value.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_thaw_freeze.py:109:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_thaw_freeze.py:10:from wepppy.nodir.state import archive_fingerprint_from_path, read_state, write_state
+tests/nodir/test_thaw_freeze.py:114:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:11:from wepppy.nodir.thaw_freeze import freeze, maintenance_lock_key, thaw
+tests/nodir/test_thaw_freeze.py:122:    assert exc.value.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_thaw_freeze.py:137:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:146:    assert (wd / "watershed.nodir").exists()
+tests/nodir/test_thaw_freeze.py:149:    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+tests/nodir/test_thaw_freeze.py:167:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:175:    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+tests/nodir/test_thaw_freeze.py:182:    _write_zip(wd / "watershed.nodir", {"fresh.txt": "fresh"})
+tests/nodir/test_thaw_freeze.py:188:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:199:def test_freeze_recovers_stale_nodir_tmp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+tests/nodir/test_thaw_freeze.py:205:    stale_tmp = wd / "watershed.nodir.tmp"
+tests/nodir/test_thaw_freeze.py:208:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:215:    with zipfile.ZipFile(wd / "watershed.nodir", "r") as zf:
+tests/nodir/test_thaw_freeze.py:224:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_thaw_freeze.py:236:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:253:    _write_zip(wd / "watershed.nodir", {"a.txt": "hello"})
+tests/nodir/test_thaw_freeze.py:255:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:265:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_thaw_freeze.py:274:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:283:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_thaw_freeze.py:64:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_thaw_freeze.py:66:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:87:    archive_path = wd / "watershed.nodir"
+tests/nodir/test_thaw_freeze.py:92:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/nodir/test_thaw_freeze.py:9:from wepppy.nodir.errors import NoDirError
+tests/nodir/test_wepp_inputs.py:10:from wepppy.nodir.errors import NoDirError, nodir_locked
+tests/nodir/test_wepp_inputs.py:11:from wepppy.nodir.wepp_inputs import (
+tests/nodir/test_wepp_inputs.py:123:        wd / "watershed.nodir",
+tests/nodir/test_wepp_inputs.py:149:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "x"})
+tests/nodir/test_wepp_inputs.py:157:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_wepp_inputs.py:159:    import wepppy.nodir.materialize as materialize_mod
+tests/nodir/test_wepp_inputs.py:166:    assert "/.nodir/cache/" in path.as_posix()
+tests/nodir/test_wepp_inputs.py:173:    _write_zip(wd / "watershed.nodir", {"a.txt": "archived"})
+tests/nodir/test_wepp_inputs.py:179:    assert exc.value.code == "NODIR_MIXED_STATE"
+tests/nodir/test_wepp_inputs.py:186:    _write_zip(wd / "watershed.nodir", {"a.txt": "from-archive"})
+tests/nodir/test_wepp_inputs.py:201:    _write_zip(wd / "watershed.nodir", {"only-in-archive.txt": "archive"})
+tests/nodir/test_wepp_inputs.py:209:    (wd / "watershed.nodir").write_bytes(b"not-a-zip")
+tests/nodir/test_wepp_inputs.py:215:    assert exc.value.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_wepp_inputs.py:220:    _write_zip(wd / "watershed.nodir", {"a.txt": "archived"})
+tests/nodir/test_wepp_inputs.py:227:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_wepp_inputs.py:235:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_wepp_inputs.py:237:    import wepppy.nodir.projections as projections_mod
+tests/nodir/test_wepp_inputs.py:245:        assert "/.nodir/cache/" not in src_path.as_posix()
+tests/nodir/test_wepp_inputs.py:253:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_wepp_inputs.py:255:    import wepppy.nodir.wepp_inputs as wepp_inputs_mod
+tests/nodir/test_wepp_inputs.py:259:        raise nodir_locked("projection lock is held")
+tests/nodir/test_wepp_inputs.py:290:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_wepp_inputs.py:292:    import wepppy.nodir.wepp_inputs as wepp_inputs_mod
+tests/nodir/test_wepp_inputs.py:296:        raise nodir_locked("projection lock is held")
+tests/nodir/test_wepp_inputs.py:311:    assert exc.value.code == "NODIR_LOCKED"
+tests/nodir/test_wepp_inputs.py:318:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_wepp_inputs.py:337:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_wepp_inputs.py:339:    import wepppy.nodir.wepp_inputs as wepp_inputs_mod
+tests/nodir/test_wepp_inputs.py:368:    _write_zip(wd / "watershed.nodir", {"a.txt": "from-archive"})
+tests/nodir/test_wepp_inputs.py:375:    assert exc.value.code == "NODIR_MIXED_STATE"
+tests/nodir/test_wepp_inputs.py:382:    (wd / "watershed.nodir").write_bytes(b"not-a-zip")
+tests/nodir/test_wepp_inputs.py:389:    assert exc.value.code == "NODIR_INVALID_ARCHIVE"
+tests/nodir/test_wepp_inputs.py:398:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "alpha"})
+tests/nodir/test_wepp_inputs.py:400:    import wepppy.nodir.wepp_inputs as wepp_inputs_mod
+tests/nodir/test_wepp_inputs.py:404:        raise nodir_locked("projection lock is held")
+tests/nodir/test_wepp_inputs.py:82:    _write_zip(wd / "watershed.nodir", {"subdir/a.txt": "alpha"})
+tests/nodir/test_wepp_inputs.py:90:    _write_zip(wd / "soils.nodir", {"soil.txt": "silty"})
+tests/nodir/test_wepp_inputs.py:98:    _write_zip(wd / "landuse.nodir", {"foo/bar.man": "man-data"})
+tests/query_engine/test_mcp_router.py:636:def test_validate_query_accepts_legacy_nodir_sidecar_alias(monkeypatch, tmp_path):
+tests/rq/test_bootstrap_autocommit_rq.py:235:    monkeypatch.setattr(wepp_rq, "_recover_mixed_nodir_roots", _fake_recover)
+tests/rq/test_omni_rq.py:101:    monkeypatch.setattr(omni_rq, "nodir_resolve", _resolve)
+tests/rq/test_omni_rq.py:106:    assert (run_wd / "soils.nodir").exists()
+tests/rq/test_omni_rq.py:10:from wepppy.nodir.errors import NoDirError
+tests/rq/test_omni_rq.py:115:def test_run_omni_scenarios_rq_stops_on_nodir_preflight_error(
+tests/rq/test_omni_rq.py:123:            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+tests/rq/test_omni_rq.py:126:    monkeypatch.setattr(omni_rq, "nodir_resolve", _raise_on_landuse)
+tests/rq/test_omni_rq.py:131:    assert exc_info.value.code == "NODIR_MIXED_STATE"
+tests/rq/test_omni_rq.py:157:    monkeypatch.setattr(omni_rq, "nodir_resolve", lambda wd, root, view="effective": None)
+tests/rq/test_omni_rq.py:59:    monkeypatch.setattr(omni_rq, "nodir_resolve", _resolve)
+tests/rq/test_omni_rq.py:91:    (run_wd / "soils.nodir").write_bytes(b"placeholder archive")
+tests/rq/test_omni_rq.py:97:        if root == "soils" and (Path(wd) / "soils").exists() and (Path(wd) / "soils.nodir").exists():
+tests/rq/test_omni_rq.py:98:            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+tests/rq/test_path_ce_rq.py:135:    monkeypatch.setattr(path_ce_rq, "nodir_resolve", _resolve)
+tests/rq/test_path_ce_rq.py:160:def test_run_path_cost_effective_rq_stops_on_nodir_preflight_error(
+tests/rq/test_path_ce_rq.py:168:            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+tests/rq/test_path_ce_rq.py:171:    monkeypatch.setattr(path_ce_rq, "nodir_resolve", _raise_on_soils)
+tests/rq/test_path_ce_rq.py:176:    assert exc_info.value.code == "NODIR_MIXED_STATE"
+tests/rq/test_path_ce_rq.py:199:    monkeypatch.setattr(path_ce_rq, "nodir_resolve", _resolve)
+tests/rq/test_path_ce_rq.py:8:from wepppy.nodir.errors import NoDirError
+tests/rq/test_project_rq_archive.py:105:    assert ".nodir/projections/read.json" in names
+tests/rq/test_project_rq_archive.py:106:    assert ".nodir/cache/watershed/123/entry.bin" not in names
+tests/rq/test_project_rq_archive.py:110:def test_calculate_run_payload_bytes_excludes_nodir_cache(
+tests/rq/test_project_rq_archive.py:118:    (run_dir / ".nodir" / "cache" / "watershed" / "123").mkdir(parents=True)
+tests/rq/test_project_rq_archive.py:119:    (run_dir / ".nodir" / "cache" / "watershed" / "123" / "ignored.bin").write_bytes(b"x" * 100)
+tests/rq/test_project_rq_archive.py:152:def test_restore_archive_rq_skips_nodir_cache_entries(
+tests/rq/test_project_rq_archive.py:163:        zf.writestr(".nodir/cache/watershed/123/entry.bin", "cache")
+tests/rq/test_project_rq_archive.py:168:    assert not (run_dir / ".nodir" / "cache" / "watershed" / "123" / "entry.bin").exists()
+tests/rq/test_project_rq_archive.py:83:def test_archive_rq_excludes_nodir_cache_entries(
+tests/rq/test_project_rq_archive.py:91:    (run_dir / ".nodir" / "cache" / "watershed" / "123").mkdir(parents=True)
+tests/rq/test_project_rq_archive.py:92:    (run_dir / ".nodir" / "cache" / "watershed" / "123" / "entry.bin").write_bytes(b"cache")
+tests/rq/test_project_rq_archive.py:93:    (run_dir / ".nodir" / "projections").mkdir(parents=True)
+tests/rq/test_project_rq_archive.py:94:    (run_dir / ".nodir" / "projections" / "read.json").write_text("{}", encoding="utf-8")
+tests/rq/test_project_rq_archive_helpers.py:21:    assert archive_helpers._is_archive_excluded_relpath(".nodir/cache/watershed/123")
+tests/rq/test_project_rq_archive_helpers.py:22:    assert not archive_helpers._is_archive_excluded_relpath(".nodir/projections/read.json")
+tests/rq/test_project_rq_ash.py:101:    monkeypatch.setattr(project, "nodir_resolve", _raise_on_watershed)
+tests/rq/test_project_rq_ash.py:106:    assert exc_info.value.code == "NODIR_MIXED_STATE"
+tests/rq/test_project_rq_ash.py:68:    monkeypatch.setattr(project, "nodir_resolve", _resolve)
+tests/rq/test_project_rq_ash.py:93:def test_run_ash_rq_stops_on_nodir_preflight_error(ash_rq_environment, monkeypatch: pytest.MonkeyPatch):
+tests/rq/test_project_rq_ash.py:98:            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+tests/rq/test_project_rq_ash.py:9:from wepppy.nodir.errors import NoDirError
+tests/rq/test_project_rq_debris_flow.py:106:            raise NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed root state")
+tests/rq/test_project_rq_debris_flow.py:109:    monkeypatch.setattr(project, "nodir_resolve", _raise_on_watershed)
+tests/rq/test_project_rq_debris_flow.py:114:    assert exc_info.value.code == "NODIR_MIXED_STATE"
+tests/rq/test_project_rq_debris_flow.py:57:    monkeypatch.setattr(project, "nodir_resolve", _resolve)
+tests/rq/test_project_rq_debris_flow.py:86:    monkeypatch.setattr(project, "nodir_resolve", lambda wd, root, view="effective": None)
+tests/rq/test_project_rq_debris_flow.py:98:def test_run_debris_flow_rq_stops_on_nodir_preflight_error(
+tests/rq/test_project_rq_debris_flow.py:9:from wepppy.nodir.errors import NoDirError
+tests/rq/test_project_rq_fork.py:17:def test_build_fork_rsync_cmd_always_excludes_nodir_cache() -> None:
+tests/rq/test_project_rq_fork.py:23:    assert ".nodir/cache/***" in excludes
+tests/rq/test_project_rq_fork.py:35:    assert ".nodir/cache/***" in excludes
+tests/rq/test_wepp_rq_nodir.py:335:    (tmp_path / "watershed.nodir").write_text("archive", encoding="utf-8")
+tests/rq/test_wepp_rq_nodir.py:353:    assert exc.value.code == "NODIR_MIXED_STATE"
+tests/rq/test_wepp_rq_nodir.py:35:def test_recover_mixed_nodir_roots_discards_dir_and_keeps_archive(tmp_path) -> None:
+tests/rq/test_wepp_rq_nodir.py:366:    (tmp_path / "watershed.nodir").write_text("archive", encoding="utf-8")
+tests/rq/test_wepp_rq_nodir.py:383:    assert exc.value.code == "NODIR_MIXED_STATE"
+tests/rq/test_wepp_rq_nodir.py:40:    (wd / "watershed.nodir").write_text("archive", encoding="utf-8")
+tests/rq/test_wepp_rq_nodir.py:44:    (wd / "soils.nodir").write_text("archive", encoding="utf-8")
+tests/rq/test_wepp_rq_nodir.py:46:    recovered = wepp_rq._recover_mixed_nodir_roots(str(wd))
+tests/rq/test_wepp_rq_nodir.py:50:    assert (wd / "watershed.nodir").exists()
+tests/rq/test_wepp_rq_nodir.py:9:from wepppy.nodir.errors import NoDirError
+tests/rq/test_weppcloudr_rq.py:15:def test_sidecar_to_logical_parquet_maps_known_nodir_sidecars() -> None:
+tests/rq/test_weppcloudr_rq.py:26:def test_discover_nodir_parquet_overrides_collects_existing_sidecars(tmp_path: Path) -> None:
+tests/rq/test_weppcloudr_rq.py:34:    overrides = _discover_nodir_parquet_overrides(tmp_path)
+tests/rq/test_weppcloudr_rq.py:8:    _discover_nodir_parquet_overrides,
+tests/tools/test_migrations_nodir_bulk.py:10:from wepppy.tools.migrations import nodir_bulk
+tests/tools/test_migrations_nodir_bulk.py:117:    first = nodir_bulk.crawl_runs(
+tests/tools/test_migrations_nodir_bulk.py:128:    assert (wd / "watershed.nodir").exists()
+tests/tools/test_migrations_nodir_bulk.py:132:    second = nodir_bulk.crawl_runs(
+tests/tools/test_migrations_nodir_bulk.py:153:    summary = nodir_bulk.crawl_runs(
+tests/tools/test_migrations_nodir_bulk.py:164:    assert not (wd / "watershed.nodir").exists()
+tests/tools/test_migrations_nodir_bulk.py:179:    monkeypatch.setattr(nodir_bulk, "lock_statuses", lambda runid: {"ron.nodb": True})
+tests/tools/test_migrations_nodir_bulk.py:182:    summary = nodir_bulk.crawl_runs(
+tests/tools/test_migrations_nodir_bulk.py:198:def test_crawl_runs_propagates_canonical_nodir_error_status(tmp_path: Path) -> None:
+tests/tools/test_migrations_nodir_bulk.py:204:    _write_zip(wd / "watershed.nodir", {"hillslopes/h001.slp": "zip"})
+tests/tools/test_migrations_nodir_bulk.py:207:    summary = nodir_bulk.crawl_runs(
+tests/tools/test_migrations_nodir_bulk.py:218:    assert records[-1]["status"] == "nodir_error"
+tests/tools/test_migrations_nodir_bulk.py:219:    assert records[-1]["code"] == "NODIR_MIXED_STATE"
+tests/tools/test_migrations_nodir_bulk.py:230:    first = nodir_bulk.crawl_runs(
+tests/tools/test_migrations_nodir_bulk.py:240:    second = nodir_bulk.crawl_runs(
+tests/tools/test_migrations_nodir_bulk.py:266:    from wepppy.nodir.errors import nodir_locked
+tests/tools/test_migrations_nodir_bulk.py:270:            raise nodir_locked("root lock busy")
+tests/tools/test_migrations_nodir_bulk.py:276:        nodir_bulk,
+tests/tools/test_migrations_nodir_bulk.py:282:    summary = nodir_bulk.crawl_runs(
+tests/tools/test_migrations_nodir_bulk.py:294:    assert records[-1]["code"] == "NODIR_LOCKED"
+tests/tools/test_migrations_nodir_bulk.py:70:def _patch_nodir_locks(monkeypatch: pytest.MonkeyPatch) -> None:
+tests/tools/test_migrations_nodir_bulk.py:71:    import wepppy.nodir.thaw_freeze as thaw_freeze_mod
+tests/tools/test_migrations_nodir_bulk.py:73:    monkeypatch.setattr(nodir_bulk, "lock_statuses", lambda runid: {})
+tests/tools/test_migrations_nodir_bulk.py:89:    summary = nodir_bulk.crawl_runs(
+tests/weppcloud/routes/test_observed_bp.py:166:        (run_path / f"{root}.nodir").write_text("archive", encoding="ascii")
+tests/weppcloud/routes/test_test_bp.py:110:    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+tests/weppcloud/routes/test_test_bp.py:118:def test_create_run_endpoint_opt_in_respects_global_nodir_env_gate(
+tests/weppcloud/routes/test_test_bp.py:125:    monkeypatch.setenv("WEPP_NODIR_DEFAULT_NEW_RUNS", "0")
+tests/weppcloud/routes/test_test_bp.py:139:    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+tests/weppcloud/routes/test_test_bp.py:64:def test_create_run_endpoint_does_not_seed_default_nodir_marker_without_opt_in(
+tests/weppcloud/routes/test_test_bp.py:71:    monkeypatch.delenv("WEPP_NODIR_DEFAULT_NEW_RUNS", raising=False)
+tests/weppcloud/routes/test_test_bp.py:85:    marker_path = run_dir / ".nodir" / "default_archive_roots.json"
+tests/weppcloud/routes/test_test_bp.py:89:def test_create_run_endpoint_seeds_default_nodir_marker_with_opt_in_override(
+tests/weppcloud/routes/test_test_bp.py:96:    monkeypatch.delenv("WEPP_NODIR_DEFAULT_NEW_RUNS", raising=False)
+tests/weppcloud/routes/test_watar_bp.py:13:from wepppy.nodir.errors import NoDirError
+tests/weppcloud/routes/test_watar_bp.py:163:def test_hillslope0_ash_handles_nodir_locked(
+tests/weppcloud/routes/test_watar_bp.py:171:        raise NoDirError(http_status=423, code="NODIR_LOCKED", message="root is locked")
+tests/weppcloud/routes/test_watar_bp.py:180:    assert payload["error"]["code"] == "NODIR_LOCKED"
+tests/weppcloud/utils/test_helpers_paths.py:208:def test_ensure_omni_shared_inputs_links_nodir_archives(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+tests/weppcloud/utils/test_helpers_paths.py:215:    (base_root / "climate.nodir").write_text("archive", encoding="utf-8")
+tests/weppcloud/utils/test_helpers_paths.py:216:    (base_root / "watershed.nodir").write_text("archive", encoding="utf-8")
+tests/weppcloud/utils/test_helpers_paths.py:224:    assert (scenario_root / "climate.nodir").is_symlink()
+tests/weppcloud/utils/test_helpers_paths.py:225:    assert (scenario_root / "watershed.nodir").is_symlink()
+wepppy/climates/climatena_ca/__init__.py:6:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/export/ermit_input.py:216:    nodir_resolve(wd, "watershed", view="effective")
+wepppy/export/ermit_input.py:30:from wepppy.nodir.materialize import materialize_path_if_archive
+wepppy/export/ermit_input.py:31:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/export/gpkg_export.py:20:from wepppy.nodir.materialize import materialize_path_if_archive
+wepppy/export/gpkg_export.py:21:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/export/prep_details.py:12:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/microservices/_gdalinfo.py:102:            _raise_nodir_http_exception(err)
+wepppy/microservices/_gdalinfo.py:31:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/_gdalinfo.py:32:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/_gdalinfo.py:33:from wepppy.nodir.fs import stat as nodir_stat
+wepppy/microservices/_gdalinfo.py:34:from wepppy.nodir.materialize import materialize_file
+wepppy/microservices/_gdalinfo.py:35:from wepppy.nodir.paths import parse_external_subpath
+wepppy/microservices/_gdalinfo.py:40:def _nodir_error_payload(err: NoDirError) -> dict:
+wepppy/microservices/_gdalinfo.py:50:def _raise_nodir_http_exception(err: NoDirError) -> None:
+wepppy/microservices/_gdalinfo.py:51:    raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
+wepppy/microservices/_gdalinfo.py:61:        logical_rel_path, nodir_view = parse_external_subpath(
+wepppy/microservices/_gdalinfo.py:70:        nodir_resolve(wd, logical_rel_path, view="effective")
+wepppy/microservices/_gdalinfo.py:72:        _raise_nodir_http_exception(err)
+wepppy/microservices/_gdalinfo.py:79:        nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
+wepppy/microservices/_gdalinfo.py:81:        _raise_nodir_http_exception(err)
+wepppy/microservices/_gdalinfo.py:83:    if nodir_target is None:
+wepppy/microservices/_gdalinfo.py:89:        entry = nodir_stat(nodir_target)
+wepppy/microservices/_gdalinfo.py:91:        _raise_nodir_http_exception(err)
+wepppy/microservices/_gdalinfo.py:98:    if nodir_target.form == "archive":
+wepppy/microservices/browse/_download.py:100:def _nodir_error_payload(err: NoDirError) -> dict:
+wepppy/microservices/browse/_download.py:110:def _raise_nodir_error(err: NoDirError) -> None:
+wepppy/microservices/browse/_download.py:111:    raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
+wepppy/microservices/browse/_download.py:119:def _is_mixed_nodir_root(wd: str, root: str) -> bool:
+wepppy/microservices/browse/_download.py:121:        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
+wepppy/microservices/browse/_download.py:125:def _allowlisted_raw_nodir_root(rel_path: str) -> str | None:
+wepppy/microservices/browse/_download.py:126:    if rel_path.lower().endswith(_NODIR_SUFFIX):
+wepppy/microservices/browse/_download.py:127:        root = rel_path[: -len(_NODIR_SUFFIX)]
+wepppy/microservices/browse/_download.py:128:        if root in _NODIR_ROOTS and "/" not in root:
+wepppy/microservices/browse/_download.py:223:    raw_root = _allowlisted_raw_nodir_root(raw_candidate)
+wepppy/microservices/browse/_download.py:225:        archive_path = os.path.abspath(os.path.join(wd, f"{raw_root}{_NODIR_SUFFIX}"))
+wepppy/microservices/browse/_download.py:228:        if _is_mixed_nodir_root(wd, raw_root) and not is_admin:
+wepppy/microservices/browse/_download.py:229:            _raise_nodir_error(
+wepppy/microservices/browse/_download.py:232:                    code="NODIR_MIXED_STATE",
+wepppy/microservices/browse/_download.py:233:                    message=f"{raw_root} is in mixed state (dir + .nodir present)",
+wepppy/microservices/browse/_download.py:238:                nodir_resolve(wd, raw_root, view="archive")
+wepppy/microservices/browse/_download.py:240:                _raise_nodir_error(err)
+wepppy/microservices/browse/_download.py:247:        logical_rel_path, nodir_view = parse_external_subpath(
+wepppy/microservices/browse/_download.py:254:    nodir_root, _inner = split_nodir_root(logical_rel_path)
+wepppy/microservices/browse/_download.py:255:    if nodir_root is not None and nodir_view == "archive" and _is_mixed_nodir_root(wd, nodir_root):
+wepppy/microservices/browse/_download.py:256:        _raise_nodir_error(
+wepppy/microservices/browse/_download.py:259:                code="NODIR_MIXED_STATE",
+wepppy/microservices/browse/_download.py:260:                message=f"{nodir_root} is in mixed state (dir + .nodir present)",
+wepppy/microservices/browse/_download.py:264:    nodir_target = None
+wepppy/microservices/browse/_download.py:266:        nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
+wepppy/microservices/browse/_download.py:268:        _raise_nodir_error(err)
+wepppy/microservices/browse/_download.py:270:    if nodir_target is not None:
+wepppy/microservices/browse/_download.py:272:            entry = nodir_stat(nodir_target)
+wepppy/microservices/browse/_download.py:278:            fp = nodir_open_read(nodir_target)
+wepppy/microservices/browse/_download.py:282:            _raise_nodir_error(err)
+wepppy/microservices/browse/_download.py:286:    if nodir_root is not None and nodir_view == "archive":
+wepppy/microservices/browse/_download.py:36:from wepppy.nodir import (
+wepppy/microservices/browse/_download.py:38:    open_read as nodir_open_read,
+wepppy/microservices/browse/_download.py:40:    resolve as nodir_resolve,
+wepppy/microservices/browse/_download.py:41:    stat as nodir_stat,
+wepppy/microservices/browse/_download.py:43:from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
+wepppy/microservices/browse/_download.py:47:_NODIR_SUFFIX = ".nodir"
+wepppy/microservices/browse/_download.py:48:_NODIR_ROOTS = frozenset(NODIR_ROOTS)
+wepppy/microservices/browse/_download.py:495:    for root in _NODIR_ROOTS:
+wepppy/microservices/browse/_download.py:496:        if _is_mixed_nodir_root(wd, root):
+wepppy/microservices/browse/_download.py:501:                        "message": f"{root} is in mixed state (dir + .nodir present)",
+wepppy/microservices/browse/_download.py:502:                        "code": "NODIR_MIXED_STATE",
+wepppy/microservices/browse/_download.py:503:                        "details": f"{root} is in mixed state (dir + .nodir present)",
+wepppy/microservices/browse/browse.py:135:from wepppy.nodir import (
+wepppy/microservices/browse/browse.py:137:    listdir as nodir_listdir,
+wepppy/microservices/browse/browse.py:138:    open_read as nodir_open_read,
+wepppy/microservices/browse/browse.py:140:    resolve as nodir_resolve,
+wepppy/microservices/browse/browse.py:141:    stat as nodir_stat,
+wepppy/microservices/browse/browse.py:143:from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
+wepppy/microservices/browse/browse.py:243:_NODIR_SUFFIX = ".nodir"
+wepppy/microservices/browse/browse.py:244:_NODIR_ROOTS = frozenset(NODIR_ROOTS)
+wepppy/microservices/browse/browse.py:254:def _is_mixed_nodir_root(wd: str, root: str) -> bool:
+wepppy/microservices/browse/browse.py:256:        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
+wepppy/microservices/browse/browse.py:260:def _mixed_nodir_roots(wd: str) -> list[str]:
+wepppy/microservices/browse/browse.py:262:    for root in _NODIR_ROOTS:
+wepppy/microservices/browse/browse.py:263:        if _is_mixed_nodir_root(wd, root):
+wepppy/microservices/browse/browse.py:268:def _allowlisted_raw_nodir_path(rel_path: str) -> str | None:
+wepppy/microservices/browse/browse.py:273:    if not rel_path.lower().endswith(_NODIR_SUFFIX):
+wepppy/microservices/browse/browse.py:275:    root = rel_path[: -len(_NODIR_SUFFIX)]
+wepppy/microservices/browse/browse.py:276:    if root in _NODIR_ROOTS:
+wepppy/microservices/browse/browse.py:281:def _raise_nodir_http_exception(err: NoDirError) -> None:
+wepppy/microservices/browse/browse.py:288:def _normalize_nodir_subpath(subpath: str) -> str:
+wepppy/microservices/browse/browse.py:294:def _extract_nodir_filter(subpath: str, *, default: str = "") -> tuple[str, str]:
+wepppy/microservices/browse/browse.py:297:    normalized = _normalize_nodir_subpath(subpath)
+wepppy/microservices/browse/browse.py:309:def _nodir_entries_to_page(entries: list, *, filter_pattern: str, page: int, page_size: int) -> tuple[list[tuple], int]:
+wepppy/microservices/browse/dtale.py:160:            logical_rel_path, nodir_view = parse_external_subpath(
+wepppy/microservices/browse/dtale.py:171:            nodir_resolve(wd, logical_rel_path, view='effective')
+wepppy/microservices/browse/dtale.py:173:            _raise_nodir_http_exception(err)
+wepppy/microservices/browse/dtale.py:188:            nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
+wepppy/microservices/browse/dtale.py:190:            _raise_nodir_http_exception(err)
+wepppy/microservices/browse/dtale.py:192:        if nodir_target is None:
+wepppy/microservices/browse/dtale.py:198:                nodir_entry = nodir_stat(nodir_target)
+wepppy/microservices/browse/dtale.py:200:                _raise_nodir_http_exception(err)
+wepppy/microservices/browse/dtale.py:204:            if nodir_entry.is_dir:
+wepppy/microservices/browse/dtale.py:207:            if nodir_target.form == 'archive':
+wepppy/microservices/browse/dtale.py:211:                    _raise_nodir_http_exception(err)
+wepppy/microservices/browse/dtale.py:31:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/browse/dtale.py:32:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/browse/dtale.py:33:from wepppy.nodir.fs import stat as nodir_stat
+wepppy/microservices/browse/dtale.py:34:from wepppy.nodir.materialize import materialize_file
+wepppy/microservices/browse/dtale.py:35:from wepppy.nodir.paths import parse_external_subpath
+wepppy/microservices/browse/dtale.py:54:def _nodir_error_payload(err: NoDirError) -> dict:
+wepppy/microservices/browse/dtale.py:64:def _raise_nodir_http_exception(err: NoDirError) -> None:
+wepppy/microservices/browse/dtale.py:65:    raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
+wepppy/microservices/browse/files_api.py:132:def _raise_nodir_error(err: NoDirError) -> None:
+wepppy/microservices/browse/files_api.py:146:def _allowlisted_nodir_root(name: str) -> str | None:
+wepppy/microservices/browse/files_api.py:147:    if not name.lower().endswith(_NODIR_SUFFIX):
+wepppy/microservices/browse/files_api.py:149:    root = name[: -len(_NODIR_SUFFIX)]
+wepppy/microservices/browse/files_api.py:150:    if root in _NODIR_ROOTS:
+wepppy/microservices/browse/files_api.py:155:def _allowlisted_raw_nodir_relpath(rel_path: str) -> str | None:
+wepppy/microservices/browse/files_api.py:160:    return _allowlisted_nodir_root(rel_path)
+wepppy/microservices/browse/files_api.py:163:def _is_mixed_nodir_root(wd: str, root: str) -> bool:
+wepppy/microservices/browse/files_api.py:165:        os.path.join(wd, f"{root}{_NODIR_SUFFIX}")
+wepppy/microservices/browse/files_api.py:169:def _mixed_nodir_roots(wd: str) -> set[str]:
+wepppy/microservices/browse/files_api.py:171:    for root in _NODIR_ROOTS:
+wepppy/microservices/browse/files_api.py:172:        if _is_mixed_nodir_root(wd, root):
+wepppy/microservices/browse/files_api.py:34:from wepppy.nodir import (
+wepppy/microservices/browse/files_api.py:36:    listdir as nodir_listdir,
+wepppy/microservices/browse/files_api.py:38:    resolve as nodir_resolve,
+wepppy/microservices/browse/files_api.py:39:    stat as nodir_stat,
+wepppy/microservices/browse/files_api.py:41:from wepppy.nodir.paths import NODIR_ROOTS, split_nodir_root
+wepppy/microservices/browse/files_api.py:495:def _build_nodir_entry_payload(
+wepppy/microservices/browse/files_api.py:539:def _sort_nodir_entries(entries: list[dict], *, sort_by: str, sort_order: str) -> list[dict]:
+wepppy/microservices/browse/files_api.py:56:_NODIR_SUFFIX = ".nodir"
+wepppy/microservices/browse/files_api.py:575:def _nodir_mixed_conflict() -> None:
+wepppy/microservices/browse/files_api.py:578:        "NoDir root is in mixed state (dir + .nodir present).",
+wepppy/microservices/browse/files_api.py:579:        code="NODIR_MIXED_STATE",
+wepppy/microservices/browse/files_api.py:57:_NODIR_ROOTS = frozenset(NODIR_ROOTS)
+wepppy/microservices/browse/files_api.py:580:        details="NoDir root is in mixed state (dir + .nodir present).",
+wepppy/microservices/browse/files_api.py:635:        hidden_mixed_roots = _mixed_nodir_roots(wd)
+wepppy/microservices/browse/files_api.py:640:        nodir_root = _allowlisted_nodir_root(name)
+wepppy/microservices/browse/files_api.py:645:                or (nodir_root is not None and nodir_root in hidden_mixed_roots)
+wepppy/microservices/browse/files_api.py:650:            nodir_root is not None and not is_symlink and not symlink_is_dir
+wepppy/microservices/browse/files_api.py:683:async def _files_nodir_list_response(
+wepppy/microservices/browse/files_api.py:697:        target_meta = nodir_stat(target)
+wepppy/microservices/browse/files_api.py:715:    entries = nodir_listdir(target)
+wepppy/microservices/browse/files_api.py:731:    sorted_rows = _sort_nodir_entries(
+wepppy/microservices/browse/files_api.py:745:            _build_nodir_entry_payload(
+wepppy/microservices/browse/files_api.py:773:async def _files_nodir_meta_response(
+wepppy/microservices/browse/files_api.py:782:        entry = nodir_stat(target)
+wepppy/microservices/browse/files_api.py:798:                for item in nodir_listdir(target)
+wepppy/microservices/browse/files_api.py:803:    payload = _build_nodir_entry_payload(
+wepppy/microservices/browse/files_api.py:942:    if _allowlisted_raw_nodir_relpath(rel_path) is not None:
+wepppy/microservices/browse/files_api.py:948:        logical_rel_path, nodir_view = parse_external_subpath(
+wepppy/microservices/browse/files_api.py:959:    nodir_root, _inner_path = split_nodir_root(logical_rel_path)
+wepppy/microservices/browse/files_api.py:960:    if nodir_root is not None and nodir_view == "archive" and _is_mixed_nodir_root(wd, nodir_root):
+wepppy/microservices/browse/files_api.py:961:        _nodir_mixed_conflict()
+wepppy/microservices/browse/files_api.py:963:    nodir_target = None
+wepppy/microservices/browse/files_api.py:965:        nodir_target = nodir_resolve(wd, logical_rel_path, view=nodir_view)
+wepppy/microservices/browse/files_api.py:967:        _raise_nodir_error(err)
+wepppy/microservices/browse/files_api.py:969:    if nodir_target is not None:
+wepppy/microservices/browse/files_api.py:971:            return await _files_nodir_meta_response(
+wepppy/microservices/browse/files_api.py:975:                target=nodir_target,
+wepppy/microservices/browse/files_api.py:978:        return await _files_nodir_list_response(
+wepppy/microservices/browse/files_api.py:982:            target=nodir_target,
+wepppy/microservices/browse/files_api.py:991:    if nodir_root is not None and nodir_view == "archive":
+wepppy/microservices/browse/flow.py:100:    virtual_path = os.path.abspath(os.path.join(wd, nodir_rel_path))
+wepppy/microservices/browse/flow.py:107:        filter_pattern=nodir_filter,
+wepppy/microservices/browse/flow.py:116:def _read_nodir_file_bytes(env, nodir_target, *, runid: str, subpath: str, wd: str, request, config):
+wepppy/microservices/browse/flow.py:118:        with env.nodir_open_read(nodir_target) as fp:
+wepppy/microservices/browse/flow.py:123:        env._raise_nodir_http_exception(err)
+wepppy/microservices/browse/flow.py:127:def _browse_nodir_file(
+wepppy/microservices/browse/flow.py:131:    nodir_meta,
+wepppy/microservices/browse/flow.py:136:    filename = nodir_meta.name
+wepppy/microservices/browse/flow.py:13:def _normalize_nodir_request(env, subpath: str, *, filter_pattern_default: str) -> tuple[str, str]:
+wepppy/microservices/browse/flow.py:14:    nodir_rel_path, nodir_filter = env._extract_nodir_filter(subpath, default=filter_pattern_default)
+wepppy/microservices/browse/flow.py:15:    if env._allowlisted_raw_nodir_path(nodir_rel_path) is not None and not nodir_rel_path.endswith("/"):
+wepppy/microservices/browse/flow.py:163:async def _handle_nodir_tree(
+wepppy/microservices/browse/flow.py:16:        nodir_rel_path = f"{nodir_rel_path}/"
+wepppy/microservices/browse/flow.py:171:    nodir_rel_path: str,
+wepppy/microservices/browse/flow.py:172:    nodir_filter: str,
+wepppy/microservices/browse/flow.py:174:    nodir_view: str,
+wepppy/microservices/browse/flow.py:175:    nodir_root: str,
+wepppy/microservices/browse/flow.py:176:    nodir_inner: str,
+wepppy/microservices/browse/flow.py:179:    mixed_state = env._is_mixed_nodir_root(wd, nodir_root)
+wepppy/microservices/browse/flow.py:17:    return nodir_rel_path, nodir_filter
+wepppy/microservices/browse/flow.py:181:        env._raise_nodir_http_exception(
+wepppy/microservices/browse/flow.py:184:                code="NODIR_MIXED_STATE",
+wepppy/microservices/browse/flow.py:185:                message=f"{nodir_root} is in mixed state (dir + .nodir present)",
+wepppy/microservices/browse/flow.py:189:    effective_view = nodir_view
+wepppy/microservices/browse/flow.py:190:    if mixed_state and is_admin and nodir_view == "effective":
+wepppy/microservices/browse/flow.py:192:    if mixed_state and is_admin and nodir_view == "archive":
+wepppy/microservices/browse/flow.py:193:        redirect_response = _mixed_nodir_alias_redirect(
+wepppy/microservices/browse/flow.py:197:            nodir_root=nodir_root,
+wepppy/microservices/browse/flow.py:198:            nodir_inner=nodir_inner,
+wepppy/microservices/browse/flow.py:203:    nodir_target = _resolve_nodir_target(env, wd, logical_rel_path, view=effective_view)
+wepppy/microservices/browse/flow.py:204:    if nodir_target is None:
+wepppy/microservices/browse/flow.py:207:    nodir_meta = _stat_nodir_target(
+wepppy/microservices/browse/flow.py:209:        nodir_target,
+wepppy/microservices/browse/flow.py:20:def _parse_external_nodir_subpath(env, nodir_rel_path: str, *, is_admin: bool) -> tuple[str, str]:
+wepppy/microservices/browse/flow.py:216:    if not hasattr(nodir_meta, "is_dir"):
+wepppy/microservices/browse/flow.py:217:        return nodir_meta
+wepppy/microservices/browse/flow.py:218:    if nodir_meta.is_dir:
+wepppy/microservices/browse/flow.py:219:        return await _browse_nodir_directory(
+wepppy/microservices/browse/flow.py:226:            nodir_target=nodir_target,
+wepppy/microservices/browse/flow.py:227:            nodir_rel_path=nodir_rel_path,
+wepppy/microservices/browse/flow.py:228:            nodir_filter=nodir_filter,
+wepppy/microservices/browse/flow.py:232:    file_bytes = _read_nodir_file_bytes(
+wepppy/microservices/browse/flow.py:234:        nodir_target,
+wepppy/microservices/browse/flow.py:23:            nodir_rel_path,
+wepppy/microservices/browse/flow.py:243:    return _browse_nodir_file(
+wepppy/microservices/browse/flow.py:246:        nodir_meta=nodir_meta,
+wepppy/microservices/browse/flow.py:31:def _mixed_nodir_alias_redirect(
+wepppy/microservices/browse/flow.py:322:    nodir_rel_path, nodir_filter = _normalize_nodir_request(
+wepppy/microservices/browse/flow.py:327:    logical_rel_path, nodir_view = _parse_external_nodir_subpath(
+wepppy/microservices/browse/flow.py:329:        nodir_rel_path,
+wepppy/microservices/browse/flow.py:332:    nodir_root, nodir_inner = env.split_nodir_root(logical_rel_path)
+wepppy/microservices/browse/flow.py:333:    if nodir_root is not None:
+wepppy/microservices/browse/flow.py:334:        return await _handle_nodir_tree(
+wepppy/microservices/browse/flow.py:341:            nodir_rel_path=nodir_rel_path,
+wepppy/microservices/browse/flow.py:342:            nodir_filter=nodir_filter,
+wepppy/microservices/browse/flow.py:344:            nodir_view=nodir_view,
+wepppy/microservices/browse/flow.py:345:            nodir_root=nodir_root,
+wepppy/microservices/browse/flow.py:346:            nodir_inner=nodir_inner,
+wepppy/microservices/browse/flow.py:36:    nodir_root: str,
+wepppy/microservices/browse/flow.py:37:    nodir_inner: str,
+wepppy/microservices/browse/flow.py:39:    normalized_subpath = env._normalize_nodir_subpath(subpath)
+wepppy/microservices/browse/flow.py:40:    if not normalized_subpath.startswith(f"{nodir_root}{env._NODIR_SUFFIX}"):
+wepppy/microservices/browse/flow.py:43:    alias_rel = f"{nodir_root}/nodir"
+wepppy/microservices/browse/flow.py:44:    if nodir_inner:
+wepppy/microservices/browse/flow.py:45:        alias_rel = f"{alias_rel}/{nodir_inner}"
+wepppy/microservices/browse/flow.py:565:        mixed_state_roots=env._mixed_nodir_roots(wd),
+wepppy/microservices/browse/flow.py:56:def _resolve_nodir_target(env, wd: str, logical_rel_path: str, *, view: str):
+wepppy/microservices/browse/flow.py:58:        return env.nodir_resolve(wd, logical_rel_path, view=view)
+wepppy/microservices/browse/flow.py:60:        env._raise_nodir_http_exception(err)
+wepppy/microservices/browse/flow.py:64:def _stat_nodir_target(env, nodir_target, *, runid: str, subpath: str, wd: str, request, config):
+wepppy/microservices/browse/flow.py:66:        return env.nodir_stat(nodir_target)
+wepppy/microservices/browse/flow.py:70:        env._raise_nodir_http_exception(err)
+wepppy/microservices/browse/flow.py:74:async def _browse_nodir_directory(
+wepppy/microservices/browse/flow.py:82:    nodir_target,
+wepppy/microservices/browse/flow.py:83:    nodir_rel_path: str,
+wepppy/microservices/browse/flow.py:84:    nodir_filter: str,
+wepppy/microservices/browse/flow.py:87:    if not env._validate_filter_pattern(nodir_filter):
+wepppy/microservices/browse/flow.py:88:        env.abort(400, f"Invalid filter pattern: {nodir_filter}")
+wepppy/microservices/browse/flow.py:90:        nodir_entries = env.nodir_listdir(nodir_target)
+wepppy/microservices/browse/flow.py:92:        env._raise_nodir_http_exception(err)
+wepppy/microservices/browse/flow.py:94:    page_entries, total_items = env._nodir_entries_to_page(
+wepppy/microservices/browse/flow.py:95:        nodir_entries,
+wepppy/microservices/browse/flow.py:96:        filter_pattern=nodir_filter,
+wepppy/microservices/browse/listing.py:17:from wepppy.nodir.paths import NODIR_ROOTS
+wepppy/microservices/browse/listing.py:226:                if not is_dir and _allowlisted_nodir_root(name) is not None:
+wepppy/microservices/browse/listing.py:324:    mixed_roots = _mixed_nodir_roots(root_wd) if hide_mixed_nodir and rel_dir == "." else set()
+wepppy/microservices/browse/listing.py:394:            nodir_root = _allowlisted_nodir_root(name)
+wepppy/microservices/browse/listing.py:397:                or (nodir_root is not None and nodir_root in mixed_roots)
+wepppy/microservices/browse/listing.py:402:                nodir_root is not None and not bool(row["is_symlink"]) and not bool(row["symlink_is_dir"])
+wepppy/microservices/browse/listing.py:409:                if nodir_root is not None and not bool(row["is_dir"]):
+wepppy/microservices/browse/listing.py:42:_NODIR_SUFFIX = ".nodir"
+wepppy/microservices/browse/listing.py:43:_NODIR_ROOTS = frozenset(NODIR_ROOTS)
+wepppy/microservices/browse/listing.py:453:        mixed_roots = _mixed_nodir_roots(root_wd)
+wepppy/microservices/browse/listing.py:460:                nodir_root = _allowlisted_nodir_root(name)
+wepppy/microservices/browse/listing.py:463:                    or (nodir_root is not None and nodir_root in mixed_roots)
+wepppy/microservices/browse/listing.py:46:def _allowlisted_nodir_root(name: str) -> str | None:
+wepppy/microservices/browse/listing.py:47:    if not name.lower().endswith(_NODIR_SUFFIX):
+wepppy/microservices/browse/listing.py:498:                is_nodir_dir_like = (
+wepppy/microservices/browse/listing.py:499:                    nodir_root is not None and not is_dir and not is_symlink and not symlink_is_dir
+wepppy/microservices/browse/listing.py:49:    root = name[: -len(_NODIR_SUFFIX)]
+wepppy/microservices/browse/listing.py:501:                effective_is_dir = is_dir or is_nodir_dir_like
+wepppy/microservices/browse/listing.py:50:    if root in _NODIR_ROOTS:
+wepppy/microservices/browse/listing.py:55:def _mixed_nodir_roots(wd: str) -> set[str]:
+wepppy/microservices/browse/listing.py:57:    for root in _NODIR_ROOTS:
+wepppy/microservices/browse/listing.py:58:        if os.path.isdir(os.path.join(wd, root)) and os.path.lexists(os.path.join(wd, f"{root}.nodir")):
+wepppy/microservices/browse/listing.py:631:        mixed_roots = _mixed_nodir_roots(root_wd)
+wepppy/microservices/browse/listing.py:638:                nodir_root = _allowlisted_nodir_root(name)
+wepppy/microservices/browse/listing.py:641:                    or (nodir_root is not None and nodir_root in mixed_roots)
+wepppy/microservices/browse/listing.py:713:            skip_manifest = bool(_mixed_nodir_roots(str(wd)))
+wepppy/microservices/rq_engine/ash_routes.py:156:    nodir_resolve(wd, "climate", view="effective")
+wepppy/microservices/rq_engine/ash_routes.py:157:    nodir_resolve(wd, "watershed", view="effective")
+wepppy/microservices/rq_engine/ash_routes.py:158:    nodir_resolve(wd, "landuse", view="effective")
+wepppy/microservices/rq_engine/ash_routes.py:19:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/ash_routes.py:20:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/rq_engine/climate_routes.py:19:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/climate_routes.py:20:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/rq_engine/climate_routes.py:67:        nodir_resolve(wd, "climate", view="effective")
+wepppy/microservices/rq_engine/debris_flow_routes.py:14:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/debris_flow_routes.py:15:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/rq_engine/debris_flow_routes.py:42:    nodir_resolve(wd, "watershed", view="effective")
+wepppy/microservices/rq_engine/debris_flow_routes.py:43:    nodir_resolve(wd, "soils", view="effective")
+wepppy/microservices/rq_engine/export_routes.py:11:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/landuse_routes.py:21:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/landuse_routes.py:22:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/rq_engine/landuse_routes.py:23:from wepppy.nodir.mutations import mutate_root
+wepppy/microservices/rq_engine/landuse_routes.py:49:    nodir_resolve(wd, "landuse", view="effective")
+wepppy/microservices/rq_engine/omni_routes.py:279:    recovered_roots = recover_mixed_nodir_roots(wd, roots=("climate", "watershed", "landuse", "soils"))
+wepppy/microservices/rq_engine/omni_routes.py:27:from wepppy.rq.wepp_rq_stage_helpers import recover_mixed_nodir_roots
+wepppy/microservices/rq_engine/omni_routes.py:287:    nodir_resolve(wd, "climate", view="effective")
+wepppy/microservices/rq_engine/omni_routes.py:288:    nodir_resolve(wd, "watershed", view="effective")
+wepppy/microservices/rq_engine/omni_routes.py:289:    nodir_resolve(wd, "landuse", view="effective")
+wepppy/microservices/rq_engine/omni_routes.py:28:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/omni_routes.py:290:    nodir_resolve(wd, "soils", view="effective")
+wepppy/microservices/rq_engine/omni_routes.py:29:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/rq_engine/project_routes.py:14:from wepppy.nodir.mutations import enable_default_archive_roots
+wepppy/microservices/rq_engine/soils_routes.py:16:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/soils_routes.py:17:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/rq_engine/soils_routes.py:74:        nodir_resolve(wd, "soils", view="effective")
+wepppy/microservices/rq_engine/treatments_routes.py:20:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/treatments_routes.py:21:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/rq_engine/treatments_routes.py:46:    nodir_resolve(wd, "landuse", view="effective")
+wepppy/microservices/rq_engine/treatments_routes.py:47:    nodir_resolve(wd, "soils", view="effective")
+wepppy/microservices/rq_engine/upload_climate_routes.py:16:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/upload_climate_routes.py:17:from wepppy.nodir.mutations import mutate_root
+wepppy/microservices/rq_engine/upload_huc_fire_routes.py:14:from wepppy.nodir.mutations import enable_default_archive_roots
+wepppy/microservices/rq_engine/watershed_routes.py:29:from wepppy.nodir.errors import NoDirError
+wepppy/microservices/rq_engine/watershed_routes.py:30:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/microservices/rq_engine/watershed_routes.py:55:    nodir_resolve(wd, "watershed", view="effective")
+wepppy/nodb/batch_runner.py:36:from wepppy.nodir.mutations import mutate_root
+wepppy/nodb/core/climate_build_router.py:29:            os.path.join(run_root, ".nodir", "lower", "climate"),
+wepppy/nodb/core/climate_build_router.py:30:            os.path.join(run_root, ".nodir", "upper", "climate"),
+wepppy/nodb/core/landuse.py:263:            os.path.join(run_root, ".nodir", "lower", "landuse"),
+wepppy/nodb/core/landuse.py:264:            os.path.join(run_root, ".nodir", "upper", "landuse"),
+wepppy/nodb/core/landuse.py:92:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/core/ron.py:104:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/core/soils.py:100:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/core/soils.py:145:            os.path.join(run_root, ".nodir", "lower", "soils"),
+wepppy/nodb/core/soils.py:146:            os.path.join(run_root, ".nodir", "upper", "soils"),
+wepppy/nodb/core/watershed.py:112:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/core/watershed_mixins.py:59:from wepppy.nodir.parquet_sidecars import (
+wepppy/nodb/core/wepp.py:189:from wepppy.nodir.wepp_inputs import (
+wepppy/nodb/duckdb_agents.py:9:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/mods/ash_transport/ash.py:49:from wepppy.nodir.wepp_inputs import with_input_file_path
+wepppy/nodb/mods/disturbed/disturbed.py:1090:        from wepppy.nodir.wepp_inputs import materialize_input_file
+wepppy/nodb/mods/omni/README.md:311:Omni follows the NoDb singleton pattern. The controller persists state in `omni.nodb` and uses Redis DB 13 for 72-hour caching. Contrast mappings are stored as ASCII sidecar TSVs under `omni/contrasts/` to avoid bloating the NoDb payload. All scenario workspaces live under `<parent_wd>/_pups/omni/scenarios/<scenario_name>` and are themselves valid WEPPcloud projects (symlinked climate/watershed, including `.nodir` archives when present; copied disturbed/landuse/soils).
+wepppy/nodb/mods/omni/README.md:341:2. **Cloning**: `_omni_clone()` creates `_pups/omni/scenarios/<scenario_name>`, symlinks shared inputs (directory or `.nodir`), copies mutable state
+wepppy/nodb/mods/omni/omni.py:468:            if exc.code != "NODIR_LOCKED":
+wepppy/nodb/mods/omni/omni.py:572:    for archive_name in ('landuse.nodir', 'soils.nodir'):
+wepppy/nodb/mods/omni/omni.py:585:        resolved_root = nodir_resolve(sibling_wd, root, view='effective')
+wepppy/nodb/mods/omni/omni.py:61:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/mods/omni/omni.py:62:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/nodb/mods/omni/omni.py:63:from wepppy.nodir.projections import with_root_projection
+wepppy/nodb/mods/omni/omni.py:64:from wepppy.nodir.errors import NoDirError
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:125:            nodir_resolve,
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:155:            src_archive = _join(wd, f"{dirname}.nodir")
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:161:                dst = _join(new_wd, f"{dirname}.nodir")
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:169:            resolved_root = nodir_resolve(wd, root, view="effective")
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:336:            nodir_resolve,
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:342:            nodir_resolve,
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:355:            nodir_resolve,
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:376:            src_archive = _join(wd, f"{dirname}.nodir")
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:382:                dst = _join(new_wd, f"{dirname}.nodir")
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:419:        soils_root = nodir_resolve(wd, "soils", view="effective")
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:446:        landuse_root = nodir_resolve(wd, "landuse", view="effective")
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:84:            nodir_resolve,
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:92:            nodir_resolve,
+wepppy/nodb/mods/omni/omni_mode_build_services.py:10:from wepppy.nodir.mutations import mutate_root, mutate_roots
+wepppy/nodb/mods/omni/omni_station_catalog_service.py:11:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/mods/path_ce/data_loader.py:17:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/mods/swat/swat.py:26:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:12:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/mods/swat/swat_recall_mixin.py:14:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:13:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/nodir/__init__.py:32:    NODIR_STATE_SCHEMA_VERSION,
+wepppy/nodir/__init__.py:33:    NODIR_TRANSITION_STATES,
+wepppy/nodir/__init__.py:86:    "NODIR_STATE_SCHEMA_VERSION",
+wepppy/nodir/__init__.py:87:    "NODIR_TRANSITION_STATES",
+wepppy/nodir/errors.py:14:    "nodir_mixed_state",
+wepppy/nodir/errors.py:15:    "nodir_invalid_archive",
+wepppy/nodir/errors.py:16:    "nodir_locked",
+wepppy/nodir/errors.py:17:    "nodir_limit_exceeded",
+wepppy/nodir/errors.py:37:def nodir_mixed_state(message: str) -> NoDirError:
+wepppy/nodir/errors.py:38:    return NoDirError(http_status=409, code="NODIR_MIXED_STATE", message=message)
+wepppy/nodir/errors.py:41:def nodir_invalid_archive(message: str) -> NoDirError:
+wepppy/nodir/errors.py:42:    return NoDirError(http_status=500, code="NODIR_INVALID_ARCHIVE", message=message)
+wepppy/nodir/errors.py:45:def nodir_locked(message: str) -> NoDirError:
+wepppy/nodir/errors.py:46:    return NoDirError(http_status=503, code="NODIR_LOCKED", message=message)
+wepppy/nodir/errors.py:49:def nodir_limit_exceeded(message: str) -> NoDirError:
+wepppy/nodir/errors.py:50:    return NoDirError(http_status=413, code="NODIR_LIMIT_EXCEEDED", message=message)
+wepppy/nodir/fs.py:102:            raise nodir_invalid_archive("archive is not a regular file")
+wepppy/nodir/fs.py:108:    raise nodir_invalid_archive("archive is not a regular file")
+wepppy/nodir/fs.py:145:        raise nodir_invalid_archive("zip entry name contains null byte")
+wepppy/nodir/fs.py:147:        raise nodir_invalid_archive("zip entry name must be relative (no leading '/')")
+wepppy/nodir/fs.py:149:        raise nodir_invalid_archive("zip entry name must use '/' separators (no backslashes)")
+wepppy/nodir/fs.py:152:        raise nodir_invalid_archive("zip entry name must not contain a drive letter")
+wepppy/nodir/fs.py:154:        raise nodir_invalid_archive("zip entry name is not normalized")
+wepppy/nodir/fs.py:159:        raise nodir_invalid_archive("zip entry name is empty")
+wepppy/nodir/fs.py:164:            raise nodir_invalid_archive("zip entry name is not normalized")
+wepppy/nodir/fs.py:171:        raise nodir_invalid_archive("encrypted zip entries are not supported")
+wepppy/nodir/fs.py:173:        raise nodir_invalid_archive("unsupported zip compression method")
+wepppy/nodir/fs.py:177:        raise nodir_invalid_archive("parquet sidecars must not be stored inside NoDir archives")
+wepppy/nodir/fs.py:17:    nodir_invalid_archive,
+wepppy/nodir/fs.py:18:    nodir_limit_exceeded,
+wepppy/nodir/fs.py:190:            raise nodir_invalid_archive("zip entry type is not a regular file/directory")
+wepppy/nodir/fs.py:192:            raise nodir_invalid_archive("zip directory entries must end with '/'")
+wepppy/nodir/fs.py:194:            raise nodir_invalid_archive("zip directory entries must be marked as directories")
+wepppy/nodir/fs.py:19:    nodir_locked,
+wepppy/nodir/fs.py:20:    nodir_mixed_state,
+wepppy/nodir/fs.py:233:                        raise nodir_invalid_archive("zip contains both file and directory entries for the same path")
+wepppy/nodir/fs.py:236:                            raise nodir_invalid_archive("zip contains a file that is also a directory prefix")
+wepppy/nodir/fs.py:23:from .paths import NoDirRoot, NoDirView, normalize_relpath, split_nodir_root
+wepppy/nodir/fs.py:244:                    raise nodir_invalid_archive("zip contains both file and directory entries for the same path")
+wepppy/nodir/fs.py:247:                        raise nodir_invalid_archive("zip contains a file that is also a directory prefix")
+wepppy/nodir/fs.py:249:                    raise nodir_invalid_archive("zip contains duplicate file entries")
+wepppy/nodir/fs.py:256:        raise nodir_invalid_archive(f"invalid zip archive: {e}") from e
+wepppy/nodir/fs.py:258:        raise nodir_invalid_archive(f"unable to read archive: {e}") from e
+wepppy/nodir/fs.py:266:        raise nodir_invalid_archive("archive is not a regular file")
+wepppy/nodir/fs.py:305:    root, inner = split_nodir_root(rel_norm)
+wepppy/nodir/fs.py:311:    archive_path = wd_path / f"{root}.nodir"
+wepppy/nodir/fs.py:331:        raise nodir_locked(f"{root} is transitioning (thaw/freeze in progress)")
+wepppy/nodir/fs.py:335:            raise nodir_mixed_state(f"{root} is in mixed state (dir + .nodir present)")
+wepppy/nodir/fs.py:38:_MAX_OPEN_READ_BYTES_ENV = "NODIR_MAX_OPEN_READ_BYTES"
+wepppy/nodir/fs.py:641:        raise nodir_limit_exceeded(
+wepppy/nodir/fs.py:99:            raise nodir_invalid_archive("archive resolves outside allowed roots")
+wepppy/nodir/materialize.py:102:    return _env_positive_int("NODIR_MATERIALIZE_LOCK_TTL_SECONDS", _DEFAULT_LOCK_TTL_SECONDS)
+wepppy/nodir/materialize.py:106:    return _env_positive_float("NODIR_MATERIALIZE_LOCK_WAIT_SECONDS", _DEFAULT_LOCK_WAIT_SECONDS)
+wepppy/nodir/materialize.py:110:    return _env_positive_int("NODIR_MATERIALIZE_MAX_FILE_BYTES", _DEFAULT_MAX_FILE_BYTES)
+wepppy/nodir/materialize.py:114:    return _env_positive_int("NODIR_MATERIALIZE_MAX_REQUEST_BYTES", _DEFAULT_MAX_REQUEST_BYTES)
+wepppy/nodir/materialize.py:118:    return _env_positive_int("NODIR_MATERIALIZE_MAX_REQUEST_FILES", _DEFAULT_MAX_REQUEST_FILES)
+wepppy/nodir/materialize.py:122:    return _env_positive_int("NODIR_MATERIALIZE_RATIO_MIN_BYTES", _DEFAULT_RATIO_MIN_BYTES)
+wepppy/nodir/materialize.py:126:    return _env_positive_float("NODIR_MATERIALIZE_RATIO_MAX", _DEFAULT_RATIO_MAX)
+wepppy/nodir/materialize.py:150:        raise nodir_invalid_archive("archive fingerprint unavailable")
+wepppy/nodir/materialize.py:26:from .errors import NoDirError, nodir_invalid_archive, nodir_limit_exceeded, nodir_locked
+wepppy/nodir/materialize.py:290:        raise nodir_invalid_archive("materialized path escaped run root") from exc
+wepppy/nodir/materialize.py:293:        raise nodir_invalid_archive("materialized path escaped run root")
+wepppy/nodir/materialize.py:308:        raise nodir_limit_exceeded(
+wepppy/nodir/materialize.py:330:                    raise nodir_limit_exceeded(
+wepppy/nodir/materialize.py:334:                    raise nodir_limit_exceeded(
+wepppy/nodir/materialize.py:343:            raise nodir_invalid_archive(
+wepppy/nodir/materialize.py:348:            raise nodir_invalid_archive(f"zip entry CRC mismatch for {info.filename}")
+wepppy/nodir/materialize.py:370:        raise nodir_limit_exceeded(
+wepppy/nodir/materialize.py:381:            raise nodir_limit_exceeded(
+wepppy/nodir/materialize.py:386:            raise nodir_limit_exceeded(
+wepppy/nodir/materialize.py:391:        raise nodir_limit_exceeded(
+wepppy/nodir/materialize.py:421:        raise nodir_locked("materialization lock backend unavailable")
+wepppy/nodir/materialize.py:442:        raise nodir_locked("failed to acquire materialization lock") from exc
+wepppy/nodir/materialize.py:445:        raise nodir_locked("materialization lock is currently held")
+wepppy/nodir/materialize.py:485:        raise nodir_locked("materialization lock backend unavailable")
+wepppy/nodir/materialize.py:498:            raise nodir_locked("failed to renew materialization lock") from exc
+wepppy/nodir/materialize.py:4:``WD/.nodir/cache`` when a downstream tool requires a real filesystem path.
+wepppy/nodir/materialize.py:501:            raise nodir_locked("materialization lock ownership lost during extraction")
+wepppy/nodir/materialize.py:504:    raise nodir_locked("materialization lock backend cannot renew atomically")
+wepppy/nodir/materialize.py:509:        raise nodir_invalid_archive("materialization target must be archive-backed")
+wepppy/nodir/materialize.py:524:        raise nodir_invalid_archive("invalid archive entry basename")
+wepppy/nodir/materialize.py:554:                raise nodir_invalid_archive(f"missing required sidecar entry: {name}")
+wepppy/nodir/materialize.py:559:            raise nodir_invalid_archive("invalid archive sidecar basename")
+wepppy/nodir/materialize.py:618:                    raise nodir_invalid_archive(
+wepppy/nodir/materialize.py:623:                    raise nodir_locked("archive changed during materialization")
+wepppy/nodir/materialize.py:683:    ``WD/.nodir/cache`` and returns the cached path.
+wepppy/nodir/materialize.py:701:        raise nodir_locked(f"{target.root} is transitioning (thaw/freeze in progress)")
+wepppy/nodir/materialize.py:712:    cache_root = wd_path / ".nodir" / "cache" / target.root / archive_fp
+wepppy/nodir/materialize.py:738:                    exc.code == "NODIR_LOCKED"
+wepppy/nodir/materialize.py:772:        _prune_cache_versions((wd_path / ".nodir" / "cache" / target.root), keep_count=2)
+wepppy/nodir/mutations.py:15:from .paths import NODIR_ROOTS, NoDirRoot
+wepppy/nodir/mutations.py:193:                        exc.code != "NODIR_LOCKED"
+wepppy/nodir/mutations.py:36:_DEFAULT_ARCHIVE_ROOTS_FILENAME = ".nodir/default_archive_roots.json"
+wepppy/nodir/mutations.py:38:_DEFAULT_ARCHIVE_ROOTS_ENV = "WEPP_NODIR_DEFAULT_NEW_RUNS"
+wepppy/nodir/mutations.py:47:    if root not in NODIR_ROOTS:
+wepppy/nodir/mutations.py:74:    roots: Iterable[str] = NODIR_ROOTS,
+wepppy/nodir/parquet_sidecars.py:17:from .paths import NODIR_ROOTS, normalize_relpath
+wepppy/nodir/parquet_sidecars.py:88:    if logical_relpath.split("/", 1)[0] not in NODIR_ROOTS:
+wepppy/nodir/paths.py:100:def split_nodir_root(rel: str) -> tuple[NoDirRoot | None, str]:
+wepppy/nodir/paths.py:110:    if head not in NODIR_ROOTS:
+wepppy/nodir/paths.py:11:    "NODIR_ROOTS",
+wepppy/nodir/paths.py:14:    "split_nodir_root",
+wepppy/nodir/paths.py:21:NODIR_ROOTS: tuple[NoDirRoot, ...] = ("landuse", "soils", "climate", "watershed")
+wepppy/nodir/paths.py:64:    - `<root>.nodir/<inner>` -> (`<root>/<inner>`, view="archive")
+wepppy/nodir/paths.py:70:    # Preserve whether a trailing slash was present so `root.nodir/` is treated as
+wepppy/nodir/paths.py:71:    # "enter archive", while `root.nodir` can remain a normal file path for raw download.
+wepppy/nodir/paths.py:82:    # Allowlisted archive-boundary syntax: `<root>.nodir/<inner>`
+wepppy/nodir/paths.py:83:    if first.endswith(".nodir") and (len(parts) > 1 or had_boundary_slash):
+wepppy/nodir/paths.py:84:        root = first[: -len(".nodir")]
+wepppy/nodir/paths.py:85:        if root in NODIR_ROOTS:
+wepppy/nodir/paths.py:91:    if allow_admin_alias and len(parts) >= 2 and parts[1] == "nodir" and parts[0] in NODIR_ROOTS:
+wepppy/nodir/projections.py:101:    return wd_path / ".nodir" / "upper" / root / token / "data"
+wepppy/nodir/projections.py:105:    return wd_path / ".nodir" / "work" / root / token
+wepppy/nodir/projections.py:138:        raise nodir_locked("NoDir projection lock backend unavailable")
+wepppy/nodir/projections.py:155:        raise nodir_locked("failed to acquire NoDir projection lock") from exc
+wepppy/nodir/projections.py:157:        raise nodir_locked("NoDir projection lock is currently held")
+wepppy/nodir/projections.py:18:from .errors import NoDirError, nodir_invalid_archive, nodir_locked, nodir_mixed_state
+wepppy/nodir/projections.py:20:from .paths import NODIR_ROOTS, NoDirRoot
+wepppy/nodir/projections.py:258:        wd_path / ".nodir" / "lower" / root,
+wepppy/nodir/projections.py:259:        wd_path / ".nodir" / "upper" / root,
+wepppy/nodir/projections.py:289:            raise nodir_locked(f"{root} projection is currently active in another mode")
+wepppy/nodir/projections.py:290:        raise nodir_mixed_state(f"{mount_path.name} is in mixed unmanaged state (dir + .nodir present)")
+wepppy/nodir/projections.py:296:        raise nodir_invalid_archive(f"failed to create projection mountpoint for {mount_path.name}") from exc
+wepppy/nodir/projections.py:372:        raise nodir_invalid_archive("projection metadata missing archive fingerprint")
+wepppy/nodir/projections.py:375:        raise nodir_invalid_archive("projection metadata has invalid mode")
+wepppy/nodir/projections.py:399:        raise nodir_locked("projection session is not active")
+wepppy/nodir/projections.py:404:        raise nodir_locked("projection lock ownership lost")
+wepppy/nodir/projections.py:408:        raise nodir_locked("NoDir projection lock backend unavailable")
+wepppy/nodir/projections.py:413:        raise nodir_locked("failed to verify NoDir projection lock ownership") from exc
+wepppy/nodir/projections.py:415:        raise nodir_locked("projection lock ownership lost")
+wepppy/nodir/projections.py:419:    projections_root = wd_path / ".nodir" / "projections" / root
+wepppy/nodir/projections.py:486:        raise nodir_invalid_archive(f"{normalized_root}.nodir archive is required for projection")
+wepppy/nodir/projections.py:515:            raise nodir_locked("NoDir projection lock is currently held")
+wepppy/nodir/projections.py:525:                raise nodir_locked("NoDir projection lock is currently held")
+wepppy/nodir/projections.py:531:                raise nodir_locked("NoDir projection metadata is stale")
+wepppy/nodir/projections.py:541:                    raise nodir_locked("NoDir projection lock is currently held")
+wepppy/nodir/projections.py:545:                raise nodir_locked("NoDir projection metadata is stale")
+wepppy/nodir/projections.py:607:        raise nodir_invalid_archive("projection metadata is missing or invalid")
+wepppy/nodir/projections.py:633:            raise nodir_invalid_archive("mutation projection metadata is invalid")
+wepppy/nodir/projections.py:640:            raise nodir_invalid_archive("mutation projection upper layer is missing")
+wepppy/nodir/projections.py:643:            raise nodir_invalid_archive("mutation projection upper layer is missing")
+wepppy/nodir/projections.py:646:        commit_wd = wd_path / ".nodir" / "work" / handle.root / handle.token / "commit"
+wepppy/nodir/projections.py:652:        archive_path = wd_path / f"{handle.root}.nodir"
+wepppy/nodir/projections.py:653:        tmp_archive = commit_wd / f"{handle.root}.nodir.tmp.{uuid.uuid4().hex}.proj"
+wepppy/nodir/projections.py:67:    if root not in NODIR_ROOTS:
+wepppy/nodir/projections.py:93:    return wd_path / ".nodir" / "projections" / root / _projection_fp(archive_fp) / f"{mode}.json"
+wepppy/nodir/projections.py:97:    return wd_path / ".nodir" / "lower" / root / _projection_fp(archive_fp) / "data"
+wepppy/nodir/state.py:113:    return wd_path / ".nodir" / f"{normalized_root}.json"
+wepppy/nodir/state.py:125:    return wd_path / f"{normalized_root}.nodir.tmp"
+wepppy/nodir/state.py:172:    if int(schema_version) != NODIR_STATE_SCHEMA_VERSION:
+wepppy/nodir/state.py:18:from .paths import NODIR_ROOTS, NoDirRoot
+wepppy/nodir/state.py:213:    expected_archive_path = f"{payload_root}.nodir"
+wepppy/nodir/state.py:24:    "NODIR_STATE_SCHEMA_VERSION",
+wepppy/nodir/state.py:25:    "NODIR_TRANSITION_STATES",
+wepppy/nodir/state.py:282:        "schema_version": NODIR_STATE_SCHEMA_VERSION,
+wepppy/nodir/state.py:290:        "archive_path": f"{normalized_root}.nodir",
+wepppy/nodir/state.py:382:    return payload["state"] in NODIR_TRANSITION_STATES
+wepppy/nodir/state.py:40:NODIR_STATE_SCHEMA_VERSION = 1
+wepppy/nodir/state.py:41:NODIR_TRANSITION_STATES: frozenset[NoDirStateName] = frozenset({"thawing", "freezing"})
+wepppy/nodir/state.py:4:``WD/.nodir/<root>.json``.
+wepppy/nodir/state.py:91:    if root not in NODIR_ROOTS:
+wepppy/nodir/thaw_freeze.py:129:        raise nodir_locked("NoDir maintenance lock backend unavailable")
+wepppy/nodir/thaw_freeze.py:150:        raise nodir_locked("failed to acquire NoDir maintenance lock") from exc
+wepppy/nodir/thaw_freeze.py:152:        raise nodir_locked(f"NoDir maintenance lock is currently held: {key}")
+wepppy/nodir/thaw_freeze.py:16:from .errors import nodir_invalid_archive, nodir_locked
+wepppy/nodir/thaw_freeze.py:19:from .paths import NODIR_ROOTS, NoDirRoot
+wepppy/nodir/thaw_freeze.py:305:        raise nodir_invalid_archive("archive entry escapes thaw root") from exc
+wepppy/nodir/thaw_freeze.py:347:            raise nodir_invalid_archive("parquet path escaped NoDir root during freeze") from exc
+wepppy/nodir/thaw_freeze.py:350:            raise nodir_invalid_archive(f"unsupported parquet entry: {rel}")
+wepppy/nodir/thaw_freeze.py:356:            raise nodir_invalid_archive(f"unsupported parquet sidecar mapping: {logical}")
+wepppy/nodir/thaw_freeze.py:360:            raise nodir_invalid_archive("parquet entries must be regular files during freeze")
+wepppy/nodir/thaw_freeze.py:380:                        raise nodir_invalid_archive(
+wepppy/nodir/thaw_freeze.py:384:                        raise nodir_invalid_archive(f"unexpected directory entry type: {child_dir}")
+wepppy/nodir/thaw_freeze.py:406:                            raise nodir_invalid_archive(
+wepppy/nodir/thaw_freeze.py:412:                            raise nodir_invalid_archive(
+wepppy/nodir/thaw_freeze.py:416:                            raise nodir_invalid_archive(
+wepppy/nodir/thaw_freeze.py:421:                        raise nodir_invalid_archive(f"unsupported file type during freeze: {source_path}")
+wepppy/nodir/thaw_freeze.py:448:    archive_path = wd_path / f"{normalized_root}.nodir"
+wepppy/nodir/thaw_freeze.py:531:    archive_path = wd_path / f"{normalized_root}.nodir"
+wepppy/nodir/thaw_freeze.py:569:        raise nodir_invalid_archive(f"NoDir root is not a directory: {dir_path}")
+wepppy/nodir/thaw_freeze.py:65:    if root not in NODIR_ROOTS:
+wepppy/nodir/wepp_inputs.py:63:        if exc.code != "NODIR_MIXED_STATE":
+wepppy/query_engine/activate.py:12:from wepppy.nodir.parquet_sidecars import (
+wepppy/query_engine/activate.py:133:def _canonicalize_nodir_parquets(base: Path, entries: list[dict[str, object]]) -> list[dict[str, object]]:
+wepppy/query_engine/activate.py:143:    targets = _collect_nodir_parquet_targets(base)
+wepppy/query_engine/activate.py:158:        parent_targets = _collect_nodir_parquet_targets(parent_root)
+wepppy/query_engine/activate.py:46:def _collect_nodir_parquet_targets(base: Path) -> dict[str, Path]:
+wepppy/query_engine/activate.py:471:                return _canonicalize_nodir_parquets(base, entries)
+wepppy/query_engine/activate.py:490:    return _canonicalize_nodir_parquets(base, entries)
+wepppy/rq/culvert_rq.py:39:from wepppy.nodir.mutations import mutate_root, mutate_roots
+wepppy/rq/culvert_rq_manifest.py:17:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/rq/land_and_soil_rq.py:18:from wepppy.nodir.mutations import mutate_root
+wepppy/rq/omni_rq.py:279:        recovered_roots = _recover_mixed_nodir_roots(wd)
+wepppy/rq/omni_rq.py:288:            nodir_resolve(wd, root, view='effective')
+wepppy/rq/omni_rq.py:32:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/rq/omni_rq.py:35:    NODIR_RECOVERY_ROOTS as _NODIR_RECOVERY_ROOTS,
+wepppy/rq/omni_rq.py:36:    recover_mixed_nodir_roots as _recover_mixed_nodir_roots_impl,
+wepppy/rq/omni_rq.py:535:        recovered_roots = _recover_mixed_nodir_roots(wd)
+wepppy/rq/omni_rq.py:53:def _recover_mixed_nodir_roots(
+wepppy/rq/omni_rq.py:56:    roots: tuple[str, ...] = _NODIR_RECOVERY_ROOTS,
+wepppy/rq/omni_rq.py:58:    return _recover_mixed_nodir_roots_impl(wd, roots=roots)
+wepppy/rq/path_ce_rq.py:107:            nodir_resolve(wd, root, view="effective")
+wepppy/rq/path_ce_rq.py:16:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/rq/project_rq.py:1043:            nodir_resolve(wd, root, view="effective")
+wepppy/rq/project_rq.py:1086:            nodir_resolve(wd, root, view="effective")
+wepppy/rq/project_rq.py:38:from wepppy.nodir.mutations import mutate_root, mutate_roots
+wepppy/rq/project_rq.py:39:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/rq/project_rq_archive.py:15:_ARCHIVE_EXCLUDE_PREFIXES: tuple[str, ...] = ("archives", ".nodir/cache")
+wepppy/rq/project_rq_fork.py:138:        from wepppy.nodir.mutations import mutate_root as mutate_root_fn
+wepppy/rq/project_rq_fork.py:24:    # `.nodir/cache` materialization artifacts are ephemeral and should never
+wepppy/rq/project_rq_fork.py:26:    cmd.extend(["--exclude", ".nodir/cache/***"])
+wepppy/rq/wepp_rq.py:111:_NODIR_RECOVERY_ROOTS = _stage_helpers.NODIR_RECOVERY_ROOTS
+wepppy/rq/wepp_rq.py:117:    _stage_helpers.nodir_mixed_state = nodir_mixed_state
+wepppy/rq/wepp_rq.py:168:def _recover_mixed_nodir_roots(
+wepppy/rq/wepp_rq.py:171:    roots: Iterable[str] = _NODIR_RECOVERY_ROOTS,
+wepppy/rq/wepp_rq.py:174:    return _stage_helpers.recover_mixed_nodir_roots(wd, roots=roots)
+wepppy/rq/wepp_rq.py:30:from wepppy.nodir.errors import nodir_mixed_state
+wepppy/rq/wepp_rq.py:31:from wepppy.nodir.fs import resolve
+wepppy/rq/wepp_rq.py:32:from wepppy.nodir.projections import with_root_projection
+wepppy/rq/wepp_rq.py:438:        recovered_roots = _recover_mixed_nodir_roots(wd)
+wepppy/rq/wepp_rq.py:506:        recovered_roots = _recover_mixed_nodir_roots(wd, roots=("watershed",))
+wepppy/rq/wepp_rq.py:577:        recovered_roots = _recover_mixed_nodir_roots(wd, roots=("watershed",))
+wepppy/rq/wepp_rq_stage_helpers.py:10:from wepppy.nodir.fs import resolve
+wepppy/rq/wepp_rq_stage_helpers.py:11:from wepppy.nodir.projections import with_root_projection
+wepppy/rq/wepp_rq_stage_helpers.py:18:NODIR_RECOVERY_ROOTS = ("climate", "landuse", "soils", "watershed")
+wepppy/rq/wepp_rq_stage_helpers.py:21:def recover_mixed_nodir_roots(
+wepppy/rq/wepp_rq_stage_helpers.py:24:    roots: Iterable[str] = NODIR_RECOVERY_ROOTS,
+wepppy/rq/wepp_rq_stage_helpers.py:32:        root_archive = wd_path / f"{root}.nodir"
+wepppy/rq/wepp_rq_stage_helpers.py:68:                raise nodir_mixed_state(f"{root} is in mixed state (dir + .nodir present)")
+wepppy/rq/wepp_rq_stage_helpers.py:9:from wepppy.nodir.errors import nodir_mixed_state
+wepppy/rq/wepp_rq_stage_helpers.pyi:11:def recover_mixed_nodir_roots(
+wepppy/rq/wepp_rq_stage_helpers.pyi:8:NODIR_RECOVERY_ROOTS: tuple[str, ...]
+wepppy/rq/weppcloudr_rq.py:161:            "parquet_overrides": _discover_nodir_parquet_overrides(active_path),
+wepppy/rq/weppcloudr_rq.py:76:def _discover_nodir_parquet_overrides(active_path: Path) -> dict[str, str]:
+wepppy/tools/migrations/README.md:133:- `nodir_bulk.py`
+wepppy/tools/migrations/landuse.py:9:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/tools/migrations/nodir_bulk.py:14:from wepppy.nodir.errors import NoDirError
+wepppy/tools/migrations/nodir_bulk.py:15:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/tools/migrations/nodir_bulk.py:16:from wepppy.nodir.paths import NODIR_ROOTS, NoDirRoot
+wepppy/tools/migrations/nodir_bulk.py:17:from wepppy.nodir.thaw_freeze import freeze_locked, maintenance_lock
+wepppy/tools/migrations/nodir_bulk.py:233:                target = nodir_resolve(str(wd), root, view="effective")
+wepppy/tools/migrations/nodir_bulk.py:259:                    target = nodir_resolve(str(wd), root, view="effective")
+wepppy/tools/migrations/nodir_bulk.py:287:            if err.code == "NODIR_LOCKED":
+wepppy/tools/migrations/nodir_bulk.py:299:                        "status": "nodir_error",
+wepppy/tools/migrations/nodir_bulk.py:30:        "nodir_error",
+wepppy/tools/migrations/nodir_bulk.py:397:        choices=sorted(NODIR_ROOTS),
+wepppy/tools/migrations/nodir_bulk.py:420:        default=Path("nodir_bulk_migration_audit.jsonl"),
+wepppy/tools/migrations/nodir_bulk.py:43:        if root not in NODIR_ROOTS:
+wepppy/tools/migrations/nodir_bulk.py:440:    roots = args.roots or list(NODIR_ROOTS)
+wepppy/tools/migrations/soils.py:9:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/tools/migrations/watershed.py:10:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/wepp/interchange/hec_ras_buffer.py:27:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_path
+wepppy/weppcloud/routes/diff/diff.py:101:        return _nodir_error_response(err)
+wepppy/weppcloud/routes/diff/diff.py:21:def _nodir_error_response(err: NoDirError):
+wepppy/weppcloud/routes/diff/diff.py:30:def _resolve_diff_target_path(wd_root: str, logical_rel_path: str, *, nodir_view: str) -> str | None:
+wepppy/weppcloud/routes/diff/diff.py:32:        nodir_target = nodir_resolve(wd_root, logical_rel_path, view=nodir_view)
+wepppy/weppcloud/routes/diff/diff.py:36:    if nodir_target is None:
+wepppy/weppcloud/routes/diff/diff.py:49:        nodir_entry = nodir_stat(nodir_target)
+wepppy/weppcloud/routes/diff/diff.py:55:    if nodir_entry.is_dir:
+wepppy/weppcloud/routes/diff/diff.py:6:from wepppy.nodir.errors import NoDirError
+wepppy/weppcloud/routes/diff/diff.py:76:        nodir_view = "effective"
+wepppy/weppcloud/routes/diff/diff.py:7:from wepppy.nodir.fs import resolve as nodir_resolve
+wepppy/weppcloud/routes/diff/diff.py:84:            nodir_view=nodir_view,
+wepppy/weppcloud/routes/diff/diff.py:87:        return _nodir_error_response(err)
+wepppy/weppcloud/routes/diff/diff.py:8:from wepppy.nodir.fs import stat as nodir_stat
+wepppy/weppcloud/routes/diff/diff.py:98:            nodir_view=nodir_view,
+wepppy/weppcloud/routes/diff/diff.py:9:from wepppy.nodir.paths import parse_external_subpath
+wepppy/weppcloud/routes/nodb_api/watar_bp.py:20:from wepppy.nodir.errors import NoDirError
+wepppy/weppcloud/routes/nodb_api/watar_bp.py:21:from wepppy.nodir.wepp_inputs import with_input_file_path
+wepppy/weppcloud/routes/run_0/run_0_bp.py:44:from wepppy.nodir.parquet_sidecars import pick_existing_parquet_relpath
+wepppy/weppcloud/routes/test_bp.py:17:from wepppy.nodir.mutations import enable_default_archive_roots
+wepppy/weppcloud/utils/helpers.py:106:        src_archive = _join(base_root, f"{dirname}.nodir")
+wepppy/weppcloud/utils/helpers.py:118:            _ensure_link(src_archive, _join(run_root, f"{dirname}.nodir"))
+wepppy/weppcloud/utils/helpers.py:71:    When shared inputs have been migrated to `.nodir` archives, link the archive

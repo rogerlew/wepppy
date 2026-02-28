@@ -1,0 +1,63 @@
+{
+  "audit_jsonl": "/tmp/phase8_wepp1_dry_run_audit.jsonl",
+  "duration_seconds": 318.738,
+  "ended_utc": "2026-02-28T03:12:19Z",
+  "file_action_counts": {
+    "conflict": 11,
+    "dedup_deleted_source": 6,
+    "planned": 1554,
+    "skipped": 6281
+  },
+  "host": "wepp1",
+  "mode": "dry-run",
+  "resource_action_counts": {
+    "climate": {
+      "planned": 239
+    },
+    "climate_metric_csv": {
+      "planned": 118
+    },
+    "landuse": {
+      "planned": 237
+    },
+    "soils": {
+      "conflict": 11,
+      "dedup_deleted_source": 3,
+      "planned": 234
+    },
+    "watershed": {
+      "dedup_deleted_source": 3,
+      "planned": 726
+    }
+  },
+  "roots": [
+    "/wc1/runs",
+    "/wc1/batch"
+  ],
+  "run_status_counts": {
+    "dry_run": 252,
+    "error": 460,
+    "skipped": 6281
+  },
+  "started_utc": "2026-02-28T03:07:00Z",
+  "status": "error",
+  "totals": {
+    "files_conflict": 11,
+    "files_dedup_deleted": 0,
+    "files_discovered": 1571,
+    "files_error": 460,
+    "files_moved": 0,
+    "runs_conflict": 0,
+    "runs_discovered": 6993,
+    "runs_dry_run": 252,
+    "runs_eligible": 252,
+    "runs_error": 460,
+    "runs_ok": 0,
+    "runs_processed": 6993,
+    "runs_skipped": 6281
+  },
+  "valid_roots": [
+    "/wc1/runs",
+    "/wc1/batch"
+  ]
+}

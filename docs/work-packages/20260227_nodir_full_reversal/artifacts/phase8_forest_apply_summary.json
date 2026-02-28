@@ -1,0 +1,53 @@
+{
+  "audit_jsonl": "/home/workdir/wepppy/docs/work-packages/20260227_nodir_full_reversal/artifacts/phase8_forest_apply_audit.jsonl",
+  "duration_seconds": 57.708,
+  "ended_utc": "2026-02-27T23:30:43Z",
+  "file_action_counts": {
+    "conflict": 2,
+    "dedup_deleted_source": 10,
+    "skipped": 2733
+  },
+  "host": "forest",
+  "mode": "apply",
+  "resource_action_counts": {
+    "climate": {
+      "dedup_deleted_source": 2
+    },
+    "soils": {
+      "conflict": 2
+    },
+    "watershed": {
+      "dedup_deleted_source": 8
+    }
+  },
+  "roots": [
+    "/wc1/runs",
+    "/wc1/batch"
+  ],
+  "run_status_counts": {
+    "conflict_requires_manual_resolution": 2,
+    "ok": 9,
+    "skipped": 2733
+  },
+  "started_utc": "2026-02-27T23:29:45Z",
+  "status": "ok",
+  "totals": {
+    "files_conflict": 2,
+    "files_dedup_deleted": 10,
+    "files_discovered": 12,
+    "files_error": 0,
+    "files_moved": 0,
+    "runs_conflict": 2,
+    "runs_discovered": 2744,
+    "runs_dry_run": 0,
+    "runs_eligible": 11,
+    "runs_error": 0,
+    "runs_ok": 9,
+    "runs_processed": 2744,
+    "runs_skipped": 2733
+  },
+  "valid_roots": [
+    "/wc1/runs",
+    "/wc1/batch"
+  ]
+}

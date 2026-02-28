@@ -1,0 +1,20 @@
+file_path,subsystem,action,target_phase,priority,blocking_decision,tests_to_run,notes
+wepppy/microservices/rq_engine/ash_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/climate_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/debris_flow_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/export_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/landuse_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/omni_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/project_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/soils_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/treatments_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/upload_climate_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/upload_huc_fire_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/watershed_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/nodb/batch_runner.py,wepppy/nodb,replace,2,high,,wctl run-pytest tests/nodb/test_batch_runner.py,stop_mutate_root_use_in_batch_paths
+wepppy/nodb/mods/omni/omni_mode_build_services.py,wepppy/nodb,replace,2,high,,wctl run-pytest tests/nodb/mods/test_omni.py,remove_mutate_roots_for_new_omni_runs
+wepppy/rq/culvert_rq.py,wepppy/rq,replace,2,high,,wctl run-pytest tests/rq,remove_mutate_root_usage_for_new_jobs
+wepppy/rq/land_and_soil_rq.py,wepppy/rq,replace,2,high,,wctl run-pytest tests/rq,remove_mutate_root_usage_for_new_jobs
+wepppy/rq/project_rq.py,wepppy/rq,replace,2,high,,wctl run-pytest tests/rq,remove_mutate_root_usage_for_new_jobs
+wepppy/weppcloud/routes/test_bp.py,wepppy/weppcloud,replace,2,high,,wctl run-pytest tests/weppcloud/routes/test_test_bp.py tests/weppcloud/utils/test_helpers_paths.py,remove_new_run_archive_linking_and_defaults
+wepppy/weppcloud/utils/helpers.py,wepppy/weppcloud,replace,2,high,,wctl run-pytest tests/weppcloud/routes/test_test_bp.py tests/weppcloud/utils/test_helpers_paths.py,remove_new_run_archive_linking_and_defaults

@@ -1,0 +1,46 @@
+{
+  "audit_jsonl": "/tmp/phase8_wepp1_apply_audit.jsonl",
+  "duration_seconds": 12.958,
+  "ended_utc": "2026-02-28T03:54:36Z",
+  "file_action_counts": {
+    "conflict": 2,
+    "skipped": 1848
+  },
+  "host": "wepp1",
+  "mode": "apply",
+  "resource_action_counts": {
+    "soils": {
+      "conflict": 2
+    }
+  },
+  "roots": [
+    "/wc1/runs",
+    "/wc1/batch"
+  ],
+  "run_status_counts": {
+    "conflict_requires_manual_resolution": 2,
+    "error": 3,
+    "skipped": 1848
+  },
+  "started_utc": "2026-02-28T03:54:23Z",
+  "status": "error",
+  "totals": {
+    "files_conflict": 2,
+    "files_dedup_deleted": 0,
+    "files_discovered": 2,
+    "files_error": 3,
+    "files_moved": 0,
+    "runs_conflict": 2,
+    "runs_discovered": 1853,
+    "runs_dry_run": 0,
+    "runs_eligible": 2,
+    "runs_error": 3,
+    "runs_ok": 0,
+    "runs_processed": 1853,
+    "runs_skipped": 1848
+  },
+  "valid_roots": [
+    "/wc1/runs",
+    "/wc1/batch"
+  ]
+}

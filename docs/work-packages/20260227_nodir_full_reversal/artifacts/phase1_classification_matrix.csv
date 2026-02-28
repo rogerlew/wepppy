@@ -1,0 +1,131 @@
+file_path,subsystem,action,target_phase,priority,blocking_decision,tests_to_run,notes
+tests/microservices/test_diff_nodir.py,tests/microservices,remove,5,high,,wctl run-pytest tests/microservices/test_diff_nodir.py,remove_nodir_specific_test_surface
+tests/microservices/test_files_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_files_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_ash_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_ash_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_climate_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_climate_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_debris_flow_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_debris_flow_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_export_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_export_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_landuse_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_landuse_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_omni_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_project_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_project_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_soils_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_soils_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_treatments_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_treatments_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_upload_climate_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_upload_climate_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_upload_huc_fire_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_upload_huc_fire_routes.py,update_existing_tests_to_directory_only_contract
+tests/microservices/test_rq_engine_watershed_routes.py,tests/microservices,replace,5,medium,,wctl run-pytest tests/microservices/test_rq_engine_watershed_routes.py,update_existing_tests_to_directory_only_contract
+tests/nodb/mods/test_ash_transport_run_ash.py,tests/nodb,replace,5,medium,,wctl run-pytest tests/nodb/mods/test_ash_transport_run_ash.py,update_existing_tests_to_directory_only_contract
+tests/nodb/mods/test_observed_processing.py,tests/nodb,replace,5,medium,,wctl run-pytest tests/nodb/mods/test_observed_processing.py,update_existing_tests_to_directory_only_contract
+tests/nodb/mods/test_omni.py,tests/nodb,replace,5,medium,,wctl run-pytest tests/nodb/mods/test_omni.py,update_existing_tests_to_directory_only_contract
+tests/nodb/test_climate_build_router_services.py,tests/nodb,replace,5,medium,,wctl run-pytest tests/nodb/test_climate_build_router_services.py,update_existing_tests_to_directory_only_contract
+tests/nodb/test_root_dir_materialization.py,tests/nodb,replace,5,medium,,wctl run-pytest tests/nodb/test_root_dir_materialization.py,update_existing_tests_to_directory_only_contract
+tests/nodb/test_wepp_nodir_read_paths.py,tests/nodb,remove,5,high,,wctl run-pytest tests/nodb/test_wepp_nodir_read_paths.py,remove_nodir_specific_test_surface
+tests/nodir/test_archive_fs.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_archive_validation.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_errors.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_lock_runid_scoping.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_materialize.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_mutations.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_parquet_precedence_fs.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_parquet_sidecars.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_paths.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_projections.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_resolve.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_state.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_symlink_security.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_thaw_freeze.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/nodir/test_wepp_inputs.py,tests/nodir,remove,5,high,,wctl run-pytest tests/nodir,remove_nodir_package_tests
+tests/query_engine/test_mcp_router.py,tests/query_engine,replace,5,medium,,wctl run-pytest tests/query_engine/test_mcp_router.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_bootstrap_autocommit_rq.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_bootstrap_autocommit_rq.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_omni_rq.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_omni_rq.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_path_ce_rq.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_path_ce_rq.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_project_rq_archive.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_project_rq_archive.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_project_rq_archive_helpers.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_project_rq_archive_helpers.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_project_rq_ash.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_project_rq_ash.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_project_rq_debris_flow.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_project_rq_debris_flow.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_project_rq_fork.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_project_rq_fork.py,update_existing_tests_to_directory_only_contract
+tests/rq/test_wepp_rq_nodir.py,tests/rq,remove,5,high,,wctl run-pytest tests/rq/test_wepp_rq_nodir.py,remove_nodir_specific_test_surface
+tests/rq/test_weppcloudr_rq.py,tests/rq,replace,5,medium,,wctl run-pytest tests/rq/test_weppcloudr_rq.py,update_existing_tests_to_directory_only_contract
+tests/tools/test_migrations_nodir_bulk.py,tests/tools,remove,5,high,,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,remove_nodir_specific_test_surface
+tests/weppcloud/routes/test_observed_bp.py,tests/weppcloud,replace,5,medium,,wctl run-pytest tests/weppcloud/routes/test_observed_bp.py,update_existing_tests_to_directory_only_contract
+tests/weppcloud/routes/test_test_bp.py,tests/weppcloud,replace,5,medium,,wctl run-pytest tests/weppcloud/routes/test_test_bp.py,update_existing_tests_to_directory_only_contract
+tests/weppcloud/routes/test_watar_bp.py,tests/weppcloud,replace,5,medium,,wctl run-pytest tests/weppcloud/routes/test_watar_bp.py,update_existing_tests_to_directory_only_contract
+tests/weppcloud/utils/test_helpers_paths.py,tests/weppcloud,replace,5,medium,,wctl run-pytest tests/weppcloud/utils/test_helpers_paths.py,update_existing_tests_to_directory_only_contract
+wepppy/climates/climatena_ca/__init__.py,wepppy/climates,replace,4,medium,,wctl run-pytest tests/nodb/test_climate_build_router_services.py,replace_sidecar_lookup_with_directory_files
+wepppy/export/ermit_input.py,wepppy/export,replace,4,medium,,wctl run-pytest tests/nodb tests/rq,replace_archive_materialization_calls
+wepppy/export/gpkg_export.py,wepppy/export,replace,4,medium,,wctl run-pytest tests/nodb tests/rq,replace_archive_materialization_calls
+wepppy/export/prep_details.py,wepppy/export,replace,4,medium,,wctl run-pytest tests/nodb tests/rq,replace_archive_materialization_calls
+wepppy/microservices/_gdalinfo.py,wepppy/microservices,guard,3,medium,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,temporary_archive_access_boundary
+wepppy/microservices/browse/_download.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/browse.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/dtale.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/files_api.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/flow.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/browse/listing.py,wepppy/microservices,guard,3,high,decide_legacy_archive_browse_window,wctl run-pytest tests/microservices/test_files_routes.py,hold_archive_boundary_until_data_cutover_done
+wepppy/microservices/rq_engine/ash_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/climate_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/debris_flow_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/export_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/landuse_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/omni_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/project_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/soils_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/treatments_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/upload_climate_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/upload_huc_fire_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/microservices/rq_engine/watershed_routes.py,wepppy/microservices,replace,2,high,,wctl run-pytest tests/microservices,stop_new_nodir_creation_and_resolve_checks
+wepppy/nodb/batch_runner.py,wepppy/nodb,replace,2,high,,wctl run-pytest tests/nodb/test_batch_runner.py,stop_mutate_root_use_in_batch_paths
+wepppy/nodb/core/climate_build_router.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/landuse.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/ron.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/core/soils.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/watershed.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/watershed_mixins.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/core/wepp.py,wepppy/nodb,replace,4,high,,wctl run-pytest tests/nodb,replace_projection_and_sidecar_reads_with_directory_paths
+wepppy/nodb/duckdb_agents.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/ash_transport/ash.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/disturbed/disturbed.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/omni/README.md,wepppy/nodb,remove,5,low,,wctl doc-lint --path wepppy/nodb/mods/omni/README.md,remove_nodir_specific_module_docs
+wepppy/nodb/mods/omni/omni.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py,wepppy/nodb,guard,3,high,decide_clone_support_for_legacy_archive_runs,wctl run-pytest tests/nodb/mods/test_omni.py,temporary_clone_compatibility_boundary
+wepppy/nodb/mods/omni/omni_mode_build_services.py,wepppy/nodb,replace,2,high,,wctl run-pytest tests/nodb/mods/test_omni.py,remove_mutate_roots_for_new_omni_runs
+wepppy/nodb/mods/omni/omni_station_catalog_service.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/path_ce/data_loader.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/swat/swat.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/swat/swat_recall_mixin.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py,wepppy/nodb,replace,4,medium,,wctl run-pytest tests/nodb,replace_nodir_helpers_in_nodb_modules
+wepppy/nodir/__init__.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/errors.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/fs.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/materialize.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/mutations.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/parquet_sidecars.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/paths.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/projections.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/state.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/thaw_freeze.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/nodir/wepp_inputs.py,wepppy/nodir,remove,4,high,,wctl run-pytest tests/nodir tests/microservices/test_files_routes.py,remove_nodir_runtime_package
+wepppy/query_engine/activate.py,wepppy/query_engine,replace,4,medium,,wctl run-pytest tests/query_engine/test_mcp_router.py,remove_nodir_parquet_override_logic
+wepppy/rq/culvert_rq.py,wepppy/rq,replace,2,high,,wctl run-pytest tests/rq,remove_mutate_root_usage_for_new_jobs
+wepppy/rq/culvert_rq_manifest.py,wepppy/rq,replace,4,medium,,wctl run-pytest tests/rq,replace_archive_path_resolution_helpers
+wepppy/rq/land_and_soil_rq.py,wepppy/rq,replace,2,high,,wctl run-pytest tests/rq,remove_mutate_root_usage_for_new_jobs
+wepppy/rq/omni_rq.py,wepppy/rq,guard,3,high,decide_mixed_state_recovery_cutoff,wctl run-pytest tests/rq,retain_or_remove_mixed_state_recovery_boundary
+wepppy/rq/path_ce_rq.py,wepppy/rq,replace,4,medium,,wctl run-pytest tests/rq,replace_archive_path_resolution_helpers
+wepppy/rq/project_rq.py,wepppy/rq,replace,2,high,,wctl run-pytest tests/rq,remove_mutate_root_usage_for_new_jobs
+wepppy/rq/project_rq_archive.py,wepppy/rq,guard,3,high,decide_nodir_cache_handling_during_cutover,wctl run-pytest tests/rq/test_project_rq_archive.py tests/rq/test_project_rq_fork.py,cache_exclusion_boundary_for_legacy_runs
+wepppy/rq/project_rq_fork.py,wepppy/rq,guard,3,high,decide_nodir_cache_handling_during_cutover,wctl run-pytest tests/rq/test_project_rq_archive.py tests/rq/test_project_rq_fork.py,cache_exclusion_boundary_for_legacy_runs
+wepppy/rq/wepp_rq.py,wepppy/rq,guard,3,high,decide_mixed_state_recovery_cutoff,wctl run-pytest tests/rq,retain_or_remove_mixed_state_recovery_boundary
+wepppy/rq/wepp_rq_stage_helpers.py,wepppy/rq,guard,3,high,decide_mixed_state_recovery_cutoff,wctl run-pytest tests/rq,retain_or_remove_mixed_state_recovery_boundary
+wepppy/rq/wepp_rq_stage_helpers.pyi,wepppy/rq,replace,4,medium,,wctl run-pytest tests/rq,replace_archive_path_resolution_helpers
+wepppy/rq/weppcloudr_rq.py,wepppy/rq,replace,4,medium,,wctl run-pytest tests/rq,replace_archive_path_resolution_helpers
+wepppy/tools/migrations/README.md,wepppy/tools,replace,5,low,,wctl doc-lint --path wepppy/tools/migrations/README.md,document_directory_only_migration_flow
+wepppy/tools/migrations/landuse.py,wepppy/tools,replace,3,medium,,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,retool_migration_helpers_for_directory_roots
+wepppy/tools/migrations/nodir_bulk.py,wepppy/tools,guard,3,high,decide_cli_retention_for_one_time_migration,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,temporary_boundary_for_data_rollback_only
+wepppy/tools/migrations/soils.py,wepppy/tools,replace,3,medium,,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,retool_migration_helpers_for_directory_roots
+wepppy/tools/migrations/watershed.py,wepppy/tools,replace,3,medium,,wctl run-pytest tests/tools/test_migrations_nodir_bulk.py,retool_migration_helpers_for_directory_roots
+wepppy/wepp/interchange/hec_ras_buffer.py,wepppy/wepp,replace,4,medium,,wctl run-pytest tests/rq,replace_parquet_sidecar_resolution
+wepppy/weppcloud/routes/diff/diff.py,wepppy/weppcloud,guard,3,medium,decide_legacy_archive_browse_window,wctl run-pytest tests/weppcloud/routes/test_test_bp.py,temporary_diff_archive_boundary
+wepppy/weppcloud/routes/nodb_api/watar_bp.py,wepppy/weppcloud,replace,4,medium,,wctl run-pytest tests/weppcloud/routes/test_watar_bp.py tests/weppcloud/routes/test_observed_bp.py,replace_input_resolution_with_directory_paths
+wepppy/weppcloud/routes/run_0/run_0_bp.py,wepppy/weppcloud,replace,4,medium,,wctl run-pytest tests/weppcloud/routes/test_watar_bp.py tests/weppcloud/routes/test_observed_bp.py,replace_input_resolution_with_directory_paths
+wepppy/weppcloud/routes/test_bp.py,wepppy/weppcloud,replace,2,high,,wctl run-pytest tests/weppcloud/routes/test_test_bp.py tests/weppcloud/utils/test_helpers_paths.py,remove_new_run_archive_linking_and_defaults
+wepppy/weppcloud/utils/helpers.py,wepppy/weppcloud,replace,2,high,,wctl run-pytest tests/weppcloud/routes/test_test_bp.py tests/weppcloud/utils/test_helpers_paths.py,remove_new_run_archive_linking_and_defaults
