@@ -1,9 +1,10 @@
-# TerrainProcessor Spec
+# TerrainProcessor Concept
 
-> High-level design for a configurable terrain processing DAG that extends
+> Concept document for a configurable terrain processing DAG that extends
 > `WhiteboxToolsTopazEmulator` to handle LiDAR/10m DEMs, road embankment
 > synthesis, culvert enforcement, bounded breach, and multi-watershed
-> delineation.
+> delineation. This document captures design intent and recommended
+> approaches — not a binding implementation specification.
 
 ## Problem Statement
 
@@ -55,7 +56,7 @@ When disabled, the pipeline still runs `breach_depressions` on the raw
 DEM — so it is not "no conditioning" vs "conditioning" but rather
 "breach only" vs "road fill + breakline burn + breach."
 
-### Shortcomings this spec addresses
+### Shortcomings TerrainProcessor addresses
 
 **No granularity.** The toggle is all-or-nothing. Users cannot enable
 road embankment synthesis without breakline burning, or vice versa.
@@ -118,7 +119,7 @@ changed, detected embankment masks, stream networks before and after
 culvert enforcement — so users can inspect intermediate results and
 adjust parameters before proceeding.
 
-## Design Principles
+## Design Intent
 
 1. **Standalone tool, not embedded in the run pipeline.** TerrainProcessor
    is its own interface. Users build a processing pipeline, configure each
@@ -129,9 +130,9 @@ adjust parameters before proceeding.
 2. **Extend, don't replace.** TerrainProcessor composes
    WhiteboxToolsTopazEmulator; the emulator's `@build_step` methods,
    artifact properties, and hook system remain the execution substrate.
-3. **Configuration over code paths.** A single `TerrainConfig` dataclass
-   declares *what* the pipeline should do. The processor translates config
-   into the correct step sequence.
+3. **Configuration over code paths.** A configuration object declares
+   *what* the pipeline should do. The processor translates config into the
+   correct step sequence.
 4. **File artifacts are the DAG edges.** Each step consumes named files and
    produces named files. The "current DEM" is a mutable pointer that
    successive preparation steps update in place.
@@ -144,7 +145,12 @@ adjust parameters before proceeding.
    paths, where outlets snapped to, and what the resulting basins look
    like before any WEPP run begins.
 
-## TerrainConfig
+## TerrainConfig (Exemplary)
+
+The dataclass below is illustrative — it shows the configuration surface
+the processor needs to expose, not a final API. Field names, groupings,
+and defaults will evolve during implementation. The intent is to capture
+the categories of decisions users need to make.
 
 ```
 @dataclass
@@ -203,7 +209,7 @@ class TerrainConfig:
     snap_distance: float = 20.0          # outlet snap to stream (m)
 ```
 
-## Pipeline Phases
+## Pipeline Phases (Conceptual)
 
 ### Phase 0: Validate and Prepare
 
@@ -467,7 +473,7 @@ centerlines. This violates Lindsay's minimum-modification principle:
    a fixed amount, destroying local slope and curvature attributes
    across the entire road network.
 
-### Proposed Strategies
+### Candidate Strategies
 
 **`"constant"` (legacy compatibility)**
 Uniform `+dy` within `buffer_width` of road centerline. Equivalent to
