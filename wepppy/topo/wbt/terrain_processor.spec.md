@@ -29,6 +29,95 @@ local terrain context, creates abrupt elevation discontinuities at buffer
 edges, doesn't vary width with road class, and can double-stamp embankments
 on LiDAR DEMs that already contain road signatures.
 
+## Comparison with Culvert_web_app Hydroenforcement
+
+The Culvert_web_app's hydroenforcement pipeline (in
+`subroutine_nested_watershed_delineation.py`) is the closest existing
+implementation to what TerrainProcessor aims to replace. Understanding its
+limitations motivates the design decisions below.
+
+### What Culvert_web_app does
+
+Hydroenforcement is a single binary toggle ("Required" / "Not Required").
+When enabled, it runs a monolithic 4-step sequence gated by the same
+`hydro_enforcement_select == 'hydroenf_required'` conditional:
+
+1. **Create breaklines** — perpendicular segments at road-stream
+   intersections, extended by a fixed offset (default 10m).
+2. **Fill roads** — `adjust_dem_along_polyline` raises the DEM by a
+   uniform +5m within a 2m buffer around all road centerlines.
+3. **Burn breaklines** — `adjust_dem_along_polyline` lowers the DEM by
+   -10m within a 1m buffer along all breaklines.
+4. **Breach depressions** — unconstrained `wbt.breach_depressions` with
+   `max_depth=None, max_length=None, fill_pits=True`.
+
+When disabled, the pipeline still runs `breach_depressions` on the raw
+DEM — so it is not "no conditioning" vs "conditioning" but rather
+"breach only" vs "road fill + breakline burn + breach."
+
+### Shortcomings this spec addresses
+
+**No granularity.** The toggle is all-or-nothing. Users cannot enable
+road embankment synthesis without breakline burning, or vice versa.
+There is no way to choose breach strategy (fill, bounded breach,
+least-cost breach) or to skip road filling on LiDAR DEMs where roads
+are already represented. TerrainProcessor decomposes these into
+independent, composable pipeline phases with separate configuration
+for road synthesis (Phase 1), conditioning strategy (Phase 2), and
+culvert enforcement (Phase 3).
+
+**Uniform, terrain-unaware modification.** `adjust_dem_along_polyline`
+applies the same +5m offset everywhere regardless of local terrain
+context, road class, or whether the DEM already captures embankments.
+Lindsay (2015) demonstrated that minimizing DEM modification is
+critical — every modified cell corrupts slope, curvature, and
+morphometric attributes. TerrainProcessor's `"profile_relative"`
+strategy adapts to local terrain, only raises where needed, and tapers
+to avoid the abrupt cliff edges that `adjust_dem_along_polyline` creates.
+
+**Unconstrained breach.** The Culvert_web_app calls `breach_depressions`
+with `max_depth=None, max_length=None` — no cost or distance limits.
+Lindsay (2015) explicitly recommends cost-constrained breaching with
+`BreachDepressionsLeastCost` and appropriate `dist` / `max_cost`
+thresholds. On steep terrain, unconstrained breach carves through
+ridgelines into adjacent basins. TerrainProcessor offers
+`breach_least_cost` (Lindsay's recommended approach) and
+`bounded_breach` (fill-first fence for basin boundary integrity).
+
+**No resolution awareness.** The same pipeline runs on any DEM
+resolution. LiDAR DEMs already contain road embankments and don't
+need +5m fill (which doubles the embankment). 10m DEMs lack road
+signatures entirely and need synthesis. 30m DEMs have scale mismatch
+with vector hydrography that neither filling nor breakline burning
+addresses — Lindsay (2016) showed `TopologicalBreachBurn` is needed at
+that scale. TerrainProcessor selects resolution-appropriate defaults
+and guides users toward the minimum-modification pipeline.
+
+**Fixed burn depth.** Breakline burning uses a constant -10m regardless
+of local stream bed elevation or road embankment height. Lindsay (2016)
+recommends `BurnStreamsAtRoads`, which finds the local minimum elevation
+in a corridor and lowers only the higher cells to match — no arbitrary
+burn depth needed. This is the TerrainProcessor default for culvert
+enforcement.
+
+**Minimal user guidance.** The Culvert_web_app provides only three
+sentences of guidance: "Required: Flat terrain where natural flow paths
+are unclear / Not Required: Steep terrain with well-defined drainage
+networks / Consider: Local topography and existing hydrologic
+connectivity." There is no mention of DEM resolution, no quantitative
+thresholds, and no reference to the tradeoffs between breach strategies.
+TerrainProcessor's resolution-specific pipeline recommendations and
+per-step visualization with diff overlays give users the information
+they need to make informed decisions.
+
+**No step-by-step visualization.** The Culvert_web_app runs the full
+pipeline as a background job and shows only the final result.
+TerrainProcessor produces visualization artifacts at every phase —
+hillshade with slope colormap, diff overlays showing what each step
+changed, detected embankment masks, stream networks before and after
+culvert enforcement — so users can inspect intermediate results and
+adjust parameters before proceeding.
+
 ## Design Principles
 
 1. **Standalone tool, not embedded in the run pipeline.** TerrainProcessor
