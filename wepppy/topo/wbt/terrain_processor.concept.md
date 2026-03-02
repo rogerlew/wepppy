@@ -163,7 +163,7 @@ class TerrainConfig:
     # ── Road Embankment Synthesis ──────────────────────────────────
     roads_source: str | None = None       # "upload", "osm", None
     roads_path: str | None = None         # uploaded road vector path
-    osm_highway_filter: tuple[str,...] = (
+    osm_highway_filter: tuple[str,...] = (  # passed to OSM roads module
         "motorway","trunk","primary","secondary",
         "tertiary","unclassified","residential","track",
     )
@@ -228,7 +228,9 @@ raw DEM
   │
   ├─ [if smooth] ──→ _smooth_dem() ──→ dem_smoothed.tif
   │                                       │
-  ├─ [if roads_source] ──→ _acquire_roads() ──→ roads_utm.{geojson,shp}
+  ├─ [if roads_source == "upload"] ──→ roads_utm.{geojson,shp}
+  ├─ [if roads_source == "osm"]    ──→ osm_roads module (server-wide cache)
+  │                                       ──→ roads_utm.{geojson,shp}
   │                              │
   │                    _synthesize_road_embankments() ──→ dem_roads.tif
   │
@@ -238,6 +240,12 @@ raw DEM
 Steps update `self._dem` so subsequent phases see the prepared version.
 A `dem_provenance: list[str]` tracks what was applied (for reproducibility
 metadata in NoDb).
+
+When `roads_source == "osm"`, road acquisition delegates to a separate
+OSM roads module (not part of the TerrainProcessor itself). This module
+maintains a server-wide persistent cache keyed by bbox + highway filter,
+so repeated queries for the same area across different projects and users
+hit the cache rather than Overpass. See "OSM Roads Module" below.
 
 ### Phase 2: Hydrologic Conditioning + Flow Stack
 
@@ -554,6 +562,38 @@ embankment mask on the hillshade. This lets users:
 - Compare detected embankments against the road vector layer to spot
   missing roads.
 
+## OSM Roads Module
+
+Road acquisition from OpenStreetMap is a separate module from the
+TerrainProcessor, shared across the WEPPcloud server. The
+TerrainProcessor calls into it but does not own it.
+
+**Server-wide persistent cache.** OSM Overpass queries are rate-limited
+and slow for large extents. The module maintains a disk-backed cache
+keyed by a normalized bbox + highway filter hash. When a request arrives:
+
+1. Round the bbox to a coarser grid (e.g., 0.01 degree) so nearby queries
+   hit the same cache entry rather than fetching overlapping tiles.
+2. Check the cache. On hit, clip the cached result to the requested extent
+   and return.
+3. On miss, query Overpass, store the result, clip to extent, and return.
+
+Cache entries have a configurable TTL (default: 30 days). OSM road data
+changes infrequently enough that month-scale staleness is acceptable for
+terrain processing.
+
+**Separation of concerns.** The module handles Overpass query construction,
+rate-limit backoff, response parsing (OSM XML/JSON → GeoJSON), coordinate
+reprojection to the project UTM zone, and highway tag → attribute mapping
+(road class, estimated width). The TerrainProcessor receives a road
+GeoJSON and doesn't know whether it came from upload, cache hit, or fresh
+Overpass query.
+
+**Why server-wide, not per-project.** Multiple users working in the same
+geographic area (e.g., a national forest) would otherwise each trigger
+their own Overpass query for the same roads. A shared cache eliminates
+redundant fetches and reduces the risk of hitting Overpass rate limits.
+
 ## Bounded Breach Detail
 
 The breach-into-adjacent-basins problem is particularly acute with LiDAR
@@ -698,11 +738,18 @@ inspection. The user sees what each processing step did before proceeding.
 
 ### Diff overlays
 
-For DEM modification steps (smooth, road fill, breach, culvert burn), the
-UI should offer a toggle between:
+All intermediate DEM TIFFs are retained (e.g., `dem_raw.tif`,
+`dem_smoothed.tif`, `dem_roads.tif`, `relief.tif`, `relief_burned.tif`).
+This enables the UI to compute diffs on-the-fly between any adjacent pair
+without pre-generating diff rasters. For DEM modification steps (smooth,
+road fill, breach, culvert burn), the UI should offer a toggle between:
 - **Absolute view** — hillshade of the output DEM
 - **Diff view** — color-ramped difference from the previous DEM
   (blue = lowered, red = raised, gray = unchanged)
+
+Retaining intermediates also supports phase re-entry: when a user changes
+a parameter and re-runs from an earlier phase, the processor can discard
+only the artifacts downstream of that phase.
 
 This lets users immediately see if breach carved through a ridgeline,
 if road fill created unrealistic spikes, or if smoothing removed a real
@@ -734,9 +781,8 @@ audit, reproducibility, and debugging.
    Should the config expose the algorithm or default to
    FeaturePreservingSmoothing?
 
-2. **OSM road fetch caching.** Overpass queries are rate-limited. Should
-   the processor cache downloaded roads in the working directory and skip
-   re-fetch if the file exists?
+2. ~~**OSM road fetch caching.**~~ Resolved: separate OSM roads module
+   with server-wide persistent cache. See "OSM Roads Module" section.
 
 3. **Bounded breach collar sizing.** The 10-pixel collar is a heuristic.
    Should this be a config parameter, or derived from DEM resolution
@@ -754,9 +800,14 @@ audit, reproducibility, and debugging.
    config fields changed and automatically determine the earliest phase
    to re-enter, or should the user explicitly choose?
 
-6. **Diff raster generation.** Should the processor always produce diff
-   TIFFs between successive DEM versions (adds disk I/O and storage), or
-   should the UI compute diffs on-the-fly from the before/after artifacts?
+6. ~~**Diff raster generation.**~~ Resolved: keep all intermediate TIFFs.
+   Each phase preserves its input and output DEM artifacts (e.g.,
+   `dem_raw.tif`, `dem_smoothed.tif`, `dem_roads.tif`, `relief.tif`,
+   `relief_burned.tif`). The UI computes diffs on-the-fly from adjacent
+   artifacts rather than pre-generating diff TIFFs. Storage cost is
+   acceptable — intermediate DEMs are the same dimensions as the input
+   and compress well, and users need them anyway for re-entry at earlier
+   phases.
 
 ## References
 
