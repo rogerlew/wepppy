@@ -162,16 +162,34 @@ _derive_flow_stack():
 
 **`"fill"`** – `wbt.fill_depressions()`. Conservative. Won't carve through
 ridgelines. Use when basin boundaries matter more than realistic drainage
-paths.
+paths. Lindsay (2015) notes that filling raises all cells within a
+depression to the elevation of the outlet cell — on LiDAR DEMs with road
+embankments, this floods entire valleys upstream of roads, losing all
+surface drainage information within those areas.
 
 **`"breach"`** – `wbt.breach_depressions(fill_pits=True)`. Aggressive.
 Produces more realistic flow paths but can breach into adjacent basins on
 high-relief terrain.
 
 **`"breach_least_cost"`** – `wbt.breach_depressions_least_cost(dist=blc_dist)`.
-Middle ground. The search distance limits how far the breach can reach, but
-the limit is spatial, not topographic — it doesn't know about basin
-boundaries.
+Lindsay & Dhun (2015) least-cost path algorithm. The `dist` parameter
+(`d_max` in the paper) controls maximum breach search distance in grid
+cells. The paper recommends iterative runs with increasing `d_max` (5, 50,
+150, 750, 1500 cells) followed by a final fill for unresolvable pits. The
+WBT tool handles this internally. Set `--max_cost` based on expected
+maximum embankment height to prevent excessive trenching. Set `--fill true`
+to resolve pits exceeding cost/distance thresholds.
+
+On the Rondeau Bay 1m LiDAR dataset (940M cells), the least-cost breach
+correctly resolved 87.7% of major embankment underpasses without any
+ancillary culvert data (Lindsay 2015, Table 2). Minor culverts (ditch-
+connecting) achieved 61.0%. The curved breach channels follow natural
+stream courses, unlike straight-line trenching from other breach methods.
+
+Key limitation: the search distance is spatial, not topographic — the
+algorithm doesn't know about basin boundaries. On steep terrain where a
+narrow ridgeline is closer (in grid cells) than the true outlet path,
+breach can carve through into an adjacent basin.
 
 **`"bounded_breach"`** – Two-pass approach:
 1. Fill depressions to get a conservative DEM.
@@ -188,6 +206,20 @@ basins. The fill acts as a topographic fence.
 ### Phase 3: Culvert Enforcement (conditional, two-pass)
 
 Only executes when `culvert_source is not None`.
+
+Lindsay (2016, p.667) recommends `BurnStreamsAtRoads` as the conservative
+approach for LiDAR DEMs: burn only a short distance upstream/downstream of
+road crossings, preserving the DEM's representation of drainage features
+elsewhere. The tool finds the local minimum elevation in a corridor of
+`width/2` cells upstream and downstream of each stream-road intersection,
+then lowers all higher cells in that corridor to match — no arbitrary
+burn depth needed.
+
+The legacy breakline approach (Culvert_web_app) uses a constant burn
+depth (-10m) along perpendicular breaklines. This is retained for cases
+where `BurnStreamsAtRoads` produces undesirable results (e.g., when the
+local minimum is itself an artifact), but `BurnStreamsAtRoads` should be
+the default.
 
 ```
 [if culvert_source == "auto_intersect"]
@@ -211,6 +243,11 @@ _derive_flow_stack()
 The re-derivation is the reason this is two-pass: the first flow stack
 identifies where streams cross roads; the burn modifies the DEM at those
 crossings; the second flow stack reflects the enforced drainage.
+
+Following Lindsay (2015), the recommended post-burn conditioning is
+`BreachDepressionsLeastCost` (not unconstrained `BreachDepressions`),
+with `fill=true` to resolve remaining pits that exceed the cost/distance
+thresholds.
 
 ### Phase 4: Outlet Resolution
 
@@ -244,11 +281,90 @@ processor's job ends at basin boundaries and stream networks.
 
 ## Road Embankment Synthesis Strategies
 
+### Guiding Principle: Minimize DEM Modification
+
+Lindsay (2015) demonstrated that least-cost breaching modified 80% fewer
+cells and produced 9x less volumetric DEM impact than depression filling
+or stream burning on the Rondeau Bay 1m LiDAR dataset:
+
+| Method | Cells modified | Volumetric impact |
+|--------|---------------|-------------------|
+| Least-cost breach | baseline | 6.2M m³ |
+| Stream burn + fill | 81% more | 33.8M m³ |
+| Depression fill | 86% more | 55.9M m³ |
+
+Lindsay (2016, p.667) explicitly recommends a conservative approach for
+LiDAR DEMs:
+
+> "an alternative, conservative method, may be to only burn a LiDAR DEM
+> for a short distance upstream/downstream of road crossings, with the
+> intent of removing road embankments while preserving the DEM's
+> representation of drainage features elsewhere."
+
+Every cell modified by road embankment synthesis corrupts local slope,
+curvature, and morphometric attributes used by downstream WEPP modeling.
+The strategies below are ordered from least to most DEM modification.
+Users should choose the minimum intervention that achieves hydrologic
+connectivity.
+
+### Recommended Pipelines by DEM Resolution
+
+**LiDAR DEMs (1–3m): No road fill needed.**
+Road embankments are already represented in the DEM. The problem is
+missing culverts, not missing roads. Recommended pipeline:
+
+1. (Optional) Smooth with `FeaturePreservingSmoothing` to reduce noise
+   while retaining drainage features.
+2. `BurnStreamsAtRoads(dem, streams, roads, width)` — localized,
+   elevation-aware road-crossing enforcement using local minimum
+   elevation. Only modifies cells at stream-road intersections.
+3. `BreachDepressionsLeastCost(dem, dist, max_cost, fill=true)` —
+   cost-constrained depression removal for remaining natural depressions.
+   Lindsay (2015) recommends iterative runs with increasing `dist`
+   (e.g., 5, 50, 150, 750 cells) for large DEMs, though the WBT tool
+   handles this internally with a single `--dist` value.
+
+This replaces the Culvert_web_app's 4-step pipeline (create breaklines +
+fill roads + burn breaklines + unconstrained breach) with two tool calls
+that are spatially controlled and elevation-aware.
+
+Use `EmbankmentMapping` (Van Nieuwenhuizen et al. 2021) in the
+visualization layer to *detect* where the DEM already represents road
+embankments — this helps users verify that the LiDAR captured the road
+network before deciding whether additional modification is needed.
+
+**10m DEMs: Road embankment synthesis required.**
+Roads are below the grid resolution. Embankments must be synthesized
+from road vectors (uploaded or fetched from OSM). Recommended pipeline:
+
+1. Acquire road vectors (upload or OSM).
+2. Synthesize embankments using `"profile_relative"` strategy (see below).
+3. `BurnStreamsAtRoads` or `RaiseWalls --breach` at known culvert
+   locations to maintain connectivity.
+4. `BreachDepressionsLeastCost` for remaining depressions.
+
+**30m DEMs (future work): TopologicalBreachBurn.**
+At coarser resolutions, scale mismatch between vector hydrography and
+DEM becomes the dominant problem. Lindsay (2016) showed FillBurn Kappa
+accuracy degraded from 0.953 (SRTM-1) to 0.490 (GTOPO-30), while
+`TopologicalBreachBurn` maintained 0.952 to 0.921 across resolutions.
+TopologicalBreachBurn uses Total Upstream Channel Length (TUCL) to prune
+the vector network to match DEM resolution, then applies a modified
+priority-flood that integrates flow direction assignment with
+topology-preserving breach-burn. This is out of scope for initial
+implementation but should be a follow-up for users working with
+GMTED/SRTM-scale DEMs and mapped hydrography.
+
 ### Why `adjust_dem_along_polyline` Is Inadequate
 
-1. **Uniform constant offset.** Adding +5m everywhere ignores that some
-   road segments sit in valleys (where +5m is reasonable) and others sit
-   on ridges (where +5m creates an unrealistic spike).
+The Culvert_web_app's `adjust_dem_along_polyline` applies a uniform
+constant offset (+5m) within a fixed-width buffer (2m) around road
+centerlines. This violates Lindsay's minimum-modification principle:
+
+1. **Uniform constant offset.** Adding +5m everywhere ignores local
+   terrain context. Roads in valleys need more raise than roads on
+   ridges. A constant offset creates unrealistic spikes on ridgelines
+   and insufficient barriers in valleys.
 2. **Fixed buffer width.** All roads get the same buffer regardless of
    road class. A forest track and a highway get identical treatment.
 3. **Abrupt edges.** The buffer boundary creates a vertical cliff in the
@@ -258,30 +374,48 @@ processor's job ends at basin boundaries and stream networks.
    already appear as embankments. The constant fill doubles the effect.
 5. **No cross-section shape.** Real roads have crowns, shoulders, ditches.
    A flat +5m slab doesn't approximate this.
+6. **Excessive modification.** Every cell under the buffer is altered by
+   a fixed amount, destroying local slope and curvature attributes
+   across the entire road network.
 
 ### Proposed Strategies
 
 **`"constant"` (legacy compatibility)**
 Uniform `+dy` within `buffer_width` of road centerline. Equivalent to
 `adjust_dem_along_polyline(burn=False)`. Retain for backward compatibility
-and simple cases.
+and simple cases. Highest DEM modification footprint.
 
-**`"profile_relative"`**
-1. Sample DEM elevations along the road centerline at regular intervals.
-2. For each sample point, query the local terrain maximum within a
-   search radius (e.g., 2x road width).
-3. Set the road surface elevation to `local_max + margin` (default 2m).
-4. Interpolate between sample points along the road.
-5. Taper the elevation adjustment over the buffer width using a cosine
-   roll-off so there's no abrupt cliff at the buffer edge.
+**`"profile_relative"` (recommended for 10m DEMs)**
+1. Rasterize road centerline (same vector-to-raster pattern as
+   `RaiseWalls`).
+2. Priority-flood expand outward to `road_width/2` (same pattern as
+   `EmbankmentMapping`), tracking perpendicular distance from centerline.
+3. At each cell, query local terrain maximum via `FixedRadiusSearch2D`
+   within a search radius of 2x road width (infrastructure already
+   exists in `EmbankmentMapping`).
+4. Set the road surface elevation to `local_max + margin` (default 2m).
+5. Taper the elevation adjustment over the buffer width using the
+   distance field from the priority-flood. Cosine roll-off prevents
+   the abrupt cliff that `adjust_dem_along_polyline` creates.
 6. Only raise, never lower — if the DEM already exceeds the target
-   (LiDAR captured embankment), leave it alone.
+   (LiDAR captured embankment, or natural ridgeline), leave it alone.
 
 This adapts to local terrain: roads in valleys get raised more, roads on
 ridges get raised less. The taper prevents artificial flow channels along
-buffer edges.
+buffer edges. Modifies fewer cells than `"constant"` because cells
+already above the target are untouched.
 
-**`"cross_section"`**
+Implementation target: a new Rust tool in weppcloud-wbt (working name
+`RaiseRoads` or enhancement to `RaiseWalls`) built from existing
+building blocks:
+- `RaiseWalls` — vector-to-raster road stamping with breach openings
+- `EmbankmentMapping` — priority-flood expansion with distance tracking,
+  `FixedRadiusSearch2D` for local terrain queries, morphometric
+  constraints (width, height, slope)
+- `BurnStreamsAtRoads` — local-minimum corridor logic (invert to
+  "find local maximum in a corridor" for terrain-relative fill)
+
+**`"cross_section"` (forest road inventories)**
 1. Define a parametric road cross-section: crown width, shoulder width,
    shoulder slope, ditch depth, ditch width, backslope angle.
 2. At each point along the road centerline, orient the cross-section
@@ -294,9 +428,9 @@ buffer edges.
    existing DEM (never excavate below existing grade, only build up).
 6. Blend transitions between successive cross-sections.
 
-Most physically realistic but requires more parameters. Appropriate when
-road geometry data includes width, surface type, and ditch presence (e.g.,
-forest road inventories).
+Most physically realistic but requires parameters that are only available
+from forest road inventories (ditch width/depth, surface type). Falls
+back to `"profile_relative"` when cross-section attributes are absent.
 
 ### Road Width Resolution
 
@@ -306,6 +440,24 @@ from road vector attributes in this priority order:
 2. OSM `highway` tag → lookup table (motorway: 12m, trunk: 10m, primary: 8m,
    secondary: 7m, tertiary: 6m, residential: 5m, track: 3m, unclassified: 4m)
 3. Fall back to 5m default
+
+### EmbankmentMapping for Visualization
+
+The `EmbankmentMapping` tool (Van Nieuwenhuizen, Lindsay, DeVries 2021)
+detects and maps existing road embankments in LiDAR DEMs using
+morphometric region-growing from road centerlines. Parameters:
+`min_road_width` (6m), `typical_width` (30m), `max_width` (60m),
+`max_height` (2m), `spillout_slope` (4 deg).
+
+In the TerrainProcessor this is a visualization-only tool, not a DEM
+modifier. Run it on the input LiDAR DEM and overlay the detected
+embankment mask on the hillshade. This lets users:
+- Verify that the LiDAR captured road embankments before skipping
+  road synthesis.
+- Identify where embankments are partial or absent (e.g., recently
+  graded roads, small forest tracks below detection threshold).
+- Compare detected embankments against the road vector layer to spot
+  missing roads.
 
 ## Bounded Breach Detail
 
@@ -412,6 +564,7 @@ inspection. The user sees what each processing step did before proceeding.
 | `dem_smoothed.tif` | Hillshade + slope colormap; diff overlay showing what smoothing changed |
 | `roads_utm.geojson` | Road vectors colored by highway class, overlaid on hillshade |
 | `dem_roads.tif` | Hillshade showing synthesized embankments; diff from pre-road DEM |
+| `embankment_mask.tif` | (LiDAR only) EmbankmentMapping detected embankments overlaid on hillshade; helps verify DEM already captures road network before deciding on synthesis |
 
 ### Phase 2 outputs (Flow Stack)
 
@@ -496,29 +649,56 @@ audit, reproducibility, and debugging.
 
 4. **Cross-section road profile parameters.** For the `"cross_section"`
    strategy, how much parameterization is appropriate? Forest road
-   inventories may have ditch width/depth; OSM roads won't. Should this
-   fall back to `"profile_relative"` when cross-section attributes are
-   absent?
+   inventories may have ditch width/depth; OSM roads won't. Falls back
+   to `"profile_relative"` when cross-section attributes are absent.
 
-5. **BurnStreamsAtRoads vs breakline approach.** BurnStreamsAtRoads
-   (Lindsay 2016) uses local minimum elevation and is more physically
-   grounded. The legacy breakline approach uses constant burn depth. Should
-   breakline be deprecated or retained for cases where BurnStreamsAtRoads
-   produces undesirable results?
-
-6. **Phase re-entry granularity.** When a user adjusts CSA/MCL after
+5. **Phase re-entry granularity.** When a user adjusts CSA/MCL after
    inspecting the stream network, only the flow stack needs re-derivation
    (Phase 2 onward). When they change the road fill strategy, everything
    from Phase 1 onward must re-run. Should the processor track which
    config fields changed and automatically determine the earliest phase
    to re-enter, or should the user explicitly choose?
 
-7. **Diff raster generation.** Should the processor always produce diff
+6. **Diff raster generation.** Should the processor always produce diff
    TIFFs between successive DEM versions (adds disk I/O and storage), or
    should the UI compute diffs on-the-fly from the before/after artifacts?
 
-8. **Road embankment strategy as Rust tool.** The `"profile_relative"`
-   and `"cross_section"` strategies involve per-pixel DEM sampling and
-   local neighborhood queries. These could be Python (rasterio + numpy)
-   or a new WBT Rust tool for performance on large LiDAR DEMs. Which
-   is the right starting point?
+## References
+
+Lindsay JB, Dhun K. 2015. Modelling surface drainage patterns in altered
+landscapes using LiDAR. *International Journal of Geographical Information
+Science* 29(3): 397–411. DOI: 10.1080/13658816.2014.975715
+
+- Introduces the least-cost breaching algorithm (`BreachDepressionsLeastCost`).
+- Key finding: breaching modified 80% fewer cells and produced 9x less
+  volumetric impact than filling or stream burning.
+- Recommended iterative `d_max` strategy (5, 50, 150, 750, 1500 cells).
+- 87.7% accuracy on major embankment underpasses without culvert data.
+- Basis for the `"breach_least_cost"` conditioning strategy and the
+  guidance to prefer breach over fill for LiDAR DEMs.
+
+Lindsay JB. 2016. The practice of DEM stream burning revisited. *Earth
+Surface Processes and Landforms* 41(5): 658–668. DOI: 10.1002/esp.3888
+
+- Introduces `TopologicalBreachBurn` for scale-insensitive stream enforcement.
+- Introduces `BurnStreamsAtRoads` as a conservative LiDAR-specific alternative.
+- Key finding: TopologicalBreachBurn maintained Kappa 0.952–0.921 across
+  resolutions from SRTM-1 to GTOPO-30; FillBurn degraded from 0.953 to 0.490.
+- Recommends burning LiDAR DEMs only at road crossings, preserving
+  the DEM's representation of drainage features elsewhere.
+- Basis for the `BurnStreamsAtRoads` default in Phase 3 and the
+  `TopologicalBreachBurn` future work note for 30m DEMs.
+
+Van Nieuwenhuizen N, Lindsay JB, DeVries B. 2021. Mapping and removing
+road and railway embankments from fine-resolution LiDAR DEMs. *Remote
+Sensing* 13(7): 1308.
+
+- Introduces `EmbankmentMapping` — region-growing embankment detection
+  from road centerlines using morphometric constraints.
+- Parameters: `min_road_width` (6m), `typical_width` (30m), `max_width`
+  (60m), `max_height` (2m), `spillout_slope` (4 deg).
+- Uses `FixedRadiusSearch2D` for IDW interpolation of terrain beneath
+  detected embankments.
+- Basis for the visualization-layer embankment detection and for the
+  building blocks (priority-flood expansion, spatial queries) reused
+  in the `"profile_relative"` road synthesis strategy.
