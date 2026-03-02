@@ -30,6 +30,15 @@ ROOT_ONLY_FILENAMES = frozenset({"exceptions.log", "exception_factory.log"})
 RUN_ALLOWED_TOKEN_CLASSES = frozenset({"session", "user", "service"})
 USER_SERVICE_TOKEN_CLASSES = frozenset({"user", "service"})
 GROUP_USER_TOKEN_ALLOWED_ROLES = frozenset({"admin", "poweruser", "dev", "root"})
+COOKIE_RECOVERABLE_AUTH_MESSAGES = frozenset(
+    {
+        "Token class is not allowed for this endpoint",
+        "Token missing run scope",
+        "Session token missing run scope",
+        "Session token run mismatch",
+        "Token not authorized for run",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -385,6 +394,20 @@ def authorize_run_request(
             bearer_context = resolve_bearer_context(request)
             if bearer_context is not None:
                 return _evaluate_context(bearer_context)
+            if (
+                primary_exc.status_code == 403
+                and primary_exc.message in COOKIE_RECOVERABLE_AUTH_MESSAGES
+            ):
+                # Treat stale/mismatched cookie tokens as anonymous when no bearer token
+                # is available so run-specific routes can trigger canonical re-mint flows.
+                return _evaluate_context(
+                    AuthContext(
+                        claims=None,
+                        token_class=None,
+                        roles=frozenset(),
+                        source="cookie",
+                    )
+                )
         raise primary_exc
 
 

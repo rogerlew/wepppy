@@ -374,6 +374,37 @@ def test_private_browse_uses_bearer_when_cookie_run_scope_mismatch(
     assert "shh" in response.text
 
 
+def test_private_browse_cookie_run_scope_mismatch_without_bearer_redirects_to_remint(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-private-cookie-remint"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-cookie-remint",
+        extra_claims={"runid": "other-run", "session_id": "sid-cookie-remint"},
+    )
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    parsed = urlparse(response.headers["location"])
+    assert parsed.path == f"/weppcloud/runs/{runid}/"
+    next_value = parse_qs(parsed.query).get("next", [""])[0]
+    assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"
+
+
 def test_private_browse_accepts_grouped_run_scoped_cookie_name(
     tmp_path: Path,
     load_secure_browse,
