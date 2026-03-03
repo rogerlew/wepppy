@@ -47,6 +47,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
+FETCH_DEM_AND_BUILD_CHANNELS_TIMEOUT = int(os.getenv("RQ_ENGINE_FETCH_DEM_BUILD_CHANNELS_TIMEOUT", "600"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 UPLOAD_DEM_MAX_DIMENSION = 1024
 UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif",)
@@ -647,7 +648,7 @@ async def fetch_dem_and_build_channels(
                     map_bounds_text,
                     map_object,
                 ),
-                timeout=RQ_TIMEOUT,
+                timeout=FETCH_DEM_AND_BUILD_CHANNELS_TIMEOUT,
             )
             prep.set_rq_job_id("fetch_dem_and_build_channels_rq", job.id)
         return JSONResponse({"job_id": job.id})
