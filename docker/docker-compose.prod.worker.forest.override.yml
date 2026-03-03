@@ -1,0 +1,7 @@
+services:
+  weppcloudr:
+    profiles: ["weppcloudr"]
+
+secrets:
+  redis_password:
+    file: ./secrets/redis_password.wc-prod
