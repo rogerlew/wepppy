@@ -75,6 +75,26 @@ On current hardware, a single WEPP hillslope run takes on the order of seconds, 
 
 The RQ worker pool architecture is well-suited to this workload. Hillslope simulations are embarrassingly parallel — each is independent and can be dispatched to any available worker. With 256 cores across two servers (versus 88 today), the worker pool can sustain far higher job concurrency. Combined with WEPPcloud's batch processing capability, which automates the submission and tracking of multi-watershed runs, the proposed infrastructure enables systematic parameter sweeps and scenario comparisons across the full St. Joe basin without manual intervention.
 
+### Alternative Futures Scenario Modeling
+
+Beyond calibration, a central objective of the I-CREWS project is to evaluate alternative management futures for the St. Joe basin — comparing how different land management strategies affect erosion, sediment delivery, and watershed health under varying climate conditions. This scenario modeling multiplies the compute demand far beyond a single baseline run.
+
+WEPPcloud includes OMNI, a scenario modeling framework that supports a range of land management treatments and disturbance types:
+
+- **Wildfire** — post-fire erosion modeling with spatially distributed burn severity maps
+- **Prescribed fire** — planned burn scenarios with controlled severity and extent
+- **Forest thinning** — selective harvest treatments that alter canopy cover and ground disturbance
+- **Mulching** — post-disturbance surface cover treatments that reduce erosion
+- **Other landuse changes** — grazing, road construction, vegetation recovery, and restoration treatments
+
+Each of these management scenarios can be evaluated under multiple climate regimes:
+
+- **Observed climate** — historical weather records for hindcast validation
+- **Stochastic climate** — statistically generated weather sequences (via CLIGEN) that capture natural variability and enable probabilistic risk assessment
+- **Future climate** — downscaled climate projections (e.g., CMIP scenarios) to evaluate management strategies under changing precipitation and temperature regimes
+
+The combinatorial nature of this analysis — multiple management treatments crossed with multiple climate regimes across 56 tributary watersheds — produces dozens to hundreds of full-basin runs. Each full-basin run requires simulating all 134,033 hillslopes and routing through 151,121 channels. This is the fundamental driver of the compute requirement: not a single model run, but a matrix of alternative futures that must be evaluated systematically to inform land management decisions for the St. Joe basin.
+
 ---
 
 ## Why Dedicated Servers Are Necessary
