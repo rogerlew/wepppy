@@ -43,6 +43,7 @@ Beyond BAER response, WEPPcloud serves a broad user base:
 - **Federal land managers** (USFS, BLM, NRCS) use the platform for watershed assessment, forest management planning, and environmental impact analysis
 - **State agencies** model erosion risk for road construction, timber harvest, and post-fire rehabilitation projects
 - **Academic researchers** use WEPPcloud for hydrological studies, climate change impact analysis, and graduate research
+- **Educators** use WEPPcloud for classroom exercises in hydrology and erosion science, as well as practitioner training for land management professionals
 - **International users** apply the platform to watersheds worldwide for erosion prediction and land management planning
 
 The platform currently serves users across multiple time zones and use cases simultaneously. As the user base grows and project scope expands (particularly with the St. Joe basin initiative), the current infrastructure cannot sustain acceptable response times for all users.
