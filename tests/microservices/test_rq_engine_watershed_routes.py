@@ -168,6 +168,23 @@ def test_upload_dem_success(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     assert payload["result"]["dem_filename"] == "uploaded.tif"
 
 
+def test_validate_dem_dimensions_accepts_limit() -> None:
+    class DummyDs:
+        RasterXSize = watershed_routes.UPLOAD_DEM_MAX_DIMENSION
+        RasterYSize = watershed_routes.UPLOAD_DEM_MAX_DIMENSION
+
+    watershed_routes._validate_dem_dimensions(DummyDs())
+
+
+def test_validate_dem_dimensions_rejects_larger_rasters() -> None:
+    class DummyDs:
+        RasterXSize = watershed_routes.UPLOAD_DEM_MAX_DIMENSION + 1
+        RasterYSize = watershed_routes.UPLOAD_DEM_MAX_DIMENSION
+
+    with pytest.raises(watershed_routes.UploadError, match="2560x2560"):
+        watershed_routes._validate_dem_dimensions(DummyDs())
+
+
 def test_validate_float_dem_rejects_int(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     class DummyBand:
         DataType = 1
