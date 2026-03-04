@@ -1,10 +1,12 @@
 # TerrainProcessor Concept
 
-> Concept document for a configurable terrain processing DAG that extends
-> `WhiteboxToolsTopazEmulator` to handle LiDAR/10m DEMs, road embankment
-> synthesis, culvert enforcement, bounded breach, and multi-watershed
-> delineation. This document captures design intent and recommended
-> approaches — not a binding implementation specification.
+> Concept document for a configurable terrain processing DAG that is
+> independent of `WhiteboxToolsTopazEmulator` while reusing the same
+> working WhiteboxTools primitives (DEM parsing, flow stack derivation,
+> outlet snapping, polygonization utilities). It handles LiDAR/10m DEMs,
+> road embankment synthesis, culvert enforcement, bounded breach, and
+> multi-watershed delineation. This document captures design intent and
+> recommended approaches — not a binding implementation specification.
 
 ## Problem Statement
 
@@ -127,9 +129,11 @@ adjust parameters before proceeding.
    with slope colormap, stream network overlay, watershed boundaries, road
    vectors). Once satisfied, they launch a WEPPcloud run or batch from
    the pipeline's output artifacts.
-2. **Extend, don't replace.** TerrainProcessor composes
-   WhiteboxToolsTopazEmulator; the emulator's `@build_step` methods,
-   artifact properties, and hook system remain the execution substrate.
+2. **Independent module, shared DNA.** TerrainProcessor is not a subclass
+   of `WhiteboxToolsTopazEmulator` and is not framed as TOPAZ emulation.
+   It reuses proven, low-level building blocks (WBT runner setup, DEM
+   metadata parsing, common raster/vector utilities) through shared helper
+   modules, not inheritance.
 3. **Configuration over code paths.** A configuration object declares
    *what* the pipeline should do. The processor translates config into the
    correct step sequence.
@@ -144,6 +148,9 @@ adjust parameters before proceeding.
    what smoothing did, where roads were stamped, how breach changed flow
    paths, where outlets snapped to, and what the resulting basins look
    like before any WEPP run begins.
+7. **Config/runtime separation.** `TerrainConfig` stores user intent and
+   reproducibility parameters; `TerrainProcessor` stores runtime state,
+   resolved inputs, and generated artifacts.
 
 ## TerrainConfig (Exemplary)
 
@@ -157,6 +164,10 @@ the categories of decisions users need to make.
 class TerrainConfig:
     # ── DEM Preprocessing ──────────────────────────────────────────
     smooth: bool = False
+    smooth_algorithm: str = "feature_preserving"
+        # "feature_preserving" – WBT FeaturePreservingSmoothing (default)
+        # "gaussian"           – Gaussian smoothing
+        # "mean"               – Mean/box filter smoothing
     smooth_filter_size: int = 11          # kernel for FeaturePreservingSmoothing
     smooth_max_diff: float = 0.5          # max elevation change threshold (m)
 
@@ -212,6 +223,36 @@ class TerrainConfig:
     outlets: list[tuple[float,float]] | None = None  # (lng, lat) pairs
     snap_distance: float = 20.0          # outlet snap to stream (m)
 ```
+
+### TerrainConfig vs TerrainProcessor Attributes
+
+`TerrainConfig` should contain only user-selected parameters that define
+the intended processing behavior and must round-trip into NoDb for
+reproducibility.
+
+Examples that belong in `TerrainConfig`:
+- Smoothing settings (`smooth`, `smooth_algorithm`, `smooth_filter_size`, `smooth_max_diff`)
+- Road sourcing/synthesis settings (`roads_source`, `road_fill_strategy`, widths/margins)
+- Conditioning settings (`conditioning`, `blc_dist_m`, `blc_max_cost`, `blc_fill`)
+- Culvert enforcement settings (`enforce_culverts`, source/method, burn widths)
+- Channel extraction and outlet-mode settings (`csa`, `mcl`, `outlet_mode`, `outlets`)
+
+`TerrainProcessor` should own runtime/derived attributes that are not
+part of user intent and may change during one run.
+
+Examples that belong in `TerrainProcessor` state:
+- Workspace/runtime handles (`wbt_wd`, logger, WBT runner instance)
+- Derived DEM metadata (`cellsize`, `epsg`, transform, extents)
+- Runtime pointers (`current_dem_path`, current phase, selected mask paths)
+- Resolved inputs (`resolved_roads_path`, resolved culvert intersections)
+- Artifact registry/index (`artifacts_by_phase`, created file paths)
+- Execution telemetry (`provenance`, warnings, elapsed timings, diagnostics)
+- Re-entry bookkeeping (which phases are invalidated by config deltas)
+
+Rule of thumb: if changing a value should require re-running a phase and
+must be persisted for audit/replay, it belongs in `TerrainConfig`; if the
+value is discovered/produced while executing, it belongs in
+`TerrainProcessor`.
 
 ## Pipeline Phases (Conceptual)
 
@@ -283,7 +324,7 @@ high-relief terrain.
 Lindsay & Dhun (2015) least-cost path algorithm. The `dist` parameter
 (`d_max` in the paper) controls maximum breach search distance. The paper's
 examples are in grid cells (5, 50, 150, 750, 1500 cells); TerrainProcessor
-stores `blc_dist_m` in meters for API consistency with existing emulator
+stores `blc_dist_m` in meters for API consistency with existing WBT backend
 contracts and converts internally as needed. Set `--max_cost` based on expected
 maximum embankment height to prevent excessive trenching. Set `--fill true`
 to resolve pits exceeding cost/distance thresholds.
@@ -548,6 +589,14 @@ Most physically realistic but requires parameters that are only available
 from forest road inventories (ditch width/depth, surface type). Falls
 back to `"profile_relative"` when cross-section attributes are absent.
 
+For unpaved roads (for example `track`, `unclassified`, or roads tagged
+`surface=gravel|dirt|unpaved`) the processor should use a reasonable
+default cross-section template when full inventory attributes are missing
+(shallow ditch, narrower crown/shoulders, conservative backslope), while
+still allowing users to override parameters through uploaded road GeoJSON
+attributes (for example `crown_width_m`, `ditch_depth_m`,
+`shoulder_slope`, `backslope_angle_deg`).
+
 ### Road Width Resolution
 
 When `road_buffer_width is None`, the processor attempts to read width
@@ -767,6 +816,11 @@ Retaining intermediates also supports phase re-entry: when a user changes
 a parameter and re-runs from an earlier phase, the processor can discard
 only the artifacts downstream of that phase.
 
+Phase re-entry should be dependency-driven: the processor tracks field-to-
+phase dependencies and automatically computes the earliest invalidated
+phase from config deltas (for example `csa`/`mcl` invalidates Phase 2+,
+while road synthesis strategy changes invalidate Phase 1+).
+
 This lets users immediately see if breach carved through a ridgeline,
 if road fill created unrealistic spikes, or if smoothing removed a real
 drainage feature.
@@ -792,10 +846,10 @@ audit, reproducibility, and debugging.
 
 ## Open Questions
 
-1. **Smooth algorithm choice.** WBT offers `FeaturePreservingSmoothing`
-   (edge-preserving, good for LiDAR) and various Gaussian/mean filters.
-   Should the config expose the algorithm or default to
-   FeaturePreservingSmoothing?
+1. ~~**Smooth algorithm choice.**~~ Resolved: expose
+   `smooth_algorithm` selections (`feature_preserving`, `gaussian`,
+   `mean`) and default to `feature_preserving`
+   (`FeaturePreservingSmoothing`).
 
 2. ~~**OSM road fetch caching.**~~ Resolved: separate OSM roads module
    with server-wide persistent cache. See "OSM Roads Module" section.
@@ -803,17 +857,15 @@ audit, reproducibility, and debugging.
 3. ~~**Bounded breach collar sizing.**~~ Resolved: expose
    `bounded_breach_collar_m` and default to `10 * cellsize` when unset.
 
-4. **Cross-section road profile parameters.** For the `"cross_section"`
-   strategy, how much parameterization is appropriate? Forest road
-   inventories may have ditch width/depth; OSM roads won't. Falls back
-   to `"profile_relative"` when cross-section attributes are absent.
+4. ~~**Cross-section road profile parameters.**~~ Resolved: support
+   GeoJSON road-attribute overrides for cross-section fields and use a
+   reasonable unpaved-road default template when inventory attributes are
+   incomplete; still fall back to `"profile_relative"` when cross-section
+   mode is not feasible.
 
-5. **Phase re-entry granularity.** When a user adjusts CSA/MCL after
-   inspecting the stream network, only the flow stack needs re-derivation
-   (Phase 2 onward). When they change the road fill strategy, everything
-   from Phase 1 onward must re-run. Should the processor track which
-   config fields changed and automatically determine the earliest phase
-   to re-enter, or should the user explicitly choose?
+5. ~~**Phase re-entry granularity.**~~ Resolved: the processor tracks
+   config-field dependencies and automatically determines the earliest
+   re-entry phase from config deltas.
 
 6. ~~**Diff raster generation.**~~ Resolved: keep all intermediate TIFFs.
    Each phase preserves its input and output DEM artifacts (e.g.,
