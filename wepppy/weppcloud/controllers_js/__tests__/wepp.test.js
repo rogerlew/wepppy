@@ -33,6 +33,7 @@ describe("Wepp controller", () => {
                 <input id="baseflow" value="">
                 <input id="sediment" value="">
                 <button type="button" data-wepp-action="run"></button>
+                <button type="button" data-wepp-action="prep-watershed"></button>
                 <input type="checkbox" data-wepp-routine="pmet">
                 <select id="reveg_scenario" data-wepp-role="reveg-scenario">
                     <option value="">Observed</option>
@@ -186,6 +187,27 @@ describe("Wepp controller", () => {
         expect(pollCompletionValues).toEqual(["WEPP_RUN_TASK_COMPLETED"]);
     });
 
+    test("prepWatershedOnly submits JSON payload and sets prep completion event", async () => {
+        const pollCompletionValues = [];
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+
+        const prepButton = document.querySelector('[data-wepp-action="prep-watershed"]');
+        prepButton.dispatchEvent(new Event("click", { bubbles: true }));
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/prep-wepp-watershed",
+            expect.objectContaining({ clip_soils: true, initial_sat: "0.3" }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), "job-1");
+        expect(pollCompletionValues).toEqual(["WEPP_PREP_TASK_COMPLETED"]);
+    });
+
     test("runWatershed handles message-only responses without undefined job id", async () => {
         postJsonMock.mockResolvedValueOnce({ body: { message: "Set wepp inputs for batch processing" } });
         const completed = jest.fn();
@@ -323,6 +345,28 @@ describe("Wepp controller", () => {
         expect(observedInstance.onWeppRunCompleted).toHaveBeenCalledTimes(1);
     });
 
+    test("prep completion trigger is idempotent and does not refresh report", () => {
+        const observedInstance = { onWeppRunCompleted: jest.fn() };
+        global.Observed.getInstance.mockReturnValue(observedInstance);
+
+        const reportSpy = jest.spyOn(wepp, "report").mockImplementation(() => {});
+        const prepCompleted = jest.fn();
+        wepp.events.on("wepp:prep_only:completed", prepCompleted);
+
+        wepp.prepWatershedOnly();
+        return Promise.resolve()
+            .then(() => Promise.resolve())
+            .then(() => {
+                wepp.triggerEvent("WEPP_PREP_TASK_COMPLETED");
+                wepp.triggerEvent("WEPP_PREP_TASK_COMPLETED");
+
+                expect(controlBaseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+                expect(reportSpy).not.toHaveBeenCalled();
+                expect(observedInstance.onWeppRunCompleted).not.toHaveBeenCalled();
+                expect(prepCompleted).toHaveBeenCalledTimes(1);
+            });
+    });
+
     test("poll failure pushes stacktrace and emits job error", async () => {
         getJsonMock.mockResolvedValueOnce({ exc_info: "trace line" });
         wepp.rq_job_id = "job-123";
@@ -330,8 +374,9 @@ describe("Wepp controller", () => {
         wepp.handle_job_status_response(wepp, { status: "failed" });
         await Promise.resolve();
         await Promise.resolve();
+        await Promise.resolve();
 
-        expect(getJsonMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(getJsonMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(controlBaseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             wepp,
             expect.objectContaining({
@@ -444,6 +489,24 @@ describe("Wepp controller", () => {
         wepp.triggerEvent("WEPP_RUN_TASK_COMPLETED", { source: "status" });
 
         expect(completed).toHaveBeenCalledWith(expect.objectContaining({ source: "status" }));
+        expect(runCompleted).not.toHaveBeenCalled();
+    });
+
+    test("bootstrap restores prep-only completion event namespace", () => {
+        const prepCompleted = jest.fn();
+        const runCompleted = jest.fn();
+        wepp.events.on("wepp:prep_only:completed", prepCompleted);
+        wepp.events.on("wepp:run:completed", runCompleted);
+
+        wepp.bootstrap({
+            jobIds: { prep_wepp_watershed_rq: "wepp-prep-job" },
+            data: { wepp: { hasRun: false } }
+        });
+
+        wepp.triggerEvent("WEPP_PREP_TASK_COMPLETED", { source: "status" });
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "wepp-prep-job");
+        expect(prepCompleted).toHaveBeenCalledWith(expect.objectContaining({ source: "status" }));
         expect(runCompleted).not.toHaveBeenCalled();
     });
 });

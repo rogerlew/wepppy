@@ -24,6 +24,7 @@ PATHS_REQUIRING_400 = {
     "/api/runs/{runid}/{config}/delete-archive",
     "/api/runs/{runid}/{config}/fetch-dem-and-build-channels",
     "/api/runs/{runid}/{config}/post-dss-export-rq",
+    "/api/runs/{runid}/{config}/prep-wepp-watershed",
     "/api/runs/{runid}/{config}/restore-archive",
     "/api/runs/{runid}/{config}/run-ash",
     "/api/runs/{runid}/{config}/run-debris-flow",

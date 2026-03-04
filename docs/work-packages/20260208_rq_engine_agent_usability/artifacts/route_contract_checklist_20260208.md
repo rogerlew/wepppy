@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **51**
+- Total frozen routes covered: **53**
 
 ## Contract Matrix
 
@@ -43,6 +43,7 @@ Guarded by:
 | `POST` | `/api/runs/{runid}/{config}/fetch-dem-and-build-channels` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/fork` | Optional JWT; anonymous CAPTCHA path | `rq:enqueue` (if bearer token is used) | mutating | async enqueue | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/post-dss-export-rq` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `POST` | `/api/runs/{runid}/{config}/prep-wepp-watershed` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/restore-archive` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-ash` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-debris-flow` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |

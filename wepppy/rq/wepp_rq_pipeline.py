@@ -60,6 +60,26 @@ def enqueue_log_complete(
     )
 
 
+def enqueue_log_prep_complete(
+    q: Queue,
+    parent_job: Job,
+    runid: str,
+    *,
+    tasks: Any,
+    kwargs: Optional[dict[str, Any]] = None,
+    depends_on: Any = None,
+) -> Job:
+    return _enqueue(
+        q,
+        parent_job,
+        key="jobs:6,func:_log_prep_complete_rq",
+        func=tasks._log_prep_complete_rq,
+        args=(runid,),
+        kwargs=kwargs,
+        depends_on=depends_on,
+    )
+
+
 def enqueue_wepp_pipeline(
     q: Queue,
     parent_job: Job,
@@ -425,6 +445,104 @@ def enqueue_wepp_pipeline(
             "commit_stage": "WEPP pipeline",
         },
         depends_on=final_dependencies,
+    )
+
+
+def enqueue_wepp_prep_only_pipeline(
+    q: Queue,
+    parent_job: Job,
+    runid: str,
+    *,
+    wepp: Any,
+    tasks: Any,
+    timeout: int,
+) -> Job:
+    jobs0_hillslopes_prep: list[Job] = []
+
+    if wepp.multi_ofe:
+        jobs0_hillslopes_prep.append(
+            _enqueue(
+                q,
+                parent_job,
+                key="jobs:0,func:_prep_multi_ofe_rq",
+                func=tasks._prep_multi_ofe_rq,
+                args=(runid,),
+                timeout="4h",
+            )
+        )
+    else:
+        jobs0_hillslopes_prep.append(
+            _enqueue(
+                q,
+                parent_job,
+                key="jobs:0,func:_prep_slopes_rq",
+                func=tasks._prep_slopes_rq,
+                args=(runid,),
+                timeout="4h",
+            )
+        )
+        jobs0_hillslopes_prep.append(
+            _enqueue(
+                q,
+                parent_job,
+                key="jobs:0,func:_prep_managements_rq",
+                func=tasks._prep_managements_rq,
+                args=(runid,),
+                timeout="4h",
+            )
+        )
+        jobs0_hillslopes_prep.append(
+            _enqueue(
+                q,
+                parent_job,
+                key="jobs:0,func:_prep_soils_rq",
+                func=tasks._prep_soils_rq,
+                args=(runid,),
+                timeout="4h",
+            )
+        )
+
+    jobs0_hillslopes_prep.append(
+        _enqueue(
+            q,
+            parent_job,
+            key="jobs:0,func:_prep_climates_rq",
+            func=tasks._prep_climates_rq,
+            args=(runid,),
+            timeout="4h",
+        )
+    )
+
+    job_prep_remaining = _enqueue(
+        q,
+        parent_job,
+        key="jobs:0,func:_prep_remaining_rq",
+        func=tasks._prep_remaining_rq,
+        args=(runid,),
+        timeout="4h",
+        depends_on=jobs0_hillslopes_prep,
+    )
+
+    job_watershed_prep = _enqueue(
+        q,
+        parent_job,
+        key="jobs:2,func:_prep_watershed_rq",
+        func=tasks._prep_watershed_rq,
+        args=(runid,),
+        timeout=timeout,
+        depends_on=job_prep_remaining,
+    )
+
+    return enqueue_log_prep_complete(
+        q,
+        parent_job,
+        runid,
+        tasks=tasks,
+        kwargs={
+            "auto_commit_inputs": True,
+            "commit_stage": "WEPP prep-only pipeline",
+        },
+        depends_on=job_watershed_prep,
     )
 
 

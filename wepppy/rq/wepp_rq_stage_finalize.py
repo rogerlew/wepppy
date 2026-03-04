@@ -109,3 +109,40 @@ def _log_complete_rq(
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_finalize.py:107", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+
+def _log_prep_complete_rq(
+    runid: str,
+    auto_commit_inputs: bool = False,
+    commit_stage: str = "WEPP prep-only pipeline",
+    *,
+    send_message: Callable[[str], None] | None = None,
+) -> None:
+    """Record prep-only completion metadata and emit prep completion trigger."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        if auto_commit_inputs:
+            wepp = Wepp.getInstance(wd)
+            _bootstrap_autocommit_with_lock(
+                runid,
+                wepp,
+                commit_stage,
+                actor=_bootstrap_autocommit_actor(job),
+            )
+
+        if send_message is not None:
+            send_message(f":construction: WEPP prep-only complete for {runid}")
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   wepp WEPP_PREP_TASK_COMPLETED')
+
+    except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_finalize.py:147", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise

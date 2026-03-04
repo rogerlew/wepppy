@@ -221,6 +221,100 @@ def test_log_complete_logs_when_redisprep_is_missing(monkeypatch: pytest.MonkeyP
     assert any("Skipping run_wepp_watershed prep timestamp" in msg for msg in log_messages)
 
 
+def test_log_prep_complete_emits_prep_trigger_without_timestamp(monkeypatch: pytest.MonkeyPatch) -> None:
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(wepp_rq, "get_current_job", lambda: SimpleNamespace(id="job-1"))
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        wepp_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((str(channel), str(message))),
+    )
+    monkeypatch.setattr(
+        wepp_rq.RedisPrep,
+        "getInstance",
+        lambda _wd: (_ for _ in ()).throw(AssertionError("prep finalize should not touch RedisPrep")),
+    )
+    monkeypatch.setattr(
+        wepp_rq.Ron,
+        "getInstance",
+        lambda _wd: SimpleNamespace(name="", scenario="", config_stem="cfg"),
+    )
+    monkeypatch.setattr(wepp_rq, "send_discord_message", None)
+
+    wepp_rq._log_prep_complete_rq("ab-run")
+
+    assert any("WEPP_PREP_TASK_COMPLETED" in message for _channel, message in published)
+
+
+def test_prep_watershed_enqueue_uses_prep_only_pipeline(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_rq, "_recover_mixed_nodir_roots", lambda wd, roots=("watershed",): ())
+    monkeypatch.setattr(wepp_rq, "_assert_supported_climate", lambda climate: None)
+
+    wepp_controller = SimpleNamespace(
+        islocked=lambda: False,
+        ensure_bootstrap_main=lambda: None,
+        clean=lambda: None,
+        _check_and_set_baseflow_map=lambda: None,
+        _check_and_set_phosphorus_map=lambda: None,
+        wepp_bin="wepp_bin",
+        logger=SimpleNamespace(info=lambda *args, **kwargs: None),
+    )
+    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda _wd: wepp_controller)
+    monkeypatch.setattr(wepp_rq.Climate, "getInstance", lambda _wd: SimpleNamespace())
+
+    class _DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            return None
+
+    class _DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(wepp_rq, "Queue", _DummyQueue)
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **_kwargs: _DummyRedis())
+
+    called: dict[str, object] = {}
+
+    def _fake_enqueue_prep_only_pipeline(q, parent_job, runid, *, wepp, tasks, timeout):
+        called.update(
+            {
+                "queue_type": type(q).__name__,
+                "parent_job_id": parent_job.id,
+                "runid": runid,
+                "wepp_is_controller": wepp is wepp_controller,
+                "tasks_is_module": tasks is wepp_rq,
+                "timeout": timeout,
+            }
+        )
+        return SimpleNamespace(id="job-final")
+
+    monkeypatch.setattr(
+        wepp_rq._pipeline,
+        "enqueue_wepp_prep_only_pipeline",
+        _fake_enqueue_prep_only_pipeline,
+    )
+
+    final_job = wepp_rq.prep_wepp_watershed_rq("ab-run")
+
+    assert final_job.id == "job-final"
+    assert called == {
+        "queue_type": "_DummyQueue",
+        "parent_job_id": "parent-job",
+        "runid": "ab-run",
+        "wepp_is_controller": True,
+        "tasks_is_module": True,
+        "timeout": wepp_rq.TIMEOUT,
+    }
+
+
 def test_standard_watershed_enqueue_sets_autocommit(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
     monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)

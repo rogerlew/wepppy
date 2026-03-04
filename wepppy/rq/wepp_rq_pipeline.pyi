@@ -15,6 +15,26 @@ def enqueue_log_complete(
     depends_on: Any = ...,
 ) -> Job: ...
 
+def enqueue_log_prep_complete(
+    q: Queue,
+    parent_job: Job,
+    runid: str,
+    *,
+    tasks: Any,
+    kwargs: Optional[dict[str, Any]] = ...,
+    depends_on: Any = ...,
+) -> Job: ...
+
+def enqueue_wepp_prep_only_pipeline(
+    q: Queue,
+    parent_job: Job,
+    runid: str,
+    *,
+    wepp: Any,
+    tasks: Any,
+    timeout: int,
+) -> Job: ...
+
 def enqueue_wepp_pipeline(
     q: Queue,
     parent_job: Job,

@@ -13,7 +13,7 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron, Soils, Watershed, Wepp
 from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.rq.wepp_rq import run_wepp_rq, run_wepp_watershed_rq
+from wepppy.rq.wepp_rq import prep_wepp_watershed_rq, run_wepp_rq, run_wepp_watershed_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -279,6 +279,57 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         request,
         job_fn=run_wepp_watershed_rq,
         job_key="run_wepp_watershed_rq",
+        boolean_fields=boolean_fields,
+    )
+
+
+@router.post(
+    "/runs/{runid}/{config}/prep-wepp-watershed",
+    summary="Prepare WEPP hillslope and watershed inputs only",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates WEPP/soil/watershed run options from payload and, outside batch mode, "
+        "asynchronously enqueues prep-only hillslope + watershed input generation."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("prep_wepp_watershed"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description=(
+            "WEPP prep-only inputs accepted; returns batch update message or enqueued `job_id`."
+        ),
+        extra={
+            400: "WEPP payload validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
+async def prep_wepp_watershed(runid: str, config: str, request: Request) -> JSONResponse:
+    try:
+        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:
+        logger.exception("rq-engine prep-wepp-watershed auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    boolean_fields = {
+        "clip_soils",
+        "clip_hillslopes",
+        "prep_details_on_run_completion",
+        "arc_export_on_run_completion",
+        "legacy_arc_export_on_run_completion",
+        "dss_export_on_run_completion",
+    }
+    for i in range(1, 6):
+        boolean_fields.add(f"dss_export_exclude_order_{i}")
+
+    return await _handle_run_wepp_request(
+        runid,
+        config,
+        request,
+        job_fn=prep_wepp_watershed_rq,
+        job_key="prep_wepp_watershed_rq",
         boolean_fields=boolean_fields,
     )
 

@@ -647,6 +647,67 @@ def run_wepp_watershed_rq(runid: str) -> Job:
 
 
 @with_exception_logging
+def prep_wepp_watershed_rq(runid: str) -> Job:
+    """Enqueue prep-only WEPP input generation for hillslopes + watershed."""
+    try:
+        job = get_current_job()
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        wd = get_wd(runid)
+        wepp = Wepp.getInstance(wd)
+
+        recovered_roots = _recover_mixed_nodir_roots(wd)
+        if recovered_roots:
+            recovered_txt = ", ".join(recovered_roots)
+            recovery_msg = f"Recovered mixed NoDir roots before {func_name}({runid}): {recovered_txt}"
+            wepp.logger.warning(recovery_msg)
+            StatusMessenger.publish(status_channel, recovery_msg)
+
+        if wepp.islocked():
+            raise Exception(f'{runid} is locked')
+
+        wepp.ensure_bootstrap_main()
+
+        wepp.logger.info('Preparing WEPP inputs only\n')
+
+        # quick prep operations that require locking
+        wepp._check_and_set_baseflow_map()
+        wepp._check_and_set_phosphorus_map()
+
+        climate = Climate.getInstance(wd)
+        _assert_supported_climate(climate)
+
+        wepp.logger.info('    wepp_bin:{}'.format(wepp.wepp_bin))
+
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job6_finalfinal = _pipeline.enqueue_wepp_prep_only_pipeline(
+                q,
+                job,
+                runid,
+                wepp=wepp,
+                tasks=sys.modules[__name__],
+                timeout=TIMEOUT,
+            )
+
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job6_finalfinal.id}',
+        )
+
+    except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:744", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+    return job6_finalfinal
+
+
+@with_exception_logging
 def run_wepp_watershed_noprep_rq(runid: str) -> Job:
     """Enqueue watershed-only WEPP execution using existing inputs (no prep)."""
     try:
@@ -838,4 +899,19 @@ def _log_complete_rq(
         auto_commit_inputs=auto_commit_inputs,
         commit_stage=commit_stage,
         send_message=send_discord_message,
+    )
+
+
+@with_exception_logging
+def _log_prep_complete_rq(
+    runid: str,
+    auto_commit_inputs: bool = False,
+    commit_stage: str = "WEPP prep-only pipeline",
+) -> None:
+    _sync_stage_finalize_compat()
+    return _stage_finalize._log_prep_complete_rq(
+        runid,
+        auto_commit_inputs=auto_commit_inputs,
+        commit_stage=commit_stage,
+        send_message=None,
     )

@@ -21,3 +21,11 @@ def _log_complete_rq(
     *,
     send_message: Callable[[str], None] | None = ...,
 ) -> None: ...
+
+def _log_prep_complete_rq(
+    runid: str,
+    auto_commit_inputs: bool = ...,
+    commit_stage: str = ...,
+    *,
+    send_message: Callable[[str], None] | None = ...,
+) -> None: ...

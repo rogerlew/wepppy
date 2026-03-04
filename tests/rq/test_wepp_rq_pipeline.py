@@ -262,3 +262,57 @@ def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_ena
     assert len(interchange_dependencies) == 2
     assert interchange_dependencies[0].id == run_hillslopes_call["job"].id
     assert interchange_dependencies[1].id == swat_build_call["job"].id
+
+
+def test_enqueue_wepp_prep_only_pipeline_skips_run_and_postrun_jobs() -> None:
+    q = _DummyQueue()
+    parent_job = _make_parent_job()
+    tasks = SimpleNamespace(
+        _prep_multi_ofe_rq=object(),
+        _prep_slopes_rq=object(),
+        _prep_managements_rq=object(),
+        _prep_soils_rq=object(),
+        _prep_climates_rq=object(),
+        _prep_remaining_rq=object(),
+        _prep_watershed_rq=object(),
+        _run_hillslopes_rq=object(),
+        run_watershed_rq=object(),
+        run_ss_batch_watershed_rq=object(),
+        _post_run_cleanup_out_rq=object(),
+        _post_watershed_interchange_rq=object(),
+        _post_make_loss_grid_rq=object(),
+        _log_complete_rq=object(),
+        _log_prep_complete_rq=object(),
+    )
+    wepp = SimpleNamespace(multi_ofe=False)
+
+    final_job = pipeline.enqueue_wepp_prep_only_pipeline(
+        q,
+        parent_job,
+        "run-4",
+        wepp=wepp,
+        tasks=tasks,
+        timeout=43_200,
+    )
+
+    call_funcs = [call["func"] for call in q.calls]
+    assert tasks._prep_slopes_rq in call_funcs
+    assert tasks._prep_managements_rq in call_funcs
+    assert tasks._prep_soils_rq in call_funcs
+    assert tasks._prep_climates_rq in call_funcs
+    assert tasks._prep_remaining_rq in call_funcs
+    assert tasks._prep_watershed_rq in call_funcs
+    assert tasks._run_hillslopes_rq not in call_funcs
+    assert tasks.run_watershed_rq not in call_funcs
+    assert tasks.run_ss_batch_watershed_rq not in call_funcs
+    assert tasks._post_run_cleanup_out_rq not in call_funcs
+    assert tasks._post_watershed_interchange_rq not in call_funcs
+    assert tasks._post_make_loss_grid_rq not in call_funcs
+    assert tasks._log_complete_rq not in call_funcs
+
+    assert q.calls[-1]["func"] is tasks._log_prep_complete_rq
+    assert q.calls[-1]["kwargs"] == {
+        "auto_commit_inputs": True,
+        "commit_stage": "WEPP prep-only pipeline",
+    }
+    assert parent_job.meta["jobs:6,func:_log_prep_complete_rq"] == final_job.id
