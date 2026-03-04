@@ -83,7 +83,14 @@ def _prepare_totwatsed3(source_tot2: Path, target_tot3: Path) -> None:
             "day_of_month": df["Day"].astype(int),
             "water_year": df["Water Year"].astype(int),
             "runvol": runoff_m3,
-            "tdet": df["Sed Del (kg)"].astype(float),
+            # Offset tdet so tests can verify return-period staging prefers class sums.
+            "tdet": df["Sed Del (kg)"].astype(float) + 10.0,
+            "tdep": 0.0,
+            "seddep_1": df["Sed Del (kg)"].astype(float),
+            "seddep_2": 0.0,
+            "seddep_3": 0.0,
+            "seddep_4": 0.0,
+            "seddep_5": 0.0,
             "Area": area_series,
             "Streamflow": df["Streamflow (mm)"].astype(float),
         }
@@ -155,6 +162,32 @@ def test_return_period_dataset_pipeline(tmp_path):
     events_path, ranks_path = refresh_return_period_events(run_dir)
     assert events_path.exists()
     assert ranks_path.exists()
+
+    events_df = pq.read_table(
+        events_path,
+        columns=["calendar_year", "mo", "da", "hill_sediment_kg"],
+    ).to_pandas()
+    tot3_path = run_dir / "wepp" / "output" / "interchange" / "totalwatsed3.parquet"
+    tot3_df = pq.read_table(
+        tot3_path,
+        columns=["year", "month", "day_of_month", "tdet", "seddep_1"],
+    ).to_pandas()
+    merged = events_df.merge(
+        tot3_df,
+        left_on=["calendar_year", "mo", "da"],
+        right_on=["year", "month", "day_of_month"],
+        how="left",
+    )
+    has_total_rows = merged["seddep_1"].notna()
+    assert has_total_rows.any()
+    assert np.allclose(
+        merged.loc[has_total_rows, "hill_sediment_kg"],
+        merged.loc[has_total_rows, "seddep_1"],
+    )
+    assert not np.allclose(
+        merged.loc[has_total_rows, "hill_sediment_kg"],
+        merged.loc[has_total_rows, "tdet"],
+    )
 
     dataset = ReturnPeriodDataset(run_dir, auto_refresh=False)
     report = dataset.create_report(

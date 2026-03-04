@@ -6,6 +6,13 @@ from rq import Queue
 from rq.job import Job
 
 
+def _delete_after_interchange_enabled(*, wepp: Any, climate: Any) -> bool:
+    value = getattr(wepp, "delete_after_interchange", None)
+    if value is None:
+        value = getattr(climate, "delete_after_interchange", False)
+    return bool(value)
+
+
 def _record_enqueue(parent_job: Job, key: str, child_job: Job) -> Job:
     parent_job.meta[key] = child_job.id
     parent_job.save()
@@ -157,10 +164,11 @@ def enqueue_wepp_pipeline(
     swat_job_build: Job | None = None
     swat_job_run: Job | None = None
 
+    delete_after_interchange = _delete_after_interchange_enabled(wepp=wepp, climate=climate)
     swat_before_interchange = bool(
         wepp.mods
         and "swat" in wepp.mods
-        and climate.delete_after_interchange
+        and delete_after_interchange
     )
     if swat_before_interchange:
         swat_dependencies = [jobs1_hillslopes]

@@ -80,6 +80,20 @@ def _quote_identifier(identifier: str) -> str:
     return f'"{escaped}"'
 
 
+def _resolve_hill_sediment_sql(tot_path: Path) -> str:
+    """Return the SQL expression for hillslope sediment delivery in kilograms."""
+    schema_names = set(pq.read_schema(tot_path).names)
+    sed_columns = [f"seddep_{idx}" for idx in range(1, 6) if f"seddep_{idx}" in schema_names]
+    if sed_columns:
+        parts = [f"COALESCE(tot.{_quote_identifier(column)}, 0.0)" for column in sed_columns]
+        return f"({' + '.join(parts)})"
+    if {"tdet", "tdep"}.issubset(schema_names):
+        return "(COALESCE(tot.tdet, 0.0) + COALESCE(tot.tdep, 0.0))"
+    if "tdet" in schema_names:
+        return "tot.tdet"
+    return "CAST(NULL AS DOUBLE)"
+
+
 def _generate_cli_parquet(base: Path) -> tuple[Path | None, Dict[str, str]]:
     """Materialize a climate parquet from an existing CLI when none are present."""
     cli_root = base / "wepp" / "runs"
@@ -262,6 +276,7 @@ def _build_raw_event_query(
 ) -> str:
     """Compose the DuckDB SQL used to stage event metrics prior to ranking."""
     climate_path, columns = climate_info
+    hill_sediment_expr = _resolve_hill_sediment_sql(tot_path)
 
     if climate_path is None or not columns:
         climate_join = ""
@@ -318,8 +333,8 @@ def _build_raw_event_query(
             e.particulate_pollutant AS particulate_p_kg,
             e.total_pollutant AS total_p_kg,
             tot.Area AS contributing_area_m2,
-            tot.tdet AS hill_sediment_kg,
-            CASE WHEN tot.tdet IS NOT NULL THEN tot.tdet / 1000.0 ELSE NULL END AS hill_sediment_tonnes,
+            {hill_sediment_expr} AS hill_sediment_kg,
+            CASE WHEN {hill_sediment_expr} IS NOT NULL THEN ({hill_sediment_expr}) / 1000.0 ELSE NULL END AS hill_sediment_tonnes,
             tot."Streamflow" AS hill_streamflow_mm,
             {intensity_10_expr} AS intensity_10min,
             {intensity_15_expr} AS intensity_15min,

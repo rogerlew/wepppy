@@ -45,6 +45,7 @@ def test_post_watershed_interchange_times_out_when_expected_output_missing(
         lambda _wd: SimpleNamespace(
             output_dir=str(tmp_path / "wepp" / "output"),
             logger=_DummyLogger(),
+            delete_after_interchange=False,
         ),
     )
 
@@ -106,6 +107,7 @@ def test_post_watershed_interchange_accepts_gzip_outputs(
         lambda _wd: SimpleNamespace(
             output_dir=str(output_dir),
             logger=_DummyLogger(),
+            delete_after_interchange=False,
         ),
     )
     monkeypatch.setattr(
@@ -133,10 +135,124 @@ def test_post_watershed_interchange_accepts_gzip_outputs(
 
     assert any(call.endswith("pass_pw0.txt.gz") for call in wait_calls)
     assert any(call.endswith("soil_pw0.txt.gz") for call in wait_calls)
-    assert interchange_calls == [(output_dir, 1998, True, True, True)]
+    assert interchange_calls == [(output_dir, 1998, True, True, False)]
     assert activation_calls == [(str(wd), False, True)]
     assert any(
         channel == "run-1:wepp" and "COMPLETED _post_watershed_interchange_rq(run-1)" in message
+        for channel, message in status_messages
+    )
+
+
+def test_build_hillslope_interchange_prefers_wepp_delete_flag(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    status_messages: list[tuple[str, str]] = []
+    interchange_calls: list[tuple[Path, int, bool, bool, bool, bool]] = []
+
+    wd = tmp_path
+
+    monkeypatch.setattr(stage_post, "get_current_job", lambda: SimpleNamespace(id="job-1"))
+    monkeypatch.setattr(stage_post, "get_wd", lambda _runid: str(wd))
+    monkeypatch.setattr(
+        stage_post.StatusMessenger,
+        "publish",
+        lambda channel, msg: status_messages.append((channel, msg)),
+    )
+    monkeypatch.setattr(
+        stage_post.Climate,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            delete_after_interchange=True,
+            calendar_start_year=2001,
+            is_single_storm=False,
+        ),
+    )
+    monkeypatch.setattr(
+        stage_post.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(delete_after_interchange=False),
+    )
+    monkeypatch.setattr(
+        stage_post,
+        "run_wepp_hillslope_interchange",
+        lambda path, *, start_year, run_loss_interchange, run_soil_interchange, run_wat_interchange, delete_after_interchange: interchange_calls.append(
+            (
+                Path(path),
+                start_year,
+                run_loss_interchange,
+                run_soil_interchange,
+                run_wat_interchange,
+                delete_after_interchange,
+            )
+        ),
+    )
+
+    stage_post._build_hillslope_interchange_rq("run-1")
+
+    assert interchange_calls == [
+        (wd / "wepp" / "output", 2001, True, True, True, False),
+    ]
+    assert any(
+        channel == "run-1:wepp" and "COMPLETED _build_hillslope_interchange_rq(run-1)" in message
+        for channel, message in status_messages
+    )
+
+
+def test_build_totalwatsed3_rebuilds_interchange_readme(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    status_messages: list[tuple[str, str]] = []
+    wait_for_paths_calls: list[list[Path]] = []
+    wait_for_path_calls: list[Path] = []
+    doc_calls: list[Path] = []
+    build_calls: list[str] = []
+
+    wd = tmp_path
+    output_dir = wd / "wepp" / "output"
+    interchange_dir = output_dir / "interchange"
+
+    monkeypatch.setattr(stage_post, "get_current_job", lambda: SimpleNamespace(id="job-1"))
+    monkeypatch.setattr(stage_post, "get_wd", lambda _runid: str(wd))
+    monkeypatch.setattr(
+        stage_post.StatusMessenger,
+        "publish",
+        lambda channel, msg: status_messages.append((channel, msg)),
+    )
+    monkeypatch.setattr(
+        stage_post.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            output_dir=str(output_dir),
+            logger=_DummyLogger(),
+            _build_totalwatsed3=lambda: build_calls.append("built"),
+        ),
+    )
+    monkeypatch.setattr(
+        stage_post,
+        "wait_for_paths",
+        lambda paths, **_kwargs: wait_for_paths_calls.append([Path(path) for path in paths]),
+    )
+    monkeypatch.setattr(
+        stage_post,
+        "wait_for_path",
+        lambda path, **_kwargs: wait_for_path_calls.append(Path(path)),
+    )
+    monkeypatch.setattr(
+        stage_post,
+        "generate_interchange_documentation",
+        lambda path: doc_calls.append(Path(path)),
+    )
+
+    stage_post._build_totalwatsed3_rq("run-1")
+
+    assert wait_for_paths_calls == [[interchange_dir / "H.pass.parquet", interchange_dir / "H.wat.parquet"]]
+    assert wait_for_path_calls == [interchange_dir / "totalwatsed3.parquet"]
+    assert build_calls == ["built"]
+    assert doc_calls == [interchange_dir]
+    assert any(
+        channel == "run-1:wepp" and "COMPLETED _build_totalwatsed3_rq(run-1)" in message
         for channel, message in status_messages
     )
 

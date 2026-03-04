@@ -101,6 +101,70 @@ def _write_wat(path: Path, area_m2: float) -> None:
         con.execute(query, [float(area_m2)])
 
 
+def _write_wat_multi_ofe(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    safe = str(path).replace("'", "''")
+    query = f"""
+    COPY (
+        SELECT
+            CAST(1 AS INTEGER) AS wepp_id,
+            CAST(1 AS SMALLINT) AS ofe_id,
+            CAST(2020 AS SMALLINT) AS year,
+            CAST(1 AS INTEGER) AS sim_day_index,
+            CAST(1 AS SMALLINT) AS julian,
+            CAST(1 AS TINYINT) AS month,
+            CAST(1 AS TINYINT) AS day_of_month,
+            CAST(2020 AS SMALLINT) AS water_year,
+            CAST(100.0 AS DOUBLE) AS Area,
+            CAST(5.0 AS DOUBLE) AS P,
+            CAST(6.0 AS DOUBLE) AS RM,
+            CAST(1.0 AS DOUBLE) AS Q,
+            CAST(0.5 AS DOUBLE) AS Dp,
+            CAST(200.0 AS DOUBLE) AS latqcc,
+            CAST(0.3 AS DOUBLE) AS QOFE,
+            CAST(0.2 AS DOUBLE) AS Ep,
+            CAST(0.1 AS DOUBLE) AS Es,
+            CAST(0.05 AS DOUBLE) AS Er,
+            CAST(0.0 AS DOUBLE) AS UpStrmQ,
+            CAST(0.0 AS DOUBLE) AS SubRIn,
+            CAST(0.0 AS DOUBLE) AS "Total-Soil Water",
+            CAST(0.0 AS DOUBLE) AS frozwt,
+            CAST(0.0 AS DOUBLE) AS "Snow-Water",
+            CAST(0.0 AS DOUBLE) AS Tile,
+            CAST(0.0 AS DOUBLE) AS Irr
+        UNION ALL
+        SELECT
+            CAST(1 AS INTEGER) AS wepp_id,
+            CAST(2 AS SMALLINT) AS ofe_id,
+            CAST(2020 AS SMALLINT) AS year,
+            CAST(1 AS INTEGER) AS sim_day_index,
+            CAST(1 AS SMALLINT) AS julian,
+            CAST(1 AS TINYINT) AS month,
+            CAST(1 AS TINYINT) AS day_of_month,
+            CAST(2020 AS SMALLINT) AS water_year,
+            CAST(100.0 AS DOUBLE) AS Area,
+            CAST(5.0 AS DOUBLE) AS P,
+            CAST(6.0 AS DOUBLE) AS RM,
+            CAST(1.0 AS DOUBLE) AS Q,
+            CAST(0.5 AS DOUBLE) AS Dp,
+            CAST(20.0 AS DOUBLE) AS latqcc,
+            CAST(0.3 AS DOUBLE) AS QOFE,
+            CAST(0.2 AS DOUBLE) AS Ep,
+            CAST(0.1 AS DOUBLE) AS Es,
+            CAST(0.05 AS DOUBLE) AS Er,
+            CAST(0.0 AS DOUBLE) AS UpStrmQ,
+            CAST(0.0 AS DOUBLE) AS SubRIn,
+            CAST(0.0 AS DOUBLE) AS "Total-Soil Water",
+            CAST(0.0 AS DOUBLE) AS frozwt,
+            CAST(0.0 AS DOUBLE) AS "Snow-Water",
+            CAST(0.0 AS DOUBLE) AS Tile,
+            CAST(0.0 AS DOUBLE) AS Irr
+    ) TO '{safe}' (FORMAT PARQUET)
+    """
+    with duckdb.connect() as con:
+        con.execute(query)
+
+
 def _write_ash(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     safe = str(path).replace("'", "''")
@@ -150,6 +214,8 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     assert "ash_transport" in data
     assert data["wind_transport"][0] == pytest.approx(0.0)
     assert data["ash_transport"][0] == pytest.approx(1.4)
+    assert data["sed_del"][0] == pytest.approx(0.25)
+    assert data["sed_del"][0] == pytest.approx(sum(data[f"seddep_{idx}"][0] for idx in range(1, 6)))
     assert "sed_vol_conc" in data
     assert data["sed_vol_conc"][0] == pytest.approx(1.159943960651508e-4)
 
@@ -164,3 +230,23 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     filtered = _read_parquet_dict(output_path)
     for column in ASH_METRIC_COLUMNS:
         assert all(value == 0.0 for value in filtered.get(column, []))
+
+
+def test_run_totalwatsed3_uses_last_ofe_for_lateral_flow(tmp_path):
+    run_dir = tmp_path / "run"
+    interchange_dir = run_dir / "wepp" / "output" / "interchange"
+    pass_path = interchange_dir / "H.pass.parquet"
+    wat_path = interchange_dir / "H.wat.parquet"
+    _write_pass(pass_path)
+    _write_wat_multi_ofe(wat_path)
+
+    output_path = run_totalwatsed3(
+        interchange_dir,
+        _BaseflowOpts(gwstorage=0.0, dscoeff=0.0, bfcoeff=0.0),
+        wepp_ids=[1],
+        ash_dir=run_dir / "ash_missing",
+    )
+
+    data = _read_parquet_dict(output_path)
+    assert data["latqcc"][0] == pytest.approx(2.0)  # m^3 from last OFE only (20 mm over 100 m^2)
+    assert data["Lateral Flow"][0] == pytest.approx(10.0)  # depth over total aggregated Area (200 m^2)

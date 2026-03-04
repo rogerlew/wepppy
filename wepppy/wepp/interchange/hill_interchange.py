@@ -49,7 +49,7 @@ def _cleanup_hillslope_sources(
 ) -> None:
     log_path = base / "interchange.log"
     _audit_log(log_path, "delete_after_interchange enabled for hillslope outputs")
-    patterns = ["H*.ebe.dat", "H*.element.dat"]
+    patterns = ["H*.pass.dat", "H*.ebe.dat", "H*.element.dat"]
     if run_loss_interchange:
         patterns.append("H*.loss.dat")
     if run_soil_interchange:

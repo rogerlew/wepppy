@@ -40,6 +40,13 @@ _write_dss_channel_geojson = _dss_helpers._write_dss_channel_geojson
 _LOGGER = logging.getLogger(__name__)
 
 
+def _delete_after_interchange_enabled(*, wepp: object, climate: object) -> bool:
+    value = getattr(wepp, "delete_after_interchange", None)
+    if value is None:
+        value = getattr(climate, "delete_after_interchange", False)
+    return bool(value)
+
+
 def _post_run_cleanup_out_rq(runid: str) -> None:
     """Move WEPP .out files into output directories once runs finish."""
     try:
@@ -126,7 +133,11 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         climate = Climate.getInstance(wd)
-        delete_after_interchange = climate.delete_after_interchange
+        wepp = Wepp.getInstance(wd)
+        delete_after_interchange = _delete_after_interchange_enabled(
+            wepp=wepp,
+            climate=climate,
+        )
         start_year = climate.calendar_start_year
         is_single_storm = climate.is_single_storm
         # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat files
@@ -163,6 +174,16 @@ def _build_totalwatsed3_rq(runid: str) -> None:
             logger=wepp.logger,
         )
         wepp._build_totalwatsed3()
+        totalwatsed3_path = interchange_dir / "totalwatsed3.parquet"
+        wait_for_path(
+            totalwatsed3_path,
+            timeout_s=60.0,
+            require_stable_size=True,
+            logger=wepp.logger,
+        )
+        # Refresh README after totalwatsed3 is materialized so documentation always
+        # reflects the latest derived dataset set.
+        generate_interchange_documentation(interchange_dir)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
@@ -218,11 +239,14 @@ def _post_watershed_interchange_rq(runid: str) -> None:
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         climate = Climate.getInstance(wd)
-        delete_after_interchange = climate.delete_after_interchange
+        wepp = Wepp.getInstance(wd)
+        delete_after_interchange = _delete_after_interchange_enabled(
+            wepp=wepp,
+            climate=climate,
+        )
         start_year = climate.calendar_start_year
         run_soil_interchange = not climate.is_single_storm
         run_chnwb_interchange = not climate.is_single_storm
-        wepp = Wepp.getInstance(wd)
         output_dir = Path(wepp.output_dir)
         timeout_s = 60.0
         poll_s = 0.5

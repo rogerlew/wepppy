@@ -23,6 +23,10 @@ WATERSHED_DOC_ORDER: List[Tuple[str, str]] = [
     ("chanwb.parquet", "Daily channel routing water balance."),
     ("chnwb.parquet", "Channel OFE water balance (chnwb.txt)."),
     ("ebe_pw0.parquet", "Watershed event-by-event runoff and sediment delivery."),
+    (
+        "totalwatsed3.parquet",
+        "Derived daily watershed summary from hillslope PASS/WAT; in MOFE runs latqcc uses only the outlet-facing (last) OFE per hillslope-day to avoid internal routing double-counting.",
+    ),
     ("soil_pw0.parquet", "Watershed soil-profile state variables."),
     ("loss_pw0.hill.parquet", "Average annual hillslope loss summary."),
     ("loss_pw0.chn.parquet", "Average annual channel loss summary."),
@@ -37,6 +41,12 @@ WATERSHED_DOC_ORDER: List[Tuple[str, str]] = [
 ]
 
 MAX_SAMPLE_ROWS = 3
+COMPANION_DOCS: List[Tuple[str, str]] = [
+    (
+        "README.totalwatsed3.md",
+        "Detailed derivation and semantics for `totalwatsed3.parquet` (including sediment and MOFE lateral-flow handling).",
+    ),
+]
 
 
 def _format_units(field: pa.Field) -> str:
@@ -126,6 +136,10 @@ def generate_interchange_documentation(interchange_dir: Path | str, to_readme_md
     else:
         version_text = str(manifest_version)
     sections.append(f"_Interchange Version: {version_text}_\n")
+    sections.append("## Companion Documentation\n")
+    for doc_name, description in COMPANION_DOCS:
+        sections.append(f"- `{doc_name}`: {description}")
+    sections.append("")
 
     sections.append("## Hillslope Products\n")
     for filename, description in HILLSLOPE_DOC_ORDER:

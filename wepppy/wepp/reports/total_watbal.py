@@ -27,10 +27,11 @@ class TotalWatbalReport(ReportBase):
             ("Lateral Flow (mm)", "Lateral Flow"),
             ("ET (mm)", "ET"),
             ("Percolation (mm)", "Percolation"),
-            ("Sed Del (kg)", "tdet"),
+            ("Sed Del (kg)", "sediment_delivery_kg"),
         ]
     )
     _RATIO_COLUMNS = {"Rain + Melt (mm)", "Lateral Flow (mm)", "ET (mm)", "Percolation (mm)"}
+    _SEDIMENT_COLUMNS = tuple(f"seddep_{idx}" for idx in range(1, 6))
 
     def __init__(
         self,
@@ -47,7 +48,15 @@ class TotalWatbalReport(ReportBase):
         if dataframe is None:
             if not dataset_path.exists():
                 raise FileNotFoundError(dataset_path)
-            columns = ["water_year", *self._MEASURE_COLUMNS.values()]
+            schema_names = set(pq.read_schema(dataset_path).names)
+            columns = ["water_year", "Precipitation", "Rain+Melt", "Lateral Flow", "ET", "Percolation"]
+            sed_columns = [name for name in self._SEDIMENT_COLUMNS if name in schema_names]
+            if sed_columns:
+                columns.extend(sed_columns)
+            elif {"tdet", "tdep"}.issubset(schema_names):
+                columns.extend(["tdet", "tdep"])
+            elif "tdet" in schema_names:
+                columns.append("tdet")
             table = pq.read_table(dataset_path, columns=columns)
             dataframe = table.to_pandas()
 
@@ -59,6 +68,20 @@ class TotalWatbalReport(ReportBase):
             return
 
         self._frame["water_year"] = self._frame["water_year"].astype(int)
+        sed_columns = [name for name in self._SEDIMENT_COLUMNS if name in self._frame.columns]
+        if sed_columns:
+            self._frame[sed_columns] = self._frame[sed_columns].astype(float).fillna(0.0)
+            self._frame["sediment_delivery_kg"] = self._frame[sed_columns].sum(axis=1)
+        elif {"tdet", "tdep"}.issubset(self._frame.columns):
+            self._frame["sediment_delivery_kg"] = (
+                self._frame["tdet"].astype(float).fillna(0.0)
+                + self._frame["tdep"].astype(float).fillna(0.0)
+            )
+        elif "tdet" in self._frame.columns:
+            self._frame["sediment_delivery_kg"] = self._frame["tdet"].astype(float).fillna(0.0)
+        else:
+            self._frame["sediment_delivery_kg"] = 0.0
+
         for column in self._MEASURE_COLUMNS.values():
             if column not in self._frame:
                 self._frame[column] = 0.0

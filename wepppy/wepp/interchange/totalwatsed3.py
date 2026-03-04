@@ -28,6 +28,7 @@ _SEDIMENT_CLASS_COUNT = 5
 SEDIMENT_SPECIFIC_GRAVITY = (2.60, 2.65, 1.80, 1.60, 2.65)
 SEDIMENT_DENSITY_KG_M3 = tuple(value * 1000.0 for value in SEDIMENT_SPECIFIC_GRAVITY)
 SEDIMENT_MASS_COLUMNS = tuple(f"seddep_{idx}" for idx in range(1, _SEDIMENT_CLASS_COUNT + 1))
+SEDIMENT_DELIVERY_COLUMN = "sed_del"
 SEDIMENT_VOLUME_COLUMN = "sed_vol_conc"
 ASH_VOLUME_COLUMN = "ash_vol_conc"
 SED_ASH_VOLUME_COLUMN = "sed+ash_vol_conc"
@@ -39,6 +40,7 @@ PASS_METRIC_COLUMNS = (
     "tdet",
     "tdep",
     *SEDIMENT_MASS_COLUMNS,
+    SEDIMENT_DELIVERY_COLUMN,
     SEDIMENT_VOLUME_COLUMN,
 )
 
@@ -73,6 +75,7 @@ SCHEMA = schema_with_version(
             pa_field("seddep_3", pa.float64(), units="kg", description="Sediment Class 3 deposition"),
             pa_field("seddep_4", pa.float64(), units="kg", description="Sediment Class 4 deposition"),
             pa_field("seddep_5", pa.float64(), units="kg", description="Sediment Class 5 deposition"),
+            pa_field("sed_del", pa.float64(), units="kg", description="Total sediment delivery (sum of class masses)"),
             pa_field(
                 "sed_vol_conc",
                 pa.float64(),
@@ -535,6 +538,15 @@ def _resolve_sim_day_column(path: Path) -> str:
     raise KeyError(f"Neither 'sim_day_index' nor 'day' column present in {path}")
 
 
+def _resolve_ofe_column(path: Path) -> str | None:
+    schema = pq.read_schema(path)
+    if "ofe_id" in schema.names:
+        return "ofe_id"
+    if "OFE" in schema.names:
+        return "OFE"
+    return None
+
+
 def _aggregate_pass(con: duckdb.DuckDBPyConnection, pass_path: Path, where_clause: str) -> pd.DataFrame:
     day_column = _resolve_sim_day_column(pass_path)
     query = f"""
@@ -560,12 +572,36 @@ def _aggregate_pass(con: duckdb.DuckDBPyConnection, pass_path: Path, where_claus
         ORDER BY year, julian, "{day_column}"
     """
     df = con.execute(query).df()
+    df[SEDIMENT_DELIVERY_COLUMN] = df[list(SEDIMENT_MASS_COLUMNS)].sum(axis=1).astype(np.float64)
     df[SEDIMENT_VOLUME_COLUMN] = _compute_sediment_volumetric_concentration(df)
     return df
 
 
 def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause: str) -> pd.DataFrame:
     day_column = _resolve_sim_day_column(wat_path)
+    ofe_column = _resolve_ofe_column(wat_path)
+    path_sql = wat_path.as_posix()
+
+    if ofe_column is None:
+        source_clause = f"FROM read_parquet('{path_sql}')\n        {where_clause}"
+        latqcc_expr = "SUM(latqcc * 0.001 * Area) AS latqcc,"
+    else:
+        source_clause = f"""
+        FROM (
+            SELECT
+                *,
+                MAX("{ofe_column}") OVER (
+                    PARTITION BY wepp_id, year, "{day_column}", julian, month, day_of_month, water_year
+                ) AS _max_ofe_id
+            FROM read_parquet('{path_sql}')
+            {where_clause}
+        ) AS wat
+        """
+        # In MOFE runs, latqcc is an internal lateral-routing term. Use only the
+        # outlet-facing (last) OFE per hillslope/day to avoid counting internal
+        # transfers multiple times.
+        latqcc_expr = f'SUM(CASE WHEN "{ofe_column}" = _max_ofe_id THEN latqcc * 0.001 * Area ELSE 0 END) AS latqcc,'
+
     query = f"""
         SELECT
             year,
@@ -579,7 +615,7 @@ def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause:
             SUM(RM * 0.001 * Area) AS RM,
             SUM(Q * 0.001 * Area) AS Q,
             SUM(Dp * 0.001 * Area) AS Dp,
-            SUM(latqcc * 0.001 * Area) AS latqcc,
+            {latqcc_expr}
             SUM(QOFE * 0.001 * Area) AS QOFE,
             SUM(Ep * 0.001 * Area) AS Ep,
             SUM(Es * 0.001 * Area) AS Es,
@@ -591,8 +627,7 @@ def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause:
             SUM("Snow-Water" * 0.001 * Area) AS Snow_Water_volume,
             SUM(Tile * 0.001 * Area) AS Tile_volume,
             SUM(Irr * 0.001 * Area) AS Irr_volume
-        FROM read_parquet('{wat_path.as_posix()}')
-        {where_clause}
+        {source_clause}
         GROUP BY year, "{day_column}", julian, month, day_of_month, water_year
         ORDER BY year, julian, "{day_column}"
     """

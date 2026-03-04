@@ -18,6 +18,7 @@ from .concurrency import write_parquet_with_pool
 
 from ._utils import (
     _build_cli_calendar_lookup,
+    _compute_sim_day_index,
     _julian_to_calendar,
     _parse_float,
 )
@@ -259,7 +260,9 @@ def _parse_wat_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, in
 
     out = _init_column_store()
 
-    for idx, raw_line in enumerate(lines[data_start:]):
+    start_year: int | None = None
+
+    for raw_line in lines[data_start:]:
         if not raw_line.strip():
             continue
         tokens = raw_line.split()
@@ -269,7 +272,18 @@ def _parse_wat_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, in
         julian = int(tokens[column_positions["J"]])
         year = int(tokens[column_positions["Y"]])
         month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
-        sim_day_index = idx + 1
+        if start_year is None:
+            start_year = year
+        sim_day_index = _compute_sim_day_index(
+            year,
+            julian,
+            start_year=start_year,
+            calendar_lookup=calendar_lookup,
+        )
+        if sim_day_index < 1:
+            raise ValueError(
+                f"Computed negative simulation day index ({sim_day_index}) for {path} at year={year}, julian={julian}"
+            )
         wy = determine_wateryear(year, julian)
         ofe_id = int(tokens[column_positions["OFE"]])
 
@@ -292,6 +306,42 @@ def _parse_wat_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, in
         _append_row(out, row)
 
     return pa.table(out, schema=SCHEMA)
+
+
+def _recompute_sim_day_index(
+    table: pa.Table,
+    *,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
+) -> pa.Table:
+    if table.num_rows == 0:
+        return table
+
+    years = table.column("year").combine_chunks().to_numpy(zero_copy_only=False).astype(np.int32, copy=False)
+    julians = table.column("julian").combine_chunks().to_numpy(zero_copy_only=False).astype(np.int32, copy=False)
+    start_year = int(years.min())
+
+    unique_dates = sorted({(int(year), int(julian)) for year, julian in zip(years, julians)})
+    sim_day_lookup = {
+        date_key: _compute_sim_day_index(
+            date_key[0],
+            date_key[1],
+            start_year=start_year,
+            calendar_lookup=calendar_lookup,
+        )
+        for date_key in unique_dates
+    }
+
+    sim_day = np.fromiter(
+        (sim_day_lookup[(int(year), int(julian))] for year, julian in zip(years, julians)),
+        dtype=np.int32,
+        count=len(years),
+    )
+    if sim_day.size and int(sim_day.min()) < 1:
+        min_sim_day = int(sim_day.min())
+        raise ValueError(f"Computed negative simulation day index ({min_sim_day}) in WAT table")
+
+    sim_col_index = table.schema.get_field_index("sim_day_index")
+    return table.set_column(sim_col_index, "sim_day_index", pa.array(sim_day, type=pa.int32()))
 
 
 def _parse_wat_file_rust(
@@ -317,7 +367,8 @@ def _parse_wat_file_rust(
             minor,
             cli_calendar_path=cli_calendar_path,
         )
-        return pa.table(columns, schema=SCHEMA)
+        table = pa.table(columns, schema=SCHEMA)
+        return _recompute_sim_day_index(table, calendar_lookup=calendar_lookup)
     except Exception as exc:
         LOGGER.warning(
             "wepp interchange: Rust hillslope WAT failed; falling back to Python (%s)",

@@ -14,6 +14,22 @@ wat_module = load_module("wepppy.wepp.interchange.hill_wat_interchange", "wepppy
 cleanup_import_state()
 
 
+def _write_multi_ofe_wat(path: Path) -> None:
+    path.write_text(
+        """ ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  OFE    J    Y      P      RM     Q                Ep      Es      Er     Dp       UpStrmQ   SubRIn    latqcc Total-Soil frozwt Snow-Water QOFE            Tile    Irr        Area
+  #      -    -      mm     mm     mm               mm      mm      mm       mm      mm           mm      mm   Water(mm)   mm        mm      mm             mm      mm         m^2
+ ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+     1    1 2000   10.00   10.00   0.0000000E+00    0.10    0.20    0.30    0.40   0.0000000E+00    0.00    0.50  100.00    0.00    0.00    0.0000000E+00    0.00    0.00      50.00
+     2    1 2000   10.00   10.00   0.0000000E+00    0.10    0.20    0.30    0.40   0.0000000E+00    0.00    0.50  100.00    0.00    0.00    0.0000000E+00    0.00    0.00      75.00
+     1    2 2000   11.00   11.00   0.0000000E+00    0.10    0.20    0.30    0.40   0.0000000E+00    0.00    0.50  100.00    0.00    0.00    0.0000000E+00    0.00    0.00      50.00
+     2    2 2000   11.00   11.00   0.0000000E+00    0.10    0.20    0.30    0.40   0.0000000E+00    0.00    0.50  100.00    0.00    0.00    0.0000000E+00    0.00    0.00      75.00
+""",
+        encoding="utf-8",
+    )
+
+
 def test_wat_interchange_writes_parquet(tmp_path, monkeypatch):
     src = PROJECT_OUTPUT
     workdir = tmp_path / "output"
@@ -57,3 +73,16 @@ def test_wat_interchange_handles_missing_files(tmp_path):
     table = pq.read_table(target)
     assert table.schema == wat_module.SCHEMA
     assert table.num_rows == 0
+
+
+def test_wat_interchange_uses_calendar_sim_day_for_multi_ofe(tmp_path):
+    workdir = tmp_path / "output"
+    workdir.mkdir()
+    _write_multi_ofe_wat(workdir / "H1.wat.dat")
+
+    target = wat_module.run_wepp_hillslope_wat_interchange(workdir)
+    df = pq.read_table(target).to_pandas()
+    df = df.sort_values(["year", "julian", "ofe_id"]).reset_index(drop=True)
+
+    assert df["sim_day_index"].tolist() == [1, 1, 2, 2]
+    assert df.groupby(["year", "julian"])["sim_day_index"].nunique().eq(1).all()

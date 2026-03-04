@@ -51,10 +51,66 @@ from wepppy.wepp.reports.total_watbal import TotalWatbalReport
 
 def _write_totalwatsed3(path: Path) -> None:
     records = [
-        {"water_year": 2000, "Precipitation": 2.0, "Rain+Melt": 3.0, "Lateral Flow": 1.0, "ET": 0.6, "Percolation": 0.4, "tdet": 5.0},
-        {"water_year": 2000, "Precipitation": 1.0, "Rain+Melt": 0.5, "Lateral Flow": 0.3, "ET": 0.2, "Percolation": 0.1, "tdet": 2.0},
-        {"water_year": 2001, "Precipitation": 4.0, "Rain+Melt": 2.0, "Lateral Flow": 1.5, "ET": 1.0, "Percolation": 0.8, "tdet": 3.0},
-        {"water_year": 2001, "Precipitation": 2.0, "Rain+Melt": 1.0, "Lateral Flow": 0.8, "ET": 0.5, "Percolation": 0.3, "tdet": 1.5},
+        {
+            "water_year": 2000,
+            "Precipitation": 2.0,
+            "Rain+Melt": 3.0,
+            "Lateral Flow": 1.0,
+            "ET": 0.6,
+            "Percolation": 0.4,
+            "tdet": 5.0,
+            "tdep": -1.0,
+            "seddep_1": 3.8,
+            "seddep_2": 0.0,
+            "seddep_3": 0.0,
+            "seddep_4": 0.0,
+            "seddep_5": 0.0,
+        },
+        {
+            "water_year": 2000,
+            "Precipitation": 1.0,
+            "Rain+Melt": 0.5,
+            "Lateral Flow": 0.3,
+            "ET": 0.2,
+            "Percolation": 0.1,
+            "tdet": 2.0,
+            "tdep": -0.5,
+            "seddep_1": 1.4,
+            "seddep_2": 0.0,
+            "seddep_3": 0.0,
+            "seddep_4": 0.0,
+            "seddep_5": 0.0,
+        },
+        {
+            "water_year": 2001,
+            "Precipitation": 4.0,
+            "Rain+Melt": 2.0,
+            "Lateral Flow": 1.5,
+            "ET": 1.0,
+            "Percolation": 0.8,
+            "tdet": 3.0,
+            "tdep": -0.2,
+            "seddep_1": 2.7,
+            "seddep_2": 0.0,
+            "seddep_3": 0.0,
+            "seddep_4": 0.0,
+            "seddep_5": 0.0,
+        },
+        {
+            "water_year": 2001,
+            "Precipitation": 2.0,
+            "Rain+Melt": 1.0,
+            "Lateral Flow": 0.8,
+            "ET": 0.5,
+            "Percolation": 0.3,
+            "tdet": 1.5,
+            "tdep": -0.1,
+            "seddep_1": 1.2,
+            "seddep_2": 0.0,
+            "seddep_3": 0.0,
+            "seddep_4": 0.0,
+            "seddep_5": 0.0,
+        },
     ]
     df = pd.DataFrame.from_records(records)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -75,7 +131,7 @@ def test_total_watbal_summarises_water_years(tmp_path):
     assert first["WaterYear"] == 2000
     assert first["Precipitation (mm)"] == pytest.approx(3.0)
     assert first["Rain + Melt (mm)"] == pytest.approx(3.5)
-    assert first["Sed Del (kg)"] == pytest.approx(7.0)
+    assert first["Sed Del (kg)"] == pytest.approx(5.2)
 
     second = dict(rows[1].row)
     assert second["WaterYear"] == 2001
