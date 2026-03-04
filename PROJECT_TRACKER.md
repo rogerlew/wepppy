@@ -317,19 +317,20 @@ Recently completed work packages. Archived immediately upon completion.
 
 ### Raster Tools Cross-Walk and Benchmark Evaluation
 **Completed**: 2026-03-04
-**Duration**: 1 day (evaluation draft closeout)
-**Status**: ✅ **DRAFT COMPLETE** (`defer`; BW-01/BW-02 executed but non-comparable under strict parity contract)
+**Duration**: 1 day (evaluation closeout)
+**Status**: ✅ **COMPLETE** (`defer`; BW-01/BW-02 executed but non-comparable under strict parity contract)
 **Owner**: Codex
 **Link**: [docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/](docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/)
 **Description**: Evaluated whether `/workdir/raster_tools` should be incorporated into WEPPpy using capability cross-walk + benchmark evidence.
 
-**Outcome**: Produced end-to-end evaluation artifacts and a `defer` recommendation. Deferred benchmark cases (`BW-03`/`BW-04`/`BW-05`) are explicitly routed to a follow-up package.
+**Outcome**: Produced end-to-end evaluation artifacts and a `defer` recommendation. Deferred benchmark cases (`BW-03`/`BW-04`/`BW-05`) are explicitly routed to a follow-up package, and external PDF claim language is documented in a source-grounded claims-vs-code addendum.
 
 **Deliverables**:
 - ✅ Capability inventory + WEPPpy usage map
 - ✅ Cross-walk matrix + overlap-only shortlist traceability
 - ✅ Benchmark harness + raw run logs with strict comparability guards
 - ✅ Results + recommendation memo + synchronized package tracker/ExecPlan docs
+- ✅ Claims-vs-code addendum with USDA PDF source link and evidence boundaries
 
 ### NoDir Full Reversal (Abandonment Program)
 **Completed**: 2026-02-27

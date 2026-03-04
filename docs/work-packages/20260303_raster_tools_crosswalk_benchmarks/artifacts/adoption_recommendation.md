@@ -20,6 +20,7 @@ Evidence references:
 - Cross-walk: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/capability_crosswalk_matrix.md`
 - Plan/harness details: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/benchmark_plan.md`
 - Results: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/benchmark_results.md`
+- Claims-vs-code addendum (includes USDA PDF link + source-grounded claim audit): `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/claims_vs_code_reality.md`
 - Raw timings: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/raw/benchmark_runs_bw01_bw02.json`
 - Supplemental zonal timings: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/raw/zonal_benchmark_wepppyo3_oxidized_rasterstats.json`
 - Supplemental zonal timings: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/raw/zonal_benchmark_raster_tools.json`

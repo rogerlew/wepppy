@@ -25,6 +25,7 @@ At completion, maintainers should be able to answer three questions with evidenc
 - [x] (2026-03-04 04:42Z) QA correction pass: tightened parity/comparability contracts in benchmark plan + harness (true p95, grid-equivalence preconditions), reran BW-01/BW-02, and updated recommendation inputs to mark both executed cases as non-comparable.
 - [x] (2026-03-04 04:47Z) Milestone 4 hardening pass: fixed nodata-aware BW-02 footprint metric, added explicit `parity_status` (`pass|fail|non_comparable`), and emitted timestamped run evidence (`benchmark_runs_bw01_bw02_20260304T044701Z.json`).
 - [x] (2026-03-04 05:11Z) Supplemental curiosity zonal comparison documented: captured `raster_tools.zonal_stats` raw timings and synchronized benchmark/recommendation artifacts with explicit out-of-shortlist caveats.
+- [x] (2026-03-04 05:36Z) Claims-vs-code addendum documented: published source-grounded audit artifact with USDA PDF link and synchronized recommendation/tracker references.
 
 ## Surprises & Discoveries
 
@@ -54,6 +55,9 @@ At completion, maintainers should be able to answer three questions with evidenc
 
 - Observation: Supplemental zonal timing showed `raster_tools.zonal_stats` substantially slower than both zonal comparators on both fixtures, but semantics remain non-equivalent and grouped-row outputs differ from per-feature expectations.
   Evidence: `notes/raw/zonal_benchmark_raster_tools.json` (`run_id=20260304T051038Z`) and `notes/raw/zonal_benchmark_wepppyo3_oxidized_rasterstats.json` (`run_id=20260304T050046Z`).
+
+- Observation: External communication language ("AI" and broad performance claims) overstates what is directly evidenced in source and package benchmarks.
+  Evidence: `artifacts/claims_vs_code_reality.md` links the USDA PDF (`https://research.fs.usda.gov/download/treesearch/80116.pdf`) to concrete code/benchmark references and required evidence gaps.
 
 ## Decision Log
 
@@ -97,6 +101,10 @@ At completion, maintainers should be able to answer three questions with evidenc
   Rationale: Milestone 2 shortlist is overlap-gated and zonal semantics across these surfaces are non-identical.
   Date/Author: 2026-03-04 / Codex.
 
+- Decision: Treat external marketing claims as non-authoritative unless backed by source and parity-evaluable benchmark evidence.
+  Rationale: Recommendation quality depends on auditable implementation and reproducible measurements, not narrative copy.
+  Date/Author: 2026-03-04 / Codex.
+
 ## Outcomes & Retrospective
 
 Milestones 1 through 5 are now drafted end-to-end for this package.
@@ -109,10 +117,13 @@ Completed artifacts:
 - `artifacts/benchmark_plan.md`
 - `artifacts/benchmark_results.md`
 - `artifacts/adoption_recommendation.md`
+- `artifacts/claims_vs_code_reality.md`
 
 Result quality is explicitly partial: BW-01/BW-02 executed but non-comparable under strict grid-equivalence guards; BW-03/BW-04/BW-05 are deferred and called out as residual gaps. Recommendation in this draft is `defer`.
 
 Post-closeout supplemental zonal timing evidence was added for stakeholder curiosity (`wepppyo3` vs `oxidized-rasterstats` vs `raster_tools`). Those results are recorded as directional-only telemetry and do not change milestone acceptance outcomes or recommendation status.
+
+An additional claims-vs-code addendum was published after stakeholders provided external communication material. It documents which claims are supported by source evidence in this package and which require further controlled validation.
 
 ## Context and Orientation
 
@@ -147,6 +158,7 @@ Primary package artifact targets:
 - `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/benchmark_plan.md`
 - `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/benchmark_results.md`
 - `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/adoption_recommendation.md`
+- `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/claims_vs_code_reality.md`
 
 ## Plan of Work
 
@@ -295,3 +307,4 @@ Revision Note (2026-03-04, Codex): Added Milestone 3 harness implementation deta
 Revision Note (2026-03-04, Codex): Applied Milestone 3/4 QA corrections for strict parity comparability (grid-equivalence preconditions), reran BW-01/BW-02, and updated outcomes to non-comparable where contracts were not met.
 Revision Note (2026-03-04, Codex): Applied Milestone 4 metric hardening (nodata-aware BW-02 footprint, explicit parity_status tri-state, timestamped raw benchmark outputs) and synchronized recommendation language to directional-only timing evidence.
 Revision Note (2026-03-04, Codex): Recorded supplemental zonal curiosity benchmark evidence (`notes/raw/zonal_benchmark_raster_tools.json`) and synchronized artifacts while preserving shortlist/milestone scope boundaries.
+Revision Note (2026-03-04, Codex): Added claims-vs-code addendum (`artifacts/claims_vs_code_reality.md`) with USDA PDF source link and source-grounded claim audit references.

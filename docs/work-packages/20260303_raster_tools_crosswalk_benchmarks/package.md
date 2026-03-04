@@ -84,6 +84,7 @@ The goal is to produce an evidence-backed recommendation (adopt, selectively ado
 - `artifacts/benchmark_plan.md`
 - `artifacts/benchmark_results.md`
 - `artifacts/adoption_recommendation.md`
+- `artifacts/claims_vs_code_reality.md`
 
 ## Follow-up Work
 - Follow-up benchmark completion package for deferred cases (`BW-03`, `BW-04`, `BW-05`) in a normalized single runtime environment.

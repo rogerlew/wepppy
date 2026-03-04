@@ -1,0 +1,44 @@
+# Milestone Addendum Evidence: Claims vs Code Reality (2026-03-04 UTC)
+
+## Command: ML/AI framework terms in raster_tools Python package
+$ rg -n "sklearn|scikit|xgboost|lightgbm|torch|tensorflow|keras|catboost" /home/workdir/raster_tools/raster_tools -g '*.py'
+(no matches)
+
+## Command: model predict integration points in raster_tools
+$ rg -n "model_predict|ModelPredictAdaptor|predict\(" /home/workdir/raster_tools/raster_tools/general.py /home/workdir/raster_tools/raster_tools/raster.py /home/workdir/raster_tools/raster_tools/vector.py
+/home/workdir/raster_tools/raster_tools/general.py:337:class ModelPredictAdaptor:
+/home/workdir/raster_tools/raster_tools/general.py:404:    def predict(self, x):
+/home/workdir/raster_tools/raster_tools/general.py:412:    pred = model.predict(np.nan_to_num(vl_arr))
+/home/workdir/raster_tools/raster_tools/general.py:418:def model_predict_raster(raster, model, n_outputs=1):
+/home/workdir/raster_tools/raster_tools/general.py:512:def model_predict_vector(
+/home/workdir/raster_tools/raster_tools/general.py:495:    y = model.predict(x[valid_mask])
+/home/workdir/raster_tools/raster_tools/raster.py:2090:    def model_predict(self, model, n_outputs=1):
+/home/workdir/raster_tools/raster_tools/vector.py:783:    def model_predict(self, model, fields, n_outputs=1, out_prefix="pred_"):
+
+## Command: default requirements
+$ sed -n '1,200p' /home/workdir/raster_tools/requirements/default.txt
+affine
+cfgrib
+dask
+dask-geopandas
+dask-image
+fiona
+geopandas
+netcdf4
+numba
+numpy>=1.22
+odc-geo<=0.4.11
+pandas
+pyogrio
+pyproj
+rioxarray
+rasterio
+scipy
+shapely>=2.0
+xarray
+
+## Cross-package benchmark references
+- docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/benchmark_results.md
+- docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/raw/benchmark_runs_bw01_bw02.json
+- docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/raw/zonal_benchmark_wepppyo3_oxidized_rasterstats.json
+- docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/raw/zonal_benchmark_raster_tools.json

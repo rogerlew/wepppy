@@ -5,7 +5,7 @@
 ## Quick Status
 
 **Started**: 2026-03-03  
-**Current phase**: Draft closeout complete with supplemental zonal curiosity evidence captured  
+**Current phase**: Draft closeout complete with supplemental zonal + claims-vs-code addenda captured  
 **Last updated**: 2026-03-04  
 **Next milestone**: Optional follow-up package for deferred benchmark coverage.
 **Implementation plan**: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/prompts/active/raster_tools_crosswalk_benchmark_execplan.md`
@@ -36,6 +36,7 @@
 - [x] QA correction pass complete: tightened benchmark parity guards (`same projection + shape + geotransform`), fixed p95 computation in harness, reran BW-01/BW-02, and reclassified both executed cases as `non-comparable` (2026-03-04).
 - [x] Benchmark metric hardening complete: BW-02 footprint made nodata-aware, parity encoded with explicit `parity_status`, and timestamped rerun evidence emitted (2026-03-04).
 - [x] Supplemental zonal curiosity comparison documented: added reproducible `raster_tools.zonal_stats` raw timings and synchronized benchmark/recommendation artifacts with out-of-shortlist caveats (2026-03-04).
+- [x] Claims-vs-code addendum documented: added source-grounded audit of USDA PDF claims versus package evidence and linked it from recommendation artifacts (2026-03-04).
 
 ## Timeline
 
@@ -50,6 +51,7 @@
 - **2026-03-04** - Milestone 3/4 QA correction pass applied; BW-01/BW-02 marked non-comparable under strict parity contract.
 - **2026-03-04** - Milestone 4 metric hardening applied (nodata-aware BW-02 footprint + parity-status tri-state + timestamped run JSON).
 - **2026-03-04** - Supplemental zonal curiosity run captured for `raster_tools` and compared against existing `wepppyo3`/`oxidized-rasterstats` zonal evidence (directional-only).
+- **2026-03-04** - Claims-vs-code addendum published with USDA PDF source link and source-evidence-backed interpretation boundaries.
 
 ## Decisions
 
@@ -167,6 +169,19 @@
 **Decision**: Record zonal timing as supplemental-only evidence with explicit semantic caveats.
 
 **Impact**: Preserves auditability for the extra run while keeping milestone acceptance criteria and recommendation basis unchanged.
+
+---
+
+### 2026-03-04: Treat external marketing claims as non-authoritative until source-backed
+**Context**: Stakeholder provided USDA communication PDF language asserting broad AI framing and efficiency claims.
+
+**Options considered**:
+1. Treat communication copy as equivalent to implementation-level evidence.
+2. Record a source-backed claims-vs-code addendum and keep recommendation anchored to audited evidence.
+
+**Decision**: Publish a claims-vs-code addendum and keep recommendation logic tied to reproducible code and benchmark artifacts.
+
+**Impact**: Reduces risk of adopting on narrative claims that exceed what is currently evidenced by source and parity benchmarks.
 
 ## Risks and Issues
 
@@ -326,6 +341,24 @@
 **Test results**:
 - `python docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/zonal_benchmark_wepppyo3_oxidized_rasterstats.py` -> pass (raw JSON written).
 - `PYTHONPATH=/home/workdir/raster_tools /tmp/raster-tools-bench-venv/bin/python - <<'PY' ... raster_tools.zonal_stats ... PY` -> pass (`notes/raw/zonal_benchmark_raster_tools.json` written).
+
+### 2026-03-04: Claims-vs-code addendum publication
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added `artifacts/claims_vs_code_reality.md` to document verifiable capabilities, unverified/contradicted claims, and required future evidence.
+- Added source URL to USDA PDF (`https://research.fs.usda.gov/download/treesearch/80116.pdf`) and linked to raw audit evidence.
+- Linked addendum from `artifacts/adoption_recommendation.md`.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+1. If needed, convert this addendum into a follow-up package acceptance gate for future adoption reconsideration.
+
+**Test results**:
+- `wctl doc-lint --path docs/work-packages/20260303_raster_tools_crosswalk_benchmarks` -> pass (`11 files validated, 0 errors, 0 warnings`).
+- `wctl doc-lint --path PROJECT_TRACKER.md` -> pass (`1 files validated, 0 errors, 0 warnings`).
 
 ## Watch List
 
