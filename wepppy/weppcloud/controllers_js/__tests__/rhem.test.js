@@ -175,7 +175,7 @@ describe("Rhem controller", () => {
         rhem.handle_job_status_response(rhem, { status: "failed" });
         await flushPromises();
 
-        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             rhem,
             expect.objectContaining({

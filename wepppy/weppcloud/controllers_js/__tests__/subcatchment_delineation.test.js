@@ -315,10 +315,9 @@ describe("Subcatchment Delineation controller", () => {
         subcatchment.rq_job_id = "job-123";
 
         subcatchment.handle_job_status_response(subcatchment, { status: "failed" });
-        await Promise.resolve();
-        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             subcatchment,
             expect.objectContaining({

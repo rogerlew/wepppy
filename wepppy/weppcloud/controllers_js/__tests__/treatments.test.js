@@ -243,7 +243,7 @@ describe("Treatments controller", () => {
         treatments.handle_job_status_response(treatments, { status: "failed" });
         await flushPromises();
 
-        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             treatments,
             expect.objectContaining({

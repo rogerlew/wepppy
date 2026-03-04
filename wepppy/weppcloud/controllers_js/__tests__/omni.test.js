@@ -338,8 +338,9 @@ describe("Omni controller", () => {
         omni.handle_job_status_response(omni, { status: "failed" });
         await Promise.resolve();
         await Promise.resolve();
+        await Promise.resolve();
 
-        expect(getJsonMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(getJsonMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             omni,
             expect.objectContaining({

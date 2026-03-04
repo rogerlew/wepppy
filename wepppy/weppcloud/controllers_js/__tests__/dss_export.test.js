@@ -216,10 +216,9 @@ describe("DssExport controller", () => {
         dss.rq_job_id = "job-123";
 
         dss.handle_job_status_response(dss, { status: "failed" });
-        await Promise.resolve();
-        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             dss,
             expect.objectContaining({

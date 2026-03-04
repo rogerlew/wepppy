@@ -338,10 +338,9 @@ describe("Ash controller", () => {
         ash.rq_job_id = "job-123";
 
         ash.handle_job_status_response(ash, { status: "failed" });
-        await Promise.resolve();
-        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(requestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(requestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             ash,
             expect.objectContaining({

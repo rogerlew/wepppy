@@ -158,7 +158,7 @@ describe("RAP_TS controller", () => {
         controller.handle_job_status_response(controller, { status: "failed" });
         await flushPromises();
 
-        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             controller,
             expect.objectContaining({

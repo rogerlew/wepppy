@@ -196,8 +196,9 @@ describe("Landuse controller", () => {
         landuse.handle_job_status_response(landuse, { status: "failed" });
         await Promise.resolve();
         await Promise.resolve();
+        await Promise.resolve();
 
-        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             landuse,
             expect.objectContaining({

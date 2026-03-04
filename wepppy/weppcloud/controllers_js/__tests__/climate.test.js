@@ -349,8 +349,9 @@ describe("Climate controller", () => {
         climate.handle_job_status_response(climate, { status: "failed" });
         await Promise.resolve();
         await Promise.resolve();
+        await Promise.resolve();
 
-        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(controlBaseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             climate,
             expect.objectContaining({

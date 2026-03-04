@@ -130,8 +130,9 @@ describe("Soil controller", () => {
         soil.handle_job_status_response(soil, { status: "failed" });
         await Promise.resolve();
         await Promise.resolve();
+        await Promise.resolve();
 
-        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123", { params: undefined });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             soil,
             expect.objectContaining({
