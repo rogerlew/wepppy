@@ -1,0 +1,161 @@
+# watershed_bp routes and calls
+14:@watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass')
+15:@watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass/')
+20:    watershed = Watershed.getInstance(wd)
+36:@watershed_bp.route('/runs/<string:runid>/<config>/resources/channels.json')
+41:    watershed = Watershed.getInstance(wd)
+55:@watershed_bp.route('/runs/<string:runid>/<config>/query/extent')
+56:@watershed_bp.route('/runs/<string:runid>/<config>/query/extent/')
+58:def query_extent(runid, config):
+64:@watershed_bp.route('/runs/<string:runid>/<config>/report/channel')
+75:@watershed_bp.route('/runs/<string:runid>/<config>/query/outlet')
+76:@watershed_bp.route('/runs/<string:runid>/<config>/query/outlet/')
+81:    return jsonify(Watershed.getInstance(wd)
+86:@watershed_bp.route('/runs/<string:runid>/<config>/report/outlet')
+87:@watershed_bp.route('/runs/<string:runid>/<config>/report/outlet/')
+94:                           outlet=Watershed.getInstance(wd).outlet,
+98:@watershed_bp.route('/runs/<string:runid>/<config>/query/has_dem')
+99:@watershed_bp.route('/runs/<string:runid>/<config>/query/has_dem/')
+107:@watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/subcatchments')
+108:@watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/subcatchments/')
+113:    return jsonify(Watershed.getInstance(wd).subs_summary)
+116:@watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/channels')
+117:@watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/channels/')
+122:    return jsonify(Watershed.getInstance(wd).chns_summary)
+125:@watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments')
+126:@watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments/')
+134:                            watershed=Watershed.getInstance(wd))
+136:@watershed_bp.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
+138:def task_abstract_watershed(runid, config):
+141:    watershed = Watershed.getInstance(wd)
+146:@watershed_bp.route('/runs/<string:runid>/<config>/tasks/sub_intersection/', methods=['POST'])
+154:    subwta_fn = Watershed.getInstance(wd).subwta
+
+# run_0 context geospatial payload
+600:def _build_runs0_context(runid, config, playwright_load_all):
+639:    browse_watershed_hillslopes_parquet = pick_existing_parquet_relpath(
+642:    browse_watershed_channels_parquet = pick_existing_parquet_relpath(
+648:    if watershed.delineation_backend_is_topaz:
+829:        browse_watershed_hillslopes_parquet=browse_watershed_hillslopes_parquet,
+830:        browse_watershed_channels_parquet=browse_watershed_channels_parquet,
+868:        context = _build_runs0_context(runid, config, playwright_load_all)
+936:    context = _build_runs0_context(runid, config, playwright_load_all=False)
+
+# batch runner geospatial snapshot/context
+139:        snapshot.setdefault("resources", {})["watershed_geojson"] = _serialize_geojson_state(geojson_state)
+144:        snapshot.setdefault("resources", {})["sbs_map"] = sbs_resource
+319:        features = batch_runner.get_watershed_features_lpt()
+340:    tile_url = current_app.config.get(
+349:        tile_url=tile_url,
+
+# channel_delineation geospatial endpoint calls/render
+523:                .getJson(url_for_run("query/extent/"), { params: { _: Date.now() } })
+948:            return http.getJson(url_for_run("query/has_dem/"), { params: { _: Date.now() } })
+1139:            return http.request(url_for_run("query/delineation_pass/"), { params: { _: Date.now() } })
+1217:            http.getJson(url_for_run("resources/channels.json"), { params: { _: Date.now() } })
+1286:            return http.request(url_for_run("report/channel"), {
+
+# channel_gl geospatial endpoint calls/render
+26:    var NETFUL_ENDPOINT = "resources/netful.json";
+27:    var CHANNELS_ENDPOINT = "resources/channels.json";
+1035:                .getJson(url_for_run("query/extent/"), { params: { _: Date.now() } })
+1549:            return http.getJson(window.url_for_run("query/has_dem/"), { params: { _: Date.now() } })
+1826:            return http.request(window.url_for_run("query/delineation_pass/"), { params: { _: Date.now() } })
+1864:            return http.request(window.url_for_run("report/channel"), {
+
+# gl dashboard raster/layer plumbing
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:95:    layer._sbsShiftedCanvas &&
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:96:    layer._sbsShiftedCanvas.width === sourceCanvas.width &&
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:97:    layer._sbsShiftedCanvas.height === sourceCanvas.height
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:99:    return layer._sbsShiftedCanvas;
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:119:  layer._sbsShiftedCanvas = canvas;
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:160:export function createLayerUtils({
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:450:    if (!state.subcatchmentLabelsVisible || !state.subcatchmentsVisible || !state.subcatchmentsGeoJson) {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:455:    const features = state.subcatchmentsGeoJson.features || [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:490:        id: 'subcatchment-labels',
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:510:    const activeChannelOrder = pickActive(state.channelsLayers || []);
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:511:    if (!state.channelsVisible || !state.channelsGeoJson || !activeChannelOrder) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:514:        id: 'channels-pass2',
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:515:        data: state.channelsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:529:    if (!state.channelLabelsVisible || !state.channelsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:530:    const labelData = Array.isArray(state.channelLabelsData) ? state.channelLabelsData : [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:534:        id: 'channel-labels',
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:554:    const layer = state.d8DirectionLayer;
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:555:    if (!state.subcatchmentsVisible || !layer || !layer.visible || !Array.isArray(layer.data) || !layer.data.length) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:558:        id: 'd8-direction-arrows',
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:575:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:577:      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.landuseSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:581:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:601:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:603:      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.soilsSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:607:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:627:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:629:      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.hillslopesSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:633:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:650:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:652:      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.watarSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:656:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:673:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:675:      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.openetSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:679:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:699:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:701:      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.weppSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:710:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:734:    if (!state.channelsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:736:      .filter((l) => l.visible && state.channelsGeoJson && state.weppChannelSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:739:          id: `wepp-channel-${overlay.key}`,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:740:          data: state.channelsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:769:    if (!state.channelsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:771:      .filter((l) => l.visible && state.channelsGeoJson && state.weppYearlyChannelSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:774:          id: `wepp-yearly-channel-${overlay.key}`,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:775:          data: state.channelsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:804:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:806:      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.weppYearlySummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:815:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:840:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:842:      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.weppEventSummary)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:846:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:866:    if (!state.subcatchmentsVisible) return [];
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:874:          data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:919:        data: state.subcatchmentsGeoJson,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:971:      const shifted = layer.key === 'sbs' && !!getState().sbsColorShiftEnabled;
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:990:    const sbsColorShift = !!state.sbsColorShiftEnabled;
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1005:          const image = layer.key === 'sbs'
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1006:            ? getShiftedSbsCanvas(layer, sbsColorShift)
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1033:    const channelDeckLayers = buildChannelsLayer(state);
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1036:    const d8DirectionLayer = buildD8DirectionLayer(state);
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1038:    const channelLabelLayers = buildChannelLabelsLayer(state);
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1051:      ...channelDeckLayers,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1054:      ...d8DirectionLayer,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1056:      ...channelLabelLayers,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1167:        if (weppYearlyChannelOverlay.mode === 'channel_discharge_volume') {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1169:        } else if (weppYearlyChannelOverlay.mode === 'channel_soil_loss') {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1187:        if (weppChannelOverlay.mode === 'channel_discharge_volume') {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1189:        } else if (weppChannelOverlay.mode === 'channel_soil_loss') {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1311:      Channels: state.channelsLayers,
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1331:    if (state.subcatchmentsVisible) {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1362:    if (state.channelsVisible && state.channelsGeoJson) {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1363:      const channelsLayer = pickActiveLayerForLegend('Channels', state);
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1364:      if (channelsLayer) {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1365:        active.push(channelsLayer);
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1369:    if (weppChannels && state.channelsVisible) {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1373:    if (weppYearlyChannels && state.channelsVisible) {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:3: * Handles GeoTIFF loading, SBS images, and GDAL info fetches.
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:8: * @property {{ sitePrefix: string, runid: string, config: string, geoTiffUrl?: string }} ctx Run-scoped identifiers and optional GeoTIFF CDN override.
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:9: * @property {() => { geoTiffLoader?: Promise<any> | null }} getState Read reactive state to reuse the GeoTIFF loader promise.
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:16: * @property {(path: string, colorMap?: Object | ((value: number) => number[] | string | null)) => Promise<{ canvas: HTMLCanvasElement, bounds: number[], values: any, width: number, height: number, sampleMode: string, nodata: number | null }>} loadRaster Fetch and render a GeoTIFF to canvas with optional colormap.
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:17: * @property {(path: string, colorMap?: Object | ((value: number) => number[] | string | null)) => Promise<{ canvas: HTMLCanvasElement, bounds: number[], values: any, width: number, height: number, sampleMode: string, nodata: number | null }>} loadRasterFromDownload Fetch and render a GeoTIFF to canvas via download routes.
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:31:  if (typeof GeoTIFF !== 'undefined' && GeoTIFF && typeof GeoTIFF.fromArrayBuffer === 'function') {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:32:    return GeoTIFF;
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:35:    if (geotiff.GeoTIFF && typeof geotiff.GeoTIFF.fromArrayBuffer === 'function') {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:36:      return geotiff.GeoTIFF;
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:49:export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:58:      script.src = ctx.geoTiffUrl || 'https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js';
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:65:          reject(new Error('GeoTIFF global missing after script load'));
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:68:      script.onerror = () => reject(new Error('GeoTIFF script failed to load'));
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:98:    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/gdalinfo/${path}`;
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:102:        logRaster('info', 'gdalinfo missing', { path, status: resp.status });
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:107:      logRaster('warn', 'gdalinfo fetch failed', { path, url, err });
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:192:    const base = source === 'download' ? 'download' : 'browse';
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:229:    const url = buildRasterUrl(path, 'browse');
+/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:234:    const url = buildRasterUrl(path, 'download');

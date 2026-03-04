@@ -1,0 +1,116 @@
+wepppy/weppcloud/combined_watershed_viewer_generator.py:9:def combined_watershed_viewer_generator(runids, title, units=None, varopts=None, varname=None, asjson=False):
+wepppy/weppcloud/_scripts/compile_dot_logs.py:191:            watershed = Watershed.getInstance(str(run_dir))
+wepppy/weppcloud/_scripts/compile_dot_logs.py:192:            centroid = watershed.centroid
+wepppy/weppcloud/routes/_security/logging.py:125:    session["_roles_mask"] = role_names
+wepppy/weppcloud/routes/_security/logging.py:135:    for key in ("_roles_mask", "_roles"):
+wepppy/weppcloud/bootstrap/pre_receive.py:223:            from wepppy.topo.watershed_abstraction.slope_file import SlopeFile, mofe_distance_fractions
+wepppy/weppcloud/utils/helpers.py:107:    for dirname in ("climate", "watershed"):
+wepppy/weppcloud/utils/helpers.py:472:    if endpoint == 'gdalinfo.gdalinfo_with_subpath':
+wepppy/weppcloud/utils/helpers.py:475:        return _apply_site_prefix(f"/runs/{values['runid']}/{values['config']}/gdalinfo/{subpath}")
+wepppy/weppcloud/__init__.py:6:__all__ = ["combined_watershed_viewer_generator"]
+wepppy/weppcloud/__init__.py:10:    if name == "combined_watershed_viewer_generator":
+wepppy/weppcloud/__init__.py:12:            ".combined_watershed_viewer_generator", __name__
+wepppy/weppcloud/__init__.py:14:        value = module.combined_watershed_viewer_generator
+wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py:139:        snapshot.setdefault("resources", {})["watershed_geojson"] = _serialize_geojson_state(geojson_state)
+wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py:233:    default_config = "disturbed9002_wbt" if "disturbed9002_wbt" in available_configs else available_configs[0]
+wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py:319:        features = batch_runner.get_watershed_features_lpt()
+wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py:322:            "batch gl-dashboard: failed to load watershed features for batch '%s'",
+wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py:419:        watershed_collection = batch_runner.get_watershed_collection()
+wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py:423:    validation = watershed_collection.validate_template(template)
+wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py:429:        "resource_checksum": watershed_collection.checksum,
+wepppy/weppcloud/routes/nodb_api/watar_bp.py:86:        watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/nodb_api/watar_bp.py:87:        translator = watershed.translator_factory()
+wepppy/weppcloud/routes/nodb_api/watar_bp.py:89:        sub = watershed.sub_summary(topaz_id)
+wepppy/weppcloud/routes/nodb_api/watar_bp.py:239:        return render_template('reports/ash/ash_watershed.htm', runid=runid, config=config,
+wepppy/weppcloud/routes/nodb_api/watar_bp.py:313:        # if not ash.has_watershed_summaries:
+wepppy/weppcloud/_blueprints_context.py:17:    "watershed_bp",
+wepppy/weppcloud/_blueprints_context.py:50:    "combined_watershed_viewer_bp",
+wepppy/weppcloud/routes/weppcloudr.py:530:                watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/nodb_api/omni_bp.py:218:                               watershed=Watershed.getInstance(wd),
+wepppy/weppcloud/routes/nodb_api/omni_bp.py:318:                               watershed=Watershed.getInstance(wd),
+wepppy/weppcloud/routes/nodb_api/__init__.py:23:    "watershed_bp",
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py:72:    # as evidence that watershed results exist.
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py:98:        "timestamps:run_wepp_watershed",
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py:445:    if routine not in ['wepp_ui', 'wepp_watershed', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']:
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py:446:        return error_factory("routine not in ['wepp_ui', 'wepp_watershed', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']")
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py:460:        elif routine == 'wepp_watershed':
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py:461:            wepp.set_run_wepp_watershed(bool(state))
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:1:"""Routes for watershed blueprint extracted from app.py."""
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:8:from wepppy.topo.watershed_abstraction import ChannelRoutingError
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:12:watershed_bp = Blueprint('watershed', __name__)
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:14:@watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:15:@watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass/')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:20:    watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:21:    has_channels = watershed.has_channels
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:22:    has_subcatchments = watershed.has_subcatchments
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:36:@watershed_bp.route('/runs/<string:runid>/<config>/resources/channels.json')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:41:    watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:42:    fn = watershed.channels_shp
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:55:@watershed_bp.route('/runs/<string:runid>/<config>/query/extent')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:56:@watershed_bp.route('/runs/<string:runid>/<config>/query/extent/')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:64:@watershed_bp.route('/runs/<string:runid>/<config>/report/channel')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:66:@requires_cap(gate_reason="Complete verification to view watershed reports.")
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:75:@watershed_bp.route('/runs/<string:runid>/<config>/query/outlet')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:76:@watershed_bp.route('/runs/<string:runid>/<config>/query/outlet/')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:86:@watershed_bp.route('/runs/<string:runid>/<config>/report/outlet')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:87:@watershed_bp.route('/runs/<string:runid>/<config>/report/outlet/')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:89:@requires_cap(gate_reason="Complete verification to view watershed reports.")
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:98:@watershed_bp.route('/runs/<string:runid>/<config>/query/has_dem')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:99:@watershed_bp.route('/runs/<string:runid>/<config>/query/has_dem/')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:107:@watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/subcatchments')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:108:@watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/subcatchments/')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:110:def query_watershed_summary_subcatchments(runid, config):
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:116:@watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/channels')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:117:@watershed_bp.route('/runs/<string:runid>/<config>/query/watershed/channels/')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:119:def query_watershed_summary_channels(runid, config):
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:125:@watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:126:@watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments/')
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:128:@requires_cap(gate_reason="Complete verification to view watershed reports.")
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:129:def query_watershed_summary(runid, config):
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:134:                            watershed=Watershed.getInstance(wd))
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:136:@watershed_bp.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:138:def task_abstract_watershed(runid, config):
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:141:    watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:142:    watershed.abstract_watershed()
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py:146:@watershed_bp.route('/runs/<string:runid>/<config>/tasks/sub_intersection/', methods=['POST'])
+wepppy/weppcloud/routes/combined_watershed_viewer.py:1:"""Routes for combined_watershed_viewer blueprint extracted from app.py."""
+wepppy/weppcloud/routes/combined_watershed_viewer.py:6:combined_watershed_viewer_bp = Blueprint('combined_watershed_viewer', __name__)
+wepppy/weppcloud/routes/combined_watershed_viewer.py:9:@combined_watershed_viewer_bp.route('/combined_ws_viewer')
+wepppy/weppcloud/routes/combined_watershed_viewer.py:10:@combined_watershed_viewer_bp.route('/combined_ws_viewer/')
+wepppy/weppcloud/routes/combined_watershed_viewer.py:15:@combined_watershed_viewer_bp.route('/combined_ws_viewer2')
+wepppy/weppcloud/routes/combined_watershed_viewer.py:16:@combined_watershed_viewer_bp.route('/combined_ws_viewer2/')
+wepppy/weppcloud/routes/combined_watershed_viewer.py:21:@combined_watershed_viewer_bp.route('/bounds_ws_viewer')
+wepppy/weppcloud/routes/combined_watershed_viewer.py:22:@combined_watershed_viewer_bp.route('/bounds_ws_viewer/')
+wepppy/weppcloud/routes/combined_watershed_viewer.py:27:@combined_watershed_viewer_bp.route('/combined_ws_viewer/url_generator', methods=['GET', 'POST'])
+wepppy/weppcloud/routes/combined_watershed_viewer.py:28:@combined_watershed_viewer_bp.route('/combined_ws_viewer/url_generator/', methods=['GET', 'POST'])
+wepppy/weppcloud/routes/combined_watershed_viewer.py:41:        from wepppy.weppcloud.combined_watershed_viewer_generator import combined_watershed_viewer_generator
+wepppy/weppcloud/routes/combined_watershed_viewer.py:42:        url = combined_watershed_viewer_generator(runids, title)
+wepppy/weppcloud/routes/nodb_api/project_bp.py:418:    watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/nodb_api/project_bp.py:419:    fn = watershed.netful_shp
+wepppy/weppcloud/routes/nodb_api/project_bp.py:429:    watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/nodb_api/project_bp.py:430:    fn = watershed.subwta_shp
+wepppy/weppcloud/routes/nodb_api/project_bp.py:448:    watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/nodb_api/project_bp.py:449:    fn = watershed.bound_shp
+wepppy/weppcloud/routes/run_0/run_0_bp.py:38:from wepppy.nodb.mods.swat.print_prt import mask_to_tokens
+wepppy/weppcloud/routes/run_0/run_0_bp.py:93:    '#wepp': TaskEnum.run_wepp_watershed,
+wepppy/weppcloud/routes/run_0/run_0_bp.py:326:        session.get("_roles_mask") or session.get("_roles") or session.get("roles")
+wepppy/weppcloud/routes/run_0/run_0_bp.py:633:    watershed = Watershed.getInstance(wd)
+wepppy/weppcloud/routes/run_0/run_0_bp.py:639:    browse_watershed_hillslopes_parquet = pick_existing_parquet_relpath(
+wepppy/weppcloud/routes/run_0/run_0_bp.py:640:        wd, "watershed/hillslopes.parquet"
+wepppy/weppcloud/routes/run_0/run_0_bp.py:642:    browse_watershed_channels_parquet = pick_existing_parquet_relpath(
+wepppy/weppcloud/routes/run_0/run_0_bp.py:643:        wd, "watershed/channels.parquet"
+wepppy/weppcloud/routes/run_0/run_0_bp.py:648:    if watershed.delineation_backend_is_topaz:
+wepppy/weppcloud/routes/run_0/run_0_bp.py:688:        for object_name, mask in rows:
+wepppy/weppcloud/routes/run_0/run_0_bp.py:689:            daily, monthly, yearly, avann = mask_to_tokens(int(mask))
+wepppy/weppcloud/routes/run_0/run_0_bp.py:782:        watershed=watershed,
+wepppy/weppcloud/routes/run_0/run_0_bp.py:829:        browse_watershed_hillslopes_parquet=browse_watershed_hillslopes_parquet,
+wepppy/weppcloud/routes/run_0/run_0_bp.py:830:        browse_watershed_channels_parquet=browse_watershed_channels_parquet,
+wepppy/weppcloud/routes/run_0/run_0_bp.py:856:                    "watersheds",
+wepppy/weppcloud/routes/run_0/run_0_bp.py:992:                "overrides": {"watershed:delineation_backend": "wbt"},
+wepppy/weppcloud/routes/__init__.py:34:    "watershed_bp": (".nodb_api.watershed_bp", "watershed_bp"),
+wepppy/weppcloud/routes/__init__.py:40:    "combined_watershed_viewer_bp": (".combined_watershed_viewer", "combined_watershed_viewer_bp"),
+wepppy/weppcloud/routes/__init__.py:89:    "watershed_bp",
+wepppy/weppcloud/routes/__init__.py:126:    "watershed_bp",
+wepppy/weppcloud/routes/__init__.py:166:    with the submodule object, masking the blueprint variable.
+wepppy/weppcloud/routes/__init__.py:182:    'combined_watershed_viewer_bp',
+wepppy/weppcloud/routes/__init__.py:213:    'watershed_bp',

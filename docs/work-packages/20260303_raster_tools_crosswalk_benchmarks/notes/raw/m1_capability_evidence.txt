@@ -1,0 +1,188 @@
+# raster_tools capabilities
+/home/workdir/raster_tools/raster_tools/warp.py:14:def reproject(
+/home/workdir/raster_tools/raster_tools/rasterize.py:530:def rasterize(
+/home/workdir/raster_tools/raster_tools/clipping.py:81:def clip(feature, data_raster, bounds=None):
+/home/workdir/raster_tools/raster_tools/clipping.py:143:def mask(feature, data_raster, invert=False):
+/home/workdir/raster_tools/raster_tools/zonal.py:300:def zonal_stats(
+/home/workdir/raster_tools/raster_tools/surface.py:168:def slope(raster, degrees=True):
+/home/workdir/raster_tools/raster_tools/raster.py:1350:    def mask(self):
+/home/workdir/raster_tools/raster_tools/raster.py:2188:    def reproject(
+
+# weppcloud-wbt capabilities
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/mod.rs:437:        tool_names.push("PruneStrahlerStreamOrder".to_string());
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/mod.rs:1078:                stream_network_analysis::PruneStrahlerStreamOrder::new(),
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/stream_network_analysis/prune_strahler_order.rs:29:pub struct PruneStrahlerStreamOrder {
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/stream_network_analysis/prune_strahler_order.rs:37:impl PruneStrahlerStreamOrder {
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/stream_network_analysis/prune_strahler_order.rs:38:    pub fn new() -> PruneStrahlerStreamOrder {
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/stream_network_analysis/prune_strahler_order.rs:40:        let name = "PruneStrahlerStreamOrder".to_string();
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/stream_network_analysis/prune_strahler_order.rs:97:        PruneStrahlerStreamOrder {
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/stream_network_analysis/prune_strahler_order.rs:107:impl WhiteboxTool for PruneStrahlerStreamOrder {
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/stream_network_analysis/mod.rs:37:pub use self::prune_strahler_order::PruneStrahlerStreamOrder;
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/watershed.rs:68:pub struct Watershed {
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.rs:127:pub struct HillslopesTopaz {
+/home/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/find_outlet.rs:22:pub struct FindOutlet {
+
+# peridot capabilities
+/home/workdir/peridot/src/watershed_abstraction/watershed_abstraction.rs:121:    let hillslopes: FlowpathCollection = abstract_subcatchments(
+/home/workdir/peridot/src/watershed_abstraction/watershed_abstraction.rs:171:pub fn abstract_subcatchments(
+/home/workdir/peridot/src/watershed_abstraction/watershed_abstraction.rs:202:                let flowpaths: FlowpathCollection = walk_flowpaths(
+/home/workdir/peridot/src/watershed_abstraction/watershed_abstraction.rs:226:                let flowpaths: FlowpathCollection = walk_flowpaths(
+/home/workdir/peridot/src/watershed_abstraction/watershed_abstraction.rs:437:pub fn walk_flowpaths(
+/home/workdir/peridot/src/watershed_abstraction/watershed_abstraction.rs:450:            walk_flowpath(
+/home/workdir/peridot/src/watershed_abstraction/watershed_abstraction.rs:470:pub fn walk_flowpath(
+/home/workdir/peridot/src/rasters/mod.rs:4:pub use d8_wbt_to_topaz::remap_whitebox_d8_to_topaz_in_place;
+/home/workdir/peridot/src/rasters/d8_wbt_to_topaz.rs:3:pub fn remap_whitebox_d8_to_topaz_in_place(flovec: &mut Raster<u8>) {
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:12:use crate::d8_wbt_to_topaz::remap_whitebox_d8_to_topaz_in_place;
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:17:use crate::watershed_abstraction::{abstract_subcatchments, walk_channels, walk_flowpath, PATHS};
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:143:    remap_whitebox_d8_to_topaz_in_place(&mut flovec);
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:245:        abstract_subcatchments_representative(
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:256:        abstract_subcatchments(
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:472:        return walk_flowpath(
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:505:        let fp = walk_flowpath(
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:588:fn abstract_subcatchments_representative(
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:626:    use crate::watershed_abstraction::walk_flowpaths;
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:655:        remap_whitebox_d8_to_topaz_in_place(&mut flovec);
+/home/workdir/peridot/src/wbt/wbt_watershed_abstraction.rs:663:            let flowpaths = walk_flowpaths(
+/home/workdir/peridot/src/wbt/wbt_sub_fields_abstraction.rs:13:use crate::d8_wbt_to_topaz::remap_whitebox_d8_to_topaz_in_place;
+/home/workdir/peridot/src/wbt/wbt_sub_fields_abstraction.rs:17:use crate::watershed_abstraction::walk_flowpaths;
+/home/workdir/peridot/src/wbt/wbt_sub_fields_abstraction.rs:147:    remap_whitebox_d8_to_topaz_in_place(&mut flovec);
+/home/workdir/peridot/src/wbt/wbt_sub_fields_abstraction.rs:245:    let _ = intersection_subwta.write(&format!("{}/sub_field_id_map.tif", output_dir));
+/home/workdir/peridot/src/wbt/wbt_sub_fields_abstraction.rs:247:        "wrote sub_field_id_map.tif in {:.2}s",
+/home/workdir/peridot/src/wbt/wbt_sub_fields_abstraction.rs:374:            let flowpaths: FlowpathCollection = walk_flowpaths(
+
+# wepppyo3 capabilities
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:621:    let dataset = Dataset::open(path)
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:740:    let dataset = Dataset::open(path)
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:789:    let dataset = Dataset::open(path)
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:838:    let dataset = Dataset::open(path)
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:894:fn reclassify_sbs_raster(
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:904:    let dataset = Dataset::open(path)
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:948:fn export_sbs_4class(
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:956:    let dataset = Dataset::open(path)
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:1049:    m.add_function(wrap_pyfunction!(reclassify_sbs_raster, m)?)?;
+/home/workdir/wepppyo3/sbs_map/src/lib.rs:1050:    m.add_function(wrap_pyfunction!(export_sbs_4class, m)?)?;
+/home/workdir/wepppyo3/raster/src/raster.rs:291:        let dataset = gdal::Dataset::open(path)?;
+/home/workdir/wepppyo3/raster/src/raster.rs:344:        let dataset = gdal::Dataset::open(path)?;
+/home/workdir/wepppyo3/raster/src/raster.rs:590:    pub fn determine_aspect<I: ToIndices>(&self, indices: &I) -> f64 {
+/home/workdir/wepppyo3/README.md:23:- `identify_mode_single_raster_key(...)`: mode parameter value per key; falls back to global mode when a key has only nodata.
+/home/workdir/wepppyo3/README.md:34:- `reclassify_sbs_raster(path, *, breaks=None, ct=None, nodata=None, offset=0, color_map_path=None)`: reclassify SBS raster values to 4 classes (returns a uint8 NumPy array).
+/home/workdir/wepppyo3/README.md:35:- `export_sbs_4class(path, dst_path, *, breaks=None, ct=None, nodata=None, color_map_path=None)`: write a 4-class GeoTIFF with palette + nodata.
+/home/workdir/wepppyo3/raster_characteristics/src/lib.rs:45:/// let result = identify_mode_single_raster_key(key_fn, parameter_fn, ignore_channels, ignore_keys);
+/home/workdir/wepppyo3/raster_characteristics/src/lib.rs:57:fn identify_mode_single_raster_key(
+/home/workdir/wepppyo3/raster_characteristics/src/lib.rs:537:    m.add_function(wrap_pyfunction!(identify_mode_single_raster_key, m)?)?;
+/home/workdir/wepppyo3/release/arm64.mac/py312/wepppyo3/raster_characteristics/__init__.py:5:    identify_mode_single_raster_key as _identify_mode_single_raster_key,
+/home/workdir/wepppyo3/release/arm64.mac/py312/wepppyo3/raster_characteristics/__init__.py:18:def identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/arm64.mac/py312/wepppyo3/raster_characteristics/__init__.py:27:    return _identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/arm64.mac/py312/wepppyo3/raster_characteristics/__init__.py:35:identify_mode_single_raster_key.__doc__ = _identify_mode_single_raster_key.__doc__
+/home/workdir/wepppyo3/tests/raster_characteristics/fixtures/README.md:1:# Test Fixtures for `identify_mode_single_raster_key`
+/home/workdir/wepppyo3/tests/raster_characteristics/fixtures/README.md:38:When calling `identify_mode_single_raster_key(key_fn, parameter_fn, ignore_channels=True)`:
+/home/workdir/wepppyo3/tests/raster_characteristics/fixtures/README.md:49:Previously, `identify_mode_single_raster_key` would silently skip hillslopes
+/home/workdir/wepppyo3/tests/raster_characteristics/fixtures/README.md:61:from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+/home/workdir/wepppyo3/tests/raster_characteristics/fixtures/README.md:63:result = identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py310/wepppyo3/raster_characteristics/__init__.py:5:    identify_mode_single_raster_key as _identify_mode_single_raster_key,
+/home/workdir/wepppyo3/release/linux/py310/wepppyo3/raster_characteristics/__init__.py:18:def identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py310/wepppyo3/raster_characteristics/__init__.py:27:    return _identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py310/wepppyo3/raster_characteristics/__init__.py:35:identify_mode_single_raster_key.__doc__ = _identify_mode_single_raster_key.__doc__
+/home/workdir/wepppyo3/release/linux/py312/wepppyo3/sbs_map/__init__.py:5:from .sbs_map_rust import reclassify_sbs_raster
+/home/workdir/wepppyo3/release/linux/py312/wepppyo3/sbs_map/__init__.py:6:from .sbs_map_rust import export_sbs_4class
+/home/workdir/wepppyo3/release/linux/py312/wepppyo3/sbs_map/__init__.py:13:    'reclassify_sbs_raster',
+/home/workdir/wepppyo3/release/linux/py312/wepppyo3/sbs_map/__init__.py:14:    'export_sbs_4class',
+/home/workdir/wepppyo3/release/linux/py36/wepppyo3/raster_characteristics/__init__.py:5:    identify_mode_single_raster_key as _identify_mode_single_raster_key,
+/home/workdir/wepppyo3/release/linux/py36/wepppyo3/raster_characteristics/__init__.py:18:def identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py36/wepppyo3/raster_characteristics/__init__.py:27:    return _identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py36/wepppyo3/raster_characteristics/__init__.py:35:identify_mode_single_raster_key.__doc__ = _identify_mode_single_raster_key.__doc__
+/home/workdir/wepppyo3/release/linux/py310-wepppy310-env/wepppyo3/raster_characteristics/__init__.py:5:    identify_mode_single_raster_key as _identify_mode_single_raster_key,
+/home/workdir/wepppyo3/release/linux/py310-wepppy310-env/wepppyo3/raster_characteristics/__init__.py:18:def identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py310-wepppy310-env/wepppyo3/raster_characteristics/__init__.py:27:    return _identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py310-wepppy310-env/wepppyo3/raster_characteristics/__init__.py:35:identify_mode_single_raster_key.__doc__ = _identify_mode_single_raster_key.__doc__
+/home/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py:5:    identify_mode_single_raster_key as _identify_mode_single_raster_key,
+/home/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py:18:def identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py:27:    return _identify_mode_single_raster_key(
+/home/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py:35:identify_mode_single_raster_key.__doc__ = _identify_mode_single_raster_key.__doc__
+/home/workdir/wepppyo3/tests/raster_characteristics/test_identify_mode_single_raster_key.py:8:from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+/home/workdir/wepppyo3/tests/raster_characteristics/test_identify_mode_single_raster_key.py:51:            result = identify_mode_single_raster_key(
+
+# oxidized-rasterstats capabilities
+/home/workdir/oxidized-rasterstats/src/point.rs:34:pub fn point_query_path(
+/home/workdir/oxidized-rasterstats/src/stats.rs:159:            _ if stat.starts_with("percentile_") => {
+/home/workdir/oxidized-rasterstats/python/rasterstats/utils.py:18:#  also percentile_{q} but that is handled as special case
+/home/workdir/oxidized-rasterstats/python/rasterstats/utils.py:22:    if not stat.startswith("percentile_"):
+/home/workdir/oxidized-rasterstats/python/rasterstats/utils.py:23:        raise ValueError("must start with 'percentile_'")
+/home/workdir/oxidized-rasterstats/python/rasterstats/utils.py:24:    qstr = stat.replace("percentile_", "")
+/home/workdir/oxidized-rasterstats/python/rasterstats/utils.py:93:        if x.startswith("percentile_"):
+/home/workdir/oxidized-rasterstats/src/zonal.rs:9:pub fn zonal_stats_path(
+/home/workdir/oxidized-rasterstats/src/lib.rs:36:fn zonal_stats_path(
+/home/workdir/oxidized-rasterstats/src/lib.rs:48:    let records = zonal::zonal_stats_path(
+/home/workdir/oxidized-rasterstats/src/lib.rs:86:fn point_query_path(
+/home/workdir/oxidized-rasterstats/src/lib.rs:94:    point::point_query_path(raster_path, &coords, band, nodata, interpolate, boundless)
+/home/workdir/oxidized-rasterstats/src/lib.rs:101:    m.add_function(wrap_pyfunction!(zonal_stats_path, m)?)?;
+/home/workdir/oxidized-rasterstats/src/lib.rs:102:    m.add_function(wrap_pyfunction!(point_query_path, m)?)?;
+/home/workdir/oxidized-rasterstats/python/rasterstats/_dispatch.py:113:    if not all(s in _SUPPORTED_STATS or s.startswith("percentile_") for s in norm_stats):
+/home/workdir/oxidized-rasterstats/python/rasterstats/_dispatch.py:157:        result = _rs_mod.zonal_stats_path(
+/home/workdir/oxidized-rasterstats/python/rasterstats/_dispatch.py:230:        raw = _rs_mod.point_query_path(
+/home/workdir/oxidized-rasterstats/python/rasterstats/_upstream_main.py:289:                for pctile in [s for s in stats if s.startswith("percentile_")]:
+
+# WEPPpy GDAL/rasterio/WBT/peridot usage anchors
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:29:from osgeo import gdal, osr
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:36:    run_peridot_abstract_watershed,
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:37:    run_peridot_wbt_abstract_watershed,
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:54:from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:154:            wbt = WhiteboxToolsTopazEmulator(
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:248:            # Use .vrt extension so WhiteboxTools recognizes the format
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:410:    def abstract_watershed(self) -> None:
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:416:                run_peridot_abstract_watershed(
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:423:                run_peridot_wbt_abstract_watershed(
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:432:            self._peridot_post_abstract_watershed()
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:436:                self._topaz_abstract_watershed()
+/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:438:                self._taudem_abstract_watershed()
+/workdir/wepppy/wepppy/topo/peridot/peridot_runner.py:94:def run_peridot_abstract_watershed(
+/workdir/wepppy/wepppy/topo/peridot/peridot_runner.py:124:def run_peridot_wbt_abstract_watershed(
+/workdir/wepppy/wepppy/topo/peridot/peridot_runner.py:134:    Run the Peridot abstract watershed tool using WhiteboxTools.
+/workdir/wepppy/wepppy/topo/peridot/peridot_runner.py:174:def post_abstract_watershed(wd: str, verbose: bool = True):
+/workdir/wepppy/wepppy/topo/peridot/peridot_runner.py:247:def run_peridot_wbt_sub_fields_abstraction(
+/workdir/wepppy/wepppy/topo/peridot/peridot_runner.py:255:    Run the Peridot abstract watershed tool using WhiteboxTools.
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:1:"""Emulate TOPAZ watershed delineation workflows using WhiteboxTools."""
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:19:import rasterio
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:21:from osgeo import gdal, osr
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:32:from whitebox_tools import WhiteboxTools
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:117:class WhiteboxToolsTopazEmulator:
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:129:            wbt_wd: Directory where WhiteboxTools intermediates and outputs are written.
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:132:            verbose: Forward to ``WhiteboxTools`` so individual commands emit console output.
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:133:            raise_on_error: Forwarded to ``WhiteboxTools`` to raise on failure.
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:157:        self._wbt_runner: Optional[WhiteboxTools] = None
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:165:        """Exclude the live WhiteboxTools runner to avoid serializing process env."""
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:245:        Returns the WhiteboxTools instance.
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:248:            self._wbt_runner = WhiteboxTools(verbose=self.verbose, raise_on_error=self.raise_on_error)
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:589:        warped = gdal.Warp(flovec_wgs_fn, src_ds, **warp_kwargs)
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:728:        """Create the channel network using WhiteboxTools.
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:923:            geojson_path: Path to the GeoJSON file produced by WhiteboxTools.
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:1214:                self.wbt.watershed(
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:1219:            except Exception as exc:  # broad-except: WhiteboxTools failures vary; retry transient errors
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:1352:        self.wbt.clip_raster_to_raster(i=self.netful, mask=self.bound, output=netw0_fn)
+/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:1668:    emulator = WhiteboxToolsTopazEmulator(dem, wbt_wd, verbose=verbose)
+/workdir/wepppy/wepppy/rq/culvert_rq.py:17:import rasterio
+/workdir/wepppy/wepppy/rq/culvert_rq.py:21:from whitebox_tools import WhiteboxTools
+/workdir/wepppy/wepppy/rq/culvert_rq.py:22:from osgeo import gdal
+/workdir/wepppy/wepppy/rq/culvert_rq.py:792:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+/workdir/wepppy/wepppy/rq/culvert_rq.py:814:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+/workdir/wepppy/wepppy/rq/culvert_rq.py:847:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+/workdir/wepppy/wepppy/rq/culvert_rq.py:865:def _clip_raster_to_raster_with_retry(
+/workdir/wepppy/wepppy/rq/culvert_rq.py:867:    wbt: WhiteboxTools,
+/workdir/wepppy/wepppy/rq/culvert_rq.py:885:            wbt.clip_raster_to_raster(
+/workdir/wepppy/wepppy/rq/culvert_rq.py:945:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+/workdir/wepppy/wepppy/rq/culvert_rq.py:949:    _clip_raster_to_raster_with_retry(
+/workdir/wepppy/wepppy/rq/culvert_rq.py:994:    wbt: WhiteboxTools,
+/workdir/wepppy/wepppy/rq/culvert_rq.py:1011:    _clip_raster_to_raster_with_retry(
+/workdir/wepppy/wepppy/rq/culvert_rq.py:1129:    so WhiteboxTools find_outlet can satisfy the junction-count constraint.
+/workdir/wepppy/wepppy/rq/culvert_rq.py:1188:        result = gdal.Translate(str(vrt_path), str(seeded_tif), format="VRT")
+/workdir/wepppy/wepppy/rq/culvert_rq.py:1371:        def _mutate_watershed() -> None:
+/workdir/wepppy/wepppy/rq/culvert_rq.py:1482:            watershed.abstract_watershed()
+/workdir/wepppy/wepppy/rq/culvert_rq.py:1524:        wepp.prep_watershed()
+/workdir/wepppy/wepppy/rq/culvert_rq.py:1525:        wepp.run_watershed()
+/workdir/wepppy/wepppy/microservices/rq_engine/watershed_routes.py:16:from osgeo import gdal, osr
+/workdir/wepppy/wepppy/microservices/rq_engine/watershed_routes.py:392:        warp_options = gdal.WarpOptions(
+/workdir/wepppy/wepppy/microservices/rq_engine/watershed_routes.py:396:        warped = gdal.Warp(str(dem_path), str(saved_path), options=warp_options)
+/workdir/wepppy/wepppy/microservices/rq_engine/watershed_routes.py:451:    vrt_ds = gdal.Translate(str(vrt_path), str(dem_path), format="VRT", **translate_options)
+/workdir/wepppy/wepppy/microservices/rq_engine/watershed_routes.py:771:async def build_subcatchments_and_abstract_watershed(
+/workdir/wepppy/wepppy/topo/watershed_abstraction/support.py:8:import rasterio
+/workdir/wepppy/wepppy/topo/watershed_abstraction/support.py:12:from osgeo import gdal, osr, ogr

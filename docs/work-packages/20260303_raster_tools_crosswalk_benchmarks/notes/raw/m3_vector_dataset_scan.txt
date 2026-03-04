@@ -1,0 +1,9 @@
+# vector fixtures in raster_tools tests
+/home/workdir/raster_tools/tests/data/vector/pods_first_10.shp
+/home/workdir/raster_tools/tests/data/vector/test_circles_small.shp
+/home/workdir/raster_tools/tests/data/vector/pods.shp
+/home/workdir/raster_tools/tests/data/vector/pods_small.shp
+
+# vector fixtures in wepppy tests
+/workdir/wepppy/tests/data/batch_runner/simple.geojson
+/workdir/wepppy/tests/data/batch_runner/invalid.geojson

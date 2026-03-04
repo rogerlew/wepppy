@@ -1,0 +1,1557 @@
+wepppy/nodb/duckdb_agents.py:74:        # Breaking after finding topaz_id would result in missing columns like slope_scalar, aspect, etc.
+wepppy/nodb/duckdb_agents.py:89:    """Return the soils summary for a single hillslope ``topaz_id``."""
+wepppy/nodb/duckdb_agents.py:100:    """Return soils summaries keyed by hillslope id or as a DataFrame."""
+wepppy/nodb/duckdb_agents.py:108:    """Return the landuse summary for a single hillslope ``topaz_id``."""
+wepppy/nodb/duckdb_agents.py:119:    """Return landuse summaries keyed by hillslope id or as a DataFrame."""
+wepppy/nodb/duckdb_agents.py:130:    """Return watershed hillslope summaries keyed by Topaz ID or DataFrame."""
+wepppy/nodb/duckdb_agents.py:131:    parquet_path = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet")
+wepppy/nodb/duckdb_agents.py:133:        raise FileNotFoundError("Missing watershed hillslopes parquet (watershed/hillslopes.parquet)")
+wepppy/nodb/duckdb_agents.py:137:    """Return the watershed hillslope summary for a single ``topaz_id``."""
+wepppy/nodb/duckdb_agents.py:138:    parquet_path = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet")
+wepppy/nodb/duckdb_agents.py:140:        raise FileNotFoundError("Missing watershed hillslopes parquet (watershed/hillslopes.parquet)")
+wepppy/nodb/base.py:2065:    def wbt_wd(self):
+wepppy/nodb/base.py:2066:        return _join(self.wd, 'dem', 'wbt')
+wepppy/nodb/redis_prep.py:34:    run_wepp_hillslopes = 'run_wepp_hillslopes'
+wepppy/nodb/redis_prep.py:70:            TaskEnum.run_wepp_hillslopes: 'Run WEPP Hillslopes',
+wepppy/nodb/redis_prep.py:104:            TaskEnum.run_wepp_hillslopes: '💧',
+wepppy/nodb/skeletonize.py:32:    "dem/wbt/*.geojson",
+wepppy/nodb/skeletonize.py:40:    "watershed/hillslopes.parquet",
+wepppy/nodb/locales/climate_catalog.py:206:        help_text='Validates and installs a user-supplied climate file. Hillslope PRISM revision available when spatial mode allows.',
+wepppy/nodb/batch_runner.py:32:    ensure_hillslope_interchange,
+wepppy/nodb/batch_runner.py:161:        TaskEnum.run_wepp_hillslopes,
+wepppy/nodb/batch_runner.py:463:        run_hillslopes = self.is_task_enabled(TaskEnum.run_wepp_hillslopes) \
+wepppy/nodb/batch_runner.py:464:            and prep[str(TaskEnum.run_wepp_hillslopes)] is None
+wepppy/nodb/batch_runner.py:468:        logger.info(f'run_hillslopes: {run_hillslopes}')
+wepppy/nodb/batch_runner.py:471:        if run_hillslopes:
+wepppy/nodb/batch_runner.py:475:        if run_hillslopes or run_watershed:
+wepppy/nodb/batch_runner.py:481:        if run_hillslopes:
+wepppy/nodb/batch_runner.py:482:            logger.info('calling wepp.prep_hillslopes()')
+wepppy/nodb/batch_runner.py:483:            wepp.prep_hillslopes()
+wepppy/nodb/batch_runner.py:484:            logger.info('calling wepp.run_hillslopes()')
+wepppy/nodb/batch_runner.py:485:            wepp.run_hillslopes()
+wepppy/nodb/batch_runner.py:487:        if run_hillslopes:
+wepppy/nodb/batch_runner.py:488:            ensure_hillslope_interchange(wepp, climate, logger)
+wepppy/nodb/wepp_nodb_post_utils.py:13:    run_wepp_hillslope_interchange,
+wepppy/nodb/wepp_nodb_post_utils.py:19:    "ensure_hillslope_interchange",
+wepppy/nodb/wepp_nodb_post_utils.py:30:def ensure_hillslope_interchange(
+wepppy/nodb/wepp_nodb_post_utils.py:39:    _log(logger, "building hillslope interchange outputs")
+wepppy/nodb/wepp_nodb_post_utils.py:40:    run_wepp_hillslope_interchange(
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:18:    """Build observed GridMET climate files for watershed + hillslopes."""
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:49:        hillslope_locations = self._build_hillslope_locations(watershed, ws_lng, ws_lat)
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:74:        self._interpolate_hillslope_timeseries(
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:76:            hillslope_locations=hillslope_locations,
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:156:    def _build_hillslope_locations(watershed: Any, ws_lng: float, ws_lat: float) -> dict[Any, dict[str, float]]:
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:157:        hillslope_locations = {"ws": {"longitude": ws_lng, "latitude": ws_lat}}
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:158:        for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:159:            _lng, _lat = watershed.hillslope_centroid_lnglat(topaz_id)
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:160:            hillslope_locations[topaz_id] = {"longitude": _lng, "latitude": _lat}
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:161:        return hillslope_locations
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:255:    def _interpolate_hillslope_timeseries(
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:259:        hillslope_locations: dict[Any, dict[str, float]],
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:273:            for topaz_id, loc in hillslope_locations.items():
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:323:            for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/climate_gridmet_multiple_build_service.py:324:                _lng, _lat = watershed.hillslope_centroid_lnglat(topaz_id)
+wepppy/nodb/core/watershed_mixins.py:29:from osgeo import gdal, osr
+wepppy/nodb/core/watershed_mixins.py:30:from osgeo.gdalconst import *
+wepppy/nodb/core/watershed_mixins.py:35:from wepppy.topo.peridot.peridot_runner import (
+wepppy/nodb/core/watershed_mixins.py:36:    run_peridot_abstract_watershed,
+wepppy/nodb/core/watershed_mixins.py:37:    run_peridot_wbt_abstract_watershed,
+wepppy/nodb/core/watershed_mixins.py:40:from wepppy.topo.peridot.flowpath import (
+wepppy/nodb/core/watershed_mixins.py:41:    PeridotHillslope,
+wepppy/nodb/core/watershed_mixins.py:49:    identify_edge_hillslopes,
+wepppy/nodb/core/watershed_mixins.py:53:from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
+wepppy/nodb/core/watershed_mixins.py:54:from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
+wepppy/nodb/core/watershed_mixins.py:73:# Debris-flow routines need the portion of the basin with slopes steeper than 30%.
+wepppy/nodb/core/watershed_mixins.py:74:# ``hillslopes.parquet`` stores slope as a rise/run ratio, so 30% equals 0.30.
+wepppy/nodb/core/watershed_mixins.py:96:        hillslopes_parquet = _pick_existing_parquet_path(
+wepppy/nodb/core/watershed_mixins.py:97:            self.wd, "watershed/hillslopes.parquet"
+wepppy/nodb/core/watershed_mixins.py:103:        if hillslopes_parquet is not None and channels_parquet is not None:
+wepppy/nodb/core/watershed_mixins.py:107:                    f"SELECT topaz_id FROM read_parquet('{hillslopes_parquet}')"
+wepppy/nodb/core/watershed_mixins.py:151:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed_mixins.py:152:            self.logger.info(f' delineation_backend_is_wbt')
+wepppy/nodb/core/watershed_mixins.py:154:            wbt = WhiteboxToolsTopazEmulator(
+wepppy/nodb/core/watershed_mixins.py:155:                self.wbt_wd,
+wepppy/nodb/core/watershed_mixins.py:159:            wbt.flovec_netful_relief_are_vrt = False
+wepppy/nodb/core/watershed_mixins.py:160:            wbt.delineate_channels(
+wepppy/nodb/core/watershed_mixins.py:163:                fill_or_breach=self.wbt_fill_or_breach,
+wepppy/nodb/core/watershed_mixins.py:164:                blc_dist=self.wbt_blc_dist,
+wepppy/nodb/core/watershed_mixins.py:167:            self._wbt = wbt
+wepppy/nodb/core/watershed_mixins.py:193:        if not self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed_mixins.py:212:        os.makedirs(self.wbt_wd, exist_ok=True)
+wepppy/nodb/core/watershed_mixins.py:249:            _ensure_vrt(flovec_src, _join(self.wbt_wd, "flovec.vrt"))
+wepppy/nodb/core/watershed_mixins.py:250:            _ensure_vrt(netful_src, _join(self.wbt_wd, "netful.vrt"))
+wepppy/nodb/core/watershed_mixins.py:252:                _ensure_vrt(relief_src, _join(self.wbt_wd, "relief.vrt"))
+wepppy/nodb/core/watershed_mixins.py:254:                _ensure_vrt(chnjnt_src, _join(self.wbt_wd, "chnjnt.vrt"))
+wepppy/nodb/core/watershed_mixins.py:256:            _ensure_symlink(flovec_src, _join(self.wbt_wd, "flovec.tif"))
+wepppy/nodb/core/watershed_mixins.py:257:            _ensure_symlink(netful_src, _join(self.wbt_wd, "netful.tif"))
+wepppy/nodb/core/watershed_mixins.py:259:                _ensure_symlink(relief_src, _join(self.wbt_wd, "relief.tif"))
+wepppy/nodb/core/watershed_mixins.py:261:                _ensure_symlink(chnjnt_src, _join(self.wbt_wd, "chnjnt.tif"))
+wepppy/nodb/core/watershed_mixins.py:265:        wbt = getattr(self, "_wbt", None)
+wepppy/nodb/core/watershed_mixins.py:266:        if wbt is not None:
+wepppy/nodb/core/watershed_mixins.py:267:            wbt.flovec_netful_relief_are_vrt = channels_are_vrt
+wepppy/nodb/core/watershed_mixins.py:313:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed_mixins.py:314:            self.logger.info(f' delineation_backend_is_wbt')
+wepppy/nodb/core/watershed_mixins.py:315:            wbt = self._ensure_wbt()
+wepppy/nodb/core/watershed_mixins.py:316:            _outlet = wbt.set_outlet(lng=lng, lat=lat, logger=self.logger)
+wepppy/nodb/core/watershed_mixins.py:322:                self._wbt = wbt
+wepppy/nodb/core/watershed_mixins.py:351:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed_mixins.py:352:            self.logger.info(f' delineation_backend_is_wbt')
+wepppy/nodb/core/watershed_mixins.py:353:            wbt = self._ensure_wbt()
+wepppy/nodb/core/watershed_mixins.py:354:            wbt.delineate_subcatchments(self.logger)
+wepppy/nodb/core/watershed_mixins.py:355:            self.identify_edge_hillslopes()
+wepppy/nodb/core/watershed_mixins.py:369:    def identify_edge_hillslopes(self) -> None:
+wepppy/nodb/core/watershed_mixins.py:371:        Identify edge hillslopes in the watershed.
+wepppy/nodb/core/watershed_mixins.py:372:        This is used to determine which hillslopes are at the edge of the watershed.
+wepppy/nodb/core/watershed_mixins.py:378:            self._edge_hillslopes = identify_edge_hillslopes(self.subwta, self.logger)
+wepppy/nodb/core/watershed_mixins.py:382:            self._edge_hillslopes = identify_edge_hillslopes(self.subwta, self.logger)
+wepppy/nodb/core/watershed_mixins.py:386:    def edge_hillslopes(self) -> List[int]:
+wepppy/nodb/core/watershed_mixins.py:388:        Get the edge hillslopes in the watershed.
+wepppy/nodb/core/watershed_mixins.py:390:        if not hasattr(self, "_edge_hillslopes"):
+wepppy/nodb/core/watershed_mixins.py:391:            self.identify_edge_hillslopes()
+wepppy/nodb/core/watershed_mixins.py:392:        return self._edge_hillslopes
+wepppy/nodb/core/watershed_mixins.py:400:        if self.abstraction_backend_is_peridot:
+wepppy/nodb/core/watershed_mixins.py:414:        if self.abstraction_backend_is_peridot:
+wepppy/nodb/core/watershed_mixins.py:416:                run_peridot_abstract_watershed(
+wepppy/nodb/core/watershed_mixins.py:418:                    clip_hillslopes=False,
+wepppy/nodb/core/watershed_mixins.py:419:                    clip_hillslope_length=self.clip_hillslope_length,
+wepppy/nodb/core/watershed_mixins.py:422:            elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed_mixins.py:423:                run_peridot_wbt_abstract_watershed(
+wepppy/nodb/core/watershed_mixins.py:425:                    clip_hillslopes=self.clip_hillslopes,
+wepppy/nodb/core/watershed_mixins.py:426:                    clip_hillslope_length=self.clip_hillslope_length,
+wepppy/nodb/core/watershed_mixins.py:432:            self._peridot_post_abstract_watershed()
+wepppy/nodb/core/watershed_mixins.py:498:            elif isinstance(wat_ss, PeridotHillslope):
+wepppy/nodb/core/watershed_mixins.py:539:            elif isinstance(wat_ss, PeridotHillslope):
+wepppy/nodb/core/watershed_mixins.py:586:        driver = gdal.GetDriverByName("GTiff")
+wepppy/nodb/core/watershed_mixins.py:605:        return dict(hillslope_n=self.sub_n, channel_n=self.chn_n, totalarea=self.wsarea)
+wepppy/nodb/core/watershed_mixins.py:611:    def sub_summary(self, topaz_id: Union[str, int]) -> Union[PeridotHillslope, Dict[str, Any], None]:
+wepppy/nodb/core/watershed_mixins.py:612:        if _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet") is not None:
+wepppy/nodb/core/watershed_mixins.py:613:            return PeridotHillslope.from_dict(
+wepppy/nodb/core/watershed_mixins.py:617:        if _exists(_join(self.wat_dir, "hillslopes.csv")):
+wepppy/nodb/core/watershed_mixins.py:620:            csv_fn = _join(self.wat_dir, "hillslopes.csv")
+wepppy/nodb/core/watershed_mixins.py:682:    def subs_summary(self) -> Dict[str, Union[PeridotHillslope, Dict[str, Any]]]:
+wepppy/nodb/core/watershed_mixins.py:683:        if _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet") is not None:
+wepppy/nodb/core/watershed_mixins.py:687:                str(topaz_id): PeridotHillslope.from_dict(d)
+wepppy/nodb/core/watershed_mixins.py:768:    def hillslope_area(self, topaz_id: Union[str, int]) -> float:
+wepppy/nodb/core/watershed_mixins.py:772:        parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/core/watershed_mixins.py:779:    def hillslope_slope(self, topaz_id: Union[str, int]) -> float:
+wepppy/nodb/core/watershed_mixins.py:780:        if hasattr(self, "_sub_slope_lookup"):
+wepppy/nodb/core/watershed_mixins.py:781:            return self._sub_slope_lookup[str(topaz_id)]  # type: ignore[attr-defined]
+wepppy/nodb/core/watershed_mixins.py:783:        parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/core/watershed_mixins.py:785:            sub_slope_lookup = self._load_lookup_from_duckdb("_sub_slope_lookup", parquet_fn, source_kind="parquet", value_columns=("slope_scalar",), value_builder=lambda row: row[1])
+wepppy/nodb/core/watershed_mixins.py:786:            return sub_slope_lookup[str(topaz_id)]
+wepppy/nodb/core/watershed_mixins.py:788:        raise Exception('Cannot find slope without hillslope.parquet file')
+wepppy/nodb/core/watershed_mixins.py:811:    def hillslope_length(self, topaz_id: Union[str, int]) -> float:
+wepppy/nodb/core/watershed_mixins.py:815:        parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/core/watershed_mixins.py:822:    def _compute_area_gt30_from_hillslopes(self) -> float:
+wepppy/nodb/core/watershed_mixins.py:823:        """Determine basin area with slopes ≥30% using hillslopes parquet data."""
+wepppy/nodb/core/watershed_mixins.py:824:        parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/core/watershed_mixins.py:827:                "hillslopes parquet not found (expected watershed/hillslopes.parquet)"
+wepppy/nodb/core/watershed_mixins.py:835:            f"WHERE slope_scalar >= {_SLOPE_RATIO_THRESHOLD}"
+wepppy/nodb/core/watershed_mixins.py:856:        dataset = gdal.Open(dem_path, gdal.GA_ReadOnly)
+wepppy/nodb/core/watershed_mixins.py:900:    def hillslope_width(self, topaz_id: Union[str, int]) -> float:
+wepppy/nodb/core/watershed_mixins.py:905:        parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/core/watershed_mixins.py:912:        csv_fn = _join(self.wat_dir, "hillslopes.csv")
+wepppy/nodb/core/watershed_mixins.py:964:            raise ValueError("Hillslope summary data is None")
+wepppy/nodb/core/watershed_mixins.py:965:        hillslope_summary = self._subs_summary[topaz_id_str]
+wepppy/nodb/core/watershed_mixins.py:966:        if isinstance(hillslope_summary, dict):
+wepppy/nodb/core/watershed_mixins.py:967:            return float(hillslope_summary["width"])
+wepppy/nodb/core/watershed_mixins.py:968:        return float(hillslope_summary.width)
+wepppy/nodb/core/watershed_mixins.py:974:        return self.hillslope_width(topaz_id)
+wepppy/nodb/core/watershed_mixins.py:976:    def hillslope_centroid_lnglat(self, topaz_id: Union[str, int]) -> Tuple[float, float]:
+wepppy/nodb/core/watershed_mixins.py:980:        parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/core/watershed_mixins.py:991:    def hillslope_slp_fn(self, topaz_id: Union[str, int]) -> str:
+wepppy/nodb/core/watershed_mixins.py:995:        elif isinstance(wat_ss, PeridotHillslope):
+wepppy/nodb/core/watershed_mixins.py:1003:    def centroid_hillslope_iter(self) -> Generator[Tuple[Union[str, int], Tuple[float, float]], None, None]:
+wepppy/nodb/core/watershed_mixins.py:1004:        parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/core/watershed_mixins.py:1017:            yield from self._deprecated_centroid_hillslope_iter()
+wepppy/nodb/core/watershed_mixins.py:1020:    def _deprecated_centroid_hillslope_iter(self) -> Generator[Tuple[str, Tuple[float, float]], None, None]:
+wepppy/nodb/core/ron.py:1311:        has_watershed = pick_existing_parquet_path(wd, "watershed/hillslopes.parquet") is not None
+wepppy/nodb/core/ron.py:1327:                    dict(meta=dict(hill_type='Hillslope',
+wepppy/nodb/core/ron.py:1349:                dict(meta=dict(hill_type='Hillslope',
+wepppy/nodb/core/ron.py:1369:        if pick_existing_parquet_path(wd, "watershed/hillslopes.parquet") is not None:
+wepppy/nodb/core/ron.py:1385:            # get watershed summary from hillslopes.csv if it exists
+wepppy/nodb/core/ron.py:1386:            if _exists(_join(wd, 'watershed/hillslopes.csv')):
+wepppy/nodb/core/ron.py:1388:                csv_fn = _join(wd, 'watershed/hillslopes.csv')
+wepppy/nodb/core/ron.py:1420:            meta=dict(hill_type='Hillslope', topaz_id=topaz_id,
+wepppy/nodb/core/wepp_prep_service.py:13:    make_hillslope_run,
+wepppy/nodb/core/wepp_prep_service.py:14:    make_ss_batch_hillslope_run,
+wepppy/nodb/core/wepp_prep_service.py:15:    make_ss_hillslope_run,
+wepppy/nodb/core/wepp_prep_service.py:27:    def prep_hillslopes(
+wepppy/nodb/core/wepp_prep_service.py:63:                wepp._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
+wepppy/nodb/core/wepp_prep_service.py:70:        wepp._make_hillslope_runs(
+wepppy/nodb/core/wepp_prep_service.py:120:        hillslope_cancovs = landuse.hillslope_cancovs
+wepppy/nodb/core/wepp_prep_service.py:238:                        hillslope_cancovs is not None
+wepppy/nodb/core/wepp_prep_service.py:243:                        management.set_cancov(hillslope_cancovs[str(topaz_id)])
+wepppy/nodb/core/wepp_prep_service.py:390:        clip_soils = soils.clip_soils
+wepppy/nodb/core/wepp_prep_service.py:391:        clip_soils_depth = soils.clip_soils_depth
+wepppy/nodb/core/wepp_prep_service.py:411:                lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
+wepppy/nodb/core/wepp_prep_service.py:438:                    clip_soils,
+wepppy/nodb/core/wepp_prep_service.py:439:                    clip_soils_depth,
+wepppy/nodb/core/wepp_prep_service.py:645:    def make_hillslope_runs(
+wepppy/nodb/core/wepp_prep_service.py:657:        wepp.logger.info("    Prepping _make_hillslope_runs... ")
+wepppy/nodb/core/wepp_prep_service.py:670:                make_ss_hillslope_run(
+wepppy/nodb/core/wepp_prep_service.py:686:                    make_ss_batch_hillslope_run(
+wepppy/nodb/core/wepp_prep_service.py:699:                make_hillslope_run(
+wepppy/nodb/core/wepp_prep_service.py:740:        wepp._prep_channel_slopes()
+wepppy/nodb/core/topaz.py:279:            mask = -1 * bound + 1
+wepppy/nodb/core/topaz.py:281:            # determine area with slope > 30
+wepppy/nodb/core/topaz.py:283:            fvslop_ma = ma.masked_array(fvslop, mask=mask)
+wepppy/nodb/core/topaz.py:289:            relief_ma = ma.masked_array(relief, mask=mask)
+wepppy/nodb/core/landuse.py:45:    Management files (.man) are generated per hillslope as p{wepp_id}.man
+wepppy/nodb/core/landuse.py:99:from wepppy.io_wait import get_peridot_input_wait_s, get_peridot_input_poll_s
+wepppy/nodb/core/landuse.py:108:import wepppyo3
+wepppy/nodb/core/landuse.py:109:from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+wepppy/nodb/core/landuse.py:110:from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
+wepppy/nodb/core/landuse.py:115:def _get_gdal_open_probe(logger: Optional[logging.Logger]) -> Optional[Callable[[str], bool]]:
+wepppy/nodb/core/landuse.py:125:        from osgeo import gdal  # type: ignore[import-not-found]
+wepppy/nodb/core/landuse.py:128:            ds = gdal.OpenEx(path, gdal.OF_RASTER | gdal.OF_READONLY)
+wepppy/nodb/core/landuse.py:143:        libname = ctypes.util.find_library('gdal')
+wepppy/nodb/core/landuse.py:145:            raise FileNotFoundError('libgdal not found')
+wepppy/nodb/core/landuse.py:147:        libgdal = ctypes.CDLL(libname)
+wepppy/nodb/core/landuse.py:148:        libgdal.GDALOpen.argtypes = [ctypes.c_char_p, ctypes.c_int]
+wepppy/nodb/core/landuse.py:149:        libgdal.GDALOpen.restype = ctypes.c_void_p
+wepppy/nodb/core/landuse.py:150:        libgdal.GDALClose.argtypes = [ctypes.c_void_p]
+wepppy/nodb/core/landuse.py:151:        libgdal.GDALClose.restype = None
+wepppy/nodb/core/landuse.py:154:            ds = libgdal.GDALOpen(path.encode('utf-8'), 0)
+wepppy/nodb/core/landuse.py:157:            libgdal.GDALClose(ds)
+wepppy/nodb/core/landuse.py:173:def _wait_for_gdal_openable_raster(
+wepppy/nodb/core/landuse.py:185:    wepppyo3 (GDALOpenEx returning null).
+wepppy/nodb/core/landuse.py:187:    probe = _get_gdal_open_probe(logger)
+wepppy/nodb/core/landuse.py:358:            self._hillslope_cancovs = None
+wepppy/nodb/core/landuse.py:359:            self._hillslope_mofe_cancovs = None
+wepppy/nodb/core/landuse.py:659:        for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/landuse.py:674:        for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/landuse.py:699:        global wepppyo3
+wepppy/nodb/core/landuse.py:717:        if wepppyo3 is None:
+wepppy/nodb/core/landuse.py:727:            self.logger.info('Building landcover grid from NLCD raster using wepppyo3 identify_mode_single_raster_key')
+wepppy/nodb/core/landuse.py:728:            wait_s = get_peridot_input_wait_s()
+wepppy/nodb/core/landuse.py:729:            poll_s = get_peridot_input_poll_s()
+wepppy/nodb/core/landuse.py:730:            _wait_for_gdal_openable_raster(subwta_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:731:            _wait_for_gdal_openable_raster(lc_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:873:                self.hillslope_cancovs = cancov_d
+wepppy/nodb/core/landuse.py:884:                area = watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/landuse.py:907:        global wepppyo3
+wepppy/nodb/core/landuse.py:922:        wait_s = get_peridot_input_wait_s()
+wepppy/nodb/core/landuse.py:923:        poll_s = get_peridot_input_poll_s()
+wepppy/nodb/core/landuse.py:924:        if wepppyo3 is not None:
+wepppy/nodb/core/landuse.py:925:            _wait_for_gdal_openable_raster(subwta_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:932:            if wepppyo3 is None:
+wepppy/nodb/core/landuse.py:938:                _wait_for_gdal_openable_raster(lc_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:966:        if wepppyo3 is None:
+wepppy/nodb/core/landuse.py:970:            wait_s = get_peridot_input_wait_s()
+wepppy/nodb/core/landuse.py:971:            poll_s = get_peridot_input_poll_s()
+wepppy/nodb/core/landuse.py:972:            _wait_for_gdal_openable_raster(watershed.subwta, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:973:            _wait_for_gdal_openable_raster(watershed.mofe_map, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:974:            _wait_for_gdal_openable_raster(self.lc_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:994:                wait_s = get_peridot_input_wait_s()
+wepppy/nodb/core/landuse.py:995:                poll_s = get_peridot_input_poll_s()
+wepppy/nodb/core/landuse.py:996:                _wait_for_gdal_openable_raster(watershed.subwta, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:997:                _wait_for_gdal_openable_raster(watershed.mofe_map, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:998:                _wait_for_gdal_openable_raster(disturbed.disturbed_cropped, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+wepppy/nodb/core/landuse.py:1060:            self.logger.info(f'building management for hillslope: {topaz_id}')
+wepppy/nodb/core/landuse.py:1129:                self.logger.info(f"building management for hillslope: {topaz_id} with doms {doms}")
+wepppy/nodb/core/landuse.py:1138:                self._hillslope_mofe_cancovs = cancov_d
+wepppy/nodb/core/landuse.py:1407:            if self.hillslope_cancovs:
+wepppy/nodb/core/landuse.py:1408:                d['cancov'] = self._hillslope_cancovs.get(topaz_id, d['cancov'])
+wepppy/nodb/core/landuse.py:1429:    def hillslope_cancovs(self) -> Optional[List]:
+wepppy/nodb/core/landuse.py:1430:        return getattr(self, '_hillslope_cancovs', None)
+wepppy/nodb/core/landuse.py:1432:    @hillslope_cancovs.setter
+wepppy/nodb/core/landuse.py:1434:    def hillslope_cancovs(self, value):
+wepppy/nodb/core/landuse.py:1435:        self._hillslope_cancovs = value
+wepppy/nodb/core/landuse.py:1438:    def hillslope_mofe_cancovs(self) -> Optional[List]:
+wepppy/nodb/core/landuse.py:1439:        return getattr(self, '_hillslope_mofe_cancovs', None)
+wepppy/nodb/core/landuse.py:1468:        hillslope_cancovs = self.hillslope_cancovs
+wepppy/nodb/core/landuse.py:1470:        if hillslope_cancovs is not None:
+wepppy/nodb/core/landuse.py:1471:            for topaz_id in hillslope_cancovs:
+wepppy/nodb/core/landuse.py:1472:                summary[topaz_id].update(dict(cancov=hillslope_cancovs[topaz_id]))
+wepppy/nodb/core/wepp_run_service.py:19:    run_hillslope,
+wepppy/nodb/core/wepp_run_service.py:20:    run_ss_batch_hillslope,
+wepppy/nodb/core/wepp_run_service.py:24:from wepppyo3.wepp_viz import make_soil_loss_grid_fps
+wepppy/nodb/core/wepp_run_service.py:43:            "watershed/slope_files/flowpaths/*.slps",
+wepppy/nodb/core/wepp_run_service.py:79:                        wepp.logger.error("  Flowpath slope extraction still running after 5 seconds.")
+wepppy/nodb/core/wepp_run_service.py:86:                            wepp.logger.info(f"  ({count}/{futures_n}) flowpath slopes prep complete")
+wepppy/nodb/core/wepp_run_service.py:91:                                f"  Flowpath slope extraction failed with an error: {exc}"
+wepppy/nodb/core/wepp_run_service.py:185:                "gdalwarp",
+wepppy/nodb/core/wepp_run_service.py:210:    def run_hillslopes(
+wepppy/nodb/core/wepp_run_service.py:236:        wepp.logger.info(f"Running Hillslopes with max_workers={max_workers}")
+wepppy/nodb/core/wepp_run_service.py:251:                wepp.logger.info(f"  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - SS batch")
+wepppy/nodb/core/wepp_run_service.py:266:                                run_ss_batch_hillslope,
+wepppy/nodb/core/wepp_run_service.py:279:                wepp.logger.info(f"  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - no SS batch")
+wepppy/nodb/core/wepp_run_service.py:292:                            run_hillslope,
+wepppy/nodb/core/wepp_run_service.py:311:                        "  Hillslope simulations still running after 30 seconds; continuing to wait."
+wepppy/nodb/core/wepp_run_service.py:320:                            f"  ({count}/{futures_n})  wepp hillslope {_id} completed in {elapsed_time}s with status={status}"
+wepppy/nodb/core/wepp_run_service.py:325:                        wepp.logger.error(f"  Hillslope simulation failed with an error: {exc}")
+wepppy/nodb/core/wepp_run_service.py:330:            prep.timestamp(TaskEnum.run_wepp_hillslopes)
+wepppy/nodb/core/wepp_run_service.py:337:            export_hillslopes_prep_details,
+wepppy/nodb/core/wepp_run_service.py:388:                    export_hillslopes_prep_details(wd)
+wepppy/nodb/core/wepp_run_service.py:396:                with wepp.timed("  running hillslope_watbal"):
+wepppy/nodb/core/wepp_run_service.py:397:                    wepp._run_hillslope_watbal()
+wepppy/nodb/core/soils.py:30:    5. Generate WEPP .sol files per hillslope
+wepppy/nodb/core/soils.py:45:    Soil files (.sol) are generated per hillslope as p{wepp_id}.sol
+wepppy/nodb/core/soils.py:112:    import wepppyo3
+wepppy/nodb/core/soils.py:113:    from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+wepppy/nodb/core/soils.py:114:    from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
+wepppy/nodb/core/soils.py:116:    print("wepppyo3 not found, using fallback methods.")
+wepppy/nodb/core/soils.py:117:    wepppyo3 = None
+wepppy/nodb/core/soils.py:224:            self._clip_soils = self.config_get_bool('soils', 'clip_soils', False)
+wepppy/nodb/core/soils.py:225:            self._clip_soils_depth = self.config_get_float('soils', 'clip_soils', 1000)
+wepppy/nodb/core/soils.py:253:    def clip_soils(self) -> bool:
+wepppy/nodb/core/soils.py:254:        return getattr(self, '_clip_soils', False)
+wepppy/nodb/core/soils.py:256:    @clip_soils.setter
+wepppy/nodb/core/soils.py:258:    def clip_soils(self, value: bool) -> None:
+wepppy/nodb/core/soils.py:259:        self._clip_soils = value
+wepppy/nodb/core/soils.py:262:    def clip_soils_depth(self) -> float:
+wepppy/nodb/core/soils.py:263:        return getattr(self, '_clip_soils_depth', 1000)
+wepppy/nodb/core/soils.py:265:    @clip_soils_depth.setter
+wepppy/nodb/core/soils.py:267:    def clip_soils_depth(self, value: float) -> None:
+wepppy/nodb/core/soils.py:268:        self._clip_soils_depth = value
+wepppy/nodb/core/soils.py:531:                soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:594:                for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/soils.py:634:                            valid_k_counts[mukey] += watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:638:            # now assign hillslopes with invalid mukeys the most common valid mukey
+wepppy/nodb/core/soils.py:647:                soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:688:            for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/soils.py:705:            # now assign hillslopes with invalid mukeys the most common valid mukey
+wepppy/nodb/core/soils.py:714:                soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:740:            for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/soils.py:745:                soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:807:                soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:1056:            area = watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:1101:            area = watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:1176:                soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:1228:                soils[mukey].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/soils.py:1250:        global wepppyo3
+wepppy/nodb/core/soils.py:1297:            if wepppyo3 is None:
+wepppy/nodb/core/soils.py:1298:                with self.timed('  Identifying dominant soils  (wepppyo3 not available)'):
+wepppy/nodb/core/soils.py:1301:                with self.timed('  Identifying dominant soils with wepppyo3 (rustlang)'):
+wepppy/nodb/core/soils.py:1332:                        soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/salvage_logging/burn_roads.py:9:    cmd = ['gdal_rasterize', '-a', attr, 
+wepppy/nodb/core/watershed.py:30:    - Hillslope parameters (Parquet)
+wepppy/nodb/core/watershed.py:43:    - wepppy.topo.peridot: Rust watershed engine
+wepppy/nodb/core/watershed.py:44:    - wepppy.topo.wbt: WhiteboxTools integration
+wepppy/nodb/core/watershed.py:79:from osgeo import gdal, osr
+wepppy/nodb/core/watershed.py:80:from osgeo.gdalconst import *
+wepppy/nodb/core/watershed.py:85:from wepppy.topo.peridot.peridot_runner import (
+wepppy/nodb/core/watershed.py:86:    run_peridot_abstract_watershed,
+wepppy/nodb/core/watershed.py:87:    run_peridot_wbt_abstract_watershed,
+wepppy/nodb/core/watershed.py:91:from wepppy.topo.peridot.flowpath import (
+wepppy/nodb/core/watershed.py:93:    PeridotHillslope,
+wepppy/nodb/core/watershed.py:102:    identify_edge_hillslopes,
+wepppy/nodb/core/watershed.py:106:from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
+wepppy/nodb/core/watershed.py:107:from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
+wepppy/nodb/core/watershed.py:130:# Debris-flow routines need the portion of the basin with slopes steeper than 30%.
+wepppy/nodb/core/watershed.py:131:# `hillslopes.parquet` stores slope as a rise/run ratio, so 30% equals 0.30.
+wepppy/nodb/core/watershed.py:172:    and no stream cells intersect with the watershed mask.
+wepppy/nodb/core/watershed.py:189:    wat_abs, sub_id, clip_hillslopes, clip_hillslope_length, max_points = args
+wepppy/nodb/core/watershed.py:193:        clip_hillslopes=clip_hillslopes,
+wepppy/nodb/core/watershed.py:194:        clip_hillslope_length=clip_hillslope_length,
+wepppy/nodb/core/watershed.py:228:            self._subs_summary: Optional[Dict[str, Any]] = None  # deprecated watershed/hillslopes.csv
+wepppy/nodb/core/watershed.py:243:            self._clip_hillslope_length: float = self.config_get_float(
+wepppy/nodb/core/watershed.py:244:                "watershed", "clip_hillslope_length"
+wepppy/nodb/core/watershed.py:246:            self._clip_hillslopes: bool = self.config_get_bool("watershed", "clip_hillslopes")
+wepppy/nodb/core/watershed.py:265:            elif delineation_backend.lower().startswith("wbt"):
+wepppy/nodb/core/watershed.py:267:                wbt_dir = self.wbt_wd
+wepppy/nodb/core/watershed.py:268:                if not _exists(wbt_dir):
+wepppy/nodb/core/watershed.py:269:                    os.mkdir(wbt_dir)
+wepppy/nodb/core/watershed.py:270:                self._csa = self.config_get_float("watershed.wbt", "csa", 5)
+wepppy/nodb/core/watershed.py:271:                self._mcl = self.config_get_float("watershed.wbt", "mcl", 60)
+wepppy/nodb/core/watershed.py:272:                self._wbt_fill_or_breach = self.config_get_str(
+wepppy/nodb/core/watershed.py:273:                    "watershed.wbt", "fill_or_breach", "breach_least_cost"
+wepppy/nodb/core/watershed.py:275:                self._wbt_blc_dist = self.config_get_int(
+wepppy/nodb/core/watershed.py:276:                    "watershed.wbt", "blc_dist", 1000
+wepppy/nodb/core/watershed.py:278:                self._wbt: Optional[WhiteboxToolsTopazEmulator] = None
+wepppy/nodb/core/watershed.py:285:                "watershed", "abstraction_backend", "peridot"
+wepppy/nodb/core/watershed.py:301:        state.pop("_wbt", None)
+wepppy/nodb/core/watershed.py:455:    def wbt_fill_or_breach(self) -> str:
+wepppy/nodb/core/watershed.py:456:        return getattr(self, "_wbt_fill_or_breach", "fill")
+wepppy/nodb/core/watershed.py:458:    @wbt_fill_or_breach.setter
+wepppy/nodb/core/watershed.py:460:    def wbt_fill_or_breach(self, value: str) -> None:
+wepppy/nodb/core/watershed.py:465:        ], f"Invalid wbt_fill_or_breach value: {value}"
+wepppy/nodb/core/watershed.py:466:        self._wbt_fill_or_breach = value
+wepppy/nodb/core/watershed.py:469:    def wbt_blc_dist(self) -> int:
+wepppy/nodb/core/watershed.py:470:        return getattr(self, "_wbt_blc_dist", 1000)
+wepppy/nodb/core/watershed.py:472:    @wbt_blc_dist.setter
+wepppy/nodb/core/watershed.py:474:    def wbt_blc_dist(self, value: int) -> None:
+wepppy/nodb/core/watershed.py:475:        self._wbt_blc_dist = value
+wepppy/nodb/core/watershed.py:489:    def abstraction_backend_is_peridot(self) -> bool:
+wepppy/nodb/core/watershed.py:490:        return self.abstraction_backend == "peridot"
+wepppy/nodb/core/watershed.py:493:    def clip_hillslopes(self) -> bool:
+wepppy/nodb/core/watershed.py:494:        return getattr(self, "_clip_hillslopes", False) and not self.multi_ofe
+wepppy/nodb/core/watershed.py:496:    @clip_hillslopes.setter
+wepppy/nodb/core/watershed.py:498:    def clip_hillslopes(self, value: bool) -> None:
+wepppy/nodb/core/watershed.py:499:        self._clip_hillslopes = value
+wepppy/nodb/core/watershed.py:502:    def clip_hillslope_length(self) -> float:
+wepppy/nodb/core/watershed.py:503:        return getattr(self, "_clip_hillslope_length", 300.0)
+wepppy/nodb/core/watershed.py:505:    @clip_hillslope_length.setter
+wepppy/nodb/core/watershed.py:507:    def clip_hillslope_length(self, value: float) -> None:
+wepppy/nodb/core/watershed.py:508:        self._clip_hillslope_length = value
+wepppy/nodb/core/watershed.py:530:        """Skip flowpath generation in peridot to reduce memory usage."""
+wepppy/nodb/core/watershed.py:540:        """Use representative flowpath mode for WBT peridot abstractions."""
+wepppy/nodb/core/watershed.py:556:    def delineation_backend_is_wbt(self) -> bool:
+wepppy/nodb/core/watershed.py:566:    def _ensure_wbt(self) -> WhiteboxToolsTopazEmulator:
+wepppy/nodb/core/watershed.py:567:        if not self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:569:        wbt = getattr(self, "_wbt", None)
+wepppy/nodb/core/watershed.py:570:        if wbt is None:
+wepppy/nodb/core/watershed.py:572:            wbt = WhiteboxToolsTopazEmulator(
+wepppy/nodb/core/watershed.py:573:                self.wbt_wd,
+wepppy/nodb/core/watershed.py:577:            wbt.flovec_netful_relief_are_vrt = self.flovec_netful_relief_chnjnt_are_vrt
+wepppy/nodb/core/watershed.py:578:            self._wbt = wbt
+wepppy/nodb/core/watershed.py:579:        return wbt
+wepppy/nodb/core/watershed.py:587:        hillslopes_parquet = pick_existing_parquet_path(
+wepppy/nodb/core/watershed.py:588:            self.wd, "watershed/hillslopes.parquet"
+wepppy/nodb/core/watershed.py:593:        return hillslopes_parquet is not None and channels_parquet is not None
+wepppy/nodb/core/watershed.py:605:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:606:            return _join(self.wbt_wd, "subwta.tif")
+wepppy/nodb/core/watershed.py:614:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:615:            return _join(self.wbt_wd, "discha.tif")
+wepppy/nodb/core/watershed.py:623:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:624:            return _join(self.wbt_wd, "subcatchments.WGS.geojson")
+wepppy/nodb/core/watershed.py:632:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:633:            return _join(self.wbt_wd, "subcatchments.geojson")
+wepppy/nodb/core/watershed.py:641:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:642:            return _join(self.wbt_wd, "bound.tif")
+wepppy/nodb/core/watershed.py:650:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:651:            return _join(self.wbt_wd, "bound.WGS.geojson")
+wepppy/nodb/core/watershed.py:666:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:668:            return _join(self.wbt_wd, f"netful.{ext}")
+wepppy/nodb/core/watershed.py:676:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:677:            return _join(self.wbt_wd, "netful.WGS.geojson")
+wepppy/nodb/core/watershed.py:685:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:686:            return _join(self.wbt_wd, "netful.geojson")
+wepppy/nodb/core/watershed.py:694:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:695:            return _join(self.wbt_wd, "channels.WGS.geojson")
+wepppy/nodb/core/watershed.py:703:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:704:            return _join(self.wbt_wd, "channels.geojson")
+wepppy/nodb/core/watershed.py:712:            hillslopes_parquet = pick_existing_parquet_path(
+wepppy/nodb/core/watershed.py:713:                self.wd, "watershed/hillslopes.parquet"
+wepppy/nodb/core/watershed.py:715:            if hillslopes_parquet is not None:
+wepppy/nodb/core/watershed.py:719:                    result = con.execute(f"SELECT COUNT(*) FROM read_parquet('{hillslopes_parquet}')").fetchone()
+wepppy/nodb/core/watershed.py:734:        hillslopes_parquet = pick_existing_parquet_path(
+wepppy/nodb/core/watershed.py:735:            self.wd, "watershed/hillslopes.parquet"
+wepppy/nodb/core/watershed.py:737:        if hillslopes_parquet is not None:
+wepppy/nodb/core/watershed.py:742:                sql = f"SELECT COUNT(*) FROM read_parquet('{hillslopes_parquet}') WHERE length > 300"
+wepppy/nodb/core/watershed.py:749:                sql = f"SELECT COUNT(*) FROM read_parquet('{hillslopes_parquet}') WHERE length > 300"
+wepppy/nodb/core/watershed.py:764:        computed = self._compute_area_gt30_from_hillslopes()
+wepppy/nodb/core/watershed.py:945:        elif self.delineation_backend_is_wbt:
+wepppy/nodb/core/watershed.py:947:            relief_path = _join(self.wbt_wd, f"relief.{ext}")
+wepppy/nodb/core/watershed.py:957:        assert self.delineation_backend_is_wbt, "find_outlet only works with WBT delineation backend"
+wepppy/nodb/core/watershed.py:959:        wbt = self._ensure_wbt()
+wepppy/nodb/core/watershed.py:962:        # build raster mask from watershed feature
+wepppy/nodb/core/watershed.py:964:            watershed_feature.build_raster_mask(
+wepppy/nodb/core/watershed.py:972:            wbt.wbt.find_outlet(
+wepppy/nodb/core/watershed.py:973:                d8_pntr=wbt.flovec,
+wepppy/nodb/core/watershed.py:974:                streams=wbt.netful,
+wepppy/nodb/core/watershed.py:976:                output=wbt.outlet_geojson
+wepppy/nodb/core/watershed.py:988:        outlet = wbt.set_outlet_from_geojson(logger=self.logger)
+wepppy/nodb/core/watershed.py:997:    def _peridot_post_abstract_watershed(self) -> None:
+wepppy/nodb/core/watershed.py:998:        self.logger.info("_peridot_post_abstract_watershed")
+wepppy/nodb/core/watershed.py:1013:            # Handle minimal watershed case (1 hillslope, 1 channel) where network.txt may not exist
+wepppy/nodb/core/watershed.py:1016:                self.logger.info("Minimal watershed (1 hillslope, 1 channel) - skipping structure.json")
+wepppy/nodb/core/watershed.py:1042:            hillslopes_parquet = pick_existing_parquet_path(
+wepppy/nodb/core/watershed.py:1043:                self.wd, "watershed/hillslopes.parquet"
+wepppy/nodb/core/watershed.py:1045:            if hillslopes_parquet is not None:
+wepppy/nodb/core/watershed.py:1049:                    result = con.execute(f"SELECT SUM(area) FROM read_parquet('{hillslopes_parquet}')").fetchone()
+wepppy/nodb/core/watershed.py:1125:                    self.clip_hillslopes,
+wepppy/nodb/core/watershed.py:1126:                    self.clip_hillslope_length,
+wepppy/nodb/core/watershed.py:1142:                _abs.watershed["hillslopes"] = subs_summary
+wepppy/nodb/core/watershed.py:1147:            # write slopes
+wepppy/nodb/core/wepp.py:24:    - Hillslope simulations (parallel execution)
+wepppy/nodb/core/wepp.py:40:    - .pass: Hillslope pass file
+wepppy/nodb/core/wepp.py:47:    >>> wepp.prep_hillslopes()
+wepppy/nodb/core/wepp.py:48:    >>> wepp.run_hillslopes()  # Parallel execution
+wepppy/nodb/core/wepp.py:63:    Hillslope runs must complete before watershed simulation.
+wepppy/nodb/core/wepp.py:64:    Use wepp.run_hillslopes() before wepp.run_watershed().
+wepppy/nodb/core/wepp.py:102:from osgeo import gdal
+wepppy/nodb/core/wepp.py:103:from osgeo.gdalconst import *
+wepppy/nodb/core/wepp.py:105:from wepppyo3.wepp_viz import make_soil_loss_grid, make_soil_loss_grid_fps
+wepppy/nodb/core/wepp.py:127:    make_hillslope_run,
+wepppy/nodb/core/wepp.py:128:    make_ss_hillslope_run,
+wepppy/nodb/core/wepp.py:129:    make_ss_batch_hillslope_run,
+wepppy/nodb/core/wepp.py:130:    run_hillslope,
+wepppy/nodb/core/wepp.py:131:    run_ss_batch_hillslope,
+wepppy/nodb/core/wepp.py:159:from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
+wepppy/nodb/core/wepp.py:164:    HillslopeWatbalReport,
+wepppy/nodb/core/wepp.py:537:    topaz_id, src_fn, dst_fn, kslast, modify_kslast_pars, initial_sat, clip_soils, clip_soils_depth = args
+wepppy/nodb/core/wepp.py:544:    if clip_soils:
+wepppy/nodb/core/wepp.py:545:        soilu.clip_soil_depth(clip_soils_depth)
+wepppy/nodb/core/wepp.py:1361:    # hillslopes
+wepppy/nodb/core/wepp.py:1363:    def prep_hillslopes(self, frost: Optional[bool] = None, baseflow: Optional[bool] = None, 
+wepppy/nodb/core/wepp.py:1367:        _WEPP_PREP_SERVICE.prep_hillslopes(
+wepppy/nodb/core/wepp.py:1726:    def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
+wepppy/nodb/core/wepp.py:1727:        self.logger.info('    Prepping _prep_slopes_peridot... ')
+wepppy/nodb/core/wepp.py:1734:                f"watershed/slope_files/hillslopes/hill_{topaz_id}.slp",
+wepppy/nodb/core/wepp.py:1749:                if clip_hillslopes:
+wepppy/nodb/core/wepp.py:1750:                    clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
+wepppy/nodb/core/wepp.py:1758:                purpose='wepp-prep-slopes',
+wepppy/nodb/core/wepp.py:1763:                if clip_hillslopes:
+wepppy/nodb/core/wepp.py:1764:                    clip_slope_file_length(projected_src_fn, dst_fn, clip_hillslope_length)
+wepppy/nodb/core/wepp.py:1768:    def _prep_slopes(self, translator, clip_hillslopes, clip_hillslope_length):
+wepppy/nodb/core/wepp.py:1769:        self.logger.info('    Prepping _prep_slopes... ')
+wepppy/nodb/core/wepp.py:1772:        if watershed.abstraction_backend == 'peridot':
+wepppy/nodb/core/wepp.py:1773:            return self._prep_slopes_peridot(watershed, translator, clip_hillslopes, clip_hillslope_length)
+wepppy/nodb/core/wepp.py:1784:                if clip_hillslopes:
+wepppy/nodb/core/wepp.py:1785:                    clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
+wepppy/nodb/core/wepp.py:1793:                purpose='wepp-prep-slopes',
+wepppy/nodb/core/wepp.py:1798:                if clip_hillslopes:
+wepppy/nodb/core/wepp.py:1799:                    clip_slope_file_length(projected_src_fn, dst_fn, clip_hillslope_length)
+wepppy/nodb/core/wepp.py:1814:        clip_soils = soils.clip_soils
+wepppy/nodb/core/wepp.py:1815:        clip_soils_depth = soils.clip_soils_depth
+wepppy/nodb/core/wepp.py:1833:            lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
+wepppy/nodb/core/wepp.py:1835:            # slope files
+wepppy/nodb/core/wepp.py:1836:            src_rel = f'watershed/slope_files/hillslopes/hill_{topaz_id}.mofe.slp'
+wepppy/nodb/core/wepp.py:1878:                if clip_soils:
+wepppy/nodb/core/wepp.py:1879:                    soilu.clip_soil_depth(clip_soils_depth)
+wepppy/nodb/core/wepp.py:1919:    def _make_hillslope_runs(self, translator, reveg=False,
+wepppy/nodb/core/wepp.py:1921:        _WEPP_PREP_SERVICE.make_hillslope_runs(
+wepppy/nodb/core/wepp.py:1931:    def run_hillslopes(self,
+wepppy/nodb/core/wepp.py:1934:        _WEPP_RUN_SERVICE.run_hillslopes(
+wepppy/nodb/core/wepp.py:1966:        # Handle minimal watershed case: 1 hillslope, 1 channel, no network.txt
+wepppy/nodb/core/wepp.py:1967:        if watershed.abstraction_backend == 'peridot' and \
+wepppy/nodb/core/wepp.py:1971:            self.logger.info('    Writing minimal structure (1 hillslope, 1 channel)')
+wepppy/nodb/core/wepp.py:1973:                fp.write('# watershed structure (1 hillslope, 1 channel)\n')
+wepppy/nodb/core/wepp.py:2012:    def _prep_channel_slopes(self):
+wepppy/nodb/core/wepp.py:2016:        src_rel = 'watershed/slope_files/channels.slp'
+wepppy/nodb/core/wepp.py:2031:                        aspect, width, elevation, order = fp.readline().strip().split()
+wepppy/nodb/core/wepp.py:2033:                        aspect = float(aspect)
+wepppy/nodb/core/wepp.py:2034:                        if aspect < 0.0:
+wepppy/nodb/core/wepp.py:2035:                            aspect += 360.0
+wepppy/nodb/core/wepp.py:2041:                        out_fp.write(f'{aspect} {width}\n')
+wepppy/nodb/core/wepp.py:2047:                    f'Unsupported channel slope file version {version} in {src_rel}. '
+wepppy/nodb/core/wepp.py:2095:            # need to do this incase someone tries to run a pre peridot project
+wepppy/nodb/core/wepp.py:2366:    def _run_hillslope_watbal(self):
+wepppy/nodb/core/wepp.py:2367:        HillslopeWatbalReport(self.wd)
+wepppy/nodb/core/wepp.py:2453:    def report_hill_watbal(self) -> HillslopeWatbalReport:
+wepppy/nodb/core/wepp.py:2454:        return HillslopeWatbalReport(self.wd)
+wepppy/nodb/core/wepp.py:2538:        cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
+wepppy/nodb/mods/disturbed/disturbed.py:13:reprojects geospatial rasters into the watershed frame, and orchestrates the
+wepppy/nodb/mods/disturbed/disturbed.py:14:creation of WEPP-ready management, soil, and slope artifacts for affected
+wepppy/nodb/mods/disturbed/disturbed.py:21:      impacted hillslope.
+wepppy/nodb/mods/disturbed/disturbed.py:51:import rasterio
+wepppy/nodb/mods/disturbed/disturbed.py:52:from rasterio.warp import reproject, Resampling
+wepppy/nodb/mods/disturbed/disturbed.py:53:from rasterio.transform import from_origin
+wepppy/nodb/mods/disturbed/disturbed.py:56:from osgeo import gdal
+wepppy/nodb/mods/disturbed/disturbed.py:71:from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+wepppy/nodb/mods/disturbed/disturbed.py:85:gdal.UseExceptions()
+wepppy/nodb/mods/disturbed/disturbed.py:224:    Map contains an invalid projection. Try reprojecting to UTM.
+wepppy/nodb/mods/disturbed/disturbed.py:401:            with rasterio.open(self.ron_instance.dem_fn) as src:
+wepppy/nodb/mods/disturbed/disturbed.py:407:                out_meta.update(dtype=rasterio.uint8, count=1, nodata=255)
+wepppy/nodb/mods/disturbed/disturbed.py:412:                out_arr = np.full_like(dem, fill_value=value, dtype=rasterio.uint8)
+wepppy/nodb/mods/disturbed/disturbed.py:415:                with rasterio.open(sbs_fn, 'w', **out_meta) as dst:
+wepppy/nodb/mods/disturbed/disturbed.py:419:            ds = gdal.Open(sbs_fn, gdal.GA_Update)
+wepppy/nodb/mods/disturbed/disturbed.py:421:            color_table = gdal.ColorTable()
+wepppy/nodb/mods/disturbed/disturbed.py:636:                raise InvalidProjection("Map contains an invalid projection. Try reprojecting to UTM.")
+wepppy/nodb/mods/disturbed/disturbed.py:1289:                    sub_area = watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/disturbed/disturbed.py:1420:                sub_area = watershed.hillslope_area(topaz_id)
+wepppy/nodb/core/climate_scaling_service.py:11:from wepppyo3.climate import calculate_monthlies as pyo3_cli_calculate_monthlies
+wepppy/nodb/core/climate_scaling_service.py:12:from wepppyo3.climate import calculate_p_annual_monthlies as pyo3_cli_calculate_annual_monthlies
+wepppy/nodb/core/climate_scaling_service.py:13:from wepppyo3.climate import rust_cli_p_scale as pyo3_cli_p_scale
+wepppy/nodb/core/climate_scaling_service.py:14:from wepppyo3.climate import rust_cli_p_scale_annual_monthlies as pyo3_cli_p_scale_annual_monthlies
+wepppy/nodb/core/climate_scaling_service.py:15:from wepppyo3.climate import rust_cli_p_scale_monthlies as pyo3_cli_p_scale_monthlies
+wepppy/nodb/core/climate_scaling_service.py:178:                    lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
+wepppy/nodb/core/climate.py:44:    Climate files are generated per hillslope as p{wepp_id}.cli
+wepppy/nodb/core/climate.py:81:import rasterio
+wepppy/nodb/core/climate.py:121:import wepppyo3
+wepppy/nodb/core/climate.py:122:from wepppyo3.climate import cli_revision as pyo3_cli_revision
+wepppy/nodb/core/climate.py:123:from wepppyo3.climate import calculate_monthlies as pyo3_cli_calculate_monthlies
+wepppy/nodb/core/climate.py:124:from wepppyo3.climate import calculate_p_annual_monthlies as pyo3_cli_calculate_annual_monthlies
+wepppy/nodb/core/climate.py:125:from wepppyo3.climate import rust_cli_p_scale as pyo3_cli_p_scale
+wepppy/nodb/core/climate.py:126:from wepppyo3.climate import rust_cli_p_scale_monthlies as pyo3_cli_p_scale_monthlies
+wepppy/nodb/core/climate.py:127:from wepppyo3.climate import rust_cli_p_scale_annual_monthlies as pyo3_cli_p_scale_annual_monthlies
+wepppy/nodb/culverts_runner.py:15:import rasterio
+wepppy/nodb/culverts_runner.py:29:def _sum_masked_raster(stream_path: str, mask_path: str) -> float:
+wepppy/nodb/culverts_runner.py:30:    with rasterio.open(stream_path) as src_stream:
+wepppy/nodb/culverts_runner.py:35:    with rasterio.open(mask_path) as src_mask:
+wepppy/nodb/culverts_runner.py:36:        mask_arr = src_mask.read(1)
+wepppy/nodb/culverts_runner.py:37:        # Identify the nodata value for the mask
+wepppy/nodb/culverts_runner.py:38:        mask_nodata = src_mask.nodata
+wepppy/nodb/culverts_runner.py:40:    # Create a boolean mask: True where mask is 1 (or not NoData)
+wepppy/nodb/culverts_runner.py:41:    # Adjust 'mask_arr == 1' if your mask uses a different value
+wepppy/nodb/culverts_runner.py:42:    boolean_mask = (mask_arr != mask_nodata) & (mask_arr > 0)
+wepppy/nodb/culverts_runner.py:44:    # Filter out stream NoData values and apply the watershed mask
+wepppy/nodb/culverts_runner.py:45:    valid_pixels = stream_arr[(stream_arr != stream_nodata) & boolean_mask]
+wepppy/nodb/culverts_runner.py:284:            # Use full DEM for stream check mask - this matches batch netful dimensions
+wepppy/nodb/culverts_runner.py:285:            # The mask will be regenerated with VRT dimensions later by find_outlet
+wepppy/nodb/culverts_runner.py:286:            watershed_feature.build_raster_mask(
+wepppy/nodb/culverts_runner.py:290:        if _sum_masked_raster(netful_src, target_path) == 0:
+wepppy/nodb/culverts_runner.py:394:                _join(watershed.wbt_wd, "flovec.tif"),
+wepppy/nodb/culverts_runner.py:395:                _join(watershed.wbt_wd, "netful.tif"),
+wepppy/nodb/culverts_runner.py:396:                _join(watershed.wbt_wd, "relief.tif"),
+wepppy/nodb/culverts_runner.py:397:                _join(watershed.wbt_wd, "chnjnt.tif"),
+wepppy/nodb/culverts_runner.py:399:            netful_link = _join(watershed.wbt_wd, "netful.tif")
+wepppy/nodb/culverts_runner.py:400:            chnjnt_link = _join(watershed.wbt_wd, "chnjnt.tif")
+wepppy/nodb/culverts_runner.py:419:                cleanup_path = _join(watershed.wbt_wd, filename)
+wepppy/nodb/culverts_runner.py:507:            cleanup_path = _join(watershed.wbt_wd, filename)
+wepppy/nodb/mods/salvage_logging/roads.py:2:from osgeo import gdal, osr
+wepppy/nodb/mods/salvage_logging/roads.py:15:        ds = gdal.Open(dem_fn)
+wepppy/nodb/mods/salvage_logging/roads.py:53:        dtype = gdal.GetDataTypeName(band.DataType)
+wepppy/nodb/mods/salvage_logging/roads.py:87:        cmd = ['gdal_rasterize', '-burn', 1, '-a_nodata', '0',
+wepppy/nodb/mods/salvage_logging/roads.py:99:        mask, _transform, _proj = read_raster(dst_fn)
+wepppy/nodb/mods/salvage_logging/roads.py:101:        dilated_mask = cv2.dilate(mask, kernel)
+wepppy/nodb/mods/salvage_logging/roads.py:103:        new_z = self.z + dilated_mask * z_offset
+wepppy/nodb/mods/salvage_logging/flowpaths.py:14:from osgeo import gdal
+wepppy/nodb/mods/salvage_logging/flowpaths.py:15:from osgeo.gdalconst import *
+wepppy/nodb/mods/salvage_logging/flowpaths.py:113:    driver = gdal.GetDriverByName("GTiff")
+wepppy/nodb/core/climate_build_helpers.py:18:import rasterio
+wepppy/nodb/core/climate_build_helpers.py:40:from wepppyo3.climate import calculate_p_annual_monthlies as pyo3_cli_calculate_annual_monthlies
+wepppy/nodb/core/climate_build_helpers.py:41:from wepppyo3.climate import cli_revision as pyo3_cli_revision
+wepppy/nodb/core/climate_build_helpers.py:424:    cmd = ["gdallocationinfo", "-wgs84", "-valonly", fn, str(lng), str(lat)]
+wepppy/nodb/core/climate_build_helpers.py:434:    with rasterio.open(fn) as src:
+wepppy/nodb/core/climate_build_helpers.py:439:    cmd = ["gdallocationinfo", "-valonly", fn, str(x), str(y)]
+wepppy/nodb/core/climate_build_helpers.py:474:        assert _exists(new_cli_path), "wepppyo3.climate.cli_revision failed"
+wepppy/nodb/core/climate_build_helpers.py:502:def _clip_cli_to_observed_years(cli_dir: str, cli_fn: str, start_year: int, end_year: int) -> ClimateFile:
+wepppy/nodb/core/climate_build_helpers.py:504:    cli.clip(date(start_year, 1, 1), date(end_year, 12, 31))
+wepppy/nodb/core/climate_build_helpers.py:563:def _build_depnexrad_hillslope_files(
+wepppy/nodb/core/climate_build_helpers.py:573:    for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/climate_build_helpers.py:576:        lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
+wepppy/nodb/core/climate_build_helpers.py:582:            _clip_cli_to_observed_years(cli_dir, hill_cli_fn, start_year, end_year)
+wepppy/nodb/core/climate_build_helpers.py:609:        cli = _clip_cli_to_observed_years(cli_dir, cli_fn, start_year, end_year)
+wepppy/nodb/core/climate_build_helpers.py:628:            climate.logger.info("  building climates for hillslopes... ")
+wepppy/nodb/core/climate_build_helpers.py:629:            sub_par_fns, sub_cli_fns = _build_depnexrad_hillslope_files(
+wepppy/nodb/core/climate_build_helpers.py:718:    for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/climate_build_helpers.py:720:        hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
+wepppy/nodb/core/climate_build_helpers.py:790:        climate.logger.info("  building climates for hillslopes... ")
+wepppy/nodb/core/climate_build_helpers.py:857:    for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/climate_build_helpers.py:860:        hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
+wepppy/nodb/core/climate_build_helpers.py:915:    with climate.timed("  building climates for hillslopes"):
+wepppy/nodb/core/climate_build_helpers.py:979:def _build_daymet_hillslope_locations(watershed: Any, ws_lng: float, ws_lat: float) -> dict[str, dict[str, float]]:
+wepppy/nodb/core/climate_build_helpers.py:980:    hillslope_locations: dict[str, dict[str, float]] = {"ws": {"longitude": ws_lng, "latitude": ws_lat}}
+wepppy/nodb/core/climate_build_helpers.py:981:    for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/climate_build_helpers.py:982:        hillslope_locations[topaz_id] = {"longitude": _lng, "latitude": _lat}
+wepppy/nodb/core/climate_build_helpers.py:983:    return hillslope_locations
+wepppy/nodb/core/climate_build_helpers.py:986:def _interpolate_daymet_hillslope_series(climate: "Climate", cli_dir: str, hillslope_locations: dict[str, dict[str, float]]) -> None:
+wepppy/nodb/core/climate_build_helpers.py:991:            hillslope_locations,
+wepppy/nodb/core/climate_build_helpers.py:1039:    for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
+wepppy/nodb/core/climate_build_helpers.py:1145:        hillslope_locations = _build_daymet_hillslope_locations(watershed, ws_lng, ws_lat)
+wepppy/nodb/core/climate_build_helpers.py:1146:        _interpolate_daymet_hillslope_series(climate, cli_dir, hillslope_locations)
+wepppy/nodb/mods/rangeland_cover/rangeland_cover.py:3:This module assembles rangeland cover fractions for each watershed hillslope.
+wepppy/nodb/mods/rangeland_cover/rangeland_cover.py:6:controller persists per-hillslope cover dictionaries, emits colorized summaries
+wepppy/nodb/mods/rangeland_cover/rangeland_cover.py:16:* `self.covers` mapping of TOPAZ hillslope ids to cover proportions.
+wepppy/nodb/mods/rangeland_cover/rangeland_cover.py:39:from osgeo import gdal
+wepppy/nodb/mods/rangeland_cover/rangeland_cover.py:52:gdal.UseExceptions()
+wepppy/nodb/mods/openet/openet_ts.py:359:            raise RuntimeError("No hillslope polygons found for OpenET.")
+wepppy/nodb/mods/openet/openet_ts.py:387:                        "OpenET: %s skipping %d cached hillslopes",
+wepppy/nodb/mods/openet/openet_ts.py:392:                    "OpenET: fetching %d hillslopes for %s", len(pending), dataset_key
+wepppy/nodb/mods/openet/openet_ts.py:429:                                    "  OpenET %s tasks still pending after %.1fs; %s hillslopes waiting.",
+wepppy/nodb/mods/openet/openet_ts.py:436:                                    "  OpenET %s waiting on hillslope tasks (pending=%s, %.1fs since last completion).",
+wepppy/nodb/mods/locations/location_mixin.py:114:                _soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/rred/rred.py:19:from osgeo import gdal
+wepppy/nodb/mods/rred/rred.py:35:gdal.UseExceptions()
+wepppy/nodb/mods/rred/rred.py:174:                _soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/path_ce_model.py:33:    "Hillslope Area (ha)",
+wepppy/nodb/mods/path_ce_model.py:65:    "slope_scalar",
+wepppy/nodb/mods/path_ce_model.py:69:    "aspect",
+wepppy/nodb/mods/path_ce_model.py:89:def _filter_solver_data(data, slope_range, bs_threshold):
+wepppy/nodb/mods/path_ce_model.py:91:    if slope_range is not None:
+wepppy/nodb/mods/path_ce_model.py:92:        min_slope, max_slope = slope_range
+wepppy/nodb/mods/path_ce_model.py:94:            (filtered["slope_deg"] >= min_slope) & (filtered["slope_deg"] <= max_slope)
+wepppy/nodb/mods/path_ce_model.py:210:    hillslope_ids,
+wepppy/nodb/mods/path_ce_model.py:225:    selected_hillslopes = [
+wepppy/nodb/mods/path_ce_model.py:226:        hillslope_ids[i]
+wepppy/nodb/mods/path_ce_model.py:231:    treatment_hillslopes = [hillslope_ids[site_ids].tolist() for site_ids in selected_sites]
+wepppy/nodb/mods/path_ce_model.py:246:    hillslopes_sdyd = []
+wepppy/nodb/mods/path_ce_model.py:250:                hillslope = data["wepp_id"][i]
+wepppy/nodb/mods/path_ce_model.py:252:                hillslopes_sdyd.append([hillslope, sdyd_value])
+wepppy/nodb/mods/path_ce_model.py:255:            hillslope = data["wepp_id"][i]
+wepppy/nodb/mods/path_ce_model.py:257:            hillslopes_sdyd.append([hillslope, sdyd_value])
+wepppy/nodb/mods/path_ce_model.py:259:    sdyd_df = pd.DataFrame(hillslopes_sdyd, columns=["wepp_id", "final_Sdyd"])
+wepppy/nodb/mods/path_ce_model.py:262:    missing_hillslopes = all_data[~all_data["wepp_id"].isin(data["wepp_id"])]
+wepppy/nodb/mods/path_ce_model.py:263:    if not missing_hillslopes.empty:
+wepppy/nodb/mods/path_ce_model.py:264:        missing_sdyd = missing_hillslopes[["wepp_id", "Sdyd post-fire"]].rename(
+wepppy/nodb/mods/path_ce_model.py:271:        selected_hillslopes,
+wepppy/nodb/mods/path_ce_model.py:272:        treatment_hillslopes,
+wepppy/nodb/mods/path_ce_model.py:275:        hillslopes_sdyd,
+wepppy/nodb/mods/path_ce_model.py:291:    slope_range=(None),
+wepppy/nodb/mods/path_ce_model.py:298:    data = _filter_solver_data(data, slope_range, bs_threshold)
+wepppy/nodb/mods/path_ce_model.py:300:    hillslope_ids = data["wepp_id"].values
+wepppy/nodb/mods/path_ce_model.py:301:    sediment_yield_reduction_thresholds = (data["Sdyd post-fire"] - sdyd_threshold).clip(lower=0)
+wepppy/nodb/mods/path_ce_model.py:361:        selected_hillslopes,
+wepppy/nodb/mods/path_ce_model.py:362:        treatment_hillslopes,
+wepppy/nodb/mods/path_ce_model.py:365:        hillslopes_sdyd,
+wepppy/nodb/mods/path_ce_model.py:373:        hillslope_ids=hillslope_ids,
+wepppy/nodb/mods/path_ce_model.py:388:        selected_hillslopes,
+wepppy/nodb/mods/path_ce_model.py:389:        treatment_hillslopes,
+wepppy/nodb/mods/path_ce_model.py:392:        hillslopes_sdyd,
+wepppy/nodb/mods/path_ce_model.py:412:def _extract_hillslope_scenario(hillslope_data, scenario_name):
+wepppy/nodb/mods/path_ce_model.py:413:    return hillslope_data[hillslope_data["scenario"] == scenario_name].reset_index(drop=True)
+wepppy/nodb/mods/path_ce_model.py:416:def path_data_ag(hillslope_data, outlet_data, hillslope_char_data):
+wepppy/nodb/mods/path_ce_model.py:417:    """Load, validate, and aggregate PATH CE hillslope/outlet inputs."""
+wepppy/nodb/mods/path_ce_model.py:418:    hillslope_data = pd.read_csv(hillslope_data)
+wepppy/nodb/mods/path_ce_model.py:420:    hillslope_char_data = pd.read_csv(hillslope_char_data)
+wepppy/nodb/mods/path_ce_model.py:422:    if hillslope_data.empty:
+wepppy/nodb/mods/path_ce_model.py:423:        raise ValueError("Hillslope data file is empty.")
+wepppy/nodb/mods/path_ce_model.py:426:    if hillslope_char_data.empty:
+wepppy/nodb/mods/path_ce_model.py:427:        raise ValueError("Hillslope characteristics data file is empty.")
+wepppy/nodb/mods/path_ce_model.py:430:        hillslope_data,
+wepppy/nodb/mods/path_ce_model.py:432:        "Hillslope data file is missing required columns.",
+wepppy/nodb/mods/path_ce_model.py:440:        hillslope_char_data,
+wepppy/nodb/mods/path_ce_model.py:442:        "Hillslope characteristics data file is missing required columns.",
+wepppy/nodb/mods/path_ce_model.py:445:    if hillslope_data.isnull().values.any():
+wepppy/nodb/mods/path_ce_model.py:446:        raise ValueError("Missing values found in hillslope data.")
+wepppy/nodb/mods/path_ce_model.py:449:    if hillslope_char_data.isnull().values.any():
+wepppy/nodb/mods/path_ce_model.py:450:        raise ValueError("Missing values found in hillslope characteristics data.")
+wepppy/nodb/mods/path_ce_model.py:452:    hillslope_char_data.drop(columns=["topaz_id"], inplace=True)
+wepppy/nodb/mods/path_ce_model.py:458:    mulch_15 = _extract_hillslope_scenario(hillslope_data, OUTLET_SCENARIO_BY_RATE["0.5 tons/acre"])
+wepppy/nodb/mods/path_ce_model.py:459:    mulch_30 = _extract_hillslope_scenario(hillslope_data, OUTLET_SCENARIO_BY_RATE["1 tons/acre"])
+wepppy/nodb/mods/path_ce_model.py:460:    mulch_60 = _extract_hillslope_scenario(hillslope_data, OUTLET_SCENARIO_BY_RATE["2 tons/acre"])
+wepppy/nodb/mods/path_ce_model.py:461:    sbs_map = _extract_hillslope_scenario(hillslope_data, "sbs_map")
+wepppy/nodb/mods/path_ce_model.py:462:    undisturbed = _extract_hillslope_scenario(hillslope_data, "undisturbed")
+wepppy/nodb/mods/path_ce_model.py:540:        .merge(hillslope_char_data, on=["wepp_id", "TopazID"])
+wepppy/nodb/mods/path_ce_model.py:559:    data_piv["slope_deg"] = np.degrees(np.arctan(data_piv["slope_scalar"]))
+wepppy/nodb/mods/treatments/treatments.py:18:from osgeo import gdal
+wepppy/nodb/mods/treatments/treatments.py:39:from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+wepppy/nodb/mods/treatments/treatments.py:47:gdal.UseExceptions()
+wepppy/nodb/mods/treatments/treatments.py:65:    Treatments are applied to the hillslopes based on the landuse and sbs state, after building the landuse and applying disturbed adjustments.
+wepppy/nodb/mods/treatments/treatments.py:134:        fn should be a gdal friendly raster file (e.g. .tif, .img) stored in the treatments directory.
+wepppy/nodb/mods/treatments/treatments.py:151:        # check it is a gdal friendly raster
+wepppy/nodb/mods/treatments/treatments.py:153:            ds = gdal.Open(treatment_path)
+wepppy/nodb/mods/treatments/treatments.py:155:                raise ValueError(f"'{treatment_path}' is not a valid gdal raster file!")
+wepppy/nodb/mods/treatments/treatments.py:162:            raise ValueError(f"'{treatment_path}' is not a valid gdal raster file!")
+wepppy/nodb/mods/treatments/treatments.py:164:        # reproject to align with the subwta
+wepppy/nodb/mods/treatments/treatments.py:247:        self.logger.info(f'Applying treatments to {len(treatments_domlc_d)} hillslopes')
+wepppy/nodb/mods/treatments/treatments.py:355:        Apply the treatment to the hillslope.
+wepppy/nodb/mods/treatments/treatments.py:423:        Apply the mulch treatment to the hillslope.
+wepppy/nodb/mods/treatments/treatments.py:442:            self.logger.info(f'Applying mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+wepppy/nodb/mods/treatments/treatments.py:487:        self.logger.info(f'Could not apply mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+wepppy/nodb/mods/treatments/treatments.py:499:        Apply the prescribed fire treatment to the hillslope.
+wepppy/nodb/mods/treatments/treatments.py:509:            self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+wepppy/nodb/mods/treatments/treatments.py:515:            self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+wepppy/nodb/mods/treatments/treatments.py:521:            self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+wepppy/nodb/mods/treatments/treatments.py:540:        Apply the prescribed fire treatment to the hillslope.
+wepppy/nodb/mods/treatments/treatments.py:549:            self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+wepppy/nodb/mods/ag_fields/ag_fields.py:28:from wepp_runner.wepp_runner import run_hillslope
+wepppy/nodb/mods/ag_fields/ag_fields.py:34:from wepppy.topo.peridot.peridot_runner import (
+wepppy/nodb/mods/ag_fields/ag_fields.py:36:    run_peridot_wbt_sub_fields_abstraction,
+wepppy/nodb/mods/ag_fields/ag_fields.py:38:from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
+wepppy/nodb/mods/ag_fields/ag_fields.py:102:            self._sub_field_min_area_threshold_m2 = 0.0  # threshold in m2 for defining sub-field in peridot
+wepppy/nodb/mods/ag_fields/ag_fields.py:277:            import rasterio
+wepppy/nodb/mods/ag_fields/ag_fields.py:278:            from rasterio.features import rasterize
+wepppy/nodb/mods/ag_fields/ag_fields.py:280:            self.logger.error("This function requires geopandas and rasterio. Please install them.")
+wepppy/nodb/mods/ag_fields/ag_fields.py:306:        with rasterio.open(template_filepath) as src:
+wepppy/nodb/mods/ag_fields/ag_fields.py:320:                reprojected_gdf = gdf.to_crs(template_crs)
+wepppy/nodb/mods/ag_fields/ag_fields.py:321:                reprojected_bounds = reprojected_gdf.total_bounds
+wepppy/nodb/mods/ag_fields/ag_fields.py:323:                intersects_after = _bounds_intersect(reprojected_bounds, template_bounds)
+wepppy/nodb/mods/ag_fields/ag_fields.py:328:                        'Field boundary features overlap the DEM grid before reprojection but not after. '
+wepppy/nodb/mods/ag_fields/ag_fields.py:334:                    gdf = reprojected_gdf
+wepppy/nodb/mods/ag_fields/ag_fields.py:339:            meta.update(compress='lzw', dtype=rasterio.int32, nodata=0)
+wepppy/nodb/mods/ag_fields/ag_fields.py:343:                'Field boundary geometries do not overlap the DEM extent after reprojection. '
+wepppy/nodb/mods/ag_fields/ag_fields.py:351:        with rasterio.open(output_filepath, 'w', **meta) as out:
+wepppy/nodb/mods/ag_fields/ag_fields.py:357:                dtype=rasterio.int32
+wepppy/nodb/mods/ag_fields/ag_fields.py:370:        with rasterio.open(output_filepath) as src:
+wepppy/nodb/mods/ag_fields/ag_fields.py:393:        Run PERIDOT to abstract sub-fields (e.g. generate slope files) and post-process the results.
+wepppy/nodb/mods/ag_fields/ag_fields.py:399:        clip_hillslopes = watershed.clip_hillslopes
+wepppy/nodb/mods/ag_fields/ag_fields.py:400:        clip_hillslope_length = watershed.clip_hillslope_length
+wepppy/nodb/mods/ag_fields/ag_fields.py:403:            run_peridot_wbt_sub_fields_abstraction(
+wepppy/nodb/mods/ag_fields/ag_fields.py:405:                clip_hillslopes=clip_hillslopes,
+wepppy/nodb/mods/ag_fields/ag_fields.py:406:                clip_hillslope_length=clip_hillslope_length,
+wepppy/nodb/mods/ag_fields/ag_fields.py:677:        clip_hillslopes = watershed.clip_hillslopes
+wepppy/nodb/mods/ag_fields/ag_fields.py:678:        clip_hillslope_length = watershed.clip_hillslope_length
+wepppy/nodb/mods/ag_fields/ag_fields.py:744:                    clip_hillslopes,
+wepppy/nodb/mods/ag_fields/ag_fields.py:745:                    clip_hillslope_length,
+wepppy/nodb/mods/ag_fields/ag_fields.py:941:        # the watershedslope.template contains comments.
+wepppy/nodb/mods/ag_fields/ag_fields.py:957:    clip_hillslopes: bool,
+wepppy/nodb/mods/ag_fields/ag_fields.py:958:    clip_hillslope_length: Optional[float],
+wepppy/nodb/mods/ag_fields/ag_fields.py:966:        'clip_hillslopes=%s, clip_hillslope_length=%s)',
+wepppy/nodb/mods/ag_fields/ag_fields.py:972:        clip_hillslopes,
+wepppy/nodb/mods/ag_fields/ag_fields.py:973:        clip_hillslope_length,
+wepppy/nodb/mods/ag_fields/ag_fields.py:984:    # slope - copy the slope generated by peridot
+wepppy/nodb/mods/ag_fields/ag_fields.py:985:    slp_path = _join(ag_field_dir, 'sub_fields/slope_files', f'field_{field_id}_{topaz_id}.slp')
+wepppy/nodb/mods/ag_fields/ag_fields.py:987:    if clip_hillslopes:
+wepppy/nodb/mods/ag_fields/ag_fields.py:988:        if clip_hillslope_length is None:
+wepppy/nodb/mods/ag_fields/ag_fields.py:989:            raise ValueError('clip_hillslope_length must be provided when clip_hillslopes is True.')
+wepppy/nodb/mods/ag_fields/ag_fields.py:990:        logger.info(f'  Clipping slope file {slp_path} to max hillslope length {clip_hillslope_length} m')
+wepppy/nodb/mods/ag_fields/ag_fields.py:991:        clip_slope_file_length(slp_path, _join(ag_field_wepp_runs_dir, slp_relpath), clip_hillslope_length)
+wepppy/nodb/mods/ag_fields/ag_fields.py:993:        logger.info(f'  Copying slope file {slp_path} to {slp_relpath}')
+wepppy/nodb/mods/ag_fields/ag_fields.py:1024:    run_hillslope(sub_field_id, 
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:248:            raise ValueError(f"No contrast hillslopes detected for {contrast_name}.")
+wepppy/nodb/mods/rhem/rhem.py:3:"""RHEM hillslope controller.
+wepppy/nodb/mods/rhem/rhem.py:5:This module prepares and executes RHEM hillslope simulations for each TOPAZ
+wepppy/nodb/mods/rhem/rhem.py:6:subcatchment. It derives slope files from watershed abstractions, merges soils
+wepppy/nodb/mods/rhem/rhem.py:37:from wepppy.rhem import make_hillslope_run, make_parameter_file, run_hillslope
+wepppy/nodb/mods/rhem/rhem.py:42:    from wepppyo3.climate import make_rhem_storm_file as _pyo3_make_rhem_storm_file
+wepppy/nodb/mods/rhem/rhem.py:107:    # hillslopes
+wepppy/nodb/mods/rhem/rhem.py:109:    def prep_hillslopes(self) -> None:
+wepppy/nodb/mods/rhem/rhem.py:113:        self.logger.info('Prepping Hillslopes... ')
+wepppy/nodb/mods/rhem/rhem.py:141:            if watershed.abstraction_backend == 'peridot':
+wepppy/nodb/mods/rhem/rhem.py:142:                slp_fn = _join(wat_dir, f'slope_files/hillslopes/hill_{topaz_id}.slp')
+wepppy/nodb/mods/rhem/rhem.py:164:                slope_length=slp.length,
+wepppy/nodb/mods/rhem/rhem.py:165:                slope_steepness=slp.slope_scalar,
+wepppy/nodb/mods/rhem/rhem.py:166:                sl=slp.slopes,
+wepppy/nodb/mods/rhem/rhem.py:186:            make_hillslope_run(
+wepppy/nodb/mods/rhem/rhem.py:207:                    self.logger.warning('  RHEM hillslope prep still running after 30 seconds; continuing to wait.')
+wepppy/nodb/mods/rhem/rhem.py:214:                        self.logger.info(f'  ({count}/{futures_n}) hillslopes prepped)')
+wepppy/nodb/mods/rhem/rhem.py:218:                        self.logger.error(f'  RHEM hillslope prep failed with an error: {exc}')
+wepppy/nodb/mods/rhem/rhem.py:242:    def run_hillslopes(self) -> None:
+wepppy/nodb/mods/rhem/rhem.py:245:        self.logger.info('Running Hillslopes\n')
+wepppy/nodb/mods/rhem/rhem.py:262:                futures.append(pool.submit(run_hillslope, topaz_id, runs_dir))
+wepppy/nodb/mods/rhem/rhem.py:273:                    self.logger.warning('  RHEM hillslopes still running after 30 seconds; continuing to wait.')
+wepppy/nodb/mods/rhem/rhem.py:280:                        self.logger.info(f'  ({count}/{futures_n}) hillslopes completed)')
+wepppy/nodb/mods/rhem/rhem.py:284:                        self.logger.error(f'  RHEM hillslope failed with an error: {exc}')
+wepppy/nodb/mods/omni/omni_input_parser.py:80:            hillslope_limit = kwds.get("omni_contrast_hillslope_limit", None)
+wepppy/nodb/mods/omni/omni_input_parser.py:81:            if hillslope_limit is not None:
+wepppy/nodb/mods/omni/omni_input_parser.py:82:                omni._contrast_hillslope_limit = hillslope_limit
+wepppy/nodb/mods/omni/omni_input_parser.py:84:            hill_min_slope = kwds.get("omni_contrast_hill_min_slope", None)
+wepppy/nodb/mods/omni/omni_input_parser.py:85:            if hill_min_slope is not None:
+wepppy/nodb/mods/omni/omni_input_parser.py:86:                omni._contrast_hill_min_slope = hill_min_slope
+wepppy/nodb/mods/omni/omni_input_parser.py:88:            hill_max_slope = kwds.get("omni_contrast_hill_max_slope", None)
+wepppy/nodb/mods/omni/omni_input_parser.py:89:            if hill_max_slope is not None:
+wepppy/nodb/mods/omni/omni_input_parser.py:90:                omni._contrast_hill_max_slope = hill_max_slope
+wepppy/nodb/mods/omni/omni_input_parser.py:112:            contrast_hillslope_groups = kwds.get("omni_contrast_hillslope_groups", None)
+wepppy/nodb/mods/omni/omni_input_parser.py:113:            if contrast_hillslope_groups is not None:
+wepppy/nodb/mods/omni/omni_input_parser.py:114:                omni._contrast_hillslope_groups = contrast_hillslope_groups
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:8:import rasterio
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:12:from osgeo import gdal, osr, ogr
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:21:gdal.UseExceptions()
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:30:    src_ds = gdal.Open(sub_field_fn)
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:33:    # build a mask for the subcatchments
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:39:    drv_mem = gdal.GetDriverByName('MEM')
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:41:        '', src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GDT_CFloat32
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:47:    # mask: 255 where arr>0, 0 otherwise
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:48:    mask_ds = drv_mem.Create(
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:49:        '', src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GDT_Byte
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:51:    mask_ds.GetRasterBand(1).WriteArray((arr > 0).astype(np.uint8) * 255)
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:70:    gdal.Polygonize(
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py:72:        mask_ds.GetRasterBand(1),              # mask band → ignore zeros
+wepppy/nodb/mods/omni/omni_scaling_service.py:16:        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+wepppy/nodb/mods/omni/omni_scaling_service.py:17:            selection_mode = "user_defined_hillslope_groups"
+wepppy/nodb/mods/omni/omni_scaling_service.py:20:    def normalize_hillslope_limit(
+wepppy/nodb/mods/omni/omni_scaling_service.py:25:        contrast_hillslope_limit: Optional[Any],
+wepppy/nodb/mods/omni/omni_scaling_service.py:27:        contrast_hillslope_limit_max = 100 if selection_mode == "cumulative" else None
+wepppy/nodb/mods/omni/omni_scaling_service.py:28:        if contrast_hillslope_limit is None:
+wepppy/nodb/mods/omni/omni_scaling_service.py:29:            return None, contrast_hillslope_limit_max
+wepppy/nodb/mods/omni/omni_scaling_service.py:32:            parsed_limit = int(contrast_hillslope_limit)
+wepppy/nodb/mods/omni/omni_scaling_service.py:34:            raise ValueError("omni_contrast_hillslope_limit must be an integer") from exc
+wepppy/nodb/mods/omni/omni_scaling_service.py:37:            raise ValueError("omni_contrast_hillslope_limit must be >= 1")
+wepppy/nodb/mods/omni/omni_scaling_service.py:39:        if contrast_hillslope_limit_max is not None and parsed_limit > contrast_hillslope_limit_max:
+wepppy/nodb/mods/omni/omni_scaling_service.py:41:                "omni_contrast_hillslope_limit capped at %d (requested %d).",
+wepppy/nodb/mods/omni/omni_scaling_service.py:42:                contrast_hillslope_limit_max,
+wepppy/nodb/mods/omni/omni_scaling_service.py:45:            parsed_limit = contrast_hillslope_limit_max
+wepppy/nodb/mods/omni/omni_scaling_service.py:47:        return parsed_limit, contrast_hillslope_limit_max
+wepppy/nodb/mods/omni/omni_scaling_service.py:52:        contrast_hill_min_slope: Any,
+wepppy/nodb/mods/omni/omni_scaling_service.py:53:        contrast_hill_max_slope: Any,
+wepppy/nodb/mods/omni/omni_scaling_service.py:57:        normalized_min = self._normalize_slope(
+wepppy/nodb/mods/omni/omni_scaling_service.py:58:            contrast_hill_min_slope,
+wepppy/nodb/mods/omni/omni_scaling_service.py:59:            "omni_contrast_hill_min_slope",
+wepppy/nodb/mods/omni/omni_scaling_service.py:61:        normalized_max = self._normalize_slope(
+wepppy/nodb/mods/omni/omni_scaling_service.py:62:            contrast_hill_max_slope,
+wepppy/nodb/mods/omni/omni_scaling_service.py:63:            "omni_contrast_hill_max_slope",
+wepppy/nodb/mods/omni/omni_scaling_service.py:70:            raise ValueError("omni_contrast_hill_min_slope must be <= omni_contrast_hill_max_slope")
+wepppy/nodb/mods/omni/omni_scaling_service.py:89:        contrast_hill_min_slope: Optional[float],
+wepppy/nodb/mods/omni/omni_scaling_service.py:90:        contrast_hill_max_slope: Optional[float],
+wepppy/nodb/mods/omni/omni_scaling_service.py:99:        slope_lookup: Dict[str, float] = {}
+wepppy/nodb/mods/omni/omni_scaling_service.py:136:            if contrast_hill_min_slope is not None or contrast_hill_max_slope is not None:
+wepppy/nodb/mods/omni/omni_scaling_service.py:137:                slope = slope_lookup.get(topaz_id)
+wepppy/nodb/mods/omni/omni_scaling_service.py:138:                if slope is None:
+wepppy/nodb/mods/omni/omni_scaling_service.py:139:                    slope = watershed.hillslope_slope(topaz_id)
+wepppy/nodb/mods/omni/omni_scaling_service.py:140:                    slope_lookup[topaz_id] = slope
+wepppy/nodb/mods/omni/omni_scaling_service.py:141:                if contrast_hill_min_slope is not None and slope < contrast_hill_min_slope:
+wepppy/nodb/mods/omni/omni_scaling_service.py:143:                if contrast_hill_max_slope is not None and slope > contrast_hill_max_slope:
+wepppy/nodb/mods/omni/omni_scaling_service.py:195:    def _normalize_slope(self, value: Any, label: str) -> Optional[float]:
+wepppy/nodb/mods/omni/omni_scaling_service.py:199:            slope = float(value)
+wepppy/nodb/mods/omni/omni_scaling_service.py:202:        if slope < 0:
+wepppy/nodb/mods/omni/omni_scaling_service.py:204:        if slope > 1.0:
+wepppy/nodb/mods/omni/omni_scaling_service.py:205:            slope = slope / 100.0
+wepppy/nodb/mods/omni/omni_scaling_service.py:206:        return slope
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:292:    def contrast_hillslope_limit(self) -> Optional[int]:
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:293:        return getattr(self, '_contrast_hillslope_limit', None)
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:295:    @contrast_hillslope_limit.setter
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:297:    def contrast_hillslope_limit(self, value: Optional[int]) -> None:
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:298:        self._contrast_hillslope_limit = value
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:301:    def contrast_hill_min_slope(self) -> Optional[float]:
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:302:        return getattr(self, '_contrast_hill_min_slope', None)
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:304:    @contrast_hill_min_slope.setter
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:306:    def contrast_hill_min_slope(self, value: Optional[float]) -> None:
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:307:        self._contrast_hill_min_slope = value
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:310:    def contrast_hill_max_slope(self) -> Optional[float]:
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:311:        return getattr(self, '_contrast_hill_max_slope', None)
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:313:    @contrast_hill_max_slope.setter
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:315:    def contrast_hill_max_slope(self, value: Optional[float]) -> None:
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:316:        self._contrast_hill_max_slope = value
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:364:    def contrast_hillslope_groups(self) -> Optional[str]:
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:365:        return getattr(self, "_contrast_hillslope_groups", None)
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:367:    @contrast_hillslope_groups.setter
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:369:    def contrast_hillslope_groups(self, value: Optional[str]) -> None:
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:370:        self._contrast_hillslope_groups = value
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:762:        keep_keys = {"timestamps:run_wepp_hillslopes", "timestamps:run_wepp_watershed"}
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:15:        "user-defined-hillslope-groups": "user_defined_hillslope_groups",
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:16:        "user-defined-hillslope-group": "user_defined_hillslope_groups",
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:21:        "user_defined_hillslope_groups",
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:36:        elif selection_mode == "user_defined_hillslope_groups":
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:37:            items = self._build_user_defined_hillslope_group_items(
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:95:            n_hillslopes = self._coerce_n_hillslopes(
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:104:                n_hillslopes=n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:114:                    "n_hillslopes": n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:122:    def _build_user_defined_hillslope_group_items(
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:131:            selection_mode="user_defined_hillslope_groups",
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:148:            n_hillslopes = self._coerce_n_hillslopes(
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:157:                n_hillslopes=n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:167:                    "n_hillslopes": n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:196:            n_hillslopes = self._coerce_n_hillslopes(
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:205:                n_hillslopes=n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:215:                    "n_hillslopes": n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:286:    def _coerce_n_hillslopes(
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:292:        raw_count = report_entry.get("n_hillslopes")
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:328:        n_hillslopes: int,
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:334:            or n_hillslopes == 0
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:336:            return "skipped", {"skipped": True, "reason": "no_hillslopes"}
+wepppy/nodb/mods/omni/omni_contrast_status_report_service.py:359:            return "skipped", {"skipped": True, "reason": "no_hillslopes"}
+wepppy/nodb/mods/rhem/rhempost.py:84:                area_ha = watershed.hillslope_area(topaz_id) / 10000
+wepppy/nodb/mods/observed/observed.py:35:        run_wepp_hillslope_pass_interchange as _run_wepp_hillslope_pass_interchange,
+wepppy/nodb/mods/observed/observed.py:36:        run_wepp_hillslope_wat_interchange as _run_wepp_hillslope_wat_interchange,
+wepppy/nodb/mods/observed/observed.py:138:            hillslope_load_time = 0.0
+wepppy/nodb/mods/observed/observed.py:139:            hillslope_fit_time = 0.0
+wepppy/nodb/mods/observed/observed.py:144:            hillslope_sim, wsarea_m2 = self._load_hillslope_simulation()
+wepppy/nodb/mods/observed/observed.py:145:            hillslope_load_time = perf_counter() - start
+wepppy/nodb/mods/observed/observed.py:146:            first_year = hillslope_sim['Year'].min() if not hillslope_sim.empty else None
+wepppy/nodb/mods/observed/observed.py:149:            def _run_hillslopes():
+wepppy/nodb/mods/observed/observed.py:151:                hillslope_results = self.run_measures(observed_df, hillslope_sim, 'Hillslopes')
+wepppy/nodb/mods/observed/observed.py:152:                return hillslope_results, perf_counter() - start
+wepppy/nodb/mods/observed/observed.py:164:                hillslope_future = executor.submit(_run_hillslopes)
+wepppy/nodb/mods/observed/observed.py:166:                results['Hillslopes'], hillslope_fit_time = hillslope_future.result()
+wepppy/nodb/mods/observed/observed.py:174:                "Observed calc_model_fit timings: hillslope_load=%.3fs hillslope_stats=%.3fs "
+wepppy/nodb/mods/observed/observed.py:176:                hillslope_load_time,
+wepppy/nodb/mods/observed/observed.py:177:                hillslope_fit_time,
+wepppy/nodb/mods/observed/observed.py:281:    def _load_hillslope_simulation(self):
+wepppy/nodb/mods/observed/observed.py:294:                interchange.run_wepp_hillslope_pass_interchange(output_dir)
+wepppy/nodb/mods/observed/observed.py:296:                interchange.run_wepp_hillslope_wat_interchange(output_dir)
+wepppy/nodb/mods/observed/observed.py:435:            mask = ebe_df['Year'] < 1000
+wepppy/nodb/mods/observed/observed.py:436:            if mask.any() and 'simulation_year' in ebe_df:
+wepppy/nodb/mods/observed/observed.py:438:                ebe_df.loc[mask, 'Year'] = ebe_df.loc[mask, 'simulation_year'].astype(np.int32) + first_year - 1
+wepppy/nodb/mods/observed/observed.py:655:                    mask = century.notna() & year.notna() & (year >= 0) & (year < 100)
+wepppy/nodb/mods/observed/observed.py:656:                    df["yr"] = year.where(~mask, century * 100 + year)
+wepppy/nodb/mods/emapr/emapr_ts.py:14:from osgeo import gdal
+wepppy/nodb/mods/emapr/emapr_ts.py:31:gdal.UseExceptions()
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:44:    """Enhanced hillslope ash model supporting dynamic transport calibration.
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:47:    extended work on post-fire ash transport, adding explicit slope,
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:103:        self.slope: Optional[float] = None
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:148:        slope: Optional[float] = None,
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:157:            hill_wat_df: Hillslope water balance dataframe aggregated by OFE.
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:164:            slope: Average slope used by the dynamic transport equation.
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:174:        self.slope = slope
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:249:        transportable_mm = np.clip(remaining_mm - roughness_limit, 0, None)
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:268:        slope = self.slope
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:384:                ash_runoff_mm[i] = np.clip(q[i] - _ash_saturated_storage_mm, 0.0, None)
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:391:                        tau[i] = 9810 * slope * (ash_runoff_mm[i] / 1000.0)
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:401:                    water_transport_tonspha[i] = np.clip(transport_tonspha[i],
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:442:            ash_decomp_tonspha[i] = np.clip(_available_ash_for_decomp * \
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py:450:            remaining_ash_tonspha[i] = np.clip(remaining_ash_tonspha[i-1] - \
+wepppy/nodb/mods/ash_transport/ashpost_documentation.py:16:        "hillslope_annuals.parquet",
+wepppy/nodb/mods/ash_transport/ashpost_documentation.py:17:        "Per-hillslope averages of wind, water, and total ash transport (tonne/ha) for the first post-fire year.",
+wepppy/nodb/mods/ash_transport/ashpost_documentation.py:21:        "Daily watershed totals of ash transport and remaining ash aggregated across all hillslopes.",
+wepppy/nodb/mods/ash_transport/ashpost_documentation.py:151:        "Derived parquet artifacts created by `AshPost` to summarize hillslope and watershed ash transport.\n",
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:220:            run_wepp_hillslope_interchange,
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:278:        with omni.timed(f"  {scenario_name}: prep hillslopes"):
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:279:            wepp.prep_hillslopes(
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:286:        with omni.timed(f"  {scenario_name}: run hillslopes"):
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:287:            wepp.run_hillslopes(
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:295:        with omni.timed(f"  {scenario_name}: run hillslope interchange"):
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:306:            run_wepp_hillslope_interchange(
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:532:        omni.logger.info("  run_omni_scenarios: compiling hillslope summaries")
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:533:        omni.compile_hillslope_summaries()
+wepppy/nodb/mods/shrubland/shrubland_map.py:15:from osgeo import gdal
+wepppy/nodb/mods/shrubland/shrubland_map.py:16:from osgeo.gdalconst import *
+wepppy/nodb/mods/shrubland/shrubland_map.py:32:            data = np.ma.masked_greater(data, 997)
+wepppy/nodb/mods/shrubland/shrubland_map.py:34:            data = np.ma.masked_greater(data, 100)
+wepppy/nodb/mods/shrubland/shrubland_map.py:43:        if np.sum(x.mask) == np.prod(x.shape):
+wepppy/nodb/mods/shrubland/shrubland_map.py:83:                    valid_pixels=len(indices[0]) - np.sum(x.mask),
+wepppy/nodb/mods/skid_trails/skid_trails.py:21:import rasterio
+wepppy/nodb/mods/skid_trails/skid_trails.py:22:from rasterio import features
+wepppy/nodb/mods/skid_trails/skid_trails.py:29:from osgeo import gdal, osr
+wepppy/nodb/mods/skid_trails/skid_trails.py:46:    'unmasked_neighbors',
+wepppy/nodb/mods/skid_trails/skid_trails.py:89:def unmasked_neighbors(a, indx, subwta, _transform, geo_transformer, channels):
+wepppy/nodb/mods/skid_trails/skid_trails.py:91:    looks at neibers of a[indx] and identifies the neighbors that are skid trials. Returns the unmasked neighbores in
+wepppy/nodb/mods/skid_trails/skid_trails.py:103:    mask = a.mask
+wepppy/nodb/mods/skid_trails/skid_trails.py:104:    w, h = mask.shape
+wepppy/nodb/mods/skid_trails/skid_trails.py:106:    _unmasked = []
+wepppy/nodb/mods/skid_trails/skid_trails.py:110:        if not mask[px - 1, py]:
+wepppy/nodb/mods/skid_trails/skid_trails.py:111:            _unmasked.append(dict(direction='west', indx=(px - 1, py)))
+wepppy/nodb/mods/skid_trails/skid_trails.py:114:        if not mask[px + 1, py]:
+wepppy/nodb/mods/skid_trails/skid_trails.py:115:            _unmasked.append(dict(direction='east', indx=(px + 1, py)))
+wepppy/nodb/mods/skid_trails/skid_trails.py:119:        if not mask[px, py - 1]:
+wepppy/nodb/mods/skid_trails/skid_trails.py:120:            _unmasked.append(dict(direction='north', indx=(px, py - 1)))
+wepppy/nodb/mods/skid_trails/skid_trails.py:124:        if not mask[px, py + 1]:
+wepppy/nodb/mods/skid_trails/skid_trails.py:125:            _unmasked.append(dict(direction='south', indx=(px, py + 1)))
+wepppy/nodb/mods/skid_trails/skid_trails.py:129:        if not mask[px - 1, py - 1]:
+wepppy/nodb/mods/skid_trails/skid_trails.py:130:            _unmasked.append(dict(direction='northwest', indx=(px - 1, py - 1)))
+wepppy/nodb/mods/skid_trails/skid_trails.py:134:        if not mask[px + 1, py + 1]:
+wepppy/nodb/mods/skid_trails/skid_trails.py:135:            _unmasked.append(dict(direction='southeast', indx=(px + 1, py + 1)))
+wepppy/nodb/mods/skid_trails/skid_trails.py:139:        if not mask[px + 1, py - 1]:
+wepppy/nodb/mods/skid_trails/skid_trails.py:140:            _unmasked.append(dict(direction='northeast', indx=(px + 1, py - 1)))
+wepppy/nodb/mods/skid_trails/skid_trails.py:144:        if not mask[px - 1, py + 1]:
+wepppy/nodb/mods/skid_trails/skid_trails.py:145:            _unmasked.append(dict(direction='southwest', indx=(px - 1, py + 1)))
+wepppy/nodb/mods/skid_trails/skid_trails.py:147:    for i in range(len(_unmasked)):
+wepppy/nodb/mods/skid_trails/skid_trails.py:148:        px, py = _unmasked[i]['indx']
+wepppy/nodb/mods/skid_trails/skid_trails.py:149:        _unmasked[i].update(dict(elevation=a[px, py],
+wepppy/nodb/mods/skid_trails/skid_trails.py:155:    return sorted(_unmasked, key=itemgetter('elevation'), reverse=True)
+wepppy/nodb/mods/skid_trails/skid_trails.py:160:    mask = a.mask
+wepppy/nodb/mods/skid_trails/skid_trails.py:161:    w, h = mask.shape
+wepppy/nodb/mods/skid_trails/skid_trails.py:183:    return np.sum(np.logical_not(a.mask[px0:pxend, py0:pyend]))
+wepppy/nodb/mods/skid_trails/skid_trails.py:228:        with rasterio.open(watershed.ron_instance.dem_fn) as dem:
+wepppy/nodb/mods/skid_trails/skid_trails.py:234:        # Check if both CRS are same if not reproject
+wepppy/nodb/mods/skid_trails/skid_trails.py:239:        skid_trails_raster = np.zeros((dem_meta['height'], dem_meta['width']), dtype=rasterio.uint8)
+wepppy/nodb/mods/skid_trails/skid_trails.py:247:                                                dtype=rasterio.uint8)
+wepppy/nodb/mods/skid_trails/skid_trails.py:250:        with rasterio.open(self.skid_trails_raster, 'w', **dem_meta) as dst:
+wepppy/nodb/mods/skid_trails/skid_trails.py:283:        # mask the dem with the skid trails
+wepppy/nodb/mods/skid_trails/skid_trails.py:284:        a = np.ma.masked_array(dem, mask=np.logical_not(skid))
+wepppy/nodb/mods/skid_trails/skid_trails.py:287:        while np.prod(a.shape) > np.sum(a.mask):
+wepppy/nodb/mods/skid_trails/skid_trails.py:293:            indxs = np.where(np.logical_not(a.mask))
+wepppy/nodb/mods/skid_trails/skid_trails.py:296:                len_unmasked = n_neighbors(a, (px, py))
+wepppy/nodb/mods/skid_trails/skid_trails.py:297:                if len_unmasked == 1:  # found all end points
+wepppy/nodb/mods/skid_trails/skid_trails.py:312:            a.mask[indx] = True # mask the origin pixel
+wepppy/nodb/mods/skid_trails/skid_trails.py:323:                # find unmasked neighbors
+wepppy/nodb/mods/skid_trails/skid_trails.py:324:                _unmasked = unmasked_neighbors(a, indx, subwta, _transform, geo_transformer, channels)
+wepppy/nodb/mods/skid_trails/skid_trails.py:325:                len_unmasked = len(_unmasked)
+wepppy/nodb/mods/skid_trails/skid_trails.py:328:                if len_unmasked == 0:
+wepppy/nodb/mods/skid_trails/skid_trails.py:329:                    print('s', _unmasked, len_unmasked, np.prod(a.shape), np.sum(a.mask))
+wepppy/nodb/mods/skid_trails/skid_trails.py:331:                    a.mask[indx] = True
+wepppy/nodb/mods/skid_trails/skid_trails.py:334:                elif len_unmasked == 1:
+wepppy/nodb/mods/skid_trails/skid_trails.py:335:                    trail.append(_unmasked[0])
+wepppy/nodb/mods/skid_trails/skid_trails.py:339:                    indx = _unmasked[0]['indx']
+wepppy/nodb/mods/skid_trails/skid_trails.py:340:                    a.mask[indx] = True
+wepppy/nodb/mods/skid_trails/skid_trails.py:342:                elif len_unmasked > 1:
+wepppy/nodb/mods/skid_trails/skid_trails.py:343:                    print('s', _unmasked, len_unmasked, np.prod(a.shape), np.sum(a.mask))
+wepppy/nodb/mods/skid_trails/skid_trails.py:344:                    trail.append(_unmasked[0])
+wepppy/nodb/mods/skid_trails/skid_trails.py:347:                    indx = _unmasked[0]['indx']
+wepppy/nodb/mods/skid_trails/skid_trails.py:348:                    a.mask[indx] = True
+wepppy/nodb/mods/shrubland/shrubland.py:4:per-band values to TOPAZ hillslopes, and exposes summaries for WEPPcloud UI
+wepppy/nodb/mods/shrubland/shrubland.py:6:sagebrush height, etc.) is downloaded via WMESque, clipped to the project
+wepppy/nodb/mods/shrubland/shrubland.py:11:- Watershed `subwta` raster that maps raster cells to TOPAZ hillslope ids.
+wepppy/nodb/mods/shrubland/shrubland.py:15:- `self.data` providing per-hillslope summaries by shrubland dataset; consumed
+wepppy/nodb/mods/shrubland/shrubland.py:35:from osgeo import gdal
+wepppy/nodb/mods/shrubland/shrubland.py:56:gdal.UseExceptions()
+wepppy/nodb/mods/ash_transport/ash.py:6:appropriate multi-year ash model, and launches hillslope runs (optionally via
+wepppy/nodb/mods/ash_transport/ash.py:12:* WEPP hydrology tables and CLIGEN climate files for each hillslope.
+wepppy/nodb/mods/ash_transport/ash.py:15:* Per-hillslope ash transport parquet files in `ash_dir`.
+wepppy/nodb/mods/ash_transport/ash.py:60:from wepppyo3.raster_characteristics import identify_median_single_raster_key
+wepppy/nodb/mods/ash_transport/ash.py:87:    Execute a single hillslope ash model run.
+wepppy/nodb/mods/ash_transport/ash.py:94:        hillslope.
+wepppy/nodb/mods/ash_transport/ash.py:99:        Path to the generated parquet file for the hillslope run.
+wepppy/nodb/mods/ash_transport/ash.py:589:        slope: Optional[float] = None
+wepppy/nodb/mods/ash_transport/ash.py:672:            self.logger.info('  Running Hillslopes')
+wepppy/nodb/mods/ash_transport/ash.py:676:                self.logger.info(f'    Running Hillslope {topaz_id}')
+wepppy/nodb/mods/ash_transport/ash.py:680:                area_ha = watershed.hillslope_area(topaz_id) / 10000
+wepppy/nodb/mods/ash_transport/ash.py:681:                slope = watershed.hillslope_slope(topaz_id)
+wepppy/nodb/mods/ash_transport/ash.py:794:                    kwds['slope'] = slope
+wepppy/nodb/mods/ash_transport/ash.py:926:    def hillslope_is_burned(self, topaz_id: int | str) -> bool:
+wepppy/nodb/mods/swat/print_prt.py:87:    "mask_from_flags",
+wepppy/nodb/mods/swat/print_prt.py:88:    "mask_from_tokens",
+wepppy/nodb/mods/swat/print_prt.py:89:    "mask_to_tokens",
+wepppy/nodb/mods/swat/print_prt.py:94:def mask_from_flags(
+wepppy/nodb/mods/swat/print_prt.py:101:    mask = 0
+wepppy/nodb/mods/swat/print_prt.py:103:        mask |= PRINT_PRT_DAILY
+wepppy/nodb/mods/swat/print_prt.py:105:        mask |= PRINT_PRT_MONTHLY
+wepppy/nodb/mods/swat/print_prt.py:107:        mask |= PRINT_PRT_YEARLY
+wepppy/nodb/mods/swat/print_prt.py:109:        mask |= PRINT_PRT_AVANN
+wepppy/nodb/mods/swat/print_prt.py:110:    return mask
+wepppy/nodb/mods/swat/print_prt.py:113:def mask_from_tokens(daily: str, monthly: str, yearly: str, avann: str) -> int:
+wepppy/nodb/mods/swat/print_prt.py:114:    return mask_from_flags(
+wepppy/nodb/mods/swat/print_prt.py:122:def mask_to_tokens(mask: int) -> Tuple[str, str, str, str]:
+wepppy/nodb/mods/swat/print_prt.py:124:        "y" if mask & PRINT_PRT_DAILY else "n",
+wepppy/nodb/mods/swat/print_prt.py:125:        "y" if mask & PRINT_PRT_MONTHLY else "n",
+wepppy/nodb/mods/swat/print_prt.py:126:        "y" if mask & PRINT_PRT_YEARLY else "n",
+wepppy/nodb/mods/swat/print_prt.py:127:        "y" if mask & PRINT_PRT_AVANN else "n",
+wepppy/nodb/mods/swat/print_prt.py:137:    """Bitmask settings for each print.prt object output."""
+wepppy/nodb/mods/swat/print_prt.py:188:    def set_mask(self, object_name: str, mask: int) -> None:
+wepppy/nodb/mods/swat/print_prt.py:192:        setattr(self, attr_name, int(mask))
+wepppy/nodb/mods/swat/print_prt.py:239:        for object_name, mask in self.objects.iter_rows(self.object_order):
+wepppy/nodb/mods/swat/print_prt.py:240:            daily, monthly, yearly, avann = mask_to_tokens(mask)
+wepppy/nodb/mods/swat/print_prt.py:337:        mask = mask_from_tokens(parts[1], parts[2], parts[3], parts[4])
+wepppy/nodb/mods/swat/print_prt.py:338:        objects.set_mask(name, mask)
+wepppy/nodb/mods/debris_flow/debris_flow.py:4:characteristics (slope, burn severity, soils) and stochastic precipitation
+wepppy/nodb/mods/debris_flow/debris_flow.py:11:- Watershed geometry (`Watershed`) for area, ruggedness, and slope metrics.
+wepppy/nodb/mods/debris_flow/debris_flow.py:304:                # A (in km2) is the area of the basin having slopes greater than or equal to 30%,
+wepppy/nodb/mods/locations/lt/selectors/__init__.py:2:def all_hillslopes(landuse, soils):
+wepppy/nodb/mods/omni/omni_mode_build_services.py:85:        if selection_mode == "user_defined_hillslope_groups":
+wepppy/nodb/mods/omni/omni_mode_build_services.py:86:            omni._build_contrasts_user_defined_hillslope_groups()
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:13:from wepppy.topo.peridot.peridot_runner import read_network
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:41:            slope_col = _resolve_column_optional(cols, ('slope_scalar', 'slope', 'slp'))
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:53:                _select_or_null(slope_col, "slope"),
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:73:                slope,
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:91:            slope_val = _safe_float(slope, default=0.001)
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:92:            if slope_val > 1.0:
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:93:                slope_val = slope_val / 100.0
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:94:            if slope_val <= 0.0:
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:95:                slope_val = 0.001
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:138:                    "slope": slope_val,
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:154:        netw_path = _join(self.wd, "dem", "wbt", "netw.tsv")
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py:344:            values["slp"] = f"{channel['slope']:.5f}"
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:1:"""Multi-year hillslope ash transport models and helpers."""
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:42:    """Base class for hillslope ash transport simulations.
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:134:            hill_wat_df: Aggregated daily hillslope water balance dataframe.
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:138:            area_ha: Optional hillslope area; retained for signature parity.
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:226:        transportable_mm = np.clip(remaining_mm - roughness_limit, 0, None)
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:334:                ash_runoff_mm[i] = np.clip(q[i] - _ash_saturated_storage_mm, 0.0, None)
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:338:                                           np.clip((bulk_density_gmpcm3[i] - self.fin_bulk_den) / \
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:342:                    water_transport_tonspha[i] = np.clip(ash_runoff_mm[i] * transport_tonspha[i],
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:379:            ash_decomp_tonspha[i] = np.clip(_available_ash_for_decomp * \
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py:387:            remaining_ash_tonspha[i] = np.clip(remaining_ash_tonspha[i-1] - \
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:23:    def _resolve_wbt_raster(wbt_dir: Path, stem: str) -> Path:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:24:        tif_path = wbt_dir / f"{stem}.tif"
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:25:        vrt_path = wbt_dir / f"{stem}.vrt"
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:78:        if not watershed.delineation_backend_is_wbt:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:87:        wbt_dir = Path(getattr(watershed, "wbt_wd", _join(omni.wd, "dem", "wbt")))
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:88:        if not wbt_dir.exists():
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:89:            raise FileNotFoundError(f"WBT workspace not found: {wbt_dir}")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:91:        return watershed, contrast_pairs, order_reduction_passes, wbt_dir
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:93:    def _stream_order_source_paths(self, wbt_dir: Path) -> Dict[str, Path]:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:95:            "flovec": self._resolve_wbt_raster(wbt_dir, "flovec"),
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:96:            "netful": self._resolve_wbt_raster(wbt_dir, "netful"),
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:97:            "relief": self._resolve_wbt_raster(wbt_dir, "relief"),
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:98:            "chnjnt": self._resolve_wbt_raster(wbt_dir, "chnjnt"),
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:99:            "bound": self._resolve_wbt_raster(wbt_dir, "bound"),
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:100:            "subwta": self._resolve_wbt_raster(wbt_dir, "subwta"),
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:101:            "outlet": wbt_dir / "outlet.geojson",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:127:        wbt_dir: Path,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:133:            "subwta_pruned": wbt_dir / f"subwta.strahler_pruned_{order_reduction_passes}.tif",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:134:            "netw_pruned": wbt_dir / f"netw.strahler_pruned_{order_reduction_passes}.tsv",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:135:            "order_pruned": wbt_dir / f"netful.strahler_pruned_{order_reduction_passes}.tif",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:136:            "chnjnt_pruned": wbt_dir / f"chnjnt.strahler_pruned_{order_reduction_passes}.tif",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:179:    def _stream_order_needs_hillslopes(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:193:    def _maybe_rebuild_stream_order_hillslopes(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:196:        wbt_dir: Path,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:201:        needs_hillslopes: bool,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:203:        if not needs_hillslopes:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:206:        from whitebox_tools import WhiteboxTools
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:208:        wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:209:        wbt.set_working_dir(str(wbt_dir))
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:217:            self._run_strahler_stream_order(wbt, source_paths, generated_paths)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:225:            self._run_stream_junction_identifier(wbt, source_paths, generated_paths)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:227:        self._run_hillslopes_topaz(wbt, source_paths, generated_paths)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:231:        wbt: Any,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:238:        ret = wbt.strahler_stream_order(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:253:        wbt: Any,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:260:        ret = wbt.stream_junction_identifier(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:272:    def _run_hillslopes_topaz(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:273:        wbt: Any,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:277:        ret = wbt.hillslopes_topaz(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:290:                "hillslopes_topaz failed "
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:295:    def _ensure_stream_order_hillslope_outputs(generated_paths: Dict[str, Path]) -> None:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:309:        from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:311:        import rasterio
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:319:        with rasterio.open(generated_paths["subwta_pruned"]) as dataset:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:320:            data = dataset.read(1, masked=True)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:409:        n_hillslopes: int,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:421:            "n_hillslopes": n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:441:                n_hillslopes = len(topaz_ids)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:458:                        n_hillslopes=n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:461:                    if n_hillslopes == 0:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:491:        watershed, contrast_pairs, order_reduction_passes, wbt_dir = self._stream_order_context(omni)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:493:        source_paths = self._stream_order_source_paths(wbt_dir)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:499:            wbt_dir,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:512:        needs_hillslopes = self._stream_order_needs_hillslopes(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:517:        self._maybe_rebuild_stream_order_hillslopes(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:518:            wbt_dir=wbt_dir,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:523:            needs_hillslopes=needs_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:525:        self._ensure_stream_order_hillslope_outputs(generated_paths)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:579:        contrast_hillslope_limit = omni._contrast_hillslope_limit
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:580:        contrast_hill_min_slope = omni._contrast_hill_min_slope
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:581:        contrast_hill_max_slope = omni._contrast_hill_max_slope
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:597:                    contrast_hill_min_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:598:                    contrast_hill_max_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:607:            contrast_hill_min_slope = None
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:608:            contrast_hill_max_slope = None
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:611:            if contrast_hillslope_limit is not None:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:613:                    "Contrast selection mode '%s' ignores omni_contrast_hillslope_limit.",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:616:                contrast_hillslope_limit = None
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:619:            contrast_hillslope_limit,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:620:            contrast_hillslope_limit_max,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:621:        ) = scaling_service.normalize_hillslope_limit(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:624:            contrast_hillslope_limit=contrast_hillslope_limit,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:629:                contrast_hill_min_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:630:                contrast_hill_max_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:634:                contrast_hill_min_slope=contrast_hill_min_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:635:                contrast_hill_max_slope=contrast_hill_max_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:658:                contrast_hill_min_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:659:                contrast_hill_max_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:669:                contrast_hill_min_slope=contrast_hill_min_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:670:                contrast_hill_max_slope=contrast_hill_max_slope,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:676:            raise ValueError("No hillslopes matched contrast filters.")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:693:                if contrast_hillslope_limit is not None:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:694:                    if len(contrasts) >= contrast_hillslope_limit:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:697:                    contrast_hillslope_limit_max is not None
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:698:                    and len(contrasts) >= contrast_hillslope_limit_max
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:701:                        "Contrast selection reached cap of %d hillslopes without an explicit limit; stopping.",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:702:                        contrast_hillslope_limit_max,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:764:    def _parse_hillslope_groups(value: Any) -> List[List[str]]:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:796:                        "omni_contrast_hillslope_groups entries must be integers"
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:804:    def _require_hillslope_group_inputs(omni: "Omni") -> Tuple[List[List[str]], List[Dict[str, Any]]]:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:805:        contrast_groups_raw = getattr(omni, "_contrast_hillslope_groups", None)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:806:        group_rows = OmniContrastBuildService._parse_hillslope_groups(contrast_groups_raw)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:809:                "omni_contrast_hillslope_groups is required for user_defined_hillslope_groups mode"
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:815:                "omni_contrast_pairs is required for user_defined_hillslope_groups mode"
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:821:    def _select_hillslope_group_topaz(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:840:    def _hillslope_group_report_entry(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:846:        n_hillslopes: int,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:859:            "selection_mode": "user_defined_hillslope_groups",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:861:            "n_hillslopes": n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:866:    def _write_hillslope_group_report(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:885:                selected_topaz = self._select_hillslope_group_topaz(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:891:                n_hillslopes = len(selected_topaz)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:913:                    report_entry = self._hillslope_group_report_entry(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:918:                        n_hillslopes=n_hillslopes,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:942:    def build_contrasts_user_defined_hillslope_groups(self, omni: "Omni") -> None:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:949:        group_rows, contrast_pairs = self._require_hillslope_group_inputs(omni)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:951:            "user_defined_hillslope_groups",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:954:            group_label="hillslope groups",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:960:                "User-defined hillslope groups ignore filters: %s",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:971:        existing_signature_map = omni._load_user_defined_hillslope_group_signature_map()
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:974:        contrast_names, contrast_labels, missing_topaz = self._write_hillslope_group_report(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:987:                "Skipped %d hillslopes missing from translator during group parsing.",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1013:        if omni._contrast_hillslope_limit is not None:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1014:            ignored_fields.append("omni_contrast_hillslope_limit")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1015:        if omni._contrast_hill_min_slope is not None:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1016:            ignored_fields.append("omni_contrast_hill_min_slope")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1017:        if omni._contrast_hill_max_slope is not None:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1018:            ignored_fields.append("omni_contrast_hill_max_slope")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1034:    def _load_hillslope_gdf(omni: "Omni", gpd: Any) -> Tuple[Any, Any]:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1036:        hillslope_path = watershed.subwta_utm_shp
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1037:        if not hillslope_path or not _exists(hillslope_path):
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1038:            raise FileNotFoundError("Hillslope polygons not found for user-defined contrasts.")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1040:        hillslope_gdf = gpd.read_file(hillslope_path)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1041:        if hillslope_gdf.empty:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1042:            raise ValueError("No hillslope polygons available for user-defined contrasts.")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1044:        return watershed, hillslope_gdf
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1047:    def _resolve_target_crs(omni: "Omni", hillslope_gdf: Any) -> Tuple[Any, str]:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1050:        target_crs = hillslope_gdf.crs
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1054:                hillslope_gdf = hillslope_gdf.set_crs(target_crs)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1056:                    "Hillslope GeoJSON missing CRS; setting to project CRS EPSG:%s",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1065:        return hillslope_gdf, target_crs
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1085:    def _resolve_topaz_id_column(hillslope_gdf: Any) -> str:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1087:            if candidate in hillslope_gdf.columns:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1089:        raise ValueError("Hillslope polygons missing a TopazID field.")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1091:    def _build_hillslope_lookup(
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1094:        hillslope_gdf: Any,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1098:        hillslope_lookup: Dict[int, Dict[str, Any]] = {}
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1101:        for idx, row in hillslope_gdf.iterrows():
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1121:            hillslope_lookup[idx] = {
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1129:                "Skipped %d hillslopes with Topaz IDs missing from translator.",
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1132:        if not hillslope_lookup:
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1133:            raise ValueError("No valid hillslopes available for user-defined contrasts.")
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1135:        return hillslope_lookup
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1174:        hillslope_lookup: Dict[int, Dict[str, Any]],
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1188:                hill = hillslope_lookup.get(idx)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1229:            "n_hillslopes": len(selected_topaz),
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1248:        hillslope_lookup: Dict[int, Dict[str, Any]],
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1277:                        hillslope_lookup=hillslope_lookup,
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1330:        watershed, hillslope_gdf = self._load_hillslope_gdf(omni, gpd)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1331:        hillslope_gdf, target_crs = self._resolve_target_crs(omni, hillslope_gdf)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1344:        id_column = self._resolve_topaz_id_column(hillslope_gdf)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1345:        hillslope_lookup = self._build_hillslope_lookup(omni, hillslope_gdf, id_column, top2wepp)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1346:        sindex = getattr(hillslope_gdf, "sindex", None)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1347:        hill_indices = list(hillslope_lookup.keys())
+wepppy/nodb/mods/omni/omni_contrast_build_service.py:1368:            hillslope_lookup=hillslope_lookup,
+wepppy/nodb/mods/ash_transport/neris_ash_model.py:1:"""Legacy (NERIS) hillslope ash transport implementation."""
+wepppy/nodb/mods/ash_transport/neris_ash_model.py:45:    """Base class for the hillslope ash models used by NERIS."""
+wepppy/nodb/mods/ash_transport/neris_ash_model.py:110:        Runs the ash model for a hillslope
+wepppy/nodb/mods/path_ce/path_cost_effective.py:61:        "slope_range": [None, None],
+wepppy/nodb/mods/path_ce/path_cost_effective.py:146:def _coerce_slope_range(config: Mapping[str, Any]) -> Optional[Tuple[Optional[float], Optional[float]]]:
+wepppy/nodb/mods/path_ce/path_cost_effective.py:147:    slope_range = config.get("slope_range")
+wepppy/nodb/mods/path_ce/path_cost_effective.py:148:    if not slope_range:
+wepppy/nodb/mods/path_ce/path_cost_effective.py:150:    if not isinstance(slope_range, Sequence) or len(slope_range) != 2:
+wepppy/nodb/mods/path_ce/path_cost_effective.py:152:    min_slope = slope_range[0]
+wepppy/nodb/mods/path_ce/path_cost_effective.py:153:    max_slope = slope_range[1]
+wepppy/nodb/mods/path_ce/path_cost_effective.py:154:    min_value = float(min_slope) if min_slope is not None else None
+wepppy/nodb/mods/path_ce/path_cost_effective.py:155:    max_value = float(max_slope) if max_slope is not None else None
+wepppy/nodb/mods/path_ce/path_cost_effective.py:369:        slope_range = _coerce_slope_range(config)
+wepppy/nodb/mods/path_ce/path_cost_effective.py:384:                slope_range=slope_range,
+wepppy/nodb/mods/path_ce/path_cost_effective.py:402:            "selected_hillslopes": solver_result.selected_hillslopes,
+wepppy/nodb/mods/path_ce/path_cost_effective.py:403:            "treatment_hillslopes": solver_result.treatment_hillslopes,
+wepppy/nodb/mods/path_ce/path_cost_effective.py:420:        sdyd_path = self.path_dir / "hillslope_sdyd.parquet"
+wepppy/nodb/mods/path_ce/path_cost_effective.py:421:        untreatable_path = self.path_dir / "untreatable_hillslopes.parquet"
+wepppy/nodb/mods/path_ce/path_cost_effective.py:424:        pq.write_table(_dataframe_to_table(result.hillslopes_sdyd), sdyd_path)
+wepppy/nodb/mods/rap/rap.py:4:band values to TOPAZ hillslopes, and surfaces the results to downstream mods
+wepppy/nodb/mods/rap/rap.py:16:* `self.data` storing fractional cover summaries for each RAP band by hillslope.
+wepppy/nodb/mods/rap/rap.py:36:from osgeo import gdal
+wepppy/nodb/mods/rap/rap.py:47:from wepppyo3.raster_characteristics import identify_median_single_raster_key
+wepppy/nodb/mods/rap/rap.py:48:from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
+wepppy/nodb/mods/rap/rap.py:59:gdal.UseExceptions()
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:398:        areas = self._load_hillslope_areas()
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:439:    def _load_hillslope_areas(self) -> Dict[int, float]:
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:440:        hillslopes_path = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:441:        if hillslopes_path is None:
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:443:        hillslopes_parquet = str(hillslopes_path)
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:445:            cols = _read_parquet_columns(con, hillslopes_parquet)
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:446:            wepp_col = _resolve_column(cols, ("wepp_id", "WeppID"), hillslopes_parquet)
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py:454:                    path=_escape_sql_path(hillslopes_parquet),
+wepppy/nodb/mods/omni/omni.py:5:rebuilds WEPP inputs, executes hillslope and watershed runs, and aggregates
+wepppy/nodb/mods/omni/omni.py:18:* Combined parquet reports for scenarios, hillslopes, and channels
+wepppy/nodb/mods/omni/omni.py:64:    run_wepp_hillslope_interchange,
+wepppy/nodb/mods/omni/omni.py:129:        "user_defined_hillslope_groups": "User-defined hillslope groups",
+wepppy/nodb/mods/omni/omni.py:377:    control_mask = control_topaz.isin(contrast_topaz_ids)
+wepppy/nodb/mods/omni/omni.py:378:    contrast_mask = contrast_topaz.isin(contrast_topaz_ids)
+wepppy/nodb/mods/omni/omni.py:380:        [control_df[~control_mask], contrast_df[contrast_mask]],
+wepppy/nodb/mods/omni/omni.py:599:            - contrasts (property): mapping of contrast_name → per-hillslope path dict
+wepppy/nodb/mods/omni/omni.py:602:                per-hillslope contrasts up to a cumulative objective-parameter fraction
+wepppy/nodb/mods/omni/omni.py:606:            - compile_hillslope_summaries(): build and save detailed
+wepppy/nodb/mods/omni/omni.py:607:                hillslope summaries across base and all parsed scenarios
+wepppy/nodb/mods/omni/omni.py:659:            self._contrast_hillslope_limit = None
+wepppy/nodb/mods/omni/omni.py:660:            self._contrast_hill_min_slope = None
+wepppy/nodb/mods/omni/omni.py:661:            self._contrast_hill_max_slope = None
+wepppy/nodb/mods/omni/omni.py:667:            self._contrast_hillslope_groups = None
+wepppy/nodb/mods/omni/omni.py:733:            raise FileNotFoundError(f"Interchange hillslope summary not found: {hill_fn}")
+wepppy/nodb/mods/omni/omni.py:754:            raise ValueError(f"Interchange hillslope summary missing wepp_id: {hill_fn}")
+wepppy/nodb/mods/omni/omni.py:758:            raise ValueError(f"Interchange hillslope summary missing column '{column}': {hill_fn}")
+wepppy/nodb/mods/omni/omni.py:762:            if 'Hillslope Area' not in df.columns:
+wepppy/nodb/mods/omni/omni.py:763:                raise ValueError(f"Interchange hillslope summary missing Hillslope Area: {hill_fn}")
+wepppy/nodb/mods/omni/omni.py:764:            area_ha = pd.to_numeric(df['Hillslope Area'], errors='coerce')
+wepppy/nodb/mods/omni/omni.py:798:        contrast_hillslope_limit: Optional[int] = None,
+wepppy/nodb/mods/omni/omni.py:799:        hill_min_slope: Optional[float] = None,
+wepppy/nodb/mods/omni/omni.py:800:        hill_max_slope: Optional[float] = None,
+wepppy/nodb/mods/omni/omni.py:811:            contrast_hillslope_limit=contrast_hillslope_limit,
+wepppy/nodb/mods/omni/omni.py:812:            hill_min_slope=hill_min_slope,
+wepppy/nodb/mods/omni/omni.py:813:            hill_max_slope=hill_max_slope,
+wepppy/nodb/mods/omni/omni.py:825:        contrast_hillslope_limit: Optional[int] = None,
+wepppy/nodb/mods/omni/omni.py:826:        hill_min_slope: Optional[float] = None,
+wepppy/nodb/mods/omni/omni.py:827:        hill_max_slope: Optional[float] = None,
+wepppy/nodb/mods/omni/omni.py:838:            contrast_hillslope_limit=contrast_hillslope_limit,
+wepppy/nodb/mods/omni/omni.py:839:            hill_min_slope=hill_min_slope,
+wepppy/nodb/mods/omni/omni.py:840:            hill_max_slope=hill_max_slope,
+wepppy/nodb/mods/omni/omni.py:867:    def _build_contrasts_user_defined_hillslope_groups(self) -> None:
+wepppy/nodb/mods/omni/omni.py:868:        _OMNI_CONTRAST_BUILD_SERVICE.build_contrasts_user_defined_hillslope_groups(self)
+wepppy/nodb/mods/omni/omni.py:879:        contrast_hillslope_limit: Optional[int] = None,
+wepppy/nodb/mods/omni/omni.py:880:        hill_min_slope: Optional[float] = None,
+wepppy/nodb/mods/omni/omni.py:881:        hill_max_slope: Optional[float] = None,
+wepppy/nodb/mods/omni/omni.py:892:            contrast_hillslope_limit=contrast_hillslope_limit,
+wepppy/nodb/mods/omni/omni.py:893:            hill_min_slope=hill_min_slope,
+wepppy/nodb/mods/omni/omni.py:894:            hill_max_slope=hill_max_slope,
+wepppy/nodb/mods/omni/omni.py:906:        contrast_hillslope_limit: Optional[int] = None,
+wepppy/nodb/mods/omni/omni.py:907:        hill_min_slope: Optional[float] = None,
+wepppy/nodb/mods/omni/omni.py:908:        hill_max_slope: Optional[float] = None,
+wepppy/nodb/mods/omni/omni.py:919:            contrast_hillslope_limit=contrast_hillslope_limit,
+wepppy/nodb/mods/omni/omni.py:920:            hill_min_slope=hill_min_slope,
+wepppy/nodb/mods/omni/omni.py:921:            hill_max_slope=hill_max_slope,
+wepppy/nodb/mods/omni/omni.py:1040:    def _load_user_defined_hillslope_group_signature_map(self) -> Dict[str, int]:
+wepppy/nodb/mods/omni/omni.py:1043:            if entry.get("selection_mode") != "user_defined_hillslope_groups":
+wepppy/nodb/mods/omni/omni.py:1186:    def compile_hillslope_summaries(self) -> pd.DataFrame:
+wepppy/nodb/mods/omni/omni.py:1187:        return _OMNI_ARTIFACT_EXPORT_SERVICE.compile_hillslope_summaries(self)
+wepppy/nodb/mods/omni/omni.py:1189:    def _compile_hillslope_summaries_impl(self) -> pd.DataFrame:
+wepppy/nodb/mods/omni/omni.py:1190:        return _OMNI_ARTIFACT_EXPORT_SERVICE.compile_hillslope_summaries(self)
+wepppy/nodb/mods/omni/omni.py:1209:# [ ] ability to run solution scenario for PATH with specified treatments across hillslopes
+wepppy/nodb/mods/omni/omni_build_router.py:22:        "user_defined_hillslope_groups",
+wepppy/nodb/mods/omni/omni_build_router.py:33:        contrast_hillslope_limit: Optional[int],
+wepppy/nodb/mods/omni/omni_build_router.py:34:        hill_min_slope: Optional[float],
+wepppy/nodb/mods/omni/omni_build_router.py:35:        hill_max_slope: Optional[float],
+wepppy/nodb/mods/omni/omni_build_router.py:77:            omni._contrast_hillslope_limit = contrast_hillslope_limit
+wepppy/nodb/mods/omni/omni_build_router.py:78:            omni._contrast_hill_min_slope = hill_min_slope
+wepppy/nodb/mods/omni/omni_build_router.py:79:            omni._contrast_hill_max_slope = hill_max_slope
+wepppy/nodb/mods/omni/omni_build_router.py:96:        contrast_hillslope_limit: Optional[int],
+wepppy/nodb/mods/omni/omni_build_router.py:97:        hill_min_slope: Optional[float],
+wepppy/nodb/mods/omni/omni_build_router.py:98:        hill_max_slope: Optional[float],
+wepppy/nodb/mods/omni/omni_build_router.py:111:            contrast_hillslope_limit=contrast_hillslope_limit,
+wepppy/nodb/mods/omni/omni_build_router.py:112:            hill_min_slope=hill_min_slope,
+wepppy/nodb/mods/omni/omni_build_router.py:113:            hill_max_slope=hill_max_slope,
+wepppy/nodb/mods/rap/rap_ts.py:4:cover rasters, summarizes the per-band values to TOPAZ hillslopes (and optional
+wepppy/nodb/mods/rap/rap_ts.py:17:  RAP band, year, TOPAZ hillslope, and optional OFE. Dashboards and notebooks
+wepppy/nodb/mods/rap/rap_ts.py:43:from osgeo import gdal
+wepppy/nodb/mods/rap/rap_ts.py:45:import wepppyo3
+wepppy/nodb/mods/rap/rap_ts.py:46:from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
+wepppy/nodb/mods/rap/rap_ts.py:47:from wepppyo3.raster_characteristics import identify_median_single_raster_key
+wepppy/nodb/mods/rap/rap_ts.py:57:gdal.UseExceptions()
+wepppy/nodb/mods/baer/sbs_map.py:25:from osgeo import gdal
+wepppy/nodb/mods/baer/sbs_map.py:26:from osgeo.gdalconst import GDT_Byte
+wepppy/nodb/mods/baer/sbs_map.py:85:    from wepppyo3 import sbs_map as _rust_sbs_map
+wepppy/nodb/mods/baer/sbs_map.py:289:def _build_sbs_4class_export_color_table(export_palette: ExportPaletteMode) -> gdal.ColorTable:
+wepppy/nodb/mods/baer/sbs_map.py:290:    color_table = gdal.ColorTable()
+wepppy/nodb/mods/baer/sbs_map.py:297:    band: gdal.Band,
+wepppy/nodb/mods/baer/sbs_map.py:306:    ds = gdal.Open(path, gdal.GA_Update)
+wepppy/nodb/mods/baer/sbs_map.py:322:    ds = gdal.Open(path)
+wepppy/nodb/mods/baer/sbs_map.py:363:        sanity_message = "Map contains an invalid projection. Try reprojecting to UTM."
+wepppy/nodb/mods/baer/sbs_map.py:453:        ds = gdal.Open(fn)
+wepppy/nodb/mods/baer/sbs_map.py:473:    ds = gdal.Open(fn)
+wepppy/nodb/mods/baer/sbs_map.py:688:            return 1, "Map contains an invalid projection. Try reprojecting to UTM."
+wepppy/nodb/mods/baer/sbs_map.py:700:        return 1, "Map contains an invalid projection. Try reprojecting to UTM."
+wepppy/nodb/mods/baer/sbs_map.py:702:    ds = gdal.Open(fname)
+wepppy/nodb/mods/baer/sbs_map.py:755:            ds = gdal.Open(fname)
+wepppy/nodb/mods/baer/sbs_map.py:900:        ds = gdal.Open(self.fname)
+wepppy/nodb/mods/baer/sbs_map.py:909:            "gdalwarp",
+wepppy/nodb/mods/baer/sbs_map.py:920:            raise RuntimeError(f"gdalwarp failed ({res.returncode}):\n{res.stderr}\ncmd: {' '.join(cmd)}")
+wepppy/nodb/mods/baer/sbs_map.py:923:        ds = gdal.Open(fn)
+wepppy/nodb/mods/baer/sbs_map.py:1058:        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha',
+wepppy/nodb/mods/baer/sbs_map.py:1069:        cmd = ['gdal_translate', '-of', 'PNG', disturbed_rgb, disturbed_rgb_png]
+wepppy/nodb/mods/baer/sbs_map.py:1125:        src_ds = gdal.Open(fname)
+wepppy/nodb/mods/baer/sbs_map.py:1129:        driver = gdal.GetDriverByName("GTiff")
+wepppy/nodb/mods/treecanopy/treecanopy.py:4:directory, and summarizes canopy fractions to TOPAZ hillslopes. The resulting
+wepppy/nodb/mods/treecanopy/treecanopy.py:10:- Watershed `subwta` raster mapping cells to hillslope identifiers.
+wepppy/nodb/mods/treecanopy/treecanopy.py:14:- `self.data` storing canopy coverage per hillslope, consumed by reports and
+wepppy/nodb/mods/treecanopy/treecanopy.py:34:from osgeo import gdal
+wepppy/nodb/mods/treecanopy/treecanopy.py:50:gdal.UseExceptions()
+wepppy/nodb/mods/ash_transport/ashpost.py:73:    'hillslope_annuals': 'hillslope_annuals.parquet',
+wepppy/nodb/mods/ash_transport/ashpost.py:81:    'topaz_id': 'TOPAZ hillslope identifier for the modeled subwatershed.',
+wepppy/nodb/mods/ash_transport/ashpost.py:83:    'burn_class': 'Soil burn severity class assigned to the hillslope (1=unburned, 4=high).',
+wepppy/nodb/mods/ash_transport/ashpost.py:91:    'precip': 'Daily precipitation depth applied to the hillslope.',
+wepppy/nodb/mods/ash_transport/ashpost.py:101:    'remaining_ash': 'Ash mass remaining on the hillslope.',
+wepppy/nodb/mods/ash_transport/ashpost.py:247:    """Aggregate QOFE (runoff) volumes for selected hillslopes."""
+wepppy/nodb/mods/ash_transport/ashpost.py:374:def calculate_hillslope_statistics(
+wepppy/nodb/mods/ash_transport/ashpost.py:380:    """Summarize hillslope-level transport metrics and persist annual stats."""
+wepppy/nodb/mods/ash_transport/ashpost.py:387:#    print(len(df.index), 'rows in hillslope data frame')
+wepppy/nodb/mods/ash_transport/ashpost.py:392:#    print(len(df.index), 'rows in hillslope data frame')
+wepppy/nodb/mods/ash_transport/ashpost.py:394:    df_hillslope_annuals = df.groupby(['topaz_id', 'year']).agg(agg_d).reset_index()
+wepppy/nodb/mods/ash_transport/ashpost.py:395:    df_hillslope_average_annuals = df_hillslope_annuals.groupby('topaz_id').mean(numeric_only=True).reset_index()
+wepppy/nodb/mods/ash_transport/ashpost.py:396:    if 'year' in df_hillslope_average_annuals.columns:
+wepppy/nodb/mods/ash_transport/ashpost.py:397:        df_hillslope_average_annuals.drop('year', axis=1, inplace=True)
+wepppy/nodb/mods/ash_transport/ashpost.py:398:    _cast_integral_columns(df_hillslope_average_annuals)
+wepppy/nodb/mods/ash_transport/ashpost.py:405:    df_hillslope_average_annuals = df_hillslope_average_annuals[[col for col in ordered_cols if col in df_hillslope_average_annuals.columns]]
+wepppy/nodb/mods/ash_transport/ashpost.py:406:    _write_parquet(df_hillslope_average_annuals, _join(ash_post_dir, ASH_POST_FILES['hillslope_annuals']))
+wepppy/nodb/mods/ash_transport/ashpost.py:544:        runoff_nonash_m3 = np.clip(runoff_total_m3 - ash_wepp_runoff_m3, 0.0, None)
+wepppy/nodb/mods/ash_transport/ashpost.py:571:        exceed_mask = corrected_streamflow_mm > streamflow_orig_mm
+wepppy/nodb/mods/ash_transport/ashpost.py:572:        if np.any(exceed_mask):
+wepppy/nodb/mods/ash_transport/ashpost.py:573:            exceed_count = int(np.count_nonzero(exceed_mask))
+wepppy/nodb/mods/ash_transport/ashpost.py:574:            max_overage_mm = float(np.max(corrected_streamflow_mm[exceed_mask] - streamflow_orig_mm[exceed_mask]))
+wepppy/nodb/mods/ash_transport/ashpost.py:576:                exceed_mask, ['year', 'julian', 'Streamflow_orig (mm)', 'Streamflow_ash_corr (mm)']
+wepppy/nodb/mods/ash_transport/ashpost.py:712:def read_hillslope_out_fn(
+wepppy/nodb/mods/ash_transport/ashpost.py:718:    """Load a single hillslope ash parquet and attach run metadata."""
+wepppy/nodb/mods/ash_transport/ashpost.py:785:    """Aggregate hillslope outputs across the watershed and compute summaries."""
+wepppy/nodb/mods/ash_transport/ashpost.py:802:    # Read all hillslope output files to a single df
+wepppy/nodb/mods/ash_transport/ashpost.py:805:    # loop over the hillslopes and read their ash output files.
+wepppy/nodb/mods/ash_transport/ashpost.py:815:        area_m2 = watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/ash_transport/ashpost.py:826:            hill_data_frames.append(read_hillslope_out_fn(out_fn,
+wepppy/nodb/mods/ash_transport/ashpost.py:837:    calculate_hillslope_statistics(deepcopy(df), ash, ash_post_dir, first_year_only=True)
+wepppy/nodb/mods/ash_transport/ashpost.py:864:        area_m2 = watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/ash_transport/ashpost.py:874:            hill_data_frames.append(read_hillslope_out_fn(out_fn,
+wepppy/nodb/mods/ash_transport/ashpost.py:947:        for topaz_id, hill_annuals in self.hillslope_annuals.items():
+wepppy/nodb/mods/ash_transport/ashpost.py:994:    def hillslope_annuals(self) -> Dict[str, Dict[str, Any]]:
+wepppy/nodb/mods/ash_transport/ashpost.py:995:        path = _join(self.ash_post_dir, ASH_POST_FILES['hillslope_annuals'])
+wepppy/nodb/mods/ash_transport/ashpost.py:1028:        hillslope_annuals = self.hillslope_annuals
+wepppy/nodb/mods/ash_transport/ashpost.py:1031:            if ash_out[topaz_id]['ash_type'] is None or topaz_id not in hillslope_annuals:
+wepppy/nodb/mods/ash_transport/ashpost.py:1037:                ash_out[topaz_id]['water_transport (tonne/ha)'] = hillslope_annuals[topaz_id]['water_transport (tonne/ha)']
+wepppy/nodb/mods/ash_transport/ashpost.py:1038:                ash_out[topaz_id]['wind_transport (tonne/ha)'] = hillslope_annuals[topaz_id]['wind_transport (tonne/ha)']
+wepppy/nodb/mods/ash_transport/ashpost.py:1039:                ash_out[topaz_id]['ash_transport (tonne/ha)'] = hillslope_annuals[topaz_id]['ash_transport (tonne/ha)']
+wepppy/nodb/mods/swat/swat_recall_mixin.py:460:        hillslopes_path = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/mods/swat/swat_recall_mixin.py:461:        if hillslopes_path is None:
+wepppy/nodb/mods/swat/swat_recall_mixin.py:463:        hillslopes_parquet = str(hillslopes_path)
+wepppy/nodb/mods/swat/swat_recall_mixin.py:465:            cols = _read_parquet_columns(con, hillslopes_parquet)
+wepppy/nodb/mods/swat/swat_recall_mixin.py:470:                f"SELECT SUM({area_col}) FROM read_parquet('{_escape_sql_path(hillslopes_parquet)}')"
+wepppy/nodb/mods/baer/baer.py:9:* Validate and reproject SBS rasters for map display and watershed alignment.
+wepppy/nodb/mods/baer/baer.py:37:from osgeo import gdal
+wepppy/nodb/mods/baer/baer.py:64:gdal.UseExceptions()
+wepppy/nodb/mods/baer/baer.py:269:        cmd = ['gdaldem', 'color-relief', '-of', 'VRT',  self.baer_wgs, self.color_tbl_path, baer_rgb]
+wepppy/nodb/mods/baer/baer.py:277:        cmd = ['gdal_translate', '-of', 'PNG', baer_rgb, baer_rgb_png]
+wepppy/nodb/mods/baer/baer.py:414:            ds = gdal.Open(baer_path)
+wepppy/nodb/mods/baer/baer.py:423:            cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
+wepppy/nodb/mods/baer/baer.py:430:            ds = gdal.Open(baer_wgs)
+wepppy/nodb/mods/baer/baer.py:539:        cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % map.srid,
+wepppy/nodb/mods/baer/baer.py:614:                    _soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/baer/baer.py:653:                    _soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/baer/baer.py:742:                    _soils[k].area += watershed.hillslope_area(topaz_id)
+wepppy/nodb/mods/treecanopy/treecanopy_map.py:15:from osgeo import gdal
+wepppy/nodb/mods/treecanopy/treecanopy_map.py:16:from osgeo.gdalconst import *
+wepppy/nodb/mods/treecanopy/treecanopy_map.py:31:        data = np.ma.masked_greater(data, 255)
+wepppy/nodb/mods/treecanopy/treecanopy_map.py:40:        if np.sum(x.mask) == np.prod(x.shape):
+wepppy/nodb/mods/treecanopy/treecanopy_map.py:80:                    valid_pixels=len(indices[0]) - np.sum(x.mask),
+wepppy/nodb/mods/path_ce/path_ce_solver.py:4:most cost-effective set of hillslope treatments while respecting sediment
+wepppy/nodb/mods/path_ce/path_ce_solver.py:30:    selected_hillslopes: List[int]
+wepppy/nodb/mods/path_ce/path_ce_solver.py:31:    treatment_hillslopes: Mapping[str, List[int]]
+wepppy/nodb/mods/path_ce/path_ce_solver.py:34:    hillslopes_sdyd: pd.DataFrame
+wepppy/nodb/mods/path_ce/path_ce_solver.py:55:    slope_range: Optional[Tuple[Optional[float], Optional[float]]] = None,
+wepppy/nodb/mods/path_ce/path_ce_solver.py:77:    if slope_range:
+wepppy/nodb/mods/path_ce/path_ce_solver.py:78:        min_slope, max_slope = slope_range
+wepppy/nodb/mods/path_ce/path_ce_solver.py:79:        if min_slope is not None:
+wepppy/nodb/mods/path_ce/path_ce_solver.py:80:            working = working[working["slope_deg"] >= min_slope]
+wepppy/nodb/mods/path_ce/path_ce_solver.py:81:        if max_slope is not None:
+wepppy/nodb/mods/path_ce/path_ce_solver.py:82:            working = working[working["slope_deg"] <= max_slope]
+wepppy/nodb/mods/path_ce/path_ce_solver.py:99:    hillslope_ids = working["wepp_id"].tolist()
+wepppy/nodb/mods/path_ce/path_ce_solver.py:100:    sediment_yield_thresholds = (working["Sdyd post-fire"] - sdyd_threshold).clip(lower=0)
+wepppy/nodb/mods/path_ce/path_ce_solver.py:104:        raise PathCESolverError("No hillslopes available after applying filters.")
+wepppy/nodb/mods/path_ce/path_ce_solver.py:195:    selected_hillslopes = [hillslope_ids[idx] for idx in selected_indices]
+wepppy/nodb/mods/path_ce/path_ce_solver.py:197:    treatment_hillslopes = {
+wepppy/nodb/mods/path_ce/path_ce_solver.py:198:        treatment: [hillslope_ids[i] for i, value in enumerate(allocation_vars[treatment]) if _is_selected(value)]
+wepppy/nodb/mods/path_ce/path_ce_solver.py:230:        sdyd_records.append({"wepp_id": hillslope_ids[i], "final_Sdyd": value})
+wepppy/nodb/mods/path_ce/path_ce_solver.py:245:        selected_hillslopes=selected_hillslopes,
+wepppy/nodb/mods/path_ce/path_ce_solver.py:246:        treatment_hillslopes=treatment_hillslopes,
+wepppy/nodb/mods/path_ce/path_ce_solver.py:249:        hillslopes_sdyd=sdyd_df,
+wepppy/nodb/mods/swat/swat.py:4:WEPP hillslope pass routing through SWAT-DEG channels.
+wepppy/nodb/mods/swat/swat.py:304:        hillslopes_path = pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
+wepppy/nodb/mods/swat/swat.py:306:        if hillslopes_path is None:
+wepppy/nodb/mods/swat/swat.py:307:            raise FileNotFoundError("Missing hillslopes parquet (watershed/hillslopes.parquet)")
+wepppy/nodb/mods/swat/swat.py:311:        hillslopes_parquet = str(hillslopes_path)
+wepppy/nodb/mods/swat/swat.py:315:            hills_cols = _read_parquet_columns(con, hillslopes_parquet)
+wepppy/nodb/mods/swat/swat.py:318:            hills_topaz = _resolve_column(hills_cols, ('topaz_id', 'TopazID'), hillslopes_parquet)
+wepppy/nodb/mods/swat/swat.py:319:            hills_wepp = _resolve_column(hills_cols, ('wepp_id', 'WeppID'), hillslopes_parquet)
+wepppy/nodb/mods/swat/swat.py:350:                    path=_escape_sql_path(hillslopes_parquet),
+wepppy/nodb/mods/swat/swat.py:413:                "Missing channel mapping for hillslopes (count={}). "
+wepppy/nodb/mods/swat/swat.py:414:                "Check hillslopes.parquet for chn_enum/chn_topaz_id columns or provide "
+wepppy/nodb/mods/swat/swat.py:421:                "set explicit channel columns in hillslopes.parquet to avoid ambiguity."
+wepppy/nodb/mods/swat/swat.py:494:                self.print_prt.objects.set_mask(object_name, current | PRINT_PRT_DAILY)
+wepppy/nodb/mods/swat/swat.py:504:                "wepppyo3.swat_utils is required for SWAT recall generation."
+wepppy/nodb/mods/swat/swat.py:507:        recall_func = getattr(module, "wepp_hillslope_pass_to_swat_recall", None)
+wepppy/nodb/mods/swat/swat.py:510:                "wepppyo3.swat_utils is missing wepp_hillslope_pass_to_swat_recall"
+wepppy/nodb/mods/swat/swat.py:883:        source_masks = source.objects.__dict__
+wepppy/nodb/mods/swat/swat.py:886:            if attr_name not in source_masks:
+wepppy/nodb/mods/swat/swat.py:888:            target.objects.set_mask(object_name, int(source_masks[attr_name]))
+wepppy/nodb/mods/swat/swat.py:915:            print_prt.objects.set_mask(object_name, current | PRINT_PRT_DAILY)
+wepppy/nodb/mods/swat/swat.py:918:            print_prt.objects.set_mask("recall", 0)
+wepppy/nodb/mods/swat/swat.py:994:        return importlib.import_module("wepppyo3.swat_utils"), None
+wepppy/nodb/mods/swat/swat.py:996:        for module_name in ("wepppyo3.swat_utils_rust", "wepppyo3.swat_utils.swat_utils_rust"):
+wepppy/nodb/mods/swat/swat.py:1006:        return importlib.import_module("wepppyo3.swat_interchange"), None
+wepppy/nodb/mods/swat/swat.py:1009:            "wepppyo3.swat_interchange_rust",
+wepppy/nodb/mods/swat/swat.py:1010:            "wepppyo3.swat_interchange.swat_interchange_rust",
+wepppy/nodb/mods/path_ce/data_loader.py:119:    hillslope_df = _read_parquet(omni_dir / "scenarios.hillslope_summaries.parquet")
+wepppy/nodb/mods/path_ce/data_loader.py:121:    watershed_parquet = pick_existing_parquet_path(wd_path, "watershed/hillslopes.parquet")
+wepppy/nodb/mods/path_ce/data_loader.py:124:            "Required watershed parquet missing (watershed/hillslopes.parquet)"
+wepppy/nodb/mods/path_ce/data_loader.py:131:        hillslope_df=hillslope_df,
+wepppy/nodb/mods/path_ce/data_loader.py:157:    hillslope_df: pd.DataFrame,
+wepppy/nodb/mods/path_ce/data_loader.py:165:    scenario_frames = _group_by_scenario(hillslope_df)
+wepppy/nodb/mods/path_ce/data_loader.py:168:            f"Post-fire scenario '{post_fire_scenario}' not found in Omni hillslope summaries."
+wepppy/nodb/mods/path_ce/data_loader.py:183:                f"Undisturbed scenario '{undisturbed_scenario}' not found in Omni hillslope summaries."
+wepppy/nodb/mods/path_ce/data_loader.py:195:                f"Treatment scenario '{option.scenario}' not found in Omni hillslope summaries."
+wepppy/nodb/mods/path_ce/data_loader.py:217:        watershed_df[["wepp_id", "topaz_id", "slope_scalar", "area"]],
+wepppy/nodb/mods/path_ce/data_loader.py:223:        base_df[["wepp_id", "topaz_id", "Hillslope Area (ha)"]]
+wepppy/nodb/mods/path_ce/data_loader.py:225:        .rename(columns={"Hillslope Area (ha)": "area_base"})
+wepppy/nodb/mods/path_ce/data_loader.py:241:    prepared["slope_scalar"] = pd.to_numeric(
+wepppy/nodb/mods/path_ce/data_loader.py:242:        prepared.get("slope_scalar", pd.Series(np.nan, index=prepared.index)),
+wepppy/nodb/mods/path_ce/data_loader.py:245:    prepared["slope_deg"] = np.degrees(np.arctan(prepared["slope_scalar"]))
+wepppy/nodb/mods/path_ce/data_loader.py:254:def _group_by_scenario(hillslope_df: pd.DataFrame) -> MutableMapping[str, pd.DataFrame]:
+wepppy/nodb/mods/path_ce/data_loader.py:256:    for scenario, group in hillslope_df.groupby("scenario"):
+wepppy/nodb/mods/path_ce/data_loader.py:278:            f"Required columns {missing} missing from hillslope summaries; found columns: {list(normalized.columns)}"
+wepppy/nodb/mods/path_ce/data_loader.py:281:    if "Hillslope Area (ha)" not in normalized:
+wepppy/nodb/mods/path_ce/data_loader.py:284:                normalized["Hillslope Area (ha)"] = normalized[candidate]
+wepppy/nodb/mods/path_ce/data_loader.py:306:        raise PathCEDataError("Hillslope summaries missing expected metric columns.")
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:57:        hillslope_path = getattr(watershed, "subwta_shp", None)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:58:        if not hillslope_path or not _exists(hillslope_path):
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:59:            raise FileNotFoundError("Hillslope polygons not found for contrast overlay GeoJSON.")
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:61:        hillslope_gdf = gpd.read_file(hillslope_path)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:62:        if hillslope_gdf.empty:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:63:            raise ValueError("No hillslope polygons available for contrast overlay GeoJSON.")
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:67:            if candidate in hillslope_gdf.columns:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:71:            raise ValueError("Hillslope polygons missing a TopazID field.")
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:73:        hillslope_lookup: Dict[str, Any] = {}
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:74:        for _, row in hillslope_gdf.iterrows():
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:84:            hillslope_lookup[topaz_id] = geom
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:86:        if not hillslope_lookup:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:87:            raise ValueError("No valid hillslope polygons available for contrast overlay GeoJSON.")
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:97:                geom = hillslope_lookup.get(topaz_id)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:119:                "Contrast overlay GeoJSON skipped %d hillslopes missing geometry.",
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:140:            import rasterio
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:141:            from rasterio.features import shapes
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:143:            raise ImportError("rasterio is required for stream-order contrast overlay GeoJSON.") from exc
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:152:        wbt_dir = Path(getattr(watershed, "wbt_wd", _join(omni.wd, "dem", "wbt")))
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:153:        subwta_pruned_path = wbt_dir / f"subwta.strahler_pruned_{order_reduction_passes}.tif"
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:173:        with rasterio.open(subwta_pruned_path) as dataset:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:174:            data = dataset.read(1, masked=True)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:177:            mask = None
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:178:            if hasattr(data, "mask"):
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:179:                mask = ~data.mask
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:180:            for geom, value in shapes(data, mask=mask, transform=transform):
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:230:            import rasterio
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:231:            from rasterio.features import shapes
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:233:            raise ImportError("rasterio is required for user-defined contrast overlay GeoJSON.") from exc
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:243:            raise FileNotFoundError("Hillslope raster not found for user-defined contrast overlay GeoJSON.")
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:245:        with rasterio.open(subwta_path) as dataset:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:246:            data = dataset.read(1, masked=True)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:250:            base_mask = None
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:251:            if hasattr(data, "mask"):
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:252:                base_mask = ~data.mask
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:265:            mask = np.isin(data_array, topaz_values)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:266:            if base_mask is not None:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:267:                mask = mask & base_mask
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:268:            if not mask.any():
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:270:            geoms = [shape(geom) for geom, _ in shapes(data_array, mask=mask, transform=transform)]
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:321:        if selection_mode == "user_defined_hillslope_groups":
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:324:                if entry.get("selection_mode") != "user_defined_hillslope_groups":
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:359:                if entry.get("status") == "skipped" or entry.get("n_hillslopes") in (None, 0, 0.0):
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:390:        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:391:            return "user_defined_hillslope_groups"
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:519:        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:520:            selection_mode = "user_defined_hillslope_groups"
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:545:            elif selection_mode == "user_defined_hillslope_groups":
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:605:    def compile_hillslope_summaries(self, omni: "Omni") -> pd.DataFrame:
+wepppy/nodb/mods/omni/omni_artifact_export_service.py:657:        out_path = _join(omni.omni_dir, "scenarios.hillslope_summaries.parquet")

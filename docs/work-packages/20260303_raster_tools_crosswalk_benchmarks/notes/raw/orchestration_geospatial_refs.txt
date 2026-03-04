@@ -1,0 +1,238 @@
+wepppy/rq/culvert_rq_manifest.py:134:    outlet_coords = _load_outlet_coords(run_wd / "dem" / "wbt" / "outlet.geojson")
+wepppy/rq/topo_utils.py:7:from whitebox_tools import WhiteboxTools
+wepppy/rq/topo_utils.py:39:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+wepppy/rq/topo_utils.py:40:    wbt.set_working_dir(str(netful_path.parent))
+wepppy/rq/topo_utils.py:46:    ret = wbt.strahler_stream_order(
+wepppy/rq/topo_utils.py:69:        ret = wbt.prune_strahler_stream_order(
+wepppy/rq/culvert_rq.py:17:import rasterio
+wepppy/rq/culvert_rq.py:21:from whitebox_tools import WhiteboxTools
+wepppy/rq/culvert_rq.py:22:from osgeo import gdal
+wepppy/rq/culvert_rq.py:23:from rasterio.windows import Window
+wepppy/rq/culvert_rq.py:240:    ds = gdal.Open(str(dem_src))
+wepppy/rq/culvert_rq.py:792:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+wepppy/rq/culvert_rq.py:793:    wbt.set_working_dir(str(flovec_path.parent))
+wepppy/rq/culvert_rq.py:795:    wbt.d8_pointer(dem=str(dem_path), output=str(flovec_path), esri_pntr=False)
+wepppy/rq/culvert_rq.py:814:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+wepppy/rq/culvert_rq.py:815:    wbt.set_working_dir(str(netful_path.parent))
+wepppy/rq/culvert_rq.py:821:    ret = wbt.remove_short_streams(
+wepppy/rq/culvert_rq.py:847:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+wepppy/rq/culvert_rq.py:848:    wbt.set_working_dir(str(netful_path.parent))
+wepppy/rq/culvert_rq.py:853:    ret = wbt.stream_junction_identifier(
+wepppy/rq/culvert_rq.py:867:    wbt: WhiteboxTools,
+wepppy/rq/culvert_rq.py:885:            wbt.clip_raster_to_raster(
+wepppy/rq/culvert_rq.py:945:    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+wepppy/rq/culvert_rq.py:946:    wbt.set_working_dir(str(chnjnt_path.parent))
+wepppy/rq/culvert_rq.py:950:        wbt=wbt,
+wepppy/rq/culvert_rq.py:968:            wbt=wbt,
+wepppy/rq/culvert_rq.py:978:    ret = wbt.stream_junction_identifier(
+wepppy/rq/culvert_rq.py:994:    wbt: WhiteboxTools,
+wepppy/rq/culvert_rq.py:1012:        wbt=wbt,
+wepppy/rq/culvert_rq.py:1037:    with rasterio.open(raster_path) as src:
+wepppy/rq/culvert_rq.py:1061:    with rasterio.open(watershed_mask_path) as src:
+wepppy/rq/culvert_rq.py:1077:    with rasterio.open(seeded_mask, "w", **profile) as dst:
+wepppy/rq/culvert_rq.py:1134:    with rasterio.open(netful_path) as src:
+wepppy/rq/culvert_rq.py:1149:    with rasterio.open(flovec_path) as fv:
+wepppy/rq/culvert_rq.py:1182:    with rasterio.open(seeded_tif, 'w', **profile) as dst:
+wepppy/rq/culvert_rq.py:1188:        result = gdal.Translate(str(vrt_path), str(seeded_tif), format="VRT")
+wepppy/rq/culvert_rq.py:1214:    with rasterio.open(chnjnt_path) as src:
+wepppy/rq/culvert_rq.py:1232:    with rasterio.open(seeded_chnjnt, 'w', **profile) as dst:
+wepppy/rq/culvert_rq.py:1372:            wbt = watershed._ensure_wbt()
+wepppy/rq/culvert_rq.py:1443:                    netful_path=Path(wbt.netful),
+wepppy/rq/culvert_rq.py:1444:                    flovec_path=Path(wbt.flovec),
+wepppy/rq/culvert_rq.py:1467:                Path(wbt.flovec),
+wepppy/rq/culvert_rq.py:1468:                Path(wbt.netful),
+wepppy/rq/culvert_rq.py:1470:                Path(wbt.chnjnt),
+wepppy/rq/culvert_rq.py:1474:                    Path(wbt.chnjnt),
+wepppy/rq/culvert_rq.py:1660:        with rasterio.open(mask_path) as src:
+wepppy/rq/project_rq.py:594:    wbt_fill_or_breach: Optional[str],
+wepppy/rq/project_rq.py:595:    wbt_blc_dist: Optional[int],
+wepppy/rq/project_rq.py:603:        wbt_fill_or_breach: Optional override for Whitebox fill/breach strategy.
+wepppy/rq/project_rq.py:604:        wbt_blc_dist: Optional breaching distance when Whitebox backend is used.
+wepppy/rq/project_rq.py:617:            if watershed.delineation_backend_is_wbt:
+wepppy/rq/project_rq.py:618:                if wbt_fill_or_breach is not None:
+wepppy/rq/project_rq.py:619:                    StatusMessenger.publish(status_channel, f'Setting wbt_fill_or_breach to {wbt_fill_or_breach}')
+wepppy/rq/project_rq.py:620:                    watershed.wbt_fill_or_breach = wbt_fill_or_breach
+wepppy/rq/project_rq.py:621:                if wbt_blc_dist is not None:
+wepppy/rq/project_rq.py:622:                    StatusMessenger.publish(status_channel, f'Setting wbt_blc_dist to {wbt_blc_dist}')
+wepppy/rq/project_rq.py:623:                    watershed.wbt_blc_dist = wbt_blc_dist
+wepppy/rq/project_rq.py:653:    wbt_fill_or_breach: Optional[str],
+wepppy/rq/project_rq.py:654:    wbt_blc_dist: Optional[int],
+wepppy/rq/project_rq.py:669:        wbt_fill_or_breach: Optional Whitebox fill/breach directive.
+wepppy/rq/project_rq.py:670:        wbt_blc_dist: Optional breaching distance for Whitebox runs.
+wepppy/rq/project_rq.py:694:                    (runid, csa, mcl, wbt_fill_or_breach, wbt_blc_dist),
+wepppy/rq/project_rq.py:705:                    (runid, csa, mcl, wbt_fill_or_breach, wbt_blc_dist),
+wepppy/rq/culvert_rq_helpers.py:10:import rasterio
+wepppy/rq/culvert_rq_helpers.py:50:        with rasterio.open(dem_path) as src:
+wepppy/topo/watershed_collection/watershed_collection.py:168:        import rasterio
+wepppy/topo/watershed_collection/watershed_collection.py:169:        from rasterio.features import rasterize
+wepppy/topo/watershed_collection/watershed_collection.py:181:        with rasterio.open(template_filepath) as src:
+wepppy/topo/watershed_collection/watershed_collection.py:200:            with rasterio.open(dst_filepath, "w", **meta) as dst:
+wepppy/microservices/rq_engine/dss_export_routes.py:16:from wepppy.topo.peridot.flowpath import PeridotChannel
+wepppy/microservices/rq_engine/omni_routes.py:420:        if not watershed.delineation_backend_is_wbt:
+wepppy/microservices/rq_engine/watershed_routes.py:16:from osgeo import gdal, osr
+wepppy/microservices/rq_engine/watershed_routes.py:99:    wbt_fill_or_breach_raw = payload.get("wbt_fill_or_breach")
+wepppy/microservices/rq_engine/watershed_routes.py:100:    wbt_blc_dist_raw = payload.get("wbt_blc_dist")
+wepppy/microservices/rq_engine/watershed_routes.py:193:        if isinstance(wbt_fill_or_breach_raw, (list, tuple)):
+wepppy/microservices/rq_engine/watershed_routes.py:194:            wbt_fill_or_breach = next(
+wepppy/microservices/rq_engine/watershed_routes.py:195:                (str(item) for item in wbt_fill_or_breach_raw if item not in (None, "")),
+wepppy/microservices/rq_engine/watershed_routes.py:198:        elif wbt_fill_or_breach_raw in (None, ""):
+wepppy/microservices/rq_engine/watershed_routes.py:199:            wbt_fill_or_breach = None
+wepppy/microservices/rq_engine/watershed_routes.py:201:            wbt_fill_or_breach = str(wbt_fill_or_breach_raw)
+wepppy/microservices/rq_engine/watershed_routes.py:203:        if wbt_blc_dist_raw in (None, "", []):
+wepppy/microservices/rq_engine/watershed_routes.py:204:            wbt_blc_dist = None
+wepppy/microservices/rq_engine/watershed_routes.py:205:        elif isinstance(wbt_blc_dist_raw, (list, tuple)):
+wepppy/microservices/rq_engine/watershed_routes.py:206:            wbt_blc_dist = _as_int(wbt_blc_dist_raw[0], "wbt_blc_dist")
+wepppy/microservices/rq_engine/watershed_routes.py:208:            wbt_blc_dist = _as_int(wbt_blc_dist_raw, "wbt_blc_dist")
+wepppy/microservices/rq_engine/watershed_routes.py:232:            wbt_fill_or_breach,
+wepppy/microservices/rq_engine/watershed_routes.py:233:            wbt_blc_dist,
+wepppy/microservices/rq_engine/watershed_routes.py:248:def _require_spatial_reference(ds: gdal.Dataset) -> osr.SpatialReference:
+wepppy/microservices/rq_engine/watershed_routes.py:258:def _validate_dem_dimensions(ds: gdal.Dataset) -> None:
+wepppy/microservices/rq_engine/watershed_routes.py:282:    ds = gdal.Open(str(dem_path))
+wepppy/microservices/rq_engine/watershed_routes.py:287:        dtype = gdal.GetDataTypeName(band.DataType) if band is not None else ""
+wepppy/microservices/rq_engine/watershed_routes.py:359:    ds = gdal.Open(str(saved_path))
+wepppy/microservices/rq_engine/watershed_routes.py:376:        ds = gdal.Open(str(saved_path))
+wepppy/microservices/rq_engine/watershed_routes.py:392:        warp_options = gdal.WarpOptions(
+wepppy/microservices/rq_engine/watershed_routes.py:396:        warped = gdal.Warp(str(dem_path), str(saved_path), options=warp_options)
+wepppy/microservices/rq_engine/watershed_routes.py:401:        ds = gdal.Open(str(dem_path))
+wepppy/microservices/rq_engine/watershed_routes.py:451:    vrt_ds = gdal.Translate(str(vrt_path), str(dem_path), format="VRT", **translate_options)
+wepppy/microservices/rq_engine/watershed_routes.py:592:            wbt_fill_or_breach,
+wepppy/microservices/rq_engine/watershed_routes.py:593:            wbt_blc_dist,
+wepppy/microservices/rq_engine/watershed_routes.py:608:                if watershed.delineation_backend_is_wbt:
+wepppy/microservices/rq_engine/watershed_routes.py:609:                    if wbt_fill_or_breach is not None:
+wepppy/microservices/rq_engine/watershed_routes.py:610:                        watershed._wbt_fill_or_breach = wbt_fill_or_breach
+wepppy/microservices/rq_engine/watershed_routes.py:611:                    if wbt_blc_dist is not None:
+wepppy/microservices/rq_engine/watershed_routes.py:612:                        watershed._wbt_blc_dist = wbt_blc_dist
+wepppy/microservices/rq_engine/watershed_routes.py:645:                    wbt_fill_or_breach,
+wepppy/microservices/rq_engine/watershed_routes.py:646:                    wbt_blc_dist,
+wepppy/topo/topaz/topaz.py:25:from osgeo import gdal, osr
+wepppy/topo/topaz/topaz.py:40:gdal.UseExceptions()
+wepppy/topo/topaz/topaz.py:712:        Uses gdal to extract elevation values from dem and puts them in a
+wepppy/topo/topaz/topaz.py:723:                ds = gdal.Open(self.dem)
+wepppy/topo/topaz/topaz.py:742:        Uses gdal to extract elevation values from dem and puts them in a
+wepppy/topo/topaz/topaz.py:748:        ds = gdal.Open(dem)
+wepppy/topo/topaz/topaz.py:785:        dtype = gdal.GetDataTypeName(band.DataType)
+wepppy/topo/topaz/topaz.py:1065:        src_ds = gdal.Open(subwta_fn)
+wepppy/topo/topaz/topaz.py:1154:        cmd = ['gdalbuildvrt', 'NETFUL.VRT', 'NETFUL.ARC']
+wepppy/topo/topaz/topaz.py:1172:        cmd = ['gdal_translate',
+wepppy/topo/wbt/__init__.py:3:from .wbt_topaz_emulator import WhiteboxToolsTopazEmulator
+wepppy/topo/wbt/__init__.py:4:from .wbt_documentation import generate_wbt_documentation
+wepppy/topo/wbt/__init__.py:8:    'generate_wbt_documentation',
+wepppy/topo/wbt/wbt_documentation.py:11:__all__ = ["ResourceDefinition", "generate_wbt_documentation"]
+wepppy/topo/wbt/wbt_documentation.py:117:        tool="`gdal_contour -p -fl 1`.",
+wepppy/topo/wbt/wbt_documentation.py:438:def generate_wbt_documentation(
+wepppy/topo/wbt/wbt_documentation.py:451:        Directory containing WhiteboxTools outputs (``wbt_wd``).
+wepppy/topo/watershed_abstraction/watershed_abstraction.py:81:    # we read in the maps with gdal and transpose so the
+wepppy/topo/watershed_abstraction/watershed_abstraction.py:247:# we read in the maps with gdal and transpose so the
+wepppy/topo/watershed_abstraction/support.py:8:import rasterio
+wepppy/topo/watershed_abstraction/support.py:12:from osgeo import gdal, osr, ogr
+wepppy/topo/watershed_abstraction/support.py:47:gdal.UseExceptions()
+wepppy/topo/watershed_abstraction/support.py:400:    src_ds = gdal.Open(src_fn)
+wepppy/topo/watershed_abstraction/support.py:420:    gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
+wepppy/topo/watershed_abstraction/support.py:452:    src_ds = gdal.Open(bound_fn)
+wepppy/topo/watershed_abstraction/support.py:472:    gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
+wepppy/topo/watershed_abstraction/support.py:492:    src_ds = gdal.Open(subwta_fn)
+wepppy/topo/watershed_abstraction/support.py:501:    drv_mem = gdal.GetDriverByName('MEM')
+wepppy/topo/watershed_abstraction/support.py:503:        '', src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GDT_CFloat32
+wepppy/topo/watershed_abstraction/support.py:511:        '', src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GDT_Byte
+wepppy/topo/watershed_abstraction/support.py:533:    gdal.Polygonize(
+wepppy/topo/watershed_abstraction/support.py:801:    with rasterio.open(raster_path) as src:
+wepppy/topo/wbt/wbt_topaz_emulator.py:19:import rasterio
+wepppy/topo/wbt/wbt_topaz_emulator.py:21:from osgeo import gdal, osr
+wepppy/topo/wbt/wbt_topaz_emulator.py:30:from wepppy.topo.wbt.wbt_documentation import generate_wbt_documentation
+wepppy/topo/wbt/wbt_topaz_emulator.py:32:from whitebox_tools import WhiteboxTools
+wepppy/topo/wbt/wbt_topaz_emulator.py:120:        wbt_wd: str,
+wepppy/topo/wbt/wbt_topaz_emulator.py:129:            wbt_wd: Directory where WhiteboxTools intermediates and outputs are written.
+wepppy/topo/wbt/wbt_topaz_emulator.py:139:                f"WhiteBoxToolsTopazEmulator.{func_name}(wbt_wd={wbt_wd}, dem_fn={dem_fn}, verbose={verbose}, raise_on_error={raise_on_error})"
+wepppy/topo/wbt/wbt_topaz_emulator.py:149:        self.wbt_wd = os.path.abspath(wbt_wd)
+wepppy/topo/wbt/wbt_topaz_emulator.py:150:        if not _exists(self.wbt_wd):
+wepppy/topo/wbt/wbt_topaz_emulator.py:151:            os.makedirs(self.wbt_wd)
+wepppy/topo/wbt/wbt_topaz_emulator.py:157:        self._wbt_runner: Optional[WhiteboxTools] = None
+wepppy/topo/wbt/wbt_topaz_emulator.py:167:        state.pop("_wbt_runner", None)
+wepppy/topo/wbt/wbt_topaz_emulator.py:243:    def wbt(self):
+wepppy/topo/wbt/wbt_topaz_emulator.py:247:        if self._wbt_runner is None:
+wepppy/topo/wbt/wbt_topaz_emulator.py:248:            self._wbt_runner = WhiteboxTools(verbose=self.verbose, raise_on_error=self.raise_on_error)
+wepppy/topo/wbt/wbt_topaz_emulator.py:250:        return self._wbt_runner
+wepppy/topo/wbt/wbt_topaz_emulator.py:272:        return _join(self.wbt_wd, f"relief.{ext}")
+wepppy/topo/wbt/wbt_topaz_emulator.py:282:        https://www.whiteboxgeo.com/manual/wbt_book/available_tools/hydrological_analysis.html#d8pointer
+wepppy/topo/wbt/wbt_topaz_emulator.py:285:        return _join(self.wbt_wd, f"flovec.{ext}")
+wepppy/topo/wbt/wbt_topaz_emulator.py:292:        return _join(self.wbt_wd, "flovec.wgs.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:301:        return _join(self.wbt_wd, "floaccum.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:308:        return _join(self.wbt_wd, "netful0.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:316:        return _join(self.wbt_wd, f"netful.{ext}")
+wepppy/topo/wbt/wbt_topaz_emulator.py:323:        return _join(self.wbt_wd, "netful.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:330:        return _join(self.wbt_wd, "netful.WGS.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:338:        return _join(self.wbt_wd, "chnjnt.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:345:        return _join(self.wbt_wd, "outlet.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:354:        return _join(self.wbt_wd, "bound.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:361:        return _join(self.wbt_wd, "bound.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:368:        return _join(self.wbt_wd, "bound.WGS.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:375:        return _join(self.wbt_wd, "taspec.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:382:        return _join(self.wbt_wd, "discha.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:389:        return _join(self.wbt_wd, "fvslop.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:396:        return _join(self.wbt_wd, "netw0.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:403:        return _join(self.wbt_wd, "strahler.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:410:        return _join(self.wbt_wd, "subwta.tif")
+wepppy/topo/wbt/wbt_topaz_emulator.py:417:        return _join(self.wbt_wd, "netw.tsv")
+wepppy/topo/wbt/wbt_topaz_emulator.py:430:        ds = gdal.Open(dem_fn)
+wepppy/topo/wbt/wbt_topaz_emulator.py:472:        dtype = gdal.GetDataTypeName(band.DataType)
+wepppy/topo/wbt/wbt_topaz_emulator.py:536:            ret = self.wbt.fill_depressions(dem=self.dem, output=relief_fn)
+wepppy/topo/wbt/wbt_topaz_emulator.py:538:            ret = self.wbt.breach_depressions(dem=self.dem, output=relief_fn, fill_pits=True)
+wepppy/topo/wbt/wbt_topaz_emulator.py:540:            ret = self.wbt.breach_depressions_least_cost(dem=self.dem, output=relief_fn, dist=int(blc_dist), fill=True)
+wepppy/topo/wbt/wbt_topaz_emulator.py:569:        self.wbt.d8_pointer(dem=relief_fn, output=flovec_fn, esri_pntr=False)
+wepppy/topo/wbt/wbt_topaz_emulator.py:576:        src_ds = gdal.Open(flovec_fn)
+wepppy/topo/wbt/wbt_topaz_emulator.py:589:        warped = gdal.Warp(flovec_wgs_fn, src_ds, **warp_kwargs)
+wepppy/topo/wbt/wbt_topaz_emulator.py:622:        self.wbt.d8_flow_accumulation(
+wepppy/topo/wbt/wbt_topaz_emulator.py:672:        self.wbt.extract_streams(floaccum_fn, netful0_fn, threshold=threshold)
+wepppy/topo/wbt/wbt_topaz_emulator.py:682:        self.wbt.remove_short_streams(
+wepppy/topo/wbt/wbt_topaz_emulator.py:709:        self.wbt.stream_junction_identifier(
+wepppy/topo/wbt/wbt_topaz_emulator.py:890:                flovec_ds = gdal.Open(self.flovec)
+wepppy/topo/wbt/wbt_topaz_emulator.py:891:                bound_ds = gdal.Open(watershed_mask)
+wepppy/topo/wbt/wbt_topaz_emulator.py:910:        self.wbt.find_outlet(**kwargs)
+wepppy/topo/wbt/wbt_topaz_emulator.py:1050:        with rasterio.open(chnjnt_fn) as src:
+wepppy/topo/wbt/wbt_topaz_emulator.py:1214:                self.wbt.watershed(
+wepppy/topo/wbt/wbt_topaz_emulator.py:1257:            "gdal_contour",
+wepppy/topo/wbt/wbt_topaz_emulator.py:1274:                "gdal_contour failed for bound output: "
+wepppy/topo/wbt/wbt_topaz_emulator.py:1302:        self.wbt.aspect(dem=self.dem, output=aspect_fn)
+wepppy/topo/wbt/wbt_topaz_emulator.py:1329:        self.wbt.fvslope(dem=self.relief, d8_pntr=self.flovec, output=fvslop_fn, units='ratio')
+wepppy/topo/wbt/wbt_topaz_emulator.py:1352:        self.wbt.clip_raster_to_raster(i=self.netful, mask=self.bound, output=netw0_fn)
+wepppy/topo/wbt/wbt_topaz_emulator.py:1374:        self.wbt.downslope_distance_to_stream(
+wepppy/topo/wbt/wbt_topaz_emulator.py:1398:        self.wbt.strahler_stream_order(
+wepppy/topo/wbt/wbt_topaz_emulator.py:1421:        self.wbt.hillslopes_topaz(
+wepppy/topo/wbt/wbt_topaz_emulator.py:1446:        return _join(self.wbt_wd, "subwta.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:1453:        return _join(self.wbt_wd, "subcatchments.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:1460:        return _join(self.wbt_wd, "subcatchments.WGS.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:1467:        return _join(self.wbt_wd, "channels.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:1474:        return _join(self.wbt_wd, "channels.WGS.geojson")
+wepppy/topo/wbt/wbt_topaz_emulator.py:1545:        return generate_wbt_documentation(
+wepppy/topo/wbt/wbt_topaz_emulator.py:1546:            self.wbt_wd,
+wepppy/topo/wbt/wbt_topaz_emulator.py:1590:        src_ds = gdal.Open(subwta_fn)
+wepppy/topo/wbt/wbt_topaz_emulator.py:1659:    dem = "/Users/roger/src/wepppy/tests/wbt/rlew-intercontinental-prawn/dem/dem.tif"
+wepppy/topo/wbt/wbt_topaz_emulator.py:1660:    wbt_wd = "/Users/roger/src/wepppy/tests/wbt/rlew-intercontinental-prawn/dem/wbt"
+wepppy/topo/wbt/wbt_topaz_emulator.py:1668:    emulator = WhiteboxToolsTopazEmulator(dem, wbt_wd, verbose=verbose)
+wepppy/topo/wbt/wbt_topaz_emulator.py:1679:# (wepppy310-env) roger@m4air32:/Users/roger/src/wepppy/wepppy/topo/wbt$ python3 wbt_topaz_emulator.py  /Users/roger/src/wepppy/tests/wbt/supine-disputant/dem/dem.tif /Users/roger/src/wepppy/tests/wbt/supine-disputant/dem/wbt --csa 10 --mcl 100 --verbose
+wepppy/topo/peridot/peridot_runner.py:19:    get_peridot_input_wait_s,
+wepppy/topo/peridot/peridot_runner.py:20:    get_peridot_input_poll_s,
+wepppy/topo/peridot/peridot_runner.py:30:# Default CPU count for peridot processes, can be overridden via PERIDOT_CPU env var
+wepppy/topo/peridot/peridot_runner.py:34:def _get_peridot_ncpu() -> str:
+wepppy/topo/peridot/peridot_runner.py:35:    """Get the number of CPUs to use for peridot processes."""
+wepppy/topo/peridot/peridot_runner.py:80:def _get_wbt_bin():
+wepppy/topo/peridot/peridot_runner.py:81:    _bin = _join(_thisdir, 'bin', 'wbt_abstract_watershed')
+wepppy/topo/peridot/peridot_runner.py:84:        raise RuntimeError('wbt_abstract_watershed binary not found')
+wepppy/topo/peridot/peridot_runner.py:87:def _get_wbt_sub_field_bin():
+wepppy/topo/peridot/peridot_runner.py:94:def run_peridot_abstract_watershed(
+wepppy/topo/peridot/peridot_runner.py:103:        timeout_s=get_peridot_input_wait_s(),
+wepppy/topo/peridot/peridot_runner.py:104:        poll_s=get_peridot_input_poll_s(),
+wepppy/topo/peridot/peridot_runner.py:108:    cmd = [_get_bin(), wd, '--ncpu', _get_peridot_ncpu()]
+wepppy/topo/peridot/peridot_runner.py:120:    with open(_join(wd, '_peridot.log'), 'w') as _log:
+wepppy/topo/peridot/peridot_runner.py:124:def run_peridot_wbt_abstract_watershed(
+wepppy/topo/peridot/peridot_runner.py:146:        _join(wd, 'dem/wbt/subwta.tif'),
+wepppy/topo/peridot/peridot_runner.py:147:        timeout_s=get_peridot_input_wait_s(),
+wepppy/topo/peridot/peridot_runner.py:148:        poll_s=get_peridot_input_poll_s(),
+wepppy/topo/peridot/peridot_runner.py:152:    cmd = [_get_wbt_bin(), wd, '--ncpu', _get_peridot_ncpu()]
+wepppy/topo/peridot/peridot_runner.py:169:    with open(_join(wd, '_peridot.log'), 'w') as _log:
+wepppy/topo/peridot/peridot_runner.py:247:def run_peridot_wbt_sub_fields_abstraction(
+wepppy/topo/peridot/peridot_runner.py:264:    assert _exists(_join(wd, 'dem/wbt/flovec.tif')), 'dem/wbt/flovec.tif not found'
+wepppy/topo/peridot/peridot_runner.py:267:    cmd = [_get_wbt_sub_field_bin(), wd, '--ncpu', _get_peridot_ncpu()]
+wepppy/topo/peridot/peridot_runner.py:279:    _log = open(_join(wd, '_peridot.log'), 'w')
+wepppy/topo/peridot/peridot_runner.py:375:    Standardize watershed tables for peridot-derived abstractions.
+wepppy/topo/peridot/peridot_runner.py:397:    if not (watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt):

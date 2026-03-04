@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-02-27  
+**Last Updated**: 2026-03-04  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -314,6 +314,22 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Raster Tools Cross-Walk and Benchmark Evaluation
+**Completed**: 2026-03-04
+**Duration**: 1 day (evaluation draft closeout)
+**Status**: ✅ **DRAFT COMPLETE** (`defer`; BW-01/BW-02 executed but non-comparable under strict parity contract)
+**Owner**: Codex
+**Link**: [docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/](docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/)
+**Description**: Evaluated whether `/workdir/raster_tools` should be incorporated into WEPPpy using capability cross-walk + benchmark evidence.
+
+**Outcome**: Produced end-to-end evaluation artifacts and a `defer` recommendation. Deferred benchmark cases (`BW-03`/`BW-04`/`BW-05`) are explicitly routed to a follow-up package.
+
+**Deliverables**:
+- ✅ Capability inventory + WEPPpy usage map
+- ✅ Cross-walk matrix + overlap-only shortlist traceability
+- ✅ Benchmark harness + raw run logs with strict comparability guards
+- ✅ Results + recommendation memo + synchronized package tracker/ExecPlan docs
 
 ### NoDir Full Reversal (Abandonment Program)
 **Completed**: 2026-02-27

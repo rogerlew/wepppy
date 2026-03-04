@@ -1,0 +1,79 @@
+{
+  "run_id": "20260304T050046Z",
+  "generated_at_utc": "2026-03-04T05:00:46.419391+00:00",
+  "host": "forest",
+  "python": "3.12.3",
+  "oxidized_rust_available": true,
+  "warmup_runs": 1,
+  "measured_runs": 3,
+  "stats": [
+    "count",
+    "majority"
+  ],
+  "datasets": {
+    "small": {
+      "vectors": "/home/workdir/oxidized-rasterstats/tests/fixtures/weppcloud/small/dem/wbt/subcatchments.geojson",
+      "nlcd": "/home/workdir/oxidized-rasterstats/tests/fixtures/weppcloud/small/landuse/nlcd.tif",
+      "key_raster": "/workdir/wepppy/docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/raw/bench_outputs/zonal/small_topaz_key.tif",
+      "feature_count": 802,
+      "wepppyo3": {
+        "median_s": 0.04645678773522377,
+        "p95_s": 0.04723966671153903,
+        "runs_s": [
+          0.04574037715792656,
+          0.04645678773522377,
+          0.04732665326446295
+        ],
+        "result_key_count": 399
+      },
+      "oxidized_rasterstats": {
+        "median_s": 0.26694722566753626,
+        "p95_s": 0.2702327799983323,
+        "runs_s": [
+          0.26691433787345886,
+          0.26694722566753626,
+          0.27059784159064293
+        ],
+        "result_feature_count": 802
+      },
+      "diagnostics": {
+        "majority_overlap_count": 802,
+        "majority_match_count": 743,
+        "majority_match_ratio": 0.92643391521197
+      },
+      "notes": "Semantics are zonal-like but not fully identical: wepppyo3 uses raster key/value mode; oxidized-rasterstats uses polygon zonal stats."
+    },
+    "large_local": {
+      "vectors": "/home/workdir/oxidized-rasterstats/tests/fixtures/weppcloud/large_local/dem/wbt/subcatchments.geojson",
+      "nlcd": "/home/workdir/oxidized-rasterstats/tests/fixtures/weppcloud/large_local/landuse/nlcd.tif",
+      "key_raster": "/workdir/wepppy/docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/notes/raw/bench_outputs/zonal/large_local_topaz_key.tif",
+      "feature_count": 9429,
+      "wepppyo3": {
+        "median_s": 0.10572935082018375,
+        "p95_s": 0.1064360911026597,
+        "runs_s": [
+          0.10651461780071259,
+          0.10572935082018375,
+          0.10540508199483156
+        ],
+        "result_key_count": 5422
+      },
+      "oxidized_rasterstats": {
+        "median_s": 2.743858556263149,
+        "p95_s": 2.7533962266519665,
+        "runs_s": [
+          2.743858556263149,
+          2.7544559678062797,
+          2.7287441920489073
+        ],
+        "result_feature_count": 9429
+      },
+      "diagnostics": {
+        "majority_overlap_count": 9429,
+        "majority_match_count": 8653,
+        "majority_match_ratio": 0.9177007105737618
+      },
+      "notes": "Semantics are zonal-like but not fully identical: wepppyo3 uses raster key/value mode; oxidized-rasterstats uses polygon zonal stats."
+    }
+  }
+}

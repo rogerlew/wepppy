@@ -1,0 +1,50 @@
+timestamp_utc=2026-03-04T04:18:58Z
+host=forest
+kernel=Linux 6.8.0-90-generic x86_64 GNU/Linux
+
+# lscpu
+Architecture:                         x86_64
+CPU op-mode(s):                       32-bit, 64-bit
+Address sizes:                        46 bits physical, 48 bits virtual
+Byte Order:                           Little Endian
+CPU(s):                               48
+On-line CPU(s) list:                  0-47
+Vendor ID:                            GenuineIntel
+Model name:                           Intel(R) Xeon(R) CPU E5-2697 v2 @ 2.70GHz
+CPU family:                           6
+Model:                                62
+Thread(s) per core:                   2
+Core(s) per socket:                   12
+Socket(s):                            2
+Stepping:                             4
+CPU(s) scaling MHz:                   67%
+CPU max MHz:                          3500.0000
+CPU min MHz:                          1200.0000
+BogoMIPS:                             5387.27
+Flags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl smx est tm2 ssse3 cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm cpuid_fault epb pti ssbd ibrs ibpb stibp fsgsbase smep erms xsaveopt dtherm ida arat pln pts md_clear flush_l1d ibpb_exit_to_user
+L1d cache:                            768 KiB (24 instances)
+L1i cache:                            768 KiB (24 instances)
+L2 cache:                             6 MiB (24 instances)
+L3 cache:                             60 MiB (2 instances)
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0-11,24-35
+NUMA node1 CPU(s):                    12-23,36-47
+Vulnerability Gather data sampling:   Not affected
+Vulnerability Itlb multihit:          KVM: Mitigation: VMX unsupported
+Vulnerability L1tf:                   Mitigation; PTE Inversion
+Vulnerability Mds:                    Mitigation; Clear CPU buffers; SMT vulnerable
+
+# memory
+               total        used        free      shared  buff/cache   available
+Mem:           125Gi        40Gi       4.9Gi        58Mi        82Gi        85Gi
+Swap:          8.0Gi       8.0Gi       4.5Mi
+
+# system python
+python 3.12.3
+rasterio 1.4.4
+gdal 3110400
+
+# raster-tools venv python
+python 3.12.3
+rasterio 1.5.0
+raster_tools 0.9.11

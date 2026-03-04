@@ -1,0 +1,30 @@
+# Capability Cross-Walk Matrix (Milestone 2)
+
+This matrix maps WEPPpy-relevant operation families to current execution owners and `raster_tools` overlap status.
+
+Status labels:
+
+- `direct`: explicit `raster_tools` function-level support found in source.
+- `partial`: related primitives exist, but direct workflow equivalence is not established.
+- `none`: no equivalent surfaced in sampled `raster_tools` evidence.
+- `unknown`: insufficient evidence to classify confidently.
+
+## Matrix
+
+| Operation family | Current WEPPpy path | Current tool owner | `raster_tools` support status | Current evidence | `raster_tools` evidence | Parity risk notes | Benchmark priority |
+|---|---|---|---|---|---|---|---|
+| DEM reprojection / warp / VRT prep | DEM upload and normalization in rq-engine watershed route | GDAL (`Warp`, `Translate`) | `direct` | `/workdir/wepppy/wepppy/microservices/rq_engine/watershed_routes.py:392`, `/workdir/wepppy/wepppy/microservices/rq_engine/watershed_routes.py:396`, `/workdir/wepppy/wepppy/microservices/rq_engine/watershed_routes.py:451` | `/home/workdir/raster_tools/raster_tools/warp.py:14`, `/home/workdir/raster_tools/raster_tools/raster.py:2188` | Resampling defaults, nodata handling, and target alignment may differ; parity must compare geotransform + numeric deltas | `high` |
+| Raster clipping / masking for culvert and watershed masks | Culvert RQ mask and clip workflow | WhiteboxTools + rasterio + GDAL | `direct` | `/workdir/wepppy/wepppy/rq/culvert_rq.py:885`, `/workdir/wepppy/wepppy/rq/culvert_rq.py:945`, `/workdir/wepppy/wepppy/rq/culvert_rq.py:1188` | `/home/workdir/raster_tools/raster_tools/clipping.py:81`, `/home/workdir/raster_tools/raster_tools/clipping.py:143` | Clip semantics (mask polarity, edge pixel inclusion) and output nodata conventions may diverge | `medium` |
+| Geometry-to-raster conversion / rasterization | Utility mask generation and geometry rasterization | GDAL + rasterio features | `direct` | `/workdir/wepppy/wepppy/all_your_base/geo/geo.py:498`, `/workdir/wepppy/wepppy/all_your_base/geo/geo.py:545`, `/workdir/wepppy/wepppy/all_your_base/geo/geo.py:889`, `/workdir/wepppy/wepppy/all_your_base/geo/geo.py:918` | `/home/workdir/raster_tools/raster_tools/rasterize.py:530` | Attribute-burn rules and dtype defaults may differ; parity should include class-count and pixel-count checks | `medium` |
+| Terrain derivatives (slope/aspect) | WBT TOPAZ emulation outputs for terrain products | WhiteboxTools (via emulator) | `direct` | `/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:1302`, `/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:1329` | `/home/workdir/raster_tools/raster_tools/surface.py:168`, `/home/workdir/raster_tools/raster_tools/surface.py:245` | Algorithm details (kernel, unit handling, edge behavior) may differ even when function names match | `medium` |
+| Extent-window raster intersection (`sub_intersection`) | UI extent query to subcatchment IDs | NoDb `Ron.Map` + shared raster reader | `partial` | `/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/watershed_bp.py:146`, `/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/watershed_bp.py:155`, `/workdir/wepppy/wepppy/nodb/core/ron.py:503`, `/workdir/wepppy/wepppy/nodb/core/ron.py:535` | `/home/workdir/raster_tools/raster_tools/clipping.py:81`, `/home/workdir/raster_tools/raster_tools/raster.py:1566` | WEPPpy path returns unique thematic IDs over bbox; `raster_tools` has primitives but no directly evidenced equivalent function | `medium` |
+| Watershed/channel delineation and outlet snapping | NoDb watershed abstraction and WBT hydrology flow | WhiteboxTools + peridot | `none` | `/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:154`, `/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:410`, `/workdir/wepppy/wepppy/nodb/core/watershed_mixins.py:423`, `/workdir/wepppy/wepppy/topo/wbt/wbt_topaz_emulator.py:1214` | No watershed/outlet API surfaced in sampled files (`warp.py`, `clipping.py`, `zonal.py`, `surface.py`, `rasterize.py`) | Workflow semantics are hydrology/topology-specific; not a like-for-like raster utility benchmark | `exclude` |
+| Sub-field abstraction for ag fields | Sub-field ID map generation and ag-fields flowpaths | peridot `sub_fields_abstraction` | `none` | `/workdir/wepppy/wepppy/nodb/mods/ag_fields/ag_fields.py:387`, `/workdir/wepppy/wepppy/topo/peridot/peridot_runner.py:247`, `/home/workdir/peridot/src/wbt/wbt_sub_fields_abstraction.rs:245` | No sub-field abstraction workflow surfaced in sampled `raster_tools` modules | Non-comparable workflow-level abstraction; exclude from perf parity set | `exclude` |
+| WEPPcloud browser map rendering and GeoTIFF decode | Controller/dashboard endpoint orchestration and deck layers | JS clients + `geotiff.js` | `none` | `/workdir/wepppy/wepppy/weppcloud/controllers_js/channel_gl.js:26`, `/workdir/wepppy/wepppy/weppcloud/controllers_js/channel_delineation.js:523`, `/workdir/wepppy/wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:49` | `raster_tools` is Python package surface (`/home/workdir/raster_tools/pyproject.toml:1`) | Client-rendering concerns are outside backend raster compute parity | `exclude` |
+| Batch/parallel execution model for heavy geospatial tasks | Queue and process-level orchestration around watershed/culvert workflows | RQ + peridot binary execution | `unknown` | `/workdir/wepppy/wepppy/nodb/batch_runner.py:481`, `/workdir/wepppy/wepppy/topo/peridot/peridot_runner.py:30` | No explicit `raster_tools` batching model surfaced in sampled sources | Throughput comparisons risk conflating scheduler/process overhead with algorithm speed | `low` |
+
+## Notes on Non-Comparability
+
+- A direct `WEPPpy -> zonal stats` production call path was not surfaced in milestone scans (`rg -n "zonal_stats|rasterstats|point_query" wepppy -g '*.py'` returned no matches), so zonal statistics is currently treated as comparator capability context rather than a benchmarked WEPPpy workflow.
+- Watershed delineation and ag-field abstraction are workflow integrations owned by WBT/peridot pathways and are explicitly excluded from direct `raster_tools` performance comparisons.
+

@@ -1,0 +1,32 @@
+# raster_tools build/interface
+/home/workdir/raster_tools/pyproject.toml:1:[build-system]
+/home/workdir/raster_tools/pyproject.toml:4:    "setuptools>=42",
+/home/workdir/raster_tools/pyproject.toml:6:build-backend = "setuptools.build_meta"
+/home/workdir/raster_tools/setup.py:3:from setuptools import find_packages, setup
+
+# weppcloud-wbt workspace + python wrapper
+/home/workdir/weppcloud-wbt/Cargo.toml:1:[workspace]
+/home/workdir/weppcloud-wbt/Cargo.toml:3:members = ["whitebox-common", "whitebox-lidar", "whitebox-plugins", "whitebox-raster", "whitebox-tools-app", "whitebox-vector"]
+/home/workdir/weppcloud-wbt/WBT/whitebox_tools.py:5224:    def find_outlet(
+/home/workdir/weppcloud-wbt/WBT/whitebox_tools.py:5367:    def hillslopes_topaz(
+/home/workdir/weppcloud-wbt/WBT/whitebox_tools.py:5885:    def watershed(self, d8_pntr, pour_pts, output, esri_pntr=False, callback=None):
+
+# peridot workspace/binaries
+2:name = "peridot"
+8:name = "abstract_watershed"
+12:name = "wbt_abstract_watershed"
+16:name = "sub_fields_abstraction"
+
+# wepppyo3 workspace members
+1:[workspace]
+2:members = [
+4:    "raster",
+5:    "raster_characteristics",
+6:    "sbs_map",
+
+# oxidized-rasterstats build + pyo3
+/home/workdir/oxidized-rasterstats/pyproject.toml:2:requires = ["maturin>=1.12,<2.0"]
+/home/workdir/oxidized-rasterstats/pyproject.toml:3:build-backend = "maturin"
+/home/workdir/oxidized-rasterstats/pyproject.toml:44:[tool.maturin]
+/home/workdir/oxidized-rasterstats/pyproject.toml:47:features = ["pyo3/extension-module"]
+/home/workdir/oxidized-rasterstats/Cargo.toml:13:pyo3 = { version = "0.22", features = ["extension-module"] }
