@@ -183,11 +183,15 @@ class TerrainConfig:
         # "breach"             – breach only (aggressive, can cross basins)
         # "breach_least_cost"  – breach with search distance limit
         # "bounded_breach"     – fill → boundary → breach within boundary
-    blc_dist: int | None = None          # search distance for breach_least_cost
+    blc_dist_m: float | None = None      # max breach search distance (meters)
+    blc_max_cost: float | None = None    # max cumulative breach cost (z-units)
+    blc_fill: bool = True                # fill pits that exceed cost/distance limits
+    bounded_breach_collar_m: float | None = None  # defaults to 10 * cellsize
 
     # ── Culvert Enforcement ────────────────────────────────────────
-    culvert_source: str | None = None    # "upload", "auto_intersect", None
-    culvert_path: str | None = None      # uploaded culvert point/line vector
+    enforce_culverts: bool = False       # LiDAR preset should set this True
+    culvert_source: str = "auto_intersect"  # "auto_intersect", "upload_points"
+    culvert_path: str | None = None      # uploaded culvert points (optional filter)
     culvert_method: str = "burn_streams_at_roads"
         # "burn_streams_at_roads" – WBT BurnStreamsAtRoads (Lindsay 2016)
         # "breakline"            – legacy perpendicular breakline burn
@@ -215,9 +219,10 @@ class TerrainConfig:
 
 - Assert DEM exists and is projected (UTM).
 - If `roads_source == "osm"`, assert boundary polygon available for bbox query.
-- If `culvert_source == "upload"`, assert file exists and contains point geometries.
-- If `conditioning == "bounded_breach"`, ensure outlet info is available (need a
-  preliminary boundary to constrain the breach).
+- If `enforce_culverts`, assert roads are available from Phase 1.
+- If `culvert_source == "upload_points"`, assert file exists and contains point geometries.
+- If `conditioning == "bounded_breach"` and `outlet_mode != "auto"`, ensure outlet
+  info is available (auto mode can derive a preliminary outlet).
 
 ### Phase 1: DEM Preparation
 
@@ -238,7 +243,7 @@ raw DEM
 ```
 
 Steps update `self._dem` so subsequent phases see the prepared version.
-A `dem_provenance: list[str]` tracks what was applied (for reproducibility
+A `dem_provenance: list[dict[str, Any]]` tracks what was applied (for reproducibility
 metadata in NoDb).
 
 When `roads_source == "osm"`, road acquisition delegates to a separate
@@ -252,8 +257,8 @@ hit the cache rather than Overpass. See "OSM Roads Module" below.
 The flow stack subgraph (reusable, called once or twice):
 
 ```
-_derive_flow_stack():
-    _create_relief()           → relief.tif
+_derive_flow_stack(dem_input, conditioning):
+    _create_relief(dem_input)  → relief.tif
     _create_flow_vector()      → flovec.tif
     _create_flow_accumulation()→ floaccum.tif
     _extract_streams()         → netful.tif
@@ -274,12 +279,12 @@ surface drainage information within those areas.
 Produces more realistic flow paths but can breach into adjacent basins on
 high-relief terrain.
 
-**`"breach_least_cost"`** – `wbt.breach_depressions_least_cost(dist=blc_dist)`.
+**`"breach_least_cost"`** – `wbt.breach_depressions_least_cost(dist=blc_dist_m)`.
 Lindsay & Dhun (2015) least-cost path algorithm. The `dist` parameter
-(`d_max` in the paper) controls maximum breach search distance in grid
-cells. The paper recommends iterative runs with increasing `d_max` (5, 50,
-150, 750, 1500 cells) followed by a final fill for unresolvable pits. The
-WBT tool handles this internally. Set `--max_cost` based on expected
+(`d_max` in the paper) controls maximum breach search distance. The paper's
+examples are in grid cells (5, 50, 150, 750, 1500 cells); TerrainProcessor
+stores `blc_dist_m` in meters for API consistency with existing emulator
+contracts and converts internally as needed. Set `--max_cost` based on expected
 maximum embankment height to prevent excessive trenching. Set `--fill true`
 to resolve pits exceeding cost/distance thresholds.
 
@@ -308,7 +313,7 @@ basins. The fill acts as a topographic fence.
 
 ### Phase 3: Culvert Enforcement (conditional, two-pass)
 
-Only executes when `culvert_source is not None`.
+Executes when `enforce_culverts` is true.
 
 Lindsay (2016, p.667) recommends `BurnStreamsAtRoads` as the conservative
 approach for LiDAR DEMs: burn only a short distance upstream/downstream of
@@ -329,10 +334,15 @@ the default.
     _find_road_stream_intersections() → culvert_points.geojson
     (requires roads from Phase 1 and streams from Phase 2)
 
+[if culvert_source == "upload_points"]
+    _load_culvert_points() → culvert_points_upload.geojson
+    _snap_culvert_points_to_stream_road_crossings() → culvert_points.geojson
+    (uploaded points constrain which crossings are enforced)
+
 [if culvert_method == "burn_streams_at_roads"]
     wbt.burn_streams_at_roads(
         dem=relief, streams=netful_vector,
-        roads=culvert_vector, width=culvert_road_width
+        roads=roads_vector, width=culvert_road_width
     ) → relief_burned.tif
 
 [if culvert_method == "breakline"]
@@ -340,7 +350,8 @@ the default.
     _burn_dem_along_breaklines() → relief_burned.tif
 
 # Re-derive flow stack from burned relief
-_derive_flow_stack()
+self._dem = relief_burned.tif
+_derive_flow_stack(dem_input=self._dem, conditioning="breach_least_cost")
 ```
 
 The re-derivation is the reason this is two-pass: the first flow stack
@@ -418,14 +429,16 @@ missing culverts, not missing roads. Recommended pipeline:
 
 1. (Optional) Smooth with `FeaturePreservingSmoothing` to reduce noise
    while retaining drainage features.
-2. `BurnStreamsAtRoads(dem, streams, roads, width)` — localized,
+2. Enable culvert enforcement (`enforce_culverts=True`,
+   `culvert_source="auto_intersect"` by default).
+3. `BurnStreamsAtRoads(dem, streams, roads, width)` — localized,
    elevation-aware road-crossing enforcement using local minimum
    elevation. Only modifies cells at stream-road intersections.
-3. `BreachDepressionsLeastCost(dem, dist, max_cost, fill=true)` —
+4. `BreachDepressionsLeastCost(dem, dist, max_cost, fill=true)` —
    cost-constrained depression removal for remaining natural depressions.
-   Lindsay (2015) recommends iterative runs with increasing `dist`
-   (e.g., 5, 50, 150, 750 cells) for large DEMs, though the WBT tool
-   handles this internally with a single `--dist` value.
+   Lindsay (2015) recommends iterative runs with increasing `dist` in cells
+   (e.g., 5, 50, 150, 750). TerrainProcessor stores `dist` in meters
+   (`blc_dist_m`) and converts using cell size.
 
 This replaces the Culvert_web_app's 4-step pipeline (create breaklines +
 fill roads + burn breaklines + unconstrained breach) with two tool calls
@@ -620,9 +633,12 @@ Step 1 – Conservative boundary via fill:
 
 Step 2 – Breach within boundary:
     # Mask the prepared DEM to the basin interior + a collar.
-    # The collar (e.g., 10 pixels) prevents edge artifacts from
+    # The collar defaults to 10 * cellsize unless overridden via
+    # bounded_breach_collar_m.
+    # It prevents edge artifacts from
     # breach trying to route flow off the masked edge.
-    collar_mask = dilate(boundary_mask, pixels=10)
+    collar_px = round((bounded_breach_collar_m or (10 * cellsize)) / cellsize)
+    collar_mask = dilate(boundary_mask, pixels=collar_px)
     masked_dem = where(collar_mask, prepared_dem, nodata)
 
     breached_interior = breach_depressions(masked_dem)
@@ -633,7 +649,7 @@ Step 3 – Composite:
     composite_dem = where(boundary_mask, breached_interior, filled_dem)
 
 Step 4 – Final flow stack from composite:
-    _derive_flow_stack(composite_dem)
+    _derive_flow_stack(dem_input=composite_dem, conditioning="breach_least_cost")
 ```
 
 The collar prevents the breach algorithm from hitting the artificial nodata
@@ -757,7 +773,7 @@ drainage feature.
 
 ## Provenance Tracking
 
-TerrainProcessor maintains a `provenance: list[dict]` recording each
+TerrainProcessor maintains a `provenance: list[dict[str, Any]]` recording each
 mutation applied to the DEM:
 
 ```
@@ -784,9 +800,8 @@ audit, reproducibility, and debugging.
 2. ~~**OSM road fetch caching.**~~ Resolved: separate OSM roads module
    with server-wide persistent cache. See "OSM Roads Module" section.
 
-3. **Bounded breach collar sizing.** The 10-pixel collar is a heuristic.
-   Should this be a config parameter, or derived from DEM resolution
-   (e.g., `collar_m / cellsize`)?
+3. ~~**Bounded breach collar sizing.**~~ Resolved: expose
+   `bounded_breach_collar_m` and default to `10 * cellsize` when unset.
 
 4. **Cross-section road profile parameters.** For the `"cross_section"`
    strategy, how much parameterization is appropriate? Forest road
