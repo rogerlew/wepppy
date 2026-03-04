@@ -143,6 +143,28 @@ When proactively scanning for vulnerabilities, check:
 - [ ] **Dependency CVEs**: no `pip-audit` or `safety` in CI; many deps use unpinned (`>=`) versions and git-branch deps without SHA pinning
 - [ ] **Docker image tags**: prod Compose defaults to `:latest` — verify pinned tags before deployment
 
+## Engineering Judgment Directives
+
+### Performance Orientation
+This codebase treats performance as a first-class constraint. The geospatial stack uses Rust acceleration (weppcloud-wbt, wepppyo3, oxidized-rasterstats, peridot) specifically because Python-only alternatives were measured and found inadequate. When reviewing proposals to add, replace, or evaluate dependencies in the geospatial/raster/hydrology pipeline:
+
+- Assume the existing Rust-accelerated path is the performance baseline.
+- Any proposed replacement must demonstrate equal or better throughput on representative WEPPpy workloads before integration work begins.
+- Marketing claims and institutional endorsements are not engineering evidence. Require reproducible benchmarks with parity assertions.
+- Check the precedent registry and evaluation gates in `docs/standards/dependency-evaluation-standard.md`.
+
+### Dependency Evaluation Gates
+Before recommending adoption of any new external dependency:
+
+1. Check the precedent registry in `docs/standards/dependency-evaluation-standard.md`.
+2. Verify the dependency does not duplicate capability already owned in the stack (see owned-stack table in the standard).
+3. Quantify the dependency tax: transitive deps, churn risk, framework lock-in, build complexity.
+4. For performance-critical paths: require benchmark evidence before recommending adoption, not after.
+5. If the proposal originates from stakeholder or institutional request, produce a scoped evaluation work package rather than integrating speculatively.
+
+### Precedent: raster_tools evaluation (2026-03)
+Stakeholders requested evaluation of `raster_tools` (USDA RMRS). Cross-walk and benchmarks showed 17-323x slower than existing stack across reprojection, clipping, and zonal statistics. Recommendation: defer. Full evidence: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/adoption_recommendation.md`
+
 ## Document Map
 
 | Document | Audience | Purpose |

@@ -32,7 +32,7 @@
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.
-- Current work-package active ExecPlan: `none`.
+- Current work-package active ExecPlan: `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/prompts/active/raster_tools_crosswalk_benchmark_execplan.md`.
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.
@@ -45,6 +45,13 @@
 - Prefer the smallest fix that resolves the confirmed failing path.
 - State assumptions explicitly in change notes before broadening behavior.
 - Add regression coverage for the exact failure mode.
+
+## Dependency and Performance Discipline (Required)
+- Before recommending or integrating a new external dependency, run the precedent check and evaluation gates in `docs/standards/dependency-evaluation-standard.md`.
+- For geospatial/raster/hydrology/climate/model execution paths, treat `weppcloud-wbt`, `wepppyo3`, `oxidized-rasterstats`, and `peridot` as the performance baseline.
+- Do not propose pure-Python replacements for those paths without benchmark and parity evidence on WEPPpy-representative workloads.
+- Treat marketing claims and institutional endorsements as hypotheses; route unproven proposals to a scoped evaluation work package before integration.
+- Preserve "Own the Stack": prefer extending owned components over adding external dependencies that duplicate existing capability.
 
 ## Repository Contracts
 - Canonical RQ response and error payload contract: `docs/schemas/rq-response-contract.md`.

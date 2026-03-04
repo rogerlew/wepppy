@@ -1,6 +1,6 @@
 # WEPPpy Architecture Guide
 
-> Last Modified: 2026-02-09
+> Last Modified: 2026-03-04
 > Maintained by: Codex
 > Development-focused architecture reference for contributors and coding agents.
 
@@ -53,6 +53,12 @@ Go services
 | Telemetry proxies | `services/status2`, `services/preflight2` | Go | Redis pub/sub to WebSocket fan-out |
 | Rust acceleration | `/workdir/wepppyo3`, `/workdir/peridot`, `/workdir/weppcloud-wbt` | Rust/PyO3 | Raster ops, watershed abstraction, delineation performance |
 | Model binaries | `/workdir/wepp-forest`, `/workdir/wepp-forest-revegetation`, `/workdir/wepppy2` | Fortran + wrappers | Core WEPP simulation executables and runner integration |
+
+### Design Rationale: Rust Acceleration Layer
+
+The Rust acceleration layer exists because Python-only alternatives underperformed on production-style WEPPpy workloads. Recent evaluations (including the raster_tools crosswalk benchmark package) measured Python paths from 8x to 323x slower on overlapping tasks, with substantial memory/I/O penalties in key flows.
+
+For geospatial/raster/hydrology tooling decisions, benchmark proposals against the current owned components (`weppcloud-wbt`, `wepppyo3`, `oxidized-rasterstats`, `peridot`) rather than against the Python libraries those components replaced. Evaluation gates and precedent registry live in `docs/standards/dependency-evaluation-standard.md`.
 
 ## State Model
 
