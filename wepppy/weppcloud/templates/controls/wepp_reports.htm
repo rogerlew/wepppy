@@ -158,14 +158,12 @@
              rel="noopener">
             Average Annual Report
           </a>
-          {% if user.has_role('PowerUser') %}
           <a class="wc-link wc-link--file"
              href="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config) }}"
              target="_blank"
              rel="noopener">
             Yearly Report
           </a>
-          {% endif %}
           <a class="wc-link wc-link--file"
              href="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config) }}"
              target="_blank"
