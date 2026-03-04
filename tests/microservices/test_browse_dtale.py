@@ -1,8 +1,10 @@
 import importlib
+import base64
 import json
 from pathlib import Path
 
 import pandas as pd
+import pyarrow as pa
 import pytest
 
 TestClient = pytest.importorskip("starlette.testclient").TestClient
@@ -363,3 +365,145 @@ def test_dtale_open_falls_back_to_config_subdir(tmp_path: Path, monkeypatch, loa
     assert response.status_code == 303
     assert response.headers["location"] == "/weppcloud/dtale/main/xyz789"
     assert captured["json"]["path"] == "landuse/landuse.parquet"
+
+
+def _encode_filter_payload(payload: dict) -> str:
+    raw = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+
+
+def test_dtale_open_forwards_parquet_filter_payload(tmp_path: Path, monkeypatch, load_browse):
+    df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
+    data_dir = tmp_path / "wepp" / "output"
+    data_dir.mkdir(parents=True)
+    df.to_parquet(data_dir / "output.parquet")
+
+    browse = load_browse(
+        DTALE_SERVICE_URL="http://dtale-service",
+        DTALE_INTERNAL_TOKEN="secret-token",
+        SITE_PREFIX="/weppcloud",
+        BROWSE_PARQUET_FILTERS_ENABLED="1",
+    )
+    monkeypatch.setattr(browse, "get_wd", lambda runid: str(tmp_path))
+
+    captured = {}
+
+    class DummyResponse:
+        status_code = 200
+        text = ""
+
+        @staticmethod
+        def json():
+            return {"url": "/weppcloud/dtale/main/filter123"}
+
+    class DummyClient:
+        def __init__(self, *args, **kwargs):
+            _ = (args, kwargs)
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            _ = (exc_type, exc, tb)
+            return False
+
+        async def post(self, url, json=None, headers=None):
+            captured["url"] = url
+            captured["json"] = json
+            captured["headers"] = headers
+            return DummyResponse()
+
+    import wepppy.microservices.browse.dtale as dtale_mod
+
+    monkeypatch.setattr(dtale_mod.httpx, "AsyncClient", lambda *args, **kwargs: DummyClient(*args, **kwargs))
+
+    pqf = _encode_filter_payload(
+        {
+            "kind": "condition",
+            "field": "a",
+            "operator": "GreaterThan",
+            "value": "1",
+        }
+    )
+
+    app = browse.create_app()
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/run-3/default/dtale/wepp/output/output.parquet?pqf={pqf}")
+
+    if response.status_code == 404:
+        pytest.skip("D-Tale loader unavailable in test environment")
+    assert response.status_code == 303
+    assert captured["url"] == "http://dtale-service/internal/load"
+    assert captured["json"]["pqf"] == pqf
+
+
+def test_dtale_loader_uses_distinct_dataset_ids_for_distinct_filters(
+    tmp_path: Path,
+    monkeypatch,
+    load_dtale_service,
+):
+    module = load_dtale_service(
+        DTALE_INTERNAL_TOKEN="",
+        SITE_PREFIX="/weppcloud",
+        HOST="127.0.0.1",
+        PORT="9010",
+        BROWSE_PARQUET_FILTERS_ENABLED="1",
+    )
+    target_module = module if hasattr(module, "get_wd") else module.dtale
+
+    df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
+    data_path = tmp_path / "table.parquet"
+    df.to_parquet(data_path, index=False)
+
+    monkeypatch.setattr(target_module, "get_wd", lambda runid: str(tmp_path))
+    monkeypatch.setattr(target_module, "BROWSE_PARQUET_FILTERS_ENABLED", True)
+    monkeypatch.setattr(target_module, "_ensure_geojson_assets", lambda *args, **kwargs: None)
+    monkeypatch.setattr(target_module.global_state, "contains", lambda data_id: False)
+    monkeypatch.setattr(target_module.global_state, "cleanup", lambda data_id: None)
+
+    init_calls = {"count": 0}
+
+    class DummyInstance:
+        def build_main_url(self):
+            return "/weppcloud/dtale/main/demo"
+
+    def _fake_initialize(data_id, display_name, frame):
+        _ = (data_id, display_name, frame)
+        init_calls["count"] += 1
+        return DummyInstance()
+
+    monkeypatch.setattr(target_module, "_initialize_dtale_dataset", _fake_initialize)
+    monkeypatch.setattr(
+        target_module,
+        "query_filtered_parquet_export",
+        lambda path, compiled, max_rows: pa.Table.from_pandas(df[df["a"] > 1]),
+    )
+    monkeypatch.setattr(
+        target_module,
+        "compile_filter_payload_for_path",
+        lambda path, payload: object(),
+    )
+
+    payload_a = _encode_filter_payload(
+        {"kind": "condition", "field": "a", "operator": "GreaterThan", "value": "1"}
+    )
+    payload_b = _encode_filter_payload(
+        {"kind": "condition", "field": "a", "operator": "GreaterThan", "value": "0"}
+    )
+
+    app = getattr(target_module, "app", getattr(module, "app", None))
+    assert app is not None
+    with app.test_client() as client:
+        first = client.post(
+            "/internal/load",
+            json={"runid": "run-1", "config": "default", "path": "table.parquet", "pqf": payload_a},
+        )
+        second = client.post(
+            "/internal/load",
+            json={"runid": "run-1", "config": "default", "path": "table.parquet", "pqf": payload_b},
+        )
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert init_calls["count"] == 2
+    assert first.get_json()["data_id"] != second.get_json()["data_id"]

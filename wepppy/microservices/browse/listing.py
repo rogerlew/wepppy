@@ -291,6 +291,13 @@ def _pattern_sql_prefilter(pattern: str) -> tuple[str | None, list[str]]:
     return "name LIKE ? ESCAPE '\\'", [f"{escaped_prefix}%"]
 
 
+def _append_query_params(url: str, params: dict[str, str] | None) -> str:
+    if not params:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode(params)}"
+
+
 def _manifest_get_page_entries(
     root_wd: str,
     directory: str,
@@ -792,6 +799,10 @@ async def html_dir_list(
         request_path = request_path.rsplit("/", 1)[0]
 
     query_suffix = f"?{urlencode(base_query)}" if base_query else ""
+    parquet_filter_query = {}
+    pqf_value = base_query.get("pqf")
+    if pqf_value:
+        parquet_filter_query["pqf"] = pqf_value
 
     def _default_order_for_field(field: str) -> str:
         if field == "name":
@@ -837,6 +848,7 @@ async def html_dir_list(
         ts_pad = get_pad(name_col_width - len(_file))
         last_modified_time = entry[2]
         _tree_char = "├└"[i == len(page_entries) - 1]
+        row_html = ""
 
         if is_dir:
             file_link = _join(request_path, _file)
@@ -847,7 +859,7 @@ async def html_dir_list(
             dir_href = f"{file_link}/"
             if query_suffix:
                 dir_href = f"{dir_href}{query_suffix}"
-            s.append(
+            row_html = (
                 _padding
                 + f'{_tree_char} <a href="{dir_href}"><b>{_file}{ts_pad}</b></a>{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}  \n'
             )
@@ -860,20 +872,34 @@ async def html_dir_list(
             unit = size_tokens[1] if len(size_tokens) > 1 else ""
             dl_pad = get_pad(6 - len(unit))
             dl_link = "          "
+            dl_url = None
             symlink_is_dir = entry[6] if len(entry) > 6 else False
             if not symlink_is_dir:
                 dl_url = _join(request_path, _file).replace("/browse/", "/download/")
                 dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
             file_lower = _file.lower()
+            is_parquet_file = file_lower.endswith((".parquet", ".pq"))
+            parquet_link_attrs = ''
+            if is_parquet_file:
+                file_link = _append_query_params(file_link, parquet_filter_query)
+                parquet_link_attrs = ' data-parquet-link="1"'
+                if dl_url is not None:
+                    dl_url = _append_query_params(dl_url, parquet_filter_query)
+                    dl_link = f'{dl_pad}<a href="{dl_url}"{parquet_link_attrs}>download</a>'
             gl_link = "      "
             if file_lower.endswith((".arc", ".tif", ".img", ".nc")):
                 gl_url = _join(request_path, _file).replace("/browse/", "/gdalinfo/")
                 gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
-            if file_lower.endswith(".parquet"):
-                gl_url = _join(request_path, _file).replace("/browse/", "/download/") + "?as_csv=1"
-                gl_link = f'  <a href="{gl_url}">.csv</a>'
+            if is_parquet_file:
+                gl_url = _join(request_path, _file).replace("/browse/", "/download/")
+                csv_query = {"as_csv": "1"}
+                if pqf_value:
+                    csv_query["pqf"] = pqf_value
+                gl_url = _append_query_params(gl_url, csv_query)
+                gl_link = f'  <a href="{gl_url}"{parquet_link_attrs}>.csv</a>'
             repr_link = "           "
             dtale_link = "          "
+            schema_link = "          "
             if file_lower.endswith(".man") or file_lower.endswith(".sol"):
                 repr_url = _join(request_path, _file) + "?repr=1"
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
@@ -890,7 +916,19 @@ async def html_dir_list(
                 or file_lower.endswith(".pickle")
             ):
                 dtale_url = _join(request_path, _file).replace("/browse/", "/dtale/")
-                dtale_link = f'  <a href="{dtale_url}">d-tale</a>'
+                if is_parquet_file:
+                    dtale_url = _append_query_params(dtale_url, parquet_filter_query)
+                    dtale_link = f'  <a href="{dtale_url}"{parquet_link_attrs}>d-tale</a>'
+                else:
+                    dtale_link = f'  <a href="{dtale_url}">d-tale</a>'
+            if is_parquet_file:
+                schema_url = _join(request_path, _file).replace("/browse/", "/schema/")
+                panel_id = f"parquet-schema-panel-{i}"
+                schema_link = (
+                    f'  <a href="{schema_url}"'
+                    f' data-parquet-schema-link="1" data-schema-url="{schema_url}"'
+                    f' data-schema-target="{panel_id}" aria-expanded="false">schema</a>'
+                )
 
             diff_link = "    "
             if diff_wd and not file_lower.endswith((".tif", ".parquet", ".gz", ".img")):
@@ -900,14 +938,15 @@ async def html_dir_list(
                     if query_suffix:
                         diff_url = f"{diff_url}{query_suffix}"
                     diff_link = f'  <a href="{diff_url}">diff</a>'
-            s.append(
+            row_html = (
                 _padding
-                + f'{_tree_char} <a href="{file_link}">{_file}{ts_pad}</a>{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{dtale_link}{diff_link}{sym_target}\n'
+                + f'{_tree_char} <a href="{file_link}"{parquet_link_attrs}>{_file}{ts_pad}</a>{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{dtale_link}{schema_link}{diff_link}{sym_target}\n'
             )
 
         if i % 2:
-            s[-1] = f'<span class="even-row">{s[-1]}</span>'
+            row_html = f'<span class="even-row">{row_html}</span>'
         else:
-            s[-1] = f'<span class="odd-row">{s[-1]}</span>'
+            row_html = f'<span class="odd-row">{row_html}</span>'
+        s.append(row_html)
 
     return "".join(s), total_items, using_manifest

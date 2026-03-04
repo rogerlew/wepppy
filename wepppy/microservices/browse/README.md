@@ -41,17 +41,38 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 | Route | What it does | Notable query params |
 |-------|---------------|----------------------|
 | `/weppcloud/runs/{runid}/{config}/browse/` | Top-level directory view with pagination and filters. | `page` (1-based start index), shell-style wildcard filter (`../output/p1.*`), `diff={runid}` to show diff links against another run. |
-| `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables (pandas), and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet/CSV viewers expose convenience links (pivot, CSV). |
-| `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Converts parquet to CSV when `?as_csv=1`. | `as_csv=1` for parquet conversion. |
-| `/weppcloud/runs/{runid}/{config}/dtale/{subpath}` | Loads parquet/CSV/TSV/feather/pickle into the D-Tale service and redirects to the D-Tale dataset URL. | *(no additional options)* |
+| `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables (pandas), and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet viewers additionally accept `pqf=<base64url-json-filter>`. |
+| `/weppcloud/runs/{runid}/{config}/schema/{subpath}` | Returns parquet column metadata for browse row-level schema preview. | *(no additional options; parquet files only)* |
+| `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Converts parquet to CSV when `?as_csv=1`. | `as_csv=1` for parquet conversion; parquet targets also accept `pqf=<...>` for filtered parquet/CSV output. |
+| `/weppcloud/runs/{runid}/{config}/dtale/{subpath}` | Loads parquet/CSV/TSV/feather/pickle into the D-Tale service and redirects to the D-Tale dataset URL. | Parquet targets accept `pqf=<...>` when filter feature flag is enabled. |
 | `/weppcloud/runs/{runid}/{config}/aria2c.spec` | Generates an aria2c manifest for pulling the entire run. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/{subpath}` | Returns `gdalinfo -json` for a raster file. | *(no additional options)* |
 | `/weppcloud/culverts/{uuid}/browse/{subpath}` | Browse culvert grouped-run artifacts. | *(same viewer params as run browse)* |
+| `/weppcloud/culverts/{uuid}/schema/{subpath}` | Returns parquet column metadata for culvert browse rows. | *(no additional options; parquet files only)* |
 | `/weppcloud/culverts/{uuid}/download/{subpath}` | Download culvert grouped-run artifacts. | `as_csv=1` for parquet conversion. |
 | `/weppcloud/batch/{batch_name}/browse/{subpath}` | Browse batch grouped-run artifacts. | *(same viewer params as run browse)* |
+| `/weppcloud/batch/{batch_name}/schema/{subpath}` | Returns parquet column metadata for batch browse rows. | *(no additional options; parquet files only)* |
 | `/weppcloud/batch/{batch_name}/download/{subpath}` | Download batch grouped-run artifacts. | `as_csv=1` for parquet conversion. |
 
 All routes honor the site prefix automatically (default `/weppcloud`). If the service is deployed behind another prefix, set `SITE_PREFIX` in the environment.
+
+## Parquet quick-look filters
+- Feature flag: set `BROWSE_PARQUET_FILTERS_ENABLED=1` to enable parquet filter handling in browse, download/CSV, and D-Tale bridge flows.
+- Preview cap: `BROWSE_PARQUET_PREVIEW_LIMIT` (default `500`) limits parquet browse preview rows when `pqf` is active.
+- Export cap: `BROWSE_PARQUET_EXPORT_MAX_ROWS` (default `2000000`) limits filtered parquet/CSV export rows.
+- Query parameter: `pqf` is URL-safe base64 JSON with this tree contract:
+  - Group node: `{"kind":"group","logic":"AND"|"OR","children":[...]}`
+  - Condition node: `{"kind":"condition","field":"<string>","operator":"Equals|NotEquals|Contains|GreaterThan|LessThan","value":"<string>"}`
+- Validation limits: max depth `6`, max nodes `50`, field length `128`, value length `512`.
+- Operator semantics:
+  - `Contains` is case-insensitive.
+  - `GreaterThan` and `LessThan` are numeric-only.
+  - Numeric comparisons gracefully exclude missing/`NaN` values.
+- Error contract:
+  - Invalid payload/schema/operator -> HTTP `422`, `error.code = "validation_error"`.
+  - Valid filter matching zero rows in export flows -> HTTP `422`, `error.code = "no_rows_matched_filter"`.
+  - Filtered export exceeding configured row cap -> HTTP `413`, `error.code = "parquet_filter_row_limit_exceeded"`.
+- Cross-reference: `docs/schemas/weppcloud-browse-parquet-filter-contract.md`.
 
 ## Auth policy
 - Canonical policy: [`docs/schemas/weppcloud-browse-auth-contract.md`](../../../docs/schemas/weppcloud-browse-auth-contract.md).

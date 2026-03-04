@@ -48,6 +48,11 @@ from plotly import graph_objs as go
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from wepppy.config.secrets import get_secret
+from wepppy.microservices.parquet_filters import (
+    ParquetFilterError,
+    compile_filter_payload_for_path,
+    query_export as query_filtered_parquet_export,
+)
 from wepppy.nodb.core.watershed import Watershed
 
 try:
@@ -98,6 +103,7 @@ MAX_FILE_MB = float(os.getenv("DTALE_MAX_FILE_MB", "512"))
 MAX_ROWS = int(os.getenv("DTALE_MAX_ROWS", "0"))
 ALLOW_CELL_EDITS = os.getenv("DTALE_ALLOW_CELL_EDITS", "0").lower() in {"1", "true", "yes"}
 DTALE_THEME = os.getenv("DTALE_THEME", "light")
+BROWSE_PARQUET_FILTERS_ENABLED = os.getenv("BROWSE_PARQUET_FILTERS_ENABLED", "0").lower() in {"1", "true", "yes", "on"}
 
 global_state.set_app_settings(
     {
@@ -754,6 +760,10 @@ def _build_instance_response(data_id: str, instance: DtaleData, meta: DatasetMet
     )
 
 
+def _parquet_filter_error_response(err: ParquetFilterError):
+    return jsonify(err.to_payload()), err.status_code
+
+
 @app.post("/internal/load")
 def load_into_dtale():
     """Load the requested run-relative file into D-Tale and return viewer metadata."""
@@ -762,9 +772,22 @@ def load_into_dtale():
     runid = payload.get("runid", "").strip()
     config = (payload.get("config") or "").strip()
     rel_path = payload.get("path", "").strip()
+    raw_pqf_value = payload.get("pqf")
 
     if not runid or not rel_path:
         abort(400, description="Both runid and path are required.")
+
+    if raw_pqf_value is None:
+        raw_pqf = None
+    elif isinstance(raw_pqf_value, str):
+        raw_pqf = raw_pqf_value.strip() or None
+    else:
+        return _parquet_filter_error_response(
+            ParquetFilterError(
+                "Invalid parquet filter payload.",
+                details="Filter payload field 'pqf' must be a string.",
+            )
+        )
 
     rel_path = _normalize_rel(rel_path)
     wd, target = _resolve_target(runid, rel_path, config=config or None)
@@ -773,9 +796,19 @@ def load_into_dtale():
         if size_mb > MAX_FILE_MB:
             abort(413, description=f"File size {size_mb:.1f} MB exceeds limit ({MAX_FILE_MB:.0f} MB).")
 
+    parquet_filter_active = (
+        BROWSE_PARQUET_FILTERS_ENABLED
+        and bool(raw_pqf)
+        and target.suffix.lower() in {".parquet", ".pq"}
+    )
+    filter_cache_scope = raw_pqf if parquet_filter_active else ""
+    dataset_scope = f"{rel_path}::pqf::{filter_cache_scope}" if filter_cache_scope else rel_path
+
     fingerprint = _fingerprint(target)
-    data_id = _make_dataset_id(runid, config, rel_path)
+    data_id = _make_dataset_id(runid, config, dataset_scope)
     display_name = f"{runid}/{config}/{rel_path}" if config else f"{runid}/{rel_path}"
+    if parquet_filter_active:
+        display_name = f"{display_name} [filtered]"
     display_name = display_name.strip("/")[:120]
 
     _ensure_geojson_assets(runid, wd, data_id)
@@ -805,7 +838,19 @@ def load_into_dtale():
         return _build_instance_response(data_id, instance, meta)
 
     try:
-        df = _load_dataframe(target)
+        if parquet_filter_active:
+            compiled = compile_filter_payload_for_path(target, raw_pqf)
+            max_rows = MAX_ROWS if MAX_ROWS > 0 else 0
+            filtered_table = query_filtered_parquet_export(
+                target,
+                compiled,
+                max_rows=max_rows,
+            )
+            df = _postprocess_dataframe(filtered_table.to_pandas())
+        else:
+            df = _load_dataframe(target)
+    except ParquetFilterError as err:
+        return _parquet_filter_error_response(err)
     except Exception as exc:  # pragma: no cover - surface full error to caller
         logger.exception("Failed to load %s", target)
         abort(500, description=str(exc))

@@ -1,4 +1,6 @@
 import importlib
+import base64
+import json
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
@@ -36,6 +38,11 @@ def load_browse(monkeypatch):
 def _write_file(path: Path, contents: str = "demo") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(contents)
+
+
+def _encode_filter_payload(payload: dict) -> str:
+    raw = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
 
 
 @pytest.fixture
@@ -204,3 +211,179 @@ def test_markdown_renderer_failure_falls_back_to_text_template(
     assert "<article class=\"markdown-body\">" not in response.text
     assert "<pre>" in response.text
     assert "# Heading" in response.text
+
+
+def test_parquet_preview_contains_case_insensitive_filter(tmp_path: Path, load_run_browse):
+    runid = "run-parquet-filter-contains"
+    config = "cfg"
+    run_root = tmp_path / runid
+    run_root.mkdir(parents=True, exist_ok=True)
+    df = pytest.importorskip("pandas").DataFrame({"name": ["Alice", "bob"], "value": [1, 2]})
+    df.to_parquet(run_root / "table.parquet")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        BROWSE_PARQUET_FILTERS_ENABLED="1",
+    )
+    app = browse.create_app()
+
+    pqf = _encode_filter_payload(
+        {
+            "kind": "condition",
+            "field": "name",
+            "operator": "Contains",
+            "value": "AL",
+        }
+    )
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/table.parquet?pqf={pqf}")
+
+    assert response.status_code == 200
+    assert "Alice" in response.text
+    assert "bob" not in response.text
+    assert "Parquet filter active" in response.text
+
+
+def test_parquet_preview_under_nodir_root_renders_html_table(tmp_path: Path, load_run_browse):
+    runid = "run-parquet-filter-nodir-root"
+    config = "cfg"
+    run_root = tmp_path / runid
+    parquet_dir = run_root / "watershed"
+    parquet_dir.mkdir(parents=True, exist_ok=True)
+    df = pytest.importorskip("pandas").DataFrame({"topaz_id": [23, 24], "value": [1, 2]})
+    df.to_parquet(parquet_dir / "hillslopes.parquet")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        BROWSE_PARQUET_FILTERS_ENABLED="1",
+    )
+    app = browse.create_app()
+
+    pqf = _encode_filter_payload(
+        {
+            "kind": "condition",
+            "field": "topaz_id",
+            "operator": "Equals",
+            "value": "23",
+        }
+    )
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed/hillslopes.parquet?pqf={pqf}")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "content-disposition" not in response.headers
+    assert "Parquet filter active" in response.text
+    assert ">23<" in response.text
+    assert ">24<" not in response.text
+
+
+def test_parquet_preview_numeric_filter_rejects_text_field(tmp_path: Path, load_run_browse):
+    runid = "run-parquet-filter-invalid"
+    config = "cfg"
+    run_root = tmp_path / runid
+    run_root.mkdir(parents=True, exist_ok=True)
+    df = pytest.importorskip("pandas").DataFrame({"name": ["Alice", "bob"], "value": [1, 2]})
+    df.to_parquet(run_root / "table.parquet")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        BROWSE_PARQUET_FILTERS_ENABLED="1",
+    )
+    app = browse.create_app()
+
+    pqf = _encode_filter_payload(
+        {
+            "kind": "condition",
+            "field": "name",
+            "operator": "GreaterThan",
+            "value": "1",
+        }
+    )
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/table.parquet?pqf={pqf}")
+
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert "numeric-only" in payload["error"]["details"]
+
+
+def test_directory_includes_parquet_filter_builder_and_parquet_link_attrs(tmp_path: Path, load_run_browse):
+    runid = "run-parquet-filter-ui"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _write_file(run_root / "notes.txt", "hello")
+    df = pytest.importorskip("pandas").DataFrame({"name": ["A"], "value": [1]})
+    df.to_parquet(run_root / "table.parquet")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        BROWSE_PARQUET_FILTERS_ENABLED="1",
+    )
+    app = browse.create_app()
+
+    pqf = _encode_filter_payload(
+        {
+            "kind": "condition",
+            "field": "name",
+            "operator": "Equals",
+            "value": "A",
+        }
+    )
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/?pqf={pqf}")
+
+    assert response.status_code == 200
+    assert "parquet_filter_builder.js" in response.text
+    assert 'data-parquet-link="1"' in response.text
+    assert 'data-parquet-schema-link="1"' in response.text
+    assert f"/weppcloud/runs/{runid}/{config}/schema/table.parquet" in response.text
+    assert f"pqf={pqf}" in response.text
+
+
+def test_parquet_schema_endpoint_returns_column_metadata(tmp_path: Path, load_run_browse):
+    runid = "run-parquet-schema"
+    config = "cfg"
+    run_root = tmp_path / runid
+    run_root.mkdir(parents=True, exist_ok=True)
+    df = pytest.importorskip("pandas").DataFrame({"name": ["A"], "value": [1]})
+    df.to_parquet(run_root / "table.parquet")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/schema/table.parquet")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["path"] == "table.parquet"
+    assert [column["name"] for column in payload["columns"]] == ["name", "value"]
+    assert all(column.get("type") for column in payload["columns"])
+
+
+def test_parquet_schema_endpoint_rejects_non_parquet_paths(tmp_path: Path, load_run_browse):
+    runid = "run-parquet-schema-invalid"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _write_file(run_root / "notes.txt", "hello")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/schema/notes.txt")
+
+    assert response.status_code == 400
+    assert "only available for parquet files" in response.text

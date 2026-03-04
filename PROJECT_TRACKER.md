@@ -79,6 +79,39 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### OSM Roads Client with Persistent Server-Side Cache
+**Proposed**: 2026-03-04  
+**Size**: High (1-2 weeks)  
+**Priority**: High  
+**Status**: Scoped - Ready to Start  
+**Package**: [docs/work-packages/20260304_osm_roads_client_cache/](docs/work-packages/20260304_osm_roads_client_cache/)  
+**Description**: Build a production-grade WEPPpy OSM roads module with deterministic request contract, persistent server-wide cache, and lock-safe Overpass fetch/refresh behavior for terrain preprocessing consumers.
+
+**Scope**:
+- Implement `wepppy/topo/osm_roads/` module contract (`OSMRoadsRequest`, `OSMRoadsResult`, service interface, typed errors).
+- Implement file-backed persistent cache (SQLite metadata index + GeoParquet payloads), key canonicalization, TTL policy, and stale-on-error semantics.
+- Implement per-key single-flight locking to prevent duplicate upstream fetches under concurrent requests.
+- Implement Overpass query/normalize pipeline with AOI clipping and target-CRS reprojection.
+- Add tests for keying, lock behavior, TTL state transitions, reprojection, and consumer-path integration.
+
+**Strategic Value**:
+- Eliminates redundant Overpass traffic across runs/users.
+- Enables reliable `roads_source=\"osm\"` workflows for terrain conditioning and road embankment synthesis.
+- Improves operational resilience via persistent cache reuse and stale-on-error policy.
+- Keeps WEPPpy in control of cache/locking semantics without introducing speculative runtime dependencies.
+
+**Dependencies**:
+- Terrain OSM cache direction in `wepppy/topo/wbt/terrain_processor.concept.md`
+- Root dependency/performance discipline in `AGENTS.md`
+- Existing WEPPpy geospatial stack and test infrastructure
+
+**Next Steps**:
+1. Implement Milestone 1/2 module and cache scaffold from active ExecPlan.
+2. Implement Overpass + normalization + clip/reproject pipeline.
+3. Add consumer integration and full validation suite.
+
+---
+
 ### RQ-Engine Agent Usability and Documentation Hardening
 **Proposed**: 2026-02-08  
 **Size**: Medium (1-2 weeks)  
@@ -314,6 +347,29 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Browse Parquet Quick-Look Filter Builder
+**Completed**: 2026-03-04  
+**Duration**: 1 day  
+**Status**: ✅ **COMPLETE** (functional milestones complete; broad-exception enforcement drift recorded for separate follow-up scope)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260304_browse_parquet_quicklook_filters/](docs/work-packages/20260304_browse_parquet_quicklook_filters/)  
+**Description**: Added bounded, shared parquet filter contract and integrated it across browse HTML preview, filtered parquet download, filtered CSV export, and D-Tale launch with a browse-side filter builder UI.
+
+**Outcome**: Requester semantics are implemented and covered by regression tests:
+- `download` returns filtered parquet when filter state is active.
+- `Contains` is case-insensitive.
+- `GreaterThan`/`LessThan` are numeric-only and exclude missing/`NaN` rows.
+- UI operator uses select controls with nested group/condition builder and parquet-link `pqf` propagation.
+
+**Deliverables**:
+- ✅ Shared filter module: `wepppy/microservices/parquet_filters.py`
+- ✅ Browse integrations: `flow.py`, `listing.py`, `_download.py`, `dtale.py`, `browse.py`
+- ✅ D-Tale loader integration: `wepppy/webservices/dtale/dtale.py`
+- ✅ UI integration: browse templates + `wepppy/weppcloud/static/js/parquet_filter_builder.js`
+- ✅ Regression tests: `test_parquet_filters.py`, plus updates to `test_browse_routes.py`, `test_download.py`, `test_browse_dtale.py`
+- ✅ Docs updates: browse README + `docs/schemas/weppcloud-browse-parquet-filter-contract.md`
+- ✅ Validation artifact: `docs/work-packages/20260304_browse_parquet_quicklook_filters/artifacts/20260304_e2e_validation_results.md`
 
 ### Raster Tools Cross-Walk and Benchmark Evaluation
 **Completed**: 2026-03-04

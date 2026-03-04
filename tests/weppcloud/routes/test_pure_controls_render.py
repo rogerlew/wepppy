@@ -163,3 +163,31 @@ def test_interchange_advanced_template_renders_delete_after_interchange_checkbox
     assert "Delete raw WEPP outputs after successful interchange conversion" in rendered
     assert 'id="delete_after_interchange"' in rendered
     assert "checked" in rendered
+
+
+def test_poweruser_panel_parquet_table_links_do_not_append_trailing_slash(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/poweruser_panel.htm")
+
+    def _url_for_run(endpoint: str, **values) -> str:
+        if endpoint != "browse.browse_tree":
+            return f"/mock/{endpoint}"
+        subpath = (values.get("subpath") or "").lstrip("/")
+        base = f"/weppcloud/runs/{values['runid']}/{values['config']}/browse/"
+        return f"{base}{subpath}" if subpath else base
+
+    rendered = template.render(
+        url_for_run=_url_for_run,
+        runid="test-run",
+        config="test-config",
+        browse_watershed_hillslopes_parquet="watershed/hillslopes.parquet",
+        browse_watershed_channels_parquet="watershed/channels.parquet",
+        browse_landuse_parquet="landuse/landuse.parquet",
+        browse_soils_parquet="soils/soils.parquet",
+    )
+
+    assert 'href="/weppcloud/runs/test-run/test-config/browse/watershed/hillslopes.parquet"' in rendered
+    assert 'href="/weppcloud/runs/test-run/test-config/browse/watershed/channels.parquet"' in rendered
+    assert 'href="/weppcloud/runs/test-run/test-config/browse/landuse/landuse.parquet"' in rendered
+    assert 'href="/weppcloud/runs/test-run/test-config/browse/soils/soils.parquet"' in rendered

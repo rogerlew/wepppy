@@ -22,10 +22,13 @@ Routes
 ------
 - `/runs/{runid}/{config}/browse/`
 - `/runs/{runid}/{config}/browse/{subpath:path}`
+- `/runs/{runid}/{config}/schema/{subpath:path}`
 - `/culverts/{uuid}/browse/`
 - `/culverts/{uuid}/browse/{subpath:path}`
+- `/culverts/{uuid}/schema/{subpath:path}`
 - `/batch/{batch_name}/browse/`
 - `/batch/{batch_name}/browse/{subpath:path}`
+- `/batch/{batch_name}/schema/{subpath:path}`
 
 Key Behaviors
 --------------
@@ -70,6 +73,7 @@ from datetime import datetime
 from http import HTTPStatus
 
 import pandas as pd
+import pyarrow.parquet as pq
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
@@ -131,6 +135,11 @@ from wepppy.microservices.browse.security import (
     path_security_detail,
     validate_raw_subpath,
     validate_resolved_target,
+)
+from wepppy.microservices.parquet_filters import (
+    ParquetFilterError,
+    compile_filter_payload_for_path,
+    query_preview as _query_parquet_preview,
 )
 from wepppy.runtime_paths import (
     NoDirError,
@@ -573,12 +582,24 @@ def _env_truthy(key: str, *, default: bool = False) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _env_int(key: str, *, default: int) -> int:
+    raw = os.getenv(key)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
 # High-exposure service: do not return stack traces (or raw exception messages) by default.
 BROWSE_DEBUG_ERRORS = _env_truthy("BROWSE_DEBUG_ERRORS", default=False)
 
 # When enabled, append traceback text to `<wd>/exceptions.log`. Disabled by default because
 # run trees are browseable/exportable artifacts and should not collect debug payloads.
 BROWSE_WRITE_RUN_EXCEPTIONS_LOG = _env_truthy("BROWSE_WRITE_RUN_EXCEPTIONS_LOG", default=False)
+BROWSE_PARQUET_FILTERS_ENABLED = _env_truthy("BROWSE_PARQUET_FILTERS_ENABLED", default=False)
+BROWSE_PARQUET_PREVIEW_LIMIT = max(1, _env_int("BROWSE_PARQUET_PREVIEW_LIMIT", default=500))
 
 
 _logger = logging.getLogger(__name__)
@@ -651,6 +672,14 @@ def _generate_repr_content(path):
         raise
 
     return None
+
+
+def compile_parquet_filter_for_path(path: str, raw_payload: str):
+    return compile_filter_payload_for_path(path, raw_payload)
+
+
+def query_parquet_preview(path: str, compiled_filter, limit: int):
+    return _query_parquet_preview(path, compiled_filter, limit=limit)
 
 
 def _validate_filter_pattern(pattern):
@@ -1052,6 +1081,148 @@ _FILES_API_DEPENDENCIES = FilesApiDependencies(
 files_root, files_subpath = build_files_handlers(_FILES_API_DEPENDENCIES)
 
 
+def _nodir_target_path(nodir_target) -> str:
+    base = os.path.abspath(nodir_target.dir_path)
+    inner = (getattr(nodir_target, "inner_path", "") or "").strip("/")
+    if not inner:
+        return base
+    return os.path.abspath(os.path.join(base, inner))
+
+
+def _resolve_schema_target_path(
+    *,
+    wd: str,
+    subpath: str,
+    allow_recorder: bool,
+    is_admin: bool,
+) -> str:
+    subpath_value = subpath or ""
+    violation = validate_raw_subpath(subpath_value)
+    if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+        violation = None
+    if violation is not None:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail=path_security_detail(violation),
+        )
+
+    nodir_rel_path, _ = _extract_nodir_filter(subpath_value, default="")
+    if _allowlisted_raw_nodir_path(nodir_rel_path) is not None and not nodir_rel_path.endswith("/"):
+        nodir_rel_path = f"{nodir_rel_path}/"
+
+    try:
+        logical_rel_path, nodir_view = parse_external_subpath(
+            nodir_rel_path,
+            allow_admin_alias=is_admin,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Invalid path.",
+        ) from exc
+
+    nodir_root, _ = split_nodir_root(logical_rel_path)
+    if nodir_root is not None:
+        mixed_state = _is_mixed_nodir_root(wd, nodir_root)
+        if mixed_state and not is_admin:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail=f"{nodir_root} is in mixed state (dir + .nodir present)",
+            )
+
+        effective_view = nodir_view
+        if mixed_state and is_admin and nodir_view == "effective":
+            effective_view = "dir"
+
+        try:
+            nodir_target = nodir_resolve(wd, logical_rel_path, view=effective_view)
+        except NoDirError as err:
+            _raise_nodir_http_exception(err)
+        if nodir_target is None:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail="Path not found.",
+            )
+        return _nodir_target_path(nodir_target)
+
+    full_path = os.path.abspath(os.path.join(wd, subpath_value))
+    _assert_within_root(wd, full_path)
+    _assert_target_within_allowed_roots(wd, full_path, allow_recorder=allow_recorder)
+    return full_path
+
+
+def _read_parquet_schema(path: str) -> list[dict[str, str]]:
+    schema = pq.read_schema(path)
+    return [{"name": field.name, "type": str(field.type)} for field in schema]
+
+
+async def _handle_schema_request(
+    request: StarletteRequest,
+    runid: str,
+    config: str,
+    subpath: str,
+    *,
+    auth_context: AuthContext | None = None,
+    wd_override: str | Path | None = None,
+):
+    subpath_value = subpath or ""
+    context = auth_context
+    if context is None:
+        try:
+            context = authorize_run_request(
+                request,
+                runid=runid,
+                config=config,
+                subpath=subpath_value,
+                allow_public_without_token=True,
+                require_authenticated=False,
+                allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+            )
+        except BrowseAuthError as exc:
+            return handle_auth_error(
+                request,
+                runid=runid,
+                error=exc,
+                redirect_on_401=True,
+            )
+
+    if not subpath_value:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Schema path is required.",
+        )
+
+    path_lower = subpath_value.lower()
+    if not path_lower.endswith((".parquet", ".pq")):
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Schema preview is only available for parquet files.",
+        )
+
+    allow_recorder = bool(context and context.is_root)
+    is_admin = _is_admin_context(context)
+    wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
+    target_path = _resolve_schema_target_path(
+        wd=wd,
+        subpath=subpath_value,
+        allow_recorder=allow_recorder,
+        is_admin=is_admin,
+    )
+    if not os.path.isfile(target_path):
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Path not found.",
+        )
+
+    columns = await asyncio.to_thread(_read_parquet_schema, target_path)
+    return JSONResponse(
+        {
+            "path": subpath_value,
+            "columns": columns,
+        }
+    )
+
+
 async def _handle_browse_request(
     request: StarletteRequest,
     runid: str,
@@ -1238,6 +1409,68 @@ async def browse_subpath(request: StarletteRequest):
     return await _handle_browse_request(request, runid, config, subpath)
 
 
+async def schema_subpath(request: StarletteRequest):
+    runid = request.path_params["runid"]
+    config = request.path_params["config"]
+    subpath = request.path_params.get("subpath", "")
+    return await _handle_schema_request(request, runid, config, subpath)
+
+
+async def schema_culvert_subpath(request: StarletteRequest):
+    batch_uuid = request.path_params["uuid"]
+    subpath = request.path_params.get("subpath", "")
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_uuid,
+            subpath=subpath,
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+    batch_root = _resolve_culvert_batch_root(batch_uuid)
+    return await _handle_schema_request(
+        request,
+        runid=batch_uuid,
+        config="culvert-batch",
+        subpath=subpath,
+        auth_context=auth_context,
+        wd_override=batch_root,
+    )
+
+
+async def schema_batch_subpath(request: StarletteRequest):
+    batch_name = request.path_params["batch_name"]
+    subpath = request.path_params.get("subpath", "")
+    base_runid = _batch_base_runid(batch_name)
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_name,
+            subpath=subpath,
+            allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+            identifier_claim_aliases=(base_runid,),
+            allow_public_without_token=True,
+            public_runid=base_runid,
+        )
+    except BrowseAuthError as exc:
+        return handle_auth_error(
+            request,
+            runid=base_runid,
+            error=exc,
+            redirect_on_401=True,
+        )
+    batch_root = _resolve_batch_root(batch_name)
+    return await _handle_schema_request(
+        request,
+        runid=batch_name,
+        config="batch",
+        subpath=subpath,
+        auth_context=auth_context,
+        wd_override=batch_root,
+    )
+
+
 def health(_: StarletteRequest):
     return PlainTextResponse('OK')
 
@@ -1280,6 +1513,11 @@ def create_app():
             methods=['GET']
         ),
         Route(
+            '/weppcloud/runs/{runid}/{config}/schema/{subpath:path}',
+            schema_subpath,
+            methods=['GET']
+        ),
+        Route(
             '/weppcloud/culverts/{uuid}/browse/',
             browse_culvert_root,
             methods=['GET']
@@ -1295,6 +1533,11 @@ def create_app():
             methods=['GET']
         ),
         Route(
+            '/weppcloud/culverts/{uuid}/schema/{subpath:path}',
+            schema_culvert_subpath,
+            methods=['GET']
+        ),
+        Route(
             '/weppcloud/batch/{batch_name}/browse/',
             browse_batch_root,
             methods=['GET']
@@ -1307,6 +1550,11 @@ def create_app():
         Route(
             '/weppcloud/batch/{batch_name}/browse/{subpath:path}',
             browse_batch_subpath,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/batch/{batch_name}/schema/{subpath:path}',
+            schema_batch_subpath,
             methods=['GET']
         ),
         Route(

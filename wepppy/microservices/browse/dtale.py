@@ -51,6 +51,16 @@ DTALE_SUPPORTED_SUFFIXES = (
 _DTALE_HTTP_TIMEOUT = httpx.Timeout(60.0, connect=5.0)
 
 
+def _env_truthy(key: str, *, default: bool = False) -> bool:
+    raw = os.getenv(key)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+BROWSE_PARQUET_FILTERS_ENABLED = _env_truthy("BROWSE_PARQUET_FILTERS_ENABLED", default=False)
+
+
 def _nodir_error_payload(err: NoDirError) -> dict:
     return {
         'error': {
@@ -236,6 +246,9 @@ def build_handlers(
             'config': config,
             'path': dtale_rel_path,
         }
+        raw_pqf = (request.query_params.get('pqf') or '').strip()
+        if BROWSE_PARQUET_FILTERS_ENABLED and raw_pqf and rel_lower.endswith(('.parquet', '.pq')):
+            payload['pqf'] = raw_pqf
         headers = {}
         if _DTALE_INTERNAL_TOKEN:
             headers['X-DTALE-TOKEN'] = _DTALE_INTERNAL_TOKEN

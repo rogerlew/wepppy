@@ -199,7 +199,7 @@ wepp.cloud {
             }
         }
 
-        @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|files(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
+        @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|schema(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|files(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
         handle @browse_proxy {
             reverse_proxy browse:9009 {
                 transport http {
@@ -208,7 +208,7 @@ wepp.cloud {
             }
         }
 
-        @culvert_browse_proxy path_regexp culvert_browse_proxy ^/weppcloud/culverts/[^/]+/(?:browse(?:/.*)?|download(?:/.*)?|dtale(?:/.*)?|gdalinfo/.*)$
+        @culvert_browse_proxy path_regexp culvert_browse_proxy ^/weppcloud/culverts/[^/]+/(?:browse(?:/.*)?|schema(?:/.*)?|download(?:/.*)?|dtale(?:/.*)?|gdalinfo/.*)$
         handle @culvert_browse_proxy {
             reverse_proxy browse:9009 {
                 transport http {
@@ -217,7 +217,7 @@ wepp.cloud {
             }
         }
 
-        @batch_browse_proxy path_regexp batch_browse_proxy ^/weppcloud/batch/[^/]+/(?:browse(?:/.*)?|download(?:/.*)?|dtale(?:/.*)?|gdalinfo/.*)$
+        @batch_browse_proxy path_regexp batch_browse_proxy ^/weppcloud/batch/[^/]+/(?:browse(?:/.*)?|schema(?:/.*)?|download(?:/.*)?|dtale(?:/.*)?|gdalinfo/.*)$
         handle @batch_browse_proxy {
             reverse_proxy browse:9009 {
                 transport http {

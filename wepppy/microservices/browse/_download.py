@@ -15,6 +15,7 @@ from starlette.responses import FileResponse, PlainTextResponse, Response, Strea
 from starlette.routing import Route
 
 import pandas as pd
+import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepppy.config.secrets import get_secret
@@ -33,6 +34,11 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.microservices.parquet_filters import (
+    ParquetFilterError,
+    compile_filter_payload_for_path,
+    query_export,
+)
 from wepppy.runtime_paths import (
     NoDirError,
     open_read as nodir_open_read,
@@ -47,6 +53,27 @@ from wepppy.weppcloud.utils.helpers import get_wd
 _NODIR_SUFFIX = ".nodir"
 _NODIR_ROOTS = frozenset(NODIR_ROOTS)
 _RETIRED_NODIR_ARCHIVE_FILES = frozenset({f"{root}{_NODIR_SUFFIX}" for root in _NODIR_ROOTS})
+
+
+def _env_truthy(key: str, *, default: bool = False) -> bool:
+    raw = os.getenv(key)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(key: str, *, default: int) -> int:
+    raw = os.getenv(key)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+BROWSE_PARQUET_FILTERS_ENABLED = _env_truthy("BROWSE_PARQUET_FILTERS_ENABLED", default=False)
+BROWSE_PARQUET_EXPORT_MAX_ROWS = max(1, _env_int("BROWSE_PARQUET_EXPORT_MAX_ROWS", default=2_000_000))
 
 
 def _normalize_prefix(prefix: str | None) -> str:
@@ -110,6 +137,10 @@ def _nodir_error_payload(err: NoDirError) -> dict:
 
 def _raise_nodir_error(err: NoDirError) -> None:
     raise HTTPException(status_code=err.http_status, detail=_nodir_error_payload(err))
+
+
+def _raise_parquet_filter_error(err: ParquetFilterError) -> None:
+    raise HTTPException(status_code=err.status_code, detail=err.to_payload())
 
 
 def _is_admin_context(auth_context) -> bool:
@@ -344,15 +375,54 @@ async def download_response_file(path: str, query_params) -> Response:
     filename = os.path.basename(path)
     ext = os.path.splitext(filename)[1].lower()
     as_csv = query_params.get('as_csv') if query_params else False
+    raw_pqf = (query_params.get('pqf') or '').strip() if query_params else ''
+    parquet_filter_active = (
+        BROWSE_PARQUET_FILTERS_ENABLED
+        and bool(raw_pqf)
+        and ext in {'.parquet', '.pq'}
+    )
 
-    if as_csv and ext == '.parquet':
-        df = await asyncio.to_thread(_parquet_to_dataframe_with_units, path)
+    compiled_filter = None
+    if parquet_filter_active:
+        try:
+            compiled_filter = await asyncio.to_thread(compile_filter_payload_for_path, path, raw_pqf)
+        except ParquetFilterError as err:
+            _raise_parquet_filter_error(err)
+
+    if as_csv and ext in {'.parquet', '.pq'}:
+        if compiled_filter is not None:
+            try:
+                filtered_table = await asyncio.to_thread(
+                    query_export,
+                    path,
+                    compiled_filter,
+                    max_rows=BROWSE_PARQUET_EXPORT_MAX_ROWS,
+                )
+            except ParquetFilterError as err:
+                _raise_parquet_filter_error(err)
+            df = await asyncio.to_thread(_table_to_dataframe_with_units, filtered_table, path)
+        else:
+            df = await asyncio.to_thread(_parquet_to_dataframe_with_units, path)
         csv_bytes = await asyncio.to_thread(_df_to_csv_bytes, df)
         csv_name = os.path.splitext(filename)[0] + '.csv'
         headers = {
             'Content-Disposition': f'attachment; filename="{csv_name}"'
         }
         return Response(csv_bytes, media_type='text/csv', headers=headers)
+
+    if compiled_filter is not None:
+        try:
+            filtered_table = await asyncio.to_thread(
+                query_export,
+                path,
+                compiled_filter,
+                max_rows=BROWSE_PARQUET_EXPORT_MAX_ROWS,
+            )
+        except ParquetFilterError as err:
+            _raise_parquet_filter_error(err)
+        parquet_bytes = await asyncio.to_thread(_table_to_parquet_bytes, filtered_table)
+        headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
+        return Response(parquet_bytes, media_type='application/octet-stream', headers=headers)
 
     return FileResponse(path, filename=filename)
 
@@ -365,13 +435,27 @@ def _df_to_csv_bytes(df: pd.DataFrame) -> bytes:
 
 def _parquet_to_dataframe_with_units(path: str) -> pd.DataFrame:
     table = pq.read_table(path)
+    return _table_to_dataframe_with_units(table, path)
+
+
+def _table_to_dataframe_with_units(table: pa.Table, source_path: str) -> pd.DataFrame:
     df = table.to_pandas()
-    schema = table.schema
+    schema = pq.read_schema(source_path)
     # Only generate column names for actual DataFrame columns (not index columns)
-    column_names = [_field_label_with_units(field) for field in schema 
-                    if field.name not in df.index.names and field.name != '__index_level_0__']
+    labels_by_name = {
+        field.name: _field_label_with_units(field)
+        for field in schema
+        if field.name not in df.index.names and field.name != '__index_level_0__'
+    }
+    column_names = [labels_by_name.get(column_name, column_name) for column_name in df.columns]
     df.columns = column_names
     return df
+
+
+def _table_to_parquet_bytes(table: pa.Table) -> bytes:
+    buf = BytesIO()
+    pq.write_table(table, buf)
+    return buf.getvalue()
 
 
 def _field_label_with_units(field) -> str:

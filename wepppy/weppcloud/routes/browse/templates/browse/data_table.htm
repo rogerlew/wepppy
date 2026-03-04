@@ -13,14 +13,41 @@
 <script src="/weppcloud/static/js/sorttable.js"></script>
 <style>
   .table-nonfluid { width: auto !important; }
+  .filter-feedback {
+    margin: 0.75rem 0;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d9d9d9;
+    background: #f7f7f7;
+    font-family: monospace;
+  }
+  .filter-feedback.error {
+    border-color: #f0ad4e;
+    background: #fff8e6;
+  }
 </style>
 </head>
 <body>
-<a href="?download">Download File</a>
+<a href="{{ download_url }}">Download File</a>
+{% if csv_url %}
+ | <a href="{{ csv_url }}">Download CSV</a>
+{% endif %}
 {% if dtale_url %}
  | <a href="{{ dtale_url }}">Open in D-Tale</a>
 {% endif %}
 <hr>
+{% if parquet_filter_active %}
+<div class="filter-feedback{% if parquet_filter_code %} error{% endif %}">
+  <div><b>Parquet filter active</b>{% if parquet_filter_summary %}: {{ parquet_filter_summary|e }}{% endif %}</div>
+  {% if parquet_filter_message %}
+  <div>{{ parquet_filter_message|e }}</div>
+  {% endif %}
+  {% if parquet_filter_code %}
+  <div><b>Code</b>: {{ parquet_filter_code|e }}</div>
+  {% endif %}
+</div>
+{% endif %}
+{% if table_html %}
 {{ table_html|safe }}
+{% endif %}
 </body>
 </html>

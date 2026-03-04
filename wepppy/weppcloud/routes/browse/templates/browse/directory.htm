@@ -60,11 +60,62 @@ const config = "{{ config }}";
     color: #8a5200;
     white-space: normal;
   }
+  #parquet-filter-builder {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+  .parquet-schema-row {
+    display: block;
+    white-space: normal;
+  }
+  .parquet-schema-row[hidden] {
+    display: none;
+  }
+  .parquet-schema-panel {
+    display: block;
+    margin: 0 0 0.2rem 1.6rem;
+    padding: 0.15rem 0.25rem;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    background: transparent;
+    font-size: inherit;
+    line-height: inherit;
+  }
+  .parquet-schema-table {
+    border-collapse: collapse;
+    width: auto;
+    font-size: inherit;
+  }
+  .parquet-schema-table th,
+  .parquet-schema-table td {
+    border: 1px solid #d9e3ee;
+    padding: 0.2rem 0.35rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  .parquet-schema-empty,
+  .parquet-schema-error,
+  .parquet-schema-loading {
+    color: #475569;
+  }
+  .parquet-schema-error {
+    color: #a12b2b;
+  }
 </style>
 </head>
 <body>
 <input type="text" value="{{ diff_runid|e }}" id="runIdInput" placeholder="runid">
 <button onclick="redirectToDiff()">Compare project</button>
+{% if parquet_filters_enabled %}
+<div
+  id="parquet-filter-builder"
+  data-runid="{{ runid|e }}"
+  data-config="{{ config|e }}"
+  data-initial-pqf="{{ parquet_filter_payload|e }}"
+></div>
+{% endif %}
 <pre id="file-tree">
 {{ showing_text|safe }}{{ pagination_html|safe }}
 {{ project_href|safe }}{{ breadcrumbs_html|safe }}
@@ -144,5 +195,9 @@ const config = "{{ config }}";
 })();
 </script>
 {% include 'browse/_path_input_script.htm' %}
+<script src="/weppcloud/static/js/parquet_schema_preview.js"></script>
+{% if parquet_filters_enabled %}
+<script src="/weppcloud/static/js/parquet_filter_builder.js"></script>
+{% endif %}
 </body>
 </html>

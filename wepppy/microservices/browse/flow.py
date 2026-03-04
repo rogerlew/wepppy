@@ -124,6 +124,14 @@ def _read_nodir_file_bytes(env, nodir_target, *, runid: str, subpath: str, wd: s
     raise AssertionError("unreachable")
 
 
+def _nodir_target_path(nodir_target) -> str:
+    base = os.path.abspath(nodir_target.dir_path)
+    inner = (getattr(nodir_target, "inner_path", "") or "").strip("/")
+    if not inner:
+        return base
+    return os.path.abspath(os.path.join(base, inner))
+
+
 def _browse_nodir_file(
     env,
     *,
@@ -227,6 +235,18 @@ async def _handle_nodir_tree(
             nodir_rel_path=nodir_rel_path,
             nodir_filter=nodir_filter,
             is_admin=is_admin,
+        )
+
+    # NoDir runtime roots are directory-only; delegate parquet files to the
+    # standard file renderer so browse previews keep table behavior instead of
+    # binary byte responses.
+    if nodir_meta.name.lower().endswith((".parquet", ".pq")):
+        return await env.browse_response(
+            _nodir_target_path(nodir_target),
+            runid,
+            wd,
+            request,
+            config,
         )
 
     file_bytes = _read_nodir_file_bytes(
@@ -372,6 +392,7 @@ def _build_base_query(
     diff_runid: str,
     sort_by: str,
     sort_order: str,
+    parquet_filter_payload: str | None = None,
 ) -> dict[str, str]:
     base_query: dict[str, str] = {}
     if diff_runid:
@@ -380,6 +401,8 @@ def _build_base_query(
     if include_sort_params:
         base_query['sort'] = sort_by
         base_query['order'] = sort_order
+    if parquet_filter_payload:
+        base_query['pqf'] = parquet_filter_payload
     return base_query
 
 
@@ -509,6 +532,8 @@ async def _render_directory_response(
     sort_order: str,
     base_browse_url: str,
     home_href: str,
+    parquet_filters_enabled: bool,
+    parquet_filter_payload: str | None,
 ):
     breadcrumbs = _build_breadcrumbs_html(
         env,
@@ -563,6 +588,8 @@ async def _render_directory_response(
         showing_text=env.Markup(showing_text),
         using_manifest=using_manifest,
         mixed_state_roots=env._mixed_nodir_roots(wd),
+        parquet_filters_enabled=parquet_filters_enabled,
+        parquet_filter_payload=parquet_filter_payload or '',
     )
 
 
@@ -659,17 +686,72 @@ async def _markdown_response(env, *, path: str, path_lower: str, runid: str, con
     ), rendered_contents
 
 
-async def _tabular_preview(env, *, path: str, path_lower: str):
+def _append_query_params(url: str, params: dict[str, str] | None) -> str:
+    if not params:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode(params)}"
+
+
+async def _tabular_preview(env, *, path: str, path_lower: str, request):
     preview_warning = None
     html_table = None
+    filter_feedback = None
 
     if path_lower.endswith('.pkl'):
         df = await asyncio.to_thread(env.pd.read_pickle, path)
         html_table = await env._async_df_to_html(df)
 
-    if path_lower.endswith('.parquet'):
-        df = await asyncio.to_thread(env.pd.read_parquet, path)
-        html_table = await env._async_df_to_html(df)
+    if path_lower.endswith(('.parquet', '.pq')):
+        raw_payload = request.args.get('pqf')
+        if env.BROWSE_PARQUET_FILTERS_ENABLED and raw_payload:
+            try:
+                compiled = await asyncio.to_thread(env.compile_parquet_filter_for_path, path, raw_payload)
+                if compiled is None:
+                    df = await asyncio.to_thread(env.pd.read_parquet, path)
+                    html_table = await env._async_df_to_html(df)
+                else:
+                    df = await asyncio.to_thread(
+                        env.query_parquet_preview,
+                        path,
+                        compiled,
+                        env.BROWSE_PARQUET_PREVIEW_LIMIT,
+                    )
+                    html_table = await env._async_df_to_html(df)
+                    if df.empty:
+                        filter_feedback = {
+                            'active': True,
+                            'summary': compiled.summary,
+                            'code': 'no_rows_matched_filter',
+                            'message': 'No rows matched the active parquet filter.',
+                            'status_code': 200,
+                            'pqf': raw_payload,
+                        }
+                    else:
+                        filter_feedback = {
+                            'active': True,
+                            'summary': compiled.summary,
+                            'code': None,
+                            'message': (
+                                f'Showing {len(df)} filtered rows '
+                                f'(preview limit {env.BROWSE_PARQUET_PREVIEW_LIMIT}).'
+                            ),
+                            'status_code': 200,
+                            'pqf': raw_payload,
+                        }
+            except env.ParquetFilterError as exc:
+                filter_feedback = {
+                    'active': True,
+                    'summary': None,
+                    'code': exc.code,
+                    'message': exc.message,
+                    'status_code': exc.status_code,
+                    'pqf': raw_payload,
+                    'payload': exc.to_payload(),
+                }
+        else:
+            df = await asyncio.to_thread(env.pd.read_parquet, path)
+            html_table = await env._async_df_to_html(df)
 
     if path_lower.endswith('.csv'):
         skiprows = 1 if 'totalwatsed2' in path_lower else 0
@@ -704,21 +786,56 @@ async def _tabular_preview(env, *, path: str, path_lower: str):
         else:
             html_table = await env._async_df_to_html(df)
 
-    return html_table, preview_warning
+    return html_table, preview_warning, filter_feedback
 
 
-def _tabular_response(env, *, html_table: str, path: str, runid: str, wd: str, request, config: str):
-    table_markup = env.Markup(html_table)
+def _tabular_response(
+    env,
+    *,
+    html_table: str | None,
+    path: str,
+    path_lower: str,
+    runid: str,
+    wd: str,
+    request,
+    config: str,
+    filter_feedback: dict | None,
+):
+    table_markup = env.Markup(html_table) if html_table is not None else None
     rel_url = os.path.relpath(path, wd).replace('\\', '/')
     dtale_base = env._resolve_dtale_base(request.path, runid, config, env._prefix_path)
     dtale_url = f"{dtale_base}{quote(rel_url, safe='/')}"
-    return env.render_template(
+    download_url = request.path.replace('/browse/', '/download/', 1)
+    csv_url = None
+    query_params: dict[str, str] = {}
+    if filter_feedback and filter_feedback.get('active') and filter_feedback.get('pqf'):
+        query_params['pqf'] = filter_feedback['pqf']
+    if path_lower.endswith(('.parquet', '.pq')):
+        if query_params:
+            dtale_url = _append_query_params(dtale_url, query_params)
+            download_url = _append_query_params(download_url, query_params)
+        csv_query = {'as_csv': '1'}
+        if query_params:
+            csv_query.update(query_params)
+        csv_url = _append_query_params(download_url.split('?', 1)[0], csv_query)
+
+    rendered = env.render_template(
         'browse/data_table.htm',
         filename=basename(path),
         runid=runid,
         table_html=table_markup,
+        download_url=download_url,
+        csv_url=csv_url,
         dtale_url=dtale_url,
+        parquet_filter_active=bool(filter_feedback and filter_feedback.get('active')),
+        parquet_filter_summary=(filter_feedback or {}).get('summary'),
+        parquet_filter_message=(filter_feedback or {}).get('message'),
+        parquet_filter_code=(filter_feedback or {}).get('code'),
     )
+    status_code = (filter_feedback or {}).get('status_code', 200)
+    if status_code != 200:
+        return rendered, status_code
+    return rendered
 
 
 async def _final_text_response(env, *, path: str, runid: str, contents, preview_warning):
@@ -795,16 +912,26 @@ async def _render_file_response(
     if markdown_response is not None:
         return markdown_response
 
-    html_table, preview_warning = await _tabular_preview(env, path=path, path_lower=path_lower)
-    if html_table is not None:
+    html_table, preview_warning, filter_feedback = await _tabular_preview(
+        env,
+        path=path,
+        path_lower=path_lower,
+        request=request,
+    )
+    if filter_feedback and filter_feedback.get('code') and filter_feedback.get('payload'):
+        return env.jsonify(filter_feedback['payload']), filter_feedback['status_code']
+
+    if html_table is not None or (filter_feedback and filter_feedback.get('active')):
         return _tabular_response(
             env,
             html_table=html_table,
             path=path,
+            path_lower=path_lower,
             runid=runid,
             wd=wd,
             request=request,
             config=config,
+            filter_feedback=filter_feedback,
         )
 
     return await _final_text_response(
@@ -834,11 +961,15 @@ async def browse_response(
     args = request.args
     diff_runid = _sanitize_diff_runid(args)
     sort_by, sort_order = env._normalize_sort_params(args)
+    parquet_filter_payload = None
+    if env.BROWSE_PARQUET_FILTERS_ENABLED:
+        parquet_filter_payload = (args.get('pqf') or '').strip() or None
     base_query = _build_base_query(
         args=args,
         diff_runid=diff_runid,
         sort_by=sort_by,
         sort_order=sort_order,
+        parquet_filter_payload=parquet_filter_payload,
     )
     diff_wd = env.get_wd(diff_runid) if diff_runid else None
     query_suffix = f'?{urlencode(base_query)}' if base_query else ''
@@ -868,6 +999,8 @@ async def browse_response(
             sort_order=sort_order,
             base_browse_url=base_browse_url,
             home_href=home_href,
+            parquet_filters_enabled=env.BROWSE_PARQUET_FILTERS_ENABLED,
+            parquet_filter_payload=parquet_filter_payload,
         )
 
     return await _render_file_response(
