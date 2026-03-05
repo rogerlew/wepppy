@@ -255,6 +255,44 @@ must be persisted for audit/replay, it belongs in `TerrainConfig`; if the
 value is discovered/produced while executing, it belongs in
 `TerrainProcessor`.
 
+## Pre-Implementation Helper Status (2026-03-05)
+
+The helper-first pre-implementation package now ships reusable contracts in
+`wepppy/topo/wbt/terrain_processor_helpers.py`:
+
+- **Phase 1 (Flow-stack facade)**
+  - `derive_flow_stack(...) -> FlowStackArtifacts`
+  - Executes relief -> flow vector -> flow accumulation -> streams ->
+    junctions -> stream polygonization, with explicit emulator contract
+    validation and typed artifact-path return.
+- **Phase 2 (Bounded breach)**
+  - `resolve_bounded_breach_collar_pixels(...)`
+  - `create_masked_dem(...)`
+  - `run_bounded_breach_workflow(...) -> BoundedBreachArtifacts`
+  - `create_bounded_breach_composite(...)`
+  - Delivers collar sizing, interior-mask preparation, injected breach-run
+    orchestration, and filled/breached compositing.
+- **Phase 3 (Culvert prep + burn adapter)**
+  - `extract_road_stream_intersections(...)`
+  - `load_culvert_points(...)`
+  - `snap_uploaded_culvert_points_to_crossings(...)`
+  - `burn_streams_at_roads_adapter(...)`
+  - Typed helper errors now provide machine-readable codes:
+    `geometry_input_error`, `culvert_snap_error`,
+    `burn_streams_at_roads_validation_error`.
+- **Phase 4 (Multi-outlet + unnest parsing)**
+  - `snap_outlets_to_streams(...)`
+  - `build_outlet_feature_collection(...)`
+  - `parse_unnest_basins_hierarchy_csv(...) -> list[BasinSummary]`
+  - Parser accepts both conceptual and WBT-style hierarchy sidecars,
+    including `outlet_id`/`parent_outlet_id` and `row`/`column`.
+- **Phase 5 (Provenance + invalidation scaffolding)**
+  - `ProvenanceEntry`
+  - `TerrainArtifactRegistry`
+  - `determine_invalidated_phases(...)`
+  - Includes conservative unknown-key invalidation and explicit phase-order
+    semantics.
+
 ## Pipeline Phases (Conceptual)
 
 ### Phase 0: Validate and Prepare
