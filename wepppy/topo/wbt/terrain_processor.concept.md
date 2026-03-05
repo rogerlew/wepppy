@@ -293,6 +293,34 @@ The helper-first pre-implementation package now ships reusable contracts in
   - Includes conservative unknown-key invalidation and explicit phase-order
     semantics.
 
+## Runtime Implementation Status (2026-03-05)
+
+The runtime package now ships in `wepppy/topo/wbt/terrain_processor.py`
+with phase handlers aligned to this concept:
+
+- `TerrainConfig` + strict config validation contracts.
+- `TerrainProcessor.run()` + `rerun_with_config(...)` with config-delta
+  invalidation and selective phase re-entry.
+- Phase 1 orchestration for smoothing, roads-source resolution, and
+  embankment synthesis (`RaiseRoads` seam).
+- Phase 2 orchestration for fill/breach/breach-least-cost plus bounded
+  breach composite flow.
+- Breach-least-cost controls now pass through end-to-end:
+  `blc_dist_m`, `blc_max_cost`, and `blc_fill` are validated and routed
+  through helper/emulator contracts into WBT execution.
+- Phase 3 culvert enforcement with mandatory second flow-stack pass.
+- Phase 4 single/auto/multiple outlet resolution with hierarchy parsing.
+- Phase 5 backend visualization artifact generation (hillshade, slope,
+  phase diff rasters, benchmark report, and UI payload metadata contract),
+  including raster-size guardrails for expensive workloads.
+- Phase 6 invalidation report contract plus helper/runtime invalidation
+  mapping evidence output.
+- WEPPcloud watershed API surface now exposes terrain config/run/result
+  routes and artifact URL serving for UI clients.
+
+Targeted runtime validation now lives in
+`tests/topo/test_terrain_processor_runtime.py`.
+
 ## Pipeline Phases (Conceptual)
 
 ### Phase 0: Validate and Prepare
@@ -852,9 +880,11 @@ inspection. The user sees what each processing step did before proceeding.
 
 All intermediate DEM TIFFs are retained (e.g., `dem_raw.tif`,
 `dem_smoothed.tif`, `dem_roads.tif`, `relief.tif`, `relief_burned.tif`).
-This enables the UI to compute diffs on-the-fly between any adjacent pair
-without pre-generating diff rasters. For DEM modification steps (smooth,
-road fill, breach, culvert burn), the UI should offer a toggle between:
+The backend also emits canonical phase-diff rasters for adjacent
+DEM-modifying steps so UI consumers can render a stable, precomputed
+diff contract without recomputing on the client. For DEM modification
+steps (smooth, road fill, breach, culvert burn), the UI should offer a
+toggle between:
 - **Absolute view** — hillshade of the output DEM
 - **Diff view** — color-ramped difference from the previous DEM
   (blue = lowered, red = raised, gray = unchanged)
@@ -916,14 +946,12 @@ audit, reproducibility, and debugging.
    config-field dependencies and automatically determines the earliest
    re-entry phase from config deltas.
 
-6. ~~**Diff raster generation.**~~ Resolved: keep all intermediate TIFFs.
-   Each phase preserves its input and output DEM artifacts (e.g.,
-   `dem_raw.tif`, `dem_smoothed.tif`, `dem_roads.tif`, `relief.tif`,
-   `relief_burned.tif`). The UI computes diffs on-the-fly from adjacent
-   artifacts rather than pre-generating diff TIFFs. Storage cost is
-   acceptable — intermediate DEMs are the same dimensions as the input
-   and compress well, and users need them anyway for re-entry at earlier
-   phases.
+6. ~~**Diff raster generation.**~~ Resolved: keep all intermediate TIFFs
+   and generate canonical adjacent-phase diff rasters in backend runtime.
+   Intermediate DEM artifacts (`dem_raw.tif`, `dem_smoothed.tif`,
+   `dem_roads.tif`, `relief.tif`, `relief_burned.tif`) are retained for
+   re-entry semantics, while `phase*_diff.tif` outputs provide stable
+   visualization contracts for UI consumers.
 
 ## References
 

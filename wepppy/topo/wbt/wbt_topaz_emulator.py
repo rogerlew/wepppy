@@ -510,6 +510,8 @@ class WhiteboxToolsTopazEmulator:
         self,
         fill_or_breach: str = "fill",
         blc_dist: Optional[int] = None,
+        blc_max_cost: Optional[float] = None,
+        blc_fill: bool = True,
         logger: Optional[logging.Logger] = None,
     ) -> None:
         """Generate the hydrologically conditioned DEM.
@@ -518,15 +520,19 @@ class WhiteboxToolsTopazEmulator:
             fill_or_breach: Strategy to enforce drainage. Accepted values are
                 ``"fill"``, ``"breach"``, and ``"breach_least_cost"``.
             blc_dist: Search distance used by ``breach_least_cost`` (meters).
+            blc_max_cost: Optional cumulative breach cost limit.
+            blc_fill: Whether least-cost breach should fill unresolved pits.
             logger: Optional logger used for debug messages.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(
-                f"WhiteBoxToolsTopazEmulator.{func_name}(fill_or_breach={fill_or_breach}, blc_dist={blc_dist})"
+                f"WhiteBoxToolsTopazEmulator.{func_name}(fill_or_breach={fill_or_breach}, blc_dist={blc_dist}, blc_max_cost={blc_max_cost}, blc_fill={blc_fill})"
             )
-        if blc_dist is None:
-            blc_dist = 1000
+        if blc_max_cost is not None and float(blc_max_cost) <= 0:
+            raise ValueError("blc_max_cost must be greater than zero when provided")
+        if not isinstance(blc_fill, bool):
+            raise ValueError("blc_fill must be a boolean")
 
         relief_fn = self.relief
 
@@ -537,7 +543,17 @@ class WhiteboxToolsTopazEmulator:
         elif fill_or_breach == "breach":
             ret = self.wbt.breach_depressions(dem=self.dem, output=relief_fn, fill_pits=True)
         elif fill_or_breach == "breach_least_cost":
-            ret = self.wbt.breach_depressions_least_cost(dem=self.dem, output=relief_fn, dist=int(blc_dist), fill=True)
+            if blc_dist is None:
+                blc_dist = 1000
+            kwargs: Dict[str, Any] = {
+                "dem": self.dem,
+                "output": relief_fn,
+                "dist": int(blc_dist),
+                "fill": bool(blc_fill),
+            }
+            if blc_max_cost is not None:
+                kwargs["max_cost"] = float(blc_max_cost)
+            ret = self.wbt.breach_depressions_least_cost(**kwargs)
         else:
             raise ValueError("fill_or_breach must be either 'fill', 'breach' or 'breach_least_cost'")
 

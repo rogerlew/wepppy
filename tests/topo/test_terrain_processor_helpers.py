@@ -69,8 +69,15 @@ class _FlowStackEmulatorStub:
         self.netful_json = "/tmp/netful.geojson"
         self.chnjnt = "/tmp/chnjnt.tif"
 
-    def _create_relief(self, *, fill_or_breach: str, blc_dist: int | None = None) -> None:
-        self.calls.append(f"relief:{fill_or_breach}:{blc_dist}")
+    def _create_relief(
+        self,
+        *,
+        fill_or_breach: str,
+        blc_dist: int | None = None,
+        blc_max_cost: float | None = None,
+        blc_fill: bool = True,
+    ) -> None:
+        self.calls.append(f"relief:{fill_or_breach}:{blc_dist}:{blc_max_cost}:{blc_fill}")
 
     def _create_flow_vector(self) -> None:
         self.calls.append("flow_vector")
@@ -96,12 +103,14 @@ def test_phase1_derive_flow_stack_executes_in_order() -> None:
         mcl=60.0,
         fill_or_breach="breach_least_cost",
         blc_dist=500,
+        blc_max_cost=7.5,
+        blc_fill=False,
         polygonize_streams=lambda raster_path, geojson_path: poly_calls.append((raster_path, geojson_path)),
         reproject_streams_geojson=lambda geojson_path: wgs_calls.append(geojson_path),
     )
 
     assert emulator.calls == [
-        "relief:breach_least_cost:500",
+        "relief:breach_least_cost:500:7.5:False",
         "flow_vector",
         "flow_accumulation",
         "extract_streams",
@@ -119,6 +128,15 @@ def test_phase1_derive_flow_stack_rejects_invalid_thresholds() -> None:
         derive_flow_stack(emulator, csa=0.0, mcl=60.0)
     with pytest.raises(ValueError, match="mcl"):
         derive_flow_stack(emulator, csa=5.0, mcl=0.0)
+    with pytest.raises(ValueError, match="blc_max_cost"):
+        derive_flow_stack(emulator, csa=5.0, mcl=60.0, blc_max_cost=0.0)
+    with pytest.raises(ValueError, match="blc_fill"):
+        derive_flow_stack(
+            emulator,
+            csa=5.0,
+            mcl=60.0,
+            blc_fill="false",  # type: ignore[arg-type]
+        )
 
 
 def test_phase1_derive_flow_stack_rejects_missing_emulator_contract() -> None:

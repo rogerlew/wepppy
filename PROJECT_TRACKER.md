@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-03-05  
-**Active Packages**: 2  
+**Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 2 packages ✅ **Within target**
+**Current WIP**: 3 packages ✅ **Within target**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -246,7 +246,6 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-
 ### markdown-doc Toolkit Integration
 **Started**: 2025-10-25  
 **Status**: Phase 3 Complete — Integration Active (Phase 4 pending telemetry + RFC decisions)  
@@ -314,6 +313,21 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### TerrainProcessor Runtime + Visualization Artifact Implementation
+**Completed**: 2026-03-06  
+**Duration**: 1 day initial + follow-up closeout  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260305_terrain_processor_implementation/](docs/work-packages/20260305_terrain_processor_implementation/)  
+**Description**: Completed full TerrainProcessor runtime + visualization backend delivery and follow-up Tasks 1-6 (BLC fidelity, real WBT integration tests, visualization guardrails/UI payloads, watershed API surface, and docs closeout).
+
+**Outcome**:
+- Runtime now supports breach-least-cost controls end-to-end (`blc_dist_m`, `blc_max_cost`, `blc_fill`).
+- Added real WBT integration tests (`tests/topo/test_terrain_processor_wbt_integration.py`).
+- Added visualization benchmark and UI payload artifacts (`visualization_benchmarks.json`, `visualization_ui_payload.json`) plus `visualization_max_pixels` guardrail.
+- Added watershed terrain endpoints for config/run/result/manifest/resource access.
+- Follow-up validation completed (`tests/topo --maxfail=1`, `tests/weppcloud --maxfail=1`, broad-exception gate pass, docs lint pass) and prompts archived to `prompts/completed/`.
 
 ### TerrainProcessor Pre-Implementation Foundations
 **Completed**: 2026-03-05  

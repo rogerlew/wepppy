@@ -72,6 +72,8 @@ def derive_flow_stack(
     mcl: float,
     fill_or_breach: str = "fill",
     blc_dist: int | None = None,
+    blc_max_cost: float | None = None,
+    blc_fill: bool = True,
     polygonize_streams: Callable[[str, str], None] = polygonize_netful,
     reproject_streams_geojson: Callable[[str], None] = json_to_wgs,
 ) -> FlowStackArtifacts:
@@ -84,6 +86,8 @@ def derive_flow_stack(
         mcl: Minimum channel length in meters.
         fill_or_breach: Conditioning strategy used for relief generation.
         blc_dist: Optional least-cost breach distance value.
+        blc_max_cost: Optional least-cost cumulative cost limit.
+        blc_fill: Whether least-cost breach should fill unresolved pits.
         polygonize_streams: Hook for stream raster polygonization.
         reproject_streams_geojson: Hook that creates a WGS84 stream GeoJSON.
 
@@ -96,12 +100,21 @@ def derive_flow_stack(
         raise ValueError("mcl must be greater than zero")
     if fill_or_breach not in {"fill", "breach", "breach_least_cost"}:
         raise ValueError("fill_or_breach must be 'fill', 'breach', or 'breach_least_cost'")
+    if blc_max_cost is not None and blc_max_cost <= 0:
+        raise ValueError("blc_max_cost must be greater than zero when provided")
+    if not isinstance(blc_fill, bool):
+        raise ValueError("blc_fill must be a boolean")
     _validate_flow_stack_emulator_contract(emulator)
 
     emulator.csa = float(csa)
     emulator.mcl = float(mcl)
 
-    emulator._create_relief(fill_or_breach=fill_or_breach, blc_dist=blc_dist)
+    emulator._create_relief(
+        fill_or_breach=fill_or_breach,
+        blc_dist=blc_dist,
+        blc_max_cost=blc_max_cost,
+        blc_fill=blc_fill,
+    )
     emulator._create_flow_vector()
     emulator._create_flow_accumulation()
     emulator._extract_streams()
