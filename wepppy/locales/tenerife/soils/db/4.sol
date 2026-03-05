@@ -1,20 +1,13 @@
 7778
 # 
 # Comment: soil file built from profile Lomo de La Canaria (LVN28) (J.A. Guerra Garcia)
-# Author: JNerisTome
-# 
-# 
-# wepppy.wepp.soils.utils.WeppSoilUtil::7778migration
-#   Build Date: 2023-10-20 12:07:32.037835
-#   Source File: :4.template.sol
-# 
-# ofe=0,horizon0 anisotropy estimated using Rosetta(clay=27.4, sand=20.3, bd=0.74, silt=52.3)
-# ofe=0,horizon1 anisotropy estimated using Rosetta(clay=26.7, sand=21.4, bd=0.92, silt=51.9)
-# ofe=0,horizon2 anisotropy estimated using Rosetta(clay=30.7, sand=22.1, bd=1.43, silt=47.199999999999996)
-Any comments:
+# Author: JNerisTome and AAguiarMartin 
+# SoilType: Dystrustepts/Cambisol  haplico (limoso, cromico)
+Any comments: 
 1 0
-'Dystrustepts/Cambisol  haplico (limoso, cromico)'	 'LVN28'	 3	 0.23	 0.75	 4543438	 0.00746	 3.5
-	150	 0.74	 11.1435	 1.0	 35.7	 15.9	 20.3	 27.4	 3.36	 1.29	 4.7
-	450	 0.92	 9.2746	 1.0	 33.5	 15.2	 21.4	 26.7	 1.88	 1.79	 6.2
-	1150	 1.43	 5.5982	 1.0	 33.7	 17.7	 22.1	 30.7	 0.87	 4.68	 4.9
-1 10000.0 0.0036
+'Lomo de La Canaria'	'CLAY LOAM'	3	0.2300	sat	ki	kr	tauc
+	150.000000	0.740000	ke	1.000000	0.357	0.159	20.300	27.400	3.360	1.290	4.700
+	450.000000	0.920000	ke	1.000000	0.335	0.152	21.400	26.700	1.880	1.790	6.200
+	1150.000000	1.430000	ke	1.000000	0.337	0.177	22.100	30.700	0.870	4.680	4.900
+1 -1 20000.000000 0.0036
+255  255  255

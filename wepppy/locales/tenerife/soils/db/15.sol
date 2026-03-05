@@ -1,18 +1,12 @@
 7778
 # 
 # Comment: soil file built from profile Morra de Los Sauces (LVN14) (J.A. Guerra Garcia)
-# Author: JNerisTome
-# 
-# 
-# wepppy.wepp.soils.utils.WeppSoilUtil::7778migration
-#   Build Date: 2023-10-20 12:07:25.041947
-#   Source File: :15.template.sol
-# 
-# ofe=0,horizon0 anisotropy estimated using Rosetta(clay=41.8, sand=9.3, bd=0.8, silt=48.900000000000006)
-# ofe=0,horizon1 anisotropy estimated using Rosetta(clay=39.7, sand=15.5, bd=0.81, silt=44.8)
-Any comments:
+# Author: JNerisTome and AAguiarMartin 
+# SoilType: Haplustepts/Cambisol haplico (humico, limoso)
+Any comments: 
 1 0
-'Haplustepts/Cambisol haplico (humico, limoso)'	 'LVN14'	 2	 0.23	 0.75	 3749566	 0.00693	 3.5
-	900	 0.8	 2.2629	 1.0	 32.4	 18.7	 9.3	 41.8	 3.53	 1.86	 4.5
-	1400	 0.81	 8.9472	 1.0	 32.8	 18.4	 15.5	 39.7	 1.9	 1.61	 9.0
-1 10000.0 0.0036
+'Morra de Los Sauces'	'SILTY CLAY'	2	0.2300	sat	ki	kr	tauc
+	900.000000	0.800000	ke	1.000000	0.324	0.187	9.300	41.800	3.530	1.860	4.500
+	1400.000000	0.810000	ke	1.000000	0.328	0.184	15.500	39.700	1.900	1.610	9.000
+1 -1 20000.000000 0.0036
+255  255  255

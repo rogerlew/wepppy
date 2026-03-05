@@ -1,18 +1,12 @@
 7778
 # 
 # Comment: soil file built from profile Santa Catalina (BTN16) (J.A. Guerra Garcia)
-# Author: JNerisTome
-# 
-# 
-# wepppy.wepp.soils.utils.WeppSoilUtil::7778migration
-#   Build Date: 2023-10-20 12:07:24.249095
-#   Source File: :36.template.sol
-# 
-# ofe=0,horizon0 anisotropy estimated using Rosetta(clay=10.4, sand=46.7, bd=0.64, silt=42.89999999999999)
-# ofe=0,horizon1 anisotropy estimated using Rosetta(clay=12.3, sand=45.6, bd=1.13, silt=42.1)
-Any comments:
+# Author: JNerisTome and AAguiarMartin 
+# SoilType: Ustivitrands/Andosol vitrico leptico (sodico, eutrico)
+Any comments: 
 1 0
-'Ustivitrands/Andosol vitrico leptico (sodico, eutrico)'	 'BTN16'	 2	 0.23	 0.75	 10412000	 0.01398	 1.0
-	100	 0.64	 15.4836	 1.0	 38.4	 12.1	 46.7	 10.4	 4.75	 1.91	 32.6
-	700	 1.13	 17.9982	 1.0	 45.1	 13.8	 45.6	 12.3	 5.0	 1.21	 53.8
-1 10000.0 0.0036
+'Santa Catalina'	'LOAM'	2	0.2300	sat	ki	kr	tauc
+	100.000000	0.640000	ke	1.000000	0.384	0.121	46.700	10.400	4.750	1.910	32.600
+	700.000000	1.130000	ke	1.000000	0.451	0.138	45.600	12.300	5.000	1.210	53.800
+1 -1 20000.000000 0.0036
+255  255  255

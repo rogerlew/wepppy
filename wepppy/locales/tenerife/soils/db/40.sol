@@ -1,18 +1,12 @@
 7778
 # 
 # Comment: soil file built from profile Icoro (BTS14) (J.A. Guerra Garcia)
-# Author: JNerisTome
-# 
-# 
-# wepppy.wepp.soils.utils.WeppSoilUtil::7778migration
-#   Build Date: 2023-10-20 12:07:29.899857
-#   Source File: :40.template.sol
-# 
-# ofe=0,horizon0 anisotropy estimated using Rosetta(clay=49.0, sand=12.8, bd=0.97, silt=38.2)
-# ofe=0,horizon1 anisotropy estimated using Rosetta(clay=46.7, sand=12.8, bd=1.04, silt=40.5)
-Any comments:
+# Author: JNerisTome and AAguiarMartin 
+# SoilType: Xerarents/Cambisol leptico vertico (sodico, humico)
+Any comments: 
 1 0
-'Xerarents/Cambisol leptico vertico (sodico, humico)'	 'BTS14'	 2	 0.23	 0.75	 3352630	 0.00691	 3.5
-	100	 0.97	 0.9597	 1.0	 24.7	 15.5	 12.8	 49.0	 3.0	 1.37	 36.2
-	400	 1.04	 1.2265	 1.0	 23.2	 16.7	 12.8	 46.7	 1.9	 1.15	 25.4
-1 10000.0 0.0036
+'Icoro'	'CLAY'	2	0.2300	sat	ki	kr	tauc
+	100.000000	0.970000	ke	1.000000	0.247	0.155	12.800	49.000	3.000	1.370	36.200
+	400.000000	1.040000	ke	1.000000	0.232	0.167	12.800	46.700	1.900	1.150	25.400
+1 -1 20000.000000 0.0036
+255  255  255

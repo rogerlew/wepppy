@@ -1,16 +1,11 @@
 7778
 # 
 # Comment: soil file built from profile Partido de Las Torres (LVN30) (J.A. Guerra Garcia)
-# Author: JNerisTome
-# 
-# 
-# wepppy.wepp.soils.utils.WeppSoilUtil::7778migration
-#   Build Date: 2023-10-20 12:07:25.779070
-#   Source File: :31.template.sol
-# 
-# ofe=0,horizon0 anisotropy estimated using Rosetta(clay=2.9, sand=90.8, bd=0.83, silt=6.299999999999997)
-Any comments:
+# Author: JNerisTome and AAguiarMartin 
+# SoilType: Udorthents/Leptosol haplico (tefrico, districo)
+Any comments: 
 1 0
-'Udorthents/Leptosol haplico (tefrico, districo)'	 'LVN30'	 1	 0.23	 0.75	 3938230	 0.00702	 2.5
-	100	 0.83	 39.6403	 1.0	 6.8	 1.6	 90.8	 2.9	 0.34	 1.04	 73.9
-1 10000.0 0.0036
+'Partido de Las Torres'	'SAND'	1	0.2300	sat	ki	kr	tauc
+	100.000000	0.830000	ke	1.000000	0.068	0.016	90.800	2.900	0.340	1.040	73.900
+1 -1 20000.000000 0.0036
+255  255  255

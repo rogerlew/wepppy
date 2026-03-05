@@ -1,18 +1,12 @@
 7778
 # 
 # Comment: soil file built from profile La Hoya (BTN3) (J.A. Guerra Garcia)
-# Author: JNerisTome
-# 
-# 
-# wepppy.wepp.soils.utils.WeppSoilUtil::7778migration
-#   Build Date: 2023-10-20 12:07:23.015133
-#   Source File: :1.template.sol
-# 
-# ofe=0,horizon0 anisotropy estimated using Rosetta(clay=57.2, sand=17.0, bd=1.11, silt=25.799999999999997)
-# ofe=0,horizon1 anisotropy estimated using Rosetta(clay=58.9, sand=20.3, bd=1.12, silt=20.8)
-Any comments:
+# Author: JNerisTome and AAguiarMartin 
+# SoilType: Calcitorrerts/Calcisol leptico vertico (sodico, esqueletico)
+Any comments: 
 1 0
-'Calcitorrerts/Calcisol leptico vertico (sodico, esqueletico)'	 'BTN3'	 2	 0.23	 0.75	 2900564	 0.0069	 3.5
-	200	 1.11	 0.47	 1.0	 38.9	 21.9	 17.0	 57.2	 1.54	 2.08	 50.6
-	800	 1.12	 0.4156	 1.0	 45.3	 24.2	 20.3	 58.9	 0.69	 2.21	 47.1
-1 10000.0 0.0036
+'La Hoya'	'CLAY'	2	0.2300	0.6000	100000.0000	0.0000	0.1000
+	200.000000	1.110000	7.000000	1.000000	0.389	0.219	17.000	57.200	1.540	2.080	50.600
+	800.000000	1.120000	7.000000	1.000000	0.453	0.242	20.300	58.900	0.690	2.210	47.100
+1 -1 20000.000000 0.0036
+255  255  255
