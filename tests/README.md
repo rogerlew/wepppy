@@ -56,12 +56,15 @@ Certain long-running tests reach remote services and stay skipped unless you exp
 
 - `WMESQUE_INTEGRATION=1` – allows `tests/services/test_wmesque_retrieve.py` to hit the production WMesque raster service and compare ArcGrid vs GeoTIFF outputs. Expect multi-minute runs and real network traffic.
 - `SSURGO_INTEGRATION=1` – enables `tests/soils/test_ssurgo.py` to call the NRCS SDM endpoints and build WEPP soils from live SSURGO/STATSGO datasets. Requires the local SSURGO caches plus network access; plan for heavy IO.
+- `OSM_ROADS_POSTGRES_INTEGRATION=1` – includes `tests/topo/test_osm_roads_postgres_integration.py` in broader pytest selections (for example, `tests/topo` or `tests`). The dedicated file path can be run directly without this flag. Requires the compose Postgres service and credentials (`POSTGRES_*` or `WEPPPY_OSM_ROADS_CACHE_DB_URL`).
 
 Export the flag(s) before invoking pytest, e.g.:
 
 ```bash
 WMESQUE_INTEGRATION=1 wctl run-pytest tests/services/test_wmesque_retrieve.py
 SSURGO_INTEGRATION=1 wctl run-pytest tests/soils/test_ssurgo.py
+wctl run-pytest tests/topo/test_osm_roads_postgres_integration.py
+OSM_ROADS_POSTGRES_INTEGRATION=1 wctl run-pytest tests/topo -k osm_roads_postgres_integration
 ```
 
 ## Tips

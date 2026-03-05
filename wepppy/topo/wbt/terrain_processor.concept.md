@@ -4,7 +4,8 @@
 > independent of `WhiteboxToolsTopazEmulator` while reusing the same
 > working WhiteboxTools primitives (DEM parsing, flow stack derivation,
 > outlet snapping, polygonization utilities). It handles LiDAR/10m DEMs,
-> road embankment synthesis, culvert enforcement, bounded breach, and
+> road embankment synthesis (implemented via `RaiseRoads` in
+> `weppcloud-wbt`), culvert enforcement, bounded breach, and
 > multi-watershed delineation. This document captures design intent and
 > recommended approaches — not a binding implementation specification.
 
@@ -260,10 +261,13 @@ value is discovered/produced while executing, it belongs in
 
 - Assert DEM exists and is projected (UTM).
 - If `roads_source == "osm"`, assert boundary polygon available for bbox query.
+- If `roads_source == "upload"`, assert the roads vector has a defined CRS.
 - If `enforce_culverts`, assert roads are available from Phase 1.
 - If `culvert_source == "upload_points"`, assert file exists and contains point geometries.
 - If `conditioning == "bounded_breach"` and `outlet_mode != "auto"`, ensure outlet
   info is available (auto mode can derive a preliminary outlet).
+- If uploaded roads are not in DEM CRS (including WGS84 uploads), reproject
+  roads to DEM CRS before synthesis (`RaiseRoads` path).
 
 ### Phase 1: DEM Preparation
 
@@ -495,9 +499,9 @@ Roads are below the grid resolution. Embankments must be synthesized
 from road vectors (uploaded or fetched from OSM). Recommended pipeline:
 
 1. Acquire road vectors (upload or OSM).
-2. Synthesize embankments using `"profile_relative"` strategy (see below).
-3. `BurnStreamsAtRoads` or `RaiseWalls --breach` at known culvert
-   locations to maintain connectivity.
+2. Synthesize embankments using `RaiseRoads --strategy=profile_relative`.
+3. `BurnStreamsAtRoads` at known/detected culvert locations to maintain
+   connectivity (`RaiseWalls --breach` remains a legacy fallback path).
 4. `BreachDepressionsLeastCost` for remaining depressions.
 
 **30m DEMs (future work): TopologicalBreachBurn.**
@@ -562,15 +566,13 @@ ridges get raised less. The taper prevents artificial flow channels along
 buffer edges. Modifies fewer cells than `"constant"` because cells
 already above the target are untouched.
 
-Implementation target: a new Rust tool in weppcloud-wbt (working name
-`RaiseRoads` or enhancement to `RaiseWalls`) built from existing
-building blocks:
-- `RaiseWalls` — vector-to-raster road stamping with breach openings
-- `EmbankmentMapping` — priority-flood expansion with distance tracking,
-  `FixedRadiusSearch2D` for local terrain queries, morphometric
-  constraints (width, height, slope)
-- `BurnStreamsAtRoads` — local-minimum corridor logic (invert to
-  "find local maximum in a corridor" for terrain-relative fill)
+Implemented status (`weppcloud-wbt`, `RaiseRoads`): this strategy now
+exists as a shipped tool with:
+- strategy selection (`constant`, `profile_relative`, `cross_section`)
+- no-lowering guarantee (`output >= input` on valid cells)
+- width/parameter fallback hierarchy and conservative unpaved-road defaults
+- per-feature GeoJSON overrides for cross-section parameters
+- CRS-aware road ingestion and auto-reprojection to DEM CRS
 
 **`"cross_section"` (forest road inventories)**
 1. Define a parametric road cross-section: crown width, shoulder width,
@@ -597,10 +599,13 @@ still allowing users to override parameters through uploaded road GeoJSON
 attributes (for example `crown_width_m`, `ditch_depth_m`,
 `shoulder_slope`, `backslope_angle_deg`).
 
+`RaiseRoads` now implements this cross-section parameter override path and
+unpaved-road conservative fallback.
+
 ### Road Width Resolution
 
-When `road_buffer_width is None`, the processor attempts to read width
-from road vector attributes in this priority order:
+When `road_buffer_width is None`, `RaiseRoads` resolves width from road
+attributes in this priority order:
 1. `road_width` or `width` attribute (meters)
 2. OSM `highway` tag → lookup table (motorway: 12m, trunk: 10m, primary: 8m,
    secondary: 7m, tertiary: 6m, residential: 5m, track: 3m, unclassified: 4m)
@@ -628,33 +633,37 @@ embankment mask on the hillshade. This lets users:
 
 Road acquisition from OpenStreetMap is a separate module from the
 TerrainProcessor, shared across the WEPPcloud server. The
-TerrainProcessor calls into it but does not own it.
+TerrainProcessor calls into it but does not own it. The implementation now
+exists under `wepppy/topo/osm_roads/`, with the TerrainProcessor-facing seam
+at `wepppy/topo/wbt/osm_roads_consumer.py::resolve_roads_source`.
 
-**Server-wide persistent cache.** OSM Overpass queries are rate-limited
-and slow for large extents. The module maintains a disk-backed cache
-keyed by a normalized bbox + highway filter hash. When a request arrives:
+**Server-wide hybrid persistent cache.** OSM Overpass queries are rate-limited
+and slow for large extents. The module uses:
 
-1. Round the bbox to a coarser grid (e.g., 0.01 degree) so nearby queries
-   hit the same cache entry rather than fetching overlapping tiles.
-2. Check the cache. On hit, clip the cached result to the requested extent
-   and return.
-3. On miss, query Overpass, store the result, clip to extent, and return.
+- PostgreSQL metadata + advisory-lock coordination (`osm_roads_cache` schema)
+- `/wc1` file payloads (tile GeoParquet + request-level GeoJSON artifacts)
 
-Cache entries have a configurable TTL (default: 30 days). OSM road data
-changes infrequently enough that month-scale staleness is acceptable for
-terrain processing.
+Requests are keyed deterministically using tile-cover hash + highway-filter
+hash. For each request:
+
+1. Read request/tile metadata from PostgreSQL.
+2. On cache hit, reuse payloads and return clipped/reprojected output.
+3. On miss/stale, acquire per-key advisory lock, fetch from Overpass, persist
+   payload + metadata, and return.
+4. On upstream failure, apply bounded stale/expired fallback policy when
+   configured.
 
 **Separation of concerns.** The module handles Overpass query construction,
-rate-limit backoff, response parsing (OSM XML/JSON → GeoJSON), coordinate
-reprojection to the project UTM zone, and highway tag → attribute mapping
-(road class, estimated width). The TerrainProcessor receives a road
-GeoJSON and doesn't know whether it came from upload, cache hit, or fresh
-Overpass query.
+retry/backoff, response normalization, cache policy, and artifact generation.
+TerrainProcessor receives a road artifact path and does not care whether the
+source was upload, cache hit, or fresh Overpass fetch.
 
-**Why server-wide, not per-project.** Multiple users working in the same
-geographic area (e.g., a national forest) would otherwise each trigger
-their own Overpass query for the same roads. A shared cache eliminates
-redundant fetches and reduces the risk of hitting Overpass rate limits.
+**Deployment requirement (forest1 + production).** Before enabling
+`roads_source="osm"` in terrain workflows, roll out PostgreSQL schema support
+and runtime env config on both forest1 and production. Use:
+`docs/work-packages/20260304_osm_roads_client_cache/artifacts/postgres_migration_setup.md`.
+The key operational requirement is explicit `WEPPPY_OSM_ROADS_CACHE_DB_URL`
+configuration and one-shot schema initialization (`PostgresMetadataStore.ensure_schema()`).
 
 ## Bounded Breach Detail
 
@@ -852,7 +861,9 @@ audit, reproducibility, and debugging.
    (`FeaturePreservingSmoothing`).
 
 2. ~~**OSM road fetch caching.**~~ Resolved: separate OSM roads module
-   with server-wide persistent cache. See "OSM Roads Module" section.
+   implemented at `wepppy/topo/osm_roads/` with PostgreSQL metadata/advisory
+   locks + `/wc1` payload cache. Forest1/prod rollout requires the migration
+   setup in `docs/work-packages/20260304_osm_roads_client_cache/artifacts/postgres_migration_setup.md`.
 
 3. ~~**Bounded breach collar sizing.**~~ Resolved: expose
    `bounded_breach_collar_m` and default to `10 * cellsize` when unset.

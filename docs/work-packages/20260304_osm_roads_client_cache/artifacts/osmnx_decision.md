@@ -67,5 +67,5 @@ We should reconsider OSMnx integration only if a dedicated dependency evaluation
 
 - `AGENTS.md` (dependency/performance discipline and ExecPlan guardrails)
 - `docs/work-packages/20260304_osm_roads_client_cache/module_contract.md`
-- `docs/work-packages/20260304_osm_roads_client_cache/prompts/active/osm_roads_client_cache_execplan.md`
+- `docs/work-packages/20260304_osm_roads_client_cache/prompts/completed/osm_roads_client_cache_execplan.md`
 - `wepppy/topo/wbt/terrain_processor.concept.md` (`OSM Roads Module` section)

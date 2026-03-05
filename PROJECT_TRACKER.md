@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-04  
+**Last Updated**: 2026-03-05  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,39 +78,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### OSM Roads Client with Persistent Server-Side Cache
-**Proposed**: 2026-03-04  
-**Size**: High (1-2 weeks)  
-**Priority**: High  
-**Status**: Scoped - Ready to Start  
-**Package**: [docs/work-packages/20260304_osm_roads_client_cache/](docs/work-packages/20260304_osm_roads_client_cache/)  
-**Description**: Build a production-grade WEPPpy OSM roads module with deterministic request contract, persistent server-wide cache, and lock-safe Overpass fetch/refresh behavior for terrain preprocessing consumers.
-
-**Scope**:
-- Implement `wepppy/topo/osm_roads/` module contract (`OSMRoadsRequest`, `OSMRoadsResult`, service interface, typed errors).
-- Implement file-backed persistent cache (SQLite metadata index + GeoParquet payloads), key canonicalization, TTL policy, and stale-on-error semantics.
-- Implement per-key single-flight locking to prevent duplicate upstream fetches under concurrent requests.
-- Implement Overpass query/normalize pipeline with AOI clipping and target-CRS reprojection.
-- Add tests for keying, lock behavior, TTL state transitions, reprojection, and consumer-path integration.
-
-**Strategic Value**:
-- Eliminates redundant Overpass traffic across runs/users.
-- Enables reliable `roads_source=\"osm\"` workflows for terrain conditioning and road embankment synthesis.
-- Improves operational resilience via persistent cache reuse and stale-on-error policy.
-- Keeps WEPPpy in control of cache/locking semantics without introducing speculative runtime dependencies.
-
-**Dependencies**:
-- Terrain OSM cache direction in `wepppy/topo/wbt/terrain_processor.concept.md`
-- Root dependency/performance discipline in `AGENTS.md`
-- Existing WEPPpy geospatial stack and test infrastructure
-
-**Next Steps**:
-1. Implement Milestone 1/2 module and cache scaffold from active ExecPlan.
-2. Implement Overpass + normalization + clip/reproject pipeline.
-3. Add consumer integration and full validation suite.
-
----
 
 ### RQ-Engine Agent Usability and Documentation Hardening
 **Proposed**: 2026-02-08  
@@ -347,6 +314,21 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### OSM Roads Client with Persistent Server-Side Cache
+**Completed**: 2026-03-05  
+**Duration**: 1 day  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260304_osm_roads_client_cache/](docs/work-packages/20260304_osm_roads_client_cache/)  
+**Description**: Implemented a production-ready WEPPpy OSM roads client module with deterministic keying, hybrid persistent caching, lock-safe refresh, and TerrainProcessor-style consumer seam.
+
+**Outcome**:
+- Added `wepppy/topo/osm_roads/` module surface (`contracts`, `errors`, `cache`, `overpass`, `service`, runtime README).
+- Implemented hybrid cache contract support (PostgreSQL metadata/advisory-lock backend + file payload storage) with bounded stale/expired fallback behavior.
+- Added consumer seam `wepppy/topo/wbt/osm_roads_consumer.py::resolve_roads_source`.
+- Added topo regression suites for contracts/cache/service concurrency, fallback policy, cleanup, and clip/reproject behavior.
+- Executed required validation gates including `wctl run-pytest tests --maxfail=1` (pass), broad-exception enforcement (pass), and required doc-lint checks (pass).
 
 ### Browse Parquet Quick-Look Filter Builder
 **Completed**: 2026-03-04  
