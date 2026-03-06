@@ -210,6 +210,24 @@ def test_task_modify_disturbed_writes_lookup(disturbed_client):
     assert data == payload["rows"]
 
 
+def test_modify_disturbed_route_renders_absolute_urls(disturbed_client):
+    client, _DisturbedStub, _BaerStub, _RonStub, dispatched, _run_dir = disturbed_client
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/modify_disturbed")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "rendered"
+    assert dispatched["template"] == "controls/edit_csv.htm"
+    template_context = dispatched["template_context"]
+    assert template_context["runid"] == RUN_ID
+    assert template_context["config"] == CONFIG
+    assert template_context["csv_url"] == (
+        f"/runs/{RUN_ID}/{CONFIG}/download/disturbed/disturbed_land_soil_lookup.csv"
+    )
+    assert template_context["save_url"] == f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed"
+    assert template_context["session_token_url"] == (
+        f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/session-token"
+    )
+
+
 def test_modify_disturbed_page_emits_csrf_token_for_save(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -262,6 +280,9 @@ def test_modify_disturbed_page_emits_csrf_token_for_save(
         token = token_match.group(1)
         assert token
         assert "X-CSRFToken" in html
+        assert f'data-csv-url="/runs/{RUN_ID}/{CONFIG}/download/disturbed/disturbed_land_soil_lookup.csv"' in html
+        assert f'data-save-url="/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed"' in html
+        assert f'data-session-token-url="/rq-engine/api/runs/{RUN_ID}/{CONFIG}/session-token"' in html
 
         rejected_response = client.post(
             f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",

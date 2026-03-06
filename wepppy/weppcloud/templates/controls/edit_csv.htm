@@ -11,11 +11,24 @@
       integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 </head>
 <body>
-<div id="spreadsheet1"></div>
- 
-<p><button id='save'>Save my changes</button></p>
- 
+<div id="edit-csv-config"
+     data-runid="{{ runid }}"
+     data-config="{{ config }}"
+     data-csv-url="{{ csv_url }}"
+     data-save-url="{{ save_url }}"
+     data-session-token-url="{{ session_token_url }}"></div>
+<div class="container-fluid pt-2">
+    <div id="status-banner" class="alert alert-info" role="alert">
+        Preparing disturbed lookup table...
+    </div>
+    <div id="spreadsheet1"></div>
+    <p class="mt-2">
+        <button id="save" class="btn btn-primary" disabled>Save my changes</button>
+    </p>
+</div>
 <script>
+var mySpreadsheet = null;
+
 function readCsrfToken() {
     var meta = document.querySelector('meta[name="csrf-token"]');
     if (!meta) {
@@ -24,16 +37,28 @@ function readCsrfToken() {
     return String(meta.getAttribute("content") || "").trim();
 }
 
-var mySpreadsheet = jspreadsheet(document.getElementById('spreadsheet1'), {
-    csv: '{{ csv_url }}',
-    csvHeaders: true,
-    columns: [
-        { type: 'text', width: 210, 
-          source: ['bare', 
+function setStatus(level, message) {
+    var banner = document.getElementById("status-banner");
+    if (!banner) {
+        return;
+    }
+    var normalized = String(level || "info").toLowerCase();
+    var allowed = ["info", "success", "warning", "danger"];
+    if (allowed.indexOf(normalized) === -1) {
+        normalized = "info";
+    }
+    banner.className = "alert alert-" + normalized;
+    banner.textContent = message;
+}
+
+function columnsConfig() {
+    return [
+        { type: 'text', width: 210,
+          source: ['bare',
                    'forest',
-                   'forest high sev fire', 
-                   'forest low sev fire', 
-                   'forest prescribed fire', 
+                   'forest high sev fire',
+                   'forest low sev fire',
+                   'forest prescribed fire',
                    'short grass',
                    'grass high sev fire',
                    'grass low sev fire',
@@ -46,7 +71,7 @@ var mySpreadsheet = jspreadsheet(document.getElementById('spreadsheet1'), {
                    'skid',
                    'tall grass',
                    'young forest',
-                   'thinning' 
+                   'thinning'
                   ] },
         { type: 'text', width: 110,
           source: ['clay loam', 'loam', 'sand loam', 'silt loam'] },
@@ -58,10 +83,121 @@ var mySpreadsheet = jspreadsheet(document.getElementById('spreadsheet1'), {
         { type: 'text', width: 60 },
         { type: 'text', width: 60 },
         { type: 'text', width: 60 }
-    ]
-});
- 
-document.getElementById('save').onclick = function () {
+    ];
+}
+
+function parseErrorBody(response) {
+    return response
+        .text()
+        .then(function (body) {
+            if (!body) {
+                return "HTTP " + response.status;
+            }
+            try {
+                var parsed = JSON.parse(body);
+                if (parsed && parsed.error && parsed.error.message) {
+                    return parsed.error.message;
+                }
+            } catch (_ignore) {
+                // fall through to plain text
+            }
+            var lowered = String(body).toLowerCase();
+            if (lowered.indexOf("<html") !== -1 || lowered.indexOf("<!doctype") !== -1) {
+                return "HTTP " + response.status;
+            }
+            if (body.length > 300) {
+                return body.slice(0, 300) + "...";
+            }
+            return body;
+        })
+        .catch(function () {
+            return "HTTP " + response.status;
+        });
+}
+
+function ensureSpreadsheetLibraries() {
+    if (typeof jspreadsheet !== "function") {
+        throw new Error("Spreadsheet library failed to load. Disable blockers and refresh.");
+    }
+}
+
+function requestSessionToken(config) {
+    var headers = {};
+    var csrfToken = readCsrfToken();
+    if (csrfToken) {
+        headers["X-CSRFToken"] = csrfToken;
+    }
+
+    return fetch(config.sessionTokenUrl, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: headers
+    }).then(function (response) {
+        if (response.ok) {
+            return;
+        }
+        return parseErrorBody(response).then(function (message) {
+            throw new Error("Session check failed: " + message);
+        });
+    });
+}
+
+function fetchLookupCsv(config) {
+    return fetch(config.csvUrl, {
+        method: "GET",
+        credentials: "same-origin"
+    }).then(function (response) {
+        if (!response.ok) {
+            return parseErrorBody(response).then(function (message) {
+                throw new Error("Table download failed: " + message);
+            });
+        }
+        return response.text();
+    });
+}
+
+function initializeSpreadsheetFromCsv(csvText) {
+    var blob = new Blob([csvText], { type: "text/csv" });
+    var blobUrl = URL.createObjectURL(blob);
+    mySpreadsheet = jspreadsheet(document.getElementById('spreadsheet1'), {
+        csv: blobUrl,
+        csvHeaders: true,
+        columns: columnsConfig()
+    });
+}
+
+function loadSpreadsheet(config) {
+    setStatus("info", "Authorizing table access...");
+    return requestSessionToken(config)
+        .then(function () {
+            setStatus("info", "Loading disturbed lookup table...");
+            return fetchLookupCsv(config);
+        })
+        .then(function (csvText) {
+            ensureSpreadsheetLibraries();
+            initializeSpreadsheetFromCsv(csvText);
+            document.getElementById("save").disabled = false;
+            setStatus("success", "Table loaded. You can edit values and save.");
+        })
+        .catch(function (error) {
+            setStatus("danger", String(error && error.message ? error.message : error));
+        });
+}
+
+function parseSaveResponse(response) {
+    if (!response.ok) {
+        return parseErrorBody(response).then(function (message) {
+            throw new Error(message);
+        });
+    }
+    return response.json().catch(function () { return {}; });
+}
+
+function onSave(config) {
+    if (!mySpreadsheet || typeof mySpreadsheet.getData !== "function") {
+        setStatus("warning", "Table is not loaded yet.");
+        return;
+    }
     var data = mySpreadsheet.getData();
     var headers = {
         "Content-Type": "application/json"
@@ -71,33 +207,45 @@ document.getElementById('save').onclick = function () {
         headers["X-CSRFToken"] = csrfToken;
     }
 
-    fetch("tasks/modify_disturbed", {
+    setStatus("info", "Saving changes...");
+    fetch(config.saveUrl, {
         method: "POST",
+        credentials: "same-origin",
         headers: headers,
         body: JSON.stringify(data)
     })
-        .then((response) => {
-            if (!response.ok) {
-                throw response;
-            }
-            return response.json();
-        })
+        .then(parseSaveResponse)
         .then(() => {
-            alert('Save Successful');
+            setStatus("success", "Save successful.");
         })
         .catch((error) => {
-            if (error && typeof error.json === "function") {
-                error.json().then((payload) => {
-                    console.log(payload);
-                    alert('Save Error, see log');
-                }).catch(() => {
-                    alert('Save Error, see log');
-                });
-            } else {
-                alert('Save Error, see log');
-            }
+            setStatus("danger", "Save failed: " + String(error && error.message ? error.message : error));
         });
-};
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    var configNode = document.getElementById("edit-csv-config");
+    if (!configNode) {
+        setStatus("danger", "Editor config missing.");
+        return;
+    }
+    var config = {
+        csvUrl: String(configNode.dataset.csvUrl || ""),
+        saveUrl: String(configNode.dataset.saveUrl || ""),
+        sessionTokenUrl: String(configNode.dataset.sessionTokenUrl || "")
+    };
+
+    if (!config.csvUrl || !config.saveUrl || !config.sessionTokenUrl) {
+        setStatus("danger", "Editor config is incomplete.");
+        return;
+    }
+
+    document.getElementById("save").addEventListener("click", function () {
+        onSave(config);
+    });
+
+    loadSpreadsheet(config);
+});
 
 </script>
 </body>

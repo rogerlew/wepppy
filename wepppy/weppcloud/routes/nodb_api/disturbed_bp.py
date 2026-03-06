@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from urllib.parse import quote
 from typing import Any, Dict, Optional, Tuple, Union
 
 from flask import Response
@@ -23,7 +24,7 @@ from .._common import (
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed, write_disturbed_land_soil_lookup
-from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory, url_for_run
 
 disturbed_bp = Blueprint('disturbed', __name__)
 
@@ -32,9 +33,24 @@ disturbed_bp = Blueprint('disturbed', __name__)
 @authorize_and_handle_with_exception_factory
 def modify_disturbed(runid: str, config: str) -> Response:
     """Render the CSV editor for disturbed land/soil lookup."""
+    quoted_runid = quote(runid, safe="")
+    quoted_config = quote(config, safe="")
     return render_template(
         'controls/edit_csv.htm',
-        csv_url='download/disturbed/disturbed_land_soil_lookup.csv',
+        runid=runid,
+        config=config,
+        csv_url=url_for_run(
+            'download.download_with_subpath',
+            runid=runid,
+            config=config,
+            subpath='disturbed/disturbed_land_soil_lookup.csv',
+        ),
+        save_url=url_for_run(
+            'disturbed.task_modify_disturbed',
+            runid=runid,
+            config=config,
+        ),
+        session_token_url=f"/rq-engine/api/runs/{quoted_runid}/{quoted_config}/session-token",
     )
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/reset_disturbed', methods=['GET', 'POST'])
