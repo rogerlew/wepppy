@@ -1090,7 +1090,6 @@ class SoilBurnSeverityMap(LandcoverMap):
         """
         if cellsize is None:
             transform = self.transform
-            assert round(transform[1], 1) == round(abs(transform[5]), 1)
             cellsize = transform[1]
 
         fname = self.fname

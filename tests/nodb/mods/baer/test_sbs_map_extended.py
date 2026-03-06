@@ -126,7 +126,13 @@ class GeoTiffTestHelper:
     """Helper class to create test GeoTIFFs with various characteristics."""
     
     @staticmethod
-    def create_geotiff(filename, data, color_table=None, nodata_val=None):
+    def create_geotiff(
+        filename,
+        data,
+        color_table=None,
+        nodata_val=None,
+        geotransform=None,
+    ):
         """
         Create a GeoTIFF file with specified data and optional color table.
         
@@ -135,6 +141,7 @@ class GeoTiffTestHelper:
             data: 2D numpy array of pixel values
             color_table: Optional GDAL color table
             nodata_val: Optional nodata value
+            geotransform: Optional GDAL geotransform tuple/list
         """
         rows, cols = data.shape
         
@@ -154,7 +161,8 @@ class GeoTiffTestHelper:
         dataset.SetProjection(srs.ExportToWkt())
         
         # Set geotransform: [top-left x, pixel width, 0, top-left y, 0, -pixel height]
-        geotransform = [500000, 30, 0, 4500000, 0, -30]
+        if geotransform is None:
+            geotransform = [500000, 30, 0, 4500000, 0, -30]
         dataset.SetGeoTransform(geotransform)
         
         band = dataset.GetRasterBand(1)
@@ -637,6 +645,42 @@ class TestSBSMapProperties(unittest.TestCase):
         unique_vals = np.unique(output_data)
         self.assertTrue(all(v in [0, 1, 2, 3] for v in unique_vals))
         
+        ds = None
+
+    def test_export_4class_map_allows_non_square_pixels(self):
+        """Export should not fail when source pixels are rectangular."""
+        filename = os.path.join(self.temp_dir, 'test_export_rectangular_input.tif')
+        output_fn = os.path.join(self.temp_dir, 'test_export_rectangular_output.tif')
+
+        data = np.array([
+            [0, 1, 2, 3],
+            [3, 2, 1, 0],
+        ], dtype=np.uint8)
+
+        ct = GeoTiffTestHelper.create_standard_sbs_color_table()
+        GeoTiffTestHelper.create_geotiff(
+            filename,
+            data,
+            color_table=ct,
+            geotransform=[500000, 30, 0, 4500000, 0, -15],
+        )
+
+        sbs_map = SoilBurnSeverityMap(filename)
+        sbs_map.export_4class_map(output_fn)
+
+        self.assertTrue(os.path.exists(output_fn))
+        ds = gdal.Open(output_fn)
+        self.assertIsNotNone(ds)
+
+        transform = ds.GetGeoTransform()
+        self.assertEqual(transform[1], 30)
+        self.assertEqual(transform[5], -15)
+
+        band = ds.GetRasterBand(1)
+        output_data = band.ReadAsArray()
+        unique_vals = np.unique(output_data)
+        self.assertTrue(all(v in [0, 1, 2, 3] for v in unique_vals))
+
         ds = None
 
     def test_export_4class_map_legacy_palette(self):
