@@ -173,6 +173,8 @@ Mulch scenarios require a **base scenario** (typically a burn severity scenario)
 
 Low-intensity burns in mature forests that reduce ladder fuels and understory without triggering high-severity soil heating. Omni applies prescribed fire management only to forest vegetation types.
 
+Prescribed fire scenarios require an **undisturbed** clone context (no SBS map). In Omni, this is enforced by running prescribed fire from the `undisturbed` scenario when needed.
+
 ## Contrast Analysis Modes
 
 ### Cumulative Contribution
