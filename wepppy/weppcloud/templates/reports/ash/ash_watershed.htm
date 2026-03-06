@@ -1,6 +1,15 @@
 {% extends "reports/_base_report.htm" %}
 {% block report_title %}Ash Transport Model (Experimental){% endblock %}
 {% block report_content %}
+{% if burn_class_summary is mapping %}
+  {% set _burn_summary = burn_class_summary %}
+{% else %}
+  {% set _burn_summary = {} %}
+{% endif %}
+{% set _burn_unburned = _burn_summary.get(0, _burn_summary.get('0', _burn_summary.get(1, _burn_summary.get('1', 0.0)))) %}
+{% set _burn_low = _burn_summary.get(1, _burn_summary.get('1', _burn_summary.get(2, _burn_summary.get('2', 0.0)))) %}
+{% set _burn_moderate = _burn_summary.get(2, _burn_summary.get('2', _burn_summary.get(3, _burn_summary.get('3', 0.0)))) %}
+{% set _burn_high = _burn_summary.get(3, _burn_summary.get('3', _burn_summary.get(4, _burn_summary.get('4', 0.0)))) %}
 <section class="wc-panel wc-stack">
   <header class="wc-stack">
     <h2 class="wc-heading__subtitle">Model Parameters</h2>
@@ -52,25 +61,25 @@
       <tbody>
         <tr>
           <th scope="row">Unburned</th>
-          <td>{{ unitizer(burn_class_summary[0], 'ha') | safe }}</td>
+          <td>{{ unitizer(_burn_unburned, 'ha') | safe }}</td>
           <td>{{ unitizer_units('ha') | safe }}</td>
           <td>N/A</td>
         </tr>
         <tr>
           <th scope="row">Low Severity</th>
-          <td>{{ unitizer(burn_class_summary[1], 'ha') | safe }}</td>
+          <td>{{ unitizer(_burn_low, 'ha') | safe }}</td>
           <td>{{ unitizer_units('ha') | safe }}</td>
           <td>Black Ash</td>
         </tr>
         <tr>
           <th scope="row">Moderate Severity</th>
-          <td>{{ unitizer(burn_class_summary[2], 'ha') | safe }}</td>
+          <td>{{ unitizer(_burn_moderate, 'ha') | safe }}</td>
           <td>{{ unitizer_units('ha') | safe }}</td>
           <td>Black Ash</td>
         </tr>
         <tr>
           <th scope="row">High Severity</th>
-          <td>{{ unitizer(burn_class_summary[3], 'ha') | safe }}</td>
+          <td>{{ unitizer(_burn_high, 'ha') | safe }}</td>
           <td>{{ unitizer_units('ha') | safe }}</td>
           <td>White Ash</td>
         </tr>
