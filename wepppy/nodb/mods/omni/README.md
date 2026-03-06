@@ -175,6 +175,12 @@ Low-intensity burns in mature forests that reduce ladder fuels and understory wi
 
 Prescribed fire scenarios require an **undisturbed** clone context (no SBS map). In Omni, this is enforced by running prescribed fire from the `undisturbed` scenario when needed.
 
+#### Scenario Dependency Behavior
+
+- Mulch scenarios depend on a selected base scenario (`uniform_low`, `uniform_moderate`, `uniform_high`, or `sbs_map`) and run in a later pass after base scenarios are processed.
+- Thinning and `prescribed_fire` run in an undisturbed context. If the project base is `sbs_map`, include/run an `undisturbed` Omni scenario so those treatments can clone from it.
+- Scenario list order does not control execution order; Omni resolves dependencies internally.
+
 ## Contrast Analysis Modes
 
 ### Cumulative Contribution

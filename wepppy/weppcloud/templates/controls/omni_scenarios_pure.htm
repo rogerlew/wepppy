@@ -43,8 +43,11 @@
       </div>
     </div>
     <p class="wc-text-muted">
-      Mulching and thinning scenarios depend on their base scenario outputs. Place base scenarios ahead of
-      derived treatments so Omni can reuse results efficiently.
+      Mulch scenarios depend on a selected base scenario (uniform_low, uniform_moderate, uniform_high, or sbs_map)
+      and run in a later pass after base scenarios are processed. Thinning and prescribed_fire run in an
+      undisturbed context. If the project base is sbs_map, include/run an undisturbed Omni scenario so those
+      treatments can clone from it. You do not need to order the scenario list; Omni resolves dependencies
+      internally.
     </p>
   </div>
 
