@@ -310,6 +310,93 @@ Release hygiene:
 - Record whether host runtime matches repository worker/timeouts.
 - Record one known-good `/rq-engine/create/` result and one `/api/jobstatus` polling sequence.
 
+## WEPPcloud Hotfix Playbook (Minimal Disruption)
+Use this when applying a small `weppcloud` fix (for example template/python hotfix) on a live host and you want to avoid full container restarts.
+
+### 0) Scope + guardrails
+- Prefer this flow for bounded fixes in existing files; do not use it for dependency/image changes.
+- Keep blast radius small: patch one service, validate, then continue.
+- Never assume host file updates are visible in the running container. Confirm in-container content explicitly.
+
+### 1) Capture runtime identity first
+```bash
+docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | grep weppcloud
+docker inspect --format 'Cmd={{json .Config.Cmd}} RestartCount={{.RestartCount}}' docker-weppcloud-1
+```
+
+### 2) Verify host vs container file content
+```bash
+# Host checkout file
+sha256sum /workdir/wepppy/wepppy/weppcloud/templates/reports/ash/ash_watershed.htm
+
+# Running container file (authoritative for hotfix effectiveness)
+docker exec -i docker-weppcloud-1 sh -lc \
+  'sha256sum /workdir/wepppy/wepppy/weppcloud/templates/reports/ash/ash_watershed.htm'
+```
+
+If checksums differ, patching only the host checkout is insufficient.
+
+### 3) Stage + copy patch into the running container
+```bash
+# Stage on host (or copy via scp/cat pipeline from operator workstation)
+cp /workdir/wepppy/wepppy/weppcloud/templates/reports/ash/ash_watershed.htm /tmp/ash_watershed.hotfix.htm
+
+# Optional rollback snapshot from container before overwrite
+docker cp docker-weppcloud-1:/workdir/wepppy/wepppy/weppcloud/templates/reports/ash/ash_watershed.htm \
+  /tmp/ash_watershed.prehotfix.bak.htm
+
+# Apply patch into container filesystem
+docker cp /tmp/ash_watershed.hotfix.htm \
+  docker-weppcloud-1:/workdir/wepppy/wepppy/weppcloud/templates/reports/ash/ash_watershed.htm
+
+# Verify in-container content after copy
+docker exec -i docker-weppcloud-1 sh -lc \
+  'sha256sum /workdir/wepppy/wepppy/weppcloud/templates/reports/ash/ash_watershed.htm'
+```
+
+### 4) Graceful reload (no full restart)
+```bash
+# HUP Gunicorn master (PID 1 in container command layout)
+docker exec docker-weppcloud-1 sh -lc 'kill -HUP 1'
+
+# Confirm graceful worker rollover
+docker logs --since 2m docker-weppcloud-1 2>&1 | grep -E 'Handling signal: hup|Booting worker|Worker exiting'
+
+# Confirm container stayed up
+docker ps --filter name=docker-weppcloud-1 --format '{{.Names}} {{.Status}}'
+docker inspect --format 'RestartCount={{.RestartCount}}' docker-weppcloud-1
+```
+
+Expected:
+- `Handling signal: hup`
+- new worker `Booting worker` lines
+- old worker `Worker exiting` lines
+- no container restart count increase
+
+### 5) Functional verification
+```bash
+# Service health
+curl -fsS https://<host>/weppcloud/ >/dev/null
+curl -fsS https://<host>/rq-engine/health >/dev/null
+
+# Re-test the failing endpoint directly
+curl -k -sS -o /tmp/hotfix_resp.txt -w 'code=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n' \
+  "https://<host>/weppcloud/runs/<runid>/<config>/report/ash/"
+```
+
+### 6) Rollback (if needed)
+```bash
+docker cp /tmp/ash_watershed.prehotfix.bak.htm \
+  docker-weppcloud-1:/workdir/wepppy/wepppy/weppcloud/templates/reports/ash/ash_watershed.htm
+docker exec docker-weppcloud-1 sh -lc 'kill -HUP 1'
+```
+
+### 7) Record incident notes
+- Exact UTC timestamp of copy + reload.
+- File path and checksum before/after (host and container).
+- Endpoint tested and result (status + TTFB).
+- Whether error signatures stopped (for example no new run-level `exception_factory.log` entries).
+
 ## Drift Controls
 - Before incident analysis, capture:
   - Host git SHA (`git rev-parse --short HEAD` in `/workdir/wepppy`).
