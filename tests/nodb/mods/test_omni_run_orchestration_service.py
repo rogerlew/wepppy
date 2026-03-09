@@ -235,6 +235,149 @@ class _BulkContrastOmniStub:
         self.clean_stale_args.append(list(active_ids))
 
 
+@pytest.mark.parametrize(
+    ("run_wepp_watershed", "expected_delete_after_interchange"),
+    [(True, False), (False, True)],
+)
+def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    run_wepp_watershed: bool,
+    expected_delete_after_interchange: bool,
+) -> None:
+    service = OmniRunOrchestrationService()
+    scenario_wd = tmp_path / "_pups" / "omni" / "scenarios" / "uniform_low"
+    scenario_wd.mkdir(parents=True)
+
+    class _OmniScenarioRunStub:
+        def __init__(self) -> None:
+            self.wd = str(tmp_path)
+            self.runs_dir = str(tmp_path / "wepp" / "runs")
+            self.runid = "demo"
+            self.base_scenario = "undisturbed"
+            self.delete_after_interchange = True
+            self.rq_job_pool_max_worker_per_scenario_task = 1
+            self.logger = logging.getLogger("tests.omni.run_orchestration.run_omni_scenario")
+
+        @contextmanager
+        def timed(self, _label: str):
+            yield
+
+    class _LanduseStub:
+        def build_managements(self) -> None:
+            return None
+
+    class _WeppStub:
+        def __init__(self) -> None:
+            self.output_dir = str(scenario_wd / "wepp" / "output")
+            self.runs_dir = str(scenario_wd / "wepp" / "runs")
+            self.run_wepp_watershed = run_wepp_watershed
+            self.calls: list[str] = []
+
+        def prep_hillslopes(self, **_kwargs) -> None:
+            self.calls.append("prep_hillslopes")
+
+        def run_hillslopes(self, **_kwargs) -> None:
+            self.calls.append("run_hillslopes")
+
+        def prep_watershed(self) -> None:
+            self.calls.append("prep_watershed")
+
+        def run_watershed(self) -> None:
+            self.calls.append("run_watershed")
+
+    wepp_stub = _WeppStub()
+    landuse_stub = _LanduseStub()
+    disturbed_stub = object()
+    soils_stub = object()
+    climate_stub = types.SimpleNamespace(observed_start_year=None, future_start_year=None)
+    interchange_calls: list[tuple[Path, int | None, bool]] = []
+    cleanup_calls: list[_WeppStub] = []
+    mode_calls: list[tuple[str, str]] = []
+
+    core_module = types.ModuleType("wepppy.nodb.core")
+    core_module.Climate = type(
+        "Climate",
+        (),
+        {"getInstance": staticmethod(lambda _wd: climate_stub)},
+    )
+    core_module.Landuse = type(
+        "Landuse",
+        (),
+        {"getInstance": staticmethod(lambda _wd: landuse_stub)},
+    )
+    core_module.Soils = type(
+        "Soils",
+        (),
+        {"getInstance": staticmethod(lambda _wd: soils_stub)},
+    )
+    core_module.Wepp = type(
+        "Wepp",
+        (),
+        {"getInstance": staticmethod(lambda _wd: wepp_stub)},
+    )
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.core", core_module)
+
+    disturbed_module = types.ModuleType("wepppy.nodb.mods.disturbed")
+    disturbed_module.Disturbed = type(
+        "Disturbed",
+        (),
+        {"getInstance": staticmethod(lambda _wd: disturbed_stub)},
+    )
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.disturbed", disturbed_module)
+
+    omni_module = types.ModuleType("wepppy.nodb.mods.omni.omni")
+
+    class OmniScenario(IntEnum):
+        UniformLow = 1
+        Thinning = 4
+        Undisturbed = 9
+        PrescribedFire = 10
+
+        @staticmethod
+        def parse(value):
+            lookup = {
+                "uniform_low": OmniScenario.UniformLow,
+                "undisturbed": OmniScenario.Undisturbed,
+                "thinning": OmniScenario.Thinning,
+                "prescribed_fire": OmniScenario.PrescribedFire,
+            }
+            return lookup[str(value)]
+
+    class _ModeBuildServices:
+        @staticmethod
+        def apply_scenario_mode(*_args, **kwargs) -> None:
+            mode_calls.append((kwargs["scenario_name"], kwargs["new_wd"]))
+
+    omni_module.OmniScenario = OmniScenario
+    omni_module._OMNI_MODE_BUILD_SERVICES = _ModeBuildServices()
+    omni_module._omni_clone = lambda *_args, **_kwargs: str(scenario_wd)
+    omni_module._omni_clone_sibling = lambda *_args, **_kwargs: None
+    omni_module._post_watershed_run_cleanup = lambda wepp: cleanup_calls.append(wepp)
+    omni_module._scenario_name_from_scenario_definition = lambda scenario_def: str(
+        scenario_def["type"]
+    )
+    omni_module.run_wepp_hillslope_interchange = (
+        lambda path, *, start_year, delete_after_interchange: interchange_calls.append(
+            (Path(path), start_year, delete_after_interchange)
+        )
+    )
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.omni.omni", omni_module)
+
+    omni = _OmniScenarioRunStub()
+    scenario_wd_result, scenario_name = service.run_omni_scenario(omni, {"type": "uniform_low"})
+
+    assert scenario_wd_result == str(scenario_wd)
+    assert scenario_name == "uniform_low"
+    assert mode_calls == [("uniform_low", str(scenario_wd))]
+    assert interchange_calls == [
+        (scenario_wd / "wepp" / "output", None, expected_delete_after_interchange)
+    ]
+    assert wepp_stub.calls[:3] == ["prep_hillslopes", "run_hillslopes", "prep_watershed"]
+    assert wepp_stub.calls[-1] == "run_watershed"
+    assert cleanup_calls == [wepp_stub]
+
+
 def test_run_omni_scenarios_skip_and_execute_persist_state(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

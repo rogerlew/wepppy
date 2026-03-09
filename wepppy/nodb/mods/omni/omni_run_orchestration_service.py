@@ -303,10 +303,16 @@ class OmniRunOrchestrationService:
                 if normalized is not None:
                     start_year = normalized
                     break
+            # Watershed routing still depends on the raw H*.pass.dat files.
+            # Deleting hillslope sources immediately after interchange breaks
+            # the subsequent watershed run for omni scenarios.
+            delete_after_interchange = bool(
+                omni.delete_after_interchange and not wepp.run_wepp_watershed
+            )
             run_wepp_hillslope_interchange(
                 wepp.output_dir,
                 start_year=start_year,
-                delete_after_interchange=omni.delete_after_interchange,
+                delete_after_interchange=delete_after_interchange,
             )
 
         with omni.timed(f"  {scenario_name}: prep watershed"):
