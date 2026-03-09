@@ -1520,11 +1520,15 @@ def _process_culvert_run(
         wepp.clean()
         wepp.prep_hillslopes()
         wepp.run_hillslopes()
-        ensure_hillslope_interchange(wepp, climate)
+        ensure_hillslope_interchange(wepp, climate, watershed_pending=True)
         wepp.prep_watershed()
         wepp.run_watershed()
         ensure_totalwatsed3(wepp, climate)
-        ensure_watershed_interchange(wepp, climate)
+        ensure_watershed_interchange(
+            wepp,
+            climate,
+            cleanup_deferred_hillslope_sources=True,
+        )
         activate_query_engine_for_run(wepp)
     except NoOutletFoundError as exc:
         # Gracefully handle sparse network - culvert watershed has no stream intersection

@@ -312,6 +312,63 @@ def test_apply_contrast_output_triggers_creates_and_removes_files(tmp_path, omni
     assert not (runs_dir / "tc.txt").exists()
 
 
+@pytest.mark.parametrize(
+    ("delete_after_interchange", "expected_cleanup_calls"),
+    [(True, 1), (False, 0)],
+)
+def test_post_watershed_run_cleanup_defers_hillslope_cleanup_until_after_success(
+    tmp_path,
+    monkeypatch,
+    omni_module,
+    delete_after_interchange,
+    expected_cleanup_calls,
+):
+    runs_dir = tmp_path / "runs"
+    output_dir = tmp_path / "output"
+    runs_dir.mkdir()
+    output_dir.mkdir()
+    (runs_dir / "pw0.out").write_text("watershed", encoding="ascii")
+    (runs_dir / "tc_out.txt").write_text("tc", encoding="ascii")
+
+    cleanup_calls = []
+    tc_calls = []
+
+    monkeypatch.setattr(
+        omni_module.Climate,
+        "getInstance",
+        lambda _wd: types.SimpleNamespace(climate_mode=omni_module.ClimateMode.Observed),
+    )
+    monkeypatch.setattr(
+        omni_module,
+        "cleanup_hillslope_sources_for_completed_interchange",
+        lambda output_dir: cleanup_calls.append(Path(output_dir)),
+    )
+    monkeypatch.setattr(
+        omni_module,
+        "run_wepp_watershed_tc_out_interchange",
+        lambda output_dir, *, delete_after_interchange: tc_calls.append(
+            (Path(output_dir), delete_after_interchange)
+        ),
+    )
+
+    wepp = types.SimpleNamespace(
+        wd=str(tmp_path),
+        runs_dir=str(runs_dir),
+        output_dir=str(output_dir),
+        delete_after_interchange=delete_after_interchange,
+        logger=logging.getLogger("tests.omni.post_watershed_cleanup"),
+    )
+
+    omni_module._post_watershed_run_cleanup(wepp)
+
+    assert not (runs_dir / "pw0.out").exists()
+    assert not (runs_dir / "tc_out.txt").exists()
+    assert (output_dir / "pw0.out").exists()
+    assert (output_dir / "tc_out.txt").exists()
+    assert tc_calls == [(output_dir, delete_after_interchange)]
+    assert cleanup_calls == [output_dir] * expected_cleanup_calls
+
+
 def test_omni_scenario_parse_roundtrip(omni_module):
     scenario = omni_module.OmniScenario.parse("mulch")
     assert scenario is omni_module.OmniScenario.Mulch

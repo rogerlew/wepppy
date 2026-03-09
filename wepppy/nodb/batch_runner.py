@@ -485,7 +485,12 @@ class BatchRunner(NoDbBase):
             wepp.run_hillslopes()
 
         if run_hillslopes:
-            ensure_hillslope_interchange(wepp, climate, logger)
+            ensure_hillslope_interchange(
+                wepp,
+                climate,
+                logger,
+                watershed_pending=run_watershed,
+            )
 
         if run_watershed:
             logger.info('calling wepp.prep_watershed()')
@@ -493,7 +498,12 @@ class BatchRunner(NoDbBase):
             logger.info('calling wepp.run_watershed()')
             wepp.run_watershed()  # also triggers post wepp processing
             ensure_totalwatsed3(wepp, climate, logger)
-            ensure_watershed_interchange(wepp, climate, logger)
+            ensure_watershed_interchange(
+                wepp,
+                climate,
+                logger,
+                cleanup_deferred_hillslope_sources=True,
+            )
             activate_query_engine_for_run(wepp, logger)
 
         return tuple(locks_cleared) if locks_cleared else ()

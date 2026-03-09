@@ -36,6 +36,7 @@ from wepppy.export.prep_details import (
 )
 from wepppy.query_engine.activate import activate_query_engine
 from wepppy.wepp.interchange import (
+    cleanup_hillslope_sources_for_completed_interchange,
     generate_interchange_documentation,
     run_wepp_hillslope_interchange,
     run_wepp_watershed_interchange,
@@ -142,6 +143,9 @@ def _sync_stage_post_compat() -> None:
     _stage_post.TaskEnum = TaskEnum
     _stage_post.activate_query_engine = activate_query_engine
     _stage_post.generate_interchange_documentation = generate_interchange_documentation
+    _stage_post.cleanup_hillslope_sources_for_completed_interchange = (
+        cleanup_hillslope_sources_for_completed_interchange
+    )
     _stage_post.run_wepp_hillslope_interchange = run_wepp_hillslope_interchange
     _stage_post.run_wepp_watershed_interchange = run_wepp_watershed_interchange
     _stage_post.run_wepp_watershed_tc_out_interchange = run_wepp_watershed_tc_out_interchange

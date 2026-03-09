@@ -15,6 +15,10 @@ _ensure_package("wepppy.all_your_base")
 _LAZY_EXPORTS = {
     "generate_interchange_documentation": (".interchange_documentation", "generate_interchange_documentation"),
     "run_wepp_hillslope_interchange": (".hill_interchange", "run_wepp_hillslope_interchange"),
+    "cleanup_hillslope_sources_for_completed_interchange": (
+        ".hill_interchange",
+        "cleanup_hillslope_sources_for_completed_interchange",
+    ),
     "run_wepp_hillslope_ebe_interchange": (".hill_ebe_interchange", "run_wepp_hillslope_ebe_interchange"),
     "run_wepp_hillslope_element_interchange": (
         ".hill_element_interchange",
@@ -73,6 +77,7 @@ def __dir__() -> list[str]:
 __all__ = [
     "generate_interchange_documentation",
     "run_wepp_hillslope_interchange",
+    "cleanup_hillslope_sources_for_completed_interchange",
     "run_wepp_hillslope_ebe_interchange",
     "run_wepp_hillslope_element_interchange",
     "run_wepp_hillslope_loss_interchange",

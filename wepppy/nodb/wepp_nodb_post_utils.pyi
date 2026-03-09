@@ -13,13 +13,21 @@ __all__ = [
 ]
 
 def ensure_hillslope_interchange(
-    wepp: Wepp, climate: Climate, logger: Optional[logging.Logger] = ...
+    wepp: Wepp,
+    climate: Climate,
+    logger: Optional[logging.Logger] = ...,
+    *,
+    watershed_pending: bool = ...,
 ) -> None: ...
 def ensure_totalwatsed3(
     wepp: Wepp, climate: Climate, logger: Optional[logging.Logger] = ...
 ) -> None: ...
 def ensure_watershed_interchange(
-    wepp: Wepp, climate: Climate, logger: Optional[logging.Logger] = ...
+    wepp: Wepp,
+    climate: Climate,
+    logger: Optional[logging.Logger] = ...,
+    *,
+    cleanup_deferred_hillslope_sources: bool = ...,
 ) -> None: ...
 def activate_query_engine_for_run(
     wepp: Wepp, logger: Optional[logging.Logger] = ...

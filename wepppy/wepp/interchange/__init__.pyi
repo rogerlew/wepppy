@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from .hill_interchange import cleanup_hillslope_sources_for_completed_interchange as cleanup_hillslope_sources_for_completed_interchange
 from .hill_ebe_interchange import run_wepp_hillslope_ebe_interchange as run_wepp_hillslope_ebe_interchange
 from .hill_element_interchange import run_wepp_hillslope_element_interchange as run_wepp_hillslope_element_interchange
 from .hill_loss_interchange import run_wepp_hillslope_loss_interchange as run_wepp_hillslope_loss_interchange
@@ -38,6 +39,7 @@ from .versioning import (
 __all__ = [
     "generate_interchange_documentation",
     "run_wepp_hillslope_interchange",
+    "cleanup_hillslope_sources_for_completed_interchange",
     "run_wepp_hillslope_ebe_interchange",
     "run_wepp_hillslope_element_interchange",
     "run_wepp_hillslope_loss_interchange",

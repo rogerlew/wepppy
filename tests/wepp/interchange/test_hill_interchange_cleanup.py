@@ -70,3 +70,64 @@ def test_cleanup_hillslope_sources_removes_pass_and_core_outputs(
     assert (tmp_path / "H1.loss.dat").exists()
     assert (tmp_path / "H1.soil.dat").exists()
     assert (tmp_path / "H1.wat.dat").exists()
+
+
+def test_cleanup_hillslope_sources_for_completed_interchange_only_removes_completed_families(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    nodb_pkg = types.ModuleType("wepppy.nodb")
+    nodb_pkg.__path__ = []
+    core_pkg = types.ModuleType("wepppy.nodb.core")
+    core_pkg.__path__ = []
+    watershed_stub = types.ModuleType("wepppy.nodb.core.watershed")
+
+    class _Watershed:
+        @staticmethod
+        def getInstance(_wd: str):
+            raise RuntimeError("stub")
+
+    watershed_stub.Watershed = _Watershed
+
+    monkeypatch.setitem(sys.modules, "wepppy.nodb", nodb_pkg)
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.core", core_pkg)
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.core.watershed", watershed_stub)
+
+    hill_interchange = load_module(
+        "wepppy.wepp.interchange.hill_interchange",
+        "wepppy/wepp/interchange/hill_interchange.py",
+    )
+    cleanup_hillslope_sources_for_completed_interchange = (
+        hill_interchange.cleanup_hillslope_sources_for_completed_interchange
+    )
+
+    for path in (
+        tmp_path / "H1.pass.dat",
+        tmp_path / "H1.ebe.dat",
+        tmp_path / "H1.element.dat",
+        tmp_path / "H1.loss.dat",
+        tmp_path / "H1.soil.dat",
+        tmp_path / "H1.wat.dat",
+    ):
+        _touch(path)
+
+    for path in (
+        tmp_path / "interchange" / "H.pass.parquet",
+        tmp_path / "interchange" / "H.ebe.parquet",
+        tmp_path / "interchange" / "H.element.parquet",
+        tmp_path / "interchange" / "H.loss.parquet",
+    ):
+        _touch(path)
+
+    try:
+        cleaned_groups = cleanup_hillslope_sources_for_completed_interchange(tmp_path)
+    finally:
+        cleanup_import_state()
+
+    assert cleaned_groups == ["pass", "ebe", "element", "loss"]
+    assert not (tmp_path / "H1.pass.dat").exists()
+    assert not (tmp_path / "H1.ebe.dat").exists()
+    assert not (tmp_path / "H1.element.dat").exists()
+    assert not (tmp_path / "H1.loss.dat").exists()
+    assert (tmp_path / "H1.soil.dat").exists()
+    assert (tmp_path / "H1.wat.dat").exists()

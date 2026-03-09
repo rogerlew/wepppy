@@ -61,6 +61,7 @@ from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 from wepppy.runtime_paths.fs import resolve as nodir_resolve
 from wepppy.runtime_paths.errors import nodir_migration_required
 from wepppy.wepp.interchange import (
+    cleanup_hillslope_sources_for_completed_interchange,
     run_wepp_hillslope_interchange,
     run_wepp_watershed_tc_out_interchange,
 )
@@ -216,6 +217,9 @@ def _post_watershed_run_cleanup(wepp: Wepp) -> None:
                 wepp.output_dir,
                 delete_after_interchange=wepp.delete_after_interchange,
             )
+
+    if wepp.delete_after_interchange:
+        cleanup_hillslope_sources_for_completed_interchange(wepp.output_dir)
 
 
 def _apply_contrast_output_triggers(wepp: Wepp, output_options: Dict[str, bool]) -> None:

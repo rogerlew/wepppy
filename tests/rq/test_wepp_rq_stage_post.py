@@ -77,6 +77,7 @@ def test_post_watershed_interchange_accepts_gzip_outputs(
     status_messages: list[tuple[str, str]] = []
     wait_calls: list[str] = []
     interchange_calls: list[tuple[Path, int, bool, bool, bool]] = []
+    deferred_cleanup_calls: list[tuple[Path, bool, bool, bool]] = []
     activation_calls: list[tuple[str, bool, bool]] = []
 
     wd = tmp_path
@@ -122,6 +123,13 @@ def test_post_watershed_interchange_accepts_gzip_outputs(
             (Path(path), start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange)
         ),
     )
+    monkeypatch.setattr(
+        stage_post,
+        "cleanup_hillslope_sources_for_completed_interchange",
+        lambda path, *, run_loss_interchange, run_soil_interchange, run_wat_interchange: deferred_cleanup_calls.append(
+            (Path(path), run_loss_interchange, run_soil_interchange, run_wat_interchange)
+        ),
+    )
     monkeypatch.setattr(stage_post, "generate_interchange_documentation", lambda _path: None)
     monkeypatch.setattr(
         stage_post,
@@ -136,6 +144,7 @@ def test_post_watershed_interchange_accepts_gzip_outputs(
     assert any(call.endswith("pass_pw0.txt.gz") for call in wait_calls)
     assert any(call.endswith("soil_pw0.txt.gz") for call in wait_calls)
     assert interchange_calls == [(output_dir, 1998, True, True, False)]
+    assert deferred_cleanup_calls == []
     assert activation_calls == [(str(wd), False, True)]
     assert any(
         channel == "run-1:wepp" and "COMPLETED _post_watershed_interchange_rq(run-1)" in message
@@ -171,7 +180,7 @@ def test_build_hillslope_interchange_prefers_wepp_delete_flag(
     monkeypatch.setattr(
         stage_post.Wepp,
         "getInstance",
-        lambda _wd: SimpleNamespace(delete_after_interchange=False),
+        lambda _wd: SimpleNamespace(delete_after_interchange=False, run_wepp_watershed=False),
     )
     monkeypatch.setattr(
         stage_post,
@@ -197,6 +206,130 @@ def test_build_hillslope_interchange_prefers_wepp_delete_flag(
         channel == "run-1:wepp" and "COMPLETED _build_hillslope_interchange_rq(run-1)" in message
         for channel, message in status_messages
     )
+
+
+@pytest.mark.parametrize(
+    ("run_wepp_watershed", "expected_delete_after_interchange"),
+    [(True, False), (False, True)],
+)
+def test_build_hillslope_interchange_defers_delete_until_post_watershed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    run_wepp_watershed: bool,
+    expected_delete_after_interchange: bool,
+) -> None:
+    interchange_calls: list[tuple[Path, int, bool, bool, bool, bool]] = []
+
+    wd = tmp_path
+    monkeypatch.setattr(stage_post, "get_current_job", lambda: SimpleNamespace(id="job-1"))
+    monkeypatch.setattr(stage_post, "get_wd", lambda _runid: str(wd))
+    monkeypatch.setattr(stage_post.StatusMessenger, "publish", lambda *_args: None)
+    monkeypatch.setattr(
+        stage_post.Climate,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            delete_after_interchange=False,
+            calendar_start_year=2002,
+            is_single_storm=False,
+        ),
+    )
+    monkeypatch.setattr(
+        stage_post.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            delete_after_interchange=True,
+            run_wepp_watershed=run_wepp_watershed,
+        ),
+    )
+    monkeypatch.setattr(
+        stage_post,
+        "run_wepp_hillslope_interchange",
+        lambda path, *, start_year, run_loss_interchange, run_soil_interchange, run_wat_interchange, delete_after_interchange: interchange_calls.append(
+            (
+                Path(path),
+                start_year,
+                run_loss_interchange,
+                run_soil_interchange,
+                run_wat_interchange,
+                delete_after_interchange,
+            )
+        ),
+    )
+
+    stage_post._build_hillslope_interchange_rq("run-1")
+
+    assert interchange_calls == [
+        (
+            wd / "wepp" / "output",
+            2002,
+            True,
+            True,
+            True,
+            expected_delete_after_interchange,
+        ),
+    ]
+
+
+def test_post_watershed_interchange_runs_deferred_hillslope_cleanup_when_delete_enabled(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+    output_dir = wd / "wepp" / "output"
+    _touch(output_dir / "pass_pw0.txt")
+    _touch(output_dir / "ebe_pw0.txt")
+    _touch(output_dir / "loss_pw0.txt")
+    _touch(output_dir / "chan.out")
+    _touch(output_dir / "chanwb.out")
+    _touch(output_dir / "chnwb.txt")
+    _touch(output_dir / "soil_pw0.txt")
+
+    cleanup_calls: list[tuple[Path, bool, bool, bool]] = []
+    interchange_calls: list[tuple[Path, int, bool, bool, bool]] = []
+
+    monkeypatch.setattr(stage_post, "get_current_job", lambda: SimpleNamespace(id="job-1"))
+    monkeypatch.setattr(stage_post, "get_wd", lambda _runid: str(wd))
+    monkeypatch.setattr(stage_post.StatusMessenger, "publish", lambda *_args: None)
+    monkeypatch.setattr(
+        stage_post.Climate,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            delete_after_interchange=False,
+            calendar_start_year=2005,
+            is_single_storm=False,
+        ),
+    )
+    monkeypatch.setattr(
+        stage_post.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            output_dir=str(output_dir),
+            logger=_DummyLogger(),
+            delete_after_interchange=True,
+        ),
+    )
+    monkeypatch.setattr(stage_post, "wait_for_path", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        stage_post,
+        "run_wepp_watershed_interchange",
+        lambda path, *, start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange: interchange_calls.append(
+            (Path(path), start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange)
+        ),
+    )
+    monkeypatch.setattr(
+        stage_post,
+        "cleanup_hillslope_sources_for_completed_interchange",
+        lambda path, *, run_loss_interchange, run_soil_interchange, run_wat_interchange: cleanup_calls.append(
+            (Path(path), run_loss_interchange, run_soil_interchange, run_wat_interchange)
+        ),
+    )
+    monkeypatch.setattr(stage_post, "generate_interchange_documentation", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(stage_post, "activate_query_engine", lambda *_args, **_kwargs: None)
+
+    stage_post._post_watershed_interchange_rq("run-1")
+
+    assert interchange_calls == [(output_dir, 2005, True, True, True)]
+    assert cleanup_calls == [(output_dir, True, True, True)]
 
 
 def test_build_totalwatsed3_rebuilds_interchange_readme(

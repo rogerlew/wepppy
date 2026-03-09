@@ -24,6 +24,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.query_engine.activate import activate_query_engine
 from wepppy.wepp.interchange import (
+    cleanup_hillslope_sources_for_completed_interchange,
     generate_interchange_documentation,
     run_wepp_hillslope_interchange,
     run_wepp_watershed_interchange,
@@ -138,6 +139,10 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
             wepp=wepp,
             climate=climate,
         )
+        # Watershed routing may still need H*.dat files. Defer deletion until
+        # post-watershed interchange when watershed runs are enabled.
+        if bool(getattr(wepp, "run_wepp_watershed", False)):
+            delete_after_interchange = False
         start_year = climate.calendar_start_year
         is_single_storm = climate.is_single_storm
         # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat files
@@ -300,6 +305,13 @@ def _post_watershed_interchange_rq(runid: str) -> None:
             run_chnwb_interchange=run_chnwb_interchange,
             delete_after_interchange=delete_after_interchange,
         )
+        if delete_after_interchange:
+            cleanup_hillslope_sources_for_completed_interchange(
+                output_dir,
+                run_loss_interchange=not climate.is_single_storm,
+                run_soil_interchange=run_soil_interchange,
+                run_wat_interchange=not climate.is_single_storm,
+            )
         generate_interchange_documentation(_join(wd, 'wepp/output/interchange'))
         activate_query_engine(wd, run_interchange=False, force_refresh=True)
         StatusMessenger.publish(status_channel, f'rq:{job.id} ACTIVATED query_engine({runid})')

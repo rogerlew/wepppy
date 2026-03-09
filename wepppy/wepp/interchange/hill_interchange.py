@@ -18,6 +18,22 @@ except Exception:  # pragma: no cover - optional dependency
 
 LOGGER = logging.getLogger(__name__)
 
+__all__ = [
+    "cleanup_hillslope_sources_for_completed_interchange",
+    "run_wepp_hillslope_interchange",
+]
+
+_CORE_HILLSLOPE_INTERCHANGE_TARGETS = (
+    ("pass", "H*.pass.dat", "H.pass.parquet"),
+    ("ebe", "H*.ebe.dat", "H.ebe.parquet"),
+    ("element", "H*.element.dat", "H.element.parquet"),
+)
+_OPTIONAL_HILLSLOPE_INTERCHANGE_TARGETS = (
+    ("loss", "H*.loss.dat", "H.loss.parquet"),
+    ("soil", "H*.soil.dat", "H.soil.parquet"),
+    ("wat", "H*.wat.dat", "H.wat.parquet"),
+)
+
 
 def _audit_log(log_path: Path, message: str) -> None:
     try:
@@ -59,6 +75,52 @@ def _cleanup_hillslope_sources(
 
     for pattern in patterns:
         _unlink_sources(base.glob(pattern), log_path=log_path)
+
+
+def cleanup_hillslope_sources_for_completed_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    run_loss_interchange: bool = True,
+    run_soil_interchange: bool = True,
+    run_wat_interchange: bool = True,
+) -> list[str]:
+    """Delete raw hillslope outputs only when their interchange parquet exists.
+
+    This supports deferred cleanup paths where interchange finished earlier but
+    watershed routing still needed the raw H*.dat files. Each output family is
+    checked independently so missing parquet files preserve their raw sources.
+    """
+    base = Path(wepp_output_dir)
+    if not base.exists():
+        raise FileNotFoundError(base)
+
+    log_path = base / "interchange.log"
+    interchange_dir = base / "interchange"
+    enabled_targets = list(_CORE_HILLSLOPE_INTERCHANGE_TARGETS)
+    if run_loss_interchange:
+        enabled_targets.append(_OPTIONAL_HILLSLOPE_INTERCHANGE_TARGETS[0])
+    if run_soil_interchange:
+        enabled_targets.append(_OPTIONAL_HILLSLOPE_INTERCHANGE_TARGETS[1])
+    if run_wat_interchange:
+        enabled_targets.append(_OPTIONAL_HILLSLOPE_INTERCHANGE_TARGETS[2])
+
+    cleaned_groups: list[str] = []
+    for name, pattern, target_name in enabled_targets:
+        target_path = interchange_dir / target_name
+        if not target_path.exists():
+            _audit_log(
+                log_path,
+                f"retained {pattern}; missing completed interchange target {target_path}",
+            )
+            continue
+        _audit_log(
+            log_path,
+            f"deferred cleanup removing {pattern} after successful watershed using {target_path.name}",
+        )
+        _unlink_sources(base.glob(pattern), log_path=log_path)
+        cleaned_groups.append(name)
+
+    return cleaned_groups
 
 
 def run_wepp_hillslope_interchange(
