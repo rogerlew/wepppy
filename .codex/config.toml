@@ -24,6 +24,14 @@ config_file = "agents/worker.toml"
 description = "Risk-focused code reviewer for correctness, regressions, and missing tests."
 config_file = "agents/reviewer.toml"
 
+[agents.governance_control_agent]
+description = "Independent control reviewer for governance, ethics, legality, authority scope, and break-glass justification."
+config_file = "agents/governance_control_agent.toml"
+
+[agents.ops_security_control_agent]
+description = "Independent control reviewer for operations, data integrity, security, containment, and rollback safety."
+config_file = "agents/ops_security_control_agent.toml"
+
 [agents.qa_reviewer]
 description = "Secondary QA reviewer for maintainability, readability, and test quality after correctness review."
 config_file = "agents/qa_reviewer.toml"

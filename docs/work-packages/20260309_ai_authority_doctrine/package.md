@@ -96,17 +96,18 @@ Draft 1 is complete and the Draft 2 operationalization pass is now substantively
 
 ## Deliverables
 
-- Active doctrine work package with `package.md`, `tracker.md`, and active ExecPlan synchronized to Draft 2 complete / review-pending state.
+- Active doctrine work package with `package.md`, `tracker.md`, and active ExecPlan synchronized to Draft 2 complete / closeout-pending state.
 - Root doctrine Draft 1 working draft capturing the intended authority posture.
 - Root operating-practices Draft 1 working draft separating implementation details from doctrine.
 - Draft 2 operationalization updates covering execution matrix, breadcrumb minimums, record placement, and lightweight templates.
+- Local `.codex` and CAO control-agent role bindings aligned to the doctrine's named control roles.
 - Updated `PROJECT_TRACKER.md` entry for discoverability and handoff.
 
 ## Follow-up Work
 
 ### Remaining Work in This Package
 
-1. Review the Draft 2 operationalization set against real repository workflows and close the package if accepted.
+1. Close the package if the patched doctrine set is accepted as operationally sufficient.
 
 ### External Follow-up Candidates
 

@@ -24,8 +24,9 @@ Follow the active ExecPlan milestone-by-milestone. Keep plan `Progress`, `Surpri
 3. Preserve the existing minimum-sufficient evidence and succession breadcrumb rules unless discussion or validation exposes a real gap.
 4. Preserve the existing hybrid record-location model unless discussion or validation exposes a real contradiction.
 5. Preserve the lightweight templates for authority grants, competence reviews, and revocation or tripwire handling unless discussion exposes a real contradiction or missing field.
-6. Keep `package.md`, `tracker.md`, the active ExecPlan, and `PROJECT_TRACKER.md` current.
-7. If no contradiction or missing case is found, move the package toward review and closeout rather than adding more open-ended doctrine text.
+6. Preserve the named control-agent roles and executable bindings unless discussion exposes a real contradiction or role-design defect.
+7. Keep `package.md`, `tracker.md`, the active ExecPlan, and `PROJECT_TRACKER.md` current.
+8. If no contradiction or missing case is found, move the package toward review and closeout rather than adding more open-ended doctrine text.
 
 ## Required gates
 - `wctl doc-lint --path AI_AUTHORITY_DOCTRINE.md`

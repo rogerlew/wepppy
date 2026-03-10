@@ -28,6 +28,7 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
 - [x] (2026-03-09 23:45Z) Define the minimum succession breadcrumbs and minimum-sufficient evidence rules for low-friction governance.
 - [x] (2026-03-09 23:45Z) Decide whether authority records should live in repo docs, orchestration metadata, or a hybrid model.
 - [x] (2026-03-09 23:59Z) Draft lightweight templates for authority grants, competence reviews, and revocation or tripwire handling.
+- [x] Patch the first serial review findings on `T4` emergency handling, qualifying-gate independence, production investigation classification, and `T4` template fields.
 
 ## Surprises & Discoveries
 
@@ -78,6 +79,9 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
 
 - Observation: The templates only stay usable if they can live inline inside the existing breadcrumb surfaces instead of forcing a new record type.
   Evidence: User preference remained low-friction and issue-first even after the record-location model was settled, so the templates had to behave as optional scaffolds rather than mandatory forms.
+
+- Observation: In a single-maintainer stack, a `T4` rule that requires independent dual control but offers no emergency fallback is not a hard control; it is an invitation to policy bypass during incidents.
+  Evidence: The first serial review surfaced that tension directly once `T4` was reframed as incident-driven rather than as planned-window work.
 
 ## Decision Log
 
@@ -149,6 +153,18 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
   Rationale: In real operations, `T4` usually reflects a trust-boundary failure, security event, or control-plane problem that cannot honestly be framed as routine preplanned maintenance.
   Date/Author: 2026-03-09 / Codex.
 
+- Decision: Add a narrow break-glass `T4` path and define qualifying-gate independence criteria explicitly.
+  Rationale: Emergency `T4` work has to be executable without fictional paperwork, but the gate semantics also have to stay strong enough that `T4` does not collapse into self-approved action.
+  Date/Author: 2026-03-09 / Codex.
+
+- Decision: Keep rollback or containment explicit in the authority-grant template.
+  Rationale: The second serial review found the doctrine materially coherent but correctly identified that recovery planning should be a first-class template field rather than only an implied expectation.
+  Date/Author: 2026-03-09 / Codex.
+
+- Decision: Name stable control-agent roles in governance docs while keeping model bindings out of doctrine text.
+  Rationale: High-boundary review needs explicit second-controller roles, but tying doctrine to particular models would make governance churn faster than the actual control concept.
+  Date/Author: 2026-03-09 / Codex.
+
 ## Outcomes & Retrospective
 
 Current outcome:
@@ -165,9 +181,12 @@ Current outcome:
 - The doctrine and SOP now also define where durable governance meaning and execution detail should live.
 - The SOP now also includes lightweight templates for authority grants, competence reviews, and revocation or tripwire events that fit the issue-first hybrid model.
 - The doctrine and SOP now also clarify that `T4` usually arises from incident-time or emergency boundary work and therefore relies on contemporaneous dual control rather than a retroactive planned window.
+- The doctrine and SOP now also define a narrow break-glass `T4` path, qualifying-gate independence criteria, safer defaults for live production investigation, and stronger `T4` template fields.
+- The second serial review found no remaining material governance contradiction and led only to a small template polish: making rollback or containment explicit in the authority-grant scaffold.
+- The doctrine and SOP now also name stable governance and operations/security control-agent roles, and the repository now includes matching `.codex` and CAO role bindings without encoding model identities into governance text.
 
 Current gap:
-- The package now mainly needs human review and closeout; any further work should be a deliberate new package or a concrete contradiction-driven revision, not more open-ended drafting.
+- The package now mainly needs closeout judgment; any further work should be a deliberate new package or a concrete contradiction-driven revision, not more open-ended drafting.
 
 Lesson so far:
 - The repo already contains governance primitives that support legible authority; once Draft 1 exists, the real bottleneck becomes sequencing the operational details rather than inventing more theory.
@@ -202,9 +221,9 @@ Fifth, keep `docs/work-packages/20260309_ai_authority_doctrine/tracker.md`, `pac
 
 From `/workdir/wepppy`:
 
-1. Keep the Draft 1 doctrine and SOP intact while advancing only the Draft 2 operationalization work.
+1. Keep the current doctrine and SOP intact unless closeout review exposes a real contradiction or operational gap.
 
-2. Preserve the lightweight templates unless real workflow use exposes a contradiction or missing case.
+2. Patch only findings that would otherwise force policy bypass, underclassification, record drift, or omitted recovery planning.
 
 3. Keep the package docs synchronized:
 
@@ -227,18 +246,15 @@ From `/workdir/wepppy`:
 
 ## Validation and Acceptance
 
-Acceptance for Draft 1 is already met.
+Acceptance for Draft 1 and Draft 2 is already met.
 
-Acceptance for the remaining Draft 2 pass is met when:
+Closeout is complete when:
 
-- `AI_AUTHORITY_DOCTRINE.md` and `AI_AUTHORITY_OPERATING_PRACTICES.md` define a task-class execution matrix with clear evidence thresholds and escalation modes.
-- The docs define the minimum succession breadcrumbs and the rule for minimum-sufficient governance evidence in low-friction workflows.
-- The docs resolve whether authority records live in repo docs, orchestration metadata, or both, with rationale.
-- Lightweight templates exist for authority grants, competence reviews, and revocation or tripwire handling.
-- The work package, active prompts, and `PROJECT_TRACKER.md` all reflect the same current state.
-- Documentation lint passes for the touched files.
+- serial review findings are either resolved or deliberately deferred with rationale
+- the work package, active prompts, and `PROJECT_TRACKER.md` all reflect the same current state
+- documentation lint passes for the touched files
 
-Package closeout can happen after the Draft 2 outputs land even if later legal review or runtime enforcement work remains out of scope.
+Package closeout can happen after review findings are resolved even if later legal review or runtime enforcement work remains out of scope.
 
 ## Idempotence and Recovery
 

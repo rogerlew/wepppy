@@ -264,7 +264,7 @@ Leave this running in a dedicated terminal or tmux session. Logs appear in both 
 
 ### 2. Install Agent Profiles
 
-Agent profiles define the system prompt and behavior for specialized agents. CAO includes three built-in profiles:
+Agent profiles define the system prompt and behavior for specialized agents. CAO includes built-in engineering and control profiles:
 
 ```bash
 # Install supervisor agent (coordinates multi-agent workflows)
@@ -273,6 +273,10 @@ cao install code_supervisor
 # Install worker agents
 cao install developer
 cao install reviewer
+
+# Install control agents for high-boundary review
+cao install governance_control_agent
+cao install ops_security_control_agent
 ```
 
 **What `cao install` does:**
@@ -425,7 +429,7 @@ cao shutdown --all
 1. Sends `DELETE http://localhost:9889/sessions/<session-name>`
 2. Server kills the tmux session via `tmux kill-session`
 3. Database records for terminals in that session are cleaned up
-4. Log files remain for post-mortem analysis
+4. Log files remain for postmortem analysis
 
 ### cao install
 

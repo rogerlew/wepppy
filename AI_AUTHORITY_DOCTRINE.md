@@ -100,6 +100,14 @@ This matrix is a default allocation rule, not a permanent ceiling. A task class 
 
 Unlike `T3`, `T4` is often not something a healthy system plans in advance. It commonly appears when an incident, security exposure, or governability failure forces a boundary-sensitive action under pressure. The doctrine's requirement is therefore not a long-lead maintenance window, but contemporaneous dual control, durable legibility, and post-action review.
 
+A second controller may be a qualified human or a designated control-agent role. It counts only when it is distinct from the acting agent and immediate operator for the scoped action, can actually block or scope-reduce execution, and leaves durable approval or refusal evidence.
+
+A qualifying external gate only counts toward dual control when it is outside the acting agent's and immediate operator's control for the scoped action, can actually block execution, and leaves durable evidence that the gate was satisfied.
+
+The stable governance reference is the control role, not a particular model identifier. This repository may implement distinct governance-oriented and operations-oriented control-agent roles in its execution tooling, but model diversity alone does not create independence.
+
+If delaying a `T4` action would materially worsen compromise, availability loss, or loss of governability and no independent second controller or qualifying gate can be reached in time, a narrow break-glass `T4` path may be used. That path does not relax the work to `T3`. It permits only the minimum containment or recovery action, requires an emergency declaration naming why dual control was unavailable, and requires secondary review before broader follow-on remediation or authority expansion.
+
 ## Minimum-Sufficient Evidence and Succession Breadcrumbs
 
 Legibility is not a demand for maximal paperwork. It is a demand that authority, action, and outcome remain reconstructable after the original session, chat context, or operator attention has passed.
@@ -125,7 +133,7 @@ The default breadcrumb floor by task class is:
 - `T1`: `T0` plus a discoverable change surface and targeted validation outcome
 - `T2`: `T1` plus rationale for the cross-cutting choice and an explicit post-change disposition or notice
 - `T3`: `T2` plus the approved execution window, scope boundaries, rollback or containment path, and execution outcome
-- `T4`: incident-time or contemporaneous authorization evidence showing dual control, explicit scope boundary, stronger containment or recovery reasoning, and post-action review
+- `T4`: incident-time or contemporaneous authorization evidence showing dual control, or an explicit break-glass declaration naming why dual control was unavailable, plus explicit scope boundary, stronger containment or recovery reasoning, and post-action review
 - `T5`: refusal, escalation, or incident record showing why the action was not validly delegated
 
 If the action is likely to matter for continuity, incident response, review, or future authority expansion, at least one durable breadcrumb must remain after ephemeral session context disappears.
@@ -165,7 +173,7 @@ Where a legal framework imposes a positive obligation for human oversight, deplo
 
 The current working crosswalk is:
 
-- Statements 1, 5, and 6 map to EU AI Act recital 20 and Articles 4, 14, and 26(2), which emphasize AI literacy, competent human oversight, and deployer responsibility to assign oversight to natural persons with the necessary competence, training, and authority. They also map to NIST AI 600-1 `GOVERN 2.1`, `GOVERN 3.2`, and `MAP 3.4`, plus NIST SP 800-218A `PO.2.1` and `PO.2.2`, all of which focus on role definition, lines of responsibility, and operator proficiency.
+- Statements 1, 5, and 6 map to EU AI Act recital 20 and Articles 4, 14, and 26(2), which emphasize AI literacy, competent human oversight, and deployer responsibility to assign oversight to natural persons with the necessary competence, training, and authority. They also map to NIST AI 600-1 `GOVERN 2.1`, `GOVERN 3.2`, and `MAP 3.4`, plus NIST SP 800-218A `PO.2.1` and `PO.2.2`, all of which focus on role definition, lines of responsibility, operator proficiency, and qualified control roles.
 - Statement 2 maps to EU AI Act recitals 26-27 and 64-66. Those provisions organize compliance around risk management, transparency, human oversight, and accountability rather than around a blanket rule that more human intervention is always better. The doctrine's claim is that competent, bounded, and well-documented delegation can satisfy that regulatory intent more faithfully than ceremonial sign-off. The matching NIST anchors are `GOVERN 1.1`, `GOVERN 1.4`, and `GOVERN 4.1` in AI 600-1 and `PW.1.1` and `PW.1.2` in SP 800-218A.
 - Statement 3 and the doctrine's emphasis on legibility map to EU AI Act Articles 13 and 17, which require information for deployers, technical documentation, and quality-management processes, as well as Article 72 post-market monitoring. The closest NIST anchors are AI 600-1 `MEASURE 2.8` and SP 800-218A `PO.3.3` and `PW.1.2`, which stress transparent records, evidence artifacts, and retained design decisions.
 - Statement 4 maps most closely to the need for explicit human-AI role allocation and contestability in AI 600-1 `GOVERN 3.2` and `GOVERN 4.2`. In the AI Act, the closest fit is the combined requirement that intended purpose, instructions for use, and human oversight measures be stated clearly enough for deployers to act competently.

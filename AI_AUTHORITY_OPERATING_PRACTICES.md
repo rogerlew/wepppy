@@ -89,7 +89,7 @@ The current Draft 2 matrix is:
 | T1 - Bounded reversible implementation | Autonomous | doc fixes, localized refactors, focused tests, bounded code or config changes with no shared-state mutation | scoped diff, targeted validation, clear work context | task touches shared contracts, auth, governance, data migration, or environment state |
 | T2 - Cross-cutting but well-observed change | Autonomous plus notification | shared schemas, route or queue contracts, multi-module behavior changes, root governance docs, repo-wide scripted edits with strong rollback | work package or issue context, rationale, targeted validation, post-change notice | task changes live environment state, broad shared data, security boundary, or legal posture |
 | T3 - Stateful operational change in an approved window | Pre-authorized window | deploys, migrations, cache eviction, backfills, feature-flag flips, environment changes, scripted shared-state maintenance | pre-approved plan, explicit scope and rollback path, execution trace, completion note | rollback is weak, impact is irreversible, outage risk is high, or task touches control-plane or secret boundaries |
-| T4 - High-blast-radius or control-plane change | Dual control | auth-boundary changes, secret rotation, destructive shared-data operations, suspension or kill-switch path changes, authority-enforcement changes | named authorizer and operator, explicit rationale, incident-triggered or contemporaneous authorization record, containment or rollback plan where possible, live trace, post-action review | no independent reviewer or gate is available, or legal accountability requires a stronger boundary |
+| T4 - High-blast-radius or control-plane change | Dual control | auth-boundary changes, secret rotation, destructive shared-data operations, suspension or kill-switch path changes, authority-enforcement changes | named authorizer and operator, explicit rationale, either dual-control evidence or a break-glass declaration naming why no qualifying second controller or gate was available, containment or rollback plan where possible, live trace, post-action review | break-glass only if no independent second controller or qualifying gate is available and delay would materially worsen impact; otherwise pause until second control exists or treat the action as invalid |
 | T5 - Reserved or prohibited action | Prohibited | self-expanding authority, disabling independent logging or suspension, destructive actions without recovery path, legally barred actions, ungovernable external commitments | refusal, escalation, and incident note if attempted | class changes only after law, controls, or authority structure changes |
 
 Interpretation notes:
@@ -97,28 +97,32 @@ Interpretation notes:
 - `Autonomous` means the agent may execute within scope without waiting for a fresh approval each time.
 - `Autonomous plus notification` means the agent may execute but must leave a discoverable notice soon after the action.
 - `Pre-authorized window` means the task must run inside a previously approved plan, time box, or command window.
-- `Dual control` means two independent authorities, or one authority plus an explicit external gate, must exist before execution.
-- `T4` work is often incident-driven rather than preplanned; when that happens, the minimum valid control is contemporaneous dual control with a durable record, not a fictional retroactive maintenance window.
+- `Dual control` means two independent control points, or one authority plus a qualifying external gate, must exist before execution.
+- an independent second controller may be a qualified human or a designated control-agent role, but it must be distinct from the acting agent and immediate operator for the scoped action, able to block or scope-reduce execution, and durable enough to leave reviewable approval or refusal evidence; nominal observers, advisory reviewers, and agents sharing the same execution mandate do not count
+- a qualifying external gate must be outside the acting agent's and immediate operator's control for the scoped action, able to block execution, and durable enough to leave reviewable evidence; non-blocking alerts, self-approvals, and reviewer agents without halt authority do not count
+- `T4` work is often incident-driven rather than preplanned; when that happens, the minimum valid control is contemporaneous dual control with a durable record, not a fictional retroactive maintenance window
+- if no independent reviewer or qualifying gate is available and delay would materially worsen compromise, outage, or loss of governability, invoke a narrow break-glass `T4` path: record who assumed temporary sole-authorizer responsibility, why delay was unacceptable, what minimum containment or recovery action is permitted, and when secondary review will occur; this does not downgrade the work to `T3`
 - `Prohibited` means the task is outside valid delegated authority for now.
 
 Draft classification examples:
 
 1. Production OOM incident:
-   - inspect telemetry, logs, and recent changes; form hypotheses; recommend mitigations -> `T0` or `T2` depending on whether the artifact is purely analytical or becomes an operative incident note
+   - inspect production telemetry, logs, and recent changes; form hypotheses; recommend mitigations -> `T2` by default, because live production investigation is usually continuity- and incident-relevant; `T0` is only sufficient when using sanitized exports, replicas, or other non-sensitive artifacts outside live production access
    - restart services, roll back a recent deploy, reduce worker concurrency, or apply another bounded remediation on production inside an approved plan -> `T3`
    - if the proposed remediation requires changing auth boundaries, disabling safety controls, or altering the control plane, escalate that portion to `T4`
 
 2. Secret leakage through end-user-facing logs:
    - investigate exposure scope, identify affected secrets, and recommend containment -> `T2`
    - rotate secrets, change trust boundaries, or alter logging and redaction paths in a way that affects recovery or security posture -> `T4`
-   - a secondary reviewer agent counts toward `Dual control` only if it has an independent review role and explicit power to block, not if it merely echoes the primary agent
+   - if immediate containment is required and no qualifying second controller or gate is available, use break-glass `T4` with explicit emergency declaration, minimum necessary containment scope, and mandatory follow-up review
+   - a secondary reviewer or designated control agent counts toward `Dual control` only if it has an independent review role and explicit power to block, not if it merely echoes the primary agent
 
 3. Root governance-document update:
    - clarifying doctrine prose, examples, or non-operative guidance with clear reviewability -> `T2`
    - changing authority-enforcement rules, control-plane ownership, or kill-switch governance in a way that would alter who may act or halt -> `T4`
 
 4. Debugging an error on the production server:
-   - inspect production logs, telemetry, and state to determine root cause without changing the server -> `T0` or `T2` depending on whether the result remains analysis or becomes an operative incident artifact
+   - inspect production logs, telemetry, and state to determine root cause without changing the server -> `T2` by default; if the investigation requires access to secrets, auth artifacts, protected user data, or other trust-boundary material, that access path is `T4`; when using sanitized exports or replicas, `T0` may be enough
    - implement and validate the fix on the development machine -> `T1` or `T2` depending on whether the code change is bounded and local or cross-cutting
    - hot deploy the validated fix to production inside an approved incident or maintenance window -> `T3`
    - manually repair affected project or run state on production after the root cause is known -> `T3`, unless the repair crosses auth, secret, control-plane, or other trust boundaries, in which case that portion escalates to `T4`
@@ -130,6 +134,25 @@ Humans who grant, review, or revoke agent authority should meet minimum proficie
 - who is qualified to approve what
 - when a human reviewer is too far from the technical domain to be the sole gate
 - how to escalate to a more competent human or multi-party review
+
+#### Control-Agent Roles
+
+Use stable role names, not model names, as the governance reference for designated control agents.
+
+Current repository control roles are:
+
+- `governance_control_agent`: reviews authority scope, stakeholder legitimacy, governance-policy fit, ethical constraints, legal or contractual boundary concerns, break-glass justification, revocation posture, and post-action review disposition
+- `ops_security_control_agent`: reviews operational blast radius, containment, rollback quality, security boundary handling, secrets, auth, data integrity, shared-state safety, and incident execution safety
+
+Selection rules:
+
+- use the role matching the dominant `T4` risk
+- when a `T4` action spans both governance or legal legitimacy risk and operational or security integrity risk, require both roles before closeout
+- for break-glass `T4`, emergency containment may proceed first, but broader remediation, reauthorization, or closeout should obtain both role reviews if both risk domains were implicated
+
+Implementation note:
+
+- these roles may be instantiated as local subagent roles and CAO agent profiles; the stable governance reference is the role name and blocking authority, not the underlying model or provider
 
 ### 5. Anti-Runaway Controls
 
@@ -195,7 +218,7 @@ Default breadcrumb floor by class:
 - `T1`: `T0` plus discoverable change context and targeted validation outcome
 - `T2`: `T1` plus rationale and a post-change notice or disposition
 - `T3`: `T2` plus approved window or plan reference, scope boundary, rollback or containment path, and execution outcome
-- `T4`: incident-triggered or contemporaneous authorization evidence showing dual control, explicit scope boundary, stronger containment or recovery reasoning, and post-action review
+- `T4`: incident-triggered or contemporaneous authorization evidence showing dual control, or an explicit break-glass declaration naming why dual control was unavailable, plus explicit scope boundary, stronger containment or recovery reasoning, and post-action review
 - `T5`: refusal, escalation, or incident note
 
 This section defines what must remain discoverable. It does not yet decide where each breadcrumb should live. The record-location model comes next.
@@ -233,8 +256,7 @@ Default placement rules by class:
 - `T1`: let the commit, diff, or bounded work artifact carry the durable breadcrumb; issue use is optional unless the work is already being coordinated in an issue
 - `T2`: require a durable human-readable breadcrumb; use an issue for small to medium work, but prefer a mini-work-package or work-package when the change is broader, multi-session, or already package-governed; link to metadata only if it adds review value
 - `T3`: require both a human-readable authorization or completion breadcrumb and an execution trace in metadata when such trace exists; use an issue for smaller bounded ops and a package tracker for broader or multi-step operations
-- `T4`: require a durable human-readable record plus linked execution metadata; for medium to large or multi-step work, this should normally be a mini-work-package or work-package rather than an issue alone
-- emergency or incident-triggered `T4` work may open in an issue or incident note first and only later be promoted into a mini-work-package or work-package if the scope broadens beyond immediate containment and review
+- `T4`: require a durable human-readable record plus linked execution metadata; for medium to large or multi-step work, this should normally be a mini-work-package or work-package rather than an issue alone; emergency or incident-triggered `T4` work may open in an issue or incident note first, but break-glass use must record why qualifying second control was unavailable, what minimum action was taken, and when secondary review is due
 - `T5`: keep refusal, escalation, or incident disposition in a durable human-readable artifact; metadata may support but must not be the only continuity surface
 
 Anti-duplication rule:
@@ -251,6 +273,8 @@ Use these only when they reduce ambiguity or coordination cost. For small to med
 
 Delete lines that do not matter. Do not create a separate template record if an existing issue thread, work package, tracker entry, approval note, commit trail, or incident record already answers the breadcrumb questions clearly enough for succession and review.
 
+For `T4`, do not omit the authorizer, operator, second controller role/profile or qualifying gate, authorization marker, live trace, and post-action review fields. If break-glass `T4` is invoked, replace the second-controller line with why qualifying second control was unavailable and when secondary review is due.
+
 Authority grant template:
 
 ```md
@@ -258,11 +282,21 @@ Authority grant
 - Task or incident:
 - Requested by or proxied stakeholder:
 - Agent or operational identity:
+- Authorizer:
+- Operator:
 - Task class and execution mode:
+- Second controller role/profile or qualifying gate:
+- Second controller outcome: approve / reject / scope-reduce
+- Authorization marker (approval link, gate record, or timestamp):
 - Scope allowed:
 - Explicit prohibitions:
+- Rollback or containment path:
 - Required validation or evidence:
+- Live trace link or ID:
 - Approval window or expiry:
+- Break-glass reason if qualifying second control is unavailable:
+- Follow-up review due by:
+- Post-action review link or outcome:
 - Escalate, pause, or revoke if:
 - Current status:
 ```
@@ -288,10 +322,18 @@ Revocation or tripwire event
 - Trigger or observed condition:
 - Affected agent or authority:
 - Event class: tripwire / pause / demotion / revocation / refusal
+- Authorizer:
+- Operator:
+- Second controller role/profile or qualifying gate:
+- Second controller outcome: approve / reject / scope-reduce
+- Authorization marker or emergency declaration:
+- Live trace link or ID:
 - Immediate containment:
 - Rollback or recovery path:
 - Human or reviewer notified:
 - Follow-up review needed:
+- Follow-up review due by:
+- Post-action review link or outcome:
 - Reauthorization conditions:
 - Status:
 ```
@@ -323,7 +365,7 @@ This operating standard is meant to satisfy the practical governance needs empha
 The current working crosswalk is:
 
 - `Operating Stance`, `Proportionality Rule`, and `Authority Context` map to EU AI Act recital 20 and Articles 4, 13, 14, and 17. The key idea is that literacy, instructions, documentation, and oversight should be real and usable. They also map to AI 600-1 `GOVERN 1.1`, `GOVERN 1.4`, `GOVERN 2.1`, and `GOVERN 3.2`, plus SP 800-218A `PO.2.1`, `PO.2.2`, and `PO.3.3`.
-- `Competence Model` maps to EU AI Act Articles 4, 14, and 26(2), which require sufficient AI literacy and competent natural persons for assigned oversight tasks. The matching NIST anchors are AI 600-1 `MAP 3.4`, `GOVERN 2.1`, and `GOVERN 3.2`, plus SP 800-218A `PO.2.1` and `PO.2.2`.
+- `Competence Model` and `Control-Agent Roles` map to EU AI Act Articles 4, 14, and 26(2), which require sufficient AI literacy and competent natural persons for assigned oversight tasks and clear role-qualified supervision. The matching NIST anchors are AI 600-1 `MAP 3.4`, `GOVERN 2.1`, and `GOVERN 3.2`, plus SP 800-218A `PO.2.1` and `PO.2.2`.
 - `Risk-Tiered Execution Modes`, `Anti-Runaway Controls`, `Staged Autonomy`, and `Revocation and Disengagement` map to EU AI Act recitals 64-66 and Articles 14, 17, 26(2), and 72, which support ongoing risk management, oversight measures, role-qualified supervision, quality management, and post-market monitoring. The matching NIST anchors are AI 600-1 `GOVERN 3.2`, `MANAGE 2.4`, and `MEASURE 2.8` and SP 800-218A `PO.4.1`, `PW.1.1`, and `RV.2.2`.
 - `Legibility Requirements` and `Minimum-Sufficient Evidence and Succession Breadcrumbs` map to EU AI Act Articles 13 and 17 and to the technical documentation and record-keeping obligations associated with Articles 11 and 72. The matching NIST anchors are AI 600-1 `MEASURE 2.8` and SP 800-218A `PO.3.3` and `PW.1.2`.
 - `Record-Location Model` and `Lightweight Templates` map to the same documentation, record-keeping, and monitoring duties because they split durable governance meaning from high-volume execution telemetry and provide low-friction scaffolds for preserving that meaning when existing artifacts are not quite enough. The closest NIST anchors are AI 600-1 `MEASURE 2.8` and `MANAGE 2.4`, plus SP 800-218A `PO.3.3`, `PW.1.2`, and `RV.2.2`.

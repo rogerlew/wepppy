@@ -325,10 +325,13 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 - Doctrine and SOP now define minimum-sufficient evidence and succession breadcrumb rules for low-friction governance.
 - Doctrine and SOP now resolve record location as a hybrid model: durable governance meaning in repo-visible artifacts, execution detail in orchestration metadata.
 - SOP now includes lightweight templates for authority grants, competence reviews, and revocation or tripwire events, designed for issue-first use on smaller work and package artifacts on broader work.
-- Package docs and active prompts now treat the package as Draft 2 complete and ready for review/closeout.
+- First serial review findings have been patched: `T4` now has explicit break-glass handling, qualifying-gate criteria, safer production-investigation defaults, and stronger `T4` template fields.
+- Second serial review found no remaining material contradiction and led only to a small template polish: an explicit rollback-or-containment field in the authority-grant template.
+- Doctrine and SOP now name stable `governance_control_agent` and `ops_security_control_agent` roles, and the repo now includes matching `.codex` and CAO bindings without hardcoding model identities into governance docs.
+- Package docs and active prompts now treat the package as Draft 2 complete and ready for closeout if accepted.
 
 **Next Steps**:
-1. Review the Draft 2 operationalization set against real repository workflows and close the package if accepted.
+1. Close the package if the patched doctrine set is accepted as operationally sufficient.
 2. If runtime enforcement or policy tooling is desired, open a follow-on implementation package.
 
 ---

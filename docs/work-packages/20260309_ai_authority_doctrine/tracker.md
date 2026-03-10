@@ -5,15 +5,15 @@
 ## Quick Status
 
 **Started**: 2026-03-09  
-**Current phase**: Draft 2 pass 4 complete / review pending  
+**Current phase**: Serial review complete / closeout pending  
 **Last updated**: 2026-03-09  
-**Next milestone**: Review the Draft 2 operationalization set and decide package closeout  
+**Next milestone**: Close the package if no further contradictions are found  
 **Implementation plan**: `docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md`
 
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Review the Draft 2 operationalization set against real repository workflows and close the package if accepted.
+- [ ] Close the package if the patched doctrine set is accepted as operationally sufficient.
 
 ### In Progress
 - [ ] None.
@@ -233,6 +233,39 @@
 **Decision**: Choose option 2.
 
 **Impact**: Clarifies that emergency high-boundary work can still be validly governed without pretending it was routine maintenance, while preserving the stronger control requirement that makes `T4` distinct from `T3`.
+
+### 2026-03-09: Add break-glass T4 handling and qualifying-gate criteria
+**Context**: The first serial review found that incident-driven `T4` work was still not executable in a single-maintainer reality when no independent reviewer was available, and that the phrase "explicit external gate" was too weak without independence criteria.
+
+**Options considered**:
+1. Leave `T4` strict and unresolved, forcing operators to stop or bypass policy during an emergency.
+2. Add a narrow break-glass `T4` path, plus explicit qualifying-gate criteria, while keeping dual control as the normal rule.
+
+**Decision**: Choose option 2.
+
+**Impact**: Makes `T4` executable under real emergency conditions without collapsing it into `T3` or weakening the expectation that ordinary high-boundary work should still use independent dual control.
+
+### 2026-03-09: Keep rollback or containment explicit in the authority-grant template
+**Context**: The second serial review found no material governance contradictions remaining, but did identify that the authority-grant template lacked an explicit rollback or containment line even though `T3` and `T4` evidence floors require recovery thinking.
+
+**Options considered**:
+1. Leave recovery planning implicit inside other template lines.
+2. Add an explicit rollback or containment field to the authority-grant template.
+
+**Decision**: Choose option 2.
+
+**Impact**: Makes recovery thinking more discoverable in fast-moving operational work without adding meaningful template complexity.
+
+### 2026-03-09: Name control-agent roles without hardcoding model identities into governance docs
+**Context**: The user wanted two stable control roles for high-boundary review, but did not want the doctrine or SOP tied to particular model names that may change faster than the governance concept.
+
+**Options considered**:
+1. Keep control review generic and leave second-controller identity implicit.
+2. Name stable control-agent roles in the governance docs and bind them in execution tooling without encoding model identifiers into doctrine text.
+
+**Decision**: Choose option 2.
+
+**Impact**: Makes second-controller expectations more executable, lets runtime tooling bind concrete roles, and avoids forcing doctrine edits whenever model preferences change.
 
 ## Risks and Issues
 
@@ -547,6 +580,78 @@
 **Test results**:
 - `wctl doc-lint --path AI_AUTHORITY_DOCTRINE.md` -> clean.
 - `wctl doc-lint --path AI_AUTHORITY_OPERATING_PRACTICES.md` -> clean.
+
+### 2026-03-09: First serial review findings patched
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Patched the doctrine and SOP so `T4` now has an explicit break-glass path for emergency containment when qualifying second control is genuinely unavailable.
+- Defined qualifying external-gate criteria so `Dual control` still requires an actually independent, blocking control point.
+- Tightened live-production investigation examples so read-only access to production data defaults to `T2`, with escalation to `T4` when trust-boundary material is involved.
+- Expanded the lightweight templates so `T4` records can capture authorizer, operator, second controller or gate, authorization marker, and break-glass review obligations.
+- Updated the tracker and active ExecPlan so the next milestone is a second serial review pass rather than more open-ended drafting.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+1. Run a second serial review pass against the patched `T4` model.
+
+**Test results**:
+- `wctl doc-lint --path AI_AUTHORITY_DOCTRINE.md` -> clean.
+- `wctl doc-lint --path AI_AUTHORITY_OPERATING_PRACTICES.md` -> clean.
+- `wctl doc-lint --path PROJECT_TRACKER.md` -> clean.
+- `wctl doc-lint --path docs/work-packages/20260309_ai_authority_doctrine` -> clean.
+- `diff -u AI_AUTHORITY_DOCTRINE.md <(uk2us AI_AUTHORITY_DOCTRINE.md)` -> no changes.
+- `diff -u AI_AUTHORITY_OPERATING_PRACTICES.md <(uk2us AI_AUTHORITY_OPERATING_PRACTICES.md)` -> no changes.
+
+### 2026-03-09: Second serial review feedback incorporated
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Reviewed the second serial-review feedback and accepted the single low-risk recommendation.
+- Added an explicit `Rollback or containment path` field to the authority-grant template so the template aligns more directly with the `T3` and `T4` evidence floors.
+- Left the rest of the review conclusions unchanged because they reported no remaining material contradictions in the doctrine, SOP, or package-state docs.
+- Updated package state so the next step is closeout rather than another review pass.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+1. Close the package if the patched doctrine set is accepted as operationally sufficient.
+
+**Test results**:
+- `wctl doc-lint --path AI_AUTHORITY_OPERATING_PRACTICES.md` -> clean.
+- `wctl doc-lint --path PROJECT_TRACKER.md` -> clean.
+- `wctl doc-lint --path docs/work-packages/20260309_ai_authority_doctrine` -> clean.
+- `diff -u AI_AUTHORITY_OPERATING_PRACTICES.md <(uk2us AI_AUTHORITY_OPERATING_PRACTICES.md)` -> no changes.
+
+### 2026-03-09: Control-agent roles and bindings added
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added doctrine and SOP language defining stable `governance_control_agent` and `ops_security_control_agent` roles for high-boundary review without naming specific models.
+- Tightened `Dual control` semantics so an independent second controller may be a qualified human or a designated control-agent role, provided it can actually block or scope-reduce execution and leaves durable evidence.
+- Updated the lightweight templates so authority and revocation records can capture second-controller role or profile and second-controller outcome.
+- Added executable bindings in `.codex/config.toml`, `.codex/agents/`, and CAO built-in agent profiles under `services/cao/src/cli_agent_orchestrator/agent_store/`.
+- Updated `services/cao/README.md` so the new built-in control-agent profiles are discoverable.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+1. Close the package if the patched doctrine set is accepted as operationally sufficient.
+
+**Test results**:
+- `wctl doc-lint --path AI_AUTHORITY_DOCTRINE.md` -> clean.
+- `wctl doc-lint --path AI_AUTHORITY_OPERATING_PRACTICES.md` -> clean.
+- `wctl doc-lint --path PROJECT_TRACKER.md` -> clean.
+- `wctl doc-lint --path docs/work-packages/20260309_ai_authority_doctrine` -> clean.
+- `wctl doc-lint --path services/cao/README.md` -> clean.
+- `wctl doc-lint --path services/cao/src/cli_agent_orchestrator/agent_store` -> clean.
+- `diff -u AI_AUTHORITY_DOCTRINE.md <(uk2us AI_AUTHORITY_DOCTRINE.md)` -> no changes.
+- `diff -u AI_AUTHORITY_OPERATING_PRACTICES.md <(uk2us AI_AUTHORITY_OPERATING_PRACTICES.md)` -> no changes.
+- `python3` TOML parse for `.codex/config.toml` and the new control-agent role files -> clean.
 
 ## Communication Log
 
