@@ -11,13 +11,17 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple
 
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as nodir_resolve
-from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
+from wepppy.runtime_paths.thaw_freeze import (
+    maintenance_lock as nodir_maintenance_lock,
+    maintenance_lock_scope_token as nodir_maintenance_lock_scope_token,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.omni.omni import ContrastMapping, Omni, OmniScenario, ScenarioDef
 
 _OMNI_LOCK_WAIT_SECONDS = 300.0
 _OMNI_LOCK_RETRY_INTERVAL_SECONDS = 0.25
+_OMNI_LOCK_SCOPE = "effective_root_path_compat"
 
 
 def _require_directory_root(wd: str, root: str) -> None:
@@ -41,7 +45,18 @@ def _run_with_directory_root_lock(
     deadline = monotonic() + _OMNI_LOCK_WAIT_SECONDS
     while True:
         try:
-            with nodir_maintenance_lock(wd, root, purpose=purpose):
+            scope_token = nodir_maintenance_lock_scope_token(
+                wd,
+                root,
+                scope=_OMNI_LOCK_SCOPE,
+            )
+            with nodir_maintenance_lock(
+                wd,
+                root,
+                purpose=purpose,
+                scope=_OMNI_LOCK_SCOPE,
+                scope_token=scope_token,
+            ):
                 _require_directory_root(wd, root)
                 return callback()
         except NoDirError as exc:
@@ -65,7 +80,20 @@ def _run_with_directory_roots_lock(
             deadline = monotonic() + _OMNI_LOCK_WAIT_SECONDS
             while True:
                 try:
-                    stack.enter_context(nodir_maintenance_lock(wd, root, purpose=f"{purpose}/{root}"))
+                    scope_token = nodir_maintenance_lock_scope_token(
+                        wd,
+                        root,
+                        scope=_OMNI_LOCK_SCOPE,
+                    )
+                    stack.enter_context(
+                        nodir_maintenance_lock(
+                            wd,
+                            root,
+                            purpose=f"{purpose}/{root}",
+                            scope=_OMNI_LOCK_SCOPE,
+                            scope_token=scope_token,
+                        )
+                    )
                     break
                 except NoDirError as exc:
                     if exc.code != "NODIR_LOCKED" or monotonic() >= deadline:
@@ -74,6 +102,7 @@ def _run_with_directory_roots_lock(
         for root in lock_roots:
             _require_directory_root(wd, root)
         return callback()
+
 
 class OmniModeBuildServices:
     """Dispatch Omni scenario/contrast builds by selection and scenario mode."""

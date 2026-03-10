@@ -11,13 +11,15 @@ from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from time import time
-from typing import Any
+from typing import Any, Literal, cast
 
 from .errors import nodir_locked
 from .paths import NoDirRoot, NODIR_ROOTS
 
 __all__ = [
     "NoDirMaintenanceLock",
+    "NoDirMaintenanceLockScope",
+    "maintenance_lock_scope_token",
     "maintenance_lock_key",
     "acquire_maintenance_lock",
     "release_maintenance_lock",
@@ -35,6 +37,8 @@ class NoDirMaintenanceLock:
     value: str
     root: NoDirRoot
     runid: str
+    scope: "NoDirMaintenanceLockScope"
+    scope_token: str
     host: str
     pid: int
     owner: str
@@ -45,11 +49,29 @@ class NoDirMaintenanceLock:
 
 _DEFAULT_LOCK_TTL_SECONDS = 6 * 3600
 
+NoDirMaintenanceLockScope = Literal[
+    "legacy_runid",
+    "effective_root_path",
+    "effective_root_path_compat",
+]
+
+_LOCK_SCOPES: tuple[NoDirMaintenanceLockScope, ...] = (
+    "legacy_runid",
+    "effective_root_path",
+    "effective_root_path_compat",
+)
+
 
 def _normalize_root(root: str) -> NoDirRoot:
     if root not in NODIR_ROOTS:
         raise ValueError(f"unsupported root: {root}")
     return root
+
+
+def _normalize_scope(scope: str) -> NoDirMaintenanceLockScope:
+    if scope not in _LOCK_SCOPES:
+        raise ValueError(f"unsupported maintenance lock scope: {scope}")
+    return cast(NoDirMaintenanceLockScope, scope)
 
 
 def _runid_from_wd(wd_path: Path) -> str:
@@ -65,15 +87,48 @@ def _runid_from_wd(wd_path: Path) -> str:
     return wd_path.name
 
 
-def _lock_path(runid: str, root: NoDirRoot) -> Path:
+def _effective_root_path_scope_token(wd_path: Path, root: NoDirRoot) -> str:
+    root_path = wd_path / root
+    try:
+        resolved = root_path.resolve(strict=False)
+    except (OSError, RuntimeError):
+        resolved = Path(os.path.realpath(str(root_path)))
+    return os.path.normcase(os.path.normpath(str(resolved)))
+
+
+def _scope_token_for_scope(
+    wd_path: Path,
+    root: NoDirRoot,
+    scope: NoDirMaintenanceLockScope,
+) -> str:
+    if scope == "legacy_runid":
+        return _runid_from_wd(wd_path)
+    return _effective_root_path_scope_token(wd_path, root)
+
+
+def _lock_key_for_scope(
+    scope_token: str,
+    root: NoDirRoot,
+    *,
+    scope: NoDirMaintenanceLockScope,
+) -> str:
+    if scope == "legacy_runid":
+        return f"nodb-lock:{scope_token}:runtime-paths/{root}"
+    digest = hashlib.sha1(scope_token.encode("utf-8")).hexdigest()[:12]
+    return f"nodb-lock:path-scope:{digest}:runtime-paths/{root}"
+
+
+def _lock_path(scope_token: str, root: NoDirRoot) -> Path:
     lock_root = Path(
         os.getenv("WEPP_RUNTIME_PATH_LOCK_ROOT", "/tmp/wepppy-runtime-path-locks")
     )
-    safe_runid = "".join(ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in runid)
-    if not safe_runid:
-        safe_runid = "run"
-    digest = hashlib.sha1(runid.encode("utf-8")).hexdigest()[:8]
-    filename = f"{safe_runid[:80]}.{digest}.{root}.lock"
+    safe_scope_token = "".join(
+        ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in scope_token
+    )
+    if not safe_scope_token:
+        safe_scope_token = "scope"
+    digest = hashlib.sha1(scope_token.encode("utf-8")).hexdigest()[:8]
+    filename = f"{safe_scope_token[:80]}.{digest}.{root}.lock"
     return lock_root / filename
 
 
@@ -104,11 +159,50 @@ def _raise_locked(root: NoDirRoot, payload: dict[str, Any] | None = None) -> Non
     )
 
 
-def maintenance_lock_key(wd: str | Path, root: str) -> str:
+def _active_lock_payload(lock_path: Path, now: int) -> dict[str, Any] | None:
+    existing = _read_lock_payload(lock_path)
+    if existing is None:
+        return None
+    existing_expiry = existing.get("expires_at")
+    if isinstance(existing_expiry, int) and existing_expiry <= now:
+        with suppress(FileNotFoundError):
+            lock_path.unlink()
+        return None
+    return existing
+
+
+def maintenance_lock_scope_token(
+    wd: str | Path,
+    root: str,
+    *,
+    scope: NoDirMaintenanceLockScope = "legacy_runid",
+) -> str:
     wd_path = Path(os.path.abspath(str(wd)))
     normalized_root = _normalize_root(root)
-    runid = _runid_from_wd(wd_path)
-    return f"nodb-lock:{runid}:runtime-paths/{normalized_root}"
+    normalized_scope = _normalize_scope(scope)
+    return _scope_token_for_scope(wd_path, normalized_root, normalized_scope)
+
+
+def maintenance_lock_key(
+    wd: str | Path,
+    root: str,
+    *,
+    scope: NoDirMaintenanceLockScope = "legacy_runid",
+    scope_token: str | None = None,
+) -> str:
+    wd_path = Path(os.path.abspath(str(wd)))
+    normalized_root = _normalize_root(root)
+    normalized_scope = _normalize_scope(scope)
+    resolved_scope_token = (
+        scope_token
+        if scope_token is not None
+        else _scope_token_for_scope(wd_path, normalized_root, normalized_scope)
+    )
+    return _lock_key_for_scope(
+        resolved_scope_token,
+        normalized_root,
+        scope=normalized_scope,
+    )
 
 
 def acquire_maintenance_lock(
@@ -117,11 +211,24 @@ def acquire_maintenance_lock(
     *,
     purpose: str = "runtime-path-maintenance",
     ttl_seconds: int | None = None,
+    scope: NoDirMaintenanceLockScope = "legacy_runid",
+    scope_token: str | None = None,
 ) -> NoDirMaintenanceLock:
     wd_path = Path(os.path.abspath(str(wd)))
     normalized_root = _normalize_root(root)
+    normalized_scope = _normalize_scope(scope)
     runid = _runid_from_wd(wd_path)
-    key = maintenance_lock_key(wd_path, normalized_root)
+    resolved_scope_token = (
+        scope_token
+        if scope_token is not None
+        else _scope_token_for_scope(wd_path, normalized_root, normalized_scope)
+    )
+    key = maintenance_lock_key(
+        wd_path,
+        normalized_root,
+        scope=normalized_scope,
+        scope_token=resolved_scope_token,
+    )
     ttl = max(1, int(ttl_seconds)) if ttl_seconds is not None else _DEFAULT_LOCK_TTL_SECONDS
     now = int(time())
     expires_at = now + ttl
@@ -129,16 +236,18 @@ def acquire_maintenance_lock(
     pid = os.getpid()
     token = uuid.uuid4().hex
     owner = f"{host}:{pid}"
-    lock_path = _lock_path(runid, normalized_root)
-    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    primary_lock_path = _lock_path(resolved_scope_token, normalized_root)
+    compatibility_lock_paths = [primary_lock_path]
+    if normalized_scope == "effective_root_path_compat":
+        legacy_scope_token = _scope_token_for_scope(wd_path, normalized_root, "legacy_runid")
+        legacy_lock_path = _lock_path(legacy_scope_token, normalized_root)
+        if legacy_lock_path != primary_lock_path:
+            compatibility_lock_paths.append(legacy_lock_path)
+    primary_lock_path.parent.mkdir(parents=True, exist_ok=True)
 
-    existing = _read_lock_payload(lock_path)
-    if existing is not None:
-        existing_expiry = existing.get("expires_at")
-        if isinstance(existing_expiry, int) and existing_expiry <= now:
-            with suppress(FileNotFoundError):
-                lock_path.unlink()
-        else:
+    for lock_path in compatibility_lock_paths:
+        existing = _active_lock_payload(lock_path, now)
+        if existing is not None:
             _raise_locked(normalized_root, existing)
 
     payload = {
@@ -146,6 +255,8 @@ def acquire_maintenance_lock(
         "owner": owner,
         "runid": runid,
         "root": normalized_root,
+        "scope": normalized_scope,
+        "scope_token": resolved_scope_token,
         "purpose": purpose,
         "acquired_at": now,
         "expires_at": expires_at,
@@ -154,22 +265,33 @@ def acquire_maintenance_lock(
     serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
     try:
-        fd = os.open(lock_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        fd = os.open(primary_lock_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     except FileExistsError:
-        _raise_locked(normalized_root, _read_lock_payload(lock_path))
+        _raise_locked(normalized_root, _read_lock_payload(primary_lock_path))
     with os.fdopen(fd, "w", encoding="utf-8") as handle:
         handle.write(serialized)
+
+    if normalized_scope == "effective_root_path_compat":
+        for lock_path in compatibility_lock_paths[1:]:
+            existing = _active_lock_payload(lock_path, now)
+            if existing is None:
+                continue
+            with suppress(FileNotFoundError):
+                primary_lock_path.unlink()
+            _raise_locked(normalized_root, existing)
 
     return NoDirMaintenanceLock(
         key=key,
         value=purpose,
         root=normalized_root,
         runid=runid,
+        scope=normalized_scope,
+        scope_token=resolved_scope_token,
         host=host,
         pid=pid,
         owner=owner,
         token=token,
-        lock_path=str(lock_path),
+        lock_path=str(primary_lock_path),
         expires_at=expires_at,
     )
 
@@ -193,11 +315,15 @@ class _MaintenanceLockContext:
         *,
         purpose: str,
         ttl_seconds: int | None,
+        scope: NoDirMaintenanceLockScope,
+        scope_token: str | None,
     ) -> None:
         self._wd = wd
         self._root = root
         self._purpose = purpose
         self._ttl_seconds = ttl_seconds
+        self._scope = scope
+        self._scope_token = scope_token
         self._lock: NoDirMaintenanceLock | None = None
 
     def __enter__(self) -> NoDirMaintenanceLock:
@@ -206,6 +332,8 @@ class _MaintenanceLockContext:
             self._root,
             purpose=self._purpose,
             ttl_seconds=self._ttl_seconds,
+            scope=self._scope,
+            scope_token=self._scope_token,
         )
         return self._lock
 
@@ -222,12 +350,16 @@ def maintenance_lock(
     *,
     purpose: str = "runtime-path-maintenance",
     ttl_seconds: int | None = None,
+    scope: NoDirMaintenanceLockScope = "legacy_runid",
+    scope_token: str | None = None,
 ) -> _MaintenanceLockContext:
     return _MaintenanceLockContext(
         wd,
         root,
         purpose=purpose,
         ttl_seconds=ttl_seconds,
+        scope=scope,
+        scope_token=scope_token,
     )
 
 

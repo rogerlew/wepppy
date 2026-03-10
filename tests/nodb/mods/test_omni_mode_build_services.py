@@ -607,19 +607,26 @@ def test_run_with_directory_roots_lock_sorts_order_and_rechecks(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     resolve_calls: list[tuple[str, str]] = []
-    lock_events: list[tuple[str, str, str]] = []
+    scope_token_calls: list[tuple[str, str]] = []
+    lock_events: list[tuple[str, str, str, str, str]] = []
 
     def _resolve(_wd: str, root: str, view: str = "effective"):
         resolve_calls.append((root, view))
         return SimpleNamespace(form="dir")
 
     @contextmanager
-    def _lock(_wd: str, root: str, *, purpose: str):
-        lock_events.append(("enter", root, purpose))
+    def _lock(_wd: str, root: str, *, purpose: str, scope: str, scope_token: str):
+        lock_events.append(("enter", root, purpose, scope, scope_token))
         yield
-        lock_events.append(("exit", root, purpose))
+        lock_events.append(("exit", root, purpose, scope, scope_token))
 
     monkeypatch.setattr(mode_services_module, "nodir_resolve", _resolve)
+    monkeypatch.setattr(
+        mode_services_module,
+        "nodir_maintenance_lock_scope_token",
+        lambda _wd, root, *, scope: scope_token_calls.append((root, scope))
+        or f"token:{scope}:{root}",
+    )
     monkeypatch.setattr(mode_services_module, "nodir_maintenance_lock", _lock)
 
     callback_calls: list[str] = []
@@ -632,6 +639,10 @@ def test_run_with_directory_roots_lock_sorts_order_and_rechecks(
 
     assert result == "ok"
     assert callback_calls == ["called"]
+    assert scope_token_calls == [
+        ("landuse", "effective_root_path_compat"),
+        ("soils", "effective_root_path_compat"),
+    ]
     assert resolve_calls == [
         ("landuse", "effective"),
         ("soils", "effective"),
@@ -639,8 +650,89 @@ def test_run_with_directory_roots_lock_sorts_order_and_rechecks(
         ("soils", "effective"),
     ]
     assert lock_events == [
-        ("enter", "landuse", "omni-unit/landuse"),
-        ("enter", "soils", "omni-unit/soils"),
-        ("exit", "soils", "omni-unit/soils"),
-        ("exit", "landuse", "omni-unit/landuse"),
+        (
+            "enter",
+            "landuse",
+            "omni-unit/landuse",
+            "effective_root_path_compat",
+            "token:effective_root_path_compat:landuse",
+        ),
+        (
+            "enter",
+            "soils",
+            "omni-unit/soils",
+            "effective_root_path_compat",
+            "token:effective_root_path_compat:soils",
+        ),
+        (
+            "exit",
+            "soils",
+            "omni-unit/soils",
+            "effective_root_path_compat",
+            "token:effective_root_path_compat:soils",
+        ),
+        (
+            "exit",
+            "landuse",
+            "omni-unit/landuse",
+            "effective_root_path_compat",
+            "token:effective_root_path_compat:landuse",
+        ),
+    ]
+
+
+def test_run_with_directory_root_lock_uses_effective_path_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    resolve_calls: list[tuple[str, str]] = []
+    scope_token_calls: list[tuple[str, str]] = []
+    lock_events: list[tuple[str, str, str, str, str]] = []
+
+    def _resolve(_wd: str, root: str, view: str = "effective"):
+        resolve_calls.append((root, view))
+        return SimpleNamespace(form="dir")
+
+    @contextmanager
+    def _lock(_wd: str, root: str, *, purpose: str, scope: str, scope_token: str):
+        lock_events.append(("enter", root, purpose, scope, scope_token))
+        yield
+        lock_events.append(("exit", root, purpose, scope, scope_token))
+
+    monkeypatch.setattr(mode_services_module, "nodir_resolve", _resolve)
+    monkeypatch.setattr(
+        mode_services_module,
+        "nodir_maintenance_lock_scope_token",
+        lambda _wd, root, *, scope: scope_token_calls.append((root, scope))
+        or f"token:{scope}:{root}",
+    )
+    monkeypatch.setattr(mode_services_module, "nodir_maintenance_lock", _lock)
+
+    result = mode_services_module._run_with_directory_root_lock(
+        "/tmp/run",
+        "landuse",
+        lambda: "ok",
+        purpose="omni-single",
+    )
+
+    assert result == "ok"
+    assert resolve_calls == [
+        ("landuse", "effective"),
+        ("landuse", "effective"),
+    ]
+    assert scope_token_calls == [("landuse", "effective_root_path_compat")]
+    assert lock_events == [
+        (
+            "enter",
+            "landuse",
+            "omni-single",
+            "effective_root_path_compat",
+            "token:effective_root_path_compat:landuse",
+        ),
+        (
+            "exit",
+            "landuse",
+            "omni-single",
+            "effective_root_path_compat",
+            "token:effective_root_path_compat:landuse",
+        ),
     ]

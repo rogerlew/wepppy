@@ -88,6 +88,57 @@ def test_maintenance_lock_key_scopes_grouped_paths_to_parent_runid(tmp_path: Pat
     assert key == "nodb-lock:base-run:runtime-paths/landuse"
 
 
+# LOCK_SCOPE_OMNI_SIBLING_ISOLATION
+def test_maintenance_lock_path_scope_allows_distinct_sibling_roots_and_blocks_shared_root(
+    tmp_path: Path,
+) -> None:
+    base_wd = tmp_path / "wc1" / "runs" / "ab" / "base-run"
+    s1 = base_wd / "_pups" / "omni" / "scenarios" / "s1"
+    s2 = base_wd / "_pups" / "omni" / "scenarios" / "s2"
+    s1_landuse = s1 / "landuse"
+    s2_landuse = s2 / "landuse"
+    s1_landuse.mkdir(parents=True, exist_ok=True)
+    s2_landuse.mkdir(parents=True, exist_ok=True)
+
+    with maintenance_lock(
+        str(s1),
+        "landuse",
+        purpose="s1-distinct",
+        ttl_seconds=30,
+        scope="effective_root_path_compat",
+    ):
+        with maintenance_lock(
+            str(s2),
+            "landuse",
+            purpose="s2-distinct",
+            ttl_seconds=30,
+            scope="effective_root_path_compat",
+        ):
+            pass
+
+    s2_landuse.rmdir()
+    s2_landuse.symlink_to(s1_landuse, target_is_directory=True)
+
+    with maintenance_lock(
+        str(s1),
+        "landuse",
+        purpose="s1-shared",
+        ttl_seconds=30,
+        scope="effective_root_path_compat",
+    ):
+        with pytest.raises(NoDirError) as exc_info:
+            with maintenance_lock(
+                str(s2),
+                "landuse",
+                purpose="s2-shared",
+                ttl_seconds=30,
+                scope="effective_root_path_compat",
+            ):
+                pass
+
+    assert exc_info.value.code == "NODIR_LOCKED"
+
+
 def test_maintenance_lock_raises_nodir_locked_on_contention(tmp_path: Path) -> None:
     wd = tmp_path / "run"
     wd.mkdir(parents=True, exist_ok=True)
@@ -124,6 +175,27 @@ def test_maintenance_lock_contends_across_grouped_and_base_paths(tmp_path: Path)
     with maintenance_lock(str(base_wd), "landuse", purpose="base", ttl_seconds=30):
         with pytest.raises(NoDirError) as exc_info:
             with maintenance_lock(str(child_wd), "landuse", purpose="child", ttl_seconds=30):
+                pass
+
+    assert exc_info.value.code == "NODIR_LOCKED"
+
+
+def test_maintenance_lock_path_scope_compat_checks_legacy_lock(tmp_path: Path) -> None:
+    base_wd = tmp_path / "wc1" / "runs" / "ab" / "base-run"
+    s1 = base_wd / "_pups" / "omni" / "scenarios" / "s1"
+    s2 = base_wd / "_pups" / "omni" / "scenarios" / "s2"
+    (s1 / "landuse").mkdir(parents=True, exist_ok=True)
+    (s2 / "landuse").mkdir(parents=True, exist_ok=True)
+
+    with maintenance_lock(str(s1), "landuse", purpose="legacy", ttl_seconds=30):
+        with pytest.raises(NoDirError) as exc_info:
+            with maintenance_lock(
+                str(s2),
+                "landuse",
+                purpose="path-compat",
+                ttl_seconds=30,
+                scope="effective_root_path_compat",
+            ):
                 pass
 
     assert exc_info.value.code == "NODIR_LOCKED"
