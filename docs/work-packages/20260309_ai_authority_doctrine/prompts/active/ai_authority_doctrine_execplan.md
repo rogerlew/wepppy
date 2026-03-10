@@ -31,6 +31,7 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
 - [x] Patch the first serial review findings on `T4` emergency handling, qualifying-gate independence, production investigation classification, and `T4` template fields.
 - [x] (2026-03-10 01:49Z) Clarify doctrine governability scope and distinguish runaway from possible AI self-succession without treating self-succession as a present operating assumption.
 - [x] Clarify that current `T4` posture is governance-first and review-driven, while hard external enforcement and dedicated control-plane infrastructure remain future implementation work.
+- [x] (2026-03-10 03:24Z) Add doctrine definitions-and-role-model and amendment-or-ratification sections; reframe remaining unresolved items as deferred future work rather than active drafting priorities.
 
 ## Surprises & Discoveries
 
@@ -90,6 +91,9 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
 
 - Observation: A fully specified hard-enforcement `T4` control plane would outrun present WEPPpy needs and risk making the doctrine pretend to controls the repo does not yet have.
   Evidence: Follow-up discussion after governance-control review concluded that the pragmatic answer is an explicit limitation note rather than premature architecture.
+
+- Observation: The remaining high-value missing sections were not more AI-safety theory but the doctrine's own internal constitutional mechanics: definitions, roles, and how the document changes itself.
+  Evidence: Closeout review identified those as the two most authorable gross gaps, and the user explicitly chose to author them now while deferring the rest.
 
 ## Decision Log
 
@@ -181,6 +185,10 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
   Rationale: The doctrine should be honest about current controls and should not overclaim dedicated out-of-band enforcement, immutable evidence retention, or mature control-plane ownership before those mechanisms actually exist.
   Date/Author: 2026-03-10 / Codex.
 
+- Decision: Add doctrine definitions-and-role-model and amendment-or-ratification sections now, and convert the remaining unresolved drafting lists into deferred future work.
+  Rationale: Those sections improve self-containment and acceptability without forcing premature answers on reserved decisions, externalized deployments, or hard control-plane implementation.
+  Date/Author: 2026-03-10 / Codex.
+
 ## Outcomes & Retrospective
 
 Current outcome:
@@ -202,6 +210,7 @@ Current outcome:
 - The doctrine and SOP now also name stable governance and operations/security control-agent roles, and the repository now includes matching `.codex` and CAO role bindings without encoding model identities into governance text.
 - The doctrine now also states that governance controls are for governable systems and distinguishes runaway from possible AI self-succession as a future continuity state rather than a present assumption.
 - The doctrine and SOP now also state explicitly that current `T4` posture is governance-first and review-driven, while hard external enforcement and dedicated control-plane infrastructure remain future implementation work.
+- The doctrine now also defines its core governance roles and terms directly and states how doctrine amendments are classified, ratified, and reviewed, while the remaining unresolved topics are now framed as deferred future work rather than active drafting debt.
 
 Current gap:
 - The package now mainly needs closeout judgment; any further work should be a deliberate new package or a concrete contradiction-driven revision, not more open-ended drafting.

@@ -42,6 +42,7 @@
 - [x] Added lightweight templates for authority grants, competence reviews, and revocation or tripwire handling, keeping them optional and issue-first (2026-03-09).
 - [x] Clarified doctrine governability scope and distinguished runaway from possible AI self-succession as a future continuity state rather than a present assumption (2026-03-10).
 - [x] Clarified that current `T4` posture is governance-first and review-driven, while hard external enforcement and dedicated control-plane infrastructure remain future implementation work (2026-03-10).
+- [x] Added a doctrine definitions-and-role-model section plus a doctrine amendment, ratification, and re-review section; reframed remaining drafting scaffolding as deferred future work (2026-03-10).
 
 ## Timeline
 
@@ -56,6 +57,7 @@
 - **2026-03-09** - Draft 2 pass 4 completed with lightweight templates aligned to the hybrid record-location model.
 - **2026-03-10** - Doctrine clarified that governance controls apply to governable systems and that possible AI self-succession, if ever accepted, is distinct from runaway.
 - **2026-03-10** - Doctrine and SOP clarified that present `T4` controls are governance-first and that hard external enforcement remains aspirational future work.
+- **2026-03-10** - Doctrine gained explicit definitions, role model, and amendment or re-ratification rules, and both root docs now frame unresolved work as deferred rather than active drafting.
 
 ## Decisions
 
@@ -292,6 +294,17 @@
 **Decision**: Choose option 2.
 
 **Impact**: Preserves pragmatic near-term utility, avoids pretending the repository already has enterprise-grade `T4` enforcement, and leaves implementation-grade control infrastructure to a separate future package.
+
+### 2026-03-10: Author missing doctrine definitions and amendment rules now, defer the rest
+**Context**: Closeout review identified that the most authorable missing gross sections were a definitions-and-role-model section and a doctrine amendment or ratification section. The user preferred writing those now and leaving other unresolved areas for later only as needed.
+
+**Options considered**:
+1. Leave the concepts distributed implicitly across the doctrine and keep the active drafting scaffolding in place.
+2. Add the two missing doctrine sections now and reframe the remaining unresolved items as deferred future work rather than active drafting targets.
+
+**Decision**: Choose option 2.
+
+**Impact**: Makes the doctrine more self-contained, reduces ambiguity around governance roles and how the doctrine changes itself, and improves readiness for acceptance without forcing premature answers on harder unresolved questions.
 
 ## Risks and Issues
 

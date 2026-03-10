@@ -19,6 +19,23 @@ This doctrine is intended to support legal defensibility, governance review, and
 
 This doctrine is written for a stack with one primary human maintainer, strong agentic capability, and mature documentation infrastructure. It is designed to preserve competent stewardship during absence, reuse, or succession. It does not assume that adding more humans automatically improves governance. In this repository, incompetent human intervention may degrade decision support and can therefore be unethical.
 
+## Definitions and Role Model
+
+This doctrine uses practical operational definitions rather than metaphysical ones.
+
+- `principal`: the human or governance body that may delegate, narrow, suspend, revoke, or refuse authority for the scoped work; legal accountability may remain here even when execution does not
+- `proxied stakeholder`: the human whose request, interest, or authority is being represented by the immediate operator
+- `operator`: the human or agent performing or directly steering the scoped action
+- `reviewer`: the human or agent evaluating classification, evidence, rationale, or outcome; a reviewer may validate or challenge work without being the authorizer
+- `second controller`: the independent human or designated control-agent role required for `T4` work when a qualifying external gate is not the second control point
+- `qualifying external gate`: a control surface outside the acting agent's and immediate operator's control for the scoped action that can actually block execution and leaves durable evidence
+- `agent operational identity`: the role, configuration, governing documents, tool surface, and session or run context under which an agent acts
+- `authority grant`: the discoverable combination of instructions, artifacts, and constraints that gives the operator permission to act within defined scope
+- `runaway`: loss of governability, whether or not the system is unusually capable
+- `break-glass`: narrow emergency use of higher-control authority when delay would materially worsen compromise, outage, or loss of governability
+
+Not every action requires every role. `T0` and `T1` work may collapse principal, requester, and reviewer into a lightweight natural-language grant plus visible artifact. `T4` work, by contrast, should keep principal, operator, reviewer, and second-controller functions legible even when one person temporarily fills more than one role during an emergency.
+
 ## Initial Doctrine Statements
 
 ### 1. Authority Follows Competence
@@ -193,19 +210,27 @@ The current working crosswalk is:
 - The hybrid record-location model maps to the same traceability and monitoring obligations because it allocates durable governance meaning and machine execution evidence to different but linked surfaces instead of forcing either one to do both jobs badly. The closest NIST anchors are AI 600-1 `MEASURE 2.8` and `MANAGE 2.4`, plus SP 800-218A `PO.3.3`, `PW.1.2`, and `RV.2.2`.
 - The doctrine's low-friction stance does not map to a single statutory requirement. It is an implementation principle: use the lightest record set that still preserves competence, accountability, succession value, and legal defensibility. In practice that means reusing commits, issues, work packages, trackers, ExecPlans, and orchestration metadata whenever they already satisfy the evidence need.
 
-## Further Drafting Priorities
+## Amendment, Ratification, and Review
 
-1. Purpose and scope
-2. Definitions and role model
-3. Legal and governance basis for delegation
-4. Competence as the basis of authority
-5. Legible authority and decision provenance
-6. Consensus, mandate formation, and contestability
-7. Human oversight competence requirements
-8. Runaway prevention and governability safeguards
-9. Minimum-sufficient evidence and succession breadcrumbs
-10. Documentation, audit, and evidence retention
-11. Review, amendment, and periodic re-ratification
+This doctrine is not self-ratifying. Changes to it are only valid when accepted through a control path already recognized by the current doctrine and repository governance.
+
+For current WEPPpy operation:
+
+- internal ratification occurs when the responsible human principal, or a delegated named authority acting within scope, accepts the doctrine revision as operative repository governance
+- clarifying prose, examples, and non-operative explanatory edits are usually `T2`
+- edits that materially change authority boundaries, reserved decisions, control-plane ownership, break-glass posture, self-succession posture, or the conditions under which agents may act or halt should be treated as `T4`
+- doctrine amendments should leave a durable breadcrumb recording proposer, authorizer, applicable class, rationale, and resulting disposition
+- when doctrine changes materially affect execution practice, the companion SOP, package tracker state, and any bound control-agent role definitions should be updated in the same change set or explicitly queued as immediate follow-up work
+
+Review should be event-driven by default rather than calendar-heavy. Re-ratification is especially warranted after major incidents, material agent-capability shifts, legal or contractual changes, or any doctrine amendment that changes who may act, review, or halt.
+
+## Deferred Questions and Future Work
+
+1. Default reserved human-principal decisions, if any, that should remain human-ratified until law or governance structures change.
+2. Control-plane implementation work for stronger out-of-band suspension, evidence integrity, and runtime enforcement.
+3. More explicit operating posture for externally facing or regulated deployments.
+4. Agent-to-agent delegation protocol details if subordinate execution becomes materially more common.
+5. Future legal or compliance review before any claim of formal adoption beyond internal repository governance.
 
 ## Immediate Drafting Principles
 
@@ -221,7 +246,7 @@ The current working crosswalk is:
 - Do keep durable governance meaning GitHub-visible and human-readable even when execution telemetry lives elsewhere.
 - Do require independent controls that remain effective even if the agent is more competent than its immediate supervisor in the task domain.
 
-## Open Drafting Questions
+## Current Open Questions
 
 - How should competence be evidenced for agents that improve rapidly or whose capabilities differ sharply by domain?
 - How should the doctrine distinguish internal tooling agents from externally facing or decision-support systems that may trigger EU AI Act transparency or high-risk obligations?

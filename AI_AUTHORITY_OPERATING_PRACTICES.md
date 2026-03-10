@@ -359,6 +359,8 @@ Authority grants should be reviewed:
 - when task domain or deployment context changes
 - before expanding into externally facing or regulated use cases
 
+The default posture is event-driven review rather than a heavy universal calendar. Where risk, capability volatility, or succession value warrants it, the authority record should still carry an explicit expiry or next-review date.
+
 ## Compliance Crosswalk
 
 This operating standard is meant to satisfy the practical governance needs emphasized by the EU AI Act and the NIST materials without imposing unnecessary paperwork on a single-maintainer stack.
@@ -374,7 +376,7 @@ The current working crosswalk is:
 
 This crosswalk is interpretive rather than dispositive. It explains why the operating standard is structured this way and where future legal review should focus first.
 
-## Further Drafting Priorities
+## Deferred Operational Work
 
 1. Authority grant workflow
 2. Competence evaluation workflow
@@ -400,7 +402,7 @@ These are optional record types to use when needed, not mandatory forms for ever
 - revocation notice
 - reauthorization record
 
-## Open Operating Questions
+## Current Open Operating Questions
 
 - What evaluation cadence is enough for rapidly improving agent families?
 - Which validation gates are strong enough to keep a task in T2 instead of escalating it to T3?
