@@ -116,6 +116,8 @@ The stable governance reference is the control role, not a particular model iden
 
 If delaying a `T4` action would materially worsen compromise, availability loss, or loss of governability and no independent second controller or qualifying gate can be reached in time, a narrow break-glass `T4` path may be used. That path does not relax the work to `T3`. It permits only the minimum containment or recovery action, requires an emergency declaration naming why dual control was unavailable, and requires secondary review before broader follow-on remediation or authority expansion.
 
+For current WEPPpy operation, `T4` is governed primarily through explicit classification, durable records, designated control review, narrow break-glass use, and post-action review. Hard external enforcement, immutable evidence retention, and a dedicated out-of-band control plane remain future implementation work, not controls this draft claims already fully exists.
+
 ## Minimum-Sufficient Evidence and Succession Breadcrumbs
 
 Legibility is not a demand for maximal paperwork. It is a demand that authority, action, and outcome remain reconstructable after the original session, chat context, or operator attention has passed.

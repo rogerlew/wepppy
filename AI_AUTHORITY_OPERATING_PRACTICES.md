@@ -1,7 +1,7 @@
 # AI Authority Operating Practices
 
 **Status**: Draft 1 - working draft  
-**Last Updated**: 2026-03-09  
+**Last Updated**: 2026-03-10  
 **Doctrine Source**: `AI_AUTHORITY_DOCTRINE.md`
 
 ## Purpose
@@ -102,6 +102,7 @@ Interpretation notes:
 - a qualifying external gate must be outside the acting agent's and immediate operator's control for the scoped action, able to block execution, and durable enough to leave reviewable evidence; non-blocking alerts, self-approvals, and reviewer agents without halt authority do not count
 - `T4` work is often incident-driven rather than preplanned; when that happens, the minimum valid control is contemporaneous dual control with a durable record, not a fictional retroactive maintenance window
 - if no independent reviewer or qualifying gate is available and delay would materially worsen compromise, outage, or loss of governability, invoke a narrow break-glass `T4` path: record who assumed temporary sole-authorizer responsibility, why delay was unacceptable, what minimum containment or recovery action is permitted, and when secondary review will occur; this does not downgrade the work to `T3`
+- in current WEPPpy operation, `T4` is governance-first and review-driven: explicit classification, durable records, designated control review, narrow break-glass use, and post-action review are the present controls; hard external enforcement, immutable evidence retention, and a dedicated out-of-band control plane remain future implementation work and should not be overstated as already solved
 - `Prohibited` means the task is outside valid delegated authority for now.
 
 Draft classification examples:

@@ -41,6 +41,7 @@
 - [x] Resolved the record-location model as hybrid: durable governance meaning in repo-visible artifacts, execution detail in orchestration metadata, with linked discoverability (2026-03-09).
 - [x] Added lightweight templates for authority grants, competence reviews, and revocation or tripwire handling, keeping them optional and issue-first (2026-03-09).
 - [x] Clarified doctrine governability scope and distinguished runaway from possible AI self-succession as a future continuity state rather than a present assumption (2026-03-10).
+- [x] Clarified that current `T4` posture is governance-first and review-driven, while hard external enforcement and dedicated control-plane infrastructure remain future implementation work (2026-03-10).
 
 ## Timeline
 
@@ -54,6 +55,7 @@
 - **2026-03-09** - Draft 2 pass 3 completed with the hybrid record-location model.
 - **2026-03-09** - Draft 2 pass 4 completed with lightweight templates aligned to the hybrid record-location model.
 - **2026-03-10** - Doctrine clarified that governance controls apply to governable systems and that possible AI self-succession, if ever accepted, is distinct from runaway.
+- **2026-03-10** - Doctrine and SOP clarified that present `T4` controls are governance-first and that hard external enforcement remains aspirational future work.
 
 ## Decisions
 
@@ -279,6 +281,17 @@
 **Decision**: Choose option 2.
 
 **Impact**: Sharpens the anti-runaway position, prevents Kahana-style anti-self-ratification warnings from being misread as objections to all AI-authored governance work, and makes the doctrine's continuity logic more explicit without turning self-succession into a current operating assumption or legal claim.
+
+### 2026-03-10: Treat current T4 as governance-first and defer hard control-plane claims
+**Context**: Follow-up discussion after the governance-control review concluded that fully specifying `T4` infrastructure now would overfit present WEPPpy reality. The immediate need is an honest doctrine that distinguishes current review-driven governance from future hard enforcement.
+
+**Options considered**:
+1. Reopen `T4` design and specify external enforcement, immutable evidence storage, control-plane ownership, and timing SLAs now.
+2. Add a short limitation note stating that present `T4` control is governance-first and that dedicated out-of-band control-plane infrastructure remains future implementation work.
+
+**Decision**: Choose option 2.
+
+**Impact**: Preserves pragmatic near-term utility, avoids pretending the repository already has enterprise-grade `T4` enforcement, and leaves implementation-grade control infrastructure to a separate future package.
 
 ## Risks and Issues
 
