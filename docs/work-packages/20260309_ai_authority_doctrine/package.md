@@ -1,12 +1,12 @@
 # AI Authority Doctrine + Operating Practices
 
-**Status**: Open - Draft 2 operationalization complete; review and closeout pending (2026-03-09)
+**Status**: Closed - accepted as current internal governance reference (2026-03-10)
 
 ## Overview
 
 This package establishes the governance basis for delegating real operational authority to AI agents inside WEPPpy. It separates the normative and legal doctrine from the day-to-day operating standard so the project can maximize lawful agent autonomy, preserve legible authority, and prepare for stronger future agents without hardcoding human primacy into policy.
 
-Draft 1 is complete and the Draft 2 operationalization pass is now substantively complete: the root doctrine, operating standard, compliance crosswalk, task matrix, breadcrumb rules, record-location model, and lightweight templates all exist as working drafts. The package remains open only for review and closeout so the doctrine can move from persuasive working draft to usable repository governance reference without splitting a still-coherent documentation effort into multiple packages.
+Draft 1 is complete and the Draft 2 operationalization pass is complete as well. The root doctrine, operating standard, compliance crosswalk, task matrix, breadcrumb rules, record-location model, lightweight templates, control-agent role bindings, and closeout clarifications now exist as accepted internal governance artifacts for current WEPPpy operation. The package is closed; further work should happen only through deliberate follow-on packages or contradiction-driven revisions.
 
 ## Objectives
 
@@ -86,8 +86,8 @@ Draft 1 is complete and the Draft 2 operationalization pass is now substantively
 
 ## References
 
-- `AI_AUTHORITY_DOCTRINE.md` - root doctrine Draft 1 working draft
-- `AI_AUTHORITY_OPERATING_PRACTICES.md` - root operating-practices Draft 1 working draft
+- `AI_AUTHORITY_DOCTRINE.md` - accepted internal governance doctrine
+- `AI_AUTHORITY_OPERATING_PRACTICES.md` - accepted internal operating standard
 - `AGENTIC_AI_SYSTEMS_MANIFESTO.md` - AI-native operating philosophy and oversight posture
 - `/workdir/ghosts-in-the-machine/dialectic-003-the-authority-vacuum.md` - legible authority and decision-rights framing
 - `compliance/eu-ai-act.md` - local AI Act reference text
@@ -96,9 +96,9 @@ Draft 1 is complete and the Draft 2 operationalization pass is now substantively
 
 ## Deliverables
 
-- Active doctrine work package with `package.md`, `tracker.md`, and active ExecPlan synchronized to Draft 2 complete / closeout-pending state.
-- Root doctrine Draft 1 working draft capturing the intended authority posture.
-- Root operating-practices Draft 1 working draft separating implementation details from doctrine.
+- Closed doctrine work package with `package.md`, `tracker.md`, and archived prompts synchronized to accepted internal-governance state.
+- Root doctrine accepted as the current internal governance posture for WEPPpy.
+- Root operating-practices document accepted as the current internal operating standard for WEPPpy.
 - Draft 2 operationalization updates covering execution matrix, breadcrumb minimums, record placement, and lightweight templates.
 - Local `.codex` and CAO control-agent role bindings aligned to the doctrine's named control roles.
 - Updated `PROJECT_TRACKER.md` entry for discoverability and handoff.
@@ -107,7 +107,7 @@ Draft 1 is complete and the Draft 2 operationalization pass is now substantively
 
 ### Remaining Work in This Package
 
-1. Close the package if the patched doctrine set is accepted as operationally sufficient.
+- None. Package closed on 2026-03-10 after internal ratification and pragmatic-acceptance yea votes from both control-agent review roles.
 
 ### External Follow-up Candidates
 

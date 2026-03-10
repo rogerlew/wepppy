@@ -242,7 +242,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 3 packages ✅
+**Current WIP Count**: 2 packages ✅
 
 ---
 
@@ -310,38 +310,24 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### AI Authority Doctrine + Operating Practices
-**Started**: 2026-03-09  
-**Status**: Draft 2 operationalization complete - review and closeout pending  
-**Size**: High-leverage governance package (1-2 weeks iterative drafting)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260309_ai_authority_doctrine/](docs/work-packages/20260309_ai_authority_doctrine/)  
-**Description**: Establish a living doctrine for delegating authority to AI agents based on demonstrated competence, plus a separate operating standard for grants, evidence, oversight, revocation, and compliance-aware escalation.
-
-**Current Status**:
-- Draft 1 working drafts exist in `AI_AUTHORITY_DOCTRINE.md` and `AI_AUTHORITY_OPERATING_PRACTICES.md`.
-- Doctrine and SOP now include a Draft 1 compliance crosswalk to the EU AI Act and NIST materials.
-- Doctrine and SOP now include the first Draft 2 task-class execution matrix with evidence thresholds and escalation modes.
-- Doctrine and SOP now define minimum-sufficient evidence and succession breadcrumb rules for low-friction governance.
-- Doctrine and SOP now resolve record location as a hybrid model: durable governance meaning in repo-visible artifacts, execution detail in orchestration metadata.
-- SOP now includes lightweight templates for authority grants, competence reviews, and revocation or tripwire events, designed for issue-first use on smaller work and package artifacts on broader work.
-- First serial review findings have been patched: `T4` now has explicit break-glass handling, qualifying-gate criteria, safer production-investigation defaults, and stronger `T4` template fields.
-- Second serial review found no remaining material contradiction and led only to a small template polish: an explicit rollback-or-containment field in the authority-grant template.
-- Doctrine and SOP now name stable `governance_control_agent` and `ops_security_control_agent` roles, and the repo now includes matching `.codex` and CAO bindings without hardcoding model identities into governance docs.
-- Doctrine now explicitly limits its claims to governable systems and distinguishes runaway from possible AI self-succession as a future continuity state rather than a present operating assumption.
-- Doctrine and SOP now also state explicitly that current `T4` posture is governance-first and review-driven, while hard external enforcement and dedicated control-plane infrastructure remain future implementation work.
-- Doctrine now also includes explicit definitions, governance-role model, and amendment or re-ratification rules, and the remaining unresolved items are framed as deferred future work rather than active drafting debt.
-- Package docs and active prompts now treat the package as Draft 2 complete and ready for closeout if accepted.
-
-**Next Steps**:
-1. Close the package if the patched doctrine set is accepted as operationally sufficient.
-2. If runtime enforcement or policy tooling is desired, open a follow-on implementation package.
-
----
-
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### AI Authority Doctrine + Operating Practices
+**Completed**: 2026-03-10  
+**Duration**: 2 days iterative drafting and review  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260309_ai_authority_doctrine/](docs/work-packages/20260309_ai_authority_doctrine/)  
+**Description**: Established the current internal WEPPpy doctrine for delegating authority to AI agents, plus the companion operating standard for grants, evidence, oversight, revocation, and compliance-aware escalation.
+
+**Outcome**:
+- Accepted `AI_AUTHORITY_DOCTRINE.md` as the current internal governance doctrine and `AI_AUTHORITY_OPERATING_PRACTICES.md` as the current internal operating standard.
+- Added a compliance crosswalk, task-class matrix, minimum-sufficient evidence rules, hybrid record-location model, and lightweight templates.
+- Added stable `governance_control_agent` and `ops_security_control_agent` roles plus matching `.codex` and CAO bindings.
+- Clarified governability scope, possible AI self-succession, and the present pragmatic `T4` posture.
+- Added explicit definitions, governance-role model, doctrine amendment or re-ratification rules, and archived the prompts to `prompts/completed/`.
 
 ### TerrainProcessor Runtime + Visualization Artifact Implementation
 **Completed**: 2026-03-06  

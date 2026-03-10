@@ -8,7 +8,7 @@ You are advancing the AI authority doctrine package for WEPPpy.
 3. Read `/workdir/wepppy/AI_AUTHORITY_OPERATING_PRACTICES.md`.
 4. Read `/workdir/wepppy/docs/work-packages/20260309_ai_authority_doctrine/package.md`.
 5. Read `/workdir/wepppy/docs/work-packages/20260309_ai_authority_doctrine/tracker.md`.
-6. Read `/workdir/wepppy/docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md`.
+6. Read `/workdir/wepppy/docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md`.
 7. Read `/workdir/wepppy/AGENTIC_AI_SYSTEMS_MANIFESTO.md`.
 8. Read `/workdir/ghosts-in-the-machine/dialectic-003-the-authority-vacuum.md`.
 9. Read `/workdir/wepppy/compliance/eu-ai-act.md`.

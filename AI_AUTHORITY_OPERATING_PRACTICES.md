@@ -1,6 +1,6 @@
 # AI Authority Operating Practices
 
-**Status**: Draft 1 - working draft  
+**Status**: Accepted internal operating standard (ratified 2026-03-10)  
 **Last Updated**: 2026-03-10  
 **Doctrine Source**: `AI_AUTHORITY_DOCTRINE.md`
 
@@ -408,6 +408,7 @@ These are optional record types to use when needed, not mandatory forms for ever
 - Which validation gates are strong enough to keep a task in T2 instead of escalating it to T3?
 - How should agent-to-agent delegation be authorized and recorded?
 - What service or authority owns the out-of-band control plane for suspension and kill-switch actions?
+- What default maximum latency should govern secondary review after break-glass `T4` use when no stricter incident-specific deadline is set?
 - What minimum incident threshold automatically pauses a grant pending human review?
 - Which metadata substrates are stable enough to treat as preferred execution-trace homes across different agent environments?
 

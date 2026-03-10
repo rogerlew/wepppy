@@ -5,15 +5,15 @@
 ## Quick Status
 
 **Started**: 2026-03-09  
-**Current phase**: Serial review complete / closeout pending  
+**Current phase**: Closed / accepted as current internal governance reference  
 **Last updated**: 2026-03-10  
-**Next milestone**: Close the package if no further contradictions are found  
-**Implementation plan**: `docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md`
+**Next milestone**: None - follow-on work only if new contradictions or implementation packages arise  
+**Implementation plan**: `docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md`
 
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Close the package if the patched doctrine set is accepted as operationally sufficient.
+- [ ] None.
 
 ### In Progress
 - [ ] None.
@@ -43,6 +43,7 @@
 - [x] Clarified doctrine governability scope and distinguished runaway from possible AI self-succession as a future continuity state rather than a present assumption (2026-03-10).
 - [x] Clarified that current `T4` posture is governance-first and review-driven, while hard external enforcement and dedicated control-plane infrastructure remain future implementation work (2026-03-10).
 - [x] Added a doctrine definitions-and-role-model section plus a doctrine amendment, ratification, and re-review section; reframed remaining drafting scaffolding as deferred future work (2026-03-10).
+- [x] Added the remaining break-glass secondary-review timing question to the SOP open questions, ratified the doctrine and SOP for current internal use, archived the active prompts, and closed the package (2026-03-10).
 
 ## Timeline
 
@@ -58,6 +59,7 @@
 - **2026-03-10** - Doctrine clarified that governance controls apply to governable systems and that possible AI self-succession, if ever accepted, is distinct from runaway.
 - **2026-03-10** - Doctrine and SOP clarified that present `T4` controls are governance-first and that hard external enforcement remains aspirational future work.
 - **2026-03-10** - Doctrine gained explicit definitions, role model, and amendment or re-ratification rules, and both root docs now frame unresolved work as deferred rather than active drafting.
+- **2026-03-10** - Package ratified for internal use, active prompts archived, and work package closed.
 
 ## Decisions
 
@@ -306,6 +308,17 @@
 
 **Impact**: Makes the doctrine more self-contained, reduces ambiguity around governance roles and how the doctrine changes itself, and improves readiness for acceptance without forcing premature answers on harder unresolved questions.
 
+### 2026-03-10: Ratify the doctrine and SOP for current internal use and close the package
+**Context**: After the final doctrine additions landed, the user chose to ratify the docs for internal WEPPpy use, add the remaining break-glass timing question to the SOP open questions, archive the active prompts, and close the package rather than continue drafting.
+
+**Options considered**:
+1. Keep the package open while continuing to polish deferred implementation and policy questions.
+2. Ratify the current doctrine and SOP as the present internal governance baseline, record the remaining open questions explicitly, archive the prompts, and close the package.
+
+**Decision**: Choose option 2.
+
+**Impact**: Converts the root docs from persuasive drafts into accepted internal governance references, keeps unresolved implementation questions visible without blocking use, and restores package hygiene by moving the work-package prompts into `prompts/completed/`.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -375,7 +388,7 @@
 - `diff -u AI_AUTHORITY_DOCTRINE.md <(uk2us AI_AUTHORITY_DOCTRINE.md)` -> no changes.
 - `diff -u AI_AUTHORITY_OPERATING_PRACTICES.md <(uk2us AI_AUTHORITY_OPERATING_PRACTICES.md)` -> no changes.
 - `diff -u docs/work-packages/20260309_ai_authority_doctrine/tracker.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/tracker.md)` -> no changes.
-- `diff -u docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md)` -> no changes.
+- `diff -u docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md)` -> no changes.
 
 ### 2026-03-09: Low-friction governance correction
 **Agent/Contributor**: Codex
@@ -399,7 +412,7 @@
 - `diff -u AI_AUTHORITY_DOCTRINE.md <(uk2us AI_AUTHORITY_DOCTRINE.md)` -> no changes.
 - `diff -u AI_AUTHORITY_OPERATING_PRACTICES.md <(uk2us AI_AUTHORITY_OPERATING_PRACTICES.md)` -> no changes.
 - `diff -u docs/work-packages/20260309_ai_authority_doctrine/tracker.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/tracker.md)` -> no changes.
-- `diff -u docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md)` -> no changes.
+- `diff -u docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md)` -> no changes.
 
 ### 2026-03-09: Claude gap-closure edits
 **Agent/Contributor**: Codex
@@ -425,7 +438,7 @@
 - `diff -u AI_AUTHORITY_DOCTRINE.md <(uk2us AI_AUTHORITY_DOCTRINE.md)` -> no changes.
 - `diff -u AI_AUTHORITY_OPERATING_PRACTICES.md <(uk2us AI_AUTHORITY_OPERATING_PRACTICES.md)` -> no changes.
 - `diff -u docs/work-packages/20260309_ai_authority_doctrine/tracker.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/tracker.md)` -> no changes.
-- `diff -u docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md)` -> no changes.
+- `diff -u docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md)` -> no changes.
 
 ### 2026-03-09: Draft 1 compliance pass
 **Agent/Contributor**: Codex
@@ -451,7 +464,7 @@
 - `diff -u AI_AUTHORITY_OPERATING_PRACTICES.md <(uk2us AI_AUTHORITY_OPERATING_PRACTICES.md)` -> no changes.
 - `diff -u docs/work-packages/20260309_ai_authority_doctrine/package.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/package.md)` -> no changes.
 - `diff -u docs/work-packages/20260309_ai_authority_doctrine/tracker.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/tracker.md)` -> no changes.
-- `diff -u docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md)` -> no changes.
+- `diff -u docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md <(uk2us docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md)` -> no changes.
 
 ### 2026-03-09: State sync and Draft 2 sequencing
 **Agent/Contributor**: Codex

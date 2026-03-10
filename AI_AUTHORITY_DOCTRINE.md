@@ -1,6 +1,6 @@
 # AI Authority Doctrine
 
-**Status**: Draft 1 - working draft  
+**Status**: Accepted internal governance doctrine (ratified 2026-03-10)  
 **Last Updated**: 2026-03-10  
 **Related Work Package**: `docs/work-packages/20260309_ai_authority_doctrine/`  
 **Companion Standard**: `AI_AUTHORITY_OPERATING_PRACTICES.md`
@@ -216,7 +216,8 @@ This doctrine is not self-ratifying. Changes to it are only valid when accepted 
 
 For current WEPPpy operation:
 
-- internal ratification occurs when the responsible human principal, or a delegated named authority acting within scope, accepts the doctrine revision as operative repository governance
+- Roger Lew is the responsible human principal unless a delegated named authority is explicitly recorded for the scoped governance action
+- internal ratification occurs when Roger Lew, or a delegated named authority acting within scope, accepts the doctrine revision as operative repository governance
 - clarifying prose, examples, and non-operative explanatory edits are usually `T2`
 - edits that materially change authority boundaries, reserved decisions, control-plane ownership, break-glass posture, self-succession posture, or the conditions under which agents may act or halt should be treated as `T4`
 - doctrine amendments should leave a durable breadcrumb recording proposer, authorizer, applicable class, rationale, and resulting disposition
@@ -268,4 +269,4 @@ Review should be event-driven by default rather than calendar-heavy. Re-ratifica
 - `AI_AUTHORITY_OPERATING_PRACTICES.md`
 - `AGENTIC_AI_SYSTEMS_MANIFESTO.md`
 - `docs/work-packages/20260309_ai_authority_doctrine/package.md`
-- `docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md`
+- `docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/ai_authority_doctrine_execplan.md`

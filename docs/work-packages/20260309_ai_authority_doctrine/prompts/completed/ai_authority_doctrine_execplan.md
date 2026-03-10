@@ -32,6 +32,7 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
 - [x] (2026-03-10 01:49Z) Clarify doctrine governability scope and distinguish runaway from possible AI self-succession without treating self-succession as a present operating assumption.
 - [x] Clarify that current `T4` posture is governance-first and review-driven, while hard external enforcement and dedicated control-plane infrastructure remain future implementation work.
 - [x] (2026-03-10 03:24Z) Add doctrine definitions-and-role-model and amendment-or-ratification sections; reframe remaining unresolved items as deferred future work rather than active drafting priorities.
+- [x] (2026-03-10 03:34Z) Add the remaining break-glass secondary-review timing question to the SOP open questions, ratify the doctrine and SOP for current internal use, archive the active prompts, and close the package.
 
 ## Surprises & Discoveries
 
@@ -94,6 +95,9 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
 
 - Observation: The remaining high-value missing sections were not more AI-safety theory but the doctrine's own internal constitutional mechanics: definitions, roles, and how the document changes itself.
   Evidence: Closeout review identified those as the two most authorable gross gaps, and the user explicitly chose to author them now while deferring the rest.
+
+- Observation: After the last doctrine additions, the only remaining substantive unresolved item raised by review was the default maximum latency for secondary review after break-glass `T4`, which belongs in open operating questions rather than as a blocker to acceptance.
+  Evidence: Both control-agent review roles voted pragmatic-acceptance yea and separately flagged break-glass review timing as residual risk rather than a reason to reject the docs.
 
 ## Decision Log
 
@@ -189,6 +193,10 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
   Rationale: Those sections improve self-containment and acceptability without forcing premature answers on reserved decisions, externalized deployments, or hard control-plane implementation.
   Date/Author: 2026-03-10 / Codex.
 
+- Decision: Ratify the doctrine and SOP for current internal WEPPpy use, keep break-glass review timing as an explicit open operating question, archive the prompts, and close the package.
+  Rationale: The docs are now internally coherent and have pragmatic-acceptance yea votes from both governance and ops/security control-agent review roles; the remaining unresolved items are either explicit future implementation work or modest follow-up clarifications.
+  Date/Author: 2026-03-10 / Codex.
+
 ## Outcomes & Retrospective
 
 Current outcome:
@@ -211,6 +219,7 @@ Current outcome:
 - The doctrine now also states that governance controls are for governable systems and distinguishes runaway from possible AI self-succession as a future continuity state rather than a present assumption.
 - The doctrine and SOP now also state explicitly that current `T4` posture is governance-first and review-driven, while hard external enforcement and dedicated control-plane infrastructure remain future implementation work.
 - The doctrine now also defines its core governance roles and terms directly and states how doctrine amendments are classified, ratified, and reviewed, while the remaining unresolved topics are now framed as deferred future work rather than active drafting debt.
+- The SOP now also carries the remaining break-glass secondary-review timing question explicitly, and the package is now ready to archive as accepted internal governance rather than as an active drafting surface.
 
 Current gap:
 - The package now mainly needs closeout judgment; any further work should be a deliberate new package or a concrete contradiction-driven revision, not more open-ended drafting.
@@ -256,7 +265,7 @@ From `/workdir/wepppy`:
 
     edit `docs/work-packages/20260309_ai_authority_doctrine/package.md`
     edit `docs/work-packages/20260309_ai_authority_doctrine/tracker.md`
-    edit `docs/work-packages/20260309_ai_authority_doctrine/prompts/active/run_ai_authority_doctrine_e2e.prompt.md`
+    edit `docs/work-packages/20260309_ai_authority_doctrine/prompts/completed/run_ai_authority_doctrine_e2e.prompt.md`
     edit `PROJECT_TRACKER.md`
 
 4. Validate documentation changes:
