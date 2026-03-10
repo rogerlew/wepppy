@@ -350,7 +350,7 @@ wepppy/weppcloud/templates/controls/
 3. **Treatment Application**: For thinning/mulching/prescribed fire, `Treatments.getInstance(scenario_wd)` modifies landuse/soils
 4. **WEPP Execution**: Scenario workspace calls `Wepp.prep_hillslopes()`, `Wepp.run_hillslopes()`, `Wepp.run_watershed()`
 5. **Reporting**: `Omni.scenarios_report()` concatenates per-scenario output files into a unified DataFrame
-6. **Dependency Updates**: SHA1 hashes of output files are stored; subsequent runs skip unchanged scenarios
+6. **Dependency Updates**: SHA1 hashes of dependency outputs are stored; subsequent runs skip unchanged scenarios
 
 ### Contrast Execution Flow
 
@@ -392,11 +392,15 @@ wepppy/weppcloud/templates/controls/
 
 ### Dependency Tracking
 
-Omni uses SHA1 hashing to detect when scenarios need rebuilding:
+Omni uses dependency metadata to detect when scenarios need rebuilding:
 
-- **Scenario signature**: `json.dumps(scenario_def, sort_keys=True)`
-- **Dependency hash**: SHA1 of base scenario's loss output file
-- **Match logic**: Skip rebuild if both signature and hash unchanged
+- **Scenario signature**: `json.dumps(scenario_def, sort_keys=True)` (stable serialized scenario definition)
+- **Dependency target**: `mulch` depends on its declared `base_scenario`; all other scenarios depend on the Omni base scenario
+- **Dependency path**: `wepp/output/interchange/loss_pw0.out.parquet` for the dependency target
+- **Dependency hash**: SHA1 of that dependency path
+- **Match logic**:
+  - RQ concurrency path: skip when signature and dependency hash match prior `scenario_dependency_tree`
+  - In-process path: same hash/signature check plus year-set parity (`loss_pw0.all_years.class_data.parquet`) with the base scenario
 
 ### Python API Usage
 
@@ -459,7 +463,8 @@ df_contrasts = omni.contrasts_report()
 
 - `run_omni_scenarios_rq(runid)`: Dispatches scenario jobs, compiles summaries
 - `run_omni_scenario_rq(runid, scenario)`: Executes single scenario
-- Lock retry pattern with 30-second timeout
+- Runtime-path maintenance locks protect mutable `landuse`/`soils` roots with path-scoped identity (`effective_root_path_compat`) and a 300-second wait window
+- Dependency/contrast tree persistence retries NoDb lock acquisition (5 attempts, 1-second backoff)
 - Process pool fallback for CPU-heavy operations
 
 ### Testing

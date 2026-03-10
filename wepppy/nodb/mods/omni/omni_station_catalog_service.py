@@ -144,8 +144,23 @@ class OmniStationCatalogService:
         from wepppy.nodb.mods.omni.omni import OMNI_REL_DIR
 
         scenario_key = self.normalize_scenario_key(omni, scenario_name)
-        base_path = _join(omni.wd, "wepp", "output", "loss_pw0.txt")
-        scenario_path = _join(omni.wd, OMNI_REL_DIR, "scenarios", scenario_key, "wepp", "output", "loss_pw0.txt")
+        base_path = _join(
+            omni.wd,
+            "wepp",
+            "output",
+            "interchange",
+            "loss_pw0.out.parquet",
+        )
+        scenario_path = _join(
+            omni.wd,
+            OMNI_REL_DIR,
+            "scenarios",
+            scenario_key,
+            "wepp",
+            "output",
+            "interchange",
+            "loss_pw0.out.parquet",
+        )
 
         if scenario_key == str(omni.base_scenario) and not _exists(scenario_path):
             return base_path

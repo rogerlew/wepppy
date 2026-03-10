@@ -187,7 +187,7 @@ def test_normalize_and_path_helpers_resolve_base_and_scenario_paths(tmp_path: Pa
     service = OmniStationCatalogService()
     omni = _StationOmniStub(tmp_path)
 
-    base_loss_path = tmp_path / "wepp" / "output" / "loss_pw0.txt"
+    base_loss_path = tmp_path / "wepp" / "output" / "interchange" / "loss_pw0.out.parquet"
     base_loss_path.parent.mkdir(parents=True, exist_ok=True)
     base_loss_path.write_text("", encoding="ascii")
 
@@ -197,7 +197,7 @@ def test_normalize_and_path_helpers_resolve_base_and_scenario_paths(tmp_path: Pa
 
     assert service.loss_pw0_path_for_scenario(omni, None) == str(base_loss_path)
     assert service.loss_pw0_path_for_scenario(omni, "mulch").endswith(
-        "_pups/omni/scenarios/mulch/wepp/output/loss_pw0.txt"
+        "_pups/omni/scenarios/mulch/wepp/output/interchange/loss_pw0.out.parquet"
     )
 
     base_interchange_path = (
@@ -279,6 +279,35 @@ def test_signature_and_dependency_helpers_are_stable(
         "undisturbed": {"loss_path": "/loss/undisturbed.txt", "sha1": "sha:/loss/undisturbed.txt"},
         "mulch": {"loss_path": "/loss/mulch.txt", "sha1": "sha:/loss/mulch.txt"},
     }
+
+
+def test_contrast_dependencies_use_interchange_loss_out_paths(tmp_path: Path) -> None:
+    service = OmniStationCatalogService()
+    omni = _StationOmniStub(tmp_path)
+
+    base_path = tmp_path / "wepp" / "output" / "interchange" / "loss_pw0.out.parquet"
+    mulch_path = (
+        tmp_path
+        / "_pups"
+        / "omni"
+        / "scenarios"
+        / "mulch"
+        / "wepp"
+        / "output"
+        / "interchange"
+        / "loss_pw0.out.parquet"
+    )
+    base_path.parent.mkdir(parents=True, exist_ok=True)
+    mulch_path.parent.mkdir(parents=True, exist_ok=True)
+    base_path.write_text("base", encoding="ascii")
+    mulch_path.write_text("mulch", encoding="ascii")
+
+    dependencies = service.contrast_dependencies(omni, "None,10__to__mulch")
+
+    assert dependencies["undisturbed"]["loss_path"] == str(base_path)
+    assert dependencies["mulch"]["loss_path"] == str(mulch_path)
+    assert dependencies["undisturbed"]["sha1"] == omni_module._hash_file_sha1(str(base_path))
+    assert dependencies["mulch"]["sha1"] == omni_module._hash_file_sha1(str(mulch_path))
 
 
 def _new_detached_omni(tmp_path: Path) -> omni_module.Omni:
