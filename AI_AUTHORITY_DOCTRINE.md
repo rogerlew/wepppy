@@ -1,7 +1,7 @@
 # AI Authority Doctrine
 
 **Status**: Draft 1 - working draft  
-**Last Updated**: 2026-03-09  
+**Last Updated**: 2026-03-10  
 **Related Work Package**: `docs/work-packages/20260309_ai_authority_doctrine/`  
 **Companion Standard**: `AI_AUTHORITY_OPERATING_PRACTICES.md`
 
@@ -78,6 +78,14 @@ The doctrine should require, at minimum:
 - staged autonomy with stronger evidence requirements as blast radius increases
 - tripwires that auto-pause or auto-demote authority on repeated failure, scope breach, telemetry loss, or anomalous behavior
 - dual control or pre-authorized windows for high-impact irreversible actions
+
+## Governability Scope and Possible AI Self-Succession
+
+This doctrine governs systems that remain externally governable. It assumes that infrastructure, access control, suspension paths, revocation paths, and durable evidence surfaces remain meaningfully outside the acting agent's unilateral control. It does not claim that a repository document can constrain a system that has already exceeded those boundaries. Governance language has force only in the governable case.
+
+In this doctrine, runaway and AI self-succession are not the same thing. Runaway is unintended loss of governability. AI self-succession, if it is ever accepted here, is governed continuity: delegated authority that survives principal unavailability because the grant was made while the principal was competent, remains legible, remains externally enforceable, and stays inside previously authorized scope.
+
+The doctrine does not treat AI self-succession as a present operating assumption, a legal conclusion, or an inevitability. It leaves open a narrower claim: continued AI stewardship may become an acceptable future continuity state when no more competent successor is available, external control paths still function, legal accountability is not ignored, and the acting system cannot widen its own authority through self-ratification. If those conditions fail, the situation is runaway or invalid delegation, not legitimate succession.
 
 ## Task-Class Authority Allocation
 

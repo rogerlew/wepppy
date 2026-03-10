@@ -328,6 +328,7 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 - First serial review findings have been patched: `T4` now has explicit break-glass handling, qualifying-gate criteria, safer production-investigation defaults, and stronger `T4` template fields.
 - Second serial review found no remaining material contradiction and led only to a small template polish: an explicit rollback-or-containment field in the authority-grant template.
 - Doctrine and SOP now name stable `governance_control_agent` and `ops_security_control_agent` roles, and the repo now includes matching `.codex` and CAO bindings without hardcoding model identities into governance docs.
+- Doctrine now explicitly limits its claims to governable systems and distinguishes runaway from possible AI self-succession as a future continuity state rather than a present operating assumption.
 - Package docs and active prompts now treat the package as Draft 2 complete and ready for closeout if accepted.
 
 **Next Steps**:

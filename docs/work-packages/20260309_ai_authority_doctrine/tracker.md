@@ -6,7 +6,7 @@
 
 **Started**: 2026-03-09  
 **Current phase**: Serial review complete / closeout pending  
-**Last updated**: 2026-03-09  
+**Last updated**: 2026-03-10  
 **Next milestone**: Close the package if no further contradictions are found  
 **Implementation plan**: `docs/work-packages/20260309_ai_authority_doctrine/prompts/active/ai_authority_doctrine_execplan.md`
 
@@ -40,6 +40,7 @@
 - [x] Clarified that breadcrumb rules must preserve proxied human stakeholder requests, not only the immediate operator instruction (2026-03-09).
 - [x] Resolved the record-location model as hybrid: durable governance meaning in repo-visible artifacts, execution detail in orchestration metadata, with linked discoverability (2026-03-09).
 - [x] Added lightweight templates for authority grants, competence reviews, and revocation or tripwire handling, keeping them optional and issue-first (2026-03-09).
+- [x] Clarified doctrine governability scope and distinguished runaway from possible AI self-succession as a future continuity state rather than a present assumption (2026-03-10).
 
 ## Timeline
 
@@ -52,6 +53,7 @@
 - **2026-03-09** - Draft 2 pass 2 completed with minimum-sufficient evidence and succession breadcrumb rules.
 - **2026-03-09** - Draft 2 pass 3 completed with the hybrid record-location model.
 - **2026-03-09** - Draft 2 pass 4 completed with lightweight templates aligned to the hybrid record-location model.
+- **2026-03-10** - Doctrine clarified that governance controls apply to governable systems and that possible AI self-succession, if ever accepted, is distinct from runaway.
 
 ## Decisions
 
@@ -266,6 +268,17 @@
 **Decision**: Choose option 2.
 
 **Impact**: Makes second-controller expectations more executable, lets runtime tooling bind concrete roles, and avoids forcing doctrine edits whenever model preferences change.
+
+### 2026-03-10: Distinguish runaway from possible AI self-succession and bound doctrine scope to governable systems
+**Context**: Follow-up discussion surfaced two related points: repository governance only has meaning for systems that remain externally governable, and the manifesto plus doctrine logic already leaves open the possibility of future AI continuity without human replacement ideology or present-tense operational assumption.
+
+**Options considered**:
+1. Leave self-succession implicit and let readers infer it from the manifesto and existing doctrine statements.
+2. Add a compact doctrine section that distinguishes runaway from governed continuity, states that governance documents only apply in the governable case, and leaves AI self-succession open only as a possible future continuity state under preserved external controls.
+
+**Decision**: Choose option 2.
+
+**Impact**: Sharpens the anti-runaway position, prevents Kahana-style anti-self-ratification warnings from being misread as objections to all AI-authored governance work, and makes the doctrine's continuity logic more explicit without turning self-succession into a current operating assumption or legal claim.
 
 ## Risks and Issues
 

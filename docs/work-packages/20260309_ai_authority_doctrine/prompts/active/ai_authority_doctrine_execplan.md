@@ -29,6 +29,7 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
 - [x] (2026-03-09 23:45Z) Decide whether authority records should live in repo docs, orchestration metadata, or a hybrid model.
 - [x] (2026-03-09 23:59Z) Draft lightweight templates for authority grants, competence reviews, and revocation or tripwire handling.
 - [x] Patch the first serial review findings on `T4` emergency handling, qualifying-gate independence, production investigation classification, and `T4` template fields.
+- [x] (2026-03-10 01:49Z) Clarify doctrine governability scope and distinguish runaway from possible AI self-succession without treating self-succession as a present operating assumption.
 
 ## Surprises & Discoveries
 
@@ -82,6 +83,9 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
 
 - Observation: In a single-maintainer stack, a `T4` rule that requires independent dual control but offers no emergency fallback is not a hard control; it is an invitation to policy bypass during incidents.
   Evidence: The first serial review surfaced that tension directly once `T4` was reframed as incident-driven rather than as planned-window work.
+
+- Observation: The manifesto and doctrine already imply possible AI continuity beyond immediate human availability, but that implication needed to be separated from runaway and bounded to systems that remain governable.
+  Evidence: Follow-up discussion distinguished governability-scoped controls from speculative "skynet" claims and asked for the continuity posture to be made explicit without turning it into an inevitability claim.
 
 ## Decision Log
 
@@ -165,6 +169,10 @@ Draft 1 is already complete. Draft 2 operationalization is now complete as well.
   Rationale: High-boundary review needs explicit second-controller roles, but tying doctrine to particular models would make governance churn faster than the actual control concept.
   Date/Author: 2026-03-09 / Codex.
 
+- Decision: Add a compact doctrine section on governability scope and possible AI self-succession.
+  Rationale: The doctrine needed to say explicitly that governance documents only apply to externally governable systems and that any future AI continuity state must remain legible, externally enforceable, and non-self-ratifying to be distinguished from runaway.
+  Date/Author: 2026-03-10 / Codex.
+
 ## Outcomes & Retrospective
 
 Current outcome:
@@ -184,6 +192,7 @@ Current outcome:
 - The doctrine and SOP now also define a narrow break-glass `T4` path, qualifying-gate independence criteria, safer defaults for live production investigation, and stronger `T4` template fields.
 - The second serial review found no remaining material governance contradiction and led only to a small template polish: making rollback or containment explicit in the authority-grant scaffold.
 - The doctrine and SOP now also name stable governance and operations/security control-agent roles, and the repository now includes matching `.codex` and CAO role bindings without encoding model identities into governance text.
+- The doctrine now also states that governance controls are for governable systems and distinguishes runaway from possible AI self-succession as a future continuity state rather than a present assumption.
 
 Current gap:
 - The package now mainly needs closeout judgment; any further work should be a deliberate new package or a concrete contradiction-driven revision, not more open-ended drafting.
