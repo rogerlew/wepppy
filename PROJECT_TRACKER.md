@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-05  
+**Last Updated**: 2026-03-09  
 **Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -242,7 +242,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 2 packages ✅
+**Current WIP Count**: 3 packages ✅
 
 ---
 
@@ -307,6 +307,29 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 1. Implement `wepppyo3.sbs_map.summarize_sbs_raster`.
 2. Wire `sbs_map_sanity_check` to Rust summary (keep Python fallback).
 3. Implement Rust reclassification + export helpers and update tests.
+
+---
+
+### AI Authority Doctrine + Operating Practices
+**Started**: 2026-03-09  
+**Status**: Draft 2 operationalization complete - review and closeout pending  
+**Size**: High-leverage governance package (1-2 weeks iterative drafting)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260309_ai_authority_doctrine/](docs/work-packages/20260309_ai_authority_doctrine/)  
+**Description**: Establish a living doctrine for delegating authority to AI agents based on demonstrated competence, plus a separate operating standard for grants, evidence, oversight, revocation, and compliance-aware escalation.
+
+**Current Status**:
+- Draft 1 working drafts exist in `AI_AUTHORITY_DOCTRINE.md` and `AI_AUTHORITY_OPERATING_PRACTICES.md`.
+- Doctrine and SOP now include a Draft 1 compliance crosswalk to the EU AI Act and NIST materials.
+- Doctrine and SOP now include the first Draft 2 task-class execution matrix with evidence thresholds and escalation modes.
+- Doctrine and SOP now define minimum-sufficient evidence and succession breadcrumb rules for low-friction governance.
+- Doctrine and SOP now resolve record location as a hybrid model: durable governance meaning in repo-visible artifacts, execution detail in orchestration metadata.
+- SOP now includes lightweight templates for authority grants, competence reviews, and revocation or tripwire events, designed for issue-first use on smaller work and package artifacts on broader work.
+- Package docs and active prompts now treat the package as Draft 2 complete and ready for review/closeout.
+
+**Next Steps**:
+1. Review the Draft 2 operationalization set against real repository workflows and close the package if accepted.
+2. If runtime enforcement or policy tooling is desired, open a follow-on implementation package.
 
 ---
 
