@@ -23,7 +23,7 @@
 
 ## Agent Feedback Loop
 - Treat avoidable friction as diagnostic signal about the codebase, docs, tooling, or task framing.
-- Surface unprompted feedback when it would materially improve developer ergonomics, architectural clarity, or shared agent substrates.
+- Surface unprompted feedback when it would materially improve developer ergonomics, architectural clarity, or shared docs, tooling, and agent-facing interfaces.
 - Distinguish clearly between:
   - confirmed defects/blockers
   - local painpoints or ambiguity
@@ -131,7 +131,7 @@
 - Check the nearest subsystem `AGENTS.md`, then module README and tests.
 - Reuse existing patterns from adjacent code before introducing new abstractions.
 - Ask a human when requirements are unclear or an external dependency blocks progress.
-- When work is possible but unnecessarily difficult, note the friction and propose the smallest doc/tooling/interface improvement in handoff.
+- When work is possible but unnecessarily difficult, note the friction and recommend the smallest doc/tooling/interface improvement in handoff for human review.
 
 ## Root Size Policy
 - Keep this file within roughly 100-160 lines.

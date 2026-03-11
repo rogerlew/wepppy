@@ -66,7 +66,7 @@
 - If the task exposed recurring friction, include a brief `Agent Feedback` note with:
   - painpoints encountered
   - suggested substrate/doc/tooling improvement
-  - whether the current strategy still seems correct
+  - whether the current strategy appears likely to succeed based on the friction encountered in this task
 - Update the relevant work package tracker/mini package notes when work spans phases.
 
 ## When Something Feels Off
