@@ -63,6 +63,10 @@
 - Summarize exactly what changed and why (file-level scope).
 - List validations run and any validations not run.
 - Record assumptions, risks, and unresolved blockers explicitly.
+- If the task exposed recurring friction, include a brief `Agent Feedback` note with:
+  - painpoints encountered
+  - suggested substrate/doc/tooling improvement
+  - whether the current strategy still seems correct
 - Update the relevant work package tracker/mini package notes when work spans phases.
 
 ## When Something Feels Off

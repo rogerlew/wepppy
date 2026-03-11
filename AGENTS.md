@@ -21,6 +21,16 @@
 - Do not add fallback wrappers that silently mask missing required dependencies.
 - Prefer explicit failures over hidden recovery paths for easier debugging.
 
+## Agent Feedback Loop
+- Treat avoidable friction as diagnostic signal about the codebase, docs, tooling, or task framing.
+- Surface unprompted feedback when it would materially improve developer ergonomics, architectural clarity, or shared agent substrates.
+- Distinguish clearly between:
+  - confirmed defects/blockers
+  - local painpoints or ambiguity
+  - speculative improvement ideas
+- Keep unsolicited feedback concise and actionable: name the friction, why it mattered, and the smallest improvement that would reduce recurrence.
+- Do not invent speculative redesigns; prefer substrate improvements tied to concrete task experience.
+
 ## Exception Handling (Required)
 - Do not introduce bare `except:` or broad `except Exception` handlers in production paths unless the block is a deliberate boundary.
 - Prefer narrow, expected exception types and preserve canonical error contracts when translating errors.
@@ -121,6 +131,7 @@
 - Check the nearest subsystem `AGENTS.md`, then module README and tests.
 - Reuse existing patterns from adjacent code before introducing new abstractions.
 - Ask a human when requirements are unclear or an external dependency blocks progress.
+- When work is possible but unnecessarily difficult, note the friction and propose the smallest doc/tooling/interface improvement in handoff.
 
 ## Root Size Policy
 - Keep this file within roughly 100-160 lines.
