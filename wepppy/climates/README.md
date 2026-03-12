@@ -262,6 +262,7 @@ The `CligenStationsManager` supports multiple station database versions:
 | `au` | ~1,000 | Australia | Australian Bureau of Meteorology stations |
 | `chili` | ~200 | Chili | Chilean stations |
 | `ghcn` | ~25,000 | Global | GHCN International Stations |
+| `tenerife` | 62 | Tenerife | Jonay 2026 Tenerife station catalog |
 
 ```python
 # Example: Use Australian stations

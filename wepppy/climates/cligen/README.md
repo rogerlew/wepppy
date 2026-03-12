@@ -4,7 +4,7 @@
 
 ## Overview
 - `wepppy/climates/cligen` bundles everything WEPPcloud needs to select an appropriate CLIGEN station, rewrite its `.par` file with localized statistics, and run the legacy CLIGEN executables to emit `.cli`, `.prn`, and storm files.
-- The package ships the 2015 CONUS catalog plus optional Australian (`au_*`), Chilean, and GHCN-backed station sets. Heavy assets (SQLite DBs, `.par` bundles, CLIGEN binaries) live next to the Python entry points so Git LFS keeps them versioned.
+- The package ships the 2015 CONUS catalog plus optional Australian (`au_*`), Chilean, Tenerife, and GHCN-backed station sets. Heavy assets (SQLite DBs, `.par` bundles, CLIGEN binaries) live next to the Python entry points so Git LFS keeps them versioned.
 - Higher-level controllers call into this package to (a) pick the “best” station for a lat/lon, (b) align precipitation/temperature distributions with PRISM, EOBS, AGDC, or Daymet, (c) generate multi-year or observed runs, and (d) provide APIs for downstream services (gridMET/MACA, wildfire support, outreach tooling).
 
 ## Layout At A Glance
@@ -12,7 +12,8 @@
 | --- | --- |
 | `wepppy/climates/cligen/__init__.py` | Re-exports the public API from `cligen.py`, plus helpers (`_stations_dir`, `_bin_dir`, `par_row_formatter`, `make_clinp`). |
 | `wepppy/climates/cligen/cligen.py` | Core implementation: station metadata readers, localization math, CLIGEN runner, `.cli/.par/.prn` helpers, heuristics for station search, and `par_mod`. |
-| `wepppy/climates/cligen/_scripts/stations_sqlitedb_builder.py` | Offline utility that scans `.par` files and rebuilds the SQLite catalogs (`stations.db`, `2015_stations.db`, `au_stations.db`, etc.). |
+| `wepppy/climates/cligen/_scripts/stations_sqlitedb_builder.py` | Offline utility that scans `.par` files and rebuilds the generic SQLite catalogs (`stations.db`, `2015_stations.db`, `au_stations.db`, etc.). |
+| `wepppy/climates/cligen/_scripts/build_tenerife_station_db.py` | Offline utility that rebuilds the dedicated Tenerife SQLite catalog from `tenerife_stations.csv` plus `tenerife_par_files/`. |
 | `wepppy/climates/cligen/stations/__init__.py` | Empty marker so packaged `stations/` data can be imported and located with `pkg_resources`. |
 | `wepppy/climates/cligen/tests/conftest.py` | Forces the special `collection_error` helper in `geojson_export_test.py` to be collected even though it is not prefixed with `test_`. |
 | `wepppy/climates/cligen/tests/geojson_export_test.py` | Exercises `CligenStationsManager.export_to_geojson`, guarding against missing LFS assets. |
@@ -26,7 +27,7 @@
   - `Station` parses a `.par` file into numpy arrays (`ppts`, `pwws`, `pwds`, `tmaxs`, `tmins`) and exposes `localize()` to rewrite monthly means using PRISM/Daymet/EOBS/AGDC surfaces.
   - `StationMeta` holds catalog metadata (state, description, `tp5/tp6` thunderstorm params, annual precip) and can emit dictionaries (optionally embedding monthlies) or build ad‑hoc GHCN-based observed climates via `build_ghcn_daily_climate`.
 - **CligenStationsManager**
-  - Loads the requested SQLite catalog (`2015`, `legacy`, `au`, `ghcn`, `chile`) and exposes distance-first searches (`get_closest_station(s)`), heuristic searches that combine distance, elevation, and climatology, plus specialized heuristics for Europe (`get_stations_eu_heuristic_search`) and Australia (`get_stations_au_heuristic_search`).
+  - Loads the requested SQLite catalog (`2015`, `legacy`, `au`, `ghcn`, `chile`, `tenerife`) and exposes distance-first searches (`get_closest_station(s)`), heuristic searches that combine distance, elevation, and climatology, plus specialized heuristics for Europe (`get_stations_eu_heuristic_search`) and Australia (`get_stations_au_heuristic_search`).
   - `export_to_geojson`/`to_geojson` serialize the currently loaded stations, falling back to a temp dir when the requested destination is unwritable; the geojson test covers this path.
   - When an LFS asset is unavailable the manager falls back to `tests/neverland_.par` so developers still have something to interact with.
 - **ClimateFile & Prn helpers**
@@ -98,12 +99,13 @@ print(result.monthlies)  # Calculated from the generated CLI (may be None on fai
 ```
 
 ## Persistent Assets & Builder Script
-- `2015_stations.db` + `2015_par_files/` (default), `au_*`, `ghcn_*`, `chile*`, and `stations/` (legacy) ship with the repo. Pull them via Git LFS before running tests (`git lfs pull wepppy/climates/cligen/*`).
+- `2015_stations.db` + `2015_par_files/` (default), `au_*`, `ghcn_*`, `chile*`, `tenerife_*`, and `stations/` (legacy) ship with the repo. Pull them via Git LFS before running tests (`git lfs pull wepppy/climates/cligen/*`).
 - CLIGEN binaries (`bin/cligen43`, `bin/cligen52`, `bin/cligen53`, `bin/cligen532`) are Linux ELF executables; ensure they remain executable (`chmod +x`) after cloning.
-- `_scripts/stations_sqlitedb_builder.py` rebuilds the SQLite metadata when `.par` inventories change:
+- `_scripts/stations_sqlitedb_builder.py` rebuilds the generic SQLite metadata when `.par` inventories change:
   1. Place all `.par` files in a directory (nested folders acceptable).
   2. Prepare the wildcard → state name mapping (examples: `chile_state_code_wildcards`, `ghcn_state_code_wildcards` in the script).
   3. Run `python wepppy/climates/cligen/_scripts/stations_sqlitedb_builder.py` from the repo root after editing `build_db(...)` at the bottom with your config. The script parses each `.par` using `Station`, computes annual precipitation, and writes both `stations` and `states` tables before chmodding the DB to `0755`.
+- `_scripts/build_tenerife_station_db.py` is the Tenerife-specific refresh path. Run `python wepppy/climates/cligen/_scripts/build_tenerife_station_db.py` from the repo root to rebuild `tenerife_stations.db` and repopulate `tenerife_par_files/` from `/workdir/tenerife-2026/climate/`.
 - `stations/__init__.py` is intentionally empty; its presence lets packaging tools treat `stations/` as a module so callers can locate the bundled assets via `importlib.resources`.
 
 ## Example Workflows

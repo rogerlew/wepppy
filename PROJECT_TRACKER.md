@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-09  
-**Active Packages**: 3  
+**Last Updated**: 2026-03-12  
+**Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -244,8 +244,6 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 **Current WIP Count**: 2 packages ✅
 
----
-
 ### markdown-doc Toolkit Integration
 **Started**: 2025-10-25  
 **Status**: Phase 3 Complete — Integration Active (Phase 4 pending telemetry + RFC decisions)  
@@ -314,120 +312,20 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
-### AI Authority Doctrine + Operating Practices
-**Completed**: 2026-03-10  
-**Duration**: 2 days iterative drafting and review  
+### Tenerife 2026 Data Ingestion
+**Completed**: 2026-03-12  
+**Duration**: 1 focused session after discovery setup  
 **Status**: ✅ **COMPLETE**  
 **Owner**: Codex  
-**Link**: [docs/work-packages/20260309_ai_authority_doctrine/](docs/work-packages/20260309_ai_authority_doctrine/)  
-**Description**: Established the current internal WEPPpy doctrine for delegating authority to AI agents, plus the companion operating standard for grants, evidence, oversight, revocation, and compliance-aware escalation.
+**Link**: [docs/work-packages/20260312_tenerife_2026_data_ingestion/](docs/work-packages/20260312_tenerife_2026_data_ingestion/)  
+**Description**: Integrated Jonay's 2026 Tenerife refresh by switching Tenerife to a dedicated climate station catalog, validating the new DEM keys, and making the Tenerife soil runtime inventory explicit.
 
 **Outcome**:
-- Accepted `AI_AUTHORITY_DOCTRINE.md` as the current internal governance doctrine and `AI_AUTHORITY_OPERATING_PRACTICES.md` as the current internal operating standard.
-- Added a compliance crosswalk, task-class matrix, minimum-sufficient evidence rules, hybrid record-location model, and lightweight templates.
-- Added stable `governance_control_agent` and `ops_security_control_agent` roles plus matching `.codex` and CAO bindings.
-- Clarified governability scope, possible AI self-succession, and the present pragmatic `T4` posture.
-- Added explicit definitions, governance-role model, doctrine amendment or re-ratification rules, and archived the prompts to `prompts/completed/`.
-
-### TerrainProcessor Runtime + Visualization Artifact Implementation
-**Completed**: 2026-03-06  
-**Duration**: 1 day initial + follow-up closeout  
-**Status**: ✅ **COMPLETE**  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260305_terrain_processor_implementation/](docs/work-packages/20260305_terrain_processor_implementation/)  
-**Description**: Completed full TerrainProcessor runtime + visualization backend delivery and follow-up Tasks 1-6 (BLC fidelity, real WBT integration tests, visualization guardrails/UI payloads, watershed API surface, and docs closeout).
-
-**Outcome**:
-- Runtime now supports breach-least-cost controls end-to-end (`blc_dist_m`, `blc_max_cost`, `blc_fill`).
-- Added real WBT integration tests (`tests/topo/test_terrain_processor_wbt_integration.py`).
-- Added visualization benchmark and UI payload artifacts (`visualization_benchmarks.json`, `visualization_ui_payload.json`) plus `visualization_max_pixels` guardrail.
-- Added watershed terrain endpoints for config/run/result/manifest/resource access.
-- Follow-up validation completed (`tests/topo --maxfail=1`, `tests/weppcloud --maxfail=1`, broad-exception gate pass, docs lint pass) and prompts archived to `prompts/completed/`.
-
-### TerrainProcessor Pre-Implementation Foundations
-**Completed**: 2026-03-05  
-**Duration**: 1 day  
-**Status**: ✅ **COMPLETE**  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260305_terrain_processor_preimplementation/](docs/work-packages/20260305_terrain_processor_preimplementation/)  
-**Description**: Completed phased helper-first TerrainProcessor foundations with phase-scoped tests, review artifacts, concept synchronization, and package closeout.
-
-**Outcome**:
-- Added reusable helper module `wepppy/topo/wbt/terrain_processor_helpers.py` for phases 1-5 (flow-stack facade, bounded-breach helpers, culvert prep/burn adapter, multi-outlet parsing, provenance/invalidation scaffolding).
-- Added targeted regression suite `tests/topo/test_terrain_processor_helpers.py` with 34 helper tests and review-driven edge-case/failure-contract coverage.
-- Updated `wepppy/topo/wbt/terrain_processor.concept.md` with shipped-helper status and contract notes.
-- Published phase review artifacts and final validation summary under `docs/work-packages/20260305_terrain_processor_preimplementation/artifacts/`.
-- Archived prompts to `prompts/completed/` and closed package/tracker docs.
-
-### OSM Roads Client with Persistent Server-Side Cache
-**Completed**: 2026-03-05  
-**Duration**: 1 day  
-**Status**: ✅ **COMPLETE**  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260304_osm_roads_client_cache/](docs/work-packages/20260304_osm_roads_client_cache/)  
-**Description**: Implemented a production-ready WEPPpy OSM roads client module with deterministic keying, hybrid persistent caching, lock-safe refresh, and TerrainProcessor-style consumer seam.
-
-**Outcome**:
-- Added `wepppy/topo/osm_roads/` module surface (`contracts`, `errors`, `cache`, `overpass`, `service`, runtime README).
-- Implemented hybrid cache contract support (PostgreSQL metadata/advisory-lock backend + file payload storage) with bounded stale/expired fallback behavior.
-- Added consumer seam `wepppy/topo/wbt/osm_roads_consumer.py::resolve_roads_source`.
-- Added topo regression suites for contracts/cache/service concurrency, fallback policy, cleanup, and clip/reproject behavior.
-- Executed required validation gates including `wctl run-pytest tests --maxfail=1` (pass), broad-exception enforcement (pass), and required doc-lint checks (pass).
-
-### Browse Parquet Quick-Look Filter Builder
-**Completed**: 2026-03-04  
-**Duration**: 1 day  
-**Status**: ✅ **COMPLETE** (functional milestones complete; broad-exception enforcement drift recorded for separate follow-up scope)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260304_browse_parquet_quicklook_filters/](docs/work-packages/20260304_browse_parquet_quicklook_filters/)  
-**Description**: Added bounded, shared parquet filter contract and integrated it across browse HTML preview, filtered parquet download, filtered CSV export, and D-Tale launch with a browse-side filter builder UI.
-
-**Outcome**: Requester semantics are implemented and covered by regression tests:
-- `download` returns filtered parquet when filter state is active.
-- `Contains` is case-insensitive.
-- `GreaterThan`/`LessThan` are numeric-only and exclude missing/`NaN` rows.
-- UI operator uses select controls with nested group/condition builder and parquet-link `pqf` propagation.
-
-**Deliverables**:
-- ✅ Shared filter module: `wepppy/microservices/parquet_filters.py`
-- ✅ Browse integrations: `flow.py`, `listing.py`, `_download.py`, `dtale.py`, `browse.py`
-- ✅ D-Tale loader integration: `wepppy/webservices/dtale/dtale.py`
-- ✅ UI integration: browse templates + `wepppy/weppcloud/static/js/parquet_filter_builder.js`
-- ✅ Regression tests: `test_parquet_filters.py`, plus updates to `test_browse_routes.py`, `test_download.py`, `test_browse_dtale.py`
-- ✅ Docs updates: browse README + `docs/schemas/weppcloud-browse-parquet-filter-contract.md`
-- ✅ Validation artifact: `docs/work-packages/20260304_browse_parquet_quicklook_filters/artifacts/20260304_e2e_validation_results.md`
-
-### Raster Tools Cross-Walk and Benchmark Evaluation
-**Completed**: 2026-03-04
-**Duration**: 1 day (evaluation closeout)
-**Status**: ✅ **COMPLETE** (`defer`; BW-01/BW-02 executed but non-comparable under strict parity contract)
-**Owner**: Codex
-**Link**: [docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/](docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/)
-**Description**: Evaluated whether `/workdir/raster_tools` should be incorporated into WEPPpy using capability cross-walk + benchmark evidence.
-
-**Outcome**: Produced end-to-end evaluation artifacts and a `defer` recommendation. Deferred benchmark cases (`BW-03`/`BW-04`/`BW-05`) are explicitly routed to a follow-up package, and external PDF claim language is documented in a source-grounded claims-vs-code addendum.
-
-**Deliverables**:
-- ✅ Capability inventory + WEPPpy usage map
-- ✅ Cross-walk matrix + overlap-only shortlist traceability
-- ✅ Benchmark harness + raw run logs with strict comparability guards
-- ✅ Results + recommendation memo + synchronized package tracker/ExecPlan docs
-- ✅ Claims-vs-code addendum with USDA PDF source link and evidence boundaries
-
-### NoDir Full Reversal (Abandonment Program)
-**Completed**: 2026-02-27
-**Duration**: 1 day (multi-phase closeout day)
-**Status**: ✅ **COMPLETE**
-**Owner**: Codex
-**Link**: [docs/work-packages/20260227_nodir_full_reversal/](docs/work-packages/20260227_nodir_full_reversal/)
-**Description**: Abandoned NoDir runtime/test/contract surfaces and returned active WEPPpy/WEPPcloud behavior to directory-only semantics with full closeout evidence.
-
-**Outcome**: Phase 6 closeout completed with full validation gates, final rollback verification mapping all package success criteria, and mandatory subagent high/medium findings closure to zero unresolved.
-
-**Deliverables**:
-- ✅ Phase 6 closeout artifacts published (`phase6_closeout_scope.md`, `phase6_nodir_import_scan.txt`, `phase6_structural_assertions.md`, `phase6_validation_log.md`, `phase6_final_rollback_verification.md`, `phase6_subagent_review.md`, `phase6_findings_resolution.md`)
-- ✅ Required gates: `wctl run-pytest tests --maxfail=1` PASS (`2069 passed, 29 skipped`), `check_broad_exceptions` PASS, `code_quality_observability` observe-only PASS, `wctl check-rq-graph` PASS, required `wctl doc-lint` paths PASS
-- ✅ Package/tracker/project surfaces synchronized to completed state
+- Added a dedicated Tenerife climate catalog (`tenerife_stations.db`, `tenerife_stations.csv`, `tenerife_par_files/`) plus a repeatable builder script.
+- Switched the active Tenerife 25 m and 5 m configs off shared `ghcn_stations.db` and onto `tenerife_stations.db`.
+- Verified live `wmesque2` retrieval for `tenerife/136_MDT25_TF` and `tenerife/MDT05_Tenerife`.
+- Added Tenerife regression coverage for climate catalog loading, config wiring, and supported soil raster coverage.
+- Retired the legacy Tenerife 250 m soil/config branch and template-generation artifacts while keeping `tf_soil_10.tif` as reference-only inventory.
 
 ---
 

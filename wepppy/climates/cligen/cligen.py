@@ -1585,7 +1585,7 @@ class CligenStationsManager:
 
         Args:
             version: Catalog selector (``2015``, ``legacy``, ``au``, ``ghcn``,
-                ``chile``). Defaults to the 2015 catalog when omitted.
+                ``chile``, ``tenerife``). Defaults to the 2015 catalog when omitted.
             bbox: Optional bounding box ``[ul_x, ul_y, lr_x, lr_y]`` that limits
                 stations during the initial query.
         """
@@ -1604,6 +1604,10 @@ class CligenStationsManager:
         if 'au' in str(version):
             _db = _join(_thisdir, 'au_stations.db')
             _stations_dir = _join(_thisdir, 'au_par_files')
+
+        if 'tenerife' in str(version):
+            _db = _join(_thisdir, 'tenerife_stations.db')
+            _stations_dir = _join(_thisdir, 'tenerife_par_files')
 
         if 'ghcn' in str(version):
             _db = _join(_thisdir, 'ghcn_stations.db')
