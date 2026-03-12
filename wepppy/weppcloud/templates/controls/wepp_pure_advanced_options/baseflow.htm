@@ -17,6 +17,10 @@
        "baseflow_opts_bfcoeff",
        "Baseflow coefficient",
        value=wepp.baseflow_opts.bfcoeff,
+       precision=0.00001,
+       min=0.01,
+       max=0.1,
+       help="Supported range is 0.01..0.10 per day. Smaller watersheds can require values around 0.05..0.07 when observed recession is faster than the default response.",
        unit_label="per day",
        attrs={"class": "disable-readonly"}
      ) }}

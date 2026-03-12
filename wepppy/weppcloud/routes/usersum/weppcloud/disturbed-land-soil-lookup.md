@@ -88,7 +88,11 @@ Found under WEPP Advanced Options - Bedrock
 Found under WEPP Advanced Options - Baseflow Processing.
 
 **Units**: per day  
-**Range**: 0.01–0.04  
+**Range**: 0.01–0.10  
+**Guidelines**:
+- The historical WEPPcloud limit of `0.04` came from earlier disturbed-land guidance, not a hard WEPP model limit.
+- Some small watersheds, especially in the `40-100 ha` range, may require higher coefficients such as `0.05-0.07` per day to match observed recession behavior.
+- Start with the project default and only increase the coefficient when the simulated baseflow recession is too slow relative to observations or other defensible calibration targets.
 
 ### Channel Critical Shear Stress (τc)
 
@@ -108,4 +112,3 @@ Specifies hydrophobicity adjustment
 **Guidelines**:
 - Currently, we set the hydrophobicity for high severity burn only. But it could be changed as desired. Note that in the model the hydrophobicity is by burn severity applied to all four soil textures of high severity.
 - The `ksatadj` value of "1" specifies hydrophobic soils. User's can then change the lower limit of hydraulic conductivity (`lkeff` parameter value), which would restrict the infiltration allowing more surface runoff.
-

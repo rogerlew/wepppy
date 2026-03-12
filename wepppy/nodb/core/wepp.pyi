@@ -74,6 +74,7 @@ class WeppNoDbLockedException(Exception): ...
 class Wepp(NoDbBase):
     __name__: ClassVar[str]
     filename: ClassVar[str]
+    _BASEFLOW_BFCOEFF_BOUNDS: ClassVar[Tuple[float, float]]
     _SNOW_NEWSNW_BOUNDS: ClassVar[Tuple[float, float]]
     _SNOW_SSD_BOUNDS: ClassVar[Tuple[float, float]]
     _TCR_TAUMIN_BOUNDS: ClassVar[Tuple[float, float]]
@@ -96,6 +97,7 @@ class Wepp(NoDbBase):
     _FROST_KFACTOR1_DEFAULT: ClassVar[float]
     _FROST_KFACTOR2_DEFAULT: ClassVar[float]
     _FROST_KFACTOR3_DEFAULT: ClassVar[float]
+    _BASEFLOW_BFCOEFF_DEFAULT: ClassVar[float]
     phosphorus_opts: Incomplete
     p_surf_runoff_map: Incomplete
     p_lateral_flow_map: Incomplete
@@ -202,6 +204,7 @@ class Wepp(NoDbBase):
     def set_phosphorus_opts(self, surf_runoff: float | None = None, lateral_flow: float | None = None, baseflow: float | None = None, sediment: float | None = None) -> None: ...
     def _resolve_unitized_default(self, section: str, option: str, fallback: float, min_value: float, max_value: float) -> float: ...
     def _guard_unitized_value(self, section: str, option: str, value: float | None, min_value: float, max_value: float, fallback: float) -> float: ...
+    def _guard_baseflow_bounds(self) -> None: ...
     def _guard_unitized_bounds(self) -> None: ...
     def parse_inputs(self, kwds: Dict[str, Any]) -> None: ...
     @property

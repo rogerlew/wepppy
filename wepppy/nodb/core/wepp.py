@@ -576,6 +576,7 @@ class Wepp(NoDbBase):
 
     filename = 'wepp.nodb'
 
+    _BASEFLOW_BFCOEFF_BOUNDS = (0.01, 0.1)
     _SNOW_NEWSNW_BOUNDS = (25.0, 500.0)
     _SNOW_SSD_BOUNDS = (75.0, 750.0)
     _TCR_TAUMIN_BOUNDS = (5.0, 400.0)
@@ -599,6 +600,7 @@ class Wepp(NoDbBase):
     _FROST_KFACTOR1_DEFAULT = 1e-5
     _FROST_KFACTOR2_DEFAULT = 1e-5
     _FROST_KFACTOR3_DEFAULT = 0.5
+    _BASEFLOW_BFCOEFF_DEFAULT = 0.04
     
     def __init__(self, wd: str, cfg_fn: str, run_group: Optional[str] = None, group_name: Optional[str] = None) -> None:
         super(Wepp, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
@@ -656,6 +658,7 @@ class Wepp(NoDbBase):
             self.baseflow_bfcoeff_map = self.config_get_path('baseflow_opts', 'bfcoeff_map')
             self.baseflow_dscoeff_map = self.config_get_path('baseflow_opts', 'dscoeff_map')
             self.baseflow_bfthreshold_map = self.config_get_path('baseflow_opts', 'bfthreshold_map')
+            self._guard_baseflow_bounds()
 
             self._run_wepp_ui = self.config_get_bool('wepp', 'wepp_ui')
             self._run_wepp_watershed = self.config_get_bool('wepp', 'run_wepp_watershed', True)
@@ -732,6 +735,7 @@ class Wepp(NoDbBase):
                 kfactor3=instance.config_get_float('frost_opts', 'kfactor3'),
             )
         instance._guard_frost_bounds()
+        instance._guard_baseflow_bounds()
 
         return instance
 
@@ -1072,6 +1076,7 @@ class Wepp(NoDbBase):
                 bfcoeff=bfcoeff,
                 dscoeff=dscoeff,
                 bfthreshold=bfthreshold)
+            self._guard_baseflow_bounds()
 
     def set_phosphorus_opts(self, surf_runoff: Optional[float] = None, lateral_flow: Optional[float] = None, 
                             baseflow: Optional[float] = None, sediment: Optional[float] = None) -> None:
@@ -1283,6 +1288,19 @@ class Wepp(NoDbBase):
             self._FROST_KFACTOR3_DEFAULT,
         )
 
+    def _guard_baseflow_bounds(self) -> None:
+        if not hasattr(self, 'baseflow_opts') or self.baseflow_opts is None:
+            self.baseflow_opts = BaseflowOpts()
+
+        self.baseflow_opts.bfcoeff = self._guard_unitized_value(
+            'baseflow_opts',
+            'bfcoeff',
+            self.baseflow_opts.bfcoeff,
+            self._BASEFLOW_BFCOEFF_BOUNDS[0],
+            self._BASEFLOW_BFCOEFF_BOUNDS[1],
+            self._BASEFLOW_BFCOEFF_DEFAULT,
+        )
+
     def _guard_unitized_bounds(self) -> None:
         if hasattr(self, 'snow_opts'):
             self.snow_opts.newsnw = self._guard_unitized_value(
@@ -1319,6 +1337,7 @@ class Wepp(NoDbBase):
                 self._TCR_TAUMAX_DEFAULT,
             )
         self._guard_frost_bounds()
+        self._guard_baseflow_bounds()
 
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
