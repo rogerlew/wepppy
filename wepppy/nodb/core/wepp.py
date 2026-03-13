@@ -537,6 +537,14 @@ def prep_soil(args: Tuple[str, str, str, Optional[float], Optional[Dict[str, Any
     topaz_id, src_fn, dst_fn, kslast, modify_kslast_pars, initial_sat, clip_soils, clip_soils_depth = args
 
     soilu = WeppSoilUtil(src_fn)  # internally uses rosetta
+    if _soil_has_symbolic_wepp_parameters(soilu):
+        # Match legacy Tenerife template processing:
+        # WeppSoilUtil(..., compute_erodibilities=True, compute_conductivity=True).to7778()
+        soilu = WeppSoilUtil(
+            src_fn,
+            compute_erodibilities=True,
+            compute_conductivity=True,
+        ).to7778()
     soilu.modify_initial_sat(initial_sat)
 
     if kslast is not None:
@@ -546,6 +554,16 @@ def prep_soil(args: Tuple[str, str, str, Optional[float], Optional[Dict[str, Any
     soilu.write(dst_fn)
 
     return topaz_id, time.time() - t0
+
+
+def _soil_has_symbolic_wepp_parameters(soilu: WeppSoilUtil) -> bool:
+    for ofe in soilu.obj.get('ofes', []):
+        if not isfloat(ofe.get('ki')) or not isfloat(ofe.get('kr')) or not isfloat(ofe.get('shcrit')):
+            return True
+        for horizon in ofe.get('horizons', []):
+            if not isfloat(horizon.get('ksat')):
+                return True
+    return False
 
 
 class WeppNoDbLockedException(Exception):
@@ -1889,6 +1907,12 @@ class Wepp(NoDbBase):
                 allow_materialize_fallback=True,
             ) as src_fn:
                 soilu = WeppSoilUtil(src_fn)
+                if _soil_has_symbolic_wepp_parameters(soilu):
+                    soilu = WeppSoilUtil(
+                        src_fn,
+                        compute_erodibilities=True,
+                        compute_conductivity=True,
+                    ).to7778()
                 soilu.modify_initial_sat(initial_sat)
 
                 if _kslast is not None:

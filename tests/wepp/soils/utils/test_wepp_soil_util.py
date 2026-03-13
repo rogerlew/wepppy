@@ -305,3 +305,39 @@ def test_yaml_input_raises_value_error(workspace_tmp_dir, wepp_soil_util_module)
 
     with pytest.raises(ValueError, match="YAML soil serialization is no longer supported"):
         wepp_soil_util_module.WeppSoilUtil(str(src))
+
+
+def test_template_tokens_are_materialized_with_legacy_compute_flags(
+    workspace_tmp_dir,
+    wepp_soil_util_module,
+):
+    src = workspace_tmp_dir / "template_like.sol"
+    src.write_text(
+        "\n".join(
+            [
+                "7778",
+                "Any comments:",
+                "1 0",
+                "'Template Soil' 'LOAM' 1 0.2300 sat ki kr tauc",
+                "\t200.000000\t1.100000\tke\t1.000000\t0.300\t0.120\t40.000\t20.000\t2.000\t10.000\t5.000",
+                "1 10000.0 0.01",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    util = wepp_soil_util_module.WeppSoilUtil(
+        str(src),
+        compute_erodibilities=True,
+        compute_conductivity=True,
+    )
+    converted = util.to7778()
+
+    ofe = converted.obj["ofes"][0]
+    horizon = ofe["horizons"][0]
+
+    assert isinstance(ofe["ki"], (int, float))
+    assert isinstance(ofe["kr"], (int, float))
+    assert isinstance(ofe["shcrit"], (int, float))
+    assert isinstance(horizon["ksat"], (int, float))
