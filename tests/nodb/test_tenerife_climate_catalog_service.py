@@ -32,26 +32,38 @@ def test_tenerife_available_catalog_is_runtime_constrained() -> None:
 
     datasets = service.available_catalog_datasets(climate)
 
-    assert {dataset.catalog_id for dataset in datasets} == {"vanilla_cligen"}
-    dataset = datasets[0]
-    assert dataset.spatial_modes == (0,)
-    assert dataset.default_spatial_mode == 0
-    assert dataset.station_modes == (-1, 0)
+    assert {dataset.catalog_id for dataset in datasets} == {"vanilla_cligen", "user_defined_cli"}
+    by_id = {dataset.catalog_id: dataset for dataset in datasets}
+
+    vanilla = by_id["vanilla_cligen"]
+    assert vanilla.spatial_modes == (0,)
+    assert vanilla.default_spatial_mode == 0
+    assert vanilla.station_modes == (-1, 0)
+
+    user_defined = by_id["user_defined_cli"]
+    assert user_defined.spatial_modes == (0,)
+    assert user_defined.default_spatial_mode == 0
+    assert user_defined.station_modes == (4,)
 
 
-def test_tenerife_resolve_catalog_rejects_non_vanilla_modes() -> None:
+def test_tenerife_resolve_catalog_rejects_unsupported_modes() -> None:
     service = ClimateStationCatalogService()
     climate = _ClimateStub(
         locales=("tenerife", "eu"),
         uses_tenerife_station_catalog=True,
     )
 
-    assert service.resolve_catalog_dataset(climate, "user_defined_cli") is None
+    assert service.resolve_catalog_dataset(climate, "prism_stochastic") is None
 
     vanilla = service.resolve_catalog_dataset(climate, "vanilla_cligen")
     assert vanilla is not None
     assert vanilla.spatial_modes == (0,)
     assert vanilla.station_modes == (-1, 0)
+
+    user_defined = service.resolve_catalog_dataset(climate, "user_defined_cli")
+    assert user_defined is not None
+    assert user_defined.spatial_modes == (0,)
+    assert user_defined.station_modes == (4,)
 
 
 def test_non_tenerife_catalog_remains_unchanged() -> None:

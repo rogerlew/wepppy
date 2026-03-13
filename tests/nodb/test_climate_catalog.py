@@ -178,9 +178,10 @@ def test_tenerife_catalog_restricts_climate_mode_and_spatial_mode(climate_factor
     climate = climate_factory(locales=("tenerife", "eu"), cligen_db="tenerife_stations.db")
 
     climate.climate_mode = ClimateMode.Vanilla
+    climate.climate_mode = ClimateMode.UserDefined
     climate.climate_spatialmode = ClimateSpatialMode.Single
 
-    with pytest.raises(ValueError, match="only supports Vanilla climate mode"):
+    with pytest.raises(ValueError, match="only supports Vanilla or User-Defined climate mode"):
         climate.climate_mode = ClimateMode.PRISM
 
     with pytest.raises(ValueError, match="only supports Single climate spatial mode"):
@@ -200,13 +201,21 @@ def test_tenerife_catalog_restricts_station_modes_to_auto_and_closest(climate_fa
         climate.find_heuristic_stations()
 
 
+def test_tenerife_catalog_allows_user_defined_station_mode_for_user_defined_cli(climate_factory):
+    climate = climate_factory(locales=("tenerife", "eu"), cligen_db="tenerife_stations.db")
+    climate.catalog_id = "user_defined_cli"
+    climate.climate_mode = ClimateMode.UserDefined
+
+    climate.climatestation_mode = ClimateStationMode.UserDefined
+
+
 def test_tenerife_catalog_parse_inputs_rejects_non_vanilla_or_multiple(climate_factory):
     climate = climate_factory(locales=("tenerife", "eu"), cligen_db="tenerife_stations.db")
     form = _baseline_form()
     form["climate_mode"] = str(int(ClimateMode.PRISM))
     form["climate_spatialmode"] = str(int(ClimateSpatialMode.Single))
 
-    with pytest.raises(ValueError, match="only supports Vanilla climate mode"):
+    with pytest.raises(ValueError, match="only supports Vanilla or User-Defined climate mode"):
         climate.parse_inputs(form)
 
     form["climate_mode"] = str(int(ClimateMode.Vanilla))
@@ -214,3 +223,16 @@ def test_tenerife_catalog_parse_inputs_rejects_non_vanilla_or_multiple(climate_f
 
     with pytest.raises(ValueError, match="only supports Single climate spatial mode"):
         climate.parse_inputs(form)
+
+
+def test_tenerife_catalog_parse_inputs_accepts_user_defined_cli(climate_factory):
+    climate = climate_factory(locales=("tenerife", "eu"), cligen_db="tenerife_stations.db")
+    form = _baseline_form()
+    form["climate_catalog_id"] = "user_defined_cli"
+    form["climate_spatialmode"] = str(int(ClimateSpatialMode.Single))
+
+    climate.parse_inputs(form)
+
+    assert climate.catalog_id == "user_defined_cli"
+    assert climate.climate_mode == ClimateMode.UserDefined
+    assert climate.climate_spatialmode == ClimateSpatialMode.Single

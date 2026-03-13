@@ -596,12 +596,23 @@ class Climate(NoDbBase):
         if not self.uses_tenerife_station_catalog:
             return
 
+        effective_mode = climate_mode
+        if effective_mode is None:
+            effective_mode = getattr(self, "_climate_mode", None)
+        effective_catalog_id = getattr(self, "_catalog_id", None)
+        allows_user_defined_station_mode = (
+            effective_catalog_id == "user_defined_cli"
+            or effective_mode in (ClimateMode.UserDefined, ClimateMode.UserDefinedSingleStorm)
+        )
+
         if climate_mode is not None and climate_mode not in (
             ClimateMode.Undefined,
             ClimateMode.Vanilla,
+            ClimateMode.UserDefined,
+            ClimateMode.UserDefinedSingleStorm,
         ):
             raise ValueError(
-                "Tenerife station catalog only supports Vanilla climate mode."
+                "Tenerife station catalog only supports Vanilla or User-Defined climate mode."
             )
 
         if climate_spatialmode is not None and climate_spatialmode not in (
@@ -615,6 +626,11 @@ class Climate(NoDbBase):
         if climatestation_mode is not None and climatestation_mode not in (
             ClimateStationMode.FindClosestAtRuntime,
             ClimateStationMode.Closest,
+            *(
+                (ClimateStationMode.UserDefined,)
+                if allows_user_defined_station_mode
+                else ()
+            ),
         ):
             raise ValueError(
                 "Tenerife station catalog only supports auto and distance-ranking station modes."

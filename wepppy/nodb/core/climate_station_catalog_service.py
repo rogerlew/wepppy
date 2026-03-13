@@ -19,16 +19,26 @@ class ClimateStationCatalogService:
         if not climate.uses_tenerife_station_catalog:
             return dataset
 
-        # Tenerife station catalog is intentionally limited to Vanilla + Single + Auto/Closest.
-        if int(dataset.climate_mode) != 0:
-            return None
+        # Tenerife is intentionally limited to:
+        # - Vanilla station-catalog mode (Single + Auto/Closest)
+        # - User-defined CLI uploads (Single only)
+        if dataset.catalog_id == "vanilla_cligen":
+            return replace(
+                dataset,
+                spatial_modes=(0,),
+                default_spatial_mode=0,
+                station_modes=(-1, 0),
+            )
 
-        return replace(
-            dataset,
-            spatial_modes=(0,),
-            default_spatial_mode=0,
-            station_modes=(-1, 0),
-        )
+        if dataset.catalog_id == "user_defined_cli":
+            return replace(
+                dataset,
+                spatial_modes=(0,),
+                default_spatial_mode=0,
+                station_modes=(4,),
+            )
+
+        return None
 
     def available_catalog_datasets(self, climate: "Climate", include_hidden: bool = False) -> List[Any]:
         from wepppy.nodb.locales import available_climate_datasets
