@@ -53,6 +53,7 @@
 {% set selected_mode = climate.climate_mode.value %}
 {% set selected_station_mode = climate.climatestation_mode.value %}
 {% set spatial_mode = climate.climate_spatialmode.value %}
+{% set is_tenerife_station_catalog = climate.uses_tenerife_station_catalog %}
 
 {% set month_names = [
   "January", "February", "March", "April", "May", "June",
@@ -413,6 +414,7 @@
        ) }}
   </section>
 
+  {% if not is_tenerife_station_catalog %}
   {% call ui.collapsible_card(title="Advanced options", expanded=False, card_id="climate_advanced_options") %}
     <section class="wc-stack">
       {{ ui.checkbox_field(
@@ -524,6 +526,7 @@
       </div>
     </section>
   {% endcall %}
+  {% endif %}
 
 {% call button_row() %}
     <button

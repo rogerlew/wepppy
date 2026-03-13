@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
@@ -12,12 +13,36 @@ if TYPE_CHECKING:
 class ClimateStationCatalogService:
     """Resolve climate catalog selections and station metadata/search results."""
 
+    @staticmethod
+    def _apply_runtime_constraints(climate: "Climate", dataset: Any) -> Optional[Any]:
+        """Apply run-specific dataset constraints before exposing catalog options."""
+        if not climate.uses_tenerife_station_catalog:
+            return dataset
+
+        # Tenerife station catalog is intentionally limited to Vanilla + Single + Auto/Closest.
+        if int(dataset.climate_mode) != 0:
+            return None
+
+        return replace(
+            dataset,
+            spatial_modes=(0,),
+            default_spatial_mode=0,
+            station_modes=(-1, 0),
+        )
+
     def available_catalog_datasets(self, climate: "Climate", include_hidden: bool = False) -> List[Any]:
         from wepppy.nodb.locales import available_climate_datasets
 
         locales = climate.locales or ()
         mods = climate.ron_instance.mods or []
-        return available_climate_datasets(locales, mods, include_hidden=include_hidden)
+        datasets = available_climate_datasets(locales, mods, include_hidden=include_hidden)
+
+        constrained: List[Any] = []
+        for dataset in datasets:
+            constrained_dataset = self._apply_runtime_constraints(climate, dataset)
+            if constrained_dataset is not None:
+                constrained.append(constrained_dataset)
+        return constrained
 
     def resolve_catalog_dataset(
         self,
@@ -39,7 +64,7 @@ class ClimateStationCatalogService:
         if not dataset.is_allowed_for(locales, mods, include_hidden=include_hidden):
             return None
 
-        return dataset
+        return self._apply_runtime_constraints(climate, dataset)
 
     def climatestation_meta(self, climate: "Climate") -> Any:
         from wepppy.nodb.core.climate import ClimateMode
