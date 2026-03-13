@@ -174,6 +174,17 @@ def test_try_redis_set_log_level_invalid_level_falls_back_to_info(monkeypatch):
         logger.setLevel(previous_level)
 
 
+def test_config_get_path_expands_locales_dir():
+    class _StubNoDb:
+        def config_get_str(self, section, option, default=None):
+            assert (section, option, default) == ("soils", "soils_map", None)
+            return "LOCALES_DIR/tenerife/soils/tf_soil_25.tif"
+
+    resolved = base.NoDbBase.config_get_path(_StubNoDb(), "soils", "soils_map")
+
+    assert resolved.endswith("wepppy/locales/tenerife/soils/tf_soil_25.tif")
+
+
 def test_ensure_redis_lock_client_reconnects_when_unset(monkeypatch):
     class _StubRedisClient:
         def __init__(self, connection_pool):

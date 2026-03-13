@@ -677,7 +677,19 @@ class NoDbBase(object):
         assert _exists(wd)
 
         if not _exists(_join(wd, 'READONLY')):
-            ensure_version(wd)
+            # Brand-new runs start with an empty working directory, so there is
+            # no schema state to migrate yet. Skipping version I/O here keeps
+            # run creation responsive on slower network-backed run storage.
+            try:
+                has_nodb_payloads = any(
+                    entry.name.endswith('.nodb')
+                    for entry in os.scandir(wd)
+                )
+            except OSError:
+                has_nodb_payloads = True
+
+            if has_nodb_payloads:
+                ensure_version(wd)
 
         if run_group is not None:
             self._run_group = run_group
@@ -854,12 +866,12 @@ class NoDbBase(object):
             )
             self._redis_handler.setLevel(logging.DEBUG)
 
-            # File handler for run logs
+            # File handler for run logs. Delay opening until first emit so
+            # controller initialization doesn't block on slow run storage.
             log_path = self._nodb.replace('.nodb', '.log')  # absoloute path to log file
-            self._run_file_handler = FileHandler(log_path)
+            self._run_file_handler = FileHandler(log_path, delay=True)
             self._run_file_handler.setLevel(try_redis_get_log_level(self.runid, logging.INFO))
             self._run_file_handler.setFormatter(formatter)
-            Path(log_path).touch(exist_ok=True)
 
             # Console handler
             self._console_handler = StreamHandler()
@@ -1666,6 +1678,8 @@ class NoDbBase(object):
         path = self.config_get_str(section, option, default)
         if path is None:
             return None
+        locales_dir = _join(os.path.dirname(os.path.dirname(__file__)), 'locales')
+        path = path.replace('LOCALES_DIR', locales_dir)
         path = path.replace('MODS_DIR', MODS_DIR)
         path = path.replace('EXTENDED_MODS_DATA', EXTENDED_MODS_DATA)
         return path
