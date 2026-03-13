@@ -597,7 +597,8 @@ class Ron(NoDbBase):
         wd: str, 
         cfg_fn: str = '0.cfg', 
         run_group: Optional[str] = None, 
-        group_name: Optional[str] = None
+        group_name: Optional[str] = None,
+        initialize_components: bool = True,
     ) -> None:
         from wepppy.nodb.base import iter_nodb_mods_subclasses
         from wepppy.nodb.core.watershed import DelineationBackend
@@ -655,47 +656,50 @@ class Ron(NoDbBase):
             if not _exists(export_dir):
                 os.mkdir(export_dir)
 
-            # initialize the other controllers here
-            # this will create the other .nodb files
-
-            # gotcha: need to import the nodb submodules
-            # through wepppy to avoid circular references
-            watershed = Watershed(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            if watershed.delineation_backend == DelineationBackend.TOPAZ:
-                Topaz(wd, cfg_fn, run_group=run_group, group_name=group_name)
-
-            Landuse(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            Soils(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            Climate(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            Wepp(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            Observed(wd, cfg_fn, run_group=run_group, group_name=group_name)
-            Unitizer(wd, cfg_fn, run_group=run_group, group_name=group_name)
             prep = RedisPrep(wd, cfg_fn)
+            if initialize_components:
+                # initialize the other controllers here
+                # this will create the other .nodb files
+
+                # gotcha: need to import the nodb submodules
+                # through wepppy to avoid circular references
+                watershed = Watershed(wd, cfg_fn, run_group=run_group, group_name=group_name)
+                if watershed.delineation_backend == DelineationBackend.TOPAZ:
+                    Topaz(wd, cfg_fn, run_group=run_group, group_name=group_name)
+
+                Landuse(wd, cfg_fn, run_group=run_group, group_name=group_name)
+                Soils(wd, cfg_fn, run_group=run_group, group_name=group_name)
+                Climate(wd, cfg_fn, run_group=run_group, group_name=group_name)
+                Wepp(wd, cfg_fn, run_group=run_group, group_name=group_name)
+                Observed(wd, cfg_fn, run_group=run_group, group_name=group_name)
+                Unitizer(wd, cfg_fn, run_group=run_group, group_name=group_name)
+
+                # Initialize mods
+                mods_to_init = self.mods or ()
+                for mod in mods_to_init:
+                    type(self)._import_mod_module(mod)
+
+                mods_registry = {mod: cls for mod, cls in iter_nodb_mods_subclasses()}
+
+                for mod in mods_to_init:
+                    if mod not in mods_registry:
+                        raise Exception(f'unknown mod {mod}')
+                    mod_instance = mods_registry[mod](wd, cfg_fn, run_group=run_group, group_name=group_name)
+
+                    if mod in ['baer', 'disturbed']:
+                        if mod == 'baer':
+                            prep.sbs_required = True
+
+                        sbs_map = self.config_get_path('landuse', 'sbs_map')
+                        if sbs_map is not None:
+                            self.init_sbs_map(sbs_map, mod_instance)
+
             prep.timestamp(TaskEnum.project_init)
-
-            # Initialize mods
-            mods_to_init = self.mods or ()
-            for mod in mods_to_init:
-                type(self)._import_mod_module(mod)
-
-            mods_registry = {mod: cls for mod, cls in iter_nodb_mods_subclasses()}
-
-            for mod in mods_to_init:
-                if mod not in mods_registry:
-                    raise Exception(f'unknown mod {mod}')
-                mod_instance = mods_registry[mod](wd, cfg_fn, run_group=run_group, group_name=group_name)
-
-                if mod in ['baer', 'disturbed']:
-                    if mod == 'baer':
-                        prep.sbs_required = True
-
-                    sbs_map = self.config_get_path('landuse', 'sbs_map')
-                    if sbs_map is not None:
-                        self.init_sbs_map(sbs_map, mod_instance)
                         
         
-        activate_query_engine(self.wd, run_interchange=False)
-        self.trigger(TriggerEvents.ON_INIT_FINISH)
+        if initialize_components:
+            activate_query_engine(self.wd, run_interchange=False)
+            self.trigger(TriggerEvents.ON_INIT_FINISH)
 
     @property
     def profile_recorder_assembler_enabled(self) -> bool:

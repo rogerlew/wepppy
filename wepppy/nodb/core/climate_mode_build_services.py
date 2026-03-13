@@ -12,6 +12,13 @@ class ClimateModeBuildServices:
     def validate_mode_spatial_compatibility(self, climate: "Climate") -> None:
         from wepppy.nodb.core.climate import ClimateMode, ClimateSpatialMode
 
+        validator = getattr(climate, "_validate_station_catalog_constraints", None)
+        if callable(validator):
+            validator(
+                climate_mode=climate.climate_mode,
+                climate_spatialmode=climate.climate_spatialmode,
+            )
+
         if climate.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
             if climate.climate_mode not in [ClimateMode.ObservedPRISM, ClimateMode.GridMetPRISM]:
                 raise ValueError(

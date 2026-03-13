@@ -75,6 +75,13 @@ class ClimateInputParsingService:
                 assert _exists(cli_path)
                 climate._orig_cli_fn = cli_path
 
+            validator = getattr(climate, "_validate_station_catalog_constraints", None)
+            if callable(validator):
+                validator(
+                    climate_mode=climate_mode,
+                    climate_spatialmode=climate_spatialmode,
+                )
+
             climate._climate_mode = climate_mode
             climate._climate_spatialmode = climate_spatialmode
             climate._input_years = input_years

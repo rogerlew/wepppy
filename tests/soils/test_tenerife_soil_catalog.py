@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from wepppy.nodb.core.soils import Soils
 
 rasterio = pytest.importorskip("rasterio", reason="rasterio required for Tenerife soil catalog tests")
 
@@ -64,3 +65,12 @@ def test_retired_tenerife_legacy_soil_assets_are_absent() -> None:
     assert not any((_SOILS_DIR / "db").glob("*.template.sol"))
     assert not (_SOILS_DIR / "db/process.py").exists()
     assert not _LEGACY_CONFIG.exists()
+
+
+@pytest.mark.unit
+def test_soils_map_property_expands_locales_dir_for_persisted_state() -> None:
+    soils = Soils.__new__(Soils)
+    soils._soils_map = "LOCALES_DIR/tenerife/soils/tf_soil_25.tif"
+    soils._ssurgo_db = "None"
+
+    assert soils.soils_map == str(_SOILS_DIR / "tf_soil_25.tif")

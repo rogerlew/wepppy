@@ -931,6 +931,10 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
         return _exists(netful_path)
 
     @property
+    def dem_fn(self) -> str:
+        return self.ron_instance.dem_fn
+
+    @property
     def has_subcatchments(self) -> bool:
         return _exists(self.subwta)
 

@@ -176,6 +176,8 @@ def test_try_redis_set_log_level_invalid_level_falls_back_to_info(monkeypatch):
 
 def test_config_get_path_expands_locales_dir():
     class _StubNoDb:
+        _expand_config_path_tokens = base.NoDbBase._expand_config_path_tokens
+
         def config_get_str(self, section, option, default=None):
             assert (section, option, default) == ("soils", "soils_map", None)
             return "LOCALES_DIR/tenerife/soils/tf_soil_25.tif"

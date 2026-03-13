@@ -366,6 +366,9 @@ class ClimatePrecipScalingMode(IntEnum):
         raise KeyError
 
 
+_TENERIFE_CLIGEN_DB_BASENAME = "tenerife_stations.db"
+
+
 # noinspection PyUnusedLocal
 class Climate(NoDbBase):
     
@@ -570,6 +573,48 @@ class Climate(NoDbBase):
         return getattr(self, '_cligen_db', self.config_get_str('climate', 'cligen_db'))
 
     @property
+    def uses_tenerife_station_catalog(self) -> bool:
+        cligen_db = str(self.cligen_db or "").strip()
+        if not cligen_db:
+            return False
+        basename = _split(cligen_db)[1] or cligen_db
+        return basename.lower() == _TENERIFE_CLIGEN_DB_BASENAME
+
+    def _validate_station_catalog_constraints(
+        self,
+        *,
+        climate_mode: Optional[ClimateMode] = None,
+        climate_spatialmode: Optional[ClimateSpatialMode] = None,
+        climatestation_mode: Optional[ClimateStationMode] = None,
+    ) -> None:
+        if not self.uses_tenerife_station_catalog:
+            return
+
+        if climate_mode is not None and climate_mode not in (
+            ClimateMode.Undefined,
+            ClimateMode.Vanilla,
+        ):
+            raise ValueError(
+                "Tenerife station catalog only supports Vanilla climate mode."
+            )
+
+        if climate_spatialmode is not None and climate_spatialmode not in (
+            ClimateSpatialMode.Undefined,
+            ClimateSpatialMode.Single,
+        ):
+            raise ValueError(
+                "Tenerife station catalog only supports Single climate spatial mode."
+            )
+
+        if climatestation_mode is not None and climatestation_mode not in (
+            ClimateStationMode.FindClosestAtRuntime,
+            ClimateStationMode.Closest,
+        ):
+            raise ValueError(
+                "Tenerife station catalog only supports auto and distance-ranking station modes."
+            )
+
+    @property
     def cli_path(self) -> str:
         return _join(self.cli_dir, self.cli_fn)
 
@@ -743,11 +788,13 @@ class Climate(NoDbBase):
     @nodb_setter
     def climatestation_mode(self, value: Union[ClimateStationMode, int]) -> None:
         if isinstance(value, ClimateStationMode):
-            self._climatestation_mode = value
+            mode = value
         elif isinstance(value, int):
-            self._climatestation_mode = ClimateStationMode(value)
+            mode = ClimateStationMode(value)
         else:
             raise ValueError('most be ClimateStationMode or int')
+        self._validate_station_catalog_constraints(climatestation_mode=mode)
+        self._climatestation_mode = mode
 
     # noinspection PyPep8Naming
     @property
@@ -838,6 +885,7 @@ class Climate(NoDbBase):
         else:
             mode = ClimateMode.parse(value)
         _assert_supported_climate_mode(mode)
+        self._validate_station_catalog_constraints(climate_mode=mode)
         self._climate_mode = mode
 
     @property
@@ -894,16 +942,21 @@ class Climate(NoDbBase):
     @nodb_setter
     def climate_spatialmode(self, value: Union[ClimateSpatialMode, int, str]) -> None:
         if isinstance(value, ClimateSpatialMode):
-            self._climate_spatialmode = value
+            spatialmode = value
         elif isinstance(value, int):
-            self._climate_spatialmode = ClimateSpatialMode(value)
+            spatialmode = ClimateSpatialMode(value)
         else:
-            self._climate_spatialmode = ClimateSpatialMode.parse(value)
+            spatialmode = ClimateSpatialMode.parse(value)
+        self._validate_station_catalog_constraints(climate_spatialmode=spatialmode)
+        self._climate_spatialmode = spatialmode
 
     #
     # station search
     #
     def find_closest_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
+        self._validate_station_catalog_constraints(
+            climatestation_mode=ClimateStationMode.Closest
+        )
         return _CLIMATE_STATION_CATALOG_SERVICE.find_closest_stations(self, num_stations=num_stations)
         
     @property
@@ -917,14 +970,23 @@ class Climate(NoDbBase):
         return [s.as_dict() for s in self._closest_stations]
 
     def find_heuristic_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
+        self._validate_station_catalog_constraints(
+            climatestation_mode=ClimateStationMode.Heuristic
+        )
         return _CLIMATE_STATION_CATALOG_SERVICE.find_heuristic_stations(self, num_stations=num_stations)
 
     def find_eu_heuristic_stations(self, num_stations: int = 10) -> Optional[List[Dict[str, Any]]]:
+        self._validate_station_catalog_constraints(
+            climatestation_mode=ClimateStationMode.EUHeuristic
+        )
         return _CLIMATE_STATION_CATALOG_SERVICE.find_eu_heuristic_stations(
             self, num_stations=num_stations
         )
 
     def find_au_heuristic_stations(self, num_stations: Optional[int] = None) -> Optional[List[Dict[str, Any]]]:
+        self._validate_station_catalog_constraints(
+            climatestation_mode=ClimateStationMode.AUHeuristic
+        )
         return _CLIMATE_STATION_CATALOG_SERVICE.find_au_heuristic_stations(
             self, num_stations=num_stations
         )

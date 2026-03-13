@@ -6,7 +6,7 @@ import pytest
 pytest.importorskip("rasterio", reason="rasterio required for climate catalog tests")
 
 from wepppy.nodb.locales.climate_catalog import available_climate_datasets, get_climate_dataset
-from wepppy.nodb.core.climate import Climate, ClimateMode, ClimateSpatialMode
+from wepppy.nodb.core.climate import Climate, ClimateMode, ClimateSpatialMode, ClimateStationMode
 
 
 def test_available_climate_datasets_default_locale():
@@ -86,7 +86,7 @@ def climate_factory(tmp_path, monkeypatch, request):
 
     created = []
 
-    def _create(locales=('us',), mods=None):
+    def _create(locales=('us',), mods=None, cligen_db="ghcn"):
         run_dir = tmp_path / f'run_{len(created)}'
         run_dir.mkdir()
         cfg_path = run_dir / '0.cfg'
@@ -104,7 +104,7 @@ def climate_factory(tmp_path, monkeypatch, request):
             mods = {list(mods or [])}
 
             [climate]
-            cligen_db = "ghcn"
+            cligen_db = "{cligen_db}"
             observed_clis_wc = None
             future_clis_wc = None
             use_gridmet_wind_when_applicable = true
@@ -171,4 +171,46 @@ def test_parse_inputs_rejects_invalid_spatial_mode(climate_factory):
     form["climate_spatialmode"] = "2"
 
     with pytest.raises(ValueError):
+        climate.parse_inputs(form)
+
+
+def test_tenerife_catalog_restricts_climate_mode_and_spatial_mode(climate_factory):
+    climate = climate_factory(locales=("tenerife", "eu"), cligen_db="tenerife_stations.db")
+
+    climate.climate_mode = ClimateMode.Vanilla
+    climate.climate_spatialmode = ClimateSpatialMode.Single
+
+    with pytest.raises(ValueError, match="only supports Vanilla climate mode"):
+        climate.climate_mode = ClimateMode.PRISM
+
+    with pytest.raises(ValueError, match="only supports Single climate spatial mode"):
+        climate.climate_spatialmode = ClimateSpatialMode.Multiple
+
+
+def test_tenerife_catalog_restricts_station_modes_to_auto_and_closest(climate_factory):
+    climate = climate_factory(locales=("tenerife", "eu"), cligen_db="tenerife_stations.db")
+
+    climate.climatestation_mode = ClimateStationMode.FindClosestAtRuntime
+    climate.climatestation_mode = ClimateStationMode.Closest
+
+    with pytest.raises(ValueError, match="only supports auto and distance-ranking station modes"):
+        climate.climatestation_mode = ClimateStationMode.Heuristic
+
+    with pytest.raises(ValueError, match="only supports auto and distance-ranking station modes"):
+        climate.find_heuristic_stations()
+
+
+def test_tenerife_catalog_parse_inputs_rejects_non_vanilla_or_multiple(climate_factory):
+    climate = climate_factory(locales=("tenerife", "eu"), cligen_db="tenerife_stations.db")
+    form = _baseline_form()
+    form["climate_mode"] = str(int(ClimateMode.PRISM))
+    form["climate_spatialmode"] = str(int(ClimateSpatialMode.Single))
+
+    with pytest.raises(ValueError, match="only supports Vanilla climate mode"):
+        climate.parse_inputs(form)
+
+    form["climate_mode"] = str(int(ClimateMode.Vanilla))
+    form["climate_spatialmode"] = str(int(ClimateSpatialMode.Multiple))
+
+    with pytest.raises(ValueError, match="only supports Single climate spatial mode"):
         climate.parse_inputs(form)

@@ -230,6 +230,8 @@ class Soils(NoDbBase):
     @classmethod
     def _post_instance_loaded(cls, instance: "Soils") -> "Soils":
         instance = super()._post_instance_loaded(instance)
+        instance._soils_map = instance._expand_config_path_tokens(getattr(instance, "_soils_map", None))
+        instance._ssurgo_db = instance._expand_config_path_tokens(getattr(instance, "_ssurgo_db", None))
 
         soils = getattr(instance, "soils", None)
         if not isinstance(soils, dict):
@@ -305,7 +307,7 @@ class Soils(NoDbBase):
         
     @property
     def soils_map(self) -> Optional[str]:
-        return getattr(self, '_soils_map', None)
+        return self._expand_config_path_tokens(getattr(self, '_soils_map', None))
 
     @property
     def single_selection(self) -> int:
@@ -456,7 +458,9 @@ class Soils(NoDbBase):
 
     @property
     def ssurgo_db(self) -> Optional[str]:
-        return getattr(self, '_ssurgo_db', self.config_get_str('soils', 'ssurgo_db')).replace('gNATSGO', 'gNATSGSO')
+        path = getattr(self, '_ssurgo_db', self.config_get_str('soils', 'ssurgo_db'))
+        path = self._expand_config_path_tokens(path)
+        return path.replace('gNATSGO', 'gNATSGSO')
 
     @ssurgo_db.setter
     @nodb_setter

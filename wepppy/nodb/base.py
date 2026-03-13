@@ -1673,9 +1673,8 @@ class NoDbBase(object):
         except (NoSectionError, NoOptionError):
             return default
 
-    def config_get_path(self, section: str, option: str, default=None):
+    def _expand_config_path_tokens(self, path: Optional[str]) -> Optional[str]:
         from .mods import MODS_DIR, EXTENDED_MODS_DATA
-        path = self.config_get_str(section, option, default)
         if path is None:
             return None
         locales_dir = _join(os.path.dirname(os.path.dirname(__file__)), 'locales')
@@ -1683,6 +1682,10 @@ class NoDbBase(object):
         path = path.replace('MODS_DIR', MODS_DIR)
         path = path.replace('EXTENDED_MODS_DATA', EXTENDED_MODS_DATA)
         return path
+
+    def config_get_path(self, section: str, option: str, default=None):
+        path = self.config_get_str(section, option, default)
+        return self._expand_config_path_tokens(path)
 
     def config_get_raw(self, section: str, option: str, default=None):
         val = self._configparser.get(section, option, fallback=default)

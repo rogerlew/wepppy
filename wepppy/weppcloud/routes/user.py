@@ -2,6 +2,7 @@
 
 import logging
 import math
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -66,6 +67,10 @@ PROFILE_TOKEN_AUDIENCES = ('rq-engine', 'query-engine')
 PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES = ('Admin', 'PowerUser', 'Dev', 'Root')
 PROFILE_USER_TOKEN_MINT_ALLOWED_ROLE_SET = frozenset(
     role.casefold() for role in PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES
+)
+CATALOG_RON_META_MAX_RUNS = max(
+    1,
+    int(os.getenv("WEPPCLOUD_RUNS_CATALOG_RON_META_MAX_RUNS", "200")),
 )
 
 
@@ -229,6 +234,21 @@ def _run_map_inputs(run: Any) -> tuple[str, Dict[str, Any]]:
         "config": run.config,
     }
     return wd, attrs
+
+
+def _catalog_meta_from_row(row: Dict[str, Any]) -> Dict[str, Any]:
+    """Fast catalog payload that avoids opening each run's Ron file."""
+    return {
+        "name": row.get("runid"),
+        "scenario": row.get("config"),
+        "readonly": False,
+        "owner": row.get("owner"),
+        "runid": row.get("runid"),
+        "date_created": row.get("date_created"),
+        "last_modified": row.get("last_modified"),
+        "owner_id": row.get("owner_id"),
+        "config": row.get("config"),
+    }
 
 
 def _collect_metas_for_runs(runs) -> List[dict]:
@@ -698,12 +718,21 @@ def runs_catalog():
         direction_param = _normalize_direction(request.args.get('direction') or request.args.get('order'))
         is_desc = direction_param == 'desc'
         requested_alias = request.args.get('alias')
+        include_ron_meta = str(request.args.get('include_ron_meta', '')).strip().lower() in {'1', 'true', 'yes'}
         selected_user_id, missing_alias = _resolve_runs_user_id(requested_alias)
         if missing_alias is not None and _is_admin_runs_viewer():
             return error_factory(f"user alias '{missing_alias}' not found", status_code=404)
         runs_all = _collect_run_rows(_runs_query_for_user(selected_user_id))
 
-        metas = _collect_metas_for_runs(runs_all)
+        if include_ron_meta or len(runs_all) <= CATALOG_RON_META_MAX_RUNS:
+            metas = _collect_metas_for_runs(runs_all)
+        else:
+            logger.info(
+                "runs_catalog: skipping Ron metadata for %s runs (threshold=%s)",
+                len(runs_all),
+                CATALOG_RON_META_MAX_RUNS,
+            )
+            metas = [_catalog_meta_from_row(run) for run in runs_all]
         metas = _sort_metas(metas, sort_param, is_desc)
         return jsonify(
             runs=metas,
