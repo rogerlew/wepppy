@@ -247,7 +247,7 @@ versioneer==0.29
 vine==5.1.0
 wcwidth==0.2.13
 webencodings==0.5.1
-werkzeug==3.1.5
+werkzeug==3.1.6
 what3words==3.4.0
 wrapt>=1.14.0
 wtforms==3.2.1
