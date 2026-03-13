@@ -866,12 +866,12 @@ class NoDbBase(object):
             )
             self._redis_handler.setLevel(logging.DEBUG)
 
-            # File handler for run logs. Delay opening until first emit so
-            # controller initialization doesn't block on slow run storage.
+            # File handler for run logs
             log_path = self._nodb.replace('.nodb', '.log')  # absoloute path to log file
-            self._run_file_handler = FileHandler(log_path, delay=True)
+            self._run_file_handler = FileHandler(log_path)
             self._run_file_handler.setLevel(try_redis_get_log_level(self.runid, logging.INFO))
             self._run_file_handler.setFormatter(formatter)
+            Path(log_path).touch(exist_ok=True)
 
             # Console handler
             self._console_handler = StreamHandler()

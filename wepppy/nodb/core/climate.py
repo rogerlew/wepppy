@@ -574,7 +574,13 @@ class Climate(NoDbBase):
 
     @property
     def uses_tenerife_station_catalog(self) -> bool:
-        cligen_db = str(self.cligen_db or "").strip()
+        cligen_db = getattr(self, "_cligen_db", None)
+        if cligen_db is None:
+            if not hasattr(self, "_config"):
+                return False
+            cligen_db = self.config_get_str("climate", "cligen_db")
+
+        cligen_db = str(cligen_db or "").strip()
         if not cligen_db:
             return False
         basename = _split(cligen_db)[1] or cligen_db
