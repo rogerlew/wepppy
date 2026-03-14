@@ -46,6 +46,7 @@ from wepppy.nodb.mods.debris_flow import DebrisFlow
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
 from wepppy.nodb.mods.openet import OpenET_TS
+from wepppy.nodb.mods.polaris import Polaris
 from wepppy.nodb.mods.rap import RAP_TS
 from wepppy.nodb.mods.treatments import Treatments
 
@@ -1424,3 +1425,32 @@ def fetch_and_analyze_openet_ts_rq(runid: str, payload: Mapping[str, Any] | None
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1270", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+
+# POLARIS Functions
+
+@with_exception_logging
+def fetch_and_align_polaris_rq(runid: str, payload: Mapping[str, Any] | None = None) -> None:
+    """Fetch and align POLARIS rasters for the scenario."""
+    job = get_current_job()
+    wd = get_wd(runid)
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f'{runid}:polaris'
+    StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+    options = dict(payload) if payload else {}
+
+    polaris = Polaris.getInstance(wd)
+    if options:
+        try:
+            polaris.logger.info('POLARIS job options: %s', json.dumps(options, sort_keys=True))
+        except (TypeError, ValueError):
+            polaris.logger.info('POLARIS job options provided (%d keys)', len(options))
+
+    summary = polaris.acquire_and_align(payload=options)
+    StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   polaris POLARIS_TASK_COMPLETED')
+    StatusMessenger.publish(status_channel, json.dumps(summary, sort_keys=True))
+
+    prep = RedisPrep.getInstance(wd)
+    prep.timestamp(TaskEnum.fetch_polaris)

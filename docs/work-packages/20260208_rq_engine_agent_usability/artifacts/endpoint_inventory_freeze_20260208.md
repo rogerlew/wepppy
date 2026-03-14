@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **75**
-- Classification counts: **agent-facing 52**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 72**, **Flask wrapper 3**
+- Total endpoints inventoried: **76**
+- Classification counts: **agent-facing 53**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 73**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -32,6 +32,7 @@ Snapshot summary:
 | POST | `/api/run-sync` | `wepppy/microservices/rq_engine/run_sync_routes.py` | `run_sync` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Admin-only orchestration; enqueues `run_sync_rq` and optional dependent `migrations_rq`. |
 | GET | `/api/run-sync/status` | `wepppy/microservices/rq_engine/run_sync_routes.py` | `run_sync_status` | internal | rq-engine | JWT Bearer | - | read-only | Admin-only status read over RQ registries plus `RunMigration` records; no queue. |
 | POST | `/api/runs/{runid}/{config}/acquire-openet-ts` | `wepppy/microservices/rq_engine/openet_ts_routes.py` | `acquire_openet_ts` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| POST | `/api/runs/{runid}/{config}/acquire-polaris` | `wepppy/microservices/rq_engine/polaris_routes.py` | `acquire_polaris` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue for POLARIS retrieval + alignment; response includes `job_id`. |
 | POST | `/api/runs/{runid}/{config}/acquire-rap-ts` | `wepppy/microservices/rq_engine/rap_ts_routes.py` | `acquire_rap_ts` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/archive` | `wepppy/microservices/rq_engine/fork_archive_routes.py` | `archive_run` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/bootstrap/checkout` | `wepppy/microservices/rq_engine/bootstrap_routes.py` | `bootstrap_checkout` | agent-facing | rq-engine | JWT Bearer | `bootstrap:checkout` | mutating | Run access check: `authorize_run_access`. Synchronous bootstrap git checkout under lock; no queue. |

@@ -31,6 +31,7 @@ class TaskEnum(Enum):
     build_climate = 'build_climate'
     fetch_rap_ts = 'build_rap_ts'
     fetch_openet_ts = 'build_openet_ts'
+    fetch_polaris = 'build_polaris'
     run_wepp_hillslopes = 'run_wepp_hillslopes'
     run_wepp_watershed = 'run_wepp_watershed'
     run_observed = 'run_observed'
@@ -67,6 +68,7 @@ class TaskEnum(Enum):
             TaskEnum.build_climate: 'Build Climate',
             TaskEnum.fetch_rap_ts: 'Build RAP TS',
             TaskEnum.fetch_openet_ts: 'Build OpenET TS',
+            TaskEnum.fetch_polaris: 'Build POLARIS Layers',
             TaskEnum.run_wepp_hillslopes: 'Run WEPP Hillslopes',
             TaskEnum.run_wepp_watershed: 'Run WEPP Watershed',
             TaskEnum.run_observed: 'Run Observed',
@@ -101,6 +103,7 @@ class TaskEnum(Enum):
             TaskEnum.build_climate: '☁️',
             TaskEnum.fetch_rap_ts: '🐮',
             TaskEnum.fetch_openet_ts: '🛰️',
+            TaskEnum.fetch_polaris: '🧱',
             TaskEnum.run_wepp_hillslopes: '💧',
             TaskEnum.run_wepp_watershed: '⛰️',
             TaskEnum.run_observed: '📊',

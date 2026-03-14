@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-12  
-**Active Packages**: 2  
+**Last Updated**: 2026-03-13  
+**Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -311,6 +311,30 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### POLARIS NoDb Runs Client for Project-Aligned Raster Layers
+**Completed**: 2026-03-14  
+**Duration**: 2 focused sessions  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260313_polaris_nodb_runs_client/](docs/work-packages/20260313_polaris_nodb_runs_client/)  
+**Description**: Added a run-scoped, config-driven POLARIS NoDb/mods client that fetches endpoint layers and aligns GeoTIFF outputs to project raster grid contracts.
+
+**Outcome**:
+- Shipped `wepppy/nodb/mods/polaris/*` with catalog-driven layer selection and default top-horizon `sand/clay/bd/om` acquisition.
+- Added async endpoint/task flow: `POST /api/runs/{runid}/{config}/acquire-polaris` -> `fetch_and_align_polaris_rq`.
+- Added run-local artifacts under `polaris/` (`*.tif`, `manifest.json`, generated `README.md`) with attribution/metadata.
+- Added targeted unit + microservice tests including `acquire_and_align` idempotent skip and `force_refresh` behavior.
+- Verified real-run integration on `/wc1/runs/in/insightful-peacock` with DEM grid parity checks.
+- Full-suite sanity passed: `wctl run-pytest tests --maxfail=1` -> `2321 passed, 34 skipped`.
+
+**Deliverables**:
+- ✅ NoDb mod + config wiring (`[polaris]` section in `disturbed9002_wbt.cfg`)
+- ✅ rq-engine route + RQ task + RedisPrep task enum wiring
+- ✅ Route-freeze artifact updates (`endpoint_inventory_freeze_20260208.md`, `route_contract_checklist_20260208.md`)
+- ✅ Work-package closure artifacts and completed ExecPlan
+
+---
 
 ### Tenerife 2026 Data Ingestion
 **Completed**: 2026-03-12  

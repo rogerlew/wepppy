@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **53**
+- Total frozen routes covered: **54**
 
 ## Contract Matrix
 
@@ -21,6 +21,7 @@ Guarded by:
 | `GET` | `/api/jobinfo/{job_id}` | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | sync | `200, 401, 403, 404, 429, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_jobinfo.py` |
 | `GET` | `/api/jobstatus/{job_id}` | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | sync | `200, 401, 403, 404, 429, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_jobinfo.py` |
 | `POST` | `/api/runs/{runid}/{config}/acquire-openet-ts` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `POST` | `/api/runs/{runid}/{config}/acquire-polaris` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_polaris_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/acquire-rap-ts` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/archive` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/bootstrap/checkout` | JWT Bearer | bootstrap:checkout | mutating | sync no queue | `200, 400, 401, 403, 409, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_bootstrap_routes.py` |

@@ -26,6 +26,7 @@ from .landuse_soils_routes import router as landuse_soils_router
 from .migration_routes import router as migration_router
 from .omni_routes import router as omni_router
 from .openet_ts_routes import router as openet_ts_router
+from .polaris_routes import router as polaris_router
 from .project_routes import router as project_router
 from .run_sync_routes import router as run_sync_router
 from .rap_ts_routes import router as rap_ts_router
@@ -97,6 +98,7 @@ app.include_router(debris_flow_router, prefix="/api")
 app.include_router(rhem_router, prefix="/api")
 app.include_router(rap_ts_router, prefix="/api")
 app.include_router(openet_ts_router, prefix="/api")
+app.include_router(polaris_router, prefix="/api")
 app.include_router(omni_router, prefix="/api")
 app.include_router(ash_router, prefix="/api")
 app.include_router(export_router, prefix="/api")
