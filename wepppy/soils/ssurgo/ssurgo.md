@@ -6,7 +6,7 @@
 This document describes the technical process by which WEPPcloud translates USDA NRCS Soil Survey Geographic Database (SSURGO) and STATSGO2 data into WEPP model soil input files. The conversion pipeline handles data acquisition, validation, parameter estimation, and file formatting while maintaining transparency through extensive logging and build notes.
 
 **Key Capabilities:**
-- Query SSURGO/STATSGO2 via SOAP web service or local SQLite cache
+- Query SSURGO/STATSGO2 via SDA `post.rest` service or local SQLite cache
 - Build WEPP soil files (versions 7778, 2006.2) from map unit keys (mukeys)
 - Apply Rosetta pedotransfer functions for missing hydraulic parameters
 - Estimate erodibility parameters using WEPP baseline equations
@@ -679,9 +679,9 @@ ssc.makeWeppSoils(
 **Cache Lifetime:** Persists across runs. Manual deletion required to force re-fetch.
 
 ### Web Service Queries
-**Endpoint:** `https://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx`
+**Endpoint:** `https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest`
 
-**Protocol:** SOAP 1.2 with XML payload
+**Protocol:** REST/POST form payload (`query`, `format=xml`)
 
 **Fetch Functions:**
 - `_fetch_components(mukeys)` - Component data
@@ -970,7 +970,7 @@ if INVALID_MUKEY in ssc.invalidSoils:
 - [SSURGO 2.2 Data Model](https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs142p2_050900.pdf) - Schema and table relationships
 - [Table Column Descriptions](https://sdmdataaccess.nrcs.usda.gov/documents/TableColumnDescriptionsReport.pdf) - Field definitions
 - [SSURGO Metadata Tables](http://www.anslab.iastate.edu/Class/AnS321L/soil%20view%20Marshall%20county/data/metadata/SSURGO%20Metadata%20Tables.pdf) - Table-level metadata
-- [SDM Data Access Portal](https://sdmdataaccess.nrcs.usda.gov/Query.aspx) - Test SOAP queries
+- [SDM Data Access Portal](https://sdmdataaccess.nrcs.usda.gov/Query.aspx) - Test SSURGO SQL queries
 
 ### WEPP Model Documentation
 - [WEPP User Summary](https://www.ars.usda.gov/ARSUserFiles/50201000/WEPP/usersum.pdf) - Soil parameter estimation equations (Chapters 3-4)

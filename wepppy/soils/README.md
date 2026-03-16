@@ -486,7 +486,7 @@ def test_ssurgo_build():
 
 ### SSURGO Web Service Dependencies
 
-**Endpoint:** `https://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx`
+**Endpoint:** `https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest`
 
 **Failure Modes:**
 - Service downtime: Use local cache or STATSGO2 fallback
@@ -545,7 +545,7 @@ if INVALID_MUKEY in ssc.invalidSoils:
 ### SSURGO/STATSGO2 Resources
 - [SSURGO 2.2 Data Model](https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs142p2_050900.pdf) - Schema and relationships
 - [Table Column Descriptions](https://sdmdataaccess.nrcs.usda.gov/documents/TableColumnDescriptionsReport.pdf) - Field definitions
-- [SDM Data Access Portal](https://sdmdataaccess.nrcs.usda.gov/Query.aspx) - Test SOAP queries
+- [SDM Data Access Portal](https://sdmdataaccess.nrcs.usda.gov/Query.aspx) - Test SSURGO SQL queries
 - [Web Soil Survey](https://websoilsurvey.nrcs.usda.gov/) - Interactive SSURGO browser
 
 ### WEPP Model Documentation

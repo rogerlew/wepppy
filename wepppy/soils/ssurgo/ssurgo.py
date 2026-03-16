@@ -209,21 +209,12 @@ if _exists("/dev/shm"):
 # https://sdmdataaccess.nrcs.usda.gov/Query.aspx
 
 
-_ssurgo_url = "https://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx"
-_query_template = """\
-<?xml version="1.0" encoding="utf-8"?>
-<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-  <soap12:Body>
-    <RunQuery xmlns="http://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx">
-      <Query>{query}</Query>
-    </RunQuery>
-  </soap12:Body>
-</soap12:Envelope>"""
+_ssurgo_url = "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest"
 
 _metadata = {
     "dataset": " Soil Survey Geographic Database (SSURGO)/Digital General Soil Map of the United States (STATSGO2)",
     "publisher": "USDA National Resources Conservation Service (NRCS)",
-    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
 }
 
 _LOG = logging.getLogger(__name__)
@@ -299,14 +290,14 @@ _SSURGO_BASE_DELAY = 5  # seconds
 
 # noinspection PyPep8Naming
 def _makeSOAPrequest(query):
-    global _ssurgo_url, _query_template
-    headers = {"Content-Type": "application/soap+xml; charset=utf-8"}
-    body = _query_template.format(query=query)
+    global _ssurgo_url
+    headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
+    payload = {"query": query, "format": "xml"}
 
     last_exc = None
     for attempt in range(_SSURGO_MAX_RETRIES):
         try:
-            r = requests.post(_ssurgo_url, data=body, headers=headers, timeout=30)
+            r = requests.post(_ssurgo_url, data=payload, headers=headers, timeout=30)
             if r.status_code != 200:
                 raise SsurgoRequestError((r.content, query))
             return r.content
