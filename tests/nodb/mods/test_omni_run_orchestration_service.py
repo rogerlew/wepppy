@@ -6,6 +6,7 @@ import sys
 import types
 from contextlib import contextmanager
 from enum import IntEnum
+import os
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,15 @@ from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.omni.omni_run_orchestration_service import OmniRunOrchestrationService
 
 pytestmark = pytest.mark.unit
+
+
+def _hillslope_relpath_stub(base_runs_dir: str, scenario_runs_dir: str) -> str:
+    relpath = os.path.relpath(base_runs_dir, scenario_runs_dir)
+    if relpath == ".":
+        return ""
+    if not relpath.endswith("/"):
+        relpath += "/"
+    return relpath
 
 
 def _install_omni_module_stub(
@@ -64,6 +74,7 @@ def _install_omni_module_stub(
     module.ScenarioDependency = dict
     module._hash_file_sha1 = _hash_file_sha1
     module._scenario_name_from_scenario_definition = _scenario_name_from_scenario_definition
+    module._hillslope_input_relpath_to_base_runs = _hillslope_relpath_stub
     module._run_contrast = run_contrast
 
     monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.omni.omni", module)
@@ -357,6 +368,7 @@ def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershe
     omni_module._scenario_name_from_scenario_definition = lambda scenario_def: str(
         scenario_def["type"]
     )
+    omni_module._hillslope_input_relpath_to_base_runs = _hillslope_relpath_stub
     omni_module.run_wepp_hillslope_interchange = (
         lambda path, *, start_year, delete_after_interchange: interchange_calls.append(
             (Path(path), start_year, delete_after_interchange)

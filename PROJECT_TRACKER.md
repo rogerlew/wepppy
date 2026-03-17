@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-13  
-**Active Packages**: 3  
+**Last Updated**: 2026-03-17  
+**Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 3 packages ✅ **Within target**
+**Current WIP**: 2 packages ✅ **Within target**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -311,6 +311,28 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Omni Contrast Hillslope Re-run Recovery (`delete_after_interchange`)
+**Completed**: 2026-03-17  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260317_omni_contrast_hillslope_rerun/](docs/work-packages/20260317_omni_contrast_hillslope_rerun/)  
+**Description**: Added a contrast preflight in `run_omni_contrasts_rq` that reruns hillslopes (without prep and without interchange) for deduped scenarios referenced by queued contrast runs when `delete_after_interchange` has removed source hillslope outputs.
+
+**Outcome**:
+- Shipped new preflight helpers in `wepppy/rq/omni_rq.py` to collect deduped scenario keys, resolve scenario working directories, and rerun `Wepp.run_hillslopes()` before contrast enqueue fan-out, including scenario `cli/slp` relpaths back to base runs for existing Omni scenario workspaces.
+- Kept existing skip/selection semantics intact by deriving rerun targets from finalized `run_ids`.
+- Added regression coverage in `tests/rq/test_omni_rq.py` for delete-flag-enabled rerun + dedupe behavior and delete-flag-disabled no-rerun behavior.
+- Synced boundary allowlist line anchors for `wepppy/rq/omni_rq.py` after helper insertion shifted line numbers.
+- Validation passed: targeted tests, changed-file broad-exception guard, and full suite (`2323 passed, 34 skipped`).
+
+**Deliverables**:
+- ✅ `run_omni_contrasts_rq` rerun preflight for contrast scenarios under delete-after-interchange mode
+- ✅ Focused regression tests for rerun gate/dedup/order behavior
+- ✅ Package closure artifacts (`package.md`, `tracker.md`, completed ExecPlan, project tracker updates)
+
+---
 
 ### POLARIS NoDb Runs Client for Project-Aligned Raster Layers
 **Completed**: 2026-03-14  

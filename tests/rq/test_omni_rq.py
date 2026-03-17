@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -570,6 +571,422 @@ def test_run_omni_contrasts_rq_landuse_skip_prunes_dependency_entries(
     assert len(set(omni.landuse_cache_ids)) == 1
     assert omni.contrast_dependency_tree == {}
     assert any("TRIGGER omni_contrasts END_BROADCAST" in message for _, message in published)
+
+
+def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_delete_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        omni_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    parent_job = SimpleNamespace(id="job-63", meta={}, saves=0)
+
+    def _save() -> None:
+        parent_job.saves += 1
+
+    parent_job.save = _save  # type: ignore[attr-defined]
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
+    monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+
+    class _RedisCtx:
+        def __init__(self, **kwargs) -> None:
+            self.kwargs = kwargs
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_rq.redis, "Redis", lambda **kwargs: _RedisCtx(**kwargs))
+    monkeypatch.setattr(omni_rq, "redis_connection_kwargs", lambda db: {"db": int(db)})
+
+    events: list[tuple[object, ...]] = []
+    enqueue_calls: list[dict[str, object]] = []
+
+    class _QueueStub:
+        def __init__(self, name: str, connection=None) -> None:
+            assert name == "batch"
+            self.connection = connection
+
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
+            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+            enqueue_calls.append(
+                {
+                    "func": func,
+                    "args": args,
+                    "kwargs": kwargs or {},
+                    "timeout": timeout,
+                    "depends_on": depends_on,
+                    "job": job,
+                }
+            )
+            events.append(("enqueue", func.__name__))
+            return job
+
+    monkeypatch.setattr(omni_rq, "Queue", _QueueStub)
+    monkeypatch.setattr(
+        omni_rq,
+        "_validate_contrast_hillslope_rerun_inputs",
+        lambda **_kwargs: None,
+    )
+
+    class _WeppInstance:
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.runs_dir = os.path.join(wd, "wepp", "runs")
+
+        def run_hillslopes(self, **kwargs) -> None:
+            events.append(("rerun", self.wd, kwargs))
+
+    class _WeppStub:
+        @staticmethod
+        def getInstance(wd: str) -> _WeppInstance:
+            return _WeppInstance(wd)
+
+    monkeypatch.setattr(omni_rq, "Wepp", _WeppStub)
+
+    class OmniStub:
+        _instances: dict[str, "OmniStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.logger = logging.getLogger("tests.rq.omni.contrasts.rerun")
+            self.delete_after_interchange = True
+            self.base_scenario = "undisturbed"
+            self.contrast_names = [
+                "undisturbed,1__to__mulch",
+                "undisturbed,2__to__mulch",
+            ]
+            self.contrast_dependency_tree: dict[str, dict[str, str]] = {}
+            self.contrast_batch_size = 2
+            self.rq_job_pool_max_worker_per_scenario_task = 7
+            self.sidecar_paths = {
+                1: str(tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "1" / "sidecar.json"),
+                2: str(tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "2" / "sidecar.json"),
+            }
+            self.cleaned_stale_ids: list[list[int]] = []
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "OmniStub":
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+        def _contrast_landuse_skip_reason(self, *_args, **_kwargs):
+            return None
+
+        def _clean_contrast_run(self, _contrast_id: int) -> None:
+            return None
+
+        def _contrast_sidecar_path(self, contrast_id: int) -> str:
+            return self.sidecar_paths[int(contrast_id)]
+
+        def _contrast_run_status(self, _contrast_id: int, _contrast_name: str) -> str:
+            return "needs_run"
+
+        def _clean_stale_contrast_runs(self, active_ids):
+            self.cleaned_stale_ids.append(list(active_ids))
+
+        def _contrast_scenario_keys(self, _contrast_name: str) -> tuple[str, str]:
+            return "undisturbed", "mulch"
+
+        def _normalize_scenario_key(self, value):
+            return str(value)
+
+    monkeypatch.setattr(omni_rq, "Omni", OmniStub)
+
+    sidecar_1 = tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "1" / "sidecar.json"
+    sidecar_2 = tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "2" / "sidecar.json"
+    sidecar_1.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_2.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_1.write_text("{}", encoding="ascii")
+    sidecar_2.write_text("{}", encoding="ascii")
+    (tmp_path / "demo" / "_pups" / "omni" / "scenarios" / "mulch").mkdir(parents=True, exist_ok=True)
+
+    result = omni_rq.run_omni_contrasts_rq("demo")
+
+    run_wd = str(tmp_path / "demo")
+    mulch_wd = str(tmp_path / "demo" / "_pups" / "omni" / "scenarios" / "mulch")
+    expected_rerun_paths = {
+        run_wd,
+        mulch_wd,
+    }
+    rerun_events = [
+        (item[1], item[2])
+        for item in events
+        if item[0] == "rerun"
+    ]
+    enqueue_event_positions = [idx for idx, item in enumerate(events) if item[0] == "enqueue"]
+    rerun_event_positions = [idx for idx, item in enumerate(events) if item[0] == "rerun"]
+    rerun_paths = [wd for wd, _kwargs in rerun_events]
+    rerun_kwargs_by_wd = {wd: kwargs for wd, kwargs in rerun_events}
+    expected_scenario_relpath = os.path.relpath(
+        os.path.join(run_wd, "wepp", "runs"),
+        os.path.join(mulch_wd, "wepp", "runs"),
+    )
+    if not expected_scenario_relpath.endswith("/"):
+        expected_scenario_relpath += "/"
+
+    assert result.id == "child-3"
+    assert set(rerun_paths) == expected_rerun_paths
+    assert len(rerun_paths) == 2
+    assert rerun_event_positions
+    assert enqueue_event_positions
+    assert max(rerun_event_positions) < min(enqueue_event_positions)
+    assert rerun_kwargs_by_wd[run_wd]["cli_relpath"] == ""
+    assert rerun_kwargs_by_wd[run_wd]["slp_relpath"] == ""
+    assert rerun_kwargs_by_wd[mulch_wd]["cli_relpath"] == expected_scenario_relpath
+    assert rerun_kwargs_by_wd[mulch_wd]["slp_relpath"] == expected_scenario_relpath
+    assert rerun_kwargs_by_wd[mulch_wd]["man_relpath"] == ""
+    assert rerun_kwargs_by_wd[mulch_wd]["sol_relpath"] == ""
+    assert rerun_kwargs_by_wd[run_wd]["max_workers"] == 7
+    assert rerun_kwargs_by_wd[mulch_wd]["max_workers"] == 7
+    assert any("rerunning_hillslopes scenarios=mulch,undisturbed" in message for _, message in published)
+
+
+def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        omni_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    parent_job = SimpleNamespace(id="job-64", meta={}, saves=0)
+
+    def _save() -> None:
+        parent_job.saves += 1
+
+    parent_job.save = _save  # type: ignore[attr-defined]
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
+    monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+
+    class _RedisCtx:
+        def __init__(self, **kwargs) -> None:
+            self.kwargs = kwargs
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_rq.redis, "Redis", lambda **kwargs: _RedisCtx(**kwargs))
+    monkeypatch.setattr(omni_rq, "redis_connection_kwargs", lambda db: {"db": int(db)})
+
+    enqueue_calls: list[dict[str, object]] = []
+
+    class _QueueStub:
+        def __init__(self, name: str, connection=None) -> None:
+            assert name == "batch"
+            self.connection = connection
+
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
+            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+            enqueue_calls.append(
+                {
+                    "func": func,
+                    "args": args,
+                    "kwargs": kwargs or {},
+                    "timeout": timeout,
+                    "depends_on": depends_on,
+                    "job": job,
+                }
+            )
+            return job
+
+    monkeypatch.setattr(omni_rq, "Queue", _QueueStub)
+
+    class _WeppStub:
+        @staticmethod
+        def getInstance(_wd: str):
+            raise AssertionError("Wepp.getInstance should not be called when delete_after_interchange is disabled")
+
+    monkeypatch.setattr(omni_rq, "Wepp", _WeppStub)
+
+    class OmniStub:
+        _instances: dict[str, "OmniStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.logger = logging.getLogger("tests.rq.omni.contrasts.no-rerun")
+            self.delete_after_interchange = False
+            self.base_scenario = "undisturbed"
+            self.contrast_names = ["undisturbed,1__to__mulch"]
+            self.contrast_dependency_tree: dict[str, dict[str, str]] = {}
+            self.contrast_batch_size = 1
+            self.sidecar_paths = {
+                1: str(tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "1" / "sidecar.json"),
+            }
+            self.cleaned_stale_ids: list[list[int]] = []
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "OmniStub":
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+        def _contrast_landuse_skip_reason(self, *_args, **_kwargs):
+            return None
+
+        def _clean_contrast_run(self, _contrast_id: int) -> None:
+            return None
+
+        def _contrast_sidecar_path(self, contrast_id: int) -> str:
+            return self.sidecar_paths[int(contrast_id)]
+
+        def _contrast_run_status(self, _contrast_id: int, _contrast_name: str) -> str:
+            return "needs_run"
+
+        def _clean_stale_contrast_runs(self, active_ids):
+            self.cleaned_stale_ids.append(list(active_ids))
+
+        def _contrast_scenario_keys(self, _contrast_name: str) -> tuple[str, str]:
+            return "undisturbed", "mulch"
+
+        def _normalize_scenario_key(self, value):
+            return str(value)
+
+    monkeypatch.setattr(omni_rq, "Omni", OmniStub)
+
+    sidecar = tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "1" / "sidecar.json"
+    sidecar.parent.mkdir(parents=True, exist_ok=True)
+    sidecar.write_text("{}", encoding="ascii")
+
+    result = omni_rq.run_omni_contrasts_rq("demo")
+
+    assert result.id == "child-2"
+    assert len(enqueue_calls) == 2
+    assert not any("rerunning_hillslopes" in message for _, message in published)
+
+
+def test_validate_contrast_hillslope_rerun_inputs_allows_base_cli_slp_relpaths(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        omni_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    base_runs_dir = tmp_path / "base" / "wepp" / "runs"
+    scenario_runs_dir = tmp_path / "scenario" / "wepp" / "runs"
+    base_runs_dir.mkdir(parents=True, exist_ok=True)
+    scenario_runs_dir.mkdir(parents=True, exist_ok=True)
+
+    (base_runs_dir / "p1.cli").write_text("", encoding="ascii")
+    (base_runs_dir / "p1.slp").write_text("", encoding="ascii")
+    (scenario_runs_dir / "p1.man").write_text("", encoding="ascii")
+    (scenario_runs_dir / "p1.sol").write_text("", encoding="ascii")
+
+    class _TranslatorStub:
+        @staticmethod
+        def wepp(*, top: int) -> int:
+            return top
+
+    class _WatershedStub:
+        _subs_summary = [1]
+
+        @staticmethod
+        def translator_factory() -> _TranslatorStub:
+            return _TranslatorStub()
+
+    wepp = SimpleNamespace(
+        runs_dir=str(scenario_runs_dir),
+        watershed_instance=_WatershedStub(),
+    )
+    relpath_to_base_runs = omni_rq._hillslope_input_relpath_to_base_runs(
+        str(base_runs_dir),
+        str(scenario_runs_dir),
+    )
+
+    omni_rq._validate_contrast_hillslope_rerun_inputs(
+        wepp=wepp,
+        scenario_key="mulch",
+        man_relpath="",
+        cli_relpath=relpath_to_base_runs,
+        slp_relpath=relpath_to_base_runs,
+        sol_relpath="",
+        status_channel="demo:omni",
+        job_id="job-70",
+    )
+
+    assert published == []
+
+
+def test_validate_contrast_hillslope_rerun_inputs_reports_missing_local_man_sol(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        omni_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    base_runs_dir = tmp_path / "base" / "wepp" / "runs"
+    scenario_runs_dir = tmp_path / "scenario" / "wepp" / "runs"
+    base_runs_dir.mkdir(parents=True, exist_ok=True)
+    scenario_runs_dir.mkdir(parents=True, exist_ok=True)
+
+    (base_runs_dir / "p1.cli").write_text("", encoding="ascii")
+    (base_runs_dir / "p1.slp").write_text("", encoding="ascii")
+
+    class _TranslatorStub:
+        @staticmethod
+        def wepp(*, top: int) -> int:
+            return top
+
+    class _WatershedStub:
+        _subs_summary = [1]
+
+        @staticmethod
+        def translator_factory() -> _TranslatorStub:
+            return _TranslatorStub()
+
+    wepp = SimpleNamespace(
+        runs_dir=str(scenario_runs_dir),
+        watershed_instance=_WatershedStub(),
+    )
+    relpath_to_base_runs = omni_rq._hillslope_input_relpath_to_base_runs(
+        str(base_runs_dir),
+        str(scenario_runs_dir),
+    )
+
+    with pytest.raises(FileNotFoundError) as exc_info:
+        omni_rq._validate_contrast_hillslope_rerun_inputs(
+            wepp=wepp,
+            scenario_key="mulch",
+            man_relpath="",
+            cli_relpath=relpath_to_base_runs,
+            slp_relpath=relpath_to_base_runs,
+            sol_relpath="",
+            status_channel="demo:omni",
+            job_id="job-71",
+        )
+
+    error_text = str(exc_info.value)
+    assert "scenario=mulch" in error_text
+    assert "man=1" in error_text
+    assert "sol=1" in error_text
+    assert any("missing_hillslope_inputs" in message for _channel, message in published)
+    assert any("counts=man=1, sol=1" in message for _channel, message in published)
 
 
 def test_finalize_omni_scenarios_rq_timestamps_and_triggers(

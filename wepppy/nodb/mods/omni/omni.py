@@ -328,6 +328,16 @@ def _resolve_contrast_scenario_wd(wd: str, scenario_key: str, base_key: str) -> 
     return scenario_dir
 
 
+def _hillslope_input_relpath_to_base_runs(base_runs_dir: str, scenario_runs_dir: str) -> str:
+    """Return relpath from scenario runs to base runs, normalized for WEPP args."""
+    relpath = os.path.relpath(base_runs_dir, scenario_runs_dir)
+    if relpath == ".":
+        return ""
+    if not relpath.endswith("/"):
+        relpath += "/"
+    return relpath
+
+
 def _contrast_topaz_ids_from_mapping(
     contrasts: Dict[int | str, str],
     contrast_wd: str,

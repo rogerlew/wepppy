@@ -213,6 +213,7 @@ class OmniRunOrchestrationService:
         from wepppy.nodb.mods.omni.omni import (
             OmniScenario,
             _OMNI_MODE_BUILD_SERVICES,
+            _hillslope_input_relpath_to_base_runs,
             _omni_clone,
             _omni_clone_sibling,
             _post_watershed_run_cleanup,
@@ -266,14 +267,9 @@ class OmniRunOrchestrationService:
         wepp = Wepp.getInstance(new_wd)
 
         man_relpath = ""
-        cli_relpath = os.path.relpath(omni.runs_dir, wepp.runs_dir)
-        slp_relpath = os.path.relpath(omni.runs_dir, wepp.runs_dir)
+        cli_relpath = _hillslope_input_relpath_to_base_runs(omni.runs_dir, wepp.runs_dir)
+        slp_relpath = cli_relpath
         sol_relpath = ""
-
-        if not cli_relpath.endswith("/"):
-            cli_relpath += "/"
-        if not slp_relpath.endswith("/"):
-            slp_relpath += "/"
 
         with omni.timed(f"  {scenario_name}: prep hillslopes"):
             wepp.prep_hillslopes(

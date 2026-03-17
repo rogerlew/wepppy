@@ -23,8 +23,11 @@ from wepppy.config.redis_settings import (
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.rq.exception_logging import with_exception_logging
 
+from wepppy.nodb.core import Wepp
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.mods.omni.omni import (
+    OMNI_REL_DIR,
+    _hillslope_input_relpath_to_base_runs,
     _hash_file_sha1,
     _scenario_name_from_scenario_definition,
 )
@@ -129,6 +132,188 @@ def _update_contrast_dependency_state(
             time.sleep(1.0)
         else:
             break
+
+
+def _collect_contrast_scenario_keys_for_run_ids(
+    omni: Omni,
+    contrast_names: List[Optional[str]],
+    run_ids: List[int],
+) -> Set[str]:
+    """Return deduped scenario keys referenced by queued contrast ids."""
+
+    scenario_keys: Set[str] = set()
+    for contrast_id in run_ids:
+        if contrast_id < 1 or contrast_id > len(contrast_names):
+            continue
+
+        contrast_name = contrast_names[contrast_id - 1]
+        if not contrast_name:
+            continue
+
+        control_key, contrast_key = omni._contrast_scenario_keys(contrast_name)
+        scenario_keys.add(control_key)
+        scenario_keys.add(contrast_key)
+
+    return scenario_keys
+
+
+def _contrast_scenario_run_wd(omni: Omni, scenario_key: str) -> str:
+    normalized_key = omni._normalize_scenario_key(scenario_key)
+    base_key = str(omni.base_scenario)
+    if normalized_key == base_key:
+        return omni.wd
+
+    scenario_wd = os.path.join(omni.wd, OMNI_REL_DIR, "scenarios", normalized_key)
+    if not os.path.isdir(scenario_wd):
+        raise FileNotFoundError(
+            f"Scenario directory missing for {normalized_key}: {scenario_wd}"
+        )
+    return scenario_wd
+
+
+def _expected_hillslope_wepp_ids(wepp: Wepp) -> List[int]:
+    watershed = wepp.watershed_instance
+    translator = watershed.translator_factory()
+    return [
+        int(translator.wepp(top=int(topaz_id)))
+        for topaz_id in watershed._subs_summary
+    ]
+
+
+def _validate_contrast_hillslope_rerun_inputs(
+    *,
+    wepp: Wepp,
+    scenario_key: str,
+    man_relpath: str,
+    cli_relpath: str,
+    slp_relpath: str,
+    sol_relpath: str,
+    status_channel: str,
+    job_id: str,
+) -> None:
+    """Validate required hillslope run inputs before rerun for clear diagnostics."""
+
+    runs_dir = wepp.runs_dir
+    wepp_ids = _expected_hillslope_wepp_ids(wepp)
+
+    missing: Dict[str, List[str]] = {
+        "man": [],
+        "sol": [],
+        "cli": [],
+        "slp": [],
+    }
+
+    for wepp_id in wepp_ids:
+        man_path = os.path.join(runs_dir, man_relpath, f"p{wepp_id}.man")
+        sol_path = os.path.join(runs_dir, sol_relpath, f"p{wepp_id}.sol")
+        cli_path = os.path.join(runs_dir, cli_relpath, f"p{wepp_id}.cli")
+        slp_path = os.path.join(runs_dir, slp_relpath, f"p{wepp_id}.slp")
+
+        if not os.path.exists(man_path):
+            missing["man"].append(man_path)
+        if not os.path.exists(sol_path):
+            missing["sol"].append(sol_path)
+        if not os.path.exists(cli_path):
+            missing["cli"].append(cli_path)
+        if not os.path.exists(slp_path):
+            missing["slp"].append(slp_path)
+
+    if not any(missing.values()):
+        return
+
+    missing_counts = ", ".join(
+        f"{kind}={len(paths)}"
+        for kind, paths in missing.items()
+        if paths
+    )
+    sample_paths = ", ".join(
+        f"{kind}:{paths[0]}"
+        for kind, paths in missing.items()
+        if paths
+    )
+
+    StatusMessenger.publish(
+        status_channel,
+        (
+            f"rq:{job_id} ERROR run_omni_contrasts_rq missing_hillslope_inputs "
+            f"scenario={scenario_key} counts={missing_counts} samples={sample_paths}"
+        ),
+    )
+    raise FileNotFoundError(
+        (
+            f"Missing hillslope rerun inputs for scenario={scenario_key}; "
+            f"counts={missing_counts}; samples={sample_paths}"
+        )
+    )
+
+
+def _rerun_hillslopes_for_contrast_scenarios(
+    omni: Omni,
+    *,
+    contrast_names: List[Optional[str]],
+    run_ids: List[int],
+    status_channel: str,
+    job_id: str,
+) -> None:
+    """Regenerate hillslope outputs required by contrast watershed stubs.
+
+    This reruns hillslopes only. It intentionally skips prep and interchange.
+    """
+    if not bool(getattr(omni, "delete_after_interchange", False)):
+        return
+
+    scenario_keys = _collect_contrast_scenario_keys_for_run_ids(omni, contrast_names, run_ids)
+    if not scenario_keys:
+        return
+
+    ordered_keys = sorted(scenario_keys)
+    StatusMessenger.publish(
+        status_channel,
+        f"rq:{job_id} INFO run_omni_contrasts_rq rerunning_hillslopes scenarios={','.join(ordered_keys)}",
+    )
+    base_runs_dir = Wepp.getInstance(omni.wd).runs_dir
+    max_workers = getattr(omni, "rq_job_pool_max_worker_per_scenario_task", None)
+
+    for scenario_key in ordered_keys:
+        scenario_wd = _contrast_scenario_run_wd(omni, scenario_key)
+        wepp = Wepp.getInstance(scenario_wd)
+        relpath_to_base_runs = _hillslope_input_relpath_to_base_runs(
+            base_runs_dir,
+            wepp.runs_dir,
+        )
+        man_relpath = ""
+        sol_relpath = ""
+        cli_relpath = relpath_to_base_runs
+        slp_relpath = relpath_to_base_runs
+
+        _validate_contrast_hillslope_rerun_inputs(
+            wepp=wepp,
+            scenario_key=scenario_key,
+            man_relpath=man_relpath,
+            cli_relpath=cli_relpath,
+            slp_relpath=slp_relpath,
+            sol_relpath=sol_relpath,
+            status_channel=status_channel,
+            job_id=job_id,
+        )
+
+        omni.logger.info(
+            (
+                "  run_omni_contrasts: rerun hillslopes for scenario=%s wd=%s "
+                "slp_relpath=%s max_workers=%s"
+            ),
+            scenario_key,
+            scenario_wd,
+            relpath_to_base_runs,
+            max_workers,
+        )
+        wepp.run_hillslopes(
+            man_relpath=man_relpath,
+            cli_relpath=cli_relpath,
+            slp_relpath=slp_relpath,
+            sol_relpath=sol_relpath,
+            max_workers=max_workers,
+        )
 
 
 @with_exception_logging
@@ -541,7 +726,7 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
             )
 
         omni = Omni.getInstance(wd)
-        contrast_names = omni.contrast_names or []
+        contrast_names: List[Optional[str]] = omni.contrast_names or []
         if not contrast_names:
             omni.logger.info('  run_omni_contrasts: No contrasts to run')
             if omni.contrast_dependency_tree:
@@ -620,6 +805,14 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
             StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
             return None
+
+        _rerun_hillslopes_for_contrast_scenarios(
+            omni,
+            contrast_names=contrast_names,
+            run_ids=run_ids,
+            status_channel=status_channel,
+            job_id=job.id,
+        )
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
