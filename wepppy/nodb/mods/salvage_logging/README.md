@@ -1,6 +1,6 @@
 # Salvage Logging Utilities (`wepppy.nodb.mods.salvage_logging`)
 
-> Utilities for preparing and analyzing salvage-logging road/skid-trail inputs (rasterization, optional DEM conditioning, and flowpath attribution) used in WEPPpy/WEPPcloud runs.
+> Utilities for preparing and analyzing salvage-logging road/skid-trail inputs (rasterization and optional DEM conditioning) used in WEPPpy/WEPPcloud runs.
 
 > **See also:** [AGENTS.md](../../AGENTS.md) for NoDb conventions and validation entry points.
 
@@ -18,7 +18,6 @@ At a glance, the modules cover:
 
 - **Rasterization** of skid trails / roads into rasters aligned to a template DEM (`burn_roads.py`).
 - **DEM conditioning** by lowering elevations along a rasterized road/skid mask (`roads.py`).
-- **Flowpath attribution** to identify which pixels drain to which skid trail (`flowpaths.py`).
 
 ## Legacy Workflow (Deprecated)
 
@@ -47,15 +46,9 @@ Outputs:
 - A rasterized mask GeoTIFF at the path you pass as `dst_fn` (often named something like `road_mask.tif`).
 - An in-memory elevation array (`new_z`) that you can write out as a new DEM.
 
-### 3) Attribute upstream pixels to skid trails (analysis)
+### 3) Retired flowpath attribution helper
 
-`flowpaths.py` is an analysis script that:
-
-- Reads a rasterized skid-trail map (example: `salvage/skid.tif`).
-- Reads the watershed subcatchment map (`Watershed.subwta`).
-- Uses `Watershed.fps_summary(topaz_id)` flowpath coordinates to find flowpaths that intersect a skid trail, then marks upstream pixels.
-
-If you remove the early `sys.exit()` in the script, it writes an output raster (example: `salvage/up.tif`) where pixel values represent the skid-trail ID that the pixel drains toward (based on the flowpath truncation logic in the script).
+The old `flowpaths.py` analysis script has been removed. It depended on the retired WEPP flowpath runtime and on watershed flowpath artifacts that are no longer produced by default. Historical notes that mention `salvage/up.tif` or `Watershed.fps_summary()` should be treated as archival only.
 
 ## Generated artifacts
 
@@ -64,9 +57,7 @@ Common files produced/consumed by the scripts in this directory:
 | Path (relative to run `wd`) | Produced by | Purpose |
 |---|---|---|
 | `salvage/skid.tif` | `burn_roads.rasterize()` (or other rasterizers) | Skid trails / roads burned into a raster aligned to the run DEM. |
-| `salvage/up.tif` | `flowpaths.py` (after removing early exit) | Pixels attributed to the skid-trail ID they drain to (analysis output). |
 | `watershed/subwta*.tif` | `wepppy.nodb.core.Watershed` pipeline | Subcatchment map used to partition analysis by TOPAZ ID. |
-| `watershed/flowpaths/{topaz_id},*.npy` | `wepppy.nodb.core.Watershed` pipeline | Stored flowpath coordinate arrays referenced by `fps_summary()`. |
 
 ## Legacy Usage / Examples (Deprecated)
 
@@ -111,23 +102,10 @@ dst.GetRasterBand(1).WriteArray(new_z.T)  # `read_raster()`/`RoadDEM` store arra
 dst = None
 ```
 
-### Run the flowpath attribution script
-
-`flowpaths.py` is currently written as a script with a hardcoded `wd`. A typical workflow is to copy/adapt it and run it against a specific working directory:
-
-```bash
-python -m wepppy.nodb.mods.salvage_logging.flowpaths
-```
-
-Make sure your run directory has:
-- `salvage/skid.tif` (aligned to the watershed rasters), and
-- a built `Watershed` with `subwta` and flowpaths available.
-
 ## Integration points
 
 - `wepppy.all_your_base.geo.RasterDatasetInterpolator`: used by `burn_roads.py` to match the output raster extent/resolution to a template raster.
-- `wepppy.all_your_base.geo.read_raster`: used by `roads.py` and `flowpaths.py`; it returns arrays transposed (`.T`) relative to GDAL/rasterio read order.
-- `wepppy.nodb.core.Watershed`: used by `flowpaths.py` to access `subwta` and `fps_summary()` flowpath coordinates.
+- `wepppy.all_your_base.geo.read_raster`: used by `roads.py`; it returns arrays transposed (`.T`) relative to GDAL/rasterio read order.
 - WEPPcloud scenario configs for salvage logging often use the dedicated skid-trail mod (`wepppy/nodb/mods/skid_trails/`) via `[nodb].mods = ["...","skid_trails"]` and `[skid_trails].skid_trails_map = ...` (see `wepppy/nodb/configs/legacy/salvage-north_star.toml`).
 
 ## Installation / Setup
@@ -136,12 +114,12 @@ These utilities assume a WEPPpy environment with GIS tooling available:
 
 - `gdal_rasterize` on `PATH` (GDAL command-line tools).
 - Python packages providing `osgeo` (GDAL bindings), `numpy`, and `cv2` (OpenCV) for `roads.py`.
-- A run working directory with a DEM and watershed artifacts when using `flowpaths.py`.
+- A run working directory with a DEM and aligned rasters when using the archival scripts here.
 
 ## Developer notes
 
 - `roads.RoadDEM._rasterize()` is intentionally underscored; treat it as an internal helper for exploratory preprocessing.
-- Example paths in `burn_roads.py` and `flowpaths.py` use `/geodata/...` conventions; update them for your environment.
+- Example paths in `burn_roads.py` use `/geodata/...` conventions; update them for your environment.
 - `dev/` contains notebooks and scratch assets used during development; `test/north_star/` contains sample GeoJSON inputs.
 
 ## Deprecation Policy

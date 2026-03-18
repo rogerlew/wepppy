@@ -527,13 +527,8 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
 
     @property
     def skip_flowpaths(self) -> bool:
-        """Skip flowpath generation in peridot to reduce memory usage."""
-        return getattr(self, "_skip_flowpaths", False)
-
-    @skip_flowpaths.setter
-    @nodb_setter
-    def skip_flowpaths(self, value: bool) -> None:
-        self._skip_flowpaths = value
+        """Flowpath generation is disabled for peridot abstractions."""
+        return True
 
     @property
     def representative_flowpath(self) -> bool:

@@ -442,8 +442,8 @@ def task_set_hourly_seepage(runid, config):
         return error_factory('routine is None')
 
     routine = str(routine)
-    if routine not in ['wepp_ui', 'wepp_watershed', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']:
-        return error_factory("routine not in ['wepp_ui', 'wepp_watershed', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']")
+    if routine not in ['wepp_ui', 'wepp_watershed', 'pmet', 'frost', 'tcr', 'snow']:
+        return error_factory("routine not in ['wepp_ui', 'wepp_watershed', 'pmet', 'frost', 'tcr', 'snow']")
 
     state = payload.get('state', None)
     if state is None:
@@ -467,9 +467,6 @@ def task_set_hourly_seepage(runid, config):
             wepp.set_run_tcr(bool(state))
         elif routine == 'snow':
             wepp.set_run_snow(bool(state))
-        elif routine == 'run_flowpaths':
-            wepp.set_run_flowpaths(bool(state))
-
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:459", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -1196,26 +1193,6 @@ def resources_wepp_loss(runid, config):
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:1149", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
-
-
-@wepp_bp.route('/runs/<string:runid>/<config>/resources/flowpaths_loss.tif')
-@authorize_and_handle_with_exception_factory
-def resources_flowpaths_loss(runid, config):
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        loss_grid_wgs = _join(ron.plot_dir, 'flowpaths_loss.WGS.tif')
-
-        if _exists(loss_grid_wgs):
-            return send_file(loss_grid_wgs, mimetype='image/tiff')
-
-        return error_factory('loss_grid_wgs does not exist')
-
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:1166", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        return exception_factory(runid=runid)
-
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/bound_coords')
 @wepp_bp.route('/runs/<string:runid>/<config>/query/bound_coords/')

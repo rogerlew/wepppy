@@ -122,12 +122,11 @@ To prepare for macro-driven rendering, the tables below document the primary for
 | Field ID | Input Type | Label / Purpose | Options & Data Source | Backend Binding | Visibility / Notes |
 | --- | --- | --- | --- | --- | --- |
 | `btn_run_wepp` | button | Launch WEPP run | N/A | `POST /runs/<runid>/<config>/tasks/run_wepp/` → enqueues RQ job & logs via NoDb | Always visible unless `ron.mods` switches panel to RHEM; ControlBase handles status updates |
-| Advanced include stack (`controls/wepp_pure_advanced_options/*.htm`) | multiple (text, number, checkbox, file) | Configure channel parameters, flowpaths, PMET, frost, snow, baseflow, phosphorus, clipping, executable paths | Values seeded from `Wepp` attributes and per-module config defaults | Parsed in `/rq-engine/api/runs/<runid>/<config>/run-wepp` (`Wepp.parse_inputs`) updating attributes such as `Wepp.dtchr_override`, `Wepp.channel_erodibility`, `Wepp.baseflow_opts`, etc. | Each include renders inside the collapse; future metadata work should enumerate all field IDs so macros can map labels/units without duplicating HTML |
+| Advanced include stack (`controls/wepp_pure_advanced_options/*.htm`) | multiple (text, number, checkbox, file) | Configure channel parameters, PMET, frost, snow, baseflow, phosphorus, clipping, executable paths | Values seeded from `Wepp` attributes and per-module config defaults | Parsed in `/rq-engine/api/runs/<runid>/<config>/run-wepp` (`Wepp.parse_inputs`) updating attributes such as `Wepp.dtchr_override`, `Wepp.channel_erodibility`, `Wepp.baseflow_opts`, etc. | Each include renders inside the collapse; future metadata work should enumerate all field IDs so macros can map labels/units without duplicating HTML |
 
 #### WEPP Advanced Options (partial summary)
 | Section / Partial | Key Fields | Backend Binding | Visibility & Notes |
 | --- | --- | --- | --- |
-| Flowpaths (`flowpaths.htm`) | `run_flowpaths` checkbox toggles flowpath loss grid generation | `POST /runs/<runid>/<config>/tasks/set_run_wepp_routine` → `Wepp.set_run_flowpaths` | Deprecated. The flowpath loss grid is not physically reliable (no converging-flow accumulation) and can misrepresent erosion/deposition; prefer gridded model outputs. |
 | Channel Input (`chan_inp.htm`) | `dtchr_override` (seconds), `chn_topaz_ids_of_interest` (ID list) | `Wepp.parse_inputs` normalizes values (ints) and validates `dtchr_override ≥ 60` | Macro should retain guidance text and input constraints |
 | Channel Parameters (`channels.htm`) | `checkbox_wepp_tcr` toggle; `channel_critical_shear` select; `channel_erodibility`; `channel_manning_*`; optional `tcr_opts_*` numeric fields | Toggle hits `set_run_wepp_routine('tcr')`; value fields stored via `Wepp.parse_inputs` / `TCROpts.parse_inputs` | TCR inputs render only when `wepp.tcr_opts` exists; options for critical shear supplied by `critical_shear_options` context |
 | Baseflow (`baseflow.htm`) | `gwstorage`, `bfcoeff`, `dscoeff`, `bfthreshold` | `BaseflowOpts.parse_inputs` (invoked by `Wepp.parse_inputs`) | Not applicable to single-storm climates; keep units (mm, per day, ha) explicit |
@@ -142,6 +141,8 @@ To prepare for macro-driven rendering, the tables below document the primary for
 | Hourly Seepage (`wepp_ui.htm`) | `checkbox_hourly_seepage` | `set_run_wepp_routine('wepp_ui')` → `Wepp.set_run_wepp_ui` | Only affects projects with 7778 soils; include warning in macro tooltip |
 | Export on Completion (`prep_details.htm`) | `prep_details_on_run_completion`; `arc_export_on_run_completion`; `legacy_arc_export_on_run_completion` checkboxes | `api_run_wepp` updates corresponding `_prep_*` flags | Combined with main-panel `dss_export_on_run_completion` to orchestrate packaging |
 | Revegetation (`revegetation.htm`) | `reveg_scenario` select; `input_upload_cover_transform` file | `api_run_wepp` invokes `Revegetation.load_cover_transform` (when module active) | Section rendered only when `reveg` mod is enabled; macro should allow file upload gating |
+
+The experimental WEPP flowpaths card is retired. Current builds do not expose it, and the old gridded flowpath loss output is no longer part of the supported map/report surface.
 ### Treatments Control
 | Field ID | Input Type | Label / Purpose | Options & Data Source | Backend Binding | Visibility / Notes |
 | --- | --- | --- | --- | --- | --- |

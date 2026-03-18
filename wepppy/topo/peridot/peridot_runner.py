@@ -96,6 +96,7 @@ def run_peridot_abstract_watershed(
     clip_hillslopes: bool = True,
     clip_hillslope_length: float = 300.0,
     bieger2015_widths: bool = False,
+    skip_flowpaths: bool = True,
     verbose: bool = True
 ):
     _wait_for_file(
@@ -114,6 +115,9 @@ def run_peridot_abstract_watershed(
     if bieger2015_widths:
         cmd += ['--bieger2015-widths']
 
+    if skip_flowpaths:
+        cmd += ['--skip-flowpaths']
+
     if verbose:
         print(' '.join(cmd))
 
@@ -126,7 +130,7 @@ def run_peridot_wbt_abstract_watershed(
     clip_hillslopes: bool = True,
     clip_hillslope_length: float = 300.0,
     bieger2015_widths: bool = False,
-    skip_flowpaths: bool = False,
+    skip_flowpaths: bool = True,
     verbose: bool = True,
     representative_flowpath: bool = False
 ):
@@ -207,14 +211,18 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     lngs = np.concatenate((lngs, chn_df['centroid_lon'].to_numpy()))
     lats = np.concatenate((lats, chn_df['centroid_lat'].to_numpy()))
 
-    # Handle flowpaths.csv - may not exist if --skip-flowpaths was used
+    # Handle flowpaths.csv - may not exist if --skip-flowpaths was used.
+    # Remove stale parquet so reruns cannot expose legacy flowpath metadata.
     flowpaths_csv = _join(wd, 'watershed/flowpaths.csv')
+    flowpaths_parquet = _join(wd, 'watershed/flowpaths.parquet')
     if _exists(flowpaths_csv):
         fps_df = pd.read_csv(flowpaths_csv)
         fps_df['topaz_id'] = pd.to_numeric(fps_df['topaz_id'], errors='raise').astype('Int32')
         fps_df['fp_id'] = pd.to_numeric(fps_df['fp_id'], errors='raise').astype('Int32')
-        fps_df.to_parquet(_join(wd, 'watershed/flowpaths.parquet'), index=False)
+        fps_df.to_parquet(flowpaths_parquet, index=False)
         os.remove(flowpaths_csv)
+    elif _exists(flowpaths_parquet):
+        os.remove(flowpaths_parquet)
 
     os.remove(_join(wd, 'watershed/hillslopes.csv'))
     os.remove(_join(wd, 'watershed/channels.csv'))
@@ -223,8 +231,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
         try:
             _update_catalog_entry(wd, "watershed/hillslopes.parquet")
             _update_catalog_entry(wd, "watershed/channels.parquet")
-            if _exists(_join(wd, "watershed/flowpaths.parquet")):
-                _update_catalog_entry(wd, "watershed/flowpaths.parquet")
+            _update_catalog_entry(wd, "watershed/flowpaths.parquet")
             _update_catalog_entry(wd, "watershed")
         except Exception:  # broad-except: catalog refresh best effort  # pragma: no cover
             LOGGER.warning("Failed to refresh catalog for watershed outputs in %s", wd, exc_info=True)

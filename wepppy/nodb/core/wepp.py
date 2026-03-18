@@ -74,7 +74,7 @@ from pathlib import Path
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
-from typing import Optional, Dict, List, Tuple, Any, Set, TextIO
+from typing import Optional, Dict, List, Tuple, Any, Set
 
 import math
 
@@ -102,7 +102,7 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
-from wepppyo3.wepp_viz import make_soil_loss_grid, make_soil_loss_grid_fps
+from wepppyo3.wepp_viz import make_soil_loss_grid
 
 __all__ = [
     'ChannelRoutingMethod',
@@ -135,8 +135,6 @@ from wepp_runner.wepp_runner import (
     make_ss_batch_watershed_run,
     run_watershed,
     run_ss_batch_watershed,
-    make_flowpath_run,
-    run_flowpath
 )
 from wepppy.wepp.management import (
     get_channel,
@@ -570,25 +568,6 @@ class WeppNoDbLockedException(Exception):
     pass
 
 
-def extract_slps_fn(slps_fn: str, fp_runs_dir: str) -> None:
-    f: Optional[TextIO] = None
-    with open(slps_fn) as fp:
-        
-        for line in fp:
-            if line.startswith('# fp_') and line.endswith('.slp\n'):
-                fp_fn = line.split()[1].strip()
-                if f is not None:
-                    f.close()
-
-                f = open(_join(fp_runs_dir, fp_fn), 'w')
-
-            elif f is not None:
-                f.write(line)
-
-        if f is not None:
-            f.close()
-
-
 class Wepp(NoDbBase):
     __name__ = 'Wepp'
 
@@ -714,8 +693,6 @@ class Wepp(NoDbBase):
             self._ichout_override = None
             self._chn_topaz_ids_of_interest = [24]
 
-            self.run_flowpaths = False
-            self.loss_grid_d_path = None
             self._bootstrap_enabled = False
 
             self.clean()
@@ -754,6 +731,9 @@ class Wepp(NoDbBase):
             )
         instance._guard_frost_bounds()
         instance._guard_baseflow_bounds()
+        for legacy_attr in ("run_flowpaths", "loss_grid_d_path"):
+            if hasattr(instance, legacy_attr):
+                delattr(instance, legacy_attr)
 
         return instance
 
@@ -1757,9 +1737,6 @@ class Wepp(NoDbBase):
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
 
-    def prep_and_run_flowpaths(self, clean_after_run: bool = True) -> None:
-        _WEPP_RUN_SERVICE.prep_and_run_flowpaths(self, clean_after_run=clean_after_run)
-
     def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
         self.logger.info('    Prepping _prep_slopes_peridot... ')
         runs_dir = self.runs_dir
@@ -2498,11 +2475,6 @@ class Wepp(NoDbBase):
 
     def report_chn_watbal(self) -> ChannelWatbalReport:
         return ChannelWatbalReport(self.wd)
-
-    def set_run_flowpaths(self, state: bool) -> None:
-        assert state in [True, False]
-        with self.locked():
-            self.run_flowpaths = state
 
     def set_run_wepp_watershed(self, state: bool) -> None:
         assert state in [True, False]

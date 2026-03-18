@@ -43,7 +43,7 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
 ## Dataset Inventory Highlights
 - `watershed/hillslopes.parquet`: hillslope geometry + slope metrics (`topaz_id`, `wepp_id`, centroids, fp_longest*).
 - `watershed/channels.parquet`: channel summaries (`topaz_id`, `chn_enum`, area, slope, aspect).
-- `watershed/flowpaths.parquet`: individual flowpath metrics (`fp_id`, length, slope, aspect).
+- `watershed/flowpaths.parquet`: legacy optional flowpath metrics (`fp_id`, length, slope, aspect`). New Peridot abstractions skip flowpath generation by default, so this dataset may be absent.
 - `landuse/landuse.parquet`: dominant management metadata per hillslope (`key`, `_map`, coverage, canopy fractions, disturbed_class).
 - `soils/soils.parquet`: dominant soil properties per hillslope (`mukey`, texture, hydraulic properties, coverage).
 - `rap/rap_ts.parquet`: RAP band/year landcover time series (`band`, `year`, `topaz_id`, `value`).

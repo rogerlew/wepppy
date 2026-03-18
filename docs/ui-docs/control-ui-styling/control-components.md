@@ -229,7 +229,7 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Purpose**: Pure implementation of the WEPP control embedded on the runs₀ page.
 - **Layout**: `control_shell` (non-collapsible) with `status_panel` + `stacktrace_panel`, primary run button, and an `advanced_options` card containing reusable partials (`wepp_pure_advanced_options/*`).
 - **Key components**:
-  - Checkboxes (`ui.checkbox_field`) tied to `Wepp.set_run_wepp_routine` for hourly seepage, PMET, snow, frost, baseflow, flowpaths, etc.
+  - Checkboxes (`ui.checkbox_field`) tied to `Wepp.set_run_wepp_routine` for hourly seepage, PMET, snow, frost, channel TCR, and watershed-run toggles.
   - Numeric inputs (`ui.text_field`) for channel hydraulics, snow parameters, phosphorus concentrations, and soil clipping depths.
   - Select controls for channel critical shear / WEPP binary version / revegetation scenarios.
   - Inline script toggles the cover transform upload block when “User-Defined Transform” is chosen.

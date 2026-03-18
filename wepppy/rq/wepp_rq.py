@@ -48,7 +48,6 @@ try:
     from wepp_runner import (
         run_ss_batch_hillslope,
         run_hillslope,
-        run_flowpath,
         run_watershed,
         run_ss_batch_watershed,
     )
@@ -63,7 +62,6 @@ except (ModuleNotFoundError, ImportError) as exc:  # pragma: no cover - optional
 
     run_ss_batch_hillslope = _missing_runner  # type: ignore[assignment]
     run_hillslope = _missing_runner  # type: ignore[assignment]
-    run_flowpath = _missing_runner  # type: ignore[assignment]
     run_watershed = _missing_runner  # type: ignore[assignment]
     run_ss_batch_watershed = _missing_runner  # type: ignore[assignment]
 else:
@@ -278,37 +276,6 @@ def run_hillslope_rq(runid: str, wepp_id: int, wepp_bin: str | None = None) -> t
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:271", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin})')
-        raise
-
-@with_exception_logging
-def run_flowpath_rq(runid: str, flowpath: str, wepp_bin: str | None = None) -> tuple[bool, float]:
-    """Run a flowpath WEPP simulation within an RQ worker.
-
-    Args:
-        runid: Identifier used to locate the working directory.
-        flowpath: Flowpath identifier that maps to prepared input artifacts.
-        wepp_bin: Optional override for the WEPP executable name.
-
-    Returns:
-        Tuple with the runner success flag and the runtime in seconds.
-
-    Raises:
-        Exception: Propagates any failure produced by the underlying WEPP runner.
-    """
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        runs_dir = _join(wd, 'wepp/runs')
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, flowpath={flowpath}, wepp_bin={wepp_bin})')
-        status, _, duration = run_flowpath(flowpath, runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, flowpath={flowpath}, wepp_bin={wepp_bin}) -> ({status}, {duration})')
-        return status, duration
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:300", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, flowpath={flowpath}, wepp_bin={wepp_bin})')
         raise
 
 @with_exception_logging
@@ -790,12 +757,6 @@ def _prep_slopes_rq(runid: str) -> None:
 def _run_hillslopes_rq(runid: str) -> None:
     _sync_stage_prep_compat()
     return _stage_prep._run_hillslopes_rq(runid)
-
-
-@with_exception_logging
-def _run_flowpaths_rq(runid: str) -> None:
-    _sync_stage_prep_compat()
-    return _stage_prep._run_flowpaths_rq(runid)
 
 
 @with_exception_logging

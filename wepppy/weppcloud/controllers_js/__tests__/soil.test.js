@@ -35,7 +35,7 @@ describe("Soil controller", () => {
                     <option value="">Select</option>
                     <option value="DB1">DB1</option>
                 </select>
-                <input type="checkbox" id="checkbox_run_flowpaths" name="checkbox_run_flowpaths">
+                <input type="checkbox" id="checkbox_ksflag" name="checkbox_ksflag">
                 <select id="sol_ver" name="sol_ver">
                     <option value="7778.0">7778.0</option>
                     <option value="9002.0">9002.0</option>

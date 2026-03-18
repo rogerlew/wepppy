@@ -237,18 +237,6 @@ def enqueue_wepp_pipeline(
             depends_on=job2_hillslope_interchange,
         )
 
-    jobs2_flowpaths: Job | None = None
-    if wepp.run_flowpaths:
-        jobs2_flowpaths = _enqueue(
-            q,
-            parent_job,
-            key="jobs:2,func:run_flowpaths_rq",
-            func=tasks._run_flowpaths_rq,
-            args=(runid,),
-            timeout=timeout,
-            depends_on=job_prep_remaining,
-        )
-
     if wepp.mods and "swat" in wepp.mods and swat_job_build is None:
         swat_dependencies = [job2_hillslope_interchange]
         if job2_watershed_prep is not None:
@@ -429,8 +417,6 @@ def enqueue_wepp_pipeline(
         jobs5_post.append(job2_totalwatsed3)
     if job2_post_dss_export is not None:
         jobs5_post.append(job2_post_dss_export)
-    if jobs2_flowpaths is not None:
-        jobs5_post.append(jobs2_flowpaths)
     if swat_job_run is not None:
         jobs5_post.append(swat_job_run)
 

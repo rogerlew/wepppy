@@ -135,11 +135,6 @@ def test_prep_and_run_wrappers_delegate_to_run_service(
 
     monkeypatch.setattr(
         wepp_module._WEPP_RUN_SERVICE,
-        "prep_and_run_flowpaths",
-        lambda instance, clean_after_run=True: calls.append(("prep_and_run_flowpaths", clean_after_run)),
-    )
-    monkeypatch.setattr(
-        wepp_module._WEPP_RUN_SERVICE,
         "run_hillslopes",
         lambda instance, **kwargs: calls.append(("run_hillslopes", kwargs["max_workers"])),
     )
@@ -149,15 +144,40 @@ def test_prep_and_run_wrappers_delegate_to_run_service(
         lambda instance: calls.append(("run_watershed", None)),
     )
 
-    wepp.prep_and_run_flowpaths(clean_after_run=False)
     wepp.run_hillslopes(max_workers=7)
     wepp.run_watershed()
 
     assert calls == [
-        ("prep_and_run_flowpaths", False),
         ("run_hillslopes", 7),
         ("run_watershed", None),
     ]
+
+
+def test_post_instance_loaded_removes_legacy_flowpath_attrs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wepp = _new_detached_wepp(tmp_path, "tests.wepp.facade.post_instance_loaded")
+    wepp._dss_excluded_channel_orders = [1, 2]
+    wepp._bootstrap_enabled = False
+    wepp._delete_after_interchange = False
+    wepp.frost_opts = object()
+    wepp.run_flowpaths = False
+    wepp.loss_grid_d_path = "legacy"
+
+    monkeypatch.setattr(
+        wepp_module.NoDbBase,
+        "_post_instance_loaded",
+        classmethod(lambda cls, instance: instance),
+    )
+    monkeypatch.setattr(Wepp, "_guard_frost_bounds", lambda self: None)
+    monkeypatch.setattr(Wepp, "_guard_baseflow_bounds", lambda self: None)
+
+    loaded = Wepp._post_instance_loaded(wepp)
+
+    assert loaded is wepp
+    assert not hasattr(loaded, "run_flowpaths")
+    assert not hasattr(loaded, "loss_grid_d_path")
 
 
 def test_prep_watershed_delegates_to_prep_service(

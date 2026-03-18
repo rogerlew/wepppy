@@ -129,7 +129,6 @@ def test_enqueue_wepp_pipeline_defers_swat_until_after_hillslope_interchange() -
         _run_swat_rq=object(),
         _build_hillslope_interchange_rq=object(),
         _build_totalwatsed3_rq=object(),
-        _run_flowpaths_rq=object(),
         run_ss_batch_watershed_rq=object(),
         run_watershed_rq=object(),
         _post_run_cleanup_out_rq=object(),
@@ -149,7 +148,6 @@ def test_enqueue_wepp_pipeline_defers_swat_until_after_hillslope_interchange() -
         run_wepp_watershed=False,
         mods=["swat"],
         delete_after_interchange=False,  # should control queue wiring, not climate.delete_after_interchange
-        run_flowpaths=False,
         wepp_bin="wepp_bin",
         prep_details_on_run_completion=False,
         dss_export_on_run_completion=False,
@@ -202,7 +200,6 @@ def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_ena
         _run_swat_rq=object(),
         _build_hillslope_interchange_rq=object(),
         _build_totalwatsed3_rq=object(),
-        _run_flowpaths_rq=object(),
         run_ss_batch_watershed_rq=object(),
         run_watershed_rq=object(),
         _post_run_cleanup_out_rq=object(),
@@ -222,7 +219,6 @@ def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_ena
         run_wepp_watershed=False,
         mods=["swat"],
         delete_after_interchange=True,  # should force SWAT build before hillslope interchange
-        run_flowpaths=False,
         wepp_bin="wepp_bin",
         prep_details_on_run_completion=False,
         dss_export_on_run_completion=False,

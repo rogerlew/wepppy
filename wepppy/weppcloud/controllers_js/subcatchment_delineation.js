@@ -296,7 +296,6 @@ var SubcatchmentDelineation = (function () {
                 phosphorus: resolveById("wepp_sub_cmap_range_phosphorus"),
                 runoff: resolveById("wepp_sub_cmap_range_runoff"),
                 loss: resolveById("wepp_sub_cmap_range_loss"),
-                griddedLoss: resolveById("wepp_grd_cmap_range_loss"),
                 ashLoad: resolveById("ash_sub_cmap_range_load"),
                 ashTransport: resolveById("ash_sub_cmap_range_transport"),
                 rhemRunoff: resolveById("rhem_sub_cmap_range_runoff"),
@@ -311,9 +310,6 @@ var SubcatchmentDelineation = (function () {
                 runoffMax: resolveById("wepp_sub_cmap_canvas_runoff_max"),
                 lossMin: resolveById("wepp_sub_cmap_canvas_loss_min"),
                 lossMax: resolveById("wepp_sub_cmap_canvas_loss_max"),
-                griddedLossMin: resolveById("wepp_grd_cmap_range_loss_min"),
-                griddedLossMax: resolveById("wepp_grd_cmap_range_loss_max"),
-                griddedLossUnits: resolveById("wepp_grd_cmap_range_loss_units"),
                 ashLoadMin: resolveById("ash_sub_cmap_canvas_load_min"),
                 ashLoadMax: resolveById("ash_sub_cmap_canvas_load_max"),
                 rhemRunoffMin: resolveById("rhem_sub_cmap_canvas_runoff_min"),
@@ -340,9 +336,7 @@ var SubcatchmentDelineation = (function () {
                 rhemSoilLoss: createColormap({ colormap: "jet2", nshades: 64 }),
                 cover: createColormap({ colormap: "viridis", nshades: 64 })
             },
-            ashMeasure: null,
-            grid: null,
-            gridLabel: "Soil Deposition/Loss"
+            ashMeasure: null
         };
 
         sub.state = state;
@@ -1071,83 +1065,6 @@ var SubcatchmentDelineation = (function () {
             });
         }
 
-        function removeGrid() {
-            if (!state.grid) {
-                return;
-            }
-            var map = MapController.getInstance();
-            try {
-                if (typeof map.unregisterOverlay === "function") {
-                    map.unregisterOverlay(state.grid);
-                } else {
-                    map.ctrls.removeLayer(state.grid);
-                }
-            } catch (err) {
-                // ignore
-            }
-            try {
-                map.removeLayer(state.grid);
-            } catch (err) {
-                console.warn("[Subcatchment] Failed to remove grid layer", err);
-            }
-            state.grid = null;
-        }
-
-        function renderGriddedLoss() {
-            removeGrid();
-            var map = MapController.getInstance();
-            state.grid = L.leafletGeotiff(url_for_run("resources/flowpaths_loss.tif"), {
-                band: 0,
-                displayMin: 0,
-                displayMax: 1,
-                name: state.gridLabel,
-                colorScale: "jet2",
-                opacity: 1.0,
-                clampLow: true,
-                clampHigh: true,
-                arrowSize: 20
-            }).addTo(map);
-            updateGriddedLoss();
-            if (typeof map.registerOverlay === "function") {
-                map.registerOverlay(state.grid, "Gridded Output");
-            } else {
-                map.ctrls.addOverlay(state.grid, "Gridded Output");
-            }
-        }
-
-        function updateGriddedLoss() {
-            var range = state.rangeElements.griddedLoss;
-            if (!range) {
-                return;
-            }
-            var value = parseFloat(range.value);
-            if (!Number.isFinite(value)) {
-                return;
-            }
-            if (state.grid && typeof state.grid.setDisplayRange === "function") {
-                state.grid.setDisplayRange(-1.0 * value, value);
-            }
-
-            UnitizerClient.ready()
-                .then(function (client) {
-                    var maxHtml = client.renderValue(value, "kg/m^2", { includeUnits: true });
-                    var minHtml = client.renderValue(-1.0 * value, "kg/m^2", { includeUnits: true });
-                    var unitsHtml = client.renderUnits("kg/m^2");
-
-                    safeHtml(state.labelElements.griddedLossMax, maxHtml);
-                    safeHtml(state.labelElements.griddedLossMin, minHtml);
-                    safeHtml(state.labelElements.griddedLossUnits, unitsHtml);
-
-                    var project = Project.getInstance();
-                    if (project && typeof project.set_preferred_units === "function") {
-                        project.set_preferred_units();
-                    }
-                })
-                .catch(function (error) {
-                    sub.pushErrorStacktrace(sub, error);
-                });
-        }
-
         function getAshTransportMeasure() {
             var radio = document.querySelector("input[name='wepp_sub_cmap_radio']:checked");
             return radio ? radio.value : null;
@@ -1166,10 +1083,6 @@ var SubcatchmentDelineation = (function () {
                 return;
             }
             updateLegendLabels(mode);
-            if (mode === "grd_loss") {
-                updateGriddedLoss();
-                return;
-            }
             updateGlLayerStyle();
         }
 
@@ -1187,15 +1100,6 @@ var SubcatchmentDelineation = (function () {
                 var mode = this.getAttribute("data-subcatchment-scale");
                 handleRangeUpdate(mode);
             });
-        }
-
-        function bindDirectFallbackListeners() {
-            var gridded = state.rangeElements.griddedLoss;
-            if (gridded && typeof gridded.addEventListener === "function") {
-                gridded.addEventListener("input", function () {
-                    handleRangeUpdate("grd_loss");
-                });
-            }
         }
 
         function disableRadio(id, disabled) {
@@ -1330,14 +1234,6 @@ var SubcatchmentDelineation = (function () {
                 renderAshTransport();
             } else if (mode === "ash_transport (kg/ha)") {
                 renderAshTransport();
-            } else if (mode === "grd_loss") {
-                state.cmapMode = "clear";
-                refreshGlLayer();
-                renderGriddedLoss();
-            }
-
-            if (mode !== "grd_loss") {
-                removeGrid();
             }
         };
 
@@ -1346,7 +1242,6 @@ var SubcatchmentDelineation = (function () {
             renderLegendIfPresent("viridis", "wepp_sub_cmap_canvas_phosphorus");
             renderLegendIfPresent("winter", "wepp_sub_cmap_canvas_runoff");
             renderLegendIfPresent("jet2", "wepp_sub_cmap_canvas_loss");
-            renderLegendIfPresent("jet2", "wepp_grd_cmap_canvas_loss");
             renderLegendIfPresent("winter", "rhem_sub_cmap_canvas_runoff");
             renderLegendIfPresent("viridis", "rhem_sub_cmap_canvas_sed_yield");
             renderLegendIfPresent("jet2", "rhem_sub_cmap_canvas_soil_loss");
@@ -1358,8 +1253,6 @@ var SubcatchmentDelineation = (function () {
         sub._refreshGlLayer = refreshGlLayer;
         sub.updateGlLayerStyle = updateGlLayerStyle;
         sub._buildLabels = buildLabels;
-        sub.removeGrid = removeGrid;
-        sub.updateGriddedLoss = updateGriddedLoss;
 
         function showSubcatchments() {
             state.cmapMode = "default";
@@ -1679,7 +1572,6 @@ var SubcatchmentDelineation = (function () {
             sub.connect_status_stream(sub);
 
             disposeGlLayer();
-            removeGrid();
 
             if (map && typeof map.unregisterOverlay === "function") {
                 try {
@@ -1783,7 +1675,6 @@ var SubcatchmentDelineation = (function () {
         };
 
         setupDelegatedEvents();
-        bindDirectFallbackListeners();
 
         sub.renderSlpAsp = renderSlpAsp;
         sub.renderLanduse = renderLanduse;

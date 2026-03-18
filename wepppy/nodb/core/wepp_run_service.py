@@ -3,28 +3,20 @@ from __future__ import annotations
 import inspect
 import os
 import shutil
-import time
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
-from contextlib import ExitStack
 from glob import glob
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
-from subprocess import PIPE, Popen
 from typing import TYPE_CHECKING, Optional
 
 from wepp_runner.wepp_runner import (
-    make_flowpath_run,
-    run_flowpath,
     run_hillslope,
     run_ss_batch_hillslope,
     run_ss_batch_watershed,
 )
 
-from wepppyo3.wepp_viz import make_soil_loss_grid_fps
-
 from wepppy.all_your_base import NCPU
-from wepppy.all_your_base.geo import wgs84_proj4
 from wepppy.nodb.redis_prep import TaskEnum
 
 if TYPE_CHECKING:
@@ -32,181 +24,6 @@ if TYPE_CHECKING:
 
 
 class WeppRunService:
-    def prep_and_run_flowpaths(self, wepp: "Wepp", clean_after_run: bool = True) -> None:
-        from wepppy.nodb.core.wepp import extract_slps_fn
-        from wepppy.nodb.core import wepp as wepp_module
-
-        wepp.logger.info("  Prepping _prep_flowpaths... ")
-
-        fp_slps_rels = wepp_module.glob_input_files(
-            wepp.wd,
-            "watershed/slope_files/flowpaths/*.slps",
-            tolerate_mixed=True,
-            mixed_prefer="archive",
-        )
-
-        flowpath_workers = 10
-        if os.getenv("WEPPPY_NCPU"):
-            flowpath_workers = min(flowpath_workers, NCPU)
-
-        futures = []
-        with ExitStack() as input_paths:
-            fp_slps_fns = [
-                input_paths.enter_context(
-                    wepp_module.with_input_file_path(
-                        wepp.wd,
-                        rel,
-                        purpose="wepp-prep-flowpath-slps",
-                        tolerate_mixed=True,
-                        mixed_prefer="archive",
-                        allow_materialize_fallback=True,
-                    )
-                )
-                for rel in fp_slps_rels
-            ]
-
-            with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
-                for fp_slps_fn in fp_slps_fns:
-                    futures.append(pool.submit(extract_slps_fn, fp_slps_fn, wepp.fp_runs_dir))
-
-                futures_n = len(futures)
-                count = 0
-                pending = set(futures)
-                while pending:
-                    done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
-
-                    if not done:
-                        wepp.logger.error("  Flowpath slope extraction still running after 5 seconds.")
-                        continue
-
-                    for future in done:
-                        try:
-                            future.result()
-                            count += 1
-                            wepp.logger.info(f"  ({count}/{futures_n}) flowpath slopes prep complete")
-                        except Exception as exc:
-                            for remaining in pending:
-                                remaining.cancel()
-                            wepp.logger.error(
-                                f"  Flowpath slope extraction failed with an error: {exc}"
-                            )
-                            raise
-
-        watershed = wepp.watershed_instance
-        translator = watershed.translator_factory()
-        sim_years = wepp.climate_instance.input_years
-
-        fps_summary = watershed.fps_summary
-
-        futures = []
-        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
-            for topaz_id in fps_summary:
-                wepp_id = translator.wepp(top=int(topaz_id))
-                for fp_enum in fps_summary[topaz_id]:
-                    fp_id = f"fp_{wepp_id}_{fp_enum}"
-                    wepp.logger.info(f"  Creating {fp_id}.run... ")
-                    futures.append(pool.submit(make_flowpath_run, fp_id, wepp_id, sim_years, wepp.fp_runs_dir))
-
-            futures_n = len(futures)
-            count = 0
-            pending = set(futures)
-            while pending:
-                done, pending = wait(pending, timeout=5, return_when=FIRST_COMPLETED)
-
-                if not done:
-                    wepp.logger.error("  Flowpath runfile creation still running after 5 seconds.")
-                    continue
-
-                for future in done:
-                    try:
-                        future.result()
-                        count += 1
-                        wepp.logger.info(f"  ({count}/{futures_n}) flowpath run files complete")
-                    except Exception as exc:
-                        for remaining in pending:
-                            remaining.cancel()
-                        wepp.logger.error(f"  Flowpath runfile creation failed with an error: {exc}")
-                        raise
-
-        wepp.logger.info("  Running _run_flowpaths... ")
-
-        futures = []
-        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
-            for topaz_id in fps_summary:
-                wepp_id = translator.wepp(top=int(topaz_id))
-                for fp_enum in fps_summary[topaz_id]:
-                    fp_id = f"fp_{wepp_id}_{fp_enum}"
-                    wepp.logger.info(f"  Running {fp_id}... ")
-                    futures.append(
-                        pool.submit(run_flowpath, fp_id, wepp_id, wepp.runs_dir, wepp.fp_runs_dir, wepp.wepp_bin)
-                    )
-
-            futures_n = len(futures)
-            count = 0
-            pending = set(futures)
-            while pending:
-                done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
-
-                if not done:
-                    wepp.logger.warning(
-                        "  Flowpath simulation still running after 60 seconds; continuing to wait."
-                    )
-                    continue
-
-                for future in done:
-                    try:
-                        future.result()
-                        count += 1
-                        wepp.logger.info(f"  ({count}/{futures_n}) flowpaths ran")
-                    except Exception as exc:
-                        for remaining in pending:
-                            remaining.cancel()
-                        wepp.logger.error(f"  Flowpath simulation failed with an error: {exc}")
-                        raise
-
-        with wepp.timed("  Generating flowpath loss grid"):
-            loss_grid_path = _join(wepp.plot_dir, "flowpaths_loss.tif")
-
-            if _exists(loss_grid_path):
-                os.remove(loss_grid_path)
-                time.sleep(1)
-
-            make_soil_loss_grid_fps(watershed.discha, wepp.fp_runs_dir, loss_grid_path)
-
-            assert _exists(loss_grid_path)
-
-            loss_grid_wgs = _join(wepp.plot_dir, "flowpaths_loss.WGS.tif")
-
-            if _exists(loss_grid_wgs):
-                os.remove(loss_grid_wgs)
-                time.sleep(1)
-
-            cmd = [
-                "gdalwarp",
-                "-t_srs",
-                wgs84_proj4,
-                "-srcnodata",
-                "-9999",
-                "-dstnodata",
-                "-9999",
-                "-r",
-                "near",
-                loss_grid_path,
-                loss_grid_wgs,
-            ]
-            p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            p.wait()
-
-            assert _exists(loss_grid_wgs)
-
-        if clean_after_run:
-            wepp.logger.info("  Cleaning up flowpath run files... ")
-            shutil.rmtree(wepp.fp_runs_dir)
-            shutil.rmtree(wepp.fp_output_dir)
-
-            os.makedirs(wepp.fp_runs_dir)
-            os.makedirs(wepp.fp_output_dir)
-
     def run_hillslopes(
         self,
         wepp: "Wepp",

@@ -66,8 +66,8 @@ def wepp_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
         def set_run_snow(self, value: bool) -> None:
             self.calls["snow"] = value
 
-        def set_run_flowpaths(self, value: bool) -> None:
-            self.calls["run_flowpaths"] = value
+        def set_run_wepp_watershed(self, value: bool) -> None:
+            self.calls["wepp_watershed"] = value
 
     monkeypatch.setattr(wepp_module, "Wepp", DummyWepp)
 
@@ -81,11 +81,11 @@ def wepp_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     ("routine", "method_name"),
     [
         ("wepp_ui", "wepp_ui"),
+        ("wepp_watershed", "wepp_watershed"),
         ("pmet", "pmet"),
         ("frost", "frost"),
         ("tcr", "tcr"),
         ("snow", "snow"),
-        ("run_flowpaths", "run_flowpaths"),
     ],
 )
 def test_set_run_wepp_routine_accepts_json_boolean(wepp_client, routine, method_name):
@@ -128,6 +128,27 @@ def test_set_run_wepp_routine_requires_known_routine(wepp_client):
     assert response.status_code == 200
     payload = response.get_json()
     assert "routine not in" in payload["error"]["message"]
+
+
+def test_set_run_wepp_routine_rejects_flowpaths_toggle(wepp_client):
+    client, _, _ = wepp_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_run_wepp_routine/",
+        json={"routine": "run_flowpaths", "state": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "routine not in" in payload["error"]["message"]
+
+
+def test_flowpaths_loss_resource_route_is_retired(wepp_client):
+    client, _, _ = wepp_client
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/flowpaths_loss.tif")
+
+    assert response.status_code == 404
 
 
 def test_query_subcatchments_summary_returns_500_when_controller_raises(

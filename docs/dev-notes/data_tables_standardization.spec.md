@@ -16,7 +16,7 @@
 | --- | --- | --- | --- |
 | `watershed/hillslopes.parquet` | `peridot_runner.post_abstract_watershed`, WBT runner | write `wepp_id`, `topaz_id` (Int32); drop uppercase string variants | `duckdb_agents.get_watershed_*`, reports (`loss_hill_report`, `average_annuals`), query engine fixtures |
 | `watershed/channels.parquet` | same as above | ensure `wepp_id`, `topaz_id`, `chn_enum` Int32 | hydrology exports, Omni mods, query engine |
-| `watershed/flowpaths.parquet` | same as above | cast `topaz_id`, `fp_id` to Int32 | `Watershed.fps_summary`, consumers of flowpath metadata |
+| `watershed/flowpaths.parquet` | same as above | cast `topaz_id`, `fp_id` to Int32 when present; treat as legacy optional output | `Watershed.fps_summary`, consumers of legacy flowpath metadata |
 | `ag_fields/sub_fields/*.parquet` | `post_abstract_sub_fields` | emit Int32 ids | landuse editing tools, agronomic summaries |
 | `landuse/landuse.parquet` | `Landuse.dump_landuse_parquet` | output `topaz_id`, `wepp_id` Int32 | query presets, reports, DuckDB agents, R tooling |
 | `soils/soils.parquet` | `Soils.dump_soils_parquet` | same as above | same consumers as landuse |

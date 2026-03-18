@@ -488,6 +488,7 @@ class WatershedOperationsMixin:
                     clip_hillslopes=False,
                     clip_hillslope_length=self.clip_hillslope_length,
                     bieger2015_widths=self.bieger2015_widths,
+                    skip_flowpaths=self.skip_flowpaths,
                 )
             elif self.delineation_backend_is_wbt:
                 run_peridot_wbt_abstract_watershed(

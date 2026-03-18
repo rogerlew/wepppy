@@ -80,29 +80,6 @@ def _run_hillslopes_rq(runid: str) -> None:
         raise
 
 
-def _run_flowpaths_rq(runid: str) -> None:
-    """Prepare inputs and execute flowpath WEPP runs for the scenario."""
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        with with_stage_read_projections(
-            wd,
-            roots=("watershed",),
-            purpose=f"{func_name}:{runid}",
-        ):
-            wepp.prep_and_run_flowpaths()
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:93", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
-
-
 def _prep_managements_rq(runid: str) -> None:
     """Export management files required for upcoming hillslope runs."""
     try:

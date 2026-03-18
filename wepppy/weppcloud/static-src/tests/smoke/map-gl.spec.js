@@ -1291,40 +1291,6 @@ test.describe('map gl smoke', () => {
     await expect.poll(async () => (await legend.textContent()) || '').toContain('Soils');
   });
 
-  test('gridded loss mode adds overlay and updates labels', async ({ page }) => {
-    await openRun(page);
-
-    const outcome = await page.evaluate(async () => {
-      const sub = window.SubcatchmentDelineation && typeof window.SubcatchmentDelineation.getInstance === 'function'
-        ? window.SubcatchmentDelineation.getInstance()
-        : null;
-      if (!sub || typeof sub.setColorMap !== 'function') {
-        return { ok: false, reason: 'subcatchment controller missing' };
-      }
-      try {
-        sub.setColorMap('grd_loss');
-      } catch (error) {
-        return { ok: false, reason: error.message || String(error) };
-      }
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      const map = window.MapController && typeof window.MapController.getInstance === 'function'
-        ? window.MapController.getInstance()
-        : null;
-      const layer = map && map.overlayMaps ? map.overlayMaps['Gridded Output'] : null;
-      const hasLayer = Boolean(map && layer && typeof map.hasLayer === 'function' && map.hasLayer(layer));
-      const units = document.getElementById('wepp_grd_cmap_range_loss_units');
-      const unitsText = units ? (units.textContent || units.innerHTML || '').trim() : '';
-      return { ok: hasLayer, unitsText };
-    });
-
-    if (!outcome.ok) {
-      test.skip(true, `Gridded loss unavailable: ${outcome.reason || 'missing layer'}`);
-    }
-
-    expect(outcome.unitsText).not.toEqual('');
-    await waitForOverlayLayer(page, 'Gridded Output');
-  });
-
   test('build subcatchments updates status', async ({ page }) => {
     await openRun(page);
 

@@ -92,7 +92,6 @@ Emitted via `WCEvents.useEventMap`:
 | Channels (pass 1) | glify | `/resources/netful.json` | ChannelDelineation | No click handler. |
 | Channels (pass 2) | glify | `/resources/channels.json` | ChannelDelineation | Click -> `chnQuery(TopazID)`. |
 | Channel labels | LayerGroup | From channels | ChannelDelineation | Div icon markers. |
-| Gridded Output | GeoTIFF | `/resources/flowpaths_loss.tif` | SubcatchmentDelineation | Deprecated flowpath loss grid. Legacy Leaflet-only overlay removed from GL path in Phase 13; it does not account for converging flows, so prefer gridded model outputs. |
 | Outlet marker | CircleMarker | `/query/outlet/` | Outlet | Added to `markerCustomPane`. |
 | Burn Severity Map | ImageOverlay | `/query/baer_wgs_map/` | Baer | Renders legend under `#sbs_legend` (client-side). |
 | Selection overlays | GeoJSON + Rectangle | `/resources/subcatchments.json` | LanduseModify/RangelandCoverModify | For box and click selection. |
@@ -365,15 +364,14 @@ Assumptions (historical; Phase 13 flips defaults):
 - Tests: Jest covers pass 2 overlay + click drilldown, label styling, hover label behavior, and overlay toggle cleanup; Playwright stubs pass 2 data and confirms labels + drilldown panel update. `wctl run-npm test -- channel_gl.test.js` clean.
 
 ### Phase 9: subcatchments + gridded loss
-- Scope: GeoJsonLayer subcatchments, color map modes, labels, gridded loss raster.
+- Scope: GeoJsonLayer subcatchments, color map modes, and labels.
 - Tests: Jest for color mapping; Playwright toggle subcatchment layers + legend range.
 
 ### Phase 9 handoff summary
 - Subcatchments: GL GeoJsonLayer loads `resources/subcatchments.json`, registers `Subcatchments` overlay, and renders default fill/outline styling.
 - Labels: `Subcatchment Labels` TextLayer built from unique TopazID (polylabel if available), SDF outline styling (orange text + white stroke), registered but hidden by default.
 - Color maps: `setColorMap` supports slope/aspect, landuse, soils, cover, WEPP loss/runoff metrics (query-engine), phosphorus, ash, and RHEM modes with legend label updates.
-- Gridded loss: `Gridded Output` BitmapLayer loads `resources/flowpaths_loss.tif`, updates +/- range from `#wepp_grd_cmap_range_loss`, and refreshes unit labels (kg/m^2).
-- Tests: Jest `controllers_js/__tests__/subcatchments_gl.test.js` covers overlay registration, color map mode updates, range slider refresh, and gridded loss raster load. `wctl run-npm test -- subcatchments_gl.test.js` clean.
+- Tests: Jest `controllers_js/__tests__/subcatchments_gl.test.js` covers overlay registration, color map mode updates, and range slider refresh. `wctl run-npm test -- subcatchments_gl.test.js` clean.
 
 ### Phase 9b: remove Results tab from map tabset
 - Scope: remove the `Results` tab from the map control tabset in both `map_pure.htm` and `map_pure_gl.htm` (WEPP/RHEM results live in GL dashboard now).

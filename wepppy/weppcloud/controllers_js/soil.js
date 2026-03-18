@@ -394,7 +394,7 @@ var Soil = (function () {
             dbSelectionInput.addEventListener("change", soil.handleDbSelectionChange);
         }
 
-        var ksflagCheckbox = document.getElementById("checkbox_run_flowpaths");
+        var ksflagCheckbox = document.getElementById("checkbox_ksflag");
         if (ksflagCheckbox) {
             ksflagCheckbox.addEventListener("change", function (event) {
                 soil.set_ksflag(event.target.checked);

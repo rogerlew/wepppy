@@ -19,7 +19,7 @@
 | --- | --- | --- |
 | `rq_worker.py / rq_worker.pyi` | `WepppyRqWorker`, `start_worker()` | Custom worker class, logging hooks, SIGUSR1 cancellation, queue bootstrap helper. |
 | `project_rq.py / project_rq.pyi` | `test_run_rq`, `_prep_* helpers` | Full project provisioning (DEM, landuse, soils, climate, RAP TS, WEPP run triggering). Mirrors the UI's “Run” button end-to-end. |
-| `wepp_rq.py / wepp_rq.pyi` | `run_*_rq`, `compress_fn` | Hillslope/flowpath/watershed execution, interchange doc generation, WEPP runner integration (single storm + batch). |
+| `wepp_rq.py / wepp_rq.pyi` | `run_*_rq`, `compress_fn` | Hillslope/watershed execution, interchange doc generation, WEPP runner integration (single storm + batch). |
 | `batch_rq.py / batch_rq.pyi` | `run_batch_rq`, `run_batch_watershed_rq` | Launches batched watershed runs via `BatchRunner`, tracks child jobs, emits Discord notifications when done. |
 | `omni_rq.py / omni_rq.pyi` | `run_omni_scenario_rq`, `run_omni_scenarios_rq` | Executes Omni scenarios (optionally with job-pool concurrency), maintains dependency hashes, updates `Omni.scenario_run_state`. |
 | `path_ce_rq.py / path_ce_rq.pyi` | `run_path_cost_effective_rq` | Runs the PATH cost-effective optimization flow and timestamps the result in `RedisPrep`. |

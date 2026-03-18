@@ -347,7 +347,7 @@ Each blueprint section below documents:
 | --- | --- | --- | --- |
 | `/runs/<string:runid>/<config>/view/channel_def/<chn_key>[/]` | `GET` | — | Uses `wepppy.wepp.management` helpers (no NoDb singleton) |
 | `/runs/<string:runid>/<config>/view/management/<key>[/]` | `GET` | Landuse.managements | — |
-| `/runs/<string:runid>/<config>/tasks/set_run_wepp_routine[/]` | `POST` | Wepp.set_run_flowpaths, Wepp.set_run_frost, Wepp.set_run_pmet, Wepp.set_run_snow, Wepp.set_run_tcr, Wepp.set_run_wepp_ui | Toggles multiple execution flags via setter helpers |
+| `/runs/<string:runid>/<config>/tasks/set_run_wepp_routine[/]` | `POST` | Wepp.set_run_frost, Wepp.set_run_pmet, Wepp.set_run_snow, Wepp.set_run_tcr, Wepp.set_run_wepp_ui, Wepp.set_run_wepp_watershed | Toggles supported WEPP routine flags via setter helpers |
 | `/runs/<string:runid>/<config>/report/wepp/results[/]` | `GET` | Climate (template context), RedisPrep (template context), Watershed (template context), Wepp (template context) | Loads `RedisPrep` cache plus `Wepp` summaries before rendering |
 | `/runs/<string:runid>/<config>/query/subcatchments_summary[/]` | `GET` | Ron.subs_summary | — |
 | `/runs/<string:runid>/<config>/query/channels_summary[/]` | `GET` | Ron.chns_summary | — |
@@ -369,7 +369,6 @@ Each blueprint section below documents:
 | `/runs/<string:runid>/<config>/query/topaz_wepp_map[/]` | `GET` | Watershed.translator_factory, Watershed.translator_factory() | — |
 | `/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>[/]` | `GET` | Ron.sub_summary | — |
 | `/runs/<string:runid>/<config>/resources/wepp_loss.tif` | `GET` | Ron.plot_dir | Streams raster from `Ron.plot_dir` |
-| `/runs/<string:runid>/<config>/resources/flowpaths_loss.tif` | `GET` | Ron.plot_dir | Streams raster from `Ron.plot_dir` |
 | `/runs/<string:runid>/<config>/query/bound_coords[/]` | `GET` | Ron.topaz_wd | — |
 
 ## Developer Notes
