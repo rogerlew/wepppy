@@ -84,6 +84,76 @@ def _pick_existing_parquet_path(wd: str, relpath: str) -> Optional[str]:
     return _default_pick_existing_parquet_path(wd, relpath)
 
 
+def _compute_mofe_segment_cell_counts(d_fractions: np.ndarray, n_cells: int) -> np.ndarray:
+    """Convert cumulative MOFE distance fractions into per-segment cell counts."""
+    if n_cells <= 0:
+        raise ValueError(f"n_cells must be positive; received {n_cells}")
+
+    if len(d_fractions) < 2:
+        raise ValueError(f"d_fractions must include at least two points; received {d_fractions}")
+
+    n_ofe = len(d_fractions) - 1
+    if n_cells < n_ofe:
+        raise ValueError(f"cannot assign {n_ofe} OFE ids across only {n_cells} cells")
+
+    segment_lengths = np.diff(np.asarray(d_fractions, dtype=np.float64))
+    if np.any(segment_lengths < 0):
+        raise ValueError(f"d_fractions must be non-decreasing; received {d_fractions}")
+
+    raw_counts = segment_lengths * float(n_cells)
+    counts = np.floor(raw_counts).astype(np.int32)
+    remainders = raw_counts - counts
+
+    # Preserve at least one cell per OFE when feasible.
+    counts = np.maximum(counts, 1)
+
+    diff = int(n_cells - int(np.sum(counts)))
+    if diff > 0:
+        order = np.argsort(-remainders)
+        idx = 0
+        while diff > 0:
+            counts[order[idx % len(order)]] += 1
+            diff -= 1
+            idx += 1
+    elif diff < 0:
+        order = np.argsort(remainders)
+        for index in order:
+            while diff < 0 and counts[index] > 1:
+                counts[index] -= 1
+                diff += 1
+            if diff == 0:
+                break
+
+    if diff != 0:
+        raise ValueError(
+            f"unable to reconcile MOFE segment counts for {n_cells} cells: "
+            f"counts={counts.tolist()}, d_fractions={d_fractions}"
+        )
+
+    return counts
+
+
+def _assign_mofe_ids_by_discharge_rank(discha_vals: np.ndarray, d_fractions: np.ndarray) -> np.ndarray:
+    """Assign contiguous OFE ids by discharge rank using MOFE distance fractions."""
+    flat_discha_vals = np.asarray(discha_vals).reshape(-1)
+    n_cells = int(flat_discha_vals.size)
+
+    counts = _compute_mofe_segment_cell_counts(np.asarray(d_fractions, dtype=np.float64), n_cells)
+    order = np.argsort(flat_discha_vals, kind="stable")[::-1]
+
+    labels = np.empty(n_cells, dtype=np.int32)
+    start = 0
+    for ofe_id, count in enumerate(counts, start=1):
+        end = start + int(count)
+        labels[order[start:end]] = ofe_id
+        start = end
+
+    if start != n_cells:
+        raise ValueError(f"MOFE rank assignment mismatch: assigned={start}, n_cells={n_cells}")
+
+    return labels
+
+
 class WatershedOperationsMixin:
     def translator_factory(self) -> WeppTopTranslator:
         # Try to get IDs from in-memory summaries first
@@ -490,8 +560,23 @@ class WatershedOperationsMixin:
         func_name = inspect.currentframe().f_code.co_name  # type: ignore
         self.logger.info(f'{self.class_name}.{func_name}()')
         _mofe_nsegments: Dict[str, int] = {}
+        subwta, _, _ = read_raster(self.subwta, dtype=np.int32)
+        sub_ids, sub_counts = np.unique(subwta, return_counts=True)
+        hillslope_cell_counts = {
+            str(int(_id)): int(count)
+            for _id, count in zip(sub_ids, sub_counts)
+            if int(_id) > 0
+        }
+
         for topaz_id, wat_ss in self.subs_summary.items():
             not_top = not str(topaz_id).endswith("1")
+            topaz_cell_count = hillslope_cell_counts.get(str(topaz_id), 0)
+            if topaz_cell_count <= 0:
+                self.logger.warning(
+                    "No subwta cells found for topaz_id=%s while building MOFE slopes; forcing max_ofes=1",
+                    topaz_id,
+                )
+            max_ofes = min(self.mofe_max_ofes, max(1, topaz_cell_count))
 
             if isinstance(wat_ss, HillSummary):
                 slp_fn = _join(self.wat_dir, wat_ss.fname)
@@ -506,7 +591,7 @@ class WatershedOperationsMixin:
                 target_length=self.mofe_target_length,
                 apply_buffer=self.mofe_buffer and not_top,
                 buffer_length=self.mofe_buffer_length,
-                max_ofes=self.mofe_max_ofes,
+                max_ofes=max_ofes,
             )
 
         with self.locked():
@@ -525,12 +610,13 @@ class WatershedOperationsMixin:
         discha_path = self.discha
         if discha_path is None:
             raise ValueError("discha path is None")
-        discha, transform_d, proj_d = read_raster(discha_path, dtype=np.int32)
-        mofe_nsegments = self.mofe_nsegments
+        discha, _, _ = read_raster(discha_path, dtype=np.int32)
 
         mofe_map = np.zeros(subwta.shape, np.int32)
         for topaz_id, wat_ss in self.subs_summary.items():
             indices = np.where(subwta == int(topaz_id))
+            if len(indices[0]) == 0:
+                raise ValueError(f"No subwta cells found for topaz_id={topaz_id} while building MOFE map")
             _discha_vals = discha[indices]
             max_discha = np.max(_discha_vals)
 
@@ -564,12 +650,15 @@ class WatershedOperationsMixin:
                         & (discha <= _max)
                     )
                     if len(mofe_indices[0]) == 0:
+                        available_indices = np.where((subwta == int(topaz_id)) & (mofe_map == 0))
+                        candidate_indices = available_indices if len(available_indices[0]) > 0 else indices
+                        candidate_discha_vals = discha[candidate_indices]
                         target_value = (1.0 - d_fractions[i]) * max_discha
-                        diff = np.abs(target_value - _discha_vals)
+                        diff = np.abs(target_value - candidate_discha_vals)
                         closest_index = np.argmin(diff)
                         mofe_indices = (
-                            indices[0][closest_index],
-                            indices[1][closest_index],
+                            candidate_indices[0][closest_index],
+                            candidate_indices[1][closest_index],
                         )
 
                     mofe_map[mofe_indices] = j
@@ -579,7 +668,26 @@ class WatershedOperationsMixin:
             if 0 in mofe_ids:
                 mofe_ids.remove(0)
 
-            assert len(mofe_ids) == n_ofe, (topaz_id, mofe_ids)
+            if len(mofe_ids) != n_ofe:
+                self.logger.warning(
+                    "Repairing non-contiguous MOFE ids for topaz_id=%s: expected=%s present=%s",
+                    topaz_id,
+                    n_ofe,
+                    sorted(mofe_ids),
+                )
+                repaired_labels = _assign_mofe_ids_by_discharge_rank(_discha_vals, d_fractions)
+                mofe_map[indices] = repaired_labels
+                mofe_ids = set(mofe_map[indices])
+                mofe_ids.discard(0)
+
+            if len(mofe_ids) != n_ofe:
+                expected = set(range(1, n_ofe + 1))
+                missing = sorted(expected.difference(mofe_ids))
+                raise ValueError(
+                    f"Unable to assign contiguous MOFE ids for topaz_id={topaz_id}: "
+                    f"expected=1..{n_ofe} present={sorted(mofe_ids)} missing={missing} "
+                    f"cells={len(indices[0])}"
+                )
 
         num_cols, num_rows = mofe_map.shape
 
