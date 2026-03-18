@@ -8,6 +8,7 @@ from typing import Any, Mapping, Sequence
 from urllib.parse import urlparse
 
 import redis
+from flask import has_app_context
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from itsdangerous import BadSignature, Signer
@@ -15,7 +16,7 @@ from itsdangerous import BadSignature, Signer
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.base import NoDbBase
-from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
+from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, get_wd
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.browse_cookie import (
     browse_cookie_name,
@@ -303,6 +304,38 @@ def _parse_user_id(raw: Any) -> int | None:
         return None
 
 
+def _candidate_fs_uniquifier(raw: Any) -> str | None:
+    if raw is None or isinstance(raw, bool):
+        return None
+    token = str(raw).strip()
+    if not token:
+        return None
+    return token
+
+
+def _resolve_user_id_from_fs_uniquifier(raw: Any) -> int | None:
+    fs_uniquifier = _candidate_fs_uniquifier(raw)
+    if fs_uniquifier is None:
+        return None
+
+    _, User, _ = get_user_models()
+
+    def _lookup() -> Any | None:
+        return User.query.filter(User.fs_uniquifier == fs_uniquifier).first()
+
+    if has_app_context():
+        match = _lookup()
+    else:
+        from wepppy.weppcloud.app import app as flask_app
+
+        with flask_app.app_context():
+            match = _lookup()
+
+    if match is None:
+        return None
+    return _parse_user_id(getattr(match, "id", None))
+
+
 def _owner_id_matches(owner: Any, user_id: int) -> bool:
     owner_id = getattr(owner, "id", None)
     if owner_id is None:
@@ -314,7 +347,10 @@ def _owner_id_matches(owner: Any, user_id: int) -> bool:
 
 
 def _identity_from_session_payload(payload: Mapping[str, Any]) -> tuple[int | None, list[str]]:
-    user_id = _parse_user_id(payload.get("_user_id") or payload.get("user_id"))
+    raw_user_id = payload.get("_user_id") or payload.get("user_id")
+    user_id = _parse_user_id(raw_user_id)
+    if user_id is None:
+        user_id = _resolve_user_id_from_fs_uniquifier(raw_user_id)
     roles = _normalize_roles(
         payload.get("_roles_mask") or payload.get("_roles") or payload.get("roles")
     )

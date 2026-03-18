@@ -192,6 +192,179 @@ def test_session_token_issues_with_cookie(monkeypatch: pytest.MonkeyPatch) -> No
     assert claims["roles"] == ["User", "Root"]
 
 
+def test_identity_from_session_payload_resolves_fs_uniquifier_user_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fs_uniquifier = "26f2d8c2055e413ba64392db32bc7c10"
+    monkeypatch.setattr(session_routes, "_resolve_user_id_from_fs_uniquifier", lambda raw: 1384)
+
+    user_id, roles = session_routes._identity_from_session_payload(
+        {"_user_id": fs_uniquifier, "_roles_mask": ["User"]}
+    )
+
+    assert user_id == 1384
+    assert roles == ["User"]
+
+
+def test_identity_from_session_payload_prefers_numeric_user_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fallback_calls: list[object] = []
+
+    def fake_resolve(raw: object) -> int | None:
+        fallback_calls.append(raw)
+        return 999
+
+    monkeypatch.setattr(session_routes, "_resolve_user_id_from_fs_uniquifier", fake_resolve)
+
+    user_id, roles = session_routes._identity_from_session_payload(
+        {"_user_id": "42", "_roles_mask": ["Root"]}
+    )
+
+    assert user_id == 42
+    assert roles == ["Root"]
+    assert fallback_calls == []
+
+
+def test_resolve_user_id_from_fs_uniquifier_with_app_context(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class DummyField:
+        def __eq__(self, other: object) -> tuple[str, object]:
+            return ("eq", other)
+
+    class DummyQuery:
+        def __init__(self) -> None:
+            self.filter_args: list[object] = []
+
+        def filter(self, expr: object) -> "DummyQuery":
+            self.filter_args.append(expr)
+            return self
+
+        def first(self):
+            return type("DummyUserRow", (), {"id": "1384"})()
+
+    query = DummyQuery()
+    user_model = type("DummyUserModel", (), {"fs_uniquifier": DummyField(), "query": query})
+
+    monkeypatch.setattr(session_routes, "has_app_context", lambda: True)
+    monkeypatch.setattr(session_routes, "get_user_models", lambda: (object(), user_model, object()))
+
+    resolved = session_routes._resolve_user_id_from_fs_uniquifier(
+        "26f2d8c2055e413ba64392db32bc7c10"
+    )
+
+    assert resolved == 1384
+    assert query.filter_args == [("eq", "26f2d8c2055e413ba64392db32bc7c10")]
+
+
+def test_resolve_user_id_from_fs_uniquifier_uses_flask_app_context_when_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class DummyField:
+        def __eq__(self, other: object) -> tuple[str, object]:
+            return ("eq", other)
+
+    class DummyQuery:
+        def filter(self, expr: object) -> "DummyQuery":
+            self.expr = expr
+            return self
+
+        def first(self):
+            return type("DummyUserRow", (), {"id": 42})()
+
+    query = DummyQuery()
+    user_model = type("DummyUserModel", (), {"fs_uniquifier": DummyField(), "query": query})
+
+    state = {"entered": 0, "exited": 0}
+
+    class DummyContext:
+        def __enter__(self):
+            state["entered"] += 1
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            state["exited"] += 1
+            return False
+
+    class DummyFlaskApp:
+        def app_context(self) -> DummyContext:
+            return DummyContext()
+
+    monkeypatch.setattr(session_routes, "has_app_context", lambda: False)
+    monkeypatch.setattr(session_routes, "get_user_models", lambda: (object(), user_model, object()))
+
+    import wepppy.weppcloud.app as weppcloud_app
+
+    monkeypatch.setattr(weppcloud_app, "app", DummyFlaskApp())
+
+    resolved = session_routes._resolve_user_id_from_fs_uniquifier(
+        "26f2d8c2055e413ba64392db32bc7c10"
+    )
+
+    assert resolved == 42
+    assert state == {"entered": 1, "exited": 1}
+
+
+def test_resolve_user_id_from_fs_uniquifier_returns_none_when_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class DummyField:
+        def __eq__(self, other: object) -> tuple[str, object]:
+            return ("eq", other)
+
+    class DummyQuery:
+        def filter(self, expr: object) -> "DummyQuery":
+            self.expr = expr
+            return self
+
+        def first(self):
+            return None
+
+    query = DummyQuery()
+    user_model = type("DummyUserModel", (), {"fs_uniquifier": DummyField(), "query": query})
+
+    monkeypatch.setattr(session_routes, "has_app_context", lambda: True)
+    monkeypatch.setattr(session_routes, "get_user_models", lambda: (object(), user_model, object()))
+
+    resolved = session_routes._resolve_user_id_from_fs_uniquifier(
+        "26f2d8c2055e413ba64392db32bc7c10"
+    )
+
+    assert resolved is None
+
+
+def test_session_token_issues_with_cookie_when_session_user_id_is_fs_uniquifier(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fs_uniquifier = "26f2d8c2055e413ba64392db32bc7c10"
+    monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", lambda request: "sid-1")
+    monkeypatch.setattr(session_routes, "_session_exists", lambda session_id: None)
+    monkeypatch.setattr(
+        session_routes,
+        "_session_payload",
+        lambda session_id: {"_user_id": fs_uniquifier, "_roles_mask": ["User"]},
+    )
+    monkeypatch.setattr(session_routes, "_resolve_user_id_from_fs_uniquifier", lambda raw: 1384)
+    monkeypatch.setattr(session_routes, "_session_user_authorized_for_run", lambda runid, user_id, roles: True)
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            cookies={"session": "signed"},
+            headers={"Origin": "http://testserver"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["user_id"] == 1384
+    assert payload["roles"] == ["User"]
+
+
 def test_session_token_allows_public_run_without_cookie(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
