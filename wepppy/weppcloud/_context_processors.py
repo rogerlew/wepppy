@@ -215,14 +215,14 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
             try:
                 from wepppy.weppcloud.utils.helpers import get_wd
                 from wepppy.nodb.core import Wepp
-                from wepppy.weppcloud.utils.run_ttl import read_ttl_state
+                from wepppy.weppcloud.utils.run_ttl import ensure_ttl_state
 
                 wd = get_wd(runid)
                 wepp = Wepp.load_detached(wd)
                 storm_event_analyzer_ready = bool(
                     wepp and wepp.storm_event_analyzer_ready
                 )
-                ttl_state = read_ttl_state(wd)
+                ttl_state = ensure_ttl_state(wd, touched_by="context")
             except Exception:
                 storm_event_analyzer_ready = False
                 ttl_state = None

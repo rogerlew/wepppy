@@ -56,6 +56,7 @@
 {% set baer_mode = baer.sbs_mode if baer is not none else disturbed_mode %}
 {% set baer_uniform = baer.uniform_severity if baer is not none else disturbed_uniform %}
 {% set hide_landuse_wepp = 'rhem' in mods_list %}
+{% set ttl_state = current_ttl if current_ttl is defined else None %}
 
     var sitePrefix = {{ site_prefix | tojson }};
     var runId = {{ ron.runid | tojson }};
@@ -75,10 +76,10 @@
             "readonly": ron.readonly
         },
         "ttl": {
-            "policy": (current_ttl.policy if current_ttl else None),
-            "userDisabled": (current_ttl.user_disabled if current_ttl else False),
-            "disabledReason": (current_ttl.disabled_reason if current_ttl else None),
-            "expiresAt": (current_ttl.expires_at if current_ttl else None)
+            "policy": ((ttl_state.policy | default(None)) if ttl_state else None),
+            "userDisabled": ((ttl_state.user_disabled | default(False)) if ttl_state else False),
+            "disabledReason": ((ttl_state.disabled_reason | default(None)) if ttl_state else None),
+            "expiresAt": ((ttl_state.expires_at | default(None)) if ttl_state else None)
         },
         "environment": {
             "cellSize": ron.cellsize

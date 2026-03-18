@@ -42,6 +42,7 @@ __all__ = [
     "set_user_ttl_disabled",
     "sync_ttl_policy",
     "mark_delete_state",
+    "ensure_ttl_state",
     "read_ttl_state",
     "touch_ttl_from_access_log",
     "collect_gc_candidates",
@@ -140,6 +141,7 @@ def _normalize_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     normalized.setdefault("version", TTL_VERSION)
     normalized.setdefault("ttl_days", TTL_DAYS)
     normalized.setdefault("policy", POLICY_ROLLING)
+    normalized.setdefault("expires_at", None)
     normalized.setdefault("user_disabled", False)
     normalized.setdefault("disabled_by_user_id", None)
     normalized.setdefault("disabled_reason", None)
@@ -154,6 +156,7 @@ def _apply_policy(
     wd: str,
     now: datetime,
     touched_by: Optional[str] = None,
+    update_audit: bool = True,
 ) -> Dict[str, Any]:
     normalized = _normalize_payload(payload)
     readonly = _is_readonly(wd)
@@ -194,9 +197,10 @@ def _apply_policy(
             _compute_expiration(last_accessed, int(normalized.get("ttl_days", TTL_DAYS)))
         )
 
-    normalized["updated_at"] = _format_datetime(now)
-    if touched_by:
-        normalized["last_touched_by"] = touched_by
+    if update_audit:
+        normalized["updated_at"] = _format_datetime(now)
+        if touched_by:
+            normalized["last_touched_by"] = touched_by
 
     return normalized
 
@@ -336,6 +340,39 @@ def mark_delete_state(
     payload["last_touched_by"] = touched_by
     _write_payload(path, payload)
     return payload
+
+
+def ensure_ttl_state(
+    wd: str,
+    *,
+    now: Optional[datetime] = None,
+    touched_by: str = "ensure",
+) -> Optional[Dict[str, Any]]:
+    """Create or repair TTL metadata without rewriting healthy payloads."""
+    wd_path = Path(wd)
+    if not wd_path.is_dir():
+        return None
+
+    now = now or _utc_now()
+    path = ttl_path(wd)
+    payload = _load_payload(path)
+    if payload is None:
+        return initialize_ttl(wd, now=now, touched_by=touched_by)
+
+    repaired = _apply_policy(
+        payload,
+        wd=wd,
+        now=now,
+        touched_by=None,
+        update_audit=False,
+    )
+
+    if repaired != payload:
+        repaired["updated_at"] = _format_datetime(now)
+        repaired["last_touched_by"] = touched_by
+        _write_payload(path, repaired)
+
+    return repaired
 
 
 def read_ttl_state(wd: str) -> Optional[Dict[str, Any]]:

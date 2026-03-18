@@ -163,3 +163,46 @@ def test_run_page_bootstrap_openet_flag_true_for_admin(run0_template_app) -> Non
     with run0_template_app.app_context():
         js = render_template("run_page_bootstrap.js.j2", **context)
     assert _extract_openet_flag(js) == "true"
+
+
+def test_run_page_bootstrap_ttl_missing_expires_at_defaults_to_null(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["current_ttl"] = {
+        "policy": "disabled",
+        "user_disabled": False,
+        "disabled_reason": "readonly",
+    }
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert re.search(r'"expiresAt"\s*:\s*null', js) is not None
+
+
+def test_run_page_bootstrap_ttl_missing_fields_defaults_cleanly(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["current_ttl"] = {}
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert re.search(r'"policy"\s*:\s*null', js) is not None
+    assert re.search(r'"userDisabled"\s*:\s*false', js) is not None
+    assert re.search(r'"disabledReason"\s*:\s*null', js) is not None
+    assert re.search(r'"expiresAt"\s*:\s*null', js) is not None
+
+
+def test_run_page_bootstrap_public_readonly_ttl_missing_expires_at(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].readonly = True
+    context["user"] = SimpleNamespace(is_authenticated=False)
+    context["current_ttl"] = {
+        "policy": "disabled",
+        "user_disabled": False,
+        "disabled_reason": "readonly",
+    }
+
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert re.search(r'"readonly"\s*:\s*true', js) is not None
+    assert re.search(r'"isAuthenticated"\s*:\s*false', js) is not None
+    assert re.search(r'"expiresAt"\s*:\s*null', js) is not None
