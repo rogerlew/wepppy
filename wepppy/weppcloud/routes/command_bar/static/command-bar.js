@@ -23,7 +23,8 @@
     ];
     const CLEAR_HELP_LINES = [
         'clear locks         - Clear NoDb locks',
-        'clear nodb_cache    - Clear Redis NoDb cache entries'
+        'clear nodb_cache    - Clear Redis NoDb cache entries',
+        'clear directory_locks - Clear Redis runtime directory locks'
     ];
     const ABSOLUTE_URL_PATTERN = /^([a-z][a-z\d+\-.]*:)?\/\//i;
 
@@ -941,6 +942,10 @@
                     description: 'Show active NoDb file locks for this run',
                     handler: (args) => this.routeGetLocks(args)
                 },
+                directory_locks: {
+                    description: 'Show active runtime directory locks for this run',
+                    handler: (args) => this.routeGetDirectoryLocks(args)
+                },
                 query_engine_mcp_token: {
                     description: 'Generate a short-lived Query Engine MCP token with setup instructions',
                     handler: (args) => this.routeGetQueryEngineMcpToken(args)
@@ -1671,6 +1676,12 @@
             case 'nodb_cache':
             case 'nodb-cache':
                 return this.clearNodbCache();
+            case 'directory_locks':
+            case 'directory-locks':
+            case 'directory_lock':
+            case 'directory-lock':
+            case 'directorylocks':
+                return this.clearDirectoryLocks();
             default:
                 this.showResult([
                     'Available clear commands:',
@@ -1702,6 +1713,48 @@
                 })
                 .catch((error) => {
                     console.error('Error clearing locks:', error);
+                    this.showResult(`Error: ${error.message || error}`);
+                });
+        }
+
+
+        clearDirectoryLocks() {
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: The clear command is only available on a project page.');
+                return;
+            }
+            const targetUrl = this.projectBaseUrl + 'command_bar/clear_directory_locks';
+
+            return fetch(targetUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: { 'Accept': 'application/json' }
+            })
+                .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
+                .then(({ response, data }) => {
+                    if (!response.ok || hasErrorPayload(data)) {
+                        const message = resolveErrorMessage(
+                            data,
+                            `Could not clear runtime directory locks. HTTP ${response.status}`
+                        );
+                        throw new Error(message);
+                    }
+
+                    const clearedLocks = (data && data.Content && Array.isArray(data.Content.cleared_directory_locks))
+                        ? data.Content.cleared_directory_locks
+                        : [];
+
+                    if (clearedLocks.length === 0) {
+                        this.showResult('Success: No runtime directory locks were present.');
+                    } else {
+                        const details = clearedLocks
+                            .map((entry) => `  ${entry && entry.key ? entry.key : '(unknown lock key)'}`)
+                            .join('\n');
+                        this.showResult(`Success: Cleared runtime directory locks:\n${details}`);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error clearing runtime directory locks:', error);
                     this.showResult(`Error: ${error.message || error}`);
                 });
         }
@@ -2003,6 +2056,64 @@
             }).catch((error) => {
                 console.error('Error fetching lock statuses:', error);
                 this.showResult(`Error: Unable to fetch lock statuses. ${error.message || error}`);
+            });
+        }
+
+        routeGetDirectoryLocks(args = []) {
+            if (Array.isArray(args) && args.length > 0) {
+                this.showResult('Usage: get directory_locks');
+                return;
+            }
+
+            if (!this.projectBaseUrl) {
+                this.showResult('Error: This command is only available on a project page.');
+                return;
+            }
+
+            const targetUrl = `${this.projectBaseUrl}command_bar/directory_locks`;
+
+            return fetch(targetUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} fetching ${targetUrl}`);
+                }
+                return response.json();
+            }).then((data) => {
+                if (!data || hasErrorPayload(data)) {
+                    const message = resolveErrorMessage(
+                        data,
+                        'Unexpected response while fetching runtime directory lock statuses.'
+                    );
+                    throw new Error(message);
+                }
+
+                const locks = Array.isArray(data.Content && data.Content.directory_locks)
+                    ? data.Content.directory_locks
+                    : [];
+
+                if (locks.length === 0) {
+                    this.showResult('No runtime directory locks.');
+                    return;
+                }
+
+                const messageLines = [
+                    'Runtime directory locks:',
+                    ...locks.map((entry) => {
+                        const key = entry && entry.key ? entry.key : '(unknown key)';
+                        const owner = entry && entry.owner ? ` owner=${entry.owner}` : '';
+                        const expires = entry && entry.expires_at ? ` expires_at=${entry.expires_at}` : '';
+                        return `  ${key}${owner}${expires}`;
+                    })
+                ];
+                this.showResult(messageLines.join('\n'));
+            }).catch((error) => {
+                console.error('Error fetching runtime directory lock statuses:', error);
+                this.showResult(`Error: Unable to fetch runtime directory lock statuses. ${error.message || error}`);
             });
         }
 

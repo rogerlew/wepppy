@@ -6,16 +6,26 @@ from pathlib import Path
 import pytest
 
 import wepppy.runtime_paths.mutations as runtime_mutations
+import wepppy.runtime_paths.thaw_freeze as thaw_freeze_module
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.mutations import mutate_root, mutate_roots, preflight_root_forms
 from wepppy.runtime_paths.thaw_freeze import (
+    clear_runtime_locks,
     freeze_locked,
     maintenance_lock,
     maintenance_lock_key,
+    runtime_lock_statuses,
     thaw_locked,
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def _reset_runtime_lock_client() -> None:
+    thaw_freeze_module._runtime_lock_redis_client.cache_clear()
+    yield
+    thaw_freeze_module._runtime_lock_redis_client.cache_clear()
 
 
 def test_preflight_root_forms_reports_directory_archive_and_missing(tmp_path: Path) -> None:
@@ -149,6 +159,7 @@ def test_maintenance_lock_raises_nodir_locked_on_contention(tmp_path: Path) -> N
                 pass
 
     assert exc_info.value.code == "NODIR_LOCKED"
+    assert "clear directory_locks" in exc_info.value.message
 
     with maintenance_lock(str(wd), "landuse", purpose="after-release", ttl_seconds=30):
         pass
@@ -199,3 +210,51 @@ def test_maintenance_lock_path_scope_compat_checks_legacy_lock(tmp_path: Path) -
                 pass
 
     assert exc_info.value.code == "NODIR_LOCKED"
+
+
+def test_runtime_lock_statuses_and_clear_runtime_locks(tmp_path: Path) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    with maintenance_lock(str(wd), "landuse", purpose="status-check", ttl_seconds=30) as lock:
+        statuses = runtime_lock_statuses("run")
+        assert len(statuses) == 1
+        assert statuses[0]["key"] == lock.key
+        assert statuses[0]["root"] == "landuse"
+        assert statuses[0]["runid"] == "run"
+
+        cleared = clear_runtime_locks("run")
+        assert len(cleared) == 1
+        assert cleared[0]["key"] == lock.key
+
+        statuses_after = runtime_lock_statuses("run")
+        assert statuses_after == []
+
+
+def test_clear_runtime_locks_does_not_delete_new_lock_when_token_changes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    with maintenance_lock(str(wd), "landuse", purpose="stale-status", ttl_seconds=30) as lock:
+        client = thaw_freeze_module._runtime_lock_redis_client()
+        assert lock.key == lock.lock_path
+
+        stale_statuses = runtime_lock_statuses("run")
+        assert len(stale_statuses) == 1
+
+        current_raw = client.get(lock.key)
+        current_payload = thaw_freeze_module._parse_lock_payload(current_raw)
+        current_payload["token"] = "replacement-token"
+        client.set(lock.key, thaw_freeze_module._serialize_lock_payload(current_payload), ex=30)
+
+        monkeypatch.setattr(thaw_freeze_module, "runtime_lock_statuses", lambda _runid: stale_statuses)
+        cleared = clear_runtime_locks("run")
+        assert cleared == []
+
+        statuses = runtime_lock_statuses("run")
+        assert len(statuses) == 1
+        assert statuses[0]["key"] == lock.key
+        client.delete(lock.key)

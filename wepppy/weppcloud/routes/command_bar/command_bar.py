@@ -31,6 +31,7 @@ from wepppy.nodb.base import (
     try_redis_get_log_level,
     try_redis_set_log_level,
 )
+from wepppy.runtime_paths import clear_runtime_locks, runtime_lock_statuses
 from wepppy.weppcloud.utils.helpers import authorize
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.auth_tokens import JWTConfigurationError
@@ -68,9 +69,7 @@ def set_log_level(runid, config):
     try:
         try_redis_set_log_level(runid, level_key)
         effective_value = try_redis_get_log_level(runid)
-    except Exception as exc:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/command_bar/command_bar.py:71", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+    except (AttributeError, RuntimeError, TypeError, ValueError) as exc:
         logging.error('Unexpected error setting log level for %s: %s', runid, exc)
         return jsonify({'error': {'message': 'Failed to update log level. Please try again.'}}), 500
 
@@ -97,9 +96,6 @@ def get_lock_statuses(runid, config):
     except RuntimeError as exc:
         logging.error('Lock status unavailable for %s: %s', runid, exc)
         return jsonify({'error': {'message': 'Lock service unavailable. Please try again later.'}}), 503
-    except Exception as exc:  # pragma: no cover - defensive logging
-        logging.exception('Unexpected error retrieving lock statuses for %s', runid)
-        return jsonify({'error': {'message': 'Unexpected error retrieving lock statuses.'}}), 500
 
     locked_files = sorted([
         str(filename)
@@ -110,6 +106,62 @@ def get_lock_statuses(runid, config):
     return jsonify({
         'Content': {
             'locked_files': locked_files
+        }
+    })
+
+
+def _serialize_directory_lock_statuses(statuses: list[dict]) -> list[dict]:
+    serialized: list[dict] = []
+    for status in statuses:
+        serialized.append({
+            'key': status.get('key'),
+            'root': status.get('root'),
+            'owner': status.get('owner'),
+            'runid': status.get('runid'),
+            'scope': status.get('scope'),
+            'purpose': status.get('purpose'),
+            'expires_at': status.get('expires_at'),
+            'acquired_at': status.get('acquired_at'),
+            'ttl_seconds': status.get('ttl_seconds'),
+        })
+
+    return sorted(serialized, key=lambda item: str(item.get('key') or ''))
+
+
+@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/directory_locks', methods=['GET'])
+def get_directory_lock_statuses(runid, config):
+    authorize(runid, config)
+    load_run_context(runid, config)
+
+    try:
+        statuses = runtime_lock_statuses(runid)
+    except (RuntimeError, TypeError, ValueError) as exc:
+        logging.error('Runtime lock status unavailable for %s: %s', runid, exc)
+        return jsonify({'error': {'message': 'Runtime lock service unavailable. Please try again later.'}}), 503
+
+    return jsonify({
+        'Content': {
+            'directory_locks': _serialize_directory_lock_statuses(statuses),
+        }
+    })
+
+
+@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/clear_directory_locks', methods=['GET'])
+def clear_directory_lock_statuses(runid, config):
+    authorize(runid, config)
+    load_run_context(runid, config)
+
+    try:
+        cleared = clear_runtime_locks(runid)
+    except (RuntimeError, TypeError, ValueError) as exc:
+        logging.error('Runtime lock clear unavailable for %s: %s', runid, exc)
+        return jsonify({'error': {'message': 'Runtime lock service unavailable. Please try again later.'}}), 503
+
+    serialized = _serialize_directory_lock_statuses(cleared)
+    return jsonify({
+        'Content': {
+            'cleared_count': len(serialized),
+            'cleared_directory_locks': serialized,
         }
     })
 
@@ -130,9 +182,7 @@ def _build_mcp_markdown(
     if isinstance(expires_at, (int, float)):
         try:
             expires_at_iso = datetime.fromtimestamp(expires_at, tz=timezone.utc).isoformat()
-        except Exception:  # pragma: no cover - defensive
-            # Boundary catch: preserve contract behavior while logging unexpected failures.
-            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/command_bar/command_bar.py:131", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        except (OSError, OverflowError, ValueError):  # pragma: no cover - defensive
             expires_at_iso = None
 
     scope_text = ", ".join(scopes or [])
@@ -194,9 +244,9 @@ def issue_query_engine_mcp_token(runid, config):
         )
     except JWTConfigurationError as exc:
         return jsonify({'error': {'message': f'JWT configuration error: {exc}'}}), 500
-    except Exception as exc:  # pragma: no cover - defensive logging
-        logging.exception("Failed to issue Query Engine MCP token for %s", runid)
-        return jsonify({'error': {'message': 'Unexpected error generating MCP token.'}}), 500
+    except (RuntimeError, ValueError) as exc:  # pragma: no cover - defensive logging
+        logging.error("Failed to issue Query Engine MCP token for %s: %s", runid, exc)
+        return jsonify({'error': {'message': 'Failed to generate MCP token.'}}), 500
 
     claims = token_payload.get('claims', {})
     expires_at = claims.get('exp')
@@ -234,9 +284,7 @@ def issue_query_engine_mcp_token(runid, config):
     try:
         instructions_path.parent.mkdir(parents=True, exist_ok=True)
         instructions_path.write_text(markdown_body, encoding="utf-8")
-    except Exception as exc:  # pragma: no cover - defensive logging
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/command_bar/command_bar.py:233", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+    except OSError as exc:  # pragma: no cover - defensive logging
         logging.warning(
             "Failed to write MCP instructions for run %s at %s: %s",
             runid,

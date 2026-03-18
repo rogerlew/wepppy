@@ -244,6 +244,8 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 **Current WIP Count**: 2 packages ✅
 
+---
+
 ### markdown-doc Toolkit Integration
 **Started**: 2025-10-25  
 **Status**: Phase 3 Complete — Integration Active (Phase 4 pending telemetry + RFC decisions)  
@@ -311,6 +313,30 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Runtime Path Locks Redis Migration
+**Completed**: 2026-03-17  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260317_runtime_path_redis_locks/](docs/work-packages/20260317_runtime_path_redis_locks/)  
+**Description**: Replaced host-local runtime-path lock files with Redis-backed distributed runtime locks and added command-bar runtime directory lock status/clear operations.
+
+**Outcome**:
+- Migrated runtime lock acquire/release/status/clear behavior to Redis in `wepppy/runtime_paths/thaw_freeze.py`, including compatibility-safe contention checks and token-safe clear behavior.
+- Added command-bar routes and UI commands for runtime directory locks (`get directory_locks`, `clear directory_locks`) with canonical 503 error payload handling.
+- Updated `NODIR_LOCKED` guidance to direct operators to `:clear directory_locks` or wait for TTL expiry.
+- Added/updated tests in `tests/runtime_paths/test_mutations_thaw_freeze_contract.py` and `tests/weppcloud/routes/test_command_bar_mcp_token.py`.
+- Incorporated pre-closure subagent code review + QA review findings before final validation.
+- Validation passed: `tests/runtime_paths`, `tests/weppcloud/routes`, changed-file broad-exception guard, and full suite (`2333 passed, 34 skipped`).
+
+**Deliverables**:
+- ✅ Redis-backed runtime lock implementation and helper exports
+- ✅ Runtime directory lock command-bar backend + frontend controls
+- ✅ Regression coverage for clear/status flows and clear-token safety
+- ✅ Closed work-package docs/tracker + completed ExecPlan
+
+---
 
 ### Omni Contrast Hillslope Re-run Recovery (`delete_after_interchange`)
 **Completed**: 2026-03-17  
