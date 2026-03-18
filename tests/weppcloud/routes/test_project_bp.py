@@ -7,6 +7,7 @@ import pytest
 
 pytest.importorskip("flask")
 from flask import Flask
+from werkzeug.exceptions import Forbidden
 
 import wepppy.weppcloud.routes.nodb_api.project_bp as project_module
 
@@ -35,6 +36,20 @@ def project_client(
 
     helpers = __import__("wepppy.weppcloud.utils.helpers", fromlist=["authorize"])
     monkeypatch.setattr(helpers, "authorize", lambda runid, config, require_owner=False: None)
+
+    class _CurrentUserStub:
+        def __init__(self) -> None:
+            self.is_authenticated = True
+            self.id = "test-user-id"
+
+        def has_role(self, _role: str) -> bool:
+            return False
+
+        def get_id(self) -> str:
+            return self.id
+
+    current_user_stub = _CurrentUserStub()
+    monkeypatch.setattr(project_module, "current_user", current_user_stub)
 
     class DummyContext:
         def __init__(self, root_path: str) -> None:
@@ -71,6 +86,7 @@ def project_client(
     monkeypatch.setattr(project_module, "iter_nodb_mods_subclasses", lambda: [])
 
     dispatched: Dict[str, Any] = {}
+    dispatched["current_user"] = current_user_stub
 
     def fake_redis_connection_kwargs(db):
         dispatched["redis_db"] = db
@@ -201,6 +217,32 @@ def test_set_readonly_enqueues_background_job(project_client):
     assert queue_call.func is project_rq.set_run_readonly_rq
     assert queue_call.args == (RUN_ID, True)
     assert queue_call.timeout == 42
+
+
+def test_set_public_requires_authenticated_user(project_client):
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].is_authenticated = False
+
+    with pytest.raises(Forbidden):
+        client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/set_public",
+            json={"public": True},
+        )
+
+    assert RonStub.getInstance(run_dir).public is False
+
+
+def test_set_readonly_requires_authenticated_user(project_client):
+    client, _, dispatched, _, env = project_client
+    dispatched["current_user"].is_authenticated = False
+
+    with pytest.raises(Forbidden):
+        client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/set_readonly",
+            json={"readonly": True},
+        )
+
+    assert env.recorder.queue_calls == []
 
 
 def test_set_mod_enables_simple_module(project_client):

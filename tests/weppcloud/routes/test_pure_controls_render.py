@@ -191,3 +191,35 @@ def test_poweruser_panel_parquet_table_links_do_not_append_trailing_slash(
     assert 'href="/weppcloud/runs/test-run/test-config/browse/watershed/channels.parquet"' in rendered
     assert 'href="/weppcloud/runs/test-run/test-config/browse/landuse/landuse.parquet"' in rendered
     assert 'href="/weppcloud/runs/test-run/test-config/browse/soils/soils.parquet"' in rendered
+
+
+def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=anon_user,
+        current_user=anon_user,
+        request=request,
+    )
+
+    assert 'data-modal-open="teamModal"' not in rendered
+    assert 'id="checkbox_readonly"' not in rendered
+    assert 'id="checkbox_public"' not in rendered
+
+
+def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        request=request,
+    )
+
+    assert 'data-modal-open="teamModal"' in rendered
+    assert 'id="checkbox_readonly"' in rendered
+    assert 'id="checkbox_public"' in rendered

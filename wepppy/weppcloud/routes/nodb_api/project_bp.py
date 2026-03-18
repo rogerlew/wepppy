@@ -508,6 +508,9 @@ def task_setscenario(runid, config):
 @project_bp.route('/runs/<string:runid>/<config>/tasks/set_public', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_set_public(runid, config):
+    if not bool(getattr(current_user, 'is_authenticated', False)):
+        abort(403)
+
     payload = parse_request_payload(request, boolean_fields={'public'})
     state = payload.get('public', None)
 
@@ -569,6 +572,9 @@ def task_set_readonly(runid, config):
         set_run_readonly_rq,
         TIMEOUT,
     )
+
+    if not bool(getattr(current_user, 'is_authenticated', False)):
+        abort(403)
 
     payload = parse_request_payload(request, boolean_fields={'readonly'})
     state = payload.get('readonly', None)

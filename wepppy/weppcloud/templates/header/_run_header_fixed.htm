@@ -154,6 +154,7 @@
                       data-modal-open="unitizerModal">
                 Change Units
               </button>
+              {% if user.is_authenticated %}
               <button type="button"
                       class="pure-button"
                       data-modal-open="teamModal">
@@ -173,6 +174,7 @@
                        {% if current_ron.public %}checked{% endif %}>
                 <span>Public</span>
               </label>
+              {% endif %}
               {% if user.has_role('PowerUser') or user.has_role('Admin') or user.has_role('Root') %}
               <label class="wc-run-header__toggle">
                 <input id="checkbox_ttl_disabled"
