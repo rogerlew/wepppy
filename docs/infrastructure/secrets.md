@@ -34,8 +34,8 @@ Use stable secret IDs so Compose and Kubernetes mount the same filenames:
 
 | Secret ID | Used By | Notes |
 | --- | --- | --- |
-| `flask_secret_key` | `weppcloud`, `rq-engine` | Must match across services that mint/validate session cookies. |
-| `flask_security_password_salt` | `weppcloud`, `rq-engine` | Must match where password hashing/session logic depends on it. |
+| `flask_secret_key` | `weppcloud`, `rq-engine`, `rq-worker`, `rq-worker-batch` | Must match across services that mint/validate session cookies and worker paths that import Flask app config. |
+| `flask_security_password_salt` | `weppcloud`, `rq-engine`, `rq-worker`, `rq-worker-batch` | Must match where password hashing/session logic depends on it, including worker-side run-sync paths. |
 | `wepp_auth_jwt_secrets` | API services that issue/validate JWTs | File contains either a single secret or a comma-delimited rotation list (first is active). |
 | `wepp_mcp_jwt_secret` | `query-engine` | Enables MCP routes; can be the same value as `wepp_auth_jwt_secrets` but does not have to be. |
 | `agent_jwt_secret` | agent auth paths | Keep distinct from Flask secret key. |
@@ -45,7 +45,7 @@ Use stable secret IDs so Compose and Kubernetes mount the same filenames:
 | `dtale_internal_token` | `browse`, `dtale` | Internal service-to-service auth token. |
 | `cap_secret` | `cap` | CAPTCHA secret; do not expose to browser clients. |
 | `zoho_noreply_email_password` | `weppcloud` | SMTP auth secret when Zoho is enabled. |
-| `postgres_password` | `postgres`, app services | Higher priority if connection strings can surface in logs. |
+| `postgres_password` | `postgres`, app services, `rq-worker`, `rq-worker-batch` | Higher priority if connection strings can surface in logs. |
 | `redis_password` | `redis`, app services | Lower priority if Redis is network-isolated, but still a secret. |
 | `opentopography_api_key` | NoDb controllers / workers | OpenTopography API key used to download DEMs. |
 | `climate_engine_api_key` | NoDb controllers / workers | ClimateEngine API key used by the OpenET Climate Engine integration. |
@@ -64,8 +64,8 @@ This section is the Phase 0 “inventory” deliverable for the secrets migratio
 ### Secret Map
 | Secret ID | Current env var(s) | Proposed `*_FILE` env var(s) | Primary consumers | Notes |
 | --- | --- | --- | --- | --- |
-| `flask_secret_key` | `SECRET_KEY` | `SECRET_KEY_FILE` | Flask `weppcloud`; FastAPI `rq-engine` session validation | Signs Flask session cookies via `itsdangerous.Signer`. Must be identical between `weppcloud` and `rq-engine` for `/rq-engine/api/.../session-token` flows. |
-| `flask_security_password_salt` | `SECURITY_PASSWORD_SALT` | `SECURITY_PASSWORD_SALT_FILE` | Flask `weppcloud` | Flask-Security password hashing salt/pepper input. Treat as auth-critical and stable. |
+| `flask_secret_key` | `SECRET_KEY` | `SECRET_KEY_FILE` | Flask `weppcloud`; FastAPI `rq-engine` session validation; worker run-sync import path (`rq-worker*`) | Signs Flask session cookies via `itsdangerous.Signer`. Must be identical between `weppcloud` and `rq-engine` for `/rq-engine/api/.../session-token` flows. |
+| `flask_security_password_salt` | `SECURITY_PASSWORD_SALT` | `SECURITY_PASSWORD_SALT_FILE` | Flask `weppcloud`; worker run-sync import path (`rq-worker*`) | Flask-Security password hashing salt/pepper input. Treat as auth-critical and stable. |
 | `wepp_auth_jwt_secrets` | `WEPP_AUTH_JWT_SECRETS`, `WEPP_AUTH_JWT_SECRET` | `WEPP_AUTH_JWT_SECRETS_FILE`, `WEPP_AUTH_JWT_SECRET_FILE` | `weppcloud` token issuance; `rq-engine`/`browse` token validation | Prefer `WEPP_AUTH_JWT_SECRETS` (comma-delimited rotation list; first is active). |
 | `wepp_mcp_jwt_secret` | `WEPP_MCP_JWT_SECRET` | `WEPP_MCP_JWT_SECRET_FILE` | `query-engine` MCP mount | Enables `/mcp` routes when configured. Compose mounts `/run/secrets/wepp_mcp_jwt_secret` and sets `WEPP_MCP_JWT_SECRET_FILE`. |
 | `agent_jwt_secret` | `AGENT_JWT_SECRET` (dev `.env` also uses `AGENT_JWT_SECRET_KEY`) | `AGENT_JWT_SECRET_FILE` | `weppcloud` agent JWT issuance; `wepppy/mcp/*` tool auth | Code expects `AGENT_JWT_SECRET`. `AGENT_JWT_SECRET_KEY` is a legacy/dev key name; do not treat it as a runtime env var. |
@@ -76,7 +76,7 @@ This section is the Phase 0 “inventory” deliverable for the secrets migratio
 | `dtale_internal_token` | `DTALE_INTERNAL_TOKEN` | `DTALE_INTERNAL_TOKEN_FILE` | `browse` -> `dtale` loader bridge | Shared secret used as `X-DTALE-TOKEN` for `/internal/load`. |
 | `cap_secret` | `CAP_SECRET` | `CAP_SECRET_FILE` | `cap` service; server-side CAPTCHA verification (`weppcloud`, `rq-engine`) | `CAP_SITE_KEY` is public; `CAP_SECRET` is the server-side verify secret. |
 | `zoho_noreply_email_password` | `ZOHO_NOREPLY_EMAIL_PASSWORD` | `ZOHO_NOREPLY_EMAIL_PASSWORD_FILE` | `weppcloud` mail | Optional; only used when `ZOHO_NOREPLY_EMAIL` is also set. |
-| `postgres_password` | `POSTGRES_PASSWORD` | `POSTGRES_PASSWORD_FILE` | `postgres` container; app DB URLs | `DATABASE_URL`/`SQLALCHEMY_DATABASE_URI` currently embed the password (treat those as secret-bearing config). |
+| `postgres_password` | `POSTGRES_PASSWORD` | `POSTGRES_PASSWORD_FILE` | `postgres` container; app DB URLs; worker run-sync migration writes (`rq-worker*`) | `DATABASE_URL`/`SQLALCHEMY_DATABASE_URI` currently embed the password (treat those as secret-bearing config). |
 | `redis_password` | `REDIS_PASSWORD` | `REDIS_PASSWORD_FILE` | `redis` container; Python + Go clients | Many services accept `*_REDIS_URL` and inject `REDIS_PASSWORD` if the URL lacks auth. |
 | `opentopography_api_key` | `OPENTOPOGRAPHY_API_KEY` | `OPENTOPOGRAPHY_API_KEY_FILE` | DEM downloads (`wepppy/locales/earth/opentopography`) | Used as a query parameter when calling OpenTopography. |
 | `climate_engine_api_key` | `CLIMATE_ENGINE_API_KEY` | `CLIMATE_ENGINE_API_KEY_FILE` | OpenET Climate Engine integration (`wepppy/nodb/mods/openet`) | Legacy `docker/.env` scanning has been removed; configure `CLIMATE_ENGINE_API_KEY(_FILE)` explicitly. |

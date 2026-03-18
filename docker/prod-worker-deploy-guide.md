@@ -39,8 +39,13 @@ ufw allow out to <redis_ip> port 6379 proto tcp
 
 ### Required secret files
 - `docker/secrets/redis_password`
+- `docker/secrets/postgres_password`
+- `docker/secrets/flask_secret_key`
+- `docker/secrets/flask_security_password_salt`
 - `DISCORD_BOT_TOKEN_FILE` should point to a token file (for example `docker/secrets/discord_bot_token`) when Discord notifications are enabled.
   - If `DISCORD_BOT_TOKEN_FILE` is unset, the worker compose defaults to `/dev/null` so worker startup does not fail on missing `.bot_token`.
+
+`flask_secret_key`, `flask_security_password_salt`, and `postgres_password` are required on worker hosts because `run_sync_rq` writes migration rows by importing the Flask app + SQLAlchemy runtime.
 
 ### Optional
 - `WEPPCLOUDR_CONTAINER` (defaults to `weppcloudr`)
@@ -107,6 +112,11 @@ redis-cli -h <redis_ip> -a "$(cat docker/secrets/redis_password)" -n 9 ping
 - Confirm the worker containers have `/run/secrets/redis_password` mounted (Compose `secrets:`).
 - Restart workers after changing secret files (Compose secrets are file-backed but workers only read at startup).
 
+### run-sync fails with Flask or Postgres secret errors
+- If worker logs show `SECRET_KEY (or SECRET_KEY_FILE) must be configured`, verify `docker/secrets/flask_secret_key` and `docker/secrets/flask_security_password_salt` exist and are readable.
+- If worker logs show Postgres auth failures (`fe_sendauth: no password supplied`), verify `docker/secrets/postgres_password`.
+- Recreate workers after fixing files: `wctl up -d --force-recreate rq-worker rq-worker-batch`
+
 ### Workers appear idle while local host is busy
 RQ is pull-based; lower latency or more local processes can bias job pickup. Options:
 - Reduce local worker count.
@@ -126,7 +136,8 @@ Use this checklist when workers do not appear in `wepp1` `rq-info` output:
 1. On the worker host, verify compose env and token path:
    - `grep -nE '^(RQ_REDIS_URL|DISCORD_BOT_TOKEN_FILE)=' docker/.env`
 2. Verify required files exist and are readable:
-   - `ls -l docker/secrets/redis_password docker/secrets/discord_bot_token`
+   - `ls -l docker/secrets/redis_password docker/secrets/postgres_password docker/secrets/flask_secret_key docker/secrets/flask_security_password_salt`
+   - If Discord notifications are enabled: `ls -l docker/secrets/discord_bot_token`
 3. Recreate worker services:
    - `wctl up -d --force-recreate rq-worker rq-worker-batch`
 4. Confirm no restart loop:

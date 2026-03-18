@@ -432,6 +432,9 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - postgres_password
+      - flask_secret_key
+      - flask_security_password_salt
       - *discord-bot-token-secret
       - opentopography_api_key
       - climate_engine_api_key
@@ -442,6 +445,9 @@ services:
       # Prefer explicit RQ_REDIS_URL when running workers on external hosts
       REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
       WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
     volumes:
@@ -465,6 +471,9 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - postgres_password
+      - flask_secret_key
+      - flask_security_password_salt
       - *discord-bot-token-secret
       - opentopography_api_key
       - climate_engine_api_key
@@ -477,6 +486,9 @@ services:
       # Prefer explicit RQ_REDIS_URL when running workers on external hosts
       REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
       WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
     volumes:

@@ -482,6 +482,9 @@ services:
     shm_size: "8g"
     secrets:
       - redis_password
+      - postgres_password
+      - flask_secret_key
+      - flask_security_password_salt
       - opentopography_api_key
       - climate_engine_api_key
     ulimits:
@@ -501,6 +504,9 @@ services:
       RQ_LOGGING_LEVEL: DEBUG
       REDIS_HOST: redis
       MPLCONFIGDIR: /tmp/matplotlib
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
     depends_on:
@@ -514,6 +520,9 @@ services:
     shm_size: "8g"
     secrets:
       - redis_password
+      - postgres_password
+      - flask_secret_key
+      - flask_security_password_salt
       - opentopography_api_key
       - climate_engine_api_key
     ulimits:
@@ -535,6 +544,9 @@ services:
       MPLCONFIGDIR: /tmp/matplotlib
       WEPPPY_NCPU: "6"
       PERIDOT_CPU: "4"
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
     depends_on:

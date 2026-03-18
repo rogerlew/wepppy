@@ -30,9 +30,10 @@ Worker-only stacks (no Flask/Caddy/Redis/Postgres) use:
 - Compose file: `docker/docker-compose.prod.worker.yml`
 - Guide: `docker/prod-worker-deploy-guide.md`
 
-Key `docker/.env` requirements for `docker-compose.prod.worker.yml`:
+Key requirements for `docker-compose.prod.worker.yml`:
 - `RQ_REDIS_URL` must point at a reachable Redis (DB 9). If unset, the compose default falls back to `redis:6379`, which only works when a `redis` service exists on the same Compose network.
 - `DISCORD_BOT_TOKEN_FILE` should point to a token file (for example `./secrets/discord_bot_token`) if worker jobs can emit Discord notifications.
+- Worker secret files `docker/secrets/flask_secret_key`, `docker/secrets/flask_security_password_salt`, and `docker/secrets/postgres_password` must exist on the worker host so run-sync jobs can import Flask config and write migration rows.
 - `WC1_DIR` and `GEODATA_DIR` must match the host mount points (shared run storage + geodata).
 - `WEPPPY_ENV_FILE` controls the `env_file:` path for services. `wctl` sets it automatically; if running raw `docker compose`, set `WEPPPY_ENV_FILE=.env` and run from `docker/` to avoid `docker/docker/.env` path resolution failures.
 
@@ -250,6 +251,12 @@ docker run -d \
   --workdir /workdir/wepppy \
   --env-file docker/wepppy-rq-worker-batch.env \
   -v "$(pwd)/docker/secrets/redis_password:/run/secrets/redis_password:ro" \
+  -v "$(pwd)/docker/secrets/postgres_password:/run/secrets/postgres_password:ro" \
+  -v "$(pwd)/docker/secrets/flask_secret_key:/run/secrets/flask_secret_key:ro" \
+  -v "$(pwd)/docker/secrets/flask_security_password_salt:/run/secrets/flask_security_password_salt:ro" \
+  -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password \
+  -e SECRET_KEY_FILE=/run/secrets/flask_secret_key \
+  -e SECURITY_PASSWORD_SALT_FILE=/run/secrets/flask_security_password_salt \
   --volumes-from wepppy-rq-worker-batch \
   --init wepppy-dev \
   bash -lc 'set -euo pipefail; REDIS_PASSWORD="$(cat /run/secrets/redis_password)"; exec rq worker-pool -n "4" -u "redis://:${REDIS_PASSWORD}@redis:6379/9" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch'
@@ -323,6 +330,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
 - **Redis connection errors on startup** — the microservices depend on Redis; ensure `redis` comes up cleanly, that keyspace notifications include `Kh`, or restart dependent containers (`docker compose ... restart status preflight browse`).
 - **Worker pools crash trying to connect to `redis:6379`** — `docker-compose.prod.worker.yml` does not run a `redis` service. If your worker stack is still env-based (pre-secrets migration), set `RQ_REDIS_URL=redis://:<password>@<redis_host>:6379/9` in `docker/.env`. If the secrets-as-files contract is enabled on the worker host, set `RQ_REDIS_URL=redis://<redis_host>:6379/9` and provide `docker/secrets/redis_password`. Use `wctl rq-info` to confirm workers registered.
 - **Worker pools crash with `...discord_bot/.bot_token` missing** — set `DISCORD_BOT_TOKEN_FILE` to a readable token file (for example `./secrets/discord_bot_token`) and recreate workers. The compose default mounts `/dev/null` to satisfy import-time token file reads when Discord notifications are disabled.
+- **`run-sync` jobs fail with `SECRET_KEY (or SECRET_KEY_FILE) must be configured` or Postgres auth errors** — ensure worker hosts provide `docker/secrets/flask_secret_key`, `docker/secrets/flask_security_password_salt`, and `docker/secrets/postgres_password`, then recreate `rq-worker` (and `rq-worker-batch` if needed).
 - **`wctl rq-info` shows unknown hostnames** — `rq-info` worker hostnames are usually Docker container IDs, not machine FQDNs. Use `docker ps --format '{{.ID}} {{.Names}}'` on each host to map IDs to the owning host/services.
 - **Workers are visible on worker host but not on wepp1** — verify both stacks point at the same `RQ_REDIS_URL` target and DB 9, then recreate worker services and re-check from wepp1.
 

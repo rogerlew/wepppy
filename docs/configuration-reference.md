@@ -35,7 +35,7 @@ Consolidated configuration surfaces discovered from:
 | `POSTGRES_DB` | `python: wepppy`; `compose(dev|prod): wepppy` | `wepppy.weppcloud.configuration`; compose (`postgres`) | PostgreSQL database name. |
 | `POSTGRES_USER` | `python: wepppy`; `compose(dev|prod): wepppy` | `wepppy.weppcloud.configuration`; compose (`postgres`) | PostgreSQL user name. |
 | `POSTGRES_PASSWORD` | — | `wepppy.weppcloud.configuration` | PostgreSQL password (secret; prefers `POSTGRES_PASSWORD_FILE`). |
-| `POSTGRES_PASSWORD_FILE` | — | `wepppy.config.secrets`; compose (`postgres`, `weppcloud`, `rq-engine`) | Path to PostgreSQL password file (Docker secret). |
+| `POSTGRES_PASSWORD_FILE` | — | `wepppy.config.secrets`; compose (`postgres`, `weppcloud`, `rq-engine`, `rq-worker`, `rq-worker-batch`) | Path to PostgreSQL password file (Docker secret). |
 | `POSTGRES_IDLE_IN_TX_TIMEOUT` | — | `wepppy.weppcloud.configuration` | Optional `idle_in_transaction_session_timeout` (passed as a libpq `options` string). |
 | `PGHOST` | `compose(dev|prod): postgres` | compose (`postgres-backup`) | Postgres backup target host. |
 | `PGPORT` | `compose(dev|prod): 5432` | compose (`postgres-backup`) | Postgres backup target port. |
@@ -56,9 +56,9 @@ Consolidated configuration surfaces discovered from:
 | `ENABLE_LOCAL_LOGIN` | `python: true`; `compose(dev): true`; `compose(prod): false` | `wepppy.weppcloud.configuration`; compose (common env) | Enables local login flow. |
 | `GL_DASHBOARD_BATCH_ENABLED` | `python: false`; `compose(dev|prod): false` | `wepppy.weppcloud.configuration`; compose (common env) | Enables GL dashboard batch features. |
 | `SECRET_KEY` | required | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Flask `SECRET_KEY` (secret; prefers `SECRET_KEY_FILE`). |
-| `SECRET_KEY_FILE` | — | `wepppy.config.secrets`; compose (`weppcloud`, `rq-engine`) | Path to Flask `SECRET_KEY` file (Docker secret). |
+| `SECRET_KEY_FILE` | — | `wepppy.config.secrets`; compose (`weppcloud`, `rq-engine`, `rq-worker`, `rq-worker-batch`) | Path to Flask `SECRET_KEY` file (Docker secret). |
 | `SECURITY_PASSWORD_SALT` | required | `wepppy.weppcloud.configuration` | Flask-Security password salt (secret; prefers `SECURITY_PASSWORD_SALT_FILE`). |
-| `SECURITY_PASSWORD_SALT_FILE` | — | `wepppy.config.secrets`; compose (`weppcloud`, `rq-engine`) | Path to Flask-Security password salt file (Docker secret). |
+| `SECURITY_PASSWORD_SALT_FILE` | — | `wepppy.config.secrets`; compose (`weppcloud`, `rq-engine`, `rq-worker`, `rq-worker-batch`) | Path to Flask-Security password salt file (Docker secret). |
 
 ## Sessions / Cookies
 

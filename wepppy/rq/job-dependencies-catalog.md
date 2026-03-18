@@ -553,6 +553,7 @@ Audit notes:
 
 Audit notes:
 1. `migrations_rq` depends on the sync job, ensuring that run files exist before migrations execute.
+2. `run_sync_rq` writes `RunMigration` rows by importing `wepppy.weppcloud.app`; workers executing it need `SECRET_KEY(_FILE)`, `SECURITY_PASSWORD_SALT(_FILE)`, and `POSTGRES_PASSWORD(_FILE)` configured.
 
 **`wepppy/microservices/rq_engine/batch_routes.py`**
 

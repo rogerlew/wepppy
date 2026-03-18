@@ -17,6 +17,9 @@ x-worker-env: &worker-env
   RQ_REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
   REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
   REDIS_PASSWORD_FILE: /run/secrets/redis_password
+  SECRET_KEY_FILE: /run/secrets/flask_secret_key
+  SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
+  POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
   WC1_DIR: /wc1
   GEODATA_DIR: /geodata
   OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
@@ -52,6 +55,9 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - postgres_password
+      - flask_secret_key
+      - flask_security_password_salt
       - *discord-bot-token-secret
       - opentopography_api_key
       - climate_engine_api_key
@@ -74,6 +80,9 @@ services:
         hard: 1000000
     secrets:
       - redis_password
+      - postgres_password
+      - flask_secret_key
+      - flask_security_password_salt
       - *discord-bot-token-secret
       - opentopography_api_key
       - climate_engine_api_key
@@ -114,6 +123,12 @@ volumes:
 secrets:
   redis_password:
     file: ./secrets/redis_password
+  postgres_password:
+    file: ./secrets/postgres_password
+  flask_secret_key:
+    file: ./secrets/flask_secret_key
+  flask_security_password_salt:
+    file: ./secrets/flask_security_password_salt
   discord_bot_token:
     file: ${DISCORD_BOT_TOKEN_FILE:-/dev/null}
   opentopography_api_key:
