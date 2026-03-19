@@ -43,6 +43,45 @@ def _clear_reports_cache(
     publish_status(status_channel, "No WEPP reports cache directory to clear.\n")
 
 
+def _clear_export_dir(
+    run_wd: str,
+    *,
+    status_channel: str,
+    publish_status: Callable[[str, str], None],
+) -> None:
+    export_root = os.path.join(run_wd, "export")
+    publish_status(status_channel, "Clearing export directory...\n")
+    if os.path.isdir(export_root):
+        shutil.rmtree(export_root)
+    os.makedirs(export_root, exist_ok=True)
+    publish_status(status_channel, "Clearing export directory... done.\n")
+
+
+def _clear_query_engine_catalog_cache(
+    run_wd: str,
+    *,
+    status_channel: str,
+    publish_status: Callable[[str, str], None],
+) -> None:
+    query_engine_root = os.path.join(run_wd, "_query_engine")
+    catalog_path = os.path.join(query_engine_root, "catalog.json")
+    cache_dir = os.path.join(query_engine_root, "cache")
+
+    publish_status(status_channel, "Clearing query engine catalog cache...\n")
+    removed = False
+    if os.path.isdir(cache_dir):
+        shutil.rmtree(cache_dir)
+        removed = True
+    if os.path.isfile(catalog_path):
+        os.remove(catalog_path)
+        removed = True
+
+    if removed:
+        publish_status(status_channel, "Clearing query engine catalog cache... done.\n")
+        return
+    publish_status(status_channel, "No query engine catalog cache artifacts to clear.\n")
+
+
 def _stream_reader(stream: TextIO, output_queue: queue.Queue[str]) -> None:
     try:
         for line in iter(stream.readline, ""):
@@ -255,6 +294,16 @@ def prepare_fork_run(
         wait_for_paths(required_nodbs, timeout_s=60.0)
         publish_status(status_channel, "Forked .nodb files ready.\n")
         _clear_reports_cache(
+            new_wd,
+            status_channel=status_channel,
+            publish_status=publish_status,
+        )
+        _clear_export_dir(
+            new_wd,
+            status_channel=status_channel,
+            publish_status=publish_status,
+        )
+        _clear_query_engine_catalog_cache(
             new_wd,
             status_channel=status_channel,
             publish_status=publish_status,

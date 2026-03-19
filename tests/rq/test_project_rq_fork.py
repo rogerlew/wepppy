@@ -199,3 +199,90 @@ def test_clear_reports_cache_reports_missing_directory(tmp_path: Path) -> None:
 
     assert "Clearing WEPP reports cache...\n" in published
     assert "No WEPP reports cache directory to clear.\n" in published
+
+
+def test_clear_export_dir_removes_and_recreates_directory(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    run_wd = tmp_path / "run"
+    export_dir = run_wd / "export"
+    export_dir.mkdir(parents=True)
+    stale_file = export_dir / "stale.txt"
+    stale_file.write_text("stale", encoding="utf-8")
+
+    published: list[str] = []
+    fork_helpers._clear_export_dir(
+        str(run_wd),
+        status_channel="run:fork",
+        publish_status=lambda _channel, message: published.append(message),
+    )
+
+    assert export_dir.exists()
+    assert export_dir.is_dir()
+    assert not stale_file.exists()
+    assert "Clearing export directory...\n" in published
+    assert "Clearing export directory... done.\n" in published
+
+
+def test_clear_export_dir_creates_missing_directory(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    run_wd = tmp_path / "run"
+    run_wd.mkdir(parents=True)
+    export_dir = run_wd / "export"
+    published: list[str] = []
+
+    fork_helpers._clear_export_dir(
+        str(run_wd),
+        status_channel="run:fork",
+        publish_status=lambda _channel, message: published.append(message),
+    )
+
+    assert export_dir.exists()
+    assert export_dir.is_dir()
+    assert "Clearing export directory...\n" in published
+    assert "Clearing export directory... done.\n" in published
+
+
+def test_clear_query_engine_catalog_cache_removes_catalog_and_cache(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    run_wd = tmp_path / "run"
+    query_engine_root = run_wd / "_query_engine"
+    query_engine_cache = query_engine_root / "cache"
+    query_engine_cache.mkdir(parents=True)
+    (query_engine_cache / "stale.bin").write_text("stale", encoding="utf-8")
+    catalog_path = query_engine_root / "catalog.json"
+    catalog_path.write_text('{"files": []}', encoding="utf-8")
+    instructions_path = query_engine_root / "mcp_integration_instructions.md"
+    instructions_path.write_text("keep", encoding="utf-8")
+
+    published: list[str] = []
+    fork_helpers._clear_query_engine_catalog_cache(
+        str(run_wd),
+        status_channel="run:fork",
+        publish_status=lambda _channel, message: published.append(message),
+    )
+
+    assert not query_engine_cache.exists()
+    assert not catalog_path.exists()
+    assert instructions_path.exists()
+    assert "Clearing query engine catalog cache...\n" in published
+    assert "Clearing query engine catalog cache... done.\n" in published
+
+
+def test_clear_query_engine_catalog_cache_reports_missing_artifacts(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    run_wd = tmp_path / "run"
+    run_wd.mkdir(parents=True)
+    published: list[str] = []
+
+    fork_helpers._clear_query_engine_catalog_cache(
+        str(run_wd),
+        status_channel="run:fork",
+        publish_status=lambda _channel, message: published.append(message),
+    )
+
+    assert "Clearing query engine catalog cache...\n" in published
+    assert "No query engine catalog cache artifacts to clear.\n" in published
