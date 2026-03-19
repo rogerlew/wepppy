@@ -28,6 +28,21 @@ def _build_fork_rsync_cmd(run_right: str, *, undisturbify: bool) -> list[str]:
     return cmd
 
 
+def _clear_reports_cache(
+    run_wd: str,
+    *,
+    status_channel: str,
+    publish_status: Callable[[str, str], None],
+) -> None:
+    cache_root = os.path.join(run_wd, "wepp", "reports", "cache")
+    publish_status(status_channel, "Clearing WEPP reports cache...\n")
+    if os.path.isdir(cache_root):
+        shutil.rmtree(cache_root)
+        publish_status(status_channel, "Clearing WEPP reports cache... done.\n")
+        return
+    publish_status(status_channel, "No WEPP reports cache directory to clear.\n")
+
+
 def _stream_reader(stream: TextIO, output_queue: queue.Queue[str]) -> None:
     try:
         for line in iter(stream.readline, ""):
@@ -239,6 +254,11 @@ def prepare_fork_run(
         ]
         wait_for_paths(required_nodbs, timeout_s=60.0)
         publish_status(status_channel, "Forked .nodb files ready.\n")
+        _clear_reports_cache(
+            new_wd,
+            status_channel=status_channel,
+            publish_status=publish_status,
+        )
 
         publish_status(status_channel, "Undisturbifying Project...\n")
         ron = ron_cls.getInstance(new_wd)

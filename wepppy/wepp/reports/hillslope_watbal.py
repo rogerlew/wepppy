@@ -37,13 +37,17 @@ class HillslopeWatbalReport(ReportBase):
         if not self.wd.exists():
             raise FileNotFoundError(self.wd)
 
+        source_path = self.wd / self._SOURCE_REL_PATH
         cache = ReportCacheManager(self.wd)
+        cache_path = cache.root / f"{self._CACHE_KEY}.parquet"
         dataframe = cache.read_parquet(self._CACHE_KEY, version=self._CACHE_VERSION)
+        if dataframe is not None and self._source_is_newer_than_cache(source_path, cache_path):
+            dataframe = None
         if dataframe is None:
             legacy_cache = (
                 self.wd / "wepp" / "output" / "interchange" / f"{self._CACHE_KEY}.parquet"
             )
-            if legacy_cache.exists():
+            if legacy_cache.exists() and not self._source_is_newer_than_cache(source_path, legacy_cache):
                 dataframe = pd.read_parquet(legacy_cache)
 
         if dataframe is None or not self._validate_cache_columns(dataframe):
@@ -93,6 +97,13 @@ class HillslopeWatbalReport(ReportBase):
         """Return ``True`` when the cached dataframe matches the expected schema."""
         expected = {"TopazID", "WaterYear", "Area_m2", *self._MEASURE_MAP.keys()}
         return expected.issubset(set(dataframe.columns))
+
+    @staticmethod
+    def _source_is_newer_than_cache(source_path: Path, cache_path: Path) -> bool:
+        """Return ``True`` when the source parquet is newer than the cached summary."""
+        if not source_path.exists() or not cache_path.exists():
+            return False
+        return source_path.stat().st_mtime_ns > cache_path.stat().st_mtime_ns
 
     def _initialise_empty(self) -> None:
         """Initialize placeholder dataframes when no source data exists."""

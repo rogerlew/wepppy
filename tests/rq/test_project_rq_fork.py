@@ -162,3 +162,40 @@ def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch) ->
 
     assert captured["cmd"] == ["patched-rsync", "/tmp/target/", False]
     assert captured["env"] == {"PATH": "patched"}
+
+
+def test_clear_reports_cache_removes_cache_directory(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    run_wd = tmp_path / "run"
+    cache_dir = run_wd / "wepp" / "reports" / "cache"
+    cache_dir.mkdir(parents=True)
+    (cache_dir / "stale.parquet").write_text("stale")
+
+    published: list[str] = []
+    fork_helpers._clear_reports_cache(
+        str(run_wd),
+        status_channel="run:fork",
+        publish_status=lambda _channel, message: published.append(message),
+    )
+
+    assert not cache_dir.exists()
+    assert "Clearing WEPP reports cache...\n" in published
+    assert "Clearing WEPP reports cache... done.\n" in published
+
+
+def test_clear_reports_cache_reports_missing_directory(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    run_wd = tmp_path / "run"
+    run_wd.mkdir(parents=True)
+    published: list[str] = []
+
+    fork_helpers._clear_reports_cache(
+        str(run_wd),
+        status_channel="run:fork",
+        publish_status=lambda _channel, message: published.append(message),
+    )
+
+    assert "Clearing WEPP reports cache...\n" in published
+    assert "No WEPP reports cache directory to clear.\n" in published

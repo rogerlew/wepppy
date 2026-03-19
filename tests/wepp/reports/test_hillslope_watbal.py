@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import contextlib
+import json
+import os
 import sys
 import types
 from pathlib import Path
@@ -157,3 +159,42 @@ def test_hillslope_watbal_uses_cache(tmp_path, monkeypatch):
     rows = list(report.avg_annual_iter())
     assert len(rows) == 1
     assert rows[0].row["TopazID"] == 301
+
+
+def test_hillslope_watbal_rebuilds_when_source_is_newer_than_cache(tmp_path, monkeypatch):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+
+    run_dir = tmp_path / "run"
+    cache_dir = run_dir / "wepp" / "reports" / "cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path = cache_dir / "hillslope_watbal_summary.parquet"
+    meta_path = cache_dir / "hillslope_watbal_summary.meta.json"
+    cache_df = pd.DataFrame(
+        {
+            "TopazID": [301],
+            "WaterYear": [1999],
+            "Area_m2": [500.0],
+            "Precipitation (mm)": [2.0],
+            "Percolation (mm)": [1.0],
+            "Surface Runoff (mm)": [0.5],
+            "Lateral Flow (mm)": [0.25],
+            "Transpiration + Evaporation (mm)": [0.75],
+        }
+    )
+    cache_df.to_parquet(cache_path, index=False)
+    meta_path.write_text(json.dumps({"version": "1"}))
+    os.utime(cache_path, (1, 1))
+    os.utime(meta_path, (1, 1))
+
+    source_path = run_dir / "wepp" / "output" / "interchange" / "H.wat.parquet"
+    _write_h_wat_parquet(source_path)
+    os.utime(source_path, (2, 2))
+
+    report = HillslopeWatbalReport(run_dir)
+    rows = list(report.avg_annual_iter())
+    assert len(rows) == 2
+    assert rows[0].row["TopazID"] == 101
+
+    refreshed_cache = pd.read_parquet(cache_path)
+    assert len(refreshed_cache) == 4
+    assert refreshed_cache["TopazID"].tolist() == [101, 101, 202, 202]
