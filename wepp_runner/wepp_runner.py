@@ -47,12 +47,13 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 import random
+import math
 
 from glob import glob
 
 _IS_WINDOWS = os.name == 'nt'
 
-from time import sleep, time
+from time import monotonic, sleep, time
 
 import subprocess
 
@@ -97,10 +98,39 @@ def _compute_linux_wepp_bin_opts():
 # this is a list of available linux wepp binaries that can be specified for wepp_bin argument
 linux_wepp_bin_opts = _compute_linux_wepp_bin_opts()
 
+_HILLSLOPE_INPUT_WAIT_S_DEFAULT = 30.0
+_HILLSLOPE_INPUT_WAIT_POLL_S_DEFAULT = 0.25
+
 
 def get_linux_wepp_bin_opts():
     """Return the current linux WEPP binaries available on disk."""
     return _compute_linux_wepp_bin_opts()
+
+
+def _env_float_or_default(name, default, *, min_value=None):
+    raw = os.getenv(name)
+    if raw in (None, ""):
+        return default
+    try:
+        value = float(raw)
+    except ValueError:
+        return default
+    if not math.isfinite(value):
+        return default
+    if min_value is not None and value < min_value:
+        return default
+    return value
+
+
+def _wait_for_required_files(paths, *, timeout_s, poll_s):
+    deadline = monotonic() + timeout_s
+    for path in paths:
+        while not _exists(path):
+            if monotonic() >= deadline:
+                raise FileNotFoundError(
+                    f"Required WEPP hillslope input file was not available within {timeout_s:.2f}s: {path}"
+                )
+            sleep(poll_s)
 
 if _IS_WINDOWS:
     _wepp = _join(wepp_bin_dir, "wepp2014.exe")
@@ -386,13 +416,31 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
         cmd = [os.path.abspath(_wepp)]
 
     if not no_file_checks:
-        assert _exists(_join(runs_dir, f'p{wepp_id}.man'))
-        assert _exists(_join(runs_dir, f'p{wepp_id}.sol'))
+        input_wait_s = _env_float_or_default(
+            "WEPP_RUNNER_HILLSLOPE_INPUT_WAIT_S",
+            _HILLSLOPE_INPUT_WAIT_S_DEFAULT,
+            min_value=0.0,
+        )
+        input_poll_s = _env_float_or_default(
+            "WEPP_RUNNER_HILLSLOPE_INPUT_WAIT_POLL_S",
+            _HILLSLOPE_INPUT_WAIT_POLL_S_DEFAULT,
+            min_value=0.01,
+        )
 
-        assert _exists(_join(runs_dir, man_relpath, f'p{wepp_id}.man'))
-        assert _exists(_join(runs_dir, slp_relpath, f'p{wepp_id}.slp'))
-        assert _exists(_join(runs_dir, cli_relpath, f'p{wepp_id}.cli'))
-        assert _exists(_join(runs_dir, sol_relpath, f'p{wepp_id}.sol'))
+        required_inputs = [
+            _join(runs_dir, f'p{wepp_id}.man'),
+            _join(runs_dir, f'p{wepp_id}.sol'),
+            _join(runs_dir, man_relpath, f'p{wepp_id}.man'),
+            _join(runs_dir, slp_relpath, f'p{wepp_id}.slp'),
+            _join(runs_dir, cli_relpath, f'p{wepp_id}.cli'),
+            _join(runs_dir, sol_relpath, f'p{wepp_id}.sol'),
+        ]
+        unique_required_inputs = list(dict.fromkeys(required_inputs))
+        _wait_for_required_files(
+            unique_required_inputs,
+            timeout_s=input_wait_s,
+            poll_s=input_poll_s,
+        )
 
     if timeout_retries < 0:
         raise ValueError(f"timeout_retries must be >= 0 (received {timeout_retries})")

@@ -137,3 +137,72 @@ def test_run_hillslope_exhausts_timeouts_with_context(monkeypatch, tmp_path):
     assert "timeout attempt=4/4" in err_text
     assert "retrying after timeout" in err_text
     assert "metric:run_hillslope wepp_id=202 timeout_attempts=4 success_on_retry=0 final_state=timeout" in err_text
+
+
+@pytest.mark.parametrize("raw_value", ["nan", "inf", "-inf"])
+def test_env_float_or_default_rejects_non_finite(monkeypatch, raw_value):
+    monkeypatch.setenv("UNIT_WAIT", raw_value)
+    result = wepp_runner_module._env_float_or_default("UNIT_WAIT", 30.0, min_value=0.0)
+    assert result == 30.0
+
+
+def test_run_hillslope_waits_for_missing_input_then_succeeds(monkeypatch, tmp_path):
+    wepp_id = 303
+    _write_hillslope_inputs(tmp_path, wepp_id)
+    sol_path = tmp_path / f"p{wepp_id}.sol"
+    sol_path.unlink()
+
+    attempts = [{"stdout": "WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY\n"}]
+    popen_calls = []
+    sleep_calls = []
+
+    def _fake_popen(*args, **kwargs):
+        popen_calls.append((args, kwargs))
+        assert attempts, "Unexpected extra subprocess launch"
+        return _FakeProcess(attempts.pop(0))
+
+    def _fake_sleep(delay):
+        sleep_calls.append(delay)
+        if not sol_path.exists():
+            sol_path.write_text("stub\n", encoding="ascii")
+
+    monkeypatch.setattr(wepp_runner_module, "sleep", _fake_sleep)
+    monkeypatch.setattr(wepp_runner_module.subprocess, "Popen", _fake_popen)
+    monkeypatch.setenv("WEPP_RUNNER_HILLSLOPE_INPUT_WAIT_S", "1")
+    monkeypatch.setenv("WEPP_RUNNER_HILLSLOPE_INPUT_WAIT_POLL_S", "0.01")
+
+    success, returned_id, elapsed = wepp_runner_module.run_hillslope(
+        wepp_id=wepp_id,
+        runs_dir=str(tmp_path),
+        timeout=0.01,
+        timeout_retries=0,
+    )
+
+    assert success is True
+    assert returned_id == wepp_id
+    assert elapsed >= 0.0
+    assert len(popen_calls) == 1
+    assert sleep_calls == [0.01]
+
+
+def test_run_hillslope_missing_input_uses_defaults_when_env_non_finite(monkeypatch, tmp_path):
+    wepp_id = 304
+    _write_hillslope_inputs(tmp_path, wepp_id)
+    (tmp_path / f"p{wepp_id}.sol").unlink()
+
+    monkeypatch.setenv("WEPP_RUNNER_HILLSLOPE_INPUT_WAIT_S", "nan")
+    monkeypatch.setenv("WEPP_RUNNER_HILLSLOPE_INPUT_WAIT_POLL_S", "nan")
+    monkeypatch.setattr(wepp_runner_module, "_HILLSLOPE_INPUT_WAIT_S_DEFAULT", 0.01)
+    monkeypatch.setattr(wepp_runner_module, "_HILLSLOPE_INPUT_WAIT_POLL_S_DEFAULT", 0.001)
+
+    with pytest.raises(FileNotFoundError) as exc:
+        wepp_runner_module.run_hillslope(
+            wepp_id=wepp_id,
+            runs_dir=str(tmp_path),
+            timeout=0.01,
+            timeout_retries=0,
+        )
+
+    msg = str(exc.value)
+    assert "Required WEPP hillslope input file was not available within 0.01s" in msg
+    assert f"p{wepp_id}.sol" in msg
