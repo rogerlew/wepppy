@@ -1,18 +1,33 @@
 {% import "controls/_pure_macros.html" as ui %}
 
   <p class="wc-text-muted">
-    Deep soils can store excessive water and limit runoff. Clip depths to moderate soil storage.
+    Configure soil depth clipping to cap deep profiles and/or raise shallow profiles.
   </p>
   {{ ui.checkbox_field(
        "clip_soils",
-       "Clip soils",
+       "Clip Soils Maximum Depth",
        checked=soils.clip_soils,
        attrs={"class": "disable-readonly"}
      ) }}
   {{ ui.numeric_field(
        "clip_soils_depth",
-       "Soil clip depth",
+       "Soils Maximum Depth",
        value=soils.clip_soils_depth | round | int,
+       unit_label="mm",
+       unit_category="xs-distance",
+       unit_name="mm",
+       attrs={"class": "disable-readonly", "inputmode": "numeric"}
+     ) }}
+  {{ ui.checkbox_field(
+       "clip_soils_minimum",
+       "Clip Soils Minimum Depth",
+       checked=soils.clip_soils_minimum,
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "clip_soils_minimum_depth",
+       "Soils Minimum Depth",
+       value=soils.clip_soils_minimum_depth | round | int,
        unit_label="mm",
        unit_category="xs-distance",
        unit_name="mm",

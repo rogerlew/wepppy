@@ -222,7 +222,9 @@ class Soils(NoDbBase):
             self._initial_sat = 0.75
             self._ksflag = self.config_get_bool('soils', 'ksflag')
             self._clip_soils = self.config_get_bool('soils', 'clip_soils', False)
-            self._clip_soils_depth = self.config_get_float('soils', 'clip_soils', 1000)
+            self._clip_soils_depth = self.config_get_float('soils', 'clip_soils_depth', 1000)
+            self._clip_soils_minimum = self.config_get_bool('soils', 'clip_soils_minimum', False)
+            self._clip_soils_minimum_depth = self.config_get_float('soils', 'clip_soils_minimum_depth', 0)
             self._soils_is_vrt = False
 
             self._soils_map = self.config_get_path('soils', 'soils_map', None)
@@ -268,6 +270,24 @@ class Soils(NoDbBase):
     @nodb_setter
     def clip_soils_depth(self, value: float) -> None:
         self._clip_soils_depth = value
+
+    @property
+    def clip_soils_minimum(self) -> bool:
+        return getattr(self, '_clip_soils_minimum', False)
+
+    @clip_soils_minimum.setter
+    @nodb_setter
+    def clip_soils_minimum(self, value: bool) -> None:
+        self._clip_soils_minimum = value
+
+    @property
+    def clip_soils_minimum_depth(self) -> float:
+        return getattr(self, '_clip_soils_minimum_depth', 0)
+
+    @clip_soils_minimum_depth.setter
+    @nodb_setter
+    def clip_soils_minimum_depth(self, value: float) -> None:
+        self._clip_soils_minimum_depth = value
 
     @property
     def initial_sat(self) -> float:

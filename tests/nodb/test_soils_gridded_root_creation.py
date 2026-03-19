@@ -149,3 +149,48 @@ def test_soil_summary_path_skips_runid_resolution_for_absolute_soils_dir(
     monkeypatch.setattr("wepppy.weppcloud.utils.helpers.get_wd", _unexpected_get_wd)
 
     assert summary.path == str(absolute_soils_dir / "123.sol")
+
+
+def test_init_reads_depth_config_keys_with_expected_names(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    float_calls: list[tuple[str, str, float | None]] = []
+
+    def _fake_nodb_init(
+        self: Soils,
+        wd_arg: str,
+        cfg_fn: str,
+        run_group: str | None = None,
+        group_name: str | None = None,
+    ) -> None:
+        self.wd = wd_arg
+        self.logger = logging.getLogger("tests.nodb.soils_config")
+        self._logger = self.logger
+
+    monkeypatch.setattr("wepppy.nodb.core.soils.NoDbBase.__init__", _fake_nodb_init)
+    monkeypatch.setattr(Soils, "locked", lambda self: nullcontext())
+    monkeypatch.setattr(
+        Soils,
+        "config_get_path",
+        lambda self, section, option, default=None: default,
+    )
+    monkeypatch.setattr(
+        Soils,
+        "config_get_bool",
+        lambda self, section, option, default=False: bool(default),
+    )
+    monkeypatch.setattr(
+        Soils,
+        "config_get_float",
+        lambda self, section, option, default=None: float_calls.append((section, option, default))
+        or float(default if default is not None else 0.0),
+    )
+
+    _ = Soils(str(wd), "dummy.cfg")
+
+    assert ("soils", "clip_soils_depth", 1000) in float_calls
+    assert ("soils", "clip_soils_minimum_depth", 0) in float_calls

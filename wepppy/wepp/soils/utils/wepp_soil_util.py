@@ -317,6 +317,22 @@ class WeppSoilUtil(object):
             self.obj['ofes'][i]['horizons'] = horizons
             self.obj['ofes'][i]['nsl'] = len(horizons)
 
+    def ensure_minimum_soil_depth(self, min_depth: float) -> None:
+        """Ensure each OFE has at least ``min_depth`` cumulative soil depth."""
+
+        self.obj['header'].append(
+            f'wepppy.wepp.soils.utils.WeppSoilUtil::ensure_minimum_soil_depth(min_depth={min_depth})'
+        )
+
+        for i in range(len(self.obj['ofes'])):
+            horizons = self.obj['ofes'][i].get('horizons', [])
+            if not horizons:
+                continue
+
+            current_depth = try_parse_float(horizons[-1].get('solthk'))
+            if current_depth < min_depth:
+                horizons[-1]['solthk'] = min_depth
+
     def to7778(self, hostname: str = '') -> 'WeppSoilUtil':
         """Return a migrated copy in WEPP 7778 soil format."""
         from rosetta import Rosetta2, Rosetta3

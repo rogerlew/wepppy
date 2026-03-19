@@ -165,6 +165,30 @@ def test_interchange_advanced_template_renders_delete_after_interchange_checkbox
     assert "checked" in rendered
 
 
+def test_clip_soils_advanced_template_renders_dual_depth_controls(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/wepp_pure_advanced_options/clip_soils_depth.htm")
+    rendered = template.render(
+        soils=SimpleNamespace(
+            clip_soils=True,
+            clip_soils_depth=300,
+            clip_soils_minimum=True,
+            clip_soils_minimum_depth=150,
+            initial_sat=0.75,
+        )
+    )
+
+    assert "Clip Soils Maximum Depth" in rendered
+    assert "Soils Maximum Depth" in rendered
+    assert "Clip Soils Minimum Depth" in rendered
+    assert "Soils Minimum Depth" in rendered
+    assert 'id="clip_soils"' in rendered
+    assert 'id="clip_soils_depth"' in rendered
+    assert 'id="clip_soils_minimum"' in rendered
+    assert 'id="clip_soils_minimum_depth"' in rendered
+
+
 def test_poweruser_panel_parquet_table_links_do_not_append_trailing_slash(
     jinja_env: Environment,
 ) -> None:

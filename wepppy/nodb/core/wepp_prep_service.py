@@ -389,6 +389,8 @@ class WeppPrepService:
         kslast = wepp.kslast
         clip_soils = soils.clip_soils
         clip_soils_depth = soils.clip_soils_depth
+        clip_soils_minimum = soils.clip_soils_minimum
+        clip_soils_minimum_depth = soils.clip_soils_minimum_depth
         initial_sat = soils.initial_sat
 
         kslast_map_fn = wepp.kslast_map
@@ -437,6 +439,8 @@ class WeppPrepService:
                     initial_sat,
                     clip_soils,
                     clip_soils_depth,
+                    clip_soils_minimum,
+                    clip_soils_minimum_depth,
                 )
             )
 

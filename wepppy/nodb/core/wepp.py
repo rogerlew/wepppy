@@ -529,10 +529,34 @@ class TCROpts(object):
             return '\n'
 
 
-def prep_soil(args: Tuple[str, str, str, Optional[float], Optional[Dict[str, Any]], float, bool, float]) -> Tuple[str, float]:
+def prep_soil(
+    args: Tuple[
+        str,
+        str,
+        str,
+        Optional[float],
+        Optional[Dict[str, Any]],
+        float,
+        bool,
+        float,
+        bool,
+        float,
+    ]
+) -> Tuple[str, float]:
     t0 = time.time()
-    # str,    str,    str,    float,  dict|None,          float,       bool,       float
-    topaz_id, src_fn, dst_fn, kslast, modify_kslast_pars, initial_sat, clip_soils, clip_soils_depth = args
+    # str,    str,    str,    float,  dict|None,          float,       bool,       float,            bool,               float
+    (
+        topaz_id,
+        src_fn,
+        dst_fn,
+        kslast,
+        modify_kslast_pars,
+        initial_sat,
+        clip_soils,
+        clip_soils_depth,
+        clip_soils_minimum,
+        clip_soils_minimum_depth,
+    ) = args
 
     soilu = WeppSoilUtil(src_fn)  # internally uses rosetta
     if _soil_has_symbolic_wepp_parameters(soilu):
@@ -547,6 +571,8 @@ def prep_soil(args: Tuple[str, str, str, Optional[float], Optional[Dict[str, Any
 
     if kslast is not None:
         soilu.modify_kslast(kslast, pars=modify_kslast_pars)
+    if clip_soils_minimum:
+        soilu.ensure_minimum_soil_depth(clip_soils_minimum_depth)
     if clip_soils:
         soilu.clip_soil_depth(clip_soils_depth)
     soilu.write(dst_fn)
@@ -1827,6 +1853,8 @@ class Wepp(NoDbBase):
 
         clip_soils = soils.clip_soils
         clip_soils_depth = soils.clip_soils_depth
+        clip_soils_minimum = soils.clip_soils_minimum
+        clip_soils_minimum_depth = soils.clip_soils_minimum_depth
         initial_sat = soils.initial_sat
 
         disturbed = Disturbed.tryGetInstance(wd)
@@ -1894,6 +1922,9 @@ class Wepp(NoDbBase):
 
                 if _kslast is not None:
                     soilu.modify_kslast(_kslast)
+
+                if clip_soils_minimum:
+                    soilu.ensure_minimum_soil_depth(clip_soils_minimum_depth)
 
                 if clip_soils:
                     soilu.clip_soil_depth(clip_soils_depth)

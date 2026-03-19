@@ -299,6 +299,29 @@ def test_clip_soil_depth_truncates_horizons(make_soil_util):
     )
 
 
+def test_ensure_minimum_soil_depth_extends_last_horizon(make_soil_util):
+    util = make_soil_util()
+
+    util.ensure_minimum_soil_depth(300)
+
+    horizons = util.obj["ofes"][0]["horizons"]
+    assert horizons[-1]["solthk"] == 300
+    assert (
+        util.obj["header"][-1]
+        == "wepppy.wepp.soils.utils.WeppSoilUtil::ensure_minimum_soil_depth(min_depth=300)"
+    )
+
+
+def test_ensure_minimum_soil_depth_noop_when_depth_already_sufficient(make_soil_util):
+    util = make_soil_util()
+    original_depth = util.obj["ofes"][0]["horizons"][-1]["solthk"]
+
+    util.ensure_minimum_soil_depth(200)
+
+    horizons = util.obj["ofes"][0]["horizons"]
+    assert horizons[-1]["solthk"] == original_depth
+
+
 def test_yaml_input_raises_value_error(workspace_tmp_dir, wepp_soil_util_module):
     src = workspace_tmp_dir / "source.yaml"
     src.write_text("header: []\n")

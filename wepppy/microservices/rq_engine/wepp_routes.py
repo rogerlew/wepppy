@@ -99,6 +99,29 @@ async def _handle_run_wepp_request(
         if clip_soils_depth is not None:
             soils.clip_soils_depth = clip_soils_depth
 
+        clip_soils_minimum = bool(_pop_scalar(controller_payload, "clip_soils_minimum", False))
+        soils.clip_soils_minimum = clip_soils_minimum
+
+        clip_soils_minimum_depth = _parse_float(
+            _pop_scalar(controller_payload, "clip_soils_minimum_depth")
+        )
+        if clip_soils_minimum_depth is not None:
+            soils.clip_soils_minimum_depth = clip_soils_minimum_depth
+
+        if clip_soils and clip_soils_minimum:
+            max_depth = float(soils.clip_soils_depth)
+            min_depth = float(soils.clip_soils_minimum_depth)
+            if min_depth > max_depth:
+                return error_response(
+                    "Invalid soil depth clipping range",
+                    status_code=400,
+                    code="invalid_soil_depth_range",
+                    details=(
+                        "clip_soils_minimum_depth must be less than or equal to "
+                        "clip_soils_depth when both clipping options are enabled."
+                    ),
+                )
+
         clip_hillslopes = bool(_pop_scalar(controller_payload, "clip_hillslopes", False))
         watershed.clip_hillslopes = clip_hillslopes
 
@@ -214,6 +237,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
 
     boolean_fields = {
         "clip_soils",
+        "clip_soils_minimum",
         "clip_hillslopes",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",
@@ -264,6 +288,8 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     boolean_fields = {
+        "clip_soils",
+        "clip_soils_minimum",
         "clip_hillslopes",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",
@@ -315,6 +341,7 @@ async def prep_wepp_watershed(runid: str, config: str, request: Request) -> JSON
 
     boolean_fields = {
         "clip_soils",
+        "clip_soils_minimum",
         "clip_hillslopes",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",
