@@ -557,6 +557,7 @@ def test_hillslope_element_interchange_rust_parity(tmp_path: Path) -> None:
             minor,
             start_year=None,
         )
+        columns = hill_element_mod._normalize_rust_optional_columns(columns)
         return pa.table(columns, schema=hill_element_mod.SCHEMA)
 
     hill_element_mod.write_parquet_with_pool(

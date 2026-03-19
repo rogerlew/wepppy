@@ -5,11 +5,30 @@ import pyarrow.parquet as pq
 import pytest
 
 from .module_loader import PROJECT_OUTPUT, cleanup_import_state, load_module
+
+pytestmark = pytest.mark.unit
+
 load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
 load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
 concurrency_module = load_module("wepppy.wepp.interchange.concurrency", "wepppy/wepp/interchange/concurrency.py")
 element_module = load_module("wepppy.wepp.interchange.hill_element_interchange", "wepppy/wepp/interchange/hill_element_interchange.py")
 cleanup_import_state()
+
+
+def _append_qrain_qsnow_columns(path: Path, *, qrain: float, qsnow: float) -> None:
+    lines = path.read_text().splitlines()
+    lines[0] = f"{lines[0]}   QRain   QSnow"
+    lines[1] = f"{lines[1]}      mm      mm"
+
+    for idx in range(2, len(lines)):
+        if not lines[idx].strip():
+            continue
+        lines[idx] = f"{lines[idx]}{qrain:9.3f}{qsnow:9.3f}"
+        path.write_text("\n".join(lines) + "\n")
+        return
+
+    raise AssertionError(f"No element data rows found in {path}")
+
 
 def test_element_interchange_writes_parquet(tmp_path, monkeypatch):
     src = PROJECT_OUTPUT
@@ -56,6 +75,10 @@ def test_element_interchange_writes_parquet(tmp_path, monkeypatch):
     assert "DD" not in df.columns
     assert "YYYY" not in df.columns
     assert "day" not in df.columns
+    assert "QRain" in df.columns
+    assert "QSnow" in df.columns
+    assert df["QRain"].isna().all()
+    assert df["QSnow"].isna().all()
 
     first_row = df.sort_values(["wepp_id", "julian", "ofe_id"]).iloc[0]
     assert first_row["Runoff"] == pytest.approx(0.0)
@@ -103,3 +126,65 @@ def test_element_interchange_normalizes_overflow_dates(tmp_path):
     assert row["month"] == 2
     assert row["day_of_month"] == 29
     assert row["julian"] == 60
+
+
+def test_element_interchange_parses_qrain_qsnow_columns(tmp_path):
+    src = PROJECT_OUTPUT
+    workdir = tmp_path / "output"
+    shutil.copytree(src, workdir)
+
+    _append_qrain_qsnow_columns(workdir / "H1.element.dat", qrain=1.234, qsnow=2.345)
+
+    target = element_module.run_wepp_hillslope_element_interchange(workdir)
+    table = pq.read_table(target)
+    df = table.to_pandas()
+
+    row = (
+        df[
+            (df["wepp_id"] == 1)
+            & df["QRain"].notna()
+            & df["QSnow"].notna()
+        ]
+        .sort_values(["julian", "ofe_id"])
+        .iloc[0]
+    )
+    assert row["QRain"] == pytest.approx(1.234)
+    assert row["QSnow"] == pytest.approx(2.345)
+
+
+def test_element_interchange_mixed_legacy_and_qrain_files(tmp_path):
+    src = PROJECT_OUTPUT
+    workdir = tmp_path / "output"
+    shutil.copytree(src, workdir)
+
+    _append_qrain_qsnow_columns(workdir / "H1.element.dat", qrain=3.210, qsnow=0.450)
+
+    target = element_module.run_wepp_hillslope_element_interchange(workdir)
+    table = pq.read_table(target)
+    df = table.to_pandas()
+
+    h1_partition_rows = (
+        df[(df["wepp_id"] == 1) & df["QRain"].notna() & df["QSnow"].notna()]
+        .sort_values(["julian", "ofe_id"])
+    )
+    assert not h1_partition_rows.empty
+    assert h1_partition_rows.iloc[0]["QRain"] == pytest.approx(3.210)
+    assert h1_partition_rows.iloc[0]["QSnow"] == pytest.approx(0.450)
+
+    legacy_rows = df[df["wepp_id"] != 1]
+    assert not legacy_rows.empty
+    assert legacy_rows["QRain"].isna().all()
+    assert legacy_rows["QSnow"].isna().all()
+
+
+def test_element_interchange_normalizes_missing_rust_optional_columns():
+    columns = {"wepp_id": [1, 2], "Runoff": [0.0, 0.1]}
+
+    normalized = element_module._normalize_rust_optional_columns(columns)
+    assert normalized["QRain"] == [None, None]
+    assert normalized["QSnow"] == [None, None]
+    assert normalized["wepp_id"] == [1, 2]
+    assert normalized["Runoff"] == [0.0, 0.1]
+
+    already_extended = {"wepp_id": [9], "QRain": [0.7], "QSnow": [0.3]}
+    assert element_module._normalize_rust_optional_columns(already_extended) is already_extended

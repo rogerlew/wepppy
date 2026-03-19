@@ -128,7 +128,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 | --- | --- | --- | --- |
 | `H*.pass.dat` | `run_wepp_hillslope_pass_interchange` | `H.pass.parquet` | Event, sub-event, and no-event runoff plus sediment delivery, particle concentrations, groundwater flux, and water-year indices per hillslope. |
 | `H*.ebe.dat` | `run_wepp_hillslope_ebe_interchange` | `H.ebe.parquet` | Storm-scale detachment/deposition metrics with optional `start_year` padding for century-truncated simulation years. |
-| `H*.element.dat` | `run_wepp_hillslope_element_interchange` | `H.element.parquet` | Daily element (OFE) hydrology and cover factors; fixed-width parsing backfills missing values with previous-day measurements. |
+| `H*.element.dat` | `run_wepp_hillslope_element_interchange` | `H.element.parquet` | Daily element (OFE) hydrology and cover factors; fixed-width parsing backfills missing values with previous-day measurements and supports both legacy plus `QRain`/`QSnow` runoff-partition layouts (legacy rows emit nulls for the new fields). |
 | `H*.loss.dat` | `run_wepp_hillslope_loss_interchange` | `H.loss.parquet` | Particle class characteristics at the hillslope outlet, including specific gravity and exiting fraction. |
 | `H*.soil.dat` | `run_wepp_hillslope_soil_interchange` | `H.soil.parquet` | Daily soil-state variables per OFE (porosity, hydraulic conductivity, water content, saturation). |
 | `H*.wat.dat` | `run_wepp_hillslope_wat_interchange` | `H.wat.parquet` | Water balance depths and areas per OFE; includes `load_hill_wat_dataframe()` helper for daily rollups. |
