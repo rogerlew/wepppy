@@ -56,6 +56,7 @@ See `docs/weppcloud-bootstrap-spec.md` for implementation and deployment details
 - **[CONTRIBUTING_AGENTS.md](CONTRIBUTING_AGENTS.md)** - Contributing guide for AI coding assistants
 - **[docs/schemas/rq-response-contract.md](docs/schemas/rq-response-contract.md)** - RQ and rq-engine response contract (canonical keys and error shape)
 - **[docs/dev-notes/correlation-id-debugging.md](docs/dev-notes/correlation-id-debugging.md)** - End-to-end correlation ID debugging workflow (header echo, logs, enqueue metadata, worker continuity)
+- **[docs/dev-notes/wepp_binary_rebuild_and_vendoring.md](docs/dev-notes/wepp_binary_rebuild_and_vendoring.md)** - Rebuild WEPP with pinned `gfortran`, run host/container fixture validation, and vendor binaries into `wepp_runner/bin`
 - **[docs/README_AUDIT.md](docs/README_AUDIT.md)** - README.md quality audit and improvement recommendations
 - **[docs/prompt_templates/readme_authoring_template.md](docs/prompt_templates/readme_authoring_template.md)** - Standard template for authoring README.md files
 - **[docs/schemas/](docs/schemas/)** - JSON schemas for data structures

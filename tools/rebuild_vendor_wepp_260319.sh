@@ -29,9 +29,18 @@ echo "Running provenance checks"
 "${ROOT_DIR}/tools/check_wepp_binary_provenance.sh" "${dst_wepp}" "${dst_hill}"
 
 echo
-echo "Running container smoke checks in ${CONTAINER}"
-CONTAINER="${CONTAINER}" "${ROOT_DIR}/tools/smoke_wepp_binary_in_container.sh" "${dst_hill}"
-CONTAINER="${CONTAINER}" "${ROOT_DIR}/tools/smoke_wepp_binary_in_container.sh" "${dst_wepp}"
+echo "Running host fixture smoke checks"
+"${ROOT_DIR}/tools/smoke_wepp_binary_host.sh" "${dst_hill}"
+"${ROOT_DIR}/tools/smoke_wepp_binary_host.sh" "${dst_wepp}"
+
+echo
+if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' | grep -Fxq "${CONTAINER}"; then
+  echo "Running container smoke checks in ${CONTAINER}"
+  CONTAINER="${CONTAINER}" "${ROOT_DIR}/tools/smoke_wepp_binary_in_container.sh" "${dst_hill}"
+  CONTAINER="${CONTAINER}" "${ROOT_DIR}/tools/smoke_wepp_binary_in_container.sh" "${dst_wepp}"
+else
+  echo "Skipping container smoke checks: container '${CONTAINER}' is not visible in 'docker ps'."
+fi
 
 echo
 echo "Vendor refresh complete:"
