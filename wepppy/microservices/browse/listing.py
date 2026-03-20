@@ -36,6 +36,9 @@ __all__ = [
 MANIFEST_FILENAME = "manifest.db"
 MANIFEST_SCHEMA_VERSION = 1
 MAX_FILE_LIMIT = 100
+# Manifest-backed browse listings are currently disabled because cache freshness
+# has proven unreliable in production; keep write/read helpers for recovery work.
+MANIFEST_CACHE_UNSTABLE = True
 
 _logger = logging.getLogger(__name__)
 
@@ -707,9 +710,9 @@ async def get_page_entries(
     hide_mixed_nodir: bool = False,
 ):
     """List directory contents with pagination and optional filtering."""
-    skip_manifest = False
+    skip_manifest = MANIFEST_CACHE_UNSTABLE
     if hide_mixed_nodir:
-        skip_manifest = bool(_mixed_nodir_roots(str(wd)))
+        skip_manifest = skip_manifest or bool(_mixed_nodir_roots(str(wd)))
 
     if not skip_manifest:
         manifest_result = await asyncio.to_thread(

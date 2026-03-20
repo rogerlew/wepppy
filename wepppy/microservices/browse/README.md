@@ -96,10 +96,11 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
 - **Logging**
   - `/health` polling is filtered from gunicorn/uvicorn access logs.
 ## Manifest-backed directory listings
+- Status: **unstable/disabled** in runtime listing paths. `listing.get_page_entries` forces filesystem discovery and does not serve cached rows from `manifest.db`.
 - `manifest.db` is created when a project flips to readonly; it lives at the run root and is built by `create_manifest` in `browse.py` using the same traversal logic as on-demand browsing.
 - SQLite stays in WAL mode with `synchronous=NORMAL` for fast reads. The `entries` table stores `dir_path`, `name`, `entry_type` (file, directory, symlink), `size_bytes`, `mtime_ns`, `child_count`, and `symlink_target`. `entry_type` sorts with raw byte ordering so listings match `ls`.
 - Directory rows carry a `child_count` so pagination never shells out. Symlink rows capture `symlink_is_dir` so the UI can label folder links correctly and suppress download buttons for directory links.
-- `browse_response` tags responses that came from the manifest so breadcrumbs can show a subtle badge (for example “manifest cached”).
+- The manifest response badge path remains in code for rollback/re-enable work, but should stay inactive while manifests are disabled.
 - Queries fall back to on-demand scans whenever the manifest is missing, unreadable, or a pattern cannot be expressed with SQLite `GLOB` semantics.
 
 ### Creation workflow
@@ -109,10 +110,10 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
 - Clearing readonly removes `manifest.db` (if present) after the sentinel file disappears.
 
 ### Browse integration
-- `get_page_entries` checks for `manifest.db` first and serves listings directly from SQLite. Only when the manifest is absent does it shell out to `ls`/`wc`.
-- Directory rows use the stored `child_count` and symlink metadata so nested counts are instantaneous and links render correctly.
+- `get_page_entries` currently skips manifest reads and serves listings via live filesystem discovery.
+- Directory rows compute counts from live filesystem state and symlink metadata so links render correctly.
 - Symlink directories inherit the folder styling and omit download links; file symlinks still show download buttons and targets (`name -> dest`).
-- Breadcrumbs and JSON payloads surface a `using_manifest` flag for observability and to aid debugging.
+- `using_manifest`/`cached` indicators should remain false/absent while manifest reads are disabled.
 
 ### Known limitations
 - The manifest only refreshes when readonly changes; manual edits to a readonly tree are not detected until a rebuild runs.

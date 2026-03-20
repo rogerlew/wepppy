@@ -1767,7 +1767,7 @@ def test_files_manifest_cached_flag(tmp_path: Path, monkeypatch, load_browse):
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload.get("cached") is True
+    assert "cached" not in payload
 
 
 def test_files_meta_skips_cached_flag(tmp_path: Path, monkeypatch, load_browse):
@@ -1815,9 +1815,38 @@ def test_files_manifest_pattern_filtering(tmp_path: Path, monkeypatch, load_brow
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload.get("cached") is True
+    assert "cached" not in payload
     names = {entry["name"] for entry in payload["entries"]}
     assert names == {"alpha.txt", "beta.txt"}
+
+
+def test_files_manifest_stale_cache_is_ignored(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-563a"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+
+    _write_file(run_root / "alpha.txt", "a")
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    browse.create_manifest(str(run_root))
+
+    # Mutate filesystem after manifest creation to ensure stale cache would differ.
+    (run_root / "alpha.txt").unlink()
+    _write_file(run_root / "beta.txt", "b")
+
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert "cached" not in payload
+    names = {entry["name"] for entry in payload["entries"]}
+    assert "beta.txt" in names
+    assert "alpha.txt" not in names
 
 
 def test_files_dotfiles_hidden_by_default(tmp_path: Path, monkeypatch, load_browse):
