@@ -228,8 +228,8 @@ segment-based energy reconstruction is not acceptable as the canonical
 
 #### Existing Local Basis
 
-The repository already has the core ingredients needed for a Python reference
-implementation:
+The repository already has the core ingredients needed for a shared hyetograph
+implementation and for parity testing against existing Python behavior:
 
 - `wepppy.climates.cligen.cligen._wepp_hyetograph_segments(...)` reconstructs
   WEPP storm segments as `(start_hr, end_hr, intensity_mm_hr)`
@@ -240,27 +240,41 @@ implementation:
   `peak_intensity_30`
 
 `climate/wepp_cli.parquet` is therefore the right audit and interchange
-artifact, and it may be used as an implementation convenience or cache. But
-the required scientific path still runs through segment-based `E` from the
+artifact. It should not be treated as the canonical computational input for
+`cligen_static R`. The `.cli` file should remain the source of truth, both
+because it is the native WEPP climate representation and because breakpoint
+climate support is not guaranteed to round-trip through the parquet export.
+The required scientific path still runs through segment-based `E` from the
 reconstructed WEPP storm shape.
 
 #### Implementation Direction
 
-The first production implementation should be a dedicated `wepppyo3` climate
-routine for static `R`, with a Python reference path used for parity testing.
+The first production implementation should do two related things in
+`wepppyo3.climate`:
+
+1. add a reusable Rust WEPP hyetograph reconstruction helper
+2. build the `cligen_static R` routine on top of that shared helper
 
 Recommended direction:
 
+- Add a reusable Rust WEPP hyetograph reconstruction helper so existing
+  callsites can adopt the Rust path over time
+- Where callsites already have working Python hyetograph logic, allow Python
+  fallback during migration; do not invent new Python fallback paths where none
+  already exist
 - Add a `wepppyo3.climate` routine to calculate run-level static `R` from a
-  WEPP climate file
+  WEPP `.cli` file
 - Reuse the existing Rust climate-file parser in `wepppyo3` rather than
   round-tripping large storm tables through Python
-- Keep the source of truth as the WEPP climate file; `wepp_cli.parquet` may
-  remain an audit artifact or optional cache
+- Keep the source of truth as the WEPP `.cli` file; `wepp_cli.parquet` remains
+  an audit artifact rather than an alternate static-`R` input
+- Do not add a production Python fallback for `cligen_static R`; implement it
+  directly in Rust once the shared hyetograph helper exists
 - Return at least the mean annual `R` and per-year annual erosivity totals for
   manifesting and QA
-- Regression-test the Rust routine against a Python reference implementation
-  built from the existing `cligen.py` hyetograph helpers
+- Regression-test the Rust hyetograph helper against the existing
+  `cligen.py` behavior where comparable, and test static `R` from `.cli`
+  inputs directly in Rust
 
 The exact function name can be decided during implementation, but the target is
 something equivalent to `rust_cli_calculate_rusle_r(...)` or
@@ -578,8 +592,10 @@ At minimum, validation should include:
 
 - factor sanity checks by landscape position
 - masked-versus-unmasked comparison review
-- Python-reference versus `wepppyo3` parity checks for static `R` on the same
-  climate file
+- parity checks between the shared Rust hyetograph helper and the existing
+  Python hyetograph behavior where comparable
+- static-`R` regression tests from `.cli` inputs, including breakpoint-climate
+  coverage if supported by the Rust parser path
 - annual `EI30` distribution review for representative climates
 - known hotspot comparison against field or mapped observations
 - `polaris_nomograph` versus `gnatsgo_kwfact` comparison on representative
@@ -598,8 +614,8 @@ Longer term, the mod should be checked against:
 
 - Which exact storm kinetic-energy equation and unit convention should be
   encoded in the first `wepppyo3` static-`R` routine?
-- Should the Rust routine accept only a `.cli` file, or also accept
-  `climate/wepp_cli.parquet` as an alternate input path?
+- What is the preferred public API shape for the shared `wepppyo3` hyetograph
+  helper: segments only, or segments plus derived peak-intensity windows?
 - Should `LS` cap slope length by default, and if so at what value?
 - How should roads, skid trails, and treatment features participate in
   slope-length blocking?
@@ -617,10 +633,11 @@ Longer term, the mod should be checked against:
 
 1. Create the WBT `RusleLsFactor` tool and validate outputs on representative
    disturbed terrain.
-2. Build a Python reference implementation for `cligen_static R` using the
-   existing WEPP hyetograph reconstruction helpers.
-3. Implement a `wepppyo3.climate` static-`R` routine from the WEPP climate
-   file and validate it against the Python reference.
+2. Add a reusable Rust WEPP hyetograph reconstruction helper to
+   `wepppyo3.climate` and validate it against existing Python behavior where
+   comparable.
+3. Implement a `wepppyo3.climate` static-`R` routine from WEPP `.cli` inputs
+   using that helper, with no production Python fallback.
 4. Extend Polaris acquisition for `polaris_nomograph` and add NRCS `K`
    benchmark support.
 5. Define the shared `C` engine and the two source modes.
