@@ -129,13 +129,17 @@ isric_depths = (
     '100-200cm'
 )
 
+# NOTE: Keep `cfvo` at 10 (not 100). SoilGrids docs have a known ambiguity for
+# cfvo conversion, but live layer metadata reports cm^3/dm^3 (vol per mille),
+# which converts to vol% by dividing by 10. See:
+# https://github.com/rogerlew/wepppy/issues/527
 isric_conversion_factors = {
     'bdod': 100,  # Bulk density (cg/cm³)
     'cec': 10,   # Cation exchange capacity (mmol(c)/kg)
     'clay': 10,  # Clay content
     'sand': 10,  # Sand content
     'silt': 10,  # Silt content
-    'cfvo': 10,  # Coarse fragments
+    'cfvo': 10,  # Coarse fragments (cm^3/dm^3 -> vol% via /10)
     'soc': 10,   # Soil organic carbon content
     'wv1500': 10,  # Water content at 1500 kPa
     'wv0033': 10,  # Water content at 33 kPa
