@@ -599,11 +599,14 @@ equation family, not mismatched horizons.
     depth layers and broad availability
   - it is suitable as a broad profile-stoniness ancillary for the high-
     resolution `POLARIS` workflow
-- SoilGrids `cfvo` should be interpreted using the official SoilGrids
-  conversion to conventional units:
-  - stored values should be divided by `100` to obtain vol%
-  - implementation should not assume any alternate scale factor unless the
-    upstream product definition changes and the documentation is rechecked
+- SoilGrids `cfvo` should be interpreted as volumetric coarse fragments in
+  `cm^3/dm^3` (`vol‰`), with conversion to `vol%` by dividing stored values
+  by `10`
+- The current SoilGrids FAQ table should be treated as ambiguous for `cfvo`
+  conversion because it lists mapped units `cm^3/dm^3 (vol‰)` but also lists
+  conversion factor `100`; those two statements are inconsistent
+- For this mod, prefer the unit-algebra-consistent interpretation (`/10`) and
+  cross-check against live service metadata before changing scale assumptions
 - It should not be described as a literal `RUSLE2` nomograph coarse-fragment
   input:
   - SoilGrids `cfvo` is a volumetric whole-soil coarse-fragment property
@@ -626,6 +629,10 @@ equation family, not mismatched horizons.
   - compare fine-earth `POLARIS` estimates to `kffact` where available
   - compare `cfvo`-adjusted estimates to `kwfact` where available, while
     noting the variable-definition mismatch
+  - for direct coarse-fragment plausibility checks, compare against
+    `SSURGO chfrags.fragvol_r` (`vol%`, whole-soil basis), not only against
+    weight-based fragment fields (`fraggt10_r`, `frag3to10_r`,
+    `sieveno10_r`)
 
 Likely ancillary needs beyond the current Polaris request:
 
@@ -1024,8 +1031,14 @@ runtime `R` inputs in the current `Rusle` design.
   supply finer spatial variability than polygon soil-survey products.
 - ISRIC. *SoilGrids FAQs*.
   https://docs.isric.org/globaldata/soilgrids/SoilGrids_faqs_01.html
-  Official reference for SoilGrids property semantics, standard depth layers,
-  and conventional-unit conversion factors, including `cfvo`.
+  Primary reference for SoilGrids property semantics and standard depth layers.
+  Note: the current `cfvo` row is internally ambiguous (`cm^3/dm^3 (vol‰)` is
+  listed with conversion factor `100`), so conversion assumptions should be
+  cross-checked against live service metadata.
+- ISRIC. *SoilGrids `cfvo` WMS capabilities*.
+  https://maps.isric.org/mapserv?map=/map/cfvo.map&SERVICE=WMS&REQUEST=GetCapabilities
+  Live metadata reference used to verify `cfvo` layer naming and volumetric
+  unit semantics (`cm^3/dm^3` / `vol‰`).
 - ISRIC. *FAQ - WoSIS*.
   https://docs.isric.org/globaldata/wosis/faq-wosis.html
   Official definition reference for `CFVO` as volumetric coarse fragments in
