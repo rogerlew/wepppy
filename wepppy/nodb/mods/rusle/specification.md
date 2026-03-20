@@ -17,6 +17,10 @@ The initial product should provide a spatial representation of long-term
 average hillslope sheet-and-rill detachment potential, not event-scale erosion,
 not sediment delivery ratio, and not channel erosion.
 
+The first implementation should remain spatially gridded in its outputs, but
+use a run-constant, climate-derived `R` rather than an external gridded
+erosivity surface.
+
 Practically, this mod is intended to replace legacy heuristic gridded erosion
 visualizations with a product that is more explicit, more citable, and more
 academically defensible. It should be treated as a visualization and
@@ -45,6 +49,9 @@ For this mod:
 - Target config lineage: `wepppy/nodb/configs/disturbed9002_wbt.cfg`
 - Backend: WhiteboxTools fork in `/workdir/weppcloud-wbt`
 - Initial geography: United States workflows first
+- First `R` delivery: compute a scalar `R` from the run WEPP climate file and
+  broadcast it to `r.tif`; do not depend on an external gridded runtime `R`
+  source
 - Initial output family:
   - `rusle/r.tif`
   - `rusle/k.tif`
@@ -81,6 +88,26 @@ The initial NLCD exclusions should include:
 - `11` open water
 - `21`, `22`, `23`, `24` developed
 - `90`, `95` woody wetlands and emergent herbaceous wetlands
+
+#### Wetland Masking Rationale
+
+The exclusion of `NLCD 90` and `95` is a model-domain decision, not a claim
+that wetlands never erode.
+
+- `RUSLE` is being used here as a hillslope sheet-and-rill detachment model
+  for rainfall and overland flow, not as a wetland-process, channel-scour, or
+  depositional-marsh model
+- woody wetlands and emergent herbaceous wetlands commonly represent saturated,
+  ponded, or hydrologically connected environments that sit outside the
+  intended upland hillslope domain of this mod
+- wetlands often function as sediment-assimilation, storage, or filtering
+  environments, so leaving them in the primary detachment map would tend to
+  blur the distinction between upland sediment-source areas and downstream
+  receiving or depositional areas
+- this should be documented as a default scope mask rather than a universal
+  scientific statement; if a future workflow needs drained farmed wetlands,
+  wet meadows, or other edge cases treated as hillslopes, that should be an
+  explicit override with different assumptions
 
 The mask should also stop slope-length growth for `LS`.
 
@@ -742,12 +769,18 @@ runtime `R` inputs in the current `Rusle` design.
   https://www.mrlc.gov/sites/default/files/NLCDclasses.pdf
   Official land-cover class definitions supporting water, developed, and
   wetland masking decisions.
+- U.S. Environmental Protection Agency. *National Guidance: Water Quality
+  Standards for Wetlands*.
+  https://www.epa.gov/cwa-404/national-guidance-water-quality-standards-wetlands
+  Useful reference for the point that wetlands often have important sediment
+  assimilation, storage, and water-quality functions, which supports treating
+  them as outside the primary upland detachment domain of this mod.
 
 ### Notes on Evidence Hierarchy
 
 - Prefer peer-reviewed model papers, USDA handbooks, and official agency data
   documentation over tertiary web summaries.
-- Treat live operational status pages such as NOAA Atlas coverage indexes as
+- Treat live operational status pages or current product indexes as
   date-stamped evidence, not permanent truths.
 - When implementation starts, each factor builder should record its exact data
   source, version, retrieval date, and any local transformations in
