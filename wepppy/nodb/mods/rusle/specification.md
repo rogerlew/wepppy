@@ -539,6 +539,20 @@ equation family, not mismatched horizons.
 - The main reason is data availability: the canonical particle-size term uses
   silt plus very fine sand, while `POLARIS` does not provide a directly
   observed very-fine-sand field
+- For v1, estimate very fine sand using the `RUSLE2 User Reference Guide`
+  fallback equation when only sand, silt, and clay are known:
+  - `f_vfs = 0.74 * f_sand - 0.62 * f_sand^2`
+  - equivalently, in percent units:
+    `vfs_pct = 0.74 * sand_pct - 0.0062 * sand_pct^2`
+- Clamp the result to `[0, sand_pct]` before using it in the nomograph
+  particle-size term
+- Use that `RUSLE2` equation rather than a PSD interpolation or hydraulic
+  pedotransfer back-calculation because it is the only primary-source,
+  `RUSLE`-native fallback we identified for missing very fine sand
+- This also fits the product goal better than a more elaborate PSD model:
+  it keeps the approximation inside the `RUSLE2` semantics users are already
+  likely to trust, and it is easier to audit against SSURGO `sandvf_r`
+  or `vfsand_wtavg`
 - `Shojaeezadeh et al. (2024)` show one defensible way to proceed: retain the
   nomograph family, infer structure and permeability classes from ancillary
   datasets, and accept a gridded texture approximation in place of literal
@@ -546,6 +560,8 @@ equation family, not mismatched horizons.
 - The tool should therefore make the approximation explicit in metadata and
   documentation instead of implying that `POLARIS` can reproduce NRCS `K`
   exactly
+- Manifest metadata should record that `vfs` is `rusle2_estimated_from_sand`,
+  not an observed `POLARIS` field
 - Structure and permeability classes should be inferred from gridded covariates
   and documented as modeled classes, not observed survey descriptors
 - If no profile coarse-fragment ancillary is supplied, the output should be
@@ -989,6 +1005,11 @@ runtime `R` inputs in the current `Rusle` design.
   Official open documentation for both the `Wischmeier` nomograph-style
   equation and the `Williams (1995)` `EPIC` alternative used here as the
   secondary `POLARIS` estimator.
+- USDA-ARS. *RUSLE2 User Reference Guide*.
+  https://www.ars.usda.gov/ARSUserFiles/60600505/RUSLE/RUSLE2_User_Ref_Guide.pdf
+  Primary source for the fallback very-fine-sand estimation equation used here
+  when only sand, silt, and clay are available for the `polaris_nomograph`
+  path.
 - Rossiter, D. G., Poggio, L., Beaudette, D., and Libohova, Z., 2022.
   *How well does digital soil mapping represent soil geography? An
   investigation from the USA*. *SOIL*, 8, 559-586.
