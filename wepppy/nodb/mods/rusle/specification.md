@@ -591,13 +591,46 @@ equation family, not mismatched horizons.
   silently distort the high-resolution texture signal
 - Treat surface rock as a cover effect, not as a direct replacement for soil
   erodibility
+- For v1, the optional profile coarse-fragment ancillary should be the ISRIC
+  SoilGrids `cfvo` layer
+- That recommendation is pragmatic rather than perfect:
+  - `POLARIS` does not provide a directly observed coarse-fragment raster
+  - SoilGrids `cfvo` is a documented coarse-fragment property with standard
+    depth layers and broad availability
+  - it is suitable as a broad profile-stoniness ancillary for the high-
+    resolution `POLARIS` workflow
+- SoilGrids `cfvo` should be interpreted using the official SoilGrids
+  conversion to conventional units:
+  - stored values should be divided by `100` to obtain vol%
+  - implementation should not assume any alternate scale factor unless the
+    upstream product definition changes and the documentation is rechecked
+- It should not be described as a literal `RUSLE2` nomograph coarse-fragment
+  input:
+  - SoilGrids `cfvo` is a volumetric whole-soil coarse-fragment property
+  - the strict `RUSLE2` nomograph coarse-fragment input is not the same
+    variable definition
+- Because of that mismatch, `cfvo` should only support an explicitly labeled
+  approximate profile-fragment adjustment, not a claim of exact `kwfact`
+  reproduction
+- The ISRIC `cfvo` raster should be reprojected, resampled, and depth-aligned
+  to match the `POLARIS` grid before use:
+  - same CRS
+  - same extent
+  - same cell alignment
+  - same target depth support used by the `POLARIS` near-surface aggregation
+  - use the matching SoilGrids depth intervals where available, then aggregate
+    onto the same near-surface support as the `POLARIS` inputs
+- Metadata should retain the native SoilGrids resolution and note that the
+  aligned `cfvo` layer is an upscaled ancillary, not a true 30 m observation
 - Comparisons should be matched accordingly:
   - compare fine-earth `POLARIS` estimates to `kffact` where available
-  - compare profile-fragment-adjusted estimates to `kwfact` where available
+  - compare `cfvo`-adjusted estimates to `kwfact` where available, while
+    noting the variable-definition mismatch
 
 Likely ancillary needs beyond the current Polaris request:
 
-- coarse-fragment or rock-fragment fraction
+- optional ISRIC SoilGrids `cfvo` profile coarse-fragment fraction, aligned to
+  the `POLARIS` grid before use
 - a defensible structure-class mapping
 - a defensible permeability-class mapping derived from `ksat` and profile
   conditions
@@ -807,6 +840,8 @@ At minimum, validation should include:
 - sensitivity checks for `LS`, `R`, and `C`
 - sensitivity checks across `K` estimators where the differences materially
   affect the map pattern
+- `cfvo`-adjusted versus fine-earth `POLARIS` `K` comparison where the profile
+  rock-fragment option is enabled
 
 Longer term, the mod should be checked against:
 
@@ -825,8 +860,6 @@ Longer term, the mod should be checked against:
   a defensible cover-management factor?
 - Should `scenario_sbs` support a time axis from day one, or only static
   low/moderate/high severity lookups?
-- Which ancillary source should provide the optional profile coarse-fragment
-  adjustment for `POLARIS`-derived `K`, if any?
 - Which operational datasets, if any, should populate the optional
   `blocking_mask` for roads, skid trails, and treatment features in early
   deployments?
@@ -842,8 +875,9 @@ Longer term, the mod should be checked against:
 3. Implement a `wepppyo3.climate` static-`R` routine from WEPP `.cli` inputs
    using that helper, with no production Python fallback.
 4. Extend Polaris acquisition for `polaris_nomograph` and `polaris_epic`,
-   starting with the nomograph-facing path and paired NRCS `K` benchmark
-   support.
+   starting with the nomograph-facing path, paired NRCS `K` benchmark
+   support, and optional aligned SoilGrids `cfvo` support for profile-
+   fragment adjustment.
 5. Define the shared `C` engine and the two source modes.
 6. Implement the `Rusle` NoDb controller and run-scoped artifact layout.
 7. Add validation runs using `disturbed9002_wbt`-style workflows.
@@ -988,6 +1022,14 @@ runtime `R` inputs in the current `Rusle` design.
   https://doi.org/10.1029/2018WR022797
   Primary reference for what `POLARIS` is, how it was built, and why it can
   supply finer spatial variability than polygon soil-survey products.
+- ISRIC. *SoilGrids FAQs*.
+  https://docs.isric.org/globaldata/soilgrids/SoilGrids_faqs_01.html
+  Official reference for SoilGrids property semantics, standard depth layers,
+  and conventional-unit conversion factors, including `cfvo`.
+- ISRIC. *FAQ - WoSIS*.
+  https://docs.isric.org/globaldata/wosis/faq-wosis.html
+  Official definition reference for `CFVO` as volumetric coarse fragments in
+  the whole soil.
 - USDA-NRCS. *Gridded Soil Survey Geographic (gSSURGO) Database*.
   https://www.nrcs.usda.gov/resources/data-and-reports/gridded-soil-survey-geographic-gssurgo-database
   Preferred U.S. gridded soil product when `kwfact` or `kffact` coverage is
