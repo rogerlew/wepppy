@@ -128,6 +128,26 @@ Recommendation: implement a purpose-built WBT tool instead of reusing
 - A dedicated tool makes masking, slope-length truncation, and output
   diagnostics explicit.
 
+#### Reviewed Precedents
+
+The current `LS` decisions are based on both literature and existing open
+implementations:
+
+- `Desmet and Govers (1996)` remains the canonical raster `L`-factor basis
+- `McCool et al. (1987, 1989)` remains the canonical `RUSLE` basis for `S`
+  and the slope-length exponent `m`
+- `Tarboton (1997)` provides the scientific basis for default `DInf`
+  routing and specific catchment area
+- `SAGA` is a useful open implementation precedent because it explicitly
+  supports `Desmet and Govers (1996)` and aspect-dependent specific
+  catchment area
+- `GRASS r.watershed` is a useful open implementation precedent for
+  `blocking`, `max_slope_length`, and default multiple-flow routing, but not
+  for the canonical equation set because its `LS` output is documented as
+  using western-rangelands equations
+- Whitebox's existing `SedimentTransportIndex` remains a comparison or
+  diagnostic product only, not the canonical `LS`
+
 #### Proposed WBT Tool
 
 Tool name: `RusleLsFactor`
@@ -136,10 +156,9 @@ Proposed inputs:
 
 - `dem`
 - optional precomputed `sca`
-- optional precomputed `slope`
+- optional precomputed `slope_deg`
 - optional `channel_mask`
 - optional `blocking_mask`
-- optional `disturbed_land_mask`
 - optional `max_slope_length_m`
 - routing mode selector, default `DInf`
 
@@ -151,20 +170,82 @@ Proposed outputs:
 - `sca.tif`
 - `effective_slope_length.tif`
 
-#### LS Method
+#### Locked v1 Method
 
-- `L`: use a Desmet-Govers-style cellwise slope-length formulation driven by
-  upslope contributing area
-- `S`: use a McCool/RUSLE steepness formulation
-- routing: default to `DInf`, with optional `FD8` or `D8` for comparison
-- slope-length truncation:
-  - stop at channels
-  - stop at excluded land classes
-  - optionally stop at roads/trails or other blocking terrain
-  - support `max_slope_length_m`
+`RusleLsFactor` should implement one canonical v1 `LS` path rather than ship
+multiple competing `LS` equations.
 
-The first implementation should favor transparency and diagnostic outputs over
-micro-optimization.
+##### `L` Subfactor
+
+- Use the `Desmet and Govers (1996)` raster formulation
+- Drive `L` from upslope contributing area per unit contour width, not from a
+  stream-power surrogate
+- Include the standard aspect-dependent contour-width correction from
+  `Desmet and Govers (1996)` rather than assuming contour width always equals
+  cell size
+- Use the `RUSLE` slope-length exponent:
+  - `m = beta / (1 + beta)`
+  - `beta = (sin(theta) / 0.0896) / (3.0 * sin(theta)^0.8 + 0.56)`
+- Treat `theta` as the local slope angle; if `slope_deg` is supplied, convert
+  it internally to radians before applying the equations
+
+##### `S` Subfactor
+
+- Use the standard `McCool/RUSLE` steepness equations based on local slope
+  angle:
+  - `S = 10.8 * sin(theta) + 0.03` when `tan(theta) < 0.09`
+  - `S = 16.8 * sin(theta) - 0.50` when `tan(theta) >= 0.09`
+- Use local slope only in v1, not distance-weighted average catchment slope
+- Do not substitute the `Nearing (1997)` continuous steep-slope form in v1;
+  staying with the standard `McCool/RUSLE` form keeps the tool closer to USDA
+  `RUSLE` practice and the most common raster `LS` implementations
+- Do not implement the short-slope interrill-only branch from `McCool et al.
+  (1987)` in v1; that is an explicit scale assumption for a 30 m gridded
+  product rather than a claim that the branch is scientifically invalid
+
+##### Routing and DEM Assumptions
+
+- Default routing mode: `DInf`
+- Default flow input: specific catchment area from a hydrologically
+  conditioned DEM
+- The `RusleLsFactor` tool should assume the DEM has already been conditioned
+  upstream; it should not silently fill or breach pits inside the tool
+- If `sca` is supplied, it must already be a same-grid specific catchment area
+  raster in `m^2/m`
+- If `slope_deg` is supplied, it must already be a same-grid local slope raster
+  in degrees
+- `FD8` may be supported as an alternate multiple-flow sensitivity path
+- `D8` may be supported as a comparison path only, not as the default
+
+##### Slope-Length Termination and Masking
+
+- Stop slope-length growth at channel cells
+- Stop slope-length growth at masked `NLCD` water, urban, and wetland cells
+- Stop slope-length growth at explicit `blocking_mask` cells such as roads,
+  skid trails, treatment breaks, or other known barriers when those inputs are
+  intentionally supplied
+- Do not treat disturbance itself as an `LS` input. Disturbance affects the
+  final map through `C`, the joint hillslope mask, and scenario framing, not by
+  changing the topographic factor equations
+- Do not apply an arbitrary global hard cap by default. `Panagos et al.
+  (2015)` explicitly applied `Desmet and Govers (1996)` with a multiple-flow
+  algorithm and noted that they did not impose arbitrary slope lengths
+- Support `max_slope_length_m` as an explicit optional operational control. If
+  a run uses it, record that choice in `rusle/manifest.json` and treat it as a
+  visualization-stabilization assumption rather than canonical `RUSLE` science
+
+##### Output and Interpretation Assumptions
+
+- The tool should output diagnostic rasters for `L`, `S`, `LS`, `SCA`, and
+  effective slope length so the result can be audited rather than treated as a
+  black box
+- The target interpretation is broad hillslope pattern and relative detachment
+  potential at the run cell size, not microtopographic truth
+- `SedimentTransportIndex` may still be exported as an auxiliary comparison
+  layer, but not substituted for canonical `LS`
+
+The first implementation should still favor transparency and diagnostic outputs
+over micro-optimization.
 
 ### R
 
@@ -555,6 +636,7 @@ mods = ["disturbed", "debris_flow", "ash", "treatments", "polaris", "rap", "rusl
 [rusle]
 enabled = true
 ls_mode = "wbt_rusle"
+ls_routing = "dinf"
 r_mode = "cligen_static"
 k_mode = "polaris_nomograph"
 c_mode = "observed_rap"
@@ -563,10 +645,12 @@ mask_nlcd_water = true
 mask_nlcd_urban = true
 mask_nlcd_wetlands = true
 mask_channels = true
-max_slope_length_m = 100
+max_slope_length_m = None
 ```
 
-The exact defaults remain open and should be revisited during prototyping.
+The scientific defaults above are the current working position. Optional
+operational controls such as `max_slope_length_m` should only change with
+explicit validation or documented visualization needs.
 
 ## Source Precedence
 
@@ -616,9 +700,6 @@ Longer term, the mod should be checked against:
   encoded in the first `wepppyo3` static-`R` routine?
 - What is the preferred public API shape for the shared `wepppyo3` hyetograph
   helper: segments only, or segments plus derived peak-intensity windows?
-- Should `LS` cap slope length by default, and if so at what value?
-- How should roads, skid trails, and treatment features participate in
-  slope-length blocking?
 - Which exact `POLARIS`-derived `K` formulation should be adopted first:
   strict nomograph emulation, an EPIC-style approximation, or another
   precedented variant?
@@ -628,11 +709,15 @@ Longer term, the mod should be checked against:
   low/moderate/high severity lookups?
 - Which ancillary source should provide rock-fragment information for
   `POLARIS`-derived `K`, if any?
+- Which operational datasets, if any, should populate the optional
+  `blocking_mask` for roads, skid trails, and treatment features in early
+  deployments?
 
 ## Initial Milestones
 
-1. Create the WBT `RusleLsFactor` tool and validate outputs on representative
-   disturbed terrain.
+1. Create the WBT `RusleLsFactor` tool with `Desmet-Govers` `L`,
+   `McCool/RUSLE` `S`, `DInf` default routing, and diagnostic outputs; then
+   validate outputs on representative disturbed terrain.
 2. Add a reusable Rust WEPP hyetograph reconstruction helper to
    `wepppyo3.climate` and validate it against existing Python behavior where
    comparable.
@@ -690,6 +775,37 @@ runtime `R` inputs in the current `Rusle` design.
   *Journal of Soil and Water Conservation*, 51(5), 427-433.
   Canonical raster `L`-factor reference for upslope-area-based `LS`
   calculation.
+- McCool, D. K., Brown, L. C., Foster, G. R., Mutchler, C. K., and Meyer,
+  L. D., 1987. *Revised Slope Steepness Factor for the Universal Soil Loss
+  Equation*. *Transactions of the ASAE*, 30(5), 1387-1396.
+  https://doi.org/10.13031/2013.30576
+  Canonical `S`-factor reference for the two-segment `RUSLE` steepness
+  relationship and the separate short-slope branch that is intentionally not
+  used in this 30 m gridded v1 design.
+- McCool, D. K., Foster, G. R., Mutchler, C. K., and Meyer, L. D., 1989.
+  *Revised slope length factor for the universal soil loss equation*.
+  *Transactions of the ASAE*, 32(5), 1571-1576.
+  https://doi.org/10.13031/2013.31192
+  Canonical `RUSLE` reference for the slope-length exponent formulation used
+  with rasterized `L`.
+- Nearing, M. A., 1997. *A Single, Continuous Function for Slope Steepness
+  Influence on Soil Loss*. *Soil Science Society of America Journal*, 61(3),
+  917-919.
+  https://doi.org/10.2136/sssaj1997.03615995006100030029x
+  Continuous steep-slope alternative reviewed for this specification but not
+  adopted in the v1 `LS` method.
+- Tarboton, D. G., 1997. *A new method for the determination of flow
+  directions and upslope areas in grid digital elevation models*.
+  *Water Resources Research*, 33(2), 309-319.
+  https://doi.org/10.1029/96WR03137
+  Scientific basis for `D-infinity` routing and specific catchment area.
+- Panagos, P., Borrelli, P., and Meusburger, K., 2015.
+  *A New European Slope Length and Steepness Factor (LS-Factor) for Modeling
+  Soil Erosion by Water*. *Geosciences*, 5(2), 117-126.
+  https://doi.org/10.3390/geosciences5020117
+  Open-access precedent for implementing `Desmet and Govers (1996)` with a
+  multiple-flow algorithm at continental scale and for avoiding arbitrary
+  global slope-length caps.
 - Benavidez, R., Jackson, B., Maxwell, D., and Norton, K., 2018.
   *A review of the (Revised) Universal Soil Loss Equation ((R)USLE): with a
   view to increasing its global applicability and improving soil loss
@@ -697,6 +813,19 @@ runtime `R` inputs in the current `Rusle` design.
   https://doi.org/10.5194/hess-22-6059-2018
   Review of `RUSLE` factor choices, limitations, and common rasterized `LS`
   implementations in complex terrain.
+
+### Open-Source `LS` Implementation Precedents
+
+- GRASS GIS. *r.watershed manual*.
+  https://grass.osgeo.org/grass-stable/manuals/r.watershed.html
+  Useful open implementation precedent for default multiple-flow routing,
+  `blocking`, and `max_slope_length` controls. The manual also makes clear that
+  its `LS` equations are not the exact canonical `Desmet and Govers (1996)`
+  raster path adopted here.
+- SAGA GIS. *Tool Library Documentation: LS-Factor, Field Based*.
+  https://saga-gis.sourceforge.io/saga_tool_doc/9.9.2/ta_hydrology_25.html
+  Useful open implementation precedent for exposing `Desmet and Govers (1996)`
+  as a named method and for handling aspect-dependent specific catchment area.
 
 ### `R` Factor and Precipitation Data
 
