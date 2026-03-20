@@ -429,23 +429,50 @@ Conclusion:
 
 ### K
 
-#### K Mode Strategy
+#### Reviewed Precedents
 
-The design should explicitly support two `K` modes rather than forcing one
-source to win every use case.
+The current `K` decisions are based on both primary model references and open
+implementation precedents:
+
+- `RUSLE` and NRCS `kwfact` or `kffact` define the canonical U.S. soil
+  erodibility target for comparison
+- the `Wischmeier` nomograph-style path remains the closest conceptual match to
+  canonical `RUSLE K`, but it needs inputs that gridded products often do not
+  supply directly, especially very fine sand, structure class, and profile
+  permeability class
+- `SWAT+` documents the `Williams (1995)` `EPIC` alternative, which is widely
+  used when only texture and organic carbon are available
+- `Shojaeezadeh et al. (2024)` provide direct CONUS precedent for deriving
+  `K` from `POLARIS` plus ancillary datasets, but also show the approximation
+  burden: structure and permeability must be inferred, and their textural term
+  uses gridded sand and silt rather than a directly observed very-fine-sand
+  field
+- `Rossiter et al. (2022)` remain the key caution that fine-gridded digital
+  soil maps are not automatically truer than survey-based products
+
+#### Locked Mode Strategy
+
+The design should explicitly support three `K` paths:
 
 1. `polaris_nomograph`
 
-- Preferred default for map-production mode when local spatial variability is a
-  primary objective
-- Derive `K` from `POLARIS` texture, organic matter or carbon, bulk density,
-  and `ksat`, using a `RUSLE` nomograph-like workflow with explicit ancillary
-  structure, permeability, and rock-fragment handling
-- Best fit for a spatially informative visualization or prioritization product
+- Preferred default for the main `Rusle` map product
+- Target a fine-earth, `kffact`-like `K` estimate from `POLARIS`
+- Best fit when the goal is a spatially informative detachment-potential map
+  that still speaks the language of `RUSLE` and NRCS `K`
 
-2. `gnatsgo_kwfact` or `gssurgo_kwfact`
+2. `polaris_epic`
 
-- Reference or benchmark mode using NRCS soil-survey `K` fields
+- Supported as a secondary `POLARIS` mode, not the default
+- Use the `Williams (1995)` `EPIC` texture-carbon approximation as documented
+  in `SWAT+`
+- Best fit as a lower-assumption fallback, sensitivity test, or reproducibility
+  path for users coming from `SWAT`, `MUSLE`, or global gridded erosion
+  studies
+
+3. `gnatsgo_kffact`, `gnatsgo_kwfact`, `gssurgo_kffact`, or `gssurgo_kwfact`
+
+- Reference or benchmark modes using NRCS soil-survey `K` fields
 - Expected to be less spatially variable within soil map units, but more
   directly tied to official NRCS `K` interpretations
 - Should remain available for comparison, quality review, and sensitivity
@@ -460,14 +487,25 @@ source to win every use case.
   products, including `POLARIS`, can smooth real soil geography or introduce
   local artifacts relative to field survey products
 - Because of that tradeoff, runs should be able to compare
-  `polaris_nomograph` against `gnatsgo_kwfact` over the same area of interest
+  `polaris_nomograph` and `polaris_epic` against NRCS `K` products over the
+  same area of interest
+- Most end users are unlikely to have a strong prior preference between
+  `nomograph` and `EPIC`; that is an inference from the product goal here, not
+  a cited survey result. The stronger preference is likely to come from
+  technically literate reviewers:
+  - `RUSLE` or NRCS-oriented users will usually prefer the nomograph-facing
+    path
+  - `SWAT`, `MUSLE`, or large-area gridded-model users may prefer the `EPIC`
+    path
+- Because of that, `polaris_nomograph` should remain the default and
+  `polaris_epic` should be treated as an advanced or sensitivity option rather
+  than a first-choice UI decision
 
 #### POLARIS Extension Plan
 
 Recent CONUS-scale erosion work has already derived soil erodibility from
 `POLARIS` and related ancillary layers, so the general approach is precedented
-and does not need to be invented from scratch. The open design question is the
-exact parameterization to adopt in WEPPpy.
+and does not need to be invented from scratch.
 
 The current `disturbed9002_wbt` Polaris fetch was intentionally minimal for
 testing. The mod should extend the request set.
@@ -487,15 +525,59 @@ Recommended depths:
 - `5_15`
 
 The mod should compute a weighted near-surface value rather than relying only
-on `0_5`.
+on `0_5`. Both `polaris_nomograph` and `polaris_epic` should use the same
+thickness-weighted near-surface aggregation so comparisons are about the
+equation family, not mismatched horizons.
 
-Recommended target behavior:
+#### Locked Assumptions by Mode
+
+##### `polaris_nomograph`
+
+- This is the preferred first-shipping `POLARIS` mode
+- It should be described as a `nomograph-like` or `RUSLE-facing` emulation, not
+  as a literal reproduction of NRCS `kffact`
+- The main reason is data availability: the canonical particle-size term uses
+  silt plus very fine sand, while `POLARIS` does not provide a directly
+  observed very-fine-sand field
+- `Shojaeezadeh et al. (2024)` show one defensible way to proceed: retain the
+  nomograph family, infer structure and permeability classes from ancillary
+  datasets, and accept a gridded texture approximation in place of literal
+  survey terms
+- The tool should therefore make the approximation explicit in metadata and
+  documentation instead of implying that `POLARIS` can reproduce NRCS `K`
+  exactly
+- Structure and permeability classes should be inferred from gridded covariates
+  and documented as modeled classes, not observed survey descriptors
+- If no profile coarse-fragment ancillary is supplied, the output should be
+  labeled and interpreted as a fine-earth, `kffact`-like estimate
+- If a profile coarse-fragment adjustment is applied later, comparisons should
+  shift toward `kwfact`
+
+##### `polaris_epic`
+
+- This mode should implement the `Williams (1995)` alternative equation as
+  documented by `SWAT+`
+- It should use `POLARIS` `sand`, `silt`, `clay`, and `om`, converting organic
+  matter to organic carbon where required by the equation
+- It should not require structure classes, permeability classes, or very fine
+  sand
+- That lower input burden is its main advantage
+- Its main limitation is conceptual rather than computational: it is less
+  directly comparable to NRCS `kwfact` or `kffact` and less obviously aligned
+  with canonical `RUSLE K`
+- For this project, it should therefore be treated as a secondary estimator for
+  fallback, sensitivity, or reproducibility rather than the main default
+
+##### Rock Fragments and Surface Rock
 
 - First derive a fine-earth, `kffact`-like `K` estimate from `POLARIS`
-- Then handle rock fragments explicitly rather than letting stoniness silently
-  distort the high-resolution texture signal
+- Then handle profile rock fragments explicitly rather than letting stoniness
+  silently distort the high-resolution texture signal
 - Treat surface rock as a cover effect, not as a direct replacement for soil
   erodibility
+- Comparisons should be matched accordingly:
+  - compare fine-earth `POLARIS` estimates to `kffact` where available
+  - compare profile-fragment-adjusted estimates to `kwfact` where available
 
 Likely ancillary needs beyond the current Polaris request:
 
@@ -503,6 +585,22 @@ Likely ancillary needs beyond the current Polaris request:
 - a defensible structure-class mapping
 - a defensible permeability-class mapping derived from `ksat` and profile
   conditions
+
+#### Product Decision
+
+Support both `polaris_nomograph` and `polaris_epic`, but do not treat them as
+co-equal defaults.
+
+- `polaris_nomograph` is the default because it is closer to `RUSLE` and NRCS
+  `K` semantics, which better fits the academic-backing goal of this mod
+- `polaris_epic` is worth supporting because it is substantially easier to
+  compute from gridded soil products, is precedented in open modeling systems,
+  and provides a useful sensitivity or fallback path when ancillary class
+  mappings are weak or unavailable
+- For the first user-facing release, the primary UX should not ask ordinary
+  users to choose between them unless there is a concrete reason. The default
+  should simply be `polaris_nomograph`, with `polaris_epic` available through
+  advanced config or analyst workflows
 
 #### Important Distinction
 
@@ -663,7 +761,9 @@ Recommended initial precedence:
   - no external gridded runtime source in the first implementation
 - `K`
   - `polaris_nomograph` for default visualization mode
-  - `gnatsgo_kwfact` or `gssurgo_kwfact` for benchmark or reference mode
+  - `polaris_epic` for advanced fallback or sensitivity mode
+  - `gnatsgo_kffact`, `gnatsgo_kwfact`, `gssurgo_kffact`, or `gssurgo_kwfact`
+    for benchmark or reference mode
 - `C`
   - `observed_rap`
   - or `scenario_sbs`
@@ -682,10 +782,15 @@ At minimum, validation should include:
   coverage if supported by the Rust parser path
 - annual `EI30` distribution review for representative climates
 - known hotspot comparison against field or mapped observations
-- `polaris_nomograph` versus `gnatsgo_kwfact` comparison on representative
-  areas of interest
+- `polaris_nomograph` versus `polaris_epic` comparison on representative areas
+  of interest
+- `polaris_nomograph` or `polaris_epic` versus NRCS `kffact` or `kwfact`
+  comparison on representative areas of interest, matched to the fragment
+  assumption actually used
 - pre-fire/post-fire directional checks
 - sensitivity checks for `LS`, `R`, and `C`
+- sensitivity checks across `K` estimators where the differences materially
+  affect the map pattern
 
 Longer term, the mod should be checked against:
 
@@ -700,15 +805,12 @@ Longer term, the mod should be checked against:
   encoded in the first `wepppyo3` static-`R` routine?
 - What is the preferred public API shape for the shared `wepppyo3` hyetograph
   helper: segments only, or segments plus derived peak-intensity windows?
-- Which exact `POLARIS`-derived `K` formulation should be adopted first:
-  strict nomograph emulation, an EPIC-style approximation, or another
-  precedented variant?
 - What is the preferred initial `C` formula for translating RAP fractions into
   a defensible cover-management factor?
 - Should `scenario_sbs` support a time axis from day one, or only static
   low/moderate/high severity lookups?
-- Which ancillary source should provide rock-fragment information for
-  `POLARIS`-derived `K`, if any?
+- Which ancillary source should provide the optional profile coarse-fragment
+  adjustment for `POLARIS`-derived `K`, if any?
 - Which operational datasets, if any, should populate the optional
   `blocking_mask` for roads, skid trails, and treatment features in early
   deployments?
@@ -723,8 +825,9 @@ Longer term, the mod should be checked against:
    comparable.
 3. Implement a `wepppyo3.climate` static-`R` routine from WEPP `.cli` inputs
    using that helper, with no production Python fallback.
-4. Extend Polaris acquisition for `polaris_nomograph` and add NRCS `K`
-   benchmark support.
+4. Extend Polaris acquisition for `polaris_nomograph` and `polaris_epic`,
+   starting with the nomograph-facing path and paired NRCS `K` benchmark
+   support.
 5. Define the shared `C` engine and the two source modes.
 6. Implement the `Rusle` NoDb controller and run-scoped artifact layout.
 7. Add validation runs using `disturbed9002_wbt`-style workflows.
@@ -881,6 +984,11 @@ runtime `R` inputs in the current `Rusle` design.
   https://sdmdataaccess.nrcs.usda.gov/documents/TableColumnDescriptionsReport.pdf
   Official definitions for `kwfact` and `kffact`, including the distinction
   that `kwfact` includes rock-fragment adjustment.
+- SWAT+ Documentation. *Soil Erodibility Factor*.
+  https://swatplus.gitbook.io/io-docs/theoretical-documentation/section-4-erosion/sediment/musle/soil-erodibility-factor
+  Official open documentation for both the `Wischmeier` nomograph-style
+  equation and the `Williams (1995)` `EPIC` alternative used here as the
+  secondary `POLARIS` estimator.
 - Rossiter, D. G., Poggio, L., Beaudette, D., and Libohova, Z., 2022.
   *How well does digital soil mapping represent soil geography? An
   investigation from the USA*. *SOIL*, 8, 559-586.
@@ -893,9 +1001,14 @@ runtime `R` inputs in the current `Rusle` design.
   Gandomi, A. H., 2024. *Soil erosion in the United States: Present and future
   (2020-2050)*. *Catena*, 242, 108074.
   https://doi.org/10.1016/j.catena.2024.108074
+  Open preprint with method detail:
+  https://opus.lib.uts.edu.au/bitstream/10453/167179/2/2207.06579v1.pdf
   Recent CONUS-scale precedent for deriving soil erodibility from `POLARIS`
   and ancillary soil datasets rather than relying only on polygon-based NRCS
-  `K` values.
+  `K` values. The preprint method details are also useful because they show the
+  practical approximation burden of a `POLARIS` nomograph path, including
+  inferred structure and permeability classes and the lack of a directly
+  observed very-fine-sand field.
 
 ### `C` Factor, Cover Data, and Masking
 
