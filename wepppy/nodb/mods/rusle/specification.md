@@ -203,13 +203,32 @@ multiple competing `LS` equations.
   (1987)` in v1; that is an explicit scale assumption for a 30 m gridded
   product rather than a claim that the branch is scientifically invalid
 
+###### Implementable Near-`RUSLE2` Alternative (Non-Default)
+
+The locked v1 default remains the moderate-condition `McCool (1989)` `m`
+relationship above. A closer, still implementable bridge toward `RUSLE2`
+behavior is to support an optional non-default rill/interrill regime control
+for sensitivity analysis:
+
+- `m_regime = slight | moderate | high_rill`
+- compute `beta_base` using the locked v1 equation
+- apply `beta = 0.5 * beta_base` for `slight`
+- apply `beta = 1.0 * beta_base` for `moderate` (v1 default)
+- apply `beta = 2.0 * beta_base` for `high_rill`
+
+This is still not full dynamic `RUSLE2` daily `m` behavior, but it is
+implementable in raster workflows and scientifically closer than a single
+hard-coded moderate regime.
+
 ##### Routing and DEM Assumptions
 
 - Default routing mode: `DInf`
 - Default flow input: specific catchment area from a hydrologically
   conditioned DEM
-- The `RusleLsFactor` tool should assume the DEM has already been conditioned
-  upstream; it should not silently fill or breach pits inside the tool
+- The `RusleLsFactor` tool should assume the DEM is already hydrologically
+  sound upstream; it should not silently fill or breach pits inside the tool
+- The tool should fail fast with an explicit, actionable error when interior
+  no-flow artifacts indicate a likely unconditioned DEM
 - If `sca` is supplied, it must already be a same-grid specific catchment area
   raster in `m^2/m`
 - If `slope_deg` is supplied, it must already be a same-grid local slope raster
@@ -224,21 +243,77 @@ multiple competing `LS` equations.
 - Stop slope-length growth at explicit `blocking_mask` cells such as roads,
   skid trails, treatment breaks, or other known barriers when those inputs are
   intentionally supplied
+- Define `ls_stop_mask` as the union of:
+  - channel mask
+  - non-hillslope land masks used by the `Rusle` controller (`NLCD` water,
+    urban, wetlands by default)
+  - optional explicit `blocking_mask`
+- `blocking_mask` raster semantics are fixed for v1:
+  - same extent, resolution, and grid alignment as `dem`
+  - value `> 0` means stop cell
+  - value `0` means pass-through cell
+  - `NoData` in `blocking_mask` is treated as pass-through unless another
+    stop-mask component marks the cell as stop
+- Routing behavior at stop cells should be explicit and consistent across
+  routing modes:
+  - stop cells are terminal sinks with zero outflow for `LS` routing purposes
+  - for multi-flow routing (`DInf`, `FD8`), any routed fraction entering a stop
+    cell is terminated and should not be renormalized onto nonstop receivers
+  - stop-mask cells are excluded from primary hillslope `L`, `S`, and `LS`
+    outputs
 - Do not treat disturbance itself as an `LS` input. Disturbance affects the
   final map through `C`, the joint hillslope mask, and scenario framing, not by
   changing the topographic factor equations
-- Do not apply an arbitrary global hard cap by default. `Panagos et al.
-  (2015)` explicitly applied `Desmet and Govers (1996)` with a multiple-flow
-  algorithm and noted that they did not impose arbitrary slope lengths
-- Support `max_slope_length_m` as an explicit optional operational control. If
-  a run uses it, record that choice in `rusle/manifest.json` and treat it as a
-  visualization-stabilization assumption rather than canonical `RUSLE` science
+- Apply a handbook-based default slope-length cap:
+  - `max_slope_length_m = 304.8` (1000 ft)
+  - basis: `RUSLE2 Handbook` guidance that slope lengths longer than 1000 ft
+    should generally not be used
+- Allow `max_slope_length_m` override for explicit sensitivity analysis only.
+  If a run changes this value, record both the value and rationale in
+  `rusle/manifest.json`
+- The cap is part of the canonical v1 operational science contract, not a
+  hidden visualization fallback
 
 ##### Output and Interpretation Assumptions
 
-- The tool should output diagnostic rasters for `L`, `S`, `LS`, `SCA`, and
-  effective slope length so the result can be audited rather than treated as a
-  black box
+- Required v1 outputs from `RusleLsFactor`:
+  - `ls.tif`
+  - `l.tif`
+  - `s.tif`
+  - `sca.tif`
+  - `effective_slope_length.tif`
+- Required metadata in output rasters and `rusle/manifest.json` for `LS`:
+  - `tool = RusleLsFactor`
+  - `tool_version`
+  - `l_method = desmet_govers_1996`
+  - `s_method = mccool_rusle_piecewise`
+  - `m_method` and `m_regime`
+  - `routing_mode`
+  - `dem_hydrologically_sound_assumed = true`
+  - `max_slope_length_m`
+  - `max_slope_length_basis = rusle2_handbook_1000ft`
+  - `stop_mask_components`
+  - `stop_mask_routing_behavior = terminal_sink_no_renormalization`
+  - `sca_source = derived | input`
+  - `slope_source = derived | input`
+- Required v1 metadata typing and enum spellings (for Rust/Python parity):
+  - `tool` and `tool_version`: string
+  - `l_method`: enum, must be `desmet_govers_1996`
+  - `s_method`: enum, must be `mccool_rusle_piecewise`
+  - `m_method`: enum, must be `mccool_1989_beta_moderate_base`
+  - `m_regime`: enum, one of `slight`, `moderate`, `high_rill`
+  - `routing_mode`: enum, one of `dinf`, `fd8`, `d8`
+  - `dem_hydrologically_sound_assumed`: boolean, must be `true`
+  - `max_slope_length_m`: float (`304.8` default)
+  - `max_slope_length_basis`: enum, must be `rusle2_handbook_1000ft`
+  - `stop_mask_components`: string list subset of
+    `channel_mask`, `nlcd_water`, `nlcd_urban`, `nlcd_wetlands`,
+    `blocking_mask`
+  - `stop_mask_routing_behavior`: enum, must be
+    `terminal_sink_no_renormalization`
+  - `sca_source`: enum, one of `derived`, `input`
+  - `slope_source`: enum, one of `derived`, `input`
+  - `blocking_mask_source`: enum, one of `none`, `input_raster`
 - The target interpretation is broad hillslope pattern and relative detachment
   potential at the run cell size, not microtopographic truth
 - `SedimentTransportIndex` may still be exported as an auxiliary comparison
@@ -799,12 +874,12 @@ mask_nlcd_water = true
 mask_nlcd_urban = true
 mask_nlcd_wetlands = true
 mask_channels = true
-max_slope_length_m = None
+max_slope_length_m = 304.8
 ```
 
 The scientific defaults above are the current working position. Optional
 operational controls such as `max_slope_length_m` should only change with
-explicit validation or documented visualization needs.
+explicit validation and documented rationale.
 
 ## Source Precedence
 
@@ -867,9 +942,14 @@ Longer term, the mod should be checked against:
   a defensible cover-management factor?
 - Should `scenario_sbs` support a time axis from day one, or only static
   low/moderate/high severity lookups?
-- Which operational datasets, if any, should populate the optional
-  `blocking_mask` for roads, skid trails, and treatment features in early
-  deployments?
+
+### Resolved Implementation Choices
+
+- `LS` uses a handbook-based default `max_slope_length_m = 304.8`
+- DEM input is assumed hydrologically sound; `RusleLsFactor` should fail fast
+  rather than condition DEMs internally
+- Stop-mask routing semantics are fixed: terminal sinks, no renormalization of
+  terminated multi-flow fractions
 
 ## Initial Milestones
 

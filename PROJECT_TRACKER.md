@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-17  
+**Last Updated**: 2026-03-21  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -313,6 +313,29 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### RUSLE LS Factor Tooling in weppcloud-wbt
+**Completed**: 2026-03-20  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260320_rusle_ls_factor_wbt/](docs/work-packages/20260320_rusle_ls_factor_wbt/)  
+**Description**: Implemented a purpose-built `RusleLsFactor` WhiteboxTools command using locked v1 `LS` science (`Desmet-Govers` `L`, `McCool/RUSLE` `S`, `DInf` default routing), plus end-to-end `wepppy` integration and manifest provenance.
+
+**Outcome**:
+- Added `whitebox-tools-app/src/tools/terrain_analysis/rusle_ls_factor.rs` and registered it in terrain-analysis exports + tool manager dispatch.
+- Added wrapper methods in both binding files (`whitebox_tools.py`, `WBT/whitebox_tools.py`) and verified tool discoverability via `--listtools`.
+- Added WEPPpy LS integration (`wepppy/nodb/mods/rusle/ls_integration.py`, `wepppy/nodb/mods/rusle/__init__.py`) and regression tests (`tests/nodb/mods/test_rusle_ls_integration.py`).
+- Finalized LS spec edits for default 304.8 m cap, DEM assumptions, stop-mask routing semantics, and metadata contract.
+- Validation passed: WBT build/check/tests + wrapper compile checks, targeted LS integration tests, and full WEPPpy suite (`2385 passed, 34 skipped`).
+- Real-run acceptance on 5 `/wc1/runs/*` DEMs passed with breached-preprocess workflow, including LS identity (`< 2e-5` max absolute error), cap enforcement, and expected fail-fast rejection of unconditioned pit-containing DEMs.
+
+**Deliverables**:
+- ✅ New `RusleLsFactor` tool + registration + Python bindings
+- ✅ WEPPpy LS integration entrypoint and tests
+- ✅ Closed package artifacts (`package.md`, `tracker.md`, completed ExecPlan)
+
+---
 
 ### Runtime Path Locks Redis Migration
 **Completed**: 2026-03-17  

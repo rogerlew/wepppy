@@ -42,7 +42,7 @@
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.
-- Current work-package active ExecPlan: `none` (most recently completed: `docs/work-packages/20260317_runtime_path_redis_locks/prompts/completed/runtime_path_redis_locks_execplan.md`).
+- Current work-package active ExecPlan: `none` (most recently completed: `docs/work-packages/20260320_rusle_ls_factor_wbt/prompts/completed/rusle_ls_factor_execplan.md`).
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.
