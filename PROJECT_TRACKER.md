@@ -314,6 +314,27 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### RUSLE POLARIS K Implementation + NRCS Benchmark Harness
+**Completed**: 2026-03-21  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260321_rusle_k_polaris_implementation/](docs/work-packages/20260321_rusle_k_polaris_implementation/)  
+**Description**: Completed RUSLE `K` Milestone 4 by implementing `polaris_nomograph` and `polaris_epic`, adding deterministic `gnatsgo/gssurgo` benchmark harness support, and shipping sanity comparison + review/QA artifacts.
+
+**Outcome**:
+- Added K implementation modules under `wepppy/nodb/mods/rusle/`: `k_nomograph.py`, `k_epic.py`, `k_reference.py`, `k_compare.py`, `k_manifest.py`, `k_integration.py`.
+- Updated `wepppy/nodb/mods/rusle/__init__.py` exports with K integration and comparison entrypoints.
+- Added targeted K tests: `test_rusle_k_nomograph.py`, `test_rusle_k_epic.py`, `test_rusle_k_reference_harness.py`, `test_rusle_k_compare.py`, `test_rusle_k_integration.py`.
+- Implemented benchmark mode precedence contract: `gssurgo_kffact` -> `gnatsgo_kffact` -> `gssurgo_kwfact` -> `gnatsgo_kwfact`.
+- Locked Milestone 0 contracts in manifest/docs: depth support (`0_5`,`5_15` with `5/10 cm` weights), EPIC OC conversion (`OM/1.724`), comparison thresholds defaults, and `cfvo` deferred scope.
+- Captured package artifacts: `artifacts/milestone4_review.md`, `artifacts/milestone5_qa_review.md`, `artifacts/k_benchmark_comparison_summary.md`.
+
+**Validation Notes**:
+- Passed targeted K suite (`16 passed`).
+- Passed broad-exception changed-file enforcement and code-quality observability (observe-only).
+- Passed full WEPPpy sanity gate (`2410 passed, 34 skipped`).
+
 ### RUSLE Static R + WEPPpyo3 Hyetograph API Migration
 **Completed**: 2026-03-21  
 **Duration**: 2 focused sessions  

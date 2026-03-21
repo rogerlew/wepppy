@@ -1073,7 +1073,9 @@ Status update (2026-03-21):
   `docs/work-packages/20260320_rusle_ls_factor_wbt/`.
 - Milestones 2-3 completed in
   `docs/work-packages/20260320_rusle_r_static_hyetograph_api/`.
-- Milestones 4-7 remain pending and in scope for follow-on `Rusle` packages.
+- Milestone 4 completed in
+  `docs/work-packages/20260321_rusle_k_polaris_implementation/`.
+- Milestones 5-7 remain pending and in scope for follow-on `Rusle` packages.
 
 1. Create the WBT `RusleLsFactor` tool with `Desmet-Govers` `L`,
    `McCool/RUSLE` `S`, `DInf` default routing, and diagnostic outputs; then
