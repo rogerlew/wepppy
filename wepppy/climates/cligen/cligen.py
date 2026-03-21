@@ -65,6 +65,11 @@ from wepppy.climates.metquery_client import (
     c_to_f
 )
 
+try:
+    from wepppyo3 import climate as _pyo3_climate
+except ImportError:  # pragma: no cover - optional dependency boundary
+    _pyo3_climate = None
+
 _thisdir = os.path.dirname(__file__)
 _db = _join(_thisdir, '2015_stations.db')
 _stations_dir = _join(_thisdir, '2015_par_files')
@@ -402,6 +407,24 @@ def wepp_peak_intensities_from_hyetograph(
     if time_step_minutes <= 0.0:
         raise ValueError("time_step_minutes must be greater than zero.")
 
+    # Prefer the shared Rust API during migration.
+    if _pyo3_climate is not None:
+        try:
+            pyo3_out = _pyo3_climate.compute_peak_intensities_non_breakpoint(
+                prcp_mm=float(prcp),
+                dur_hr=float(dur),
+                tp=float(tp),
+                ip=float(ip),
+                windows_minutes=[int(v) for v in max_time],
+                ip_correction=float(ip_correction),
+                time_step_minutes=float(time_step_minutes),
+            )
+            return [float(pyo3_out.get(f"peak_intensity_{int(v)}", 0.0)) for v in max_time]
+        except (AttributeError, TypeError, ValueError, RuntimeError):
+            _LOGGER.exception(
+                "wepppyo3 non-breakpoint peak intensity calculation failed; falling back to legacy Python path"
+            )
+
     segments = _wepp_hyetograph_segments(
         prcp,
         dur,
@@ -442,6 +465,47 @@ def wepp_peak_intensities_from_hyetograph(
         results.append(max_depth / window_hours)
 
     return results
+
+
+def _breakpoint_peak_intensities_from_hyetograph(
+    breakpoint_times_hr: Sequence[float],
+    breakpoint_cum_depth_mm: Sequence[float],
+    *,
+    max_time: Sequence[float] = (10, 15, 30, 60),
+    time_step_minutes: float = 5.0,
+) -> list[float]:
+    """Compute breakpoint-storm peak intensities via the shared Rust API."""
+    if _pyo3_climate is None:
+        raise RuntimeError(
+            "Breakpoint peak-intensity calculations require wepppyo3.climate; no Python-only fallback is defined."
+        )
+    out = _pyo3_climate.compute_peak_intensities_breakpoint(
+        breakpoint_times_hr=[float(v) for v in breakpoint_times_hr],
+        breakpoint_cum_depth_mm=[float(v) for v in breakpoint_cum_depth_mm],
+        windows_minutes=[int(v) for v in max_time],
+        time_step_minutes=float(time_step_minutes),
+    )
+    return [float(out.get(f"peak_intensity_{int(v)}", 0.0)) for v in max_time]
+
+
+def cli_calculate_static_r(
+    src_fn: str,
+    *,
+    ip_correction: float = 0.70,
+    time_step_minutes: float = 5.0,
+    storm_depth_threshold_mm: float = 12.5,
+) -> dict[str, Any]:
+    """Calculate static annual R erosivity metrics from a WEPP CLI file."""
+    if _pyo3_climate is None:
+        raise RuntimeError(
+            "Static R calculations require wepppyo3.climate.compute_static_r_from_cli."
+        )
+    return _pyo3_climate.compute_static_r_from_cli(
+        src_fn,
+        ip_correction=float(ip_correction),
+        time_step_minutes=float(time_step_minutes),
+        storm_depth_threshold_mm=float(storm_depth_threshold_mm),
+    )
 
 
 def cli2pat(
@@ -1129,12 +1193,19 @@ class ClimateFile(object):
 
         if breakpoint:
             d['prcp'] = []
+            d['dur'] = []
+            d['tp'] = []
+            d['ip'] = []
 
         if calc_peak_intensities:
             d['10-min Peak Rainfall Intensity (mm/hour)'] = []
             d['15-min Peak Rainfall Intensity (mm/hour)'] = []
             d['30-min Peak Rainfall Intensity (mm/hour)'] = []
             d['60-min Peak Rainfall Intensity (mm/hour)'] = []
+            d['peak_intensity_10'] = []
+            d['peak_intensity_15'] = []
+            d['peak_intensity_30'] = []
+            d['peak_intensity_60'] = []
 
         for i, L in enumerate(self.lines[data0line:]):
             row = [v.strip() for v in L.split()]
@@ -1154,20 +1225,36 @@ class ClimateFile(object):
 
             if breakpoint:
                 nbrkpt = d['nbrkpt'][-1]
+                breakpoint_times_hr: list[float] = []
+                breakpoint_cum_depth_mm: list[float] = []
                 if nbrkpt > 0:
-                    x = self.lines[data0line + i + nbrkpt].split()
-                    if len(x) != 2:
-                        raise Exception(f'Expecting {nbrkpt} breakpoints for {date_str}')
-                    timem, pptcum = x
-                    timem = float(timem)
-                    pptcum = float(pptcum)
-                    d['prcp'].append(pptcum)
+                    for bp_offset in range(1, nbrkpt + 1):
+                        x = self.lines[data0line + i + bp_offset].split()
+                        if len(x) != 2:
+                            raise Exception(f'Expecting {nbrkpt} breakpoints for {date_str}')
+                        timem, pptcum = x
+                        breakpoint_times_hr.append(float(timem))
+                        breakpoint_cum_depth_mm.append(float(pptcum))
+
+                    d['prcp'].append(breakpoint_cum_depth_mm[-1])
+                    d['dur'].append(breakpoint_times_hr[-1])
                 else:
                     d['prcp'].append(0.0)
+                    d['dur'].append(0.0)
+
+                d['tp'].append(float('nan'))
+                d['ip'].append(float('nan'))
 
             if calc_peak_intensities:
                 if self.breakpoint:
-                    intensities = [-1, -1, -1, -1]
+                    if nbrkpt > 0:
+                        intensities = _breakpoint_peak_intensities_from_hyetograph(
+                            breakpoint_times_hr,
+                            breakpoint_cum_depth_mm,
+                            max_time=[10, 15, 30, 60],
+                        )
+                    else:
+                        intensities = [0.0, 0.0, 0.0, 0.0]
                 else:
                     max_time = [10, 15, 30, 60]
                     intensities = wepp_peak_intensities_from_hyetograph(
@@ -1182,6 +1269,10 @@ class ClimateFile(object):
                 d['15-min Peak Rainfall Intensity (mm/hour)'].append(intensities[1])
                 d['30-min Peak Rainfall Intensity (mm/hour)'].append(intensities[2])
                 d['60-min Peak Rainfall Intensity (mm/hour)'].append(intensities[3])
+                d['peak_intensity_10'].append(intensities[0])
+                d['peak_intensity_15'].append(intensities[1])
+                d['peak_intensity_30'].append(intensities[2])
+                d['peak_intensity_60'].append(intensities[3])
 
         return pd.DataFrame(data=d)
 

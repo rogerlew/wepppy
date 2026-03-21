@@ -314,6 +314,33 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### RUSLE Static R + WEPPpyo3 Hyetograph API Migration
+**Completed**: 2026-03-21  
+**Duration**: 2 focused sessions  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260320_rusle_r_static_hyetograph_api/](docs/work-packages/20260320_rusle_r_static_hyetograph_api/)  
+**Description**: Implemented static `R` (`cligen_static`) and shared hyetograph helpers in `wepppyo3.climate`, migrated WEPPpy climate callsites to canonical outputs, and delivered dedicated review + QA-review artifacts.
+
+**Outcome**:
+- Added new `wepppyo3.climate` API surface for non-breakpoint/breakpoint hyetograph reconstruction, peak-intensity windows, and static-`R` from CLI.
+- Synced canonical py312 runtime release artifacts under `/home/workdir/wepppyo3/release/linux/py312/`.
+- Migrated in-scope WEPPpy consumers (`cligen.py`, climate artifact export, interchange fallback, return-period staging) to use canonical `peak_intensity_*` + duration schema handling.
+- Removed breakpoint sentinel intensity behavior and ensured exported artifacts include `dur`, nullable `tp/ip`, `storm_duration_*`, and `peak_intensity_10/15/30/60`.
+- Added regression coverage in `tests/climate/test_cligen_peak_intensity_contract.py`, `tests/nodb/test_climate_artifact_export_service.py`, and `tests/wepp/interchange/test_utils_phase7.py`.
+- Added deterministic breakpoint intensity assertions, static-`R` aggregation invariants, repeated non-breakpoint stability checks, and parquet coalescing-precedence coverage.
+- Captured Milestone 4/5 review artifacts and final validation summary under package `artifacts/`.
+
+**Validation Notes**:
+- Passed: targeted migration tests, Rust tests, broad-exception changed-file enforcement, code-quality observability (observe-only), package/spec/tracker doc lint, and full WEPPpy sanity suite (`2392 passed, 34 skipped`).
+
+**Deliverables**:
+- ✅ New `wepppyo3` hyetograph + static-`R` API implementation and py312 release sync
+- ✅ WEPPpy callsite migration + breakpoint artifact contract upgrades
+- ✅ Review/QA/final-validation artifacts and completed ExecPlan
+
+---
+
 ### RUSLE LS Factor Tooling in weppcloud-wbt
 **Completed**: 2026-03-20  
 **Duration**: 1 focused session  

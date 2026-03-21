@@ -58,13 +58,48 @@ class ClimateArtifactExportService:
                     export_df["julian"] = ordered["julian"].reindex(export_df.index).astype("Int64")
                     export_df["sim_day_index"] = ordered["sim_day_index"].reindex(export_df.index).astype("Int64")
 
-            export_df["peak_intensity_10"] = export_df.get("10-min Peak Rainfall Intensity (mm/hour)")
-            export_df["peak_intensity_15"] = export_df.get("15-min Peak Rainfall Intensity (mm/hour)")
-            export_df["peak_intensity_30"] = export_df.get("30-min Peak Rainfall Intensity (mm/hour)")
-            export_df["peak_intensity_60"] = export_df.get("60-min Peak Rainfall Intensity (mm/hour)")
+            def _coalesce_series(canonical: str, legacy: str) -> pd.Series:
+                canonical_series = export_df.get(canonical)
+                legacy_series = export_df.get(legacy)
+                if canonical_series is None and legacy_series is None:
+                    return pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+                if canonical_series is None:
+                    return pd.to_numeric(legacy_series, errors="coerce")
+                canonical_numeric = pd.to_numeric(canonical_series, errors="coerce")
+                if legacy_series is None:
+                    return canonical_numeric
+                return canonical_numeric.fillna(pd.to_numeric(legacy_series, errors="coerce"))
 
-            export_df["storm_duration_hours"] = export_df.get("dur")
-            export_df["storm_duration"] = export_df.get("dur")
+            export_df["peak_intensity_10"] = _coalesce_series(
+                "peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)"
+            )
+            export_df["peak_intensity_15"] = _coalesce_series(
+                "peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)"
+            )
+            export_df["peak_intensity_30"] = _coalesce_series(
+                "peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)"
+            )
+            export_df["peak_intensity_60"] = _coalesce_series(
+                "peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)"
+            )
+
+            for canonical, legacy in (
+                ("peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)"),
+                ("peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)"),
+                ("peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)"),
+                ("peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)"),
+            ):
+                export_df[legacy] = export_df[canonical]
+
+            if "dur" not in export_df.columns:
+                export_df["dur"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+            if "tp" not in export_df.columns:
+                export_df["tp"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+            if "ip" not in export_df.columns:
+                export_df["ip"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+
+            export_df["storm_duration_hours"] = pd.to_numeric(export_df.get("dur"), errors="coerce")
+            export_df["storm_duration"] = pd.to_numeric(export_df.get("dur"), errors="coerce")
 
             parquet_path = Path(climate.wd) / "climate" / "wepp_cli.parquet"
             parquet_path.parent.mkdir(parents=True, exist_ok=True)
@@ -72,7 +107,7 @@ class ClimateArtifactExportService:
             climate.logger.info("Exported CLI parquet with peak intensities", extra={"parquet": str(parquet_path)})
             return parquet_path
         # Export boundary: any parse/serialization backend error should be logged and skipped.
-        except Exception:
+        except (ImportError, KeyError, OSError, RuntimeError, TypeError, ValueError):
             climate.logger.exception(
                 "Failed exporting CLI parquet with peak intensities",
                 extra={"cli_path": str(cli_path)},
@@ -88,7 +123,7 @@ class ClimateArtifactExportService:
         try:
             df = pd.read_parquet(parquet_path)
         # Read boundary: parquet backend/format issues are non-fatal for climate build completion.
-        except Exception:
+        except (ImportError, OSError, RuntimeError, TypeError, ValueError):
             climate.logger.exception(
                 "Failed reading CLI parquet for precip frequency stats",
                 extra={"parquet": str(parquet_path)},
@@ -236,7 +271,7 @@ class ClimateArtifactExportService:
                 lng_text = f"{float(lng):.4f} Degree"
                 lat_text = f"{float(lat):.4f} Degree"
         # Metadata boundary: centroid lookup should not block CSV generation.
-        except Exception:
+        except (AttributeError, RuntimeError, TypeError, ValueError):
             climate.logger.debug("Unable to resolve watershed centroid for precip frequency export", exc_info=True)
 
         output_path = parquet_path.with_name("wepp_cli_pds_mean_metric.csv")
@@ -291,7 +326,7 @@ class ClimateArtifactExportService:
             )
             return output_path
         # Write boundary: emit telemetry and continue without the optional artifact.
-        except Exception:
+        except (OSError, RuntimeError, ValueError):
             climate.logger.exception(
                 "Failed writing CLI precip frequency stats",
                 extra={"csv": str(output_path)},
@@ -318,14 +353,14 @@ class ClimateArtifactExportService:
                 return None
             lng, lat = watershed.centroid
         # Geolocation boundary: unavailable centroid should not fail the climate build.
-        except Exception:
+        except (AttributeError, RuntimeError, TypeError, ValueError):
             climate.logger.exception("Failed resolving watershed centroid for NOAA Atlas 14")
             return None
 
         try:
             from pfdf.data.noaa import atlas14
         # Optional dependency boundary: pfdf may not be installed in all environments.
-        except Exception:
+        except ImportError:
             climate.logger.exception("Failed importing pfdf NOAA Atlas 14 client")
             return None
 
@@ -358,7 +393,7 @@ class ClimateArtifactExportService:
             )
             return None
         # Network/client boundary: remote/API issues should not fail climate build completion.
-        except Exception:
+        except (ConnectionError, OSError, RuntimeError, TimeoutError):
             climate.logger.exception(
                 "Failed downloading NOAA Atlas 14 intensity data",
                 extra={"lat": lat, "lon": lng},

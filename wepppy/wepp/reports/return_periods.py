@@ -120,11 +120,48 @@ def _generate_cli_parquet(base: Path) -> tuple[Path | None, Dict[str, str]]:
         export_df["month"] = export_df.get("mo")
         export_df["day_of_month"] = export_df.get("da")
 
-        export_df["peak_intensity_10"] = export_df.get("10-min Peak Rainfall Intensity (mm/hour)")
-        export_df["peak_intensity_15"] = export_df.get("15-min Peak Rainfall Intensity (mm/hour)")
-        export_df["peak_intensity_30"] = export_df.get("30-min Peak Rainfall Intensity (mm/hour)")
-        export_df["storm_duration_hours"] = export_df.get("dur")
-        export_df["storm_duration"] = export_df.get("dur")
+        def _coalesce_series(canonical: str, legacy: str) -> pd.Series:
+            canonical_series = export_df.get(canonical)
+            legacy_series = export_df.get(legacy)
+            if canonical_series is None and legacy_series is None:
+                return pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+            if canonical_series is None:
+                return pd.to_numeric(legacy_series, errors="coerce")
+            canonical_numeric = pd.to_numeric(canonical_series, errors="coerce")
+            if legacy_series is None:
+                return canonical_numeric
+            return canonical_numeric.fillna(pd.to_numeric(legacy_series, errors="coerce"))
+
+        export_df["peak_intensity_10"] = _coalesce_series(
+            "peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)"
+        )
+        export_df["peak_intensity_15"] = _coalesce_series(
+            "peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)"
+        )
+        export_df["peak_intensity_30"] = _coalesce_series(
+            "peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)"
+        )
+        export_df["peak_intensity_60"] = _coalesce_series(
+            "peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)"
+        )
+
+        for canonical, legacy in (
+            ("peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)"),
+            ("peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)"),
+            ("peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)"),
+            ("peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)"),
+        ):
+            export_df[legacy] = export_df[canonical]
+
+        if "dur" not in export_df.columns:
+            export_df["dur"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+        if "tp" not in export_df.columns:
+            export_df["tp"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+        if "ip" not in export_df.columns:
+            export_df["ip"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+
+        export_df["storm_duration_hours"] = pd.to_numeric(export_df.get("dur"), errors="coerce")
+        export_df["storm_duration"] = pd.to_numeric(export_df.get("dur"), errors="coerce")
 
         parquet_path = base / "climate" / "wepp_cli.parquet"
         parquet_path.parent.mkdir(parents=True, exist_ok=True)

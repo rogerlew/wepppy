@@ -404,8 +404,9 @@ implementation and for parity testing against existing Python behavior:
 - `wepppy.climates.cligen.cligen.wepp_peak_intensities_from_hyetograph(...)`
   already computes peak intensities from that reconstructed hyetograph
 - `climate/wepp_cli.parquet` is already exported with storm parameters and
-  derived intensities, including `prcp`, `dur`, `tp`, `ip`, and
-  `peak_intensity_30`
+  derived intensities, including `prcp`, `dur`, `tp`, `ip`,
+  `peak_intensity_10`, `peak_intensity_15`, `peak_intensity_30`, and
+  `peak_intensity_60`
 
 `climate/wepp_cli.parquet` is therefore the right audit and interchange
 artifact. It should not be treated as the canonical computational input for
@@ -430,6 +431,9 @@ Recommended direction:
 - Where callsites already have working Python hyetograph logic, allow Python
   fallback during migration; do not invent new Python fallback paths where none
   already exist
+- Treat breakpoint-climate hyetograph/intensity support as Rust-first:
+  if no legacy Python fallback path already exists for a breakpoint use case,
+  do not add one as part of this package
 - Add a `wepppyo3.climate` routine to calculate run-level static `R` from a
   WEPP `.cli` file
 - Reuse the existing Rust climate-file parser in `wepppyo3` rather than
@@ -438,15 +442,109 @@ Recommended direction:
   an audit artifact rather than an alternate static-`R` input
 - Do not add a production Python fallback for `cligen_static R`; implement it
   directly in Rust once the shared hyetograph helper exists
+- For this package, cross-repo release synchronization is limited to the
+  canonical WEPPpy runtime target:
+  `/workdir/wepppyo3/release/linux/py312/`
 - Return at least the mean annual `R` and per-year annual erosivity totals for
   manifesting and QA
 - Regression-test the Rust hyetograph helper against the existing
   `cligen.py` behavior where comparable, and test static `R` from `.cli`
   inputs directly in Rust
 
-The exact function name can be decided during implementation, but the target is
-something equivalent to `rust_cli_calculate_rusle_r(...)` or
-`rust_cli_calculate_static_r(...)`.
+Implementation status (2026-03-21):
+
+- This scope is completed in
+  `docs/work-packages/20260320_rusle_r_static_hyetograph_api/`.
+- `wepppyo3.climate` now ships:
+  - `build_hyetograph_non_breakpoint(...)`
+  - `build_hyetograph_breakpoint(...)`
+  - `compute_peak_intensities_from_hyetograph(...)`
+  - `compute_peak_intensities_non_breakpoint(...)`
+  - `compute_peak_intensities_breakpoint(...)`
+  - `compute_static_r_from_cli(...)`
+- WEPPpy callsites in `cligen.py`, climate artifact export, interchange, and
+  return-period staging are migrated to canonical `peak_intensity_*` outputs.
+
+#### Static-`R` v1 Storm Kinetic Energy Contract (Resolved)
+
+For `cligen_static` v1, storm kinetic energy is fixed to a WEPP/AH537-aligned
+SI convention:
+
+- segment intensity `i_mm_hr` comes from reconstructed WEPP hyetograph segments
+- segment unit energy:
+  - `e = 0` when `i_mm_hr <= 0`
+  - `e = min(0.119 + 0.0873 * log10(i_mm_hr), 0.283)` when `i_mm_hr > 0`
+- `e` units: `MJ ha^-1 mm^-1`
+- segment depth `delta_v_mm` units: `mm`
+- storm energy `E_event = sum(e * delta_v_mm)` units: `MJ ha^-1`
+- `I30_event` units: `mm hr^-1` from the max continuous 30-minute window over
+  the same reconstructed storm
+- event erosivity `EI30_event = E_event * I30_event` units:
+  `MJ mm ha^-1 h^-1`
+
+Annual and run-level aggregation:
+
+- `R_year = sum(EI30_event)` over qualifying storms in a simulation year
+- `R_mean = mean(R_year)` across available simulation years
+- v1 reported run-level `R` uses `R_mean` in `MJ mm ha^-1 h^-1`
+
+Qualifying-storm convention for v1:
+
+- include storms with depth `>= 12.5 mm` (`0.5 in`)
+- storms below `12.5 mm` are excluded until the canonical high-intensity
+  exception path is explicitly implemented
+
+Rationale:
+
+- keeps static `R` aligned with WEPP storm-shape energy behavior for this
+  stack (`/workdir/wepp-forest/src/idat.for`)
+- avoids introducing a second erosivity-energy convention in the same runtime
+  workflow
+- `RUSLE2` Eq. 6.2 (`e = 0.29 * (1 - 0.72 * exp(-0.082 * i))`) remains a
+  future optional mode, not the v1 default
+
+#### Resolved Contract: Hyetograph API and Breakpoint Artifact Compatibility
+
+The shared `wepppyo3.climate` public contract is resolved as:
+
+- ship both low-level segment builders and peak-intensity helpers
+- treat peak-intensity helpers as the canonical WEPPpy callsite surface
+- keep segment helpers public for static `R` (`EI30`) and parity testing
+
+Preferred public function shape:
+
+- `build_hyetograph_non_breakpoint(...)`
+- `build_hyetograph_breakpoint(...)`
+- `compute_peak_intensities_from_hyetograph(...)`
+- convenience wrappers:
+  - `compute_peak_intensities_non_breakpoint(...)`
+  - `compute_peak_intensities_breakpoint(...)`
+
+Canonical peak-intensity output keys:
+
+- `peak_intensity_10`
+- `peak_intensity_15`
+- `peak_intensity_30`
+- `peak_intensity_60`
+
+Backward-compatibility contract for `climate/wepp_cli.parquet`:
+
+- always emit: `dur`, `tp`, `ip`, `storm_duration_hours`, `storm_duration`,
+  `peak_intensity_10`, `peak_intensity_15`, `peak_intensity_30`,
+  `peak_intensity_60`
+- breakpoint rows must carry real `peak_intensity_*` values (no `-1` sentinel)
+- breakpoint rows keep `tp` and `ip` as nullable (`NULL`/`NaN`), not
+  synthesized
+- breakpoint `dur` and `storm_duration_*` derive from breakpoint intervals
+  using WEPP-consistent duration semantics
+- zero-rain rows keep `peak_intensity_* = 0.0`
+
+Migration compatibility policy:
+
+1. dual-write canonical snake_case intensity columns and legacy labeled
+   intensity columns during migration
+2. canonical snake_case becomes producer source of truth
+3. reader alias tolerance remains until explicit deprecation cleanup
 
 #### Runtime Scope Boundary
 
@@ -946,10 +1044,6 @@ Longer term, the mod should be checked against:
 
 ## Open Questions
 
-- Which exact storm kinetic-energy equation and unit convention should be
-  encoded in the first `wepppyo3` static-`R` routine?
-- What is the preferred public API shape for the shared `wepppyo3` hyetograph
-  helper: segments only, or segments plus derived peak-intensity windows?
 - What is the preferred initial `C` formula for translating RAP fractions into
   a defensible cover-management factor?
 - Should `scenario_sbs` support a time axis from day one, or only static
@@ -962,8 +1056,24 @@ Longer term, the mod should be checked against:
   rather than condition DEMs internally
 - Stop-mask routing semantics are fixed: terminal sinks, no renormalization of
   terminated multi-flow fractions
+- `R` static-`cligen` storm energy uses the WEPP/AH537-aligned SI convention:
+  `e(i) = min(0.119 + 0.0873*log10(i_mm_hr), 0.283)` with `e = 0` for `i <= 0`
+- Shared hyetograph API surface is dual-layer: segment builders plus
+  peak-intensity helpers, with peak helpers as canonical WEPPpy callsite
+  surface
+- Breakpoint climate artifact compatibility is fixed: real `peak_intensity_*`
+  values, nullable `tp/ip`, derived breakpoint `dur`, and no sentinel `-1`
+  intensities
 
 ## Initial Milestones
+
+Status update (2026-03-21):
+
+- Milestone 1 completed in
+  `docs/work-packages/20260320_rusle_ls_factor_wbt/`.
+- Milestones 2-3 completed in
+  `docs/work-packages/20260320_rusle_r_static_hyetograph_api/`.
+- Milestones 4-7 remain pending and in scope for follow-on `Rusle` packages.
 
 1. Create the WBT `RusleLsFactor` tool with `Desmet-Govers` `L`,
    `McCool/RUSLE` `S`, `DInf` default routing, and diagnostic outputs; then

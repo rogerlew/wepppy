@@ -43,6 +43,36 @@ def _write_minimal_cli(path: Path) -> None:
     )
 
 
+def _write_minimal_breakpoint_cli(path: Path) -> None:
+    path.write_text(
+        "\n".join(
+            [
+                "0.00",
+                "   1   1   0",
+                "Station: Test",
+                " Latitude Longitude Elevation (m) Obs. Years    Beginning year  Years simulated",
+                "    33.66  -109.31             1831             6             2011             2",
+                " Observed monthly ave max temperature (C)",
+                " 27.0 27.0 27.0 27.0 27.0 27.0 27.0 27.0 27.0 27.0 27.0 27.0",
+                " Observed monthly ave min temperature (C)",
+                "  8.0  8.0  8.0  8.0  8.0  8.0  8.0  8.0  8.0  8.0  8.0  8.0",
+                " Observed monthly ave solar radiation (Langleys)",
+                " 300.0 300.0 300.0 300.0 300.0 300.0 300.0 300.0 300.0 300.0 300.0 300.0",
+                " Observed monthly ave rainfall (mm)",
+                "  20.0 20.0 20.0 20.0 20.0 20.0 20.0 20.0 20.0 20.0 20.0 20.0",
+                "   day mon year nbrkpt tmax  tmin    rad   w-vel  w-dir   dew",
+                "                (mm)    (C)   (C) (ly/day) m/sec    deg    (C)",
+                "    1   1  2011   3    -4.28  -23.72 277.6    2.20  290.0 -25.6",
+                "00.75     0.000",
+                "01.00     10.000",
+                "05.00     10.254",
+                "    2   1  2011   0    -5.39  -22.06 259.2    5.60  324.0 -18.4",
+                "",
+            ]
+        )
+    )
+
+
 def test_export_post_build_artifacts_runs_sequence(monkeypatch: pytest.MonkeyPatch) -> None:
     service = ClimateArtifactExportService()
     calls: list[str] = []
@@ -86,6 +116,102 @@ def test_export_cli_parquet_writes_expected_sidecar(tmp_path: Path) -> None:
 
     df = pd.read_parquet(parquet_path)
     assert {"peak_intensity_30", "storm_duration_hours", "julian", "sim_day_index"}.issubset(df.columns)
+
+
+def test_export_cli_parquet_breakpoint_writes_real_intensities_and_nullable_tp_ip(tmp_path: Path) -> None:
+    service = ClimateArtifactExportService()
+    cli_dir = tmp_path / "cli"
+    cli_dir.mkdir()
+    cli_fn = "breakpoint.cli"
+    _write_minimal_breakpoint_cli(cli_dir / cli_fn)
+
+    climate = SimpleNamespace(
+        cli_fn=cli_fn,
+        cli_dir=str(cli_dir),
+        wd=str(tmp_path),
+        logger=logging.getLogger("tests.nodb.climate.artifacts.breakpoint.parquet"),
+    )
+
+    parquet_path = service.export_cli_parquet(climate)
+    assert parquet_path == tmp_path / "climate" / "wepp_cli.parquet"
+    assert parquet_path.exists()
+
+    df = pd.read_parquet(parquet_path)
+    required = {
+        "dur",
+        "tp",
+        "ip",
+        "peak_intensity_10",
+        "peak_intensity_15",
+        "peak_intensity_30",
+        "peak_intensity_60",
+    }
+    assert required.issubset(df.columns)
+    assert (df[["peak_intensity_10", "peak_intensity_15", "peak_intensity_30", "peak_intensity_60"]] >= 0.0).all().all()
+    assert pd.isna(df.loc[0, "tp"])
+    assert pd.isna(df.loc[0, "ip"])
+    assert float(df.loc[0, "dur"]) > 0.0
+    assert float(df.loc[0, "peak_intensity_10"]) == pytest.approx(40.0)
+    assert float(df.loc[0, "peak_intensity_15"]) == pytest.approx(40.0)
+    assert float(df.loc[0, "peak_intensity_30"]) == pytest.approx(20.03175)
+    assert float(df.loc[0, "peak_intensity_60"]) == pytest.approx(10.047625)
+
+
+def test_export_cli_parquet_prefers_canonical_intensity_columns_and_backfills_nullable_fields(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateArtifactExportService()
+    cli_dir = tmp_path / "cli"
+    cli_dir.mkdir()
+    cli_fn = "stub.cli"
+    (cli_dir / cli_fn).write_text("stub")
+
+    stub_df = pd.DataFrame(
+        {
+            "year": [1980],
+            "mo": [1],
+            "da": [1],
+            "peak_intensity_10": [11.0],
+            "10-min Peak Rainfall Intensity (mm/hour)": [99.0],
+            "peak_intensity_15": [pd.NA],
+            "15-min Peak Rainfall Intensity (mm/hour)": [88.0],
+            "30-min Peak Rainfall Intensity (mm/hour)": [77.0],
+            "peak_intensity_60": [66.0],
+        }
+    )
+
+    class _FakeClimateFile:
+        def __init__(self, _path: str) -> None:
+            pass
+
+        def as_dataframe(self, *, calc_peak_intensities: bool) -> pd.DataFrame:
+            assert calc_peak_intensities is True
+            return stub_df.copy()
+
+    monkeypatch.setattr("wepppy.nodb.core.climate_artifact_export_service.ClimateFile", _FakeClimateFile)
+
+    climate = SimpleNamespace(
+        cli_fn=cli_fn,
+        cli_dir=str(cli_dir),
+        wd=str(tmp_path),
+        logger=logging.getLogger("tests.nodb.climate.artifacts.coalesce.parquet"),
+    )
+
+    parquet_path = service.export_cli_parquet(climate)
+    assert parquet_path is not None
+    assert parquet_path.exists()
+
+    df = pd.read_parquet(parquet_path)
+    assert float(df.loc[0, "peak_intensity_10"]) == pytest.approx(11.0)
+    assert float(df.loc[0, "10-min Peak Rainfall Intensity (mm/hour)"]) == pytest.approx(11.0)
+    assert float(df.loc[0, "peak_intensity_15"]) == pytest.approx(88.0)
+    assert float(df.loc[0, "15-min Peak Rainfall Intensity (mm/hour)"]) == pytest.approx(88.0)
+    assert float(df.loc[0, "peak_intensity_30"]) == pytest.approx(77.0)
+    assert float(df.loc[0, "peak_intensity_60"]) == pytest.approx(66.0)
+    assert pd.isna(df.loc[0, "dur"])
+    assert pd.isna(df.loc[0, "tp"])
+    assert pd.isna(df.loc[0, "ip"])
 
 
 def test_export_cli_precip_frequency_csv_writes_recurrence_limited_by_years(tmp_path: Path) -> None:
