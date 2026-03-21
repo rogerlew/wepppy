@@ -858,16 +858,53 @@ The `C` factor needs two source modes that share one common calculation engine.
 Initial `C` should be a simplified `RUSLE`-style cover-management factor driven
 by:
 
-- canopy protection
 - surface protection
-- optional roughness and consolidation terms later
+- optional canopy, roughness, and consolidation terms later
 
 The first implementation should use:
 
-- canopy term from live cover and landuse-specific defaults
-- surface term from bare ground, litter, rock, and low vegetation cover
+- a `RUSLE2`-style surface-cover subfactor driven by RAP bare ground
+- canopy set to a neutral default in `observed_rap` v1
 - roughness, biomass, and consolidation set to neutral defaults unless separate
   data are introduced
+
+#### Resolved Contract: Initial `observed_rap` Formula
+
+The preferred initial `observed_rap` formula is a simplified `RUSLE2` ground-
+cover path, not an `NDVI -> C` regression and not a land-cover lookup table.
+
+Use:
+
+- `fg = clamp(100 - bare_ground_pct, 0, 100)` as net ground cover percent
+- `C = exp(-b * fg)` with `b = 0.04` for the initial implementation
+- `canopy = 1.0`, `roughness = 1.0`, `biomass = 1.0`, and
+  `consolidation = 1.0` in `observed_rap` v1
+
+Rationale:
+
+- `RUSLE2` defines the ground-cover subfactor as an exponential reduction in
+  erosion with increasing net ground cover, and explicitly notes that net
+  ground cover is effectively `100 - bare ground`
+- RAP directly observes `bare_ground`, `litter`, and live fractional-cover
+  components, but it does not directly observe the `RUSLE2` canopy inputs
+  needed for a more defensible canopy subfactor, especially effective fall
+  height and the split between above-ground canopy and live ground cover
+- using RAP bare ground as the primary control keeps litter and exposed
+  interspace as first-class drivers, which is especially important for
+  post-fire and semiarid rangeland conditions
+- `NDVI -> C` transforms are a weaker fit here because RAP already provides
+  more physically relevant cover fractions than a greenness index, and review
+  literature notes that broad `NDVI` formulas can behave unrealistically for
+  grassland and woodland classes
+
+Use RAP fractions as follows in `observed_rap` v1:
+
+- `bare_ground` is the direct input to `fg`
+- `litter`, `annual_forb_and_grass`, `perennial_forb_and_grass`, `shrub`, and
+  `tree` are retained for QA, masking interpretation, and future canopy or
+  roughness extensions
+- do not sum RAP fractional bands into a separate surface-cover term; `RUSLE2`
+  wants net ground cover rather than a potentially double-counted component sum
 
 #### Mode 1: `observed_rap`
 
@@ -887,11 +924,121 @@ Interpretation cautions:
 
 #### Mode 2: `scenario_sbs`
 
+Restrict this mode to runs where the `Disturbed` module is active.
+
 Use explicit lookup values keyed by:
 
-- landuse class
+- canonical `disturbed_class` family from the disturbed workflow
 - SBS class
-- optionally years since disturbance
+
+Initial implementation choice:
+
+- static low/moderate/high severity lookups only
+- no time axis in v1
+- add a time axis later only if a separate recovery-trajectory package defines
+  and validates it against observations
+
+Resolved contract:
+
+- `scenario_sbs` is a disturbed-only mode; do not expose it for generic runs
+  that do not have the disturbed/SBS workflow active
+- use the disturbed workflow's canonical vegetation family instead of generic
+  `landuse_class`
+- normalize disturbed classes before lookup so the key space stays small and
+  stable:
+  - `forest` and `young forest` -> `forest`
+  - shrub classes -> `shrub`
+  - grass classes -> `tall_grass`
+- do not key the lookup by severity-specific or treatment-suffixed raw
+  `disturbed_class` strings such as `forest moderate sev fire`,
+  `forest high sev fire-mulch_15`, or `thinning`; severity remains the
+  separate `sbs_class` dimension
+
+#### Required Raster Preprocessing
+
+`Rusle` is raster/cell based, so `scenario_sbs` needs a gridded
+`disturbed_class` product on the run DEM grid.
+
+- create `rusle/disturbed_class.tif` as a DEM-aligned raster of canonical
+  disturbed-class family labels or integer codes
+- do not reuse the hillslope-level disturbed assignment directly; the existing
+  `Disturbed` workflow maps classes to hillslopes, which is sufficient for WEPP
+  input generation but not for raster `RUSLE C`
+- build the gridded disturbed-class raster from the same landuse-to-disturbed
+  semantics used by `wepppy/wepp/management/data/disturbed.json`
+- normalize to canonical families before applying SBS:
+  - `forest` and `young forest` -> `forest`
+  - `shrub` -> `shrub`
+  - `tall grass` -> `tall_grass`
+- only apply SBS burn remapping to these three canonical families
+- leave all other classes unchanged by SBS severity and handle them according
+  to the non-burnable-class policy table below
+
+#### Initial `scenario_sbs` Static Matrix
+
+The first `scenario_sbs` implementation should ship with an explicit static
+matrix for the burnable canonical disturbed classes. These values are initial
+defaults for `rusle_c_lookup.csv`, derived from the same simplified
+`RUSLE2`-style form used elsewhere in this spec:
+
+- `C = exp(-0.04 * fg)`
+- `fg` taken from the static disturbed management ground-cover defaults
+
+| Canonical disturbed class | Unburned | Low | Moderate | High | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `forest` | `0.0183` | `0.0334` | `0.0907` | `0.3010` | includes `young forest`; initial `fg` = `100`, `85`, `60`, `30` |
+| `shrub` | `0.0273` | `0.0408` | `0.1108` | `0.3010` | initial `fg` = `90`, `80`, `55`, `30` |
+| `tall_grass` | `0.0907` | `0.0907` | `0.2466` | `0.6703` | initial `fg` = `60`, `60`, `35`, `10` |
+
+Rationale for these initial defaults:
+
+- the values are not arbitrary lookup guesses; each row is computed directly
+  from the existing static disturbed management defaults already documented in
+  `wepppy/nodb/mods/disturbed/README.md`
+- for this initial `scenario_sbs` path, `fg` is taken from the static
+  near-surface cover state (`inrcov` / `rilcov`) rather than canopy cover
+  because the v1 `C` contract in this spec is intentionally a simplified
+  `RUSLE2` ground-cover formulation
+- the severity progression follows the existing disturbed management templates:
+  - forest ground cover declines `1.00 -> 0.85 -> 0.60 -> 0.30`
+  - shrub ground cover declines `0.90 -> 0.80 -> 0.55 -> 0.30`
+  - tall-grass ground cover declines `0.60 -> 0.60 -> 0.35 -> 0.10`
+- those cover fractions are converted to percent (`100`, `85`, `60`, `30`,
+  etc.) and then mapped through `C = exp(-0.04 * fg)`
+- this means the matrix is anchored to the same disturbed scenario semantics
+  that already drive WEPP management behavior, which keeps the first raster
+  `scenario_sbs` implementation directionally consistent with the existing
+  disturbed package rather than introducing a second, unrelated burn-severity
+  interpretation
+- the forest and shrub rows show monotonic erosion-protection loss from
+  unburned to high severity because the underlying disturbed management
+  templates already reduce near-surface cover that way
+- the `tall_grass` unburned and low-severity rows are intentionally identical
+  in v1 because the current disturbed management defaults assign the same
+  ground-cover state (`0.60`) to both classes; if future validation shows that
+  low-severity grass should diverge, the lookup table can be revised without
+  changing the runtime contract
+- `young forest` is folded into the canonical `forest` family to keep the
+  lookup key space small and because `scenario_sbs` is keyed by canonical
+  disturbed family plus severity, not by every management variant
+
+These values are defaults, not permanent calibration truth. The matrix should
+live in `rusle_c_lookup.csv` so future package work can revise it without
+changing the runtime contract.
+
+#### Non-Burnable NLCD / Disturbed-Class Policy
+
+The classes below do not participate in the SBS burn matrix even when
+`scenario_sbs` is active.
+
+| NLCD classes | Disturbed mapping / family | SBS handling | `C` handling |
+| --- | --- | --- | --- |
+| `11`, `21`, `22`, `23`, `24`, `90`, `95` | water, developed, wetlands | no burn | masked; `C = nodata` |
+| `12` | perennial ice/snow / no disturbed class | no burn | treat as out-of-domain and mask in `scenario_sbs` |
+| `31` | `bare` | no burn | static row only; initial default `C = 1.0` |
+| `73`, `74` | `short_grass` | no burn | static row only; initial default `C = 0.2019` |
+| `81`, `82` | `agriculture_crops` | no burn | require explicit unburned lookup rows; do not infer wildfire severity effects |
+| any other unmasked class not normalized to `forest`, `shrub`, or `tall_grass` | class-specific | no burn | require explicit unburned lookup row or fail fast |
 
 Best fit:
 
@@ -909,9 +1056,9 @@ Create a dedicated lookup, for example:
 
 Suggested fields:
 
-- `landuse_class`
+- `disturbed_class`
 - `sbs_class`
-- `years_since_disturbance`
+- `nlcd_class`
 - `canopy_cover`
 - `ground_cover`
 - `litter_cover`
@@ -919,6 +1066,7 @@ Suggested fields:
 - `effective_fall_height`
 - `c_override`
 - `notes`
+- optional future field: `years_since_disturbance`
 
 ### P
 
@@ -1042,12 +1190,15 @@ Longer term, the mod should be checked against:
 - independent erosivity references where appropriate
 - known disturbed hillslope inventories
 
-## Open Questions
+## Resolved Open Questions
 
-- What is the preferred initial `C` formula for translating RAP fractions into
-  a defensible cover-management factor?
-- Should `scenario_sbs` support a time axis from day one, or only static
-  low/moderate/high severity lookups?
+- The preferred initial `C` formula for `observed_rap` is the simplified
+  `RUSLE2` surface-cover form `C = exp(-0.04 * fg)` where
+  `fg = clamp(100 - bare_ground_pct, 0, 100)`.
+- `scenario_sbs` should support static low/moderate/high severity lookups in
+  v1, with no time axis until recovery trajectories are defined and validated.
+- `scenario_sbs` should be restricted to disturbed runs and keyed by canonical
+  `disturbed_class` family plus `sbs_class`, not generic `landuse_class`.
 
 ### Resolved Implementation Choices
 
@@ -1064,6 +1215,16 @@ Longer term, the mod should be checked against:
 - Breakpoint climate artifact compatibility is fixed: real `peak_intensity_*`
   values, nullable `tp/ip`, derived breakpoint `dur`, and no sentinel `-1`
   intensities
+- Initial `observed_rap` `C` uses the simplified `RUSLE2` surface-cover form
+  `C = exp(-0.04 * fg)` with `fg = clamp(100 - bare_ground_pct, 0, 100)` and
+  neutral canopy/roughness/biomass/consolidation terms in v1
+- `scenario_sbs` v1 uses static severity lookups only; no time axis until a
+  separate recovery-trajectory path is defined and validated
+- `scenario_sbs` is restricted to disturbed runs and uses canonical
+  `disturbed_class` family plus `sbs_class` as its lookup key
+- `scenario_sbs` requires a DEM-aligned gridded `disturbed_class` raster and
+  only applies SBS burn remapping to canonical `forest`, `shrub`, and
+  `tall_grass` families
 
 ## Initial Milestones
 
@@ -1075,7 +1236,9 @@ Status update (2026-03-21):
   `docs/work-packages/20260320_rusle_r_static_hyetograph_api/`.
 - Milestone 4 completed in
   `docs/work-packages/20260321_rusle_k_polaris_implementation/`.
-- Milestones 5-7 remain pending and in scope for follow-on `Rusle` packages.
+- Milestone 5 completed in
+  `docs/work-packages/20260321_rusle_c_modes_implementation/`.
+- Milestones 6-7 remain pending and in scope for follow-on `Rusle` packages.
 
 1. Create the WBT `RusleLsFactor` tool with `Desmet-Govers` `L`,
    `McCool/RUSLE` `S`, `DInf` default routing, and diagnostic outputs; then
@@ -1303,6 +1466,11 @@ runtime `R` inputs in the current `Rusle` design.
   Primary reference for the RAP fractional-cover product used in the
   `observed_rap` `C` mode. The publication also cautions that RAP should be
   interpreted alongside local data and expert knowledge.
+- USDA-NRCS. *National Range and Pasture Handbook, Chapter 7: Rangeland and
+  Pastureland Hydrology and Erosion*.
+  https://www.nrcs.usda.gov/sites/default/files/2022-09/Chapter%207%20-%20Grazing%20Lands%20Hydrology.pdf
+  Useful NRCS synthesis for why litter, vegetation, and exposed interspace are
+  first-order controls on runoff and erosion in rangeland settings.
 - Multi-Resolution Land Characteristics Consortium. *National Land Cover
   Database Class Legend and Description*.
   https://www.mrlc.gov/sites/default/files/NLCDclasses.pdf

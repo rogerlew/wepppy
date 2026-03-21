@@ -314,6 +314,35 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### RUSLE C Modes Implementation (`observed_rap` + `scenario_sbs`)
+**Completed**: 2026-03-21  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260321_rusle_c_modes_implementation/](docs/work-packages/20260321_rusle_c_modes_implementation/)  
+**Description**: Completed RUSLE `C` Milestone 5 by implementing the shared `C` engine, the locked `observed_rap` and `scenario_sbs` modes, auditable run-scoped artifacts, and dedicated review/QA/validation artifacts.
+
+**Outcome**:
+- Added new RUSLE `C` modules under `wepppy/nodb/mods/rusle/`: `c_formula.py`, `c_lookup.py`, `c_manifest.py`, `c_integration.py`.
+- Added the runtime lookup substrate: `wepppy/nodb/mods/rusle/data/rusle_c_lookup.csv`.
+- Updated `wepppy/nodb/mods/rusle/__init__.py` exports with the new `C` helpers and integration entrypoint.
+- Implemented `observed_rap` with the exact locked contract:
+  - `fg = clamp(100 - bare_ground_pct, 0, 100)`
+  - `C = exp(-0.04 * fg)`
+  - neutral canopy/roughness/biomass/consolidation terms
+- Implemented `scenario_sbs` with:
+  - DEM-aligned `disturbed_class.tif`
+  - disturbed-family normalization (`young forest -> forest`)
+  - burn-only application for `forest`, `shrub`, and `tall_grass`
+  - explicit non-burnable policy enforcement and fail-fast missing-row behavior
+- Added targeted tests: `test_rusle_c_formula.py`, `test_rusle_c_lookup.py`, `test_rusle_c_integration.py`.
+- Captured package artifacts: `artifacts/milestone4_review.md`, `artifacts/milestone5_qa_review.md`, `artifacts/final_validation_summary.md`.
+
+**Validation Notes**:
+- Passed targeted `RUSLE C` suite (`19 passed`).
+- Passed broad-exception changed-file enforcement and code-quality observability (observe-only).
+- Passed full WEPPpy sanity gate (`2429 passed, 34 skipped`).
+
 ### RUSLE POLARIS K Implementation + NRCS Benchmark Harness
 **Completed**: 2026-03-21  
 **Duration**: 1 focused session  
