@@ -115,8 +115,8 @@ The mask should also stop slope-length growth for `LS`.
 
 ### LS
 
-Recommendation: implement a purpose-built WBT tool instead of reusing
-`SedimentTransportIndex` as the canonical `LS`.
+Implementation status: a purpose-built WBT tool (`RusleLsFactor`) now exists
+and is the canonical `LS` path; `SedimentTransportIndex` remains comparison-only.
 
 #### Rationale
 
@@ -148,11 +148,11 @@ implementations:
 - Whitebox's existing `SedimentTransportIndex` remains a comparison or
   diagnostic product only, not the canonical `LS`
 
-#### Proposed WBT Tool
+#### Implemented WBT Tool
 
 Tool name: `RusleLsFactor`
 
-Proposed inputs:
+Current inputs:
 
 - `dem`
 - optional precomputed `sca`
@@ -162,13 +162,25 @@ Proposed inputs:
 - optional `max_slope_length_m`
 - routing mode selector, default `DInf`
 
-Proposed outputs:
+Current outputs:
 
 - `ls.tif`
 - `l.tif`
 - `s.tif`
 - `sca.tif`
 - `effective_slope_length.tif`
+
+Implementation locations:
+
+- `weppcloud-wbt/whitebox-tools-app/src/tools/terrain_analysis/rusle_ls_factor.rs`
+- registered via:
+  - `weppcloud-wbt/whitebox-tools-app/src/tools/terrain_analysis/mod.rs`
+  - `weppcloud-wbt/whitebox-tools-app/src/tools/mod.rs`
+- Python wrappers:
+  - `weppcloud-wbt/whitebox_tools.py`
+  - `weppcloud-wbt/WBT/whitebox_tools.py`
+- WEPPpy integration entrypoint:
+  - `wepppy/nodb/mods/rusle/ls_integration.py`
 
 #### Locked v1 Method
 
