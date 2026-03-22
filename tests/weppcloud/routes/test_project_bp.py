@@ -84,6 +84,12 @@ def project_client(
 
     monkeypatch.setattr(project_module, "Ron", RonStub)
     monkeypatch.setattr(project_module, "iter_nodb_mods_subclasses", lambda: [])
+    WatershedStub = singleton_factory(
+        "WatershedStub",
+        attrs={"delineation_backend_is_wbt": True},
+        mixins=(LockedMixin,),
+    )
+    monkeypatch.setattr(project_module, "Watershed", WatershedStub)
 
     dispatched: Dict[str, Any] = {}
     dispatched["current_user"] = current_user_stub
@@ -109,6 +115,7 @@ def project_client(
         yield client, RonStub, dispatched, str(run_dir), env
 
     RonStub.reset_instances()
+    WatershedStub.reset_instances()
 
 
 def test_setname_accepts_json_payload(project_client):
@@ -310,6 +317,23 @@ def test_set_mod_rusle_requires_disturbed(project_client):
     assert response.status_code == 200
     payload = response.get_json()
     assert "requires Disturbed" in payload["error"]["message"]
+    assert "rusle" not in controller.mods
+
+
+def test_set_mod_rusle_requires_wbt_backend(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["disturbed"]
+    project_module.Watershed.getInstance(run_dir).delineation_backend_is_wbt = False
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rusle", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "requires the WBT delineation backend" in payload["error"]["message"]
     assert "rusle" not in controller.mods
 
 

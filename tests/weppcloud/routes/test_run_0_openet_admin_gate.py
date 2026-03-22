@@ -66,7 +66,12 @@ def _bootstrap_context(user_roles: set[str]) -> dict:
         "current_ttl": None,
         "rq_job_ids": {},
         "playwright_load_all": False,
-        "watershed": SimpleNamespace(has_channels=False, has_subcatchments=False, has_outlet=False),
+        "watershed": SimpleNamespace(
+            has_channels=False,
+            has_subcatchments=False,
+            has_outlet=False,
+            delineation_backend_is_wbt=True,
+        ),
         "landuse": SimpleNamespace(has_landuse=False, mode="none", single_selection=False),
         "soils": SimpleNamespace(has_soils=False, mode="none", single_dbselection=False),
         "climate": SimpleNamespace(
@@ -187,6 +192,16 @@ def test_run_page_bootstrap_rusle_flag_true_with_disturbed(run0_template_app) ->
         js = render_template("run_page_bootstrap.js.j2", **context)
 
     assert _extract_mod_flag(js, "rusle") == "true"
+
+
+def test_run_page_bootstrap_rusle_flag_false_for_topaz_backend(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["rusle", "disturbed"]
+    context["watershed"].delineation_backend_is_wbt = False
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "rusle") == "false"
 
 
 def test_run_page_bootstrap_ttl_missing_expires_at_defaults_to_null(run0_template_app) -> None:

@@ -138,12 +138,15 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
 ) -> None:
     wd = tmp_path
     dem_path = wd / "dem.tif"
+    relief_path = wd / "dem" / "wbt" / "relief.tif"
     cli_path = wd / "climate.cli"
     landuse_path = wd / "landuse.tif"
     rusle_dir = wd / "rusle"
     rusle_dir.mkdir(parents=True, exist_ok=True)
+    relief_path.parent.mkdir(parents=True, exist_ok=True)
 
     _write_raster(dem_path, np.ones((2, 2), dtype=np.float32))
+    _write_raster(relief_path, np.ones((2, 2), dtype=np.float32))
     _write_raster(landuse_path, np.ones((2, 2), dtype=np.float32))
     cli_path.write_text("cli", encoding="utf-8")
 
@@ -168,7 +171,11 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
     monkeypatch.setattr(
         rusle_module.Watershed,
         "getInstance",
-        lambda _wd: SimpleNamespace(netful=None),
+        lambda _wd: SimpleNamespace(
+            netful=None,
+            delineation_backend_is_wbt=True,
+            relief=str(relief_path),
+        ),
     )
     monkeypatch.setattr(
         rusle_module.Disturbed,
@@ -198,6 +205,7 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
     monkeypatch.setattr(rusle_module, "update_catalog_entry", lambda _wd, _relpath: None)
 
     def _fake_ls(_wd: str, _dem: str, *, channel_mask=None):
+        assert _dem == str(relief_path)
         ls_path = rusle_dir / "ls.tif"
         l_path = rusle_dir / "l.tif"
         s_path = rusle_dir / "s.tif"
@@ -314,3 +322,43 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
         manifest = json.load(stream)
     assert manifest["rusle"]["options"]["c_mode"] == "scenario_sbs"
     assert manifest["rusle"]["options"]["k_modes"] == ["polaris_nomograph"]
+
+
+def test_build_rejects_topaz_backend(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+    dem_path = wd / "dem.tif"
+    _write_raster(dem_path, np.ones((2, 2), dtype=np.float32))
+
+    controller = rusle_module.Rusle(str(wd), "disturbed9002.cfg")
+
+    monkeypatch.setattr(
+        controller,
+        "parse_inputs",
+        lambda payload=None: {
+            "c_mode": "scenario_sbs",
+            "rap_year": 2025,
+            "k_modes": ["polaris_nomograph"],
+            "default_k_mode": "polaris_nomograph",
+            "p_value": 1.0,
+            "force_polaris_refresh": False,
+        },
+    )
+    monkeypatch.setattr(
+        rusle_module.Ron,
+        "getInstance",
+        lambda _wd: SimpleNamespace(dem_fn=str(dem_path), map=None),
+    )
+    monkeypatch.setattr(rusle_module.Climate, "getInstance", lambda _wd: SimpleNamespace())
+    monkeypatch.setattr(rusle_module.Landuse, "getInstance", lambda _wd: SimpleNamespace())
+    monkeypatch.setattr(
+        rusle_module.Watershed,
+        "getInstance",
+        lambda _wd: SimpleNamespace(delineation_backend_is_wbt=False),
+    )
+    monkeypatch.setattr(rusle_module.Disturbed, "tryGetInstance", lambda _wd: None)
+
+    with pytest.raises(ValueError, match="WBT delineation backend"):
+        controller.build(payload={})

@@ -274,9 +274,26 @@ def test_run_header_shows_rusle_mod_when_disturbed_enabled(jinja_env: Environmen
         current_user=auth_user,
         request=request,
         current_ron_mods=["disturbed", "rusle"],
+        watershed=SimpleNamespace(delineation_backend_is_wbt=True),
     )
 
     assert 'data-project-mod="rusle"' in rendered
+
+
+def test_run_header_hides_rusle_mod_for_topaz_backend(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        request=request,
+        current_ron_mods=["disturbed", "rusle"],
+        watershed=SimpleNamespace(delineation_backend_is_wbt=False),
+    )
+
+    assert 'data-project-mod="rusle"' not in rendered
 
 
 def test_runs0_template_places_rusle_after_wepp_sections() -> None:

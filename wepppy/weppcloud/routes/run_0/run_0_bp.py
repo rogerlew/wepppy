@@ -751,9 +751,11 @@ def _build_runs0_context(runid, config, playwright_load_all):
     show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
     show_path_ce = 'path_ce' in mods_list or playwright_load_all
+    rusle_backend_supported = bool(getattr(watershed, "delineation_backend_is_wbt", False))
     show_rusle = (
         (('rusle' in mods_list) or playwright_load_all)
         and (('disturbed' in mods_list) or playwright_load_all)
+        and (rusle_backend_supported or playwright_load_all)
         and ((rusle is not None) or playwright_load_all)
     )
     rusle_rap_year_options = rusle.available_rap_years() if rusle is not None else []
@@ -838,6 +840,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,
         show_rusle=show_rusle,
+        rusle_backend_supported=rusle_backend_supported,
         omni_user_defined_contrast_limit=int(getattr(omni_mod, "USER_DEFINED_CONTRAST_LIMIT", 200)),
         is_omni_child=is_omni_child,
         omni_has_ran_scenarios=omni_has_ran_scenarios,

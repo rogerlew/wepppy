@@ -56,6 +56,7 @@
 {% set baer_mode = baer.sbs_mode if baer is not none else disturbed_mode %}
 {% set baer_uniform = baer.uniform_severity if baer is not none else disturbed_uniform %}
 {% set hide_landuse_wepp = 'rhem' in mods_list %}
+{% set rusle_backend_supported = rusle_backend_supported if rusle_backend_supported is defined else (watershed.delineation_backend_is_wbt if watershed is defined and watershed is not none and watershed.delineation_backend_is_wbt is defined else False) %}
 {% set ttl_state = current_ttl if current_ttl is defined else None %}
 
     var sitePrefix = {{ site_prefix | tojson }};
@@ -101,7 +102,7 @@
                 "openet_ts": ('openet_ts' in mods_list) and openet_admin_enabled,
                 "treatments": 'treatments' in mods_list,
                 "observed": 'observed' in mods_list,
-                "rusle": ('rusle' in mods_list) and ('disturbed' in mods_list)
+                "rusle": ('rusle' in mods_list) and ('disturbed' in mods_list) and rusle_backend_supported
             }
         },
         "flags": {

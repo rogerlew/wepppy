@@ -397,6 +397,23 @@ class Rusle(NoDbBase):
             raise ValueError(f"K output for default mode {default_k_mode!r} is not available")
         return selected
 
+    def _resolve_ls_dem_path(self, *, watershed: Watershed) -> str:
+        if not bool(getattr(watershed, "delineation_backend_is_wbt", False)):
+            raise ValueError("RUSLE requires WBT delineation backend; TOPAZ runs are not supported.")
+
+        wbt_relief_tif = _join(self.wd, "dem", "wbt", "relief.tif")
+        if _exists(wbt_relief_tif):
+            return wbt_relief_tif
+
+        relief_path = watershed.relief
+        if relief_path and _exists(relief_path):
+            return relief_path
+
+        raise FileNotFoundError(
+            "RUSLE requires the WBT conditioned DEM at dem/wbt/relief.tif. "
+            "Run channel delineation with WBT before building RUSLE."
+        )
+
     def _write_final_a(
         self,
         *,
@@ -464,6 +481,7 @@ class Rusle(NoDbBase):
         dem_path = ron.dem_fn
         if not _exists(dem_path):
             raise FileNotFoundError(f"DEM path does not exist: {dem_path}")
+        ls_dem_path = self._resolve_ls_dem_path(watershed=watershed)
 
         cli_path = climate.cli_path
         if not _exists(cli_path):
@@ -484,7 +502,7 @@ class Rusle(NoDbBase):
         channel_mask = watershed.netful if watershed.netful and _exists(watershed.netful) else None
         ls_result: RusleLsResult = run_rusle_ls_factor(
             self.wd,
-            dem_path,
+            ls_dem_path,
             channel_mask=channel_mask,
         )
         for path in asdict(ls_result).values():

@@ -59,6 +59,11 @@ def _openet_admin_enabled() -> bool:
     return _current_user_has_role("Admin")
 
 
+def _rusle_backend_supported(wd: str) -> bool:
+    watershed = Watershed.getInstance(wd)
+    return bool(getattr(watershed, "delineation_backend_is_wbt", False))
+
+
 def _mod_state_paths(wd: str, mod_name: str) -> tuple[str, str]:
     nodb_path = os.path.join(wd, f'{mod_name}.nodb')
     backup_path = os.path.join(wd, f'{mod_name}.bak')
@@ -166,8 +171,11 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
     cfg_fn = f"{config}.cfg"
     active_mods = set(ron.mods or [])
 
-    if enabled and mod_name == "rusle" and "disturbed" not in active_mods:
-        raise ValueError("RUSLE requires Disturbed to be enabled.")
+    if enabled and mod_name == "rusle":
+        if "disturbed" not in active_mods:
+            raise ValueError("RUSLE requires Disturbed to be enabled.")
+        if not _rusle_backend_supported(wd):
+            raise ValueError("RUSLE requires the WBT delineation backend; TOPAZ runs are not supported.")
 
     if enabled:
         changed = _enable_mod_for_run(ron, wd, cfg_fn, mod_name)
