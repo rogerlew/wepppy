@@ -314,6 +314,25 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### RUSLE NoDb + Run-Page UI Integration
+**Completed**: 2026-03-21  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260321_rusle_nodb_ui/](docs/work-packages/20260321_rusle_nodb_ui/)  
+**Description**: Completed RUSLE Milestones 6-7 with end-to-end NoDb orchestration, async RQ build route, run-header/run-page UI integration, preflight/task wiring, stale invalidation, and full review/QA/validation closeout.
+
+**Outcome**:
+- Added `Rusle` NoDb facade (`wepppy/nodb/mods/rusle/rusle.py`) and exports.
+- Added async RQ/API flow (`build_rusle_rq`, `POST /api/runs/{runid}/{config}/build-rusle`).
+- Added disturbed-gated mod toggle + dynamic run-page section rendering with Rusle controls after WEPP.
+- Added preflight `TaskEnum.build_rusle` (`🔱`) checklist/TOC wiring and staleness invalidation on climate and SBS updates.
+- Added focused tests across nodb, rq-engine, WEPPcloud routes/templates/controllers, and preflight checklist logic.
+- Synchronized frozen route artifacts/checklists for the new agent-facing endpoint (`build-rusle`) and updated frozen-route count assertion.
+
+**Validation Notes**:
+- Required gates passed: `tests/nodb`, `tests/weppcloud`, npm lint/test, broad-exception enforcement, code-quality observability (observe-only), and full suite (`2443 passed, 34 skipped`).
+
 ### RUSLE C Modes Implementation (`observed_rap` + `scenario_sbs`)
 **Completed**: 2026-03-21  
 **Duration**: 1 focused session  

@@ -345,3 +345,56 @@ def test_scenario_sbs_uses_unburned_short_grass_row_even_when_sbs_is_burned(tmp_
     value = float(c_data[0, 0])
     assert value != c_nodata
     assert value == pytest.approx(0.20189651799465538)
+
+
+def test_scenario_sbs_without_sbs_uses_unburned_and_does_not_write_sbs_artifact(tmp_path: Path) -> None:
+    dem_path = tmp_path / "dem.tif"
+    landuse_path = tmp_path / "landuse.tif"
+    mapping_path = tmp_path / "disturbed.json"
+
+    _write_raster(dem_path, np.ones((1, 1), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_raster(landuse_path, np.asarray([[52]], dtype=np.uint8), dtype="uint8", nodata=0)
+    _write_disturbed_mapping(mapping_path, {52: {"DisturbedClass": "shrub"}})
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="scenario_sbs",
+        landuse=str(landuse_path),
+        sbs=None,
+        disturbed_mapping_path=str(mapping_path),
+    )
+
+    assert result.sbs_4class is None
+    assert not (tmp_path / "rusle" / "sbs_4class.tif").exists()
+
+    c_data, c_nodata = _read_single_band(result.c)
+    value = float(c_data[0, 0])
+    assert value != c_nodata
+    assert value == pytest.approx(0.02732372244729257)
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    assert manifest["c"]["sbs_input_mode"] == "missing_use_unburned"
+
+
+def test_observed_rap_supports_mode_specific_output_filename(tmp_path: Path) -> None:
+    dem_path = tmp_path / "dem.tif"
+    rap_path = tmp_path / "rap.tif"
+
+    _write_raster(dem_path, np.ones((1, 1), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_default_rap_dataset(
+        rap_path,
+        bare_ground=np.asarray([[25.0]], dtype=np.float32),
+    )
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="observed_rap",
+        c_output_filename="c_observed_rap.tif",
+        rap=str(rap_path),
+    )
+
+    assert result.c.endswith("rusle/c_observed_rap.tif")
+    assert Path(result.c).exists()

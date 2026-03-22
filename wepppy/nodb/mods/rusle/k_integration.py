@@ -36,8 +36,8 @@ __all__ = ["RusleKResult", "run_rusle_k_factors"]
 
 @dataclass(frozen=True)
 class RusleKResult:
-    nomograph: str
-    epic: str
+    nomograph: str | None
+    epic: str | None
     k_default: str | None
     manifest: str
     reference_samples: str | None
@@ -156,6 +156,8 @@ def run_rusle_k_factors(
     *,
     statistic: str = "mean",
     depth_weights_cm: Mapping[str, float] | None = None,
+    selected_modes: Sequence[str] | None = None,
+    default_k_mode: str = "polaris_nomograph",
     write_default_k: bool = True,
     reference_paths: Mapping[str, str] | None = None,
     comparison_points: Iterable[ReferencePoint | Mapping[str, Any] | Sequence[Any]] | None = None,
@@ -225,16 +227,50 @@ def run_rusle_k_factors(
     nomograph_path = _join(rusle_dir, "k_polaris_nomograph.tif")
     epic_path = _join(rusle_dir, "k_polaris_epic.tif")
     manifest_path = _join(rusle_dir, "manifest.json")
+    mode_arrays: dict[str, np.ndarray] = {
+        "polaris_nomograph": nomograph,
+        "polaris_epic": epic,
+    }
+    mode_paths: dict[str, str] = {
+        "polaris_nomograph": nomograph_path,
+        "polaris_epic": epic_path,
+    }
 
-    _write_k_raster(nomograph_path, nomograph, profile)
-    _write_k_raster(epic_path, epic, profile)
+    selected = [str(mode).strip() for mode in (selected_modes or ("polaris_nomograph", "polaris_epic"))]
+    selected_modes_normalized = list(dict.fromkeys(mode for mode in selected if mode))
+    if not selected_modes_normalized:
+        raise ValueError("selected_modes must include at least one mode")
+
+    invalid_modes = [mode for mode in selected_modes_normalized if mode not in mode_arrays]
+    if invalid_modes:
+        raise ValueError(f"Unsupported K mode(s): {invalid_modes}")
+
+    default_mode = str(default_k_mode).strip()
+    if default_mode not in mode_arrays:
+        raise ValueError(f"default_k_mode must be one of {tuple(mode_arrays)}, got {default_k_mode!r}")
+    if write_default_k and default_mode not in selected_modes_normalized:
+        raise ValueError("default_k_mode must be included in selected_modes when write_default_k=True")
+
+    wrote_nomograph = "polaris_nomograph" in selected_modes_normalized
+    wrote_epic = "polaris_epic" in selected_modes_normalized
+    if wrote_nomograph:
+        _write_k_raster(nomograph_path, nomograph, profile)
+    if wrote_epic:
+        _write_k_raster(epic_path, epic, profile)
 
     default_k_path: str | None = None
     if write_default_k:
         default_k_path = _join(rusle_dir, "k.tif")
-        _write_k_raster(default_k_path, nomograph, profile)
+        _write_k_raster(default_k_path, mode_arrays[default_mode], profile)
 
-    for path in (nomograph_path, epic_path, default_k_path):
+    catalog_paths: list[str] = []
+    if wrote_nomograph:
+        catalog_paths.append(nomograph_path)
+    if wrote_epic:
+        catalog_paths.append(epic_path)
+    if default_k_path is not None:
+        catalog_paths.append(default_k_path)
+    for path in catalog_paths:
         if path is None:
             continue
         update_catalog_entry(wd, _relative_path(wd, path))
@@ -245,6 +281,8 @@ def run_rusle_k_factors(
     harness_payload: dict[str, Any] | None = None
 
     if reference_paths is not None and comparison_points is not None:
+        if not (wrote_nomograph and wrote_epic):
+            raise ValueError("reference comparison requires both polaris_nomograph and polaris_epic outputs")
         harness_payload = run_reference_harness(
             reference_paths=reference_paths,
             points=comparison_points,
@@ -292,7 +330,8 @@ def run_rusle_k_factors(
         "near_surface_depths": list(NEAR_SURFACE_DEPTHS),
         "near_surface_weights_cm": weights,
         "statistic": statistic,
-        "default_k_mode": "polaris_nomograph",
+        "selected_modes": selected_modes_normalized,
+        "default_k_mode": default_mode,
         "mode_contract": {
             "polaris_nomograph": {
                 "vfs_source": "rusle2_estimated_from_sand",
@@ -311,8 +350,8 @@ def run_rusle_k_factors(
             "rel_error_warn": thresholds.rel_error_warn,
         },
         "artifacts": {
-            "nomograph": _relative_path(wd, nomograph_path),
-            "epic": _relative_path(wd, epic_path),
+            "nomograph": _relative_path(wd, nomograph_path) if wrote_nomograph else None,
+            "epic": _relative_path(wd, epic_path) if wrote_epic else None,
             "k_default": _relative_path(wd, default_k_path) if default_k_path else None,
             "reference_samples": _relative_path(wd, reference_samples_path) if reference_samples_path else None,
             "comparison_summary": _relative_path(wd, comparison_path) if comparison_path else None,
@@ -329,8 +368,8 @@ def run_rusle_k_factors(
     update_k_manifest(manifest_path, k_manifest)
 
     return RusleKResult(
-        nomograph=nomograph_path,
-        epic=epic_path,
+        nomograph=nomograph_path if wrote_nomograph else None,
+        epic=epic_path if wrote_epic else None,
         k_default=default_k_path,
         manifest=manifest_path,
         reference_samples=reference_samples_path,

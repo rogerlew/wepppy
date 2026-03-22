@@ -34,6 +34,7 @@ from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.debris_flow import DebrisFlow
+from wepppy.nodb.mods.rusle import Rusle
 from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.swat.print_prt import mask_to_tokens
 from wepppy.nodb.mods.openet import OpenET_TS
@@ -91,6 +92,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#soils': TaskEnum.build_soils,
     '#treatments': TaskEnum.build_treatments,
     '#wepp': TaskEnum.run_wepp_watershed,
+    '#rusle': TaskEnum.build_rusle,
     '#ash': TaskEnum.run_watar,
     '#rhem': TaskEnum.run_rhem,
     '#omni-scenarios': TaskEnum.run_omni_scenarios,
@@ -168,6 +170,12 @@ MOD_UI_DEFINITIONS = OrderedDict([
         'section_id': 'path-cost-effective',
         'section_class': 'wc-stack',
         'template': 'controls/path_cost_effective_pure.htm',
+    }),
+    ('rusle', {
+        'label': 'RUSLE',
+        'section_id': 'rusle',
+        'section_class': 'wc-stack',
+        'template': 'controls/rusle_pure.htm',
     }),
 ])
 
@@ -667,6 +675,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     treatments = Treatments.tryGetInstance(wd)
     redis_prep = RedisPrep.tryGetInstance(wd)
     debris_flow = DebrisFlow.tryGetInstance(wd) if 'debris_flow' in ron.mods else None
+    rusle = Rusle.tryGetInstance(wd) if 'rusle' in mods_list else None
     swat = Swat.tryGetInstance(wd) if 'swat' in ron.mods else None
     swat_print_prt_rows = []
     swat_print_prt_meta = {}
@@ -742,6 +751,12 @@ def _build_runs0_context(runid, config, playwright_load_all):
     show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
     show_path_ce = 'path_ce' in mods_list or playwright_load_all
+    show_rusle = (
+        (('rusle' in mods_list) or playwright_load_all)
+        and (('disturbed' in mods_list) or playwright_load_all)
+        and ((rusle is not None) or playwright_load_all)
+    )
+    rusle_rap_year_options = rusle.available_rap_years() if rusle is not None else []
 
     bootstrap_admin_disabled = bool(getattr(run_record, "bootstrap_disabled", False)) if run_record else False
     bootstrap_is_anonymous = not bool(getattr(run_record, "owner_id", None)) if run_record else True
@@ -759,6 +774,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         'debris_flow': show_debris_flow,
         'dss_export': show_dss_export,
         'path_ce': show_path_ce,
+        'rusle': show_rusle,
     }
 
     context = dict(
@@ -787,6 +803,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
         OmniScenario=OmniScenario,
         treatments=treatments,
         debris_flow=debris_flow,
+        rusle=rusle,
+        rusle_rap_year_options=rusle_rap_year_options,
         swat=swat,
         swat_print_prt_rows=swat_print_prt_rows,
         swat_print_prt_meta=swat_print_prt_meta,
@@ -819,6 +837,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_debris_flow=show_debris_flow,
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,
+        show_rusle=show_rusle,
         omni_user_defined_contrast_limit=int(getattr(omni_mod, "USER_DEFINED_CONTRAST_LIMIT", 200)),
         is_omni_child=is_omni_child,
         omni_has_ran_scenarios=omni_has_ran_scenarios,

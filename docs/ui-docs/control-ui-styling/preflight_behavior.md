@@ -133,6 +133,24 @@ When adding a new module, update the header list, append metadata in `MOD_UI_DEF
 drop a `data-mod-section` wrapper in `runs0_pure.htm`, and optionally register a bootstrap
 handler so the controller self-initializes after dynamic inserts.
 
+### Planned `Rusle` integration
+
+For the planned `Rusle` NoDb/UI work:
+
+- `Rusle` should be an optional disturbed-only module toggled from the header
+  `Mods` menu
+- the run-page control should appear after `WEPP`
+- preflight should gain a dedicated checklist key for `Rusle`
+- `TaskEnum` should gain a dedicated `Rusle` build task using emoji `🔱`
+- the TOC/preflight anchor should point to the `Rusle` control section
+- the `Rusle` build should run through RQ, not inline
+- initial stale invalidators should include:
+  - climate rebuild
+  - SBS map removal
+  - SBS map replacement or modification
+- when `Rusle` becomes stale, preflight should clear its completion state until
+  the user rebuilds
+
 ---
 
 ## TOC Emoji Mapping

@@ -24,6 +24,7 @@
 {% set allow_debris_flow = user.has_role('PowerUser') or (config is mapping and config.get('TEST_SUPPORT_ENABLED')) or playwright_load_all %}
 {% set show_debris_flow = ('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and allow_debris_flow %}
 {% set show_dss_export = 'dss_export' in mods_list or playwright_load_all %}
+{% set show_rusle = show_rusle if show_rusle is defined else (('rusle' in mods_list and 'disturbed' in mods_list) or playwright_load_all) %}
 {% set show_disturbed_sbs = (('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods) or playwright_load_all %}
 
 {% block head_extras %}
@@ -108,6 +109,9 @@
         {% if not hide_landuse_wepp %}
         <li><a href="#wepp" class="nav-link">WEPP</a></li>
         {% endif %}
+        <li data-mod-nav="rusle" {% if not show_rusle %}hidden{% endif %}>
+          <a href="#rusle" class="nav-link">RUSLE</a>
+        </li>
         <li data-mod-nav="ash" {% if not show_ash %}hidden{% endif %}>
           <a href="#ash" class="nav-link">Ash Transport</a>
         </li>
@@ -210,6 +214,14 @@
         {% include 'controls/wepp_pure.htm' %}
       </section>
       {% endif %}
+
+      <div data-mod-section="rusle" {% if not show_rusle %}hidden{% endif %}>
+        {% if show_rusle %}
+        <section id="rusle" class="wc-stack">
+          {% include 'controls/rusle_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
       <div data-mod-section="ash" {% if not show_ash %}hidden{% endif %}>
         {% if show_ash %}

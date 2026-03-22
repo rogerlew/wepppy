@@ -297,6 +297,40 @@ def test_set_mod_openet_allows_admin(project_client, monkeypatch: pytest.MonkeyP
     assert "openet_ts" in controller.mods
 
 
+def test_set_mod_rusle_requires_disturbed(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = []
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rusle", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "requires Disturbed" in payload["error"]["message"]
+    assert "rusle" not in controller.mods
+
+
+def test_set_mod_rusle_allows_when_disturbed_enabled(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["disturbed"]
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rusle", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["mod"] == "rusle"
+    assert payload["Content"]["enabled"] is True
+    assert "rusle" in controller.mods
+    assert "disturbed" in controller.mods
+
+
 def test_set_mod_disables_module_when_no_guards(project_client):
     client, RonStub, _, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)

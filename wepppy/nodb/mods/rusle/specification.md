@@ -1105,8 +1105,9 @@ Likely dependencies:
 - `Landuse`
 - `Climate`
 - `Disturbed`
-- `POLARIS`
-- `RAP`
+- internal `Polaris` NoDb substrate for aligned soil-property rasters
+- internal single-year RAP raster retrieval built on the RAP dataset access
+  layer, but not on the `rap` or `rap_ts` NoDb mods
 - `wepppyo3.climate` static `R` routine
 
 ## Config Direction
@@ -1118,7 +1119,7 @@ Possible config additions:
 
 ```ini
 [nodb]
-mods = ["disturbed", "debris_flow", "ash", "treatments", "polaris", "rap", "rusle"]
+mods = ["disturbed", "debris_flow", "ash", "treatments", "polaris", "rusle"]
 
 [rusle]
 enabled = true
@@ -1127,6 +1128,7 @@ ls_routing = "dinf"
 r_mode = "cligen_static"
 k_mode = "polaris_nomograph"
 c_mode = "observed_rap"
+rap_year = "auto"
 p_mode = "default"
 mask_nlcd_water = true
 mask_nlcd_urban = true
@@ -1138,6 +1140,191 @@ max_slope_length_m = 304.8
 The scientific defaults above are the current working position. Optional
 operational controls such as `max_slope_length_m` should only change with
 explicit validation and documented rationale.
+
+Because `polaris` currently exists only to support `rusle`, its runtime default
+request should be shifted to the `Rusle K` layer set rather than the earlier
+minimal test request:
+
+- properties: `sand`, `silt`, `clay`, `om`, `bd`, `ksat`
+- statistics: `mean`
+- depths: `0_5`, `5_15`
+
+## User Specification
+
+### Availability and Activation
+
+- `Rusle` should be a user-toggleable optional mod in the run-header `Mods`
+  menu for disturbed projects
+- for the first implementation, use the presence of the `disturbed` mod as the
+  eligibility gate; do not present `Rusle` as a generic mod for unrelated run
+  types
+- enabling `rusle` should ensure the internal `polaris` substrate is available
+  for the run
+- enabling `rusle` must not auto-add `rap` or `rap_ts`
+- `disturbed` is already treated as non-removable for this project class, so
+  `rusle` does not need a separate `disturbed` removal guard
+- `polaris` should not have its own user-facing mods toggle or dedicated run
+  page section in this workflow
+- enabling `rusle` should only register/reveal the workflow; it should not
+  trigger a background build automatically
+- disabling `rusle` should remove only `rusle`; any cleanup of the internal
+  `polaris` state can remain an implementation detail rather than a user-facing
+  contract
+
+### Run-Page Placement
+
+- add a dedicated `RUSLE` navigation entry and control section on the run page
+- place it after `WEPP`
+- follow the standard `control_shell` pattern:
+  - status area
+  - stacktrace area
+  - job hint
+  - build/refresh action
+  - concise method summary
+- show prerequisite readiness for at least:
+  - DEM/watershed
+  - landuse
+  - climate
+  - disturbed
+
+### Required v1 Controls
+
+- build/refresh button for the run-scoped `RUSLE` artifacts
+- build/refresh should enqueue an RQ job rather than run inline in the request
+  cycle
+- `C` mode selector:
+  - `observed_rap`
+  - `scenario_sbs`
+- default `C` mode in the first user-facing release should be `observed_rap`
+- `RAP` year selector shown only when `c_mode = observed_rap`
+  - single year only
+  - valid year choices should come from the same RAP implementation surface used
+    by [rap.py](../rap/rap.py), which should
+    remain the source of truth for supported single-year RAP availability
+  - default should be the latest available completed RAP year unless a saved
+    `rusle.rap_year` already exists
+- `K` mode selector in an advanced section:
+  - `polaris_nomograph` default
+  - `polaris_epic` advanced sensitivity option
+
+### Additional v1 Controls Worth Exposing
+
+- `LS` routing selector in an advanced section:
+  - `dinf` default
+  - `fd8` optional sensitivity path
+  - keep `d8` out of the ordinary UI unless it is intentionally added as a
+    comparison-only analyst mode
+- `max_slope_length_m` numeric input in an advanced section, default `304.8`
+- masking toggles in an advanced section:
+  - `mask_nlcd_water`
+  - `mask_nlcd_urban`
+  - `mask_nlcd_wetlands`
+  - `mask_channels`
+
+### Fixed or Read-Only Method Rows
+
+These should be shown as method summary rows rather than user-editable fields
+in the first release:
+
+- `LS mode = wbt_rusle`
+- `R mode = cligen_static`
+- `P mode = default` (`1.0`)
+
+### `scenario_sbs` User-Facing Contract
+
+- `scenario_sbs` should consume the disturbed workflow's SBS state; do not add
+  a second SBS upload control inside the `Rusle` panel
+- `scenario_sbs` should stay fixed to the canonical RUSLE disturbed-family
+  policy and should not inherit optional Disturbed runtime knobs such as
+  shrub/grass burn toggles
+- when a disturbed/BAER SBS map exists, use it
+- when no SBS map exists, `scenario_sbs` should still be allowed and should use
+  `unburned` lookup parameters everywhere
+- the UI should surface that state explicitly, for example:
+  `No SBS map detected; using unburned parameters.`
+- the gridded `disturbed_class` raster remains required and must still be
+  derived on the DEM grid from the disturbed mapping; do not substitute the
+  hillslope-only disturbed assignment
+
+### `observed_rap` User-Facing Contract
+
+- `Rusle` should retrieve the selected single-year RAP raster directly for the
+  run
+- reuse the low-level RAP dataset access layer, but do not require the `rap` or
+  `rap_ts` NoDb modules to be enabled or instantiated
+- store the retrieved RAP raster under the run-scoped `rusle/` tree and record
+  the selected year in manifest/catalog metadata
+- reuse an existing aligned RAP artifact only when the saved artifact matches
+  the requested year and the current run extent/alignment contract; otherwise
+  refresh it explicitly
+
+### Internal `polaris` Acquisition Contract
+
+- there should be no separate `POLARIS` UI for `Rusle` users in v1
+- when a `Rusle` build needs `K` inputs, the controller should check whether the
+  aligned required `POLARIS` layers already exist for the run
+- if required aligned layers are missing, `Rusle` should call the existing
+  `Polaris` NoDb controller automatically
+- the automatic request should target the `Rusle K` substrate layer set:
+  - properties: `sand`, `silt`, `clay`, `om`, `bd`, `ksat`
+  - statistics: `mean`
+  - depths: `0_5`, `5_15`
+- even if `Polaris` defaults are changed to match the `Rusle K` request, the
+  `Rusle` controller should still pass an explicit acquisition payload so the
+  build remains deterministic and self-describing in manifest history
+- if the existing `polaris/manifest.json` does not satisfy the required layer
+  set or alignment contract, `Rusle` should refresh the missing or drifted
+  layers explicitly rather than assuming the current `polaris/` tree is valid
+- this should remain idempotent:
+  - if the required aligned layers already exist and satisfy the request,
+    `Rusle` should reuse them without re-fetching
+
+### Build Scope Contract
+
+- the standard `Rusle` build should write only the selected active-mode outputs
+  for user-facing factors, not every alternate estimator
+- specifically:
+  - selected `K` mode output only
+  - selected `C` mode output only
+  - active `LS`, `R`, `P`, and final `A` outputs
+- inactive comparison artifacts should be reserved for explicit future
+  comparison/debug workflows so ordinary users are less likely to browse or
+  download the wrong raster by mistake
+
+### Artifact Naming Contract
+
+- user-facing factor artifacts should use mode-specific filenames rather than
+  only generic names, so browsing/downloading makes the active estimator
+  obvious
+- generic aliases may still exist for internal convenience, but mode-specific
+  names should be the primary auditable outputs
+
+### Preflight and Staleness Contract
+
+- `Rusle` should integrate with the preflight system as its own checklist item
+- add a dedicated `TaskEnum` entry for the main `Rusle` build and use the `🔱`
+  emoji in TOC/preflight surfaces
+- initial stale/invalidating events should include:
+  - climate rebuild
+  - SBS map removal
+  - SBS map replacement or modification
+- stale `Rusle` state should clear its preflight-complete indicator until the
+  user rebuilds
+
+### Failure UX Contract
+
+- follow the existing control pattern for asynchronous failures:
+  - concise status message in the control
+  - stacktrace/details panel for deeper error information
+  - no custom one-off error presentation for `Rusle`
+
+### Inputs Explicitly Out of Scope for v1 UI
+
+- `m_regime`
+- NRCS benchmark/reference `K` modes
+- explicit `cfvo` coarse-fragment adjustment controls
+- raw `POLARIS` property/statistic/depth selection controls
+- custom `scenario_sbs` lookup-table editing inside the `Rusle` panel
 
 ## Source Precedence
 
@@ -1225,6 +1412,37 @@ Longer term, the mod should be checked against:
 - `scenario_sbs` requires a DEM-aligned gridded `disturbed_class` raster and
   only applies SBS burn remapping to canonical `forest`, `shrub`, and
   `tall_grass` families
+- user-facing `scenario_sbs` remains available when no SBS map is present;
+  that case must use explicit `unburned` parameters everywhere rather than
+  failing or silently changing modes
+- `Rusle` should retrieve single-year RAP internally for `observed_rap` and
+  must not depend on the `rap` or `rap_ts` NoDb mods
+- enabling `rusle` from the UI should auto-add `polaris` when needed
+- first-release `Rusle` UI eligibility should be keyed to the presence of the
+  `disturbed` mod
+- enabling `rusle` should reveal/register the workflow but should not trigger
+  a build automatically
+- default first-release user selection should remain `c_mode = observed_rap`
+- `scenario_sbs` should remain independent of optional Disturbed runtime burn
+  toggles and use the fixed canonical RUSLE disturbed-family policy
+- `Rusle` should pass an explicit `Polaris` acquisition payload even if the
+  underlying `Polaris` defaults match the same layer set
+- valid `observed_rap` year choices should be sourced from the RAP
+  implementation surface used by `rap.py`, with latest available completed year
+  as the default when the user has not saved an override
+- standard user-facing builds should emit only selected active-mode outputs, so
+  inactive estimator rasters are not surfaced by default
+- the `Rusle` control should appear after `WEPP` on the run page
+- `Rusle` builds should run through RQ
+- `Rusle` should integrate with preflight using a dedicated `TaskEnum` entry
+  and `🔱` emoji
+- initial `Rusle` staleness invalidators are climate rebuild plus SBS removal or
+  change
+- user-facing artifacts should prefer mode-specific filenames
+- `scenario_sbs` without an SBS map should not emit a synthetic all-unburned
+  `sbs_4class.tif` artifact by default
+- `Rusle` failure UX should follow the standard status-plus-stacktrace control
+  pattern
 
 ## Initial Milestones
 
@@ -1238,7 +1456,8 @@ Status update (2026-03-21):
   `docs/work-packages/20260321_rusle_k_polaris_implementation/`.
 - Milestone 5 completed in
   `docs/work-packages/20260321_rusle_c_modes_implementation/`.
-- Milestones 6-7 remain pending and in scope for follow-on `Rusle` packages.
+- Milestones 6-7 completed in
+  `docs/work-packages/20260321_rusle_nodb_ui/`.
 
 1. Create the WBT `RusleLsFactor` tool with `Desmet-Govers` `L`,
    `McCool/RUSLE` `S`, `DInf` default routing, and diagnostic outputs; then

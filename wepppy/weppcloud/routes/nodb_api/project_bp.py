@@ -37,6 +37,7 @@ MOD_DISPLAY_NAMES = {
     'dss_export': 'DSS Export',
     'omni': 'Omni',
     'path_ce': 'Path CE',
+    'rusle': 'RUSLE',
 }
 
 MOD_DEPENDENCIES = {
@@ -162,6 +163,10 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
     wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
     cfg_fn = f"{config}.cfg"
+    active_mods = set(ron.mods or [])
+
+    if enabled and mod_name == "rusle" and "disturbed" not in active_mods:
+        raise ValueError("RUSLE requires Disturbed to be enabled.")
 
     if enabled:
         changed = _enable_mod_for_run(ron, wd, cfg_fn, mod_name)
@@ -239,7 +244,7 @@ def delete_run(runid, config):
         with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
             queue = Queue(connection=redis_conn)
             job = queue.enqueue_call(delete_run_rq, (runid, wd), timeout=TIMEOUT)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:233", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error queuing delete task', runid=runid)
@@ -290,7 +295,7 @@ def task_adduser(runid, config):
         if hasattr(user_datastore, 'find_user'):
             try:
                 user = user_datastore.find_user(email=email)
-            except Exception:
+            except Exception:  # broad-except: boundary contract
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:282", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 user = None
@@ -298,7 +303,7 @@ def task_adduser(runid, config):
         if user is None:
             try:
                 user = User.query.filter(func.lower(User.email) == email.lower()).first()
-            except Exception:
+            except Exception:  # broad-except: boundary contract
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:288", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 user = None
@@ -308,7 +313,7 @@ def task_adduser(runid, config):
 
         try:
             run = Run.query.filter(Run.runid == runid).first()
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             # Boundary catch: preserve contract behavior while logging unexpected failures.
             __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:296", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             run = None
@@ -332,7 +337,7 @@ def task_adduser(runid, config):
             'user_id': getattr(user, 'id', None),
             'email': getattr(user, 'email', email)
         })
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:318", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(f'Error adding user: {email}', runid=runid)
@@ -364,7 +369,7 @@ def task_removeuser(runid, config):
 
         try:
             user = User.query.filter(User.id == user_id).first()
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             # Boundary catch: preserve contract behavior while logging unexpected failures.
             __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:348", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             user = None
@@ -374,7 +379,7 @@ def task_removeuser(runid, config):
 
         try:
             run = Run.query.filter(Run.runid == runid).first()
-        except Exception:
+        except Exception:  # broad-except: boundary contract
             # Boundary catch: preserve contract behavior while logging unexpected failures.
             __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:356", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             run = None
@@ -394,7 +399,7 @@ def task_removeuser(runid, config):
         user_datastore.remove_run_to_user(user, run)
 
         return success_factory({'user_id': user_id})
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:374", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(f'Error removing user: {user_id}', runid=runid)
@@ -522,7 +527,7 @@ def task_set_public(runid, config):
     try:
         ctx = load_run_context(runid, config)
         Ron.getInstance(str(ctx.active_root)).public = bool(state)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:497", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
@@ -557,7 +562,7 @@ def task_set_ttl_disabled(runid, config):
         from wepppy.weppcloud.utils.run_ttl import set_user_ttl_disabled
 
         ttl_state = set_user_ttl_disabled(wd, bool(state), str(user_id))
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:530", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting TTL state', runid=runid)
@@ -591,7 +596,7 @@ def task_set_readonly(runid, config):
         with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
             queue = Queue(connection=redis_conn)
             job = queue.enqueue_call(set_run_readonly_rq, (runid, desired_state), timeout=TIMEOUT)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:559", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error queuing readonly task', runid=runid)
@@ -620,7 +625,7 @@ def task_set_mod(runid, config):
         state = set_project_mod_state(runid, config, mod_key, bool(enabled))
     except ValueError as exc:
         return error_factory(str(exc))
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:583", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error updating module state', runid=runid)

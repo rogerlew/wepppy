@@ -39,6 +39,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"observed":        false,
 		"debris":          false,
 		"watar":           false,
+		"rusle":           false,
 		"dss_export":      false,
 		"run_path_ce":     false,
 	}
@@ -89,6 +90,14 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		safeGT(prep["timestamps:run_watar"], prep["timestamps:build_soils"]) &&
 		safeGT(prep["timestamps:run_watar"], prep["timestamps:build_climate"]) &&
 		safeGT(prep["timestamps:run_watar"], runWepp)
+
+	rusleRun := prep["timestamps:build_rusle"]
+	if runWepp == "" {
+		check["rusle"] = safeGT(rusleRun, prep["timestamps:build_climate"])
+	} else {
+		check["rusle"] = safeGT(rusleRun, prep["timestamps:build_climate"]) &&
+			safeGT(rusleRun, runWepp)
+	}
 
 	omniContrastBaseline := maxTimestamp(
 		prep,

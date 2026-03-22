@@ -6,6 +6,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import upload_disturbed_routes
+from wepppy.nodb.redis_prep import TaskEnum
 
 
 pytestmark = pytest.mark.microservice
@@ -19,6 +20,13 @@ def test_upload_sbs_returns_disturbed_fn(monkeypatch: pytest.MonkeyPatch, tmp_pa
     monkeypatch.setattr(upload_disturbed_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(upload_disturbed_routes, "authorize_run_access", lambda claims, runid: None)
     monkeypatch.setattr(upload_disturbed_routes, "get_wd", lambda runid: str(run_dir))
+    prep_state = {"removed": []}
+
+    class DummyPrep:
+        def remove_timestamp(self, task) -> None:
+            prep_state["removed"].append(task)
+
+    monkeypatch.setattr(upload_disturbed_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
 
     class DummyRon:
         mods: set[str] = set()
@@ -50,6 +58,7 @@ def test_upload_sbs_returns_disturbed_fn(monkeypatch: pytest.MonkeyPatch, tmp_pa
     assert response.status_code == 200
     payload = response.json()
     assert payload["result"]["disturbed_fn"] == "disturbed.txt"
+    assert prep_state["removed"] == [TaskEnum.build_rusle]
 
 
 def test_upload_cover_transform_returns_result(

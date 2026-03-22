@@ -104,3 +104,33 @@ def test_run_rusle_k_factors_requires_points_when_reference_requested(tmp_path: 
             str(tmp_path),
             reference_paths={"gssurgo_kffact": str(tmp_path / "missing.tif")},
         )
+
+
+def test_run_rusle_k_factors_writes_only_selected_mode_outputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write_polaris_layers(tmp_path)
+
+    catalog_updates: list[str] = []
+    monkeypatch.setattr(k_integration, "update_catalog_entry", lambda _wd, relpath: catalog_updates.append(relpath))
+
+    result = k_integration.run_rusle_k_factors(
+        str(tmp_path),
+        selected_modes=["polaris_nomograph"],
+        default_k_mode="polaris_nomograph",
+        write_default_k=False,
+    )
+
+    assert result.nomograph is not None and Path(result.nomograph).exists()
+    assert result.epic is None
+    assert result.k_default is None
+
+    assert "rusle/k_polaris_nomograph.tif" in catalog_updates
+    assert "rusle/k_polaris_epic.tif" not in catalog_updates
+    assert "rusle/k.tif" not in catalog_updates
+
+    epic_path = tmp_path / "rusle" / "k_polaris_epic.tif"
+    default_path = tmp_path / "rusle" / "k.tif"
+    assert not epic_path.exists()
+    assert not default_path.exists()

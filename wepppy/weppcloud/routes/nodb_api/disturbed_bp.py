@@ -24,6 +24,7 @@ from .._common import (
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed, write_disturbed_land_soil_lookup
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory, url_for_run
 
 disturbed_bp = Blueprint('disturbed', __name__)
@@ -184,6 +185,7 @@ def task_baer_class_map(runid: str, config: str) -> Response:
     nodata_vals = payload.get('nodata_vals')
 
     baer.modify_burn_class(classes, nodata_vals)
+    RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.build_rusle)
     return success_factory()
 
 
@@ -274,6 +276,7 @@ def task_remove_sbs(runid: str, config: str) -> Response:
     else:
         baer = Disturbed.getInstance(wd)
         baer.remove_sbs()
+    RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.build_rusle)
     return success_factory()
 
 
@@ -327,4 +330,5 @@ def task_build_uniform_sbs(runid: str, config: str, value: Optional[str] = None)
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/disturbed_bp.py:303", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 pass
 
+    RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.build_rusle)
     return success_factory({'disturbed_fn': disturbed.disturbed_fn})

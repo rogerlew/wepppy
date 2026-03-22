@@ -247,3 +247,46 @@ def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env:
     assert 'data-modal-open="teamModal"' in rendered
     assert 'id="checkbox_readonly"' in rendered
     assert 'id="checkbox_public"' in rendered
+
+
+def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        request=request,
+        current_ron_mods=[],
+    )
+
+    assert 'data-project-mod="rusle"' not in rendered
+
+
+def test_run_header_shows_rusle_mod_when_disturbed_enabled(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        request=request,
+        current_ron_mods=["disturbed", "rusle"],
+    )
+
+    assert 'data-project-mod="rusle"' in rendered
+
+
+def test_runs0_template_places_rusle_after_wepp_sections() -> None:
+    template_path = RUN_0_TEMPLATE_ROOT / "runs0_pure.htm"
+    source = template_path.read_text(encoding="utf-8")
+
+    wepp_nav_index = source.index('<a href="#wepp" class="nav-link">WEPP</a>')
+    rusle_nav_index = source.index('<a href="#rusle" class="nav-link">RUSLE</a>')
+    assert wepp_nav_index < rusle_nav_index
+
+    wepp_section_index = source.index('<section id="wepp" class="wc-stack">')
+    rusle_section_index = source.index('<div data-mod-section="rusle"')
+    assert wepp_section_index < rusle_section_index

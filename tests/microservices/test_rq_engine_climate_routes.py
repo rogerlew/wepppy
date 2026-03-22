@@ -38,15 +38,18 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
     monkeypatch.setattr(climate_routes.redis, "Redis", lambda **kwargs: DummyRedis())
 
 
-def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
-    class DummyPrep:
-        def remove_timestamp(self, *args, **kwargs) -> None:
-            return None
+def _stub_prep(monkeypatch: pytest.MonkeyPatch):
+    state = {"removed": [], "jobs": []}
 
-        def set_rq_job_id(self, *args, **kwargs) -> None:
-            return None
+    class DummyPrep:
+        def remove_timestamp(self, task, *args, **kwargs) -> None:
+            state["removed"].append(task)
+
+        def set_rq_job_id(self, key, job_id, *args, **kwargs) -> None:
+            state["jobs"].append((key, job_id))
 
     monkeypatch.setattr(climate_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+    return state
 
 
 def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -76,7 +79,7 @@ def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_build_climate_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-88")
-    _stub_prep(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
     monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
 
     class DummyClimate:
@@ -96,6 +99,11 @@ def test_build_climate_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-88"
+    assert prep_state["removed"] == [
+        climate_routes.TaskEnum.build_climate,
+        climate_routes.TaskEnum.build_rusle,
+    ]
+    assert prep_state["jobs"] == [("build_climate_rq", "job-88")]
 
 
 def test_build_climate_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:

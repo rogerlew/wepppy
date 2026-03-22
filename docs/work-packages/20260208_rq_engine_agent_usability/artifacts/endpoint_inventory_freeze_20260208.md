@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **76**
-- Classification counts: **agent-facing 53**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 73**, **Flask wrapper 3**
+- Total endpoints inventoried: **77**
+- Classification counts: **agent-facing 54**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 74**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -41,6 +41,7 @@ Snapshot summary:
 | POST | `/api/runs/{runid}/{config}/bootstrap/enable` | `wepppy/microservices/rq_engine/bootstrap_routes.py` | `bootstrap_enable` | agent-facing | rq-engine | JWT Bearer | `bootstrap:enable` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/bootstrap/mint-token` | `wepppy/microservices/rq_engine/bootstrap_routes.py` | `bootstrap_mint_token` | agent-facing | rq-engine | JWT Bearer | `bootstrap:token:mint` | mutating | Run access check: `authorize_run_access`. Synchronous bootstrap clone-token minting; no queue. |
 | POST | `/api/runs/{runid}/{config}/build-climate` | `wepppy/microservices/rq_engine/climate_routes.py` | `build_climate` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| POST | `/api/runs/{runid}/{config}/build-rusle` | `wepppy/microservices/rq_engine/rusle_routes.py` | `build_rusle` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `build_landuse` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/build-soils` | `wepppy/microservices/rq_engine/soils_routes.py` | `build_soils` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed` | `wepppy/microservices/rq_engine/watershed_routes.py` | `build_subcatchments_and_abstract_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |

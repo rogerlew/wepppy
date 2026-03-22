@@ -3,6 +3,7 @@
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
+from datetime import date
 import utm
 import subprocess
 import os
@@ -23,6 +24,7 @@ IS_WINDOWS = os.name == 'nt'
 _thisdir = os.path.dirname(__file__)
 
 DEFAULT_VERSION = 'v3'
+RAP_FIRST_DATA_YEAR = 1986
 
 
 __all__ = [
@@ -112,6 +114,27 @@ class RangelandAnalysisPlatform(object):
         self.lr_x, self.lr_y = float(lr_x), float(lr_y)
 
         return retries
+
+    @classmethod
+    def latest_completed_year(cls, *, today=None):
+        """Return the latest completed RAP year available for stable selection."""
+        current_date = today or date.today()
+        return int(current_date.year) - 1
+
+    def available_years(self, *, include_cached=True):
+        """Return sorted RAP years supported by this implementation surface."""
+        latest = self.latest_completed_year()
+        if latest < RAP_FIRST_DATA_YEAR:
+            return []
+
+        years = set(range(RAP_FIRST_DATA_YEAR, latest + 1))
+        if include_cached:
+            for key in self.ds.keys():
+                try:
+                    years.add(int(key))
+                except (TypeError, ValueError):
+                    continue
+        return sorted(years)
         
     def validate_raster(self, filename):
         """Return True when ``filename`` exists and includes non-zero values."""

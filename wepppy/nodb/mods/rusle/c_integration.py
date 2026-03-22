@@ -256,6 +256,7 @@ def run_rusle_c_factor(
     dem: str,
     *,
     c_mode: str,
+    c_output_filename: str = "c.tif",
     rap: str | None = None,
     landuse: str | None = None,
     sbs: str | None = None,
@@ -270,7 +271,10 @@ def run_rusle_c_factor(
     rusle_dir = _join(wd, "rusle")
     os.makedirs(rusle_dir, exist_ok=True)
 
-    c_path = _join(rusle_dir, "c.tif")
+    c_output_name = str(c_output_filename).strip()
+    if not c_output_name:
+        raise ValueError("c_output_filename must be a non-empty filename")
+    c_path = _join(rusle_dir, c_output_name)
     fg_path = _join(rusle_dir, "c_fg.tif")
     disturbed_class_path = _join(rusle_dir, "disturbed_class.tif")
     sbs_4class_path = _join(rusle_dir, "sbs_4class.tif")
@@ -345,8 +349,6 @@ def run_rusle_c_factor(
 
     if landuse is None:
         raise ValueError("landuse path is required for c_mode='scenario_sbs'")
-    if sbs is None:
-        raise ValueError("sbs path is required for c_mode='scenario_sbs'")
 
     lookup = load_rusle_c_lookup(lookup_path)
     disturbed_mapping = _load_disturbed_mapping(disturbed_mapping_path)
@@ -363,13 +365,15 @@ def run_rusle_c_factor(
         nodata=DISTURBED_CLASS_RASTER_NODATA,
     )
 
-    sbs_4class = _prepare_sbs_4class(
-        sbs_path=sbs,
-        dem_path=dem,
-        dem_profile=dem_profile,
-        output_path=sbs_4class_path,
-        sbs_is_4class=sbs_is_4class,
-    )
+    sbs_4class: np.ndarray | None = None
+    if sbs is not None:
+        sbs_4class = _prepare_sbs_4class(
+            sbs_path=sbs,
+            dem_path=dem,
+            dem_profile=dem_profile,
+            output_path=sbs_4class_path,
+            sbs_is_4class=sbs_is_4class,
+        )
 
     inverse_family_codes = {code: family for family, code in family_codes.items()}
     c = np.full(landuse_aligned.shape, np.nan, dtype=np.float64)
@@ -386,7 +390,7 @@ def run_rusle_c_factor(
         if family in MASKED_FAMILY_NAMES:
             continue
 
-        if family in BURNABLE_FAMILIES:
+        if family in BURNABLE_FAMILIES and sbs_4class is not None:
             for sbs_value, sbs_class in SBS_VALUE_TO_CLASS.items():
                 mask = family_mask & (sbs_4class == sbs_value)
                 if not np.any(mask):
@@ -403,10 +407,16 @@ def run_rusle_c_factor(
     shutil.copyfile(lookup_path, lookup_copy_path)
     _write_float_raster(c_path, c, dem_profile)
 
-    for path in (c_path, disturbed_class_path, sbs_4class_path, lookup_copy_path):
+    catalog_paths = [c_path, disturbed_class_path, lookup_copy_path]
+    if sbs_4class is not None:
+        catalog_paths.append(sbs_4class_path)
+    for path in catalog_paths:
         update_catalog_entry(wd, _relative_path(wd, path))
 
-    sbs_counts = Counter(str(int(value)) for value in sbs_4class[np.where(sbs_4class != 255)])
+    if sbs_4class is None:
+        sbs_counts: dict[str, int] = {}
+    else:
+        sbs_counts = dict(Counter(str(int(value)) for value in sbs_4class[np.where(sbs_4class != 255)]))
     c_manifest = {
         "mode": "scenario_sbs",
         "formula": {
@@ -418,7 +428,7 @@ def run_rusle_c_factor(
         "masked_families": sorted(MASKED_FAMILY_NAMES),
         "disturbed_class_codes": {family: int(code) for family, code in sorted(family_codes.items(), key=lambda item: item[1])},
         "disturbed_family_counts": family_counts,
-        "sbs_counts": dict(sbs_counts),
+        "sbs_counts": sbs_counts,
         "lookup_keys_used": _build_lookup_key_payload(lookup_keys_used, lookup),
         "source_paths": {
             "dem": dem,
@@ -427,7 +437,13 @@ def run_rusle_c_factor(
             "disturbed_mapping": disturbed_mapping_path,
             "lookup": lookup_path,
         },
-        "sbs_input_mode": "classified_4class" if sbs_is_4class else "normalized_from_source",
+        "sbs_input_mode": (
+            "classified_4class"
+            if sbs_is_4class and sbs is not None
+            else "normalized_from_source"
+            if sbs is not None
+            else "missing_use_unburned"
+        ),
         "nlcd_family_map": nlcd_family_map,
         "generated_utc": _utc_now_iso(),
         "artifacts": asdict(
@@ -436,7 +452,7 @@ def run_rusle_c_factor(
                 manifest=manifest_path,
                 fg=None,
                 disturbed_class=disturbed_class_path,
-                sbs_4class=sbs_4class_path,
+                sbs_4class=sbs_4class_path if sbs_4class is not None else None,
                 lookup_copy=lookup_copy_path,
             )
         ),
@@ -449,6 +465,6 @@ def run_rusle_c_factor(
         manifest=manifest_path,
         fg=None,
         disturbed_class=disturbed_class_path,
-        sbs_4class=sbs_4class_path,
+        sbs_4class=sbs_4class_path if sbs_4class is not None else None,
         lookup_copy=lookup_copy_path,
     )

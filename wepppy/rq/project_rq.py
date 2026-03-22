@@ -48,6 +48,7 @@ from wepppy.nodb.mods.rhem import Rhem
 from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.polaris import Polaris
 from wepppy.nodb.mods.rap import RAP_TS
+from wepppy.nodb.mods.rusle import Rusle
 from wepppy.nodb.mods.treatments import Treatments
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -1454,3 +1455,29 @@ def fetch_and_align_polaris_rq(runid: str, payload: Mapping[str, Any] | None = N
 
     prep = RedisPrep.getInstance(wd)
     prep.timestamp(TaskEnum.fetch_polaris)
+
+
+@with_exception_logging
+def build_rusle_rq(runid: str, payload: Mapping[str, Any] | None = None) -> None:
+    """Build RUSLE factors and final mode-specific A output."""
+    job = get_current_job()
+    wd = get_wd(runid)
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:rusle"
+    StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid})")
+
+    options = dict(payload) if payload else {}
+    rusle = Rusle.getInstance(wd)
+    if options:
+        try:
+            rusle.logger.info("RUSLE job options: %s", json.dumps(options, sort_keys=True))
+        except (TypeError, ValueError):
+            rusle.logger.info("RUSLE job options provided (%d keys)", len(options))
+
+    summary = rusle.build(payload=options)
+    StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
+    StatusMessenger.publish(status_channel, "rq:{job.id} TRIGGER   rusle RUSLE_BUILD_TASK_COMPLETED".format(job=job))
+    StatusMessenger.publish(status_channel, json.dumps(summary, sort_keys=True))
+
+    prep = RedisPrep.getInstance(wd)
+    prep.timestamp(TaskEnum.build_rusle)

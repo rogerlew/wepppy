@@ -1,0 +1,143 @@
+{# RUSLE build control #}
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Build RUSLE factors and mode-specific annual detachment output (<code>A = R * K * LS * C * P</code>)
+    for this run. The build executes asynchronously through RQ.
+  </p>
+{% endset %}
+
+{% set rusle_c_mode = rusle.c_mode if rusle is not none else 'observed_rap' %}
+{% set rusle_k_modes = rusle.k_modes if rusle is not none and rusle.k_modes else ['polaris_nomograph'] %}
+{% set rusle_default_k_mode = rusle.default_k_mode if rusle is not none else 'polaris_nomograph' %}
+{% set rusle_p_value = rusle.p_value if rusle is not none else 1.0 %}
+{% set rap_year_options = rusle_rap_year_options | default([], true) %}
+{% set selected_rap_year = (rusle.rap_year | string) if rusle is not none else (rap_year_options[-1] | string if rap_year_options else '') %}
+
+{% set rap_ns = namespace(options=[]) %}
+{% for year in rap_year_options %}
+  {% set rap_ns.options = rap_ns.options + [((year | string), (year | string))] %}
+{% endfor %}
+{% if not rap_ns.options %}
+  {% set rap_ns.options = [('', 'No RAP years available')] %}
+{% endif %}
+
+{% call ui.control_shell(
+     form_id="rusle_form",
+     title="RUSLE",
+     collapsible=False,
+     description=description,
+     status_panel_options={"id": "rusle_status_panel"},
+     stacktrace_panel_options={"panel_id": "rusle_stacktrace_panel", "body_id": "stacktrace"}
+   ) %}
+
+  {{ ui.radio_group(
+       "c_mode",
+       label="C factor mode",
+       layout="horizontal",
+       options=[
+         {
+           "id": "rusle_c_mode_observed_rap",
+           "label": "Observed RAP",
+           "value": "observed_rap",
+           "selected": rusle_c_mode == "observed_rap",
+           "attrs": {"class": "disable-readonly", "data-rusle-c-mode": "observed_rap"}
+         },
+         {
+           "id": "rusle_c_mode_scenario_sbs",
+           "label": "Scenario SBS",
+           "value": "scenario_sbs",
+           "selected": rusle_c_mode == "scenario_sbs",
+           "attrs": {"class": "disable-readonly", "data-rusle-c-mode": "scenario_sbs"}
+         }
+       ],
+       help="Observed RAP uses RAP bare-ground by year; Scenario SBS uses landcover + SBS classes (or unburned defaults when no SBS map is present)."
+     ) }}
+
+  <div data-rusle-section="rap-year" {% if rusle_c_mode != 'observed_rap' %}style="display: none;"{% endif %}>
+    {{ ui.select_field(
+         "rap_year",
+         "RAP year",
+         options=rap_ns.options,
+         selected=selected_rap_year,
+         help="Defaults to the latest completed RAP year unless this run has a saved override.",
+         attrs={"class": "disable-readonly", "data-rusle-input": "rap-year"}
+       ) }}
+  </div>
+
+  <div class="wc-field" style="max-width: 750px;">
+    <span class="wc-field__label">K factor modes</span>
+    <div class="wc-choice-group wc-choice-group--horizontal" data-rusle-k-group>
+      <label class="wc-choice wc-choice--checkbox">
+        <input type="checkbox"
+               id="rusle_k_mode_nomograph"
+               name="k_modes"
+               value="polaris_nomograph"
+               data-rusle-k-mode
+               class="disable-readonly"
+               {% if 'polaris_nomograph' in rusle_k_modes %}checked{% endif %}>
+        <span class="wc-choice__body"><span class="wc-choice__label">POLARIS Nomograph</span></span>
+      </label>
+      <label class="wc-choice wc-choice--checkbox">
+        <input type="checkbox"
+               id="rusle_k_mode_epic"
+               name="k_modes"
+               value="polaris_epic"
+               data-rusle-k-mode
+               class="disable-readonly"
+               {% if 'polaris_epic' in rusle_k_modes %}checked{% endif %}>
+        <span class="wc-choice__body"><span class="wc-choice__label">POLARIS EPIC</span></span>
+      </label>
+    </div>
+    <p class="wc-field__help">Build outputs are limited to selected modes.</p>
+  </div>
+
+  {{ ui.select_field(
+       "default_k_mode",
+       "Default K mode for final A",
+       options=[
+         ('polaris_nomograph', 'POLARIS Nomograph'),
+         ('polaris_epic', 'POLARIS EPIC')
+       ],
+       selected=rusle_default_k_mode,
+       attrs={"class": "disable-readonly", "data-rusle-input": "default-k"},
+       help="The selected default mode supplies <code>K</code> in the final mode-specific <code>A</code> raster."
+     ) }}
+
+  {{ ui.numeric_field(
+       "p_value",
+       "P factor scalar",
+       value=rusle_p_value,
+       precision="0.01",
+       min="0",
+       attrs={"class": "disable-readonly", "data-rusle-input": "p-value"},
+       help="Run-scoped constant multiplier used for P in this workflow."
+     ) }}
+
+  {{ ui.checkbox_field(
+       "force_polaris_refresh",
+       "Force POLARIS refresh before build",
+       checked=False,
+       attrs={"class": "disable-readonly", "data-rusle-input": "force-polaris-refresh"},
+       help="When enabled, POLARIS layers are re-acquired even if current layers appear aligned."
+     ) }}
+
+  {% call button_row() %}
+    <button
+      id="btn_build_rusle"
+      type="button"
+      class="pure-button pure-button-primary disable-readonly"
+      data-rusle-action="run">
+      <img
+        id="build_rusle_lock"
+        src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}"
+        alt=""
+        style="display:none;">
+      <span>Build RUSLE</span>
+    </button>
+  {% endcall %}
+  {{ ui.job_hint("hint_build_rusle", extra_class="wc-field__help") }}
+
+{% endcall %}

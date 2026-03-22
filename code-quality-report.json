@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-02-28T04:03:12Z",
+  "generated_at_utc": "2026-03-22T02:16:28Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -37,30 +37,30 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 750.0,
+      "count": 785.0,
       "p50": 104.0,
-      "p75": 240.75,
-      "p90": 498.2,
-      "p95": 774.1,
-      "p99": 1260.97,
+      "p75": 248.0,
+      "p90": 507.6,
+      "p95": 813.0,
+      "p99": 1325.6,
       "max": 2214.0
     },
     "python_prod_max_function_len": {
-      "count": 584.0,
-      "p50": 56.5,
+      "count": 617.0,
+      "p50": 56.0,
       "p75": 102.0,
-      "p90": 151.4,
-      "p95": 213.85,
-      "p99": 277.36,
+      "p90": 148.4,
+      "p95": 215.2,
+      "p99": 282.72,
       "max": 381.0
     },
     "python_prod_max_cc": {
-      "count": 594.0,
+      "count": 627.0,
       "p50": 10.0,
       "p75": 18.0,
       "p90": 28.0,
-      "p95": 37.35,
-      "p99": 56.07,
+      "p95": 37.7,
+      "p99": 52.48,
       "max": 67.0
     },
     "js_source_file_sloc": {
@@ -68,7 +68,7 @@
       "p50": 257.0,
       "p75": 553.0,
       "p90": 1113.0,
-      "p95": 1316.0,
+      "p95": 1334.5,
       "p99": 2126.5,
       "max": 2500.0
     },
@@ -78,7 +78,7 @@
       "p75": 21.0,
       "p90": 33.0,
       "p95": 43.5,
-      "p99": 75.5,
+      "p99": 78.0,
       "max": 155.0
     }
   },
@@ -86,7 +86,7 @@
     "python_file_sloc_top20": [
       {
         "path": "tests/nodb/mods/test_omni.py",
-        "value": 2417.0
+        "value": 2467.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -94,75 +94,75 @@
       },
       {
         "path": "wepppy/nodb/core/wepp.py",
-        "value": 2051.0
+        "value": 2098.0
       },
       {
         "path": "wepppy/climates/cligen/cligen.py",
-        "value": 2006.0
+        "value": 2091.0
       },
       {
         "path": "wepppy/nodb/base.py",
-        "value": 1872.0
-      },
-      {
-        "path": "wepppy/soils/ssurgo/ssurgo.py",
-        "value": 1785.0
+        "value": 1884.0
       },
       {
         "path": "tests/microservices/test_browse_auth_routes.py",
-        "value": 1753.0
+        "value": 1779.0
+      },
+      {
+        "path": "wepppy/soils/ssurgo/ssurgo.py",
+        "value": 1776.0
+      },
+      {
+        "path": "wepppy/topo/wbt/terrain_processor.py",
+        "value": 1670.0
       },
       {
         "path": "tests/microservices/test_files_routes.py",
-        "value": 1517.0
+        "value": 1537.0
       },
       {
         "path": "wepppy/rq/culvert_rq.py",
-        "value": 1484.0
+        "value": 1488.0
       },
       {
         "path": "wepppy/topo/wbt/wbt_topaz_emulator.py",
-        "value": 1339.0
+        "value": 1355.0
+      },
+      {
+        "path": "wepppy/microservices/browse/browse.py",
+        "value": 1320.0
       },
       {
         "path": "wepppy/nodb/core/landuse.py",
         "value": 1284.0
       },
       {
+        "path": "wepppy/nodb/core/climate.py",
+        "value": 1258.0
+      },
+      {
         "path": "wepppy/nodb/core/soils.py",
-        "value": 1237.0
+        "value": 1257.0
+      },
+      {
+        "path": "wepppy/tools/migrations/unroll_root_resources_batch.py",
+        "value": 1256.0
       },
       {
         "path": "wepppy/nodb/core/ron.py",
-        "value": 1217.0
+        "value": 1220.0
+      },
+      {
+        "path": "wepppy/rq/project_rq.py",
+        "value": 1216.0
       },
       {
         "path": "wepppy/nodb/mods/omni/omni_contrast_build_service.py",
         "value": 1199.0
       },
       {
-        "path": "wepppy/nodb/core/climate.py",
-        "value": 1183.0
-      },
-      {
-        "path": "wepppy/rq/project_rq.py",
-        "value": 1172.0
-      },
-      {
         "path": "wepppy/nodb/mods/disturbed/disturbed.py",
         "value": 1118.0
-      },
-      {
-        "path": "wepppy/microservices/browse/browse.py",
-        "value": 1102.0
-      },
-      {
-        "path": "wepppy/all_your_base/geo/shapefile.py",
-        "value": 1099.0
-      },
-      {
-        "path": "wepppy/profile_recorder/playback.py",
-        "value": 1030.0
       }
     ],
     "python_max_function_len_top20": [
@@ -176,11 +176,15 @@
       },
       {
         "path": "wepppy/rq/wepp_rq_pipeline.py",
-        "value": 365.0
+        "value": 352.0
       },
       {
         "path": "wepppy/export/arc_export.py",
         "value": 332.0
+      },
+      {
+        "path": "wepppy/tools/migrations/unroll_root_resources_batch.py",
+        "value": 309.0
       },
       {
         "path": "wepppy/nodb/mods/ash_transport/ashpost.py",
@@ -219,12 +223,16 @@
         "value": 252.0
       },
       {
+        "path": "wepppy/rq/culvert_rq.py",
+        "value": 249.0
+      },
+      {
         "path": "wepppy/webservices/wmesque.py",
         "value": 249.0
       },
       {
-        "path": "wepppy/rq/culvert_rq.py",
-        "value": 245.0
+        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+        "value": 246.0
       },
       {
         "path": "tools/wctl2/commands/playwright.py",
@@ -235,16 +243,8 @@
         "value": 237.0
       },
       {
-        "path": "wepppy/nodb/unitizer.py",
-        "value": 235.0
-      },
-      {
-        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
-        "value": 235.0
-      },
-      {
         "path": "wepppy/microservices/browse/dtale.py",
-        "value": 233.0
+        "value": 236.0
       }
     ],
     "python_max_cc_top20": [
@@ -269,10 +269,6 @@
         "value": 57.0
       },
       {
-        "path": "wepppy/weppcloud/utils/helpers.py",
-        "value": 57.0
-      },
-      {
         "path": "wepppy/nodb/mods/path_ce/path_ce_solver.py",
         "value": 56.0
       },
@@ -285,7 +281,15 @@
         "value": 51.0
       },
       {
+        "path": "wepppy/weppcloud/utils/helpers.py",
+        "value": 51.0
+      },
+      {
         "path": "wepppy/nodb/mods/ash_transport/neris_ash_model.py",
+        "value": 48.0
+      },
+      {
+        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
         "value": 48.0
       },
       {
@@ -323,10 +327,6 @@
       {
         "path": "wepppy/nodb/core/landuse.py",
         "value": 43.0
-      },
-      {
-        "path": "wepppy/all_your_base/geo/geo.py",
-        "value": 42.0
       }
     ],
     "js_file_sloc_top20": [
@@ -348,7 +348,7 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/subcatchment_delineation.js",
-        "value": 1736.0
+        "value": 1636.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/subcatchments_gl.js",
@@ -363,6 +363,10 @@
         "value": 1338.0
       },
       {
+        "path": "wepppy/weppcloud/controllers_js/wepp.js",
+        "value": 1331.0
+      },
+      {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js",
         "value": 1294.0
       },
@@ -372,7 +376,7 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/project.js",
-        "value": 1253.0
+        "value": 1256.0
       },
       {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js",
@@ -384,11 +388,7 @@
       },
       {
         "path": "wepppy/weppcloud/static-src/tests/smoke/map-gl.spec.js",
-        "value": 1215.0
-      },
-      {
-        "path": "wepppy/weppcloud/controllers_js/wepp.js",
-        "value": 1207.0
+        "value": 1185.0
       },
       {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js",
@@ -421,12 +421,12 @@
         "value": 81.0
       },
       {
-        "path": "wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js",
-        "value": 70.0
+        "path": "wepppy/weppcloud/controllers_js/wepp.js",
+        "value": 75.0
       },
       {
-        "path": "wepppy/weppcloud/controllers_js/wepp.js",
-        "value": 64.0
+        "path": "wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js",
+        "value": 70.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/dss_export.js",

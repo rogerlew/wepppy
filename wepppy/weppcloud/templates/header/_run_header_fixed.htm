@@ -8,7 +8,8 @@
   ('debris_flow', 'Debris Flow'),
   ('dss_export', 'DSS Export'),
   ('omni', 'Omni'),
-  ('path_ce', 'Path CE')
+  ('path_ce', 'Path CE'),
+  ('rusle', 'RUSLE')
 ] %}
 {% set current_mods = current_ron_mods if current_ron_mods is defined else (current_ron.mods or []) %}
 {% set allow_debris_flow = user.has_role('PowerUser') %}
@@ -105,7 +106,7 @@
             </summary>
             <div class="wc-run-header__menu-content">
               {% for mod_name, mod_label in header_mod_options %}
-              {% if (mod_name != 'openet_ts' or user.has_role('Admin')) and (mod_name != 'debris_flow' or allow_debris_flow) %}
+              {% if (mod_name != 'openet_ts' or user.has_role('Admin')) and (mod_name != 'debris_flow' or allow_debris_flow) and (mod_name != 'rusle' or 'disturbed' in current_mods) %}
               <label class="wc-run-header__toggle">
                 <input type="checkbox"
                        data-project-mod="{{ mod_name }}"

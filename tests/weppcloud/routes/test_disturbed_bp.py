@@ -12,6 +12,7 @@ pytest.importorskip("flask")
 from flask import Flask, Response
 
 import wepppy.weppcloud.routes.nodb_api.disturbed_bp as disturbed_module
+from wepppy.nodb.redis_prep import TaskEnum
 from tests.factories.singleton import LockedMixin, singleton_factory
 
 pytestmark = pytest.mark.routes
@@ -335,6 +336,8 @@ def test_task_baer_modify_class_parses_integers(disturbed_client):
     assert payload == {}
     controller = BaerStub.getInstance(run_dir)
     assert controller.burn_class_updates[-1] == ([1, 2, 3, 4], "999")
+    prep = disturbed_module.RedisPrep.getInstance(run_dir)
+    assert prep.removed[-1] == TaskEnum.build_rusle
 
 
 def test_task_baer_modify_class_requires_four_values(disturbed_client):
@@ -390,6 +393,8 @@ def test_task_remove_sbs_calls_baer(disturbed_client):
     assert response.get_json() == {}
     controller = BaerStub.getInstance(run_dir)
     assert controller.sbs_removed == 1
+    prep = disturbed_module.RedisPrep.getInstance(run_dir)
+    assert prep.removed[-1] == TaskEnum.build_rusle
 
 
 def test_task_build_uniform_sbs_runs_validation(disturbed_client):
@@ -409,6 +414,8 @@ def test_task_build_uniform_sbs_runs_validation(disturbed_client):
     baer_controller = BaerStub.getInstance(run_dir)
     assert baer_controller.sbs_mode == 1
     assert baer_controller.uniform_severity == 7
+    prep = disturbed_module.RedisPrep.getInstance(run_dir)
+    assert prep.removed[-1] == TaskEnum.build_rusle
 
 
 def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
@@ -425,3 +432,5 @@ def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
     baer_controller = BaerStub.getInstance(run_dir)
     assert baer_controller.sbs_mode == 1
     assert baer_controller.uniform_severity == 9
+    prep = disturbed_module.RedisPrep.getInstance(run_dir)
+    assert prep.removed[-1] == TaskEnum.build_rusle

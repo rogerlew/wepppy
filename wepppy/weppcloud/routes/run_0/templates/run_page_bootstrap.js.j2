@@ -100,7 +100,8 @@
                 "rap_ts": 'rap_ts' in mods_list,
                 "openet_ts": ('openet_ts' in mods_list) and openet_admin_enabled,
                 "treatments": 'treatments' in mods_list,
-                "observed": 'observed' in mods_list
+                "observed": 'observed' in mods_list,
+                "rusle": ('rusle' in mods_list) and ('disturbed' in mods_list)
             }
         },
         "flags": {
@@ -191,7 +192,8 @@
             "path_ce",
             "debris_flow",
             "openet_ts",
-            "dss_export"
+            "dss_export",
+            "rusle"
         ].forEach(function (modName) {
             modsFlags[modName] = true;
         });
@@ -228,6 +230,7 @@
             modFlags.debris_flow = true;
             modFlags.openet_ts = true;
             modFlags.treatments = true;
+            modFlags.rusle = true;
         }
         var disabledControllers = new Set(
             (context.ui && Array.isArray(context.ui.disabledControllers)) ? context.ui.disabledControllers : []
@@ -291,6 +294,9 @@
         }
         if (modFlags.path_ce && typeof PathCE !== "undefined" && PathCE && typeof PathCE.getInstance === "function") {
             add("pathCe", PathCE);
+        }
+        if (modFlags.rusle) {
+            add("rusle", typeof Rusle !== "undefined" ? Rusle : null);
         }
 
         return entries;

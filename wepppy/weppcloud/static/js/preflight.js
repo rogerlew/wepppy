@@ -45,7 +45,8 @@ const LOCKABLE_FILES = Object.freeze({
     "ash.nodb": { lockImageId: "run_ash_lock", puLockImageId: "pu_ash_lock" },
     "ashpost.nodb": { lockImageId: "run_ash_lock", puLockImageId: "pu_ashpost_lock" },
     "debris_flow.nodb": { lockImageId: "run_debris_flow_lock", puLockImageId: "pu_debris_flow_lock" },
-    "omni.nodb": { lockImageId: null, puLockImageId: "pu_omni_lock" }
+    "omni.nodb": { lockImageId: null, puLockImageId: "pu_omni_lock" },
+    "rusle.nodb": { lockImageId: "build_rusle_lock", puLockImageId: null }
 });
 
 function normalizeLastModified(raw) {
@@ -301,7 +302,8 @@ function getSelectorForKey(key) {
         "debris": 'a[href="#debris-flow"]',
         "watar": 'a[href="#ash"]',
         "dss_export": 'a[href="#dss-export"]',
-        "run_path_ce": 'a[href="#path-cost-effective"]'
+        "run_path_ce": 'a[href="#path-cost-effective"]',
+        "rusle": 'a[href="#rusle"]'
     };
 
     return mapping[key];

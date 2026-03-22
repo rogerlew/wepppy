@@ -102,6 +102,7 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
     try:
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_climate)
+        prep.remove_timestamp(TaskEnum.build_rusle)
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:

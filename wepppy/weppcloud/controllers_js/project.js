@@ -464,6 +464,9 @@ var Project = (function () {
             },
             observed: function (ctx) {
                 bootstrapControllerSymbol(window.Observed, ctx);
+            },
+            rusle: function (ctx) {
+                bootstrapControllerSymbol(window.Rusle, ctx, { forceRemount: true });
             }
         };
 

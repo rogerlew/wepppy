@@ -103,6 +103,12 @@ def _extract_openet_flag(js_text: str) -> str:
     return match.group(1)
 
 
+def _extract_mod_flag(js_text: str, flag_name: str) -> str:
+    match = re.search(rf'"{re.escape(flag_name)}"\s*:\s*(true|false)', js_text)
+    assert match is not None
+    return match.group(1)
+
+
 def test_view_mod_section_openet_denied_for_non_admin(
     run0_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -163,6 +169,24 @@ def test_run_page_bootstrap_openet_flag_true_for_admin(run0_template_app) -> Non
     with run0_template_app.app_context():
         js = render_template("run_page_bootstrap.js.j2", **context)
     assert _extract_openet_flag(js) == "true"
+
+
+def test_run_page_bootstrap_rusle_flag_false_without_disturbed(run0_template_app) -> None:
+    context = _bootstrap_context({"Admin"})
+    context["ron"].mods = ["rusle"]
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "rusle") == "false"
+
+
+def test_run_page_bootstrap_rusle_flag_true_with_disturbed(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["rusle", "disturbed"]
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "rusle") == "true"
 
 
 def test_run_page_bootstrap_ttl_missing_expires_at_defaults_to_null(run0_template_app) -> None:

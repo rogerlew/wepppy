@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -55,7 +56,7 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-sbs auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -93,10 +94,11 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         if ret != 0:
             return error_response(description, status_code=400)
         baer.validate(filename, mode=0)
+        RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.build_rusle)
         return upload_success(result={"disturbed_fn": baer.disturbed_fn})
     except UploadError as exc:
         return upload_failure(str(exc))
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-sbs failed")
         return error_response_with_traceback("Failed validating file", status_code=500)
 
@@ -124,7 +126,7 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cover-transform auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -151,7 +153,7 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
         return upload_success(result=res)
     except UploadError as exc:
         return upload_failure(str(exc))
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cover-transform failed")
         return error_response_with_traceback("Failed validating file", status_code=500)
 
