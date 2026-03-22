@@ -42,6 +42,7 @@ MOD_DISPLAY_NAMES = {
 
 MOD_DEPENDENCIES = {
     'omni': ['treatments'],
+    'rusle': ['polaris'],
 }
 
 MOD_DISABLE_GUARDS = {

@@ -329,6 +329,7 @@ def test_set_mod_rusle_allows_when_disturbed_enabled(project_client):
     assert payload["Content"]["enabled"] is True
     assert "rusle" in controller.mods
     assert "disturbed" in controller.mods
+    assert "polaris" in controller.mods
 
 
 def test_set_mod_disables_module_when_no_guards(project_client):

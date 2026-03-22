@@ -350,13 +350,35 @@ class Rusle(NoDbBase):
         fetched = bool(force_refresh) or need_refresh
         summary: dict[str, Any] = {"layers_requested": len(self._expected_polaris_layers())}
         if fetched:
-            summary = Polaris.getInstance(self.wd).acquire_and_align(payload=payload)
+            summary = self._ensure_polaris_controller().acquire_and_align(payload=payload)
         return {
             "fetched": fetched,
             "reason": reason if not force_refresh else "force_refresh",
             "payload": payload,
             "summary": summary,
         }
+
+    def _ensure_polaris_controller(self) -> Polaris:
+        """Return a Polaris controller, bootstrapping missing run state when needed."""
+        existing = Polaris.tryGetInstance(self.wd)
+        if existing is not None:
+            return existing
+
+        ron = Ron.getInstance(self.wd)
+        current_mods = list(ron.mods or [])
+        if "polaris" not in current_mods:
+            with ron.locked():
+                mods = ron.mods
+                if mods is None:
+                    ron._mods = ["polaris"]
+                elif "polaris" not in mods:
+                    ron._mods.append("polaris")
+
+        existing = Polaris.tryGetInstance(self.wd)
+        if existing is not None:
+            return existing
+
+        return Polaris(self.wd, f"{ron.config_stem}.cfg")
 
     def _resolve_observed_rap(self, *, extent: Sequence[float], rap_year: int) -> str:
         os.makedirs(self.rusle_rap_dir, exist_ok=True)
@@ -562,4 +584,3 @@ class Rusle(NoDbBase):
             "rap_year": int(options["rap_year"]),
             "artifacts": artifacts,
         }
-

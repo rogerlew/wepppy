@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -65,7 +66,7 @@ def test_ensure_polaris_layers_passes_explicit_rusle_payload(
             captured["payload"] = dict(payload)
             return {"layers_requested": 12, "layers_written": 12}
 
-    monkeypatch.setattr(rusle_module.Polaris, "getInstance", lambda wd: DummyPolaris())
+    monkeypatch.setattr(controller, "_ensure_polaris_controller", lambda: DummyPolaris())
 
     summary = controller._ensure_polaris_layers(force_refresh=True)
 
@@ -77,6 +78,58 @@ def test_ensure_polaris_layers_passes_explicit_rusle_payload(
         "depths": ["0_5", "5_15"],
     }
     assert captured["payload"] == summary["payload"]
+
+
+def test_ensure_polaris_layers_bootstraps_missing_polaris_nodb(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = rusle_module.Rusle(str(tmp_path), "disturbed9002.cfg")
+    captured: dict[str, object] = {}
+
+    class DummyRon:
+        def __init__(self) -> None:
+            self._mods = ["disturbed", "rusle"]
+            self.config_stem = "disturbed9002"
+
+        @property
+        def mods(self):
+            return self._mods
+
+        @contextmanager
+        def locked(self):
+            yield self
+
+    ron = DummyRon()
+
+    class DummyPolaris:
+        instance = None
+
+        def __init__(self, wd: str, cfg_fn: str, run_group=None, group_name=None) -> None:
+            captured["constructed_wd"] = wd
+            captured["constructed_cfg_fn"] = cfg_fn
+            self._payloads: list[dict[str, object]] = []
+            DummyPolaris.instance = self
+
+        @classmethod
+        def tryGetInstance(cls, wd: str):
+            return cls.instance
+
+        def acquire_and_align(self, payload):
+            captured["payload"] = dict(payload)
+            return {"layers_requested": 12, "layers_written": 12}
+
+    monkeypatch.setattr(rusle_module.Ron, "getInstance", lambda wd: ron)
+    monkeypatch.setattr(rusle_module, "Polaris", DummyPolaris)
+
+    summary = controller._ensure_polaris_layers(force_refresh=True)
+
+    assert summary["fetched"] is True
+    assert summary["reason"] == "force_refresh"
+    assert captured["constructed_wd"] == str(tmp_path)
+    assert captured["constructed_cfg_fn"] == "disturbed9002.cfg"
+    assert captured["payload"] == summary["payload"]
+    assert "polaris" in ron.mods
 
 
 def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
