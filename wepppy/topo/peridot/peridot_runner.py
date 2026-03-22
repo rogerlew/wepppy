@@ -96,11 +96,28 @@ def _build_manifest_file_section(
     readme_size: Optional[int],
 ) -> str:
     rows = []
+    slope_bundle_rows: dict[str, dict[str, int]] = {}
     for path in sorted(watershed_dir.rglob('*')):
         if not path.is_file():
             continue
         rel = f'watershed/{path.relative_to(watershed_dir).as_posix()}'
         if rel == 'watershed/README.md':
+            continue
+        if rel.startswith('watershed/slope_files/hillslopes/'):
+            entry = slope_bundle_rows.setdefault(
+                'watershed/slope_files/hillslopes/*',
+                {'size': 0, 'files': 0},
+            )
+            entry['size'] += path.stat().st_size
+            entry['files'] += 1
+            continue
+        if rel.startswith('watershed/slope_files/flowpaths/'):
+            entry = slope_bundle_rows.setdefault(
+                'watershed/slope_files/flowpaths/*',
+                {'size': 0, 'files': 0},
+            )
+            entry['size'] += path.stat().st_size
+            entry['files'] += 1
             continue
         fmt = _detect_manifest_format(path)
         size = path.stat().st_size
@@ -111,6 +128,10 @@ def _build_manifest_file_section(
         else:
             tabular_row_count = '-'
         rows.append((rel, fmt, size, tabular_row_count))
+
+    for rel, aggregate in slope_bundle_rows.items():
+        rows.append((rel, 'slp bundle', aggregate['size'], f"{aggregate['files']} files"))
+    rows.sort(key=lambda item: item[0])
 
     readme_size_display = str(readme_size) if readme_size is not None else 'pending'
     lines = [

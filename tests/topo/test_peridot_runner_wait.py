@@ -222,6 +222,10 @@ def test_post_abstract_watershed_refreshes_readme_and_flowpaths_fallback(
         "topaz_id,fp_id,area,centroid_lon,centroid_lat\n11,1,1.0,-116.8,46.8\n",
         encoding="utf-8",
     )
+    slope_dir = watershed_dir / "slope_files" / "hillslopes"
+    slope_dir.mkdir(parents=True)
+    (slope_dir / "hill_11.slp").write_text("slope 11", encoding="utf-8")
+    (slope_dir / "hill_12.slp").write_text("slope 12", encoding="utf-8")
     (watershed_dir / "README.md").write_text(
         """# Watershed Output Manifest
 
@@ -264,6 +268,9 @@ stale
     assert "| wepp_id | int32 |" in readme
     assert "| chn_enum | int32 |" in readme
     assert "| watershed/README.md | markdown |" in readme
+    assert "| watershed/slope_files/hillslopes/* | slp bundle |" in readme
+    assert "2 files" in readme
+    assert "watershed/slope_files/hillslopes/hill_11.slp" not in readme
     assert "- `representative_flowpath`: `false`" in readme
 
 

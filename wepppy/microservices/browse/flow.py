@@ -237,12 +237,13 @@ async def _handle_nodir_tree(
             is_admin=is_admin,
         )
 
-    # NoDir runtime roots are directory-only; delegate parquet files to the
-    # standard file renderer so browse previews keep table behavior instead of
-    # binary byte responses.
-    if nodir_meta.name.lower().endswith((".parquet", ".pq")):
+    # Prefer the standard file renderer for materialized files under NoDir roots.
+    # This keeps markdown, table previews, and typed renderers consistent with
+    # non-NoDir browse paths.
+    nodir_file_path = _nodir_target_path(nodir_target)
+    if os.path.isfile(nodir_file_path):
         return await env.browse_response(
-            _nodir_target_path(nodir_target),
+            nodir_file_path,
             runid,
             wd,
             request,

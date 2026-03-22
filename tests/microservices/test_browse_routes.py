@@ -213,6 +213,27 @@ def test_markdown_renderer_failure_falls_back_to_text_template(
     assert "# Heading" in response.text
 
 
+def test_nodir_markdown_file_uses_markdown_template(tmp_path: Path, load_run_browse):
+    runid = "run-nodir-markdown"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _write_file(run_root / "watershed" / "README.md", "# Heading\n\nbody")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/watershed/README.md")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "<article class=\"markdown-body\">" in response.text
+    assert "<h1>Heading</h1>" in response.text
+
+
 def test_parquet_preview_contains_case_insensitive_filter(tmp_path: Path, load_run_browse):
     runid = "run-parquet-filter-contains"
     config = "cfg"
