@@ -570,7 +570,16 @@ class Rusle(NoDbBase):
             "a_relpath": _relative_path(self.wd, a_path),
         }
         readme_path = self._write_readme(options=options, artifacts=artifacts)
-        update_catalog_entry(self.wd, _relative_path(self.wd, readme_path))
+        readme_relpath = _relative_path(self.wd, readme_path)
+        try:
+            update_catalog_entry(self.wd, readme_relpath)
+        except ValueError as exc:
+            if "Unsupported asset type" not in str(exc):
+                raise
+            self.logger.info(
+                "Skipping query-engine catalog update for unsupported asset: %s",
+                readme_relpath,
+            )
 
         manifest_path = _join(self.rusle_dir, "manifest.json")
         manifest = _load_manifest(manifest_path)

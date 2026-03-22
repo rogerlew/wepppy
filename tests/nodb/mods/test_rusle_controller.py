@@ -202,7 +202,15 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
             "summary": {"layers_requested": 12},
         },
     )
-    monkeypatch.setattr(rusle_module, "update_catalog_entry", lambda _wd, _relpath: None)
+    catalog_updates: list[str] = []
+
+    def _fake_update_catalog_entry(_wd: str, relpath: str):
+        catalog_updates.append(relpath)
+        if relpath.endswith("README.md"):
+            raise ValueError("Unsupported asset type for '/tmp/rusle/README.md'")
+        return None
+
+    monkeypatch.setattr(rusle_module, "update_catalog_entry", _fake_update_catalog_entry)
 
     def _fake_ls(_wd: str, _dem: str, *, channel_mask=None):
         assert _dem == str(relief_path)
@@ -322,6 +330,7 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
         manifest = json.load(stream)
     assert manifest["rusle"]["options"]["c_mode"] == "scenario_sbs"
     assert manifest["rusle"]["options"]["k_modes"] == ["polaris_nomograph"]
+    assert "rusle/README.md" in catalog_updates
 
 
 def test_build_rejects_topaz_backend(
