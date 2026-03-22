@@ -213,6 +213,12 @@ def build_soil_saturation_payload(
 
     strategy = resolve_join_strategy(run_dir, catalog, dataset_paths=[climate_path, soil_path])
     climate_cols = _resolve_climate_columns(catalog, climate_path)
+    soil_saturation_column = _select_column(
+        catalog,
+        soil_path,
+        ("TSMF", "Saturation"),
+        label="soil saturation",
+    )
 
     filters = _build_intensity_filters(
         climate_cols,
@@ -238,7 +244,7 @@ def build_soil_saturation_payload(
         columns=_event_key_columns("ev", climate_cols),
         aggregations=[
             {
-                "sql": f"AVG({_qualify_column('soil', 'Saturation')})",
+                "sql": f"AVG({_qualify_column('soil', soil_saturation_column)})",
                 "alias": "soil_saturation_t1",
             }
         ],

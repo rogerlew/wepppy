@@ -48,6 +48,15 @@ function updateUnitRow(table, unitizer, measureUnitKey) {
   });
 }
 
+function updateSoilSaturationLabel(table, soilSaturationLabel) {
+  if (!table) return;
+  const label = soilSaturationLabel || 'Top 0.1 m Saturation';
+  const header = `Soil saturation (${label})`;
+  table.querySelectorAll('[data-storm-event-analyzer-soil-saturation-label]').forEach((target) => {
+    target.textContent = header;
+  });
+}
+
 function clearRows(tbody) {
   if (!tbody) return;
   Array.from(tbody.querySelectorAll('tr')).forEach((row) => {
@@ -73,11 +82,13 @@ export function renderEventTable({
   unitizer,
   onSelect,
   measureUnitKey,
+  soilSaturationLabel,
 }) {
   if (!table) {
     return;
   }
   const tbody = table.tBodies[0] || table.createTBody();
+  updateSoilSaturationLabel(table, soilSaturationLabel);
   updateUnitRow(table, unitizer, measureUnitKey);
   clearRows(tbody);
 

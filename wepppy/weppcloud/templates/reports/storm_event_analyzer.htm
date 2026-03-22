@@ -199,7 +199,10 @@
           <th scope="col">Date</th>
           <th scope="col" class="wc-text-right">Depth</th>
           <th scope="col" class="wc-text-right">Duration</th>
-          <th scope="col" class="wc-text-right">Soil saturation <sub>T-1</sub></th>
+          <th scope="col" class="wc-text-right">
+            <span data-storm-event-analyzer-soil-saturation-label>Soil saturation (Top 0.1 m Saturation)</span>
+            <sub>T-1</sub>
+          </th>
           <th scope="col" class="wc-text-right">Snow coverage <sub>T-1</sub></th>
           <th scope="col" class="wc-text-right">Peak discharge</th>
         </tr>
@@ -311,7 +314,10 @@
           {% endif %}
         </tr>
         <tr>
-          <th scope="row">Soil saturation <sub>T-1</sub></th>
+          <th scope="row">
+            <span data-storm-event-analyzer-soil-saturation-label>Soil saturation (Top 0.1 m Saturation)</span>
+            <sub>T-1</sub>
+          </th>
           <td class="wc-text-right" data-storm-event-analyzer-summary="soil-saturation">--</td>
           {% if omni_scenarios %}
           <td class="wc-text-right" data-storm-event-analyzer-summary="soil-saturation-scenario">--</td>

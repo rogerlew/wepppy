@@ -171,6 +171,15 @@ function setUnitCell(cell, unitKey, unitizer) {
   applyHtml(cell, renderUnits(unitizer, unitKey));
 }
 
+function updateSoilSaturationLabel(section, soilSaturationLabel) {
+  if (!section) return;
+  const label = soilSaturationLabel || 'Top 0.1 m Saturation';
+  const text = `Soil saturation (${label})`;
+  section.querySelectorAll('[data-storm-event-analyzer-soil-saturation-label]').forEach((target) => {
+    target.textContent = text;
+  });
+}
+
 function buildSelectedMeasureLabel(selectedMetric) {
   if (!selectedMetric) {
     return 'Selected measure';
@@ -229,6 +238,7 @@ export function renderHydrologySummary({
   unitizer,
   tcAvailable,
   selectedMetric,
+  soilSaturationLabel,
   omniScenario,
   omniSummary,
   baseScenarioLabel,
@@ -236,6 +246,7 @@ export function renderHydrologySummary({
   if (!section) {
     return;
   }
+  updateSoilSaturationLabel(section, soilSaturationLabel);
 
   const emptyState = section.querySelector('[data-empty-state]');
   const hasSelection = !!row;

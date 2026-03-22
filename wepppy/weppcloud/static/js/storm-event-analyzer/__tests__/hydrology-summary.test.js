@@ -44,7 +44,10 @@ function buildSummarySection() {
             <td data-storm-event-analyzer-summary="selected-measure-change">--</td>
           </tr>
           <tr>
-            <th scope="row">Soil saturation <sub>T-1</sub></th>
+            <th scope="row">
+              <span data-storm-event-analyzer-soil-saturation-label>Soil saturation (Top 0.1 m Saturation)</span>
+              <sub>T-1</sub>
+            </th>
             <td data-storm-event-analyzer-summary="soil-saturation">--</td>
             <td data-storm-event-analyzer-summary="soil-saturation-scenario">--</td>
             <td data-storm-event-analyzer-unit="summary-soil-saturation">--</td>
@@ -259,6 +262,7 @@ describe('storm-event-analyzer hydrology summary rendering', () => {
         ari: 10,
         unitKey: 'mm/hour',
       },
+      soilSaturationLabel: 'Full Depth Soil Saturation',
       omniScenario: { name: 'Mulch 30', path: '_pups/omni/scenarios/mulch_30' },
       omniSummary: {
         date: '2024-06-03',
@@ -289,6 +293,8 @@ describe('storm-event-analyzer hydrology summary rendering', () => {
     expect(snowWaterScenarioCell.textContent).toBe('5:mm');
     const snowWaterChangeCell = section.querySelector('[data-storm-event-analyzer-summary="snow-water-change"]');
     expect(snowWaterChangeCell.textContent).toBe('\u2014');
+    const soilSaturationLabel = section.querySelector('[data-storm-event-analyzer-soil-saturation-label]');
+    expect(soilSaturationLabel.textContent).toBe('Soil saturation (Full Depth Soil Saturation)');
     const selectedMeasureUnit = section.querySelector(
       '[data-storm-event-analyzer-unit="summary-selected-measure"]',
     );

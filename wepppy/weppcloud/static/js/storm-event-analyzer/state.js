@@ -11,6 +11,7 @@ const defaultState = {
   selectedEventSimDayIndex: null,
   eventError: null,
   tcAvailable: false,
+  soilSaturationLabel: 'Top 0.1 m Saturation',
   omniScenarios: [],
   omniScenario: null,
   omniSummary: null,

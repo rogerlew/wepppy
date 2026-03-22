@@ -40,7 +40,18 @@ def _write_manifest(run_dir: Path, version: Version) -> None:
     write_version_manifest(interchange_dir, version=version)
 
 
-def _base_schemas(include_tc: bool = True) -> dict[str, list[str]]:
+def _base_schemas(include_tc: bool = True, include_tsmf: bool = False) -> dict[str, list[str]]:
+    soil_fields = [
+        "sim_day_index",
+        "year",
+        "julian",
+        "month",
+        "day_of_month",
+        "Saturation",
+    ]
+    if include_tsmf:
+        soil_fields.append("TSMF")
+
     schemas = {
         STORM_EVENT_DATASETS["climate"]: [
             "sim_day_index",
@@ -57,14 +68,7 @@ def _base_schemas(include_tc: bool = True) -> dict[str, list[str]]:
             "peak_intensity_30",
             "peak_intensity_60",
         ],
-        STORM_EVENT_DATASETS["soil"]: [
-            "sim_day_index",
-            "year",
-            "julian",
-            "month",
-            "day_of_month",
-            "Saturation",
-        ],
+        STORM_EVENT_DATASETS["soil"]: soil_fields,
         STORM_EVENT_DATASETS["water"]: [
             "sim_day_index",
             "year",
@@ -191,6 +195,40 @@ def test_soil_payload_uses_julian_fallback_t1_join(tmp_path: Path) -> None:
     join = payload.join_specs[0]
     assert "MAKE_DATE(ev.year" in join.left_on[0]
     assert "MAKE_DATE(soil.year" in join.right_on[0]
+
+
+def test_soil_payload_prefers_tsmf_when_available(tmp_path: Path) -> None:
+    _write_manifest(tmp_path, Version(major=1, minor=1))
+    catalog = _build_catalog(tmp_path, _base_schemas(include_tc=False, include_tsmf=True))
+
+    payload = build_soil_saturation_payload(
+        tmp_path,
+        catalog,
+        intensity=10,
+        min_value=1.0,
+        max_value=2.0,
+    )
+
+    soil_agg = next((agg for agg in payload.aggregation_specs if agg.alias == "soil_saturation_t1"), None)
+    assert soil_agg is not None
+    assert "soil.TSMF" in soil_agg.sql
+
+
+def test_soil_payload_falls_back_to_saturation_when_tsmf_missing(tmp_path: Path) -> None:
+    _write_manifest(tmp_path, Version(major=1, minor=1))
+    catalog = _build_catalog(tmp_path, _base_schemas(include_tc=False, include_tsmf=False))
+
+    payload = build_soil_saturation_payload(
+        tmp_path,
+        catalog,
+        intensity=10,
+        min_value=1.0,
+        max_value=2.0,
+    )
+
+    soil_agg = next((agg for agg in payload.aggregation_specs if agg.alias == "soil_saturation_t1"), None)
+    assert soil_agg is not None
+    assert "soil.Saturation" in soil_agg.sql
 
 
 def test_tc_payload_optional_when_missing(tmp_path: Path) -> None:

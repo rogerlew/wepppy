@@ -68,6 +68,7 @@ async function initStormEventAnalyzer() {
     selectedEventSimDayIndex: null,
     eventError: null,
     tcAvailable: false,
+    soilSaturationLabel: 'Top 0.1 m Saturation',
     omniScenarios,
     omniScenario: null,
     omniSummary: null,
@@ -191,6 +192,7 @@ async function initStormEventAnalyzer() {
       selectedEventSimDayIndex: state.selectedEventSimDayIndex,
       unitizer: unitizerClient,
       measureUnitKey,
+      soilSaturationLabel: state.soilSaturationLabel,
       onSelect: (simDayIndex) => setState({ selectedEventSimDayIndex: simDayIndex }),
     });
     setEventErrorBanner({ banner: eventErrorBanner, message: state.eventError });
@@ -213,6 +215,7 @@ async function initStormEventAnalyzer() {
       unitizer: unitizerClient,
       tcAvailable: !!state.tcAvailable,
       selectedMetric: state.selectedMetric,
+      soilSaturationLabel: state.soilSaturationLabel,
       omniScenario: state.omniScenario,
       omniSummary: state.omniSummary,
       baseScenarioLabel: state.baseScenarioLabel,
@@ -244,6 +247,7 @@ async function initStormEventAnalyzer() {
         selectedEventSimDayIndex: null,
         eventError: null,
         tcAvailable: false,
+        soilSaturationLabel: 'Top 0.1 m Saturation',
       });
       return;
     }
@@ -261,6 +265,8 @@ async function initStormEventAnalyzer() {
       }
       const rows = result && Array.isArray(result.rows) ? result.rows : [];
       const tcAvailable = result && typeof result.tcAvailable === 'boolean' ? result.tcAvailable : false;
+      const soilSaturationLabel =
+        result && result.soilSaturationLabel ? result.soilSaturationLabel : 'Top 0.1 m Saturation';
       const selected = rows.some((row) => row.sim_day_index === state.selectedEventSimDayIndex)
         ? state.selectedEventSimDayIndex
         : null;
@@ -271,6 +277,7 @@ async function initStormEventAnalyzer() {
         selectedEventSimDayIndex: selected,
         eventError: null,
         tcAvailable,
+        soilSaturationLabel,
       });
     } catch (error) {
       if (requestId !== eventRequestId) {

@@ -12,6 +12,10 @@ const INTENSITY_COLUMN_BY_MINUTES = {
   30: 'peak_intensity_30',
   60: 'peak_intensity_60',
 };
+const SOIL_SATURATION_SOURCE_LABELS = {
+  tsmf: 'Full Depth Soil Saturation',
+  saturation: 'Top 0.1 m Saturation',
+};
 
 const warmupYearCache = new Map();
 const warmupYearPromiseCache = new Map();
@@ -117,7 +121,14 @@ export function buildEventFilterPayload({ filterColumn, minValue, maxValue, warm
   };
 }
 
-export function buildSoilPayload({ filterColumn, minValue, maxValue, warmupYear }) {
+export function buildSoilPayload({
+  filterColumn,
+  minValue,
+  maxValue,
+  warmupYear,
+  soilSaturationSource = 'tsmf',
+}) {
+  const sourceColumn = soilSaturationSource === 'saturation' ? 'Saturation' : 'TSMF';
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
@@ -140,7 +151,7 @@ export function buildSoilPayload({ filterColumn, minValue, maxValue, warmupYear 
     ],
     aggregations: [
       {
-        sql: 'AVG(soil.Saturation) * 100',
+        sql: `AVG(soil.${sourceColumn}) * 100`,
         alias: 'soil_saturation_pct',
       },
     ],
@@ -160,6 +171,15 @@ export function buildSoilPayload({ filterColumn, minValue, maxValue, warmupYear 
     group_by: ['ev.sim_day_index', 'ev.year', 'ev.month', 'ev.day_of_month'],
     order_by: ['ev.sim_day_index'],
   };
+}
+
+function getSoilSaturationLabel(source) {
+  return SOIL_SATURATION_SOURCE_LABELS[source] || SOIL_SATURATION_SOURCE_LABELS.saturation;
+}
+
+function isMissingTsmfColumnError(error) {
+  const message = error && error.message ? String(error.message) : '';
+  return /tsmf/i.test(message) && /(missing|not found|no field|unknown|does not exist|does not have|column)/i.test(message);
 }
 
 export function buildSnowPayload({ filterColumn, minValue, maxValue, warmupYear }) {
@@ -468,6 +488,61 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
     }
   }
 
+  async function fetchSoilResult({
+    filterColumn,
+    minValue,
+    maxValue,
+    warmupYear,
+    postQueryEngineFn = postQueryEngine,
+  }) {
+    const primarySource = 'tsmf';
+    const primaryPayload = buildSoilPayload({
+      filterColumn,
+      minValue,
+      maxValue,
+      warmupYear,
+      soilSaturationSource: primarySource,
+    });
+    try {
+      const result = await postQueryEngineFn(primaryPayload);
+      return {
+        records: (result && result.records) || [],
+        soilSaturationLabel: getSoilSaturationLabel(primarySource),
+      };
+    } catch (error) {
+      if (!isMissingTsmfColumnError(error)) {
+        console.warn('Storm Event Analyzer: soil saturation query failed', error);
+        return {
+          records: [],
+          soilSaturationLabel: getSoilSaturationLabel('saturation'),
+        };
+      }
+      console.warn('Storm Event Analyzer: TSMF not available; falling back to Saturation', error);
+    }
+
+    const fallbackSource = 'saturation';
+    const fallbackPayload = buildSoilPayload({
+      filterColumn,
+      minValue,
+      maxValue,
+      warmupYear,
+      soilSaturationSource: fallbackSource,
+    });
+    try {
+      const result = await postQueryEngineFn(fallbackPayload);
+      return {
+        records: (result && result.records) || [],
+        soilSaturationLabel: getSoilSaturationLabel(fallbackSource),
+      };
+    } catch (error) {
+      console.warn('Storm Event Analyzer: legacy soil saturation query failed', error);
+      return {
+        records: [],
+        soilSaturationLabel: getSoilSaturationLabel(fallbackSource),
+      };
+    }
+  }
+
   function buildEventRow({ row, filterSpec, soilMap, snowMap, hydroMap, precipMap, tcMap, tcAvailable }) {
     const simDay = toNumberOrNull(row.sim_day_index);
     const year = toNumberOrNull(row.year);
@@ -531,26 +606,19 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
 
   async function fetchEventRows({ selectedMetric, filterRangePct, includeWarmup }) {
     if (!selectedMetric) {
-      return { rows: [], tcAvailable: false };
+      return { rows: [], tcAvailable: false, soilSaturationLabel: getSoilSaturationLabel('saturation') };
     }
 
     const filterSpec = resolveFilterSpec(selectedMetric);
 
     const range = computeIntensityRange(selectedMetric.value, filterRangePct);
     if (!range) {
-      return { rows: [], tcAvailable: false };
+      return { rows: [], tcAvailable: false, soilSaturationLabel: getSoilSaturationLabel('saturation') };
     }
 
     const warmupYear = includeWarmup ? await fetchWarmupYear({ postQueryEngine, runid: ctx.runid }) : null;
 
     const eventPayload = buildEventFilterPayload({
-      filterColumn: filterSpec.filterColumn,
-      minValue: range.minValue,
-      maxValue: range.maxValue,
-      warmupYear,
-    });
-
-    const soilPayload = buildSoilPayload({
       filterColumn: filterSpec.filterColumn,
       minValue: range.minValue,
       maxValue: range.maxValue,
@@ -580,7 +648,12 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
 
     const eventResult = await postQueryEngine(eventPayload);
     const [soilResult, snowResult, hydroResult, precipResult, tcResult] = await Promise.all([
-      safeQuery(soilPayload, 'soil saturation'),
+      fetchSoilResult({
+        filterColumn: filterSpec.filterColumn,
+        minValue: range.minValue,
+        maxValue: range.maxValue,
+        warmupYear,
+      }),
       safeQuery(snowPayload, 'snow water'),
       safeQuery(hydroPayload, 'hydrology'),
       safeQuery(precipPayload, 'precip volume'),
@@ -594,6 +667,10 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
     const precipMap = mapRowsBySimDay((precipResult && precipResult.records) || []);
     const tcAvailable = !!(tcResult && tcResult.available);
     const tcMap = mapBySimDay((tcResult && tcResult.records) || [], 'tc_hours');
+    const soilSaturationLabel =
+      soilResult && soilResult.soilSaturationLabel
+        ? soilResult.soilSaturationLabel
+        : getSoilSaturationLabel('saturation');
 
     const rows = baseRows.map((row) =>
       buildEventRow({
@@ -607,7 +684,7 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
         tcAvailable,
       }),
     );
-    return { rows, tcAvailable };
+    return { rows, tcAvailable, soilSaturationLabel };
   }
 
   async function fetchScenarioSummary({ selectedMetric, simDayIndex, scenarioPath }) {
@@ -623,13 +700,6 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
     const scenarioQuery = (payload) => postQueryEngineForScenario(payload, scenarioPath);
 
     const eventPayload = buildEventFilterPayload({
-      filterColumn,
-      minValue,
-      maxValue,
-      warmupYear,
-    });
-
-    const soilPayload = buildSoilPayload({
       filterColumn,
       minValue,
       maxValue,
@@ -666,7 +736,13 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
     try {
       [eventResult, soilResult, snowResult, hydroResult, precipResult, tcResult] = await Promise.all([
         scenarioQuery(eventPayload),
-        safeQuery(soilPayload, 'omni soil saturation', scenarioQuery),
+        fetchSoilResult({
+          filterColumn,
+          minValue,
+          maxValue,
+          warmupYear,
+          postQueryEngineFn: scenarioQuery,
+        }),
         safeQuery(snowPayload, 'omni snow water', scenarioQuery),
         safeQuery(hydroPayload, 'omni hydrology', scenarioQuery),
         safeQuery(precipPayload, 'omni precip volume', scenarioQuery),

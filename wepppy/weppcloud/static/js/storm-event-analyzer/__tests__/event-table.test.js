@@ -4,6 +4,21 @@ import { renderEventTable, updateEventSelection } from '../ui/event-table.js';
 function buildEventTable() {
   document.body.innerHTML = `
     <table id="storm_event_characteristics_table">
+      <thead>
+        <tr>
+          <th scope="col">Select</th>
+          <th scope="col">Measure</th>
+          <th scope="col">Date</th>
+          <th scope="col">Depth</th>
+          <th scope="col">Duration</th>
+          <th scope="col">
+            <span data-storm-event-analyzer-soil-saturation-label>Soil saturation (Top 0.1 m Saturation)</span>
+            <sub>T-1</sub>
+          </th>
+          <th scope="col">Snow coverage</th>
+          <th scope="col">Peak discharge</th>
+        </tr>
+      </thead>
       <tbody>
         <tr data-sort-position="top">
           <td data-storm-event-analyzer-unit="select"></td>
@@ -52,6 +67,7 @@ describe('storm-event-analyzer event table rendering', () => {
       rows,
       selectedEventSimDayIndex: 102,
       unitizer: null,
+      soilSaturationLabel: 'Full Depth Soil Saturation',
       onSelect: () => {},
     });
 
@@ -63,6 +79,8 @@ describe('storm-event-analyzer event table rendering', () => {
     const selectedRadio = renderedRows[1].querySelector('input[type="radio"]');
     expect(selectedRadio).toBeTruthy();
     expect(selectedRadio.checked).toBe(true);
+    const saturationLabel = table.querySelector('[data-storm-event-analyzer-soil-saturation-label]');
+    expect(saturationLabel.textContent).toBe('Soil saturation (Full Depth Soil Saturation)');
   });
 
   it('fires selection callback when a radio is clicked', () => {
