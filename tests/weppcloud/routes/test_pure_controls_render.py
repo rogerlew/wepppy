@@ -301,7 +301,7 @@ def test_runs0_template_places_rusle_after_wepp_sections() -> None:
     source = template_path.read_text(encoding="utf-8")
 
     wepp_nav_index = source.index('<a href="#wepp" class="nav-link">WEPP</a>')
-    rusle_nav_index = source.index('<a href="#rusle" class="nav-link">RUSLE</a>')
+    rusle_nav_index = source.index('<a href="#rusle" class="nav-link">Gridded RUSLE</a>')
     assert wepp_nav_index < rusle_nav_index
 
     wepp_section_index = source.index('<section id="wepp" class="wc-stack">')
