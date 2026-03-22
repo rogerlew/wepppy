@@ -1,8 +1,10 @@
 import logging
 import os
+import re
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
+from pathlib import Path
 import shutil
 import time
 from typing import Optional
@@ -26,6 +28,8 @@ except ImportError:  # pragma: no cover - optional catalog support
     _update_catalog_entry = None
 
 LOGGER = logging.getLogger(__name__)
+_MANIFEST_FILE_HEADING = '## File Manifest'
+_MANIFEST_SCHEMA_HEADING = '## Tabular Schema Summary'
 
 # Default CPU count for peridot processes, can be overridden via PERIDOT_CPU env var
 _DEFAULT_PERIDOT_CPU = '24'
@@ -65,6 +69,131 @@ def _wait_for_file(
         if time.monotonic() >= deadline:
             raise FileNotFoundError(f'Expected file {path} to be available within {timeout_s:.2f}s')
         time.sleep(poll_s)
+
+
+def _detect_manifest_format(path: Path) -> str:
+    ext = path.suffix.lower().lstrip('.')
+    if ext in {'parquet', 'csv', 'geojson', 'json', 'txt'}:
+        return ext
+    if ext in {'slp', 'slps'}:
+        return 'slp'
+    if ext == 'md':
+        return 'markdown'
+    return ext or 'file'
+
+
+def _replace_markdown_section(markdown: str, heading: str, replacement: str) -> str:
+    pattern = re.compile(rf'(?ms)^{re.escape(heading)}\n\n.*?(?=^## |\Z)')
+    normalized = replacement.rstrip('\n') + '\n\n'
+    if pattern.search(markdown):
+        return pattern.sub(normalized, markdown, count=1)
+    return f'{markdown.rstrip()}\n\n{normalized}'
+
+
+def _build_manifest_file_section(
+    watershed_dir: Path,
+    tabular_rows: dict[str, int],
+    readme_size: Optional[int],
+) -> str:
+    rows = []
+    for path in sorted(watershed_dir.rglob('*')):
+        if not path.is_file():
+            continue
+        rel = f'watershed/{path.relative_to(watershed_dir).as_posix()}'
+        if rel == 'watershed/README.md':
+            continue
+        fmt = _detect_manifest_format(path)
+        size = path.stat().st_size
+        if rel in tabular_rows:
+            tabular_row_count = str(tabular_rows[rel])
+        elif fmt in {'parquet', 'csv'}:
+            tabular_row_count = 'unknown'
+        else:
+            tabular_row_count = '-'
+        rows.append((rel, fmt, size, tabular_row_count))
+
+    readme_size_display = str(readme_size) if readme_size is not None else 'pending'
+    lines = [
+        _MANIFEST_FILE_HEADING,
+        '',
+        'Refreshed by WEPPpy post-processing to reflect final parquet outputs.',
+        '',
+        '| Path | Format | Size (bytes) | Rows |',
+        '| --- | --- | ---: | ---: |',
+    ]
+    for rel, fmt, size, row_count in rows:
+        lines.append(f'| {rel} | {fmt} | {size} | {row_count} |')
+    lines.append(f'| watershed/README.md | markdown | {readme_size_display} | - |')
+    return '\n'.join(lines)
+
+
+def _build_manifest_schema_section(
+    tabular_rows: dict[str, int],
+    tabular_schemas: dict[str, list[tuple[str, str]]],
+) -> str:
+    lines = [
+        _MANIFEST_SCHEMA_HEADING,
+        '',
+        'Canonical downstream contract uses parquet tables. Compatibility CSV files may omit derived columns.',
+        '',
+    ]
+    if not tabular_schemas:
+        lines.append('No tabular outputs were recorded.')
+        return '\n'.join(lines)
+
+    for rel in sorted(tabular_schemas):
+        lines.append(f'### `{rel}` (format: parquet, rows: {tabular_rows[rel]})')
+        lines.append('')
+        lines.append('| Column | Type |')
+        lines.append('| --- | --- |')
+        for column_name, dtype_name in tabular_schemas[rel]:
+            lines.append(f'| {column_name} | {dtype_name} |')
+        lines.append('')
+    return '\n'.join(lines)
+
+
+def _refresh_watershed_readme(
+    watershed_dir: Path,
+    tabular_frames: dict[str, pd.DataFrame],
+) -> None:
+    readme_path = watershed_dir / 'README.md'
+    if not readme_path.exists():
+        return
+
+    base_markdown = readme_path.read_text(encoding='utf-8')
+    tabular_rows: dict[str, int] = {}
+    tabular_schemas: dict[str, list[tuple[str, str]]] = {}
+    for rel_path, frame in tabular_frames.items():
+        tabular_rows[rel_path] = len(frame.index)
+        tabular_schemas[rel_path] = [
+            (column_name, str(dtype).lower())
+            for column_name, dtype in frame.dtypes.items()
+        ]
+
+    readme_size: Optional[int] = None
+    for _ in range(3):
+        file_section = _build_manifest_file_section(
+            watershed_dir,
+            tabular_rows=tabular_rows,
+            readme_size=readme_size,
+        )
+        schema_section = _build_manifest_schema_section(tabular_rows, tabular_schemas)
+        refreshed = _replace_markdown_section(
+            base_markdown,
+            _MANIFEST_FILE_HEADING,
+            file_section,
+        )
+        refreshed = _replace_markdown_section(
+            refreshed,
+            _MANIFEST_SCHEMA_HEADING,
+            schema_section,
+        )
+        readme_path.write_text(refreshed, encoding='utf-8')
+        observed_size = readme_path.stat().st_size
+        if readme_size == observed_size:
+            return
+        readme_size = observed_size
+        base_markdown = refreshed
 
 
 _thisdir = os.path.dirname(__file__)
@@ -184,17 +313,47 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
 
     from wepppy.topo.watershed_abstraction import WeppTopTranslator
 
-    hill_df = pd.read_csv(_join(wd, 'watershed/hillslopes.csv'))
-    sub_ids = sorted([int(x) for x in hill_df['topaz_id']])
+    watershed_dir = Path(wd) / "watershed"
+    hill_df_raw, hill_source = _load_watershed_table(watershed_dir, "hillslopes")
+    chn_df_raw, chn_source = _load_watershed_table(watershed_dir, "channels")
 
-    chn_df = pd.read_csv(_join(wd, 'watershed/channels.csv'))
+    if hill_df_raw is None:
+        raise FileNotFoundError(
+            "Missing watershed hillslope table; expected watershed/hillslopes.parquet "
+            "or watershed/hillslopes.csv"
+        )
+    if chn_df_raw is None:
+        raise FileNotFoundError(
+            "Missing watershed channel table; expected watershed/channels.parquet "
+            "or watershed/channels.csv"
+        )
+
+    if hill_source is not None and hill_source.suffix.lower() == ".csv":
+        LOGGER.warning(
+            "Legacy fallback path active: using watershed/hillslopes.csv because "
+            "watershed/hillslopes.parquet is missing for %s",
+            wd,
+        )
+    if chn_source is not None and chn_source.suffix.lower() == ".csv":
+        LOGGER.warning(
+            "Legacy fallback path active: using watershed/channels.csv because "
+            "watershed/channels.parquet is missing for %s",
+            wd,
+        )
+
+    hill_df = hill_df_raw.copy()
+    chn_df = chn_df_raw.copy()
+
+    hill_df['topaz_id'] = _extract_int32_column(hill_df, 'topaz_id', ('TopazID',))
+    chn_df['topaz_id'] = _extract_int32_column(chn_df, 'topaz_id', ('TopazID',))
+
+    sub_ids = sorted([int(x) for x in hill_df['topaz_id']])
     chn_ids = sorted([int(x) for x in  chn_df['topaz_id']])
 
     translator = WeppTopTranslator(sub_ids, chn_ids)
     get_wepp_id = lambda topaz_id: translator.wepp(topaz_id)
     get_chn_enum = lambda topaz_id: translator.chn_enum(top=topaz_id)
 
-    hill_df['topaz_id'] = pd.to_numeric(hill_df['topaz_id'], errors='raise').astype('Int32')
     hill_df['wepp_id'] = hill_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
 
     hill_df.to_parquet(_join(wd, 'watershed/hillslopes.parquet'), index=False)
@@ -202,7 +361,6 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     lngs = hill_df['centroid_lon'].to_numpy()
     lats = hill_df['centroid_lat'].to_numpy()
 
-    chn_df['topaz_id'] = pd.to_numeric(chn_df['topaz_id'], errors='raise').astype('Int32')
     chn_df['wepp_id'] = chn_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
     chn_df['chn_enum'] = chn_df['topaz_id'].apply(lambda top: get_chn_enum(int(top))).astype('Int32')
 
@@ -211,21 +369,34 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     lngs = np.concatenate((lngs, chn_df['centroid_lon'].to_numpy()))
     lats = np.concatenate((lats, chn_df['centroid_lat'].to_numpy()))
 
-    # Handle flowpaths.csv - may not exist if --skip-flowpaths was used.
-    # Remove stale parquet so reruns cannot expose legacy flowpath metadata.
-    flowpaths_csv = _join(wd, 'watershed/flowpaths.csv')
+    # Handle flowpaths metadata. This may be absent when skip-flowpaths mode is enabled.
     flowpaths_parquet = _join(wd, 'watershed/flowpaths.parquet')
-    if _exists(flowpaths_csv):
-        fps_df = pd.read_csv(flowpaths_csv)
-        fps_df['topaz_id'] = pd.to_numeric(fps_df['topaz_id'], errors='raise').astype('Int32')
-        fps_df['fp_id'] = pd.to_numeric(fps_df['fp_id'], errors='raise').astype('Int32')
+    fps_df_raw, fps_source = _load_watershed_table(watershed_dir, "flowpaths")
+    fps_df = None
+    if fps_df_raw is not None:
+        if fps_source is not None and fps_source.suffix.lower() == ".csv":
+            LOGGER.warning(
+                "Legacy fallback path active: using watershed/flowpaths.csv because "
+                "watershed/flowpaths.parquet is missing for %s",
+                wd,
+            )
+        fps_df = fps_df_raw.copy()
+        fps_df['topaz_id'] = _extract_int32_column(fps_df, 'topaz_id', ('TopazID',))
+        fps_df['fp_id'] = _extract_int32_column(fps_df, 'fp_id', ())
         fps_df.to_parquet(flowpaths_parquet, index=False)
-        os.remove(flowpaths_csv)
-    elif _exists(flowpaths_parquet):
-        os.remove(flowpaths_parquet)
 
-    os.remove(_join(wd, 'watershed/hillslopes.csv'))
-    os.remove(_join(wd, 'watershed/channels.csv'))
+    _refresh_watershed_readme(
+        watershed_dir,
+        {
+            'watershed/hillslopes.parquet': hill_df,
+            'watershed/channels.parquet': chn_df,
+            **(
+                {'watershed/flowpaths.parquet': fps_df}
+                if fps_df is not None
+                else {}
+            ),
+        },
+    )
 
     if _update_catalog_entry is not None:
         try:
@@ -323,14 +494,12 @@ def post_abstract_sub_fields(wd: str, verbose: bool = True):
 
 
 def _load_watershed_table(watershed_dir, stem: str):
-    from pathlib import Path
-
     csv_path = Path(watershed_dir, f"{stem}.csv")
     parquet_path = Path(watershed_dir, f"{stem}.parquet")
-    if csv_path.exists():
-        return pd.read_csv(csv_path), csv_path
     if parquet_path.exists():
         return pd.read_parquet(parquet_path), parquet_path
+    if csv_path.exists():
+        return pd.read_csv(csv_path), csv_path
     return None, None
 
 
@@ -406,9 +575,9 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
             print(f"[migrate_watershed_outputs] Skipping {wd}: not a Peridot abstraction backend")
         return False
 
-    hill_df_raw, hill_source = _load_watershed_table(watershed_dir, "hillslopes")
-    chn_df_raw, chn_source = _load_watershed_table(watershed_dir, "channels")
-    fp_df_raw, fp_source = _load_watershed_table(watershed_dir, "flowpaths")
+    hill_df_raw, _hill_source = _load_watershed_table(watershed_dir, "hillslopes")
+    chn_df_raw, _chn_source = _load_watershed_table(watershed_dir, "channels")
+    fp_df_raw, _fp_source = _load_watershed_table(watershed_dir, "flowpaths")
 
     if hill_df_raw is None and chn_df_raw is None and fp_df_raw is None:
         if verbose:
@@ -445,11 +614,6 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
     hill_target = watershed_dir / "hillslopes.parquet"
     hill_df.to_parquet(hill_target, index=False)
     modified = True
-    if remove_csv and hill_source is not None and hill_source.suffix.lower() == ".csv":
-        try:
-            hill_source.unlink()
-        except FileNotFoundError:
-            pass
 
     if chn_df_raw is not None:
         chn_df = chn_df_raw.copy()
@@ -475,11 +639,6 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
         chn_target = watershed_dir / "channels.parquet"
         chn_df.to_parquet(chn_target, index=False)
         modified = True
-        if remove_csv and chn_source is not None and chn_source.suffix.lower() == ".csv":
-            try:
-                chn_source.unlink()
-            except FileNotFoundError:
-                pass
 
     if fp_df_raw is not None:
         fp_df = fp_df_raw.copy()
@@ -489,9 +648,12 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
         fp_target = watershed_dir / "flowpaths.parquet"
         fp_df.to_parquet(fp_target, index=False)
         modified = True
-        if remove_csv and fp_source is not None and fp_source.suffix.lower() == ".csv":
+
+    if remove_csv:
+        for legacy_name in ("hillslopes.csv", "channels.csv", "flowpaths.csv"):
+            legacy_path = watershed_dir / legacy_name
             try:
-                fp_source.unlink()
+                legacy_path.unlink()
             except FileNotFoundError:
                 pass
 

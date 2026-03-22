@@ -314,6 +314,28 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Peridot Watershed Parquet + Manifest Integration
+**Completed**: 2026-03-21  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260321_peridot_watershed_parquet_manifest/](docs/work-packages/20260321_peridot_watershed_parquet_manifest/)  
+**Description**: Implemented direct Peridot watershed parquet outputs plus flag-aware `watershed/README.md` manifest generation, then switched WEPPpy to parquet-first ingestion with explicit legacy CSV fallback/migration behavior.
+
+**Outcome**:
+- Peridot now writes `watershed/hillslopes.parquet`, `watershed/channels.parquet`, and conditional `watershed/flowpaths.parquet` for both `abstract_watershed` and `wbt_abstract_watershed`.
+- Peridot now writes `watershed/README.md` with execution flags, file manifest, tabular schema summary, and conditional notes.
+- WEPPpy now consumes watershed parquet directly for new runs, logs explicit CSV fallback warnings for legacy runs, and keeps `migrate_watershed_outputs()` functional for old CSV-only projects.
+- WEPPpy post-processing now refreshes README manifest/schema sections to reflect final canonical parquet outputs after derived-column normalization.
+- Added Rust and pytest coverage for parquet generation, manifest conditionals, direct parquet path, legacy fallback, and migration edge cases.
+- Completed real-run verification on `/wc1/runs/un/unassailable-sensuousness`, including slope sanity check against `wepp/runs/p*.slp`.
+
+**Validation Notes**:
+- `cargo test --test watershed_parquet_manifest -- --nocapture` passed (`3 passed`).
+- `cargo test --test hillslope_slope_scalar -- --nocapture` passed (`1 passed`).
+- `wctl run-pytest tests/topo/test_peridot_runner_wait.py` passed (`11 passed`).
+- `wctl run-pytest tests/tools/test_migrations_parquet_backfill.py -k watershed` passed.
+
 ### RUSLE NoDb + Run-Page UI Integration
 **Completed**: 2026-03-21  
 **Duration**: 1 focused session  

@@ -14,9 +14,9 @@
 ## Target Datasets
 | Dataset | Writer(s) | Required changes | Key consumers to audit |
 | --- | --- | --- | --- |
-| `watershed/hillslopes.parquet` | `peridot_runner.post_abstract_watershed`, WBT runner | write `wepp_id`, `topaz_id` (Int32); drop uppercase string variants | `duckdb_agents.get_watershed_*`, reports (`loss_hill_report`, `average_annuals`), query engine fixtures |
-| `watershed/channels.parquet` | same as above | ensure `wepp_id`, `topaz_id`, `chn_enum` Int32 | hydrology exports, Omni mods, query engine |
-| `watershed/flowpaths.parquet` | same as above | cast `topaz_id`, `fp_id` to Int32 when present; treat as legacy optional output | `Watershed.fps_summary`, consumers of legacy flowpath metadata |
+| `watershed/hillslopes.parquet` | Peridot `abstract_watershed` / `wbt_abstract_watershed` + `peridot_runner.post_abstract_watershed` normalization | Peridot writes base parquet directly; WEPPpy post-step enforces `wepp_id`, `topaz_id` Int32 and drops uppercase legacy variants | `duckdb_agents.get_watershed_*`, reports (`loss_hill_report`, `average_annuals`), query engine fixtures |
+| `watershed/channels.parquet` | same as above | Peridot writes base parquet directly; WEPPpy post-step enforces `wepp_id`, `topaz_id`, `chn_enum` Int32 | hydrology exports, Omni mods, query engine |
+| `watershed/flowpaths.parquet` | same as above | Peridot writes flowpaths parquet when enabled; WEPPpy normalizes `topaz_id`, `fp_id` Int32 when present | `Watershed.fps_summary`, consumers of legacy flowpath metadata |
 | `ag_fields/sub_fields/*.parquet` | `post_abstract_sub_fields` | emit Int32 ids | landuse editing tools, agronomic summaries |
 | `landuse/landuse.parquet` | `Landuse.dump_landuse_parquet` | output `topaz_id`, `wepp_id` Int32 | query presets, reports, DuckDB agents, R tooling |
 | `soils/soils.parquet` | `Soils.dump_soils_parquet` | same as above | same consumers as landuse |
@@ -30,6 +30,12 @@
 1. Introduce helpers (likely in `duckdb_agents` or dataframe loaders) that detect legacy uppercase string ids and cast them to new int columns.  
 2. During transition, readers prefer lowercase Int32 columns but fall back gracefully.  
 3. Add validation to run activation/build steps to confirm new parquet assets comply.
+
+## Peridot Watershed Contract (Current)
+- Peridot now emits watershed parquet outputs directly (`hillslopes.parquet`, `channels.parquet`, optional `flowpaths.parquet`) and generates `watershed/README.md` with run flags, file manifest, and schema summary.
+- `post_abstract_watershed()` is parquet-first for new runs and uses an explicit legacy CSV fallback path only when a required parquet file is missing.
+- After WEPPpy post-processing adds canonical derived columns, `post_abstract_watershed()` refreshes `watershed/README.md` manifest/schema sections so documented contract matches final on-disk parquet outputs.
+- Legacy migration for historical runs with only `watershed/*.csv` remains supported via `migrate_watershed_outputs()` / `migrate_watersheds()`.
 
 ## Testing & Docs
 - Update unit/integration tests to assert int32 schemas. Regenerate fixtures referencing legacy casing.  
