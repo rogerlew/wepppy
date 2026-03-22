@@ -9,6 +9,34 @@ import {
   buildBatchFeatureKey,
   resolveTopazIdFromProperties,
 } from '../batch-keys.js';
+import * as colorHelpers from '../colors.js';
+
+const viridisColor =
+  typeof colorHelpers.viridisColor === 'function'
+    ? colorHelpers.viridisColor
+    : (v) => [Math.round(68 + 185 * Math.min(1, Math.max(0, Number(v)))), 1, 84, 230];
+const winterColor =
+  typeof colorHelpers.winterColor === 'function'
+    ? colorHelpers.winterColor
+    : (v) => [0, Math.round(Math.min(1, Math.max(0, Number(v))) * 255), 192, 230];
+const jet2Color =
+  typeof colorHelpers.jet2Color === 'function'
+    ? colorHelpers.jet2Color
+    : viridisColor;
+const plasmaColor =
+  typeof colorHelpers.plasmaColor === 'function'
+    ? colorHelpers.plasmaColor
+    : (v) => {
+      const normalized = Math.min(1, Math.max(0, Number(v)));
+      const start = [13, 8, 135];
+      const end = [240, 249, 33];
+      return [
+        Math.round(start[0] + (end[0] - start[0]) * normalized),
+        Math.round(start[1] + (end[1] - start[1]) * normalized),
+        Math.round(start[2] + (end[2] - start[2]) * normalized),
+        230,
+      ];
+    };
 
 function logDetection(kind, message, context) {
   const parts = [`gl-dashboard detection: ${message}`];
@@ -558,6 +586,124 @@ export function computeBoundsFromGdal(info) {
   return [west, south, east, north];
 }
 
+function toFiniteNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function normalizeNumericRange(range) {
+  if (!range || typeof range !== 'object') return null;
+  const min = toFiniteNumber(range.min);
+  const max = toFiniteNumber(range.max);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null;
+  return { min, max };
+}
+
+function extractStatsRangeFromMetadata(metadata) {
+  if (!metadata || typeof metadata !== 'object') return null;
+  const domains = [
+    metadata[''],
+    metadata.DEFAULT,
+    metadata.default,
+    metadata.STATISTICS,
+    metadata,
+  ];
+  for (const domain of domains) {
+    if (!domain || typeof domain !== 'object') continue;
+    const min = toFiniteNumber(
+      domain.STATISTICS_MINIMUM ?? domain.MINIMUM ?? domain.minimum,
+    );
+    const max = toFiniteNumber(
+      domain.STATISTICS_MAXIMUM ?? domain.MAXIMUM ?? domain.maximum,
+    );
+    if (Number.isFinite(min) && Number.isFinite(max) && max > min) {
+      return { min, max };
+    }
+  }
+  return null;
+}
+
+function extractRasterRangeFromGdal(info) {
+  if (!info || typeof info !== 'object') return null;
+  const firstBand = Array.isArray(info.bands) && info.bands.length ? info.bands[0] : null;
+  if (firstBand && typeof firstBand === 'object') {
+    const directMin = toFiniteNumber(
+      firstBand.minimum ?? firstBand.min ?? firstBand.computedMin,
+    );
+    const directMax = toFiniteNumber(
+      firstBand.maximum ?? firstBand.max ?? firstBand.computedMax,
+    );
+    if (Number.isFinite(directMin) && Number.isFinite(directMax) && directMax > directMin) {
+      return { min: directMin, max: directMax };
+    }
+    const bandMetaRange = extractStatsRangeFromMetadata(firstBand.metadata);
+    if (bandMetaRange) return bandMetaRange;
+  }
+  return extractStatsRangeFromMetadata(info.metadata);
+}
+
+function isNoDataValue(value, nodata) {
+  if (!Number.isFinite(value)) return true;
+  if (!Number.isFinite(nodata)) return false;
+  const tolerance = Math.max(1e-12, Math.abs(nodata) * 1e-12);
+  return Math.abs(value - nodata) <= tolerance;
+}
+
+function computeRasterRange(values, nodata) {
+  if (!values || typeof values.length !== 'number') return null;
+  let min = Infinity;
+  let max = -Infinity;
+  for (let i = 0; i < values.length; i += 1) {
+    const value = Number(values[i]);
+    if (!Number.isFinite(value) || isNoDataValue(value, nodata)) continue;
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null;
+  return { min, max };
+}
+
+function resolveColormapFunction(name) {
+  if (name === 'winter') return winterColor;
+  if (name === 'jet2') return jet2Color;
+  if (name === 'plasma') return plasmaColor;
+  if (name === 'viridis') return viridisColor;
+  return null;
+}
+
+function buildContinuousRasterColorMap(def, gdalRange) {
+  const colormapName = typeof def.colormap === 'string' ? def.colormap.trim() : '';
+  if (!colormapName) return { colorMap: null, sourceRange: null };
+  const colorFn = resolveColormapFunction(colormapName);
+  if (typeof colorFn !== 'function') return { colorMap: null, sourceRange: null };
+  const fixedRange =
+    normalizeNumericRange(def.valueRange) ||
+    normalizeNumericRange(gdalRange);
+  let activeRange = fixedRange || { min: 0, max: 1 };
+  const colorMap = (value) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return [0, 0, 0, 0];
+    }
+    const span = activeRange.max - activeRange.min || 1;
+    const normalized = Math.min(1, Math.max(0, (numeric - activeRange.min) / span));
+    return colorFn(normalized);
+  };
+  if (!fixedRange) {
+    colorMap.dynamicRange = true;
+    colorMap.setDynamicRange = (range) => {
+      const normalized = normalizeNumericRange(range);
+      if (normalized) {
+        activeRange = normalized;
+      }
+    };
+  }
+  return {
+    colorMap,
+    sourceRange: fixedRange || null,
+  };
+}
+
 async function ensureSubcatchments(buildBaseUrl, subcatchmentsGeoJson) {
   if (subcatchmentsGeoJson) {
     return subcatchmentsGeoJson;
@@ -645,13 +791,35 @@ export async function detectRasterLayers({
         const info = await fetchGdalInfo(path);
         if (!info) continue;
         const wgs84Bounds = computeBoundsFromGdal(info);
-        const colorMap = def.key === 'landuse' ? nlcdColormap : def.key === 'soils' ? soilColorForValue : null;
+        const gdalRange = extractRasterRangeFromGdal(info);
+        let colorMap = null;
+        let sourceRange = null;
+        if (def.key === 'landuse') {
+          colorMap = nlcdColormap;
+        } else if (def.key === 'soils') {
+          colorMap = soilColorForValue;
+        } else {
+          const continuousColor = buildContinuousRasterColorMap(def, gdalRange);
+          colorMap = continuousColor.colorMap;
+          sourceRange = continuousColor.sourceRange;
+        }
         const raster = await loadRaster(path, colorMap);
         const bounds = wgs84Bounds || raster.bounds;
         if (!bounds) continue;
+        const sampledRange = computeRasterRange(raster.values, raster.nodata);
+        const legendRange =
+          normalizeNumericRange(def.legendRange) ||
+          normalizeNumericRange(def.valueRange) ||
+          sampledRange ||
+          normalizeNumericRange(sourceRange) ||
+          normalizeNumericRange(gdalRange);
         found = {
           key: def.key,
           label: def.label,
+          group: def.group || null,
+          colormap: def.colormap || null,
+          units: def.units || null,
+          range: legendRange || null,
           path,
           ...raster,
           bounds,

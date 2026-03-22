@@ -1299,6 +1299,31 @@ in the first release:
 - generic aliases may still exist for internal convenience, but mode-specific
   names should be the primary auditable outputs
 
+### GL-Dashboard Output Visualization Contract
+
+- `Rusle` outputs should be discoverable in the run `gl-dashboard` as raster
+  overlays when corresponding run artifacts exist
+- the layer list should include a dedicated `RUSLE` section under
+  subcatchment overlays, placed after `WEPP`
+- `RUSLE` layer discovery should be artifact-driven (only show rasters that are
+  present), with mode-specific filenames as the primary selectors:
+  - `A`: `a_observed_rap_polaris_nomograph.tif`,
+    `a_observed_rap_polaris_epic.tif`,
+    `a_scenario_sbs_polaris_nomograph.tif`,
+    `a_scenario_sbs_polaris_epic.tif`
+  - `C`: `c_observed_rap.tif`, `c_scenario_sbs.tif`
+  - `K`: `k_polaris_nomograph.tif`, `k_polaris_epic.tif`
+- colormap and legend contract:
+  - `A` uses `jet2`, units `t/ha/yr`, and a dynamic legend range derived from
+    finite raster values for the active artifact
+  - `C` uses `viridis`, units `unitless`, and fixed legend range `[0, 1]`
+  - `K` uses `plasma`, units `t*ha*h/(ha*MJ*mm)`, and current fixed range
+    `[0, 0.7]` pending future validation updates
+- raster NoData behavior in `gl-dashboard` should be transparent; NoData and
+  non-finite cells render with `alpha = 0` so they do not mask valid outputs
+- raster tooltips should use the standard raster pattern (layer path plus
+  sampled pixel value) with no custom one-off tooltip contract
+
 ### Preflight and Staleness Contract
 
 - `Rusle` should integrate with the preflight system as its own checklist item
@@ -1443,6 +1468,13 @@ Longer term, the mod should be checked against:
   `sbs_4class.tif` artifact by default
 - `Rusle` failure UX should follow the standard status-plus-stacktrace control
   pattern
+- `gl-dashboard` should expose run-scoped `RUSLE` `A/C/K` rasters in a dedicated
+  section after `WEPP`, using factor-specific colormaps (`A=jet2`,
+  `C=viridis`, `K=plasma`)
+- `gl-dashboard` `RUSLE` `A` legends should auto-range from the active raster's
+  finite values, while `C` and `K` use fixed validated ranges
+- `gl-dashboard` raster NoData cells should render transparent for `RUSLE`
+  overlays
 
 ## Initial Milestones
 

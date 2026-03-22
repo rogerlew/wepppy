@@ -4,6 +4,7 @@ import {
   hexToRgbaArray,
   jet2Color,
   normalizeColorEntry,
+  plasmaColor,
   rgbaStringToArray,
   rdbuColor,
   viridisColor,
@@ -33,6 +34,13 @@ describe('gl-dashboard colors', () => {
     expect(jetHigh).toEqual([255, 128, 0, 230]);
     expect(withinByteRange(jetLow)).toBe(true);
     expect(withinByteRange(jetHigh)).toBe(true);
+
+    const plasmaStart = plasmaColor(0);
+    const plasmaEnd = plasmaColor(1);
+    expect(plasmaStart).toEqual([13, 8, 135, 230]);
+    expect(plasmaEnd).toEqual([240, 249, 33, 230]);
+    expect(withinByteRange(plasmaStart)).toBe(true);
+    expect(withinByteRange(plasmaEnd)).toBe(true);
 
     expect(divergingColor(-1)).toEqual([33, 102, 172, 230]);
     expect(divergingColor(1)).toEqual([255, 102, 94, 230]);

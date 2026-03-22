@@ -163,12 +163,13 @@ export function createLayerUtils({
   colorScales,
   constants,
 }) {
-  const { viridisColor, winterColor, jet2Color, rdbuScale } = colorScales;
+  const { viridisColor, winterColor, jet2Color, plasmaColor = viridisColor, rdbuScale } = colorScales;
   const { WATER_MEASURES, SOIL_MEASURES, NLCD_COLORMAP, NLCD_LABELS, RAP_BAND_LABELS } = constants;
 
   function colorFromPalette(name, normalized) {
     if (name === 'winter') return winterColor(normalized);
     if (name === 'jet2') return jet2Color(normalized);
+    if (name === 'plasma') return plasmaColor(normalized);
     if (name === 'viridis') return viridisColor(normalized);
     // Fallback to viridis to avoid silent gray fills if a palette is added without support.
     return viridisColor(normalized);

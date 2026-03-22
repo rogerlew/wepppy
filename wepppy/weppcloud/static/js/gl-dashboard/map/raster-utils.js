@@ -127,7 +127,30 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
     return null;
   }
 
-  function colorize(values, width, height, colorMap) {
+  function isNoDataValue(value, nodata) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return true;
+    if (!Number.isFinite(nodata)) return false;
+    const tolerance = Math.max(1e-12, Math.abs(nodata) * 1e-12);
+    return Math.abs(numeric - nodata) <= tolerance;
+  }
+
+  function computeValueRange(values, nodata) {
+    if (!values || typeof values.length !== 'number') return null;
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < values.length; i += 1) {
+      const value = values[i];
+      if (isNoDataValue(value, nodata)) continue;
+      const numeric = Number(value);
+      if (numeric < min) min = numeric;
+      if (numeric > max) max = numeric;
+    }
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null;
+    return { min, max };
+  }
+
+  function colorize(values, width, height, colorMap, nodata = null) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -146,10 +169,24 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
         return acc;
       }, {});
     const fnCache = new Map();
+    if (
+      typeof colorMap === 'function' &&
+      colorMap.dynamicRange === true &&
+      typeof colorMap.setDynamicRange === 'function'
+    ) {
+      colorMap.setDynamicRange(computeValueRange(values, nodata));
+    }
 
     if (mapEntries && Object.keys(mapEntries).length) {
       for (let i = 0, j = 0; i < values.length; i++, j += 4) {
         const v = values[i];
+        if (isNoDataValue(v, nodata)) {
+          imgData.data[j] = 0;
+          imgData.data[j + 1] = 0;
+          imgData.data[j + 2] = 0;
+          imgData.data[j + 3] = 0;
+          continue;
+        }
         const rgb = mapEntries[v];
         const color = rgb || [128, 128, 128];
         imgData.data[j] = color[0];
@@ -160,6 +197,13 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
     } else {
       for (let i = 0, j = 0; i < values.length; i++, j += 4) {
         const v = values[i];
+        if (isNoDataValue(v, nodata)) {
+          imgData.data[j] = 0;
+          imgData.data[j + 1] = 0;
+          imgData.data[j + 2] = 0;
+          imgData.data[j + 3] = 0;
+          continue;
+        }
         let color = [180, 180, 180, 230];
         if (Number.isFinite(v)) {
           if (typeof colorMap === 'function') {
@@ -206,14 +250,14 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
     const height = image.getHeight();
     const raster = await image.readRasters({ interleave: true, samples: [0] });
     const values = ArrayBuffer.isView(raster) ? raster : raster[0];
-    const canvas = colorize(values, width, height, colorMap);
-    const bounds = image.getBoundingBox();
     const rawNoData = typeof image.getGDALNoData === 'function' ? image.getGDALNoData() : null;
     let nodata = null;
     if (rawNoData !== null && rawNoData !== undefined && rawNoData !== '') {
       const parsed = Number(rawNoData);
       nodata = Number.isFinite(parsed) ? parsed : null;
     }
+    const canvas = colorize(values, width, height, colorMap, nodata);
+    const bounds = image.getBoundingBox();
     return {
       canvas,
       bounds,

@@ -221,6 +221,30 @@ export function jet2Color(val, scale) {
   ];
 }
 
+export function plasmaColor(val, scale) {
+  const v = Math.min(1, Math.max(0, Number(val)));
+  if (scale && typeof scale.map === 'function') {
+    const mapped = scale.map(v);
+    const rgba = normalizeColorEntry(mapped, 230);
+    if (rgba) return rgba;
+  }
+  if (scale && Array.isArray(scale) && scale.length) {
+    const idx = Math.min(scale.length - 1, Math.floor(v * (scale.length - 1)));
+    const color = scale[idx];
+    const rgba = normalizeColorEntry(color, 230);
+    if (rgba) return rgba;
+  }
+  // Approximate plasma fallback for environments without chroma scale support.
+  const start = [13, 8, 135];
+  const end = [240, 249, 33];
+  return [
+    Math.round(start[0] + (end[0] - start[0]) * v),
+    Math.round(start[1] + (end[1] - start[1]) * v),
+    Math.round(start[2] + (end[2] - start[2]) * v),
+    230,
+  ];
+}
+
 export function divergingColor(normalizedDiff, scale) {
   const v = Math.min(1, Math.max(0, (normalizedDiff + 1) / 2));
   if (scale && typeof scale.map === 'function') {
@@ -273,15 +297,18 @@ export function createColorScales(colormapFn) {
   const rdbuScale = makeScale(colormapFn, 'rdbu');
   const winterScale = makeScale(colormapFn, 'winter');
   const jet2Scale = makeScale(colormapFn, 'jet2');
+  const plasmaScale = makeScale(colormapFn, 'plasma');
 
   return {
     viridisScale,
     rdbuScale,
     winterScale,
     jet2Scale,
+    plasmaScale,
     viridisColor: (val) => viridisColor(val, viridisScale),
     winterColor: (val) => winterColor(val, winterScale),
     jet2Color: (val) => jet2Color(val, jet2Scale),
+    plasmaColor: (val) => plasmaColor(val, plasmaScale),
     divergingColor: (val) => divergingColor(val, rdbuScale),
     rdbuColor: (val) => rdbuColor(val, rdbuScale),
   };
