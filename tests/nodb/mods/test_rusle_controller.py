@@ -332,6 +332,15 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
     assert manifest["rusle"]["options"]["k_modes"] == ["polaris_nomograph"]
     assert "rusle/README.md" in catalog_updates
 
+    readme_path = rusle_dir / "README.md"
+    readme_text = readme_path.read_text(encoding="utf-8")
+    assert "## Intermediate raster products" in readme_text
+    assert "## Provenance" in readme_text
+    assert "## Raster specifications" in readme_text
+    assert "| `rusle/ls.tif` |" in readme_text
+    assert "| `rusle/effective_slope_length.tif` |" in readme_text
+    assert "| `rusle/disturbed_class.tif` |" in readme_text
+
 
 def test_build_rejects_topaz_backend(
     tmp_path: Path,
