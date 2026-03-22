@@ -139,13 +139,214 @@ describe('gl-dashboard layer renderer', () => {
 
     renderer.updateLegendsPanel();
     let swatches = legendsContentEl.querySelectorAll('.gl-legend-categorical__swatch');
-    expect(swatches.length).toBe(4);
+    expect(swatches).toHaveLength(4);
     expect(swatches[1].style.backgroundColor).toContain('77, 230, 0');
 
     state.sbsColorShiftEnabled = true;
     renderer.updateLegendsPanel();
     swatches = legendsContentEl.querySelectorAll('.gl-legend-categorical__swatch');
-    expect(swatches.length).toBe(4);
+    expect(swatches).toHaveLength(4);
     expect(swatches[1].style.backgroundColor).toContain('86, 180, 233');
+  });
+
+  it('renders RUSLE section after WEPP and honors explicit raster colormaps in legend', () => {
+    const layerListEl = document.createElement('ul');
+    const layerEmptyEl = document.createElement('div');
+    const legendsContentEl = document.createElement('div');
+    const legendEmptyEl = document.createElement('p');
+    legendEmptyEl.id = 'gl-legend-empty';
+    legendsContentEl.appendChild(legendEmptyEl);
+
+    const state = {
+      landuseLayers: [],
+      soilsLayers: [],
+      hillslopesLayers: [],
+      channelsLayers: [],
+      weppLayers: [{ key: 'soil_loss', label: 'Soil Loss', mode: 'soil_loss', visible: false }],
+      weppChannelLayers: [],
+      weppYearlyLayers: [],
+      weppYearlyChannelLayers: [],
+      weppEventLayers: [],
+      watarLayers: [],
+      rapLayers: [],
+      openetLayers: [],
+      detectedLayers: [
+        {
+          key: 'rusle-a-observed-rap-nomograph',
+          group: 'rusle',
+          label: 'RUSLE A (Observed RAP, Nomograph K)',
+          path: 'rusle/a_observed_rap_polaris_nomograph.tif',
+          colormap: 'jet2',
+          units: 't/ha/yr',
+          range: { min: 0, max: 12 },
+          visible: true,
+        },
+        {
+          key: 'rusle-k-nomograph',
+          group: 'rusle',
+          label: 'RUSLE K (POLARIS Nomograph)',
+          path: 'rusle/k_polaris_nomograph.tif',
+          colormap: 'plasma',
+          units: 't*ha*h/(ha*MJ*mm)',
+          range: { min: 0, max: 0.7 },
+          visible: true,
+        },
+      ],
+      rapCumulativeMode: false,
+      weppStatistic: 'mean',
+    };
+
+    const renderer = createLayerRenderer({
+      getState: () => state,
+      setValue: jest.fn(),
+      layerUtils: {
+        getActiveLayersForLegend: () =>
+          state.detectedLayers
+            .filter((layer) => layer.visible)
+            .map((layer) => ({ ...layer, category: 'Raster' })),
+      },
+      domRefs: { layerListEl, layerEmptyEl, legendsContentEl, legendEmptyEl },
+      yearSlider: { setRange: jest.fn() },
+      deselectAllSubcatchmentOverlays: jest.fn(),
+      activateWeppYearlyLayer: jest.fn(),
+      activateWeppYearlyChannelLayer: jest.fn(),
+      refreshWeppStatisticData: jest.fn(),
+      refreshRapData: jest.fn(),
+      refreshOpenetData: jest.fn(),
+      refreshWeppEventData: jest.fn(),
+      loadRapTimeseriesData: jest.fn(),
+      loadWeppYearlyTimeseriesData: jest.fn(),
+      loadOpenetTimeseriesData: jest.fn(),
+      applyLayers: jest.fn(),
+      syncGraphLayout: jest.fn(),
+      clearGraphModeOverride: jest.fn(),
+      setGraphFocus: jest.fn(),
+      setGraphCollapsed: jest.fn(),
+      pickActiveWeppEventLayer: jest.fn(),
+      soilColorForValue: jest.fn(),
+      constants: {},
+    });
+
+    renderer.updateLayerList();
+    const summaries = Array.from(layerListEl.querySelectorAll('summary.gl-layer-group')).map((el) => (el.textContent || '').trim());
+    const weppIdx = summaries.indexOf('WEPP');
+    const rusleIdx = summaries.indexOf('RUSLE');
+    expect(weppIdx).toBeGreaterThanOrEqual(0);
+    expect(rusleIdx).toBeGreaterThan(weppIdx);
+
+    renderer.updateLegendsPanel();
+    const bars = Array.from(legendsContentEl.querySelectorAll('.gl-legend-continuous__bar'));
+    expect(bars.length).toBeGreaterThanOrEqual(2);
+    expect(bars.some((bar) => bar.className.includes('gl-legend-continuous__bar--jet2'))).toBe(true);
+    expect(bars.some((bar) => bar.className.includes('gl-legend-continuous__bar--plasma'))).toBe(true);
+  });
+
+  it('renders A tolerance control with raster-max default and applies overrides to A range', () => {
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = () => null;
+    try {
+      const layerListEl = document.createElement('ul');
+      const layerEmptyEl = document.createElement('div');
+      const legendsContentEl = document.createElement('div');
+      const legendEmptyEl = document.createElement('p');
+      legendEmptyEl.id = 'gl-legend-empty';
+      legendsContentEl.appendChild(legendEmptyEl);
+
+      const state = {
+        rusleATolerance: null,
+        landuseLayers: [],
+        soilsLayers: [],
+        hillslopesLayers: [],
+        channelsLayers: [],
+        weppLayers: [],
+        weppChannelLayers: [],
+        weppYearlyLayers: [],
+        weppYearlyChannelLayers: [],
+        weppEventLayers: [],
+        watarLayers: [],
+        rapLayers: [],
+        openetLayers: [],
+        detectedLayers: [
+          {
+            key: 'rusle-a-observed-rap-nomograph',
+            group: 'rusle',
+            label: 'RUSLE A (Observed RAP, Nomograph K)',
+            path: 'rusle/a_observed_rap_polaris_nomograph.tif',
+            colormap: 'jet2',
+            units: 't/ha/yr',
+            values: new Float32Array([1, 6, 12]),
+            nodata: -9999,
+            width: 3,
+            height: 1,
+            range: { min: 1, max: 12 },
+            canvas: document.createElement('canvas'),
+            visible: true,
+          },
+        ],
+        rapCumulativeMode: false,
+        weppStatistic: 'mean',
+      };
+
+      const setValue = jest.fn((key, value) => {
+        state[key] = value;
+      });
+      const applyLayers = jest.fn();
+
+      const renderer = createLayerRenderer({
+        getState: () => state,
+        setValue,
+        layerUtils: {
+          getActiveLayersForLegend: () =>
+            state.detectedLayers
+              .filter((layer) => layer.visible)
+              .map((layer) => ({ ...layer, category: 'Raster' })),
+        },
+        domRefs: { layerListEl, layerEmptyEl, legendsContentEl, legendEmptyEl },
+        yearSlider: { setRange: jest.fn() },
+        deselectAllSubcatchmentOverlays: jest.fn(),
+        activateWeppYearlyLayer: jest.fn(),
+        activateWeppYearlyChannelLayer: jest.fn(),
+        refreshWeppStatisticData: jest.fn(),
+        refreshRapData: jest.fn(),
+        refreshOpenetData: jest.fn(),
+        refreshWeppEventData: jest.fn(),
+        loadRapTimeseriesData: jest.fn(),
+        loadWeppYearlyTimeseriesData: jest.fn(),
+        loadOpenetTimeseriesData: jest.fn(),
+        applyLayers,
+        syncGraphLayout: jest.fn(),
+        clearGraphModeOverride: jest.fn(),
+        setGraphFocus: jest.fn(),
+        setGraphCollapsed: jest.fn(),
+        pickActiveWeppEventLayer: jest.fn(),
+        soilColorForValue: jest.fn(),
+        constants: {},
+      });
+
+      renderer.updateLayerList();
+
+      const toleranceLabel = layerListEl.querySelector('label[for="gl-rusle-a-tolerance-input"]');
+      const toleranceInput = layerListEl.querySelector('#gl-rusle-a-tolerance-input');
+      expect(toleranceLabel).not.toBeNull();
+      expect(toleranceLabel.textContent).toContain('A Tolerance');
+      expect(toleranceInput).not.toBeNull();
+      expect(toleranceInput.value).toBe('12');
+
+      toleranceInput.value = '6';
+      toleranceInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+      expect(state.rusleATolerance).toBe(6);
+      expect(setValue).toHaveBeenCalledWith('rusleATolerance', 6);
+      expect(state.detectedLayers[0].range).toEqual({ min: 1, max: 6 });
+      expect(applyLayers).toHaveBeenCalled();
+
+      renderer.updateLegendsPanel();
+      const legendLabels = legendsContentEl.querySelectorAll('.gl-legend-continuous__labels span');
+      expect(legendLabels).toHaveLength(2);
+      expect(legendLabels[0].textContent).toBe('1.0');
+      expect(legendLabels[1].textContent).toBe('6.0');
+    } finally {
+      HTMLCanvasElement.prototype.getContext = originalGetContext;
+    }
   });
 });

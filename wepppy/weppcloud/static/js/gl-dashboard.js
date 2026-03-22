@@ -131,10 +131,12 @@
       viridisScale: null,
       winterScale: null,
       jet2Scale: null,
+      plasmaScale: null,
       rdbuScale: null,
       viridisColor: colorsModule.viridisColor,
       winterColor: colorsModule.winterColor,
       jet2Color: colorsModule.jet2Color,
+      plasmaColor: colorsModule.plasmaColor || colorsModule.viridisColor,
       divergingColor: colorsModule.divergingColor,
       rdbuColor: colorsModule.rdbuColor,
     };
@@ -142,6 +144,7 @@
     viridisColor = colorsModule.viridisColor,
     winterColor = colorsModule.winterColor,
     jet2Color = colorsModule.jet2Color,
+    plasmaColor = colorsModule.plasmaColor || colorsModule.viridisColor,
     rdbuColor = colorsModule.rdbuColor,
   } = colorScales;
 
@@ -197,6 +200,7 @@
     channelsVisible: true,
     channelLabelsVisible: false,
     sbsColorShiftEnabled: false,
+    rusleATolerance: null,
   });
   const state = getState();
   function bindStateKeys(keys) {
@@ -224,6 +228,7 @@
     'channelsVisible',
     'channelLabelsVisible',
     'sbsColorShiftEnabled',
+    'rusleATolerance',
     'currentViewState',
     'graphFocus',
     'graphMode',
@@ -629,7 +634,7 @@
   layerUtils = createLayerUtils({
     deck,
     getState,
-    colorScales: { viridisColor, winterColor, jet2Color, rdbuScale: rdbuColor },
+    colorScales: { viridisColor, winterColor, jet2Color, plasmaColor, rdbuScale: rdbuColor },
     constants: {
       WATER_MEASURES,
       SOIL_MEASURES,

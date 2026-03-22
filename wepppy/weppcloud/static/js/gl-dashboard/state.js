@@ -38,6 +38,7 @@ const defaultState = {
   hillslopeAreaCache: {},
 
   detectedLayers: [],
+  rusleATolerance: null,
   landuseLayers: [],
   soilsLayers: [],
   hillslopesLayers: [],
