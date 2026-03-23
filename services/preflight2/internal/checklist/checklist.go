@@ -65,9 +65,17 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 	check["openet_ts"] = safeGT(prep["timestamps:build_openet_ts"], prep["timestamps:build_climate"])
 
 	runWepp := firstTimestamp(prep, "timestamps:run_wepp_watershed", "timestamps:run_wepp")
+	rusleRun := prep["timestamps:build_rusle"]
 	check["wepp"] = safeGT(runWepp, prep["timestamps:build_landuse"]) &&
 		safeGT(runWepp, prep["timestamps:build_soils"]) &&
 		safeGT(runWepp, prep["timestamps:build_climate"])
+	if runWepp == "" {
+		// Gridded RUSLE-only runs may not emit run_wepp* timestamps.
+		// Treat a fresh RUSLE build as satisfying legacy WEPP preflight gates.
+		check["wepp"] = safeGT(rusleRun, prep["timestamps:build_landuse"]) &&
+			safeGT(rusleRun, prep["timestamps:build_soils"]) &&
+			safeGT(rusleRun, prep["timestamps:build_climate"])
+	}
 
 	omniRun := prep["timestamps:run_omni_scenarios"]
 	if runWepp == "" {
@@ -91,7 +99,6 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		safeGT(prep["timestamps:run_watar"], prep["timestamps:build_climate"]) &&
 		safeGT(prep["timestamps:run_watar"], runWepp)
 
-	rusleRun := prep["timestamps:build_rusle"]
 	if runWepp == "" {
 		check["rusle"] = safeGT(rusleRun, prep["timestamps:build_climate"])
 	} else {

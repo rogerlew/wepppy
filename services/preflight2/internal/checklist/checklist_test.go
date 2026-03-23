@@ -60,3 +60,32 @@ func TestEvaluateRusleBecomesStaleWhenClimateIsNewer(t *testing.T) {
 		t.Fatalf("expected rusle checklist entry to be false when climate is newer")
 	}
 }
+
+func TestEvaluateWeppSatisfiedByRusleForGriddedRuns(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:build_landuse": "100",
+		"timestamps:build_soils":   "110",
+		"timestamps:build_climate": "120",
+		"timestamps:build_rusle":   "130",
+	})
+
+	if !check["rusle"] {
+		t.Fatalf("expected rusle checklist entry to be true for fresh gridded RUSLE output")
+	}
+	if !check["wepp"] {
+		t.Fatalf("expected wepp checklist entry to be true when gridded RUSLE is fresher than prerequisites")
+	}
+}
+
+func TestEvaluateWeppNotSatisfiedByStaleRusleForGriddedRuns(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:build_landuse": "100",
+		"timestamps:build_soils":   "110",
+		"timestamps:build_climate": "140",
+		"timestamps:build_rusle":   "130",
+	})
+
+	if check["wepp"] {
+		t.Fatalf("expected wepp checklist entry to remain false when gridded RUSLE is stale")
+	}
+}
