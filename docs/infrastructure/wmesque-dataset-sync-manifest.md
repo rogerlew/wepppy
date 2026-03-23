@@ -41,8 +41,7 @@ These appear in committed NoDb configs and route through `wmesque_retrieve(...)`
 - `alaska/nlcd/2016`
 - `ca/canadalandcover2020`
 - `eu/CORINE_LandCover/2000`
-- `eu/corine_landcover/2000`
-- `eu/corine_landcover/2018`
+- `eu/CORINE_LandCover/2018`
 - `hawaii/nlcd/wepp_31131a7`
 - `locales/ChileCayumanque/landuse`
 - `locales/earth/C3Slandcover/2020`
