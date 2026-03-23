@@ -3,6 +3,7 @@
 import io
 import re
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import wepppy
@@ -103,6 +104,58 @@ def _wepp_results_invalidated(prep) -> bool:
         and _safe_gt_timestamp(run_wepp, prep.redis.hget(prep.run_id, "timestamps:build_soils"))
         and _safe_gt_timestamp(run_wepp, prep.redis.hget(prep.run_id, "timestamps:build_climate"))
     )
+
+
+def _rusle_outputs_exist(wd: str) -> bool:
+    rusle_dir = Path(wd) / "rusle"
+    if not rusle_dir.exists():
+        return False
+    if any(rusle_dir.glob("a_*.tif")):
+        return True
+    return (rusle_dir / "manifest.json").exists()
+
+
+def _rusle_results_invalidated(prep) -> bool:
+    run_wepp = _first_valid_timestamp(
+        prep,
+        "timestamps:run_wepp_watershed",
+        "timestamps:run_wepp",
+    )
+    rusle_build = prep.redis.hget(prep.run_id, "timestamps:build_rusle")
+    build_climate = prep.redis.hget(prep.run_id, "timestamps:build_climate")
+
+    if run_wepp in (None, ""):
+        return not _safe_gt_timestamp(rusle_build, build_climate)
+
+    return not (
+        _safe_gt_timestamp(rusle_build, build_climate)
+        and _safe_gt_timestamp(rusle_build, run_wepp)
+    )
+
+
+def _resolve_rusle_active_a_relpath(wd: str) -> str | None:
+    manifest_path = Path(wd) / "rusle" / "manifest.json"
+    if not manifest_path.exists():
+        return None
+
+    try:
+        with manifest_path.open("r", encoding="utf-8") as stream:
+            manifest = json.load(stream)
+    except (OSError, ValueError, TypeError):
+        return None
+
+    rusle_payload = manifest.get("rusle", {}) if isinstance(manifest, dict) else {}
+    artifacts = rusle_payload.get("artifacts", {}) if isinstance(rusle_payload, dict) else {}
+    relpath = artifacts.get("a_relpath") if isinstance(artifacts, dict) else None
+    if not isinstance(relpath, str):
+        return None
+
+    normalized = relpath.replace("\\", "/").strip()
+    if not normalized.startswith("rusle/"):
+        return None
+    if not _exists(_join(wd, normalized)):
+        return None
+    return normalized
 
 
 def _render_report_csv(*, runid, report: ReportBase, unitizer, slug, table=None):
@@ -518,6 +571,47 @@ def report_wepp_results(runid, config):
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:504", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building reports template', runid=runid)
+
+
+@wepp_bp.route('/runs/<string:runid>/<config>/report/rusle/results')
+@wepp_bp.route('/runs/<string:runid>/<config>/report/rusle/results/')
+@authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view RUSLE reports.")
+def report_rusle_results(runid, config):
+    wd = get_wd(runid)
+
+    try:
+        prep = RedisPrep.getInstance(wd)
+    except FileNotFoundError:
+        prep = None
+
+    has_results = _rusle_outputs_exist(wd)
+    if not has_results:
+        return ""
+
+    rusle_results_stale = bool(prep is not None and _rusle_results_invalidated(prep))
+    run_results_title = "Run Results" + (" (stale)" if rusle_results_stale else "")
+
+    rusle_manifest_exists = _exists(_join(wd, "rusle", "manifest.json"))
+    rusle_readme_exists = _exists(_join(wd, "rusle", "README.md"))
+    rusle_active_a_relpath = _resolve_rusle_active_a_relpath(wd)
+
+    try:
+        return render_template(
+            "controls/rusle_reports.htm",
+            runid=runid,
+            config=config,
+            run_results_title=run_results_title,
+            rusle_results_stale=rusle_results_stale,
+            rusle_manifest_exists=rusle_manifest_exists,
+            rusle_readme_exists=rusle_readme_exists,
+            rusle_active_a_relpath=rusle_active_a_relpath,
+            user=current_user,
+        )
+    except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:557", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        return exception_factory('Error building RUSLE reports template', runid=runid)
 
 
 

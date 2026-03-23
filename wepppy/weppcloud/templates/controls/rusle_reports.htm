@@ -1,0 +1,38 @@
+{% extends 'controls/_content_base.htm' %}
+{% import "controls/_pure_macros.html" as ui %}
+{% set page_id = "rusle-reports" %}
+
+{% set card_description %}
+  <p class="wc-text-muted">
+    Quick links to Gridded RUSLE artifacts for this run.
+  </p>
+{% endset %}
+
+{% set results_title = run_results_title if run_results_title is defined else "Run Results" %}
+
+{% block content %}
+  <div class="wc-stack">
+    {% call ui.card_shell(
+         results_title,
+         collapsible=True,
+         description=card_description | trim) %}
+      <section class="wc-stack">
+        <h4 class="wc-heading wc-heading--sm">RUSLE Results</h4>
+        <div class="wc-stack">
+          <a class="wc-link wc-link--file"
+             href="{{ url_for_run('gl_dashboard.gl_dashboard', runid=runid, config=config) }}"
+             target="_blank"
+             rel="noopener">
+            GL Dashboard
+          </a>
+          <a class="wc-link wc-link--file"
+             href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='rusle/') }}"
+             target="_blank"
+             rel="noopener">
+            View RUSLE Outputs Directory
+          </a>
+        </div>
+      </section>
+    {% endcall %}
+  </div>
+{% endblock content %}

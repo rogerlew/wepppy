@@ -14,6 +14,7 @@ var Rusle = (function () {
 
     var SELECTORS = {
         form: "#" + FORM_ID,
+        results: "#rusle-results",
         status: "#status",
         stacktrace: "#stacktrace",
         rqJob: "#rq_job",
@@ -35,6 +36,7 @@ var Rusle = (function () {
         "rusle:build:queued",
         "rusle:build:completed",
         "rusle:build:failed",
+        "rusle:report:loaded",
         "rusle:status:updated",
         "job:started",
         "job:completed",
@@ -53,7 +55,12 @@ var Rusle = (function () {
         if (!forms || typeof forms.serializeForm !== "function") {
             throw new Error("Rusle controller requires WCForms helpers.");
         }
-        if (!http || typeof http.postJsonWithSessionToken !== "function" || typeof http.isHttpError !== "function") {
+        if (
+            !http ||
+            typeof http.postJsonWithSessionToken !== "function" ||
+            typeof http.request !== "function" ||
+            typeof http.isHttpError !== "function"
+        ) {
             throw new Error("Rusle controller requires WCHttp helpers.");
         }
         if (!events || typeof events.createEmitter !== "function") {
@@ -277,6 +284,7 @@ var Rusle = (function () {
         }
 
         var formElement = dom.qs(SELECTORS.form);
+        var resultsElement = dom.qs(SELECTORS.results);
         var statusElement = formElement ? dom.qs(SELECTORS.status, formElement) : null;
         var stacktraceElement = formElement ? dom.qs(SELECTORS.stacktrace, formElement) : null;
         var rqJobElement = formElement ? dom.qs(SELECTORS.rqJob, formElement) : null;
@@ -291,6 +299,7 @@ var Rusle = (function () {
             http: http,
             events: emitter,
             form: formElement,
+            resultsContainer: resultsElement,
             status: createLegacyAdapter(statusElement),
             stacktrace: createLegacyAdapter(stacktraceElement),
             rq_job: createLegacyAdapter(rqJobElement),
@@ -336,7 +345,8 @@ var Rusle = (function () {
                     clearStatus: true,
                     clearSummary: true,
                     clearHint: true,
-                    clearResults: false,
+                    clearResults: true,
+                    resultsTarget: controller.resultsContainer,
                     clearStacktrace: true
                 });
             } else {
@@ -404,6 +414,30 @@ var Rusle = (function () {
                     k_modes: selectedKModes(controller.form)
                 });
             }
+        };
+
+        controller.report = function () {
+            var target = controller.resultsContainer;
+            if (!target) {
+                return;
+            }
+
+            http.request(url_for_run("report/rusle/results/"))
+                .then(function (result) {
+                    var body = result && result.body;
+                    if (typeof body === "string") {
+                        target.innerHTML = body;
+                        if (controller.events && typeof controller.events.emit === "function") {
+                            controller.events.emit("rusle:report:loaded", {
+                                runId: getActiveRunId(),
+                                html: body
+                            });
+                        }
+                    }
+                })
+                .catch(function (error) {
+                    controller.pushResponseStacktrace(controller, toResponsePayload(http, error));
+                });
         };
 
         function submitBuild() {
@@ -484,6 +518,9 @@ var Rusle = (function () {
                 }
                 controller._completion_seen = true;
                 controller.disconnect_status_stream(controller);
+                if (typeof controller.report === "function") {
+                    controller.report();
+                }
                 if (controller.events && typeof controller.events.emit === "function") {
                     controller.events.emit("rusle:build:completed", {
                         runId: getActiveRunId(),
@@ -516,6 +553,10 @@ var Rusle = (function () {
             });
         }
 
+        var bootstrapState = {
+            reportTriggered: false
+        };
+
         controller.bootstrap = function bootstrap(context) {
             controller.syncUi();
             var ctx = context || {};
@@ -547,6 +588,11 @@ var Rusle = (function () {
                     runId: getActiveRunId(),
                     job_id: jobId || null
                 });
+            }
+
+            if (!bootstrapState.reportTriggered && typeof controller.report === "function") {
+                controller.report();
+                bootstrapState.reportTriggered = true;
             }
 
             return controller;

@@ -180,6 +180,12 @@ def _touch_wepp_results(run_dir: str) -> None:
     (output_dir / "loss_pw0.txt").write_text("results")
 
 
+def _touch_rusle_results(run_dir: str) -> None:
+    rusle_dir = Path(run_dir) / "rusle"
+    rusle_dir.mkdir(parents=True, exist_ok=True)
+    (rusle_dir / "a_observed_rap_polaris_nomograph.tif").write_text("results")
+
+
 def test_report_wepp_results_marks_stale_when_invalidated(wepp_client, monkeypatch: pytest.MonkeyPatch):
     client, _, run_dir = wepp_client
     _touch_wepp_results(run_dir)
@@ -308,6 +314,99 @@ def test_report_wepp_results_returns_500_when_template_render_raises(
     assert response.status_code == 500
     payload = response.get_json()
     assert payload["error"]["message"] == "Error building reports template"
+
+
+def test_report_rusle_results_returns_empty_when_outputs_missing(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, _ = wepp_client
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/rusle/results/")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == ""
+
+
+def test_report_rusle_results_marks_stale_when_invalidated(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, run_dir = wepp_client
+    _touch_rusle_results(run_dir)
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyRedis:
+        def __init__(self, values: Dict[str, str]) -> None:
+            self._values = values
+
+        def hget(self, run_id: str, key: str):
+            return self._values.get(key)
+
+    class DummyRedisPrep:
+        def __init__(self, values: Dict[str, str]) -> None:
+            self.run_id = RUN_ID
+            self.redis = DummyRedis(values)
+
+        @staticmethod
+        def getInstance(wd: str):
+            return DummyRedisPrep(
+                {
+                    "timestamps:build_climate": "200",
+                    "timestamps:build_rusle": "100",
+                }
+            )
+
+    monkeypatch.setattr(wepp_module, "RedisPrep", DummyRedisPrep)
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "controls/rusle_reports.htm"
+        return str(kwargs["run_results_title"])
+
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/rusle/results/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "Run Results (stale)"
+
+
+def test_report_rusle_results_not_stale_when_current(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, run_dir = wepp_client
+    _touch_rusle_results(run_dir)
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyRedis:
+        def __init__(self, values: Dict[str, str]) -> None:
+            self._values = values
+
+        def hget(self, run_id: str, key: str):
+            return self._values.get(key)
+
+    class DummyRedisPrep:
+        def __init__(self, values: Dict[str, str]) -> None:
+            self.run_id = RUN_ID
+            self.redis = DummyRedis(values)
+
+        @staticmethod
+        def getInstance(wd: str):
+            return DummyRedisPrep(
+                {
+                    "timestamps:build_climate": "200",
+                    "timestamps:build_rusle": "300",
+                }
+            )
+
+    monkeypatch.setattr(wepp_module, "RedisPrep", DummyRedisPrep)
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "controls/rusle_reports.htm"
+        return str(kwargs["run_results_title"])
+
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/rusle/results/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "Run Results"
 
 
 def test_query_channels_summary_returns_500_when_controller_raises(

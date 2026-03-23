@@ -37,6 +37,7 @@ describe("Rusle controller", () => {
                 <input type="checkbox" id="force_polaris_refresh" name="force_polaris_refresh">
                 <button id="btn_build_rusle" type="button" data-rusle-action="run">Build</button>
             </form>
+            <div id="rusle-results"></div>
             <div id="rusle_status_panel"><span id="braille"></span></div>
             <div id="rusle_stacktrace_panel"><div id="stacktrace"></div></div>
         `;
@@ -50,6 +51,7 @@ describe("Rusle controller", () => {
 
         httpMock = {
             postJsonWithSessionToken: jest.fn(() => Promise.resolve({ body: { job_id: "job-rusle-1" } })),
+            request: jest.fn(() => Promise.resolve({ body: "<div>RUSLE Results</div>" })),
             isHttpError: jest.fn(() => false)
         };
         global.WCHttp = httpMock;
@@ -160,5 +162,23 @@ describe("Rusle controller", () => {
         const payload = httpMock.postJsonWithSessionToken.mock.calls[0][1];
         expect(payload.k_modes).toEqual(["polaris_nomograph"]);
         expect(payload.default_k_mode).toBe("polaris_nomograph");
+    });
+
+    test("completion event refreshes the run results summary", async () => {
+        rusle.triggerEvent("RUSLE_BUILD_TASK_COMPLETED");
+        await flushPromises();
+
+        expect(httpMock.request).toHaveBeenCalledWith("report/rusle/results/");
+        expect(document.getElementById("rusle-results").innerHTML).toContain("RUSLE Results");
+    });
+
+    test("bootstrap fetches the run results summary once", async () => {
+        rusle.bootstrap({});
+        await flushPromises();
+        rusle.bootstrap({});
+        await flushPromises();
+
+        expect(httpMock.request).toHaveBeenCalledTimes(1);
+        expect(httpMock.request).toHaveBeenCalledWith("report/rusle/results/");
     });
 });
