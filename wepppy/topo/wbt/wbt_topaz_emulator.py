@@ -543,12 +543,11 @@ class WhiteboxToolsTopazEmulator:
         elif fill_or_breach == "breach":
             ret = self.wbt.breach_depressions(dem=self.dem, output=relief_fn, fill_pits=True)
         elif fill_or_breach == "breach_least_cost":
-            if blc_dist is None:
-                blc_dist = 1000
+            dist_cells = self._resolve_blc_dist_cells(blc_dist)
             kwargs: Dict[str, Any] = {
                 "dem": self.dem,
                 "output": relief_fn,
-                "dist": int(blc_dist),
+                "dist": dist_cells,
                 "fill": bool(blc_fill),
             }
             if blc_max_cost is not None:
@@ -562,6 +561,18 @@ class WhiteboxToolsTopazEmulator:
 
         if self.verbose:
             print(f"Relief file created successfully: {relief_fn}")
+
+    def _resolve_blc_dist_cells(self, blc_dist: Optional[int]) -> int:
+        """Convert breach least-cost distance from meters to raster cells."""
+        blc_dist_m = 1000.0 if blc_dist is None else float(blc_dist)
+        if blc_dist_m <= 0:
+            raise ValueError("blc_dist must be greater than zero when provided")
+
+        cellsize_m = float(getattr(self, "cellsize", 0.0))
+        if cellsize_m <= 0:
+            raise ValueError("cellsize must be greater than zero before converting blc_dist to cells")
+
+        return max(1, int(round(blc_dist_m / cellsize_m)))
 
     @build_step("flow_vector")
     def _create_flow_vector(self, logger: Optional[logging.Logger] = None) -> None:
@@ -747,7 +758,7 @@ class WhiteboxToolsTopazEmulator:
             csa: Channel source area threshold expressed in hectares.
             mcl: Minimum channel length in meters.
             fill_or_breach: Conditioning strategy used when creating relief.
-            blc_dist: Optional distance parameter for ``breach_least_cost``.
+            blc_dist: Optional distance parameter for ``breach_least_cost`` in meters.
             logger: Optional logger used for debug messages.
         """
         if logger is not None:

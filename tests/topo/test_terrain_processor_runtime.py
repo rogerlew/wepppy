@@ -395,12 +395,15 @@ def test_terrain_processor_phase2_passes_blc_controls_to_flow_stack(
         ),
     )
 
+    # Breach least-cost distance is configured in meters and converted to cells.
+    processor._emulator.cellsize = 5.0  # type: ignore[attr-defined]
+
     processor._run_phase1_dem_preparation(())
     processor._run_phase2_conditioning_flow_stack(())
 
     assert len(flow_stack_stub) == 1
     assert flow_stack_stub[0]["fill_or_breach"] == "breach_least_cost"
-    assert flow_stack_stub[0]["blc_dist"] == 250
+    assert flow_stack_stub[0]["blc_dist"] == 50
     assert flow_stack_stub[0]["blc_max_cost"] == pytest.approx(12.5)
     assert flow_stack_stub[0]["blc_fill"] is False
 

@@ -1596,7 +1596,8 @@ class TerrainProcessor:
     def _as_blc_dist(self) -> int | None:
         if self.config.blc_dist_m is None:
             return None
-        return int(round(self.config.blc_dist_m))
+        cellsize_m = self._require_cellsize()
+        return max(1, int(round(float(self.config.blc_dist_m) / cellsize_m)))
 
     def _set_emulator_dem(self, dem_path: str) -> None:
         if hasattr(self._emulator, "_parse_dem"):
