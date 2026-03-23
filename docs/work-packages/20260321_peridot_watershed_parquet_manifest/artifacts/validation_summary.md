@@ -43,3 +43,19 @@
 - WEPP hillslope profile slope median (`wepp/runs/p*.slp`, excluding `pw0.slp`): `0.24995`
 - Median ratio (`parquet / profile`): `1.0561512026411934`
 - Interpretation: magnitudes are in a reasonable range.
+
+## Follow-up correction verification (2026-03-22)
+
+1. Updated `/workdir/peridot` abstraction writers to remove watershed CSV output emission in both paths:
+   - `src/watershed_abstraction/watershed_abstraction.rs`
+   - `src/wbt/wbt_watershed_abstraction.rs`
+2. Rebuilt producer binaries:
+   - `cargo test --test watershed_parquet_manifest -- --nocapture` - PASS (`3 passed`)
+   - `cargo test --test hillslope_slope_scalar -- --nocapture` - PASS (`1 passed`)
+   - `cargo build --release --bin abstract_watershed --bin wbt_abstract_watershed` - PASS
+3. Replaced WEPPpy bundled binaries with rebuilt artifacts via atomic rename to avoid `ETXTBUSY`.
+4. Verified updated runtime surface:
+   - `abstract_watershed --help` and `wbt_abstract_watershed --help` now describe `--skip-flowpaths` as skipping `flowpaths.parquet` + slope files.
+   - Binary string scan confirms no `watershed/hillslopes.csv`, `watershed/channels.csv`, or `watershed/flowpaths.csv` output strings.
+5. Re-ran WEPPpy targeted regression:
+   - `wctl run-pytest tests/topo/test_peridot_runner_wait.py` - PASS (`11 passed`).

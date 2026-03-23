@@ -42,9 +42,9 @@ After this change, Peridot will directly emit watershed parquet files as first-c
   Rationale: Keeps behavior verifiable at each milestone and minimizes regression risk.
   Date/Author: 2026-03-21 / Codex.
 
-- Decision: Keep CSV outputs in Peridot for compatibility during transition, but make parquet the first-class producer output.
-  Rationale: Avoids breaking unknown CSV consumers while eliminating mandatory CSV->parquet conversion for new runs.
-  Date/Author: 2026-03-21 / Codex.
+- Decision (superseding clarification): Peridot producer outputs for watershed tabular data are parquet-only; compatibility scope is legacy migration/fallback for old CSV-only projects.
+  Rationale: Matches migration requirement without leaving `watershed/*.csv` artifacts that retrigger migration gating for new runs.
+  Date/Author: 2026-03-22 / Codex.
 
 - Decision: Make `post_abstract_watershed()` parquet-first with explicit warnings when CSV fallback is used.
   Rationale: Provides explicit old-run compatibility behavior without silently masking missing new artifacts.
@@ -60,7 +60,7 @@ After this change, Peridot will directly emit watershed parquet files as first-c
 
 ## Outcomes & Retrospective
 
-Completed. Peridot now emits first-class watershed parquet outputs and a flag-aware manifest README in both abstraction binaries; WEPPpy consumes parquet-first for new runs, retains explicit legacy CSV fallback/migration behavior, and refreshes README manifest/schema after post-processing so final contracts remain aligned on disk.
+Completed. Peridot now emits first-class watershed parquet outputs and a flag-aware manifest README in both abstraction binaries, and abstraction producers no longer emit watershed tabular CSV files. WEPPpy consumes parquet-first for new runs, retains explicit legacy CSV fallback/migration behavior for old runs, and refreshes README manifest/schema after post-processing so final contracts remain aligned on disk.
 
 Subagent findings were addressed with additional code and tests. Residual accepted risk is low: very large flowpath-enabled exports still build one in-memory parquet batch (`write_subflows_metadata_to_parquet`), now serialized outside the parallel pool.
 
@@ -147,3 +147,4 @@ WEPPpy consumer contract:
 
 ---
 Revision Note (2026-03-21, Codex): Plan completed; ready to archive under `prompts/completed/`.
+Revision Note (2026-03-22, Codex): Clarified compatibility scope and applied parquet-only producer correction for watershed abstraction outputs.

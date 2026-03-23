@@ -6,7 +6,7 @@
 
 **Started**: 2026-03-21
 **Current phase**: Closed
-**Last updated**: 2026-03-21
+**Last updated**: 2026-03-22
 **Next milestone**: None (package complete)
 
 ## Task Board
@@ -36,12 +36,14 @@
 - [x] Fixed README drift by refreshing manifest/schema sections after WEPPpy parquet post-processing (2026-03-21).
 - [x] Reduced flowpaths parquet contention by moving export outside Peridot parallel output pool (2026-03-21).
 - [x] Expanded WEPPpy fallback/migration tests and Peridot manifest conditional tests (2026-03-21).
+- [x] Follow-up correction: removed watershed CSV emission from Peridot abstraction outputs; compatibility remains via legacy migration/fallback for old CSV-only runs (2026-03-22).
 
 ## Timeline
 
 - **2026-03-21** - Package created and activated.
 - **2026-03-21** - Peridot producer + WEPPpy parquet-first integration implemented and validated.
 - **2026-03-21** - Real-run verification completed on `/wc1/runs/un/unassailable-sensuousness`.
+- **2026-03-22** - Producer behavior corrected to parquet-only watershed tabular outputs (no `watershed/*.csv` emission).
 
 ## Decisions
 
@@ -52,12 +54,12 @@
 
 **Impact**: Enables immediate migration without breaking historical runs while keeping fallback behavior discoverable and auditable.
 
-### 2026-03-21: Keep CSV outputs for compatibility, but make parquet canonical
-**Context**: Peridot now writes parquet directly; removing CSV immediately could break unknown downstream scripts.
+### 2026-03-22: Clarify compatibility scope (producer parquet-only)
+**Context**: Compatibility for old runs was incorrectly interpreted as requiring dual-format producer outputs.
 
-**Decision**: Keep CSV emission in Peridot for now, generate parquet in the same run, and switch WEPPpy post-processing to consume parquet first.
+**Decision**: Peridot abstraction producers are parquet-only for watershed tabular outputs. Legacy compatibility remains in WEPPpy migration/fallback paths for old projects that only have CSV.
 
-**Impact**: New runs no longer require CSV->parquet conversion while old tooling can still read CSV during transition.
+**Impact**: New abstractions do not leave `watershed/*.csv` artifacts that retrigger migration checks; historical CSV-only projects remain migratable.
 
 ### 2026-03-21: Preserve explicit legacy migration path
 **Context**: User required old projects with `watershed/*.csv` to remain migratable.
@@ -162,6 +164,26 @@
 - `wctl run-pytest tests/topo/test_peridot_runner_wait.py` PASS (`11 passed`).
 - `wctl run-pytest tests/tools/test_migrations_parquet_backfill.py -k watershed` PASS.
 - Real-run verification PASS (`/wc1/runs/un/unassailable-sensuousness`).
+
+### 2026-03-22: Producer format correction (parquet-only)
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Updated `/workdir/peridot` watershed abstraction writers (`abstract_watershed`, `wbt_abstract_watershed`) to stop emitting `watershed/channels.csv`, `watershed/hillslopes.csv`, and `watershed/flowpaths.csv`.
+- Updated Peridot CLI help text for `--skip-flowpaths` to reflect parquet-only flowpath tabular outputs.
+- Rebuilt Peridot binaries and replaced WEPPpy bundled binaries in `wepppy/topo/peridot/bin/`.
+- Updated work-package docs to clarify that migration compatibility applies to old CSV-only projects, not new producer output format.
+
+**Blockers encountered**:
+- Direct overwrite of active binaries returned `ETXTBUSY`; resolved with atomic `*.new` rename replacement.
+
+**Next steps**:
+- None (clarification and producer behavior now aligned with requirement).
+
+**Test results**:
+- `cargo test --test watershed_parquet_manifest -- --nocapture` PASS (`3 passed`).
+- `cargo test --test hillslope_slope_scalar -- --nocapture` PASS (`1 passed`).
+- `wctl run-pytest tests/topo/test_peridot_runner_wait.py` PASS (`11 passed`).
 
 ## Communication Log
 

@@ -1,12 +1,15 @@
 # Peridot Watershed Parquet + Manifest Integration
 
-**Status**: Completed (2026-03-21)
+**Status**: Completed (2026-03-21), clarified follow-up applied (2026-03-22)
 
 ## Overview
 This package upgrades the Peridot-to-WEPPpy watershed abstraction contract so Peridot writes first-class parquet outputs directly and ships a run-generated `watershed/README.md` manifest/schema summary. WEPPpy then consumes these parquet files directly for new runs while keeping explicit legacy behavior for older runs that only have CSV outputs.
 
+Clarification (2026-03-22): compatibility for old runs means migration/fallback support for legacy CSV-only projects. It does not require Peridot abstraction producers to emit new `watershed/*.csv` files; producer output is parquet-only for watershed tabular artifacts.
+
 ## Objectives
 - Enable Peridot `abstract_watershed` and `wbt_abstract_watershed` to write complete watershed parquet outputs (`hillslopes`, `channels`, optional `flowpaths`).
+- Ensure Peridot abstraction does not emit watershed tabular CSV outputs for new runs.
 - Generate `watershed/README.md` from Peridot with executed flags, file manifest, and tabular schema summaries.
 - Remove mandatory CSV->parquet conversion from WEPPpy for new runs while preserving explicit legacy compatibility for old runs.
 - Add and pass focused Rust and pytest coverage for direct parquet and legacy fallback paths.
@@ -32,6 +35,7 @@ This package upgrades the Peridot-to-WEPPpy watershed abstraction contract so Pe
 
 ## Success Criteria
 - [x] Peridot writes `watershed/hillslopes.parquet`, `watershed/channels.parquet`, and conditional `watershed/flowpaths.parquet` in both abstraction paths.
+- [x] Peridot abstraction does not emit `watershed/hillslopes.csv`, `watershed/channels.csv`, or `watershed/flowpaths.csv` for new runs.
 - [x] Peridot writes `watershed/README.md` with flag-aware manifest/schema details.
 - [x] WEPPpy uses Peridot parquet directly for new runs without mandatory CSV->parquet conversion.
 - [x] WEPPpy retains explicit legacy behavior for runs lacking parquet.
@@ -70,6 +74,6 @@ This package upgrades the Peridot-to-WEPPpy watershed abstraction contract so Pe
 - Work-package execution artifacts (review + validation).
 
 ## Follow-up Work
-- Evaluate eventual deprecation timeline for CSV compatibility once old-run coverage window closes.
+- Evaluate eventual deprecation timeline for legacy CSV fallback readers/migration inputs once historical run coverage window closes.
 - Add end-to-end Peridot abstraction entrypoint tests (topaz + wbt) for output wiring regression protection.
 - Evaluate chunked/row-group flowpaths parquet writer to reduce remaining peak-memory risk on large flowpath exports.
