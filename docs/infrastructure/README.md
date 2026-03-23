@@ -15,6 +15,7 @@
 | [incident-2026-03-12-forest-nfs-client-path-degradation.md](incident-2026-03-12-forest-nfs-client-path-degradation.md) | Incident note for `forest` create/catalog timeouts tied to degraded NFS client-path behavior and follow-up network comparison. |
 | [secrets.md](secrets.md) | Canonical secrets handling policy (Compose secrets now; Kubernetes worker pools next). |
 | [ui-rcds-nfs-vs-dev-nfs.md](ui-rcds-nfs-vs-dev-nfs.md) | NFS metadata workload benchmark for delete/recreate performance comparisons. |
+| [wmesque-dataset-sync-manifest.md](wmesque-dataset-sync-manifest.md) | Canonical dataset inventory for production-to-test-production WMesque geodata sync. |
 
 ## Curation Notes
 - This directory is a knowledgebase, not a ticket queue.
