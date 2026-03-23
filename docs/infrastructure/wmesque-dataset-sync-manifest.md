@@ -40,7 +40,10 @@ These appear in committed NoDb configs and route through `wmesque_retrieve(...)`
 ### Landuse (`nlcd_db`) dataset IDs
 - `alaska/nlcd/2016`
 - `ca/canadalandcover2020`
+- `eu/CORINE_LandCover/1990`
 - `eu/CORINE_LandCover/2000`
+- `eu/CORINE_LandCover/2006`
+- `eu/CORINE_LandCover/2012`
 - `eu/CORINE_LandCover/2018`
 - `hawaii/nlcd/wepp_31131a7`
 - `locales/ChileCayumanque/landuse`
