@@ -1,0 +1,85 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set roads_summary = roads.query_summary() if roads is defined and roads is not none else {} %}
+{% set roads_params = roads_summary.get("roads_params", {}) %}
+{% set roads_upload_relpath = roads_summary.get("uploaded_geojson_relpath") %}
+{% set roads_max_upload_mb = roads_params.get("max_upload_mb", 50) %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Upload a roads GeoJSON map, prepare segment lowpoint/channel/hillslope mapping, then run Roads watershed integration.
+  </p>
+  <ol class="wc-list">
+    <li><strong>Upload Roads GeoJSON</strong>: FeatureCollection with LineString or MultiLineString roads.</li>
+    <li><strong>Prepare Segment Candidates</strong>: builds monotonic segments and writes decision diagnostics.</li>
+    <li><strong>Run WEPPcloud Roads</strong>: runs mapped segments and watershed pass integration.</li>
+  </ol>
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="roads_form",
+     title="Roads",
+     collapsible=True,
+     description=description,
+     form_attrs={"data-roads-max-upload-mb": roads_max_upload_mb},
+     status_panel_options={"id": "roads_status_panel", "log_id": "roads_status"},
+     summary_panel_options={"panel_id": "roads_summary_panel", "summary_id": "roads_info"},
+     stacktrace_panel_options={"panel_id": "roads_stacktrace_panel", "body_id": "roads_stacktrace"}
+   ) %}
+  <section class="wc-stack">
+    {{ ui.file_upload(
+         "roads_geojson_file",
+         "Upload roads GeoJSON",
+         accept=".geojson,application/geo+json,application/json",
+         help="Maximum file size: " ~ roads_max_upload_mb ~ " MB. Upload a FeatureCollection with LineString or MultiLineString geometries.",
+         current_filename=roads_upload_relpath,
+         extra_control_class="disable-readonly",
+         field_name="file"
+       ) }}
+
+    <div id="roads_geojson_file-progress" class="wc-upload-progress" hidden>
+      <div class="wc-upload-progress__bar">
+        <div class="wc-upload-progress__fill" style="width: 0%"></div>
+      </div>
+      <p class="wc-upload-progress__status">Uploading: 0%</p>
+    </div>
+
+    {% call button_row() %}
+      <button
+        id="roads_upload_geojson"
+        type="button"
+        class="pure-button pure-button-secondary disable-readonly"
+        data-roads-action="upload">
+        Upload Roads GeoJSON
+      </button>
+    {% endcall %}
+    <p id="roads_upload_message" class="wc-field__help" aria-live="polite"></p>
+
+    {% call button_row() %}
+      <button
+        id="roads_prepare_segments"
+        type="button"
+        class="pure-button pure-button-primary disable-readonly"
+        data-roads-action="prepare-segments">
+        <span>Prepare Segment Candidates</span>
+      </button>
+      <button
+        id="run_roads_wepp"
+        type="button"
+        class="pure-button pure-button-primary disable-readonly"
+        data-roads-action="run">
+        <img
+          id="run_roads_lock"
+          src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}"
+          alt=""
+          style="display:none;">
+        <span>Run WEPPcloud Roads</span>
+      </button>
+    {% endcall %}
+    <p class="wc-field__help">
+      Segment candidates with <code>mapped</code> lowpoint decisions are eligible for Roads WEPP runs; all decisions are written to Roads summary artifacts.
+    </p>
+    {{ ui.job_hint("hint_run_roads", extra_class="wc-field__help") }}
+  </section>
+{% endcall %}

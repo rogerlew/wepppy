@@ -35,6 +35,7 @@ _BLUEPRINT_ATTRS = [
     "storm_event_analyzer_bp",
     "pivottable_bp",
     "project_bp",
+    "roads_bp",
     "jsoncrack_bp",
     "rangeland_bp",
     "rangeland_cover_bp",

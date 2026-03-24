@@ -31,6 +31,7 @@ from .project_routes import router as project_router
 from .run_sync_routes import router as run_sync_router
 from .rap_ts_routes import router as rap_ts_router
 from .rhem_routes import router as rhem_router
+from .roads_routes import router as roads_router
 from .rusle_routes import router as rusle_router
 from .session_routes import router as session_router
 from .soils_routes import router as soils_router
@@ -97,6 +98,7 @@ app.include_router(wepp_router, prefix="/api")
 app.include_router(swat_router, prefix="/api")
 app.include_router(debris_flow_router, prefix="/api")
 app.include_router(rhem_router, prefix="/api")
+app.include_router(roads_router, prefix="/api")
 app.include_router(rusle_router, prefix="/api")
 app.include_router(rap_ts_router, prefix="/api")
 app.include_router(openet_ts_router, prefix="/api")

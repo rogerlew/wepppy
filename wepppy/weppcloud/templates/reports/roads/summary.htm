@@ -1,0 +1,20 @@
+{% extends "layout.htm" %}
+
+{% block title %}Roads Summary{% endblock %}
+
+{% block body %}
+<div class="wc-container">
+  <h1>Roads Summary</h1>
+  <p><strong>Run:</strong> {{ runid }} / {{ config }}</p>
+
+  <section>
+    <h2>Status</h2>
+    <pre>{{ roads_status | tojson(indent=2) }}</pre>
+  </section>
+
+  <section>
+    <h2>Summary</h2>
+    <pre>{{ roads_summary | tojson(indent=2) }}</pre>
+  </section>
+</div>
+{% endblock %}

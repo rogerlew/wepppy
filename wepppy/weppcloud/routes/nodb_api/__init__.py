@@ -13,6 +13,7 @@ __all__ = [
     "observed_bp",
     "omni_bp",
     "project_bp",
+    "roads_bp",
     "rangeland_bp",
     "rangeland_cover_bp",
     "rhem_bp",

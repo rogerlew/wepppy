@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-21  
-**Active Packages**: 2  
+**Last Updated**: 2026-03-23  
+**Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 2 packages ✅ **Within target**
+**Current WIP**: 3 packages ✅ **Within target**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -242,7 +242,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 2 packages ✅
+**Current WIP Count**: 3 packages ✅
 
 ---
 
@@ -287,6 +287,26 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 1. **Immediate** (Nov 2-8): Resolve RFC decisions (4 decisions), finalize integration (onboarding docs, release notes)
 2. **Phase 4 Gate** (Nov 18): Review telemetry data, resolve Phase 4 open questions (index storage, watch mode, UI integration, search patterns), make go/no-go decision
 3. **If Phase 4 Greenlit**: Create Phase 4 work package structure, draft agent prompts, assign ownership, schedule M1 target (~Dec 6)
+
+---
+
+### Roads NoDb Inslope End-to-End Implementation
+**Started**: 2026-03-23  
+**Status**: Planning Complete - Implementation Ready (ExecPlan active)  
+**Size**: Large (1-2 weeks)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260323_roads_nodb_inslope_e2e/](docs/work-packages/20260323_roads_nodb_inslope_e2e/)  
+**Description**: Deliver phase-1 Roads integration from `wepppy/nodb/mods/roads/specification.md`, including `Roads(NoDbBase)`, mod enablement/WBT guard, run-page/header/preflight wiring, Roads routes + RQ jobs, single-OFE road runs, pass combination, and queue governance updates.
+
+**Current Status**:
+- Package scaffold authored (`package.md`, `tracker.md`, active ExecPlan).
+- Implementation-ready file-level edit map and validation strategy published with `clogging-starch` as default fixture run.
+- Root/package trackers and active ExecPlan pointer synchronized.
+
+**Next Steps**:
+1. Implement Milestone 1 (`Roads` controller + monotonic segment inslope parity).
+2. Wire UI/preflight/task enum + Roads blueprint/rq-engine/RQ paths.
+3. Complete `clogging-starch` e2e validation and queue/route governance checks.
 
 ---
 

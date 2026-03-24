@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **55**
+- Total frozen routes covered: **57**
 
 ## Contract Matrix
 
@@ -52,7 +52,9 @@ Guarded by:
 | `POST` | `/api/runs/{runid}/{config}/run-omni` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-omni-contrasts` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-omni-contrasts-dry-run` | JWT Bearer | rq:enqueue | read-only | sync no queue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `POST` | `/api/runs/{runid}/{config}/prepare-roads` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_roads_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-rhem` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `POST` | `/api/runs/{runid}/{config}/run-roads` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_roads_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-swat` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-swat-noprep` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_bootstrap_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-wepp` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |

@@ -89,3 +89,24 @@ func TestEvaluateWeppNotSatisfiedByStaleRusleForGriddedRuns(t *testing.T) {
 		t.Fatalf("expected wepp checklist entry to remain false when gridded RUSLE is stale")
 	}
 }
+
+func TestEvaluateRoadsRequiresWeppFreshness(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:run_wepp_watershed": "200",
+		"timestamps:run_roads":          "210",
+	})
+
+	if !check["roads"] {
+		t.Fatalf("expected roads checklist entry to be true when run_roads is newer than WEPP")
+	}
+}
+
+func TestEvaluateRoadsStaysFalseWithoutRunWepp(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:run_roads": "210",
+	})
+
+	if check["roads"] {
+		t.Fatalf("expected roads checklist entry to be false when WEPP timestamp is missing")
+	}
+}

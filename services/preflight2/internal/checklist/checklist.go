@@ -38,6 +38,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"omni_contrasts":  false,
 		"observed":        false,
 		"debris":          false,
+		"roads":           false,
 		"watar":           false,
 		"rusle":           false,
 		"dss_export":      false,
@@ -93,6 +94,8 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		safeGT(prep["timestamps:run_debris"], prep["timestamps:build_soils"]) &&
 		safeGT(prep["timestamps:run_debris"], prep["timestamps:build_climate"]) &&
 		safeGT(prep["timestamps:run_debris"], runWepp)
+
+	check["roads"] = safeGT(prep["timestamps:run_roads"], runWepp)
 
 	check["watar"] = safeGT(prep["timestamps:run_watar"], prep["timestamps:build_landuse"]) &&
 		safeGT(prep["timestamps:run_watar"], prep["timestamps:build_soils"]) &&

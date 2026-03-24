@@ -459,6 +459,9 @@ var Project = (function () {
             debris_flow: function (ctx) {
                 bootstrapControllerSymbol(window.DebrisFlow, ctx);
             },
+            roads: function (ctx) {
+                bootstrapControllerSymbol(window.Roads, ctx);
+            },
             path_ce: function (ctx) {
                 bootstrapControllerSymbol(window.PathCE, ctx);
             },

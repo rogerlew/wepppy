@@ -241,6 +241,16 @@
   },
   {
     "depends_on": [],
+    "enqueue_target": "func",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_roads_job",
+    "source_lineno": 49,
+    "source_module": "wepppy/microservices/rq_engine/roads_routes.py"
+  },
+  {
+    "depends_on": [],
     "enqueue_target": "run_sync_rq",
     "job_meta_stage": null,
     "notes": [],
@@ -1479,7 +1489,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "delete_run",
-    "source_lineno": 246,
+    "source_lineno": 264,
     "source_module": "wepppy/weppcloud/routes/nodb_api/project_bp.py"
   },
   {
@@ -1489,7 +1499,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "task_set_readonly",
-    "source_lineno": 598,
+    "source_lineno": 616,
     "source_module": "wepppy/weppcloud/routes/nodb_api/project_bp.py"
   },
   {
@@ -1501,6 +1511,16 @@
     "source_function": "task_build_rangeland_cover",
     "source_lineno": 252,
     "source_module": "wepppy/weppcloud/routes/nodb_api/rangeland_bp.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "func",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_roads_job",
+    "source_lineno": 126,
+    "source_module": "wepppy/weppcloud/routes/nodb_api/roads_bp.py"
   },
   {
     "depends_on": [],

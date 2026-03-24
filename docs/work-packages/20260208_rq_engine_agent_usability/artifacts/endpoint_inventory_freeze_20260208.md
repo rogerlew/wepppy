@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **77**
-- Classification counts: **agent-facing 54**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 74**, **Flask wrapper 3**
+- Total endpoints inventoried: **79**
+- Classification counts: **agent-facing 56**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 76**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -66,7 +66,9 @@ Snapshot summary:
 | POST | `/api/runs/{runid}/{config}/run-omni` | `wepppy/microservices/rq_engine/omni_routes.py` | `run_omni` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/run-omni-contrasts` | `wepppy/microservices/rq_engine/omni_routes.py` | `run_omni_contrasts` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/run-omni-contrasts-dry-run` | `wepppy/microservices/rq_engine/omni_routes.py` | `run_omni_contrasts_dry_run` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | read-only | Run access check: `authorize_run_access`. Dry-run endpoint; returns contrast report in `result`; no queue. |
+| POST | `/api/runs/{runid}/{config}/prepare-roads` | `wepppy/microservices/rq_engine/roads_routes.py` | `prepare_roads` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; clears stale `run_roads` timestamp and returns `job_id`. |
 | POST | `/api/runs/{runid}/{config}/run-rhem` | `wepppy/microservices/rq_engine/rhem_routes.py` | `run_rhem` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| POST | `/api/runs/{runid}/{config}/run-roads` | `wepppy/microservices/rq_engine/roads_routes.py` | `run_roads` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; clears stale `run_roads` timestamp and returns `job_id`. |
 | POST | `/api/runs/{runid}/{config}/run-swat` | `wepppy/microservices/rq_engine/swat_routes.py` | `run_swat` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/run-swat-noprep` | `wepppy/microservices/rq_engine/bootstrap_routes.py` | `run_swat_noprep` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/run-wepp` | `wepppy/microservices/rq_engine/wepp_routes.py` | `run_wepp` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |

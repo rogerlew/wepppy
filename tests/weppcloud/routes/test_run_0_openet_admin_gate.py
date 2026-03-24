@@ -204,6 +204,15 @@ def test_run_page_bootstrap_rusle_flag_false_for_topaz_backend(run0_template_app
     assert _extract_mod_flag(js, "rusle") == "false"
 
 
+def test_run_page_bootstrap_roads_flag_true_when_enabled(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["roads"]
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "roads") == "true"
+
+
 def test_run_page_bootstrap_ttl_missing_expires_at_defaults_to_null(run0_template_app) -> None:
     context = _bootstrap_context(set())
     context["current_ttl"] = {

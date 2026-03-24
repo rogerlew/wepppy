@@ -34,6 +34,7 @@ from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.debris_flow import DebrisFlow
+from wepppy.nodb.mods.roads import Roads
 from wepppy.nodb.mods.rusle import Rusle
 from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.swat.print_prt import mask_to_tokens
@@ -99,6 +100,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#omni-contrasts': TaskEnum.run_omni_contrasts,
     '#observed': TaskEnum.run_observed,
     '#debris-flow': TaskEnum.run_debris,
+    '#roads': TaskEnum.run_roads,
     '#dss-export': TaskEnum.dss_export,
     '#path-cost-effective': TaskEnum.run_path_cost_effective,
     '#team': TaskEnum.project_init,  # Using project init emoji as placeholder
@@ -158,6 +160,12 @@ MOD_UI_DEFINITIONS = OrderedDict([
         'section_class': 'wc-stack',
         'template': 'controls/debris_flow_pure.htm',
         'requires_power_user': True,
+    }),
+    ('roads', {
+        'label': 'Roads',
+        'section_id': 'roads',
+        'section_class': 'wc-stack',
+        'template': 'controls/roads_pure.htm',
     }),
     ('dss_export', {
         'label': 'DSS Export',
@@ -675,6 +683,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     treatments = Treatments.tryGetInstance(wd)
     redis_prep = RedisPrep.tryGetInstance(wd)
     debris_flow = DebrisFlow.tryGetInstance(wd) if 'debris_flow' in ron.mods else None
+    roads = Roads.tryGetInstance(wd) if 'roads' in mods_list else None
     rusle = Rusle.tryGetInstance(wd) if 'rusle' in mods_list else None
     swat = Swat.tryGetInstance(wd) if 'swat' in ron.mods else None
     swat_print_prt_rows = []
@@ -749,6 +758,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         or playwright_load_all
     )
     show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
+    show_roads = ('roads' in mods_list and roads is not None) or playwright_load_all
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
     show_path_ce = 'path_ce' in mods_list or playwright_load_all
     rusle_backend_supported = bool(getattr(watershed, "delineation_backend_is_wbt", False))
@@ -774,6 +784,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         'omni': show_omni,
         'observed': show_observed,
         'debris_flow': show_debris_flow,
+        'roads': show_roads,
         'dss_export': show_dss_export,
         'path_ce': show_path_ce,
         'rusle': show_rusle,
@@ -805,6 +816,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         OmniScenario=OmniScenario,
         treatments=treatments,
         debris_flow=debris_flow,
+        roads=roads,
         rusle=rusle,
         rusle_rap_year_options=rusle_rap_year_options,
         swat=swat,
@@ -837,6 +849,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_omni=show_omni,
         show_observed=show_observed,
         show_debris_flow=show_debris_flow,
+        show_roads=show_roads,
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,
         show_rusle=show_rusle,

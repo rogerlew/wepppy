@@ -36,6 +36,7 @@ class TaskEnum(Enum):
     run_wepp_watershed = 'run_wepp_watershed'
     run_observed = 'run_observed'
     run_debris = 'run_debris'
+    run_roads = 'run_roads'
     run_watar = 'run_watar'
     run_rhem = 'run_rhem'
     fetch_dem = 'fetch_dem'
@@ -74,6 +75,7 @@ class TaskEnum(Enum):
             TaskEnum.run_wepp_watershed: 'Run WEPP Watershed',
             TaskEnum.run_observed: 'Run Observed',
             TaskEnum.run_debris: 'Run Debris',
+            TaskEnum.run_roads: 'Run Roads',
             TaskEnum.run_watar: 'Run WATAR',
             TaskEnum.run_rhem: 'Run RHEM',
             TaskEnum.fetch_dem: 'Fetch DEM',
@@ -110,6 +112,7 @@ class TaskEnum(Enum):
             TaskEnum.run_wepp_watershed: '⛰️',
             TaskEnum.run_observed: '📊',
             TaskEnum.run_debris: '🪨',
+            TaskEnum.run_roads: '🚗',
             TaskEnum.run_watar: '🌋',
             TaskEnum.run_rhem: '🌵',
             TaskEnum.fetch_dem: '🌍',

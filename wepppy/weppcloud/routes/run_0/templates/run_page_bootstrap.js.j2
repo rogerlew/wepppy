@@ -98,6 +98,7 @@
                 "dss_export": 'dss_export' in mods_list,
                 "path_ce": 'path_ce' in mods_list,
                 "debris_flow": 'debris_flow' in mods_list,
+                "roads": 'roads' in mods_list,
                 "rap_ts": 'rap_ts' in mods_list,
                 "openet_ts": ('openet_ts' in mods_list) and openet_admin_enabled,
                 "treatments": 'treatments' in mods_list,
@@ -192,6 +193,7 @@
             "ash",
             "path_ce",
             "debris_flow",
+            "roads",
             "openet_ts",
             "dss_export",
             "rusle"
@@ -229,6 +231,7 @@
             modFlags.ash = true;
             modFlags.path_ce = true;
             modFlags.debris_flow = true;
+            modFlags.roads = true;
             modFlags.openet_ts = true;
             modFlags.treatments = true;
             modFlags.rusle = true;
@@ -267,6 +270,9 @@
         }
         if (modFlags.debris_flow) {
             add("debrisFlow", typeof DebrisFlow !== "undefined" ? DebrisFlow : null);
+        }
+        if (modFlags.roads) {
+            add("roads", typeof Roads !== "undefined" ? Roads : null);
         }
         add("rapTs", typeof RAP_TS !== "undefined" ? RAP_TS : null);
         if (modFlags.openet_ts) {

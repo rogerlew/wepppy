@@ -356,6 +356,41 @@ def test_set_mod_rusle_allows_when_disturbed_enabled(project_client):
     assert "polaris" in controller.mods
 
 
+def test_set_mod_roads_requires_wbt_backend(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = []
+    project_module.Watershed.getInstance(run_dir).delineation_backend_is_wbt = False
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "roads", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "requires the WBT delineation backend" in payload["error"]["message"]
+    assert "roads" not in controller.mods
+
+
+def test_set_mod_roads_allows_when_wbt_backend(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = []
+    project_module.Watershed.getInstance(run_dir).delineation_backend_is_wbt = True
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "roads", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["mod"] == "roads"
+    assert payload["Content"]["enabled"] is True
+    assert "roads" in controller.mods
+
+
 def test_set_mod_disables_module_when_no_guards(project_client):
     client, RonStub, _, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)

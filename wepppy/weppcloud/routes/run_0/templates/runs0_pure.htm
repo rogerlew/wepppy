@@ -134,6 +134,9 @@
           <a href="#debris-flow" class="nav-link">Debris Flow</a>
         </li>
         {% endif %}
+        <li data-mod-nav="roads" {% if not show_roads %}hidden{% endif %}>
+          <a href="#roads" class="nav-link">Roads</a>
+        </li>
         <li data-mod-nav="dss_export" {% if not show_dss_export %}hidden{% endif %}>
           <a href="#dss-export" class="nav-link">DSS Export</a>
         </li>
@@ -274,6 +277,14 @@
     {% endif %}
   </div>
 {% endif %}
+
+      <div data-mod-section="roads" {% if not show_roads %}hidden{% endif %}>
+        {% if show_roads %}
+        <section id="roads" class="wc-stack">
+          {% include 'controls/roads_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
       <div data-mod-section="dss_export" {% if not show_dss_export %}hidden{% endif %}>
         {% if show_dss_export %}

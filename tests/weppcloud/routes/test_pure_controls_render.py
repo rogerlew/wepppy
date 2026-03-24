@@ -15,6 +15,7 @@ RUN_0_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_0" / 
 PURE_TEMPLATES = [
     "controls/path_cost_effective_pure.htm",
     "controls/omni_contrasts_pure.htm",
+    "controls/roads_pure.htm",
     "reports/storm_event_analyzer.htm",
     "run_0/rq-migration-status.htm",
 ]
@@ -108,6 +109,29 @@ def jinja_env() -> Environment:
 def test_pure_control_renders(template_name: str, jinja_env: Environment) -> None:
     template = jinja_env.get_template(template_name)
     template.render()
+
+
+def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/roads_pure.htm")
+    rendered = template.render()
+
+    assert '<form id="roads_form"' in rendered
+    assert 'class="wc-control' in rendered
+    assert 'id="roads_geojson_file"' in rendered
+    assert 'data-roads-action="upload"' in rendered
+    assert 'id="roads_geojson_file-progress"' in rendered
+    assert 'class="wc-upload-progress"' in rendered
+    assert 'id="roads_upload_message"' in rendered
+    assert 'id="roads_prepare_segments"' in rendered
+    assert 'id="run_roads_wepp"' in rendered
+    assert "Upload Roads GeoJSON" in rendered
+    assert "Prepare Segment Candidates" in rendered
+    assert "lowpoint decisions" in rendered
+    assert 'id="run_roads_lock"' in rendered
+    assert 'id="roads_status"' in rendered
+    assert 'id="roads_info"' in rendered
+    assert 'id="roads_stacktrace"' in rendered
+    assert "pure-u-md-1-2" not in rendered
 
 
 def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Environment) -> None:
@@ -307,3 +331,18 @@ def test_runs0_template_places_rusle_after_wepp_sections() -> None:
     wepp_section_index = source.index('<section id="wepp" class="wc-stack">')
     rusle_section_index = source.index('<div data-mod-section="rusle"')
     assert wepp_section_index < rusle_section_index
+
+
+def test_runs0_template_places_roads_after_debris_flow() -> None:
+    template_path = RUN_0_TEMPLATE_ROOT / "runs0_pure.htm"
+    source = template_path.read_text(encoding="utf-8")
+
+    debris_nav_index = source.index('<a href="#debris-flow" class="nav-link">Debris Flow</a>')
+    roads_nav_index = source.index('<a href="#roads" class="nav-link">Roads</a>')
+    dss_nav_index = source.index('<a href="#dss-export" class="nav-link">DSS Export</a>')
+    assert debris_nav_index < roads_nav_index < dss_nav_index
+
+    debris_section_index = source.index('<section id="debris-flow" class="wc-stack">')
+    roads_section_index = source.index('<div data-mod-section="roads"')
+    dss_section_index = source.index('<div data-mod-section="dss_export"')
+    assert debris_section_index < roads_section_index < dss_section_index
