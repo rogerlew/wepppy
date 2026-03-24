@@ -1,7 +1,7 @@
 # Roads NoDb Inslope Integration Specification
 
-Status: Draft  
-Last Updated: 2026-03-23  
+Status: Implemented (Phase 1)  
+Last Updated: 2026-03-24  
 Scope: `Inslope_bd` and `Inslope_rd` road designs for the first WEPPcloud Roads NoDb integration.
 
 ## Goal
@@ -34,7 +34,7 @@ This phase targets only inslope bare-ditch and inslope rocked-ditch designs.
 
 Roads is in-scope as a first-class NoDb controller for this phase.
 
-Proposed implementation targets:
+Implementation targets:
 
 - Controller: `wepppy/nodb/mods/roads/roads.py`
 - Module package: `wepppy/nodb/mods/roads/`
@@ -77,11 +77,11 @@ Roads artifacts (run-relative):
 - `wepp/roads/segments/*`
 - `wepp/roads/runs/*`
 - `wepp/roads/output/*`
-- `wepp/roads/interchange/*` (optional diagnostics)
+- `wepp/roads/output/interchange/*` (regenerated report resources)
 
 ## Roads(NoDbBase) Implementation Blueprint
 
-Proposed class contract (`wepppy/nodb/mods/roads/roads.py`):
+Implemented class contract (`wepppy/nodb/mods/roads/roads.py`):
 
 - `class Roads(NoDbBase)`
 - `filename = "roads.nodb"`
@@ -157,6 +157,7 @@ Expected route family (patterned after existing NoDb `api/tasks/query/report` ro
 - `GET /runs/<runid>/<config>/query/roads`
 - `GET /runs/<runid>/<config>/query/roads/summary`
 - `GET /runs/<runid>/<config>/report/roads/summary`
+- `GET /runs/<runid>/<config>/report/roads/results`
 
 UI control requirement:
 
@@ -171,21 +172,80 @@ Execution mode:
   - `run_roads_rq(runid: str)` executes full run stage from latest prepared segments.
   - both jobs persist status transitions in `roads.nodb`.
 
+## Roads Report Resource Regeneration Contract (Implemented)
+
+At the end of `run_roads_wepp()`, Roads executes `_regenerate_roads_report_resources()` and stores the result under `last_run_summary["roads_report_resources"]`.
+
+Behavioral contract:
+
+- Regeneration is roads-scoped only:
+  - writes under `wepp/roads/output/interchange/*`,
+  - never mutates baseline `wepp/output/*`.
+- Regeneration refreshes query-engine catalog registration for roads outputs.
+- Regeneration fails explicitly when required resources are missing (no silent fallback wrappers).
+- Output scope is explicit and fixed in this payload:
+  - `output_scope = "roads"`.
+
+Persisted `roads_report_resources` fields:
+
+- `status` (`"ready"` on success)
+- `output_scope` (`"roads"`)
+- `roads_output_relpath`
+- `interchange_relpath`
+- `required_relpaths`
+- `missing_relpaths`
+- `roads_segment_loss_summary_relpath` (`null` for single-storm runs)
+- `generated_at`
+
+Required resource sets:
+
+- Non-single-storm:
+  - `H.pass.parquet`
+  - `H.wat.parquet`
+  - `loss_pw0.out.parquet`
+  - `loss_pw0.hill.parquet`
+  - `loss_pw0.chn.parquet`
+  - `ebe_pw0.parquet`
+  - `totalwatsed3.parquet`
+  - `README.md`
+  - `roads_segment_loss_summary.parquet`
+  - optional `chnwb.parquet` only when source `chnwb.txt(.gz)` exists.
+- Single-storm:
+  - `H.pass.parquet`
+  - `ebe_pw0.parquet`
+  - `README.md`
+
+Run Results link gating:
+
+- `report/roads/results` shows only report links whose required roads resources are present.
+- Non-single-storm-only links (for example return periods, yearly/avg water balance, streamflow, watershed loss summary) are hidden when required resources are absent.
+
+Road segment loss summary artifact:
+
+- File: `wepp/roads/output/interchange/roads_segment_loss_summary.parquet`.
+- Built from `roads.segment.pass.manifest.json` + `loss_pw0.hill.parquet`.
+- Join precedence:
+  - first `target_hillslope_wepp_id`,
+  - fallback `segment_run_id`.
+- Includes diagnostics columns:
+  - `loss_match_key`
+  - `loss_row_missing`.
+- No on-disk CSV is written; CSV is served on demand via download conversion (`?as_csv=1`).
+
 ## Roads API Payload and Validation Contract
 
 `upload_geojson` request contract:
 
-- Accept either:
-  - multipart upload (`file`) with `.geojson` extension, or
-  - JSON payload containing a server-local path (development mode only).
+- Accept multipart upload (`file`) with `.geojson` extension.
 - Require GeoJSON `FeatureCollection` with `LineString`/`MultiLineString` geometries.
-- Reject non-line geometries and invalid JSON with explicit error codes.
+- Reject non-line geometries and invalid JSON with explicit error responses.
 
 `upload_geojson` validation rules:
 
 - max upload size (phase-1 default): `50 MB`.
 - reject empty feature sets.
-- require readable CRS context; if source CRS differs from run working CRS, reproject at ingest and persist normalized artifact.
+- require readable CRS context (`input_crs` param + optional GeoJSON `crs.properties.name`).
+- prepare stage uses configured `input_crs` for coordinate transforms during segmentation/attribution.
 - persist source checksum (`sha256`) and normalized ingest summary.
 
 `set_params` request contract:
@@ -196,15 +256,16 @@ Execution mode:
   - `rfg_pct_default`, `road_width_m_default`,
   - optional per-segment override field mappings.
 
-Common API error codes:
+Common API error messages (current behavior):
 
-- `roads_not_enabled`
-- `roads_requires_wbt_backend`
-- `wepp_not_complete`
-- `invalid_geojson`
-- `unsupported_geometry`
-- `upload_too_large`
-- `invalid_roads_params`
+- `"Roads module is not enabled for this run."`
+- `"Roads requires WBT delineation backend."`
+- `"Provide multipart \`file\` for Roads upload."`
+- `"Roads upload must be a .geojson file."`
+- `"Roads GeoJSON must be a FeatureCollection."`
+- `"Roads GeoJSON supports only LineString or MultiLineString geometries."`
+- `"Roads upload exceeds max_upload_mb limit (... MB)."`
+- parameter-validation messages from `set_params` (for example numeric/range/enum validation failures).
 
 ## TaskEnum and Preflight Contract
 
@@ -226,9 +287,9 @@ Preflight service checklist updates (`services/preflight2/internal/checklist/che
   - `check["roads"] = safeGT(prep["timestamps:run_roads"], runWepp)`.
   - if `runWepp` is missing, `roads` remains `false`.
 
-Optional lock UI mapping updates:
+Lock UI mapping update:
 
-- add `"roads.nodb"` lock mapping in `preflight.js` once Roads lock icon IDs are finalized in controls/power-user UI.
+- `"roads.nodb"` is mapped in `preflight.js` to the Roads run lock indicator.
 
 ## Feasibility Assessment
 
@@ -240,20 +301,19 @@ Optional lock UI mapping updates:
   - preserves source properties.
   - assigns unique `segment_id`.
   - emits segment low-point point features.
-  - sets `topaz_id_chn_lowpoint` (currently only for `Inslope_bd`).
+  - sets `topaz_id_chn_lowpoint` and `topaz_id_hill_lowpoint` for eligible inslope designs.
 - Existing watershed runs consume `H*.pass.dat` entries from `pw0.run`, so swapping selected hillslope pass files is operationally feasible.
 - `wepp_runner.make_watershed_omni_contrasts_run(...)` already supports per-hillslope pass path substitution.
 - `wepppyo3` already has high-performance hillslope pass parsing (`hillslope_pass_to_columns`), which is a good base for a pass combiner.
 
-## What Needs To Change
+## What Changed In Implementation
 
-- Extend segment channel attribution from only `Inslope_bd` to both:
+- Segment eligibility/attribution is implemented for both:
   - `Inslope_bd`
   - `Inslope_rd`
-- Add receiving hillslope attribution near the channel low point:
-  - `topaz_id_hill_lowpoint` (must end in `1`, `2`, or `3`).
-- Add an integration path for segment execution under `wepp/roads/segments/` and `wepp/roads/{runs,output}/`.
-- Add a pass combiner (preferably in `wepppyo3`) to merge road-segment and hillslope pass contributions event-by-event.
+- Receiving hillslope attribution is implemented as `topaz_id_hill_lowpoint` with suffix invariant (`1|2|3`) enforced by utility behavior/tests.
+- Segment execution is implemented under `wepp/roads/segments/` and `wepp/roads/{runs,output}/`.
+- Pass combination is implemented through `wepppyo3.wepp_interchange.combine_hillslope_pass_files(..., strategy="phase1")`.
 
 ## Technical Risk and Mitigation
 
@@ -405,7 +465,7 @@ Controller-level defaults (editable in Roads UI/API):
 - `input_years`: inherit baseline WEPP climate years unless explicitly overridden
 - `wepp_bin`: inherit baseline run setting unless explicitly overridden
 
-Per-segment property overrides should be supported for:
+Per-segment property overrides are supported for:
 
 - design
 - surface
@@ -497,13 +557,17 @@ Run-root-relative directories:
 - `wepp/roads/runs/`
 - `wepp/roads/output/`
 
-Proposed artifacts:
+Primary artifacts:
 
 - `wepp/roads/segments/roads.inslope.monotonic.geojson`
 - `wepp/roads/segments/roads.inslope.low_points.geojson`
 - `wepp/roads/segments/roads.inslope.summary.json`
+- `wepp/roads/segments/roads.segment.pass.manifest.json`
 - `wepp/roads/runs/*.run` (segment and watershed runs)
 - `wepp/roads/output/H<segment_or_target>.pass.dat`
+- `wepp/roads/output/interchange/*`
+  - includes `roads_segment_loss_summary.parquet` and regenerated report resources
+- `wepp/roads/roads.log`
 
 Layout rationale:
 
@@ -617,7 +681,7 @@ Notes:
 ## Utility Tests
 
 - Existing monotonic split tests remain green.
-- Add tests for:
+- Coverage includes tests for:
   - `Inslope_rd` channel attribution parity with `Inslope_bd`.
   - `topaz_id_hill_lowpoint` assignment and suffix invariant.
   - deterministic tie-break behavior.
@@ -636,20 +700,19 @@ Notes:
   - update `wepppy/rq/job-dependencies-catalog.md`,
   - run `wctl check-rq-graph` (and regenerate graph if drift is reported).
 
-## Implementation Phases
+## Implementation Milestones (Completed)
 
-1. Finalize segment utility behavior for both inslope designs (`Inslope_bd`, `Inslope_rd`), including channel/hillslope lowpoint attribution and deterministic IDs.
-2. Complete unit/integration coverage for `monotonic_segments` outputs and invariants.
-3. Implement `Roads(NoDbBase)` controller (`roads.py`) with persisted state contract and status lifecycle.
-4. Implement Roads API/UI scaffolding:
+1. Finalized segment utility behavior for both inslope designs (`Inslope_bd`, `Inslope_rd`), including channel/hillslope lowpoint attribution and deterministic IDs.
+2. Completed unit/integration coverage for `monotonic_segments` outputs and invariants.
+3. Implemented `Roads(NoDbBase)` controller (`roads.py`) with persisted state contract and status lifecycle.
+4. Implemented Roads API/UI scaffolding:
    - blueprint routes in `roads_bp.py`,
    - Roads controls panel with upload/config/run actions,
-   - summary report endpoint/template.
-5. Add RQ workers for `prepare_segments` and `run` orchestration.
-   - include queue dependency catalog/graph updates in same change set.
-6. Implement single-OFE segment WEPP run assembly under `wepp/roads/{runs,output}/` using this parameterization contract.
-7. Prototype and integrate pass combiner in `wepppyo3`, then wire watershed rerun assembly with `make_watershed_omni_contrasts_run`.
-8. Add diagnostics/reporting and execute end-to-end smoke validation on a known run.
+   - summary + run-results report endpoints/templates.
+5. Added RQ workers for `prepare_segments` and `run` orchestration.
+6. Implemented single-OFE segment WEPP run assembly under `wepp/roads/{runs,output}/` using this parameterization contract.
+7. Integrated pass combiner in `wepppyo3`, then wired watershed rerun assembly with `make_watershed_omni_contrasts_run`.
+8. Added diagnostics/reporting, roads-scoped report-resource regeneration, and end-to-end validation on fixture runs.
 
 ## Non-Goals (Phase 1)
 
