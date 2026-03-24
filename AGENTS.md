@@ -66,6 +66,7 @@
 ## Repository Contracts
 - Canonical RQ response and error payload contract: `docs/schemas/rq-response-contract.md`.
 - Canonical CSRF contract for browser/session boundaries: `docs/schemas/weppcloud-csrf-contract.md`.
+- Canonical WEPP output scope contract (baseline vs roads): `docs/schemas/output-scope-contract.md`.
 - Update `wepppy/rq/job-dependencies-catalog.md` whenever enqueue sites or dependency edges change in:
   - `wepppy/rq/*.py`
   - `wepppy/microservices/rq_engine/*`

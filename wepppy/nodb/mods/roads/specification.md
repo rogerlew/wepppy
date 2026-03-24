@@ -3,6 +3,7 @@
 Status: Implemented (Phase 1)  
 Last Updated: 2026-03-24  
 Scope: `Inslope_bd` and `Inslope_rd` road designs for the first WEPPcloud Roads NoDb integration.
+Canonical cross-route `output_scope` contract: `docs/schemas/output-scope-contract.md`.
 
 ## Goal
 
