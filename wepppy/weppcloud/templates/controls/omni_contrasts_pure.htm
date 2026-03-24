@@ -277,13 +277,15 @@
                extra_control_class="disable-readonly"
              ) }}
 
-          {{ ui.text_field(
-               "omni_contrast_select_topaz_ids",
-               "Topaz IDs (optional)",
-               value=omni.contrast_select_topaz_ids|join(", ") if omni.contrast_select_topaz_ids is defined and omni.contrast_select_topaz_ids else "",
-               help="Comma-separated list of Topaz IDs to include.",
-               extra_control_class="disable-readonly"
-             ) }}
+          <div hidden>
+            {{ ui.text_field(
+                 "omni_contrast_select_topaz_ids",
+                 "Topaz IDs (optional)",
+                 value=omni.contrast_select_topaz_ids|join(", ") if omni.contrast_select_topaz_ids is defined and omni.contrast_select_topaz_ids else "",
+                 help="Comma-separated list of Topaz IDs to include.",
+                 extra_control_class="disable-readonly"
+               ) }}
+          </div>
         </div>
       {% endcall %}
       {% call ui.card(
