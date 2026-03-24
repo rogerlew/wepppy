@@ -36,6 +36,7 @@ var Roads = (function () {
     var SELECTORS = {
         form: "#" + FORM_ID,
         info: "#roads_info",
+        results: "#roads-results",
         status: "#roads_status",
         stacktrace: "#roads_stacktrace",
         rqJob: "#rq_job",
@@ -259,6 +260,7 @@ var Roads = (function () {
 
         var formElement = null;
         var infoElement = null;
+        var resultsElement = null;
         var statusElement = null;
         var stacktraceElement = null;
         var rqJobElement = null;
@@ -276,6 +278,7 @@ var Roads = (function () {
             events: emitter,
             form: null,
             info: createLegacyAdapter(null),
+            resultsContainer: null,
             status: createLegacyAdapter(null),
             stacktrace: createLegacyAdapter(null),
             rq_job: createLegacyAdapter(null),
@@ -397,6 +400,16 @@ var Roads = (function () {
                 infoElement = next;
                 controller.info = createLegacyAdapter(infoElement);
             });
+            var nextResults = null;
+            try {
+                nextResults = dom.qs(SELECTORS.results);
+            } catch (errResults) {
+                nextResults = null;
+            }
+            if (nextResults !== resultsElement) {
+                resultsElement = nextResults;
+                controller.resultsContainer = resultsElement;
+            }
             syncAdapter(SELECTORS.status, statusElement, function (next) {
                 statusElement = next;
                 controller.status = createLegacyAdapter(statusElement);
@@ -552,26 +565,15 @@ var Roads = (function () {
             controller.info.html("<div class=\"wc-stack-sm\">" + details.join("") + "</div>");
         }
 
-        function renderRunSummaryLink() {
-            if (!controller.info || typeof controller.info.html !== "function") {
-                return;
-            }
-            var href = resolveRunUrl("report/roads/summary");
-            controller.info.html(
-                "<a class=\"wc-link wc-link--file\" href=\"" + escapeHtml(href) + "\" target=\"_blank\">View Roads Summary Report</a>"
-            );
-        }
-
         function renderRunSummary(summary) {
             if (!controller.info || typeof controller.info.html !== "function") {
                 return;
             }
             if (!summary || typeof summary !== "object") {
-                renderRunSummaryLink();
+                controller.info.html("");
                 return;
             }
 
-            var reportHref = resolveRunUrl("report/roads/summary");
             var skippedReasonHtml = renderDecisionCounts(summary.skipped_segment_reason_counts);
             var details = [
                 "<div><strong>Mapped segments:</strong> " + escapeHtml(String(summary.mapped_segment_count || 0)) + "</div>",
@@ -580,10 +582,40 @@ var Roads = (function () {
             if (skippedReasonHtml) {
                 details.push("<div><strong>Skipped reasons:</strong>" + skippedReasonHtml + "</div>");
             }
-            details.push(
-                "<a class=\"wc-link wc-link--file\" href=\"" + escapeHtml(reportHref) + "\" target=\"_blank\">View Roads Summary Report</a>"
-            );
             controller.info.html("<div class=\"wc-stack-sm\">" + details.join("") + "</div>");
+        }
+
+        function renderRoadsResultsPanel() {
+            if (!controller.resultsContainer || !http || typeof http.request !== "function") {
+                return Promise.resolve(null);
+            }
+            return http.request(resolveRunUrl("report/roads/results/")).then(function (result) {
+                var body = result && result.body;
+                if (typeof body === "string" && controller.resultsContainer) {
+                    controller.resultsContainer.innerHTML = body;
+                }
+                return body;
+            }).catch(function (error) {
+                controller.pushResponseStacktrace(controller, toResponsePayload(http, error));
+                return null;
+            });
+        }
+
+        function renderLatestRoadsSummary(payload) {
+            if (!payload || typeof payload !== "object") {
+                return;
+            }
+            if (payload.last_run_summary && typeof payload.last_run_summary === "object") {
+                renderRunSummary(payload.last_run_summary);
+                return;
+            }
+            if (payload.last_prepare_summary && typeof payload.last_prepare_summary === "object") {
+                renderPrepareSummary(payload.last_prepare_summary);
+                return;
+            }
+            if (controller.info && typeof controller.info.html === "function") {
+                controller.info.html("");
+            }
         }
 
         function refreshRoadsResults(taskKey) {
@@ -597,6 +629,19 @@ var Roads = (function () {
                 } else if (taskKey === "run") {
                     renderRunSummary(payload.last_run_summary || null);
                 }
+                return payload;
+            }).catch(function () {
+                return null;
+            });
+        }
+
+        function refreshRoadsSummary() {
+            if (!http || typeof http.getJson !== "function") {
+                return Promise.resolve(null);
+            }
+            return http.getJson(resolveRunUrl("api/roads/results")).then(function (result) {
+                var payload = result && result.body ? result.body : {};
+                renderLatestRoadsSummary(payload);
                 return payload;
             }).catch(function () {
                 return null;
@@ -652,11 +697,12 @@ var Roads = (function () {
             if (taskKey === "prepare") {
                 controller.append_status_message(controller, "Road segment candidates prepared.");
                 refreshRoadsResults("prepare");
+                renderRoadsResultsPanel();
             }
             if (taskKey === "run") {
                 controller.append_status_message(controller, "Roads run completed.");
-                renderRunSummaryLink();
                 refreshRoadsResults("run");
+                renderRoadsResultsPanel();
             }
 
             if (emitter && typeof emitter.emit === "function") {
@@ -943,6 +989,9 @@ var Roads = (function () {
                 controller.poll_completion_event = TASKS[candidateTask].completionEvent;
                 controller.set_rq_job_id(controller, candidateJobId);
             }
+
+            refreshRoadsSummary();
+            renderRoadsResultsPanel();
 
             return controller;
         };

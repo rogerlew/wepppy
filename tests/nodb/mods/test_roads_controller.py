@@ -7,7 +7,9 @@ from types import SimpleNamespace
 
 import pytest
 
+import wepppy.nodb.wepp_nodb_post_utils as post_utils_module
 import wepppy.nodb.mods.roads.roads as roads_module
+import wepppy.wepp.interchange as interchange_module
 from wepppy.nodb.mods.roads.monotonic_segments import MonotonicConversionSummary
 from wepppy.nodb.mods.roads.roads import Roads
 
@@ -40,6 +42,19 @@ def _seed_prepared_state(controller: Roads, *, upload_sha: str = "seed-upload-sh
             "roads_params_signature": controller._params_signature(params),
         }
         controller._status = "prepared"
+
+
+def _ready_report_resources_stub(controller: Roads) -> dict[str, object]:
+    relpath = "wepp/roads/output/interchange/README.md"
+    return {
+        "status": "ready",
+        "output_scope": "roads",
+        "roads_output_relpath": "wepp/roads/output",
+        "interchange_relpath": "wepp/roads/output/interchange",
+        "required_relpaths": [relpath],
+        "missing_relpaths": [],
+        "generated_at": 1234567890,
+    }
 
 
 def test_set_uploaded_geojson_stages_file_and_checksum(tmp_path: Path) -> None:
@@ -431,6 +446,7 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
 
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", _fake_make)
     monkeypatch.setattr(roads_module, "run_watershed", lambda runs_dir: None)
+    monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
 
     summary = controller.run_roads_wepp()
     status = controller.query_status()
@@ -446,6 +462,7 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
     assert summary["segment_pass_count"] == 1
     assert len(summary["segment_execution_records"]) == 1
     assert summary["segment_execution_records"][0]["status"] == "completed"
+    assert summary["roads_report_resources"]["status"] == "ready"
     assert Path(tmp_path / summary["segment_pass_manifest_relpath"]).exists()
     assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "combined"
     assert summary["roads_log_relpath"] == "wepp/roads/roads.log"
@@ -736,3 +753,431 @@ def test_run_roads_wepp_fails_when_segment_execution_fails(
     assert last_run["status"] == "failed"
     assert last_run["failed_stage"] == "segment_runs"
     assert last_run["failed_segment_count"] == 1
+
+
+def test_regenerate_roads_report_resources_uses_roads_scope_outputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    climate = SimpleNamespace(is_single_storm=False, calendar_start_year=1995)
+    wepp_instance = SimpleNamespace(
+        wd=str(tmp_path),
+        climate_instance=climate,
+        baseflow_opts=SimpleNamespace(gwstorage=0.0, bfcoeff=0.0, dscoeff=0.0, bfthreshold=0.0),
+        output_dir=str(tmp_path / "wepp" / "output"),
+    )
+    monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
+
+    output_dir = Path(controller.roads_output_dir)
+    interchange_dir = output_dir / "interchange"
+    calls: list[tuple[str, str]] = []
+
+    def _fake_hillslope(wepp_output_dir: Path, **_kwargs):
+        calls.append(("hillslope", str(wepp_output_dir)))
+        interchange_dir.mkdir(parents=True, exist_ok=True)
+        (interchange_dir / "H.pass.parquet").write_text("pass", encoding="utf-8")
+        (interchange_dir / "H.wat.parquet").write_text("wat", encoding="utf-8")
+
+    def _fake_totalwatsed3(path: Path, **_kwargs):
+        calls.append(("totalwatsed3", str(path)))
+        (interchange_dir / "totalwatsed3.parquet").write_text("tw3", encoding="utf-8")
+
+    def _fake_watershed(wepp_output_dir: Path, **_kwargs):
+        calls.append(("watershed", str(wepp_output_dir)))
+        (interchange_dir / "loss_pw0.out.parquet").write_text("loss out", encoding="utf-8")
+        (interchange_dir / "loss_pw0.hill.parquet").write_text("loss hill", encoding="utf-8")
+        (interchange_dir / "loss_pw0.chn.parquet").write_text("loss chn", encoding="utf-8")
+        (interchange_dir / "ebe_pw0.parquet").write_text("ebe", encoding="utf-8")
+        (interchange_dir / "chnwb.parquet").write_text("chnwb", encoding="utf-8")
+
+    def _fake_docs(path: Path):
+        calls.append(("docs", str(path)))
+        (interchange_dir / "README.md").write_text("readme", encoding="utf-8")
+
+    def _fake_activate(wepp_obj):
+        calls.append(("activate", str(getattr(wepp_obj, "wd", ""))))
+
+    def _fake_segment_summary(self: Roads, *, interchange_dir: Path) -> str:
+        calls.append(("segment-summary", str(interchange_dir)))
+        relpath = "wepp/roads/output/interchange/roads_segment_loss_summary.parquet"
+        (Path(self.wd) / relpath).write_text("segment summary", encoding="utf-8")
+        return relpath
+
+    monkeypatch.setattr(interchange_module, "run_wepp_hillslope_interchange", _fake_hillslope)
+    monkeypatch.setattr(interchange_module, "run_totalwatsed3", _fake_totalwatsed3)
+    monkeypatch.setattr(interchange_module, "run_wepp_watershed_interchange", _fake_watershed)
+    monkeypatch.setattr(interchange_module, "generate_interchange_documentation", _fake_docs)
+    monkeypatch.setattr(post_utils_module, "activate_query_engine_for_run", _fake_activate)
+    monkeypatch.setattr(Roads, "_build_roads_segment_loss_summary_parquet", _fake_segment_summary)
+
+    resources = controller._regenerate_roads_report_resources()
+
+    assert resources["status"] == "ready"
+    assert resources["output_scope"] == "roads"
+    assert resources["missing_relpaths"] == []
+    assert "wepp/roads/output/interchange/totalwatsed3.parquet" in resources["required_relpaths"]
+    assert "wepp/roads/output/interchange/roads_segment_loss_summary.parquet" in resources["required_relpaths"]
+    assert resources["roads_segment_loss_summary_relpath"] == "wepp/roads/output/interchange/roads_segment_loss_summary.parquet"
+    assert calls[0] == ("hillslope", str(output_dir))
+    assert ("watershed", str(output_dir)) in calls
+    assert ("totalwatsed3", str(interchange_dir)) in calls
+    assert ("segment-summary", str(interchange_dir)) in calls
+
+
+def test_regenerate_roads_report_resources_fails_when_segment_summary_generation_raises(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    climate = SimpleNamespace(is_single_storm=False, calendar_start_year=1995)
+    wepp_instance = SimpleNamespace(
+        wd=str(tmp_path),
+        climate_instance=climate,
+        baseflow_opts=SimpleNamespace(gwstorage=0.0, bfcoeff=0.0, dscoeff=0.0, bfthreshold=0.0),
+        output_dir=str(tmp_path / "wepp" / "output"),
+    )
+    monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
+
+    output_dir = Path(controller.roads_output_dir)
+    interchange_dir = output_dir / "interchange"
+
+    def _fake_hillslope(wepp_output_dir: Path, **_kwargs):
+        assert wepp_output_dir == output_dir
+        interchange_dir.mkdir(parents=True, exist_ok=True)
+        (interchange_dir / "H.pass.parquet").write_text("pass", encoding="utf-8")
+        (interchange_dir / "H.wat.parquet").write_text("wat", encoding="utf-8")
+
+    def _fake_totalwatsed3(path: Path, **_kwargs):
+        assert path == interchange_dir
+        (interchange_dir / "totalwatsed3.parquet").write_text("tw3", encoding="utf-8")
+
+    def _fake_watershed(wepp_output_dir: Path, **_kwargs):
+        assert wepp_output_dir == output_dir
+        (interchange_dir / "loss_pw0.out.parquet").write_text("loss out", encoding="utf-8")
+        (interchange_dir / "loss_pw0.hill.parquet").write_text("loss hill", encoding="utf-8")
+        (interchange_dir / "loss_pw0.chn.parquet").write_text("loss chn", encoding="utf-8")
+        (interchange_dir / "ebe_pw0.parquet").write_text("ebe", encoding="utf-8")
+        (interchange_dir / "chnwb.parquet").write_text("chnwb", encoding="utf-8")
+
+    def _fake_docs(path: Path):
+        assert path == interchange_dir
+        (interchange_dir / "README.md").write_text("readme", encoding="utf-8")
+
+    def _fake_segment_summary(self: Roads, *, interchange_dir: Path) -> str:
+        raise RuntimeError(f"segment summary failed at {interchange_dir}")
+
+    monkeypatch.setattr(interchange_module, "run_wepp_hillslope_interchange", _fake_hillslope)
+    monkeypatch.setattr(interchange_module, "run_totalwatsed3", _fake_totalwatsed3)
+    monkeypatch.setattr(interchange_module, "run_wepp_watershed_interchange", _fake_watershed)
+    monkeypatch.setattr(interchange_module, "generate_interchange_documentation", _fake_docs)
+    monkeypatch.setattr(post_utils_module, "activate_query_engine_for_run", lambda _wepp_obj: None)
+    monkeypatch.setattr(Roads, "_build_roads_segment_loss_summary_parquet", _fake_segment_summary)
+
+    with pytest.raises(RuntimeError, match="segment summary failed"):
+        controller._regenerate_roads_report_resources()
+
+
+def test_build_roads_segment_loss_summary_parquet_joins_manifest_and_loss_hill(tmp_path: Path) -> None:
+    import duckdb
+
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    interchange_dir = Path(controller.roads_output_dir) / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+
+    manifest_path = Path(controller.roads_segment_pass_manifest_path)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            [
+                {
+                    "segment_id": "seg-a",
+                    "segment_run_id": 900001,
+                    "target_hillslope_wepp_id": 123,
+                    "topaz_id_hill_lowpoint": 456,
+                    "topaz_id_chn_lowpoint": 789,
+                    "design": "inslope_bd",
+                    "surface": "gravel",
+                    "traffic": "high",
+                    "soil_texture": "clay",
+                    "rfg_pct": 20.0,
+                    "road_width_m": 4.0,
+                    "segment_length_m": 200.0,
+                    "slope_pct_clamped": 5.0,
+                    "status": "completed",
+                },
+                {
+                    "segment_id": "seg-b",
+                    "segment_run_id": 900002,
+                    "status": "skipped",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    loss_hill_path = interchange_dir / "loss_pw0.hill.parquet"
+    loss_hill_path_sql = str(loss_hill_path).replace("'", "''")
+    with duckdb.connect(database=":memory:") as con:
+        con.execute(
+            f"""
+            COPY (
+                SELECT * FROM (
+                    SELECT
+                        'Hill' AS "Type",
+                        123 AS wepp_id,
+                        120.0 AS "Runoff Volume",
+                        10.0 AS "Subrunoff Volume",
+                        5.0 AS "Baseflow Volume",
+                        40.0 AS "Soil Loss",
+                        1.0 AS "Sediment Deposition",
+                        15.0 AS "Sediment Yield",
+                        0.5 AS "Hillslope Area",
+                        0.0 AS "Solub. React. Pollutant",
+                        0.0 AS "Particulate Pollutant",
+                        0.0 AS "Total Pollutant"
+                    UNION ALL
+                    SELECT
+                        'Hill' AS "Type",
+                        900001 AS wepp_id,
+                        999.0 AS "Runoff Volume",
+                        999.0 AS "Subrunoff Volume",
+                        999.0 AS "Baseflow Volume",
+                        999.0 AS "Soil Loss",
+                        999.0 AS "Sediment Deposition",
+                        999.0 AS "Sediment Yield",
+                        1.0 AS "Hillslope Area",
+                        0.0 AS "Solub. React. Pollutant",
+                        0.0 AS "Particulate Pollutant",
+                        0.0 AS "Total Pollutant"
+                )
+            ) TO '{loss_hill_path_sql}' (FORMAT PARQUET)
+            """,
+        )
+
+    relpath = controller._build_roads_segment_loss_summary_parquet(interchange_dir=interchange_dir)
+    assert relpath == "wepp/roads/output/interchange/roads_segment_loss_summary.parquet"
+    summary_path = tmp_path / relpath
+    assert summary_path.exists()
+
+    with duckdb.connect(database=":memory:") as con:
+        rows = con.execute(
+            """
+            SELECT
+                segment_id,
+                segment_run_id,
+                loss_match_key,
+                road_prism_erosion_kg,
+                sediment_leaving_buffer_kg,
+                soil_loss_density_kg_m2,
+                runoff_depth_mm,
+                loss_row_missing
+            FROM read_parquet(?)
+            """,
+            [str(summary_path)],
+        ).fetchall()
+
+    assert len(rows) == 1
+    (
+        segment_id,
+        segment_run_id,
+        loss_match_key,
+        road_prism_erosion_kg,
+        sediment_leaving_buffer_kg,
+        soil_loss_density,
+        runoff_depth_mm,
+        loss_row_missing,
+    ) = rows[0]
+    assert segment_id == "seg-a"
+    assert segment_run_id == 900001
+    assert loss_match_key == "target_hillslope_wepp_id"
+    assert road_prism_erosion_kg == pytest.approx(40.0)
+    assert sediment_leaving_buffer_kg == pytest.approx(15.0)
+    assert soil_loss_density == pytest.approx(0.008)
+    assert runoff_depth_mm == pytest.approx(24.0)
+    assert loss_row_missing is False
+
+
+def test_build_roads_segment_loss_summary_parquet_falls_back_to_segment_run_id(tmp_path: Path) -> None:
+    import duckdb
+
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    interchange_dir = Path(controller.roads_output_dir) / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+
+    manifest_path = Path(controller.roads_segment_pass_manifest_path)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            [
+                {
+                    "segment_id": "seg-fallback",
+                    "segment_run_id": 900001,
+                    "target_hillslope_wepp_id": 12345,
+                    "status": "completed",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    loss_hill_path = interchange_dir / "loss_pw0.hill.parquet"
+    loss_hill_path_sql = str(loss_hill_path).replace("'", "''")
+    with duckdb.connect(database=":memory:") as con:
+        con.execute(
+            f"""
+            COPY (
+                SELECT * FROM (
+                    VALUES
+                        ('Hill', 900001, 80.0, 5.0, 2.0, 20.0, 0.5, 9.0, 0.4, 0.0, 0.0, 0.0)
+                )
+                AS t(
+                    "Type",
+                    wepp_id,
+                    "Runoff Volume",
+                    "Subrunoff Volume",
+                    "Baseflow Volume",
+                    "Soil Loss",
+                    "Sediment Deposition",
+                    "Sediment Yield",
+                    "Hillslope Area",
+                    "Solub. React. Pollutant",
+                    "Particulate Pollutant",
+                    "Total Pollutant"
+                )
+            ) TO '{loss_hill_path_sql}' (FORMAT PARQUET)
+            """,
+        )
+
+    relpath = controller._build_roads_segment_loss_summary_parquet(interchange_dir=interchange_dir)
+    summary_path = tmp_path / relpath
+
+    with duckdb.connect(database=":memory:") as con:
+        row = con.execute(
+            """
+            SELECT loss_match_key, road_prism_erosion_kg, sediment_leaving_buffer_kg, loss_row_missing
+            FROM read_parquet(?)
+            """,
+            [str(summary_path)],
+        ).fetchone()
+
+    assert row is not None
+    loss_match_key, road_prism_erosion_kg, sediment_leaving_buffer_kg, loss_row_missing = row
+    assert loss_match_key == "segment_run_id"
+    assert road_prism_erosion_kg == pytest.approx(20.0)
+    assert sediment_leaving_buffer_kg == pytest.approx(9.0)
+    assert loss_row_missing is False
+
+
+def test_build_roads_segment_loss_summary_parquet_marks_missing_loss_rows(tmp_path: Path) -> None:
+    import duckdb
+
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    interchange_dir = Path(controller.roads_output_dir) / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+
+    manifest_path = Path(controller.roads_segment_pass_manifest_path)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            [
+                {
+                    "segment_id": "seg-missing",
+                    "segment_run_id": 900002,
+                    "target_hillslope_wepp_id": 22222,
+                    "status": "completed",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    loss_hill_path = interchange_dir / "loss_pw0.hill.parquet"
+    loss_hill_path_sql = str(loss_hill_path).replace("'", "''")
+    with duckdb.connect(database=":memory:") as con:
+        con.execute(
+            f"""
+            COPY (
+                SELECT * FROM (
+                    VALUES
+                        ('Hill', 700000, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.1, 0.0, 0.0, 0.0)
+                )
+                AS t(
+                    "Type",
+                    wepp_id,
+                    "Runoff Volume",
+                    "Subrunoff Volume",
+                    "Baseflow Volume",
+                    "Soil Loss",
+                    "Sediment Deposition",
+                    "Sediment Yield",
+                    "Hillslope Area",
+                    "Solub. React. Pollutant",
+                    "Particulate Pollutant",
+                    "Total Pollutant"
+                )
+            ) TO '{loss_hill_path_sql}' (FORMAT PARQUET)
+            """,
+        )
+
+    relpath = controller._build_roads_segment_loss_summary_parquet(interchange_dir=interchange_dir)
+    summary_path = tmp_path / relpath
+
+    with duckdb.connect(database=":memory:") as con:
+        row = con.execute(
+            """
+            SELECT loss_match_key, road_prism_erosion_kg, sediment_leaving_buffer_kg, loss_row_missing
+            FROM read_parquet(?)
+            """,
+            [str(summary_path)],
+        ).fetchone()
+
+    assert row is not None
+    loss_match_key, road_prism_erosion_kg, sediment_leaving_buffer_kg, loss_row_missing = row
+    assert loss_match_key is None
+    assert road_prism_erosion_kg == pytest.approx(0.0)
+    assert sediment_leaving_buffer_kg == pytest.approx(0.0)
+    assert loss_row_missing is True
+
+
+def test_build_roads_segment_loss_summary_parquet_rejects_non_list_manifest(tmp_path: Path) -> None:
+    import duckdb
+
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    interchange_dir = Path(controller.roads_output_dir) / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+
+    manifest_path = Path(controller.roads_segment_pass_manifest_path)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps({"segment_id": "not-a-list"}), encoding="utf-8")
+
+    loss_hill_path = interchange_dir / "loss_pw0.hill.parquet"
+    loss_hill_path_sql = str(loss_hill_path).replace("'", "''")
+    with duckdb.connect(database=":memory:") as con:
+        con.execute(
+            f"""
+            COPY (
+                SELECT * FROM (
+                    VALUES
+                        ('Hill', 1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.1, 0.0, 0.0, 0.0)
+                )
+                AS t(
+                    "Type",
+                    wepp_id,
+                    "Runoff Volume",
+                    "Subrunoff Volume",
+                    "Baseflow Volume",
+                    "Soil Loss",
+                    "Sediment Deposition",
+                    "Sediment Yield",
+                    "Hillslope Area",
+                    "Solub. React. Pollutant",
+                    "Particulate Pollutant",
+                    "Total Pollutant"
+                )
+            ) TO '{loss_hill_path_sql}' (FORMAT PARQUET)
+            """,
+        )
+
+    with pytest.raises(ValueError, match="must be a JSON list"):
+        controller._build_roads_segment_loss_summary_parquet(interchange_dir=interchange_dir)

@@ -10,6 +10,7 @@ import pandas as pd
 from wepppy.query_engine.payload import QueryRequest
 
 from .helpers import ReportQueryContext
+from .output_scope import normalize_output_scope, scoped_dataset_path
 from .report_base import ReportBase
 from .row_data import RowData
 
@@ -19,10 +20,10 @@ __all__ = ["ChannelSummaryReport", "ChannelSummary"]
 class ChannelSummaryReport(ReportBase):
     """Channel-scale summary derived from loss_pw0.chn and watershed channel metadata."""
 
-    _LOSS_DATASET = "wepp/output/interchange/loss_pw0.chn.parquet"
+    _BASELINE_LOSS_DATASET = "wepp/output/interchange/loss_pw0.chn.parquet"
     _CHANNEL_DATASET = "watershed/channels.parquet"
 
-    def __init__(self, wd: str | Path | Any):
+    def __init__(self, wd: str | Path | Any, *, output_scope: str | None = None):
         loss = wd if self._is_loss_like(wd) else None
         if loss is not None:
             self._wd = self._infer_wd_from_loss(loss)
@@ -31,6 +32,8 @@ class ChannelSummaryReport(ReportBase):
         if not self._wd.exists():
             raise FileNotFoundError(self._wd)
 
+        self._output_scope = normalize_output_scope(output_scope)
+        self._loss_dataset = scoped_dataset_path(self._BASELINE_LOSS_DATASET, self._output_scope)
         context = self._prepare_context()
         dataframe = self._build_dataframe(context)
 
@@ -40,14 +43,14 @@ class ChannelSummaryReport(ReportBase):
     def _prepare_context(self) -> ReportQueryContext:
         """Bootstrap and validate the report query context."""
         context = ReportQueryContext(self._wd, run_interchange=False)
-        context.ensure_datasets(self._LOSS_DATASET, self._CHANNEL_DATASET)
+        context.ensure_datasets(self._loss_dataset, self._CHANNEL_DATASET)
         return context
 
     def _build_dataframe(self, context: ReportQueryContext) -> pd.DataFrame:
         """Run the DuckDB query and return a fully formatted dataframe."""
         payload = QueryRequest(
             datasets=[
-                {"path": self._LOSS_DATASET, "alias": "loss"},
+                {"path": self._loss_dataset, "alias": "loss"},
                 {"path": self._CHANNEL_DATASET, "alias": "chn"},
             ],
             columns=[

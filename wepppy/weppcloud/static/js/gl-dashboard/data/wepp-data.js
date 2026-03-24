@@ -9,7 +9,11 @@
  * @property {() => { mode: string } | null} pickActiveWeppEventLayer Resolve the currently selected WEPP event layer descriptor.
  * @property {string} WEPP_YEARLY_PATH Parquet path for yearly WEPP outputs (interchange/H.parquet alias).
  * @property {string} WEPP_LOSS_PATH Parquet path for soil loss outputs (reserved for future queries).
- * @property {string} WEPP_CHANNEL_PATH Parquet path for yearly WEPP channel outputs.
+ * @property {string} WEPP_CHANNEL_PATH Parquet path for WEPP channel summary outputs.
+ * @property {string} WEPP_YEARLY_CHANNEL_PATH Parquet path for yearly WEPP channel outputs.
+ * @property {string} WEPP_EVENT_WAT_PATH Parquet path for WEPP event water records.
+ * @property {string} WEPP_EVENT_SOIL_PATH Parquet path for WEPP event soil records.
+ * @property {string} WEPP_EVENT_PASS_PATH Parquet path for WEPP event pass records.
  */
 
 /**
@@ -47,6 +51,10 @@ export function createWeppDataManager({
   WEPP_YEARLY_PATH,
   WEPP_LOSS_PATH,
   WEPP_CHANNEL_PATH,
+  WEPP_YEARLY_CHANNEL_PATH = WEPP_CHANNEL_PATH,
+  WEPP_EVENT_WAT_PATH,
+  WEPP_EVENT_SOIL_PATH,
+  WEPP_EVENT_PASS_PATH,
 }) {
   // Placeholder to avoid unused warning until WEPP_LOSS_PATH is used for additional queries.
   void WEPP_LOSS_PATH;
@@ -301,7 +309,7 @@ export function createWeppDataManager({
       const aggregations = buildWeppChannelAggregations('mean');
       const payload = {
         datasets: [
-          { path: WEPP_CHANNEL_PATH, alias: 'loss' },
+          { path: WEPP_YEARLY_CHANNEL_PATH, alias: 'loss' },
           { path: 'watershed/channels.parquet', alias: 'chn' },
         ],
         joins: [{ left: 'loss', right: 'chn', on: 'chn_enum', type: 'inner' }],
@@ -597,7 +605,7 @@ export function createWeppDataManager({
       const baseQueryUrl = `/query-engine/${baseQueryPath}/query`;
 
       if (mode === 'event_P' || mode === 'event_Q' || mode === 'event_ET') {
-        const parquetPath = 'wepp/output/interchange/H.wat.parquet';
+        const parquetPath = WEPP_EVENT_WAT_PATH;
         const watColumn = mode === 'event_P' ? 'P' : mode === 'event_Q' ? 'Q' : null;
         const valueExpression =
           mode === 'event_ET'
@@ -633,7 +641,7 @@ export function createWeppDataManager({
           }
         }
       } else if (mode === 'event_Saturation') {
-        const parquetPath = 'wepp/output/interchange/H.soil.parquet';
+        const parquetPath = WEPP_EVENT_SOIL_PATH;
         const valueExpression = 'AVG(soil.Saturation) * 100';
         filters = [
           { column: 'soil.year', op: '=', value: year },
@@ -665,7 +673,7 @@ export function createWeppDataManager({
           }
         }
       } else if (mode === 'event_peakro' || mode === 'event_tdet') {
-        const parquetPath = 'wepp/output/interchange/H.pass.parquet';
+        const parquetPath = WEPP_EVENT_PASS_PATH;
         const passColumn = mode === 'event_peakro' ? 'peakro' : 'tdet';
         const valueExpression =
           mode === 'event_peakro' ? `MAX(pass.${passColumn})` : `SUM(pass.${passColumn})`;
@@ -727,7 +735,7 @@ export function createWeppDataManager({
       let dataResult = null;
 
       if (mode === 'event_P' || mode === 'event_Q' || mode === 'event_ET') {
-        const parquetPath = 'wepp/output/interchange/H.wat.parquet';
+        const parquetPath = WEPP_EVENT_WAT_PATH;
         const watColumn = mode === 'event_P' ? 'P' : mode === 'event_Q' ? 'Q' : null;
         const valueExpression =
           mode === 'event_ET'
@@ -751,7 +759,7 @@ export function createWeppDataManager({
         };
         dataResult = await postQueryEngine(dataPayload);
       } else if (mode === 'event_Saturation') {
-        const parquetPath = 'wepp/output/interchange/H.soil.parquet';
+        const parquetPath = WEPP_EVENT_SOIL_PATH;
         const valueExpression = 'AVG(soil.Saturation) * 100';
         const filters = [
           { column: 'soil.year', op: '=', value: year },
@@ -771,7 +779,7 @@ export function createWeppDataManager({
         };
         dataResult = await postQueryEngine(dataPayload);
       } else if (mode === 'event_peakro' || mode === 'event_tdet') {
-        const parquetPath = 'wepp/output/interchange/H.pass.parquet';
+        const parquetPath = WEPP_EVENT_PASS_PATH;
         const passColumn = mode === 'event_peakro' ? 'peakro' : 'tdet';
         const valueExpression =
           mode === 'event_peakro' ? `MAX(pass.${passColumn})` : `SUM(pass.${passColumn})`;

@@ -16,6 +16,7 @@ from wepppy.nodb import unitizer as unitizer_module
 from wepppy.nodb.base import get_configs, get_config_dir
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.batch_runner import BatchRunner
+from wepppy.wepp.reports.output_scope import scoped_dataset_path
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir, handle_with_exception_factory
 
@@ -54,6 +55,20 @@ def _coerce_bool_setting(value: object, *, default: bool = False) -> bool:
         if token in {"0", "false", "no", "off"}:
             return False
     return default
+
+
+def _build_gl_dashboard_wepp_paths(output_scope: str = "baseline") -> Dict[str, str]:
+    """Build scope-aware WEPP relpaths for the batch gl-dashboard context."""
+    return {
+        "lossHill": scoped_dataset_path("wepp/output/interchange/loss_pw0.hill.parquet", output_scope),
+        "lossChannel": scoped_dataset_path("wepp/output/interchange/loss_pw0.chn.parquet", output_scope),
+        "lossAllYearsOutlet": scoped_dataset_path("wepp/output/interchange/loss_pw0.all_years.out.parquet", output_scope),
+        "lossAllYearsHill": scoped_dataset_path("wepp/output/interchange/loss_pw0.all_years.hill.parquet", output_scope),
+        "lossAllYearsChannel": scoped_dataset_path("wepp/output/interchange/loss_pw0.all_years.chn.parquet", output_scope),
+        "hWat": scoped_dataset_path("wepp/output/interchange/H.wat.parquet", output_scope),
+        "hSoil": scoped_dataset_path("wepp/output/interchange/H.soil.parquet", output_scope),
+        "hPass": scoped_dataset_path("wepp/output/interchange/H.pass.parquet", output_scope),
+    }
 
 
 _BATCH_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$")
@@ -222,10 +237,6 @@ def create_batch_project():
             return redirect(url_for("batch_runner.view_batch", batch_name=batch_runner.batch_name))   
         except (ValueError, FileExistsError, FileNotFoundError) as err:
             errors.append(str(err))
-        except Exception as err:  # pragma: no cover - defensive path
-            current_app.logger.exception("Failed to create batch project")
-            errors.append(f"An unexpected error occurred while creating the batch: {err}")
-            raise
 
     if errors:
         context["errors"] = errors
@@ -317,7 +328,7 @@ def gl_dashboard_batch(batch_name: str):
     runs = []
     try:
         features = batch_runner.get_watershed_features_lpt()
-    except Exception:
+    except (OSError, RuntimeError, ValueError):
         current_app.logger.warning(
             "batch gl-dashboard: failed to load watershed features for batch '%s'",
             batch_name,
@@ -354,6 +365,8 @@ def gl_dashboard_batch(batch_name: str):
         omni_scenarios=None,
         omni_contrasts=None,
         is_omni_child=False,
+        output_scope="baseline",
+        wepp_paths=_build_gl_dashboard_wepp_paths("baseline"),
         mode="batch",
         batch_name=batch_name,
         batch={

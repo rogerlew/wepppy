@@ -76,7 +76,9 @@
 <script>
   window.STORM_EVENT_ANALYZER_CONTEXT = {{ {
     "omniScenarios": omni_scenarios,
-    "baseScenarioLabel": base_scenario_label
+    "baseScenarioLabel": base_scenario_label,
+    "outputScope": output_scope | default("baseline", true),
+    "weppPaths": wepp_paths | default({}, true)
   } | tojson }};
 </script>
 {% endblock %}

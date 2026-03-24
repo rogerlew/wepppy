@@ -88,6 +88,7 @@ describe("Roads controller", () => {
                 <button id="roads_prepare_segments" type="button" data-roads-action="prepare-segments">Prepare</button>
                 <button id="run_roads_wepp" type="button" data-roads-action="run">Run</button>
             </form>
+            <div id="roads-results"></div>
             <p id="hint_run_roads"></p>
             <section id="roads_status_panel"><span id="braille"></span><div data-status-log></div></section>
             <section id="roads_stacktrace_panel"><div data-stacktrace-body></div></section>
@@ -97,7 +98,12 @@ describe("Roads controller", () => {
         await import("../events.js");
 
         httpMock = {
-            request: jest.fn(() => Promise.resolve({ body: { job_id: "roads-job-1" } })),
+            request: jest.fn((path, options) => {
+                if (!options && path === "/runs/test-run/test-config/report/roads/results/") {
+                    return Promise.resolve({ body: "<div data-roads-results-panel>Roads Run Results</div>" });
+                }
+                return Promise.resolve({ body: { job_id: "roads-job-1" } });
+            }),
             getJson: jest.fn(() => Promise.resolve({ body: {} })),
             isHttpError: jest.fn(() => false),
             getCsrfToken: jest.fn(() => "csrf-token")
@@ -194,17 +200,21 @@ describe("Roads controller", () => {
         await roads.runRoads();
         await Promise.resolve();
         roads.triggerEvent("ROADS_RUN_TASK_COMPLETED", { source: "test", job_id: "roads-job-1" });
+        await Promise.resolve();
 
+        expect(httpMock.request).toHaveBeenCalledTimes(4);
         expect(httpMock.request).toHaveBeenNthCalledWith(
             1,
             "/runs/test-run/test-config/tasks/roads/prepare_segments",
             expect.objectContaining({ method: "POST", form: expect.any(HTMLFormElement) })
         );
+        expect(httpMock.request).toHaveBeenNthCalledWith(2, "/runs/test-run/test-config/report/roads/results/");
         expect(httpMock.request).toHaveBeenNthCalledWith(
-            2,
+            3,
             "/runs/test-run/test-config/tasks/roads/run",
             expect.objectContaining({ method: "POST", form: expect.any(HTMLFormElement) })
         );
+        expect(httpMock.request).toHaveBeenNthCalledWith(4, "/runs/test-run/test-config/report/roads/results/");
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(roads, "roads-job-1");
         expect(pollEvents).toEqual(["ROADS_PREPARE_TASK_COMPLETED", "ROADS_RUN_TASK_COMPLETED"]);
     });
@@ -215,9 +225,11 @@ describe("Roads controller", () => {
 
         roads.triggerEvent("ROADS_RUN_TASK_COMPLETED", { source: "test", job_id: "roads-job-1" });
         roads.triggerEvent("ROADS_RUN_TASK_COMPLETED", { source: "test", job_id: "roads-job-1" });
+        await Promise.resolve();
+        await Promise.resolve();
 
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
-        expect(document.getElementById("roads_info").innerHTML).toContain("report/roads/summary");
+        expect(document.getElementById("roads-results").innerHTML).toContain("Roads Run Results");
     });
 
     test("queueTask blocks concurrent roads task submissions", async () => {
@@ -243,5 +255,15 @@ describe("Roads controller", () => {
 
         roads.triggerEvent("ROADS_RUN_TASK_COMPLETED", { source: "poll", job_id: "roads-job-1" });
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+    });
+
+    test("bootstrap fetches roads results panel", async () => {
+        roads.bootstrap({});
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(httpMock.getJson).toHaveBeenCalledWith("/runs/test-run/test-config/api/roads/results");
+        expect(httpMock.request).toHaveBeenCalledWith("/runs/test-run/test-config/report/roads/results/");
+        expect(document.getElementById("roads-results").innerHTML).toContain("Roads Run Results");
     });
 });

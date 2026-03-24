@@ -156,6 +156,13 @@ def _prepare_run_directory(base: Path) -> Path:
     return run_dir
 
 
+def _prepare_roads_scope(run_dir: Path) -> Path:
+    baseline_output = run_dir / "wepp" / "output"
+    roads_output = run_dir / "wepp" / "roads" / "output"
+    shutil.copytree(baseline_output, roads_output, dirs_exist_ok=True)
+    return roads_output
+
+
 def test_return_period_dataset_pipeline(tmp_path):
     run_dir = _prepare_run_directory(tmp_path)
 
@@ -279,3 +286,34 @@ def test_return_periods_export_summary_variants(tmp_path):
     extraneous_text = extraneous_path.read_text(encoding="utf-8")
     assert "Recurrence Interval (years)" in extraneous_text
     assert "Weibull T" in extraneous_text
+
+
+def test_return_period_dataset_uses_roads_output_scope(tmp_path):
+    run_dir = _prepare_run_directory(tmp_path)
+    roads_output = _prepare_roads_scope(run_dir)
+
+    roads_ebe_path = roads_output / "interchange" / "ebe_pw0.parquet"
+    roads_ebe = pd.read_parquet(roads_ebe_path)
+    roads_ebe["precip"] = roads_ebe["precip"].astype(float) + 1000.0
+    roads_ebe.to_parquet(roads_ebe_path, index=False)
+
+    events_path, ranks_path = refresh_return_period_events(run_dir, output_scope="roads")
+    assert str(events_path).endswith("wepp/roads/output/interchange/return_period_events.parquet")
+    assert str(ranks_path).endswith("wepp/roads/output/interchange/return_period_event_ranks.parquet")
+
+    dataset = ReturnPeriodDataset(run_dir, auto_refresh=False, output_scope="roads")
+    report = dataset.create_report((2, 5), method="cta")
+
+    precip_entries = report.return_periods.get("Precipitation Depth", {})
+    assert precip_entries
+    assert max(entry["Precipitation Depth"] for entry in precip_entries.values()) > 900.0
+
+
+def test_return_period_dataset_rejects_invalid_output_scope(tmp_path):
+    run_dir = _prepare_run_directory(tmp_path)
+
+    with pytest.raises(ValueError, match="Invalid output_scope"):
+        refresh_return_period_events(run_dir, output_scope="invalid")
+
+    with pytest.raises(ValueError, match="Invalid output_scope"):
+        ReturnPeriodDataset(run_dir, output_scope="invalid")

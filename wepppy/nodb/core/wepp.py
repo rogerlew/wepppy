@@ -2457,7 +2457,8 @@ class Wepp(NoDbBase):
                               meoization: bool = True,
                               exclude_months: Optional[List[int]] = None,
                               chn_topaz_id_of_interest: Optional[int] = None,
-                              wait_for_inputs: bool = True) -> ReturnPeriods:
+                              wait_for_inputs: bool = True,
+                              output_scope: str = "baseline") -> ReturnPeriods:
         return _WEPP_POSTPROCESS_SERVICE.report_return_periods(
             self,
             rec_intervals=rec_intervals,
@@ -2468,6 +2469,7 @@ class Wepp(NoDbBase):
             exclude_months=exclude_months,
             chn_topaz_id_of_interest=chn_topaz_id_of_interest,
             wait_for_inputs=wait_for_inputs,
+            output_scope=output_scope,
         )
 
     def export_return_periods_tsv_summary(self, rec_intervals: Tuple[int, ...] = (50, 25, 20, 10, 5, 2), 
@@ -2501,11 +2503,11 @@ class Wepp(NoDbBase):
     def report_sediment_delivery(self) -> SedimentCharacteristics:
         return SedimentCharacteristics(self.wd)
 
-    def report_hill_watbal(self) -> HillslopeWatbalReport:
-        return HillslopeWatbalReport(self.wd)
+    def report_hill_watbal(self, output_scope: str = "baseline") -> HillslopeWatbalReport:
+        return HillslopeWatbalReport(self.wd, output_scope=output_scope)
 
-    def report_chn_watbal(self) -> ChannelWatbalReport:
-        return ChannelWatbalReport(self.wd)
+    def report_chn_watbal(self, output_scope: str = "baseline") -> ChannelWatbalReport:
+        return ChannelWatbalReport(self.wd, output_scope=output_scope)
 
     def set_run_wepp_watershed(self, state: bool) -> None:
         assert state in [True, False]

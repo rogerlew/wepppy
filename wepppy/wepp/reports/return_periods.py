@@ -20,12 +20,22 @@ from wepppy.io_wait import wait_for_path
 from wepppy.query_engine import activate_query_engine, resolve_run_context, update_catalog_entry
 from wepppy.query_engine.activate import READONLY_SENTINEL
 from wepppy.runtime_paths.errors import nodir_migration_required
+
+from .output_scope import normalize_output_scope, scoped_dataset_path
 LOGGER = logging.getLogger(__name__)
 
 EVENTS_REL_PATH = Path("wepp/output/interchange/return_period_events.parquet")
 RANKS_REL_PATH = Path("wepp/output/interchange/return_period_event_ranks.parquet")
 EBE_DATASET = "wepp/output/interchange/ebe_pw0.parquet"
 TOTALWATSED3_DATASET = "wepp/output/interchange/totalwatsed3.parquet"
+
+
+def _events_rel_path(output_scope: str) -> Path:
+    return Path(scoped_dataset_path(EVENTS_REL_PATH, output_scope))
+
+
+def _ranks_rel_path(output_scope: str) -> Path:
+    return Path(scoped_dataset_path(RANKS_REL_PATH, output_scope))
 
 CLIMATE_REQUIRED = {
     "year": ("year", "Year"),
@@ -442,6 +452,7 @@ def refresh_return_period_events(
     max_rank: int = 128,
     buffer: int = 10,
     wait_for_inputs: bool = True,
+    output_scope: str | None = None,
 ) -> tuple[Path, Path]:
     """Regenerate the staged parquet assets that power return-period reports.
 
@@ -450,18 +461,20 @@ def refresh_return_period_events(
         topaz_ids: Optional subset of channel identifiers to rank.
         max_rank: Maximum rank that should be guaranteed in the staged table.
         buffer: Additional rows per measure retained beyond ``max_rank``.
+        output_scope: Output dataset scope (``baseline`` or ``roads``).
 
     Returns:
         Tuple containing the paths to the staged ``events`` and ``ranks`` parquet files.
     """
 
+    normalized_scope = normalize_output_scope(output_scope)
     base = _ensure_path(wd)
     activate_query_engine(base, run_interchange=False)
     context = resolve_run_context(str(base), auto_activate=False)
     root_dir = context.base_dir
 
-    ebe_path = root_dir / EBE_DATASET
-    alt_ebe = root_dir / "wepp" / "output" / "ebe_pw0.parquet"
+    ebe_path = root_dir / scoped_dataset_path(EBE_DATASET, normalized_scope)
+    alt_ebe = root_dir / scoped_dataset_path("wepp/output/ebe_pw0.parquet", normalized_scope)
     if not ebe_path.exists() and alt_ebe.exists():
         ebe_path = alt_ebe
     if wait_for_inputs:
@@ -478,7 +491,7 @@ def refresh_return_period_events(
         if not ebe_path.exists():
             raise FileNotFoundError(ebe_path)
 
-    tot_path = root_dir / TOTALWATSED3_DATASET
+    tot_path = root_dir / scoped_dataset_path(TOTALWATSED3_DATASET, normalized_scope)
     if wait_for_inputs:
         wait_for_path(tot_path, logger=LOGGER)
     elif not tot_path.exists():
@@ -487,8 +500,10 @@ def refresh_return_period_events(
     climate_info = _discover_climate_asset(root_dir)
     topaz_filter = _build_topaz_filter(topaz_ids)
 
-    events_path = root_dir / EVENTS_REL_PATH
-    ranks_path = root_dir / RANKS_REL_PATH
+    events_rel_path = _events_rel_path(normalized_scope)
+    ranks_rel_path = _ranks_rel_path(normalized_scope)
+    events_path = root_dir / events_rel_path
+    ranks_path = root_dir / ranks_rel_path
     events_path.parent.mkdir(parents=True, exist_ok=True)
 
     rank_limit = max(max_rank + buffer, max_rank)
@@ -638,12 +653,12 @@ def refresh_return_period_events(
         pq.write_table(ranks_table, ranks_path, compression="snappy")
 
     try:
-        update_catalog_entry(root_dir, str(EVENTS_REL_PATH))
+        update_catalog_entry(root_dir, str(events_rel_path))
     except FileNotFoundError:  # pragma: no cover - catalog may not exist yet
         activate_query_engine(root_dir, run_interchange=False)
 
     try:
-        update_catalog_entry(root_dir, str(RANKS_REL_PATH))
+        update_catalog_entry(root_dir, str(ranks_rel_path))
     except FileNotFoundError:  # pragma: no cover
         activate_query_engine(root_dir, run_interchange=False)
 
@@ -660,6 +675,7 @@ class ReturnPeriodDataset:
         max_rank: int = 128,
         buffer: int = 10,
         wait_for_inputs: bool = True,
+        output_scope: str | None = None,
     ) -> None:
         """Load the staged parquet files and optionally regenerate them first.
 
@@ -672,11 +688,14 @@ class ReturnPeriodDataset:
                 if inputs are missing (useful for UI routes that should not block).
         """
         base = _ensure_path(wd)
+        self._output_scope = normalize_output_scope(output_scope)
         context = resolve_run_context(str(base), auto_activate=False)
         self._root = context.base_dir
+        events_rel_path = _events_rel_path(self._output_scope)
+        ranks_rel_path = _ranks_rel_path(self._output_scope)
 
-        self._events_path = self._root / EVENTS_REL_PATH
-        self._ranks_path = self._root / RANKS_REL_PATH
+        self._events_path = self._root / events_rel_path
+        self._ranks_path = self._root / ranks_rel_path
 
         readonly = (self._root / READONLY_SENTINEL).exists()
         missing_assets = (not self._events_path.exists() or not self._ranks_path.exists())
@@ -687,6 +706,7 @@ class ReturnPeriodDataset:
                 max_rank=max_rank,
                 buffer=buffer,
                 wait_for_inputs=wait_for_inputs,
+                output_scope=self._output_scope,
             )
         elif readonly and missing_assets:
             raise PermissionError(

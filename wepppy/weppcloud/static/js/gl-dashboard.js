@@ -118,9 +118,23 @@
   } = config;
   const { DASHBOARD_MODES, getFeatureKeyFromProperties } = batchKeysModule;
 
-  const WEPP_YEARLY_PATH = 'wepp/output/interchange/loss_pw0.all_years.hill.parquet';
-  const WEPP_LOSS_PATH = 'wepp/output/interchange/loss_pw0.hill.parquet';
-  const WEPP_CHANNEL_PATH = 'wepp/output/interchange/loss_pw0.all_years.chn.parquet';
+  function requireWeppPath(pathKey) {
+    const pathMap = ctx && typeof ctx.weppPaths === 'object' ? ctx.weppPaths : {};
+    const value = pathMap[pathKey];
+    if (typeof value !== 'string' || !value.trim()) {
+      throw new Error(`gl-dashboard: missing wepp path '${pathKey}' in GL_DASHBOARD_CONTEXT.weppPaths`);
+    }
+    return value;
+  }
+
+  const WEPP_YEARLY_PATH = requireWeppPath('lossAllYearsHill');
+  const WEPP_LOSS_PATH = requireWeppPath('lossHill');
+  const WEPP_CHANNEL_PATH = requireWeppPath('lossChannel');
+  const WEPP_YEARLY_CHANNEL_PATH = requireWeppPath('lossAllYearsChannel');
+  const WEPP_OUTLET_ALL_YEARS_PATH = requireWeppPath('lossAllYearsOutlet');
+  const WEPP_EVENT_WAT_PATH = requireWeppPath('hWat');
+  const WEPP_EVENT_SOIL_PATH = requireWeppPath('hSoil');
+  const WEPP_EVENT_PASS_PATH = requireWeppPath('hPass');
   const WATAR_PATH = 'ash/post/hillslope_annuals.parquet';
 
   const colorScaleFactory =
@@ -473,6 +487,10 @@
     WEPP_YEARLY_PATH,
     WEPP_LOSS_PATH,
     WEPP_CHANNEL_PATH,
+    WEPP_YEARLY_CHANNEL_PATH,
+    WEPP_EVENT_WAT_PATH,
+    WEPP_EVENT_SOIL_PATH,
+    WEPP_EVENT_PASS_PATH,
   });
 
   const {
@@ -870,6 +888,10 @@
         postQueryEngine,
         postBaseQueryEngine,
         postQueryEngineForScenario,
+        weppLossPath: WEPP_LOSS_PATH,
+        weppChannelPath: WEPP_CHANNEL_PATH,
+        weppYearlyPath: WEPP_YEARLY_PATH,
+        weppOutletAllYearsPath: WEPP_OUTLET_ALL_YEARS_PATH,
         viridisColor,
         winterColor,
         jet2Color,
@@ -924,7 +946,11 @@
     fetchWeppChannelSummary,
     weppLossPath: WEPP_LOSS_PATH,
     weppChannelPath: WEPP_CHANNEL_PATH,
+    weppYearlyChannelPath: WEPP_YEARLY_CHANNEL_PATH,
     weppYearlyPath: WEPP_YEARLY_PATH,
+    weppEventWatPath: WEPP_EVENT_WAT_PATH,
+    weppEventSoilPath: WEPP_EVENT_SOIL_PATH,
+    weppEventPassPath: WEPP_EVENT_PASS_PATH,
     watarPath: WATAR_PATH,
     postQueryEngine,
     postBaseQueryEngine,

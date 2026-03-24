@@ -8,6 +8,7 @@
     &nbsp;
   {% endif %}
 {%- endmacro %}
+{% set output_scope_value = output_scope | default('baseline', true) %}
 
 {% macro render_table(report, slug, title, description) -%}
   {% set table_id = slug ~ '_watbal' %}
@@ -50,7 +51,7 @@
     <div class="wc-table-actions">
       <button type="button" class="pure-button pure-button-link"
               data-report-csv="{{ table_id }}"
-              data-report-url="{{ url_for_run('wepp.report_wepp_avg_annual_watbal', runid=runid, config=config, format='csv', table=slug) }}"
+              data-report-url="{{ url_for_run('wepp.report_wepp_avg_annual_watbal', runid=runid, config=config, format='csv', table=slug, output_scope=output_scope_value) }}"
               data-report-table="{{ slug }}">
         Download CSV
       </button>

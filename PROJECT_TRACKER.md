@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-03-23  
-**Active Packages**: 3  
+**Active Packages**: 4  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -242,7 +242,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 3 packages ✅
+**Current WIP Count**: 4 packages ✅
 
 ---
 
@@ -287,6 +287,26 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 1. **Immediate** (Nov 2-8): Resolve RFC decisions (4 decisions), finalize integration (onboarding docs, release notes)
 2. **Phase 4 Gate** (Nov 18): Review telemetry data, resolve Phase 4 open questions (index storage, watch mode, UI integration, search patterns), make go/no-go decision
 3. **If Phase 4 Greenlit**: Create Phase 4 work package structure, draft agent prompts, assign ownership, schedule M1 target (~Dec 6)
+
+---
+
+### Roads WEPP Report Regeneration and Run Results Summary
+**Started**: 2026-03-23  
+**Status**: Complete (Milestones 1-10 closed, final gates passed)  
+**Size**: Large (3-6 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260323_roads_wepp_reports_regen/](docs/work-packages/20260323_roads_wepp_reports_regen/)  
+**Description**: Extend Roads runtime so `run_roads_wepp()` regenerates Roads-scoped interchange/totalwatsed/water-balance resources under `wepp/roads/output`, and add a Roads Run Results summary with links to Roads-augmented canonical WEPP outputs.
+
+**Current Status**:
+- Roads post-run regeneration now builds required Roads report resources under `wepp/roads/output/interchange` and persists readiness metadata in run summary.
+- Roads Run Results summary route/template/control links are delivered with roads-scoped canonical WEPP report links.
+- Dedicated rollover, code review, and QA review artifacts are complete with no open medium/high findings.
+- Full validation gates passed (`npm lint/test`, preflight checklist tests, broad-exception enforcement, full pytest, docs lint).
+
+**Next Steps**:
+1. Merge and monitor first production/staging runs using the Roads Run Results summary.
+2. Scope optional follow-up package for baseline-vs-roads comparative analytics.
 
 ---
 

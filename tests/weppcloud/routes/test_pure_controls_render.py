@@ -127,11 +127,43 @@ def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environmen
     assert "Upload Roads GeoJSON" in rendered
     assert "Prepare Segment Candidates" in rendered
     assert "lowpoint decisions" in rendered
+    assert 'id="roads-results"' in rendered
     assert 'id="run_roads_lock"' in rendered
     assert 'id="roads_status"' in rendered
     assert 'id="roads_info"' in rendered
     assert 'id="roads_stacktrace"' in rendered
     assert "pure-u-md-1-2" not in rendered
+
+
+def test_roads_summary_report_template_renders_with_base_layout(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("reports/roads/summary.htm")
+    rendered = template.render(
+        roads_status={},
+        roads_summary={},
+        roads_run_summary={},
+        roads_report_resources={},
+        roads_report_links=[],
+        roads_resource_links=[],
+    )
+
+    assert "Roads Run Results" in rendered
+    assert "<!doctype html>" in rendered
+
+
+def test_roads_reports_control_template_renders_with_link_panel(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/roads_reports.htm")
+    rendered = template.render(
+        roads_status={},
+        roads_summary={},
+        roads_run_summary={},
+        roads_report_resources={},
+        roads_report_links=[],
+        roads_resource_links=[],
+        run_results_title="Run Results",
+    )
+
+    assert "Roads Results" in rendered
+    assert "Run Results" in rendered
 
 
 def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Environment) -> None:

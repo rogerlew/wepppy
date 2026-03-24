@@ -36,6 +36,7 @@ def refresh_return_period_events(
     max_rank: int = ...,
     buffer: int = ...,
     wait_for_inputs: bool = ...,
+    output_scope: str | None = ...,
 ) -> tuple[Path, Path]: ...
 
 
@@ -48,6 +49,7 @@ class ReturnPeriodDataset:
         max_rank: int = ...,
         buffer: int = ...,
         wait_for_inputs: bool = ...,
+        output_scope: str | None = ...,
     ) -> None: ...
 
     @property

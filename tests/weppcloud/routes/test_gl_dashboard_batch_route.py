@@ -12,6 +12,17 @@ batch_runner_module = importlib.import_module("wepppy.weppcloud.routes.batch_run
 
 pytestmark = pytest.mark.routes
 
+BASELINE_WEPP_PATHS = {
+    "lossHill": "wepp/output/interchange/loss_pw0.hill.parquet",
+    "lossChannel": "wepp/output/interchange/loss_pw0.chn.parquet",
+    "lossAllYearsOutlet": "wepp/output/interchange/loss_pw0.all_years.out.parquet",
+    "lossAllYearsHill": "wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+    "lossAllYearsChannel": "wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+    "hWat": "wepp/output/interchange/H.wat.parquet",
+    "hSoil": "wepp/output/interchange/H.soil.parquet",
+    "hPass": "wepp/output/interchange/H.pass.parquet",
+}
+
 
 @dataclass(frozen=True)
 class _FeatureStub:
@@ -66,6 +77,8 @@ def test_batch_gl_dashboard_renders_with_batch_context(batch_gl_dashboard_client
     assert kwargs["runid"] == "batch;;spring-2025;;_base"
     assert kwargs["config"] == "cfg"
     assert kwargs["batch_mode_enabled"] is True
+    assert kwargs["output_scope"] == "baseline"
+    assert kwargs["wepp_paths"] == BASELINE_WEPP_PATHS
     assert kwargs["batch"]["name"] == "spring-2025"
     assert kwargs["batch"]["runs"] == [
         {"runid": "batch;;spring-2025;;run-001", "leaf_runid": "run-001"},

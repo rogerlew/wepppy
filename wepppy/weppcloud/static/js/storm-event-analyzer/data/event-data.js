@@ -1,10 +1,13 @@
 const CLIMATE_PATH = 'climate/wepp_cli.parquet';
-const SOIL_PATH = 'wepp/output/interchange/H.soil.parquet';
-const WATER_PATH = 'wepp/output/interchange/H.wat.parquet';
-const OUTLET_PATH = 'wepp/output/interchange/ebe_pw0.parquet';
-const HILL_EVENTS_PATH = 'wepp/output/interchange/H.ebe.parquet';
 const HILLSLOPE_PATH = 'watershed/hillslopes.parquet';
-const TC_PATH = 'wepp/output/interchange/tc_out.parquet';
+const REQUIRED_WEPP_PATH_KEYS = ['soil', 'water', 'outlet', 'hillEvents', 'tc'];
+const DEFAULT_WEPP_PATHS = Object.freeze({
+  soil: 'wepp/output/interchange/H.soil.parquet',
+  water: 'wepp/output/interchange/H.wat.parquet',
+  outlet: 'wepp/output/interchange/ebe_pw0.parquet',
+  hillEvents: 'wepp/output/interchange/H.ebe.parquet',
+  tc: 'wepp/output/interchange/tc_out.parquet',
+});
 
 const INTENSITY_COLUMN_BY_MINUTES = {
   10: 'peak_intensity_10',
@@ -19,6 +22,26 @@ const SOIL_SATURATION_SOURCE_LABELS = {
 
 const warmupYearCache = new Map();
 const warmupYearPromiseCache = new Map();
+
+function resolveWeppPaths(weppPaths) {
+  if (weppPaths === undefined) {
+    return DEFAULT_WEPP_PATHS;
+  }
+
+  if (!weppPaths || typeof weppPaths !== 'object') {
+    throw new Error('Storm Event Analyzer requires STORM_EVENT_ANALYZER_CONTEXT.weppPaths.');
+  }
+
+  const resolved = {};
+  for (const key of REQUIRED_WEPP_PATH_KEYS) {
+    const value = weppPaths[key];
+    if (typeof value !== 'string' || value.trim() === '') {
+      throw new Error(`Storm Event Analyzer requires STORM_EVENT_ANALYZER_CONTEXT.weppPaths.${key}.`);
+    }
+    resolved[key] = value;
+  }
+  return resolved;
+}
 
 function pad2(value) {
   return String(value).padStart(2, '0');
@@ -127,12 +150,13 @@ export function buildSoilPayload({
   maxValue,
   warmupYear,
   soilSaturationSource = 'tsmf',
-}) {
+}, weppPaths = DEFAULT_WEPP_PATHS) {
+  const paths = resolveWeppPaths(weppPaths);
   const sourceColumn = soilSaturationSource === 'saturation' ? 'Saturation' : 'TSMF';
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
-      { path: SOIL_PATH, alias: 'soil' },
+      { path: paths.soil, alias: 'soil' },
     ],
     joins: [
       {
@@ -182,14 +206,18 @@ function isMissingTsmfColumnError(error) {
   return /tsmf/i.test(message) && /(missing|not found|no field|unknown|does not exist|does not have|column)/i.test(message);
 }
 
-export function buildSnowPayload({ filterColumn, minValue, maxValue, warmupYear }) {
+export function buildSnowPayload(
+  { filterColumn, minValue, maxValue, warmupYear },
+  weppPaths = DEFAULT_WEPP_PATHS,
+) {
+  const paths = resolveWeppPaths(weppPaths);
   const coverageExpr =
     'SUM(CASE WHEN wat."Snow-Water" > 0 THEN wat.Area ELSE 0 END) / NULLIF(SUM(wat.Area), 0) * 100.0';
   const snowWaterExpr = 'SUM(wat."Snow-Water" * wat.Area) / NULLIF(SUM(wat.Area), 0)';
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
-      { path: WATER_PATH, alias: 'wat' },
+      { path: paths.water, alias: 'wat' },
     ],
     joins: [
       {
@@ -234,11 +262,15 @@ export function buildSnowPayload({ filterColumn, minValue, maxValue, warmupYear 
   };
 }
 
-export function buildHydrologyPayload({ filterColumn, minValue, maxValue, warmupYear }) {
+export function buildHydrologyPayload(
+  { filterColumn, minValue, maxValue, warmupYear },
+  weppPaths = DEFAULT_WEPP_PATHS,
+) {
+  const paths = resolveWeppPaths(weppPaths);
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
-      { path: OUTLET_PATH, alias: 'out' },
+      { path: paths.outlet, alias: 'out' },
     ],
     joins: [
       {
@@ -287,11 +319,15 @@ export function buildHydrologyPayload({ filterColumn, minValue, maxValue, warmup
   };
 }
 
-export function buildPrecipVolumePayload({ filterColumn, minValue, maxValue, warmupYear }) {
+export function buildPrecipVolumePayload(
+  { filterColumn, minValue, maxValue, warmupYear },
+  weppPaths = DEFAULT_WEPP_PATHS,
+) {
+  const paths = resolveWeppPaths(weppPaths);
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
-      { path: HILL_EVENTS_PATH, alias: 'hebe' },
+      { path: paths.hillEvents, alias: 'hebe' },
       { path: HILLSLOPE_PATH, alias: 'hill' },
     ],
     joins: [
@@ -344,11 +380,12 @@ export function buildPrecipVolumePayload({ filterColumn, minValue, maxValue, war
   };
 }
 
-export function buildTcPayloadBySimDay({ warmupYear }) {
+export function buildTcPayloadBySimDay({ warmupYear }, weppPaths = DEFAULT_WEPP_PATHS) {
+  const paths = resolveWeppPaths(weppPaths);
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
-      { path: TC_PATH, alias: 'tc' },
+      { path: paths.tc, alias: 'tc' },
     ],
     joins: [
       {
@@ -371,11 +408,12 @@ export function buildTcPayloadBySimDay({ warmupYear }) {
   };
 }
 
-export function buildTcPayloadByJulian({ warmupYear }) {
+export function buildTcPayloadByJulian({ warmupYear }, weppPaths = DEFAULT_WEPP_PATHS) {
+  const paths = resolveWeppPaths(weppPaths);
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
-      { path: TC_PATH, alias: 'tc' },
+      { path: paths.tc, alias: 'tc' },
     ],
     joins: [
       {
@@ -456,7 +494,12 @@ function mapRowsBySimDay(records) {
   return map;
 }
 
-export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineForScenario }) {
+export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineForScenario, weppPaths }) {
+  if (weppPaths === undefined) {
+    throw new Error('Storm Event Analyzer requires STORM_EVENT_ANALYZER_CONTEXT.weppPaths.');
+  }
+  const datasetPaths = resolveWeppPaths(weppPaths);
+
   async function safeQuery(payload, label, postQueryEngineFn = postQueryEngine) {
     try {
       return await postQueryEngineFn(payload);
@@ -470,7 +513,7 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
     if (!ctx.runid) {
       return { available: false, records: [] };
     }
-    const primary = buildTcPayloadBySimDay({ warmupYear });
+    const primary = buildTcPayloadBySimDay({ warmupYear }, datasetPaths);
     try {
       const result = await postQueryEngineFn(primary);
       return { available: true, records: (result && result.records) || [] };
@@ -478,7 +521,7 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
       console.warn('Storm Event Analyzer: tc_out sim_day_index join failed', error);
     }
 
-    const fallback = buildTcPayloadByJulian({ warmupYear });
+    const fallback = buildTcPayloadByJulian({ warmupYear }, datasetPaths);
     try {
       const result = await postQueryEngineFn(fallback);
       return { available: true, records: (result && result.records) || [] };
@@ -502,7 +545,7 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
       maxValue,
       warmupYear,
       soilSaturationSource: primarySource,
-    });
+    }, datasetPaths);
     try {
       const result = await postQueryEngineFn(primaryPayload);
       return {
@@ -527,7 +570,7 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
       maxValue,
       warmupYear,
       soilSaturationSource: fallbackSource,
-    });
+    }, datasetPaths);
     try {
       const result = await postQueryEngineFn(fallbackPayload);
       return {
@@ -630,21 +673,21 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
       minValue: range.minValue,
       maxValue: range.maxValue,
       warmupYear,
-    });
+    }, datasetPaths);
 
     const hydroPayload = buildHydrologyPayload({
       filterColumn: filterSpec.filterColumn,
       minValue: range.minValue,
       maxValue: range.maxValue,
       warmupYear,
-    });
+    }, datasetPaths);
 
     const precipPayload = buildPrecipVolumePayload({
       filterColumn: filterSpec.filterColumn,
       minValue: range.minValue,
       maxValue: range.maxValue,
       warmupYear,
-    });
+    }, datasetPaths);
 
     const eventResult = await postQueryEngine(eventPayload);
     const [soilResult, snowResult, hydroResult, precipResult, tcResult] = await Promise.all([
@@ -711,21 +754,21 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
       minValue,
       maxValue,
       warmupYear,
-    });
+    }, datasetPaths);
 
     const hydroPayload = buildHydrologyPayload({
       filterColumn,
       minValue,
       maxValue,
       warmupYear,
-    });
+    }, datasetPaths);
 
     const precipPayload = buildPrecipVolumePayload({
       filterColumn,
       minValue,
       maxValue,
       warmupYear,
-    });
+    }, datasetPaths);
 
     let eventResult = null;
     let soilResult = null;

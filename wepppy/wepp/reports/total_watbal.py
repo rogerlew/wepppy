@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 
+from .output_scope import normalize_output_scope, scoped_dataset_path
 from .report_base import ReportBase
 from .row_data import RowData
 
@@ -39,12 +40,14 @@ class TotalWatbalReport(ReportBase):
         exclude_yr_indxs: Iterable[int] | None = None,
         *,
         dataframe: pd.DataFrame | None = None,
+        output_scope: str | None = None,
     ):
         base = Path(wd).expanduser()
         if not base.exists():
             raise FileNotFoundError(base)
+        self._output_scope = normalize_output_scope(output_scope)
 
-        dataset_path = base / self._DATASET_REL_PATH
+        dataset_path = base / scoped_dataset_path(self._DATASET_REL_PATH, self._output_scope)
         if dataframe is None:
             if not dataset_path.exists():
                 raise FileNotFoundError(dataset_path)

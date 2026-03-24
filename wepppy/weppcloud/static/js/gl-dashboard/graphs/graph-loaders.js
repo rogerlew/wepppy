@@ -75,6 +75,10 @@ export function createGraphLoaders(deps) {
     postQueryEngine,
     postQueryEngineForScenario,
     postBaseQueryEngine,
+    weppLossPath,
+    weppChannelPath,
+    weppYearlyPath,
+    weppOutletAllYearsPath,
     viridisColor,
     winterColor,
     jet2Color,
@@ -222,7 +226,7 @@ export function createGraphLoaders(deps) {
     }
     const payload = {
       datasets: [
-        { path: 'wepp/output/interchange/loss_pw0.hill.parquet', alias: 'loss' },
+        { path: weppLossPath, alias: 'loss' },
         { path: 'watershed/hillslopes.parquet', alias: 'hill' },
       ],
       joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],
@@ -285,7 +289,7 @@ export function createGraphLoaders(deps) {
     if (state.channelLossCache[cacheKey]) return state.channelLossCache[cacheKey];
     const payload = {
       datasets: [
-        { path: 'wepp/output/interchange/loss_pw0.chn.parquet', alias: 'loss' },
+        { path: weppChannelPath, alias: 'loss' },
         { path: 'watershed/channels.parquet', alias: 'chn' },
       ],
       joins: [{ left: 'loss', right: 'chn', on: 'wepp_id', type: 'inner' }],
@@ -321,7 +325,7 @@ export function createGraphLoaders(deps) {
     const isBaseScenario = !scenPath;
     if (state.outletAllYearsCache[cacheKey]) return state.outletAllYearsCache[cacheKey];
     const payload = {
-      datasets: [{ path: 'wepp/output/interchange/loss_pw0.all_years.out.parquet', alias: 'out' }],
+      datasets: [{ path: weppOutletAllYearsPath, alias: 'out' }],
       columns: ['out.key AS key', 'out.year AS year', 'out.value AS value'],
       order_by: ['year'],
     };
@@ -1216,7 +1220,7 @@ export function createGraphLoaders(deps) {
       const valueColumn = WEPP_YEARLY_COLUMN_MAP[overlay.mode] || overlay.mode;
         const dataPayload = {
         datasets: [
-          { path: 'wepp/output/interchange/loss_pw0.all_years.hill.parquet', alias: 'loss' },
+          { path: weppYearlyPath, alias: 'loss' },
           { path: 'watershed/hillslopes.parquet', alias: 'hill' },
         ],
         joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],

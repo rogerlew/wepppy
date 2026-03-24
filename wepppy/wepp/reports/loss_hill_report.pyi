@@ -21,6 +21,7 @@ class HillSummaryReport(ReportBase):
         wd: str | Path | Any,
         *,
         fraction_under: float | None = ...,
+        output_scope: str | None = ...,
         **_unused_kwargs: Any,
     ) -> None: ...
 

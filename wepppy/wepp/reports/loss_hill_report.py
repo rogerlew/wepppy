@@ -10,6 +10,7 @@ import pandas as pd
 from wepppy.query_engine.payload import QueryRequest
 
 from .helpers import ReportQueryContext
+from .output_scope import normalize_output_scope, scoped_dataset_path
 from .report_base import ReportBase
 from .row_data import RowData
 
@@ -19,7 +20,7 @@ __all__ = ["HillSummaryReport", "HillSummary"]
 class HillSummaryReport(ReportBase):
     """Per-hillslope summary derived from loss_pw0.hill + spatial metadata."""
 
-    _LOSS_DATASET = "wepp/output/interchange/loss_pw0.hill.parquet"
+    _BASELINE_LOSS_DATASET = "wepp/output/interchange/loss_pw0.hill.parquet"
     _HILLSLOPE_DATASET = "watershed/hillslopes.parquet"
     _LANDUSE_DATASET = "landuse/landuse.parquet"
     _SOILS_DATASET = "soils/soils.parquet"
@@ -29,6 +30,7 @@ class HillSummaryReport(ReportBase):
         wd: str | Path | Any,
         *,
         fraction_under: float | None = None,
+        output_scope: str | None = None,
         **_unused_kwargs,
     ):
         loss = wd if self._is_loss_like(wd) else None
@@ -38,7 +40,9 @@ class HillSummaryReport(ReportBase):
             self._wd = Path(wd).expanduser()
         if not self._wd.exists():
             raise FileNotFoundError(self._wd)
-        
+
+        self._output_scope = normalize_output_scope(output_scope)
+        self._loss_dataset = scoped_dataset_path(self._BASELINE_LOSS_DATASET, self._output_scope)
         self._fraction_under = fraction_under
 
         context = self._prepare_context()
@@ -50,7 +54,7 @@ class HillSummaryReport(ReportBase):
     def _prepare_context(self) -> ReportQueryContext:
         """Bootstrap and validate the report query context."""
         context = ReportQueryContext(self._wd, run_interchange=False)
-        context.ensure_datasets(self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET)
+        context.ensure_datasets(self._loss_dataset, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET)
         return context
 
     def _build_dataframe(self, context: ReportQueryContext) -> pd.DataFrame:
@@ -59,7 +63,7 @@ class HillSummaryReport(ReportBase):
         include_soils = catalog.has(self._SOILS_DATASET)
 
         datasets = [
-            {"path": self._LOSS_DATASET, "alias": "loss"},
+            {"path": self._loss_dataset, "alias": "loss"},
             {"path": self._HILLSLOPE_DATASET, "alias": "hills"},
             {"path": self._LANDUSE_DATASET, "alias": "lu"},
         ]

@@ -10,6 +10,7 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 from .helpers import extract_units_from_schema
+from .output_scope import normalize_output_scope, scoped_dataset_path
 from .report_base import ReportBase
 from .row_data import RowData, parse_units
 
@@ -40,13 +41,14 @@ class ChannelWatbalReport(ReportBase):
     }
     _TRANSPIRATION_COLUMNS = ["Ep (mm)", "Es (mm)", "Er (mm)"]
 
-    def __init__(self, wd: str | Path):
+    def __init__(self, wd: str | Path, *, output_scope: str | None = None):
         """Load the channel water-balance parquet and compute summary tables."""
         self.wd = Path(wd).expanduser()
         if not self.wd.exists():
             raise FileNotFoundError(self.wd)
+        self._output_scope = normalize_output_scope(output_scope)
 
-        dataset_path = self.wd / self._DATASET_REL_PATH
+        dataset_path = self.wd / scoped_dataset_path(self._DATASET_REL_PATH, self._output_scope)
         if not dataset_path.exists():
             raise FileNotFoundError(dataset_path)
 

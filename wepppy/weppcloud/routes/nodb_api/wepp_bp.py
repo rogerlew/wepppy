@@ -20,6 +20,7 @@ from wepppy.wepp.reports import ChannelSummaryReport, HillSummaryReport, OutletS
 from wepppy.wepp.reports import TotalWatbalReport
 from wepppy.wepp.reports.report_base import ReportBase
 from wepppy.wepp.reports.row_data import parse_name, parse_units
+from wepppy.wepp.reports.output_scope import normalize_output_scope, scoped_dataset_path
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.query_engine import resolve_run_context
@@ -37,6 +38,16 @@ def _wants_csv() -> bool:
         return True
     accept = request.headers.get('Accept', '')
     return 'text/csv' in accept.lower()
+
+
+def _resolve_output_scope():
+    """Resolve and validate the report output scope from request args."""
+    try:
+        return normalize_output_scope(request.args.get("output_scope"))
+    except ValueError as exc:
+        response = error_factory(str(exc))
+        response.status_code = 400
+        return response
 
 
 def _safe_gt_timestamp(a, b) -> bool:
@@ -714,6 +725,10 @@ def report_wepp_run_summary(runid, config):
 @authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_loss(runid, config):
+    output_scope = _resolve_output_scope()
+    if isinstance(output_scope, Response):
+        return output_scope
+
     extraneous = request.args.get('extraneous', None) == 'true'
 
     wd = get_wd(runid)
@@ -721,21 +736,21 @@ def report_wepp_loss(runid, config):
     
     # Try to instantiate reports - they may fail if interchange files are missing
     try:
-        out_rpt = OutletSummaryReport(wd)
+        out_rpt = OutletSummaryReport(wd, output_scope=output_scope)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:610", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         out_rpt = None
         
     try:
-        hill_rpt = HillSummaryReport(wd)
+        hill_rpt = HillSummaryReport(wd, output_scope=output_scope)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:615", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         hill_rpt = None
         
     try:
-        chn_rpt = ChannelSummaryReport(wd)
+        chn_rpt = ChannelSummaryReport(wd, output_scope=output_scope)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:620", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -792,6 +807,7 @@ def report_wepp_loss(runid, config):
         unitizer_nodb=unitizer,
         precisions=wepppy.nodb.unitizer.precisions,
         is_singlestorm=is_singlestorm,
+        output_scope=output_scope,
         user=current_user,
     )
 
@@ -801,6 +817,10 @@ def report_wepp_loss(runid, config):
 @authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_yearly_watbal(runid, config):
+    output_scope = _resolve_output_scope()
+    if isinstance(output_scope, Response):
+        return output_scope
+
     try:
         res = request.args.get('exclude_yr_indxs')
         exclude_yr_indxs = []
@@ -816,7 +836,7 @@ def report_wepp_yearly_watbal(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
-    totwatbal = TotalWatbalReport(wd, exclude_yr_indxs=exclude_yr_indxs)
+    totwatbal = TotalWatbalReport(wd, exclude_yr_indxs=exclude_yr_indxs, output_scope=output_scope)
 
     unitizer = Unitizer.getInstance(wd)
 
@@ -834,6 +854,7 @@ def report_wepp_yearly_watbal(runid, config):
                             precisions=wepppy.nodb.unitizer.precisions,
                             rpt=totwatbal,
                             exclude_yr_indxs=exclude_yr_indxs,
+                            output_scope=output_scope,
                             ron=ron,
                             user=current_user)
 
@@ -873,13 +894,17 @@ def report_wepp_avg_annual_by_landuse(runid, config):
 @authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_avg_annual_watbal(runid, config):
+    output_scope = _resolve_output_scope()
+    if isinstance(output_scope, Response):
+        return output_scope
+
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
-    hill_rpt = wepp.report_hill_watbal()
+    hill_rpt = wepp.report_hill_watbal(output_scope=output_scope)
     chn_rpt = None
     try:
-        chn_rpt = wepp.report_chn_watbal()
+        chn_rpt = wepp.report_chn_watbal(output_scope=output_scope)
     except FileNotFoundError:
         chn_rpt = None
 
@@ -908,6 +933,7 @@ def report_wepp_avg_annual_watbal(runid, config):
                             precisions=wepppy.nodb.unitizer.precisions,
                             hill_rpt=hill_rpt,
                             chn_rpt=chn_rpt,
+                            output_scope=output_scope,
                             ron=ron,
                             user=current_user)
 
@@ -916,6 +942,10 @@ def report_wepp_avg_annual_watbal(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')
 @authorize_and_handle_with_exception_factory
 def plot_wepp_streamflow(runid, config):
+    output_scope = _resolve_output_scope()
+    if isinstance(output_scope, Response):
+        return output_scope
+
     res = request.args.get('exclude_yr_indxs')
     if res:
         exclude_yr_indxs = [int(yr) for yr in res.split(',') if isint(yr)]
@@ -923,7 +953,7 @@ def plot_wepp_streamflow(runid, config):
         exclude_yr_indxs = [0, 1]
 
     wd = get_wd(runid)
-    stream_rel_path = 'wepp/output/interchange/totalwatsed3.parquet'
+    stream_rel_path = scoped_dataset_path('wepp/output/interchange/totalwatsed3.parquet', output_scope)
     stream_parquet = _join(wd, stream_rel_path)
     if not _exists(stream_parquet):
         return error_factory('totalwatsed3.parquet is not available; please run the WEPP interchange workflow first.')
@@ -1014,6 +1044,7 @@ def plot_wepp_streamflow(runid, config):
         precisions=wepppy.nodb.unitizer.precisions,
         exclude_yr_indxs=exclude_yr_indxs,
         exclude_yr_indxs_csv=','.join(str(yr) for yr in exclude_yr_indxs),
+        output_scope=output_scope,
         streamflow_data_json=timeseries_json,
         streamflow_query_json=payload_json,
         streamflow_sql=result.sql,
@@ -1027,6 +1058,10 @@ def plot_wepp_streamflow(runid, config):
 @authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_return_periods(runid, config):
+    output_scope = _resolve_output_scope()
+    if isinstance(output_scope, Response):
+        return output_scope
+
     try:
         res = request.args.get('exclude_yr_indxs')
         exclude_yr_indxs = []
@@ -1078,6 +1113,7 @@ def report_wepp_return_periods(runid, config):
         exclude_months=exclude_months,
         chn_topaz_id_of_interest=chn_topaz_id_of_interest,
         wait_for_inputs=False,
+        output_scope=output_scope,
     )
 
     translator = Watershed.getInstance(wd).translator_factory()
@@ -1129,7 +1165,8 @@ def report_wepp_return_periods(runid, config):
                             measure_order=measure_order,
                             method=method,
                             exclude_yr_indxs=exclude_yr_indxs,
-                            exclude_months=exclude_months)
+                            exclude_months=exclude_months,
+                            output_scope=output_scope)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')

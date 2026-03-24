@@ -15,7 +15,11 @@ export function createDetectionController({
   fetchWeppChannelSummary,
   weppLossPath,
   weppChannelPath,
+  weppYearlyChannelPath,
   weppYearlyPath,
+  weppEventWatPath,
+  weppEventSoilPath,
+  weppEventPassPath,
   watarPath,
   postQueryEngine,
   postBaseQueryEngine,
@@ -251,7 +255,7 @@ export function createDetectionController({
       buildBaseUrl,
       fetchWeppChannelSummary,
       weppStatistic: getState().weppStatistic,
-      weppChannelPath: weppChannelPath || 'wepp/output/interchange/loss_pw0.all_years.chn.parquet',
+      weppChannelPath,
       channelsGeoJson: getState().channelsGeoJson,
     });
     if (result) {
@@ -277,7 +281,7 @@ export function createDetectionController({
     const result = await detectorModule.detectWeppYearlyChannelOverlays({
       buildBaseUrl,
       postQueryEngine,
-      weppChannelPath: weppChannelPath || 'wepp/output/interchange/loss_pw0.all_years.chn.parquet',
+      weppYearlyChannelPath: weppYearlyChannelPath || weppChannelPath,
       channelsGeoJson: getState().channelsGeoJson,
     });
     if (result) {
@@ -301,7 +305,7 @@ export function createDetectionController({
     const result = await detectorModule.detectWeppYearlyOverlays({
       buildBaseUrl,
       postQueryEngine,
-      weppYearlyPath: weppYearlyPath || 'wepp/output/interchange/loss_pw0.all_years.hill.parquet',
+      weppYearlyPath,
       currentSelectedYear: getState().weppYearlySelectedYear,
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
     });
@@ -325,6 +329,9 @@ export function createDetectionController({
     const result = await detectorModule.detectWeppEventOverlays({
       buildBaseUrl,
       climateCtx,
+      weppEventWatPath,
+      weppEventSoilPath,
+      weppEventPassPath,
       currentSelectedDate: getState().weppEventSelectedDate,
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
     });

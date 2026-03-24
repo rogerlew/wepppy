@@ -121,6 +121,7 @@
 {% endblock %}
 
 {% block report_content %}
+{% set output_scope_value = output_scope | default('baseline', true) %}
 <header class="wc-stack">
   <h1 class="wc-heading__title">Daily streamflow</h1>
   <p class="wc-text-muted">
@@ -137,18 +138,18 @@
     <label>
       <span class="wc-text-muted">Exclude simulation years</span>
       <select id="streamflowYearSelection">
-        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config) }}"{% if not exclude_yr_indxs %} selected{% endif %}>Include all years</option>
-        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0') }}"{% if exclude_yr_indxs == [0] %} selected{% endif %}>
+        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, output_scope=output_scope_value) }}"{% if not exclude_yr_indxs %} selected{% endif %}>Include all years</option>
+        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0', output_scope=output_scope_value) }}"{% if exclude_yr_indxs == [0] %} selected{% endif %}>
           Exclude first year
         </option>
-        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0,1') }}"{% if exclude_yr_indxs == [0, 1] %} selected{% endif %}>
+        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0,1', output_scope=output_scope_value) }}"{% if exclude_yr_indxs == [0, 1] %} selected{% endif %}>
           Exclude first two years
         </option>
-        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0,1,2,3,4') }}"{% if exclude_yr_indxs == [0, 1, 2, 3, 4] %} selected{% endif %}>
+        <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs='0,1,2,3,4', output_scope=output_scope_value) }}"{% if exclude_yr_indxs == [0, 1, 2, 3, 4] %} selected{% endif %}>
           Exclude first five years
         </option>
         {% if exclude_yr_indxs and exclude_yr_indxs not in ([0], [0, 1], [0, 1, 2, 3, 4]) %}
-          <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs=exclude_yr_indxs|join(',')) }}" selected>
+          <option value="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config, exclude_yr_indxs=exclude_yr_indxs|join(','), output_scope=output_scope_value) }}" selected>
             Custom: {{ exclude_yr_indxs|join(', ') }}
           </option>
         {% endif %}

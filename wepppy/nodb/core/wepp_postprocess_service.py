@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from os.path import exists as _exists
 from os.path import join as _join
 from typing import TYPE_CHECKING, Any, Optional
 
 from wepppy.all_your_base import NumpyEncoder, isinf, isnan
 from wepppy.wepp.reports import ReturnPeriodDataset, ReturnPeriods
+from wepppy.wepp.reports.output_scope import normalize_output_scope, resolve_output_scope_paths
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.wepp import Wepp
@@ -24,8 +26,11 @@ class WeppPostprocessService:
         exclude_months: Optional[list[int]] = None,
         chn_topaz_id_of_interest: Optional[int] = None,
         wait_for_inputs: bool = True,
+        output_scope: str | None = None,
     ) -> ReturnPeriods:
-        output_dir = wepp.output_dir
+        normalized_scope = normalize_output_scope(output_scope)
+        scoped_paths = resolve_output_scope_paths(normalized_scope)
+        output_dir = _join(wepp.wd, str(scoped_paths.output_root))
 
         return_periods_fn = None
         cached_report: ReturnPeriods | None = None
@@ -71,6 +76,7 @@ class WeppPostprocessService:
             wepp.wd,
             auto_refresh=not readonly,
             wait_for_inputs=wait_for_inputs,
+            output_scope=normalized_scope,
         )
         return_periods = dataset.create_report(
             rec_intervals,
@@ -82,6 +88,7 @@ class WeppPostprocessService:
         )
 
         if return_periods_fn is not None:
+            Path(return_periods_fn).parent.mkdir(parents=True, exist_ok=True)
             with open(return_periods_fn, "w") as fp:
                 json.dump(return_periods.to_dict(), fp, cls=NumpyEncoder)
 

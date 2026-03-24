@@ -1,20 +1,78 @@
-{% extends "layout.htm" %}
+{% extends "base_pure.htm" %}
 
-{% block title %}Roads Summary{% endblock %}
+{% block title %}Roads Run Results{% endblock %}
 
 {% block body %}
-<div class="wc-container">
-  <h1>Roads Summary</h1>
-  <p><strong>Run:</strong> {{ runid }} / {{ config }}</p>
+{% set run_state = roads_status.get("status", "unknown") if roads_status else "unknown" %}
+{% set run_summary_state = roads_run_summary.get("status", run_state) if roads_run_summary else run_state %}
+{% set resources_state = roads_report_resources.get("status", "pending") if roads_report_resources else "pending" %}
+{% set required_relpaths = roads_report_resources.get("required_relpaths", []) if roads_report_resources else [] %}
+{% set missing_relpaths = roads_report_resources.get("missing_relpaths", []) if roads_report_resources else [] %}
+{% set resources_ready = run_summary_state == "completed" and resources_state == "ready" and (missing_relpaths | length == 0) %}
 
-  <section>
-    <h2>Status</h2>
-    <pre>{{ roads_status | tojson(indent=2) }}</pre>
+<div class="wc-container wc-stack">
+  <header class="wc-stack-sm">
+    <h1 class="wc-heading__title">Roads Run Results</h1>
+    <p class="wc-text-muted">Run: <code>{{ runid }}/{{ config }}</code></p>
+  </header>
+
+  <section class="wc-panel wc-stack-sm">
+    <h2 class="wc-heading__subtitle">Execution Status</h2>
+    <div><strong>Controller state:</strong> {{ run_state }}</div>
+    <div><strong>Run summary state:</strong> {{ run_summary_state }}</div>
+    <div><strong>Report resources:</strong> {{ resources_state }}</div>
+    {% if roads_status and roads_status.get("errors") %}
+    <div class="wc-alert wc-alert--warning" role="alert">
+      <p class="wc-alert__body"><strong>Errors:</strong> {{ roads_status.get("errors") | join("; ") }}</p>
+    </div>
+    {% endif %}
   </section>
 
-  <section>
-    <h2>Summary</h2>
-    <pre>{{ roads_summary | tojson(indent=2) }}</pre>
+  <section class="wc-panel wc-stack-sm">
+    <h2 class="wc-heading__subtitle">Roads-Scoped Report Links</h2>
+    {% if resources_ready %}
+    <ul class="wc-list">
+      {% for link in roads_report_links %}
+      <li>
+        <a class="wc-link wc-link--file" href="{{ link.href }}" target="_blank">{{ link.label }}</a>
+        <span class="wc-text-muted"> - {{ link.description }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="wc-text-muted">Run completion and resource regeneration are required before Roads-scoped report links are considered ready.</p>
+    {% endif %}
   </section>
+
+  <section class="wc-panel wc-stack-sm">
+    <h2 class="wc-heading__subtitle">Regenerated Resources</h2>
+    {% if required_relpaths %}
+    <ul class="wc-list">
+      {% for relpath in required_relpaths %}
+      {% set is_missing = relpath in missing_relpaths %}
+      <li>
+        <code>{{ relpath }}</code>
+        {% if is_missing %}
+          <span class="wc-text-danger"> (missing)</span>
+        {% else %}
+          <span class="wc-text-success"> (ready)</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="wc-text-muted">No resource manifest is available yet.</p>
+    {% endif %}
+  </section>
+
+  <details class="wc-panel">
+    <summary class="wc-heading__subtitle">Diagnostics (JSON)</summary>
+    <div class="wc-stack-sm">
+      <h3 class="wc-heading__subtitle">roads_status</h3>
+      <pre>{{ roads_status | tojson(indent=2) }}</pre>
+      <h3 class="wc-heading__subtitle">roads_summary</h3>
+      <pre>{{ roads_summary | tojson(indent=2) }}</pre>
+    </div>
+  </details>
 </div>
 {% endblock %}

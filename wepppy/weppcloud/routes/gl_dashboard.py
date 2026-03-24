@@ -9,7 +9,8 @@ from flask import current_app
 from ._common import *  # noqa: F401,F403
 from wepppy.nodb.core import Ron, Climate
 from wepppy.nodb.mods.omni import Omni
-from wepppy.weppcloud.utils.helpers import is_omni_child_run
+from wepppy.wepp.reports.output_scope import normalize_output_scope, scoped_dataset_path
+from wepppy.weppcloud.utils.helpers import error_factory, is_omni_child_run
 
 
 gl_dashboard_bp = Blueprint("gl_dashboard", __name__)
@@ -29,6 +30,20 @@ def _coerce_bool_setting(value: object, *, default: bool = False) -> bool:
         if token in {"0", "false", "no", "off"}:
             return False
     return default
+
+
+def _build_wepp_paths(output_scope: str) -> dict[str, str]:
+    """Build scope-aware WEPP dataset relpaths for gl-dashboard query payloads."""
+    return {
+        "lossHill": scoped_dataset_path("wepp/output/interchange/loss_pw0.hill.parquet", output_scope),
+        "lossChannel": scoped_dataset_path("wepp/output/interchange/loss_pw0.chn.parquet", output_scope),
+        "lossAllYearsOutlet": scoped_dataset_path("wepp/output/interchange/loss_pw0.all_years.out.parquet", output_scope),
+        "lossAllYearsHill": scoped_dataset_path("wepp/output/interchange/loss_pw0.all_years.hill.parquet", output_scope),
+        "lossAllYearsChannel": scoped_dataset_path("wepp/output/interchange/loss_pw0.all_years.chn.parquet", output_scope),
+        "hWat": scoped_dataset_path("wepp/output/interchange/H.wat.parquet", output_scope),
+        "hSoil": scoped_dataset_path("wepp/output/interchange/H.soil.parquet", output_scope),
+        "hPass": scoped_dataset_path("wepp/output/interchange/H.pass.parquet", output_scope),
+    }
 
 
 def _get_omni_scenarios(wd: str):
@@ -105,6 +120,13 @@ def _get_omni_contrasts(wd: str):
 )
 def gl_dashboard(runid: str, config: str):
     authorize(runid, config)
+    try:
+        output_scope = normalize_output_scope(request.args.get("output_scope"))
+    except ValueError as exc:
+        response = error_factory(str(exc))
+        response.status_code = 400
+        return response
+
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
 
@@ -180,6 +202,8 @@ def gl_dashboard(runid: str, config: str):
         omni_scenarios=omni_scenarios,
         omni_contrasts=omni_contrasts,
         is_omni_child=is_omni_child,
+        output_scope=output_scope,
+        wepp_paths=_build_wepp_paths(output_scope),
         mode="run",
         batch=None,
         batch_mode_enabled=batch_mode_enabled,

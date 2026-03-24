@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import shutil
 import sys
 import types
 from pathlib import Path
@@ -153,3 +154,32 @@ def test_total_watbal_excludes_year_indices(tmp_path):
     rows = list(report)
     assert len(rows) == 1
     assert rows[0].row["WaterYear"] == 2001
+
+
+def test_total_watbal_uses_roads_output_scope(tmp_path):
+    run_dir = tmp_path / "run"
+    baseline_path = run_dir / "wepp" / "output" / "interchange" / "totalwatsed3.parquet"
+    _write_totalwatsed3(baseline_path)
+
+    roads_path = run_dir / "wepp" / "roads" / "output" / "interchange" / "totalwatsed3.parquet"
+    roads_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(baseline_path, roads_path)
+
+    roads_df = pd.read_parquet(roads_path)
+    roads_df["Precipitation"] = roads_df["Precipitation"].astype(float) + 100.0
+    roads_df.to_parquet(roads_path, index=False)
+
+    baseline_report = TotalWatbalReport(run_dir, exclude_yr_indxs=[], output_scope="baseline")
+    roads_report = TotalWatbalReport(run_dir, exclude_yr_indxs=[], output_scope="roads")
+
+    baseline_rows = [row.row for row in baseline_report]
+    roads_rows = [row.row for row in roads_report]
+    assert roads_rows[0]["Precipitation (mm)"] > baseline_rows[0]["Precipitation (mm)"]
+
+
+def test_total_watbal_rejects_invalid_output_scope(tmp_path):
+    run_dir = tmp_path / "run"
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(ValueError, match="Invalid output_scope"):
+        TotalWatbalReport(run_dir, output_scope="invalid")

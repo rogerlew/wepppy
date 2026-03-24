@@ -11,6 +11,28 @@ import wepppy.weppcloud.routes.gl_dashboard as gl_dashboard_module
 
 pytestmark = pytest.mark.routes
 
+BASELINE_WEPP_PATHS = {
+    "lossHill": "wepp/output/interchange/loss_pw0.hill.parquet",
+    "lossChannel": "wepp/output/interchange/loss_pw0.chn.parquet",
+    "lossAllYearsOutlet": "wepp/output/interchange/loss_pw0.all_years.out.parquet",
+    "lossAllYearsHill": "wepp/output/interchange/loss_pw0.all_years.hill.parquet",
+    "lossAllYearsChannel": "wepp/output/interchange/loss_pw0.all_years.chn.parquet",
+    "hWat": "wepp/output/interchange/H.wat.parquet",
+    "hSoil": "wepp/output/interchange/H.soil.parquet",
+    "hPass": "wepp/output/interchange/H.pass.parquet",
+}
+
+ROADS_WEPP_PATHS = {
+    "lossHill": "wepp/roads/output/interchange/loss_pw0.hill.parquet",
+    "lossChannel": "wepp/roads/output/interchange/loss_pw0.chn.parquet",
+    "lossAllYearsOutlet": "wepp/roads/output/interchange/loss_pw0.all_years.out.parquet",
+    "lossAllYearsHill": "wepp/roads/output/interchange/loss_pw0.all_years.hill.parquet",
+    "lossAllYearsChannel": "wepp/roads/output/interchange/loss_pw0.all_years.chn.parquet",
+    "hWat": "wepp/roads/output/interchange/H.wat.parquet",
+    "hSoil": "wepp/roads/output/interchange/H.soil.parquet",
+    "hPass": "wepp/roads/output/interchange/H.pass.parquet",
+}
+
 
 @pytest.mark.parametrize(
     ("raw", "expected"),
@@ -102,6 +124,8 @@ def test_gl_dashboard_context_includes_batch_mode_flag(gl_dashboard_client) -> N
     assert kwargs["mode"] == "run"
     assert kwargs["batch"] is None
     assert kwargs["batch_mode_enabled"] is True
+    assert kwargs["output_scope"] == "baseline"
+    assert kwargs["wepp_paths"] == BASELINE_WEPP_PATHS
 
 
 def test_gl_dashboard_context_respects_disabled_batch_flag(gl_dashboard_client) -> None:
@@ -113,6 +137,27 @@ def test_gl_dashboard_context_respects_disabled_batch_flag(gl_dashboard_client) 
     assert response.status_code == 200
     kwargs = captured["kwargs"]
     assert kwargs["batch_mode_enabled"] is False
+
+
+def test_gl_dashboard_context_supports_roads_output_scope(gl_dashboard_client) -> None:
+    client, captured, _app = gl_dashboard_client
+
+    response = client.get("/runs/run-456/cfg/gl-dashboard?output_scope=roads")
+
+    assert response.status_code == 200
+    kwargs = captured["kwargs"]
+    assert kwargs["output_scope"] == "roads"
+    assert kwargs["wepp_paths"] == ROADS_WEPP_PATHS
+
+
+def test_gl_dashboard_rejects_invalid_output_scope(gl_dashboard_client) -> None:
+    client, _captured, _app = gl_dashboard_client
+
+    response = client.get("/runs/run-456/cfg/gl-dashboard?output_scope=invalid")
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "Invalid output_scope" in payload["error"]["message"]
 
 
 def test_get_omni_contrasts_returns_only_completed_readme_entries(

@@ -316,6 +316,332 @@ def test_report_wepp_results_returns_500_when_template_render_raises(
     assert payload["error"]["message"] == "Error building reports template"
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        f"/runs/{RUN_ID}/{CONFIG}/report/wepp/summary?output_scope=invalid",
+        f"/runs/{RUN_ID}/{CONFIG}/plot/wepp/streamflow?output_scope=invalid",
+        f"/runs/{RUN_ID}/{CONFIG}/report/wepp/yearly_watbal?output_scope=invalid",
+        f"/runs/{RUN_ID}/{CONFIG}/report/wepp/avg_annual_watbal?output_scope=invalid",
+        f"/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?output_scope=invalid",
+    ],
+)
+def test_wepp_report_routes_reject_invalid_output_scope(wepp_client, path, monkeypatch: pytest.MonkeyPatch):
+    client, _, _ = wepp_client
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    response = client.get(path)
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "Invalid output_scope" in payload["error"]["message"]
+
+
+def test_wepp_loss_summary_supports_roads_output_scope(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, run_dir = wepp_client
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+    monkeypatch.setattr(wepp_module, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return type("ClimateObj", (), {"is_single_storm": False})()
+
+    class DummyRon:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    class DummyUnitizer:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
+    monkeypatch.setattr(wepp_module, "RonViewModel", lambda _ron: object())
+
+    captured_scopes: Dict[str, Any] = {}
+
+    class _DummyOutlet:
+        def rows(self, include_extraneous: bool = False):
+            return []
+
+    class _DummyTabular:
+        hdr = []
+        units = []
+
+        def __iter__(self):
+            return iter([])
+
+    def _outlet(wd: str, *, output_scope: str | None = None):
+        captured_scopes["outlet"] = output_scope
+        return _DummyOutlet()
+
+    def _hill(wd: str, *, output_scope: str | None = None):
+        captured_scopes["hill"] = output_scope
+        return _DummyTabular()
+
+    def _channel(wd: str, *, output_scope: str | None = None):
+        captured_scopes["channel"] = output_scope
+        return _DummyTabular()
+
+    monkeypatch.setattr(wepp_module, "OutletSummaryReport", _outlet)
+    monkeypatch.setattr(wepp_module, "HillSummaryReport", _hill)
+    monkeypatch.setattr(wepp_module, "ChannelSummaryReport", _channel)
+
+    captured_template: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs: Any) -> str:
+        captured_template["template_name"] = template_name
+        captured_template["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/summary?output_scope=roads")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured_scopes == {"outlet": "roads", "hill": "roads", "channel": "roads"}
+    assert captured_template["template_name"] == "reports/wepp/summary.htm"
+    assert captured_template["kwargs"]["output_scope"] == "roads"
+
+
+def test_avg_annual_watbal_supports_roads_output_scope(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, run_dir = wepp_client
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+    monkeypatch.setattr(wepp_module, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyRon:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    class DummyUnitizer:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    captured_scopes: Dict[str, Any] = {}
+
+    class DummyWepp:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return DummyWepp()
+
+        def report_hill_watbal(self, *, output_scope: str = "baseline"):
+            captured_scopes["hill"] = output_scope
+            return object()
+
+        def report_chn_watbal(self, *, output_scope: str = "baseline"):
+            captured_scopes["channel"] = output_scope
+            return object()
+
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
+    monkeypatch.setattr(wepp_module, "Wepp", DummyWepp)
+
+    captured_template: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs: Any) -> str:
+        captured_template["template_name"] = template_name
+        captured_template["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/avg_annual_watbal?output_scope=roads")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured_scopes == {"hill": "roads", "channel": "roads"}
+    assert captured_template["template_name"] == "reports/wepp/avg_annual_watbal.htm"
+    assert captured_template["kwargs"]["output_scope"] == "roads"
+
+
+def test_yearly_watbal_supports_roads_output_scope(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, run_dir = wepp_client
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+    monkeypatch.setattr(wepp_module, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyRon:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    class DummyUnitizer:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    captured_scopes: Dict[str, Any] = {}
+
+    class DummyTotWatBal:
+        pass
+
+    def _totwatbal(wd: str, *, exclude_yr_indxs=None, output_scope: str = "baseline"):
+        assert wd == run_dir
+        captured_scopes["yearly"] = output_scope
+        captured_scopes["exclude_yr_indxs"] = exclude_yr_indxs
+        return DummyTotWatBal()
+
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
+    monkeypatch.setattr(wepp_module, "TotalWatbalReport", _totwatbal)
+
+    captured_template: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs: Any) -> str:
+        captured_template["template_name"] = template_name
+        captured_template["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/yearly_watbal?output_scope=roads")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured_scopes["yearly"] == "roads"
+    assert captured_template["template_name"] == "reports/wepp/yearly_watbal.htm"
+    assert captured_template["kwargs"]["output_scope"] == "roads"
+
+
+def test_streamflow_supports_roads_output_scope(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, run_dir = wepp_client
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+    monkeypatch.setattr(wepp_module, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyRon:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    class DummyUnitizer:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
+    monkeypatch.setattr(wepp_module, "_exists", lambda path: True)
+    monkeypatch.setattr(wepp_module, "resolve_run_context", lambda *_args, **_kwargs: object())
+    monkeypatch.setattr(wepp_module, "QueryRequest", lambda **kwargs: kwargs)
+
+    captured_query: Dict[str, Any] = {}
+
+    def _fake_run_query(_run_context: Any, query: Dict[str, Any]):
+        captured_query["payload"] = query
+        return type("QueryResult", (), {"formatted": {"series": []}, "sql": "SELECT 1"})()
+
+    monkeypatch.setattr(wepp_module, "run_query", _fake_run_query)
+
+    captured_template: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs: Any) -> str:
+        captured_template["template_name"] = template_name
+        captured_template["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/plot/wepp/streamflow?output_scope=roads")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured_query["payload"]["datasets"][0]["path"] == "wepp/roads/output/interchange/totalwatsed3.parquet"
+    assert captured_template["template_name"] == "reports/wepp/daily_streamflow_graph.htm"
+    assert captured_template["kwargs"]["output_scope"] == "roads"
+
+
+def test_return_periods_supports_roads_output_scope(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, run_dir = wepp_client
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+    monkeypatch.setattr(wepp_module, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return type("ClimateObj", (), {"years": 30})()
+
+    class DummyRon:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    class DummyUnitizer:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    class DummyWatershed:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return type("WatershedObj", (), {"translator_factory": staticmethod(lambda: object())})()
+
+    captured_scopes: Dict[str, Any] = {}
+
+    class DummyReport:
+        return_periods = {"Peak Discharge": {2: 1.0, 5: 2.0}}
+
+    class DummyWepp:
+        chn_topaz_ids_of_interest = []
+
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return DummyWepp()
+
+        def report_return_periods(self, **kwargs: Any):
+            captured_scopes["return_periods"] = kwargs.get("output_scope")
+            return DummyReport()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
+    monkeypatch.setattr(wepp_module, "Watershed", DummyWatershed)
+    monkeypatch.setattr(wepp_module, "Wepp", DummyWepp)
+    monkeypatch.setattr(wepp_module, "parse_rec_intervals", lambda *_args, **_kwargs: [2, 5])
+
+    captured_template: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs: Any) -> str:
+        captured_template["template_name"] = template_name
+        captured_template["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?output_scope=roads")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured_scopes["return_periods"] == "roads"
+    assert captured_template["template_name"] == "reports/wepp/return_periods.htm"
+    assert captured_template["kwargs"]["output_scope"] == "roads"
+
+
 def test_report_rusle_results_returns_empty_when_outputs_missing(
     wepp_client,
     monkeypatch: pytest.MonkeyPatch,

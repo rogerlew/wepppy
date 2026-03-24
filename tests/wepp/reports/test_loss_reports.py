@@ -209,6 +209,86 @@ def test_outlet_summary_rows(monkeypatch, tmp_path):
     assert abs(precipitation_row.per_area_value - 500000.0 * 1000.0 / (100.0 * 10000.0)) < 1e-6
 
 
+def test_loss_reports_use_roads_output_scope_paths(monkeypatch, tmp_path):
+    dataset_paths = {
+        "wepp/roads/output/interchange/loss_pw0.hill.parquet",
+        "wepp/roads/output/interchange/loss_pw0.chn.parquet",
+        "wepp/roads/output/interchange/loss_pw0.out.parquet",
+        "watershed/hillslopes.parquet",
+        "watershed/channels.parquet",
+        "landuse/landuse.parquet",
+        "soils/soils.parquet",
+    }
+    records_map = {
+        "wepp/roads/output/interchange/loss_pw0.hill.parquet": [
+            {
+                "wepp_id": 1,
+                "topaz_id": 101,
+                "length_m": 120.0,
+                "width_m": 25.0,
+                "slope": 0.12,
+                "area_ha": 2.0,
+                "runoff_m3": 10.0,
+                "lateral_m3": 6.0,
+                "baseflow_m3": 4.0,
+                "soil_loss_kg": 200.0,
+                "sediment_dep_kg": 50.0,
+                "sediment_yield_kg": 25.0,
+                "solub_react_kg": 0.0,
+                "particulate_kg": 0.0,
+                "total_kg": 0.0,
+                "landuse_key": 105,
+                "landuse_desc": "Forest",
+                "soil_key": "S1",
+                "soil_desc": "Soil One",
+            }
+        ],
+        "wepp/roads/output/interchange/loss_pw0.chn.parquet": [
+            {
+                "loss_channel_id": 1,
+                "channel_wepp_id": 10,
+                "channel_enum": 10,
+                "topaz_id": 501,
+                "length_m": 300.0,
+                "width_m": 15.0,
+                "channel_order": 2,
+                "slope": 0.02,
+                "channel_area_m2": 5000.0,
+                "contributing_area_ha": 50.0,
+                "discharge_m3": 1000.0,
+                "lateral_m3": 500.0,
+                "upland_m3": 100.0,
+                "sediment_yield_tonne": 2.0,
+                "soil_loss_kg": 600.0,
+                "solub_react_kg": 0.0,
+                "particulate_kg": 0.0,
+                "total_kg": 0.0,
+            }
+        ],
+        "wepp/roads/output/interchange/loss_pw0.out.parquet": [
+            {"key": "Total contributing area to outlet", "value": 100.0, "units": "ha"},
+            {"key": "Avg. Ann. Precipitation volume in contributing area", "value": 500000.0, "units": "m^3/yr"},
+            {"key": "Avg. Ann. water discharge from outlet", "value": 200000.0, "units": "m^3/yr"},
+            {"key": "Avg. Ann. total hillslope soil loss", "value": 5.0, "units": "tonne/yr"},
+            {"key": "Avg. Ann. total channel soil loss", "value": 2.0, "units": "tonne/yr"},
+            {"key": "Avg. Ann. sediment discharge from outlet", "value": 2.5, "units": "tonne/yr"},
+            {"key": "Sediment Delivery Ratio for Watershed", "value": 0.5, "units": ""},
+            {"key": "Avg. Ann. Phosphorus discharge from outlet", "value": 30.0, "units": "kg/yr"},
+        ],
+    }
+
+    payloads = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
+
+    _ = HillSummaryReport(tmp_path, output_scope="roads")
+    _ = ChannelSummaryReport(tmp_path, output_scope="roads")
+    _ = OutletSummaryReport(tmp_path, output_scope="roads")
+
+    queried_paths = [payload.datasets[0]["path"] for payload in payloads if not isinstance(payload, dict)]
+    assert "wepp/roads/output/interchange/loss_pw0.hill.parquet" in queried_paths
+    assert "wepp/roads/output/interchange/loss_pw0.chn.parquet" in queried_paths
+    assert "wepp/roads/output/interchange/loss_pw0.out.parquet" in queried_paths
+
+
 def test_outlet_summary_accepts_loss_instance(monkeypatch, tmp_path):
     def _raise_context(*args, **kwargs):
         raise AssertionError("Query context should not be constructed for Loss inputs")

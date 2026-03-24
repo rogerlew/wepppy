@@ -87,6 +87,7 @@
 {% set extraneous_toggle_value = 'false' if extraneous else 'true' %}
 {% set exclude_years_param = exclude_yr_indxs|join(',') if exclude_yr_indxs else None %}
 {% set exclude_months_param = exclude_months|join(',') if exclude_months else None %}
+{% set output_scope_value = output_scope | default('baseline', true) %}
 
 {% macro build_csv_url(slug) -%}
   {{ url_for_run('wepp.report_wepp_return_periods',
@@ -99,6 +100,7 @@
                  method=method,
                  exclude_yr_indxs=exclude_years_param,
                  exclude_months=exclude_months_param,
+                 output_scope=output_scope_value,
                  chn_topaz_id_of_interest=chn_topaz_id_of_interest if chn_topaz_id_of_interest is not none else None) }}
 {%- endmacro %}
 
@@ -276,20 +278,20 @@
     <label>
       <span class="wc-text-muted">Year selection</span>
       <select id="yearSelection">
-        <option value="./?extraneous={{ extraneous_value }}"{% if report.exclude_yr_indxs is none %} selected{% endif %}>
+        <option value="./?extraneous={{ extraneous_value }}&output_scope={{ output_scope_value }}"{% if report.exclude_yr_indxs is none %} selected{% endif %}>
           All years included
         </option>
-        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0"{% if report.exclude_yr_indxs == [0] %} selected{% endif %}>
+        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0&output_scope={{ output_scope_value }}"{% if report.exclude_yr_indxs == [0] %} selected{% endif %}>
           Exclude first year
         </option>
-        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0,1"{% if report.exclude_yr_indxs == [0, 1] %} selected{% endif %}>
+        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0,1&output_scope={{ output_scope_value }}"{% if report.exclude_yr_indxs == [0, 1] %} selected{% endif %}>
           Exclude first two years
         </option>
-        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0,1,2,3,4"{% if report.exclude_yr_indxs == [0, 1, 2, 3, 4] %} selected{% endif %}>
+        <option value="./?extraneous={{ extraneous_value }}&exclude_yr_indxs=0,1,2,3,4&output_scope={{ output_scope_value }}"{% if report.exclude_yr_indxs == [0, 1, 2, 3, 4] %} selected{% endif %}>
           Exclude first five years
         </option>
         {% if report.exclude_yr_indxs and report.exclude_yr_indxs not in ([], [0], [0,1], [0,1,2,3,4]) %}
-        <option value="./?exclude_yr_indxs={{ report.exclude_yr_indxs|join(',') }}" selected>
+        <option value="./?exclude_yr_indxs={{ report.exclude_yr_indxs|join(',') }}&output_scope={{ output_scope_value }}" selected>
           Custom: {{ report.exclude_yr_indxs|join(', ') }}
         </option>
         {% endif %}
@@ -496,7 +498,7 @@
       sel.addEventListener('change', function () {
         const target = new URL(this.value, window.location.href);
         const cur = new URL(window.location.href);
-        ['gringorten_correction', 'exclude_months', 'extraneous', 'chn_topaz_id_of_interest', 'method']
+        ['gringorten_correction', 'exclude_months', 'extraneous', 'chn_topaz_id_of_interest', 'method', 'output_scope']
           .forEach(k => {
             if (cur.searchParams.has(k)) target.searchParams.set(k, cur.searchParams.get(k));
             else target.searchParams.delete(k);

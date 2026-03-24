@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import shutil
 import sys
 import types
 from pathlib import Path
@@ -318,3 +319,33 @@ def test_channel_watbal_aggregates_average_annual_values(tmp_path):
     assert yearly_records[0]["Precipitation (mm)"] == pytest.approx(7.5)
     assert yearly_records[0]["Streamflow (mm)"] == pytest.approx(3.45)
     assert yearly_records[1]["Precipitation (mm)"] == pytest.approx(6.125)
+
+
+def test_channel_watbal_uses_roads_output_scope(tmp_path):
+    run_dir = tmp_path / "run"
+    baseline_path = run_dir / "wepp" / "output" / "interchange" / "chnwb.parquet"
+    baseline_path.parent.mkdir(parents=True, exist_ok=True)
+    _write_sample_channel_parquet(baseline_path)
+
+    roads_path = run_dir / "wepp" / "roads" / "output" / "interchange" / "chnwb.parquet"
+    roads_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(baseline_path, roads_path)
+
+    roads_frame = pd.read_parquet(roads_path)
+    roads_frame["P (mm)"] = roads_frame["P (mm)"].astype(float) + 50.0
+    roads_frame.to_parquet(roads_path, index=False)
+
+    baseline = ChannelWatbalReport(run_dir, output_scope="baseline")
+    roads = ChannelWatbalReport(run_dir, output_scope="roads")
+
+    baseline_rows = [row.row for row in baseline.avg_annual_iter()]
+    roads_rows = [row.row for row in roads.avg_annual_iter()]
+    assert roads_rows[0]["Precipitation (mm)"] > baseline_rows[0]["Precipitation (mm)"]
+
+
+def test_channel_watbal_rejects_invalid_output_scope(tmp_path):
+    run_dir = tmp_path / "run"
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(ValueError, match="Invalid output_scope"):
+        ChannelWatbalReport(run_dir, output_scope="invalid")

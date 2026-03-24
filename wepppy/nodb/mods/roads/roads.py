@@ -1283,6 +1283,440 @@ class Roads(NoDbBase):
         make_hillslope_run(segment_run_id, sim_years, str(runs_dir), reveg=False)
         run_hillslope(segment_run_id, str(runs_dir), wepp_bin=wepp_bin)
 
+    def _build_roads_segment_loss_summary_parquet(self, *, interchange_dir: Path) -> str:
+        """Build a segment-level Roads loss summary parquet from manifest + hillslope loss outputs."""
+        import duckdb
+        import pandas as pd
+
+        manifest_path = Path(self.roads_segment_pass_manifest_path)
+        if not manifest_path.exists():
+            raise FileNotFoundError(f"Missing Roads segment manifest: {manifest_path}")
+
+        loss_hill_path = interchange_dir / "loss_pw0.hill.parquet"
+        if not loss_hill_path.exists():
+            raise FileNotFoundError(f"Missing roads hillslope loss parquet: {loss_hill_path}")
+
+        try:
+            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError(f"Invalid Roads segment manifest JSON: {manifest_path}") from exc
+
+        if not isinstance(payload, list):
+            raise ValueError(f"Roads segment manifest must be a JSON list: {manifest_path}")
+
+        def _as_int(value: Any) -> Optional[int]:
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                return None
+
+        def _as_float(value: Any) -> Optional[float]:
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return None
+
+        records: List[Dict[str, Any]] = []
+        for row in payload:
+            if not isinstance(row, Mapping):
+                continue
+
+            status = str(row.get("status") or "completed").strip().lower()
+            if status != "completed":
+                continue
+
+            segment_run_id = _as_int(row.get("segment_run_id"))
+            if segment_run_id is None:
+                continue
+
+            records.append(
+                {
+                    "segment_id": str(row.get("segment_id") or segment_run_id),
+                    "segment_run_id": segment_run_id,
+                    "target_hillslope_wepp_id": _as_int(row.get("target_hillslope_wepp_id")),
+                    "topaz_id_hill_lowpoint": _as_int(row.get("topaz_id_hill_lowpoint")),
+                    "topaz_id_chn_lowpoint": _as_int(row.get("topaz_id_chn_lowpoint")),
+                    "design": str(row.get("design") or ""),
+                    "surface": str(row.get("surface") or ""),
+                    "traffic": str(row.get("traffic") or ""),
+                    "soil_texture": str(row.get("soil_texture") or ""),
+                    "rfg_pct": _as_float(row.get("rfg_pct")),
+                    "road_width_m": _as_float(row.get("road_width_m")),
+                    "segment_length_m": _as_float(row.get("segment_length_m")),
+                    "slope_pct_clamped": _as_float(row.get("slope_pct_clamped")),
+                }
+            )
+
+        manifest_frame = pd.DataFrame.from_records(
+            records,
+            columns=[
+                "segment_id",
+                "segment_run_id",
+                "target_hillslope_wepp_id",
+                "topaz_id_hill_lowpoint",
+                "topaz_id_chn_lowpoint",
+                "design",
+                "surface",
+                "traffic",
+                "soil_texture",
+                "rfg_pct",
+                "road_width_m",
+                "segment_length_m",
+                "slope_pct_clamped",
+            ],
+        )
+        if manifest_frame.empty:
+            manifest_frame = pd.DataFrame(
+                {
+                    "segment_id": pd.Series(dtype="string"),
+                    "segment_run_id": pd.Series(dtype="int64"),
+                    "target_hillslope_wepp_id": pd.Series(dtype="Int64"),
+                    "topaz_id_hill_lowpoint": pd.Series(dtype="Int64"),
+                    "topaz_id_chn_lowpoint": pd.Series(dtype="Int64"),
+                    "design": pd.Series(dtype="string"),
+                    "surface": pd.Series(dtype="string"),
+                    "traffic": pd.Series(dtype="string"),
+                    "soil_texture": pd.Series(dtype="string"),
+                    "rfg_pct": pd.Series(dtype="float64"),
+                    "road_width_m": pd.Series(dtype="float64"),
+                    "segment_length_m": pd.Series(dtype="float64"),
+                    "slope_pct_clamped": pd.Series(dtype="float64"),
+                }
+            )
+
+        summary_path = interchange_dir / "roads_segment_loss_summary.parquet"
+        summary_path_sql = str(summary_path).replace("'", "''")
+
+        with duckdb.connect(database=":memory:") as con:
+            con.register("segment_manifest", manifest_frame)
+            con.execute(
+                f"""
+                COPY (
+                    SELECT
+                        manifest.segment_id::VARCHAR AS segment_id,
+                        manifest.segment_run_id::BIGINT AS segment_run_id,
+                        manifest.target_hillslope_wepp_id::BIGINT AS target_hillslope_wepp_id,
+                        manifest.topaz_id_hill_lowpoint::BIGINT AS topaz_id_hill_lowpoint,
+                        manifest.topaz_id_chn_lowpoint::BIGINT AS topaz_id_chn_lowpoint,
+                        manifest.design::VARCHAR AS design,
+                        manifest.surface::VARCHAR AS surface,
+                        manifest.traffic::VARCHAR AS traffic,
+                        manifest.soil_texture::VARCHAR AS soil_texture,
+                        manifest.rfg_pct::DOUBLE AS rfg_pct,
+                        manifest.road_width_m::DOUBLE AS road_width_m,
+                        manifest.segment_length_m::DOUBLE AS segment_length_m,
+                        manifest.slope_pct_clamped::DOUBLE AS slope_pct_clamped,
+                        CASE
+                            WHEN target_hill.wepp_id IS NOT NULL THEN 'target_hillslope_wepp_id'
+                            WHEN segment_hill.wepp_id IS NOT NULL THEN 'segment_run_id'
+                            ELSE NULL
+                        END AS loss_match_key,
+                        COALESCE(
+                            CAST(target_hill."Runoff Volume" AS DOUBLE),
+                            CAST(segment_hill."Runoff Volume" AS DOUBLE),
+                            0.0
+                        ) AS runoff_volume_m3,
+                        COALESCE(
+                            CAST(target_hill."Subrunoff Volume" AS DOUBLE),
+                            CAST(segment_hill."Subrunoff Volume" AS DOUBLE),
+                            0.0
+                        ) AS subrunoff_volume_m3,
+                        COALESCE(
+                            CAST(target_hill."Baseflow Volume" AS DOUBLE),
+                            CAST(segment_hill."Baseflow Volume" AS DOUBLE),
+                            0.0
+                        ) AS baseflow_volume_m3,
+                        COALESCE(
+                            CAST(target_hill."Soil Loss" AS DOUBLE),
+                            CAST(segment_hill."Soil Loss" AS DOUBLE),
+                            0.0
+                        ) AS soil_loss_kg,
+                        COALESCE(
+                            CAST(target_hill."Sediment Deposition" AS DOUBLE),
+                            CAST(segment_hill."Sediment Deposition" AS DOUBLE),
+                            0.0
+                        ) AS sediment_deposition_kg,
+                        COALESCE(
+                            CAST(target_hill."Sediment Yield" AS DOUBLE),
+                            CAST(segment_hill."Sediment Yield" AS DOUBLE),
+                            0.0
+                        ) AS sediment_yield_kg,
+                        COALESCE(
+                            CAST(target_hill."Hillslope Area" AS DOUBLE),
+                            CAST(segment_hill."Hillslope Area" AS DOUBLE),
+                            0.0
+                        ) AS hillslope_area_ha,
+                        CASE
+                            WHEN COALESCE(
+                                    CAST(target_hill."Hillslope Area" AS DOUBLE),
+                                    CAST(segment_hill."Hillslope Area" AS DOUBLE),
+                                    0.0
+                                ) > 0.0
+                                THEN (
+                                        COALESCE(
+                                            CAST(target_hill."Runoff Volume" AS DOUBLE),
+                                            CAST(segment_hill."Runoff Volume" AS DOUBLE),
+                                            0.0
+                                        ) * 1000.0
+                                    ) / (
+                                        COALESCE(
+                                            CAST(target_hill."Hillslope Area" AS DOUBLE),
+                                            CAST(segment_hill."Hillslope Area" AS DOUBLE),
+                                            0.0
+                                        ) * 10000.0
+                                    )
+                            ELSE NULL
+                        END AS runoff_depth_mm,
+                        CASE
+                            WHEN COALESCE(
+                                    CAST(target_hill."Hillslope Area" AS DOUBLE),
+                                    CAST(segment_hill."Hillslope Area" AS DOUBLE),
+                                    0.0
+                                ) > 0.0
+                                THEN COALESCE(
+                                        CAST(target_hill."Soil Loss" AS DOUBLE),
+                                        CAST(segment_hill."Soil Loss" AS DOUBLE),
+                                        0.0
+                                    ) / (
+                                        COALESCE(
+                                            CAST(target_hill."Hillslope Area" AS DOUBLE),
+                                            CAST(segment_hill."Hillslope Area" AS DOUBLE),
+                                            0.0
+                                        ) * 10000.0
+                                    )
+                            ELSE NULL
+                        END AS soil_loss_density_kg_m2,
+                        CASE
+                            WHEN COALESCE(
+                                    CAST(target_hill."Hillslope Area" AS DOUBLE),
+                                    CAST(segment_hill."Hillslope Area" AS DOUBLE),
+                                    0.0
+                                ) > 0.0
+                                THEN COALESCE(
+                                        CAST(target_hill."Sediment Yield" AS DOUBLE),
+                                        CAST(segment_hill."Sediment Yield" AS DOUBLE),
+                                        0.0
+                                    ) / (
+                                        COALESCE(
+                                            CAST(target_hill."Hillslope Area" AS DOUBLE),
+                                            CAST(segment_hill."Hillslope Area" AS DOUBLE),
+                                            0.0
+                                        ) * 10000.0
+                                    )
+                            ELSE NULL
+                        END AS sediment_yield_density_kg_m2,
+                        CASE
+                            WHEN ABS(
+                                COALESCE(
+                                    CAST(target_hill."Soil Loss" AS DOUBLE),
+                                    CAST(segment_hill."Soil Loss" AS DOUBLE),
+                                    0.0
+                                )
+                            ) > 0.0
+                                THEN COALESCE(
+                                        CAST(target_hill."Sediment Yield" AS DOUBLE),
+                                        CAST(segment_hill."Sediment Yield" AS DOUBLE),
+                                        0.0
+                                    ) / COALESCE(
+                                        CAST(target_hill."Soil Loss" AS DOUBLE),
+                                        CAST(segment_hill."Soil Loss" AS DOUBLE),
+                                        0.0
+                                    )
+                            ELSE NULL
+                        END AS sediment_delivery_ratio,
+                        COALESCE(
+                            CAST(target_hill."Soil Loss" AS DOUBLE),
+                            CAST(segment_hill."Soil Loss" AS DOUBLE),
+                            0.0
+                        ) AS road_prism_erosion_kg,
+                        COALESCE(
+                            CAST(target_hill."Sediment Yield" AS DOUBLE),
+                            CAST(segment_hill."Sediment Yield" AS DOUBLE),
+                            0.0
+                        ) AS sediment_leaving_buffer_kg,
+                        CASE
+                            WHEN target_hill.wepp_id IS NULL AND segment_hill.wepp_id IS NULL THEN TRUE
+                            ELSE FALSE
+                        END AS loss_row_missing
+                    FROM segment_manifest AS manifest
+                    LEFT JOIN read_parquet(?) AS target_hill
+                        ON CAST(target_hill.wepp_id AS BIGINT) = CAST(manifest.target_hillslope_wepp_id AS BIGINT)
+                    LEFT JOIN read_parquet(?) AS segment_hill
+                        ON CAST(segment_hill.wepp_id AS BIGINT) = CAST(manifest.segment_run_id AS BIGINT)
+                    ORDER BY sediment_yield_kg DESC, segment_run_id ASC
+                ) TO '{summary_path_sql}' (FORMAT PARQUET, COMPRESSION ZSTD)
+                """,
+                [str(loss_hill_path), str(loss_hill_path)],
+            )
+
+        return os.path.relpath(summary_path, self.wd)
+
+    def _required_roads_report_resource_relpaths(
+        self,
+        *,
+        is_single_storm: bool,
+        include_chnwb: bool,
+        include_segment_loss_summary: bool,
+    ) -> List[str]:
+        base = os.path.join("wepp", "roads", "output", "interchange")
+        required = [
+            os.path.join(base, "H.pass.parquet"),
+            os.path.join(base, "ebe_pw0.parquet"),
+            os.path.join(base, "README.md"),
+        ]
+        if not is_single_storm:
+            required.extend(
+                [
+                    os.path.join(base, "H.wat.parquet"),
+                    os.path.join(base, "loss_pw0.out.parquet"),
+                    os.path.join(base, "loss_pw0.hill.parquet"),
+                    os.path.join(base, "loss_pw0.chn.parquet"),
+                    os.path.join(base, "totalwatsed3.parquet"),
+                ]
+            )
+            if include_segment_loss_summary:
+                required.append(os.path.join(base, "roads_segment_loss_summary.parquet"))
+            if include_chnwb:
+                required.append(os.path.join(base, "chnwb.parquet"))
+        return required
+
+    def _regenerate_roads_report_resources(self) -> Dict[str, Any]:
+        from wepppy.nodb.wepp_nodb_post_utils import activate_query_engine_for_run
+        from wepppy.wepp.interchange import (
+            generate_interchange_documentation,
+            run_totalwatsed3,
+            run_wepp_hillslope_interchange,
+            run_wepp_watershed_interchange,
+        )
+
+        climate = self.wepp_instance.climate_instance
+        is_single_storm = bool(getattr(climate, "is_single_storm", False))
+        start_year_raw = getattr(climate, "calendar_start_year", None)
+        start_year = int(start_year_raw) if start_year_raw not in (None, "") else None
+        output_dir = Path(self.roads_output_dir)
+        interchange_dir = output_dir / "interchange"
+        hillslope_soil_available = any(output_dir.glob("H*.soil.dat"))
+        watershed_soil_available = (output_dir / "soil_pw0.txt").exists()
+        chan_out_available = (output_dir / "chan.out").exists() or (output_dir / "chan.out.gz").exists()
+        chnwb_available = (output_dir / "chnwb.txt").exists() or (output_dir / "chnwb.txt.gz").exists()
+        run_hillslope_soil_interchange = not is_single_storm and hillslope_soil_available
+        run_watershed_soil_interchange = not is_single_storm and watershed_soil_available
+        run_chan_out_interchange = not is_single_storm and chan_out_available
+        run_chnwb_interchange = not is_single_storm and chnwb_available
+
+        self._append_roads_log(
+            "run",
+            "roads_report_resources_regen_started",
+            {
+                "roads_output_relpath": os.path.relpath(output_dir, self.wd),
+                "is_single_storm": is_single_storm,
+                "start_year": start_year,
+                "run_hillslope_soil_interchange": run_hillslope_soil_interchange,
+                "run_watershed_soil_interchange": run_watershed_soil_interchange,
+                "run_chan_out_interchange": run_chan_out_interchange,
+                "run_chnwb_interchange": run_chnwb_interchange,
+            },
+        )
+
+        run_wepp_hillslope_interchange(
+            output_dir,
+            start_year=start_year,
+            run_loss_interchange=not is_single_storm,
+            run_soil_interchange=run_hillslope_soil_interchange,
+            run_wat_interchange=not is_single_storm,
+            delete_after_interchange=False,
+        )
+        self._append_roads_log(
+            "run",
+            "roads_hillslope_interchange_completed",
+            {"interchange_relpath": os.path.relpath(interchange_dir, self.wd)},
+        )
+
+        if not is_single_storm:
+            baseflow_opts = getattr(self.wepp_instance, "baseflow_opts", None)
+            if baseflow_opts is None:
+                from wepppy.nodb.core.wepp import BaseflowOpts
+
+                baseflow_opts = BaseflowOpts()
+            run_totalwatsed3(interchange_dir, baseflow_opts=baseflow_opts)
+            self._append_roads_log(
+                "run",
+                "roads_totalwatsed3_completed",
+                {"totalwatsed3_relpath": os.path.relpath(interchange_dir / "totalwatsed3.parquet", self.wd)},
+            )
+
+        run_wepp_watershed_interchange(
+            output_dir,
+            start_year=start_year,
+            run_chan_out_interchange=run_chan_out_interchange,
+            run_soil_interchange=run_watershed_soil_interchange,
+            run_chnwb_interchange=run_chnwb_interchange,
+            delete_after_interchange=False,
+        )
+        self._append_roads_log(
+            "run",
+            "roads_watershed_interchange_completed",
+            {"interchange_relpath": os.path.relpath(interchange_dir, self.wd)},
+        )
+
+        roads_segment_loss_summary_relpath = None
+        if not is_single_storm:
+            roads_segment_loss_summary_relpath = self._build_roads_segment_loss_summary_parquet(
+                interchange_dir=interchange_dir
+            )
+            self._append_roads_log(
+                "run",
+                "roads_segment_loss_summary_parquet_completed",
+                {"roads_segment_loss_summary_relpath": roads_segment_loss_summary_relpath},
+            )
+
+        generate_interchange_documentation(interchange_dir)
+        self._append_roads_log(
+            "run",
+            "roads_interchange_readme_completed",
+            {"readme_relpath": os.path.relpath(interchange_dir / "README.md", self.wd)},
+        )
+
+        activate_query_engine_for_run(self.wepp_instance)
+        self._append_roads_log("run", "roads_query_engine_catalog_refreshed")
+
+        required_relpaths = self._required_roads_report_resource_relpaths(
+            is_single_storm=is_single_storm,
+            include_chnwb=run_chnwb_interchange,
+            include_segment_loss_summary=not is_single_storm,
+        )
+        missing_relpaths = [relpath for relpath in required_relpaths if not Path(self.wd, relpath).exists()]
+        if missing_relpaths:
+            self._append_roads_log(
+                "run",
+                "roads_report_resources_missing",
+                {"missing_relpaths": missing_relpaths},
+            )
+            missing = ", ".join(missing_relpaths)
+            raise FileNotFoundError(
+                f"Roads report resource regeneration incomplete; missing required resources: {missing}"
+            )
+
+        resources = {
+            "status": "ready",
+            "output_scope": "roads",
+            "roads_output_relpath": os.path.relpath(output_dir, self.wd),
+            "interchange_relpath": os.path.relpath(interchange_dir, self.wd),
+            "required_relpaths": required_relpaths,
+            "missing_relpaths": [],
+            "roads_segment_loss_summary_relpath": roads_segment_loss_summary_relpath,
+            "generated_at": int(time.time()),
+        }
+        self._append_roads_log(
+            "run",
+            "roads_report_resources_regen_completed",
+            {
+                "required_resource_count": len(required_relpaths),
+                "interchange_relpath": resources["interchange_relpath"],
+            },
+        )
+        return resources
+
     def run_roads_wepp(self) -> Dict[str, Any]:
         failed_run_summary: Optional[Dict[str, Any]] = None
         run_summary_base: Optional[Dict[str, Any]] = None
@@ -1763,9 +2197,12 @@ class Roads(NoDbBase):
                 "watershed_rerun_completed",
                 {"watershed_run_relpath": run_summary_base["watershed_run_relpath"]},
             )
+            current_stage = "report_resource_regen"
+            roads_report_resources = self._regenerate_roads_report_resources()
 
             run_summary = {
                 **run_summary_base,
+                "roads_report_resources": roads_report_resources,
                 "status": "completed",
                 "completed_at": int(time.time()),
             }

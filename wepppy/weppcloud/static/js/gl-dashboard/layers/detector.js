@@ -1349,24 +1349,24 @@ export async function detectWeppChannelOverlays({
 export async function detectWeppYearlyChannelOverlays({
   buildBaseUrl,
   postQueryEngine,
-  weppChannelPath,
+  weppYearlyChannelPath,
   channelsGeoJson,
 }) {
   try {
     const yearsPayload = {
-      datasets: [{ path: weppChannelPath, alias: 'loss' }],
+      datasets: [{ path: weppYearlyChannelPath, alias: 'loss' }],
       columns: ['DISTINCT loss.year AS year'],
       order_by: ['year'],
     };
     const yearsResult = await postQueryEngine(yearsPayload);
     if (!yearsResult || !yearsResult.records || !yearsResult.records.length) {
-      logDetectionInfo('WEPP yearly channel overlays missing year list', { path: weppChannelPath });
+      logDetectionInfo('WEPP yearly channel overlays missing year list', { path: weppYearlyChannelPath });
       return { weppYearlyChannelLayers: [], channelsGeoJson };
     }
 
     const geoJson = await ensureChannels(buildBaseUrl, channelsGeoJson);
     if (!geoJson) {
-      logDetectionInfo('WEPP yearly channel overlays missing channels geometry', { path: weppChannelPath });
+      logDetectionInfo('WEPP yearly channel overlays missing channels geometry', { path: weppYearlyChannelPath });
       return { weppYearlyChannelLayers: [], channelsGeoJson };
     }
 
@@ -1374,14 +1374,14 @@ export async function detectWeppYearlyChannelOverlays({
       {
         key: 'wepp-yearly-channel-discharge',
         label: 'Discharge Volume (m^3)',
-        path: weppChannelPath,
+        path: weppYearlyChannelPath,
         mode: 'channel_discharge_volume',
         visible: false,
       },
       {
         key: 'wepp-yearly-channel-soil-loss',
         label: 'Soil Loss (kg)',
-        path: weppChannelPath,
+        path: weppYearlyChannelPath,
         mode: 'channel_soil_loss',
         visible: false,
       },
@@ -1461,6 +1461,9 @@ export async function detectWeppYearlyOverlays({
 export async function detectWeppEventOverlays({
   buildBaseUrl,
   climateCtx,
+  weppEventWatPath,
+  weppEventSoilPath,
+  weppEventPassPath,
   currentSelectedDate,
   subcatchmentsGeoJson,
 }) {
@@ -1485,12 +1488,12 @@ export async function detectWeppEventOverlays({
     if (!geoJson) return null;
 
     const weppEventLayers = [
-      { key: 'wepp-event-P', label: 'Precipitation (P)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_P', visible: false },
-      { key: 'wepp-event-Q', label: 'Runoff (Q)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_Q', visible: false },
-      { key: 'wepp-event-ET', label: 'Total ET (Ep+Es+Er)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_ET', visible: false },
-      { key: 'wepp-event-saturation', label: 'Saturation (%)', path: 'wepp/output/interchange/H.soil.parquet', mode: 'event_Saturation', visible: false },
-      { key: 'wepp-event-peakro', label: 'Peak Runoff Rate', path: 'wepp/output/interchange/H.pass.parquet', mode: 'event_peakro', visible: false },
-      { key: 'wepp-event-tdet', label: 'Total Detachment', path: 'wepp/output/interchange/H.pass.parquet', mode: 'event_tdet', visible: false },
+      { key: 'wepp-event-P', label: 'Precipitation (P)', path: weppEventWatPath, mode: 'event_P', visible: false },
+      { key: 'wepp-event-Q', label: 'Runoff (Q)', path: weppEventWatPath, mode: 'event_Q', visible: false },
+      { key: 'wepp-event-ET', label: 'Total ET (Ep+Es+Er)', path: weppEventWatPath, mode: 'event_ET', visible: false },
+      { key: 'wepp-event-saturation', label: 'Saturation (%)', path: weppEventSoilPath, mode: 'event_Saturation', visible: false },
+      { key: 'wepp-event-peakro', label: 'Peak Runoff Rate', path: weppEventPassPath, mode: 'event_peakro', visible: false },
+      { key: 'wepp-event-tdet', label: 'Total Detachment', path: weppEventPassPath, mode: 'event_tdet', visible: false },
     ];
 
     return { weppEventLayers, weppEventMetadata: metadata, weppEventSelectedDate: selectedDate, subcatchmentsGeoJson: geoJson };

@@ -127,3 +127,124 @@ describe('gl-dashboard wepp-data ranges', () => {
     expect(state.comparisonDiffRanges).toEqual(diff);
   });
 });
+
+describe('gl-dashboard wepp-data path wiring', () => {
+  let state;
+  let manager;
+  let setState;
+  let setValue;
+  let postQueryEngine;
+  let activeEventMode;
+
+  beforeEach(() => {
+    state = {
+      weppStatistic: 'mean',
+      weppChannelLayers: [{ visible: true }],
+      weppYearlySelectedYear: 2021,
+      weppYearlyChannelLayers: [{ visible: true }],
+      weppYearlyChannelCache: {},
+      weppEventSelectedDate: '2021-01-02',
+      weppEventSummary: {},
+      weppEventRanges: {},
+      comparisonMode: false,
+      currentScenarioPath: null,
+    };
+    setValue = jest.fn((key, value) => {
+      state[key] = value;
+    });
+    setState = jest.fn((updates) => {
+      Object.assign(state, updates);
+    });
+    postQueryEngine = jest.fn(async () => ({
+      records: [{ topaz_id: 42, value: 2.5, channel_discharge_volume: 3.0, channel_soil_loss: 1.2 }],
+    }));
+    activeEventMode = 'event_P';
+
+    manager = createWeppDataManager({
+      ctx: { sitePrefix: '/site', runid: 'run1', config: 'cfg1' },
+      getState: () => state,
+      setValue,
+      setState,
+      postQueryEngine,
+      postBaseQueryEngine: async () => null,
+      pickActiveWeppEventLayer: () => ({ mode: activeEventMode }),
+      WEPP_YEARLY_PATH: 'wepp/roads/output/interchange/H.wat.parquet',
+      WEPP_LOSS_PATH: 'wepp/roads/output/interchange/loss_pw0.hill.parquet',
+      WEPP_CHANNEL_PATH: 'wepp/roads/output/interchange/loss_pw0.chn.parquet',
+      WEPP_YEARLY_CHANNEL_PATH: 'wepp/roads/output/interchange/loss_pw0.all_years.chn.parquet',
+      WEPP_EVENT_WAT_PATH: 'wepp/roads/output/interchange/H.wat.parquet',
+      WEPP_EVENT_SOIL_PATH: 'wepp/roads/output/interchange/H.soil.parquet',
+      WEPP_EVENT_PASS_PATH: 'wepp/roads/output/interchange/H.pass.parquet',
+    });
+  });
+
+  it('uses configured paths for hillslope, channel, and yearly channel payloads', async () => {
+    await manager.fetchWeppSummary('mean');
+    await manager.fetchWeppChannelSummary('mean');
+    await manager.refreshWeppYearlyChannelData();
+
+    expect(postQueryEngine).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        datasets: expect.arrayContaining([
+          expect.objectContaining({ path: 'wepp/roads/output/interchange/H.wat.parquet', alias: 'loss' }),
+        ]),
+      })
+    );
+    expect(postQueryEngine).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        datasets: expect.arrayContaining([
+          expect.objectContaining({ path: 'wepp/roads/output/interchange/loss_pw0.chn.parquet', alias: 'loss' }),
+        ]),
+      })
+    );
+    expect(postQueryEngine).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        datasets: expect.arrayContaining([
+          expect.objectContaining({
+            path: 'wepp/roads/output/interchange/loss_pw0.all_years.chn.parquet',
+            alias: 'loss',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('uses configured event dataset paths for each event mode family', async () => {
+    activeEventMode = 'event_P';
+    await manager.refreshWeppEventData();
+
+    activeEventMode = 'event_Saturation';
+    await manager.refreshWeppEventData();
+
+    activeEventMode = 'event_peakro';
+    await manager.refreshWeppEventData();
+
+    expect(postQueryEngine).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        datasets: expect.arrayContaining([
+          expect.objectContaining({ path: 'wepp/roads/output/interchange/H.wat.parquet', alias: 'wat' }),
+        ]),
+      })
+    );
+    expect(postQueryEngine).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        datasets: expect.arrayContaining([
+          expect.objectContaining({ path: 'wepp/roads/output/interchange/H.soil.parquet', alias: 'soil' }),
+        ]),
+      })
+    );
+    expect(postQueryEngine).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        datasets: expect.arrayContaining([
+          expect.objectContaining({ path: 'wepp/roads/output/interchange/H.pass.parquet', alias: 'pass' }),
+        ]),
+      })
+    );
+  });
+});

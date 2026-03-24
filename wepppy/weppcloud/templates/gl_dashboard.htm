@@ -1084,6 +1084,8 @@
     window.GL_DASHBOARD_CONTEXT = {{ {
       "runid": runid,
       "config": config,
+      "outputScope": output_scope | default("baseline", true),
+      "weppPaths": wepp_paths | default({}, true),
       "sitePrefix": site_prefix,
       "tileUrl": tile_url,
       "geoTiffUrl": "https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js",

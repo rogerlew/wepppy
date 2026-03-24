@@ -21,6 +21,7 @@ class TotalWatbalReport(ReportBase):
         exclude_yr_indxs: Iterable[int] | None = ...,
         *,
         dataframe: pd.DataFrame | None = ...,
+        output_scope: str | None = ...,
     ) -> None: ...
 
     def _initialise_empty(self) -> None: ...

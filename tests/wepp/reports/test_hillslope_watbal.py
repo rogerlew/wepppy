@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import shutil
 import sys
 import types
 from pathlib import Path
@@ -198,3 +199,88 @@ def test_hillslope_watbal_rebuilds_when_source_is_newer_than_cache(tmp_path, mon
     refreshed_cache = pd.read_parquet(cache_path)
     assert len(refreshed_cache) == 4
     assert refreshed_cache["TopazID"].tolist() == [101, 101, 202, 202]
+
+
+def test_hillslope_watbal_uses_roads_output_scope_with_isolated_cache(tmp_path, monkeypatch):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+
+    run_dir = tmp_path / "run"
+    baseline_path = run_dir / "wepp" / "output" / "interchange" / "H.wat.parquet"
+    _write_h_wat_parquet(baseline_path)
+
+    roads_path = run_dir / "wepp" / "roads" / "output" / "interchange" / "H.wat.parquet"
+    roads_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(baseline_path, roads_path)
+
+    roads_frame = pd.read_parquet(roads_path)
+    roads_frame["P"] = roads_frame["P"].astype(float) + 10.0
+    roads_frame.to_parquet(roads_path, index=False)
+
+    baseline = HillslopeWatbalReport(run_dir, output_scope="baseline")
+    roads = HillslopeWatbalReport(run_dir, output_scope="roads")
+
+    baseline_rows = [row.row for row in baseline.avg_annual_iter()]
+    roads_rows = [row.row for row in roads.avg_annual_iter()]
+    assert roads_rows[0]["Precipitation (mm)"] > baseline_rows[0]["Precipitation (mm)"]
+
+    cache_dir = run_dir / "wepp" / "reports" / "cache"
+    assert (cache_dir / "hillslope_watbal_summary.parquet").exists()
+    assert (cache_dir / "hillslope_watbal_summary_roads.parquet").exists()
+
+
+def test_hillslope_watbal_roads_maps_segment_run_ids_from_manifest(tmp_path, monkeypatch):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+
+    run_dir = tmp_path / "run"
+    roads_path = run_dir / "wepp" / "roads" / "output" / "interchange" / "H.wat.parquet"
+    _write_h_wat_parquet(roads_path)
+
+    roads_frame = pd.read_parquet(roads_path)
+    roads_frame.loc[roads_frame["wepp_id"] == 1, "wepp_id"] = 900001
+    roads_frame.to_parquet(roads_path, index=False)
+
+    manifest_path = run_dir / "wepp" / "roads" / "segments" / "roads.segment.pass.manifest.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            [
+                {
+                    "segment_run_id": 900001,
+                    "target_hillslope_wepp_id": 1,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report = HillslopeWatbalReport(run_dir, output_scope="roads")
+    avg_rows = [row.row for row in report.avg_annual_iter()]
+    topaz_ids = sorted(int(row["TopazID"]) for row in avg_rows)
+    assert topaz_ids == [101, 202]
+
+
+def test_hillslope_watbal_roads_preserves_unknown_ids_without_crashing(tmp_path, monkeypatch):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+
+    run_dir = tmp_path / "run"
+    roads_path = run_dir / "wepp" / "roads" / "output" / "interchange" / "H.wat.parquet"
+    _write_h_wat_parquet(roads_path)
+
+    roads_frame = pd.read_parquet(roads_path)
+    roads_frame.loc[roads_frame["wepp_id"] == 1, "wepp_id"] = 900001
+    roads_frame.to_parquet(roads_path, index=False)
+
+    report = HillslopeWatbalReport(run_dir, output_scope="roads")
+    avg_rows = [row.row for row in report.avg_annual_iter()]
+    topaz_ids = sorted(int(row["TopazID"]) for row in avg_rows)
+    assert topaz_ids == [202, 900001]
+
+
+def test_hillslope_watbal_rejects_invalid_output_scope(tmp_path, monkeypatch):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+
+    run_dir = tmp_path / "run"
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(ValueError, match="Invalid output_scope"):
+        HillslopeWatbalReport(run_dir, output_scope="invalid")

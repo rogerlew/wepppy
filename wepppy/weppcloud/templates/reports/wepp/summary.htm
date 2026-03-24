@@ -38,6 +38,7 @@
 {% set outlet_rows = out_rpt.rows(include_extraneous=extraneous) if out_rpt else [] %}
 {% set extraneous_value = 'true' if extraneous else 'false' %}
 {% set extraneous_toggle_value = 'false' if extraneous else 'true' %}
+{% set output_scope_value = output_scope | default('baseline', true) %}
 
 <header class="wc-stack">
   <h1 class="wc-heading__title">Loss summary</h1>
@@ -65,12 +66,12 @@
 <div class="wc-inline">
   {% if extraneous %}
     <a class="pure-button pure-button-link"
-       href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, extraneous=extraneous_toggle_value) }}">
+       href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, extraneous=extraneous_toggle_value, output_scope=output_scope_value) }}">
       Hide extraneous parameters
     </a>
   {% else %}
     <a class="pure-button pure-button-link"
-       href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, extraneous=extraneous_toggle_value) }}">
+       href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, extraneous=extraneous_toggle_value, output_scope=output_scope_value) }}">
       Show extraneous parameters
     </a>
   {% endif %}
@@ -114,7 +115,7 @@
   <div class="wc-table-actions">
     <button type="button" class="pure-button pure-button-link"
             data-report-csv="outlet_summary_tbl"
-            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value) }}"
+            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value, output_scope=output_scope_value) }}"
             data-report-table="outlet">
       Download CSV
     </button>
@@ -160,7 +161,7 @@
   <div class="wc-table-actions">
     <button type="button" class="pure-button pure-button-link"
             data-report-csv="hill_summary_tbl"
-            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value) }}"
+            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value, output_scope=output_scope_value) }}"
             data-report-table="hillslopes">
       Download CSV
     </button>
@@ -206,7 +207,7 @@
   <div class="wc-table-actions">
     <button type="button" class="pure-button pure-button-link"
             data-report-csv="channel_summary_tbl"
-            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value) }}"
+            data-report-url="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config, format='csv', extraneous=extraneous_value, output_scope=output_scope_value) }}"
             data-report-table="channels">
       Download CSV
     </button>

@@ -1,0 +1,51 @@
+{% extends 'controls/_content_base.htm' %}
+{% import "controls/_pure_macros.html" as ui %}
+{% set page_id = "roads-reports" %}
+
+{% set card_description %}
+  <p class="wc-text-muted">
+    Roads-scoped report links for this run.
+  </p>
+{% endset %}
+
+{% set run_state = roads_status.get("status", "unknown") if roads_status else "unknown" %}
+{% set run_summary_state = roads_run_summary.get("status", run_state) if roads_run_summary else run_state %}
+{% set resources_state = roads_report_resources.get("status", "pending") if roads_report_resources else "pending" %}
+{% set missing_relpaths = roads_report_resources.get("missing_relpaths", []) if roads_report_resources else [] %}
+{% set resources_ready = run_summary_state == "completed" and resources_state == "ready" and (missing_relpaths | length == 0) %}
+{% set results_title = run_results_title if run_results_title is defined else "Run Results" %}
+
+{% block content %}
+  <div class="wc-stack">
+    {% call ui.card_shell(
+         results_title,
+         collapsible=True,
+         description=card_description | trim) %}
+      <section class="wc-stack">
+        <h4 class="wc-heading wc-heading--sm">Roads Results</h4>
+        <p class="wc-text-muted">
+          Controller state: <code>{{ run_state }}</code> |
+          Run summary: <code>{{ run_summary_state }}</code> |
+          Resources: <code>{{ resources_state }}</code>
+        </p>
+        {% if resources_ready %}
+        <div class="wc-stack">
+          {% for link in roads_report_links %}
+          <a class="wc-link wc-link--file"
+             href="{{ link.href }}"
+             target="_blank"
+             rel="noopener">
+            {{ link.label }}
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="wc-text-muted">
+          Run Roads WEPP and regenerate resources to unlock the full Roads-scoped report links.
+        </p>
+        {% endif %}
+      </section>
+
+    {% endcall %}
+  </div>
+{% endblock content %}

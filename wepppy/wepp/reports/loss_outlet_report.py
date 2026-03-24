@@ -11,6 +11,7 @@ import pandas as pd
 from wepppy.query_engine.payload import QueryRequest
 
 from .helpers import ReportQueryContext
+from .output_scope import normalize_output_scope, scoped_dataset_path
 
 __all__ = ["OutletSummaryReport", "OutletSummary"]
 
@@ -29,9 +30,11 @@ class OutletRow:
 class OutletSummaryReport:
     """Summarize outlet delivery metrics using loss_pw0.out interchange assets."""
 
-    _DATASET_PATH = "wepp/output/interchange/loss_pw0.out.parquet"
+    _BASELINE_DATASET_PATH = "wepp/output/interchange/loss_pw0.out.parquet"
 
-    def __init__(self, wd: str | Path | Any):
+    def __init__(self, wd: str | Path | Any, *, output_scope: str | None = None):
+        self._output_scope = normalize_output_scope(output_scope)
+        self._dataset_path = scoped_dataset_path(self._BASELINE_DATASET_PATH, self._output_scope)
         table = self._resolve_table(wd)
         self._rows = self._build_rows(table)
 
@@ -52,13 +55,13 @@ class OutletSummaryReport:
     def _prepare_context(self) -> ReportQueryContext:
         """Ensure the outlet dataset is cataloged and return the context."""
         context = ReportQueryContext(self._wd, run_interchange=False)
-        context.ensure_datasets(self._DATASET_PATH)
+        context.ensure_datasets(self._dataset_path)
         return context
 
     def _load_table(self, context: ReportQueryContext) -> pd.DataFrame:
         """Execute the query-engine payload and return a dataframe keyed by ``key``."""
         payload = QueryRequest(
-            datasets=[{"path": self._DATASET_PATH, "alias": "out"}],
+            datasets=[{"path": self._dataset_path, "alias": "out"}],
             columns=[
                 "out.key AS key",
                 "out.value AS value",
@@ -68,7 +71,7 @@ class OutletSummaryReport:
         result = context.query(payload)
         frame = pd.DataFrame(result.records or [], columns=["key", "value", "units"])
         if frame.empty:
-            raise ValueError(f"{self._DATASET_PATH} did not return any rows")
+            raise ValueError(f"{self._dataset_path} did not return any rows")
         frame["value"] = pd.to_numeric(frame["value"], errors="coerce")
         frame["units"] = frame["units"].fillna("")
         return frame.set_index("key")
@@ -93,7 +96,7 @@ class OutletSummaryReport:
         records = records_attr() if callable(records_attr) else records_attr
         frame = pd.DataFrame(records or [], columns=["key", "value", "units"])
         if frame.empty:
-            raise ValueError(f"{self._DATASET_PATH} did not return any rows")
+            raise ValueError(f"{self._dataset_path} did not return any rows")
         if "key" not in frame.columns or "value" not in frame.columns:
             raise KeyError("Loss out_tbl must provide 'key' and 'value' columns")
         if "units" not in frame.columns:

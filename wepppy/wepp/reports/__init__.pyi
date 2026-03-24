@@ -5,6 +5,15 @@ from .channel_watbal import ChannelWatbal as ChannelWatbal, ChannelWatbalReport 
 from .frq_flood import FrqFlood as FrqFlood, FrqFloodReport as FrqFloodReport
 from .harness import ReportHarness as ReportHarness
 from .helpers import ReportCacheManager as ReportCacheManager, ReportQueryContext as ReportQueryContext, extract_units_from_schema as extract_units_from_schema
+from .output_scope import (
+    DEFAULT_OUTPUT_SCOPE as DEFAULT_OUTPUT_SCOPE,
+    VALID_OUTPUT_SCOPES as VALID_OUTPUT_SCOPES,
+    OutputScope as OutputScope,
+    OutputScopePaths as OutputScopePaths,
+    normalize_output_scope as normalize_output_scope,
+    resolve_output_scope_paths as resolve_output_scope_paths,
+    scoped_dataset_path as scoped_dataset_path,
+)
 from .hillslope_watbal import HillslopeWatbal as HillslopeWatbal, HillslopeWatbalReport as HillslopeWatbalReport
 from .report_base import ReportBase as ReportBase
 from .return_periods import ReturnPeriodDataset as ReturnPeriodDataset, ReturnPeriods as ReturnPeriods, refresh_return_period_events as refresh_return_period_events
@@ -38,6 +47,13 @@ __all__ = [
     "ReportCacheManager",
     "ReportQueryContext",
     "extract_units_from_schema",
+    "OutputScope",
+    "OutputScopePaths",
+    "DEFAULT_OUTPUT_SCOPE",
+    "VALID_OUTPUT_SCOPES",
+    "normalize_output_scope",
+    "resolve_output_scope_paths",
+    "scoped_dataset_path",
     "ReportHarness",
     "TotalWatbalReport",
     "SedimentCharacteristics",

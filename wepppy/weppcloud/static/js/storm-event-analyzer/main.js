@@ -88,7 +88,20 @@ async function initStormEventAnalyzer() {
 
   const ctx = { runid: window.runid, config: window.config };
   const { postQueryEngine, postQueryEngineForScenario } = createQueryEngine(ctx);
-  const eventDataManager = createEventDataManager({ ctx, postQueryEngine, postQueryEngineForScenario });
+  let eventDataManager;
+  try {
+    eventDataManager = createEventDataManager({
+      ctx,
+      postQueryEngine,
+      postQueryEngineForScenario,
+      weppPaths: omniContext.weppPaths,
+    });
+  } catch (error) {
+    console.error('Storm Event Analyzer: invalid context', error);
+    const message = error instanceof Error ? error.message : 'Invalid storm event analyzer context.';
+    setEventErrorBanner({ banner: eventErrorBanner, message });
+    return;
+  }
   const hyetographChart = createHyetographChart({
     container: hyetographContainer,
     emptyEl: hyetographEmptyMessage,

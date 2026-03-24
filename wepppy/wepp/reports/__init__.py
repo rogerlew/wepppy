@@ -9,6 +9,15 @@ from .helpers import (
     ReportQueryContext,
     extract_units_from_schema,
 )
+from .output_scope import (
+    DEFAULT_OUTPUT_SCOPE,
+    VALID_OUTPUT_SCOPES,
+    OutputScope,
+    OutputScopePaths,
+    normalize_output_scope,
+    resolve_output_scope_paths,
+    scoped_dataset_path,
+)
 from .hillslope_watbal import HillslopeWatbalReport
 from .report_base import ReportBase
 from .return_periods import ReturnPeriodDataset, ReturnPeriods, refresh_return_period_events
@@ -42,6 +51,13 @@ __all__ = [
     "ReportCacheManager",
     "ReportQueryContext",
     "extract_units_from_schema",
+    "OutputScope",
+    "OutputScopePaths",
+    "DEFAULT_OUTPUT_SCOPE",
+    "VALID_OUTPUT_SCOPES",
+    "normalize_output_scope",
+    "resolve_output_scope_paths",
+    "scoped_dataset_path",
     "ReportHarness",
     "TotalWatbalReport",
     "SedimentCharacteristics",

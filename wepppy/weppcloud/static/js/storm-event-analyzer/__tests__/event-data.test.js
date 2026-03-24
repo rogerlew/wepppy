@@ -1,11 +1,20 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import {
   buildEventFilterPayload,
+  buildHydrologyPayload,
   buildSoilPayload,
   computeIntensityRange,
   createEventDataManager,
   getIntensityColumn,
 } from '../data/event-data.js';
+
+const TEST_WEPP_PATHS = Object.freeze({
+  soil: 'wepp/roads/output/interchange/H.soil.parquet',
+  water: 'wepp/roads/output/interchange/H.wat.parquet',
+  outlet: 'wepp/roads/output/interchange/ebe_pw0.parquet',
+  hillEvents: 'wepp/roads/output/interchange/H.ebe.parquet',
+  tc: 'wepp/roads/output/interchange/tc_out.parquet',
+});
 
 describe('storm-event-analyzer event data helpers', () => {
   it('maps duration minutes to intensity columns', () => {
@@ -43,8 +52,9 @@ describe('storm-event-analyzer event data helpers', () => {
       minValue: 1,
       maxValue: 2,
       warmupYear: null,
-    });
+    }, TEST_WEPP_PATHS);
     expect(primary.aggregations[0].sql).toBe('AVG(soil.TSMF) * 100');
+    expect(primary.datasets[1].path).toBe(TEST_WEPP_PATHS.soil);
 
     const fallback = buildSoilPayload({
       filterColumn: 'peak_intensity_10',
@@ -52,8 +62,22 @@ describe('storm-event-analyzer event data helpers', () => {
       maxValue: 2,
       warmupYear: null,
       soilSaturationSource: 'saturation',
-    });
+    }, TEST_WEPP_PATHS);
     expect(fallback.aggregations[0].sql).toBe('AVG(soil.Saturation) * 100');
+  });
+
+  it('builds hydrology payload with explicit scoped output path', () => {
+    const payload = buildHydrologyPayload(
+      {
+        filterColumn: 'peak_intensity_10',
+        minValue: 1,
+        maxValue: 2,
+        warmupYear: null,
+      },
+      TEST_WEPP_PATHS,
+    );
+
+    expect(payload.datasets[1].path).toBe(TEST_WEPP_PATHS.outlet);
   });
 
   it('falls back to legacy Saturation when TSMF is unavailable', async () => {
@@ -86,7 +110,11 @@ describe('storm-event-analyzer event data helpers', () => {
       return { records: [] };
     });
 
-    const manager = createEventDataManager({ ctx: { runid: 'demo', config: 'disturbed' }, postQueryEngine });
+    const manager = createEventDataManager({
+      ctx: { runid: 'demo', config: 'disturbed' },
+      postQueryEngine,
+      weppPaths: TEST_WEPP_PATHS,
+    });
     const result = await manager.fetchEventRows({
       selectedMetric: { durationMinutes: 10, value: 10 },
       filterRangePct: 10,
@@ -138,7 +166,11 @@ describe('storm-event-analyzer event data helpers', () => {
       .mockResolvedValueOnce({ records: [] })
       .mockResolvedValueOnce({ records: [] });
 
-    const manager = createEventDataManager({ ctx: { runid: 'demo', config: 'disturbed' }, postQueryEngine });
+    const manager = createEventDataManager({
+      ctx: { runid: 'demo', config: 'disturbed' },
+      postQueryEngine,
+      weppPaths: TEST_WEPP_PATHS,
+    });
     const result = await manager.fetchEventRows({
       selectedMetric: { durationMinutes: 10, value: 10 },
       filterRangePct: 10,
@@ -153,5 +185,14 @@ describe('storm-event-analyzer event data helpers', () => {
     expect(rows[0].precip_mm).toBeNull();
     expect(rows[0].soil_saturation_pct).toBeNull();
     expect(rows[1].precip_mm).toBe(12);
+  });
+
+  it('requires explicit weppPaths when constructing event data manager', () => {
+    expect(() => {
+      createEventDataManager({
+        ctx: { runid: 'demo', config: 'disturbed' },
+        postQueryEngine: jest.fn(),
+      });
+    }).toThrow('STORM_EVENT_ANALYZER_CONTEXT.weppPaths');
   });
 });

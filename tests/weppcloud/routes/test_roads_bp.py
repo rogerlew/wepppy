@@ -86,7 +86,28 @@ class RoadsStub(LockedMixin):
 
     def run_roads_wepp(self) -> Dict[str, Any]:
         self._status = "completed"
-        self._run_summary = {"completed": True}
+        self._run_summary = {
+            "status": "completed",
+            "roads_log_relpath": "wepp/roads/roads.log",
+            "roads_output_relpath": "wepp/roads/output",
+            "segment_pass_manifest_relpath": "wepp/roads/segments/roads.segment.pass.manifest.json",
+            "roads_report_resources": {
+                "status": "ready",
+                "required_relpaths": [
+                    "wepp/roads/output/interchange/H.pass.parquet",
+                    "wepp/roads/output/interchange/H.wat.parquet",
+                    "wepp/roads/output/interchange/loss_pw0.out.parquet",
+                    "wepp/roads/output/interchange/loss_pw0.hill.parquet",
+                    "wepp/roads/output/interchange/loss_pw0.chn.parquet",
+                    "wepp/roads/output/interchange/totalwatsed3.parquet",
+                    "wepp/roads/output/interchange/ebe_pw0.parquet",
+                    "wepp/roads/output/interchange/README.md",
+                    "wepp/roads/output/interchange/roads_segment_loss_summary.parquet",
+                ],
+                "missing_relpaths": [],
+                "roads_segment_loss_summary_relpath": "wepp/roads/output/interchange/roads_segment_loss_summary.parquet",
+            },
+        }
         return dict(self._run_summary)
 
     def query_status(self) -> Dict[str, Any]:
@@ -121,6 +142,34 @@ def roads_client(
     monkeypatch.setattr(roads_module, "load_run_context", lambda runid, cfg: context)
     monkeypatch.setattr(roads_module, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(roads_module, "Roads", RoadsStub)
+
+    def _fake_url_for_run(endpoint: str, **values: Any) -> str:
+        runid = values.get("runid", RUN_ID)
+        config = values.get("config", CONFIG)
+        scope = values.get("output_scope")
+        suffixes = {
+            "wepp.report_wepp_loss": "report/wepp/summary",
+            "wepp.report_wepp_return_periods": "report/wepp/return_periods",
+            "wepp.report_wepp_yearly_watbal": "report/wepp/yearly_watbal",
+            "wepp.report_wepp_avg_annual_watbal": "report/wepp/avg_annual_watbal",
+            "wepp.plot_wepp_streamflow": "plot/wepp/streamflow",
+            "gl_dashboard.gl_dashboard": "gl-dashboard",
+            "storm_event_analyzer.storm_event_analyzer": "storm-event-analyzer",
+            "download.download_with_subpath": "download",
+        }
+        if endpoint == "browse.browse_tree":
+            subpath = str(values.get("subpath", "")).lstrip("/")
+            return f"/runs/{runid}/{config}/browse/{subpath}"
+        if endpoint == "download.download_with_subpath":
+            subpath = str(values.get("subpath", "")).lstrip("/")
+            return f"/runs/{runid}/{config}/download/{subpath}"
+        suffix = suffixes.get(endpoint, endpoint)
+        path = f"/runs/{runid}/{config}/{suffix}"
+        if scope:
+            path = f"{path}?output_scope={scope}"
+        return path
+
+    monkeypatch.setattr(roads_module, "url_for_run", _fake_url_for_run)
 
     RonStub = singleton_factory("RonStub", attrs={"mods": ["roads"]}, mixins=(LockedMixin,))
     monkeypatch.setattr(roads_module, "Ron", RonStub)
@@ -289,3 +338,132 @@ def test_roads_routes_require_mod_enabled(roads_client):
     assert response.status_code == 200
     payload = response.get_json()
     assert "not enabled" in payload["error"]["message"]
+
+
+def test_report_roads_summary_includes_scoped_links_and_segment_exports(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+    controller.run_roads_wepp()
+
+    captured: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs):
+        captured["template_name"] = template_name
+        captured["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(roads_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/roads/summary")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured["template_name"] == "reports/roads/summary.htm"
+    kwargs = captured["kwargs"]
+    links = kwargs["roads_report_links"]
+    assert any(link["href"].endswith("/report/wepp/summary?output_scope=roads") for link in links)
+    assert any(link["href"].endswith("/report/wepp/return_periods?output_scope=roads") for link in links)
+    assert any(link["href"].endswith("/storm-event-analyzer?output_scope=roads") for link in links)
+    assert any(
+        link["href"].endswith("/browse/wepp/roads/output/interchange/roads_segment_loss_summary.parquet")
+        for link in links
+    )
+    assert any(
+        link["href"].endswith("/download/wepp/roads/output/interchange/roads_segment_loss_summary.parquet?as_csv=1")
+        for link in links
+    )
+    resource_links = kwargs["roads_resource_links"]
+    assert any(item["relpath"] == "wepp/roads/output/interchange/H.pass.parquet" for item in resource_links)
+    assert any(item["href"].endswith("/browse/wepp/roads/output/interchange/README.md") for item in resource_links)
+
+
+def test_report_roads_results_renders_run_results_panel(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+    controller.run_roads_wepp()
+
+    captured: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs):
+        captured["template_name"] = template_name
+        captured["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(roads_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/roads/results")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured["template_name"] == "controls/roads_reports.htm"
+    kwargs = captured["kwargs"]
+    assert kwargs["run_results_title"] == "Run Results"
+    links = kwargs["roads_report_links"]
+    assert any(link["href"].endswith("/report/wepp/summary?output_scope=roads") for link in links)
+    assert any(link["href"].endswith("/report/wepp/yearly_watbal?output_scope=roads") for link in links)
+    assert any(link["href"].endswith("/gl-dashboard?output_scope=roads") for link in links)
+    assert any(
+        link["href"].endswith("/download/wepp/roads/output/interchange/roads_segment_loss_summary.parquet?as_csv=1")
+        for link in links
+    )
+    resource_links = kwargs["roads_resource_links"]
+    assert any(item["relpath"] == "wepp/roads/output/interchange/README.md" for item in resource_links)
+    assert any(item["href"].endswith("/browse/wepp/roads/output/interchange/H.pass.parquet") for item in resource_links)
+
+
+def test_report_roads_results_hides_non_single_storm_links_when_resources_absent(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+    controller._status = "completed"
+    controller._run_summary = {
+        "status": "completed",
+        "roads_report_resources": {
+            "status": "ready",
+            "required_relpaths": [
+                "wepp/roads/output/interchange/H.pass.parquet",
+                "wepp/roads/output/interchange/ebe_pw0.parquet",
+                "wepp/roads/output/interchange/README.md",
+            ],
+            "missing_relpaths": [],
+            "roads_segment_loss_summary_relpath": None,
+        },
+    }
+
+    captured: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs):
+        captured["template_name"] = template_name
+        captured["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(roads_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/roads/results")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured["template_name"] == "controls/roads_reports.htm"
+    links = captured["kwargs"]["roads_report_links"]
+    hrefs = {link["href"] for link in links}
+    assert f"/runs/{RUN_ID}/{CONFIG}/report/wepp/summary?output_scope=roads" not in hrefs
+    assert f"/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?output_scope=roads" not in hrefs
+    assert f"/runs/{RUN_ID}/{CONFIG}/report/wepp/yearly_watbal?output_scope=roads" not in hrefs
+    assert f"/runs/{RUN_ID}/{CONFIG}/report/wepp/avg_annual_watbal?output_scope=roads" not in hrefs
+    assert f"/runs/{RUN_ID}/{CONFIG}/plot/wepp/streamflow?output_scope=roads" not in hrefs
+    assert f"/runs/{RUN_ID}/{CONFIG}/gl-dashboard?output_scope=roads" in hrefs
+    assert f"/runs/{RUN_ID}/{CONFIG}/storm-event-analyzer?output_scope=roads" in hrefs
