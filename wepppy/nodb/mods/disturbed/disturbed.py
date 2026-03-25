@@ -37,6 +37,7 @@ import os
 import ast
 import csv
 import shutil
+import tempfile
 import inspect
 from collections import Counter
 from datetime import datetime
@@ -870,7 +871,6 @@ class Disturbed(NoDbBase):
         from wepppy.nodb.mods.disturbed import read_disturbed_land_soil_lookup
 
         import os
-        import json
 
         hdr = ['key', 'desc', 'man', 'disturbed_class',
             'ini.data.bdtill', 'ini.data.cancov', 'ini.data.daydis', 'ini.data.dsharv', 'ini.data.frdp', 
@@ -924,68 +924,80 @@ class Disturbed(NoDbBase):
                 man_d_base[base_class] = man_d[disturbed_class]
 
         landsoil_lookup = self.land_soil_replacements_d
-        extended_landsoil_lookup = _join(_data_dir, 'extended_disturbed_land_soil_lookup.csv')
+        extended_landsoil_lookup = self._new_extended_land_soil_lookup_tmp_path()
 
         wtr = None
-        with open(extended_landsoil_lookup, 'w') as f:
-            for (texid, disturbed_class), _d in landsoil_lookup.items():
-                man_row = man_d.get(disturbed_class) or man_d_base.get(disturbed_class)
-                if man_row is None:
-                    print(f'No management found for {disturbed_class} in man_d')
-                    continue
+        try:
+            with open(extended_landsoil_lookup, 'w') as f:
+                for (texid, disturbed_class), _d in landsoil_lookup.items():
+                    man_row = man_d.get(disturbed_class) or man_d_base.get(disturbed_class)
+                    if man_row is None:
+                        print(f'No management found for {disturbed_class} in man_d')
+                        continue
 
-                _d.update(man_row)
+                    _d.update(man_row)
 
-                sev_enum = 0
-                luse_value = _d.get('luse', disturbed_class)
-                if 'high sev' in disturbed_class:
-                    sev_enum = 4
-                elif 'moderate sev' in disturbed_class:
-                    sev_enum = 3
-                elif 'low sev' in disturbed_class:
-                    sev_enum = 2
-                elif 'prescribed' in disturbed_class:
-                    sev_enum = 1
+                    sev_enum = 0
+                    luse_value = _d.get('luse', disturbed_class)
+                    if 'high sev' in disturbed_class:
+                        sev_enum = 4
+                    elif 'moderate sev' in disturbed_class:
+                        sev_enum = 3
+                    elif 'low sev' in disturbed_class:
+                        sev_enum = 2
+                    elif 'prescribed' in disturbed_class:
+                        sev_enum = 1
 
-                luse = f'{luse_value}'
+                    luse = f'{luse_value}'
 
-                if 'forest' in luse:
-                    luse = 'forest'
-                elif 'grass' in luse and 'short' not in luse:
-                    luse = 'tall grass'
-                elif 'shrub' in luse:
-                    luse = 'shrub'
+                    if 'forest' in luse:
+                        luse = 'forest'
+                    elif 'grass' in luse and 'short' not in luse:
+                        luse = 'tall grass'
+                    elif 'shrub' in luse:
+                        luse = 'shrub'
 
-                if 'luse' in _d:
-                    del _d['luse']
+                    if 'luse' in _d:
+                        del _d['luse']
 
-                _d = {'sev_enum': sev_enum,  'landuse': luse, 'disturbed_class': disturbed_class, **_d}
-                # Keep canonical disturbed class from lookup key for downstream
-                # soil replacement lookups (for example, ("silt loam", "thinning")).
-                _d['disturbed_class'] = disturbed_class
+                    _d = {'sev_enum': sev_enum,  'landuse': luse, 'disturbed_class': disturbed_class, **_d}
+                    # Keep canonical disturbed class from lookup key for downstream
+                    # soil replacement lookups (for example, ("silt loam", "thinning")).
+                    _d['disturbed_class'] = disturbed_class
 
-                if 'rdmax' in _d:
-                    _d['plant.data.rdmax'] = _d['rdmax']
-                    del _d['rdmax']
-                elif 'plant.data.rdmax' not in _d:
-                    _d['plant.data.rdmax'] = None
+                    if 'rdmax' in _d:
+                        _d['plant.data.rdmax'] = _d['rdmax']
+                        del _d['rdmax']
+                    elif 'plant.data.rdmax' not in _d:
+                        _d['plant.data.rdmax'] = None
 
-                if 'xmxlai' in _d:
-                    _d['plant.data.xmxlai'] = _d['xmxlai']
-                    del _d['xmxlai']
-                elif 'plant.data.xmxlai' not in _d:
-                    _d['plant.data.xmxlai'] = None
+                    if 'xmxlai' in _d:
+                        _d['plant.data.xmxlai'] = _d['xmxlai']
+                        del _d['xmxlai']
+                    elif 'plant.data.xmxlai' not in _d:
+                        _d['plant.data.xmxlai'] = None
 
-                if wtr is None:
-                    wtr = csv.DictWriter(f, fieldnames=_d.keys())
-                    wtr.writeheader()
+                    if wtr is None:
+                        wtr = csv.DictWriter(f, fieldnames=_d.keys())
+                        wtr.writeheader()
 
-                wtr.writerow(_d)
+                    wtr.writerow(_d)
 
-        if _exists(extended_landsoil_lookup):
-            os.remove(self.lookup_fn)
+            os.replace(extended_landsoil_lookup, self.lookup_fn)
+        finally:
+            if _exists(extended_landsoil_lookup):
+                os.remove(extended_landsoil_lookup)
 
-        shutil.move(extended_landsoil_lookup, self.lookup_fn)
+    def _new_extended_land_soil_lookup_tmp_path(self) -> str:
+        """Create a run-scoped writable temporary CSV path for extended lookup generation."""
+        os.makedirs(self.disturbed_dir, exist_ok=True)
+        fd, path = tempfile.mkstemp(
+            prefix='extended_disturbed_land_soil_lookup.',
+            suffix='.csv',
+            dir=self.disturbed_dir,
+        )
+        os.close(fd)
+        return path
 
     def remap_mofe_landuse(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
