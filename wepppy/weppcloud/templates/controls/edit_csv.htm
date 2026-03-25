@@ -21,10 +21,10 @@
     <div id="status-banner" class="alert alert-info" role="alert">
         Preparing disturbed lookup table...
     </div>
-    <div id="spreadsheet1"></div>
-    <p class="mt-2">
-        <button id="save" class="btn btn-primary" disabled>Save my changes</button>
+    <p class="mb-2">
+        <button id="save" class="btn btn-primary" disabled>Save My Changes</button>
     </p>
+    <div id="spreadsheet1"></div>
 </div>
 <script>
 var mySpreadsheet = null;
@@ -216,7 +216,7 @@ function onSave(config) {
     })
         .then(parseSaveResponse)
         .then(() => {
-            setStatus("success", "Save successful.");
+            setStatus("success", "Save successful. Please rebuild Landuse and Soils.");
         })
         .catch((error) => {
             setStatus("danger", "Save failed: " + String(error && error.message ? error.message : error));
