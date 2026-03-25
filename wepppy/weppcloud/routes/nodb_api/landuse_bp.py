@@ -22,6 +22,13 @@ from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 landuse_bp = Blueprint('landuse', __name__)
 
+_DISTURBED_PREVIEW_TEXTURES: tuple[tuple[str, str], ...] = (
+    ("clay", "Clay"),
+    ("loam", "Loam"),
+    ("sand", "Sand"),
+    ("silt", "Silt"),
+)
+
 
 def _coerce_landuse_code(value: Any) -> str:
     if value in (None, ''):
@@ -253,6 +260,7 @@ def report_landuse(runid: str, config: str) -> Response:
         landuse = Landuse.getInstance(wd)
         landuseoptions = landuse.landuseoptions
         report_context = build_landuse_report_context(landuse)
+        disturbed_preview_available = "disturbed" in tuple(getattr(landuse, "mods", ()))
 
         return render_template(
             'reports/landuse.htm',
@@ -263,6 +271,8 @@ def report_landuse(runid: str, config: str) -> Response:
             dataset_options=report_context['dataset_options'],
             coverage_percentages=report_context['coverage_percentages'],
             report=report_context['report_rows'],
+            disturbed_preview_available=disturbed_preview_available,
+            disturbed_preview_textures=_DISTURBED_PREVIEW_TEXTURES,
         )
 
     except Exception:

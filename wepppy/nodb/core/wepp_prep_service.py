@@ -18,6 +18,10 @@ from wepp_runner.wepp_runner import (
 from wepppy.all_your_base import NCPU, isfloat
 from wepppy.all_your_base.geo import RDIOutOfBoundsException, RasterDatasetInterpolator
 from wepppy.nodb.base import TriggerEvents, createProcessPoolExecutor
+from wepppy.nodb.core.management_overrides import (
+    normalize_disturbed_class_for_management_lookup,
+    resolve_disturbed_scalar_replacements,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.wepp import Wepp
@@ -226,13 +230,9 @@ class WeppPrepService:
                 management.set_bdtill(bd_d[sol_key])
 
                 if disturbed is not None:
-                    disturbed_class_str = disturbed_class if isinstance(disturbed_class, str) else ""
-                    if isinstance(disturbed_class, str):
-                        if "mulch" in disturbed_class:
-                            disturbed_class = "mulch"
-                        elif "thinning" in disturbed_class:
-                            disturbed_class = "thinning"
-                        disturbed_class_str = disturbed_class
+                    disturbed_class, disturbed_class_str = (
+                        normalize_disturbed_class_for_management_lookup(disturbed_class)
+                    )
 
                     if (
                         hillslope_cancovs is not None
@@ -297,19 +297,12 @@ class WeppPrepService:
                             f"     _prep_managements: {texid}:{disturbed_class} not in replacements_d"
                         )
 
-                    if disturbed_class is None or disturbed_class == "" or ("developed" in disturbed_class_str):
-                        rdmax = None
-                        xmxlai = None
-                    elif replacements is None:
-                        rdmax = None
-                        xmxlai = None
-                    else:
-                        rdmax = replacements.get("rdmax", None)
-                        if man_summary.cancov_override is None:
-                            xmxlai = replacements.get("xmxlai", None)
-                        else:
-                            rdmax = None
-                            xmxlai = None
+                    rdmax, xmxlai = resolve_disturbed_scalar_replacements(
+                        disturbed_class=disturbed_class,
+                        disturbed_class_str=disturbed_class_str,
+                        replacements=replacements,
+                        cancov_override=man_summary.cancov_override,
+                    )
 
                     if isfloat(rdmax):
                         management.set_rdmax(float(rdmax))

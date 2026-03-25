@@ -16,6 +16,15 @@
       <tr class="wc-landuse-report__summary" data-landuse-row="{{ row.key }}">
         <td class="wc-landuse-report__cell">
           <a href="view/management/{{ row.key }}" target="_blank" rel="noopener">{{ row.key }}</a>
+          {% if disturbed_preview_available %}
+          <span class="wc-landuse-report__disturbed-links">
+            (
+            {% for texture_slug, texture_label in disturbed_preview_textures %}
+            <a href="view/management_effective/{{ row.key }}/{{ texture_slug }}/" target="_blank" rel="noopener">{{ texture_label }}</a>{% if not loop.last %} | {% endif %}
+            {% endfor %}
+            )
+          </span>
+          {% endif %}
         </td>
         <td class="wc-landuse-report__cell">
           <button

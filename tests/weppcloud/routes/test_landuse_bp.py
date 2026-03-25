@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, List
+from types import SimpleNamespace
 
 import pytest
 
 pytest.importorskip("flask")
-from flask import Flask
+from flask import Flask, render_template
 
 import wepppy.weppcloud.routes.nodb_api.landuse_bp as landuse_module
 
@@ -32,6 +34,7 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 
     class DummyLanduse:
         _instances: Dict[str, "DummyLanduse"] = {}
+        _mods: tuple[str, ...] = ()
 
         def __init__(self, wd: str) -> None:
             self.wd = wd
@@ -47,6 +50,7 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             self.subs_summary = [{"topaz_id": 1}]
             self.chns_summary = [{"topaz_id": 2}]
             self.hillslope_cancovs = {"1": {"cover": 45}}
+            self.mods = tuple(type(self)._mods)
 
         @classmethod
         def getInstance(cls, wd: str) -> "DummyLanduse":
@@ -140,6 +144,69 @@ def test_report_landuse_renders_template(landuse_client):
     assert captured["template"] == "reports/landuse.htm"
     assert captured["context"]["runid"] == RUN_ID
     assert captured["context"]["landuseoptions"] == {"options": []}
+    assert captured["context"]["disturbed_preview_available"] is False
+
+
+def test_report_landuse_enables_disturbed_preview_context(landuse_client):
+    client, DummyLanduse, captured, _ = landuse_client
+    DummyLanduse._mods = ("disturbed",)
+    try:
+        response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/landuse/")
+
+        assert response.status_code == 200
+        assert captured["context"]["disturbed_preview_available"] is True
+        assert captured["context"]["disturbed_preview_textures"] == (
+            ("clay", "Clay"),
+            ("loam", "Loam"),
+            ("sand", "Sand"),
+            ("silt", "Silt"),
+        )
+    finally:
+        DummyLanduse._mods = ()
+
+
+def test_landuse_template_renders_disturbed_preview_links_conditionally() -> None:
+    template_dir = Path(__file__).resolve().parents[3] / "wepppy" / "weppcloud" / "templates"
+    app = Flask(__name__, template_folder=str(template_dir))
+    app.config["TESTING"] = True
+    app.jinja_env.globals["startswith"] = lambda value, prefix: str(value).startswith(str(prefix))
+
+    row = {
+        "key": "42",
+        "pct_coverage": 57.5,
+        "cancov": 0.5,
+        "inrcov": 0.4,
+        "rilcov": 0.3,
+        "cancov_override": None,
+        "inrcov_override": None,
+        "rilcov_override": None,
+    }
+    landuse = SimpleNamespace(mods=())
+    landuseoptions = [{"Key": "42", "Description": "Forest", "ManagementFile": "forest.man"}]
+    textures = (("clay", "Clay"), ("loam", "Loam"), ("sand", "Sand"), ("silt", "Silt"))
+
+    with app.app_context():
+        html_without_disturbed = render_template(
+            "reports/landuse.htm",
+            report=[row],
+            landuse=landuse,
+            landuseoptions=landuseoptions,
+            coverage_percentages=[],
+            disturbed_preview_available=False,
+            disturbed_preview_textures=textures,
+        )
+        html_with_disturbed = render_template(
+            "reports/landuse.htm",
+            report=[row],
+            landuse=landuse,
+            landuseoptions=landuseoptions,
+            coverage_percentages=[],
+            disturbed_preview_available=True,
+            disturbed_preview_textures=textures,
+        )
+
+    assert "view/management_effective/42/clay/" not in html_without_disturbed
+    assert "view/management_effective/42/clay/" in html_with_disturbed
 
 
 def test_task_modify_landuse_parses_ids(landuse_client):

@@ -3571,24 +3571,38 @@ h5:first-child {
 
 .wc-landuse-report__table {
   width: 100%;
+  table-layout: fixed;
+}
+
+.wc-landuse-report__col--key {
+  width: 16rem;
 }
 
 .wc-landuse-report__col--actions {
-  width: 3.75rem;
+  width: 2.75rem;
   text-align: center;
 }
 
 .wc-landuse-report__col--mapping {
-  width: 55%;
+  width: auto;
 }
 
 .wc-landuse-report__col--coverage {
+  width: 7.5rem;
   text-align: right;
   white-space: nowrap;
 }
 
 .wc-landuse-report__cell {
   vertical-align: middle;
+}
+
+.wc-landuse-report__cell--key {
+  overflow-wrap: anywhere;
+}
+
+.wc-landuse-report__disturbed-links {
+  font-size: 0.97em;
 }
 
 .wc-landuse-report__cell--numeric {

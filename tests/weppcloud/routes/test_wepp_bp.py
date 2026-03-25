@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict
+import tempfile
 
 import pytest
 
@@ -149,6 +150,265 @@ def test_flowpaths_loss_resource_route_is_retired(wepp_client):
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/flowpaths_loss.tif")
 
     assert response.status_code == 404
+
+
+@pytest.mark.parametrize(
+    ("texture_slug", "rdmax", "xmxlai", "decfct"),
+    [
+        ("clay", 1.1, 2.1, 0.11),
+        ("loam", 1.2, 2.2, 0.22),
+        ("sand", 1.3, 2.3, 0.33),
+        ("silt", 1.4, 2.4, 0.44),
+    ],
+)
+def test_view_management_effective_returns_texture_specific_preview(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+    texture_slug: str,
+    rdmax: float,
+    xmxlai: float,
+    decfct: float,
+) -> None:
+    client, _, run_dir = wepp_client
+
+    class DummyManagement:
+        def __init__(self) -> None:
+            self.rdmax = -1.0
+            self.xmxlai = -1.0
+            self.overrides: Dict[str, float] = {}
+
+        def set_rdmax(self, value: float) -> None:
+            self.rdmax = value
+
+        def set_xmxlai(self, value: float) -> None:
+            self.xmxlai = value
+
+        def __setitem__(self, key: str, value: float) -> None:
+            self.overrides[key] = value
+
+        def __repr__(self) -> str:
+            return (
+                "DummyManagement("
+                f"rdmax={self.rdmax}, xmxlai={self.xmxlai}, "
+                f"decfct={self.overrides.get('plant.data.decfct')}"
+                ")"
+            )
+
+    class DummyManagementSummary:
+        disturbed_class = "forest moderate sev fire-mulch_15"
+        cancov_override = None
+
+        @staticmethod
+        def get_management() -> DummyManagement:
+            return DummyManagement()
+
+    class DummyLanduse:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("LanduseObj", (), {"managements": {"42": DummyManagementSummary()}})()
+
+    class DummyDisturbed:
+        @classmethod
+        def tryGetInstance(cls, wd: str):
+            assert wd == run_dir
+            replacements = {
+                ("clay loam", "mulch"): {"rdmax": 1.1, "xmxlai": 2.1, "plant.data.decfct": 0.11},
+                ("loam", "mulch"): {"rdmax": 1.2, "xmxlai": 2.2, "plant.data.decfct": 0.22},
+                ("sand loam", "mulch"): {"rdmax": 1.3, "xmxlai": 2.3, "plant.data.decfct": 0.33},
+                ("silt loam", "mulch"): {"rdmax": 1.4, "xmxlai": 2.4, "plant.data.decfct": 0.44},
+            }
+            return type("DisturbedObj", (), {"land_soil_replacements_d": replacements})()
+
+    monkeypatch.setattr(wepp_module, "Landuse", DummyLanduse)
+    monkeypatch.setattr(wepp_module, "nodb_mods", type("Mods", (), {"Disturbed": DummyDisturbed}))
+
+    response = client.get(
+        f"/runs/{RUN_ID}/{CONFIG}/view/management_effective/42/{texture_slug}/"
+    )
+
+    assert response.status_code == 200
+    assert response.mimetype == "text/plain"
+    body = response.get_data(as_text=True)
+    assert f"rdmax={rdmax}" in body
+    assert f"xmxlai={xmxlai}" in body
+    assert f"decfct={decfct}" in body
+
+
+def test_view_management_effective_rejects_invalid_texture(
+    wepp_client,
+) -> None:
+    client, _, _ = wepp_client
+
+    response = client.get(
+        f"/runs/{RUN_ID}/{CONFIG}/view/management_effective/42/invalid-texture/"
+    )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"]["code"] == "invalid_texture"
+    assert "Invalid texture" in payload["error"]["message"]
+
+
+def test_view_management_effective_requires_disturbed_mod(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+
+    class DummyManagementSummary:
+        disturbed_class = "forest"
+        cancov_override = None
+
+        @staticmethod
+        def get_management():
+            return type("DummyManagement", (), {})()
+
+    class DummyLanduse:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("LanduseObj", (), {"managements": {"42": DummyManagementSummary()}})()
+
+    class DummyDisturbed:
+        @classmethod
+        def tryGetInstance(cls, wd: str):
+            assert wd == run_dir
+            return None
+
+    monkeypatch.setattr(wepp_module, "Landuse", DummyLanduse)
+    monkeypatch.setattr(wepp_module, "nodb_mods", type("Mods", (), {"Disturbed": DummyDisturbed}))
+
+    response = client.get(
+        f"/runs/{RUN_ID}/{CONFIG}/view/management_effective/42/clay/"
+    )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"]["code"] == "disturbed_not_enabled"
+    assert "Disturbed mod is not enabled" in payload["error"]["message"]
+
+
+def test_view_management_effective_applies_lookup_xmxlai_when_cancov_override_exists(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+
+    class DummyManagement:
+        def __init__(self) -> None:
+            self.rdmax = -1.0
+            self.xmxlai = 3.6
+
+        def set_rdmax(self, value: float) -> None:
+            self.rdmax = value
+
+        def set_xmxlai(self, value: float) -> None:
+            self.xmxlai = value
+
+        def __repr__(self) -> str:
+            return f"DummyManagement(rdmax={self.rdmax}, xmxlai={self.xmxlai})"
+
+    class DummyManagementSummary:
+        disturbed_class = "tall grass"
+        cancov_override = 0.6
+
+        @staticmethod
+        def get_management() -> DummyManagement:
+            return DummyManagement()
+
+    class DummyLanduse:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("LanduseObj", (), {"managements": {"71": DummyManagementSummary()}})()
+
+    class DummyDisturbed:
+        @classmethod
+        def tryGetInstance(cls, wd: str):
+            assert wd == run_dir
+            replacements = {("clay loam", "tall grass"): {"rdmax": 0.4, "xmxlai": 5.1}}
+            return type("DisturbedObj", (), {"land_soil_replacements_d": replacements})()
+
+    monkeypatch.setattr(wepp_module, "Landuse", DummyLanduse)
+    monkeypatch.setattr(wepp_module, "nodb_mods", type("Mods", (), {"Disturbed": DummyDisturbed}))
+
+    response = client.get(
+        f"/runs/{RUN_ID}/{CONFIG}/view/management_effective/71/clay/"
+    )
+
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert "rdmax=0.4" in body
+    assert "xmxlai=5.1" in body
+
+
+def test_view_management_effective_does_not_persist_preview_artifacts(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+
+    class DummyManagement:
+        def set_rdmax(self, value: float) -> None:
+            self.rdmax = value
+
+        def set_xmxlai(self, value: float) -> None:
+            self.xmxlai = value
+
+        def __setitem__(self, key: str, value: float) -> None:
+            setattr(self, key.replace(".", "_"), value)
+
+        def __repr__(self) -> str:
+            return "DummyManagement()"
+
+    class DummyManagementSummary:
+        disturbed_class = "forest"
+        cancov_override = None
+
+        @staticmethod
+        def get_management() -> DummyManagement:
+            return DummyManagement()
+
+    class DummyLanduse:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("LanduseObj", (), {"managements": {"42": DummyManagementSummary()}})()
+
+    class DummyDisturbed:
+        @classmethod
+        def tryGetInstance(cls, wd: str):
+            assert wd == run_dir
+            replacements = {("clay loam", "forest"): {"rdmax": 2.5, "xmxlai": 3.5}}
+            return type("DisturbedObj", (), {"land_soil_replacements_d": replacements})()
+
+    original_open = open
+
+    def guarded_open(path, mode="r", *args, **kwargs):
+        if any(flag in mode for flag in ("w", "a", "x", "+")):
+            raise AssertionError(f"Unexpected write-mode open during preview request: {path} ({mode})")
+        return original_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(wepp_module, "Landuse", DummyLanduse)
+    monkeypatch.setattr(wepp_module, "nodb_mods", type("Mods", (), {"Disturbed": DummyDisturbed}))
+    monkeypatch.setattr("builtins.open", guarded_open)
+    monkeypatch.setattr(
+        tempfile,
+        "mkstemp",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Preview route must not create temporary files.")
+        ),
+    )
+
+    before = sorted(str(p.relative_to(run_dir)) for p in Path(run_dir).rglob("*"))
+    response = client.get(
+        f"/runs/{RUN_ID}/{CONFIG}/view/management_effective/42/clay/"
+    )
+    after = sorted(str(p.relative_to(run_dir)) for p in Path(run_dir).rglob("*"))
+
+    assert response.status_code == 200
+    assert before == after
 
 
 def test_query_subcatchments_summary_returns_500_when_controller_raises(
@@ -756,3 +1016,94 @@ def test_query_channels_summary_returns_500_when_controller_raises(
     assert response.status_code == 500
     payload = response.get_json()
     assert payload["error"]["message"] == "Error building summary"
+
+
+def test_get_wepp_prep_details_passes_disturbed_preview_context(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+    monkeypatch.setattr(wepp_module, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyRon:
+        mods = ("disturbed",)
+
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return cls()
+
+        def subs_summary(self, abbreviated: bool = False):
+            assert abbreviated is True
+            return [{"meta": {"topaz_id": "1"}}]
+
+        def chns_summary(self, abbreviated: bool = False):
+            assert abbreviated is True
+            return [{"meta": {"topaz_id": "2"}}]
+
+    class DummyUnitizer:
+        @staticmethod
+        def getInstance(wd: str):
+            assert wd == run_dir
+            return object()
+
+    captured: Dict[str, Any] = {}
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        captured["template_name"] = template_name
+        captured["kwargs"] = kwargs
+        return "rendered"
+
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/prep_details/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "rendered"
+    assert captured["template_name"] == "reports/wepp/prep_details.htm"
+    assert captured["kwargs"]["disturbed_preview_available"] is True
+    assert captured["kwargs"]["disturbed_preview_textures"] == (
+        ("clay", "Clay"),
+        ("loam", "Loam"),
+        ("sand", "Sand"),
+        ("silt", "Silt"),
+    )
+
+
+def test_report_ron_sub_summary_disables_disturbed_preview_without_mod(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+    monkeypatch.setattr(wepp_module, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyRon:
+        mods = ("rap",)
+
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return cls()
+
+        @staticmethod
+        def sub_summary(topaz_id: str):
+            return {"meta": {"topaz_id": topaz_id}, "landuse": None}
+
+    captured: Dict[str, Any] = {}
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        captured["template_name"] = template_name
+        captured["kwargs"] = kwargs
+        return "rendered"
+
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/sub_summary/10/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "rendered"
+    assert captured["template_name"] == "reports/hill.htm"
+    assert captured["kwargs"]["disturbed_preview_available"] is False

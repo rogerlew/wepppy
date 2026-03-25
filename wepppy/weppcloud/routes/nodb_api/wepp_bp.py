@@ -10,8 +10,14 @@ import wepppy
 
 from .._common import *  # noqa: F401,F403
 
-from wepppy.all_your_base import isint
+from wepppy.all_your_base import isfloat, isint
+from wepppy.nodb import mods as nodb_mods
 from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp
+from wepppy.nodb.core.management_overrides import (
+    apply_disturbed_management_overrides,
+    normalize_disturbed_class_for_management_lookup,
+    resolve_disturbed_scalar_replacements,
+)
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.unitizer import Unitizer, precisions, converters
 from wepppy.nodb.redis_prep import RedisPrep
@@ -30,6 +36,38 @@ import json
 from flask import Response, abort
 
 wepp_bp = Blueprint('wepp', __name__)
+
+_DISTURBED_PREVIEW_TEXTURES: tuple[tuple[str, str, str], ...] = (
+    ("clay", "Clay", "clay loam"),
+    ("loam", "Loam", "loam"),
+    ("sand", "Sand", "sand loam"),
+    ("silt", "Silt", "silt loam"),
+)
+
+_DISTURBED_PREVIEW_TEXTURE_ALIASES = {
+    "clay": "clay loam",
+    "clay loam": "clay loam",
+    "loam": "loam",
+    "sand": "sand loam",
+    "sand loam": "sand loam",
+    "silt": "silt loam",
+    "silt loam": "silt loam",
+}
+
+
+def _build_disturbed_preview_context(mods) -> dict[str, object]:
+    normalized_mods = tuple(mods or ())
+    return {
+        "disturbed_preview_available": "disturbed" in normalized_mods,
+        "disturbed_preview_textures": tuple(
+            (slug, label) for slug, label, _texture_name in _DISTURBED_PREVIEW_TEXTURES
+        ),
+    }
+
+
+def _normalize_disturbed_preview_texture(texture: str) -> str | None:
+    token = re.sub(r"[\s_-]+", " ", (texture or "").strip().lower())
+    return _DISTURBED_PREVIEW_TEXTURE_ALIASES.get(token)
 
 
 def _wants_csv() -> bool:
@@ -495,6 +533,69 @@ def view_management(runid, config, key):
     return r
 
 
+@wepp_bp.route('/runs/<string:runid>/<config>/view/management_effective/<key>/<texture>')
+@wepp_bp.route('/runs/<string:runid>/<config>/view/management_effective/<key>/<texture>/')
+@authorize_and_handle_with_exception_factory
+def view_management_effective(runid, config, key, texture):
+    wd = get_wd(runid)
+    assert wd is not None
+
+    requested_texture = _normalize_disturbed_preview_texture(texture)
+    if requested_texture is None:
+        valid_textures = ", ".join(label for _slug, label, _name in _DISTURBED_PREVIEW_TEXTURES)
+        return error_factory(
+            f"Invalid texture '{texture}'. Expected one of: {valid_textures}.",
+            status_code=400,
+            code="invalid_texture",
+        )
+
+    landuse = Landuse.getInstance(wd)
+    man_summary = landuse.managements.get(str(key))
+    if man_summary is None:
+        return error_factory(
+            f'Could not find management with key "{key}"',
+            status_code=404,
+            code="management_not_found",
+        )
+
+    disturbed = nodb_mods.Disturbed.tryGetInstance(wd)
+    if disturbed is None:
+        return error_factory(
+            "Disturbed mod is not enabled for this run; disturbed-effective preview is unavailable.",
+            status_code=400,
+            code="disturbed_not_enabled",
+        )
+
+    management_obj = man_summary.get_management()
+    disturbed_class, disturbed_class_str = normalize_disturbed_class_for_management_lookup(
+        getattr(man_summary, "disturbed_class", None)
+    )
+    replacements = disturbed.land_soil_replacements_d.get((requested_texture, disturbed_class))
+
+    rdmax, xmxlai = resolve_disturbed_scalar_replacements(
+        disturbed_class=disturbed_class,
+        disturbed_class_str=disturbed_class_str,
+        replacements=replacements,
+        # Preview output should expose lookup-effective replacement parameters
+        # directly, even when cancov override exists on the summary.
+        cancov_override=None,
+    )
+
+    if isfloat(rdmax):
+        management_obj.set_rdmax(float(rdmax))
+
+    if isfloat(xmxlai):
+        management_obj.set_xmxlai(float(xmxlai))
+
+    if replacements is not None:
+        apply_disturbed_management_overrides(management_obj, replacements)
+
+    contents = repr(management_obj)
+    response = Response(response=contents, status=200, mimetype="text/plain")
+    response.headers["Content-Type"] = "text/plain; charset=utf-8"
+    return response
+
+
 @wepp_bp.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine', methods=['POST'])
 @wepp_bp.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine/', methods=['POST'])
 @authorize_and_handle_with_exception_factory
@@ -673,6 +774,7 @@ def get_wepp_prep_details(runid, config):
     channels_summary = ron.chns_summary(abbreviated=True)
 
     unitizer = Unitizer.getInstance(wd)
+    disturbed_preview_context = _build_disturbed_preview_context(getattr(ron, "mods", ()))
 
     return render_template('reports/wepp/prep_details.htm', runid=runid, config=config,
                             unitizer_nodb=unitizer,
@@ -680,7 +782,8 @@ def get_wepp_prep_details(runid, config):
                             subcatchments_summary=subcatchments_summary,
                             channels_summary=channels_summary,
                             user=current_user,
-                            ron=ron)
+                            ron=ron,
+                            **disturbed_preview_context)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts')
@@ -1272,9 +1375,11 @@ def report_ron_chn_summary(runid, config, topaz_id):
     try:
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
+        disturbed_preview_context = _build_disturbed_preview_context(getattr(ron, "mods", ()))
         return render_template('reports/hill.htm', runid=runid, config=config,
                             ron=ron,
-                            d=ron.chn_summary(topaz_id))
+                            d=ron.chn_summary(topaz_id),
+                            **disturbed_preview_context)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:1106", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -1302,9 +1407,11 @@ def query_topaz_wepp_map(runid, config):
 def report_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
+    disturbed_preview_context = _build_disturbed_preview_context(getattr(ron, "mods", ()))
     return render_template('reports/hill.htm', runid=runid, config=config,
                            ron=ron,
-                           d=ron.sub_summary(topaz_id))
+                           d=ron.sub_summary(topaz_id),
+                           **disturbed_preview_context)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/resources/wepp_loss.tif')

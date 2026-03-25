@@ -57,7 +57,16 @@
       <td>&mdash;</td>
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.landuse.desc }} (<a href="../../../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)</td>
+      <td>
+        {{ d.landuse.desc }} (<a href="../../../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)
+        {% if disturbed_preview_available %}
+        (
+        {% for texture_slug, texture_label in disturbed_preview_textures %}
+        <a href="../../../view/management_effective/{{ d.landuse.key }}/{{ texture_slug }}/" target="_blank">{{ texture_label }}</a>{% if not loop.last %} | {% endif %}
+        {% endfor %}
+        )
+        {% endif %}
+      </td>
       <td>{{ d.landuse.cancov }} </td>
       {% endif %}
       {% if d.soil.desc is not defined %}

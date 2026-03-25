@@ -53,6 +53,13 @@
         {% if d.landuse is not none %}
         {{ d.landuse.desc }}
         (<a href="view/management/{{ d.landuse.key }}/" target="_blank" class="wc-summary-pane__link">{{ d.landuse.key }}</a>)
+        {% if disturbed_preview_available %}
+        (
+        {% for texture_slug, texture_label in disturbed_preview_textures %}
+        <a href="view/management_effective/{{ d.landuse.key }}/{{ texture_slug }}/" target="_blank" class="wc-summary-pane__link">{{ texture_label }}</a>{% if not loop.last %} | {% endif %}
+        {% endfor %}
+        )
+        {% endif %}
         {% endif %}
       </dd>
     </div>
