@@ -798,7 +798,18 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
 
     @property
     def wsarea(self) -> float:
-        return getattr(self, "_wsarea", 1)
+        wsarea = getattr(self, "_wsarea", None)
+        if wsarea is not None:
+            return float(wsarea)
+
+        # Backward/partial-state compatibility: older or interrupted runs can
+        # persist watershed.nodb with _wsarea=None while hillslope/channel area
+        # data still exists (often in parquet sidecars).
+        computed_area = float(self.sub_area) + float(self.chn_area)
+        if computed_area > 0.0 and math.isfinite(computed_area):
+            return computed_area
+
+        return 1.0
 
     def _structure_json_path(self) -> str:
         return _join(self.wat_dir, "structure.json")
