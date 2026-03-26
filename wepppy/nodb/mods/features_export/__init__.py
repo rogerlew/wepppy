@@ -9,6 +9,19 @@ from .catalog_loader import (
     load_layer_catalog,
     parse_layer_catalog,
 )
+from .cache_key import (
+    CACHE_INDEX_RELPATH,
+    CACHE_INDEX_SCHEMA_VERSION,
+    DEFAULT_CONVERSION_VERSION_MARKER,
+    DEFAULT_EXPORT_VERSION_MARKER,
+    CacheKeyParts,
+    build_cache_key,
+    build_request_hash,
+    cache_index_path,
+    get_cache_index_entry,
+    load_cache_index,
+    upsert_cache_index_entry,
+)
 from .contracts import (
     ExportRequest,
     ExportWarning,
@@ -18,11 +31,27 @@ from .contracts import (
     ResolvedLayerPlan,
     ValidationIssue,
 )
+from .dependency_tracker import (
+    DependencyEntry,
+    DependencyResolutionError,
+    DependencySnapshot,
+    build_catalog_signature,
+    build_dependency_snapshot,
+    dependency_fingerprint,
+)
 from .planner import normalize_export_request, resolve_export_plan
 
 __all__ = [
+    "CACHE_INDEX_RELPATH",
+    "CACHE_INDEX_SCHEMA_VERSION",
     "CatalogLayer",
     "CatalogMetadata",
+    "CacheKeyParts",
+    "DEFAULT_CONVERSION_VERSION_MARKER",
+    "DEFAULT_EXPORT_VERSION_MARKER",
+    "DependencyEntry",
+    "DependencyResolutionError",
+    "DependencySnapshot",
     "ExportRequest",
     "ExportWarning",
     "FeaturesExportValidationError",
@@ -32,9 +61,18 @@ __all__ = [
     "ResolvedExportPlan",
     "ResolvedLayerPlan",
     "ValidationIssue",
+    "build_cache_key",
+    "build_catalog_signature",
+    "build_dependency_snapshot",
+    "build_request_hash",
+    "cache_index_path",
     "default_catalog_path",
+    "dependency_fingerprint",
+    "get_cache_index_entry",
     "load_layer_catalog",
+    "load_cache_index",
     "normalize_export_request",
     "parse_layer_catalog",
     "resolve_export_plan",
+    "upsert_cache_index_entry",
 ]

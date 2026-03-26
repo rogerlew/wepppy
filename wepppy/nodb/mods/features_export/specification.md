@@ -279,6 +279,31 @@ Artifact layout:
 - Manifest exists in both locations.
 - Job manifest includes `cache_hit` and `source_job_id`.
 
+### 6.5 WP-2 Milestone Status (Completed 2026-03-26)
+
+ExecPlan completion:
+- `docs/mini-work-packages/20260326_features_export_wp2_execplan.md` status is `done`.
+
+Implemented files:
+- `wepppy/nodb/mods/features_export/dependency_tracker.py`
+- `wepppy/nodb/mods/features_export/cache_key.py`
+- `wepppy/nodb/mods/features_export/__init__.py`
+- `tests/nodb/mods/test_features_export_dependency_tracker.py`
+- `tests/nodb/mods/test_features_export_cache_key.py`
+
+Contract clarifications from implementation:
+- `nodb_ref` locator paths are resolved through an explicit resolver callback contract in WP-2 helpers; no implicit controller fallback behavior is used.
+- `path_template` locators that include `{table_name}` require pre-resolved table names (for example SWAT table discovery output) before dependency fingerprinting.
+- Dependency fingerprints include a stable catalog metadata signature (`catalog_version`, `schema_version`, `updated_at_utc`, `owner`, `status`) plus ordered canonical dependency entries.
+- Dependency entry snapshots include `relpath`, `exists`, `size`, `mtime_ns`, and optional `content_hash_marker`/`content_hash_value` (`sha256` mode).
+- Cache request hashing requires a concrete `swat_run_id` (no unresolved `latest`) and requires Unitizer preferences fingerprint input when `units=project`.
+- WP-2 cache index helper persists deterministic JSON at `export/features/cache/index.json` with load/get/upsert semantics and `schema_version=1`.
+
+Validation evidence:
+- `wctl run-pytest tests/nodb/mods/test_features_export_dependency_tracker.py --maxfail=1` -> pass (3 passed)
+- `wctl run-pytest tests/nodb/mods/test_features_export_cache_key.py --maxfail=1` -> pass (4 passed)
+- `wctl run-pytest tests/nodb/mods/test_features_export_catalog_loader.py --maxfail=1` -> pass (2 passed)
+
 ## 7. Units Strategy And Unitizer Requirements
 Units modes:
 - `si`: SI export output.
@@ -511,11 +536,12 @@ WP-1: Core contracts and planner skeleton (completed 2026-03-26)
 - Contract clarification: temporal incompatibility is handled per layer; incompatible layers emit `layer_unavailable`, and if all layers are excluded the planner raises `no_exportable_layers`.
 - Deliverable: deterministic `ResolvedExportPlan` object and unit tests for selector rules.
 
-WP-2: Dependency tracking and options-aware caching
-- Add `dependency_tracker.py` and `cache_key.py`.
-- Wire RedisPrep/TaskEnum preflight records and dependency fingerprints.
-- Include Unitizer settings fingerprint in cache key for `units=project`.
-- Deliverable: cache key + dependency manifest components stable across reruns.
+WP-2: Dependency tracking and options-aware caching (completed 2026-03-26)
+- Status: done via `docs/mini-work-packages/20260326_features_export_wp2_execplan.md`.
+- Implemented files: `dependency_tracker.py`, `cache_key.py`, package export wiring, and focused tests under `tests/nodb/mods/test_features_export_dependency_tracker.py` and `test_features_export_cache_key.py`.
+- Contract clarification: dependency locators enforce strict `kind`/`value` structure at resolution time; `nodb_ref` requires explicit resolver input and `path_template` entries requiring `{table_name}` require pre-resolved table names.
+- Contract clarification: request hash requires concrete `swat_run_id` and includes Unitizer preferences fingerprint for `units=project`, plus catalog/conversion/export version markers.
+- Deliverable: deterministic dependency snapshot/fingerprint and deterministic cache-key/index foundation (`export/features/cache/index.json`).
 
 WP-3: Format writers and packaging
 - Add `exporters/*` plus `manifest.py`.
