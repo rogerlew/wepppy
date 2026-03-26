@@ -62,7 +62,7 @@
            "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "canonical_rusle2"}
          }
        ],
-       help="`cligen_static` approximates WEPP-run erosivity; `momm2025_county_region` and `canonical_rusle2` are planning-climatology references selected at the watershed centroid."
+      help="cligen_static approximates WEPP-run erosivity; momm2025_county_region and canonical_rusle2 are planning-climatology references selected at the watershed centroid."
      ) }}
 
   {{ ui.radio_group(
@@ -135,7 +135,7 @@
        ],
        selected=rusle_default_k_mode,
        attrs={"class": "disable-readonly", "data-rusle-input": "default-k"},
-       help="The selected default mode supplies <code>K</code> in the final mode-specific <code>A</code> raster."
+       help="The selected default mode supplies K in the final mode-specific A raster."
      ) }}
 
   {{ ui.numeric_field(
@@ -148,7 +148,7 @@
        unit_category="sm-distance",
        unit_name="m",
        attrs={"class": "disable-readonly", "data-rusle-input": "max-slope-length"},
-       help="LS uses this cap before `L`/`LS` calculation. Default is 304.8 m (1000 ft, RUSLE2 handbook); change only for explicit sensitivity analysis."
+      help="LS uses this cap before L/LS calculation. Default is 304.8 m (1000 ft, RUSLE2 handbook); change only for explicit sensitivity analysis."
      ) }}
 
   {{ ui.numeric_field(
