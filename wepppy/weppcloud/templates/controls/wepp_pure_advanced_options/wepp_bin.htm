@@ -6,14 +6,13 @@
        "WEPP binary version",
        wepp_bin_options,
        selected=wepp.wepp_bin,
-       help="Recommended: use wepp_dcc56a6 for non-OFE projects; use wepp_251003 for OFE projects (may timeout with some agricultural soils). OMNI requires long path support, so only wepp_dcc52a6 and newer binaries are compatible.",
        extra_control_class="disable-readonly"
      ) }}
 
   {% if wepp.multi_ofe %}
     <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
       <p class="wc-alert__body">
-        Multiple OFE processing currently requires the <strong>wepp_250915</strong> binary.
+        Multiple OFE processing currently requires the <strong>wepp_260324</strong> or later.
         Alter at your peril.
       </p>
     </div>
