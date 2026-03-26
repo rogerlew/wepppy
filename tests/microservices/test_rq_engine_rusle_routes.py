@@ -72,6 +72,7 @@ def test_build_rusle_enqueues_job_with_filtered_payload(monkeypatch: pytest.Monk
                 "default_k_mode": "polaris_nomograph",
                 "rap_year": 2025,
                 "max_slope_length_m": 250.5,
+                "max_slope_length_rationale": "Sensitivity sweep for long uninterrupted slopes.",
                 "p_value": 0.85,
                 "force_polaris_refresh": "true",
                 "unexpected": "ignore-me",
@@ -88,6 +89,7 @@ def test_build_rusle_enqueues_job_with_filtered_payload(monkeypatch: pytest.Monk
         "default_k_mode": "polaris_nomograph",
         "rap_year": 2025,
         "max_slope_length_m": 250.5,
+        "max_slope_length_rationale": "Sensitivity sweep for long uninterrupted slopes.",
         "p_value": 0.85,
         "force_polaris_refresh": True,
     }

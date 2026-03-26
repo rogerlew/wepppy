@@ -528,6 +528,7 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
             "k_modes": ["polaris_nomograph"],
             "default_k_mode": "polaris_nomograph",
             "max_slope_length_m": 220.0,
+            "max_slope_length_rationale": "Sensitivity check for long uninterrupted hillslopes.",
             "p_value": 1.0,
         }
     )
@@ -543,6 +544,10 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
         manifest = json.load(stream)
     assert manifest["rusle"]["options"]["r_mode"] == "momm2025_county_region"
     assert manifest["rusle"]["options"]["max_slope_length_m"] == pytest.approx(220.0)
+    assert (
+        manifest["rusle"]["options"]["max_slope_length_rationale"]
+        == "Sensitivity check for long uninterrupted hillslopes."
+    )
     assert manifest["rusle"]["r_factor"]["selected_fips"] == "53009"
     assert manifest["rusle"]["r_factor"]["r_source_label"] == "Momm 2025 County Climatology"
     assert manifest["rusle"]["static_r"]["source_mode"] == "momm2025_county_region"
@@ -568,6 +573,7 @@ def test_build_rejects_topaz_backend(
             "k_modes": ["polaris_nomograph"],
             "default_k_mode": "polaris_nomograph",
             "max_slope_length_m": 304.8,
+            "max_slope_length_rationale": "",
             "p_value": 1.0,
             "force_polaris_refresh": False,
         },
@@ -597,9 +603,15 @@ def test_parse_inputs_accepts_max_slope_length_override(
     controller = rusle_module.Rusle(str(tmp_path), "disturbed9002.cfg")
     monkeypatch.setattr(controller, "available_rap_years", lambda: [])
 
-    parsed = controller.parse_inputs(payload={"max_slope_length_m": "250.5"})
+    parsed = controller.parse_inputs(
+        payload={
+            "max_slope_length_m": "250.5",
+            "max_slope_length_rationale": "Sensitivity check",
+        }
+    )
 
     assert parsed["max_slope_length_m"] == pytest.approx(250.5)
+    assert parsed["max_slope_length_rationale"] == "Sensitivity check"
 
 
 def test_parse_inputs_rejects_non_positive_max_slope_length(
@@ -611,3 +623,14 @@ def test_parse_inputs_rejects_non_positive_max_slope_length(
 
     with pytest.raises(ValueError, match="max_slope_length_m must be greater than 0"):
         controller.parse_inputs(payload={"max_slope_length_m": 0})
+
+
+def test_parse_inputs_requires_rationale_for_non_default_max_slope_length(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = rusle_module.Rusle(str(tmp_path), "disturbed9002.cfg")
+    monkeypatch.setattr(controller, "available_rap_years", lambda: [])
+
+    with pytest.raises(ValueError, match="max_slope_length_rationale must be provided"):
+        controller.parse_inputs(payload={"max_slope_length_m": 250.5, "max_slope_length_rationale": ""})
