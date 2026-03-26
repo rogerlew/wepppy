@@ -249,15 +249,27 @@ def raster_stacker(
 
     # 1. Use the "match" raster to define the output grid.
     with rasterio.open(match_fn) as match:
-        # Get the metadata to use for the output file.
         # This ensures the new raster has the exact same grid as the match raster.
         out_profile = match.profile.copy()
-    
+        match_transform = match.transform
+        match_crs = match.crs
+        match_width = match.width
+        match_height = match.height
+
     # 2. Open the source raster to get its data.
     with rasterio.open(src_fn) as src:
         # Update the output profile with source properties and compression.
         # It's important to use the source's nodata value and data type.
         out_profile.update({
+            # Always materialize to GeoTIFF. If match_fn is a VRT, preserving
+            # its driver would create a VRT destination, and rasterio cannot
+            # warp into VRTSourcedRasterBand.
+            'driver': 'GTiff',
+            'width': match_width,
+            'height': match_height,
+            'count': 1,
+            'transform': match_transform,
+            'crs': match_crs,
             'compress': 'lzw',
             'nodata': src.nodata,
             'dtype': src.dtypes[0]
@@ -270,8 +282,8 @@ def raster_stacker(
                 destination=rasterio.band(dst, 1),
                 src_transform=src.transform,
                 src_crs=src.crs,
-                dst_transform=match.transform,
-                dst_crs=match.crs,
+                dst_transform=match_transform,
+                dst_crs=match_crs,
                 resampling=resampling_methods[resample]
             )
     
