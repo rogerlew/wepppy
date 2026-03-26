@@ -308,7 +308,7 @@ def test_modify_disturbed_page_emits_csrf_token_for_save(
         assert f'data-lookup-snapshot-url="/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_snapshot"' in html
         assert f'data-session-token-url="/rq-engine/api/runs/{RUN_ID}/{CONFIG}/session-token"' in html
         assert 'id="reload-current"' in html
-        assert 'id="refresh-page"' in html
+        assert 'id="refresh-page"' not in html
         assert 'cache: "no-store"' in html
         assert 'recoveryAttempt: true' in html
         assert 'PRECONDITION_REQUIRED' in html

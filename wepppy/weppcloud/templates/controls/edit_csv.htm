@@ -28,7 +28,6 @@
     </p>
     <p id="stale-actions" class="mb-2" style="display:none;">
         <button id="reload-current" class="btn btn-warning btn-sm">Load Current Table</button>
-        <button id="refresh-page" class="btn btn-secondary btn-sm">Refresh Page</button>
     </p>
     <div id="spreadsheet1"></div>
 </div>
@@ -168,7 +167,7 @@ function markStale(remoteSha256) {
     setSaveEnabled();
     toggleStaleActions(true);
     var suffix = remoteSha256 ? " (new version detected)." : ".";
-    setStatus("warning", "This page is stale and editing is locked" + suffix + " Load current data or refresh.");
+    setStatus("warning", "This page is stale and editing is locked" + suffix + " Load current data.");
 }
 
 function clearStaleState() {
@@ -449,7 +448,7 @@ function onSave(config) {
         return;
     }
     if (editorState.stale) {
-        setStatus("warning", "This page is stale. Load current table or refresh before saving.");
+        setStatus("warning", "This page is stale. Load current table before saving.");
         return;
     }
     if (!mySpreadsheet || typeof mySpreadsheet.getData !== "function") {
@@ -501,21 +500,21 @@ function onSave(config) {
                 if (code === "STALE_LOOKUP") {
                     var remoteSha = error.details && error.details.current_sha256 ? error.details.current_sha256 : null;
                     markStale(remoteSha);
-                    setStatus("warning", "Save blocked: table is stale. Load current data or refresh.");
+                    setStatus("warning", "Save blocked: table is stale. Load current data.");
                     return;
                 }
                 if (code === "LOOKUP_VERSION_UNAVAILABLE") {
                     markStale(null);
-                    setStatus("warning", "Save blocked: version check is unavailable. Load current data or refresh.");
+                    setStatus("warning", "Save blocked: version check is unavailable. Load current data.");
                     return;
                 }
                 if (code === "PRECONDITION_REQUIRED" || error.status === 428) {
                     markStale(null);
-                    setStatus("warning", "Save blocked: page version token is missing. Load current data or refresh.");
+                    setStatus("warning", "Save blocked: page version token is missing. Load current data.");
                     return;
                 }
                 markStale(null);
-                setStatus("warning", "Save blocked: table changed. Load current data or refresh.");
+                setStatus("warning", "Save blocked: table changed. Load current data.");
                 return;
             }
             setStatus("danger", "Save failed: " + String(error && error.message ? error.message : error));
@@ -555,9 +554,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     document.getElementById("reload-current").addEventListener("click", function () {
         loadSpreadsheet(config, { recoveryAttempt: true });
-    });
-    document.getElementById("refresh-page").addEventListener("click", function () {
-        window.location.reload();
     });
 
     setSaveEnabled();
