@@ -15,6 +15,7 @@
 {% set rusle_default_k_mode = rusle.default_k_mode if rusle is not none else 'polaris_nomograph' %}
 {% set rusle_p_value = rusle.p_value if rusle is not none else 1.0 %}
 {% set rusle_max_slope_length_m = rusle.max_slope_length_m if rusle is not none else 304.8 %}
+{% set rusle_max_slope_length_rationale = rusle.max_slope_length_rationale if rusle is not none else '' %}
 {% set rap_year_options = rusle_rap_year_options | default([], true) %}
 {% set selected_rap_year = (rusle.rap_year | string) if rusle is not none else (rap_year_options[-1] | string if rap_year_options else '') %}
 
@@ -62,7 +63,7 @@
            "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "canonical_rusle2"}
          }
        ],
-      help="cligen_static approximates WEPP-run erosivity; momm2025_county_region and canonical_rusle2 are planning-climatology references selected at the watershed centroid."
+      help="cligen_static estimates erosivity from cligen event hyetographs; momm2025_county_region and canonical_rusle2 are planning-climatology references selected at the watershed centroid."
      ) }}
 
   {{ ui.radio_group(
@@ -149,6 +150,15 @@
        unit_name="m",
        attrs={"class": "disable-readonly", "data-rusle-input": "max-slope-length"},
       help="LS uses this cap before L/LS calculation. Default is 304.8 m (1000 ft, RUSLE2 handbook); change only for explicit sensitivity analysis."
+     ) }}
+
+  {{ ui.textarea_field(
+       "max_slope_length_rationale",
+       "Max slope-length override rationale",
+       value=rusle_max_slope_length_rationale,
+       rows=2,
+       attrs={"class": "disable-readonly", "data-rusle-input": "max-slope-rationale"},
+       help="Required when max_slope_length_m differs from 304.8 m. Describe the sensitivity-analysis objective."
      ) }}
 
   {{ ui.numeric_field(
