@@ -28,6 +28,7 @@ class TaskEnum(Enum):
     run_omni_scenarios = "run_omni_scenarios"
     run_omni_contrasts = "run_omni_contrasts"
     dss_export = "dss_export"
+    run_features_export = "run_features_export"
     set_readonly = "set_readonly"
     run_path_cost_effective = "run_path_ce"
 

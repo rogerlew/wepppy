@@ -1,25 +1,50 @@
 from __future__ import annotations
 
+import json
 import logging
+import os
 from pathlib import Path
 
 import anyio
+import redis
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse
+from rq import Queue
 
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron
+from wepppy.nodb.mods.features_export import (
+    FeaturesExportValidationError,
+    prepare_export_submission,
+)
+from wepppy.nodb.mods.features_export.cache_key import get_cache_index_entry
+from wepppy.nodb.mods.features_export.service import (
+    FeaturesExportServiceError,
+    resolve_download_artifact_path,
+)
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.rq.features_export_rq import (
+    run_features_export_cache_hit_rq,
+    run_features_export_rq,
+)
+from wepppy.rq.job_info import get_wepppy_rq_job_info
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
-from .responses import error_response, error_response_with_traceback
+from .responses import (
+    error_response,
+    error_response_with_traceback,
+    validation_error_response,
+)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 EXPORT_SCOPES = ["rq:export"]
+RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -64,6 +89,108 @@ def _resolve_export_wd(runid: str, request: Request) -> str:
         raise FileNotFoundError(f"Unknown pup project: {pup_relpath}")
 
     return str(candidate)
+
+
+def _json_media_type(request: Request) -> str:
+    content_type = request.headers.get("content-type", "")
+    return content_type.split(";", 1)[0].strip().lower()
+
+
+def _validation_issue(*, code: str, message: str, path: str) -> dict[str, str]:
+    return {"code": code, "message": message, "path": path}
+
+
+async def _parse_features_export_submit_payload(request: Request) -> tuple[dict[str, object] | None, JSONResponse | None]:
+    if _json_media_type(request) != "application/json":
+        return None, error_response(
+            "Request body must use application/json.",
+            status_code=415,
+            code="unsupported_media_type",
+            details="Submit features export requests as application/json only.",
+        )
+
+    raw_body = await request.body()
+    if not raw_body.strip():
+        return None, validation_error_response(
+            [
+                _validation_issue(
+                    code="missing_body",
+                    message="Request body must not be empty.",
+                    path="$",
+                )
+            ]
+        )
+
+    try:
+        payload = json.loads(raw_body)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        return None, validation_error_response(
+            [
+                _validation_issue(
+                    code="invalid_json",
+                    message=f"Invalid JSON payload: {exc}",
+                    path="$",
+                )
+            ]
+        )
+
+    if not isinstance(payload, dict):
+        return None, validation_error_response(
+            [
+                _validation_issue(
+                    code="invalid_type",
+                    message="Request payload must be a JSON object.",
+                    path="$",
+                )
+            ]
+        )
+
+    if not payload:
+        return None, validation_error_response(
+            [
+                _validation_issue(
+                    code="missing_field",
+                    message="Request payload must not be empty.",
+                    path="$",
+                )
+            ]
+        )
+
+    return payload, None
+
+
+def _features_export_status_url(job_id: str) -> str:
+    return f"/rq-engine/api/jobstatus/{job_id}"
+
+
+def _features_export_download_url(runid: str, config: str, job_id: str) -> str:
+    return f"/rq-engine/api/runs/{runid}/{config}/export/features/{job_id}/download"
+
+
+def _enqueue_features_export_job(
+    *,
+    runid: str,
+    config: str,
+    wd: str,
+    payload: dict[str, object],
+) -> tuple[str, bool]:
+    submission = prepare_export_submission(wd, payload)
+    cache_entry = get_cache_index_entry(wd, submission.cache_key_parts.cache_key)
+    target_func = run_features_export_cache_hit_rq if cache_entry is not None else run_features_export_rq
+
+    prep = RedisPrep.getInstance(wd)
+    prep.remove_timestamp(TaskEnum.run_features_export)
+
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+        queue = Queue(connection=redis_conn)
+        job = queue.enqueue_call(
+            target_func,
+            (runid, config, payload, wd),
+            timeout=RQ_TIMEOUT,
+        )
+
+    prep.set_rq_job_id("features_export", job.id)
+    return str(job.id), cache_entry is not None
 
 
 @router.get(
@@ -281,6 +408,166 @@ async def export_prep_details(runid: str, config: str, request: Request):
             return nodir_response
         logger.exception("rq-engine export_prep_details failed")
         return error_response_with_traceback("Error exporting prep details")
+
+
+@router.post(
+    "/runs/{runid}/{config}/export/features",
+    summary="Submit features export job",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Accepts only `application/json`, computes features-export planning/cache context, and enqueues async RQ execution."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_features_submit"),
+    responses=agent_route_responses(
+        success_code=202,
+        success_description="Features export job accepted and `job_id` returned.",
+        extra={
+            400: "Validation error. Returns the canonical error payload.",
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Conflict while resolving export artifacts. Returns the canonical error payload.",
+            415: "Unsupported media type; JSON body is required.",
+        },
+    ),
+)
+async def export_features_submit(runid: str, config: str, request: Request):
+    try:
+        claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: boundary contract
+        logger.exception("rq-engine export_features_submit auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    payload, payload_error = await _parse_features_export_submit_payload(request)
+    if payload_error is not None:
+        return payload_error
+    assert payload is not None
+
+    try:
+        wd = get_wd(runid)
+        job_id, _cache_hit = await _run_sync(
+            lambda: _enqueue_features_export_job(
+                runid=runid,
+                config=config,
+                wd=wd,
+                payload=payload,
+            )
+        )
+        return JSONResponse(
+            {
+                "job_id": job_id,
+                "status_url": _features_export_status_url(job_id),
+                "download_url": _features_export_download_url(runid, config, job_id),
+                "message": "Features export job enqueued.",
+            },
+            status_code=202,
+        )
+    except FeaturesExportValidationError as exc:
+        return JSONResponse(exc.to_error_payload(), status_code=exc.status_code)
+    except FeaturesExportServiceError as exc:
+        return error_response(
+            str(exc),
+            status_code=exc.status_code,
+            code=exc.code,
+            details=exc.details,
+        )
+    except FileNotFoundError as exc:
+        return error_response(str(exc), status_code=404, code="not_found")
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.exception("rq-engine export_features_submit enqueue failed")
+        return error_response_with_traceback("Error submitting features export")
+
+
+@router.get(
+    "/runs/{runid}/{config}/export/features/{job_id}/download",
+    summary="Download completed features export artifact",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Returns 409 until job status is `finished`; on success returns the export artifact file."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_features_download"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Features export artifact file returned.",
+        extra={
+            404: "Job or artifact mapping not found. Returns the canonical error payload.",
+            409: "Job has not reached terminal success (`finished`) yet.",
+        },
+    ),
+)
+async def export_features_download(runid: str, config: str, job_id: str, request: Request):
+    try:
+        claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: boundary contract
+        logger.exception("rq-engine export_features_download auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    try:
+        wd = get_wd(runid)
+        job_info = await _run_sync(get_wepppy_rq_job_info, job_id)
+        status = str(job_info.get("status") or "")
+        if status == "not_found":
+            return error_response(
+                "Job not found",
+                status_code=404,
+                code="not_found",
+                details=f"Job {job_id} not found.",
+            )
+
+        job_runid = job_info.get("runid")
+        if isinstance(job_runid, str) and job_runid and job_runid != runid:
+            return error_response(
+                "Features export artifact mapping not found for job.",
+                status_code=404,
+                code="not_found",
+                details=f"Job {job_id} does not belong to run {runid}.",
+            )
+
+        if status != "finished":
+            return error_response(
+                "Features export job is not finished.",
+                status_code=409,
+                code="conflict",
+                details=f"Job {job_id} status is {status}.",
+            )
+
+        job_result = job_info.get("result")
+        if not isinstance(job_result, dict):
+            job_result = None
+
+        artifact_path, _artifact_relpath = await _run_sync(
+            lambda: resolve_download_artifact_path(
+                wd,
+                job_id=job_id,
+                job_result=job_result,
+            )
+        )
+        resolved_path = Path(artifact_path)
+        return FileResponse(path=resolved_path, filename=resolved_path.name)
+    except FeaturesExportServiceError as exc:
+        return error_response(
+            str(exc),
+            status_code=exc.status_code,
+            code=exc.code,
+            details=exc.details,
+        )
+    except FileNotFoundError as exc:
+        return error_response(str(exc), status_code=404, code="not_found")
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.exception("rq-engine export_features_download failed")
+        return error_response_with_traceback("Error downloading features export artifact")
 
 
 __all__ = ["router"]

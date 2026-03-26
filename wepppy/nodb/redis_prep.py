@@ -45,6 +45,7 @@ class TaskEnum(Enum):
     run_omni_scenarios = 'run_omni_scenarios'
     run_omni_contrasts = 'run_omni_contrasts'
     dss_export = 'dss_export'
+    run_features_export = 'run_features_export'
     build_rusle = 'build_rusle'
     set_readonly = 'set_readonly'
     run_path_cost_effective = 'run_path_ce'
@@ -84,6 +85,7 @@ class TaskEnum(Enum):
             TaskEnum.run_omni_scenarios: 'Run OMNI Scenarios',
             TaskEnum.run_omni_contrasts: 'Run OMNI Contrasts',
             TaskEnum.dss_export: 'Export DSS',
+            TaskEnum.run_features_export: 'Export Features',
             TaskEnum.build_rusle: 'Build RUSLE',
             TaskEnum.set_readonly: 'Set Readonly',
             TaskEnum.run_path_cost_effective: 'Run PATH Cost-Effective',
@@ -121,6 +123,7 @@ class TaskEnum(Enum):
             TaskEnum.run_omni_scenarios: '🪓',
             TaskEnum.run_omni_contrasts: '⚖️',
             TaskEnum.dss_export: '📤',
+            TaskEnum.run_features_export: '📦',
             TaskEnum.build_rusle: '🔱',
             TaskEnum.set_readonly: '🔒',
             TaskEnum.run_path_cost_effective: '🧮',
