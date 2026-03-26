@@ -1,0 +1,1671 @@
+metadata:
+  catalog_version: "0.3.0-draft"
+  schema_version: 2
+  updated_at_utc: "2026-03-25T21:05:00Z"
+  owner: "wepppy/nodb/mods/features_export"
+  status: "draft"
+  resolver_contract:
+    allowed_locator_kinds:
+      - "nodb_ref"
+      - "relpath"
+      - "path_template"
+    path_template_vars:
+      scope_root:
+        description: "Output scope path root for WEPP scope-aware datasets."
+        values:
+          baseline: "output"
+          roads: "roads/output"
+      scenario_id:
+        description: "Resolved Omni scenario identifier from request selector."
+      contrast_id:
+        description: "Resolved Omni contrast identifier from request selector."
+      swat_run_id:
+        description: "Resolved SWAT run id (never `latest` after normalization)."
+      table_name:
+        description: "Resolved SWAT interchange table name."
+      crs_token:
+        description: "Filename token for CRS-specific geometry assets."
+        values:
+          wgs: "WGS"
+          utm: "UTM"
+    join_key_precedence:
+      order:
+        - "primary_key"
+        - "fallback_keys"
+      source_key_map_overrides: true
+    include_geometry_locator_in_dependency_fingerprint: true
+    temporal_modes:
+      - "annual_average"
+      - "yearly"
+      - "event"
+    event_selectors:
+      - "date"
+      - "return_period"
+  notes:
+    - "Authoritative machine-readable catalog for features export discoverability."
+    - "Layer definitions include resolved datapaths, join contracts, dependency inputs, and temporal rule metadata."
+    - "Optional measures define explicit availability gates for version/column drift (for example `tsmf`, phosphorus)."
+
+layers:
+  - layer_id: "watershed.subcatchments"
+    family: "watershed"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "topaz_id"
+      fallback_keys:
+        - "TopazID"
+        - "wepp_id"
+      source_key_map:
+        watershed_subcatchments_geojson:
+          - "TopazID"
+          - "topaz_id"
+    sources:
+      - source_id: "watershed_subcatchments_geojson"
+        kind: "vector"
+        locator:
+          kind: "nodb_ref"
+          value: "nodb:watershed.subwta_shp"
+        required: true
+        role: "geometry_and_attributes"
+    dependencies:
+      - dep_id: "watershed_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "watershed.nodb"
+        required: true
+        purpose: "Topology/state fingerprint dependency."
+    temporal:
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
+    measures:
+      required:
+        - "topaz_id"
+        - "area_m2"
+      optional: []
+
+  - layer_id: "watershed.channels"
+    family: "watershed"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "line"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.chn_shp"
+      feature_id_keys:
+        - "chn_id"
+        - "channel_id"
+        - "TopazID"
+    join:
+      primary_key: "chn_id"
+      fallback_keys:
+        - "channel_id"
+        - "TopazID"
+      source_key_map:
+        watershed_channels_geojson:
+          - "chn_id"
+          - "channel_id"
+        watershed_channels_table:
+          - "chn_id"
+          - "id"
+    sources:
+      - source_id: "watershed_channels_geojson"
+        kind: "vector"
+        locator:
+          kind: "nodb_ref"
+          value: "nodb:watershed.chn_shp"
+        required: true
+        role: "geometry"
+      - source_id: "watershed_channels_table"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "watershed/channels.parquet"
+        required: false
+        role: "attributes"
+    dependencies:
+      - dep_id: "watershed_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "watershed.nodb"
+        required: true
+        purpose: "Channel topology and controller state."
+    temporal:
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
+    measures:
+      required:
+        - "chn_id"
+        - "length_m"
+      optional:
+        - measure_id: "slope_pct"
+          key_aliases:
+            - "slope_pct"
+            - "Slope"
+          availability:
+            requires_any_column:
+              - "slope_pct"
+              - "Slope"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "landuse.dominant"
+    family: "landuse"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+    join:
+      primary_key: "topaz_id"
+      fallback_keys:
+        - "TopazID"
+      source_key_map:
+        landuse_table:
+          - "topaz_id"
+          - "TopazID"
+          - "wepp_id"
+    sources:
+      - source_id: "landuse_table"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "landuse/landuse.parquet"
+        required: true
+        role: "attributes"
+    dependencies:
+      - dep_id: "landuse_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "landuse.nodb"
+        required: true
+        purpose: "Landuse selector/config dependency."
+    temporal:
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
+    measures:
+      required:
+        - "landuse_id"
+        - "landuse_desc"
+      optional:
+        - measure_id: "cover_pct"
+          key_aliases:
+            - "cover_pct"
+            - "canopy_cover_pct"
+          availability:
+            requires_any_column:
+              - "cover_pct"
+              - "canopy_cover_pct"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "soils.dominant"
+    family: "soils"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+    join:
+      primary_key: "topaz_id"
+      fallback_keys:
+        - "TopazID"
+      source_key_map:
+        soils_table:
+          - "topaz_id"
+          - "TopazID"
+          - "wepp_id"
+    sources:
+      - source_id: "soils_table"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "soils/soils.parquet"
+        required: true
+        role: "attributes"
+    dependencies:
+      - dep_id: "soils_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "soils.nodb"
+        required: true
+        purpose: "Soils selector/config dependency."
+    temporal:
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
+    measures:
+      required:
+        - "soil_id"
+        - "soil_desc"
+      optional:
+        - measure_id: "k_factor"
+          key_aliases:
+            - "k_factor"
+            - "KFactor"
+          availability:
+            requires_any_column:
+              - "k_factor"
+              - "KFactor"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.summary.hillslopes"
+    family: "wepp_summary"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "topaz_id"
+      fallback_keys:
+        - "TopazID"
+        - "wepp_id"
+      source_key_map:
+        wepp_loss_hill:
+          - "topaz_id"
+          - "TopazID"
+          - "wepp_id"
+        wepp_hillslope_attributes:
+          - "topaz_id"
+          - "TopazID"
+          - "wepp_id"
+    sources:
+      - source_id: "wepp_loss_hill"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/loss_pw0.hill.parquet"
+        required: true
+        role: "metrics"
+      - source_id: "wepp_hillslope_attributes"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "watershed/hillslopes.parquet"
+        required: false
+        role: "attributes"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+      - dep_id: "wepp_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "wepp.nodb"
+        required: true
+        purpose: "WEPP run/config dependency."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "mixed"
+      time_columns:
+        - "year"
+        - "date"
+        - "return_period"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["date"]
+            - ["return_period"]
+          selector_support:
+            - "date"
+            - "return_period"
+          aggregation: "identity_per_event"
+    measures:
+      required:
+        - "runoff_mm"
+        - "subrunoff_mm"
+        - "baseflow_mm"
+        - "soil_loss_kg_ha"
+        - "sediment_yield_kg_ha"
+      optional:
+        - measure_id: "phosphorus_total"
+          key_aliases:
+            - "Total_Phosphorus"
+            - "total_phosphorus"
+            - "tp_kg"
+          availability:
+            requires_any_column:
+              - "Total_Phosphorus"
+              - "total_phosphorus"
+              - "tp_kg"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+        - measure_id: "tsmf"
+          key_aliases:
+            - "TSMF"
+            - "tsmf"
+          availability:
+            requires_any_column:
+              - "TSMF"
+              - "tsmf"
+            min_source_version: "1.2"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.summary.channels"
+    family: "wepp_summary"
+    scope_class: "scope_aware"
+    geometry:
+      type: "line"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.chn_shp"
+      feature_id_keys:
+        - "chn_id"
+        - "channel_id"
+        - "TopazID"
+    join:
+      primary_key: "chn_id"
+      fallback_keys:
+        - "channel_id"
+        - "TopazID"
+      source_key_map:
+        wepp_loss_channel:
+          - "chn_id"
+          - "channel_id"
+          - "id"
+        wepp_channel_attributes:
+          - "chn_id"
+          - "channel_id"
+    sources:
+      - source_id: "wepp_loss_channel"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/loss_pw0.chn.parquet"
+        required: true
+        role: "metrics"
+      - source_id: "wepp_channel_attributes"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "watershed/channels.parquet"
+        required: false
+        role: "attributes"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+      - dep_id: "wepp_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "wepp.nodb"
+        required: true
+        purpose: "WEPP run/config dependency."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+      grain: "year"
+      time_columns:
+        - "year"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+    measures:
+      required:
+        - "discharge_mm"
+        - "sediment_delivery_kg_ha"
+        - "erosion_kg_ha"
+      optional:
+        - measure_id: "phosphorus_total"
+          key_aliases:
+            - "Total_Phosphorus"
+            - "total_phosphorus"
+            - "tp_kg"
+          availability:
+            requires_any_column:
+              - "Total_Phosphorus"
+              - "total_phosphorus"
+              - "tp_kg"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.temporal.events"
+    family: "wepp_temporal"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "topaz_id"
+      fallback_keys:
+        - "TopazID"
+        - "wepp_id"
+      source_key_map:
+        wepp_return_period_events:
+          - "topaz_id"
+          - "TopazID"
+          - "wepp_id"
+    sources:
+      - source_id: "wepp_return_period_events"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/return_period_events.parquet"
+        required: true
+        role: "event_metrics"
+      - source_id: "wepp_return_period_ranks"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/return_period_event_ranks.parquet"
+        required: false
+        role: "event_rank_lookup"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+      - dep_id: "wepp_ebe_dataset"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/ebe_pw0.parquet"
+        required: false
+        purpose: "Event-metric backfill source."
+    temporal:
+      supported_modes:
+        - "event"
+      grain: "event"
+      time_columns:
+        - "date"
+        - "return_period"
+      mode_rules:
+        event:
+          required_columns_any:
+            - ["date"]
+            - ["return_period"]
+          selector_support:
+            - "date"
+            - "return_period"
+          aggregation: "identity_per_event"
+    measures:
+      required:
+        - "runoff_m3"
+        - "peak_flow_cms"
+        - "sediment_yield_kg"
+      optional:
+        - measure_id: "phosphorus_total"
+          key_aliases:
+            - "Total_Phosphorus"
+            - "total_phosphorus"
+            - "tp_kg"
+          availability:
+            requires_any_column:
+              - "Total_Phosphorus"
+              - "total_phosphorus"
+              - "tp_kg"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.hill_pass"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_hill_pass:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_hill_pass"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/H.pass.parquet"
+        required: true
+        role: "metrics"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "mixed"
+      time_columns:
+        - "year"
+        - "date"
+        - "return_period"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["date"]
+            - ["return_period"]
+          selector_support:
+            - "date"
+            - "return_period"
+          aggregation: "identity_per_event"
+    measures:
+      required:
+        - "runvol"
+        - "seddel"
+        - "sedcon"
+      optional:
+        - measure_id: "phosphorus_total"
+          key_aliases:
+            - "Total_Phosphorus"
+            - "total_phosphorus"
+            - "tp_kg"
+          availability:
+            requires_any_column:
+              - "Total_Phosphorus"
+              - "total_phosphorus"
+              - "tp_kg"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.hill_element"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_hill_element:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_hill_element"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/H.element.parquet"
+        required: true
+        role: "ofe_daily_metrics"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "daily"
+      time_columns:
+        - "year"
+        - "month"
+        - "day_of_month"
+        - "julian"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["year", "month", "day_of_month"]
+            - ["year", "julian"]
+          selector_support:
+            - "date"
+          aggregation: "identity_per_date"
+    measures:
+      required:
+        - "OFE"
+        - "Precip"
+        - "Runoff"
+        - "SedLeave"
+      optional:
+        - measure_id: "QRain"
+          key_aliases:
+            - "QRain"
+          availability:
+            requires_any_column:
+              - "QRain"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+        - measure_id: "QSnow"
+          key_aliases:
+            - "QSnow"
+          availability:
+            requires_any_column:
+              - "QSnow"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.hill_wat"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_hill_wat:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_hill_wat"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/H.wat.parquet"
+        required: true
+        role: "metrics"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+      grain: "year"
+      time_columns:
+        - "year"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+    measures:
+      required:
+        - "P"
+        - "Q"
+        - "ET"
+        - "Dp"
+      optional:
+        - measure_id: "latqcc"
+          key_aliases:
+            - "latqcc"
+            - "Subrunoff"
+          availability:
+            requires_any_column:
+              - "latqcc"
+              - "Subrunoff"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "ash.transport.hillslope_annuals"
+    family: "ash"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        ash_hillslope_annuals:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "ash_hillslope_annuals"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ash/post/hillslope_annuals.parquet"
+        required: true
+        role: "metrics"
+    dependencies:
+      - dep_id: "ashpost_version_manifest"
+        kind: "json"
+        locator:
+          kind: "relpath"
+          value: "ash/post/ashpost_version.json"
+        required: true
+        purpose: "AshPost schema/version fingerprint."
+      - dep_id: "ash_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "ash.nodb"
+        required: true
+        purpose: "Ash run/config dependency."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+      grain: "year"
+      time_columns:
+        - "fire_year"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "fire_year"
+          year_selection_supported: false
+          aggregation: "mean_over_available_years"
+        yearly:
+          required_columns:
+            - "fire_year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+    measures:
+      required:
+        - "water_transport_tonne_ha"
+        - "wind_transport_tonne_ha"
+        - "total_transport_tonne_ha"
+      optional:
+        - measure_id: "remaining_ash_tonne_ha"
+          key_aliases:
+            - "remaining_ash_tonne_ha"
+            - "remaining_ash_mass_tonne_ha"
+          availability:
+            requires_any_column:
+              - "remaining_ash_tonne_ha"
+              - "remaining_ash_mass_tonne_ha"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "omni.scenarios.hillslopes"
+    family: "omni_scenarios"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "topaz_id"
+      fallback_keys:
+        - "TopazID"
+        - "wepp_id"
+      source_key_map:
+        omni_scenario_loss_hill:
+          - "topaz_id"
+          - "TopazID"
+          - "wepp_id"
+    sources:
+      - source_id: "omni_scenario_loss_hill"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "_pups/omni/scenarios/{scenario_id}/wepp/output/interchange/loss_pw0.hill.parquet"
+        required: true
+        role: "metrics"
+    dependencies:
+      - dep_id: "omni_scenario_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "_pups/omni/scenarios/{scenario_id}/index.json"
+        required: false
+        purpose: "Scenario metadata fingerprint."
+      - dep_id: "omni_scenario_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "_pups/omni/scenarios/{scenario_id}/wepp/output/interchange/interchange_version.json"
+        required: true
+        purpose: "Omni scenario interchange schema/version for optional-measure gating."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "mixed"
+      time_columns:
+        - "year"
+        - "date"
+        - "return_period"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["date"]
+            - ["return_period"]
+          selector_support:
+            - "date"
+            - "return_period"
+          aggregation: "identity_per_event"
+    measures:
+      required:
+        - "runoff_mm"
+        - "sediment_yield_kg_ha"
+      optional:
+        - measure_id: "tsmf"
+          key_aliases:
+            - "TSMF"
+            - "tsmf"
+          availability:
+            requires_any_column:
+              - "TSMF"
+              - "tsmf"
+            min_source_version: "1.2"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "omni.contrasts.hillslopes"
+    family: "omni_contrasts"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "topaz_id"
+      fallback_keys:
+        - "TopazID"
+        - "wepp_id"
+      source_key_map:
+        omni_contrast_loss_hill:
+          - "topaz_id"
+          - "TopazID"
+          - "wepp_id"
+    sources:
+      - source_id: "omni_contrast_loss_hill"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "_pups/omni/contrasts/{contrast_id}/wepp/output/interchange/loss_pw0.hill.parquet"
+        required: true
+        role: "contrast_metrics"
+    dependencies:
+      - dep_id: "omni_contrast_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "_pups/omni/contrasts/{contrast_id}/index.json"
+        required: false
+        purpose: "Contrast metadata fingerprint."
+      - dep_id: "omni_contrast_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "_pups/omni/contrasts/{contrast_id}/wepp/output/interchange/interchange_version.json"
+        required: true
+        purpose: "Omni contrast interchange schema/version for optional-measure gating."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "mixed"
+      time_columns:
+        - "year"
+        - "date"
+        - "return_period"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["date"]
+            - ["return_period"]
+          selector_support:
+            - "date"
+            - "return_period"
+          aggregation: "identity_per_event"
+    measures:
+      required:
+        - "delta_runoff_mm"
+        - "delta_sediment_yield_kg_ha"
+      optional:
+        - measure_id: "delta_phosphorus_total"
+          key_aliases:
+            - "delta_Total_Phosphorus"
+            - "delta_total_phosphorus"
+          availability:
+            requires_any_column:
+              - "delta_Total_Phosphorus"
+              - "delta_total_phosphorus"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "swat.interchange.table"
+    family: "swat_interchange"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "table_profile_resolved"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "subbasin"
+        - "subbasin_id"
+        - "topaz_id"
+    join:
+      primary_key: "subbasin"
+      fallback_keys:
+        - "subbasin_id"
+        - "topaz_id"
+      source_key_map:
+        swat_interchange_table:
+          - "subbasin"
+          - "subbasin_id"
+    table_profiles:
+      - profile_id: "subbasin"
+        match:
+          strategy: "column_presence"
+          requires_any_columns:
+            - "subbasin"
+            - "subbasin_id"
+        spatiality: "spatial"
+        geometry:
+          type: "polygon"
+          locator:
+            kind: "nodb_ref"
+            value: "nodb:watershed.subwta_shp"
+          feature_id_keys:
+            - "subbasin"
+            - "subbasin_id"
+            - "topaz_id"
+        join:
+          primary_key: "subbasin"
+          fallback_keys:
+            - "subbasin_id"
+            - "topaz_id"
+      - profile_id: "channel"
+        match:
+          strategy: "column_presence"
+          requires_any_columns:
+            - "channel"
+            - "channel_id"
+            - "chn_id"
+        spatiality: "spatial"
+        geometry:
+          type: "line"
+          locator:
+            kind: "nodb_ref"
+            value: "nodb:watershed.chn_shp"
+          feature_id_keys:
+            - "channel"
+            - "channel_id"
+            - "chn_id"
+        join:
+          primary_key: "channel"
+          fallback_keys:
+            - "channel_id"
+            - "chn_id"
+      - profile_id: "hru_non_spatial"
+        match:
+          strategy: "column_presence"
+          requires_any_columns:
+            - "hru"
+            - "hru_id"
+        spatiality: "non_spatial"
+        geometry:
+          type: "none"
+          locator:
+            kind: "path_template"
+            value: "swat/outputs/run_{swat_run_id}/interchange/{table_name}.parquet"
+          feature_id_keys: []
+        join:
+          primary_key: "hru"
+          fallback_keys:
+            - "hru_id"
+      - profile_id: "fallback_non_spatial"
+        match:
+          strategy: "fallback"
+        spatiality: "non_spatial"
+        geometry:
+          type: "none"
+          locator:
+            kind: "path_template"
+            value: "swat/outputs/run_{swat_run_id}/interchange/{table_name}.parquet"
+          feature_id_keys: []
+        join:
+          primary_key: "row_id"
+          fallback_keys: []
+    sources:
+      - source_id: "swat_interchange_table"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "swat/outputs/run_{swat_run_id}/interchange/{table_name}.parquet"
+        required: true
+        role: "metrics"
+      - source_id: "swat_run_index"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "swat/outputs/run_{swat_run_id}/index.json"
+        required: true
+        role: "table_discovery_and_metadata"
+    dependencies:
+      - dep_id: "swat_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "swat.nodb"
+        required: true
+        purpose: "SWAT run/config dependency."
+      - dep_id: "swat_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "swat/outputs/run_{swat_run_id}/interchange/manifest.json"
+        required: false
+        purpose: "SWAT interchange schema/version fingerprint when present."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+      grain: "table_profile_resolved"
+      time_columns:
+        - "year"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+    measures:
+      required: []
+      optional: []
+
+  - layer_id: "ag_fields.subfields"
+    family: "ag_fields_spatial"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "relpath"
+        value: "ag_fields/sub_fields/sub_fields.WGS.geojson"
+      feature_id_keys:
+        - "sub_field_id"
+        - "field_id"
+        - "topaz_id"
+        - "wepp_id"
+    join:
+      primary_key: "sub_field_id"
+      fallback_keys:
+        - "field_id"
+        - "wepp_id"
+      source_key_map:
+        ag_fields_subfields_geojson:
+          - "sub_field_id"
+          - "field_id"
+          - "wepp_id"
+        ag_fields_subfields_table:
+          - "sub_field_id"
+          - "field_id"
+          - "wepp_id"
+    sources:
+      - source_id: "ag_fields_subfields_geojson"
+        kind: "vector"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/sub_fields/sub_fields.WGS.geojson"
+        required: true
+        role: "geometry"
+      - source_id: "ag_fields_subfields_table"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/sub_fields/fields.parquet"
+        required: true
+        role: "attributes"
+    dependencies:
+      - dep_id: "ag_fields_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "ag_fields.nodb"
+        required: true
+        purpose: "AgFields configuration/state dependency."
+      - dep_id: "ag_fields_rotation_schedule"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/rotation_schedule.parquet"
+        required: false
+        purpose: "Rotation metadata for optional attribute enrichment."
+    temporal:
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
+    measures:
+      required:
+        - "sub_field_id"
+        - "field_id"
+        - "topaz_id"
+        - "wepp_id"
+      optional: []
+
+  - layer_id: "ag_fields.fields"
+    family: "ag_fields_spatial"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "relpath"
+        value: "ag_fields/fields.WGS.geojson"
+      feature_id_keys:
+        - "field_id"
+    join:
+      primary_key: "field_id"
+      fallback_keys:
+        - "field_name"
+      source_key_map:
+        ag_fields_fields_geojson:
+          - "field_id"
+        ag_fields_subfields_table:
+          - "field_id"
+    sources:
+      - source_id: "ag_fields_fields_geojson"
+        kind: "vector"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/fields.WGS.geojson"
+        required: true
+        role: "geometry"
+      - source_id: "ag_fields_subfields_table"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/sub_fields/fields.parquet"
+        required: false
+        role: "attributes"
+    dependencies:
+      - dep_id: "ag_fields_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "ag_fields.nodb"
+        required: true
+        purpose: "AgFields configuration/state dependency."
+      - dep_id: "ag_fields_rotation_schedule"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/rotation_schedule.parquet"
+        required: false
+        purpose: "Rotation metadata for optional attribute enrichment."
+    temporal:
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
+    measures:
+      required:
+        - "field_id"
+      optional:
+        - measure_id: "field_area_m2"
+          key_aliases:
+            - "field_area_m2"
+            - "area_m2"
+          availability:
+            requires_any_column:
+              - "field_area_m2"
+              - "area_m2"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "ag_fields.metrics.subfields"
+    family: "ag_fields_metrics"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "relpath"
+        value: "ag_fields/sub_fields/sub_fields.WGS.geojson"
+      feature_id_keys:
+        - "sub_field_id"
+        - "field_id"
+        - "topaz_id"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "sub_field_id"
+        - "topaz_id"
+      source_key_map:
+        ag_fields_subfields_geojson:
+          - "sub_field_id"
+          - "field_id"
+          - "wepp_id"
+        ag_fields_hill_pass:
+          - "wepp_id"
+          - "topaz_id"
+        ag_fields_hill_wat:
+          - "wepp_id"
+          - "topaz_id"
+        ag_fields_totalwatsed3:
+          - "wepp_id"
+          - "topaz_id"
+        ag_fields_subfields_table:
+          - "sub_field_id"
+          - "field_id"
+          - "wepp_id"
+    sources:
+      - source_id: "ag_fields_subfields_geojson"
+        kind: "vector"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/sub_fields/sub_fields.WGS.geojson"
+        required: true
+        role: "geometry"
+      - source_id: "ag_fields_subfields_table"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/sub_fields/fields.parquet"
+        required: true
+        role: "field_to_hillslope_mapping"
+      - source_id: "ag_fields_hill_pass"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "wepp/ag_fields/output/interchange/H.pass.parquet"
+        required: true
+        role: "event_and_yearly_metrics"
+      - source_id: "ag_fields_hill_wat"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "wepp/ag_fields/output/interchange/H.wat.parquet"
+        required: true
+        role: "hydrology_metrics"
+      - source_id: "ag_fields_totalwatsed3"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "wepp/ag_fields/output/interchange/totalwatsed3.parquet"
+        required: false
+        role: "derived_aggregate_metrics"
+    dependencies:
+      - dep_id: "ag_fields_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "ag_fields.nodb"
+        required: true
+        purpose: "AgFields configuration/state dependency."
+      - dep_id: "ag_fields_rotation_schedule"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/rotation_schedule.parquet"
+        required: false
+        purpose: "Rotation metadata used for join enrichment."
+      - dep_id: "ag_fields_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "relpath"
+          value: "wepp/ag_fields/output/interchange/interchange_version.json"
+        required: true
+        purpose: "AgFields interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "mixed"
+      time_columns:
+        - "year"
+        - "date"
+        - "return_period"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["date"]
+            - ["return_period"]
+          selector_support:
+            - "date"
+            - "return_period"
+          aggregation: "identity_per_event"
+    measures:
+      required:
+        - "runoff"
+        - "subrunoff"
+        - "baseflow"
+        - "runvol"
+      optional:
+        - measure_id: "phosphorus_total"
+          key_aliases:
+            - "Total_Phosphorus"
+            - "total_phosphorus"
+            - "tp_kg"
+          availability:
+            requires_any_column:
+              - "Total_Phosphorus"
+              - "total_phosphorus"
+              - "tp_kg"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+        - measure_id: "tsmf"
+          key_aliases:
+            - "TSMF"
+            - "tsmf"
+          availability:
+            requires_any_column:
+              - "TSMF"
+              - "tsmf"
+            min_source_version: "1.2"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "ag_fields.metrics.fields"
+    family: "ag_fields_metrics"
+    scope_class: "scope_invariant"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "relpath"
+        value: "ag_fields/fields.WGS.geojson"
+      feature_id_keys:
+        - "field_id"
+    join:
+      primary_key: "field_id"
+      fallback_keys:
+        - "wepp_id"
+        - "topaz_id"
+      source_key_map:
+        ag_fields_fields_geojson:
+          - "field_id"
+        ag_fields_subfields_table:
+          - "field_id"
+          - "wepp_id"
+          - "topaz_id"
+        ag_fields_hill_pass:
+          - "wepp_id"
+          - "topaz_id"
+        ag_fields_hill_wat:
+          - "wepp_id"
+          - "topaz_id"
+        ag_fields_totalwatsed3:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "ag_fields_fields_geojson"
+        kind: "vector"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/fields.WGS.geojson"
+        required: true
+        role: "geometry"
+      - source_id: "ag_fields_subfields_table"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/sub_fields/fields.parquet"
+        required: true
+        role: "field_to_hillslope_mapping"
+      - source_id: "ag_fields_hill_pass"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "wepp/ag_fields/output/interchange/H.pass.parquet"
+        required: true
+        role: "event_and_yearly_metrics"
+      - source_id: "ag_fields_hill_wat"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "wepp/ag_fields/output/interchange/H.wat.parquet"
+        required: true
+        role: "hydrology_metrics"
+      - source_id: "ag_fields_totalwatsed3"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "wepp/ag_fields/output/interchange/totalwatsed3.parquet"
+        required: false
+        role: "derived_aggregate_metrics"
+    dependencies:
+      - dep_id: "ag_fields_controller_state"
+        kind: "nodb"
+        locator:
+          kind: "relpath"
+          value: "ag_fields.nodb"
+        required: true
+        purpose: "AgFields configuration/state dependency."
+      - dep_id: "ag_fields_rotation_schedule"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "ag_fields/rotation_schedule.parquet"
+        required: false
+        purpose: "Rotation metadata used for join enrichment."
+      - dep_id: "ag_fields_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "relpath"
+          value: "wepp/ag_fields/output/interchange/interchange_version.json"
+        required: true
+        purpose: "AgFields interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "mixed"
+      time_columns:
+        - "year"
+        - "date"
+        - "return_period"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["date"]
+            - ["return_period"]
+          selector_support:
+            - "date"
+            - "return_period"
+          aggregation: "identity_per_event"
+    measures:
+      required:
+        - "runoff"
+        - "subrunoff"
+        - "baseflow"
+        - "runvol"
+      optional:
+        - measure_id: "phosphorus_total"
+          key_aliases:
+            - "Total_Phosphorus"
+            - "total_phosphorus"
+            - "tp_kg"
+          availability:
+            requires_any_column:
+              - "Total_Phosphorus"
+              - "total_phosphorus"
+              - "tp_kg"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+        - measure_id: "tsmf"
+          key_aliases:
+            - "TSMF"
+            - "tsmf"
+          availability:
+            requires_any_column:
+              - "TSMF"
+              - "tsmf"
+            min_source_version: "1.2"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
