@@ -14,6 +14,10 @@ through the NRCS or Purdue-hosted RUSLE2 data site, converted into repository-
 native Parquet or GeoParquet artifacts for inspection, provenance, and future
 runtime or validation work.
 
+These assets now back the implemented `canonical_rusle2` `r_mode` in the
+RUSLE controller, with a v1 runtime scope limited to watershed-centroid
+selection against polygon-backed official links.
+
 The official distribution is not packaged as modern analytics formats. It is
 published as:
 
@@ -140,6 +144,9 @@ auditable when multiple official climate rows share the same `REC_LINK`.
 - The `.gdb` files in the official distribution are legacy SQLite 2.x
   databases, so reproducible regeneration requires compatible extraction
   tooling.
+- Runtime v1 behavior intentionally rejects centroid selections that do not
+  resolve to a polygon-backed official climate record; there is no silent
+  fallback to table-only rows.
 
 ## Developer Notes
 

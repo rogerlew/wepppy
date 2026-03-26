@@ -23,8 +23,8 @@ US-only datasets (POLARIS for K; RAP for `observed_rap` C mode only).
 Key characteristics:
 
 - Spatially gridded outputs aligned to the run DEM
-- Run-constant, climate-derived R factor (not an external gridded erosivity
-  surface)
+- Run-constant scalar `R` factor sourced by explicit `r_mode`:
+  `cligen_static`, `momm2025_county_region`, or `canonical_rusle2`
 - POLARIS-derived soil erodibility (K) with nomograph and EPIC estimators
 - Two C-factor modes: observed RAP fractional cover and scenario-based
   disturbed/SBS lookup
@@ -48,8 +48,9 @@ A RUSLE build orchestrates five factor computations and assembles the final
 pipeline:
 
 1. **R** — Parse the run WEPP climate file, compute a scalar mean annual R
-   via `cli_calculate_static_r`, and broadcast it as a constant raster
-   (`rusle/r.tif`)
+   via `cli_calculate_static_r` (`cligen_static`) or select a scalar planning
+   climatology R from the vendored Momm 2025 county dataset or canonical
+   official RUSLE2 polygon dataset; broadcast as `rusle/r.tif`
 2. **LS** — Invoke the WBT `RusleLsFactor` tool on the conditioned DEM
    (prefers `dem/wbt/relief.tif`, falls back to `watershed.relief`),
    producing `ls.tif`, `l.tif`, `s.tif`, `sca.tif`, and
@@ -169,6 +170,7 @@ the `[rusle]` section:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
+| `r_mode` | `cligen_static` | R-factor source: `cligen_static`, `momm2025_county_region`, or `canonical_rusle2` |
 | `c_mode` | `observed_rap` | C-factor source: `observed_rap` or `scenario_sbs` |
 | `rap_year` | latest available | RAP observation year for `observed_rap` mode |
 | `k_modes` | `polaris_nomograph` | Comma-separated K estimators to compute |

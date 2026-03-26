@@ -19,6 +19,9 @@ describe("Rusle controller", () => {
                 <div id="stacktrace" style="display:none;"></div>
                 <div id="rq_job"></div>
                 <p id="hint_build_rusle"></p>
+                <label><input type="radio" name="r_mode" value="cligen_static" data-rusle-r-mode="cligen_static" checked></label>
+                <label><input type="radio" name="r_mode" value="momm2025_county_region" data-rusle-r-mode="momm2025_county_region"></label>
+                <label><input type="radio" name="r_mode" value="canonical_rusle2" data-rusle-r-mode="canonical_rusle2"></label>
                 <label><input type="radio" name="c_mode" value="observed_rap" data-rusle-c-mode="observed_rap" checked></label>
                 <label><input type="radio" name="c_mode" value="scenario_sbs" data-rusle-c-mode="scenario_sbs"></label>
                 <div data-rusle-section="rap-year">
@@ -115,6 +118,7 @@ describe("Rusle controller", () => {
         expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
             "/rq-engine/api/runs/test/cfg/build-rusle",
             expect.objectContaining({
+                r_mode: "cligen_static",
                 c_mode: "observed_rap",
                 rap_year: "2024",
                 k_modes: ["polaris_nomograph"],
@@ -126,6 +130,19 @@ describe("Rusle controller", () => {
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rusle, "job-rusle-1");
         expect(pollCompletionValues).toEqual(["RUSLE_BUILD_TASK_COMPLETED"]);
+    });
+
+    test("selected r_mode is sent in the build payload", async () => {
+        const canonical = document.querySelector('[data-rusle-r-mode="canonical_rusle2"]');
+        canonical.checked = true;
+
+        const button = document.querySelector("[data-rusle-action='run']");
+        button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+        await flushPromises();
+
+        const payload = httpMock.postJsonWithSessionToken.mock.calls[0][1];
+        expect(payload.r_mode).toBe("canonical_rusle2");
     });
 
     test("scenario_sbs hides rap-year selector and omits rap_year payload", async () => {

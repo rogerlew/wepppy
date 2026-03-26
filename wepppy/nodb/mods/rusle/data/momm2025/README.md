@@ -15,12 +15,12 @@ conservation planning with the RUSLE2 water erosion model," together with a
 county geometry layer selected to match the dataset's county FIPS coverage.
 
 The goal here is reproducible local access for the RUSLE NoDb mod. The data is
-not currently the shipped default runtime `R` source. Instead, it is the basis
-for a planned additional `r_mode` that complements the existing
-`cligen_static` path:
+not the shipped default runtime `R` source. It is an implemented optional
+`r_mode` that complements the existing `cligen_static` path:
 
 - `cligen_static` is the WEPP-aligned approximation path.
-- `momm2025` is the planned CONUS RUSLE2 planning-climatology path.
+- `momm2025_county_region` is the implemented CONUS RUSLE2
+  planning-climatology path.
 - the locked v1 runtime intent is a scalar run-level `R` selected from the
   watershed centroid county, with monthly values preserved in provenance
 
@@ -109,7 +109,8 @@ exact county-level join for every row in the vendored main Parquet.
 - Coverage is limited to the continental US plus DC.
 
 The lack of public `REGION` polygons is the main open implementation decision
-for a future `momm2025` runtime mode.
+for this dataset. Current runtime behavior therefore rejects split-county
+multi-`REGION` selections explicitly rather than guessing a sub-county region.
 
 ## Academic Highlights
 

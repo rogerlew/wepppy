@@ -24,6 +24,12 @@ from wepppy.query_engine.activate import update_catalog_entry
 from .c_integration import RusleCResult, run_rusle_c_factor
 from .k_integration import RusleKResult, run_rusle_k_factors
 from .ls_integration import RusleLsResult, run_rusle_ls_factor
+from .r_modes import (
+    SUPPORTED_R_MODES,
+    RusleRModeSelection,
+    select_canonical_rusle2_r,
+    select_momm2025_county_region_r,
+)
 
 __all__ = ["Rusle"]
 
@@ -141,6 +147,9 @@ class Rusle(NoDbBase):
         super().__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
         default_rap_year = int(RangelandAnalysisPlatformV3.latest_completed_year())
         configured_rap_year = self.config_get_int("rusle", "rap_year", default_rap_year)
+        configured_r_mode = self.config_get_str("rusle", "r_mode", "cligen_static")
+        if configured_r_mode not in SUPPORTED_R_MODES:
+            raise ValueError(f"Unsupported r_mode {configured_r_mode!r}; expected one of {SUPPORTED_R_MODES}")
         configured_modes = _coerce_mode_list(
             self.config_get_raw("rusle", "k_modes", None),
             allowed=SUPPORTED_K_MODES,
@@ -152,6 +161,7 @@ class Rusle(NoDbBase):
 
         with self.locked():
             os.makedirs(self.rusle_dir, exist_ok=True)
+            self._r_mode = configured_r_mode
             self._c_mode = self.config_get_str("rusle", "c_mode", "observed_rap")
             self._rap_year = int(configured_rap_year)
             self._k_modes = configured_modes
@@ -169,6 +179,18 @@ class Rusle(NoDbBase):
     @property
     def rusle_rap_dir(self) -> str:
         return _join(self.rusle_dir, "rap")
+
+    @property
+    def r_mode(self) -> str:
+        return str(getattr(self, "_r_mode", "cligen_static"))
+
+    @r_mode.setter
+    @nodb_setter
+    def r_mode(self, value: str) -> None:
+        token = str(value).strip()
+        if token not in SUPPORTED_R_MODES:
+            raise ValueError(f"Unsupported r_mode {value!r}; expected one of {SUPPORTED_R_MODES}")
+        self._r_mode = token
 
     @property
     def c_mode(self) -> str:
@@ -238,6 +260,10 @@ class Rusle(NoDbBase):
     def parse_inputs(self, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         raw = dict(payload or {})
 
+        r_mode = str(raw.get("r_mode", self.r_mode)).strip()
+        if r_mode not in SUPPORTED_R_MODES:
+            raise ValueError(f"Unsupported r_mode {r_mode!r}; expected one of {SUPPORTED_R_MODES}")
+
         c_mode = str(raw.get("c_mode", self.c_mode)).strip()
         if c_mode not in SUPPORTED_C_MODES:
             raise ValueError(f"Unsupported c_mode {c_mode!r}; expected one of {SUPPORTED_C_MODES}")
@@ -267,6 +293,7 @@ class Rusle(NoDbBase):
         force_polaris_refresh = _coerce_bool(raw.get("force_polaris_refresh"), default=False)
 
         return {
+            "r_mode": r_mode,
             "c_mode": c_mode,
             "rap_year": rap_year,
             "k_modes": k_modes,
@@ -282,6 +309,71 @@ class Rusle(NoDbBase):
             if isinstance(value, (int, float)):
                 return float(value)
         raise ValueError("Static R payload does not include a numeric mean annual R factor")
+
+    def _resolve_external_r_selection(
+        self,
+        *,
+        watershed: Watershed,
+        r_mode: str,
+    ) -> RusleRModeSelection:
+        centroid = getattr(watershed, "centroid", None)
+        if not isinstance(centroid, tuple) or len(centroid) != 2:
+            raise ValueError(
+                f"r_mode '{r_mode}' requires watershed centroid coordinates. "
+                "Run watershed abstraction before building RUSLE."
+            )
+
+        centroid_lnglat = (float(centroid[0]), float(centroid[1]))
+        if r_mode == "momm2025_county_region":
+            return select_momm2025_county_region_r(centroid_lnglat)
+        if r_mode == "canonical_rusle2":
+            return select_canonical_rusle2_r(centroid_lnglat)
+
+        raise ValueError(f"Unsupported external r_mode {r_mode!r}")
+
+    def _resolve_r_selection(
+        self,
+        *,
+        r_mode: str,
+        climate: Climate,
+        watershed: Watershed,
+    ) -> tuple[float, dict[str, Any]]:
+        if r_mode == "cligen_static":
+            cli_path = climate.cli_path
+            if not _exists(cli_path):
+                raise FileNotFoundError(f"Climate CLI path does not exist: {cli_path}")
+
+            r_metrics = cli_calculate_static_r(cli_path)
+            r_scalar = self._extract_static_r(r_metrics)
+            manifest_payload = {
+                "r_mode": "cligen_static",
+                "r_source_label": "WEPP Climate-Derived R",
+                "r_source_purpose": (
+                    "Approximates the erosivity used by WEPP from this run's .cli "
+                    "climate record."
+                ),
+                "r_selection_method": "wepp_cli_static",
+                "r_scalar": float(r_scalar),
+                "r_scalar_units": "MJ*mm/(ha*h*yr)",
+                "annual_source_field": "mean_annual_r",
+                "annual_dataset_value": float(r_scalar),
+                "annual_dataset_units": "MJ*mm/(ha*h*yr)",
+                "watershed_centroid_lnglat": None,
+                "selected_fips": None,
+                "selected_county": None,
+                "selected_region": None,
+                "selected_rec_link": None,
+                "selected_record_name": None,
+                "selected_record_variant": None,
+                "selected_source_zip": None,
+                "monthly_dataset_values": None,
+                "dataset_artifacts": {"source_cli": cli_path},
+                "notes": [],
+            }
+            return float(r_scalar), manifest_payload
+
+        selection = self._resolve_external_r_selection(watershed=watershed, r_mode=r_mode)
+        return float(selection.r_scalar_value), selection.to_manifest_payload()
 
     def _write_constant_from_dem(self, dem_path: str, output_path: str, value: float) -> None:
         with rasterio.open(dem_path) as dataset:
@@ -441,12 +533,34 @@ class Rusle(NoDbBase):
         a_data[valid] = r_data[valid] * k_data[valid] * ls_data[valid] * c_data[valid] * p_data[valid]
         _write_float_raster(output_path, a_data, profile)
 
-    def _write_readme(self, *, options: Mapping[str, Any], artifacts: Mapping[str, str]) -> str:
+    def _write_readme(
+        self,
+        *,
+        options: Mapping[str, Any],
+        artifacts: Mapping[str, str],
+        r_manifest: Mapping[str, Any],
+    ) -> str:
         readme_path = _join(self.rusle_dir, "README.md")
         k_mode_relpaths = {
             "polaris_nomograph": "rusle/k_polaris_nomograph.tif",
             "polaris_epic": "rusle/k_polaris_epic.tif",
         }
+
+        r_source_label = str(r_manifest.get("r_source_label", "R Source")).strip() or "R Source"
+        r_mode = str(r_manifest.get("r_mode", options.get("r_mode", "cligen_static"))).strip()
+        r_selection_method = str(r_manifest.get("r_selection_method", "unknown")).strip()
+        r_annual_field = str(r_manifest.get("annual_source_field", "unknown")).strip()
+        r_provenance = f"{r_source_label} (`{r_mode}`), selection method `{r_selection_method}`, annual source `{r_annual_field}`."
+        if r_mode == "cligen_static":
+            source_cli = None
+            dataset_artifacts = r_manifest.get("dataset_artifacts")
+            if isinstance(dataset_artifacts, Mapping):
+                source_cli = dataset_artifacts.get("source_cli")
+            if isinstance(source_cli, str) and source_cli:
+                r_provenance = (
+                    "Derived from `climate.cli` via `cli_calculate_static_r`; "
+                    f"source CLI `{source_cli}`."
+                )
 
         c_provenance = (
             f"Scenario C-factor from disturbed-family/SBS lookup (`scenario_sbs`) "
@@ -463,7 +577,7 @@ class Rusle(NoDbBase):
                 "`rusle/r.tif`",
                 "Static annual rainfall erosivity factor (R).",
                 "MJ*mm/(ha*h*yr)",
-                "Derived from `climate.cli` via `cli_calculate_static_r`; rasterized to run DEM grid.",
+                r_provenance,
             ),
             (
                 "`rusle/ls.tif`",
@@ -554,6 +668,8 @@ class Rusle(NoDbBase):
             "# RUSLE Outputs",
             "",
             f"- Generated UTC: `{_utc_now_iso()}`",
+            f"- R mode: `{options['r_mode']}`",
+            f"- R source: `{r_source_label}`",
             f"- C mode: `{options['c_mode']}`",
             f"- K modes selected: `{', '.join(options['k_modes'])}`",
             f"- Default K mode: `{options['default_k_mode']}`",
@@ -608,6 +724,7 @@ class Rusle(NoDbBase):
     def build(self, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         options = self.parse_inputs(payload)
         with self.locked():
+            self._r_mode = options["r_mode"]
             self._c_mode = options["c_mode"]
             self._rap_year = int(options["rap_year"])
             self._k_modes = list(options["k_modes"])
@@ -625,18 +742,17 @@ class Rusle(NoDbBase):
             raise FileNotFoundError(f"DEM path does not exist: {dem_path}")
         ls_dem_path = self._resolve_ls_dem_path(watershed=watershed)
 
-        cli_path = climate.cli_path
-        if not _exists(cli_path):
-            raise FileNotFoundError(f"Climate CLI path does not exist: {cli_path}")
-
         landuse_path = landuse.lc_fn
         if not _exists(landuse_path):
             raise FileNotFoundError(f"Landuse raster path does not exist: {landuse_path}")
 
         polaris_state = self._ensure_polaris_layers(force_refresh=bool(options["force_polaris_refresh"]))
 
-        r_metrics = cli_calculate_static_r(cli_path)
-        r_scalar = self._extract_static_r(r_metrics)
+        r_scalar, r_manifest = self._resolve_r_selection(
+            r_mode=options["r_mode"],
+            climate=climate,
+            watershed=watershed,
+        )
         r_path = _join(self.rusle_dir, "r.tif")
         self._write_constant_from_dem(dem_path, r_path, r_scalar)
         update_catalog_entry(self.wd, _relative_path(self.wd, r_path))
@@ -711,7 +827,7 @@ class Rusle(NoDbBase):
             "p_relpath": _relative_path(self.wd, p_path),
             "a_relpath": _relative_path(self.wd, a_path),
         }
-        readme_path = self._write_readme(options=options, artifacts=artifacts)
+        readme_path = self._write_readme(options=options, artifacts=artifacts, r_manifest=r_manifest)
         readme_relpath = _relative_path(self.wd, readme_path)
         try:
             update_catalog_entry(self.wd, readme_relpath)
@@ -725,19 +841,27 @@ class Rusle(NoDbBase):
 
         manifest_path = _join(self.rusle_dir, "manifest.json")
         manifest = _load_manifest(manifest_path)
+        static_r_payload: dict[str, Any] = {"mean_annual_r": float(r_scalar)}
+        dataset_artifacts = r_manifest.get("dataset_artifacts")
+        if isinstance(dataset_artifacts, Mapping):
+            source_cli = dataset_artifacts.get("source_cli")
+            if isinstance(source_cli, str) and source_cli:
+                static_r_payload["source_cli"] = source_cli
+        if "source_cli" not in static_r_payload:
+            static_r_payload["source_mode"] = options["r_mode"]
+
         manifest["rusle"] = {
             "generated_utc": _utc_now_iso(),
             "options": {
+                "r_mode": options["r_mode"],
                 "c_mode": options["c_mode"],
                 "k_modes": list(options["k_modes"]),
                 "default_k_mode": options["default_k_mode"],
                 "rap_year": int(options["rap_year"]),
                 "p_value": float(options["p_value"]),
             },
-            "static_r": {
-                "mean_annual_r": float(r_scalar),
-                "source_cli": cli_path,
-            },
+            "r_factor": dict(r_manifest),
+            "static_r": static_r_payload,
             "polaris": polaris_state,
             "artifacts": artifacts,
         }
@@ -748,6 +872,7 @@ class Rusle(NoDbBase):
             self._last_build_artifacts = artifacts
 
         return {
+            "r_mode": options["r_mode"],
             "mode": options["c_mode"],
             "default_k_mode": options["default_k_mode"],
             "rap_year": int(options["rap_year"]),

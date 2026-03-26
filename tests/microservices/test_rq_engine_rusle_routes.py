@@ -66,6 +66,7 @@ def test_build_rusle_enqueues_job_with_filtered_payload(monkeypatch: pytest.Monk
         response = client.post(
             "/api/runs/run-1/cfg/build-rusle",
             json={
+                "r_mode": "momm2025_county_region",
                 "c_mode": "observed_rap",
                 "k_modes": ["polaris_nomograph"],
                 "default_k_mode": "polaris_nomograph",
@@ -80,6 +81,7 @@ def test_build_rusle_enqueues_job_with_filtered_payload(monkeypatch: pytest.Monk
     payload = response.json()
     assert payload["job_id"] == "job-77"
     assert payload["payload"] == {
+        "r_mode": "momm2025_county_region",
         "c_mode": "observed_rap",
         "k_modes": "polaris_nomograph",
         "default_k_mode": "polaris_nomograph",

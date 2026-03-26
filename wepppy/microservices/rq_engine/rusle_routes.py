@@ -58,6 +58,7 @@ async def build_rusle(runid: str, config: str, request: Request) -> JSONResponse
             boolean_fields=("force_polaris_refresh",),
         )
         allowed_keys = (
+            "r_mode",
             "c_mode",
             "rap_year",
             "k_modes",
@@ -95,4 +96,3 @@ async def build_rusle(runid: str, config: str, request: Request) -> JSONResponse
 
 
 __all__ = ["router"]
-

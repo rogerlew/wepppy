@@ -79,6 +79,48 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### RUSLE Momm 2025 R-Mode Integration
+**Proposed**: 2026-03-25  
+**Size**: Medium (1-2 weeks after decision checkpoint)  
+**Priority**: High  
+**Status**: Complete (2026-03-26)  
+**Package**: [docs/work-packages/20260325_rusle_momm2025_r_mode/](docs/work-packages/20260325_rusle_momm2025_r_mode/)  
+**Description**: Add Momm et al. (2025) county or region monthly erosivity as a
+second `R`-estimation path for the RUSLE NoDb mod while keeping
+`cligen_static` as the WEPP-aligned default.
+
+**Scope**:
+- Vendor the public Momm 2025 dataset as repo-native Parquet plus a matching
+  county GeoParquet companion.
+- Update the RUSLE specification so `cligen_static` is explicitly the
+  WEPP-aligned approximation path and Momm 2025 is a separate
+  planning-climatology path.
+- Define and implement a new `r_mode` with explicit provenance, AOI selection,
+  and split-county `REGION` handling.
+- Add targeted tests for county selection, manifest semantics, and backward
+  compatibility with `cligen_static`.
+
+**Strategic Value**:
+- Adds a published RUSLE2 planning climatology path without conflating it with
+  the run's WEPP climate record.
+- Makes the public Momm 2025 supplement reproducibly available inside the repo.
+- Surfaces a clean science or product boundary between WEPP-aligned erosivity
+  and RUSLE2 planning isoerodents.
+
+**Dependencies**:
+- `docs/work-packages/20260320_rusle_r_static_hyetograph_api/`
+- `wepppy/nodb/mods/rusle/specification.md`
+- Vendored data under `wepppy/nodb/mods/rusle/data/momm2025/`
+
+**Outcome**:
+- Split-county `REGION` and canonical polygon-backed contracts were locked.
+- `momm2025_county_region` and `canonical_rusle2` `r_mode` paths were
+  implemented in `Rusle` with explicit provenance and explicit unsupported-case
+  errors.
+- UI, rq-engine payload support, and focused regression coverage were delivered.
+
+---
+
 ### RQ-Engine Agent Usability and Documentation Hardening
 **Proposed**: 2026-02-08  
 **Size**: Medium (1-2 weeks)  

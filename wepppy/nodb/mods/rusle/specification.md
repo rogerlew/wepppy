@@ -589,7 +589,7 @@ Migration compatibility policy:
 
 #### Planned Additional Runtime Mode: `momm2025_county_region`
 
-This mode is planned but not yet implemented in the runtime controller.
+This mode is implemented in the runtime controller.
 
 Purpose:
 
@@ -673,12 +673,80 @@ Locked v1 decisions (2026-03-25):
   - `r_dataset_doi`
   - `r_scalar_units`
 
-Open implementation decisions required before runtime rollout:
+Resolved runtime contract (2026-03-26):
 
-- how counties with multiple public `REGION` rows are handled after centroid
-  county selection when no public `REGION` polygons are available
-- whether the initial public mode should reject split-county cases until a
-  defensible `REGION` rule is approved
+- counties with multiple public `REGION` rows are explicitly rejected in v1
+  with a clear runtime error; there is no silent fallback to another `R` mode
+- this keeps the mode truthful to the public data limitation (no shipped
+  sub-county `REGION` polygons) while preserving deterministic centroid-county
+  behavior for single-row counties
+
+#### Planned Additional Runtime Mode: `canonical_rusle2`
+
+This mode is implemented in the runtime controller.
+
+Purpose:
+
+- give the mod a planning-climatology path tied to the vendored official
+  RUSLE2 climate-database release rather than only the newer Momm 2025 update
+- expose the official RUSLE2 climate-zone polygons and climate records as a
+  first-class `R` source rather than leaving them as reference-only data
+- keep `cligen_static` as the WEPP-aligned path when the goal is to approximate
+  the erosivity used by WEPP for the run
+
+Vendored data assets:
+
+- `wepppy/nodb/mods/rusle/data/rusle2/rusle2_official_climate_records.parquet`
+- `wepppy/nodb/mods/rusle/data/rusle2/rusle2_official_climate_zones.geoparquet`
+- `wepppy/nodb/mods/rusle/data/rusle2/rusle2_official_source_files.parquet`
+
+Why it matters:
+
+- it is the vendored official RUSLE2 planning-climatology baseline, not a
+  post-processed local fit or an indirect proxy
+- it provides a broader official coverage footprint than the Momm 2025 CONUS
+  update
+- it allows future comparisons between the official baseline and the newer
+  Momm 2025 update without leaving the repo
+
+Shortcomings and caveats:
+
+- it is not a WEPP run-specific erosivity reconstruction
+- the official polygon bundle does not cover every official climate-table row
+- the official distribution is legacy and required normalization into Parquet
+  or GeoParquet for repo-native use
+- some rows expose official `R_MONTHLY`, while others require monthly values to
+  be derived from official precipitation and erosivity-density fields
+- duplicate official climate rows can share one polygon `REC_LINK`, so the
+  vendored GeoParquet intentionally carries deterministic selected-record and
+  duplicate-diagnostic fields
+
+Working v1 position:
+
+- `canonical_rusle2` should remain on the current scalar-`R` controller
+  contract
+- the runtime should select the official climate zone by watershed centroid
+  against the vendored GeoParquet
+- the runtime should use the vendored deterministic selected record for the
+  matched official `REC_LINK` and preserve enough provenance to audit the
+  selection
+- the user-facing label should be `Canonical RUSLE2`
+- suggested help text:
+  `Uses the vendored official RUSLE2 climate database and climate-zone polygons at the watershed centroid.`
+
+Resolved runtime contract (2026-03-26):
+
+- v1 is limited to polygon-backed official links selected by watershed
+  centroid against the vendored GeoParquet
+- centroid hits that resolve to polygons without a climate record are rejected
+  explicitly; there is no silent fallback to table-only rows
+- centroid hits that ambiguously intersect multiple `REC_LINK` polygons are
+  rejected explicitly to preserve deterministic provenance
+- runtime manifest provenance records at least:
+  - `selected_rec_link`
+  - `selected_record_name`
+  - `selected_record_variant`
+  - `selected_source_zip`
 
 #### Explicit Review Basis
 
@@ -1251,8 +1319,9 @@ enabled = true
 ls_mode = "wbt_rusle"
 ls_routing = "dinf"
 r_mode = "cligen_static"
-# planned additional mode after Momm 2025 integration:
-# r_mode = "momm2025_county_region"
+# additional planning-climatology modes:
+# r_mode = "momm2025_county_region"  # watershed-centroid county (split-county reject)
+# r_mode = "canonical_rusle2"  # watershed-centroid official polygon (polygon-backed only)
 k_mode = "polaris_nomograph"
 c_mode = "observed_rap"
 rap_year = "auto"
@@ -1353,9 +1422,9 @@ These should be shown as method summary rows rather than user-editable fields
 in the first release:
 
 - `LS mode = wbt_rusle`
-- `R mode = cligen_static` in the current shipped runtime
-- `R mode = momm2025_county_region` may be added in a later package once the
-  county or `REGION` spatialization contract is locked
+- `R mode = cligen_static`
+- `R mode = momm2025_county_region` (with explicit split-county rejection in v1)
+- `R mode = canonical_rusle2` (polygon-backed official links only in v1)
 - `P mode = default` (`1.0`)
 
 ### `scenario_sbs` User-Facing Contract
@@ -1488,7 +1557,10 @@ Recommended initial precedence:
 - `R`
   - current shipped mode: `cligen_static` from the run WEPP climate file when
     the goal is to approximate the erosivity used by WEPP
-  - planned additional mode: `momm2025_county_region` from the vendored CONUS
+  - additional mode: `canonical_rusle2` from the vendored official
+    RUSLE2 climate zones and climate records when the goal is the canonical
+    official planning-climatology baseline
+  - additional mode: `momm2025_county_region` from the vendored CONUS
     county or `REGION` monthly climatology when the goal is a published RUSLE2
     planning-climatology reference
   - no external gridded runtime source should be implied until the
@@ -1515,6 +1587,10 @@ At minimum, validation should include:
 - static-`R` regression tests from `.cli` inputs, including breakpoint-climate
   coverage if supported by the Rust parser path
 - annual `EI30` distribution review for representative climates
+- `canonical_rusle2` centroid-selection and `REC_LINK` provenance tests if
+  that mode is enabled
+- explicit canonical table-only acceptance or rejection tests for unsupported
+  official rows
 - `momm2025` county-selection and multi-county aggregation tests if that mode
   is enabled
 - explicit split-county `REGION` acceptance or rejection tests for the public

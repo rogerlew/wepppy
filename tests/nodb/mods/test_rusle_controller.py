@@ -14,6 +14,7 @@ import wepppy.nodb.mods.rusle.rusle as rusle_module
 from wepppy.nodb.mods.rusle.c_integration import RusleCResult
 from wepppy.nodb.mods.rusle.k_integration import RusleKResult
 from wepppy.nodb.mods.rusle.ls_integration import RusleLsResult
+from wepppy.nodb.mods.rusle.r_modes import RusleRModeSelection
 
 
 pytestmark = pytest.mark.unit
@@ -328,8 +329,10 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
     manifest_path = rusle_dir / "manifest.json"
     with open(manifest_path, "r", encoding="utf-8") as stream:
         manifest = json.load(stream)
+    assert manifest["rusle"]["options"]["r_mode"] == "cligen_static"
     assert manifest["rusle"]["options"]["c_mode"] == "scenario_sbs"
     assert manifest["rusle"]["options"]["k_modes"] == ["polaris_nomograph"]
+    assert manifest["rusle"]["r_factor"]["r_source_label"] == "WEPP Climate-Derived R"
     assert "rusle/README.md" in catalog_updates
 
     readme_path = rusle_dir / "README.md"
@@ -340,6 +343,193 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
     assert "| `rusle/ls.tif` |" in readme_text
     assert "| `rusle/effective_slope_length.tif` |" in readme_text
     assert "| `rusle/disturbed_class.tif` |" in readme_text
+
+
+def test_build_with_momm2025_r_mode_uses_external_selection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+    dem_path = wd / "dem.tif"
+    relief_path = wd / "dem" / "wbt" / "relief.tif"
+    landuse_path = wd / "landuse.tif"
+    rusle_dir = wd / "rusle"
+    rusle_dir.mkdir(parents=True, exist_ok=True)
+    relief_path.parent.mkdir(parents=True, exist_ok=True)
+
+    _write_raster(dem_path, np.ones((2, 2), dtype=np.float32))
+    _write_raster(relief_path, np.ones((2, 2), dtype=np.float32))
+    _write_raster(landuse_path, np.ones((2, 2), dtype=np.float32))
+
+    controller = rusle_module.Rusle(str(wd), "disturbed9002.cfg")
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        rusle_module.Ron,
+        "getInstance",
+        lambda _wd: SimpleNamespace(dem_fn=str(dem_path), map=None),
+    )
+    monkeypatch.setattr(
+        rusle_module.Climate,
+        "getInstance",
+        lambda _wd: SimpleNamespace(cli_path=str(wd / "missing.cli")),
+    )
+    monkeypatch.setattr(
+        rusle_module.Landuse,
+        "getInstance",
+        lambda _wd: SimpleNamespace(lc_fn=str(landuse_path)),
+    )
+    monkeypatch.setattr(
+        rusle_module.Watershed,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            centroid=(-120.5, 46.5),
+            netful=None,
+            delineation_backend_is_wbt=True,
+            relief=str(relief_path),
+        ),
+    )
+    monkeypatch.setattr(
+        rusle_module.Disturbed,
+        "tryGetInstance",
+        lambda _wd: SimpleNamespace(has_map=False, disturbed_path=None),
+    )
+    monkeypatch.setattr(
+        controller,
+        "_ensure_polaris_layers",
+        lambda force_refresh=False: {
+            "fetched": False,
+            "reason": "aligned",
+            "payload": {
+                "force_refresh": bool(force_refresh),
+                "properties": ["sand", "silt", "clay", "om", "bd", "ksat"],
+                "statistics": ["mean"],
+                "depths": ["0_5", "5_15"],
+            },
+            "summary": {"layers_requested": 12},
+        },
+    )
+    monkeypatch.setattr(rusle_module, "update_catalog_entry", lambda _wd, relpath: relpath)
+
+    def _fake_select_momm(centroid_lnglat):
+        captured["centroid_lnglat"] = centroid_lnglat
+        return RusleRModeSelection(
+            r_mode="momm2025_county_region",
+            r_source_label="Momm 2025 County Climatology",
+            r_source_purpose="test-purpose",
+            r_selection_method="watershed_centroid_county",
+            r_scalar_value=73.5,
+            r_scalar_units="MJ*mm/(ha*h*yr)",
+            annual_source_field="annual_r",
+            annual_dataset_value=73.5,
+            annual_dataset_units="MJ*mm/(ha*h*yr)",
+            centroid_lng=-120.5,
+            centroid_lat=46.5,
+            selected_fips="53009",
+            selected_county="Clallam",
+            selected_region=None,
+            monthly_dataset_values={"jan": 1.0},
+            dataset_artifacts={"momm_table": "fake.parquet"},
+        )
+
+    monkeypatch.setattr(rusle_module, "select_momm2025_county_region_r", _fake_select_momm)
+    def _fake_ls(_wd: str, _dem: str, *, channel_mask=None):
+        ls_path = rusle_dir / "ls.tif"
+        l_path = rusle_dir / "l.tif"
+        s_path = rusle_dir / "s.tif"
+        sca_path = rusle_dir / "sca.tif"
+        eff_path = rusle_dir / "effective_slope_length.tif"
+        manifest_path = rusle_dir / "manifest.json"
+        _write_constant_from_dem(dem_path, ls_path, 2.0)
+        _write_constant_from_dem(dem_path, l_path, 2.0)
+        _write_constant_from_dem(dem_path, s_path, 2.0)
+        _write_constant_from_dem(dem_path, sca_path, 2.0)
+        _write_constant_from_dem(dem_path, eff_path, 2.0)
+        manifest_path.write_text("{}", encoding="utf-8")
+        return RusleLsResult(
+            ls=str(ls_path),
+            l=str(l_path),
+            s=str(s_path),
+            sca=str(sca_path),
+            effective_slope_length=str(eff_path),
+            manifest=str(manifest_path),
+        )
+
+    monkeypatch.setattr(rusle_module, "run_rusle_ls_factor", _fake_ls)
+
+    def _fake_k(
+        _wd: str,
+        *,
+        statistic: str,
+        selected_modes,
+        default_k_mode: str,
+        write_default_k: bool,
+        **_kwargs,
+    ):
+        nomograph_path = rusle_dir / "k_polaris_nomograph.tif"
+        _write_constant_from_dem(dem_path, nomograph_path, 3.0)
+        manifest_path = rusle_dir / "manifest.json"
+        if not manifest_path.exists():
+            manifest_path.write_text("{}", encoding="utf-8")
+        return RusleKResult(
+            nomograph=str(nomograph_path),
+            epic=None,
+            k_default=None,
+            manifest=str(manifest_path),
+            reference_samples=None,
+            comparison_summary=None,
+        )
+
+    def _fake_c(
+        _wd: str,
+        _dem: str,
+        *,
+        c_mode: str,
+        c_output_filename: str,
+        **_kwargs,
+    ):
+        c_path = rusle_dir / c_output_filename
+        _write_constant_from_dem(dem_path, c_path, 4.0)
+        manifest_path = rusle_dir / "manifest.json"
+        if not manifest_path.exists():
+            manifest_path.write_text("{}", encoding="utf-8")
+        disturbed_class_path = rusle_dir / "disturbed_class.tif"
+        _write_constant_from_dem(dem_path, disturbed_class_path, 1.0)
+        lookup_copy_path = rusle_dir / "c_lookup_used.csv"
+        lookup_copy_path.write_text("disturbed_class,sbs_class,c_value\n", encoding="utf-8")
+        return RusleCResult(
+            c=str(c_path),
+            manifest=str(manifest_path),
+            fg=None,
+            disturbed_class=str(disturbed_class_path),
+            sbs_4class=None,
+            lookup_copy=str(lookup_copy_path),
+        )
+
+    monkeypatch.setattr(rusle_module, "run_rusle_k_factors", _fake_k)
+    monkeypatch.setattr(rusle_module, "run_rusle_c_factor", _fake_c)
+
+    summary = controller.build(
+        payload={
+            "r_mode": "momm2025_county_region",
+            "c_mode": "scenario_sbs",
+            "k_modes": ["polaris_nomograph"],
+            "default_k_mode": "polaris_nomograph",
+            "p_value": 1.0,
+        }
+    )
+
+    assert captured["centroid_lnglat"] == (-120.5, 46.5)
+    assert summary["r_mode"] == "momm2025_county_region"
+    assert _read_valid_value(wd / summary["artifacts"]["r_relpath"]) == pytest.approx(73.5)
+
+    manifest_path = rusle_dir / "manifest.json"
+    with open(manifest_path, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    assert manifest["rusle"]["options"]["r_mode"] == "momm2025_county_region"
+    assert manifest["rusle"]["r_factor"]["selected_fips"] == "53009"
+    assert manifest["rusle"]["r_factor"]["r_source_label"] == "Momm 2025 County Climatology"
+    assert manifest["rusle"]["static_r"]["source_mode"] == "momm2025_county_region"
 
 
 def test_build_rejects_topaz_backend(
@@ -356,6 +546,7 @@ def test_build_rejects_topaz_backend(
         controller,
         "parse_inputs",
         lambda payload=None: {
+            "r_mode": "cligen_static",
             "c_mode": "scenario_sbs",
             "rap_year": 2025,
             "k_modes": ["polaris_nomograph"],

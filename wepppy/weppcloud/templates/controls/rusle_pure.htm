@@ -9,6 +9,7 @@
   </p>
 {% endset %}
 
+{% set rusle_r_mode = rusle.r_mode if rusle is not none else 'cligen_static' %}
 {% set rusle_c_mode = rusle.c_mode if rusle is not none else 'observed_rap' %}
 {% set rusle_k_modes = rusle.k_modes if rusle is not none and rusle.k_modes else ['polaris_nomograph'] %}
 {% set rusle_default_k_mode = rusle.default_k_mode if rusle is not none else 'polaris_nomograph' %}
@@ -32,6 +33,36 @@
      status_panel_options={"id": "rusle_status_panel"},
      stacktrace_panel_options={"panel_id": "rusle_stacktrace_panel", "body_id": "stacktrace"}
    ) %}
+
+  {{ ui.radio_group(
+       "r_mode",
+       label="R factor mode",
+       layout="vertical",
+       options=[
+         {
+           "id": "rusle_r_mode_cligen_static",
+           "label": "WEPP Climate-Derived R",
+           "value": "cligen_static",
+           "selected": rusle_r_mode == "cligen_static",
+           "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "cligen_static"}
+         },
+         {
+           "id": "rusle_r_mode_momm2025_county_region",
+           "label": "Momm 2025 County Climatology",
+           "value": "momm2025_county_region",
+           "selected": rusle_r_mode == "momm2025_county_region",
+           "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "momm2025_county_region"}
+         },
+         {
+           "id": "rusle_r_mode_canonical_rusle2",
+           "label": "Canonical RUSLE2",
+           "value": "canonical_rusle2",
+           "selected": rusle_r_mode == "canonical_rusle2",
+           "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "canonical_rusle2"}
+         }
+       ],
+       help="`cligen_static` approximates WEPP-run erosivity; `momm2025_county_region` and `canonical_rusle2` are planning-climatology references selected at the watershed centroid."
+     ) }}
 
   {{ ui.radio_group(
        "c_mode",
