@@ -543,11 +543,25 @@ WP-2: Dependency tracking and options-aware caching (completed 2026-03-26)
 - Contract clarification: request hash requires concrete `swat_run_id` and includes Unitizer preferences fingerprint for `units=project`, plus catalog/conversion/export version markers.
 - Deliverable: deterministic dependency snapshot/fingerprint and deterministic cache-key/index foundation (`export/features/cache/index.json`).
 
-WP-3: Format writers and packaging
-- Add `exporters/*` plus `manifest.py`.
-- Implement all five format writers behind one writer interface.
-- Implement single-layer zip packaging behavior for `geojson|geoparquet|kmz`.
-- Deliverable: artifact + manifest generated from a pre-resolved plan.
+WP-3: Format writers, packaging, and manifest generation (completed 2026-03-26)
+- Status: done via `docs/mini-work-packages/20260326_features_export_wp3_execplan.md`.
+- Implemented files:
+  - `wepppy/nodb/mods/features_export/exporters/__init__.py`
+  - `wepppy/nodb/mods/features_export/exporters/base.py`
+  - `wepppy/nodb/mods/features_export/exporters/geojson.py`
+  - `wepppy/nodb/mods/features_export/exporters/geoparquet.py`
+  - `wepppy/nodb/mods/features_export/exporters/kmz.py`
+  - `wepppy/nodb/mods/features_export/exporters/geopackage.py`
+  - `wepppy/nodb/mods/features_export/exporters/geodatabase.py`
+  - `wepppy/nodb/mods/features_export/exporters/packaging.py`
+  - `wepppy/nodb/mods/features_export/manifest.py`
+  - `tests/nodb/mods/test_features_export_exporters.py`
+  - `tests/nodb/mods/test_features_export_manifest.py`
+- Contract clarification: writer inputs are explicitly pre-resolved and payload-driven (`ResolvedExportPlan` + per-layer `PreparedLayerPayload` mapping keyed by `output_layer_id`); WP-3 does not resolve or extract source datasets.
+- Contract clarification: single-layer formats (`geojson|geoparquet|kmz`) write deterministic one-file-per-layer outputs and return one deterministic zip bundle; multi-layer formats return one container artifact per request.
+- Contract clarification: geodatabase writer uses the canonical `f_esri` gpkg conversion boundary and fails explicitly when backend capability is unavailable.
+- Contract clarification: manifest assembly is pure (`build_export_manifest`) and serialization/write (`serialize_export_manifest`, `write_export_manifest`) is a separate step.
+- Deliverable: deterministic artifact metadata and manifest generation from pre-resolved plan inputs.
 
 WP-4: Service orchestration and RQ wiring
 - Add `service.py` orchestration and thin rq-engine route/task adapters.
