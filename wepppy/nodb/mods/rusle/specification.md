@@ -385,13 +385,24 @@ as canonical annual `RUSLE R`.
 
 #### Preferred Runtime Mode: `cligen_static`
 
-- Preferred first shipping mode and expected default
+- Preferred first shipping mode and current default
 - Use the run WEPP climate file as the source of truth for rainfall erosivity
+  when the product goal is to approximate the erosivity used by WEPP in the
+  same run
 - Compute one scalar `R` for the full run climate record, then broadcast that
   value over the unmasked AOI
 - Treat `PRISM`, `NOAA Atlas 14`, and similar external precipitation products
   as upstream climate-generation inputs only, not as runtime `R` inputs for
   the `Rusle` mod
+
+Interpretation note:
+
+- `cligen_static` is the WEPP-aligned approximation path in this spec
+- it is not the only academically defensible long-term erosivity climatology
+  that the mod may eventually support
+- the planned `momm2025` mode below is complementary rather than contradictory:
+  it targets published RUSLE2 planning climatology, not replay of the run's
+  WEPP storm sequence
 
 #### Required Computation Path
 
@@ -575,6 +586,99 @@ Migration compatibility policy:
 - `PRISM` and `NOAA Atlas 14` may still matter upstream when building or
   revising climate inputs, but they are not direct `R`-factor dependencies for
   the first `Rusle` delivery
+
+#### Planned Additional Runtime Mode: `momm2025_county_region`
+
+This mode is planned but not yet implemented in the runtime controller.
+
+Purpose:
+
+- give the mod a second `R` path tied to the public Momm et al. (2025)
+  RUSLE2 isoerodent update for the continental US
+- keep `cligen_static` as the WEPP-aligned path when the goal is to approximate
+  the erosivity used by WEPP for the run
+- let users opt into a published planning-climatology source without treating
+  it as the same thing as the run's WEPP climate history
+
+Vendored data assets:
+
+- `wepppy/nodb/mods/rusle/data/momm2025/momm2025_county_region_monthly_r.parquet`
+- `wepppy/nodb/mods/rusle/data/momm2025/momm2025_counties_conus_2010_500k.geoparquet`
+
+Academic highlights to preserve in implementation notes and manifests:
+
+- the paper updates operational RUSLE2 isoerodent generation for the
+  continental US
+- the published workflow is reproducible and updatable rather than dependent on
+  older hand-built surfaces
+- the supplement distributes monthly erosivity values because RUSLE2 consumes
+  monthly climate inputs
+- the paper highlights small-event handling, spatially varying recurrence
+  intervals, and weighted interpolation
+- the improvement claim is mainly smoother spatial and temporal behavior while
+  staying broadly aligned with official RUSLE2 practice, not a claim that every
+  location's absolute `R` changes dramatically
+
+Availability boundary:
+
+- dataset coverage is CONUS plus DC, not Alaska or Hawaii
+- the public supplement is county or `REGION` tabular data, not a complete
+  polygonal sub-county map
+- the county geometry companion in this repo uses the 2010 Census county
+  vintage because the public dataset still uses FIPS `46113` (Shannon County,
+  SD) and `51515` (Bedford city, VA)
+
+Why it can be better:
+
+- it offers a published and reproducible RUSLE2 planning climatology for CONUS
+- it should improve smoothness and updateability relative to older manual or
+  zone-built surfaces
+- it is likely most useful near county or climate-zone seams and in areas where
+  the older surface-construction workflow depended more heavily on manual
+  adjustments or sparse-station interpolation
+
+Shortcomings and caveats:
+
+- it is not a WEPP run-specific erosivity reconstruction
+- the public supplement does not ship sub-county `REGION` polygons
+- the available public files appear to be final tabular outputs, not the full
+  station-processing pipeline or cleaned storm archive
+- any implementation that collapses monthly values to a single annual scalar
+  must record that aggregation explicitly
+
+Locked v1 decisions (2026-03-25):
+
+- `momm2025_county_region` remains on the current scalar-`R` controller
+  contract rather than invent a gridded erosivity surface from county data
+- the runtime should select the source county by watershed centroid
+- the runtime should sum the selected row's monthly values to annual `R` for
+  the scalar controller contract while preserving the monthly values in
+  manifest provenance
+- user-facing provenance wording should stay explicit:
+  - `cligen_static` label: `WEPP Climate-Derived R`
+  - `cligen_static` help text:
+    `Approximates the erosivity used by WEPP from this run's .cli climate record.`
+  - `momm2025_county_region` label: `Momm 2025 County Climatology`
+  - `momm2025_county_region` help text:
+    `Uses the published Momm et al. (2025) RUSLE2 monthly erosivity climatology for the watershed centroid county.`
+- provenance fields written by the eventual runtime should include enough
+  detail to audit the selection, for example:
+  - `r_mode`
+  - `r_source_label`
+  - `r_source_purpose`
+  - `r_selection_method = watershed_centroid`
+  - `r_selected_fips`
+  - `r_selected_county`
+  - `r_selected_region`
+  - `r_dataset_doi`
+  - `r_scalar_units`
+
+Open implementation decisions required before runtime rollout:
+
+- how counties with multiple public `REGION` rows are handled after centroid
+  county selection when no public `REGION` polygons are available
+- whether the initial public mode should reject split-county cases until a
+  defensible `REGION` rule is approved
 
 #### Explicit Review Basis
 
@@ -1147,6 +1251,8 @@ enabled = true
 ls_mode = "wbt_rusle"
 ls_routing = "dinf"
 r_mode = "cligen_static"
+# planned additional mode after Momm 2025 integration:
+# r_mode = "momm2025_county_region"
 k_mode = "polaris_nomograph"
 c_mode = "observed_rap"
 rap_year = "auto"
@@ -1247,7 +1353,9 @@ These should be shown as method summary rows rather than user-editable fields
 in the first release:
 
 - `LS mode = wbt_rusle`
-- `R mode = cligen_static`
+- `R mode = cligen_static` in the current shipped runtime
+- `R mode = momm2025_county_region` may be added in a later package once the
+  county or `REGION` spatialization contract is locked
 - `P mode = default` (`1.0`)
 
 ### `scenario_sbs` User-Facing Contract
@@ -1378,8 +1486,13 @@ Recommended initial precedence:
 - `LS`
   - purpose-built WBT `RusleLsFactor`
 - `R`
-  - `cligen_static` from the run WEPP climate file
-  - no external gridded runtime source in the first implementation
+  - current shipped mode: `cligen_static` from the run WEPP climate file when
+    the goal is to approximate the erosivity used by WEPP
+  - planned additional mode: `momm2025_county_region` from the vendored CONUS
+    county or `REGION` monthly climatology when the goal is a published RUSLE2
+    planning-climatology reference
+  - no external gridded runtime source should be implied until the
+    split-county `REGION` spatialization contract is explicitly resolved
 - `K`
   - `polaris_nomograph` for default visualization mode
   - `polaris_epic` for advanced fallback or sensitivity mode
@@ -1402,6 +1515,10 @@ At minimum, validation should include:
 - static-`R` regression tests from `.cli` inputs, including breakpoint-climate
   coverage if supported by the Rust parser path
 - annual `EI30` distribution review for representative climates
+- `momm2025` county-selection and multi-county aggregation tests if that mode
+  is enabled
+- explicit split-county `REGION` acceptance or rejection tests for the public
+  Momm 2025 mode
 - known hotspot comparison against field or mapped observations
 - `polaris_nomograph` versus `polaris_epic` comparison on representative areas
   of interest
@@ -1641,6 +1758,19 @@ runtime `R` inputs in the current `Rusle` design.
   Official description of `CLIGEN` as the WEPP stochastic weather generator and
   of its storm-parameter outputs, including storm duration, time to peak, and
   peak intensity.
+- Momm, H. G., McGehee, R. P., and coauthors, 2025.
+  *Isoerodent surfaces of the continental US for conservation planning with the
+  RUSLE2 water erosion model*. *Catena*, 249, 108879.
+  https://doi.org/10.1016/j.catena.2025.108879
+  Primary reference for the planned `momm2025` mode: monthly CONUS RUSLE2
+  isoerodent update with reproducible interpolation workflow and smoother
+  operational surfaces.
+- USDA ARS Agricultural Data Commons. *Data from: Isoerodent surfaces of the
+  continental US for conservation planning with the RUSLE2 water erosion
+  model*.
+  https://doi.org/10.15482/USDA.ADC/28821569.v1
+  Public dataset reference for the vendored `momm2025` Parquet and GeoParquet
+  inputs used in this repo.
 - Panda, S. S., Amatya, D. M., Grace, J. M., Caldwell, P., and Marion, D. A.,
   2022. *Extreme precipitation-based vulnerability assessment of road-crossing
   drainage structures in forested watersheds using an integrated environmental

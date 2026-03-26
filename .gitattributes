@@ -10,3 +10,5 @@ wepppy/soils/ssurgo/data/statsgo/*.db filter=lfs diff=lfs merge=lfs -text
 wepppy/soils/ssurgo/data/surgo/*.db filter=lfs diff=lfs merge=lfs -text
 wepppy/soils/ssurgo/data/statsgo/statsgo_tabular.db filter=lfs diff=lfs merge=lfs -text
 wepppy/soils/ssurgo/data/surgo/surgo_tabular.db filter=lfs diff=lfs merge=lfs -text
+wepppy/nodb/mods/rusle/data/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+wepppy/nodb/mods/rusle/data/**/*.geoparquet filter=lfs diff=lfs merge=lfs -text
