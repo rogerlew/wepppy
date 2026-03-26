@@ -16,18 +16,35 @@
      data-config="{{ config }}"
      data-csv-url="{{ csv_url }}"
      data-save-url="{{ save_url }}"
+     data-lookup-meta-url="{{ lookup_meta_url }}"
+     data-lookup-snapshot-url="{{ lookup_snapshot_url }}"
      data-session-token-url="{{ session_token_url }}"></div>
 <div class="container-fluid pt-2">
-    <div id="status-banner" class="alert alert-info" role="alert">
+    <div id="status-banner" class="alert alert-info" role="status" aria-live="polite">
         Preparing disturbed lookup table...
     </div>
     <p class="mb-2">
         <button id="save" class="btn btn-primary" disabled>Save My Changes</button>
     </p>
+    <p id="stale-actions" class="mb-2" style="display:none;">
+        <button id="reload-current" class="btn btn-warning btn-sm">Load Current Table</button>
+        <button id="refresh-page" class="btn btn-secondary btn-sm">Refresh Page</button>
+    </p>
     <div id="spreadsheet1"></div>
 </div>
 <script>
 var mySpreadsheet = null;
+var stalePollHandle = null;
+var pollWarningState = {
+    lastAtMs: 0,
+    lastMessage: ""
+};
+var editorState = {
+    loaded: false,
+    inFlightSave: false,
+    stale: false,
+    baselineSha256: null
+};
 
 function readCsrfToken() {
     var meta = document.querySelector('meta[name="csrf-token"]');
@@ -51,67 +68,169 @@ function setStatus(level, message) {
     banner.textContent = message;
 }
 
-function columnsConfig() {
-    return [
-        { type: 'text', width: 210,
-          source: ['bare',
-                   'forest',
-                   'forest high sev fire',
-                   'forest low sev fire',
-                   'forest prescribed fire',
-                   'short grass',
-                   'grass high sev fire',
-                   'grass low sev fire',
-                   'grass prescribed fire',
-                   'short grass',
-                   'shrub',
-                   'shrub high sev fire',
-                   'shrub low sev fire',
-                   'shrub prescribed fire',
-                   'skid',
-                   'tall grass',
-                   'young forest',
-                   'thinning'
-                  ] },
-        { type: 'text', width: 110,
-          source: ['clay loam', 'loam', 'sand loam', 'silt loam'] },
-        { type: 'text', width: 60 },
-        { type: 'text', width: 60 },
-        { type: 'text', width: 100 },
-        { type: 'text', width: 100 },
-        { type: 'text', width: 60 },
-        { type: 'text', width: 60 },
-        { type: 'text', width: 60 },
-        { type: 'text', width: 60 }
-    ];
+function columnsConfig(headers) {
+    var cols = [];
+    var luseValues = ['bare',
+                      'forest',
+                      'forest high sev fire',
+                      'forest low sev fire',
+                      'forest prescribed fire',
+                      'short grass',
+                      'grass high sev fire',
+                      'grass low sev fire',
+                      'grass prescribed fire',
+                      'short grass',
+                      'shrub',
+                      'shrub high sev fire',
+                      'shrub low sev fire',
+                      'shrub prescribed fire',
+                      'skid',
+                      'tall grass',
+                      'young forest',
+                      'thinning'];
+    var textureValues = ['clay loam', 'loam', 'sand loam', 'silt loam'];
+
+    (headers || []).forEach(function (header, index) {
+        var h = String(header || "").trim().toLowerCase();
+        if (index === 0 || h === "luse" || h === "disturbed_class") {
+            cols.push({ type: 'text', width: 210, source: luseValues });
+            return;
+        }
+        if (index === 1 || h === "stext" || h === "texid") {
+            cols.push({ type: 'text', width: 110, source: textureValues });
+            return;
+        }
+        cols.push({ type: 'text', width: 90 });
+    });
+
+    return cols;
+}
+
+function parseCsvHeaders(csvText) {
+    var firstLine = String(csvText || "").split(/\r?\n/, 1)[0] || "";
+    if (!firstLine) {
+        return [];
+    }
+    return firstLine.split(",").map(function (header) {
+        return String(header || "").replace(/^\"|\"$/g, "").trim();
+    });
+}
+
+function extractContent(payload) {
+    if (!payload || typeof payload !== "object") {
+        return {};
+    }
+    if (payload.Content && typeof payload.Content === "object") {
+        return payload.Content;
+    }
+    if (payload.content && typeof payload.content === "object") {
+        return payload.content;
+    }
+    if (payload.result && typeof payload.result === "object") {
+        return payload.result;
+    }
+    return payload;
+}
+
+function setTableEditingEnabled(enabled) {
+    var host = document.getElementById("spreadsheet1");
+    if (!host) {
+        return;
+    }
+    host.style.pointerEvents = enabled ? "auto" : "none";
+    host.style.opacity = enabled ? "1" : "0.6";
+    host.setAttribute("aria-disabled", enabled ? "false" : "true");
+
+    if (!enabled && document.activeElement && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur();
+    }
+}
+
+function setSaveEnabled() {
+    var saveBtn = document.getElementById("save");
+    if (!saveBtn) {
+        return;
+    }
+    saveBtn.disabled = !editorState.loaded || editorState.inFlightSave || editorState.stale;
+}
+
+function toggleStaleActions(show) {
+    var actions = document.getElementById("stale-actions");
+    if (!actions) {
+        return;
+    }
+    actions.style.display = show ? "block" : "none";
+}
+
+function markStale(remoteSha256) {
+    editorState.stale = true;
+    setTableEditingEnabled(false);
+    setSaveEnabled();
+    toggleStaleActions(true);
+    var suffix = remoteSha256 ? " (new version detected)." : ".";
+    setStatus("warning", "This page is stale and editing is locked" + suffix + " Load current data or refresh.");
+}
+
+function clearStaleState() {
+    editorState.stale = false;
+    setTableEditingEnabled(true);
+    setSaveEnabled();
+    toggleStaleActions(false);
 }
 
 function parseErrorBody(response) {
+    return parseErrorObject(response).then(function (payload) {
+        return payload.message;
+    });
+}
+
+function parseErrorObject(response) {
     return response
         .text()
         .then(function (body) {
+            var parsed = null;
             if (!body) {
-                return "HTTP " + response.status;
+                return {
+                    message: "HTTP " + response.status,
+                    code: "",
+                    details: null
+                };
             }
             try {
-                var parsed = JSON.parse(body);
+                parsed = JSON.parse(body);
                 if (parsed && parsed.error && parsed.error.message) {
-                    return parsed.error.message;
+                    return {
+                        message: parsed.error.message,
+                        code: String(parsed.error.code || ""),
+                        details: parsed.error.details || null
+                    };
                 }
             } catch (_ignore) {
                 // fall through to plain text
             }
             var lowered = String(body).toLowerCase();
             if (lowered.indexOf("<html") !== -1 || lowered.indexOf("<!doctype") !== -1) {
-                return "HTTP " + response.status;
+                return {
+                    message: "HTTP " + response.status,
+                    code: "",
+                    details: null
+                };
             }
             if (body.length > 300) {
-                return body.slice(0, 300) + "...";
+                body = body.slice(0, 300) + "...";
             }
-            return body;
+            return {
+                message: body,
+                code: "",
+                details: null
+            };
         })
         .catch(function () {
-            return "HTTP " + response.status;
+            return {
+                message: "HTTP " + response.status,
+                code: "",
+                details: null
+            };
         });
 }
 
@@ -142,62 +261,206 @@ function requestSessionToken(config) {
     });
 }
 
-function fetchLookupCsv(config) {
-    return fetch(config.csvUrl, {
+function fetchLookupSnapshot(config) {
+    return fetch(config.lookupSnapshotUrl, {
         method: "GET",
-        credentials: "same-origin"
+        credentials: "same-origin",
+        cache: "no-store"
     }).then(function (response) {
         if (!response.ok) {
             return parseErrorBody(response).then(function (message) {
                 throw new Error("Table download failed: " + message);
             });
         }
-        return response.text();
+        return response.json().then(function (payload) {
+            var content = extractContent(payload);
+            return {
+                csvText: String(content.csv_text || ""),
+                sha256: String(content.lookup_sha256 || "").trim() || null,
+                rows: content.rows,
+                columns: content.columns,
+                mtimeEpoch: content.mtime_epoch
+            };
+        });
     });
+}
+
+function fetchLookupMeta(config) {
+    return fetch(config.lookupMetaUrl, {
+        method: "GET",
+        credentials: "same-origin",
+        cache: "no-store"
+    }).then(function (response) {
+        if (!response.ok) {
+            return parseErrorBody(response).then(function (message) {
+                throw new Error("Lookup version check failed: " + message);
+            });
+        }
+        return response.json().then(function (payload) {
+            var content = extractContent(payload);
+            return {
+                sha256: String(content.lookup_sha256 || "").trim() || null,
+                rows: content.rows,
+                columns: content.columns,
+                mtimeEpoch: content.mtime_epoch
+            };
+        });
+    });
+}
+
+function stopStalePolling() {
+    if (stalePollHandle !== null) {
+        window.clearInterval(stalePollHandle);
+        stalePollHandle = null;
+    }
+}
+
+function pollForStaleLookup(config) {
+    if (!editorState.loaded || editorState.inFlightSave || editorState.stale || !editorState.baselineSha256) {
+        return Promise.resolve();
+    }
+    return fetchLookupMeta(config)
+        .then(function (meta) {
+            if (meta.sha256 && meta.sha256 !== editorState.baselineSha256) {
+                markStale(meta.sha256);
+            }
+        })
+        .catch(function (error) {
+            if (editorState.stale) {
+                return;
+            }
+            var message = String(error && error.message ? error.message : error);
+            var nowMs = Date.now();
+            if (
+                pollWarningState.lastMessage === message &&
+                (nowMs - pollWarningState.lastAtMs) < 60000
+            ) {
+                return;
+            }
+            pollWarningState.lastMessage = message;
+            pollWarningState.lastAtMs = nowMs;
+            setStatus("warning", message);
+        });
+}
+
+function startStalePolling(config) {
+    stopStalePolling();
+    stalePollHandle = window.setInterval(function () {
+        pollForStaleLookup(config);
+    }, 15000);
 }
 
 function initializeSpreadsheetFromCsv(csvText) {
+    var host = document.getElementById('spreadsheet1');
+    if (mySpreadsheet && typeof mySpreadsheet.destroy === "function") {
+        try {
+            mySpreadsheet.destroy();
+        } catch (_ignore) {
+            // best-effort cleanup
+        }
+    }
+    if (host) {
+        host.innerHTML = "";
+    }
+
     var blob = new Blob([csvText], { type: "text/csv" });
     var blobUrl = URL.createObjectURL(blob);
-    mySpreadsheet = jspreadsheet(document.getElementById('spreadsheet1'), {
+    var headers = parseCsvHeaders(csvText);
+    mySpreadsheet = jspreadsheet(host, {
         csv: blobUrl,
         csvHeaders: true,
-        columns: columnsConfig()
+        columns: columnsConfig(headers)
     });
 }
 
-function loadSpreadsheet(config) {
+function loadSpreadsheet(config, options) {
+    var opts = options || {};
+    var recoveryAttempt = Boolean(opts.recoveryAttempt);
+    var wasStale = editorState.stale;
+
+    stopStalePolling();
+    editorState.loaded = false;
+    editorState.baselineSha256 = null;
+    setSaveEnabled();
+    if (!wasStale) {
+        clearStaleState();
+    }
+    setTableEditingEnabled(false);
+    if (wasStale || recoveryAttempt) {
+        toggleStaleActions(true);
+    }
     setStatus("info", "Authorizing table access...");
     return requestSessionToken(config)
         .then(function () {
             setStatus("info", "Loading disturbed lookup table...");
-            return fetchLookupCsv(config);
+            return fetchLookupSnapshot(config);
         })
-        .then(function (csvText) {
+        .then(function (snapshot) {
             ensureSpreadsheetLibraries();
-            initializeSpreadsheetFromCsv(csvText);
-            document.getElementById("save").disabled = false;
+            initializeSpreadsheetFromCsv(snapshot.csvText);
+            editorState.baselineSha256 = snapshot.sha256;
+            editorState.loaded = true;
+            if (!editorState.baselineSha256) {
+                markStale(null);
+                setStatus("warning", "Table loaded, but version verification is unavailable. Load current data before editing.");
+                startStalePolling(config);
+                return;
+            }
+            clearStaleState();
+            setSaveEnabled();
             setStatus("success", "Table loaded. You can edit values and save.");
+            startStalePolling(config);
         })
         .catch(function (error) {
-            setStatus("danger", String(error && error.message ? error.message : error));
+            editorState.loaded = false;
+            setSaveEnabled();
+            var message = String(error && error.message ? error.message : error);
+            if (wasStale || recoveryAttempt) {
+                markStale(null);
+                setStatus("warning", "Reload failed while page is stale: " + message);
+                return;
+            }
+            setStatus("danger", message);
         });
 }
 
 function parseSaveResponse(response) {
     if (!response.ok) {
-        return parseErrorBody(response).then(function (message) {
-            throw new Error(message);
+        return parseErrorObject(response).then(function (payload) {
+            var err = new Error(payload.message);
+            err.status = response.status;
+            err.code = payload.code;
+            err.details = payload.details;
+            throw err;
         });
     }
-    return response.json().catch(function () { return {}; });
+    var shaHeader = String(response.headers.get("X-Lookup-Sha256") || "").trim() || null;
+    return response.json().catch(function () { return {}; }).then(function (payload) {
+        return {
+            payload: payload,
+            lookupSha256: shaHeader
+        };
+    });
 }
 
 function onSave(config) {
+    if (editorState.inFlightSave) {
+        setStatus("warning", "Save already in progress.");
+        return;
+    }
+    if (editorState.stale) {
+        setStatus("warning", "This page is stale. Load current table or refresh before saving.");
+        return;
+    }
     if (!mySpreadsheet || typeof mySpreadsheet.getData !== "function") {
         setStatus("warning", "Table is not loaded yet.");
         return;
     }
+    if (!editorState.baselineSha256) {
+        setStatus("danger", "Lookup version is unknown. Reload the table before saving.");
+        return;
+    }
+
     var data = mySpreadsheet.getData();
     var headers = {
         "Content-Type": "application/json"
@@ -207,19 +470,60 @@ function onSave(config) {
         headers["X-CSRFToken"] = csrfToken;
     }
 
+    editorState.inFlightSave = true;
+    setTableEditingEnabled(false);
+    setSaveEnabled();
     setStatus("info", "Saving changes...");
     fetch(config.saveUrl, {
         method: "POST",
         credentials: "same-origin",
         headers: headers,
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+            rows: data,
+            if_match_sha256: editorState.baselineSha256
+        })
     })
         .then(parseSaveResponse)
-        .then(() => {
+        .then(function (result) {
+            if (result.lookupSha256) {
+                editorState.baselineSha256 = result.lookupSha256;
+            } else {
+                markStale(null);
+                setStatus("warning", "Changes were saved, but version refresh failed. Load current table before editing again.");
+                return;
+            }
+            clearStaleState();
             setStatus("success", "Save successful. Please rebuild Landuse and Soils.");
         })
         .catch((error) => {
+            if (error && (error.status === 409 || error.status === 428)) {
+                var code = String(error.code || "");
+                if (code === "STALE_LOOKUP") {
+                    var remoteSha = error.details && error.details.current_sha256 ? error.details.current_sha256 : null;
+                    markStale(remoteSha);
+                    setStatus("warning", "Save blocked: table is stale. Load current data or refresh.");
+                    return;
+                }
+                if (code === "LOOKUP_VERSION_UNAVAILABLE") {
+                    markStale(null);
+                    setStatus("warning", "Save blocked: version check is unavailable. Load current data or refresh.");
+                    return;
+                }
+                if (code === "PRECONDITION_REQUIRED" || error.status === 428) {
+                    markStale(null);
+                    setStatus("warning", "Save blocked: page version token is missing. Load current data or refresh.");
+                    return;
+                }
+                markStale(null);
+                setStatus("warning", "Save blocked: table changed. Load current data or refresh.");
+                return;
+            }
             setStatus("danger", "Save failed: " + String(error && error.message ? error.message : error));
+        })
+        .finally(function () {
+            editorState.inFlightSave = false;
+            setTableEditingEnabled(!editorState.stale);
+            setSaveEnabled();
         });
 }
 
@@ -230,12 +534,18 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
     var config = {
-        csvUrl: String(configNode.dataset.csvUrl || ""),
         saveUrl: String(configNode.dataset.saveUrl || ""),
+        lookupMetaUrl: String(configNode.dataset.lookupMetaUrl || ""),
+        lookupSnapshotUrl: String(configNode.dataset.lookupSnapshotUrl || ""),
         sessionTokenUrl: String(configNode.dataset.sessionTokenUrl || "")
     };
 
-    if (!config.csvUrl || !config.saveUrl || !config.sessionTokenUrl) {
+    if (
+        !config.saveUrl ||
+        !config.lookupMetaUrl ||
+        !config.lookupSnapshotUrl ||
+        !config.sessionTokenUrl
+    ) {
         setStatus("danger", "Editor config is incomplete.");
         return;
     }
@@ -243,8 +553,19 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("save").addEventListener("click", function () {
         onSave(config);
     });
+    document.getElementById("reload-current").addEventListener("click", function () {
+        loadSpreadsheet(config, { recoveryAttempt: true });
+    });
+    document.getElementById("refresh-page").addEventListener("click", function () {
+        window.location.reload();
+    });
 
+    setSaveEnabled();
     loadSpreadsheet(config);
+});
+
+window.addEventListener("beforeunload", function () {
+    stopStalePolling();
 });
 
 </script>

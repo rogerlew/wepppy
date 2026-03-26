@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager, nullcontext
+import logging
+import os
 from urllib.parse import quote
 from typing import Any, Dict, Optional, Tuple, Union
 
@@ -19,15 +22,67 @@ from .._common import (
     request,
     send_file,
     success_factory,
-    _join,
 )
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.baer import Baer
-from wepppy.nodb.mods.disturbed import Disturbed, write_disturbed_land_soil_lookup
+from wepppy.nodb.mods.disturbed import (
+    Disturbed,
+    get_disturbed_land_soil_lookup_sha256,
+    get_disturbed_land_soil_lookup_snapshot,
+    write_disturbed_land_soil_lookup,
+)
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory, url_for_run
 
 disturbed_bp = Blueprint('disturbed', __name__)
+_logger = logging.getLogger(__name__)
+
+
+def _set_no_store_headers(response: Response) -> Response:
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+
+@contextmanager
+def _controller_lock(controller: Any):
+    if not hasattr(controller, 'lock') or not hasattr(controller, 'unlock'):
+        # Test stubs may only expose locked(); production NoDb controllers provide lock/unlock.
+        with controller.locked():
+            yield
+        return
+
+    acquired = False
+    controller.lock()
+    acquired = True
+    try:
+        yield
+    finally:
+        if acquired:
+            controller.unlock()
+
+
+def _read_lock_context(controller: Any):
+    if getattr(controller, 'readonly', False):
+        return nullcontext()
+    return _controller_lock(controller)
+
+
+def _build_lookup_snapshot_payload(lookup_fn: str) -> Dict[str, Any]:
+    snapshot = get_disturbed_land_soil_lookup_snapshot(lookup_fn)
+    csv_text = ''
+    if lookup_fn and os.path.exists(lookup_fn):
+        with open(lookup_fn) as fp:
+            csv_text = fp.read()
+    return dict(
+        csv_text=csv_text,
+        lookup_sha256=snapshot.get('sha256'),
+        size_bytes=snapshot.get('size_bytes'),
+        mtime_epoch=snapshot.get('mtime_epoch'),
+        rows=snapshot.get('rows'),
+        columns=snapshot.get('columns'),
+    )
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/modify_disturbed')
@@ -48,6 +103,16 @@ def modify_disturbed(runid: str, config: str) -> Response:
         ),
         save_url=url_for_run(
             'disturbed.task_modify_disturbed',
+            runid=runid,
+            config=config,
+        ),
+        lookup_meta_url=url_for_run(
+            'disturbed.lookup_disturbed_lookup_meta',
+            runid=runid,
+            config=config,
+        ),
+        lookup_snapshot_url=url_for_run(
+            'disturbed.lookup_disturbed_lookup_snapshot',
             runid=runid,
             config=config,
         ),
@@ -87,6 +152,46 @@ def has_sbs(runid: str, config: str) -> Response:
     return jsonify(dict(has_sbs=disturbed.has_sbs))
 
 
+@disturbed_bp.route('/runs/<string:runid>/<config>/api/disturbed/lookup_meta')
+@authorize_and_handle_with_exception_factory
+def lookup_disturbed_lookup_meta(runid: str, config: str) -> Response:
+    """Return run-scoped disturbed lookup fingerprint metadata."""
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    disturbed = Disturbed.getInstance(wd)
+
+    with _read_lock_context(disturbed):
+        lookup_fn = disturbed.lookup_fn
+        snapshot = get_disturbed_land_soil_lookup_snapshot(lookup_fn)
+
+    response = success_factory(
+        dict(
+            lookup_sha256=snapshot.get('sha256'),
+            size_bytes=snapshot.get('size_bytes'),
+            mtime_epoch=snapshot.get('mtime_epoch'),
+            rows=snapshot.get('rows'),
+            columns=snapshot.get('columns'),
+        )
+    )
+    return _set_no_store_headers(response)
+
+
+@disturbed_bp.route('/runs/<string:runid>/<config>/api/disturbed/lookup_snapshot')
+@authorize_and_handle_with_exception_factory
+def lookup_disturbed_lookup_snapshot(runid: str, config: str) -> Response:
+    """Return run-scoped disturbed lookup CSV + fingerprint from one locked read."""
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    disturbed = Disturbed.getInstance(wd)
+
+    with _read_lock_context(disturbed):
+        lookup_fn = disturbed.lookup_fn
+        payload = _build_lookup_snapshot_payload(lookup_fn)
+
+    response = success_factory(payload)
+    return _set_no_store_headers(response)
+
+
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/modify_disturbed', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def task_modify_disturbed(runid: str, config: str) -> Response:
@@ -98,20 +203,106 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
     # The frontend sends a raw JSON array of rows (list of lists).
     # Try to parse it directly first, falling back to dict payload format.
     raw_json = request.get_json(silent=True, force=True)
+    if_match_sha256: Optional[str] = request.headers.get('X-If-Match-Sha256')
     if isinstance(raw_json, list):
         # Direct array payload from jspreadsheet getData()
         rows = raw_json
     elif isinstance(raw_json, dict):
         # Dict payload with 'rows' key
         rows = raw_json.get('rows', [])
+        requested_sha = raw_json.get('if_match_sha256')
+        if requested_sha is not None:
+            if_match_sha256 = str(requested_sha).strip()
         if isinstance(rows, dict):
             rows = [rows]
     else:
-        rows = []
+        return error_factory('rows payload must be JSON list or {"rows": [...]}', status_code=400)
 
-    lookup_fn = Disturbed.getInstance(wd).lookup_fn
-    write_disturbed_land_soil_lookup(lookup_fn, rows)
-    return success_factory()
+    if not isinstance(rows, list) or len(rows) == 0:
+        return error_factory('rows payload must be a non-empty list', status_code=400)
+
+    if any(not isinstance(row, (list, tuple, dict)) for row in rows):
+        return error_factory('each row must be a list or mapping', status_code=400)
+
+    if if_match_sha256 is not None:
+        if_match_sha256 = if_match_sha256.strip()
+    if not if_match_sha256:
+        _logger.warning(
+            'disturbed_lookup_write_blocked_missing_if_match runid=%s config=%s',
+            runid,
+            config,
+        )
+        return error_factory('if_match_sha256 is required', status_code=428)
+
+    disturbed = Disturbed.getInstance(wd)
+
+    try:
+        with _controller_lock(disturbed):
+            lookup_fn = disturbed.lookup_fn
+            current_sha256 = get_disturbed_land_soil_lookup_sha256(lookup_fn)
+            if not current_sha256:
+                _logger.warning(
+                    'disturbed_lookup_write_blocked_sha_unavailable runid=%s config=%s lookup_fn=%s',
+                    runid,
+                    config,
+                    lookup_fn,
+                )
+                return error_factory(
+                    'Unable to verify current disturbed lookup version. Reload and retry.',
+                    status_code=409,
+                    code='LOOKUP_VERSION_UNAVAILABLE',
+                )
+            if current_sha256 != if_match_sha256:
+                _logger.warning(
+                    'disturbed_lookup_write_blocked_stale runid=%s config=%s expected_sha=%s current_sha=%s',
+                    runid,
+                    config,
+                    if_match_sha256,
+                    current_sha256,
+                )
+                return error_factory(
+                    'Stale disturbed lookup. Reload current data before saving.',
+                    status_code=409,
+                    code='STALE_LOOKUP',
+                    details=dict(
+                        expected_sha256=if_match_sha256,
+                        current_sha256=current_sha256,
+                    ),
+                )
+            write_disturbed_land_soil_lookup(lookup_fn, rows)
+            updated_sha256 = get_disturbed_land_soil_lookup_sha256(lookup_fn)
+            if not updated_sha256:
+                _logger.warning(
+                    'disturbed_lookup_write_postsave_sha_unavailable runid=%s config=%s lookup_fn=%s',
+                    runid,
+                    config,
+                    lookup_fn,
+                )
+                return error_factory(
+                    'Disturbed lookup saved but new version fingerprint is unavailable.',
+                    status_code=409,
+                    code='LOOKUP_VERSION_UNAVAILABLE',
+                )
+            _logger.info(
+                'disturbed_lookup_write_committed runid=%s config=%s expected_sha=%s prior_sha=%s updated_sha=%s row_count=%s',
+                runid,
+                config,
+                if_match_sha256,
+                current_sha256,
+                updated_sha256,
+                len(rows),
+            )
+    except ValueError as exc:
+        _logger.warning(
+            'disturbed_lookup_write_rejected runid=%s config=%s err=%s',
+            runid,
+            config,
+            exc,
+        )
+        return error_factory(str(exc), status_code=400)
+    response = success_factory()
+    response.headers['X-Lookup-Sha256'] = updated_sha256
+    return response
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/query/baer_wgs_map')

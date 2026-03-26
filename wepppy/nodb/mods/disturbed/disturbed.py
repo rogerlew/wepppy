@@ -36,18 +36,21 @@ See also:
 import os
 import ast
 import csv
+import json
+import hashlib
 import shutil
 import tempfile
 import inspect
+import logging
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timezone
 from subprocess import Popen, PIPE
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 from copy import deepcopy
 from collections import Counter
-from typing import Optional, Dict, List, Tuple, Any, Union
+from typing import Optional, Dict, List, Tuple, Any, Union, Sequence
 
 import rasterio
 from rasterio.warp import reproject, Resampling
@@ -76,6 +79,8 @@ __all__ = [
     'TREATMENT_SUFFIXES',
     'lookup_disturbed_class',
     'read_disturbed_land_soil_lookup',
+    'get_disturbed_land_soil_lookup_snapshot',
+    'get_disturbed_land_soil_lookup_sha256',
     'migrate_land_soil_lookup',
     'write_disturbed_land_soil_lookup',
     'DisturbedNoDbLockedException',
@@ -87,6 +92,7 @@ gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
+_logger = logging.getLogger(__name__)
 
 
 def _resolve_external_mods_path(path: Optional[str]) -> Optional[str]:
@@ -108,6 +114,19 @@ disturbed_class_aliases: Dict[str, str] = {
 
 # Treatment suffixes that should be stripped when looking up base disturbed class
 TREATMENT_SUFFIXES = ('-mulch_15', '-mulch_30', '-mulch_60', '-thinning', '-prescribed_fire')
+LOOKUP_KEY_FIELDS: Tuple[str, str] = ('luse', 'stext')
+LOOKUP_FALLBACK_KEY_FIELDS: Tuple[str, str] = ('disturbed_class', 'texid')
+LOOKUP_REQUIRED_COLUMNS: Tuple[str, ...] = (
+    'pmet_kcb',
+    'pmet_rawp',
+    'rdmax',
+    'xmxlai',
+    'keffflag',
+    'lkeff',
+)
+LOOKUP_REQUIRED_KEYS: Tuple[Tuple[str, str], ...] = (
+    ('forest moderate sev fire', 'loam'),
+)
 
 
 def lookup_disturbed_class(disturbed_class: Optional[str]) -> Optional[str]:
@@ -134,21 +153,189 @@ def lookup_disturbed_class(disturbed_class: Optional[str]) -> Optional[str]:
     return disturbed_class
 
 
+def _read_lookup_rows(fname: str) -> Tuple[List[str], List[Dict[str, Any]]]:
+    with open(fname) as fp:
+        reader = csv.DictReader(fp)
+        fieldnames = list(reader.fieldnames or [])
+        rows: List[Dict[str, Any]] = []
+        for row in reader:
+            rows.append({field: row.get(field, '') for field in fieldnames})
+    return fieldnames, rows
+
+
+def _lookup_row_key(row: Dict[str, Any]) -> Optional[Tuple[str, str]]:
+    luse = row.get('luse') or row.get('disturbed_class')
+    stext = row.get('stext') or row.get('texid')
+    if luse is None or stext is None:
+        return None
+    luse_str = str(luse).strip()
+    stext_str = str(stext).strip()
+    if not luse_str or not stext_str:
+        return None
+    return luse_str, stext_str
+
+
+def _atomic_write_lookup_rows(fname: str, fieldnames: Sequence[str], rows: Sequence[Dict[str, Any]]) -> None:
+    if not fieldnames:
+        raise ValueError('lookup fieldnames are empty')
+
+    os.makedirs(os.path.dirname(fname), exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(
+        prefix='disturbed_land_soil_lookup.',
+        suffix='.csv',
+        dir=os.path.dirname(fname),
+    )
+    os.close(fd)
+
+    try:
+        with open(tmp_path, 'w') as fp:
+            writer = csv.DictWriter(fp, list(fieldnames))
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({field: row.get(field, '') for field in fieldnames})
+
+        backup_fn = f'{fname}.bak'
+        if _exists(fname):
+            shutil.copyfile(fname, backup_fn)
+        os.replace(tmp_path, fname)
+    finally:
+        if _exists(tmp_path):
+            os.remove(tmp_path)
+
+
+def _lookup_file_snapshot(fname: str) -> Dict[str, Any]:
+    snapshot: Dict[str, Any] = {'path': fname, 'exists': _exists(fname)}
+    if not snapshot['exists']:
+        return snapshot
+
+    try:
+        stat = os.stat(fname)
+        snapshot['size_bytes'] = stat.st_size
+        snapshot['mtime_epoch'] = stat.st_mtime
+    except OSError:
+        return snapshot
+
+    digest = hashlib.sha256()
+    try:
+        with open(fname, 'rb') as fp:
+            for chunk in iter(lambda: fp.read(65536), b''):
+                digest.update(chunk)
+        snapshot['sha256'] = digest.hexdigest()
+    except OSError:
+        snapshot['sha256'] = None
+
+    try:
+        fieldnames, rows = _read_lookup_rows(fname)
+        snapshot['columns'] = len(fieldnames)
+        snapshot['rows'] = len(rows)
+    except (OSError, csv.Error, UnicodeError):
+        pass
+
+    return snapshot
+
+
+def _lookup_audit_path(lookup_path: str) -> str:
+    return _join(os.path.dirname(lookup_path), 'disturbed_lookup_audit.jsonl')
+
+
+def get_disturbed_land_soil_lookup_snapshot(fname: str) -> Dict[str, Any]:
+    """Return current lookup file fingerprint metadata."""
+    return _lookup_file_snapshot(fname)
+
+
+def get_disturbed_land_soil_lookup_sha256(fname: str) -> Optional[str]:
+    """Return current lookup SHA-256 fingerprint when readable."""
+    snapshot = _lookup_file_snapshot(fname)
+    value = snapshot.get('sha256')
+    return value if isinstance(value, str) and value else None
+
+
+def _emit_lookup_audit(
+    event: str,
+    lookup_path: str,
+    *,
+    before: Optional[Dict[str, Any]] = None,
+    after: Optional[Dict[str, Any]] = None,
+    details: Optional[Dict[str, Any]] = None,
+) -> None:
+    payload: Dict[str, Any] = {
+        'timestamp_utc': datetime.now(timezone.utc).isoformat(),
+        'event': event,
+        'lookup_path': lookup_path,
+        'before': before,
+        'after': after,
+        'details': details or {},
+    }
+    serialized = json.dumps(payload, sort_keys=True, separators=(',', ':'))
+    _logger.info('disturbed_lookup_audit %s', serialized)
+
+    audit_fn = _lookup_audit_path(lookup_path)
+    try:
+        os.makedirs(os.path.dirname(audit_fn), exist_ok=True)
+        with open(audit_fn, 'a') as fp:
+            fp.write(serialized)
+            fp.write('\n')
+    except OSError as exc:
+        _logger.warning(
+            'disturbed_lookup_audit_write_failed path=%s err=%s',
+            audit_fn,
+            exc,
+        )
+
+
+def _normalize_lookup_payload_row(
+    row: Union[List[Any], Tuple[Any, ...], Dict[str, Any]],
+    fieldnames: Sequence[str],
+    index: int,
+) -> Dict[str, Any]:
+    normalized: Dict[str, Any] = {}
+
+    if isinstance(row, (list, tuple)):
+        if len(row) != len(fieldnames):
+            raise ValueError(
+                f'row {index} has {len(row)} columns; expected {len(fieldnames)}'
+            )
+        normalized = {field: value for field, value in zip(fieldnames, row)}
+    elif isinstance(row, dict):
+        missing_fields: List[str] = []
+        for field in fieldnames:
+            if field in row:
+                continue
+            if field == 'luse' and str(row.get('disturbed_class', '')).strip():
+                continue
+            if field == 'stext' and str(row.get('texid', '')).strip():
+                continue
+            missing_fields.append(field)
+        if missing_fields:
+            preview = ', '.join(missing_fields[:5])
+            raise ValueError(f'row {index} is missing columns: {preview}')
+        normalized = {field: row.get(field, '') for field in fieldnames}
+        if 'luse' in fieldnames and not normalized.get('luse'):
+            normalized['luse'] = row.get('disturbed_class', '')
+        if 'stext' in fieldnames and not normalized.get('stext'):
+            normalized['stext'] = row.get('texid', '')
+    else:
+        raise ValueError(f'row {index} must be a list or mapping')
+
+    key = _lookup_row_key(normalized)
+    if key is None:
+        raise ValueError(f'row {index} must include non-empty luse/stext key values')
+
+    if 'luse' in fieldnames:
+        normalized['luse'] = key[0]
+    if 'stext' in fieldnames:
+        normalized['stext'] = key[1]
+    return normalized
+
+
 def read_disturbed_land_soil_lookup(fname: str) -> Dict[Tuple[str, str], Dict[str, Any]]:
     d = {}
 
     with open(fname) as fp:
         reader = csv.DictReader(fp)
         for row in reader:
-            try:
-                disturbed_class = row['luse']
-            except KeyError:
-                disturbed_class = row['disturbed_class']
-
-            try:
-                texid = row['stext']
-            except KeyError:
-                texid = row['texid']
+            disturbed_class = str(row.get('luse') or row.get('disturbed_class') or '').strip()
+            texid = str(row.get('stext') or row.get('texid') or '').strip()
 
             for k in row:
                 v = row[k]
@@ -178,6 +365,7 @@ def migrate_land_soil_lookup(
     pars: List[str], 
     defaults: Dict[str, Any]
 ) -> None:
+    before_snapshot = _lookup_file_snapshot(target_fn)
     src = read_disturbed_land_soil_lookup(src_fn)
     target = read_disturbed_land_soil_lookup(target_fn)
 
@@ -202,18 +390,152 @@ def migrate_land_soil_lookup(
         for k, row in target.items():
             wtr.writerow(row)
 
+    _emit_lookup_audit(
+        'lookup.migrate',
+        target_fn,
+        before=before_snapshot,
+        after=_lookup_file_snapshot(target_fn),
+        details={
+            'source_lookup': src_fn,
+            'target_rows': len(target),
+            'added_parameters': list(pars),
+        },
+    )
 
-def write_disturbed_land_soil_lookup(fname: str, data: List[List[Any]]) -> None:
-    with open(fname) as fp:
-        rdr = csv.DictReader(fp)
-        fieldnames = rdr.fieldnames
 
-    with open(fname, 'w') as fp:
-        wtr = csv.DictWriter(fp, fieldnames)
-        wtr.writeheader()
+def write_disturbed_land_soil_lookup(
+    fname: str,
+    data: List[Union[List[Any], Tuple[Any, ...], Dict[str, Any]]],
+) -> None:
+    before_snapshot = _lookup_file_snapshot(fname)
+    fieldnames, existing_rows = _read_lookup_rows(fname)
+    if not fieldnames:
+        raise ValueError('lookup file has no header row')
+    if not isinstance(data, list) or len(data) == 0:
+        raise ValueError('rows payload must be a non-empty list')
 
-        for row in data:
-            wtr.writerow({k: v for k, v in zip(fieldnames, row)})
+    incoming_rows = [
+        _normalize_lookup_payload_row(row, fieldnames, index=i)
+        for i, row in enumerate(data, start=1)
+    ]
+
+    existing_keys = {
+        key
+        for row in existing_rows
+        if (key := _lookup_row_key(row)) is not None
+    }
+    incoming_keys = {
+        key
+        for row in incoming_rows
+        if (key := _lookup_row_key(row)) is not None
+    }
+    if existing_keys - incoming_keys:
+        raise ValueError('rows payload is missing existing lookup rows; refresh and retry')
+
+    seen_keys: set[Tuple[str, str]] = set()
+    for i, row in enumerate(incoming_rows, start=1):
+        key = _lookup_row_key(row)
+        assert key is not None
+        if key in seen_keys:
+            raise ValueError(f'row {i} duplicates key values: {key[0]}/{key[1]}')
+        seen_keys.add(key)
+
+    _atomic_write_lookup_rows(fname, fieldnames, incoming_rows)
+    _emit_lookup_audit(
+        'lookup.write',
+        fname,
+        before=before_snapshot,
+        after=_lookup_file_snapshot(fname),
+        details={
+            'incoming_rows': len(incoming_rows),
+            'existing_rows': len(existing_rows),
+        },
+    )
+
+
+def upgrade_disturbed_land_soil_lookup(
+    target_fn: str,
+    default_fn: str,
+) -> bool:
+    before_snapshot = _lookup_file_snapshot(target_fn)
+    target_fieldnames, target_rows = _read_lookup_rows(target_fn)
+    default_fieldnames, default_rows = _read_lookup_rows(default_fn)
+    if not default_fieldnames:
+        raise ValueError('default disturbed lookup has no header row')
+
+    normalized_fieldnames = list(default_fieldnames)
+    for field in target_fieldnames:
+        if field not in normalized_fieldnames:
+            normalized_fieldnames.append(field)
+
+    default_by_key: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    for row in default_rows:
+        key = _lookup_row_key(row)
+        if key is not None:
+            default_by_key[key] = row
+
+    changed = False
+    normalized_rows: List[Dict[str, Any]] = []
+    present_keys: set[Tuple[str, str]] = set()
+
+    for row in target_rows:
+        normalized = {field: row.get(field, '') for field in normalized_fieldnames}
+        key = _lookup_row_key(normalized)
+        if key is not None:
+            if 'luse' in normalized_fieldnames and str(normalized.get('luse', '')).strip() != key[0]:
+                normalized['luse'] = key[0]
+                changed = True
+            if 'stext' in normalized_fieldnames and str(normalized.get('stext', '')).strip() != key[1]:
+                normalized['stext'] = key[1]
+                changed = True
+            present_keys.add(key)
+            default_row = default_by_key.get(key, {})
+            for field in LOOKUP_REQUIRED_COLUMNS:
+                if field not in normalized_fieldnames:
+                    continue
+                if str(normalized.get(field, '')).strip() == '':
+                    fallback = default_row.get(field, '')
+                    if str(fallback).strip() != '':
+                        normalized[field] = fallback
+                        changed = True
+        if normalized != row:
+            changed = True
+        normalized_rows.append(normalized)
+
+    for row in default_rows:
+        key = _lookup_row_key(row)
+        if key is None or key in present_keys:
+            continue
+        normalized_rows.append({field: row.get(field, '') for field in normalized_fieldnames})
+        present_keys.add(key)
+        changed = True
+
+    for required_key in LOOKUP_REQUIRED_KEYS:
+        if required_key not in present_keys and required_key in default_by_key:
+            row = default_by_key[required_key]
+            normalized_rows.append({field: row.get(field, '') for field in normalized_fieldnames})
+            present_keys.add(required_key)
+            changed = True
+
+    if target_fieldnames != normalized_fieldnames:
+        changed = True
+
+    if changed:
+        _atomic_write_lookup_rows(target_fn, normalized_fieldnames, normalized_rows)
+    _emit_lookup_audit(
+        'lookup.schema_upgrade',
+        target_fn,
+        before=before_snapshot,
+        after=_lookup_file_snapshot(target_fn),
+        details={
+            'changed': changed,
+            'target_rows': len(target_rows),
+            'normalized_rows': len(normalized_rows),
+            'target_columns': len(target_fieldnames),
+            'normalized_columns': len(normalized_fieldnames),
+        },
+    )
+    return changed
 
 
 class DisturbedNoDbLockedException(Exception):
@@ -255,7 +577,7 @@ class Disturbed(NoDbBase):
             self._sbs_mode = 0
             self._uniform_severity = None
 
-            self.reset_land_soil_lookup()
+            self.reset_land_soil_lookup(reason='init')
 
             self.sbs_coverage = None
             self._h0_max_om = self.config_get_float('disturbed', 'h0_max_om')
@@ -299,13 +621,21 @@ class Disturbed(NoDbBase):
             _lookup_path = _join(_data_dir, 'disturbed_land_soil_lookup.csv')
         return _resolve_external_mods_path(_lookup_path)
 
-    def reset_land_soil_lookup(self) -> None:
+    def reset_land_soil_lookup(self, reason: str = 'manual') -> None:
         _lookup = _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
+        before_snapshot = _lookup_file_snapshot(_lookup)
 
         if _exists(_lookup):
             os.remove(_lookup)
 
         shutil.copyfile(self.default_land_soil_lookup_fn, _lookup)
+        _emit_lookup_audit(
+            'lookup.reset',
+            _lookup,
+            before=before_snapshot,
+            after=_lookup_file_snapshot(_lookup),
+            details={'reason': reason},
+        )
 
     @property
     def disturbed_dir(self) -> str:
@@ -923,6 +1253,7 @@ class Disturbed(NoDbBase):
             if isinstance(base_class, str) and base_class not in man_d_base:
                 man_d_base[base_class] = man_d[disturbed_class]
 
+        self.ensure_land_soil_lookup_schema()
         landsoil_lookup = self.land_soil_replacements_d
         extended_landsoil_lookup = self._new_extended_land_soil_lookup_tmp_path()
 
@@ -983,7 +1314,7 @@ class Disturbed(NoDbBase):
 
                     wtr.writerow(_d)
 
-            os.replace(extended_landsoil_lookup, self.lookup_fn)
+            os.replace(extended_landsoil_lookup, self.extended_lookup_fn)
         finally:
             if _exists(extended_landsoil_lookup):
                 os.remove(extended_landsoil_lookup)
@@ -1044,41 +1375,29 @@ class Disturbed(NoDbBase):
         _lookup = _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
 
         if not _exists(_lookup):
-            self.reset_land_soil_lookup()
+            self.reset_land_soil_lookup(reason='missing_lookup_autorecover')
 
         return _lookup
 
     @property
+    def extended_lookup_fn(self) -> str:
+        return _join(self.disturbed_dir, 'disturbed_land_soil_lookup_extended.csv')
+
+    def ensure_land_soil_lookup_schema(self) -> None:
+        upgraded = upgrade_disturbed_land_soil_lookup(
+            self.lookup_fn,
+            self.default_land_soil_lookup_fn,
+        )
+        if upgraded:
+            self.logger.info('  upgraded disturbed lookup schema in place')
+
+    @property
     def land_soil_replacements_d(self) -> Dict[Tuple[str, str], Dict[str, Any]]:
+        self.ensure_land_soil_lookup_schema()
         default_fn = self.default_land_soil_lookup_fn
         _lookup_fn = self.lookup_fn
 
         lookup = read_disturbed_land_soil_lookup(_lookup_fn)
-        for k in lookup:
-            if 'pmet_kcb' not in lookup[k]:
-                migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['pmet_kcb', 'pmet_rawp', 'rdmax', 'xmxlai'], {})
-                return read_disturbed_land_soil_lookup(_lookup_fn)
-                
-            elif 'rdmax' not in lookup[k] and 'plant.data.rdmax' not in lookup[k]:
-                migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['rdmax', 'xmxlai'], {})
-                return read_disturbed_land_soil_lookup(_lookup_fn)
-
-            elif 'xmxlai' not in lookup[k] and 'plant.data.xmxlai' not in lookup[k]:
-                migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['xmxlai'], {})
-                return read_disturbed_land_soil_lookup(_lookup_fn)
-
-            elif 'keffflag' not in lookup[k]:
-                migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['keffflag', 'lkeff'], {})
-                return read_disturbed_land_soil_lookup(_lookup_fn)
-
-        if ('loam', 'forest moderate sev fire') not in lookup:
-            migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, [], {})
-            return read_disturbed_land_soil_lookup(_lookup_fn)
 
         expected_thinning_keys = {
             ('clay loam', 'thinning'),

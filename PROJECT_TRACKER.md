@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-23  
+**Last Updated**: 2026-03-26  
 **Active Packages**: 4  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 3 packages ✅ **Within target**
+**Current WIP**: 4 packages ✅ **Within target**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -353,6 +353,35 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Disturbed Lookup Hardening and Preservation
+**Completed**: 2026-03-26 (reopen addendum)  
+**Duration**: 2 focused sessions  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260325_disturbed_lookup_hardening/](docs/work-packages/20260325_disturbed_lookup_hardening/)  
+**Description**: Hardened disturbed lookup CSV persistence against user-edit loss, then reopened to add stale-page lockout/recovery UX and double-submit safeguards while preserving `?pup` compatibility.
+
+**Outcome**:
+- Hardened disturbed lookup writes with strict payload validation, duplicate-key rejection, and missing-row guardrails to block partial-table truncation.
+- Hardened legacy schema upgrade/read behavior so `disturbed_class`/`texid` rows remain readable after upgrade.
+- Prevented extended lookup export from clobbering editable lookup CSV (`disturbed_land_soil_lookup_extended.csv` now separate artifact).
+- Updated disturbed CSV editor to dynamic header-driven columns for the full lookup schema.
+- Added strict optimistic concurrency (`if_match_sha256`) for disturbed lookup writes and explicit stale/version-unavailable write-block contracts.
+- Added stale-page safeguards in disturbed editor: polling-based stale detection, locked editing on stale state, and explicit `Load Current Table` / `Refresh Page` actions.
+- Added in-flight save table lock to reduce duplicate-submission/user-confusion paths.
+- Added route-side observability events for blocked/committed disturbed lookup writes.
+- Completed reviewer + QA subagent passes with artifacts and no unresolved medium/high findings.
+
+**Validation Notes**:
+- `wctl run-pytest tests/weppcloud/routes/test_disturbed_bp.py --maxfail=1`
+- `wctl run-pytest tests/nodb/mods/test_disturbed_lookup_persistence.py --maxfail=1`
+- `wctl run-pytest tests/nodb/mods -k disturbed --maxfail=1`
+- `wctl run-pytest tests --maxfail=1`
+- `wctl run-stubtest wepppy.weppcloud.routes.nodb_api.disturbed_bp`
+- `wctl check-test-stubs`
+- `wctl run-npm lint`
+- `wctl run-npm test`
 
 ### Peridot Watershed Parquet + Manifest Integration
 **Completed**: 2026-03-21  

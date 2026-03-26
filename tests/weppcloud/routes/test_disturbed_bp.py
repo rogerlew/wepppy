@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict
@@ -153,7 +154,7 @@ def disturbed_client(
 
     monkeypatch.setattr(disturbed_module, "render_template", fake_render_template)
 
-    def fake_send_file(path: str, mimetype: str) -> Response:
+    def fake_send_file(path: str, mimetype: str, **_kwargs: Any) -> Response:
         dispatched["send_file"] = (path, mimetype)
         return Response("file", mimetype=mimetype)
 
@@ -197,7 +198,13 @@ def test_load_extended_lookup_uses_post(disturbed_client):
 
 def test_task_modify_disturbed_writes_lookup(disturbed_client):
     client, DisturbedStub, _, _, dispatched, run_dir = disturbed_client
-    payload = {"rows": [{"id": 1}]}
+    meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+    assert meta_response.status_code == 200
+    current_sha = meta_response.get_json()["Content"]["lookup_sha256"]
+    payload = {
+        "rows": [["forest", "loam", "1", "2", "3", "4", "1", "0", "0", "0"]],
+        "if_match_sha256": current_sha,
+    }
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
         data=json.dumps(payload),
@@ -207,7 +214,6 @@ def test_task_modify_disturbed_writes_lookup(disturbed_client):
     assert response.get_json() == {}
     lookup_path, data = dispatched["write_lookup"]
     assert lookup_path == DisturbedStub.getInstance(run_dir).lookup_fn
-    # The endpoint now extracts rows from the payload dict
     assert data == payload["rows"]
 
 
@@ -224,6 +230,12 @@ def test_modify_disturbed_route_renders_absolute_urls(disturbed_client):
         f"/runs/{RUN_ID}/{CONFIG}/download/disturbed/disturbed_land_soil_lookup.csv"
     )
     assert template_context["save_url"] == f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed"
+    assert template_context["lookup_meta_url"] == (
+        f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta"
+    )
+    assert template_context["lookup_snapshot_url"] == (
+        f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_snapshot"
+    )
     assert template_context["session_token_url"] == (
         f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/session-token"
     )
@@ -262,6 +274,15 @@ def test_modify_disturbed_page_emits_csrf_token_for_save(
         def getInstance(cls, wd: str):
             return disturbed_instance
 
+    @contextmanager
+    def disturbed_lock():
+        yield
+
+    disturbed_instance.locked = disturbed_lock
+    disturbed_instance.lock = lambda: None
+    disturbed_instance.unlock = lambda flag=None: None
+    disturbed_instance.readonly = False
+
     monkeypatch.setattr(disturbed_module, "Disturbed", DisturbedStub)
 
     captured: Dict[str, Any] = {}
@@ -283,7 +304,19 @@ def test_modify_disturbed_page_emits_csrf_token_for_save(
         assert "X-CSRFToken" in html
         assert f'data-csv-url="/runs/{RUN_ID}/{CONFIG}/download/disturbed/disturbed_land_soil_lookup.csv"' in html
         assert f'data-save-url="/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed"' in html
+        assert f'data-lookup-meta-url="/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta"' in html
+        assert f'data-lookup-snapshot-url="/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_snapshot"' in html
         assert f'data-session-token-url="/rq-engine/api/runs/{RUN_ID}/{CONFIG}/session-token"' in html
+        assert 'id="reload-current"' in html
+        assert 'id="refresh-page"' in html
+        assert 'cache: "no-store"' in html
+        assert 'recoveryAttempt: true' in html
+        assert 'PRECONDITION_REQUIRED' in html
+        assert 'LOOKUP_VERSION_UNAVAILABLE' in html
+
+        meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+        assert meta_response.status_code == 200
+        current_sha = meta_response.get_json()["Content"]["lookup_sha256"]
 
         rejected_response = client.post(
             f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
@@ -294,7 +327,10 @@ def test_modify_disturbed_page_emits_csrf_token_for_save(
         accepted_response = client.post(
             f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
             json=[["forest", "loam"]],
-            headers={"X-CSRFToken": token},
+            headers={
+                "X-CSRFToken": token,
+                "X-If-Match-Sha256": current_sha,
+            },
         )
         assert accepted_response.status_code == 200
         assert accepted_response.get_json() == {}
@@ -311,6 +347,289 @@ def test_query_baer_wgs_map_returns_metadata(disturbed_client):
     content = payload["Content"]
     assert content["imgurl"] == "resources/baer.png"
     assert "bounds" in content
+
+
+def test_task_modify_disturbed_rejects_empty_rows(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+        json=[],
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "non-empty list" in payload["error"]["message"].lower()
+
+
+def test_lookup_meta_returns_sha_and_shape(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"].startswith("no-store")
+    payload = response.get_json()
+    content = payload["Content"]
+    assert content["lookup_sha256"]
+    assert isinstance(content["columns"], int)
+    assert isinstance(content["rows"], int)
+
+
+def test_lookup_snapshot_returns_csv_and_sha(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_snapshot")
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"].startswith("no-store")
+    payload = response.get_json()
+    content = payload["Content"]
+    assert isinstance(content["csv_text"], str)
+    assert content["lookup_sha256"]
+    assert isinstance(content["rows"], int)
+    assert isinstance(content["columns"], int)
+
+
+def test_task_modify_disturbed_rejects_missing_if_match(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+        json={"rows": [["forest", "loam", "1", "2", "3", "4", "1", "0", "0", "0"]]},
+    )
+    assert response.status_code == 428
+    payload = response.get_json()
+    assert "if_match_sha256" in payload["error"]["message"]
+
+
+def test_task_modify_disturbed_accepts_dict_payload_if_match_header(disturbed_client):
+    client, DisturbedStub, _, _, dispatched, run_dir = disturbed_client
+    meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+    assert meta_response.status_code == 200
+    current_sha = meta_response.get_json()["Content"]["lookup_sha256"]
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+        json={"rows": [["forest", "loam", "1", "2", "3", "4", "1", "0", "0", "0"]]},
+        headers={"X-If-Match-Sha256": current_sha},
+    )
+    assert response.status_code == 200
+    assert response.get_json() == {}
+    lookup_path, data = dispatched["write_lookup"]
+    assert lookup_path == DisturbedStub.getInstance(run_dir).lookup_fn
+    assert data == [["forest", "loam", "1", "2", "3", "4", "1", "0", "0", "0"]]
+
+
+def test_task_modify_disturbed_rejects_stale_if_match(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+        json={
+            "rows": [["forest", "loam", "1", "2", "3", "4", "1", "0", "0", "0"]],
+            "if_match_sha256": "stale-hash",
+        },
+    )
+    assert response.status_code == 409
+    payload = response.get_json()
+    assert payload["error"]["code"] == "STALE_LOOKUP"
+
+
+def test_task_modify_disturbed_accepts_matching_if_match(disturbed_client):
+    client, DisturbedStub, _, _, dispatched, run_dir = disturbed_client
+    meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+    assert meta_response.status_code == 200
+    current_sha = meta_response.get_json()["Content"]["lookup_sha256"]
+
+    payload = {
+        "rows": [["forest", "loam", "1", "2", "3", "4", "1", "0", "0", "0"]],
+        "if_match_sha256": current_sha,
+    }
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+    assert response.status_code == 200
+    assert response.get_json() == {}
+    assert response.headers["X-Lookup-Sha256"]
+    lookup_path, data = dispatched["write_lookup"]
+    assert lookup_path == DisturbedStub.getInstance(run_dir).lookup_fn
+    assert data == payload["rows"]
+
+
+def test_task_modify_disturbed_rejects_when_lookup_sha_unavailable(
+    disturbed_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, *_ = disturbed_client
+    monkeypatch.setattr(
+        disturbed_module,
+        "get_disturbed_land_soil_lookup_sha256",
+        lambda _path: None,
+    )
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+        json={
+            "rows": [["forest", "loam", "1", "2", "3", "4", "1", "0", "0", "0"]],
+            "if_match_sha256": "deadbeef",
+        },
+    )
+    assert response.status_code == 409
+    payload = response.get_json()
+    assert payload["error"]["code"] == "LOOKUP_VERSION_UNAVAILABLE"
+
+
+def test_lookup_endpoints_use_non_mutating_lock(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    app.register_blueprint(disturbed_module.disturbed_bp)
+
+    run_dir = tmp_path / RUN_ID
+    run_dir.mkdir()
+    lookup_csv = run_dir / "lookup.csv"
+    lookup_csv.write_text("luse,stext,ki\nforest,loam,1\n")
+    context = SimpleNamespace(active_root=run_dir)
+    monkeypatch.setattr(disturbed_module, "load_run_context", lambda runid, config: context)
+
+    class DisturbedInstance:
+        def __init__(self, lookup_fn: str):
+            self.lookup_fn = lookup_fn
+            self.readonly = False
+            self.lock_calls = 0
+            self.unlock_calls = 0
+            self.locked_calls = 0
+
+        def lock(self) -> None:
+            self.lock_calls += 1
+
+        def unlock(self, flag=None) -> None:
+            self.unlock_calls += 1
+
+        def locked(self):
+            self.locked_calls += 1
+            raise AssertionError("lookup GET routes must not call locked()")
+
+    disturbed_instance = DisturbedInstance(str(lookup_csv))
+
+    class DisturbedStub:
+        @classmethod
+        def getInstance(cls, wd: str):
+            return disturbed_instance
+
+    monkeypatch.setattr(disturbed_module, "Disturbed", DisturbedStub)
+
+    with app.test_client() as client:
+        meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+        assert meta_response.status_code == 200
+        snapshot_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_snapshot")
+        assert snapshot_response.status_code == 200
+
+    assert disturbed_instance.lock_calls == 2
+    assert disturbed_instance.unlock_calls == 2
+    assert disturbed_instance.locked_calls == 0
+
+
+def test_task_modify_disturbed_rejects_partial_table_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    app.register_blueprint(disturbed_module.disturbed_bp)
+
+    run_dir = tmp_path / RUN_ID
+    run_dir.mkdir()
+    lookup_csv = run_dir / "lookup.csv"
+    lookup_csv.write_text(
+        "luse,stext,ki,kr\n"
+        "forest,loam,100,1\n"
+        "shrub,loam,200,2\n"
+    )
+    before = lookup_csv.read_text()
+    context = SimpleNamespace(active_root=run_dir)
+    monkeypatch.setattr(disturbed_module, "load_run_context", lambda runid, config: context)
+
+    helpers = __import__("wepppy.weppcloud.utils.helpers", fromlist=["authorize"])
+    monkeypatch.setattr(helpers, "authorize", lambda runid, config, require_owner=False: None)
+
+    class DisturbedStub:
+        @classmethod
+        def getInstance(cls, wd: str):
+            instance = SimpleNamespace(lookup_fn=str(lookup_csv))
+            instance.locked = disturbed_lock
+            instance.lock = lambda: None
+            instance.unlock = lambda flag=None: None
+            instance.readonly = False
+            return instance
+
+    @contextmanager
+    def disturbed_lock():
+        yield
+
+    monkeypatch.setattr(disturbed_module, "Disturbed", DisturbedStub)
+    current_sha = disturbed_module.get_disturbed_land_soil_lookup_sha256(str(lookup_csv))
+
+    with app.test_client() as client:
+        response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+            json={
+                "rows": [["forest", "loam", "999", "9"]],
+                "if_match_sha256": current_sha,
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "missing existing lookup rows" in payload["error"]["message"].lower()
+    assert lookup_csv.read_text() == before
+
+
+def test_task_modify_disturbed_rejects_blank_rows_from_table_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    app.register_blueprint(disturbed_module.disturbed_bp)
+
+    run_dir = tmp_path / RUN_ID
+    run_dir.mkdir()
+    lookup_csv = run_dir / "lookup.csv"
+    lookup_csv.write_text("luse,stext,ki,kr\nforest,loam,100,1\n")
+    before = lookup_csv.read_text()
+    context = SimpleNamespace(active_root=run_dir)
+    monkeypatch.setattr(disturbed_module, "load_run_context", lambda runid, config: context)
+
+    helpers = __import__("wepppy.weppcloud.utils.helpers", fromlist=["authorize"])
+    monkeypatch.setattr(helpers, "authorize", lambda runid, config, require_owner=False: None)
+
+    class DisturbedStub:
+        @classmethod
+        def getInstance(cls, wd: str):
+            instance = SimpleNamespace(lookup_fn=str(lookup_csv))
+            instance.locked = disturbed_lock
+            instance.lock = lambda: None
+            instance.unlock = lambda flag=None: None
+            instance.readonly = False
+            return instance
+
+    @contextmanager
+    def disturbed_lock():
+        yield
+
+    monkeypatch.setattr(disturbed_module, "Disturbed", DisturbedStub)
+    current_sha = disturbed_module.get_disturbed_land_soil_lookup_sha256(str(lookup_csv))
+
+    with app.test_client() as client:
+        response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed",
+            json={
+                "rows": [
+                    ["forest", "loam", "999", "9"],
+                    ["", "", "", ""],
+                ],
+                "if_match_sha256": current_sha,
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "non-empty luse/stext" in payload["error"]["message"].lower()
+    assert lookup_csv.read_text() == before
 
 
 def test_task_baer_modify_color_map_converts_keys(disturbed_client):
