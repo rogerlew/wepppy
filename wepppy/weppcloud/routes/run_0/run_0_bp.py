@@ -40,6 +40,7 @@ from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.swat.print_prt import mask_to_tokens
 from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.omni import Omni, OmniScenario
+from wepppy.nodb.mods.features_export import load_layer_catalog
 import wepppy.nodb.mods.omni as omni_mod
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -101,6 +102,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#observed': TaskEnum.run_observed,
     '#debris-flow': TaskEnum.run_debris,
     '#roads': TaskEnum.run_roads,
+    '#features-export': TaskEnum.run_features_export,
     '#dss-export': TaskEnum.dss_export,
     '#path-cost-effective': TaskEnum.run_path_cost_effective,
     '#team': TaskEnum.project_init,  # Using project init emoji as placeholder
@@ -167,6 +169,12 @@ MOD_UI_DEFINITIONS = OrderedDict([
         'section_class': 'wc-stack',
         'template': 'controls/roads_pure.htm',
     }),
+    ('features_export', {
+        'label': 'Features Export',
+        'section_id': 'features-export',
+        'section_class': 'wc-stack',
+        'template': 'controls/features_export_pure.htm',
+    }),
     ('dss_export', {
         'label': 'DSS Export',
         'section_id': 'dss-export',
@@ -186,6 +194,255 @@ MOD_UI_DEFINITIONS = OrderedDict([
         'template': 'controls/rusle_pure.htm',
     }),
 ])
+
+
+FEATURES_EXPORT_FAMILY_ORDER = [
+    "watershed",
+    "landuse",
+    "soils",
+    "wepp_summary",
+    "wepp_temporal",
+    "wepp_interchange",
+    "ash_watar",
+    "omni_scenarios",
+    "omni_contrasts",
+    "swat_interchange",
+    "agfields_spatial",
+    "agfields_metrics",
+]
+
+FEATURES_EXPORT_FAMILY_LABELS = {
+    "watershed": "Watershed",
+    "landuse": "Landuse",
+    "soils": "Soils",
+    "wepp_summary": "WEPP Summary",
+    "wepp_temporal": "WEPP Temporal",
+    "wepp_interchange": "WEPP Interchange",
+    "ash_watar": "Ash / WATAR",
+    "omni_scenarios": "Omni Scenarios",
+    "omni_contrasts": "Omni Contrasts",
+    "swat_interchange": "SWAT Interchange",
+    "agfields_spatial": "AgFields Spatial",
+    "agfields_metrics": "AgFields Metrics",
+}
+
+FEATURES_EXPORT_DEFAULT_LAYER_IDS = [
+    "watershed.subcatchments",
+    "watershed.channels",
+    "landuse.dominant",
+    "soils.dominant",
+    "wepp.summary.hillslopes",
+    "wepp.summary.channels",
+]
+
+
+def _format_features_export_family_label(family: str) -> str:
+    if family in FEATURES_EXPORT_FAMILY_LABELS:
+        return FEATURES_EXPORT_FAMILY_LABELS[family]
+    tokens = [token for token in family.split("_") if token]
+    if not tokens:
+        return family
+    return " ".join(token.capitalize() for token in tokens)
+
+
+def _format_features_export_layer_label(layer_id: str) -> str:
+    tail = layer_id.split(".")[-1].strip()
+    if not tail:
+        return layer_id
+    return " ".join(token.capitalize() for token in tail.replace("_", " ").split())
+
+
+def _features_export_selector_requirements(family: str) -> list[str]:
+    requirements: list[str] = []
+    if family == "omni_scenarios":
+        requirements.append("omni_scenario")
+    elif family == "omni_contrasts":
+        requirements.append("omni_contrast")
+    elif family == "swat_interchange":
+        requirements.append("swat")
+    if family == "agfields_metrics":
+        requirements.append("agfields_auto_prep")
+    return requirements
+
+
+def _build_features_export_catalog_payload() -> dict:
+    try:
+        catalog = load_layer_catalog()
+    except Exception:
+        # Boundary catch: keep runs page rendering resilient if catalog load fails.
+        __import__("logging").getLogger(__name__).exception(
+            "Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:features_export_catalog_load"
+        )
+        return {
+            "metadata": {},
+            "family_order": list(FEATURES_EXPORT_FAMILY_ORDER),
+            "family_labels": dict(FEATURES_EXPORT_FAMILY_LABELS),
+            "layers": [],
+            "load_error": "Unable to load features export layer catalog.",
+        }
+
+    layers_payload: list[dict] = []
+    for layer in catalog.layers:
+        raw = dict(layer.raw)
+        geometry = raw.get("geometry") if isinstance(raw.get("geometry"), dict) else {}
+        geometry_type = geometry.get("type") if isinstance(geometry, dict) else None
+        family = layer.family
+        layers_payload.append(
+            {
+                "layer_id": layer.layer_id,
+                "label": _format_features_export_layer_label(layer.layer_id),
+                "family": family,
+                "family_label": _format_features_export_family_label(family),
+                "scope_class": layer.scope_class,
+                "geometry_type": str(geometry_type or "unknown"),
+                "temporal_modes": list(layer.temporal_supported_modes),
+                "selector_requirements": _features_export_selector_requirements(family),
+                "raw": raw,
+            }
+        )
+
+    metadata = {
+        "catalog_version": catalog.metadata.catalog_version,
+        "schema_version": catalog.metadata.schema_version,
+        "updated_at_utc": catalog.metadata.updated_at_utc,
+        "owner": catalog.metadata.owner,
+        "status": catalog.metadata.status,
+        "allowed_locator_kinds": list(catalog.metadata.allowed_locator_kinds),
+        "temporal_modes": list(catalog.metadata.temporal_modes),
+        "event_selectors": list(catalog.metadata.event_selectors),
+        "path_template_vars": dict(catalog.metadata.path_template_vars),
+    }
+
+    return {
+        "metadata": metadata,
+        "family_order": list(FEATURES_EXPORT_FAMILY_ORDER),
+        "family_labels": dict(FEATURES_EXPORT_FAMILY_LABELS),
+        "layers": layers_payload,
+        "load_error": None,
+    }
+
+
+def _discover_features_export_omni_selectors(wd: str) -> tuple[list[dict], list[dict]]:
+    wd_path = pathlib.Path(wd)
+    scenarios_root = wd_path / "_pups" / "omni" / "scenarios"
+    contrasts_root = wd_path / "_pups" / "omni" / "contrasts"
+
+    def _discover(root: pathlib.Path) -> list[dict]:
+        if not root.is_dir():
+            return []
+        rows = []
+        for entry in sorted(root.iterdir(), key=lambda item: item.name.lower()):
+            if not entry.is_dir() or entry.name.startswith("."):
+                continue
+            rows.append({"id": entry.name, "label": entry.name})
+        return rows
+
+    return _discover(scenarios_root), _discover(contrasts_root)
+
+
+def _discover_features_export_swat_catalog(wd: str) -> dict:
+    outputs_root = pathlib.Path(wd) / "swat" / "outputs"
+    if not outputs_root.is_dir():
+        return {"runs": [], "latest_run_id": None, "tables_by_run": {}, "all_tables": []}
+
+    run_entries: list[tuple[str, pathlib.Path, int]] = []
+    for entry in outputs_root.iterdir():
+        if not entry.is_dir() or not entry.name.startswith("run_"):
+            continue
+        run_id = entry.name[len("run_") :].strip() or entry.name
+        try:
+            mtime_ns = entry.stat().st_mtime_ns
+        except OSError:
+            mtime_ns = 0
+        run_entries.append((run_id, entry, mtime_ns))
+
+    run_entries.sort(key=lambda row: (-row[2], row[0]))
+    tables_by_run: dict[str, list[str]] = {}
+    all_tables: set[str] = set()
+    runs_payload: list[dict] = []
+
+    for run_id, run_dir, _mtime_ns in run_entries:
+        interchange_dir = run_dir / "interchange"
+        tables: set[str] = set()
+        if interchange_dir.is_dir():
+            for path in interchange_dir.iterdir():
+                if not path.is_file():
+                    continue
+                stem = path.stem.strip()
+                if stem:
+                    tables.add(stem)
+        table_list = sorted(tables)
+        tables_by_run[run_id] = table_list
+        all_tables.update(table_list)
+        runs_payload.append({"id": run_id, "label": run_id})
+
+    latest_run_id = runs_payload[0]["id"] if runs_payload else None
+    return {
+        "runs": runs_payload,
+        "latest_run_id": latest_run_id,
+        "tables_by_run": tables_by_run,
+        "all_tables": sorted(all_tables),
+    }
+
+
+def _resolve_features_export_utm_epsg(ron: Ron) -> int | None:
+    map_obj = getattr(ron, "map", None)
+    if map_obj is None:
+        return None
+    srid = getattr(map_obj, "srid", None)
+    if isinstance(srid, int) and srid > 0:
+        return srid
+    if isinstance(srid, str):
+        candidate = srid.strip()
+        if candidate.isdigit():
+            parsed = int(candidate)
+            if parsed > 0:
+                return parsed
+    return None
+
+
+def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_epsg: int | None) -> dict:
+    scenarios, contrasts = _discover_features_export_omni_selectors(wd)
+    swat_catalog = _discover_features_export_swat_catalog(wd)
+    preferred_swat_run_id = swat_catalog.get("latest_run_id") or "latest"
+
+    return {
+        "defaults": {
+            "format": "geopackage",
+            "units": "project",
+            "crs": "wgs",
+            "output_scopes": ["baseline"],
+        },
+        "profiles": {
+            "gpkg_adjacent": {
+                "format": "geopackage",
+                "units": "project",
+                "crs": "wgs",
+                "output_scopes": ["baseline"],
+                "swat_run_id": "latest",
+                "layers": list(FEATURES_EXPORT_DEFAULT_LAYER_IDS),
+                "temporal": None,
+                "scenario": None,
+                "contrast_id": None,
+                "swat_tables": None,
+            }
+        },
+        "resolved_utm_epsg": resolved_utm_epsg,
+        "utm_available": resolved_utm_epsg is not None,
+        "omni": {
+            "scenarios": scenarios,
+            "contrasts": contrasts,
+        },
+        "swat": {
+            "preferred_run_id": preferred_swat_run_id,
+            "runs": swat_catalog["runs"],
+            "tables_by_run": swat_catalog["tables_by_run"],
+            "all_tables": swat_catalog["all_tables"],
+        },
+        "runtime": {
+            "readonly": bool(getattr(ron, "readonly", False)),
+        },
+    }
 
 @run_0_bp.route('/sw.js')
 def service_worker():
@@ -759,6 +1016,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     )
     show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
     show_roads = ('roads' in mods_list and roads is not None) or playwright_load_all
+    show_features_export = 'features_export' in mods_list or playwright_load_all
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
     show_path_ce = 'path_ce' in mods_list or playwright_load_all
     rusle_backend_supported = bool(getattr(watershed, "delineation_backend_is_wbt", False))
@@ -785,10 +1043,23 @@ def _build_runs0_context(runid, config, playwright_load_all):
         'observed': show_observed,
         'debris_flow': show_debris_flow,
         'roads': show_roads,
+        'features_export': show_features_export,
         'dss_export': show_dss_export,
         'path_ce': show_path_ce,
         'rusle': show_rusle,
     }
+
+    features_export_catalog_payload = {}
+    features_export_bootstrap_payload = {}
+    features_export_utm_epsg = None
+    if show_features_export:
+        features_export_utm_epsg = _resolve_features_export_utm_epsg(ron)
+        features_export_catalog_payload = _build_features_export_catalog_payload()
+        features_export_bootstrap_payload = _build_features_export_bootstrap_payload(
+            wd,
+            ron,
+            features_export_utm_epsg,
+        )
 
     context = dict(
         user=current_user,
@@ -850,6 +1121,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_observed=show_observed,
         show_debris_flow=show_debris_flow,
         show_roads=show_roads,
+        show_features_export=show_features_export,
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,
         show_rusle=show_rusle,
@@ -865,6 +1137,13 @@ def _build_runs0_context(runid, config, playwright_load_all):
         browse_watershed_channels_parquet=browse_watershed_channels_parquet,
         browse_landuse_parquet=browse_landuse_parquet,
         browse_soils_parquet=browse_soils_parquet,
+        features_export_catalog_payload=features_export_catalog_payload,
+        features_export_bootstrap_payload=features_export_bootstrap_payload,
+        features_export_utm_epsg=features_export_utm_epsg,
+        features_export_submit_url=f"/rq-engine/api/runs/{runid}/{config}/export/features",
+        features_export_download_url_template=(
+            f"/rq-engine/api/runs/{runid}/{config}/export/features/__JOB_ID__/download"
+        ),
     )
     return context
 

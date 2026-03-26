@@ -35,6 +35,7 @@ MOD_DISPLAY_NAMES = {
     'observed': 'Observed Data',
     'debris_flow': 'Debris Flow',
     'roads': 'Roads',
+    'features_export': 'Features Export',
     'dss_export': 'DSS Export',
     'omni': 'Omni',
     'path_ce': 'Path CE',

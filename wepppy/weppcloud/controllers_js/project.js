@@ -462,6 +462,9 @@ var Project = (function () {
             roads: function (ctx) {
                 bootstrapControllerSymbol(window.Roads, ctx);
             },
+            features_export: function (ctx) {
+                bootstrapControllerSymbol(window.FeaturesExport, ctx);
+            },
             path_ce: function (ctx) {
                 bootstrapControllerSymbol(window.PathCE, ctx);
             },

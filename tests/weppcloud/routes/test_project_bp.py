@@ -269,6 +269,24 @@ def test_set_mod_enables_simple_module(project_client):
     assert "rap_ts" in controller.mods
 
 
+def test_set_mod_enables_features_export_module(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    assert controller.mods == []
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "features_export", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["mod"] == "features_export"
+    assert payload["Content"]["enabled"] is True
+    assert payload["Content"]["label"] == "Features Export"
+    assert "features_export" in controller.mods
+
+
 def test_set_mod_openet_requires_admin(project_client):
     client, RonStub, _, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)

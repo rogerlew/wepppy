@@ -23,6 +23,7 @@
 {% set show_observed = 'observed' in mods_list or playwright_load_all %}
 {% set allow_debris_flow = user.has_role('PowerUser') or (config is mapping and config.get('TEST_SUPPORT_ENABLED')) or playwright_load_all %}
 {% set show_debris_flow = ('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and allow_debris_flow %}
+{% set show_features_export = show_features_export if show_features_export is defined else ('features_export' in mods_list or playwright_load_all) %}
 {% set show_dss_export = 'dss_export' in mods_list or playwright_load_all %}
 {% set rusle_backend_supported = rusle_backend_supported if rusle_backend_supported is defined else (watershed.delineation_backend_is_wbt if watershed is defined and watershed is not none and watershed.delineation_backend_is_wbt is defined else False) %}
 {% set show_rusle = show_rusle if show_rusle is defined else ((('rusle' in mods_list and 'disturbed' in mods_list and rusle_backend_supported) or playwright_load_all)) %}
@@ -136,6 +137,9 @@
         {% endif %}
         <li data-mod-nav="roads" {% if not show_roads %}hidden{% endif %}>
           <a href="#roads" class="nav-link">Roads</a>
+        </li>
+        <li data-mod-nav="features_export" {% if not show_features_export %}hidden{% endif %}>
+          <a href="#features-export" class="nav-link">Features Export</a>
         </li>
         <li data-mod-nav="dss_export" {% if not show_dss_export %}hidden{% endif %}>
           <a href="#dss-export" class="nav-link">DSS Export</a>
@@ -282,6 +286,14 @@
         {% if show_roads %}
         <section id="roads" class="wc-stack">
           {% include 'controls/roads_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
+
+      <div data-mod-section="features_export" {% if not show_features_export %}hidden{% endif %}>
+        {% if show_features_export %}
+        <section id="features-export" class="wc-stack">
+          {% include 'controls/features_export_pure.htm' %}
         </section>
         {% endif %}
       </div>

@@ -32,6 +32,42 @@ const prepareTreatments = async ({ page }) => {
   });
 };
 
+const prepareFeaturesExport = async ({ page }) => {
+  const clearSelectionButton = page
+    .locator('form#features_export_form [data-features-export-action="clear-selection"]')
+    .first();
+  if (await clearSelectionButton.count()) {
+    await clearSelectionButton.click();
+  }
+
+  let layerToggle = page
+    .locator('form#features_export_form [data-features-export-action="toggle-layer"][value="watershed.subcatchments"]')
+    .first();
+  if (!(await layerToggle.count())) {
+    layerToggle = page
+      .locator('form#features_export_form [data-features-export-action="toggle-layer"]')
+      .first();
+  }
+  if (await layerToggle.count()) {
+    await layerToggle.check({ force: true });
+  }
+
+  const temporalGroup = page
+    .locator('form#features_export_form [data-features-export-group="temporal"]')
+    .first();
+  if (await temporalGroup.count()) {
+    const temporalHidden = await temporalGroup.evaluate((node) => node.hidden || node.hasAttribute("hidden"));
+    if (!temporalHidden) {
+      const annualAverageRadio = page
+        .locator('form#features_export_form [data-features-export-field="temporal-mode"][value="annual_average"]')
+        .first();
+      if (await annualAverageRadio.count()) {
+        await annualAverageRadio.check({ force: true });
+      }
+    }
+  }
+};
+
 /**
  * @typedef {Object} ControllerCase
  * @property {string} name
@@ -190,6 +226,18 @@ const controllerCases = [
     hintLocator: "#hint_export_dss",
     workflow: "rq_job",
     requireHintVisible: true
+  },
+  {
+    name: "features_export",
+    formSelector: "form#features_export_form",
+    actionSelector: "#btn_run_features_export",
+    requestUrlPattern: "**/rq-engine/api/**/export/features",
+    stacktraceLocator: "#features_export_stacktrace_panel [data-stacktrace-body]",
+    stacktracePanelLocator: "#features_export_stacktrace_panel",
+    hintLocator: "#hint_run_features_export",
+    workflow: "rq_job",
+    prepareAction: prepareFeaturesExport,
+    skipMessage: "Features Export control not enabled for this run"
   },
   {
     name: "ash",

@@ -98,8 +98,8 @@ def _canonical_size_bytes(payload: dict) -> int:
 
 
 def test_frozen_agent_route_count_is_expected(_frozen_agent_routes: list[tuple[str, str]]) -> None:
-    assert len(_frozen_agent_routes) == 57
-    assert len(set(_frozen_agent_routes)) == 57
+    assert len(_frozen_agent_routes) == 59
+    assert len(set(_frozen_agent_routes)) == 59
 
 
 def test_frozen_agent_routes_exist_in_openapi(

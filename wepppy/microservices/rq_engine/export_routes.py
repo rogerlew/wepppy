@@ -488,7 +488,8 @@ async def export_features_submit(runid: str, config: str, request: Request):
     summary="Download completed features export artifact",
     description=(
         "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
-        "Returns 409 until job status is `finished`; on success returns the export artifact file."
+        "Read-only endpoint (no queue): returns 409 until job status is `finished`; "
+        "on success returns the export artifact file."
     ),
     tags=["rq-engine", "exports"],
     operation_id=rq_operation_id("export_features_download"),

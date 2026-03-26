@@ -1,0 +1,300 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set features_defaults = features_export_bootstrap_payload.get("defaults", {}) if features_export_bootstrap_payload else {} %}
+{% set default_format = features_defaults.get("format", "geopackage") %}
+{% set default_units = features_defaults.get("units", "project") %}
+{% set default_crs = features_defaults.get("crs", "wgs") %}
+{% set utm_available = features_export_utm_epsg is not none %}
+{% set swat_bootstrap = features_export_bootstrap_payload.get("swat", {}) if features_export_bootstrap_payload else {} %}
+{% set swat_runs = swat_bootstrap.get("runs", []) if swat_bootstrap else [] %}
+{% set swat_preferred_run_id = swat_bootstrap.get("preferred_run_id", "latest") if swat_bootstrap else "latest" %}
+{% set omni_bootstrap = features_export_bootstrap_payload.get("omni", {}) if features_export_bootstrap_payload else {} %}
+{% set omni_scenarios = omni_bootstrap.get("scenarios", []) if omni_bootstrap else [] %}
+{% set omni_contrasts = omni_bootstrap.get("contrasts", []) if omni_bootstrap else [] %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Export run-scoped spatial and tabular artifacts across WEPP, Omni, Ash/WATAR, SWAT, and AgFields.
+  </p>
+{% endset %}
+
+{% set status_panel_override %}
+<section id="features_export_status_panel" class="wc-control__panel" data-status-panel aria-live="polite">
+  <h3 class="wc-control__panel-title">Status</h3>
+  <div id="features_export_rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
+  <span id="features_export_braille" class="wc-status-panel__meta" aria-hidden="true"></span>
+  <p id="features_export_message" data-features-export-region="message" class="wc-field__help">
+    Waiting for export selection.
+  </p>
+  <div id="features_export_status_log" data-status-log role="log" class="wc-stack-sm"></div>
+</section>
+{% endset %}
+
+{% set summary_panel_override %}
+<section id="features_export_results_panel" class="wc-control__panel" data-features-export-results>
+  <h3 class="wc-control__panel-title">Results / Warnings</h3>
+  <p id="features_export_result_state" data-features-export-region="result-state">Idle</p>
+  <div data-features-export-region="download"></div>
+  <div data-features-export-region="artifact-meta"></div>
+  <ul data-features-export-region="warnings" class="wc-list"></ul>
+</section>
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="features_export_form",
+     title="Features Export",
+     collapsible=True,
+     description=description,
+     form_attrs={"data-features-export-root": ""},
+     status_panel_override=status_panel_override,
+     summary_panel_override=summary_panel_override,
+     stacktrace_panel_options={"panel_id": "features_export_stacktrace_panel", "body_id": "features_export_stacktrace", "title": "Stack trace"}
+   ) %}
+  <div
+    data-features-export-config
+    data-features-export-job-key="run_features_export"
+    data-features-export-channel="features_export"
+    data-features-export-submit-url="{{ features_export_submit_url }}"
+    data-features-export-download-url-template="{{ features_export_download_url_template }}"
+    data-features-export-utm-available="{{ 'true' if utm_available else 'false' }}"
+    data-features-export-default-format="geopackage"
+    data-features-export-default-units="project"
+    data-features-export-default-crs="wgs"
+    data-features-export-default-profile-key="gpkg_adjacent"
+    hidden></div>
+
+  <script type="application/json" id="features_export_catalog_data" data-features-export-catalog>{{ features_export_catalog_payload | tojson }}</script>
+  <script type="application/json" id="features_export_bootstrap_data" data-features-export-bootstrap>{{ features_export_bootstrap_payload | tojson }}</script>
+
+  <section data-features-export-group="settings" class="wc-stack-sm">
+    {% call button_row() %}
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-action="load-defaults">
+        Load Defaults
+      </button>
+    {% endcall %}
+
+    <div class="wc-field" style="max-width: 750px;">
+      <label class="wc-field__label" for="features_export_format">Format</label>
+      <select
+        id="features_export_format"
+        name="format"
+        class="wc-field__control"
+        data-features-export-field="format">
+        <option value="geopackage" {% if default_format == 'geopackage' %}selected{% endif %}>GeoPackage</option>
+        <option value="geodatabase" {% if default_format == 'geodatabase' %}selected{% endif %}>Geodatabase</option>
+        <option value="geoparquet" {% if default_format == 'geoparquet' %}selected{% endif %}>GeoParquet</option>
+        <option value="geojson" {% if default_format == 'geojson' %}selected{% endif %}>GeoJSON</option>
+        <option value="kmz" {% if default_format == 'kmz' %}selected{% endif %}>KMZ</option>
+      </select>
+    </div>
+
+    <fieldset class="wc-fieldset">
+      <legend class="wc-fieldset__legend">Units</legend>
+      <label class="wc-toggle-inline">
+        <input type="radio" name="features_export_units" value="project" data-features-export-field="units" {% if default_units == 'project' %}checked{% endif %}>
+        <span>Project</span>
+      </label>
+      <label class="wc-toggle-inline">
+        <input type="radio" name="features_export_units" value="si" data-features-export-field="units" {% if default_units == 'si' %}checked{% endif %}>
+        <span>SI</span>
+      </label>
+      <label class="wc-toggle-inline">
+        <input type="radio" name="features_export_units" value="english" data-features-export-field="units" {% if default_units == 'english' %}checked{% endif %}>
+        <span>English</span>
+      </label>
+    </fieldset>
+
+    <fieldset class="wc-fieldset">
+      <legend class="wc-fieldset__legend">CRS</legend>
+      <label class="wc-toggle-inline">
+        <input type="radio" name="features_export_crs" value="wgs" data-features-export-field="crs" {% if default_crs == 'wgs' %}checked{% endif %}>
+        <span>WGS84 (EPSG:4326)</span>
+      </label>
+      <label class="wc-toggle-inline">
+        <input
+          type="radio"
+          name="features_export_crs"
+          value="utm"
+          data-features-export-field="crs"
+          {% if default_crs == 'utm' %}checked{% endif %}
+          {% if not utm_available %}disabled{% endif %}>
+        <span>
+          UTM
+          {% if utm_available %}
+            (EPSG:{{ features_export_utm_epsg }})
+          {% else %}
+            (unavailable for this run)
+          {% endif %}
+        </span>
+      </label>
+    </fieldset>
+
+    <p class="wc-field__help" id="features_export_packaging_hint" data-features-export-region="packaging-hint"></p>
+  </section>
+
+  <section data-features-export-group="summary" class="wc-stack-sm">
+    <h3 class="wc-control__panel-title">Selected Summary</h3>
+    <p data-features-export-region="selected-count">Selected: 0 layers</p>
+    <p data-features-export-region="family-counts">Families: none</p>
+    <p data-features-export-region="capability-counts">Scope-aware: 0 | Temporal-capable: 0</p>
+    <p data-features-export-region="validation" class="wc-field__help"></p>
+    <p data-features-export-region="summary-warnings" class="wc-field__help"></p>
+  </section>
+
+  <section data-features-export-group="catalog" class="wc-stack-sm">
+    <h3 class="wc-control__panel-title">Layer Catalog</h3>
+
+    <div class="wc-field" style="max-width: 750px;">
+      <label class="wc-field__label" for="features_export_layer_search">Search layers</label>
+      <input
+        id="features_export_layer_search"
+        name="features_export_layer_search"
+        type="text"
+        class="wc-field__control"
+        data-features-export-field="layer-search"
+        placeholder="Search by label, layer id, or family">
+    </div>
+
+    {% call button_row() %}
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-filter="all">All</button>
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-filter="selected">Selected</button>
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-filter="temporal">Temporal</button>
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-filter="scope-aware">Scope-aware</button>
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-filter="needs-selector">Needs selector</button>
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-action="clear-filters">Clear filters</button>
+    {% endcall %}
+
+    {% call button_row() %}
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-action="select-visible">Select visible</button>
+    {% endcall %}
+
+    <div id="features_export_catalog_list" data-features-export-catalog-list class="wc-stack-sm"></div>
+  </section>
+
+  <section data-features-export-group="scopes" class="wc-stack-sm" hidden>
+    <h3 class="wc-control__panel-title">Output Scopes</h3>
+    <label class="wc-toggle-inline">
+      <input type="checkbox" name="features_export_output_scope" value="baseline" data-features-export-field="output-scope" checked>
+      <span>Baseline</span>
+    </label>
+    <label class="wc-toggle-inline">
+      <input type="checkbox" name="features_export_output_scope" value="roads" data-features-export-field="output-scope">
+      <span>Roads</span>
+    </label>
+    <p class="wc-field__help">Scope-invariant layers export once as shared output.</p>
+  </section>
+
+  <section data-features-export-group="temporal" class="wc-stack-sm" hidden>
+    <h3 class="wc-control__panel-title">Temporal</h3>
+    <label class="wc-toggle-inline">
+      <input type="radio" name="features_export_temporal_mode" value="annual_average" data-features-export-field="temporal-mode">
+      <span>Annual average</span>
+    </label>
+    <label class="wc-toggle-inline">
+      <input type="radio" name="features_export_temporal_mode" value="yearly" data-features-export-field="temporal-mode">
+      <span>Yearly</span>
+    </label>
+    <label class="wc-toggle-inline">
+      <input type="radio" name="features_export_temporal_mode" value="event" data-features-export-field="temporal-mode">
+      <span>Event</span>
+    </label>
+
+    <div data-features-export-temporal-year-options hidden>
+      <div class="wc-field" style="max-width: 750px;">
+        <label class="wc-field__label" for="features_export_temporal_year_selection">Year selection</label>
+        <select id="features_export_temporal_year_selection" class="wc-field__control" data-features-export-field="temporal-year-selection">
+          <option value="all">All</option>
+          <option value="exclude_first">Exclude first year</option>
+          <option value="exclude_first_two">Exclude first two years</option>
+          <option value="exclude_first_five">Exclude first five years</option>
+          <option value="custom">Custom exclusions</option>
+        </select>
+      </div>
+      <div class="wc-field" style="max-width: 750px;" data-features-export-temporal-custom-wrap hidden>
+        <label class="wc-field__label" for="features_export_temporal_exclude_indices">Custom excluded year indices</label>
+        <input
+          id="features_export_temporal_exclude_indices"
+          type="text"
+          class="wc-field__control"
+          data-features-export-field="temporal-exclude-year-indices"
+          placeholder="e.g. 0,1,2">
+      </div>
+    </div>
+
+    <div data-features-export-temporal-event-options hidden>
+      <label class="wc-toggle-inline">
+        <input type="radio" name="features_export_temporal_event_selector" value="date" data-features-export-field="temporal-event-selector">
+        <span>By date</span>
+      </label>
+      <label class="wc-toggle-inline">
+        <input type="radio" name="features_export_temporal_event_selector" value="return_period" data-features-export-field="temporal-event-selector">
+        <span>By return period</span>
+      </label>
+      <div class="wc-field" style="max-width: 750px;" data-features-export-temporal-dates-wrap hidden>
+        <label class="wc-field__label" for="features_export_temporal_dates">Dates (YYYY-MM-DD, comma-separated)</label>
+        <textarea id="features_export_temporal_dates" class="wc-field__control" data-features-export-field="temporal-event-dates"></textarea>
+      </div>
+      <div class="wc-field" style="max-width: 750px;" data-features-export-temporal-return-periods-wrap hidden>
+        <label class="wc-field__label" for="features_export_temporal_return_periods">Return periods (years, comma-separated)</label>
+        <textarea id="features_export_temporal_return_periods" class="wc-field__control" data-features-export-field="temporal-event-return-periods"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section data-features-export-group="omni" class="wc-stack-sm" hidden>
+    <h3 class="wc-control__panel-title" data-features-export-region="omni-title">Omni Selector</h3>
+    <div class="wc-field" style="max-width: 750px;" data-features-export-omni-scenario-wrap hidden>
+      <label class="wc-field__label" for="features_export_scenario">Scenario</label>
+      <select id="features_export_scenario" class="wc-field__control" data-features-export-field="scenario">
+        <option value="">Select scenario</option>
+        {% for row in omni_scenarios %}
+          <option value="{{ row.id }}">{{ row.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="wc-field" style="max-width: 750px;" data-features-export-omni-contrast-wrap hidden>
+      <label class="wc-field__label" for="features_export_contrast_id">Contrast</label>
+      <select id="features_export_contrast_id" class="wc-field__control" data-features-export-field="contrast-id">
+        <option value="">Select contrast</option>
+        {% for row in omni_contrasts %}
+          <option value="{{ row.id }}">{{ row.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </section>
+
+  <section data-features-export-group="swat" class="wc-stack-sm" hidden>
+    <h3 class="wc-control__panel-title">SWAT Options</h3>
+    <div class="wc-field" style="max-width: 750px;">
+      <label class="wc-field__label" for="features_export_swat_run_id">SWAT run</label>
+      <select id="features_export_swat_run_id" class="wc-field__control" data-features-export-field="swat-run-id">
+        <option value="latest" {% if swat_preferred_run_id == 'latest' %}selected{% endif %}>latest</option>
+        {% for run_item in swat_runs %}
+          <option value="{{ run_item.id }}" {% if run_item.id == swat_preferred_run_id %}selected{% endif %}>{{ run_item.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="wc-field" style="max-width: 750px;">
+      <label class="wc-field__label" for="features_export_swat_table_mode">Table filter mode</label>
+      <select id="features_export_swat_table_mode" class="wc-field__control" data-features-export-field="swat-table-mode">
+        <option value="all">All tables</option>
+        <option value="include">Include selected tables</option>
+        <option value="exclude">Exclude selected tables</option>
+      </select>
+    </div>
+    <div id="features_export_swat_tables" data-features-export-swat-tables class="wc-stack-sm"></div>
+  </section>
+
+  <section data-features-export-group="actions" class="wc-stack-sm">
+    {% call button_row() %}
+      <button id="btn_run_features_export" type="submit" class="pure-button pure-button-primary" data-features-export-action="submit" disabled>
+        Export Features
+      </button>
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-action="clear-selection">
+        Clear selection
+      </button>
+    {% endcall %}
+    {{ ui.job_hint("hint_run_features_export", extra_class="wc-field__help") }}
+  </section>
+{% endcall %}

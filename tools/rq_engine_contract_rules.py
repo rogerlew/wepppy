@@ -3,6 +3,7 @@ from __future__ import annotations
 SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
     ("POST", "/api/runs/{runid}/{config}/run-omni"): 202,
     ("POST", "/api/runs/{runid}/{config}/run-omni-contrasts"): 202,
+    ("POST", "/api/runs/{runid}/{config}/export/features"): 202,
     ("POST", "/create/"): 303,
 }
 
@@ -22,6 +23,7 @@ PATHS_REQUIRING_400 = {
     "/api/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed",
     "/api/runs/{runid}/{config}/build-treatments",
     "/api/runs/{runid}/{config}/delete-archive",
+    "/api/runs/{runid}/{config}/export/features",
     "/api/runs/{runid}/{config}/fetch-dem-and-build-channels",
     "/api/runs/{runid}/{config}/post-dss-export-rq",
     "/api/runs/{runid}/{config}/prep-wepp-watershed",
@@ -55,6 +57,8 @@ PATHS_REQUIRING_404 = {
     "/api/runs/{runid}/{config}/archive",
     "/api/runs/{runid}/{config}/delete-archive",
     "/api/runs/{runid}/{config}/export/ermit",
+    "/api/runs/{runid}/{config}/export/features",
+    "/api/runs/{runid}/{config}/export/features/{job_id}/download",
     "/api/runs/{runid}/{config}/export/geodatabase",
     "/api/runs/{runid}/{config}/export/geopackage",
     "/api/runs/{runid}/{config}/export/prep_details",
@@ -64,6 +68,8 @@ PATHS_REQUIRING_404 = {
 }
 
 PATHS_REQUIRING_409 = {
+    "/api/runs/{runid}/{config}/export/features",
+    "/api/runs/{runid}/{config}/export/features/{job_id}/download",
     "/api/runs/{runid}/{config}/bootstrap/checkout",
     "/api/runs/{runid}/{config}/bootstrap/enable",
 }
@@ -76,6 +82,10 @@ PATHS_REQUIRING_429 = {
 
 PATHS_REQUIRING_EXTRA_202 = {
     "/api/runs/{runid}/{config}/bootstrap/enable",
+}
+
+PATHS_REQUIRING_415 = {
+    "/api/runs/{runid}/{config}/export/features",
 }
 
 
@@ -93,6 +103,8 @@ def required_response_codes(method: str, path: str) -> set[int]:
         required.add(429)
     if path in PATHS_REQUIRING_EXTRA_202:
         required.add(202)
+    if path in PATHS_REQUIRING_415:
+        required.add(415)
 
     return required
 

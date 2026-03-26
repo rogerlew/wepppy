@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import os
 import re
 from pathlib import Path
 from types import SimpleNamespace
@@ -211,6 +212,179 @@ def test_run_page_bootstrap_roads_flag_true_when_enabled(run0_template_app) -> N
         js = render_template("run_page_bootstrap.js.j2", **context)
 
     assert _extract_mod_flag(js, "roads") == "true"
+
+
+def test_run_page_bootstrap_features_export_flag_true_when_enabled(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["features_export"]
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "features_export") == "true"
+
+
+def test_features_export_catalog_payload_builds_from_catalog(
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_catalog = SimpleNamespace(
+        metadata=SimpleNamespace(
+            catalog_version="2026.03.26",
+            schema_version="1",
+            updated_at_utc="2026-03-26T00:00:00Z",
+            owner="wepppy",
+            status="active",
+            allowed_locator_kinds=("nodb_ref", "relpath", "path_template"),
+            temporal_modes=("annual_average", "yearly", "event"),
+            event_selectors=("date", "return_period"),
+            path_template_vars={"scope_root": "output"},
+        ),
+        layers=[
+            SimpleNamespace(
+                layer_id="watershed.subcatchments",
+                family="watershed",
+                scope_class="scope_invariant",
+                temporal_supported_modes=(),
+                raw={"geometry": {"type": "polygon"}},
+            ),
+            SimpleNamespace(
+                layer_id="agfields.metrics.field",
+                family="agfields_metrics",
+                scope_class="scope_invariant",
+                temporal_supported_modes=("annual_average",),
+                raw={"geometry": {"type": "polygon"}},
+            ),
+        ],
+    )
+    monkeypatch.setattr(run0_module, "load_layer_catalog", lambda: fake_catalog)
+
+    payload = run0_module._build_features_export_catalog_payload()
+
+    assert payload["load_error"] is None
+    assert payload["metadata"]["catalog_version"] == "2026.03.26"
+    assert payload["family_order"][0] == "watershed"
+    assert [layer["layer_id"] for layer in payload["layers"]] == [
+        "watershed.subcatchments",
+        "agfields.metrics.field",
+    ]
+    agfields = next(
+        layer for layer in payload["layers"] if layer["layer_id"] == "agfields.metrics.field"
+    )
+    assert agfields["selector_requirements"] == ["agfields_auto_prep"]
+
+
+def test_features_export_catalog_payload_handles_catalog_load_failure(
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _raise_catalog_load() -> None:
+        raise RuntimeError("catalog unavailable")
+
+    monkeypatch.setattr(run0_module, "load_layer_catalog", _raise_catalog_load)
+
+    payload = run0_module._build_features_export_catalog_payload()
+
+    assert payload["metadata"] == {}
+    assert payload["layers"] == []
+    assert payload["load_error"] == "Unable to load features export layer catalog."
+
+
+def test_features_export_omni_selector_discovery_uses_sorted_non_hidden_dirs(
+    run0_module,
+    tmp_path: Path,
+) -> None:
+    scenarios_root = tmp_path / "_pups" / "omni" / "scenarios"
+    contrasts_root = tmp_path / "_pups" / "omni" / "contrasts"
+    (scenarios_root / "zeta").mkdir(parents=True)
+    (scenarios_root / "Alpha").mkdir(parents=True)
+    (scenarios_root / ".hidden").mkdir(parents=True)
+    (scenarios_root / "not_a_dir.txt").write_text("skip", encoding="utf-8")
+    (contrasts_root / "mulch").mkdir(parents=True)
+    (contrasts_root / "control").mkdir(parents=True)
+
+    scenarios, contrasts = run0_module._discover_features_export_omni_selectors(str(tmp_path))
+
+    assert [row["id"] for row in scenarios] == ["Alpha", "zeta"]
+    assert [row["id"] for row in contrasts] == ["control", "mulch"]
+
+
+def test_features_export_swat_catalog_discovers_runs_tables_and_latest(
+    run0_module,
+    tmp_path: Path,
+) -> None:
+    run_001 = tmp_path / "swat" / "outputs" / "run_001" / "interchange"
+    run_002 = tmp_path / "swat" / "outputs" / "run_002" / "interchange"
+    run_001.mkdir(parents=True)
+    run_002.mkdir(parents=True)
+
+    (run_001 / "hru.parquet").write_text("hru", encoding="utf-8")
+    (run_001 / "rch.parquet").write_text("rch", encoding="utf-8")
+    (run_002 / "sub.parquet").write_text("sub", encoding="utf-8")
+
+    os.utime(tmp_path / "swat" / "outputs" / "run_001", (1000, 1000))
+    os.utime(tmp_path / "swat" / "outputs" / "run_002", (2000, 2000))
+
+    payload = run0_module._discover_features_export_swat_catalog(str(tmp_path))
+
+    assert payload["latest_run_id"] == "002"
+    assert [row["id"] for row in payload["runs"]] == ["002", "001"]
+    assert payload["tables_by_run"]["001"] == ["hru", "rch"]
+    assert payload["tables_by_run"]["002"] == ["sub"]
+    assert payload["all_tables"] == ["hru", "rch", "sub"]
+
+
+def test_features_export_resolve_utm_epsg_handles_int_str_and_invalid(run0_module) -> None:
+    assert run0_module._resolve_features_export_utm_epsg(
+        SimpleNamespace(map=SimpleNamespace(srid=32611))
+    ) == 32611
+    assert run0_module._resolve_features_export_utm_epsg(
+        SimpleNamespace(map=SimpleNamespace(srid="32612"))
+    ) == 32612
+    assert run0_module._resolve_features_export_utm_epsg(
+        SimpleNamespace(map=SimpleNamespace(srid="bad"))
+    ) is None
+    assert run0_module._resolve_features_export_utm_epsg(SimpleNamespace(map=None)) is None
+
+
+def test_features_export_bootstrap_payload_includes_defaults_selectors_and_runtime(
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        run0_module,
+        "_discover_features_export_omni_selectors",
+        lambda wd: ([{"id": "uniform_low", "label": "Uniform Low"}], [{"id": "c1", "label": "Contrast 1"}]),
+    )
+    monkeypatch.setattr(
+        run0_module,
+        "_discover_features_export_swat_catalog",
+        lambda wd: {
+            "runs": [{"id": "run_123", "label": "run_123"}],
+            "latest_run_id": "run_123",
+            "tables_by_run": {"run_123": ["hru", "rch"]},
+            "all_tables": ["hru", "rch"],
+        },
+    )
+
+    payload = run0_module._build_features_export_bootstrap_payload(
+        "/tmp/fake-run",
+        SimpleNamespace(readonly=True),
+        32611,
+    )
+
+    assert payload["defaults"] == {
+        "format": "geopackage",
+        "units": "project",
+        "crs": "wgs",
+        "output_scopes": ["baseline"],
+    }
+    assert payload["profiles"]["gpkg_adjacent"]["swat_run_id"] == "latest"
+    assert payload["omni"]["scenarios"] == [{"id": "uniform_low", "label": "Uniform Low"}]
+    assert payload["omni"]["contrasts"] == [{"id": "c1", "label": "Contrast 1"}]
+    assert payload["swat"]["preferred_run_id"] == "run_123"
+    assert payload["resolved_utm_epsg"] == 32611
+    assert payload["utm_available"] is True
+    assert payload["runtime"]["readonly"] is True
 
 
 def test_run_page_bootstrap_ttl_missing_expires_at_defaults_to_null(run0_template_app) -> None:

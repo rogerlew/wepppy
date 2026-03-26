@@ -569,9 +569,24 @@ WP-4: Service orchestration and RQ wiring
 - Deliverable: end-to-end export job execution for API callers with warning contract.
 
 WP-5: Runs-page UI control integration
-- Implement template + JS controller using `ui_control_layout.md`.
-- Include top-level `Load Defaults`, progressive disclosure cards, and status/stacktrace/job-hint contract.
-- Deliverable: fully wired Runs-page control with Jest/Playwright coverage.
+- Status: completed 2026-03-26 via `docs/mini-work-packages/20260326_features_export_wp5_execplan.md`.
+- Implemented files:
+  - `wepppy/weppcloud/routes/run_0/run_0_bp.py`
+  - `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm`
+  - `wepppy/weppcloud/routes/run_0/templates/run_page_bootstrap.js.j2`
+  - `wepppy/weppcloud/templates/header/_run_header_fixed.htm`
+  - `wepppy/weppcloud/controllers_js/project.js`
+  - `wepppy/weppcloud/templates/controls/features_export_pure.htm`
+  - `wepppy/weppcloud/controllers_js/features_export.js`
+  - `wepppy/weppcloud/controllers_js/__tests__/features_export.test.js`
+  - `wepppy/weppcloud/static-src/tests/smoke/controller-cases.js`
+  - `tests/weppcloud/routes/test_pure_controls_render.py`
+  - `tests/weppcloud/routes/test_project_bp.py`
+  - `tests/weppcloud/routes/test_run_0_openet_admin_gate.py`
+- Contract clarification: Runs-page dynamic mod behavior requires both server-side mod metadata (`MOD_UI_DEFINITIONS` + `view/mod/<mod_name>`) and client-side bootstrap registration (`project.js` `MOD_BOOTSTRAP_MAP`) for runtime mod insertion parity with initial page render.
+- Contract clarification: the features-export submit route is `rq:export` scoped and explicitly documents/requires `415` for non-JSON payloads; frozen checklist/rules artifacts were aligned accordingly.
+- Contract clarification: smoke-case execution requires a pre-submit layer selection for `features_export` because the form submit action is validation-gated until minimum payload requirements are met.
+- Deliverable: fully wired Runs-page control with Jest coverage and updated smoke/route-template invariants.
 
 WP-6: Cutover and legacy retirement
 - Remove legacy gpkg/gdb routes and completion hooks.

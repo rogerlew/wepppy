@@ -15,6 +15,7 @@ RUN_0_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_0" / 
 PURE_TEMPLATES = [
     "controls/path_cost_effective_pure.htm",
     "controls/omni_contrasts_pure.htm",
+    "controls/features_export_pure.htm",
     "controls/roads_pure.htm",
     "reports/storm_event_analyzer.htm",
     "run_0/rq-migration-status.htm",
@@ -93,6 +94,16 @@ def jinja_env() -> Environment:
         cls_units=lambda value: value,
         str_units=lambda value: value,
         omni_scenarios=[],
+        features_export_submit_url="/rq-engine/api/runs/test-run/test-config/export/features",
+        features_export_download_url_template="/rq-engine/api/runs/test-run/test-config/export/features/__JOB_ID__/download",
+        features_export_catalog_payload={"metadata": {}, "family_order": [], "family_labels": {}, "layers": [], "load_error": None},
+        features_export_bootstrap_payload={
+            "defaults": {"format": "geopackage", "units": "project", "crs": "wgs", "output_scopes": ["baseline"]},
+            "profiles": {"gpkg_adjacent": {"layers": []}},
+            "omni": {"scenarios": [], "contrasts": []},
+            "swat": {"preferred_run_id": "latest", "runs": [], "tables_by_run": {}, "all_tables": []},
+        },
+        features_export_utm_epsg=None,
         omni=stub_omni,
         watershed=stub_watershed,
         base_scenario_label="Base",
@@ -378,3 +389,77 @@ def test_runs0_template_places_roads_after_debris_flow() -> None:
     roads_section_index = source.index('<div data-mod-section="roads"')
     dss_section_index = source.index('<div data-mod-section="dss_export"')
     assert debris_section_index < roads_section_index < dss_section_index
+
+
+def test_runs0_template_places_features_export_between_roads_and_dss() -> None:
+    template_path = RUN_0_TEMPLATE_ROOT / "runs0_pure.htm"
+    source = template_path.read_text(encoding="utf-8")
+
+    roads_nav_index = source.index('<a href="#roads" class="nav-link">Roads</a>')
+    features_nav_index = source.index('<a href="#features-export" class="nav-link">Features Export</a>')
+    dss_nav_index = source.index('<a href="#dss-export" class="nav-link">DSS Export</a>')
+    assert roads_nav_index < features_nav_index < dss_nav_index
+
+    roads_section_index = source.index('<div data-mod-section="roads"')
+    features_section_index = source.index('<div data-mod-section="features_export"')
+    dss_section_index = source.index('<div data-mod-section="dss_export"')
+    assert roads_section_index < features_section_index < dss_section_index
+
+
+def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        request=request,
+        current_ron_mods=[],
+    )
+
+    assert 'data-project-mod="features_export"' in rendered
+
+
+def test_features_export_template_exposes_required_dom_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/features_export_pure.htm")
+    rendered = template.render(
+        features_export_submit_url="/rq-engine/api/runs/test-run/test-config/export/features",
+        features_export_download_url_template="/rq-engine/api/runs/test-run/test-config/export/features/__JOB_ID__/download",
+        features_export_catalog_payload={
+            "metadata": {},
+            "family_order": ["watershed"],
+            "family_labels": {"watershed": "Watershed"},
+            "layers": [],
+            "load_error": None,
+        },
+        features_export_bootstrap_payload={
+            "defaults": {"format": "geopackage", "units": "project", "crs": "wgs", "output_scopes": ["baseline"]},
+            "profiles": {"gpkg_adjacent": {"layers": []}},
+            "omni": {"scenarios": [], "contrasts": []},
+            "swat": {"preferred_run_id": "latest", "runs": [], "tables_by_run": {}, "all_tables": []},
+        },
+        features_export_utm_epsg=None,
+    )
+
+    for token in (
+        'form id="features_export_form"',
+        'id="features_export_catalog_data"',
+        'id="features_export_bootstrap_data"',
+        'data-features-export-group="settings"',
+        'data-features-export-group="summary"',
+        'data-features-export-group="catalog"',
+        'data-features-export-group="scopes"',
+        'data-features-export-group="temporal"',
+        'data-features-export-group="omni"',
+        'data-features-export-group="swat"',
+        'data-features-export-group="actions"',
+        'data-features-export-action="load-defaults"',
+        'id="features_export_results_panel"',
+        'id="features_export_status_panel"',
+        'id="features_export_status_log"',
+        'id="features_export_stacktrace_panel"',
+        'id="features_export_stacktrace"',
+        'id="hint_run_features_export"',
+    ):
+        assert token in rendered
