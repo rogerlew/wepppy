@@ -10,8 +10,12 @@
 
 from __future__ import annotations
 
+import json
 from collections import OrderedDict
-from typing import Callable, Dict, Mapping, Optional, OrderedDict as OrderedDictType, Set
+from collections.abc import Mapping as MappingABC, Sequence as SequenceABC
+from dataclasses import dataclass
+from hashlib import sha256
+from typing import Any, Callable, Dict, Mapping, Optional, OrderedDict as OrderedDictType, Set
 
 from wepppy.all_your_base import isfloat, isnan
 
@@ -20,6 +24,12 @@ from .base import NoDbBase
 __all__ = [
     'converters',
     'precisions',
+    'get_unit_class',
+    'UnitTargetResolution',
+    'UnitConversionMetadata',
+    'UnitizedScalar',
+    'UnitizedSequence',
+    'UnitizedTable',
     'UnitizerNoDbLockedException',
     'Unitizer',
 ]
@@ -326,6 +336,77 @@ for _k in precisions:
     assert _k in converters, _k
 
 
+_VALID_UNIT_MODES = frozenset({'si', 'english', 'project'})
+
+
+@dataclass(frozen=True)
+class UnitTargetResolution:
+    """Resolved target unit details for numeric conversion APIs."""
+
+    source_unit: Optional[str]
+    target_unit: Optional[str]
+    unit_class: Optional[str]
+    precision_policy: Optional[int]
+    pass_through_reason: Optional[str]
+
+
+@dataclass(frozen=True)
+class UnitConversionMetadata:
+    """Machine-readable metadata describing one conversion contract."""
+
+    source_unit: Optional[str]
+    target_unit: Optional[str]
+    unit_class: Optional[str]
+    precision_policy: Optional[int]
+    conversion_applied: bool
+    pass_through_reason: Optional[str]
+
+
+@dataclass(frozen=True)
+class UnitizedScalar:
+    """Scalar conversion payload with metadata."""
+
+    value: Any
+    metadata: UnitConversionMetadata
+
+
+@dataclass(frozen=True)
+class UnitizedSequence:
+    """Sequence conversion payload with metadata."""
+
+    values: list[Any]
+    metadata: UnitConversionMetadata
+
+
+@dataclass(frozen=True)
+class UnitizedTable:
+    """Tabular conversion payload with per-column metadata."""
+
+    data: Any
+    metadata_by_column: Dict[str, UnitConversionMetadata]
+
+
+def get_unit_class(in_units: Optional[str]) -> Optional[str]:
+    """Return the registered unit class for ``in_units``."""
+
+    classes = _get_unit_classes(in_units)
+    if not classes:
+        return None
+    return classes[0]
+
+
+def _get_unit_classes(in_units: Optional[str]) -> list[str]:
+    if in_units is None:
+        return []
+
+    in_units_str = str(in_units)
+    classes: list[str] = []
+    for unit_class, available_units in precisions.items():
+        if in_units_str in available_units:
+            classes.append(unit_class)
+    return classes
+
+
 class UnitizerNoDbLockedException(Exception):
     """Legacy exception preserved for backwards compatibility."""
 
@@ -439,6 +520,360 @@ class Unitizer(NoDbBase):
 
         return self._preferences
 
+    def preferences_fingerprint(self) -> str:
+        """Return a stable fingerprint of current unit preferences."""
+
+        canonical_payload = json.dumps(
+            dict(self._preferences),
+            sort_keys=True,
+            separators=(',', ':'),
+        )
+        return sha256(canonical_payload.encode('utf-8')).hexdigest()
+
+    @staticmethod
+    def _normalize_units_mode(units_mode: str) -> str:
+        canonical_mode = str(units_mode).strip().lower()
+        if canonical_mode not in _VALID_UNIT_MODES:
+            allowed = ', '.join(sorted(_VALID_UNIT_MODES))
+            raise ValueError(f'Unsupported units mode {units_mode!r}; expected one of {allowed}')
+        return canonical_mode
+
+    def resolve_target_unit(
+        self,
+        source_unit: Optional[str],
+        *,
+        units_mode: str = 'project',
+        target_unit: Optional[str] = None,
+    ) -> UnitTargetResolution:
+        """Resolve a target unit for ``source_unit`` under the requested mode."""
+
+        source_unit_str = None if source_unit is None else str(source_unit)
+        source_unit_classes = _get_unit_classes(source_unit_str)
+        if not source_unit_classes:
+            pass_through_reason = 'source_unit_missing' if source_unit_str is None else 'unit_class_not_found'
+            return UnitTargetResolution(
+                source_unit=source_unit_str,
+                target_unit=None,
+                unit_class=None,
+                precision_policy=None,
+                pass_through_reason=pass_through_reason,
+            )
+
+        target_unit_str: Optional[str] = None
+        if target_unit is not None:
+            target_unit_str = str(target_unit)
+            target_unit_classes = _get_unit_classes(target_unit_str)
+            candidate_classes = [
+                unit_class_name
+                for unit_class_name in source_unit_classes
+                if unit_class_name in target_unit_classes
+            ]
+            if not candidate_classes:
+                raise ValueError(
+                    f'target_unit {target_unit_str!r} is not compatible with source_unit {source_unit_str!r}'
+                )
+            if len(candidate_classes) > 1:
+                return UnitTargetResolution(
+                    source_unit=source_unit_str,
+                    target_unit=target_unit_str,
+                    unit_class=None,
+                    precision_policy=None,
+                    pass_through_reason='ambiguous_unit_class',
+                )
+            unit_class = candidate_classes[0]
+        else:
+            if len(source_unit_classes) > 1:
+                return UnitTargetResolution(
+                    source_unit=source_unit_str,
+                    target_unit=None,
+                    unit_class=None,
+                    precision_policy=None,
+                    pass_through_reason='ambiguous_unit_class',
+                )
+            unit_class = source_unit_classes[0]
+
+        canonical_mode = self._normalize_units_mode(units_mode)
+        known_units = list(precisions[unit_class].keys())
+
+        if target_unit_str is not None:
+            if target_unit_str not in precisions[unit_class]:
+                raise ValueError(
+                    f'target_unit {target_unit_str!r} does not belong to the available units for '
+                    f'source_unit {source_unit_str!r}'
+                )
+        elif canonical_mode == 'project':
+            target_unit_str = self._preferences.get(unit_class)
+            if target_unit_str is None:
+                return UnitTargetResolution(
+                    source_unit=source_unit_str,
+                    target_unit=None,
+                    unit_class=unit_class,
+                    precision_policy=None,
+                    pass_through_reason='preference_missing',
+                )
+        elif canonical_mode == 'si':
+            target_unit_str = known_units[0]
+        else:
+            target_unit_str = known_units[1] if len(known_units) > 1 else known_units[0]
+
+        precision_policy = precisions[unit_class].get(target_unit_str)
+        if precision_policy is None:
+            return UnitTargetResolution(
+                source_unit=source_unit_str,
+                target_unit=target_unit_str,
+                unit_class=unit_class,
+                precision_policy=None,
+                pass_through_reason='target_unit_not_supported',
+            )
+
+        pass_through_reason = None
+        if source_unit_str != target_unit_str:
+            converter = converters[unit_class].get((source_unit_str, target_unit_str))
+            if converter is None:
+                pass_through_reason = 'no_mapping'
+
+        return UnitTargetResolution(
+            source_unit=source_unit_str,
+            target_unit=target_unit_str,
+            unit_class=unit_class,
+            precision_policy=precision_policy,
+            pass_through_reason=pass_through_reason,
+        )
+
+    @staticmethod
+    def _convert_scalar_with_resolution(
+        value: Any,
+        resolution: UnitTargetResolution,
+    ) -> tuple[Any, bool, Optional[str]]:
+        """Convert ``value`` using an already-resolved target unit."""
+
+        if resolution.pass_through_reason is not None:
+            return value, False, resolution.pass_through_reason
+
+        if not isfloat(value) or isnan(value):
+            return value, False, 'non_numeric'
+
+        numeric_value = float(value)
+        if resolution.source_unit == resolution.target_unit:
+            return value, False, 'identity'
+
+        if resolution.unit_class is None:
+            return value, False, 'unit_class_not_found'
+
+        converter = converters[resolution.unit_class].get((resolution.source_unit, resolution.target_unit))
+        if converter is None:
+            return value, False, 'no_mapping'
+
+        try:
+            return converter(numeric_value), True, None
+        except (TypeError, ValueError, OverflowError):
+            return value, False, 'conversion_error'
+
+    @staticmethod
+    def _metadata_from_resolution(
+        resolution: UnitTargetResolution,
+        *,
+        conversion_applied: bool,
+        pass_through_reason: Optional[str],
+    ) -> UnitConversionMetadata:
+        return UnitConversionMetadata(
+            source_unit=resolution.source_unit,
+            target_unit=resolution.target_unit,
+            unit_class=resolution.unit_class,
+            precision_policy=resolution.precision_policy,
+            conversion_applied=conversion_applied,
+            pass_through_reason=pass_through_reason,
+        )
+
+    def convert_scalar(
+        self,
+        value: Any,
+        source_unit: Optional[str],
+        *,
+        units_mode: str = 'project',
+        target_unit: Optional[str] = None,
+    ) -> UnitizedScalar:
+        """Convert one numeric value and return machine-readable metadata."""
+
+        resolution = self.resolve_target_unit(
+            source_unit,
+            units_mode=units_mode,
+            target_unit=target_unit,
+        )
+        converted_value, conversion_applied, item_reason = self._convert_scalar_with_resolution(value, resolution)
+        pass_through_reason = None if conversion_applied else item_reason
+        metadata = self._metadata_from_resolution(
+            resolution,
+            conversion_applied=conversion_applied,
+            pass_through_reason=pass_through_reason,
+        )
+        return UnitizedScalar(value=converted_value, metadata=metadata)
+
+    def convert_sequence(
+        self,
+        values: SequenceABC[Any],
+        source_unit: Optional[str],
+        *,
+        units_mode: str = 'project',
+        target_unit: Optional[str] = None,
+    ) -> UnitizedSequence:
+        """Convert a sequence while preserving order and returning one metadata payload."""
+
+        resolution = self.resolve_target_unit(
+            source_unit,
+            units_mode=units_mode,
+            target_unit=target_unit,
+        )
+
+        if resolution.pass_through_reason is not None:
+            metadata = self._metadata_from_resolution(
+                resolution,
+                conversion_applied=False,
+                pass_through_reason=resolution.pass_through_reason,
+            )
+            return UnitizedSequence(values=list(values), metadata=metadata)
+
+        converted_values: list[Any] = []
+        conversion_applied = False
+        saw_non_numeric = False
+        saw_conversion_error = False
+
+        for value in values:
+            converted_value, value_converted, item_reason = self._convert_scalar_with_resolution(value, resolution)
+            converted_values.append(converted_value)
+            conversion_applied = conversion_applied or value_converted
+            saw_non_numeric = saw_non_numeric or item_reason == 'non_numeric'
+            saw_conversion_error = saw_conversion_error or item_reason == 'conversion_error'
+
+        pass_through_reason = None
+        if conversion_applied:
+            if saw_conversion_error:
+                pass_through_reason = 'partial_conversion_error'
+            elif saw_non_numeric:
+                pass_through_reason = 'partial_non_numeric'
+        else:
+            if resolution.source_unit == resolution.target_unit:
+                pass_through_reason = 'identity'
+            elif saw_conversion_error:
+                pass_through_reason = 'conversion_error'
+            elif saw_non_numeric:
+                pass_through_reason = 'non_numeric'
+
+        metadata = self._metadata_from_resolution(
+            resolution,
+            conversion_applied=conversion_applied,
+            pass_through_reason=pass_through_reason,
+        )
+        return UnitizedSequence(values=converted_values, metadata=metadata)
+
+    @staticmethod
+    def _missing_column_metadata(source_unit: Optional[str]) -> UnitConversionMetadata:
+        source_unit_str = None if source_unit is None else str(source_unit)
+        return UnitConversionMetadata(
+            source_unit=source_unit_str,
+            target_unit=None,
+            unit_class=get_unit_class(source_unit_str),
+            precision_policy=None,
+            conversion_applied=False,
+            pass_through_reason='missing_column',
+        )
+
+    def convert_table(
+        self,
+        table: Any,
+        column_units: Mapping[str, Optional[str]],
+        *,
+        units_mode: str = 'project',
+        target_units: Optional[Mapping[str, Optional[str]]] = None,
+    ) -> UnitizedTable:
+        """Convert table-like payloads with pandas-aware and fallback support."""
+
+        target_units = target_units or {}
+        metadata_by_column: Dict[str, UnitConversionMetadata] = {}
+
+        try:
+            import pandas as pd  # type: ignore
+        except ImportError:
+            pd = None
+
+        if pd is not None and isinstance(table, pd.DataFrame):
+            converted_df = table.copy()
+            for column_name, source_unit in column_units.items():
+                if column_name not in converted_df.columns:
+                    metadata_by_column[column_name] = self._missing_column_metadata(source_unit)
+                    continue
+
+                sequence_result = self.convert_sequence(
+                    converted_df[column_name].tolist(),
+                    source_unit,
+                    units_mode=units_mode,
+                    target_unit=target_units.get(column_name),
+                )
+                converted_df[column_name] = sequence_result.values
+                metadata_by_column[column_name] = sequence_result.metadata
+
+            return UnitizedTable(data=converted_df, metadata_by_column=metadata_by_column)
+
+        if isinstance(table, MappingABC):
+            converted_mapping = dict(table)
+            for column_name, source_unit in column_units.items():
+                if column_name not in table:
+                    metadata_by_column[column_name] = self._missing_column_metadata(source_unit)
+                    continue
+
+                column_values = table[column_name]
+                if isinstance(column_values, SequenceABC) and not isinstance(column_values, (str, bytes, bytearray)):
+                    sequence_result = self.convert_sequence(
+                        column_values,
+                        source_unit,
+                        units_mode=units_mode,
+                        target_unit=target_units.get(column_name),
+                    )
+                    converted_mapping[column_name] = sequence_result.values
+                    metadata_by_column[column_name] = sequence_result.metadata
+                else:
+                    scalar_result = self.convert_scalar(
+                        column_values,
+                        source_unit,
+                        units_mode=units_mode,
+                        target_unit=target_units.get(column_name),
+                    )
+                    converted_mapping[column_name] = scalar_result.value
+                    metadata_by_column[column_name] = scalar_result.metadata
+
+            return UnitizedTable(data=converted_mapping, metadata_by_column=metadata_by_column)
+
+        if isinstance(table, SequenceABC) and not isinstance(table, (str, bytes, bytearray)):
+            if all(isinstance(row, MappingABC) for row in table):
+                converted_rows = [dict(row) for row in table]
+                for column_name, source_unit in column_units.items():
+                    indices: list[int] = []
+                    values: list[Any] = []
+                    for idx, row in enumerate(converted_rows):
+                        if column_name in row:
+                            indices.append(idx)
+                            values.append(row[column_name])
+
+                    if not indices:
+                        metadata_by_column[column_name] = self._missing_column_metadata(source_unit)
+                        continue
+
+                    sequence_result = self.convert_sequence(
+                        values,
+                        source_unit,
+                        units_mode=units_mode,
+                        target_unit=target_units.get(column_name),
+                    )
+                    for idx, converted_value in zip(indices, sequence_result.values):
+                        converted_rows[idx][column_name] = converted_value
+                    metadata_by_column[column_name] = sequence_result.metadata
+
+                return UnitizedTable(data=converted_rows, metadata_by_column=metadata_by_column)
+
+        raise TypeError(
+            'Unsupported table shape. Expected pandas.DataFrame, mapping-of-columns, or sequence-of-record mappings.'
+        )
+
     @staticmethod
     def context_processor_package() -> Dict[str, Callable[..., str]]:
         global converters, precisions
@@ -459,11 +894,7 @@ class Unitizer(NoDbBase):
                 return str(v)
 
         def determine_unitclass(in_units):
-            for k, v in precisions.items():
-                if in_units in v.keys():
-                    return k
-
-            return None
+            return get_unit_class(in_units)
 
         def str_other_class(other_classes):
             oc = ''
