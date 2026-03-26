@@ -13,6 +13,7 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 import rasterio
 
+from wepppy.climates.cligen import Station
 from wepppy.climates.cligen.cligen import cli_calculate_static_r
 from wepppy.landcover.rap import RangelandAnalysisPlatformV3
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
@@ -125,6 +126,46 @@ def _read_float_band(path: str) -> tuple[np.ndarray, dict[str, Any]]:
         data[np.isclose(data, float(nodata), equal_nan=True)] = np.nan
     data[~np.isfinite(data)] = np.nan
     return data, profile
+
+
+def _resolve_momm2025_annual_precip_in(climate: Climate) -> float | None:
+    par_fn = getattr(climate, "par_fn", None)
+    cli_dir = getattr(climate, "cli_dir", None)
+    if isinstance(par_fn, str) and par_fn.strip():
+        if os.path.isabs(par_fn):
+            par_path = par_fn
+        elif isinstance(cli_dir, str) and cli_dir:
+            par_path = _join(cli_dir, par_fn)
+        else:
+            par_path = par_fn
+        if _exists(par_path):
+            annual_ppt_in = float(np.sum(Station(par_path).monthly_ppts))
+            if not np.isfinite(annual_ppt_in) or annual_ppt_in <= 0.0:
+                raise ValueError(
+                    f"Localized climate annual precipitation from {par_path} must be positive and finite."
+                )
+            return annual_ppt_in
+
+    station_meta = climate.climatestation_meta
+    if station_meta is None:
+        return None
+
+    annual_ppt = getattr(station_meta, "annual_ppt", None)
+    if annual_ppt is None:
+        return None
+
+    try:
+        annual_ppt_in = float(annual_ppt)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            f"Localized climate annual precipitation must be numeric, got {annual_ppt!r}."
+        ) from exc
+
+    if not np.isfinite(annual_ppt_in) or annual_ppt_in <= 0.0:
+        raise ValueError(
+            f"Localized climate annual precipitation must be positive and finite, got {annual_ppt!r}."
+        )
+    return annual_ppt_in
 
 
 def _write_float_raster(path: str, data: np.ndarray, profile: Mapping[str, Any], *, nodata: float = -9999.0) -> None:
@@ -349,6 +390,7 @@ class Rusle(NoDbBase):
         self,
         *,
         watershed: Watershed,
+        climate: Climate,
         r_mode: str,
     ) -> RusleRModeSelection:
         centroid = getattr(watershed, "centroid", None)
@@ -360,7 +402,10 @@ class Rusle(NoDbBase):
 
         centroid_lnglat = (float(centroid[0]), float(centroid[1]))
         if r_mode == "momm2025_county_region":
-            return select_momm2025_county_region_r(centroid_lnglat)
+            return select_momm2025_county_region_r(
+                centroid_lnglat,
+                annual_precip_in=_resolve_momm2025_annual_precip_in(climate),
+            )
         if r_mode == "canonical_rusle2":
             return select_canonical_rusle2_r(centroid_lnglat)
 
@@ -407,7 +452,11 @@ class Rusle(NoDbBase):
             }
             return float(r_scalar), manifest_payload
 
-        selection = self._resolve_external_r_selection(watershed=watershed, r_mode=r_mode)
+        selection = self._resolve_external_r_selection(
+            watershed=watershed,
+            climate=climate,
+            r_mode=r_mode,
+        )
         return float(selection.r_scalar_value), selection.to_manifest_payload()
 
     def _write_constant_from_dem(self, dem_path: str, output_path: str, value: float) -> None:

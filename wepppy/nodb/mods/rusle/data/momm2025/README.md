@@ -109,8 +109,10 @@ exact county-level join for every row in the vendored main Parquet.
 - Coverage is limited to the continental US plus DC.
 
 The lack of public `REGION` polygons is the main open implementation decision
-for this dataset. Current runtime behavior therefore rejects split-county
-multi-`REGION` selections explicitly rather than guessing a sub-county region.
+for this dataset. Current runtime behavior therefore keeps centroid-county
+selection for the county itself, then resolves split-county `REGION` rows by
+matching the run's localised annual precipitation against the numeric public
+`REGION` interval labels rather than inventing sub-county polygons.
 
 ## Academic Highlights
 
@@ -130,7 +132,8 @@ high-signal points for this repository are:
 
 - Prefer reading these assets with the repository `.venv`, which already has
   `pyarrow` and `geopandas`.
-- Do not infer sub-county `REGION` polygons from the label strings alone.
+- Do not infer sub-county `REGION` polygons from the label strings alone; the
+  runtime only uses the numeric interval labels to choose one published row.
 - The approved v1 selection contract is watershed centroid, not county-area
   weighting.
 - The approved v1 output contract is scalar `R`, not a spatially varying

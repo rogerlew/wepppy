@@ -134,6 +134,22 @@ def _extract_monthly_values(row: Any, *, prefix: str = "") -> dict[str, float] |
     return monthly if saw_value else None
 
 
+def _parse_region_interval(value: Any) -> tuple[float, float] | None:
+    token = _optional_str(value)
+    if token is None:
+        return None
+
+    lower_token, separator, upper_token = token.partition("-")
+    if separator != "-":
+        return None
+
+    lower = _coerce_finite_float(lower_token, field_name="region_lower")
+    upper = _coerce_finite_float(upper_token, field_name="region_upper")
+    if lower >= upper:
+        raise ValueError(f"Expected region lower bound to be less than upper bound, got {token!r}.")
+    return lower, upper
+
+
 @lru_cache(maxsize=1)
 def _load_momm_table():
     table = pd.read_parquet(_data_root() / "momm2025" / "momm2025_county_region_monthly_r.parquet").copy()
@@ -208,6 +224,7 @@ class RusleRModeSelection:
 def select_momm2025_county_region_r(
     centroid_lnglat: tuple[float, float],
     *,
+    annual_precip_in: float | None = None,
     table: pd.DataFrame | None = None,
     counties=None,
 ) -> RusleRModeSelection:
@@ -242,6 +259,8 @@ def select_momm2025_county_region_r(
     if matched_rows.empty:
         raise ValueError(f"Momm 2025 table did not contain FIPS {selected_fips}.")
 
+    selection_method = "watershed_centroid_county"
+    notes: list[str] | None = None
     if len(matched_rows) > 1:
         region_labels = sorted(
             {
@@ -250,10 +269,40 @@ def select_momm2025_county_region_r(
                 if label is not None
             }
         )
-        raise ValueError(
-            "Momm 2025 split-county REGION rows are unsupported for runtime selection "
-            f"(selected county FIPS {selected_fips}, regions={region_labels})."
-        )
+        if annual_precip_in is None:
+            raise ValueError(
+                "Momm 2025 split-county REGION rows require localized annual precipitation for "
+                f"runtime selection (selected county FIPS {selected_fips}, regions={region_labels})."
+            )
+
+        precip_in = _coerce_finite_float(annual_precip_in, field_name="annual_precip_in")
+        parsed_rows: list[tuple[float, float, int]] = []
+        for row_index, region_value in matched_rows["region"].items():
+            bounds = _parse_region_interval(region_value)
+            if bounds is None:
+                raise ValueError(
+                    "Momm 2025 split-county REGION rows must use numeric interval labels for "
+                    f"runtime selection (selected county FIPS {selected_fips}, regions={region_labels})."
+                )
+            parsed_rows.append((bounds[0], bounds[1], row_index))
+
+        parsed_rows.sort(key=lambda item: (item[0], item[1], item[2]))
+        max_upper = max(upper for _, upper, _ in parsed_rows)
+        matching_indexes = [
+            row_index
+            for lower, upper, row_index in parsed_rows
+            if (lower <= precip_in < upper)
+            or (math.isclose(precip_in, max_upper) and math.isclose(upper, max_upper))
+        ]
+        if len(matching_indexes) != 1:
+            raise ValueError(
+                "Momm 2025 split-county REGION rows did not contain a unique annual precipitation "
+                f"match for county FIPS {selected_fips} (annual_precip_in={precip_in}, regions={region_labels})."
+            )
+
+        matched_rows = matched_rows.loc[matching_indexes].copy()
+        selection_method = "watershed_centroid_county_annual_precip_bin"
+        notes = [f"Split-county REGION row selected using localized annual precipitation {precip_in:.3f} in."]
 
     row = matched_rows.iloc[0]
     monthly_values = _extract_monthly_values(row)
@@ -270,7 +319,7 @@ def select_momm2025_county_region_r(
             "Uses the published Momm et al. (2025) RUSLE2 monthly erosivity "
             "climatology for the watershed centroid county."
         ),
-        r_selection_method="watershed_centroid_county",
+        r_selection_method=selection_method,
         r_scalar_value=annual_r,
         r_scalar_units=R_SCALAR_UNITS_SI,
         annual_source_field="annual_r",
@@ -286,6 +335,7 @@ def select_momm2025_county_region_r(
             "momm_table": MOMM_TABLE_RELPATH,
             "momm_counties": MOMM_COUNTIES_RELPATH,
         },
+        notes=notes,
     )
 
 

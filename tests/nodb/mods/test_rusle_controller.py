@@ -376,7 +376,12 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
     monkeypatch.setattr(
         rusle_module.Climate,
         "getInstance",
-        lambda _wd: SimpleNamespace(cli_path=str(wd / "missing.cli")),
+        lambda _wd: SimpleNamespace(
+            cli_path=str(wd / "missing.cli"),
+            cli_dir=str(wd / "climate"),
+            par_fn="localized.par",
+            climatestation_meta=SimpleNamespace(annual_ppt=22.4),
+        ),
     )
     monkeypatch.setattr(
         rusle_module.Landuse,
@@ -414,9 +419,11 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
         },
     )
     monkeypatch.setattr(rusle_module, "update_catalog_entry", lambda _wd, relpath: relpath)
+    monkeypatch.setattr(rusle_module, "_resolve_momm2025_annual_precip_in", lambda _climate: 43.6)
 
-    def _fake_select_momm(centroid_lnglat):
+    def _fake_select_momm(centroid_lnglat, *, annual_precip_in=None):
         captured["centroid_lnglat"] = centroid_lnglat
+        captured["annual_precip_in"] = annual_precip_in
         return RusleRModeSelection(
             r_mode="momm2025_county_region",
             r_source_label="Momm 2025 County Climatology",
@@ -526,6 +533,7 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
     )
 
     assert captured["centroid_lnglat"] == (-120.5, 46.5)
+    assert captured["annual_precip_in"] == pytest.approx(43.6)
     assert captured["max_slope_length_m"] == pytest.approx(220.0)
     assert summary["r_mode"] == "momm2025_county_region"
     assert _read_valid_value(wd / summary["artifacts"]["r_relpath"]) == pytest.approx(73.5)

@@ -675,11 +675,15 @@ Locked v1 decisions (2026-03-25):
 
 Resolved runtime contract (2026-03-26):
 
-- counties with multiple public `REGION` rows are explicitly rejected in v1
-  with a clear runtime error; there is no silent fallback to another `R` mode
+- counties with multiple public `REGION` rows are resolved by matching the
+  run-localised annual precipitation (inches/year) against the numeric public
+  `REGION` interval labels
+- there is no silent fallback to another `R` mode when the annual
+  precipitation reference is unavailable or does not map to exactly one
+  published `REGION` row
 - this keeps the mode truthful to the public data limitation (no shipped
   sub-county `REGION` polygons) while preserving deterministic centroid-county
-  behavior for single-row counties
+  behavior for both single-row and split-row counties
 
 #### Planned Additional Runtime Mode: `canonical_rusle2`
 
@@ -1320,7 +1324,7 @@ ls_mode = "wbt_rusle"
 ls_routing = "dinf"
 r_mode = "cligen_static"
 # additional planning-climatology modes:
-# r_mode = "momm2025_county_region"  # watershed-centroid county (split-county reject)
+# r_mode = "momm2025_county_region"  # watershed-centroid county + annual-precip REGION bin
 # r_mode = "canonical_rusle2"  # watershed-centroid official polygon (polygon-backed only)
 k_mode = "polaris_nomograph"
 c_mode = "observed_rap"
@@ -1423,7 +1427,7 @@ in the first release:
 
 - `LS mode = wbt_rusle`
 - `R mode = cligen_static`
-- `R mode = momm2025_county_region` (with explicit split-county rejection in v1)
+- `R mode = momm2025_county_region` (split counties resolved by annual-precip REGION bin)
 - `R mode = canonical_rusle2` (polygon-backed official links only in v1)
 - `P mode = default` (`1.0`)
 

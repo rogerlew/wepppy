@@ -62,7 +62,7 @@ def test_select_momm2025_county_region_r_returns_single_county_selection() -> No
     assert selection.monthly_dataset_values["jul"] == pytest.approx(7.0)
 
 
-def test_select_momm2025_county_region_r_rejects_split_county() -> None:
+def test_select_momm2025_county_region_r_requires_annual_precip_for_split_county() -> None:
     counties = gpd.GeoDataFrame(
         {"fips": ["53009"]},
         geometry=[Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])],
@@ -70,13 +70,43 @@ def test_select_momm2025_county_region_r_rejects_split_county() -> None:
     )
     table = pd.DataFrame(
         [
-            _build_momm_row(fips="53009", region="A", annual_r=70.0),
-            _build_momm_row(fips="53009", region="B", annual_r=71.0),
+            _build_momm_row(fips="53009", region="20-22", annual_r=70.0),
+            _build_momm_row(fips="53009", region="22-25", annual_r=71.0),
         ]
     )
 
-    with pytest.raises(ValueError, match="split-county REGION rows are unsupported"):
+    with pytest.raises(ValueError, match="require localized annual precipitation"):
         select_momm2025_county_region_r((1.0, 1.0), table=table, counties=counties)
+
+
+def test_select_momm2025_county_region_r_selects_split_county_by_annual_precip() -> None:
+    counties = gpd.GeoDataFrame(
+        {"fips": ["16015"]},
+        geometry=[Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])],
+        crs="EPSG:4326",
+    )
+    table = pd.DataFrame(
+        [
+            _build_momm_row(fips="16015", region="20-22", annual_r=60.0),
+            _build_momm_row(fips="16015", region="22-25", annual_r=61.0),
+            _build_momm_row(fips="16015", region="25-28", annual_r=62.0),
+        ]
+    )
+
+    selection = select_momm2025_county_region_r(
+        (1.0, 1.0),
+        annual_precip_in=22.4,
+        table=table,
+        counties=counties,
+    )
+
+    assert selection.selected_fips == "16015"
+    assert selection.selected_region == "22-25"
+    assert selection.r_selection_method == "watershed_centroid_county_annual_precip_bin"
+    assert selection.r_scalar_value == pytest.approx(61.0)
+    assert selection.notes == [
+        "Split-county REGION row selected using localized annual precipitation 22.400 in."
+    ]
 
 
 def test_select_canonical_rusle2_r_converts_english_r_to_si() -> None:
