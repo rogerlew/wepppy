@@ -64,7 +64,6 @@ async def build_rusle(runid: str, config: str, request: Request) -> JSONResponse
             "k_modes",
             "default_k_mode",
             "max_slope_length_m",
-            "max_slope_length_rationale",
             "p_value",
             "force_polaris_refresh",
         )

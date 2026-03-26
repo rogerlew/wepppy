@@ -37,7 +37,6 @@ describe("Rusle controller", () => {
                     <option value="polaris_epic">epic</option>
                 </select>
                 <input id="max_slope_length_m" name="max_slope_length_m" value="304.8" data-unitizer-category="sm-distance" data-unitizer-unit="m">
-                <textarea id="max_slope_length_rationale" name="max_slope_length_rationale"></textarea>
                 <input id="p_value" name="p_value" value="1.0">
                 <input type="checkbox" id="force_polaris_refresh" name="force_polaris_refresh">
                 <button id="btn_build_rusle" type="button" data-rusle-action="run">Build</button>
@@ -126,7 +125,6 @@ describe("Rusle controller", () => {
                 k_modes: ["polaris_nomograph"],
                 default_k_mode: "polaris_nomograph",
                 max_slope_length_m: "304.8",
-                max_slope_length_rationale: "",
                 p_value: "1.0"
             }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
