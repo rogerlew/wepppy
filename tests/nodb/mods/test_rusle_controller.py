@@ -153,6 +153,7 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
 
     controller = rusle_module.Rusle(str(wd), "disturbed9002.cfg")
     c_call: dict[str, object] = {}
+    ls_call: dict[str, object] = {}
 
     monkeypatch.setattr(
         rusle_module.Ron,
@@ -213,8 +214,10 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
 
     monkeypatch.setattr(rusle_module, "update_catalog_entry", _fake_update_catalog_entry)
 
-    def _fake_ls(_wd: str, _dem: str, *, channel_mask=None):
+    def _fake_ls(_wd: str, _dem: str, *, channel_mask=None, max_slope_length_m=304.8):
         assert _dem == str(relief_path)
+        ls_call["channel_mask"] = channel_mask
+        ls_call["max_slope_length_m"] = max_slope_length_m
         ls_path = rusle_dir / "ls.tif"
         l_path = rusle_dir / "l.tif"
         s_path = rusle_dir / "s.tif"
@@ -316,6 +319,7 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
         "landuse": str(landuse_path),
         "sbs": None,
     }
+    assert ls_call["max_slope_length_m"] == pytest.approx(304.8)
 
     artifacts = summary["artifacts"]
     assert artifacts["c_relpath"] == "rusle/c_scenario_sbs.tif"
@@ -433,7 +437,8 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
         )
 
     monkeypatch.setattr(rusle_module, "select_momm2025_county_region_r", _fake_select_momm)
-    def _fake_ls(_wd: str, _dem: str, *, channel_mask=None):
+    def _fake_ls(_wd: str, _dem: str, *, channel_mask=None, max_slope_length_m=304.8):
+        captured["max_slope_length_m"] = float(max_slope_length_m)
         ls_path = rusle_dir / "ls.tif"
         l_path = rusle_dir / "l.tif"
         s_path = rusle_dir / "s.tif"
@@ -515,11 +520,13 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
             "c_mode": "scenario_sbs",
             "k_modes": ["polaris_nomograph"],
             "default_k_mode": "polaris_nomograph",
+            "max_slope_length_m": 220.0,
             "p_value": 1.0,
         }
     )
 
     assert captured["centroid_lnglat"] == (-120.5, 46.5)
+    assert captured["max_slope_length_m"] == pytest.approx(220.0)
     assert summary["r_mode"] == "momm2025_county_region"
     assert _read_valid_value(wd / summary["artifacts"]["r_relpath"]) == pytest.approx(73.5)
 
@@ -527,6 +534,7 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
     with open(manifest_path, "r", encoding="utf-8") as stream:
         manifest = json.load(stream)
     assert manifest["rusle"]["options"]["r_mode"] == "momm2025_county_region"
+    assert manifest["rusle"]["options"]["max_slope_length_m"] == pytest.approx(220.0)
     assert manifest["rusle"]["r_factor"]["selected_fips"] == "53009"
     assert manifest["rusle"]["r_factor"]["r_source_label"] == "Momm 2025 County Climatology"
     assert manifest["rusle"]["static_r"]["source_mode"] == "momm2025_county_region"
@@ -551,6 +559,7 @@ def test_build_rejects_topaz_backend(
             "rap_year": 2025,
             "k_modes": ["polaris_nomograph"],
             "default_k_mode": "polaris_nomograph",
+            "max_slope_length_m": 304.8,
             "p_value": 1.0,
             "force_polaris_refresh": False,
         },
@@ -571,3 +580,26 @@ def test_build_rejects_topaz_backend(
 
     with pytest.raises(ValueError, match="WBT delineation backend"):
         controller.build(payload={})
+
+
+def test_parse_inputs_accepts_max_slope_length_override(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = rusle_module.Rusle(str(tmp_path), "disturbed9002.cfg")
+    monkeypatch.setattr(controller, "available_rap_years", lambda: [])
+
+    parsed = controller.parse_inputs(payload={"max_slope_length_m": "250.5"})
+
+    assert parsed["max_slope_length_m"] == pytest.approx(250.5)
+
+
+def test_parse_inputs_rejects_non_positive_max_slope_length(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = rusle_module.Rusle(str(tmp_path), "disturbed9002.cfg")
+    monkeypatch.setattr(controller, "available_rap_years", lambda: [])
+
+    with pytest.raises(ValueError, match="max_slope_length_m must be greater than 0"):
+        controller.parse_inputs(payload={"max_slope_length_m": 0})

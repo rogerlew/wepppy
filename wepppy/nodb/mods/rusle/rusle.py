@@ -39,6 +39,7 @@ SUPPORTED_K_MODES: tuple[str, ...] = ("polaris_nomograph", "polaris_epic")
 RUSLE_POLARIS_PROPERTIES: tuple[str, ...] = ("sand", "silt", "clay", "om", "bd", "ksat")
 RUSLE_POLARIS_STATISTICS: tuple[str, ...] = ("mean",)
 RUSLE_POLARIS_DEPTHS: tuple[str, ...] = ("0_5", "5_15")
+DEFAULT_MAX_SLOPE_LENGTH_M = 304.8
 
 
 def _utc_now_iso() -> str:
@@ -74,6 +75,17 @@ def _coerce_bool(value: Any, *, default: bool = False) -> bool:
     if token in {"false", "0", "no", "off"}:
         return False
     raise ValueError(f"Could not parse boolean value {value!r}")
+
+
+def _coerce_positive_float(value: Any, *, field: str) -> float:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field} must be numeric, got {value!r}") from exc
+
+    if not np.isfinite(parsed) or parsed <= 0.0:
+        raise ValueError(f"{field} must be greater than 0, got {value!r}")
+    return parsed
 
 
 def _coerce_mode_list(
@@ -148,6 +160,10 @@ class Rusle(NoDbBase):
         default_rap_year = int(RangelandAnalysisPlatformV3.latest_completed_year())
         configured_rap_year = self.config_get_int("rusle", "rap_year", default_rap_year)
         configured_r_mode = self.config_get_str("rusle", "r_mode", "cligen_static")
+        configured_max_slope_length = _coerce_positive_float(
+            self.config_get_float("rusle", "max_slope_length_m", DEFAULT_MAX_SLOPE_LENGTH_M),
+            field="max_slope_length_m",
+        )
         if configured_r_mode not in SUPPORTED_R_MODES:
             raise ValueError(f"Unsupported r_mode {configured_r_mode!r}; expected one of {SUPPORTED_R_MODES}")
         configured_modes = _coerce_mode_list(
@@ -166,6 +182,7 @@ class Rusle(NoDbBase):
             self._rap_year = int(configured_rap_year)
             self._k_modes = configured_modes
             self._default_k_mode = configured_default_k
+            self._max_slope_length_m = configured_max_slope_length
             self._p_value = float(self.config_get_float("rusle", "p_value", 1.0))
             self._last_build_artifacts: dict[str, str] = {}
 
@@ -248,6 +265,15 @@ class Rusle(NoDbBase):
         self._p_value = float(value)
 
     @property
+    def max_slope_length_m(self) -> float:
+        return float(getattr(self, "_max_slope_length_m", DEFAULT_MAX_SLOPE_LENGTH_M))
+
+    @max_slope_length_m.setter
+    @nodb_setter
+    def max_slope_length_m(self, value: float) -> None:
+        self._max_slope_length_m = _coerce_positive_float(value, field="max_slope_length_m")
+
+    @property
     def last_build_artifacts(self) -> dict[str, str]:
         return dict(getattr(self, "_last_build_artifacts", {}))
 
@@ -289,6 +315,14 @@ class Rusle(NoDbBase):
         if default_k_mode not in k_modes:
             raise ValueError("default_k_mode must be included in k_modes")
 
+        raw_max_slope_length = raw.get("max_slope_length_m", self.max_slope_length_m)
+        if isinstance(raw_max_slope_length, str) and not raw_max_slope_length.strip():
+            max_slope_length_m = self.max_slope_length_m
+        elif raw_max_slope_length is None:
+            max_slope_length_m = self.max_slope_length_m
+        else:
+            max_slope_length_m = _coerce_positive_float(raw_max_slope_length, field="max_slope_length_m")
+
         p_value = float(raw.get("p_value", self.p_value))
         force_polaris_refresh = _coerce_bool(raw.get("force_polaris_refresh"), default=False)
 
@@ -298,6 +332,7 @@ class Rusle(NoDbBase):
             "rap_year": rap_year,
             "k_modes": k_modes,
             "default_k_mode": default_k_mode,
+            "max_slope_length_m": max_slope_length_m,
             "p_value": p_value,
             "force_polaris_refresh": force_polaris_refresh,
         }
@@ -674,6 +709,7 @@ class Rusle(NoDbBase):
             f"- K modes selected: `{', '.join(options['k_modes'])}`",
             f"- Default K mode: `{options['default_k_mode']}`",
             f"- RAP year: `{options['rap_year']}`",
+            f"- Max slope length cap: `{options['max_slope_length_m']}` m",
             f"- P value: `{options['p_value']}`",
             "",
             "## Primary outputs",
@@ -729,6 +765,7 @@ class Rusle(NoDbBase):
             self._rap_year = int(options["rap_year"])
             self._k_modes = list(options["k_modes"])
             self._default_k_mode = options["default_k_mode"]
+            self._max_slope_length_m = float(options["max_slope_length_m"])
             self._p_value = float(options["p_value"])
 
         ron = Ron.getInstance(self.wd)
@@ -762,6 +799,7 @@ class Rusle(NoDbBase):
             self.wd,
             ls_dem_path,
             channel_mask=channel_mask,
+            max_slope_length_m=float(options["max_slope_length_m"]),
         )
         for path in asdict(ls_result).values():
             if path and _exists(path):
@@ -858,6 +896,7 @@ class Rusle(NoDbBase):
                 "k_modes": list(options["k_modes"]),
                 "default_k_mode": options["default_k_mode"],
                 "rap_year": int(options["rap_year"]),
+                "max_slope_length_m": float(options["max_slope_length_m"]),
                 "p_value": float(options["p_value"]),
             },
             "r_factor": dict(r_manifest),
@@ -876,5 +915,6 @@ class Rusle(NoDbBase):
             "mode": options["c_mode"],
             "default_k_mode": options["default_k_mode"],
             "rap_year": int(options["rap_year"]),
+            "max_slope_length_m": float(options["max_slope_length_m"]),
             "artifacts": artifacts,
         }

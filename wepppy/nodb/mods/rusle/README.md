@@ -175,6 +175,7 @@ the `[rusle]` section:
 | `rap_year` | latest available | RAP observation year for `observed_rap` mode |
 | `k_modes` | `polaris_nomograph` | Comma-separated K estimators to compute |
 | `default_k_mode` | first in `k_modes` | Which K raster feeds the final A product |
+| `max_slope_length_m` | `304.8` | LS effective slope-length cap in meters (1000 ft handbook basis); override only for explicit sensitivity analysis |
 | `p_value` | `1.0` | Constant support-practice factor |
 
 See [specification.md § Config Direction](specification.md#config-direction)

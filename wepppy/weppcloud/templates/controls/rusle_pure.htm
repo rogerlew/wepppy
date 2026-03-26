@@ -14,6 +14,7 @@
 {% set rusle_k_modes = rusle.k_modes if rusle is not none and rusle.k_modes else ['polaris_nomograph'] %}
 {% set rusle_default_k_mode = rusle.default_k_mode if rusle is not none else 'polaris_nomograph' %}
 {% set rusle_p_value = rusle.p_value if rusle is not none else 1.0 %}
+{% set rusle_max_slope_length_m = rusle.max_slope_length_m if rusle is not none else 304.8 %}
 {% set rap_year_options = rusle_rap_year_options | default([], true) %}
 {% set selected_rap_year = (rusle.rap_year | string) if rusle is not none else (rap_year_options[-1] | string if rap_year_options else '') %}
 
@@ -135,6 +136,19 @@
        selected=rusle_default_k_mode,
        attrs={"class": "disable-readonly", "data-rusle-input": "default-k"},
        help="The selected default mode supplies <code>K</code> in the final mode-specific <code>A</code> raster."
+     ) }}
+
+  {{ ui.numeric_field(
+       "max_slope_length_m",
+       "Maximum slope length cap",
+       value=rusle_max_slope_length_m,
+       precision="0.1",
+       min="0.1",
+       unit_label="m",
+       unit_category="sm-distance",
+       unit_name="m",
+       attrs={"class": "disable-readonly", "data-rusle-input": "max-slope-length"},
+       help="LS uses this cap before `L`/`LS` calculation. Default is 304.8 m (1000 ft, RUSLE2 handbook); change only for explicit sensitivity analysis."
      ) }}
 
   {{ ui.numeric_field(
