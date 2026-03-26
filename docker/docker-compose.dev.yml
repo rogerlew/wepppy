@@ -791,6 +791,8 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.fcgiwrap
+      args:
+        APP_USER: "${UID:-1000}"
     volumes:
       - ../:/workdir/wepppy
       - ${WC1_DIR}:/wc1
