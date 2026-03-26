@@ -45,19 +45,28 @@ var Roads = (function () {
         uploadProgress: "#roads_geojson_file-progress",
         uploadProgressFill: ".wc-upload-progress__fill",
         uploadProgressStatus: ".wc-upload-progress__status",
-        uploadMessage: "#roads_upload_message"
+        uploadMessage: "#roads_upload_message",
+        mappingSection: "#roads_attribute_mapping_section",
+        mappingPreview: "#roads_attribute_catalog_preview",
+        mappingMessage: "#roads_mapping_message",
+        mappingSelects: "[data-roads-map-field]",
+        defaultSelects: "[data-roads-default-field]"
     };
 
     var ACTIONS = {
         upload: "[data-roads-action='upload']",
         prepare: "[data-roads-action='prepare-segments']",
-        run: "[data-roads-action='run']"
+        run: "[data-roads-action='run']",
+        applyMapping: "[data-roads-action='apply-attribute-mapping']"
     };
 
     var EVENT_NAMES = [
         "roads:upload:started",
         "roads:upload:completed",
         "roads:upload:error",
+        "roads:mapping:started",
+        "roads:mapping:completed",
+        "roads:mapping:error",
         "roads:prepare:started",
         "roads:prepare:completed",
         "roads:prepare:error",
@@ -68,6 +77,9 @@ var Roads = (function () {
         "job:completed",
         "job:error"
     ];
+
+    var SURFACE_DEFAULT_OPTIONS = ["gravel", "paved"];
+    var TRAFFIC_DEFAULT_OPTIONS = ["high", "low", "none"];
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -270,6 +282,11 @@ var Roads = (function () {
         var uploadProgressFillElement = null;
         var uploadProgressStatusElement = null;
         var uploadMessageElement = null;
+        var mappingSectionElement = null;
+        var mappingPreviewElement = null;
+        var mappingMessageElement = null;
+        var mappingSelectElements = [];
+        var defaultSelectElements = [];
 
         var controller = Object.assign(base, {
             dom: dom,
@@ -284,6 +301,7 @@ var Roads = (function () {
             rq_job: createLegacyAdapter(null),
             hint: createLegacyAdapter(null),
             uploadMessage: createLegacyAdapter(null),
+            mappingMessage: createLegacyAdapter(null),
             statusPanelEl: null,
             stacktracePanelEl: null,
             statusSpinnerEl: null,
@@ -339,6 +357,12 @@ var Roads = (function () {
         function setUploadMessage(text) {
             if (controller.uploadMessage && typeof controller.uploadMessage.text === "function") {
                 controller.uploadMessage.text(text || "");
+            }
+        }
+
+        function setMappingMessage(text) {
+            if (controller.mappingMessage && typeof controller.mappingMessage.text === "function") {
+                controller.mappingMessage.text(text || "");
             }
         }
 
@@ -438,6 +462,22 @@ var Roads = (function () {
                 uploadMessageElement = next;
                 controller.uploadMessage = createLegacyAdapter(uploadMessageElement);
             });
+            syncAdapter(SELECTORS.mappingSection, mappingSectionElement, function (next) {
+                mappingSectionElement = next;
+            });
+            syncAdapter(SELECTORS.mappingPreview, mappingPreviewElement, function (next) {
+                mappingPreviewElement = next;
+            });
+            syncAdapter(SELECTORS.mappingMessage, mappingMessageElement, function (next) {
+                mappingMessageElement = next;
+                controller.mappingMessage = createLegacyAdapter(mappingMessageElement);
+            });
+            mappingSelectElements = controller.form
+                ? Array.prototype.slice.call(controller.form.querySelectorAll(SELECTORS.mappingSelects))
+                : [];
+            defaultSelectElements = controller.form
+                ? Array.prototype.slice.call(controller.form.querySelectorAll(SELECTORS.defaultSelects))
+                : [];
 
             var nextStatusPanel = null;
             var nextStacktracePanel = null;
@@ -495,6 +535,10 @@ var Roads = (function () {
                 event.preventDefault();
                 controller.runRoads();
             }));
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.applyMapping, function (event) {
+                event.preventDefault();
+                controller.applyAttributeMapping();
+            }));
         }
 
         function resolveMaxUploadBytes() {
@@ -531,6 +575,199 @@ var Roads = (function () {
             if (pieces.length > 0) {
                 controller.info.html("<div class=\"wc-stack-sm\">" + pieces.join("") + "</div>");
             }
+        }
+
+        function extractPayload(rawPayload) {
+            if (!rawPayload || typeof rawPayload !== "object") {
+                return {};
+            }
+            if (rawPayload.Content && typeof rawPayload.Content === "object") {
+                return rawPayload.Content;
+            }
+            return rawPayload;
+        }
+
+        function normalizeFieldNames(catalog) {
+            if (!catalog || typeof catalog !== "object" || !Array.isArray(catalog.field_names)) {
+                return [];
+            }
+            return catalog.field_names.filter(function (fieldName) {
+                return typeof fieldName === "string" && fieldName.length > 0;
+            });
+        }
+
+        function normalizeMappingState(summary) {
+            var roadsParams = summary && typeof summary === "object" && summary.roads_params && typeof summary.roads_params === "object"
+                ? summary.roads_params
+                : {};
+            var map = summary && typeof summary === "object" && summary.attribute_field_map && typeof summary.attribute_field_map === "object"
+                ? summary.attribute_field_map
+                : (roadsParams.attribute_field_map && typeof roadsParams.attribute_field_map === "object"
+                    ? roadsParams.attribute_field_map
+                    : {});
+            return {
+                design: typeof map.design === "string" ? map.design : "",
+                surface: typeof map.surface === "string" ? map.surface : "",
+                traffic: typeof map.traffic === "string" ? map.traffic : ""
+            };
+        }
+
+        function normalizeFallbackDefaults(summary) {
+            var roadsParams = summary && typeof summary === "object" && summary.roads_params && typeof summary.roads_params === "object"
+                ? summary.roads_params
+                : null;
+            var hasRoadsParams = !!roadsParams;
+            var rawSurface = roadsParams && typeof roadsParams.surface_default === "string"
+                ? roadsParams.surface_default.toLowerCase()
+                : "";
+            var rawTraffic = roadsParams && typeof roadsParams.traffic_default === "string"
+                ? roadsParams.traffic_default.toLowerCase()
+                : "";
+
+            return {
+                hasRoadsParams: hasRoadsParams,
+                surface_default: SURFACE_DEFAULT_OPTIONS.indexOf(rawSurface) !== -1 ? rawSurface : "gravel",
+                traffic_default: TRAFFIC_DEFAULT_OPTIONS.indexOf(rawTraffic) !== -1 ? rawTraffic : "low"
+            };
+        }
+
+        function applySelectOptions(selectElement, fieldNames, selectedValue) {
+            if (!selectElement) {
+                return;
+            }
+            while (selectElement.firstChild) {
+                selectElement.removeChild(selectElement.firstChild);
+            }
+
+            function addOption(value, text) {
+                var option = document.createElement("option");
+                option.value = value;
+                option.textContent = text;
+                selectElement.appendChild(option);
+            }
+
+            addOption("", "Auto / Unset");
+            fieldNames.forEach(function (fieldName) {
+                addOption(fieldName, fieldName);
+            });
+            if (selectedValue && fieldNames.indexOf(selectedValue) === -1) {
+                addOption(selectedValue, selectedValue + " (not in current upload)");
+            }
+            selectElement.value = selectedValue || "";
+        }
+
+        function applyDefaultValueOptions(selectElement, options, selectedValue) {
+            if (!selectElement) {
+                return;
+            }
+            while (selectElement.firstChild) {
+                selectElement.removeChild(selectElement.firstChild);
+            }
+
+            options.forEach(function (value) {
+                var option = document.createElement("option");
+                option.value = value;
+                option.textContent = value;
+                selectElement.appendChild(option);
+            });
+
+            var resolved = options.indexOf(selectedValue) !== -1 ? selectedValue : options[0];
+            selectElement.value = resolved;
+        }
+
+        function renderAttributeCatalogPreview(catalog) {
+            if (!mappingPreviewElement) {
+                return;
+            }
+            if (!catalog || typeof catalog !== "object") {
+                mappingPreviewElement.innerHTML = "<p class=\"wc-field__help\">Upload a GeoJSON file to discover attributes.</p>";
+                return;
+            }
+
+            var fieldNames = normalizeFieldNames(catalog);
+            var fieldCount = Number(catalog.field_count || fieldNames.length || 0);
+            var totalFeatures = Number(catalog.total_feature_count || 0);
+            var profiledFeatures = Number(catalog.profiled_feature_count || totalFeatures);
+            var profileRows = Array.isArray(catalog.field_profiles) ? catalog.field_profiles : [];
+            var previewRows = profileRows.slice(0, 8).map(function (row) {
+                var samples = Array.isArray(row.sample_values) && row.sample_values.length
+                    ? row.sample_values.map(function (sample) { return "<code>" + escapeHtml(String(sample)) + "</code>"; }).join(", ")
+                    : "<span class=\"wc-text-muted\">(none)</span>";
+                return "<li><strong>" + escapeHtml(String(row.name || "")) + "</strong>: " + samples + "</li>";
+            }).join("");
+
+            var summary = [
+                "<div><strong>Discovered fields:</strong> " + escapeHtml(String(fieldCount)) + "</div>",
+                "<div><strong>Features profiled:</strong> " + escapeHtml(String(profiledFeatures)) + " / " + escapeHtml(String(totalFeatures)) + "</div>"
+            ];
+            if (previewRows) {
+                summary.push("<div><strong>Sample values:</strong><ul class=\"wc-list\">" + previewRows + "</ul></div>");
+            }
+            if (profileRows.length > 8) {
+                summary.push("<p class=\"wc-field__help\">Showing first 8 fields by name.</p>");
+            }
+
+            mappingPreviewElement.innerHTML = "<div class=\"wc-stack-sm\">" + summary.join("") + "</div>";
+        }
+
+        function renderAttributeMappingState(rawPayload) {
+            var summary = extractPayload(rawPayload);
+            var catalog = summary.discovered_attribute_catalog && typeof summary.discovered_attribute_catalog === "object"
+                ? summary.discovered_attribute_catalog
+                : null;
+            var fieldNames = normalizeFieldNames(catalog);
+            var mappingState = normalizeMappingState(summary);
+            var fallbackState = normalizeFallbackDefaults(summary);
+
+            if (mappingSectionElement) {
+                mappingSectionElement.dataset.roadsHasAttributeCatalog = fieldNames.length ? "1" : "0";
+            }
+            mappingSelectElements.forEach(function (selectElement) {
+                var mapField = selectElement.dataset ? selectElement.dataset.roadsMapField : "";
+                var selectedValue = mapField && Object.prototype.hasOwnProperty.call(mappingState, mapField)
+                    ? mappingState[mapField]
+                    : "";
+                applySelectOptions(selectElement, fieldNames, selectedValue);
+            });
+            defaultSelectElements.forEach(function (selectElement) {
+                var defaultField = selectElement.dataset ? selectElement.dataset.roadsDefaultField : "";
+                var fallbackOptions = defaultField === "traffic_default" ? TRAFFIC_DEFAULT_OPTIONS : SURFACE_DEFAULT_OPTIONS;
+                var fallbackValue = "";
+                if (defaultField && Object.prototype.hasOwnProperty.call(fallbackState, defaultField)) {
+                    fallbackValue = fallbackState[defaultField];
+                }
+                if (!fallbackState.hasRoadsParams && selectElement.value) {
+                    fallbackValue = selectElement.value;
+                }
+                applyDefaultValueOptions(selectElement, fallbackOptions, fallbackValue);
+            });
+            renderAttributeCatalogPreview(catalog);
+        }
+
+        function readAttributeMappingFromForm() {
+            var payload = {};
+            mappingSelectElements.forEach(function (selectElement) {
+                var mapField = selectElement.dataset ? selectElement.dataset.roadsMapField : "";
+                if (!mapField) {
+                    return;
+                }
+                var value = selectElement.value || "";
+                payload[mapField] = value ? value : null;
+            });
+            return payload;
+        }
+
+        function readFallbackDefaultsFromForm() {
+            var payload = {};
+            defaultSelectElements.forEach(function (selectElement) {
+                var defaultField = selectElement.dataset ? selectElement.dataset.roadsDefaultField : "";
+                if (!defaultField) {
+                    return;
+                }
+                var value = selectElement.value || "";
+                payload[defaultField] = value;
+            });
+            return payload;
         }
 
         function renderDecisionCounts(decisionCounts) {
@@ -642,6 +879,19 @@ var Roads = (function () {
             return http.getJson(resolveRunUrl("api/roads/results")).then(function (result) {
                 var payload = result && result.body ? result.body : {};
                 renderLatestRoadsSummary(payload);
+                return payload;
+            }).catch(function () {
+                return null;
+            });
+        }
+
+        function refreshRoadsConfig() {
+            if (!http || typeof http.getJson !== "function") {
+                return Promise.resolve(null);
+            }
+            return http.getJson(resolveRunUrl("api/roads/config")).then(function (result) {
+                var payload = result && result.body ? result.body : {};
+                renderAttributeMappingState(payload);
                 return payload;
             }).catch(function () {
                 return null;
@@ -902,8 +1152,10 @@ var Roads = (function () {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         updateUploadProgress(100, "Upload complete.", true);
                         setUploadMessage(TASKS.upload.successMessage);
+                        setMappingMessage("");
                         controller.append_status_message(controller, TASKS.upload.successMessage);
                         renderUploadSummary(parsed || {});
+                        renderAttributeMappingState(parsed || {});
                         if (emitter && typeof emitter.emit === "function") {
                             emitter.emit(TASKS.upload.eventPrefix + ":completed", {
                                 response: parsed || {},
@@ -921,6 +1173,7 @@ var Roads = (function () {
 
                     var payload = parsed || { error: { message: xhr.statusText || "Upload failed." } };
                     setUploadMessage(extractErrorMessage(payload, "Upload failed."));
+                    setMappingMessage("");
                     updateUploadProgress(0, "Upload failed.", true);
                     controller.pushResponseStacktrace(controller, payload);
                     if (emitter && typeof emitter.emit === "function") {
@@ -933,6 +1186,7 @@ var Roads = (function () {
                 xhr.addEventListener("error", function () {
                     var payload = { error: { message: "Network error during upload." } };
                     setUploadMessage(payload.error.message);
+                    setMappingMessage("");
                     updateUploadProgress(0, "Upload failed.", true);
                     controller.pushResponseStacktrace(controller, payload);
                     if (emitter && typeof emitter.emit === "function") {
@@ -952,6 +1206,50 @@ var Roads = (function () {
 
         controller.runRoads = function runRoads() {
             return queueTask("run");
+        };
+
+        controller.applyAttributeMapping = function applyAttributeMapping() {
+            rebindDomReferences(false);
+            if (!controller.form || !http || typeof http.request !== "function") {
+                return Promise.resolve(null);
+            }
+
+            var payload = {
+                attribute_field_map: readAttributeMappingFromForm()
+            };
+            Object.assign(payload, readFallbackDefaultsFromForm());
+            setUploadMessage("");
+            setMappingMessage("");
+            hideStacktrace();
+            controller.append_status_message(controller, "Applying Roads attribute mapping and defaults.");
+
+            if (emitter && typeof emitter.emit === "function") {
+                emitter.emit("roads:mapping:started", { payload: payload });
+            }
+
+            return http.request(resolveRunUrl("tasks/roads/set_params"), {
+                method: "POST",
+                form: controller.form,
+                json: payload
+            }).then(function (response) {
+                var body = response && response.body ? response.body : {};
+                renderAttributeMappingState(body);
+                setMappingMessage("Attribute mapping and fallback defaults applied.");
+                controller.append_status_message(controller, "Roads attribute mapping and defaults applied.");
+                refreshRoadsSummary();
+                if (emitter && typeof emitter.emit === "function") {
+                    emitter.emit("roads:mapping:completed", { response: body });
+                }
+                return body;
+            }).catch(function (error) {
+                var responsePayload = toResponsePayload(http, error);
+                controller.pushResponseStacktrace(controller, responsePayload);
+                setMappingMessage(extractErrorMessage(responsePayload, "Failed to apply attribute mapping."));
+                if (emitter && typeof emitter.emit === "function") {
+                    emitter.emit("roads:mapping:error", { error: responsePayload });
+                }
+                return null;
+            });
         };
 
         controller.bootstrap = function bootstrap(context) {
@@ -990,6 +1288,7 @@ var Roads = (function () {
                 controller.set_rq_job_id(controller, candidateJobId);
             }
 
+            refreshRoadsConfig();
             refreshRoadsSummary();
             renderRoadsResultsPanel();
 

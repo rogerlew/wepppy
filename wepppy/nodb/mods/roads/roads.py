@@ -11,7 +11,7 @@ import shutil
 import time
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
 import rasterio
 from pyproj import CRS, Geod, Transformer
@@ -71,6 +71,22 @@ ALLOWED_SOIL_TEXTURES: frozenset[str] = frozenset(SOIL_TEXTURE_ALIASES.values())
 ALLOWED_SURFACES: frozenset[str] = frozenset(SURFACE_ALIASES.values())
 ALLOWED_TRAFFIC: frozenset[str] = frozenset({"high", "low", "none"})
 
+ATTRIBUTE_FIELD_MAP_KEYS: Tuple[str, ...] = (
+    "design",
+    "surface",
+    "traffic",
+)
+
+LEGACY_DESIGN_KEYS: Tuple[str, ...] = ("DESIGN", "design")
+LEGACY_SURFACE_KEYS: Tuple[str, ...] = ("SURFACE", "surface", "ROAD_SURFACE")
+LEGACY_TRAFFIC_KEYS: Tuple[str, ...] = ("TRAFFIC", "traffic", "CONDITION", "condition")
+
+ATTRIBUTE_DISCOVERY_PROFILE_FEATURE_LIMIT_KEY = "attribute_discovery_profile_feature_limit"
+ATTRIBUTE_DISCOVERY_VALUE_PREVIEW_LIMIT_KEY = "attribute_discovery_value_preview_limit"
+ATTRIBUTE_DISCOVERY_VALUE_MAX_CHARS_KEY = "attribute_discovery_value_max_chars"
+
+DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT = 10
+
 
 class Roads(NoDbBase):
     """Persist run-scoped Roads state and orchestrate Roads prep/run stages."""
@@ -93,6 +109,7 @@ class Roads(NoDbBase):
             self._uploaded_geojson_relpath = None
             self._uploaded_geojson_sha256 = None
             self._roads_params = self._default_params()
+            self._uploaded_attribute_catalog = None
             self._last_prepare_summary = None
             self._last_run_summary = None
             self._status = "idle"
@@ -122,6 +139,10 @@ class Roads(NoDbBase):
             instance._uploaded_geojson_sha256 = None
         if not hasattr(instance, "_roads_params") or not isinstance(instance._roads_params, dict):
             instance._roads_params = instance._default_params()
+        else:
+            instance._roads_params = instance._normalize_params_with_defaults(instance._roads_params)
+        if not hasattr(instance, "_uploaded_attribute_catalog"):
+            instance._uploaded_attribute_catalog = None
         if not hasattr(instance, "_last_prepare_summary"):
             instance._last_prepare_summary = None
         if not hasattr(instance, "_last_run_summary"):
@@ -154,7 +175,310 @@ class Roads(NoDbBase):
             "rfg_pct_default": 15.0,
             "road_width_m_default": 4.0,
             "max_upload_mb": 50,
+            "attribute_field_map": {
+                "design": None,
+                "surface": None,
+                "traffic": None,
+            },
+            ATTRIBUTE_DISCOVERY_PROFILE_FEATURE_LIMIT_KEY: 5000,
+            ATTRIBUTE_DISCOVERY_VALUE_PREVIEW_LIMIT_KEY: 5,
+            ATTRIBUTE_DISCOVERY_VALUE_MAX_CHARS_KEY: 120,
         }
+
+    @classmethod
+    def _empty_attribute_field_map(cls) -> Dict[str, Optional[str]]:
+        return {key: None for key in ATTRIBUTE_FIELD_MAP_KEYS}
+
+    @classmethod
+    def _normalize_attribute_field_map(
+        cls,
+        raw_map: Any,
+        *,
+        known_fields: Optional[Set[str]] = None,
+    ) -> Dict[str, Optional[str]]:
+        if raw_map in (None, ""):
+            return cls._empty_attribute_field_map()
+        if not isinstance(raw_map, Mapping):
+            raise ValueError("attribute_field_map must be an object.")
+
+        unknown_keys = sorted(str(key) for key in raw_map.keys() if str(key) not in ATTRIBUTE_FIELD_MAP_KEYS)
+        if unknown_keys:
+            raise ValueError(f"attribute_field_map has unsupported key(s): {', '.join(unknown_keys)}.")
+
+        normalized = cls._empty_attribute_field_map()
+        for field_key in ATTRIBUTE_FIELD_MAP_KEYS:
+            raw_value = raw_map.get(field_key)
+            if raw_value in (None, ""):
+                normalized[field_key] = None
+                continue
+            if not isinstance(raw_value, str):
+                raise ValueError(f"attribute_field_map.{field_key} must be a string or null.")
+            field_name = raw_value.strip()
+            if not field_name:
+                normalized[field_key] = None
+                continue
+            if known_fields is not None and field_name not in known_fields:
+                raise ValueError(
+                    f"attribute_field_map.{field_key}={field_name!r} is not present in discovered attributes."
+                )
+            normalized[field_key] = field_name
+        return normalized
+
+    @classmethod
+    def _normalize_params_with_defaults(cls, params: Mapping[str, Any]) -> Dict[str, Any]:
+        merged = dict(cls._default_params())
+        merged.update(dict(params))
+        try:
+            merged["attribute_field_map"] = cls._normalize_attribute_field_map(
+                merged.get("attribute_field_map"),
+                known_fields=None,
+            )
+        except ValueError:
+            merged["attribute_field_map"] = cls._empty_attribute_field_map()
+
+        for key in (
+            ATTRIBUTE_DISCOVERY_PROFILE_FEATURE_LIMIT_KEY,
+            ATTRIBUTE_DISCOVERY_VALUE_PREVIEW_LIMIT_KEY,
+            ATTRIBUTE_DISCOVERY_VALUE_MAX_CHARS_KEY,
+        ):
+            default_value = int(cls._default_params()[key])
+            try:
+                parsed = int(merged.get(key, default_value))
+            except (TypeError, ValueError):
+                parsed = default_value
+            if parsed <= 0:
+                parsed = default_value
+            merged[key] = parsed
+
+        return merged
+
+    @staticmethod
+    def _dedupe_keys(keys: Iterable[str]) -> Tuple[str, ...]:
+        ordered: List[str] = []
+        seen: Set[str] = set()
+        for key in keys:
+            if not isinstance(key, str):
+                continue
+            normalized = key.strip()
+            if not normalized or normalized in seen:
+                continue
+            ordered.append(normalized)
+            seen.add(normalized)
+        return tuple(ordered)
+
+    @staticmethod
+    def _first_non_empty_property_with_key(
+        properties: Mapping[str, Any],
+        keys: Iterable[str],
+    ) -> Tuple[Optional[str], Optional[str]]:
+        for key in keys:
+            value = properties.get(key)
+            if value is None:
+                continue
+            text = str(value).strip()
+            if text:
+                return text, key
+        return None, None
+
+    @staticmethod
+    def _stringify_attribute_sample(value: Any, *, max_chars: int) -> str:
+        if isinstance(value, str):
+            text = value.strip()
+        elif isinstance(value, (int, float, bool)) or value is None:
+            text = str(value)
+        else:
+            text = json.dumps(value, sort_keys=True, default=str)
+        if len(text) <= max_chars:
+            return text
+        if max_chars <= 3:
+            return text[:max_chars]
+        return text[: max_chars - 3] + "..."
+
+    def _discovered_attribute_field_names(self) -> Tuple[str, ...]:
+        catalog = getattr(self, "_uploaded_attribute_catalog", None)
+        if not isinstance(catalog, Mapping):
+            return tuple()
+        field_names = catalog.get("field_names")
+        if not isinstance(field_names, list):
+            return tuple()
+        return tuple(
+            field_name
+            for field_name in field_names
+            if isinstance(field_name, str) and field_name.strip()
+        )
+
+    def _build_attribute_catalog(
+        self,
+        *,
+        payload: Mapping[str, Any],
+        params: Mapping[str, Any],
+    ) -> Dict[str, Any]:
+        features_raw = payload.get("features")
+        features = features_raw if isinstance(features_raw, list) else []
+
+        field_names_set: Set[str] = set()
+        for feature in features:
+            properties = feature.get("properties") if isinstance(feature, Mapping) else None
+            if not isinstance(properties, Mapping):
+                continue
+            for key in properties.keys():
+                if isinstance(key, str) and key.strip():
+                    field_names_set.add(key)
+
+        field_names = sorted(field_names_set)
+        profile_limit = int(params.get(ATTRIBUTE_DISCOVERY_PROFILE_FEATURE_LIMIT_KEY, 5000))
+        preview_limit = int(params.get(ATTRIBUTE_DISCOVERY_VALUE_PREVIEW_LIMIT_KEY, 5))
+        preview_max_chars = int(params.get(ATTRIBUTE_DISCOVERY_VALUE_MAX_CHARS_KEY, 120))
+
+        profiled_feature_count = min(len(features), profile_limit)
+        field_non_empty_counts: Dict[str, int] = {field_name: 0 for field_name in field_names}
+        field_distinct_sets: Dict[str, Set[str]] = {field_name: set() for field_name in field_names}
+        field_samples: Dict[str, List[str]] = {field_name: [] for field_name in field_names}
+
+        for feature in features[:profiled_feature_count]:
+            properties = feature.get("properties") if isinstance(feature, Mapping) else None
+            if not isinstance(properties, Mapping):
+                continue
+            for key, raw_value in properties.items():
+                if key not in field_non_empty_counts:
+                    continue
+                text = str(raw_value).strip() if raw_value is not None else ""
+                if not text:
+                    continue
+                field_non_empty_counts[key] += 1
+                sample_value = self._stringify_attribute_sample(raw_value, max_chars=preview_max_chars)
+                field_distinct_sets[key].add(sample_value)
+                if sample_value not in field_samples[key] and len(field_samples[key]) < preview_limit:
+                    field_samples[key].append(sample_value)
+
+        field_profiles = [
+            {
+                "name": field_name,
+                "non_empty_count": field_non_empty_counts[field_name],
+                "distinct_non_empty_count": len(field_distinct_sets[field_name]),
+                "sample_values": field_samples[field_name],
+            }
+            for field_name in field_names
+        ]
+
+        return {
+            "field_names": field_names,
+            "field_profiles": field_profiles,
+            "field_count": len(field_names),
+            "total_feature_count": len(features),
+            "profiled_feature_count": profiled_feature_count,
+            "profile_truncated": profiled_feature_count < len(features),
+            "discovery_limits": {
+                ATTRIBUTE_DISCOVERY_PROFILE_FEATURE_LIMIT_KEY: profile_limit,
+                ATTRIBUTE_DISCOVERY_VALUE_PREVIEW_LIMIT_KEY: preview_limit,
+                ATTRIBUTE_DISCOVERY_VALUE_MAX_CHARS_KEY: preview_max_chars,
+            },
+        }
+
+    @staticmethod
+    def _collect_warning(
+        warning_counts: Counter[str],
+        warning_examples: List[Dict[str, Any]],
+        *,
+        code: str,
+        message: str,
+        limit: int,
+        segment_id: Optional[str] = None,
+        field_name: Optional[str] = None,
+    ) -> None:
+        warning_counts[code] += 1
+        if len(warning_examples) >= max(0, int(limit)):
+            return
+        row: Dict[str, Any] = {"code": code, "message": message}
+        if segment_id:
+            row["segment_id"] = segment_id
+        if field_name:
+            row["field_name"] = field_name
+        warning_examples.append(row)
+
+    def _auto_discover_attribute_field_map(
+        self,
+        *,
+        field_names: Sequence[str],
+        previous_map: Mapping[str, Any],
+    ) -> Dict[str, Optional[str]]:
+        discovered_fields: Set[str] = {
+            field_name for field_name in field_names if isinstance(field_name, str) and field_name.strip()
+        }
+        normalized_previous = self._normalize_attribute_field_map(previous_map, known_fields=None)
+        resolved = self._empty_attribute_field_map()
+
+        for field_key in ATTRIBUTE_FIELD_MAP_KEYS:
+            previous_value = normalized_previous.get(field_key)
+            if previous_value and previous_value in discovered_fields:
+                resolved[field_key] = previous_value
+
+        candidate_defaults = {
+            "design": ("DESIGN", "design"),
+            "surface": ("SURFACE", "surface"),
+            "traffic": ("TRAFFIC", "traffic"),
+        }
+        for field_key, candidates in candidate_defaults.items():
+            if resolved[field_key]:
+                continue
+            for candidate in candidates:
+                if candidate in discovered_fields:
+                    resolved[field_key] = candidate
+                    break
+
+        return resolved
+
+    def _resolve_design_for_feature(
+        self,
+        *,
+        properties: Mapping[str, Any],
+        attribute_field_map: Mapping[str, Optional[str]],
+        warning_counts: Optional[Counter[str]] = None,
+        warning_examples: Optional[List[Dict[str, Any]]] = None,
+        warning_limit: int = DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT,
+        segment_id: Optional[str] = None,
+    ) -> Tuple[Optional[str], Optional[str]]:
+        mapped_design_key = attribute_field_map.get("design")
+        mapped_design_is_custom = bool(mapped_design_key) and mapped_design_key not in LEGACY_DESIGN_KEYS
+        if mapped_design_key:
+            mapped_design_raw, _ = self._first_non_empty_property_with_key(properties, (mapped_design_key,))
+            if mapped_design_raw is None:
+                if mapped_design_is_custom and warning_counts is not None and warning_examples is not None:
+                    self._collect_warning(
+                        warning_counts,
+                        warning_examples,
+                        code="design_mapped_field_missing",
+                        message=(
+                            f"Mapped design field {mapped_design_key!r} is missing or empty; using fallback keys."
+                        ),
+                        limit=warning_limit,
+                        segment_id=segment_id,
+                        field_name=mapped_design_key,
+                    )
+            elif _is_eligible_design(mapped_design_raw):
+                return mapped_design_raw.strip().lower(), mapped_design_key
+            else:
+                if mapped_design_is_custom and warning_counts is not None and warning_examples is not None:
+                    self._collect_warning(
+                        warning_counts,
+                        warning_examples,
+                        code="design_mapped_field_not_eligible",
+                        message=(
+                            f"Mapped design field {mapped_design_key!r} value {mapped_design_raw!r} "
+                            "is not an eligible inslope design; using fallback keys."
+                        ),
+                        limit=warning_limit,
+                        segment_id=segment_id,
+                        field_name=mapped_design_key,
+                    )
+
+        for key in LEGACY_DESIGN_KEYS:
+            raw_value, _ = self._first_non_empty_property_with_key(properties, (key,))
+            if raw_value is None:
+                continue
+            if _is_eligible_design(raw_value):
+                return raw_value.strip().lower(), key
+        return None, None
 
     @property
     def enabled(self) -> bool:
@@ -305,7 +629,7 @@ class Roads(NoDbBase):
         if not prepared_sha or prepared_sha != current_sha:
             raise ValueError("Roads upload changed after prepare_segments. Run prepare_segments again.")
 
-        current_params = dict(getattr(self, "_roads_params", self._default_params()))
+        current_params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
         prepared_signature = str(prepare_summary.get("roads_params_signature") or "")
         current_signature = self._params_signature(current_params)
         if not prepared_signature or prepared_signature != current_signature:
@@ -402,8 +726,7 @@ class Roads(NoDbBase):
             "set_params_requested",
             {"keys": sorted(str(key) for key in payload.keys())},
         )
-        params = dict(self._default_params())
-        params.update(dict(getattr(self, "_roads_params", {})))
+        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
 
         if "input_crs" in payload:
             value = str(payload["input_crs"]).strip()
@@ -441,6 +764,21 @@ class Roads(NoDbBase):
                 raise ValueError("max_upload_mb must be > 0.")
             params["max_upload_mb"] = max_upload_mb
 
+        for key in (
+            ATTRIBUTE_DISCOVERY_PROFILE_FEATURE_LIMIT_KEY,
+            ATTRIBUTE_DISCOVERY_VALUE_PREVIEW_LIMIT_KEY,
+            ATTRIBUTE_DISCOVERY_VALUE_MAX_CHARS_KEY,
+        ):
+            if key not in payload:
+                continue
+            try:
+                value = int(payload[key])
+            except (TypeError, ValueError):
+                raise ValueError(f"{key} must be an integer.")
+            if value <= 0:
+                raise ValueError(f"{key} must be > 0.")
+            params[key] = value
+
         for key in ("soil_texture_default", "surface_default", "traffic_default"):
             if key in payload:
                 raw_value = str(payload[key]).strip()
@@ -467,6 +805,28 @@ class Roads(NoDbBase):
                     if normalized_traffic not in ALLOWED_TRAFFIC:
                         raise ValueError(f"traffic_default must be one of {sorted(ALLOWED_TRAFFIC)}.")
                     params[key] = normalized_traffic
+
+        if "attribute_field_map" in payload:
+            payload_map = payload["attribute_field_map"]
+            current_map = self._normalize_attribute_field_map(params.get("attribute_field_map"), known_fields=None)
+            if payload_map in (None, ""):
+                merged_map = self._empty_attribute_field_map()
+            else:
+                if not isinstance(payload_map, Mapping):
+                    raise ValueError("attribute_field_map must be an object.")
+                merged_map = dict(current_map)
+                for key in payload_map.keys():
+                    key_text = str(key)
+                    if key_text not in ATTRIBUTE_FIELD_MAP_KEYS:
+                        raise ValueError(f"attribute_field_map has unsupported key: {key_text}.")
+                    merged_map[key_text] = payload_map[key]
+            known_fields = set(self._discovered_attribute_field_names()) or None
+            params["attribute_field_map"] = self._normalize_attribute_field_map(
+                merged_map,
+                known_fields=known_fields,
+            )
+
+        params = self._normalize_params_with_defaults(params)
 
         with self.locked():
             self._roads_params = params
@@ -517,7 +877,8 @@ class Roads(NoDbBase):
         if source_path.suffix.lower() != ".geojson":
             raise ValueError("Roads upload must be a .geojson file.")
 
-        max_upload_mb = int(dict(getattr(self, "_roads_params", {})).get("max_upload_mb", 50))
+        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+        max_upload_mb = int(params.get("max_upload_mb", 50))
         max_upload_bytes = max_upload_mb * 1024 * 1024
         if source_path.stat().st_size > max_upload_bytes:
             raise ValueError(f"Roads upload exceeds max_upload_mb limit ({max_upload_mb} MB).")
@@ -525,7 +886,7 @@ class Roads(NoDbBase):
         payload = json.loads(source_path.read_text(encoding="utf-8"))
         self._validate_uploaded_geojson(payload)
 
-        configured_input_crs = str(dict(getattr(self, "_roads_params", {})).get("input_crs") or "EPSG:4326")
+        configured_input_crs = str(params.get("input_crs") or "EPSG:4326")
         try:
             CRS.from_user_input(configured_input_crs)
         except Exception as exc:
@@ -545,10 +906,19 @@ class Roads(NoDbBase):
         digest = hashlib.sha256(target_path.read_bytes()).hexdigest()
         relpath = str(target_path.relative_to(self.wd))
         now = int(time.time())
+        attribute_catalog = self._build_attribute_catalog(payload=payload, params=params)
+        previous_map = self._normalize_attribute_field_map(params.get("attribute_field_map"), known_fields=None)
+        discovered_map = self._auto_discover_attribute_field_map(
+            field_names=attribute_catalog.get("field_names", []),
+            previous_map=previous_map,
+        )
+        params["attribute_field_map"] = discovered_map
 
         with self.locked():
             self._uploaded_geojson_relpath = relpath
             self._uploaded_geojson_sha256 = digest
+            self._uploaded_attribute_catalog = attribute_catalog
+            self._roads_params = params
             self._timestamps["upload_geojson"] = now
             self._clear_stale_run_state_locked()
             status = str(self._status)
@@ -563,6 +933,8 @@ class Roads(NoDbBase):
                 "uploaded_at": now,
                 "configured_input_crs": configured_input_crs,
                 "source_crs": source_crs,
+                "discovered_attribute_field_count": int(attribute_catalog.get("field_count", 0)),
+                "attribute_field_map": discovered_map,
                 "status": status,
             },
         )
@@ -574,6 +946,8 @@ class Roads(NoDbBase):
             "uploaded_at": now,
             "configured_input_crs": configured_input_crs,
             "source_crs": source_crs,
+            "discovered_attribute_catalog": attribute_catalog,
+            "attribute_field_map": discovered_map,
         }
 
     def _load_segment_features(self) -> List[Dict[str, Any]]:
@@ -613,7 +987,18 @@ class Roads(NoDbBase):
                 "start_prepare_segments",
                 {"uploaded_geojson_relpath": self._path_for_summary(staged_path)},
             )
-            params = dict(getattr(self, "_roads_params", self._default_params()))
+            params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+            attribute_field_map = self._normalize_attribute_field_map(
+                params.get("attribute_field_map"),
+                known_fields=None,
+            )
+            design_property_keys = self._dedupe_keys(
+                (
+                    [attribute_field_map.get("design")] if attribute_field_map.get("design") else []
+                )
+                + list(LEGACY_DESIGN_KEYS)
+            )
+            warning_limit = DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT
             input_crs_value = str(params.get("input_crs") or "EPSG:4326")
             try:
                 CRS.from_user_input(input_crs_value)
@@ -640,6 +1025,7 @@ class Roads(NoDbBase):
                 tolerance_m=float(params.get("tolerance_m", 0.5)),
                 channel_raster_path=raster_paths["channel_raster_path"],
                 topaz_id_raster_path=raster_paths["topaz_id_raster_path"],
+                design_property_keys=design_property_keys,
             )
 
             segment_payload = json.loads(Path(self.roads_monotonic_geojson_path).read_text(encoding="utf-8"))
@@ -647,15 +1033,28 @@ class Roads(NoDbBase):
             eligible_segments = 0
             mapped_candidates = 0
             decision_counts: Counter[str] = Counter()
+            warning_counts: Counter[str] = Counter()
+            warning_examples: List[Dict[str, Any]] = []
             for feature in features:
                 properties = feature.get("properties", {}) if isinstance(feature, Mapping) else {}
-                design_value = self._first_non_empty_property(properties, ("DESIGN", "design"))
-                if not _is_eligible_design(design_value):
+                segment_id = self._segment_key(feature)
+                design_value, _ = self._resolve_design_for_feature(
+                    properties=properties,
+                    attribute_field_map=attribute_field_map,
+                    warning_counts=warning_counts,
+                    warning_examples=warning_examples,
+                    warning_limit=warning_limit,
+                    segment_id=segment_id,
+                )
+                if design_value is None:
                     continue
                 eligible_segments += 1
                 decision_key = str(properties.get("_roads_lowpoint_decision") or "unknown")
                 decision_counts[decision_key] += 1
-                if properties.get("topaz_id_chn_lowpoint") is not None and properties.get("topaz_id_hill_lowpoint") is not None:
+                if (
+                    properties.get("topaz_id_chn_lowpoint") is not None
+                    and properties.get("topaz_id_hill_lowpoint") is not None
+                ):
                     mapped_candidates += 1
 
             prepare_summary = {
@@ -668,6 +1067,9 @@ class Roads(NoDbBase):
                 "eligible_segment_count": eligible_segments,
                 "eligible_with_lowpoint_ids": mapped_candidates,
                 "eligible_lowpoint_decision_counts": dict(sorted(decision_counts.items())),
+                "mapping_warning_count": int(sum(warning_counts.values())),
+                "mapping_warning_counts": dict(sorted(warning_counts.items())),
+                "mapping_warning_examples": warning_examples,
                 "prepare_raster_paths": {
                     "dem_path": self._path_for_summary(raster_paths["dem_path"]),
                     "channel_raster_path": self._path_for_summary(raster_paths["channel_raster_path"]),
@@ -678,6 +1080,8 @@ class Roads(NoDbBase):
                 "summary_relpath": os.path.relpath(self.roads_summary_path, self.wd),
                 "roads_log_relpath": os.path.relpath(self.roads_log_path, self.wd),
                 "input_crs": input_crs_value,
+                "design_property_keys": list(design_property_keys),
+                "attribute_field_map": dict(attribute_field_map),
                 "roads_params_signature": self._params_signature(params),
                 "uploaded_geojson_sha256": getattr(self, "_uploaded_geojson_sha256", None),
                 "prepared_at": int(time.time()),
@@ -693,9 +1097,19 @@ class Roads(NoDbBase):
                     "eligible_segment_count": eligible_segments,
                     "eligible_with_lowpoint_ids": mapped_candidates,
                     "eligible_lowpoint_decision_counts": dict(sorted(decision_counts.items())),
+                    "mapping_warning_count": int(sum(warning_counts.values())),
                     "summary_relpath": prepare_summary["summary_relpath"],
                 },
             )
+            if warning_counts:
+                self._append_roads_log(
+                    "prepare",
+                    "mapping_warnings_detected",
+                    {
+                        "mapping_warning_count": int(sum(warning_counts.values())),
+                        "mapping_warning_codes": sorted(warning_counts.keys()),
+                    },
+                )
 
             with self.locked():
                 self._last_prepare_summary = prepare_summary
@@ -760,15 +1174,28 @@ class Roads(NoDbBase):
             return default_value
         return normalized
 
+    @staticmethod
+    def _normalize_traffic_value(value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        text = value.strip()
+        if not text:
+            return None
+        normalized = TRAFFIC_ALIASES.get(text.lower().replace(" ", ""))
+        if normalized is not None:
+            return normalized
+        condition_normalized = CONDITION_TRAFFIC_MAP.get(text.lower())
+        if condition_normalized is not None:
+            return condition_normalized
+        return None
+
     def _normalize_traffic(self, value: Optional[str], condition: Optional[str], default_value: str) -> str:
-        if value is not None:
-            normalized = TRAFFIC_ALIASES.get(value.strip().lower().replace(" ", ""))
-            if normalized is not None:
-                return normalized
-        if condition is not None:
-            condition_key = condition.strip().lower()
-            if condition_key in CONDITION_TRAFFIC_MAP:
-                return CONDITION_TRAFFIC_MAP[condition_key]
+        from_value = self._normalize_traffic_value(value)
+        if from_value is not None:
+            return from_value
+        from_condition = self._normalize_traffic_value(condition)
+        if from_condition is not None:
+            return from_condition
         return default_value
 
     def _normalize_soil_texture(self, value: Optional[str], default_value: str) -> str:
@@ -779,16 +1206,131 @@ class Roads(NoDbBase):
             return default_value
         return normalized
 
+    def _resolve_surface_for_feature(
+        self,
+        *,
+        properties: Mapping[str, Any],
+        default_value: str,
+        attribute_field_map: Mapping[str, Optional[str]],
+        warning_counts: Counter[str],
+        warning_examples: List[Dict[str, Any]],
+        warning_limit: int,
+        segment_id: str,
+    ) -> Tuple[str, str]:
+        mapped_surface_key = attribute_field_map.get("surface")
+        if mapped_surface_key:
+            mapped_raw, _ = self._first_non_empty_property_with_key(properties, (mapped_surface_key,))
+            if mapped_raw is None:
+                if mapped_surface_key not in LEGACY_SURFACE_KEYS:
+                    self._collect_warning(
+                        warning_counts,
+                        warning_examples,
+                        code="surface_mapped_primary_missing",
+                        message=(
+                            f"Mapped surface field {mapped_surface_key!r} is missing/empty; "
+                            "using configured surface default value."
+                        ),
+                        limit=warning_limit,
+                        segment_id=segment_id,
+                        field_name=mapped_surface_key,
+                    )
+                return default_value, "mapped_default_value"
+            normalized_mapped = SURFACE_ALIASES.get(mapped_raw.strip().lower())
+            if normalized_mapped is not None:
+                return normalized_mapped, "mapped_primary"
+            if mapped_surface_key not in LEGACY_SURFACE_KEYS:
+                self._collect_warning(
+                    warning_counts,
+                    warning_examples,
+                    code="surface_mapped_primary_invalid",
+                    message=(
+                        f"Mapped surface field {mapped_surface_key!r} value {mapped_raw!r} is not recognized; "
+                        "using configured surface default value."
+                    ),
+                    limit=warning_limit,
+                    segment_id=segment_id,
+                    field_name=mapped_surface_key,
+                )
+            return default_value, "mapped_default_value"
+
+        for key in LEGACY_SURFACE_KEYS:
+            raw_value, _ = self._first_non_empty_property_with_key(properties, (key,))
+            if raw_value is None:
+                continue
+            normalized = SURFACE_ALIASES.get(raw_value.strip().lower())
+            if normalized is not None:
+                return normalized, "segment_property"
+        return default_value, "roads_default"
+
+    def _resolve_traffic_for_feature(
+        self,
+        *,
+        properties: Mapping[str, Any],
+        default_value: str,
+        attribute_field_map: Mapping[str, Optional[str]],
+        warning_counts: Counter[str],
+        warning_examples: List[Dict[str, Any]],
+        warning_limit: int,
+        segment_id: str,
+    ) -> Tuple[str, str]:
+        mapped_traffic_key = attribute_field_map.get("traffic")
+        if mapped_traffic_key:
+            mapped_raw, _ = self._first_non_empty_property_with_key(properties, (mapped_traffic_key,))
+            if mapped_raw is None:
+                if mapped_traffic_key not in LEGACY_TRAFFIC_KEYS:
+                    self._collect_warning(
+                        warning_counts,
+                        warning_examples,
+                        code="traffic_mapped_primary_missing",
+                        message=(
+                            f"Mapped traffic field {mapped_traffic_key!r} is missing/empty; "
+                            "using configured traffic default value."
+                        ),
+                        limit=warning_limit,
+                        segment_id=segment_id,
+                        field_name=mapped_traffic_key,
+                    )
+                return default_value, "mapped_default_value"
+            normalized_mapped = self._normalize_traffic_value(mapped_raw)
+            if normalized_mapped is not None:
+                return normalized_mapped, "mapped_primary"
+            if mapped_traffic_key not in LEGACY_TRAFFIC_KEYS:
+                self._collect_warning(
+                    warning_counts,
+                    warning_examples,
+                    code="traffic_mapped_primary_invalid",
+                    message=(
+                        f"Mapped traffic field {mapped_traffic_key!r} value {mapped_raw!r} is not recognized; "
+                        "using configured traffic default value."
+                    ),
+                    limit=warning_limit,
+                    segment_id=segment_id,
+                    field_name=mapped_traffic_key,
+                )
+            return default_value, "mapped_default_value"
+
+        for key in LEGACY_TRAFFIC_KEYS:
+            raw_value, _ = self._first_non_empty_property_with_key(properties, (key,))
+            if raw_value is None:
+                continue
+            normalized = self._normalize_traffic_value(raw_value)
+            if normalized is not None:
+                return normalized, "segment_property_or_condition"
+        return default_value, "roads_default"
+
     def _resolve_segment_run_inputs(
         self,
         *,
         properties: Mapping[str, Any],
         params: Mapping[str, Any],
+        segment_id: str,
+        design: str,
+        warning_counts: Counter[str],
+        warning_examples: List[Dict[str, Any]],
+        warning_limit: int,
     ) -> Dict[str, Any]:
-        design_raw = self._first_non_empty_property(properties, ("DESIGN", "design"))
-        design = (design_raw or "").strip().lower()
         if design not in {"inslope_bd", "inslope_rd"}:
-            raise ValueError(f"Unsupported Roads design for segment execution: {design_raw!r}")
+            raise ValueError(f"Unsupported Roads design for segment execution: {design!r}")
 
         default_surface = self._normalize_surface(
             str(params.get("surface_default", "gravel")),
@@ -806,18 +1348,29 @@ class Roads(NoDbBase):
         default_rfg = float(params.get("rfg_pct_default", 15.0))
         default_width = float(params.get("road_width_m_default", 4.0))
 
-        surface_raw = self._first_non_empty_property(
-            properties,
-            ("SURFACE", "surface", "ROAD_SURFACE"),
+        attribute_field_map = self._normalize_attribute_field_map(
+            params.get("attribute_field_map"),
+            known_fields=None,
         )
-        condition_raw = self._first_non_empty_property(
-            properties,
-            ("CONDITION", "condition"),
+        resolved_surface, surface_source = self._resolve_surface_for_feature(
+            properties=properties,
+            default_value=default_surface,
+            attribute_field_map=attribute_field_map,
+            warning_counts=warning_counts,
+            warning_examples=warning_examples,
+            warning_limit=warning_limit,
+            segment_id=segment_id,
         )
-        traffic_raw = self._first_non_empty_property(
-            properties,
-            ("TRAFFIC", "traffic"),
+        resolved_traffic, traffic_source = self._resolve_traffic_for_feature(
+            properties=properties,
+            default_value=default_traffic,
+            attribute_field_map=attribute_field_map,
+            warning_counts=warning_counts,
+            warning_examples=warning_examples,
+            warning_limit=warning_limit,
+            segment_id=segment_id,
         )
+
         texture_raw = self._first_non_empty_property(
             properties,
             ("SOIL_TEXTURE", "soil_texture", "SOIL", "soil"),
@@ -831,8 +1384,6 @@ class Roads(NoDbBase):
             ("WIDTH_M", "width_m", "ROAD_WIDTH_M", "road_width_m"),
         )
 
-        resolved_surface = self._normalize_surface(surface_raw, default_surface)
-        resolved_traffic = self._normalize_traffic(traffic_raw, condition_raw, default_traffic)
         resolved_texture = self._normalize_soil_texture(texture_raw, default_texture)
 
         rfg_pct = self._coerce_float(rfg_raw)
@@ -854,8 +1405,8 @@ class Roads(NoDbBase):
             "rfg_pct": float(rfg_pct),
             "road_width_m": float(road_width_m),
             "resolution_sources": {
-                "surface": "segment_property" if surface_raw else "roads_default",
-                "traffic": "segment_property_or_condition" if (traffic_raw or condition_raw) else "roads_default",
+                "surface": surface_source,
+                "traffic": traffic_source,
                 "soil_texture": "segment_property" if texture_raw else "roads_default",
                 "rfg_pct": "segment_property" if rfg_raw else "roads_default",
                 "road_width_m": "segment_property" if width_raw else "roads_default",
@@ -1763,7 +2314,12 @@ class Roads(NoDbBase):
                 {"roads_runs_relpath": os.path.relpath(self.roads_runs_dir, self.wd)},
             )
 
-            params = dict(getattr(self, "_roads_params", self._default_params()))
+            params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+            attribute_field_map = self._normalize_attribute_field_map(
+                params.get("attribute_field_map"),
+                known_fields=None,
+            )
+            warning_limit = DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT
             input_crs = CRS.from_user_input(str(params.get("input_crs") or "EPSG:4326"))
             geod = Geod(ellps="WGS84")
             dem_path = self._resolve_prepare_raster_paths()["dem_path"]
@@ -1777,6 +2333,8 @@ class Roads(NoDbBase):
             segment_sequence = 0
             management_cache_by_traffic: Dict[str, Path] = {}
             failed_segment_records: List[Dict[str, Any]] = []
+            mapping_warning_counts: Counter[str] = Counter()
+            mapping_warning_examples: List[Dict[str, Any]] = []
 
             current_stage = "segment_runs"
             with rasterio.open(dem_path) as dem_dataset:
@@ -1787,10 +2345,17 @@ class Roads(NoDbBase):
 
                 for feature in features:
                     properties = feature.get("properties", {}) if isinstance(feature, Mapping) else {}
-                    design = self._first_non_empty_property(properties, ("DESIGN", "design"))
                     segment_id = self._segment_key(feature)
+                    design, design_source = self._resolve_design_for_feature(
+                        properties=properties,
+                        attribute_field_map=attribute_field_map,
+                        warning_counts=mapping_warning_counts,
+                        warning_examples=mapping_warning_examples,
+                        warning_limit=warning_limit,
+                        segment_id=segment_id,
+                    )
 
-                    if not _is_eligible_design(design):
+                    if design is None:
                         skipped_segments.append({"segment_id": segment_id, "reason": "design_not_eligible"})
                         self._append_roads_log(
                             "run",
@@ -1836,7 +2401,18 @@ class Roads(NoDbBase):
                     mapped_segment_count += 1
                     wepp_id_int = int(wepp_id)
 
-                    segment_inputs = self._resolve_segment_run_inputs(properties=properties, params=params)
+                    segment_inputs = self._resolve_segment_run_inputs(
+                        properties=properties,
+                        params=params,
+                        segment_id=segment_id,
+                        design=design,
+                        warning_counts=mapping_warning_counts,
+                        warning_examples=mapping_warning_examples,
+                        warning_limit=warning_limit,
+                    )
+                    segment_inputs["resolution_sources"]["design"] = (
+                        "mapped_primary" if design_source == attribute_field_map.get("design") else "segment_property"
+                    )
 
                     try:
                         profile = self._build_segment_profile(
@@ -2040,6 +2616,17 @@ class Roads(NoDbBase):
             skipped_reason_counts = Counter(
                 str(row.get("reason") or "unknown") for row in skipped_segments
             )
+            mapping_warning_count = int(sum(mapping_warning_counts.values()))
+            mapping_warning_counts_dict = dict(sorted(mapping_warning_counts.items()))
+            if mapping_warning_count:
+                self._append_roads_log(
+                    "run",
+                    "mapping_warnings_detected",
+                    {
+                        "mapping_warning_count": mapping_warning_count,
+                        "mapping_warning_codes": sorted(mapping_warning_counts.keys()),
+                    },
+                )
 
             if failed_segment_records:
                 failed_run_summary = {
@@ -2057,6 +2644,10 @@ class Roads(NoDbBase):
                     "roads_runs_relpath": os.path.relpath(self.roads_runs_dir, self.wd),
                     "roads_output_relpath": os.path.relpath(self.roads_output_dir, self.wd),
                     "roads_log_relpath": os.path.relpath(self.roads_log_path, self.wd),
+                    "mapping_warning_count": mapping_warning_count,
+                    "mapping_warning_counts": mapping_warning_counts_dict,
+                    "mapping_warning_examples": mapping_warning_examples,
+                    "attribute_field_map": dict(attribute_field_map),
                     "status": "failed",
                     "failed_stage": "segment_runs",
                     "failed_segment_count": len(failed_segment_records),
@@ -2072,7 +2663,10 @@ class Roads(NoDbBase):
                     "segment_stage_failed",
                     {
                         "failed_segment_count": len(failed_segment_records),
-                        "segment_pass_manifest_relpath": os.path.relpath(self.roads_segment_pass_manifest_path, self.wd),
+                        "segment_pass_manifest_relpath": os.path.relpath(
+                            self.roads_segment_pass_manifest_path, self.wd
+                        ),
+                        "mapping_warning_count": mapping_warning_count,
                     },
                 )
                 raise RuntimeError(failed_run_summary["error"])
@@ -2153,6 +2747,10 @@ class Roads(NoDbBase):
                 "roads_runs_relpath": os.path.relpath(self.roads_runs_dir, self.wd),
                 "roads_output_relpath": os.path.relpath(self.roads_output_dir, self.wd),
                 "roads_log_relpath": os.path.relpath(self.roads_log_path, self.wd),
+                "mapping_warning_count": mapping_warning_count,
+                "mapping_warning_counts": mapping_warning_counts_dict,
+                "mapping_warning_examples": mapping_warning_examples,
+                "attribute_field_map": dict(attribute_field_map),
                 "watershed_run_relpath": os.path.relpath(
                     os.path.join(self.roads_runs_dir, "pw0.run"),
                     self.wd,
@@ -2248,11 +2846,14 @@ class Roads(NoDbBase):
         return status_payload
 
     def query_summary(self) -> Dict[str, Any]:
+        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
         summary_payload = {
             "enabled": bool(getattr(self, "_enabled", False)),
             "uploaded_geojson_relpath": getattr(self, "_uploaded_geojson_relpath", None),
             "uploaded_geojson_sha256": getattr(self, "_uploaded_geojson_sha256", None),
-            "roads_params": dict(getattr(self, "_roads_params", self._default_params())),
+            "roads_params": params,
+            "attribute_field_map": dict(params.get("attribute_field_map", self._empty_attribute_field_map())),
+            "discovered_attribute_catalog": getattr(self, "_uploaded_attribute_catalog", None),
             "last_prepare_summary": getattr(self, "_last_prepare_summary", None),
             "last_run_summary": getattr(self, "_last_run_summary", None),
             "roads_log_relpath": os.path.relpath(self.roads_log_path, self.wd),
@@ -2266,6 +2867,7 @@ class Roads(NoDbBase):
             {
                 "enabled": summary_payload["enabled"],
                 "status": summary_payload["status"],
+                "has_attribute_catalog": summary_payload["discovered_attribute_catalog"] is not None,
                 "has_prepare_summary": summary_payload["last_prepare_summary"] is not None,
                 "has_run_summary": summary_payload["last_run_summary"] is not None,
             },

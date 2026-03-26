@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -71,6 +72,42 @@ def test_set_uploaded_geojson_stages_file_and_checksum(tmp_path: Path) -> None:
     assert summary["feature_count"] == 1
 
 
+def test_set_uploaded_geojson_discovers_attributes_and_auto_maps(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    source_path = tmp_path / "input.geojson"
+    payload = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[-116.0, 45.0], [-116.0005, 45.0005]]},
+                "properties": {
+                    "DESIGN": "Inslope_bd",
+                    "SURFACE": "gravel",
+                    "ROAD_SURFACE": "asphalt",
+                    "TRAFFIC": "low",
+                    "CONDITION": "year round",
+                },
+            }
+        ],
+    }
+    source_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    summary = controller.set_uploaded_geojson(str(source_path))
+
+    assert summary["attribute_field_map"]["design"] == "DESIGN"
+    assert summary["attribute_field_map"]["surface"] == "SURFACE"
+    assert summary["attribute_field_map"]["traffic"] == "TRAFFIC"
+    catalog = summary["discovered_attribute_catalog"]
+    assert "DESIGN" in catalog["field_names"]
+    assert "ROAD_SURFACE" in catalog["field_names"]
+    assert catalog["field_count"] == 5
+
+    query = controller.query_summary()
+    assert query["discovered_attribute_catalog"]["field_count"] == 5
+    assert query["attribute_field_map"]["traffic"] == "TRAFFIC"
+
+
 def test_set_params_updates_state_and_clears_stale_summaries(tmp_path: Path) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
 
@@ -89,6 +126,70 @@ def test_set_params_updates_state_and_clears_stale_summaries(tmp_path: Path) -> 
     assert state["last_run_summary"] is None
     assert state["status"] == "idle"
     assert state["errors"] == []
+
+
+def test_set_params_validates_attribute_field_map_against_discovered_fields(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    source_path = tmp_path / "input.geojson"
+    payload = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[-116.0, 45.0], [-116.0005, 45.0005]]},
+                "properties": {"ROADTYPE": "Inslope_bd", "TRAF_VALUE": "high"},
+            }
+        ],
+    }
+    source_path.write_text(json.dumps(payload), encoding="utf-8")
+    controller.set_uploaded_geojson(str(source_path))
+
+    params = controller.set_params({"attribute_field_map": {"design": "ROADTYPE", "traffic": "TRAF_VALUE"}})
+    assert params["attribute_field_map"]["design"] == "ROADTYPE"
+    assert params["attribute_field_map"]["traffic"] == "TRAF_VALUE"
+
+    with pytest.raises(ValueError, match="not present in discovered attributes"):
+        controller.set_params({"attribute_field_map": {"design": "MISSING_FIELD"}})
+
+
+def test_resolve_segment_run_inputs_uses_user_defaults_when_mapped_fields_are_missing(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    controller.set_params(
+        {
+            "attribute_field_map": {
+                "surface": "SURFACE_MAIN",
+                "traffic": "TRAFFIC_MAIN",
+            },
+            "surface_default": "paved",
+            "traffic_default": "high",
+        }
+    )
+    params = controller.query_summary()["roads_params"]
+    warning_counts: Counter[str] = Counter()
+    warning_examples: list[dict[str, object]] = []
+
+    resolved = controller._resolve_segment_run_inputs(
+        properties={
+            "SURFACE": "gravel",
+            "TRAFFIC": "none",
+            "SOIL_TEXTURE": "loam",
+            "RFG_PCT": 12,
+            "WIDTH_M": 6.0,
+        },
+        params=params,
+        segment_id="roads-seg-000001",
+        design="inslope_bd",
+        warning_counts=warning_counts,
+        warning_examples=warning_examples,
+        warning_limit=10,
+    )
+
+    assert resolved["surface"] == "paved"
+    assert resolved["traffic"] == "high"
+    assert resolved["resolution_sources"]["surface"] == "mapped_default_value"
+    assert resolved["resolution_sources"]["traffic"] == "mapped_default_value"
+    assert warning_counts["surface_mapped_primary_missing"] == 1
+    assert warning_counts["traffic_mapped_primary_missing"] == 1
 
 
 def test_set_enabled_requires_wbt_backend(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -215,6 +316,7 @@ def test_prepare_segments_writes_summary_and_marks_prepared(
     controller.set_uploaded_geojson(str(source_path))
 
     def _fake_convert(**kwargs):
+        assert tuple(kwargs["design_property_keys"]) == ("DESIGN", "design")
         output_geojson_path = Path(kwargs["output_geojson_path"])
         output_geojson_path.parent.mkdir(parents=True, exist_ok=True)
         output_geojson_path.write_text(
@@ -268,6 +370,8 @@ def test_prepare_segments_writes_summary_and_marks_prepared(
     assert summary["eligible_segment_count"] == 1
     assert summary["eligible_with_lowpoint_ids"] == 1
     assert summary["eligible_lowpoint_decision_counts"] == {"unknown": 1}
+    assert summary["design_property_keys"] == ["DESIGN", "design"]
+    assert summary["mapping_warning_count"] == 0
     assert summary["prepare_raster_paths"] == {
         "dem_path": "dem/wbt/relief.tif",
         "channel_raster_path": "dem/wbt/netful.tif",

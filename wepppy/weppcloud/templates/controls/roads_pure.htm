@@ -3,8 +3,22 @@
 
 {% set roads_summary = roads.query_summary() if roads is defined and roads is not none else {} %}
 {% set roads_params = roads_summary.get("roads_params", {}) %}
+{% set roads_attribute_field_map = roads_summary.get("attribute_field_map", roads_params.get("attribute_field_map", {})) %}
+{% set roads_attribute_catalog = roads_summary.get("discovered_attribute_catalog", {}) %}
+{% set roads_discovered_fields = roads_attribute_catalog.get("field_names", []) if roads_attribute_catalog else [] %}
 {% set roads_upload_relpath = roads_summary.get("uploaded_geojson_relpath") %}
 {% set roads_max_upload_mb = roads_params.get("max_upload_mb", 50) %}
+{% set roads_surface_default = roads_params.get("surface_default", "gravel") %}
+{% set roads_traffic_default = roads_params.get("traffic_default", "low") %}
+{% set roads_field_options_ns = namespace(values=[("", "Auto / Unset")]) %}
+{% for field_name in roads_discovered_fields %}
+  {% if field_name is string and field_name %}
+    {% set roads_field_options_ns.values = roads_field_options_ns.values + [(field_name, field_name)] %}
+  {% endif %}
+{% endfor %}
+{% set roads_field_options = roads_field_options_ns.values %}
+{% set roads_surface_default_options = [("gravel", "gravel"), ("paved", "paved")] %}
+{% set roads_traffic_default_options = [("high", "high"), ("low", "low"), ("none", "none")] %}
 
 {% set description %}
   <p class="wc-text-muted">
@@ -55,6 +69,73 @@
       </button>
     {% endcall %}
     <p id="roads_upload_message" class="wc-field__help" aria-live="polite"></p>
+
+    <fieldset
+      id="roads_attribute_mapping_section"
+      class="wc-fieldset"
+      data-roads-has-attribute-catalog="{{ '1' if roads_discovered_fields else '0' }}">
+      <legend class="wc-fieldset__legend">Attribute Mapping</legend>
+      <p class="wc-fieldset__description">
+        Map GeoJSON feature properties to Roads semantics. Surface/traffic resolution uses the mapped field when
+        present, otherwise the selected fallback value. When mapping is unset, legacy keys remain active.
+      </p>
+      <div id="roads_attribute_catalog_preview" class="wc-stack-sm"></div>
+      {{ ui.select_field(
+           "roads_design_field",
+           "Design field",
+           roads_field_options,
+           selected=roads_attribute_field_map.get("design"),
+           help="Used for inslope design eligibility in prepare and run stages.",
+           attrs={"data-roads-map-field": "design"},
+           extra_control_class="disable-readonly"
+         ) }}
+      {{ ui.select_field(
+           "roads_surface_field",
+           "Surface field",
+           roads_field_options,
+           selected=roads_attribute_field_map.get("surface"),
+           help="Primary surface field.",
+           attrs={"data-roads-map-field": "surface"},
+           extra_control_class="disable-readonly"
+         ) }}
+      {{ ui.select_field(
+           "roads_surface_default",
+           "Surface fallback value",
+           roads_surface_default_options,
+           selected=roads_surface_default,
+           help="Used when the mapped surface field is missing or invalid (choose gravel or paved).",
+           attrs={"data-roads-default-field": "surface_default"},
+           extra_control_class="disable-readonly"
+         ) }}
+      {{ ui.select_field(
+           "roads_traffic_field",
+           "Traffic field",
+           roads_field_options,
+           selected=roads_attribute_field_map.get("traffic"),
+           help="Primary traffic field.",
+           attrs={"data-roads-map-field": "traffic"},
+           extra_control_class="disable-readonly"
+         ) }}
+      {{ ui.select_field(
+           "roads_traffic_default",
+           "Traffic fallback value",
+           roads_traffic_default_options,
+           selected=roads_traffic_default,
+           help="Used when the mapped traffic field is missing or invalid (choose high, low, or none).",
+           attrs={"data-roads-default-field": "traffic_default"},
+           extra_control_class="disable-readonly"
+         ) }}
+      {% call button_row() %}
+        <button
+          id="roads_apply_mapping"
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly"
+          data-roads-action="apply-attribute-mapping">
+          Apply Attribute Mapping
+        </button>
+      {% endcall %}
+      <p id="roads_mapping_message" class="wc-field__help" aria-live="polite"></p>
+    </fieldset>
 
     {% call button_row() %}
       <button

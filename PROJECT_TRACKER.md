@@ -354,6 +354,31 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Roads GeoJSON Attribute Discovery and Mapping UI
+**Completed**: 2026-03-26  
+**Duration**: 2 focused sessions  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260326_roads_geojson_attribute_mapping/](docs/work-packages/20260326_roads_geojson_attribute_mapping/)  
+**Description**: Added Roads GeoJSON attribute discovery with explicit mapping controls for `design`, `surface`, and `traffic`, plus user-configurable fallback values (`surface_default` and `traffic_default`) and end-to-end validation.
+
+**Outcome**:
+- Upload/config payloads now expose discovered top-level feature-property catalog metadata and persisted mapping state.
+- Prepare-stage design eligibility now respects mapping-aware key resolution.
+- Run-stage `surface`/`traffic` now use mapped-field resolution with explicit fallback values (`surface`: `gravel|paved`; `traffic`: `high|low|none`).
+- Roads UI now supports mapping apply workflow and fallback value selection after upload.
+- Regression coverage added/updated across NoDb controller, monotonic segment utility, roads routes, and Roads JS controller.
+- Manual run-page E2E confirmed by user: UI mapping flow worked as expected and Roads WEPP run completed successfully.
+
+**Validation Notes**:
+- `wctl run-pytest tests/nodb/mods/test_roads_controller.py --maxfail=1`
+- `wctl run-pytest tests/nodb/mods/test_roads_monotonic_segments.py --maxfail=1`
+- `wctl run-pytest tests/weppcloud/routes/test_roads_bp.py --maxfail=1`
+- `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1`
+- `wctl run-npm test -- roads`
+- `wctl run-npm lint`
+- `wctl run-pytest tests --maxfail=1`
+
 ### Disturbed Lookup Hardening and Preservation
 **Completed**: 2026-03-26 (reopen addendum)  
 **Duration**: 2 focused sessions  

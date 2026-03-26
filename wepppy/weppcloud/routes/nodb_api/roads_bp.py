@@ -296,7 +296,14 @@ def roads_set_params(runid: str, config: str) -> Response:
     except ValueError as exc:
         return error_factory(str(exc))
     _invalidate_roads_timestamp(wd)
-    return success_factory({"roads_params": params})
+    summary = controller.query_summary()
+    return success_factory(
+        {
+            "roads_params": params,
+            "attribute_field_map": summary.get("attribute_field_map") or {},
+            "discovered_attribute_catalog": summary.get("discovered_attribute_catalog"),
+        }
+    )
 
 
 def _enqueue_roads_job(runid: str, *, func, prep_key: str) -> Dict[str, Any]:
@@ -366,6 +373,8 @@ def roads_get_config(runid: str, config: str) -> Response:
         {
             "enabled": summary.get("enabled", False),
             "roads_params": summary.get("roads_params", {}),
+            "attribute_field_map": summary.get("attribute_field_map") or {},
+            "discovered_attribute_catalog": summary.get("discovered_attribute_catalog"),
             "uploaded_geojson_relpath": summary.get("uploaded_geojson_relpath"),
             "uploaded_geojson_sha256": summary.get("uploaded_geojson_sha256"),
         }
@@ -384,7 +393,14 @@ def roads_set_config(runid: str, config: str) -> Response:
     except ValueError as exc:
         return error_factory(str(exc))
     _invalidate_roads_timestamp(wd)
-    return success_factory({"roads_params": params})
+    summary = controller.query_summary()
+    return success_factory(
+        {
+            "roads_params": params,
+            "attribute_field_map": summary.get("attribute_field_map") or {},
+            "discovered_attribute_catalog": summary.get("discovered_attribute_catalog"),
+        }
+    )
 
 
 @roads_bp.route("/runs/<string:runid>/<config>/api/roads/status", methods=["GET"])

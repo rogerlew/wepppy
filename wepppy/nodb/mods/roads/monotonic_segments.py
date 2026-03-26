@@ -18,6 +18,7 @@ EPSILON = 1e-9
 DEFAULT_INPUT_CRS = "EPSG:4326"
 DEFAULT_TOLERANCE_M = 0.5
 METADATA_PREFIX = "_roads_"
+DEFAULT_DESIGN_PROPERTY_KEYS: Tuple[str, ...] = ("DESIGN", "design")
 
 
 @dataclass(frozen=True)
@@ -354,6 +355,23 @@ def _is_eligible_inslope_design(design_value: Any) -> bool:
     return isinstance(design_value, str) and design_value.lower() in {"inslope_bd", "inslope_rd"}
 
 
+def _resolve_eligible_inslope_design(
+    properties: Mapping[str, Any],
+    *,
+    design_property_keys: Sequence[str],
+) -> Tuple[Optional[str], Optional[str]]:
+    for key in design_property_keys:
+        raw_value = properties.get(key)
+        if raw_value is None:
+            continue
+        design_value = str(raw_value).strip()
+        if not design_value:
+            continue
+        if _is_eligible_inslope_design(design_value):
+            return design_value, key
+    return None, None
+
+
 def _lookup_hillslope_topaz_id_near_lowpoint(
     channel_lookup: _ChannelLookup,
     *,
@@ -441,6 +459,7 @@ def convert_geojson_to_monotonic_segments(
     tolerance_m: float = DEFAULT_TOLERANCE_M,
     channel_raster_path: Optional[str | Path] = None,
     topaz_id_raster_path: Optional[str | Path] = None,
+    design_property_keys: Sequence[str] = DEFAULT_DESIGN_PROPERTY_KEYS,
     add_segment_metadata: bool = False,
 ) -> Tuple[Dict[str, Any], MonotonicConversionSummary]:
     """
@@ -466,6 +485,9 @@ def convert_geojson_to_monotonic_segments(
         Adds `topaz_id_chn_lowpoint` and `topaz_id_hill_lowpoint` to each segment
         (defaults null; set for DESIGN in `Inslope_bd`/`Inslope_rd` when a
         deterministic nearby channel and receiving hillslope are found).
+    design_property_keys:
+        Ordered property keys checked for inslope design eligibility.
+        Defaults to `("DESIGN", "design")`.
     """
 
     output_geojson, _, summary = _convert_geojson_to_monotonic_segments_internal(
@@ -476,6 +498,7 @@ def convert_geojson_to_monotonic_segments(
         tolerance_m=tolerance_m,
         channel_raster_path=channel_raster_path,
         topaz_id_raster_path=topaz_id_raster_path,
+        design_property_keys=design_property_keys,
         add_segment_metadata=add_segment_metadata,
     )
     return output_geojson, summary
@@ -490,6 +513,7 @@ def convert_geojson_to_monotonic_segments_with_low_points(
     tolerance_m: float = DEFAULT_TOLERANCE_M,
     channel_raster_path: Optional[str | Path] = None,
     topaz_id_raster_path: Optional[str | Path] = None,
+    design_property_keys: Sequence[str] = DEFAULT_DESIGN_PROPERTY_KEYS,
     add_segment_metadata: bool = False,
 ) -> Tuple[Dict[str, Any], Dict[str, Any], MonotonicConversionSummary]:
     """Return both monotonic segment features and per-segment low-point features."""
@@ -502,6 +526,7 @@ def convert_geojson_to_monotonic_segments_with_low_points(
         tolerance_m=tolerance_m,
         channel_raster_path=channel_raster_path,
         topaz_id_raster_path=topaz_id_raster_path,
+        design_property_keys=design_property_keys,
         add_segment_metadata=add_segment_metadata,
     )
 
@@ -515,10 +540,19 @@ def _convert_geojson_to_monotonic_segments_internal(
     tolerance_m: float,
     channel_raster_path: Optional[str | Path],
     topaz_id_raster_path: Optional[str | Path],
+    design_property_keys: Sequence[str],
     add_segment_metadata: bool,
 ) -> Tuple[Dict[str, Any], Dict[str, Any], MonotonicConversionSummary]:
     if tolerance_m < 0.0:
         raise ValueError("tolerance_m must be >= 0.")
+
+    normalized_design_property_keys = tuple(
+        key.strip()
+        for key in design_property_keys
+        if isinstance(key, str) and key.strip()
+    )
+    if not normalized_design_property_keys:
+        normalized_design_property_keys = DEFAULT_DESIGN_PROPERTY_KEYS
 
     features = _ensure_feature_collection(roads_geojson)
 
@@ -600,8 +634,11 @@ def _convert_geojson_to_monotonic_segments_internal(
 
                     topaz_id_chn_lowpoint: Optional[int] = None
                     topaz_id_hill_lowpoint: Optional[int] = None
-                    design_value = properties.get("DESIGN")
-                    is_design_eligible = _is_eligible_inslope_design(design_value)
+                    design_value, design_source_key = _resolve_eligible_inslope_design(
+                        properties,
+                        design_property_keys=normalized_design_property_keys,
+                    )
+                    is_design_eligible = design_value is not None
                     channel_diagnostics: Dict[str, Any] = {}
                     hillslope_diagnostics: Dict[str, Any] = {}
                     lowpoint_decision = "design_not_eligible"
@@ -636,6 +673,7 @@ def _convert_geojson_to_monotonic_segments_internal(
                     properties["topaz_id_hill_lowpoint"] = (
                         int(topaz_id_hill_lowpoint) if topaz_id_hill_lowpoint is not None else None
                     )
+                    properties[f"{METADATA_PREFIX}design_source_key"] = design_source_key
                     properties[f"{METADATA_PREFIX}design_eligible"] = bool(is_design_eligible)
                     properties[f"{METADATA_PREFIX}channel_lookup_available"] = bool(channel_lookup is not None)
                     properties[f"{METADATA_PREFIX}lowpoint_decision"] = str(lowpoint_decision)
@@ -735,6 +773,7 @@ def convert_geojson_file_to_monotonic_segments(
     tolerance_m: float = DEFAULT_TOLERANCE_M,
     channel_raster_path: Optional[str | Path] = None,
     topaz_id_raster_path: Optional[str | Path] = None,
+    design_property_keys: Sequence[str] = DEFAULT_DESIGN_PROPERTY_KEYS,
     low_points_output_geojson_path: Optional[str | Path] = None,
     add_segment_metadata: bool = False,
 ) -> MonotonicConversionSummary:
@@ -753,6 +792,7 @@ def convert_geojson_file_to_monotonic_segments(
         tolerance_m=tolerance_m,
         channel_raster_path=channel_raster_path,
         topaz_id_raster_path=topaz_id_raster_path,
+        design_property_keys=design_property_keys,
         add_segment_metadata=add_segment_metadata,
     )
 

@@ -1,7 +1,7 @@
 # Roads NoDb Inslope Integration Specification
 
 Status: Implemented (Phase 1)  
-Last Updated: 2026-03-24  
+Last Updated: 2026-03-26  
 Scope: `Inslope_bd` and `Inslope_rd` road designs for the first WEPPcloud Roads NoDb integration.
 Canonical cross-route `output_scope` contract: `docs/schemas/output-scope-contract.md`.
 
@@ -66,6 +66,7 @@ Minimum persisted state fields:
 - `enabled`: bool
 - `uploaded_geojson_relpath`: str | null
 - `uploaded_geojson_sha256`: str | null
+- `discovered_attribute_catalog`: dict | null (top-level feature-property field catalog for current upload)
 - `roads_params`: dict
 - `last_prepare_summary`: dict | null
 - `last_run_summary`: dict | null
@@ -255,7 +256,36 @@ Road segment loss summary artifact:
 - validate enums/ranges for:
   - `soil_texture_default`, `surface_default`, `traffic_default`,
   - `rfg_pct_default`, `road_width_m_default`,
-  - optional per-segment override field mappings.
+  - optional `attribute_field_map` values:
+    - `design`
+    - `surface`
+    - `traffic`
+  - attribute discovery limit params:
+    - `attribute_discovery_profile_feature_limit`
+    - `attribute_discovery_value_preview_limit`
+    - `attribute_discovery_value_max_chars`.
+
+### Attribute Discovery and Mapping Contract
+
+- Upload-time discovery scans top-level `feature.properties` keys and persists:
+  - `field_names`
+  - `field_profiles` (`non_empty_count`, `distinct_non_empty_count`, `sample_values`)
+  - profile scope metadata (`field_count`, `total_feature_count`, `profiled_feature_count`, `profile_truncated`)
+  - discovery-limit metadata (`discovery_limits`).
+- On each upload:
+  - stale mapping selections are reset,
+  - best-effort remap discovery is attempted by exact field-name match.
+- Mapping is used in both prepare and run stages:
+  - prepare-stage design eligibility respects configured `attribute_field_map.design`,
+  - run-stage design/surface/traffic resolution respects configured mapping fields.
+- Surface and traffic fallback values are explicit params:
+  - `surface_default` must resolve to `gravel` or `paved`,
+  - `traffic_default` must resolve to `high`, `low`, or `none`.
+- Surface and traffic resolution order depends on mapping state:
+  - when mapped field is set: mapped field -> configured default value,
+  - when mapped field is unset: legacy keys -> configured default value.
+- Missing custom mapped fields warn and fallback to configured defaults (no hard fail). Warning summaries are persisted in prepare/run summaries.
+- Discovery and mapping scope is top-level `feature.properties` only for this phase (nested paths out of scope).
 
 Common API error messages (current behavior):
 
@@ -361,6 +391,8 @@ Default normalization from incoming road properties (case-insensitive):
 
 If no recognized surface value exists, use controller default (phase-1 default: `gravel`) and log a warning.
 
+This legacy lookup applies when `attribute_field_map.surface` is unset. When a surface mapping is set, runtime order is mapped field -> `surface_default`.
+
 ## Traffic Mapping
 
 Target traffic domain:
@@ -377,6 +409,8 @@ Resolution order:
    - `Year round` -> `high`
    - `New2011` -> `low`
 3. controller default (phase-1 default: `low`).
+
+This legacy order applies when `attribute_field_map.traffic` is unset. When a traffic mapping is set, runtime order is mapped field -> `traffic_default`.
 
 ## Soil Template Selection
 

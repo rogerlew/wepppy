@@ -85,6 +85,16 @@ describe("Roads controller", () => {
                 <div id="roads_stacktrace" style="display:none;"></div>
                 <div id="rq_job"></div>
                 <button id="roads_upload_geojson" type="button" data-roads-action="upload">Upload</button>
+                <fieldset id="roads_attribute_mapping_section">
+                    <div id="roads_attribute_catalog_preview"></div>
+                    <select id="roads_design_field" data-roads-map-field="design"></select>
+                    <select id="roads_surface_field" data-roads-map-field="surface"></select>
+                    <select id="roads_surface_default" data-roads-default-field="surface_default"></select>
+                    <select id="roads_traffic_field" data-roads-map-field="traffic"></select>
+                    <select id="roads_traffic_default" data-roads-default-field="traffic_default"></select>
+                    <button id="roads_apply_mapping" type="button" data-roads-action="apply-attribute-mapping">Apply</button>
+                    <p id="roads_mapping_message"></p>
+                </fieldset>
                 <button id="roads_prepare_segments" type="button" data-roads-action="prepare-segments">Prepare</button>
                 <button id="run_roads_wepp" type="button" data-roads-action="run">Run</button>
             </form>
@@ -102,9 +112,67 @@ describe("Roads controller", () => {
                 if (!options && path === "/runs/test-run/test-config/report/roads/results/") {
                     return Promise.resolve({ body: "<div data-roads-results-panel>Roads Run Results</div>" });
                 }
+                if (path === "/runs/test-run/test-config/tasks/roads/set_params") {
+                    return Promise.resolve({
+                        body: {
+                            roads_params: {
+                                surface_default: "paved",
+                                traffic_default: "none",
+                                attribute_field_map: {
+                                    design: "ROADTYPE",
+                                    surface: "SURF_MAIN",
+                                    traffic: "TRAF_MAIN"
+                                }
+                            },
+                            attribute_field_map: {
+                                design: "ROADTYPE",
+                                surface: "SURF_MAIN",
+                                traffic: "TRAF_MAIN"
+                            },
+                            discovered_attribute_catalog: {
+                                field_names: ["ROADTYPE", "SURF_MAIN", "TRAF_MAIN"],
+                                field_profiles: [],
+                                field_count: 3,
+                                total_feature_count: 1,
+                                profiled_feature_count: 1,
+                                profile_truncated: false
+                            }
+                        }
+                    });
+                }
                 return Promise.resolve({ body: { job_id: "roads-job-1" } });
             }),
-            getJson: jest.fn(() => Promise.resolve({ body: {} })),
+            getJson: jest.fn((path) => {
+                if (path === "/runs/test-run/test-config/api/roads/config") {
+                    return Promise.resolve({
+                        body: {
+                            roads_params: {
+                                surface_default: "gravel",
+                                traffic_default: "low",
+                                attribute_field_map: {
+                                    design: "DESIGN",
+                                    surface: "SURFACE",
+                                    traffic: "TRAFFIC"
+                                }
+                            },
+                            attribute_field_map: {
+                                design: "DESIGN",
+                                surface: "SURFACE",
+                                traffic: "TRAFFIC"
+                            },
+                            discovered_attribute_catalog: {
+                                field_names: ["DESIGN", "SURFACE", "ROAD_SURFACE", "TRAFFIC", "CONDITION"],
+                                field_profiles: [],
+                                field_count: 5,
+                                total_feature_count: 2,
+                                profiled_feature_count: 2,
+                                profile_truncated: false
+                            }
+                        }
+                    });
+                }
+                return Promise.resolve({ body: {} });
+            }),
             isHttpError: jest.fn(() => false),
             getCsrfToken: jest.fn(() => "csrf-token")
         };
@@ -175,7 +243,20 @@ describe("Roads controller", () => {
         xhr.triggerLoad(200, {
             Content: {
                 uploaded_geojson_relpath: "roads/roads.uploaded.geojson",
-                feature_count: 7
+                feature_count: 7,
+                attribute_field_map: {
+                    design: "DESIGN",
+                    surface: "SURFACE",
+                    traffic: "TRAFFIC"
+                },
+                discovered_attribute_catalog: {
+                    field_names: ["DESIGN", "SURFACE", "ROAD_SURFACE", "TRAFFIC", "CONDITION"],
+                    field_profiles: [],
+                    field_count: 5,
+                    total_feature_count: 7,
+                    profiled_feature_count: 7,
+                    profile_truncated: false
+                }
             }
         });
         await uploadPromise;
@@ -183,6 +264,9 @@ describe("Roads controller", () => {
         expect(document.getElementById("roads_upload_message").textContent).toContain("uploaded successfully");
         expect(document.querySelector(".wc-upload-progress__fill").style.width).toBe("100%");
         expect(document.getElementById("roads_info").innerHTML).toContain("roads.uploaded.geojson");
+        expect(document.getElementById("roads_design_field").value).toBe("DESIGN");
+        expect(document.getElementById("roads_surface_default").value).toBe("gravel");
+        expect(document.getElementById("roads_traffic_default").value).toBe("low");
     });
 
     test("prepare and run actions enqueue roads jobs with matching completion events", async () => {
@@ -262,8 +346,42 @@ describe("Roads controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
+        expect(httpMock.getJson).toHaveBeenCalledWith("/runs/test-run/test-config/api/roads/config");
         expect(httpMock.getJson).toHaveBeenCalledWith("/runs/test-run/test-config/api/roads/results");
         expect(httpMock.request).toHaveBeenCalledWith("/runs/test-run/test-config/report/roads/results/");
         expect(document.getElementById("roads-results").innerHTML).toContain("Roads Run Results");
+        expect(document.getElementById("roads_traffic_field").value).toBe("TRAFFIC");
+    });
+
+    test("apply mapping posts attribute_field_map payload", async () => {
+        roads.bootstrap({});
+        await Promise.resolve();
+        await Promise.resolve();
+
+        document.getElementById("roads_design_field").value = "DESIGN";
+        document.getElementById("roads_surface_field").value = "SURFACE";
+        document.getElementById("roads_traffic_field").value = "TRAFFIC";
+        document.getElementById("roads_surface_default").value = "paved";
+        document.getElementById("roads_traffic_default").value = "none";
+
+        await roads.applyAttributeMapping();
+        await Promise.resolve();
+
+        expect(httpMock.request).toHaveBeenCalledWith(
+            "/runs/test-run/test-config/tasks/roads/set_params",
+            expect.objectContaining({
+                method: "POST",
+                json: {
+                    attribute_field_map: {
+                        design: "DESIGN",
+                        surface: "SURFACE",
+                        traffic: "TRAFFIC"
+                    },
+                    surface_default: "paved",
+                    traffic_default: "none"
+                }
+            })
+        );
+        expect(document.getElementById("roads_mapping_message").textContent).toContain("applied");
     });
 });

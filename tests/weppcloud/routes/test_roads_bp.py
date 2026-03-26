@@ -26,7 +26,18 @@ class RoadsStub(LockedMixin):
         self.wd = wd
         self.cfg_fn = cfg_fn
         self._enabled = False
-        self._params: Dict[str, Any] = {"tolerance_m": 0.5}
+        self._params: Dict[str, Any] = {
+            "tolerance_m": 0.5,
+            "surface_default": "gravel",
+            "traffic_default": "low",
+            "attribute_field_map": {
+                "design": None,
+                "surface": None,
+                "traffic": None,
+            },
+        }
+        self._attribute_field_map: Dict[str, Any] = dict(self._params["attribute_field_map"])
+        self._attribute_catalog: Optional[Dict[str, Any]] = None
         self._uploaded_geojson_relpath: Optional[str] = None
         self._status = "idle"
         self._errors: list[str] = []
@@ -64,6 +75,9 @@ class RoadsStub(LockedMixin):
         self._enabled = bool(enabled)
 
     def set_params(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        if "attribute_field_map" in payload and isinstance(payload["attribute_field_map"], dict):
+            self._attribute_field_map.update(payload["attribute_field_map"])
+            self._params["attribute_field_map"] = dict(self._attribute_field_map)
         self._params.update(payload)
         return dict(self._params)
 
@@ -76,8 +90,35 @@ class RoadsStub(LockedMixin):
         dst = Path(self.wd) / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(json.dumps(payload), encoding="utf-8")
+        field_names = sorted(
+            {
+                key
+                for feature in payload.get("features", [])
+                for key in (feature.get("properties") or {}).keys()
+                if isinstance(key, str)
+            }
+        )
+        self._attribute_catalog = {
+            "field_names": field_names,
+            "field_count": len(field_names),
+            "total_feature_count": len(payload.get("features", [])),
+            "profiled_feature_count": len(payload.get("features", [])),
+            "profile_truncated": False,
+            "field_profiles": [],
+        }
+        self._attribute_field_map = {
+            "design": "DESIGN" if "DESIGN" in field_names else None,
+            "surface": "SURFACE" if "SURFACE" in field_names else None,
+            "traffic": "TRAFFIC" if "TRAFFIC" in field_names else None,
+        }
+        self._params["attribute_field_map"] = dict(self._attribute_field_map)
         self._uploaded_geojson_relpath = rel
-        return {"uploaded_geojson_relpath": rel, "feature_count": len(payload.get("features", []))}
+        return {
+            "uploaded_geojson_relpath": rel,
+            "feature_count": len(payload.get("features", [])),
+            "discovered_attribute_catalog": self._attribute_catalog,
+            "attribute_field_map": dict(self._attribute_field_map),
+        }
 
     def prepare_segments(self) -> Dict[str, Any]:
         self._status = "prepared"
@@ -117,6 +158,8 @@ class RoadsStub(LockedMixin):
         return {
             "enabled": self._enabled,
             "roads_params": dict(self._params),
+            "attribute_field_map": dict(self._attribute_field_map),
+            "discovered_attribute_catalog": self._attribute_catalog,
             "uploaded_geojson_relpath": self._uploaded_geojson_relpath,
             "last_prepare_summary": self._prepare_summary,
             "last_run_summary": self._run_summary,
@@ -282,6 +325,51 @@ def test_set_params_updates_controller_state(roads_client):
     assert RoadsStub.getInstance(run_dir).query_summary()["roads_params"]["soil_texture_default"] == "loam"
     prep = RedisPrepStub.tryGetInstance(run_dir)
     assert prep.removed == [roads_module.TaskEnum.run_roads]
+
+
+def test_roads_config_exposes_attribute_catalog_and_mapping(roads_client):
+    client, _RoadsStub, _RonStub, _RedisPrepStub, _rq_environment, _run_dir = roads_client
+    payload = json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "LineString", "coordinates": [[0, 0], [1, 1]]},
+                    "properties": {"DESIGN": "Inslope_bd", "SURFACE": "gravel", "TRAFFIC": "low"},
+                }
+            ],
+        }
+    ).encode("utf-8")
+    upload_response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+        data={"file": (io.BytesIO(payload), "roads.geojson")},
+        content_type="multipart/form-data",
+    )
+    assert upload_response.status_code == 200
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/roads/config")
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["discovered_attribute_catalog"]["field_count"] == 3
+    assert body["attribute_field_map"]["design"] == "DESIGN"
+
+
+def test_set_params_returns_mapping_state(roads_client):
+    client, _RoadsStub, _RonStub, _RedisPrepStub, _rq_environment, _run_dir = roads_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params",
+        json={
+            "attribute_field_map": {"surface": "SURF_A"},
+            "surface_default": "paved",
+            "traffic_default": "none",
+        },
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["attribute_field_map"]["surface"] == "SURF_A"
+    assert payload["Content"]["roads_params"]["surface_default"] == "paved"
+    assert payload["Content"]["roads_params"]["traffic_default"] == "none"
 
 
 def test_prepare_and_run_enqueue_jobs(roads_client):
