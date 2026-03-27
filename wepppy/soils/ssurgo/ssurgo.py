@@ -286,6 +286,10 @@ class SsurgoRequestError(Exception):
 # Retry settings for SSURGO requests
 _SSURGO_MAX_RETRIES = 3
 _SSURGO_BASE_DELAY = 5  # seconds
+_SSURGO_PUBLIC_API_URL = "https://sdmdataaccess.nrcs.usda.gov"
+_SSURGO_UNAVAILABLE_MESSAGE = (
+    f"{_SSURGO_PUBLIC_API_URL} SSURGO API is not available. Try again later."
+)
 
 
 # noinspection PyPep8Naming
@@ -311,11 +315,8 @@ def _makeSOAPrequest(query):
                 )
                 time.sleep(delay)
             else:
-                message = (
-                    "NRCS SDM Data Access service (sdmdataaccess.nrcs.usda.gov) is currently "
-                    "unavailable after %d attempts. Try again later." % _SSURGO_MAX_RETRIES
-                )
-                _LOG.error(message)
+                message = _SSURGO_UNAVAILABLE_MESSAGE
+                _LOG.error("%s (connect timeout after %d attempts)", message, _SSURGO_MAX_RETRIES)
                 raise SsurgoRequestError(message) from exc
         except requests.exceptions.Timeout as exc:
             last_exc = exc
@@ -327,12 +328,13 @@ def _makeSOAPrequest(query):
                 )
                 time.sleep(delay)
             else:
-                message = (
-                    "NRCS SDM Data Access service (sdmdataaccess.nrcs.usda.gov) did not respond "
-                    "before the timeout after %d attempts. Try again later." % _SSURGO_MAX_RETRIES
-                )
-                _LOG.error(message)
+                message = _SSURGO_UNAVAILABLE_MESSAGE
+                _LOG.error("%s (request timeout after %d attempts)", message, _SSURGO_MAX_RETRIES)
                 raise SsurgoRequestError(message) from exc
+        except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
+            message = _SSURGO_UNAVAILABLE_MESSAGE
+            _LOG.error("%s (%s)", message, exc)
+            raise SsurgoRequestError(message) from exc
         except requests.exceptions.RequestException as exc:
             message = f"Failed to query NRCS SDM Data Access service: {exc}"
             _LOG.error(message)
