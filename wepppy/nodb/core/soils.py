@@ -810,11 +810,11 @@ class Soils(NoDbBase):
 
             soils = {}
             for topaz_id, mukey in domsoil_d.items():
-                sol_fn = _join(soils_dir, f'{mukey}.sol')
-                if not _exists(sol_fn):
-                    shutil.copyfile(_join(soils_db_dir,  f'{mukey}.sol'), sol_fn)
-
                 if mukey not in soils:
+                    src_sol_fn = _join(soils_db_dir, f'{mukey}.sol')
+                    sol_fn = _join(soils_dir, f'{mukey}.sol')
+                    # Refresh the run-local copy on each build so locale DB fixes are propagated.
+                    shutil.copyfile(src_sol_fn, sol_fn)
                     wsu = WeppSoilUtil(sol_fn)
                     soils[mukey] = SoilSummary(
                         mukey=mukey,

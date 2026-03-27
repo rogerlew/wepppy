@@ -150,6 +150,63 @@ def test_build_gridded_coverage_uses_hillslope_area_not_wsarea(
     ) == pytest.approx(100.0)
 
 
+def test_build_from_map_db_refreshes_existing_run_local_sol_from_db(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    soils_dir = wd / "soils"
+    soils_dir.mkdir(parents=True, exist_ok=True)
+
+    locale_dir = tmp_path / "locale"
+    soils_db_dir = locale_dir / "db"
+    soils_db_dir.mkdir(parents=True, exist_ok=True)
+
+    soils_map = locale_dir / "soils_map.tif"
+    soils_map.write_text("stub-map", encoding="utf-8")
+
+    src_sol = soils_db_dir / "30.sol"
+    src_sol.write_text("fresh-from-db\n", encoding="utf-8")
+
+    run_sol = soils_dir / "30.sol"
+    run_sol.write_text("stale-run-copy\n", encoding="utf-8")
+
+    soils = Soils.__new__(Soils)
+    soils.wd = str(wd)
+    soils.logger = logging.getLogger("tests.nodb.soils_map_db_refresh")
+    soils._soils_map = str(soils_map)
+    soils.locked = lambda: nullcontext()
+    soils.trigger = lambda *_args, **_kwargs: None
+
+    watershed_stub = SimpleNamespace(
+        dem_fn=str(wd / "watershed" / "dem.tif"),
+        subwta=str(wd / "watershed" / "subwta.tif"),
+        sub_area=4.0,
+        hillslope_area=lambda topaz_id: {"11": 1.0, "12": 3.0}[str(topaz_id)],
+    )
+
+    monkeypatch.setattr(Soils, "watershed_instance", property(lambda _self: watershed_stub))
+    monkeypatch.setattr(Soils, "getInstance", classmethod(lambda cls, _wd: soils))
+    monkeypatch.setattr("wepppy.nodb.core.soils.raster_stacker", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        "wepppy.nodb.core.soils.identify_mode_single_raster_key",
+        lambda **_kwargs: {"11": "30", "12": "30"},
+        raising=False,
+    )
+
+    class _WeppSoilUtilStub:
+        def __init__(self, _sol_path: str) -> None:
+            self.obj = {"ofes": [{"slid": "stub soil"}]}
+
+    monkeypatch.setattr("wepppy.wepp.soils.utils.WeppSoilUtil", _WeppSoilUtilStub)
+
+    soils._build_from_map_db()
+
+    assert run_sol.read_text(encoding="utf-8") == "fresh-from-db\n"
+    assert soils.domsoil_d == {"11": "30", "12": "30"}
+    assert soils.soils["30"].pct_coverage == pytest.approx(100.0)
+
+
 def test_post_dump_skips_parquet_when_soils_dir_missing(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
