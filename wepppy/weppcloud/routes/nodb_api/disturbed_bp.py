@@ -36,6 +36,8 @@ from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_f
 
 disturbed_bp = Blueprint('disturbed', __name__)
 _logger = logging.getLogger(__name__)
+LOOKUP_VARIANT_BASE = 'base'
+LOOKUP_VARIANT_EXTENDED = 'extended'
 
 
 def _set_no_store_headers(response: Response) -> Response:
@@ -69,6 +71,33 @@ def _read_lock_context(controller: Any):
     return _controller_lock(controller)
 
 
+def _is_blank_lookup_cell(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return value.strip() == ''
+    return False
+
+
+def _is_blank_lookup_row(row: Union[list, tuple, dict]) -> bool:
+    if isinstance(row, dict):
+        values = row.values()
+    else:
+        values = row
+    return all(_is_blank_lookup_cell(value) for value in values)
+
+
+def _prune_blank_lookup_rows(rows: list[Union[list, tuple, dict]]) -> tuple[list[Union[list, tuple, dict]], int]:
+    pruned_rows = []
+    dropped_count = 0
+    for row in rows:
+        if _is_blank_lookup_row(row):
+            dropped_count += 1
+            continue
+        pruned_rows.append(row)
+    return pruned_rows, dropped_count
+
+
 def _build_lookup_snapshot_payload(lookup_fn: str) -> Dict[str, Any]:
     snapshot = get_disturbed_land_soil_lookup_snapshot(lookup_fn)
     csv_text = ''
@@ -85,10 +114,64 @@ def _build_lookup_snapshot_payload(lookup_fn: str) -> Dict[str, Any]:
     )
 
 
+def _normalize_lookup_variant(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+
+    normalized = str(value).strip().lower()
+    if normalized in {'base', 'default', 'disturbed_land_soil_lookup', 'disturbed_land_soil_lookup.csv'}:
+        return LOOKUP_VARIANT_BASE
+    if normalized in {'extended', 'disturbed_land_soil_lookup_extended', 'disturbed_land_soil_lookup_extended.csv'}:
+        return LOOKUP_VARIANT_EXTENDED
+    return None
+
+
+def _resolve_lookup_target(
+    disturbed: Any,
+    requested_variant: Optional[str] = None,
+) -> Tuple[str, str]:
+    base_lookup_fn = disturbed.lookup_fn
+    extended_lookup_fn = getattr(disturbed, 'extended_lookup_fn', None)
+    has_extended_lookup = (
+        isinstance(extended_lookup_fn, str)
+        and extended_lookup_fn != ''
+        and os.path.exists(extended_lookup_fn)
+    )
+
+    variant = _normalize_lookup_variant(requested_variant)
+    if variant == LOOKUP_VARIANT_BASE:
+        return LOOKUP_VARIANT_BASE, base_lookup_fn
+    if variant == LOOKUP_VARIANT_EXTENDED:
+        if has_extended_lookup:
+            return LOOKUP_VARIANT_EXTENDED, extended_lookup_fn
+        _logger.info(
+            'disturbed_lookup_variant_missing_extended_fallback_base requested_variant=%s base_lookup_fn=%s extended_lookup_fn=%s',
+            requested_variant,
+            base_lookup_fn,
+            extended_lookup_fn,
+        )
+        return LOOKUP_VARIANT_BASE, base_lookup_fn
+
+    if has_extended_lookup:
+        return LOOKUP_VARIANT_EXTENDED, extended_lookup_fn
+    return LOOKUP_VARIANT_BASE, base_lookup_fn
+
+
+def _resolve_lookup_target_from_request(disturbed: Any) -> Tuple[str, str]:
+    requested_variant = request.args.get('lookup') or request.args.get('table')
+    return _resolve_lookup_target(disturbed, requested_variant=requested_variant)
+
+
 @disturbed_bp.route('/runs/<string:runid>/<config>/modify_disturbed')
 @authorize_and_handle_with_exception_factory
 def modify_disturbed(runid: str, config: str) -> Response:
     """Render the CSV editor for disturbed land/soil lookup."""
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    disturbed = Disturbed.getInstance(wd)
+    lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
+    lookup_filename = os.path.basename(lookup_fn)
+
     quoted_runid = quote(runid, safe="")
     quoted_config = quote(config, safe="")
     return render_template(
@@ -99,23 +182,27 @@ def modify_disturbed(runid: str, config: str) -> Response:
             'download.download_with_subpath',
             runid=runid,
             config=config,
-            subpath='disturbed/disturbed_land_soil_lookup.csv',
+            subpath=f'disturbed/{lookup_filename}',
         ),
         save_url=url_for_run(
             'disturbed.task_modify_disturbed',
             runid=runid,
             config=config,
+            lookup=lookup_variant,
         ),
         lookup_meta_url=url_for_run(
             'disturbed.lookup_disturbed_lookup_meta',
             runid=runid,
             config=config,
+            lookup=lookup_variant,
         ),
         lookup_snapshot_url=url_for_run(
             'disturbed.lookup_disturbed_lookup_snapshot',
             runid=runid,
             config=config,
+            lookup=lookup_variant,
         ),
+        lookup_variant=lookup_variant,
         session_token_url=f"/rq-engine/api/runs/{quoted_runid}/{quoted_config}/session-token",
     )
 
@@ -161,11 +248,12 @@ def lookup_disturbed_lookup_meta(runid: str, config: str) -> Response:
     disturbed = Disturbed.getInstance(wd)
 
     with _read_lock_context(disturbed):
-        lookup_fn = disturbed.lookup_fn
+        lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
         snapshot = get_disturbed_land_soil_lookup_snapshot(lookup_fn)
 
     response = success_factory(
         dict(
+            lookup_variant=lookup_variant,
             lookup_sha256=snapshot.get('sha256'),
             size_bytes=snapshot.get('size_bytes'),
             mtime_epoch=snapshot.get('mtime_epoch'),
@@ -185,8 +273,9 @@ def lookup_disturbed_lookup_snapshot(runid: str, config: str) -> Response:
     disturbed = Disturbed.getInstance(wd)
 
     with _read_lock_context(disturbed):
-        lookup_fn = disturbed.lookup_fn
+        lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
         payload = _build_lookup_snapshot_payload(lookup_fn)
+        payload['lookup_variant'] = lookup_variant
 
     response = success_factory(payload)
     return _set_no_store_headers(response)
@@ -224,6 +313,17 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
     if any(not isinstance(row, (list, tuple, dict)) for row in rows):
         return error_factory('each row must be a list or mapping', status_code=400)
 
+    rows, dropped_blank_rows = _prune_blank_lookup_rows(rows)
+    if dropped_blank_rows:
+        _logger.info(
+            'disturbed_lookup_write_pruned_blank_rows runid=%s config=%s dropped_rows=%s',
+            runid,
+            config,
+            dropped_blank_rows,
+        )
+    if len(rows) == 0:
+        return error_factory('rows payload must include at least one non-blank row', status_code=400)
+
     if if_match_sha256 is not None:
         if_match_sha256 = if_match_sha256.strip()
     if not if_match_sha256:
@@ -238,13 +338,14 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
 
     try:
         with _controller_lock(disturbed):
-            lookup_fn = disturbed.lookup_fn
+            lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
             current_sha256 = get_disturbed_land_soil_lookup_sha256(lookup_fn)
             if not current_sha256:
                 _logger.warning(
-                    'disturbed_lookup_write_blocked_sha_unavailable runid=%s config=%s lookup_fn=%s',
+                    'disturbed_lookup_write_blocked_sha_unavailable runid=%s config=%s lookup_variant=%s lookup_fn=%s',
                     runid,
                     config,
+                    lookup_variant,
                     lookup_fn,
                 )
                 return error_factory(
@@ -254,9 +355,10 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
                 )
             if current_sha256 != if_match_sha256:
                 _logger.warning(
-                    'disturbed_lookup_write_blocked_stale runid=%s config=%s expected_sha=%s current_sha=%s',
+                    'disturbed_lookup_write_blocked_stale runid=%s config=%s lookup_variant=%s expected_sha=%s current_sha=%s',
                     runid,
                     config,
+                    lookup_variant,
                     if_match_sha256,
                     current_sha256,
                 )
@@ -273,9 +375,10 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
             updated_sha256 = get_disturbed_land_soil_lookup_sha256(lookup_fn)
             if not updated_sha256:
                 _logger.warning(
-                    'disturbed_lookup_write_postsave_sha_unavailable runid=%s config=%s lookup_fn=%s',
+                    'disturbed_lookup_write_postsave_sha_unavailable runid=%s config=%s lookup_variant=%s lookup_fn=%s',
                     runid,
                     config,
+                    lookup_variant,
                     lookup_fn,
                 )
                 return error_factory(
@@ -284,9 +387,10 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
                     code='LOOKUP_VERSION_UNAVAILABLE',
                 )
             _logger.info(
-                'disturbed_lookup_write_committed runid=%s config=%s expected_sha=%s prior_sha=%s updated_sha=%s row_count=%s',
+                'disturbed_lookup_write_committed runid=%s config=%s lookup_variant=%s expected_sha=%s prior_sha=%s updated_sha=%s row_count=%s',
                 runid,
                 config,
+                lookup_variant,
                 if_match_sha256,
                 current_sha256,
                 updated_sha256,
@@ -302,6 +406,7 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
         return error_factory(str(exc), status_code=400)
     response = success_factory()
     response.headers['X-Lookup-Sha256'] = updated_sha256
+    response.headers['X-Lookup-Variant'] = lookup_variant
     return response
 
 
