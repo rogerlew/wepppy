@@ -682,6 +682,120 @@ function controlBase() {
         return firstLine.slice(0, maxLength - 3) + "...";
     }
 
+    function extractTerminalTraceLine(lines) {
+        if (!Array.isArray(lines) || lines.length === 0) {
+            return null;
+        }
+
+        for (let index = lines.length - 1; index >= 0; index -= 1) {
+            const rawLine = lines[index];
+            const line = rawLine === undefined || rawLine === null ? "" : String(rawLine).trim();
+            if (!line) {
+                continue;
+            }
+            if (line === "Traceback (most recent call last):") {
+                continue;
+            }
+            if (/^\^+$/.test(line)) {
+                continue;
+            }
+            if (line.startsWith("File \"") || line.startsWith("File '")) {
+                continue;
+            }
+            if (line.startsWith("During handling of the above exception")) {
+                continue;
+            }
+            if (line.startsWith("The above exception was the direct cause")) {
+                continue;
+            }
+            return line;
+        }
+
+        return null;
+    }
+
+    function extractExceptionMessage(line) {
+        if (!line) {
+            return "";
+        }
+
+        const text = String(line).trim();
+        if (!text) {
+            return "";
+        }
+
+        const classMessageMatch = text.match(/^[A-Za-z_][\w.]*(?:Error|Exception):\s*(.+)$/);
+        if (classMessageMatch && classMessageMatch[1]) {
+            return classMessageMatch[1].trim();
+        }
+
+        const delimiter = text.indexOf(": ");
+        if (delimiter > -1 && delimiter + 2 < text.length) {
+            return text.slice(delimiter + 2).trim();
+        }
+
+        return text;
+    }
+
+    function resolveSummaryTarget(self) {
+        if (!self) {
+            return null;
+        }
+        if (self.info) {
+            return self.info;
+        }
+        if (self.infoElement) {
+            return self.infoElement;
+        }
+        if (self.summary) {
+            return self.summary;
+        }
+        if (self.summaryElement) {
+            return self.summaryElement;
+        }
+        if (self.form && typeof self.form.querySelector === "function") {
+            return self.form.querySelector("#info");
+        }
+        return null;
+    }
+
+    function resolveErrorSummary(response, fallback) {
+        const stackLines = resolveStacktrace(response);
+        const terminalLine = extractTerminalTraceLine(stackLines);
+        if (terminalLine) {
+            return extractExceptionMessage(terminalLine);
+        }
+
+        const errorMessage = resolveErrorMessage(response);
+        if (errorMessage !== null && errorMessage !== undefined) {
+            const parsedErrorLine = extractTerminalTraceLine(splitStacktrace(errorMessage));
+            if (parsedErrorLine) {
+                return extractExceptionMessage(parsedErrorLine);
+            }
+            const summary = extractSummaryText(errorMessage, 240);
+            if (summary) {
+                return summary;
+            }
+        }
+
+        if (fallback !== undefined && fallback !== null) {
+            return extractSummaryText(fallback, 240);
+        }
+        return "";
+    }
+
+    function updateErrorSummary(self, response, fallback) {
+        const target = resolveSummaryTarget(self);
+        if (!target) {
+            return;
+        }
+        const summary = resolveErrorSummary(response, fallback);
+        if (!summary) {
+            return;
+        }
+        setTextContent(target, summary);
+    }
+
     function resolveButtons(self) {
         if (!self || !self.command_btn_id) {
             return [];
@@ -857,6 +971,7 @@ function controlBase() {
             }
 
             revealStacktracePanel(self.stacktrace);
+            updateErrorSummary(self, response);
         },
 
         pushErrorStacktrace: function pushErrorStacktrace(self, error, textStatus, errorThrown) {
@@ -873,6 +988,14 @@ function controlBase() {
             }
 
             revealStacktracePanel(self.stacktrace);
+            updateErrorSummary(
+                self,
+                {
+                    error: { message: parts.detail || parts.statusText },
+                    stacktrace: parts.detail
+                },
+                `${parts.statusCode} ${parts.statusText}`
+            );
         },
 
         has_stacktrace_content: function has_stacktrace_content(self) {

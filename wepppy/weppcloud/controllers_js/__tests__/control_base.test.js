@@ -13,6 +13,7 @@ describe("controlBase job status error handling", () => {
         document.body.innerHTML = `
             <button id="btn_run" type="button">Run</button>
             <div id="rq_job"></div>
+            <div id="info"></div>
             <div id="stacktrace"></div>
         `;
 
@@ -23,6 +24,7 @@ describe("controlBase job status error handling", () => {
 
         base.command_btn_id = "btn_run";
         base.rq_job = document.getElementById("rq_job");
+        base.info = document.getElementById("info");
         base.stacktrace = document.getElementById("stacktrace");
         base.schedule_stacktrace_backfill = jest.fn();
         base.schedule_job_status_poll = jest.fn();
@@ -119,5 +121,24 @@ describe("controlBase job status error handling", () => {
         expect(getJsonMock).toHaveBeenCalledTimes(1);
         expect(requestWithSessionTokenMock).toHaveBeenCalledTimes(2);
         expect(base.rq_job_status.status).toBe("finished");
+    });
+
+    test("pushResponseStacktrace writes exception message into summary panel", () => {
+        base.pushResponseStacktrace(base, {
+            error: { message: "Job failed." },
+            stacktrace: [
+                "Traceback (most recent call last):",
+                "  File \"/workdir/wepppy/wepppy/soils/ssurgo/ssurgo.py\", line 339, in _makeSOAPrequest",
+                "    raise SsurgoRequestError(message) from exc",
+                "wepppy.soils.ssurgo.ssurgo.SsurgoRequestError: https://sdmdataaccess.nrcs.usda.gov SSURGO API is not available. Try again later."
+            ]
+        });
+
+        expect(document.getElementById("info").textContent).toBe(
+            "https://sdmdataaccess.nrcs.usda.gov SSURGO API is not available. Try again later."
+        );
+        expect(document.getElementById("stacktrace").textContent).toContain(
+            "wepppy.soils.ssurgo.ssurgo.SsurgoRequestError"
+        );
     });
 });
