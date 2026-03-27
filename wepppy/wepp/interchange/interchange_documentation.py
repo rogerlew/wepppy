@@ -136,10 +136,14 @@ def generate_interchange_documentation(interchange_dir: Path | str, to_readme_md
     else:
         version_text = str(manifest_version)
     sections.append(f"_Interchange Version: {version_text}_\n")
-    sections.append("## Companion Documentation\n")
-    for doc_name, description in COMPANION_DOCS:
-        sections.append(f"- `{doc_name}`: {description}")
-    sections.append("")
+    existing_companion_docs = [
+        (doc_name, description) for doc_name, description in COMPANION_DOCS if (base / doc_name).exists()
+    ]
+    if existing_companion_docs:
+        sections.append("## Companion Documentation\n")
+        for doc_name, description in existing_companion_docs:
+            sections.append(f"- `{doc_name}`: {description}")
+        sections.append("")
 
     sections.append("## Hillslope Products\n")
     for filename, description in HILLSLOPE_DOC_ORDER:

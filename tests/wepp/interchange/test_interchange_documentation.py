@@ -23,13 +23,23 @@ def test_generate_interchange_documentation_includes_totalwatsed3_mofe_latqcc_no
     pq.write_table(table, interchange_dir / "totalwatsed3.parquet")
 
     markdown = generate_interchange_documentation(interchange_dir, to_readme_md=True)
-    assert "## Companion Documentation" in markdown
-    assert "`README.totalwatsed3.md`" in markdown
+    assert "## Companion Documentation" not in markdown
+    assert "`README.totalwatsed3.md`" not in markdown
     assert "### `totalwatsed3.parquet`" in markdown
     assert "outlet-facing (last) OFE" in markdown
 
     readme_text = (interchange_dir / "README.md").read_text(encoding="utf-8")
-    assert "## Companion Documentation" in readme_text
-    assert "`README.totalwatsed3.md`" in readme_text
+    assert "## Companion Documentation" not in readme_text
+    assert "`README.totalwatsed3.md`" not in readme_text
     assert "### `totalwatsed3.parquet`" in readme_text
     assert "outlet-facing (last) OFE" in readme_text
+
+
+def test_generate_interchange_documentation_lists_existing_companion_docs(tmp_path: Path) -> None:
+    interchange_dir = tmp_path / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    (interchange_dir / "README.totalwatsed3.md").write_text("Companion", encoding="utf-8")
+
+    markdown = generate_interchange_documentation(interchange_dir, to_readme_md=True)
+    assert "## Companion Documentation" in markdown
+    assert "`README.totalwatsed3.md`" in markdown
