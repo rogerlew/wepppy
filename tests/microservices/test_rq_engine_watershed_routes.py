@@ -1,5 +1,6 @@
 import contextlib
 import pytest
+import numpy as np
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -89,6 +90,263 @@ def test_fetch_dem_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-42"
+
+
+def test_fetch_dem_upload_mode_topaz_rejects_nodata_dem(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used when Topaz upload DEM has NoData values")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = "default"
+        delineation_backend_is_topaz = True
+
+    class DummyRon:
+        map = object()
+        has_dem = True
+        dem_fn = "/tmp/run/dem/dem.vrt"
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(watershed_routes, "_dem_contains_nodata_values", lambda dem_path: True)
+
+    payload = {
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 3,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/fetch-dem-and-build-channels", json=payload)
+
+    assert response.status_code == 400
+    body = response.json()
+    assert body["error"]["code"] == "TOPAZ_UPLOAD_DEM_NODATA"
+    assert body["error"]["message"] == (
+        "TOPAZ requires maps without NoData values. Please start a new project with the "
+        "WEPPcloud-WBT delineation backend"
+    )
+    assert queue_called["called"] is False
+
+
+def test_fetch_dem_upload_mode_topaz_enqueues_when_dem_has_no_nodata(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-topaz-ok")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        run_group = "default"
+        delineation_backend_is_topaz = True
+
+    class DummyRon:
+        map = object()
+        has_dem = True
+        dem_fn = "/tmp/run/dem/dem.vrt"
+
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(watershed_routes, "_dem_contains_nodata_values", lambda dem_path: False)
+
+    payload = {
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 3,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/fetch-dem-and-build-channels", json=payload)
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-topaz-ok"
+
+
+def test_fetch_dem_upload_mode_topaz_rejects_nodata_dem_for_batch_context(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = "batch"
+        delineation_backend_is_topaz = True
+
+        @contextlib.contextmanager
+        def locked(self):
+            yield self
+
+    class DummyRon:
+        map = object()
+        has_dem = True
+        dem_fn = "/tmp/run/dem/dem.vrt"
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(watershed_routes, "_dem_contains_nodata_values", lambda dem_path: True)
+
+    payload = {
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 3,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/fetch-dem-and-build-channels", json=payload)
+
+    assert response.status_code == 400
+    body = response.json()
+    assert body["error"]["code"] == "TOPAZ_UPLOAD_DEM_NODATA"
+    assert body["error"]["message"] == watershed_routes.TOPAZ_UPLOAD_DEM_NODATA_MESSAGE
+    assert queue_called["called"] is False
+
+
+def test_fetch_dem_upload_mode_topaz_returns_400_when_dem_scan_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        run_group = "default"
+        delineation_backend_is_topaz = True
+
+    class DummyRon:
+        map = object()
+        has_dem = True
+        dem_fn = "/tmp/run/dem/dem.vrt"
+
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+
+    def _raise_scan_error(_dem_path):
+        raise watershed_routes.UploadError("Unable to read validated DEM.")
+
+    monkeypatch.setattr(watershed_routes, "_dem_contains_nodata_values", _raise_scan_error)
+
+    payload = {
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 3,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/fetch-dem-and-build-channels", json=payload)
+
+    assert response.status_code == 400
+    body = response.json()
+    assert body["error"]["message"] == "Unable to read validated DEM."
+
+
+def test_dem_contains_nodata_values_true_for_explicit_nodata(monkeypatch: pytest.MonkeyPatch) -> None:
+    class DummyMaskBand:
+        def ReadAsArray(self):
+            return np.array([[255, 255], [255, 255]], dtype=np.uint8)
+
+    class DummyBand:
+        def GetNoDataValue(self):
+            return -9999.0
+
+        def ReadAsArray(self):
+            return np.array([[1.0, 2.0], [-9999.0, 4.0]], dtype=np.float32)
+
+        def GetMaskBand(self):
+            return DummyMaskBand()
+
+    class DummyDataset:
+        def GetRasterBand(self, index):
+            assert index == 1
+            return DummyBand()
+
+    monkeypatch.setattr(watershed_routes.gdal, "Open", lambda _path: DummyDataset())
+    assert watershed_routes._dem_contains_nodata_values("/tmp/dem.vrt") is True
+
+
+def test_dem_contains_nodata_values_true_for_masked_pixels(monkeypatch: pytest.MonkeyPatch) -> None:
+    class DummyMaskBand:
+        def ReadAsArray(self):
+            return np.array([[255, 255], [0, 255]], dtype=np.uint8)
+
+    class DummyBand:
+        def GetNoDataValue(self):
+            return None
+
+        def ReadAsArray(self):
+            return np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32)
+
+        def GetMaskBand(self):
+            return DummyMaskBand()
+
+    class DummyDataset:
+        def GetRasterBand(self, index):
+            assert index == 1
+            return DummyBand()
+
+    monkeypatch.setattr(watershed_routes.gdal, "Open", lambda _path: DummyDataset())
+    assert watershed_routes._dem_contains_nodata_values("/tmp/dem.vrt") is True
+
+
+def test_dem_contains_nodata_values_false_for_fully_valid_dem(monkeypatch: pytest.MonkeyPatch) -> None:
+    class DummyMaskBand:
+        def ReadAsArray(self):
+            return np.array([[255, 255], [255, 255]], dtype=np.uint8)
+
+    class DummyBand:
+        def GetNoDataValue(self):
+            return None
+
+        def ReadAsArray(self):
+            return np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32)
+
+        def GetMaskBand(self):
+            return DummyMaskBand()
+
+    class DummyDataset:
+        def GetRasterBand(self, index):
+            assert index == 1
+            return DummyBand()
+
+    monkeypatch.setattr(watershed_routes.gdal, "Open", lambda _path: DummyDataset())
+    assert watershed_routes._dem_contains_nodata_values("/tmp/dem.vrt") is False
 
 
 def test_set_outlet_requires_coordinates(monkeypatch: pytest.MonkeyPatch) -> None:

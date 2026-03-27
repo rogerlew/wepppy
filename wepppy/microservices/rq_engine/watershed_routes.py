@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import redis
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -51,6 +52,10 @@ FETCH_DEM_AND_BUILD_CHANNELS_TIMEOUT = int(os.getenv("RQ_ENGINE_FETCH_DEM_BUILD_
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 UPLOAD_DEM_MAX_DIMENSION = 2560
 UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif",)
+TOPAZ_UPLOAD_DEM_NODATA_MESSAGE = (
+    "TOPAZ requires maps without NoData values. Please start a new project with the "
+    "WEPPcloud-WBT delineation backend"
+)
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -289,6 +294,40 @@ def _validate_float_dem(dem_path: Path) -> None:
             raise UploadError(
                 f"DEM must be floating point (Float32/Float64). Detected {dtype or 'unknown'}."
             )
+    finally:
+        ds = None
+
+
+def _dem_contains_nodata_values(dem_path: Path) -> bool:
+    ds = gdal.Open(str(dem_path))
+    if ds is None:
+        raise UploadError("Unable to read validated DEM.")
+
+    try:
+        band = ds.GetRasterBand(1)
+        if band is None:
+            raise UploadError("Validated DEM is missing a raster band.")
+
+        data = band.ReadAsArray()
+        if data is None:
+            raise UploadError("Unable to read validated DEM pixels.")
+
+        nodata = band.GetNoDataValue()
+        if nodata is not None:
+            nodata_float = float(nodata)
+            if math.isnan(nodata_float):
+                if np.isnan(data).any():
+                    return True
+            elif np.isclose(data, nodata_float, rtol=0.0, atol=1.0e-8).any():
+                return True
+
+        mask_band = band.GetMaskBand()
+        if mask_band is None:
+            return False
+        mask_data = mask_band.ReadAsArray()
+        if mask_data is None:
+            return False
+        return bool((mask_data == 0).any())
     finally:
         ds = None
 
@@ -599,6 +638,21 @@ async def fetch_dem_and_build_channels(
         wd = get_wd(runid)
         _preflight_watershed_mutation_root(wd)
         watershed = Watershed.getInstance(wd)
+        if int(set_extent_mode) == 3:
+            ron = Ron.getInstance(wd)
+            if ron.map is None or not ron.has_dem:
+                return error_response(
+                    "Upload DEM mode requires a validated DEM upload.",
+                    status_code=400,
+                )
+            if bool(getattr(watershed, "delineation_backend_is_topaz", False)):
+                if _dem_contains_nodata_values(Path(ron.dem_fn)):
+                    return error_response(
+                        TOPAZ_UPLOAD_DEM_NODATA_MESSAGE,
+                        status_code=400,
+                        code="TOPAZ_UPLOAD_DEM_NODATA",
+                    )
+
         if watershed.run_group == "batch" or _is_base_project_context(runid, config):
             with watershed.locked():
                 watershed._mcl = mcl
@@ -621,14 +675,6 @@ async def fetch_dem_and_build_channels(
         if int(set_extent_mode) != 3:
             prep.remove_timestamp(TaskEnum.fetch_dem)
         prep.remove_timestamp(TaskEnum.build_channels)
-
-        if int(set_extent_mode) == 3:
-            ron = Ron.getInstance(wd)
-            if ron.map is None or not ron.has_dem:
-                return error_response(
-                    "Upload DEM mode requires a validated DEM upload.",
-                    status_code=400,
-                )
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
@@ -658,6 +704,8 @@ async def fetch_dem_and_build_channels(
             status_code=400,
             details=exc.__doc__,
         )
+    except UploadError as exc:
+        return error_response(str(exc), status_code=400)
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
