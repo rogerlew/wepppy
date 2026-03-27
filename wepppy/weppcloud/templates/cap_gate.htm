@@ -34,6 +34,7 @@
     {% endif %}
     <p class="cap-gate__status" id="cap-status">Completing verification...</p>
     <p class="cap-gate__help" id="cap-help">If verification does not start, click Verify now or reload the page.</p>
+    <p class="cap-gate__help"><a href="{{ url_for('security.login', next=cap_next) }}">Login</a> to bypass verification.</p>
     <div class="wc-button-row">
       <button type="button" class="pure-button pure-button-primary" id="cap-retry">
         Verify now
