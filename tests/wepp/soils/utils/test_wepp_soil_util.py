@@ -364,3 +364,31 @@ def test_template_tokens_are_materialized_with_legacy_compute_flags(
     assert isinstance(ofe["kr"], (int, float))
     assert isinstance(ofe["shcrit"], (int, float))
     assert isinstance(horizon["ksat"], (int, float))
+
+
+def test_compute_conductivity_raises_when_estimate_unavailable(
+    workspace_tmp_dir,
+    wepp_soil_util_module,
+):
+    src = workspace_tmp_dir / "preserve_ksat_when_cec_zero.sol"
+    src.write_text(
+        "\n".join(
+            [
+                "7778",
+                "Any comments:",
+                "1 0",
+                "'Template Soil' 'LOAM' 2 0.2300 0.75 400000 0.00008 2",
+                "\t200.000000\t1.100000\t60.000000\t1.000000\t0.300\t0.120\t40.000\t20.000\t2.000\t0.000\t5.000",
+                "\t400.000000\t1.200000\tke\t1.000000\t0.320\t0.140\t45.000\t18.000\t1.500\t0.000\t2.000",
+                "1 10000.0 0.01",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(Exception, match="Unable to compute ksat"):
+        wepp_soil_util_module.WeppSoilUtil(
+            str(src),
+            compute_conductivity=True,
+        )

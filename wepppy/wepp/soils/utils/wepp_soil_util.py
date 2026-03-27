@@ -67,8 +67,8 @@ class WeppSoilUtil(object):
         if fn.endswith('.sol'):
             try:
                 self._parse_sol(fn)
-            except Exception:
-                raise Exception(f"Error opening {fn}")
+            except Exception as exc:
+                raise Exception(f"Error opening {fn}: {exc}") from exc
         elif fn.endswith('.yaml'):
             raise ValueError("YAML soil serialization is no longer supported. Use .sol or .bson.")
         elif fn.endswith('.bson'):
@@ -187,12 +187,16 @@ class WeppSoilUtil(object):
 
                 if self.compute_conductivity:
                     from wepppy.wepp.soils.horizon_mixin import compute_conductivity
-                    ksat = compute_conductivity(clay=float(clay), sand=float(sand), cec=float(cec))
+                    computed_ksat = compute_conductivity(clay=float(clay), sand=float(sand), cec=float(cec))
 
-                    if ksat is not None:
-                        ksat = round(ksat, 4)
+                    if computed_ksat is None:
+                        raise ValueError(
+                            "Unable to compute ksat from clay/sand/cec during soil parsing "
+                            f"(file={fn}, ofe={ofe_counter}, horizon={j}, clay={clay}, sand={sand}, cec={cec})"
+                        )
 
-                        header.append(f'ofe={ofe_counter},horizon={j} calculated ksat from clay, sand, and cec')
+                    ksat = round(computed_ksat, 4)
+                    header.append(f'ofe={ofe_counter},horizon={j} calculated ksat from clay, sand, and cec')
              
                 horizons.append(
                     dict(solthk=try_parse(solthk),

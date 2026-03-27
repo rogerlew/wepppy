@@ -5,7 +5,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from wepppy.all_your_base import isfloat
 from wepppy.nodb.core.soils import Soils
+from wepppy.wepp.soils.utils import WeppSoilUtil
 
 rasterio = pytest.importorskip("rasterio", reason="rasterio required for Tenerife soil catalog tests")
 
@@ -74,3 +76,45 @@ def test_soils_map_property_expands_locales_dir_for_persisted_state() -> None:
     soils._ssurgo_db = "None"
 
     assert soils.soils_map == str(_SOILS_DIR / "tf_soil_25.tif")
+
+
+def _has_symbolic_wepp_parameters(soil: WeppSoilUtil) -> bool:
+    for ofe in soil.obj.get("ofes", []):
+        if not isfloat(ofe.get("ki")) or not isfloat(ofe.get("kr")) or not isfloat(ofe.get("shcrit")):
+            return True
+        for horizon in ofe.get("horizons", []):
+            if not isfloat(horizon.get("ksat")):
+                return True
+    return False
+
+
+def test_tenerife_soil_catalog_symbolic_materialization_audit() -> None:
+    soils_db_dir = _SOILS_DIR / "db"
+    symbolic_profiles = 0
+    failures: list[tuple[str, str]] = []
+
+    for soil_path in sorted(soils_db_dir.glob("*.sol")):
+        soil = WeppSoilUtil(str(soil_path))
+        if not _has_symbolic_wepp_parameters(soil):
+            continue
+
+        symbolic_profiles += 1
+        try:
+            materialized = WeppSoilUtil(
+                str(soil_path),
+                compute_erodibilities=True,
+                compute_conductivity=True,
+            ).to7778()
+        except Exception as exc:
+            failures.append((soil_path.name, str(exc)))
+            continue
+
+        for ofe_idx, ofe in enumerate(materialized.obj.get("ofes", [])):
+            if not isfloat(ofe.get("ki")) or not isfloat(ofe.get("kr")) or not isfloat(ofe.get("shcrit")):
+                failures.append((soil_path.name, f"ofe={ofe_idx} has non-numeric erodibility fields"))
+            for hz_idx, horizon in enumerate(ofe.get("horizons", [])):
+                if not isfloat(horizon.get("ksat")):
+                    failures.append((soil_path.name, f"ofe={ofe_idx},horizon={hz_idx} has non-numeric ksat"))
+
+    assert symbolic_profiles > 0
+    assert failures == []

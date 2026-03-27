@@ -119,5 +119,6 @@ Implementation path:
 3. Confirm soils runtime assets exist:
    - active `tf_soil_*.tif`
    - required `db/*.sol` (including `20.sol`, `21.sol`)
-4. Run Tenerife tests and a run-level smoke test (`build-soils` then `run-wepp`).
-
+4. Run Tenerife soil database validation:
+   - `wctl run-pytest tests/soils/test_tenerife_soil_catalog.py`
+5. Run a run-level smoke test (`build-soils` then `run-wepp`).
