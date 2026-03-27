@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-26  
-**Active Packages**: 4  
+**Last Updated**: 2026-03-27  
+**Active Packages**: 5  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 4 packages ✅ **Within target**
+**Current WIP**: 5 packages ⚠️ **Above target**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -329,6 +329,26 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 1. **Immediate** (Nov 2-8): Resolve RFC decisions (4 decisions), finalize integration (onboarding docs, release notes)
 2. **Phase 4 Gate** (Nov 18): Review telemetry data, resolve Phase 4 open questions (index storage, watch mode, UI integration, search patterns), make go/no-go decision
 3. **If Phase 4 Greenlit**: Create Phase 4 work package structure, draft agent prompts, assign ownership, schedule M1 target (~Dec 6)
+
+---
+
+### Roads Point-Source Flowpath Trace Core (Peridot + PyO3)
+**Started**: 2026-03-27  
+**Status**: Planning Complete - Implementation Ready (ExecPlan active)  
+**Size**: Large (3-6 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260327_roads_peridot_trace_core/](docs/work-packages/20260327_roads_peridot_trace_core/)  
+**Description**: Implement Roads step-1 substrate for one-point downslope tracing in shared Rust `peridot` core, surface it through `wepppyo3` (`pyo3`), and lock a deterministic trace contract for later non-channel point-source integration.
+
+**Current Status**:
+- Package scaffold, tracker, and active ExecPlan are authored.
+- Active plan defines one-core/two-interface architecture (`peridot` core + CLI + `wepppyo3` binding).
+- Milestone-level acceptance includes explicit termination semantics, profile arrays, and mandatory review artifacts.
+
+**Next Steps**:
+1. Implement `peridot` trace core and CLI with deterministic JSON contract.
+2. Implement `wepppyo3` binding over shared core and release-tree module packaging.
+3. Complete code review + QA review artifacts and resolve all medium/high findings.
 
 ---
 
