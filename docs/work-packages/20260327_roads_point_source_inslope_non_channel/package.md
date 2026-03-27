@@ -1,6 +1,6 @@
 # Roads Point-Source Inslope Non-Channel Routing
 
-**Status**: Open (2026-03-27)
+**Status**: Implemented (2026-03-27)
 
 ## Overview
 Roads phase 1 supports point-source injections only when segment low points are channel-associated (on or adjacent to channel pixels). This package implements non-channel routing for `inslope_bd` and `inslope_rd` by tracing low-point flowpaths to channel and modeling contributors as `road OFE + flowpath buffer OFE` before pass-file merge.
@@ -36,15 +36,15 @@ This package implements inslope non-channel point-source behavior only.
 - **Informed**: WEPPcloud route/report maintainers and operations.
 
 ## Success Criteria
-- [ ] Inslope non-channel low points are identified as routable when low-point `subwta` ends in `1|2|3`.
-- [ ] Segment run path traces routable low points to channel through step-1 Rust API.
-- [ ] Routed inslope contributors use MOFE ordering `road -> buffer` and produce WEPP pass files.
-- [ ] Routed contributor passes merge into receiving hillslope pass outputs without double-run failures.
-- [ ] Existing channel-associated inslope behavior remains unchanged.
-- [ ] `last_prepare_summary` and `last_run_summary` include explicit routed/non-routed diagnostics.
-- [ ] Targeted and full regression suites pass.
-- [ ] Code review artifact has no unresolved medium/high findings.
-- [ ] QA review artifact has no unresolved medium/high findings.
+- [x] Inslope non-channel low points are identified as routable when low-point `subwta` ends in `1|2|3`.
+- [x] Segment run path traces routable low points to channel through step-1 Rust API.
+- [x] Routed inslope contributors use MOFE ordering `road -> buffer` and produce WEPP pass files.
+- [x] Routed contributor passes merge into receiving hillslope pass outputs without double-run failures.
+- [x] Existing channel-associated inslope behavior remains unchanged.
+- [x] `last_prepare_summary` and `last_run_summary` include explicit routed/non-routed diagnostics.
+- [ ] Targeted and full regression suites pass. (targeted pass; full-suite has unrelated baseline failure outside Roads scope)
+- [x] Code review artifact has no unresolved medium/high findings.
+- [x] QA review artifact has no unresolved medium/high findings.
 
 ## Dependencies
 

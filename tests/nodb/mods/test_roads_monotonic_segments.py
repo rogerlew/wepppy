@@ -280,13 +280,19 @@ def test_inslope_segments_get_channel_topaz_id_at_low_point_or_neighbor(tmp_path
     values = [feature["properties"]["topaz_id_chn_lowpoint"] for feature in output["features"]]
     hill_values = [feature["properties"]["topaz_id_hill_lowpoint"] for feature in output["features"]]
     decisions = [feature["properties"]["_roads_lowpoint_decision"] for feature in output["features"]]
+    routable_flags = [feature["properties"]["_roads_non_channel_routable"] for feature in output["features"]]
+    routing_eligibility = [feature["properties"]["_roads_routing_eligibility"] for feature in output["features"]]
 
     assert summary.output_feature_count == 2
     assert values.count(24) == 1
     assert values.count(None) == 1
     assert hill_values.count(None) == 2
-    assert decisions.count("no_channel_pixel_near_lowpoint") == 1
+    assert decisions.count("non_channel_hillslope_routable") == 1
     assert decisions.count("no_receiving_hillslope_candidate_near_lowpoint") == 1
+    assert routable_flags.count(True) == 1
+    assert routable_flags.count(False) == 1
+    assert routing_eligibility.count("non_channel_routable") == 1
+    assert routing_eligibility.count("non_routable") == 1
 
 
 def test_inslope_rd_segments_get_channel_and_hillslope_lowpoint_ids(tmp_path: Path) -> None:
@@ -328,6 +334,42 @@ def test_inslope_rd_segments_get_channel_and_hillslope_lowpoint_ids(tmp_path: Pa
         row["topaz_id_hill_lowpoint"] is None or str(row["topaz_id_hill_lowpoint"]).endswith(("1", "2", "3"))
         for row in rows
     )
+
+
+def test_non_channel_lowpoint_is_not_routable_when_lowpoint_cell_is_not_hillslope(tmp_path: Path) -> None:
+    dem_path = _write_dem(tmp_path, [4.0, 3.0, 2.0, 1.0, 0.0])
+    channel_path, topaz_path = _write_channel_topaz_rasters(
+        tmp_path,
+        channel_values=[0.0, 0.0, 0.0, 0.0, 0.0],
+        topaz_values=[14.0, 14.0, 14.0, 14.0, 14.0],
+    )
+    roads_path = _write_line_geojson(
+        tmp_path,
+        line_coords=[[0.5, 0.5], [4.5, 0.5]],
+        properties={"road_id": "E2B", "DESIGN": "Inslope_bd"},
+    )
+    output_path = tmp_path / "roads.monotonic.geojson"
+
+    convert_geojson_file_to_monotonic_segments(
+        input_geojson_path=roads_path,
+        dem_path=dem_path,
+        output_geojson_path=output_path,
+        input_crs="EPSG:32610",
+        sample_step_m=1.0,
+        tolerance_m=0.0,
+        channel_raster_path=channel_path,
+        topaz_id_raster_path=topaz_path,
+    )
+
+    output = json.loads(output_path.read_text(encoding="utf-8"))
+    assert len(output["features"]) == 1
+    props = output["features"][0]["properties"]
+    assert props["topaz_id_chn_lowpoint"] is None
+    assert props["topaz_id_hill_lowpoint"] is None
+    assert props["_roads_lowpoint_decision"] == "no_channel_pixel_near_lowpoint"
+    assert props["_roads_non_channel_routable"] is False
+    assert props["_roads_routing_eligibility"] == "non_routable"
+    assert props["_roads_lowpoint_is_hillslope_pixel"] is False
 
 
 def test_custom_design_property_keys_control_inslope_eligibility(tmp_path: Path) -> None:

@@ -11,14 +11,14 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
 ## Progress
 
 - [x] (2026-03-27 00:00Z) Authored package/tracker/ExecPlan scaffold for step-2 scope.
-- [ ] Milestone 1: Lock trace-API assumptions from step-1 package and implement prepare-stage routable low-point classification.
-- [ ] Milestone 2: Integrate run-stage per-point tracing for eligible inslope non-channel segments.
-- [ ] Milestone 3: Build inslope routed MOFE contributors (`road -> buffer`) and generate pass outputs.
-- [ ] Milestone 4: Merge routed contributors into receiving hillslopes and update run/prepare summaries.
-- [ ] Milestone 5: Add regression tests and fixture-backed validation.
-- [ ] Milestone 6: Complete code-review artifact and resolve medium/high findings.
-- [ ] Milestone 7: Complete QA-review artifact and resolve medium/high findings.
-- [ ] Milestone 8: Run final validation gates and update package handoff docs.
+- [x] (2026-03-27) Milestone 1: Locked step-1 tracer contract usage and implemented prepare-stage non-channel routable classification metadata.
+- [x] (2026-03-27) Milestone 2: Integrated run-stage per-segment trace calls for eligible non-channel inslope segments.
+- [x] (2026-03-27) Milestone 3: Added routed contributor assembly for `road OFE + buffer OFE` with trace-derived buffer geometry.
+- [x] (2026-03-27) Milestone 4: Routed contributor pass files merge through existing combine flow; run summaries now include routed/trace diagnostics.
+- [x] (2026-03-27) Milestone 5: Expanded regression tests for prepare classification, routed execution, and trace-failure skip behavior.
+- [x] (2026-03-27) Milestone 6: Completed code-review artifact with no unresolved medium/high findings.
+- [x] (2026-03-27) Milestone 7: Completed QA-review artifact with no unresolved medium/high findings.
+- [x] (2026-03-27) Milestone 8: Ran validation gates and synchronized package docs/tracker/ExecPlan.
 
 ## Surprises & Discoveries
 
@@ -30,6 +30,9 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
 
 - Observation: Existing segment execution assumes single-OFE road profiles in phase 1.
   Evidence: Roads run assembly writes one-OFE slope/soil/man for segment runs.
+
+- Observation: Full `tests --maxfail=1` currently fails on an unrelated baseline issue in `tests/nodb/test_soils_gridded_root_creation.py` (`wepppy.wepp.soils` monkeypatch path).
+  Evidence: Validation run reached 49% and failed outside Roads step-2 touched files.
 
 ## Decision Log
 
@@ -45,9 +48,26 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
   Rationale: Explicit user requirement to avoid out-of-contract routing.
   Date/Author: 2026-03-27 / User + Codex.
 
+- Decision: Receiving hillslope for traced non-channel contributors is taken from the traced pre-channel `subwta` cell (must end with `1|2|3`), with explicit skip diagnostics when unavailable.
+  Rationale: Uses traced flowpath outcome directly while avoiding hidden fallback mapping.
+  Date/Author: 2026-03-27 / Codex.
+
 ## Outcomes & Retrospective
 
-Not complete yet. Fill as milestones close and at final handoff.
+Completed implementation delivers:
+
+- Prepare-stage classification now distinguishes channel-associated vs non-channel-routable inslope segments and persists routing metadata.
+- Run-stage tracing now calls the step-1 Rust tracer contract for non-channel-routable segments and records deterministic trace diagnostics.
+- Routed non-channel contributors now execute with `road OFE + buffer OFE` assembly and merge through existing pass-combine flow.
+- Regression coverage was expanded for new prepare/run behavior and routed trace failure handling.
+
+Validation snapshot:
+
+- Targeted Roads pytest suites: pass.
+- Roads route/API pytest suite: pass.
+- Roads frontend Jest (`wctl run-npm test -- roads`): pass.
+- Frontend lint (`wctl run-npm lint`): pass.
+- Full `wctl run-pytest tests --maxfail=1`: fail on unrelated baseline test outside Roads scope.
 
 ## Context and Orientation
 
@@ -188,3 +208,4 @@ Dependency requirement:
 ---
 
 Revision note (2026-03-27 00:00Z): Initial step-2 ExecPlan authored with scoped inslope non-channel routing milestones and mandatory code/QA review gates.
+Revision note (2026-03-27): Milestones 1-8 completed; living sections updated with implementation, validation outcomes, and review closure.

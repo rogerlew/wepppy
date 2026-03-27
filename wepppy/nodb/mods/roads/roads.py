@@ -1,4 +1,4 @@
-"""Roads NoDb controller for the phase-1 inslope workflow."""
+"""Roads NoDb controller for inslope point-source routing workflows."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
+import numpy as np
 import rasterio
 from pyproj import CRS, Geod, Transformer
 from wepp_runner.wepp_runner import (
@@ -30,6 +31,13 @@ __all__ = ["Roads"]
 
 def _is_eligible_design(value: Any) -> bool:
     return isinstance(value, str) and value.lower() in {"inslope_bd", "inslope_rd"}
+
+
+def _is_hillslope_topaz_id(value: Any) -> bool:
+    try:
+        return abs(int(value)) % 10 in {1, 2, 3}
+    except (TypeError, ValueError):
+        return False
 
 
 SURFACE_ALIASES: Dict[str, str] = {
@@ -174,6 +182,7 @@ class Roads(NoDbBase):
             "traffic_default": "low",
             "rfg_pct_default": 15.0,
             "road_width_m_default": 4.0,
+            "trace_max_steps": 20000,
             "max_upload_mb": 50,
             "attribute_field_map": {
                 "design": None,
@@ -665,6 +674,55 @@ class Roads(NoDbBase):
             "topaz_id_raster_path": topaz_id_raster_path,
         }
 
+    def _resolve_trace_raster_paths(self) -> Dict[str, str]:
+        base_paths = self._resolve_prepare_raster_paths()
+        watershed = self.watershed_instance
+        flovec_path = self._normalize_existing_path(getattr(watershed, "flovec", None))
+
+        if flovec_path is None:
+            wbt_wd = Path(getattr(watershed, "wbt_wd", Path(self.wd) / "dem" / "wbt"))
+            flovec_candidates = (wbt_wd / "flovec.tif", wbt_wd / "flovec.vrt")
+            for candidate in flovec_candidates:
+                normalized = self._normalize_existing_path(str(candidate))
+                if normalized is not None:
+                    flovec_path = normalized
+                    break
+
+        if flovec_path is None:
+            raise FileNotFoundError(
+                "Roads run tracing requires an existing flow-vector raster (`watershed.flovec` or dem/wbt/flovec.tif)."
+            )
+
+        return {
+            **base_paths,
+            "flovec_path": flovec_path,
+        }
+
+    @staticmethod
+    def _as_int_or_none(value: Any) -> Optional[int]:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _as_float_or_none(value: Any) -> Optional[float]:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _is_truthy_property(value: Any) -> bool:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return bool(value)
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            return normalized in {"1", "true", "yes", "y"}
+        return False
+
     def _clear_stale_run_state_locked(self) -> None:
         self._last_prepare_summary = None
         self._last_run_summary = None
@@ -754,6 +812,15 @@ class Roads(NoDbBase):
             if key == "tolerance_m" and numeric < 0:
                 raise ValueError("tolerance_m must be >= 0.")
             params[key] = numeric
+
+        if "trace_max_steps" in payload:
+            try:
+                trace_max_steps = int(payload["trace_max_steps"])
+            except (TypeError, ValueError):
+                raise ValueError("trace_max_steps must be an integer.")
+            if trace_max_steps <= 0:
+                raise ValueError("trace_max_steps must be > 0.")
+            params["trace_max_steps"] = trace_max_steps
 
         if "max_upload_mb" in payload:
             try:
@@ -1033,6 +1100,7 @@ class Roads(NoDbBase):
             eligible_segments = 0
             mapped_candidates = 0
             decision_counts: Counter[str] = Counter()
+            routing_eligibility_counts: Counter[str] = Counter()
             warning_counts: Counter[str] = Counter()
             warning_examples: List[Dict[str, Any]] = []
             for feature in features:
@@ -1051,12 +1119,17 @@ class Roads(NoDbBase):
                 eligible_segments += 1
                 decision_key = str(properties.get("_roads_lowpoint_decision") or "unknown")
                 decision_counts[decision_key] += 1
+                routing_key = str(properties.get("_roads_routing_eligibility") or "unknown")
+                routing_eligibility_counts[routing_key] += 1
                 if (
                     properties.get("topaz_id_chn_lowpoint") is not None
                     and properties.get("topaz_id_hill_lowpoint") is not None
                 ):
                     mapped_candidates += 1
 
+            channel_associated_count = int(routing_eligibility_counts.get("channel_associated", 0))
+            non_channel_routable_count = int(routing_eligibility_counts.get("non_channel_routable", 0))
+            non_routable_count = int(routing_eligibility_counts.get("non_routable", 0))
             prepare_summary = {
                 "input_feature_count": int(summary.input_feature_count),
                 "output_feature_count": int(summary.output_feature_count),
@@ -1066,7 +1139,11 @@ class Roads(NoDbBase):
                 "tolerance_m": float(summary.tolerance_m),
                 "eligible_segment_count": eligible_segments,
                 "eligible_with_lowpoint_ids": mapped_candidates,
+                "eligible_channel_associated_count": channel_associated_count,
+                "eligible_non_channel_routable_count": non_channel_routable_count,
+                "eligible_non_routable_count": non_routable_count,
                 "eligible_lowpoint_decision_counts": dict(sorted(decision_counts.items())),
+                "eligible_routing_eligibility_counts": dict(sorted(routing_eligibility_counts.items())),
                 "mapping_warning_count": int(sum(warning_counts.values())),
                 "mapping_warning_counts": dict(sorted(warning_counts.items())),
                 "mapping_warning_examples": warning_examples,
@@ -1096,6 +1173,8 @@ class Roads(NoDbBase):
                 {
                     "eligible_segment_count": eligible_segments,
                     "eligible_with_lowpoint_ids": mapped_candidates,
+                    "eligible_channel_associated_count": channel_associated_count,
+                    "eligible_non_channel_routable_count": non_channel_routable_count,
                     "eligible_lowpoint_decision_counts": dict(sorted(decision_counts.items())),
                     "mapping_warning_count": int(sum(warning_counts.values())),
                     "summary_relpath": prepare_summary["summary_relpath"],
@@ -1510,6 +1589,306 @@ class Roads(NoDbBase):
             "high_point": [float(high_point[0]), float(high_point[1])],
             "low_point": [float(low_point[0]), float(low_point[1])],
         }
+
+    def _derive_buffer_profile_from_trace(self, trace_result: Mapping[str, Any]) -> Dict[str, float]:
+        path_length_m = self._as_float_or_none(trace_result.get("path_length_m"))
+        if path_length_m is None or path_length_m <= 0:
+            raise ValueError("Trace result is missing a positive path_length_m for routed contributor assembly.")
+
+        slope_candidates: List[float] = []
+        mean_slope = self._as_float_or_none(trace_result.get("mean_slope"))
+        if mean_slope is not None and np.isfinite(mean_slope):
+            slope_candidates.append(float(mean_slope))
+
+        drop_m = self._as_float_or_none(trace_result.get("drop_m"))
+        if drop_m is not None and np.isfinite(drop_m) and path_length_m > 0:
+            slope_candidates.append(float(drop_m) / float(path_length_m))
+
+        segment_slope = trace_result.get("segment_slope")
+        if isinstance(segment_slope, list):
+            for raw in segment_slope:
+                value = self._as_float_or_none(raw)
+                if value is None or not np.isfinite(value):
+                    continue
+                slope_candidates.append(float(value))
+
+        positive_candidates = [value for value in slope_candidates if value > 0.0]
+        slope_fraction = max(positive_candidates) if positive_candidates else 0.001
+        slope_pct = self._clamp_percent_slope(slope_fraction * 100.0)
+        return {
+            "buffer_length_m": max(0.3, float(path_length_m)),
+            "buffer_slope_pct": float(slope_pct),
+            "buffer_slope_fraction": float(slope_pct / 100.0),
+        }
+
+    @staticmethod
+    def _write_routed_two_ofe_slope_file(
+        path: Path,
+        *,
+        width_m: float,
+        road_length_m: float,
+        road_slope_pct: float,
+        buffer_length_m: float,
+        buffer_slope_pct: float,
+    ) -> None:
+        road_slope_fraction = float(road_slope_pct) / 100.0
+        buffer_slope_fraction = float(buffer_slope_pct) / 100.0
+        content = [
+            "97.3",
+            "2",
+            f"180.0 {float(width_m):.3f}",
+            f"2 {float(road_length_m):.3f}",
+            f"0.00, {road_slope_fraction:.6f} 1.00, {road_slope_fraction:.6f}",
+            f"3 {float(buffer_length_m):.3f}",
+            f"0.00, {road_slope_fraction:.6f} 0.05, {buffer_slope_fraction:.6f} 1.00, {buffer_slope_fraction:.6f}",
+        ]
+        path.write_text("\n".join(content) + "\n", encoding="utf-8")
+
+    @staticmethod
+    def _replace_soil_marker(
+        horizon_line: str,
+        *,
+        urr_ref: float,
+        ufr_ref: float,
+        ubr_value: float,
+    ) -> str:
+        tokens = horizon_line.split()
+        if not tokens:
+            return horizon_line
+        marker = tokens[-1].lower()
+        if marker == "urr":
+            tokens[-1] = f"{float(urr_ref):.6g}"
+        elif marker == "ufr":
+            tokens[-1] = f"{float(ufr_ref):.6g}"
+        elif marker == "ubr":
+            tokens[-1] = f"{float(ubr_value):.6g}"
+        return " ".join(tokens)
+
+    def _build_routed_two_ofe_soil_file(
+        self,
+        *,
+        template_path: Path,
+        output_path: Path,
+        traffic: str,
+        surface: str,
+        rfg_pct: float,
+    ) -> None:
+        lines = template_path.read_text(encoding="utf-8").splitlines()
+        if len(lines) < 8:
+            raise ValueError(f"Roads soil template is malformed: {template_path}")
+
+        out: List[str] = []
+        i = 0
+        out.append(lines[i])
+        i += 1
+
+        while i < len(lines) and lines[i].startswith("#"):
+            out.append(lines[i])
+            i += 1
+
+        if i >= len(lines):
+            raise ValueError(f"Roads soil template is malformed (missing soil comment): {template_path}")
+        out.append(lines[i])
+        i += 1
+
+        while i < len(lines) and not lines[i].strip():
+            out.append(lines[i])
+            i += 1
+
+        if i >= len(lines):
+            raise ValueError(f"Roads soil template is malformed (missing ntemp line): {template_path}")
+        ntemp_tokens = lines[i].split()
+        ksflag = ntemp_tokens[1] if len(ntemp_tokens) > 1 else "0"
+        out.append(f"2 {ksflag}")
+        i += 1
+
+        while i < len(lines) and not lines[i].strip():
+            i += 1
+
+        ofe_pairs: List[Tuple[str, str]] = []
+        while i < len(lines):
+            if not lines[i].strip():
+                i += 1
+                continue
+            if i + 1 >= len(lines):
+                raise ValueError(f"Roads soil template has incomplete OFE pair: {template_path}")
+            ofe_pairs.append((lines[i], lines[i + 1]))
+            i += 2
+
+        if len(ofe_pairs) < 3:
+            raise ValueError(f"Roads soil template must include at least three OFEs: {template_path}")
+
+        road_header, road_horizon = ofe_pairs[0]
+        buffer_header, buffer_horizon = ofe_pairs[2]
+        road_tokens = shlex.split(road_header)
+        if len(road_tokens) < 8:
+            raise ValueError(f"Roads soil template has malformed road OFE header: {template_path}")
+        slid, texid = road_tokens[0], road_tokens[1]
+        nsl, salb, sat, ki, kr, shcrit = road_tokens[2:8]
+        avke = road_tokens[8] if len(road_tokens) > 8 else None
+
+        ki_value = float(ki)
+        kr_value = float(kr)
+        if traffic != "high":
+            ki_value /= 4.0
+            kr_value /= 4.0
+
+        road_header_line = (
+            f"'{slid}' '{texid}' {nsl} {salb} {sat} {ki_value:.6g} {kr_value:.6g} {shcrit}"
+        )
+        if avke is not None:
+            road_header_line += f" {avke}"
+
+        urr_ref = 95.0 if surface == "paved" else 65.0
+        ufr_ref = (float(rfg_pct) + 65.0) / 2.0
+        road_horizon_line = self._replace_soil_marker(
+            road_horizon,
+            urr_ref=urr_ref,
+            ufr_ref=ufr_ref,
+            ubr_value=float(rfg_pct),
+        )
+        buffer_horizon_line = self._replace_soil_marker(
+            buffer_horizon,
+            urr_ref=urr_ref,
+            ufr_ref=ufr_ref,
+            ubr_value=float(rfg_pct),
+        )
+
+        out.append(road_header_line)
+        out.append(road_horizon_line)
+        out.append(buffer_header)
+        out.append(buffer_horizon_line)
+        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+
+    @staticmethod
+    def _strip_management_scenario_block(
+        lines: List[str], *, start_marker: str, end_marker: str
+    ) -> List[str]:
+        out: List[str] = []
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            if start_marker in line:
+                while i < len(lines) and end_marker not in lines[i]:
+                    i += 1
+                continue
+            out.append(line)
+            i += 1
+        return out
+
+    def _build_routed_two_ofe_management_file(self, *, template_path: Path, output_path: Path) -> None:
+        lines = template_path.read_text(encoding="utf-8").splitlines()
+        lines = self._strip_management_scenario_block(
+            lines,
+            start_marker="Plant scenario 2 of 3",
+            end_marker="Plant scenario 3 of 3",
+        )
+        lines = self._strip_management_scenario_block(
+            lines,
+            start_marker="Initial Conditions scenario 2 of 3",
+            end_marker="Initial Conditions scenario 3 of 3",
+        )
+        lines = self._strip_management_scenario_block(
+            lines,
+            start_marker="Yearly scenario 2 of 3",
+            end_marker="Yearly scenario 3 of 3",
+        )
+
+        out: List[str] = []
+        initial_condition_index_counter = 0
+        skip_next_year_index = False
+        remap_next_year_index = False
+
+        for line in lines:
+            if "Plant scenario 3 of 3" in line:
+                line = line.replace("Plant scenario 3 of 3", "Plant scenario 2 of 2")
+            elif "Initial Conditions scenario 3 of 3" in line:
+                line = line.replace("Initial Conditions scenario 3 of 3", "Initial Conditions scenario 2 of 2")
+            elif "Yearly scenario 3 of 3" in line:
+                line = line.replace("Yearly scenario 3 of 3", "Yearly scenario 2 of 2")
+
+            if (
+                "# number of OFEs" in line
+                or "# looper; number of Plant scenarios" in line
+                or "# looper; number of Initial Conditions scenarios" in line
+                or "# looper; number of Yearly scenarios" in line
+                or "# `nofe'" in line
+            ):
+                line = self._replace_leading_int(line, 2)
+
+            if "# `Initial Conditions indx'" in line:
+                initial_condition_index_counter += 1
+                if initial_condition_index_counter == 2:
+                    continue
+                if initial_condition_index_counter == 3:
+                    line = self._replace_leading_int(line, 2)
+
+            if "# `nycrop'" in line and "OFE :" in line:
+                if "OFE : 2" in line:
+                    skip_next_year_index = True
+                    continue
+                if "OFE : 3" in line:
+                    line = line.replace("OFE : 3", "OFE : 2")
+                    remap_next_year_index = True
+
+            if skip_next_year_index:
+                skip_next_year_index = False
+                continue
+
+            if remap_next_year_index and "# `YEAR indx'" in line:
+                line = self._replace_leading_int(line, 2)
+                remap_next_year_index = False
+
+            out.append(line)
+
+        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+
+    def _materialize_routed_two_ofe_management_template(self, *, traffic: str) -> Path:
+        source_path = self._resolve_legacy_management_template_path(traffic=traffic)
+        output_path = Path(self.roads_runs_dir) / f"{source_path.stem}.routed_two_ofe.man"
+        self._build_routed_two_ofe_management_file(template_path=source_path, output_path=output_path)
+        return output_path
+
+    def _resolve_trace_receiving_hillslope_topaz(
+        self,
+        *,
+        trace_result: Mapping[str, Any],
+        topaz_values: np.ndarray,
+    ) -> Optional[int]:
+        rows = trace_result.get("rows")
+        cols = trace_result.get("cols")
+        if not isinstance(rows, list) or not isinstance(cols, list):
+            return None
+        if len(rows) != len(cols) or len(rows) < 2:
+            return None
+
+        channel_row = self._as_int_or_none(trace_result.get("channel_row"))
+        channel_col = self._as_int_or_none(trace_result.get("channel_col"))
+        channel_index = len(rows) - 1
+        if channel_row is not None and channel_col is not None:
+            for idx in range(len(rows) - 1, -1, -1):
+                row_i = self._as_int_or_none(rows[idx])
+                col_i = self._as_int_or_none(cols[idx])
+                if row_i == channel_row and col_i == channel_col:
+                    channel_index = idx
+                    break
+        if channel_index <= 0:
+            return None
+
+        row_i = self._as_int_or_none(rows[channel_index - 1])
+        col_i = self._as_int_or_none(cols[channel_index - 1])
+        if row_i is None or col_i is None:
+            return None
+        if row_i < 0 or col_i < 0 or row_i >= topaz_values.shape[0] or col_i >= topaz_values.shape[1]:
+            return None
+
+        topaz_value = float(topaz_values[row_i, col_i])
+        if not np.isfinite(topaz_value):
+            return None
+        topaz_id = int(round(topaz_value))
+        if not _is_hillslope_topaz_id(topaz_id):
+            return None
+        return topaz_id
 
     @staticmethod
     def _write_single_ofe_slope_file(path: Path, *, width_m: float, length_m: float, slope_pct: float) -> None:
@@ -2342,6 +2721,13 @@ class Roads(NoDbBase):
                     raise ValueError(f"Roads DEM is missing CRS metadata: {dem_path}")
                 input_to_wgs84 = Transformer.from_crs(input_crs, CRS.from_epsg(4326), always_xy=True)
                 input_to_dem = Transformer.from_crs(input_crs, dem_dataset.crs, always_xy=True)
+                routed_management_cache_by_traffic: Dict[str, Path] = {}
+                routing_mode_counts: Counter[str] = Counter()
+                trace_invocation_count = 0
+                trace_reaches_channel_count = 0
+                trace_termination_reason_counts: Counter[str] = Counter()
+                trace_context: Optional[Dict[str, Any]] = None
+                trace_fn = None
 
                 for feature in features:
                     properties = feature.get("properties", {}) if isinstance(feature, Mapping) else {}
@@ -2365,9 +2751,17 @@ class Roads(NoDbBase):
                         continue
 
                     eligible_segment_count += 1
-                    hill_topaz = properties.get("topaz_id_hill_lowpoint")
-                    chn_topaz = properties.get("topaz_id_chn_lowpoint")
-                    if hill_topaz is None or chn_topaz is None:
+                    routing_eligibility = str(properties.get("_roads_routing_eligibility") or "unknown")
+                    channel_hill_topaz = self._as_int_or_none(properties.get("topaz_id_hill_lowpoint"))
+                    channel_chn_topaz = self._as_int_or_none(properties.get("topaz_id_chn_lowpoint"))
+                    non_channel_routable = self._is_truthy_property(
+                        properties.get("_roads_non_channel_routable")
+                    ) or routing_eligibility == "non_channel_routable"
+
+                    routing_mode = "channel_associated" if (
+                        channel_hill_topaz is not None and channel_chn_topaz is not None
+                    ) else "non_channel_routed"
+                    if routing_mode == "non_channel_routed" and not non_channel_routable:
                         skipped_segments.append({"segment_id": segment_id, "reason": "missing_topaz_lowpoint_ids"})
                         self._append_roads_log(
                             "run",
@@ -2376,29 +2770,244 @@ class Roads(NoDbBase):
                         )
                         continue
 
-                    try:
-                        hill_topaz_int = int(hill_topaz)
-                        chn_topaz_int = int(chn_topaz)
-                    except (TypeError, ValueError):
-                        skipped_segments.append({"segment_id": segment_id, "reason": "invalid_topaz_lowpoint_ids"})
-                        self._append_roads_log(
-                            "run",
-                            "segment_skipped",
-                            {"segment_id": segment_id, "reason": "invalid_topaz_lowpoint_ids"},
-                        )
-                        continue
+                    trace_result: Optional[Dict[str, Any]] = None
+                    trace_summary: Dict[str, Any] = {}
+                    hill_topaz_int: Optional[int] = None
+                    chn_topaz_int: Optional[int] = None
+                    if routing_mode == "channel_associated":
+                        hill_topaz_int = channel_hill_topaz
+                        chn_topaz_int = channel_chn_topaz
+                        if hill_topaz_int is None or chn_topaz_int is None:
+                            skipped_segments.append(
+                                {"segment_id": segment_id, "reason": "invalid_topaz_lowpoint_ids"}
+                            )
+                            self._append_roads_log(
+                                "run",
+                                "segment_skipped",
+                                {"segment_id": segment_id, "reason": "invalid_topaz_lowpoint_ids"},
+                            )
+                            continue
+                    else:
+                        seed_row = self._as_int_or_none(properties.get("_roads_lowpoint_row"))
+                        seed_col = self._as_int_or_none(properties.get("_roads_lowpoint_col"))
+                        if seed_row is None or seed_col is None:
+                            skipped_segments.append({"segment_id": segment_id, "reason": "trace_seed_cell_missing"})
+                            segment_execution_records.append(
+                                {
+                                    "segment_id": segment_id,
+                                    "status": "skipped",
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_seed_cell_missing",
+                                }
+                            )
+                            self._append_roads_log(
+                                "run",
+                                "segment_skipped",
+                                {
+                                    "segment_id": segment_id,
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_seed_cell_missing",
+                                },
+                            )
+                            continue
 
-                    wepp_id = top2wepp.get(hill_topaz_int)
+                        if trace_context is None:
+                            trace_paths = self._resolve_trace_raster_paths()
+                            with rasterio.open(trace_paths["topaz_id_raster_path"]) as topaz_dataset:
+                                topaz_arr = topaz_dataset.read(1, masked=True)
+                                topaz_values = np.asarray(topaz_arr.filled(np.nan), dtype=float)
+                                if np.ma.isMaskedArray(topaz_arr):
+                                    topaz_values[np.ma.getmaskarray(topaz_arr)] = np.nan
+                                nodata = topaz_dataset.nodata
+                                if nodata is not None and np.isfinite(nodata):
+                                    topaz_values[np.isclose(topaz_values, nodata, rtol=0.0, atol=1e-8)] = np.nan
+                            from wepppyo3.roads_flowpath import trace_downslope_flowpath
+
+                            trace_context = {"paths": trace_paths, "topaz_values": topaz_values}
+                            trace_fn = trace_downslope_flowpath
+                            self._append_roads_log(
+                                "run",
+                                "trace_context_initialized",
+                                {
+                                    "trace_relief_path": self._path_for_summary(trace_paths["dem_path"]),
+                                    "trace_flovec_path": self._path_for_summary(trace_paths["flovec_path"]),
+                                    "trace_subwta_path": self._path_for_summary(trace_paths["topaz_id_raster_path"]),
+                                    "trace_channel_path": self._path_for_summary(trace_paths["channel_raster_path"]),
+                                },
+                            )
+
+                        assert trace_context is not None and trace_fn is not None
+                        trace_max_steps = int(params.get("trace_max_steps", 20000))
+                        trace_invocation_count += 1
+                        try:
+                            trace_result = trace_fn(
+                                trace_context["paths"]["topaz_id_raster_path"],
+                                trace_context["paths"]["flovec_path"],
+                                trace_context["paths"]["dem_path"],
+                                seed_row,
+                                seed_col,
+                                channel_path=trace_context["paths"]["channel_raster_path"],
+                                max_steps=trace_max_steps,
+                            )
+                        except Exception as exc:
+                            skipped_segments.append({"segment_id": segment_id, "reason": "trace_execution_failed"})
+                            segment_execution_records.append(
+                                {
+                                    "segment_id": segment_id,
+                                    "status": "failed",
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_execution_failed",
+                                    "error": str(exc),
+                                }
+                            )
+                            failed_segment_records.append(
+                                {
+                                    "segment_id": segment_id,
+                                    "reason": "trace_execution_failed",
+                                    "error": str(exc),
+                                }
+                            )
+                            self._append_roads_log(
+                                "run",
+                                "segment_trace_failed",
+                                {
+                                    "segment_id": segment_id,
+                                    "routing_mode": routing_mode,
+                                    "seed_row": seed_row,
+                                    "seed_col": seed_col,
+                                    "error": str(exc),
+                                },
+                            )
+                            continue
+
+                        termination_reason = str(trace_result.get("termination_reason") or "unknown")
+                        trace_termination_reason_counts[termination_reason] += 1
+                        reaches_channel = bool(trace_result.get("reaches_channel"))
+                        if reaches_channel:
+                            trace_reaches_channel_count += 1
+                        trace_summary = {
+                            "trace_seed_row": seed_row,
+                            "trace_seed_col": seed_col,
+                            "trace_reaches_channel": reaches_channel,
+                            "trace_termination_reason": termination_reason,
+                            "trace_path_length_m": self._as_float_or_none(trace_result.get("path_length_m")),
+                            "trace_mean_slope": self._as_float_or_none(trace_result.get("mean_slope")),
+                            "trace_drop_m": self._as_float_or_none(trace_result.get("drop_m")),
+                            "trace_profile_point_count": (
+                                len(trace_result.get("rows"))
+                                if isinstance(trace_result.get("rows"), list)
+                                else 0
+                            ),
+                            "trace_segment_slope_count": (
+                                len(trace_result.get("segment_slope"))
+                                if isinstance(trace_result.get("segment_slope"), list)
+                                else 0
+                            ),
+                        }
+                        if not reaches_channel:
+                            skipped_segments.append({"segment_id": segment_id, "reason": "trace_did_not_reach_channel"})
+                            segment_execution_records.append(
+                                {
+                                    "segment_id": segment_id,
+                                    "status": "skipped",
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_did_not_reach_channel",
+                                    **trace_summary,
+                                }
+                            )
+                            self._append_roads_log(
+                                "run",
+                                "segment_skipped",
+                                {
+                                    "segment_id": segment_id,
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_did_not_reach_channel",
+                                    "trace_termination_reason": termination_reason,
+                                },
+                            )
+                            continue
+
+                        chn_topaz_int = self._as_int_or_none(trace_result.get("channel_topaz_id"))
+                        if chn_topaz_int is None:
+                            skipped_segments.append({"segment_id": segment_id, "reason": "trace_channel_topaz_missing"})
+                            segment_execution_records.append(
+                                {
+                                    "segment_id": segment_id,
+                                    "status": "skipped",
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_channel_topaz_missing",
+                                    **trace_summary,
+                                }
+                            )
+                            self._append_roads_log(
+                                "run",
+                                "segment_skipped",
+                                {
+                                    "segment_id": segment_id,
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_channel_topaz_missing",
+                                },
+                            )
+                            continue
+
+                        hill_topaz_int = self._resolve_trace_receiving_hillslope_topaz(
+                            trace_result=trace_result,
+                            topaz_values=trace_context["topaz_values"],
+                        )
+                        if hill_topaz_int is None:
+                            skipped_segments.append(
+                                {"segment_id": segment_id, "reason": "trace_receiving_hillslope_missing"}
+                            )
+                            segment_execution_records.append(
+                                {
+                                    "segment_id": segment_id,
+                                    "status": "skipped",
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_receiving_hillslope_missing",
+                                    **trace_summary,
+                                }
+                            )
+                            self._append_roads_log(
+                                "run",
+                                "segment_skipped",
+                                {
+                                    "segment_id": segment_id,
+                                    "routing_mode": routing_mode,
+                                    "reason": "trace_receiving_hillslope_missing",
+                                    "channel_topaz_id": chn_topaz_int,
+                                },
+                            )
+                            continue
+
+                    wepp_id = top2wepp.get(int(hill_topaz_int))
                     if wepp_id is None:
-                        skipped_segments.append({"segment_id": segment_id, "reason": "translator_missing_hillslope_map"})
+                        skipped_segments.append(
+                            {"segment_id": segment_id, "reason": "translator_missing_hillslope_map"}
+                        )
+                        segment_execution_records.append(
+                            {
+                                "segment_id": segment_id,
+                                "status": "skipped",
+                                "routing_mode": routing_mode,
+                                "reason": "translator_missing_hillslope_map",
+                                "topaz_id_hill_lowpoint": int(hill_topaz_int),
+                                **trace_summary,
+                            }
+                        )
                         self._append_roads_log(
                             "run",
                             "segment_skipped",
-                            {"segment_id": segment_id, "reason": "translator_missing_hillslope_map"},
+                            {
+                                "segment_id": segment_id,
+                                "routing_mode": routing_mode,
+                                "reason": "translator_missing_hillslope_map",
+                                "topaz_id_hill_lowpoint": int(hill_topaz_int),
+                            },
                         )
                         continue
 
                     mapped_segment_count += 1
+                    routing_mode_counts[routing_mode] += 1
                     wepp_id_int = int(wepp_id)
 
                     segment_inputs = self._resolve_segment_run_inputs(
@@ -2430,8 +3039,10 @@ class Roads(NoDbBase):
                                 "segment_id": segment_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
                                 "status": "skipped",
+                                "routing_mode": routing_mode,
                                 "reason": "segment_profile_unavailable",
                                 "error": str(exc),
+                                **trace_summary,
                             }
                         )
                         self._append_roads_log(
@@ -2440,6 +3051,7 @@ class Roads(NoDbBase):
                             {
                                 "segment_id": segment_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
+                                "routing_mode": routing_mode,
                                 "reason": "segment_profile_unavailable",
                                 "error": str(exc),
                             },
@@ -2453,30 +3065,58 @@ class Roads(NoDbBase):
                         surface=segment_inputs["surface"],
                         soil_texture=segment_inputs["soil_texture"],
                     )
-
-                    management_path = management_cache_by_traffic.get(segment_inputs["traffic"])
-                    if management_path is None:
-                        management_path = self._materialize_single_ofe_management_template(
-                            traffic=segment_inputs["traffic"]
-                        )
-                        management_cache_by_traffic[segment_inputs["traffic"]] = management_path
-
+                    segment_soil_suffix = "single_ofe"
+                    management_path: Path
                     segment_soil_path = Path(self.roads_runs_dir) / f"p{segment_run_id}.single_ofe.sol"
                     segment_slope_path = Path(self.roads_runs_dir) / f"p{segment_run_id}.slp"
+                    routed_buffer_profile: Dict[str, float] = {}
 
-                    self._build_single_ofe_soil_file(
-                        template_path=soil_template_path,
-                        output_path=segment_soil_path,
-                        traffic=segment_inputs["traffic"],
-                        surface=segment_inputs["surface"],
-                        rfg_pct=segment_inputs["rfg_pct"],
-                    )
-                    self._write_single_ofe_slope_file(
-                        segment_slope_path,
-                        width_m=segment_inputs["road_width_m"],
-                        length_m=profile["segment_length_m"],
-                        slope_pct=profile["slope_pct"],
-                    )
+                    if routing_mode == "channel_associated":
+                        management_path = management_cache_by_traffic.get(segment_inputs["traffic"])
+                        if management_path is None:
+                            management_path = self._materialize_single_ofe_management_template(
+                                traffic=segment_inputs["traffic"]
+                            )
+                            management_cache_by_traffic[segment_inputs["traffic"]] = management_path
+                        self._build_single_ofe_soil_file(
+                            template_path=soil_template_path,
+                            output_path=segment_soil_path,
+                            traffic=segment_inputs["traffic"],
+                            surface=segment_inputs["surface"],
+                            rfg_pct=segment_inputs["rfg_pct"],
+                        )
+                        self._write_single_ofe_slope_file(
+                            segment_slope_path,
+                            width_m=segment_inputs["road_width_m"],
+                            length_m=profile["segment_length_m"],
+                            slope_pct=profile["slope_pct"],
+                        )
+                    else:
+                        assert trace_result is not None
+                        segment_soil_suffix = "routed_two_ofe"
+                        segment_soil_path = Path(self.roads_runs_dir) / f"p{segment_run_id}.routed_two_ofe.sol"
+                        management_path = routed_management_cache_by_traffic.get(segment_inputs["traffic"])
+                        if management_path is None:
+                            management_path = self._materialize_routed_two_ofe_management_template(
+                                traffic=segment_inputs["traffic"]
+                            )
+                            routed_management_cache_by_traffic[segment_inputs["traffic"]] = management_path
+                        self._build_routed_two_ofe_soil_file(
+                            template_path=soil_template_path,
+                            output_path=segment_soil_path,
+                            traffic=segment_inputs["traffic"],
+                            surface=segment_inputs["surface"],
+                            rfg_pct=segment_inputs["rfg_pct"],
+                        )
+                        routed_buffer_profile = self._derive_buffer_profile_from_trace(trace_result)
+                        self._write_routed_two_ofe_slope_file(
+                            segment_slope_path,
+                            width_m=segment_inputs["road_width_m"],
+                            road_length_m=profile["segment_length_m"],
+                            road_slope_pct=profile["slope_pct"],
+                            buffer_length_m=routed_buffer_profile["buffer_length_m"],
+                            buffer_slope_pct=routed_buffer_profile["buffer_slope_pct"],
+                        )
 
                     self._append_roads_log(
                         "run",
@@ -2484,18 +3124,25 @@ class Roads(NoDbBase):
                         {
                             "segment_id": segment_id,
                             "segment_run_id": segment_run_id,
+                            "routing_mode": routing_mode,
+                            "routing_eligibility": routing_eligibility,
                             "target_hillslope_wepp_id": wepp_id_int,
+                            "topaz_id_chn_lowpoint": int(chn_topaz_int),
+                            "topaz_id_hill_lowpoint": int(hill_topaz_int),
                             "design": segment_inputs["design"],
                             "surface": segment_inputs["surface"],
                             "traffic": segment_inputs["traffic"],
                             "soil_texture": segment_inputs["soil_texture"],
                             "rfg_pct": segment_inputs["rfg_pct"],
+                            "soil_file_variant": segment_soil_suffix,
                             "road_width_m": segment_inputs["road_width_m"],
                             "segment_length_m": profile["segment_length_m"],
                             "slope_pct_raw": profile["raw_slope_pct"],
                             "slope_pct_clamped": profile["slope_pct"],
                             "high_point": profile["high_point"],
                             "low_point": profile["low_point"],
+                            **trace_summary,
+                            **routed_buffer_profile,
                         },
                     )
 
@@ -2518,8 +3165,10 @@ class Roads(NoDbBase):
                                 "segment_run_id": segment_run_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
                                 "status": "failed",
+                                "routing_mode": routing_mode,
                                 "reason": "segment_run_failed",
                                 "error": str(exc),
+                                **trace_summary,
                             }
                         )
                         failed_segment_records.append(
@@ -2527,6 +3176,7 @@ class Roads(NoDbBase):
                                 "segment_id": segment_id,
                                 "segment_run_id": segment_run_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
+                                "routing_mode": routing_mode,
                                 "reason": "segment_run_failed",
                                 "error": str(exc),
                             }
@@ -2538,6 +3188,7 @@ class Roads(NoDbBase):
                                 "segment_id": segment_id,
                                 "segment_run_id": segment_run_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
+                                "routing_mode": routing_mode,
                                 "error": str(exc),
                             },
                         )
@@ -2552,7 +3203,9 @@ class Roads(NoDbBase):
                                 "segment_run_id": segment_run_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
                                 "status": "failed",
+                                "routing_mode": routing_mode,
                                 "reason": "segment_pass_missing",
+                                **trace_summary,
                             }
                         )
                         failed_segment_records.append(
@@ -2560,6 +3213,7 @@ class Roads(NoDbBase):
                                 "segment_id": segment_id,
                                 "segment_run_id": segment_run_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
+                                "routing_mode": routing_mode,
                                 "reason": "segment_pass_missing",
                             }
                         )
@@ -2570,6 +3224,7 @@ class Roads(NoDbBase):
                                 "segment_id": segment_id,
                                 "segment_run_id": segment_run_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
+                                "routing_mode": routing_mode,
                                 "reason": "segment_pass_missing",
                             },
                         )
@@ -2582,8 +3237,10 @@ class Roads(NoDbBase):
                         "segment_run_id": segment_run_id,
                         "target_hillslope_wepp_id": wepp_id_int,
                         "status": "completed",
-                        "topaz_id_chn_lowpoint": chn_topaz_int,
-                        "topaz_id_hill_lowpoint": hill_topaz_int,
+                        "routing_mode": routing_mode,
+                        "routing_eligibility": routing_eligibility,
+                        "topaz_id_chn_lowpoint": int(chn_topaz_int),
+                        "topaz_id_hill_lowpoint": int(hill_topaz_int),
                         "design": segment_inputs["design"],
                         "surface": segment_inputs["surface"],
                         "traffic": segment_inputs["traffic"],
@@ -2596,6 +3253,8 @@ class Roads(NoDbBase):
                         "elevation_high_m": profile["elevation_high_m"],
                         "elevation_low_m": profile["elevation_low_m"],
                         "segment_pass_relpath": os.path.relpath(segment_pass_path, self.wd),
+                        **trace_summary,
+                        **routed_buffer_profile,
                     }
                     segment_execution_records.append(execution_record)
                     self._append_roads_log("run", "segment_run_completed", execution_record)
@@ -2633,6 +3292,12 @@ class Roads(NoDbBase):
                     "eligible_segment_count": eligible_segment_count,
                     "mapped_segment_count": mapped_segment_count,
                     "executed_segment_count": successful_segment_count,
+                    "executed_channel_associated_segment_count": int(routing_mode_counts.get("channel_associated", 0)),
+                    "executed_non_channel_routed_segment_count": int(routing_mode_counts.get("non_channel_routed", 0)),
+                    "segment_routing_mode_counts": dict(sorted(routing_mode_counts.items())),
+                    "trace_invocation_count": int(trace_invocation_count),
+                    "trace_reached_channel_count": int(trace_reaches_channel_count),
+                    "trace_termination_reason_counts": dict(sorted(trace_termination_reason_counts.items())),
                     "targeted_hillslope_count": 0,
                     "targeted_hillslope_wepp_ids": [],
                     "skipped_segments": skipped_segments,
@@ -2736,6 +3401,12 @@ class Roads(NoDbBase):
                 "eligible_segment_count": eligible_segment_count,
                 "mapped_segment_count": mapped_segment_count,
                 "executed_segment_count": successful_segment_count,
+                "executed_channel_associated_segment_count": int(routing_mode_counts.get("channel_associated", 0)),
+                "executed_non_channel_routed_segment_count": int(routing_mode_counts.get("non_channel_routed", 0)),
+                "segment_routing_mode_counts": dict(sorted(routing_mode_counts.items())),
+                "trace_invocation_count": int(trace_invocation_count),
+                "trace_reached_channel_count": int(trace_reaches_channel_count),
+                "trace_termination_reason_counts": dict(sorted(trace_termination_reason_counts.items())),
                 "targeted_hillslope_count": len(targeted_ids),
                 "targeted_hillslope_wepp_ids": targeted_ids,
                 "skipped_segments": skipped_segments,

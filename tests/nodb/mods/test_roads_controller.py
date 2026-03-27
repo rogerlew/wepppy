@@ -5,6 +5,7 @@ import json
 from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
+import numpy as np
 
 import pytest
 
@@ -279,6 +280,52 @@ def test_build_single_ofe_management_file_keeps_only_ofe_1(tmp_path: Path) -> No
     assert "OFE : 3" not in text
 
 
+def test_build_routed_two_ofe_soil_file_keeps_road_and_buffer_ofes(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    template_path = Path(controller.roads_legacy_soils_dir) / "3gloam2.sol"
+    output_path = tmp_path / "roads" / "routed_two_ofe.sol"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    controller._build_routed_two_ofe_soil_file(
+        template_path=template_path,
+        output_path=output_path,
+        traffic="low",
+        surface="gravel",
+        rfg_pct=20.0,
+    )
+
+    text = output_path.read_text(encoding="utf-8")
+    assert "2 0" in text
+    assert "'Road'" in text
+    assert "'Forest'" in text
+    assert "'Fill'" not in text
+    assert "urr" not in text
+    assert "ufr" not in text
+    assert "ubr" not in text
+
+
+def test_build_routed_two_ofe_management_file_keeps_road_and_buffer(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    template_path = Path(controller.roads_legacy_managements_dir) / "3inslope.man"
+    output_path = tmp_path / "roads" / "routed_two_ofe.man"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    controller._build_routed_two_ofe_management_file(
+        template_path=template_path,
+        output_path=output_path,
+    )
+
+    text = output_path.read_text(encoding="utf-8")
+    assert "3\t# number of OFEs" not in text
+    assert "2\t# number of OFEs" in text
+    assert "Plant scenario 2 of 3" not in text
+    assert "Initial Conditions scenario 2 of 3" not in text
+    assert "Yearly scenario 2 of 3" not in text
+    assert "OFE : 3" not in text
+    assert "OFE : 2" in text
+    assert "Initial Conditions indx' - <FILL>" not in text
+
+
 def test_prepare_segments_writes_summary_and_marks_prepared(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -332,6 +379,8 @@ def test_prepare_segments_writes_summary_and_marks_prepared(
                                 "DESIGN": "Inslope_bd",
                                 "topaz_id_chn_lowpoint": 24,
                                 "topaz_id_hill_lowpoint": 21,
+                                "_roads_routing_eligibility": "channel_associated",
+                                "_roads_non_channel_routable": False,
                             },
                         },
                         {
@@ -342,6 +391,8 @@ def test_prepare_segments_writes_summary_and_marks_prepared(
                                 "DESIGN": "Outslope",
                                 "topaz_id_chn_lowpoint": None,
                                 "topaz_id_hill_lowpoint": None,
+                                "_roads_routing_eligibility": "design_not_eligible",
+                                "_roads_non_channel_routable": False,
                             },
                         },
                     ],
@@ -369,7 +420,11 @@ def test_prepare_segments_writes_summary_and_marks_prepared(
 
     assert summary["eligible_segment_count"] == 1
     assert summary["eligible_with_lowpoint_ids"] == 1
+    assert summary["eligible_channel_associated_count"] == 1
+    assert summary["eligible_non_channel_routable_count"] == 0
+    assert summary["eligible_non_routable_count"] == 0
     assert summary["eligible_lowpoint_decision_counts"] == {"unknown": 1}
+    assert summary["eligible_routing_eligibility_counts"] == {"channel_associated": 1}
     assert summary["design_property_keys"] == ["DESIGN", "design"]
     assert summary["mapping_warning_count"] == 0
     assert summary["prepare_raster_paths"] == {
@@ -383,6 +438,95 @@ def test_prepare_segments_writes_summary_and_marks_prepared(
     assert Path(controller.roads_monotonic_geojson_path).exists()
     assert Path(controller.roads_low_points_geojson_path).exists()
     assert Path(controller.roads_log_path).exists()
+
+
+def test_prepare_segments_counts_non_channel_routable_segments(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    source_path = tmp_path / "input.geojson"
+    _write_roads_geojson(source_path)
+
+    relief_path = tmp_path / "dem" / "wbt" / "relief.tif"
+    netful_path = tmp_path / "dem" / "wbt" / "netful.tif"
+    subwta_path = tmp_path / "dem" / "wbt" / "subwta.tif"
+    relief_path.parent.mkdir(parents=True, exist_ok=True)
+    relief_path.write_text("relief", encoding="utf-8")
+    netful_path.write_text("netful", encoding="utf-8")
+    subwta_path.write_text("subwta", encoding="utf-8")
+
+    monkeypatch.setattr(
+        Roads,
+        "ron_instance",
+        property(lambda self: SimpleNamespace(dem_fn=str(tmp_path / "dem" / "dem.vrt"))),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "watershed_instance",
+        property(
+            lambda self: SimpleNamespace(
+                delineation_backend_is_wbt=True,
+                relief=str(relief_path),
+                netful=str(netful_path),
+                subwta=str(subwta_path),
+            )
+        ),
+    )
+    controller.set_enabled(True)
+    controller.set_uploaded_geojson(str(source_path))
+
+    def _fake_convert(**kwargs):
+        Path(kwargs["output_geojson_path"]).parent.mkdir(parents=True, exist_ok=True)
+        Path(kwargs["output_geojson_path"]).write_text(
+            json.dumps(
+                {
+                    "type": "FeatureCollection",
+                    "features": [
+                        {
+                            "type": "Feature",
+                            "geometry": {"type": "LineString", "coordinates": [[0.0, 0.0], [1.0, 1.0]]},
+                            "properties": {
+                                "segment_id": "roads-seg-000101",
+                                "DESIGN": "Inslope_bd",
+                                "topaz_id_chn_lowpoint": None,
+                                "topaz_id_hill_lowpoint": None,
+                                "_roads_lowpoint_decision": "non_channel_hillslope_routable",
+                                "_roads_routing_eligibility": "non_channel_routable",
+                                "_roads_non_channel_routable": True,
+                                "_roads_lowpoint_row": 1,
+                                "_roads_lowpoint_col": 2,
+                            },
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        Path(kwargs["low_points_output_geojson_path"]).write_text(
+            json.dumps({"type": "FeatureCollection", "features": []}),
+            encoding="utf-8",
+        )
+        return MonotonicConversionSummary(
+            input_feature_count=1,
+            output_feature_count=1,
+            split_feature_count=0,
+            low_point_feature_count=1,
+            sample_step_m=1.0,
+            tolerance_m=0.5,
+        )
+
+    monkeypatch.setattr(roads_module, "convert_geojson_file_to_monotonic_segments", _fake_convert)
+
+    summary = controller.prepare_segments()
+
+    assert summary["eligible_segment_count"] == 1
+    assert summary["eligible_with_lowpoint_ids"] == 0
+    assert summary["eligible_channel_associated_count"] == 0
+    assert summary["eligible_non_channel_routable_count"] == 1
+    assert summary["eligible_non_routable_count"] == 0
+    assert summary["eligible_lowpoint_decision_counts"] == {"non_channel_hillslope_routable": 1}
+    assert summary["eligible_routing_eligibility_counts"] == {"non_channel_routable": 1}
 
 
 def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
@@ -573,6 +717,420 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
     assert Path(controller.roads_log_path).exists()
     assert captured_make["years"] == 25
     assert captured_make["runs_dir"] == controller.roads_runs_dir
+
+
+def test_run_roads_wepp_routes_non_channel_routable_segments_with_trace_contract(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    Path(controller.roads_monotonic_geojson_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(controller.roads_monotonic_geojson_path).write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {"type": "LineString", "coordinates": [[0.0, 0.0], [1.0, 1.0]]},
+                        "properties": {
+                            "segment_id": "roads-seg-009001",
+                            "DESIGN": "Inslope_bd",
+                            "topaz_id_chn_lowpoint": None,
+                            "topaz_id_hill_lowpoint": None,
+                            "_roads_non_channel_routable": True,
+                            "_roads_routing_eligibility": "non_channel_routable",
+                            "_roads_lowpoint_row": 1,
+                            "_roads_lowpoint_col": 0,
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    baseline_runs_dir = tmp_path / "wepp" / "runs"
+    baseline_output_dir = tmp_path / "wepp" / "output"
+    baseline_runs_dir.mkdir(parents=True, exist_ok=True)
+    baseline_output_dir.mkdir(parents=True, exist_ok=True)
+    (baseline_runs_dir / "baseline.txt").write_text("baseline", encoding="utf-8")
+    (baseline_runs_dir / "p1.cli").write_text("climate", encoding="utf-8")
+    (baseline_output_dir / "H1.pass.dat").write_text("h1 baseline", encoding="utf-8")
+    (baseline_output_dir / "H2.pass.dat").write_text("h2 baseline", encoding="utf-8")
+
+    translator = SimpleNamespace(
+        top2wepp={21: 1},
+        iter_wepp_sub_ids=lambda: iter([1, 2]),
+    )
+    watershed_instance = SimpleNamespace(
+        delineation_backend_is_wbt=True,
+        translator_factory=lambda: translator,
+    )
+    wepp_instance = SimpleNamespace(
+        runs_dir=str(baseline_runs_dir),
+        output_dir=str(baseline_output_dir),
+        climate_instance=SimpleNamespace(input_years=25),
+        wepp_bin="wepp_dcc52a6",
+    )
+
+    relief_path = str(tmp_path / "dem" / "relief.tif")
+    netful_path = str(tmp_path / "dem" / "netful.tif")
+    subwta_path = str(tmp_path / "dem" / "subwta.tif")
+    flovec_path = str(tmp_path / "dem" / "flovec.tif")
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_prepare_raster_paths",
+        lambda self: {
+            "dem_path": relief_path,
+            "channel_raster_path": netful_path,
+            "topaz_id_raster_path": subwta_path,
+        },
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_trace_raster_paths",
+        lambda self: {
+            "dem_path": relief_path,
+            "channel_raster_path": netful_path,
+            "topaz_id_raster_path": subwta_path,
+            "flovec_path": flovec_path,
+        },
+    )
+
+    topaz_values = np.array(
+        [
+            [11.0, 12.0, 14.0],
+            [20.0, 21.0, 24.0],
+            [31.0, 32.0, 34.0],
+        ],
+        dtype=np.float32,
+    )
+
+    class _FakeDemDataset:
+        crs = "EPSG:4326"
+        nodata = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        @staticmethod
+        def sample(_coords):
+            return iter(([100.0],))
+
+    class _FakeTopazDataset:
+        nodata = -9999.0
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        @staticmethod
+        def read(_idx, *, masked=False):
+            if masked:
+                return np.ma.array(topaz_values, mask=np.zeros_like(topaz_values, dtype=bool))
+            return np.array(topaz_values, copy=True)
+
+    def _fake_raster_open(path: str, *args, **kwargs):
+        if str(path).endswith("subwta.tif"):
+            return _FakeTopazDataset()
+        return _FakeDemDataset()
+
+    monkeypatch.setattr(roads_module.rasterio, "open", _fake_raster_open)
+    monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
+    monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
+    controller.set_enabled(True)
+    _seed_prepared_state(controller)
+
+    tracer_calls: list[tuple[int, int]] = []
+    import wepppyo3.roads_flowpath as roads_flowpath_module
+
+    def _fake_trace(_subwta_path, _flovec_path, _relief_path, seed_row: int, seed_col: int, **_kwargs):
+        tracer_calls.append((seed_row, seed_col))
+        return {
+            "seed_row": seed_row,
+            "seed_col": seed_col,
+            "seed_topaz_id": 11,
+            "reaches_channel": True,
+            "channel_row": 1,
+            "channel_col": 2,
+            "channel_topaz_id": 24,
+            "termination_reason": "hit_channel",
+            "rows": [1, 1, 2],
+            "cols": [0, 1, 2],
+            "indices": [3, 4, 5],
+            "distance_m": [0.0, 20.0, 45.0],
+            "elevation_m": [100.0, 98.0, 94.0],
+            "segment_slope": [0.1, 0.2],
+            "path_length_m": 45.0,
+            "drop_m": 6.0,
+            "mean_slope": 0.1333333333,
+            "max_slope": 0.2,
+        }
+
+    monkeypatch.setattr(roads_flowpath_module, "trace_downslope_flowpath", _fake_trace)
+
+    monkeypatch.setattr(
+        Roads,
+        "_build_segment_profile",
+        lambda self, **_kwargs: {
+            "segment_length_m": 120.0,
+            "elevation_high_m": 1400.0,
+            "elevation_low_m": 1360.0,
+            "raw_slope_pct": 33.333,
+            "slope_pct": 33.333,
+            "high_point": [0.0, 1.0],
+            "low_point": [1.0, 0.0],
+        },
+    )
+    routed_build_calls: dict[str, int] = {"management": 0, "soil": 0, "slope": 0}
+    routed_management_path = tmp_path / "roads" / "routed_two_ofe.man"
+    routed_management_path.parent.mkdir(parents=True, exist_ok=True)
+    routed_management_path.write_text("routed management", encoding="utf-8")
+
+    def _fake_materialize_routed_management(self, *, traffic: str) -> Path:
+        assert traffic in {"high", "low", "none"}
+        routed_build_calls["management"] += 1
+        return routed_management_path
+
+    def _fake_build_routed_soil(self, *, output_path: Path, **_kwargs) -> None:
+        routed_build_calls["soil"] += 1
+        Path(output_path).write_text("routed soil", encoding="utf-8")
+
+    def _fake_write_routed_slope(self, path: Path, **_kwargs) -> None:
+        routed_build_calls["slope"] += 1
+        Path(path).write_text("routed slope", encoding="utf-8")
+
+    monkeypatch.setattr(Roads, "_materialize_routed_two_ofe_management_template", _fake_materialize_routed_management)
+    monkeypatch.setattr(Roads, "_build_routed_two_ofe_soil_file", _fake_build_routed_soil)
+    monkeypatch.setattr(Roads, "_write_routed_two_ofe_slope_file", _fake_write_routed_slope)
+
+    monkeypatch.setattr(
+        Roads,
+        "_run_segment_hillslope",
+        lambda self, *, segment_run_id, **_kwargs: (Path(self.roads_output_dir) / f"H{segment_run_id}.pass.dat").write_text(
+            "segment pass",
+            encoding="utf-8",
+        ),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_combine_target_hillslope_pass",
+        lambda self, *, output_pass_path, **_kwargs: Path(output_pass_path).write_text("combined", encoding="utf-8"),
+    )
+    monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *args, **kwargs: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir: None)
+    monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
+
+    summary = controller.run_roads_wepp()
+
+    assert tracer_calls == [(1, 0)]
+    assert summary["status"] == "completed"
+    assert summary["executed_segment_count"] == 1
+    assert summary["executed_channel_associated_segment_count"] == 0
+    assert summary["executed_non_channel_routed_segment_count"] == 1
+    assert summary["trace_invocation_count"] == 1
+    assert summary["trace_reached_channel_count"] == 1
+    assert summary["trace_termination_reason_counts"] == {"hit_channel": 1}
+    assert summary["segment_routing_mode_counts"] == {"non_channel_routed": 1}
+    assert summary["targeted_hillslope_wepp_ids"] == [1]
+    assert summary["segment_execution_records"][0]["routing_mode"] == "non_channel_routed"
+    assert summary["segment_execution_records"][0]["topaz_id_hill_lowpoint"] == 21
+    assert summary["segment_execution_records"][0]["trace_reaches_channel"] is True
+    assert summary["segment_execution_records"][0]["trace_termination_reason"] == "hit_channel"
+    assert summary["segment_execution_records"][0]["buffer_length_m"] == pytest.approx(45.0)
+    assert routed_build_calls == {"management": 1, "soil": 1, "slope": 1}
+
+
+def test_run_roads_wepp_skips_non_channel_routable_segment_when_trace_does_not_reach_channel(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    Path(controller.roads_monotonic_geojson_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(controller.roads_monotonic_geojson_path).write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {"type": "LineString", "coordinates": [[0.0, 0.0], [1.0, 1.0]]},
+                        "properties": {
+                            "segment_id": "roads-seg-009101",
+                            "DESIGN": "Inslope_bd",
+                            "topaz_id_chn_lowpoint": None,
+                            "topaz_id_hill_lowpoint": None,
+                            "_roads_non_channel_routable": True,
+                            "_roads_routing_eligibility": "non_channel_routable",
+                            "_roads_lowpoint_row": 1,
+                            "_roads_lowpoint_col": 0,
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    baseline_runs_dir = tmp_path / "wepp" / "runs"
+    baseline_output_dir = tmp_path / "wepp" / "output"
+    baseline_runs_dir.mkdir(parents=True, exist_ok=True)
+    baseline_output_dir.mkdir(parents=True, exist_ok=True)
+    (baseline_runs_dir / "baseline.txt").write_text("baseline", encoding="utf-8")
+    (baseline_runs_dir / "p1.cli").write_text("climate", encoding="utf-8")
+    (baseline_output_dir / "H1.pass.dat").write_text("h1 baseline", encoding="utf-8")
+    (baseline_output_dir / "H2.pass.dat").write_text("h2 baseline", encoding="utf-8")
+
+    translator = SimpleNamespace(
+        top2wepp={21: 1},
+        iter_wepp_sub_ids=lambda: iter([1, 2]),
+    )
+    watershed_instance = SimpleNamespace(
+        delineation_backend_is_wbt=True,
+        translator_factory=lambda: translator,
+    )
+    wepp_instance = SimpleNamespace(
+        runs_dir=str(baseline_runs_dir),
+        output_dir=str(baseline_output_dir),
+        climate_instance=SimpleNamespace(input_years=25),
+        wepp_bin="wepp_dcc52a6",
+    )
+
+    relief_path = str(tmp_path / "dem" / "relief.tif")
+    netful_path = str(tmp_path / "dem" / "netful.tif")
+    subwta_path = str(tmp_path / "dem" / "subwta.tif")
+    flovec_path = str(tmp_path / "dem" / "flovec.tif")
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_prepare_raster_paths",
+        lambda self: {
+            "dem_path": relief_path,
+            "channel_raster_path": netful_path,
+            "topaz_id_raster_path": subwta_path,
+        },
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_trace_raster_paths",
+        lambda self: {
+            "dem_path": relief_path,
+            "channel_raster_path": netful_path,
+            "topaz_id_raster_path": subwta_path,
+            "flovec_path": flovec_path,
+        },
+    )
+
+    class _FakeDemDataset:
+        crs = "EPSG:4326"
+        nodata = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        @staticmethod
+        def sample(_coords):
+            return iter(([100.0],))
+
+    class _FakeTopazDataset:
+        nodata = -9999.0
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        @staticmethod
+        def read(_idx, *, masked=False):
+            data = np.array([[11.0, 12.0, 14.0], [20.0, 21.0, 24.0], [31.0, 32.0, 34.0]], dtype=np.float32)
+            if masked:
+                return np.ma.array(data, mask=np.zeros_like(data, dtype=bool))
+            return data
+
+    def _fake_raster_open(path: str, *args, **kwargs):
+        if str(path).endswith("subwta.tif"):
+            return _FakeTopazDataset()
+        return _FakeDemDataset()
+
+    monkeypatch.setattr(roads_module.rasterio, "open", _fake_raster_open)
+    monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
+    monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
+    controller.set_enabled(True)
+    _seed_prepared_state(controller)
+
+    import wepppyo3.roads_flowpath as roads_flowpath_module
+
+    monkeypatch.setattr(
+        roads_flowpath_module,
+        "trace_downslope_flowpath",
+        lambda _subwta_path, _flovec_path, _relief_path, seed_row, seed_col, **_kwargs: {
+            "seed_row": seed_row,
+            "seed_col": seed_col,
+            "seed_topaz_id": 11,
+            "reaches_channel": False,
+            "channel_row": None,
+            "channel_col": None,
+            "channel_topaz_id": None,
+            "termination_reason": "raster_edge",
+            "rows": [1, 1, 0],
+            "cols": [0, 1, 1],
+            "indices": [3, 4, 1],
+            "distance_m": [0.0, 20.0, 30.0],
+            "elevation_m": [100.0, 98.0, 97.0],
+            "segment_slope": [0.1, 0.05],
+            "path_length_m": 30.0,
+            "drop_m": 3.0,
+            "mean_slope": 0.1,
+            "max_slope": 0.1,
+        },
+    )
+
+    monkeypatch.setattr(
+        Roads,
+        "_build_segment_profile",
+        lambda self, **_kwargs: {
+            "segment_length_m": 120.0,
+            "elevation_high_m": 1400.0,
+            "elevation_low_m": 1360.0,
+            "raw_slope_pct": 33.333,
+            "slope_pct": 33.333,
+            "high_point": [0.0, 1.0],
+            "low_point": [1.0, 0.0],
+        },
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_run_segment_hillslope",
+        lambda self, **_kwargs: (_ for _ in ()).throw(RuntimeError("should not run")),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_combine_target_hillslope_pass",
+        lambda self, **_kwargs: (_ for _ in ()).throw(RuntimeError("should not combine")),
+    )
+    monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *args, **kwargs: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir: None)
+    monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
+
+    summary = controller.run_roads_wepp()
+
+    assert summary["status"] == "completed"
+    assert summary["executed_segment_count"] == 0
+    assert summary["trace_invocation_count"] == 1
+    assert summary["trace_reached_channel_count"] == 0
+    assert summary["trace_termination_reason_counts"] == {"raster_edge": 1}
+    assert summary["targeted_hillslope_count"] == 0
+    assert summary["skipped_segment_reason_counts"] == {"trace_did_not_reach_channel": 1}
 
 
 def test_run_roads_wepp_persists_failed_summary_on_watershed_failure(

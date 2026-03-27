@@ -1,7 +1,7 @@
 # Roads NoDb Inslope Integration Specification
 
-Status: Implemented (Phase 1)  
-Last Updated: 2026-03-26  
+Status: Implemented (Phase 2 Step-2)  
+Last Updated: 2026-03-27  
 Scope: `Inslope_bd` and `Inslope_rd` road designs for the first WEPPcloud Roads NoDb integration.
 Canonical cross-route `output_scope` contract: `docs/schemas/output-scope-contract.md`.
 
@@ -497,6 +497,7 @@ Controller-level defaults (editable in Roads UI/API):
 - `surface_default`: `gravel`
 - `traffic_default`: `low`
 - `road_width_m_default`: `4.0`
+- `trace_max_steps`: `20000`
 - `input_years`: inherit baseline WEPP climate years unless explicitly overridden
 - `wepp_bin`: inherit baseline run setting unless explicitly overridden
 
@@ -509,9 +510,9 @@ Per-segment property overrides are supported for:
 - rock fragment percent
 - road width
 
-## Single-OFE WEPP Run Assembly Contract
+## WEPP Run Assembly Contract
 
-For each selected segment, Roads must generate a standalone one-OFE WEPP hillslope run with:
+For each selected segment, Roads must generate a standalone WEPP hillslope contributor run with:
 
 - climate: inherit baseline run climate station/files and simulation year span unless explicitly overridden in Roads params.
 - slope file: generated from monotonic, downslope-oriented segment profile (see monotonicity requirement below).
@@ -520,6 +521,13 @@ For each selected segment, Roads must generate a standalone one-OFE WEPP hillslo
 - run metadata:
   - deterministic run key based on `segment_id`,
   - preserved provenance fields (`segment_id`, source feature ID if available, `topaz_id_chn_lowpoint`, `topaz_id_hill_lowpoint`).
+
+Contributor variants:
+
+- channel-associated segments: one-OFE road contributor (phase-1 behavior retained).
+- non-channel routed segments: two-OFE routed contributor (`road OFE + buffer OFE`), where:
+  - road OFE uses the existing inslope road parameterization,
+  - buffer OFE uses trace-derived `path_length_m` and slope statistics.
 
 Required output for each successful segment run:
 
@@ -548,6 +556,11 @@ Each output segment feature must preserve all source properties and include:
 - `_roads_low_point_x`: low point x in source CRS.
 - `_roads_low_point_y`: low point y in source CRS.
 - `_roads_low_point_elevation_m`: sampled DEM elevation.
+- `_roads_lowpoint_decision`: prepare-stage classification label.
+- `_roads_routing_eligibility`: one of `channel_associated`, `non_channel_routable`, `non_routable`, `design_not_eligible`, `missing_channel_lookup_rasters`.
+- `_roads_non_channel_routable`: bool flag for run-stage trace eligibility.
+- `_roads_lowpoint_row`, `_roads_lowpoint_col`: lowpoint seed cell used for run-stage trace calls.
+- `_roads_lowpoint_topaz_id`, `_roads_lowpoint_topaz_suffix`, `_roads_lowpoint_is_hillslope_pixel`: lowpoint `subwta` diagnostics.
 
 Companion low-point point features must carry the same properties as their segment, plus:
 
@@ -563,6 +576,20 @@ For eligible designs:
 4. If none found, set `null`.
 
 Determinism: preserve fixed offset order so repeated runs produce identical IDs.
+
+## Non-Channel Routable Rule (Step-2)
+
+For eligible designs where channel-neighbor search fails:
+
+1. Inspect `subwta` at the low-point cell.
+2. If low-point `subwta` suffix is `1`, `2`, or `3`, mark segment as non-channel routable:
+   - `_roads_lowpoint_decision = "non_channel_hillslope_routable"`
+   - `_roads_routing_eligibility = "non_channel_routable"`
+   - `_roads_non_channel_routable = true`
+3. Otherwise mark non-routable:
+   - `_roads_lowpoint_decision = "no_channel_pixel_near_lowpoint"`
+   - `_roads_routing_eligibility = "non_routable"`
+   - `_roads_non_channel_routable = false`
 
 ## Hillslope Lowpoint Rule
 
@@ -611,11 +638,17 @@ Layout rationale:
 
 ## Segment Selection for WEPP Runs
 
-Operational filter for phase 1:
+Operational filter for inslope step-2:
 
 - `DESIGN` in `{Inslope_bd, Inslope_rd}`
-- `topaz_id_chn_lowpoint` is not null
-- `topaz_id_hill_lowpoint` is not null
+- channel-associated execution path:
+  - `topaz_id_chn_lowpoint` is not null,
+  - `topaz_id_hill_lowpoint` is not null.
+- non-channel routed execution path:
+  - `_roads_non_channel_routable == true` (prepare-stage metadata),
+  - run-stage trace reaches channel,
+  - traced receiving hillslope resolves to `subwta` suffix `1|2|3`,
+  - traced receiving hillslope maps through `top2wepp`.
 
 Non-selected segments are recorded but not executed.
 
@@ -781,20 +814,23 @@ Physical assumptions:
 - inslope point-source cases assume ditch/culvert bypass of fill-slope dynamics.
 - outslope rutted assumes no culvert bypass; concentrated flow can erode across fill slope before entering downslope buffer.
 
-Current implementation boundary (phase 1):
+Current implementation boundary (phase 2 step-2):
 
 - only inslope designs are implemented.
-- point-source routing is only modeled when the segment low point is at or adjacent to a channel pixel (channel-associated low point).
-- segments with low points on hillslope interior are currently not modeled for routing/injection.
+- channel-associated low points keep the phase-1 behavior (`topaz_id_chn_lowpoint` + `topaz_id_hill_lowpoint` prepare mapping).
+- non-channel low points are now routable when the low-point `subwta` suffix is `1|2|3`; run-stage tracing routes those segments to channel and executes routed contributors as `road OFE + buffer OFE`.
+- routed contributors are merged through the existing pass-combine flow using traced receiving-hillslope attribution.
 
-Future extension for non-channel low points:
+Implemented step-2 non-channel low-point path:
 
 1. If low point is not channel-associated, evaluate low-point cell in `subwta`.
-2. If `subwta` value is a hillslope pixel (`int` value ending in `1|2|3`), treat it as a routable hillslope low point.
-3. Build point-source contributor profile by design:
-   - inslope (`bd` or `rd`): `road OFE + flowpath buffer OFE to channel`.
-   - outslope rutted: `road OFE + fill OFE + flowpath buffer OFE to channel`.
-4. Route/merge resulting contributor pass with the mapped receiving hillslope pass file.
+2. If `subwta` value is a hillslope pixel (`int` value ending in `1|2|3`), mark segment as non-channel routable in prepare outputs.
+3. During run, trace routable low points to channel via `wepppyo3.roads_flowpath.trace_downslope_flowpath(...)`.
+4. If trace reaches channel, build routed contributor profile as `road OFE + flowpath buffer OFE`:
+   - road OFE from existing inslope segment parameterization,
+   - buffer OFE from trace path length/slope.
+5. Resolve receiving hillslope from traced pre-channel cell (`subwta` suffix `1|2|3`) and merge resulting contributor pass into mapped hillslope output.
+6. If trace does not reach channel, skip contributor generation and persist explicit diagnostics in run summary/logs.
 
 ### High-Fidelity Concept (Top-Level)
 
@@ -875,6 +911,5 @@ v1 integration constraints:
 
 ### Ordered Follow-On Plan
 
-1. Implement non-channel low-point routing for `inslope_bd` and `inslope_rd` using the shared step-1 tracer output.
-2. Implement `outslope_rutted` point-source routing for both channel-associated and non-channel low points, including explicit fill OFE handling.
-3. Implement `outslope_unrutted` as MOFE hillslope replacement (`hill -> road -> fill -> hill`) with replacement semantics (no double counting).
+1. Implement `outslope_rutted` point-source routing for both channel-associated and non-channel low points, including explicit fill OFE handling.
+2. Implement `outslope_unrutted` as MOFE hillslope replacement (`hill -> road -> fill -> hill`) with replacement semantics (no double counting).

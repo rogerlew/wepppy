@@ -351,6 +351,45 @@ def _lookup_channel_topaz_id_at_or_near_lowpoint(
     return None, diagnostics
 
 
+def _is_hillslope_topaz_id(topaz_id: Optional[int]) -> bool:
+    if topaz_id is None:
+        return False
+    return abs(int(topaz_id)) % 10 in {1, 2, 3}
+
+
+def _lookup_topaz_id_at_lowpoint_cell(
+    channel_lookup: _ChannelLookup,
+    *,
+    low_point_dem_x: float,
+    low_point_dem_y: float,
+) -> Tuple[Optional[int], Dict[str, Any]]:
+    row, col = rowcol(channel_lookup.transform, low_point_dem_x, low_point_dem_y)
+    row_i = int(row)
+    col_i = int(col)
+
+    diagnostics: Dict[str, Any] = {
+        "lowpoint_row": row_i,
+        "lowpoint_col": col_i,
+        "lowpoint_topaz_id": None,
+        "lowpoint_topaz_suffix": None,
+        "lowpoint_is_hillslope_pixel": False,
+    }
+
+    rows, cols = channel_lookup.topaz_ids.shape
+    if row_i < 0 or col_i < 0 or row_i >= rows or col_i >= cols:
+        return None, diagnostics
+
+    value = float(channel_lookup.topaz_ids[row_i, col_i])
+    if not np.isfinite(value):
+        return None, diagnostics
+
+    topaz_id = int(round(value))
+    diagnostics["lowpoint_topaz_id"] = int(topaz_id)
+    diagnostics["lowpoint_topaz_suffix"] = int(abs(topaz_id) % 10)
+    diagnostics["lowpoint_is_hillslope_pixel"] = bool(_is_hillslope_topaz_id(topaz_id))
+    return topaz_id, diagnostics
+
+
 def _is_eligible_inslope_design(design_value: Any) -> bool:
     return isinstance(design_value, str) and design_value.lower() in {"inslope_bd", "inslope_rd"}
 
@@ -640,19 +679,34 @@ def _convert_geojson_to_monotonic_segments_internal(
                     )
                     is_design_eligible = design_value is not None
                     channel_diagnostics: Dict[str, Any] = {}
+                    lowpoint_topaz_diagnostics: Dict[str, Any] = {}
                     hillslope_diagnostics: Dict[str, Any] = {}
                     lowpoint_decision = "design_not_eligible"
+                    routing_eligibility = "design_not_eligible"
+                    non_channel_routable = False
 
                     if is_design_eligible and channel_lookup is None:
                         lowpoint_decision = "missing_channel_lookup_rasters"
+                        routing_eligibility = "missing_channel_lookup_rasters"
                     elif is_design_eligible and channel_lookup is not None:
+                        _, lowpoint_topaz_diagnostics = _lookup_topaz_id_at_lowpoint_cell(
+                            channel_lookup,
+                            low_point_dem_x=low_point_dem_x,
+                            low_point_dem_y=low_point_dem_y,
+                        )
                         topaz_id_chn_lowpoint, channel_diagnostics = _lookup_channel_topaz_id_at_or_near_lowpoint(
                             channel_lookup,
                             low_point_dem_x=low_point_dem_x,
                             low_point_dem_y=low_point_dem_y,
                         )
                         if topaz_id_chn_lowpoint is None:
-                            lowpoint_decision = "no_channel_pixel_near_lowpoint"
+                            if bool(lowpoint_topaz_diagnostics.get("lowpoint_is_hillslope_pixel")):
+                                lowpoint_decision = "non_channel_hillslope_routable"
+                                routing_eligibility = "non_channel_routable"
+                                non_channel_routable = True
+                            else:
+                                lowpoint_decision = "no_channel_pixel_near_lowpoint"
+                                routing_eligibility = "non_routable"
                         else:
                             topaz_id_hill_lowpoint, hillslope_diagnostics = _lookup_hillslope_topaz_id_near_lowpoint(
                                 channel_lookup,
@@ -664,8 +718,10 @@ def _convert_geojson_to_monotonic_segments_internal(
                                 hillslope_diagnostics.get("hillslope_decision")
                                 or "no_receiving_hillslope_candidate_near_lowpoint"
                             )
+                            routing_eligibility = "non_routable"
                             if topaz_id_hill_lowpoint is not None:
                                 lowpoint_decision = "mapped"
+                                routing_eligibility = "channel_associated"
 
                     properties["topaz_id_chn_lowpoint"] = (
                         int(topaz_id_chn_lowpoint) if topaz_id_chn_lowpoint is not None else None
@@ -677,6 +733,17 @@ def _convert_geojson_to_monotonic_segments_internal(
                     properties[f"{METADATA_PREFIX}design_eligible"] = bool(is_design_eligible)
                     properties[f"{METADATA_PREFIX}channel_lookup_available"] = bool(channel_lookup is not None)
                     properties[f"{METADATA_PREFIX}lowpoint_decision"] = str(lowpoint_decision)
+                    properties[f"{METADATA_PREFIX}routing_eligibility"] = str(routing_eligibility)
+                    properties[f"{METADATA_PREFIX}non_channel_routable"] = bool(non_channel_routable)
+                    properties[f"{METADATA_PREFIX}lowpoint_topaz_id"] = lowpoint_topaz_diagnostics.get(
+                        "lowpoint_topaz_id"
+                    )
+                    properties[f"{METADATA_PREFIX}lowpoint_topaz_suffix"] = lowpoint_topaz_diagnostics.get(
+                        "lowpoint_topaz_suffix"
+                    )
+                    properties[f"{METADATA_PREFIX}lowpoint_is_hillslope_pixel"] = lowpoint_topaz_diagnostics.get(
+                        "lowpoint_is_hillslope_pixel"
+                    )
 
                     properties[f"{METADATA_PREFIX}lowpoint_row"] = channel_diagnostics.get("lowpoint_row")
                     properties[f"{METADATA_PREFIX}lowpoint_col"] = channel_diagnostics.get("lowpoint_col")
