@@ -205,7 +205,7 @@
 
   {% if not current_user.is_authenticated %}
   <section class="wc-login-bypass-banner" aria-label="Login bypass banner">
-    <a href="{{ url_for('security.login', next=url_for('weppcloud_site.interfaces')) }}">Login</a> to Bypass Capchas
+    <a href="{{ url_for('security.login', next=url_for('weppcloud_site.interfaces')) }}">Login</a> to Bypass Captchas
   </section>
   {% endif %}
 
