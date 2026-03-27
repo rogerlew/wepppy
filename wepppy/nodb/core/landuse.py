@@ -1310,8 +1310,7 @@ class Landuse(NoDbBase):
             # for the landcover types in the watershed
             total_area = 0.0
             for topaz_id, k in domlc_d.items():
-                area = len(np.where(subwta == int(topaz_id))[0])
-                area *= cell2 / 10000
+                area = watershed.hillslope_area(topaz_id)
 
                 if k not in managements:
                     assert not k.endswith('-mulch_15') and not k.endswith('-mulch_30') and not k.endswith('-mulch_60'), k

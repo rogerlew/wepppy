@@ -56,6 +56,100 @@ def test_build_gridded_creates_soils_dir_before_retrieve(
     assert expected_soils_dir.is_dir()
 
 
+def test_build_gridded_coverage_uses_hillslope_area_not_wsarea(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+    (wd / "watershed").mkdir(parents=True, exist_ok=True)
+    (wd / "soils").mkdir(parents=True, exist_ok=True)
+    (wd / "soils" / "ssurgo.tif").write_text("stub", encoding="utf-8")
+
+    soils = Soils.__new__(Soils)
+    soils.wd = str(wd)
+    soils.logger = logging.getLogger("tests.nodb.soils_gridded_coverage")
+    soils._soils_is_vrt = False
+    soils._ssurgo_db = "ssurgo"
+    soils._initial_sat = 0.75
+    soils._ksflag = True
+
+    soils.locked = lambda: nullcontext()
+    soils.timed = lambda _label: nullcontext()
+    soils.trigger = lambda *_args, **_kwargs: None
+
+    map_stub = SimpleNamespace(extent=(-116.1, 47.0, -116.0, 47.1), cellsize=30.0)
+
+    class _WatershedStub:
+        subwta = str(wd / "watershed" / "subwta.tif")
+        sub_area = 5.0
+
+        @property
+        def wsarea(self) -> float:
+            raise AssertionError("Soils coverage should not use watershed.wsarea")
+
+        @staticmethod
+        def hillslope_area(topaz_id: str) -> float:
+            return {"11": 2.0, "12": 3.0}[str(topaz_id)]
+
+    monkeypatch.setattr(
+        Soils,
+        "ron_instance",
+        property(lambda _self: SimpleNamespace(map=map_stub)),
+    )
+    monkeypatch.setattr(
+        Soils,
+        "watershed_instance",
+        property(lambda _self: _WatershedStub()),
+    )
+    monkeypatch.setattr(
+        Soils,
+        "getInstance",
+        classmethod(lambda cls, _wd: soils),
+    )
+    monkeypatch.setattr("wepppy.nodb.core.soils.wepppyo3", None)
+
+    class _SoilSummaryStub:
+        def __init__(self) -> None:
+            self.area = 0.0
+            self.pct_coverage = 0.0
+
+    class _SurgoMapStub:
+        def __init__(self, _ssurgo_fn: str) -> None:
+            self.mukeys = [1001, 1002]
+
+        @staticmethod
+        def build_soilgrid(_subwta: str) -> dict[str, str]:
+            return {"11": "1001", "12": "1002"}
+
+    class _SurgoCollectionStub:
+        def __init__(self, _mukeys: set[int]) -> None:
+            pass
+
+        @staticmethod
+        def makeWeppSoils(**_kwargs) -> None:
+            return None
+
+        @staticmethod
+        def writeWeppSoils(**_kwargs) -> dict[int, _SoilSummaryStub]:
+            return {1001: _SoilSummaryStub(), 1002: _SoilSummaryStub()}
+
+        @staticmethod
+        def logInvalidSoils(**_kwargs) -> None:
+            return None
+
+    monkeypatch.setattr("wepppy.nodb.core.soils.SurgoMap", _SurgoMapStub)
+    monkeypatch.setattr("wepppy.nodb.core.soils.SurgoSoilCollection", _SurgoCollectionStub)
+
+    soils._build_gridded(retrieve_gridded_ssurgo=False, max_workers=1)
+
+    assert soils.soils["1001"].pct_coverage == pytest.approx(40.0)
+    assert soils.soils["1002"].pct_coverage == pytest.approx(60.0)
+    assert (
+        soils.soils["1001"].pct_coverage + soils.soils["1002"].pct_coverage
+    ) == pytest.approx(100.0)
+
+
 def test_post_dump_skips_parquet_when_soils_dir_missing(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

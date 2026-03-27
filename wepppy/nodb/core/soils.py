@@ -1351,7 +1351,8 @@ class Soils(NoDbBase):
                     for k in soils:
                         soils[k].area = 0.0
 
-                    total_area = watershed.wsarea
+                    # Keep coverage denominator aligned with Landuse: hillslopes only.
+                    total_area = watershed.sub_area
                     for topaz_id, k in domsoil_d.items():
                         soils[k].area += watershed.hillslope_area(topaz_id)
 
