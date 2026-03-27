@@ -755,3 +755,126 @@ Notes:
 - Exact replication of legacy 3-OFE WEPP:Road behavior.
 - Full WEPP:Road 3-OFE decomposition (road/fill/buffer) inside Roads phase 1.
 - Advanced physics-based hydrograph merge beyond the documented phase-1 approximation.
+
+## Future Concept Draft: `Outslope_unrutted` MOFE Hillslope Replacement
+
+Status: concept draft only (not implemented in phase 1).
+
+This concept treats Roads as an enhanced scenario model, not a baseline-vs-roads delta workflow.
+
+### Intent
+
+- model `Outslope_unrutted` with a multi-OFE profile that preserves explicit road, fill, and buffer behavior.
+- replace targeted receiving hillslope pass files with synthetic roads-aware pass files.
+- avoid additive double counting by replacing (not adding to) the targeted hillslope response.
+
+### Flow Regime and Routing Semantics (Concept Draft)
+
+Design-regime mapping:
+
+- `outslope unrutted`: sheet-flow abstraction.
+- `outslope rutted`: point-source abstraction for water/sediment discharge from road low point.
+- `inslope bare ditch` and `inslope rocky ditch`: point-source abstraction for water/sediment discharge from road low point.
+
+Physical assumptions:
+
+- inslope point-source cases assume ditch/culvert bypass of fill-slope dynamics.
+- outslope rutted assumes no culvert bypass; concentrated flow can erode across fill slope before entering downslope buffer.
+
+Current implementation boundary (phase 1):
+
+- only inslope designs are implemented.
+- point-source routing is only modeled when the segment low point is at or adjacent to a channel pixel (channel-associated low point).
+- segments with low points on hillslope interior are currently not modeled for routing/injection.
+
+Future extension for non-channel low points:
+
+1. If low point is not channel-associated, evaluate low-point cell in `subwta`.
+2. If `subwta` value is a hillslope pixel (`int` value ending in `1|2|3`), treat it as a routable hillslope low point.
+3. Build point-source contributor profile by design:
+   - inslope (`bd` or `rd`): `road OFE + flowpath buffer OFE to channel`.
+   - outslope rutted: `road OFE + fill OFE + flowpath buffer OFE to channel`.
+4. Route/merge resulting contributor pass with the mapped receiving hillslope pass file.
+
+### High-Fidelity Concept (Top-Level)
+
+1. Identify outsloped road discharge strips and trace downslope delivery paths to the channel network.
+2. Partition traced strips by receiving WEPP hillslope ID so each contributor maps deterministically.
+3. For each affected strip, build a roads-aware MOFE profile with ordering:
+   - upslope hillslope segment -> road -> fill -> downslope buffer segment.
+4. For each affected receiving hillslope, represent unaffected remainder area with non-road hillslope contributor profile(s).
+5. Run WEPP for all contributors, then assemble one synthetic `H<wepp_id>.pass.dat` per affected hillslope by contributor aggregation.
+6. Stage synthetic hillslope pass files as replacements for affected hillslopes; keep baseline pass files for untouched hillslopes.
+7. Run watershed routing once using the full set of staged pass files.
+
+### Fidelity Invariants
+
+- **Replacement semantics**: targeted hillslope response is replaced, not incrementally added.
+- **Area conservation**: affected-strip plus unaffected remainder area equals original hillslope area.
+- **Buffer preservation**: final downslope buffer OFE remains explicit in the roads-aware contributor profile.
+- **Topology preservation**: watershed structure remains unchanged (`left/right/top` hillslope-channel linkage stays canonical).
+- **Road geometry parity**: `Outslope_unrutted` road OFE parameterization follows legacy outslope geometry intent (including area-preserving transform behavior).
+
+### Deferred Details (To Be Specified Later)
+
+- exact strip delineation and flowpath tracing rules.
+- hillslope-boundary splitting when a traced strip crosses multiple hillslopes.
+- contributor aggregation math for hydrograph-shape terms in replacement mode.
+- parameter defaults and per-segment overrides for outsloped designs.
+- handling for segments that terminate on channels vs within hillslope interiors.
+
+## Point-Source Flowpath Trace Contract in Rust
+
+Status: step-1 substrate implemented (2026-03-27).
+
+### Direction
+
+- keep the point-source routing engine in Rust (no pure-Python reimplementation).
+- keep one shared implementation in `peridot` and expose it through both CLI and `wepppyo3`.
+
+### Implemented Step-1 Surfaces
+
+- `peridot` core API:
+  - `roads_trace::trace_downslope_flowpath(...) -> TraceDownslopeResult`
+- `peridot` CLI wrapper:
+  - `trace_downslope_flowpath --subwta --flovec --relief --seed-row --seed-col [--channel] [--max-steps] [--out-json]`
+- `wepppyo3` runtime API:
+  - `wepppyo3.roads_flowpath.trace_downslope_flowpath(subwta_path, flovec_path, relief_path, seed_row, seed_col, channel_path=None, max_steps=20000) -> dict`
+
+### Implemented v1 Trace Result Contract
+
+Returned fields (CLI JSON and `wepppyo3` dict keys):
+
+- `seed_row`, `seed_col`, `seed_topaz_id`
+- `reaches_channel`
+- `channel_row`, `channel_col`, `channel_topaz_id`
+- `termination_reason`
+- `rows`, `cols`, `indices`
+- `distance_m`, `elevation_m`, `segment_slope`
+- `path_length_m`, `drop_m`, `mean_slope`, `max_slope`
+
+Termination labels:
+
+- `hit_channel`
+- `invalid_flow_direction`
+- `loop_detected`
+- `raster_edge`
+- `max_steps_exceeded`
+
+Channel-detection rule in v1:
+
+- when `channel_path/channel_mask` is provided, channel is `mask > 0`.
+- when channel mask is absent, channel is inferred from `SUBWTA` suffix `4` (`topaz_id % 10 == 4`).
+
+v1 integration constraints:
+
+- `subwta`, `flovec`, `relief`, and optional channel-mask rasters must share identical raster shape (`width`/`height`); shape mismatches fail explicitly.
+- seed inputs are raster cell coordinates (`seed_row`, `seed_col`, 0-based), not projected/map coordinates.
+- v1 does not perform raster reprojection/resampling inside trace execution; callers are responsible for providing aligned rasters.
+- CLI and `wepppyo3` wrappers are contract-bound to the shared `peridot` core API (validated by parity tests).
+
+### Ordered Follow-On Plan
+
+1. Implement non-channel low-point routing for `inslope_bd` and `inslope_rd` using the shared step-1 tracer output.
+2. Implement `outslope_rutted` point-source routing for both channel-associated and non-channel low points, including explicit fill OFE handling.
+3. Implement `outslope_unrutted` as MOFE hillslope replacement (`hill -> road -> fill -> hill`) with replacement semantics (no double counting).
