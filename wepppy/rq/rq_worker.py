@@ -77,6 +77,26 @@ class JobCancelledException(Exception):
     pass
 
 
+def _extract_runid(job: Job) -> str | None:
+    """Best-effort runid extraction for jobs with positional or keyword args."""
+    if job.args:
+        candidate = job.args[0]
+        if isinstance(candidate, str) and candidate:
+            return candidate
+
+    if isinstance(job.kwargs, dict):
+        candidate = job.kwargs.get("runid")
+        if isinstance(candidate, str) and candidate:
+            return candidate
+
+    if isinstance(job.meta, dict):
+        candidate = job.meta.get("runid")
+        if isinstance(candidate, str) and candidate:
+            return candidate
+
+    return None
+
+
 class WepppyRqWorker(Worker):
     """RQ worker that attaches run-scoped logs and supports SIGUSR1 cancellations."""
 
@@ -144,9 +164,12 @@ class WepppyRqWorker(Worker):
     def perform_job(self, job: 'Job', queue: 'Queue') -> bool:
         """Override perform_job to capture PID/runid metadata and log to rq.log."""
         self.default_result_ttl = DEFAULT_RESULT_TTL
-        runid = job.args[0]
+        runid = _extract_runid(job)
+        if not isinstance(job.meta, dict):
+            job.meta = {}
         job.meta['pid'] = os.getpid()
-        job.meta['runid'] = runid
+        if runid is not None:
+            job.meta['runid'] = runid
         job.save()
 
         auth_token = None
