@@ -79,6 +79,82 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Roads Step-2: Inslope Non-Channel Point-Source Routing
+**Proposed**: 2026-03-27  
+**Size**: Large (3-5 focused sessions)  
+**Priority**: High  
+**Status**: Scoped - Ready to Start (after step-1 API completion)  
+**Package**: [docs/work-packages/20260327_roads_point_source_inslope_non_channel/](docs/work-packages/20260327_roads_point_source_inslope_non_channel/)  
+**Description**: Extend Roads inslope (`inslope_bd`, `inslope_rd`) so non-channel low points on hillslope pixels are traced to channel and modeled as point-source MOFE contributors (`road -> buffer`) before pass merge.
+
+**Scope**:
+- Prepare-stage routable non-channel low-point classification (`subwta` suffix `1|2|3`).
+- Run-stage trace integration and routed contributor generation for inslope designs.
+- Pass-merge integration, diagnostics, and regression tests.
+- Mandatory code and QA review milestones.
+
+**Dependencies**:
+- `docs/work-packages/20260327_roads_peridot_trace_core/`
+- `wepppy/nodb/mods/roads/specification.md`
+
+**Next Steps**:
+1. Freeze step-1 trace API contract and add Roads adapter checks.
+2. Implement inslope routed contributor run path (`road -> buffer`) and tests.
+3. Complete review gates and full validation suites.
+
+---
+
+### Roads Step-3: Outslope Rutted Point Source with Fill OFE
+**Proposed**: 2026-03-27  
+**Size**: Large (3-6 focused sessions)  
+**Priority**: High  
+**Status**: Scoped - Ready to Start (after steps 1-2)  
+**Package**: [docs/work-packages/20260327_roads_point_source_outslope_rutted/](docs/work-packages/20260327_roads_point_source_outslope_rutted/)  
+**Description**: Implement `outslope_rutted` as point-source contributor path with explicit `road -> fill -> buffer` modeling, including channel-associated and non-channel low points plus fill-parameter defaults sourced from roads vectors.
+
+**Scope**:
+- Enable `outslope_rutted` prepare/run eligibility.
+- Add fill parameter contracts with defaults (`fill_length_m`, `fill_slope_pct`).
+- Build branch-specific routed contributor logic and diagnostics.
+- Mandatory code and QA review milestones.
+
+**Dependencies**:
+- `docs/work-packages/20260327_roads_peridot_trace_core/`
+- `docs/work-packages/20260327_roads_point_source_inslope_non_channel/`
+
+**Next Steps**:
+1. Lock fill attribute/default contract in Roads params/spec.
+2. Implement run-stage `road -> fill -> buffer` contributor builder and branch diagnostics.
+3. Complete review gates and validation suites.
+
+---
+
+### Roads Step-4: Outslope Unrutted MOFE Hillslope Replacement
+**Proposed**: 2026-03-27  
+**Size**: Very Large (5-9 focused sessions)  
+**Priority**: High  
+**Status**: Scoped - Ready to Start (after steps 1-3)  
+**Package**: [docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/](docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/)  
+**Description**: Implement `outslope_unrutted` as sheet-flow MOFE hillslope replacement (`hill -> road -> fill -> hill`) with strict replacement semantics, area conservation, and no double counting.
+
+**Scope**:
+- Build targeted hillslope decomposition (`affected strip` + `unaffected remainder`).
+- Assemble roads-aware replacement contributors and aggregate replacement pass files.
+- Stage replacement pass sets for watershed rerun while preserving untouched hillslopes.
+- Mandatory code and QA review milestones.
+
+**Dependencies**:
+- `docs/work-packages/20260327_roads_peridot_trace_core/`
+- `docs/work-packages/20260327_roads_point_source_inslope_non_channel/`
+- `docs/work-packages/20260327_roads_point_source_outslope_rutted/`
+
+**Next Steps**:
+1. Lock decomposition and replacement invariants in code/spec.
+2. Implement replacement pass aggregation and conservation checks.
+3. Complete review gates and full validation suites.
+
+---
+
 ### RUSLE Momm 2025 R-Mode Integration
 **Proposed**: 2026-03-25  
 **Size**: Medium (1-2 weeks after decision checkpoint)  
