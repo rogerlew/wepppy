@@ -15,6 +15,8 @@ Key design points:
 cd /workdir/wepppy
 ./wctl/install.sh dev     # pin docker/docker-compose.dev.yml (default)
 # or
+./wctl/install.sh hpc     # pin docker/docker-compose.dev.hpc.yml (HPC cpuset/storage profile)
+# or
 ./wctl/install.sh prod    # pin docker/docker-compose.prod.yml
 # or
 ./wctl/install.sh wepp1   # prod + wepp1 override (adds docker/docker-compose.prod.wepp1.yml)

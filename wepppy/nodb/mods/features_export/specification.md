@@ -371,6 +371,7 @@ Supported modes:
 
 Mixed-layer temporal compatibility:
 - Temporal compatibility is layer-specific and driven by each layer's catalog `temporal.supported_modes` and `temporal.mode_rules`.
+- Layers with `temporal.supported_modes=[]` are explicitly atemporal and remain exportable regardless of request temporal mode.
 - Layers incompatible with request temporal selectors are excluded with `layer_unavailable` when at least one other layer remains exportable.
 - If every requested layer is excluded by temporal compatibility checks, return 400.
 - `year_selection` and `exclude_yr_indxs` are only applied where catalog rules allow `year_selection_supported=true`; otherwise emit `selector_defaulted`.
@@ -560,6 +561,8 @@ WP-3: Format writers, packaging, and manifest generation (completed 2026-03-26)
 - Contract clarification: writer inputs are explicitly pre-resolved and payload-driven (`ResolvedExportPlan` + per-layer `PreparedLayerPayload` mapping keyed by `output_layer_id`); WP-3 does not resolve or extract source datasets.
 - Contract clarification: single-layer formats (`geojson|geoparquet|kmz`) write deterministic one-file-per-layer outputs and return one deterministic zip bundle; multi-layer formats return one container artifact per request.
 - Contract clarification: geodatabase writer uses the canonical `f_esri` gpkg conversion boundary and fails explicitly when backend capability is unavailable.
+- Contract clarification: geopackage artifacts must be valid SQLite/GPKG containers (not synthesized JSON payload bytes); geodatabase staging gpkg input must use the same container contract.
+- Contract clarification: geopackage writer output must be GDAL/OGR-readable for downstream conversion boundaries; implementation uses the GDAL `GPKG` driver with aspatial attribute layers to preserve interoperability.
 - Contract clarification: manifest assembly is pure (`build_export_manifest`) and serialization/write (`serialize_export_manifest`, `write_export_manifest`) is a separate step.
 - Deliverable: deterministic artifact metadata and manifest generation from pre-resolved plan inputs.
 
@@ -586,6 +589,12 @@ WP-5: Runs-page UI control integration
 - Contract clarification: Runs-page dynamic mod behavior requires both server-side mod metadata (`MOD_UI_DEFINITIONS` + `view/mod/<mod_name>`) and client-side bootstrap registration (`project.js` `MOD_BOOTSTRAP_MAP`) for runtime mod insertion parity with initial page render.
 - Contract clarification: the features-export submit route is `rq:export` scoped and explicitly documents/requires `415` for non-JSON payloads; frozen checklist/rules artifacts were aligned accordingly.
 - Contract clarification: smoke-case execution requires a pre-submit layer selection for `features_export` because the form submit action is validation-gated until minimum payload requirements are met.
+- Contract clarification: service orchestration must always pass a `nodb_ref_resolver` into dependency snapshot construction so catalog `nodb_ref` locators (for example `nodb:watershed.subwta_shp`) resolve deterministically during submit-time cache/dependency planning.
+- Contract clarification: features-export status UI must use canonical `control_shell` status-panel plumbing (`status_panel_options`) so `wc-status-panel` theming and shared status-log behavior remain consistent with other controllers.
+- Contract clarification: controller submit/bootstrap paths must resolve job IDs from canonical variants (`job_id`, wrapped `Content.job_id`, and keyed `job_ids` maps including `run_features_export`/`run_features_export_rq`) before treating submit as failed.
+- Contract clarification: completed features-export result payloads should provide browser-friendly browse-service download links (`/runs/{runid}/{config}/download/{artifact_relpath}`) so Runs-page session flows do not require explicit bearer JWT headers for artifact download.
+- Contract clarification: cache-hit reuse must validate geopackage artifact signature; legacy non-SQLite `.gpkg` cache entries are treated as invalid and regenerated through cache-miss execution.
+- Contract clarification: rq-engine enqueue selection for cache-hit worker must use validated cache eligibility (artifact format/path integrity), not cache-index presence alone, so invalid legacy entries route to standard execution.
 - Deliverable: fully wired Runs-page control with Jest coverage and updated smoke/route-template invariants.
 
 WP-6: Cutover and legacy retirement

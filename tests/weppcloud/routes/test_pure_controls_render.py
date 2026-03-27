@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 import json
 import re
 from pathlib import Path
@@ -95,7 +96,7 @@ def jinja_env() -> Environment:
         str_units=lambda value: value,
         omni_scenarios=[],
         features_export_submit_url="/rq-engine/api/runs/test-run/test-config/export/features",
-        features_export_download_url_template="/rq-engine/api/runs/test-run/test-config/export/features/__JOB_ID__/download",
+        features_export_download_url_template="/runs/test-run/test-config/download/__ARTIFACT_RELPATH__",
         features_export_catalog_payload={"metadata": {}, "family_order": [], "family_labels": {}, "layers": [], "load_error": None},
         features_export_bootstrap_payload={
             "defaults": {"format": "geopackage", "units": "project", "crs": "wgs", "output_scopes": ["baseline"]},
@@ -300,6 +301,57 @@ def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environm
     assert 'id="checkbox_public"' not in rendered
 
 
+def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("interfaces.htm")
+    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+
+    def _url_for(endpoint: str, **values) -> str:
+        if endpoint == "security.login":
+            return f"/login?next={values.get('next', '')}"
+        if endpoint == "weppcloud_site.interfaces":
+            return "/interfaces/"
+        return f"/mock/{endpoint}"
+
+    rendered = template.render(
+        user=anon_user,
+        current_user=anon_user,
+        url_for=_url_for,
+        runs_counter=Counter(),
+        commafy=lambda value: f"{value:,}",
+        cap_base_url="/cap",
+        cap_asset_base_url="/cap/assets",
+        cap_site_key="test-site-key",
+        rq_engine_token="token",
+    )
+
+    assert ">Login</a> to Bypass Capchas" in rendered
+    assert 'href="/login?next=/interfaces/"' in rendered
+
+
+def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("interfaces.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+
+    def _url_for(endpoint: str, **values) -> str:
+        if endpoint == "security.login":
+            return f"/login?next={values.get('next', '')}"
+        if endpoint == "weppcloud_site.interfaces":
+            return "/interfaces/"
+        return f"/mock/{endpoint}"
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        url_for=_url_for,
+        runs_counter=Counter(),
+        commafy=lambda value: f"{value:,}",
+        rq_engine_token="token",
+    )
+
+    assert "Login to Bypass Capchas" not in rendered
+    assert 'href="/login?next=/interfaces/"' not in rendered
+
+
 def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
@@ -425,7 +477,7 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
     template = jinja_env.get_template("controls/features_export_pure.htm")
     rendered = template.render(
         features_export_submit_url="/rq-engine/api/runs/test-run/test-config/export/features",
-        features_export_download_url_template="/rq-engine/api/runs/test-run/test-config/export/features/__JOB_ID__/download",
+        features_export_download_url_template="/runs/test-run/test-config/download/__ARTIFACT_RELPATH__",
         features_export_catalog_payload={
             "metadata": {},
             "family_order": ["watershed"],
@@ -458,6 +510,8 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
         'id="features_export_results_panel"',
         'id="features_export_status_panel"',
         'id="features_export_status_log"',
+        'class="wc-status-panel"',
+        'class="wc-status-panel__log"',
         'id="features_export_stacktrace_panel"',
         'id="features_export_stacktrace"',
         'id="hint_run_features_export"',

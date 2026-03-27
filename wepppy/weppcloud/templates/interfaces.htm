@@ -62,6 +62,20 @@
   {{ super() }}
   {% if not current_user.is_authenticated %}
   <style>
+    .wc-login-bypass-banner {
+      border: 1px solid var(--wc-color-border);
+      border-left: 4px solid var(--wc-color-primary);
+      border-radius: var(--wc-radius-sm);
+      background: color-mix(in srgb, var(--wc-color-primary) 6%, var(--wc-color-surface));
+      padding: var(--wc-space-sm) var(--wc-space-md);
+      font-size: var(--wc-font-size-sm);
+      line-height: 1.5;
+    }
+
+    .wc-login-bypass-banner a {
+      font-weight: 600;
+    }
+
     .wc-run-button.is-disabled {
       opacity: 0.6;
       filter: grayscale(0.2);
@@ -188,6 +202,12 @@
       <button type="button" class="pure-button pure-button-secondary" data-unitizer="true" role="menuitem">English</button>
     </div>
   </div>
+
+  {% if not current_user.is_authenticated %}
+  <section class="wc-login-bypass-banner" aria-label="Login bypass banner">
+    <a href="{{ url_for('security.login', next=url_for('weppcloud_site.interfaces')) }}">Login</a> to Bypass Capchas
+  </section>
+  {% endif %}
 
   <section class="wc-panel" aria-labelledby="section-disturbed">
     <article class="wc-feature">

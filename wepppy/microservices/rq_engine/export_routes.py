@@ -20,6 +20,7 @@ from wepppy.nodb.mods.features_export import (
 from wepppy.nodb.mods.features_export.cache_key import get_cache_index_entry
 from wepppy.nodb.mods.features_export.service import (
     FeaturesExportServiceError,
+    cache_entry_supports_cache_hit,
     resolve_download_artifact_path,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -176,7 +177,22 @@ def _enqueue_features_export_job(
 ) -> tuple[str, bool]:
     submission = prepare_export_submission(wd, payload)
     cache_entry = get_cache_index_entry(wd, submission.cache_key_parts.cache_key)
-    target_func = run_features_export_cache_hit_rq if cache_entry is not None else run_features_export_rq
+
+    format_token = ""
+    plan = getattr(submission, "plan", None)
+    if plan is not None:
+        request = getattr(plan, "request", None)
+        if request is not None:
+            format_token = str(getattr(request, "format", "") or "")
+    if not format_token:
+        format_token = str(payload.get("format") or "")
+
+    cache_hit_eligible = cache_entry_supports_cache_hit(
+        wd,
+        cache_entry=cache_entry,
+        format_token=format_token,
+    )
+    target_func = run_features_export_cache_hit_rq if cache_hit_eligible else run_features_export_rq
 
     prep = RedisPrep.getInstance(wd)
     prep.remove_timestamp(TaskEnum.run_features_export)
@@ -190,7 +206,7 @@ def _enqueue_features_export_job(
         )
 
     prep.set_rq_job_id("features_export", job.id)
-    return str(job.id), cache_entry is not None
+    return str(job.id), cache_hit_eligible
 
 
 @router.get(

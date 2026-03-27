@@ -679,6 +679,10 @@ def _layer_supports_temporal(
 ) -> bool:
     if temporal is None:
         return True
+    # Empty supported_modes denotes an atemporal layer; temporal selectors do
+    # not filter these resources.
+    if not layer.temporal_supported_modes:
+        return True
     if temporal.mode not in layer.temporal_supported_modes:
         return False
     if temporal.mode != "event" or temporal.event is None:

@@ -220,6 +220,61 @@ var FeaturesExport = (function () {
         return { error: { message: (error && error.message) || "Request failed" } };
     }
 
+    function unwrapResponseBody(response) {
+        var body = response && response.body !== undefined ? response.body : response;
+        if (body && typeof body === "object" && !Array.isArray(body)) {
+            if (!body.error && !body.errors && body.Content && typeof body.Content === "object") {
+                return body.Content;
+            }
+        }
+        return body;
+    }
+
+    function extractJobId(payload, preferredJobKey) {
+        if (!payload || typeof payload !== "object") {
+            return null;
+        }
+
+        var rawJobId = null;
+        if (Object.prototype.hasOwnProperty.call(payload, "job_id")) {
+            rawJobId = payload.job_id;
+        }
+        if ((rawJobId === null || rawJobId === undefined || String(rawJobId).trim() === "") &&
+            payload.status &&
+            typeof payload.status === "object" &&
+            Object.prototype.hasOwnProperty.call(payload.status, "job_id")) {
+            rawJobId = payload.status.job_id;
+        }
+        if ((rawJobId === null || rawJobId === undefined || String(rawJobId).trim() === "") &&
+            Array.isArray(payload.job_ids) &&
+            payload.job_ids.length > 0) {
+            rawJobId = payload.job_ids[0];
+        }
+        if ((rawJobId === null || rawJobId === undefined || String(rawJobId).trim() === "") &&
+            payload.job_ids &&
+            typeof payload.job_ids === "object") {
+            if (preferredJobKey && Object.prototype.hasOwnProperty.call(payload.job_ids, preferredJobKey)) {
+                rawJobId = payload.job_ids[preferredJobKey];
+            } else {
+                var keyedJobIds = Object.keys(payload.job_ids);
+                if (keyedJobIds.length > 0) {
+                    rawJobId = payload.job_ids[keyedJobIds[0]];
+                }
+            }
+        }
+        if ((rawJobId === null || rawJobId === undefined || String(rawJobId).trim() === "") &&
+            payload.Content &&
+            typeof payload.Content === "object") {
+            return extractJobId(payload.Content, preferredJobKey);
+        }
+
+        if (rawJobId === null || rawJobId === undefined) {
+            return null;
+        }
+        var normalized = String(rawJobId).trim();
+        return normalized || null;
+    }
+
     function normalizeArray(value) {
         if (!Array.isArray(value)) {
             return [];
@@ -273,6 +328,22 @@ var FeaturesExport = (function () {
             .replace(/>/g, "&gt;")
             .replace(/\"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+
+    function applySitePrefixToRunsUrl(rawUrl) {
+        var url = rawUrl === undefined || rawUrl === null ? "" : String(rawUrl).trim();
+        if (!url || url.indexOf("/runs/") !== 0) {
+            return url;
+        }
+        var prefix = typeof window.site_prefix === "string" ? window.site_prefix : "";
+        var normalizedPrefix = prefix.replace(/\/+$/, "");
+        if (!normalizedPrefix) {
+            return url;
+        }
+        if (url.indexOf(normalizedPrefix + "/") === 0) {
+            return url;
+        }
+        return normalizedPrefix + url;
     }
 
     function normalizeFormat(formatValue) {
@@ -844,26 +915,25 @@ var FeaturesExport = (function () {
                         var temporal = temporalBadge(layer);
                         var selector = selectorBadge(layer);
                         htmlParts.push(
-                            '<div class="wc-stack-sm" data-features-export-layer data-layer-id="' + escapeHtml(layer.layer_id)
+                            '<div class="wc-stack" data-features-export-layer data-layer-id="' + escapeHtml(layer.layer_id)
                             + '" data-family="' + escapeHtml(layer.family)
                             + '" data-scope-class="' + escapeHtml(layer.scope_class)
                             + '">'
                         );
                         htmlParts.push(
-                            '<label class="wc-toggle-inline">'
+                            '<label class="wc-choice wc-choice--checkbox">'
                             + '<input type="checkbox" data-features-export-action="toggle-layer" value="' + escapeHtml(layer.layer_id) + '"' + checked + '>'
-                            + '<span><strong>' + escapeHtml(layer.label) + '</strong> '
-                            + '<code>' + escapeHtml(layer.layer_id) + '</code>'
-                            + '</span>'
-                            + '</label>'
-                        );
-                        htmlParts.push(
-                            '<p class="wc-field__help">'
+                            + '<span class="wc-choice__body">'
+                            + '<span class="wc-choice__label"><strong>' + escapeHtml(layer.label) + '</strong> '
+                            + '<code>' + escapeHtml(layer.layer_id) + '</code></span>'
+                            + '<span class="wc-choice__description">'
                             + 'geometry: ' + escapeHtml(layer.geometry_type)
                             + ' | scope: ' + escapeHtml(scopeBadge)
                             + ' | temporal: ' + escapeHtml(temporal)
                             + (selector ? ' | selector: ' + escapeHtml(selector) : '')
-                            + '</p>'
+                            + '</span>'
+                            + '</span>'
+                            + '</label>'
                         );
                         htmlParts.push("</div>");
                     });
@@ -1433,6 +1503,7 @@ var FeaturesExport = (function () {
 
             if (controller.downloadRegionEl) {
                 var downloadUrl = result && result.download_url ? String(result.download_url) : "";
+                downloadUrl = applySitePrefixToRunsUrl(downloadUrl);
                 if (downloadUrl) {
                     controller.downloadRegionEl.innerHTML = '<a class="pure-button pure-button-primary" data-features-export-action="download" href="'
                         + escapeHtml(downloadUrl)
@@ -1506,7 +1577,7 @@ var FeaturesExport = (function () {
             controller._completion_jobinfo_job_id = normalizedJobId;
             controller._completion_jobinfo_inflight = Promise.resolve(requestPromise)
                 .then(function (response) {
-                    var body = response && response.body !== undefined ? response.body : response;
+                    var body = unwrapResponseBody(response);
                     if (body && (body.error || body.errors)) {
                         controller.pushResponseStacktrace(controller, body);
                         throw new Error("Features export jobinfo request failed");
@@ -1736,11 +1807,14 @@ var FeaturesExport = (function () {
         }
 
         function readConfigNode() {
+            var sitePrefix = typeof window.site_prefix === "string"
+                ? window.site_prefix.replace(/\/+$/, "")
+                : "";
             var config = {
                 jobKey: "run_features_export",
                 channel: STATUS_CHANNEL,
                 submitUrl: "/rq-engine/api/runs/" + encodeURIComponent(window.runid || window.runId || "") + "/" + encodeURIComponent(window.config || "") + "/export/features",
-                downloadUrlTemplate: "/rq-engine/api/runs/" + encodeURIComponent(window.runid || window.runId || "") + "/" + encodeURIComponent(window.config || "") + "/export/features/__JOB_ID__/download",
+                downloadUrlTemplate: (sitePrefix ? sitePrefix : "") + "/runs/" + encodeURIComponent(window.runid || window.runId || "") + "/" + encodeURIComponent(window.config || "") + "/download/__ARTIFACT_RELPATH__",
                 utmAvailable: false,
                 defaultFormat: "geopackage",
                 defaultUnits: "project",
@@ -1835,26 +1909,38 @@ var FeaturesExport = (function () {
 
             http.postJsonWithSessionToken(controller.state.config.submitUrl, payload, { form: controller.form })
                 .then(function (response) {
-                    var body = response && response.body !== undefined ? response.body : response;
-                    if (!body || body.error || body.errors || !body.job_id) {
-                        controller.pushResponseStacktrace(controller, body || { error: { message: "Submit failed." } });
+                    var body = unwrapResponseBody(response);
+                    var preferredJobKey = controller.state.config && controller.state.config.jobKey
+                        ? String(controller.state.config.jobKey)
+                        : "run_features_export";
+                    var jobId = extractJobId(body, preferredJobKey);
+                    if (!body || body.error || body.errors || !jobId) {
+                        var failurePayload = body || { error: { message: "Submit failed." } };
+                        if (!body || (!body.error && !body.errors && !jobId)) {
+                            failurePayload = {
+                                error: {
+                                    message: "Submit response did not include a job_id.",
+                                    details: body || null
+                                }
+                            };
+                        }
+                        controller.pushResponseStacktrace(controller, failurePayload);
                         showStacktracePanel();
                         controller.disconnect_status_stream(controller);
                         if (controller.events && typeof controller.events.emit === "function") {
                             controller.events.emit("features_export:error", {
                                 job_id: null,
-                                error: body || null
+                                error: failurePayload
                             });
                         }
                         controller.triggerEvent("job:error", {
                             payload: payload,
-                            error: body || null,
+                            error: failurePayload,
                             task: "features_export:submit"
                         });
                         return;
                     }
 
-                    var jobId = String(body.job_id);
                     controller.poll_completion_event = COMPLETION_EVENT;
                     controller.set_rq_job_id(controller, jobId);
                     controller.append_status_message(controller, "Features export job queued: " + jobId);
@@ -1998,21 +2084,42 @@ var FeaturesExport = (function () {
 
         function resolveBootstrapJobId(ctx) {
             var helper = window.WCControllerBootstrap || null;
-            var resolvedByHelper = helper && typeof helper.resolveJobId === "function"
-                ? helper.resolveJobId(ctx, "run_features_export")
-                : null;
-            if (resolvedByHelper) {
-                return String(resolvedByHelper);
+            var configuredJobKey = controller.state.config && controller.state.config.jobKey
+                ? String(controller.state.config.jobKey)
+                : "run_features_export";
+            var jobKeyCandidates = uniqueStrings([
+                configuredJobKey,
+                configuredJobKey.endsWith("_rq") ? configuredJobKey.slice(0, -3) : configuredJobKey + "_rq",
+                "run_features_export",
+                "run_features_export_rq"
+            ]);
+
+            if (helper && typeof helper.resolveJobId === "function") {
+                for (var i = 0; i < jobKeyCandidates.length; i += 1) {
+                    var resolvedByHelper = helper.resolveJobId(ctx, jobKeyCandidates[i]);
+                    if (resolvedByHelper) {
+                        return String(resolvedByHelper);
+                    }
+                }
             }
 
             var controllerContext = getControllerContext(ctx);
-            if (controllerContext && controllerContext.job_id) {
-                return String(controllerContext.job_id);
+            var contextJobId = extractJobId(controllerContext, configuredJobKey);
+            if (contextJobId) {
+                return contextJobId;
             }
 
             var jobIds = ctx && (ctx.jobIds || ctx.jobs);
-            if (jobIds && typeof jobIds === "object" && jobIds.run_features_export) {
-                return String(jobIds.run_features_export);
+            if (jobIds && typeof jobIds === "object") {
+                for (var index = 0; index < jobKeyCandidates.length; index += 1) {
+                    var key = jobKeyCandidates[index];
+                    if (Object.prototype.hasOwnProperty.call(jobIds, key) && jobIds[key] !== null && jobIds[key] !== undefined) {
+                        var normalized = String(jobIds[key]).trim();
+                        if (normalized) {
+                            return normalized;
+                        }
+                    }
+                }
             }
             return null;
         }

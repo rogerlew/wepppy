@@ -21,6 +21,12 @@ WP-5 wires the new Features Export mod into the Runs page so users can discover 
 - [x] (2026-03-27 00:02Z) Ran requested validation gates and full test sweep; all commands passed.
 - [x] (2026-03-27 00:06Z) Ran `reviewer` + `qa_reviewer` agent loops, fixed all high/medium findings, and confirmed no remaining high/medium findings.
 - [x] (2026-03-27 00:10Z) Updated WP-5 status block in `wepppy/nodb/mods/features_export/specification.md` with ExecPlan path/status and implementation clarifications.
+- [x] (2026-03-27 01:04Z) Fixed post-integration submit regression (`DependencyResolutionError: nodb_ref locator requires an explicit nodb_ref_resolver callback`) by wiring service-level nodb_ref resolution and adding regression coverage.
+- [x] (2026-03-27 11:22Z) Fixed temporal compatibility regression so atemporal layers (`temporal.supported_modes=[]`) are not excluded when a request includes temporal selectors; added planner regression coverage and spec clarification.
+- [x] (2026-03-27 12:18Z) Realigned Features Export status panel/job-id handling with canonical controller patterns: switched template to `status_panel_options` (`wc-status-panel` theming) and hardened submit/bootstrap job-id resolution for wrapped/keyed payload variants.
+- [x] (2026-03-27 12:44Z) Brought Features Export control inputs/layout into UI-contract compliance by replacing ad-hoc radio/checkbox markup with canonical choice controls and updating JS-rendered catalog layer checkboxes to `wc-choice` styling.
+- [x] (2026-03-27 14:22Z) Fixed artifact delivery integrity regressions: features-export job results now emit browser-session `browse/download` URLs, stale cache-hit `.gpkg` artifacts with non-SQLite signatures are invalidated/rebuilt, and geodatabase staging now uses real GeoPackage bytes instead of synthesized JSON payload bytes.
+- [x] (2026-03-27 16:18Z) Closed reviewer follow-up findings: switched GeoPackage container creation to GDAL/OGR-backed output (interoperable with `f_esri` conversion), enforced enqueue-time cache-hit eligibility checks so invalid cache entries route to full worker execution, and fixed GeoPackage temp-file cleanup/dead-code issues.
 
 ## Surprises & Discoveries
 
@@ -30,6 +36,20 @@ WP-5 wires the new Features Export mod into the Runs page so users can discover 
   Evidence: `controller-regression.spec.js` expects enabled action before click; `features_export` needed new `prepareFeaturesExport` helper in `controller-cases.js`.
 - Observation: Full-suite route-contract guards enforce frozen artifact parity beyond WP-5 files; adding new agent-facing routes required synchronized updates to endpoint inventory/checklist and response-rule catalog.
   Evidence: `tests/tools/test_endpoint_inventory_guard.py`, `tests/tools/test_route_contract_checklist_guard.py`, and `tests/microservices/test_rq_engine_openapi_contract.py` failed until artifacts/rules were aligned.
+- Observation: Real submit flow surfaced a runtime-only dependency resolver gap not exercised by existing route tests: `prepare_export_submission` invoked dependency snapshot building without `nodb_ref_resolver`.
+  Evidence: live traceback at `wepppy/nodb/mods/features_export/dependency_tracker.py` raising `DependencyResolutionError` for `nodb_ref` during `/export/features` submit.
+- Observation: Planner treated `temporal.supported_modes=[]` as "supports nothing" rather than "atemporal", which caused legitimate static layers to be dropped with `layer_unavailable` warnings and produced nearly-empty artifacts.
+  Evidence: live run warnings for `landuse.dominant`, `soils.dominant`, `watershed.channels`, and `watershed.subcatchments` under `annual_average`.
+- Observation: Features Export used a custom status panel override that diverged from canonical `wc-status-panel` markup and had stricter-than-canonical submit parsing (`body.job_id` only), making job-id rendering brittle when payload wrappers differ.
+  Evidence: live UI submit failures with missing job-id surfacing despite successful/wrapped backend contracts in related controllers.
+- Observation: Returning `download_url` as `/rq-engine/api/.../download` from job results is incompatible with normal browser clicks because rq-engine download endpoints require explicit bearer JWT headers.
+  Evidence: live UI/browser attempts returned `401 Missing Authorization header` for rq-engine features-export download links.
+- Observation: Legacy cache entries created before GeoPackage writer hardening can persist JSON bytes with `.gpkg` extension, causing cache-hit reuse of invalid artifacts after code upgrades.
+  Evidence: live artifact under `export/features/artifacts/*/features_export.gpkg` decoded as JSON text and was only served when `cache_hit=true`.
+- Observation: Validating cache eligibility only inside the worker is insufficient when submit-time queue selection forces `run_features_export_cache_hit_rq`; stale/invalid cache entries can still fail before fallback logic executes.
+  Evidence: rq-engine enqueue selected cache-hit worker from cache-index presence alone while service-level invalidation rejected the same cache entry under `force_cache_hit=True`.
+- Observation: Manual SQLite synthesis for `.gpkg` passed byte-level checks but produced containers not readable by GDAL `GPKG` driver in conversion flow.
+  Evidence: direct `f_esri.c2c_gpkg_to_gdb` probe failed against synthesized output and succeeded after OGR-backed GeoPackage creation.
 
 ## Decision Log
 
@@ -42,6 +62,27 @@ WP-5 wires the new Features Export mod into the Runs page so users can discover 
 - Decision: Treat `POST /api/runs/{runid}/{config}/export/features` as `rq:export` with required `415` in frozen contract artifacts and response-rule enforcement.
   Rationale: Route implementation and OpenAPI contract are JSON-only; guard artifacts must match canonical behavior to avoid drift and false failures.
   Date/Author: 2026-03-26 / Codex
+- Decision: Resolve catalog `nodb_ref` locators in service orchestration by supplying a deterministic resolver callback (`watershed.*` support) to `build_dependency_snapshot` and returning canonical service errors when unsupported tokens are encountered.
+  Rationale: Dependency tracking contract already requires explicit resolver callbacks for `nodb_ref`; wiring the callback in service is the minimal, explicit fix that preserves strict failure semantics.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Interpret empty `temporal.supported_modes` as an explicit atemporal contract and bypass temporal-mode compatibility filtering for those layers.
+  Rationale: Catalog uses `supported_modes: []` for static families, and temporal selectors should not suppress atemporal resources.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Use `control_shell` `status_panel_options` for Features Export status markup and accept canonical job-id envelope variants (`job_id`, wrapped `Content`, keyed `job_ids`) in submit/bootstrap flows.
+  Rationale: Keeps Features Export consistent with shared theming and resilient to canonical response/context payload shapes already used across WEPPcloud controllers.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Emit completed features-export `download_url` values as browse-service paths (`/runs/{runid}/{config}/download/{artifact_relpath}`) rather than rq-engine job download endpoints.
+  Rationale: Runs-page browser flows authenticate via session/cookies; browse/download is the canonical browser-facing download surface and avoids bearer-token-only failures.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Validate cached geopackage artifacts on cache-hit reuse with a SQLite signature check and fall back to cache-miss regeneration when invalid.
+  Rationale: Prevents stale legacy JSON-labeled `.gpkg` artifacts from being reused after writer contract changes while keeping cache behavior deterministic for valid artifacts.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Generate GeoPackage artifacts with GDAL/OGR (`GPKG` driver, aspatial attribute layers) rather than hand-crafted SQLite schema assembly.
+  Rationale: Ensures generated containers are interoperable with downstream GDAL/f_esri conversion paths and avoids brittle spec/schema drift in manual SQL.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Gate cache-hit worker enqueue on validated cache-entry usability (`cache_entry_supports_cache_hit`) instead of cache-index presence alone.
+  Rationale: Aligns rq-engine queue selection with service-level cache validation and prevents deterministic failures on stale/invalid cache entries.
+  Date/Author: 2026-03-27 / Codex
 
 ## Outcomes & Retrospective
 
@@ -124,6 +165,9 @@ Validation commands executed (all pass):
 - `wctl run-pytest tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1`
 - `wctl check-test-stubs`
 - `wctl run-pytest tests --maxfail=1`
+- `wctl run-pytest tests/nodb/mods/test_features_export_service.py --maxfail=1`
+- `wctl run-pytest tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1`
+- `wctl run-pytest tests/nodb/mods/test_features_export_exporters.py --maxfail=1`
 
 Reviewer outcomes:
 - `reviewer` agent: reported one medium checklist contract mismatch; fixed via checklist/rules alignment; re-review reported no high/medium findings.
@@ -137,3 +181,8 @@ No new external dependencies are planned. WP-5 relies on existing WEPPcloud help
 
 - 2026-03-26 (Codex): Created WP-5 ExecPlan with implementation sequence, validation gates, and reviewer loop requirements.
 - 2026-03-27 (Codex): Marked implementation complete; recorded delivered wiring/template/controller/tests, review-loop fixes, guard-artifact alignments, and final validation outcomes.
+- 2026-03-27 (Codex): Recorded and fixed post-integration nodb_ref dependency resolver regression with added service-level tests.
+- 2026-03-27 (Codex): Recorded and fixed atemporal-layer temporal filtering regression in planner; added regression test and updated temporal semantics contract note.
+- 2026-03-27 (Codex): Recorded canonical UI/theming + job-id parsing hardening for Features Export submit/bootstrap paths with updated Jest/route template coverage.
+- 2026-03-27 (Codex): Recorded browse/download URL contract update for completed result links and cache-hit invalidation for legacy non-SQLite `.gpkg` artifacts; updated exporter/service tests accordingly.
+- 2026-03-27 (Codex): Recorded GDAL/OGR GeoPackage writer cutover, enqueue-time cache-hit eligibility gating, and GeoPackage temp-file lifecycle fixes driven by reviewer high/medium findings.

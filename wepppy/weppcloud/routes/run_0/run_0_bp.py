@@ -1142,7 +1142,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         features_export_utm_epsg=features_export_utm_epsg,
         features_export_submit_url=f"/rq-engine/api/runs/{runid}/{config}/export/features",
         features_export_download_url_template=(
-            f"/rq-engine/api/runs/{runid}/{config}/export/features/__JOB_ID__/download"
+            f"{current_app.config.get('SITE_PREFIX', '').rstrip('/')}/runs/{runid}/{config}/download/__ARTIFACT_RELPATH__"
         ),
     )
     return context

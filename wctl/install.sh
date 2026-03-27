@@ -11,7 +11,7 @@ VENDOR_DIR="${PROJECT_DIR}/.wctl/vendor"
 usage() {
   cat <<'USAGE' >&2
 Usage:
-  ./wctl/install.sh [dev|prod|wepp1|worker]
+  ./wctl/install.sh [dev|hpc|prod|wepp1|worker]
 
 Configure the wctl Typer CLI to target the selected docker compose file.
 USAGE
@@ -34,6 +34,10 @@ ENVIRONMENT="${1:-dev}"
 case "${ENVIRONMENT}" in
   dev)
     COMPOSE_RELATIVE_PATH="docker/docker-compose.dev.yml"
+    COMPOSE_EXTRA_RELATIVE_PATH=""
+    ;;
+  hpc)
+    COMPOSE_RELATIVE_PATH="docker/docker-compose.dev.hpc.yml"
     COMPOSE_EXTRA_RELATIVE_PATH=""
     ;;
   prod)

@@ -5,9 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path
+import sqlite3
+from urllib.parse import quote
 from uuid import uuid4
 
+from wepppy.nodb.core import Watershed
 from wepppy.nodb.unitizer import Unitizer
 
 from .cache_key import CacheKeyParts, build_cache_key, get_cache_index_entry, upsert_cache_index_entry
@@ -28,6 +32,7 @@ FEATURES_EXPORT_ROOT_RELPATH = "export/features"
 FEATURES_EXPORT_ARTIFACTS_RELPATH = "export/features/artifacts"
 FEATURES_EXPORT_JOBS_RELPATH = "export/features/jobs"
 FEATURES_EXPORT_MANIFEST_NAME = "manifest.json"
+_GPKG_APPLICATION_ID = 0x47504B47
 
 
 class FeaturesExportServiceError(RuntimeError):
@@ -75,6 +80,7 @@ def prepare_export_submission(
         resolved_plan,
         layer_catalog,
         wd_path,
+        nodb_ref_resolver=_resolve_nodb_ref_relpath,
     )
 
     unitizer_preferences_fingerprint = _resolve_unitizer_preferences_fingerprint(
@@ -95,6 +101,58 @@ def prepare_export_submission(
         cache_key_parts=cache_key_parts,
         unitizer_preferences_fingerprint=unitizer_preferences_fingerprint,
     )
+
+
+def _resolve_nodb_ref_relpath(wd: str, controller: str, attribute: str) -> str | Path:
+    wd_path = Path(wd).resolve()
+    controller_key = str(controller).strip().lower()
+    attribute_key = str(attribute).strip()
+
+    if not controller_key or not attribute_key:
+        raise FeaturesExportServiceError(
+            "Invalid nodb_ref locator tokens.",
+            status_code=400,
+            code="validation_error",
+            details=f"controller={controller!r}, attribute={attribute!r}",
+        )
+
+    if controller_key != "watershed":
+        raise FeaturesExportServiceError(
+            f"Unsupported nodb_ref controller {controller_key!r}.",
+            status_code=400,
+            code="validation_error",
+            details="Only nodb:watershed.<attribute> locators are supported.",
+        )
+
+    watershed = Watershed.getInstance(str(wd_path))
+    if watershed is None:
+        raise FeaturesExportServiceError(
+            "Watershed controller is unavailable for nodb_ref resolution.",
+            status_code=404,
+            code="not_found",
+            details=f"Unable to hydrate watershed controller for {wd_path}.",
+        )
+
+    if not hasattr(watershed, attribute_key):
+        raise FeaturesExportServiceError(
+            f"nodb_ref attribute {attribute_key!r} is not available on controller {controller_key!r}.",
+            status_code=400,
+            code="validation_error",
+        )
+
+    resolved_value = getattr(watershed, attribute_key)
+    if callable(resolved_value):
+        resolved_value = resolved_value()
+
+    if not isinstance(resolved_value, (str, Path)) or not str(resolved_value).strip():
+        raise FeaturesExportServiceError(
+            f"nodb_ref attribute {attribute_key!r} did not resolve to a path.",
+            status_code=404,
+            code="not_found",
+            details=f"nodb:{controller_key}.{attribute_key} returned {resolved_value!r}.",
+        )
+
+    return resolved_value
 
 
 def execute_features_export(
@@ -123,6 +181,14 @@ def execute_features_export(
             code="not_found",
             details=f"No cache index entry found for key {cache_key}.",
         )
+
+    if cache_entry is not None:
+        if not _cache_entry_has_valid_artifact_for_format(
+            wd_path,
+            cache_entry,
+            format_token=submission.plan.request.format,
+        ):
+            cache_entry = None
 
     if cache_entry is not None:
         return _finalize_cache_hit(
@@ -220,6 +286,24 @@ def load_job_manifest(wd: str | Path, job_id: str) -> dict[str, object] | None:
     return parsed
 
 
+def cache_entry_supports_cache_hit(
+    wd: str | Path,
+    *,
+    cache_entry: dict[str, object] | None,
+    format_token: str,
+) -> bool:
+    """Return whether one cache entry can safely serve a forced cache-hit flow."""
+
+    if not isinstance(cache_entry, dict):
+        return False
+    wd_path = Path(wd).resolve()
+    return _cache_entry_has_valid_artifact_for_format(
+        wd_path,
+        cache_entry,
+        format_token=format_token,
+    )
+
+
 def _run_cache_miss_export(
     wd: Path,
     *,
@@ -283,7 +367,7 @@ def _run_cache_miss_export(
     return {
         "artifact_id": artifact_id,
         "artifact_relpath": artifact_relpath,
-        "download_url": _download_url(runid, config, job_id),
+        "download_url": _download_url(runid, config, artifact_relpath),
         "cache_hit": False,
         "source_job_id": None,
         "manifest_relpath": job_manifest_relpath,
@@ -361,7 +445,7 @@ def _finalize_cache_hit(
     return {
         "artifact_id": artifact_id,
         "artifact_relpath": artifact_relpath,
-        "download_url": _download_url(runid, config, job_id),
+        "download_url": _download_url(runid, config, artifact_relpath),
         "cache_hit": True,
         "source_job_id": source_job_id,
         "manifest_relpath": job_manifest_relpath,
@@ -578,8 +662,70 @@ def _artifact_relpath_from_manifest(manifest: dict[str, object]) -> str | None:
     return token
 
 
-def _download_url(runid: str, config: str, job_id: str) -> str:
-    return f"/rq-engine/api/runs/{runid}/{config}/export/features/{job_id}/download"
+def _cache_entry_has_valid_artifact_for_format(
+    wd: Path,
+    cache_entry: dict[str, object],
+    *,
+    format_token: str,
+) -> bool:
+    artifact_relpath = _cache_entry_artifact_relpath(cache_entry)
+    if artifact_relpath is None:
+        return False
+
+    artifact_path = _resolve_relpath(wd, artifact_relpath)
+    if not artifact_path.is_file():
+        return False
+
+    normalized_format = format_token.strip().lower()
+    if normalized_format == "f_esri":
+        normalized_format = "geodatabase"
+
+    if normalized_format == "geopackage":
+        return _is_valid_cached_geopackage(artifact_path)
+
+    return True
+
+
+def _is_valid_cached_geopackage(artifact_path: Path) -> bool:
+    try:
+        with artifact_path.open("rb") as handle:
+            if not handle.read(16).startswith(b"SQLite format 3\x00"):
+                return False
+    except OSError:
+        return False
+
+    try:
+        with sqlite3.connect(str(artifact_path)) as conn:
+            application_id_row = conn.execute("PRAGMA application_id").fetchone()
+            if not application_id_row:
+                return False
+            try:
+                application_id = int(application_id_row[0])
+            except (TypeError, ValueError):
+                return False
+            if application_id != _GPKG_APPLICATION_ID:
+                return False
+
+            gpkg_contents_exists = conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='gpkg_contents'"
+            ).fetchone()
+            return gpkg_contents_exists is not None
+    except sqlite3.Error:
+        return False
+
+
+def _download_url(runid: str, config: str, artifact_relpath: str) -> str:
+    browse_path = f"/runs/{runid}/{config}/download/{quote(artifact_relpath, safe='/')}"
+    return f"{_site_prefix()}{browse_path}"
+
+
+def _site_prefix() -> str:
+    token = str(os.getenv("SITE_PREFIX", "/weppcloud")).strip()
+    if not token or token == "/":
+        return ""
+    if not token.startswith("/"):
+        token = f"/{token}"
+    return token.rstrip("/")
 
 
 def _job_manifest_relpath(job_id: str) -> str:
@@ -669,6 +815,7 @@ __all__ = [
     "FEATURES_EXPORT_ROOT_RELPATH",
     "FeaturesExportServiceError",
     "FeaturesExportSubmission",
+    "cache_entry_supports_cache_hit",
     "execute_features_export",
     "load_job_manifest",
     "prepare_export_submission",

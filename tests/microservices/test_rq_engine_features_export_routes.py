@@ -132,9 +132,13 @@ def test_features_export_submit_cache_hit_enqueues_finalize_job(monkeypatch: pyt
     monkeypatch.setattr(
         export_routes,
         "prepare_export_submission",
-        lambda wd, payload: SimpleNamespace(cache_key_parts=SimpleNamespace(cache_key="cache-key")),
+        lambda wd, payload: SimpleNamespace(
+            cache_key_parts=SimpleNamespace(cache_key="cache-key"),
+            plan=SimpleNamespace(request=SimpleNamespace(format="geopackage")),
+        ),
     )
     monkeypatch.setattr(export_routes, "get_cache_index_entry", lambda wd, cache_key: {"artifact_id": "artifact-1"})
+    monkeypatch.setattr(export_routes, "cache_entry_supports_cache_hit", lambda wd, **kwargs: True)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -150,6 +154,40 @@ def test_features_export_submit_cache_hit_enqueues_finalize_job(monkeypatch: pyt
     payload = response.json()
     assert payload["job_id"] == "features-job-33"
     assert captured["func"] is export_routes.run_features_export_cache_hit_rq
+
+
+def test_features_export_submit_invalid_cache_entry_falls_back_to_full_worker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    captured = _stub_queue(monkeypatch, job_id="features-job-44")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        export_routes,
+        "prepare_export_submission",
+        lambda wd, payload: SimpleNamespace(
+            cache_key_parts=SimpleNamespace(cache_key="cache-key"),
+            plan=SimpleNamespace(request=SimpleNamespace(format="geopackage")),
+        ),
+    )
+    monkeypatch.setattr(export_routes, "get_cache_index_entry", lambda wd, cache_key: {"artifact_id": "artifact-1"})
+    monkeypatch.setattr(export_routes, "cache_entry_supports_cache_hit", lambda wd, **kwargs: False)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/export/features",
+            json={
+                "format": "geopackage",
+                "units": "si",
+                "layers": ["watershed.subcatchments"],
+            },
+        )
+
+    assert response.status_code == 202
+    payload = response.json()
+    assert payload["job_id"] == "features-job-44"
+    assert captured["func"] is export_routes.run_features_export_rq
 
 
 def test_features_export_submit_invalid_selector_payload_returns_400(

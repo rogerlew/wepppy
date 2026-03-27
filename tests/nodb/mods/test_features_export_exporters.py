@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
+import sqlite3
 import zipfile
 
 import pytest
@@ -143,11 +143,20 @@ def test_geopackage_writer_emits_single_multilayer_container(tmp_path: Path, cat
     assert artifact.packaged_member_relpaths == ("features_export.gpkg",)
     assert len({entry.relpath for entry in artifact.layer_outputs}) == 1
 
-    gpkg_payload = json.loads(Path(artifact.artifact_path).read_text(encoding="utf-8"))
-    assert gpkg_payload["format"] == "geopackage"
-    assert [entry["output_layer_id"] for entry in gpkg_payload["layers"]] == [
+    with sqlite3.connect(artifact.artifact_path) as conn:
+        contents_rows = conn.execute(
+            "SELECT identifier, data_type FROM gpkg_contents ORDER BY identifier"
+        ).fetchall()
+
+    assert [row[0] for row in contents_rows] == [
         layer.output_layer_id for layer in sorted(plan.layers, key=lambda item: item.output_layer_id)
     ]
+    assert {row[1] for row in contents_rows} == {"attributes"}
+
+    ogr_module = pytest.importorskip("osgeo.ogr")
+    dataset = ogr_module.Open(artifact.artifact_path)
+    assert dataset is not None
+    assert dataset.GetLayerCount() == len(plan.layers)
 
 
 def test_geodatabase_writer_uses_f_esri_conversion_boundary(tmp_path: Path, catalog) -> None:
@@ -164,6 +173,11 @@ def test_geodatabase_writer_uses_f_esri_conversion_boundary(tmp_path: Path, cata
     def converter(gpkg_path: str, gdb_path: str) -> str:
         calls.append((gpkg_path, gdb_path))
         assert gpkg_path.endswith("features_export.geodatabase_source.gpkg")
+        assert Path(gpkg_path).read_bytes().startswith(b"SQLite format 3\x00")
+        ogr_module = pytest.importorskip("osgeo.ogr")
+        dataset = ogr_module.Open(gpkg_path)
+        assert dataset is not None
+        assert dataset.GetLayerCount() == len(plan.layers)
         gdb_dir = Path(gdb_path)
         gdb_dir.mkdir(parents=True, exist_ok=True)
         (gdb_dir / "a.gdbtable").write_text("stub", encoding="utf-8")

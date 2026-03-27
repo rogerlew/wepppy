@@ -12,12 +12,12 @@ from .base import (
     ExportWriter,
     ExportWriterRequest,
     FeaturesExportWriterError,
-    build_container_payload_bytes,
     container_layer_outputs,
     merge_warnings,
     payload_warnings,
     resolve_layer_payload_pairs,
 )
+from .geopackage import GeopackageExportWriter
 
 BackendAvailabilityCheck = cabc.Callable[[], bool]
 GpkgToGdbConverter = cabc.Callable[[str, str], object]
@@ -31,6 +31,7 @@ class GeodatabaseExportWriter(ExportWriter):
     """Write one FileGDB zip artifact using the canonical f_esri conversion path."""
 
     format_token = "geodatabase"
+    _gpkg_staging_writer = GeopackageExportWriter()
 
     def __init__(
         self,
@@ -53,7 +54,7 @@ class GeodatabaseExportWriter(ExportWriter):
         layer_pairs = resolve_layer_payload_pairs(request)
         gpkg_staging_path = artifact_dir / f"{request.artifact_basename}.geodatabase_source.gpkg"
         gpkg_staging_path.write_bytes(
-            build_container_payload_bytes("geopackage", layer_pairs)
+            self._gpkg_staging_writer.build_container_bytes(request, layer_pairs)
         )
 
         gdb_container_path = artifact_dir / f"{request.artifact_basename}.gdb"

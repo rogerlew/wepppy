@@ -159,7 +159,7 @@ def test_resolve_export_plan_rejects_when_temporal_mode_excludes_all_layers(cata
     payload = {
         "format": "geoparquet",
         "units": "si",
-        "layers": ["watershed.channels"],
+        "layers": ["wepp.summary.channels"],
         "temporal": {
             "mode": "event",
             "event": {"selector": "date", "dates": ["2025-01-01"]},
@@ -170,6 +170,32 @@ def test_resolve_export_plan_rejects_when_temporal_mode_excludes_all_layers(cata
         resolve_export_plan(payload, catalog)
 
     assert any(issue.code == "no_exportable_layers" for issue in exc.value.issues)
+
+
+def test_resolve_export_plan_keeps_atemporal_layers_when_temporal_mode_is_selected(catalog) -> None:
+    payload = {
+        "format": "geoparquet",
+        "units": "si",
+        "layers": [
+            "landuse.dominant",
+            "soils.dominant",
+            "watershed.channels",
+            "watershed.subcatchments",
+        ],
+        "temporal": {
+            "mode": "annual_average",
+        },
+    }
+
+    plan = resolve_export_plan(payload, catalog)
+
+    assert [layer.output_layer_id for layer in plan.layers] == [
+        "shared__landuse.dominant",
+        "shared__soils.dominant",
+        "shared__watershed.channels",
+        "shared__watershed.subcatchments",
+    ]
+    assert plan.warnings == ()
 
 
 def test_resolve_export_plan_is_deterministic_for_ordering_and_serialization(catalog) -> None:

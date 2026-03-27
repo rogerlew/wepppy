@@ -106,7 +106,7 @@ function buildFixtureHtml() {
                 data-features-export-job-key="run_features_export"
                 data-features-export-channel="features_export"
                 data-features-export-submit-url="/rq-engine/api/runs/test-run/test-cfg/export/features"
-                data-features-export-download-url-template="/rq-engine/api/runs/test-run/test-cfg/export/features/__JOB_ID__/download"
+                data-features-export-download-url-template="/runs/test-run/test-cfg/download/__ARTIFACT_RELPATH__"
                 data-features-export-utm-available="true"
                 data-features-export-default-format="geopackage"
                 data-features-export-default-units="project"
@@ -224,9 +224,9 @@ function buildFixtureHtml() {
                 <ul data-features-export-region="warnings"></ul>
             </aside>
 
-            <section id="features_export_status_panel" data-status-panel aria-live="polite">
+            <section id="features_export_status_panel" class="wc-status-panel" data-status-panel aria-live="polite">
                 <p id="features_export_message" data-features-export-region="message">Waiting for export selection.</p>
-                <div id="features_export_status_log" data-status-log role="log"></div>
+                <div id="features_export_status_log" class="wc-status-panel__log" data-status-log role="log"></div>
             </section>
 
             <details id="features_export_stacktrace_panel" data-stacktrace-panel hidden>
@@ -289,6 +289,7 @@ describe("FeaturesExport controller", () => {
         delete window.runid;
         delete window.runId;
         delete window.config;
+        delete window.site_prefix;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -385,6 +386,9 @@ describe("FeaturesExport controller", () => {
     test("submit posts JSON and completion fetches jobinfo once per cycle with rendered results", async () => {
         document.body.innerHTML = buildFixtureHtml();
         controller.bootstrap({});
+        window.site_prefix = "/weppcloud";
+        var responseDownloadUrl = "/runs/test-run/test-cfg/download/export/features/artifacts/artifact-123/features_export%20result.gpkg";
+        var expectedDownloadUrl = "/weppcloud" + responseDownloadUrl;
 
         var layer = document.querySelector('[data-features-export-action="toggle-layer"][value="watershed.subcatchments"]');
         layer.checked = true;
@@ -393,7 +397,7 @@ describe("FeaturesExport controller", () => {
         httpMock.requestWithSessionToken.mockResolvedValueOnce({
             body: {
                 result: {
-                    download_url: "/download/features/job-101",
+                    download_url: responseDownloadUrl,
                     artifact_id: "artifact-123",
                     cache_hit: true,
                     source_job_id: "job-source-7",
@@ -434,7 +438,7 @@ describe("FeaturesExport controller", () => {
         );
 
         expect(document.querySelector('[data-features-export-region="download"]').innerHTML).toContain(
-            "/download/features/job-101"
+            'href="' + expectedDownloadUrl + '"'
         );
         expect(document.querySelector('[data-features-export-region="artifact-meta"]').innerHTML).toContain(
             "artifact-123"
@@ -444,6 +448,43 @@ describe("FeaturesExport controller", () => {
         );
         expect(document.getElementById("features_export_result_state").textContent).toContain("Partial success");
         expect(document.getElementById("hint_run_features_export").textContent).toContain("job-101");
+    });
+
+    test("submit accepts canonical wrapped job_id payloads", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var layer = document.querySelector('[data-features-export-action="toggle-layer"][value="watershed.subcatchments"]');
+        layer.checked = true;
+        layer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        httpMock.postJsonWithSessionToken.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    job_ids: {
+                        run_features_export_rq: "job-303"
+                    }
+                }
+            }
+        });
+
+        document
+            .getElementById("features_export_form")
+            .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(controller, "job-303");
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+    });
+
+    test("bootstrap resolves legacy and rq-suffixed job keys", () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({ jobIds: { run_features_export_rq: "job-bootstrap-rq" } });
+        expect(baseInstance.set_rq_job_id).toHaveBeenLastCalledWith(controller, "job-bootstrap-rq");
+
+        controller.bootstrap({ jobIds: { run_features_export: "job-bootstrap-plain" } });
+        expect(baseInstance.set_rq_job_id).toHaveBeenLastCalledWith(controller, "job-bootstrap-plain");
     });
 
     test("validation and async failures route to stacktrace surfaces", async () => {
