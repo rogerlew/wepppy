@@ -11,7 +11,7 @@ from .dependency_tracker import DependencySnapshot
 from .exporters.base import ExportArtifactMetadata
 
 MANIFEST_SCHEMA_VERSION = 1
-MANIFEST_GENERATOR_VERSION = "features-export-wp8-key-first"
+MANIFEST_GENERATOR_VERSION = "features-export-wp12-temporal-wide"
 
 
 def build_export_manifest(

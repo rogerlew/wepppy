@@ -420,7 +420,7 @@ Residual risk:
 ## 8. Temporal Semantics
 Temporal schema policy:
 - Preserve native source schemas and temporal grain.
-- Do not force long-table normalization.
+- For `event` and `yearly` exports, materialize temporal measures in wide form at carrier geometry grain (one spatial feature row per canonical key).
 
 Supported modes:
 - `annual_average`
@@ -441,7 +441,8 @@ Global temporal control model:
 `yearly` rules:
 - If `year_selection` is omitted, default to `all`.
 - Export includes every available year after global year filters are applied.
-- No implicit annual aggregation is permitted in `yearly` mode.
+- `yearly` wide materialization pivots selected measures to year-suffixed columns (for example `runoff_yr2015_mm`).
+- When multiple rows exist for one `{key, year}` slice, numeric measures are explicitly reduced by summation before pivoting; conflicting non-numeric slices fail with `materialization_error`.
 - If year filtering excludes all years for a layer, that layer is dropped with `layer_unavailable` (or 400 if no layers remain).
 
 `event` rules:
@@ -452,8 +453,9 @@ Global temporal control model:
 - Required sources missing selector-compatible columns must fail with `materialization_error`.
 - Required sources with selector-compatible columns but zero matched rows remain materialized as empty event cores; export succeeds with canonical geometry rows and null event metrics.
 - Optional sources that cannot satisfy the active event selector are skipped.
-- Event-mode carrier cores may retain one-to-many rows per geometry key after selector filtering; geometry attachment must preserve those rows without collapsing event records.
-- If two event-mode inputs both remain non-unique on the same carrier join key (unresolved many-to-many), materialization must fail with `materialization_error`.
+- Event materialization pivots selected measures to selector-token-suffixed columns (for example `q_2015_01_16_mm` or `runoff_rp2_mm`) so output geometry remains normalized to canonical carrier feature counts.
+- If event slices contain duplicate OFE rows, the terminal OFE (`max(ofe_id)`) is selected as the deterministic per-slice representative before pivoting.
+- Remaining conflicting duplicates for the same `{key, event_token, measure}` slice are contract failures (`materialization_error`).
 
 Mixed-layer temporal compatibility:
 - Temporal compatibility is layer-specific and driven by each layer's catalog `temporal.supported_modes` and `temporal.mode_rules`.
@@ -591,6 +593,7 @@ Back-compat behavior for existing saved configs:
 - Users can include/exclude columns per selected dataset; required identity/join columns remain enforced.
 - `yearly` mode exports every available year by default (`year_selection=all`) unless globally filtered.
 - Global year selection applies consistently across all applicable selected datasets.
+- `event` and `yearly` exports keep carrier geometry normalized (no long-row duplication) and append temporal selector tokens to measure column names.
 - Polling and terminal status behavior align with canonical RQ contract (`finished` success).
 - Warnings are present in both `jobinfo.result.warnings` and `manifest.json`.
 - Cache hits return 202 with a new lightweight job ID, `cache_hit=true`, and reusable artifact delivery.
@@ -764,6 +767,7 @@ WP-8: Key-first carrier materialization rewrite and module maintainability refac
 - Contract clarification: no temporary feature flag is allowed; the rewritten key-first path becomes the default implementation.
 - Contract clarification: discovery-driven schema extraction (column labels/descriptions/units) is required input to both UI payloads and column-selection validation for layers without explicit catalog `columns`.
 - Contract clarification: baseline default exports must materialize only `subcatchments` and `channels` carrier layers with carrier-grain row counts.
+- Contract clarification: temporal `event`/`yearly` exports must remain carrier-grain spatially and encode temporal selectors in wide measure column names (no long-format feature duplication).
 - Deliverable: maintainable and performant default export path with deterministic cardinality, deterministic naming, and verified small-watershed runtime targets.
 
 WP-9: Service quality compliance closure and strictness coverage completion (planned 2026-03-28)

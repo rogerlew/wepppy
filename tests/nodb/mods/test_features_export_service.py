@@ -28,9 +28,15 @@ from wepppy.nodb.mods.features_export.exporters import (
     ExportedLayerArtifact,
     PreparedLayerPayload,
 )
-from wepppy.nodb.mods.features_export.join_planner import MaterializationContractError
+from wepppy.nodb.mods.features_export.join_planner import (
+    MaterializationContractError,
+    resolve_geometry_key,
+)
 from wepppy.nodb.mods.features_export.output_column_naming import (
     apply_unitized_column_suffixes,
+)
+from wepppy.nodb.mods.features_export.temporal_wide_materializer import (
+    materialize_temporal_layer_wide,
 )
 
 pytestmark = pytest.mark.unit
@@ -1062,6 +1068,106 @@ def test_resolve_selected_columns_event_mode_forces_date_identity_column() -> No
     )
 
     assert "date" in selected_columns
+
+
+def test_materialize_temporal_layer_wide_event_pivots_measures_to_one_row_per_key() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1", "2", "2"],
+            "wepp_id": [1, 1, 2, 2],
+            "date": ["2015-01-15", "2015-01-16", "2015-01-15", "2015-01-16"],
+            "p_mm": [22.6, 15.7, 20.0, 14.0],
+            "q_mm": [0.0, 0.0, 0.5, 0.4],
+        }
+    )
+
+    reshaped = materialize_temporal_layer_wide(
+        frame=frame,
+        layer_id="wepp.interchange.hill_wat",
+        temporal_mode="event",
+        selected_columns=("wepp_id", "date", "p_mm", "q_mm"),
+        unit_mapping={"p_mm": "mm", "q_mm": "mm", "wepp_id": "non-unitized"},
+        join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+        event_selector=NormalizedTemporalEvent(
+            selector="date",
+            dates=("2015-01-15", "2015-01-16"),
+        ),
+    )
+
+    assert len(reshaped.frame.index) == 2
+    assert reshaped.selected_columns == (
+        "wepp_id",
+        "p_mm_2015_01_15",
+        "p_mm_2015_01_16",
+        "q_mm_2015_01_15",
+        "q_mm_2015_01_16",
+    )
+    assert reshaped.frame.loc[reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1", "p_mm_2015_01_15"].iloc[0] == pytest.approx(22.6)
+    assert reshaped.frame.loc[reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1", "p_mm_2015_01_16"].iloc[0] == pytest.approx(15.7)
+
+
+def test_materialize_temporal_layer_wide_event_prefers_terminal_ofe_slice() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1"],
+            "wepp_id": [1, 1],
+            "ofe_id": [1, 2],
+            "date": ["2015-01-15", "2015-01-15"],
+            "q_mm": [0.5, 1.25],
+        }
+    )
+
+    reshaped = materialize_temporal_layer_wide(
+        frame=frame,
+        layer_id="wepp.interchange.hill_wat",
+        temporal_mode="event",
+        selected_columns=("wepp_id", "date", "q_mm"),
+        unit_mapping={"q_mm": "mm", "wepp_id": "non-unitized"},
+        join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+        event_selector=NormalizedTemporalEvent(
+            selector="date",
+            dates=("2015-01-15",),
+        ),
+    )
+
+    assert len(reshaped.frame.index) == 1
+    assert reshaped.selected_columns == ("wepp_id", "q_mm_2015_01_15")
+    assert reshaped.frame["q_mm_2015_01_15"].iloc[0] == pytest.approx(1.25)
+
+
+def test_materialize_temporal_layer_wide_yearly_pivots_measures_to_year_columns() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1", "2", "2"],
+            "wepp_id": [1, 1, 2, 2],
+            "year": [2014, 2015, 2014, 2015],
+            "sediment_kg": [10.0, 12.0, 8.0, 9.5],
+        }
+    )
+
+    reshaped = materialize_temporal_layer_wide(
+        frame=frame,
+        layer_id="wepp.interchange.hill_pass",
+        temporal_mode="yearly",
+        selected_columns=("wepp_id", "year", "sediment_kg"),
+        unit_mapping={"sediment_kg": "kg", "wepp_id": "non-unitized"},
+        join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+        event_selector=None,
+    )
+
+    assert len(reshaped.frame.index) == 2
+    assert reshaped.selected_columns == ("wepp_id", "sediment_kg_yr2014", "sediment_kg_yr2015")
+    assert reshaped.frame.loc[reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "2", "sediment_kg_yr2015"].iloc[0] == pytest.approx(9.5)
+
+
+def test_resolve_geometry_key_prefers_layer_candidates_before_carrier_defaults() -> None:
+    resolved = resolve_geometry_key(
+        geometry_columns=("TopazID", "WeppID"),
+        carrier_layer="sbs_map-subcatchments",
+        candidate_tokens=("wepp_id",),
+    )
+
+    assert resolved == "WeppID"
 
 
 def test_backfill_identity_from_geometry_key_fills_missing_event_identity_values() -> None:

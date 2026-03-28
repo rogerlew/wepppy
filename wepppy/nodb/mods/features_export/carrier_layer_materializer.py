@@ -13,6 +13,7 @@ from .contracts import ExportWarning, NormalizedTemporalEvent, ResolvedExportPla
 from .discovery import DiscoveredSourceFrame, discover_layer_sources
 from .duckdb_materializer import materialize_layer_attributes
 from .join_planner import MaterializationContractError
+from .temporal_wide_materializer import materialize_temporal_layer_wide
 
 
 @dataclass(frozen=True)
@@ -55,12 +56,13 @@ def materialize_carrier_layer_core(
     )
 
     join_contract = _as_mapping(catalog_layer_raw.get("join"))
+    allow_non_unique_layer_keys = layer.temporal_mode in {"event", "yearly"}
     layer_frame, discovered_units = materialize_layer_attributes(
         layer_id=layer.layer_id,
         carrier_layer=layer.carrier_layer,
         join_contract=join_contract,
         sources=discovered_sources,
-        allow_non_unique_keys=layer.temporal_mode == "event",
+        allow_non_unique_keys=allow_non_unique_layer_keys,
     )
     layer_frame = _ensure_event_date_column(layer_frame, temporal_mode=layer.temporal_mode)
 
@@ -72,6 +74,24 @@ def materialize_carrier_layer_core(
         discovered_units=discovered_units,
         consolidated_join_key_column=consolidated_join_key_column,
     )
+    event_selector = (
+        request_plan.request.temporal.event
+        if request_plan.request.temporal is not None
+        else None
+    )
+    temporal_wide = materialize_temporal_layer_wide(
+        frame=layer_frame,
+        layer_id=layer.layer_id,
+        temporal_mode=layer.temporal_mode,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        join_key_column=consolidated_join_key_column,
+        event_selector=event_selector,
+    )
+    layer_frame = temporal_wide.frame
+    selected_columns = temporal_wide.selected_columns
+    unit_mapping = temporal_wide.unit_mapping
+
     if consolidated_join_key_column not in layer_frame.columns:
         raise MaterializationContractError(
             "Layer materialization table is missing canonical join key.",

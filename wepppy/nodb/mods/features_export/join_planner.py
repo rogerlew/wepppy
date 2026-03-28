@@ -193,13 +193,17 @@ def resolve_geometry_key(
     carrier_layer: str | None,
     candidate_tokens: cabc.Sequence[str],
 ) -> str | None:
-    """Resolve one geometry key from carrier defaults plus layer-derived candidates."""
+    """Resolve one geometry key, preferring layer-derived contract keys first."""
 
     lookup = normalized_column_lookup(geometry_columns)
     seen: set[str] = set()
 
     ordered_candidates: list[str] = []
-    for token in (*_CARRIER_KEY_PREFERENCE.get(str(carrier_layer or ""), ()), *candidate_tokens, *_GENERIC_KEY_FALLBACK):
+    for token in (
+        *candidate_tokens,
+        *_CARRIER_KEY_PREFERENCE.get(str(carrier_layer or ""), ()),
+        *_GENERIC_KEY_FALLBACK,
+    ):
         normalized = normalize_join_token(str(token))
         if not normalized or normalized in seen:
             continue

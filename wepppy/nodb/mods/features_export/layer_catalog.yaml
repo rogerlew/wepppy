@@ -1,7 +1,7 @@
 metadata:
   catalog_version: "0.3.0-draft"
   schema_version: 2
-  updated_at_utc: "2026-03-25T21:05:00Z"
+  updated_at_utc: "2026-03-28T17:05:00Z"
   owner: "wepppy/nodb/mods/features_export"
   status: "draft"
   resolver_contract:
@@ -795,9 +795,13 @@ layers:
       supported_modes:
         - "annual_average"
         - "yearly"
-      grain: "year"
+        - "event"
+      grain: "daily"
       time_columns:
         - "year"
+        - "month"
+        - "day_of_month"
+        - "julian"
       mode_rules:
         annual_average:
           required_columns:
@@ -809,6 +813,13 @@ layers:
             - "year"
           year_selection_supported: true
           aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["year", "month", "day_of_month"]
+            - ["year", "julian"]
+          selector_support:
+            - "date"
+          aggregation: "identity_per_date"
     measures:
       required:
         - "P"
@@ -824,6 +835,310 @@ layers:
             requires_any_column:
               - "latqcc"
               - "Subrunoff"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.hill_ebe"
+    label: "H.ebe.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_hill_ebe:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_hill_ebe"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/H.ebe.parquet"
+        required: true
+        role: "event_metrics"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "daily"
+      time_columns:
+        - "year"
+        - "month"
+        - "day_of_month"
+        - "julian"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["year", "month", "day_of_month"]
+            - ["year", "julian"]
+          selector_support:
+            - "date"
+          aggregation: "identity_per_date"
+    measures:
+      required:
+        - "Precip"
+        - "Runoff"
+        - "Sed.Del"
+      optional:
+        - measure_id: "ER"
+          key_aliases:
+            - "ER"
+          availability:
+            requires_any_column:
+              - "ER"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.hill_soil"
+    label: "H.soil.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_hill_soil:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_hill_soil"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/H.soil.parquet"
+        required: true
+        role: "soil_state_metrics"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "daily"
+      time_columns:
+        - "year"
+        - "month"
+        - "day_of_month"
+        - "julian"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["year", "month", "day_of_month"]
+            - ["year", "julian"]
+          selector_support:
+            - "date"
+          aggregation: "identity_per_date"
+    measures:
+      required:
+        - "Poros"
+        - "Keff"
+        - "FC"
+        - "WP"
+      optional:
+        - measure_id: "TSMF"
+          key_aliases:
+            - "TSMF"
+          availability:
+            requires_any_column:
+              - "TSMF"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.hill_pass_events"
+    label: "pass_pw0.events.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_hill_pass_events:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_hill_pass_events"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/pass_pw0.events.parquet"
+        required: true
+        role: "event_metrics"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "daily"
+      time_columns:
+        - "year"
+        - "month"
+        - "day_of_month"
+        - "julian"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["year", "month", "day_of_month"]
+            - ["year", "julian"]
+          selector_support:
+            - "date"
+          aggregation: "identity_per_date"
+    measures:
+      required:
+        - "runoff"
+        - "runvol"
+        - "peakro"
+      optional:
+        - measure_id: "sbrunv"
+          key_aliases:
+            - "sbrunv"
+          availability:
+            requires_any_column:
+              - "sbrunv"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.hill_pass_metadata"
+    label: "pass_pw0.metadata.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_hill_pass_metadata:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_hill_pass_metadata"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/pass_pw0.metadata.parquet"
+        required: true
+        role: "metadata"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
+    measures:
+      required:
+        - "climate_file"
+        - "area"
+      optional:
+        - measure_id: "dia_1"
+          key_aliases:
+            - "dia_1"
+          availability:
+            requires_any_column:
+              - "dia_1"
           on_missing: "warn"
           warning_code: "measure_unavailable"
 

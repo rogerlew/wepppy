@@ -160,17 +160,11 @@ def required_identity_columns(catalog_layer_raw: cabc.Mapping[str, object]) -> s
     """Return required identity columns from join + geometry contracts."""
 
     required: set[str] = set()
-    seen_keys: set[str] = set()
 
     def _add_required(candidate: object) -> None:
         token = _as_string(candidate)
         if not token:
             return
-        key = "".join(char for char in token.lower() if char.isalnum())
-        dedupe_key = key or token.lower()
-        if dedupe_key in seen_keys:
-            return
-        seen_keys.add(dedupe_key)
         required.add(token)
 
     join_contract = _as_mapping(catalog_layer_raw.get("join"))

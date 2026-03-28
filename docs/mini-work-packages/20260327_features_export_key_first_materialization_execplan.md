@@ -12,6 +12,21 @@ The user-visible outcome is straightforward: selected datasets are merged by can
 
 ## Progress
 
+- [x] (2026-03-28 23:42Z) Implemented temporal-wide carrier materialization for `event` and `yearly` modes via new collaborator `wepppy/nodb/mods/features_export/temporal_wide_materializer.py`; event/yearly outputs now keep carrier geometry normalized and pivot temporal tokens into measure column names.
+- [x] (2026-03-28 23:42Z) Fixed geometry-key mismatch for `wepp_id` layers by prioritizing layer candidate keys over carrier defaults in `join_planner.resolve_geometry_key` (`WeppID` now selected over `TopazID` when contracts require it).
+- [x] (2026-03-28 23:42Z) Replayed operator payload shape for `wepp.interchange.hill_wat` event export and verified normalized output on `/wc1/runs/cl/clogging-starch`:
+  - manifest: `/wc1/runs/cl/clogging-starch/export/features/jobs/debug-wide-hill-wat-20260328d/manifest.json`
+  - artifact: `/wc1/runs/cl/clogging-starch/export/features/artifacts/ffde6721cfde4869ad4475b87f97890f/features_export.gpkg`
+  - layer `clogging-starch-sbs_map-subcatchments`: `row_count=66`, `feature_count=66`
+  - temporal wide columns present: `p_2015_01_15_mm`, `p_2015_01_16_mm`, `q_2015_01_15_mm`, `q_2015_01_16_mm`, plus identity columns.
+- [x] (2026-03-28 23:42Z) Bumped export cache/version markers to invalidate stale long-format artifacts:
+  - cache marker: `features-export-wp12-temporal-wide-v1`
+  - manifest generator version: `features-export-wp12-temporal-wide`
+- [x] (2026-03-28 23:42Z) Re-ran required validation gates after temporal-wide + key-resolution fixes:
+  - `wctl run-pytest tests/nodb/mods/test_features_export_planner.py tests/nodb/mods/test_features_export_service.py tests/nodb/mods/test_features_export_exporters.py tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1` -> `75 passed`
+  - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py -k features_export --maxfail=1` -> `4 passed`
+  - `wctl run-pytest tests/weppcloud/routes/test_run_0_openet_admin_gate.py -k features_export --maxfail=1` -> `10 passed`
+  - `wctl run-npm test -- features_export` -> `14 passed`
 - [x] (2026-03-27 23:40Z) Confirmed current regression behavior and root cause from live artifacts/job manifests (`391,930` subcatchment rows and `35,292` channel rows from multiplicative key joins).
 - [x] (2026-03-27 23:40Z) Updated `wepppy/nodb/mods/features_export/specification.md` with the normative key-first/geometry-last contract and explicit no-feature-flag rollout stance.
 - [x] (2026-03-27 23:40Z) Authored this WP-8 ExecPlan with concrete milestones, file targets, and acceptance checks.
@@ -31,6 +46,14 @@ The user-visible outcome is straightforward: selected datasets are merged by can
 
 ## Surprises & Discoveries
 
+- Observation: `H.wat.parquet` carries OFE-level daily rows (`ofe_id`) so naive event pivot by `{wepp_id,date}` can still produce conflicting duplicate slices.
+  Evidence: direct DuckDB inspection on `/wc1/runs/cl/clogging-starch/wepp/output/interchange/H.wat.parquet` showed duplicate `{wepp_id,year,month,day_of_month}` slices with varying `Q` across OFEs.
+- Observation: Selecting terminal OFE (`max(ofe_id)`) before event pivot resolves deterministic hillslope slice representative rows and preserves one-row-per-feature output after wide pivot.
+  Evidence: `debug-wide-hill-wat-20260328d` artifact contains `66` rows/`66` features with fully populated date-suffixed measure columns.
+- Observation: Carrier-first geometry key ordering caused sparse/null-heavy event exports for `wepp_id` datasets when both `TopazID` and `WeppID` existed in geometry.
+  Evidence: manifests for failing jobs reported `carrier_key_column=TopazID` for `wepp.interchange.hill_wat`; after precedence fix, event export normalized to expected feature counts.
+- Observation: Existing cache entries can preserve pre-fix long-format artifacts even after materialization logic changes.
+  Evidence: replaying the original payload hit prior artifact `19f2cc28078c415c8e6410c29c810ed9` until version markers were bumped.
 - Observation: Current row explosion is deterministic many-to-many multiplication, not random instability.
   Evidence: For `subcatchments.WGS.geojson`, per-key multiplicities `n_i` satisfy `sum(n_i^4) = 391,930`, which exactly matches broken export row counts.
 - Observation: Source WEPP metric tables already exist at expected carrier grain (`66` hillslope rows, `27` channel rows), so blowup is introduced by merge strategy, not source volume.
@@ -46,6 +69,18 @@ The user-visible outcome is straightforward: selected datasets are merged by can
 
 ## Decision Log
 
+- Decision: For `event`/`yearly` carrier layers, materialize temporal outputs as wide columns at carrier geometry grain instead of long-row geometry duplication.
+  Rationale: Keeps export layers normalized to canonical feature counts and makes downstream GIS/table consumption tractable for temporal comparisons.
+  Date/Author: 2026-03-28 / Codex
+- Decision: Resolve event OFE duplicates by selecting terminal OFE (`max(ofe_id)`) per `{join_key, temporal_token}` before pivoting.
+  Rationale: WEPP hillslope interchange daily tables are OFE-grained; selecting a deterministic outlet representative resolves one-to-many slices without silent many-to-many fanout.
+  Date/Author: 2026-03-28 / Codex
+- Decision: Prioritize layer-derived join candidates when resolving canonical geometry key.
+  Rationale: Contract-defined source keys (`wepp_id`) must override carrier defaults (`TopazID`) to avoid null-heavy mismatches and preserve deterministic key alignment.
+  Date/Author: 2026-03-28 / Codex
+- Decision: Bump export cache marker and manifest generator version for temporal-wide rollout.
+  Rationale: Prevent cache-hit reuse of stale long-format artifacts produced before event/yearly wide-materialization contract changes.
+  Date/Author: 2026-03-28 / Codex
 - Decision: Make key-first/geometry-last materialization the only production path for WP-8 (no temporary flag).
   Rationale: This feature has not shipped in acceptable form and a dual-path rollout would preserve complexity and failure risk without user value.
   Date/Author: 2026-03-27 / Codex
@@ -71,6 +106,8 @@ WP-8 is implemented and validated end-to-end.
 
 Delivered outcomes:
 - Production `features_export` hot path now materializes key-first carrier cores in DuckDB and attaches geometry exactly once from canonical carrier geometry.
+- Temporal `event` and `yearly` outputs now reshape to wide measure columns so exported geometry remains at canonical carrier feature counts.
+- Event-mode OFE-grained daily sources now resolve deterministic per-slice representatives (`max(ofe_id)`) before wide pivoting.
 - Explicit cardinality guards now fail unresolved duplicate-key conflicts as `materialization_error` instead of allowing Cartesian growth.
 - Canonical carrier geometry is reduced to one row per key (deterministic dissolve on benign duplicate geometry rows), then used to bound final spatial row sets.
 - Default baseline export on `clogging-starch/disturbed9002-wbt-mofe` now emits exactly two layers with carrier-grain counts:

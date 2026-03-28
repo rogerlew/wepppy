@@ -94,6 +94,7 @@ The expected user-visible outcome is that a typical base WEPP export produces up
 - `wctl run-playwright --env dev --no-create-run --run-path "https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/?playwright_load_all=true" --workers 1 --grep "features_export"` -> `1 passed`
 - [x] (2026-03-27 23:40Z) Documented post-WP-7 architecture correction need: updated `specification.md` with key-first/geometry-last carrier contract and authored follow-on WP-8 execplan at `docs/mini-work-packages/20260327_features_export_key_first_materialization_execplan.md`.
 - [x] (2026-03-28 03:29Z) Linked WP-8 completion evidence back to WP-7 reconciliation: key-first carrier path now live with required validations passing and run-path evidence (`manual-wp8-cold-v2-*` / `manual-wp8-warm-v2-*`) showing final two-layer `66/27` baseline output on `/wc1/runs/cl/clogging-starch`.
+- [x] (2026-03-28 23:42Z) Added WP-8 follow-on linkage for temporal normalization: event/yearly layers now materialize in wide form at carrier geometry grain (no long-row geometry duplication) with live evidence at `debug-wide-hill-wat-20260328d` (`66/66` rows/features on `clogging-starch-sbs_map-subcatchments`).
 
 ## Surprises & Discoveries
 

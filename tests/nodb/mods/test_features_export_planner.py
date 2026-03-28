@@ -198,6 +198,45 @@ def test_resolve_export_plan_keeps_atemporal_layers_when_temporal_mode_is_select
     assert plan.warnings == ()
 
 
+def test_resolve_export_plan_hill_wat_supports_event_mode(catalog) -> None:
+    payload = {
+        "format": "geopackage",
+        "units": "project",
+        "layers": ["wepp.interchange.hill_wat"],
+        "temporal": {
+            "layer_modes": {"wepp.interchange.hill_wat": "event"},
+            "event": {"selector": "date", "dates": ["2005-01-15"]},
+        },
+    }
+
+    plan = resolve_export_plan(payload, catalog)
+
+    assert [layer.output_layer_id for layer in plan.layers] == ["baseline__wepp.interchange.hill_wat"]
+    assert plan.warnings == ()
+
+
+def test_resolve_export_plan_new_hillslope_interchange_layers_are_cataloged(catalog) -> None:
+    payload = {
+        "format": "geopackage",
+        "units": "project",
+        "layers": [
+            "wepp.interchange.hill_ebe",
+            "wepp.interchange.hill_soil",
+            "wepp.interchange.hill_pass_events",
+            "wepp.interchange.hill_pass_metadata",
+        ],
+    }
+
+    plan = resolve_export_plan(payload, catalog)
+
+    assert [layer.output_layer_id for layer in plan.layers] == [
+        "baseline__wepp.interchange.hill_ebe",
+        "baseline__wepp.interchange.hill_pass_events",
+        "baseline__wepp.interchange.hill_pass_metadata",
+        "baseline__wepp.interchange.hill_soil",
+    ]
+
+
 def test_resolve_export_plan_is_deterministic_for_ordering_and_serialization(catalog) -> None:
     payload_a = {
         "format": "geoparquet",
