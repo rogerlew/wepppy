@@ -1,6 +1,6 @@
 # Features Export Specification
 
-Status: Implementation In Progress  
+Status: Implemented (Living Spec)  
 Owner: WEPPpy NoDb export subsystem  
 Primary module: `wepppy/nodb/mods/features_export`  
 Replaces: `wepppy/export/gpkg_export.py`
@@ -629,6 +629,15 @@ wepppy/nodb/mods/features_export/
   dependency_tracker.py       # RedisPrep/TaskEnum preflight/dependency checks
   cache_key.py                # options-aware canonical cache key/fingerprint
   unit_conversion.py          # Unitizer numeric conversion integration adapter
+  column_selection.py         # selected-column resolution and unit inference helpers
+  cache_rehydration.py        # cache-entry artifact/layer-output rehydration helpers
+  discovery.py                # source discovery and strict required-source handling
+  join_planner.py             # join-key normalization and cardinality contracts
+  duckdb_materializer.py      # key-first DuckDB attribute materialization
+  geometry_carriers.py        # canonical geometry carrier build + final attach
+  manifest_builder.py         # manifest-facing per-layer column metadata assembly
+  legacy_source_materializer.py   # legacy geometry-first source merge collaborator
+  carrier_layer_materializer.py   # carrier-source materialization collaborator
   exporters/
     __init__.py
     base.py                   # common writer contract
@@ -750,6 +759,13 @@ WP-8: Key-first carrier materialization rewrite and module maintainability refac
 - Contract clarification: baseline default exports must materialize only `subcatchments` and `channels` carrier layers with carrier-grain row counts.
 - Deliverable: maintainable and performant default export path with deterministic cardinality, deterministic naming, and verified small-watershed runtime targets.
 
+WP-9: Service quality compliance closure and strictness coverage completion (planned 2026-03-28)
+- Status: complete via `docs/work-packages/20260328_features_export_service_compliance_refactor/`.
+- Scope: close QA \"conditionally compliant\" findings by extracting remaining service collaborators, removing dead wrappers, and adding missing strict-required branch coverage.
+- Contract clarification: strict required-source behavior is shared across carrier and legacy paths through `discover_layer_sources` policy reuse; required source dependency/file/kind and unresolved required join key all fail explicitly with `materialization_error`.
+- Contract clarification: refactor does not change external submit/jobinfo/download contracts; service API behavior remains stable while orchestration internals are decomposed.
+- Deliverable: reduced service orchestration complexity, closed medium QA findings, and preserved baseline run-path parity (`66/27` on `clogging-starch/disturbed9002-wbt-mofe`).
+
 ### 14.2 Dependency Order And Parallelism
 - WP-1 depends on completed WP-0 Unitizer APIs.
 - WP-2 depends on WP-1 outputs.
@@ -758,6 +774,7 @@ WP-8: Key-first carrier materialization rewrite and module maintainability refac
 - WP-5 can begin after WP-1 contracts stabilize, then finalize against WP-4 endpoints.
 - WP-7 depends on WP-4/WP-5 behavior and may revise portions of both.
 - WP-8 depends on WP-7 outputs and supersedes WP-7 merge-path assumptions.
+- WP-9 depends on WP-8 internals and closes remaining service-quality and strictness-coverage gaps.
 - WP-6 final cutover validation follows WP-8.
 
 ### 14.3 Keep-It-Organized Rules
