@@ -20,6 +20,7 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
 - [x] (2026-03-27) Milestone 7: Completed QA-review artifact with no unresolved medium/high findings.
 - [x] (2026-03-27) Milestone 8: Ran validation gates and synchronized package docs/tracker/ExecPlan.
 - [x] (2026-03-27) Post-handoff hotfix: fixed routed two-OFE management transform to remap yearly `itype` (`3 -> 2`) after fill OFE removal; added regression test and reran validation gates.
+- [x] (2026-03-27) Post-hotfix docs hardening: codified canonical controller job-tracking guidance (bootstrap `jobIds` as hints only + stale local latch reconciliation) in shared controller contract/foundation docs.
 
 ## Surprises & Discoveries
 
@@ -37,6 +38,9 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
 
 - Observation: Routed two-OFE management transform left FOREST yearly `itype` as `3` after reducing to two scenarios, causing WEPP parser failure (`ntype read as 3; must be between 1 and 2`) for real runs.
   Evidence: `/wc1/runs/cl/clogging-starch/wepp/roads/runs/p900025.err` and generated `p900025.man` from failed job `ed22a800-e4d1-452a-b09e-cf8cd031060f`.
+
+- Observation: UI-level active-task latches can become stale when initialized from bootstrap last-known `jobIds`, even when backend Roads status is terminal/idle.
+  Evidence: Run UI blocked queue actions with local conflict text while backend status was `idle` and locks were absent.
 
 ## Decision Log
 
@@ -60,6 +64,10 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
   Rationale: WEPP requires `itype` to match the reduced two-scenario management cardinality; leaving `3` causes runtime parse failure.
   Date/Author: 2026-03-27 / Codex.
 
+- Decision: Canonical controller guidance must treat bootstrap `jobIds` as last-known hints only; controllers with custom active-task latches must reconcile against authoritative status before rejecting queue actions.
+  Rationale: Prevents stale client-side lockouts after canceled/failed/terminal jobs while preserving server-authoritative concurrency control.
+  Date/Author: 2026-03-27 / Codex.
+
 ## Outcomes & Retrospective
 
 Completed implementation delivers:
@@ -69,6 +77,7 @@ Completed implementation delivers:
 - Routed non-channel contributors now execute with `road OFE + buffer OFE` assembly and merge through existing pass-combine flow.
 - Regression coverage was expanded for new prepare/run behavior and routed trace failure handling.
 - Post-handoff hotfix now guarantees routed two-OFE management files are WEPP-parseable by remapping yearly `itype` values to two-scenario cardinality.
+- Shared controller docs now explicitly codify canonical job-tracking behavior (bootstrap hint semantics + stale-latch reconciliation) for future controller implementations.
 
 Validation snapshot:
 
@@ -220,3 +229,4 @@ Dependency requirement:
 Revision note (2026-03-27 00:00Z): Initial step-2 ExecPlan authored with scoped inslope non-channel routing milestones and mandatory code/QA review gates.
 Revision note (2026-03-27): Milestones 1-8 completed; living sections updated with implementation, validation outcomes, and review closure.
 Revision note (2026-03-27): Post-handoff hotfix applied for routed two-OFE management `itype` remap; regression validated against failing `p900025` input set and tests.
+Revision note (2026-03-27): Follow-up docs hardening added canonical controller job-tracking guidance to prevent stale client-side active-job latches in future controls.

@@ -80,6 +80,8 @@ This document captures the patterns, conventions, and principles established dur
 - Use the scoped event emitter for domain events; use `controlBase` events for cross-controller telemetry
 - Let `controlBase` manage polling—don't implement custom interval loops
 - Enrich errors with `controlBase.pushResponseStacktrace` or `appendStatus` for user-facing diagnostics
+- Treat bootstrap `jobIds` as last-known hint metadata (link/poll hydration), not as proof an active job still exists
+- If a controller maintains a local active-task latch, reconcile it against server status before blocking new actions; clear stale latches on terminal/non-running states
 
 ## 4. Controller Bootstrap Contract (Established)
 
@@ -97,7 +99,7 @@ This document captures the patterns, conventions, and principles established dur
   mods: { hasDisturbed, hasBaer, hasRangeland, ... },
   flags: { readonly, isPublic, ... },
   map: { center, zoom, bounds },
-  jobIds: { climate: 'uuid', wepp: 'uuid', ... },  // RQ job IDs
+  jobIds: { climate: 'uuid', wepp: 'uuid', ... },  // Last-known RQ job IDs for hint/poll hydration
   data: {
     climate: { hasObserved, precipScalingMode, ... },
     watershed: { hasChannels, outletSet, ... },

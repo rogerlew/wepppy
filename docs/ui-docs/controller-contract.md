@@ -56,6 +56,12 @@
 ### Job hints
 - `controlBase.set_rq_job_id` will set and render hints if `hint` points at a `data-job-hint` element. Do not clear hints in `reset_panel_state` when `rq_job_id` is set—rely on the control_base guard instead.
 - **Hydrate on load:** In `bootstrap(context)` always look up the last job id from (in order) `WCControllerBootstrap.resolveJobId(ctx, "<rq_key>")`, `controllerContext.job_id`, and `ctx.jobIds.<rq_key>`, then pass it to `set_rq_job_id`. This keeps the job link visible after page reloads or mod toggles.
+- **Bootstrap IDs are not active locks:** `context.jobIds` and controller `job_id` hints are last-known metadata only. Do not set domain-specific active-task latches (or disable queue buttons) from bootstrap hints alone.
+- **Authority order for "is active":**
+  - queue/post response contract (`202 Accepted` + new `job_id`, or conflict status from server),
+  - domain status endpoint (for controllers that expose one),
+  - `/rq-engine/api/jobstatus/<job_id>` polling state.
+- **Stale-lock reconciliation:** if a local active-task latch exists when the user queues work, reconcile once with the authoritative status endpoint before rejecting the action. If status is terminal/non-running (`finished`, `failed`, `stopped`, `canceled`, `not_found`, `idle`), clear the stale local latch and retry queueing once.
 - **Split hint vs. status:** Reserve the job hint element for the RQ dashboard link only. Use a separate `<p>` in the status panel meta (e.g., `#<control>_message`) for human-readable status/errors so the link is never overwritten by `"py/state"` or other payloads.
 - **Clear before enqueue:** When handling a run click, immediately clear status text and stacktrace content before posting so stale errors disappear. Do not clear the job hint if a job id is present—`set_rq_job_id` will refresh it.
 
@@ -91,6 +97,8 @@ When modernizing a controller:
 - [ ] Replace jQuery with `WCDom`, `WCHttp`, `WCForms`
 - [ ] Use delegated events on data attributes
 - [ ] Implement re-query pattern in `bootstrap()`
+- [ ] Treat bootstrap `jobIds` as hints only; do not infer active jobs from them
+- [ ] Reconcile custom active-task latches against server status before blocking queue actions
 - [ ] Test dynamic loading scenario
 - [ ] Add Jest unit tests
 - [ ] Add Playwright regression test

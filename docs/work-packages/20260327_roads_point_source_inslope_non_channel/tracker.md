@@ -5,7 +5,7 @@
 ## Quick Status
 
 **Started**: 2026-03-27  
-**Current phase**: Implementation Complete - Hotfix Verified  
+**Current phase**: Implementation Complete - Hotfix + Docs Hardening Verified  
 **Last updated**: 2026-03-27  
 **Active ExecPlan**: `prompts/active/roads_point_source_inslope_non_channel_execplan.md`  
 **Next milestone**: Package handoff and downstream follow-up triage.
@@ -33,12 +33,14 @@
 - [x] Milestone 7: QA review artifact completed; unresolved medium/high findings = 0 (2026-03-27).
 - [x] Milestone 8: Validation/doc gates executed; out-of-scope full-suite baseline failure documented (2026-03-27).
 - [x] Post-handoff hotfix: routed two-OFE management yearly `itype` remapped (`3 -> 2`) to resolve WEPP `ntype` parse failure from live run artifacts; regression test and validation reruns completed (2026-03-27).
+- [x] Post-hotfix docs hardening: canonical controller job-tracking contract updated (bootstrap `jobIds` hint semantics + stale local latch reconciliation) for future controls (2026-03-27).
 
 ## Timeline
 
 - **2026-03-27** - Package authored and scoped as step-2 Roads work.
 - **2026-03-27** - Implemented step-2 prepare/run routing behavior, routed contributor assembly, and expanded tests/review artifacts.
 - **2026-03-27** - Closed live regression from job `ed22a800-e4d1-452a-b09e-cf8cd031060f` by fixing routed two-OFE management transform and revalidating gates.
+- **2026-03-27** - Hardened shared controller documentation to codify canonical job-tracking behavior and prevent stale client-side active-job latches.
 
 ## Decisions
 
@@ -65,6 +67,19 @@
 **Decision**: Option 2.
 
 **Impact**: Reduces false routing and preserves predictable routing scope.
+
+---
+
+### 2026-03-27: Bootstrap `jobIds` are hints only for controller job tracking
+**Context**: A canceled Roads job left stale client-side active-task state, blocking new queue actions despite backend status being idle.
+
+**Options considered**:
+1. Preserve per-controller ad-hoc lock semantics.
+2. Standardize contract guidance: bootstrap IDs hydrate hints only; active latches must reconcile against authoritative server status.
+
+**Decision**: Option 2.
+
+**Impact**: Future controllers follow one canonical lock/recovery pattern and avoid stale active-job UI lockouts.
 
 ## Risks and Issues
 
@@ -159,3 +174,20 @@
 - `wctl run-npm test -- roads`: pass.
 - `wctl run-npm lint`: pass.
 - `wctl run-pytest tests --maxfail=1`: fail on unrelated baseline test noted above.
+
+### 2026-03-27: Documentation hardening for canonical controller job tracking
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Updated `docs/ui-docs/controller-contract.md` with explicit rules for bootstrap job-id semantics, authoritative active-job checks, and stale-latch reconciliation.
+- Updated `docs/dev-notes/controller_foundations.md` to align architecture guidance with the same canonical rules.
+- Updated controller maintainer docs (`wepppy/weppcloud/controllers_js/AGENTS.md`, `wepppy/weppcloud/controllers_js/README.md`) so future controller work follows the contract by default.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- Apply the canonical pattern whenever adding custom active-task latches to new or migrated controllers.
+
+**Test results**:
+- Documentation linting for touched files: pass.

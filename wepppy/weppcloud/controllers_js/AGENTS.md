@@ -12,6 +12,7 @@ See `docs/dev-notes/controller_foundations.md` for the canonical vision. Key pil
 - **Shared UI primitives**: structure markup around `data-*` hooks so `WCDom`/`WCEvents` manage toggles, buttons, and lifecycle events consistently.
 - **Unified payload schemas**: every controller/route pair runs through `parse_request_payload`; NoDb `parse_inputs` now expect native booleans/ints/floats (never `"on"` strings). Keep per-domain docs up to date.
 - **Evolving `controlBase`**: treat it as the declarative job runner—prefer its lifecycle events (`job:started`, `job:completed`, `job:error`) over ad-hoc polling.
+- **Canonical job tracking**: treat bootstrap `jobIds` as last-known hint metadata only; never infer active-task locks from bootstrap alone. If a controller adds a custom active-task latch, reconcile once against server status before rejecting queue actions.
 - **Telemetry via StatusStream**: all controllers must use `controlBase.attach_status_stream`; `WSClient` is gone and should not be reintroduced.
 - **Documentation alignment**: when you add primitives or change payloads/events, update `controllers_js/README.md`, this playbook, and the domain contract doc.
 - **Tooling expectations**: lint (`wctl run-npm lint`), test (`wctl run-npm test`), rebuild bundle, and run targeted pytest suites before handoff. Add Jest coverage when primitives or controller patterns evolve.

@@ -95,7 +95,7 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 ### Bootstrap Contract (2025 refresh)
 - Controllers now expose an idempotent `instance.bootstrap(context)` method. The context is a plain object built by the page bootstrapper (`run_page_bootstrap.js.j2`) and contains:
   - `run`, `user`, `mods`, `flags`, and `map` metadata for cross-controller coordination
-  - `jobIds` (RQ names → job ids) and `data` (domain flags such as `hasChannels`, `hasRun`, `precipScalingMode`)
+  - `jobIds` (RQ names → last-known job ids for link/poll hydration, not active-lock inference) and `data` (domain flags such as `hasChannels`, `hasRun`, `precipScalingMode`)
   - Optional `controllers[controllerName]` overrides for controller-specific hints (for example default color maps)
 - The helper `bootstrap.js` publishes `window.WCControllerBootstrap` so pages can:
   - `setContext(context)` — cache the run context once per page load
@@ -142,6 +142,7 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 - `control_base.attach_status_stream` is the preferred way to consume the websocket status channel. It wires spinners, DOM events, and stacktrace enrichment automatically, and fabricates hidden panels when a template only exposes the legacy form shell.
 - `StatusStream` (in `status_stream.js`) is the authoritative telemetry surface for both dashboards and controllers. It renders against `[data-status-panel]`/`[data-status-log]` markup, manages reconnection/backoff, emits `status:*` custom events, and hydrates stack traces through optional fetchers—replacing the legacy `WSClient` shim entirely.
 - Together, these two components are the contract for any control that launches asynchronous work: provide the DOM IDs, call `set_rq_job_id`, and the infrastructure handles the rest.
+- Controllers with domain-specific active-task latches (for example multi-action queue buttons) must treat bootstrap job IDs as hints only and reconcile stale local latches against authoritative server status before blocking user actions.
 - The Project controller applies the same contract when readonly toggles queue `set_run_readonly_rq`; the worker now pushes human-readable updates to `<runid>:command`, which the command bar consumes directly to surface messages such as `manifest.db creation finished` without extra wiring.
 
 ### Polling Interval Reference (Client)
