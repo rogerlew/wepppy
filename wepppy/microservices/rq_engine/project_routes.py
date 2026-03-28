@@ -312,20 +312,29 @@ async def create(request: Request) -> Response:
             logger.exception("rq-engine create auth failed")
             return error_response_with_traceback("Failed to authorize request", status_code=401)
     else:
-        if not cap_token:
-            return error_response("CAPTCHA token is required.", status_code=403)
-        try:
-            verification = await asyncio.to_thread(_verify_cap_token, request, cap_token)
-        except CapVerificationError as exc:
-            logger.error("CAPTCHA verification error for create/%s: %s", config, exc)
-            return error_response("CAPTCHA verification failed.", status_code=500)
-        if not verification.get("success"):
-            logger.warning(
-                "CAPTCHA rejected for create/%s (errors=%s)",
-                config,
-                verification.get("error-codes"),
-            )
-            return error_response("CAPTCHA verification failed.", status_code=403)
+        if cap_token:
+            try:
+                verification = await asyncio.to_thread(_verify_cap_token, request, cap_token)
+            except CapVerificationError as exc:
+                logger.error("CAPTCHA verification error for create/%s: %s", config, exc)
+                return error_response("CAPTCHA verification failed.", status_code=500)
+            if not verification.get("success"):
+                logger.warning(
+                    "CAPTCHA rejected for create/%s (errors=%s)",
+                    config,
+                    verification.get("error-codes"),
+                )
+                return error_response("CAPTCHA verification failed.", status_code=403)
+        else:
+            try:
+                claims = await asyncio.to_thread(_claims_from_session_cookie, request)
+            except AuthError as exc:
+                if exc.status_code in {401, 403} and exc.code in {"unauthorized", "forbidden"}:
+                    return error_response("CAPTCHA token is required.", status_code=403)
+                return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+            except Exception:  # broad-except: boundary contract
+                logger.exception("rq-engine create session-cookie auth failed")
+                return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     cfg = f"{config}.cfg"
     overrides = _collect_overrides(payload, request.query_params)

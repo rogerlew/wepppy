@@ -455,7 +455,6 @@ def interfaces():
             or os.getenv('CAP_ASSET_BASE_URL', f'{cap_base_url}/assets')
         ).rstrip('/')
         cap_site_key = current_app.config.get('CAP_SITE_KEY') or os.getenv('CAP_SITE_KEY', '')
-        rq_engine_token = _issue_rq_engine_token()
         return render_template(
             'interfaces.htm',
             user=current_user,
@@ -463,11 +462,7 @@ def interfaces():
             cap_base_url=cap_base_url,
             cap_asset_base_url=cap_asset_base_url,
             cap_site_key=cap_site_key,
-            rq_engine_token=rq_engine_token,
         )
-    except auth_tokens.JWTConfigurationError as exc:
-        current_app.logger.exception("Failed to issue rq-engine token for interfaces")
-        return exception_factory(f"JWT configuration error: {exc}")
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloud_site.py:465", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

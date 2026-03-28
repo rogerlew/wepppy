@@ -231,9 +231,6 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="disturbed9002">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -249,9 +246,6 @@
             </button>
           </form>
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="disturbed-hi">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -267,9 +261,6 @@
             </button>
           </form>
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="disturbed-ak">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -312,9 +303,6 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="disturbed9002_wbt">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -352,9 +340,6 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="reveg">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -370,9 +355,6 @@
             </button>
           </form>
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="reveg-mofe">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -388,9 +370,6 @@
             </button>
           </form>
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="reveg-10m-mofe">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -406,9 +385,6 @@
             </button>
           </form>
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="disturbed-ak">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -450,9 +426,6 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="eu" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="eu-disturbed">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -489,9 +462,6 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="au" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="au-disturbed">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -531,9 +501,6 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="rhem" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="rhem">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -607,9 +574,6 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-weppcloud" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="0">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -624,9 +588,6 @@
             </button>
           </form>
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-weppcloud" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="13">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
@@ -665,9 +626,6 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-baer" data-cap-required="true"{% endif %}>
-            {% if rq_engine_token %}
-            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
-            {% endif %}
             <input type="hidden" name="config" value="baer">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>

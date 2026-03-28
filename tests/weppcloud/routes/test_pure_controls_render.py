@@ -324,8 +324,9 @@ def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_
         rq_engine_token="token",
     )
 
-    assert ">Login</a> to Bypass Capchas" in rendered
+    assert ">Login</a> to Bypass Captchas" in rendered
     assert 'href="/login?next=/interfaces/"' in rendered
+    assert 'name="rq_token"' not in rendered
 
 
 def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(jinja_env: Environment) -> None:
@@ -348,8 +349,9 @@ def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(ji
         rq_engine_token="token",
     )
 
-    assert "Login to Bypass Capchas" not in rendered
+    assert "Login to Bypass Captchas" not in rendered
     assert 'href="/login?next=/interfaces/"' not in rendered
+    assert 'name="rq_token"' not in rendered
 
 
 def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env: Environment) -> None:
