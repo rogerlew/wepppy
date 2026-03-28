@@ -67,10 +67,12 @@ describe("Roads controller", () => {
     let roads;
     let httpMock;
     let originalXmlHttpRequest;
+    let roadsTaskStatus;
 
     beforeEach(async () => {
         jest.resetModules();
         FakeXMLHttpRequest.instances = [];
+        roadsTaskStatus = "running";
 
         document.body.innerHTML = `
             <form id="roads_form" data-roads-max-upload-mb="50">
@@ -143,6 +145,9 @@ describe("Roads controller", () => {
                 return Promise.resolve({ body: { job_id: "roads-job-1" } });
             }),
             getJson: jest.fn((path) => {
+                if (path === "/runs/test-run/test-config/api/roads/status") {
+                    return Promise.resolve({ body: { status: roadsTaskStatus } });
+                }
                 if (path === "/runs/test-run/test-config/api/roads/config") {
                     return Promise.resolve({
                         body: {
@@ -330,6 +335,23 @@ describe("Roads controller", () => {
         );
     });
 
+    test("queueTask clears stale active roads task after terminal status", async () => {
+        await roads.runRoads();
+        await Promise.resolve();
+
+        roadsTaskStatus = "idle";
+        await roads.prepareSegments();
+        await Promise.resolve();
+
+        expect(httpMock.getJson).toHaveBeenCalledWith("/runs/test-run/test-config/api/roads/status");
+        expect(httpMock.request).toHaveBeenCalledTimes(2);
+        expect(httpMock.request).toHaveBeenNthCalledWith(
+            2,
+            "/runs/test-run/test-config/tasks/roads/prepare_segments",
+            expect.objectContaining({ method: "POST", form: expect.any(HTMLFormElement) })
+        );
+    });
+
     test("completion events must match active job id", async () => {
         await roads.runRoads();
         await Promise.resolve();
@@ -351,6 +373,22 @@ describe("Roads controller", () => {
         expect(httpMock.request).toHaveBeenCalledWith("/runs/test-run/test-config/report/roads/results/");
         expect(document.getElementById("roads-results").innerHTML).toContain("Roads Run Results");
         expect(document.getElementById("roads_traffic_field").value).toBe("TRAFFIC");
+    });
+
+    test("bootstrap job hint does not lock prepare/run actions", async () => {
+        roads.bootstrap({ jobIds: { run_roads_rq: "stale-roads-job" } });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        await roads.prepareSegments();
+        await Promise.resolve();
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(roads, "stale-roads-job");
+        expect(httpMock.request).toHaveBeenNthCalledWith(
+            2,
+            "/runs/test-run/test-config/tasks/roads/prepare_segments",
+            expect.objectContaining({ method: "POST", form: expect.any(HTMLFormElement) })
+        );
     });
 
     test("apply mapping posts attribute_field_map payload", async () => {

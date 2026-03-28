@@ -918,6 +918,46 @@ var Roads = (function () {
             controller._lastQueuedTask = null;
         }
 
+        function emitTaskConflict(taskKey) {
+            var activeTask = controller._activeTaskKey || controller._lastQueuedTask || "task";
+            var conflictPayload = {
+                error: {
+                    message: "Roads " + activeTask + " is already active. Wait for completion before starting another task."
+                }
+            };
+            controller.append_status_message(
+                controller,
+                "Roads " + activeTask + " is already active. Wait for completion before starting another task."
+            );
+            if (emitter && typeof emitter.emit === "function") {
+                emitter.emit(TASKS[taskKey].eventPrefix + ":error", {
+                    error: conflictPayload,
+                    task: taskKey
+                });
+            }
+            controller.triggerEvent("job:error", { task: "roads:" + taskKey, error: conflictPayload });
+            return null;
+        }
+
+        function reconcileTerminalActiveTaskState() {
+            if (!controller._activeTaskKey || !http || typeof http.getJson !== "function") {
+                return Promise.resolve(false);
+            }
+            return http.getJson(resolveRunUrl("api/roads/status")).then(function (result) {
+                var payload = result && result.body ? result.body : {};
+                var statusValue = payload && payload.status ? String(payload.status).toLowerCase() : "";
+                if (statusValue === "running") {
+                    return false;
+                }
+                controller.disconnect_status_stream(controller);
+                clearActiveTaskState();
+                controller.set_rq_job_id(controller, null);
+                return true;
+            }).catch(function () {
+                return false;
+            });
+        }
+
         function markTaskCompleted(taskKey, source, payload) {
             if (!TASKS[taskKey] || !controller.form) {
                 return;
@@ -998,25 +1038,17 @@ var Roads = (function () {
             if (!controller.form) {
                 return Promise.resolve(null);
             }
-            if (controller._taskRequestInFlight || controller._activeTaskKey) {
-                var activeTask = controller._activeTaskKey || controller._lastQueuedTask || "task";
-                var conflictPayload = {
-                    error: {
-                        message: "Roads " + activeTask + " is already active. Wait for completion before starting another task."
-                    }
-                };
-                controller.append_status_message(
-                    controller,
-                    "Roads " + activeTask + " is already active. Wait for completion before starting another task."
-                );
-                if (emitter && typeof emitter.emit === "function") {
-                    emitter.emit(TASKS[taskKey].eventPrefix + ":error", {
-                        error: conflictPayload,
-                        task: taskKey
-                    });
-                }
-                controller.triggerEvent("job:error", { task: "roads:" + taskKey, error: conflictPayload });
+            if (controller._taskRequestInFlight) {
+                emitTaskConflict(taskKey);
                 return Promise.resolve(null);
+            }
+            if (controller._activeTaskKey) {
+                return reconcileTerminalActiveTaskState().then(function (cleared) {
+                    if (!cleared && controller._activeTaskKey) {
+                        return emitTaskConflict(taskKey);
+                    }
+                    return queueTask(taskKey);
+                });
             }
 
             var task = TASKS[taskKey];
@@ -1280,10 +1312,10 @@ var Roads = (function () {
 
             if (candidateJobId && candidateTask) {
                 controller._completionSeen[candidateTask] = false;
-                controller._lastQueuedTask = candidateTask;
-                controller._activeTaskKey = candidateTask;
-                controller._activeJobId = candidateJobId;
                 controller._taskRequestInFlight = false;
+                controller._lastQueuedTask = null;
+                controller._activeTaskKey = null;
+                controller._activeJobId = null;
                 controller.poll_completion_event = TASKS[candidateTask].completionEvent;
                 controller.set_rq_job_id(controller, candidateJobId);
             }
