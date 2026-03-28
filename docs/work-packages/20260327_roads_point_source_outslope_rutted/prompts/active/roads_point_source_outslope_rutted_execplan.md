@@ -11,6 +11,7 @@ After this package, `outslope_rutted` is modeled as a point-source Roads design 
 ## Progress
 
 - [x] (2026-03-27 00:00Z) Authored package/tracker/ExecPlan scaffold for step-3 scope.
+- [x] (2026-03-27 23:40Z) Step-1 and step-2 dependencies confirmed complete; package activated as current Roads ExecPlan.
 - [ ] Milestone 1: Implement design eligibility and fill-parameter contract.
 - [ ] Milestone 2: Integrate run-stage `outslope_rutted` contributor builder (`road -> fill -> buffer`).
 - [ ] Milestone 3: Implement channel-associated and non-channel branch behavior with diagnostics.
@@ -177,4 +178,7 @@ Dependency requirement:
 
 ---
 
-Revision note (2026-03-27 00:00Z): Initial step-3 ExecPlan authored with explicit fill OFE contract and mandatory code/QA review gates.
+Revision notes:
+
+- 2026-03-27 00:00Z: Initial step-3 ExecPlan authored with explicit fill OFE contract and mandatory code/QA review gates.
+- 2026-03-27 23:40Z: Activated as current Roads ExecPlan after step-1/step-2 completion handoff.

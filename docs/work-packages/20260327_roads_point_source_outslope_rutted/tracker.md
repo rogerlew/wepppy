@@ -5,7 +5,7 @@
 ## Quick Status
 
 **Started**: 2026-03-27  
-**Current phase**: Planning Complete - Implementation Ready  
+**Current phase**: Active - Milestone 1 in progress  
 **Last updated**: 2026-03-27  
 **Active ExecPlan**: `prompts/active/roads_point_source_outslope_rutted_execplan.md`  
 **Next milestone**: Milestone 1 - finalize fill-parameter contract and design eligibility integration
@@ -13,7 +13,6 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Milestone 1: Add `outslope_rutted` design eligibility and fill-parameter contract.
 - [ ] Milestone 2: Implement run-stage `road -> fill -> buffer` contributor assembly.
 - [ ] Milestone 3: Handle channel-associated vs non-channel routing branches with diagnostics.
 - [ ] Milestone 4: Update summaries/reports and add regression tests.
@@ -23,10 +22,10 @@
 - [ ] Milestone 8: Run final gates and handoff updates.
 
 ### In Progress
-- [ ] None.
+- [ ] Milestone 1: Add `outslope_rutted` design eligibility and fill-parameter contract.
 
 ### Blocked
-- [ ] Await step-1 and step-2 package completion and interface freeze.
+- [ ] None.
 
 ### Done
 - [x] Authored package scaffold, tracker, and active ExecPlan (2026-03-27).
@@ -35,6 +34,7 @@
 ## Timeline
 
 - **2026-03-27** - Package authored and scoped as Roads step-3 work.
+- **2026-03-27** - Package activated after step-1 and step-2 completion handoff.
 
 ## Decisions
 
@@ -105,6 +105,24 @@
 
 **Next steps**:
 - Begin Milestone 1 after upstream interfaces stabilize.
+- Begin Milestone 1 implementation using step-2 trace integration as fixed contract.
 
 **Test results**:
 - Documentation authoring session; implementation tests not run yet.
+
+### 2026-03-27: Package activation for implementation
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Confirmed step-1 (peridot/wepppyo3 trace core) and step-2 (inslope non-channel routing) handoffs are complete.
+- Promoted this package to active work-package in root `AGENTS.md`.
+- Moved Milestone 1 to In Progress.
+
+**Blockers encountered**:
+- None at activation time.
+
+**Next steps**:
+- Execute Milestone 1 end-to-end, then continue through Milestone 8 without widening scope beyond `outslope_rutted`.
+
+**Test results**:
+- Activation/documentation update only; no implementation tests run in this activation pass.

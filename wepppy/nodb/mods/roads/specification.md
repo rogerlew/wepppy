@@ -832,6 +832,13 @@ Implemented step-2 non-channel low-point path:
 5. Resolve receiving hillslope from traced pre-channel cell (`subwta` suffix `1|2|3`) and merge resulting contributor pass into mapped hillslope output.
 6. If trace does not reach channel, skip contributor generation and persist explicit diagnostics in run summary/logs.
 
+Step-2 as-implemented contract notes (2026-03-27 review):
+
+- point-source contributor execution currently requires channel delivery (`trace_reaches_channel == true`); traces that terminate on hillslope interior are explicitly skipped (`trace_did_not_reach_channel`).
+- run summary diagnostics include `trace_invocation_count`, `trace_reached_channel_count`, `trace_termination_reason_counts`, and `segment_routing_mode_counts` for deterministic branch accounting.
+- run input parameter `trace_max_steps` (default `20000`) is exposed and validated as a positive integer.
+- this behavior applies only to inslope point-source designs in step-2; `outslope_rutted` and `outslope_unrutted` remain follow-on implementations.
+
 ### High-Fidelity Concept (Top-Level)
 
 1. Identify outsloped road discharge strips and trace downslope delivery paths to the channel network.
