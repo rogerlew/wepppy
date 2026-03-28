@@ -1,7 +1,7 @@
 metadata:
   catalog_version: "0.3.0-draft"
   schema_version: 2
-  updated_at_utc: "2026-03-28T17:05:00Z"
+  updated_at_utc: "2026-03-28T23:59:00Z"
   owner: "wepppy/nodb/mods/features_export"
   status: "draft"
   resolver_contract:
@@ -1139,6 +1139,179 @@ layers:
           availability:
             requires_any_column:
               - "dia_1"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.loss_all_years_hill"
+    label: "loss_pw0.all_years.hill.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_loss_all_years_hill:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_loss_all_years_hill"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/loss_pw0.all_years.hill.parquet"
+        required: true
+        role: "yearly_metrics"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+      grain: "year"
+      time_columns:
+        - "year"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+    measures:
+      required:
+        - "Runoff Volume"
+        - "Subrunoff Volume"
+        - "Baseflow Volume"
+        - "Soil Loss"
+        - "Sediment Yield"
+      optional:
+        - measure_id: "Sediment Deposition"
+          key_aliases:
+            - "Sediment Deposition"
+          availability:
+            requires_any_column:
+              - "Sediment Deposition"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+        - measure_id: "Total Pollutant"
+          key_aliases:
+            - "Total Pollutant"
+            - "Solub. React. Pollutant"
+            - "Particulate Pollutant"
+          availability:
+            requires_any_column:
+              - "Total Pollutant"
+              - "Solub. React. Pollutant"
+              - "Particulate Pollutant"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.loss_all_years_channel"
+    label: "loss_pw0.all_years.chn.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "line"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.channels_shp"
+      feature_id_keys:
+        - "chn_id"
+        - "channel_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "topaz_id"
+      fallback_keys:
+        - "chn_id"
+        - "channel_id"
+        - "TopazID"
+      source_key_map:
+        wepp_loss_all_years_channel:
+          - "wepp_id"
+          - "chn_enum"
+          - "chn_id"
+          - "channel_id"
+    sources:
+      - source_id: "wepp_loss_all_years_channel"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/loss_pw0.all_years.chn.parquet"
+        required: true
+        role: "yearly_metrics"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+      grain: "year"
+      time_columns:
+        - "year"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+    measures:
+      required:
+        - "Discharge Volume"
+        - "Sediment Yield"
+        - "Soil Loss"
+        - "Upland Charge"
+      optional:
+        - measure_id: "Subsuface Flow Volume"
+          key_aliases:
+            - "Subsuface Flow Volume"
+          availability:
+            requires_any_column:
+              - "Subsuface Flow Volume"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+        - measure_id: "Total Pollutant"
+          key_aliases:
+            - "Total Pollutant"
+            - "Solub. React. Pollutant"
+            - "Particulate Pollutant"
+          availability:
+            requires_any_column:
+              - "Total Pollutant"
+              - "Solub. React. Pollutant"
+              - "Particulate Pollutant"
           on_missing: "warn"
           warning_code: "measure_unavailable"
 

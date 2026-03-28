@@ -215,7 +215,7 @@ def test_resolve_export_plan_hill_wat_supports_event_mode(catalog) -> None:
     assert plan.warnings == ()
 
 
-def test_resolve_export_plan_new_hillslope_interchange_layers_are_cataloged(catalog) -> None:
+def test_resolve_export_plan_new_interchange_layers_are_cataloged(catalog) -> None:
     payload = {
         "format": "geopackage",
         "units": "project",
@@ -224,6 +224,8 @@ def test_resolve_export_plan_new_hillslope_interchange_layers_are_cataloged(cata
             "wepp.interchange.hill_soil",
             "wepp.interchange.hill_pass_events",
             "wepp.interchange.hill_pass_metadata",
+            "wepp.interchange.loss_all_years_hill",
+            "wepp.interchange.loss_all_years_channel",
         ],
     }
 
@@ -234,6 +236,8 @@ def test_resolve_export_plan_new_hillslope_interchange_layers_are_cataloged(cata
         "baseline__wepp.interchange.hill_pass_events",
         "baseline__wepp.interchange.hill_pass_metadata",
         "baseline__wepp.interchange.hill_soil",
+        "baseline__wepp.interchange.loss_all_years_channel",
+        "baseline__wepp.interchange.loss_all_years_hill",
     ]
 
 
