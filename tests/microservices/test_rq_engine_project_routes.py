@@ -151,6 +151,79 @@ def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch)
     assert owner_calls["user_email"] == "tester@example.com"
 
 
+def test_create_reauths_expired_rq_token_with_session_cookie(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, _ = create_client
+    stub_user = SimpleNamespace(email="tester@example.com")
+    owner_calls: Dict[str, Any] = {}
+
+    def _raise_expired_token(*_args, **_kwargs):
+        raise project_routes.AuthError("Invalid token: Token has expired")
+
+    monkeypatch.setattr(
+        project_routes,
+        "_require_rq_token",
+        _raise_expired_token,
+    )
+    monkeypatch.setattr(
+        project_routes,
+        "_claims_from_session_cookie",
+        lambda request: {"sub": "42", "token_class": "user", "email": "tester@example.com"},
+    )
+    monkeypatch.setattr(project_routes, "_resolve_user_from_claims", lambda claims: stub_user)
+
+    def fake_register(runid: str, config: str, user: Any) -> None:
+        owner_calls["runid"] = runid
+        owner_calls["config"] = config
+        owner_calls["user_email"] = getattr(user, "email", None)
+
+    monkeypatch.setattr(project_routes, "_register_run_owner", fake_register)
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "rq_token": "expired-token"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert owner_calls["runid"] == RUN_ID
+    assert owner_calls["config"] == CONFIG
+    assert owner_calls["user_email"] == "tester@example.com"
+
+
+def test_create_non_expired_rq_token_error_does_not_reauth(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, captured = create_client
+
+    def _raise_signature_error(*_args, **_kwargs):
+        raise project_routes.AuthError("Invalid token: Token signature mismatch")
+
+    monkeypatch.setattr(
+        project_routes,
+        "_require_rq_token",
+        _raise_signature_error,
+    )
+
+    def _unexpected_cookie_reauth(_request):
+        raise AssertionError("session-cookie reauth should not be attempted")
+
+    monkeypatch.setattr(project_routes, "_claims_from_session_cookie", _unexpected_cookie_reauth)
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "rq_token": "bad-token"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 401
+    assert response.json()["error"]["message"] == "Invalid token: Token signature mismatch"
+    assert "cfg" not in captured
+
+
 def test_create_does_not_enable_default_nodir_roots_marker_without_opt_in(
     create_client,
     monkeypatch: pytest.MonkeyPatch,

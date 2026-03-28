@@ -139,6 +139,30 @@ def _require_rq_token(token: str, *, required_scopes: Sequence[str]) -> Mapping[
     return claims
 
 
+def _is_expired_rq_token_error(exc: AuthError) -> bool:
+    message = str(getattr(exc, "message", "")).lower()
+    return exc.status_code == 401 and exc.code == "unauthorized" and "token has expired" in message
+
+
+def _claims_from_session_cookie(request: Request) -> Mapping[str, Any]:
+    from . import session_routes
+
+    if not session_routes._is_same_origin_cookie_request(request):
+        raise AuthError("Cross-origin request blocked.", status_code=403, code="forbidden")
+
+    session_id = session_routes._resolve_session_id_from_cookie(request)
+    session_routes._session_exists(session_id)
+    payload = session_routes._session_payload(session_id)
+    user_id, roles = session_routes._identity_from_session_payload(payload)
+    if user_id is None:
+        raise AuthError("Session expired or invalid", status_code=401, code="unauthorized")
+
+    claims: dict[str, Any] = {"sub": str(user_id), "token_class": "user"}
+    if roles:
+        claims["roles"] = roles
+    return claims
+
+
 def _create_run_dir(user_email: str | None) -> tuple[str, str]:
     runs_root = "/wc1/runs"
     if not os.path.exists(runs_root):
@@ -261,7 +285,20 @@ async def create(request: Request) -> Response:
                 required_scopes=RQ_CREATE_SCOPES,
             )
         except AuthError as exc:
-            return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+            if not _is_expired_rq_token_error(exc):
+                return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+            try:
+                claims = await asyncio.to_thread(_claims_from_session_cookie, request)
+            except AuthError as session_exc:
+                return error_response(
+                    session_exc.message,
+                    status_code=session_exc.status_code,
+                    code=session_exc.code,
+                    details=exc.message,
+                )
+            except Exception:  # broad-except: boundary contract
+                logger.exception("rq-engine create session reauth failed")
+                return error_response_with_traceback("Failed to authorize request", status_code=401)
     elif "authorization" in {key.lower() for key in request.headers.keys()}:
         try:
             claims = await asyncio.to_thread(
