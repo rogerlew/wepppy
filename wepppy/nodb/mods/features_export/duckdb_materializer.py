@@ -79,7 +79,7 @@ def materialize_layer_attributes(
             details=f"layer={layer_id}",
         )
 
-    source_id, merged, source_units = staged_tables[0]
+    _source_id, merged, source_units = staged_tables[0]
     merged = merged.copy()
     unit_mapping: dict[str, str] = {}
     for column_name, display_unit in source_units.items():

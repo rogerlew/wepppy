@@ -851,7 +851,6 @@ def _build_materialized_execution_plan(
         if _should_consolidate_layer(layer):
             consolidation_scope = _consolidation_scope_for_layer(
                 layer=layer,
-                requested_output_scopes=plan.request.output_scopes,
             )
             group_key = (
                 layer.context,
@@ -903,13 +902,8 @@ def _should_consolidate_layer(layer: ResolvedLayerPlan) -> bool:
 def _consolidation_scope_for_layer(
     *,
     layer: ResolvedLayerPlan,
-    requested_output_scopes: cabc.Sequence[str],
 ) -> str:
-    if layer.context != "base":
-        return layer.scope
-    if layer.scope == "shared":
-        if "roads" in requested_output_scopes:
-            return "baseline"
+    if layer.context == "base" and layer.scope == "shared":
         return "baseline"
     return layer.scope
 
@@ -960,29 +954,21 @@ def _build_materialized_layer_payload(
     for result in source_sorted:
         warnings.extend(result.warnings)
 
-    if len(source_sorted) == 1:
-        merged = source_sorted[0].frame.copy()
-        selected_columns = list(source_sorted[0].selected_columns)
-        unit_mapping = dict(source_sorted[0].unit_mapping)
-        source_layer_ids = [source_sorted[0].layer.layer_id]
-    else:
-        merged = source_sorted[0].frame.copy()
-        selected_columns = list(source_sorted[0].selected_columns)
-        unit_mapping = dict(source_sorted[0].unit_mapping)
-        source_layer_ids = [source_sorted[0].layer.layer_id]
-        for result in source_sorted[1:]:
-            merged, rename_map = _merge_consolidated_layer_frame(
-                left_frame=merged,
-                right_frame=result.frame,
-                source_id=result.layer.layer_id,
-            )
-            source_layer_ids.append(result.layer.layer_id)
-            for column_name in result.selected_columns:
-                renamed = rename_map.get(column_name, column_name)
-                if renamed not in selected_columns and renamed in merged.columns:
-                    selected_columns.append(renamed)
-                mapped_unit = result.unit_mapping.get(column_name, "non-unitized")
-                unit_mapping[renamed] = mapped_unit
+    if len(source_sorted) != 1:
+        raise FeaturesExportServiceError(
+            "Unexpected passthrough materialization group cardinality.",
+            status_code=500,
+            code="materialization_error",
+            details=(
+                f"output_layer_id={layer.output_layer_id!r}; "
+                f"source_count={len(source_sorted)}"
+            ),
+        )
+
+    merged = source_sorted[0].frame.copy()
+    selected_columns = list(source_sorted[0].selected_columns)
+    unit_mapping = dict(source_sorted[0].unit_mapping)
+    source_layer_ids = [source_sorted[0].layer.layer_id]
 
     merged = merged.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
     row_count = int(len(merged.index))
@@ -1369,61 +1355,6 @@ def _ensure_join_key_column(
 
     result[_CONSOLIDATED_JOIN_KEY_COLUMN] = result[selected_key].map(_canonical_join_value)
     return result
-
-
-def _merge_consolidated_layer_frame(
-    *,
-    left_frame: gpd.GeoDataFrame,
-    right_frame: gpd.GeoDataFrame,
-    source_id: str,
-) -> tuple[gpd.GeoDataFrame, dict[str, str]]:
-    geometry_name = left_frame.geometry.name
-    if _CONSOLIDATED_JOIN_KEY_COLUMN not in left_frame.columns:
-        raise FeaturesExportServiceError(
-            "Consolidation key is missing from left frame.",
-            status_code=500,
-            code="materialization_error",
-        )
-    if _CONSOLIDATED_JOIN_KEY_COLUMN not in right_frame.columns:
-        raise FeaturesExportServiceError(
-            "Consolidation key is missing from right frame.",
-            status_code=500,
-            code="materialization_error",
-        )
-
-    left_non_geom = pd.DataFrame(left_frame.drop(columns=[geometry_name]))
-    right_non_geom = pd.DataFrame(
-        right_frame.drop(columns=[right_frame.geometry.name], errors="ignore")
-    )
-
-    rename_map: dict[str, str] = {}
-    used_names = set(left_non_geom.columns) | set(right_non_geom.columns)
-    source_suffix = _normalize_join_token(source_id) or "source"
-    for column_name in list(right_non_geom.columns):
-        if column_name == _CONSOLIDATED_JOIN_KEY_COLUMN:
-            continue
-        if column_name not in left_non_geom.columns:
-            continue
-        renamed = _dedupe_column_name(f"{column_name}__{source_suffix}", used_names)
-        rename_map[column_name] = renamed
-        used_names.add(renamed)
-    if rename_map:
-        right_non_geom = right_non_geom.rename(columns=rename_map)
-
-    left_rowid = "__features_export_left_rowid__"
-    left_non_geom[left_rowid] = range(len(left_non_geom.index))
-    joined = _duckdb_left_join_dataframe(
-        left_df=left_non_geom,
-        right_df=right_non_geom,
-        left_key=_CONSOLIDATED_JOIN_KEY_COLUMN,
-        right_key=_CONSOLIDATED_JOIN_KEY_COLUMN,
-    )
-    geometry_lookup = left_frame.geometry.reset_index(drop=True)
-    joined_geometry = joined[left_rowid].map(geometry_lookup)
-    joined = joined.drop(columns=[left_rowid], errors="ignore")
-    joined[geometry_name] = joined_geometry.values
-    merged = gpd.GeoDataFrame(joined, geometry=geometry_name, crs=left_frame.crs)
-    return merged, rename_map
 
 
 def _layer_dependency_relpath(

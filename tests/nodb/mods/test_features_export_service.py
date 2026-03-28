@@ -309,6 +309,57 @@ def test_build_materialized_execution_plan_wepp_six_inputs_collapse_to_two_carri
     ]
 
 
+def test_build_materialized_layer_payload_rejects_multi_source_passthrough_group() -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments",
+    )
+    source_a = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments__a",
+    )
+    source_b = ResolvedLayerPlan(
+        layer_id="wepp.summary.hillslopes",
+        family="wepp_summary",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.summary.hillslopes",
+    )
+    frame = gpd.GeoDataFrame(
+        {"value": [1.0], "geometry": [Point(0, 0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    source_results = (
+        service._LayerFrameResult(
+            layer=source_a,
+            frame=frame.copy(),
+            selected_columns=("value",),
+            unit_mapping={"value": "m3"},
+            warnings=(),
+        ),
+        service._LayerFrameResult(
+            layer=source_b,
+            frame=frame.copy(),
+            selected_columns=("value",),
+            unit_mapping={"value": "m3"},
+            warnings=(),
+        ),
+    )
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._build_materialized_layer_payload(layer, source_results=source_results)
+
+    assert exc_info.value.code == "materialization_error"
+    assert "source_count=2" in exc_info.value.details
+
+
 def test_resolve_selected_columns_prefers_discovered_units_when_catalog_columns_absent() -> None:
     layer = ResolvedLayerPlan(
         layer_id="wepp.summary.hillslopes",
