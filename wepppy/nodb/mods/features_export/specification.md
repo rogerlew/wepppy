@@ -144,6 +144,7 @@ Carrier materialization contract (normative):
   - Catalog `join.source_key_map` overrides remain authoritative for source-specific key resolution.
 - Each source dataset must be reduced to one row per effective carrier key before joining into Phase A output (via deterministic temporal filtering, deterministic projection, and deterministic dedupe/aggregation rules when needed).
 - Unresolved many-to-many key joins on a carrier hot path are contract violations and must fail explicitly with `materialization_error`; silent Cartesian growth is forbidden.
+- Legacy non-carrier source merges must resolve identity keys from explicit join contract candidates (`join.primary_key`, `join.fallback_keys`, `geometry.feature_id_keys`). If no candidate resolves, fail with `materialization_error`; arbitrary first-column fallback is non-compliant.
 - Canonical carrier geometry tables must contain one geometry row per effective carrier key. When raw geometry sources contain repeated key rows, geometry must be canonicalized (for example, deterministic dissolve/aggregation) before Phase B.
 - For spatial carriers, the canonical geometry keyset is the authoritative export row domain. Phase A keys not present in canonical geometry are excluded before final attachment, and final row/feature counts must match canonical carrier entity counts.
 - Repeated geometry-attached frame merges (geometry-first per-dataset pipelines) are non-compliant for production export paths.
@@ -235,8 +236,8 @@ Validation:
 - If some layers are incompatible with requested temporal settings and at least one layer remains exportable, incompatible layers are dropped with `layer_unavailable` warnings.
 - If no requested layers support the requested temporal settings, return 400.
 - If `year_selection` or `exclude_yr_indxs` is provided for a layer whose catalog rule sets `year_selection_supported=false`, ignore those selectors for that layer and emit `selector_defaulted`.
-- Missing required datasets return 404 only when nothing exportable remains.
-- If at least one requested export target resolves, unresolved requested layers/tables are emitted as warnings and do not fail the job.
+- Missing required source dependencies for a resolved layer (missing required source locator, missing required source file, unsupported required source kind, unresolved required join key) fail the job with `materialization_error`; silent downgrade to warnings is forbidden.
+- Optional missing datasets may emit warnings and still succeed when at least one export target resolves.
 - Unsupported format dependency returns 409.
 
 CRS behavior:

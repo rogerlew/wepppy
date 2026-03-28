@@ -17,7 +17,7 @@ from wepppy.nodb.mods.features_export.contracts import (
     ResolvedExportPlan,
     ResolvedLayerPlan,
 )
-from wepppy.nodb.mods.features_export.discovery import DiscoveredSourceFrame
+from wepppy.nodb.mods.features_export.discovery import DiscoveredSourceFrame, discover_layer_sources
 from wepppy.nodb.mods.features_export.dependency_tracker import DependencyEntry, DependencySnapshot
 from wepppy.nodb.mods.features_export.duckdb_materializer import materialize_layer_attributes
 from wepppy.nodb.mods.features_export.exporters import (
@@ -358,6 +358,518 @@ def test_build_materialized_layer_payload_rejects_multi_source_passthrough_group
 
     assert exc_info.value.code == "materialization_error"
     assert "source_count=2" in exc_info.value.details
+
+
+def test_ensure_join_key_column_requires_contract_defined_identity_key() -> None:
+    frame = gpd.GeoDataFrame(
+        {"legacy_id": [7], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._ensure_join_key_column(
+            frame,
+            join_contract={"primary_key": "topaz_id", "fallback_keys": ["TopazID"]},
+            catalog_layer_raw={"geometry": {"feature_id_keys": ["wepp_id"]}},
+        )
+
+    assert exc_info.value.code == "materialization_error"
+    assert "identity_candidates" in exc_info.value.details
+
+
+def test_build_layer_frame_from_sources_required_source_missing_raises_materialization_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments",
+    )
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=(layer.layer_id,),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+    dependency_entries = (
+        DependencyEntry(
+            relpath="geometry/subcatchments.geojson",
+            exists=True,
+            size=1,
+            mtime_ns=1,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            dependency_role="geometry",
+            dependency_id="geometry",
+        ),
+    )
+    geometry_frame = gpd.GeoDataFrame(
+        {"TopazID": [1], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    monkeypatch.setattr(service, "_load_vector_dataframe", lambda wd, relpath: geometry_frame)
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._build_layer_frame_from_sources(
+            wd=tmp_path,
+            layer=layer,
+            catalog_layer_raw={
+                "join": {"primary_key": "TopazID"},
+                "sources": [{"source_id": "required_metrics", "kind": "parquet", "required": True}],
+            },
+            request_plan=plan,
+            dependency_entries=dependency_entries,
+        )
+
+    assert exc_info.value.code == "materialization_error"
+    assert "dependency_missing" in exc_info.value.details
+
+
+def test_build_layer_frame_from_sources_required_source_missing_file_raises_materialization_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments",
+    )
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=(layer.layer_id,),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+    dependency_entries = (
+        DependencyEntry(
+            relpath="geometry/subcatchments.geojson",
+            exists=True,
+            size=1,
+            mtime_ns=1,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            dependency_role="geometry",
+            dependency_id="geometry",
+        ),
+        DependencyEntry(
+            relpath="missing/required.parquet",
+            exists=False,
+            size=None,
+            mtime_ns=None,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            dependency_role="source",
+            dependency_id="required_metrics",
+        ),
+    )
+    required_source_path = tmp_path / "sources" / "required.geojson"
+    required_source_path.parent.mkdir(parents=True, exist_ok=True)
+    geometry_frame = gpd.GeoDataFrame(
+        {"TopazID": [1], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    monkeypatch.setattr(service, "_load_vector_dataframe", lambda wd, relpath: geometry_frame)
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._build_layer_frame_from_sources(
+            wd=tmp_path,
+            layer=layer,
+            catalog_layer_raw={
+                "join": {"primary_key": "TopazID"},
+                "sources": [{"source_id": "required_metrics", "kind": "parquet", "required": True}],
+            },
+            request_plan=plan,
+            dependency_entries=dependency_entries,
+        )
+
+    assert exc_info.value.code == "materialization_error"
+    assert "file_missing" in exc_info.value.details
+
+
+def test_build_layer_frame_from_sources_required_source_unsupported_kind_raises_materialization_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments",
+    )
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=(layer.layer_id,),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+    source_relpath = "sources/required.data"
+    source_path = tmp_path / source_relpath
+    source_path.parent.mkdir(parents=True, exist_ok=True)
+    source_path.write_text("placeholder", encoding="utf-8")
+    dependency_entries = (
+        DependencyEntry(
+            relpath="geometry/subcatchments.geojson",
+            exists=True,
+            size=1,
+            mtime_ns=1,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            dependency_role="geometry",
+            dependency_id="geometry",
+        ),
+        DependencyEntry(
+            relpath=source_relpath,
+            exists=True,
+            size=source_path.stat().st_size,
+            mtime_ns=source_path.stat().st_mtime_ns,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            dependency_role="source",
+            dependency_id="required_metrics",
+        ),
+    )
+    required_source_path = tmp_path / "sources" / "required.geojson"
+    required_source_path.parent.mkdir(parents=True, exist_ok=True)
+    required_source_path.write_text("{}", encoding="utf-8")
+    geometry_frame = gpd.GeoDataFrame(
+        {"TopazID": [1], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    monkeypatch.setattr(service, "_load_vector_dataframe", lambda wd, relpath: geometry_frame)
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._build_layer_frame_from_sources(
+            wd=tmp_path,
+            layer=layer,
+            catalog_layer_raw={
+                "join": {"primary_key": "TopazID"},
+                "sources": [{"source_id": "required_metrics", "kind": "unsupported", "required": True}],
+            },
+            request_plan=plan,
+            dependency_entries=dependency_entries,
+        )
+
+    assert exc_info.value.code == "materialization_error"
+    assert "unsupported_source_kind" in exc_info.value.details
+
+
+def test_build_layer_frame_from_sources_required_source_join_unresolved_raises_materialization_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments",
+    )
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=(layer.layer_id,),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+    dependency_entries = (
+        DependencyEntry(
+            relpath="geometry/subcatchments.geojson",
+            exists=True,
+            size=1,
+            mtime_ns=1,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            dependency_role="geometry",
+            dependency_id="geometry",
+        ),
+        DependencyEntry(
+            relpath="sources/required.geojson",
+            exists=True,
+            size=1,
+            mtime_ns=1,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            dependency_role="source",
+            dependency_id="required_metrics",
+        ),
+    )
+    required_source_path = tmp_path / "sources" / "required.geojson"
+    required_source_path.parent.mkdir(parents=True, exist_ok=True)
+    required_source_path.write_text("{}", encoding="utf-8")
+    geometry_frame = gpd.GeoDataFrame(
+        {"TopazID": [1], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    source_frame = gpd.GeoDataFrame(
+        {"ForeignID": [1], "metric": [5.0], "geometry": [Point(1.0, 1.0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    source_frame.to_file(required_source_path, driver="GeoJSON")
+    monkeypatch.setattr(service, "_load_vector_dataframe", lambda wd, relpath: geometry_frame)
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._build_layer_frame_from_sources(
+            wd=tmp_path,
+            layer=layer,
+            catalog_layer_raw={
+                "join": {"primary_key": "TopazID"},
+                "sources": [{"source_id": "required_metrics", "kind": "vector", "required": True}],
+            },
+            request_plan=plan,
+            dependency_entries=dependency_entries,
+        )
+
+    assert exc_info.value.code == "materialization_error"
+    assert "required_source_join_unresolved" in exc_info.value.details
+
+
+def test_discover_layer_sources_required_missing_dependency_raises_materialization_contract_error(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(MaterializationContractError) as exc_info:
+        discover_layer_sources(
+            wd=tmp_path,
+            layer_id="wepp.summary.hillslopes",
+            scope="baseline",
+            catalog_layer_raw={
+                "sources": [{"source_id": "required_metrics", "kind": "parquet", "required": True}],
+            },
+            dependency_entries=(),
+        )
+
+    assert "dependency_missing" in exc_info.value.details
+
+
+def test_discover_layer_sources_required_missing_file_raises_materialization_contract_error(
+    tmp_path: Path,
+) -> None:
+    dependency_entries = (
+        DependencyEntry(
+            relpath="missing/required.parquet",
+            exists=False,
+            size=None,
+            mtime_ns=None,
+            layer_id="wepp.summary.hillslopes",
+            output_layer_id="baseline__wepp.summary.hillslopes",
+            dependency_role="source",
+            dependency_id="required_metrics",
+        ),
+    )
+    with pytest.raises(MaterializationContractError) as exc_info:
+        discover_layer_sources(
+            wd=tmp_path,
+            layer_id="wepp.summary.hillslopes",
+            scope="baseline",
+            catalog_layer_raw={
+                "sources": [{"source_id": "required_metrics", "kind": "parquet", "required": True}],
+            },
+            dependency_entries=dependency_entries,
+        )
+
+    assert "file_missing" in exc_info.value.details
+
+
+def test_discover_layer_sources_required_unsupported_kind_raises_materialization_contract_error(
+    tmp_path: Path,
+) -> None:
+    source_relpath = "sources/required.data"
+    source_path = tmp_path / source_relpath
+    source_path.parent.mkdir(parents=True, exist_ok=True)
+    source_path.write_text("placeholder", encoding="utf-8")
+    dependency_entries = (
+        DependencyEntry(
+            relpath=source_relpath,
+            exists=True,
+            size=source_path.stat().st_size,
+            mtime_ns=source_path.stat().st_mtime_ns,
+            layer_id="wepp.summary.hillslopes",
+            output_layer_id="baseline__wepp.summary.hillslopes",
+            dependency_role="source",
+            dependency_id="required_metrics",
+        ),
+    )
+    with pytest.raises(MaterializationContractError) as exc_info:
+        discover_layer_sources(
+            wd=tmp_path,
+            layer_id="wepp.summary.hillslopes",
+            scope="baseline",
+            catalog_layer_raw={
+                "sources": [{"source_id": "required_metrics", "kind": "unsupported", "required": True}],
+            },
+            dependency_entries=dependency_entries,
+        )
+
+    assert "unsupported_source_kind" in exc_info.value.details
+
+
+def test_materialize_export_payloads_translates_carrier_materialization_contract_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="wepp.summary.hillslopes",
+        family="wepp_summary",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.summary.hillslopes",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=(layer.layer_id,),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+    submission = service.FeaturesExportSubmission(
+        catalog=SimpleNamespace(get_layer=lambda layer_id: SimpleNamespace(raw={"join": {"primary_key": "topaz_id"}})),
+        plan=plan,
+        dependency_snapshot=DependencySnapshot(
+            catalog_signature="catalog-signature",
+            entries=(),
+            fingerprint="dependency-fingerprint",
+        ),
+        cache_key_parts=CacheKeyParts(
+            request_hash="request-hash",
+            dependency_fingerprint="dependency-fingerprint",
+            cache_key="request-hash+dependency-fingerprint",
+        ),
+        unitizer_preferences_fingerprint=None,
+    )
+
+    monkeypatch.setattr(
+        service,
+        "_build_materialized_execution_plan",
+        lambda plan, runid: (plan, {layer.output_layer_id: [layer]}),
+    )
+
+    def _raise_materialization_contract_error(**kwargs):  # noqa: ARG001
+        raise MaterializationContractError("carrier failure", details="carrier_fail_reason")
+
+    monkeypatch.setattr(service, "materialize_carrier_layer_core", _raise_materialization_contract_error)
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._materialize_export_payloads(submission, wd=tmp_path, runid="clogging-starch")
+
+    assert exc_info.value.code == "materialization_error"
+    assert "carrier_fail_reason" in exc_info.value.details
+
+
+def test_ensure_join_key_column_uses_fallback_candidate_when_primary_is_missing() -> None:
+    frame = gpd.GeoDataFrame(
+        {"WeppID": [2], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+
+    resolved = service._ensure_join_key_column(
+        frame,
+        join_contract={"primary_key": "TopazID", "fallback_keys": ["WeppID"]},
+        catalog_layer_raw={"geometry": {"feature_id_keys": ["TopazID"]}},
+    )
+
+    assert service._CONSOLIDATED_JOIN_KEY_COLUMN in resolved.columns
+    assert resolved.loc[0, service._CONSOLIDATED_JOIN_KEY_COLUMN] == "2"
+
+
+def test_layer_outputs_from_cache_entry_skips_malformed_entries_and_falls_back_to_plan() -> None:
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=("watershed.subcatchments",),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+    )
+    layer = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments",
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+
+    outputs = service._layer_outputs_from_cache_entry(
+        {
+            "layer_outputs": [
+                {"layer_id": "", "output_layer_id": "missing-layer-id"},
+                {"layer_id": "missing-output-id", "output_layer_id": ""},
+                {"scope": "shared"},
+                123,
+            ]
+        },
+        plan,
+        "export/features/artifacts/cache/features_export.gpkg",
+        "geopackage",
+    )
+
+    assert len(outputs) == 1
+    assert outputs[0].layer_id == "watershed.subcatchments"
+    assert outputs[0].output_layer_id == "shared__watershed.subcatchments"
+    assert outputs[0].row_count is None
+    assert outputs[0].feature_count is None
 
 
 def test_resolve_selected_columns_prefers_discovered_units_when_catalog_columns_absent() -> None:

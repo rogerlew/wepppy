@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-27  
-**Active Packages**: 5  
+**Last Updated**: 2026-03-28  
+**Active Packages**: 4  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -491,6 +491,61 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Features Export Service Compliance Refactor (4-Phase E2E)
+**Completed**: 2026-03-28  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260328_features_export_service_compliance_refactor/](docs/work-packages/20260328_features_export_service_compliance_refactor/)  
+**Description**: Closed the QA follow-up four-phase service quality pass for `features_export` by extracting legacy/carrier collaborators, removing dead wrappers, adding missing strict-required branch tests, and validating end-to-end behavior.
+
+**Outcome**:
+- Added collaborators:
+  - `wepppy/nodb/mods/features_export/legacy_source_materializer.py`
+  - `wepppy/nodb/mods/features_export/carrier_layer_materializer.py`
+- Refactored `service.py` to delegate legacy and carrier source materialization responsibilities to collaborators.
+- Added `discover_layer_sources(..., skip_vector_relpath=...)` support to reuse strict required-source policy for legacy flows without duplicated logic.
+- Removed dead wrappers and unused helper code in service (`_column_metadata_by_id`, `_identity_column_token`, legacy parquet helpers no longer needed after extraction).
+- Added missing strict-required tests (`file_missing`, `unsupported_source_kind`, and carrier-path materialization error translation).
+- Preserved run-path behavior and counts on baseline smoke run (`66` subcatchments, `27` channels).
+
+**Validation Notes**:
+- `wctl run-pytest tests/nodb/mods/test_features_export_service.py -k "required_source or discover_layer_sources or materialization_error or ensure_join_key" --maxfail=1` (`9 passed`)
+- `wctl run-pytest tests/nodb/mods/test_features_export_planner.py tests/nodb/mods/test_features_export_service.py tests/nodb/mods/test_features_export_exporters.py tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1` (`65 passed`)
+- `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py -k features_export --maxfail=1` (`4 passed`)
+- `wctl run-pytest tests/weppcloud/routes/test_run_0_openet_admin_gate.py -k features_export --maxfail=1` (`10 passed`)
+- `wctl run-npm test -- features_export` (`12 passed`)
+- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` (pass; net delta `-1`)
+
+### Features Export Service Quality Refactor (Phased E2E)
+**Completed**: 2026-03-28  
+**Duration**: 2 focused sessions  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260327_features_export_service_quality_refactor/](docs/work-packages/20260327_features_export_service_quality_refactor/)  
+**Description**: Completed phased quality refactor of `wepppy/nodb/mods/features_export/service.py` with contract hardening, collaborator extraction, strict required-source enforcement, and full validation/evidence closure.
+
+**Outcome**:
+- Removed hidden identity-key fallback and enforced explicit `materialization_error` behavior when join-key contracts do not resolve.
+- Enforced strict required-source handling on both legacy merge and carrier discovery paths (no warning-only degrade for required missing/unsupported sources).
+- Extracted service collaborators:
+  - `wepppy/nodb/mods/features_export/column_selection.py`
+  - `wepppy/nodb/mods/features_export/cache_rehydration.py`
+- Expanded service regression tests for required-source failure branches, join-key contracts, and malformed cache-entry fallback behavior.
+- Updated `wepppy/nodb/mods/features_export/specification.md` to lock strict required-source and explicit identity-key contract semantics.
+- Completed review artifacts with no unresolved medium/high findings.
+
+**Validation Notes**:
+- `wctl run-pytest tests/nodb/mods/test_features_export_planner.py tests/nodb/mods/test_features_export_service.py tests/nodb/mods/test_features_export_exporters.py tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1` (`62 passed`)
+- `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py -k features_export --maxfail=1` (`4 passed`)
+- `wctl run-pytest tests/weppcloud/routes/test_run_0_openet_admin_gate.py -k features_export --maxfail=1` (`10 passed`)
+- `wctl run-npm test -- features_export` (`12 passed`)
+- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` (pass; net delta `-1`)
+- `wctl doc-lint --path wepppy/nodb/mods/features_export/specification.md` (pass)
+- `wctl doc-lint --path docs/work-packages/20260327_features_export_service_quality_refactor/package.md` (pass)
+- `wctl doc-lint --path docs/work-packages/20260327_features_export_service_quality_refactor/tracker.md` (pass)
+- `wctl doc-lint --path docs/work-packages/20260327_features_export_service_quality_refactor/prompts/completed/features_export_service_quality_refactor_execplan.md` (pass)
 
 ### Roads GeoJSON Attribute Discovery and Mapping UI
 **Completed**: 2026-03-26  

@@ -17,35 +17,32 @@ from uuid import uuid4
 import duckdb
 import geopandas as gpd
 import pandas as pd
-try:
-    import pyarrow.parquet as _pyarrow_parquet
-    import pyarrow.lib as _pyarrow_lib
-except ModuleNotFoundError:  # pragma: no cover - runtime image normally includes pyarrow
-    _pyarrow_parquet = None
-    _pyarrow_lib = None
-
-if _pyarrow_lib is not None:
-    _PYARROW_SCHEMA_EXCEPTIONS: tuple[type[Exception], ...] = (
-        OSError,
-        ValueError,
-        _pyarrow_lib.ArrowException,
-    )
-else:  # pragma: no cover - pyarrow missing in non-runtime contexts
-    _PYARROW_SCHEMA_EXCEPTIONS = (OSError, ValueError)
 
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.runtime_paths.materialize import materialize_path_if_archive
 
+from .carrier_layer_materializer import materialize_carrier_layer_core
+from .cache_rehydration import (
+    artifact_metadata_from_cache_entry as _artifact_metadata_from_cache_entry_helper,
+    artifact_relpath_from_result as _artifact_relpath_from_result_helper,
+    cache_entry_artifact_relpath as _cache_entry_artifact_relpath_helper,
+    layer_outputs_from_cache_entry as _layer_outputs_from_cache_entry_helper,
+)
 from .cache_key import CacheKeyParts, build_cache_key, get_cache_index_entry, upsert_cache_index_entry
 from .catalog_loader import LayerCatalog, load_layer_catalog
-from .contracts import DEFAULT_SWAT_RUN_ID, ExportWarning, ResolvedExportPlan, ResolvedLayerPlan, WARNING_LAYER_UNAVAILABLE
+from .column_selection import (
+    dedupe_identity_selected_columns as _dedupe_identity_selected_columns_helper,
+    infer_display_unit_for_column as _infer_display_unit_for_column_helper,
+    required_identity_columns as _required_identity_columns_helper,
+    resolve_selected_columns as _resolve_selected_columns_helper,
+)
+from .contracts import DEFAULT_SWAT_RUN_ID, ExportWarning, ResolvedExportPlan, ResolvedLayerPlan
 from .dependency_tracker import DependencySnapshot, build_dependency_snapshot
-from .discovery import discover_layer_sources, layer_key_candidates, resolve_geometry_relpath
+from .discovery import layer_key_candidates, resolve_geometry_relpath
 from .duckdb_materializer import (
     LayerCarrierInput,
     materialize_carrier_core,
-    materialize_layer_attributes,
 )
 from .exporters import (
     ExportArtifactMetadata,
@@ -56,6 +53,7 @@ from .exporters import (
 )
 from .geometry_carriers import attach_geometry_once, build_canonical_geometry_carrier
 from .join_planner import JOIN_KEY_COLUMN, MaterializationContractError
+from .legacy_source_materializer import build_legacy_merged_frame
 from .manifest import build_export_manifest, write_export_manifest
 from .manifest_builder import build_output_layer_column_metadata
 from .planner import resolve_export_plan
@@ -67,7 +65,6 @@ FEATURES_EXPORT_MANIFEST_NAME = "manifest.json"
 _GPKG_APPLICATION_ID = 0x47504B47
 _CONSOLIDATED_JOIN_KEY_COLUMN = JOIN_KEY_COLUMN
 _SAFE_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
-_IDENTITY_COLUMN_TOKENS = frozenset({"topazid", "chnid", "channelid", "weppid", "id"})
 
 
 class FeaturesExportServiceError(RuntimeError):
@@ -525,12 +522,7 @@ def _materialize_export_payloads(
     runid: str,
 ) -> tuple[ResolvedExportPlan, dict[str, PreparedLayerPayload], dict[str, dict[str, object]]]:
     materialized_plan, grouped_layers = _build_materialized_execution_plan(submission.plan, runid=runid)
-    entries_by_output_layer_id: dict[str, list[object]] = {}
-    for entry in submission.dependency_snapshot.entries:
-        output_layer_id = entry.output_layer_id
-        if not isinstance(output_layer_id, str) or not output_layer_id:
-            continue
-        entries_by_output_layer_id.setdefault(output_layer_id, []).append(entry)
+    entries_by_output_layer_id = _dependency_entries_by_output_layer_id(submission.dependency_snapshot.entries)
 
     layer_core_results: dict[str, _LayerCoreResult] = {}
     legacy_frame_results: dict[str, _LayerFrameResult] = {}
@@ -555,28 +547,14 @@ def _materialize_export_payloads(
             )
             continue
 
-        discovered_sources, discovery_warnings = discover_layer_sources(
-            wd=wd,
-            layer_id=layer.layer_id,
-            scope=layer.scope,
-            catalog_layer_raw=catalog_layer.raw,
-            dependency_entries=dependency_entries,
-        )
-        if not discovered_sources:
-            raise FeaturesExportServiceError(
-                "No source tables were available for carrier layer materialization.",
-                status_code=500,
-                code="materialization_error",
-                details=f"layer={layer.layer_id!r}; output_layer_id={layer.output_layer_id!r}",
-            )
-
-        join_contract = _as_mapping(catalog_layer.raw.get("join"))
         try:
-            layer_frame, discovered_units = materialize_layer_attributes(
-                layer_id=layer.layer_id,
-                carrier_layer=layer.carrier_layer,
-                join_contract=join_contract,
-                sources=discovered_sources,
+            carrier_core = materialize_carrier_layer_core(
+                wd=wd,
+                layer=layer,
+                catalog_layer_raw=_as_mapping(catalog_layer.raw),
+                request_plan=submission.plan,
+                dependency_entries=dependency_entries,
+                consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
             )
         except MaterializationContractError as exc:
             raise FeaturesExportServiceError(
@@ -586,35 +564,12 @@ def _materialize_export_payloads(
                 details=exc.details,
             ) from exc
 
-        selected_columns, unit_mapping = _resolve_selected_columns(
-            layer=layer,
-            frame=layer_frame,
-            catalog_layer_raw=catalog_layer.raw,
-            request_plan=submission.plan,
-            discovered_units=discovered_units,
-        )
-        if _CONSOLIDATED_JOIN_KEY_COLUMN not in layer_frame.columns:
-            raise FeaturesExportServiceError(
-                "Layer materialization table is missing canonical join key.",
-                status_code=500,
-                code="materialization_error",
-                details=f"layer={layer.layer_id!r}; key={_CONSOLIDATED_JOIN_KEY_COLUMN!r}",
-            )
-
-        projected_columns: list[str] = [
-            column_name
-            for column_name in selected_columns
-            if column_name in layer_frame.columns and column_name != _CONSOLIDATED_JOIN_KEY_COLUMN
-        ]
-        projected_columns.append(_CONSOLIDATED_JOIN_KEY_COLUMN)
-        projected_frame = layer_frame[projected_columns].copy()
-
         layer_core_results[layer.output_layer_id] = _LayerCoreResult(
             layer=layer,
-            frame=projected_frame,
-            selected_columns=selected_columns,
-            unit_mapping=unit_mapping,
-            warnings=tuple(discovery_warnings),
+            frame=carrier_core.frame,
+            selected_columns=carrier_core.selected_columns,
+            unit_mapping=carrier_core.unit_mapping,
+            warnings=carrier_core.warnings,
             catalog_layer_raw=_as_mapping(catalog_layer.raw),
         )
 
@@ -657,6 +612,18 @@ def _materialize_export_payloads(
         column_metadata_by_output_layer_id[layer.output_layer_id] = column_metadata
 
     return materialized_plan, payloads, column_metadata_by_output_layer_id
+
+
+def _dependency_entries_by_output_layer_id(
+    entries: cabc.Sequence[object],
+) -> dict[str, list[object]]:
+    by_output_layer_id: dict[str, list[object]] = {}
+    for entry in entries:
+        output_layer_id = getattr(entry, "output_layer_id", None)
+        if not isinstance(output_layer_id, str) or not output_layer_id:
+            continue
+        by_output_layer_id.setdefault(output_layer_id, []).append(entry)
+    return by_output_layer_id
 
 
 def _build_key_first_materialized_layer_payload(
@@ -1026,109 +993,33 @@ def _build_layer_frame_from_sources(
 
     geometry_frame = _load_vector_dataframe(wd, geometry_relpath)
     join_contract = _as_mapping(catalog_layer_raw.get("join"))
-    source_entries = _as_sequence(catalog_layer_raw.get("sources"))
-    warnings: list[ExportWarning] = []
-    discovered_units: dict[str, str] = {}
-
-    merged = geometry_frame
-    for source_entry in source_entries:
-        source_map = _as_mapping(source_entry)
-        source_id = _as_string(source_map.get("source_id"))
-        source_kind = _as_string(source_map.get("kind")).lower()
-        source_required = bool(source_map.get("required", False))
-        if not source_id:
-            continue
-
-        source_relpath = _layer_dependency_relpath(
-            dependency_entries,
-            dependency_role="source",
-            dependency_id=source_id,
-        )
-        if source_relpath is None:
-            if source_required:
-                warnings.append(
-                    ExportWarning(
-                        code=WARNING_LAYER_UNAVAILABLE,
-                        message=(
-                            f"Required source {source_id!r} for layer {layer.layer_id!r} is missing."
-                        ),
-                        layer_id=layer.layer_id,
-                        scope=layer.scope,
-                    )
-                )
-            continue
-
-        source_path = _resolve_relpath(wd, source_relpath)
-        if not source_path.exists():
-            if source_required:
-                warnings.append(
-                    ExportWarning(
-                        code=WARNING_LAYER_UNAVAILABLE,
-                        message=(
-                            f"Required source {source_id!r} for layer {layer.layer_id!r} "
-                            f"does not exist at {source_relpath!r}."
-                        ),
-                        layer_id=layer.layer_id,
-                        scope=layer.scope,
-                    )
-                )
-            continue
-
-        if source_kind == "vector":
-            if source_relpath == geometry_relpath:
-                continue
-            source_frame = _load_vector_dataframe(wd, source_relpath)
-            source_df = pd.DataFrame(source_frame.drop(columns=source_frame.geometry.name))
-            source_units: dict[str, str] = {}
-        elif source_kind == "parquet":
-            source_df, source_units = _load_parquet_dataframe(source_path)
-        else:
-            if source_required:
-                warnings.append(
-                    ExportWarning(
-                        code=WARNING_LAYER_UNAVAILABLE,
-                        message=(
-                            f"Required source {source_id!r} for layer {layer.layer_id!r} has "
-                            f"unsupported kind {source_kind!r}."
-                        ),
-                        layer_id=layer.layer_id,
-                        scope=layer.scope,
-                    )
-                )
-            continue
-
-        merged, joined, source_column_map = _merge_source_dataframe(
-            geometry_frame=merged,
-            source_df=source_df,
-            source_id=source_id,
+    try:
+        legacy_merged = build_legacy_merged_frame(
+            wd=wd,
+            layer_id=layer.layer_id,
+            scope=layer.scope,
+            catalog_layer_raw=catalog_layer_raw,
+            dependency_entries=dependency_entries,
+            geometry_relpath=geometry_relpath,
+            geometry_frame=geometry_frame,
             join_contract=join_contract,
+            merge_source_dataframe=_merge_source_dataframe,
         )
-        if joined:
-            for source_column, display_unit in source_units.items():
-                if not isinstance(display_unit, str) or not display_unit.strip():
-                    continue
-                resolved_column = source_column_map.get(source_column, source_column)
-                if resolved_column in merged.columns:
-                    discovered_units[resolved_column] = display_unit.strip()
-        if not joined and source_required:
-            warnings.append(
-                ExportWarning(
-                    code=WARNING_LAYER_UNAVAILABLE,
-                    message=(
-                        f"Unable to resolve join key for required source {source_id!r} "
-                        f"on layer {layer.layer_id!r}."
-                    ),
-                    layer_id=layer.layer_id,
-                    scope=layer.scope,
-                )
-            )
+    except MaterializationContractError as exc:
+        raise FeaturesExportServiceError(
+            "Legacy layer materialization failed.",
+            status_code=500,
+            code="materialization_error",
+            details=exc.details,
+        ) from exc
+    merged = legacy_merged.frame
 
     selected_columns, unit_mapping = _resolve_selected_columns(
         layer=layer,
         frame=merged,
         catalog_layer_raw=catalog_layer_raw,
         request_plan=request_plan,
-        discovered_units=discovered_units,
+        discovered_units=legacy_merged.discovered_units,
     )
 
     merged = _ensure_join_key_column(
@@ -1154,7 +1045,7 @@ def _build_layer_frame_from_sources(
         frame=merged,
         selected_columns=tuple(column for column in projection_columns if column != _CONSOLIDATED_JOIN_KEY_COLUMN),
         unit_mapping=unit_mapping,
-        warnings=tuple(warnings),
+        warnings=legacy_merged.warnings,
     )
 
 
@@ -1178,145 +1069,22 @@ def _resolve_selected_columns(
     request_plan: ResolvedExportPlan,
     discovered_units: cabc.Mapping[str, str] | None = None,
 ) -> tuple[tuple[str, ...], dict[str, str]]:
-    geometry_name = frame.geometry.name if isinstance(frame, gpd.GeoDataFrame) else None
-    available_columns = [
-        column_name
-        for column_name in frame.columns
-        if column_name != geometry_name and column_name != _CONSOLIDATED_JOIN_KEY_COLUMN
-    ]
-    available_set = set(available_columns)
-
-    required_columns = _required_identity_columns(catalog_layer_raw)
-    required_selected = [
-        column_name for column_name in available_columns if column_name in required_columns
-    ]
-
-    columns_meta = _column_metadata_by_id(catalog_layer_raw)
-    selection = request_plan.request.column_selection_for(layer.layer_id)
-
-    selected_optional: list[str]
-    if selection is not None and selection.include is not None:
-        selected_optional = [
-            column_name
-            for column_name in available_columns
-            if column_name in set(selection.include)
-        ]
-    elif selection is not None and selection.exclude is not None:
-        excluded = set(selection.exclude)
-        selected_optional = [
-            column_name
-            for column_name in available_columns
-            if column_name not in excluded
-        ]
-    else:
-        defaults = [
-            column_name
-            for column_name in available_columns
-            if columns_meta.get(column_name, {}).get("default_selected") is True
-        ]
-        selected_optional = defaults if defaults else list(available_columns)
-
-    selected_columns: list[str] = []
-    for column_name in [*required_selected, *selected_optional]:
-        if column_name in available_set and column_name not in selected_columns:
-            selected_columns.append(column_name)
-
-    for column_name in required_columns:
-        if column_name not in selected_columns:
-            selected_columns.append(column_name)
-
-    if not selected_columns:
-        selected_columns = list(available_columns)
-
-    unit_mapping: dict[str, str] = {}
-    discovered_unit_map = discovered_units or {}
-    for column_name in selected_columns:
-        meta = columns_meta.get(column_name, {})
-        unit_value = meta.get("display_unit")
-        if isinstance(unit_value, str) and unit_value.strip():
-            unit_mapping[column_name] = unit_value.strip()
-        elif isinstance(discovered_unit_map.get(column_name), str) and discovered_unit_map.get(column_name):
-            unit_mapping[column_name] = str(discovered_unit_map[column_name]).strip()
-        else:
-            unit_mapping[column_name] = _infer_display_unit_for_column(column_name)
-
-    return tuple(selected_columns), unit_mapping
+    return _resolve_selected_columns_helper(
+        layer=layer,
+        frame=frame,
+        catalog_layer_raw=catalog_layer_raw,
+        request_plan=request_plan,
+        discovered_units=discovered_units,
+        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
 
 
 def _required_identity_columns(catalog_layer_raw: cabc.Mapping[str, object]) -> set[str]:
-    required: set[str] = set()
-    seen_keys: set[str] = set()
-
-    def _add_required(candidate: object) -> None:
-        token = _as_string(candidate)
-        if not token:
-            return
-        key = "".join(char for char in token.lower() if char.isalnum())
-        dedupe_key = key or token.lower()
-        if dedupe_key in seen_keys:
-            return
-        seen_keys.add(dedupe_key)
-        required.add(token)
-
-    join_contract = _as_mapping(catalog_layer_raw.get("join"))
-    primary_key = _as_string(join_contract.get("primary_key"))
-    if primary_key:
-        _add_required(primary_key)
-
-    geometry_contract = _as_mapping(catalog_layer_raw.get("geometry"))
-    for feature_key in _as_string_sequence(geometry_contract.get("feature_id_keys")):
-        _add_required(feature_key)
-    return required
-
-
-def _column_metadata_by_id(catalog_layer_raw: cabc.Mapping[str, object]) -> dict[str, dict[str, object]]:
-    columns_raw = catalog_layer_raw.get("columns")
-    if not isinstance(columns_raw, list):
-        return {}
-    metadata_by_id: dict[str, dict[str, object]] = {}
-    for entry in columns_raw:
-        if not isinstance(entry, cabc.Mapping):
-            continue
-        column_id = _as_string(entry.get("column_id"))
-        if not column_id:
-            continue
-        unit_meta = _as_mapping(entry.get("unit"))
-        metadata_by_id[column_id] = {
-            "display_unit": (
-                _as_string(unit_meta.get("display_unit"))
-                or _infer_display_unit_for_column(column_id)
-            ),
-            "default_selected": bool(entry.get("default_selected", False)),
-        }
-    return metadata_by_id
+    return _required_identity_columns_helper(catalog_layer_raw)
 
 
 def _infer_display_unit_for_column(column_name: str) -> str:
-    token = _as_string(column_name).lower()
-    if not token:
-        return "non-unitized"
-
-    suffix_units = (
-        ("_mm", "mm"),
-        ("_cm", "cm"),
-        ("_m", "m"),
-        ("_m2", "m2"),
-        ("_m3", "m3"),
-        ("_kg_ha", "kg/ha"),
-        ("_kg_m2", "kg/m2"),
-        ("_kg", "kg"),
-        ("_ha", "ha"),
-        ("_c", "C"),
-        ("_cms", "cms"),
-        ("_pct", "%"),
-    )
-    for suffix, unit in suffix_units:
-        if token.endswith(suffix):
-            return unit
-
-    if token.startswith("pct_") or token.endswith("_percent") or token.endswith("_percentage"):
-        return "%"
-    return "non-unitized"
+    return _infer_display_unit_for_column_helper(column_name)
 
 
 def _ensure_join_key_column(
@@ -1342,15 +1110,14 @@ def _ensure_join_key_column(
             break
 
     if selected_key is None:
-        for column_name in result.columns:
-            if column_name != geometry_name:
-                selected_key = column_name
-                break
-    if selected_key is None:
         raise FeaturesExportServiceError(
             "Unable to resolve identity key for features export layer.",
             status_code=500,
             code="materialization_error",
+            details=(
+                f"identity_candidates={tuple(candidate for candidate in identity_candidates if candidate)!r}; "
+                f"available_columns={tuple(column for column in result.columns if column != geometry_name)!r}"
+            ),
         )
 
     result[_CONSOLIDATED_JOIN_KEY_COLUMN] = result[selected_key].map(_canonical_join_value)
@@ -1394,72 +1161,8 @@ def _load_vector_dataframe(wd: Path, relpath: str) -> gpd.GeoDataFrame:
     return frame
 
 
-def _load_parquet_dataframe(path: Path) -> tuple[pd.DataFrame, dict[str, str]]:
-    try:
-        frame = pd.read_parquet(path)
-    except (ImportError, OSError, ValueError) as exc:
-        raise FeaturesExportServiceError(
-            "Failed to read parquet export source.",
-            status_code=404,
-            code="not_found",
-            details=f"Unable to read parquet source {path}: {exc}",
-        ) from exc
-    return frame, _parquet_column_units(path)
-
-
-def _parquet_column_units(path: Path) -> dict[str, str]:
-    if _pyarrow_parquet is None:
-        return {}
-
-    try:
-        schema = _pyarrow_parquet.read_schema(path)
-    except _PYARROW_SCHEMA_EXCEPTIONS:
-        return {}
-
-    units_by_column: dict[str, str] = {}
-    for field in schema:
-        column_name = str(field.name).strip()
-        if not column_name:
-            continue
-        metadata = field.metadata if isinstance(field.metadata, dict) else {}
-        unit_raw = metadata.get(b"units") if metadata else None
-        if isinstance(unit_raw, bytes):
-            unit_token = unit_raw.decode("utf-8", errors="ignore").strip()
-        elif isinstance(unit_raw, str):
-            unit_token = unit_raw.strip()
-        else:
-            unit_token = ""
-        if unit_token:
-            units_by_column[column_name] = unit_token
-    return units_by_column
-
-
 def _dedupe_identity_selected_columns(columns: cabc.Sequence[str]) -> list[str]:
-    deduped: list[str] = []
-    seen_columns: set[str] = set()
-    seen_identity_tokens: set[str] = set()
-
-    for column_name in columns:
-        token = _as_string(column_name)
-        if not token or token in seen_columns:
-            continue
-        identity_token = _identity_column_token(token)
-        if identity_token and identity_token in seen_identity_tokens:
-            continue
-        deduped.append(token)
-        seen_columns.add(token)
-        if identity_token:
-            seen_identity_tokens.add(identity_token)
-
-    return deduped
-
-
-def _identity_column_token(column_name: str) -> str | None:
-    base_name = _as_string(column_name).split("__", 1)[0]
-    normalized = _normalize_join_token(base_name)
-    if normalized in _IDENTITY_COLUMN_TOKENS:
-        return normalized
-    return None
+    return _dedupe_identity_selected_columns_helper(columns)
 
 
 def _merge_source_dataframe(
@@ -1728,12 +1431,6 @@ def _as_mapping(value: object) -> dict[str, object]:
     return normalized
 
 
-def _as_sequence(value: object) -> tuple[object, ...]:
-    if isinstance(value, (str, bytes)) or not isinstance(value, cabc.Sequence):
-        return ()
-    return tuple(value)
-
-
 def _as_string(value: object) -> str:
     if not isinstance(value, str):
         return ""
@@ -1827,18 +1524,11 @@ def _artifact_metadata_from_cache_entry(
     artifact_relpath: str,
     artifact_path: str,
 ) -> ExportArtifactMetadata:
-    format_token = str(cache_entry.get("artifact_format") or plan.request.format)
-    layer_outputs = _layer_outputs_from_cache_entry(cache_entry, plan, artifact_relpath, format_token)
-    packaged_member_relpaths_raw = cache_entry.get("packaged_member_relpaths")
-    packaged_member_relpaths = _normalize_string_tuple(packaged_member_relpaths_raw)
-
-    return ExportArtifactMetadata(
-        format=format_token,
+    return _artifact_metadata_from_cache_entry_helper(
+        cache_entry,
+        plan=plan,
         artifact_relpath=artifact_relpath,
         artifact_path=artifact_path,
-        layer_outputs=layer_outputs,
-        warnings=(),
-        packaged_member_relpaths=packaged_member_relpaths,
     )
 
 
@@ -1848,66 +1538,20 @@ def _layer_outputs_from_cache_entry(
     artifact_relpath: str,
     format_token: str,
 ) -> tuple[ExportedLayerArtifact, ...]:
-    raw_layer_outputs = cache_entry.get("layer_outputs")
-    if isinstance(raw_layer_outputs, list):
-        parsed_outputs: list[ExportedLayerArtifact] = []
-        for entry in raw_layer_outputs:
-            if not isinstance(entry, dict):
-                continue
-            try:
-                parsed_outputs.append(
-                    ExportedLayerArtifact(
-                        layer_id=str(entry.get("layer_id") or ""),
-                        output_layer_id=str(entry.get("output_layer_id") or ""),
-                        scope=str(entry.get("scope") or "shared"),
-                        scope_class=str(entry.get("scope_class") or "scope_invariant"),
-                        format=str(entry.get("format") or format_token),
-                        relpath=str(entry.get("relpath") or artifact_relpath),
-                        row_count=_optional_int(entry.get("row_count")),
-                        feature_count=_optional_int(entry.get("feature_count")),
-                    )
-                )
-            except Exception:
-                continue
-        if parsed_outputs:
-            return tuple(parsed_outputs)
-
-    return tuple(
-        ExportedLayerArtifact(
-            layer_id=layer.layer_id,
-            output_layer_id=layer.output_layer_id,
-            scope=layer.scope,
-            scope_class=layer.scope_class,
-            format=format_token,
-            relpath=artifact_relpath,
-            row_count=None,
-            feature_count=None,
-        )
-        for layer in plan.layers
+    return _layer_outputs_from_cache_entry_helper(
+        cache_entry,
+        plan=plan,
+        artifact_relpath=artifact_relpath,
+        format_token=format_token,
     )
 
 
 def _cache_entry_artifact_relpath(cache_entry: dict[str, object]) -> str | None:
-    artifact_relpath = cache_entry.get("artifact_relpath")
-    if isinstance(artifact_relpath, str) and artifact_relpath.strip():
-        return artifact_relpath.strip()
-
-    artifact_paths = cache_entry.get("artifact_paths")
-    if isinstance(artifact_paths, list) and artifact_paths:
-        first = artifact_paths[0]
-        if isinstance(first, str) and first.strip():
-            return first.strip()
-
-    return None
+    return _cache_entry_artifact_relpath_helper(cache_entry)
 
 
 def _artifact_relpath_from_result(job_result: dict[str, object] | None) -> str | None:
-    if not isinstance(job_result, dict):
-        return None
-    value = job_result.get("artifact_relpath")
-    if isinstance(value, str) and value.strip():
-        return value.strip()
-    return None
+    return _artifact_relpath_from_result_helper(job_result)
 
 
 def _artifact_relpath_from_manifest(manifest: dict[str, object]) -> str | None:
@@ -2025,40 +1669,6 @@ def _to_relpath(wd: Path, path: Path) -> str:
             code="path_escape",
             details=f"Resolved {resolved} outside {wd}.",
         ) from exc
-
-
-def _optional_int(value: object) -> int | None:
-    if value is None or value == "":
-        return None
-
-    if isinstance(value, bool):
-        return int(value)
-    if isinstance(value, int):
-        return value
-    if isinstance(value, float):
-        return int(value)
-    if isinstance(value, str):
-        token = value.strip()
-        if not token:
-            return None
-        try:
-            return int(token)
-        except ValueError:
-            return None
-    return None
-
-
-def _normalize_string_tuple(value: object) -> tuple[str, ...]:
-    if not isinstance(value, list):
-        return ()
-    normalized: list[str] = []
-    for entry in value:
-        if not isinstance(entry, str):
-            continue
-        token = entry.strip()
-        if token:
-            normalized.append(token)
-    return tuple(normalized)
 
 
 def _normalize_warnings_payload(value: object) -> list[dict[str, object]]:

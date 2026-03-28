@@ -119,6 +119,7 @@ def discover_layer_sources(
     scope: str,
     catalog_layer_raw: cabc.Mapping[str, object],
     dependency_entries: cabc.Sequence[object],
+    skip_vector_relpath: str | None = None,
 ) -> tuple[tuple[DiscoveredSourceFrame, ...], tuple[ExportWarning, ...]]:
     """Load all resolvable layer sources into dataframes plus warning metadata."""
 
@@ -142,30 +143,33 @@ def discover_layer_sources(
         )
         if source_relpath is None:
             if source_required:
-                warnings.append(
-                    ExportWarning(
-                        code=WARNING_LAYER_UNAVAILABLE,
-                        message=f"Required source {source_id!r} for layer {layer_id!r} is missing.",
-                        layer_id=layer_id,
-                        scope=scope,
-                    )
+                raise MaterializationContractError(
+                    "Required source dependency is missing for carrier layer materialization.",
+                    details=(
+                        f"layer={layer_id!r}; source_id={source_id!r}; "
+                        "reason=dependency_missing"
+                    ),
                 )
             continue
 
         source_path = (wd / source_relpath).resolve()
         if not source_path.exists():
             if source_required:
-                warnings.append(
-                    ExportWarning(
-                        code=WARNING_LAYER_UNAVAILABLE,
-                        message=(
-                            f"Required source {source_id!r} for layer {layer_id!r} "
-                            f"does not exist at {source_relpath!r}."
-                        ),
-                        layer_id=layer_id,
-                        scope=scope,
-                    )
+                raise MaterializationContractError(
+                    "Required source file does not exist for carrier layer materialization.",
+                    details=(
+                        f"layer={layer_id!r}; source_id={source_id!r}; "
+                        f"source_relpath={source_relpath!r}; reason=file_missing"
+                    ),
                 )
+            continue
+
+        if (
+            source_kind == "vector"
+            and isinstance(skip_vector_relpath, str)
+            and skip_vector_relpath
+            and source_relpath == skip_vector_relpath
+        ):
             continue
 
         if source_kind == "vector":
@@ -175,16 +179,12 @@ def discover_layer_sources(
             dataframe, units_by_column = _load_parquet_dataframe(source_path)
         else:
             if source_required:
-                warnings.append(
-                    ExportWarning(
-                        code=WARNING_LAYER_UNAVAILABLE,
-                        message=(
-                            f"Required source {source_id!r} for layer {layer_id!r} has "
-                            f"unsupported kind {source_kind!r}."
-                        ),
-                        layer_id=layer_id,
-                        scope=scope,
-                    )
+                raise MaterializationContractError(
+                    "Required source kind is unsupported for carrier layer materialization.",
+                    details=(
+                        f"layer={layer_id!r}; source_id={source_id!r}; "
+                        f"source_kind={source_kind!r}; reason=unsupported_source_kind"
+                    ),
                 )
             continue
 
