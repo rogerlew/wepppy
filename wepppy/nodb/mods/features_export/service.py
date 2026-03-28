@@ -56,6 +56,7 @@ from .join_planner import JOIN_KEY_COLUMN, MaterializationContractError
 from .legacy_source_materializer import build_legacy_merged_frame
 from .manifest import build_export_manifest, write_export_manifest
 from .manifest_builder import build_output_layer_column_metadata
+from .output_column_naming import apply_unitized_column_suffixes
 from .planner import resolve_export_plan
 
 FEATURES_EXPORT_ROOT_RELPATH = "export/features"
@@ -699,6 +700,15 @@ def _build_key_first_materialized_layer_payload(
         source_results=source_results,
     )
 
+    geometry_name = merged.geometry.name
+    merged, selected_columns, unit_mapping = apply_unitized_column_suffixes(
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        geometry_name=geometry_name,
+        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
+
     merged = merged.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
     geometry_name = merged.geometry.name
     projection_columns = [column for column in selected_columns if column in merged.columns and column != geometry_name]
@@ -1026,6 +1036,14 @@ def _build_layer_frame_from_sources(
         merged,
         join_contract=join_contract,
         catalog_layer_raw=catalog_layer_raw,
+    )
+    geometry_name = merged.geometry.name
+    merged, selected_columns, unit_mapping = apply_unitized_column_suffixes(
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        geometry_name=geometry_name,
+        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
     )
     geometry_name = merged.geometry.name
     projection_columns: list[str] = []

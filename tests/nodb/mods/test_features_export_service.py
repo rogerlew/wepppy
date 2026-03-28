@@ -26,6 +26,9 @@ from wepppy.nodb.mods.features_export.exporters import (
     PreparedLayerPayload,
 )
 from wepppy.nodb.mods.features_export.join_planner import MaterializationContractError
+from wepppy.nodb.mods.features_export.output_column_naming import (
+    apply_unitized_column_suffixes,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -670,6 +673,94 @@ def test_build_layer_frame_from_sources_required_source_join_unresolved_raises_m
     assert "required_source_join_unresolved" in exc_info.value.details
 
 
+def test_build_layer_frame_from_sources_appends_unit_suffixes_for_unitized_columns(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="wepp.summary.hillslopes",
+        family="wepp_summary",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.summary.hillslopes",
+    )
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=(layer.layer_id,),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+    dependency_entries = (
+        DependencyEntry(
+            relpath="geometry/subcatchments.geojson",
+            exists=True,
+            size=1,
+            mtime_ns=1,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            dependency_role="geometry",
+            dependency_id="geometry",
+        ),
+    )
+    geometry_frame = gpd.GeoDataFrame(
+        {"topaz_id": [1], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    merged_frame = gpd.GeoDataFrame(
+        {
+            "topaz_id": [1],
+            "hillslope_area": [2.5],
+            "runoff_volume": [4.2],
+            "geometry": [Point(0.0, 0.0)],
+        },
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    monkeypatch.setattr(service, "_load_vector_dataframe", lambda wd, relpath: geometry_frame)
+    monkeypatch.setattr(
+        service,
+        "build_legacy_merged_frame",
+        lambda **kwargs: SimpleNamespace(
+            frame=merged_frame,
+            discovered_units={
+                "hillslope_area": "ha",
+                "runoff_volume": "m^3",
+            },
+            warnings=(),
+        ),
+    )
+
+    result = service._build_layer_frame_from_sources(
+        wd=tmp_path,
+        layer=layer,
+        catalog_layer_raw={
+            "join": {"primary_key": "topaz_id"},
+            "sources": [],
+        },
+        request_plan=plan,
+        dependency_entries=dependency_entries,
+    )
+
+    assert result.selected_columns == ("topaz_id", "hillslope_area_ha", "runoff_volume_m3")
+    assert "hillslope_area_ha" in result.frame.columns
+    assert "runoff_volume_m3" in result.frame.columns
+    assert result.unit_mapping == {
+        "topaz_id": "non-unitized",
+        "hillslope_area_ha": "ha",
+        "runoff_volume_m3": "m^3",
+    }
+
+
 def test_discover_layer_sources_required_missing_dependency_raises_materialization_contract_error(
     tmp_path: Path,
 ) -> None:
@@ -909,6 +1000,77 @@ def test_resolve_selected_columns_prefers_discovered_units_when_catalog_columns_
     )
     assert "Runoff Volume" in selected_columns
     assert unit_mapping["Runoff Volume"] == "m^3"
+
+
+def test_apply_unitized_column_suffixes_appends_canonical_unit_token() -> None:
+    frame = gpd.GeoDataFrame(
+        {
+            "topaz_id": [101],
+            "hillslope_area": [12.5],
+            "runoff_volume": [8.1],
+            "geometry": [Point(0.0, 0.0)],
+        },
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+
+    renamed_frame, selected_columns, unit_mapping = apply_unitized_column_suffixes(
+        frame=frame,
+        selected_columns=("topaz_id", "hillslope_area", "runoff_volume"),
+        unit_mapping={
+            "topaz_id": "non-unitized",
+            "hillslope_area": "ha",
+            "runoff_volume": "m^3",
+        },
+        geometry_name="geometry",
+        consolidated_join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
+
+    assert selected_columns == ("topaz_id", "hillslope_area_ha", "runoff_volume_m3")
+    assert "hillslope_area_ha" in renamed_frame.columns
+    assert "runoff_volume_m3" in renamed_frame.columns
+    assert "hillslope_area" not in renamed_frame.columns
+    assert "runoff_volume" not in renamed_frame.columns
+    assert unit_mapping == {
+        "topaz_id": "non-unitized",
+        "hillslope_area_ha": "ha",
+        "runoff_volume_m3": "m^3",
+    }
+
+
+def test_apply_unitized_column_suffixes_avoids_double_append_and_dedupes_collisions() -> None:
+    frame = gpd.GeoDataFrame(
+        {
+            "runoff": [8.1],
+            "runoff_mm": [7.0],
+            "sediment_yield_kg_ha": [0.4],
+            "geometry": [Point(0.0, 0.0)],
+        },
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+
+    renamed_frame, selected_columns, unit_mapping = apply_unitized_column_suffixes(
+        frame=frame,
+        selected_columns=("runoff", "runoff_mm", "sediment_yield_kg_ha"),
+        unit_mapping={
+            "runoff": "mm",
+            "runoff_mm": "mm",
+            "sediment_yield_kg_ha": "kg/ha",
+        },
+        geometry_name="geometry",
+        consolidated_join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
+
+    assert selected_columns == ("runoff_mm_2", "runoff_mm", "sediment_yield_kg_ha")
+    assert "runoff_mm_2" in renamed_frame.columns
+    assert "runoff_mm" in renamed_frame.columns
+    assert "sediment_yield_kg_ha" in renamed_frame.columns
+    assert unit_mapping == {
+        "runoff_mm_2": "mm",
+        "runoff_mm": "mm",
+        "sediment_yield_kg_ha": "kg/ha",
+    }
 
 
 def test_dedupe_identity_selected_columns_drops_suffixed_join_key_duplicates() -> None:

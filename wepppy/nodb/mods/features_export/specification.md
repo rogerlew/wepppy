@@ -375,7 +375,7 @@ Units modes:
 `features_export` must use Unitizer numeric conversion primitives.
 
 Column naming contract:
-- Unit-applicable output columns must include a normalized unit token suffix in the exported column name (for example `runoff__mm`, `sediment_yield__kg_m2`, `peak_flow__cfs`).
+- Unit-applicable output columns must include a normalized unit token suffix in the exported column name (for example `runoff_mm`, `hillslope_area_ha`, `runoff_volume_m3`, `sediment_yield_kg_m2`).
 - Columns without an applicable unit mapping keep their canonical source name and are recorded as pass-through in manifest unit metadata.
 - Manifest must include a per-column unit mapping table so UI/download consumers can recover source field, target field, and resolved unit metadata deterministically.
 
