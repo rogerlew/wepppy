@@ -21,6 +21,7 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
 - [x] (2026-03-27) Milestone 8: Ran validation gates and synchronized package docs/tracker/ExecPlan.
 - [x] (2026-03-27) Post-handoff hotfix: fixed routed two-OFE management transform to remap yearly `itype` (`3 -> 2`) after fill OFE removal; added regression test and reran validation gates.
 - [x] (2026-03-27) Post-hotfix docs hardening: codified canonical controller job-tracking guidance (bootstrap `jobIds` as hints only + stale local latch reconciliation) in shared controller contract/foundation docs.
+- [x] (2026-03-28 UTC) Post-implementation production sanity check on `clogging-starch` confirmed routed non-channel execution in completed run artifacts (`non_channel_routed completed=1`).
 
 ## Surprises & Discoveries
 
@@ -41,6 +42,9 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
 
 - Observation: UI-level active-task latches can become stale when initialized from bootstrap last-known `jobIds`, even when backend Roads status is terminal/idle.
   Evidence: Run UI blocked queue actions with local conflict text while backend status was `idle` and locks were absent.
+
+- Observation: In the validated production run snapshot, most non-channel eligible segments did not reach channel; one did and executed routed `road -> buffer` successfully.
+  Evidence: `roads.segment.pass.manifest.json` counts: `non_channel_routed completed=1`, `non_channel_routed skipped=46`, completed routed segment `roads-seg-000102` (`segment_run_id=900025`) with `trace_termination_reason=hit_channel`.
 
 ## Decision Log
 
@@ -78,6 +82,7 @@ Completed implementation delivers:
 - Regression coverage was expanded for new prepare/run behavior and routed trace failure handling.
 - Post-handoff hotfix now guarantees routed two-OFE management files are WEPP-parseable by remapping yearly `itype` values to two-scenario cardinality.
 - Shared controller docs now explicitly codify canonical job-tracking behavior (bootstrap hint semantics + stale-latch reconciliation) for future controller implementations.
+- Completed run artifacts from `/wc1/runs/cl/clogging-starch/` confirm the intended routed non-channel execution path is exercised end-to-end (`road -> buffer` on `roads-seg-000102`).
 
 Validation snapshot:
 
@@ -230,3 +235,4 @@ Revision note (2026-03-27 00:00Z): Initial step-2 ExecPlan authored with scoped 
 Revision note (2026-03-27): Milestones 1-8 completed; living sections updated with implementation, validation outcomes, and review closure.
 Revision note (2026-03-27): Post-handoff hotfix applied for routed two-OFE management `itype` remap; regression validated against failing `p900025` input set and tests.
 Revision note (2026-03-27): Follow-up docs hardening added canonical controller job-tracking guidance to prevent stale client-side active-job latches in future controls.
+Revision note (2026-03-28 UTC): Added production run sanity-check evidence confirming routed non-channel inslope execution in completed `clogging-starch` artifacts.

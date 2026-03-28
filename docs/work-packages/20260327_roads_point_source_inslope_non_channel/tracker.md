@@ -5,10 +5,10 @@
 ## Quick Status
 
 **Started**: 2026-03-27  
-**Current phase**: Implementation Complete - Hotfix + Docs Hardening Verified  
-**Last updated**: 2026-03-27  
+**Current phase**: Closed - Production Validation Verified  
+**Last updated**: 2026-03-28  
 **Active ExecPlan**: `prompts/active/roads_point_source_inslope_non_channel_execplan.md`  
-**Next milestone**: Package handoff and downstream follow-up triage.
+**Next milestone**: None (package closed); optional performance follow-up only.
 
 ## Task Board
 
@@ -34,6 +34,7 @@
 - [x] Milestone 8: Validation/doc gates executed; out-of-scope full-suite baseline failure documented (2026-03-27).
 - [x] Post-handoff hotfix: routed two-OFE management yearly `itype` remapped (`3 -> 2`) to resolve WEPP `ntype` parse failure from live run artifacts; regression test and validation reruns completed (2026-03-27).
 - [x] Post-hotfix docs hardening: canonical controller job-tracking contract updated (bootstrap `jobIds` hint semantics + stale local latch reconciliation) for future controls (2026-03-27).
+- [x] Production sanity check: completed `clogging-starch` run confirmed non-channel routed path execution (`road -> buffer`) and successful pass merge (`segment_id=roads-seg-000102`, run_id `900025`) (2026-03-28 UTC).
 
 ## Timeline
 
@@ -41,6 +42,7 @@
 - **2026-03-27** - Implemented step-2 prepare/run routing behavior, routed contributor assembly, and expanded tests/review artifacts.
 - **2026-03-27** - Closed live regression from job `ed22a800-e4d1-452a-b09e-cf8cd031060f` by fixing routed two-OFE management transform and revalidating gates.
 - **2026-03-27** - Hardened shared controller documentation to codify canonical job-tracking behavior and prevent stale client-side active-job latches.
+- **2026-03-28 (UTC)** - Verified completed production run output for `/wc1/runs/cl/clogging-starch/`: `non_channel_routed completed=1`, `non_channel_routed skipped=46`, `channel_associated completed=24`; package closure approved.
 
 ## Decisions
 
@@ -191,3 +193,20 @@
 
 **Test results**:
 - Documentation linting for touched files: pass.
+
+### 2026-03-28: Production run sanity check and closure recommendation
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Inspected `wepp/roads/segments/roads.segment.pass.manifest.json` and confirmed non-channel routed execution in completed run output.
+- Confirmed routed completion record for `roads-seg-000102` with `routing_mode=non_channel_routed`, `trace_reaches_channel=true`, `trace_termination_reason=hit_channel`, `buffer_length_m=34.0`, and `segment_pass_relpath=wepp/roads/output/H900025.pass.dat`.
+- Confirmed aggregate manifest counts for the completed run snapshot: `channel_associated completed=24`, `non_channel_routed completed=1`, `non_channel_routed skipped=46`.
+
+**Blockers encountered**:
+- None for this package closure.
+
+**Next steps**:
+- Close this tracker/package; keep optional performance follow-up (`large segment counts`) as separate future work.
+
+**Test results**:
+- Artifact sanity checks: pass (manifest/log inspection on production run outputs).
