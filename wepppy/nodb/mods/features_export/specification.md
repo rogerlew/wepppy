@@ -448,6 +448,12 @@ Global temporal control model:
 - `selector=date`: explicit date set.
 - `selector=return_period`: explicit return-period intervals.
 - Mixed date and return-period selectors in one request are invalid.
+- Event selector filtering is applied to discovered source frames before key-first uniqueness checks.
+- Required sources missing selector-compatible columns must fail with `materialization_error`.
+- Required sources with selector-compatible columns but zero matched rows remain materialized as empty event cores; export succeeds with canonical geometry rows and null event metrics.
+- Optional sources that cannot satisfy the active event selector are skipped.
+- Event-mode carrier cores may retain one-to-many rows per geometry key after selector filtering; geometry attachment must preserve those rows without collapsing event records.
+- If two event-mode inputs both remain non-unique on the same carrier join key (unresolved many-to-many), materialization must fail with `materialization_error`.
 
 Mixed-layer temporal compatibility:
 - Temporal compatibility is layer-specific and driven by each layer's catalog `temporal.supported_modes` and `temporal.mode_rules`.

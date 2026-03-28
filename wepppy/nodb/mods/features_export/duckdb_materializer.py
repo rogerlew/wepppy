@@ -46,6 +46,7 @@ def materialize_layer_attributes(
     carrier_layer: str | None,
     join_contract: cabc.Mapping[str, object],
     sources: cabc.Sequence[DiscoveredSourceFrame],
+    allow_non_unique_keys: bool = False,
 ) -> tuple[pd.DataFrame, dict[str, str]]:
     """Materialize one key-first per-layer attributes table from discovered sources."""
 
@@ -67,9 +68,10 @@ def materialize_layer_attributes(
             continue
 
         source_frame = with_canonical_join_key(source.dataframe, source_key=source_key)
-        source_frame = ensure_unique_keys(
+        source_frame = _normalize_keyed_frame(
             source_frame,
             context_label=f"layer={layer_id};source={source.source_id}",
+            allow_non_unique_keys=allow_non_unique_keys,
         )
         staged_tables.append((source.source_id, source_frame, dict(source.units_by_column)))
 
@@ -104,15 +106,28 @@ def materialize_layer_attributes(
         if rename_map:
             right = right.rename(columns=rename_map)
 
+        if allow_non_unique_keys:
+            left_unique = merged[JOIN_KEY_COLUMN].is_unique
+            right_unique = right[JOIN_KEY_COLUMN].is_unique
+            if not left_unique and not right_unique:
+                raise MaterializationContractError(
+                    "Unresolved many-to-many key cardinality detected during materialization.",
+                    details=(
+                        f"context=layer={layer_id};joined_source={source_id}; "
+                        "explicit pre-aggregation or selector narrowing is required"
+                    ),
+                )
+
         merged = _duckdb_left_join(
             left_df=merged,
             right_df=right,
             left_key=JOIN_KEY_COLUMN,
             right_key=JOIN_KEY_COLUMN,
         )
-        merged = ensure_unique_keys(
+        merged = _normalize_keyed_frame(
             merged,
             context_label=f"layer={layer_id};joined_source={source_id}",
+            allow_non_unique_keys=allow_non_unique_keys,
         )
 
         for source_column, display_unit in source_units.items():
@@ -129,6 +144,7 @@ def materialize_carrier_core(
     *,
     carrier_label: str,
     layer_inputs: cabc.Sequence[LayerCarrierInput],
+    allow_non_unique_keys: bool = False,
 ) -> CarrierCoreResult:
     """Consolidate one carrier core table across resolved source layers."""
 
@@ -140,9 +156,10 @@ def materialize_carrier_core(
 
     normalized_inputs: list[LayerCarrierInput] = []
     for layer_input in layer_inputs:
-        normalized_frame = ensure_unique_keys(
+        normalized_frame = _normalize_keyed_frame(
             layer_input.dataframe,
             context_label=f"carrier={carrier_label};layer={layer_input.layer_id}",
+            allow_non_unique_keys=allow_non_unique_keys,
         )
         normalized_inputs.append(
             LayerCarrierInput(
@@ -153,7 +170,10 @@ def materialize_carrier_core(
             )
         )
 
-    key_seed = _union_key_seed([entry.dataframe for entry in normalized_inputs])
+    key_seed = _union_key_seed(
+        [entry.dataframe for entry in normalized_inputs],
+        allow_non_unique_keys=allow_non_unique_keys,
+    )
 
     selected_columns: list[str] = []
     unit_mapping: dict[str, str] = {}
@@ -180,15 +200,28 @@ def materialize_carrier_core(
         if rename_map:
             right = right.rename(columns=rename_map)
 
+        if allow_non_unique_keys:
+            left_unique = merged[JOIN_KEY_COLUMN].is_unique
+            right_unique = right[JOIN_KEY_COLUMN].is_unique
+            if not left_unique and not right_unique:
+                raise MaterializationContractError(
+                    "Unresolved many-to-many key cardinality detected during materialization.",
+                    details=(
+                        f"context=carrier={carrier_label};joined_layer={layer_input.layer_id}; "
+                        "explicit pre-aggregation or selector narrowing is required"
+                    ),
+                )
+
         merged = _duckdb_left_join(
             left_df=merged,
             right_df=right,
             left_key=JOIN_KEY_COLUMN,
             right_key=JOIN_KEY_COLUMN,
         )
-        merged = ensure_unique_keys(
+        merged = _normalize_keyed_frame(
             merged,
             context_label=f"carrier={carrier_label};joined_layer={layer_input.layer_id}",
+            allow_non_unique_keys=allow_non_unique_keys,
         )
 
         for column_name in layer_input.selected_columns:
@@ -208,7 +241,11 @@ def materialize_carrier_core(
     )
 
 
-def _union_key_seed(frames: cabc.Sequence[pd.DataFrame]) -> pd.DataFrame:
+def _union_key_seed(
+    frames: cabc.Sequence[pd.DataFrame],
+    *,
+    allow_non_unique_keys: bool,
+) -> pd.DataFrame:
     if not frames:
         raise MaterializationContractError("Unable to build key seed from empty frame sequence.")
 
@@ -230,7 +267,32 @@ def _union_key_seed(frames: cabc.Sequence[pd.DataFrame]) -> pd.DataFrame:
     finally:
         connection.close()
 
+    if allow_non_unique_keys and seed.empty:
+        return seed
+
     return ensure_unique_keys(seed, context_label="carrier_key_seed")
+
+
+def _normalize_keyed_frame(
+    frame: pd.DataFrame,
+    *,
+    context_label: str,
+    allow_non_unique_keys: bool,
+) -> pd.DataFrame:
+    if not allow_non_unique_keys:
+        return ensure_unique_keys(frame, context_label=context_label)
+
+    if JOIN_KEY_COLUMN not in frame.columns:
+        raise MaterializationContractError(
+            "Materialized table is missing canonical join key.",
+            details=f"context={context_label}",
+        )
+
+    working = frame.copy()
+    working = working.loc[working[JOIN_KEY_COLUMN].notna()].reset_index(drop=True)
+    if working.empty:
+        return working
+    return working
 
 
 def _duckdb_left_join(

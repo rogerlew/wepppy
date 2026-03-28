@@ -657,6 +657,7 @@ def _build_key_first_materialized_layer_payload(
     carrier_core = materialize_carrier_core(
         carrier_label=layer.output_layer_id,
         layer_inputs=layer_inputs,
+        allow_non_unique_keys=layer.temporal_mode == "event",
     )
 
     candidate_key_tokens: list[str] = []
@@ -679,15 +680,31 @@ def _build_key_first_materialized_layer_payload(
         carrier_core.dataframe[_CONSOLIDATED_JOIN_KEY_COLUMN].isin(geometry_keys)
     ].reset_index(drop=True)
     if core_for_geometry.empty:
-        raise MaterializationContractError(
-            "Carrier core contains no keys that match canonical carrier geometry.",
-            details=f"output_layer_id={layer.output_layer_id!r}; carrier={layer.carrier_layer!r}",
-        )
+        if layer.temporal_mode != "event":
+            raise MaterializationContractError(
+                "Carrier core contains no keys that match canonical carrier geometry.",
+                details=f"output_layer_id={layer.output_layer_id!r}; carrier={layer.carrier_layer!r}",
+            )
+
+        seed_keys = sorted(geometry_keys)
+        placeholder: dict[str, object] = {_CONSOLIDATED_JOIN_KEY_COLUMN: seed_keys}
+        for column_name in carrier_core.selected_columns:
+            if column_name == _CONSOLIDATED_JOIN_KEY_COLUMN or column_name in placeholder:
+                continue
+            placeholder[column_name] = [None] * len(seed_keys)
+        core_for_geometry = pd.DataFrame(placeholder)
 
     merged = attach_geometry_once(
         core_table=core_for_geometry,
         geometry_carrier=geometry_carrier,
+        allow_non_unique_keys=layer.temporal_mode == "event",
     )
+    if layer.temporal_mode == "event":
+        merged = _backfill_identity_from_geometry_key(
+            merged,
+            geometry_key_column=geometry_carrier.key_column,
+            consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+        )
 
     selected_columns = _carrier_selected_columns(
         merged=merged,
@@ -783,6 +800,41 @@ def _carrier_selected_columns(
         ]
 
     return tuple(_dedupe_identity_selected_columns(selected_columns))
+
+
+def _backfill_identity_from_geometry_key(
+    frame: gpd.GeoDataFrame,
+    *,
+    geometry_key_column: str,
+    consolidated_join_key_column: str,
+) -> gpd.GeoDataFrame:
+    if consolidated_join_key_column not in frame.columns:
+        return frame
+
+    key_token = _normalize_join_token(geometry_key_column)
+    if not key_token:
+        return frame
+
+    result = frame.copy()
+    join_values = result[consolidated_join_key_column]
+    for column_name in result.columns:
+        if column_name == consolidated_join_key_column:
+            continue
+        if _normalize_join_token(column_name) != key_token:
+            continue
+
+        series = result[column_name]
+        missing_mask = series.isna()
+        if not missing_mask.any():
+            continue
+
+        if pd.api.types.is_numeric_dtype(series):
+            fill_values = pd.to_numeric(join_values, errors="coerce")
+        else:
+            fill_values = join_values
+        result.loc[missing_mask, column_name] = fill_values.loc[missing_mask]
+
+    return result
 
 
 def _carrier_unit_mapping(

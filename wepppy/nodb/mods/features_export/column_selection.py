@@ -32,9 +32,20 @@ def resolve_selected_columns(
     available_set = set(available_columns)
 
     required_columns = required_identity_columns(catalog_layer_raw)
+    required_temporal = required_temporal_columns(
+        layer=layer,
+        available_columns=available_columns,
+        request_plan=request_plan,
+    )
+    required_temporal_set = set(required_temporal)
     required_selected = [
         column_name for column_name in available_columns if column_name in required_columns
     ]
+    required_selected.extend(
+        column_name
+        for column_name in available_columns
+        if column_name in required_temporal_set and column_name not in required_selected
+    )
 
     columns_meta = column_metadata_by_id(catalog_layer_raw)
     selection = request_plan.request.column_selection_for(layer.layer_id)
@@ -61,8 +72,8 @@ def resolve_selected_columns(
         if column_name in available_set and column_name not in selected_columns:
             selected_columns.append(column_name)
 
-    for column_name in required_columns:
-        if column_name not in selected_columns:
+    for column_name in (*required_columns, *required_temporal):
+        if column_name in available_set and column_name not in selected_columns:
             selected_columns.append(column_name)
 
     if not selected_columns:
@@ -85,6 +96,64 @@ def resolve_selected_columns(
         unit_mapping[column_name] = infer_display_unit_for_column(column_name)
 
     return tuple(selected_columns), unit_mapping
+
+
+def required_temporal_columns(
+    *,
+    layer: ResolvedLayerPlan,
+    available_columns: cabc.Sequence[str],
+    request_plan: ResolvedExportPlan,
+) -> tuple[str, ...]:
+    """Return temporal identity columns that must be retained for selected mode."""
+
+    if layer.temporal_mode != "event":
+        return ()
+
+    lookup = _normalized_column_lookup(available_columns)
+    required: list[str] = []
+
+    # Date selectors need an explicit date identity in output rows so multi-date
+    # exports remain interpretable without date-pivoted column names.
+    selector = None
+    temporal_request = request_plan.request.temporal
+    if temporal_request is not None and temporal_request.event is not None:
+        selector = temporal_request.event.selector
+
+    date_column = _first_matching_column(lookup, ("date", "event_date", "eventdate"))
+    if date_column:
+        required.append(date_column)
+    else:
+        year_column = _first_matching_column(lookup, ("calendar_year", "year"))
+        month_column = _first_matching_column(lookup, ("month", "mo"))
+        day_column = _first_matching_column(lookup, ("day_of_month", "day", "da"))
+        julian_column = _first_matching_column(lookup, ("julian", "day_of_year", "doy"))
+        if year_column and month_column and day_column:
+            required.extend([year_column, month_column, day_column])
+        elif year_column and julian_column:
+            required.extend([year_column, julian_column])
+
+    if selector == "return_period":
+        return_period_column = _first_matching_column(
+            lookup,
+            (
+                "return_period",
+                "return_period_years",
+                "recurrence_interval",
+                "recurrence_interval_years",
+            ),
+        )
+        if return_period_column:
+            required.append(return_period_column)
+
+    event_id_column = _first_matching_column(lookup, ("event_id",))
+    if event_id_column:
+        required.append(event_id_column)
+
+    deduped: list[str] = []
+    for column_name in required:
+        if column_name in lookup.values() and column_name not in deduped:
+            deduped.append(column_name)
+    return tuple(deduped)
 
 
 def required_identity_columns(catalog_layer_raw: cabc.Mapping[str, object]) -> set[str]:
@@ -213,6 +282,27 @@ def normalize_join_token(value: str) -> str:
     """Normalize a join token to lowercase alphanumerics only."""
 
     return "".join(ch for ch in value.lower() if ch.isalnum())
+
+
+def _normalized_column_lookup(columns: cabc.Iterable[object]) -> dict[str, str]:
+    lookup: dict[str, str] = {}
+    for column in columns:
+        token = _as_string(column)
+        if not token:
+            continue
+        normalized = normalize_join_token(token)
+        if not normalized or normalized in lookup:
+            continue
+        lookup[normalized] = token
+    return lookup
+
+
+def _first_matching_column(lookup: cabc.Mapping[str, str], candidates: cabc.Sequence[str]) -> str | None:
+    for candidate in candidates:
+        normalized = normalize_join_token(candidate)
+        if normalized in lookup:
+            return lookup[normalized]
+    return None
 
 
 def _as_mapping(value: object) -> dict[str, object]:

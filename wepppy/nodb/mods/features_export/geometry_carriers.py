@@ -145,6 +145,7 @@ def attach_geometry_once(
     *,
     core_table: pd.DataFrame,
     geometry_carrier: CanonicalGeometryCarrier,
+    allow_non_unique_keys: bool = False,
 ) -> gpd.GeoDataFrame:
     """Attach canonical carrier geometry once to one key-first attribute core table."""
 
@@ -154,23 +155,31 @@ def attach_geometry_once(
             details=f"carrier={geometry_carrier.carrier_layer}",
         )
 
-    core_unique = ensure_unique_keys(
-        core_table,
-        context_label=f"carrier_core={geometry_carrier.carrier_layer}",
-    )
+    if allow_non_unique_keys:
+        core_unique = core_table.copy()
+        core_unique = core_unique.loc[core_unique[JOIN_KEY_COLUMN].notna()].reset_index(drop=True)
+        if core_unique.empty:
+            raise MaterializationContractError(
+                "Carrier core table has no usable join keys.",
+                details=f"carrier={geometry_carrier.carrier_layer}",
+            )
+    else:
+        core_unique = ensure_unique_keys(
+            core_table,
+            context_label=f"carrier_core={geometry_carrier.carrier_layer}",
+        )
     geometry_frame = geometry_carrier.dataframe
     geometry_name = geometry_frame.geometry.name
 
     geometry_non_geom = pd.DataFrame(geometry_frame.drop(columns=[geometry_name]))
-    duplicate_columns = [
-        column
-        for column in geometry_non_geom.columns
-        if column != JOIN_KEY_COLUMN and column in core_unique.columns
-    ]
-    if duplicate_columns:
-        geometry_non_geom = geometry_non_geom.drop(columns=duplicate_columns, errors="ignore")
-
-    merged = core_unique.merge(geometry_non_geom, on=JOIN_KEY_COLUMN, how="left")
+    duplicate_columns = [column for column in geometry_non_geom.columns if column != JOIN_KEY_COLUMN and column in core_unique.columns]
+    if allow_non_unique_keys:
+        core_for_join = core_unique.drop(columns=duplicate_columns, errors="ignore")
+        merged = geometry_non_geom.merge(core_for_join, on=JOIN_KEY_COLUMN, how="left")
+    else:
+        if duplicate_columns:
+            geometry_non_geom = geometry_non_geom.drop(columns=duplicate_columns, errors="ignore")
+        merged = core_unique.merge(geometry_non_geom, on=JOIN_KEY_COLUMN, how="left")
     geometry_lookup = geometry_frame.set_index(JOIN_KEY_COLUMN)[geometry_name]
     merged[geometry_name] = merged[JOIN_KEY_COLUMN].map(geometry_lookup)
 

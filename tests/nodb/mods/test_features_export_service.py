@@ -13,7 +13,10 @@ from wepppy.nodb.mods.features_export import service
 from wepppy.nodb.mods.features_export.catalog_loader import load_layer_catalog
 from wepppy.nodb.mods.features_export.cache_key import CacheKeyParts
 from wepppy.nodb.mods.features_export.contracts import (
+    LayerColumnSelection,
     NormalizedExportRequest,
+    NormalizedTemporalEvent,
+    NormalizedTemporalRequest,
     ResolvedExportPlan,
     ResolvedLayerPlan,
 )
@@ -1000,6 +1003,87 @@ def test_resolve_selected_columns_prefers_discovered_units_when_catalog_columns_
     )
     assert "Runoff Volume" in selected_columns
     assert unit_mapping["Runoff Volume"] == "m^3"
+
+
+def test_resolve_selected_columns_event_mode_forces_date_identity_column() -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="wepp.temporal.events",
+        family="wepp_temporal",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.temporal.events",
+        temporal_mode="event",
+    )
+    frame = gpd.GeoDataFrame(
+        {
+            "topaz_id": [93],
+            "date": ["2005-01-15"],
+            "hill_sediment_tonnes": [0.0],
+            "geometry": [Point(0.0, 0.0)],
+        },
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="project",
+        layers=("wepp.temporal.events",),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+        temporal=NormalizedTemporalRequest(
+            mode="event",
+            event=NormalizedTemporalEvent(
+                selector="date",
+                dates=("2005-01-15",),
+            ),
+        ),
+        column_selection=(
+            LayerColumnSelection(
+                layer_id="wepp.temporal.events",
+                include=("hill_sediment_tonnes", "topaz_id"),
+            ),
+        ),
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+
+    selected_columns, _unit_mapping = service._resolve_selected_columns(
+        layer=layer,
+        frame=frame,
+        catalog_layer_raw={"join": {"primary_key": "topaz_id"}},
+        request_plan=plan,
+        discovered_units=None,
+    )
+
+    assert "date" in selected_columns
+
+
+def test_backfill_identity_from_geometry_key_fills_missing_event_identity_values() -> None:
+    frame = gpd.GeoDataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["93", "22", "23"],
+            "TopazID": [93, 22, 23],
+            "topaz_id": [93.0, float("nan"), float("nan")],
+            "hill_sediment_tonnes": [0.0, None, None],
+            "geometry": [Point(0.0, 0.0), Point(1.0, 1.0), Point(2.0, 2.0)],
+        },
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+
+    result = service._backfill_identity_from_geometry_key(
+        frame,
+        geometry_key_column="TopazID",
+        consolidated_join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
+
+    assert result["topaz_id"].tolist() == [93.0, 22.0, 23.0]
 
 
 def test_apply_unitized_column_suffixes_appends_canonical_unit_token() -> None:
