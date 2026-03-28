@@ -1167,7 +1167,6 @@ var FeaturesExport = (function () {
             });
 
             var htmlParts = [];
-            var familyIndex = 0;
             order.concat(Object.keys(groups).filter(function (family) {
                 return order.indexOf(family) === -1;
             })).forEach(function (family) {
@@ -1180,11 +1179,10 @@ var FeaturesExport = (function () {
                     return selectedSet.has(layer.layer_id);
                 }).length;
 
-                var defaultOpen = familyIndex < 2;
+                var defaultOpen = false;
                 var isOpen = Object.prototype.hasOwnProperty.call(controller.state.familyOpen, family)
                     ? Boolean(controller.state.familyOpen[family])
                     : defaultOpen;
-                familyIndex += 1;
 
                 htmlParts.push(
                     '<details class="features-export-tree__family" data-features-export-family data-family="' + escapeHtml(family) + '"' + (isOpen ? " open" : "") + '>'

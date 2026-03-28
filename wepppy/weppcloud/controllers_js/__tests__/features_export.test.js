@@ -493,6 +493,19 @@ describe("FeaturesExport controller", () => {
         expect(document.getElementById("features_export_catalog_list").textContent).toContain("Annual runoff depth");
     });
 
+    test("family sections load collapsed by default", () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var watershedFamily = document.querySelector('[data-features-export-family][data-family="watershed"]');
+        var weppFamily = document.querySelector('[data-features-export-family][data-family="wepp"]');
+
+        expect(watershedFamily).not.toBeNull();
+        expect(weppFamily).not.toBeNull();
+        expect(watershedFamily.open).toBe(false);
+        expect(weppFamily.open).toBe(false);
+    });
+
     test("discovery payload hides unavailable layers and disables roads scope when unavailable", () => {
         document.body.innerHTML = buildFixtureHtml();
         var bootstrapNode = document.getElementById("features_export_bootstrap_data");
