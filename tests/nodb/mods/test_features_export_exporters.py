@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import io
+import json
 from pathlib import Path
 import sqlite3
 import zipfile
 
+import pandas as pd
 import pytest
 
 from wepppy.nodb.mods.features_export.catalog_loader import load_layer_catalog
@@ -159,6 +162,147 @@ def test_geopackage_writer_emits_single_multilayer_container(tmp_path: Path, cat
     assert dataset.GetLayerCount() == len(plan.layers)
 
 
+def test_geopackage_writer_materializes_feature_collection_payloads(tmp_path: Path, catalog) -> None:
+    plan = _resolved_plan(catalog, "geopackage")
+    plan_layers = sorted(plan.layers, key=lambda item: item.output_layer_id)
+    first_layer = plan_layers[0]
+    second_layer = plan_layers[1]
+
+    feature_payload = {
+        "schema": "wepppy.features_export.feature_collection.v1",
+        "layer_id": first_layer.layer_id,
+        "output_layer_id": first_layer.output_layer_id,
+        "scope": first_layer.scope,
+        "scope_class": first_layer.scope_class,
+        "crs_epsg": 4326,
+        "feature_collection": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"TopazID": 1, "label": "alpha"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+                    },
+                }
+            ],
+        },
+    }
+
+    payloads: dict[str, PreparedLayerPayload] = {}
+    for layer in plan_layers:
+        if layer.output_layer_id == first_layer.output_layer_id:
+            payloads[layer.output_layer_id] = PreparedLayerPayload(
+                output_layer_id=layer.output_layer_id,
+                payload=json.dumps(feature_payload, sort_keys=True, separators=(",", ":")),
+                row_count=1,
+                feature_count=1,
+            )
+            continue
+
+        payloads[layer.output_layer_id] = PreparedLayerPayload(
+            output_layer_id=layer.output_layer_id,
+            payload=f"payload::{layer.output_layer_id}",
+            row_count=1,
+            feature_count=1,
+        )
+
+    request = ExportWriterRequest(
+        plan=plan,
+        layer_payloads=payloads,
+        artifact_dir=tmp_path,
+        artifact_basename="features_export",
+    )
+
+    writer = get_export_writer("geopackage")
+    artifact = writer.write(request)
+
+    with sqlite3.connect(artifact.artifact_path) as conn:
+        rows = conn.execute(
+            "SELECT identifier, table_name, data_type FROM gpkg_contents ORDER BY identifier"
+        ).fetchall()
+
+        row_by_identifier = {row[0]: row for row in rows}
+        assert row_by_identifier[first_layer.output_layer_id][2] == "features"
+        assert row_by_identifier[second_layer.output_layer_id][2] == "attributes"
+
+        spatial_table = row_by_identifier[first_layer.output_layer_id][1]
+        geom_count = conn.execute(
+            f'SELECT COUNT(*) FROM "{spatial_table}" WHERE geom IS NOT NULL'
+        ).fetchone()[0]
+        assert geom_count == 1
+
+
+def test_geopackage_writer_keeps_null_only_property_columns(tmp_path: Path, catalog) -> None:
+    plan = _resolved_plan(catalog, "geopackage")
+    plan_layers = sorted(plan.layers, key=lambda item: item.output_layer_id)
+    first_layer = plan_layers[0]
+
+    feature_payload = {
+        "schema": "wepppy.features_export.feature_collection.v1",
+        "layer_id": first_layer.layer_id,
+        "output_layer_id": first_layer.output_layer_id,
+        "scope": first_layer.scope,
+        "scope_class": first_layer.scope_class,
+        "crs_epsg": 4326,
+        "feature_collection": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"nullable_only": None, "count": 1},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+                    },
+                }
+            ],
+        },
+    }
+
+    payloads: dict[str, PreparedLayerPayload] = {}
+    for layer in plan_layers:
+        if layer.output_layer_id == first_layer.output_layer_id:
+            payloads[layer.output_layer_id] = PreparedLayerPayload(
+                output_layer_id=layer.output_layer_id,
+                payload=json.dumps(feature_payload, sort_keys=True, separators=(",", ":")),
+                row_count=1,
+                feature_count=1,
+            )
+            continue
+
+        payloads[layer.output_layer_id] = PreparedLayerPayload(
+            output_layer_id=layer.output_layer_id,
+            payload=f"payload::{layer.output_layer_id}",
+            row_count=1,
+            feature_count=1,
+        )
+
+    request = ExportWriterRequest(
+        plan=plan,
+        layer_payloads=payloads,
+        artifact_dir=tmp_path,
+        artifact_basename="features_export",
+    )
+
+    writer = get_export_writer("geopackage")
+    artifact = writer.write(request)
+
+    with sqlite3.connect(artifact.artifact_path) as conn:
+        row = conn.execute(
+            "SELECT table_name FROM gpkg_contents WHERE identifier = ?",
+            (first_layer.output_layer_id,),
+        ).fetchone()
+        assert row is not None
+        table_name = row[0]
+        table_info = conn.execute(f'PRAGMA table_info("{table_name}")').fetchall()
+        column_types = {entry[1]: str(entry[2]).upper() for entry in table_info}
+
+    assert "nullable_only" in column_types
+    assert "INT" in column_types["count"]
+
+
 def test_geodatabase_writer_uses_f_esri_conversion_boundary(tmp_path: Path, catalog) -> None:
     plan = _resolved_plan(catalog, "geodatabase")
     request = ExportWriterRequest(
@@ -213,3 +357,85 @@ def test_geodatabase_writer_fails_explicitly_when_backend_unavailable(
     writer = GeodatabaseExportWriter(backend_available=lambda: False)
     with pytest.raises(ExportBackendCapabilityError, match="f_esri backend capability"):
         writer.write(request)
+
+
+@pytest.mark.parametrize(
+    "format_token,expected_extension",
+    [
+        ("parquet", ".parquet"),
+        ("csv", ".csv"),
+    ],
+)
+def test_geometryless_formats_drop_geometry_and_keep_properties(
+    tmp_path: Path,
+    catalog,
+    format_token: str,
+    expected_extension: str,
+) -> None:
+    plan = resolve_export_plan(
+        {
+            "format": format_token,
+            "units": "si",
+            "layers": ["watershed.subcatchments"],
+        },
+        catalog,
+    )
+    layer = plan.layers[0]
+    payload = {
+        "schema": "wepppy.features_export.feature_collection.v1",
+        "layer_id": layer.layer_id,
+        "output_layer_id": layer.output_layer_id,
+        "scope": layer.scope,
+        "scope_class": layer.scope_class,
+        "feature_collection": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"TopazID": 1, "Name": "A"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+                    },
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"TopazID": 2, "Name": "B"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[1, 1], [2, 1], [2, 2], [1, 2], [1, 1]]],
+                    },
+                },
+            ],
+        },
+    }
+    request = ExportWriterRequest(
+        plan=plan,
+        layer_payloads={
+            layer.output_layer_id: PreparedLayerPayload(
+                output_layer_id=layer.output_layer_id,
+                payload=json.dumps(payload, sort_keys=True, separators=(",", ":")),
+                row_count=2,
+                feature_count=2,
+            )
+        },
+        artifact_dir=tmp_path,
+        artifact_basename="features_export",
+    )
+
+    artifact = get_export_writer(format_token).write(request)
+    expected_member = f"{layer.output_layer_id}{expected_extension}"
+    assert artifact.packaged_member_relpaths == (expected_member,)
+
+    with zipfile.ZipFile(artifact.artifact_path, "r") as zip_handle:
+        member_bytes = zip_handle.read(expected_member)
+
+    if format_token == "parquet":
+        frame = pd.read_parquet(io.BytesIO(member_bytes))
+    else:
+        frame = pd.read_csv(io.BytesIO(member_bytes))
+
+    assert "TopazID" in frame.columns
+    assert "Name" in frame.columns
+    assert "geometry" not in frame.columns
+    assert frame["TopazID"].tolist() == [1, 2]

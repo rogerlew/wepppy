@@ -18,15 +18,19 @@ from .base import (
     SingleLayerZipWriter,
     deterministic_layer_filename,
 )
+from .csv import CsvExportWriter
 from .geodatabase import GeodatabaseExportWriter
 from .geojson import GeoJsonExportWriter
 from .geopackage import GeopackageExportWriter
 from .geoparquet import GeoparquetExportWriter
 from .kmz import KmzExportWriter
+from .parquet import ParquetExportWriter
 
 _WRITER_FACTORIES: dict[str, cabc.Callable[[], ExportWriter]] = {
     "geojson": GeoJsonExportWriter,
     "geoparquet": GeoparquetExportWriter,
+    "parquet": ParquetExportWriter,
+    "csv": CsvExportWriter,
     "kmz": KmzExportWriter,
     "geopackage": GeopackageExportWriter,
     "geodatabase": GeodatabaseExportWriter,
@@ -70,11 +74,13 @@ __all__ = [
     "ExportWriterRequest",
     "ExportedLayerArtifact",
     "FeaturesExportWriterError",
+    "CsvExportWriter",
     "GeodatabaseExportWriter",
     "GeoJsonExportWriter",
     "GeopackageExportWriter",
     "GeoparquetExportWriter",
     "KmzExportWriter",
+    "ParquetExportWriter",
     "MultiLayerContainerWriter",
     "PreparedLayerPayload",
     "SingleLayerZipWriter",

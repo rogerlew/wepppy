@@ -14,6 +14,7 @@ from .contracts import (
     ExportRequest,
     ExportWarning,
     FeaturesExportValidationError,
+    LayerColumnSelection,
     NormalizedExportRequest,
     NormalizedSwatTables,
     NormalizedTemporalEvent,
@@ -27,6 +28,7 @@ from .contracts import (
     SUPPORTED_TEMPORAL_MODES,
     SUPPORTED_UNITS,
     SUPPORTED_YEAR_SELECTIONS,
+    TemporalLayerMode,
     ValidationIssue,
     WARNING_LAYER_UNAVAILABLE,
     WARNING_SCOPE_NOT_APPLICABLE,
@@ -34,12 +36,19 @@ from .contracts import (
 
 _DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
+_OMNI_SCENARIO_LAYER_BY_BASE: dict[str, str] = {
+    "wepp.summary.hillslopes": "omni.scenarios.hillslopes",
+}
+_OMNI_CONTRAST_LAYER_BY_BASE: dict[str, str] = {
+    "wepp.summary.hillslopes": "omni.contrasts.hillslopes",
+}
+
 
 def normalize_export_request(
     request: ExportRequest | cabc.Mapping[str, object],
     catalog: LayerCatalog,
 ) -> NormalizedExportRequest:
-    """Normalize request payload tokens and enforce WP-1 validation contracts."""
+    """Normalize request payload tokens and enforce planner validation contracts."""
 
     payload = _as_request_mapping(request)
     errors: list[ValidationIssue] = []
@@ -72,14 +81,22 @@ def normalize_export_request(
     normalized_layers = _normalize_layers(payload.get("layers"), catalog, errors=errors)
     normalized_output_scopes = _normalize_output_scopes(payload.get("output_scopes"), errors=errors)
 
-    scenario = _optional_string(payload.get("scenario"), path="scenario", errors=errors)
-    contrast_id = _optional_string(payload.get("contrast_id"), path="contrast_id", errors=errors)
-    if scenario is not None and contrast_id is not None:
+    scenarios = _normalize_selector_array(payload.get("scenarios"), path="scenarios", errors=errors)
+    contrast_ids = _normalize_selector_array(payload.get("contrast_ids"), path="contrast_ids", errors=errors)
+
+    scenario_alias = _optional_string(payload.get("scenario"), path="scenario", errors=errors)
+    contrast_alias = _optional_string(payload.get("contrast_id"), path="contrast_id", errors=errors)
+    if scenario_alias is not None:
+        scenarios = sorted(set([*scenarios, scenario_alias]))
+    if contrast_alias is not None:
+        contrast_ids = sorted(set([*contrast_ids, contrast_alias]))
+
+    if scenarios and contrast_ids:
         errors.append(
             ValidationIssue(
                 code="mutually_exclusive",
-                message="scenario and contrast_id are mutually exclusive.",
-                path="scenario",
+                message="scenarios and contrast_ids are mutually exclusive.",
+                path="scenarios",
             )
         )
 
@@ -88,12 +105,23 @@ def normalize_export_request(
         swat_run_id = DEFAULT_SWAT_RUN_ID
 
     swat_tables = _normalize_swat_tables(payload.get("swat_tables"), errors=errors)
-    temporal = _normalize_temporal(payload.get("temporal"), errors=errors)
+    temporal = _normalize_temporal(
+        payload.get("temporal"),
+        selected_layers=normalized_layers,
+        catalog=catalog,
+        errors=errors,
+    )
+    column_selection = _normalize_column_selection(
+        payload.get("column_selection"),
+        selected_layers=normalized_layers,
+        catalog=catalog,
+        errors=errors,
+    )
 
     _validate_omni_selector_rules(
         normalized_layers,
-        scenario=scenario,
-        contrast_id=contrast_id,
+        scenarios=tuple(scenarios),
+        contrast_ids=tuple(contrast_ids),
         catalog=catalog,
         errors=errors,
     )
@@ -107,11 +135,12 @@ def normalize_export_request(
         layers=tuple(normalized_layers),
         crs=crs_token,
         output_scopes=tuple(normalized_output_scopes),
-        scenario=scenario,
-        contrast_id=contrast_id,
+        scenarios=tuple(scenarios),
+        contrast_ids=tuple(contrast_ids),
         swat_run_id=swat_run_id,
         swat_tables=swat_tables,
         temporal=temporal,
+        column_selection=tuple(column_selection),
     )
 
 
@@ -124,62 +153,42 @@ def resolve_export_plan(
     normalized_request = normalize_export_request(request, catalog)
     warnings: list[ExportWarning] = []
     resolved_layers: list[ResolvedLayerPlan] = []
-    requested_temporal_mode = (
-        normalized_request.temporal.mode
-        if normalized_request.temporal is not None
-        else None
-    )
 
     for layer_id in normalized_request.layers:
         layer = catalog.layer_index[layer_id]
-        if not _layer_supports_temporal(layer, normalized_request.temporal):
+        effective_mode = _effective_temporal_mode_for_layer(layer_id, normalized_request.temporal)
+        if not _layer_supports_temporal(layer, effective_mode, normalized_request.temporal):
             warnings.append(
                 ExportWarning(
                     code=WARNING_LAYER_UNAVAILABLE,
                     layer_id=layer.layer_id,
                     message=(
                         f"Layer {layer.layer_id!r} is incompatible with temporal mode "
-                        f"{requested_temporal_mode!r}."
+                        f"{effective_mode!r}."
                     ),
                 )
             )
             continue
 
-        if layer.scope_class == "scope_aware":
-            for scope in normalized_request.output_scopes:
-                resolved_layers.append(
-                    ResolvedLayerPlan(
-                        layer_id=layer.layer_id,
-                        family=layer.family,
-                        scope_class=layer.scope_class,
-                        scope=scope,
-                        output_layer_id=f"{scope}__{layer.layer_id}",
-                        temporal_mode=requested_temporal_mode,
-                    )
-                )
-        else:
-            resolved_layers.append(
-                ResolvedLayerPlan(
-                    layer_id=layer.layer_id,
-                    family=layer.family,
-                    scope_class=layer.scope_class,
-                    scope="shared",
-                    output_layer_id=f"shared__{layer.layer_id}",
-                    temporal_mode=requested_temporal_mode,
-                )
+        resolved_layers.extend(
+            _resolve_layer_for_context(
+                layer=layer,
+                layer_id=layer.layer_id,
+                effective_mode=effective_mode,
+                context="base",
+                selector_id=None,
+                output_scopes=normalized_request.output_scopes,
+                warnings=warnings,
             )
-            if "roads" in normalized_request.output_scopes:
-                warnings.append(
-                    ExportWarning(
-                        code=WARNING_SCOPE_NOT_APPLICABLE,
-                        layer_id=layer.layer_id,
-                        scope="roads",
-                        message=(
-                            f"Layer {layer.layer_id!r} is scope-invariant; "
-                            "roads scope is not separately applicable."
-                        ),
-                    )
-                )
+        )
+
+    resolved_layers.extend(
+        _resolve_omni_context_layers(
+            request=normalized_request,
+            catalog=catalog,
+            warnings=warnings,
+        )
+    )
 
     if not resolved_layers:
         raise FeaturesExportValidationError(
@@ -205,6 +214,214 @@ def resolve_export_plan(
     )
 
 
+def _resolve_omni_context_layers(
+    *,
+    request: NormalizedExportRequest,
+    catalog: LayerCatalog,
+    warnings: list[ExportWarning],
+) -> list[ResolvedLayerPlan]:
+    resolved: list[ResolvedLayerPlan] = []
+
+    if request.scenarios:
+        omni_layer_ids = _resolve_omni_layer_ids(
+            request=request,
+            catalog=catalog,
+            context="scenario",
+        )
+        for scenario_id in request.scenarios:
+            for layer_id in omni_layer_ids:
+                layer = catalog.layer_index[layer_id]
+                effective_mode = _effective_temporal_mode_for_layer(
+                    layer_id,
+                    request.temporal,
+                )
+                if not _layer_supports_temporal(layer, effective_mode, request.temporal):
+                    warnings.append(
+                        ExportWarning(
+                            code=WARNING_LAYER_UNAVAILABLE,
+                            layer_id=layer.layer_id,
+                            message=(
+                                f"Layer {layer.layer_id!r} is incompatible with temporal mode "
+                                f"{effective_mode!r} for scenario {scenario_id!r}."
+                            ),
+                        )
+                    )
+                    continue
+                resolved.extend(
+                    _resolve_layer_for_context(
+                        layer=layer,
+                        layer_id=layer.layer_id,
+                        effective_mode=effective_mode,
+                        context="scenario",
+                        selector_id=scenario_id,
+                        output_scopes=request.output_scopes,
+                        warnings=warnings,
+                    )
+                )
+
+    if request.contrast_ids:
+        omni_layer_ids = _resolve_omni_layer_ids(
+            request=request,
+            catalog=catalog,
+            context="contrast",
+        )
+        for contrast_id in request.contrast_ids:
+            for layer_id in omni_layer_ids:
+                layer = catalog.layer_index[layer_id]
+                effective_mode = _effective_temporal_mode_for_layer(
+                    layer_id,
+                    request.temporal,
+                )
+                if not _layer_supports_temporal(layer, effective_mode, request.temporal):
+                    warnings.append(
+                        ExportWarning(
+                            code=WARNING_LAYER_UNAVAILABLE,
+                            layer_id=layer.layer_id,
+                            message=(
+                                f"Layer {layer.layer_id!r} is incompatible with temporal mode "
+                                f"{effective_mode!r} for contrast {contrast_id!r}."
+                            ),
+                        )
+                    )
+                    continue
+                resolved.extend(
+                    _resolve_layer_for_context(
+                        layer=layer,
+                        layer_id=layer.layer_id,
+                        effective_mode=effective_mode,
+                        context="contrast",
+                        selector_id=contrast_id,
+                        output_scopes=request.output_scopes,
+                        warnings=warnings,
+                    )
+                )
+
+    return resolved
+
+
+def _resolve_omni_layer_ids(
+    *,
+    request: NormalizedExportRequest,
+    catalog: LayerCatalog,
+    context: str,
+) -> tuple[str, ...]:
+    if context not in {"scenario", "contrast"}:
+        return ()
+
+    expected_family = "omni_scenarios" if context == "scenario" else "omni_contrasts"
+    selected_direct = [
+        layer_id
+        for layer_id in request.layers
+        if catalog.layer_index[layer_id].family == expected_family
+    ]
+    if selected_direct:
+        return tuple(sorted(set(selected_direct)))
+
+    mapping = _OMNI_SCENARIO_LAYER_BY_BASE if context == "scenario" else _OMNI_CONTRAST_LAYER_BY_BASE
+    derived: list[str] = []
+    for layer_id in request.layers:
+        mapped = mapping.get(layer_id)
+        if mapped and mapped in catalog.layer_index:
+            derived.append(mapped)
+    return tuple(sorted(set(derived)))
+
+
+def _resolve_layer_for_context(
+    *,
+    layer: CatalogLayer,
+    layer_id: str,
+    effective_mode: str | None,
+    context: str,
+    selector_id: str | None,
+    output_scopes: tuple[str, ...],
+    warnings: list[ExportWarning],
+) -> list[ResolvedLayerPlan]:
+    resolved: list[ResolvedLayerPlan] = []
+
+    if layer.scope_class == "scope_aware":
+        scopes = output_scopes
+    else:
+        scopes = ("shared",)
+        if "roads" in output_scopes:
+            warnings.append(
+                ExportWarning(
+                    code=WARNING_SCOPE_NOT_APPLICABLE,
+                    layer_id=layer.layer_id,
+                    scope="roads",
+                    message=(
+                        f"Layer {layer.layer_id!r} is scope-invariant; "
+                        "roads scope is not separately applicable."
+                    ),
+                )
+            )
+
+    for scope in scopes:
+        output_layer_id = _resolved_output_layer_id(
+            context=context,
+            selector_id=selector_id,
+            scope=scope,
+            layer_id=layer_id,
+        )
+        resolved.append(
+            ResolvedLayerPlan(
+                layer_id=layer_id,
+                family=layer.family,
+                scope_class=layer.scope_class,
+                scope=scope,
+                output_layer_id=output_layer_id,
+                temporal_mode=effective_mode,
+                context=context,
+                selector_id=selector_id,
+                carrier_layer=_carrier_for_layer(layer),
+            )
+        )
+
+    return resolved
+
+
+def _resolved_output_layer_id(
+    *,
+    context: str,
+    selector_id: str | None,
+    scope: str,
+    layer_id: str,
+) -> str:
+    if context == "base":
+        return f"{scope}__{layer_id}"
+
+    selector_token = selector_id if selector_id is not None else "unknown"
+    return f"{context}-{selector_token}__{scope}__{layer_id}"
+
+
+def _carrier_for_layer(layer: CatalogLayer) -> str | None:
+    geometry = layer.raw.get("geometry") if isinstance(layer.raw, cabc.Mapping) else None
+    if not isinstance(geometry, cabc.Mapping):
+        return None
+
+    locator = geometry.get("locator")
+    locator_value = ""
+    if isinstance(locator, cabc.Mapping):
+        value = locator.get("value")
+        if isinstance(value, str):
+            locator_value = value.lower()
+
+    geometry_type = str(geometry.get("type") or "").lower()
+    if "channel" in locator_value or geometry_type == "line":
+        return "chan_map-channels"
+    if "subwta" in locator_value or geometry_type == "polygon":
+        return "sbs_map-subcatchments"
+    return None
+
+
+def _effective_temporal_mode_for_layer(
+    layer_id: str,
+    temporal: NormalizedTemporalRequest | None,
+) -> str | None:
+    if temporal is None:
+        return None
+    return temporal.mode_for_layer(layer_id)
+
+
 def _as_request_mapping(request: ExportRequest | cabc.Mapping[str, object]) -> cabc.Mapping[str, object]:
     if isinstance(request, cabc.Mapping):
         return request
@@ -218,6 +435,10 @@ def _as_request_mapping(request: ExportRequest | cabc.Mapping[str, object]) -> c
             payload["crs"] = request.crs
         if request.output_scopes is not None:
             payload["output_scopes"] = list(request.output_scopes)
+        if request.scenarios is not None:
+            payload["scenarios"] = list(request.scenarios)
+        if request.contrast_ids is not None:
+            payload["contrast_ids"] = list(request.contrast_ids)
         if request.scenario is not None:
             payload["scenario"] = request.scenario
         if request.contrast_id is not None:
@@ -235,6 +456,10 @@ def _as_request_mapping(request: ExportRequest | cabc.Mapping[str, object]) -> c
             temporal: dict[str, object] = {}
             if request.temporal.mode is not None:
                 temporal["mode"] = request.temporal.mode
+            if request.temporal.layer_modes:
+                temporal["layer_modes"] = {
+                    item.layer_id: item.mode for item in request.temporal.layer_modes
+                }
             if request.temporal.year_selection is not None:
                 temporal["year_selection"] = request.temporal.year_selection
             if request.temporal.exclude_yr_indxs:
@@ -247,6 +472,10 @@ def _as_request_mapping(request: ExportRequest | cabc.Mapping[str, object]) -> c
                     temporal_event["return_periods"] = list(request.temporal.event.return_periods)
                 temporal["event"] = temporal_event
             payload["temporal"] = temporal
+        if request.column_selection is not None:
+            payload["column_selection"] = {
+                selection.layer_id: selection.to_mapping() for selection in request.column_selection
+            }
         return payload
     raise TypeError(
         "request must be a mapping payload or ExportRequest, "
@@ -361,6 +590,209 @@ def _normalize_output_scopes(
     return [scope for scope in SUPPORTED_OUTPUT_SCOPES if scope in seen]
 
 
+def _normalize_selector_array(
+    value: object,
+    *,
+    path: str,
+    errors: list[ValidationIssue],
+) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        errors.append(
+            ValidationIssue(
+                code="invalid_type",
+                message=f"{path} must be an array of selector identifiers.",
+                path=path,
+            )
+        )
+        return []
+
+    selectors = _normalize_string_list(value, path=path, errors=errors)
+    if selectors is None:
+        return []
+    return sorted(set(selectors))
+
+
+def _normalize_column_selection(
+    value: object,
+    *,
+    selected_layers: list[str],
+    catalog: LayerCatalog,
+    errors: list[ValidationIssue],
+) -> list[LayerColumnSelection]:
+    if value is None:
+        return []
+    if not isinstance(value, cabc.Mapping):
+        errors.append(
+            ValidationIssue(
+                code="invalid_type",
+                message="column_selection must be an object keyed by layer id.",
+                path="column_selection",
+            )
+        )
+        return []
+
+    selected_layer_set = set(selected_layers)
+    normalized: list[LayerColumnSelection] = []
+
+    for layer_id_raw, entry_value in value.items():
+        if not isinstance(layer_id_raw, str) or not layer_id_raw.strip():
+            errors.append(
+                ValidationIssue(
+                    code="invalid_type",
+                    message="column_selection keys must be non-empty layer id strings.",
+                    path="column_selection",
+                )
+            )
+            continue
+
+        layer_id = layer_id_raw.strip()
+        if layer_id not in selected_layer_set:
+            errors.append(
+                ValidationIssue(
+                    code="unknown_layer_id",
+                    message=f"column_selection references unselected layer {layer_id!r}.",
+                    path=f"column_selection.{layer_id}",
+                )
+            )
+            continue
+
+        if not isinstance(entry_value, cabc.Mapping):
+            errors.append(
+                ValidationIssue(
+                    code="invalid_type",
+                    message="column_selection entries must be objects.",
+                    path=f"column_selection.{layer_id}",
+                )
+            )
+            continue
+
+        has_include = "include" in entry_value and entry_value.get("include") is not None
+        has_exclude = "exclude" in entry_value and entry_value.get("exclude") is not None
+        if has_include and has_exclude:
+            errors.append(
+                ValidationIssue(
+                    code="mutually_exclusive",
+                    message="include and exclude are mutually exclusive per layer.",
+                    path=f"column_selection.{layer_id}",
+                )
+            )
+
+        include = _normalize_string_list(
+            entry_value.get("include"),
+            path=f"column_selection.{layer_id}.include",
+            errors=errors,
+        )
+        exclude = _normalize_string_list(
+            entry_value.get("exclude"),
+            path=f"column_selection.{layer_id}.exclude",
+            errors=errors,
+        )
+
+        include_values = tuple(sorted(set(include or []))) if include is not None else None
+        exclude_values = tuple(sorted(set(exclude or []))) if exclude is not None else None
+
+        layer_catalog_entry = catalog.layer_index[layer_id]
+        known_columns = _known_column_ids_for_layer(layer_catalog_entry)
+        if known_columns and _layer_has_explicit_column_contract(layer_catalog_entry):
+            unknown_columns: list[str] = []
+            for column_id in list(include_values or ()) + list(exclude_values or ()):
+                if column_id not in known_columns:
+                    unknown_columns.append(column_id)
+            if unknown_columns:
+                errors.append(
+                    ValidationIssue(
+                        code="unknown_column_id",
+                        message=(
+                            f"Unknown column id(s) for {layer_id!r}: {sorted(set(unknown_columns))}."
+                        ),
+                        path=f"column_selection.{layer_id}",
+                    )
+                )
+
+        if include_values is None and exclude_values is None:
+            continue
+        normalized.append(
+            LayerColumnSelection(
+                layer_id=layer_id,
+                include=include_values,
+                exclude=exclude_values,
+            )
+        )
+
+    return sorted(normalized, key=lambda item: item.layer_id)
+
+
+def _layer_has_explicit_column_contract(layer: CatalogLayer) -> bool:
+    raw = layer.raw if isinstance(layer.raw, cabc.Mapping) else {}
+    columns = raw.get("columns")
+    if not isinstance(columns, list):
+        return False
+    for column in columns:
+        if not isinstance(column, cabc.Mapping):
+            continue
+        token = column.get("column_id")
+        if isinstance(token, str) and token.strip():
+            return True
+    return False
+
+
+def _known_column_ids_for_layer(layer: CatalogLayer) -> set[str]:
+    known: set[str] = set()
+    raw = layer.raw if isinstance(layer.raw, cabc.Mapping) else {}
+
+    columns = raw.get("columns")
+    if isinstance(columns, list):
+        for column in columns:
+            if not isinstance(column, cabc.Mapping):
+                continue
+            token = column.get("column_id")
+            if isinstance(token, str) and token.strip():
+                known.add(token.strip())
+
+    join = raw.get("join")
+    if isinstance(join, cabc.Mapping):
+        primary = join.get("primary_key")
+        if isinstance(primary, str) and primary.strip():
+            known.add(primary.strip())
+        fallback_keys = join.get("fallback_keys")
+        if isinstance(fallback_keys, list):
+            for key in fallback_keys:
+                if isinstance(key, str) and key.strip():
+                    known.add(key.strip())
+
+    geometry = raw.get("geometry")
+    if isinstance(geometry, cabc.Mapping):
+        feature_id_keys = geometry.get("feature_id_keys")
+        if isinstance(feature_id_keys, list):
+            for key in feature_id_keys:
+                if isinstance(key, str) and key.strip():
+                    known.add(key.strip())
+
+    measures = raw.get("measures")
+    if isinstance(measures, cabc.Mapping):
+        required = measures.get("required")
+        if isinstance(required, list):
+            for key in required:
+                if isinstance(key, str) and key.strip():
+                    known.add(key.strip())
+
+        optional = measures.get("optional")
+        if isinstance(optional, list):
+            for optional_measure in optional:
+                if isinstance(optional_measure, str) and optional_measure.strip():
+                    known.add(optional_measure.strip())
+                elif isinstance(optional_measure, cabc.Mapping):
+                    aliases = optional_measure.get("key_aliases")
+                    if isinstance(aliases, list):
+                        for key in aliases:
+                            if isinstance(key, str) and key.strip():
+                                known.add(key.strip())
+
+    return known
+
+
 def _normalize_swat_tables(
     value: object,
     *,
@@ -408,6 +840,8 @@ def _normalize_swat_tables(
 def _normalize_temporal(
     value: object,
     *,
+    selected_layers: list[str],
+    catalog: LayerCatalog,
     errors: list[ValidationIssue],
 ) -> NormalizedTemporalRequest | None:
     if value is None:
@@ -423,40 +857,62 @@ def _normalize_temporal(
         return None
 
     mode_token = _optional_string(value.get("mode"), path="temporal.mode", errors=errors)
-    has_other_temporal_fields = any(key in value for key in ("year_selection", "exclude_yr_indxs", "event"))
-    if mode_token is None:
-        if has_other_temporal_fields:
+    mode: str | None = None
+    if mode_token is not None:
+        mode = mode_token.lower()
+        if mode == "daily":
             errors.append(
                 ValidationIssue(
-                    code="missing_field",
-                    message="temporal.mode is required when temporal selectors are provided.",
+                    code="unsupported_temporal_mode",
+                    message="Daily temporal mode is not supported for features export.",
                     path="temporal.mode",
                 )
             )
-        return None
-
-    mode = mode_token.lower()
-    if mode == "daily":
-        errors.append(
-            ValidationIssue(
-                code="unsupported_temporal_mode",
-                message="Daily temporal mode is not supported for features export.",
-                path="temporal.mode",
+            mode = None
+        elif mode not in SUPPORTED_TEMPORAL_MODES:
+            errors.append(
+                ValidationIssue(
+                    code="invalid_enum",
+                    message=(
+                        f"Unsupported temporal.mode {mode_token!r}; supported values are "
+                        f"{list(SUPPORTED_TEMPORAL_MODES)!r}."
+                    ),
+                    path="temporal.mode",
+                )
             )
-        )
-        return None
-    if mode not in SUPPORTED_TEMPORAL_MODES:
+            mode = None
+
+    layer_modes = _normalize_layer_modes(
+        value.get("layer_modes"),
+        selected_layers=selected_layers,
+        errors=errors,
+    )
+
+    selected_temporal_layers = [
+        layer_id for layer_id in selected_layers if catalog.layer_index[layer_id].temporal_supported_modes
+    ]
+    if selected_temporal_layers and mode is None and not layer_modes:
         errors.append(
             ValidationIssue(
-                code="invalid_enum",
+                code="missing_field",
                 message=(
-                    f"Unsupported temporal.mode {mode_token!r}; supported values are "
-                    f"{list(SUPPORTED_TEMPORAL_MODES)!r}."
+                    "temporal.mode or temporal.layer_modes is required when temporal-capable "
+                    "layers are selected."
                 ),
                 path="temporal.mode",
             )
         )
-        return None
+
+    for layer_id in selected_temporal_layers:
+        effective_mode = layer_modes.get(layer_id) or mode
+        if effective_mode is None:
+            errors.append(
+                ValidationIssue(
+                    code="missing_field",
+                    message=f"No temporal mode resolved for layer {layer_id!r}.",
+                    path="temporal.layer_modes",
+                )
+            )
 
     year_selection: str | None = None
     if "year_selection" in value and value.get("year_selection") is not None:
@@ -491,7 +947,11 @@ def _normalize_temporal(
     else:
         exclude_year_indices = []
 
-    if mode in {"annual_average", "yearly"} and year_selection is None:
+    resolved_layer_modes = [layer_modes.get(layer_id) or mode for layer_id in selected_temporal_layers]
+    uses_year_selection = any(token in {"annual_average", "yearly"} for token in resolved_layer_modes if token)
+    uses_event = any(token == "event" for token in resolved_layer_modes if token)
+
+    if uses_year_selection and year_selection is None:
         year_selection = "all"
 
     if year_selection == "custom" and not exclude_year_indices:
@@ -505,136 +965,214 @@ def _normalize_temporal(
 
     event_selector: NormalizedTemporalEvent | None = None
     raw_event = value.get("event")
-    if mode == "event":
+    if uses_event:
         if not isinstance(raw_event, cabc.Mapping):
             errors.append(
                 ValidationIssue(
                     code="missing_field",
-                    message="temporal.event is required when temporal.mode=event.",
+                    message="temporal.event is required when effective temporal mode includes event.",
                     path="temporal.event",
                 )
             )
-            return None
-
-        selector_token = _optional_string(
-            raw_event.get("selector"),
-            path="temporal.event.selector",
-            errors=errors,
-        )
-        if selector_token is None:
-            return None
-        selector = selector_token.lower()
-        if selector not in SUPPORTED_EVENT_SELECTORS:
-            errors.append(
-                ValidationIssue(
-                    code="invalid_enum",
-                    message=(
-                        f"Unsupported temporal.event.selector {selector_token!r}; "
-                        f"supported values are {list(SUPPORTED_EVENT_SELECTORS)!r}."
-                    ),
-                    path="temporal.event.selector",
-                )
-            )
-            return None
-
-        dates = _normalize_string_list(raw_event.get("dates"), path="temporal.event.dates", errors=errors)
-        return_periods = _normalize_positive_float_list(
-            raw_event.get("return_periods"),
-            path="temporal.event.return_periods",
-            errors=errors,
-        )
-        if dates is None:
-            dates = []
-        if return_periods is None:
-            return_periods = []
-
-        for index, date_token in enumerate(dates):
-            if _DATE_PATTERN.match(date_token) is None:
-                errors.append(
-                    ValidationIssue(
-                        code="invalid_format",
-                        message="temporal.event.dates values must use YYYY-MM-DD format.",
-                        path=f"temporal.event.dates[{index}]",
-                    )
-                )
-
-        if selector == "date":
-            if not dates:
-                errors.append(
-                    ValidationIssue(
-                        code="missing_field",
-                        message="temporal.event.dates is required when selector=date.",
-                        path="temporal.event.dates",
-                    )
-                )
-            if return_periods:
-                errors.append(
-                    ValidationIssue(
-                        code="mutually_exclusive",
-                        message=(
-                            "temporal.event.return_periods is not allowed when selector=date."
-                        ),
-                        path="temporal.event.return_periods",
-                    )
-                )
-            event_selector = NormalizedTemporalEvent(selector=selector, dates=tuple(sorted(set(dates))))
         else:
-            if not return_periods:
+            selector_token = _optional_string(
+                raw_event.get("selector"),
+                path="temporal.event.selector",
+                errors=errors,
+            )
+            selector = selector_token.lower() if selector_token is not None else None
+            if selector is None:
+                selector = None
+            elif selector not in SUPPORTED_EVENT_SELECTORS:
                 errors.append(
                     ValidationIssue(
-                        code="missing_field",
+                        code="invalid_enum",
                         message=(
-                            "temporal.event.return_periods is required when selector=return_period."
+                            f"Unsupported temporal.event.selector {selector_token!r}; "
+                            f"supported values are {list(SUPPORTED_EVENT_SELECTORS)!r}."
                         ),
-                        path="temporal.event.return_periods",
+                        path="temporal.event.selector",
                     )
                 )
-            if dates:
-                errors.append(
-                    ValidationIssue(
-                        code="mutually_exclusive",
-                        message="temporal.event.dates is not allowed when selector=return_period.",
-                        path="temporal.event.dates",
-                    )
-                )
-            event_selector = NormalizedTemporalEvent(
-                selector=selector,
-                return_periods=tuple(sorted(set(return_periods))),
-            )
+                selector = None
 
-        if year_selection is not None or exclude_year_indices:
-            errors.append(
-                ValidationIssue(
-                    code="invalid_selector_combo",
-                    message=(
-                        "temporal.year_selection and temporal.exclude_yr_indxs are not "
-                        "supported when temporal.mode=event."
-                    ),
-                    path="temporal",
-                )
+            dates = _normalize_string_list(raw_event.get("dates"), path="temporal.event.dates", errors=errors)
+            return_periods = _normalize_positive_float_list(
+                raw_event.get("return_periods"),
+                path="temporal.event.return_periods",
+                errors=errors,
             )
+            if dates is None:
+                dates = []
+            if return_periods is None:
+                return_periods = []
+
+            for index, date_token in enumerate(dates):
+                if _DATE_PATTERN.match(date_token) is None:
+                    errors.append(
+                        ValidationIssue(
+                            code="invalid_format",
+                            message="temporal.event.dates values must use YYYY-MM-DD format.",
+                            path=f"temporal.event.dates[{index}]",
+                        )
+                    )
+
+            if selector == "date":
+                if not dates:
+                    errors.append(
+                        ValidationIssue(
+                            code="missing_field",
+                            message="temporal.event.dates is required when selector=date.",
+                            path="temporal.event.dates",
+                        )
+                    )
+                if return_periods:
+                    errors.append(
+                        ValidationIssue(
+                            code="mutually_exclusive",
+                            message=(
+                                "temporal.event.return_periods is not allowed when selector=date."
+                            ),
+                            path="temporal.event.return_periods",
+                        )
+                    )
+                event_selector = NormalizedTemporalEvent(
+                    selector="date",
+                    dates=tuple(sorted(set(dates))),
+                )
+            elif selector == "return_period":
+                if not return_periods:
+                    errors.append(
+                        ValidationIssue(
+                            code="missing_field",
+                            message=(
+                                "temporal.event.return_periods is required when selector=return_period."
+                            ),
+                            path="temporal.event.return_periods",
+                        )
+                    )
+                if dates:
+                    errors.append(
+                        ValidationIssue(
+                            code="mutually_exclusive",
+                            message="temporal.event.dates is not allowed when selector=return_period.",
+                            path="temporal.event.dates",
+                        )
+                    )
+                event_selector = NormalizedTemporalEvent(
+                    selector="return_period",
+                    return_periods=tuple(sorted(set(return_periods))),
+                )
     elif raw_event is not None:
         errors.append(
             ValidationIssue(
                 code="invalid_selector_combo",
-                message="temporal.event is only valid when temporal.mode=event.",
+                message="temporal.event is only valid when an effective temporal mode is event.",
                 path="temporal.event",
+            )
+        )
+
+    if uses_event and (year_selection is not None or exclude_year_indices):
+        errors.append(
+            ValidationIssue(
+                code="invalid_selector_combo",
+                message=(
+                    "temporal.year_selection and temporal.exclude_yr_indxs are not supported "
+                    "when effective mode includes event."
+                ),
+                path="temporal",
             )
         )
 
     return NormalizedTemporalRequest(
         mode=mode,
+        layer_modes=tuple(
+            TemporalLayerMode(layer_id=layer_id, mode=layer_mode)
+            for layer_id, layer_mode in sorted(layer_modes.items())
+        ),
         year_selection=year_selection,
         exclude_yr_indxs=tuple(exclude_year_indices),
         event=event_selector,
     )
 
 
+def _normalize_layer_modes(
+    value: object,
+    *,
+    selected_layers: list[str],
+    errors: list[ValidationIssue],
+) -> dict[str, str]:
+    if value is None:
+        return {}
+    if not isinstance(value, cabc.Mapping):
+        errors.append(
+            ValidationIssue(
+                code="invalid_type",
+                message="temporal.layer_modes must be an object keyed by layer id.",
+                path="temporal.layer_modes",
+            )
+        )
+        return {}
+
+    selected_layer_set = set(selected_layers)
+    normalized: dict[str, str] = {}
+    for layer_id_raw, mode_raw in value.items():
+        if not isinstance(layer_id_raw, str) or not layer_id_raw.strip():
+            errors.append(
+                ValidationIssue(
+                    code="invalid_type",
+                    message="temporal.layer_modes keys must be layer ids.",
+                    path="temporal.layer_modes",
+                )
+            )
+            continue
+
+        layer_id = layer_id_raw.strip()
+        if layer_id not in selected_layer_set:
+            errors.append(
+                ValidationIssue(
+                    code="unknown_layer_id",
+                    message=f"temporal.layer_modes references unselected layer {layer_id!r}.",
+                    path=f"temporal.layer_modes.{layer_id}",
+                )
+            )
+            continue
+
+        mode = _optional_string(mode_raw, path=f"temporal.layer_modes.{layer_id}", errors=errors)
+        if mode is None:
+            continue
+        mode_token = mode.lower()
+        if mode_token == "daily":
+            errors.append(
+                ValidationIssue(
+                    code="unsupported_temporal_mode",
+                    message="Daily temporal mode is not supported for features export.",
+                    path=f"temporal.layer_modes.{layer_id}",
+                )
+            )
+            continue
+        if mode_token not in SUPPORTED_TEMPORAL_MODES:
+            errors.append(
+                ValidationIssue(
+                    code="invalid_enum",
+                    message=(
+                        f"Unsupported temporal mode {mode!r}; supported values are "
+                        f"{list(SUPPORTED_TEMPORAL_MODES)!r}."
+                    ),
+                    path=f"temporal.layer_modes.{layer_id}",
+                )
+            )
+            continue
+        normalized[layer_id] = mode_token
+
+    return normalized
+
+
 def _validate_omni_selector_rules(
     layer_ids: list[str],
     *,
-    scenario: str | None,
-    contrast_id: str | None,
+    scenarios: tuple[str, ...],
+    contrast_ids: tuple[str, ...],
     catalog: LayerCatalog,
     errors: list[ValidationIssue],
 ) -> None:
@@ -655,37 +1193,38 @@ def _validate_omni_selector_rules(
                 path="layers",
             )
         )
-    if has_omni_scenarios and scenario is None:
+    if has_omni_scenarios and not scenarios:
         errors.append(
             ValidationIssue(
                 code="missing_field",
-                message="scenario is required when Omni scenario layers are requested.",
-                path="scenario",
+                message="scenarios is required when Omni scenario layers are requested.",
+                path="scenarios",
             )
         )
-    if has_omni_contrasts and contrast_id is None:
+    if has_omni_contrasts and not contrast_ids:
         errors.append(
             ValidationIssue(
                 code="missing_field",
-                message="contrast_id is required when Omni contrast layers are requested.",
-                path="contrast_id",
+                message="contrast_ids is required when Omni contrast layers are requested.",
+                path="contrast_ids",
             )
         )
 
 
 def _layer_supports_temporal(
     layer: CatalogLayer,
+    effective_mode: str | None,
     temporal: NormalizedTemporalRequest | None,
 ) -> bool:
     if temporal is None:
         return True
-    # Empty supported_modes denotes an atemporal layer; temporal selectors do
-    # not filter these resources.
     if not layer.temporal_supported_modes:
         return True
-    if temporal.mode not in layer.temporal_supported_modes:
+    if effective_mode is None:
         return False
-    if temporal.mode != "event" or temporal.event is None:
+    if effective_mode not in layer.temporal_supported_modes:
+        return False
+    if effective_mode != "event" or temporal.event is None:
         return True
 
     event_rule = layer.temporal_mode_rules.get("event", {})

@@ -248,3 +248,23 @@ def test_normalize_export_request_rejects_unknown_layer_ids(catalog) -> None:
         normalize_export_request(payload, catalog)
 
     assert any(issue.code == "unknown_layer_id" for issue in exc.value.issues)
+
+
+def test_normalize_export_request_allows_dynamic_column_selection_without_explicit_contract(catalog) -> None:
+    payload = {
+        "format": "geopackage",
+        "units": "project",
+        "layers": ["wepp.summary.hillslopes"],
+        "column_selection": {
+            "wepp.summary.hillslopes": {
+                "include": ["Runoff Volume", "Soil Loss", "TopazID"],
+            }
+        },
+    }
+
+    normalized = normalize_export_request(payload, catalog)
+
+    assert normalized.column_selection
+    selection = normalized.column_selection[0]
+    assert selection.layer_id == "wepp.summary.hillslopes"
+    assert selection.include == ("Runoff Volume", "Soil Loss", "TopazID")

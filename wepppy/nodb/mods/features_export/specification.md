@@ -10,10 +10,14 @@ Document posture: Living working specification; mutate when implementation evide
 Create a NoDb `features_export` mod for user-configurable spatial and spatial-temporal exports across WEPP, Omni, Ash/WATAR, WEPP interchange, SWAT interchange, and AgFields datasets.
 This is an immediate replacement for legacy gpkg/gdb export behavior, but implemented with NoDb controller patterns, canonical RQ polling contracts, and dependency-aware cache reuse.
 AgFields support is parity+ (spatial + WEPP interchange metrics), including automatic on-demand AgFields interchange generation when required for requested export layers.
+Data extraction and merge orchestration for export payload assembly is DuckDB-first (SQL joins/projections/filters) for performance and deterministic schema control; pandas merge loops are non-compliant for production payload assembly paths.
+User-facing dataset labels and output layer names must prioritize established WEPP output vocabulary over internal family or implementation tokens.
 
 ## 2. Supported Formats
 - `geojson` (single-layer format)
 - `geoparquet` (single-layer format)
+- `parquet` (single-layer geometryless tabular format)
+- `csv` (single-layer geometryless tabular format)
 - `kmz` (single-layer format)
 - `geopackage` (multi-layer container format)
 - `geodatabase` (multi-layer FileGDB container via `f_esri`)
@@ -27,6 +31,8 @@ Packaging rules:
 - Single-layer formats produce one file per resolved layer and return a zip bundle.
 - Multi-layer formats produce one container artifact per request.
 - KMZ is single-layer only; multi-layer requests produce multiple `.kmz` files in the zip.
+- Geometryless formats (`parquet`, `csv`) always emit tabular outputs without geometry columns/encodings.
+- For geometryless formats, required identity/join fields remain included even when geometry is removed.
 
 ## 3. Layer Catalog And Discoverability
 The backend owns an authoritative, versioned export layer catalog.
@@ -58,6 +64,13 @@ Catalog contract:
 - `dependencies` (additional files that must participate in readiness/fingerprint checks)
 - `temporal` options (`supported_modes`, `grain`, `time_columns`, `mode_rules`)
 - `measures.required` and `measures.optional`
+- `columns` contract for UI-visible field selection:
+  - `column_id` (canonical source/output field key)
+  - `label` (human-readable field name)
+  - `unit` metadata (`display_unit`, `unit_class`, `is_unitized`)
+  - `default_selected` (boolean)
+  - optional availability/selector guards
+  - When a layer omits an explicit `columns` block, runtime schema discovery (from resolved source datasets) is the fallback source of truth for UI column selectors and unit labels.
 - SWAT table-profile contract for `swat.interchange.*` layers (`table_profiles`, profile-level geometry/join rules, non-spatial behavior)
 - Optional measure availability rules (`requires_any_column`, `requires_all_columns`, version gates, selector constraints)
 - Version-gate semantics: `min_source_version` is a semantic version string compared against the resolved dependency manifest `version` field (for example `interchange_version.json.version`).
@@ -77,13 +90,15 @@ Initial layer families:
 - Ash/WATAR: hillslope ash transport outputs.
 - AgFields spatial: field boundaries and sub-field polygons.
 - AgFields WEPP metrics: sub-field/field metrics sourced from `wepp/ag_fields/output/interchange/*`.
-- WEPP summary: runoff, subrunoff, baseflow, soil loss, sediment yields.
-- WEPP temporal: yearly and event layers.
+- WEPP: canonical output datasets labeled with familiar file names (for example `H.element.parquet`, `H.wat.parquet`, `H.pass.parquet`, `H.loss.parquet`, `H.soil.parquet`, `H.ebe.parquet`, `chan.out.parquet`, `chanwb.parquet`).
+- SWAT interchange: `swat/outputs/run_*/interchange/*`.
 - Omni scenarios: `_pups/omni/scenarios/*`.
 - Omni contrasts: `_pups/omni/contrasts/*`.
-- WEPP interchange: interchange-backed export layers/tables.
-- WEPP interchange includes hillslope element exports (`H.element.parquet`) with optional runoff-partition measures `QRain` and `QSnow`.
-- SWAT interchange: `swat/outputs/run_*/interchange/*`.
+
+Discoverability requirements:
+- Internal ids like `wepp.temporal.events` are backend-only tokens and must never be shown as the primary UI label.
+- Group rendering is discovery-driven: hide groups with zero currently available datasets for the active run/config.
+- Group order keeps Omni families at the bottom of the catalog list.
 
 ## 4. Output Scope Contract Alignment
 `output_scopes` is an array selector with values `baseline|roads`.
@@ -102,8 +117,17 @@ Layer scope classes:
 - Scope-invariant layers: watershed, landuse, soils, ash/watar, AgFields, Omni, SWAT interchange, and any layer not rooted at `wepp/output`.
 
 Export behavior:
-- Scope-aware layers are emitted separately per requested scope using `{scope}__{layer_id}`.
-- Scope-invariant layers are emitted once using `shared__{layer_id}` even when both scopes are requested.
+- WEPP and Omni output datasets are consolidated by geometry carrier per context to keep layer counts legible:
+  - Up to one `sbs_map-subcatchments` layer per scope.
+  - Up to one `chan_map-channels` layer per scope.
+- Base WEPP context emits at most two consolidated layers per requested scope (`subcatchments` and/or `channels`) depending on selected outputs.
+- Each selected Omni scenario/contrast emits its own consolidated `subcatchments` and/or `channels` layer set per requested scope.
+- Scope-invariant families remain single-emission artifacts and are not duplicated per scope unless explicitly scope-aware in catalog metadata.
+- Consolidated layer names must use descriptive run/context naming:
+  - Baseline base context: `{runid}-sbs_map-subcatchments`, `{runid}-chan_map-channels`.
+  - Roads scope: `{runid}-roads-sbs_map-subcatchments`, `{runid}-roads-chan_map-channels`.
+  - Scenario context: `{runid}-scenario-{scenario_id}-{carrier}`.
+  - Contrast context: `{runid}-contrast-{contrast_id}-{carrier}`.
 - If one requested scope is missing for a scope-aware layer, export available scopes and emit warning code `scope_missing_layer`.
 - If a requested scope is not applicable to a scope-invariant layer, emit warning code `scope_not_applicable`.
 - If no layer resolves after scope processing, return 404.
@@ -128,15 +152,21 @@ Request schema:
 - `crs`: optional enum `wgs|utm`, default `wgs`.
 - `layers`: required non-empty array of layer IDs.
 - `output_scopes`: optional non-empty array of `baseline|roads`.
-- `scenario`: optional Omni scenario selector.
-- `contrast_id`: optional Omni contrast selector.
+- `scenarios`: optional non-empty array of Omni scenario IDs.
+- `contrast_ids`: optional non-empty array of Omni contrast IDs.
+- Backward-compatible aliases `scenario` and `contrast_id` are accepted and normalized into single-entry arrays.
 - `swat_run_id`: optional SWAT run selector, default `latest`.
 - `swat_tables`: optional object with one of `include` or `exclude`, each an array of table names.
+- `column_selection`: optional object keyed by `layer_id` with one of:
+  - `include`: non-empty array of `column_id` values to export.
+  - `exclude`: array of `column_id` values to drop from export.
+  - `include` and `exclude` are mutually exclusive per layer.
 - `temporal`: optional object.
-- `temporal.mode`: optional enum `annual_average|yearly|event`.
-- `temporal.year_selection`: optional enum `all|exclude_first|exclude_first_two|exclude_first_five|custom`.
-- `temporal.exclude_yr_indxs`: optional array of zero-based integer indices.
-- `temporal.event`: required when `temporal.mode=event`.
+- `temporal.mode`: optional default enum `annual_average|yearly|event` used when a temporal-capable layer does not provide an override.
+- `temporal.layer_modes`: optional object keyed by `layer_id`; value enum `annual_average|yearly|event`.
+- `temporal.year_selection`: optional global enum `all|exclude_first|exclude_first_two|exclude_first_five|custom`.
+- `temporal.exclude_yr_indxs`: optional global array of zero-based integer indices.
+- `temporal.event`: required when any effective temporal mode is `event`.
 - `temporal.event.selector`: enum `date|return_period`.
 - `temporal.event.dates`: required for `selector=date`; array of `YYYY-MM-DD`.
 - `temporal.event.return_periods`: required for `selector=return_period`; numeric array in years.
@@ -147,11 +177,16 @@ Request example:
   "format": "geoparquet",
   "units": "project",
   "crs": "wgs",
-  "layers": ["wepp.summary.hillslopes", "watershed.subcatchments"],
+  "layers": ["wepp.H.element.parquet", "wepp.chan.out.parquet"],
   "output_scopes": ["baseline", "roads"],
+  "scenarios": ["thinned", "control"],
   "swat_run_id": "latest",
   "temporal": {
-    "mode": "annual_average",
+    "mode": "yearly",
+    "layer_modes": {
+      "wepp.H.element.parquet": "yearly",
+      "wepp.chan.out.parquet": "annual_average"
+    },
     "year_selection": "exclude_first_two",
     "exclude_yr_indxs": [0, 1]
   }
@@ -159,19 +194,28 @@ Request example:
 ```
 
 Validation:
-- `scenario` and `contrast_id` are mutually exclusive.
+- `scenarios` and `contrast_ids` are mutually exclusive.
 - Omni scenario and Omni contrast layer families cannot be mixed in one request.
-- Omni scenario layers require `scenario`.
-- Omni contrast layers require `contrast_id`.
+- Omni scenario layers require `scenarios`.
+- Omni contrast layers require `contrast_ids`.
 - SWAT layers require a resolved `swat_run_id`; `latest` is resolved to a concrete run ID before execution and persisted in manifest/cache key.
 - Unknown layer IDs return 400.
 - Unsupported `crs` value returns 400.
 - Unsupported temporal mode returns 400.
 - Daily timeseries mode is not supported and returns 400.
 - `swat_tables.include` and `swat_tables.exclude` are mutually exclusive.
+- `format=parquet|csv` is valid for both spatial and non-spatial datasets and strips geometry from output rows instead of failing on spatial inputs.
+- `column_selection[layer_id].include` and `column_selection[layer_id].exclude` are mutually exclusive.
+- Unknown layer ids in `column_selection` return 400 with structured validation errors.
+- Unknown column ids return 400 when the target layer has an explicit `columns` contract in catalog metadata; for discovery-driven layers without explicit `columns`, dynamic source-schema column ids are accepted.
+- If `column_selection[layer_id].include` is provided, exported fields for that layer are limited to the selected set plus required identity/join geometry fields.
+- If `column_selection[layer_id].exclude` removes all optional fields, export still retains required identity/join geometry fields.
 - `crs=utm` requires a resolvable run UTM CRS; unresolved UTM CRS returns 409.
 - AgFields WEPP metric layers require AgFields output/interchange assets; exporter performs on-demand preparation as defined in Section 6.3.
 - Temporal mode support is evaluated per resolved layer from catalog `temporal.supported_modes`.
+- Every selected temporal-capable layer must resolve an effective temporal mode from `temporal.layer_modes[layer_id]` or fallback `temporal.mode`.
+- If `temporal.mode=yearly` (or a layer-level effective mode is `yearly`) and `temporal.year_selection` is omitted, default to `year_selection=all`.
+- `year_selection` and `exclude_yr_indxs` apply globally across all layers whose effective mode supports year filtering.
 - If some layers are incompatible with requested temporal settings and at least one layer remains exportable, incompatible layers are dropped with `layer_unavailable` warnings.
 - If no requested layers support the requested temporal settings, return 400.
 - If `year_selection` or `exclude_yr_indxs` is provided for a layer whose catalog rule sets `year_selection_supported=false`, ignore those selectors for that layer and emit `selector_defaulted`.
@@ -183,6 +227,7 @@ CRS behavior:
 - `crs=wgs` exports spatial layers in EPSG:4326.
 - `crs=utm` exports spatial layers in the run-resolved UTM CRS (single resolved EPSG per job).
 - Non-spatial layers are unaffected by CRS selection.
+- Geometryless formats (`parquet`, `csv`) are unaffected by CRS selection because geometry is not exported.
 
 Submission response:
 - Always HTTP 202 with canonical async payload.
@@ -248,7 +293,7 @@ Cache key must use normalized payload and resolved dependencies:
 - Include dependency fingerprint from the export dependency resolver (not RedisPrep/Preflight task status).
 
 Dependency resolver contract:
-- Resolve final dataset relpaths after all selectors are applied (`output_scopes`, scenario/contrast, SWAT run/table filters, temporal mode).
+- Resolve final dataset relpaths after all selectors are applied (`output_scopes`, scenarios/contrast_ids, SWAT run/table filters, temporal mode).
 - Build dependency entries from actual resolved `geometry.locator`, `sources`, and `dependencies` in `layer_catalog.yaml`, including `unitizer.nodb` when `units=project`.
 - Include `layer_catalog.yaml` metadata/version signature in dependency resolution.
 - Fingerprint each dependency entry from canonical relpath plus file metadata (`size`, `mtime_ns`) and optional content hash when configured.
@@ -312,6 +357,11 @@ Units modes:
 
 `features_export` must use Unitizer numeric conversion primitives.
 
+Column naming contract:
+- Unit-applicable output columns must include a normalized unit token suffix in the exported column name (for example `runoff__mm`, `sediment_yield__kg_m2`, `peak_flow__cfs`).
+- Columns without an applicable unit mapping keep their canonical source name and are recorded as pass-through in manifest unit metadata.
+- Manifest must include a per-column unit mapping table so UI/download consumers can recover source field, target field, and resolved unit metadata deterministically.
+
 ### 7.1 Unitizer Milestone Status (Completed 2026-03-25)
 
 ExecPlan completion:
@@ -359,10 +409,22 @@ Supported modes:
 - `yearly`
 - `event`
 
+Global temporal control model:
+- Temporal mode is resolved per selected temporal-capable dataset from `temporal.layer_modes[layer_id]` with fallback to `temporal.mode`.
+- Global year selection controls (`year_selection`, `exclude_yr_indxs`) apply across all datasets whose effective temporal mode supports year filtering.
+- UI control order must place global year selection immediately after CRS selection.
+- Per-dataset column selection is independent from temporal controls and applies after temporal filtering.
+
 `annual_average` rules:
 - Uses return-period year-selection behavior.
 - `exclude_yr_indxs` uses zero-based year index semantics consistent with return-period processing.
 - `year_selection=custom` requires explicit `exclude_yr_indxs`.
+
+`yearly` rules:
+- If `year_selection` is omitted, default to `all`.
+- Export includes every available year after global year filters are applied.
+- No implicit annual aggregation is permitted in `yearly` mode.
+- If year filtering excludes all years for a layer, that layer is dropped with `layer_unavailable` (or 400 if no layers remain).
 
 `event` rules:
 - `selector=date`: explicit date set.
@@ -378,9 +440,11 @@ Mixed-layer temporal compatibility:
 
 ## 9. Selector Rules For Omni And SWAT
 Omni:
-- Scenario layers require `scenario`.
-- Contrast layers require `contrast_id`.
+- Scenario layers require `scenarios`.
+- Contrast layers require `contrast_ids`.
 - Scenario and contrast families cannot be requested together in one job.
+- Omni contexts inherit the selected base WEPP datasets; users do not pick separate Omni dataset lists.
+- Omni selectors are multi-select and support bulk controls (`Select All`, `Unselect All`) for discovered options (required for contrasts).
 
 SWAT:
 - Default is all discovered interchange tables for resolved `swat_run_id`.
@@ -389,7 +453,7 @@ SWAT:
 - Include/exclude values are deduplicated and lexicographically sorted for cache canonicalization.
 - SWAT table resolution is profile-driven from catalog `table_profiles` (for example, `subbasin`, `channel`, `hru`, `non_spatial`).
 - Each resolved table maps to profile-defined geometry strategy and join contract before export.
-- Non-spatial SWAT tables are exportable for `geoparquet`, `geopackage`, and `geodatabase`; they are skipped with `table_unavailable` warnings for `geojson` and `kmz`.
+- Non-spatial SWAT tables are exportable for `geoparquet`, `parquet`, `csv`, `geopackage`, and `geodatabase`; they are skipped with `table_unavailable` warnings for `geojson` and `kmz`.
 
 ## 10. NoDb Mod And Runs-Page UI Contract
 Module placement:
@@ -401,6 +465,24 @@ Runs page integration:
 - Implement a NoDb controller UI using established async pattern.
 - Add a top-of-control secondary `Load Defaults` action that applies a gpkg-adjacent profile without auto-submit.
 - `Load Defaults` profile defaults: `format=geopackage`, `units=project`, `crs=wgs`, `output_scopes=["baseline"]`, cleared temporal/Omni selectors, and a curated baseline layer set aligned with legacy gpkg outcomes.
+- Run settings visual order is fixed: `format` -> `units` -> `crs` -> global `year_selection`.
+- Catalog UI is hierarchy-first and must not include a layer search box, filter chips, or "select visible" behavior.
+- Family labels are user-facing domain labels and must use one consolidated `WEPP` family with familiar output names (not split `WEPP Summary`, `WEPP Temporal`, `WEPP Interchange` headings).
+- Layer rows must present clear hierarchy/indentation under family headers rather than a flat left-aligned list.
+- Each dataset row must include an expandable/collapsible "Columns" section showing:
+  - Column checkbox (selected/unselected)
+  - Column label / `column_id`
+  - Source-backed description text when available
+  - Resolved unit display (or explicit non-unitized marker)
+  - Required-field indicator for non-removable identity/join columns
+- The collapsed row remains scannable; detailed column picking is opt-in through expansion.
+- Column metadata source order is: parquet field metadata (`label`, `description`, `units`) -> interchange `README.md` docs for the resolved source file -> deterministic fallback label/unit inference.
+- Required identity/join locks are canonicalized by column token so alias-equivalent keys (for example `topaz_id` vs `TopazID`) do not render as duplicate mandatory selectors.
+- Every temporal-capable dataset row includes a temporal mode control (dataset-scoped mode); global year selection remains single and shared.
+- Omni Scenarios and Omni Contrasts families render at the bottom of the catalog.
+- Output scope controls are discovery-aware: disable `roads` with an explanatory hint when roads outputs are unavailable for the active run/config.
+- Family discovery is dynamic: hide groups with no available datasets (for example AgFields when missing inputs).
+- Availability/scope readiness updates should stream through websocket status updates so users do not need a manual dataset-detection action.
 - Use the dedicated subagent role pack at `wepppy/nodb/mods/features_export/SUBAGENT_ROLES.md` for UI design/development specification and implementation planning.
 - Use `wepppy/nodb/mods/features_export/ui_control_layout.md` as the canonical detailed control layout and ASCII wireframe reference.
 - Controller posts JSON payload, stores returned `job_id`, and polls canonical `/rq-engine/api/jobstatus/{job_id}` via `set_rq_job_id`.
@@ -409,6 +491,7 @@ Runs page integration:
 - Controller must attach `attach_status_stream` with stacktrace hooks and keep poll fallback enabled.
 - Controller must hydrate prior `job_id` on bootstrap using existing controller-contract guidance.
 - Template must include required status panel, stacktrace panel, and job-hint DOM hooks with `aria-live="polite"` status behavior.
+- Follow-on profile (post-WP-7, not part of this immediate cut) should define a tabular defaults preset that replaces `prep_details` behavior using geometryless `parquet`/`csv` exports with curated column selections.
 
 ## 11. Manifest And Warning Contract
 Every artifact includes `manifest.json`.
@@ -418,9 +501,12 @@ Manifest minimum fields:
 - CRS metadata (`requested_crs`, `resolved_crs`, `resolved_epsg`).
 - Resolved dependency entries with path, existence, timestamp, and fingerprint components.
 - Per-layer scope metadata (`baseline|roads|shared`).
+- Layer context metadata (`base|scenario|contrast`), selected selector id when applicable, and consolidated geometry carrier (`sbs_map-subcatchments|chan_map-channels`).
 - SWAT table profile resolution and per-table spatiality classification.
 - Temporal compatibility decisions (selectors applied, selectors defaulted, and layer/table exclusions).
 - Conversion summary and unit pass-through fields.
+- Unitized column-name mapping (`source_column`, `export_column`, `resolved_unit`, `pass_through_reason`).
+- Column-selection decisions by layer (`include`, `exclude`, and required columns auto-retained).
 - Row and feature counts per layer.
 - Generation timestamps and tool/catalog versions.
 - `cache_hit`, `source_job_id`, `artifact_id`.
@@ -441,6 +527,7 @@ Reserved warning codes:
 - `measure_unavailable`
 - `unit_pass_through`
 - `selector_defaulted`
+- `roads_scope_unavailable`
 - `legacy_flags_ignored`
 
 ## 12. Migration And Cutover
@@ -458,16 +545,26 @@ Back-compat behavior for existing saved configs:
 - Existing runs with `arc_export_on_run_completion=true` no longer auto-generate gpkg/gdb; on first export interaction emit `legacy_flags_ignored` warning in manifest and `jobinfo.result.warnings`.
 
 ## 13. Acceptance Criteria
-- All five formats export successfully on representative runs.
+- All seven formats export successfully on representative runs.
+- Dataset merge/materialization path is DuckDB-first for production export payload assembly (no pandas merge loops on the hot path).
 - Single-layer formats produce zipped files with one file per resolved layer.
 - Multi-layer formats produce one container artifact per request.
-- Scope-aware layers export per requested scope; scope-invariant layers export once as `shared__*`.
+- Base WEPP context exports at most two consolidated spatial layers per requested scope (`sbs_map-subcatchments` and/or `chan_map-channels`).
+- Each selected Omni scenario/contrast exports its own consolidated `subcatchments` and/or `channels` layers per requested scope.
+- Consolidated layer names follow descriptive run/context naming (for example `{runid}-roads-sbs_map-subcatchments`).
 - Partial-scope exports emit warnings and still succeed when at least one scoped layer resolves.
 - Non-scope missing requested layers/tables emit `layer_unavailable` or `table_unavailable` warnings and still succeed when at least one export target resolves.
+- Geometryless formats (`parquet`, `csv`) export tabular outputs with geometry removed while preserving required identity/join columns.
 - Parity+ AgFields support is present: boundaries/sub-fields plus AgFields WEPP metric layers sourced from `wepp/ag_fields/output/interchange/*`.
 - Requesting AgFields WEPP metric layers triggers on-demand AgFields interchange preparation when needed and proceeds without manual pre-run migration.
 - Submit endpoint rejects non-JSON payloads with 415 and validates selector rules with 400/404/409 per contract.
 - CRS selection works with `wgs|utm`, defaults to `wgs`, and exports include CRS metadata in manifest.
+- UI places global year selection directly after CRS selection.
+- Temporal-capable datasets expose per-dataset temporal mode controls.
+- Dataset rows expose expandable column-selection panels with visible units.
+- Users can include/exclude columns per selected dataset; required identity/join columns remain enforced.
+- `yearly` mode exports every available year by default (`year_selection=all`) unless globally filtered.
+- Global year selection applies consistently across all applicable selected datasets.
 - Polling and terminal status behavior align with canonical RQ contract (`finished` success).
 - Warnings are present in both `jobinfo.result.warnings` and `manifest.json`.
 - Cache hits return 202 with a new lightweight job ID, `cache_hit=true`, and reusable artifact delivery.
@@ -475,10 +572,17 @@ Back-compat behavior for existing saved configs:
 - Dependency fingerprint is computed from resolved geometry/sources/dependencies, not task timestamps/preflight status.
 - `output_scopes` is case-normalized, deduplicated, and invalid values fail with 400.
 - `layer_catalog.yaml` is present, machine-readable, and drives layer discovery/validation.
+- UI catalog shows one consolidated `WEPP` family with familiar output names (for example `H.element.parquet`) and does not surface internal labels such as `wepp.temporal.events`.
+- Omni Scenarios and Omni Contrasts render at the bottom of the catalog.
+- Omni selectors support multi-select and bulk selection controls (`Select All`, `Unselect All`).
+- Layer search/filter strip is removed from the control.
+- Discovery hides unavailable families and disables unavailable `roads` scope without requiring manual detection refresh.
 - `layer_catalog.yaml` schema validation enforces locator vocabulary, temporal mode rules, and join-key precedence.
 - Optional measure availability (for example `tsmf`, phosphorus, `QRain`, `QSnow`) follows catalog rules and emits `measure_unavailable` warnings when absent.
 - RedisPrep/TaskEnum timestamps and `rq:features_export` tracking are wired.
 - `units=si|english|project` all work with manifest conversion metadata.
+- Unit-applicable exported columns include unit tokens in column names and are documented in manifest column mapping metadata.
+- Applied per-layer column-selection decisions are recorded in manifest metadata.
 - Unitizer numeric API foundation (`convert_scalar|convert_sequence|convert_table`, `resolve_target_unit`, `preferences_fingerprint`) is complete and available for `features_export` integration.
 - `annual_average`, `yearly`, and `event` modes work; daily is rejected.
 - Mixed temporal requests have deterministic partial-export behavior and warning semantics.
@@ -510,6 +614,8 @@ wepppy/nodb/mods/features_export/
     base.py                   # common writer contract
     geojson.py
     geoparquet.py
+    parquet.py
+    csv.py
     kmz.py
     geopackage.py
     geodatabase.py
@@ -562,7 +668,8 @@ WP-3: Format writers, packaging, and manifest generation (completed 2026-03-26)
 - Contract clarification: single-layer formats (`geojson|geoparquet|kmz`) write deterministic one-file-per-layer outputs and return one deterministic zip bundle; multi-layer formats return one container artifact per request.
 - Contract clarification: geodatabase writer uses the canonical `f_esri` gpkg conversion boundary and fails explicitly when backend capability is unavailable.
 - Contract clarification: geopackage artifacts must be valid SQLite/GPKG containers (not synthesized JSON payload bytes); geodatabase staging gpkg input must use the same container contract.
-- Contract clarification: geopackage writer output must be GDAL/OGR-readable for downstream conversion boundaries; implementation uses the GDAL `GPKG` driver with aspatial attribute layers to preserve interoperability.
+- Contract clarification: geopackage writer output must be GDAL/OGR-readable for downstream conversion boundaries; implementation uses the GDAL `GPKG` driver and supports both spatial feature payloads and aspatial fallback payloads for interoperability.
+- Contract clarification: feature-layer field synthesis must retain null-only properties as nullable columns while preserving numeric field typing for non-null numeric properties.
 - Contract clarification: manifest assembly is pure (`build_export_manifest`) and serialization/write (`serialize_export_manifest`, `write_export_manifest`) is a separate step.
 - Deliverable: deterministic artifact metadata and manifest generation from pre-resolved plan inputs.
 
@@ -595,6 +702,7 @@ WP-5: Runs-page UI control integration
 - Contract clarification: completed features-export result payloads should provide browser-friendly browse-service download links (`/runs/{runid}/{config}/download/{artifact_relpath}`) so Runs-page session flows do not require explicit bearer JWT headers for artifact download.
 - Contract clarification: cache-hit reuse must validate geopackage artifact signature; legacy non-SQLite `.gpkg` cache entries are treated as invalid and regenerated through cache-miss execution.
 - Contract clarification: rq-engine enqueue selection for cache-hit worker must use validated cache eligibility (artifact format/path integrity), not cache-index presence alone, so invalid legacy entries route to standard execution.
+- Contract clarification: submit-time service payload preparation must materialize catalog/dependency-resolved source data into per-layer feature collections (geometry + joined attributes) for default exports; payload-metadata-only `.gpkg` rows are non-compliant for the Runs-page experience.
 - Deliverable: fully wired Runs-page control with Jest coverage and updated smoke/route-template invariants.
 
 WP-6: Cutover and legacy retirement
@@ -602,13 +710,26 @@ WP-6: Cutover and legacy retirement
 - Finalize migration warnings for ignored legacy flags.
 - Deliverable: feature flag/cutover complete with regression suite passing.
 
+WP-7: Reconciliation pass for WEPP naming, temporal controls, and consolidated layer outputs (planned 2026-03-27)
+- Status: active via `docs/mini-work-packages/20260327_features_export_reconciliation_execplan.md`.
+- Scope: reconcile taxonomy/UI/selector behavior with operator expectations, replace merge hot path with DuckDB-oriented consolidation for WEPP/Omni contexts, and land deterministic naming/temporal contracts.
+- Contract clarification: WEPP outputs are presented as one family with familiar output names; internal labels (for example `wepp.temporal.events`) are hidden.
+- Contract clarification: yearly mode must export all years by default and year-selection controls are global while temporal mode selection is dataset-scoped.
+- Contract clarification: Omni scenario/contrast selection is multi-select, inherits base WEPP output selection, and supports `Select All`/`Unselect All`.
+- Contract clarification: base and Omni WEPP outputs are consolidated to up to two geometry-carrier layers per scope with descriptive run/context layer naming.
+- Contract clarification: control layout is hierarchy-first, removes search/filter strip, hides unavailable families, and receives websocket-driven discovery updates.
+- Contract clarification: geometryless format tokens `parquet` and `csv` are added as first-class single-layer tabular exports that drop geometry while keeping required identity/join columns.
+- Contract clarification: a post-WP-7 defaults profile is planned to replace `prep_details` with geometryless exports plus curated column-selection presets.
+- Deliverable: reconciled backend/UI contract with regression and performance validation coverage.
+
 ### 14.2 Dependency Order And Parallelism
 - WP-1 depends on completed WP-0 Unitizer APIs.
 - WP-2 depends on WP-1 outputs.
 - WP-3 depends on WP-1; can proceed in parallel with late WP-2 testing once plan shape is stable.
 - WP-4 depends on WP-2 and WP-3.
 - WP-5 can begin after WP-1 contracts stabilize, then finalize against WP-4 endpoints.
-- WP-6 is last.
+- WP-7 depends on WP-4/WP-5 behavior and may revise portions of both.
+- WP-6 final cutover validation follows WP-7.
 
 ### 14.3 Keep-It-Organized Rules
 - Keep planner and validation logic pure and side-effect free.
@@ -616,3 +737,4 @@ WP-6: Cutover and legacy retirement
 - Keep route/task files as adapters only; no business logic.
 - Keep warning-code definitions centralized in `contracts.py`.
 - Keep catalog/path resolution logic centralized in `catalog_loader.py`; no duplicated path construction in writers.
+- Keep data-shaping joins/projections in DuckDB SQL paths; avoid pandas merge pipelines in export hot paths.

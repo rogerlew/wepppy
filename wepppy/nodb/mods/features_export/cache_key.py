@@ -14,7 +14,7 @@ from .contracts import DEFAULT_SWAT_RUN_ID, ResolvedExportPlan
 CACHE_INDEX_RELPATH = "export/features/cache/index.json"
 CACHE_INDEX_SCHEMA_VERSION = 1
 DEFAULT_CONVERSION_VERSION_MARKER = "unitizer-v1"
-DEFAULT_EXPORT_VERSION_MARKER = "features-export-wp2"
+DEFAULT_EXPORT_VERSION_MARKER = "features-export-wp10"
 
 
 @dataclass(frozen=True)

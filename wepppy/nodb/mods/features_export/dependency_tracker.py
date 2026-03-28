@@ -302,9 +302,14 @@ def _build_base_template_context(
             if isinstance(resolved_scope_root, str) and resolved_scope_root:
                 context["scope_root"] = resolved_scope_root
 
-    if plan.request.scenario is not None:
+    if layer_plan.context == "scenario" and layer_plan.selector_id is not None:
+        context["scenario_id"] = layer_plan.selector_id
+    elif plan.request.scenario is not None:
         context["scenario_id"] = plan.request.scenario
-    if plan.request.contrast_id is not None:
+
+    if layer_plan.context == "contrast" and layer_plan.selector_id is not None:
+        context["contrast_id"] = layer_plan.selector_id
+    elif plan.request.contrast_id is not None:
         context["contrast_id"] = plan.request.contrast_id
     if plan.request.swat_run_id and plan.request.swat_run_id != DEFAULT_SWAT_RUN_ID:
         context["swat_run_id"] = plan.request.swat_run_id

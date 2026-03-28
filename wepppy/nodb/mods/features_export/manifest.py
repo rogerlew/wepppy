@@ -11,7 +11,7 @@ from .dependency_tracker import DependencySnapshot
 from .exporters.base import ExportArtifactMetadata
 
 MANIFEST_SCHEMA_VERSION = 1
-MANIFEST_GENERATOR_VERSION = "features-export-wp3"
+MANIFEST_GENERATOR_VERSION = "features-export-wp7"
 
 
 def build_export_manifest(
@@ -31,6 +31,8 @@ def build_export_manifest(
     conversion_summary: cabc.Mapping[str, object] | None = None,
     dependency_preparation: cabc.Sequence[cabc.Mapping[str, object]] | None = None,
     additional_warnings: cabc.Sequence[ExportWarning | cabc.Mapping[str, object]] = (),
+    column_metadata_by_output_layer_id: cabc.Mapping[str, cabc.Mapping[str, object]] | None = None,
+    request_column_selection_by_layer_id: cabc.Mapping[str, cabc.Mapping[str, object]] | None = None,
 ) -> dict[str, object]:
     """Build pure, deterministic artifact manifest payload for WP-3."""
 
@@ -40,24 +42,32 @@ def build_export_manifest(
         raise ValueError("generation_timestamp_utc must be a non-empty string.")
 
     dependency_mapping = _normalize_dependency_snapshot(dependency_snapshot)
-    layer_outputs_by_id = {entry.output_layer_id: entry for entry in artifact.layer_outputs}
+    plan_layers_by_output = {entry.output_layer_id: entry for entry in plan.layers}
+    output_column_metadata = _normalize_column_metadata(column_metadata_by_output_layer_id)
 
     layer_scope_metadata: list[dict[str, object]] = []
-    for layer in sorted(plan.layers, key=lambda item: item.output_layer_id):
-        output = layer_outputs_by_id.get(layer.output_layer_id)
-        layer_scope_metadata.append(
-            {
-                "layer_id": layer.layer_id,
-                "output_layer_id": layer.output_layer_id,
-                "family": layer.family,
-                "scope_class": layer.scope_class,
-                "scope": layer.scope,
-                "temporal_mode": layer.temporal_mode,
-                "artifact_relpath": output.relpath if output is not None else artifact.artifact_relpath,
-                "row_count": output.row_count if output is not None else None,
-                "feature_count": output.feature_count if output is not None else None,
-            }
-        )
+    for output in sorted(artifact.layer_outputs, key=lambda item: item.output_layer_id):
+        plan_layer = plan_layers_by_output.get(output.output_layer_id)
+        entry = {
+            "layer_id": output.layer_id,
+            "output_layer_id": output.output_layer_id,
+            "family": plan_layer.family if plan_layer is not None else None,
+            "scope_class": output.scope_class,
+            "scope": output.scope,
+            "context": plan_layer.context if plan_layer is not None else None,
+            "selector_id": plan_layer.selector_id if plan_layer is not None else None,
+            "carrier_layer": plan_layer.carrier_layer if plan_layer is not None else None,
+            "temporal_mode": plan_layer.temporal_mode if plan_layer is not None else None,
+            "artifact_relpath": output.relpath,
+            "row_count": output.row_count,
+            "feature_count": output.feature_count,
+        }
+        column_meta = output_column_metadata.get(output.output_layer_id, {})
+        if column_meta:
+            entry["source_layer_ids"] = list(column_meta.get("source_layer_ids", []))
+            entry["selected_columns"] = list(column_meta.get("selected_columns", []))
+            entry["unit_mapping"] = dict(column_meta.get("unit_mapping", {}))
+        layer_scope_metadata.append(entry)
 
     warnings_payload = _normalize_warnings(
         [
@@ -88,6 +98,9 @@ def build_export_manifest(
             "resolved": plan.request.to_mapping(),
             "layers_requested": list(plan.request.layers),
             "output_scopes_requested": list(plan.request.output_scopes),
+            "column_selection_by_layer_id": _normalize_generic_mapping(
+                request_column_selection_by_layer_id
+            ),
         },
         "crs": {
             "requested_crs": requested_crs or plan.request.crs,
@@ -98,10 +111,37 @@ def build_export_manifest(
         "layers": layer_scope_metadata,
         "swat_table_resolution": dict(swat_table_resolution or {}),
         "temporal": dict(temporal_decisions or {}),
+        "columns": {
+            "output_layer_metadata": output_column_metadata,
+        },
         "conversion_summary": dict(conversion_summary or {}),
         "dependency_preparation": [dict(item) for item in (dependency_preparation or ())],
         "warnings": warnings_payload,
     }
+
+
+def _normalize_column_metadata(
+    value: cabc.Mapping[str, cabc.Mapping[str, object]] | None,
+) -> dict[str, dict[str, object]]:
+    if not isinstance(value, cabc.Mapping):
+        return {}
+    normalized: dict[str, dict[str, object]] = {}
+    for output_layer_id, entry in value.items():
+        if not isinstance(output_layer_id, str) or not output_layer_id.strip():
+            continue
+        if not isinstance(entry, cabc.Mapping):
+            continue
+        normalized[output_layer_id.strip()] = _normalize_generic_mapping(entry)
+    return normalized
+
+
+def _normalize_generic_mapping(value: cabc.Mapping[str, object] | None) -> dict[str, object]:
+    if not isinstance(value, cabc.Mapping):
+        return {}
+    payload = json.loads(json.dumps(dict(value), sort_keys=True, separators=(",", ":")))
+    if not isinstance(payload, dict):
+        return {}
+    return payload
 
 
 def serialize_export_manifest(manifest: cabc.Mapping[str, object]) -> str:

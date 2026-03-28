@@ -51,7 +51,7 @@ Audience: template, controller, and test implementers for `wepppy/nodb/mods/feat
 | > AgFields Spatial (0 / 2)                                    +--------------------------------------------------+
 | > AgFields Metrics (0 / 2)                                    | H. Results / Warnings                            |
 |                                                               | State badge: idle | running | success | partial |
-| Layer row details toggle shows measures, selectors, and notes | Download artifact                               |
+| Layer row details toggle shows columns (with units + include toggles), measures, selectors, and notes | Download artifact                               |
 | such as "needs Omni scenario", "AgFields auto-prep", or       | Cache-hit/source job note                       |
 | "geojson/kmz skips non-spatial SWAT tables".                  | Warning list                                    |
 +---------------------------------------------------------------+--------------------------------------------------+
@@ -124,6 +124,7 @@ Audience: template, controller, and test implementers for `wepppy/nodb/mods/feat
 | Temporal | Choose export temporal mode and subordinate selectors. | Hidden. | Show when at least one selected layer supports one or more temporal modes. Keep expanded while invalid. |
 | Temporal Year Options | Choose `all`, `exclude_first`, `exclude_first_two`, `exclude_first_five`, or `custom`. | Hidden inside Temporal. | Show only when Temporal mode is `annual_average` or `yearly` and at least one selected layer supports year selection. |
 | Temporal Event Selector | Choose event-by-date or event-by-return-period. | Hidden inside Temporal. | Show only when Temporal mode is `event`. |
+| Dataset Columns | Expand a selected dataset row and choose columns to include/exclude using unit-aware checkboxes. | Collapsed per row. | Show in row details when a dataset is selected; keep collapsed by default. |
 | Omni Selector | Choose scenario or contrast instance. | Hidden. | Show when any selected layer belongs to `omni_scenarios` or `omni_contrasts`. The card title changes to `Omni Scenario` or `Omni Contrast`; both modes cannot be shown at once. |
 | SWAT Options | Choose SWAT run and optional include/exclude table filter. | Hidden. | Show when `swat.interchange.table` is selected. |
 | Results / Warnings | Show final artifact link, cache-hit note, warning list, and manifest-related details. | Visible but empty. | Populate after successful `jobinfo.result`; badge becomes `partial` when warnings are non-empty. |
@@ -159,7 +160,22 @@ Each layer row should expose the following scan-friendly elements without requir
 - Temporal badge: `none`, `annual/yearly`, `event`, or `annual/yearly/event`
 - Selector badge when required: `Omni scenario`, `Omni contrast`, `SWAT`, `AgFields auto-prep`
 
-The row details disclosure may show measure notes, optional-measure warning behavior, and format caveats. This mirrors GL dashboard layer affordances: the row is scannable first, detailed second.
+Row details disclosure requirements:
+
+- Each dataset row must provide an expandable `Columns` block.
+- The columns block must list columns with:
+  - Include checkbox
+  - Human label + canonical `column_id`
+  - Source-backed description text when available
+  - Unit chip/text (`mm`, `kg/m2`, etc.) or `non-unitized`
+  - Required-lock indicator for mandatory identity/join columns
+- If catalog metadata omits explicit column definitions for a dataset, the UI uses runtime source-schema discovery to populate columns and units.
+- Metadata precedence for rendered column rows is: parquet field metadata (`label`, `description`, `units`) -> interchange `README.md` docs for the resolved source file -> deterministic fallback label/unit inference.
+- Required identity/join locks should be canonicalized by token so alias-equivalent keys (for example `topaz_id` and `TopazID`) do not appear as duplicate mandatory rows.
+- Include/exclude interactions should be selectable without opening a separate modal.
+- The row details disclosure may also show measure notes, optional-measure warning behavior, and format caveats.
+
+This preserves scan-first behavior while allowing precise per-dataset field control.
 
 ## 4. Control-State Matrix
 
@@ -266,7 +282,11 @@ Use `ui.control_shell(...)` with:
 | `[data-features-export-filter]` | Quick filter buttons. | `all`, `selected`, `temporal`, `scope-aware`, `needs-selector`. |
 | `[data-features-export-family]` | Per-family `<details>` root. | Includes count badge and empty-state line. |
 | `[data-features-export-layer]` | Repeated layer row root. | Carries `data-layer-id`, `data-family`, `data-scope-class`, and serialized capability tokens. |
+| `[data-features-export-layer-columns]` | Expandable columns container for one dataset row. | Rendered from catalog column metadata + current selection state. |
+| `[data-features-export-column]` | One selectable column row. | Carries `data-layer-id`, `data-column-id`, and optional required flag. |
 | `[data-features-export-action="toggle-layer"]` | Layer checkbox target. | Delegated change handler only. |
+| `[data-features-export-action="toggle-layer-columns"]` | Expand/collapse one dataset's columns section. | Delegated click handler only. |
+| `[data-features-export-action="toggle-column"]` | Include/exclude one column for one dataset. | Delegated change handler only. |
 | `[data-features-export-action="load-defaults"]` | Apply gpkg-adjacent defaults profile. | Resets key selectors/selections to profile values; never auto-submits. |
 | `[data-features-export-action="select-visible"]` | Bulk-select filtered rows. | Secondary action. |
 | `[data-features-export-action="clear-selection"]` | Clear all selected layers. | Secondary action and reset helper. |
@@ -298,6 +318,7 @@ Use `ui.control_shell(...)` with:
 2. `bootstrap(context)` re-queries `#features_export_form`, status/stacktrace/job-hint nodes, config node, and JSON script nodes.
 3. `bootstrap(context)` attaches delegated listeners once, or re-attaches if the control was injected later by the Mods menu.
 4. `bootstrap(context)` parses catalog/bootstrap JSON, renders the family list, restores family open state, and computes progressive-disclosure visibility.
+   - During render, each selected layer gets an expandable columns list sourced from catalog `columns` metadata.
 5. `bootstrap(context)` resolves the last job id in this order:
    - `WCControllerBootstrap.resolveJobId(ctx, "run_features_export")`
    - `controllerContext.job_id`
@@ -307,6 +328,12 @@ Use `ui.control_shell(...)` with:
 8. On submit, the controller clears old result/warning/stacktrace content, preserves any existing hint until the new `job_id` arrives, posts JSON only, then stores the returned `job_id` via `set_rq_job_id`.
 9. On terminal success, the controller fetches `jobinfo`, renders artifact/warning results, and re-enables the primary action.
 10. On failure, `controlBase` surfaces jobinfo stacktrace enrichment automatically; the controller adds domain error state and leaves the stacktrace panel open.
+
+Column selection payload contract:
+
+- Controller serializes per-layer column decisions into request `column_selection`.
+- Default state honors catalog `default_selected` values.
+- Required columns are always sent as selected and cannot be deselected client-side.
 
 ### 6.2 Event Surface
 
@@ -380,7 +407,7 @@ FeaturesExport.getInstance().events = WCEvents.useEventMap([
 
 | Concern | Payload Keys | Assembly Rules | Blocking UX Rule | Non-Blocking Warning Rule |
 | --- | --- | --- | --- | --- |
-| Format | `format` | Emit one canonical token from `geojson`, `geoparquet`, `kmz`, `geopackage`, `geodatabase`. | Required. Disable submit until selected. | Show packaging hint only; multi-layer single-file formats are valid and should not warn. |
+| Format | `format` | Emit one canonical token from `geojson`, `geoparquet`, `parquet`, `csv`, `kmz`, `geopackage`, `geodatabase`. | Required. Disable submit until selected. | Show packaging hint only; `parquet` and `csv` are geometryless and export attributes only. |
 | Layers | `layers` | Emit selected `layer_id` array in UI selection order. Server may canonicalize later. | At least one layer required. On failure, open the Layer Catalog family containing the first invalid state and focus the first checkbox. | None. |
 | Units | `units` | Emit `project`, `si`, or `english`. Default UI selection should be `project`. | Required. | None. |
 | CRS | `crs` | Emit `wgs` or `utm`. Default UI selection should be `wgs`. | If config says UTM is unresolved, disable the `utm` choice and explain why. | None. |
@@ -417,6 +444,7 @@ Rules:
 - The action updates controls and selections only; it never auto-submits.
 - If some profile layers are absent in the active catalog, apply available layers and emit one non-blocking warning in Selected Summary.
 - If the catalog fails to load, disable the button and show an inline reason near the action.
+- Future follow-on profile work (post-WP-7) may add a geometryless tabular preset intended to replace `prep_details`; this does not change the `gpkg_adjacent` behavior above.
 
 ### 7.3 Practical Validation Rules
 

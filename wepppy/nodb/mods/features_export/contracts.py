@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import collections.abc as cabc
 
 SUPPORTED_FORMATS: tuple[str, ...] = (
     "geojson",
     "geoparquet",
+    "parquet",
+    "csv",
     "kmz",
     "geopackage",
     "geodatabase",
@@ -37,6 +40,7 @@ WARNING_TABLE_UNAVAILABLE = "table_unavailable"
 WARNING_MEASURE_UNAVAILABLE = "measure_unavailable"
 WARNING_UNIT_PASS_THROUGH = "unit_pass_through"
 WARNING_SELECTOR_DEFAULTED = "selector_defaulted"
+WARNING_ROADS_SCOPE_UNAVAILABLE = "roads_scope_unavailable"
 WARNING_LEGACY_FLAGS_IGNORED = "legacy_flags_ignored"
 
 WARNING_CODES: tuple[str, ...] = (
@@ -47,6 +51,7 @@ WARNING_CODES: tuple[str, ...] = (
     WARNING_MEASURE_UNAVAILABLE,
     WARNING_UNIT_PASS_THROUGH,
     WARNING_SELECTOR_DEFAULTED,
+    WARNING_ROADS_SCOPE_UNAVAILABLE,
     WARNING_LEGACY_FLAGS_IGNORED,
 )
 
@@ -114,13 +119,39 @@ class TemporalEventRequest:
 
 
 @dataclass(frozen=True)
+class TemporalLayerMode:
+    """Per-layer temporal mode override."""
+
+    layer_id: str
+    mode: str
+
+
+@dataclass(frozen=True)
 class TemporalRequest:
     """Requested temporal selection payload."""
 
     mode: str | None = None
+    layer_modes: tuple[TemporalLayerMode, ...] = ()
     year_selection: str | None = None
     exclude_yr_indxs: tuple[int, ...] = ()
     event: TemporalEventRequest | None = None
+
+
+@dataclass(frozen=True)
+class LayerColumnSelection:
+    """Per-layer include/exclude column selector."""
+
+    layer_id: str
+    include: tuple[str, ...] | None = None
+    exclude: tuple[str, ...] | None = None
+
+    def to_mapping(self) -> dict[str, object]:
+        payload: dict[str, object] = {}
+        if self.include is not None:
+            payload["include"] = list(self.include)
+        if self.exclude is not None:
+            payload["exclude"] = list(self.exclude)
+        return payload
 
 
 @dataclass(frozen=True)
@@ -132,11 +163,14 @@ class ExportRequest:
     layers: tuple[str, ...]
     crs: str | None = None
     output_scopes: tuple[str, ...] | None = None
+    scenarios: tuple[str, ...] | None = None
+    contrast_ids: tuple[str, ...] | None = None
     scenario: str | None = None
     contrast_id: str | None = None
     swat_run_id: str | None = None
     swat_tables: SwatTablesRequest | None = None
     temporal: TemporalRequest | None = None
+    column_selection: tuple[LayerColumnSelection, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -176,13 +210,26 @@ class NormalizedTemporalEvent:
 class NormalizedTemporalRequest:
     """Canonical temporal selector bundle."""
 
-    mode: str
+    mode: str | None = None
+    layer_modes: tuple[TemporalLayerMode, ...] = ()
     year_selection: str | None = None
     exclude_yr_indxs: tuple[int, ...] = ()
     event: NormalizedTemporalEvent | None = None
 
+    def mode_for_layer(self, layer_id: str) -> str | None:
+        for selection in self.layer_modes:
+            if selection.layer_id == layer_id:
+                return selection.mode
+        return self.mode
+
     def to_mapping(self) -> dict[str, object]:
-        payload: dict[str, object] = {"mode": self.mode}
+        payload: dict[str, object] = {}
+        if self.mode is not None:
+            payload["mode"] = self.mode
+        if self.layer_modes:
+            payload["layer_modes"] = {
+                selection.layer_id: selection.mode for selection in self.layer_modes
+            }
         if self.year_selection is not None:
             payload["year_selection"] = self.year_selection
         if self.exclude_yr_indxs:
@@ -201,11 +248,30 @@ class NormalizedExportRequest:
     layers: tuple[str, ...]
     crs: str = DEFAULT_CRS
     output_scopes: tuple[str, ...] = DEFAULT_OUTPUT_SCOPES
-    scenario: str | None = None
-    contrast_id: str | None = None
+    scenarios: tuple[str, ...] = ()
+    contrast_ids: tuple[str, ...] = ()
     swat_run_id: str = DEFAULT_SWAT_RUN_ID
     swat_tables: NormalizedSwatTables | None = None
     temporal: NormalizedTemporalRequest | None = None
+    column_selection: tuple[LayerColumnSelection, ...] = ()
+
+    @property
+    def scenario(self) -> str | None:
+        """Backward-compatible alias for single scenario selectors."""
+
+        return self.scenarios[0] if self.scenarios else None
+
+    @property
+    def contrast_id(self) -> str | None:
+        """Backward-compatible alias for single contrast selectors."""
+
+        return self.contrast_ids[0] if self.contrast_ids else None
+
+    def column_selection_for(self, layer_id: str) -> LayerColumnSelection | None:
+        for selection in self.column_selection:
+            if selection.layer_id == layer_id:
+                return selection
+        return None
 
     def to_mapping(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -216,14 +282,21 @@ class NormalizedExportRequest:
             "output_scopes": list(self.output_scopes),
             "swat_run_id": self.swat_run_id,
         }
-        if self.scenario is not None:
-            payload["scenario"] = self.scenario
-        if self.contrast_id is not None:
-            payload["contrast_id"] = self.contrast_id
+        if self.scenarios:
+            payload["scenarios"] = list(self.scenarios)
+        if self.contrast_ids:
+            payload["contrast_ids"] = list(self.contrast_ids)
         if self.swat_tables is not None:
             payload["swat_tables"] = self.swat_tables.to_mapping()
         if self.temporal is not None:
-            payload["temporal"] = self.temporal.to_mapping()
+            temporal_mapping = self.temporal.to_mapping()
+            if temporal_mapping:
+                payload["temporal"] = temporal_mapping
+        if self.column_selection:
+            payload["column_selection"] = {
+                selection.layer_id: selection.to_mapping()
+                for selection in self.column_selection
+            }
         return payload
 
 
@@ -247,7 +320,7 @@ class ExportWarning:
 
 @dataclass(frozen=True)
 class ResolvedLayerPlan:
-    """Resolved export target for one layer and one scope context."""
+    """Resolved export target for one layer and one scope/context."""
 
     layer_id: str
     family: str
@@ -255,6 +328,9 @@ class ResolvedLayerPlan:
     scope: str
     output_layer_id: str
     temporal_mode: str | None = None
+    context: str = "base"
+    selector_id: str | None = None
+    carrier_layer: str | None = None
 
     def to_mapping(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -263,9 +339,14 @@ class ResolvedLayerPlan:
             "scope_class": self.scope_class,
             "scope": self.scope,
             "output_layer_id": self.output_layer_id,
+            "context": self.context,
         }
         if self.temporal_mode is not None:
             payload["temporal_mode"] = self.temporal_mode
+        if self.selector_id is not None:
+            payload["selector_id"] = self.selector_id
+        if self.carrier_layer is not None:
+            payload["carrier_layer"] = self.carrier_layer
         return payload
 
 
@@ -299,6 +380,7 @@ __all__ = [
     "FeaturesExportValidationError",
     "ExportRequest",
     "ExportWarning",
+    "LayerColumnSelection",
     "NormalizedExportRequest",
     "NormalizedSwatTables",
     "NormalizedTemporalEvent",
@@ -314,12 +396,14 @@ __all__ = [
     "SUPPORTED_YEAR_SELECTIONS",
     "SwatTablesRequest",
     "TemporalEventRequest",
+    "TemporalLayerMode",
     "TemporalRequest",
     "ValidationIssue",
     "WARNING_CODES",
     "WARNING_LAYER_UNAVAILABLE",
     "WARNING_LEGACY_FLAGS_IGNORED",
     "WARNING_MEASURE_UNAVAILABLE",
+    "WARNING_ROADS_SCOPE_UNAVAILABLE",
     "WARNING_SCOPE_MISSING_LAYER",
     "WARNING_SCOPE_NOT_APPLICABLE",
     "WARNING_SELECTOR_DEFAULTED",

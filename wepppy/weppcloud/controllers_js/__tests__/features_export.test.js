@@ -13,13 +13,13 @@ function buildFixtureHtml() {
         metadata: { catalog_version: "2026.03.26", schema_version: "1" },
         family_order: [
             "watershed",
-            "wepp_summary",
+            "wepp",
             "omni_scenarios",
             "swat_interchange"
         ],
         family_labels: {
             watershed: "Watershed",
-            wepp_summary: "WEPP Summary",
+            wepp: "WEPP",
             omni_scenarios: "Omni Scenarios",
             swat_interchange: "SWAT Interchange"
         },
@@ -32,27 +32,40 @@ function buildFixtureHtml() {
                 scope_class: "scope_invariant",
                 geometry_type: "polygon",
                 temporal_modes: [],
-                selector_requirements: []
+                selector_requirements: [],
+                columns: [
+                    { column_id: "TopazID", label: "Topaz ID", description: "Primary watershed identifier", display_unit: "non-unitized", required: true, default_selected: true },
+                    { column_id: "Name", label: "Name", description: "Subcatchment label", display_unit: "non-unitized", required: false, default_selected: true }
+                ],
+                required_columns: ["TopazID"]
             },
             {
                 layer_id: "wepp.summary.hillslopes",
                 label: "WEPP Hillslopes",
-                family: "wepp_summary",
-                family_label: "WEPP Summary",
+                family: "wepp",
+                family_label: "WEPP",
                 scope_class: "scope_aware",
                 geometry_type: "polygon",
                 temporal_modes: ["annual_average", "yearly", "event"],
-                selector_requirements: []
+                selector_requirements: [],
+                columns: [
+                    { column_id: "topaz_id", label: "Topaz ID", description: "Primary hillslope identifier", display_unit: "non-unitized", required: true, default_selected: true },
+                    { column_id: "runoff_mm", label: "Runoff", description: "Annual runoff depth", display_unit: "mm", required: false, default_selected: true },
+                    { column_id: "sediment_yield_kg_ha", label: "Sediment Yield", description: "Annual sediment delivery", display_unit: "kg/ha", required: false, default_selected: true }
+                ],
+                required_columns: ["topaz_id"]
             },
             {
-                layer_id: "omni.scenarios.boundaries",
+                layer_id: "omni.scenarios.hillslopes",
                 label: "Omni Scenario Boundaries",
                 family: "omni_scenarios",
                 family_label: "Omni Scenarios",
                 scope_class: "scope_invariant",
                 geometry_type: "polygon",
                 temporal_modes: [],
-                selector_requirements: ["omni_scenario"]
+                selector_requirements: ["omni_scenario"],
+                columns: [{ column_id: "topaz_id", label: "Topaz ID", display_unit: "non-unitized", required: true, default_selected: true }],
+                required_columns: ["topaz_id"]
             },
             {
                 layer_id: "swat.interchange.table",
@@ -62,7 +75,9 @@ function buildFixtureHtml() {
                 scope_class: "scope_invariant",
                 geometry_type: "table",
                 temporal_modes: [],
-                selector_requirements: ["swat"]
+                selector_requirements: ["swat"],
+                columns: [{ column_id: "subbasin", label: "Subbasin", display_unit: "non-unitized", required: true, default_selected: true }],
+                required_columns: ["subbasin"]
             }
         ],
         load_error: null
@@ -94,6 +109,16 @@ function buildFixtureHtml() {
             runs: [{ id: "run_001", label: "run_001" }],
             tables_by_run: { run_001: ["hru", "rch"] },
             all_tables: ["hru", "rch"]
+        },
+        discovery: {
+            roads_scope_available: true,
+            available_layer_ids: [
+                "watershed.subcatchments",
+                "wepp.summary.hillslopes",
+                "omni.scenarios.hillslopes",
+                "swat.interchange.table"
+            ],
+            available_families: ["watershed", "wepp", "omni_scenarios", "swat_interchange"]
         }
     };
 
@@ -139,27 +164,16 @@ function buildFixtureHtml() {
             </section>
 
             <section data-features-export-group="catalog">
-                <input type="text" data-features-export-field="layer-search">
-                <button type="button" data-features-export-filter="all">All</button>
-                <button type="button" data-features-export-filter="selected">Selected</button>
-                <button type="button" data-features-export-filter="temporal">Temporal</button>
-                <button type="button" data-features-export-filter="scope-aware">Scope</button>
-                <button type="button" data-features-export-filter="needs-selector">Selector</button>
-                <button type="button" data-features-export-action="clear-filters">Clear filters</button>
-                <button type="button" data-features-export-action="select-visible">Select visible</button>
                 <div id="features_export_catalog_list"></div>
             </section>
 
             <section data-features-export-group="scopes" hidden>
                 <label><input type="checkbox" data-features-export-field="output-scope" value="baseline" checked>baseline</label>
                 <label><input type="checkbox" data-features-export-field="output-scope" value="roads">roads</label>
+                <p data-features-export-region="roads-scope-note"></p>
             </section>
 
             <section data-features-export-group="temporal" hidden>
-                <label><input type="radio" data-features-export-field="temporal-mode" name="fx_temporal_mode" value="annual_average">annual</label>
-                <label><input type="radio" data-features-export-field="temporal-mode" name="fx_temporal_mode" value="yearly">yearly</label>
-                <label><input type="radio" data-features-export-field="temporal-mode" name="fx_temporal_mode" value="event">event</label>
-
                 <div data-features-export-temporal-year-options hidden>
                     <select data-features-export-field="temporal-year-selection">
                         <option value="all" selected>all</option>
@@ -185,16 +199,14 @@ function buildFixtureHtml() {
             <section data-features-export-group="omni" hidden>
                 <h3 data-features-export-region="omni-title">Omni Selector</h3>
                 <div data-features-export-omni-scenario-wrap hidden>
-                    <select data-features-export-field="scenario">
-                        <option value="">Select scenario</option>
-                        <option value="uniform_low">Uniform Low</option>
-                    </select>
+                    <button type="button" data-features-export-action="omni-select-all" data-omni-target="scenarios">Select All</button>
+                    <button type="button" data-features-export-action="omni-unselect-all" data-omni-target="scenarios">Unselect All</button>
+                    <label><input type="checkbox" data-features-export-field="scenario" value="uniform_low">Uniform Low</label>
                 </div>
                 <div data-features-export-omni-contrast-wrap hidden>
-                    <select data-features-export-field="contrast-id">
-                        <option value="">Select contrast</option>
-                        <option value="mulch_vs_control">Mulch vs Control</option>
-                    </select>
+                    <button type="button" data-features-export-action="omni-select-all" data-omni-target="contrasts">Select All</button>
+                    <button type="button" data-features-export-action="omni-unselect-all" data-omni-target="contrasts">Unselect All</button>
+                    <label><input type="checkbox" data-features-export-field="contrast-id" value="mulch_vs_control">Mulch vs Control</label>
                 </div>
             </section>
 
@@ -353,23 +365,35 @@ describe("FeaturesExport controller", () => {
 
         expect(scopesGroup.hidden).toBe(false);
         expect(temporalGroup.hidden).toBe(false);
+        expect(submitButton.disabled).toBe(false);
+
+        var weppTemporalMode = document.querySelector('[data-features-export-field="layer-temporal-mode"][data-layer-id="wepp.summary.hillslopes"]');
+        weppTemporalMode.value = "event";
+        weppTemporalMode.dispatchEvent(new Event("change", { bubbles: true }));
         expect(submitButton.disabled).toBe(true);
 
-        document.querySelector('[data-features-export-field="temporal-mode"][value="annual_average"]').checked = true;
+        var eventSelectorDate = document.querySelector('[data-features-export-field="temporal-event-selector"][value="date"]');
+        eventSelectorDate.checked = true;
+        eventSelectorDate.dispatchEvent(new Event("change", { bubbles: true }));
+        document.querySelector('[data-features-export-field="temporal-event-dates"]').value = "2025-01-01";
         document
-            .querySelector('[data-features-export-field="temporal-mode"][value="annual_average"]')
-            .dispatchEvent(new Event("change", { bubbles: true }));
-
+            .querySelector('[data-features-export-field="temporal-event-dates"]')
+            .dispatchEvent(new Event("input", { bubbles: true }));
         expect(submitButton.disabled).toBe(false);
 
         document
             .querySelector('[data-features-export-action="clear-selection"]')
             .dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
-        var omniLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="omni.scenarios.boundaries"]');
+        var omniLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="omni.scenarios.hillslopes"]');
         omniLayer.checked = true;
         omniLayer.dispatchEvent(new Event("change", { bubbles: true }));
         expect(document.querySelector('[data-features-export-group="omni"]').hidden).toBe(false);
+        expect(submitButton.disabled).toBe(true);
+        var scenarioCheckbox = document.querySelector('[data-features-export-field="scenario"][value="uniform_low"]');
+        scenarioCheckbox.checked = true;
+        scenarioCheckbox.dispatchEvent(new Event("change", { bubbles: true }));
+        expect(submitButton.disabled).toBe(false);
 
         document
             .querySelector('[data-features-export-action="clear-selection"]')
@@ -381,6 +405,157 @@ describe("FeaturesExport controller", () => {
         expect(document.querySelector('[data-features-export-group="swat"]').hidden).toBe(false);
 
         await flushPromises();
+    });
+
+    test("payload includes per-layer temporal modes and column selection", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var weppLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.summary.hillslopes"]');
+        weppLayer.checked = true;
+        weppLayer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var temporalSelect = document.querySelector('[data-features-export-field="layer-temporal-mode"][data-layer-id="wepp.summary.hillslopes"]');
+        temporalSelect.value = "yearly";
+        temporalSelect.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var sedimentColumn = document.querySelector(
+            '[data-features-export-action="toggle-column"][data-layer-id="wepp.summary.hillslopes"][data-column-id="sediment_yield_kg_ha"]'
+        );
+        sedimentColumn.checked = false;
+        sedimentColumn.dispatchEvent(new Event("change", { bubbles: true }));
+
+        document
+            .getElementById("features_export_form")
+            .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test-run/test-cfg/export/features",
+            expect.objectContaining({
+                layers: ["wepp.summary.hillslopes"],
+                temporal: expect.objectContaining({
+                    layer_modes: {
+                        "wepp.summary.hillslopes": "yearly"
+                    }
+                }),
+                column_selection: expect.objectContaining({
+                    "wepp.summary.hillslopes": expect.objectContaining({
+                        include: ["topaz_id", "runoff_mm"]
+                    })
+                })
+            }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+    });
+
+    test("layer details markup keeps hierarchy semantics and renders schema descriptions", () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var weppLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.summary.hillslopes"]');
+        weppLayer.checked = true;
+        weppLayer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        expect(document.querySelector('summary [data-features-export-action="toggle-layer"]')).toBeNull();
+        expect(document.querySelectorAll(".features-export-tree__family").length).toBeGreaterThan(0);
+        expect(document.querySelectorAll(".features-export-tree__dataset").length).toBeGreaterThan(0);
+        expect(document.querySelectorAll(".features-export-tree__column").length).toBeGreaterThan(0);
+
+        var columnInputs = Array.from(
+            document.querySelectorAll(
+                '[data-features-export-action="toggle-column"][data-layer-id="wepp.summary.hillslopes"]'
+            )
+        );
+        var columnIds = columnInputs.map((node) => node.getAttribute("data-column-id"));
+        expect(columnIds).toEqual(Array.from(new Set(columnIds)));
+
+        var firstColumnLabel = columnInputs[0].closest("label");
+        expect(firstColumnLabel).not.toBeNull();
+        expect(firstColumnLabel.className).toContain("wc-choice");
+        expect(firstColumnLabel.className).toContain("wc-choice--checkbox");
+        expect(document.getElementById("features_export_catalog_list").textContent).toContain("Annual runoff depth");
+    });
+
+    test("discovery payload hides unavailable layers and disables roads scope when unavailable", () => {
+        document.body.innerHTML = buildFixtureHtml();
+        var bootstrapNode = document.getElementById("features_export_bootstrap_data");
+        var bootstrapPayload = JSON.parse(bootstrapNode.textContent);
+        bootstrapPayload.discovery = {
+            roads_scope_available: false,
+            available_layer_ids: [
+                "watershed.subcatchments",
+                "wepp.summary.hillslopes"
+            ],
+            available_families: ["watershed", "wepp"]
+        };
+        bootstrapNode.textContent = JSON.stringify(bootstrapPayload);
+
+        controller.bootstrap({});
+
+        expect(document.querySelector('[data-features-export-action="toggle-layer"][value="omni.scenarios.hillslopes"]')).toBeNull();
+        expect(document.querySelector('[data-features-export-action="toggle-layer"][value="swat.interchange.table"]')).toBeNull();
+
+        var weppLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.summary.hillslopes"]');
+        weppLayer.checked = true;
+        weppLayer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var roadsCheckbox = document.querySelector('[data-features-export-field="output-scope"][value="roads"]');
+        expect(roadsCheckbox.disabled).toBe(true);
+        expect(roadsCheckbox.checked).toBe(false);
+        expect(document.querySelector('[data-features-export-region="roads-scope-note"]').textContent)
+            .toContain("Roads scope is unavailable for this run.");
+    });
+
+    test("status-stream discovery refresh updates availability without page reload", () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        expect(document.querySelector('[data-features-export-action="toggle-layer"][value="omni.scenarios.hillslopes"]')).not.toBeNull();
+
+        var attachCall = baseInstance.attach_status_stream.mock.calls[0];
+        var streamOptions = attachCall[1];
+        expect(typeof streamOptions.onStatus).toBe("function");
+
+        streamOptions.onStatus({
+            raw: JSON.stringify({
+                refresh_channel: "features_export",
+                roads_scope_available: false,
+                available_layer_ids: ["watershed.subcatchments", "wepp.summary.hillslopes"],
+                available_families: ["watershed", "wepp"]
+            })
+        });
+
+        expect(document.querySelector('[data-features-export-action="toggle-layer"][value="omni.scenarios.hillslopes"]')).toBeNull();
+
+        var weppLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.summary.hillslopes"]');
+        weppLayer.checked = true;
+        weppLayer.dispatchEvent(new Event("change", { bubbles: true }));
+        var roadsCheckbox = document.querySelector('[data-features-export-field="output-scope"][value="roads"]');
+        expect(roadsCheckbox.disabled).toBe(true);
+    });
+
+    test("omni select-all and unselect-all buttons toggle multi-select checkboxes", () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var omniLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="omni.scenarios.hillslopes"]');
+        omniLayer.checked = true;
+        omniLayer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var scenarioCheckbox = document.querySelector('[data-features-export-field="scenario"][value="uniform_low"]');
+        expect(scenarioCheckbox.checked).toBe(false);
+
+        document
+            .querySelector('[data-features-export-action="omni-select-all"][data-omni-target="scenarios"]')
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        expect(scenarioCheckbox.checked).toBe(true);
+
+        document
+            .querySelector('[data-features-export-action="omni-unselect-all"][data-omni-target="scenarios"]')
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        expect(scenarioCheckbox.checked).toBe(false);
     });
 
     test("submit posts JSON and completion fetches jobinfo once per cycle with rendered results", async () => {

@@ -36,19 +36,19 @@ var FeaturesExport = (function () {
     var ACTIONS = {
         toggleLayer: '[data-features-export-action="toggle-layer"]',
         loadDefaults: '[data-features-export-action="load-defaults"]',
-        selectVisible: '[data-features-export-action="select-visible"]',
         clearSelection: '[data-features-export-action="clear-selection"]',
-        clearFilters: '[data-features-export-action="clear-filters"]',
-        toggleSwatTable: '[data-features-export-action="toggle-swat-table"]'
+        toggleSwatTable: '[data-features-export-action="toggle-swat-table"]',
+        toggleColumn: '[data-features-export-action="toggle-column"]',
+        omniSelectAll: '[data-features-export-action="omni-select-all"]',
+        omniUnselectAll: '[data-features-export-action="omni-unselect-all"]'
     };
 
     var FIELDS = {
-        layerSearch: '[data-features-export-field="layer-search"]',
         format: '[data-features-export-field="format"]',
         units: '[data-features-export-field="units"]',
         crs: '[data-features-export-field="crs"]',
         outputScope: '[data-features-export-field="output-scope"]',
-        temporalMode: '[data-features-export-field="temporal-mode"]',
+        temporalMode: '[data-features-export-field="layer-temporal-mode"]',
         temporalYearSelection: '[data-features-export-field="temporal-year-selection"]',
         temporalExcludeIndices: '[data-features-export-field="temporal-exclude-year-indices"]',
         temporalEventSelector: '[data-features-export-field="temporal-event-selector"]',
@@ -299,6 +299,19 @@ var FeaturesExport = (function () {
         return out;
     }
 
+    function columnMatchKey(value) {
+        if (value === undefined || value === null) {
+            return "";
+        }
+        return String(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+    }
+
+    function labelsMatchColumnId(label, columnId) {
+        var labelKey = columnMatchKey(label);
+        var idKey = columnMatchKey(columnId);
+        return Boolean(labelKey && idKey && labelKey === idKey);
+    }
+
     function parseJsonScript(node, fallback) {
         if (!node) {
             return fallback;
@@ -483,9 +496,15 @@ var FeaturesExport = (function () {
                 layersById: {},
                 selectedLayerIds: [],
                 selectedSwatTables: [],
-                visibleLayerIds: [],
-                filter: "all",
-                search: "",
+                selectedScenarios: [],
+                selectedContrasts: [],
+                layerTemporalModes: {},
+                layerColumnSelection: {},
+                discovery: {
+                    roads_scope_available: true,
+                    available_layer_ids: [],
+                    available_families: []
+                },
                 familyOpen: {},
                 validation: {
                     valid: false,
@@ -599,15 +618,46 @@ var FeaturesExport = (function () {
             return normalized;
         }
 
+        function readSelectedScenarios() {
+            return uniqueStrings(
+                queryAllWithinForm(FIELDS.scenario)
+                    .filter(function (node) {
+                        return Boolean(node && node.checked);
+                    })
+                    .map(function (node) {
+                        return String(node.value || "").trim();
+                    })
+            );
+        }
+
+        function readSelectedContrasts() {
+            return uniqueStrings(
+                queryAllWithinForm(FIELDS.contrastId)
+                    .filter(function (node) {
+                        return Boolean(node && node.checked);
+                    })
+                    .map(function (node) {
+                        return String(node.value || "").trim();
+                    })
+            );
+        }
+
         function updateTemporalVisibility() {
-            var mode = readCheckedRadio(FIELDS.temporalMode);
+            var selected = selectedLayers();
+            var modes = selected.map(function (layer) {
+                return effectiveLayerTemporalMode(layer);
+            }).filter(function (modeToken) {
+                return Boolean(modeToken);
+            });
             var yearWrap = getFieldNode("[data-features-export-temporal-year-options]");
             var customWrap = getFieldNode("[data-features-export-temporal-custom-wrap]");
             var eventWrap = getFieldNode("[data-features-export-temporal-event-options]");
             var datesWrap = getFieldNode("[data-features-export-temporal-dates-wrap]");
             var returnPeriodsWrap = getFieldNode("[data-features-export-temporal-return-periods-wrap]");
 
-            var isYearMode = mode === "annual_average" || mode === "yearly";
+            var isYearMode = modes.some(function (modeToken) {
+                return modeToken === "annual_average" || modeToken === "yearly";
+            });
             if (yearWrap) {
                 yearWrap.hidden = !isYearMode;
             }
@@ -616,7 +666,7 @@ var FeaturesExport = (function () {
                 customWrap.hidden = !isYearMode || yearSelection !== "custom";
             }
 
-            var isEventMode = mode === "event";
+            var isEventMode = modes.indexOf("event") !== -1;
             if (eventWrap) {
                 eventWrap.hidden = !isEventMode;
             }
@@ -690,6 +740,8 @@ var FeaturesExport = (function () {
 
         function clearSelectedLayers() {
             controller.state.selectedLayerIds = [];
+            controller.state.layerTemporalModes = {};
+            controller.state.layerColumnSelection = {};
         }
 
         function selectedLayers() {
@@ -697,6 +749,70 @@ var FeaturesExport = (function () {
             return controller.state.layers.filter(function (layer) {
                 return selectedSet.has(layer.layer_id);
             });
+        }
+
+        function defaultLayerTemporalMode(layer) {
+            if (!layer.temporal_modes || !layer.temporal_modes.length) {
+                return "";
+            }
+            if (layer.temporal_modes.indexOf("annual_average") !== -1) {
+                return "annual_average";
+            }
+            return String(layer.temporal_modes[0]);
+        }
+
+        function effectiveLayerTemporalMode(layer) {
+            var layerModes = controller.state.layerTemporalModes || {};
+            if (Object.prototype.hasOwnProperty.call(layerModes, layer.layer_id)) {
+                return String(layerModes[layer.layer_id] || "");
+            }
+            return defaultLayerTemporalMode(layer);
+        }
+
+        function defaultColumnsForLayer(layer) {
+            var columnIds = (layer.columns || []).map(function (entry) {
+                return entry.column_id;
+            });
+            var required = new Set(uniqueStrings(layer.required_columns || []));
+            var defaults = [];
+            (layer.columns || []).forEach(function (entry) {
+                if (entry.required || entry.default_selected) {
+                    defaults.push(entry.column_id);
+                }
+            });
+            var selected = uniqueStrings(defaults);
+            if (!selected.length) {
+                selected = uniqueStrings(columnIds);
+            }
+            required.forEach(function (columnId) {
+                if (selected.indexOf(columnId) === -1) {
+                    selected.push(columnId);
+                }
+            });
+            return selected;
+        }
+
+        function effectiveColumnsForLayer(layer) {
+            var layerSelection = controller.state.layerColumnSelection || {};
+            var selected = layerSelection[layer.layer_id];
+            if (Array.isArray(selected) && selected.length) {
+                return uniqueStrings(selected);
+            }
+            return defaultColumnsForLayer(layer);
+        }
+
+        function setLayerTemporalMode(layerId, mode) {
+            if (!controller.state.layerTemporalModes || typeof controller.state.layerTemporalModes !== "object") {
+                controller.state.layerTemporalModes = {};
+            }
+            controller.state.layerTemporalModes[layerId] = mode;
+        }
+
+        function setLayerColumns(layerId, columnIds) {
+            if (!controller.state.layerColumnSelection || typeof controller.state.layerColumnSelection !== "object") {
+                controller.state.layerColumnSelection = {};
+            }
+            controller.state.layerColumnSelection[layerId] = uniqueStrings(columnIds);
         }
 
         function normalizeLayer(rawLayer) {
@@ -712,15 +828,36 @@ var FeaturesExport = (function () {
             var requirements = uniqueStrings(rawLayer.selector_requirements || []);
             var scopeClass = rawLayer.scope_class ? String(rawLayer.scope_class) : "scope_invariant";
             var geometryType = rawLayer.geometry_type ? String(rawLayer.geometry_type) : "unknown";
+            var requiredColumns = uniqueStrings(rawLayer.required_columns || []);
+            var columns = normalizeArray(rawLayer.columns).map(function (entry) {
+                if (!entry || typeof entry !== "object") {
+                    return null;
+                }
+                var columnId = entry.column_id ? String(entry.column_id) : "";
+                if (!columnId) {
+                    return null;
+                }
+                return {
+                    column_id: columnId,
+                    label: entry.label ? String(entry.label) : columnId,
+                    description: entry.description ? String(entry.description) : "",
+                    display_unit: entry.display_unit ? String(entry.display_unit) : "non-unitized",
+                    required: Boolean(entry.required),
+                    default_selected: Boolean(entry.default_selected)
+                };
+            }).filter(Boolean);
             return {
                 layer_id: layerId,
                 label: rawLayer.label ? String(rawLayer.label) : layerId,
                 family: family,
                 family_label: rawLayer.family_label ? String(rawLayer.family_label) : familyLabel(family),
+                family_raw: rawLayer.family_raw ? String(rawLayer.family_raw) : family,
                 scope_class: scopeClass,
                 geometry_type: geometryType,
                 temporal_modes: temporalModes,
                 selector_requirements: requirements,
+                required_columns: requiredColumns,
+                columns: columns,
                 raw: rawLayer.raw && typeof rawLayer.raw === "object" ? rawLayer.raw : {}
             };
         }
@@ -754,6 +891,76 @@ var FeaturesExport = (function () {
                 parsed = {};
             }
             controller.state.bootstrap = parsed;
+            controller.state.discovery = normalizeDiscoveryPayload(parsed.discovery);
+        }
+
+        function normalizeDiscoveryPayload(discovery) {
+            var payload = discovery && typeof discovery === "object" ? discovery : {};
+            return {
+                roads_scope_available: payload.roads_scope_available !== false,
+                available_layer_ids: uniqueStrings(payload.available_layer_ids || []),
+                available_families: uniqueStrings(payload.available_families || [])
+            };
+        }
+
+        function discoveryPayloadEqual(a, b) {
+            var left = normalizeDiscoveryPayload(a);
+            var right = normalizeDiscoveryPayload(b);
+            return (
+                left.roads_scope_available === right.roads_scope_available
+                && JSON.stringify(left.available_layer_ids) === JSON.stringify(right.available_layer_ids)
+                && JSON.stringify(left.available_families) === JSON.stringify(right.available_families)
+            );
+        }
+
+        function parseDiscoveryRefreshPayload(detail) {
+            var raw = detail && detail.raw !== undefined
+                ? detail.raw
+                : detail && detail.detail !== undefined
+                    ? detail.detail
+                    : detail;
+            var candidate = raw;
+            if (typeof candidate === "string") {
+                var trimmed = candidate.trim();
+                if (!trimmed) {
+                    return null;
+                }
+                try {
+                    candidate = JSON.parse(trimmed);
+                } catch (_error) {
+                    return null;
+                }
+            }
+            if (!candidate || typeof candidate !== "object") {
+                return null;
+            }
+            if (candidate.discovery && typeof candidate.discovery === "object") {
+                candidate = candidate.discovery;
+            }
+            if (candidate.refresh_channel && String(candidate.refresh_channel).trim() !== STATUS_CHANNEL) {
+                return null;
+            }
+            if (
+                !Object.prototype.hasOwnProperty.call(candidate, "roads_scope_available")
+                && !Object.prototype.hasOwnProperty.call(candidate, "available_layer_ids")
+                && !Object.prototype.hasOwnProperty.call(candidate, "available_families")
+            ) {
+                return null;
+            }
+            return candidate;
+        }
+
+        function applyDiscoveryRefresh(detail) {
+            var refreshPayload = parseDiscoveryRefreshPayload(detail);
+            if (!refreshPayload) {
+                return false;
+            }
+            if (discoveryPayloadEqual(controller.state.discovery, refreshPayload)) {
+                return false;
+            }
+            controller.state.discovery = normalizeDiscoveryPayload(refreshPayload);
+            rerender();
+            return true;
         }
 
         function getDefaultsProfile() {
@@ -781,31 +988,15 @@ var FeaturesExport = (function () {
             return null;
         }
 
-        function rowMatchesSearch(layer, searchTerm) {
-            if (!searchTerm) {
-                return true;
+        function isLayerDiscoveryAvailable(layer) {
+            var discovery = controller.state.discovery || {};
+            var availableIds = uniqueStrings(discovery.available_layer_ids || []);
+            var availableFamilies = uniqueStrings(discovery.available_families || []);
+            if (availableIds.length && availableIds.indexOf(layer.layer_id) === -1) {
+                return false;
             }
-            var haystack = [
-                layer.layer_id,
-                layer.label,
-                layer.family,
-                layer.family_label
-            ].join(" ").toLowerCase();
-            return haystack.indexOf(searchTerm) !== -1;
-        }
-
-        function rowMatchesFilter(layer, filterMode, selectedSet) {
-            if (filterMode === "selected") {
-                return selectedSet.has(layer.layer_id);
-            }
-            if (filterMode === "temporal") {
-                return layer.temporal_modes.length > 0;
-            }
-            if (filterMode === "scope-aware") {
-                return layer.scope_class === "scope_aware";
-            }
-            if (filterMode === "needs-selector") {
-                return layer.selector_requirements.length > 0;
+            if (availableFamilies.length && availableFamilies.indexOf(layer.family) === -1) {
+                return false;
             }
             return true;
         }
@@ -848,25 +1039,108 @@ var FeaturesExport = (function () {
             }).join(", ");
         }
 
+        function renderLayerColumns(layer) {
+            var seenColumnKeys = new Set();
+            var columns = normalizeArray(layer.columns).filter(function (entry) {
+                if (!entry || typeof entry !== "object") {
+                    return false;
+                }
+                var columnId = String(entry.column_id || "").trim();
+                var dedupeKey = columnMatchKey(columnId) || columnId;
+                if (!columnId || seenColumnKeys.has(dedupeKey)) {
+                    return false;
+                }
+                seenColumnKeys.add(dedupeKey);
+                return true;
+            });
+            if (!columns.length) {
+                return '<p class="wc-field__help">No schema columns were discovered for this dataset.</p>';
+            }
+            var selectedSet = new Set(effectiveColumnsForLayer(layer));
+            var requiredSet = new Set(uniqueStrings(layer.required_columns || []));
+            var requiredKeys = new Set(
+                uniqueStrings(layer.required_columns || [])
+                    .map(function (entry) {
+                        return columnMatchKey(entry);
+                    })
+                    .filter(Boolean)
+            );
+            var rows = columns.map(function (column) {
+                var columnId = String(column.column_id || "").trim();
+                var columnKey = columnMatchKey(columnId);
+                var checked = selectedSet.has(column.column_id) ? " checked" : "";
+                var isRequired = requiredSet.has(column.column_id)
+                    || requiredKeys.has(columnKey)
+                    || Boolean(column.required);
+                var disabled = isRequired ? " disabled" : "";
+                var requirementLabel = isRequired ? "required" : "optional";
+                var unitLabel = column.display_unit || "non-unitized";
+                var description = String(column.description || "").trim();
+                var label = String(column.label || columnId).trim();
+                var showInlineId = !labelsMatchColumnId(label, columnId);
+                return (
+                    '<label class="wc-choice wc-choice--checkbox features-export-tree__column">'
+                    + '<input type="checkbox"'
+                    + ' data-features-export-action="toggle-column"'
+                    + ' data-layer-id="' + escapeHtml(layer.layer_id) + '"'
+                    + ' data-column-id="' + escapeHtml(column.column_id) + '"'
+                    + checked + disabled + '>'
+                    + '<span class="wc-choice__body">'
+                    + '<span class="wc-choice__label"><strong>' + escapeHtml(label) + '</strong>'
+                    + (showInlineId ? ' <code>' + escapeHtml(columnId) + '</code>' : '')
+                    + '</span>'
+                    + (!showInlineId ? '<span class="wc-choice__description"><code>' + escapeHtml(columnId) + '</code></span>' : '')
+                    + (description ? '<span class="wc-choice__description">' + escapeHtml(description) + '</span>' : '')
+                    + '<span class="wc-choice__description">unit: ' + escapeHtml(unitLabel) + ' | ' + requirementLabel + '</span>'
+                    + '</span>'
+                    + '</label>'
+                );
+            });
+            return rows.join("");
+        }
+
+        function renderTemporalModeControl(layer) {
+            if (!layer.temporal_modes.length) {
+                return '<p class="wc-field__help">Temporal: not supported.</p>';
+            }
+            var selectedMode = effectiveLayerTemporalMode(layer);
+            var selectId = "features_export_temporal_mode_" + layer.layer_id.replace(/[^A-Za-z0-9_]/g, "_");
+            var options = layer.temporal_modes.map(function (modeToken) {
+                var selected = modeToken === selectedMode ? " selected" : "";
+                var label = modeToken.replace(/_/g, " ");
+                return '<option value="' + escapeHtml(modeToken) + '"' + selected + '>' + escapeHtml(label) + '</option>';
+            });
+            return (
+                '<div class="wc-field features-export-tree__temporal-field">'
+                + '<label class="wc-field__label" for="' + escapeHtml(selectId) + '">Temporal mode</label>'
+                + '<select id="' + escapeHtml(selectId) + '" class="wc-field__control"'
+                + ' data-features-export-field="layer-temporal-mode"'
+                + ' data-layer-id="' + escapeHtml(layer.layer_id) + '">'
+                + options.join("")
+                + '</select>'
+                + '</div>'
+            );
+        }
+
         function renderCatalog() {
             if (!controller.catalogListEl) {
                 return;
             }
 
             var selectedSet = selectedLayerSet();
-            var search = (controller.state.search || "").toLowerCase().trim();
-            var filterMode = controller.state.filter || "all";
             var groups = {};
             var order = familyOrder();
 
             controller.state.layers.forEach(function (layer) {
+                if (!isLayerDiscoveryAvailable(layer)) {
+                    return;
+                }
                 if (!groups[layer.family]) {
                     groups[layer.family] = [];
                 }
                 groups[layer.family].push(layer);
             });
 
-            var visibleLayerIds = [];
             var htmlParts = [];
             var familyIndex = 0;
             order.concat(Object.keys(groups).filter(function (family) {
@@ -877,18 +1151,9 @@ var FeaturesExport = (function () {
                     return;
                 }
 
-                var visibleRows = layers.filter(function (layer) {
-                    return rowMatchesSearch(layer, search) && rowMatchesFilter(layer, filterMode, selectedSet);
-                });
                 var selectedCount = layers.filter(function (layer) {
                     return selectedSet.has(layer.layer_id);
                 }).length;
-
-                if (visibleRows.length) {
-                    visibleRows.forEach(function (layer) {
-                        visibleLayerIds.push(layer.layer_id);
-                    });
-                }
 
                 var defaultOpen = familyIndex < 2;
                 var isOpen = Object.prototype.hasOwnProperty.call(controller.state.familyOpen, family)
@@ -897,52 +1162,64 @@ var FeaturesExport = (function () {
                 familyIndex += 1;
 
                 htmlParts.push(
-                    '<details data-features-export-family data-family="' + escapeHtml(family) + '"' + (isOpen ? " open" : "") + '>'
+                    '<details class="features-export-tree__family" data-features-export-family data-family="' + escapeHtml(family) + '"' + (isOpen ? " open" : "") + '>'
                 );
                 htmlParts.push(
-                    '<summary>'
-                    + escapeHtml(familyLabel(family))
-                    + ' (' + selectedCount + ' / ' + layers.length + ')'
+                    '<summary class="features-export-tree__family-summary">'
+                    + '<span class="features-export-tree__family-title">' + escapeHtml(familyLabel(family)) + "</span>"
+                    + '<span class="features-export-tree__family-count">(' + selectedCount + ' / ' + layers.length + ")</span>"
                     + '</summary>'
                 );
+                htmlParts.push('<div class="features-export-tree__family-children">');
 
-                if (!visibleRows.length) {
-                    htmlParts.push('<p class="wc-field__help">No layers match current filters.</p>');
-                } else {
-                    visibleRows.forEach(function (layer) {
-                        var checked = selectedSet.has(layer.layer_id) ? " checked" : "";
-                        var scopeBadge = layer.scope_class === "scope_aware" ? "scope-aware" : "shared";
-                        var temporal = temporalBadge(layer);
-                        var selector = selectorBadge(layer);
-                        htmlParts.push(
-                            '<div class="wc-stack" data-features-export-layer data-layer-id="' + escapeHtml(layer.layer_id)
-                            + '" data-family="' + escapeHtml(layer.family)
-                            + '" data-scope-class="' + escapeHtml(layer.scope_class)
-                            + '">'
-                        );
-                        htmlParts.push(
-                            '<label class="wc-choice wc-choice--checkbox">'
-                            + '<input type="checkbox" data-features-export-action="toggle-layer" value="' + escapeHtml(layer.layer_id) + '"' + checked + '>'
-                            + '<span class="wc-choice__body">'
-                            + '<span class="wc-choice__label"><strong>' + escapeHtml(layer.label) + '</strong> '
-                            + '<code>' + escapeHtml(layer.layer_id) + '</code></span>'
-                            + '<span class="wc-choice__description">'
-                            + 'geometry: ' + escapeHtml(layer.geometry_type)
-                            + ' | scope: ' + escapeHtml(scopeBadge)
-                            + ' | temporal: ' + escapeHtml(temporal)
-                            + (selector ? ' | selector: ' + escapeHtml(selector) : '')
-                            + '</span>'
-                            + '</span>'
-                            + '</label>'
-                        );
-                        htmlParts.push("</div>");
-                    });
-                }
+                layers.forEach(function (layer) {
+                    var checked = selectedSet.has(layer.layer_id) ? " checked" : "";
+                    var scopeBadge = layer.scope_class === "scope_aware" ? "scope-aware" : "shared";
+                    var temporal = temporalBadge(layer);
+                    var selector = selectorBadge(layer);
+                    var detailsOpen = selectedSet.has(layer.layer_id) ? " open" : "";
+                    htmlParts.push(
+                        '<article class="wc-stack features-export-tree__dataset" data-features-export-layer data-layer-id="' + escapeHtml(layer.layer_id)
+                        + '" data-family="' + escapeHtml(layer.family)
+                        + '" data-scope-class="' + escapeHtml(layer.scope_class)
+                        + '">'
+                    );
+                    htmlParts.push(
+                        '<label class="wc-choice wc-choice--checkbox features-export-tree__dataset-toggle">'
+                        + '<input type="checkbox" data-features-export-action="toggle-layer" value="' + escapeHtml(layer.layer_id) + '"' + checked + '>'
+                        + '<span class="wc-choice__body">'
+                        + '<span class="wc-choice__label"><strong>' + escapeHtml(layer.label) + '</strong></span>'
+                        + '<span class="wc-choice__description"><code>' + escapeHtml(layer.layer_id) + '</code></span>'
+                        + '</span>'
+                        + '</label>'
+                    );
+                    htmlParts.push(
+                        '<p class="wc-field__help features-export-tree__dataset-meta">'
+                        + 'geometry: ' + escapeHtml(layer.geometry_type)
+                        + ' | scope: ' + escapeHtml(scopeBadge)
+                        + ' | temporal: ' + escapeHtml(temporal)
+                        + (selector ? ' | selector: ' + escapeHtml(selector) : '')
+                        + '</p>'
+                    );
+                    htmlParts.push('<details class="wc-stack features-export-tree__dataset-options" data-features-export-layer-columns' + detailsOpen + '>');
+                    htmlParts.push('<summary class="features-export-tree__dataset-options-summary">Dataset options</summary>');
+                    htmlParts.push('<div class="wc-stack features-export-tree__dataset-options-body" data-features-export-layer-details>');
+                    htmlParts.push(renderTemporalModeControl(layer));
+                    htmlParts.push('<div class="features-export-tree__columns">');
+                    htmlParts.push('<label class="wc-field__label">Columns</label>');
+                    htmlParts.push('<div class="features-export-tree__column-list">');
+                    htmlParts.push(renderLayerColumns(layer));
+                    htmlParts.push("</div>");
+                    htmlParts.push("</div>");
+                    htmlParts.push("</div>");
+                    htmlParts.push("</details>");
+                    htmlParts.push("</article>");
+                });
 
+                htmlParts.push("</div>");
                 htmlParts.push("</details>");
             });
 
-            controller.state.visibleLayerIds = uniqueStrings(visibleLayerIds);
             controller.catalogListEl.innerHTML = htmlParts.join("");
         }
 
@@ -1032,7 +1309,8 @@ var FeaturesExport = (function () {
             }
             var hasScenario = familiesSet.has("omni_scenarios");
             var hasContrast = familiesSet.has("omni_contrasts");
-            var show = hasScenario || hasContrast;
+            var hasWepp = familiesSet.has("wepp");
+            var show = hasScenario || hasContrast || hasWepp;
             omniGroup.hidden = !show;
 
             var scenarioWrap = getFieldNode("[data-features-export-omni-scenario-wrap]");
@@ -1040,18 +1318,18 @@ var FeaturesExport = (function () {
             var omniTitle = controller.form.querySelector('[data-features-export-region="omni-title"]');
 
             if (scenarioWrap) {
-                scenarioWrap.hidden = !hasScenario;
+                scenarioWrap.hidden = !(hasScenario || hasWepp);
             }
             if (contrastWrap) {
-                contrastWrap.hidden = !hasContrast;
+                contrastWrap.hidden = !(hasContrast || hasWepp);
             }
             if (omniTitle) {
-                if (hasScenario && !hasContrast) {
+                if (hasScenario && !hasContrast && !hasWepp) {
                     omniTitle.textContent = "Omni Scenario";
-                } else if (!hasScenario && hasContrast) {
+                } else if (!hasScenario && hasContrast && !hasWepp) {
                     omniTitle.textContent = "Omni Contrast";
                 } else {
-                    omniTitle.textContent = "Omni Selector";
+                    omniTitle.textContent = "Omni Scenarios / Contrasts";
                 }
             }
         }
@@ -1090,6 +1368,25 @@ var FeaturesExport = (function () {
             controller.swatTablesEl.innerHTML = rows.join("");
         }
 
+        function updateRoadsScopeAvailability() {
+            var discovery = controller.state.discovery || {};
+            var roadsAvailable = discovery.roads_scope_available !== false;
+            queryAllWithinForm(FIELDS.outputScope).forEach(function (node) {
+                if (String(node.value || "") !== "roads") {
+                    return;
+                }
+                node.disabled = !roadsAvailable;
+                if (!roadsAvailable) {
+                    node.checked = false;
+                }
+            });
+            if (roadsAvailable) {
+                setRegionText("roads-scope-note", "Scope-invariant layers export once as shared output.");
+            } else {
+                setRegionText("roads-scope-note", "Roads scope is unavailable for this run.");
+            }
+        }
+
         function updateProgressiveDisclosure() {
             var selected = selectedLayers();
             var families = selectedFamilies();
@@ -1106,6 +1403,7 @@ var FeaturesExport = (function () {
             showGroup("swat", hasSwat);
             updateOmniVisibility(families);
             updateTemporalVisibility();
+            updateRoadsScopeAvailability();
 
             if (hasSwat) {
                 updateSwatTables();
@@ -1150,10 +1448,33 @@ var FeaturesExport = (function () {
             }
 
             if (!controller.groups.temporal.hidden) {
-                var temporalMode = readCheckedRadio(FIELDS.temporalMode);
-                if (!temporalMode) {
-                    errors.push({ group: "temporal", message: "Temporal mode is required when temporal layers are selected." });
-                } else if (temporalMode === "annual_average" || temporalMode === "yearly") {
+                var temporalModes = selected
+                    .filter(function (layer) {
+                        return layer.temporal_modes.length > 0;
+                    })
+                    .map(function (layer) {
+                        return {
+                            layer_id: layer.layer_id,
+                            mode: effectiveLayerTemporalMode(layer)
+                        };
+                    });
+                temporalModes.forEach(function (entry) {
+                    if (!entry.mode) {
+                        errors.push({
+                            group: "temporal",
+                            message: "Temporal mode is required for " + entry.layer_id + "."
+                        });
+                    }
+                });
+
+                var usesYearSelectors = temporalModes.some(function (entry) {
+                    return entry.mode === "annual_average" || entry.mode === "yearly";
+                });
+                var usesEventSelectors = temporalModes.some(function (entry) {
+                    return entry.mode === "event";
+                });
+
+                if (usesYearSelectors) {
                     var yearSelection = readFieldValue(FIELDS.temporalYearSelection) || "all";
                     if (yearSelection === "custom") {
                         var customIndices = parseIntList(readFieldValue(FIELDS.temporalExcludeIndices));
@@ -1161,10 +1482,11 @@ var FeaturesExport = (function () {
                             errors.push({ group: "temporal", message: "Provide at least one custom excluded year index." });
                         }
                     }
-                } else if (temporalMode === "event") {
+                }
+                if (usesEventSelectors) {
                     var selector = readCheckedRadio(FIELDS.temporalEventSelector);
                     if (!selector) {
-                        errors.push({ group: "temporal", message: "Event selector is required for event mode." });
+                        errors.push({ group: "temporal", message: "Event selector is required when any temporal mode is event." });
                     } else if (selector === "date") {
                         if (!parseCommaList(readFieldValue(FIELDS.temporalEventDates)).length) {
                             errors.push({ group: "temporal", message: "Provide at least one event date." });
@@ -1173,18 +1495,6 @@ var FeaturesExport = (function () {
                         if (!parseFloatList(readFieldValue(FIELDS.temporalEventReturnPeriods)).length) {
                             errors.push({ group: "temporal", message: "Provide at least one return period." });
                         }
-                    }
-                }
-
-                if (temporalMode) {
-                    var incompatible = selected.filter(function (layer) {
-                        return layer.temporal_modes.indexOf(temporalMode) === -1;
-                    });
-                    if (incompatible.length && incompatible.length < selected.length) {
-                        warnings.push({
-                            group: "temporal",
-                            message: "Some selected layers do not support temporal mode " + temporalMode + " and may be skipped."
-                        });
                     }
                 }
             }
@@ -1196,13 +1506,15 @@ var FeaturesExport = (function () {
                 var hasContrast = selected.some(function (layer) {
                     return layer.family === "omni_contrasts";
                 });
-                if (hasScenario && hasContrast) {
+                var selectedScenarioIds = readSelectedScenarios();
+                var selectedContrastIds = readSelectedContrasts();
+                if ((hasScenario && hasContrast) || (selectedScenarioIds.length && selectedContrastIds.length)) {
                     errors.push({ group: "omni", message: "Omni scenario and contrast layer families cannot be mixed." });
                 }
-                if (hasScenario && !readFieldValue(FIELDS.scenario)) {
+                if (hasScenario && !selectedScenarioIds.length) {
                     errors.push({ group: "omni", message: "Select an Omni scenario." });
                 }
-                if (hasContrast && !readFieldValue(FIELDS.contrastId)) {
+                if (hasContrast && !selectedContrastIds.length) {
                     errors.push({ group: "omni", message: "Select an Omni contrast." });
                 }
             }
@@ -1228,14 +1540,19 @@ var FeaturesExport = (function () {
         }
 
         function emitSelectionChanged() {
+            var availableLayerIds = controller.state.layers.filter(function (layer) {
+                return isLayerDiscoveryAvailable(layer);
+            }).map(function (layer) {
+                return layer.layer_id;
+            });
             var payload = {
                 selectedLayerIds: uniqueStrings(controller.state.selectedLayerIds),
                 counts: {
                     selected: uniqueStrings(controller.state.selectedLayerIds).length,
-                    visible: uniqueStrings(controller.state.visibleLayerIds).length,
+                    visible: uniqueStrings(availableLayerIds).length,
                     total: controller.state.layers.length
                 },
-                visibleLayerIds: uniqueStrings(controller.state.visibleLayerIds)
+                visibleLayerIds: uniqueStrings(availableLayerIds)
             };
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("features_export:selection:changed", payload);
@@ -1261,24 +1578,21 @@ var FeaturesExport = (function () {
         }
 
         function emitTemporalChanged() {
-            var mode = readCheckedRadio(FIELDS.temporalMode);
             var selected = selectedLayers();
-            var compatible = [];
-            var excluded = [];
-            if (mode) {
-                selected.forEach(function (layer) {
-                    if (layer.temporal_modes.indexOf(mode) !== -1) {
-                        compatible.push(layer.layer_id);
-                    } else {
-                        excluded.push(layer.layer_id);
-                    }
-                });
-            }
+            var layerModes = {};
+            selected.forEach(function (layer) {
+                if (!layer.temporal_modes.length) {
+                    return;
+                }
+                var mode = effectiveLayerTemporalMode(layer);
+                if (mode) {
+                    layerModes[layer.layer_id] = mode;
+                }
+            });
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("features_export:temporal:changed", {
                     temporal: buildTemporalPayload(),
-                    compatibleLayerIds: compatible,
-                    excludedLayerIds: excluded
+                    layer_modes: layerModes
                 });
             }
         }
@@ -1296,8 +1610,8 @@ var FeaturesExport = (function () {
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("features_export:omni:changed", {
                     mode: mode,
-                    scenario: readFieldValue(FIELDS.scenario) || null,
-                    contrast_id: readFieldValue(FIELDS.contrastId) || null
+                    scenarios: readSelectedScenarios(),
+                    contrast_ids: readSelectedContrasts()
                 });
             }
         }
@@ -1325,9 +1639,12 @@ var FeaturesExport = (function () {
             controller.submitButtonEl.disabled = !enabled;
         }
 
-        function rerender() {
-            captureFamilyOpenState();
-            renderCatalog();
+        function rerender(options) {
+            var skipCatalog = Boolean(options && options.skipCatalog);
+            if (!skipCatalog) {
+                captureFamilyOpenState();
+                renderCatalog();
+            }
             updateProgressiveDisclosure();
             var validation = buildValidation();
             controller.state.validation = validation;
@@ -1418,18 +1735,37 @@ var FeaturesExport = (function () {
             if (controller.groups.temporal && controller.groups.temporal.hidden) {
                 return null;
             }
-            var mode = readCheckedRadio(FIELDS.temporalMode);
-            if (!mode) {
+            var selected = selectedLayers();
+            var layerModes = {};
+            selected.forEach(function (layer) {
+                if (!layer.temporal_modes.length) {
+                    return;
+                }
+                var mode = effectiveLayerTemporalMode(layer);
+                if (mode) {
+                    layerModes[layer.layer_id] = mode;
+                }
+            });
+            if (!Object.keys(layerModes).length) {
                 return null;
             }
-            var temporal = { mode: mode };
-            if (mode === "annual_average" || mode === "yearly") {
+            var temporal = { layer_modes: layerModes };
+            var modes = Object.keys(layerModes).map(function (layerId) {
+                return layerModes[layerId];
+            });
+            var usesYearSelectors = modes.some(function (mode) {
+                return mode === "annual_average" || mode === "yearly";
+            });
+            var usesEventSelectors = modes.indexOf("event") !== -1;
+
+            if (usesYearSelectors) {
                 var yearSelection = readFieldValue(FIELDS.temporalYearSelection) || "all";
                 temporal.year_selection = yearSelection;
                 if (yearSelection === "custom") {
                     temporal.exclude_yr_indxs = parseIntList(readFieldValue(FIELDS.temporalExcludeIndices));
                 }
-            } else if (mode === "event") {
+            }
+            if (usesEventSelectors) {
                 var selector = readCheckedRadio(FIELDS.temporalEventSelector);
                 if (!selector) {
                     return temporal;
@@ -1442,6 +1778,18 @@ var FeaturesExport = (function () {
                 }
             }
             return temporal;
+        }
+
+        function buildColumnSelectionPayload() {
+            var payload = {};
+            selectedLayers().forEach(function (layer) {
+                var selectedColumns = effectiveColumnsForLayer(layer);
+                if (!selectedColumns.length) {
+                    return;
+                }
+                payload[layer.layer_id] = { include: selectedColumns };
+            });
+            return payload;
         }
 
         function buildPayload() {
@@ -1464,20 +1812,13 @@ var FeaturesExport = (function () {
                 payload.temporal = temporal;
             }
 
-            if (!controller.groups.omni.hidden) {
-                var selectedFamiliesSet = selectedFamilies();
-                if (selectedFamiliesSet.has("omni_scenarios")) {
-                    var scenario = readFieldValue(FIELDS.scenario);
-                    if (scenario) {
-                        payload.scenario = scenario;
-                    }
-                }
-                if (selectedFamiliesSet.has("omni_contrasts")) {
-                    var contrastId = readFieldValue(FIELDS.contrastId);
-                    if (contrastId) {
-                        payload.contrast_id = contrastId;
-                    }
-                }
+            var scenarios = readSelectedScenarios();
+            var contrastIds = readSelectedContrasts();
+            if (scenarios.length) {
+                payload.scenarios = scenarios;
+            }
+            if (contrastIds.length) {
+                payload.contrast_ids = contrastIds;
             }
 
             if (!controller.groups.swat.hidden) {
@@ -1489,6 +1830,11 @@ var FeaturesExport = (function () {
                 } else if (tableMode === "exclude") {
                     payload.swat_tables = { exclude: selectedTables };
                 }
+            }
+
+            var columnSelection = buildColumnSelectionPayload();
+            if (Object.keys(columnSelection).length) {
+                payload.column_selection = columnSelection;
             }
 
             return payload;
@@ -1663,31 +2009,76 @@ var FeaturesExport = (function () {
                 } else {
                     removeSelectedLayer(layerId);
                 }
+                rerender({ skipCatalog: true });
+            }));
+
+            controller._delegates.push(dom.delegate(controller.form, "change", FIELDS.temporalMode, function (_event, target) {
+                var layerId = String(target.getAttribute("data-layer-id") || "").trim();
+                if (!layerId) {
+                    return;
+                }
+                var mode = String(target.value || "").trim();
+                setLayerTemporalMode(layerId, mode);
                 rerender();
             }));
 
-            controller._delegates.push(dom.delegate(controller.form, "click", FILTER_SELECTOR, function (event, target) {
+            controller._delegates.push(dom.delegate(controller.form, "change", ACTIONS.toggleColumn, function (_event, target) {
+                var layerId = String(target.getAttribute("data-layer-id") || "").trim();
+                var columnId = String(target.getAttribute("data-column-id") || "").trim();
+                if (!layerId || !columnId) {
+                    return;
+                }
+                var layer = getLayerById(layerId);
+                if (!layer) {
+                    return;
+                }
+                var requiredSet = new Set(uniqueStrings(layer.required_columns || []));
+                var nextSelection = effectiveColumnsForLayer(layer).slice();
+                if (target.checked || requiredSet.has(columnId)) {
+                    if (nextSelection.indexOf(columnId) === -1) {
+                        nextSelection.push(columnId);
+                    }
+                } else {
+                    nextSelection = nextSelection.filter(function (entry) {
+                        return entry !== columnId;
+                    });
+                }
+                requiredSet.forEach(function (requiredColumn) {
+                    if (nextSelection.indexOf(requiredColumn) === -1) {
+                        nextSelection.push(requiredColumn);
+                    }
+                });
+                setLayerColumns(layerId, nextSelection);
+                rerender();
+            }));
+
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.omniSelectAll, function (event, target) {
                 event.preventDefault();
-                controller.state.filter = String(target.getAttribute("data-features-export-filter") || "all");
+                var omniTarget = String(target.getAttribute("data-omni-target") || "").trim();
+                if (omniTarget === "scenarios") {
+                    queryAllWithinForm(FIELDS.scenario).forEach(function (node) {
+                        node.checked = true;
+                    });
+                } else if (omniTarget === "contrasts") {
+                    queryAllWithinForm(FIELDS.contrastId).forEach(function (node) {
+                        node.checked = true;
+                    });
+                }
                 rerender();
             }));
 
-            controller._delegates.push(dom.delegate(controller.form, "input", FIELDS.layerSearch, function (_event, target) {
-                controller.state.search = String(target.value || "");
-                rerender();
-            }));
-
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.clearFilters, function (event) {
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.omniUnselectAll, function (event, target) {
                 event.preventDefault();
-                controller.state.filter = "all";
-                controller.state.search = "";
-                setSelectOrInput(FIELDS.layerSearch, "");
-                rerender();
-            }));
-
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.selectVisible, function (event) {
-                event.preventDefault();
-                addSelectedLayers(controller.state.visibleLayerIds);
+                var omniTarget = String(target.getAttribute("data-omni-target") || "").trim();
+                if (omniTarget === "scenarios") {
+                    queryAllWithinForm(FIELDS.scenario).forEach(function (node) {
+                        node.checked = false;
+                    });
+                } else if (omniTarget === "contrasts") {
+                    queryAllWithinForm(FIELDS.contrastId).forEach(function (node) {
+                        node.checked = false;
+                    });
+                }
                 rerender();
             }));
 
@@ -1717,7 +2108,7 @@ var FeaturesExport = (function () {
                 rerender();
             }));
 
-            controller._delegates.push(dom.delegate(controller.form, "change", FIELDS.format + ", " + FIELDS.units + ", " + FIELDS.crs + ", " + FIELDS.outputScope + ", " + FIELDS.temporalMode + ", " + FIELDS.temporalYearSelection + ", " + FIELDS.temporalEventSelector + ", " + FIELDS.scenario + ", " + FIELDS.contrastId + ", " + FIELDS.swatRunId + ", " + FIELDS.swatTableMode, function () {
+            controller._delegates.push(dom.delegate(controller.form, "change", FIELDS.format + ", " + FIELDS.units + ", " + FIELDS.crs + ", " + FIELDS.outputScope + ", " + FIELDS.temporalYearSelection + ", " + FIELDS.temporalEventSelector + ", " + FIELDS.scenario + ", " + FIELDS.contrastId + ", " + FIELDS.swatRunId + ", " + FIELDS.swatTableMode, function () {
                 if (this && this.matches && this.matches(FIELDS.swatRunId)) {
                     updateSwatTables();
                 }
@@ -1760,7 +2151,7 @@ var FeaturesExport = (function () {
             setOutputScopes(profile.output_scopes || ["baseline"]);
             changedFields.push("output_scopes");
 
-            setRadioValue(FIELDS.temporalMode, "");
+            controller.state.layerTemporalModes = {};
             setSelectOrInput(FIELDS.temporalYearSelection, "all");
             setSelectOrInput(FIELDS.temporalExcludeIndices, "");
             setRadioValue(FIELDS.temporalEventSelector, "");
@@ -1768,13 +2159,18 @@ var FeaturesExport = (function () {
             setSelectOrInput(FIELDS.temporalEventReturnPeriods, "");
             changedFields.push("temporal");
 
-            setSelectOrInput(FIELDS.scenario, "");
-            setSelectOrInput(FIELDS.contrastId, "");
+            queryAllWithinForm(FIELDS.scenario).forEach(function (node) {
+                node.checked = false;
+            });
+            queryAllWithinForm(FIELDS.contrastId).forEach(function (node) {
+                node.checked = false;
+            });
             changedFields.push("omni");
 
             setSelectOrInput(FIELDS.swatRunId, profile.swat_run_id || "latest");
             setSelectOrInput(FIELDS.swatTableMode, "all");
             controller.state.selectedSwatTables = [];
+            controller.state.layerColumnSelection = {};
             changedFields.push("swat");
 
             var availableLayerIds = new Set(controller.state.layers.map(function (layer) {
@@ -1791,6 +2187,16 @@ var FeaturesExport = (function () {
                 }
             });
             setSelectedLayers(selected);
+            selected.forEach(function (layerId) {
+                var layer = getLayerById(layerId);
+                if (!layer) {
+                    return;
+                }
+                if (layer.temporal_modes.length) {
+                    setLayerTemporalMode(layerId, defaultLayerTemporalMode(layer));
+                }
+                setLayerColumns(layerId, defaultColumnsForLayer(layer));
+            });
             controller._defaults_skipped_layers = skipped;
 
             updateSwatTables();
@@ -2062,7 +2468,10 @@ var FeaturesExport = (function () {
                     ? { element: controller.stacktracePanelEl, body: controller.stacktrace.element || null }
                     : null,
                 spinner: controller.statusSpinnerEl,
-                logLimit: 300
+                logLimit: 300,
+                onStatus: function (statusDetail) {
+                    applyDiscoveryRefresh(statusDetail);
+                }
             });
         }
 

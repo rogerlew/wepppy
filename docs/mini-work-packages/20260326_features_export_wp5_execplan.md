@@ -27,6 +27,10 @@ WP-5 wires the new Features Export mod into the Runs page so users can discover 
 - [x] (2026-03-27 12:44Z) Brought Features Export control inputs/layout into UI-contract compliance by replacing ad-hoc radio/checkbox markup with canonical choice controls and updating JS-rendered catalog layer checkboxes to `wc-choice` styling.
 - [x] (2026-03-27 14:22Z) Fixed artifact delivery integrity regressions: features-export job results now emit browser-session `browse/download` URLs, stale cache-hit `.gpkg` artifacts with non-SQLite signatures are invalidated/rebuilt, and geodatabase staging now uses real GeoPackage bytes instead of synthesized JSON payload bytes.
 - [x] (2026-03-27 16:18Z) Closed reviewer follow-up findings: switched GeoPackage container creation to GDAL/OGR-backed output (interoperable with `f_esri` conversion), enforced enqueue-time cache-hit eligibility checks so invalid cache entries route to full worker execution, and fixed GeoPackage temp-file cleanup/dead-code issues.
+- [x] (2026-03-27 06:52Z) Replaced synthetic layer payload generation with catalog/dependency-driven source extraction (vector + parquet joins) so defaults produce real spatial features/attributes; GeoPackage writer now materializes feature-collection payloads as `gpkg_contents.data_type='features'` layers with non-null geometries.
+- [x] (2026-03-27 06:52Z) Verified defaults on `/wc1/runs/ci/civilized-projection` (`runid=civilized-projection`, `config=disturbed9002_wbt`) produce six populated spatial layers in `features_export.gpkg` (74/122 geometry rows per layer, no placeholder payload-only tables).
+- [x] (2026-03-27 07:39Z) Addressed QA medium follow-ups: source-join duplicate column collisions now preserve both values via deterministic `__{source_id}` suffixes, null-only feature properties retain schema columns without coercing numeric columns to text, and focused tests were added for join miss/fanout/collision plus null-only property schema invariants.
+- [x] (2026-03-27 07:46Z) Re-ran `reviewer` and `qa_reviewer` loops on updated diff; both reported no open high/medium findings.
 
 ## Surprises & Discoveries
 
@@ -50,6 +54,10 @@ WP-5 wires the new Features Export mod into the Runs page so users can discover 
   Evidence: rq-engine enqueue selected cache-hit worker from cache-index presence alone while service-level invalidation rejected the same cache entry under `force_cache_hit=True`.
 - Observation: Manual SQLite synthesis for `.gpkg` passed byte-level checks but produced containers not readable by GDAL `GPKG` driver in conversion flow.
   Evidence: direct `f_esri.c2c_gpkg_to_gdb` probe failed against synthesized output and succeeded after OGR-backed GeoPackage creation.
+- Observation: Even with OGR-backed container output, service-layer payload preparation remained synthetic (`payload_sha256/payload_base64` metadata rows), so users received structurally valid `.gpkg` files without real exported feature data.
+  Evidence: live artifacts contained only aspatial payload metadata columns and no actual source-derived geometries/attributes for selected defaults.
+- Observation: For join-heavy layers, exact-name column collision handling must preserve both source and geometry attributes; dropping right-side duplicates silently hides valid data and makes layer schemas unstable across source combinations.
+  Evidence: QA review flagged silent right-side duplicate drops in `_merge_source_dataframe` prior to deterministic source-suffix renaming.
 
 ## Decision Log
 
@@ -83,12 +91,26 @@ WP-5 wires the new Features Export mod into the Runs page so users can discover 
 - Decision: Gate cache-hit worker enqueue on validated cache-entry usability (`cache_entry_supports_cache_hit`) instead of cache-index presence alone.
   Rationale: Aligns rq-engine queue selection with service-level cache validation and prevents deterministic failures on stale/invalid cache entries.
   Date/Author: 2026-03-27 / Codex
+- Decision: Build prepared layer payloads from resolved dependency snapshot sources (geometry + source locators from catalog) and serialize per-layer feature collections for writer consumption, rather than synthetic metadata payload blobs.
+  Rationale: Preserves data-driven catalog contracts and produces user-meaningful spatial exports for defaults without introducing hardcoded layer maps.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Extend GeoPackage writer with dual-mode behavior: spatial write path for feature-collection payloads and aspatial fallback path for non-feature payloads.
+  Rationale: Enables immediate real spatial output for service-generated payloads while keeping writer contracts backward-compatible for existing unit payload fixtures.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Preserve join-collision attributes by deterministic source-qualified renaming (for example `area__landusetable`) rather than dropping duplicate right-side columns.
+  Rationale: Prevents silent data loss in multi-source layer joins while keeping deterministic/stable output schema naming.
+  Date/Author: 2026-03-27 / Codex
+- Decision: Keep null-only properties in GeoPackage schemas with string fallback while preserving numeric inference for non-null numeric properties.
+  Rationale: Stabilizes schema presence for nullable attributes without regressing numeric typing for downstream filtering/query usage.
+  Date/Author: 2026-03-27 / Codex
 
 ## Outcomes & Retrospective
 
 WP-5 is complete. Features Export is now fully wired into Runs-page navigation/sections, dynamic mod loading, and controller bootstrap, with a dedicated control template and a data-driven JS controller that follows canonical async/status contracts.
 
 The implementation delivered all requested surfaces: separate status text/log, job hint, results/warnings, and stacktrace handling; delegated event wiring; progressive disclosure cards; JSON-only submission; and one jobinfo fetch per completion cycle. Runs-page bootstrap now provides catalog/bootstrap payloads (including UTM availability/defaults/selectors) without hardcoded frontend layer maps.
+
+Post-handoff hardening closed a critical correctness gap: default exports now materialize real source-derived geometries and attributes into the GeoPackage (instead of payload metadata placeholders), and live verification against `civilized-projection/disturbed9002_wbt` confirms non-empty spatial layers for watershed, landuse, soils, and WEPP summary defaults.
 
 Validation gates and full-suite tests passed after resolving guard drift in frozen contract artifacts. Reviewer and QA reviewer loops were executed; all reported high/medium findings were fixed and both agents confirmed no remaining high/medium findings.
 
@@ -168,6 +190,13 @@ Validation commands executed (all pass):
 - `wctl run-pytest tests/nodb/mods/test_features_export_service.py --maxfail=1`
 - `wctl run-pytest tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1`
 - `wctl run-pytest tests/nodb/mods/test_features_export_exporters.py --maxfail=1`
+- `wctl run-pytest tests/nodb/mods/test_features_export_service.py tests/nodb/mods/test_features_export_exporters.py --maxfail=1 -q`
+- `wctl run-pytest tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1 -q`
+- `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1 -q`
+- `wctl run-pytest tests --maxfail=1`
+- `wctl run-pytest tests/nodb/mods/test_features_export_exporters.py tests/nodb/mods/test_features_export_service.py --maxfail=1 -q` (post-QA follow-up fixes)
+- `wctl run-pytest tests --maxfail=1` (post-QA follow-up fixes)
+- `wctl run --rm weppcloud /opt/venv/bin/python - <<'PY' ... execute_features_export defaults for civilized-projection/disturbed9002_wbt ... PY` (manual artifact verification: six `features` layers with non-null geometries)
 
 Reviewer outcomes:
 - `reviewer` agent: reported one medium checklist contract mismatch; fixed via checklist/rules alignment; re-review reported no high/medium findings.
@@ -186,3 +215,5 @@ No new external dependencies are planned. WP-5 relies on existing WEPPcloud help
 - 2026-03-27 (Codex): Recorded canonical UI/theming + job-id parsing hardening for Features Export submit/bootstrap paths with updated Jest/route template coverage.
 - 2026-03-27 (Codex): Recorded browse/download URL contract update for completed result links and cache-hit invalidation for legacy non-SQLite `.gpkg` artifacts; updated exporter/service tests accordingly.
 - 2026-03-27 (Codex): Recorded GDAL/OGR GeoPackage writer cutover, enqueue-time cache-hit eligibility gating, and GeoPackage temp-file lifecycle fixes driven by reviewer high/medium findings.
+- 2026-03-27 (Codex): Recorded source-driven spatial payload materialization fix (replacing synthetic payload rows), GeoPackage writer feature-collection support, new regression tests for spatial layers, and live default-run artifact verification.
+- 2026-03-27 (Codex): Recorded post-review follow-up fixes for join-column collision preservation and null-only property schema stability plus final re-review confirmation of no open high/medium findings.

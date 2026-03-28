@@ -273,6 +273,120 @@ def test_features_export_catalog_payload_builds_from_catalog(
     assert agfields["selector_requirements"] == ["agfields_auto_prep"]
 
 
+def test_features_export_catalog_payload_prefers_discovered_columns(
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_catalog = SimpleNamespace(
+        metadata=SimpleNamespace(
+            catalog_version="2026.03.26",
+            schema_version="1",
+            updated_at_utc="2026-03-26T00:00:00Z",
+            owner="wepppy",
+            status="active",
+            allowed_locator_kinds=("nodb_ref", "relpath", "path_template"),
+            temporal_modes=("annual_average", "yearly", "event"),
+            event_selectors=("date", "return_period"),
+            path_template_vars={"scope_root": "output"},
+        ),
+        layers=[
+            SimpleNamespace(
+                layer_id="wepp.summary.hillslopes",
+                family="wepp_summary",
+                scope_class="scope_aware",
+                temporal_supported_modes=("annual_average", "yearly"),
+                raw={
+                    "geometry": {"type": "polygon", "feature_id_keys": ["TopazID"]},
+                    "join": {"primary_key": "TopazID", "fallback_keys": []},
+                    "sources": [],
+                },
+            )
+        ],
+    )
+    monkeypatch.setattr(run0_module, "load_layer_catalog", lambda: fake_catalog)
+    monkeypatch.setattr(
+        run0_module,
+        "_features_export_discover_layer_columns",
+        lambda **kwargs: [
+            {
+                "column_id": "Runoff Volume",
+                "label": "Runoff Volume",
+                "display_unit": "m^3",
+                "description": "Runoff volume exported from interchange schema.",
+                "default_selected": True,
+            }
+        ],
+    )
+
+    payload = run0_module._build_features_export_catalog_payload("/tmp/features-export")
+    layer = payload["layers"][0]
+
+    assert [entry["column_id"] for entry in layer["columns"]] == ["TopazID", "Runoff Volume"]
+    assert layer["columns"][1]["display_unit"] == "m^3"
+    assert layer["columns"][1]["description"] == "Runoff volume exported from interchange schema."
+
+
+def test_features_export_column_contract_dedupes_and_infers_units(run0_module) -> None:
+    columns, required_columns = run0_module._features_export_column_contract(
+        {
+            "join": {"primary_key": "topaz_id", "fallback_keys": ["TopazID"]},
+            "geometry": {"feature_id_keys": ["TopazID"]},
+            "measures": {
+                "required": ["baseflow_mm", "runoff_mm"],
+                "optional": [{"key_aliases": ["sediment_yield_kg_ha"]}],
+            },
+        },
+        discovered_columns=[
+            {
+                "column_id": "baseflow_mm",
+                "label": "Baseflow",
+                "display_unit": "mm",
+                "description": "Groundwater baseflow depth",
+            },
+            {"column_id": "runoff_mm", "label": "Runoff", "display_unit": "mm"},
+            {"column_id": "runoff_mm", "label": "Runoff duplicate", "display_unit": "mm"},
+            {"column_id": "sediment_yield_kg_ha"},
+        ],
+    )
+
+    column_ids = [entry["column_id"] for entry in columns]
+    assert column_ids.count("baseflow_mm") == 1
+    assert column_ids.count("runoff_mm") == 1
+
+    by_id = {entry["column_id"]: entry for entry in columns}
+    assert by_id["baseflow_mm"]["display_unit"] == "mm"
+    assert by_id["baseflow_mm"]["description"] == "Groundwater baseflow depth"
+    assert by_id["runoff_mm"]["display_unit"] == "mm"
+    assert by_id["sediment_yield_kg_ha"]["display_unit"] == "kg/ha"
+    assert required_columns == {"topaz_id"}
+
+
+def test_features_export_parse_interchange_readme_extracts_column_docs(
+    run0_module,
+    tmp_path: Path,
+) -> None:
+    readme_path = tmp_path / "README.md"
+    readme_path.write_text(
+        """
+### `loss_pw0.hill.parquet`
+
+| Column | Type | Units | Description |
+| --- | --- | --- | --- |
+| Runoff Volume | double | m^3 | Annual runoff volume |
+| Baseflow Volume | double | m^3 |  |
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    parsed = run0_module._features_export_parse_interchange_readme(readme_path)
+    docs = parsed["loss_pw0.hill.parquet"]
+
+    assert docs["exact"]["Runoff Volume"]["display_unit"] == "m^3"
+    assert docs["exact"]["Runoff Volume"]["description"] == "Annual runoff volume"
+    assert docs["match"]["runoffvolume"]["label"] == "Runoff Volume"
+
+
 def test_features_export_catalog_payload_handles_catalog_load_failure(
     run0_module,
     monkeypatch: pytest.MonkeyPatch,

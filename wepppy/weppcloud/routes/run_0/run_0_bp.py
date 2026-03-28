@@ -6,11 +6,18 @@ import pathlib
 from collections import OrderedDict
 
 from datetime import datetime
+import re
 import uuid
 from wepppy.weppcloud.utils.runid import generate_runid
 import json
 import traceback
 from urllib.parse import unquote, urlsplit
+try:
+    import pyarrow.lib as _pyarrow_lib
+    import pyarrow.parquet as _pyarrow_parquet
+except ModuleNotFoundError:  # pragma: no cover - runtime image normally includes pyarrow
+    _pyarrow_lib = None
+    _pyarrow_parquet = None
 
 import redis
 from itsdangerous import BadSignature, Signer
@@ -110,6 +117,15 @@ TOC_TASK_ANCHOR_TO_TASK = {
 
 TOC_TASK_EMOJI_MAP = {anchor: task.emoji() for anchor, task in TOC_TASK_ANCHOR_TO_TASK.items()}
 
+if _pyarrow_lib is not None:
+    _FEATURES_EXPORT_PARQUET_SCHEMA_EXCEPTIONS: tuple[type[Exception], ...] = (
+        OSError,
+        ValueError,
+        _pyarrow_lib.ArrowException,
+    )
+else:  # pragma: no cover - pyarrow missing in non-runtime contexts
+    _FEATURES_EXPORT_PARQUET_SCHEMA_EXCEPTIONS = (OSError, ValueError)
+
 
 def _current_user_has_role(role: str) -> bool:
     has_role = getattr(current_user, "has_role", None)
@@ -200,30 +216,46 @@ FEATURES_EXPORT_FAMILY_ORDER = [
     "watershed",
     "landuse",
     "soils",
-    "wepp_summary",
-    "wepp_temporal",
-    "wepp_interchange",
+    "wepp",
     "ash_watar",
-    "omni_scenarios",
-    "omni_contrasts",
     "swat_interchange",
     "agfields_spatial",
     "agfields_metrics",
+    "omni_scenarios",
+    "omni_contrasts",
 ]
 
 FEATURES_EXPORT_FAMILY_LABELS = {
     "watershed": "Watershed",
     "landuse": "Landuse",
     "soils": "Soils",
-    "wepp_summary": "WEPP Summary",
-    "wepp_temporal": "WEPP Temporal",
-    "wepp_interchange": "WEPP Interchange",
+    "wepp": "WEPP",
     "ash_watar": "Ash / WATAR",
     "omni_scenarios": "Omni Scenarios",
     "omni_contrasts": "Omni Contrasts",
     "swat_interchange": "SWAT Interchange",
     "agfields_spatial": "AgFields Spatial",
     "agfields_metrics": "AgFields Metrics",
+}
+
+FEATURES_EXPORT_UI_FAMILY_BY_RAW = {
+    "wepp_summary": "wepp",
+    "wepp_temporal": "wepp",
+    "wepp_interchange": "wepp",
+    "ash": "ash_watar",
+    "ag_fields_spatial": "agfields_spatial",
+    "ag_fields_metrics": "agfields_metrics",
+}
+
+FEATURES_EXPORT_LAYER_LABELS = {
+    "wepp.summary.hillslopes": "H.loss.parquet",
+    "wepp.summary.channels": "chan.out.parquet",
+    "wepp.temporal.events": "H.ebe.parquet",
+    "wepp.interchange.hill_pass": "H.pass.parquet",
+    "wepp.interchange.hill_element": "H.element.parquet",
+    "wepp.interchange.hill_wat": "H.wat.parquet",
+    "omni.scenarios.hillslopes": "H.loss.parquet (Scenario)",
+    "omni.contrasts.hillslopes": "H.loss.parquet (Contrast)",
 }
 
 FEATURES_EXPORT_DEFAULT_LAYER_IDS = [
@@ -246,10 +278,16 @@ def _format_features_export_family_label(family: str) -> str:
 
 
 def _format_features_export_layer_label(layer_id: str) -> str:
+    if layer_id in FEATURES_EXPORT_LAYER_LABELS:
+        return FEATURES_EXPORT_LAYER_LABELS[layer_id]
     tail = layer_id.split(".")[-1].strip()
     if not tail:
         return layer_id
     return " ".join(token.capitalize() for token in tail.replace("_", " ").split())
+
+
+def _features_export_ui_family(raw_family: str) -> str:
+    return FEATURES_EXPORT_UI_FAMILY_BY_RAW.get(raw_family, raw_family)
 
 
 def _features_export_selector_requirements(family: str) -> list[str]:
@@ -265,7 +303,477 @@ def _features_export_selector_requirements(family: str) -> list[str]:
     return requirements
 
 
-def _build_features_export_catalog_payload() -> dict:
+_FEATURES_EXPORT_INTERCHANGE_HEADING_RE = re.compile(r"^###\s+`([^`]+\.parquet)`\s*$")
+
+
+def _infer_features_export_display_unit(column_id: str) -> str:
+    token = str(column_id or "").strip().lower()
+    if not token:
+        return "non-unitized"
+
+    suffix_units = [
+        ("_mm", "mm"),
+        ("_cm", "cm"),
+        ("_m", "m"),
+        ("_m2", "m2"),
+        ("_m3", "m3"),
+        ("_kg_ha", "kg/ha"),
+        ("_kg_m2", "kg/m2"),
+        ("_kg", "kg"),
+        ("_ha", "ha"),
+        ("_c", "C"),
+        ("_cms", "cms"),
+        ("_pct", "%"),
+    ]
+    for suffix, unit in suffix_units:
+        if token.endswith(suffix):
+            return unit
+
+    if token.startswith("pct_") or token.endswith("_percent") or token.endswith("_percentage"):
+        return "%"
+    return "non-unitized"
+
+
+def _features_export_column_label(column_id: str) -> str:
+    token = str(column_id or "").strip()
+    if not token:
+        return ""
+    if any(ch in token for ch in (" ", "-", "/", "%", ".")):
+        return token
+    return token.replace("_", " ")
+
+
+def _features_export_column_match_key(column_id: str) -> str:
+    token = str(column_id or "").strip().lower()
+    if not token:
+        return ""
+    return re.sub(r"[^a-z0-9]+", "", token)
+
+
+def _features_export_decode_metadata_value(value: object) -> str:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="ignore").strip()
+    if isinstance(value, str):
+        return value.strip()
+    return ""
+
+
+def _features_export_metadata_lookup(metadata: dict, *keys: str) -> str:
+    if not isinstance(metadata, dict):
+        return ""
+    for key in keys:
+        byte_key = key.encode("utf-8")
+        if byte_key in metadata:
+            resolved = _features_export_decode_metadata_value(metadata.get(byte_key))
+            if resolved:
+                return resolved
+        if key in metadata:
+            resolved = _features_export_decode_metadata_value(metadata.get(key))
+            if resolved:
+                return resolved
+    return ""
+
+
+def _features_export_parse_markdown_table_row(line: str) -> list[str]:
+    stripped = line.strip()
+    if not (stripped.startswith("|") and stripped.endswith("|")):
+        return []
+    return [cell.strip() for cell in stripped.split("|")[1:-1]]
+
+
+def _features_export_parse_interchange_readme(
+    readme_path: pathlib.Path,
+) -> dict[str, dict[str, dict[str, dict[str, str]]]]:
+    if not readme_path.is_file():
+        return {}
+
+    try:
+        lines = readme_path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return {}
+
+    parsed: dict[str, dict[str, dict[str, dict[str, str]]]] = {}
+    current_file = ""
+    in_table = False
+    for raw_line in lines:
+        line = raw_line.strip()
+        heading_match = _FEATURES_EXPORT_INTERCHANGE_HEADING_RE.match(line)
+        if heading_match:
+            current_file = heading_match.group(1).strip().lower()
+            parsed.setdefault(current_file, {"exact": {}, "match": {}})
+            in_table = False
+            continue
+
+        if not current_file:
+            continue
+        if line.lower() == "| column | type | units | description |":
+            in_table = True
+            continue
+        if not in_table:
+            continue
+        if not line.startswith("|"):
+            in_table = False
+            continue
+
+        cells = _features_export_parse_markdown_table_row(line)
+        if len(cells) < 4:
+            continue
+        if all(not cell or set(cell) <= {"-", ":"} for cell in cells):
+            continue
+
+        column_name = cells[0].strip()
+        if not column_name or column_name.lower() == "column":
+            continue
+
+        doc: dict[str, str] = {"label": column_name}
+        units = cells[2].strip()
+        description = cells[3].strip()
+        if units:
+            doc["display_unit"] = units
+        if description:
+            doc["description"] = description
+
+        file_docs = parsed[current_file]
+        exact = file_docs.setdefault("exact", {})
+        match = file_docs.setdefault("match", {})
+        exact.setdefault(column_name, doc)
+        match_key = _features_export_column_match_key(column_name)
+        if match_key:
+            match.setdefault(match_key, doc)
+    return parsed
+
+
+def _features_export_find_source_readme(source_path: pathlib.Path, wd_path: pathlib.Path) -> pathlib.Path | None:
+    current = source_path.parent
+    while True:
+        candidate = current / "README.md"
+        if candidate.is_file():
+            return candidate
+        if current == wd_path:
+            return None
+        if wd_path not in current.parents and current != wd_path:
+            return None
+        parent = current.parent
+        if parent == current:
+            return None
+        current = parent
+
+
+def _features_export_lookup_readme_column_doc(
+    readme_columns: dict[str, dict[str, dict[str, str]]] | None,
+    column_id: str,
+) -> dict[str, str]:
+    if not isinstance(readme_columns, dict):
+        return {}
+
+    exact = readme_columns.get("exact")
+    if isinstance(exact, dict):
+        exact_doc = exact.get(column_id)
+        if isinstance(exact_doc, dict):
+            return dict(exact_doc)
+
+    match = readme_columns.get("match")
+    if isinstance(match, dict):
+        key = _features_export_column_match_key(column_id)
+        match_doc = match.get(key)
+        if isinstance(match_doc, dict):
+            return dict(match_doc)
+    return {}
+
+
+def _features_export_parquet_source_columns(
+    path: pathlib.Path,
+    *,
+    readme_columns: dict[str, dict[str, dict[str, str]]] | None = None,
+) -> list[dict]:
+    if _pyarrow_parquet is None:
+        return []
+
+    try:
+        schema = _pyarrow_parquet.read_schema(path)
+    except _FEATURES_EXPORT_PARQUET_SCHEMA_EXCEPTIONS:
+        return []
+
+    columns: list[dict] = []
+    for field in schema:
+        column_id = str(field.name or "").strip()
+        if not column_id:
+            continue
+        metadata = field.metadata if isinstance(field.metadata, dict) else {}
+        readme_doc = _features_export_lookup_readme_column_doc(readme_columns, column_id)
+        metadata_label = _features_export_metadata_lookup(metadata, "label", "display_name", "long_name")
+        metadata_description = _features_export_metadata_lookup(metadata, "description", "desc")
+        metadata_unit = _features_export_metadata_lookup(metadata, "units", "unit")
+        readme_label = str(readme_doc.get("label") or "").strip()
+        readme_description = str(readme_doc.get("description") or "").strip()
+        readme_unit = str(readme_doc.get("display_unit") or "").strip()
+        display_unit = metadata_unit or readme_unit or _infer_features_export_display_unit(column_id)
+        columns.append(
+            {
+                "column_id": column_id,
+                "label": metadata_label or readme_label or _features_export_column_label(column_id),
+                "display_unit": display_unit,
+                "description": metadata_description or readme_description,
+                "default_selected": True,
+            }
+        )
+    return columns
+
+
+def _features_export_resolve_source_path(
+    *,
+    wd: pathlib.Path,
+    source: dict,
+    scenarios: list[dict],
+    contrasts: list[dict],
+    swat_catalog: dict,
+) -> pathlib.Path | None:
+    locator = source.get("locator") if isinstance(source.get("locator"), dict) else {}
+    kind = str(locator.get("kind") or "").strip()
+    value = str(locator.get("value") or "").strip()
+    if not kind or not value:
+        return None
+
+    if kind == "relpath":
+        return wd / value
+    if kind != "path_template":
+        return None
+
+    latest_swat_run = str(swat_catalog.get("latest_run_id") or "latest").strip() or "latest"
+    all_swat_tables = swat_catalog.get("all_tables", [])
+    swat_table = ""
+    if isinstance(all_swat_tables, list) and all_swat_tables:
+        swat_table = str(all_swat_tables[0] or "").strip()
+
+    context = {
+        "scope_root": "output",
+        "scenario_id": str(scenarios[0].get("id")) if scenarios else "",
+        "contrast_id": str(contrasts[0].get("id")) if contrasts else "",
+        "swat_run_id": latest_swat_run,
+        "table_name": swat_table,
+        "crs_token": "WGS",
+    }
+    try:
+        resolved = value.format_map(context)
+    except KeyError:
+        return None
+    return wd / resolved
+
+
+def _features_export_discover_layer_columns(
+    *,
+    wd: str | None,
+    raw_layer: dict,
+    scenarios: list[dict],
+    contrasts: list[dict],
+    swat_catalog: dict,
+) -> list[dict]:
+    if not wd:
+        return []
+
+    wd_path = pathlib.Path(wd)
+    if not wd_path.exists():
+        return []
+
+    discovered_by_id: dict[str, dict] = {}
+    discovered_order: list[str] = []
+    readme_cache: dict[pathlib.Path, dict[str, dict[str, dict[str, dict[str, str]]]]] = {}
+    for source_entry in raw_layer.get("sources", []):
+        if not isinstance(source_entry, dict):
+            continue
+        if str(source_entry.get("kind") or "").strip() != "parquet":
+            continue
+        source_path = _features_export_resolve_source_path(
+            wd=wd_path,
+            source=source_entry,
+            scenarios=scenarios,
+            contrasts=contrasts,
+            swat_catalog=swat_catalog,
+        )
+        if source_path is None or not source_path.exists():
+            continue
+        readme_columns: dict[str, dict[str, dict[str, str]]] = {}
+        readme_path = _features_export_find_source_readme(source_path, wd_path)
+        if readme_path is not None:
+            parsed_readme = readme_cache.get(readme_path)
+            if parsed_readme is None:
+                parsed_readme = _features_export_parse_interchange_readme(readme_path)
+                readme_cache[readme_path] = parsed_readme
+            readme_columns = parsed_readme.get(source_path.name.lower(), {})
+        for column in _features_export_parquet_source_columns(source_path, readme_columns=readme_columns):
+            column_id = str(column.get("column_id") or "").strip()
+            if not column_id:
+                continue
+            existing = discovered_by_id.get(column_id)
+            if existing is None:
+                discovered_by_id[column_id] = dict(column)
+                discovered_order.append(column_id)
+                continue
+
+            existing_description = str(existing.get("description") or "").strip()
+            incoming_description = str(column.get("description") or "").strip()
+            if not existing_description and incoming_description:
+                existing["description"] = incoming_description
+
+            existing_unit = str(existing.get("display_unit") or "").strip()
+            incoming_unit = str(column.get("display_unit") or "").strip()
+            if (
+                (not existing_unit or existing_unit == "non-unitized")
+                and incoming_unit
+                and incoming_unit != "non-unitized"
+            ):
+                existing["display_unit"] = incoming_unit
+
+            fallback_label = _features_export_column_label(column_id)
+            existing_label = str(existing.get("label") or "").strip()
+            incoming_label = str(column.get("label") or "").strip()
+            if (
+                (not existing_label or existing_label == fallback_label)
+                and incoming_label
+                and incoming_label != fallback_label
+            ):
+                existing["label"] = incoming_label
+    return [discovered_by_id[column_id] for column_id in discovered_order]
+
+
+def _features_export_column_contract(
+    raw_layer: dict,
+    *,
+    discovered_columns: list[dict] | None = None,
+) -> tuple[list[dict], set[str]]:
+    join_contract = raw_layer.get("join") if isinstance(raw_layer.get("join"), dict) else {}
+    geometry_contract = raw_layer.get("geometry") if isinstance(raw_layer.get("geometry"), dict) else {}
+    measures = raw_layer.get("measures") if isinstance(raw_layer.get("measures"), dict) else {}
+    explicit_columns = raw_layer.get("columns") if isinstance(raw_layer.get("columns"), list) else []
+    columns = discovered_columns if discovered_columns else explicit_columns
+
+    required_columns: set[str] = set()
+    required_seen_keys: set[str] = set()
+
+    def _add_required_column(candidate: str) -> None:
+        token = str(candidate or "").strip()
+        if not token:
+            return
+        dedupe_key = _features_export_column_match_key(token) or token.lower()
+        if dedupe_key in required_seen_keys:
+            return
+        required_seen_keys.add(dedupe_key)
+        required_columns.add(token)
+
+    primary_key = str(join_contract.get("primary_key") or "").strip()
+    if primary_key:
+        _add_required_column(primary_key)
+    for feature_key in geometry_contract.get("feature_id_keys", []):
+        _add_required_column(str(feature_key or ""))
+
+    normalized_columns: list[dict] = []
+    seen_column_keys: set[str] = set()
+    required_keys = {
+        key
+        for key in (_features_export_column_match_key(column_id) for column_id in required_columns)
+        if key
+    }
+    for entry in columns:
+        if not isinstance(entry, dict):
+            continue
+        column_id = str(entry.get("column_id") or "").strip()
+        dedupe_key = _features_export_column_match_key(column_id) or column_id
+        if not column_id or dedupe_key in seen_column_keys:
+            continue
+        seen_column_keys.add(dedupe_key)
+        unit_meta = entry.get("unit") if isinstance(entry.get("unit"), dict) else {}
+        is_required = column_id in required_columns or dedupe_key in required_keys
+        display_unit = (
+            str(entry.get("display_unit") or "").strip()
+            or
+            str(unit_meta.get("display_unit") or "").strip()
+            or _infer_features_export_display_unit(column_id)
+        )
+        normalized_columns.append(
+            {
+                "column_id": column_id,
+                "label": str(entry.get("label") or _features_export_column_label(column_id)),
+                "description": str(entry.get("description") or "").strip(),
+                "display_unit": display_unit,
+                "required": is_required,
+                "default_selected": bool(entry.get("default_selected", True) or is_required),
+            }
+        )
+
+    if not normalized_columns:
+        derived_columns: set[str] = set(required_columns)
+        for measure in measures.get("optional", []):
+            if isinstance(measure, str):
+                token = measure.strip()
+                if token:
+                    derived_columns.add(token)
+                continue
+            if not isinstance(measure, dict):
+                continue
+            aliases = measure.get("key_aliases", [])
+            if isinstance(aliases, list):
+                for alias in aliases:
+                    token = str(alias or "").strip()
+                    if token:
+                        derived_columns.add(token)
+        for column_id in sorted(derived_columns):
+            dedupe_key = _features_export_column_match_key(column_id) or column_id
+            if dedupe_key in seen_column_keys:
+                continue
+            seen_column_keys.add(dedupe_key)
+            is_required = column_id in required_columns or dedupe_key in required_keys
+            normalized_columns.append(
+                {
+                    "column_id": column_id,
+                    "label": _features_export_column_label(column_id),
+                    "description": "",
+                    "display_unit": _infer_features_export_display_unit(column_id),
+                    "required": is_required,
+                    "default_selected": is_required,
+                }
+            )
+
+    for required_column in sorted(required_columns):
+        dedupe_key = _features_export_column_match_key(required_column) or required_column
+        if dedupe_key in seen_column_keys:
+            continue
+        seen_column_keys.add(dedupe_key)
+        normalized_columns.append(
+            {
+                "column_id": required_column,
+                "label": _features_export_column_label(required_column),
+                "description": "",
+                "display_unit": _infer_features_export_display_unit(required_column),
+                "required": True,
+                "default_selected": True,
+            }
+        )
+
+    normalized_columns.sort(
+        key=lambda item: (
+            0 if item["required"] else 1,
+            str(item["label"]).lower(),
+            str(item["column_id"]).lower(),
+        )
+    )
+    return normalized_columns, required_columns
+
+
+def _build_features_export_catalog_payload(
+    wd: str | None = None,
+    *,
+    scenarios: list[dict] | None = None,
+    contrasts: list[dict] | None = None,
+    swat_catalog: dict | None = None,
+) -> dict:
+    scenarios = list(scenarios or [])
+    contrasts = list(contrasts or [])
+    swat_catalog = dict(swat_catalog or {})
+
+    if wd and not scenarios and not contrasts and not swat_catalog:
+        scenarios, contrasts = _discover_features_export_omni_selectors(wd)
+        swat_catalog = _discover_features_export_swat_catalog(wd)
+
     try:
         catalog = load_layer_catalog()
     except Exception:
@@ -286,17 +794,32 @@ def _build_features_export_catalog_payload() -> dict:
         raw = dict(layer.raw)
         geometry = raw.get("geometry") if isinstance(raw.get("geometry"), dict) else {}
         geometry_type = geometry.get("type") if isinstance(geometry, dict) else None
-        family = layer.family
+        raw_family = layer.family
+        family = _features_export_ui_family(raw_family)
+        discovered_columns = _features_export_discover_layer_columns(
+            wd=wd,
+            raw_layer=raw,
+            scenarios=scenarios,
+            contrasts=contrasts,
+            swat_catalog=swat_catalog,
+        )
+        columns, required_columns = _features_export_column_contract(
+            raw,
+            discovered_columns=discovered_columns,
+        )
         layers_payload.append(
             {
                 "layer_id": layer.layer_id,
                 "label": _format_features_export_layer_label(layer.layer_id),
                 "family": family,
                 "family_label": _format_features_export_family_label(family),
+                "family_raw": raw_family,
                 "scope_class": layer.scope_class,
                 "geometry_type": str(geometry_type or "unknown"),
                 "temporal_modes": list(layer.temporal_supported_modes),
                 "selector_requirements": _features_export_selector_requirements(family),
+                "columns": columns,
+                "required_columns": sorted(required_columns),
                 "raw": raw,
             }
         )
@@ -385,6 +908,115 @@ def _discover_features_export_swat_catalog(wd: str) -> dict:
     }
 
 
+def _features_export_layer_discovery_available(
+    *,
+    wd: pathlib.Path,
+    layer,
+    roads_scope_available: bool,
+    scenarios: list[dict],
+    contrasts: list[dict],
+    swat_catalog: dict,
+) -> bool:
+    raw_layer = layer.raw if isinstance(layer.raw, dict) else {}
+    ui_family = _features_export_ui_family(layer.family)
+
+    if ui_family == "omni_scenarios":
+        return bool(scenarios)
+    if ui_family == "omni_contrasts":
+        return bool(contrasts)
+    if ui_family == "swat_interchange":
+        return bool(swat_catalog.get("runs"))
+
+    required_locators: list[dict] = []
+    for source in raw_layer.get("sources", []):
+        if not isinstance(source, dict):
+            continue
+        if bool(source.get("required", False)):
+            locator = source.get("locator")
+            if isinstance(locator, dict):
+                required_locators.append(locator)
+    for dependency in raw_layer.get("dependencies", []):
+        if not isinstance(dependency, dict):
+            continue
+        if bool(dependency.get("required", False)):
+            locator = dependency.get("locator")
+            if isinstance(locator, dict):
+                required_locators.append(locator)
+
+    template_context = {
+        "scope_root": "output",
+        "scenario_id": scenarios[0]["id"] if scenarios else "",
+        "contrast_id": contrasts[0]["id"] if contrasts else "",
+        "swat_run_id": str(swat_catalog.get("latest_run_id") or "none"),
+        "table_name": "",
+        "crs_token": "WGS",
+    }
+
+    for locator in required_locators:
+        kind = str(locator.get("kind") or "").strip()
+        value = str(locator.get("value") or "").strip()
+        if not kind or not value:
+            continue
+        if kind == "nodb_ref":
+            continue
+        if kind == "relpath":
+            candidate = wd / value
+        elif kind == "path_template":
+            try:
+                expanded = value.format_map(template_context)
+            except KeyError:
+                return False
+            candidate = wd / expanded
+        else:
+            continue
+        if not candidate.exists():
+            return False
+
+    return True
+
+
+def _build_features_export_discovery_payload(
+    wd: str,
+    *,
+    scenarios: list[dict],
+    contrasts: list[dict],
+    swat_catalog: dict,
+) -> dict:
+    wd_path = pathlib.Path(wd)
+    roads_scope_available = (wd_path / "wepp" / "roads" / "output").is_dir()
+    try:
+        catalog = load_layer_catalog()
+    except Exception:
+        return {
+            "roads_scope_available": roads_scope_available,
+            "available_layer_ids": [],
+            "available_families": [],
+            "refresh_channel": "features_export",
+        }
+
+    available_layer_ids: list[str] = []
+    available_families: set[str] = set()
+    for layer in catalog.layers:
+        if not _features_export_layer_discovery_available(
+            wd=wd_path,
+            layer=layer,
+            roads_scope_available=roads_scope_available,
+            scenarios=scenarios,
+            contrasts=contrasts,
+            swat_catalog=swat_catalog,
+        ):
+            continue
+        available_layer_ids.append(layer.layer_id)
+        available_families.add(_features_export_ui_family(layer.family))
+
+    return {
+        "roads_scope_available": roads_scope_available,
+        "available_layer_ids": sorted(set(available_layer_ids)),
+        "available_families": sorted(available_families),
+        "refresh_channel": "features_export",
+    }
+
+
 def _resolve_features_export_utm_epsg(ron: Ron) -> int | None:
     map_obj = getattr(ron, "map", None)
     if map_obj is None:
@@ -404,6 +1036,12 @@ def _resolve_features_export_utm_epsg(ron: Ron) -> int | None:
 def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_epsg: int | None) -> dict:
     scenarios, contrasts = _discover_features_export_omni_selectors(wd)
     swat_catalog = _discover_features_export_swat_catalog(wd)
+    discovery_payload = _build_features_export_discovery_payload(
+        wd,
+        scenarios=scenarios,
+        contrasts=contrasts,
+        swat_catalog=swat_catalog,
+    )
     preferred_swat_run_id = swat_catalog.get("latest_run_id") or "latest"
 
     return {
@@ -422,8 +1060,8 @@ def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_eps
                 "swat_run_id": "latest",
                 "layers": list(FEATURES_EXPORT_DEFAULT_LAYER_IDS),
                 "temporal": None,
-                "scenario": None,
-                "contrast_id": None,
+                "scenarios": [],
+                "contrast_ids": [],
                 "swat_tables": None,
             }
         },
@@ -439,6 +1077,7 @@ def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_eps
             "tables_by_run": swat_catalog["tables_by_run"],
             "all_tables": swat_catalog["all_tables"],
         },
+        "discovery": discovery_payload,
         "runtime": {
             "readonly": bool(getattr(ron, "readonly", False)),
         },
@@ -1054,7 +1693,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     features_export_utm_epsg = None
     if show_features_export:
         features_export_utm_epsg = _resolve_features_export_utm_epsg(ron)
-        features_export_catalog_payload = _build_features_export_catalog_payload()
+        features_export_catalog_payload = _build_features_export_catalog_payload(wd)
         features_export_bootstrap_payload = _build_features_export_bootstrap_payload(
             wd,
             ron,

@@ -517,3 +517,8 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
         'id="hint_run_features_export"',
     ):
         assert token in rendered
+
+    crs_index = rendered.index('data-features-export-field="crs"')
+    year_selection_index = rendered.index('for="features_export_temporal_year_selection"')
+    temporal_group_index = rendered.index('data-features-export-group="temporal"')
+    assert crs_index < year_selection_index < temporal_group_index
