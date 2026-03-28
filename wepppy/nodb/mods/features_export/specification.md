@@ -11,6 +11,8 @@ Create a NoDb `features_export` mod for user-configurable spatial and spatial-te
 This is an immediate replacement for legacy gpkg/gdb export behavior, but implemented with NoDb controller patterns, canonical RQ polling contracts, and dependency-aware cache reuse.
 AgFields support is parity+ (spatial + WEPP interchange metrics), including automatic on-demand AgFields interchange generation when required for requested export layers.
 Data extraction and merge orchestration for export payload assembly is DuckDB-first (SQL joins/projections/filters) for performance and deterministic schema control; pandas merge loops are non-compliant for production payload assembly paths.
+The normative materialization architecture is key-first and geometry-last: build one attribute table per carrier/context/scope keyed by canonical ids, then attach geometry exactly once from canonical carrier geometry.
+This architecture is the default implementation contract (no temporary feature-flagged parallel path).
 User-facing dataset labels and output layer names must prioritize established WEPP output vocabulary over internal family or implementation tokens.
 
 ## 2. Supported Formats
@@ -131,6 +133,20 @@ Export behavior:
 - If one requested scope is missing for a scope-aware layer, export available scopes and emit warning code `scope_missing_layer`.
 - If a requested scope is not applicable to a scope-invariant layer, emit warning code `scope_not_applicable`.
 - If no layer resolves after scope processing, return 404.
+
+Carrier materialization contract (normative):
+- Consolidated carriers are built in two phases:
+  - Phase A (`DuckDB attribute core`): materialize one table per `{context, selector_id, scope, carrier}` from discovered datasets using canonical join keys.
+  - Phase B (`geometry attach`): join Phase A output to a canonical carrier geometry table exactly once.
+- Canonical key precedence:
+  - Subcatchments carrier: `topaz_id` preferred, `wepp_id` fallback.
+  - Channels carrier: `chn_id` preferred, `topaz_id` fallback.
+  - Catalog `join.source_key_map` overrides remain authoritative for source-specific key resolution.
+- Each source dataset must be reduced to one row per effective carrier key before joining into Phase A output (via deterministic temporal filtering, deterministic projection, and deterministic dedupe/aggregation rules when needed).
+- Unresolved many-to-many key joins on a carrier hot path are contract violations and must fail explicitly with `materialization_error`; silent Cartesian growth is forbidden.
+- Canonical carrier geometry tables must contain one geometry row per effective carrier key. When raw geometry sources contain repeated key rows, geometry must be canonicalized (for example, deterministic dissolve/aggregation) before Phase B.
+- For spatial carriers, the canonical geometry keyset is the authoritative export row domain. Phase A keys not present in canonical geometry are excluded before final attachment, and final row/feature counts must match canonical carrier entity counts.
+- Repeated geometry-attached frame merges (geometry-first per-dataset pipelines) are non-compliant for production export paths.
 
 ## 5. API Contract (rq-engine)
 ### 5.1 Submit Export Job
@@ -547,6 +563,8 @@ Back-compat behavior for existing saved configs:
 ## 13. Acceptance Criteria
 - All seven formats export successfully on representative runs.
 - Dataset merge/materialization path is DuckDB-first for production export payload assembly (no pandas merge loops on the hot path).
+- Materialization is key-first/geometry-last: exactly one DuckDB carrier core table per `{context, selector_id, scope, carrier}` plus one final geometry attach.
+- Export row counts are bounded by carrier key cardinality; multiplicative row growth from repeated many-to-many joins is a contract failure.
 - Single-layer formats produce zipped files with one file per resolved layer.
 - Multi-layer formats produce one container artifact per request.
 - Base WEPP context exports at most two consolidated spatial layers per requested scope (`sbs_map-subcatchments` and/or `chan_map-channels`).
@@ -579,6 +597,7 @@ Back-compat behavior for existing saved configs:
 - Discovery hides unavailable families and disables unavailable `roads` scope without requiring manual detection refresh.
 - `layer_catalog.yaml` schema validation enforces locator vocabulary, temporal mode rules, and join-key precedence.
 - Optional measure availability (for example `tsmf`, phosphorus, `QRain`, `QSnow`) follows catalog rules and emits `measure_unavailable` warnings when absent.
+- Baseline default export for run `clogging-starch/disturbed9002-wbt-mofe` is a regression anchor with exactly two spatial layers and carrier-aligned feature counts (`66` subcatchments, `27` channels).
 - RedisPrep/TaskEnum timestamps and `rq:features_export` tracking are wired.
 - `units=si|english|project` all work with manifest conversion metadata.
 - Unit-applicable exported columns include unit tokens in column names and are documented in manifest column mapping metadata.
@@ -708,10 +727,10 @@ WP-5: Runs-page UI control integration
 WP-6: Cutover and legacy retirement
 - Remove legacy gpkg/gdb routes and completion hooks.
 - Finalize migration warnings for ignored legacy flags.
-- Deliverable: feature flag/cutover complete with regression suite passing.
+- Deliverable: cutover complete with regression suite passing.
 
 WP-7: Reconciliation pass for WEPP naming, temporal controls, and consolidated layer outputs (planned 2026-03-27)
-- Status: active via `docs/mini-work-packages/20260327_features_export_reconciliation_execplan.md`.
+- Status: complete via `docs/mini-work-packages/20260327_features_export_reconciliation_execplan.md`; architecture correction landed in WP-8.
 - Scope: reconcile taxonomy/UI/selector behavior with operator expectations, replace merge hot path with DuckDB-oriented consolidation for WEPP/Omni contexts, and land deterministic naming/temporal contracts.
 - Contract clarification: WEPP outputs are presented as one family with familiar output names; internal labels (for example `wepp.temporal.events`) are hidden.
 - Contract clarification: yearly mode must export all years by default and year-selection controls are global while temporal mode selection is dataset-scoped.
@@ -722,6 +741,14 @@ WP-7: Reconciliation pass for WEPP naming, temporal controls, and consolidated l
 - Contract clarification: a post-WP-7 defaults profile is planned to replace `prep_details` with geometryless exports plus curated column-selection presets.
 - Deliverable: reconciled backend/UI contract with regression and performance validation coverage.
 
+WP-8: Key-first carrier materialization rewrite and module maintainability refactor (planned 2026-03-27)
+- Status: complete via `docs/mini-work-packages/20260327_features_export_key_first_materialization_execplan.md` (validated 2026-03-28 with `66/27` baseline carrier counts on `clogging-starch/disturbed9002-wbt-mofe`).
+- Scope: replace geometry-first dataset materialization with key-first DuckDB carrier-core assembly, enforce one-row-per-key join contracts, canonicalize carrier geometry, and split service orchestration into maintainable collaborators (`discovery`, `join_planner`, `duckdb_materializer`, `geometry_carriers`, `manifest_builder`).
+- Contract clarification: no temporary feature flag is allowed; the rewritten key-first path becomes the default implementation.
+- Contract clarification: discovery-driven schema extraction (column labels/descriptions/units) is required input to both UI payloads and column-selection validation for layers without explicit catalog `columns`.
+- Contract clarification: baseline default exports must materialize only `subcatchments` and `channels` carrier layers with carrier-grain row counts.
+- Deliverable: maintainable and performant default export path with deterministic cardinality, deterministic naming, and verified small-watershed runtime targets.
+
 ### 14.2 Dependency Order And Parallelism
 - WP-1 depends on completed WP-0 Unitizer APIs.
 - WP-2 depends on WP-1 outputs.
@@ -729,7 +756,8 @@ WP-7: Reconciliation pass for WEPP naming, temporal controls, and consolidated l
 - WP-4 depends on WP-2 and WP-3.
 - WP-5 can begin after WP-1 contracts stabilize, then finalize against WP-4 endpoints.
 - WP-7 depends on WP-4/WP-5 behavior and may revise portions of both.
-- WP-6 final cutover validation follows WP-7.
+- WP-8 depends on WP-7 outputs and supersedes WP-7 merge-path assumptions.
+- WP-6 final cutover validation follows WP-8.
 
 ### 14.3 Keep-It-Organized Rules
 - Keep planner and validation logic pure and side-effect free.

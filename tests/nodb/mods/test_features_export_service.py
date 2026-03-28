@@ -17,12 +17,15 @@ from wepppy.nodb.mods.features_export.contracts import (
     ResolvedExportPlan,
     ResolvedLayerPlan,
 )
+from wepppy.nodb.mods.features_export.discovery import DiscoveredSourceFrame
 from wepppy.nodb.mods.features_export.dependency_tracker import DependencyEntry, DependencySnapshot
+from wepppy.nodb.mods.features_export.duckdb_materializer import materialize_layer_attributes
 from wepppy.nodb.mods.features_export.exporters import (
     ExportArtifactMetadata,
     ExportedLayerArtifact,
     PreparedLayerPayload,
 )
+from wepppy.nodb.mods.features_export.join_planner import MaterializationContractError
 
 pytestmark = pytest.mark.unit
 
@@ -678,6 +681,54 @@ def test_merge_source_dataframe_supports_duplicate_right_keys_fanout() -> None:
     assert len(merged.index) == 2
     assert sorted(merged["metric"].tolist()) == [5.0, 7.0]
     assert source_column_map["metric"] == "metric"
+
+
+def test_materialize_layer_attributes_rejects_conflicting_duplicate_source_keys() -> None:
+    with pytest.raises(MaterializationContractError, match="many-to-many"):
+        materialize_layer_attributes(
+            layer_id="wepp.summary.hillslopes",
+            carrier_layer="sbs_map-subcatchments",
+            join_contract={"primary_key": "topaz_id", "fallback_keys": ["TopazID"]},
+            sources=(
+                DiscoveredSourceFrame(
+                    source_id="conflicting_source",
+                    source_kind="parquet",
+                    required=True,
+                    dataframe=pd.DataFrame(
+                        {
+                            "topaz_id": [1, 1],
+                            "runoff_mm": [5.0, 7.0],
+                        }
+                    ),
+                    units_by_column={},
+                ),
+            ),
+        )
+
+
+def test_materialize_layer_attributes_collapses_benign_duplicate_source_keys() -> None:
+    merged, _ = materialize_layer_attributes(
+        layer_id="wepp.summary.hillslopes",
+        carrier_layer="sbs_map-subcatchments",
+        join_contract={"primary_key": "topaz_id", "fallback_keys": ["TopazID"]},
+        sources=(
+            DiscoveredSourceFrame(
+                source_id="duplicate_source",
+                source_kind="parquet",
+                required=True,
+                dataframe=pd.DataFrame(
+                    {
+                        "topaz_id": [1, 1],
+                        "runoff_mm": [5.0, 5.0],
+                    }
+                ),
+                units_by_column={"runoff_mm": "mm"},
+            ),
+        ),
+    )
+
+    assert len(merged.index) == 1
+    assert merged.iloc[0]["runoff_mm"] == pytest.approx(5.0)
 
 
 def test_execute_features_export_writes_spatial_geopackage_layers(

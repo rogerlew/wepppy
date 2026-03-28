@@ -41,6 +41,12 @@ from .cache_key import CacheKeyParts, build_cache_key, get_cache_index_entry, up
 from .catalog_loader import LayerCatalog, load_layer_catalog
 from .contracts import DEFAULT_SWAT_RUN_ID, ExportWarning, ResolvedExportPlan, ResolvedLayerPlan, WARNING_LAYER_UNAVAILABLE
 from .dependency_tracker import DependencySnapshot, build_dependency_snapshot
+from .discovery import discover_layer_sources, layer_key_candidates, resolve_geometry_relpath
+from .duckdb_materializer import (
+    LayerCarrierInput,
+    materialize_carrier_core,
+    materialize_layer_attributes,
+)
 from .exporters import (
     ExportArtifactMetadata,
     ExportedLayerArtifact,
@@ -48,7 +54,10 @@ from .exporters import (
     PreparedLayerPayload,
     get_export_writer,
 )
+from .geometry_carriers import attach_geometry_once, build_canonical_geometry_carrier
+from .join_planner import JOIN_KEY_COLUMN, MaterializationContractError
 from .manifest import build_export_manifest, write_export_manifest
+from .manifest_builder import build_output_layer_column_metadata
 from .planner import resolve_export_plan
 
 FEATURES_EXPORT_ROOT_RELPATH = "export/features"
@@ -56,7 +65,7 @@ FEATURES_EXPORT_ARTIFACTS_RELPATH = "export/features/artifacts"
 FEATURES_EXPORT_JOBS_RELPATH = "export/features/jobs"
 FEATURES_EXPORT_MANIFEST_NAME = "manifest.json"
 _GPKG_APPLICATION_ID = 0x47504B47
-_CONSOLIDATED_JOIN_KEY_COLUMN = "__features_export_join_key__"
+_CONSOLIDATED_JOIN_KEY_COLUMN = JOIN_KEY_COLUMN
 _SAFE_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
 _IDENTITY_COLUMN_TOKENS = frozenset({"topazid", "chnid", "channelid", "weppid", "id"})
 
@@ -96,6 +105,16 @@ class _LayerFrameResult:
     selected_columns: tuple[str, ...]
     unit_mapping: dict[str, str]
     warnings: tuple[ExportWarning, ...]
+
+
+@dataclass(frozen=True)
+class _LayerCoreResult:
+    layer: ResolvedLayerPlan
+    frame: pd.DataFrame
+    selected_columns: tuple[str, ...]
+    unit_mapping: dict[str, str]
+    warnings: tuple[ExportWarning, ...]
+    catalog_layer_raw: dict[str, object]
 
 
 def prepare_export_submission(
@@ -513,7 +532,8 @@ def _materialize_export_payloads(
             continue
         entries_by_output_layer_id.setdefault(output_layer_id, []).append(entry)
 
-    frame_results: dict[str, _LayerFrameResult] = {}
+    layer_core_results: dict[str, _LayerCoreResult] = {}
+    legacy_frame_results: dict[str, _LayerFrameResult] = {}
     for layer in submission.plan.layers:
         catalog_layer = submission.catalog.get_layer(layer.layer_id)
         if catalog_layer is None:
@@ -524,12 +544,78 @@ def _materialize_export_payloads(
                 details=f"Missing catalog definition for {layer.layer_id!r}.",
             )
 
-        frame_results[layer.output_layer_id] = _build_layer_frame_from_sources(
+        dependency_entries = entries_by_output_layer_id.get(layer.output_layer_id, [])
+        if not layer.carrier_layer:
+            legacy_frame_results[layer.output_layer_id] = _build_layer_frame_from_sources(
+                wd=wd,
+                layer=layer,
+                catalog_layer_raw=catalog_layer.raw,
+                request_plan=submission.plan,
+                dependency_entries=dependency_entries,
+            )
+            continue
+
+        discovered_sources, discovery_warnings = discover_layer_sources(
             wd=wd,
+            layer_id=layer.layer_id,
+            scope=layer.scope,
+            catalog_layer_raw=catalog_layer.raw,
+            dependency_entries=dependency_entries,
+        )
+        if not discovered_sources:
+            raise FeaturesExportServiceError(
+                "No source tables were available for carrier layer materialization.",
+                status_code=500,
+                code="materialization_error",
+                details=f"layer={layer.layer_id!r}; output_layer_id={layer.output_layer_id!r}",
+            )
+
+        join_contract = _as_mapping(catalog_layer.raw.get("join"))
+        try:
+            layer_frame, discovered_units = materialize_layer_attributes(
+                layer_id=layer.layer_id,
+                carrier_layer=layer.carrier_layer,
+                join_contract=join_contract,
+                sources=discovered_sources,
+            )
+        except MaterializationContractError as exc:
+            raise FeaturesExportServiceError(
+                "Key-first layer materialization failed.",
+                status_code=500,
+                code="materialization_error",
+                details=exc.details,
+            ) from exc
+
+        selected_columns, unit_mapping = _resolve_selected_columns(
             layer=layer,
+            frame=layer_frame,
             catalog_layer_raw=catalog_layer.raw,
             request_plan=submission.plan,
-            dependency_entries=entries_by_output_layer_id.get(layer.output_layer_id, []),
+            discovered_units=discovered_units,
+        )
+        if _CONSOLIDATED_JOIN_KEY_COLUMN not in layer_frame.columns:
+            raise FeaturesExportServiceError(
+                "Layer materialization table is missing canonical join key.",
+                status_code=500,
+                code="materialization_error",
+                details=f"layer={layer.layer_id!r}; key={_CONSOLIDATED_JOIN_KEY_COLUMN!r}",
+            )
+
+        projected_columns: list[str] = [
+            column_name
+            for column_name in selected_columns
+            if column_name in layer_frame.columns and column_name != _CONSOLIDATED_JOIN_KEY_COLUMN
+        ]
+        projected_columns.append(_CONSOLIDATED_JOIN_KEY_COLUMN)
+        projected_frame = layer_frame[projected_columns].copy()
+
+        layer_core_results[layer.output_layer_id] = _LayerCoreResult(
+            layer=layer,
+            frame=projected_frame,
+            selected_columns=selected_columns,
+            unit_mapping=unit_mapping,
+            warnings=tuple(discovery_warnings),
+            catalog_layer_raw=_as_mapping(catalog_layer.raw),
         )
 
     payloads: dict[str, PreparedLayerPayload] = {}
@@ -539,15 +625,215 @@ def _materialize_export_payloads(
         source_layers = grouped_layers.get(layer.output_layer_id, ())
         if not source_layers:
             continue
-        source_results = [frame_results[item.output_layer_id] for item in source_layers]
-        payload, column_metadata = _build_materialized_layer_payload(
-            layer,
-            source_results=source_results,
-        )
+
+        if not layer.carrier_layer:
+            source_results = [legacy_frame_results[item.output_layer_id] for item in source_layers]
+            payload, column_metadata = _build_materialized_layer_payload(
+                layer,
+                source_results=source_results,
+            )
+            payloads[layer.output_layer_id] = payload
+            column_metadata_by_output_layer_id[layer.output_layer_id] = column_metadata
+            continue
+
+        source_results = [layer_core_results[item.output_layer_id] for item in source_layers]
+        try:
+            payload, column_metadata = _build_key_first_materialized_layer_payload(
+                wd=wd,
+                layer=layer,
+                source_layers=source_layers,
+                source_results=source_results,
+                entries_by_output_layer_id=entries_by_output_layer_id,
+            )
+        except MaterializationContractError as exc:
+            raise FeaturesExportServiceError(
+                "Key-first carrier materialization failed.",
+                status_code=500,
+                code="materialization_error",
+                details=exc.details,
+            ) from exc
+
         payloads[layer.output_layer_id] = payload
         column_metadata_by_output_layer_id[layer.output_layer_id] = column_metadata
 
     return materialized_plan, payloads, column_metadata_by_output_layer_id
+
+
+def _build_key_first_materialized_layer_payload(
+    *,
+    wd: Path,
+    layer: ResolvedLayerPlan,
+    source_layers: cabc.Sequence[ResolvedLayerPlan],
+    source_results: cabc.Sequence[_LayerCoreResult],
+    entries_by_output_layer_id: cabc.Mapping[str, cabc.Sequence[object]],
+) -> tuple[PreparedLayerPayload, dict[str, object]]:
+    if not source_results:
+        raise MaterializationContractError(
+            "No source tables were available for carrier payload materialization.",
+            details=f"output_layer_id={layer.output_layer_id!r}",
+        )
+
+    warnings: list[ExportWarning] = []
+    layer_inputs: list[LayerCarrierInput] = []
+    for result in source_results:
+        warnings.extend(result.warnings)
+        layer_inputs.append(
+            LayerCarrierInput(
+                layer_id=result.layer.layer_id,
+                dataframe=result.frame,
+                selected_columns=result.selected_columns,
+                unit_mapping=result.unit_mapping,
+            )
+        )
+
+    carrier_core = materialize_carrier_core(
+        carrier_label=layer.output_layer_id,
+        layer_inputs=layer_inputs,
+    )
+
+    candidate_key_tokens: list[str] = []
+    geometry_relpaths: list[str] = []
+    for source_layer, source_result in zip(source_layers, source_results):
+        candidate_key_tokens.extend(layer_key_candidates(source_result.catalog_layer_raw))
+        dependency_entries = entries_by_output_layer_id.get(source_layer.output_layer_id, ())
+        geometry_relpath = resolve_geometry_relpath(dependency_entries)
+        if geometry_relpath is not None:
+            geometry_relpaths.append(geometry_relpath)
+
+    geometry_carrier = build_canonical_geometry_carrier(
+        wd=wd,
+        carrier_layer=layer.carrier_layer,
+        geometry_relpaths=geometry_relpaths,
+        candidate_key_tokens=candidate_key_tokens,
+    )
+    geometry_keys = set(geometry_carrier.dataframe[_CONSOLIDATED_JOIN_KEY_COLUMN].tolist())
+    core_for_geometry = carrier_core.dataframe[
+        carrier_core.dataframe[_CONSOLIDATED_JOIN_KEY_COLUMN].isin(geometry_keys)
+    ].reset_index(drop=True)
+    if core_for_geometry.empty:
+        raise MaterializationContractError(
+            "Carrier core contains no keys that match canonical carrier geometry.",
+            details=f"output_layer_id={layer.output_layer_id!r}; carrier={layer.carrier_layer!r}",
+        )
+
+    merged = attach_geometry_once(
+        core_table=core_for_geometry,
+        geometry_carrier=geometry_carrier,
+    )
+
+    selected_columns = _carrier_selected_columns(
+        merged=merged,
+        carrier_core=carrier_core,
+        source_results=source_results,
+    )
+    unit_mapping = _carrier_unit_mapping(
+        selected_columns=selected_columns,
+        carrier_core=carrier_core,
+        source_results=source_results,
+    )
+
+    merged = merged.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
+    geometry_name = merged.geometry.name
+    projection_columns = [column for column in selected_columns if column in merged.columns and column != geometry_name]
+    selected_columns = tuple(_dedupe_identity_selected_columns(projection_columns))
+    merged = gpd.GeoDataFrame(
+        merged[list(selected_columns) + [geometry_name]],
+        geometry=geometry_name,
+        crs=merged.crs,
+    )
+
+    row_count = int(len(merged.index))
+    feature_count = int(merged.geometry.notna().sum())
+    payload = _serialize_feature_collection_payload(
+        merged,
+        layer_id=layer.layer_id,
+        output_layer_id=layer.output_layer_id,
+        scope=layer.scope,
+        scope_class=layer.scope_class,
+    )
+
+    column_metadata = build_output_layer_column_metadata(
+        source_layer_ids=carrier_core.source_layer_ids,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        materialization={
+            "strategy": "key_first_geometry_last",
+            "carrier_layer": layer.carrier_layer,
+            "carrier_key_column": geometry_carrier.key_column,
+            "geometry_relpath": geometry_carrier.geometry_relpath,
+            "core_row_count": int(len(core_for_geometry.index)),
+            "geometry_row_count": int(len(geometry_carrier.dataframe.index)),
+        },
+    )
+
+    return (
+        PreparedLayerPayload(
+            output_layer_id=layer.output_layer_id,
+            payload=payload,
+            row_count=row_count,
+            feature_count=feature_count,
+            warnings=tuple(warnings),
+        ),
+        column_metadata,
+    )
+
+
+def _carrier_selected_columns(
+    *,
+    merged: gpd.GeoDataFrame,
+    carrier_core: object,
+    source_results: cabc.Sequence[_LayerCoreResult],
+) -> tuple[str, ...]:
+    geometry_name = merged.geometry.name
+    selected_columns: list[str] = []
+    for column_name in getattr(carrier_core, "selected_columns", ()):
+        if column_name in merged.columns and column_name != geometry_name and column_name not in selected_columns:
+            selected_columns.append(column_name)
+
+    for source_result in source_results:
+        for column_name in source_result.selected_columns:
+            if column_name in merged.columns and column_name != geometry_name and column_name not in selected_columns:
+                selected_columns.append(column_name)
+        for required_column in _required_identity_columns(source_result.catalog_layer_raw):
+            if required_column in merged.columns and required_column != geometry_name and required_column not in selected_columns:
+                selected_columns.append(required_column)
+
+    if not selected_columns:
+        selected_columns = [
+            column_name
+            for column_name in merged.columns
+            if column_name not in {geometry_name, _CONSOLIDATED_JOIN_KEY_COLUMN}
+        ]
+
+    return tuple(_dedupe_identity_selected_columns(selected_columns))
+
+
+def _carrier_unit_mapping(
+    *,
+    selected_columns: cabc.Sequence[str],
+    carrier_core: object,
+    source_results: cabc.Sequence[_LayerCoreResult],
+) -> dict[str, str]:
+    merged_units: dict[str, str] = {}
+    for column_name, unit_value in getattr(carrier_core, "unit_mapping", {}).items():
+        if isinstance(unit_value, str) and unit_value.strip():
+            merged_units[column_name] = unit_value.strip()
+
+    for source_result in source_results:
+        for column_name, unit_value in source_result.unit_mapping.items():
+            if column_name in merged_units:
+                continue
+            if isinstance(unit_value, str) and unit_value.strip():
+                merged_units[column_name] = unit_value.strip()
+
+    resolved: dict[str, str] = {}
+    for column_name in selected_columns:
+        unit_value = merged_units.get(column_name)
+        if isinstance(unit_value, str) and unit_value.strip():
+            resolved[column_name] = unit_value.strip()
+        else:
+            resolved[column_name] = _infer_display_unit_for_column(column_name)
+    return resolved
 
 
 def _build_materialized_execution_plan(
@@ -901,12 +1187,12 @@ def _request_column_selection_payload(plan: ResolvedExportPlan) -> dict[str, dic
 def _resolve_selected_columns(
     *,
     layer: ResolvedLayerPlan,
-    frame: gpd.GeoDataFrame,
+    frame: pd.DataFrame,
     catalog_layer_raw: cabc.Mapping[str, object],
     request_plan: ResolvedExportPlan,
     discovered_units: cabc.Mapping[str, str] | None = None,
 ) -> tuple[tuple[str, ...], dict[str, str]]:
-    geometry_name = frame.geometry.name
+    geometry_name = frame.geometry.name if isinstance(frame, gpd.GeoDataFrame) else None
     available_columns = [
         column_name
         for column_name in frame.columns
@@ -947,6 +1233,10 @@ def _resolve_selected_columns(
     selected_columns: list[str] = []
     for column_name in [*required_selected, *selected_optional]:
         if column_name in available_set and column_name not in selected_columns:
+            selected_columns.append(column_name)
+
+    for column_name in required_columns:
+        if column_name not in selected_columns:
             selected_columns.append(column_name)
 
     if not selected_columns:

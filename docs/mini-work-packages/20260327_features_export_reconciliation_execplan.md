@@ -92,6 +92,8 @@ The expected user-visible outcome is that a typical base WEPP export produces up
 - `wctl run-pytest tests/weppcloud/routes/test_run_0_openet_admin_gate.py -k features_export --maxfail=1` -> `10 passed`
 - `wctl run-npm test -- features_export` -> `12 passed`
 - `wctl run-playwright --env dev --no-create-run --run-path "https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/?playwright_load_all=true" --workers 1 --grep "features_export"` -> `1 passed`
+- [x] (2026-03-27 23:40Z) Documented post-WP-7 architecture correction need: updated `specification.md` with key-first/geometry-last carrier contract and authored follow-on WP-8 execplan at `docs/mini-work-packages/20260327_features_export_key_first_materialization_execplan.md`.
+- [x] (2026-03-28 03:29Z) Linked WP-8 completion evidence back to WP-7 reconciliation: key-first carrier path now live with required validations passing and run-path evidence (`manual-wp8-cold-v2-*` / `manual-wp8-warm-v2-*`) showing final two-layer `66/27` baseline output on `/wc1/runs/cl/clogging-starch`.
 
 ## Surprises & Discoveries
 
@@ -121,6 +123,8 @@ The expected user-visible outcome is that a typical base WEPP export produces up
   Evidence: direct metadata inspection via `wctl exec weppcloud python` and README table review under `/wc1/runs/cl/clogging-starch/wepp/output/interchange/README.md`.
 - Observation: required identity aliases (`topaz_id`, `TopazID`) can silently force duplicate lock-columns in selectors unless canonicalized before UI contract emission.
   Evidence: operator screenshot + prior contract behavior that treated each alias token as independently required.
+- Observation: current consolidated merge path still multiplies rows because multiple geometry-backed frames are joined repeatedly on non-unique keys.
+  Evidence: `/wc1/runs/cl/clogging-starch` artifact had `391,930` subcatchment rows and `35,292` channel rows; key-frequency math matches `sum(n_i^4)` and `sum(n_i^2)` respectively.
 
 ## Decision Log
 
@@ -175,6 +179,9 @@ The expected user-visible outcome is that a typical base WEPP export produces up
 - Decision: Render catalog with explicit nested hierarchy classes (`features-export-tree__family`, `__dataset`, `__columns`) and keep checkboxes outside `<summary>`.
   Rationale: Improves scanability and interaction clarity while staying compliant with PureCSS control semantics.
   Date/Author: 2026-03-28 / Codex
+- Decision: Start a follow-on WP-8 rewrite for key-first DuckDB carrier materialization with no temporary flag.
+  Rationale: WP-7 reconciliation improved UX/discovery contracts but did not fully solve cardinality/performance regression in default exports; merge architecture must change.
+  Date/Author: 2026-03-27 / Codex
 
 ## Outcomes & Retrospective
 
@@ -196,6 +203,7 @@ Delivered outcomes:
 
 Residual follow-on:
 - Full profile replacement work for `prep_details` remains post-WP-7 as intended by scope.
+- WP-8 key-first carrier rewrite and service modularization are complete (`20260327_features_export_key_first_materialization_execplan.md`), including required validations and live run-path `66/27` evidence; future follow-on can focus on non-carrier/table-profile specialization and broader performance profiling.
 
 ## Context and Orientation
 
