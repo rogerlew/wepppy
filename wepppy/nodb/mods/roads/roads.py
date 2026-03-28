@@ -1823,6 +1823,11 @@ class Roads(NoDbBase):
                 if initial_condition_index_counter == 3:
                     line = self._replace_leading_int(line, 2)
 
+            if "# `itype'" in line:
+                match = re.match(r"^\s*(\d+)", line)
+                if match and int(match.group(1)) == 3:
+                    line = self._replace_leading_int(line, 2)
+
             if "# `nycrop'" in line and "OFE :" in line:
                 if "OFE : 2" in line:
                     skip_next_year_index = True

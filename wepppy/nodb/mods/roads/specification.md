@@ -527,7 +527,8 @@ Contributor variants:
 - channel-associated segments: one-OFE road contributor (phase-1 behavior retained).
 - non-channel routed segments: two-OFE routed contributor (`road OFE + buffer OFE`), where:
   - road OFE uses the existing inslope road parameterization,
-  - buffer OFE uses trace-derived `path_length_m` and slope statistics.
+  - buffer OFE uses trace-derived `path_length_m` and slope statistics,
+  - routed management transform strips fill scenario content and remaps yearly FOREST `itype` from `3` to `2` so WEPP management cardinality stays aligned with two-scenario output.
 
 Required output for each successful segment run:
 

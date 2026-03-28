@@ -324,6 +324,8 @@ def test_build_routed_two_ofe_management_file_keeps_road_and_buffer(tmp_path: Pa
     assert "OFE : 3" not in text
     assert "OFE : 2" in text
     assert "Initial Conditions indx' - <FILL>" not in text
+    assert "3       # `itype' - <FOREST>" not in text
+    assert "2       # `itype' - <FOREST>" in text
 
 
 def test_prepare_segments_writes_summary_and_marks_prepared(

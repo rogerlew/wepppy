@@ -1,9 +1,11 @@
 # Roads Point-Source Inslope Non-Channel Routing
 
-**Status**: Implemented (2026-03-27)
+**Status**: Implemented + post-handoff hotfix validated (2026-03-27)
 
 ## Overview
 Roads phase 1 supports point-source injections only when segment low points are channel-associated (on or adjacent to channel pixels). This package implements non-channel routing for `inslope_bd` and `inslope_rd` by tracing low-point flowpaths to channel and modeling contributors as `road OFE + flowpath buffer OFE` before pass-file merge.
+
+Post-handoff hotfix note: routed two-OFE management generation now remaps yearly FOREST `itype` from `3` to `2` after fill scenario removal to keep WEPP management cardinality parse-safe.
 
 ## Objectives
 - Enable non-channel low-point eligibility for `inslope_bd` and `inslope_rd` when low point lies on a hillslope pixel (`subwta` suffix `1|2|3`).
@@ -42,6 +44,7 @@ This package implements inslope non-channel point-source behavior only.
 - [x] Routed contributor passes merge into receiving hillslope pass outputs without double-run failures.
 - [x] Existing channel-associated inslope behavior remains unchanged.
 - [x] `last_prepare_summary` and `last_run_summary` include explicit routed/non-routed diagnostics.
+- [x] Routed two-OFE management files remain WEPP-parseable (`itype` cardinality aligned to two-scenario output).
 - [ ] Targeted and full regression suites pass. (targeted pass; full-suite has unrelated baseline failure outside Roads scope)
 - [x] Code review artifact has no unresolved medium/high findings.
 - [x] QA review artifact has no unresolved medium/high findings.

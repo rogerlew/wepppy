@@ -19,6 +19,7 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
 - [x] (2026-03-27) Milestone 6: Completed code-review artifact with no unresolved medium/high findings.
 - [x] (2026-03-27) Milestone 7: Completed QA-review artifact with no unresolved medium/high findings.
 - [x] (2026-03-27) Milestone 8: Ran validation gates and synchronized package docs/tracker/ExecPlan.
+- [x] (2026-03-27) Post-handoff hotfix: fixed routed two-OFE management transform to remap yearly `itype` (`3 -> 2`) after fill OFE removal; added regression test and reran validation gates.
 
 ## Surprises & Discoveries
 
@@ -33,6 +34,9 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
 
 - Observation: Full `tests --maxfail=1` currently fails on an unrelated baseline issue in `tests/nodb/test_soils_gridded_root_creation.py` (`wepppy.wepp.soils` monkeypatch path).
   Evidence: Validation run reached 49% and failed outside Roads step-2 touched files.
+
+- Observation: Routed two-OFE management transform left FOREST yearly `itype` as `3` after reducing to two scenarios, causing WEPP parser failure (`ntype read as 3; must be between 1 and 2`) for real runs.
+  Evidence: `/wc1/runs/cl/clogging-starch/wepp/roads/runs/p900025.err` and generated `p900025.man` from failed job `ed22a800-e4d1-452a-b09e-cf8cd031060f`.
 
 ## Decision Log
 
@@ -52,6 +56,10 @@ After this package, inslope roads (`inslope_bd`, `inslope_rd`) with low points t
   Rationale: Uses traced flowpath outcome directly while avoiding hidden fallback mapping.
   Date/Author: 2026-03-27 / Codex.
 
+- Decision: Routed two-OFE management generation must remap yearly FOREST `itype` from `3` to `2` when fill scenario is stripped.
+  Rationale: WEPP requires `itype` to match the reduced two-scenario management cardinality; leaving `3` causes runtime parse failure.
+  Date/Author: 2026-03-27 / Codex.
+
 ## Outcomes & Retrospective
 
 Completed implementation delivers:
@@ -60,6 +68,7 @@ Completed implementation delivers:
 - Run-stage tracing now calls the step-1 Rust tracer contract for non-channel-routable segments and records deterministic trace diagnostics.
 - Routed non-channel contributors now execute with `road OFE + buffer OFE` assembly and merge through existing pass-combine flow.
 - Regression coverage was expanded for new prepare/run behavior and routed trace failure handling.
+- Post-handoff hotfix now guarantees routed two-OFE management files are WEPP-parseable by remapping yearly `itype` values to two-scenario cardinality.
 
 Validation snapshot:
 
@@ -68,6 +77,7 @@ Validation snapshot:
 - Roads frontend Jest (`wctl run-npm test -- roads`): pass.
 - Frontend lint (`wctl run-npm lint`): pass.
 - Full `wctl run-pytest tests --maxfail=1`: fail on unrelated baseline test outside Roads scope.
+- Repro validation on failed run inputs (`p900025`): pass-file generated; no `ntype read as 3` parser error after hotfix transform.
 
 ## Context and Orientation
 
@@ -209,3 +219,4 @@ Dependency requirement:
 
 Revision note (2026-03-27 00:00Z): Initial step-2 ExecPlan authored with scoped inslope non-channel routing milestones and mandatory code/QA review gates.
 Revision note (2026-03-27): Milestones 1-8 completed; living sections updated with implementation, validation outcomes, and review closure.
+Revision note (2026-03-27): Post-handoff hotfix applied for routed two-OFE management `itype` remap; regression validated against failing `p900025` input set and tests.
