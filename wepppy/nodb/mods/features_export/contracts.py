@@ -28,10 +28,12 @@ SUPPORTED_YEAR_SELECTIONS: tuple[str, ...] = (
     "custom",
 )
 SUPPORTED_EVENT_SELECTORS: tuple[str, ...] = ("date", "return_period")
+SUPPORTED_TABULAR_TEMPORAL_LAYOUTS: tuple[str, ...] = ("wide", "long")
 
 DEFAULT_CRS = "wgs"
 DEFAULT_OUTPUT_SCOPES: tuple[str, ...] = ("baseline",)
 DEFAULT_SWAT_RUN_ID = "latest"
+DEFAULT_TABULAR_TEMPORAL_LAYOUT = "wide"
 
 WARNING_SCOPE_MISSING_LAYER = "scope_missing_layer"
 WARNING_SCOPE_NOT_APPLICABLE = "scope_not_applicable"
@@ -155,6 +157,14 @@ class LayerColumnSelection:
 
 
 @dataclass(frozen=True)
+class TabularRequest:
+    """Requested tabular export controls for csv/parquet formats."""
+
+    concatenate_tables: bool | None = None
+    temporal_layout: str | None = None
+
+
+@dataclass(frozen=True)
 class ExportRequest:
     """Typed incoming request payload before canonical normalization."""
 
@@ -171,6 +181,7 @@ class ExportRequest:
     swat_tables: SwatTablesRequest | None = None
     temporal: TemporalRequest | None = None
     column_selection: tuple[LayerColumnSelection, ...] | None = None
+    tabular: TabularRequest | None = None
 
 
 @dataclass(frozen=True)
@@ -240,6 +251,20 @@ class NormalizedTemporalRequest:
 
 
 @dataclass(frozen=True)
+class NormalizedTabularRequest:
+    """Canonical tabular controls used by planner/service/writers."""
+
+    concatenate_tables: bool = False
+    temporal_layout: str = DEFAULT_TABULAR_TEMPORAL_LAYOUT
+
+    def to_mapping(self) -> dict[str, object]:
+        return {
+            "concatenate_tables": bool(self.concatenate_tables),
+            "temporal_layout": self.temporal_layout,
+        }
+
+
+@dataclass(frozen=True)
 class NormalizedExportRequest:
     """Canonical request payload used for planning and cache-key inputs."""
 
@@ -254,6 +279,7 @@ class NormalizedExportRequest:
     swat_tables: NormalizedSwatTables | None = None
     temporal: NormalizedTemporalRequest | None = None
     column_selection: tuple[LayerColumnSelection, ...] = ()
+    tabular: NormalizedTabularRequest | None = None
 
     @property
     def scenario(self) -> str | None:
@@ -297,6 +323,8 @@ class NormalizedExportRequest:
                 selection.layer_id: selection.to_mapping()
                 for selection in self.column_selection
             }
+        if self.tabular is not None:
+            payload["tabular"] = self.tabular.to_mapping()
         return payload
 
 
@@ -381,6 +409,7 @@ __all__ = [
     "ExportRequest",
     "ExportWarning",
     "LayerColumnSelection",
+    "NormalizedTabularRequest",
     "NormalizedExportRequest",
     "NormalizedSwatTables",
     "NormalizedTemporalEvent",
@@ -391,10 +420,12 @@ __all__ = [
     "SUPPORTED_EVENT_SELECTORS",
     "SUPPORTED_FORMATS",
     "SUPPORTED_OUTPUT_SCOPES",
+    "SUPPORTED_TABULAR_TEMPORAL_LAYOUTS",
     "SUPPORTED_TEMPORAL_MODES",
     "SUPPORTED_UNITS",
     "SUPPORTED_YEAR_SELECTIONS",
     "SwatTablesRequest",
+    "TabularRequest",
     "TemporalEventRequest",
     "TemporalLayerMode",
     "TemporalRequest",

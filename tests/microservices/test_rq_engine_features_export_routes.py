@@ -124,6 +124,34 @@ def test_features_export_submit_valid_enqueues_job(monkeypatch: pytest.MonkeyPat
     assert prep_state["jobs"] == [("features_export", "features-job-22")]
 
 
+def test_features_export_submit_accepts_tabular_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    captured = _stub_queue(monkeypatch, job_id="features-job-tabular")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        export_routes,
+        "prepare_export_submission",
+        lambda wd, payload: SimpleNamespace(cache_key_parts=SimpleNamespace(cache_key="cache-key")),
+    )
+    monkeypatch.setattr(export_routes, "get_cache_index_entry", lambda wd, cache_key: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/export/features",
+            json={
+                "format": "csv",
+                "units": "project",
+                "layers": ["wepp.summary.hillslopes"],
+                "tabular": {"concatenate_tables": True, "temporal_layout": "long"},
+            },
+        )
+
+    assert response.status_code == 202
+    enqueued_payload = captured["args"][2]
+    assert enqueued_payload["tabular"] == {"concatenate_tables": True, "temporal_layout": "long"}
+
+
 def test_features_export_submit_cache_hit_enqueues_finalize_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     captured = _stub_queue(monkeypatch, job_id="features-job-33")

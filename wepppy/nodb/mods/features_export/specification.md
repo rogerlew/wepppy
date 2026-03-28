@@ -35,6 +35,11 @@ Packaging rules:
 - KMZ is single-layer only; multi-layer requests produce multiple `.kmz` files in the zip.
 - Geometryless formats (`parquet`, `csv`) always emit tabular outputs without geometry columns/encodings.
 - For geometryless formats, required identity/join fields remain included even when geometry is removed.
+- Geometryless formats support optional `tabular` controls:
+  - `concatenate_tables=true` concatenates hillslope carrier tables into one `hillslopes` file and channel carrier tables into one `channels` file.
+  - `temporal_layout=wide|long` controls temporal measure shaping for `event`/`yearly` layers (`wide` default).
+- Geometryless writer path is table-native end-to-end: tabular exports consume DataFrame payloads directly and must not serialize/parse FeatureCollection JSON in the writer path.
+- Geometryless carrier materialization is independent of geometry files: tabular outputs are produced from attribute sources only and do not enrich identity columns from carrier geometry datasets.
 
 ## 3. Layer Catalog And Discoverability
 The backend owns an authoritative, versioned export layer catalog.
@@ -134,6 +139,13 @@ Export behavior:
 - If one requested scope is missing for a scope-aware layer, export available scopes and emit warning code `scope_missing_layer`.
 - If a requested scope is not applicable to a scope-invariant layer, emit warning code `scope_not_applicable`.
 - If no layer resolves after scope processing, return 404.
+- When `format=csv|parquet` and `tabular.concatenate_tables=true`, carrier-concatenated rows include provenance columns:
+  - `output_scope`
+  - `omni_scenario` (scenario-context rows only; null otherwise)
+  - `omni_contrast_id` (contrast-context rows only; null otherwise)
+- `tabular.temporal_layout` behavior for `event`/`yearly` temporal modes:
+  - `wide` (default): one row per feature key with temporal selector tokens appended to measure column names.
+  - `long`: one temporal selector column (`date`, `return_period`, or `year`) with measure columns across multiple rows.
 
 Carrier materialization contract (normative):
 - Consolidated carriers are built in two phases:
@@ -188,6 +200,9 @@ Request schema:
 - `temporal.event.selector`: enum `date|return_period`.
 - `temporal.event.dates`: required for `selector=date`; array of `YYYY-MM-DD`.
 - `temporal.event.return_periods`: required for `selector=return_period`; numeric array in years.
+- `tabular`: optional object, valid only for `format=csv|parquet`.
+- `tabular.concatenate_tables`: optional boolean, default `false`.
+- `tabular.temporal_layout`: optional enum `wide|long`, default `wide`.
 
 Request example:
 ```json
@@ -223,6 +238,10 @@ Validation:
 - Daily timeseries mode is not supported and returns 400.
 - `swat_tables.include` and `swat_tables.exclude` are mutually exclusive.
 - `format=parquet|csv` is valid for both spatial and non-spatial datasets and strips geometry from output rows instead of failing on spatial inputs.
+- `tabular` is only valid when `format=parquet|csv`.
+- `tabular.concatenate_tables` must be boolean when provided.
+- `tabular.temporal_layout` must be `wide|long` when provided.
+- `tabular.temporal_layout=long` rejects mixed effective `event` and `yearly` layer modes in one request.
 - `column_selection[layer_id].include` and `column_selection[layer_id].exclude` are mutually exclusive.
 - Unknown layer ids in `column_selection` return 400 with structured validation errors.
 - Unknown column ids return 400 when the target layer has an explicit `columns` contract in catalog metadata; for discovery-driven layers without explicit `columns`, dynamic source-schema column ids are accepted.
@@ -583,6 +602,7 @@ Back-compat behavior for existing saved configs:
 - Partial-scope exports emit warnings and still succeed when at least one scoped layer resolves.
 - Non-scope missing requested layers/tables emit `layer_unavailable` or `table_unavailable` warnings and still succeed when at least one export target resolves.
 - Geometryless formats (`parquet`, `csv`) export tabular outputs with geometry removed while preserving required identity/join columns.
+- Geometryless formats expose `tabular.concatenate_tables` and `tabular.temporal_layout` controls with deterministic writer behavior.
 - Parity+ AgFields support is present: boundaries/sub-fields plus AgFields WEPP metric layers sourced from `wepp/ag_fields/output/interchange/*`.
 - Requesting AgFields WEPP metric layers triggers on-demand AgFields interchange preparation when needed and proceeds without manual pre-run migration.
 - Submit endpoint rejects non-JSON payloads with 415 and validates selector rules with 400/404/409 per contract.
@@ -593,7 +613,8 @@ Back-compat behavior for existing saved configs:
 - Users can include/exclude columns per selected dataset; required identity/join columns remain enforced.
 - `yearly` mode exports every available year by default (`year_selection=all`) unless globally filtered.
 - Global year selection applies consistently across all applicable selected datasets.
-- `event` and `yearly` exports keep carrier geometry normalized (no long-row duplication) and append temporal selector tokens to measure column names.
+- `event` and `yearly` exports default to `wide` temporal layout with temporal selector tokens appended to measure columns.
+- `tabular.temporal_layout=long` emits one temporal selector column (`date`, `return_period`, or `year`) and rejects mixed `event` + `yearly` requests.
 - Polling and terminal status behavior align with canonical RQ contract (`finished` success).
 - Warnings are present in both `jobinfo.result.warnings` and `manifest.json`.
 - Cache hits return 202 with a new lightweight job ID, `cache_hit=true`, and reusable artifact delivery.

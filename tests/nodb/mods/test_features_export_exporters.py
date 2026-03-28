@@ -10,7 +10,13 @@ import pandas as pd
 import pytest
 
 from wepppy.nodb.mods.features_export.catalog_loader import load_layer_catalog
-from wepppy.nodb.mods.features_export.contracts import ExportWarning
+from wepppy.nodb.mods.features_export.contracts import (
+    ExportWarning,
+    NormalizedExportRequest,
+    NormalizedTabularRequest,
+    ResolvedExportPlan,
+    ResolvedLayerPlan,
+)
 from wepppy.nodb.mods.features_export.exporters import (
     ExportBackendCapabilityError,
     ExportWriterRequest,
@@ -381,40 +387,19 @@ def test_geometryless_formats_drop_geometry_and_keep_properties(
         catalog,
     )
     layer = plan.layers[0]
-    payload = {
-        "schema": "wepppy.features_export.feature_collection.v1",
-        "layer_id": layer.layer_id,
-        "output_layer_id": layer.output_layer_id,
-        "scope": layer.scope,
-        "scope_class": layer.scope_class,
-        "feature_collection": {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                    "type": "Feature",
-                    "properties": {"TopazID": 1, "Name": "A"},
-                    "geometry": {
-                        "type": "Polygon",
-                        "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
-                    },
-                },
-                {
-                    "type": "Feature",
-                    "properties": {"TopazID": 2, "Name": "B"},
-                    "geometry": {
-                        "type": "Polygon",
-                        "coordinates": [[[1, 1], [2, 1], [2, 2], [1, 2], [1, 1]]],
-                    },
-                },
-            ],
-        },
-    }
+    tabular_frame = pd.DataFrame(
+        [
+            {"TopazID": 1, "Name": "A"},
+            {"TopazID": 2, "Name": "B"},
+        ]
+    )
     request = ExportWriterRequest(
         plan=plan,
         layer_payloads={
             layer.output_layer_id: PreparedLayerPayload(
                 output_layer_id=layer.output_layer_id,
-                payload=json.dumps(payload, sort_keys=True, separators=(",", ":")),
+                payload=b"",
+                tabular_frame=tabular_frame,
                 row_count=2,
                 feature_count=2,
             )
@@ -439,3 +424,197 @@ def test_geometryless_formats_drop_geometry_and_keep_properties(
     assert "Name" in frame.columns
     assert "geometry" not in frame.columns
     assert frame["TopazID"].tolist() == [1, 2]
+
+
+@pytest.mark.parametrize("format_token", ["parquet", "csv"])
+def test_geometryless_formats_require_tabular_frame_payload(
+    tmp_path: Path,
+    catalog,
+    format_token: str,
+) -> None:
+    plan = resolve_export_plan(
+        {
+            "format": format_token,
+            "units": "si",
+            "layers": ["watershed.subcatchments"],
+        },
+        catalog,
+    )
+    layer = plan.layers[0]
+    request = ExportWriterRequest(
+        plan=plan,
+        layer_payloads={
+            layer.output_layer_id: PreparedLayerPayload(
+                output_layer_id=layer.output_layer_id,
+                payload="legacy-feature-collection-json",
+                row_count=1,
+                feature_count=1,
+            )
+        },
+        artifact_dir=tmp_path,
+        artifact_basename="features_export",
+    )
+
+    with pytest.raises(FeaturesExportWriterError, match="tabular_frame"):
+        get_export_writer(format_token).write(request)
+
+
+@pytest.mark.parametrize(
+    "format_token,member_name",
+    [
+        ("parquet", "hillslopes.parquet"),
+        ("csv", "hillslopes.csv"),
+    ],
+)
+def test_tabular_concatenate_tables_merges_hillslope_layers_with_provenance_columns(
+    tmp_path: Path,
+    catalog,
+    format_token: str,
+    member_name: str,
+) -> None:
+    plan = resolve_export_plan(
+        {
+            "format": format_token,
+            "units": "project",
+            "layers": [
+                "wepp.summary.hillslopes",
+                "wepp.interchange.hill_wat",
+            ],
+            "tabular": {
+                "concatenate_tables": True,
+                "temporal_layout": "wide",
+            },
+        },
+        catalog,
+    )
+    layer_pairs = sorted(plan.layers, key=lambda item: item.output_layer_id)
+    payloads: dict[str, PreparedLayerPayload] = {}
+    for idx, layer in enumerate(layer_pairs):
+        payloads[layer.output_layer_id] = PreparedLayerPayload(
+            output_layer_id=layer.output_layer_id,
+            payload=b"",
+            tabular_frame=pd.DataFrame(
+                [
+                    {"topaz_id": idx + 1, "metric": float(idx + 10)},
+                ]
+            ),
+            row_count=1,
+            feature_count=1,
+        )
+
+    request = ExportWriterRequest(
+        plan=plan,
+        layer_payloads=payloads,
+        artifact_dir=tmp_path,
+        artifact_basename="features_export",
+    )
+    artifact = get_export_writer(format_token).write(request)
+
+    assert member_name in artifact.packaged_member_relpaths
+
+    with zipfile.ZipFile(artifact.artifact_path, "r") as zip_handle:
+        member_bytes = zip_handle.read(member_name)
+
+    if format_token == "parquet":
+        frame = pd.read_parquet(io.BytesIO(member_bytes))
+    else:
+        frame = pd.read_csv(io.BytesIO(member_bytes))
+
+    assert len(frame.index) == 2
+    assert "output_scope" in frame.columns
+    assert "omni_scenario" in frame.columns
+    assert "omni_contrast_id" in frame.columns
+
+
+@pytest.mark.parametrize(
+    "format_token,member_name",
+    [
+        ("parquet", "hillslopes.parquet"),
+        ("csv", "hillslopes.csv"),
+    ],
+)
+def test_tabular_concatenate_tables_sets_omni_selector_provenance(
+    tmp_path: Path,
+    format_token: str,
+    member_name: str,
+) -> None:
+    request_payload = NormalizedExportRequest(
+        format=format_token,
+        units="project",
+        layers=("wepp.summary.hillslopes", "omni.scenarios.hillslopes", "omni.contrasts.hillslopes"),
+        crs="wgs",
+        output_scopes=("baseline",),
+        scenarios=("scenario-a",),
+        contrast_ids=("contrast-a",),
+        swat_run_id="none",
+        tabular=NormalizedTabularRequest(concatenate_tables=True, temporal_layout="wide"),
+    )
+    layer_base = ResolvedLayerPlan(
+        layer_id="wepp.summary.hillslopes",
+        family="wepp",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.summary.hillslopes",
+        context="base",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    layer_scenario = ResolvedLayerPlan(
+        layer_id="omni.scenarios.hillslopes",
+        family="omni_scenarios",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="scenario-scenario-a__shared__omni.scenarios.hillslopes",
+        context="scenario",
+        selector_id="scenario-a",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    layer_contrast = ResolvedLayerPlan(
+        layer_id="omni.contrasts.hillslopes",
+        family="omni_contrasts",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="contrast-contrast-a__shared__omni.contrasts.hillslopes",
+        context="contrast",
+        selector_id="contrast-a",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    plan = ResolvedExportPlan(
+        catalog_version="test",
+        schema_version=1,
+        request=request_payload,
+        layers=(layer_base, layer_scenario, layer_contrast),
+        warnings=(),
+    )
+    payloads: dict[str, PreparedLayerPayload] = {}
+    for index, layer in enumerate(plan.layers):
+        payloads[layer.output_layer_id] = PreparedLayerPayload(
+            output_layer_id=layer.output_layer_id,
+            payload=b"",
+            tabular_frame=pd.DataFrame(
+                [
+                    {"topaz_id": index + 1, "metric": float(index + 1)},
+                ]
+            ),
+            row_count=1,
+            feature_count=1,
+        )
+
+    request = ExportWriterRequest(
+        plan=plan,
+        layer_payloads=payloads,
+        artifact_dir=tmp_path,
+        artifact_basename="features_export",
+    )
+    artifact = get_export_writer(format_token).write(request)
+    assert member_name in artifact.packaged_member_relpaths
+
+    with zipfile.ZipFile(artifact.artifact_path, "r") as zip_handle:
+        member_bytes = zip_handle.read(member_name)
+
+    if format_token == "parquet":
+        frame = pd.read_parquet(io.BytesIO(member_bytes))
+    else:
+        frame = pd.read_csv(io.BytesIO(member_bytes))
+
+    assert sorted(frame["omni_scenario"].dropna().unique().tolist()) == ["scenario-a"]
+    assert sorted(frame["omni_contrast_id"].dropna().unique().tolist()) == ["contrast-a"]

@@ -506,6 +506,14 @@ def test_features_export_bootstrap_payload_includes_defaults_selectors_and_runti
         "units": "project",
         "crs": "wgs",
         "output_scopes": ["baseline"],
+        "tabular": {
+            "concatenate_tables": False,
+            "temporal_layout": "wide",
+        },
+    }
+    assert payload["profiles"]["gpkg_adjacent"]["tabular"] == {
+        "concatenate_tables": False,
+        "temporal_layout": "wide",
     }
     assert payload["profiles"]["gpkg_adjacent"]["swat_run_id"] == "latest"
     assert payload["omni"]["scenarios"] == [{"id": "uniform_low", "label": "Uniform Low"}]

@@ -1043,6 +1043,10 @@ def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_eps
             "units": "project",
             "crs": "wgs",
             "output_scopes": ["baseline"],
+            "tabular": {
+                "concatenate_tables": False,
+                "temporal_layout": "wide",
+            },
         },
         "profiles": {
             "gpkg_adjacent": {
@@ -1050,6 +1054,10 @@ def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_eps
                 "units": "project",
                 "crs": "wgs",
                 "output_scopes": ["baseline"],
+                "tabular": {
+                    "concatenate_tables": False,
+                    "temporal_layout": "wide",
+                },
                 "swat_run_id": "latest",
                 "layers": list(FEATURES_EXPORT_DEFAULT_LAYER_IDS),
                 "temporal": None,

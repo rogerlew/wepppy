@@ -7,6 +7,7 @@ import collections.abc as cabc
 
 from .catalog_loader import CatalogLayer, LayerCatalog
 from .contracts import (
+    DEFAULT_TABULAR_TEMPORAL_LAYOUT,
     DEFAULT_CRS,
     DEFAULT_OUTPUT_SCOPES,
     DEFAULT_SWAT_RUN_ID,
@@ -17,6 +18,7 @@ from .contracts import (
     LayerColumnSelection,
     NormalizedExportRequest,
     NormalizedSwatTables,
+    NormalizedTabularRequest,
     NormalizedTemporalEvent,
     NormalizedTemporalRequest,
     ResolvedExportPlan,
@@ -25,6 +27,7 @@ from .contracts import (
     SUPPORTED_EVENT_SELECTORS,
     SUPPORTED_FORMATS,
     SUPPORTED_OUTPUT_SCOPES,
+    SUPPORTED_TABULAR_TEMPORAL_LAYOUTS,
     SUPPORTED_TEMPORAL_MODES,
     SUPPORTED_UNITS,
     SUPPORTED_YEAR_SELECTIONS,
@@ -111,6 +114,14 @@ def normalize_export_request(
         catalog=catalog,
         errors=errors,
     )
+    tabular = _normalize_tabular(
+        payload.get("tabular"),
+        format_token=format_token,
+        selected_layers=normalized_layers,
+        temporal=temporal,
+        catalog=catalog,
+        errors=errors,
+    )
     column_selection = _normalize_column_selection(
         payload.get("column_selection"),
         selected_layers=normalized_layers,
@@ -141,6 +152,7 @@ def normalize_export_request(
         swat_tables=swat_tables,
         temporal=temporal,
         column_selection=tuple(column_selection),
+        tabular=tabular,
     )
 
 
@@ -476,6 +488,13 @@ def _as_request_mapping(request: ExportRequest | cabc.Mapping[str, object]) -> c
             payload["column_selection"] = {
                 selection.layer_id: selection.to_mapping() for selection in request.column_selection
             }
+        if request.tabular is not None:
+            tabular: dict[str, object] = {}
+            if request.tabular.concatenate_tables is not None:
+                tabular["concatenate_tables"] = bool(request.tabular.concatenate_tables)
+            if request.tabular.temporal_layout is not None:
+                tabular["temporal_layout"] = request.tabular.temporal_layout
+            payload["tabular"] = tabular
         return payload
     raise TypeError(
         "request must be a mapping payload or ExportRequest, "
@@ -722,6 +741,125 @@ def _normalize_column_selection(
         )
 
     return sorted(normalized, key=lambda item: item.layer_id)
+
+
+def _normalize_tabular(
+    value: object,
+    *,
+    format_token: str,
+    selected_layers: list[str],
+    temporal: NormalizedTemporalRequest | None,
+    catalog: LayerCatalog,
+    errors: list[ValidationIssue],
+) -> NormalizedTabularRequest | None:
+    is_tabular_format = format_token in {"csv", "parquet"}
+    default_tabular = NormalizedTabularRequest(
+        concatenate_tables=False,
+        temporal_layout=DEFAULT_TABULAR_TEMPORAL_LAYOUT,
+    )
+
+    if value is None:
+        normalized = default_tabular if is_tabular_format else None
+    else:
+        if not isinstance(value, cabc.Mapping):
+            errors.append(
+                ValidationIssue(
+                    code="invalid_type",
+                    message="tabular must be an object when provided.",
+                    path="tabular",
+                )
+            )
+            return default_tabular if is_tabular_format else None
+
+        if not is_tabular_format:
+            errors.append(
+                ValidationIssue(
+                    code="invalid_selector_combo",
+                    message="tabular options are only valid for format=csv|parquet.",
+                    path="tabular",
+                )
+            )
+            return None
+
+        concatenate_tables = _normalize_bool(
+            value.get("concatenate_tables"),
+            path="tabular.concatenate_tables",
+            errors=errors,
+        )
+        if concatenate_tables is None:
+            concatenate_tables = False
+
+        temporal_layout = DEFAULT_TABULAR_TEMPORAL_LAYOUT
+        if "temporal_layout" in value and value.get("temporal_layout") is not None:
+            raw_layout = _optional_string(
+                value.get("temporal_layout"),
+                path="tabular.temporal_layout",
+                errors=errors,
+            )
+            if raw_layout is not None:
+                candidate = raw_layout.lower()
+                if candidate not in SUPPORTED_TABULAR_TEMPORAL_LAYOUTS:
+                    errors.append(
+                        ValidationIssue(
+                            code="invalid_enum",
+                            message=(
+                                "Unsupported tabular.temporal_layout "
+                                f"{raw_layout!r}; supported values are "
+                                f"{list(SUPPORTED_TABULAR_TEMPORAL_LAYOUTS)!r}."
+                            ),
+                            path="tabular.temporal_layout",
+                        )
+                    )
+                else:
+                    temporal_layout = candidate
+
+        normalized = NormalizedTabularRequest(
+            concatenate_tables=bool(concatenate_tables),
+            temporal_layout=temporal_layout,
+        )
+
+    if normalized is None:
+        return None
+
+    if normalized.temporal_layout == "long":
+        effective_modes = _tabular_effective_temporal_modes(
+            selected_layers=selected_layers,
+            temporal=temporal,
+            catalog=catalog,
+        )
+        if "event" in effective_modes and "yearly" in effective_modes:
+            errors.append(
+                ValidationIssue(
+                    code="mixed_temporal_modes",
+                    message=(
+                        "tabular.temporal_layout=long does not support mixed event and yearly "
+                        "layer modes in one export request."
+                    ),
+                    path="tabular.temporal_layout",
+                )
+            )
+
+    return normalized
+
+
+def _tabular_effective_temporal_modes(
+    *,
+    selected_layers: cabc.Sequence[str],
+    temporal: NormalizedTemporalRequest | None,
+    catalog: LayerCatalog,
+) -> set[str]:
+    if temporal is None:
+        return set()
+
+    resolved: set[str] = set()
+    for layer_id in selected_layers:
+        layer = catalog.layer_index.get(layer_id)
+        if layer is None or not layer.temporal_supported_modes:
+            continue
+        mode = temporal.mode_for_layer(layer_id)
+        if mode in {"event", "yearly"}:
+            resolved.add(mode)
+    return resolved
 
 
 def _layer_has_explicit_column_contract(layer: CatalogLayer) -> bool:
@@ -1279,6 +1417,26 @@ def _optional_string(
     if not token:
         return None
     return token
+
+
+def _normalize_bool(
+    value: object,
+    *,
+    path: str,
+    errors: list[ValidationIssue],
+) -> bool | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    errors.append(
+        ValidationIssue(
+            code="invalid_type",
+            message=f"{path} must be a boolean.",
+            path=path,
+        )
+    )
+    return None
 
 
 def _normalize_string_list(

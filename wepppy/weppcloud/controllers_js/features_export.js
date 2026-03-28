@@ -54,6 +54,8 @@ var FeaturesExport = (function () {
         temporalEventSelector: '[data-features-export-field="temporal-event-selector"]',
         temporalEventDates: '[data-features-export-field="temporal-event-dates"]',
         temporalEventReturnPeriods: '[data-features-export-field="temporal-event-return-periods"]',
+        tabularConcatenateTables: '[data-features-export-field="tabular-concatenate-tables"]',
+        tabularTemporalLayout: '[data-features-export-field="tabular-temporal-layout"]',
         scenario: '[data-features-export-field="scenario"]',
         contrastId: '[data-features-export-field="contrast-id"]',
         swatRunId: '[data-features-export-field="swat-run-id"]',
@@ -396,6 +398,10 @@ var FeaturesExport = (function () {
             return "geodatabase";
         }
         return token;
+    }
+
+    function isTabularFormat(formatToken) {
+        return formatToken === "csv" || formatToken === "parquet";
     }
 
     function parseCommaList(value) {
@@ -1411,6 +1417,15 @@ var FeaturesExport = (function () {
             }
         }
 
+        function updateTabularOptionsVisibility() {
+            var tabularWrap = getFieldNode("[data-features-export-tabular-options]");
+            if (!tabularWrap) {
+                return;
+            }
+            var format = normalizeFormat(readFieldValue(FIELDS.format));
+            tabularWrap.hidden = !isTabularFormat(format);
+        }
+
         function updateProgressiveDisclosure() {
             var selected = selectedLayers();
             var families = selectedFamilies();
@@ -1429,6 +1444,7 @@ var FeaturesExport = (function () {
             showGroup("scenario-catalog", hasScopeAware || hasOmni);
             updateTemporalVisibility();
             updateRoadsScopeAvailability();
+            updateTabularOptionsVisibility();
 
             if (hasSwat) {
                 updateSwatTables();
@@ -1472,17 +1488,18 @@ var FeaturesExport = (function () {
                 }
             }
 
+            var temporalModes = selected
+                .filter(function (layer) {
+                    return layer.temporal_modes.length > 0;
+                })
+                .map(function (layer) {
+                    return {
+                        layer_id: layer.layer_id,
+                        mode: effectiveLayerTemporalMode(layer)
+                    };
+                });
+
             if (!controller.groups.temporal.hidden) {
-                var temporalModes = selected
-                    .filter(function (layer) {
-                        return layer.temporal_modes.length > 0;
-                    })
-                    .map(function (layer) {
-                        return {
-                            layer_id: layer.layer_id,
-                            mode: effectiveLayerTemporalMode(layer)
-                        };
-                    });
                 temporalModes.forEach(function (entry) {
                     if (!entry.mode) {
                         errors.push({
@@ -1520,6 +1537,24 @@ var FeaturesExport = (function () {
                         if (!parseFloatList(readFieldValue(FIELDS.temporalEventReturnPeriods)).length) {
                             errors.push({ group: "temporal", message: "Provide at least one return period." });
                         }
+                    }
+                }
+            }
+
+            if (isTabularFormat(format)) {
+                var tabularTemporalLayout = readCheckedRadio(FIELDS.tabularTemporalLayout) || "wide";
+                if (tabularTemporalLayout === "long") {
+                    var hasEventTemporal = temporalModes.some(function (entry) {
+                        return entry.mode === "event";
+                    });
+                    var hasYearlyTemporal = temporalModes.some(function (entry) {
+                        return entry.mode === "yearly";
+                    });
+                    if (hasEventTemporal && hasYearlyTemporal) {
+                        errors.push({
+                            group: "settings",
+                            message: "Tabular long layout does not support mixing event and yearly temporal modes."
+                        });
                     }
                 }
             }
@@ -1692,6 +1727,8 @@ var FeaturesExport = (function () {
                 hint = "";
             } else if (format === "geopackage" || format === "geodatabase") {
                 hint = "Packaging: 1 container artifact.";
+            } else if (isTabularFormat(format) && readFieldValue(FIELDS.tabularConcatenateTables)) {
+                hint = "Packaging: zip bundle with carrier-concatenated tabular files.";
             } else {
                 hint = "Packaging: zip bundle with " + selectedCount + " file" + (selectedCount === 1 ? "" : "s") + ".";
             }
@@ -1860,6 +1897,13 @@ var FeaturesExport = (function () {
             var columnSelection = buildColumnSelectionPayload();
             if (Object.keys(columnSelection).length) {
                 payload.column_selection = columnSelection;
+            }
+
+            if (isTabularFormat(payload.format)) {
+                payload.tabular = {
+                    concatenate_tables: Boolean(readFieldValue(FIELDS.tabularConcatenateTables)),
+                    temporal_layout: readCheckedRadio(FIELDS.tabularTemporalLayout) || "wide"
+                };
             }
 
             return payload;
@@ -2133,7 +2177,7 @@ var FeaturesExport = (function () {
                 rerender();
             }));
 
-            controller._delegates.push(dom.delegate(controller.form, "change", FIELDS.format + ", " + FIELDS.units + ", " + FIELDS.crs + ", " + FIELDS.outputScope + ", " + FIELDS.temporalYearSelection + ", " + FIELDS.temporalEventSelector + ", " + FIELDS.scenario + ", " + FIELDS.contrastId + ", " + FIELDS.swatRunId + ", " + FIELDS.swatTableMode, function () {
+            controller._delegates.push(dom.delegate(controller.form, "change", FIELDS.format + ", " + FIELDS.units + ", " + FIELDS.crs + ", " + FIELDS.outputScope + ", " + FIELDS.temporalYearSelection + ", " + FIELDS.temporalEventSelector + ", " + FIELDS.tabularConcatenateTables + ", " + FIELDS.tabularTemporalLayout + ", " + FIELDS.scenario + ", " + FIELDS.contrastId + ", " + FIELDS.swatRunId + ", " + FIELDS.swatTableMode, function () {
                 if (this && this.matches && this.matches(FIELDS.swatRunId)) {
                     updateSwatTables();
                 }
@@ -2172,6 +2216,16 @@ var FeaturesExport = (function () {
             changedFields.push("units");
             setRadioValue(FIELDS.crs, nextCrs);
             changedFields.push("crs");
+            var profileTabular = profile.tabular && typeof profile.tabular === "object" ? profile.tabular : {};
+            setCheckboxValue(
+                FIELDS.tabularConcatenateTables,
+                Boolean(profileTabular.concatenate_tables)
+            );
+            setRadioValue(
+                FIELDS.tabularTemporalLayout,
+                String(profileTabular.temporal_layout || "wide")
+            );
+            changedFields.push("tabular");
 
             setOutputScopes(profile.output_scopes || ["baseline"]);
             changedFields.push("output_scopes");

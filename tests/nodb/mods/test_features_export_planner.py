@@ -35,6 +35,84 @@ def test_resolve_export_plan_valid_minimal_request(catalog) -> None:
     assert plan.warnings == ()
 
 
+def test_normalize_export_request_sets_tabular_defaults_for_csv(catalog) -> None:
+    payload = {
+        "format": "csv",
+        "units": "project",
+        "layers": ["watershed.subcatchments"],
+    }
+
+    normalized = normalize_export_request(payload, catalog)
+
+    assert normalized.tabular is not None
+    assert normalized.tabular.concatenate_tables is False
+    assert normalized.tabular.temporal_layout == "wide"
+
+
+def test_normalize_export_request_rejects_tabular_options_for_non_tabular_formats(catalog) -> None:
+    payload = {
+        "format": "geopackage",
+        "units": "project",
+        "layers": ["watershed.subcatchments"],
+        "tabular": {"concatenate_tables": True, "temporal_layout": "long"},
+    }
+
+    with pytest.raises(FeaturesExportValidationError) as exc:
+        normalize_export_request(payload, catalog)
+
+    assert any(
+        issue.code == "invalid_selector_combo" and issue.path == "tabular"
+        for issue in exc.value.issues
+    )
+
+
+def test_normalize_export_request_rejects_non_boolean_tabular_concatenate_tables(catalog) -> None:
+    payload = {
+        "format": "parquet",
+        "units": "project",
+        "layers": ["watershed.subcatchments"],
+        "tabular": {"concatenate_tables": "yes"},
+    }
+
+    with pytest.raises(FeaturesExportValidationError) as exc:
+        normalize_export_request(payload, catalog)
+
+    assert any(
+        issue.code == "invalid_type" and issue.path == "tabular.concatenate_tables"
+        for issue in exc.value.issues
+    )
+
+
+def test_normalize_export_request_rejects_long_tabular_layout_with_mixed_event_and_yearly_modes(
+    catalog,
+) -> None:
+    payload = {
+        "format": "csv",
+        "units": "project",
+        "layers": [
+            "wepp.temporal.events",
+            "wepp.interchange.loss_all_years_hill",
+        ],
+        "temporal": {
+            "layer_modes": {
+                "wepp.temporal.events": "event",
+                "wepp.interchange.loss_all_years_hill": "yearly",
+            },
+            "event": {"selector": "date", "dates": ["2005-01-15"]},
+            "year_selection": "all",
+        },
+        "tabular": {"temporal_layout": "long"},
+    }
+
+    with pytest.raises(FeaturesExportValidationError) as exc:
+        normalize_export_request(payload, catalog)
+
+    assert any(
+        issue.code == "mixed_temporal_modes" and issue.path == "tabular.temporal_layout"
+        for issue in exc.value.issues
+    )
+
+
 def test_normalize_export_plan_format_alias_f_esri_maps_to_geodatabase(catalog) -> None:
     payload = _base_payload()
     payload["format"] = "f_esri"

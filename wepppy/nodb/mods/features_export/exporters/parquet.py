@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-
-import pandas as pd
 
 from .base import (
     ExportArtifactMetadata,
@@ -18,36 +15,7 @@ from .base import (
     resolve_layer_payload_pairs,
 )
 from .packaging import package_files_as_zip
-
-
-def _table_rows_from_payload(layer, payload) -> list[dict[str, object]]:
-    try:
-        parsed = json.loads(payload.payload_bytes().decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
-        parsed = None
-
-    if isinstance(parsed, dict):
-        feature_collection = parsed.get("feature_collection")
-        if isinstance(feature_collection, dict) and feature_collection.get("type") == "FeatureCollection":
-            rows: list[dict[str, object]] = []
-            for feature in feature_collection.get("features", []):
-                if not isinstance(feature, dict):
-                    continue
-                properties = feature.get("properties")
-                if isinstance(properties, dict):
-                    rows.append(dict(properties))
-            if rows:
-                return rows
-
-    return [
-        {
-            "layer_id": layer.layer_id,
-            "output_layer_id": layer.output_layer_id,
-            "scope": layer.scope,
-            "scope_class": layer.scope_class,
-            "payload_sha256": payload.payload_sha256(),
-        }
-    ]
+from .tabular_common import build_tabular_frames
 
 
 class ParquetExportWriter(ExportWriter):
@@ -60,22 +28,31 @@ class ParquetExportWriter(ExportWriter):
         artifact_dir.mkdir(parents=True, exist_ok=True)
 
         layer_pairs = resolve_layer_payload_pairs(request)
+        concatenate_tables = bool(
+            request.plan.request.tabular is not None
+            and request.plan.request.tabular.concatenate_tables
+        )
+        frame_by_filename, filename_by_output_layer_id = build_tabular_frames(
+            layer_payload_pairs=layer_pairs,
+            file_extension="parquet",
+            concatenate_tables=concatenate_tables,
+        )
         per_layer_files: dict[str, Path] = {}
         layer_outputs: list[ExportedLayerArtifact] = []
 
-        for layer, payload in layer_pairs:
-            rows = _table_rows_from_payload(layer, payload)
-            frame = pd.DataFrame(rows)
-            layer_filename = f"{layer.output_layer_id}.parquet"
+        for layer_filename, frame in frame_by_filename.items():
             layer_path = artifact_dir / layer_filename
             try:
                 frame.to_parquet(layer_path, index=False)
             except Exception as exc:  # boundary: exporter failure should be explicit
                 raise ExportPayloadValidationError(
-                    f"Failed to write parquet payload for layer {layer.output_layer_id!r}: {exc}"
+                    f"Failed to write parquet payload file {layer_filename!r}: {exc}"
                 ) from exc
 
             per_layer_files[layer_filename] = layer_path
+
+        for layer, payload in layer_pairs:
+            layer_filename = filename_by_output_layer_id[layer.output_layer_id]
             layer_outputs.append(
                 ExportedLayerArtifact(
                     layer_id=layer.layer_id,

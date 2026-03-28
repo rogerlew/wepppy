@@ -37,7 +37,13 @@ from .column_selection import (
     required_identity_columns as _required_identity_columns_helper,
     resolve_selected_columns as _resolve_selected_columns_helper,
 )
-from .contracts import DEFAULT_SWAT_RUN_ID, ExportWarning, ResolvedExportPlan, ResolvedLayerPlan
+from .contracts import (
+    DEFAULT_SWAT_RUN_ID,
+    ExportWarning,
+    NormalizedTemporalEvent,
+    ResolvedExportPlan,
+    ResolvedLayerPlan,
+)
 from .dependency_tracker import DependencySnapshot, build_dependency_snapshot
 from .discovery import layer_key_candidates, resolve_geometry_relpath
 from .duckdb_materializer import (
@@ -58,6 +64,7 @@ from .manifest import build_export_manifest, write_export_manifest
 from .manifest_builder import build_output_layer_column_metadata
 from .output_column_naming import apply_unitized_column_suffixes
 from .planner import resolve_export_plan
+from .tabular_temporal_layout import reshape_temporal_wide_to_long
 
 FEATURES_EXPORT_ROOT_RELPATH = "export/features"
 FEATURES_EXPORT_ARTIFACTS_RELPATH = "export/features/artifacts"
@@ -576,6 +583,13 @@ def _materialize_export_payloads(
 
     payloads: dict[str, PreparedLayerPayload] = {}
     column_metadata_by_output_layer_id: dict[str, dict[str, object]] = {}
+    use_tabular_payload = _request_uses_tabular_payload(submission.plan)
+    use_tabular_long_layout = _request_uses_tabular_long_layout(submission.plan)
+    tabular_event_selector = (
+        submission.plan.request.temporal.event
+        if submission.plan.request.temporal is not None
+        else None
+    )
 
     for layer in materialized_plan.layers:
         source_layers = grouped_layers.get(layer.output_layer_id, ())
@@ -587,6 +601,7 @@ def _materialize_export_payloads(
             payload, column_metadata = _build_materialized_layer_payload(
                 layer,
                 source_results=source_results,
+                use_tabular_payload=use_tabular_payload,
             )
             payloads[layer.output_layer_id] = payload
             column_metadata_by_output_layer_id[layer.output_layer_id] = column_metadata
@@ -600,6 +615,9 @@ def _materialize_export_payloads(
                 source_layers=source_layers,
                 source_results=source_results,
                 entries_by_output_layer_id=entries_by_output_layer_id,
+                use_tabular_payload=use_tabular_payload,
+                use_tabular_long_layout=use_tabular_long_layout,
+                tabular_event_selector=tabular_event_selector,
             )
         except MaterializationContractError as exc:
             raise FeaturesExportServiceError(
@@ -634,6 +652,9 @@ def _build_key_first_materialized_layer_payload(
     source_layers: cabc.Sequence[ResolvedLayerPlan],
     source_results: cabc.Sequence[_LayerCoreResult],
     entries_by_output_layer_id: cabc.Mapping[str, cabc.Sequence[object]],
+    use_tabular_payload: bool,
+    use_tabular_long_layout: bool,
+    tabular_event_selector: NormalizedTemporalEvent | None,
 ) -> tuple[PreparedLayerPayload, dict[str, object]]:
     if not source_results:
         raise MaterializationContractError(
@@ -659,6 +680,70 @@ def _build_key_first_materialized_layer_payload(
         layer_inputs=layer_inputs,
         allow_non_unique_keys=layer.temporal_mode == "event",
     )
+
+    if use_tabular_payload:
+        merged_table = carrier_core.dataframe.copy()
+
+        selected_columns = _carrier_selected_columns(
+            merged=merged_table,
+            carrier_core=carrier_core,
+            source_results=source_results,
+        )
+        unit_mapping = _carrier_unit_mapping(
+            selected_columns=selected_columns,
+            carrier_core=carrier_core,
+            source_results=source_results,
+        )
+        if use_tabular_long_layout:
+            temporal_long = reshape_temporal_wide_to_long(
+                frame=merged_table,
+                selected_columns=selected_columns,
+                unit_mapping=unit_mapping,
+                temporal_mode=layer.temporal_mode,
+                event_selector=tabular_event_selector,
+            )
+            merged_table = temporal_long.frame
+            selected_columns = temporal_long.selected_columns
+            unit_mapping = temporal_long.unit_mapping
+
+        merged_table, selected_columns, unit_mapping = apply_unitized_column_suffixes(
+            frame=merged_table,
+            selected_columns=selected_columns,
+            unit_mapping=unit_mapping,
+            geometry_name="",
+            consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+        )
+        merged_table = merged_table.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
+
+        projection_columns = [column for column in selected_columns if column in merged_table.columns]
+        selected_columns = tuple(_dedupe_identity_selected_columns(projection_columns))
+        table_frame = pd.DataFrame(merged_table[list(selected_columns)]).copy()
+
+        row_count = int(len(table_frame.index))
+        feature_count = row_count
+
+        column_metadata = build_output_layer_column_metadata(
+            source_layer_ids=carrier_core.source_layer_ids,
+            selected_columns=selected_columns,
+            unit_mapping=unit_mapping,
+            materialization={
+                "strategy": "key_first_tabular_no_geometry",
+                "carrier_layer": layer.carrier_layer,
+                "core_row_count": int(len(carrier_core.dataframe.index)),
+            },
+        )
+
+        return (
+            PreparedLayerPayload(
+                output_layer_id=layer.output_layer_id,
+                payload=b"",
+                tabular_frame=table_frame,
+                row_count=row_count,
+                feature_count=feature_count,
+                warnings=tuple(warnings),
+            ),
+            column_metadata,
+        )
 
     candidate_key_tokens: list[str] = []
     geometry_relpaths: list[str] = []
@@ -716,6 +801,17 @@ def _build_key_first_materialized_layer_payload(
         carrier_core=carrier_core,
         source_results=source_results,
     )
+    if use_tabular_long_layout:
+        temporal_long = reshape_temporal_wide_to_long(
+            frame=merged,
+            selected_columns=selected_columns,
+            unit_mapping=unit_mapping,
+            temporal_mode=layer.temporal_mode,
+            event_selector=tabular_event_selector,
+        )
+        merged = temporal_long.frame
+        selected_columns = temporal_long.selected_columns
+        unit_mapping = temporal_long.unit_mapping
 
     geometry_name = merged.geometry.name
     merged, selected_columns, unit_mapping = apply_unitized_column_suffixes(
@@ -774,11 +870,11 @@ def _build_key_first_materialized_layer_payload(
 
 def _carrier_selected_columns(
     *,
-    merged: gpd.GeoDataFrame,
+    merged: pd.DataFrame,
     carrier_core: object,
     source_results: cabc.Sequence[_LayerCoreResult],
 ) -> tuple[str, ...]:
-    geometry_name = merged.geometry.name
+    geometry_name = merged.geometry.name if isinstance(merged, gpd.GeoDataFrame) else None
     selected_columns: list[str] = []
     for column_name in getattr(carrier_core, "selected_columns", ()):
         if column_name in merged.columns and column_name != geometry_name and column_name not in selected_columns:
@@ -803,11 +899,11 @@ def _carrier_selected_columns(
 
 
 def _backfill_identity_from_geometry_key(
-    frame: gpd.GeoDataFrame,
+    frame: pd.DataFrame,
     *,
     geometry_key_column: str,
     consolidated_join_key_column: str,
-) -> gpd.GeoDataFrame:
+) -> pd.DataFrame:
     if consolidated_join_key_column not in frame.columns:
         return frame
 
@@ -969,6 +1065,7 @@ def _build_materialized_layer_payload(
     layer: ResolvedLayerPlan,
     *,
     source_results: cabc.Sequence[_LayerFrameResult],
+    use_tabular_payload: bool,
 ) -> tuple[PreparedLayerPayload, dict[str, object]]:
     if not source_results:
         raise FeaturesExportServiceError(
@@ -1000,18 +1097,26 @@ def _build_materialized_layer_payload(
     source_layer_ids = [source_sorted[0].layer.layer_id]
 
     merged = merged.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
-    row_count = int(len(merged.index))
-    feature_count = int(merged.geometry.notna().sum())
-    payload = _serialize_feature_collection_payload(
-        merged,
-        layer_id=layer.layer_id,
-        output_layer_id=layer.output_layer_id,
-        scope=layer.scope,
-        scope_class=layer.scope_class,
-    )
-
-    selected_columns = [column for column in selected_columns if column in merged.columns]
+    selected_columns = [column for column in selected_columns if column in merged.columns and column != merged.geometry.name]
     selected_columns = _dedupe_identity_selected_columns(selected_columns)
+
+    if use_tabular_payload:
+        table_frame = pd.DataFrame(merged[selected_columns]).copy()
+        row_count = int(len(table_frame.index))
+        feature_count = row_count
+        payload: str | bytes = b""
+    else:
+        row_count = int(len(merged.index))
+        feature_count = int(merged.geometry.notna().sum())
+        payload = _serialize_feature_collection_payload(
+            merged,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            scope=layer.scope,
+            scope_class=layer.scope_class,
+        )
+        table_frame = None
+
     column_metadata = {
         "source_layer_ids": source_layer_ids,
         "selected_columns": selected_columns,
@@ -1024,13 +1129,13 @@ def _build_materialized_layer_payload(
         PreparedLayerPayload(
             output_layer_id=layer.output_layer_id,
             payload=payload,
+            tabular_frame=table_frame,
             row_count=row_count,
             feature_count=feature_count,
             warnings=tuple(warnings),
         ),
         column_metadata,
     )
-
 
 def _build_layer_frame_from_sources(
     *,
@@ -1520,6 +1625,20 @@ def _as_string_sequence(value: object) -> tuple[str, ...]:
         if token:
             normalized.append(token)
     return tuple(normalized)
+
+
+def _request_uses_tabular_long_layout(plan: ResolvedExportPlan) -> bool:
+    request = plan.request
+    if request.format not in {"csv", "parquet"}:
+        return False
+    tabular = request.tabular
+    if tabular is None:
+        return False
+    return str(tabular.temporal_layout or "").strip().lower() == "long"
+
+
+def _request_uses_tabular_payload(plan: ResolvedExportPlan) -> bool:
+    return plan.request.format in {"csv", "parquet"}
 
 
 def _resolve_plan_swat_run_id(plan: ResolvedExportPlan, wd: Path) -> ResolvedExportPlan:

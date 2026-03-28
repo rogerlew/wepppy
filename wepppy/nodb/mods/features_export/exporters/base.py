@@ -9,8 +9,12 @@ from hashlib import sha256
 import json
 from pathlib import Path
 import re
+from typing import TYPE_CHECKING
 
 from ..contracts import ExportWarning, ResolvedExportPlan, ResolvedLayerPlan
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 _OUTPUT_LAYER_ID_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
 
@@ -33,6 +37,7 @@ class PreparedLayerPayload:
 
     output_layer_id: str
     payload: bytes | str
+    tabular_frame: pd.DataFrame | None = None
     row_count: int | None = None
     feature_count: int | None = None
     warnings: tuple[ExportWarning, ...] = ()

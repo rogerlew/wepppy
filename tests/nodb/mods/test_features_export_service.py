@@ -38,6 +38,9 @@ from wepppy.nodb.mods.features_export.output_column_naming import (
 from wepppy.nodb.mods.features_export.temporal_wide_materializer import (
     materialize_temporal_layer_wide,
 )
+from wepppy.nodb.mods.features_export.tabular_temporal_layout import (
+    reshape_temporal_wide_to_long,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -366,10 +369,128 @@ def test_build_materialized_layer_payload_rejects_multi_source_passthrough_group
     )
 
     with pytest.raises(service.FeaturesExportServiceError) as exc_info:
-        service._build_materialized_layer_payload(layer, source_results=source_results)
+        service._build_materialized_layer_payload(
+            layer,
+            source_results=source_results,
+            use_tabular_payload=False,
+        )
 
     assert exc_info.value.code == "materialization_error"
     assert "source_count=2" in exc_info.value.details
+
+
+def test_build_materialized_layer_payload_tabular_skips_feature_collection_serialization(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments",
+    )
+    source = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments__source",
+    )
+    frame = gpd.GeoDataFrame(
+        {"TopazID": [1, 2], "metric": [4.0, 5.0], "geometry": [Point(0, 0), Point(1, 1)]},
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+
+    def _raise_if_called(*args, **kwargs):
+        raise AssertionError("feature-collection serializer should not be called for tabular payloads")
+
+    monkeypatch.setattr(service, "_serialize_feature_collection_payload", _raise_if_called)
+
+    payload, column_metadata = service._build_materialized_layer_payload(
+        layer,
+        source_results=(
+            service._LayerFrameResult(
+                layer=source,
+                frame=frame,
+                selected_columns=("TopazID", "metric"),
+                unit_mapping={"TopazID": "non-unitized", "metric": "mm"},
+                warnings=(),
+            ),
+        ),
+        use_tabular_payload=True,
+    )
+
+    assert payload.payload == b""
+    assert payload.tabular_frame is not None
+    assert list(payload.tabular_frame.columns) == ["TopazID", "metric"]
+    assert payload.row_count == 2
+    assert payload.feature_count == 2
+    assert column_metadata["selected_columns"] == ["TopazID", "metric"]
+
+
+def test_key_first_tabular_payload_does_not_touch_geometry_carrier(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="wepp_interchange.sbs_map-subcatchments",
+        family="wepp_interchange",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="clogging-starch-sbs_map-subcatchments",
+        temporal_mode="yearly",
+        context="base",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    source_layer = ResolvedLayerPlan(
+        layer_id="wepp.interchange.hill_ebe",
+        family="wepp_interchange",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.interchange.hill_ebe",
+        temporal_mode="yearly",
+        context="base",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    source_result = service._LayerCoreResult(
+        layer=source_layer,
+        frame=pd.DataFrame(
+            {
+                service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "2"],
+                "wepp_id": [1, 2],
+                "ER_yr2000": [0.1, 0.2],
+            }
+        ),
+        selected_columns=("wepp_id", "ER_yr2000"),
+        unit_mapping={"wepp_id": "non-unitized", "ER_yr2000": "non-unitized"},
+        warnings=(),
+        catalog_layer_raw={
+            "join": {"primary_key": "wepp_id"},
+            "geometry": {"feature_id_keys": ["wepp_id"]},
+        },
+    )
+
+    def _raise_geometry_access(*args, **kwargs):
+        raise AssertionError("geometry carrier should not be loaded for tabular payloads")
+
+    monkeypatch.setattr(service, "build_canonical_geometry_carrier", _raise_geometry_access)
+
+    payload, column_metadata = service._build_key_first_materialized_layer_payload(
+        wd=tmp_path,
+        layer=layer,
+        source_layers=(source_layer,),
+        source_results=(source_result,),
+        entries_by_output_layer_id={},
+        use_tabular_payload=True,
+        use_tabular_long_layout=False,
+        tabular_event_selector=None,
+    )
+
+    assert payload.tabular_frame is not None
+    assert list(payload.tabular_frame.columns) == ["wepp_id", "ER_yr2000"]
+    assert payload.payload == b""
+    assert column_metadata["materialization"]["strategy"] == "key_first_tabular_no_geometry"
 
 
 def test_ensure_join_key_column_requires_contract_defined_identity_key() -> None:
@@ -1158,6 +1279,103 @@ def test_materialize_temporal_layer_wide_yearly_pivots_measures_to_year_columns(
     assert len(reshaped.frame.index) == 2
     assert reshaped.selected_columns == ("wepp_id", "sediment_kg_yr2014", "sediment_kg_yr2015")
     assert reshaped.frame.loc[reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "2", "sediment_kg_yr2015"].iloc[0] == pytest.approx(9.5)
+
+
+def test_reshape_temporal_wide_to_long_event_restores_date_rows() -> None:
+    frame = gpd.GeoDataFrame(
+        {
+            "topaz_id": [1, 2],
+            "p_mm_2015_01_15": [22.6, 20.0],
+            "p_mm_2015_01_16": [15.7, 14.0],
+            "q_mm_2015_01_15": [0.0, 0.5],
+            "q_mm_2015_01_16": [0.0, 0.4],
+            "geometry": [Point(0.0, 0.0), Point(1.0, 1.0)],
+        },
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+
+    reshaped = reshape_temporal_wide_to_long(
+        frame=frame,
+        selected_columns=(
+            "topaz_id",
+            "p_mm_2015_01_15",
+            "p_mm_2015_01_16",
+            "q_mm_2015_01_15",
+            "q_mm_2015_01_16",
+        ),
+        unit_mapping={
+            "topaz_id": "non-unitized",
+            "p_mm_2015_01_15": "mm",
+            "p_mm_2015_01_16": "mm",
+            "q_mm_2015_01_15": "mm",
+            "q_mm_2015_01_16": "mm",
+        },
+        temporal_mode="event",
+        event_selector=NormalizedTemporalEvent(selector="date", dates=("2015-01-15", "2015-01-16")),
+    )
+
+    assert reshaped.selected_columns == ("topaz_id", "date", "p_mm", "q_mm")
+    assert len(reshaped.frame.index) == 4
+    assert sorted(reshaped.frame["date"].dropna().unique().tolist()) == ["2015-01-15", "2015-01-16"]
+    assert reshaped.frame.loc[0, "p_mm"] == pytest.approx(22.6)
+    assert reshaped.frame.loc[1, "p_mm"] == pytest.approx(20.0)
+
+
+def test_reshape_temporal_wide_to_long_yearly_restores_year_rows() -> None:
+    frame = gpd.GeoDataFrame(
+        {
+            "wepp_id": [1, 2],
+            "soil_loss_kg_yr2014": [10.0, 8.0],
+            "soil_loss_kg_yr2015": [12.0, 9.5],
+            "geometry": [Point(0.0, 0.0), Point(1.0, 1.0)],
+        },
+        geometry="geometry",
+        crs="EPSG:4326",
+    )
+
+    reshaped = reshape_temporal_wide_to_long(
+        frame=frame,
+        selected_columns=("wepp_id", "soil_loss_kg_yr2014", "soil_loss_kg_yr2015"),
+        unit_mapping={
+            "wepp_id": "non-unitized",
+            "soil_loss_kg_yr2014": "kg",
+            "soil_loss_kg_yr2015": "kg",
+        },
+        temporal_mode="yearly",
+        event_selector=None,
+    )
+
+    assert reshaped.selected_columns == ("wepp_id", "year", "soil_loss_kg")
+    assert sorted(reshaped.frame["year"].dropna().unique().tolist()) == [2014, 2015]
+    assert len(reshaped.frame.index) == 4
+
+
+def test_reshape_temporal_wide_to_long_supports_non_geometry_frames() -> None:
+    frame = pd.DataFrame(
+        {
+            "wepp_id": [1, 2],
+            "soil_loss_kg_yr2014": [10.0, 8.0],
+            "soil_loss_kg_yr2015": [12.0, 9.5],
+        }
+    )
+
+    reshaped = reshape_temporal_wide_to_long(
+        frame=frame,
+        selected_columns=("wepp_id", "soil_loss_kg_yr2014", "soil_loss_kg_yr2015"),
+        unit_mapping={
+            "wepp_id": "non-unitized",
+            "soil_loss_kg_yr2014": "kg",
+            "soil_loss_kg_yr2015": "kg",
+        },
+        temporal_mode="yearly",
+        event_selector=None,
+    )
+
+    assert reshaped.selected_columns == ("wepp_id", "year", "soil_loss_kg")
+    assert "geometry" not in reshaped.frame.columns
+    assert sorted(reshaped.frame["year"].dropna().unique().tolist()) == [2014, 2015]
+    assert len(reshaped.frame.index) == 4
 
 
 def test_resolve_geometry_key_prefers_layer_candidates_before_carrier_defaults() -> None:

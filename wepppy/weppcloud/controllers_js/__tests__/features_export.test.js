@@ -78,6 +78,36 @@ function buildFixtureHtml() {
                 selector_requirements: ["swat"],
                 columns: [{ column_id: "subbasin", label: "Subbasin", display_unit: "non-unitized", required: true, default_selected: true }],
                 required_columns: ["subbasin"]
+            },
+            {
+                layer_id: "wepp.temporal.events",
+                label: "WEPP Events",
+                family: "wepp",
+                family_label: "WEPP",
+                scope_class: "scope_aware",
+                geometry_type: "polygon",
+                temporal_modes: ["event"],
+                selector_requirements: [],
+                columns: [
+                    { column_id: "topaz_id", label: "Topaz ID", display_unit: "non-unitized", required: true, default_selected: true },
+                    { column_id: "hill_sediment_tonnes", label: "Hill Sediment", display_unit: "tonnes", required: false, default_selected: true }
+                ],
+                required_columns: ["topaz_id"]
+            },
+            {
+                layer_id: "wepp.interchange.loss_all_years_hill",
+                label: "WEPP Loss All Years Hill",
+                family: "wepp",
+                family_label: "WEPP",
+                scope_class: "scope_aware",
+                geometry_type: "polygon",
+                temporal_modes: ["yearly"],
+                selector_requirements: [],
+                columns: [
+                    { column_id: "topaz_id", label: "Topaz ID", display_unit: "non-unitized", required: true, default_selected: true },
+                    { column_id: "soil_loss_kg", label: "Soil Loss", display_unit: "kg", required: false, default_selected: true }
+                ],
+                required_columns: ["topaz_id"]
             }
         ],
         load_error: null
@@ -115,6 +145,8 @@ function buildFixtureHtml() {
             available_layer_ids: [
                 "watershed.subcatchments",
                 "wepp.summary.hillslopes",
+                "wepp.temporal.events",
+                "wepp.interchange.loss_all_years_hill",
                 "omni.scenarios.hillslopes",
                 "swat.interchange.table"
             ],
@@ -143,11 +175,19 @@ function buildFixtureHtml() {
 
             <section data-features-export-group="settings">
                 <button type="button" data-features-export-action="load-defaults">Load Defaults</button>
+                <button type="button" data-features-export-action="clear-selection">Clear selection</button>
                 <select data-features-export-field="format">
                     <option value="geopackage" selected>GeoPackage</option>
                     <option value="geodatabase">Geodatabase</option>
                     <option value="geojson">GeoJSON</option>
+                    <option value="parquet">Parquet</option>
+                    <option value="csv">CSV</option>
                 </select>
+                <div data-features-export-tabular-options hidden>
+                    <label><input type="checkbox" data-features-export-field="tabular-concatenate-tables">Concatenate tables</label>
+                    <label><input type="radio" data-features-export-field="tabular-temporal-layout" name="fx_tabular_temporal_layout" value="wide" checked>wide</label>
+                    <label><input type="radio" data-features-export-field="tabular-temporal-layout" name="fx_tabular_temporal_layout" value="long">long</label>
+                </div>
                 <label><input type="radio" data-features-export-field="units" name="fx_units" value="project" checked>project</label>
                 <label><input type="radio" data-features-export-field="units" name="fx_units" value="si">si</label>
                 <label><input type="radio" data-features-export-field="crs" name="fx_crs" value="wgs" checked>wgs</label>
@@ -225,7 +265,6 @@ function buildFixtureHtml() {
 
             <section data-features-export-group="actions">
                 <button id="btn_run_features_export" type="submit" data-features-export-action="submit" disabled>Export Features</button>
-                <button type="button" data-features-export-action="clear-selection">Clear selection</button>
                 <p id="hint_run_features_export" data-job-hint></p>
             </section>
 
@@ -420,6 +459,97 @@ describe("FeaturesExport controller", () => {
         expect(document.querySelector('[data-features-export-group="swat"]').hidden).toBe(false);
 
         await flushPromises();
+    });
+
+    test("tabular options are format-dependent and included in csv/parquet payloads", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var tabularWrap = document.querySelector("[data-features-export-tabular-options]");
+        expect(tabularWrap.hidden).toBe(true);
+
+        var formatSelect = document.querySelector('[data-features-export-field="format"]');
+        formatSelect.value = "csv";
+        formatSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        expect(tabularWrap.hidden).toBe(false);
+
+        var weppLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.summary.hillslopes"]');
+        weppLayer.checked = true;
+        weppLayer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var temporalMode = document.querySelector('[data-features-export-field="layer-temporal-mode"][data-layer-id="wepp.summary.hillslopes"]');
+        temporalMode.value = "yearly";
+        temporalMode.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var concatenateCheckbox = document.querySelector('[data-features-export-field="tabular-concatenate-tables"]');
+        concatenateCheckbox.checked = true;
+        concatenateCheckbox.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var longRadio = document.querySelector('[data-features-export-field="tabular-temporal-layout"][value="long"]');
+        longRadio.checked = true;
+        longRadio.dispatchEvent(new Event("change", { bubbles: true }));
+
+        document
+            .getElementById("features_export_form")
+            .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test-run/test-cfg/export/features",
+            expect.objectContaining({
+                format: "csv",
+                tabular: {
+                    concatenate_tables: true,
+                    temporal_layout: "long"
+                }
+            }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+    });
+
+    test("tabular long layout blocks mixed event and yearly temporal selections", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var formatSelect = document.querySelector('[data-features-export-field="format"]');
+        formatSelect.value = "csv";
+        formatSelect.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var eventLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.temporal.events"]');
+        var yearlyLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.interchange.loss_all_years_hill"]');
+        eventLayer.checked = true;
+        yearlyLayer.checked = true;
+        eventLayer.dispatchEvent(new Event("change", { bubbles: true }));
+        yearlyLayer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var longRadio = document.querySelector('[data-features-export-field="tabular-temporal-layout"][value="long"]');
+        longRadio.checked = true;
+        longRadio.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var eventSelectorDate = document.querySelector('[data-features-export-field="temporal-event-selector"][value="date"]');
+        eventSelectorDate.checked = true;
+        eventSelectorDate.dispatchEvent(new Event("change", { bubbles: true }));
+        var eventDates = document.querySelector('[data-features-export-field="temporal-event-dates"]');
+        eventDates.value = "2015-01-15";
+        eventDates.dispatchEvent(new Event("input", { bubbles: true }));
+
+        document
+            .getElementById("features_export_form")
+            .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+
+        expect(httpMock.postJsonWithSessionToken).not.toHaveBeenCalled();
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            controller,
+            expect.objectContaining({
+                error: expect.objectContaining({
+                    message: "Features export form validation failed."
+                })
+            })
+        );
+        expect(document.querySelector('[data-features-export-region="validation"]').textContent)
+            .toContain("Tabular long layout does not support mixing event and yearly temporal modes.");
     });
 
     test("payload includes per-layer temporal modes and column selection", async () => {

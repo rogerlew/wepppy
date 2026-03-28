@@ -195,6 +195,14 @@
       display: grid;
       gap: 0.35rem;
     }
+
+    .features-export-tabular-options {
+      margin-left: 1.15rem;
+      padding-left: 0.85rem;
+      border-left: 2px solid rgba(127, 127, 127, 0.28);
+      display: grid;
+      gap: 0.35rem;
+    }
   </style>
 
   {% set units_options = [
@@ -219,6 +227,9 @@
       <button type="button" class="pure-button pure-button-secondary" data-features-export-action="load-defaults">
         Load Defaults
       </button>
+      <button type="button" class="pure-button pure-button-secondary" data-features-export-action="clear-selection">
+        Clear selection
+      </button>
     {% endcall %}
 
     {{ ui.select_field(
@@ -237,6 +248,48 @@
          attrs={"data-features-export-field": "format"},
          max_width="750px"
        ) }}
+
+    <div class="features-export-tabular-options" data-features-export-tabular-options hidden>
+      <label class="wc-toggle-inline" for="features_export_tabular_concatenate_tables">
+        <input
+          id="features_export_tabular_concatenate_tables"
+          type="checkbox"
+          data-features-export-field="tabular-concatenate-tables">
+        <span>Concatenate tables</span>
+      </label>
+      <p class="wc-field__help">
+        Merge all hillslope carrier outputs into one table and all channel carrier outputs into one table.
+        Concatenated rows include provenance columns for output scope and Omni selector context when applicable.
+      </p>
+      <div class="wc-field" style="max-width: 750px;">
+        <span class="wc-field__label">Temporal table layout</span>
+        <div class="wc-field__control-group">
+          <label class="wc-toggle-inline" for="features_export_tabular_temporal_layout_wide">
+            <input
+              id="features_export_tabular_temporal_layout_wide"
+              type="radio"
+              name="features_export_tabular_temporal_layout"
+              value="wide"
+              data-features-export-field="tabular-temporal-layout"
+              checked>
+            <span>wide</span>
+          </label>
+          <label class="wc-toggle-inline" for="features_export_tabular_temporal_layout_long">
+            <input
+              id="features_export_tabular_temporal_layout_long"
+              type="radio"
+              name="features_export_tabular_temporal_layout"
+              value="long"
+              data-features-export-field="tabular-temporal-layout">
+            <span>long</span>
+          </label>
+        </div>
+      </div>
+      <p class="wc-field__help">
+        Wide keeps one row per carrier feature and appends year/date/return-period tokens into measure column names.
+        Long emits one temporal selector column (`year`, `date`, or `return_period`) plus measure columns across multiple rows.
+      </p>
+    </div>
 
     {{ ui.radio_group(
          "features_export_units",
@@ -411,9 +464,6 @@
     {% call button_row() %}
       <button id="btn_run_features_export" type="submit" class="pure-button pure-button-primary" data-features-export-action="submit" disabled>
         Export Features
-      </button>
-      <button type="button" class="pure-button pure-button-secondary" data-features-export-action="clear-selection">
-        Clear selection
       </button>
     {% endcall %}
     {{ ui.job_hint("hint_run_features_export", extra_class="wc-field__help") }}
