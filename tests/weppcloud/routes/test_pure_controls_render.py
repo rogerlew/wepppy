@@ -501,12 +501,13 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
         'id="features_export_catalog_data"',
         'id="features_export_bootstrap_data"',
         'data-features-export-group="settings"',
-        'data-features-export-group="summary"',
         'data-features-export-group="catalog"',
+        'data-features-export-group="scenario-catalog"',
         'data-features-export-group="scopes"',
         'data-features-export-group="temporal"',
         'data-features-export-group="omni"',
         'data-features-export-group="swat"',
+        'data-features-export-group="summary"',
         'data-features-export-group="actions"',
         'data-features-export-action="load-defaults"',
         'id="features_export_results_panel"',
@@ -524,3 +525,9 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
     year_selection_index = rendered.index('for="features_export_temporal_year_selection"')
     temporal_group_index = rendered.index('data-features-export-group="temporal"')
     assert crs_index < year_selection_index < temporal_group_index
+    assert "data-features-export-temporal-year-options hidden" not in rendered
+    assert "Temporal mode is selected per dataset row." not in rendered
+
+    summary_group_index = rendered.index('data-features-export-group="summary"')
+    export_button_index = rendered.index('id="btn_run_features_export"')
+    assert summary_group_index < export_button_index

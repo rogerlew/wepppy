@@ -68,6 +68,10 @@ layers:
         watershed_subcatchments_geojson:
           - "TopazID"
           - "topaz_id"
+        watershed_hillslope_attributes:
+          - "topaz_id"
+          - "TopazID"
+          - "wepp_id"
     sources:
       - source_id: "watershed_subcatchments_geojson"
         kind: "vector"
@@ -76,6 +80,13 @@ layers:
           value: "nodb:watershed.subwta_shp"
         required: true
         role: "geometry_and_attributes"
+      - source_id: "watershed_hillslope_attributes"
+        kind: "parquet"
+        locator:
+          kind: "relpath"
+          value: "watershed/hillslopes.parquet"
+        required: false
+        role: "attributes"
     dependencies:
       - dep_id: "watershed_controller_state"
         kind: "nodb"
@@ -278,6 +289,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "wepp.summary.hillslopes"
+    label: "H.loss.parquet"
     family: "wepp_summary"
     scope_class: "scope_aware"
     geometry:
@@ -299,10 +311,6 @@ layers:
           - "topaz_id"
           - "TopazID"
           - "wepp_id"
-        wepp_hillslope_attributes:
-          - "topaz_id"
-          - "TopazID"
-          - "wepp_id"
     sources:
       - source_id: "wepp_loss_hill"
         kind: "parquet"
@@ -311,13 +319,6 @@ layers:
           value: "wepp/{scope_root}/interchange/loss_pw0.hill.parquet"
         required: true
         role: "metrics"
-      - source_id: "wepp_hillslope_attributes"
-        kind: "parquet"
-        locator:
-          kind: "relpath"
-          value: "watershed/hillslopes.parquet"
-        required: false
-        role: "attributes"
     dependencies:
       - dep_id: "wepp_interchange_manifest"
         kind: "json"
@@ -395,6 +396,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "wepp.summary.channels"
+    label: "chan.out.parquet"
     family: "wepp_summary"
     scope_class: "scope_aware"
     geometry:
@@ -487,6 +489,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "wepp.temporal.events"
+    label: "return_period_events.parquet"
     family: "wepp_temporal"
     scope_class: "scope_aware"
     geometry:
@@ -574,6 +577,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "wepp.interchange.hill_pass"
+    label: "H.pass.parquet"
     family: "wepp_interchange"
     scope_class: "scope_aware"
     geometry:
@@ -659,6 +663,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "wepp.interchange.hill_element"
+    label: "H.element.parquet"
     family: "wepp_interchange"
     scope_class: "scope_aware"
     geometry:
@@ -749,6 +754,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "wepp.interchange.hill_wat"
+    label: "H.wat.parquet"
     family: "wepp_interchange"
     scope_class: "scope_aware"
     geometry:
@@ -901,6 +907,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "omni.scenarios.hillslopes"
+    label: "H.loss.parquet (Scenario)"
     family: "omni_scenarios"
     scope_class: "scope_invariant"
     geometry:
@@ -992,6 +999,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "omni.contrasts.hillslopes"
+    label: "H.loss.parquet (Contrast)"
     family: "omni_contrasts"
     scope_class: "scope_invariant"
     geometry:

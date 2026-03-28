@@ -247,17 +247,6 @@ FEATURES_EXPORT_UI_FAMILY_BY_RAW = {
     "ag_fields_metrics": "agfields_metrics",
 }
 
-FEATURES_EXPORT_LAYER_LABELS = {
-    "wepp.summary.hillslopes": "H.loss.parquet",
-    "wepp.summary.channels": "chan.out.parquet",
-    "wepp.temporal.events": "H.ebe.parquet",
-    "wepp.interchange.hill_pass": "H.pass.parquet",
-    "wepp.interchange.hill_element": "H.element.parquet",
-    "wepp.interchange.hill_wat": "H.wat.parquet",
-    "omni.scenarios.hillslopes": "H.loss.parquet (Scenario)",
-    "omni.contrasts.hillslopes": "H.loss.parquet (Contrast)",
-}
-
 FEATURES_EXPORT_DEFAULT_LAYER_IDS = [
     "watershed.subcatchments",
     "watershed.channels",
@@ -277,9 +266,10 @@ def _format_features_export_family_label(family: str) -> str:
     return " ".join(token.capitalize() for token in tokens)
 
 
-def _format_features_export_layer_label(layer_id: str) -> str:
-    if layer_id in FEATURES_EXPORT_LAYER_LABELS:
-        return FEATURES_EXPORT_LAYER_LABELS[layer_id]
+def _format_features_export_layer_label(layer_id: str, *, catalog_layer_raw: dict[str, object]) -> str:
+    raw_label = catalog_layer_raw.get("label")
+    if isinstance(raw_label, str) and raw_label.strip():
+        return raw_label.strip()
     tail = layer_id.split(".")[-1].strip()
     if not tail:
         return layer_id
@@ -810,7 +800,10 @@ def _build_features_export_catalog_payload(
         layers_payload.append(
             {
                 "layer_id": layer.layer_id,
-                "label": _format_features_export_layer_label(layer.layer_id),
+                "label": _format_features_export_layer_label(
+                    layer.layer_id,
+                    catalog_layer_raw=raw,
+                ),
                 "family": family,
                 "family_label": _format_features_export_family_label(family),
                 "family_raw": raw_family,

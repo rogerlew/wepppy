@@ -62,6 +62,15 @@
   <script type="application/json" id="features_export_bootstrap_data" data-features-export-bootstrap>{{ features_export_bootstrap_payload | tojson }}</script>
 
   <style>
+    #features_export_form section[data-features-export-group] + section[data-features-export-group] {
+      margin-top: 0.95rem;
+    }
+
+    #features_export_form .wc-control__panel-title {
+      margin-top: 0.15rem;
+      margin-bottom: 0.65rem;
+    }
+
     .features-export-tree__family {
       border: 1px solid rgba(127, 127, 127, 0.35);
       border-radius: 0.5rem;
@@ -138,6 +147,54 @@
     .features-export-tree__temporal-field .wc-field__control {
       width: 100%;
     }
+
+    .features-export-scenario-catalog {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .features-export-scenario-group {
+      border: 1px solid rgba(127, 127, 127, 0.35);
+      border-radius: 0.5rem;
+      padding: 0.35rem 0.5rem 0.5rem;
+      background: rgba(127, 127, 127, 0.08);
+    }
+
+    .features-export-scenario-group__summary {
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .features-export-scenario-group__body {
+      margin-left: 1.15rem;
+      padding-left: 0.85rem;
+      border-left: 2px solid rgba(127, 127, 127, 0.28);
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .features-export-scenario-subgroup {
+      border: 1px dashed rgba(127, 127, 127, 0.45);
+      border-radius: 0.4rem;
+      padding: 0.25rem 0.45rem 0.45rem;
+      background: rgba(127, 127, 127, 0.04);
+    }
+
+    .features-export-scenario-subgroup__summary {
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .features-export-summary-body {
+      margin-left: 1.15rem;
+      padding-left: 0.85rem;
+      border-left: 2px solid rgba(127, 127, 127, 0.28);
+      display: grid;
+      gap: 0.35rem;
+    }
   </style>
 
   {% set units_options = [
@@ -197,7 +254,7 @@
          max_width="750px"
        ) }}
 
-    <div data-features-export-temporal-year-options hidden>
+    <div data-features-export-temporal-year-options>
       <div class="wc-field" style="max-width: 750px;">
         <label class="wc-field__label" for="features_export_temporal_year_selection">Year selection</label>
         <select id="features_export_temporal_year_selection" class="wc-field__control" data-features-export-field="temporal-year-selection">
@@ -222,15 +279,6 @@
     <p class="wc-field__help" id="features_export_packaging_hint" data-features-export-region="packaging-hint"></p>
   </section>
 
-  <section data-features-export-group="summary" class="wc-stack">
-    <h3 class="wc-control__panel-title">Selected Summary</h3>
-    <p data-features-export-region="selected-count">Selected: 0 layers</p>
-    <p data-features-export-region="family-counts">Families: none</p>
-    <p data-features-export-region="capability-counts">Scope-aware: 0 | Temporal-capable: 0</p>
-    <p data-features-export-region="validation" class="wc-field__help"></p>
-    <p data-features-export-region="summary-warnings" class="wc-field__help"></p>
-  </section>
-
   <section data-features-export-group="catalog" class="wc-stack">
     <h3 class="wc-control__panel-title">Layer Catalog</h3>
     <p class="wc-field__help">
@@ -239,23 +287,66 @@
     <div id="features_export_catalog_list" data-features-export-catalog-list class="wc-stack"></div>
   </section>
 
-  <section data-features-export-group="scopes" class="wc-stack" hidden>
-    <h3 class="wc-control__panel-title">Output Scopes</h3>
-    {{ ui.checkbox_field(
-         "features_export_scope_baseline",
-         "Baseline",
-         checked=True,
-         attrs={"value": "baseline", "data-features-export-field": "output-scope"},
-         max_width="750px"
-       ) }}
-    {{ ui.checkbox_field(
-         "features_export_scope_roads",
-         "Roads",
-         checked=False,
-         attrs={"value": "roads", "data-features-export-field": "output-scope"},
-         max_width="750px"
-       ) }}
-    <p class="wc-field__help" data-features-export-region="roads-scope-note">Scope-invariant layers export once as shared output.</p>
+  <section data-features-export-group="scenario-catalog" class="wc-stack features-export-scenario-catalog" hidden>
+    <h3 class="wc-control__panel-title">Scenario Catalog</h3>
+
+    <details data-features-export-group="scopes" class="features-export-scenario-group" hidden open>
+      <summary class="features-export-scenario-group__summary">Output Scopes</summary>
+      <div class="features-export-scenario-group__body">
+        {{ ui.checkbox_field(
+             "features_export_scope_baseline",
+             "Baseline",
+             checked=True,
+             attrs={"value": "baseline", "data-features-export-field": "output-scope"},
+             max_width="750px"
+           ) }}
+        {{ ui.checkbox_field(
+             "features_export_scope_roads",
+             "Roads",
+             checked=False,
+             attrs={"value": "roads", "data-features-export-field": "output-scope"},
+             max_width="750px"
+           ) }}
+        <p class="wc-field__help" data-features-export-region="roads-scope-note">Scope-invariant layers export once as shared output.</p>
+      </div>
+    </details>
+
+    <details data-features-export-group="omni" class="features-export-scenario-group" hidden open>
+      <summary class="features-export-scenario-group__summary" data-features-export-region="omni-title">Omni Scenarios / Contrasts</summary>
+      <div class="features-export-scenario-group__body">
+        <details class="features-export-scenario-subgroup" data-features-export-omni-scenario-wrap hidden open>
+          <summary class="features-export-scenario-subgroup__summary">Scenarios</summary>
+          {% call button_row() %}
+            <button type="button" class="pure-button pure-button-secondary" data-features-export-action="omni-select-all" data-omni-target="scenarios">Select All</button>
+            <button type="button" class="pure-button pure-button-secondary" data-features-export-action="omni-unselect-all" data-omni-target="scenarios">Unselect All</button>
+          {% endcall %}
+          <div data-features-export-omni-scenarios-list class="wc-stack">
+            {% for row in omni_scenarios %}
+              <label class="wc-toggle-inline">
+                <input type="checkbox" data-features-export-field="scenario" value="{{ row.id }}">
+                <span>{{ row.label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </details>
+
+        <details class="features-export-scenario-subgroup" data-features-export-omni-contrast-wrap hidden open>
+          <summary class="features-export-scenario-subgroup__summary">Contrasts</summary>
+          {% call button_row() %}
+            <button type="button" class="pure-button pure-button-secondary" data-features-export-action="omni-select-all" data-omni-target="contrasts">Select All</button>
+            <button type="button" class="pure-button pure-button-secondary" data-features-export-action="omni-unselect-all" data-omni-target="contrasts">Unselect All</button>
+          {% endcall %}
+          <div data-features-export-omni-contrasts-list class="wc-stack">
+            {% for row in omni_contrasts %}
+              <label class="wc-toggle-inline">
+                <input type="checkbox" data-features-export-field="contrast-id" value="{{ row.id }}">
+                <span>{{ row.label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </details>
+      </div>
+    </details>
   </section>
 
   {% set temporal_event_selector_options = [
@@ -264,11 +355,6 @@
   ] %}
 
   <section data-features-export-group="temporal" class="wc-stack" hidden>
-    <h3 class="wc-control__panel-title">Temporal</h3>
-    <p class="wc-field__help" data-features-export-region="temporal-summary">
-      Temporal mode is selected per dataset row. Global year/event selectors apply to all selected temporal datasets.
-    </p>
-
     <div data-features-export-temporal-event-options hidden>
       {{ ui.radio_group(
            "features_export_temporal_event_selector",
@@ -284,40 +370,6 @@
       <div class="wc-field" style="max-width: 750px;" data-features-export-temporal-return-periods-wrap hidden>
         <label class="wc-field__label" for="features_export_temporal_return_periods">Return periods (years, comma-separated)</label>
         <textarea id="features_export_temporal_return_periods" class="wc-field__control" data-features-export-field="temporal-event-return-periods"></textarea>
-      </div>
-    </div>
-  </section>
-
-  <section data-features-export-group="omni" class="wc-stack" hidden>
-    <h3 class="wc-control__panel-title" data-features-export-region="omni-title">Omni Selector</h3>
-    <div class="wc-field" style="max-width: 750px;" data-features-export-omni-scenario-wrap hidden>
-      <label class="wc-field__label">Scenarios</label>
-      {% call button_row() %}
-        <button type="button" class="pure-button pure-button-secondary" data-features-export-action="omni-select-all" data-omni-target="scenarios">Select All</button>
-        <button type="button" class="pure-button pure-button-secondary" data-features-export-action="omni-unselect-all" data-omni-target="scenarios">Unselect All</button>
-      {% endcall %}
-      <div data-features-export-omni-scenarios-list class="wc-stack">
-        {% for row in omni_scenarios %}
-          <label class="wc-toggle-inline">
-            <input type="checkbox" data-features-export-field="scenario" value="{{ row.id }}">
-            <span>{{ row.label }}</span>
-          </label>
-        {% endfor %}
-      </div>
-    </div>
-    <div class="wc-field" style="max-width: 750px;" data-features-export-omni-contrast-wrap hidden>
-      <label class="wc-field__label">Contrasts</label>
-      {% call button_row() %}
-        <button type="button" class="pure-button pure-button-secondary" data-features-export-action="omni-select-all" data-omni-target="contrasts">Select All</button>
-        <button type="button" class="pure-button pure-button-secondary" data-features-export-action="omni-unselect-all" data-omni-target="contrasts">Unselect All</button>
-      {% endcall %}
-      <div data-features-export-omni-contrasts-list class="wc-stack">
-        {% for row in omni_contrasts %}
-          <label class="wc-toggle-inline">
-            <input type="checkbox" data-features-export-field="contrast-id" value="{{ row.id }}">
-            <span>{{ row.label }}</span>
-          </label>
-        {% endfor %}
       </div>
     </div>
   </section>
@@ -342,6 +394,17 @@
       </select>
     </div>
     <div id="features_export_swat_tables" data-features-export-swat-tables class="wc-stack"></div>
+  </section>
+
+  <section data-features-export-group="summary" class="wc-stack">
+    <h3 class="wc-control__panel-title">Selected Summary</h3>
+    <div class="features-export-summary-body">
+      <p data-features-export-region="selected-count">Selected: 0 layers</p>
+      <p data-features-export-region="family-counts">Families: none</p>
+      <p data-features-export-region="capability-counts">Scope-aware: 0 | Temporal-capable: 0</p>
+      <p data-features-export-region="validation" class="wc-field__help"></p>
+      <p data-features-export-region="summary-warnings" class="wc-field__help"></p>
+    </div>
   </section>
 
   <section data-features-export-group="actions" class="wc-stack">

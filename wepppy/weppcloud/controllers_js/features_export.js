@@ -31,7 +31,7 @@ var FeaturesExport = (function () {
         swatTables: "#features_export_swat_tables"
     };
 
-    var GROUPS = ["settings", "summary", "catalog", "scopes", "temporal", "omni", "swat", "actions"];
+    var GROUPS = ["settings", "catalog", "scenario-catalog", "scopes", "temporal", "omni", "swat", "summary", "actions"];
 
     var ACTIONS = {
         toggleLayer: '[data-features-export-action="toggle-layer"]',
@@ -80,6 +80,9 @@ var FeaturesExport = (function () {
         "job:completed",
         "job:error"
     ];
+    var SUPPRESSED_RESULT_WARNING_CODES = {
+        scope_not_applicable: true
+    };
 
     var DEFAULT_PROFILE_KEY = "gpkg_adjacent";
     var DEFAULT_FAMILY_ORDER = [
@@ -228,6 +231,31 @@ var FeaturesExport = (function () {
             }
         }
         return body;
+    }
+
+    function normalizedWarningCode(value) {
+        if (value === null || value === undefined) {
+            return "";
+        }
+        return String(value).trim().toLowerCase();
+    }
+
+    function isSuppressedResultWarning(warning) {
+        if (!warning || typeof warning !== "object") {
+            return false;
+        }
+        var code = normalizedWarningCode(warning.code);
+        if (!code) {
+            return false;
+        }
+        return Boolean(SUPPRESSED_RESULT_WARNING_CODES[code]);
+    }
+
+    function visibleResultWarnings(result) {
+        var warnings = Array.isArray(result && result.warnings) ? result.warnings : [];
+        return warnings.filter(function (warning) {
+            return !isSuppressedResultWarning(warning);
+        });
     }
 
     function extractJobId(payload, preferredJobKey) {
@@ -655,15 +683,12 @@ var FeaturesExport = (function () {
             var datesWrap = getFieldNode("[data-features-export-temporal-dates-wrap]");
             var returnPeriodsWrap = getFieldNode("[data-features-export-temporal-return-periods-wrap]");
 
-            var isYearMode = modes.some(function (modeToken) {
-                return modeToken === "annual_average" || modeToken === "yearly";
-            });
             if (yearWrap) {
-                yearWrap.hidden = !isYearMode;
+                yearWrap.hidden = false;
             }
             if (customWrap) {
                 var yearSelection = readFieldValue(FIELDS.temporalYearSelection);
-                customWrap.hidden = !isYearMode || yearSelection !== "custom";
+                customWrap.hidden = yearSelection !== "custom";
             }
 
             var isEventMode = modes.indexOf("event") !== -1;
@@ -1305,7 +1330,7 @@ var FeaturesExport = (function () {
         function updateOmniVisibility(familiesSet) {
             var omniGroup = controller.groups.omni;
             if (!omniGroup) {
-                return;
+                return false;
             }
             var hasScenario = familiesSet.has("omni_scenarios");
             var hasContrast = familiesSet.has("omni_contrasts");
@@ -1325,13 +1350,14 @@ var FeaturesExport = (function () {
             }
             if (omniTitle) {
                 if (hasScenario && !hasContrast && !hasWepp) {
-                    omniTitle.textContent = "Omni Scenario";
+                    omniTitle.textContent = "Omni Scenarios";
                 } else if (!hasScenario && hasContrast && !hasWepp) {
-                    omniTitle.textContent = "Omni Contrast";
+                    omniTitle.textContent = "Omni Contrasts";
                 } else {
                     omniTitle.textContent = "Omni Scenarios / Contrasts";
                 }
             }
+            return show;
         }
 
         function updateSwatTables() {
@@ -1401,7 +1427,8 @@ var FeaturesExport = (function () {
             showGroup("scopes", hasScopeAware);
             showGroup("temporal", hasTemporal);
             showGroup("swat", hasSwat);
-            updateOmniVisibility(families);
+            var hasOmni = updateOmniVisibility(families);
+            showGroup("scenario-catalog", hasScopeAware || hasOmni);
             updateTemporalVisibility();
             updateRoadsScopeAvailability();
 
@@ -1841,7 +1868,7 @@ var FeaturesExport = (function () {
         }
 
         function renderResult(result) {
-            var warnings = Array.isArray(result && result.warnings) ? result.warnings : [];
+            var warnings = visibleResultWarnings(result);
             var hasWarnings = warnings.length > 0;
             if (controller.resultStateEl) {
                 controller.resultStateEl.textContent = hasWarnings ? "Partial success" : "Success";
@@ -1961,7 +1988,7 @@ var FeaturesExport = (function () {
                         return;
                     }
                     renderResult(result);
-                    var warnings = Array.isArray(result.warnings) ? result.warnings : [];
+                    var warnings = visibleResultWarnings(result);
                     if (controller.events && typeof controller.events.emit === "function") {
                         controller.events.emit("features_export:completed", {
                             job_id: jobId,

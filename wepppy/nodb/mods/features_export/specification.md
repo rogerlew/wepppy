@@ -92,13 +92,14 @@ Initial layer families:
 - Ash/WATAR: hillslope ash transport outputs.
 - AgFields spatial: field boundaries and sub-field polygons.
 - AgFields WEPP metrics: sub-field/field metrics sourced from `wepp/ag_fields/output/interchange/*`.
-- WEPP: canonical output datasets labeled with familiar file names (for example `H.element.parquet`, `H.wat.parquet`, `H.pass.parquet`, `H.loss.parquet`, `H.soil.parquet`, `H.ebe.parquet`, `chan.out.parquet`, `chanwb.parquet`).
+- WEPP: canonical output datasets labeled with familiar file names (for example `H.element.parquet`, `H.wat.parquet`, `H.pass.parquet`, `H.loss.parquet`, `H.soil.parquet`, `return_period_events.parquet`, `chan.out.parquet`, `chanwb.parquet`).
 - SWAT interchange: `swat/outputs/run_*/interchange/*`.
 - Omni scenarios: `_pups/omni/scenarios/*`.
 - Omni contrasts: `_pups/omni/contrasts/*`.
 
 Discoverability requirements:
 - Internal ids like `wepp.temporal.events` are backend-only tokens and must never be shown as the primary UI label.
+- Primary dataset labels are catalog-owned via per-layer `label` in `layer_catalog.yaml`; route/controller code must not maintain a parallel hardcoded label map.
 - Group rendering is discovery-driven: hide groups with zero currently available datasets for the active run/config.
 - Group order keeps Omni families at the bottom of the catalog list.
 

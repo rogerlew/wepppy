@@ -248,6 +248,16 @@ def test_features_export_catalog_payload_builds_from_catalog(
                 raw={"geometry": {"type": "polygon"}},
             ),
             SimpleNamespace(
+                layer_id="wepp.temporal.events",
+                family="wepp_temporal",
+                scope_class="scope_aware",
+                temporal_supported_modes=("event",),
+                raw={
+                    "label": "return_period_events.parquet",
+                    "geometry": {"type": "polygon"},
+                },
+            ),
+            SimpleNamespace(
                 layer_id="agfields.metrics.field",
                 family="agfields_metrics",
                 scope_class="scope_invariant",
@@ -265,8 +275,13 @@ def test_features_export_catalog_payload_builds_from_catalog(
     assert payload["family_order"][0] == "watershed"
     assert [layer["layer_id"] for layer in payload["layers"]] == [
         "watershed.subcatchments",
+        "wepp.temporal.events",
         "agfields.metrics.field",
     ]
+    wepp_events = next(
+        layer for layer in payload["layers"] if layer["layer_id"] == "wepp.temporal.events"
+    )
+    assert wepp_events["label"] == "return_period_events.parquet"
     agfields = next(
         layer for layer in payload["layers"] if layer["layer_id"] == "agfields.metrics.field"
     )

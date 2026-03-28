@@ -351,6 +351,21 @@ describe("FeaturesExport controller", () => {
         expect(httpMock.postJsonWithSessionToken).not.toHaveBeenCalled();
     });
 
+    test("year selection remains visible even when no temporal layers are selected", () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var yearWrap = document.querySelector("[data-features-export-temporal-year-options]");
+        expect(yearWrap).not.toBeNull();
+        expect(yearWrap.hidden).toBe(false);
+
+        document
+            .querySelector('[data-features-export-action="clear-selection"]')
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+        expect(yearWrap.hidden).toBe(false);
+    });
+
     test("progressive disclosure and validation gating respond to selected families", async () => {
         document.body.innerHTML = buildFixtureHtml();
         controller.bootstrap({});
@@ -651,6 +666,56 @@ describe("FeaturesExport controller", () => {
 
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(controller, "job-303");
         expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+    });
+
+    test("scope_not_applicable warnings are suppressed from result state and warning list", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var layer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.summary.hillslopes"]');
+        layer.checked = true;
+        layer.dispatchEvent(new Event("change", { bubbles: true }));
+        var roadsScope = document.querySelector('[data-features-export-field="output-scope"][value="roads"]');
+        roadsScope.checked = true;
+        roadsScope.dispatchEvent(new Event("change", { bubbles: true }));
+
+        httpMock.requestWithSessionToken.mockResolvedValueOnce({
+            body: {
+                result: {
+                    download_url: "/runs/test-run/test-cfg/download/export/features/artifacts/artifact-456/features_export.gpkg",
+                    artifact_id: "artifact-456",
+                    cache_hit: false,
+                    manifest_relpath: "export/features/job-404/manifest.json",
+                    warnings: [
+                        {
+                            code: "scope_not_applicable",
+                            message: "Layer 'watershed.subcatchments' is scope-invariant; roads scope is not separately applicable."
+                        },
+                        {
+                            code: "scope_not_applicable",
+                            message: "Layer 'watershed.channels' is scope-invariant; roads scope is not separately applicable."
+                        }
+                    ]
+                }
+            }
+        });
+
+        document
+            .getElementById("features_export_form")
+            .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+        await flushPromises();
+
+        controller.triggerEvent("FEATURES_EXPORT_TASK_COMPLETED", { source: "status", job_id: "job-101" });
+        await flushPromises();
+        await flushPromises();
+
+        expect(document.getElementById("features_export_result_state").textContent).toContain("Success");
+        expect(document.querySelector('[data-features-export-region="warnings"]').innerHTML).toBe("");
+        expect(baseInstance.append_status_message).toHaveBeenLastCalledWith(
+            controller,
+            "Features export completed successfully."
+        );
     });
 
     test("bootstrap resolves legacy and rq-suffixed job keys", () => {
