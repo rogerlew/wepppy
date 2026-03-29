@@ -860,7 +860,7 @@ def test_return_periods_supports_roads_output_scope(wepp_client, monkeypatch: py
             assert wd == run_dir
             return type("WatershedObj", (), {"translator_factory": staticmethod(lambda: object())})()
 
-    captured_scopes: Dict[str, Any] = {}
+    captured_report_kwargs: Dict[str, Any] = {}
 
     class DummyReport:
         return_periods = {"Peak Discharge": {2: 1.0, 5: 2.0}}
@@ -874,7 +874,7 @@ def test_return_periods_supports_roads_output_scope(wepp_client, monkeypatch: py
             return DummyWepp()
 
         def report_return_periods(self, **kwargs: Any):
-            captured_scopes["return_periods"] = kwargs.get("output_scope")
+            captured_report_kwargs.update(kwargs)
             return DummyReport()
 
     monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
@@ -893,13 +893,26 @@ def test_return_periods_supports_roads_output_scope(wepp_client, monkeypatch: py
 
     monkeypatch.setattr(wepp_module, "render_template", _fake_render)
 
-    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?output_scope=roads")
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?output_scope=roads&method=am")
 
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "ok"
-    assert captured_scopes["return_periods"] == "roads"
+    assert captured_report_kwargs["output_scope"] == "roads"
+    assert captured_report_kwargs["method"] == "am"
     assert captured_template["template_name"] == "reports/wepp/return_periods.htm"
     assert captured_template["kwargs"]["output_scope"] == "roads"
+    assert captured_template["kwargs"]["method"] == "am"
+
+
+def test_return_periods_rejects_invalid_method(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, _ = wepp_client
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/return_periods?method=invalid")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["error"]["message"] == "method must be either cta or am"
 
 
 def test_report_rusle_results_returns_empty_when_outputs_missing(

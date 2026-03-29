@@ -260,12 +260,15 @@
   </section>
 {%- endmacro %}
 
+{% set method_value = method | default('cta', true) %}
 {% set method_label = 'Gringorten' if gringorten_correction else 'Weibull' %}
+{% set analysis_mode_label = 'Annual Maxima' if method_value == 'am' else 'Continuous Time Analysis (CTA)' %}
+{% set analysis_series_label = 'annual-maxima series (largest event per year)' if method_value == 'am' else 'continuous-event series (all simulated events)' %}
 
 <header class="wc-stack">
   <h1 class="wc-heading__title">Return periods</h1>
   <p class="wc-text-muted">
-    Frequency analysis of watershed metrics using {{ method_label }} plotting positions.
+    Frequency analysis of watershed metrics using {{ analysis_mode_label }} and {{ method_label }} plotting positions.
     Configure the simulation years, channel of interest, and optional exclusions below.
   </p>
 </header>
@@ -333,6 +336,26 @@
           </p>
 
           <fieldset class="wc-stack">
+            <legend class="wc-text-muted">Analysis mode</legend>
+            <div class="wc-choice-group">
+              <label class="wc-choice">
+                <input type="radio" id="methodCta" name="method" value="cta"{% if method_value == 'cta' %} checked{% endif %}>
+                <span class="wc-choice__body">
+                  <span class="wc-choice__label">Continuous Time Analysis (CTA)</span>
+                  <span class="wc-choice__description">Ranks all simulated events in the selected period.</span>
+                </span>
+              </label>
+              <label class="wc-choice">
+                <input type="radio" id="methodAm" name="method" value="am"{% if method_value == 'am' %} checked{% endif %}>
+                <span class="wc-choice__body">
+                  <span class="wc-choice__label">Annual Maxima (AM)</span>
+                  <span class="wc-choice__description">Ranks the single largest event from each year.</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="wc-stack">
             <legend class="wc-text-muted">Exclude months from analysis</legend>
             <div class="wc-choice-group">
               {% set months = [
@@ -368,19 +391,24 @@
   </header>
   {% if gringorten_correction %}
     <p class="wc-text-muted">
-      Return periods are estimated using the <strong>Gringorten</strong> plotting position on the annual maxima series:
-      <code>T = (N + 0.12) / (m − 0.44)</code>, where <em>T</em> is the return period, <em>N</em> is the number of
-      simulated daily values, and <em>m</em> is the event rank.
+      Return periods are estimated using the <strong>Gringorten</strong> plotting position on the
+      <strong>{{ analysis_series_label }}</strong>: <code>T = (N + 0.12) / (m − 0.44)</code>, where <em>T</em> is
+      the return period, <em>N</em> is the number of observations in the selected series, and <em>m</em> is the
+      event rank.
     </p>
   {% else %}
     <p class="wc-text-muted">
-      Return periods are estimated using the <strong>Weibull</strong> plotting position on the annual maxima series:
-      <code>T = (N + 1) / m</code>, where <em>T</em> is the return period, <em>N</em> is the number of simulated daily
-      values, and <em>m</em> is the event rank.
+      Return periods are estimated using the <strong>Weibull</strong> plotting position on the
+      <strong>{{ analysis_series_label }}</strong>: <code>T = (N + 1) / m</code>, where <em>T</em> is the return
+      period, <em>N</em> is the number of observations in the selected series, and <em>m</em> is the event rank.
     </p>
   {% endif %}
   <div class="wc-summary-pane">
     <dl class="wc-summary-pane__list">
+      <div class="wc-summary-pane__item">
+        <dt class="wc-summary-pane__term">Analysis mode</dt>
+        <dd class="wc-summary-pane__definition">{{ analysis_mode_label }}</dd>
+      </div>
       <div class="wc-summary-pane__item">
         <dt class="wc-summary-pane__term">Years in simulation</dt>
         <dd class="wc-summary-pane__definition">{{ report.years }}</dd>
@@ -448,12 +476,19 @@
     return (sp.get('gringorten_correction') || 'false').toLowerCase() === 'true';
   }
 
+  function parseMethodFromURL() {
+    const sp = new URLSearchParams(window.location.search);
+    const method = (sp.get('method') || 'cta').toLowerCase();
+    return method === 'am' ? 'am' : 'cta';
+  }
+
   function submitAdvancedOpts(e) {
     e.preventDefault();
     const checkedMonths = Array.from(
       document.querySelectorAll('#excludeMonthsForm input[type="checkbox"][id^="m"]:checked')
     ).map(cb => parseInt(cb.value, 10)).sort((a, b) => a - b);
     const gring = !!document.getElementById('gringortenCheckbox')?.checked;
+    const selectedMethod = document.querySelector('#excludeMonthsForm input[name="method"]:checked')?.value || 'cta';
     const yearSel = document.getElementById('yearSelection');
     const base = new URL(yearSel ? yearSel.value : window.location.pathname, window.location.href);
     const current = new URL(window.location.href);
@@ -462,6 +497,7 @@
     if (checkedMonths.length) params.set('exclude_months', checkedMonths.join(','));
     else params.delete('exclude_months');
     params.set('gringorten_correction', gring ? 'true' : 'false');
+    params.set('method', selectedMethod);
     window.location.href = current.pathname + '?' + params.toString();
     return false;
   }
@@ -469,6 +505,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     const months = parseExcludeMonthsFromURL();
     const gring = parseGringortenFromURL();
+    const method = parseMethodFromURL();
 
     months.forEach(m => {
       const el = document.getElementById('m' + m);
@@ -478,8 +515,11 @@
     const grChk = document.getElementById('gringortenCheckbox');
     if (grChk) grChk.checked = gring;
 
+    const methodInput = document.querySelector(`#excludeMonthsForm input[name="method"][value="${method}"]`);
+    if (methodInput) methodInput.checked = true;
+
     const advancedCollapse = document.getElementById('advancedOptionsCollapse');
-    if (advancedCollapse && (months.length > 0 || gring)) {
+    if (advancedCollapse && (months.length > 0 || gring || method !== 'cta')) {
       advancedCollapse.setAttribute('open', 'open');
     }
 
