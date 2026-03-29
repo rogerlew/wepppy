@@ -526,11 +526,11 @@ async def export_features_submit(runid: str, config: str, request: Request):
 
 @router.post(
     "/runs/{runid}/{config}/export/features/profile/resolve",
-    summary="Resolve features export profile text",
+    summary="Resolve features export profile",
     description=(
         "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
-        "Parses profile text (`profile_text`) as YAML, validates it against the "
-        "features-export planner, and returns a normalized request mapping."
+        "Read-only, no queue: parse YAML `profile_text` and return "
+        "features-export request mapping."
     ),
     tags=["rq-engine", "exports"],
     operation_id=rq_operation_id("export_features_profile_resolve"),

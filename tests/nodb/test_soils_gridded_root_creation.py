@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import logging
 from contextlib import nullcontext
 from pathlib import Path
@@ -198,7 +199,8 @@ def test_build_from_map_db_refreshes_existing_run_local_sol_from_db(
         def __init__(self, _sol_path: str) -> None:
             self.obj = {"ofes": [{"slid": "stub soil"}]}
 
-    monkeypatch.setattr("wepppy.wepp.soils.utils.WeppSoilUtil", _WeppSoilUtilStub)
+    soils_utils = importlib.import_module("wepppy.wepp.soils.utils")
+    monkeypatch.setattr(soils_utils, "WeppSoilUtil", _WeppSoilUtilStub)
 
     soils._build_from_map_db()
 
