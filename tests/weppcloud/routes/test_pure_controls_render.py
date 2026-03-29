@@ -544,3 +544,5 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
     summary_group_index = rendered.index('data-features-export-group="summary"')
     export_button_index = rendered.index('id="btn_run_features_export"')
     assert summary_group_index < export_button_index
+    assert "Unitizer Selections" in rendered
+    assert "Unitzer Selections" not in rendered

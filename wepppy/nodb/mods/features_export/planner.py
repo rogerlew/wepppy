@@ -168,7 +168,11 @@ def resolve_export_plan(
 
     for layer_id in normalized_request.layers:
         layer = catalog.layer_index[layer_id]
-        effective_mode = _effective_temporal_mode_for_layer(layer_id, normalized_request.temporal)
+        effective_mode = _effective_temporal_mode_for_layer(
+            layer_id,
+            normalized_request.temporal,
+            layer_temporal_supported_modes=layer.temporal_supported_modes,
+        )
         if not _layer_supports_temporal(layer, effective_mode, normalized_request.temporal):
             warnings.append(
                 ExportWarning(
@@ -246,6 +250,7 @@ def _resolve_omni_context_layers(
                 effective_mode = _effective_temporal_mode_for_layer(
                     layer_id,
                     request.temporal,
+                    layer_temporal_supported_modes=layer.temporal_supported_modes,
                 )
                 if not _layer_supports_temporal(layer, effective_mode, request.temporal):
                     warnings.append(
@@ -283,6 +288,7 @@ def _resolve_omni_context_layers(
                 effective_mode = _effective_temporal_mode_for_layer(
                     layer_id,
                     request.temporal,
+                    layer_temporal_supported_modes=layer.temporal_supported_modes,
                 )
                 if not _layer_supports_temporal(layer, effective_mode, request.temporal):
                     warnings.append(
@@ -428,8 +434,12 @@ def _carrier_for_layer(layer: CatalogLayer) -> str | None:
 def _effective_temporal_mode_for_layer(
     layer_id: str,
     temporal: NormalizedTemporalRequest | None,
+    *,
+    layer_temporal_supported_modes: cabc.Sequence[str] | None = None,
 ) -> str | None:
     if temporal is None:
+        return None
+    if not layer_temporal_supported_modes:
         return None
     return temporal.mode_for_layer(layer_id)
 
@@ -1080,6 +1090,7 @@ def _normalize_temporal(
             )
 
     year_selection: str | None = None
+    year_selection_explicit = False
     if "year_selection" in value and value.get("year_selection") is not None:
         raw_year_selection = _optional_string(
             value.get("year_selection"),
@@ -1101,7 +1112,9 @@ def _normalize_temporal(
                 )
             else:
                 year_selection = candidate
+                year_selection_explicit = True
 
+    exclude_year_indices_explicit = "exclude_yr_indxs" in value and value.get("exclude_yr_indxs") is not None
     exclude_year_indices = _normalize_non_negative_int_list(
         value.get("exclude_yr_indxs"),
         path="temporal.exclude_yr_indxs",
@@ -1237,7 +1250,7 @@ def _normalize_temporal(
             )
         )
 
-    if uses_event and (year_selection is not None or exclude_year_indices):
+    if uses_event and (year_selection_explicit or exclude_year_indices_explicit):
         errors.append(
             ValidationIssue(
                 code="invalid_selector_combo",

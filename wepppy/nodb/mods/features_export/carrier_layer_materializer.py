@@ -26,6 +26,14 @@ class CarrierLayerCoreMaterialization:
     warnings: tuple[ExportWarning, ...]
 
 
+@dataclass(frozen=True)
+class _EventSelectorMaskResult:
+    """Internal selector mask payload with optional derived return-period values."""
+
+    mask: pd.Series | None
+    derived_return_period: pd.Series | None = None
+
+
 def materialize_carrier_layer_core(
     *,
     wd: Path,
@@ -199,12 +207,23 @@ def _apply_temporal_selector_filtering(
         return tuple(sources)
 
     selector = temporal_request.event
+    return_period_lookup = (
+        _build_event_return_period_lookup(sources)
+        if selector.selector == "return_period"
+        else None
+    )
     filtered_sources: list[DiscoveredSourceFrame] = []
     for source in sources:
+        if (
+            selector.selector == "return_period"
+            and _is_return_period_lookup_only_source(source)
+        ):
+            continue
         filtered = _filter_source_for_event_selector(
             source=source,
             layer_id=layer.layer_id,
             selector=selector,
+            return_period_lookup=return_period_lookup,
         )
         if filtered is not None:
             filtered_sources.append(filtered)
@@ -223,9 +242,14 @@ def _filter_source_for_event_selector(
     source: DiscoveredSourceFrame,
     layer_id: str,
     selector: NormalizedTemporalEvent,
+    return_period_lookup: cabc.Mapping[str, frozenset[float]] | None = None,
 ) -> DiscoveredSourceFrame | None:
-    mask = _event_selector_mask(source.dataframe, selector=selector)
-    if mask is None:
+    mask_result = _event_selector_mask(
+        source.dataframe,
+        selector=selector,
+        return_period_lookup=return_period_lookup,
+    )
+    if mask_result.mask is None:
         if source.required:
             raise MaterializationContractError(
                 "Required source does not expose columns compatible with event selector filtering.",
@@ -236,7 +260,14 @@ def _filter_source_for_event_selector(
             )
         return None
 
-    filtered_frame = source.dataframe.loc[mask].reset_index(drop=True)
+    filtered_frame = source.dataframe.loc[mask_result.mask].copy()
+    if (
+        mask_result.derived_return_period is not None
+        and "return_period" not in filtered_frame.columns
+    ):
+        derived_values = mask_result.derived_return_period.loc[mask_result.mask]
+        filtered_frame["return_period"] = derived_values.values
+    filtered_frame = filtered_frame.reset_index(drop=True)
     if not filtered_frame.empty:
         return DiscoveredSourceFrame(
             source_id=source.source_id,
@@ -264,15 +295,19 @@ def _event_selector_mask(
     frame: pd.DataFrame,
     *,
     selector: NormalizedTemporalEvent,
-) -> pd.Series | None:
+    return_period_lookup: cabc.Mapping[str, frozenset[float]] | None = None,
+) -> _EventSelectorMaskResult:
     if selector.selector == "date":
-        return _date_selector_mask(frame, selected_dates=selector.dates)
+        return _EventSelectorMaskResult(
+            mask=_date_selector_mask(frame, selected_dates=selector.dates)
+        )
     if selector.selector == "return_period":
         return _return_period_selector_mask(
             frame,
             selected_return_periods=selector.return_periods,
+            return_period_lookup=return_period_lookup,
         )
-    return None
+    return _EventSelectorMaskResult(mask=None)
 
 
 def _date_selector_mask(
@@ -322,7 +357,8 @@ def _return_period_selector_mask(
     frame: pd.DataFrame,
     *,
     selected_return_periods: cabc.Sequence[float],
-) -> pd.Series | None:
+    return_period_lookup: cabc.Mapping[str, frozenset[float]] | None = None,
+) -> _EventSelectorMaskResult:
     lookup = _normalized_column_lookup(frame.columns)
     period_column = _first_matching_column(
         lookup,
@@ -331,14 +367,158 @@ def _return_period_selector_mask(
             "return_period_years",
             "recurrence_interval",
             "recurrence_interval_years",
+            "rank",
         ),
     )
-    if period_column is None:
-        return None
-
     selected = {float(value) for value in selected_return_periods}
-    values = pd.to_numeric(frame[period_column], errors="coerce")
-    return values.isin(selected).fillna(False)
+    if period_column is not None:
+        values = pd.to_numeric(frame[period_column], errors="coerce")
+        return _EventSelectorMaskResult(
+            mask=values.isin(selected).fillna(False),
+            derived_return_period=values,
+        )
+
+    event_id_column = _first_matching_column(lookup, ("event_id", "eventid"))
+    if event_id_column is None or not return_period_lookup:
+        return _EventSelectorMaskResult(mask=None)
+
+    preferred_order = [float(value) for value in selected_return_periods]
+    event_tokens = frame[event_id_column].map(_canonical_event_id_token)
+    derived_periods = event_tokens.map(
+        lambda token: _preferred_selected_return_period(
+            event_token=token,
+            selected_periods=preferred_order,
+            return_period_lookup=return_period_lookup,
+        )
+    )
+    return _EventSelectorMaskResult(
+        mask=derived_periods.notna().fillna(False),
+        derived_return_period=derived_periods,
+    )
+
+
+def _build_event_return_period_lookup(
+    sources: cabc.Sequence[DiscoveredSourceFrame],
+) -> dict[str, frozenset[float]]:
+    by_event_id: dict[str, set[float]] = {}
+    for source in sources:
+        frame = source.dataframe
+        lookup = _normalized_column_lookup(frame.columns)
+        event_id_column = _first_matching_column(lookup, ("event_id", "eventid"))
+        period_column = _first_matching_column(
+            lookup,
+            (
+                "return_period",
+                "return_period_years",
+                "recurrence_interval",
+                "recurrence_interval_years",
+                "rank",
+            ),
+        )
+        if event_id_column is None or period_column is None:
+            continue
+
+        measure_id_column = _first_matching_column(lookup, ("measure_id", "measureid", "measure"))
+        if measure_id_column is not None:
+            measure_tokens = frame[measure_id_column].map(_normalized_measure_token)
+            preferred_measure = _preferred_measure_token(measure_tokens.tolist())
+            if preferred_measure is not None:
+                frame = frame.loc[measure_tokens == preferred_measure].reset_index(drop=True)
+                if frame.empty:
+                    continue
+
+        event_tokens = frame[event_id_column].map(_canonical_event_id_token)
+        period_values = pd.to_numeric(frame[period_column], errors="coerce")
+        for event_token, period_value in zip(event_tokens.tolist(), period_values.tolist()):
+            if event_token is None or pd.isna(period_value):
+                continue
+            by_event_id.setdefault(event_token, set()).add(float(period_value))
+
+    return {event_id: frozenset(values) for event_id, values in by_event_id.items() if values}
+
+
+def _canonical_event_id_token(value: object) -> str | None:
+    if value is None or pd.isna(value):
+        return None
+    if isinstance(value, float):
+        if not value.is_integer():
+            return str(value).strip() or None
+        return str(int(value))
+    if isinstance(value, int):
+        return str(value)
+    token = str(value).strip()
+    if not token:
+        return None
+    if token.isdigit():
+        return str(int(token))
+    try:
+        float_value = float(token)
+    except ValueError:
+        return token
+    if float_value.is_integer():
+        return str(int(float_value))
+    return token
+
+
+def _preferred_selected_return_period(
+    *,
+    event_token: str | None,
+    selected_periods: cabc.Sequence[float],
+    return_period_lookup: cabc.Mapping[str, frozenset[float]],
+) -> float | None:
+    if event_token is None:
+        return None
+    available = return_period_lookup.get(event_token)
+    if not available:
+        return None
+    for period in selected_periods:
+        if period in available:
+            return period
+    return None
+
+
+def _is_return_period_lookup_only_source(source: DiscoveredSourceFrame) -> bool:
+    if source.required:
+        return False
+    lookup = _normalized_column_lookup(source.dataframe.columns)
+    has_event_id = _first_matching_column(lookup, ("event_id", "eventid")) is not None
+    has_rank = _first_matching_column(
+        lookup,
+        (
+            "rank",
+            "return_period",
+            "return_period_years",
+            "recurrence_interval",
+            "recurrence_interval_years",
+        ),
+    ) is not None
+    return has_event_id and has_rank
+
+
+def _normalized_measure_token(value: object) -> str:
+    token = str(value or "").strip().lower()
+    if not token:
+        return ""
+    return "".join(ch for ch in token if ch.isalnum() or ch == "_")
+
+
+def _preferred_measure_token(measure_tokens: cabc.Sequence[str]) -> str | None:
+    if not measure_tokens:
+        return None
+    available = {token for token in measure_tokens if token}
+    if not available:
+        return None
+    preferred = (
+        "runoff_depth",
+        "runoff_volume",
+        "runoff",
+        "peak_discharge",
+        "sediment_yield",
+    )
+    for token in preferred:
+        if token in available:
+            return token
+    return None
 
 
 __all__ = [

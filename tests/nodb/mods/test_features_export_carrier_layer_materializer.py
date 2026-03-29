@@ -31,14 +31,23 @@ def _event_layer_plan() -> ResolvedLayerPlan:
     )
 
 
-def _event_request_plan(*, dates: tuple[str, ...]) -> ResolvedExportPlan:
+def _event_request_plan(
+    *,
+    selector: str = "date",
+    dates: tuple[str, ...] = (),
+    return_periods: tuple[float, ...] = (),
+) -> ResolvedExportPlan:
     request = NormalizedExportRequest(
         format="geopackage",
         units="si",
         layers=("wepp.temporal.events",),
         temporal=NormalizedTemporalRequest(
             mode="event",
-            event=NormalizedTemporalEvent(selector="date", dates=dates),
+            event=NormalizedTemporalEvent(
+                selector=selector,
+                dates=dates,
+                return_periods=return_periods,
+            ),
         ),
     )
     return ResolvedExportPlan(
@@ -226,6 +235,62 @@ def test_materialize_carrier_layer_core_keeps_required_source_when_event_filter_
 
     assert result.frame.empty
     assert list(result.frame.columns) == ["runoff_volume_m3", "date", JOIN_KEY_COLUMN]
+
+
+def test_materialize_carrier_layer_core_filters_event_sources_by_selected_return_periods(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request_plan = _event_request_plan(selector="return_period", return_periods=(2.0,))
+    layer = _event_layer_plan()
+    required_source = DiscoveredSourceFrame(
+        source_id="wepp_return_period_events",
+        source_kind="parquet",
+        required=True,
+        dataframe=pd.DataFrame(
+            {
+                "event_id": [10, 11, 12],
+                "topaz_id": [1, 1, 1],
+                "runoff_volume_m3": [100.0, 200.0, 300.0],
+            }
+        ),
+        units_by_column={"runoff_volume_m3": "m^3"},
+    )
+    optional_ranks = DiscoveredSourceFrame(
+        source_id="wepp_return_period_ranks",
+        source_kind="parquet",
+        required=False,
+        dataframe=pd.DataFrame(
+            {
+                "event_id": [10, 11, 12],
+                "rank": [1, 2, 10],
+            }
+        ),
+        units_by_column={"rank": "non-unitized"},
+    )
+    monkeypatch.setattr(
+        materializer,
+        "discover_layer_sources",
+        lambda **kwargs: ((required_source, optional_ranks), ()),
+    )
+    monkeypatch.setattr(
+        materializer,
+        "resolve_selected_columns",
+        lambda **kwargs: (("runoff_volume_m3",), {"runoff_volume_m3": "m^3"}),
+    )
+
+    result = materializer.materialize_carrier_layer_core(
+        wd=tmp_path,
+        layer=layer,
+        catalog_layer_raw={"join": {"primary_key": "topaz_id", "fallback_keys": ("TopazID",)}},
+        request_plan=request_plan,
+        dependency_entries=(),
+        consolidated_join_key_column=JOIN_KEY_COLUMN,
+    )
+
+    assert len(result.frame.index) == 1
+    assert result.frame[JOIN_KEY_COLUMN].tolist() == ["1"]
+    assert result.frame["runoff_volume_m3_rp2"].tolist() == [200.0]
 
 
 def test_materialize_carrier_layer_core_allows_non_unique_keys_when_join_contract_opt_in(

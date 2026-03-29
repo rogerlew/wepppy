@@ -113,6 +113,35 @@ def test_normalize_export_request_rejects_long_tabular_layout_with_mixed_event_a
     )
 
 
+def test_normalize_export_request_allows_wide_tabular_layout_with_mixed_event_and_yearly_modes(
+    catalog,
+) -> None:
+    payload = {
+        "format": "csv",
+        "units": "project",
+        "layers": [
+            "wepp.temporal.events",
+            "wepp.interchange.loss_all_years_hill",
+        ],
+        "temporal": {
+            "layer_modes": {
+                "wepp.temporal.events": "event",
+                "wepp.interchange.loss_all_years_hill": "yearly",
+            },
+            "event": {"selector": "date", "dates": ["2005-01-15"]},
+        },
+        "tabular": {"temporal_layout": "wide"},
+    }
+
+    normalized = normalize_export_request(payload, catalog)
+
+    assert normalized.tabular is not None
+    assert normalized.tabular.temporal_layout == "wide"
+    assert normalized.temporal is not None
+    assert normalized.temporal.mode_for_layer("wepp.temporal.events") == "event"
+    assert normalized.temporal.mode_for_layer("wepp.interchange.loss_all_years_hill") == "yearly"
+
+
 def test_normalize_export_plan_format_alias_f_esri_maps_to_geodatabase(catalog) -> None:
     payload = _base_payload()
     payload["format"] = "f_esri"
@@ -276,6 +305,27 @@ def test_resolve_export_plan_keeps_atemporal_layers_when_temporal_mode_is_select
         "shared__watershed.subcatchments",
     ]
     assert plan.warnings == ()
+    assert {layer.layer_id: layer.temporal_mode for layer in plan.layers} == {
+        "landuse.dominant": None,
+        "soils.dominant": None,
+        "watershed.channels": None,
+        "watershed.subcatchments": None,
+    }
+
+
+def test_resolve_export_plan_applies_yearly_mode_only_to_temporal_layers(catalog) -> None:
+    payload = {
+        "format": "parquet",
+        "units": "si",
+        "layers": ["watershed.subcatchments", "wepp.interchange.loss_all_years_hill"],
+        "temporal": {"mode": "yearly", "year_selection": "all"},
+    }
+
+    plan = resolve_export_plan(payload, catalog)
+    layer_by_id = {layer.layer_id: layer for layer in plan.layers}
+
+    assert layer_by_id["watershed.subcatchments"].temporal_mode is None
+    assert layer_by_id["wepp.interchange.loss_all_years_hill"].temporal_mode == "yearly"
 
 
 def test_resolve_export_plan_hill_wat_supports_event_mode(catalog) -> None:

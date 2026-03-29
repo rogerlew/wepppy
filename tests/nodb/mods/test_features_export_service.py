@@ -519,6 +519,7 @@ def test_key_first_tabular_payload_does_not_touch_geometry_carrier(
         use_tabular_long_layout=False,
         tabular_event_selector=None,
         watershed_identity_lookup_cache={},
+        units_mode="si",
     )
 
     assert payload.tabular_frame is not None
@@ -587,6 +588,7 @@ def test_key_first_tabular_payload_backfills_topaz_id_from_watershed_parquet(tmp
         use_tabular_long_layout=False,
         tabular_event_selector=None,
         watershed_identity_lookup_cache={},
+        units_mode="si",
     )
 
     assert payload.tabular_frame is not None
@@ -689,6 +691,7 @@ def test_key_first_tabular_payload_retargets_join_key_domain_using_identity_look
         use_tabular_long_layout=False,
         tabular_event_selector=None,
         watershed_identity_lookup_cache={},
+        units_mode="si",
     )
 
     assert payload.tabular_frame is not None
@@ -771,6 +774,7 @@ def test_build_layer_frame_from_sources_required_source_missing_raises_materiali
             },
             request_plan=plan,
             dependency_entries=dependency_entries,
+            units_mode="si",
         )
 
     assert exc_info.value.code == "materialization_error"
@@ -844,6 +848,7 @@ def test_build_layer_frame_from_sources_required_source_missing_file_raises_mate
             },
             request_plan=plan,
             dependency_entries=dependency_entries,
+            units_mode="si",
         )
 
     assert exc_info.value.code == "materialization_error"
@@ -922,6 +927,7 @@ def test_build_layer_frame_from_sources_required_source_unsupported_kind_raises_
             },
             request_plan=plan,
             dependency_entries=dependency_entries,
+            units_mode="si",
         )
 
     assert exc_info.value.code == "materialization_error"
@@ -1002,6 +1008,7 @@ def test_build_layer_frame_from_sources_required_source_join_unresolved_raises_m
             },
             request_plan=plan,
             dependency_entries=dependency_entries,
+            units_mode="si",
         )
 
     assert exc_info.value.code == "materialization_error"
@@ -1084,6 +1091,7 @@ def test_build_layer_frame_from_sources_appends_unit_suffixes_for_unitized_colum
         },
         request_plan=plan,
         dependency_entries=dependency_entries,
+        units_mode="si",
     )
 
     assert result.selected_columns == ("topaz_id", "wepp_id", "hillslope_area_ha", "runoff_volume_m3")
@@ -1896,6 +1904,52 @@ def test_apply_unitized_column_suffixes_avoids_double_append_and_dedupes_collisi
         "runoff_mm": "mm",
         "sediment_yield_kg_ha": "kg/ha",
     }
+
+
+def test_apply_unit_conversions_uses_unitizer_metadata_and_converted_values(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    frame = pd.DataFrame(
+        {
+            "topaz_id": [101, 102],
+            "runoff_volume_m3": [1.0, 2.0],
+        }
+    )
+
+    class _FakeUnitizer:
+        def convert_table(self, table, column_units, *, units_mode="project", target_units=None):  # noqa: ARG002
+            assert units_mode == "english"
+            assert column_units == {
+                "topaz_id": "non-unitized",
+                "runoff_volume_m3": "m^3",
+            }
+            converted = table.copy()
+            converted["runoff_volume_m3"] = converted["runoff_volume_m3"] * 35.3146667
+            return SimpleNamespace(
+                data=converted,
+                metadata_by_column={
+                    "topaz_id": SimpleNamespace(source_unit="non-unitized", target_unit="non-unitized"),
+                    "runoff_volume_m3": SimpleNamespace(source_unit="m^3", target_unit="ft^3"),
+                },
+            )
+
+    monkeypatch.setattr(service.Unitizer, "getInstance", lambda wd, **kwargs: _FakeUnitizer())
+
+    converted_frame, converted_mapping = service._apply_unit_conversions(
+        wd=tmp_path,
+        frame=frame,
+        selected_columns=("topaz_id", "runoff_volume_m3"),
+        unit_mapping={
+            "topaz_id": "non-unitized",
+            "runoff_volume_m3": "m^3",
+        },
+        units_mode="english",
+    )
+
+    assert converted_frame["runoff_volume_m3"].tolist() == pytest.approx([35.3146667, 70.6293334])
+    assert converted_mapping["runoff_volume_m3"] == "ft^3"
+    assert converted_mapping["topaz_id"] == "non-unitized"
 
 
 def test_dedupe_identity_selected_columns_drops_suffixed_join_key_duplicates() -> None:

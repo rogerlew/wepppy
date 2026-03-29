@@ -654,6 +654,7 @@ def _materialize_export_payloads(
                 catalog_layer_raw=catalog_layer.raw,
                 request_plan=submission.plan,
                 dependency_entries=dependency_entries,
+                units_mode=submission.plan.request.units,
             )
             continue
 
@@ -708,6 +709,7 @@ def _materialize_export_payloads(
                 layer,
                 source_results=source_results,
                 use_tabular_payload=use_tabular_payload,
+                requested_crs=submission.plan.request.crs,
             )
             payloads[layer.output_layer_id] = payload
             column_metadata_by_output_layer_id[layer.output_layer_id] = column_metadata
@@ -725,6 +727,8 @@ def _materialize_export_payloads(
                 use_tabular_long_layout=use_tabular_long_layout,
                 tabular_event_selector=tabular_event_selector,
                 watershed_identity_lookup_cache=watershed_identity_lookup_cache,
+                units_mode=submission.plan.request.units,
+                requested_crs=submission.plan.request.crs,
             )
         except MaterializationContractError as exc:
             raise FeaturesExportServiceError(
@@ -766,6 +770,8 @@ def _build_key_first_materialized_layer_payload(
         tuple[str, str],
         tuple[dict[str, object], dict[str, object]] | None,
     ],
+    units_mode: str,
+    requested_crs: str = "wgs",
 ) -> tuple[PreparedLayerPayload, dict[str, object]]:
     if not source_results:
         raise MaterializationContractError(
@@ -815,6 +821,13 @@ def _build_key_first_materialized_layer_payload(
             selected_columns=selected_columns,
             carrier_core=carrier_core,
             source_results=source_results,
+        )
+        merged_table, unit_mapping = _apply_unit_conversions(
+            wd=wd,
+            frame=merged_table,
+            selected_columns=selected_columns,
+            unit_mapping=unit_mapping,
+            units_mode=units_mode,
         )
         if use_tabular_long_layout:
             temporal_long = reshape_temporal_wide_to_long(
@@ -936,6 +949,13 @@ def _build_key_first_materialized_layer_payload(
         carrier_core=carrier_core,
         source_results=source_results,
     )
+    merged, unit_mapping = _apply_unit_conversions(
+        wd=wd,
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        units_mode=units_mode,
+    )
     if use_tabular_long_layout:
         temporal_long = reshape_temporal_wide_to_long(
             frame=merged,
@@ -972,6 +992,10 @@ def _build_key_first_materialized_layer_payload(
         merged[list(selected_columns) + [geometry_name]],
         geometry=geometry_name,
         crs=merged.crs,
+    )
+    merged = _project_spatial_frame_for_request(
+        merged,
+        requested_crs=requested_crs,
     )
 
     row_count = int(len(merged.index))
@@ -1400,6 +1424,176 @@ def _carrier_unit_mapping(
     return resolved
 
 
+def _apply_unit_conversions(
+    *,
+    wd: Path,
+    frame: pd.DataFrame,
+    selected_columns: cabc.Sequence[str],
+    unit_mapping: cabc.Mapping[str, str],
+    units_mode: str,
+) -> tuple[pd.DataFrame, dict[str, str]]:
+    resolved_columns = [column for column in selected_columns if column in frame.columns]
+    if not resolved_columns:
+        return frame, dict(unit_mapping)
+
+    conversion_units: dict[str, str] = {}
+    for column_name in resolved_columns:
+        unit_value = str(unit_mapping.get(column_name) or "").strip()
+        if not unit_value:
+            unit_value = _infer_display_unit_for_column(column_name)
+        if unit_value:
+            conversion_units[column_name] = unit_value
+
+    if not conversion_units:
+        return frame, dict(unit_mapping)
+
+    try:
+        unitizer = Unitizer.getInstance(str(wd), allow_nonexistent=True)
+    except FileNotFoundError as exc:
+        if units_mode == "project":
+            raise FeaturesExportServiceError(
+                "Unitizer preferences are required for project unit conversions.",
+                status_code=500,
+                code="unitizer_unavailable",
+                details=str(exc),
+            ) from exc
+        return frame, dict(unit_mapping)
+
+    if unitizer is None:
+        if units_mode == "project":
+            raise FeaturesExportServiceError(
+                "Unitizer preferences are required for project unit conversions.",
+                status_code=500,
+                code="unitizer_unavailable",
+                details="unitizer.nodb is missing for requested project units mode.",
+            )
+        return frame, dict(unit_mapping)
+
+    convert_table = getattr(unitizer, "convert_table", None)
+    if not callable(convert_table):
+        raise FeaturesExportServiceError(
+            "Unitizer table conversion API is unavailable.",
+            status_code=500,
+            code="unitizer_unavailable",
+            details="Unitizer controller does not expose convert_table().",
+        )
+
+    try:
+        converted_table = convert_table(
+            frame,
+            conversion_units,
+            units_mode=units_mode,
+        )
+    except (KeyError, RuntimeError, TypeError, ValueError) as exc:
+        raise FeaturesExportServiceError(
+            "Unit conversion failed during features export materialization.",
+            status_code=500,
+            code="materialization_error",
+            details=str(exc),
+        ) from exc
+
+    converted_frame = getattr(converted_table, "data", None)
+    if not isinstance(converted_frame, pd.DataFrame):
+        raise FeaturesExportServiceError(
+            "Unitizer table conversion returned an invalid payload shape.",
+            status_code=500,
+            code="materialization_error",
+            details="Expected pandas.DataFrame result from convert_table().",
+        )
+
+    if isinstance(frame, gpd.GeoDataFrame) and not isinstance(converted_frame, gpd.GeoDataFrame):
+        geometry_name = frame.geometry.name
+        if geometry_name in converted_frame.columns:
+            converted_frame = gpd.GeoDataFrame(
+                converted_frame,
+                geometry=geometry_name,
+                crs=frame.crs,
+            )
+
+    metadata_by_column = getattr(converted_table, "metadata_by_column", {})
+    resolved_unit_mapping: dict[str, str] = dict(unit_mapping)
+    for column_name in resolved_columns:
+        column_metadata = (
+            metadata_by_column.get(column_name)
+            if isinstance(metadata_by_column, cabc.Mapping)
+            else None
+        )
+        target_unit = _as_string(getattr(column_metadata, "target_unit", None))
+        source_unit = _as_string(getattr(column_metadata, "source_unit", None))
+        if target_unit:
+            resolved_unit_mapping[column_name] = target_unit
+        elif source_unit and column_name not in resolved_unit_mapping:
+            resolved_unit_mapping[column_name] = source_unit
+        elif column_name not in resolved_unit_mapping:
+            resolved_unit_mapping[column_name] = _infer_display_unit_for_column(column_name)
+
+    return converted_frame, resolved_unit_mapping
+
+
+def _project_spatial_frame_for_request(
+    frame: gpd.GeoDataFrame,
+    *,
+    requested_crs: str,
+) -> gpd.GeoDataFrame:
+    target = str(requested_crs or "wgs").strip().lower()
+    if target == "wgs":
+        if frame.crs is None:
+            return frame
+        try:
+            epsg = frame.crs.to_epsg()
+        except Exception:  # boundary: CRS inspection must not crash export
+            epsg = None
+        if epsg == 4326:
+            return frame
+        try:
+            return frame.to_crs(epsg=4326)
+        except (RuntimeError, TypeError, ValueError) as exc:
+            raise FeaturesExportServiceError(
+                "Failed to reproject export layer to WGS84.",
+                status_code=500,
+                code="materialization_error",
+                details=str(exc),
+            ) from exc
+
+    if target != "utm":
+        return frame
+    if frame.crs is None:
+        raise FeaturesExportServiceError(
+            "Unable to resolve UTM projection without source CRS metadata.",
+            status_code=500,
+            code="materialization_error",
+            details="Spatial frame is missing CRS metadata for UTM export.",
+        )
+
+    try:
+        utm_crs = frame.estimate_utm_crs()
+    except (RuntimeError, TypeError, ValueError) as exc:
+        raise FeaturesExportServiceError(
+            "Failed to resolve UTM CRS for export layer.",
+            status_code=500,
+            code="materialization_error",
+            details=str(exc),
+        ) from exc
+
+    if utm_crs is None:
+        raise FeaturesExportServiceError(
+            "Unable to resolve UTM CRS for export layer.",
+            status_code=500,
+            code="materialization_error",
+            details="Could not estimate UTM EPSG from layer geometry.",
+        )
+
+    try:
+        return frame.to_crs(utm_crs)
+    except (RuntimeError, TypeError, ValueError) as exc:
+        raise FeaturesExportServiceError(
+            "Failed to reproject export layer to UTM CRS.",
+            status_code=500,
+            code="materialization_error",
+            details=str(exc),
+        ) from exc
+
+
 def _build_materialized_execution_plan(
     plan: ResolvedExportPlan,
     *,
@@ -1505,6 +1699,7 @@ def _build_materialized_layer_payload(
     *,
     source_results: cabc.Sequence[_LayerFrameResult],
     use_tabular_payload: bool,
+    requested_crs: str = "wgs",
 ) -> tuple[PreparedLayerPayload, dict[str, object]]:
     if not source_results:
         raise FeaturesExportServiceError(
@@ -1545,6 +1740,10 @@ def _build_materialized_layer_payload(
         feature_count = row_count
         payload: str | bytes = b""
     else:
+        merged = _project_spatial_frame_for_request(
+            merged,
+            requested_crs=requested_crs,
+        )
         row_count = int(len(merged.index))
         feature_count = int(merged.geometry.notna().sum())
         payload = _serialize_feature_collection_payload(
@@ -1583,6 +1782,7 @@ def _build_layer_frame_from_sources(
     catalog_layer_raw: cabc.Mapping[str, object],
     request_plan: ResolvedExportPlan,
     dependency_entries: cabc.Sequence[object],
+    units_mode: str,
 ) -> _LayerFrameResult:
     geometry_relpath = _layer_dependency_relpath(
         dependency_entries,
@@ -1634,6 +1834,13 @@ def _build_layer_frame_from_sources(
         catalog_layer_raw=catalog_layer_raw,
     )
     geometry_name = merged.geometry.name
+    merged, unit_mapping = _apply_unit_conversions(
+        wd=wd,
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        units_mode=units_mode,
+    )
     merged, selected_columns, unit_mapping = apply_unitized_column_suffixes(
         frame=merged,
         selected_columns=selected_columns,
