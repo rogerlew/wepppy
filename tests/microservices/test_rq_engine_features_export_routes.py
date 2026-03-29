@@ -203,7 +203,7 @@ def test_features_export_submit_valid_enqueues_job(monkeypatch: pytest.MonkeyPat
     payload = response.json()
     assert payload["job_id"] == "features-job-22"
     assert payload["status_url"] == "/rq-engine/api/jobstatus/features-job-22"
-    assert payload["download_url"] == "/rq-engine/api/runs/run-1/cfg/export/features/features-job-22/download"
+    assert payload["download_url"] == "/rq-engine/api/runs/run-1/cfg/export/features/job/features-job-22/download"
     assert captured["func"] is export_routes.run_features_export_rq
     assert prep_state["removed"] == [TaskEnum.run_features_export]
     assert prep_state["jobs"] == [("features_export", "features-job-22")]
@@ -349,7 +349,7 @@ def test_features_export_download_before_finished_returns_409(
     )
 
     with TestClient(rq_engine.app) as client:
-        response = client.get("/api/runs/run-1/cfg/export/features/job-9/download")
+        response = client.get("/api/runs/run-1/cfg/export/features/job/job-9/download")
 
     assert response.status_code == 409
     payload = response.json()
@@ -379,10 +379,109 @@ def test_features_export_download_after_finished_returns_file(
     )
 
     with TestClient(rq_engine.app) as client:
-        response = client.get("/api/runs/run-1/cfg/export/features/job-9/download")
+        response = client.get("/api/runs/run-1/cfg/export/features/job/job-9/download")
 
     assert response.status_code == 200
     assert "features_export.gpkg" in response.headers.get("content-disposition", "")
+
+
+def test_features_export_published_download_returns_file(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    artifact_path = tmp_path / "export" / "features" / "artifacts" / "artifact-1" / "features_export.gpkg.zip"
+    artifact_path.parent.mkdir(parents=True)
+    artifact_path.write_text("artifact", encoding="utf-8")
+    artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
+
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(tmp_path))
+    monkeypatch.setattr(
+        export_routes,
+        "resolve_published_artifact_path",
+        lambda wd, profile: (artifact_path, artifact_relpath),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/export/features/published/prep-wepp/download")
+
+    assert response.status_code == 200
+    assert "run-1.prep-wepp.geopackage.zip" in response.headers.get("content-disposition", "")
+
+
+def test_features_export_published_download_alias_uses_canonical_filename(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    artifact_path = tmp_path / "export" / "features" / "artifacts" / "artifact-1" / "features_export.gpkg.zip"
+    artifact_path.parent.mkdir(parents=True)
+    artifact_path.write_text("artifact", encoding="utf-8")
+    artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
+
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(tmp_path))
+    monkeypatch.setattr(
+        export_routes,
+        "resolve_published_artifact_path",
+        lambda wd, profile: (artifact_path, artifact_relpath),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/export/features/published/post_wepp/download")
+
+    assert response.status_code == 200
+    assert "run-1.prep-wepp.geopackage.zip" in response.headers.get("content-disposition", "")
+
+
+def test_features_export_published_download_prep_details_filename_includes_format(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    artifact_path = tmp_path / "export" / "features" / "artifacts" / "artifact-1" / "features_export.csv.zip"
+    artifact_path.parent.mkdir(parents=True)
+    artifact_path.write_text("artifact", encoding="utf-8")
+    artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
+
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(tmp_path))
+    monkeypatch.setattr(
+        export_routes,
+        "resolve_published_artifact_path",
+        lambda wd, profile: (artifact_path, artifact_relpath),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/export/features/published/prep-details/download")
+
+    assert response.status_code == 200
+    assert "run-1.prep-details.csv.zip" in response.headers.get("content-disposition", "")
+
+
+def test_features_export_published_download_stale_returns_409(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(tmp_path))
+    monkeypatch.setattr(
+        export_routes,
+        "resolve_published_artifact_path",
+        lambda wd, profile: (_ for _ in ()).throw(
+            export_routes.FeaturesExportServiceError(
+                "Published features export artifact is stale.",
+                status_code=409,
+                code="stale_publication",
+                details="profile=prep-wepp: stale",
+            )
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/export/features/published/prep-wepp/download")
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert payload["error"]["code"] == "stale_publication"
 
 
 def test_features_export_submit_auth_401_payload(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -416,8 +515,75 @@ def test_features_export_download_auth_403_payload(monkeypatch: pytest.MonkeyPat
     )
 
     with TestClient(rq_engine.app) as client:
-        response = client.get("/api/runs/run-1/cfg/export/features/job-9/download")
+        response = client.get("/api/runs/run-1/cfg/export/features/job/job-9/download")
 
     assert response.status_code == 403
     payload = response.json()
     assert payload["error"]["code"] == "forbidden"
+
+
+def test_features_export_download_public_run_allows_missing_auth(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    artifact_path = tmp_path / "export" / "features" / "artifacts" / "artifact-1" / "features_export.gpkg"
+    artifact_path.parent.mkdir(parents=True)
+    artifact_path.write_text("artifact", encoding="utf-8")
+    artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
+
+    monkeypatch.setattr(export_routes, "_is_public_run_for_download", lambda runid: True)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid: str(tmp_path))
+    monkeypatch.setattr(
+        export_routes,
+        "get_wepppy_rq_job_info",
+        lambda job_id: {
+            "job_id": job_id,
+            "runid": "run-1",
+            "status": "finished",
+            "result": {"artifact_relpath": artifact_relpath},
+        },
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/export/features/job/job-9/download")
+
+    assert response.status_code == 200
+    assert "features_export.gpkg" in response.headers.get("content-disposition", "")
+
+
+def test_features_export_published_download_public_run_allows_missing_auth(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    artifact_path = tmp_path / "export" / "features" / "artifacts" / "artifact-1" / "features_export.gpkg.zip"
+    artifact_path.parent.mkdir(parents=True)
+    artifact_path.write_text("artifact", encoding="utf-8")
+    artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
+
+    monkeypatch.setattr(export_routes, "_is_public_run_for_download", lambda runid: True)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(tmp_path))
+    monkeypatch.setattr(
+        export_routes,
+        "resolve_published_artifact_path",
+        lambda wd, profile: (artifact_path, artifact_relpath),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/export/features/published/prep-wepp/download")
+
+    assert response.status_code == 200
+    assert "run-1.prep-wepp.geopackage.zip" in response.headers.get("content-disposition", "")
+
+
+def test_features_export_published_download_private_run_requires_auth(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(export_routes, "_is_public_run_for_download", lambda runid: False)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/export/features/published/prep-wepp/download")
+
+    assert response.status_code == 401
+    payload = response.json()
+    assert payload["error"]["code"] == "unauthorized"

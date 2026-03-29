@@ -6,21 +6,19 @@ import collections.abc as cabc
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import json
-import os
 from pathlib import Path
 import sqlite3
 import string
 import re
 import shutil
-from urllib.parse import quote
 from uuid import uuid4
 import zipfile
 
 import duckdb
 import geopandas as gpd
 import pandas as pd
-import yaml
 
+from wepppy import f_esri
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.runtime_paths import pick_existing_parquet_path
@@ -70,20 +68,47 @@ from .manifest import build_export_manifest, write_export_manifest
 from .manifest_builder import build_output_layer_column_metadata
 from .output_column_naming import apply_unitized_column_suffixes
 from .planner import resolve_export_plan
-from .profiles import profile_bundle_member_sources
+from .profiles import load_builtin_profiles, normalize_profile_key
 from .tabular_temporal_layout import reshape_temporal_wide_to_long
 
 FEATURES_EXPORT_ROOT_RELPATH = "export/features"
 FEATURES_EXPORT_ARTIFACTS_RELPATH = "export/features/artifacts"
 FEATURES_EXPORT_JOBS_RELPATH = "export/features/jobs"
+FEATURES_EXPORT_PUBLISHED_RELPATH = "export/features/published"
+FEATURES_EXPORT_PUBLISHED_INDEX_RELPATH = f"{FEATURES_EXPORT_PUBLISHED_RELPATH}/index.json"
 FEATURES_EXPORT_MANIFEST_NAME = "manifest.json"
-FEATURES_EXPORT_PROFILE_RELPATH = "profile.yml"
-FEATURES_EXPORT_PROVENANCE_RELPATH = "README.md"
+FEATURES_EXPORT_PUBLICATION_SCHEMA_VERSION = 1
 _GPKG_APPLICATION_ID = 0x47504B47
 _CONSOLIDATED_JOIN_KEY_COLUMN = JOIN_KEY_COLUMN
 _SAFE_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
+_PROFILE_TOKEN_PATTERN = re.compile(r"[^a-z0-9]+")
 _TOPAZ_ID_COLUMN = "topaz_id"
 _WEPP_ID_COLUMN = "wepp_id"
+_PUBLISHED_PROFILE_ALIASES: dict[str, str] = {
+    "post-wepp": "prep-wepp",
+    "post_wepp": "prep-wepp",
+    "prep-wepp": "prep-wepp",
+    "prep_wepp": "prep-wepp",
+    "post-wepp-gpkg-gdb": "prep-wepp-gpkg-gdb",
+    "post_wepp_gpkg_gdb": "prep-wepp-gpkg-gdb",
+    "prep-wepp-gpkg-gdb": "prep-wepp-gpkg-gdb",
+    "prep_wepp_gpkg_gdb": "prep-wepp-gpkg-gdb",
+    "post-wepp-geodatabase": "prep-wepp-geodatabase",
+    "post_wepp_geodatabase": "prep-wepp-geodatabase",
+    "prep-wepp-geodatabase": "prep-wepp-geodatabase",
+    "prep_wepp_geodatabase": "prep-wepp-geodatabase",
+    "prep-details": "prep-details",
+    "prep_details": "prep-details",
+}
+_PUBLISHED_PROFILE_TO_BUILTIN_KEY: dict[str, str] = {
+    "prep-wepp": "post_wepp",
+    "prep-wepp-gpkg-gdb": "post_wepp",
+    "prep-wepp-geodatabase": "post_wepp",
+    "prep-details": "prep_details",
+}
+_PUBLISHED_PROFILE_FORMAT_OVERRIDES: dict[str, str] = {
+    "prep-wepp-geodatabase": "geodatabase",
+}
 
 
 class FeaturesExportServiceError(RuntimeError):
@@ -328,6 +353,497 @@ def resolve_download_artifact_path(
     return artifact_path, artifact_relpath
 
 
+def normalize_published_profile_id(profile: str) -> str | None:
+    """Normalize one publication profile token to canonical kebab-case id."""
+
+    if not isinstance(profile, str):
+        return None
+    token = _PROFILE_TOKEN_PATTERN.sub("-", profile.strip().lower()).strip("-")
+    if not token:
+        return None
+    return _PUBLISHED_PROFILE_ALIASES.get(token)
+
+
+def resolve_published_profile_request(
+    profile: str,
+    *,
+    format_override: str | None = None,
+) -> tuple[str, dict[str, object]]:
+    """Return canonical published profile id and normalized request payload."""
+
+    canonical_profile = normalize_published_profile_id(profile)
+    if canonical_profile is None:
+        raise FeaturesExportServiceError(
+            "Unknown published features export profile.",
+            status_code=404,
+            code="not_found",
+            details=f"Unknown published profile {profile!r}.",
+        )
+
+    builtin_key = _PUBLISHED_PROFILE_TO_BUILTIN_KEY.get(canonical_profile)
+    if not isinstance(builtin_key, str) or not builtin_key:
+        raise FeaturesExportServiceError(
+            "Published profile mapping is not configured.",
+            status_code=500,
+            code="profile_resolution_error",
+            details=f"Missing built-in mapping for profile {canonical_profile!r}.",
+        )
+
+    request_by_builtin_key: dict[str, dict[str, object]] = {}
+    for row in load_builtin_profiles():
+        profile_key = normalize_profile_key(str(row.get("key") or ""))
+        request_mapping = row.get("request")
+        if not profile_key or not isinstance(request_mapping, dict):
+            continue
+        normalized_request = json.loads(
+            json.dumps(request_mapping, sort_keys=True, separators=(",", ":"))
+        )
+        if isinstance(normalized_request, dict):
+            request_by_builtin_key[profile_key] = normalized_request
+
+    request_payload = request_by_builtin_key.get(builtin_key)
+    if request_payload is None:
+        raise FeaturesExportServiceError(
+            "Published profile is unavailable.",
+            status_code=409,
+            code="profile_unavailable",
+            details=f"Built-in profile {builtin_key!r} is not available.",
+        )
+
+    resolved_format_override = _PUBLISHED_PROFILE_FORMAT_OVERRIDES.get(canonical_profile)
+    if isinstance(resolved_format_override, str) and resolved_format_override.strip():
+        request_payload["format"] = resolved_format_override.strip()
+
+    if isinstance(format_override, str) and format_override.strip():
+        request_payload["format"] = format_override.strip()
+
+    return canonical_profile, request_payload
+
+
+def load_publication_registry(wd: str | Path) -> dict[str, object]:
+    """Load publication registry mapping for one run root."""
+
+    wd_path = Path(wd).resolve()
+    registry_path = _resolve_relpath(wd_path, FEATURES_EXPORT_PUBLISHED_INDEX_RELPATH)
+    if not registry_path.exists():
+        return _empty_publication_registry()
+
+    try:
+        parsed = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise FeaturesExportServiceError(
+            "Failed to parse features export publication registry.",
+            code="publication_registry_invalid",
+            details=str(exc),
+        ) from exc
+
+    if not isinstance(parsed, dict):
+        raise FeaturesExportServiceError(
+            "Features export publication registry must be a JSON object.",
+            code="publication_registry_invalid",
+            details=f"Invalid registry payload type: {type(parsed).__name__}.",
+        )
+
+    return _normalize_publication_registry(parsed)
+
+
+def publish_profile_artifact(
+    wd: str | Path,
+    *,
+    profile: str,
+    job_id: str,
+    job_result: dict[str, object] | None,
+) -> dict[str, object]:
+    """Publish one completed export job result to the profile registry."""
+
+    wd_path = Path(wd).resolve()
+    canonical_profile, request_payload = resolve_published_profile_request(profile)
+    if not isinstance(job_id, str) or not job_id:
+        raise FeaturesExportServiceError("job_id must be a non-empty string.", status_code=500)
+
+    artifact_relpath = _artifact_relpath_from_result(job_result)
+    if artifact_relpath is None:
+        manifest = load_job_manifest(wd_path, job_id)
+        if manifest is not None:
+            artifact_relpath = _artifact_relpath_from_manifest(manifest)
+
+    if artifact_relpath is None:
+        raise FeaturesExportServiceError(
+            "Published features export artifact mapping is invalid.",
+            status_code=404,
+            code="not_found",
+            details=f"Missing artifact_relpath for job {job_id}.",
+        )
+
+    artifact_path = _resolve_relpath(wd_path, artifact_relpath)
+    if not artifact_path.is_file():
+        raise FeaturesExportServiceError(
+            "Published features export artifact file not found.",
+            status_code=404,
+            code="not_found",
+            details=f"Missing artifact at {artifact_relpath}.",
+        )
+
+    submission = prepare_export_submission(wd_path, request_payload)
+    manifest_relpath = _job_manifest_relpath(job_id)
+    if isinstance(job_result, dict):
+        candidate_manifest_relpath = job_result.get("manifest_relpath")
+        if isinstance(candidate_manifest_relpath, str) and candidate_manifest_relpath.strip():
+            manifest_relpath = candidate_manifest_relpath.strip()
+
+    entry: dict[str, object] = {
+        "profile": canonical_profile,
+        "job_id": job_id,
+        "artifact_id": (
+            str(job_result.get("artifact_id") or "").strip()
+            if isinstance(job_result, dict)
+            else ""
+        ),
+        "artifact_relpath": artifact_relpath,
+        "manifest_relpath": manifest_relpath,
+        "format": str(submission.plan.request.format),
+        "request_hash": str(submission.cache_key_parts.request_hash),
+        "dependency_fingerprint": str(submission.dependency_snapshot.fingerprint),
+        "cache_key": str(submission.cache_key_parts.cache_key),
+        "published_at_utc": _utcnow_iso(),
+    }
+
+    registry = load_publication_registry(wd_path)
+    profiles = registry.setdefault("profiles", {})
+    if not isinstance(profiles, dict):
+        profiles = {}
+        registry["profiles"] = profiles
+    profiles[canonical_profile] = entry
+    registry["updated_at_utc"] = _utcnow_iso()
+    _write_publication_registry(wd_path, registry)
+    return entry
+
+
+def co_create_post_wepp_geodatabase_artifact(
+    wd: str | Path,
+    *,
+    source_job_id: str,
+    source_job_result: dict[str, object] | None,
+) -> dict[str, object]:
+    """Create one FileGDB artifact from a completed prep-wepp GeoPackage artifact."""
+
+    wd_path = Path(wd).resolve()
+    if not isinstance(source_job_id, str) or not source_job_id:
+        raise FeaturesExportServiceError("source_job_id must be a non-empty string.", status_code=500)
+
+    if not f_esri.has_f_esri:
+        raise FeaturesExportServiceError(
+            "Geodatabase co-creation requires f_esri backend capability, but it is unavailable.",
+            status_code=409,
+            code="export_backend_unavailable",
+        )
+
+    source_artifact_path, source_artifact_relpath = resolve_download_artifact_path(
+        wd_path,
+        job_id=source_job_id,
+        job_result=source_job_result,
+    )
+    gpkg_path = _resolve_geopackage_co_creation_source(
+        source_artifact_path=source_artifact_path,
+        source_artifact_relpath=source_artifact_relpath,
+    )
+    artifact_dir = source_artifact_path.parent
+    gdb_container_path = artifact_dir / "features_export.gdb"
+    gdb_zip_path = gdb_container_path.with_suffix(".gdb.zip")
+    if gdb_container_path.exists() and gdb_container_path.is_dir():
+        shutil.rmtree(gdb_container_path, ignore_errors=True)
+    if gdb_zip_path.exists() and gdb_zip_path.is_file():
+        gdb_zip_path.unlink()
+
+    f_esri.c2c_gpkg_to_gdb(str(gpkg_path), str(gdb_container_path), zip_output=True)
+
+    if not gdb_zip_path.is_file():
+        raise FeaturesExportServiceError(
+            "f_esri conversion did not produce expected FileGDB archive.",
+            status_code=500,
+            code="artifact_missing",
+            details=f"Missing geodatabase archive at {gdb_zip_path}.",
+        )
+
+    gdb_artifact_relpath = _to_relpath(wd_path, gdb_zip_path)
+    geodatabase_request = resolve_published_profile_request("prep-wepp-geodatabase")[1]
+    submission = prepare_export_submission(wd_path, geodatabase_request)
+    _upsert_co_created_published_cache_entry(
+        wd_path,
+        cache_key=submission.cache_key_parts.cache_key,
+        artifact_relpath=gdb_artifact_relpath,
+        artifact_path=gdb_zip_path,
+        source_job_id=source_job_id,
+        source_job_result=source_job_result,
+    )
+
+    source_manifest_relpath = (
+        str(source_job_result.get("manifest_relpath") or "").strip()
+        if isinstance(source_job_result, dict)
+        else ""
+    )
+    if not source_manifest_relpath:
+        source_manifest_relpath = _job_manifest_relpath(source_job_id)
+
+    source_artifact_id = (
+        str(source_job_result.get("artifact_id") or "").strip()
+        if isinstance(source_job_result, dict)
+        else ""
+    )
+    if source_artifact_id:
+        geodatabase_artifact_id = f"{source_artifact_id}-geodatabase"
+    else:
+        geodatabase_artifact_id = gdb_zip_path.parent.name
+
+    return {
+        "artifact_id": geodatabase_artifact_id,
+        "artifact_relpath": gdb_artifact_relpath,
+        "manifest_relpath": source_manifest_relpath,
+    }
+
+
+def publish_profile_execution_artifacts(
+    wd: str | Path,
+    *,
+    requested_profile: str,
+    job_id: str,
+    job_result: dict[str, object] | None,
+) -> dict[str, dict[str, object]]:
+    """Publish profile artifacts, including optional co-created companions."""
+
+    canonical_profile = normalize_published_profile_id(requested_profile)
+    if canonical_profile is None:
+        raise FeaturesExportServiceError(
+            "Unknown published features export profile.",
+            status_code=404,
+            code="not_found",
+            details=f"Unknown published profile {requested_profile!r}.",
+        )
+
+    published_entries: dict[str, dict[str, object]] = {}
+    if canonical_profile == "prep-wepp-gpkg-gdb":
+        published_entries["prep-wepp"] = publish_profile_artifact(
+            wd,
+            profile="prep-wepp",
+            job_id=job_id,
+            job_result=job_result,
+        )
+        geodatabase_result = co_create_post_wepp_geodatabase_artifact(
+            wd,
+            source_job_id=job_id,
+            source_job_result=job_result,
+        )
+        published_entries["prep-wepp-geodatabase"] = publish_profile_artifact(
+            wd,
+            profile="prep-wepp-geodatabase",
+            job_id=job_id,
+            job_result=geodatabase_result,
+        )
+        return published_entries
+
+    published_entries[canonical_profile] = publish_profile_artifact(
+        wd,
+        profile=canonical_profile,
+        job_id=job_id,
+        job_result=job_result,
+    )
+    return published_entries
+
+
+def resolve_published_artifact_path(
+    wd: str | Path,
+    *,
+    profile: str,
+) -> tuple[Path, str]:
+    """Resolve one published artifact path with stale-registry validation."""
+
+    wd_path = Path(wd).resolve()
+    canonical_profile, request_payload = resolve_published_profile_request(profile)
+    registry = load_publication_registry(wd_path)
+    profiles = registry.get("profiles")
+    if not isinstance(profiles, dict):
+        profiles = {}
+
+    raw_entry = profiles.get(canonical_profile)
+    if not isinstance(raw_entry, dict):
+        raise FeaturesExportServiceError(
+            "Published features export profile is not available.",
+            status_code=404,
+            code="not_found",
+            details=f"No published artifact for profile {canonical_profile!r}.",
+        )
+
+    entry = _normalize_publication_entry(canonical_profile, raw_entry)
+    artifact_relpath = str(entry.get("artifact_relpath") or "").strip()
+    if not artifact_relpath:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Registry entry is missing artifact_relpath.",
+        )
+
+    artifact_path = _resolve_relpath(wd_path, artifact_relpath)
+    if not artifact_path.is_file():
+        raise FeaturesExportServiceError(
+            "Published features export artifact file not found.",
+            status_code=404,
+            code="not_found",
+            details=f"Missing artifact at {artifact_relpath}.",
+        )
+
+    submission = prepare_export_submission(wd_path, request_payload)
+    expected_cache_key = str(entry.get("cache_key") or "").strip()
+    expected_request_hash = str(entry.get("request_hash") or "").strip()
+    expected_dependency_fingerprint = str(entry.get("dependency_fingerprint") or "").strip()
+    expected_format = str(entry.get("format") or "").strip().lower()
+
+    if not expected_cache_key or not expected_request_hash or not expected_dependency_fingerprint:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Registry entry is missing cache/dependency fingerprints.",
+        )
+
+    if expected_format and expected_format != str(submission.plan.request.format).strip().lower():
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published format no longer matches canonical profile request.",
+        )
+
+    if expected_cache_key != submission.cache_key_parts.cache_key:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published cache key no longer matches current dependency/request state.",
+        )
+    if expected_request_hash != submission.cache_key_parts.request_hash:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published request hash no longer matches current profile request.",
+        )
+    if expected_dependency_fingerprint != submission.dependency_snapshot.fingerprint:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published dependency fingerprint no longer matches current run assets.",
+        )
+
+    cache_entry = get_cache_index_entry(wd_path, submission.cache_key_parts.cache_key)
+    if cache_entry is None:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published cache entry is missing.",
+        )
+
+    cache_artifact_relpath = _cache_entry_artifact_relpath(cache_entry)
+    if cache_artifact_relpath is None:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published cache entry is missing artifact mapping.",
+        )
+    if cache_artifact_relpath != artifact_relpath:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published artifact no longer matches cache mapping.",
+        )
+
+    return artifact_path, artifact_relpath
+
+
+def _upsert_co_created_published_cache_entry(
+    wd: Path,
+    *,
+    cache_key: str,
+    artifact_relpath: str,
+    artifact_path: Path,
+    source_job_id: str,
+    source_job_result: dict[str, object] | None,
+) -> None:
+    source_warnings = _normalize_warnings_payload(
+        source_job_result.get("warnings") if isinstance(source_job_result, dict) else None
+    )
+    source_manifest_relpath = (
+        str(source_job_result.get("manifest_relpath") or "").strip()
+        if isinstance(source_job_result, dict)
+        else ""
+    )
+    if not source_manifest_relpath:
+        source_manifest_relpath = _job_manifest_relpath(source_job_id)
+
+    source_artifact_id = (
+        str(source_job_result.get("artifact_id") or "").strip()
+        if isinstance(source_job_result, dict)
+        else ""
+    )
+    if source_artifact_id:
+        artifact_id = f"{source_artifact_id}-geodatabase"
+    else:
+        artifact_id = artifact_path.parent.name
+
+    cache_entry = {
+        "artifact_id": artifact_id,
+        "artifact_relpath": artifact_relpath,
+        "artifact_path": str(artifact_path),
+        "artifact_paths": [artifact_relpath],
+        "artifact_format": "geodatabase",
+        "layer_outputs": [],
+        "packaged_member_relpaths": [artifact_path.name],
+        "source_job_id": source_job_id,
+        "manifest_relpath": source_manifest_relpath,
+        "warnings": source_warnings,
+    }
+    upsert_cache_index_entry(wd, cache_key, cache_entry)
+
+
+def _resolve_geopackage_co_creation_source(
+    *,
+    source_artifact_path: Path,
+    source_artifact_relpath: str,
+) -> Path:
+    if source_artifact_path.suffix.lower() == ".gpkg" and source_artifact_path.is_file():
+        return source_artifact_path
+
+    artifact_dir = source_artifact_path.parent
+    gpkg_candidates = sorted(
+        candidate
+        for candidate in artifact_dir.glob("*.gpkg")
+        if candidate.is_file()
+    )
+    if gpkg_candidates:
+        return gpkg_candidates[0]
+
+    if source_artifact_path.suffix.lower() != ".zip":
+        raise FeaturesExportServiceError(
+            "Prep-wepp geodatabase co-creation requires a GeoPackage source artifact.",
+            status_code=409,
+            code="materialization_error",
+            details=f"Artifact {source_artifact_relpath} does not expose a GeoPackage payload.",
+        )
+
+    extracted_path = artifact_dir / "features_export.geodatabase_source.gpkg"
+    try:
+        with zipfile.ZipFile(source_artifact_path, mode="r") as zip_handle:
+            gpkg_members = sorted(
+                member for member in zip_handle.namelist() if member.lower().endswith(".gpkg")
+            )
+            if not gpkg_members:
+                raise FeaturesExportServiceError(
+                    "Prep-wepp geodatabase co-creation requires a GeoPackage source artifact.",
+                    status_code=409,
+                    code="materialization_error",
+                    details=(
+                        f"Artifact {source_artifact_relpath} does not contain a .gpkg payload member."
+                    ),
+                )
+            with zip_handle.open(gpkg_members[0], mode="r") as source_handle:
+                extracted_path.write_bytes(source_handle.read())
+    except (zipfile.BadZipFile, OSError, KeyError) as exc:
+        raise FeaturesExportServiceError(
+            "Prep-wepp geodatabase co-creation failed while reading GeoPackage payload.",
+            status_code=500,
+            code="artifact_missing",
+            details=str(exc),
+        ) from exc
+
+    return extracted_path
+
+
 def load_job_manifest(wd: str | Path, job_id: str) -> dict[str, object] | None:
     """Load job-scoped manifest JSON when present; return None when absent."""
 
@@ -406,37 +922,14 @@ def _run_cache_miss_export(
         )
     )
     generation_timestamp_utc = _utcnow_iso()
-    profile_bundle_sources = profile_bundle_member_sources()
-
-    profile_path = _write_profile_document(
-        artifact_dir / FEATURES_EXPORT_PROFILE_RELPATH,
-        materialized_plan=materialized_plan,
-    )
-    profile_member_sources = _materialize_profile_bundle_members(
-        artifact_dir=artifact_dir,
-        profile_sources=profile_bundle_sources,
-    )
-    profile_bundle_relpaths = tuple(sorted(profile_member_sources))
 
     payload_member_sources = _payload_member_sources(
         artifact=writer_artifact,
         artifact_dir=artifact_dir,
     )
-    provenance_path = _write_provenance_readme(
-        artifact_dir / FEATURES_EXPORT_PROVENANCE_RELPATH,
-        runid=runid,
-        config=config,
-        artifact_id=artifact_id,
-        submission=submission,
-        generation_timestamp_utc=generation_timestamp_utc,
-        payload_member_relpaths=tuple(sorted(payload_member_sources)),
-    )
 
     bundle_member_sources: dict[str, Path] = {}
     bundle_member_sources.update(payload_member_sources)
-    bundle_member_sources[FEATURES_EXPORT_PROFILE_RELPATH] = profile_path
-    bundle_member_sources.update(profile_member_sources)
-    bundle_member_sources[FEATURES_EXPORT_PROVENANCE_RELPATH] = provenance_path
 
     bundle_filename = _bundle_filename(submission.plan.request.format)
     bundle_path = artifact_dir / bundle_filename
@@ -466,9 +959,6 @@ def _run_cache_miss_export(
         resolved_crs=submission.plan.request.crs,
         column_metadata_by_output_layer_id=column_metadata_by_output_layer_id,
         request_column_selection_by_layer_id=_request_column_selection_payload(submission.plan),
-        profile_relpath=FEATURES_EXPORT_PROFILE_RELPATH,
-        profile_bundle_relpaths=profile_bundle_relpaths,
-        provenance_readme_relpath=FEATURES_EXPORT_PROVENANCE_RELPATH,
     )
 
     artifact_manifest_relpath = f"{artifact_dir_relpath}/{FEATURES_EXPORT_MANIFEST_NAME}"
@@ -500,9 +990,6 @@ def _run_cache_miss_export(
         "packaged_member_relpaths": list(packaged_member_relpaths),
         "source_job_id": job_id,
         "manifest_relpath": artifact_manifest_relpath,
-        "profile_relpath": FEATURES_EXPORT_PROFILE_RELPATH,
-        "profile_bundle_relpaths": list(profile_bundle_relpaths),
-        "provenance_readme_relpath": FEATURES_EXPORT_PROVENANCE_RELPATH,
         "warnings": warnings_payload,
     }
     upsert_cache_index_entry(wd, submission.cache_key_parts.cache_key, cache_entry)
@@ -510,7 +997,7 @@ def _run_cache_miss_export(
     return {
         "artifact_id": artifact_id,
         "artifact_relpath": artifact_relpath,
-        "download_url": _download_url(runid, config, artifact_relpath),
+        "download_url": _job_download_url(runid, config, job_id),
         "cache_hit": False,
         "source_job_id": None,
         "manifest_relpath": job_manifest_relpath,
@@ -561,31 +1048,6 @@ def _finalize_cache_hit(
 
     warnings_payload = _normalize_warnings_payload(cache_entry.get("warnings"))
     generation_timestamp_utc = _utcnow_iso()
-    profile_relpath_raw = cache_entry.get("profile_relpath")
-    profile_relpath = (
-        str(profile_relpath_raw).strip()
-        if isinstance(profile_relpath_raw, str) and profile_relpath_raw.strip()
-        else FEATURES_EXPORT_PROFILE_RELPATH
-    )
-    profile_bundle_relpaths_raw = cache_entry.get("profile_bundle_relpaths")
-    profile_bundle_relpaths: tuple[str, ...] = ()
-    if isinstance(profile_bundle_relpaths_raw, list):
-        profile_bundle_relpaths = tuple(
-            sorted(
-                {
-                    str(entry).strip()
-                    for entry in profile_bundle_relpaths_raw
-                    if isinstance(entry, str) and entry.strip()
-                }
-            )
-        )
-    provenance_readme_relpath_raw = cache_entry.get("provenance_readme_relpath")
-    provenance_readme_relpath = (
-        str(provenance_readme_relpath_raw).strip()
-        if isinstance(provenance_readme_relpath_raw, str)
-        and provenance_readme_relpath_raw.strip()
-        else FEATURES_EXPORT_PROVENANCE_RELPATH
-    )
 
     artifact_metadata = _artifact_metadata_from_cache_entry(
         cache_entry,
@@ -606,9 +1068,6 @@ def _finalize_cache_hit(
         resolved_crs=submission.plan.request.crs,
         additional_warnings=warnings_payload,
         request_column_selection_by_layer_id=_request_column_selection_payload(submission.plan),
-        profile_relpath=profile_relpath,
-        profile_bundle_relpaths=profile_bundle_relpaths,
-        provenance_readme_relpath=provenance_readme_relpath,
     )
 
     job_manifest_relpath = _job_manifest_relpath(job_id)
@@ -617,7 +1076,7 @@ def _finalize_cache_hit(
     return {
         "artifact_id": artifact_id,
         "artifact_relpath": artifact_relpath,
-        "download_url": _download_url(runid, config, artifact_relpath),
+        "download_url": _job_download_url(runid, config, job_id),
         "cache_hit": True,
         "source_job_id": source_job_id,
         "manifest_relpath": job_manifest_relpath,
@@ -2585,92 +3044,6 @@ def _payload_member_sources(
     return {default_member: artifact_path}
 
 
-def _materialize_profile_bundle_members(
-    *,
-    artifact_dir: Path,
-    profile_sources: cabc.Mapping[str, Path],
-) -> dict[str, Path]:
-    copied: dict[str, Path] = {}
-    for relpath in sorted(profile_sources):
-        source = Path(profile_sources[relpath]).resolve()
-        if not source.is_file():
-            raise FeaturesExportServiceError(
-                "Built-in profile source file is missing.",
-                status_code=500,
-                code="profile_missing",
-                details=f"Missing built-in profile source {source}.",
-            )
-        destination = (artifact_dir / relpath).resolve()
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        if source != destination:
-            shutil.copyfile(source, destination)
-        copied[relpath] = destination
-    return copied
-
-
-def _write_profile_document(path: Path, *, materialized_plan: ResolvedExportPlan) -> Path:
-    payload = {
-        "request": materialized_plan.request.to_mapping(),
-    }
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        yaml.safe_dump(payload, sort_keys=False, allow_unicode=False),
-        encoding="utf-8",
-    )
-    return path
-
-
-def _write_provenance_readme(
-    path: Path,
-    *,
-    runid: str,
-    config: str,
-    artifact_id: str,
-    submission: FeaturesExportSubmission,
-    generation_timestamp_utc: str,
-    payload_member_relpaths: cabc.Sequence[str],
-) -> Path:
-    request = submission.plan.request
-    lines = [
-        "# Features Export Provenance",
-        "",
-        f"- Generated at (UTC): {generation_timestamp_utc}",
-        f"- Run ID: {runid}",
-        f"- Config: {config}",
-        f"- Artifact ID: {artifact_id}",
-        f"- Format: {request.format}",
-        f"- Units: {request.units}",
-        f"- CRS: {request.crs}",
-        f"- Output scopes: {', '.join(request.output_scopes)}",
-        f"- Catalog version: {submission.plan.catalog_version}",
-        f"- Catalog schema version: {submission.plan.schema_version}",
-        f"- Dependency fingerprint: {submission.dependency_snapshot.fingerprint}",
-        f"- Cache key: {submission.cache_key_parts.cache_key}",
-        "",
-        "## Layers",
-    ]
-    for layer_id in request.layers:
-        lines.append(f"- {layer_id}")
-    lines.extend(
-        [
-            "",
-            "## Payload Members",
-        ]
-    )
-    for relpath in sorted({str(item) for item in payload_member_relpaths if str(item).strip()}):
-        lines.append(f"- {relpath}")
-    lines.extend(
-        [
-            "",
-            "## Replay",
-            "Copy `profile.yml` from this bundle and load it in the Features Export control.",
-        ]
-    )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
-    return path
-
-
 def _cleanup_intermediate_writer_artifact(
     *,
     artifact: ExportArtifactMetadata,
@@ -2688,18 +3061,112 @@ def _cleanup_intermediate_writer_artifact(
         return
 
 
-def _download_url(runid: str, config: str, artifact_relpath: str) -> str:
-    browse_path = f"/runs/{runid}/{config}/download/{quote(artifact_relpath, safe='/')}"
-    return f"{_site_prefix()}{browse_path}"
+def _job_download_url(runid: str, config: str, job_id: str) -> str:
+    return f"/rq-engine/api/runs/{runid}/{config}/export/features/job/{job_id}/download"
 
 
-def _site_prefix() -> str:
-    token = str(os.getenv("SITE_PREFIX", "/weppcloud")).strip()
-    if not token or token == "/":
-        return ""
-    if not token.startswith("/"):
-        token = f"/{token}"
-    return token.rstrip("/")
+def _empty_publication_registry() -> dict[str, object]:
+    return {
+        "schema_version": FEATURES_EXPORT_PUBLICATION_SCHEMA_VERSION,
+        "updated_at_utc": "",
+        "profiles": {},
+    }
+
+
+def _normalize_publication_entry(
+    canonical_profile: str,
+    value: cabc.Mapping[str, object],
+) -> dict[str, object]:
+    return {
+        "profile": canonical_profile,
+        "job_id": str(value.get("job_id") or "").strip(),
+        "artifact_id": str(value.get("artifact_id") or "").strip(),
+        "artifact_relpath": str(value.get("artifact_relpath") or "").strip(),
+        "manifest_relpath": str(value.get("manifest_relpath") or "").strip(),
+        "format": str(value.get("format") or "").strip(),
+        "request_hash": str(value.get("request_hash") or "").strip(),
+        "dependency_fingerprint": str(value.get("dependency_fingerprint") or "").strip(),
+        "cache_key": str(value.get("cache_key") or "").strip(),
+        "published_at_utc": str(value.get("published_at_utc") or "").strip(),
+    }
+
+
+def _normalize_publication_registry(value: cabc.Mapping[str, object]) -> dict[str, object]:
+    schema_version_raw = value.get("schema_version")
+    try:
+        schema_version = int(schema_version_raw)
+    except (TypeError, ValueError) as exc:
+        raise FeaturesExportServiceError(
+            "Features export publication registry has invalid schema_version.",
+            code="publication_registry_invalid",
+            details=f"schema_version={schema_version_raw!r}",
+        ) from exc
+
+    if schema_version != FEATURES_EXPORT_PUBLICATION_SCHEMA_VERSION:
+        raise FeaturesExportServiceError(
+            "Unsupported features export publication registry schema version.",
+            code="publication_registry_invalid",
+            details=(
+                f"Expected schema_version={FEATURES_EXPORT_PUBLICATION_SCHEMA_VERSION}, "
+                f"received {schema_version}."
+            ),
+        )
+
+    updated_at_utc_raw = value.get("updated_at_utc")
+    updated_at_utc = (
+        str(updated_at_utc_raw).strip()
+        if isinstance(updated_at_utc_raw, str)
+        else ""
+    )
+
+    normalized_profiles: dict[str, dict[str, object]] = {}
+    profiles_raw = value.get("profiles")
+    if isinstance(profiles_raw, cabc.Mapping):
+        for raw_profile, raw_entry in profiles_raw.items():
+            canonical_profile = normalize_published_profile_id(str(raw_profile))
+            if canonical_profile is None:
+                continue
+            if not isinstance(raw_entry, cabc.Mapping):
+                continue
+            normalized_profiles[canonical_profile] = _normalize_publication_entry(
+                canonical_profile,
+                raw_entry,
+            )
+
+    return {
+        "schema_version": FEATURES_EXPORT_PUBLICATION_SCHEMA_VERSION,
+        "updated_at_utc": updated_at_utc,
+        "profiles": normalized_profiles,
+    }
+
+
+def _write_publication_registry(wd: Path, registry: cabc.Mapping[str, object]) -> Path:
+    normalized_registry = _normalize_publication_registry(registry)
+    registry_path = _resolve_relpath(wd, FEATURES_EXPORT_PUBLISHED_INDEX_RELPATH)
+    registry_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = registry_path.with_name(f"{registry_path.name}.{uuid4().hex}.tmp")
+    try:
+        tmp_path.write_text(
+            json.dumps(normalized_registry, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        tmp_path.replace(registry_path)
+    except OSError as exc:
+        raise FeaturesExportServiceError(
+            "Failed to write features export publication registry.",
+            code="publication_registry_write_failed",
+            details=str(exc),
+        ) from exc
+    return registry_path
+
+
+def _stale_publication_error(profile: str, details: str) -> FeaturesExportServiceError:
+    return FeaturesExportServiceError(
+        "Published features export artifact is stale.",
+        status_code=409,
+        code="stale_publication",
+        details=f"profile={profile}: {details}",
+    )
 
 
 def _job_manifest_relpath(job_id: str) -> str:
@@ -2752,12 +3219,22 @@ __all__ = [
     "FEATURES_EXPORT_ARTIFACTS_RELPATH",
     "FEATURES_EXPORT_JOBS_RELPATH",
     "FEATURES_EXPORT_MANIFEST_NAME",
+    "FEATURES_EXPORT_PUBLISHED_INDEX_RELPATH",
+    "FEATURES_EXPORT_PUBLISHED_RELPATH",
+    "FEATURES_EXPORT_PUBLICATION_SCHEMA_VERSION",
     "FEATURES_EXPORT_ROOT_RELPATH",
     "FeaturesExportServiceError",
     "FeaturesExportSubmission",
     "cache_entry_supports_cache_hit",
+    "co_create_post_wepp_geodatabase_artifact",
     "execute_features_export",
+    "load_publication_registry",
     "load_job_manifest",
+    "normalize_published_profile_id",
+    "publish_profile_execution_artifacts",
     "prepare_export_submission",
+    "publish_profile_artifact",
     "resolve_download_artifact_path",
+    "resolve_published_artifact_path",
+    "resolve_published_profile_request",
 ]

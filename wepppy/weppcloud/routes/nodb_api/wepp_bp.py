@@ -19,6 +19,13 @@ from wepppy.nodb.core.management_overrides import (
     resolve_disturbed_scalar_replacements,
 )
 from wepppy.nodb.core.ron import RonViewModel
+from wepppy.nodb.mods.features_export.service import (
+    FeaturesExportServiceError,
+    load_publication_registry,
+    normalize_published_profile_id,
+    resolve_published_artifact_path,
+    resolve_published_profile_request,
+)
 from wepppy.nodb.unitizer import Unitizer, precisions, converters
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
@@ -140,6 +147,57 @@ def _wepp_outputs_exist(wd: str, climate: Climate) -> bool:
         return False
 
     return False
+
+
+def _resolve_published_export_relpath(wd: str, profile: str) -> str | None:
+    canonical_profile = normalize_published_profile_id(profile)
+    if canonical_profile is None:
+        return None
+
+    try:
+        registry = load_publication_registry(wd)
+    except FeaturesExportServiceError:
+        return None
+
+    profiles = registry.get("profiles")
+    if not isinstance(profiles, dict):
+        return None
+    entry = profiles.get(canonical_profile)
+    if not isinstance(entry, dict):
+        return None
+
+    artifact_relpath = str(entry.get("artifact_relpath") or "").strip()
+    if not artifact_relpath:
+        return None
+
+    wd_path = Path(wd).resolve()
+    artifact_path = (wd_path / artifact_relpath).resolve()
+    try:
+        artifact_path.relative_to(wd_path)
+    except ValueError:
+        return None
+    if not artifact_path.is_file():
+        return None
+    return artifact_relpath
+
+
+_DOWNLOAD_FILENAME_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def _safe_download_filename_token(value: str, *, fallback: str) -> str:
+    token = _DOWNLOAD_FILENAME_TOKEN_PATTERN.sub("-", str(value).strip()).strip("-._")
+    if token:
+        return token
+    return fallback
+
+
+def _published_export_download_filename(runid: str, profile: str) -> str:
+    canonical_profile, request_payload = resolve_published_profile_request(profile)
+    format_token = str(request_payload.get("format") or "export")
+    runid_token = _safe_download_filename_token(runid, fallback="run")
+    profile_token = _safe_download_filename_token(canonical_profile, fallback="profile")
+    format_token_safe = _safe_download_filename_token(format_token, fallback="export")
+    return f"{runid_token}.{profile_token}.{format_token_safe}.zip"
 
 
 def _wepp_results_invalidated(prep) -> bool:
@@ -666,6 +724,42 @@ def report_wepp_results(runid, config):
     interchange_readme_exists = _exists(
         _join(wd, 'wepp', 'output', 'interchange', 'README.md')
     )
+    prep_details_export_relpath = _resolve_published_export_relpath(wd, "prep-details")
+    post_wepp_geopackage_export_relpath = _resolve_published_export_relpath(wd, "prep-wepp")
+    post_wepp_geodatabase_export_relpath = _resolve_published_export_relpath(
+        wd,
+        "prep-wepp-geodatabase",
+    )
+    prep_details_export_download_url = (
+        url_for_run(
+            'wepp.download_features_export_published',
+            runid=runid,
+            config=config,
+            profile='prep-details',
+        )
+        if prep_details_export_relpath
+        else None
+    )
+    post_wepp_geopackage_export_download_url = (
+        url_for_run(
+            'wepp.download_features_export_published',
+            runid=runid,
+            config=config,
+            profile='prep-wepp',
+        )
+        if post_wepp_geopackage_export_relpath
+        else None
+    )
+    post_wepp_geodatabase_export_download_url = (
+        url_for_run(
+            'wepp.download_features_export_published',
+            runid=runid,
+            config=config,
+            profile='prep-wepp-geodatabase',
+        )
+        if post_wepp_geodatabase_export_relpath
+        else None
+    )
 
     try:
         return render_template('controls/wepp_reports.htm',
@@ -678,11 +772,41 @@ def report_wepp_results(runid, config):
                                totalwatsed3_exists=totalwatsed3_exists,
                                totalwatsed2_exists=totalwatsed2_exists,
                                interchange_readme_exists=interchange_readme_exists,
+                               prep_details_export_download_url=prep_details_export_download_url,
+                               post_wepp_geopackage_export_download_url=post_wepp_geopackage_export_download_url,
+                               post_wepp_geodatabase_export_download_url=post_wepp_geodatabase_export_download_url,
                                user=current_user)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:504", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building reports template', runid=runid)
+
+
+@wepp_bp.route('/runs/<string:runid>/<config>/download/features/published/<string:profile>')
+@wepp_bp.route('/runs/<string:runid>/<config>/download/features/published/<string:profile>/')
+@authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to download published features exports.")
+def download_features_export_published(runid: str, config: str, profile: str):
+    wd = get_wd(runid)
+    try:
+        artifact_path, _artifact_relpath = resolve_published_artifact_path(
+            wd,
+            profile=profile,
+        )
+        filename = _published_export_download_filename(runid, profile)
+        return send_file(
+            str(artifact_path),
+            as_attachment=True,
+            download_name=filename,
+        )
+    except FeaturesExportServiceError as exc:
+        response = error_factory(str(exc), code=exc.code, details=exc.details)
+        response.status_code = exc.status_code
+        return response
+    except FileNotFoundError as exc:
+        response = error_factory(str(exc), code='not_found')
+        response.status_code = 404
+        return response
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/rusle/results')

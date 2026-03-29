@@ -2,7 +2,7 @@ profile_id: prep_details
 label: Prep details
 description: Geometryless tabular prep-details replacement profile.
 request:
-  format: parquet
+  format: csv
   units: project
   crs: wgs
   output_scopes:

@@ -148,6 +148,44 @@
         {% endif %}
       </section>
 
+      <section class="wc-stack">
+        <h4 class="wc-heading wc-heading--sm">Exports</h4>
+        <div class="wc-stack">
+          {% if prep_details_export_download_url %}
+          <a class="wc-link wc-link--file"
+             href="{{ prep_details_export_download_url }}"
+             target="_blank"
+             rel="noopener">
+            Prep Details
+          </a>
+          {% else %}
+          <span class="wc-text-muted">Prep Details (not available)</span>
+          {% endif %}
+
+          {% if post_wepp_geopackage_export_download_url %}
+          <a class="wc-link wc-link--file"
+             href="{{ post_wepp_geopackage_export_download_url }}"
+             target="_blank"
+             rel="noopener">
+            Post WEPP Geopackage Features Export
+          </a>
+          {% else %}
+          <span class="wc-text-muted">Post WEPP Geopackage Features Export (not available)</span>
+          {% endif %}
+
+          {% if post_wepp_geodatabase_export_download_url %}
+          <a class="wc-link wc-link--file"
+             href="{{ post_wepp_geodatabase_export_download_url }}"
+             target="_blank"
+             rel="noopener">
+            Post WEPP Geodatabase (ESRI) Features Export
+          </a>
+          {% else %}
+          <span class="wc-text-muted">Post WEPP Geodatabase (ESRI) Features Export (not available)</span>
+          {% endif %}
+        </div>
+      </section>
+
       {% if not is_single_storm %}
       <section class="wc-stack">
         <h4 class="wc-heading wc-heading--sm">Water Balance Reports</h4>

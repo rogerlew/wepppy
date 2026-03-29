@@ -14,10 +14,6 @@ from typing import Optional
 
 from rq import get_current_job
 
-from wepppy.export.prep_details import (
-    export_channels_prep_details,
-    export_hillslopes_prep_details,
-)
 from wepppy.io_wait import wait_for_path, wait_for_paths
 from wepppy.nodb.core import Climate, ClimateMode, Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -46,6 +42,45 @@ def _delete_after_interchange_enabled(*, wepp: object, climate: object) -> bool:
     if value is None:
         value = getattr(climate, "delete_after_interchange", False)
     return bool(value)
+
+
+def _run_published_features_export_profile(
+    *,
+    runid: str,
+    wd: str,
+    profile: str,
+    format_override: str | None = None,
+) -> dict[str, object]:
+    from wepppy.nodb.mods.features_export.service import (
+        execute_features_export,
+        publish_profile_execution_artifacts,
+        resolve_published_profile_request,
+    )
+
+    canonical_profile, payload = resolve_published_profile_request(
+        profile,
+        format_override=format_override,
+    )
+    job = get_current_job()
+    base_job_id = getattr(job, "id", None)
+    if isinstance(base_job_id, str) and base_job_id:
+        export_job_id = f"{base_job_id}-{canonical_profile}"
+    else:
+        export_job_id = f"post-{canonical_profile}-{int(time.time() * 1000)}"
+    result = execute_features_export(
+        wd,
+        runid=runid,
+        config="run_completion",
+        payload=payload,
+        job_id=export_job_id,
+    )
+    publish_profile_execution_artifacts(
+        wd,
+        requested_profile=canonical_profile,
+        job_id=export_job_id,
+        job_result=result,
+    )
+    return result
 
 
 def _post_run_cleanup_out_rq(runid: str) -> None:
@@ -225,8 +260,11 @@ def _post_prep_details_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        export_channels_prep_details(wd)
-        export_hillslopes_prep_details(wd)
+        _run_published_features_export_profile(
+            runid=runid,
+            wd=wd,
+            profile="prep-details",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
@@ -343,16 +381,18 @@ def _post_legacy_arc_export_rq(runid: str) -> None:
 
 
 def _post_gpkg_export_rq(runid: str) -> None:
-    """Rebuild the GeoPackage export bundle when requested."""
+    """Rebuild published post-WEPP spatial exports (GeoPackage + FileGDB)."""
     try:
-        from wepppy.export.gpkg_export import gpkg_export
-
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        gpkg_export(wd)
+        _run_published_features_export_profile(
+            runid=runid,
+            wd=wd,
+            profile="prep-wepp-gpkg-gdb",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.

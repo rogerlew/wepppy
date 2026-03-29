@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import os
+from pathlib import Path
 import shutil
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from glob import glob
@@ -9,6 +10,7 @@ from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 from typing import TYPE_CHECKING, Optional
+from uuid import uuid4
 
 from wepp_runner.wepp_runner import (
     run_hillslope,
@@ -149,12 +151,39 @@ class WeppRunService:
             pass
 
     def run_watershed(self, wepp: "Wepp") -> None:
-        from wepppy.export.prep_details import (
-            export_channels_prep_details,
-            export_hillslopes_prep_details,
+        from wepppy.nodb.core import wepp as wepp_module
+        from wepppy.nodb.mods.features_export.service import (
+            execute_features_export,
+            publish_profile_execution_artifacts,
+            resolve_published_profile_request,
         )
 
-        from wepppy.nodb.core import wepp as wepp_module
+        def _run_published_features_export_profile(
+            profile: str,
+            *,
+            format_override: str | None = None,
+        ) -> dict[str, object]:
+            canonical_profile, payload = resolve_published_profile_request(
+                profile,
+                format_override=format_override,
+            )
+            runid_token = str(getattr(wepp, "runid", Path(wd).name))
+            config_token = str(getattr(wepp, "config", "run_completion"))
+            job_id = f"sync-{canonical_profile}-{uuid4().hex}"
+            result = execute_features_export(
+                wd,
+                runid=runid_token,
+                config=config_token,
+                payload=payload,
+                job_id=job_id,
+            )
+            publish_profile_execution_artifacts(
+                wd,
+                requested_profile=canonical_profile,
+                job_id=job_id,
+                job_result=result,
+            )
+            return result
 
         if not wepp.run_wepp_watershed:
             wepp.logger.info("Skipping WEPP watershed run (wepp.run_wepp_watershed=False)")
@@ -201,8 +230,7 @@ class WeppRunService:
 
             if wepp.prep_details_on_run_completion:
                 with wepp.timed("  Exporting prep details"):
-                    export_channels_prep_details(wd)
-                    export_hillslopes_prep_details(wd)
+                    _run_published_features_export_profile("prep-details")
 
             climate = wepp.climate_instance
 
@@ -223,10 +251,8 @@ class WeppRunService:
                 _ = wepp.loss_report
 
             if wepp.arc_export_on_run_completion:
-                with wepp.timed("  running gpkg_export"):
-                    from wepppy.export.gpkg_export import gpkg_export
-
-                    gpkg_export(wepp.wd)
+                with wepp.timed("  running features_export prep-wepp-gpkg-gdb profile"):
+                    _run_published_features_export_profile("prep-wepp-gpkg-gdb")
 
                     wepp.make_loss_grid()
 

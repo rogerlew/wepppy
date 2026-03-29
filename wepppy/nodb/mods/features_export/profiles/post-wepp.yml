@@ -7,9 +7,6 @@ request:
   crs: wgs
   output_scopes:
     - baseline
-  tabular:
-    concatenate_tables: false
-    temporal_layout: wide
   swat_run_id: latest
   layers:
     - watershed.subcatchments

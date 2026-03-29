@@ -544,6 +544,61 @@ def test_report_wepp_results_not_stale_when_current(wepp_client, monkeypatch: py
     assert response.get_data(as_text=True) == "Run Results"
 
 
+def test_report_wepp_results_passes_export_relpaths(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, _, run_dir = wepp_client
+    _touch_wepp_results(run_dir)
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("ClimateInstance", (), {"is_single_storm": False, "ss_batch_storms": None})()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+    def _raise_file_not_found(_wd: str):
+        raise FileNotFoundError()
+
+    monkeypatch.setattr(wepp_module.RedisPrep, "getInstance", _raise_file_not_found)
+
+    relpaths = {
+        "prep-details": "export/features/artifacts/a/features_export.csv.zip",
+        "prep-wepp": "export/features/artifacts/b/features_export.geopackage.zip",
+        "prep-wepp-geodatabase": "export/features/artifacts/b/features_export.gdb.zip",
+    }
+    monkeypatch.setattr(
+        wepp_module,
+        "_resolve_published_export_relpath",
+        lambda _wd, profile: relpaths.get(profile),
+    )
+
+    captured: dict[str, Any] = {}
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "controls/wepp_reports.htm"
+        captured.update(kwargs)
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/results/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert (
+        captured["prep_details_export_download_url"].rstrip("/")
+        == f"/runs/{RUN_ID}/{CONFIG}/download/features/published/prep-details"
+    )
+    assert (
+        captured["post_wepp_geopackage_export_download_url"].rstrip("/")
+        == f"/runs/{RUN_ID}/{CONFIG}/download/features/published/prep-wepp"
+    )
+    assert (
+        captured["post_wepp_geodatabase_export_download_url"].rstrip("/")
+        == f"/runs/{RUN_ID}/{CONFIG}/download/features/published/prep-wepp-geodatabase"
+    )
+
+
 def test_report_wepp_results_returns_500_when_template_render_raises(
     wepp_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -574,6 +629,30 @@ def test_report_wepp_results_returns_500_when_template_render_raises(
     assert response.status_code == 500
     payload = response.get_json()
     assert payload["error"]["message"] == "Error building reports template"
+
+
+def test_download_features_export_published_returns_file_with_canonical_filename(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    artifact_path = Path(run_dir) / "export" / "features" / "artifacts" / "a1" / "features_export.csv.zip"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    artifact_path.write_text("artifact", encoding="utf-8")
+    artifact_relpath = artifact_path.relative_to(Path(run_dir)).as_posix()
+    monkeypatch.setattr(
+        wepp_module,
+        "resolve_published_artifact_path",
+        lambda wd, profile: (artifact_path, artifact_relpath),
+    )
+
+    response = client.get(
+        f"/runs/{RUN_ID}/{CONFIG}/download/features/published/prep-details"
+    )
+    assert response.status_code == 200
+    assert "test-run.prep-details.csv.zip" in response.headers.get("Content-Disposition", "")
 
 
 @pytest.mark.parametrize(

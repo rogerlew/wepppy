@@ -18,11 +18,6 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(export_routes, "authorize_run_access", lambda claims, runid: None)
 
 
-class _RonStub:
-    def __init__(self, export_arc_dir: str) -> None:
-        self.export_arc_dir = export_arc_dir
-
-
 class _AttrShapedError(RuntimeError):
     def __init__(self) -> None:
         super().__init__("attr-shaped runtime error")
@@ -35,19 +30,13 @@ def test_export_geopackage_propagates_nodir_errors(tmp_path: Path, monkeypatch: 
     runid = "run-export-nodir"
     run_root = tmp_path / runid
     run_root.mkdir()
-    export_dir = run_root / "export" / "arcmap"
-    export_dir.mkdir(parents=True)
 
     _stub_auth(monkeypatch)
     monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
-    monkeypatch.setattr(export_routes.Ron, "getInstance", lambda wd: _RonStub(str(export_dir)))
-
-    import wepppy.export as export_pkg
-
     monkeypatch.setattr(
-        export_pkg,
-        "gpkg_export",
-        lambda wd: (_ for _ in ()).throw(
+        export_routes,
+        "_execute_features_export_profile",
+        lambda **kwargs: (_ for _ in ()).throw(
             NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
         ),
     )
@@ -68,19 +57,13 @@ def test_export_geopackage_attr_shaped_runtime_error_uses_generic_boundary(
     runid = "run-export-attr-runtime"
     run_root = tmp_path / runid
     run_root.mkdir()
-    export_dir = run_root / "export" / "arcmap"
-    export_dir.mkdir(parents=True)
 
     _stub_auth(monkeypatch)
     monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
-    monkeypatch.setattr(export_routes.Ron, "getInstance", lambda wd: _RonStub(str(export_dir)))
-
-    import wepppy.export as export_pkg
-
     monkeypatch.setattr(
-        export_pkg,
-        "gpkg_export",
-        lambda wd: (_ for _ in ()).throw(_AttrShapedError()),
+        export_routes,
+        "_execute_features_export_profile",
+        lambda **kwargs: (_ for _ in ()).throw(_AttrShapedError()),
     )
 
     with TestClient(rq_engine.app) as client:
@@ -130,19 +113,13 @@ def test_export_geodatabase_propagates_nodir_errors(
     runid = "run-export-gdb-nodir"
     run_root = tmp_path / runid
     run_root.mkdir()
-    export_dir = run_root / "export" / "arcmap"
-    export_dir.mkdir(parents=True)
 
     _stub_auth(monkeypatch)
     monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
-    monkeypatch.setattr(export_routes.Ron, "getInstance", lambda wd: _RonStub(str(export_dir)))
-
-    import wepppy.export as export_pkg
-
     monkeypatch.setattr(
-        export_pkg,
-        "gpkg_export",
-        lambda wd: (_ for _ in ()).throw(
+        export_routes,
+        "_execute_features_export_profile",
+        lambda **kwargs: (_ for _ in ()).throw(
             NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
         ),
     )
@@ -156,6 +133,37 @@ def test_export_geodatabase_propagates_nodir_errors(
     assert payload["error"]["message"] == "locked"
 
 
+def test_export_geodatabase_prefers_published_artifact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-export-gdb-published"
+    run_root = tmp_path / runid
+    run_root.mkdir()
+    artifact_path = run_root / "export" / "features" / "artifacts" / "artifact-1" / "features_export.gdb.zip"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    artifact_path.write_bytes(b"gdb-zip")
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
+    monkeypatch.setattr(
+        export_routes,
+        "resolve_published_artifact_path",
+        lambda wd, profile: (artifact_path, "export/features/artifacts/artifact-1/features_export.gdb.zip"),
+    )
+    monkeypatch.setattr(
+        export_routes,
+        "_execute_features_export_profile",
+        lambda **kwargs: (_ for _ in ()).throw(AssertionError("unexpected on-demand execution")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/runs/{runid}/cfg/export/geodatabase")
+
+    assert response.status_code == 200
+    assert "zip" in response.headers.get("content-type", "").lower()
+
+
 def test_export_prep_details_propagates_nodir_errors(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -167,21 +175,12 @@ def test_export_prep_details_propagates_nodir_errors(
     _stub_auth(monkeypatch)
     monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
 
-    import wepppy.export as export_pkg
-    import wepppy.export.prep_details as prep_details_pkg
-
-    monkeypatch.setattr(export_pkg, "archive_project", lambda wd: str(run_root / "prep.zip"))
     monkeypatch.setattr(
-        prep_details_pkg,
-        "export_hillslopes_prep_details",
-        lambda wd: (_ for _ in ()).throw(
+        export_routes,
+        "_execute_features_export_profile",
+        lambda **kwargs: (_ for _ in ()).throw(
             NoDirError(http_status=409, code="NODIR_MIXED_STATE", message="mixed")
         ),
-    )
-    monkeypatch.setattr(
-        prep_details_pkg,
-        "export_channels_prep_details",
-        lambda wd: str(run_root / "channels.gpkg"),
     )
 
     with TestClient(rq_engine.app) as client:

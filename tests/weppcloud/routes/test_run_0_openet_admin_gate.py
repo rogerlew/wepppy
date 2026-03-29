@@ -496,6 +496,19 @@ def test_features_export_bootstrap_payload_includes_defaults_selectors_and_runti
     )
     monkeypatch.setattr(
         run0_module,
+        "_build_features_export_discovery_payload",
+        lambda _wd, scenarios, contrasts, swat_catalog: {
+            "roads_scope_available": True,
+            "available_layer_ids": [
+                "watershed.subcatchments",
+                "omni.scenarios.hillslopes",
+            ],
+            "available_families": ["watershed", "omni_scenarios"],
+            "refresh_channel": "features_export",
+        },
+    )
+    monkeypatch.setattr(
+        run0_module,
         "load_builtin_profiles",
         lambda: (
             {
@@ -550,16 +563,68 @@ def test_features_export_bootstrap_payload_includes_defaults_selectors_and_runti
     }
     assert payload["profiles"]["post_wepp"]["swat_run_id"] == "latest"
     assert payload["profiles"]["prep_details"]["format"] == "parquet"
-    assert payload["profile_buttons"] == [
-        {"key": "post_wepp", "label": "Post Wepp"},
-        {"key": "prep_details", "label": "Prep details"},
-    ]
+    assert payload["profiles"]["prep_wepp_gpkg_gdb"]["output_scopes"] == ["baseline", "roads"]
+    assert payload["profiles"]["prep_wepp_gpkg_gdb"]["scenarios"] == ["uniform_low"]
+    assert "omni.scenarios.hillslopes" in payload["profiles"]["prep_wepp_gpkg_gdb"]["layers"]
+    assert {"key": "post_wepp", "label": "Post Wepp"} in payload["profile_buttons"]
+    assert {"key": "prep_details", "label": "Prep details"} in payload["profile_buttons"]
+    assert {"key": "prep_wepp_gpkg_gdb", "label": "Post Wepp (GPKG + GDB)"} in payload["profile_buttons"]
     assert payload["omni"]["scenarios"] == [{"id": "uniform_low", "label": "Uniform Low"}]
     assert payload["omni"]["contrasts"] == [{"id": "c1", "label": "Contrast 1"}]
     assert payload["swat"]["preferred_run_id"] == "run_123"
     assert payload["resolved_utm_epsg"] == 32611
     assert payload["utm_available"] is True
     assert payload["runtime"]["readonly"] is True
+
+
+def test_features_export_bootstrap_virtual_profile_is_discovery_conditioned(
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(run0_module, "_discover_features_export_omni_selectors", lambda wd: ([], []))
+    monkeypatch.setattr(
+        run0_module,
+        "_discover_features_export_swat_catalog",
+        lambda wd: {"runs": [], "latest_run_id": None, "tables_by_run": {}, "all_tables": []},
+    )
+    monkeypatch.setattr(
+        run0_module,
+        "_build_features_export_discovery_payload",
+        lambda _wd, scenarios, contrasts, swat_catalog: {
+            "roads_scope_available": False,
+            "available_layer_ids": ["watershed.subcatchments"],
+            "available_families": ["watershed"],
+            "refresh_channel": "features_export",
+        },
+    )
+    monkeypatch.setattr(
+        run0_module,
+        "load_builtin_profiles",
+        lambda: (
+            {
+                "key": "post_wepp",
+                "label": "Post Wepp",
+                "request": {
+                    "format": "geopackage",
+                    "units": "project",
+                    "crs": "wgs",
+                    "output_scopes": ["baseline"],
+                    "layers": ["watershed.subcatchments"],
+                },
+            },
+        ),
+    )
+
+    payload = run0_module._build_features_export_bootstrap_payload(
+        "/tmp/fake-run",
+        SimpleNamespace(readonly=False),
+        None,
+    )
+
+    virtual_profile = payload["profiles"]["prep_wepp_gpkg_gdb"]
+    assert virtual_profile["output_scopes"] == ["baseline"]
+    assert virtual_profile.get("scenarios") in (None, [])
+    assert "omni.scenarios.hillslopes" not in virtual_profile["layers"]
 
 
 def test_run_page_bootstrap_ttl_missing_expires_at_defaults_to_null(run0_template_app) -> None:

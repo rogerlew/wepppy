@@ -3,7 +3,7 @@
 Status: Implemented (Living Spec)  
 Owner: WEPPpy NoDb export subsystem  
 Primary module: `wepppy/nodb/mods/features_export`  
-Replaces: `wepppy/export/gpkg_export.py`
+Replaces legacy export modules: `wepppy/export/gpkg_export.py`, `wepppy/export/prep_details.py`, and associated route/task wiring
 Document posture: Living working specification; mutate when implementation evidence shows a better contract or exposes gaps.
 
 ## 1. Summary
@@ -43,10 +43,8 @@ Packaging rules:
 - Geometryless carrier materialization is independent of geometry files: tabular outputs are produced from attribute sources only and do not enrich identity columns from carrier geometry datasets.
 - Every zip artifact must include:
   - export payload members (data files/container members),
-  - `manifest.json`,
-  - `profile.yml` (resolved request profile for replay),
-  - `profiles/post-wepp.yml`, `profiles/prep-details.yml`, and `profiles/temporal-yearly.yml`,
-  - `README.md` provenance summary.
+  - `manifest.json`.
+- Artifact bundles must not include `profile.yml`, built-in profile files, or provenance `README.md`; profile discovery/replay is route-level (`profile/resolve`) and publication-level (`published/index.json`) metadata.
 - Identity normalization contract for all output formats (geometry and tabular):
   - Emit canonical identity columns `topaz_id`, `wepp_id` as the first two output columns.
   - Coalesce identity aliases (`TopazID`/`topaz_id`, `WeppID`/`wepp_id`) into canonical columns.
@@ -178,7 +176,8 @@ Carrier materialization contract (normative):
 `POST /api/runs/{runid}/{config}/export/features`
 
 Auth contract:
-- Submit and download endpoints require `rq:export` plus run-access authorization.
+- Submit/profile-resolve endpoints require `rq:export` plus run-access authorization.
+- Download endpoints (`job/{job_id}/download`, `published/{profile}/download`) allow anonymous access for public runs; non-public runs require `rq:export` plus run-access authorization.
 - Polling auth follows canonical `/rq-engine/api/jobstatus` and `/rq-engine/api/jobinfo` route policy; `features_export` does not introduce route-specific polling auth overrides.
 
 Transport contract:
@@ -281,7 +280,7 @@ Submission response:
 - Always HTTP 202 with canonical async payload.
 - Required key: `job_id`.
 - Required `status_url` points to `/rq-engine/api/jobstatus/{job_id}`.
-- Optional `download_url` may be present but is only valid once the job is `finished`.
+- Required `download_url` points to `/rq-engine/api/runs/{runid}/{config}/export/features/job/{job_id}/download` and is only valid once the job is `finished`.
 - Cache hits still return 202 with a new `job_id` (fast-path job), never sync 200.
 
 ### 5.2 Polling And Result Contract
@@ -300,20 +299,26 @@ Warnings and summaries:
 - Export warnings and manifest summary are carried in `jobinfo.result`.
 - `jobinfo.result` minimum fields:
 - `artifact_id`
-- `download_url`
+- `download_url` (canonical job route URL)
 - `cache_hit` (boolean)
 - `source_job_id` (present on cache hit)
 - `manifest_relpath`
 - `warnings` (array of warning objects)
 
 ### 5.3 Download
-`GET /api/runs/{runid}/{config}/export/features/{job_id}/download`
+`GET /api/runs/{runid}/{config}/export/features/job/{job_id}/download`  
+`GET /api/runs/{runid}/{config}/export/features/published/{profile}/download`
 
 Behavior:
-- Resolves `job_id` to an `artifact_id` mapping.
-- Returns file response when `jobstatus.status == "finished"`.
-- Returns 409 if job is not yet terminal success.
-- Returns canonical 404 if job or artifact mapping does not exist.
+- Job endpoint resolves `job_id` to an `artifact_id` mapping.
+- Job endpoint returns file response when `jobstatus.status == "finished"`.
+- Job endpoint returns 409 if job is not yet terminal success.
+- Job endpoint returns canonical 404 if job or artifact mapping does not exist.
+- Published endpoint resolves `{profile}` through `export/features/published/index.json` (source of truth).
+- Published endpoint profile tokens are canonical kebab-case profile IDs (for cutover: `prep-wepp`, `prep-wepp-geodatabase`, `prep-details`); no `latest` path segment is used.
+- Published endpoint returns 404 when the profile has no published entry.
+- Published endpoint returns 409 `stale_publication` when the registry entry no longer matches resolvable current dependency/request fingerprints for the published request.
+- Published endpoint sets `Content-Disposition` filename as `<runid>.<canonical-profile>.<format>.zip` (for example `run-1.prep-wepp.geopackage.zip`).
 
 ## 6. Dependency Tracking And Options-Aware Caching
 ### 6.1 Execution Tracking Versus Cache Index
@@ -364,7 +369,7 @@ Cache hit flow:
 - Submit endpoint still enqueues a lightweight export-finalize RQ job and returns 202.
 - Lightweight job writes a new job-scoped manifest that points to existing `artifact_id`.
 - `jobinfo.result.cache_hit=true` and `source_job_id=<original producer job>`.
-- Download route serves the cached artifact via `artifact_id` mapping.
+- Job download endpoint serves the cached artifact via `artifact_id` mapping.
 
 Artifact layout:
 - Job metadata: `export/features/jobs/{job_id}/`.
@@ -372,7 +377,34 @@ Artifact layout:
 - Manifest exists in both locations.
 - Job manifest includes `cache_hit` and `source_job_id`.
 
-### 6.5 WP-2 Milestone Status (Completed 2026-03-26)
+### 6.5 Published Profile Registry
+Publication-level downloads use one run-scoped registry document:
+- Path: `export/features/published/index.json`.
+- This file is the source of truth for `GET /api/runs/{runid}/{config}/export/features/published/{profile}/download`.
+- The registry is a lightweight JSON index; it must not be modeled as a dedicated NoDb controller class.
+
+Registry contract:
+- Top-level:
+  - `schema_version` (integer),
+  - `updated_at_utc` (ISO 8601 UTC timestamp),
+  - `profiles` (object map keyed by canonical profile ID).
+- Canonical profile IDs for legacy-cutover publication are `prep-wepp`, `prep-wepp-geodatabase`, and `prep-details`.
+- `prep-wepp-gpkg-gdb` is an execution-only virtual orchestration profile and is not persisted as a registry key; it co-publishes `prep-wepp` and `prep-wepp-geodatabase`.
+- Each `profiles.{profile}` entry includes:
+  - `profile` (string, matches key),
+  - `job_id`,
+  - `artifact_id`,
+  - `artifact_relpath`,
+  - `manifest_relpath`,
+  - `format`,
+  - `request_hash`,
+  - `dependency_fingerprint`,
+  - `cache_key`,
+  - `published_at_utc`.
+- Registry writes are atomic and idempotent per profile key.
+- Published download resolution must verify that the registry entry still maps to an existing artifact and that its cache/dependency fingerprint remains valid for the resolved published request contract.
+
+### 6.6 WP-2 Milestone Status (Completed 2026-03-26)
 
 ExecPlan completion:
 - `docs/mini-work-packages/20260326_features_export_wp2_execplan.md` status is `done`.
@@ -522,11 +554,17 @@ Runs page integration:
 - Add `Export` to the Mods list.
 - Implement a NoDb controller UI using established async pattern.
 - Add top-of-control profile actions:
-  - `Load Export Profile` quick actions are populated from built-in profile files discovered via `load_builtin_profiles()` (current built-ins: `Prep details`, `Post Wepp`, `Temporal yearly`).
+  - `Load Export Profile` quick actions are populated from built-in profile files discovered via `load_builtin_profiles()` plus virtual orchestration presets (current built-ins: `Prep details`, `Post Wepp`, `Temporal yearly`; virtual: `Post Wepp (GPKG + GDB)` / `prep_wepp_gpkg_gdb`).
   - `Specify Export from Profile` text area + `Load profile` action.
   - `Clear selection` remains available as a separate action.
 - `Post Wepp` is the default quick profile and replaces the legacy `Load Defaults` button behavior.
-- Profile text loading accepts `profile.yml` content from prior exports and applies the profile without auto-submit.
+- Virtual profile discoverability contract:
+  - `prep_wepp_gpkg_gdb` is emitted in runs-page bootstrap `profiles`/`profile_buttons` even though it has no dedicated `.yml` file.
+  - Its base request is resolved via `resolve_published_profile_request("prep-wepp-gpkg-gdb")`.
+  - Runtime enrichment applies before exposing it to the UI:
+    - add `roads` to `output_scopes` when roads scope is available for the active run/config;
+    - add `omni.scenarios.hillslopes` and discovered scenario IDs (`scenarios`) when Omni scenarios are available.
+- Profile text loading accepts pasted YAML/JSON request-profile content and applies the profile without auto-submit.
 - Run settings visual order is fixed: `format` -> `units` -> `crs` -> global `year_selection`.
 - Catalog UI is hierarchy-first and must not include a layer search box, filter chips, or "select visible" behavior.
 - Family labels are user-facing domain labels and must use one consolidated `WEPP` family with familiar output names (not split `WEPP Summary`, `WEPP Temporal`, `WEPP Interchange` headings).
@@ -557,7 +595,9 @@ Runs page integration:
   - `wepppy/nodb/mods/features_export/profiles/post-wepp.yml`
   - `wepppy/nodb/mods/features_export/profiles/prep-details.yml`
   - `wepppy/nodb/mods/features_export/profiles/temporal-yearly.yml`
-- `prep-details.yml` is the canonical replacement profile for legacy `prep_details` export behavior.
+- Virtual quick profiles (for example `prep_wepp_gpkg_gdb`) are discoverable through bootstrap payload composition and intentionally do not require a dedicated file under `profiles/`.
+- Published download profile IDs are canonical kebab-case tokens (`prep-wepp`, `prep-wepp-geodatabase`, `prep-details`) and may map to built-in profile aliases during cutover (`post_wepp` -> `prep-wepp`, `prep_details` -> `prep-details`).
+- `prep-details.yml` is the canonical replacement profile for legacy `prep_details` export behavior and defaults to `format=csv`.
 - `temporal-yearly.yml` is the canonical built-in preset that exercises yearly temporal measures (`wepp.interchange.loss_all_years_hill`).
 
 ## 11. Manifest And Warning Contract
@@ -579,10 +619,9 @@ Manifest minimum fields:
 - `cache_hit`, `source_job_id`, `artifact_id`.
 - Dependency-preparation records (including AgFields interchange auto-prep attempts and outcomes).
 - `warnings` array.
-- Profile/provenance fields:
-  - `profile_relpath` (`profile.yml`),
-  - `profile_bundle_relpaths` (packaged built-in profile files),
-  - `provenance_readme_relpath` (`README.md`).
+- Optional publication metadata when a job is promoted to published profile status:
+  - `published_profile`,
+  - `published_at_utc`.
 
 Warning object shape:
 - `code`: machine-readable warning code.
@@ -604,16 +643,22 @@ Reserved warning codes:
 ## 12. Migration And Cutover
 Cutover is immediate with explicit legacy cleanup:
 - Remove direct `gpkg_export` route/task usage from rq-engine export routes.
-- Move export ownership from `wepppy/export/gpkg_export.py` to NoDb `features_export`.
-- Remove run-completion hooks that auto-generate gpkg/gdb artifacts.
-- Retire `/export/geopackage` and `/export/geodatabase` in favor of `/export/features`.
-- Remove legacy prep UI toggles for gpkg/gdb auto-export.
+- Remove direct `prep_details` route/task usage from rq-engine export routes.
+- Move export ownership from legacy modules (`wepppy/export/gpkg_export.py`, `wepppy/export/prep_details.py`) to NoDb `features_export`.
+- Rewire run-completion hooks to `features_export` profile execution/publication.
+- Keep `/export/geopackage`, `/export/geodatabase`, and `/export/prep_details` as compatibility facades that execute `features_export` profiles.
+- Standardize job downloads on `/export/features/job/{job_id}/download` (replace `/export/features/{job_id}/download`).
+- Add profile-aware published downloads on `/export/features/published/{profile}/download` backed by `export/features/published/index.json`.
+- Keep run-completion toggles functional while routing generation through `features_export` internals.
+- Remove artifact-bundled profile/provenance files (`profile.yml`, built-in profile files, `README.md`) from export bundles.
 - AgFields parity+ support ships without legacy compatibility shims (single-project assumption).
 
 Back-compat behavior for existing saved configs:
-- Persisted legacy export flags (`create_gpkg`, `create_gdb`, `arc_export_on_run_completion`) are ignored.
-- Default config for new runs sets `arc_export_on_run_completion=false` (or removes the setting entirely) as part of the same cutover.
-- Existing runs with `arc_export_on_run_completion=true` no longer auto-generate gpkg/gdb; on first export interaction emit `legacy_flags_ignored` warning in manifest and `jobinfo.result.warnings`.
+- Persisted run-completion export flags remain active but now drive `features_export` profile execution:
+  - `prep_details_on_run_completion` -> published `prep-details`.
+  - `arc_export_on_run_completion` -> published orchestration profile `prep-wepp-gpkg-gdb` (co-publishes `prep-wepp` + `prep-wepp-geodatabase`).
+- Legacy module imports/writers are removed; flags do not call `wepppy/export/gpkg_export.py` or `wepppy/export/prep_details.py`.
+- Legacy module deletion (`gpkg_export.py`, `prep_details.py`) must occur only after explicit human approval based on parity validation evidence (see work-package gate requirements).
 
 ## 13. Acceptance Criteria
 - All seven formats export successfully on representative runs.
@@ -665,8 +710,10 @@ Back-compat behavior for existing saved configs:
 - Mixed temporal requests have deterministic partial-export behavior and warning semantics.
 - SWAT default all-table export and include/exclude overrides work with profile-based geometry/non-spatial handling.
 - Export mod appears on Runs page and follows existing NoDb async controller interaction.
-- Run-page control exposes built-in profile quick buttons (current set: `Prep details`, `Post Wepp`, `Temporal yearly`) and a profile-text load path for pasted `profile.yml` content.
-- All artifact downloads are zip bundles and include `manifest.json`, `profile.yml`, built-in profile files, and provenance `README.md`.
+- Run-page control exposes profile quick buttons (current set: built-ins `Prep details`, `Post Wepp`, `Temporal yearly`, plus virtual `Post Wepp (GPKG + GDB)`) and a profile-text load path for pasted profile content.
+- All artifact downloads are zip bundles and include export payload members plus `manifest.json` only.
+- Download routes are standardized to `/export/features/job/{job_id}/download` and `/export/features/published/{profile}/download`.
+- `export/features/published/index.json` is authoritative for published profile download resolution (`prep-wepp`, `prep-wepp-geodatabase`, `prep-details`).
 - Regression tests cover payload shape, selector validation, scope behavior, cache hit flow, and legacy cutover.
 
 ## 14. Implementation Skeleton And Work-Package Breakdown
@@ -786,16 +833,24 @@ WP-5: Runs-page UI control integration
 - Contract clarification: service orchestration must always pass a `nodb_ref_resolver` into dependency snapshot construction so catalog `nodb_ref` locators (for example `nodb:watershed.subwta_shp`) resolve deterministically during submit-time cache/dependency planning.
 - Contract clarification: features-export status UI must use canonical `control_shell` status-panel plumbing (`status_panel_options`) so `wc-status-panel` theming and shared status-log behavior remain consistent with other controllers.
 - Contract clarification: controller submit/bootstrap paths must resolve job IDs from canonical variants (`job_id`, wrapped `Content.job_id`, and keyed `job_ids` maps including `run_features_export`/`run_features_export_rq`) before treating submit as failed.
-- Contract clarification: completed features-export result payloads should provide browser-friendly browse-service download links (`/runs/{runid}/{config}/download/{artifact_relpath}`) so Runs-page session flows do not require explicit bearer JWT headers for artifact download.
+- Contract clarification: completed features-export result payloads should provide dedicated rq-engine download links (`/api/runs/{runid}/{config}/export/features/job/{job_id}/download`) instead of browse-service relpath URLs.
 - Contract clarification: cache-hit reuse must validate geopackage artifact signature; legacy non-SQLite `.gpkg` cache entries are treated as invalid and regenerated through cache-miss execution.
 - Contract clarification: rq-engine enqueue selection for cache-hit worker must use validated cache eligibility (artifact format/path integrity), not cache-index presence alone, so invalid legacy entries route to standard execution.
 - Contract clarification: submit-time service payload preparation must materialize catalog/dependency-resolved source data into per-layer feature collections (geometry + joined attributes) for default exports; payload-metadata-only `.gpkg` rows are non-compliant for the Runs-page experience.
 - Deliverable: fully wired Runs-page control with Jest coverage and updated smoke/route-template invariants.
 
 WP-6: Cutover and legacy retirement
-- Remove legacy gpkg/gdb routes and completion hooks.
-- Finalize migration warnings for ignored legacy flags.
-- Deliverable: cutover complete with regression suite passing.
+- Status: complete via `docs/work-packages/20260329_features_export_legacy_exports_cutover/` (including GO-approved Phase 8 legacy module deletion).
+- Active planning package: `docs/work-packages/20260329_features_export_legacy_exports_cutover/`.
+- Replace legacy geopackage/prep-details routes and completion hooks with `features_export` profile-backed execution.
+- Add publication-aware download path and registry (`/export/features/published/{profile}/download`, `export/features/published/index.json`) with canonical published profiles `prep-wepp`, `prep-wepp-geodatabase`, and `prep-details`.
+- Remove compatibility `/export/features/{job_id}/download` route in favor of `/export/features/job/{job_id}/download`.
+- Contract clarification (2026-03-29): rq-engine legacy endpoints `/export/geopackage`, `/export/geodatabase`, and `/export/prep_details` execute through `resolve_published_profile_request` + `execute_features_export`; `geopackage` and `prep_details` publish to `export/features/published/index.json`.
+- Contract clarification (2026-03-29): geodatabase cutover path prefers published `prep-wepp-geodatabase` artifact resolution and only triggers on-demand execution when absent/stale.
+- Contract clarification (2026-03-29): post-WEPP completion hooks `_post_gpkg_export_rq` and `_post_prep_details_rq` execute profile-backed features-export flows; `_post_gpkg_export_rq` runs orchestration profile `prep-wepp-gpkg-gdb` that executes `prep-wepp` once, co-creates `.gdb`, and publishes both `prep-wepp` and `prep-wepp-geodatabase`.
+- `legacy_flags_ignored` warning code remains reserved for explicit legacy-flag migration messaging but is not required for normal profile-routed run-completion execution.
+- Require explicit human approval gate after parity and e2e validation evidence before deleting legacy modules (`wepppy/export/gpkg_export.py`, `wepppy/export/prep_details.py`).
+- Deliverable: legacy replacement shipped with parity evidence, human approval record, and legacy modules removed.
 
 WP-7: Reconciliation pass for WEPP naming, temporal controls, and consolidated layer outputs (planned 2026-03-27)
 - Status: complete via `docs/mini-work-packages/20260327_features_export_reconciliation_execplan.md`; architecture correction landed in WP-8.

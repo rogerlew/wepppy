@@ -30,10 +30,6 @@ from wepppy.io_wait import wait_for_path, wait_for_paths
 from wepppy.runtime_paths.errors import nodir_mixed_state
 from wepppy.runtime_paths.fs import resolve
 from wepppy.runtime_paths.projections import with_root_projection
-from wepppy.export.prep_details import (
-    export_channels_prep_details,
-    export_hillslopes_prep_details,
-)
 from wepppy.query_engine.activate import activate_query_engine
 from wepppy.wepp.interchange import (
     cleanup_hillslope_sources_for_completed_interchange,

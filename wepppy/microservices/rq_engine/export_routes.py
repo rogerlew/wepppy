@@ -4,6 +4,8 @@ import json
 import logging
 import os
 from pathlib import Path
+import re
+from uuid import uuid4
 
 import anyio
 import redis
@@ -23,7 +25,12 @@ from wepppy.nodb.mods.features_export.cache_key import get_cache_index_entry
 from wepppy.nodb.mods.features_export.service import (
     FeaturesExportServiceError,
     cache_entry_supports_cache_hit,
+    execute_features_export,
+    normalize_published_profile_id,
+    publish_profile_execution_artifacts,
     resolve_download_artifact_path,
+    resolve_published_artifact_path,
+    resolve_published_profile_request,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.features_export_rq import (
@@ -48,6 +55,7 @@ router = APIRouter()
 
 EXPORT_SCOPES = ["rq:export"]
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
+_DOWNLOAD_FILENAME_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -101,6 +109,50 @@ def _json_media_type(request: Request) -> str:
 
 def _validation_issue(*, code: str, message: str, path: str) -> dict[str, str]:
     return {"code": code, "message": message, "path": path}
+
+
+def _safe_download_filename_token(value: str, *, fallback: str) -> str:
+    token = _DOWNLOAD_FILENAME_TOKEN_PATTERN.sub("-", str(value).strip()).strip("-._")
+    if token:
+        return token
+    return fallback
+
+
+def _published_download_filename(runid: str, profile: str) -> str:
+    canonical_profile = normalize_published_profile_id(profile)
+    profile_token = canonical_profile if canonical_profile is not None else profile
+    format_token = "export"
+    try:
+        _resolved_profile, request_payload = resolve_published_profile_request(profile)
+        candidate_format = str(request_payload.get("format") or "").strip().lower()
+        if candidate_format:
+            format_token = candidate_format
+    except FeaturesExportServiceError:
+        format_token = "export"
+    runid_token = _safe_download_filename_token(runid, fallback="run")
+    profile_token_safe = _safe_download_filename_token(profile_token, fallback="profile")
+    format_token_safe = _safe_download_filename_token(format_token, fallback="export")
+    return f"{runid_token}.{profile_token_safe}.{format_token_safe}.zip"
+
+
+def _is_public_run_for_download(runid: str) -> bool:
+    try:
+        wd = get_wd(runid, prefer_active=False)
+    except Exception:
+        return False
+    try:
+        return bool(Ron.ispublic(wd))
+    except Exception:
+        return False
+
+
+def _authorize_download_or_public(request: Request, *, runid: str) -> None:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header and _is_public_run_for_download(runid):
+        return
+
+    claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
+    authorize_run_access(claims, runid)
 
 
 async def _parse_features_export_submit_payload(request: Request) -> tuple[dict[str, object] | None, JSONResponse | None]:
@@ -190,7 +242,43 @@ def _features_export_status_url(job_id: str) -> str:
 
 
 def _features_export_download_url(runid: str, config: str, job_id: str) -> str:
-    return f"/rq-engine/api/runs/{runid}/{config}/export/features/{job_id}/download"
+    return f"/rq-engine/api/runs/{runid}/{config}/export/features/job/{job_id}/download"
+
+
+def _execute_features_export_profile(
+    *,
+    runid: str,
+    config: str,
+    wd: str | Path,
+    profile: str,
+    format_override: str | None = None,
+    publish_profile: bool,
+) -> tuple[dict[str, object], Path]:
+    canonical_profile, payload = resolve_published_profile_request(
+        profile,
+        format_override=format_override,
+    )
+    job_id = f"route-{canonical_profile}-{uuid4().hex}"
+    result = execute_features_export(
+        wd,
+        runid=runid,
+        config=config,
+        payload=payload,
+        job_id=job_id,
+    )
+    if publish_profile:
+        publish_profile_execution_artifacts(
+            wd,
+            requested_profile=canonical_profile,
+            job_id=job_id,
+            job_result=result,
+        )
+    artifact_path, _artifact_relpath = resolve_download_artifact_path(
+        wd,
+        job_id=job_id,
+        job_result=result,
+    )
+    return result, artifact_path
 
 
 def _enqueue_features_export_job(
@@ -306,17 +394,18 @@ async def export_geopackage(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        from wepppy.export import gpkg_export
-
         wd = _resolve_export_wd(runid, request)
-        ron = Ron.getInstance(wd)
-        gpkg_path = Path(ron.export_arc_dir) / f"{runid}.gpkg"
-
-        if not gpkg_path.exists():
-            await _run_sync(gpkg_export, wd)
-
-        _require_file(gpkg_path, label="GeoPackage export")
-        return FileResponse(path=gpkg_path, filename=gpkg_path.name)
+        _result, artifact_path = await _run_sync(
+            lambda: _execute_features_export_profile(
+                runid=runid,
+                config=config,
+                wd=wd,
+                profile="prep-wepp",
+                publish_profile=True,
+            )
+        )
+        _require_file(artifact_path, label="GeoPackage export")
+        return FileResponse(path=artifact_path, filename=artifact_path.name)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception as exc:  # broad-except: boundary contract
@@ -355,17 +444,34 @@ async def export_geodatabase(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        from wepppy.export import gpkg_export
-
         wd = _resolve_export_wd(runid, request)
-        ron = Ron.getInstance(wd)
-        gdb_path = Path(ron.export_arc_dir) / f"{runid}.gdb.zip"
 
-        if not gdb_path.exists():
-            await _run_sync(gpkg_export, wd)
+        try:
+            artifact_path, _artifact_relpath = await _run_sync(
+                lambda: resolve_published_artifact_path(
+                    wd,
+                    profile="prep-wepp-geodatabase",
+                )
+            )
+        except FeaturesExportServiceError:
+            await _run_sync(
+                lambda: _execute_features_export_profile(
+                    runid=runid,
+                    config=config,
+                    wd=wd,
+                    profile="prep-wepp-gpkg-gdb",
+                    publish_profile=True,
+                )
+            )
+            artifact_path, _artifact_relpath = await _run_sync(
+                lambda: resolve_published_artifact_path(
+                    wd,
+                    profile="prep-wepp-geodatabase",
+                )
+            )
 
-        _require_file(gdb_path, label="Geodatabase export")
-        return FileResponse(path=gdb_path, filename=gdb_path.name)
+        _require_file(artifact_path, label="Geodatabase export")
+        return FileResponse(path=artifact_path, filename=artifact_path.name)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception as exc:  # broad-except: boundary contract
@@ -421,22 +527,21 @@ async def export_prep_details(runid: str, config: str, request: Request):
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        from wepppy.export import archive_project
-        from wepppy.export.prep_details import (
-            export_channels_prep_details,
-            export_hillslopes_prep_details,
-        )
-
         wd = _resolve_export_wd(runid, request)
-        await _run_sync(export_hillslopes_prep_details, wd)
-        channels_fn = await _run_sync(export_channels_prep_details, wd)
-        channels_path = _require_file(Path(channels_fn), label="Prep details export")
+        _result, artifact_path = await _run_sync(
+            lambda: _execute_features_export_profile(
+                runid=runid,
+                config=config,
+                wd=wd,
+                profile="prep-details",
+                publish_profile=True,
+            )
+        )
 
         if request.query_params.get("no_retrieve") is not None:
             return JSONResponse({"status": "ok"})
 
-        archive_path = await _run_sync(archive_project, str(channels_path.parent))
-        archive_file = _require_file(Path(archive_path), label="Prep details archive")
+        archive_file = _require_file(artifact_path, label="Prep details archive")
         return FileResponse(
             path=archive_file,
             filename=f"{runid}_prep_details.zip",
@@ -598,7 +703,7 @@ async def export_features_profile_resolve(runid: str, config: str, request: Requ
 
 
 @router.get(
-    "/runs/{runid}/{config}/export/features/{job_id}/download",
+    "/runs/{runid}/{config}/export/features/job/{job_id}/download",
     summary="Download completed features export artifact",
     description=(
         "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
@@ -618,8 +723,7 @@ async def export_features_profile_resolve(runid: str, config: str, request: Requ
 )
 async def export_features_download(runid: str, config: str, job_id: str, request: Request):
     try:
-        claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
-        authorize_run_access(claims, runid)
+        _authorize_download_or_public(request, runid=runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
@@ -683,6 +787,63 @@ async def export_features_download(runid: str, config: str, job_id: str, request
             return nodir_response
         logger.exception("rq-engine export_features_download failed")
         return error_response_with_traceback("Error downloading features export artifact")
+
+
+@router.get(
+    "/runs/{runid}/{config}/export/features/published/{profile}/download",
+    summary="Download published features export artifact",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Read-only endpoint (no queue): resolves one canonical published profile id through "
+        "`export/features/published/index.json` and returns its artifact file."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_features_download_published"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Published features export artifact file returned.",
+        extra={
+            404: "Published profile or artifact mapping not found. Returns the canonical error payload.",
+            409: "Published mapping is stale relative to current dependency/request fingerprints.",
+        },
+    ),
+)
+async def export_features_published_download(runid: str, config: str, profile: str, request: Request):
+    try:
+        _authorize_download_or_public(request, runid=runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: boundary contract
+        logger.exception("rq-engine export_features_published_download auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    try:
+        wd = _resolve_export_wd(runid, request)
+        artifact_path, _artifact_relpath = await _run_sync(
+            lambda: resolve_published_artifact_path(
+                wd,
+                profile=profile,
+            )
+        )
+        return FileResponse(
+            path=artifact_path,
+            filename=_published_download_filename(runid, profile),
+        )
+    except FeaturesExportServiceError as exc:
+        return error_response(
+            str(exc),
+            status_code=exc.status_code,
+            code=exc.code,
+            details=exc.details,
+        )
+    except FileNotFoundError as exc:
+        return error_response(str(exc), status_code=404, code="not_found")
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.exception("rq-engine export_features_published_download failed")
+        return error_response_with_traceback("Error downloading published features export artifact")
 
 
 __all__ = ["router"]

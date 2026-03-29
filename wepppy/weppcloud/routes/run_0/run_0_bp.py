@@ -49,8 +49,10 @@ from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.mods.features_export import (
     FeaturesExportProfileError,
+    FeaturesExportServiceError,
     load_builtin_profiles,
     load_layer_catalog,
+    resolve_published_profile_request,
 )
 import wepppy.nodb.mods.omni as omni_mod
 from wepppy.nodb.core.climate import Climate
@@ -1020,6 +1022,60 @@ def _resolve_features_export_utm_epsg(ron: Ron) -> int | None:
     return None
 
 
+def _features_export_unique_tokens(values: object) -> list[str]:
+    if not isinstance(values, (list, tuple, set)):
+        return []
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for value in values:
+        token = str(value or "").strip()
+        if not token or token in seen:
+            continue
+        seen.add(token)
+        ordered.append(token)
+    return ordered
+
+
+def _build_virtual_prep_wepp_gpkg_gdb_profile(
+    *,
+    roads_scope_available: bool,
+    scenarios: list[dict],
+    available_layer_ids: set[str],
+) -> dict[str, object] | None:
+    try:
+        _canonical_profile, request_payload = resolve_published_profile_request("prep-wepp-gpkg-gdb")
+    except FeaturesExportServiceError:
+        return None
+
+    if not isinstance(request_payload, dict):
+        return None
+
+    profile_request = json.loads(json.dumps(request_payload, sort_keys=True, separators=(",", ":")))
+    if not isinstance(profile_request, dict):
+        return None
+
+    requested_scopes = set(_features_export_unique_tokens(profile_request.get("output_scopes")))
+    if not requested_scopes:
+        requested_scopes.add("baseline")
+    if roads_scope_available:
+        requested_scopes.add("roads")
+    profile_request["output_scopes"] = [scope for scope in ("baseline", "roads") if scope in requested_scopes]
+
+    scenario_ids = _features_export_unique_tokens(
+        [entry.get("id") for entry in scenarios if isinstance(entry, dict)]
+    )
+    omni_scenarios_layer_id = "omni.scenarios.hillslopes"
+    if scenario_ids and omni_scenarios_layer_id in available_layer_ids:
+        layer_ids = _features_export_unique_tokens(profile_request.get("layers"))
+        if omni_scenarios_layer_id not in layer_ids:
+            layer_ids.append(omni_scenarios_layer_id)
+        profile_request["layers"] = layer_ids
+        profile_request["scenarios"] = scenario_ids
+        profile_request.pop("contrast_ids", None)
+
+    return profile_request
+
+
 def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_epsg: int | None) -> dict:
     scenarios, contrasts = _discover_features_export_omni_selectors(wd)
     swat_catalog = _discover_features_export_swat_catalog(wd)
@@ -1046,6 +1102,22 @@ def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_eps
             {
                 "key": key,
                 "label": str(profile.get("label") or key),
+            }
+        )
+
+    available_layer_ids = set(_features_export_unique_tokens(discovery_payload.get("available_layer_ids")))
+    virtual_profile_key = "prep_wepp_gpkg_gdb"
+    virtual_profile_request = _build_virtual_prep_wepp_gpkg_gdb_profile(
+        roads_scope_available=bool(discovery_payload.get("roads_scope_available", True)),
+        scenarios=scenarios,
+        available_layer_ids=available_layer_ids,
+    )
+    if isinstance(virtual_profile_request, dict):
+        profile_requests[virtual_profile_key] = virtual_profile_request
+        profile_buttons.append(
+            {
+                "key": virtual_profile_key,
+                "label": "Post Wepp (GPKG + GDB)",
             }
         )
 

@@ -59,7 +59,7 @@ def features_export_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Pa
         )
         return {
             "artifact_id": "artifact-1",
-            "download_url": "/rq-engine/api/runs/run-1/cfg/export/features/job-77/download",
+            "download_url": "/rq-engine/api/runs/run-1/cfg/export/features/job/job-77/download",
             "cache_hit": force_cache_hit,
             "source_job_id": "job-1" if force_cache_hit else None,
             "manifest_relpath": "export/features/jobs/job-77/manifest.json",
@@ -124,4 +124,3 @@ def test_run_features_export_rq_rejects_non_object_payload(
 ) -> None:
     with pytest.raises(ValueError, match="JSON object"):
         features_export_rq.run_features_export_rq("run-1", "cfg", ["not", "an", "object"])  # type: ignore[arg-type]
-

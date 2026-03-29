@@ -2019,7 +2019,7 @@ def test_execute_features_export_cache_miss_result_shape(
     assert isinstance(result["artifact_id"], str) and result["artifact_id"]
     assert (
         result["download_url"]
-        == f"/weppcloud/runs/run-1/cfg/download/export/features/artifacts/{result['artifact_id']}/features_export.geopackage.zip"
+        == "/rq-engine/api/runs/run-1/cfg/export/features/job/job-source/download"
     )
     assert result["manifest_relpath"] == "export/features/jobs/job-source/manifest.json"
     assert isinstance(result["warnings"], list)
@@ -2031,8 +2031,6 @@ def test_execute_features_export_cache_miss_result_shape(
     with zipfile.ZipFile(artifact_zip_path, "r") as zip_handle:
         names = set(zip_handle.namelist())
         assert "manifest.json" in names
-        assert "profile.yml" in names
-        assert "README.md" in names
         assert "features_export.gpkg" in names
 
     cache_entry = service.get_cache_index_entry(tmp_path, submission.cache_key_parts.cache_key)
@@ -2067,8 +2065,6 @@ def test_execute_features_export_cache_miss_retains_final_zip_for_zip_writer(
         names = set(zip_handle.namelist())
         assert "hillslopes.parquet" in names
         assert "manifest.json" in names
-        assert "profile.yml" in names
-        assert "README.md" in names
 
 def test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id(
     tmp_path: Path,
@@ -2107,7 +2103,7 @@ def test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id(
     assert hit_result["artifact_id"] == miss_result["artifact_id"]
     assert (
         hit_result["download_url"]
-        == f"/weppcloud/runs/run-1/cfg/download/{miss_result['artifact_relpath']}"
+        == "/rq-engine/api/runs/run-1/cfg/export/features/job/job-cache/download"
     )
     assert hit_result["manifest_relpath"] == "export/features/jobs/job-cache/manifest.json"
 
@@ -2516,3 +2512,196 @@ def test_execute_features_export_writes_spatial_geopackage_layers(
 
     assert row_count == 2
     assert geom_count == 2
+
+
+def test_publish_profile_artifact_and_resolve_published_artifact_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    artifact_path = tmp_path / "export" / "features" / "artifacts" / "artifact-1" / "features_export.geopackage.zip"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    artifact_path.write_bytes(b"zip-bytes")
+    artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
+
+    submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+
+    service.upsert_cache_index_entry(
+        tmp_path,
+        submission.cache_key_parts.cache_key,
+        {
+            "artifact_id": "artifact-1",
+            "artifact_relpath": artifact_relpath,
+            "artifact_path": str(artifact_path),
+            "artifact_paths": [artifact_relpath],
+            "artifact_format": "geopackage",
+            "layer_outputs": [],
+            "packaged_member_relpaths": [],
+            "source_job_id": "job-1",
+            "manifest_relpath": "export/features/artifacts/artifact-1/manifest.json",
+            "warnings": [],
+        },
+    )
+
+    entry = service.publish_profile_artifact(
+        tmp_path,
+        profile="prep-wepp",
+        job_id="job-1",
+        job_result={
+            "artifact_id": "artifact-1",
+            "artifact_relpath": artifact_relpath,
+            "manifest_relpath": "export/features/jobs/job-1/manifest.json",
+        },
+    )
+
+    assert entry["profile"] == "prep-wepp"
+    assert entry["artifact_relpath"] == artifact_relpath
+    registry = service.load_publication_registry(tmp_path)
+    profiles = registry.get("profiles", {})
+    assert isinstance(profiles, dict)
+    assert "prep-wepp" in profiles
+
+    resolved_path, resolved_relpath = service.resolve_published_artifact_path(
+        tmp_path,
+        profile="prep-wepp",
+    )
+    assert resolved_path == artifact_path
+    assert resolved_relpath == artifact_relpath
+
+
+def test_resolve_published_artifact_path_rejects_stale_registry(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    artifact_path = tmp_path / "export" / "features" / "artifacts" / "artifact-1" / "features_export.geopackage.zip"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    artifact_path.write_bytes(b"zip-bytes")
+    artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
+
+    submission_fresh = _build_submission(cache_key="request-hash+dependency-fingerprint")
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission_fresh)
+    service.upsert_cache_index_entry(
+        tmp_path,
+        submission_fresh.cache_key_parts.cache_key,
+        {
+            "artifact_id": "artifact-1",
+            "artifact_relpath": artifact_relpath,
+            "artifact_path": str(artifact_path),
+            "artifact_paths": [artifact_relpath],
+            "artifact_format": "geopackage",
+            "layer_outputs": [],
+            "packaged_member_relpaths": [],
+            "source_job_id": "job-1",
+            "manifest_relpath": "export/features/artifacts/artifact-1/manifest.json",
+            "warnings": [],
+        },
+    )
+    service.publish_profile_artifact(
+        tmp_path,
+        profile="prep-wepp",
+        job_id="job-1",
+        job_result={
+            "artifact_id": "artifact-1",
+            "artifact_relpath": artifact_relpath,
+            "manifest_relpath": "export/features/jobs/job-1/manifest.json",
+        },
+    )
+
+    stale_submission = _build_submission(cache_key="request-hash+dependency-fingerprint-stale")
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: stale_submission)
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc:
+        service.resolve_published_artifact_path(tmp_path, profile="prep-wepp")
+
+    assert exc.value.status_code == 409
+    assert exc.value.code == "stale_publication"
+
+
+def test_resolve_published_profile_request_supports_cutover_profiles() -> None:
+    prep_wepp_profile, prep_wepp_request = service.resolve_published_profile_request("prep-wepp")
+    assert prep_wepp_profile == "prep-wepp"
+    assert prep_wepp_request["format"] == "geopackage"
+
+    prep_details_profile, prep_details_request = service.resolve_published_profile_request(
+        "prep-details"
+    )
+    assert prep_details_profile == "prep-details"
+    assert prep_details_request["format"] == "csv"
+
+    dual_profile, dual_request = service.resolve_published_profile_request("prep-wepp-gpkg-gdb")
+    assert dual_profile == "prep-wepp-gpkg-gdb"
+    assert dual_request["format"] == "geopackage"
+
+    geodatabase_profile, geodatabase_request = service.resolve_published_profile_request(
+        "prep-wepp-geodatabase"
+    )
+    assert geodatabase_profile == "prep-wepp-geodatabase"
+    assert geodatabase_request["format"] == "geodatabase"
+
+
+def test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    artifact_dir = tmp_path / "export" / "features" / "artifacts" / "artifact-1"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    source_zip_path = artifact_dir / "features_export.geopackage.zip"
+    source_zip_path.write_bytes(b"source-geopackage-zip")
+    source_gpkg_path = artifact_dir / "features_export.gpkg"
+    source_gpkg_path.write_bytes(b"source-gpkg")
+
+    def _fake_prepare_export_submission(_wd: Path, payload: dict[str, object]):
+        format_token = str(payload.get("format") or "").strip().lower()
+        if format_token == "geodatabase":
+            return _build_submission(
+                cache_key="request-hash+dependency-fingerprint-geodatabase",
+                format_token="geodatabase",
+            )
+        return _build_submission(
+            cache_key="request-hash+dependency-fingerprint-geopackage",
+            format_token="geopackage",
+        )
+
+    monkeypatch.setattr(service, "prepare_export_submission", _fake_prepare_export_submission)
+    monkeypatch.setattr(service.f_esri, "has_f_esri", True)
+
+    def _fake_convert_gpkg_to_gdb(gpkg_path: str, gdb_path: str, zip_output: bool = True) -> None:
+        assert Path(gpkg_path) == source_gpkg_path
+        assert zip_output is True
+        gdb_dir = Path(gdb_path)
+        gdb_dir.mkdir(parents=True, exist_ok=True)
+        gdb_dir.with_suffix(".gdb.zip").write_bytes(b"co-created-gdb-zip")
+
+    monkeypatch.setattr(service.f_esri, "c2c_gpkg_to_gdb", _fake_convert_gpkg_to_gdb)
+
+    source_artifact_relpath = source_zip_path.relative_to(tmp_path).as_posix()
+    published_entries = service.publish_profile_execution_artifacts(
+        tmp_path,
+        requested_profile="prep-wepp-gpkg-gdb",
+        job_id="job-1",
+        job_result={
+            "artifact_id": "artifact-1",
+            "artifact_relpath": source_artifact_relpath,
+            "manifest_relpath": "export/features/jobs/job-1/manifest.json",
+        },
+    )
+
+    assert set(published_entries.keys()) == {"prep-wepp", "prep-wepp-geodatabase"}
+    gdb_entry = published_entries["prep-wepp-geodatabase"]
+    gdb_relpath = str(gdb_entry["artifact_relpath"])
+    assert gdb_relpath.endswith("features_export.gdb.zip")
+    assert (tmp_path / gdb_relpath).is_file()
+
+    gdb_cache_entry = service.get_cache_index_entry(
+        tmp_path,
+        "request-hash+dependency-fingerprint-geodatabase",
+    )
+    assert isinstance(gdb_cache_entry, dict)
+    assert gdb_cache_entry["artifact_relpath"] == gdb_relpath
+
+    resolved_path, resolved_relpath = service.resolve_published_artifact_path(
+        tmp_path,
+        profile="prep-wepp-geodatabase",
+    )
+    assert resolved_relpath == gdb_relpath
+    assert resolved_path == tmp_path / gdb_relpath

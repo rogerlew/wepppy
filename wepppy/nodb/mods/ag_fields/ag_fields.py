@@ -28,7 +28,6 @@ import pandas as pd
 from wepp_runner.wepp_runner import run_hillslope
 
 from wepppy.all_your_base.all_your_base import isint
-from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 from wepppy.nodb.base import NoDbBase, nodb_setter
 from wepppy.nodb.core import Climate, Landuse, Watershed
 from wepppy.topo.peridot.peridot_runner import (
