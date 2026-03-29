@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import sqlite3
 from types import SimpleNamespace
@@ -33,6 +34,7 @@ from wepppy.nodb.mods.features_export.join_planner import (
     MaterializationContractError,
     resolve_geometry_key,
 )
+from wepppy.nodb.mods.features_export.readme_builder import build_export_readme
 from wepppy.nodb.mods.features_export.output_column_naming import (
     apply_unitized_column_suffixes,
 )
@@ -2031,7 +2033,27 @@ def test_execute_features_export_cache_miss_result_shape(
     with zipfile.ZipFile(artifact_zip_path, "r") as zip_handle:
         names = set(zip_handle.namelist())
         assert "manifest.json" in names
+        assert "README.md" in names
         assert "features_export.gpkg" in names
+        assert "profile.yml" not in names
+        assert not any(name.endswith(".yml") for name in names)
+
+        manifest = json.loads(zip_handle.read("manifest.json").decode("utf-8"))
+        readme_text = zip_handle.read("README.md").decode("utf-8")
+
+    assert manifest["artifact"]["packaged_member_relpaths"] == [
+        "README.md",
+        "features_export.gpkg",
+        "manifest.json",
+    ]
+    assert manifest["artifact_id"] == result["artifact_id"]
+    assert manifest["artifact"]["artifact_relpath"] == "features_export.geopackage.zip"
+    assert "| Run ID | run-1 |" in readme_text
+    assert "| Config | cfg |" in readme_text
+    assert f"| Artifact ID | {result['artifact_id']} |" in readme_text
+    assert "shared__watershed.subcatchments" in readme_text
+    assert "features_export.gpkg" in readme_text
+    assert "`manifest.json` is the canonical machine-readable provenance" in readme_text
 
     cache_entry = service.get_cache_index_entry(tmp_path, submission.cache_key_parts.cache_key)
     assert cache_entry is not None
@@ -2064,7 +2086,19 @@ def test_execute_features_export_cache_miss_retains_final_zip_for_zip_writer(
     with zipfile.ZipFile(artifact_zip_path, "r") as zip_handle:
         names = set(zip_handle.namelist())
         assert "hillslopes.parquet" in names
+        assert "README.md" in names
         assert "manifest.json" in names
+        assert "profile.yml" not in names
+        assert not any(name.endswith(".yml") for name in names)
+        manifest = json.loads(zip_handle.read("manifest.json").decode("utf-8"))
+        readme_text = zip_handle.read("README.md").decode("utf-8")
+
+    assert manifest["artifact"]["packaged_member_relpaths"] == [
+        "README.md",
+        "hillslopes.parquet",
+        "manifest.json",
+    ]
+    assert "hillslopes.parquet" in readme_text
 
 def test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id(
     tmp_path: Path,
@@ -2111,6 +2145,81 @@ def test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id(
     assert manifest is not None
     assert manifest["cache_hit"] is True
     assert manifest["source_job_id"] == "job-source"
+    assert "README.md" in manifest["artifact"]["packaged_member_relpaths"]
+    assert "manifest.json" in manifest["artifact"]["packaged_member_relpaths"]
+
+
+def test_build_export_readme_is_deterministic_and_redacts_absolute_paths() -> None:
+    manifest = {
+        "artifact_id": "artifact-123",
+        "cache_hit": False,
+        "generated_at_utc": "2026-03-29T23:10:00Z",
+        "source_job_id": None,
+        "artifact": {
+            "format": "geopackage",
+            "artifact_relpath": "features_export.geopackage.zip",
+            "packaged_member_relpaths": ["features_export.gpkg", "manifest.json", "README.md"],
+        },
+        "request": {
+            "resolved": {
+                "format": "geopackage",
+                "units": "si",
+                "crs": "wgs",
+                "layers": ["watershed.subcatchments"],
+                "output_scopes": ["baseline"],
+            },
+        },
+        "crs": {
+            "requested_crs": "wgs",
+            "resolved_crs": "wgs",
+            "resolved_epsg": 4326,
+        },
+        "layers": [
+            {
+                "layer_id": "watershed.subcatchments",
+                "output_layer_id": "shared__watershed.subcatchments",
+                "scope": "shared",
+                "context": "base",
+                "row_count": 1,
+                "feature_count": 1,
+                "artifact_relpath": "features_export.gpkg",
+            }
+        ],
+        "columns": {
+            "output_layer_metadata": {
+                "shared__watershed.subcatchments": {
+                    "source_layer_ids": ["watershed.subcatchments"],
+                    "selected_columns": ["TopazID"],
+                    "unit_mapping": {"TopazID": "non-unitized"},
+                }
+            }
+        },
+        "dependency_snapshot": {
+            "catalog_signature": "catalog-signature",
+            "fingerprint": "dependency-fingerprint",
+            "entries": [
+                {
+                    "dependency_role": "source",
+                    "dependency_id": "sbs",
+                    "layer_id": "watershed.subcatchments",
+                    "output_layer_id": "shared__watershed.subcatchments",
+                    "relpath": "/wc1/runs/run-1/private/path.parquet",
+                    "exists": True,
+                    "size": 101,
+                }
+            ],
+        },
+        "warnings": [],
+    }
+
+    rendered_a = build_export_readme(manifest=manifest, runid="run-1", config="cfg")
+    rendered_b = build_export_readme(manifest=manifest, runid="run-1", config="cfg")
+
+    assert rendered_a == rendered_b
+    assert "## Layer inventory" in rendered_a
+    assert "## Dependency lineage summary" in rendered_a
+    assert "[redacted-absolute-path]" in rendered_a
+    assert "/wc1/runs/run-1/private/path.parquet" not in rendered_a
 
 
 def test_prepare_export_submission_passes_nodb_ref_resolver(

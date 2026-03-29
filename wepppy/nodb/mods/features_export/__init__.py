@@ -78,7 +78,9 @@ from .profiles import (
     parse_profile_text,
     profile_bundle_member_sources,
 )
+from .readme_builder import build_export_readme
 from .service import (
+    FEATURES_EXPORT_ARTIFACT_README_NAME,
     FEATURES_EXPORT_ARTIFACTS_RELPATH,
     FEATURES_EXPORT_JOBS_RELPATH,
     FEATURES_EXPORT_MANIFEST_NAME,
@@ -125,6 +127,7 @@ __all__ = [
     "FeaturesExportServiceError",
     "FeaturesExportSubmission",
     "FeaturesExportValidationError",
+    "FEATURES_EXPORT_ARTIFACT_README_NAME",
     "FEATURES_EXPORT_ARTIFACTS_RELPATH",
     "FEATURES_EXPORT_JOBS_RELPATH",
     "FEATURES_EXPORT_MANIFEST_NAME",
@@ -154,6 +157,7 @@ __all__ = [
     "build_cache_key",
     "build_catalog_signature",
     "build_dependency_snapshot",
+    "build_export_readme",
     "build_request_hash",
     "cache_index_path",
     "default_catalog_path",

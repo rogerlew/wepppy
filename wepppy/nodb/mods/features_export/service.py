@@ -69,6 +69,7 @@ from .manifest_builder import build_output_layer_column_metadata
 from .output_column_naming import apply_unitized_column_suffixes
 from .planner import resolve_export_plan
 from .profiles import load_builtin_profiles, normalize_profile_key
+from .readme_builder import build_export_readme
 from .tabular_temporal_layout import reshape_temporal_wide_to_long
 
 FEATURES_EXPORT_ROOT_RELPATH = "export/features"
@@ -77,6 +78,7 @@ FEATURES_EXPORT_JOBS_RELPATH = "export/features/jobs"
 FEATURES_EXPORT_PUBLISHED_RELPATH = "export/features/published"
 FEATURES_EXPORT_PUBLISHED_INDEX_RELPATH = f"{FEATURES_EXPORT_PUBLISHED_RELPATH}/index.json"
 FEATURES_EXPORT_MANIFEST_NAME = "manifest.json"
+FEATURES_EXPORT_ARTIFACT_README_NAME = "README.md"
 FEATURES_EXPORT_PUBLICATION_SCHEMA_VERSION = 1
 _GPKG_APPLICATION_ID = 0x47504B47
 _CONSOLIDATED_JOIN_KEY_COLUMN = JOIN_KEY_COLUMN
@@ -936,7 +938,13 @@ def _run_cache_miss_export(
     artifact_relpath = _to_relpath(wd, bundle_path)
 
     planned_packaged_member_relpaths = tuple(
-        sorted((*bundle_member_sources.keys(), FEATURES_EXPORT_MANIFEST_NAME))
+        sorted(
+            (
+                *bundle_member_sources.keys(),
+                FEATURES_EXPORT_MANIFEST_NAME,
+                FEATURES_EXPORT_ARTIFACT_README_NAME,
+            )
+        )
     )
     bundle_artifact = ExportArtifactMetadata(
         format=writer_artifact.format,
@@ -964,7 +972,19 @@ def _run_cache_miss_export(
     artifact_manifest_relpath = f"{artifact_dir_relpath}/{FEATURES_EXPORT_MANIFEST_NAME}"
     artifact_manifest_path = _resolve_relpath(wd, artifact_manifest_relpath)
     write_export_manifest(artifact_manifest_path, manifest)
+
+    readme_path = artifact_dir / FEATURES_EXPORT_ARTIFACT_README_NAME
+    readme_path.write_text(
+        build_export_readme(
+            manifest=manifest,
+            runid=runid,
+            config=config,
+        ),
+        encoding="utf-8",
+    )
+
     bundle_member_sources[FEATURES_EXPORT_MANIFEST_NAME] = artifact_manifest_path
+    bundle_member_sources[FEATURES_EXPORT_ARTIFACT_README_NAME] = readme_path
 
     packaged_member_relpaths = package_files_as_zip(bundle_path, bundle_member_sources)
 
@@ -3216,6 +3236,7 @@ def _utcnow_iso() -> str:
 
 
 __all__ = [
+    "FEATURES_EXPORT_ARTIFACT_README_NAME",
     "FEATURES_EXPORT_ARTIFACTS_RELPATH",
     "FEATURES_EXPORT_JOBS_RELPATH",
     "FEATURES_EXPORT_MANIFEST_NAME",

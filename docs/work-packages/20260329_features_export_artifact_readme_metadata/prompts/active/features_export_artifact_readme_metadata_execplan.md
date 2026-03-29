@@ -13,10 +13,10 @@ After this change, every features-export zip artifact will include a determinist
 - [x] (2026-03-29 20:15Z) Reviewed current `features_export` spec/service/manifest contracts and identified available README inputs.
 - [x] (2026-03-29 20:33Z) Updated `wepppy/nodb/mods/features_export/specification.md` with standards baseline, metadata availability assessment, and dynamic README packaging contract.
 - [x] (2026-03-29 20:45Z) Authored work-package scaffold (`package.md`, `tracker.md`, active ExecPlan).
-- [ ] Implement README builder helper module and deterministic rendering contract.
-- [ ] Integrate README generation into cache-miss artifact publication path.
-- [ ] Add regression tests for zip member contract and README/manifest consistency.
-- [ ] Run validation commands and update tracker/results.
+- [x] (2026-03-29 20:00Z) Implemented `wepppy/nodb/mods/features_export/readme_builder.py` with deterministic section ordering, table rendering, and absolute-path redaction for relpath fields.
+- [x] (2026-03-29 20:01Z) Integrated cache-miss publication flow in `service.py` to generate/write `README.md` and include it in `bundle_member_sources` and planned packaged member relpaths.
+- [x] (2026-03-29 20:03Z) Extended `tests/nodb/mods/test_features_export_service.py` coverage for zip membership (`README.md` + `manifest.json` + payload), README/manifest consistency assertions, cache-hit packaged member propagation, and deterministic README redaction behavior.
+- [x] (2026-03-29 20:06Z) Ran required backend/doc validation commands and captured exact pass results in tracker/closeout notes.
 
 ## Surprises & Discoveries
 
@@ -25,6 +25,9 @@ After this change, every features-export zip artifact will include a determinist
 
 - Observation: Packaging policy in recent package history changed multiple times (include profile/provenance files, then remove profile/provenance files), so the README contract must be explicit to avoid another oscillation.
   Evidence: `docs/work-packages/20260328_features_export_profiles_provenance_zip/package.md` vs current `wepppy/nodb/mods/features_export/specification.md` contract text prior to this update.
+
+- Observation: Cache-hit manifest packaging metadata can remain aligned without new cache-hit README generation because `_artifact_metadata_from_cache_entry(...)` already rehydrates `packaged_member_relpaths` directly from cache index entries.
+  Evidence: `test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id` now asserts `README.md` is present in cache-hit `manifest["artifact"]["packaged_member_relpaths"]` after a cache-miss seed run.
 
 ## Decision Log
 
@@ -36,9 +39,20 @@ After this change, every features-export zip artifact will include a determinist
   Rationale: Profile replay already has route-level contracts; bundling profiles creates duplicate truth sources.
   Date/Author: 2026-03-29 / Codex.
 
+- Decision: Keep README provenance pointer implicit via `artifact.packaged_member_relpaths` and bundle root member name (`README.md`) rather than adding a new manifest field such as `readme_relpath`.
+  Rationale: Existing artifact member contract already communicates member presence deterministically; adding another field would duplicate pointer data without improving consumer behavior.
+  Date/Author: 2026-03-29 / Codex.
+
 ## Outcomes & Retrospective
 
-The planning phase is complete: requirements are now explicit in `specification.md`, a standards baseline is documented, and this package defines an implementation sequence with validation gates. Implementation outcomes will be added after code changes and test runs.
+Implementation completed end-to-end for the package scope. Features-export cache-miss publication now generates a deterministic artifact `README.md`, includes it in zip bundles with payload members and `manifest.json`, and preserves profile-file exclusion. Cache-hit flows remain artifact-reuse based and continue to emit job-scoped manifests while carrying `README.md` membership through cached `packaged_member_relpaths`.
+
+Validation outcomes:
+- `wctl run-pytest tests/nodb/mods/test_features_export_service.py -k "readme or manifest or cache_hit" --maxfail=1` -> `2 passed, 57 deselected`.
+- `wctl run-pytest tests/nodb/mods/test_features_export_manifest.py tests/nodb/mods/test_features_export_exporters.py --maxfail=1` -> `21 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1` -> `21 passed`.
+- `wctl run-pytest tests/nodb/mods/test_features_export_service.py --maxfail=1` -> `59 passed` (extra confidence run beyond required checklist).
+- `wctl doc-lint --path ...` for specification/package/tracker/execplan -> all passed with `0 errors, 0 warnings`.
 
 ## Context and Orientation
 
@@ -126,3 +140,4 @@ Proposed module/interface additions:
 - Keep dependencies internal to stdlib + existing module contracts; do not add external packages.
 
 Revision Note (2026-03-29, Codex): Initial ExecPlan authored to implement standards-aligned dynamic artifact README generation and zip-plumbing for features_export.
+Revision Note (2026-03-29, Codex): Updated plan as a living document after implementation, including completed progress checkboxes, validation evidence, final decisions, and outcomes for package closure.

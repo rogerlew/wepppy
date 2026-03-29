@@ -655,6 +655,35 @@ def test_download_features_export_published_returns_file_with_canonical_filename
     assert "test-run.prep-details.csv.zip" in response.headers.get("Content-Disposition", "")
 
 
+def test_download_features_export_published_stale_returns_service_error(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    def _resolve(wd: str, profile: str):
+        assert wd == run_dir
+        assert profile == "prep-wepp"
+        raise wepp_module.FeaturesExportServiceError(
+            "Published features export artifact is stale.",
+            status_code=409,
+            code="stale_publication",
+            details="profile=prep-wepp: stale",
+        )
+
+    monkeypatch.setattr(wepp_module, "resolve_published_artifact_path", _resolve)
+
+    response = client.get(
+        f"/runs/{RUN_ID}/{CONFIG}/download/features/published/prep-wepp"
+    )
+
+    assert response.status_code == 409
+    payload = response.get_json()
+    assert payload["error"]["code"] == "stale_publication"
+    assert payload["error"]["details"] == "profile=prep-wepp: stale"
+
+
 @pytest.mark.parametrize(
     "path",
     [

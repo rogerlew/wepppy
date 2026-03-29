@@ -1,6 +1,6 @@
 # Features Export Artifact README Metadata Packaging
 
-**Status**: Open (2026-03-29)
+**Status**: Closed (2026-03-29)
 
 ## Overview
 This package adds deterministic, dynamically generated artifact `README.md` files to all `features_export` zip products. The README will be derived from resolved export metadata (manifest/request/layer/dependency context), aligned to geospatial metadata standards guidance, and packaged alongside `manifest.json` and payload members.
@@ -34,12 +34,12 @@ This package adds deterministic, dynamically generated artifact `README.md` file
 - **Informed**: users relying on downloadable artifact provenance and reproducibility.
 
 ## Success Criteria
-- [ ] Every features-export zip artifact contains payload members, `manifest.json`, and generated `README.md`.
-- [ ] README generation is deterministic for identical resolved inputs and contains standards-aligned metadata sections.
-- [ ] README content matches manifest values (no contract drift).
-- [ ] Cache-hit jobs reuse existing artifact README without regenerating divergent bundle content.
-- [ ] Targeted backend regression suites pass.
-- [ ] Package tracker, ExecPlan, and closeout artifacts are complete.
+- [x] Every features-export zip artifact contains payload members, `manifest.json`, and generated `README.md`.
+- [x] README generation is deterministic for identical resolved inputs and contains standards-aligned metadata sections.
+- [x] README content matches manifest values (no contract drift).
+- [x] Cache-hit jobs reuse existing artifact README without regenerating divergent bundle content.
+- [x] Targeted backend regression suites pass.
+- [x] Package tracker, ExecPlan, and closeout artifacts are complete.
 
 ## Dependencies
 
