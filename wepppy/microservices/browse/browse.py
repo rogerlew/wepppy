@@ -1193,7 +1193,7 @@ async def _handle_schema_request(
         )
 
     path_lower = subpath_value.lower()
-    if not path_lower.endswith((".parquet", ".pq")):
+    if not path_lower.endswith((".parquet", ".geoparquet", ".pq")):
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Schema preview is only available for parquet files.",

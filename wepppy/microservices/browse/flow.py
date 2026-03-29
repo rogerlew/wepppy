@@ -703,7 +703,7 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
         df = await asyncio.to_thread(env.pd.read_pickle, path)
         html_table = await env._async_df_to_html(df)
 
-    if path_lower.endswith(('.parquet', '.pq')):
+    if path_lower.endswith(('.parquet', '.geoparquet', '.pq')):
         raw_payload = request.args.get('pqf')
         if env.BROWSE_PARQUET_FILTERS_ENABLED and raw_payload:
             try:
@@ -811,7 +811,7 @@ def _tabular_response(
     query_params: dict[str, str] = {}
     if filter_feedback and filter_feedback.get('active') and filter_feedback.get('pqf'):
         query_params['pqf'] = filter_feedback['pqf']
-    if path_lower.endswith(('.parquet', '.pq')):
+    if path_lower.endswith(('.parquet', '.geoparquet', '.pq')):
         if query_params:
             dtale_url = _append_query_params(dtale_url, query_params)
             download_url = _append_query_params(download_url, query_params)

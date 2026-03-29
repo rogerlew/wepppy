@@ -379,7 +379,7 @@ async def download_response_file(path: str, query_params) -> Response:
     parquet_filter_active = (
         BROWSE_PARQUET_FILTERS_ENABLED
         and bool(raw_pqf)
-        and ext in {'.parquet', '.pq'}
+        and ext in {'.parquet', '.geoparquet', '.pq'}
     )
 
     compiled_filter = None
@@ -389,7 +389,7 @@ async def download_response_file(path: str, query_params) -> Response:
         except ParquetFilterError as err:
             _raise_parquet_filter_error(err)
 
-    if as_csv and ext in {'.parquet', '.pq'}:
+    if as_csv and ext in {'.parquet', '.geoparquet', '.pq'}:
         if compiled_filter is not None:
             try:
                 filtered_table = await asyncio.to_thread(

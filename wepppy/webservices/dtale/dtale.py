@@ -511,6 +511,7 @@ def _read_pickle(path: Path) -> pd.DataFrame:
 
 READERS: dict[str, Callable[[Path], pd.DataFrame]] = {
     ".parquet": _read_parquet,
+    ".geoparquet": _read_parquet,
     ".pq": _read_parquet,
     ".feather": _read_feather,
     ".arrow": _read_feather,
@@ -799,7 +800,7 @@ def load_into_dtale():
     parquet_filter_active = (
         BROWSE_PARQUET_FILTERS_ENABLED
         and bool(raw_pqf)
-        and target.suffix.lower() in {".parquet", ".pq"}
+        and target.suffix.lower() in {".parquet", ".geoparquet", ".pq"}
     )
     filter_cache_scope = raw_pqf if parquet_filter_active else ""
     dataset_scope = f"{rel_path}::pqf::{filter_cache_scope}" if filter_cache_scope else rel_path

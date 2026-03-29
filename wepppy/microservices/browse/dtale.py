@@ -38,6 +38,7 @@ _DTALE_SERVICE_URL = os.getenv('DTALE_SERVICE_URL', 'http://dtale:9010').rstrip(
 _DTALE_INTERNAL_TOKEN = (get_secret('DTALE_INTERNAL_TOKEN') or '').strip()
 DTALE_SUPPORTED_SUFFIXES = (
     '.parquet',
+    '.geoparquet',
     '.pq',
     '.feather',
     '.arrow',
@@ -247,7 +248,7 @@ def build_handlers(
             'path': dtale_rel_path,
         }
         raw_pqf = (request.query_params.get('pqf') or '').strip()
-        if BROWSE_PARQUET_FILTERS_ENABLED and raw_pqf and rel_lower.endswith(('.parquet', '.pq')):
+        if BROWSE_PARQUET_FILTERS_ENABLED and raw_pqf and rel_lower.endswith(('.parquet', '.geoparquet', '.pq')):
             payload['pqf'] = raw_pqf
         headers = {}
         if _DTALE_INTERNAL_TOKEN:

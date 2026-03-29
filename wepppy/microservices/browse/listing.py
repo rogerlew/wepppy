@@ -881,7 +881,7 @@ async def html_dir_list(
                 dl_url = _join(request_path, _file).replace("/browse/", "/download/")
                 dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
             file_lower = _file.lower()
-            is_parquet_file = file_lower.endswith((".parquet", ".pq"))
+            is_parquet_file = file_lower.endswith((".parquet", ".geoparquet", ".pq"))
             parquet_link_attrs = ''
             if is_parquet_file:
                 file_link = _append_query_params(file_link, parquet_filter_query)
@@ -908,6 +908,7 @@ async def html_dir_list(
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
             if (
                 file_lower.endswith(".parquet")
+                or file_lower.endswith(".geoparquet")
                 or file_lower.endswith(".pq")
                 or file_lower.endswith(".feather")
                 or file_lower.endswith(".arrow")
@@ -934,7 +935,7 @@ async def html_dir_list(
                 )
 
             diff_link = "    "
-            if diff_wd and not file_lower.endswith((".tif", ".parquet", ".gz", ".img")):
+            if diff_wd and not file_lower.endswith((".tif", ".parquet", ".geoparquet", ".gz", ".img")):
                 diff_path = _join(diff_wd, os.path.relpath(path, wd))
                 if _exists(diff_path):
                     diff_url = _join(request_path, _file).replace("/browse/", "/diff/")

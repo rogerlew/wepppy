@@ -57,11 +57,12 @@ def load_dtale_service(monkeypatch):
     return _loader
 
 
-def test_dtale_open_redirect(tmp_path: Path, monkeypatch, load_browse):
+@pytest.mark.parametrize("extension", [".parquet", ".geoparquet"])
+def test_dtale_open_redirect(tmp_path: Path, monkeypatch, load_browse, extension: str):
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
     data_dir = tmp_path / "wepp" / "output"
     data_dir.mkdir(parents=True)
-    data_path = data_dir / "output.parquet"
+    data_path = data_dir / f"output{extension}"
     df.to_parquet(data_path)
 
     browse = load_browse(
@@ -112,7 +113,7 @@ def test_dtale_open_redirect(tmp_path: Path, monkeypatch, load_browse):
     app = browse.create_app()
 
     with TestClient(app) as client:
-        response = client.get("/weppcloud/runs/run-1/default/dtale/wepp/output/output.parquet")
+        response = client.get(f"/weppcloud/runs/run-1/default/dtale/wepp/output/output{extension}")
 
     if response.status_code == 404:
         pytest.skip(f"D-Tale loader unavailable (status=404, path={touched.get('path')})")
@@ -123,10 +124,10 @@ def test_dtale_open_redirect(tmp_path: Path, monkeypatch, load_browse):
     assert captured["json"] == {
         "runid": "run-1",
         "config": "default",
-        "path": "wepp/output/output.parquet",
+        "path": f"wepp/output/output{extension}",
     }
     assert captured["headers"]["X-DTALE-TOKEN"] == "secret-token"
-    assert touched["path"].endswith("wepp/output/output.parquet")
+    assert touched["path"].endswith(f"wepp/output/output{extension}")
 
 
 def test_dtale_open_rejects_unsupported_extension(tmp_path: Path, monkeypatch, load_browse):

@@ -367,13 +367,15 @@ def test_directory_includes_parquet_filter_builder_and_parquet_link_attrs(tmp_pa
     assert f"pqf={pqf}" in response.text
 
 
-def test_parquet_schema_endpoint_returns_column_metadata(tmp_path: Path, load_run_browse):
+@pytest.mark.parametrize("extension", [".parquet", ".geoparquet"])
+def test_parquet_schema_endpoint_returns_column_metadata(tmp_path: Path, load_run_browse, extension: str):
     runid = "run-parquet-schema"
     config = "cfg"
     run_root = tmp_path / runid
     run_root.mkdir(parents=True, exist_ok=True)
     df = pytest.importorskip("pandas").DataFrame({"name": ["A"], "value": [1]})
-    df.to_parquet(run_root / "table.parquet")
+    file_name = f"table{extension}"
+    df.to_parquet(run_root / file_name)
 
     browse = load_run_browse(
         {runid: run_root},
@@ -382,11 +384,11 @@ def test_parquet_schema_endpoint_returns_column_metadata(tmp_path: Path, load_ru
     app = browse.create_app()
 
     with TestClient(app) as client:
-        response = client.get(f"/weppcloud/runs/{runid}/{config}/schema/table.parquet")
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/schema/{file_name}")
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["path"] == "table.parquet"
+    assert payload["path"] == file_name
     assert [column["name"] for column in payload["columns"]] == ["name", "value"]
     assert all(column.get("type") for column in payload["columns"])
 

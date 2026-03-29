@@ -91,11 +91,10 @@ def test_get_export_writer_dispatches_supported_formats_and_aliases() -> None:
     "format_token,expected_extension",
     [
         ("geojson", ".geojson"),
-        ("geoparquet", ".parquet"),
         ("kmz", ".kmz"),
     ],
 )
-def test_single_layer_formats_package_one_file_per_resolved_layer(
+def test_single_layer_passthrough_formats_package_one_file_per_resolved_layer(
     tmp_path: Path,
     catalog,
     format_token: str,
@@ -126,6 +125,65 @@ def test_single_layer_formats_package_one_file_per_resolved_layer(
         for member in expected_members:
             output_layer_id = member[: -len(expected_extension)]
             assert zip_handle.read(member).decode("utf-8") == f"payload::{output_layer_id}"
+
+
+def test_geoparquet_writer_emits_valid_parquet_members(tmp_path: Path, catalog) -> None:
+    plan = resolve_export_plan(
+        {
+            "format": "geoparquet",
+            "units": "si",
+            "layers": ["watershed.subcatchments"],
+            "output_scopes": ["baseline"],
+        },
+        catalog,
+    )
+    layer = plan.layers[0]
+    feature_payload = {
+        "schema": "wepppy.features_export.feature_collection.v1",
+        "layer_id": layer.layer_id,
+        "output_layer_id": layer.output_layer_id,
+        "scope": layer.scope,
+        "scope_class": layer.scope_class,
+        "crs_epsg": 4326,
+        "feature_collection": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"TopazID": 1, "label": "alpha"},
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [0.0, 0.0],
+                    },
+                }
+            ],
+        },
+    }
+    request = ExportWriterRequest(
+        plan=plan,
+        layer_payloads={
+            layer.output_layer_id: PreparedLayerPayload(
+                output_layer_id=layer.output_layer_id,
+                payload=json.dumps(feature_payload, sort_keys=True, separators=(",", ":")),
+                row_count=1,
+                feature_count=1,
+            )
+        },
+        artifact_dir=tmp_path,
+        artifact_basename="features_export",
+    )
+
+    artifact = get_export_writer("geoparquet").write(request)
+
+    expected_member = f"{layer.output_layer_id}.geoparquet"
+    assert artifact.packaged_member_relpaths == (expected_member,)
+    with zipfile.ZipFile(artifact.artifact_path, "r") as zip_handle:
+        member_bytes = zip_handle.read(expected_member)
+
+    frame = pd.read_parquet(io.BytesIO(member_bytes))
+    assert frame["TopazID"].tolist() == [1]
+    assert frame["label"].tolist() == ["alpha"]
+    assert "geometry" in frame.columns
 
 
 def test_output_layer_filename_is_deterministic() -> None:
