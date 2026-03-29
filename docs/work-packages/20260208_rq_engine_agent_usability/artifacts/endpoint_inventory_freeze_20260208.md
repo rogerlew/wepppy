@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **80**
-- Classification counts: **agent-facing 57**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 77**, **Flask wrapper 3**
+- Total endpoints inventoried: **81**
+- Classification counts: **agent-facing 58**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 78**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -51,7 +51,8 @@ Snapshot summary:
 | GET | `/api/runs/{runid}/{config}/export/ermit` | `wepppy/microservices/rq_engine/export_routes.py` | `export_ermit` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. May generate export artifacts synchronously before file response. |
 | POST | `/api/runs/{runid}/{config}/export/features` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_submit` | agent-facing | rq-engine | JWT Bearer | `rq:export` | mutating | Run access check: `authorize_run_access`. JSON-only async enqueue endpoint; returns `202` with `job_id`, `status_url`, and `download_url`. |
 | POST | `/api/runs/{runid}/{config}/export/features/profile/resolve` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_profile_resolve` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. Synchronous profile parse + normalization endpoint; no queue. |
-| GET | `/api/runs/{runid}/{config}/export/features/{job_id}/download` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_download` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. Returns artifact file only when job status is `finished`; otherwise canonical `409` conflict payload. |
+| GET | `/api/runs/{runid}/{config}/export/features/job/{job_id}/download` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_download` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. Returns artifact file only when job status is `finished`; otherwise canonical `409` conflict payload. |
+| GET | `/api/runs/{runid}/{config}/export/features/published/{profile}/download` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_published_download` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. Resolves canonical published profile mapping and returns artifact file when mapping and artifact are current; returns canonical `409` payload when stale. |
 | GET | `/api/runs/{runid}/{config}/export/geodatabase` | `wepppy/microservices/rq_engine/export_routes.py` | `export_geodatabase` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. May generate export artifacts synchronously before file response. |
 | GET | `/api/runs/{runid}/{config}/export/geopackage` | `wepppy/microservices/rq_engine/export_routes.py` | `export_geopackage` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. May generate export artifacts synchronously before file response. |
 | GET | `/api/runs/{runid}/{config}/export/prep_details` | `wepppy/microservices/rq_engine/export_routes.py` | `export_prep_details` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. May generate export artifacts synchronously before file response. |

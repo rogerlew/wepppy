@@ -59,7 +59,8 @@ PATHS_REQUIRING_404 = {
     "/api/runs/{runid}/{config}/delete-archive",
     "/api/runs/{runid}/{config}/export/ermit",
     "/api/runs/{runid}/{config}/export/features",
-    "/api/runs/{runid}/{config}/export/features/{job_id}/download",
+    "/api/runs/{runid}/{config}/export/features/job/{job_id}/download",
+    "/api/runs/{runid}/{config}/export/features/published/{profile}/download",
     "/api/runs/{runid}/{config}/export/geodatabase",
     "/api/runs/{runid}/{config}/export/geopackage",
     "/api/runs/{runid}/{config}/export/prep_details",
@@ -70,7 +71,8 @@ PATHS_REQUIRING_404 = {
 
 PATHS_REQUIRING_409 = {
     "/api/runs/{runid}/{config}/export/features",
-    "/api/runs/{runid}/{config}/export/features/{job_id}/download",
+    "/api/runs/{runid}/{config}/export/features/job/{job_id}/download",
+    "/api/runs/{runid}/{config}/export/features/published/{profile}/download",
     "/api/runs/{runid}/{config}/bootstrap/checkout",
     "/api/runs/{runid}/{config}/bootstrap/enable",
 }
