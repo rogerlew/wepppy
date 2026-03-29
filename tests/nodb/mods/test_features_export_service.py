@@ -485,12 +485,184 @@ def test_key_first_tabular_payload_does_not_touch_geometry_carrier(
         use_tabular_payload=True,
         use_tabular_long_layout=False,
         tabular_event_selector=None,
+        watershed_identity_lookup_cache={},
     )
 
     assert payload.tabular_frame is not None
-    assert list(payload.tabular_frame.columns) == ["wepp_id", "ER_yr2000"]
+    assert list(payload.tabular_frame.columns) == ["topaz_id", "wepp_id", "ER_yr2000"]
+    assert payload.tabular_frame["topaz_id"].isna().all()
     assert payload.payload == b""
     assert column_metadata["materialization"]["strategy"] == "key_first_tabular_no_geometry"
+    assert column_metadata["selected_columns"][:2] == ["topaz_id", "wepp_id"]
+
+
+def test_key_first_tabular_payload_backfills_topaz_id_from_watershed_parquet(tmp_path: Path) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="wepp_interchange.sbs_map-subcatchments",
+        family="wepp_interchange",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="clogging-starch-sbs_map-subcatchments",
+        temporal_mode="yearly",
+        context="base",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    source_layer = ResolvedLayerPlan(
+        layer_id="wepp.interchange.hill_ebe",
+        family="wepp_interchange",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.interchange.hill_ebe",
+        temporal_mode="yearly",
+        context="base",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    source_result = service._LayerCoreResult(
+        layer=source_layer,
+        frame=pd.DataFrame(
+            {
+                service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "2"],
+                "wepp_id": [1, 2],
+                "ER_yr2000": [0.1, 0.2],
+            }
+        ),
+        selected_columns=("wepp_id", "ER_yr2000"),
+        unit_mapping={"wepp_id": "non-unitized", "ER_yr2000": "non-unitized"},
+        warnings=(),
+        catalog_layer_raw={
+            "join": {"primary_key": "wepp_id"},
+            "geometry": {"feature_id_keys": ["wepp_id"]},
+        },
+    )
+
+    watershed_dir = tmp_path / "watershed"
+    watershed_dir.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(
+        {
+            "topaz_id": [101, 102],
+            "wepp_id": [1, 2],
+        }
+    ).to_parquet(watershed_dir / "hillslopes.parquet", index=False)
+
+    payload, _ = service._build_key_first_materialized_layer_payload(
+        wd=tmp_path,
+        layer=layer,
+        source_layers=(source_layer,),
+        source_results=(source_result,),
+        entries_by_output_layer_id={},
+        use_tabular_payload=True,
+        use_tabular_long_layout=False,
+        tabular_event_selector=None,
+        watershed_identity_lookup_cache={},
+    )
+
+    assert payload.tabular_frame is not None
+    assert payload.tabular_frame["topaz_id"].tolist() == [101, 102]
+    assert payload.tabular_frame["wepp_id"].tolist() == [1, 2]
+
+
+def test_key_first_tabular_payload_retargets_join_key_domain_using_identity_lookup(
+    tmp_path: Path,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="wepp_interchange.sbs_map-subcatchments",
+        family="wepp_interchange",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="clogging-starch-sbs_map-subcatchments",
+        context="base",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    watershed_layer = ResolvedLayerPlan(
+        layer_id="watershed.subcatchments",
+        family="watershed",
+        scope_class="scope_invariant",
+        scope="shared",
+        output_layer_id="shared__watershed.subcatchments",
+        context="base",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    wepp_layer = ResolvedLayerPlan(
+        layer_id="wepp.interchange.loss_all_years_hill",
+        family="wepp_interchange",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.interchange.loss_all_years_hill",
+        temporal_mode="annual_average",
+        context="base",
+        carrier_layer="sbs_map-subcatchments",
+    )
+    source_results = (
+        service._LayerCoreResult(
+            layer=watershed_layer,
+            frame=pd.DataFrame(
+                {
+                    service._CONSOLIDATED_JOIN_KEY_COLUMN: ["22", "23"],
+                    "topaz_id": [22, 23],
+                    "wepp_id": [1, 2],
+                    "slope_scalar": [1.1, 2.2],
+                }
+            ),
+            selected_columns=("topaz_id", "wepp_id", "slope_scalar"),
+            unit_mapping={
+                "topaz_id": "non-unitized",
+                "wepp_id": "non-unitized",
+                "slope_scalar": "non-unitized",
+            },
+            warnings=(),
+            catalog_layer_raw={
+                "join": {"primary_key": "topaz_id"},
+                "geometry": {"feature_id_keys": ["topaz_id", "wepp_id"]},
+            },
+        ),
+        service._LayerCoreResult(
+            layer=wepp_layer,
+            frame=pd.DataFrame(
+                {
+                    service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "2"],
+                    "wepp_id": [1, 2],
+                    "runoff": [100.0, 200.0],
+                }
+            ),
+            selected_columns=("wepp_id", "runoff"),
+            unit_mapping={
+                "wepp_id": "non-unitized",
+                "runoff": "non-unitized",
+            },
+            warnings=(),
+            catalog_layer_raw={
+                "join": {"primary_key": "wepp_id"},
+                "geometry": {"feature_id_keys": ["topaz_id", "wepp_id"]},
+            },
+        ),
+    )
+
+    watershed_dir = tmp_path / "watershed"
+    watershed_dir.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(
+        {
+            "topaz_id": [22, 23],
+            "wepp_id": [1, 2],
+        }
+    ).to_parquet(watershed_dir / "hillslopes.parquet", index=False)
+
+    payload, _ = service._build_key_first_materialized_layer_payload(
+        wd=tmp_path,
+        layer=layer,
+        source_layers=(watershed_layer, wepp_layer),
+        source_results=source_results,
+        entries_by_output_layer_id={},
+        use_tabular_payload=True,
+        use_tabular_long_layout=False,
+        tabular_event_selector=None,
+        watershed_identity_lookup_cache={},
+    )
+
+    assert payload.tabular_frame is not None
+    result = payload.tabular_frame.sort_values("topaz_id").reset_index(drop=True)
+    assert result[["topaz_id", "wepp_id"]].values.tolist() == [[22, 1], [23, 2]]
+    assert result["slope_scalar"].tolist() == [1.1, 2.2]
+    assert result["runoff"].tolist() == [100.0, 200.0]
 
 
 def test_ensure_join_key_column_requires_contract_defined_identity_key() -> None:
@@ -881,11 +1053,13 @@ def test_build_layer_frame_from_sources_appends_unit_suffixes_for_unitized_colum
         dependency_entries=dependency_entries,
     )
 
-    assert result.selected_columns == ("topaz_id", "hillslope_area_ha", "runoff_volume_m3")
+    assert result.selected_columns == ("topaz_id", "wepp_id", "hillslope_area_ha", "runoff_volume_m3")
+    assert result.frame["wepp_id"].isna().all()
     assert "hillslope_area_ha" in result.frame.columns
     assert "runoff_volume_m3" in result.frame.columns
     assert result.unit_mapping == {
         "topaz_id": "non-unitized",
+        "wepp_id": "non-unitized",
         "hillslope_area_ha": "ha",
         "runoff_volume_m3": "m^3",
     }
@@ -1281,6 +1455,157 @@ def test_materialize_temporal_layer_wide_yearly_pivots_measures_to_year_columns(
     assert reshaped.frame.loc[reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "2", "sediment_kg_yr2015"].iloc[0] == pytest.approx(9.5)
 
 
+def test_materialize_temporal_layer_wide_yearly_sums_numeric_like_object_slices() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1", "1", "2"],
+            "wepp_id": [1, 1, 1, 2],
+            "year": [2014, 2014, 2015, 2014],
+            "sediment_kg": ["10.0", "12.5", "3.0", "8.0"],
+        }
+    )
+
+    reshaped = materialize_temporal_layer_wide(
+        frame=frame,
+        layer_id="wepp.interchange.hill_pass",
+        temporal_mode="yearly",
+        selected_columns=("wepp_id", "year", "sediment_kg"),
+        unit_mapping={"sediment_kg": "kg", "wepp_id": "non-unitized"},
+        join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+        event_selector=None,
+    )
+
+    assert reshaped.selected_columns == ("wepp_id", "sediment_kg_yr2014", "sediment_kg_yr2015")
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1",
+        "sediment_kg_yr2014",
+    ].iloc[0] == pytest.approx(22.5)
+
+
+def test_materialize_temporal_layer_wide_yearly_rejects_conflicting_non_numeric_slices() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1"],
+            "wepp_id": [1, 1],
+            "year": [2014, 2014],
+            "soil_class": ["A", "B"],
+        }
+    )
+
+    with pytest.raises(MaterializationContractError) as exc_info:
+        materialize_temporal_layer_wide(
+            frame=frame,
+            layer_id="wepp.interchange.hill_pass",
+            temporal_mode="yearly",
+            selected_columns=("wepp_id", "year", "soil_class"),
+            unit_mapping={"soil_class": "non-unitized", "wepp_id": "non-unitized"},
+            join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+            event_selector=None,
+        )
+
+    assert "conflicting non-numeric values" in str(exc_info.value)
+
+
+def test_materialize_temporal_layer_wide_yearly_treats_event_column_as_control() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1", "1"],
+            "wepp_id": [1, 1, 1],
+            "year": [2014, 2014, 2015],
+            "event": ["E1", "E2", "E3"],
+            "sediment_kg": [10.0, 12.5, 3.0],
+        }
+    )
+
+    reshaped = materialize_temporal_layer_wide(
+        frame=frame,
+        layer_id="wepp.interchange.hill_pass",
+        temporal_mode="yearly",
+        selected_columns=("wepp_id", "year", "event", "sediment_kg"),
+        unit_mapping={
+            "event": "non-unitized",
+            "sediment_kg": "kg",
+            "wepp_id": "non-unitized",
+        },
+        join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+        event_selector=None,
+    )
+
+    assert reshaped.selected_columns == ("wepp_id", "sediment_kg_yr2014", "sediment_kg_yr2015")
+    assert "event_yr2014" not in reshaped.frame.columns
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1",
+        "sediment_kg_yr2014",
+    ].iloc[0] == pytest.approx(22.5)
+
+
+def test_materialize_temporal_layer_wide_annual_average_means_selected_years() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1", "1", "2", "2"],
+            "wepp_id": [1, 1, 1, 2, 2],
+            "year": [2014, 2014, 2015, 2014, 2015],
+            "runoff_mm": [10.0, 12.0, 8.0, 4.0, 6.0],
+            "sim_day_index": [1, 2, 3, 10, 11],
+        }
+    )
+
+    reshaped = materialize_temporal_layer_wide(
+        frame=frame,
+        layer_id="wepp.interchange.hill_pass",
+        temporal_mode="annual_average",
+        selected_columns=("wepp_id", "year", "runoff_mm", "sim_day_index"),
+        unit_mapping={
+            "wepp_id": "non-unitized",
+            "runoff_mm": "mm",
+            "sim_day_index": "non-unitized",
+        },
+        join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+        event_selector=None,
+    )
+
+    assert reshaped.selected_columns == ("wepp_id", "runoff_mm", "sim_day_index")
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1",
+        "runoff_mm",
+    ].iloc[0] == pytest.approx(15.0)
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1",
+        "sim_day_index",
+    ].iloc[0] == pytest.approx(3.0)
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "2",
+        "runoff_mm",
+    ].iloc[0] == pytest.approx(5.0)
+    assert "runoff_mm_yr2014" not in reshaped.frame.columns
+
+
+def test_materialize_temporal_layer_wide_annual_average_rejects_conflicting_non_numeric_year_values() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1", "1"],
+            "wepp_id": [1, 1, 1],
+            "year": [2014, 2015, 2016],
+            "soil_class": ["A", "A", "B"],
+        }
+    )
+
+    with pytest.raises(MaterializationContractError) as exc_info:
+        materialize_temporal_layer_wide(
+            frame=frame,
+            layer_id="wepp.interchange.hill_pass",
+            temporal_mode="annual_average",
+            selected_columns=("wepp_id", "year", "soil_class"),
+            unit_mapping={"soil_class": "non-unitized", "wepp_id": "non-unitized"},
+            join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+            event_selector=None,
+        )
+
+    assert "Annual-average materialization found conflicting non-numeric values across years." in str(
+        exc_info.value
+    )
+
+
 def test_reshape_temporal_wide_to_long_event_restores_date_rows() -> None:
     frame = gpd.GeoDataFrame(
         {
@@ -1408,6 +1733,65 @@ def test_backfill_identity_from_geometry_key_fills_missing_event_identity_values
     )
 
     assert result["topaz_id"].tolist() == [93.0, 22.0, 23.0]
+
+
+def test_align_carrier_identity_join_key_preserves_wepp_join_for_subcatchments(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(
+        service,
+        "_backfill_tabular_identity_from_watershed",
+        lambda **kwargs: kwargs["frame"],  # noqa: ARG005
+    )
+
+    existing_join_frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "2", "3"],
+            "wepp_id": [1, 2, 3],
+            "topaz_id": [101, 101, 102],
+        }
+    )
+    existing_join_result = service._align_carrier_identity_join_key(
+        frame=existing_join_frame,
+        wd=tmp_path,
+        carrier_layer="sbs_map-subcatchments",
+        cache={},
+    )
+    assert existing_join_result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["1", "2", "3"]
+
+    # Do not retarget the canonical join domain when topaz/wepp are one-to-one
+    # but carry different values; geometry key resolution relies on preserving
+    # the resolved source join key domain.
+    one_to_one_identity_frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "2", "3"],
+            "wepp_id": [1, 2, 3],
+            "topaz_id": [101, 102, 103],
+        }
+    )
+    one_to_one_identity_result = service._align_carrier_identity_join_key(
+        frame=one_to_one_identity_frame,
+        wd=tmp_path,
+        carrier_layer="sbs_map-subcatchments",
+        cache={},
+    )
+    assert one_to_one_identity_result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["1", "2", "3"]
+
+    missing_join_frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: [None, None, "3"],
+            "wepp_id": [1, 2, 3],
+            "topaz_id": [101, 101, 102],
+        }
+    )
+    missing_join_result = service._align_carrier_identity_join_key(
+        frame=missing_join_frame,
+        wd=tmp_path,
+        carrier_layer="sbs_map-subcatchments",
+        cache={},
+    )
+    assert missing_join_result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["1", "2", "3"]
 
 
 def test_apply_unitized_column_suffixes_appends_canonical_unit_token() -> None:

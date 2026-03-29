@@ -40,6 +40,10 @@ Packaging rules:
   - `temporal_layout=wide|long` controls temporal measure shaping for `event`/`yearly` layers (`wide` default).
 - Geometryless writer path is table-native end-to-end: tabular exports consume DataFrame payloads directly and must not serialize/parse FeatureCollection JSON in the writer path.
 - Geometryless carrier materialization is independent of geometry files: tabular outputs are produced from attribute sources only and do not enrich identity columns from carrier geometry datasets.
+- Identity normalization contract for all output formats (geometry and tabular):
+  - Emit canonical identity columns `topaz_id`, `wepp_id` as the first two output columns.
+  - Coalesce identity aliases (`TopazID`/`topaz_id`, `WeppID`/`wepp_id`) into canonical columns.
+  - Remove redundant alias columns after coalescing.
 
 ## 3. Layer Catalog And Discoverability
 The backend owns an authoritative, versioned export layer catalog.

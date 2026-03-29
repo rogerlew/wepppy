@@ -38,6 +38,7 @@ _YEARLY_CONTROL_TOKENS = frozenset(
     {
         "calendaryear",
         "year",
+        "event",
         "date",
         "month",
         "mo",
@@ -76,7 +77,7 @@ def materialize_temporal_layer_wide(
     """Reshape event/yearly rows to one-row-per-join-key wide attributes."""
 
     mode = str(temporal_mode or "").strip().lower()
-    if mode not in {"event", "yearly"}:
+    if mode not in {"annual_average", "event", "yearly"}:
         return TemporalWideMaterialization(
             frame=frame,
             selected_columns=tuple(selected_columns),
@@ -155,6 +156,38 @@ def materialize_temporal_layer_wide(
         layer_id=layer_id,
     )
 
+    if mode == "annual_average":
+        averaged_columns: list[str] = []
+        averaged_unit_mapping: dict[str, str] = {}
+        for measure_column in measure_columns:
+            averaged = _collapse_measure_annual_average(
+                frame=working,
+                join_key_column=join_key_column,
+                measure_column=measure_column,
+                layer_id=layer_id,
+            )
+            if averaged.empty:
+                continue
+
+            base = base.merge(averaged, on=join_key_column, how="left")
+            averaged_columns.append(measure_column)
+            unit_value = str(unit_mapping.get(measure_column) or "").strip()
+            if unit_value:
+                averaged_unit_mapping[measure_column] = unit_value
+
+        selected_output = tuple([*identity_columns, *_dedupe_preserve_order(averaged_columns)])
+        identity_unit_mapping = {
+            column_name: str(unit_mapping.get(column_name) or "").strip()
+            for column_name in identity_columns
+            if str(unit_mapping.get(column_name) or "").strip()
+        }
+        merged_unit_mapping = {**identity_unit_mapping, **averaged_unit_mapping}
+        return TemporalWideMaterialization(
+            frame=base,
+            selected_columns=selected_output,
+            unit_mapping=merged_unit_mapping,
+        )
+
     wide_columns: list[str] = []
     wide_unit_mapping: dict[str, str] = {}
     for measure_column in measure_columns:
@@ -206,7 +239,7 @@ def _resolve_temporal_tokens(
     event_selector: NormalizedTemporalEvent | None,
     layer_id: str,
 ) -> tuple[pd.Series | None, list[str], str | None]:
-    if temporal_mode == "yearly":
+    if temporal_mode in {"annual_average", "yearly"}:
         year_column = _first_matching_column(frame.columns, ("calendar_year", "year"))
         if year_column is None:
             return None, [], None
@@ -531,9 +564,13 @@ def _collapse_measure_yearly(
     layer_id: str,
 ) -> pd.DataFrame:
     series = subset[measure_column]
-    if pd.api.types.is_numeric_dtype(series):
+    numeric_series = _coerce_numeric_series(series)
+
+    if numeric_series is not None:
+        numeric_subset = subset.copy()
+        numeric_subset[measure_column] = numeric_series
         return (
-            subset.groupby(list(group_cols), dropna=False, sort=False)[measure_column]
+            numeric_subset.groupby(list(group_cols), dropna=False, sort=False)[measure_column]
             .sum(min_count=1)
             .reset_index()
         )
@@ -565,6 +602,80 @@ def _collapse_measure_yearly(
         .first()
         .reset_index()
     )
+
+
+def _collapse_measure_annual_average(
+    *,
+    frame: pd.DataFrame,
+    join_key_column: str,
+    measure_column: str,
+    layer_id: str,
+) -> pd.DataFrame:
+    subset = frame[[join_key_column, "__features_export_temporal_token__", measure_column]].copy()
+    if subset.empty:
+        return pd.DataFrame(columns=[join_key_column, measure_column])
+
+    yearly_collapsed = _collapse_measure_yearly(
+        subset=subset,
+        group_cols=[join_key_column, "__features_export_temporal_token__"],
+        measure_column=measure_column,
+        layer_id=layer_id,
+    )
+    if yearly_collapsed.empty:
+        return pd.DataFrame(columns=[join_key_column, measure_column])
+
+    series = yearly_collapsed[measure_column]
+    numeric_series = _coerce_numeric_series(series)
+    if numeric_series is not None:
+        numeric_yearly = yearly_collapsed.copy()
+        numeric_yearly[measure_column] = numeric_series
+        return (
+            numeric_yearly.groupby(join_key_column, dropna=False, sort=False)[measure_column]
+            .mean()
+            .reset_index()
+        )
+
+    conflict_rows: list[object] = []
+    collapsed_rows: list[tuple[object, object]] = []
+    for join_value, group in yearly_collapsed.groupby(join_key_column, dropna=False, sort=False):
+        values = group[measure_column].dropna().tolist()
+        if not values:
+            collapsed_rows.append((join_value, None))
+            continue
+        canonical = {
+            canonical_join_value(value) if canonical_join_value(value) is not None else str(value)
+            for value in values
+        }
+        if len(canonical) > 1:
+            conflict_rows.append(join_value)
+            continue
+        collapsed_rows.append((join_value, values[0]))
+
+    if conflict_rows:
+        sample = ", ".join(str(join_value) for join_value in conflict_rows[:8])
+        raise MaterializationContractError(
+            "Annual-average materialization found conflicting non-numeric values across years.",
+            details=(
+                f"layer={layer_id!r}; column={measure_column!r}; "
+                f"conflicts={sample}"
+            ),
+        )
+
+    return pd.DataFrame(collapsed_rows, columns=[join_key_column, measure_column])
+
+
+def _coerce_numeric_series(series: pd.Series) -> pd.Series | None:
+    if pd.api.types.is_numeric_dtype(series):
+        return series
+
+    non_null_mask = series.notna()
+    if not non_null_mask.any():
+        return None
+
+    coerced = pd.to_numeric(series, errors="coerce")
+    if coerced.loc[non_null_mask].notna().all():
+        return coerced
+    return None
 
 
 def _first_matching_column(columns: cabc.Iterable[object], candidates: cabc.Sequence[str]) -> str | None:

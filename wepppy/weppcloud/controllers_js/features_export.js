@@ -1271,6 +1271,28 @@ var FeaturesExport = (function () {
             node.textContent = value;
         }
 
+        function setValidationAlertState(state) {
+            var node = getFieldNode("[data-features-export-validation-alert]");
+            if (!node) {
+                return;
+            }
+            node.classList.remove("wc-alert--info", "wc-alert--success", "wc-alert--error");
+            if (state === "error") {
+                node.classList.add("wc-alert--error");
+                node.setAttribute("role", "alert");
+                node.setAttribute("aria-live", "assertive");
+            } else if (state === "ready") {
+                node.classList.add("wc-alert--success");
+                node.setAttribute("role", "status");
+                node.setAttribute("aria-live", "polite");
+            } else {
+                node.classList.add("wc-alert--info");
+                node.setAttribute("role", "status");
+                node.setAttribute("aria-live", "polite");
+            }
+            node.setAttribute("data-validation-state", state);
+        }
+
         function renderSummary(validation) {
             var selected = selectedLayers();
             var families = {};
@@ -1292,17 +1314,22 @@ var FeaturesExport = (function () {
             });
             setRegionText("selected-count", "Selected: " + selected.length + " layers");
             setRegionText("family-counts", "Families: " + (familySummary.length ? familySummary.join(", ") : "none"));
-            setRegionText("capability-counts", "Scope-aware: " + scopeAwareCount + " | Temporal-capable: " + temporalCount);
+            setRegionText("scope-aware-count", "Scope-aware: " + scopeAwareCount);
+            setRegionText("temporal-capable-count", "Temporal-capable: " + temporalCount);
 
             var validationText = "";
+            var validationState = "pending";
             if (validation.errors.length) {
                 validationText = "Validation: " + validation.errors[0].message;
+                validationState = "error";
             } else if (validation.valid) {
                 validationText = "Validation: Ready to export.";
+                validationState = "ready";
             } else {
                 validationText = "Validation: Waiting for required selections.";
             }
             setRegionText("validation", validationText);
+            setValidationAlertState(validationState);
 
             var warningLines = validation.warnings.map(function (entry) {
                 return entry.message;
@@ -1419,11 +1446,15 @@ var FeaturesExport = (function () {
 
         function updateTabularOptionsVisibility() {
             var tabularWrap = getFieldNode("[data-features-export-tabular-options]");
-            if (!tabularWrap) {
-                return;
-            }
+            var geometryWrap = getFieldNode("[data-features-export-geometry-options]");
             var format = normalizeFormat(readFieldValue(FIELDS.format));
-            tabularWrap.hidden = !isTabularFormat(format);
+            var tabularFormat = isTabularFormat(format);
+            if (tabularWrap) {
+                tabularWrap.hidden = !tabularFormat;
+            }
+            if (geometryWrap) {
+                geometryWrap.hidden = tabularFormat;
+            }
         }
 
         function updateProgressiveDisclosure() {
@@ -1468,16 +1499,17 @@ var FeaturesExport = (function () {
             var format = normalizeFormat(readFieldValue(FIELDS.format));
             var units = readCheckedRadio(FIELDS.units);
             var crs = readCheckedRadio(FIELDS.crs);
+            var requiresCrs = !isTabularFormat(format);
             if (!format) {
                 errors.push({ group: "settings", message: "Format is required." });
             }
             if (!units) {
                 errors.push({ group: "settings", message: "Units is required." });
             }
-            if (!crs) {
+            if (requiresCrs && !crs) {
                 errors.push({ group: "settings", message: "CRS is required." });
             }
-            if (crs === "utm" && !getUtmAvailable()) {
+            if (requiresCrs && crs === "utm" && !getUtmAvailable()) {
                 errors.push({ group: "settings", message: "UTM CRS is unavailable for this run." });
             }
 
@@ -1855,12 +1887,16 @@ var FeaturesExport = (function () {
         }
 
         function buildPayload() {
+            var format = normalizeFormat(readFieldValue(FIELDS.format));
+            var crs = readCheckedRadio(FIELDS.crs);
             var payload = {
-                format: normalizeFormat(readFieldValue(FIELDS.format)),
+                format: format,
                 units: readCheckedRadio(FIELDS.units),
-                crs: readCheckedRadio(FIELDS.crs),
                 layers: uniqueStrings(controller.state.selectedLayerIds)
             };
+            if (!isTabularFormat(format) && crs) {
+                payload.crs = crs;
+            }
 
             if (!controller.groups.scopes.hidden) {
                 var outputScopes = readOutputScopes();
@@ -2023,6 +2059,15 @@ var FeaturesExport = (function () {
             if (!jobId) {
                 return;
             }
+            controller.rq_job_status = {
+                status: "finished",
+                job_id: jobId
+            };
+            controller._job_status_error = null;
+            controller._job_status_error_parts = null;
+            if (typeof controller.update_command_button_state === "function") {
+                controller.update_command_button_state(controller);
+            }
             controller.append_status_message(controller, "Features export completed. Loading job details...");
             requestJobInfo(jobId)
                 .then(function (result) {
@@ -2088,7 +2133,9 @@ var FeaturesExport = (function () {
                 }
                 var mode = String(target.value || "").trim();
                 setLayerTemporalMode(layerId, mode);
-                rerender();
+                // Avoid replacing the active temporal-mode select during native selection
+                // interaction; replacing the node mid-click can trigger unintended submit.
+                rerender({ skipCatalog: true });
             }));
 
             controller._delegates.push(dom.delegate(controller.form, "change", ACTIONS.toggleColumn, function (_event, target) {
@@ -2635,6 +2682,18 @@ var FeaturesExport = (function () {
                     handleCompletion(payload || null, "job-completed");
                 }
             } else if (normalized === "JOB:ERROR") {
+                var failedJobId = (controller.rq_job_id || (payload && payload.job_id) || "").toString().trim();
+                if (failedJobId) {
+                    controller.rq_job_status = {
+                        status: "failed",
+                        job_id: failedJobId
+                    };
+                    controller._job_status_error = null;
+                    controller._job_status_error_parts = null;
+                    if (typeof controller.update_command_button_state === "function") {
+                        controller.update_command_button_state(controller);
+                    }
+                }
                 showStacktracePanel();
                 controller.append_status_message(controller, "Features export failed. Review stack trace for details.");
                 if (controller.events && typeof controller.events.emit === "function") {

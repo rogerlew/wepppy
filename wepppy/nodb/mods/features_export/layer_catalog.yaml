@@ -48,6 +48,7 @@ metadata:
 
 layers:
   - layer_id: "watershed.subcatchments"
+    label: "hillslopes.parquet"
     family: "watershed"
     scope_class: "scope_invariant"
     geometry:
@@ -107,6 +108,7 @@ layers:
       optional: []
 
   - layer_id: "watershed.channels"
+    label: "channels.parquet"
     family: "watershed"
     scope_class: "scope_invariant"
     geometry:
@@ -175,6 +177,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "landuse.dominant"
+    label: "landuse.parquet"
     family: "landuse"
     scope_class: "scope_invariant"
     geometry:
@@ -232,6 +235,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "soils.dominant"
+    label: "soils.parquet"
     family: "soils"
     scope_class: "scope_invariant"
     geometry:
@@ -289,7 +293,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "wepp.summary.hillslopes"
-    label: "H.loss.parquet"
+    label: "loss_pw0.hill.parquet"
     family: "wepp_summary"
     scope_class: "scope_aware"
     geometry:
@@ -335,34 +339,10 @@ layers:
         required: true
         purpose: "WEPP run/config dependency."
     temporal:
-      supported_modes:
-        - "annual_average"
-        - "yearly"
-        - "event"
-      grain: "mixed"
-      time_columns:
-        - "year"
-        - "date"
-        - "return_period"
-      mode_rules:
-        annual_average:
-          required_columns:
-            - "year"
-          year_selection_supported: true
-          aggregation: "mean_over_selected_years"
-        yearly:
-          required_columns:
-            - "year"
-          year_selection_supported: true
-          aggregation: "identity_per_year"
-        event:
-          required_columns_any:
-            - ["date"]
-            - ["return_period"]
-          selector_support:
-            - "date"
-            - "return_period"
-          aggregation: "identity_per_event"
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
     measures:
       required:
         - "runoff_mm"
@@ -396,7 +376,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "wepp.summary.channels"
-    label: "chan.out.parquet"
+    label: "loss_pw0.chn.parquet"
     family: "wepp_summary"
     scope_class: "scope_aware"
     geometry:
@@ -452,23 +432,10 @@ layers:
         required: true
         purpose: "WEPP run/config dependency."
     temporal:
-      supported_modes:
-        - "annual_average"
-        - "yearly"
-      grain: "year"
-      time_columns:
-        - "year"
-      mode_rules:
-        annual_average:
-          required_columns:
-            - "year"
-          year_selection_supported: true
-          aggregation: "mean_over_selected_years"
-        yearly:
-          required_columns:
-            - "year"
-          year_selection_supported: true
-          aggregation: "identity_per_year"
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
     measures:
       required:
         - "discharge_mm"
@@ -1142,6 +1109,246 @@ layers:
           on_missing: "warn"
           warning_code: "measure_unavailable"
 
+  - layer_id: "wepp.interchange.h_loss"
+    label: "H.loss.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      allow_non_unique_keys: true
+      source_key_map:
+        wepp_h_loss:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_h_loss"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/H.loss.parquet"
+        required: true
+        role: "sediment_class_distribution"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes: []
+      grain: "none"
+      time_columns: []
+      mode_rules: {}
+    measures:
+      required:
+        - "class_id"
+        - "Class"
+        - "Sediment Fraction"
+        - "In Flow Exiting"
+      optional:
+        - measure_id: "Diameter"
+          key_aliases:
+            - "Diameter"
+          availability:
+            requires_any_column:
+              - "Diameter"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+        - measure_id: "Specific Gravity"
+          key_aliases:
+            - "Specific Gravity"
+          availability:
+            requires_any_column:
+              - "Specific Gravity"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.chnwb"
+    label: "chnwb.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_chnwb:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_chnwb"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/chnwb.parquet"
+        required: true
+        role: "daily_water_balance"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "daily"
+      time_columns:
+        - "year"
+        - "month"
+        - "day_of_month"
+        - "julian"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["year", "month", "day_of_month"]
+            - ["year", "julian"]
+          selector_support:
+            - "date"
+          aggregation: "identity_per_date"
+    measures:
+      required:
+        - "P (mm)"
+        - "Q (mm)"
+        - "Area (m^2)"
+      optional:
+        - measure_id: "RM (mm)"
+          key_aliases:
+            - "RM (mm)"
+          availability:
+            requires_any_column:
+              - "RM (mm)"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+        - measure_id: "Base (mm)"
+          key_aliases:
+            - "Base (mm)"
+          availability:
+            requires_any_column:
+              - "Base (mm)"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
+  - layer_id: "wepp.interchange.soil_pw0"
+    label: "soil_pw0.parquet"
+    family: "wepp_interchange"
+    scope_class: "scope_aware"
+    geometry:
+      type: "polygon"
+      locator:
+        kind: "nodb_ref"
+        value: "nodb:watershed.subwta_shp"
+      feature_id_keys:
+        - "topaz_id"
+        - "TopazID"
+        - "wepp_id"
+    join:
+      primary_key: "wepp_id"
+      fallback_keys:
+        - "topaz_id"
+        - "TopazID"
+      source_key_map:
+        wepp_soil_pw0:
+          - "wepp_id"
+          - "topaz_id"
+    sources:
+      - source_id: "wepp_soil_pw0"
+        kind: "parquet"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/soil_pw0.parquet"
+        required: true
+        role: "daily_soil_state"
+    dependencies:
+      - dep_id: "wepp_interchange_manifest"
+        kind: "json"
+        locator:
+          kind: "path_template"
+          value: "wepp/{scope_root}/interchange/interchange_version.json"
+        required: true
+        purpose: "WEPP interchange schema/version fingerprint."
+    temporal:
+      supported_modes:
+        - "annual_average"
+        - "yearly"
+        - "event"
+      grain: "daily"
+      time_columns:
+        - "year"
+        - "month"
+        - "day_of_month"
+        - "julian"
+      mode_rules:
+        annual_average:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "mean_over_selected_years"
+        yearly:
+          required_columns:
+            - "year"
+          year_selection_supported: true
+          aggregation: "identity_per_year"
+        event:
+          required_columns_any:
+            - ["year", "month", "day_of_month"]
+            - ["year", "julian"]
+          selector_support:
+            - "date"
+          aggregation: "identity_per_date"
+    measures:
+      required:
+        - "Poros"
+        - "Keff"
+        - "TSW"
+      optional:
+        - measure_id: "TSMF"
+          key_aliases:
+            - "TSMF"
+          availability:
+            requires_any_column:
+              - "TSMF"
+          on_missing: "warn"
+          warning_code: "measure_unavailable"
+
   - layer_id: "wepp.interchange.loss_all_years_hill"
     label: "loss_pw0.all_years.hill.parquet"
     family: "wepp_interchange"
@@ -1316,6 +1523,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "ash.transport.hillslope_annuals"
+    label: "hillslope_annuals.parquet"
     family: "ash"
     scope_class: "scope_invariant"
     geometry:
@@ -1578,6 +1786,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "swat.interchange.table"
+    label: "{table_name}.parquet"
     family: "swat_interchange"
     scope_class: "scope_invariant"
     geometry:
@@ -1725,6 +1934,7 @@ layers:
       optional: []
 
   - layer_id: "ag_fields.subfields"
+    label: "sub_fields.WGS.geojson"
     family: "ag_fields_spatial"
     scope_class: "scope_invariant"
     geometry:
@@ -1795,6 +2005,7 @@ layers:
       optional: []
 
   - layer_id: "ag_fields.fields"
+    label: "fields.WGS.geojson"
     family: "ag_fields_spatial"
     scope_class: "scope_invariant"
     geometry:
@@ -1864,6 +2075,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "ag_fields.metrics.subfields"
+    label: "H.pass.parquet"
     family: "ag_fields_metrics"
     scope_class: "scope_invariant"
     geometry:
@@ -2018,6 +2230,7 @@ layers:
           warning_code: "measure_unavailable"
 
   - layer_id: "ag_fields.metrics.fields"
+    label: "H.pass.parquet"
     family: "ag_fields_metrics"
     scope_class: "scope_invariant"
     geometry:

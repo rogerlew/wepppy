@@ -154,6 +154,55 @@ def _create_spatial_reference(crs_epsg: int | None):
     return srs
 
 
+_GEOMETRY_TYPE_MAP: dict[str, int] = {
+    "point": ogr.wkbPoint,
+    "multipoint": ogr.wkbMultiPoint,
+    "linestring": ogr.wkbLineString,
+    "multilinestring": ogr.wkbMultiLineString,
+    "polygon": ogr.wkbPolygon,
+    "multipolygon": ogr.wkbMultiPolygon,
+    "geometrycollection": ogr.wkbGeometryCollection,
+}
+
+_GEOMETRY_TYPE_PROMOTIONS: dict[frozenset[str], str] = {
+    frozenset({"point", "multipoint"}): "multipoint",
+    frozenset({"linestring", "multilinestring"}): "multilinestring",
+    frozenset({"polygon", "multipolygon"}): "multipolygon",
+}
+
+
+def _infer_feature_collection_geom_type(feature_collection: dict[str, object]) -> int:
+    raw_features = feature_collection.get("features")
+    if not isinstance(raw_features, list):
+        return ogr.wkbGeometryCollection
+
+    discovered_types: set[str] = set()
+    for raw_feature in raw_features:
+        if not isinstance(raw_feature, dict):
+            continue
+        geometry_payload = raw_feature.get("geometry")
+        if not isinstance(geometry_payload, dict):
+            continue
+        geometry_type = geometry_payload.get("type")
+        if not isinstance(geometry_type, str):
+            continue
+        geometry_key = geometry_type.strip().lower()
+        if geometry_key in _GEOMETRY_TYPE_MAP:
+            discovered_types.add(geometry_key)
+
+    if not discovered_types:
+        return ogr.wkbGeometryCollection
+
+    if len(discovered_types) == 1:
+        return _GEOMETRY_TYPE_MAP[next(iter(discovered_types))]
+
+    promoted = _GEOMETRY_TYPE_PROMOTIONS.get(frozenset(discovered_types))
+    if promoted is not None:
+        return _GEOMETRY_TYPE_MAP[promoted]
+
+    return ogr.wkbGeometryCollection
+
+
 def _write_feature_collection_layer(ogr_layer, feature_collection: dict[str, object]) -> None:
     raw_features = feature_collection.get("features")
     if not isinstance(raw_features, list):
@@ -304,6 +353,7 @@ class GeopackageExportWriter(MultiLayerContainerWriter):
                     feature_collection, crs_epsg = _parse_feature_collection_payload(payload)
                     if feature_collection is not None:
                         spatial_ref = _create_spatial_reference(crs_epsg)
+                        geometry_type = _infer_feature_collection_geom_type(feature_collection)
                         layer_options = [
                             f"IDENTIFIER={layer.output_layer_id}",
                             f"DESCRIPTION={layer.layer_id}",
@@ -311,7 +361,7 @@ class GeopackageExportWriter(MultiLayerContainerWriter):
                         ogr_layer = dataset.CreateLayer(
                             table_name,
                             srs=spatial_ref,
-                            geom_type=ogr.wkbUnknown,
+                            geom_type=geometry_type,
                             options=layer_options,
                         )
                     else:

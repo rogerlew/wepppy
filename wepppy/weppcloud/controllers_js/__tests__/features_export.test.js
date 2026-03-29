@@ -190,16 +190,27 @@ function buildFixtureHtml() {
                 </div>
                 <label><input type="radio" data-features-export-field="units" name="fx_units" value="project" checked>project</label>
                 <label><input type="radio" data-features-export-field="units" name="fx_units" value="si">si</label>
-                <label><input type="radio" data-features-export-field="crs" name="fx_crs" value="wgs" checked>wgs</label>
-                <label><input type="radio" data-features-export-field="crs" name="fx_crs" value="utm">utm</label>
+                <label><input type="radio" data-features-export-field="units" name="fx_units" value="english">english</label>
+                <div data-features-export-geometry-options>
+                    <label><input type="radio" data-features-export-field="crs" name="fx_crs" value="wgs" checked>wgs</label>
+                    <label><input type="radio" data-features-export-field="crs" name="fx_crs" value="utm">utm</label>
+                </div>
                 <p data-features-export-region="packaging-hint"></p>
             </section>
 
             <section data-features-export-group="summary">
                 <p data-features-export-region="selected-count"></p>
                 <p data-features-export-region="family-counts"></p>
-                <p data-features-export-region="capability-counts"></p>
-                <p data-features-export-region="validation"></p>
+                <p data-features-export-region="scope-aware-count"></p>
+                <p data-features-export-region="temporal-capable-count"></p>
+                <div
+                    class="wc-alert wc-alert--info"
+                    data-features-export-validation-alert
+                    data-validation-state="pending"
+                    role="status"
+                    aria-live="polite">
+                    <p data-features-export-region="validation" class="wc-alert__body"></p>
+                </div>
                 <p data-features-export-region="summary-warnings"></p>
             </section>
 
@@ -461,17 +472,45 @@ describe("FeaturesExport controller", () => {
         await flushPromises();
     });
 
+    test("validation alert uses distinct ready and error states", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var alertNode = document.querySelector("[data-features-export-validation-alert]");
+        expect(alertNode.classList.contains("wc-alert--error")).toBe(true);
+        expect(alertNode.getAttribute("data-validation-state")).toBe("error");
+        expect(alertNode.getAttribute("role")).toBe("alert");
+        expect(alertNode.getAttribute("aria-live")).toBe("assertive");
+        expect(document.querySelector('[data-features-export-region="validation"]').textContent)
+            .toContain("Select at least one layer.");
+
+        document
+            .querySelector('[data-features-export-action="load-defaults"]')
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        await flushPromises();
+
+        expect(alertNode.classList.contains("wc-alert--success")).toBe(true);
+        expect(alertNode.getAttribute("data-validation-state")).toBe("ready");
+        expect(alertNode.getAttribute("role")).toBe("status");
+        expect(alertNode.getAttribute("aria-live")).toBe("polite");
+        expect(document.querySelector('[data-features-export-region="validation"]').textContent)
+            .toContain("Ready to export.");
+    });
+
     test("tabular options are format-dependent and included in csv/parquet payloads", async () => {
         document.body.innerHTML = buildFixtureHtml();
         controller.bootstrap({});
 
         var tabularWrap = document.querySelector("[data-features-export-tabular-options]");
+        var geometryWrap = document.querySelector("[data-features-export-geometry-options]");
         expect(tabularWrap.hidden).toBe(true);
+        expect(geometryWrap.hidden).toBe(false);
 
         var formatSelect = document.querySelector('[data-features-export-field="format"]');
         formatSelect.value = "csv";
         formatSelect.dispatchEvent(new Event("change", { bubbles: true }));
         expect(tabularWrap.hidden).toBe(false);
+        expect(geometryWrap.hidden).toBe(true);
 
         var weppLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.summary.hillslopes"]');
         weppLayer.checked = true;
@@ -506,6 +545,34 @@ describe("FeaturesExport controller", () => {
             }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
+    });
+
+    test("tabular formats do not require CRS and omit CRS from payload", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        document.querySelectorAll('[data-features-export-field="crs"]').forEach((node) => {
+            node.checked = false;
+        });
+
+        var formatSelect = document.querySelector('[data-features-export-field="format"]');
+        formatSelect.value = "csv";
+        formatSelect.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var layer = document.querySelector('[data-features-export-action="toggle-layer"][value="watershed.subcatchments"]');
+        layer.checked = true;
+        layer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        document
+            .getElementById("features_export_form")
+            .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledTimes(1);
+        var payload = httpMock.postJsonWithSessionToken.mock.calls[0][1];
+        expect(payload.format).toBe("csv");
+        expect(Object.prototype.hasOwnProperty.call(payload, "crs")).toBe(false);
     });
 
     test("tabular long layout blocks mixed event and yearly temporal selections", async () => {
@@ -593,6 +660,33 @@ describe("FeaturesExport controller", () => {
             }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
+    });
+
+    test("changing layer temporal mode does not replace controls or trigger form submit", () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var weppLayer = document.querySelector('[data-features-export-action="toggle-layer"][value="wepp.summary.hillslopes"]');
+        weppLayer.checked = true;
+        weppLayer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var temporalSelect = document.querySelector(
+            '[data-features-export-field="layer-temporal-mode"][data-layer-id="wepp.summary.hillslopes"]'
+        );
+        expect(temporalSelect).not.toBeNull();
+
+        var form = document.getElementById("features_export_form");
+        var submitCount = 0;
+        form.addEventListener("submit", function () {
+            submitCount += 1;
+        });
+
+        temporalSelect.value = "yearly";
+        temporalSelect.dispatchEvent(new Event("change", { bubbles: true }));
+
+        expect(submitCount).toBe(0);
+        expect(document.contains(temporalSelect)).toBe(true);
+        expect(temporalSelect.value).toBe("yearly");
     });
 
     test("layer details markup keeps hierarchy semantics and renders schema descriptions", () => {
@@ -781,6 +875,55 @@ describe("FeaturesExport controller", () => {
         );
         expect(document.getElementById("features_export_result_state").textContent).toContain("Partial success");
         expect(document.getElementById("hint_run_features_export").textContent).toContain("job-101");
+    });
+
+    test("completion marks command button as terminal-ready so follow-up format and units changes stay enabled", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        var layer = document.querySelector('[data-features-export-action="toggle-layer"][value="watershed.subcatchments"]');
+        layer.checked = true;
+        layer.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var submitButton = document.getElementById("btn_run_features_export");
+        submitButton.disabled = true;
+
+        controller.rq_job_id = "job-locked";
+        controller.rq_job_status = null;
+        controller.update_command_button_state = jest.fn((self) => {
+            var status = self && self.rq_job_status ? String(self.rq_job_status.status || "") : "";
+            var isTerminal = status === "finished"
+                || status === "failed"
+                || status === "stopped"
+                || status === "canceled"
+                || status === "not_found";
+            submitButton.disabled = !isTerminal;
+        });
+
+        httpMock.requestWithSessionToken.mockResolvedValueOnce({
+            body: {
+                result: {
+                    download_url: "/runs/test-run/test-cfg/download/export/features/artifacts/artifact-locked/features_export.gpkg"
+                }
+            }
+        });
+
+        controller.triggerEvent("FEATURES_EXPORT_TASK_COMPLETED", { job_id: "job-locked" });
+        await flushPromises();
+        await flushPromises();
+
+        expect(controller.update_command_button_state).toHaveBeenCalled();
+        expect(submitButton.disabled).toBe(false);
+
+        var formatSelect = document.querySelector('[data-features-export-field="format"]');
+        formatSelect.value = "csv";
+        formatSelect.dispatchEvent(new Event("change", { bubbles: true }));
+
+        var englishUnits = document.querySelector('[data-features-export-field="units"][value="english"]');
+        englishUnits.checked = true;
+        englishUnits.dispatchEvent(new Event("change", { bubbles: true }));
+
+        expect(submitButton.disabled).toBe(false);
     });
 
     test("submit accepts canonical wrapped job_id payloads", async () => {

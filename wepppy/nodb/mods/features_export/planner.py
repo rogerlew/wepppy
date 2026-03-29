@@ -1026,6 +1026,33 @@ def _normalize_temporal(
         errors=errors,
     )
 
+    validated_layer_modes: dict[str, str] = {}
+    for layer_id, layer_mode in layer_modes.items():
+        supported_modes = catalog.layer_index[layer_id].temporal_supported_modes
+        if not supported_modes:
+            errors.append(
+                ValidationIssue(
+                    code="unsupported_temporal_mode",
+                    message=f"Layer {layer_id!r} does not support temporal modes.",
+                    path=f"temporal.layer_modes.{layer_id}",
+                )
+            )
+            continue
+        if layer_mode not in supported_modes:
+            errors.append(
+                ValidationIssue(
+                    code="unsupported_temporal_mode",
+                    message=(
+                        f"Layer {layer_id!r} does not support temporal mode {layer_mode!r}; "
+                        f"supported values are {list(supported_modes)!r}."
+                    ),
+                    path=f"temporal.layer_modes.{layer_id}",
+                )
+            )
+            continue
+        validated_layer_modes[layer_id] = layer_mode
+    layer_modes = validated_layer_modes
+
     selected_temporal_layers = [
         layer_id for layer_id in selected_layers if catalog.layer_index[layer_id].temporal_supported_modes
     ]

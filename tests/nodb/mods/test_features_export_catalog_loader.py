@@ -64,6 +64,17 @@ def test_load_layer_catalog_default_file_contract_is_valid() -> None:
     assert catalog.layer_index["wepp.summary.hillslopes"].scope_class == "scope_aware"
 
 
+def test_load_layer_catalog_requires_non_empty_labels_for_all_layers() -> None:
+    catalog = load_layer_catalog()
+
+    missing_labels = [
+        layer.layer_id
+        for layer in catalog.layers
+        if not str(layer.raw.get("label") or "").strip()
+    ]
+    assert missing_labels == []
+
+
 def test_load_layer_catalog_rejects_locator_alias_keys(tmp_path) -> None:
     payload = _minimal_catalog_payload(locator={"kind": "relpath", "path": "bad.alias"})
     catalog_path = tmp_path / "invalid_locator_catalog.yaml"

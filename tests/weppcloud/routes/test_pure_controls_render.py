@@ -513,6 +513,8 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
         'data-features-export-field="tabular-concatenate-tables"',
         'data-features-export-field="tabular-temporal-layout"',
         'data-features-export-tabular-options',
+        'data-features-export-geometry-options',
+        'data-features-export-validation-alert',
         'id="features_export_results_panel"',
         'id="features_export_status_panel"',
         'id="features_export_status_log"',

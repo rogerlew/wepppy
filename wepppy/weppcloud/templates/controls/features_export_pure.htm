@@ -196,7 +196,15 @@
       gap: 0.35rem;
     }
 
-    .features-export-tabular-options {
+    .features-export-validation-alert {
+      margin-top: 0.15rem;
+    }
+
+    .features-export-validation-alert .wc-alert__body {
+      font-weight: 600;
+    }
+
+    .features-export-format-dependent-options {
       margin-left: 1.15rem;
       padding-left: 0.85rem;
       border-left: 2px solid rgba(127, 127, 127, 0.28);
@@ -206,7 +214,7 @@
   </style>
 
   {% set units_options = [
-    {"id": "features_export_units_project", "label": "Project", "value": "project", "selected": default_units == "project", "attrs": {"data-features-export-field": "units"}},
+    {"id": "features_export_units_project", "label": "Unitzer Selections", "value": "project", "selected": default_units == "project", "attrs": {"data-features-export-field": "units"}},
     {"id": "features_export_units_si", "label": "SI", "value": "si", "selected": default_units == "si", "attrs": {"data-features-export-field": "units"}},
     {"id": "features_export_units_english", "label": "English", "value": "english", "selected": default_units == "english", "attrs": {"data-features-export-field": "units"}},
   ] %}
@@ -219,6 +227,21 @@
       "selected": default_crs == "utm",
       "disabled": (not utm_available),
       "attrs": {"data-features-export-field": "crs"}
+    },
+  ] %}
+  {% set tabular_temporal_layout_options = [
+    {
+      "id": "features_export_tabular_temporal_layout_wide",
+      "label": "wide",
+      "value": "wide",
+      "selected": True,
+      "attrs": {"data-features-export-field": "tabular-temporal-layout"}
+    },
+    {
+      "id": "features_export_tabular_temporal_layout_long",
+      "label": "long",
+      "value": "long",
+      "attrs": {"data-features-export-field": "tabular-temporal-layout"}
     },
   ] %}
 
@@ -249,46 +272,34 @@
          max_width="750px"
        ) }}
 
-    <div class="features-export-tabular-options" data-features-export-tabular-options hidden>
-      <label class="wc-toggle-inline" for="features_export_tabular_concatenate_tables">
-        <input
-          id="features_export_tabular_concatenate_tables"
-          type="checkbox"
-          data-features-export-field="tabular-concatenate-tables">
-        <span>Concatenate tables</span>
-      </label>
-      <p class="wc-field__help">
-        Merge all hillslope carrier outputs into one table and all channel carrier outputs into one table.
-        Concatenated rows include provenance columns for output scope and Omni selector context when applicable.
-      </p>
-      <div class="wc-field" style="max-width: 750px;">
-        <span class="wc-field__label">Temporal table layout</span>
-        <div class="wc-field__control-group">
-          <label class="wc-toggle-inline" for="features_export_tabular_temporal_layout_wide">
-            <input
-              id="features_export_tabular_temporal_layout_wide"
-              type="radio"
-              name="features_export_tabular_temporal_layout"
-              value="wide"
-              data-features-export-field="tabular-temporal-layout"
-              checked>
-            <span>wide</span>
-          </label>
-          <label class="wc-toggle-inline" for="features_export_tabular_temporal_layout_long">
-            <input
-              id="features_export_tabular_temporal_layout_long"
-              type="radio"
-              name="features_export_tabular_temporal_layout"
-              value="long"
-              data-features-export-field="tabular-temporal-layout">
-            <span>long</span>
-          </label>
-        </div>
-      </div>
-      <p class="wc-field__help">
-        Wide keeps one row per carrier feature and appends year/date/return-period tokens into measure column names.
-        Long emits one temporal selector column (`year`, `date`, or `return_period`) plus measure columns across multiple rows.
-      </p>
+    <div class="features-export-format-dependent-options" data-features-export-tabular-options hidden>
+      {{ ui.checkbox_field(
+           "features_export_tabular_concatenate_tables",
+           "Concatenate tables",
+           checked=False,
+           help="Merge all hillslope carrier outputs into one table and all channel carrier outputs into one table. Concatenated rows include provenance columns for output scope and Omni selector context when applicable.",
+           attrs={"data-features-export-field": "tabular-concatenate-tables"},
+           max_width="750px"
+         ) }}
+
+      {{ ui.radio_group(
+           "features_export_tabular_temporal_layout",
+           label="Temporal table layout",
+           layout="horizontal",
+           options=tabular_temporal_layout_options,
+           help="Wide keeps one row per carrier feature and appends year/date/return-period tokens into measure column names. Long emits one temporal selector column (`year`, `date`, or `return_period`) plus measure columns across multiple rows.",
+           max_width="750px"
+         ) }}
+    </div>
+
+    <div class="features-export-format-dependent-options" data-features-export-geometry-options>
+      {{ ui.radio_group(
+           "features_export_crs",
+           label="CRS",
+           layout="horizontal",
+           options=crs_options,
+           max_width="750px"
+         ) }}
     </div>
 
     {{ ui.radio_group(
@@ -296,14 +307,6 @@
          label="Units",
          layout="horizontal",
          options=units_options,
-         max_width="750px"
-       ) }}
-
-    {{ ui.radio_group(
-         "features_export_crs",
-         label="CRS",
-         layout="horizontal",
-         options=crs_options,
          max_width="750px"
        ) }}
 
@@ -454,8 +457,15 @@
     <div class="features-export-summary-body">
       <p data-features-export-region="selected-count">Selected: 0 layers</p>
       <p data-features-export-region="family-counts">Families: none</p>
-      <p data-features-export-region="capability-counts">Scope-aware: 0 | Temporal-capable: 0</p>
-      <p data-features-export-region="validation" class="wc-field__help"></p>
+      <p data-features-export-region="scope-aware-count">Scope-aware: 0</p>
+      <p data-features-export-region="temporal-capable-count">Temporal-capable: 0</p>
+      <div class="wc-alert wc-alert--info features-export-validation-alert"
+           data-features-export-validation-alert
+           data-validation-state="pending"
+           role="status"
+           aria-live="polite">
+        <p data-features-export-region="validation" class="wc-alert__body">Validation: Waiting for required selections.</p>
+      </div>
       <p data-features-export-region="summary-warnings" class="wc-field__help"></p>
     </div>
   </section>

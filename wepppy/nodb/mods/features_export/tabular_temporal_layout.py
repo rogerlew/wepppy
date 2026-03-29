@@ -90,38 +90,45 @@ def reshape_temporal_wide_to_long(
     measure_columns = _ordered_unique([match.measure_name for match in column_matches])
     ordered_tokens = _ordered_unique([match.temporal_token for match in column_matches])
 
-    source = frame.copy()
-    token_frames: list[pd.DataFrame] = []
-    for token in ordered_tokens:
-        base_columns = identity_columns + static_columns
-        if geometry_name is not None:
-            base_columns = [*base_columns, geometry_name]
-        token_frame = source[base_columns].copy()
-        for measure_name in measure_columns:
-            source_column = _resolve_measure_token_column(
-                column_matches=column_matches,
-                measure_name=measure_name,
-                temporal_token=token,
-            )
-            if source_column is None:
-                token_frame[measure_name] = pd.NA
-            else:
-                token_frame[measure_name] = source[source_column]
-        token_frame[temporal_column] = _decode_temporal_value(
+    source = frame.reset_index(drop=True)
+    base_columns = [*identity_columns, *static_columns]
+    if geometry_name is not None:
+        base_columns.append(geometry_name)
+    base_values = source[base_columns]
+
+    column_by_pair = {
+        (match.measure_name, match.temporal_token): match.column_name
+        for match in column_matches
+    }
+    decoded_temporal_values = [
+        _decode_temporal_value(
             temporal_token=token,
             mode=mode,
             selector=temporal_selector,
         )
-        if geometry_name is not None:
-            token_frames.append(
-                gpd.GeoDataFrame(
-                    token_frame,
-                    geometry=geometry_name,
-                    crs=source.crs,
-                )
+        for token in ordered_tokens
+    ]
+    token_frames: list[pd.DataFrame] = []
+    for token, decoded_temporal in zip(ordered_tokens, decoded_temporal_values):
+        present_columns = {
+            measure_name: column_by_pair[(measure_name, token)]
+            for measure_name in measure_columns
+            if (measure_name, token) in column_by_pair
+        }
+        if present_columns:
+            temporal_values = source[list(present_columns.values())].rename(
+                columns={
+                    source_column: measure_name
+                    for measure_name, source_column in present_columns.items()
+                }
             )
+            temporal_values = temporal_values.reindex(columns=measure_columns)
         else:
-            token_frames.append(token_frame)
+            temporal_values = pd.DataFrame(index=source.index, columns=measure_columns)
+
+        token_frame = pd.concat([base_values, temporal_values], axis=1, copy=False)
+        token_frame[temporal_column] = decoded_temporal
+        token_frames.append(token_frame)
 
     if not token_frames:
         return TabularTemporalLongResult(
@@ -156,11 +163,7 @@ def reshape_temporal_wide_to_long(
             resolved_units[column_name] = unit_value
 
     for measure_name in measure_columns:
-        sample_column = _resolve_measure_token_column(
-            column_matches=column_matches,
-            measure_name=measure_name,
-            temporal_token=ordered_tokens[0],
-        )
+        sample_column = column_by_pair.get((measure_name, ordered_tokens[0]))
         if sample_column is None:
             sample_column = next(
                 (
@@ -254,19 +257,6 @@ def _parse_temporal_wide_column(
     if not measure_name or not date_token:
         return None
     return measure_name, date_token
-
-
-def _resolve_measure_token_column(
-    *,
-    column_matches: cabc.Sequence[_WideTemporalColumnMatch],
-    measure_name: str,
-    temporal_token: str,
-) -> str | None:
-    for match in column_matches:
-        if match.measure_name == measure_name and match.temporal_token == temporal_token:
-            return match.column_name
-    return None
-
 
 def _decode_temporal_value(*, temporal_token: str, mode: str, selector: str) -> object:
     token = str(temporal_token or "").strip()

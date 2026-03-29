@@ -20,6 +20,7 @@ import pandas as pd
 
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.unitizer import Unitizer
+from wepppy.runtime_paths import pick_existing_parquet_path
 from wepppy.runtime_paths.materialize import materialize_path_if_archive
 
 from .carrier_layer_materializer import materialize_carrier_layer_core
@@ -58,6 +59,7 @@ from .exporters import (
     get_export_writer,
 )
 from .geometry_carriers import attach_geometry_once, build_canonical_geometry_carrier
+from .identity_columns import normalize_identity_output_columns
 from .join_planner import JOIN_KEY_COLUMN, MaterializationContractError
 from .legacy_source_materializer import build_legacy_merged_frame
 from .manifest import build_export_manifest, write_export_manifest
@@ -73,6 +75,8 @@ FEATURES_EXPORT_MANIFEST_NAME = "manifest.json"
 _GPKG_APPLICATION_ID = 0x47504B47
 _CONSOLIDATED_JOIN_KEY_COLUMN = JOIN_KEY_COLUMN
 _SAFE_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
+_TOPAZ_ID_COLUMN = "topaz_id"
+_WEPP_ID_COLUMN = "wepp_id"
 
 
 class FeaturesExportServiceError(RuntimeError):
@@ -590,6 +594,10 @@ def _materialize_export_payloads(
         if submission.plan.request.temporal is not None
         else None
     )
+    watershed_identity_lookup_cache: dict[
+        tuple[str, str],
+        tuple[dict[str, object], dict[str, object]] | None,
+    ] = {}
 
     for layer in materialized_plan.layers:
         source_layers = grouped_layers.get(layer.output_layer_id, ())
@@ -618,6 +626,7 @@ def _materialize_export_payloads(
                 use_tabular_payload=use_tabular_payload,
                 use_tabular_long_layout=use_tabular_long_layout,
                 tabular_event_selector=tabular_event_selector,
+                watershed_identity_lookup_cache=watershed_identity_lookup_cache,
             )
         except MaterializationContractError as exc:
             raise FeaturesExportServiceError(
@@ -655,6 +664,10 @@ def _build_key_first_materialized_layer_payload(
     use_tabular_payload: bool,
     use_tabular_long_layout: bool,
     tabular_event_selector: NormalizedTemporalEvent | None,
+    watershed_identity_lookup_cache: dict[
+        tuple[str, str],
+        tuple[dict[str, object], dict[str, object]] | None,
+    ],
 ) -> tuple[PreparedLayerPayload, dict[str, object]]:
     if not source_results:
         raise MaterializationContractError(
@@ -666,19 +679,30 @@ def _build_key_first_materialized_layer_payload(
     layer_inputs: list[LayerCarrierInput] = []
     for result in source_results:
         warnings.extend(result.warnings)
+        aligned_frame = _align_carrier_identity_join_key(
+            frame=result.frame,
+            wd=wd,
+            carrier_layer=layer.carrier_layer,
+            cache=watershed_identity_lookup_cache,
+        )
         layer_inputs.append(
             LayerCarrierInput(
                 layer_id=result.layer.layer_id,
-                dataframe=result.frame,
+                dataframe=aligned_frame,
                 selected_columns=result.selected_columns,
                 unit_mapping=result.unit_mapping,
             )
         )
 
+    allow_non_unique_carrier_keys = (
+        layer.temporal_mode == "event"
+        or any(_layer_join_allows_non_unique_keys(result.catalog_layer_raw) for result in source_results)
+    )
+
     carrier_core = materialize_carrier_core(
         carrier_label=layer.output_layer_id,
         layer_inputs=layer_inputs,
-        allow_non_unique_keys=layer.temporal_mode == "event",
+        allow_non_unique_keys=allow_non_unique_carrier_keys,
     )
 
     if use_tabular_payload:
@@ -712,6 +736,19 @@ def _build_key_first_materialized_layer_payload(
             unit_mapping=unit_mapping,
             geometry_name="",
             consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+        )
+        merged_table, selected_columns, unit_mapping = normalize_identity_output_columns(
+            frame=merged_table,
+            selected_columns=selected_columns,
+            unit_mapping=unit_mapping,
+            geometry_name=None,
+            consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+        )
+        merged_table = _backfill_tabular_identity_from_watershed(
+            frame=merged_table,
+            wd=wd,
+            carrier_layer=layer.carrier_layer,
+            cache=watershed_identity_lookup_cache,
         )
         merged_table = merged_table.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
 
@@ -782,7 +819,7 @@ def _build_key_first_materialized_layer_payload(
     merged = attach_geometry_once(
         core_table=core_for_geometry,
         geometry_carrier=geometry_carrier,
-        allow_non_unique_keys=layer.temporal_mode == "event",
+        allow_non_unique_keys=allow_non_unique_carrier_keys,
     )
     if layer.temporal_mode == "event":
         merged = _backfill_identity_from_geometry_key(
@@ -815,6 +852,13 @@ def _build_key_first_materialized_layer_payload(
 
     geometry_name = merged.geometry.name
     merged, selected_columns, unit_mapping = apply_unitized_column_suffixes(
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        geometry_name=geometry_name,
+        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
+    merged, selected_columns, unit_mapping = normalize_identity_output_columns(
         frame=merged,
         selected_columns=selected_columns,
         unit_mapping=unit_mapping,
@@ -931,6 +975,303 @@ def _backfill_identity_from_geometry_key(
         result.loc[missing_mask, column_name] = fill_values.loc[missing_mask]
 
     return result
+
+
+def _align_carrier_identity_join_key(
+    *,
+    frame: pd.DataFrame,
+    wd: Path,
+    carrier_layer: str | None,
+    cache: dict[
+        tuple[str, str],
+        tuple[dict[str, object], dict[str, object]] | None,
+    ],
+) -> pd.DataFrame:
+    if _CONSOLIDATED_JOIN_KEY_COLUMN not in frame.columns:
+        return frame
+
+    carrier_token = str(carrier_layer or "").strip().lower()
+    if carrier_token not in {"sbs_map-subcatchments", "chan_map-channels"}:
+        return frame
+
+    has_topaz = _TOPAZ_ID_COLUMN in frame.columns
+    has_wepp = _WEPP_ID_COLUMN in frame.columns
+    if not has_topaz and not has_wepp:
+        return frame
+
+    result = frame.copy()
+    if not has_topaz:
+        result[_TOPAZ_ID_COLUMN] = pd.Series(
+            [None] * len(result.index),
+            index=result.index,
+            dtype="object",
+        )
+    if not has_wepp:
+        result[_WEPP_ID_COLUMN] = pd.Series(
+            [None] * len(result.index),
+            index=result.index,
+            dtype="object",
+        )
+
+    result = _backfill_tabular_identity_from_watershed(
+        frame=result,
+        wd=wd,
+        carrier_layer=carrier_layer,
+        cache=cache,
+    )
+
+    normalized_join = result[_CONSOLIDATED_JOIN_KEY_COLUMN].map(_canonical_join_value)
+    preferred_identity_order = (
+        (_WEPP_ID_COLUMN, _TOPAZ_ID_COLUMN)
+        if carrier_token == "sbs_map-subcatchments"
+        else (_TOPAZ_ID_COLUMN, _WEPP_ID_COLUMN)
+    )
+    retargetable_identity_columns = {
+        _TOPAZ_ID_COLUMN: has_topaz,
+        _WEPP_ID_COLUMN: has_wepp,
+    }
+
+    existing_join_non_null = normalized_join.dropna()
+    existing_join_unique_count = int(existing_join_non_null.nunique())
+
+    for identity_column in preferred_identity_order:
+        if not retargetable_identity_columns.get(identity_column, False):
+            continue
+
+        identity_series = result[identity_column].map(_canonical_join_value)
+        identity_non_null = identity_series.dropna()
+        if identity_non_null.empty:
+            continue
+
+        if existing_join_unique_count == 0:
+            normalized_join = identity_series
+            existing_join_non_null = normalized_join.dropna()
+            existing_join_unique_count = int(existing_join_non_null.nunique())
+            break
+
+        overlap_mask = normalized_join.notna() & identity_series.notna()
+        if not overlap_mask.any():
+            continue
+
+        overlap_frame = pd.DataFrame(
+            {
+                "join": normalized_join.loc[overlap_mask],
+                "identity": identity_series.loc[overlap_mask],
+            }
+        ).drop_duplicates()
+
+        # Retarget only when the identity domain covers every resolved join key
+        # and preserves one-to-one key cardinality.
+        if int(overlap_frame["join"].nunique()) != existing_join_unique_count:
+            continue
+        if int(overlap_frame["identity"].nunique()) != int(identity_non_null.nunique()):
+            continue
+        if int(overlap_frame["identity"].nunique()) != existing_join_unique_count:
+            continue
+
+        normalized_join = identity_series
+        existing_join_non_null = normalized_join.dropna()
+        existing_join_unique_count = int(existing_join_non_null.nunique())
+        break
+
+    fill_identity_order = list(preferred_identity_order)
+    if normalized_join.notna().any():
+        scored_order: list[tuple[int, int, str]] = []
+        for order_index, identity_column in enumerate(preferred_identity_order):
+            identity_series = result[identity_column].map(_canonical_join_value)
+            overlap_mask = normalized_join.notna() & identity_series.notna()
+            match_score = 0
+            if overlap_mask.any():
+                match_score = int(
+                    (normalized_join.loc[overlap_mask] == identity_series.loc[overlap_mask]).sum()
+                )
+            scored_order.append((-match_score, order_index, identity_column))
+        scored_order.sort()
+        fill_identity_order = [entry[2] for entry in scored_order]
+
+    missing_join_mask = normalized_join.isna()
+    if missing_join_mask.any():
+        for identity_column in fill_identity_order:
+            identity_series = result[identity_column].map(_canonical_join_value)
+            fill_mask = missing_join_mask & identity_series.notna()
+            if fill_mask.any():
+                normalized_join.loc[fill_mask] = identity_series.loc[fill_mask]
+                missing_join_mask = normalized_join.isna()
+            if not missing_join_mask.any():
+                break
+
+    if not normalized_join.notna().any():
+        return result
+
+    result[_CONSOLIDATED_JOIN_KEY_COLUMN] = normalized_join
+    return result
+
+
+def _backfill_tabular_identity_from_watershed(
+    *,
+    frame: pd.DataFrame,
+    wd: Path,
+    carrier_layer: str | None,
+    cache: dict[
+        tuple[str, str],
+        tuple[dict[str, object], dict[str, object]] | None,
+    ],
+) -> pd.DataFrame:
+    if _TOPAZ_ID_COLUMN not in frame.columns or _WEPP_ID_COLUMN not in frame.columns:
+        return frame
+
+    missing_topaz = frame[_TOPAZ_ID_COLUMN].isna()
+    missing_wepp = frame[_WEPP_ID_COLUMN].isna()
+    if not missing_topaz.any() and not missing_wepp.any():
+        return frame
+
+    lookup = _load_watershed_identity_lookup(
+        wd=wd,
+        carrier_layer=carrier_layer,
+        cache=cache,
+    )
+    if lookup is None:
+        return frame
+    topaz_by_wepp, wepp_by_topaz = lookup
+    if not topaz_by_wepp and not wepp_by_topaz:
+        return frame
+
+    result = frame.copy()
+    result[_TOPAZ_ID_COLUMN] = _fill_missing_identity_values(
+        target_series=result[_TOPAZ_ID_COLUMN],
+        source_series=result[_WEPP_ID_COLUMN],
+        lookup=topaz_by_wepp,
+    )
+    result[_WEPP_ID_COLUMN] = _fill_missing_identity_values(
+        target_series=result[_WEPP_ID_COLUMN],
+        source_series=result[_TOPAZ_ID_COLUMN],
+        lookup=wepp_by_topaz,
+    )
+    result[_TOPAZ_ID_COLUMN] = _fill_missing_identity_values(
+        target_series=result[_TOPAZ_ID_COLUMN],
+        source_series=result[_WEPP_ID_COLUMN],
+        lookup=topaz_by_wepp,
+    )
+    return result
+
+
+def _load_watershed_identity_lookup(
+    *,
+    wd: Path,
+    carrier_layer: str | None,
+    cache: dict[
+        tuple[str, str],
+        tuple[dict[str, object], dict[str, object]] | None,
+    ],
+) -> tuple[dict[str, object], dict[str, object]] | None:
+    carrier_token = str(carrier_layer or "").strip().lower()
+    cache_key = (str(wd.resolve()), carrier_token)
+    cached = cache.get(cache_key)
+    if cache_key in cache:
+        return cached
+
+    topaz_by_wepp: dict[str, object] = {}
+    wepp_by_topaz: dict[str, object] = {}
+    ambiguous_wepp_keys: set[str] = set()
+    ambiguous_topaz_keys: set[str] = set()
+
+    for relpath in _watershed_identity_relpaths_for_carrier(carrier_token):
+        parquet_path = pick_existing_parquet_path(wd, relpath)
+        if parquet_path is None:
+            continue
+
+        for topaz_value, wepp_value in _read_watershed_identity_pairs(parquet_path):
+            _merge_watershed_identity_pair(
+                topaz_value=topaz_value,
+                wepp_value=wepp_value,
+                topaz_by_wepp=topaz_by_wepp,
+                wepp_by_topaz=wepp_by_topaz,
+                ambiguous_wepp_keys=ambiguous_wepp_keys,
+                ambiguous_topaz_keys=ambiguous_topaz_keys,
+            )
+
+    for ambiguous_wepp in ambiguous_wepp_keys:
+        topaz_by_wepp.pop(ambiguous_wepp, None)
+    for ambiguous_topaz in ambiguous_topaz_keys:
+        wepp_by_topaz.pop(ambiguous_topaz, None)
+
+    lookup: tuple[dict[str, object], dict[str, object]] | None = None
+    if topaz_by_wepp or wepp_by_topaz:
+        lookup = (topaz_by_wepp, wepp_by_topaz)
+
+    cache[cache_key] = lookup
+    return lookup
+
+
+def _watershed_identity_relpaths_for_carrier(carrier_token: str) -> tuple[str, ...]:
+    if carrier_token == "chan_map-channels":
+        return ("watershed/channels.parquet", "watershed/hillslopes.parquet")
+    return ("watershed/hillslopes.parquet", "watershed/channels.parquet")
+
+
+def _read_watershed_identity_pairs(parquet_path: Path) -> tuple[tuple[object, object], ...]:
+    frame = pd.read_parquet(parquet_path)
+    column_lookup = _normalized_column_lookup(frame.columns)
+    topaz_column = column_lookup.get("topazid")
+    wepp_column = column_lookup.get("weppid")
+    if topaz_column is None or wepp_column is None:
+        return ()
+
+    pairs_frame = frame[[topaz_column, wepp_column]].dropna(how="any")
+    if pairs_frame.empty:
+        return ()
+    return tuple(pairs_frame.itertuples(index=False, name=None))
+
+
+def _merge_watershed_identity_pair(
+    *,
+    topaz_value: object,
+    wepp_value: object,
+    topaz_by_wepp: dict[str, object],
+    wepp_by_topaz: dict[str, object],
+    ambiguous_wepp_keys: set[str],
+    ambiguous_topaz_keys: set[str],
+) -> None:
+    topaz_key = _canonical_join_value(topaz_value)
+    wepp_key = _canonical_join_value(wepp_value)
+    if topaz_key is None or wepp_key is None:
+        return
+
+    existing_topaz = topaz_by_wepp.get(wepp_key)
+    if existing_topaz is None:
+        topaz_by_wepp[wepp_key] = topaz_value
+    elif _canonical_join_value(existing_topaz) != topaz_key:
+        ambiguous_wepp_keys.add(wepp_key)
+
+    existing_wepp = wepp_by_topaz.get(topaz_key)
+    if existing_wepp is None:
+        wepp_by_topaz[topaz_key] = wepp_value
+    elif _canonical_join_value(existing_wepp) != wepp_key:
+        ambiguous_topaz_keys.add(topaz_key)
+
+
+def _fill_missing_identity_values(
+    *,
+    target_series: pd.Series,
+    source_series: pd.Series,
+    lookup: cabc.Mapping[str, object],
+) -> pd.Series:
+    if not lookup:
+        return target_series
+
+    missing_mask = target_series.isna()
+    if not missing_mask.any():
+        return target_series
+
+    source_keys = source_series.map(_canonical_join_value)
+    mapped_values = source_keys.map(lookup)
+    fill_mask = missing_mask & mapped_values.notna()
+    if not fill_mask.any():
+        return target_series
+
+    filled = target_series.copy()
+    filled.loc[fill_mask] = mapped_values.loc[fill_mask]
+    return filled
 
 
 def _carrier_unit_mapping(
@@ -1196,6 +1537,13 @@ def _build_layer_frame_from_sources(
     )
     geometry_name = merged.geometry.name
     merged, selected_columns, unit_mapping = apply_unitized_column_suffixes(
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        geometry_name=geometry_name,
+        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
+    merged, selected_columns, unit_mapping = normalize_identity_output_columns(
         frame=merged,
         selected_columns=selected_columns,
         unit_mapping=unit_mapping,
@@ -1604,6 +1952,12 @@ def _as_mapping(value: object) -> dict[str, object]:
             continue
         normalized[key_text] = item
     return normalized
+
+
+def _layer_join_allows_non_unique_keys(catalog_layer_raw: cabc.Mapping[str, object]) -> bool:
+    join_contract = _as_mapping(catalog_layer_raw.get("join"))
+    allow_flag = join_contract.get("allow_non_unique_keys")
+    return isinstance(allow_flag, bool) and allow_flag
 
 
 def _as_string(value: object) -> str:

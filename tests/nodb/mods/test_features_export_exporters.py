@@ -348,6 +348,89 @@ def test_geodatabase_writer_uses_f_esri_conversion_boundary(tmp_path: Path, cata
     assert all(output.relpath == "features_export.gdb.zip" for output in artifact.layer_outputs)
 
 
+def test_geodatabase_writer_staging_gpkg_uses_typed_geometry(tmp_path: Path, catalog) -> None:
+    plan = _resolved_plan(catalog, "geodatabase")
+    plan_layers = sorted(plan.layers, key=lambda item: item.output_layer_id)
+    spatial_layer = plan_layers[0]
+
+    feature_payload = {
+        "schema": "wepppy.features_export.feature_collection.v1",
+        "layer_id": spatial_layer.layer_id,
+        "output_layer_id": spatial_layer.output_layer_id,
+        "scope": spatial_layer.scope,
+        "scope_class": spatial_layer.scope_class,
+        "crs_epsg": 4326,
+        "feature_collection": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"TopazID": 1},
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [[0, 0], [1, 1]],
+                    },
+                }
+            ],
+        },
+    }
+
+    payloads: dict[str, PreparedLayerPayload] = {}
+    for layer in plan_layers:
+        if layer.output_layer_id == spatial_layer.output_layer_id:
+            payloads[layer.output_layer_id] = PreparedLayerPayload(
+                output_layer_id=layer.output_layer_id,
+                payload=json.dumps(feature_payload, sort_keys=True, separators=(",", ":")),
+                row_count=1,
+                feature_count=1,
+            )
+            continue
+        payloads[layer.output_layer_id] = PreparedLayerPayload(
+            output_layer_id=layer.output_layer_id,
+            payload=f"payload::{layer.output_layer_id}",
+            row_count=1,
+            feature_count=1,
+        )
+
+    request = ExportWriterRequest(
+        plan=plan,
+        layer_payloads=payloads,
+        artifact_dir=tmp_path,
+        artifact_basename="features_export",
+    )
+
+    def converter(gpkg_path: str, gdb_path: str) -> str:
+        with sqlite3.connect(gpkg_path) as conn:
+            row = conn.execute(
+                """
+                SELECT gc.geometry_type_name
+                FROM gpkg_geometry_columns gc
+                JOIN gpkg_contents c ON c.table_name = gc.table_name
+                WHERE c.identifier = ?
+                """,
+                (spatial_layer.output_layer_id,),
+            ).fetchone()
+
+        assert row is not None
+        assert row[0] == "LINESTRING"
+
+        gdb_dir = Path(gdb_path)
+        gdb_dir.mkdir(parents=True, exist_ok=True)
+        (gdb_dir / "a.gdbtable").write_text("stub", encoding="utf-8")
+        zip_path = gdb_dir.with_suffix(".gdb.zip")
+        zip_path.write_bytes(b"zip")
+        return str(gdb_dir)
+
+    writer = GeodatabaseExportWriter(
+        backend_available=lambda: True,
+        gpkg_to_gdb_converter=converter,
+    )
+    artifact = writer.write(request)
+
+    assert artifact.artifact_relpath == "features_export.gdb.zip"
+    assert Path(artifact.artifact_path).exists()
+
+
 def test_geodatabase_writer_fails_explicitly_when_backend_unavailable(
     tmp_path: Path,
     catalog,

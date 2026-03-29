@@ -56,7 +56,9 @@ def materialize_carrier_layer_core(
     )
 
     join_contract = _as_mapping(catalog_layer_raw.get("join"))
-    allow_non_unique_layer_keys = layer.temporal_mode in {"event", "yearly"}
+    allow_non_unique_layer_keys = _join_allows_non_unique_keys(join_contract) or (
+        layer.temporal_mode in {"annual_average", "event", "yearly"}
+    )
     layer_frame, discovered_units = materialize_layer_attributes(
         layer_id=layer.layer_id,
         carrier_layer=layer.carrier_layer,
@@ -118,6 +120,11 @@ def _as_mapping(value: object) -> dict[str, object]:
     if isinstance(value, cabc.Mapping):
         return {str(key): val for key, val in value.items()}
     return {}
+
+
+def _join_allows_non_unique_keys(join_contract: cabc.Mapping[str, object]) -> bool:
+    flag = join_contract.get("allow_non_unique_keys")
+    return isinstance(flag, bool) and flag
 
 
 def _ensure_event_date_column(frame: pd.DataFrame, *, temporal_mode: str | None) -> pd.DataFrame:

@@ -89,7 +89,7 @@ def test_materialize_carrier_layer_core_filters_event_sources_by_selected_dates(
 
     assert len(result.frame.index) == 2
     assert sorted(result.frame[JOIN_KEY_COLUMN].tolist()) == ["1", "2"]
-    assert sorted(result.frame["runoff_volume_m3"].tolist()) == [10.0, 30.0]
+    assert sorted(result.frame["runoff_volume_m3_2010_01_01"].tolist()) == [10.0, 30.0]
 
 
 def test_materialize_carrier_layer_core_skips_optional_event_source_without_date_columns(
@@ -225,4 +225,74 @@ def test_materialize_carrier_layer_core_keeps_required_source_when_event_filter_
     )
 
     assert result.frame.empty
-    assert "date" in result.frame.columns
+    assert list(result.frame.columns) == ["runoff_volume_m3", "date", JOIN_KEY_COLUMN]
+
+
+def test_materialize_carrier_layer_core_allows_non_unique_keys_when_join_contract_opt_in(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="wepp.interchange.h_loss",
+        family="wepp_interchange",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.interchange.h_loss",
+        temporal_mode=None,
+        carrier_layer="sbs_map-subcatchments",
+    )
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=("wepp.interchange.h_loss",),
+    )
+    request_plan = ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(layer,),
+        warnings=(),
+    )
+    source = DiscoveredSourceFrame(
+        source_id="wepp_h_loss",
+        source_kind="parquet",
+        required=True,
+        dataframe=pd.DataFrame(
+            {
+                "wepp_id": [1, 1],
+                "class_id": [1, 2],
+                "Sediment Fraction": [0.4, 0.6],
+            }
+        ),
+        units_by_column={"Sediment Fraction": "non-unitized"},
+    )
+    monkeypatch.setattr(materializer, "discover_layer_sources", lambda **kwargs: ((source,), ()))
+    monkeypatch.setattr(
+        materializer,
+        "resolve_selected_columns",
+        lambda **kwargs: (
+            ("wepp_id", "class_id", "Sediment Fraction"),
+            {
+                "wepp_id": "non-unitized",
+                "class_id": "non-unitized",
+                "Sediment Fraction": "non-unitized",
+            },
+        ),
+    )
+
+    result = materializer.materialize_carrier_layer_core(
+        wd=tmp_path,
+        layer=layer,
+        catalog_layer_raw={
+            "join": {
+                "primary_key": "wepp_id",
+                "allow_non_unique_keys": True,
+            }
+        },
+        request_plan=request_plan,
+        dependency_entries=(),
+        consolidated_join_key_column=JOIN_KEY_COLUMN,
+    )
+
+    assert len(result.frame.index) == 2
+    assert result.frame[JOIN_KEY_COLUMN].tolist() == ["1", "1"]

@@ -213,7 +213,7 @@ def test_normalize_export_request_rejects_daily_temporal_mode(catalog) -> None:
     assert any(issue.code == "unsupported_temporal_mode" for issue in exc.value.issues)
 
 
-def test_resolve_export_plan_drops_temporally_incompatible_layers_with_warning(catalog) -> None:
+def test_resolve_export_plan_keeps_atemporal_channels_when_event_mode_is_selected(catalog) -> None:
     payload = {
         "format": "geoparquet",
         "units": "si",
@@ -226,8 +226,11 @@ def test_resolve_export_plan_drops_temporally_incompatible_layers_with_warning(c
 
     plan = resolve_export_plan(payload, catalog)
 
-    assert [layer.output_layer_id for layer in plan.layers] == ["baseline__wepp.temporal.events"]
-    assert any(
+    assert [layer.output_layer_id for layer in plan.layers] == [
+        "baseline__wepp.summary.channels",
+        "baseline__wepp.temporal.events",
+    ]
+    assert not any(
         warning.code == "layer_unavailable" and warning.layer_id == "wepp.summary.channels"
         for warning in plan.warnings
     )
@@ -237,10 +240,9 @@ def test_resolve_export_plan_rejects_when_temporal_mode_excludes_all_layers(cata
     payload = {
         "format": "geoparquet",
         "units": "si",
-        "layers": ["wepp.summary.channels"],
+        "layers": ["wepp.temporal.events"],
         "temporal": {
-            "mode": "event",
-            "event": {"selector": "date", "dates": ["2025-01-01"]},
+            "mode": "yearly",
         },
     }
 
