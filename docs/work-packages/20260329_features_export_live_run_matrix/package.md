@@ -1,11 +1,13 @@
-# Features Export Live-Run E2E Matrix (clogging-starch)
+# Features Export Live-Run E2E Matrix (Phase 2: Omni Scenarios/Contrasts)
 
-**Status**: Closed (2026-03-29)
+**Status**: Completed (Phase 2 closed 2026-03-29 after Omni scenario/contrast matrix execution)
 
 ## Overview
-This package validates `features_export` end-to-end against a real run (`clogging-starch/disturbed9002-wbt-mofe`) before expanding regression tests. It is a manual-plus-automated quality gate focused on output correctness, format integrity, CRS behavior, Unitizer-driven units, temporal selection behavior, and identity-key normalization.
+This package validates `features_export` end-to-end against real runs. Phase 1 completed on `clogging-starch/disturbed9002-wbt-mofe`. Phase 2 reopens the package to validate Omni scenarios/contrasts behavior on `walk-in-obsessive-compulsive/disturbed9002_wbt` (single OFE context). It remains a manual-plus-automated quality gate focused on output correctness, format integrity, CRS behavior, Unitizer-driven units, temporal selection behavior, and identity-key normalization.
 
-The package intentionally starts with one roads-capable run and treats it as a canonical anchor for data-shape and artifact checks.
+The package now uses two anchors:
+- Phase 1 anchor: roads-capable run (`clogging-starch/disturbed9002-wbt-mofe`).
+- Phase 2 anchor: Omni-inclusive single-OFE run (`walk-in-obsessive-compulsive/disturbed9002_wbt`).
 
 ## Objectives
 - Establish two execution gates:
@@ -41,10 +43,12 @@ The package intentionally starts with one roads-capable run and treats it as a c
   - export-button unlock behavior after completed export and settings changes.
 - Manual artifact sanity review (QGIS / ogrinfo / parquet tools) with recorded evidence.
 - Follow-up pytest/Jest additions for stable matrix subsets.
+- Omni scenario and Omni contrast export validation on `walk-in-obsessive-compulsive/disturbed9002_wbt`.
+- Omni selector-contract coverage where scenario vs contrast families are validated independently with single-OFE geometry.
 
 ### Explicitly Out of Scope
 - New export families or catalog redesign.
-- SWAT/Omni/AgFields broad parity validation on this first pass (can be follow-up package).
+- SWAT and AgFields broad parity validation (can be follow-up package).
 - Performance optimization work beyond basic runtime capture.
 
 ## Stakeholders
@@ -62,12 +66,16 @@ The package intentionally starts with one roads-capable run and treats it as a c
 - [x] Cache-hit replay contract is verified and covered by tests.
 - [x] Negative-path contract checks are verified and covered by tests.
 - [x] Closeout includes reproducible commands and acceptance summary.
+- [x] Omni scenario sentinel cases pass on `walk-in-obsessive-compulsive/disturbed9002_wbt`.
+- [x] Omni contrast sentinel cases pass on `walk-in-obsessive-compulsive/disturbed9002_wbt`.
+- [x] Omni scenario/contrast matrix evidence is appended and summarized in package artifacts.
 
 ## Dependencies
 
 ### Prerequisites
 - Existing package: `docs/work-packages/20260328_features_export_profiles_provenance_zip/`
 - Live run path: `/wc1/runs/cl/clogging-starch`
+- Reopen live run path: `/wc1/runs/wa/walk-in-obsessive-compulsive`
 - Features Export spec: `wepppy/nodb/mods/features_export/specification.md`
 
 ### Blocks
@@ -77,9 +85,10 @@ The package intentionally starts with one roads-capable run and treats it as a c
 - **Depends on**: [20260328_features_export_profiles_provenance_zip](../20260328_features_export_profiles_provenance_zip/package.md)
 - **Related**: [20260327_roads_peridot_trace_core](../20260327_roads_peridot_trace_core/package.md)
 - **Follow-up**: dedicated SWAT/Omni/AgFields matrix package if needed.
+- **Supersedes prior follow-up**: Omni coverage is now executed in this reopened package (Phase 2).
 
 ## Timeline Estimate
-- **Expected duration**: 2-4 focused sessions.
+- **Expected duration**: 2-4 focused sessions (completed).
 - **Complexity**: High.
 - **Risk level**: Medium-High (data correctness and contract confidence gate).
 
@@ -127,6 +136,13 @@ The package intentionally starts with one roads-capable run and treats it as a c
 - Expansion (`F-G`): 19 jobs (11 successful + 8 negative) plus UI regression test runs.
 - Total planned export job executions: **97**.
 
+**Phase 2 Omni extension**:
+- `H1`: Omni scenario sentinel across all formats (7).
+- `H2`: Omni contrast sentinel across all formats (7).
+- `H3`: Omni selector validation negatives (4).
+- `H4`: Omni scope/temporal compatibility assertions (8).
+- Total Phase 2 Omni executions: **26**.
+
 ### Cross-Run Assertions (every successful case)
 - Artifact is a zip and includes required bundle members (`manifest.json`, `profile.yml`, `profiles/post-wepp.yml`, `profiles/prep-details.yml`, `README.md`).
 - Payload member format matches request token.
@@ -159,11 +175,11 @@ The package intentionally starts with one roads-capable run and treats it as a c
 - Updated docs/tracker/closure summary.
 
 ## Follow-up Work
-- Extend same matrix harness to one SWAT-inclusive run and one Omni-inclusive run.
+- Extend same matrix harness to one SWAT-inclusive run.
 - Add nightly matrix subset in CI for format/identity regression detection.
 
 ## Closure Notes
-Closed on 2026-03-29 after full live-run matrix execution against:
+Phase 1 closed on 2026-03-29 after full live-run matrix execution against:
 - `runid=clogging-starch`
 - `config=disturbed9002-wbt-mofe`
 
@@ -192,3 +208,19 @@ Validation commands executed:
 - `wctl run-pytest tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1`
 - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1`
 - `wctl run-npm test -- features_export`
+
+Phase 2 closure note (2026-03-29):
+- Omni scenario/contrast matrix executed on:
+  - `runid=walk-in-obsessive-compulsive`
+  - `config=disturbed9002_wbt`
+- Phase 2 pass counts:
+  - `H1`: 7/7
+  - `H2`: 7/7
+  - `H3`: 4/4
+  - `H4`: 8/8
+  - Total: 26/26
+- Shared matrix ledger now includes Phase 1 + Phase 2:
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/matrix_results.jsonl` (136 rows, 0 failures).
+- Phase 2 artifacts:
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_phase2_omni.md`
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_phase2_omni.md`

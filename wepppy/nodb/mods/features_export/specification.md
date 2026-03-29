@@ -45,7 +45,7 @@ Packaging rules:
   - export payload members (data files/container members),
   - `manifest.json`,
   - `profile.yml` (resolved request profile for replay),
-  - `profiles/post-wepp.yml` and `profiles/prep-details.yml`,
+  - `profiles/post-wepp.yml`, `profiles/prep-details.yml`, and `profiles/temporal-yearly.yml`,
   - `README.md` provenance summary.
 - Identity normalization contract for all output formats (geometry and tabular):
   - Emit canonical identity columns `topaz_id`, `wepp_id` as the first two output columns.
@@ -556,7 +556,9 @@ Runs page integration:
 - Built-in profile source-of-truth files live in:
   - `wepppy/nodb/mods/features_export/profiles/post-wepp.yml`
   - `wepppy/nodb/mods/features_export/profiles/prep-details.yml`
+  - `wepppy/nodb/mods/features_export/profiles/temporal-yearly.yml`
 - `prep-details.yml` is the canonical replacement profile for legacy `prep_details` export behavior.
+- `temporal-yearly.yml` is the canonical built-in preset that exercises yearly temporal measures (`wepp.interchange.loss_all_years_hill`).
 
 ## 11. Manifest And Warning Contract
 Every artifact includes `manifest.json`.

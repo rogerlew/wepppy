@@ -1,4 +1,4 @@
-# Features Export Live-Run E2E Matrix (clogging-starch)
+# Features Export Live-Run E2E Matrix (Phase 2 Reopen: Omni Scenarios/Contrasts)
 
 This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept up to date as work proceeds.
 
@@ -21,6 +21,11 @@ This plan establishes release-confidence for Features Export by validating real 
 - [x] (2026-03-29) Implemented defects discovered during matrix execution (return-period selector materialization, unit conversion integration, mixed temporal wide planner behavior, atemporal temporal-mode inheritance, UI copy typo).
 - [x] (2026-03-29) Added regression tests for critical slices.
 - [x] (2026-03-29) Updated docs/trackers and artifacts for handoff.
+- [x] (2026-03-29) Reopened this ExecPlan as Phase 2 to execute deferred Omni scenario/contrast live-run testing.
+- [x] (2026-03-29) Implemented Phase-2 harness extensions (`--phase phase2_omni`) with dynamic selector discovery and Omni groups `H1-H4`.
+- [x] (2026-03-29) Defined Omni scenario and Omni contrast case groups on `walk-in-obsessive-compulsive/disturbed9002_wbt` (single-OFE run).
+- [x] (2026-03-29) Executed Omni `Gate-1` sentinel exports and captured artifacts.
+- [x] (2026-03-29) Executed Omni expansion matrix groups and appended evidence/results.
 
 ## Surprises & Discoveries
 
@@ -38,6 +43,15 @@ This plan establishes release-confidence for Features Export by validating real 
 
 - Observation: Global temporal mode was being applied to atemporal layers, causing atemporal+temporal combo failures in `B6` and `C3`.
   Evidence: `materialization_error` on `watershed.subcatchments` pre-fix; combo cases pass post-fix.
+
+- Observation: Phase 1 closure intentionally deferred Omni-inclusive validation to follow-up despite harness support.
+  Evidence: package `Follow-up Work` and tracker closeout notes.
+
+- Observation: The Phase-2 Omni run contains valid selectors for scenarios (`mulch_15_sbs_map`, `mulch_30_sbs_map`, `mulch_60_sbs_map`) and contrasts (`1-24`), but temporal selector columns (`date`, `return_period`, `year`) are absent from required Omni interchange sources.
+  Evidence: `h4_neg_scenario_event_temporal_columns_missing` and `h4_neg_contrast_yearly_temporal_columns_missing` both passed expected `materialization_error` assertions.
+
+- Observation: Omni scope-invariant exports continue to emit backend `scope_not_applicable` warnings when `output_scopes=["baseline","roads"]`; these are informational and do not affect artifact correctness.
+  Evidence: `h4_scope_roads_scenario` and `h4_scope_roads_contrast` warning-code assertions.
 
 ## Decision Log
 
@@ -73,9 +87,21 @@ This plan establishes release-confidence for Features Export by validating real 
   Rationale: Atemporal layers must remain exportable alongside temporal layers without synthetic temporal token requirements.
   Date/Author: 2026-03-29 / Codex.
 
+- Decision: Reopen this existing package for Omni scenario/contrast testing instead of creating a new package.
+  Rationale: Reuses established matrix harness, artifacts, and defect ledger while preserving one continuous validation history.
+  Date/Author: 2026-03-29 / Codex.
+
+- Decision: Discover Phase-2 Omni selector IDs directly from run-path datasets at execution time instead of hardcoding IDs in the case catalog.
+  Rationale: Prevents stale selector fixtures and ensures sentinel coverage always targets selectors with required interchange dependencies.
+  Date/Author: 2026-03-29 / Codex.
+
+- Decision: Model missing Omni temporal selector columns on this run as expected negative-path contract checks (`materialization_error`) rather than patching runtime behavior in this package.
+  Rationale: Current specification requires explicit materialization failure when required sources cannot satisfy requested temporal selectors.
+  Date/Author: 2026-03-29 / Codex.
+
 ## Outcomes & Retrospective
 
-- Matrix execution completed with strict gate order:
+Phase 1 matrix execution completed with strict gate order:
   - `Gate-1`: 10/10 passed.
   - `Gate-2`: 80/80 passed (includes synthesized `E1` and `E2` audits).
   - Expansion (`F-G`): 20/20 passed.
@@ -96,12 +122,33 @@ This plan establishes release-confidence for Features Export by validating real 
   - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1`
   - `wctl run-npm test -- features_export`
 
+Phase 2 status:
+- Omni Phase-2 execution completed on `walk-in-obsessive-compulsive/disturbed9002_wbt` with:
+  - `H1` Omni scenario sentinel: 7/7 passed.
+  - `H2` Omni contrast sentinel: 7/7 passed.
+  - `H3` Omni selector negatives: 4/4 passed.
+  - `H4` Omni scope/temporal compatibility: 8/8 passed.
+  - Wall-clock execution window (matrix harness): 286.742 seconds (`2026-03-29T05:51:05Z` to `2026-03-29T05:55:52Z`).
+- Phase-2 harness/artefact additions:
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/run_live_matrix.py` now supports `--phase phase2_omni` and dynamic Omni selector discovery from run-path datasets.
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_phase2_omni.md`
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_phase2_omni.md`
+- Shared matrix ledger appended with Omni rows:
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/matrix_results.jsonl` now contains 136 rows total (110 Phase-1 + 26 Phase-2), 0 new failures.
+
 ## Context and Orientation
 
 Primary run under test:
 - `runid=clogging-starch`
 - `config=disturbed9002-wbt-mofe`
 - run root: `/wc1/runs/cl/clogging-starch`
+
+Phase 2 reopen run under test:
+- `runid=walk-in-obsessive-compulsive`
+- `config=disturbed9002_wbt`
+- run root: `/wc1/runs/wa/walk-in-obsessive-compulsive`
+- discovered scenario selectors with required interchange data: `mulch_15_sbs_map`, `mulch_30_sbs_map`, `mulch_60_sbs_map`
+- discovered contrast selectors with required interchange data: `1..24`
 
 Primary module and contracts:
 - `wepppy/nodb/mods/features_export/specification.md`
@@ -159,6 +206,13 @@ Artifacts are zip bundles. Valid exports must include `manifest.json`, `profile.
 
 Core total (`A-E`): 78 runs (77 positive + 1 negative).  
 Expanded total (`A-G`): 97 export-job runs + UI regression test suites.
+
+Phase 2 Omni reopen additions:
+- H1: Omni scenario exports on single-OFE run (`omni_scenarios` family).
+- H2: Omni contrast exports on single-OFE run (`omni_contrasts` family).
+- H3: Omni selector negative-path checks (mixed scenario+contrast selection rejection, missing selector rejection).
+- H4: Omni scope/temporal compatibility assertions for selected WEPP-coupled layers.
+Phase 2 Omni total: 26 runs (22 positive + 4 negative).
 
 ## Plan of Work
 
@@ -265,3 +319,4 @@ Target artifacts to capture:
 
 Date/author note:
 - 2026-03-29 / Codex: initial ExecPlan authored with explicit 78-case matrix and milestone sequencing.
+- 2026-03-29 / Codex: reopened ExecPlan for Omni scenario/contrast Phase 2 on `walk-in-obsessive-compulsive/disturbed9002_wbt`.

@@ -1,11 +1,11 @@
-# Tracker - Features Export Live-Run E2E Matrix (clogging-starch)
+# Tracker - Features Export Live-Run E2E Matrix (Phase 2 Reopen)
 
 ## Quick Status
 
 **Started**: 2026-03-29  
-**Current phase**: Closed  
+**Current phase**: Complete (Phase 2 Omni scenario/contrast matrix closed)  
 **Last updated**: 2026-03-29  
-**Next milestone**: None - package execution complete.
+**Next milestone**: Optional follow-up package for SWAT/AgFields live-run matrix parity.
 
 ## Task Board
 
@@ -38,6 +38,15 @@
   - `artifacts/manual_sanity_notes.md`
   - `artifacts/defect_log.md`
   (2026-03-29)
+- [x] Reopened package for Omni single-OFE scenario/contrast validation follow-up, reactivating tracker and active ExecPlan. (2026-03-29)
+- [x] Added Phase-2 Omni harness support to `artifacts/run_live_matrix.py` (`--phase phase2_omni`, dynamic selector discovery, `H1-H4` groups). (2026-03-29)
+- [x] Executed Omni sentinel matrix groups `H1-H2` on `walk-in-obsessive-compulsive/disturbed9002_wbt` (14/14 pass). (2026-03-29)
+- [x] Executed Omni expansion groups `H3-H4` including selector negatives and scope/temporal compatibility checks (12/12 pass). (2026-03-29)
+- [x] Appended Omni evidence to shared matrix ledger and generated dedicated Phase-2 evidence artifacts:
+  - `artifacts/matrix_results.jsonl` (136 rows total, 0 failures)
+  - `artifacts/manual_sanity_notes_phase2_omni.md`
+  - `artifacts/defect_log_phase2_omni.md`
+  (2026-03-29)
 
 ## Timeline
 
@@ -47,6 +56,8 @@
 - **2026-03-29** - Identified and fixed live defects (return-period selector, units conversion, mixed temporal wide, atemporal temporal inheritance, UI copy).
 - **2026-03-29** - Re-ran matrix to closure with strict gate order and produced final evidence set (110/110 pass).
 - **2026-03-29** - Completed required pytest/Jest validation commands.
+- **2026-03-29** - Reopened package as Phase 2 to execute Omni scenarios/contrasts validation on `walk-in-obsessive-compulsive/disturbed9002_wbt` (single OFE context).
+- **2026-03-29** - Completed Phase 2 Omni matrix execution (`H1-H4`: 26/26 pass) and published dedicated Omni evidence artifacts.
 
 ## Decisions
 
@@ -73,6 +84,28 @@
 **Decision**: Backup cache index, then reinitialize with valid schema payload (`{"schema_version":1,"entries":{}}`) for final run.
 
 **Impact**: Ensured deterministic post-fix validation for cache and artifact replay contract without schema regression.
+
+### 2026-03-29: Reopen this package instead of creating a new Omni-only package
+**Context**: Original package closure explicitly listed Omni-inclusive matrix execution as follow-up work.
+
+**Options considered**:
+1. Open a new standalone package for Omni scenario/contrast testing.
+2. Reopen this package as Phase 2 and extend matrix scope.
+
+**Decision**: Reopen this package as Phase 2.
+
+**Impact**: Preserves one contiguous artifact/test history for Features Export live-run matrix evolution while adding the missing Omni scenario/contrast coverage.
+
+### 2026-03-29: Discover Omni selectors from run-path datasets at execution time
+**Context**: Omni scenario/contrast IDs vary by run and can drift from static fixtures.
+
+**Options considered**:
+1. Hardcode selector IDs in the matrix catalog.
+2. Inspect run-path `_pups/omni/...` directories and require required interchange files before selecting IDs.
+
+**Decision**: Use runtime selector discovery in `run_live_matrix.py` for Phase 2 case generation.
+
+**Impact**: Removed selector drift risk and guaranteed `H1-H4` coverage targets selectors with materializable source files.
 
 ## Risks and Mitigations
 
@@ -103,6 +136,9 @@
 - [x] Expansion groups F-G executed (20/20).
 - [x] Group E integrity audits executed across all successful outputs.
 - [x] Failures triaged with linked fixes; no deferred follow-ups remain in this package.
+- [x] Omni scenario sentinel cases pass on `walk-in-obsessive-compulsive/disturbed9002_wbt`.
+- [x] Omni contrast sentinel cases pass on `walk-in-obsessive-compulsive/disturbed9002_wbt`.
+- [x] Omni-focused matrix evidence appended to `artifacts/matrix_results.jsonl` and summarized in dedicated Phase-2 artifacts.
 
 ## Progress Notes
 
@@ -142,3 +178,23 @@
 
 **Next Steps**:
 - None in this package; ready for reviewer handoff.
+
+### 2026-03-29 - Phase 2 Reopen (Omni Scenarios/Contrasts, Single OFE)
+**Agent**: Codex
+
+**Completed**:
+- Reopened package/tracker status from Closed to active Phase 2 follow-up.
+- Captured target run context:
+  - URL: `https://wc.bearhive.duckdns.org/weppcloud/runs/walk-in-obsessive-compulsive/disturbed9002_wbt/`
+  - Focus: Omni scenarios and Omni contrasts in single-OFE configuration.
+- Implemented Phase-2 harness extensions and executed Omni matrix groups:
+  - `H1`: 7/7 (Omni scenario sentinel across all formats)
+  - `H2`: 7/7 (Omni contrast sentinel across all formats)
+  - `H3`: 4/4 (selector validation negatives)
+  - `H4`: 8/8 (scope/temporal compatibility + multi-select assertions)
+- Appended results to `artifacts/matrix_results.jsonl` (now 136 rows total) and generated:
+  - `artifacts/manual_sanity_notes_phase2_omni.md`
+  - `artifacts/defect_log_phase2_omni.md`
+
+**Next Steps**:
+- None in this package. Ready for final reviewer handoff.

@@ -1,0 +1,3125 @@
+{
+  "entries": {
+    "0229bf341c5a595e6b944087e78055737d9fbb49b7e92c986be1ec2d326ef5eb+df066b86a47db9a18099e3e1f54c8a69ae392310423a06cdd1e52f4f2aafe3e0": {
+      "artifact_format": "geopackage",
+      "artifact_id": "47670ba67ff14d6da445db7e7f6a727b",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/47670ba67ff14d6da445db7e7f6a727b/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/47670ba67ff14d6da445db7e7f6a727b/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/47670ba67ff14d6da445db7e7f6a727b/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 52,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 120,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/47670ba67ff14d6da445db7e7f6a727b/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "manual-wp8-cold-20260328032307222462",
+      "updated_at_utc": "2026-03-28T03:23:10.686051+00:00",
+      "warnings": []
+    },
+    "0538d1cd9113221fb5e55ddcd282c7568fe2349db6b6d1078e965baad1ee7319+334adfecba6ee23e1cb2af53078f66266573a9c294c40e64bcf77944607e7ff5": {
+      "artifact_format": "csv",
+      "artifact_id": "95f6620721a745f78ebb97a0a9336352",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/95f6620721a745f78ebb97a0a9336352/features_export.csv.zip",
+      "artifact_paths": [
+        "export/features/artifacts/95f6620721a745f78ebb97a0a9336352/features_export.csv.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/95f6620721a745f78ebb97a0a9336352/features_export.csv.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 2,
+          "format": "csv",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "clogging-starch-chan_map-channels.csv",
+          "row_count": 2,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 2,
+          "format": "csv",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "clogging-starch-roads-chan_map-channels.csv",
+          "row_count": 2,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "csv",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "clogging-starch-roads-sbs_map-subcatchments.csv",
+          "row_count": 66,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "csv",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.csv",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/95f6620721a745f78ebb97a0a9336352/manifest.json",
+      "packaged_member_relpaths": [
+        "clogging-starch-chan_map-channels.csv",
+        "clogging-starch-roads-chan_map-channels.csv",
+        "clogging-starch-roads-sbs_map-subcatchments.csv",
+        "clogging-starch-sbs_map-subcatchments.csv"
+      ],
+      "source_job_id": "6a752d87-0037-4ddf-ba24-bc0734c41af1",
+      "updated_at_utc": "2026-03-28T16:52:30.970395+00:00",
+      "warnings": []
+    },
+    "06cdcfeeef2f303a79df89c9e7d930c6fdcd5e269c6f552554e764bb13933388+555af568b2781f073323d35f08505cdba440b0de7c2203c55d870ad32311d7e6": {
+      "artifact_format": "geopackage",
+      "artifact_id": "72510aa151194d9caabcd8175cb61f18",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/72510aa151194d9caabcd8175cb61f18/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/72510aa151194d9caabcd8175cb61f18/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/72510aa151194d9caabcd8175cb61f18/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 818,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 818,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 172,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 172,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/72510aa151194d9caabcd8175cb61f18/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "manual-wp10-discovery-v2",
+      "updated_at_utc": "2026-03-27T23:31:42.938906+00:00",
+      "warnings": []
+    },
+    "07b2ddc34153b8ce1bc67479d297b6fcdbfa06ff4e860887adb8425d5a34c385+4982d580554c6c9c79740b8cca5df2b3dbde64aded47ab6b47969f03efa74576": {
+      "artifact_format": "geopackage",
+      "artifact_id": "06f2bc7d4e704e73a235a0388783e4c7",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/06f2bc7d4e704e73a235a0388783e4c7/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/06f2bc7d4e704e73a235a0388783e4c7/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/06f2bc7d4e704e73a235a0388783e4c7/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 330,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 330,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/06f2bc7d4e704e73a235a0388783e4c7/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "debug-h-loss-layer",
+      "updated_at_utc": "2026-03-28T22:05:50.830655+00:00",
+      "warnings": []
+    },
+    "08ed8654274ac019391888de55beb06e856ca55af5f67a1713c7b56ab70e5249+c93bba2d471e55aaad268ba89fa71463b13d37fce8818bcb734c0deecfe3ef1f": {
+      "artifact_format": "kmz",
+      "artifact_id": "f2e8be72e0af4c978ada9b62cb218c70",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/f2e8be72e0af4c978ada9b62cb218c70/features_export.kmz.zip",
+      "artifact_paths": [
+        "export/features/artifacts/f2e8be72e0af4c978ada9b62cb218c70/features_export.kmz.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/f2e8be72e0af4c978ada9b62cb218c70/features_export.kmz.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "kmz",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.kmz",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/f2e8be72e0af4c978ada9b62cb218c70/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.kmz",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-format-kmz",
+      "updated_at_utc": "2026-03-29T03:20:16.898576+00:00",
+      "warnings": []
+    },
+    "161ac7f9e1b5242c4521becc59e9627be4b1b82eee849a54c3d42b0b8e1ed000+df066b86a47db9a18099e3e1f54c8a69ae392310423a06cdd1e52f4f2aafe3e0": {
+      "artifact_format": "geopackage",
+      "artifact_id": "85c341b0d4ab47b08a4bcf5997f55ffb",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/85c341b0d4ab47b08a4bcf5997f55ffb/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/85c341b0d4ab47b08a4bcf5997f55ffb/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/85c341b0d4ab47b08a4bcf5997f55ffb/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 35292,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 35292,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 391930,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 391930,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/85c341b0d4ab47b08a4bcf5997f55ffb/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "perf-ca26d126371f4e51b16abb7123f90069",
+      "updated_at_utc": "2026-03-28T03:02:42.638358+00:00",
+      "warnings": []
+    },
+    "185a19e89dbd985eaaae7c6eb3927d9a219508f72e8aac8852847848b7370933+cb837208a31dd5e2671dac5b7b44f0c5817e584198551a918794535795465eda": {
+      "artifact_format": "parquet",
+      "artifact_id": "ddc558b5addd4dd99eb3c5e3ab864e31",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/ddc558b5addd4dd99eb3c5e3ab864e31/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/ddc558b5addd4dd99eb3c5e3ab864e31/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/ddc558b5addd4dd99eb3c5e3ab864e31/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 1056,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "hillslopes.parquet",
+          "row_count": 1056,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/ddc558b5addd4dd99eb3c5e3ab864e31/manifest.json",
+      "packaged_member_relpaths": [
+        "hillslopes.parquet"
+      ],
+      "source_job_id": "perf-tabular-nogeom-20260328180903",
+      "updated_at_utc": "2026-03-28T18:11:53.052984+00:00",
+      "warnings": []
+    },
+    "19a8258d4407eba27b6245a65fba5686a14320d42be56f053c5d7823b7170658+e35fdf98b7dd0f8c42448e3f5f0f71dcddbc5ddc3f0deed9ddf94d58283e39e0": {
+      "artifact_format": "geopackage",
+      "artifact_id": "62781f727e754b72b20d03fb2f613965",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/62781f727e754b72b20d03fb2f613965/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/62781f727e754b72b20d03fb2f613965/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/62781f727e754b72b20d03fb2f613965/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/62781f727e754b72b20d03fb2f613965/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "11409090-72e8-4ef0-b3ef-287a00ac0383",
+      "updated_at_utc": "2026-03-28T07:22:55.393057+00:00",
+      "warnings": []
+    },
+    "2289d64d4c58725fb44ee81b4e336e2a6016185c27d84f970ed13b2f676dcaf0+42293648e2525ae816c474b0d4ba847a2b8f61c27663d0c927cee9438f4b89a5": {
+      "artifact_format": "parquet",
+      "artifact_id": "6c83a7b7c3cc47d0bf1abe960d457b4b",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/6c83a7b7c3cc47d0bf1abe960d457b4b/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/6c83a7b7c3cc47d0bf1abe960d457b4b/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/6c83a7b7c3cc47d0bf1abe960d457b4b/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 67,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 67,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/6c83a7b7c3cc47d0bf1abe960d457b4b/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "probe-mixed-wide-v2",
+      "updated_at_utc": "2026-03-29T03:55:28.850730+00:00",
+      "warnings": []
+    },
+    "24f02f04e167af515954df1fa43c9f398fed4f811ebbef52c8f0112c36d4ffaa+5457b6001f1ad03617c3958cfd7b8df0b9933a5af763eeb417863cc50394fc78": {
+      "artifact_format": "geopackage",
+      "artifact_id": "6edb82c393574507aafcf168b96ab4db",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/6edb82c393574507aafcf168b96ab4db/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/6edb82c393574507aafcf168b96ab4db/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/6edb82c393574507aafcf168b96ab4db/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/6edb82c393574507aafcf168b96ab4db/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "2c487c47-0e38-4ca2-9f90-aa183ec6d5e0",
+      "updated_at_utc": "2026-03-29T00:37:34.830623+00:00",
+      "warnings": []
+    },
+    "25306a263b86a957450309f1748649b61820316d838f50d26fde5f1002a40a2b+07eb1167bc3bc7c36a1cb9cb2a9e2483e7549aa1975fd01bb1c5326ab6b21116": {
+      "artifact_format": "parquet",
+      "artifact_id": "9073fc6b69904989b46ccbca018f8127",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/9073fc6b69904989b46ccbca018f8127/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/9073fc6b69904989b46ccbca018f8127/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/9073fc6b69904989b46ccbca018f8127/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 1,
+          "format": "parquet",
+          "layer_id": "wepp_temporal.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 1,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/9073fc6b69904989b46ccbca018f8127/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "matrix-probe-events-rp3",
+      "updated_at_utc": "2026-03-29T03:47:39.901806+00:00",
+      "warnings": []
+    },
+    "2645150811682feae5d3f6d2684feba3c092ac5b826b629f443842bd1dae1c25+2759364c3008e5d0b257a34ba7edff1086aebd1db3f61679cdc2dbd689ecf0b9": {
+      "artifact_format": "parquet",
+      "artifact_id": "98a3afeaa527419887f2e9b06559907a",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/98a3afeaa527419887f2e9b06559907a/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/98a3afeaa527419887f2e9b06559907a/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/98a3afeaa527419887f2e9b06559907a/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 52,
+          "format": "parquet",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "channels.parquet",
+          "row_count": 52,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 120,
+          "format": "parquet",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "hillslopes.parquet",
+          "row_count": 120,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/98a3afeaa527419887f2e9b06559907a/manifest.json",
+      "packaged_member_relpaths": [
+        "channels.parquet",
+        "hillslopes.parquet"
+      ],
+      "source_job_id": "ce853bd2-d536-447d-8b4e-0b556a78f37e",
+      "updated_at_utc": "2026-03-28T22:26:45.640833+00:00",
+      "warnings": []
+    },
+    "287370c6f414c5e968358d2730b886d0fe39412fe450e499e0698e49a1f4b061+6d6f3ecc03c76b0ec4325abbcdf8e3ae8216b0e52171f6633c78492f289f73f1": {
+      "artifact_format": "geopackage",
+      "artifact_id": "889234c5d450443390d83890c62700ea",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/889234c5d450443390d83890c62700ea/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/889234c5d450443390d83890c62700ea/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/889234c5d450443390d83890c62700ea/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_temporal.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/889234c5d450443390d83890c62700ea/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "b73d0f0f-97cd-4456-9a88-88a664fb1492",
+      "updated_at_utc": "2026-03-28T07:00:00.921259+00:00",
+      "warnings": []
+    },
+    "2aa9248bf098da82f1ca370fb61d136956ea6343ad088e66a285228285d3a1b4+555af568b2781f073323d35f08505cdba440b0de7c2203c55d870ad32311d7e6": {
+      "artifact_format": "geopackage",
+      "artifact_id": "e72b391a396f438d9cd50459268d83f6",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/e72b391a396f438d9cd50459268d83f6/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/e72b391a396f438d9cd50459268d83f6/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/e72b391a396f438d9cd50459268d83f6/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 818,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 818,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 172,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 172,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/e72b391a396f438d9cd50459268d83f6/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "manual-wp10-discovery",
+      "updated_at_utc": "2026-03-27T23:24:43.777864+00:00",
+      "warnings": []
+    },
+    "2acbbdbd458a2de7fbf1ac892290df5fcf04ef0e93c23e76131ebf096c80c78b+2759364c3008e5d0b257a34ba7edff1086aebd1db3f61679cdc2dbd689ecf0b9": {
+      "artifact_format": "geopackage",
+      "artifact_id": "0fb3eef25f1e4669bf313580835145ff",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/0fb3eef25f1e4669bf313580835145ff/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/0fb3eef25f1e4669bf313580835145ff/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/0fb3eef25f1e4669bf313580835145ff/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/0fb3eef25f1e4669bf313580835145ff/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "a049d0d0-32a6-4255-b9aa-4b55c8a5e524",
+      "updated_at_utc": "2026-03-28T22:25:18.666255+00:00",
+      "warnings": []
+    },
+    "2b8add47f69553d9a17fb8caa6f884101f01dbf3c88959bc33268b3b86fd8ba9+c93bba2d471e55aaad268ba89fa71463b13d37fce8818bcb734c0deecfe3ef1f": {
+      "artifact_format": "geojson",
+      "artifact_id": "21e78fda339b47b1b494be29e7257db5",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/21e78fda339b47b1b494be29e7257db5/features_export.geojson.zip",
+      "artifact_paths": [
+        "export/features/artifacts/21e78fda339b47b1b494be29e7257db5/features_export.geojson.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/21e78fda339b47b1b494be29e7257db5/features_export.geojson.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geojson",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.geojson",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/21e78fda339b47b1b494be29e7257db5/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.geojson",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-utm-geojson",
+      "updated_at_utc": "2026-03-29T03:21:43.082799+00:00",
+      "warnings": []
+    },
+    "2efbbe06d3d11b59a2a83d68260f161455a271434e2360234987167b13bee835+4334b334f471967228a5495b7ee98ba6a64aa317727dd77d4366760b5d59e9f0": {
+      "artifact_format": "parquet",
+      "artifact_id": "71264bf5d63b4ce782708b0aa2fb43c7",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/71264bf5d63b4ce782708b0aa2fb43c7/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/71264bf5d63b4ce782708b0aa2fb43c7/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/71264bf5d63b4ce782708b0aa2fb43c7/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/71264bf5d63b4ce782708b0aa2fb43c7/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-hpass-si",
+      "updated_at_utc": "2026-03-29T03:26:28.402476+00:00",
+      "warnings": []
+    },
+    "30f36bf983d2c5eb4e7d1bb7c1c1e4cdde7d05f2c7d0b1186d10a33e4df3387e+c93bba2d471e55aaad268ba89fa71463b13d37fce8818bcb734c0deecfe3ef1f": {
+      "artifact_format": "csv",
+      "artifact_id": "8cf1ada42131456984865742fdf7975a",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/8cf1ada42131456984865742fdf7975a/features_export.csv.zip",
+      "artifact_paths": [
+        "export/features/artifacts/8cf1ada42131456984865742fdf7975a/features_export.csv.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/8cf1ada42131456984865742fdf7975a/features_export.csv.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "csv",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.csv",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/8cf1ada42131456984865742fdf7975a/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.csv",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-format-csv",
+      "updated_at_utc": "2026-03-29T03:20:14.604987+00:00",
+      "warnings": []
+    },
+    "3661101ff43da999493f7e079e66e50d3f56e72de310e7e8c62ea5d0f5bac1a5+a796a37919161870ca18d3044800e7d1cc84d8414817e039770a952b6f94b82f": {
+      "artifact_format": "geojson",
+      "artifact_id": "8971f1064249470bb83423081ec8838f",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/8971f1064249470bb83423081ec8838f/features_export.geojson.zip",
+      "artifact_paths": [
+        "export/features/artifacts/8971f1064249470bb83423081ec8838f/features_export.geojson.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/8971f1064249470bb83423081ec8838f/features_export.geojson.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geojson",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.geojson",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/8971f1064249470bb83423081ec8838f/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.geojson",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "matrix-probe-geojson-wgs",
+      "updated_at_utc": "2026-03-29T03:48:54.949280+00:00",
+      "warnings": []
+    },
+    "3888e4c7c95caa05103401be0fd60505cf36c9baec5a6acfa56997d127eaafbb+f2ed72b813ab25df2fa1ce69abe9d3cce571ea6ab1b95ea1329551ff26faf88d": {
+      "artifact_format": "geopackage",
+      "artifact_id": "ec4b4b58859c4e47a19c4aed01919fa3",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/ec4b4b58859c4e47a19c4aed01919fa3/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/ec4b4b58859c4e47a19c4aed01919fa3/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/ec4b4b58859c4e47a19c4aed01919fa3/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 35292,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 35292,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 818,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 818,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 172,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 172,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 391930,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 391930,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/ec4b4b58859c4e47a19c4aed01919fa3/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "a6334c1d-bb63-40fd-8d23-ac18de0c63bc",
+      "updated_at_utc": "2026-03-28T02:22:35.586792+00:00",
+      "warnings": [
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "landuse.dominant",
+          "message": "Layer 'landuse.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "soils.dominant",
+          "message": "Layer 'soils.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.channels",
+          "message": "Layer 'watershed.channels' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.subcatchments",
+          "message": "Layer 'watershed.subcatchments' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        }
+      ]
+    },
+    "446f58d42b6d9fd94d8111446532e5a70f5427dfac4dd5f2b25c09dd5a5c4cae+c93bba2d471e55aaad268ba89fa71463b13d37fce8818bcb734c0deecfe3ef1f": {
+      "artifact_format": "geoparquet",
+      "artifact_id": "1f5214b77b314810aedabe06eb509896",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/1f5214b77b314810aedabe06eb509896/features_export.geoparquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/1f5214b77b314810aedabe06eb509896/features_export.geoparquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/1f5214b77b314810aedabe06eb509896/features_export.geoparquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geoparquet",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.geoparquet",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/1f5214b77b314810aedabe06eb509896/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.geoparquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-format-geoparquet",
+      "updated_at_utc": "2026-03-29T03:20:09.996585+00:00",
+      "warnings": []
+    },
+    "5153685271058e648928414b05f7a495cb8ff69a101b819de5b4623022379f79+4203d44a54732a47204b2f3ab11dd0544bd49412ac987032fd9af6a05cce02f5": {
+      "artifact_format": "geopackage",
+      "artifact_id": "babb31d79453491a93a4abdd74fa4891",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/babb31d79453491a93a4abdd74fa4891/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/babb31d79453491a93a4abdd74fa4891/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/babb31d79453491a93a4abdd74fa4891/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 35292,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 35292,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 391930,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 391930,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/babb31d79453491a93a4abdd74fa4891/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "manual-wp10-default6",
+      "updated_at_utc": "2026-03-27T23:51:20.191074+00:00",
+      "warnings": []
+    },
+    "51d6917adef51c11fd50aaef8a5ef2bfd1e0a732a3de5a3b82425470927536a6+c8a4300a8f302a37c0af150d56b51668a697f61fee598601b5ad23eb3d562793": {
+      "artifact_format": "geopackage",
+      "artifact_id": "20b7e96e5d224d2faf481656825db3b8",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/20b7e96e5d224d2faf481656825db3b8/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/20b7e96e5d224d2faf481656825db3b8/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/20b7e96e5d224d2faf481656825db3b8/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/20b7e96e5d224d2faf481656825db3b8/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "0880d534-22f7-49d6-a899-c0254e821169",
+      "updated_at_utc": "2026-03-28T07:28:21.442619+00:00",
+      "warnings": []
+    },
+    "52f7120d0bbb8c7efa73e06bcbf37da304f944c3a0b53fd93d437aaf3e8697af+0acdbc11c31237d055364e96535fc9051492e42a05270b4026ff80c09de692ad": {
+      "artifact_format": "geopackage",
+      "artifact_id": "fa54b3aec20d47089ab343409804e952",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/fa54b3aec20d47089ab343409804e952/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/fa54b3aec20d47089ab343409804e952/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/fa54b3aec20d47089ab343409804e952/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/fa54b3aec20d47089ab343409804e952/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "debug-wide-hill-wat-20260328e-cold",
+      "updated_at_utc": "2026-03-28T16:41:19.402622+00:00",
+      "warnings": []
+    },
+    "560fbb797447eeec398a1e4cc3af6e99f0cbf3689e378205fb543692a33a818e+644b6f667ba4f3df62934a7ee2b3bec194c2a69cfe32d5b1ee4e5dfa9dcb06f2": {
+      "artifact_format": "geopackage",
+      "artifact_id": "16ce7ffcf28c470fad698ed342cf8da8",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/16ce7ffcf28c470fad698ed342cf8da8/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/16ce7ffcf28c470fad698ed342cf8da8/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/16ce7ffcf28c470fad698ed342cf8da8/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/16ce7ffcf28c470fad698ed342cf8da8/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "debug-rowcheck-si",
+      "updated_at_utc": "2026-03-29T00:56:19.703131+00:00",
+      "warnings": []
+    },
+    "5698d391a04c8d5e4b0031c6d869112122429a6cef6088b87b2450dd1e76ed70+996308f2c41cbb420632aab52d4578d38c60c1b63d3c6552b78e53be6a2ff52b": {
+      "artifact_format": "geopackage",
+      "artifact_id": "0bd034df2bab41ce895d5674f15f4db0",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/0bd034df2bab41ce895d5674f15f4db0/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/0bd034df2bab41ce895d5674f15f4db0/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/0bd034df2bab41ce895d5674f15f4db0/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/0bd034df2bab41ce895d5674f15f4db0/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "debug-chnwb-layer",
+      "updated_at_utc": "2026-03-28T22:06:15.498572+00:00",
+      "warnings": []
+    },
+    "5fcc570ef85bac726e27b108598fb4736fe27839f106d0d2774e61c1b22330d9+4334b334f471967228a5495b7ee98ba6a64aa317727dd77d4366760b5d59e9f0": {
+      "artifact_format": "parquet",
+      "artifact_id": "f6185812db144c43a1a20eb3cfcdd3fe",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/f6185812db144c43a1a20eb3cfcdd3fe/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/f6185812db144c43a1a20eb3cfcdd3fe/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/f6185812db144c43a1a20eb3cfcdd3fe/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/f6185812db144c43a1a20eb3cfcdd3fe/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "matrix-probe-hill-pass-english-v2",
+      "updated_at_utc": "2026-03-29T03:45:14.114263+00:00",
+      "warnings": []
+    },
+    "6cf27875509a2e4bd314d27d410cc0feedaa956b03199fc9deb2e6e4e0f133f8+754068f04d786de429e628cb75dcc5047791570b1a6cc5075cbcdcfdf9decd3b": {
+      "artifact_format": "parquet",
+      "artifact_id": "cc457004238a4a4aae7a8b25c605b256",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/cc457004238a4a4aae7a8b25c605b256/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/cc457004238a4a4aae7a8b25c605b256/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/cc457004238a4a4aae7a8b25c605b256/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "parquet",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "channels.parquet",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "hillslopes.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/cc457004238a4a4aae7a8b25c605b256/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "channels.parquet",
+        "hillslopes.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "81350940-7099-42f7-95dc-3911ec040afd",
+      "updated_at_utc": "2026-03-29T02:49:22.603267+00:00",
+      "warnings": []
+    },
+    "7006ce4e8e879d2ba3a1689b5e7c2c5bfc1df287ae6113b3db4b20553d2e1bb4+3b552342c2243fbd555693269369f159ad181351407ca91e375b89ec2d103e7b": {
+      "artifact_format": "parquet",
+      "artifact_id": "daa6302568704c63abb361046ed1eb42",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/daa6302568704c63abb361046ed1eb42/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/daa6302568704c63abb361046ed1eb42/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/daa6302568704c63abb361046ed1eb42/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/daa6302568704c63abb361046ed1eb42/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-units-project",
+      "updated_at_utc": "2026-03-29T03:23:56.730805+00:00",
+      "warnings": []
+    },
+    "780837d931e5f08009d1ec18d48c5b51a8ef81e63bd1d14331b1e10b47493884+6d6f3ecc03c76b0ec4325abbcdf8e3ae8216b0e52171f6633c78492f289f73f1": {
+      "artifact_format": "geopackage",
+      "artifact_id": "a8c9fb18ae3944e18992676e24824092",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/a8c9fb18ae3944e18992676e24824092/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/a8c9fb18ae3944e18992676e24824092/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/a8c9fb18ae3944e18992676e24824092/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_temporal.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/a8c9fb18ae3944e18992676e24824092/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "4f8b75dd-dd1d-4f86-9018-485250fd5640",
+      "updated_at_utc": "2026-03-28T07:01:15.819074+00:00",
+      "warnings": []
+    },
+    "787bda361ec5b7e9329bb4c7f56350cafe0a591b9bef166d9f856cf29c29438f+3bd387b26d2db4993f4649bd44cdaf0b3c53eed9221207e43001593a991b9a9d": {
+      "artifact_format": "geopackage",
+      "artifact_id": "adb291af1cd0480c8f1ff9df9e713363",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/adb291af1cd0480c8f1ff9df9e713363/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/adb291af1cd0480c8f1ff9df9e713363/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/adb291af1cd0480c8f1ff9df9e713363/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/adb291af1cd0480c8f1ff9df9e713363/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "d78b80e3-ab49-4c90-984a-7a83e462938b",
+      "updated_at_utc": "2026-03-28T07:28:22.672240+00:00",
+      "warnings": []
+    },
+    "78d47259f5ee47672a7054508461e6383730dff07c0607a1f85b98a86159dd3f+0acdbc11c31237d055364e96535fc9051492e42a05270b4026ff80c09de692ad": {
+      "artifact_format": "geopackage",
+      "artifact_id": "82324d7b31cd45d0b106430009f0fc01",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/82324d7b31cd45d0b106430009f0fc01/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/82324d7b31cd45d0b106430009f0fc01/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/82324d7b31cd45d0b106430009f0fc01/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/82324d7b31cd45d0b106430009f0fc01/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "debug-wide-hill-wat-20260328b",
+      "updated_at_utc": "2026-03-28T16:33:20.144008+00:00",
+      "warnings": []
+    },
+    "7ab6ea939087e27948e9f3127968032ee9c935b4d5bca082ba524cf47b5b8ace+6d6f3ecc03c76b0ec4325abbcdf8e3ae8216b0e52171f6633c78492f289f73f1": {
+      "artifact_format": "geopackage",
+      "artifact_id": "381ec1ded5ab4cf5ae5b499fbce6ebb5",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/381ec1ded5ab4cf5ae5b499fbce6ebb5/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/381ec1ded5ab4cf5ae5b499fbce6ebb5/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/381ec1ded5ab4cf5ae5b499fbce6ebb5/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_temporal.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/381ec1ded5ab4cf5ae5b499fbce6ebb5/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "5674e02c-4792-45c3-bc90-a67ec192a38b",
+      "updated_at_utc": "2026-03-28T06:42:17.520657+00:00",
+      "warnings": []
+    },
+    "7dbd3b403dc7d725d144031ea9e560f1d2dd69b86a537394e2a34e83eade1883+43fdd5b2eff26117a0139dc654de58b5c7067e2d0fcf5ffccd6cd0babe76e73f": {
+      "artifact_format": "parquet",
+      "artifact_id": "da483e5a04f74b8eb408204b60d23dc0",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/da483e5a04f74b8eb408204b60d23dc0/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/da483e5a04f74b8eb408204b60d23dc0/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/da483e5a04f74b8eb408204b60d23dc0/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/da483e5a04f74b8eb408204b60d23dc0/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-units-si",
+      "updated_at_utc": "2026-03-29T03:23:59.037826+00:00",
+      "warnings": []
+    },
+    "81db406c927ebe37a53dda893d4d61edcef0ef4b9fbc71e4c99133ad3e97c212+0acdbc11c31237d055364e96535fc9051492e42a05270b4026ff80c09de692ad": {
+      "artifact_format": "geopackage",
+      "artifact_id": "19f2cc28078c415c8e6410c29c810ed9",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/19f2cc28078c415c8e6410c29c810ed9/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/19f2cc28078c415c8e6410c29c810ed9/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/19f2cc28078c415c8e6410c29c810ed9/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 126,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 126,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/19f2cc28078c415c8e6410c29c810ed9/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "847a7d3a-763c-4b47-ac22-1e66ecae8d24",
+      "updated_at_utc": "2026-03-28T16:16:23.512330+00:00",
+      "warnings": []
+    },
+    "85fe5a69f06f69133f7bc48bf92a30271f1598eb820a4730717333b99eb626bf+e79a3f1b32e5b3e1d548c8f5969ed5d949963bd4599fa0a68973eb4064b92456": {
+      "artifact_format": "geopackage",
+      "artifact_id": "f3c2cdc46c1e4b608076aa82dd260e04",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/f3c2cdc46c1e4b608076aa82dd260e04/features_export.geopackage.zip",
+      "artifact_paths": [
+        "export/features/artifacts/f3c2cdc46c1e4b608076aa82dd260e04/features_export.geopackage.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/f3c2cdc46c1e4b608076aa82dd260e04/features_export.geopackage.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 2,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 2,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/f3c2cdc46c1e4b608076aa82dd260e04/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "features_export.gpkg",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "728dcaf0-1115-40e9-8bbc-723e2e729a14",
+      "updated_at_utc": "2026-03-29T02:50:40.921116+00:00",
+      "warnings": [
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "landuse.dominant",
+          "message": "Layer 'landuse.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "soils.dominant",
+          "message": "Layer 'soils.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.channels",
+          "message": "Layer 'watershed.channels' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.subcatchments",
+          "message": "Layer 'watershed.subcatchments' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        }
+      ]
+    },
+    "89aff7944702f0d67dd5002f4865de436665998adfac4e9490127ee84891f807+2759364c3008e5d0b257a34ba7edff1086aebd1db3f61679cdc2dbd689ecf0b9": {
+      "artifact_format": "parquet",
+      "artifact_id": "7478eac55cbc4d66864cf7fc15299964",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/7478eac55cbc4d66864cf7fc15299964/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/7478eac55cbc4d66864cf7fc15299964/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/7478eac55cbc4d66864cf7fc15299964/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "parquet",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "channels.parquet",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "hillslopes.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/7478eac55cbc4d66864cf7fc15299964/manifest.json",
+      "packaged_member_relpaths": [
+        "channels.parquet",
+        "hillslopes.parquet"
+      ],
+      "source_job_id": "906d098b-e1b8-48b0-84ff-e7085780511c",
+      "updated_at_utc": "2026-03-28T23:43:16.289095+00:00",
+      "warnings": []
+    },
+    "89f9c3564ed5789e6d892bc2dbb39cd29cfbd9089c87c4902ce98a275b671003+d2c2d09e3fc4589ccd813e0bbf7136d464f8d0d2e86c8f9034c63466601e57f4": {
+      "artifact_format": "parquet",
+      "artifact_id": "1757d089cae94fcfadcd26b7947d5188",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/1757d089cae94fcfadcd26b7947d5188/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/1757d089cae94fcfadcd26b7947d5188/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/1757d089cae94fcfadcd26b7947d5188/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/1757d089cae94fcfadcd26b7947d5188/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-hpass-project",
+      "updated_at_utc": "2026-03-29T03:25:25.598753+00:00",
+      "warnings": []
+    },
+    "8a0cb72f251d0fa3635ea7a1c7d29221b16eb7c124a73262228311333aca17a1+43fdd5b2eff26117a0139dc654de58b5c7067e2d0fcf5ffccd6cd0babe76e73f": {
+      "artifact_format": "parquet",
+      "artifact_id": "346e8345509d4c36a85d920a926eba1c",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/346e8345509d4c36a85d920a926eba1c/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/346e8345509d4c36a85d920a926eba1c/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/346e8345509d4c36a85d920a926eba1c/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/346e8345509d4c36a85d920a926eba1c/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-units-english",
+      "updated_at_utc": "2026-03-29T03:24:00.700473+00:00",
+      "warnings": []
+    },
+    "8ba10eb9791ca6bc68dcde2a2457ed1f93c2b57ae9a9d1f66857e9d2ee5509b1+03644f046669e4d9578ab062ae8963a49cb62b58b2337fc4492462fed1a3c0d0": {
+      "artifact_format": "parquet",
+      "artifact_id": "1c11ab57ba304f7287feaf9aeafece18",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/1c11ab57ba304f7287feaf9aeafece18/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/1c11ab57ba304f7287feaf9aeafece18/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/1c11ab57ba304f7287feaf9aeafece18/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 1456,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "hillslopes.parquet",
+          "row_count": 1456,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 1056,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "hillslopes.parquet",
+          "row_count": 1056,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/1c11ab57ba304f7287feaf9aeafece18/manifest.json",
+      "packaged_member_relpaths": [
+        "hillslopes.parquet"
+      ],
+      "source_job_id": "c54de89f-e9a6-4605-81ec-e3f714744544",
+      "updated_at_utc": "2026-03-28T19:45:12.319338+00:00",
+      "warnings": []
+    },
+    "910ff22bf45c82155293b244032b48ab983731d43f11eeb9ad2ce16abcbdbba8+c93bba2d471e55aaad268ba89fa71463b13d37fce8818bcb734c0deecfe3ef1f": {
+      "artifact_format": "geodatabase",
+      "artifact_id": "5b7a7ec069fd4c2e976f9a9526ec100c",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/5b7a7ec069fd4c2e976f9a9526ec100c/features_export.geodatabase.zip",
+      "artifact_paths": [
+        "export/features/artifacts/5b7a7ec069fd4c2e976f9a9526ec100c/features_export.geodatabase.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/5b7a7ec069fd4c2e976f9a9526ec100c/features_export.geodatabase.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geodatabase",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gdb.zip",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/5b7a7ec069fd4c2e976f9a9526ec100c/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "features_export.gdb.zip",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-format-geodatabase",
+      "updated_at_utc": "2026-03-29T03:21:06.095193+00:00",
+      "warnings": []
+    },
+    "94b021a5d3c0432b063ab4e70c7fe22bb5ce76390f19a96959cc2594f8e7d98a+334adfecba6ee23e1cb2af53078f66266573a9c294c40e64bcf77944607e7ff5": {
+      "artifact_format": "geopackage",
+      "artifact_id": "fdff91ee26ca48f9aa17a3ac1939adbb",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/fdff91ee26ca48f9aa17a3ac1939adbb/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/fdff91ee26ca48f9aa17a3ac1939adbb/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/fdff91ee26ca48f9aa17a3ac1939adbb/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 2,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 2,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 2,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 2,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/fdff91ee26ca48f9aa17a3ac1939adbb/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "301c7b6e-d7f0-4ce3-b9e0-ee31afd2a9bc",
+      "updated_at_utc": "2026-03-28T16:50:52.596034+00:00",
+      "warnings": []
+    },
+    "99a2043810057379f33bc72dd87162bbf7286dbdcdb72e5bd37aad55f2397a42+4334b334f471967228a5495b7ee98ba6a64aa317727dd77d4366760b5d59e9f0": {
+      "artifact_format": "parquet",
+      "artifact_id": "847dab779e1545f3807639a23ff13cae",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/847dab779e1545f3807639a23ff13cae/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/847dab779e1545f3807639a23ff13cae/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/847dab779e1545f3807639a23ff13cae/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/847dab779e1545f3807639a23ff13cae/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "matrix-probe-hill-pass-si",
+      "updated_at_utc": "2026-03-29T03:43:40.535959+00:00",
+      "warnings": []
+    },
+    "9bb303132bc9c1e0f1702745ce1b9d547e3ffb54e49120a46b63985041090dd9+a796a37919161870ca18d3044800e7d1cc84d8414817e039770a952b6f94b82f": {
+      "artifact_format": "geojson",
+      "artifact_id": "5abdeec6ba394b7daacd58ced53405f3",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/5abdeec6ba394b7daacd58ced53405f3/features_export.geojson.zip",
+      "artifact_paths": [
+        "export/features/artifacts/5abdeec6ba394b7daacd58ced53405f3/features_export.geojson.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/5abdeec6ba394b7daacd58ced53405f3/features_export.geojson.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geojson",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.geojson",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/5abdeec6ba394b7daacd58ced53405f3/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.geojson",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "matrix-probe-geojson-utm",
+      "updated_at_utc": "2026-03-29T03:48:57.179700+00:00",
+      "warnings": []
+    },
+    "9e04a89e4e1eba976c94f399d1e7c65625235aab4486fd57e26335baa7d3644f+5ade005183ff483e6b761a531503e10e7e15a0688550ff9a62fe7563623a3350": {
+      "artifact_format": "geojson",
+      "artifact_id": "39eab679c16e45f6bd7d7e835d4a10c7",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/39eab679c16e45f6bd7d7e835d4a10c7/features_export.geojson.zip",
+      "artifact_paths": [
+        "export/features/artifacts/39eab679c16e45f6bd7d7e835d4a10c7/features_export.geojson.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/39eab679c16e45f6bd7d7e835d4a10c7/features_export.geojson.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geojson",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.geojson",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/39eab679c16e45f6bd7d7e835d4a10c7/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.geojson",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "matrix-probe-utm-unique1",
+      "updated_at_utc": "2026-03-29T03:52:23.513582+00:00",
+      "warnings": []
+    },
+    "a043bee5f3c73cbf339ed6a94e839af1c34771dd8bec3c5b2685a3f056dc94e7+831d86780ceadbb6bc066977ca8741eb535fabb6b8911af6036f6a1e06bcbe45": {
+      "artifact_format": "geopackage",
+      "artifact_id": "6f53d05543f041c9b56f0b0e5dff1740",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/6f53d05543f041c9b56f0b0e5dff1740/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/6f53d05543f041c9b56f0b0e5dff1740/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/6f53d05543f041c9b56f0b0e5dff1740/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/6f53d05543f041c9b56f0b0e5dff1740/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "56314745-4a03-4f45-80a8-29e1ee8b9f11",
+      "updated_at_utc": "2026-03-28T05:57:43.327299+00:00",
+      "warnings": [
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "landuse.dominant",
+          "message": "Layer 'landuse.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "soils.dominant",
+          "message": "Layer 'soils.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.channels",
+          "message": "Layer 'watershed.channels' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.subcatchments",
+          "message": "Layer 'watershed.subcatchments' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        }
+      ]
+    },
+    "a95e9e2b140c6e61f699d2f6b8a082e62e879f1370e7aa8f15bb1d5552b1fb28+df066b86a47db9a18099e3e1f54c8a69ae392310423a06cdd1e52f4f2aafe3e0": {
+      "artifact_format": "geopackage",
+      "artifact_id": "0455159252ed461a94a4e18504e36afb",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/0455159252ed461a94a4e18504e36afb/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/0455159252ed461a94a4e18504e36afb/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/0455159252ed461a94a4e18504e36afb/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 818,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 818,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 172,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 172,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 172,
+          "format": "geopackage",
+          "layer_id": "landuse.dominant",
+          "output_layer_id": "shared__landuse.dominant",
+          "relpath": "features_export.gpkg",
+          "row_count": 172,
+          "scope": "shared",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 172,
+          "format": "geopackage",
+          "layer_id": "soils.dominant",
+          "output_layer_id": "shared__soils.dominant",
+          "relpath": "features_export.gpkg",
+          "row_count": 172,
+          "scope": "shared",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 818,
+          "format": "geopackage",
+          "layer_id": "watershed.channels",
+          "output_layer_id": "shared__watershed.channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 818,
+          "scope": "shared",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 172,
+          "format": "geopackage",
+          "layer_id": "watershed.subcatchments",
+          "output_layer_id": "shared__watershed.subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 172,
+          "scope": "shared",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/0455159252ed461a94a4e18504e36afb/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "0bee93f8-6556-4894-9a0c-239d34e3a034",
+      "updated_at_utc": "2026-03-27T21:36:42.878646+00:00",
+      "warnings": []
+    },
+    "ace496061820e5a4b26553e76a773e69c7f4444e72cc49b6afc67f21645810a0+5457b6001f1ad03617c3958cfd7b8df0b9933a5af763eeb417863cc50394fc78": {
+      "artifact_format": "geopackage",
+      "artifact_id": "0e32333fe3ff4f108ad9a3b62365caf5",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/0e32333fe3ff4f108ad9a3b62365caf5/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/0e32333fe3ff4f108ad9a3b62365caf5/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/0e32333fe3ff4f108ad9a3b62365caf5/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 2,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 2,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 2,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 2,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/0e32333fe3ff4f108ad9a3b62365caf5/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "e53c1efc-0fba-49e7-8ea5-6eaf0e0fd530",
+      "updated_at_utc": "2026-03-29T01:09:24.273718+00:00",
+      "warnings": []
+    },
+    "ae462d0f98f47db718ee1444b5dfebc2cbcc75828c23dc797bbe65034d93b76d+c93bba2d471e55aaad268ba89fa71463b13d37fce8818bcb734c0deecfe3ef1f": {
+      "artifact_format": "parquet",
+      "artifact_id": "6d653af7319243a3a43726e0b2b508e4",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/6d653af7319243a3a43726e0b2b508e4/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/6d653af7319243a3a43726e0b2b508e4/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/6d653af7319243a3a43726e0b2b508e4/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/6d653af7319243a3a43726e0b2b508e4/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-format-parquet",
+      "updated_at_utc": "2026-03-29T03:20:11.936877+00:00",
+      "warnings": []
+    },
+    "b4964f99ddc5227657ff8d629a4e48becbafd8dd34bfcb8c570e4473afec4368+df066b86a47db9a18099e3e1f54c8a69ae392310423a06cdd1e52f4f2aafe3e0": {
+      "artifact_format": "geopackage",
+      "artifact_id": "e1d4e4f3a1154b5c8fb6800e17bbe67e",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/e1d4e4f3a1154b5c8fb6800e17bbe67e/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/e1d4e4f3a1154b5c8fb6800e17bbe67e/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/e1d4e4f3a1154b5c8fb6800e17bbe67e/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 35292,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 35292,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 391930,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 391930,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/e1d4e4f3a1154b5c8fb6800e17bbe67e/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "manual-wp8-layer-check",
+      "updated_at_utc": "2026-03-27T21:47:56.461462+00:00",
+      "warnings": []
+    },
+    "beb1e94dc7e58ee9cf8d69a6b2d50aaf438477f15278f97b0571b89e9bdf51e4+4cb3df8fa7c12da841b1987a01b277a59849cc7f733fc299da1633a27218e9b6": {
+      "artifact_format": "geopackage",
+      "artifact_id": "7e0df9ce2e1a4a22891397fbb736da2b",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/7e0df9ce2e1a4a22891397fbb736da2b/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/7e0df9ce2e1a4a22891397fbb736da2b/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/7e0df9ce2e1a4a22891397fbb736da2b/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/7e0df9ce2e1a4a22891397fbb736da2b/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "e338f0bf-87ab-4999-9432-20dd9709e9d3",
+      "updated_at_utc": "2026-03-28T07:13:09.022655+00:00",
+      "warnings": []
+    },
+    "bf3ad5fc791f8b9386d96995559a0548ff4090a22104410b0de1e8571f919e3b+c93bba2d471e55aaad268ba89fa71463b13d37fce8818bcb734c0deecfe3ef1f": {
+      "artifact_format": "geopackage",
+      "artifact_id": "955a00f3c26e42de865847045e0a9918",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/955a00f3c26e42de865847045e0a9918/features_export.geopackage.zip",
+      "artifact_paths": [
+        "export/features/artifacts/955a00f3c26e42de865847045e0a9918/features_export.geopackage.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/955a00f3c26e42de865847045e0a9918/features_export.geopackage.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/955a00f3c26e42de865847045e0a9918/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "features_export.gpkg",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-live-case-1",
+      "updated_at_utc": "2026-03-29T03:18:59.503245+00:00",
+      "warnings": []
+    },
+    "c0185837b45d8d10944756e9d245e01869db4df954a8d9fd49c6e7efad820e0c+df066b86a47db9a18099e3e1f54c8a69ae392310423a06cdd1e52f4f2aafe3e0": {
+      "artifact_format": "parquet",
+      "artifact_id": "707b53d03b444b8486ee09f425f2e29c",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/707b53d03b444b8486ee09f425f2e29c/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/707b53d03b444b8486ee09f425f2e29c/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/707b53d03b444b8486ee09f425f2e29c/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 35292,
+          "format": "parquet",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "clogging-starch-chan_map-channels.parquet",
+          "row_count": 35292,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 391930,
+          "format": "parquet",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 391930,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/707b53d03b444b8486ee09f425f2e29c/manifest.json",
+      "packaged_member_relpaths": [
+        "clogging-starch-chan_map-channels.parquet",
+        "clogging-starch-sbs_map-subcatchments.parquet"
+      ],
+      "source_job_id": "perf-parq-dc05ad3a2f8d46f89122b70a478fcbc8",
+      "updated_at_utc": "2026-03-28T02:44:36.759323+00:00",
+      "warnings": []
+    },
+    "c2dfc794020df7c051f34297a1ec95fd1180fcc5724382c8d50034e4247c40c3+269ae3503861dd0e1dfa391e288745e79b53fde2ba1f215b66db0778f38b97aa": {
+      "artifact_format": "geopackage",
+      "artifact_id": "9ba0ff62a9b14701a8384090625a934d",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/9ba0ff62a9b14701a8384090625a934d/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/9ba0ff62a9b14701a8384090625a934d/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/9ba0ff62a9b14701a8384090625a934d/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/9ba0ff62a9b14701a8384090625a934d/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "debug-soil-pw0-layer",
+      "updated_at_utc": "2026-03-28T22:06:40.238546+00:00",
+      "warnings": []
+    },
+    "c643833bd9c7a89904bed4e6ca92591feb2b9cac2a8f600b9922ff3b7358f894+0acdbc11c31237d055364e96535fc9051492e42a05270b4026ff80c09de692ad": {
+      "artifact_format": "geopackage",
+      "artifact_id": "8ddfb9442b084c218e40e4c2ba7c7894",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/8ddfb9442b084c218e40e4c2ba7c7894/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/8ddfb9442b084c218e40e4c2ba7c7894/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/8ddfb9442b084c218e40e4c2ba7c7894/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/8ddfb9442b084c218e40e4c2ba7c7894/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "b6c3af1c-a8a2-44de-89d2-4fbc03bbaf11",
+      "updated_at_utc": "2026-03-28T16:40:32.449347+00:00",
+      "warnings": []
+    },
+    "c6f7dd873664629dbaec0868f05952caf25717e693857fcadf62a068f1fdcba2+03644f046669e4d9578ab062ae8963a49cb62b58b2337fc4492462fed1a3c0d0": {
+      "artifact_format": "parquet",
+      "artifact_id": "4cf9669f8623420985fbcd052df9ac21",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/4cf9669f8623420985fbcd052df9ac21/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/4cf9669f8623420985fbcd052df9ac21/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/4cf9669f8623420985fbcd052df9ac21/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 91,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "hillslopes.parquet",
+          "row_count": 91,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "hillslopes.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/4cf9669f8623420985fbcd052df9ac21/manifest.json",
+      "packaged_member_relpaths": [
+        "hillslopes.parquet"
+      ],
+      "source_job_id": "debug-repro-b74db2e6-patched",
+      "updated_at_utc": "2026-03-28T18:57:29.529125+00:00",
+      "warnings": []
+    },
+    "c7ca3660a055c8f486f2a27da59138f6a95c33512c440c94d0aa857e5b1c6375+754068f04d786de429e628cb75dcc5047791570b1a6cc5075cbcdcfdf9decd3b": {
+      "artifact_format": "geoparquet",
+      "artifact_id": "ab8b83e1a0194a139f728f42534715af",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/ab8b83e1a0194a139f728f42534715af/features_export.geoparquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/ab8b83e1a0194a139f728f42534715af/features_export.geoparquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/ab8b83e1a0194a139f728f42534715af/features_export.geoparquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geoparquet",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "clogging-starch-chan_map-channels.parquet",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "geoparquet",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/ab8b83e1a0194a139f728f42534715af/manifest.json",
+      "packaged_member_relpaths": [
+        "clogging-starch-chan_map-channels.parquet",
+        "clogging-starch-sbs_map-subcatchments.parquet"
+      ],
+      "source_job_id": "de3cf2b4-26ca-4ef9-932e-53243298843e",
+      "updated_at_utc": "2026-03-29T01:20:50.979559+00:00",
+      "warnings": []
+    },
+    "c962044de7bc17e1ebd30ef3c322a1c73b2fc81c004c341fc331f344bfbe528d+2759364c3008e5d0b257a34ba7edff1086aebd1db3f61679cdc2dbd689ecf0b9": {
+      "artifact_format": "geodatabase",
+      "artifact_id": "8f630a52c5964930abd89e290c246c08",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/8f630a52c5964930abd89e290c246c08/features_export.gdb.zip",
+      "artifact_paths": [
+        "export/features/artifacts/8f630a52c5964930abd89e290c246c08/features_export.gdb.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/8f630a52c5964930abd89e290c246c08/features_export.gdb.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geodatabase",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gdb.zip",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "geodatabase",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gdb.zip",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/8f630a52c5964930abd89e290c246c08/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gdb.zip"
+      ],
+      "source_job_id": "03ee8f7b-b231-446c-9a81-1433944b462d",
+      "updated_at_utc": "2026-03-29T00:17:39.354801+00:00",
+      "warnings": []
+    },
+    "ca04a5b973cdc9973108d257db902f198c049f6ca6162e1f12da2cd005d77db4+754068f04d786de429e628cb75dcc5047791570b1a6cc5075cbcdcfdf9decd3b": {
+      "artifact_format": "geoparquet",
+      "artifact_id": "dd6d0e39dcff4be483873a6d7a6c8967",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/dd6d0e39dcff4be483873a6d7a6c8967/features_export.geoparquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/dd6d0e39dcff4be483873a6d7a6c8967/features_export.geoparquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/dd6d0e39dcff4be483873a6d7a6c8967/features_export.geoparquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geoparquet",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "clogging-starch-chan_map-channels.geoparquet",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "geoparquet",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.geoparquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/dd6d0e39dcff4be483873a6d7a6c8967/manifest.json",
+      "packaged_member_relpaths": [
+        "clogging-starch-chan_map-channels.geoparquet",
+        "clogging-starch-sbs_map-subcatchments.geoparquet"
+      ],
+      "source_job_id": "6fb1eef7-ba9f-4dd3-9d42-cc6459db7909",
+      "updated_at_utc": "2026-03-29T01:30:41.254363+00:00",
+      "warnings": []
+    },
+    "cba39f3898a7cbd0117335a04129ba90124f6e4bf908f4d9297e2c3f8967d1ae+7ed19a7cedb555af41bd8461727178dedf58648d0fc70eb7b9bf52f28a796820": {
+      "artifact_format": "geopackage",
+      "artifact_id": "064a54c948a64686be125395f520c2b6",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/064a54c948a64686be125395f520c2b6/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/064a54c948a64686be125395f520c2b6/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/064a54c948a64686be125395f520c2b6/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 2,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 2,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/064a54c948a64686be125395f520c2b6/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "8dc70bf3-eb35-4ed9-8bf5-400292552634",
+      "updated_at_utc": "2026-03-28T05:25:05.472484+00:00",
+      "warnings": [
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "landuse.dominant",
+          "message": "Layer 'landuse.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "soils.dominant",
+          "message": "Layer 'soils.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.channels",
+          "message": "Layer 'watershed.channels' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.subcatchments",
+          "message": "Layer 'watershed.subcatchments' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        }
+      ]
+    },
+    "d166419383bb3f28779fd74de18a547b40484f2b44a1a36259e91e111215f6bb+5457b6001f1ad03617c3958cfd7b8df0b9933a5af763eeb417863cc50394fc78": {
+      "artifact_format": "geopackage",
+      "artifact_id": "6ccf610dfc1945f199a2de23c2c1eade",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/6ccf610dfc1945f199a2de23c2c1eade/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/6ccf610dfc1945f199a2de23c2c1eade/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/6ccf610dfc1945f199a2de23c2c1eade/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/6ccf610dfc1945f199a2de23c2c1eade/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "b2060b25-ada0-479e-8871-b54ab62497e2",
+      "updated_at_utc": "2026-03-29T00:28:59.014985+00:00",
+      "warnings": []
+    },
+    "d1d81b82c2ee2afebc9a7f785c22a60fe794efbf62a7810fc6c4bf23899b2cc1+c93bba2d471e55aaad268ba89fa71463b13d37fce8818bcb734c0deecfe3ef1f": {
+      "artifact_format": "geojson",
+      "artifact_id": "59a461c310fe4f4eacbe84c31d96daba",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/59a461c310fe4f4eacbe84c31d96daba/features_export.geojson.zip",
+      "artifact_paths": [
+        "export/features/artifacts/59a461c310fe4f4eacbe84c31d96daba/features_export.geojson.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/59a461c310fe4f4eacbe84c31d96daba/features_export.geojson.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 12,
+          "format": "geojson",
+          "layer_id": "watershed.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.geojson",
+          "row_count": 12,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/59a461c310fe4f4eacbe84c31d96daba/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.geojson",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-format-geojson",
+      "updated_at_utc": "2026-03-29T03:20:07.328215+00:00",
+      "warnings": []
+    },
+    "d994dec7c969765ff399f7397579ab675be034d7bbed4ca5dc7bd1849def40bf+df066b86a47db9a18099e3e1f54c8a69ae392310423a06cdd1e52f4f2aafe3e0": {
+      "artifact_format": "geopackage",
+      "artifact_id": "459dab5f11b34c3794df24c11deb8058",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/459dab5f11b34c3794df24c11deb8058/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/459dab5f11b34c3794df24c11deb8058/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/459dab5f11b34c3794df24c11deb8058/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 35292,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 35292,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 391930,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 391930,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/459dab5f11b34c3794df24c11deb8058/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "manual-wp9-column-check",
+      "updated_at_utc": "2026-03-27T23:00:45.346450+00:00",
+      "warnings": []
+    },
+    "da124453a9d328c2b590ffc1076a760ab77a4e7603e545f9285127198a5876cc+f2ed72b813ab25df2fa1ce69abe9d3cce571ea6ab1b95ea1329551ff26faf88d": {
+      "artifact_format": "geopackage",
+      "artifact_id": "9621d7ed287d411f9a128e3449f71740",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/9621d7ed287d411f9a128e3449f71740/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/9621d7ed287d411f9a128e3449f71740/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/9621d7ed287d411f9a128e3449f71740/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 2,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 2,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 12,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 12,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/9621d7ed287d411f9a128e3449f71740/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "318bb364-3530-44ae-a4e1-75c0e0f26251",
+      "updated_at_utc": "2026-03-28T03:32:21.483710+00:00",
+      "warnings": [
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "landuse.dominant",
+          "message": "Layer 'landuse.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "soils.dominant",
+          "message": "Layer 'soils.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.channels",
+          "message": "Layer 'watershed.channels' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.subcatchments",
+          "message": "Layer 'watershed.subcatchments' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        }
+      ]
+    },
+    "dae56a0b3212c6e51280bcc0da62218db837262ea20d223511cefe657b50e1ef+cb837208a31dd5e2671dac5b7b44f0c5817e584198551a918794535795465eda": {
+      "artifact_format": "geopackage",
+      "artifact_id": "7a4240c74e394acd80771d00d6d720de",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/7a4240c74e394acd80771d00d6d720de/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/7a4240c74e394acd80771d00d6d720de/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/7a4240c74e394acd80771d00d6d720de/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/7a4240c74e394acd80771d00d6d720de/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "perf-geom-compare2-20260328181153",
+      "updated_at_utc": "2026-03-28T18:14:40.260881+00:00",
+      "warnings": []
+    },
+    "dce89d09678a1d1a03f08e72dd9fad3f92099cada73cba59ae47aeaa36375586+0acdbc11c31237d055364e96535fc9051492e42a05270b4026ff80c09de692ad": {
+      "artifact_format": "geopackage",
+      "artifact_id": "ffde6721cfde4869ad4475b87f97890f",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/ffde6721cfde4869ad4475b87f97890f/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/ffde6721cfde4869ad4475b87f97890f/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/ffde6721cfde4869ad4475b87f97890f/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/ffde6721cfde4869ad4475b87f97890f/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "debug-wide-hill-wat-20260328d",
+      "updated_at_utc": "2026-03-28T16:36:17.516327+00:00",
+      "warnings": []
+    },
+    "e3016b0ccd9d83318e271b841dacf4b58a0dd2b9ec180b8a85fb8e5f7a90cff3+6d6f3ecc03c76b0ec4325abbcdf8e3ae8216b0e52171f6633c78492f289f73f1": {
+      "artifact_format": "geopackage",
+      "artifact_id": "e762c755239548459e61c021008c7602",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/e762c755239548459e61c021008c7602/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/e762c755239548459e61c021008c7602/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/e762c755239548459e61c021008c7602/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 67,
+          "format": "geopackage",
+          "layer_id": "wepp_temporal.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 67,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/e762c755239548459e61c021008c7602/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "79998eed-d2f9-4a45-9211-1e8d708a4b1c",
+      "updated_at_utc": "2026-03-28T07:02:07.551470+00:00",
+      "warnings": []
+    },
+    "e3cd3f3179f5eb2d72373e20cda2710833ff21948d6fcdf378cba0570c576be6+03644f046669e4d9578ab062ae8963a49cb62b58b2337fc4492462fed1a3c0d0": {
+      "artifact_format": "geopackage",
+      "artifact_id": "086c9eee3dc34924a0c8a05b7360496c",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/086c9eee3dc34924a0c8a05b7360496c/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/086c9eee3dc34924a0c8a05b7360496c/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/086c9eee3dc34924a0c8a05b7360496c/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/086c9eee3dc34924a0c8a05b7360496c/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "debug-hill-pass-annual-average-only",
+      "updated_at_utc": "2026-03-28T21:34:12.549215+00:00",
+      "warnings": []
+    },
+    "e9deb42ff4a4df81ccc37074a5006bb944223647c078ebb16d5fa2e2e9eeb14f+4334b334f471967228a5495b7ee98ba6a64aa317727dd77d4366760b5d59e9f0": {
+      "artifact_format": "parquet",
+      "artifact_id": "ee392ee42d48479c9522c912f4569929",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/ee392ee42d48479c9522c912f4569929/features_export.parquet.zip",
+      "artifact_paths": [
+        "export/features/artifacts/ee392ee42d48479c9522c912f4569929/features_export.parquet.zip"
+      ],
+      "artifact_relpath": "export/features/artifacts/ee392ee42d48479c9522c912f4569929/features_export.parquet.zip",
+      "layer_outputs": [
+        {
+          "feature_count": 66,
+          "format": "parquet",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "clogging-starch-sbs_map-subcatchments.parquet",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/ee392ee42d48479c9522c912f4569929/manifest.json",
+      "packaged_member_relpaths": [
+        "README.md",
+        "clogging-starch-sbs_map-subcatchments.parquet",
+        "manifest.json",
+        "profile.yml",
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_bundle_relpaths": [
+        "profiles/post-wepp.yml",
+        "profiles/prep-details.yml"
+      ],
+      "profile_relpath": "profile.yml",
+      "provenance_readme_relpath": "README.md",
+      "source_job_id": "debug-hpass-english",
+      "updated_at_utc": "2026-03-29T03:27:31.417923+00:00",
+      "warnings": []
+    },
+    "eeee0cc32560a1a92acf7165a2482a83fe2769078c4d99203cfbe934e7ea758b+ef59b6715449909669c7eef8900db6f47eb772f2574c626b5200bc822c55e240": {
+      "artifact_format": "geopackage",
+      "artifact_id": "86c2d61adf2746129f4bb8c86f272479",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/86c2d61adf2746129f4bb8c86f272479/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/86c2d61adf2746129f4bb8c86f272479/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/86c2d61adf2746129f4bb8c86f272479/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 90,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 90,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/86c2d61adf2746129f4bb8c86f272479/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "4717c9a4-76d3-40e7-974a-e560526d829c",
+      "updated_at_utc": "2026-03-28T07:22:54.122780+00:00",
+      "warnings": []
+    },
+    "f5b4288592e7831b84c27a1d9dfd081bf790f02e5a0a1822e30fc405dc901a67+69196e298b12f3b20d06a482ab0e79077ec73a2a40f370f915f0ebc6c8023839": {
+      "artifact_format": "geopackage",
+      "artifact_id": "a51b93d0f2fc42639a09e85714582320",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/a51b93d0f2fc42639a09e85714582320/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/a51b93d0f2fc42639a09e85714582320/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/a51b93d0f2fc42639a09e85714582320/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 35292,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 35292,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 818,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.chan_map-channels",
+          "output_layer_id": "clogging-starch-roads-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 818,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 172,
+          "format": "geopackage",
+          "layer_id": "wepp_summary.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-roads-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 172,
+          "scope": "roads",
+          "scope_class": "scope_aware"
+        },
+        {
+          "feature_count": 391930,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 391930,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/a51b93d0f2fc42639a09e85714582320/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "2a198492-3e25-43cd-8dc7-3752fbfbfb25",
+      "updated_at_utc": "2026-03-27T22:22:45.912208+00:00",
+      "warnings": [
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "landuse.dominant",
+          "message": "Layer 'landuse.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "soils.dominant",
+          "message": "Layer 'soils.dominant' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.channels",
+          "message": "Layer 'watershed.channels' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        },
+        {
+          "code": "scope_not_applicable",
+          "layer_id": "watershed.subcatchments",
+          "message": "Layer 'watershed.subcatchments' is scope-invariant; roads scope is not separately applicable.",
+          "scope": "roads"
+        }
+      ]
+    },
+    "f93c2a399e15625f62a532e9e4223b690a3ae917305374a4b62fca0c4e1d0c55+db21864d84398ee9904ad8a804021a48c0212182ac44b438b0acebaee347719b": {
+      "artifact_format": "geopackage",
+      "artifact_id": "0333c6a06b8c46b39b9cdd8d70c9f394",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/0333c6a06b8c46b39b9cdd8d70c9f394/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/0333c6a06b8c46b39b9cdd8d70c9f394/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/0333c6a06b8c46b39b9cdd8d70c9f394/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 818,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 818,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 391930,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 391930,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/0333c6a06b8c46b39b9cdd8d70c9f394/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "6c71af83-7efc-4789-a42f-c02b11c29518",
+      "updated_at_utc": "2026-03-28T02:50:06.705088+00:00",
+      "warnings": []
+    },
+    "fac1ff46f2390bfcaee33ef5c18555879507ad16653b0eb6ec14a358becb1252+df066b86a47db9a18099e3e1f54c8a69ae392310423a06cdd1e52f4f2aafe3e0": {
+      "artifact_format": "geopackage",
+      "artifact_id": "6f6fddc846554054a01eebcad52f0f51",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/6f6fddc846554054a01eebcad52f0f51/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/6f6fddc846554054a01eebcad52f0f51/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/6f6fddc846554054a01eebcad52f0f51/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/6f6fddc846554054a01eebcad52f0f51/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "manual-wp-service-compliance-cold-20260328045609019671",
+      "updated_at_utc": "2026-03-28T04:56:12.296236+00:00",
+      "warnings": []
+    },
+    "fd67abfaf94d903d18d7089fb6d2f15a1233edcb0b8e7047a9a7949f09f64fa3+6d6f3ecc03c76b0ec4325abbcdf8e3ae8216b0e52171f6633c78492f289f73f1": {
+      "artifact_format": "geopackage",
+      "artifact_id": "6b34b513e5ba4bddab1d7a5960bf0cac",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/6b34b513e5ba4bddab1d7a5960bf0cac/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/6b34b513e5ba4bddab1d7a5960bf0cac/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/6b34b513e5ba4bddab1d7a5960bf0cac/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 1,
+          "format": "geopackage",
+          "layer_id": "wepp_temporal.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 1,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/6b34b513e5ba4bddab1d7a5960bf0cac/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "7cb2075d-4ce3-45ee-985f-7ebb946236b8",
+      "updated_at_utc": "2026-03-28T06:36:34.128345+00:00",
+      "warnings": []
+    },
+    "fe66c32bdc5accfdfaf494e4d9fc536744534200678411df8925b649b3b42ab7+492e72f757ea7aea2ad696fcd26d3d4f3d93ae65a66880eae8bbfe0d31aca3de": {
+      "artifact_format": "geopackage",
+      "artifact_id": "c55c5be549c24e1e8522ac42c77fb4ce",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/c55c5be549c24e1e8522ac42c77fb4ce/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/c55c5be549c24e1e8522ac42c77fb4ce/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/c55c5be549c24e1e8522ac42c77fb4ce/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 27,
+          "format": "geopackage",
+          "layer_id": "watershed.chan_map-channels",
+          "output_layer_id": "clogging-starch-chan_map-channels",
+          "relpath": "features_export.gpkg",
+          "row_count": 27,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        },
+        {
+          "feature_count": 66,
+          "format": "geopackage",
+          "layer_id": "landuse.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 66,
+          "scope": "baseline",
+          "scope_class": "scope_invariant"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/c55c5be549c24e1e8522ac42c77fb4ce/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "0363c36a-26ea-4307-b3b2-e8c09a6abbd3",
+      "updated_at_utc": "2026-03-28T05:53:21.044313+00:00",
+      "warnings": []
+    },
+    "ff0809d2c02d16b50d6d5808167b2981a18f17c08d2cf6711934007e7ee68701+0acdbc11c31237d055364e96535fc9051492e42a05270b4026ff80c09de692ad": {
+      "artifact_format": "geopackage",
+      "artifact_id": "24366db4a2a847098bc5c1ab790519d7",
+      "artifact_path": "/wc1/runs/cl/clogging-starch/export/features/artifacts/24366db4a2a847098bc5c1ab790519d7/features_export.gpkg",
+      "artifact_paths": [
+        "export/features/artifacts/24366db4a2a847098bc5c1ab790519d7/features_export.gpkg"
+      ],
+      "artifact_relpath": "export/features/artifacts/24366db4a2a847098bc5c1ab790519d7/features_export.gpkg",
+      "layer_outputs": [
+        {
+          "feature_count": 90,
+          "format": "geopackage",
+          "layer_id": "wepp_interchange.sbs_map-subcatchments",
+          "output_layer_id": "clogging-starch-sbs_map-subcatchments",
+          "relpath": "features_export.gpkg",
+          "row_count": 90,
+          "scope": "baseline",
+          "scope_class": "scope_aware"
+        }
+      ],
+      "manifest_relpath": "export/features/artifacts/24366db4a2a847098bc5c1ab790519d7/manifest.json",
+      "packaged_member_relpaths": [
+        "features_export.gpkg"
+      ],
+      "source_job_id": "be29ea55-38ea-42da-8813-dce089d92f78",
+      "updated_at_utc": "2026-03-28T07:22:51.614919+00:00",
+      "warnings": []
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,18 @@
+profile_id: temporal_yearly
+label: Temporal yearly
+description: Yearly temporal export profile for WEPP hillslope interchange measures.
+request:
+  format: parquet
+  units: project
+  crs: wgs
+  output_scopes:
+    - baseline
+  tabular:
+    concatenate_tables: false
+    temporal_layout: wide
+  swat_run_id: latest
+  temporal:
+    mode: yearly
+    year_selection: all
+  layers:
+    - wepp.interchange.loss_all_years_hill

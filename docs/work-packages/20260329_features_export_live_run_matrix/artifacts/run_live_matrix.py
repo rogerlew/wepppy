@@ -45,6 +45,8 @@ PAYLOAD_EXTENSIONS = (
 )
 YEAR_WIDE_RE = re.compile(r"_yr\d{4}$")
 DATE_WIDE_RE = re.compile(r"_\d{4}_\d{2}_\d{2}$")
+PHASE1_PLAN = "phase1"
+PHASE2_OMNI_PLAN = "phase2_omni"
 
 
 @dataclass(frozen=True)
@@ -122,6 +124,8 @@ def _payload(
     output_scopes: list[str] | None = None,
     temporal: dict[str, Any] | None = None,
     tabular: dict[str, Any] | None = None,
+    scenarios: list[str] | None = None,
+    contrast_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "format": format_token,
@@ -134,6 +138,10 @@ def _payload(
         payload["temporal"] = temporal
     if tabular is not None:
         payload["tabular"] = tabular
+    if scenarios:
+        payload["scenarios"] = scenarios
+    if contrast_ids:
+        payload["contrast_ids"] = contrast_ids
     return payload
 
 
@@ -693,6 +701,269 @@ def build_expansion_cases() -> list[MatrixCase]:
     return cases
 
 
+def _natural_sort_key(value: str) -> tuple[int, object]:
+    if value.isdigit():
+        return (0, int(value))
+    return (1, value)
+
+
+def discover_omni_phase2_selectors(wd: Path) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    scenario_root = wd / "_pups/omni/scenarios"
+    contrast_root = wd / "_pups/omni/contrasts"
+
+    scenario_ids: list[str] = []
+    if scenario_root.is_dir():
+        for path in sorted(scenario_root.iterdir(), key=lambda item: item.name):
+            if not path.is_dir():
+                continue
+            metrics_path = path / "wepp/output/interchange/loss_pw0.hill.parquet"
+            interchange_manifest = path / "wepp/output/interchange/interchange_version.json"
+            if metrics_path.is_file() and interchange_manifest.is_file():
+                scenario_ids.append(path.name)
+
+    contrast_ids: list[str] = []
+    if contrast_root.is_dir():
+        for path in sorted(contrast_root.iterdir(), key=lambda item: _natural_sort_key(item.name)):
+            if not path.is_dir():
+                continue
+            metrics_path = path / "wepp/output/interchange/loss_pw0.hill.parquet"
+            interchange_manifest = path / "wepp/output/interchange/interchange_version.json"
+            if metrics_path.is_file() and interchange_manifest.is_file():
+                contrast_ids.append(path.name)
+
+    if not scenario_ids:
+        raise RuntimeError(
+            "Phase-2 Omni case discovery could not find any scenario selectors with required interchange datasets."
+        )
+    if not contrast_ids:
+        raise RuntimeError(
+            "Phase-2 Omni case discovery could not find any contrast selectors with required interchange datasets."
+        )
+
+    return tuple(scenario_ids), tuple(contrast_ids)
+
+
+def build_phase2_omni_cases(
+    *,
+    scenario_ids: tuple[str, ...],
+    contrast_ids: tuple[str, ...],
+) -> list[MatrixCase]:
+    primary_scenario = scenario_ids[0]
+    primary_contrast = contrast_ids[0]
+    multi_scenarios = list(scenario_ids[:2]) if len(scenario_ids) > 1 else [primary_scenario]
+    multi_contrasts = list(contrast_ids[:2]) if len(contrast_ids) > 1 else [primary_contrast]
+
+    cases: list[MatrixCase] = []
+
+    for format_token in ALL_FORMATS:
+        tabular = {"concatenate_tables": False, "temporal_layout": "wide"} if format_token in TABULAR_FORMATS else None
+        cases.append(
+            MatrixCase(
+                case_id=f"h1_omni_scenario_{format_token}",
+                gate="phase2_gate1",
+                group="H1",
+                description="Omni scenario sentinel export.",
+                payload=_payload(
+                    format_token=format_token,
+                    layers=["omni.scenarios.hillslopes"],
+                    scenarios=[primary_scenario],
+                    tabular=tabular,
+                ),
+            )
+        )
+
+    for format_token in ALL_FORMATS:
+        tabular = {"concatenate_tables": False, "temporal_layout": "wide"} if format_token in TABULAR_FORMATS else None
+        cases.append(
+            MatrixCase(
+                case_id=f"h2_omni_contrast_{format_token}",
+                gate="phase2_gate1",
+                group="H2",
+                description="Omni contrast sentinel export.",
+                payload=_payload(
+                    format_token=format_token,
+                    layers=["omni.contrasts.hillslopes"],
+                    contrast_ids=[primary_contrast],
+                    tabular=tabular,
+                ),
+            )
+        )
+
+    cases.extend(
+        [
+            MatrixCase(
+                case_id="h3_neg_mixed_omni_families",
+                gate="phase2_gate1",
+                group="H3",
+                description="Scenario and contrast Omni families cannot be mixed.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.scenarios.hillslopes", "omni.contrasts.hillslopes"],
+                    scenarios=[primary_scenario],
+                ),
+                expect_success=False,
+                expected_status=400,
+                expected_code="invalid_selector_combo",
+            ),
+            MatrixCase(
+                case_id="h3_neg_missing_scenario_selector",
+                gate="phase2_gate1",
+                group="H3",
+                description="Scenario selector required for Omni scenario layers.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.scenarios.hillslopes"],
+                ),
+                expect_success=False,
+                expected_status=400,
+                expected_code="missing_field",
+            ),
+            MatrixCase(
+                case_id="h3_neg_missing_contrast_selector",
+                gate="phase2_gate1",
+                group="H3",
+                description="Contrast selector required for Omni contrast layers.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.contrasts.hillslopes"],
+                ),
+                expect_success=False,
+                expected_status=400,
+                expected_code="missing_field",
+            ),
+            MatrixCase(
+                case_id="h3_neg_mutually_exclusive_selectors",
+                gate="phase2_gate1",
+                group="H3",
+                description="scenarios and contrast_ids are mutually exclusive.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["wepp.summary.hillslopes"],
+                    scenarios=[primary_scenario],
+                    contrast_ids=[primary_contrast],
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+                expect_success=False,
+                expected_status=400,
+                expected_code="mutually_exclusive",
+            ),
+        ]
+    )
+
+    cases.extend(
+        [
+            MatrixCase(
+                case_id="h4_base_layer_scenarios_mapping",
+                gate="phase2_expansion",
+                group="H4",
+                description="Base WEPP hillslope layer expands to scenario context.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["wepp.summary.hillslopes"],
+                    scenarios=[primary_scenario],
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+            ),
+            MatrixCase(
+                case_id="h4_base_layer_contrasts_mapping",
+                gate="phase2_expansion",
+                group="H4",
+                description="Base WEPP hillslope layer expands to contrast context.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["wepp.summary.hillslopes"],
+                    contrast_ids=[primary_contrast],
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+            ),
+            MatrixCase(
+                case_id="h4_multi_scenario_selectors",
+                gate="phase2_expansion",
+                group="H4",
+                description="Omni scenario multi-select produces selector-specific outputs.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.scenarios.hillslopes"],
+                    scenarios=multi_scenarios,
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+            ),
+            MatrixCase(
+                case_id="h4_multi_contrast_selectors",
+                gate="phase2_expansion",
+                group="H4",
+                description="Omni contrast multi-select produces selector-specific outputs.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.contrasts.hillslopes"],
+                    contrast_ids=multi_contrasts,
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+            ),
+            MatrixCase(
+                case_id="h4_scope_roads_scenario",
+                gate="phase2_expansion",
+                group="H4",
+                description="Scope-invariant Omni scenario export accepts roads with warnings.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.scenarios.hillslopes"],
+                    output_scopes=["baseline", "roads"],
+                    scenarios=[primary_scenario],
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+            ),
+            MatrixCase(
+                case_id="h4_scope_roads_contrast",
+                gate="phase2_expansion",
+                group="H4",
+                description="Scope-invariant Omni contrast export accepts roads with warnings.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.contrasts.hillslopes"],
+                    output_scopes=["baseline", "roads"],
+                    contrast_ids=[primary_contrast],
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+            ),
+            MatrixCase(
+                case_id="h4_neg_scenario_event_temporal_columns_missing",
+                gate="phase2_expansion",
+                group="H4",
+                description="Event temporal request fails when required selector columns are absent.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.scenarios.hillslopes"],
+                    scenarios=[primary_scenario],
+                    temporal={"mode": "event", "event": {"selector": "date", "dates": ["2015-01-15"]}},
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+                expect_success=False,
+                expected_status=500,
+                expected_code="materialization_error",
+            ),
+            MatrixCase(
+                case_id="h4_neg_contrast_yearly_temporal_columns_missing",
+                gate="phase2_expansion",
+                group="H4",
+                description="Yearly temporal request fails when required year columns are absent.",
+                payload=_payload(
+                    format_token="parquet",
+                    layers=["omni.contrasts.hillslopes"],
+                    contrast_ids=[primary_contrast],
+                    temporal={"mode": "yearly", "year_selection": "all"},
+                    tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                ),
+                expect_success=False,
+                expected_status=500,
+                expected_code="materialization_error",
+            ),
+        ]
+    )
+
+    return cases
+
+
 def _payload_members(zip_names: list[str]) -> list[str]:
     members: list[str] = []
     for name in zip_names:
@@ -960,6 +1231,64 @@ def _audit_success_case(
                     if not rp_columns:
                         reasons.append("event_return_period_columns_missing")
 
+        selector_layers = manifest.get("layers", [])
+        scenario_ids_in_manifest = sorted(
+            {
+                str(entry.get("selector_id"))
+                for entry in selector_layers
+                if entry.get("context") == "scenario" and entry.get("selector_id") is not None
+            }
+        )
+        contrast_ids_in_manifest = sorted(
+            {
+                str(entry.get("selector_id"))
+                for entry in selector_layers
+                if entry.get("context") == "contrast" and entry.get("selector_id") is not None
+            }
+        )
+        checks["manifest_scenario_ids"] = scenario_ids_in_manifest
+        checks["manifest_contrast_ids"] = contrast_ids_in_manifest
+
+        requested_scenarios = case.payload.get("scenarios")
+        if isinstance(requested_scenarios, list):
+            missing_scenarios = sorted(
+                {
+                    str(selector)
+                    for selector in requested_scenarios
+                    if str(selector) not in scenario_ids_in_manifest
+                }
+            )
+            checks["requested_scenarios"] = [str(item) for item in requested_scenarios]
+            if missing_scenarios:
+                checks["missing_manifest_scenarios"] = missing_scenarios
+                reasons.append("scenario_selector_manifest_mismatch")
+
+        requested_contrasts = case.payload.get("contrast_ids")
+        if isinstance(requested_contrasts, list):
+            missing_contrasts = sorted(
+                {
+                    str(selector)
+                    for selector in requested_contrasts
+                    if str(selector) not in contrast_ids_in_manifest
+                }
+            )
+            checks["requested_contrasts"] = [str(item) for item in requested_contrasts]
+            if missing_contrasts:
+                checks["missing_manifest_contrasts"] = missing_contrasts
+                reasons.append("contrast_selector_manifest_mismatch")
+
+        if "scope_roads" in case.case_id:
+            warning_codes = sorted(
+                {
+                    str(warning.get("code"))
+                    for warning in result.get("warnings", [])
+                    if isinstance(warning, dict) and warning.get("code") is not None
+                }
+            )
+            checks["result_warning_codes"] = warning_codes
+            if "scope_not_applicable" not in warning_codes:
+                reasons.append("scope_not_applicable_warning_missing")
+
     passed = len(reasons) == 0
     return passed, checks, reasons
 
@@ -1188,33 +1517,69 @@ def _write_manual_sanity_notes(
         "",
         f"- Generated: {_utc_now_iso()}",
         "",
-        "## Gate-1 Format Sentinel",
-        "",
     ]
-    for format_token in ALL_FORMATS:
-        case_id = f"gate1_success_{format_token}"
-        row = result_by_case_id.get(case_id, {})
-        lines.append(f"### {format_token}")
-        lines.append(f"- Case: `{case_id}`")
-        lines.append(f"- Passed: `{row.get('passed')}`")
-        result = row.get("result", {})
-        if isinstance(result, dict):
-            lines.append(f"- cache_hit: `{result.get('cache_hit')}`")
-            lines.append(f"- artifact_relpath: `{result.get('artifact_relpath')}`")
-        checks = row.get("checks", {})
-        if isinstance(checks, dict):
-            members = checks.get("payload_members", [])
-            lines.append(f"- payload_members: `{members}`")
-            epsg_values = checks.get("spatial_epsg_values")
-            if epsg_values is not None:
-                lines.append(f"- spatial_epsg_values: `{epsg_values}`")
-            identity_issues = checks.get("tabular_identity_issues")
-            if identity_issues is not None:
-                lines.append(f"- tabular_identity_issues: `{identity_issues}`")
-        failures = row.get("check_failures", [])
-        if failures:
-            lines.append(f"- check_failures: `{failures}`")
-        lines.append("")
+
+    def append_case_details(case_ids: list[str], section: str) -> None:
+        if not any(case_id in result_by_case_id for case_id in case_ids):
+            return
+        lines.extend([f"## {section}", ""])
+        for case_id in case_ids:
+            row = result_by_case_id.get(case_id)
+            if row is None:
+                continue
+            lines.append(f"### {case_id}")
+            lines.append(f"- Passed: `{row.get('passed')}`")
+            result = row.get("result", {})
+            if isinstance(result, dict):
+                lines.append(f"- cache_hit: `{result.get('cache_hit')}`")
+                lines.append(f"- artifact_relpath: `{result.get('artifact_relpath')}`")
+            checks = row.get("checks", {})
+            if isinstance(checks, dict):
+                members = checks.get("payload_members", [])
+                lines.append(f"- payload_members: `{members}`")
+                epsg_values = checks.get("spatial_epsg_values")
+                if epsg_values is not None:
+                    lines.append(f"- spatial_epsg_values: `{epsg_values}`")
+                identity_issues = checks.get("tabular_identity_issues")
+                if identity_issues is not None:
+                    lines.append(f"- tabular_identity_issues: `{identity_issues}`")
+                scenario_ids = checks.get("manifest_scenario_ids")
+                if scenario_ids:
+                    lines.append(f"- manifest_scenario_ids: `{scenario_ids}`")
+                contrast_ids = checks.get("manifest_contrast_ids")
+                if contrast_ids:
+                    lines.append(f"- manifest_contrast_ids: `{contrast_ids}`")
+                warning_codes = checks.get("result_warning_codes")
+                if warning_codes is not None:
+                    lines.append(f"- warning_codes: `{warning_codes}`")
+            failures = row.get("check_failures", [])
+            if failures:
+                lines.append(f"- check_failures: `{failures}`")
+            lines.append("")
+
+    append_case_details(
+        [f"gate1_success_{format_token}" for format_token in ALL_FORMATS],
+        "Gate-1 Format Sentinel",
+    )
+    append_case_details(
+        [f"h1_omni_scenario_{format_token}" for format_token in ALL_FORMATS],
+        "Phase-2 Omni Scenario Sentinel (H1)",
+    )
+    append_case_details(
+        [f"h2_omni_contrast_{format_token}" for format_token in ALL_FORMATS],
+        "Phase-2 Omni Contrast Sentinel (H2)",
+    )
+    append_case_details(
+        [
+            "h4_base_layer_scenarios_mapping",
+            "h4_base_layer_contrasts_mapping",
+            "h4_multi_scenario_selectors",
+            "h4_multi_contrast_selectors",
+            "h4_scope_roads_scenario",
+            "h4_scope_roads_contrast",
+        ],
+        "Phase-2 Omni Compatibility (H4)",
+    )
 
     notes_path.write_text("\n".join(lines), encoding="utf-8")
 
@@ -1223,50 +1588,69 @@ def _write_defect_log(
     *,
     defect_path: Path,
     result_by_case_id: dict[str, dict[str, Any]],
-    numeric_oracle_row: dict[str, Any],
+    numeric_oracle_row: dict[str, Any] | None = None,
 ) -> None:
+    group_totals: dict[str, int] = {}
+    group_passed: dict[str, int] = {}
+    for row in result_by_case_id.values():
+        group = str(row.get("group") or "unknown")
+        group_totals[group] = group_totals.get(group, 0) + 1
+        if row.get("passed"):
+            group_passed[group] = group_passed.get(group, 0) + 1
+
     lines: list[str] = [
         "# Defect Log",
         "",
         f"- Generated: {_utc_now_iso()}",
         "",
-        "## Fixed During Execution",
-        "",
-        "1. Return-period selector failed with materialization errors on `wepp.temporal.events`.",
-        "   - Fix: derive selector filtering from rank lookup source, inject deterministic `return_period` token, and exclude lookup-only rank source from carrier joins.",
-        "   - Evidence: `b3_event_selector_return_period` passed.",
-        "",
-        "2. Unit conversions were not applied to exported numeric values.",
-        "   - Fix: integrate `Unitizer.convert_table` into materialization paths before unit-suffix naming.",
-        "   - Evidence: `g1` numeric oracle checks.",
-        "",
-        "3. UI copy typo in Features Export controls.",
-        "   - Fix: `Unitzer Selections` -> `Unitizer Selections` + route render test coverage.",
-        "",
-        "## Outstanding Failures",
+        "## Group Summary",
         "",
     ]
+    for group in sorted(group_totals):
+        lines.append(
+            f"- `{group}`: `{group_passed.get(group, 0)}/{group_totals[group]}` passed"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Outstanding Failures",
+            "",
+        ]
+    )
 
     outstanding = [row for row in result_by_case_id.values() if not row.get("passed")]
     if not outstanding:
-        lines.append("- None. All matrix cases passed.")
+        lines.append("- None. All executed cases passed.")
     else:
         for row in sorted(outstanding, key=lambda item: item.get("case_id", "")):
             lines.append(
                 f"- `{row.get('case_id')}`: outcome={row.get('outcome')} error={row.get('error')} failures={row.get('check_failures')}"
             )
 
-    lines.extend(
-        [
-            "",
-            "## Numeric Oracle Summary",
-            "",
-            f"- Passed: `{numeric_oracle_row.get('passed')}`",
-            f"- Details: `{numeric_oracle_row.get('checks')}`",
-            f"- Failures: `{numeric_oracle_row.get('check_failures')}`",
-            "",
-        ]
-    )
+    if numeric_oracle_row is not None:
+        lines.extend(
+            [
+                "",
+                "## Numeric Oracle Summary",
+                "",
+                f"- Passed: `{numeric_oracle_row.get('passed')}`",
+                f"- Details: `{numeric_oracle_row.get('checks')}`",
+                f"- Failures: `{numeric_oracle_row.get('check_failures')}`",
+                "",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "",
+                "## Numeric Oracle Summary",
+                "",
+                "- Not executed in this phase.",
+                "",
+            ]
+        )
+
     defect_path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -1278,6 +1662,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--results", required=True, help="Output matrix_results.jsonl path.")
     parser.add_argument("--manual-notes", required=True, help="Output manual_sanity_notes.md path.")
     parser.add_argument("--defect-log", required=True, help="Output defect_log.md path.")
+    parser.add_argument(
+        "--phase",
+        choices=(PHASE1_PLAN, PHASE2_OMNI_PLAN),
+        default=PHASE1_PLAN,
+        help="Matrix case plan to execute.",
+    )
+    parser.add_argument(
+        "--append-results",
+        action="store_true",
+        help="Append to results file instead of replacing it.",
+    )
     return parser.parse_args()
 
 
@@ -1289,11 +1684,58 @@ def main() -> int:
     defect_log_path = Path(args.defect_log).resolve()
     for output_path in (results_path, manual_notes_path, defect_log_path):
         output_path.parent.mkdir(parents=True, exist_ok=True)
-    if results_path.exists():
+    if results_path.exists() and not args.append_results:
         results_path.unlink()
 
     oracle_topaz_ids, oracle_wepp_ids = _load_oracle_domains(wd)
     result_by_case_id: dict[str, dict[str, Any]] = {}
+
+    if args.phase == PHASE2_OMNI_PLAN:
+        scenario_ids, contrast_ids = discover_omni_phase2_selectors(wd)
+        phase2_cases = build_phase2_omni_cases(
+            scenario_ids=scenario_ids,
+            contrast_ids=contrast_ids,
+        )
+        sentinel_cases = [case for case in phase2_cases if case.gate == "phase2_gate1"]
+        expansion_cases = [case for case in phase2_cases if case.gate == "phase2_expansion"]
+
+        sentinel_ok = execute_cases(
+            cases=sentinel_cases,
+            wd=wd,
+            runid=args.runid,
+            config=args.config,
+            results_path=results_path,
+            result_by_case_id=result_by_case_id,
+            oracle_topaz_ids=oracle_topaz_ids,
+            oracle_wepp_ids=oracle_wepp_ids,
+        )
+        if not sentinel_ok:
+            _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
+            _write_defect_log(
+                defect_path=defect_log_path,
+                result_by_case_id=result_by_case_id,
+                numeric_oracle_row=None,
+            )
+            return 1
+
+        expansion_ok = execute_cases(
+            cases=expansion_cases,
+            wd=wd,
+            runid=args.runid,
+            config=args.config,
+            results_path=results_path,
+            result_by_case_id=result_by_case_id,
+            oracle_topaz_ids=oracle_topaz_ids,
+            oracle_wepp_ids=oracle_wepp_ids,
+        )
+
+        _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
+        _write_defect_log(
+            defect_path=defect_log_path,
+            result_by_case_id=result_by_case_id,
+            numeric_oracle_row=None,
+        )
+        return 0 if expansion_ok else 1
 
     gate1_ok = execute_cases(
         cases=build_gate1_cases(),
