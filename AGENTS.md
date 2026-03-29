@@ -20,6 +20,7 @@
 - Keep docs terse: Codex loads context in bulk and does not compress verbose guidance.
 - Do not add fallback wrappers that silently mask missing required dependencies.
 - Prefer explicit failures over hidden recovery paths for easier debugging.
+- Do not create or switch to a new git branch unless the user explicitly asks for it.
 
 ## Agent Feedback Loop
 - Treat avoidable friction as diagnostic signal about the codebase, docs, tooling, or task framing.
