@@ -11,12 +11,13 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
 import threading
 import traceback
-from typing import Iterable, Sequence
+from typing import Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TIMING_CACHE_FILE = REPO_ROOT / ".pytest_cache" / "wctl" / "run_pytest_sharded_module_timings.json"
@@ -28,6 +29,31 @@ XDIST_OPTIONS = {
     "--numprocesses",
     "--dist",
     "--tx",
+}
+OPTIONS_REQUIRING_VALUE = {
+    "-k",
+    "-m",
+    "-c",
+    "-o",
+    "-p",
+    "-r",
+    "--basetemp",
+    "--capture",
+    "--confcutdir",
+    "--durations",
+    "--durations-min",
+    "--ignore",
+    "--ignore-glob",
+    "--deselect",
+    "--import-mode",
+    "--junitxml",
+    "--log-cli-level",
+    "--log-level",
+    "--log-file",
+    "--maxfail",
+    "--override-ini",
+    "--rootdir",
+    "--tb",
 }
 
 
@@ -98,8 +124,8 @@ class WorkerProcess:
     shard_total: int
     shard_files: list[str]
     process: subprocess.Popen[str]
-    selected_files_json: str
     result_json: str
+    basetemp_dir: str
     stdout_thread: threading.Thread
     stderr_thread: threading.Thread
 
@@ -143,23 +169,92 @@ class _CollectFilesPlugin:
             self.files.add(_item_path(item))
 
 
-class _ShardFilterPlugin:
-    def __init__(self, selected_files: Iterable[str]) -> None:
-        self._selected = {_normalize_path(path) for path in selected_files}
+def _option_requires_value(option: str) -> bool:
+    if option in OPTIONS_REQUIRING_VALUE:
+        return True
+    if option.startswith("--") and "=" in option:
+        return False
+    if option.startswith("-k") and option != "-k":
+        return False
+    if option.startswith("-m") and option != "-m":
+        return False
+    if option.startswith("-c") and option != "-c":
+        return False
+    if option.startswith("-o") and option != "-o":
+        return False
+    if option.startswith("-p") and option != "-p":
+        return False
+    if option.startswith("-r") and option != "-r":
+        return False
+    return option in OPTIONS_REQUIRING_VALUE
 
-    def pytest_collection_modifyitems(self, session: object, config: object, items: list[object]) -> None:
-        kept: list[object] = []
-        dropped: list[object] = []
-        for item in items:
-            if _item_path(item) in self._selected:
-                kept.append(item)
-            else:
-                dropped.append(item)
-        if dropped:
-            hook = getattr(config, "hook", None)
-            if hook is not None:
-                hook.pytest_deselected(items=dropped)
-        items[:] = kept
+
+def split_pytest_options_and_targets(pytest_args: Sequence[str]) -> tuple[list[str], list[str]]:
+    options: list[str] = []
+    targets: list[str] = []
+    index = 0
+    args = list(pytest_args)
+    while index < len(args):
+        token = args[index]
+        if token == "--":
+            targets.extend(args[index + 1 :])
+            break
+        if token.startswith("-"):
+            options.append(token)
+            if _option_requires_value(token) and "=" not in token and (index + 1) < len(args):
+                options.append(args[index + 1])
+                index += 1
+            index += 1
+            continue
+        targets.append(token)
+        index += 1
+    return options, targets
+
+
+def _normalized_file_target(target: str) -> str | None:
+    module_token = target.split("::", 1)[0]
+    candidate = Path(module_token)
+    if candidate.suffix == ".py":
+        return _normalize_path(candidate)
+    if candidate.is_absolute() and candidate.is_file():
+        return _normalize_path(candidate)
+    resolved = (Path.cwd() / candidate).resolve()
+    if resolved.is_file():
+        return str(resolved)
+    return None
+
+
+def _has_basetemp_option(pytest_options: Sequence[str]) -> bool:
+    for token in pytest_options:
+        if token == "--basetemp" or token.startswith("--basetemp="):
+            return True
+    return False
+
+
+def build_worker_pytest_args(
+    pytest_options: Sequence[str],
+    original_targets: Sequence[str],
+    shard_files: Sequence[str],
+    *,
+    basetemp_dir: str,
+) -> list[str]:
+    shard_set = {_normalize_path(path) for path in shard_files}
+    selected_targets: list[str] = []
+    for target in original_targets:
+        normalized = _normalized_file_target(target)
+        if normalized is None:
+            continue
+        if normalized in shard_set:
+            selected_targets.append(target)
+
+    if not selected_targets:
+        selected_targets = list(shard_files)
+
+    worker_args: list[str] = list(pytest_options)
+    if not _has_basetemp_option(pytest_options):
+        worker_args.append(f"--basetemp={basetemp_dir}")
+    worker_args.extend(selected_targets)
+    return worker_args
 
 
 class _WorkerRecorderPlugin:
@@ -171,8 +266,10 @@ class _WorkerRecorderPlugin:
         self.skipped = 0
         self.warnings = 0
         self.module_durations: dict[str, float] = {}
-        self.failed_nodeids: list[str] = []
-        self.error_nodeids: list[str] = []
+        self.passed_nodeids: set[str] = set()
+        self.failed_nodeids: set[str] = set()
+        self.error_nodeids: set[str] = set()
+        self.skipped_nodeids: set[str] = set()
 
     def pytest_runtest_logreport(self, report: object) -> None:
         when = str(getattr(report, "when", ""))
@@ -187,17 +284,18 @@ class _WorkerRecorderPlugin:
 
         if when == "call":
             if passed:
-                self.passed += 1
+                self.passed_nodeids.add(nodeid)
             elif failed:
-                self.failed += 1
-                self.failed_nodeids.append(nodeid)
+                self.failed_nodeids.add(nodeid)
             elif skipped:
-                self.skipped += 1
+                self.skipped_nodeids.add(nodeid)
             return
 
         if failed:
-            self.errors += 1
-            self.error_nodeids.append(nodeid)
+            self.error_nodeids.add(nodeid)
+            return
+        if skipped:
+            self.skipped_nodeids.add(nodeid)
 
     def pytest_warning_recorded(
         self,
@@ -210,6 +308,11 @@ class _WorkerRecorderPlugin:
 
     def pytest_sessionfinish(self, session: object, exitstatus: int) -> None:
         self.collected = int(getattr(session, "testscollected", 0))
+        self.passed = len(self.passed_nodeids)
+        self.failed = len(self.failed_nodeids)
+        # Treat non-call failures that do not already have a call failure as setup/teardown errors.
+        self.errors = len(self.error_nodeids - self.failed_nodeids)
+        self.skipped = len(self.skipped_nodeids)
 
 
 def _contains_xdist_options(pytest_args: Sequence[str]) -> bool:
@@ -382,8 +485,9 @@ def _stream_pipe(
     try:
         for raw_line in iter(stream.readline, ""):
             line = raw_line.rstrip("\n")
+            output_stream = sys.stderr if stream_name == "stderr" else sys.stdout
             with print_lock:
-                print(f"[pytest-shard {shard_index}][{stream_name}] {line}")
+                print(f"[pytest-shard {shard_index}][{stream_name}] {line}", file=output_stream, flush=True)
     finally:
         stream.close()
 
@@ -393,19 +497,10 @@ def _start_worker(
     shard_index: int,
     shard_total: int,
     shard_files: Sequence[str],
-    pytest_args: Sequence[str],
+    pytest_options: Sequence[str],
+    original_targets: Sequence[str],
     print_lock: threading.Lock,
 ) -> WorkerProcess:
-    with tempfile.NamedTemporaryFile(
-        mode="w",
-        encoding="utf-8",
-        prefix=f"pytest-shard-{shard_index:02d}-",
-        suffix=".selected.json",
-        delete=False,
-    ) as selected_handle:
-        json.dump(list(shard_files), selected_handle)
-        selected_files_json = selected_handle.name
-
     with tempfile.NamedTemporaryFile(
         mode="w",
         encoding="utf-8",
@@ -415,14 +510,21 @@ def _start_worker(
     ) as result_handle:
         result_json = result_handle.name
 
+    basetemp_dir = tempfile.mkdtemp(prefix=f"pytest-shard-{shard_index:02d}-basetemp-")
+    worker_pytest_args = build_worker_pytest_args(
+        pytest_options,
+        original_targets,
+        shard_files,
+        basetemp_dir=basetemp_dir,
+    )
+
     command = [
         sys.executable,
         str(Path(__file__).resolve()),
         "--worker",
-        f"--selected-files-json={selected_files_json}",
         f"--result-json={result_json}",
         "--",
-        *pytest_args,
+        *worker_pytest_args,
     ]
     process = subprocess.Popen(
         command,
@@ -460,16 +562,16 @@ def _start_worker(
         shard_total=shard_total,
         shard_files=list(shard_files),
         process=process,
-        selected_files_json=selected_files_json,
         result_json=result_json,
+        basetemp_dir=basetemp_dir,
         stdout_thread=stdout_thread,
         stderr_thread=stderr_thread,
     )
 
 
 def _cleanup_worker_artifacts(worker: WorkerProcess) -> None:
-    Path(worker.selected_files_json).unlink(missing_ok=True)
     Path(worker.result_json).unlink(missing_ok=True)
+    shutil.rmtree(worker.basetemp_dir, ignore_errors=True)
 
 
 def _load_worker_summary(worker: WorkerProcess) -> WorkerSummary:
@@ -504,15 +606,17 @@ def aggregate_worker_summaries(summaries: Sequence[WorkerSummary]) -> AggregateS
     passed = sum(summary.passed for summary in summaries)
     skipped = sum(summary.skipped for summary in summaries)
     warnings = sum(summary.warnings for summary in summaries)
-    failures = sum(summary.failed + summary.errors for summary in summaries)
-    total_tests = passed + skipped + failures
-
     failed_nodeids = sorted(
         {
             *[nodeid for summary in summaries for nodeid in summary.failed_nodeids],
             *[nodeid for summary in summaries for nodeid in summary.error_nodeids],
         }
     )
+    failures = len(failed_nodeids)
+    total_tests = sum(summary.collected for summary in summaries)
+    minimum_total = passed + skipped + failures
+    if total_tests < minimum_total:
+        total_tests = minimum_total
     return AggregateSummary(
         shards=len(summaries),
         total_tests=total_tests,
@@ -536,6 +640,18 @@ def _print_summary(summary: AggregateSummary) -> None:
         print("Failed tests:")
         for nodeid in summary.failed_nodeids:
             print(f"- {nodeid}")
+
+
+def should_update_timing_cache(first_failure: int, aggregate: AggregateSummary) -> bool:
+    return first_failure == 0 and aggregate.failures == 0
+
+
+def normalize_worker_exit_code(return_code: int, summary: WorkerSummary) -> int:
+    # pytest uses 5 for "no tests collected". Treat empty shards as neutral
+    # so broad filters like `-k` don't fail healthy multi-shard runs.
+    if return_code == 5 and summary.collected == 0:
+        return 0
+    return return_code
 
 
 def _orchestrate(pytest_args: Sequence[str], workers: int) -> int:
@@ -566,6 +682,7 @@ def _orchestrate(pytest_args: Sequence[str], workers: int) -> int:
         print(f"Collected {len(files)} file(s); running serial pytest.")
         return _run_pytest_subprocess(pytest_args)
 
+    pytest_options, original_targets = split_pytest_options_and_targets(pytest_args)
     timing_cache = load_module_timing_cache()
     cached_modules = sum(1 for file_path in files if _normalize_path(file_path) in timing_cache)
     if cached_modules > 0:
@@ -592,7 +709,8 @@ def _orchestrate(pytest_args: Sequence[str], workers: int) -> int:
             shard_index=index,
             shard_total=len(shards),
             shard_files=shard_files,
-            pytest_args=pytest_args,
+            pytest_options=pytest_options,
+            original_targets=original_targets,
             print_lock=print_lock,
         )
         for index, shard_files in enumerate(shards, start=1)
@@ -608,8 +726,9 @@ def _orchestrate(pytest_args: Sequence[str], workers: int) -> int:
         summaries.append(worker_summary)
         _cleanup_worker_artifacts(worker)
 
-        if return_code != 0 and first_failure == 0:
-            first_failure = return_code
+        effective_code = normalize_worker_exit_code(return_code, worker_summary)
+        if effective_code != 0 and first_failure == 0:
+            first_failure = effective_code
 
     aggregate = aggregate_worker_summaries(summaries)
     observed_module_timings = {
@@ -618,27 +737,29 @@ def _orchestrate(pytest_args: Sequence[str], workers: int) -> int:
         for path, duration in summary.module_durations.items()
         if duration > 0.0
     }
-    if observed_module_timings:
+    if observed_module_timings and should_update_timing_cache(first_failure, aggregate):
         merged_timings = merge_module_timings(timing_cache, observed_module_timings)
         save_module_timing_cache(merged_timings)
         print(
             f"Updated module timing cache with {len(observed_module_timings)} file(s): "
             f"{TIMING_CACHE_FILE}"
         )
+    elif observed_module_timings:
+        print("Skipped timing cache update because the sharded run was not clean.")
     _print_summary(aggregate)
+    if first_failure == 0 and all(summary.collected == 0 for summary in summaries):
+        return 5
     if first_failure == 0 and aggregate.failures > 0:
         return 1
     return first_failure
 
 
-def _run_worker(selected_files_json: str, result_json: str, pytest_args: Sequence[str]) -> int:
+def _run_worker(result_json: str, pytest_args: Sequence[str]) -> int:
     import pytest
 
-    selected_files = json.loads(Path(selected_files_json).read_text(encoding="utf-8"))
-    filter_plugin = _ShardFilterPlugin(selected_files=selected_files)
     recorder = _WorkerRecorderPlugin()
 
-    exit_code = int(pytest.main(list(pytest_args), plugins=[filter_plugin, recorder]))
+    exit_code = int(pytest.main(list(pytest_args), plugins=[recorder]))
     summary = WorkerSummary(
         exit_code=exit_code,
         collected=recorder.collected,
@@ -648,8 +769,8 @@ def _run_worker(selected_files_json: str, result_json: str, pytest_args: Sequenc
         skipped=recorder.skipped,
         warnings=recorder.warnings,
         module_durations=dict(recorder.module_durations),
-        failed_nodeids=list(recorder.failed_nodeids),
-        error_nodeids=list(recorder.error_nodeids),
+        failed_nodeids=sorted(recorder.failed_nodeids),
+        error_nodeids=sorted(recorder.error_nodeids),
     )
     Path(result_json).write_text(json.dumps(summary.to_payload()), encoding="utf-8")
     return exit_code
@@ -659,7 +780,6 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run module-level concurrent pytest shards.")
     parser.add_argument("--workers", type=int, default=_default_workers(), help="Maximum concurrent shard workers.")
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--selected-files-json", type=str, help=argparse.SUPPRESS)
     parser.add_argument("--result-json", type=str, help=argparse.SUPPRESS)
     parser.add_argument("pytest_args", nargs=argparse.REMAINDER)
     return parser.parse_args(list(argv))
@@ -672,12 +792,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         pytest_args = list(DEFAULT_TARGETS)
 
     if args.worker:
-        if not args.selected_files_json or not args.result_json:
-            print("--worker requires --selected-files-json and --result-json", file=sys.stderr)
+        if not args.result_json:
+            print("--worker requires --result-json", file=sys.stderr)
             return 2
         try:
             return _run_worker(
-                selected_files_json=args.selected_files_json,
                 result_json=args.result_json,
                 pytest_args=pytest_args,
             )

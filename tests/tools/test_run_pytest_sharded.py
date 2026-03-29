@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import io
 from pathlib import Path
+import threading
 
 import pytest
 
@@ -92,10 +94,65 @@ def test_timing_cache_roundtrip_and_merge(tmp_path: Path, monkeypatch: pytest.Mo
     assert reloaded[module_b] == pytest.approx(5.0)
 
 
+def test_split_pytest_options_and_targets_parses_common_flags() -> None:
+    options, targets = shard_runner.split_pytest_options_and_targets(
+        [
+            "-q",
+            "--maxfail=1",
+            "-k",
+            "openapi",
+            "tests/microservices",
+            "tests/tools/test_run_pytest_sharded.py::test_strip_remainder_separator",
+        ]
+    )
+    assert options == ["-q", "--maxfail=1", "-k", "openapi"]
+    assert targets == [
+        "tests/microservices",
+        "tests/tools/test_run_pytest_sharded.py::test_strip_remainder_separator",
+    ]
+
+
+def test_build_worker_pytest_args_prefers_targeted_nodeids(tmp_path: Path) -> None:
+    test_file_a = tmp_path / "test_a.py"
+    test_file_b = tmp_path / "test_b.py"
+    test_file_a.write_text("def test_a():\n    assert True\n")
+    test_file_b.write_text("def test_b():\n    assert True\n")
+
+    options = ["-q", "-k", "test_a"]
+    original_targets = [
+        f"{test_file_a}::test_a",
+        f"{test_file_b}::test_b",
+    ]
+    shard_files = [str(test_file_b)]
+    worker_args = shard_runner.build_worker_pytest_args(
+        options,
+        original_targets,
+        shard_files,
+        basetemp_dir=str(tmp_path / "basetemp"),
+    )
+    assert "-q" in worker_args
+    assert f"{test_file_b}::test_b" in worker_args
+    assert f"{test_file_a}::test_a" not in worker_args
+
+
+def test_stream_pipe_writes_stderr_channel(capsys: pytest.CaptureFixture[str]) -> None:
+    lock = threading.Lock()
+    shard_runner._stream_pipe(
+        io.StringIO("hello from err\n"),
+        shard_index=2,
+        stream_name="stderr",
+        print_lock=lock,
+    )
+    captured = capsys.readouterr()
+    assert "[pytest-shard 2][stderr] hello from err" in captured.err
+    assert "[pytest-shard 2][stderr] hello from err" not in captured.out
+
+
 def test_aggregate_worker_summaries_rolls_up_totals_and_failures() -> None:
     summaries = [
         shard_runner.WorkerSummary(
             exit_code=1,
+            collected=9,
             passed=5,
             failed=1,
             errors=1,
@@ -107,6 +164,7 @@ def test_aggregate_worker_summaries_rolls_up_totals_and_failures() -> None:
         ),
         shard_runner.WorkerSummary(
             exit_code=0,
+            collected=8,
             passed=7,
             failed=0,
             errors=0,
@@ -129,3 +187,52 @@ def test_aggregate_worker_summaries_rolls_up_totals_and_failures() -> None:
         "tests/a.py::test_fail",
         "tests/b.py::test_setup_error",
     ]
+
+
+def test_aggregate_worker_summaries_deduplicates_failure_nodeids() -> None:
+    summaries = [
+        shard_runner.WorkerSummary(
+            exit_code=1,
+            collected=1,
+            failed=1,
+            errors=1,
+            failed_nodeids=["tests/a.py::test_fail"],
+            error_nodeids=["tests/a.py::test_fail"],
+        )
+    ]
+    aggregate = shard_runner.aggregate_worker_summaries(summaries)
+    assert aggregate.total_tests == 1
+    assert aggregate.failures == 1
+    assert aggregate.failed_nodeids == ["tests/a.py::test_fail"]
+
+
+def test_should_update_timing_cache_requires_clean_run() -> None:
+    clean = shard_runner.AggregateSummary(
+        shards=2,
+        total_tests=10,
+        passed=10,
+        skipped=0,
+        warnings=0,
+        failures=0,
+        failed_nodeids=[],
+    )
+    dirty = shard_runner.AggregateSummary(
+        shards=2,
+        total_tests=10,
+        passed=9,
+        skipped=0,
+        warnings=0,
+        failures=1,
+        failed_nodeids=["tests/a.py::test_fail"],
+    )
+    assert shard_runner.should_update_timing_cache(0, clean)
+    assert not shard_runner.should_update_timing_cache(1, clean)
+    assert not shard_runner.should_update_timing_cache(0, dirty)
+
+
+def test_normalize_worker_exit_code_allows_empty_shards() -> None:
+    empty = shard_runner.WorkerSummary(exit_code=5, collected=0)
+    with_tests = shard_runner.WorkerSummary(exit_code=5, collected=3)
+    assert shard_runner.normalize_worker_exit_code(5, empty) == 0
+    assert shard_runner.normalize_worker_exit_code(5, with_tests) == 5
+    assert shard_runner.normalize_worker_exit_code(1, empty) == 1

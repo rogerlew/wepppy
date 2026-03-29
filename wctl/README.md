@@ -44,7 +44,7 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl restore-docker-data-permissions` – repairs ownership for `.docker-data/*` using the UID/GID from the active env file.
 - `wctl run-npm` – runs host-side npm/Yarn scripts with `--prefix wepppy/weppcloud/static-src` (plain npm commands like `install`, `test`, `lint`, etc.).
 - `wctl run-pytest` – executes pytest inside the running `weppcloud` container (`pytest tests` by default).
-- `wctl run-pytest-sharded` – executes module-level pytest shards in parallel subprocesses (no xdist), streams shard logs live, automatically reuses cached module timings for longest-first balancing when available, and prints an aggregate result summary.
+- `wctl run-pytest-sharded` – executes module-level pytest shards in parallel subprocesses (no xdist), streams shard logs live, automatically reuses cached module timings for longest-first balancing when available, and prints an aggregate result summary. Start with `--workers 4` unless you have a known reason to tune higher/lower.
 - `wctl run-python` – opens the project virtualenv's Python inside the container, defaulting to an interactive REPL when no script/args are supplied.
 - `wctl issue-auth-token` / `revoke-auth-token` – mint or revoke WEPPcloud JWTs (e.g., `wctl issue-auth-token culvert-app --scope culvert:batch:submit --audience rq-engine --expires-in 7776000`).
 - `wctl run-stubtest` – runs stubtest from the container (default target `wepppy.nodb.core`).
@@ -84,7 +84,7 @@ Use the Typer helpers instead of crafting long `docker compose exec` commands ma
 ```bash
 wctl run-pytest tests/weppcloud/routes/test_climate_bp.py
 wctl run-pytest tests --maxfail=1
-wctl run-pytest-sharded --workers 2 -- tests/microservices -k openapi
+wctl run-pytest-sharded --workers 4 -- tests/microservices -k openapi
 wctl run-stubtest wepppy.nodb.core
 wctl check-test-stubs
 wctl run-npm lint
