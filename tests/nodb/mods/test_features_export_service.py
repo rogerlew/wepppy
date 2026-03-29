@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import sqlite3
 from types import SimpleNamespace
+import zipfile
 
 import geopandas as gpd
 import pandas as pd
@@ -84,9 +85,41 @@ class _DummyWriter:
         )
 
 
-def _build_submission(cache_key: str) -> service.FeaturesExportSubmission:
+class _DummyZipWriter:
+    def __init__(self, wd: Path) -> None:
+        self._wd = wd
+
+    def write(self, request) -> ExportArtifactMetadata:
+        artifact_path = request.artifact_dir / "features_export.parquet.zip"
+        member_path = request.artifact_dir / "hillslopes.parquet"
+        member_path.write_bytes(b"dummy parquet bytes")
+
+        with zipfile.ZipFile(artifact_path, "w") as zip_handle:
+            zip_handle.writestr("hillslopes.parquet", member_path.read_bytes())
+
+        layer_output = ExportedLayerArtifact(
+            layer_id="watershed.subcatchments",
+            output_layer_id="shared__watershed.subcatchments",
+            scope="shared",
+            scope_class="scope_invariant",
+            format="parquet",
+            relpath="hillslopes.parquet",
+            row_count=1,
+            feature_count=1,
+        )
+        return ExportArtifactMetadata(
+            format="parquet",
+            artifact_relpath=artifact_path.relative_to(self._wd).as_posix(),
+            artifact_path=str(artifact_path),
+            layer_outputs=(layer_output,),
+            warnings=(),
+            packaged_member_relpaths=("hillslopes.parquet",),
+        )
+
+
+def _build_submission(cache_key: str, *, format_token: str = "geopackage") -> service.FeaturesExportSubmission:
     request = NormalizedExportRequest(
-        format="geopackage",
+        format=format_token,
         units="si",
         layers=("watershed.subcatchments",),
         crs="wgs",
@@ -1906,17 +1939,56 @@ def test_execute_features_export_cache_miss_result_shape(
     assert isinstance(result["artifact_id"], str) and result["artifact_id"]
     assert (
         result["download_url"]
-        == f"/weppcloud/runs/run-1/cfg/download/export/features/artifacts/{result['artifact_id']}/features_export.gpkg"
+        == f"/weppcloud/runs/run-1/cfg/download/export/features/artifacts/{result['artifact_id']}/features_export.geopackage.zip"
     )
     assert result["manifest_relpath"] == "export/features/jobs/job-source/manifest.json"
     assert isinstance(result["warnings"], list)
     assert (tmp_path / str(result["artifact_relpath"])).is_file()
     assert (tmp_path / result["manifest_relpath"]).is_file()
+    assert str(result["artifact_relpath"]).endswith(".zip")
+
+    artifact_zip_path = tmp_path / str(result["artifact_relpath"])
+    with zipfile.ZipFile(artifact_zip_path, "r") as zip_handle:
+        names = set(zip_handle.namelist())
+        assert "manifest.json" in names
+        assert "profile.yml" in names
+        assert "README.md" in names
+        assert "features_export.gpkg" in names
 
     cache_entry = service.get_cache_index_entry(tmp_path, submission.cache_key_parts.cache_key)
     assert cache_entry is not None
     assert cache_entry["source_job_id"] == "job-source"
 
+
+def test_execute_features_export_cache_miss_retains_final_zip_for_zip_writer(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("SITE_PREFIX", "/weppcloud")
+    submission = _build_submission(
+        cache_key="request-hash+dependency-fingerprint+parquet",
+        format_token="parquet",
+    )
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyZipWriter(tmp_path))
+    monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
+
+    result = service.execute_features_export(
+        tmp_path,
+        runid="run-1",
+        config="cfg",
+        payload={"format": "parquet"},
+        job_id="job-source",
+    )
+
+    artifact_zip_path = tmp_path / str(result["artifact_relpath"])
+    assert artifact_zip_path.is_file()
+    with zipfile.ZipFile(artifact_zip_path, "r") as zip_handle:
+        names = set(zip_handle.namelist())
+        assert "hillslopes.parquet" in names
+        assert "manifest.json" in names
+        assert "profile.yml" in names
+        assert "README.md" in names
 
 def test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id(
     tmp_path: Path,
@@ -2340,7 +2412,14 @@ def test_execute_features_export_writes_spatial_geopackage_layers(
     artifact_path = tmp_path / str(result["artifact_relpath"])
     assert artifact_path.is_file()
 
-    with sqlite3.connect(artifact_path) as conn:
+    with zipfile.ZipFile(artifact_path, "r") as zip_handle:
+        gpkg_member = next(name for name in zip_handle.namelist() if name.endswith(".gpkg"))
+        gpkg_bytes = zip_handle.read(gpkg_member)
+
+    extracted_gpkg = tmp_path / "extracted.gpkg"
+    extracted_gpkg.write_bytes(gpkg_bytes)
+
+    with sqlite3.connect(extracted_gpkg) as conn:
         content_row = conn.execute(
             "SELECT table_name, data_type FROM gpkg_contents WHERE identifier = ?",
             ("shared__watershed.subcatchments",),

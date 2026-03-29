@@ -14,7 +14,9 @@ from rq import Queue
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.features_export import (
+    FeaturesExportProfileError,
     FeaturesExportValidationError,
+    parse_profile_text,
     prepare_export_submission,
 )
 from wepppy.nodb.mods.features_export.cache_key import get_cache_index_entry
@@ -158,6 +160,29 @@ async def _parse_features_export_submit_payload(request: Request) -> tuple[dict[
         )
 
     return payload, None
+
+
+async def _parse_features_export_profile_resolve_payload(
+    request: Request,
+) -> tuple[str | None, JSONResponse | None]:
+    payload, payload_error = await _parse_features_export_submit_payload(request)
+    if payload_error is not None:
+        return None, payload_error
+    assert payload is not None
+
+    profile_text = payload.get("profile_text")
+    if not isinstance(profile_text, str) or not profile_text.strip():
+        return None, validation_error_response(
+            [
+                _validation_issue(
+                    code="missing_field",
+                    message="profile_text must be a non-empty string.",
+                    path="profile_text",
+                )
+            ]
+        )
+
+    return profile_text, None
 
 
 def _features_export_status_url(job_id: str) -> str:
@@ -497,6 +522,79 @@ async def export_features_submit(runid: str, config: str, request: Request):
             return nodir_response
         logger.exception("rq-engine export_features_submit enqueue failed")
         return error_response_with_traceback("Error submitting features export")
+
+
+@router.post(
+    "/runs/{runid}/{config}/export/features/profile/resolve",
+    summary="Resolve features export profile text",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Parses profile text (`profile_text`) as YAML, validates it against the "
+        "features-export planner, and returns a normalized request mapping."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_features_profile_resolve"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Profile text parsed and normalized.",
+        extra={
+            400: "Validation error. Returns the canonical error payload.",
+            415: "Unsupported media type; JSON body is required.",
+        },
+    ),
+)
+async def export_features_profile_resolve(runid: str, config: str, request: Request):
+    try:
+        claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: boundary contract
+        logger.exception("rq-engine export_features_profile_resolve auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    profile_text, payload_error = await _parse_features_export_profile_resolve_payload(request)
+    if payload_error is not None:
+        return payload_error
+    assert profile_text is not None
+
+    try:
+        request_payload = parse_profile_text(profile_text)
+        wd = get_wd(runid)
+        submission = await _run_sync(lambda: prepare_export_submission(wd, request_payload))
+        return JSONResponse(
+            {
+                "profile": submission.plan.request.to_mapping(),
+            },
+            status_code=200,
+        )
+    except FeaturesExportProfileError as exc:
+        return validation_error_response(
+            [
+                _validation_issue(
+                    code="invalid_profile_text",
+                    message=str(exc),
+                    path="profile_text",
+                )
+            ]
+        )
+    except FeaturesExportValidationError as exc:
+        return JSONResponse(exc.to_error_payload(), status_code=exc.status_code)
+    except FeaturesExportServiceError as exc:
+        return error_response(
+            str(exc),
+            status_code=exc.status_code,
+            code=exc.code,
+            details=exc.details,
+        )
+    except FileNotFoundError as exc:
+        return error_response(str(exc), status_code=404, code="not_found")
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.exception("rq-engine export_features_profile_resolve failed")
+        return error_response_with_traceback("Error resolving features export profile text")
 
 
 @router.get(

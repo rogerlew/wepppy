@@ -35,7 +35,8 @@ var FeaturesExport = (function () {
 
     var ACTIONS = {
         toggleLayer: '[data-features-export-action="toggle-layer"]',
-        loadDefaults: '[data-features-export-action="load-defaults"]',
+        loadProfilePreset: '[data-features-export-action="load-profile-preset"]',
+        loadProfileText: '[data-features-export-action="load-profile-text"]',
         clearSelection: '[data-features-export-action="clear-selection"]',
         toggleSwatTable: '[data-features-export-action="toggle-swat-table"]',
         toggleColumn: '[data-features-export-action="toggle-column"]',
@@ -56,6 +57,7 @@ var FeaturesExport = (function () {
         temporalEventReturnPeriods: '[data-features-export-field="temporal-event-return-periods"]',
         tabularConcatenateTables: '[data-features-export-field="tabular-concatenate-tables"]',
         tabularTemporalLayout: '[data-features-export-field="tabular-temporal-layout"]',
+        profileText: '[data-features-export-field="profile-text"]',
         scenario: '[data-features-export-field="scenario"]',
         contrastId: '[data-features-export-field="contrast-id"]',
         swatRunId: '[data-features-export-field="swat-run-id"]',
@@ -69,6 +71,7 @@ var FeaturesExport = (function () {
         "features_export:selection:changed",
         "features_export:validation:changed",
         "features_export:defaults:loaded",
+        "features_export:profile:loaded",
         "features_export:scope:changed",
         "features_export:temporal:changed",
         "features_export:omni:changed",
@@ -86,7 +89,7 @@ var FeaturesExport = (function () {
         scope_not_applicable: true
     };
 
-    var DEFAULT_PROFILE_KEY = "gpkg_adjacent";
+    var DEFAULT_PROFILE_KEY = "post_wepp";
     var DEFAULT_FAMILY_ORDER = [
         "watershed",
         "landuse",
@@ -521,7 +524,7 @@ var FeaturesExport = (function () {
             _completion_source: null,
             _last_jobinfo_result: null,
             _last_submission_payload: null,
-            _defaults_skipped_layers: [],
+            _profile_skipped_layers: [],
             state: {
                 config: {},
                 catalog: {},
@@ -994,17 +997,36 @@ var FeaturesExport = (function () {
             return true;
         }
 
-        function getDefaultsProfile() {
+        function normalizeProfileKey(value) {
+            return String(value || "")
+                .trim()
+                .toLowerCase()
+                .replace(/-/g, "_")
+                .replace(/[^a-z0-9_]+/g, "_")
+                .replace(/^_+|_+$/g, "");
+        }
+
+        function profileRequestPayload(profileValue) {
+            if (!profileValue || typeof profileValue !== "object") {
+                return null;
+            }
+            if (profileValue.request && typeof profileValue.request === "object") {
+                return profileValue.request;
+            }
+            return profileValue;
+        }
+
+        function getProfileByKey(profileKey) {
             var bootstrap = controller.state.bootstrap || {};
             var profiles = bootstrap.profiles && typeof bootstrap.profiles === "object"
                 ? bootstrap.profiles
                 : {};
-            var profileKey = controller.state.config.defaultProfileKey || DEFAULT_PROFILE_KEY;
-            var profile = profiles[profileKey];
-            if (!profile || typeof profile !== "object") {
+            var normalizedKey = normalizeProfileKey(profileKey);
+            if (!normalizedKey) {
                 return null;
             }
-            return profile;
+            var profile = profiles[normalizedKey];
+            return profileRequestPayload(profile);
         }
 
         function getUtmAvailable() {
@@ -1334,9 +1356,9 @@ var FeaturesExport = (function () {
             var warningLines = validation.warnings.map(function (entry) {
                 return entry.message;
             });
-            if (controller._defaults_skipped_layers.length) {
+            if (controller._profile_skipped_layers.length) {
                 warningLines.push(
-                    "Load Defaults skipped unavailable layers: " + controller._defaults_skipped_layers.join(", ")
+                    "Profile load skipped unavailable layers: " + controller._profile_skipped_layers.join(", ")
                 );
             }
             setRegionText("summary-warnings", warningLines.join(" | "));
@@ -1758,7 +1780,7 @@ var FeaturesExport = (function () {
             if (!format || !selectedCount) {
                 hint = "";
             } else if (format === "geopackage" || format === "geodatabase") {
-                hint = "Packaging: 1 container artifact.";
+                hint = "Packaging: zip bundle with one container payload.";
             } else if (isTabularFormat(format) && readFieldValue(FIELDS.tabularConcatenateTables)) {
                 hint = "Packaging: zip bundle with carrier-concatenated tabular files.";
             } else {
@@ -1958,7 +1980,7 @@ var FeaturesExport = (function () {
                 if (downloadUrl) {
                     controller.downloadRegionEl.innerHTML = '<a class="pure-button pure-button-primary" data-features-export-action="download" href="'
                         + escapeHtml(downloadUrl)
-                        + '" target="_blank" rel="noopener">Download Artifact</a>';
+                        + '" download>Download Artifact</a>';
                 } else {
                     controller.downloadRegionEl.innerHTML = "";
                 }
@@ -2204,9 +2226,15 @@ var FeaturesExport = (function () {
                 rerender();
             }));
 
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.loadDefaults, function (event) {
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.loadProfilePreset, function (event, target) {
                 event.preventDefault();
-                applyDefaultsProfile();
+                var profileKey = String(target.getAttribute("data-profile-key") || "").trim();
+                loadPresetProfile(profileKey);
+            }));
+
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.loadProfileText, function (event) {
+                event.preventDefault();
+                loadProfileFromText();
             }));
 
             controller._delegates.push(dom.delegate(controller.form, "change", ACTIONS.toggleSwatTable, function (_event, target) {
@@ -2245,13 +2273,16 @@ var FeaturesExport = (function () {
             controller._delegateRoot = controller.form;
         }
 
-        function applyDefaultsProfile() {
-            var profile = getDefaultsProfile();
+        function applyProfileRequest(profileRequest, options) {
+            var profile = profileRequestPayload(profileRequest);
             if (!profile) {
-                setRegionText("summary-warnings", "Load Defaults profile is unavailable.");
-                return;
+                return false;
             }
 
+            var profileKey = options && options.profileKey
+                ? normalizeProfileKey(options.profileKey)
+                : normalizeProfileKey(controller.state.config.defaultProfileKey || DEFAULT_PROFILE_KEY);
+            var source = options && options.source ? String(options.source) : "preset";
             var changedFields = [];
 
             var nextFormat = normalizeFormat(profile.format || controller.state.config.defaultFormat || "geopackage");
@@ -2274,28 +2305,61 @@ var FeaturesExport = (function () {
             );
             changedFields.push("tabular");
 
-            setOutputScopes(profile.output_scopes || ["baseline"]);
+            var requestedScopes = uniqueStrings(profile.output_scopes || []);
+            setOutputScopes(requestedScopes.length ? requestedScopes : ["baseline"]);
             changedFields.push("output_scopes");
 
             controller.state.layerTemporalModes = {};
-            setSelectOrInput(FIELDS.temporalYearSelection, "all");
-            setSelectOrInput(FIELDS.temporalExcludeIndices, "");
-            setRadioValue(FIELDS.temporalEventSelector, "");
-            setSelectOrInput(FIELDS.temporalEventDates, "");
-            setSelectOrInput(FIELDS.temporalEventReturnPeriods, "");
+            var profileTemporal = profile.temporal && typeof profile.temporal === "object"
+                ? profile.temporal
+                : {};
+            var profileLayerModes = profileTemporal.layer_modes && typeof profileTemporal.layer_modes === "object"
+                ? profileTemporal.layer_modes
+                : {};
+            setSelectOrInput(
+                FIELDS.temporalYearSelection,
+                String(profileTemporal.year_selection || "all")
+            );
+            setSelectOrInput(
+                FIELDS.temporalExcludeIndices,
+                parseIntList(profileTemporal.exclude_yr_indxs).join(",")
+            );
+            var profileEvent = profileTemporal.event && typeof profileTemporal.event === "object"
+                ? profileTemporal.event
+                : {};
+            var profileEventSelector = profileEvent.selector ? String(profileEvent.selector) : "";
+            setRadioValue(FIELDS.temporalEventSelector, profileEventSelector);
+            setSelectOrInput(FIELDS.temporalEventDates, parseCommaList(profileEvent.dates).join(","));
+            setSelectOrInput(
+                FIELDS.temporalEventReturnPeriods,
+                parseFloatList(profileEvent.return_periods).join(",")
+            );
             changedFields.push("temporal");
 
+            var requestedScenarios = new Set(uniqueStrings(profile.scenarios || []));
+            var requestedContrasts = new Set(uniqueStrings(profile.contrast_ids || []));
             queryAllWithinForm(FIELDS.scenario).forEach(function (node) {
-                node.checked = false;
+                node.checked = requestedScenarios.has(String(node.value || "").trim());
             });
             queryAllWithinForm(FIELDS.contrastId).forEach(function (node) {
-                node.checked = false;
+                node.checked = requestedContrasts.has(String(node.value || "").trim());
             });
             changedFields.push("omni");
 
             setSelectOrInput(FIELDS.swatRunId, profile.swat_run_id || "latest");
-            setSelectOrInput(FIELDS.swatTableMode, "all");
-            controller.state.selectedSwatTables = [];
+            var swatTables = profile.swat_tables && typeof profile.swat_tables === "object"
+                ? profile.swat_tables
+                : {};
+            if (Array.isArray(swatTables.include)) {
+                setSelectOrInput(FIELDS.swatTableMode, "include");
+                controller.state.selectedSwatTables = uniqueStrings(swatTables.include);
+            } else if (Array.isArray(swatTables.exclude)) {
+                setSelectOrInput(FIELDS.swatTableMode, "exclude");
+                controller.state.selectedSwatTables = uniqueStrings(swatTables.exclude);
+            } else {
+                setSelectOrInput(FIELDS.swatTableMode, "all");
+                controller.state.selectedSwatTables = [];
+            }
             controller.state.layerColumnSelection = {};
             changedFields.push("swat");
 
@@ -2319,23 +2383,129 @@ var FeaturesExport = (function () {
                     return;
                 }
                 if (layer.temporal_modes.length) {
-                    setLayerTemporalMode(layerId, defaultLayerTemporalMode(layer));
+                    var requestedMode = String(profileLayerModes[layerId] || "").trim();
+                    if (requestedMode && layer.temporal_modes.indexOf(requestedMode) !== -1) {
+                        setLayerTemporalMode(layerId, requestedMode);
+                    } else {
+                        setLayerTemporalMode(layerId, defaultLayerTemporalMode(layer));
+                    }
                 }
-                setLayerColumns(layerId, defaultColumnsForLayer(layer));
+                var requestedColumns = profile.column_selection
+                    && profile.column_selection[layerId]
+                    && typeof profile.column_selection[layerId] === "object"
+                    ? profile.column_selection[layerId].include
+                    : null;
+                if (Array.isArray(requestedColumns) && requestedColumns.length) {
+                    var availableColumns = new Set((layer.columns || []).map(function (entry) {
+                        return entry.column_id;
+                    }));
+                    var requiredColumns = new Set(uniqueStrings(layer.required_columns || []));
+                    var nextColumns = uniqueStrings(requestedColumns).filter(function (columnId) {
+                        return availableColumns.has(columnId) || requiredColumns.has(columnId);
+                    });
+                    requiredColumns.forEach(function (columnId) {
+                        if (nextColumns.indexOf(columnId) === -1) {
+                            nextColumns.push(columnId);
+                        }
+                    });
+                    setLayerColumns(layerId, nextColumns);
+                } else {
+                    setLayerColumns(layerId, defaultColumnsForLayer(layer));
+                }
             });
-            controller._defaults_skipped_layers = skipped;
+            controller._profile_skipped_layers = skipped;
 
             updateSwatTables();
             rerender();
 
             if (controller.events && typeof controller.events.emit === "function") {
-                controller.events.emit("features_export:defaults:loaded", {
-                    profileKey: controller.state.config.defaultProfileKey || DEFAULT_PROFILE_KEY,
+                var payload = {
+                    profileKey: profileKey,
+                    source: source,
                     selectedLayerIds: uniqueStrings(controller.state.selectedLayerIds),
                     changedFields: changedFields,
                     skippedLayerIds: skipped
-                });
+                };
+                controller.events.emit("features_export:profile:loaded", payload);
+                if (source === "preset") {
+                    controller.events.emit("features_export:defaults:loaded", payload);
+                }
             }
+            return true;
+        }
+
+        function loadPresetProfile(profileKey) {
+            var normalizedKey = normalizeProfileKey(profileKey || controller.state.config.defaultProfileKey || DEFAULT_PROFILE_KEY);
+            var profile = getProfileByKey(normalizedKey);
+            if (!profile) {
+                setRegionText("summary-warnings", "Selected profile is unavailable.");
+                return;
+            }
+            applyProfileRequest(profile, { profileKey: normalizedKey, source: "preset" });
+        }
+
+        function parseProfileResponse(responseBody) {
+            if (!responseBody || typeof responseBody !== "object") {
+                return null;
+            }
+            if (responseBody.profile && typeof responseBody.profile === "object") {
+                return responseBody.profile;
+            }
+            if (responseBody.request && typeof responseBody.request === "object") {
+                return responseBody.request;
+            }
+            return profileRequestPayload(responseBody);
+        }
+
+        function resolveProfileFromText(profileText) {
+            var trimmed = String(profileText || "").trim();
+            if (!trimmed) {
+                return Promise.reject(new Error("Profile text is required."));
+            }
+
+            var resolveUrl = controller.state.config && controller.state.config.profileResolveUrl
+                ? String(controller.state.config.profileResolveUrl)
+                : "";
+            if (!resolveUrl) {
+                try {
+                    return Promise.resolve(profileRequestPayload(JSON.parse(trimmed)));
+                } catch (_error) {
+                    return Promise.reject(new Error("Profile text must be valid YAML or JSON."));
+                }
+            }
+
+            return Promise.resolve(
+                http.postJsonWithSessionToken(
+                    resolveUrl,
+                    { profile_text: trimmed },
+                    { form: controller.form }
+                )
+            ).then(function (response) {
+                var body = unwrapResponseBody(response);
+                if (body && (body.error || body.errors)) {
+                    var details = (body.error && (body.error.details || body.error.message))
+                        || "Profile text could not be resolved.";
+                    throw new Error(String(details));
+                }
+                var resolved = parseProfileResponse(body);
+                if (!resolved) {
+                    throw new Error("Resolved profile payload is missing.");
+                }
+                return resolved;
+            });
+        }
+
+        function loadProfileFromText() {
+            var profileText = readFieldValue(FIELDS.profileText);
+            resolveProfileFromText(profileText)
+                .then(function (profile) {
+                    if (!applyProfileRequest(profile, { profileKey: "custom_text", source: "text" })) {
+                        throw new Error("Resolved profile is invalid.");
+                    }
+                })
+                .catch(function (error) {
+                    setRegionText("summary-warnings", String(error && error.message ? error.message : "Failed to load profile text."));
+                });
         }
 
         function readConfigNode() {
@@ -2346,6 +2516,7 @@ var FeaturesExport = (function () {
                 jobKey: "run_features_export",
                 channel: STATUS_CHANNEL,
                 submitUrl: "/rq-engine/api/runs/" + encodeURIComponent(window.runid || window.runId || "") + "/" + encodeURIComponent(window.config || "") + "/export/features",
+                profileResolveUrl: "/rq-engine/api/runs/" + encodeURIComponent(window.runid || window.runId || "") + "/" + encodeURIComponent(window.config || "") + "/export/features/profile/resolve",
                 downloadUrlTemplate: (sitePrefix ? sitePrefix : "") + "/runs/" + encodeURIComponent(window.runid || window.runId || "") + "/" + encodeURIComponent(window.config || "") + "/download/__ARTIFACT_RELPATH__",
                 utmAvailable: false,
                 defaultFormat: "geopackage",
@@ -2367,6 +2538,9 @@ var FeaturesExport = (function () {
             }
             if (dataset.featuresExportSubmitUrl) {
                 config.submitUrl = String(dataset.featuresExportSubmitUrl);
+            }
+            if (dataset.featuresExportProfileResolveUrl) {
+                config.profileResolveUrl = String(dataset.featuresExportProfileResolveUrl);
             }
             if (dataset.featuresExportDownloadUrlTemplate) {
                 config.downloadUrlTemplate = String(dataset.featuresExportDownloadUrlTemplate);
@@ -2736,10 +2910,10 @@ var FeaturesExport = (function () {
             updateSwatTables();
             rerender();
 
-            var defaultsButton = getFieldNode(ACTIONS.loadDefaults);
-            if (defaultsButton) {
-                defaultsButton.disabled = !controller.state.layers.length || Boolean(getCatalogLoadError());
-            }
+            var disableProfileActions = !controller.state.layers.length || Boolean(getCatalogLoadError());
+            queryAllWithinForm(ACTIONS.loadProfilePreset + ", " + ACTIONS.loadProfileText).forEach(function (node) {
+                node.disabled = disableProfileActions;
+            });
 
             var jobId = resolveBootstrapJobId(ctx);
             if (jobId) {

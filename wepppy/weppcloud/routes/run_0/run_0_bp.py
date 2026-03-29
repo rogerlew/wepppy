@@ -47,7 +47,11 @@ from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.swat.print_prt import mask_to_tokens
 from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.omni import Omni, OmniScenario
-from wepppy.nodb.mods.features_export import load_layer_catalog
+from wepppy.nodb.mods.features_export import (
+    FeaturesExportProfileError,
+    load_builtin_profiles,
+    load_layer_catalog,
+)
 import wepppy.nodb.mods.omni as omni_mod
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -246,16 +250,6 @@ FEATURES_EXPORT_UI_FAMILY_BY_RAW = {
     "ag_fields_spatial": "agfields_spatial",
     "ag_fields_metrics": "agfields_metrics",
 }
-
-FEATURES_EXPORT_DEFAULT_LAYER_IDS = [
-    "watershed.subcatchments",
-    "watershed.channels",
-    "landuse.dominant",
-    "soils.dominant",
-    "wepp.summary.hillslopes",
-    "wepp.summary.channels",
-]
-
 
 def _format_features_export_family_label(family: str) -> str:
     if family in FEATURES_EXPORT_FAMILY_LABELS:
@@ -1036,36 +1030,45 @@ def _build_features_export_bootstrap_payload(wd: str, ron: Ron, resolved_utm_eps
         swat_catalog=swat_catalog,
     )
     preferred_swat_run_id = swat_catalog.get("latest_run_id") or "latest"
+    try:
+        profile_rows = list(load_builtin_profiles())
+    except (FeaturesExportProfileError, OSError):
+        profile_rows = []
+    profile_requests: dict[str, dict[str, object]] = {}
+    profile_buttons: list[dict[str, str]] = []
+    for profile in profile_rows:
+        key = str(profile.get("key") or "").strip()
+        request_mapping = profile.get("request")
+        if not key or not isinstance(request_mapping, dict):
+            continue
+        profile_requests[key] = dict(request_mapping)
+        profile_buttons.append(
+            {
+                "key": key,
+                "label": str(profile.get("label") or key),
+            }
+        )
+
+    default_profile_key = "post_wepp"
+    default_profile = profile_requests.get(default_profile_key, {})
+    default_tabular = default_profile.get("tabular")
+    if not isinstance(default_tabular, dict):
+        default_tabular = {"concatenate_tables": False, "temporal_layout": "wide"}
+    default_output_scopes = default_profile.get("output_scopes")
+    if not isinstance(default_output_scopes, list) or not default_output_scopes:
+        default_output_scopes = ["baseline"]
 
     return {
         "defaults": {
-            "format": "geopackage",
-            "units": "project",
-            "crs": "wgs",
-            "output_scopes": ["baseline"],
-            "tabular": {
-                "concatenate_tables": False,
-                "temporal_layout": "wide",
-            },
+            "format": str(default_profile.get("format") or "geopackage"),
+            "units": str(default_profile.get("units") or "project"),
+            "crs": str(default_profile.get("crs") or "wgs"),
+            "output_scopes": list(default_output_scopes),
+            "tabular": dict(default_tabular),
         },
-        "profiles": {
-            "gpkg_adjacent": {
-                "format": "geopackage",
-                "units": "project",
-                "crs": "wgs",
-                "output_scopes": ["baseline"],
-                "tabular": {
-                    "concatenate_tables": False,
-                    "temporal_layout": "wide",
-                },
-                "swat_run_id": "latest",
-                "layers": list(FEATURES_EXPORT_DEFAULT_LAYER_IDS),
-                "temporal": None,
-                "scenarios": [],
-                "contrast_ids": [],
-                "swat_tables": None,
-            }
-        },
+        "profiles": profile_requests,
+        "profile_buttons": profile_buttons,
+        "default_profile_key": default_profile_key,
         "resolved_utm_epsg": resolved_utm_epsg,
         "utm_available": resolved_utm_epsg is not None,
         "omni": {
@@ -1781,6 +1784,9 @@ def _build_runs0_context(runid, config, playwright_load_all):
         features_export_bootstrap_payload=features_export_bootstrap_payload,
         features_export_utm_epsg=features_export_utm_epsg,
         features_export_submit_url=f"/rq-engine/api/runs/{runid}/{config}/export/features",
+        features_export_profile_resolve_url=(
+            f"/rq-engine/api/runs/{runid}/{config}/export/features/profile/resolve"
+        ),
         features_export_download_url_template=(
             f"{current_app.config.get('SITE_PREFIX', '').rstrip('/')}/runs/{runid}/{config}/download/__ARTIFACT_RELPATH__"
         ),

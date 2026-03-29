@@ -1,0 +1,20 @@
+profile_id: post_wepp
+label: Post Wepp
+description: Baseline post-WEPP spatial export profile.
+request:
+  format: geopackage
+  units: project
+  crs: wgs
+  output_scopes:
+    - baseline
+  tabular:
+    concatenate_tables: false
+    temporal_layout: wide
+  swat_run_id: latest
+  layers:
+    - watershed.subcatchments
+    - watershed.channels
+    - landuse.dominant
+    - soils.dominant
+    - wepp.summary.hillslopes
+    - wepp.summary.channels

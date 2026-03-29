@@ -121,7 +121,7 @@ function buildFixtureHtml() {
             output_scopes: ["baseline"]
         },
         profiles: {
-            gpkg_adjacent: {
+            post_wepp: {
                 format: "geopackage",
                 units: "project",
                 crs: "wgs",
@@ -130,6 +130,10 @@ function buildFixtureHtml() {
                 layers: ["watershed.subcatchments", "wepp.summary.hillslopes"]
             }
         },
+        profile_buttons: [
+            { key: "post_wepp", label: "Post Wepp" }
+        ],
+        default_profile_key: "post_wepp",
         omni: {
             scenarios: [{ id: "uniform_low", label: "Uniform Low" }],
             contrasts: [{ id: "mulch_vs_control", label: "Mulch vs Control" }]
@@ -163,18 +167,21 @@ function buildFixtureHtml() {
                 data-features-export-job-key="run_features_export"
                 data-features-export-channel="features_export"
                 data-features-export-submit-url="/rq-engine/api/runs/test-run/test-cfg/export/features"
+                data-features-export-profile-resolve-url="/rq-engine/api/runs/test-run/test-cfg/export/features/profile/resolve"
                 data-features-export-download-url-template="/runs/test-run/test-cfg/download/__ARTIFACT_RELPATH__"
                 data-features-export-utm-available="true"
                 data-features-export-default-format="geopackage"
                 data-features-export-default-units="project"
                 data-features-export-default-crs="wgs"
-                data-features-export-default-profile-key="gpkg_adjacent"
+                data-features-export-default-profile-key="post_wepp"
                 hidden></div>
             <script type="application/json" id="features_export_catalog_data" data-features-export-catalog>${JSON.stringify(catalogPayload)}</script>
             <script type="application/json" id="features_export_bootstrap_data" data-features-export-bootstrap>${JSON.stringify(bootstrapPayload)}</script>
 
             <section data-features-export-group="settings">
-                <button type="button" data-features-export-action="load-defaults">Load Defaults</button>
+                <button type="button" data-features-export-action="load-profile-preset" data-profile-key="post_wepp">Post Wepp</button>
+                <textarea data-features-export-field="profile-text"></textarea>
+                <button type="button" data-features-export-action="load-profile-text">Load profile</button>
                 <button type="button" data-features-export-action="clear-selection">Clear selection</button>
                 <select data-features-export-field="format">
                     <option value="geopackage" selected>GeoPackage</option>
@@ -377,7 +384,7 @@ describe("FeaturesExport controller", () => {
         expect(document.querySelectorAll("[data-features-export-layer]").length).toBeGreaterThan(0);
     });
 
-    test("load defaults applies gpkg_adjacent profile and does not auto-submit", async () => {
+    test("preset profile applies post_wepp defaults and does not auto-submit", async () => {
         document.body.innerHTML = buildFixtureHtml();
         controller.bootstrap({});
 
@@ -385,7 +392,7 @@ describe("FeaturesExport controller", () => {
         controller.events.on("features_export:defaults:loaded", (payload) => defaultsEvents.push(payload));
 
         document
-            .querySelector('[data-features-export-action="load-defaults"]')
+            .querySelector('[data-features-export-action="load-profile-preset"]')
             .dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
         await flushPromises();
@@ -395,10 +402,48 @@ describe("FeaturesExport controller", () => {
         expect(document.querySelector('[data-features-export-field="crs"][value="wgs"]').checked).toBe(true);
         expect(defaultsEvents).toHaveLength(1);
         expect(defaultsEvents[0]).toEqual(expect.objectContaining({
-            profileKey: "gpkg_adjacent",
+            profileKey: "post_wepp",
+            source: "preset",
             selectedLayerIds: ["watershed.subcatchments", "wepp.summary.hillslopes"]
         }));
         expect(httpMock.postJsonWithSessionToken).not.toHaveBeenCalled();
+    });
+
+    test("profile text resolves through API and applies returned request payload", async () => {
+        document.body.innerHTML = buildFixtureHtml();
+        controller.bootstrap({});
+
+        httpMock.postJsonWithSessionToken.mockResolvedValueOnce({
+            body: {
+                profile: {
+                    format: "csv",
+                    units: "english",
+                    output_scopes: ["baseline"],
+                    layers: ["watershed.subcatchments"]
+                }
+            }
+        });
+
+        var textarea = document.querySelector('[data-features-export-field="profile-text"]');
+        textarea.value = "request:\n  format: csv\n";
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+
+        document
+            .querySelector('[data-features-export-action="load-profile-text"]')
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+        await flushPromises();
+        await flushPromises();
+
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test-run/test-cfg/export/features/profile/resolve",
+            { profile_text: "request:\n  format: csv" },
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+        expect(document.querySelector('[data-features-export-field="format"]').value).toBe("csv");
+        expect(document.querySelector('[data-features-export-field="units"][value="english"]').checked).toBe(true);
+        expect(document.querySelector('[data-features-export-action="toggle-layer"][value="watershed.subcatchments"]').checked)
+            .toBe(true);
     });
 
     test("year selection remains visible even when no temporal layers are selected", () => {
@@ -485,7 +530,7 @@ describe("FeaturesExport controller", () => {
             .toContain("Select at least one layer.");
 
         document
-            .querySelector('[data-features-export-action="load-defaults"]')
+            .querySelector('[data-features-export-action="load-profile-preset"]')
             .dispatchEvent(new MouseEvent("click", { bubbles: true }));
         await flushPromises();
 
@@ -867,6 +912,10 @@ describe("FeaturesExport controller", () => {
         expect(document.querySelector('[data-features-export-region="download"]').innerHTML).toContain(
             'href="' + expectedDownloadUrl + '"'
         );
+        var downloadLink = document.querySelector('[data-features-export-action="download"]');
+        expect(downloadLink).not.toBeNull();
+        expect(downloadLink.hasAttribute("download")).toBe(true);
+        expect(downloadLink.getAttribute("target")).toBeNull();
         expect(document.querySelector('[data-features-export-region="artifact-meta"]').innerHTML).toContain(
             "artifact-123"
         );

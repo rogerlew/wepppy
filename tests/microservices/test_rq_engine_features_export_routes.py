@@ -92,6 +92,91 @@ def test_features_export_submit_empty_json_returns_400(monkeypatch: pytest.Monke
     assert payload["errors"][0]["code"] == "missing_field"
 
 
+def test_features_export_profile_resolve_missing_profile_text_returns_400(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/export/features/profile/resolve",
+            json={"format": "geopackage"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["errors"][0]["path"] == "profile_text"
+
+
+def test_features_export_profile_resolve_success_returns_normalized_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        export_routes,
+        "parse_profile_text",
+        lambda profile_text: {"format": "csv", "units": "si", "layers": ["watershed.subcatchments"]},
+    )
+    monkeypatch.setattr(
+        export_routes,
+        "prepare_export_submission",
+        lambda wd, payload: SimpleNamespace(
+            plan=SimpleNamespace(
+                request=SimpleNamespace(
+                    to_mapping=lambda: {
+                        "format": "csv",
+                        "units": "si",
+                        "layers": ["watershed.subcatchments"],
+                    }
+                )
+            )
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/export/features/profile/resolve",
+            json={"profile_text": "request:\n  format: csv\n"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload == {
+        "profile": {
+            "format": "csv",
+            "units": "si",
+            "layers": ["watershed.subcatchments"],
+        }
+    }
+
+
+def test_features_export_profile_resolve_invalid_profile_text_returns_400(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(
+        export_routes,
+        "parse_profile_text",
+        lambda profile_text: (_ for _ in ()).throw(
+            export_routes.FeaturesExportProfileError("bad yaml")
+        ),
+    )
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/export/features/profile/resolve",
+            json={"profile_text": "bad"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["errors"][0]["code"] == "invalid_profile_text"
+
+
 def test_features_export_submit_valid_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     captured = _stub_queue(monkeypatch, job_id="features-job-22")

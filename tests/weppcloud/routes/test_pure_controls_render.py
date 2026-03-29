@@ -96,11 +96,14 @@ def jinja_env() -> Environment:
         str_units=lambda value: value,
         omni_scenarios=[],
         features_export_submit_url="/rq-engine/api/runs/test-run/test-config/export/features",
+        features_export_profile_resolve_url="/rq-engine/api/runs/test-run/test-config/export/features/profile/resolve",
         features_export_download_url_template="/runs/test-run/test-config/download/__ARTIFACT_RELPATH__",
         features_export_catalog_payload={"metadata": {}, "family_order": [], "family_labels": {}, "layers": [], "load_error": None},
         features_export_bootstrap_payload={
             "defaults": {"format": "geopackage", "units": "project", "crs": "wgs", "output_scopes": ["baseline"]},
-            "profiles": {"gpkg_adjacent": {"layers": []}},
+            "profiles": {"post_wepp": {"layers": []}},
+            "profile_buttons": [{"key": "post_wepp", "label": "Post Wepp"}],
+            "default_profile_key": "post_wepp",
             "omni": {"scenarios": [], "contrasts": []},
             "swat": {"preferred_run_id": "latest", "runs": [], "tables_by_run": {}, "all_tables": []},
         },
@@ -479,6 +482,7 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
     template = jinja_env.get_template("controls/features_export_pure.htm")
     rendered = template.render(
         features_export_submit_url="/rq-engine/api/runs/test-run/test-config/export/features",
+        features_export_profile_resolve_url="/rq-engine/api/runs/test-run/test-config/export/features/profile/resolve",
         features_export_download_url_template="/runs/test-run/test-config/download/__ARTIFACT_RELPATH__",
         features_export_catalog_payload={
             "metadata": {},
@@ -489,7 +493,9 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
         },
         features_export_bootstrap_payload={
             "defaults": {"format": "geopackage", "units": "project", "crs": "wgs", "output_scopes": ["baseline"]},
-            "profiles": {"gpkg_adjacent": {"layers": []}},
+            "profiles": {"post_wepp": {"layers": []}},
+            "profile_buttons": [{"key": "post_wepp", "label": "Post Wepp"}],
+            "default_profile_key": "post_wepp",
             "omni": {"scenarios": [], "contrasts": []},
             "swat": {"preferred_run_id": "latest", "runs": [], "tables_by_run": {}, "all_tables": []},
         },
@@ -509,7 +515,9 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
         'data-features-export-group="swat"',
         'data-features-export-group="summary"',
         'data-features-export-group="actions"',
-        'data-features-export-action="load-defaults"',
+        'data-features-export-action="load-profile-preset"',
+        'data-features-export-action="load-profile-text"',
+        'data-features-export-field="profile-text"',
         'data-features-export-field="tabular-concatenate-tables"',
         'data-features-export-field="tabular-temporal-layout"',
         'data-features-export-tabular-options',

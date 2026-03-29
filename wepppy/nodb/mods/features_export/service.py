@@ -11,12 +11,15 @@ from pathlib import Path
 import sqlite3
 import string
 import re
+import shutil
 from urllib.parse import quote
 from uuid import uuid4
+import zipfile
 
 import duckdb
 import geopandas as gpd
 import pandas as pd
+import yaml
 
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.unitizer import Unitizer
@@ -58,6 +61,7 @@ from .exporters import (
     PreparedLayerPayload,
     get_export_writer,
 )
+from .exporters.packaging import package_files_as_zip
 from .geometry_carriers import attach_geometry_once, build_canonical_geometry_carrier
 from .identity_columns import normalize_identity_output_columns
 from .join_planner import JOIN_KEY_COLUMN, MaterializationContractError
@@ -66,12 +70,15 @@ from .manifest import build_export_manifest, write_export_manifest
 from .manifest_builder import build_output_layer_column_metadata
 from .output_column_naming import apply_unitized_column_suffixes
 from .planner import resolve_export_plan
+from .profiles import profile_bundle_member_sources
 from .tabular_temporal_layout import reshape_temporal_wide_to_long
 
 FEATURES_EXPORT_ROOT_RELPATH = "export/features"
 FEATURES_EXPORT_ARTIFACTS_RELPATH = "export/features/artifacts"
 FEATURES_EXPORT_JOBS_RELPATH = "export/features/jobs"
 FEATURES_EXPORT_MANIFEST_NAME = "manifest.json"
+FEATURES_EXPORT_PROFILE_RELPATH = "profile.yml"
+FEATURES_EXPORT_PROVENANCE_RELPATH = "README.md"
 _GPKG_APPLICATION_ID = 0x47504B47
 _CONSOLIDATED_JOIN_KEY_COLUMN = JOIN_KEY_COLUMN
 _SAFE_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
@@ -390,7 +397,7 @@ def _run_cache_miss_export(
         runid=runid,
     )
     writer = get_export_writer(submission.plan.request.format)
-    artifact = writer.write(
+    writer_artifact = writer.write(
         ExportWriterRequest(
             plan=materialized_plan,
             layer_payloads=layer_payloads,
@@ -398,13 +405,58 @@ def _run_cache_miss_export(
             artifact_basename="features_export",
         )
     )
-
-    artifact_relpath = _to_relpath(wd, Path(artifact.artifact_path))
     generation_timestamp_utc = _utcnow_iso()
+    profile_bundle_sources = profile_bundle_member_sources()
+
+    profile_path = _write_profile_document(
+        artifact_dir / FEATURES_EXPORT_PROFILE_RELPATH,
+        materialized_plan=materialized_plan,
+    )
+    profile_member_sources = _materialize_profile_bundle_members(
+        artifact_dir=artifact_dir,
+        profile_sources=profile_bundle_sources,
+    )
+    profile_bundle_relpaths = tuple(sorted(profile_member_sources))
+
+    payload_member_sources = _payload_member_sources(
+        artifact=writer_artifact,
+        artifact_dir=artifact_dir,
+    )
+    provenance_path = _write_provenance_readme(
+        artifact_dir / FEATURES_EXPORT_PROVENANCE_RELPATH,
+        runid=runid,
+        config=config,
+        artifact_id=artifact_id,
+        submission=submission,
+        generation_timestamp_utc=generation_timestamp_utc,
+        payload_member_relpaths=tuple(sorted(payload_member_sources)),
+    )
+
+    bundle_member_sources: dict[str, Path] = {}
+    bundle_member_sources.update(payload_member_sources)
+    bundle_member_sources[FEATURES_EXPORT_PROFILE_RELPATH] = profile_path
+    bundle_member_sources.update(profile_member_sources)
+    bundle_member_sources[FEATURES_EXPORT_PROVENANCE_RELPATH] = provenance_path
+
+    bundle_filename = _bundle_filename(submission.plan.request.format)
+    bundle_path = artifact_dir / bundle_filename
+    artifact_relpath = _to_relpath(wd, bundle_path)
+
+    planned_packaged_member_relpaths = tuple(
+        sorted((*bundle_member_sources.keys(), FEATURES_EXPORT_MANIFEST_NAME))
+    )
+    bundle_artifact = ExportArtifactMetadata(
+        format=writer_artifact.format,
+        artifact_relpath=bundle_filename,
+        artifact_path=str(bundle_path),
+        layer_outputs=writer_artifact.layer_outputs,
+        warnings=writer_artifact.warnings,
+        packaged_member_relpaths=planned_packaged_member_relpaths,
+    )
 
     manifest = build_export_manifest(
         plan=materialized_plan,
-        artifact=artifact,
+        artifact=bundle_artifact,
         dependency_snapshot=submission.dependency_snapshot,
         artifact_id=artifact_id,
         cache_hit=False,
@@ -414,25 +466,43 @@ def _run_cache_miss_export(
         resolved_crs=submission.plan.request.crs,
         column_metadata_by_output_layer_id=column_metadata_by_output_layer_id,
         request_column_selection_by_layer_id=_request_column_selection_payload(submission.plan),
+        profile_relpath=FEATURES_EXPORT_PROFILE_RELPATH,
+        profile_bundle_relpaths=profile_bundle_relpaths,
+        provenance_readme_relpath=FEATURES_EXPORT_PROVENANCE_RELPATH,
     )
 
     artifact_manifest_relpath = f"{artifact_dir_relpath}/{FEATURES_EXPORT_MANIFEST_NAME}"
-    write_export_manifest(_resolve_relpath(wd, artifact_manifest_relpath), manifest)
+    artifact_manifest_path = _resolve_relpath(wd, artifact_manifest_relpath)
+    write_export_manifest(artifact_manifest_path, manifest)
+    bundle_member_sources[FEATURES_EXPORT_MANIFEST_NAME] = artifact_manifest_path
+
+    packaged_member_relpaths = package_files_as_zip(bundle_path, bundle_member_sources)
 
     job_manifest_relpath = _job_manifest_relpath(job_id)
     write_export_manifest(_resolve_relpath(wd, job_manifest_relpath), manifest)
+
+    _cleanup_intermediate_writer_artifact(
+        artifact=writer_artifact,
+        retained_sources=(
+            *tuple(bundle_member_sources.values()),
+            bundle_path,
+        ),
+    )
 
     warnings_payload = _normalize_warnings_payload(manifest.get("warnings"))
     cache_entry = {
         "artifact_id": artifact_id,
         "artifact_relpath": artifact_relpath,
-        "artifact_path": str(_resolve_relpath(wd, artifact_relpath)),
+        "artifact_path": str(bundle_path),
         "artifact_paths": [artifact_relpath],
-        "artifact_format": artifact.format,
-        "layer_outputs": [layer.to_mapping() for layer in artifact.layer_outputs],
-        "packaged_member_relpaths": list(artifact.packaged_member_relpaths),
+        "artifact_format": submission.plan.request.format,
+        "layer_outputs": [layer.to_mapping() for layer in writer_artifact.layer_outputs],
+        "packaged_member_relpaths": list(packaged_member_relpaths),
         "source_job_id": job_id,
         "manifest_relpath": artifact_manifest_relpath,
+        "profile_relpath": FEATURES_EXPORT_PROFILE_RELPATH,
+        "profile_bundle_relpaths": list(profile_bundle_relpaths),
+        "provenance_readme_relpath": FEATURES_EXPORT_PROVENANCE_RELPATH,
         "warnings": warnings_payload,
     }
     upsert_cache_index_entry(wd, submission.cache_key_parts.cache_key, cache_entry)
@@ -491,6 +561,31 @@ def _finalize_cache_hit(
 
     warnings_payload = _normalize_warnings_payload(cache_entry.get("warnings"))
     generation_timestamp_utc = _utcnow_iso()
+    profile_relpath_raw = cache_entry.get("profile_relpath")
+    profile_relpath = (
+        str(profile_relpath_raw).strip()
+        if isinstance(profile_relpath_raw, str) and profile_relpath_raw.strip()
+        else FEATURES_EXPORT_PROFILE_RELPATH
+    )
+    profile_bundle_relpaths_raw = cache_entry.get("profile_bundle_relpaths")
+    profile_bundle_relpaths: tuple[str, ...] = ()
+    if isinstance(profile_bundle_relpaths_raw, list):
+        profile_bundle_relpaths = tuple(
+            sorted(
+                {
+                    str(entry).strip()
+                    for entry in profile_bundle_relpaths_raw
+                    if isinstance(entry, str) and entry.strip()
+                }
+            )
+        )
+    provenance_readme_relpath_raw = cache_entry.get("provenance_readme_relpath")
+    provenance_readme_relpath = (
+        str(provenance_readme_relpath_raw).strip()
+        if isinstance(provenance_readme_relpath_raw, str)
+        and provenance_readme_relpath_raw.strip()
+        else FEATURES_EXPORT_PROVENANCE_RELPATH
+    )
 
     artifact_metadata = _artifact_metadata_from_cache_entry(
         cache_entry,
@@ -511,6 +606,9 @@ def _finalize_cache_hit(
         resolved_crs=submission.plan.request.crs,
         additional_warnings=warnings_payload,
         request_column_selection_by_layer_id=_request_column_selection_payload(submission.plan),
+        profile_relpath=profile_relpath,
+        profile_bundle_relpaths=profile_bundle_relpaths,
+        provenance_readme_relpath=provenance_readme_relpath,
     )
 
     job_manifest_relpath = _job_manifest_relpath(job_id)
@@ -2136,12 +2234,68 @@ def _cache_entry_has_valid_artifact_for_format(
         normalized_format = "geodatabase"
 
     if normalized_format == "geopackage":
-        return _is_valid_cached_geopackage(artifact_path)
+        return _is_valid_cached_geopackage_artifact(
+            artifact_path=artifact_path,
+            packaged_member_relpaths=_cache_entry_packaged_member_relpaths(cache_entry),
+        )
 
     return True
 
 
-def _is_valid_cached_geopackage(artifact_path: Path) -> bool:
+def _cache_entry_packaged_member_relpaths(cache_entry: dict[str, object]) -> tuple[str, ...]:
+    raw = cache_entry.get("packaged_member_relpaths")
+    if not isinstance(raw, list):
+        return ()
+    normalized: list[str] = []
+    for entry in raw:
+        if isinstance(entry, str) and entry.strip():
+            normalized.append(entry.strip())
+    return tuple(normalized)
+
+
+def _is_valid_cached_geopackage_artifact(
+    *,
+    artifact_path: Path,
+    packaged_member_relpaths: cabc.Sequence[str],
+) -> bool:
+    if artifact_path.suffix.lower() == ".zip":
+        return _is_valid_cached_geopackage_zip(
+            artifact_path=artifact_path,
+            packaged_member_relpaths=packaged_member_relpaths,
+        )
+    return _is_valid_cached_geopackage_file(artifact_path)
+
+
+def _is_valid_cached_geopackage_zip(
+    *,
+    artifact_path: Path,
+    packaged_member_relpaths: cabc.Sequence[str],
+) -> bool:
+    try:
+        with zipfile.ZipFile(artifact_path, mode="r") as zip_handle:
+            names = tuple(zip_handle.namelist())
+            if not names:
+                return False
+
+            candidate_members = [
+                member
+                for member in packaged_member_relpaths
+                if member.lower().endswith(".gpkg") and member in names
+            ]
+            if not candidate_members:
+                candidate_members = [
+                    member for member in names if member.lower().endswith(".gpkg")
+                ]
+            if not candidate_members:
+                return False
+
+            with zip_handle.open(sorted(candidate_members)[0], mode="r") as handle:
+                return handle.read(16).startswith(b"SQLite format 3\x00")
+    except (OSError, zipfile.BadZipFile, KeyError):
+        return False
+
+
+def _is_valid_cached_geopackage_file(artifact_path: Path) -> bool:
     try:
         with artifact_path.open("rb") as handle:
             if not handle.read(16).startswith(b"SQLite format 3\x00"):
@@ -2167,6 +2321,159 @@ def _is_valid_cached_geopackage(artifact_path: Path) -> bool:
             return gpkg_contents_exists is not None
     except sqlite3.Error:
         return False
+
+
+def _bundle_filename(format_token: str) -> str:
+    normalized = str(format_token or "").strip().lower()
+    if normalized == "f_esri":
+        normalized = "geodatabase"
+    safe = _SAFE_TOKEN_PATTERN.sub("_", normalized).strip("._")
+    if not safe:
+        safe = "export"
+    return f"features_export.{safe}.zip"
+
+
+def _payload_member_sources(
+    *,
+    artifact: ExportArtifactMetadata,
+    artifact_dir: Path,
+) -> dict[str, Path]:
+    if artifact.packaged_member_relpaths:
+        member_sources: dict[str, Path] = {}
+        artifact_path = Path(artifact.artifact_path).resolve()
+        for member_relpath in artifact.packaged_member_relpaths:
+            token = str(member_relpath or "").strip()
+            if not token:
+                continue
+            source = (artifact_dir / token).resolve()
+            if not source.exists() and artifact_path.name == Path(token).name and artifact_path.exists():
+                source = artifact_path
+            if not source.is_file():
+                raise FeaturesExportServiceError(
+                    "Writer output is missing an expected payload member file.",
+                    status_code=500,
+                    code="artifact_missing",
+                    details=f"Missing payload member {token!r} for format {artifact.format!r}.",
+                )
+            member_sources[token] = source
+        if member_sources:
+            return member_sources
+
+    artifact_path = Path(artifact.artifact_path).resolve()
+    if not artifact_path.is_file():
+        raise FeaturesExportServiceError(
+            "Writer output artifact file is missing.",
+            status_code=500,
+            code="artifact_missing",
+            details=f"Missing writer artifact at {artifact_path}.",
+        )
+    default_member = Path(str(artifact.artifact_relpath or artifact_path.name)).name
+    if not default_member:
+        default_member = artifact_path.name
+    return {default_member: artifact_path}
+
+
+def _materialize_profile_bundle_members(
+    *,
+    artifact_dir: Path,
+    profile_sources: cabc.Mapping[str, Path],
+) -> dict[str, Path]:
+    copied: dict[str, Path] = {}
+    for relpath in sorted(profile_sources):
+        source = Path(profile_sources[relpath]).resolve()
+        if not source.is_file():
+            raise FeaturesExportServiceError(
+                "Built-in profile source file is missing.",
+                status_code=500,
+                code="profile_missing",
+                details=f"Missing built-in profile source {source}.",
+            )
+        destination = (artifact_dir / relpath).resolve()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if source != destination:
+            shutil.copyfile(source, destination)
+        copied[relpath] = destination
+    return copied
+
+
+def _write_profile_document(path: Path, *, materialized_plan: ResolvedExportPlan) -> Path:
+    payload = {
+        "request": materialized_plan.request.to_mapping(),
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        yaml.safe_dump(payload, sort_keys=False, allow_unicode=False),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_provenance_readme(
+    path: Path,
+    *,
+    runid: str,
+    config: str,
+    artifact_id: str,
+    submission: FeaturesExportSubmission,
+    generation_timestamp_utc: str,
+    payload_member_relpaths: cabc.Sequence[str],
+) -> Path:
+    request = submission.plan.request
+    lines = [
+        "# Features Export Provenance",
+        "",
+        f"- Generated at (UTC): {generation_timestamp_utc}",
+        f"- Run ID: {runid}",
+        f"- Config: {config}",
+        f"- Artifact ID: {artifact_id}",
+        f"- Format: {request.format}",
+        f"- Units: {request.units}",
+        f"- CRS: {request.crs}",
+        f"- Output scopes: {', '.join(request.output_scopes)}",
+        f"- Catalog version: {submission.plan.catalog_version}",
+        f"- Catalog schema version: {submission.plan.schema_version}",
+        f"- Dependency fingerprint: {submission.dependency_snapshot.fingerprint}",
+        f"- Cache key: {submission.cache_key_parts.cache_key}",
+        "",
+        "## Layers",
+    ]
+    for layer_id in request.layers:
+        lines.append(f"- {layer_id}")
+    lines.extend(
+        [
+            "",
+            "## Payload Members",
+        ]
+    )
+    for relpath in sorted({str(item) for item in payload_member_relpaths if str(item).strip()}):
+        lines.append(f"- {relpath}")
+    lines.extend(
+        [
+            "",
+            "## Replay",
+            "Copy `profile.yml` from this bundle and load it in the Features Export control.",
+        ]
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return path
+
+
+def _cleanup_intermediate_writer_artifact(
+    *,
+    artifact: ExportArtifactMetadata,
+    retained_sources: cabc.Sequence[Path],
+) -> None:
+    artifact_path = Path(artifact.artifact_path).resolve()
+    retained = {Path(entry).resolve() for entry in retained_sources}
+    if artifact_path in retained:
+        return
+    try:
+        if artifact_path.is_file():
+            artifact_path.unlink()
+    except OSError:
+        # Best-effort cleanup only; do not fail export completion.
+        return
 
 
 def _download_url(runid: str, config: str, artifact_relpath: str) -> str:

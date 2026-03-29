@@ -11,7 +11,7 @@ from .dependency_tracker import DependencySnapshot
 from .exporters.base import ExportArtifactMetadata
 
 MANIFEST_SCHEMA_VERSION = 1
-MANIFEST_GENERATOR_VERSION = "features-export-wp12-temporal-wide"
+MANIFEST_GENERATOR_VERSION = "features-export-wp13-profile-bundle"
 
 
 def build_export_manifest(
@@ -33,6 +33,9 @@ def build_export_manifest(
     additional_warnings: cabc.Sequence[ExportWarning | cabc.Mapping[str, object]] = (),
     column_metadata_by_output_layer_id: cabc.Mapping[str, cabc.Mapping[str, object]] | None = None,
     request_column_selection_by_layer_id: cabc.Mapping[str, cabc.Mapping[str, object]] | None = None,
+    profile_relpath: str | None = None,
+    profile_bundle_relpaths: cabc.Sequence[str] | None = None,
+    provenance_readme_relpath: str | None = None,
 ) -> dict[str, object]:
     """Build pure, deterministic artifact manifest payload for WP-3."""
 
@@ -116,6 +119,18 @@ def build_export_manifest(
         },
         "conversion_summary": dict(conversion_summary or {}),
         "dependency_preparation": [dict(item) for item in (dependency_preparation or ())],
+        "profile_relpath": str(profile_relpath or "").strip(),
+        "profile_bundle_relpaths": [
+            token
+            for token in sorted(
+                {
+                    str(entry).strip()
+                    for entry in (profile_bundle_relpaths or ())
+                    if isinstance(entry, str) and str(entry).strip()
+                }
+            )
+        ],
+        "provenance_readme_relpath": str(provenance_readme_relpath or "").strip(),
         "warnings": warnings_payload,
     }
 

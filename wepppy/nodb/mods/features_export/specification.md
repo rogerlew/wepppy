@@ -27,11 +27,12 @@ User-facing dataset labels and output layer names must prioritize established WE
 Format token contract:
 - Canonical request token is `geodatabase`.
 - Backward-compatible alias `f_esri` is accepted and normalized to `geodatabase`.
-- FileGDB download artifact filename extension is `.gdb.zip`.
+- FileGDB payload member extension remains `.gdb.zip` inside the final download bundle.
 
 Packaging rules:
-- Single-layer formats produce one file per resolved layer and return a zip bundle.
-- Multi-layer formats produce one container artifact per request.
+- All format downloads are `.zip` artifacts.
+- Single-layer formats produce one file per resolved layer inside the zip bundle.
+- Multi-layer formats produce one container payload member inside the zip bundle.
 - KMZ is single-layer only; multi-layer requests produce multiple `.kmz` files in the zip.
 - Geometryless formats (`parquet`, `csv`) always emit tabular outputs without geometry columns/encodings.
 - For geometryless formats, required identity/join fields remain included even when geometry is removed.
@@ -40,6 +41,12 @@ Packaging rules:
   - `temporal_layout=wide|long` controls temporal measure shaping for `event`/`yearly` layers (`wide` default).
 - Geometryless writer path is table-native end-to-end: tabular exports consume DataFrame payloads directly and must not serialize/parse FeatureCollection JSON in the writer path.
 - Geometryless carrier materialization is independent of geometry files: tabular outputs are produced from attribute sources only and do not enrich identity columns from carrier geometry datasets.
+- Every zip artifact must include:
+  - export payload members (data files/container members),
+  - `manifest.json`,
+  - `profile.yml` (resolved request profile for replay),
+  - `profiles/post-wepp.yml` and `profiles/prep-details.yml`,
+  - `README.md` provenance summary.
 - Identity normalization contract for all output formats (geometry and tabular):
   - Emit canonical identity columns `topaz_id`, `wepp_id` as the first two output columns.
   - Coalesce identity aliases (`TopazID`/`topaz_id`, `WeppID`/`wepp_id`) into canonical columns.
@@ -512,8 +519,12 @@ Module placement:
 Runs page integration:
 - Add `Export` to the Mods list.
 - Implement a NoDb controller UI using established async pattern.
-- Add a top-of-control secondary `Load Defaults` action that applies a gpkg-adjacent profile without auto-submit.
-- `Load Defaults` profile defaults: `format=geopackage`, `units=project`, `crs=wgs`, `output_scopes=["baseline"]`, cleared temporal/Omni selectors, and a curated baseline layer set aligned with legacy gpkg outcomes.
+- Add top-of-control profile actions:
+  - `Load Export Profile` quick actions: `Prep details` and `Post Wepp`.
+  - `Specify Export from Profile` text area + `Load profile` action.
+  - `Clear selection` remains available as a separate action.
+- `Post Wepp` is the default quick profile and replaces the legacy `Load Defaults` button behavior.
+- Profile text loading accepts `profile.yml` content from prior exports and applies the profile without auto-submit.
 - Run settings visual order is fixed: `format` -> `units` -> `crs` -> global `year_selection`.
 - Catalog UI is hierarchy-first and must not include a layer search box, filter chips, or "select visible" behavior.
 - Family labels are user-facing domain labels and must use one consolidated `WEPP` family with familiar output names (not split `WEPP Summary`, `WEPP Temporal`, `WEPP Interchange` headings).
@@ -540,7 +551,10 @@ Runs page integration:
 - Controller must attach `attach_status_stream` with stacktrace hooks and keep poll fallback enabled.
 - Controller must hydrate prior `job_id` on bootstrap using existing controller-contract guidance.
 - Template must include required status panel, stacktrace panel, and job-hint DOM hooks with `aria-live="polite"` status behavior.
-- Follow-on profile (post-WP-7, not part of this immediate cut) should define a tabular defaults preset that replaces `prep_details` behavior using geometryless `parquet`/`csv` exports with curated column selections.
+- Built-in profile source-of-truth files live in:
+  - `wepppy/nodb/mods/features_export/profiles/post-wepp.yml`
+  - `wepppy/nodb/mods/features_export/profiles/prep-details.yml`
+- `prep-details.yml` is the canonical replacement profile for legacy `prep_details` export behavior.
 
 ## 11. Manifest And Warning Contract
 Every artifact includes `manifest.json`.
@@ -561,6 +575,10 @@ Manifest minimum fields:
 - `cache_hit`, `source_job_id`, `artifact_id`.
 - Dependency-preparation records (including AgFields interchange auto-prep attempts and outcomes).
 - `warnings` array.
+- Profile/provenance fields:
+  - `profile_relpath` (`profile.yml`),
+  - `profile_bundle_relpaths` (packaged built-in profile files),
+  - `provenance_readme_relpath` (`README.md`).
 
 Warning object shape:
 - `code`: machine-readable warning code.
@@ -643,7 +661,8 @@ Back-compat behavior for existing saved configs:
 - Mixed temporal requests have deterministic partial-export behavior and warning semantics.
 - SWAT default all-table export and include/exclude overrides work with profile-based geometry/non-spatial handling.
 - Export mod appears on Runs page and follows existing NoDb async controller interaction.
-- `Load Defaults` is available as a secondary action near the top of the control, applies gpkg-adjacent defaults, emits a defaults-loaded event, and never auto-submits.
+- Run-page control exposes quick profile buttons (`Prep details`, `Post Wepp`) and a profile-text load path for pasted `profile.yml` content.
+- All artifact downloads are zip bundles and include `manifest.json`, `profile.yml`, built-in profile files, and provenance `README.md`.
 - Regression tests cover payload shape, selector validation, scope behavior, cache hit flow, and legacy cutover.
 
 ## 14. Implementation Skeleton And Work-Package Breakdown
@@ -783,7 +802,7 @@ WP-7: Reconciliation pass for WEPP naming, temporal controls, and consolidated l
 - Contract clarification: base and Omni WEPP outputs are consolidated to up to two geometry-carrier layers per scope with descriptive run/context layer naming.
 - Contract clarification: control layout is hierarchy-first, removes search/filter strip, hides unavailable families, and receives websocket-driven discovery updates.
 - Contract clarification: geometryless format tokens `parquet` and `csv` are added as first-class single-layer tabular exports that drop geometry while keeping required identity/join columns.
-- Contract clarification: a post-WP-7 defaults profile is planned to replace `prep_details` with geometryless exports plus curated column-selection presets.
+- Contract clarification: profile-based defaults are first-class (`post-wepp.yml`, `prep-details.yml`) and replace the legacy defaults/prep-details split behavior.
 - Deliverable: reconciled backend/UI contract with regression and performance validation coverage.
 
 WP-8: Key-first carrier materialization rewrite and module maintainability refactor (planned 2026-03-27)

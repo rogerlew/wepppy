@@ -1,0 +1,18 @@
+profile_id: prep_details
+label: Prep details
+description: Geometryless tabular prep-details replacement profile.
+request:
+  format: parquet
+  units: project
+  crs: wgs
+  output_scopes:
+    - baseline
+  tabular:
+    concatenate_tables: true
+    temporal_layout: wide
+  swat_run_id: latest
+  layers:
+    - watershed.subcatchments
+    - watershed.channels
+    - landuse.dominant
+    - soils.dominant

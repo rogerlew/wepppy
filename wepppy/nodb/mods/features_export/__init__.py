@@ -70,6 +70,14 @@ from .manifest import (
     write_export_manifest,
 )
 from .planner import normalize_export_request, resolve_export_plan
+from .profiles import (
+    FeaturesExportProfileError,
+    default_profiles_dir,
+    load_builtin_profiles,
+    normalize_profile_key,
+    parse_profile_text,
+    profile_bundle_member_sources,
+)
 from .service import (
     FEATURES_EXPORT_ARTIFACTS_RELPATH,
     FEATURES_EXPORT_JOBS_RELPATH,
@@ -102,6 +110,7 @@ __all__ = [
     "ExportWriterRequest",
     "ExportedLayerArtifact",
     "ExportWarning",
+    "FeaturesExportProfileError",
     "FeaturesExportWriterError",
     "FeaturesExportServiceError",
     "FeaturesExportSubmission",
@@ -140,13 +149,18 @@ __all__ = [
     "execute_features_export",
     "get_cache_index_entry",
     "get_export_writer",
+    "default_profiles_dir",
+    "load_builtin_profiles",
     "load_job_manifest",
     "load_layer_catalog",
     "load_cache_index",
     "normalize_export_request",
+    "normalize_profile_key",
     "normalize_format_token",
     "parse_layer_catalog",
+    "parse_profile_text",
     "prepare_export_submission",
+    "profile_bundle_member_sources",
     "resolve_export_plan",
     "resolve_download_artifact_path",
     "serialize_export_manifest",

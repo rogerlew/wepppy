@@ -494,6 +494,38 @@ def test_features_export_bootstrap_payload_includes_defaults_selectors_and_runti
             "all_tables": ["hru", "rch"],
         },
     )
+    monkeypatch.setattr(
+        run0_module,
+        "load_builtin_profiles",
+        lambda: (
+            {
+                "key": "post_wepp",
+                "label": "Post Wepp",
+                "request": {
+                    "format": "geopackage",
+                    "units": "project",
+                    "crs": "wgs",
+                    "output_scopes": ["baseline"],
+                    "tabular": {"concatenate_tables": False, "temporal_layout": "wide"},
+                    "swat_run_id": "latest",
+                    "layers": ["watershed.subcatchments"],
+                },
+            },
+            {
+                "key": "prep_details",
+                "label": "Prep details",
+                "request": {
+                    "format": "parquet",
+                    "units": "project",
+                    "crs": "wgs",
+                    "output_scopes": ["baseline"],
+                    "tabular": {"concatenate_tables": True, "temporal_layout": "wide"},
+                    "swat_run_id": "latest",
+                    "layers": ["watershed.channels"],
+                },
+            },
+        ),
+    )
 
     payload = run0_module._build_features_export_bootstrap_payload(
         "/tmp/fake-run",
@@ -511,11 +543,17 @@ def test_features_export_bootstrap_payload_includes_defaults_selectors_and_runti
             "temporal_layout": "wide",
         },
     }
-    assert payload["profiles"]["gpkg_adjacent"]["tabular"] == {
+    assert payload["default_profile_key"] == "post_wepp"
+    assert payload["profiles"]["post_wepp"]["tabular"] == {
         "concatenate_tables": False,
         "temporal_layout": "wide",
     }
-    assert payload["profiles"]["gpkg_adjacent"]["swat_run_id"] == "latest"
+    assert payload["profiles"]["post_wepp"]["swat_run_id"] == "latest"
+    assert payload["profiles"]["prep_details"]["format"] == "parquet"
+    assert payload["profile_buttons"] == [
+        {"key": "post_wepp", "label": "Post Wepp"},
+        {"key": "prep_details", "label": "Prep details"},
+    ]
     assert payload["omni"]["scenarios"] == [{"id": "uniform_low", "label": "Uniform Low"}]
     assert payload["omni"]["contrasts"] == [{"id": "c1", "label": "Contrast 1"}]
     assert payload["swat"]["preferred_run_id"] == "run_123"

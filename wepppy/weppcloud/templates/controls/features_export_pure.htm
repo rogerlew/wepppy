@@ -12,6 +12,8 @@
 {% set omni_bootstrap = features_export_bootstrap_payload.get("omni", {}) if features_export_bootstrap_payload else {} %}
 {% set omni_scenarios = omni_bootstrap.get("scenarios", []) if omni_bootstrap else [] %}
 {% set omni_contrasts = omni_bootstrap.get("contrasts", []) if omni_bootstrap else [] %}
+{% set profile_buttons = features_export_bootstrap_payload.get("profile_buttons", []) if features_export_bootstrap_payload else [] %}
+{% set default_profile_key = features_export_bootstrap_payload.get("default_profile_key", "post_wepp") if features_export_bootstrap_payload else "post_wepp" %}
 
 {% set description %}
   <p class="wc-text-muted">
@@ -50,12 +52,13 @@
     data-features-export-job-key="run_features_export"
     data-features-export-channel="features_export"
     data-features-export-submit-url="{{ features_export_submit_url }}"
+    data-features-export-profile-resolve-url="{{ features_export_profile_resolve_url }}"
     data-features-export-download-url-template="{{ features_export_download_url_template }}"
     data-features-export-utm-available="{{ 'true' if utm_available else 'false' }}"
     data-features-export-default-format="geopackage"
     data-features-export-default-units="project"
     data-features-export-default-crs="wgs"
-    data-features-export-default-profile-key="gpkg_adjacent"
+    data-features-export-default-profile-key="{{ default_profile_key }}"
     hidden></div>
 
   <script type="application/json" id="features_export_catalog_data" data-features-export-catalog>{{ features_export_catalog_payload | tojson }}</script>
@@ -246,10 +249,42 @@
   ] %}
 
   <section data-features-export-group="settings" class="wc-stack">
+    <div class="wc-field">
+      <p class="wc-field__label">Load Export Profile</p>
+      <div class="features-export-format-dependent-options">
+        {% call button_row() %}
+          {% for profile_button in profile_buttons %}
+            <button
+              type="button"
+              class="pure-button pure-button-secondary"
+              data-features-export-action="load-profile-preset"
+              data-profile-key="{{ profile_button.get('key', '') }}">
+              {{ profile_button.get('label', profile_button.get('key', 'Profile')) }}
+            </button>
+          {% endfor %}
+        {% endcall %}
+      </div>
+    </div>
+
+    <div class="wc-field">
+      <label class="wc-field__label" for="features_export_profile_text">Specify Export from Profile</label>
+      <div class="features-export-format-dependent-options">
+        <textarea
+          id="features_export_profile_text"
+          class="wc-field__control"
+          data-features-export-field="profile-text"
+          rows="6"
+          placeholder="Paste profile.yml text here"></textarea>
+        <p class="wc-field__help">Hint: copy <code>profile.yml</code> text from previous export.</p>
+        {% call button_row() %}
+          <button type="button" class="pure-button pure-button-secondary" data-features-export-action="load-profile-text">
+            Load profile
+          </button>
+        {% endcall %}
+      </div>
+    </div>
+
     {% call button_row() %}
-      <button type="button" class="pure-button pure-button-secondary" data-features-export-action="load-defaults">
-        Load Defaults
-      </button>
       <button type="button" class="pure-button pure-button-secondary" data-features-export-action="clear-selection">
         Clear selection
       </button>

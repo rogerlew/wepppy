@@ -28,7 +28,7 @@ def catalog():
 def _resolved_plan(catalog):
     return resolve_export_plan(
         {
-            "format": "geoparquet",
+            "format": "geojson",
             "units": "si",
             "layers": [
                 "wepp.summary.hillslopes",
@@ -53,7 +53,7 @@ def _layer_payloads(plan) -> dict[str, PreparedLayerPayload]:
 
 
 def _artifact_for_manifest(tmp_path: Path, plan):
-    writer = get_export_writer("geoparquet")
+    writer = get_export_writer("geojson")
     request = ExportWriterRequest(
         plan=plan,
         layer_payloads=_layer_payloads(plan),
