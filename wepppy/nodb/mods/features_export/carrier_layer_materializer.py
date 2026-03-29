@@ -360,6 +360,8 @@ def _return_period_selector_mask(
     return_period_lookup: cabc.Mapping[str, frozenset[float]] | None = None,
 ) -> _EventSelectorMaskResult:
     lookup = _normalized_column_lookup(frame.columns)
+    # `rank` is an order statistic in WEPP outputs, not a return-period year token.
+    # Restrict selector matching to explicit return-period interval columns.
     period_column = _first_matching_column(
         lookup,
         (
@@ -367,7 +369,6 @@ def _return_period_selector_mask(
             "return_period_years",
             "recurrence_interval",
             "recurrence_interval_years",
-            "rank",
         ),
     )
     selected = {float(value) for value in selected_return_periods}
@@ -412,7 +413,6 @@ def _build_event_return_period_lookup(
                 "return_period_years",
                 "recurrence_interval",
                 "recurrence_interval_years",
-                "rank",
             ),
         )
         if event_id_column is None or period_column is None:

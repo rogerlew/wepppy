@@ -1263,6 +1263,32 @@ def test_ensure_join_key_column_uses_fallback_candidate_when_primary_is_missing(
     assert resolved.loc[0, service._CONSOLIDATED_JOIN_KEY_COLUMN] == "2"
 
 
+def test_project_spatial_frame_for_request_wgs_requires_source_crs() -> None:
+    frame = gpd.GeoDataFrame(
+        {"topaz_id": [1], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+    )
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._project_spatial_frame_for_request(frame, requested_crs="wgs")
+
+    assert exc_info.value.code == "materialization_error"
+    assert "missing CRS metadata for WGS84 export" in exc_info.value.details
+
+
+def test_project_spatial_frame_for_request_utm_requires_source_crs() -> None:
+    frame = gpd.GeoDataFrame(
+        {"topaz_id": [1], "geometry": [Point(0.0, 0.0)]},
+        geometry="geometry",
+    )
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service._project_spatial_frame_for_request(frame, requested_crs="utm")
+
+    assert exc_info.value.code == "materialization_error"
+    assert "missing CRS metadata for UTM export" in exc_info.value.details
+
+
 def test_layer_outputs_from_cache_entry_skips_malformed_entries_and_falls_back_to_plan() -> None:
     request = NormalizedExportRequest(
         format="geopackage",

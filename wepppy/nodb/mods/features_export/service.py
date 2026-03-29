@@ -1538,7 +1538,12 @@ def _project_spatial_frame_for_request(
     target = str(requested_crs or "wgs").strip().lower()
     if target == "wgs":
         if frame.crs is None:
-            return frame
+            raise FeaturesExportServiceError(
+                "Unable to resolve WGS84 projection without source CRS metadata.",
+                status_code=500,
+                code="materialization_error",
+                details="Spatial frame is missing CRS metadata for WGS84 export.",
+            )
         try:
             epsg = frame.crs.to_epsg()
         except Exception:  # boundary: CRS inspection must not crash export

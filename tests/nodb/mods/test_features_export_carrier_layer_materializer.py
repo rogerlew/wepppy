@@ -263,10 +263,10 @@ def test_materialize_carrier_layer_core_filters_event_sources_by_selected_return
         dataframe=pd.DataFrame(
             {
                 "event_id": [10, 11, 12],
-                "rank": [1, 2, 10],
+                "return_period": [1, 2, 10],
             }
         ),
-        units_by_column={"rank": "non-unitized"},
+        units_by_column={"return_period": "non-unitized"},
     )
     monkeypatch.setattr(
         materializer,
@@ -291,6 +291,61 @@ def test_materialize_carrier_layer_core_filters_event_sources_by_selected_return
     assert len(result.frame.index) == 1
     assert result.frame[JOIN_KEY_COLUMN].tolist() == ["1"]
     assert result.frame["runoff_volume_m3_rp2"].tolist() == [200.0]
+
+
+def test_materialize_carrier_layer_core_return_period_selector_rejects_rank_only_lookup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request_plan = _event_request_plan(selector="return_period", return_periods=(2.0,))
+    layer = _event_layer_plan()
+    required_source = DiscoveredSourceFrame(
+        source_id="wepp_return_period_events",
+        source_kind="parquet",
+        required=True,
+        dataframe=pd.DataFrame(
+            {
+                "event_id": [10, 11, 12],
+                "topaz_id": [1, 1, 1],
+                "runoff_volume_m3": [100.0, 200.0, 300.0],
+            }
+        ),
+        units_by_column={"runoff_volume_m3": "m^3"},
+    )
+    optional_ranks = DiscoveredSourceFrame(
+        source_id="wepp_return_period_ranks",
+        source_kind="parquet",
+        required=False,
+        dataframe=pd.DataFrame(
+            {
+                "event_id": [10, 11, 12],
+                "rank": [1, 2, 10],
+            }
+        ),
+        units_by_column={"rank": "non-unitized"},
+    )
+    monkeypatch.setattr(
+        materializer,
+        "discover_layer_sources",
+        lambda **kwargs: ((required_source, optional_ranks), ()),
+    )
+    monkeypatch.setattr(
+        materializer,
+        "resolve_selected_columns",
+        lambda **kwargs: (("runoff_volume_m3",), {"runoff_volume_m3": "m^3"}),
+    )
+
+    with pytest.raises(MaterializationContractError) as exc_info:
+        materializer.materialize_carrier_layer_core(
+            wd=tmp_path,
+            layer=layer,
+            catalog_layer_raw={"join": {"primary_key": "topaz_id", "fallback_keys": ("TopazID",)}},
+            request_plan=request_plan,
+            dependency_entries=(),
+            consolidated_join_key_column=JOIN_KEY_COLUMN,
+        )
+
+    assert "selector_columns_missing" in str(exc_info.value.details)
 
 
 def test_materialize_carrier_layer_core_allows_non_unique_keys_when_join_contract_opt_in(
