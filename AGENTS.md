@@ -42,7 +42,7 @@
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.
-- Current work-package active ExecPlan: `docs/work-packages/20260327_roads_point_source_outslope_rutted/prompts/active/roads_point_source_outslope_rutted_execplan.md`
+- Current work-package active ExecPlan: `none`
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.
@@ -76,6 +76,7 @@
 
 ## Environment Baseline
 - Assume Linux host with Docker, Docker Compose, and `wctl` installed.
+- Local virtualenv baseline: `/workdir/wepppy/.venv` is built from the same `requirements-uv.txt` used by `wepppy`.
 - Compose source of truth: `docker/docker-compose.dev.yml`.
 - Use `wctl` wrappers for tests, container exec, and local orchestration.
 - Canonical run root is `/wc1/runs/`; check it first when debugging run data.
