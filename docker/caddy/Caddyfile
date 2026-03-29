@@ -189,6 +189,16 @@ http://:8080 {
             }
         }
 
+        @published_features_download path_regexp published_features_download ^/weppcloud/runs/[^/]+/[^/]+/download/features/published/[^/]+/?$
+        handle @published_features_download {
+            uri strip_prefix /weppcloud
+            reverse_proxy weppcloud:8000 {
+                header_up X-Forwarded-Prefix /weppcloud
+                header_up X-Forwarded-Proto {scheme}
+                header_up Host {host}
+            }
+        }
+
         @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|schema(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|files(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
         handle @browse_proxy {
             reverse_proxy browse:9009 {
