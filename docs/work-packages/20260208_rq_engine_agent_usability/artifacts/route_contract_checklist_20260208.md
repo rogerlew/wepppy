@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **60**
+- Total frozen routes covered: **61**
 
 ## Contract Matrix
 
@@ -44,7 +44,8 @@ Guarded by:
 | `GET` | `/api/runs/{runid}/{config}/export/prep_details/` | JWT Bearer | rq:export | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/export/features` | JWT Bearer | rq:export | mutating | async enqueue | `202, 400, 401, 403, 404, 409, 415, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_features_export_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/export/features/profile/resolve` | JWT Bearer | rq:export | read-only | sync no queue | `200, 400, 401, 403, 415, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_features_export_routes.py` |
-| `GET` | `/api/runs/{runid}/{config}/export/features/{job_id}/download` | JWT Bearer | rq:export | read-only | sync no queue | `200, 401, 403, 404, 409, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_features_export_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/export/features/job/{job_id}/download` | JWT Bearer | rq:export | read-only | sync no queue | `200, 401, 403, 404, 409, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_features_export_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/export/features/published/{profile}/download` | JWT Bearer | rq:export | read-only | sync no queue | `200, 401, 403, 404, 409, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_features_export_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/fetch-dem-and-build-channels` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/fork` | Optional JWT; anonymous CAPTCHA path | `rq:enqueue` (if bearer token is used) | mutating | async enqueue | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/post-dss-export-rq` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |

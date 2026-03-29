@@ -40,6 +40,31 @@ def register(app: typer.Typer) -> None:
         _exit_from_result(result)
 
     @app.command(
+        "run-pytest-sharded",
+        context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    )
+    def run_pytest_sharded(
+        ctx: typer.Context,
+        workers: int = typer.Option(
+            2,
+            "--workers",
+            min=1,
+            help="Maximum concurrent pytest shard workers.",
+        ),
+    ) -> None:
+        context = _context(ctx)
+        args = list(ctx.args) or ["tests"]
+        quoted_args = quote_args(args)
+        command = (
+            "cd /workdir/wepppy && "
+            "PYTHONPATH=/workdir/wepppy "
+            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+            f"/opt/venv/bin/python tools/run_pytest_sharded.py --workers {workers} -- {quoted_args}"
+        )
+        result = compose_exec(context, "weppcloud", command, check=False)
+        _exit_from_result(result)
+
+    @app.command(
         "run-python",
         context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
     )

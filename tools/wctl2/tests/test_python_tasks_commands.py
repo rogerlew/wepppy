@@ -75,3 +75,75 @@ def test_check_rq_graph_runs_guard_script(monkeypatch: pytest.MonkeyPatch, temp_
             False,
         )
     ]
+
+
+def test_run_pytest_sharded_defaults_to_tests(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
+    runner = CliRunner()
+    recorded: List[Tuple[str, str, bool, bool]] = []
+
+    def fake_compose_exec(context, service, exec_command, tty=True, check=True):
+        recorded.append((service, exec_command, tty, check))
+        return DummyResult()
+
+    monkeypatch.setattr("tools.wctl2.commands.python_tasks.compose_exec", fake_compose_exec)
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "run-pytest-sharded",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "weppcloud",
+            "cd /workdir/wepppy && "
+            "PYTHONPATH=/workdir/wepppy "
+            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+            "/opt/venv/bin/python tools/run_pytest_sharded.py --workers 2 -- tests",
+            True,
+            False,
+        )
+    ]
+
+
+def test_run_pytest_sharded_passes_workers_and_args(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
+    runner = CliRunner()
+    recorded: List[Tuple[str, str, bool, bool]] = []
+
+    def fake_compose_exec(context, service, exec_command, tty=True, check=True):
+        recorded.append((service, exec_command, tty, check))
+        return DummyResult()
+
+    monkeypatch.setattr("tools.wctl2.commands.python_tasks.compose_exec", fake_compose_exec)
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "run-pytest-sharded",
+            "--workers",
+            "3",
+            "tests/microservices",
+            "-k",
+            "openapi",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "weppcloud",
+            "cd /workdir/wepppy && "
+            "PYTHONPATH=/workdir/wepppy "
+            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+            "/opt/venv/bin/python tools/run_pytest_sharded.py --workers 3 -- "
+            "tests/microservices -k openapi",
+            True,
+            False,
+        )
+    ]
