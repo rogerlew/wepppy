@@ -43,8 +43,9 @@ Packaging rules:
 - Geometryless carrier materialization is independent of geometry files: tabular outputs are produced from attribute sources only and do not enrich identity columns from carrier geometry datasets.
 - Every zip artifact must include:
   - export payload members (data files/container members),
-  - `manifest.json`.
-- Artifact bundles must not include `profile.yml`, built-in profile files, or provenance `README.md`; profile discovery/replay is route-level (`profile/resolve`) and publication-level (`published/index.json`) metadata.
+  - `manifest.json`,
+  - generated `README.md` (artifact metadata summary).
+- Artifact bundles must not include `profile.yml` or built-in profile files; profile discovery/replay is route-level (`profile/resolve`) and publication-level (`published/index.json`) metadata.
 - Identity normalization contract for all output formats (geometry and tabular):
   - Emit canonical identity columns `topaz_id`, `wepp_id` as the first two output columns.
   - Coalesce identity aliases (`TopazID`/`topaz_id`, `WeppID`/`wepp_id`) into canonical columns.
@@ -601,7 +602,82 @@ Runs page integration:
 - `temporal-yearly.yml` is the canonical built-in preset that exercises yearly temporal measures (`wepp.interchange.loss_all_years_hill`).
 
 ## 11. Manifest And Warning Contract
-Every artifact includes `manifest.json`.
+Every artifact includes:
+- `manifest.json` (canonical machine-readable metadata/provenance contract).
+- generated `README.md` (human-readable metadata summary derived from resolved export metadata).
+
+### 11.1 Geospatial Metadata Standards Baseline For Artifact README
+The generated `README.md` must align with established geospatial metadata guidance and format standards:
+- FGDC CSDGM v2 (`FGDC-STD-001-1998`) and FGDC CSDGM Essential Metadata Elements for minimum discovery, contact, extent, quality, and lineage coverage.
+  - References:
+    - https://www.fgdc.gov/metadata/csdgm-standard
+    - https://www.fgdc.gov/metadata/documents/CSDGMEssentialMeta_20080514.pdf
+- FGDC-endorsed ISO 191** metadata suite baseline with ISO 19115-1 Fundamentals as the core model.
+  - Reference: https://www.fgdc.gov/metadata/iso-suite-of-geospatial-metadata-standards
+- USGS metadata best practices for practical quality guardrails (descriptive title, abstract/purpose, update dates, DOI-as-URL when present, and packaging metadata with data).
+  - Reference: https://www.usgs.gov/data-management/metadata-creation
+- GeoParquet v1.1.0 metadata requirements for geometry encoding and CRS semantics in parquet payloads.
+  - Reference: https://geoparquet.org/releases/v1.1.0/
+- OGC GeoPackage metadata extension model (`gpkg_metadata`, `gpkg_metadata_reference`) for standards-compatible metadata carriage in GPKG ecosystems.
+  - Reference: https://docs.ogc.org/is/12-128r19/12-128r19.html
+- GeoJSON RFC 7946 CRS and bbox semantics for GeoJSON payload interpretation.
+  - Reference: https://www.rfc-editor.org/rfc/rfc7946
+
+### 11.2 Available Metadata Inputs For README Generation (Current Implementation)
+Metadata already available today (no new science/data-source contracts required):
+- Manifest/request context:
+  - `request.resolved` (`format`, `units`, `crs`, `output_scopes`, temporal selectors, scenario/contrast selectors, SWAT selectors, column selection, tabular options)
+  - `generated_at_utc`, `cache_hit`, `source_job_id`, `artifact_id`
+- Artifact and packaging context:
+  - `artifact.format`, `artifact.artifact_relpath`, `artifact.packaged_member_relpaths`
+- Layer-level context:
+  - `layer_id`, `output_layer_id`, `family`, `scope_class`, `scope`, `context`, `selector_id`, `carrier_layer`, `temporal_mode`
+  - `row_count`, `feature_count`, `artifact_relpath`
+  - output column metadata (`source_layer_ids`, `selected_columns`, `unit_mapping`, materialization strategy metadata)
+- CRS/projection context:
+  - `crs.requested_crs`, `crs.resolved_crs`, `crs.resolved_epsg` (when available)
+- Dependency and lineage context:
+  - `dependency_snapshot.catalog_signature`, `dependency_snapshot.fingerprint`
+  - per dependency entry: `relpath`, `exists`, `size`, `mtime_ns`, `content_hash_*`, `dependency_role`, `dependency_id`
+- QA/status context:
+  - `warnings` with canonical warning codes and optional `layer_id`/`scope`
+
+Known metadata gaps to track separately (do not block initial README rollout):
+- Persistent identifiers (DOI/PID) for exported artifacts.
+- Explicit distribution license/use constraints and access constraints per export artifact.
+- Canonical contact/organization fields for artifact-level metadata ownership.
+- Spatial extent (`bbox`) and temporal extent summaries precomputed across all exported layers.
+- Formal data-quality measure blocks (beyond warning summaries and source dependency fingerprinting).
+
+### 11.3 Dynamic Artifact README Contract
+README generation behavior:
+- `README.md` is generated dynamically for each cache-miss artifact publication and packaged into the artifact zip root.
+- Cache-hit jobs reuse the cached artifact `README.md`; cache-hit job manifests remain job-scoped and can differ only in `cache_hit`/`source_job_id` context.
+- `README.md` is deterministic for the same artifact payload/manifest inputs (stable ordering and section structure).
+
+README minimum sections:
+- Export summary:
+  - generated timestamp, run/config context, format, units mode, CRS mode.
+- Standards and interpretation notes:
+  - concise format-specific CRS/metadata interpretation notes (for example GeoJSON RFC 7946 WGS84 semantics, GeoParquet CRS notes).
+- Resolved request profile:
+  - normalized selectors (`layers`, `output_scopes`, temporal selectors, scenario/contrast selectors, SWAT selectors, tabular layout controls).
+- Layer inventory table:
+  - output layer id, source layer id(s), context/scope, row count, feature count, artifact member path.
+- Column and unit summary:
+  - selected columns and resolved unit mapping per output layer.
+- Dependency lineage summary:
+  - dependency fingerprint, catalog signature, and grouped dependency entries by role.
+- Warning summary:
+  - warning code/message table with layer/scope attachments when present.
+- Machine-readable contract pointer:
+  - explicit pointer that `manifest.json` is the canonical machine-readable provenance payload.
+
+README authoring rules:
+- Do not include absolute host filesystem paths.
+- Do not include secrets/tokens/auth headers.
+- Avoid profile replay payload embedding (`profile.yml` is not bundled).
+- Prefer concise tables and stable ordering to keep diffs/cache artifacts deterministic.
 
 Manifest minimum fields:
 - Resolved request payload and selector defaults.
@@ -650,7 +726,7 @@ Cutover is immediate with explicit legacy cleanup:
 - Standardize job downloads on `/export/features/job/{job_id}/download` (replace `/export/features/{job_id}/download`).
 - Add profile-aware published downloads on `/export/features/published/{profile}/download` backed by `export/features/published/index.json`.
 - Keep run-completion toggles functional while routing generation through `features_export` internals.
-- Remove artifact-bundled profile/provenance files (`profile.yml`, built-in profile files, `README.md`) from export bundles.
+- Keep artifact bundles profile-file-free (`profile.yml`, built-in profile files are excluded) while including generated artifact `README.md` plus `manifest.json`.
 - AgFields parity+ support ships without legacy compatibility shims (single-project assumption).
 
 Back-compat behavior for existing saved configs:
@@ -711,7 +787,8 @@ Back-compat behavior for existing saved configs:
 - SWAT default all-table export and include/exclude overrides work with profile-based geometry/non-spatial handling.
 - Export mod appears on Runs page and follows existing NoDb async controller interaction.
 - Run-page control exposes profile quick buttons (current set: built-ins `Prep details`, `Post Wepp`, `Temporal yearly`, plus virtual `Post Wepp (GPKG + GDB)`) and a profile-text load path for pasted profile content.
-- All artifact downloads are zip bundles and include export payload members plus `manifest.json` only.
+- All artifact downloads are zip bundles and include export payload members plus `manifest.json` and generated `README.md`.
+- Generated `README.md` includes standards-aligned metadata sections (summary, layer inventory, CRS/units, dependency lineage, warnings, and manifest pointer).
 - Download routes are standardized to `/export/features/job/{job_id}/download` and `/export/features/published/{profile}/download`.
 - `export/features/published/index.json` is authoritative for published profile download resolution (`prep-wepp`, `prep-wepp-geodatabase`, `prep-details`).
 - Regression tests cover payload shape, selector validation, scope behavior, cache hit flow, and legacy cutover.
@@ -880,6 +957,14 @@ WP-9: Service quality compliance closure and strictness coverage completion (pla
 - Contract clarification: refactor does not change external submit/jobinfo/download contracts; service API behavior remains stable while orchestration internals are decomposed.
 - Deliverable: reduced service orchestration complexity, closed medium QA findings, and preserved baseline run-path parity (`66/27` on `clogging-starch/disturbed9002-wbt-mofe`).
 
+WP-10: Standards-aligned artifact `README.md` generation and zip plumbing (planned 2026-03-29)
+- Status: planned via `docs/work-packages/20260329_features_export_artifact_readme_metadata/`.
+- Scope: generate deterministic, standards-aligned artifact `README.md` from resolved manifest/catalog/request metadata and package it into every features-export zip artifact.
+- Contract clarification: `manifest.json` remains canonical for machine-readable consumers; `README.md` is a human-readable derivative and must not diverge from manifest values.
+- Contract clarification: artifact bundles exclude profile files (`profile.yml`, built-in profile files) while including generated `README.md` and `manifest.json`.
+- Contract clarification: README generation must be deterministic and safe (no absolute paths/secrets), and cache-hit behavior must reuse the cached artifact README.
+- Deliverable: end-to-end README generation helper + service packaging integration + regression coverage + documentation/work-package closure artifacts.
+
 ### 14.2 Dependency Order And Parallelism
 - WP-1 depends on completed WP-0 Unitizer APIs.
 - WP-2 depends on WP-1 outputs.
@@ -889,7 +974,8 @@ WP-9: Service quality compliance closure and strictness coverage completion (pla
 - WP-7 depends on WP-4/WP-5 behavior and may revise portions of both.
 - WP-8 depends on WP-7 outputs and supersedes WP-7 merge-path assumptions.
 - WP-9 depends on WP-8 internals and closes remaining service-quality and strictness-coverage gaps.
-- WP-6 final cutover validation follows WP-8.
+- WP-10 depends on WP-9 baseline service contracts and updates artifact packaging/docs contracts.
+- WP-6 final cutover validation follows WP-10.
 
 ### 14.3 Keep-It-Organized Rules
 - Keep planner and validation logic pure and side-effect free.
