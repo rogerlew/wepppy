@@ -522,7 +522,7 @@ Runs page integration:
 - Add `Export` to the Mods list.
 - Implement a NoDb controller UI using established async pattern.
 - Add top-of-control profile actions:
-  - `Load Export Profile` quick actions: `Prep details` and `Post Wepp`.
+  - `Load Export Profile` quick actions are populated from built-in profile files discovered via `load_builtin_profiles()` (current built-ins: `Prep details`, `Post Wepp`, `Temporal yearly`).
   - `Specify Export from Profile` text area + `Load profile` action.
   - `Clear selection` remains available as a separate action.
 - `Post Wepp` is the default quick profile and replaces the legacy `Load Defaults` button behavior.
@@ -665,7 +665,7 @@ Back-compat behavior for existing saved configs:
 - Mixed temporal requests have deterministic partial-export behavior and warning semantics.
 - SWAT default all-table export and include/exclude overrides work with profile-based geometry/non-spatial handling.
 - Export mod appears on Runs page and follows existing NoDb async controller interaction.
-- Run-page control exposes quick profile buttons (`Prep details`, `Post Wepp`) and a profile-text load path for pasted `profile.yml` content.
+- Run-page control exposes built-in profile quick buttons (current set: `Prep details`, `Post Wepp`, `Temporal yearly`) and a profile-text load path for pasted `profile.yml` content.
 - All artifact downloads are zip bundles and include `manifest.json`, `profile.yml`, built-in profile files, and provenance `README.md`.
 - Regression tests cover payload shape, selector validation, scope behavior, cache hit flow, and legacy cutover.
 
@@ -806,7 +806,7 @@ WP-7: Reconciliation pass for WEPP naming, temporal controls, and consolidated l
 - Contract clarification: base and Omni WEPP outputs are consolidated to up to two geometry-carrier layers per scope with descriptive run/context layer naming.
 - Contract clarification: control layout is hierarchy-first, removes search/filter strip, hides unavailable families, and receives websocket-driven discovery updates.
 - Contract clarification: geometryless format tokens `parquet` and `csv` are added as first-class single-layer tabular exports that drop geometry while keeping required identity/join columns.
-- Contract clarification: profile-based defaults are first-class (`post-wepp.yml`, `prep-details.yml`) and replace the legacy defaults/prep-details split behavior.
+- Contract clarification: profile-based defaults are first-class (`post-wepp.yml`, `prep-details.yml`, `temporal-yearly.yml`) and replace the legacy defaults/prep-details split behavior.
 - Deliverable: reconciled backend/UI contract with regression and performance validation coverage.
 
 WP-8: Key-first carrier materialization rewrite and module maintainability refactor (planned 2026-03-27)
