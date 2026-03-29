@@ -293,11 +293,11 @@ def test_materialize_carrier_layer_core_filters_event_sources_by_selected_return
     assert result.frame["runoff_volume_m3_rp2"].tolist() == [200.0]
 
 
-def test_materialize_carrier_layer_core_return_period_selector_rejects_rank_only_lookup(
+def test_materialize_carrier_layer_core_maps_requested_return_period_to_nearest_available_interval(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    request_plan = _event_request_plan(selector="return_period", return_periods=(2.0,))
+    request_plan = _event_request_plan(selector="return_period", return_periods=(5.0,))
     layer = _event_layer_plan()
     required_source = DiscoveredSourceFrame(
         source_id="wepp_return_period_events",
@@ -307,6 +307,7 @@ def test_materialize_carrier_layer_core_return_period_selector_rejects_rank_only
             {
                 "event_id": [10, 11, 12],
                 "topaz_id": [1, 1, 1],
+                "calendar_year": [2015, 2015, 2015],
                 "runoff_volume_m3": [100.0, 200.0, 300.0],
             }
         ),
@@ -319,10 +320,10 @@ def test_materialize_carrier_layer_core_return_period_selector_rejects_rank_only
         dataframe=pd.DataFrame(
             {
                 "event_id": [10, 11, 12],
-                "rank": [1, 2, 10],
+                "return_period": [1, 2, 10],
             }
         ),
-        units_by_column={"rank": "non-unitized"},
+        units_by_column={"return_period": "non-unitized"},
     )
     monkeypatch.setattr(
         materializer,
@@ -335,17 +336,90 @@ def test_materialize_carrier_layer_core_return_period_selector_rejects_rank_only
         lambda **kwargs: (("runoff_volume_m3",), {"runoff_volume_m3": "m^3"}),
     )
 
-    with pytest.raises(MaterializationContractError) as exc_info:
-        materializer.materialize_carrier_layer_core(
-            wd=tmp_path,
-            layer=layer,
-            catalog_layer_raw={"join": {"primary_key": "topaz_id", "fallback_keys": ("TopazID",)}},
-            request_plan=request_plan,
-            dependency_entries=(),
-            consolidated_join_key_column=JOIN_KEY_COLUMN,
-        )
+    result = materializer.materialize_carrier_layer_core(
+        wd=tmp_path,
+        layer=layer,
+        catalog_layer_raw={"join": {"primary_key": "topaz_id", "fallback_keys": ("TopazID",)}},
+        request_plan=request_plan,
+        dependency_entries=(),
+        consolidated_join_key_column=JOIN_KEY_COLUMN,
+    )
 
-    assert "selector_columns_missing" in str(exc_info.value.details)
+    assert len(result.frame.index) == 1
+    assert result.frame[JOIN_KEY_COLUMN].tolist() == ["1"]
+    assert result.frame["runoff_volume_m3_rp5"].tolist() == [300.0]
+
+
+def test_materialize_carrier_layer_core_uses_canonical_t_stat_for_rank_lookup_not_rank_number(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request_plan = _event_request_plan(selector="return_period", return_periods=(5.0,))
+    layer = _event_layer_plan()
+    required_source = DiscoveredSourceFrame(
+        source_id="wepp_return_period_events",
+        source_kind="parquet",
+        required=True,
+        dataframe=pd.DataFrame(
+            {
+                "event_id": [10, 11, 12],
+                "topaz_id": [1, 1, 1],
+                "calendar_year": [2015, 2015, 2015],
+                "runoff_volume_m3": [100.0, 200.0, 300.0],
+            }
+        ),
+        units_by_column={"runoff_volume_m3": "m^3"},
+    )
+    optional_ranks = DiscoveredSourceFrame(
+        source_id="wepp_return_period_ranks",
+        source_kind="parquet",
+        required=False,
+        dataframe=pd.DataFrame(
+            {
+                "measure_id": ["runoff_depth", "runoff_depth", "runoff_depth"],
+                "topaz_id": [1, 1, 1],
+                "event_id": [10, 11, 12],
+                "rank": [5, 10, 50],
+            }
+        ),
+        units_by_column={"rank": "non-unitized"},
+    )
+    optional_years_hint = DiscoveredSourceFrame(
+        source_id="wepp_return_period_events_years_hint",
+        source_kind="parquet",
+        required=False,
+        dataframe=pd.DataFrame(
+            {
+                "calendar_year": list(range(2000, 2050)),
+            }
+        ),
+        units_by_column={},
+    )
+    monkeypatch.setattr(
+        materializer,
+        "discover_layer_sources",
+        lambda **kwargs: ((required_source, optional_ranks, optional_years_hint), ()),
+    )
+    monkeypatch.setattr(
+        materializer,
+        "resolve_selected_columns",
+        lambda **kwargs: (("runoff_volume_m3",), {"runoff_volume_m3": "m^3"}),
+    )
+
+    result = materializer.materialize_carrier_layer_core(
+        wd=tmp_path,
+        layer=layer,
+        catalog_layer_raw={"join": {"primary_key": "topaz_id", "fallback_keys": ("TopazID",)}},
+        request_plan=request_plan,
+        dependency_entries=(),
+        consolidated_join_key_column=JOIN_KEY_COLUMN,
+    )
+
+    assert len(result.frame.index) == 1
+    assert result.frame[JOIN_KEY_COLUMN].tolist() == ["1"]
+    # CTA+Gringorten maps a 5-year recurrence to rank 10 for this synthetic rank table;
+    # this confirms we do not treat request value "5" as rank 5.
+    assert result.frame["runoff_volume_m3_rp5"].tolist() == [200.0]
 
 
 def test_materialize_carrier_layer_core_allows_non_unique_keys_when_join_contract_opt_in(

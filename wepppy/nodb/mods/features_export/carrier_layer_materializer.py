@@ -12,7 +12,7 @@ from .column_selection import resolve_selected_columns
 from .contracts import ExportWarning, NormalizedTemporalEvent, ResolvedExportPlan, ResolvedLayerPlan
 from .discovery import DiscoveredSourceFrame, discover_layer_sources
 from .duckdb_materializer import materialize_layer_attributes
-from .join_planner import MaterializationContractError
+from .join_planner import MaterializationContractError, canonical_join_value
 from .temporal_wide_materializer import materialize_temporal_layer_wide
 
 
@@ -32,6 +32,10 @@ class _EventSelectorMaskResult:
 
     mask: pd.Series | None
     derived_return_period: pd.Series | None = None
+
+
+_CANONICAL_CTA_DAYS_PER_YEAR = 365.25
+_CANONICAL_GRINGORTEN_RANK_OFFSET = 0.44
 
 
 def materialize_carrier_layer_core(
@@ -371,24 +375,45 @@ def _return_period_selector_mask(
             "recurrence_interval_years",
         ),
     )
-    selected = {float(value) for value in selected_return_periods}
+    selected = [float(value) for value in selected_return_periods]
     if period_column is not None:
         values = pd.to_numeric(frame[period_column], errors="coerce")
+        interval_matches = _resolve_return_period_interval_matches(
+            selected_periods=selected,
+            available_periods=values.tolist(),
+        )
+        if interval_matches:
+            available_to_requested = _available_period_to_requested_map(interval_matches)
+            available_tokens = values.map(canonical_join_value)
+            requested_periods = available_tokens.map(
+                lambda token: available_to_requested.get(token)
+            )
+            mask = requested_periods.notna().fillna(False)
+        else:
+            requested_periods = pd.Series([None] * len(frame.index), index=frame.index)
+            mask = pd.Series([False] * len(frame.index), index=frame.index, dtype=bool)
         return _EventSelectorMaskResult(
-            mask=values.isin(selected).fillna(False),
-            derived_return_period=values,
+            mask=mask,
+            derived_return_period=requested_periods,
         )
 
     event_id_column = _first_matching_column(lookup, ("event_id", "eventid"))
     if event_id_column is None or not return_period_lookup:
         return _EventSelectorMaskResult(mask=None)
 
-    preferred_order = [float(value) for value in selected_return_periods]
+    preferred_matches = _resolve_return_period_interval_matches(
+        selected_periods=selected,
+        available_periods=_lookup_available_return_periods(return_period_lookup),
+    )
+    if not preferred_matches:
+        return _EventSelectorMaskResult(
+            mask=pd.Series([False] * len(frame.index), index=frame.index, dtype=bool),
+        )
     event_tokens = frame[event_id_column].map(_canonical_event_id_token)
     derived_periods = event_tokens.map(
         lambda token: _preferred_selected_return_period(
             event_token=token,
-            selected_periods=preferred_order,
+            interval_matches=preferred_matches,
             return_period_lookup=return_period_lookup,
         )
     )
@@ -402,6 +427,7 @@ def _build_event_return_period_lookup(
     sources: cabc.Sequence[DiscoveredSourceFrame],
 ) -> dict[str, frozenset[float]]:
     by_event_id: dict[str, set[float]] = {}
+    simulation_years = _estimate_simulation_years(sources)
     for source in sources:
         frame = source.dataframe
         lookup = _normalized_column_lookup(frame.columns)
@@ -415,7 +441,8 @@ def _build_event_return_period_lookup(
                 "recurrence_interval_years",
             ),
         )
-        if event_id_column is None or period_column is None:
+        rank_column = _first_matching_column(lookup, ("rank", "event_rank", "event_rank_index"))
+        if event_id_column is None or (period_column is None and rank_column is None):
             continue
 
         measure_id_column = _first_matching_column(lookup, ("measure_id", "measureid", "measure"))
@@ -428,7 +455,15 @@ def _build_event_return_period_lookup(
                     continue
 
         event_tokens = frame[event_id_column].map(_canonical_event_id_token)
-        period_values = pd.to_numeric(frame[period_column], errors="coerce")
+        period_values = _resolve_source_return_period_values(
+            frame=frame,
+            lookup=lookup,
+            period_column=period_column,
+            rank_column=rank_column,
+            simulation_years=simulation_years,
+        )
+        if period_values is None:
+            continue
         for event_token, period_value in zip(event_tokens.tolist(), period_values.tolist()):
             if event_token is None or pd.isna(period_value):
                 continue
@@ -463,7 +498,7 @@ def _canonical_event_id_token(value: object) -> str | None:
 def _preferred_selected_return_period(
     *,
     event_token: str | None,
-    selected_periods: cabc.Sequence[float],
+    interval_matches: cabc.Sequence[tuple[float, float]],
     return_period_lookup: cabc.Mapping[str, frozenset[float]],
 ) -> float | None:
     if event_token is None:
@@ -471,10 +506,126 @@ def _preferred_selected_return_period(
     available = return_period_lookup.get(event_token)
     if not available:
         return None
-    for period in selected_periods:
-        if period in available:
-            return period
+    available_tokens = {
+        canonical_join_value(value)
+        for value in available
+        if canonical_join_value(value) is not None
+    }
+    for requested_period, available_period in interval_matches:
+        available_token = canonical_join_value(available_period)
+        if available_token and available_token in available_tokens:
+            return requested_period
     return None
+
+
+def _resolve_source_return_period_values(
+    *,
+    frame: pd.DataFrame,
+    lookup: cabc.Mapping[str, str],
+    period_column: str | None,
+    rank_column: str | None,
+    simulation_years: float | None,
+) -> pd.Series | None:
+    if period_column is not None:
+        return pd.to_numeric(frame[period_column], errors="coerce")
+
+    if rank_column is None or simulation_years is None:
+        return None
+
+    rank_values = pd.to_numeric(frame[rank_column], errors="coerce")
+    if rank_values.empty:
+        return None
+
+    daily_count = (simulation_years * _CANONICAL_CTA_DAYS_PER_YEAR) + 1.0
+    period_values = (
+        daily_count
+        / (rank_values - _CANONICAL_GRINGORTEN_RANK_OFFSET)
+    ) / _CANONICAL_CTA_DAYS_PER_YEAR
+    valid_mask = rank_values.gt(_CANONICAL_GRINGORTEN_RANK_OFFSET)
+    return period_values.where(valid_mask)
+
+
+def _lookup_available_return_periods(
+    return_period_lookup: cabc.Mapping[str, frozenset[float]],
+) -> tuple[float, ...]:
+    available: set[float] = set()
+    for periods in return_period_lookup.values():
+        available.update(float(value) for value in periods)
+    return tuple(sorted(available))
+
+
+def _resolve_return_period_interval_matches(
+    *,
+    selected_periods: cabc.Sequence[float],
+    available_periods: cabc.Iterable[float],
+) -> tuple[tuple[float, float], ...]:
+    available = sorted(
+        {
+            float(value)
+            for value in available_periods
+            if not pd.isna(value) and float(value) > 0
+        }
+    )
+    if not available:
+        return ()
+
+    used_available: set[str] = set()
+    matches: list[tuple[float, float]] = []
+    for requested in selected_periods:
+        if pd.isna(requested):
+            continue
+        requested_value = float(requested)
+        candidate = next(
+            (
+                value
+                for value in available
+                if value >= requested_value
+                and canonical_join_value(value) not in used_available
+            ),
+            None,
+        )
+        if candidate is None:
+            continue
+        candidate_token = canonical_join_value(candidate)
+        if candidate_token is None:
+            continue
+        used_available.add(candidate_token)
+        matches.append((requested_value, candidate))
+    return tuple(matches)
+
+
+def _available_period_to_requested_map(
+    interval_matches: cabc.Sequence[tuple[float, float]],
+) -> dict[str, float]:
+    mapping: dict[str, float] = {}
+    for requested_period, available_period in interval_matches:
+        available_token = canonical_join_value(available_period)
+        if not available_token:
+            continue
+        mapping[available_token] = float(requested_period)
+    return mapping
+
+
+def _estimate_simulation_years(
+    sources: cabc.Sequence[DiscoveredSourceFrame],
+) -> float | None:
+    best_year_count = 0
+    for source in sources:
+        frame = source.dataframe
+        lookup = _normalized_column_lookup(frame.columns)
+        year_column = _first_matching_column(lookup, ("calendar_year", "year"))
+        if year_column is None:
+            continue
+        year_values = pd.to_numeric(frame[year_column], errors="coerce").dropna()
+        if year_values.empty:
+            continue
+        year_count = len(set(int(value) for value in year_values.tolist()))
+        if year_count > best_year_count:
+            best_year_count = year_count
+
+    if best_year_count <= 0:
+        return None
+    return float(best_year_count)
 
 
 def _is_return_period_lookup_only_source(source: DiscoveredSourceFrame) -> bool:

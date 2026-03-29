@@ -477,12 +477,14 @@ Global temporal control model:
 
 `event` rules:
 - `selector=date`: explicit date set.
-- `selector=return_period`: explicit return-period intervals.
+- `selector=return_period`: explicit requested recurrence intervals (years), never raw rank values.
 - Mixed date and return-period selectors in one request are invalid.
 - Event selector filtering is applied to discovered source frames before key-first uniqueness checks.
 - Required sources missing selector-compatible columns must fail with `materialization_error`.
 - Required sources with selector-compatible columns but zero matched rows remain materialized as empty event cores; export succeeds with canonical geometry rows and null event metrics.
 - Optional sources that cannot satisfy the active event selector are skipped.
+- Return-period filtering uses nearest available Weibull `T` where `T >= requested_interval` (one available interval may satisfy at most one requested interval).
+- Rank-only lookup sources derive `T` using the canonical WEPP return-period defaults (`method=cta`, Gringorten correction enabled) before applying interval matching.
 - Event materialization pivots selected measures to selector-token-suffixed columns (for example `q_2015_01_16_mm` or `runoff_rp2_mm`) so output geometry remains normalized to canonical carrier feature counts.
 - If event slices contain duplicate OFE rows, the terminal OFE (`max(ofe_id)`) is selected as the deterministic per-slice representative before pivoting.
 - Remaining conflicting duplicates for the same `{key, event_token, measure}` slice are contract failures (`materialization_error`).
