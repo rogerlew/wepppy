@@ -46,13 +46,11 @@ def parse_args() -> argparse.Namespace:
         nargs="+",
         choices=[
             "wepppy",
-            "wepppy2",
             "peridot",
             "wepppyo3",
             "fswepp2",
-            "markdown-extract",
+            "markdown-toolkit",
             "rosetta",
-            "WEPPcloudR",
             "wepp-forest",
             "wepp-forest-revegetation",
             "weppcloud-wbt",
@@ -99,7 +97,6 @@ def build_project_configs(base_dir: Path) -> Mapping[str, ProjectConfig]:
             base_dir / "wepppy",
             cloc_args=(f"--not-match-f={VENDOR_ASSET_REGEX}",),
         ),
-        "wepppy2": ProjectConfig("wepppy2", base_dir / "wepppy2"),
         "peridot": ProjectConfig("peridot", base_dir / "peridot"),
         "wepppyo3": ProjectConfig("wepppyo3", base_dir / "wepppyo3"),
         "fswepp2": ProjectConfig(
@@ -107,11 +104,10 @@ def build_project_configs(base_dir: Path) -> Mapping[str, ProjectConfig]:
             base_dir / "fswepp2",
             cloc_args=(f"--not-match-f={VENDOR_ASSET_REGEX}",),
         ),
-        "markdown-extract": ProjectConfig(
-            "markdown-extract", base_dir / "markdown-extract"
+        "markdown-toolkit": ProjectConfig(
+            "markdown-toolkit", base_dir / "markdown-toolkit"
         ),
         "rosetta": ProjectConfig("rosetta", base_dir / "rosetta"),
-        "WEPPcloudR": ProjectConfig("WEPPcloudR", base_dir / "WEPPcloudR"),
         "wepp-forest": ProjectConfig("wepp-forest", base_dir / "wepp-forest"),
         "wepp-forest-revegetation": ProjectConfig(
             "wepp-forest-revegetation", base_dir / "wepp-forest-revegetation"
