@@ -16,15 +16,6 @@
 {% endblock %}
 
 {% block head_extras %}
-<script>
-  /* Apply stored theme immediately to prevent FOUC */
-  (function() {
-    try {
-      var theme = localStorage.getItem('wc-theme');
-      if (theme) document.documentElement.setAttribute('data-theme', theme);
-    } catch (e) {}
-  })();
-</script>
 <style>
   /* GL Dashboard Layout - uses theme system CSS variables */
   .gl-layer-list {
@@ -1014,73 +1005,6 @@
 
 {% block script_extras %}
   <script>
-    /* Theme Switcher Controller */
-    (function () {
-      var STORAGE_KEY = "wc-theme";
-      var SELECTOR = "[data-theme-select]";
-      var root = document.documentElement;
-
-      function applyTheme(theme) {
-        if (!theme || theme === "default") {
-          root.removeAttribute("data-theme");
-        } else {
-          root.setAttribute("data-theme", theme);
-        }
-      }
-
-      function storeTheme(theme) {
-        try {
-          if (!theme || theme === "default") {
-            localStorage.removeItem(STORAGE_KEY);
-          } else {
-            localStorage.setItem(STORAGE_KEY, theme);
-          }
-        } catch (e) {}
-      }
-
-      function syncSelects(theme) {
-        var value = theme && theme !== "" ? theme : "default";
-        document.querySelectorAll(SELECTOR).forEach(function (select) {
-          if (select.value !== value) select.value = value;
-        });
-      }
-
-      function listAvailableThemes() {
-        var values = ["default"];
-        document.querySelectorAll(SELECTOR).forEach(function (select) {
-          var options = select && select.options ? select.options : [];
-          for (var i = 0; i < options.length; i += 1) {
-            var value = options[i].value || "default";
-            if (values.indexOf(value) === -1) values.push(value);
-          }
-        });
-        return values;
-      }
-
-      function handleChange(event) {
-        var select = event.target;
-        if (!select || !select.matches(SELECTOR)) return;
-        var theme = select.value;
-        applyTheme(theme);
-        storeTheme(theme);
-        syncSelects(theme);
-      }
-
-      // Initialize
-      var stored = null;
-      try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
-      var initial = stored || root.getAttribute("data-theme") || "default";
-      var available = listAvailableThemes();
-      if (available.indexOf(initial) === -1) {
-        initial = "default";
-        storeTheme(initial);
-      }
-      applyTheme(initial);
-      syncSelects(initial);
-      document.addEventListener("change", handleChange, { passive: true });
-    })();
-  </script>
- <script>
     window.GL_DASHBOARD_CONTEXT = {{ {
       "runid": runid,
       "config": config,

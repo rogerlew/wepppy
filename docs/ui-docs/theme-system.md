@@ -1,5 +1,5 @@
 # VS Code Theme Integration – System Documentation
-> **Status:** ✅ Production · **Last Updated:** 2025-12-22  
+> **Status:** ✅ Production · **Last Updated:** 2026-03-30  
 > **Work Package:** [`docs/work-packages/20251027_vscode_theme_integration/`](/workdir/wepppy/docs/work-packages/20251027_vscode_theme_integration/)  
 > **Audience:** UI contributors, operations engineers, stakeholders evaluating theme additions
 
@@ -19,7 +19,7 @@ The weppcloud theme system reuses curated VS Code themes to populate CSS custom 
 ### User Experience
 - Theme picker lives in the header; selections apply instantly and persist via `localStorage`.
 - Default palette is the no-attribute state in `ui-foundation.css`; themes override variables in `all-themes.css`.
-- FOUC prevention is only in `gl_dashboard.htm` today; other pages rely on `theme.js` after DOMContentLoaded.
+- FOUC prevention is applied in `base_pure.htm` via an inline `wc-theme` bootstrap before CSS loads, so most theme-aware pages paint with the persisted theme.
 
 ## Architecture
 
@@ -73,7 +73,7 @@ Key tooling (`wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py`):
 - `controllers_js/theme.js` reads/writes `wc-theme`, applies `data-theme`, and dispatches `wc-theme:change`.
 - Themes are derived from `<select data-theme-select>` options; selects are kept in sync.
 - Default theme removes `data-theme` and clears `localStorage`.
-- `gl_dashboard.htm` sets the theme before paint; other templates do not.
+- `base_pure.htm` applies the stored theme before stylesheet evaluation for pages that inherit the base template.
 
 ```javascript
 (function (global) {
@@ -199,7 +199,7 @@ wepppy/weppcloud/
 - **Theme renders incorrectly:** Re-run the converter with `--validate-only` to confirm tokens; add per-theme overrides for missing or unsuitable values.
 - **Theme missing from dropdown:** Ensure `_theme_switcher.htm` (header) and `THEME_OPTIONS` (Theme Lab) include the key as intended, then rebuild `all-themes.css`.
 - **Contrast warnings:** Check `themes-contrast.md` (converter) and `static-src/test-results/theme-metrics/` (Playwright); patch `theme-mapping.json` overrides and regenerate the CSS.
-- **FOUC on first load:** Only `gl_dashboard.htm` sets `data-theme` before paint. Add a small inline boot script to `base_pure.htm` if you need this everywhere.
+- **FOUC on first load:** `base_pure.htm` now applies persisted theme before paint. If you add a template that does not inherit `base_pure.htm`, add an equivalent inline boot script in its `<head>`.
 - **Print outputs unreadable:** No print-specific overrides exist today; add `@media print` rules in `ui-foundation.css` if needed.
 
 ## Zero-Aesthetic Alignment
