@@ -1,0 +1,11 @@
+<header class="wc-header">
+  <div class="wc-header__inner wc-container">
+    <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
+    <div class="wc-header__nav">
+      <a class="wc-link" href="{{ url_for('usersum.usersum_index') }}">UserSummary Docs</a>
+    </div>
+    <div class="wc-header__tools">
+      {% include 'header/_theme_switcher.htm' %}
+    </div>
+  </div>
+</header>

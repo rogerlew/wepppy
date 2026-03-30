@@ -1,5 +1,5 @@
 {% extends "usersum/layout.j2" %}
-{% block body %}
+{% block body_content %}
 <p><a href="{{ url_for('usersum.usersum_index') }}">&larr; Back to usersum index</a></p>
 <h1>{{ title }}</h1>
 {{ content_html|safe }}

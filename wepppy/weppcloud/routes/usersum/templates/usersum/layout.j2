@@ -1,40 +1,40 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title or 'Usersum' }}</title>
-    <link rel="stylesheet" href="{{ static_url('css/ui-foundation.css') }}">
-    <link rel="stylesheet" href="{{ static_url('css/themes/all-themes.css') }}">
-    <link rel="stylesheet" href="{{ static_url('css/markdown-theme.css') }}">
-    <script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
-    <style>
-      body {
-        margin: 0;
-        background: var(--wc-color-page);
-        color: var(--wc-color-text);
-        font-family: var(--wc-font-sans);
-      }
+{% extends "base_pure.htm" %}
 
-      .markdown-body {
-        box-sizing: border-box;
-        min-width: 200px;
-        width: 100%;
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 45px;
-      }
+{% block title %}{{ title or 'WEPPcloud UserSummary Documentation' }}{% endblock %}
 
-      @media (max-width: 767.98px) {
-        .markdown-body {
-          padding: 15px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <article class="markdown-body">
-      {% block body %}{% endblock %}
-    </article>
-  </body>
-</html>
+{% block site_header %}
+  {% include "usersum/header.htm" %}
+{% endblock %}
+
+{% block head_extras %}
+<link rel="stylesheet" href="{{ static_url('css/markdown-theme.css') }}">
+<style>
+  .wc-usersum-shell {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .wc-usersum-shell .markdown-body {
+    box-sizing: border-box;
+    min-width: 200px;
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 45px;
+  }
+
+  @media (max-width: 767.98px) {
+    .wc-usersum-shell .markdown-body {
+      padding: 15px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block body_container_class %}wc-container wc-usersum-shell{% endblock %}
+
+{% block body %}
+<article class="markdown-body">
+  {% block body_content %}{% endblock %}
+</article>
+{% endblock %}
