@@ -1021,10 +1021,19 @@ export function AppLight() {
             <h4 className="font-semibold text-slate-800 mb-2">Regional Data Documentation</h4>
             <div className="space-y-1">
               {[
-                { region: 'United States', url: 'https://doc.wepp.cloud/us-data.html' },
-                { region: 'Europe', url: 'https://doc.wepp.cloud/eu-data.html' },
-                { region: 'Australia', url: 'https://doc.wepp.cloud/au-data.html' },
-                { region: 'Earth', url: 'https://doc.wepp.cloud/earth-data.html' },
+                {
+                  region: 'United States',
+                  url: '/weppcloud/usersum/view/weppcloud/data-attribution.md#united-states',
+                },
+                { region: 'Europe', url: '/weppcloud/usersum/view/weppcloud/data-attribution.md#europe' },
+                {
+                  region: 'Australia',
+                  url: '/weppcloud/usersum/view/weppcloud/data-attribution.md#australia',
+                },
+                {
+                  region: 'Earth',
+                  url: '/weppcloud/usersum/view/weppcloud/data-attribution.md#global-and-earth-workflows',
+                },
               ].map((item) => (
                 <div key={item.region} className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-slate-400" aria-hidden="true" />
@@ -1048,18 +1057,29 @@ export function AppLight() {
           className="mx-auto max-w-4xl"
         >
           <h2 className="text-lg font-semibold text-slate-800 mb-4">Legal Disclaimer</h2>
-          <div className="p-6 border border-gray-200 bg-gray-50">
+          <div className="space-y-4 p-6 border border-gray-200 bg-gray-50">
             <p className="text-sm leading-relaxed text-slate-600">
-              THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-              EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-              OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
-              SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-              INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-              TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-              BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-              CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
-              WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-              DAMAGE.
+              WEPPcloud simulation outputs are estimates derived from mathematical models and
+              publicly available geospatial data. They are not a substitute for professional
+              judgment or site-specific field assessment.
+            </p>
+            <p className="text-sm leading-relaxed text-slate-600">
+              THIS SOFTWARE AND ITS OUTPUTS ARE PROVIDED &ldquo;AS IS&rdquo; WITHOUT WARRANTY OF
+              ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+              MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT
+              SHALL THE UNIVERSITY OF IDAHO, USDA FOREST SERVICE, OR ANY CONTRIBUTING INSTITUTION,
+              DEVELOPER, OR CONTRIBUTOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+              EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA,
+              PROPERTY DAMAGE, ENVIRONMENTAL HARM, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR
+              FINANCIAL LOSS) ARISING FROM THE USE OF OR RELIANCE ON WEPPCLOUD OR ITS OUTPUTS,
+              HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+              OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE), EVEN IF ADVISED OF THE POSSIBILITY OF
+              SUCH DAMAGE.
+            </p>
+            <p className="text-sm leading-relaxed text-slate-600">
+              By using WEPPcloud, you acknowledge that simulation outputs are approximations
+              subject to uncertainty and agree that you bear sole responsibility for any decisions,
+              actions, or consequences arising from their use.
             </p>
           </div>
         </motion.div>
