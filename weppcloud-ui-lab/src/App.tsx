@@ -535,7 +535,7 @@ const mapSubtitle =
 
   const navItems = useMemo(
     () => [
-      { label: 'Docs', href: 'https://doc.wepp.cloud' },
+      { label: 'Docs', href: '/weppcloud/usersum/' },
       { label: 'Research', href: 'https://forest.moscowfsl.wsu.edu/library/', external: true },
       { label: 'Interfaces', href: '/weppcloud/interfaces/' },
       {

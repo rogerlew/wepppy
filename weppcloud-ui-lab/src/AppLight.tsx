@@ -517,7 +517,7 @@ export function AppLight() {
   const navItems = useMemo(
     () => [
       { label: 'Interfaces', href: '/weppcloud/interfaces/', primary: true },
-      { label: 'Docs', href: 'https://doc.wepp.cloud' },
+      { label: 'Docs', href: '/weppcloud/usersum/' },
       { label: 'Research', href: 'https://forest.moscowfsl.wsu.edu/library/', external: true },
       {
         label: isAuthenticated ? 'My Runs' : 'Login',

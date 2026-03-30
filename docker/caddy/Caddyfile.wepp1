@@ -247,3 +247,7 @@ wepp.cloud {
         }
     }
 }
+
+doc.wepp.cloud {
+    redir https://wepp.cloud/weppcloud/usersum/ permanent
+}

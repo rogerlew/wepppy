@@ -14,8 +14,6 @@ _BASE_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _BASE_DIR.parents[3]
 _DB_DIR = _BASE_DIR / 'db'
 _SPEC_DIR = _BASE_DIR / 'input-file-specifications'
-_DOCS_ROOT = _REPO_ROOT / 'docs'
-_DEV_NOTES_DIR = _DOCS_ROOT / 'dev-notes'
 _WEPPCLOUD_DIR = _BASE_DIR / 'weppcloud'
 
 _PARAM_HEADER_RE = re.compile(r'^#### `([^`]+)` —\s*(.+)$')
@@ -67,10 +65,6 @@ def usersum_index():
     if db_items:
         sections.append({'title': 'Parameter Databases', 'entries': db_items})
 
-    dev_items = _list_markdown(_DEV_NOTES_DIR, 'dev-notes')
-    if dev_items:
-        sections.append({'title': 'Developer Notes', 'entries': dev_items})
-
     spec_items = _list_markdown(_SPEC_DIR, 'input-file-specifications')
     if spec_items:
         sections.append({'title': 'Input File Specifications', 'entries': spec_items})
@@ -79,13 +73,12 @@ def usersum_index():
     if wc_items:
         sections.append({'title': 'WEPPcloud Guides', 'entries': wc_items})
 
-    return render_template('usersum/index.htm', title='Usersum Reference', sections=sections)
+    return render_template('usersum/index.htm', title='WEPPcloud UserSummary Documentation', sections=sections)
 
 
 def _resolve_markdown_path(category: str, filename: str) -> Path:
     allowed: Dict[str, Path] = {
         'db': _DB_DIR,
-        'dev-notes': _DEV_NOTES_DIR,
         'input-file-specifications': _SPEC_DIR,
         'weppcloud': _WEPPCLOUD_DIR,
     }

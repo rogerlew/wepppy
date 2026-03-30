@@ -1,13 +1,7 @@
 {% extends "usersum/layout.j2" %}
 {% block body %}
-<h1>WEPP Usersum Reference</h1>
-<p>The usersum catalog exposes markdown documentation from <code>input-file-specifications</code> and curated parameter databases under <code>db</code>. Use the links below to browse the original files or query them via the command bar using <code>usersum</code>.</p>
-<h2>Command Bar Usage</h2>
-<ul>
-  <li><code>usersum &lt;parameter&gt;</code> - show the concise description.</li>
-  <li><code>usersum &lt;parameter&gt; -e</code> - include extended details.</li>
-  <li><code>usersum -k &lt;keyword&gt;</code> - search for parameters matching the keyword.</li>
-</ul>
+<h1>WEPPcloud UserSummary Documentation</h1>
+<p>The usersum catalog exposes markdown documentation from <code>input-file-specifications</code> and curated parameter databases under <code>db</code>. Use the links below to browse the source documentation.</p>
 {% for section in sections %}
   <h2>{{ section.title }}</h2>
   <ul>
