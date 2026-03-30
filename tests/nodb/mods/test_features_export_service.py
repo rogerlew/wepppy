@@ -1524,6 +1524,44 @@ def test_materialize_temporal_layer_wide_yearly_pivots_measures_to_year_columns(
     assert reshaped.frame.loc[reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "2", "sediment_kg_yr2015"].iloc[0] == pytest.approx(9.5)
 
 
+def test_materialize_temporal_layer_wide_yearly_accepts_fire_year_column() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1", "2"],
+            "wepp_id": [1, 1, 2],
+            "fire_year": [2021, 2022, 2021],
+            "ash_transport_tonne_ha": [5.0, 7.0, 3.5],
+        }
+    )
+
+    reshaped = materialize_temporal_layer_wide(
+        frame=frame,
+        layer_id="ash.transport.hillslope_annuals",
+        temporal_mode="yearly",
+        selected_columns=("wepp_id", "fire_year", "ash_transport_tonne_ha"),
+        unit_mapping={
+            "wepp_id": "non-unitized",
+            "ash_transport_tonne_ha": "tonne/ha",
+        },
+        join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+        event_selector=None,
+    )
+
+    assert reshaped.selected_columns == (
+        "wepp_id",
+        "ash_transport_tonne_ha_yr2021",
+        "ash_transport_tonne_ha_yr2022",
+    )
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1",
+        "ash_transport_tonne_ha_yr2021",
+    ].iloc[0] == pytest.approx(5.0)
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1",
+        "ash_transport_tonne_ha_yr2022",
+    ].iloc[0] == pytest.approx(7.0)
+
+
 def test_materialize_temporal_layer_wide_yearly_sums_numeric_like_object_slices() -> None:
     frame = pd.DataFrame(
         {
@@ -1647,6 +1685,39 @@ def test_materialize_temporal_layer_wide_annual_average_means_selected_years() -
         "runoff_mm",
     ].iloc[0] == pytest.approx(5.0)
     assert "runoff_mm_yr2014" not in reshaped.frame.columns
+
+
+def test_materialize_temporal_layer_wide_annual_average_without_year_column_averages_rows() -> None:
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "1", "2"],
+            "wepp_id": [1, 1, 2],
+            "ash_transport_tonne_ha": [10.0, 14.0, 20.0],
+        }
+    )
+
+    reshaped = materialize_temporal_layer_wide(
+        frame=frame,
+        layer_id="ash.transport.hillslope_annuals",
+        temporal_mode="annual_average",
+        selected_columns=("wepp_id", "ash_transport_tonne_ha"),
+        unit_mapping={
+            "wepp_id": "non-unitized",
+            "ash_transport_tonne_ha": "tonne/ha",
+        },
+        join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
+        event_selector=None,
+    )
+
+    assert reshaped.selected_columns == ("wepp_id", "ash_transport_tonne_ha")
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "1",
+        "ash_transport_tonne_ha",
+    ].iloc[0] == pytest.approx(12.0)
+    assert reshaped.frame.loc[
+        reshaped.frame[service._CONSOLIDATED_JOIN_KEY_COLUMN] == "2",
+        "ash_transport_tonne_ha",
+    ].iloc[0] == pytest.approx(20.0)
 
 
 def test_materialize_temporal_layer_wide_annual_average_rejects_conflicting_non_numeric_year_values() -> None:

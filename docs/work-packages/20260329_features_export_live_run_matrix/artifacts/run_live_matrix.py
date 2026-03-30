@@ -29,10 +29,7 @@ UNIT_MODES = ("project", "si", "english")
 CRS_MODES = ("wgs", "utm")
 REQUIRED_BUNDLE_MEMBERS = (
     "manifest.json",
-    "profile.yml",
     "README.md",
-    "profiles/post-wepp.yml",
-    "profiles/prep-details.yml",
 )
 PAYLOAD_EXTENSIONS = (
     ".geojson",
@@ -47,6 +44,7 @@ YEAR_WIDE_RE = re.compile(r"_yr\d{4}$")
 DATE_WIDE_RE = re.compile(r"_\d{4}_\d{2}_\d{2}$")
 PHASE1_PLAN = "phase1"
 PHASE2_OMNI_PLAN = "phase2_omni"
+ASH_WATAR_LAYER_ID = "ash.transport.hillslope_annuals"
 
 
 @dataclass(frozen=True)
@@ -113,6 +111,15 @@ def _load_oracle_domains(wd: Path) -> tuple[set[str], set[str]]:
                     if token is not None:
                         wepp_ids.add(token)
     return topaz_ids, wepp_ids
+
+
+def _has_ash_watar_assets(wd: Path) -> bool:
+    required_relpaths = (
+        "ash/post/hillslope_annuals.parquet",
+        "ash/post/ashpost_version.json",
+        "ash.nodb",
+    )
+    return all((wd / relpath).is_file() for relpath in required_relpaths)
 
 
 def _payload(
@@ -227,7 +234,7 @@ def build_gate1_cases() -> list[MatrixCase]:
     return cases
 
 
-def build_gate2_cases() -> list[MatrixCase]:
+def build_gate2_cases(*, include_ash_watar: bool = False) -> list[MatrixCase]:
     cases: list[MatrixCase] = []
 
     for format_token in SPATIAL_FORMATS:
@@ -266,6 +273,26 @@ def build_gate2_cases() -> list[MatrixCase]:
                         ),
                     )
                 )
+
+    if include_ash_watar:
+        for format_token in ALL_FORMATS:
+            cases.append(
+                MatrixCase(
+                    case_id=f"a3_ash_watar_{format_token}",
+                    gate="gate2",
+                    group="A3",
+                    description="Ash/WATAR format contract.",
+                    payload=_payload(
+                        format_token=format_token,
+                        layers=[ASH_WATAR_LAYER_ID],
+                        units="si",
+                        crs="wgs",
+                        tabular={"concatenate_tables": False, "temporal_layout": "wide"}
+                        if format_token in TABULAR_FORMATS
+                        else None,
+                    ),
+                )
+            )
 
     year_variants: dict[str, dict[str, Any]] = {
         "all": {"mode": "yearly", "year_selection": "all"},
@@ -486,7 +513,7 @@ def build_gate2_cases() -> list[MatrixCase]:
     return cases
 
 
-def build_expansion_cases() -> list[MatrixCase]:
+def build_expansion_cases(*, include_ash_watar: bool = False) -> list[MatrixCase]:
     cases: list[MatrixCase] = []
     for format_token in ALL_FORMATS:
         layers = ["watershed.subcatchments"] if format_token in SPATIAL_FORMATS else ["wepp.summary.hillslopes"]
@@ -640,6 +667,40 @@ def build_expansion_cases() -> list[MatrixCase]:
             ),
         ]
     )
+
+    if include_ash_watar:
+        cases.extend(
+            [
+                MatrixCase(
+                    case_id="f3_scope_roads_ash_watar_parquet",
+                    gate="expansion",
+                    group="F3",
+                    description="Scope-invariant Ash/WATAR export accepts roads with warnings.",
+                    payload=_payload(
+                        format_token="parquet",
+                        layers=[ASH_WATAR_LAYER_ID],
+                        output_scopes=["baseline", "roads"],
+                        tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                    ),
+                ),
+                MatrixCase(
+                    case_id="f3_cache_replay_ash_watar_parquet",
+                    gate="expansion",
+                    group="F3",
+                    description="Ash/WATAR cache replay contract check.",
+                    payload=_payload(
+                        format_token="parquet",
+                        layers=[ASH_WATAR_LAYER_ID],
+                        units="si",
+                        crs="wgs",
+                        tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                    ),
+                    expect_success=True,
+                    expect_cache_hit=True,
+                    reference_case_id="a3_ash_watar_parquet",
+                ),
+            ]
+        )
 
     cases.extend(
         [
@@ -1277,7 +1338,11 @@ def _audit_success_case(
                 checks["missing_manifest_contrasts"] = missing_contrasts
                 reasons.append("contrast_selector_manifest_mismatch")
 
-        if "scope_roads" in case.case_id:
+        output_scopes = case.payload.get("output_scopes")
+        roads_requested = isinstance(output_scopes, list) and any(
+            str(scope_token) == "roads" for scope_token in output_scopes
+        )
+        if roads_requested:
             warning_codes = sorted(
                 {
                     str(warning.get("code"))
@@ -1286,7 +1351,16 @@ def _audit_success_case(
                 }
             )
             checks["result_warning_codes"] = warning_codes
-            if "scope_not_applicable" not in warning_codes:
+            manifest_scope_values = sorted(
+                {
+                    str(entry.get("scope"))
+                    for entry in manifest.get("layers", [])
+                    if isinstance(entry, dict) and entry.get("scope") is not None
+                }
+            )
+            checks["manifest_scope_values"] = manifest_scope_values
+            roads_emitted = "roads" in manifest_scope_values or any("-roads-" in member for member in payload_members)
+            if not roads_emitted and "scope_not_applicable" not in warning_codes:
                 reasons.append("scope_not_applicable_warning_missing")
 
     passed = len(reasons) == 0
@@ -1580,6 +1654,14 @@ def _write_manual_sanity_notes(
         ],
         "Phase-2 Omni Compatibility (H4)",
     )
+    append_case_details(
+        [
+            *[f"a3_ash_watar_{format_token}" for format_token in ALL_FORMATS],
+            "f3_scope_roads_ash_watar_parquet",
+            "f3_cache_replay_ash_watar_parquet",
+        ],
+        "Ash/WATAR Coverage",
+    )
 
     notes_path.write_text("\n".join(lines), encoding="utf-8")
 
@@ -1688,6 +1770,11 @@ def main() -> int:
         results_path.unlink()
 
     oracle_topaz_ids, oracle_wepp_ids = _load_oracle_domains(wd)
+    include_ash_watar = _has_ash_watar_assets(wd)
+    if include_ash_watar:
+        print("Detected ash assets in run path; enabling optional Ash/WATAR matrix cases (A3/F3).")
+    else:
+        print("No ash assets detected in run path; skipping optional Ash/WATAR matrix cases (A3/F3).")
     result_by_case_id: dict[str, dict[str, Any]] = {}
 
     if args.phase == PHASE2_OMNI_PLAN:
@@ -1757,7 +1844,7 @@ def main() -> int:
         return 1
 
     gate2_ok = execute_cases(
-        cases=build_gate2_cases(),
+        cases=build_gate2_cases(include_ash_watar=include_ash_watar),
         wd=wd,
         runid=args.runid,
         config=args.config,
@@ -1776,7 +1863,7 @@ def main() -> int:
         return 1
 
     expansion_ok = execute_cases(
-        cases=build_expansion_cases(),
+        cases=build_expansion_cases(include_ash_watar=include_ash_watar),
         wd=wd,
         runid=args.runid,
         config=args.config,

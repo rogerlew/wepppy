@@ -19,6 +19,7 @@ _EVENT_CONTROL_TOKENS = frozenset(
         "eventdate",
         "calendaryear",
         "year",
+        "fireyear",
         "month",
         "mo",
         "day",
@@ -38,6 +39,7 @@ _YEARLY_CONTROL_TOKENS = frozenset(
     {
         "calendaryear",
         "year",
+        "fireyear",
         "event",
         "date",
         "month",
@@ -112,13 +114,26 @@ def materialize_temporal_layer_wide(
         layer_id=layer_id,
     )
     if temporal_tokens is None:
-        raise MaterializationContractError(
-            "Temporal wide materialization could not resolve selector dimension column.",
-            details=(
-                f"layer={layer_id!r}; temporal_mode={mode!r}; "
-                "expected date/return_period/year columns"
-            ),
-        )
+        if mode == "annual_average":
+            # Some datasets ship pre-aggregated annual-average rows without
+            # an explicit year column. Preserve those rows and compute a
+            # per-key average across observed rows.
+            temporal_tokens = pd.Series(
+                [_sanitize_token(f"row{index}") for index in range(len(working.index))],
+                index=working.index,
+                dtype="string",
+            )
+            ordered_tokens = _ordered_observed_tokens(temporal_tokens)
+            temporal_column = None
+        else:
+            raise MaterializationContractError(
+                "Temporal wide materialization could not resolve selector dimension column.",
+                details=(
+                    f"layer={layer_id!r}; temporal_mode={mode!r}; "
+                    "expected date/return_period/year columns "
+                    "(calendar_year, year, or fire_year)"
+                ),
+            )
 
     working["__features_export_temporal_token__"] = temporal_tokens
     working = working.loc[working["__features_export_temporal_token__"].notna()].reset_index(drop=True)
@@ -240,7 +255,7 @@ def _resolve_temporal_tokens(
     layer_id: str,
 ) -> tuple[pd.Series | None, list[str], str | None]:
     if temporal_mode in {"annual_average", "yearly"}:
-        year_column = _first_matching_column(frame.columns, ("calendar_year", "year"))
+        year_column = _first_matching_column(frame.columns, ("calendar_year", "year", "fire_year"))
         if year_column is None:
             return None, [], None
 
@@ -298,7 +313,7 @@ def _resolve_temporal_tokens(
             return tokens, ordered_tokens, temporal_column
 
     if selector == "date":
-        year_column = _first_matching_column(frame.columns, ("calendar_year", "year"))
+        year_column = _first_matching_column(frame.columns, ("calendar_year", "year", "fire_year"))
         month_column = _first_matching_column(frame.columns, ("month", "mo"))
         day_column = _first_matching_column(frame.columns, ("day_of_month", "day", "da"))
         julian_column = _first_matching_column(frame.columns, ("julian", "day_of_year", "doy"))
