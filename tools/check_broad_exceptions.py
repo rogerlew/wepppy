@@ -200,7 +200,14 @@ def _git_merge_base(repo_root: Path, *, base_ref: str) -> str:
         check=False,
     )
     if proc.returncode != 0:
-        raise RuntimeError(f"git merge-base failed: {proc.stderr.strip()}")
+        stderr = proc.stderr.strip()
+        stdout = proc.stdout.strip()
+        details = [f"base_ref={base_ref!r}", f"returncode={proc.returncode}"]
+        if stderr:
+            details.append(f"stderr={stderr}")
+        if stdout:
+            details.append(f"stdout={stdout}")
+        raise RuntimeError(f"git merge-base failed ({', '.join(details)})")
     return proc.stdout.strip()
 
 
