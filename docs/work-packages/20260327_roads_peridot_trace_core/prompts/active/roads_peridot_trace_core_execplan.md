@@ -12,14 +12,14 @@ After this package, a Roads pipeline can call a Rust tracer for one low-point se
 
 - [x] (2026-03-27 00:00Z) Authored package scaffold (`package.md`, `tracker.md`, active ExecPlan).
 - [x] (2026-03-27 00:00Z) Updated root `AGENTS.md` active ExecPlan pointer and `PROJECT_TRACKER.md` entry.
-- [ ] Milestone 1: Implement `peridot` trace core contract and algorithm with deterministic termination semantics.
-- [ ] Milestone 2: Add `peridot` CLI command for one-point trace execution and JSON output.
-- [ ] Milestone 3: Add `wepppyo3` `pyo3` binding that calls the same `peridot` core function.
-- [ ] Milestone 4: Add/expand tests in `peridot` and `wepppyo3`; add WEPPpy smoke-path wrapper test if a wrapper is introduced.
-- [ ] Milestone 5: Update Roads spec contract text for implemented trace fields and behavior.
-- [ ] Milestone 6: Complete independent code review artifact and resolve all medium/high findings.
-- [ ] Milestone 7: Complete independent QA review artifact and resolve all medium/high findings.
-- [ ] Milestone 8: Run final validation gates and publish handoff summary.
+- [x] (2026-03-27) Milestone 1: Implemented `peridot` trace core contract and deterministic termination semantics in `src/roads_trace/trace_downslope.rs`.
+- [x] (2026-03-27) Milestone 2: Added `peridot` CLI command `trace_downslope_flowpath` with JSON output contract parity.
+- [x] (2026-03-27) Milestone 3: Added `wepppyo3` `roads_flowpath_rust` `pyo3` binding crate that calls the shared `peridot` core.
+- [x] (2026-03-27) Milestone 4: Added `peridot` and `wepppyo3` regression tests, including CLI-vs-`pyo3` parity coverage.
+- [x] (2026-03-27) Milestone 5: Updated Roads spec trace-contract section with implemented v1 fields and termination labels.
+- [x] (2026-03-27) Milestone 6: Completed code review artifact with zero unresolved medium/high findings.
+- [x] (2026-03-27) Milestone 7: Completed QA review artifact with zero unresolved medium/high findings.
+- [x] (2026-03-27) Milestone 8: Ran final validation gates and prepared handoff summary details.
 
 ## Surprises & Discoveries
 
@@ -35,6 +35,9 @@ After this package, a Roads pipeline can call a Rust tracer for one low-point se
 - Observation: `wepppyo3` already ships multiple `pyo3` extension crates with a canonical release tree under `release/linux/py312/wepppyo3/`.
   Evidence: `wepppyo3/README.md` build/copy commands and current release layout.
 
+- Observation: `cargo test -- --nocapture` in `peridot` is not globally green due pre-existing failures in untouched legacy tests (`rasters::raster::*`, `support::support::*`).
+  Evidence: failing tests from command output while touched trace-module tests pass.
+
 ## Decision Log
 
 - Decision: Implement one shared tracing core in `peridot` and expose it through both CLI and `wepppyo3`.
@@ -49,9 +52,19 @@ After this package, a Roads pipeline can call a Rust tracer for one low-point se
   Rationale: Roads MOFE assembly needs deterministic numeric profiles and explicit termination outcomes.
   Date/Author: 2026-03-27 / User + Codex.
 
+- Decision: Define channel-mask truth in v1 as `mask > 0` and document it in Roads spec.
+  Rationale: Removes ambiguity between wrappers and keeps CLI/`pyo3` behavior deterministic for mixed raster conventions.
+  Date/Author: 2026-03-27 / Codex.
+
 ## Outcomes & Retrospective
 
-Not complete yet. Fill at milestone closure and final handoff.
+- Implemented one shared Rust tracer core in `peridot` and surfaced it through both a CLI binary and a `wepppyo3` `pyo3` module with no duplicated routing algorithm.
+- Added deterministic regression coverage for all required termination modes and profile invariants in `peridot`, plus Python schema/parity tests in `wepppyo3`.
+- Updated Roads specification trace-contract text to match implemented v1 output fields and termination labels.
+- Completed mandatory code/QA review artifacts with no unresolved medium/high findings.
+- Validation summary:
+  - all targeted new/required tests passed,
+  - `peridot` full-suite command still reports pre-existing unrelated failures outside touched scope.
 
 ## Context and Orientation
 
