@@ -17,10 +17,12 @@ _REPO_ROOT = _BASE_DIR.parents[3]
 _DB_DIR = _BASE_DIR / 'db'
 _SPEC_DIR = _BASE_DIR / 'input-file-specifications'
 _WEPPCLOUD_DIR = _BASE_DIR / 'weppcloud'
+_PATH_DIR = _BASE_DIR / 'path'
 _CATEGORY_ROOTS: Dict[str, Path] = {
     'db': _DB_DIR,
     'input-file-specifications': _SPEC_DIR,
     'weppcloud': _WEPPCLOUD_DIR,
+    'path': _PATH_DIR,
 }
 
 _PARAM_HEADER_RE = re.compile(r'^#### `([^`]+)` —\s*(.+)$')
@@ -83,6 +85,10 @@ def usersum_index():
     wc_items = _list_markdown(_WEPPCLOUD_DIR, 'weppcloud')
     if wc_items:
         sections.append({'title': 'WEPPcloud Guides', 'entries': wc_items})
+
+    path_items = _list_markdown(_PATH_DIR, 'path')
+    if path_items:
+        sections.append({'title': 'PATH Cost-Effective', 'entries': path_items})
 
     return render_template('usersum/index.htm', title='WEPPcloud UserSummary Documentation', sections=sections)
 
