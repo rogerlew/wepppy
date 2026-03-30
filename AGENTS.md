@@ -88,6 +88,7 @@
 - Frontend changes: `wctl run-npm lint` and `wctl run-npm test`
 - Stub/API surface changes: `wctl run-stubtest <module>` and `wctl check-test-stubs`
 - RQ queue wiring changes: `wctl check-rq-graph`
+- Dead-code refactor gate: `.venv/bin/vulture` (configured in `pyproject.toml`, whitelist in `wepppy/vulture_whitelist.py`)
 - Code quality observability (non-blocking): `python3 tools/code_quality_observability.py --base-ref origin/master`
 - Broad exception inventory/enforcement: `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master`
 - Docs changes: `wctl doc-lint --path <file>`; preview spelling normalization with `diff -u <file> <(uk2us <file>)`
@@ -106,6 +107,7 @@
 - Mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
+- Vulture dead-code gate standard: `docs/standards/vulture-dead-code-gate-standard.md`
 
 ## Subsystem Maps (Nearest AGENTS Wins)
 - NoDb controllers and module contracts: `wepppy/nodb/AGENTS.md`
