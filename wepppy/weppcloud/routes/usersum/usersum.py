@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import re
 from functools import lru_cache
+from html import escape as html_escape, unescape as html_unescape
 from pathlib import Path
 from typing import Dict, List, Tuple, TypedDict, Set
+from urllib.parse import unquote, urlsplit, urlunsplit
 
-from flask import Blueprint, abort, jsonify, render_template, request, url_for  # type: ignore[import-not-found]
+from flask import Blueprint, abort, jsonify, redirect, render_template, request, url_for  # type: ignore[import-not-found]
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # type: ignore[import-not-found]
 
 usersum_bp = Blueprint('usersum', __name__, template_folder='templates')
@@ -15,10 +17,19 @@ _REPO_ROOT = _BASE_DIR.parents[3]
 _DB_DIR = _BASE_DIR / 'db'
 _SPEC_DIR = _BASE_DIR / 'input-file-specifications'
 _WEPPCLOUD_DIR = _BASE_DIR / 'weppcloud'
+_CATEGORY_ROOTS: Dict[str, Path] = {
+    'db': _DB_DIR,
+    'input-file-specifications': _SPEC_DIR,
+    'weppcloud': _WEPPCLOUD_DIR,
+}
 
 _PARAM_HEADER_RE = re.compile(r'^#### `([^`]+)` —\s*(.+)$')
 _DETAIL_RE = re.compile(r'^- \*\*([^*]+)\*\*: ?(.*)$')
 _WHITESPACE_RE = re.compile(r'\s+')
+_ANCHOR_HREF_RE = re.compile(
+    r'(<a\b[^>]*?\bhref\s*=\s*)(["\'])(.*?)(\2)',
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 class ParameterDetail(TypedDict):
@@ -77,12 +88,7 @@ def usersum_index():
 
 
 def _resolve_markdown_path(category: str, filename: str) -> Path:
-    allowed: Dict[str, Path] = {
-        'db': _DB_DIR,
-        'input-file-specifications': _SPEC_DIR,
-        'weppcloud': _WEPPCLOUD_DIR,
-    }
-    root = allowed.get(category)
+    root = _CATEGORY_ROOTS.get(category)
     if root is None:
         abort(404)
         raise RuntimeError('unreachable')
@@ -103,30 +109,106 @@ def _resolve_src_markdown_path(rel_path: str) -> Path:
     return candidate
 
 
+def _route_for_repo_markdown(path: Path) -> str | None:
+    resolved = path.resolve()
+
+    for category, root in _CATEGORY_ROOTS.items():
+        root_resolved = root.resolve()
+        if root_resolved in resolved.parents:
+            rel_filename = resolved.relative_to(root_resolved).as_posix()
+            return url_for('usersum.view_markdown', category=category, filename=rel_filename)
+
+    if _REPO_ROOT in resolved.parents:
+        rel_path = resolved.relative_to(_REPO_ROOT).as_posix()
+        return url_for('usersum.view_src_markdown', rel_path=rel_path)
+
+    return None
+
+
+def _resolve_linked_markdown_path(source_path: Path, href_path: str) -> Path | None:
+    rel_token = href_path.strip()
+    if not rel_token:
+        return None
+
+    candidate: Path
+    if rel_token.startswith('/'):
+        candidate = (_REPO_ROOT / rel_token.lstrip('/')).resolve()
+    else:
+        candidate = (source_path.parent / rel_token).resolve()
+
+    if not candidate.is_file():
+        return None
+    if candidate.suffix.lower() != '.md':
+        return None
+    if _REPO_ROOT not in candidate.parents:
+        return None
+    return candidate
+
+
+def _rewrite_markdown_href(source_path: Path, href: str) -> str:
+    parsed = urlsplit(href)
+    if parsed.scheme or parsed.netloc:
+        return href
+
+    path_part = parsed.path
+    if not path_part or not path_part.lower().endswith('.md'):
+        return href
+
+    linked_path = _resolve_linked_markdown_path(source_path, unquote(path_part))
+    if linked_path is None:
+        return href
+
+    routed_path = _route_for_repo_markdown(linked_path)
+    if routed_path is None:
+        return href
+
+    return urlunsplit(('', '', routed_path, parsed.query, parsed.fragment))
+
+
+def _rewrite_markdown_links(source_path: Path, content_html: str) -> str:
+    def _replace(match: re.Match[str]) -> str:
+        href_value = html_unescape(match.group(3))
+        rewritten_href = _rewrite_markdown_href(source_path, href_value)
+        if rewritten_href == href_value:
+            return match.group(0)
+
+        return (
+            f"{match.group(1)}{match.group(2)}"
+            f"{html_escape(rewritten_href, quote=True)}"
+            f"{match.group(4)}"
+        )
+
+    return _ANCHOR_HREF_RE.sub(_replace, content_html)
+
+
+def _render_markdown_document(path: Path, *, title: str):
+    markdown_source = path.read_text(encoding='utf-8')
+    content_html = markdown_to_html(markdown_source)
+    content_html = _rewrite_markdown_links(path, content_html)
+    return render_template(
+        'usersum/view.htm',
+        title=title,
+        content_html=content_html,
+    )
+
+
 @usersum_bp.route('/usersum/view/<category>/<path:filename>')
 def view_markdown(category: str, filename: str):
     path = _resolve_markdown_path(category, filename)
-    markdown_source = path.read_text(encoding='utf-8')
-    content_html = markdown_to_html(markdown_source)
     display_name = _friendly_display_name(path.name)
-    return render_template(
-        'usersum/view.htm',
-        title=display_name,
-        content_html=content_html
-    )
+    return _render_markdown_document(path, title=display_name)
+
+
+@usersum_bp.route('/usersum/src/<path:rel_path>')
+def view_src_markdown(rel_path: str):
+    path = _resolve_src_markdown_path(rel_path)
+    display_name = str(path.relative_to(_REPO_ROOT))
+    return _render_markdown_document(path, title=display_name)
 
 
 @usersum_bp.route('/usersum/src//<path:rel_path>')
-def view_src_markdown(rel_path: str):
-    path = _resolve_src_markdown_path(rel_path)
-    markdown_source = path.read_text(encoding='utf-8')
-    content_html = markdown_to_html(markdown_source)
-    display_name = str(path.relative_to(_REPO_ROOT))
-    return render_template(
-        'usersum/view.htm',
-        title=display_name,
-        content_html=content_html
-    )
+def view_src_markdown_legacy(rel_path: str):
+    return redirect(url_for('usersum.view_src_markdown', rel_path=rel_path), code=308)
 
 
 def _normalise_spaces(value: str) -> str:
