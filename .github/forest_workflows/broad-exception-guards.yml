@@ -41,6 +41,7 @@ jobs:
       - name: Run broad exception changed-file enforcement
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_REF: ${{ github.base_ref }}
           PUSH_BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
@@ -52,6 +53,21 @@ jobs:
           fi
           if [ -z "${BASE_REF}" ] || [ "${BASE_REF}" = "0000000000000000000000000000000000000000" ]; then
             BASE_REF="origin/master"
+          fi
+
+          # Ensure the base history exists in this checkout for merge-base resolution.
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ -n "${PR_BASE_REF:-}" ]; then
+            git fetch --no-tags --prune origin "${PR_BASE_REF}" || true
+          else
+            git fetch --no-tags --prune origin master || true
+          fi
+
+          if ! git rev-parse --verify --quiet "${BASE_REF}^{commit}" >/dev/null; then
+            if [ "${{ github.event_name }}" = "pull_request" ] && [ -n "${PR_BASE_REF:-}" ]; then
+              BASE_REF="origin/${PR_BASE_REF}"
+            else
+              BASE_REF="origin/master"
+            fi
           fi
 
           set +e
