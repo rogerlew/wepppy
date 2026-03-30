@@ -113,6 +113,7 @@ The package now uses two anchors:
 |---|---:|---:|---|---|
 | A1 Spatial format contract | 5 formats x 2 CRS x 3 units | 30 | `format in {geojson, geoparquet, kmz, geopackage, geodatabase}`; atemporal single-layer | Correct member extension/signature, manifest counts match artifact, CRS matches request, identity columns present |
 | A2 Tabular format contract | 2 formats x 2 CRS x 3 units | 12 | `format in {parquet, csv}`; atemporal single-layer | Geometry absent, CRS request accepted and treated as no-op, both `topaz_id` and `wepp_id` non-null per row |
+| A3 Ash/WATAR format contract (optional) | 7 formats | 7 | all formats, layer=`ash.transport.hillslope_annuals`, `crs=wgs`, `units=si` | Same payload/member/identity assertions as A1/A2 for AshPost-backed runs |
 | B1 Year selection variants | 5 year selectors | 5 | `format=parquet`, `temporal.mode=yearly`, layer=`wepp.interchange.loss_all_years_hill`, year selectors: `all`, `exclude_first`, `exclude_first_two`, `exclude_first_five`, `custom` | Year-column expansion or row-temporal layout matches selector; deterministic row domain; no duplicate key-year slices |
 | B2 Yearly multi-layer | 1 | 1 | `format=parquet`, yearly, layers=`loss_all_years_hill + loss_all_years_channel` | Both carriers emitted, counts align to carrier keys, schema/column expectations valid |
 | B3 Event selector variants | 2 | 2 | `format=parquet`, `temporal.mode=event`, layer=`wepp.temporal.events`, selector `date` and `return_period` | Correct temporal selector columns/tokens, deterministic event pivot behavior |
@@ -128,13 +129,14 @@ The package now uses two anchors:
 | E2 Manifest integrity audit | all successful runs | 77 | post-run artifact scan | `manifest.json` row/feature/column metadata exactly matches payload files |
 | F1 Cache-hit replay contract | 7 formats | 7 | repeat identical successful payload per format | 2nd run returns `cache_hit=true`, stable artifact mapping, valid `source_job_id`, valid download |
 | F2 Negative-path payload contract | 8 | 8 | invalid layer id, invalid `tabular` shape, mixed long event+yearly, missing event selector payload, invalid CRS token, invalid temporal mode, invalid year-selection custom payload, invalid scope token | 400/404/409 response code and structured error contract match spec |
+| F3 Ash/WATAR scope/cache contract (optional) | 2 | 2 | `format=parquet`, layer=`ash.transport.hillslope_annuals`, scope replay and cache replay | Scope-invariant roads warning (`scope_not_applicable`) and deterministic cache-hit replay |
 | G1 Units numeric oracle checks | 4 | 4 | selected conversions across `project`, `si`, `english` on stable fields | conversion magnitudes/tolerances match expected unit transforms |
 | G2 UI regression checks | Jest/route tests | 0 export jobs | copy + behavior regression checks | label copy, no reload on temporal change, unlock behavior remain correct |
 
 **Planned job count**:
-- Core (`A-E`): 78 jobs (77 successful + 1 negative).
-- Expansion (`F-G`): 19 jobs (11 successful + 8 negative) plus UI regression test runs.
-- Total planned export job executions: **97**.
+- Core (`A-E`): 78 jobs (77 successful + 1 negative) for baseline WEPP/watershed matrix, plus optional `A3` (+7) when AshPost assets are present in the run path.
+- Expansion (`F-G`): 19 jobs (11 successful + 8 negative) plus UI regression test runs, plus optional `F3` (+2) when AshPost assets are present.
+- Total planned export job executions: **97 baseline**, **106 when optional Ash/WATAR groups are enabled**.
 
 **Phase 2 Omni extension**:
 - `H1`: Omni scenario sentinel across all formats (7).
@@ -144,7 +146,7 @@ The package now uses two anchors:
 - Total Phase 2 Omni executions: **26**.
 
 ### Cross-Run Assertions (every successful case)
-- Artifact is a zip and includes required bundle members (`manifest.json`, `profile.yml`, `profiles/post-wepp.yml`, `profiles/prep-details.yml`, `README.md`).
+- Artifact is a zip and includes required bundle members (`manifest.json`, `README.md`).
 - Payload member format matches request token.
 - File count follows contract:
   - Single-layer formats: one payload file per resolved layer.
