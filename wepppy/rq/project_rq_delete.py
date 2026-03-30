@@ -312,6 +312,7 @@ def compile_dot_logs_rq(
     job_id = getattr(job, "id", "sync")
     func_name = "compile_dot_logs_rq"
     status_channel = "maintenance:access_log"
+    started_at = time.perf_counter()
 
     _publish(
         runtime,
@@ -331,17 +332,33 @@ def compile_dot_logs_rq(
         )
         raise
 
-    result = compile_dot_logs(
-        access_log_path=access_log_path,
-        run_locations_path=run_locations_path,
-        run_roots=run_roots,
-        legacy_roots=legacy_roots,
-    )
+    try:
+        result = compile_dot_logs(
+            access_log_path=access_log_path,
+            run_locations_path=run_locations_path,
+            run_roots=run_roots,
+            legacy_roots=legacy_roots,
+            logger=runtime.logger,
+        )
+    except Exception as exc:
+        elapsed = time.perf_counter() - started_at
+        _publish(
+            runtime,
+            status_channel,
+            f"rq:{job_id} EXCEPTION {func_name}({exc}) elapsed_s={elapsed:.1f}",
+        )
+        raise
 
+    elapsed = time.perf_counter() - started_at
     _publish(
         runtime,
         status_channel,
-        f"rq:{job_id} COMPLETED {func_name}",
+        (
+            f"rq:{job_id} COMPLETED {func_name}"
+            f"(logs={result.get('logs', 0)}, runs={result.get('runs', 0)},"
+            f" access_rows={result.get('access_rows', 0)},"
+            f" run_locations={result.get('run_locations', 0)}, elapsed_s={elapsed:.1f})"
+        ),
     )
 
     return result

@@ -15,8 +15,10 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import logging
 import os
 import sys
+import time
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime
@@ -36,6 +38,23 @@ DEFAULT_ACCESS_LOG_PATHS = [
 
 DEFAULT_RUN_ROOTS = ["/wc1/runs"]
 DEFAULT_LEGACY_ROOTS = ["/geodata/weppcloud_runs"]
+DEFAULT_PROGRESS_EVERY = 250
+
+ACCESS_LOG_HEADER = [
+    "runid",
+    "config",
+    "has_sbs",
+    "hillslopes",
+    "ash_hillslopes",
+    "centroid_longitude",
+    "centroid_latitude",
+    "year",
+    "user",
+    "ip",
+    "date",
+]
+
+RUN_COUNTS_HEADER = ["runid", "hillslopes", "ash_hillslopes", "year", "config"]
 
 
 @dataclass(frozen=True)
@@ -59,6 +78,20 @@ class RunMetrics:
     access_count: int
     last_accessed: Optional[datetime]
     first_accessed: Optional[datetime]
+
+
+def _log_info(logger: Optional[logging.Logger], message: str, *args: object) -> None:
+    if logger is not None:
+        logger.info(message, *args)
+
+
+def _log_warning(logger: Optional[logging.Logger], message: str, *args: object) -> None:
+    if logger is not None:
+        logger.warning(message, *args)
+        return
+    if args:
+        message = message % args
+    print(f"Warning: {message}", file=sys.stderr)
 
 
 def _resolve_access_log_path(override: Optional[str] = None) -> Path:
@@ -170,7 +203,12 @@ def _parse_access_line(line: str) -> Optional[tuple[str, str, datetime]]:
     return email, ip, timestamp
 
 
-def _load_run_metadata(run_dir: Path, runid: str) -> tuple[Optional[str], Optional[bool], int, int, Optional[float], Optional[float]]:
+def _load_run_metadata(
+    run_dir: Path,
+    runid: str,
+    *,
+    logger: Optional[logging.Logger] = None,
+) -> tuple[Optional[str], Optional[bool], int, int, Optional[float], Optional[float]]:
     config = None
     has_sbs: Optional[bool] = None
 
@@ -179,10 +217,18 @@ def _load_run_metadata(run_dir: Path, runid: str) -> tuple[Optional[str], Option
         config = ron.config_stem
         has_sbs = bool(getattr(ron, 'has_sbs', False))
     except Exception as exc:
-        print(f"Warning: failed to load Ron for {run_dir}: {exc}", file=sys.stderr)
+        _log_warning(logger, "failed to load Ron for %s (%s): %s", runid, run_dir, exc)
 
-    hillslopes = len(glob(str(run_dir / "wepp" / "runs" / "*.slp")))
-    ash_hillslopes = len(glob(str(run_dir / "ash" / "*ash.csv")))
+    try:
+        hillslopes = len(glob(str(run_dir / "wepp" / "runs" / "*.slp")))
+    except OSError as exc:
+        _log_warning(logger, "failed to scan hillslopes for %s (%s): %s", runid, run_dir, exc)
+        hillslopes = 0
+    try:
+        ash_hillslopes = len(glob(str(run_dir / "ash" / "*ash.csv")))
+    except OSError as exc:
+        _log_warning(logger, "failed to scan ash hillslopes for %s (%s): %s", runid, run_dir, exc)
+        ash_hillslopes = 0
 
     centroid_longitude: Optional[float] = None
     centroid_latitude: Optional[float] = None
@@ -193,7 +239,7 @@ def _load_run_metadata(run_dir: Path, runid: str) -> tuple[Optional[str], Option
             if centroid is not None:
                 centroid_longitude, centroid_latitude = centroid
         except Exception as exc:
-            print(f"Warning: failed to load centroid for {run_dir}: {exc}", file=sys.stderr)
+            _log_warning(logger, "failed to load centroid for %s (%s): %s", runid, run_dir, exc)
 
     return config, has_sbs, hillslopes, ash_hillslopes, centroid_longitude, centroid_latitude
 
@@ -236,7 +282,10 @@ def compile_dot_logs(
     run_locations_path: Optional[str] = None,
     run_roots: Optional[list[str]] = None,
     legacy_roots: Optional[list[str]] = None,
+    logger: Optional[logging.Logger] = None,
+    progress_every: int = DEFAULT_PROGRESS_EVERY,
 ) -> dict[str, int]:
+    started_at = time.perf_counter()
     access_path = _resolve_access_log_path(access_log_path)
     run_locations_path = _resolve_run_locations_path(access_path, run_locations_path)
     runs_counter_path = _resolve_runs_counter_path(access_path)
@@ -245,87 +294,113 @@ def compile_dot_logs(
     run_root_paths = [Path(root) for root in (run_roots or DEFAULT_RUN_ROOTS)]
     legacy_root_paths = [Path(root) for root in (legacy_roots or DEFAULT_LEGACY_ROOTS)]
 
-    logs = _iter_log_files(run_root_paths, legacy_root_paths)
-
-    access_rows: list[list[object]] = []
-    run_metrics: dict[str, RunMetrics] = {}
-
-    for log in logs:
-        config, has_sbs, hillslopes, ash_hillslopes, centroid_longitude, centroid_latitude = _load_run_metadata(
-            log.run_dir,
-            log.runid,
-        )
-
-        metrics = run_metrics.get(log.runid)
-        if metrics is None:
-            metrics = RunMetrics(
-                runid=log.runid,
-                run_name=_derive_run_name(log.runid),
-                run_dir=log.run_dir,
-                config=config,
-                has_sbs=has_sbs,
-                hillslopes=hillslopes,
-                ash_hillslopes=ash_hillslopes,
-                centroid_longitude=centroid_longitude,
-                centroid_latitude=centroid_latitude,
-                access_count=0,
-                last_accessed=None,
-                first_accessed=None,
-            )
-            run_metrics[log.runid] = metrics
-
-        try:
-            with log.log_path.open('r', encoding='utf-8') as handle:
-                for raw_line in handle:
-                    parsed = _parse_access_line(raw_line)
-                    if parsed is None:
-                        continue
-                    email, ip, timestamp = parsed
-                    metrics.access_count += 1
-                    if metrics.last_accessed is None or timestamp > metrics.last_accessed:
-                        metrics.last_accessed = timestamp
-                    if metrics.first_accessed is None or timestamp < metrics.first_accessed:
-                        metrics.first_accessed = timestamp
-                    access_rows.append([
-                        log.runid,
-                        config,
-                        has_sbs,
-                        hillslopes,
-                        ash_hillslopes,
-                        centroid_longitude,
-                        centroid_latitude,
-                        timestamp.year,
-                        email,
-                        ip,
-                        timestamp.isoformat(sep=' '),
-                    ])
-        except OSError as exc:
-            print(f"Warning: failed to read {log.log_path}: {exc}", file=sys.stderr)
-
-    access_rows.sort(key=lambda row: (row[0], row[10]))
-
-    _write_csv(
+    _log_info(
+        logger,
+        "compile_dot_logs starting: access_path=%s run_locations_path=%s run_roots=%s legacy_roots=%s",
         access_path,
-        access_rows,
-        header=[
-            "runid",
-            "config",
-            "has_sbs",
-            "hillslopes",
-            "ash_hillslopes",
-            "centroid_longitude",
-            "centroid_latitude",
-            "year",
-            "user",
-            "ip",
-            "date",
-        ],
+        run_locations_path,
+        [str(root) for root in run_root_paths],
+        [str(root) for root in legacy_root_paths],
+    )
+
+    discover_started_at = time.perf_counter()
+    logs = _iter_log_files(run_root_paths, legacy_root_paths)
+    discover_elapsed = time.perf_counter() - discover_started_at
+    _log_info(
+        logger,
+        "compile_dot_logs discovered %d access logs in %.1fs",
+        len(logs),
+        discover_elapsed,
+    )
+
+    run_metrics: dict[str, RunMetrics] = {}
+    access_rows_count = 0
+
+    parse_started_at = time.perf_counter()
+    access_path.parent.mkdir(parents=True, exist_ok=True)
+    access_tmp_path = access_path.with_name(access_path.name + ".tmp")
+    with access_tmp_path.open('w', newline='', encoding='utf-8') as access_handle:
+        access_writer = csv.writer(access_handle)
+        access_writer.writerow(ACCESS_LOG_HEADER)
+
+        for index, log in enumerate(logs, start=1):
+            config, has_sbs, hillslopes, ash_hillslopes, centroid_longitude, centroid_latitude = _load_run_metadata(
+                log.run_dir,
+                log.runid,
+                logger=logger,
+            )
+
+            metrics = run_metrics.get(log.runid)
+            if metrics is None:
+                metrics = RunMetrics(
+                    runid=log.runid,
+                    run_name=_derive_run_name(log.runid),
+                    run_dir=log.run_dir,
+                    config=config,
+                    has_sbs=has_sbs,
+                    hillslopes=hillslopes,
+                    ash_hillslopes=ash_hillslopes,
+                    centroid_longitude=centroid_longitude,
+                    centroid_latitude=centroid_latitude,
+                    access_count=0,
+                    last_accessed=None,
+                    first_accessed=None,
+                )
+                run_metrics[log.runid] = metrics
+
+            try:
+                with log.log_path.open('r', encoding='utf-8') as handle:
+                    for raw_line in handle:
+                        parsed = _parse_access_line(raw_line)
+                        if parsed is None:
+                            continue
+                        email, ip, timestamp = parsed
+                        metrics.access_count += 1
+                        if metrics.last_accessed is None or timestamp > metrics.last_accessed:
+                            metrics.last_accessed = timestamp
+                        if metrics.first_accessed is None or timestamp < metrics.first_accessed:
+                            metrics.first_accessed = timestamp
+                        access_writer.writerow([
+                            log.runid,
+                            config,
+                            has_sbs,
+                            hillslopes,
+                            ash_hillslopes,
+                            centroid_longitude,
+                            centroid_latitude,
+                            timestamp.year,
+                            email,
+                            ip,
+                            timestamp.isoformat(sep=' '),
+                        ])
+                        access_rows_count += 1
+            except OSError as exc:
+                _log_warning(logger, "failed to read %s: %s", log.log_path, exc)
+
+            if progress_every > 0 and index % progress_every == 0:
+                _log_info(
+                    logger,
+                    "compile_dot_logs progress(parse): processed_logs=%d/%d runs=%d access_rows=%d elapsed_s=%.1f",
+                    index,
+                    len(logs),
+                    len(run_metrics),
+                    access_rows_count,
+                    time.perf_counter() - parse_started_at,
+                )
+
+    access_tmp_path.replace(access_path)
+    parse_elapsed = time.perf_counter() - parse_started_at
+    _log_info(
+        logger,
+        "compile_dot_logs wrote access.csv rows=%d in %.1fs",
+        access_rows_count,
+        parse_elapsed,
     )
 
     try:
         from wepppy.weppcloud.utils.run_ttl import read_ttl_state, touch_ttl, DELETE_STATE_ACTIVE
     except Exception as exc:
-        print(f"Warning: run TTL helpers unavailable ({exc})", file=sys.stderr)
+        _log_warning(logger, "run TTL helpers unavailable (%s)", exc)
         read_ttl_state = None
         touch_ttl = None
         DELETE_STATE_ACTIVE = None
@@ -333,12 +408,13 @@ def compile_dot_logs(
     run_locations: list[dict[str, object]] = []
     runs_counter = Counter()
 
-    for metrics in run_metrics.values():
+    build_started_at = time.perf_counter()
+    for index, metrics in enumerate(run_metrics.values(), start=1):
         if metrics.last_accessed and touch_ttl is not None:
             try:
                 touch_ttl(str(metrics.run_dir), accessed_at=metrics.last_accessed, touched_by="access_log")
             except Exception as exc:
-                print(f"Warning: failed to touch TTL for {metrics.runid}: {exc}", file=sys.stderr)
+                _log_warning(logger, "failed to touch TTL for %s: %s", metrics.runid, exc)
 
         if read_ttl_state is not None and DELETE_STATE_ACTIVE is not None:
             try:
@@ -346,7 +422,7 @@ def compile_dot_logs(
                 if ttl_state and ttl_state.get("delete_state") != DELETE_STATE_ACTIVE:
                     continue
             except Exception as exc:
-                print(f"Warning: failed to read TTL for {metrics.runid}: {exc}", file=sys.stderr)
+                _log_warning(logger, "failed to read TTL for %s: %s", metrics.runid, exc)
 
         if metrics.centroid_longitude is None or metrics.centroid_latitude is None:
             continue
@@ -391,6 +467,16 @@ def compile_dot_logs(
             runs_counter['hillruns'] += metrics.hillslopes
             runs_counter['ash_hillruns'] += metrics.ash_hillslopes
 
+        if progress_every > 0 and index % progress_every == 0:
+            _log_info(
+                logger,
+                "compile_dot_logs progress(locations): processed_runs=%d/%d run_locations=%d elapsed_s=%.1f",
+                index,
+                len(run_metrics),
+                len(run_locations),
+                time.perf_counter() - build_started_at,
+            )
+
     run_locations.sort(key=lambda entry: entry.get("last_accessed") or "", reverse=True)
     _write_json(run_locations_path, run_locations)
     _write_json(runs_counter_path, runs_counter)
@@ -410,12 +496,27 @@ def compile_dot_logs(
     _write_csv(
         run_counts_path,
         run_counts_rows,
-        header=["runid", "hillslopes", "ash_hillslopes", "year", "config"],
+        header=RUN_COUNTS_HEADER,
+    )
+
+    build_elapsed = time.perf_counter() - build_started_at
+    total_elapsed = time.perf_counter() - started_at
+    _log_info(
+        logger,
+        "compile_dot_logs completed: logs=%d runs=%d access_rows=%d run_locations=%d elapsed_s=%.1f discover_s=%.1f parse_s=%.1f build_s=%.1f",
+        len(logs),
+        len(run_metrics),
+        access_rows_count,
+        len(run_locations),
+        total_elapsed,
+        discover_elapsed,
+        parse_elapsed,
+        build_elapsed,
     )
 
     return {
         "logs": len(logs),
-        "access_rows": len(access_rows),
+        "access_rows": access_rows_count,
         "run_locations": len(run_locations),
         "runs": len(run_metrics),
     }
