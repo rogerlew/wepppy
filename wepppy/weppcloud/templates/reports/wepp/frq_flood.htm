@@ -27,7 +27,13 @@ yield are conducted separately.
 </dl>
 <h5>
 Report
-  <a onclick="javascript:copytable('rpt_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+  <button type="button"
+          onclick="copytable('rpt_tbl')"
+          aria-label="Copy Report table"
+          title="Copy table"
+          style="border:0;background:none;padding:0;cursor:pointer;">
+    <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}" alt="" aria-hidden="true"/>
+  </button>
 </h5>
 <table class="table table-condensed" id="rpt_tbl">
   <thead>

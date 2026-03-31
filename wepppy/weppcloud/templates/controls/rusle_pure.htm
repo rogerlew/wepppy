@@ -7,6 +7,10 @@
     Build RUSLE factors and mode-specific annual detachment output (<code>A = R * K * LS * C * P</code>)
     for this run. The build executes asynchronously through RQ.
   </p>
+  <p class="wc-text-muted">
+    For factor definitions and mode details, see
+    {{ usersum_doc_link('src', 'wepppy/nodb/mods/rusle/README.md', 'RUSLE documentation') }}.
+  </p>
 {% endset %}
 
 {% set rusle_r_mode = rusle.r_mode if rusle is not none else 'cligen_static' %}

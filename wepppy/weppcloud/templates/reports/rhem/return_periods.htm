@@ -3,7 +3,13 @@
 {% block report_content %}
 <h2>RHEM Results Summary</h2>
 <h5>Return Periods
-    <a onclick="javascript:copytable('ret_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+    <button type="button"
+            onclick="copytable('ret_tbl')"
+            aria-label="Copy Return Periods table"
+            title="Copy table"
+            style="border:0;background:none;padding:0;cursor:pointer;">
+      <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}" alt="" aria-hidden="true"/>
+    </button>
 </h5>
 <table class="table table-condensed" id="ret_tbl">
   <thead>

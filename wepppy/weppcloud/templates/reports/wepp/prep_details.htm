@@ -3,7 +3,13 @@
 {% block report_content %}
 <h2>WEPP Preparation Details</h2>
 <h5>Subcatchments
-  <a onclick="javascript:copytable('sub_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+  <button type="button"
+          onclick="copytable('sub_tbl')"
+          aria-label="Copy Subcatchments table"
+          title="Copy table"
+          style="border:0;background:none;padding:0;cursor:pointer;">
+    <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}" alt="" aria-hidden="true"/>
+  </button>
 </h5>
 <table class="table table-condensed" id="sub_tbl">
   <thead>
@@ -104,7 +110,13 @@
 </table>
 <br/>
 <h5>Channels
-  <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+  <button type="button"
+          onclick="copytable('chn_tbl')"
+          aria-label="Copy Channels table"
+          title="Copy table"
+          style="border:0;background:none;padding:0;cursor:pointer;">
+    <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}" alt="" aria-hidden="true"/>
+  </button>
 </h5>
 <table class="table table-condensed" id="chn_tbl">
   <thead>

@@ -11,6 +11,10 @@
     Ash depths below the roughness limit (white: {{ "%.1f"|format(ash.anu_white_ash_model_pars.roughness_limit) }}&nbsp;mm;
     black: {{ "%.1f"|format(ash.anu_black_ash_model_pars.roughness_limit) }}&nbsp;mm) are treated as non-transportable.
   </p>
+  <p class="wc-text-muted">
+    For ash transport workflow details and calibration model notes, see
+    {{ usersum_doc_link('src', 'wepppy/nodb/mods/ash_transport/README.md', 'Ash Transport documentation') }}.
+  </p>
 {% endset %}
 
 {% call ui.control_shell(

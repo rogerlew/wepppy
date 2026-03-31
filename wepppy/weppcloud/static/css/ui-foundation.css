@@ -3985,6 +3985,12 @@ body.wc-modal-open {
   list-style: none;
 }
 
+.wc-unitizer__summary:focus-visible {
+  outline: 2px solid var(--wc-color-accent);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 3px var(--wc-color-accent-soft);
+}
+
 .wc-unitizer__summary::-webkit-details-marker {
   display: none;
 }

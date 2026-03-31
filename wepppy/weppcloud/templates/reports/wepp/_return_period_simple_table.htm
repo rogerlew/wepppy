@@ -1,7 +1,11 @@
   <h5><b>{{ key }}</b>
-  <a onclick="javascript:copytable('{{ key | replace(' ', '') }}_tbl')">
-      <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/>
-  </a>
+  <button type="button"
+          onclick="copytable('{{ key | replace(' ', '') }}_tbl')"
+          aria-label="Copy {{ key }} table"
+          title="Copy table"
+          style="border:0;background:none;padding:0;cursor:pointer;">
+      <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}" alt="" aria-hidden="true"/>
+  </button>
   </h5>
   <table class="table" id="{{ key | replace(' ', '') }}_tbl" style="min-width: 400px; max-width: 600px;">
     <thead>

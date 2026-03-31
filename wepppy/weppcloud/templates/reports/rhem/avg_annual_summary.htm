@@ -3,7 +3,13 @@
 {% block report_content %}
 <h2>RHEM Results Summary</h2>
 <h5>Average Annual Summary for Hillslopes
-    <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+    <button type="button"
+            onclick="copytable('hill_tbl')"
+            aria-label="Copy Average Annual Summary for Hillslopes table"
+            title="Copy table"
+            style="border:0;background:none;padding:0;cursor:pointer;">
+      <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}" alt="" aria-hidden="true"/>
+    </button>
 </h5>
 <table class="table table-condensed" id="hill_tbl">
   <thead>
