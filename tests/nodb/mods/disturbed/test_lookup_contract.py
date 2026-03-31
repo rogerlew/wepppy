@@ -112,6 +112,91 @@ def test_extended_lookup_temp_file_is_run_scoped_and_writable(tmp_path: Path) ->
     tmp_lookup.unlink()
 
 
+def test_land_soil_replacements_prefers_extended_lookup_when_present(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("extended-precedence")
+    disturbed_dir = run_dir / "disturbed"
+
+    base_lookup = disturbed_dir / "disturbed_land_soil_lookup.csv"
+    _write_csv(
+        base_lookup,
+        ["luse", "stext", "rdmax", "xmxlai", "pmet_kcb", "pmet_rawp", "keffflag", "lkeff"],
+        [
+            {
+                "luse": "forest",
+                "stext": "loam",
+                "rdmax": "1.0",
+                "xmxlai": "2.0",
+                "pmet_kcb": "0.95",
+                "pmet_rawp": "0.80",
+                "keffflag": "0",
+                "lkeff": "-9999",
+            }
+        ],
+    )
+
+    extended_lookup = disturbed_dir / "disturbed_land_soil_lookup_extended.csv"
+    _write_csv(
+        extended_lookup,
+        [
+            "disturbed_class",
+            "stext",
+            "rdmax",
+            "xmxlai",
+            "pmet_kcb",
+            "pmet_rawp",
+            "keffflag",
+            "lkeff",
+            "ini.data.cancov",
+        ],
+        [
+            {
+                "disturbed_class": "forest",
+                "stext": "loam",
+                "rdmax": "9.0",
+                "xmxlai": "8.0",
+                "pmet_kcb": "0.33",
+                "pmet_rawp": "0.22",
+                "keffflag": "1",
+                "lkeff": "2.5",
+                "ini.data.cancov": "0.44",
+            }
+        ],
+    )
+
+    default_lookup = run_dir / "default_lookup.csv"
+    _write_csv(
+        default_lookup,
+        ["luse", "stext", "rdmax", "xmxlai", "pmet_kcb", "pmet_rawp", "keffflag", "lkeff"],
+        [
+            {
+                "luse": "forest",
+                "stext": "loam",
+                "rdmax": "3.0",
+                "xmxlai": "4.0",
+                "pmet_kcb": "0.90",
+                "pmet_rawp": "0.70",
+                "keffflag": "0",
+                "lkeff": "-9999",
+            }
+        ],
+    )
+
+    disturbed.config_get_path = lambda *_args, **_kwargs: str(default_lookup)
+    monkeypatch.setattr(Disturbed, "ensure_land_soil_lookup_schema", lambda self: None)
+
+    replacements = disturbed.land_soil_replacements_d
+    row = replacements[("loam", "forest")]
+
+    assert row["rdmax"] == "9.0"
+    assert row["xmxlai"] == "8.0"
+    assert row["pmet_kcb"] == "0.33"
+    assert row["pmet_rawp"] == "0.22"
+    assert row["ini.data.cancov"] == "0.44"
+
+
 def test_write_lookup_replaces_table_when_payload_is_complete(tmp_path: Path) -> None:
     lookup_path = tmp_path / "lookup.csv"
     fieldnames = ["luse", "stext", "ki", "kr"]
