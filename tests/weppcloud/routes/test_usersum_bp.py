@@ -64,3 +64,11 @@ def test_usersum_src_route_renders_markdown(usersum_client) -> None:
     response = usersum_client.get("/usersum/src/wepppy/nodb/mods/openet/README.md")
     assert response.status_code == 200
     assert "OpenET Climate Engine Mod" in response.get_data(as_text=True)
+
+
+def test_usersum_view_does_not_render_procedural_h1_title(usersum_client) -> None:
+    response = usersum_client.get("/usersum/view/weppcloud/disturbed-land-soil-lookup.md")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "<h1>Disturbed Land Soil Lookup</h1>" not in body
