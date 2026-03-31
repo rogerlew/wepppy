@@ -219,6 +219,7 @@ def component_gallery() -> str:
             "id": "wc_field_spin_button",
             "label": "Numeric spin button vs input background",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "pairs": [
                 {
                     "name": "spin_vs_input",
@@ -268,6 +269,7 @@ def component_gallery() -> str:
             "id": "wc_checkbox_checked",
             "label": "Readonly toggle (checked)",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "actions": [{"type": "set_checked", "target": "#theme_lab_checkbox", "value": True}],
             "pairs": [
                 {
@@ -281,6 +283,7 @@ def component_gallery() -> str:
             "id": "wc_checkbox_unchecked",
             "label": "Readonly toggle (unchecked)",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "actions": [{"type": "set_checked", "target": "#theme_lab_checkbox", "value": False}],
             "pairs": [
                 {
@@ -294,6 +297,7 @@ def component_gallery() -> str:
             "id": "wc_landuse_toggle_icon",
             "label": "Landuse wrench vs toggle background",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "pairs": [
                 {
                     "name": "icon_vs_button",
@@ -306,6 +310,7 @@ def component_gallery() -> str:
             "id": "wc_cap_checkbox",
             "label": "Cap checkbox border vs surface",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "pairs": [
                 {
                     "name": "border_vs_surface",
@@ -319,6 +324,7 @@ def component_gallery() -> str:
             "id": "wc_cap_checkbox_verified",
             "label": "Cap checkbox verified vs background",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "pairs": [
                 {
                     "name": "verified_border_vs_background",
@@ -368,6 +374,7 @@ def component_gallery() -> str:
             "id": "sub_cmap_radio_default_checked",
             "label": "Subcatchment radio (checked) vs background",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "actions": [{"type": "click", "target": "#sub_cmap_radio_default"}],
             "pairs": [
                 {
@@ -381,6 +388,7 @@ def component_gallery() -> str:
             "id": "sub_cmap_radio_default_unchecked",
             "label": "Subcatchment radio (unchecked) vs background",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "pairs": [
                 {
                     "name": "unchecked_vs_background",
@@ -393,6 +401,7 @@ def component_gallery() -> str:
             "id": "sub_cmap_radio_checked_vs_unchecked",
             "label": "Subcatchment radio checked vs unchecked token",
             "threshold": 1.0,
+            "aa_exempt": True,
             "pairs": [
                 {
                     "name": "checked_vs_unchecked",
@@ -405,6 +414,7 @@ def component_gallery() -> str:
             "id": "leaflet_zoom_in",
             "label": "Leaflet zoom-in button",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "pairs": [
                 {
                     "name": "text_vs_background",
@@ -417,6 +427,7 @@ def component_gallery() -> str:
             "id": "leaflet_zoom_out",
             "label": "Leaflet zoom-out button",
             "threshold": 3.0,
+            "aa_kind": "non_text",
             "pairs": [
                 {
                     "name": "text_vs_background",

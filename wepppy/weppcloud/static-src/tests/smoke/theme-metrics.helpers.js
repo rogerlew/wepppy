@@ -6,6 +6,9 @@ import path from 'node:path';
 // and recreates/cleans that directory on each run, which deletes any custom artifacts we write there.
 // Using 'test-results/' avoids this conflict since Playwright only cleans test-specific subdirectories.
 const DEFAULT_REPORT_DIR = path.join('test-results', 'theme-metrics');
+const WCAG_AA_TEXT_NORMAL = 4.5;
+const WCAG_AA_LARGE_TEXT = 3.0;
+const WCAG_AA_NON_TEXT = 3.0;
 
 export async function extractThemeIds(page) {
   const values = await page.evaluate(() => {
@@ -53,6 +56,32 @@ export async function measureTarget(page, target) {
   for (const pair of target.pairs || []) {
     const sample = await samplePairColors(page, pair);
     const errors = [...actionErrors];
+    const typography = sample.typography || null;
+    const configuredThreshold =
+      typeof pair.threshold === 'number'
+        ? pair.threshold
+        : typeof target.threshold === 'number'
+          ? target.threshold
+          : null;
+    const aaKind = pair.aa_kind || target.aa_kind || 'text';
+    const aaExempt = Boolean(
+      pair.aa_exempt !== undefined
+        ? pair.aa_exempt
+        : target.aa_exempt !== undefined
+          ? target.aa_exempt
+          : false
+    );
+    const aaThreshold = aaExempt
+      ? null
+      : aaKind === 'non_text'
+        ? WCAG_AA_NON_TEXT
+        : requiredTextAaThreshold(typography);
+    const threshold =
+      aaThreshold !== null && configuredThreshold !== null
+        ? Math.max(aaThreshold, configuredThreshold)
+        : aaThreshold !== null
+          ? aaThreshold
+          : configuredThreshold;
     let ratio = null;
     if (sample.error) {
       errors.push(sample.error);
@@ -72,12 +101,17 @@ export async function measureTarget(page, target) {
       targetId: target.id,
       targetLabel: target.label,
       pairName: pair.name,
-      threshold: typeof target.threshold === 'number' ? target.threshold : null,
+      aaKind,
+      aaExempt,
+      configuredThreshold,
+      aaThreshold,
+      threshold,
       ratio,
       passed:
-        typeof target.threshold === 'number' && ratio !== null
-          ? ratio >= target.threshold
+        typeof threshold === 'number' && ratio !== null
+          ? ratio >= threshold
           : null,
+      typography,
       foreground: sample.foreground
         ? {
             rgba: sample.foreground,
@@ -288,6 +322,16 @@ async function samplePairColors(page, pair) {
         return borderColor || parsed;
       };
 
+      const resolveTypography = (element, pseudo) => {
+        if (!element) return null;
+        const style = pseudo ? getComputedStyle(element, pseudo) : getComputedStyle(element);
+        return {
+          fontSize: style.fontSize || null,
+          fontWeight: style.fontWeight || null,
+          lineHeight: style.lineHeight || null,
+        };
+      };
+
       const getElement = (selector) => {
         if (!selector) return null;
         return document.querySelector(selector);
@@ -302,6 +346,7 @@ async function samplePairColors(page, pair) {
       return {
         foreground: resolveForeground(foregroundEl, foregroundMode, foregroundPseudo),
         background: resolveBackground(backgroundEl || foregroundEl, backgroundPseudo),
+        typography: resolveTypography(foregroundEl, foregroundPseudo),
         missingForeground: !foregroundEl,
         missingBackground: Boolean(descriptor.background && !backgroundEl),
       };
@@ -316,6 +361,48 @@ export function computeContrast(foreground, background) {
   const lumB = relativeLuminance(background);
   const [lighter, darker] = lumA >= lumB ? [lumA, lumB] : [lumB, lumA];
   return Number(((lighter + 0.05) / (darker + 0.05)).toFixed(3));
+}
+
+function parseFontSizePx(value) {
+  if (!value || typeof value !== 'string') {
+    return null;
+  }
+  const match = value.trim().match(/^([0-9]*\.?[0-9]+)px$/i);
+  if (!match) {
+    return null;
+  }
+  const px = Number.parseFloat(match[1]);
+  return Number.isFinite(px) ? px : null;
+}
+
+function parseFontWeight(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+  const normalized = String(value).trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  if (normalized === 'normal') return 400;
+  if (normalized === 'bold') return 700;
+  if (normalized === 'bolder') return 700;
+  if (normalized === 'lighter') return 300;
+  const numeric = Number.parseInt(normalized, 10);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function requiredTextAaThreshold(typography) {
+  const fontSizePx = parseFontSizePx(typography?.fontSize || '');
+  const fontWeight = parseFontWeight(typography?.fontWeight);
+  if (fontSizePx === null) {
+    return WCAG_AA_TEXT_NORMAL;
+  }
+  const isBold = fontWeight !== null ? fontWeight >= 700 : false;
+  const isLargeText = fontSizePx >= 24 || (isBold && fontSizePx >= 18.66);
+  return isLargeText ? WCAG_AA_LARGE_TEXT : WCAG_AA_TEXT_NORMAL;
 }
 
 function relativeLuminance(color) {
@@ -366,16 +453,27 @@ function renderMarkdown(results) {
   const lines = [
     '# Theme Contrast Metrics',
     '',
-    '| Theme | Target | Pair | Ratio | Threshold | Status | Notes |',
-    '|-------|--------|------|-------|-----------|--------|-------|',
+    '| Theme | Target | Pair | Ratio | Threshold | Rendered Font | Status | Notes |',
+    '|-------|--------|------|-------|-----------|---------------|--------|-------|',
   ];
   for (const entry of results) {
     const status = entry.passed === null ? 'n/a' : entry.passed ? '✅' : '⚠️';
-    const notes = entry.errors?.length ? entry.errors.join('<br>') : '';
+    const notes = [];
+    if (entry.aaExempt) {
+      notes.push('AA exempt');
+    } else if (entry.aaKind) {
+      notes.push(`AA kind: ${entry.aaKind}`);
+    }
+    if (entry.errors?.length) {
+      notes.push(entry.errors.join('<br>'));
+    }
     const ratioText = entry.ratio === null ? 'n/a' : entry.ratio.toFixed(3);
     const thresholdText = entry.threshold === null ? 'n/a' : entry.threshold.toFixed(2);
+    const fontSize = entry.typography?.fontSize || 'n/a';
+    const fontWeight = entry.typography?.fontWeight || 'n/a';
+    const fontText = `${fontSize} / ${fontWeight}`;
     lines.push(
-      `| ${entry.theme} | ${entry.targetLabel || entry.targetId} | ${entry.pairName || '(default)'} | ${ratioText} | ${thresholdText} | ${status} | ${notes} |`
+      `| ${entry.theme} | ${entry.targetLabel || entry.targetId} | ${entry.pairName || '(default)'} | ${ratioText} | ${thresholdText} | ${fontText} | ${status} | ${notes.join('<br>')} |`
     );
   }
   return `${lines.join('\n')}\n`;

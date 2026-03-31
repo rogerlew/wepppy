@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
   extractThemeIds,
   readContrastTargets,
@@ -85,5 +85,18 @@ test.describe('theme contrast metrics', () => {
     }
 
     await writeContrastReport(results, { baseUrl: themeLabUrl.toString() });
+
+    const aaFailures = results.filter((entry) => !entry.aaExempt && entry.passed === false);
+    expect(
+      aaFailures,
+      `WCAG AA contrast failures:\n${aaFailures
+        .slice(0, 20)
+        .map(
+          (entry) =>
+            `- [${entry.theme}] ${entry.targetLabel || entry.targetId} :: ${entry.pairName || '(default)'} `
+            + `(ratio=${entry.ratio}, threshold=${entry.threshold}, font=${entry.typography?.fontSize || 'n/a'}/${entry.typography?.fontWeight || 'n/a'})`
+        )
+        .join('\n')}`
+    ).toEqual([]);
   });
 });

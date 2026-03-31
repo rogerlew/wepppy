@@ -107,7 +107,10 @@
       "overrides": {
         "--wc-shadow-sm": "none",
         "--wc-shadow-md": "none",
-        "--wc-color-on-primary": "#1f2430"
+        "--wc-color-on-primary": "#1f2430",
+        "--wc-button-disabled-bg": "#545E6E",
+        "--wc-button-disabled-border": "#545E6E",
+        "--wc-button-disabled-text": "#FFFFFF"
       }
     },
     "ayu-mirage-bordered": {
@@ -121,7 +124,10 @@
       "overrides": {
         "--wc-shadow-sm": "0 1px 2px rgba(15, 23, 42, 0.08)",
         "--wc-shadow-md": "0 6px 18px rgba(15, 23, 42, 0.12)",
-        "--wc-color-on-primary": "#1c212b"
+        "--wc-color-on-primary": "#1c212b",
+        "--wc-button-disabled-bg": "#545E6E",
+        "--wc-button-disabled-border": "#545E6E",
+        "--wc-button-disabled-text": "#FFFFFF"
       }
     },
     "cursor-dark-anysphere": {
@@ -155,11 +161,9 @@
         "--wc-color-primary": "#8FBCBB",
         "--wc-color-primary-dark": "#6DA1A6",
         "--wc-color-on-primary": "#1E2127",
-        "--wc-color-text-muted": "#8A97AE"
-      },
-      "extra_css": [
-        ":root[data-theme=\"cursor-dark-midnight\"] {\n  --wc-button-disabled-text: var(--wc-color-text);\n}"
-      ]
+        "--wc-color-text-muted": "#8A97AE",
+        "--wc-button-disabled-text": "#D8DEE9"
+      }
     },
     "cursor-dark-high-contrast": {
       "label": "Cursor Dark (High Contrast)",
@@ -212,7 +216,9 @@
         "--wc-font-size-base": "18px",
         "--wc-font-size-sm": "17px",
         "--wc-font-size-xs": "16px",
-        "--wc-line-height": "1.65"
+        "--wc-line-height": "1.65",
+        "--wc-color-positive": "#0C7A20",
+        "--wc-button-disabled-text": "#E2ECFF"
       },
       "extra_css": [
         ":root[data-theme=\"light-high-contrast\"] .wc-control__panel-summary {\n  font-size: calc(var(--wc-font-size-base) * 1.15);\n}"

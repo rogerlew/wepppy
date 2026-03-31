@@ -4,6 +4,7 @@
   --wc-color-accent-soft: rgba(0, 80, 164, 0.180);
   --wc-color-attention: #C25A00;
   --wc-color-attention-soft: rgba(194, 90, 0, 0.220);
+  --wc-button-disabled-text: #E2ECFF;
   --wc-color-border: #0F3A5F;
   --wc-color-border-strong: rgba(5, 21, 38, 0.550);
   --wc-color-critical: #B00020;
@@ -12,7 +13,7 @@
   --wc-color-link-hover: #002347;
   --wc-color-on-primary: #FFFFFF;
   --wc-color-page: #E4EDFF;
-  --wc-color-positive: #0F8B25;
+  --wc-color-positive: #0C7A20;
   --wc-color-positive-soft: rgba(15, 139, 37, 0.180);
   --wc-color-primary: #0050A4;
   --wc-color-primary-dark: #004083;

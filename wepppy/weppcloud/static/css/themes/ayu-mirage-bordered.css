@@ -4,6 +4,9 @@
   --wc-color-accent-soft: rgba(255, 204, 102, 0.180);
   --wc-color-attention: #ffcc6633;
   --wc-color-attention-soft: rgba(255, 204, 102, 0.220);
+  --wc-button-disabled-bg: #545E6E;
+  --wc-button-disabled-border: #545E6E;
+  --wc-button-disabled-text: #FFFFFF;
   --wc-color-border: #707a8c45;
   --wc-color-border-strong: rgba(204, 202, 194, 0.550);
   --wc-color-critical: #242936;

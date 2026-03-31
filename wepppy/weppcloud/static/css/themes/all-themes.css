@@ -203,6 +203,9 @@
   --wc-color-accent-soft: rgba(255, 204, 102, 0.180);
   --wc-color-attention: #ffcc6633;
   --wc-color-attention-soft: rgba(255, 204, 102, 0.220);
+  --wc-button-disabled-bg: #545E6E;
+  --wc-button-disabled-border: #545E6E;
+  --wc-button-disabled-text: #FFFFFF;
   --wc-color-border: #707a8c45;
   --wc-color-border-strong: rgba(204, 202, 194, 0.550);
   --wc-color-critical: #242936;
@@ -244,6 +247,9 @@
   --wc-color-accent-soft: rgba(255, 204, 102, 0.180);
   --wc-color-attention: #ffcc6633;
   --wc-color-attention-soft: rgba(255, 204, 102, 0.220);
+  --wc-button-disabled-bg: #545E6E;
+  --wc-button-disabled-border: #545E6E;
+  --wc-button-disabled-text: #FFFFFF;
   --wc-color-border: #707a8c45;
   --wc-color-border-strong: rgba(204, 202, 194, 0.550);
   --wc-color-critical: #242936;
@@ -325,6 +331,7 @@
   --wc-color-accent-soft: rgba(143, 188, 187, 0.22);
   --wc-color-attention: #88c0d0;
   --wc-color-attention-soft: rgba(136, 192, 208, 0.220);
+  --wc-button-disabled-text: #D8DEE9;
   --wc-color-border: #272c36;
   --wc-color-border-strong: rgba(123, 136, 161, 0.550);
   --wc-color-critical: #d8dee9;
@@ -358,10 +365,6 @@
 :root[data-theme="cursor-dark-midnight"] .wc-card, :root[data-theme="cursor-dark-midnight"] .wc-control, :root[data-theme="cursor-dark-midnight"] .wc-panel {
   border-color: transparent;
   box-shadow: none;
-}
-
-:root[data-theme="cursor-dark-midnight"] {
-  --wc-button-disabled-text: var(--wc-color-text);
 }
 
 /* Generated from Cursor-Dark-High-Contrast-color-theme.json on 2026-03-31T19:23:12.238210+00:00 */
@@ -451,6 +454,7 @@
   --wc-color-accent-soft: rgba(0, 80, 164, 0.180);
   --wc-color-attention: #C25A00;
   --wc-color-attention-soft: rgba(194, 90, 0, 0.220);
+  --wc-button-disabled-text: #E2ECFF;
   --wc-color-border: #0F3A5F;
   --wc-color-border-strong: rgba(5, 21, 38, 0.550);
   --wc-color-critical: #B00020;
@@ -459,7 +463,7 @@
   --wc-color-link-hover: #002347;
   --wc-color-on-primary: #FFFFFF;
   --wc-color-page: #E4EDFF;
-  --wc-color-positive: #0F8B25;
+  --wc-color-positive: #0C7A20;
   --wc-color-positive-soft: rgba(15, 139, 37, 0.180);
   --wc-color-primary: #0050A4;
   --wc-color-primary-dark: #004083;

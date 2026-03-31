@@ -4,6 +4,7 @@
   --wc-color-accent-soft: rgba(143, 188, 187, 0.22);
   --wc-color-attention: #88c0d0;
   --wc-color-attention-soft: rgba(136, 192, 208, 0.220);
+  --wc-button-disabled-text: #D8DEE9;
   --wc-color-border: #272c36;
   --wc-color-border-strong: rgba(123, 136, 161, 0.550);
   --wc-color-critical: #d8dee9;
@@ -37,8 +38,4 @@
 :root[data-theme="cursor-dark-midnight"] .wc-card, :root[data-theme="cursor-dark-midnight"] .wc-control, :root[data-theme="cursor-dark-midnight"] .wc-panel {
   border-color: transparent;
   box-shadow: none;
-}
-
-:root[data-theme="cursor-dark-midnight"] {
-  --wc-button-disabled-text: var(--wc-color-text);
 }
