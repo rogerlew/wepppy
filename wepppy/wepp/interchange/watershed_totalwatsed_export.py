@@ -31,6 +31,31 @@ from wepppy.wepp.interchange.date_filters import apply_date_filters
 __all__ = ["totalwatsed_partitioned_dss_export", "archive_dss_export_zip"]
 
 
+def _projection_wkt_from_dem(wd: Path) -> str | None:
+    try:
+        from wepppy.nodb.core import Ron
+    except ModuleNotFoundError:  # pragma: no cover - optional dependency
+        return None
+
+    dem_fn = Path(Ron.getInstance(wd).dem_fn)
+    prj_path = dem_fn.with_suffix(".prj")
+    if prj_path.exists():
+        return prj_path.read_text(encoding="utf-8").strip()
+
+    if not dem_fn.exists():
+        return None
+
+    try:
+        import rasterio
+    except ModuleNotFoundError:  # pragma: no cover - optional dependency
+        return None
+
+    with rasterio.open(dem_fn) as dataset:
+        if dataset.crs is None:
+            return None
+        return dataset.crs.to_wkt().strip()
+
+
 def _channel_wepp_ids(translator, network, channel_top_id: int) -> list[int]:
     try:
         from wepppy.topo.watershed_abstraction import upland_hillslopes
@@ -242,10 +267,16 @@ def archive_dss_export_zip(wd: str | Path, status_channel: str | None = None) ->
 
     wd_path = Path(wd)
     dss_export_dir = wd_path / "export" / "dss"
+    projection_wkt = _projection_wkt_from_dem(wd_path)
 
     zip_file = wd_path / "export" / "dss.zip"
     with zipfile.ZipFile(zip_file, "w") as zipf:
+        if projection_wkt:
+            zipf.writestr("projection.prj", projection_wkt)
         for root, dirs, files in os.walk(dss_export_dir):
             for file in files:
                 file_path = os.path.join(root, file)
-                zipf.write(file_path, os.path.relpath(file_path, dss_export_dir))
+                relative_path = os.path.relpath(file_path, dss_export_dir)
+                if relative_path == "projection.prj" and projection_wkt:
+                    continue
+                zipf.write(file_path, relative_path)

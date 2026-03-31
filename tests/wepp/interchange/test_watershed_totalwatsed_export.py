@@ -1,4 +1,5 @@
 import copy
+import zipfile
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
@@ -171,3 +172,36 @@ def test_partitioned_dss_accepts_year_one_dates(monkeypatch, tmp_path):
     assert runvol_record is not None
     assert runvol_record["start"] == "11JAN0001 00:00:00"
     assert "11JAN0001" in runvol_record["pathname"]
+
+
+def test_archive_dss_zip_uses_projection_from_ron_dem(monkeypatch, tmp_path):
+    wd = tmp_path / "run"
+    dss_dir = wd / "export" / "dss"
+    dss_dir.mkdir(parents=True)
+    (dss_dir / "totalwatsed3_chan_101.dss").write_text("dss", encoding="utf-8")
+    (dss_dir / "projection.prj").write_text("LEGACY", encoding="utf-8")
+
+    dem_dir = wd / "dem"
+    dem_dir.mkdir(parents=True)
+    dem_fn = dem_dir / "dem.tif"
+    dem_fn.write_bytes(b"dem")
+    dem_projection = 'PROJCS["WGS 84 / UTM zone 11N"]'
+    dem_prj = dem_dir / "dem.prj"
+    dem_prj.write_text(dem_projection, encoding="utf-8")
+
+    class DummyRon:
+        def __init__(self, path: Path):
+            self.dem_fn = str(path)
+
+        @classmethod
+        def getInstance(cls, _wd):
+            return cls(dem_fn)
+
+    monkeypatch.setattr("wepppy.nodb.core.Ron", DummyRon)
+
+    mod.archive_dss_export_zip(wd)
+
+    with zipfile.ZipFile(wd / "export" / "dss.zip", "r") as zipf:
+        assert "totalwatsed3_chan_101.dss" in zipf.namelist()
+        assert "projection.prj" in zipf.namelist()
+        assert zipf.read("projection.prj").decode("utf-8") == dem_projection
