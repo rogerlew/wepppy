@@ -336,6 +336,7 @@ var Disturbed = (function () {
         var lookupStatusElement = dom.qs("[data-disturbed-lookup-status]") || null;
         var lookupVariantInputs = dom.qsa("[data-disturbed-lookup-variant]") || [];
         var lookupModifyLinks = dom.qsa("[data-disturbed-modify-link]") || [];
+        var extendedDependentControls = dom.qsa("[data-disturbed-requires-extended]") || [];
 
         var uploadHintElement = formElement ? dom.qs("#hint_upload_sbs", formElement) : null;
         var removeHintElement = formElement ? dom.qs("#hint_remove_sbs", formElement) : null;
@@ -423,7 +424,8 @@ var Disturbed = (function () {
             hasSbs: undefined,
             hasSbsRequest: null,
             uniformSeverity: initialUniform,
-            lookupVariant: LOOKUP_VARIANT_BASE
+            lookupVariant: LOOKUP_VARIANT_BASE,
+            hasExtendedLookup: false
         };
 
         function emit(name, payload) {
@@ -462,6 +464,39 @@ var Disturbed = (function () {
         function setLookupStatusError(payload, fallback) {
             var message = resolveErrorMessage(payload, fallback) || fallback || "Request failed";
             setLookupStatus(message, "error");
+        }
+
+        function setExtendedLookupAvailability(hasExtendedLookup) {
+            var available = hasExtendedLookup === true;
+            state.hasExtendedLookup = available;
+
+            extendedDependentControls.forEach(function (control) {
+                if (!control) {
+                    return;
+                }
+                var tagName = String(control.tagName || "").toLowerCase();
+                if (tagName === "a") {
+                    if (available) {
+                        control.removeAttribute("aria-disabled");
+                        control.removeAttribute("tabindex");
+                        if (control.dataset) {
+                            delete control.dataset.disabled;
+                        }
+                    } else {
+                        control.setAttribute("aria-disabled", "true");
+                        control.setAttribute("tabindex", "-1");
+                        if (control.dataset) {
+                            control.dataset.disabled = "true";
+                        }
+                    }
+                    return;
+                }
+                control.disabled = !available;
+            });
+
+            if (!available && state.lookupVariant === LOOKUP_VARIANT_EXTENDED) {
+                setLookupVariantSelection(LOOKUP_VARIANT_BASE, { emit: false });
+            }
         }
 
         function normalizeLookupVariant(value) {
@@ -516,10 +551,12 @@ var Disturbed = (function () {
                 .then(function (result) {
                     var data = result.body || {};
                     var content = data.Content || data.content || data;
+                    setExtendedLookupAvailability(content.has_extended_lookup === true);
                     var variant = content.lookup_variant || state.lookupVariant;
                     var normalized = setLookupVariantSelection(variant, { emit: false });
                     emit("disturbed:lookup:variant", {
                         lookupVariant: normalized,
+                        hasExtendedLookup: state.hasExtendedLookup,
                         source: reason || "api"
                     });
                     return normalized;
@@ -531,6 +568,11 @@ var Disturbed = (function () {
 
         function setLookupVariantOnServer(variant) {
             var requestedVariant = normalizeLookupVariant(variant);
+            if (requestedVariant === LOOKUP_VARIANT_EXTENDED && state.hasExtendedLookup !== true) {
+                setLookupVariantSelection(LOOKUP_VARIANT_BASE, { emit: false });
+                setLookupStatus("Extended lookup is unavailable. Load extended table first.", "warning");
+                return Promise.resolve(LOOKUP_VARIANT_BASE);
+            }
             setLookupStatus("Saving lookup selection...", "pending");
             return http
                 .request(url_for_run("tasks/set_lookup_variant"), {
@@ -545,12 +587,16 @@ var Disturbed = (function () {
                         return refreshLookupVariantSelection("set-lookup-variant-error");
                     }
                     var content = data.Content || data.content || data;
+                    if (content.has_extended_lookup !== undefined) {
+                        setExtendedLookupAvailability(content.has_extended_lookup === true);
+                    }
                     var effectiveVariant = normalizeLookupVariant(content.lookup_variant || requestedVariant);
                     setLookupVariantSelection(effectiveVariant, { emit: false });
                     setLookupStatus("Active lookup set to " + effectiveVariant + ".", "success");
                     emit("disturbed:lookup:variant", {
                         lookupVariant: effectiveVariant,
                         requestedLookupVariant: requestedVariant,
+                        hasExtendedLookup: state.hasExtendedLookup,
                         source: "set-lookup-variant"
                     });
                     return effectiveVariant;
@@ -1226,11 +1272,23 @@ var Disturbed = (function () {
                 setLookupVariantSelection(requestedVariant, { emit: true });
                 setLookupVariantOnServer(requestedVariant);
             });
+
+            dom.delegate(document, "click", "[data-disturbed-requires-extended]", function (event, target) {
+                if (state.hasExtendedLookup === true) {
+                    return;
+                }
+                event.preventDefault();
+                if (target && target.dataset && target.dataset.disturbedLookupVariant) {
+                    setLookupVariantSelection(LOOKUP_VARIANT_BASE, { emit: false });
+                }
+                setLookupStatus("Extended lookup is unavailable. Load extended table first.", "warning");
+            });
         }
 
         setMode(state.mode, false);
         bindHandlers();
         setLookupVariantSelection(state.lookupVariant, { emit: false });
+        setExtendedLookupAvailability(false);
         refreshLookupVariantSelection("bootstrap");
 
         disturbed.reset_land_soil_lookup = resetLandSoilLookup;

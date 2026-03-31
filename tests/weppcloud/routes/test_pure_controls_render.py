@@ -327,6 +327,7 @@ def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> N
     assert "Delete Extended Landsoil Lookup Table" in rendered
     assert 'data-disturbed-action="sync-base-to-extended-lookup"' in rendered
     assert 'data-disturbed-lookup-variant' in rendered
+    assert rendered.count('data-disturbed-requires-extended="true"') >= 4
     assert "Extended" in rendered
     assert "Base uses the canonical lookup table." in rendered
     assert "Restore the base lookup CSV to default values." in rendered

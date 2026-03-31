@@ -38,6 +38,15 @@ disturbed_bp = Blueprint('disturbed', __name__)
 _logger = logging.getLogger(__name__)
 LOOKUP_VARIANT_BASE = 'base'
 LOOKUP_VARIANT_EXTENDED = 'extended'
+LOOKUP_VARIANT_UNAVAILABLE_CODE = 'LOOKUP_VARIANT_UNAVAILABLE'
+
+
+class LookupVariantUnavailableError(RuntimeError):
+    """Raised when an explicitly requested lookup variant is unavailable."""
+
+    def __init__(self, requested_variant: str):
+        super().__init__(requested_variant)
+        self.requested_variant = requested_variant
 
 
 def _set_no_store_headers(response: Response) -> Response:
@@ -126,17 +135,24 @@ def _normalize_lookup_variant(value: Optional[str]) -> Optional[str]:
     return None
 
 
-def _resolve_lookup_target(
-    disturbed: Any,
-    requested_variant: Optional[str] = None,
-) -> Tuple[str, str]:
-    base_lookup_fn = disturbed.lookup_fn
+def _has_extended_lookup(disturbed: Any) -> bool:
     extended_lookup_fn = getattr(disturbed, 'extended_lookup_fn', None)
-    has_extended_lookup = (
+    return (
         isinstance(extended_lookup_fn, str)
         and extended_lookup_fn != ''
         and os.path.exists(extended_lookup_fn)
     )
+
+
+def _resolve_lookup_target(
+    disturbed: Any,
+    requested_variant: Optional[str] = None,
+    *,
+    strict_requested: bool = False,
+) -> Tuple[str, str]:
+    base_lookup_fn = disturbed.lookup_fn
+    extended_lookup_fn = getattr(disturbed, 'extended_lookup_fn', None)
+    has_extended_lookup = _has_extended_lookup(disturbed)
 
     variant = _normalize_lookup_variant(requested_variant)
     if variant is None:
@@ -149,6 +165,8 @@ def _resolve_lookup_target(
     if variant == LOOKUP_VARIANT_EXTENDED:
         if has_extended_lookup:
             return LOOKUP_VARIANT_EXTENDED, extended_lookup_fn
+        if strict_requested:
+            raise LookupVariantUnavailableError(LOOKUP_VARIANT_EXTENDED)
         _logger.info(
             'disturbed_lookup_variant_missing_extended_fallback_base requested_variant=%s base_lookup_fn=%s extended_lookup_fn=%s',
             requested_variant,
@@ -164,7 +182,21 @@ def _resolve_lookup_target(
 
 def _resolve_lookup_target_from_request(disturbed: Any) -> Tuple[str, str]:
     requested_variant = request.args.get('lookup') or request.args.get('table')
-    return _resolve_lookup_target(disturbed, requested_variant=requested_variant)
+    normalized_requested_variant = _normalize_lookup_variant(requested_variant)
+    strict_requested = normalized_requested_variant == LOOKUP_VARIANT_EXTENDED
+    return _resolve_lookup_target(
+        disturbed,
+        requested_variant=requested_variant,
+        strict_requested=strict_requested,
+    )
+
+
+def _lookup_variant_unavailable_error_response() -> Response:
+    return error_factory(
+        'Extended lookup table is unavailable. Load extended lookup first.',
+        status_code=409,
+        code=LOOKUP_VARIANT_UNAVAILABLE_CODE,
+    )
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/set_lookup_variant', methods=['POST'])
@@ -184,6 +216,8 @@ def task_set_lookup_variant(runid: str, config: str) -> Response:
     normalized_variant = _normalize_lookup_variant(requested_variant)
     if normalized_variant is None:
         return error_factory("lookup_variant must be one of {'base', 'extended'}", status_code=400)
+    if normalized_variant == LOOKUP_VARIANT_EXTENDED and not _has_extended_lookup(disturbed):
+        return _lookup_variant_unavailable_error_response()
 
     disturbed.active_lookup_variant = normalized_variant
     effective_variant, _ = _resolve_lookup_target(disturbed, requested_variant=normalized_variant)
@@ -192,6 +226,7 @@ def task_set_lookup_variant(runid: str, config: str) -> Response:
         dict(
             requested_lookup_variant=normalized_variant,
             lookup_variant=effective_variant,
+            has_extended_lookup=_has_extended_lookup(disturbed),
         )
     )
 
@@ -203,7 +238,10 @@ def modify_disturbed(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     disturbed = Disturbed.getInstance(wd)
-    lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
+    try:
+        lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
+    except LookupVariantUnavailableError:
+        return _lookup_variant_unavailable_error_response()
     lookup_filename = os.path.basename(lookup_fn)
 
     quoted_runid = quote(runid, safe="")
@@ -322,13 +360,17 @@ def lookup_disturbed_lookup_meta(runid: str, config: str) -> Response:
     wd = str(ctx.active_root)
     disturbed = Disturbed.getInstance(wd)
 
-    with _read_lock_context(disturbed):
-        lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
-        snapshot = get_disturbed_land_soil_lookup_snapshot(lookup_fn)
+    try:
+        with _read_lock_context(disturbed):
+            lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
+            snapshot = get_disturbed_land_soil_lookup_snapshot(lookup_fn)
+    except LookupVariantUnavailableError:
+        return _lookup_variant_unavailable_error_response()
 
     response = success_factory(
         dict(
             lookup_variant=lookup_variant,
+            has_extended_lookup=_has_extended_lookup(disturbed),
             lookup_sha256=snapshot.get('sha256'),
             size_bytes=snapshot.get('size_bytes'),
             mtime_epoch=snapshot.get('mtime_epoch'),
@@ -347,10 +389,14 @@ def lookup_disturbed_lookup_snapshot(runid: str, config: str) -> Response:
     wd = str(ctx.active_root)
     disturbed = Disturbed.getInstance(wd)
 
-    with _read_lock_context(disturbed):
-        lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
-        payload = _build_lookup_snapshot_payload(lookup_fn)
-        payload['lookup_variant'] = lookup_variant
+    try:
+        with _read_lock_context(disturbed):
+            lookup_variant, lookup_fn = _resolve_lookup_target_from_request(disturbed)
+            payload = _build_lookup_snapshot_payload(lookup_fn)
+            payload['lookup_variant'] = lookup_variant
+            payload['has_extended_lookup'] = _has_extended_lookup(disturbed)
+    except LookupVariantUnavailableError:
+        return _lookup_variant_unavailable_error_response()
 
     response = success_factory(payload)
     return _set_no_store_headers(response)
@@ -471,6 +517,8 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
                 updated_sha256,
                 len(rows),
             )
+    except LookupVariantUnavailableError:
+        return _lookup_variant_unavailable_error_response()
     except ValueError as exc:
         _logger.warning(
             'disturbed_lookup_write_rejected runid=%s config=%s err=%s',

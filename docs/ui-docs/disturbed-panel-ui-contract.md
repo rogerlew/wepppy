@@ -31,6 +31,13 @@ Define the canonical UI and route contract for the Disturbed modal that manages 
   - Active lookup selection is persisted in Disturbed NoDb (`disturbed.nodb`) as run-scoped state.
   - Radio change contract: `POST /runs/<runid>/<config>/tasks/set_lookup_variant` with `{"lookup_variant":"base|extended"}`.
   - On refresh, server response remains authoritative (`lookup_variant` falls back to `base` if extended is unavailable).
+- Extended-availability gating:
+  - UI reads `has_extended_lookup` from `GET /runs/<runid>/<config>/api/disturbed/lookup_meta`.
+  - When `has_extended_lookup=false`, disable:
+    - Extended radio selector
+    - `Modify Extended Table`
+    - `Delete Extended Landsoil Lookup Table`
+    - `Sync Base to Extended`
 
 ### 3. Modify Landsoil Lookup Tables
 - `Modify Base Table` link: `modify_disturbed?lookup=base`
@@ -62,7 +69,8 @@ Define the canonical UI and route contract for the Disturbed modal that manages 
 
 ## Default Lookup Preference
 - Resolver behavior:
-  - If `lookup=base|extended` is provided, honor it (extended falls back to base if missing).
+  - If `lookup=base` is provided, honor base selection.
+  - If `lookup=extended` is provided, require extended lookup to exist (otherwise return `LOOKUP_VARIANT_UNAVAILABLE`).
   - If no explicit lookup is provided, resolve from Disturbed NoDb `active_lookup_variant`.
   - Backward compatibility: if no persisted value exists, legacy default still applies (prefer extended when extended CSV exists; otherwise base).
 - Deleting the extended table forces active selection to base.

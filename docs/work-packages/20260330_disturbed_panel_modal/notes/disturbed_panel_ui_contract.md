@@ -68,6 +68,7 @@ Required selector controls:
 Implementation note:
 - Existing backend contract uses `lookup=base|extended`; selector should map directly to that query contract.
 - Selector state must be persisted in Disturbed NoDb (`disturbed.nodb`) via a task endpoint, not local browser storage.
+- Extended-only controls must be disabled when extended lookup does not exist.
 
 ### 3. Modify Landsoil Lookup Tables
 Required action controls:
@@ -87,6 +88,7 @@ Required documentation link behavior:
 - `POST /runs/<runid>/<config>/tasks/reset_disturbed`
 - `POST /runs/<runid>/<config>/tasks/load_extended_land_soil_lookup`
 - `GET /runs/<runid>/<config>/modify_disturbed?lookup=base|extended`
+  - Explicit `lookup=extended` must hard-fail (`409 LOOKUP_VARIANT_UNAVAILABLE`) when extended lookup is absent.
 
 ### New routes required
 - `POST /runs/<runid>/<config>/tasks/set_lookup_variant`
@@ -100,6 +102,7 @@ Required documentation link behavior:
 ### Status feedback behavior
 - All Disturbed modal actions should report status through the shared `data-disturbed-lookup-status` feedback node.
 - Failed actions should surface existing error payload message text where available.
+- `lookup_meta` should include `has_extended_lookup` so the controller can disable/enable extended-only controls deterministically.
 
 ## Jinja Usersum Link Helper Contract
 A reusable helper should be introduced for control-page documentation links.

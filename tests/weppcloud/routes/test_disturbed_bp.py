@@ -323,6 +323,14 @@ def test_modify_disturbed_route_prefers_extended_lookup_when_present(disturbed_c
     assert template_context["lookup_variant"] == "extended"
 
 
+def test_modify_disturbed_route_errors_when_explicit_extended_missing(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/modify_disturbed?lookup=extended")
+    assert response.status_code == 409
+    payload = response.get_json()
+    assert payload["error"]["code"] == "LOOKUP_VARIANT_UNAVAILABLE"
+
+
 def test_modify_disturbed_page_emits_csrf_token_for_save(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -450,8 +458,30 @@ def test_lookup_meta_returns_sha_and_shape(disturbed_client):
     payload = response.get_json()
     content = payload["Content"]
     assert content["lookup_sha256"]
+    assert content["has_extended_lookup"] is False
     assert isinstance(content["columns"], int)
     assert isinstance(content["rows"], int)
+
+
+def test_lookup_meta_reports_extended_available_when_present(disturbed_client):
+    client, DisturbedStub, _, _, _dispatched, run_dir = disturbed_client
+    disturbed = DisturbedStub.getInstance(run_dir)
+    Path(disturbed.extended_lookup_fn).write_text(
+        "sev_enum,landuse,disturbed_class,stext\n0,forest,forest,loam\n"
+    )
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+    assert response.status_code == 200
+    content = response.get_json()["Content"]
+    assert content["has_extended_lookup"] is True
+
+
+def test_lookup_meta_errors_when_explicit_extended_missing(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta?lookup=extended")
+    assert response.status_code == 409
+    payload = response.get_json()
+    assert payload["error"]["code"] == "LOOKUP_VARIANT_UNAVAILABLE"
 
 
 def test_lookup_snapshot_returns_csv_and_sha(disturbed_client):
@@ -464,8 +494,17 @@ def test_lookup_snapshot_returns_csv_and_sha(disturbed_client):
     assert isinstance(content["csv_text"], str)
     assert content["lookup_sha256"]
     assert content["lookup_variant"] == "base"
+    assert content["has_extended_lookup"] is False
     assert isinstance(content["rows"], int)
     assert isinstance(content["columns"], int)
+
+
+def test_lookup_snapshot_errors_when_explicit_extended_missing(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_snapshot?lookup=extended")
+    assert response.status_code == 409
+    payload = response.get_json()
+    assert payload["error"]["code"] == "LOOKUP_VARIANT_UNAVAILABLE"
 
 
 def test_lookup_snapshot_prefers_extended_when_present(disturbed_client):
@@ -482,6 +521,7 @@ def test_lookup_snapshot_prefers_extended_when_present(disturbed_client):
     payload = response.get_json()
     content = payload["Content"]
     assert content["lookup_variant"] == "extended"
+    assert content["has_extended_lookup"] is True
     assert content["columns"] == 7
     assert "plant.data.bb" in content["csv_text"].splitlines()[0]
 
@@ -522,6 +562,7 @@ def test_set_lookup_variant_persists_selection_in_controller_state(disturbed_cli
     set_payload = set_response.get_json()["Content"]
     assert set_payload["requested_lookup_variant"] == "extended"
     assert set_payload["lookup_variant"] == "extended"
+    assert set_payload["has_extended_lookup"] is True
     assert disturbed.active_lookup_variant == "extended"
 
     meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
@@ -551,6 +592,17 @@ def test_set_lookup_variant_rejects_invalid_payload(disturbed_client):
     assert response.status_code == 400
     payload = response.get_json()
     assert "lookup_variant" in payload["error"]["message"]
+
+
+def test_set_lookup_variant_rejects_extended_when_missing(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_lookup_variant",
+        json={"lookup_variant": "extended"},
+    )
+    assert response.status_code == 409
+    payload = response.get_json()
+    assert payload["error"]["code"] == "LOOKUP_VARIANT_UNAVAILABLE"
 
 
 def test_task_modify_disturbed_rejects_missing_if_match(disturbed_client):
@@ -700,6 +752,20 @@ def test_task_modify_disturbed_rejects_when_lookup_sha_unavailable(
     assert response.status_code == 409
     payload = response.get_json()
     assert payload["error"]["code"] == "LOOKUP_VERSION_UNAVAILABLE"
+
+
+def test_task_modify_disturbed_errors_when_explicit_extended_missing(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_disturbed?lookup=extended",
+        json={
+            "rows": [["forest", "loam", "1", "2", "3", "4", "1", "0", "0", "0"]],
+            "if_match_sha256": "deadbeef",
+        },
+    )
+    assert response.status_code == 409
+    payload = response.get_json()
+    assert payload["error"]["code"] == "LOOKUP_VARIANT_UNAVAILABLE"
 
 
 def test_lookup_endpoints_use_non_mutating_lock(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

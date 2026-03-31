@@ -112,6 +112,7 @@ Each blueprint section below documents:
 - **Controller docs**: [Disturbed Controller Reference (2025 helper migration)](../../controllers_js/README.md#disturbed-controller-reference-2025-helper-migration), [BAER Controller Reference (2025 helper migration)](../../controllers_js/README.md#baer-controller-reference-2025-helper-migration)
 - **Helper stack**: `authorize`, `authorize_and_handle_with_exception_factory`, `load_run_context`, `parse_request_payload`, `send_file`, `success_factory`, `exception_factory`, `error_factory`
 - **Testing**: [tests/weppcloud/routes/test_disturbed_bp.py](../../../../tests/weppcloud/routes/test_disturbed_bp.py) — uses `tests.factories.singleton_factory` to stub Disturbed/Baer; keep stub signatures aligned.
+- **Lookup contract note**: explicit `lookup=extended` requests hard-fail with `LOOKUP_VARIANT_UNAVAILABLE` if the extended lookup file is absent.
 
 | Route | Methods | NoDb interactions | Notes |
 | --- | --- | --- | --- |

@@ -211,9 +211,11 @@ describe("Disturbed lookup variant persistence", () => {
             </form>
             <div data-disturbed-lookup-status></div>
             <input type="radio" name="disturbed_lookup_variant" value="base" data-disturbed-lookup-variant checked>
-            <input type="radio" name="disturbed_lookup_variant" value="extended" data-disturbed-lookup-variant>
+            <input type="radio" name="disturbed_lookup_variant" value="extended" data-disturbed-lookup-variant data-disturbed-requires-extended="true">
             <a data-disturbed-modify-link="base"></a>
-            <a data-disturbed-modify-link="extended"></a>
+            <a data-disturbed-modify-link="extended" data-disturbed-requires-extended="true"></a>
+            <button type="button" data-disturbed-action="delete-extended-lookup" data-disturbed-requires-extended="true"></button>
+            <button type="button" data-disturbed-action="sync-base-to-extended-lookup" data-disturbed-requires-extended="true"></button>
         `;
 
         await import("../dom.js");
@@ -229,10 +231,13 @@ describe("Disturbed lookup variant persistence", () => {
 
         httpRequestMock = jest.fn((url) => {
             if (url === "api/disturbed/lookup_meta") {
-                return Promise.resolve({ body: { Content: { lookup_variant: "base" } } });
+                return Promise.resolve({ body: { Content: { lookup_variant: "base", has_extended_lookup: false } } });
             }
             if (url === "tasks/set_lookup_variant") {
-                return Promise.resolve({ body: { Content: { lookup_variant: "extended" } } });
+                return Promise.resolve({ body: { Content: { lookup_variant: "extended", has_extended_lookup: true } } });
+            }
+            if (url === "tasks/load_extended_land_soil_lookup") {
+                return Promise.resolve({ body: {} });
             }
             return Promise.resolve({ body: { Content: {} } });
         });
@@ -293,15 +298,16 @@ describe("Disturbed lookup variant persistence", () => {
             expect.objectContaining({ method: "GET" }),
         );
         expect(document.querySelector('[data-disturbed-lookup-variant][value="base"]').checked).toBe(true);
+        expect(document.querySelector('[data-disturbed-lookup-variant][value="extended"]').disabled).toBe(true);
     });
 
     test("changing lookup radio persists selection in NoDb via task endpoint", async () => {
         httpRequestMock.mockImplementation((url) => {
             if (url === "api/disturbed/lookup_meta") {
-                return Promise.resolve({ body: { Content: { lookup_variant: "base" } } });
+                return Promise.resolve({ body: { Content: { lookup_variant: "base", has_extended_lookup: true } } });
             }
             if (url === "tasks/set_lookup_variant") {
-                return Promise.resolve({ body: { Content: { lookup_variant: "extended" } } });
+                return Promise.resolve({ body: { Content: { lookup_variant: "extended", has_extended_lookup: true } } });
             }
             return Promise.resolve({ body: { Content: {} } });
         });
@@ -324,5 +330,68 @@ describe("Disturbed lookup variant persistence", () => {
             }),
         );
         expect(document.querySelector('[data-disturbed-lookup-variant][value="extended"]').checked).toBe(true);
+    });
+
+    test("extended-dependent controls remain disabled when extended lookup is absent", async () => {
+        httpRequestMock.mockImplementation((url) => {
+            if (url === "api/disturbed/lookup_meta") {
+                return Promise.resolve({ body: { Content: { lookup_variant: "base", has_extended_lookup: false } } });
+            }
+            return Promise.resolve({ body: { Content: {} } });
+        });
+
+        getController();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const extendedRadio = document.querySelector('[data-disturbed-lookup-variant][value="extended"]');
+        const extendedLink = document.querySelector('[data-disturbed-modify-link="extended"]');
+        const syncButton = document.querySelector('[data-disturbed-action="sync-base-to-extended-lookup"]');
+
+        expect(extendedRadio.disabled).toBe(true);
+        expect(syncButton.disabled).toBe(true);
+        expect(extendedLink.getAttribute("aria-disabled")).toBe("true");
+        expect(httpRequestMock).not.toHaveBeenCalledWith(
+            "tasks/set_lookup_variant",
+            expect.any(Object),
+        );
+    });
+
+    test("load extended lookup re-enables extended-dependent controls", async () => {
+        let metaRequestCount = 0;
+        httpRequestMock.mockImplementation((url) => {
+            if (url === "api/disturbed/lookup_meta") {
+                metaRequestCount += 1;
+                if (metaRequestCount === 1) {
+                    return Promise.resolve({ body: { Content: { lookup_variant: "base", has_extended_lookup: false } } });
+                }
+                return Promise.resolve({ body: { Content: { lookup_variant: "base", has_extended_lookup: true } } });
+            }
+            if (url === "tasks/load_extended_land_soil_lookup") {
+                return Promise.resolve({ body: {} });
+            }
+            return Promise.resolve({ body: { Content: {} } });
+        });
+
+        const controller = getController();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const extendedRadio = document.querySelector('[data-disturbed-lookup-variant][value="extended"]');
+        const extendedLink = document.querySelector('[data-disturbed-modify-link="extended"]');
+        const syncButton = document.querySelector('[data-disturbed-action="sync-base-to-extended-lookup"]');
+
+        expect(extendedRadio.disabled).toBe(true);
+        await controller.load_extended_land_soil_lookup();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(httpRequestMock).toHaveBeenCalledWith(
+            "tasks/load_extended_land_soil_lookup",
+            expect.objectContaining({ method: "POST" }),
+        );
+        expect(extendedRadio.disabled).toBe(false);
+        expect(syncButton.disabled).toBe(false);
+        expect(extendedLink.getAttribute("aria-disabled")).toBe(null);
     });
 });
