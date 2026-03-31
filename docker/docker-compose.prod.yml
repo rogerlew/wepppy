@@ -425,6 +425,13 @@ services:
 
   rq-worker:
     <<: *wepppy-service
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      f-esri:
+        condition: service_started
     cpuset: "0-39"
     ulimits:
       nofile:
@@ -464,6 +471,13 @@ services:
 
   rq-worker-batch:
     <<: *wepppy-service
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      f-esri:
+        condition: service_started
     cpuset: "0-39"
     ulimits:
       nofile:
@@ -613,12 +627,16 @@ services:
 
   f-esri:
     image: ${F_ESRI_IMAGE:-wepppy-f-esri:latest}
+    container_name: ${F_ESRI_CONTAINER:-wepppy-f-esri}
     build:
       context: ..
       dockerfile: docker/Dockerfile.f-esri
     restart: unless-stopped
     init: true
     command: ["tail", "-f", "/dev/null"]
+    volumes:
+      - /wc1:/wc1
+      - /wc1/geodata:/geodata
     networks:
       - backend
 
