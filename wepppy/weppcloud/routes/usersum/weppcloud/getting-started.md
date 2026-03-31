@@ -107,7 +107,7 @@ The **Fork** button in the header creates a complete copy of your project under 
 - **Create a baseline copy** before making changes
 - **Share a starting point** with a colleague
 
-When forking, you also have the option to **Undisturbify** — this creates the copy but removes fire-related disturbance data (burn severity maps and fire-modified soils/landuse), resetting the project to undisturbed baseline conditions. This lets you quickly set up a "before fire" comparison scenario from an existing post-fire project.
+When forking, you also have the option to **Undisturbify** — this creates the copy, removes fire-related disturbance data (burn severity maps and fire-modified soils/landuse), resets the project to undisturbed baseline conditions, and reruns WEPP. This lets you quickly set up a "before fire" comparison scenario from an existing post-fire project.
 
 <!-- ![Fork console with undisturbify option](static/getting-started/fork-console.png) -->
 
