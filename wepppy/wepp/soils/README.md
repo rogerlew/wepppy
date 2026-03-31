@@ -2,6 +2,8 @@
 > WEPP soil input file format specification, manipulation utilities, and pre-built soil library
 
 > **See also:** [AGENTS.md](../../../AGENTS.md) for coding conventions and [wepppy.soils](../../soils/README.md) for SSURGO data acquisition.
+>
+> **User documentation:** [Soil Input File Specification](../../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md) (line-by-line file format reference) and [Soil File Parameters](../../../weppcloud/routes/usersum/db/soil_file.parameters.md) (parameter dictionary with extended descriptions).
 
 ## Overview
 
