@@ -260,6 +260,7 @@
 
   function buildRunsCatalogUrl() {
     const params = new URLSearchParams();
+    params.set('include_ron_meta', '1');
     if (runsSortParam) {
       params.set('sort', runsSortParam);
     }

@@ -17,50 +17,50 @@
 
   {% call ui.collapsible_card(title="WEPP Advanced Options", expanded=False, card_id="wepp_advanced_options") %}
     <div class="wc-stack" data-wepp-advanced>
-      {% call ui.card("WEPP UI - Hourly Seepage", attrs={"id": "wepp_hourly_seepage"}) %}
+      {% call ui.collapsible_card("WEPP UI - Hourly Seepage", expanded=False, card_id="wepp_hourly_seepage") %}
       {% include "controls/wepp_pure_advanced_options/wepp_ui.htm" %}
       {% endcall %}
-      {% call ui.card("Potential ET (PMET)", attrs={"id": "wepp_pmet_options"}) %}
+      {% call ui.collapsible_card("Potential ET (PMET)", expanded=False, card_id="wepp_pmet_options") %}
       {% include "controls/wepp_pure_advanced_options/pmet.htm" %}
       {% endcall %}
-      {% call ui.card("Frost", attrs={"id": "wepp_frost_options"}) %}
+      {% call ui.collapsible_card("Frost", expanded=False, card_id="wepp_frost_options") %}
       {% include "controls/wepp_pure_advanced_options/frost.htm" %}
       {% endcall %}
-      {% call ui.card("Snow", attrs={"id": "wepp_snow_options"}) %}
+      {% call ui.collapsible_card("Snow", expanded=False, card_id="wepp_snow_options") %}
       {% include "controls/wepp_pure_advanced_options/snow.htm" %}
       {% endcall %}
-      {% call ui.card("Baseflow Processing", attrs={"id": "wepp_baseflow_options"}) %}
+      {% call ui.collapsible_card("Baseflow Processing", expanded=False, card_id="wepp_baseflow_options") %}
       {% include "controls/wepp_pure_advanced_options/baseflow.htm" %}
       {% endcall %}
-      {% call ui.card("Channel Inputs (chan.inp)", attrs={"id": "wepp_chan_inp_options"}) %}
+      {% call ui.collapsible_card("Channel Inputs (chan.inp)", expanded=False, card_id="wepp_chan_inp_options") %}
       {% include "controls/wepp_pure_advanced_options/chan_inp.htm" %}
       {% endcall %}
-      {% call ui.card("Channel Parameters", attrs={"id": "wepp_channel_parameters"}) %}
+      {% call ui.collapsible_card("Channel Parameters", expanded=False, card_id="wepp_channel_parameters") %}
       {% include "controls/wepp_pure_advanced_options/channels.htm" %}
       {% endcall %}
-      {% call ui.card("Bedrock", attrs={"id": "wepp_bedrock_options"}) %}
+      {% call ui.collapsible_card("Bedrock", expanded=False, card_id="wepp_bedrock_options") %}
       {% include "controls/wepp_pure_advanced_options/bedrock.htm" %}
       {% endcall %}
-      {% call ui.card("Clip Hillslopes", attrs={"id": "wepp_clip_hillslopes"}) %}
+      {% call ui.collapsible_card("Clip Hillslopes", expanded=False, card_id="wepp_clip_hillslopes") %}
       {% include "controls/wepp_pure_advanced_options/clip_hillslopes.htm" %}
       {% endcall %}
-      {% call ui.card("Soil Options", attrs={"id": "wepp_soil_options"}) %}
+      {% call ui.collapsible_card("Soil Options", expanded=False, card_id="wepp_soil_options") %}
       {% include "controls/wepp_pure_advanced_options/clip_soils_depth.htm" %}
       {% endcall %}
-      {% call ui.card("Phosphorus", attrs={"id": "wepp_phosphorus_options"}) %}
+      {% call ui.collapsible_card("Phosphorus", expanded=False, card_id="wepp_phosphorus_options") %}
       {% include "controls/wepp_pure_advanced_options/phosphorus.htm" %}
       {% endcall %}
-      {% call ui.card("Export Configuration", attrs={"id": "wepp_export_configuration"}) %}
+      {% call ui.collapsible_card("Export Configuration", expanded=False, card_id="wepp_export_configuration") %}
       {% include "controls/wepp_pure_advanced_options/prep_details.htm" %}
       {% endcall %}
-      {% call ui.card("Interchange", attrs={"id": "wepp_interchange_options"}) %}
+      {% call ui.collapsible_card("Interchange", expanded=False, card_id="wepp_interchange_options") %}
       {% include "controls/wepp_pure_advanced_options/interchange.htm" %}
       {% endcall %}
-      {% call ui.card("WEPP Exec", attrs={"id": "wepp_binary_selection"}) %}
+      {% call ui.collapsible_card("WEPP Exec", expanded=False, card_id="wepp_binary_selection") %}
       {% include "controls/wepp_pure_advanced_options/wepp_bin.htm" %}
       {% endcall %}
       {% if reveg %}
-        {% call ui.card("Revegetation Scenarios", attrs={"id": "wepp_revegetation_options"}) %}
+        {% call ui.collapsible_card("Revegetation Scenarios", expanded=False, card_id="wepp_revegetation_options") %}
           {% include "controls/wepp_pure_advanced_options/revegetation.htm" %}
         {% endcall %}
       {% endif %}
