@@ -654,10 +654,12 @@ class WeppSoilUtil(object):
         """
         if replacements is None:
             replacements = {}
+        else:
+            replacements = dict(replacements)
 
         new = deepcopy(self)
         if new.obj['datver'] != 7778.0:
-            new = self.to7778()
+            new = self.to7778(hostname=hostname)
 
         if 'ksflag' in replacements:
             del replacements['ksflag']
@@ -721,7 +723,10 @@ class WeppSoilUtil(object):
                     horizons.append(new_horizon)
 
                 if j == 0 and h0_max_om is not None:
-                    if horizon['om'] < h0_max_om:
+                    horizon_om = horizon.get('om', horizon.get('orgmat'))
+                    if horizon_om is None:
+                        raise KeyError("Missing organic matter key; expected 'om' or 'orgmat'")
+                    if horizon_om < h0_max_om:
                         horizons.append(horizon)
                 else:
                     horizons.append(horizon)
@@ -811,12 +816,17 @@ class WeppSoilUtil(object):
             A migrated :class:`WeppSoilUtil` copy configured for the requested
             WEPP version.
         """
+        if version not in (9001, 9002, 9003, 9005):
+            raise ValueError(f"Unsupported WEPP soil version: {version}")
+
         if replacements is None:
             replacements = {}
+        else:
+            replacements = dict(replacements)
 
         new = deepcopy(self)
         if new.obj['datver'] != 7778.0:
-            new = self.to7778()
+            new = self.to7778(hostname=hostname)
 
         header = new.obj['header']
         header.append('')
@@ -895,7 +905,10 @@ class WeppSoilUtil(object):
                     horizons.append(new_horizon)
 
                 if j == 0 and h0_max_om is not None:
-                    if horizon['om'] < h0_max_om:
+                    horizon_om = horizon.get('om', horizon.get('orgmat'))
+                    if horizon_om is None:
+                        raise KeyError("Missing organic matter key; expected 'om' or 'orgmat'")
+                    if horizon_om < h0_max_om:
                         horizons.append(horizon)
                 else:
                     horizons.append(horizon)

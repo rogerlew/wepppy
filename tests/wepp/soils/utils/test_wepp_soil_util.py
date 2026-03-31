@@ -3,6 +3,7 @@ import math
 import shutil
 import sys
 import types
+from copy import deepcopy
 from pathlib import Path
 from typing import NamedTuple
 
@@ -177,6 +178,7 @@ def _soil_payload(luse="test use"):
                         "wp": 0.1,
                         "sand": 60.0,
                         "clay": 20.0,
+                        "om": 0.2,
                         "orgmat": 1.0,
                         "cec": 10.0,
                         "rfg": 0.0,
@@ -190,6 +192,7 @@ def _soil_payload(luse="test use"):
                         "wp": 0.12,
                         "sand": 55.0,
                         "clay": 25.0,
+                        "om": 0.1,
                         "orgmat": 1.2,
                         "cec": 11.0,
                         "rfg": 0.0,
@@ -392,3 +395,446 @@ def test_compute_conductivity_raises_when_estimate_unavailable(
             str(src),
             compute_conductivity=True,
         )
+
+
+def test_to_7778disturbed_applies_replacements_and_metadata(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_7778disturbed(
+        replacements={
+            "ki": "*2",
+            "kr": "8.5",
+            "shcrit": "*3",
+            "avke": "0.75",
+            "kslast": "*2",
+            "luse": "forest high sev fire",
+            "stext": "sandy loam",
+        },
+        h0_min_depth=120.0,
+        hostname="dev.wepp.cloud",
+    )
+
+    ofe = disturbed.obj["ofes"][0]
+    horizons = ofe["horizons"]
+
+    assert ofe["ki"] == "2.0"
+    assert ofe["kr"] == "8.5"
+    assert ofe["shcrit"] == "9.0"
+    assert ofe["luse"] == "forest high sev fire"
+    assert ofe["stext"] == "sandy loam"
+    assert float(horizons[0]["solthk"]) == 120.0
+    assert horizons[0]["ksat"] == "0.75"
+    assert float(horizons[1]["solthk"]) == 200.0
+    assert horizons[1]["ksat"] == "0.75"
+    assert horizons[2]["ksat"] == 0.2
+    assert ofe["res_lyr"]["kslast"] == "1.0"
+    assert ofe["nsl"] == len(horizons) == 3
+    assert disturbed.obj["datver"] == 7778.0
+    assert any(
+        "WeppSoilUtil::7778disturbed_migration" in line
+        for line in disturbed.obj["header"]
+    )
+    assert any("ki -> *2" in line for line in disturbed.obj["header"])
+    assert any("h0_min_depth = 120.0" in line for line in disturbed.obj["header"])
+
+
+def test_to_7778disturbed_none_replacements_preserves_values_and_records_source(
+    make_soil_util,
+):
+    util = make_soil_util()
+    original = util.obj["ofes"][0]
+
+    disturbed = util.to_7778disturbed(
+        replacements=None,
+        hostname="unit.test",
+    )
+    ofe = disturbed.obj["ofes"][0]
+
+    assert ofe["ki"] == original["ki"]
+    assert ofe["kr"] == original["kr"]
+    assert ofe["shcrit"] == original["shcrit"]
+    assert any(
+        "Source File: unit.test:in-memory" in line for line in disturbed.obj["header"]
+    )
+
+
+def test_to_7778disturbed_ignores_over9000_only_replacements(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_7778disturbed(
+        replacements={
+            "ksflag": "9",
+            "ksatadj": "2",
+            "ksatfac": "3",
+            "ksatrec": "4",
+        }
+    )
+
+    ofe = disturbed.obj["ofes"][0]
+    assert disturbed.obj["ksflag"] == 1
+    assert ofe["ksatadj"] == "1"
+    assert ofe["ksatfac"] == "1"
+    assert ofe["ksatrec"] == "1"
+
+
+def test_to_7778disturbed_falls_back_to_ksat_when_avke_is_none(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_7778disturbed(
+        replacements={"avke": None, "ksat": "6.2"},
+    )
+
+    assert disturbed.obj["ofes"][0]["horizons"][0]["ksat"] == "6.2"
+
+
+@pytest.mark.parametrize(
+    "avke,expected_ksat",
+    [
+        (None, "6.2"),
+        (0, "0"),
+        ("0", "0"),
+    ],
+)
+def test_to_7778disturbed_avke_precedence(make_soil_util, avke, expected_ksat):
+    util = make_soil_util()
+
+    disturbed = util.to_7778disturbed(
+        replacements={"avke": avke, "ksat": "6.2"},
+    )
+
+    assert disturbed.obj["ofes"][0]["horizons"][0]["ksat"] == expected_ksat
+
+
+def test_to_7778disturbed_h0_max_om_filters_first_horizon(make_soil_util):
+    util = make_soil_util()
+    util.obj["ofes"][0]["horizons"][0].pop("om", None)
+    util.obj["ofes"][0]["horizons"][1].pop("om", None)
+    util.obj["ofes"][0]["horizons"][0]["orgmat"] = 0.5
+    util.obj["ofes"][0]["horizons"][1]["orgmat"] = 0.1
+    util.obj["ofes"][0]["horizons"][1]["solthk"] = 150.0
+
+    disturbed = util.to_7778disturbed(replacements={}, h0_max_om=0.2)
+    horizons = disturbed.obj["ofes"][0]["horizons"]
+
+    assert len(horizons) == 1
+    assert float(horizons[0]["solthk"]) == 150.0
+    assert disturbed.obj["ofes"][0]["nsl"] == 1
+
+
+def test_to_7778disturbed_h0_max_om_keeps_first_horizon_when_under_threshold(
+    make_soil_util,
+):
+    util = make_soil_util()
+    util.obj["ofes"][0]["horizons"][0].pop("om", None)
+    util.obj["ofes"][0]["horizons"][0]["orgmat"] = 0.1
+
+    disturbed = util.to_7778disturbed(replacements={}, h0_max_om=0.2)
+
+    assert disturbed.obj["ofes"][0]["nsl"] == 3
+    assert float(disturbed.obj["ofes"][0]["horizons"][0]["solthk"]) == 50.0
+
+
+def test_to_7778disturbed_does_not_mutate_source_or_replacements(make_soil_util):
+    util = make_soil_util()
+    original_obj = deepcopy(util.obj)
+    replacements = {"ksflag": "9", "ksatadj": "2", "ki": "4"}
+
+    disturbed = util.to_7778disturbed(replacements=replacements)
+
+    assert util.obj == original_obj
+    assert replacements == {"ksflag": "9", "ksatadj": "2", "ki": "4"}
+    assert disturbed.obj["ofes"][0]["ki"] == "4"
+
+
+def test_to_7778disturbed_uses_to7778_when_source_not_7778(make_soil_util, monkeypatch):
+    util = make_soil_util()
+    util.obj["datver"] = 9002.0
+    migrated_7778 = make_soil_util()
+    called = {"count": 0, "hostname": None}
+
+    def _fake_to7778(hostname=""):
+        called["count"] += 1
+        called["hostname"] = hostname
+        return migrated_7778
+
+    monkeypatch.setattr(util, "to7778", _fake_to7778)
+
+    disturbed = util.to_7778disturbed(replacements={"ki": "4"}, hostname="unit.test")
+
+    assert called["count"] == 1
+    assert called["hostname"] == "unit.test"
+    assert disturbed.obj["datver"] == 7778.0
+    assert disturbed.obj["ofes"][0]["ki"] == "4"
+
+
+def test_to_over9000_applies_replacements_and_sets_datver(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={
+            "ki": "*2",
+            "kr": "5.5",
+            "shcrit": "4.5",
+            "ksflag": "9",
+            "ksatadj": "2",
+            "ksatfac": "*3",
+            "ksatrec": "*4",
+            "avke": "0.8",
+            "kslast": "*3",
+            "luse": "forest high sev fire",
+            "stext": "silt loam",
+        },
+        h0_min_depth=120.0,
+        version=9002,
+        hostname="dev.wepp.cloud",
+    )
+
+    ofe = disturbed.obj["ofes"][0]
+    horizons = ofe["horizons"]
+
+    assert disturbed.obj["datver"] == 9002
+    assert disturbed.obj["ksflag"] == "9"
+    assert ofe["ki"] == "2.0"
+    assert ofe["kr"] == "5.5"
+    assert ofe["shcrit"] == "4.5"
+    assert ofe["ksatadj"] == "2"
+    assert ofe["ksatfac"] == "3.0"
+    assert ofe["ksatrec"] == "4.0"
+    assert ofe["luse"] == "forest high sev fire"
+    assert ofe["stext"] == "silt loam"
+    assert float(horizons[0]["solthk"]) == 120.0
+    assert horizons[0]["ksat"] == "0.8"
+    assert float(horizons[1]["solthk"]) == 200.0
+    assert horizons[1]["ksat"] == "0.8"
+    assert horizons[2]["ksat"] == 0.2
+    assert ofe["res_lyr"]["kslast"] == "1.5"
+    assert ofe["nsl"] == len(horizons) == 3
+    assert any("WeppSoilUtil::9002migration" in line for line in disturbed.obj["header"])
+
+
+def test_to_over9000_prefers_ksat_when_avke_is_falsey(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={"avke": 0, "ksat": "7.5"},
+        version=9002,
+    )
+
+    assert disturbed.obj["ofes"][0]["horizons"][0]["ksat"] == "7.5"
+
+
+@pytest.mark.parametrize("version", [9001, 9002])
+def test_to_over9000_versions_9001_9002_update_ksatfac_ksatrec(
+    make_soil_util,
+    version,
+):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={"ksatfac": "*5", "ksatrec": "*6"},
+        version=version,
+    )
+
+    ofe = disturbed.obj["ofes"][0]
+    assert ofe["ksatfac"] == "5.0"
+    assert ofe["ksatrec"] == "6.0"
+    assert disturbed.obj["datver"] == version
+
+
+def test_to_over9000_version_9003_uses_lkeff_not_ksatfac_ksatrec(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={"lkeff": "0.42", "ksatfac": "7", "ksatrec": "8"},
+        version=9003,
+    )
+
+    ofe = disturbed.obj["ofes"][0]
+    assert ofe["lkeff"] == "0.42"
+    assert ofe["ksatfac"] == "1"
+    assert ofe["ksatrec"] == "1"
+    assert disturbed.obj["datver"] == 9003
+
+
+def test_to_over9000_version_9005_sets_lkeff_and_uksat(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={"lkeff": "0.77", "uksat": "123"},
+        version=9005,
+    )
+
+    ofe = disturbed.obj["ofes"][0]
+    assert ofe["lkeff"] == "0.77"
+    assert ofe["uksat"] == "123"
+    assert disturbed.obj["datver"] == 9005
+
+
+def test_to_over9000_version_9005_defaults_lkeff_and_uksat(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(replacements={}, version=9005)
+
+    ofe = disturbed.obj["ofes"][0]
+    assert ofe["lkeff"] == "-9999"
+    assert ofe["uksat"] == "-9999"
+
+
+def test_to_over9000_records_source_and_h0_metadata_in_header(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={"ki": "3"},
+        h0_min_depth=90.0,
+        h0_max_om=0.2,
+        hostname="unit.test",
+        version=9002,
+    )
+
+    header = disturbed.obj["header"]
+    assert any("Source File: unit.test:in-memory" in line for line in header)
+    assert any("h0_min_depth = 90.0" in line for line in header)
+    assert any("h0_max_om = 0.2" in line for line in header)
+
+
+def test_to_over9000_h0_max_om_filters_first_horizon(make_soil_util):
+    util = make_soil_util()
+    util.obj["ofes"][0]["horizons"][0].pop("om", None)
+    util.obj["ofes"][0]["horizons"][1].pop("om", None)
+    util.obj["ofes"][0]["horizons"][0]["orgmat"] = 0.5
+    util.obj["ofes"][0]["horizons"][1]["orgmat"] = 0.1
+    util.obj["ofes"][0]["horizons"][1]["solthk"] = 150.0
+
+    disturbed = util.to_over9000(replacements={}, h0_max_om=0.2, version=9002)
+    horizons = disturbed.obj["ofes"][0]["horizons"]
+
+    assert len(horizons) == 1
+    assert float(horizons[0]["solthk"]) == 150.0
+    assert disturbed.obj["ofes"][0]["nsl"] == 1
+
+
+def test_to_over9000_h0_max_om_keeps_first_horizon_when_under_threshold(make_soil_util):
+    util = make_soil_util()
+    util.obj["ofes"][0]["horizons"][0].pop("om", None)
+    util.obj["ofes"][0]["horizons"][0]["orgmat"] = 0.1
+
+    disturbed = util.to_over9000(replacements={}, h0_max_om=0.2, version=9002)
+
+    assert disturbed.obj["ofes"][0]["nsl"] == 3
+    assert float(disturbed.obj["ofes"][0]["horizons"][0]["solthk"]) == 50.0
+
+
+def test_to_over9000_first_horizon_above_200_splits_once_and_skips_secondary_split(
+    make_soil_util,
+):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={"avke": "0.8"},
+        h0_min_depth=250.0,
+        version=9002,
+    )
+
+    horizons = disturbed.obj["ofes"][0]["horizons"]
+    assert len(horizons) == 3
+    assert float(horizons[0]["solthk"]) == 200.0
+    assert horizons[0]["ksat"] == "0.8"
+    assert float(horizons[1]["solthk"]) == 250.0
+    assert horizons[1]["ksat"] == 0.1
+    assert horizons[2]["ksat"] == 0.2
+
+
+def test_to_over9000_rejects_unsupported_version(make_soil_util):
+    util = make_soil_util()
+
+    with pytest.raises(ValueError, match="Unsupported WEPP soil version"):
+        util.to_over9000(replacements={}, version=9004)
+
+
+def test_to_over9000_does_not_mutate_source_or_replacements(make_soil_util):
+    util = make_soil_util()
+    original_obj = deepcopy(util.obj)
+    replacements = {"ki": "4", "ksflag": "9"}
+
+    disturbed = util.to_over9000(replacements=replacements, version=9002)
+
+    assert util.obj == original_obj
+    assert replacements == {"ki": "4", "ksflag": "9"}
+    assert disturbed.obj["ofes"][0]["ki"] == "4"
+
+
+def test_to_over9000_uses_to7778_when_source_not_7778(make_soil_util, monkeypatch):
+    util = make_soil_util()
+    util.obj["datver"] = 9002.0
+    migrated_7778 = make_soil_util()
+    called = {"count": 0, "hostname": None}
+
+    def _fake_to7778(hostname=""):
+        called["count"] += 1
+        called["hostname"] = hostname
+        return migrated_7778
+
+    monkeypatch.setattr(util, "to7778", _fake_to7778)
+
+    disturbed = util.to_over9000(
+        replacements={"ki": "4"},
+        version=9001,
+        hostname="unit.test",
+    )
+
+    assert called["count"] == 1
+    assert called["hostname"] == "unit.test"
+    assert disturbed.obj["ofes"][0]["ki"] == "4"
+    assert disturbed.obj["datver"] == 9001
+
+
+@pytest.mark.parametrize(
+    "wrapper_name,expected_version",
+    [
+        ("to9001", 9001),
+        ("to9002", 9002),
+        ("to9003", 9003),
+        ("to9005", 9005),
+    ],
+)
+def test_over9000_wrappers_forward_expected_version(
+    make_soil_util,
+    monkeypatch,
+    wrapper_name,
+    expected_version,
+):
+    util = make_soil_util()
+    captured = {}
+
+    def _fake_to_over9000(
+        replacements,
+        h0_min_depth=None,
+        h0_max_om=None,
+        hostname="",
+        version=9002,
+    ):
+        captured.update(
+            replacements=replacements,
+            h0_min_depth=h0_min_depth,
+            h0_max_om=h0_max_om,
+            hostname=hostname,
+            version=version,
+        )
+        return "sentinel"
+
+    monkeypatch.setattr(util, "to_over9000", _fake_to_over9000)
+
+    wrapper = getattr(util, wrapper_name)
+    result = wrapper(
+        {"ki": 1.0},
+        h0_min_depth=60.0,
+        h0_max_om=0.15,
+        hostname="dev.wepp.cloud",
+    )
+
+    assert result == "sentinel"
+    assert captured["replacements"] == {"ki": 1.0}
+    assert captured["h0_min_depth"] == 60.0
+    assert captured["h0_max_om"] == 0.15
+    assert captured["hostname"] == "dev.wepp.cloud"
+    assert captured["version"] == expected_version
