@@ -266,37 +266,6 @@
                     data-project-action="clear-locks">
               Clear Locks
             </button>
-            {% if 'disturbed' in ron.mods %}
-              <a class="pure-button pure-button-secondary"
-                 href="{{ url_for_run('disturbed.modify_disturbed', runid=runid, config=config) }}"
-                 target="_blank"
-                 rel="noopener"
-                 data-open-tab-pref>
-                Modify Disturbed Parameters
-              </a>
-              <button type="button"
-                      class="pure-button pure-button-secondary"
-                      data-disturbed-action="reset-lookup">
-                Reset Disturbed Parameters
-              </button>
-              <button type="button"
-                      class="pure-button pure-button-secondary"
-                      data-disturbed-action="load-extended-lookup">
-                Load Extended Disturbed Parameters
-              </button>
-              <a class="pure-button pure-button-secondary"
-                 href="https://doc.wepp.cloud/disturbed_land_soil_lookup_doc.html"
-                 target="_blank"
-                 rel="noopener"
-                 data-open-tab-pref>
-                Disturbed Parameters Doc
-              </a>
-              <div class="pu-action-feedback"
-                   data-disturbed-lookup-status
-                   role="status"
-                   aria-live="polite"
-                   aria-atomic="true"></div>
-            {% endif %}
             {% if ron.profile_recorder_assembler_enabled and current_user.has_role('Admin') %}
               <button type="button"
                       class="pure-button pure-button-secondary"

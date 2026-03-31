@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-28  
+**Last Updated**: 2026-03-30  
 **Active Packages**: 4  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,6 +78,86 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### Features Export Legacy Exports Cutover (Prep Details + Geopackage)
+**Proposed**: 2026-03-29  
+**Size**: Large (3-6 focused sessions)  
+**Priority**: High  
+**Status**: Scoped - Ready to Start  
+**Package**: [docs/work-packages/20260329_features_export_legacy_exports_cutover/](docs/work-packages/20260329_features_export_legacy_exports_cutover/)  
+**Description**: Replace legacy `prep_details` and `geopackage`/`geodatabase` export flows with `features_export`, standardize download contracts around explicit job and published profile endpoints, and retire legacy writer modules only after parity evidence and explicit human approval.
+
+**Scope**:
+- Canonical download routes:
+  - `/rq-engine/api/runs/{runid}/{config}/export/features/job/{job_id}/download`
+  - `/rq-engine/api/runs/{runid}/{config}/export/features/published/{profile}/download`
+- Publication registry source-of-truth at `export/features/published/index.json` for profile IDs `prep-wepp` and `prep-details`.
+- Legacy endpoint and run-completion hook rewiring to `features_export` profile execution.
+- Artifact packaging simplification (payload members + `manifest.json` + generated `README.md`, no bundled profile files).
+- Human approval gate artifact before deleting `wepppy/export/gpkg_export.py` and `wepppy/export/prep_details.py`.
+
+**Dependencies**:
+- `docs/work-packages/20260328_features_export_service_compliance_refactor/`
+- `wepppy/nodb/mods/features_export/specification.md`
+
+**Next Steps**:
+1. Implement route and publication-registry collaborators with focused route/service tests.
+2. Rewire legacy prep/geopackage callsites to features-export profiles and validate parity.
+3. Capture e2e evidence, secure human approval, then delete legacy modules and run final regressions.
+
+---
+
+### Features Export Live-Run E2E Matrix (clogging-starch)
+**Proposed**: 2026-03-29  
+**Size**: Large (2-4 focused sessions)  
+**Priority**: High  
+**Status**: Scoped - Ready to Start  
+**Package**: [docs/work-packages/20260329_features_export_live_run_matrix/](docs/work-packages/20260329_features_export_live_run_matrix/)  
+**Description**: Execute a systematic manual-plus-automated verification matrix for Features Export against `clogging-starch/disturbed9002-wbt-mofe`, covering all formats, CRS behavior, Unitizer units behavior, temporal combinations, roads scope handling, and identity/null data integrity checks before locking in expanded regression tests.
+
+**Scope**:
+- Full format matrix (`geojson`, `geoparquet`, `parquet`, `csv`, `kmz`, `geopackage`, `geodatabase`) with artifact signature/file-count validation.
+- CRS validation (`wgs`, `utm`) across spatial formats and tabular CRS no-op contract validation.
+- Units validation (`project`, `si`, `english`) including UI copy correction to `Unitizer Selections`.
+- Temporal matrix coverage (`annual_average`, `yearly`, `event`, year selection variants, mixed atemporal+temporal, mixed event+yearly rejection for long layout).
+- Data quality checks for row/feature/column counts, `topaz_id`/`wepp_id` normalization, and missing-data irregularities.
+
+**Dependencies**:
+- `docs/work-packages/20260328_features_export_profiles_provenance_zip/`
+- `wepppy/nodb/mods/features_export/specification.md`
+
+**Next Steps**:
+1. Build matrix runner and artifact auditor utilities.
+2. Execute manual pilot (one representative case per format) with evidence capture.
+3. Run full matrix, triage defects, and lock critical slices into pytest/Jest coverage.
+
+---
+
+### Features Export Artifact README Metadata Packaging
+**Proposed**: 2026-03-29  
+**Size**: Medium (2-4 focused sessions)  
+**Priority**: High  
+**Status**: Scoped - Ready to Start  
+**Package**: [docs/work-packages/20260329_features_export_artifact_readme_metadata/](docs/work-packages/20260329_features_export_artifact_readme_metadata/)  
+**Description**: Generate deterministic, standards-aligned artifact `README.md` files from resolved features-export metadata and include them in all zip artifacts while keeping `manifest.json` as canonical machine-readable provenance.
+
+**Scope**:
+- Add README builder/helper for deterministic Markdown rendering from manifest/request/layer/dependency metadata.
+- Integrate README generation into cache-miss artifact publication path and include README in zip bundle members.
+- Keep bundles profile-file-free (`profile.yml`, built-in profile files excluded).
+- Add regression tests for zip membership and README/manifest consistency.
+
+**Dependencies**:
+- `docs/work-packages/20260328_features_export_service_compliance_refactor/`
+- `docs/work-packages/20260329_features_export_legacy_exports_cutover/`
+- `wepppy/nodb/mods/features_export/specification.md`
+
+**Next Steps**:
+1. Implement README builder and deterministic section/table ordering.
+2. Wire README generation into service packaging flow and validate cache-hit reuse behavior.
+3. Extend tests and run targeted validation/doc-lint gates.
+
+---
 
 ### Roads Step-2: Inslope Non-Channel Point-Source Routing
 **Proposed**: 2026-03-27  
@@ -491,6 +571,57 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Disturbed Panel Modal and Landsoil Lookup UX Contract
+**Completed**: 2026-03-30  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260330_disturbed_panel_modal/](docs/work-packages/20260330_disturbed_panel_modal/)  
+**Description**: Added a dedicated Disturbed modal in the run-page/report More menu, relocated disturbed lookup actions out of PowerUser, and formalized the base/extended lookup workflow plus docs-link helper contract.
+
+**Outcome**:
+- Added new Disturbed modal template with requested sections:
+  - landsoil lifecycle actions (reset base, load extended, delete extended),
+  - table-resource selection radios (base/disturbed),
+  - explicit modify actions (base, extended, sync base to extended),
+  - Help link generated via usersum helper with `📄` affordance.
+- Removed disturbed lookup action block and external disturbed-doc link from PowerUser panel.
+- Added disturbed task routes:
+  - `POST .../tasks/delete_extended_land_soil_lookup`
+  - `POST .../tasks/sync_base_to_extended_land_soil_lookup`
+- Extended disturbed controller wiring for delete/sync actions and lookup-variant UI state refresh.
+- Added reusable Jinja helper `usersum_doc_link(...)` and published canonical developer contract doc at `docs/ui-docs/disturbed-panel-ui-contract.md`.
+
+**Validation Notes**:
+- `python3 wepppy/weppcloud/controllers_js/build_controllers_js.py`
+- `wctl run-npm lint`
+- `wctl run-npm test`
+- `wctl run-pytest tests/weppcloud/routes/test_disturbed_bp.py tests/weppcloud/routes/test_pure_controls_render.py tests/weppcloud/test_jinja_filters.py --maxfail=1` (`65 passed`)
+- `wctl run-pytest tests --maxfail=1` (`2858 passed, 35 skipped`)
+
+---
+
+### Features Export Profiles + Provenance Zip Packaging
+**Completed**: 2026-03-28  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260328_features_export_profiles_provenance_zip/](docs/work-packages/20260328_features_export_profiles_provenance_zip/)  
+**Description**: Replaced legacy Features Export defaults with profile-driven UX and standardized all export downloads as zip bundles that include payload outputs plus replay/provenance files.
+
+**Outcome**:
+- Added built-in profiles (`post-wepp.yml`, `prep-details.yml`) and run-page profile controls (quick profile buttons + profile-text load).
+- Added rq-engine profile resolve endpoint: `POST /api/runs/{runid}/{config}/export/features/profile/resolve`.
+- Refactored service packaging so final artifacts are zip bundles containing payload members, `manifest.json`, `profile.yml`, built-in profile files, and `README.md`.
+- Extended manifest payload with profile/provenance relpath fields and bumped features-export cache version marker for packaging contract change.
+
+**Validation Notes**:
+- `wctl run-pytest tests/nodb/mods/test_features_export_service.py tests/nodb/mods/test_features_export_manifest.py tests/microservices/test_rq_engine_features_export_routes.py tests/weppcloud/routes/test_pure_controls_render.py tests/weppcloud/routes/test_run_0_openet_admin_gate.py --maxfail=1` (`113 passed`)
+- `wctl run-pytest tests/nodb/mods/test_features_export_exporters.py tests/nodb/mods/test_features_export_manifest.py --maxfail=1` (`21 passed`)
+- `wctl run-npm test -- features_export` (`22 passed`)
+
+---
 
 ### Features Export Service Compliance Refactor (4-Phase E2E)
 **Completed**: 2026-03-28  

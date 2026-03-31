@@ -38,6 +38,8 @@ describe("Disturbed controller", () => {
             </form>
             <button type="button" data-disturbed-action="reset-lookup"></button>
             <button type="button" data-disturbed-action="load-extended-lookup"></button>
+            <button type="button" data-disturbed-action="delete-extended-lookup"></button>
+            <button type="button" data-disturbed-action="sync-base-to-extended-lookup"></button>
         `;
 
         await import("../dom.js");
@@ -161,6 +163,30 @@ describe("Disturbed controller", () => {
         expect(emitter.emit).toHaveBeenCalledWith("disturbed:lookup:reset", {});
     });
 
+    test("delete_extended_land_soil_lookup posts to task endpoint", async () => {
+        httpRequestMock.mockImplementationOnce((url, options) => {
+            expect(url).toBe("tasks/delete_extended_land_soil_lookup");
+            expect(options.method).toBe("POST");
+            return Promise.resolve({ body: {} });
+        });
+
+        const controller = getController();
+        await controller.delete_extended_land_soil_lookup();
+        expect(emitter.emit).toHaveBeenCalledWith("disturbed:lookup:deleted", {});
+    });
+
+    test("sync_base_to_extended_land_soil_lookup posts to task endpoint", async () => {
+        httpRequestMock.mockImplementationOnce((url, options) => {
+            expect(url).toBe("tasks/sync_base_to_extended_land_soil_lookup");
+            expect(options.method).toBe("POST");
+            return Promise.resolve({ body: {} });
+        });
+
+        const controller = getController();
+        await controller.sync_base_to_extended_land_soil_lookup();
+        expect(emitter.emit).toHaveBeenCalledWith("disturbed:lookup:synced", {});
+    });
+
     test("bootstrap seeds has_sbs cache", () => {
         const controller = getController();
         controller.clear_has_sbs_cache();
@@ -168,5 +194,126 @@ describe("Disturbed controller", () => {
         controller.bootstrap({ flags: { initialHasSbs: true } });
 
         expect(controller.has_sbs()).toBe(true);
+    });
+});
+
+describe("Disturbed lookup variant persistence", () => {
+    const storageKey = "weppcloud:disturbed:lookup_variant:test-run:test-config";
+    let httpRequestMock;
+
+    beforeEach(async () => {
+        jest.resetModules();
+        localStorage.clear();
+        document.body.innerHTML = `
+            <form id="sbs_upload_form">
+                <div id="info"></div>
+                <div id="status"></div>
+                <div id="stacktrace"></div>
+                <div id="rq_job"></div>
+            </form>
+            <div data-disturbed-lookup-status></div>
+            <input type="radio" name="disturbed_lookup_variant" value="base" data-disturbed-lookup-variant checked>
+            <input type="radio" name="disturbed_lookup_variant" value="extended" data-disturbed-lookup-variant>
+            <a data-disturbed-modify-link="base"></a>
+            <a data-disturbed-modify-link="extended"></a>
+        `;
+
+        await import("../dom.js");
+
+        global.WCEvents = {
+            createEmitter: jest.fn(() => ({ emit: jest.fn() })),
+            useEventMap: jest.fn((_, emitter) => emitter),
+        };
+
+        global.WCForms = {
+            serializeForm: jest.fn(() => ({})),
+        };
+
+        httpRequestMock = jest.fn((url) => {
+            const lookupVariant = url.includes("lookup=extended") ? "extended" : "base";
+            return Promise.resolve({ body: { Content: { lookup_variant: lookupVariant } } });
+        });
+
+        const controlBaseFactory = createControlBaseStub({
+            pushResponseStacktrace: jest.fn(),
+            triggerEvent: jest.fn(),
+        });
+
+        global.WCHttp = {
+            request: httpRequestMock,
+            isHttpError: jest.fn().mockReturnValue(false),
+        };
+
+        global.controlBase = jest.fn(() => Object.assign({}, controlBaseFactory.base));
+        global.url_for_run = jest.fn((path) => path);
+        global.runid = "test-run";
+        global.runId = "test-run";
+        global.config = "test-config";
+        window.runid = "test-run";
+        window.runId = "test-run";
+        window.config = "test-config";
+
+        await import("../disturbed.js");
+    });
+
+    afterEach(() => {
+        localStorage.clear();
+        jest.clearAllMocks();
+        delete window.Disturbed;
+        delete global.WCHttp;
+        delete global.WCForms;
+        delete global.controlBase;
+        delete global.WCEvents;
+        delete global.url_for_run;
+        delete global.runid;
+        delete global.runId;
+        delete global.config;
+        delete window.runid;
+        delete window.runId;
+        delete window.config;
+        if (global.WCDom) {
+            delete global.WCDom;
+        }
+        document.body.innerHTML = "";
+    });
+
+    function getController() {
+        return window.Disturbed.getInstance();
+    }
+
+    test("bootstrap requests lookup metadata using persisted selection and stores server-normalized variant", async () => {
+        localStorage.setItem(storageKey, "extended");
+        httpRequestMock.mockImplementationOnce(() => Promise.resolve({ body: { Content: { lookup_variant: "base" } } }));
+
+        getController();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(httpRequestMock).toHaveBeenCalledWith(
+            "api/disturbed/lookup_meta?lookup=extended",
+            expect.objectContaining({ method: "GET" }),
+        );
+        expect(localStorage.getItem(storageKey)).toBe("base");
+        expect(document.querySelector('[data-disturbed-lookup-variant][value="base"]').checked).toBe(true);
+    });
+
+    test("changing lookup radio persists selection and refreshes metadata with requested variant", async () => {
+        localStorage.setItem(storageKey, "base");
+
+        getController();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const extendedRadio = document.querySelector('[data-disturbed-lookup-variant][value="extended"]');
+        extendedRadio.checked = true;
+        extendedRadio.dispatchEvent(new Event("change", { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(localStorage.getItem(storageKey)).toBe("extended");
+        expect(httpRequestMock).toHaveBeenCalledWith(
+            "api/disturbed/lookup_meta?lookup=extended",
+            expect.objectContaining({ method: "GET" }),
+        );
     });
 });

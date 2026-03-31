@@ -111,8 +111,11 @@
                  data-open-tab-pref>
                 Browse
               </a>
-              <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
-              <button type="button" class="pure-button" data-command="open-unitizer">Unitizer</button>
+              <button type="button" class="pure-button" data-modal-open="puModal">PowerUser</button>
+              {% if 'disturbed' in (ron.mods or []) %}
+              <button type="button" class="pure-button" data-modal-open="disturbedModal">Disturbed</button>
+              {% endif %}
+              <button type="button" class="pure-button" data-modal-open="unitizerModal">Change Units</button>
               <label class="wc-run-header__toggle">
                 <input id="checkbox_readonly"
                        type="checkbox"
@@ -192,6 +195,7 @@
 
 {% include 'controls/unitizer_modal.htm' %}
 {% include 'controls/poweruser_panel.htm' %}
+{% include 'controls/disturbed_modal.htm' %}
 
 <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
@@ -209,10 +213,6 @@
   window.runId = runid;
   window.config = config;
   let project = null;
-  const unitizerButton = document.querySelector('[data-command="open-unitizer"]');
-  const powerUserButton = document.querySelector('[data-command="open-poweruser"]');
-  const unitizerModal = document.getElementById('unitizerModal');
-  const powerUserModal = document.getElementById('puModal');
   const pupRelPath = {{ pup_relpath | tojson }};
 
   function triggerUnitChange() {
@@ -225,38 +225,6 @@
     project = (window.Project && typeof window.Project.getInstance === 'function')
       ? window.Project.getInstance()
       : null;
-    if (unitizerButton && unitizerModal) {
-      unitizerButton.addEventListener('click', () => {
-        if (window.ModalManager && typeof window.ModalManager.open === 'function') {
-          window.ModalManager.open(unitizerModal);
-        }
-      });
-    }
-
-    if (powerUserButton && powerUserModal) {
-      powerUserButton.addEventListener('click', () => {
-        const isHidden = powerUserModal.hasAttribute('hidden');
-        if (isHidden) {
-          powerUserModal.removeAttribute('hidden');
-          powerUserModal.dataset.open = 'true';
-          powerUserModal.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          powerUserModal.setAttribute('hidden', 'hidden');
-          delete powerUserModal.dataset.open;
-        }
-      });
-    }
-
-    document.querySelectorAll('[data-close]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-close');
-        const target = document.getElementById(targetId);
-        if (target) {
-          target.setAttribute('hidden', 'hidden');
-          delete target.dataset.open;
-        }
-      });
-    });
 
     document.querySelectorAll('[name^="unitizer_"]').forEach((el) => {
       el.addEventListener('change', triggerUnitChange);

@@ -206,7 +206,7 @@ def modify_disturbed(runid: str, config: str) -> Response:
         session_token_url=f"/rq-engine/api/runs/{quoted_runid}/{quoted_config}/session-token",
     )
 
-@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/reset_disturbed', methods=['GET', 'POST'])
+@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/reset_disturbed', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def reset_disturbed(runid: str, config: str) -> Response:
     """Reset the disturbed land/soil lookup to defaults."""
@@ -216,10 +216,49 @@ def reset_disturbed(runid: str, config: str) -> Response:
     disturbed.reset_land_soil_lookup()
     return success_factory()
 
-@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup', methods=['GET', 'POST'])
+@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup', methods=['POST'])
 @authorize_and_handle_with_exception_factory
 def load_extended_land_soil_lookup(runid: str, config: str) -> Response:
     """Populate the extended disturbed land/soil lookup."""
+    authorize(runid, config)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    disturbed = Disturbed.getInstance(wd)
+    disturbed.build_extended_land_soil_lookup()
+    return success_factory()
+
+
+@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/delete_extended_land_soil_lookup', methods=['POST'])
+@authorize_and_handle_with_exception_factory
+def delete_extended_land_soil_lookup(runid: str, config: str) -> Response:
+    """Delete the extended disturbed lookup table when present."""
+    authorize(runid, config)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    disturbed = Disturbed.getInstance(wd)
+
+    extended_lookup_fn = getattr(disturbed, 'extended_lookup_fn', None)
+    deleted = False
+    if isinstance(extended_lookup_fn, str) and extended_lookup_fn:
+        with _controller_lock(disturbed):
+            if os.path.exists(extended_lookup_fn):
+                os.remove(extended_lookup_fn)
+                deleted = True
+
+    _logger.info(
+        'disturbed_lookup_delete_extended runid=%s config=%s deleted=%s extended_lookup_fn=%s',
+        runid,
+        config,
+        deleted,
+        extended_lookup_fn,
+    )
+    return success_factory()
+
+
+@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/sync_base_to_extended_land_soil_lookup', methods=['POST'])
+@authorize_and_handle_with_exception_factory
+def sync_base_to_extended_land_soil_lookup(runid: str, config: str) -> Response:
+    """Rebuild the extended disturbed lookup from the current base lookup."""
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)

@@ -1,0 +1,246 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% set disturbed_runid = runid if runid is defined else (ron.runid if ron is defined else None) %}
+{% set disturbed_config = config if config is defined else (ron.config_stem if ron is defined else None) %}
+{% set disturbed_mod_enabled = ron is defined and 'disturbed' in (ron.mods or []) %}
+{% set lookup_variant_options = [
+  {
+    "id": "disturbed_lookup_variant_base",
+    "label": "Base",
+    "value": "base",
+    "selected": True,
+    "attrs": {"data-disturbed-lookup-variant": ""}
+  },
+  {
+    "id": "disturbed_lookup_variant_extended",
+    "label": "Extended",
+    "value": "extended",
+    "attrs": {"data-disturbed-lookup-variant": ""}
+  }
+] %}
+{% if disturbed_mod_enabled %}
+<div class="wc-modal" id="disturbedModal" data-modal hidden>
+  <style>
+    .disturbed-modal__dialog {
+      width: 90vw;
+      max-width: 90%;
+      height: 90vh;
+      max-height: 90vh;
+    }
+
+    .disturbed-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--wc-space-lg);
+      padding-top: var(--wc-space-lg);
+    }
+
+    .disturbed-panel__section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--wc-space-sm);
+    }
+
+    .disturbed-panel__section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0;
+      color: var(--wc-color-text-muted);
+    }
+
+    .disturbed-panel__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--wc-space-sm);
+    }
+
+    .disturbed-panel__action {
+      display: flex;
+      flex-direction: column;
+      gap: var(--wc-space-xs);
+      min-width: 18rem;
+    }
+
+    .disturbed-panel__action .wc-field__help {
+      margin: 0;
+    }
+
+    .disturbed-panel__section .wc-field {
+      margin: 0;
+      max-width: none !important;
+    }
+
+    .disturbed-panel [data-disturbed-lookup-radio-group="true"] {
+      width: fit-content;
+      gap: var(--wc-space-md);
+      justify-content: flex-start;
+    }
+
+    .disturbed-panel__help-link {
+      align-self: flex-start;
+    }
+
+    .pu-action-feedback {
+      min-height: 1.1rem;
+      margin-top: var(--wc-space-xs);
+      font-size: 0.85rem;
+      color: var(--wc-status-text-muted);
+    }
+
+    .pu-action-feedback[data-state="pending"] {
+      color: var(--wc-info-fg);
+    }
+
+    .pu-action-feedback[data-state="success"] {
+      color: var(--wc-success-fg);
+    }
+
+    .pu-action-feedback[data-state="error"] {
+      color: var(--wc-error-fg);
+    }
+
+    .disturbed-panel__modify-link[data-selected="true"] {
+      border-color: var(--wc-color-accent);
+      box-shadow: 0 0 0 1px var(--wc-color-accent);
+    }
+
+    .disturbed-modal__dialog .wc-modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 3rem;
+    }
+
+    .disturbed-modal__dialog .wc-modal__body {
+      flex: 1 1 auto;
+    }
+  </style>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <div class="wc-modal__dialog disturbed-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="disturbedModalTitle">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title" id="disturbedModalTitle">Disturbed Panel</h2>
+      <button type="button"
+              class="wc-modal__close"
+              data-modal-dismiss
+              aria-label="Close Disturbed Panel">
+        &times;
+      </button>
+    </header>
+    <div class="wc-modal__body">
+      <div class="disturbed-panel">
+        <section class="disturbed-panel__section" aria-labelledby="disturbedLookupTableHeading">
+          <h3 class="disturbed-panel__section-title" id="disturbedLookupTableHeading">Landsoil Lookup Parameter Table</h3>
+          <div class="disturbed-panel__actions">
+            <div class="disturbed-panel__action">
+              <button type="button"
+                      class="pure-button pure-button-secondary"
+                      data-disturbed-action="reset-lookup"
+                      aria-describedby="disturbed_hint_reset_base">
+                Reset Base Landsoil Lookup Table
+              </button>
+              <p id="disturbed_hint_reset_base" class="wc-field__help">
+                Restore the base lookup CSV to default values.
+              </p>
+            </div>
+            <div class="disturbed-panel__action">
+              <button type="button"
+                      class="pure-button pure-button-secondary"
+                      data-disturbed-action="load-extended-lookup"
+                      aria-describedby="disturbed_hint_load_extended">
+                Load Extended Landsoil Lookup Table
+              </button>
+              <p id="disturbed_hint_load_extended" class="wc-field__help">
+                Build an extended lookup table using current base values and management mappings.
+              </p>
+            </div>
+            <div class="disturbed-panel__action">
+              <button type="button"
+                      class="pure-button pure-button-secondary"
+                      data-disturbed-action="delete-extended-lookup"
+                      aria-describedby="disturbed_hint_delete_extended">
+                Delete Extended Landsoil Lookup Table
+              </button>
+              <p id="disturbed_hint_delete_extended" class="wc-field__help">
+                Remove the extended lookup file and return default selection behavior to base.
+              </p>
+            </div>
+          </div>
+          <div class="pu-action-feedback"
+               data-disturbed-lookup-status
+               role="status"
+               aria-live="polite"
+               aria-atomic="true"></div>
+        </section>
+
+        <section class="disturbed-panel__section" aria-labelledby="disturbedLookupSelectHeading">
+          <h3 class="disturbed-panel__section-title" id="disturbedLookupSelectHeading">Select Landsoil Lookup Table Resource</h3>
+          {{ ui.radio_group(
+               "disturbed_lookup_variant",
+               layout="horizontal",
+               options=lookup_variant_options,
+               help="Base uses the canonical lookup table. Extended uses the generated expanded lookup table when present.",
+               attrs={"data-disturbed-lookup-radio-group": "true"},
+               max_width=None
+             ) }}
+        </section>
+
+        <section class="disturbed-panel__section" aria-labelledby="disturbedLookupModifyHeading">
+          <h3 class="disturbed-panel__section-title" id="disturbedLookupModifyHeading">Modify Landsoil Lookup Tables</h3>
+          <div class="disturbed-panel__actions">
+            <div class="disturbed-panel__action">
+              <a class="pure-button pure-button-secondary disturbed-panel__modify-link"
+                 href="{{ url_for_run('disturbed.modify_disturbed', runid=disturbed_runid, config=disturbed_config, lookup='base') }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref
+                 data-disturbed-modify-link="base"
+                 aria-describedby="disturbed_hint_modify_base">
+                Modify Base Table
+              </a>
+              <p id="disturbed_hint_modify_base" class="wc-field__help">
+                Open the lookup editor scoped to the base table (`lookup=base`).
+              </p>
+            </div>
+            <div class="disturbed-panel__action">
+              <a class="pure-button pure-button-secondary disturbed-panel__modify-link"
+                 href="{{ url_for_run('disturbed.modify_disturbed', runid=disturbed_runid, config=disturbed_config, lookup='extended') }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref
+                 data-disturbed-modify-link="extended"
+                 aria-describedby="disturbed_hint_modify_extended">
+                Modify Extended Table
+              </a>
+              <p id="disturbed_hint_modify_extended" class="wc-field__help">
+                Open the lookup editor scoped to the extended table (`lookup=extended`).
+              </p>
+            </div>
+            <div class="disturbed-panel__action">
+              <button type="button"
+                      class="pure-button pure-button-secondary"
+                      data-disturbed-action="sync-base-to-extended-lookup"
+                      aria-describedby="disturbed_hint_sync_extended">
+                Sync Base to Extended
+              </button>
+              <p id="disturbed_hint_sync_extended" class="wc-field__help">
+                Regenerate the extended table from the current base table values.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="disturbed-panel__section" aria-labelledby="disturbedHelpHeading">
+          <h3 class="disturbed-panel__section-title" id="disturbedHelpHeading">Help</h3>
+          <div class="disturbed-panel__help-link">
+            {{ usersum_doc_link('weppcloud', 'disturbed-land-soil-lookup.md', 'WEPPcloud Calibration') }}
+          </div>
+        </section>
+      </div>
+    </div>
+    <footer class="wc-modal__footer">
+      <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>Close</button>
+    </footer>
+  </div>
+</div>
+{% endif %}

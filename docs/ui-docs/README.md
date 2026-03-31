@@ -7,6 +7,7 @@ The `ui-docs/` folder centralizes documentation for the web UI. Use these refere
 - `ui-style-guide.md` — Core styling conventions and reusable snippets for controls, summary panes, and typography.
 - `theme-system.md` — Complete VS Code theme integration reference: architecture, implementation, configurable mapping, and contribution guidelines.
 - `gl-dashboard.md` — WebGL dashboard spec (deck.gl layers, graphs, state).
+- `disturbed-panel-ui-contract.md` — Disturbed modal layout, action hooks, and base/extended lookup route contract.
 - `cap-js-captcha-auth.md` — Cap.js CAPTCHA service wiring, floating prompt UX, and verification flow.
 - Additional markdown files — Design decisions, migration plans, or retrospectives for UI modernization work.
 

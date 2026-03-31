@@ -153,6 +153,13 @@
                       data-modal-open="puModal">
                 PowerUser
               </button>
+              {% if 'disturbed' in current_mods %}
+              <button type="button"
+                      class="pure-button"
+                      data-modal-open="disturbedModal">
+                Disturbed
+              </button>
+              {% endif %}
               <button type="button"
                       class="pure-button"
                       data-modal-open="unitizerModal">

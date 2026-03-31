@@ -199,6 +199,57 @@ def test_load_extended_lookup_uses_post(disturbed_client):
     assert dispatched["extended_lookup"] == 1
 
 
+def test_sync_base_to_extended_lookup_uses_post(disturbed_client):
+    client, *_, dispatched, _ = disturbed_client
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/sync_base_to_extended_land_soil_lookup")
+    assert response.status_code == 200
+    assert response.get_json() == {}
+    assert dispatched["extended_lookup"] == 1
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "tasks/reset_disturbed",
+        "tasks/load_extended_land_soil_lookup",
+        "tasks/delete_extended_land_soil_lookup",
+        "tasks/sync_base_to_extended_land_soil_lookup",
+    ],
+)
+def test_lookup_mutation_routes_reject_get(disturbed_client, path: str):
+    client, *_ = disturbed_client
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/{path}")
+    assert response.status_code == 405
+
+
+def test_delete_extended_lookup_removes_file_when_present(disturbed_client):
+    client, DisturbedStub, _, _, _dispatched, run_dir = disturbed_client
+    disturbed = DisturbedStub.getInstance(run_dir)
+    extended_path = Path(disturbed.extended_lookup_fn)
+    extended_path.write_text("sev_enum,landuse\n0,forest\n")
+    assert extended_path.exists()
+
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/delete_extended_land_soil_lookup")
+
+    assert response.status_code == 200
+    assert response.get_json() == {}
+    assert not extended_path.exists()
+
+
+def test_delete_extended_lookup_is_idempotent_when_missing(disturbed_client):
+    client, DisturbedStub, _, _, _dispatched, run_dir = disturbed_client
+    disturbed = DisturbedStub.getInstance(run_dir)
+    extended_path = Path(disturbed.extended_lookup_fn)
+    if extended_path.exists():
+        extended_path.unlink()
+
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/delete_extended_land_soil_lookup")
+
+    assert response.status_code == 200
+    assert response.get_json() == {}
+    assert not extended_path.exists()
+
+
 def test_task_modify_disturbed_writes_lookup(disturbed_client):
     client, DisturbedStub, _, _, dispatched, run_dir = disturbed_client
     meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")

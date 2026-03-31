@@ -29,11 +29,18 @@ var Disturbed = (function () {
         3: "Uniform High SBS"
     };
 
+    var LOOKUP_VARIANT_BASE = "base";
+    var LOOKUP_VARIANT_EXTENDED = "extended";
+    var LOOKUP_VARIANT_STORAGE_KEY_PREFIX = "weppcloud:disturbed:lookup_variant:";
+
     var EVENT_NAMES = [
         "disturbed:mode:changed",
         "disturbed:sbs:state",
         "disturbed:lookup:reset",
         "disturbed:lookup:extended",
+        "disturbed:lookup:deleted",
+        "disturbed:lookup:synced",
+        "disturbed:lookup:variant",
         "disturbed:lookup:error",
         "disturbed:upload:started",
         "disturbed:upload:completed",
@@ -328,6 +335,8 @@ var Disturbed = (function () {
         var rqJobElement = formElement ? dom.qs("#rq_job", formElement) : null;
         var spinnerElement = formElement ? dom.qs("#braille", formElement) : null;
         var lookupStatusElement = dom.qs("[data-disturbed-lookup-status]") || null;
+        var lookupVariantInputs = dom.qsa("[data-disturbed-lookup-variant]") || [];
+        var lookupModifyLinks = dom.qsa("[data-disturbed-modify-link]") || [];
 
         var uploadHintElement = formElement ? dom.qs("#hint_upload_sbs", formElement) : null;
         var removeHintElement = formElement ? dom.qs("#hint_remove_sbs", formElement) : null;
@@ -414,7 +423,8 @@ var Disturbed = (function () {
             mode: initialMode,
             hasSbs: undefined,
             hasSbsRequest: null,
-            uniformSeverity: initialUniform
+            uniformSeverity: initialUniform,
+            lookupVariant: readLookupVariantPreference() || LOOKUP_VARIANT_BASE
         };
 
         function emit(name, payload) {
@@ -453,6 +463,149 @@ var Disturbed = (function () {
         function setLookupStatusError(payload, fallback) {
             var message = resolveErrorMessage(payload, fallback) || fallback || "Request failed";
             setLookupStatus(message, "error");
+        }
+
+        function normalizeLookupVariant(value) {
+            if (value === undefined || value === null) {
+                return LOOKUP_VARIANT_BASE;
+            }
+            var normalized = String(value).trim().toLowerCase();
+            if (normalized === LOOKUP_VARIANT_EXTENDED || normalized === "disturbed") {
+                return LOOKUP_VARIANT_EXTENDED;
+            }
+            return LOOKUP_VARIANT_BASE;
+        }
+
+        function lookupVariantStorageKey() {
+            var runId = "";
+            var runConfig = "";
+
+            if (typeof window !== "undefined") {
+                if (typeof window.runid === "string" && window.runid.trim() !== "") {
+                    runId = window.runid.trim();
+                } else if (typeof window.runId === "string" && window.runId.trim() !== "") {
+                    runId = window.runId.trim();
+                }
+                if (typeof window.config === "string" && window.config.trim() !== "") {
+                    runConfig = window.config.trim();
+                }
+            }
+
+            if (!runId || !runConfig) {
+                return null;
+            }
+            return LOOKUP_VARIANT_STORAGE_KEY_PREFIX + runId + ":" + runConfig;
+        }
+
+        function readLookupVariantPreference() {
+            if (typeof window === "undefined" || !window.localStorage) {
+                return null;
+            }
+
+            var key = lookupVariantStorageKey();
+            if (!key) {
+                return null;
+            }
+
+            try {
+                var storedValue = window.localStorage.getItem(key);
+                if (storedValue === null || storedValue === undefined || storedValue === "") {
+                    return null;
+                }
+                return normalizeLookupVariant(storedValue);
+            } catch (_err) {
+                return null;
+            }
+        }
+
+        function persistLookupVariantPreference(variant) {
+            if (typeof window === "undefined" || !window.localStorage) {
+                return;
+            }
+
+            var key = lookupVariantStorageKey();
+            if (!key) {
+                return;
+            }
+
+            try {
+                window.localStorage.setItem(key, normalizeLookupVariant(variant));
+            } catch (_err) {
+                // LocalStorage can fail in private-browsing or quota-exceeded scenarios.
+            }
+        }
+
+        function withLookupVariantQuery(url, variant) {
+            var normalized = normalizeLookupVariant(variant);
+            var query = "lookup=" + encodeURIComponent(normalized);
+
+            if (url.indexOf("?") === -1) {
+                return url + "?" + query;
+            }
+
+            var lastChar = url.charAt(url.length - 1);
+            var separator = lastChar === "?" || lastChar === "&" ? "" : "&";
+            return url + separator + query;
+        }
+
+        function setLookupVariantSelection(variant, options) {
+            var opts = options || {};
+            var normalized = normalizeLookupVariant(variant);
+            state.lookupVariant = normalized;
+
+            lookupVariantInputs.forEach(function (input) {
+                if (!input) {
+                    return;
+                }
+                input.checked = String(input.value || "").toLowerCase() === normalized;
+            });
+
+            lookupModifyLinks.forEach(function (link) {
+                if (!link || !link.dataset) {
+                    return;
+                }
+                var matches = String(link.dataset.disturbedModifyLink || "").toLowerCase() === normalized;
+                link.dataset.selected = matches ? "true" : "false";
+            });
+
+            if (opts.persist !== false) {
+                persistLookupVariantPreference(normalized);
+            }
+
+            if (opts.emit !== false) {
+                emit("disturbed:lookup:variant", { lookupVariant: normalized });
+            }
+            return normalized;
+        }
+
+        function refreshLookupVariantSelection(reason) {
+            if (lookupVariantInputs.length === 0 && lookupModifyLinks.length === 0) {
+                return Promise.resolve(state.lookupVariant);
+            }
+
+            var preferredVariant = normalizeLookupVariant(state.lookupVariant);
+            var lookupMetaUrl = withLookupVariantQuery(url_for_run("api/disturbed/lookup_meta"), preferredVariant);
+
+            return http
+                .request(lookupMetaUrl, {
+                    method: "GET",
+                    form: formElement || undefined
+                })
+                .then(function (result) {
+                    var data = result.body || {};
+                    var content = data.Content || data.content || data;
+                    var variant = content.lookup_variant || preferredVariant;
+                    var normalized = setLookupVariantSelection(variant, { emit: false, persist: true });
+                    emit("disturbed:lookup:variant", {
+                        lookupVariant: normalized,
+                        requestedLookupVariant: preferredVariant,
+                        source: reason || "api"
+                    });
+                    return normalized;
+                })
+                .catch(function (_error) {
+                    return state.lookupVariant;
+                });
         }
 
         function completeTask(taskMsg) {
@@ -650,6 +803,10 @@ var Disturbed = (function () {
                     setLookupStatusError(payload, "Failed to reset disturbed parameters.");
                     handleResponseError(taskMsg, payload, "disturbed:lookup:error", "disturbed:lookup:reset");
                     return payload;
+                })
+                .then(function (payload) {
+                    refreshLookupVariantSelection("reset-base");
+                    return payload;
                 });
         }
 
@@ -684,6 +841,88 @@ var Disturbed = (function () {
                     var payload = toResponsePayload(http, error);
                     setLookupStatusError(payload, "Failed to load extended disturbed parameters.");
                     handleResponseError(taskMsg, payload, "disturbed:lookup:error", "disturbed:lookup:extended");
+                    return payload;
+                })
+                .then(function (payload) {
+                    refreshLookupVariantSelection("load-extended");
+                    return payload;
+                });
+        }
+
+        function deleteExtendedLandSoilLookup() {
+            var taskMsg = "Deleting extended disturbed lookup";
+            setLookupStatus("Deleting extended disturbed parameters...", "pending");
+            startTask(taskMsg);
+            emit("disturbed:lookup:deleted", {});
+            disturbed.triggerEvent("job:started", { task: "disturbed:lookup:deleted" });
+            return http
+                .request(url_for_run("tasks/delete_extended_land_soil_lookup"), {
+                    method: "POST",
+                    form: formElement || undefined
+                })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (!data.error && !data.errors) {
+                        completeTask(taskMsg);
+                        setAdapterText(infoAdapter, "Extended disturbed lookup deleted.");
+                        setLookupStatus("Extended disturbed parameters deleted. Base lookup is now default.", "success");
+                        disturbed.triggerEvent("job:completed", {
+                            task: "disturbed:lookup:deleted",
+                            response: data
+                        });
+                        return data;
+                    }
+                    setLookupStatusError(data, "Failed to delete extended disturbed parameters.");
+                    handleResponseError(taskMsg, data, "disturbed:lookup:error", "disturbed:lookup:deleted");
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    setLookupStatusError(payload, "Failed to delete extended disturbed parameters.");
+                    handleResponseError(taskMsg, payload, "disturbed:lookup:error", "disturbed:lookup:deleted");
+                    return payload;
+                })
+                .then(function (payload) {
+                    refreshLookupVariantSelection("delete-extended");
+                    return payload;
+                });
+        }
+
+        function syncBaseToExtendedLandSoilLookup() {
+            var taskMsg = "Syncing base lookup to extended";
+            setLookupStatus("Syncing base table to extended table...", "pending");
+            startTask(taskMsg);
+            emit("disturbed:lookup:synced", {});
+            disturbed.triggerEvent("job:started", { task: "disturbed:lookup:synced" });
+            return http
+                .request(url_for_run("tasks/sync_base_to_extended_land_soil_lookup"), {
+                    method: "POST",
+                    form: formElement || undefined
+                })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (!data.error && !data.errors) {
+                        completeTask(taskMsg);
+                        setAdapterText(infoAdapter, "Base disturbed lookup synced to extended table.");
+                        setLookupStatus("Base table synced to extended table.", "success");
+                        disturbed.triggerEvent("job:completed", {
+                            task: "disturbed:lookup:synced",
+                            response: data
+                        });
+                        return data;
+                    }
+                    setLookupStatusError(data, "Failed to sync base table to extended table.");
+                    handleResponseError(taskMsg, data, "disturbed:lookup:error", "disturbed:lookup:synced");
+                    return data;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    setLookupStatusError(payload, "Failed to sync base table to extended table.");
+                    handleResponseError(taskMsg, payload, "disturbed:lookup:error", "disturbed:lookup:synced");
+                    return payload;
+                })
+                .then(function (payload) {
+                    refreshLookupVariantSelection("sync-base-to-extended");
                     return payload;
                 });
         }
@@ -1016,15 +1255,33 @@ var Disturbed = (function () {
                 }
                 if (action === "load-extended-lookup") {
                     loadExtendedLandSoilLookup();
+                    return;
                 }
+                if (action === "delete-extended-lookup") {
+                    deleteExtendedLandSoilLookup();
+                    return;
+                }
+                if (action === "sync-base-to-extended-lookup") {
+                    syncBaseToExtendedLandSoilLookup();
+                    return;
+                }
+            });
+
+            dom.delegate(document, "change", "[data-disturbed-lookup-variant]", function (_event, target) {
+                setLookupVariantSelection(target ? target.value : LOOKUP_VARIANT_BASE, { emit: true, persist: true });
+                refreshLookupVariantSelection("user-select");
             });
         }
 
         setMode(state.mode, false);
         bindHandlers();
+        setLookupVariantSelection(state.lookupVariant, { emit: false, persist: false });
+        refreshLookupVariantSelection("bootstrap");
 
         disturbed.reset_land_soil_lookup = resetLandSoilLookup;
         disturbed.load_extended_land_soil_lookup = loadExtendedLandSoilLookup;
+        disturbed.delete_extended_land_soil_lookup = deleteExtendedLandSoilLookup;
+        disturbed.sync_base_to_extended_land_soil_lookup = syncBaseToExtendedLandSoilLookup;
         disturbed.upload_sbs = uploadSbs;
         disturbed.remove_sbs = removeSbs;
         disturbed.build_uniform_sbs = buildUniformSbs;

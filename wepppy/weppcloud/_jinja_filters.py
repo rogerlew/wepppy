@@ -41,6 +41,8 @@ min:
 """
 
 import re
+from flask import url_for
+from markupsafe import Markup, escape
 from wepppy.all_your_base import isfloat
 
 
@@ -57,8 +59,21 @@ def extract_leading_digits(s):
 def sort_numeric(value, reverse=False):
     return sorted(value, key=extract_leading_digits, reverse=reverse)
 
+
+def usersum_doc_link(category, filename, label, classes='wc-link wc-link--file'):
+    href = url_for('usersum.view_markdown', category=category, filename=filename)
+    text = f'📄 {label}'
+    return Markup(
+        f'<a class="{escape(classes)}" '
+        f'href="{escape(href)}" '
+        'target="_blank" '
+        'rel="noopener" '
+        f'data-open-tab-pref>{escape(text)}</a>'
+    )
+
+
 def register_jinja_filters(app):
     app.jinja_env.filters['zip'] = zip
     app.jinja_env.filters['sort_numeric'] = sort_numeric
     app.jinja_env.filters['sort_numeric_keys'] = sort_numeric_keys
-    app.jinja_env.globals.update(max=max, min=min)
+    app.jinja_env.globals.update(max=max, min=min, usersum_doc_link=usersum_doc_link)

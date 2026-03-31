@@ -73,6 +73,9 @@ def jinja_env() -> Environment:
         url_for_run=lambda *args, **kwargs: "",
         static_url=lambda *args, **kwargs: "",
         site_prefix="",
+        usersum_doc_link=lambda category, filename, label: (
+            f'<a href="/usersum/view/{category}/{filename}" target="_blank" rel="noopener">📄 {label}</a>'
+        ),
         user=stub_user,
         current_user=stub_user,
         ron=SimpleNamespace(mods=set(), runid="test-run", config_stem="test-config", name="", scenario=""),
@@ -288,6 +291,88 @@ def test_poweruser_panel_parquet_table_links_do_not_append_trailing_slash(
     assert 'href="/weppcloud/runs/test-run/test-config/browse/soils/soils.parquet"' in rendered
 
 
+def test_poweruser_panel_no_longer_renders_disturbed_lookup_actions(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/poweruser_panel.htm")
+    rendered = template.render(
+        ron=SimpleNamespace(
+            mods={"disturbed"},
+            runid="test-run",
+            config_stem="test-config",
+            name="",
+            scenario="",
+            profile_recorder_assembler_enabled=False,
+        ),
+    )
+
+    assert "Modify Disturbed Parameters" not in rendered
+    assert "Reset Disturbed Parameters" not in rendered
+    assert "Load Extended Disturbed Parameters" not in rendered
+    assert "Disturbed Parameters Doc" not in rendered
+    assert 'data-disturbed-action="reset-lookup"' not in rendered
+    assert 'data-disturbed-action="load-extended-lookup"' not in rendered
+
+
+def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/disturbed_modal.htm")
+    rendered = template.render(
+        runid="test-run",
+        config="test-config",
+        ron=SimpleNamespace(mods={"disturbed"}, runid="test-run", config_stem="test-config"),
+    )
+
+    assert 'id="disturbedModal"' in rendered
+    assert "Landsoil Lookup Parameter Table" in rendered
+    assert "Reset Base Landsoil Lookup Table" in rendered
+    assert "Load Extended Landsoil Lookup Table" in rendered
+    assert "Delete Extended Landsoil Lookup Table" in rendered
+    assert 'data-disturbed-action="sync-base-to-extended-lookup"' in rendered
+    assert 'data-disturbed-lookup-variant' in rendered
+    assert "Extended" in rendered
+    assert "Base uses the canonical lookup table." in rendered
+    assert "Restore the base lookup CSV to default values." in rendered
+    assert "Regenerate the extended table from the current base table values." in rendered
+    assert "Modify Base Table" in rendered
+    assert "Modify Extended Table" in rendered
+    assert 'href="/usersum/view/weppcloud/disturbed-land-soil-lookup.md"' in rendered
+    assert "📄 WEPPcloud Calibration" in rendered
+
+
+def test_base_report_uses_modal_manager_hooks_for_disturbed_controls(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("reports/_base_report.htm")
+    rendered = template.render(
+        ron=SimpleNamespace(mods={"disturbed"}, runid="test-run", config_stem="test-config", name="", scenario=""),
+        request=SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"}),
+    )
+
+    assert 'data-modal-open="puModal"' in rendered
+    assert 'data-modal-open="disturbedModal"' in rendered
+    assert 'data-modal-open="unitizerModal"' in rendered
+    assert 'data-command="open-poweruser"' not in rendered
+    assert 'data-command="open-disturbed"' not in rendered
+    assert 'data-command="open-unitizer"' not in rendered
+    assert "toggleLegacyModal(" not in rendered
+
+
+def test_page_container_includes_disturbed_modal(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("reports/_page_container.htm")
+    rendered = template.render(
+        ron=SimpleNamespace(mods={"disturbed"}, runid="test-run", config_stem="test-config", name="", scenario=""),
+        current_ron=SimpleNamespace(
+            mods={"disturbed"},
+            runid="test-run",
+            config_stem="test-config",
+            nodb_version=None,
+            name="",
+            scenario="",
+            readonly=False,
+            public=False,
+            pup_relpath=None,
+        ),
+    )
+
+    assert 'id="disturbedModal"' in rendered
+
+
 def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
@@ -386,6 +471,7 @@ def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Enviro
     )
 
     assert 'data-project-mod="rusle"' not in rendered
+    assert 'data-modal-open="disturbedModal"' not in rendered
 
 
 def test_run_header_shows_rusle_mod_when_disturbed_enabled(jinja_env: Environment) -> None:
@@ -402,6 +488,7 @@ def test_run_header_shows_rusle_mod_when_disturbed_enabled(jinja_env: Environmen
     )
 
     assert 'data-project-mod="rusle"' in rendered
+    assert 'data-modal-open="disturbedModal"' in rendered
 
 
 def test_run_header_hides_rusle_mod_for_topaz_backend(jinja_env: Environment) -> None:
