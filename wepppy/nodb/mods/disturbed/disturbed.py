@@ -1395,9 +1395,11 @@ class Disturbed(NoDbBase):
     def land_soil_replacements_d(self) -> Dict[Tuple[str, str], Dict[str, Any]]:
         self.ensure_land_soil_lookup_schema()
         default_fn = self.default_land_soil_lookup_fn
-        _lookup_fn = self.lookup_fn
+        base_lookup_fn = self.lookup_fn
+        extended_lookup_fn = self.extended_lookup_fn
+        active_lookup_fn = extended_lookup_fn if _exists(extended_lookup_fn) else base_lookup_fn
 
-        lookup = read_disturbed_land_soil_lookup(_lookup_fn)
+        lookup = read_disturbed_land_soil_lookup(active_lookup_fn)
 
         expected_thinning_keys = {
             ('clay loam', 'thinning'),
@@ -1406,10 +1408,17 @@ class Disturbed(NoDbBase):
             ('silt loam', 'thinning'),
         }
         if any(key not in lookup for key in expected_thinning_keys):
-            default_lookup = read_disturbed_land_soil_lookup(default_fn)
+            fallback_lookups = []
+            if _exists(base_lookup_fn):
+                fallback_lookups.append(read_disturbed_land_soil_lookup(base_lookup_fn))
+            fallback_lookups.append(read_disturbed_land_soil_lookup(default_fn))
             for key in expected_thinning_keys:
-                if key not in lookup and key in default_lookup:
-                    lookup[key] = default_lookup[key]
+                if key in lookup:
+                    continue
+                for fallback_lookup in fallback_lookups:
+                    if key in fallback_lookup:
+                        lookup[key] = fallback_lookup[key]
+                        break
 
         return lookup
 
