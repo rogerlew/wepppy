@@ -335,7 +335,7 @@ def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> N
     assert "Modify Base Table" in rendered
     assert "Modify Extended Table" in rendered
     assert 'href="/usersum/view/weppcloud/disturbed-land-soil-lookup.md"' in rendered
-    assert "📄 WEPPcloud Calibration" in rendered
+    assert "📄 Disturbed Land Soil Lookup Table Guidance" in rendered
 
 
 def test_base_report_uses_modal_manager_hooks_for_disturbed_controls(jinja_env: Environment) -> None:

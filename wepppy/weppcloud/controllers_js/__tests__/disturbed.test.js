@@ -392,6 +392,6 @@ describe("Disturbed lookup variant persistence", () => {
         );
         expect(extendedRadio.disabled).toBe(false);
         expect(syncButton.disabled).toBe(false);
-        expect(extendedLink.getAttribute("aria-disabled")).toBe(null);
+        expect(extendedLink.getAttribute("aria-disabled")).toBeNull();
     });
 });
