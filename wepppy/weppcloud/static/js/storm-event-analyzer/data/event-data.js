@@ -54,6 +54,51 @@ function formatDate(year, month, day) {
   return `${year}-${pad2(month)}-${pad2(day)}`;
 }
 
+function isLeapYear(year) {
+  if (!Number.isFinite(year)) {
+    return false;
+  }
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
+function isValidCalendarDay(year, month, day) {
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+    return false;
+  }
+  if (month < 1 || month > 12 || day < 1) {
+    return false;
+  }
+  const monthLengths = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= monthLengths[month - 1];
+}
+
+function buildYearCandidates(year) {
+  const numeric = Number(year);
+  if (!Number.isFinite(numeric)) {
+    return [];
+  }
+  const value = Math.trunc(numeric);
+  const candidates = [];
+  const push = (candidate) => {
+    if (!Number.isFinite(candidate)) {
+      return;
+    }
+    const normalized = Math.trunc(candidate);
+    if (!candidates.includes(normalized)) {
+      candidates.push(normalized);
+    }
+  };
+
+  push(value);
+  if (value >= 0 && value <= 99) {
+    push(1900 + value);
+    push(2000 + value);
+  } else {
+    push(value % 100);
+  }
+  return candidates;
+}
+
 function toNumberOrNull(value) {
   if (value === null || value === undefined || value === '') {
     return null;
@@ -141,6 +186,63 @@ export function buildEventFilterPayload({ filterColumn, minValue, maxValue, warm
       ...buildWarmupFilter(warmupYear),
     ],
     order_by: [filterColumn, 'sim_day_index'],
+  };
+}
+
+export function buildEventDatePayload({ year, month, day, warmupYear }) {
+  const yearValues = Array.isArray(year)
+    ? year.map((value) => Number(value)).filter((value) => Number.isFinite(value))
+    : Number.isFinite(Number(year))
+      ? [Number(year)]
+      : [];
+  if (!yearValues.length) {
+    throw new Error('Date year filter is required.');
+  }
+  const yearFilter =
+    yearValues.length === 1
+      ? {
+          column: 'ev.year',
+          operator: '=',
+          value: yearValues[0],
+        }
+      : {
+          column: 'ev.year',
+          operator: 'IN',
+          value: yearValues,
+        };
+
+  return {
+    datasets: [{ path: CLIMATE_PATH, alias: 'ev' }],
+    columns: [
+      'ev.sim_day_index AS sim_day_index',
+      'ev.year AS year',
+      'ev.month AS month',
+      'ev.day_of_month AS day_of_month',
+      'ev.prcp AS depth_mm',
+      'ev.prcp AS precip_mm',
+      'ev.dur AS duration_hours',
+      'ev.tp AS tp',
+      'ev.ip AS ip',
+      'ev.peak_intensity_10 AS peak_intensity_10',
+      'ev.peak_intensity_15 AS peak_intensity_15',
+      'ev.peak_intensity_30 AS peak_intensity_30',
+      'ev.peak_intensity_60 AS peak_intensity_60',
+    ],
+    filters: [
+      yearFilter,
+      {
+        column: 'ev.month',
+        operator: '=',
+        value: month,
+      },
+      {
+        column: 'ev.day_of_month',
+        operator: '=',
+        value: day,
+      },
+      ...buildWarmupFilter(warmupYear),
+    ],
+    order_by: ['sim_day_index'],
   };
 }
 
@@ -730,12 +832,122 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
     return { rows, tcAvailable, soilSaturationLabel };
   }
 
+  async function fetchEventRowByDate({ year, month, day, includeWarmup }) {
+    const yearValue = toNumberOrNull(year);
+    const monthValue = toNumberOrNull(month);
+    const dayValue = toNumberOrNull(day);
+    if (!Number.isFinite(yearValue) || !Number.isFinite(monthValue) || !Number.isFinite(dayValue)) {
+      throw new Error('Date must use YY-MM-DD or YYYY-MM-DD.');
+    }
+    if (!isValidCalendarDay(yearValue, monthValue, dayValue)) {
+      throw new Error('Date is not a valid calendar day.');
+    }
+
+    const warmupYear = includeWarmup ? await fetchWarmupYear({ postQueryEngine, runid: ctx.runid }) : null;
+    const yearCandidates = buildYearCandidates(yearValue);
+    const eventPayload = buildEventDatePayload({
+      year: yearCandidates,
+      month: monthValue,
+      day: dayValue,
+      warmupYear,
+    });
+    const eventResult = await postQueryEngine(eventPayload);
+    const baseRows = (eventResult && eventResult.records) || [];
+    const row = baseRows[0] || null;
+    if (!row) {
+      return {
+        row: null,
+        tcAvailable: false,
+        soilSaturationLabel: getSoilSaturationLabel('saturation'),
+      };
+    }
+
+    const simDayIndex = toNumberOrNull(row.sim_day_index);
+    if (!Number.isFinite(simDayIndex)) {
+      throw new Error('Event data is missing sim_day_index. Re-run interchange outputs for this run.');
+    }
+
+    const filterColumn = 'sim_day_index';
+    const minValue = simDayIndex;
+    const maxValue = simDayIndex;
+    const filterSpec = { metricKey: 'manual-date' };
+
+    const snowPayload = buildSnowPayload(
+      {
+        filterColumn,
+        minValue,
+        maxValue,
+        warmupYear,
+      },
+      datasetPaths,
+    );
+
+    const hydroPayload = buildHydrologyPayload(
+      {
+        filterColumn,
+        minValue,
+        maxValue,
+        warmupYear,
+      },
+      datasetPaths,
+    );
+
+    const precipPayload = buildPrecipVolumePayload(
+      {
+        filterColumn,
+        minValue,
+        maxValue,
+        warmupYear,
+      },
+      datasetPaths,
+    );
+
+    const [soilResult, snowResult, hydroResult, precipResult, tcResult] = await Promise.all([
+      fetchSoilResult({
+        filterColumn,
+        minValue,
+        maxValue,
+        warmupYear,
+      }),
+      safeQuery(snowPayload, 'snow water (manual date)'),
+      safeQuery(hydroPayload, 'hydrology (manual date)'),
+      safeQuery(precipPayload, 'precip volume (manual date)'),
+      fetchTcResult({ warmupYear }),
+    ]);
+
+    const soilMap = mapBySimDay((soilResult && soilResult.records) || [], 'soil_saturation_pct');
+    const snowMap = mapRowsBySimDay((snowResult && snowResult.records) || []);
+    const hydroMap = mapRowsBySimDay((hydroResult && hydroResult.records) || []);
+    const precipMap = mapRowsBySimDay((precipResult && precipResult.records) || []);
+    const tcAvailable = !!(tcResult && tcResult.available);
+    const tcMap = mapBySimDay((tcResult && tcResult.records) || [], 'tc_hours');
+    const soilSaturationLabel =
+      soilResult && soilResult.soilSaturationLabel
+        ? soilResult.soilSaturationLabel
+        : getSoilSaturationLabel('saturation');
+
+    return {
+      row: buildEventRow({
+        row,
+        filterSpec,
+        soilMap,
+        snowMap,
+        hydroMap,
+        precipMap,
+        tcMap,
+        tcAvailable,
+      }),
+      tcAvailable,
+      soilSaturationLabel,
+    };
+  }
+
   async function fetchScenarioSummary({ selectedMetric, simDayIndex, scenarioPath }) {
-    if (!selectedMetric || !Number.isFinite(simDayIndex) || !scenarioPath || !postQueryEngineForScenario) {
+    if (!Number.isFinite(simDayIndex) || !scenarioPath || !postQueryEngineForScenario) {
       return null;
     }
 
-    const filterSpec = resolveFilterSpec(selectedMetric);
+    const filterSpec = selectedMetric ? resolveFilterSpec(selectedMetric) : { metricKey: 'manual-date' };
     const filterColumn = 'sim_day_index';
     const minValue = simDayIndex;
     const maxValue = simDayIndex;
@@ -822,5 +1034,5 @@ export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineFo
     });
   }
 
-  return { fetchEventRows, fetchScenarioSummary };
+  return { fetchEventRows, fetchEventRowByDate, fetchScenarioSummary };
 }

@@ -62,8 +62,87 @@
     text-align: center;
   }
 
+  .storm-event-analyzer__event-radio {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--storm-event-analyzer-radio-accent, var(--wc-color-accent));
+  }
+
+  .storm-event-analyzer__event-radio:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--wc-color-accent) 65%, transparent);
+    outline-offset: 2px;
+  }
+
+  .storm-event-analyzer__events-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--wc-space-xs);
+  }
+
+  .storm-event-analyzer__events-loading::before {
+    content: '';
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 2px solid color-mix(in srgb, var(--wc-color-border) 75%, transparent);
+    border-top-color: var(--storm-event-analyzer-loading-accent, var(--wc-color-accent));
+    border-radius: 999px;
+    animation: storm-event-analyzer-spin 700ms linear infinite;
+  }
+
+  .storm-event-analyzer__events.is-loading .wc-table-wrapper {
+    opacity: 0.55;
+    transition: opacity 120ms ease;
+  }
+
+  @keyframes storm-event-analyzer-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .storm-event-analyzer__filter-range {
     justify-content: flex-start;
+  }
+
+  .storm-event-analyzer__summary-date-cell {
+    min-width: 10rem;
+  }
+
+  .storm-event-analyzer__summary-date-row > th,
+  .storm-event-analyzer__summary-date-row > td {
+    vertical-align: middle;
+  }
+
+  .storm-event-analyzer__summary-date-input {
+    min-width: 9.5rem;
+    width: 100%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .storm-event-analyzer__summary .wc-table-actions .pure-button-link[data-report-csv] {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--wc-color-link, var(--wc-color-accent));
+    text-decoration: none;
+  }
+
+  .storm-event-analyzer__summary .wc-table-actions .pure-button-link[data-report-csv]:hover,
+  .storm-event-analyzer__summary .wc-table-actions .pure-button-link[data-report-csv]:active,
+  .storm-event-analyzer__summary .wc-table-actions .pure-button-link[data-report-csv]:focus {
+    background: transparent;
+    color: var(--wc-color-link, var(--wc-color-accent));
+    text-decoration: underline;
+    box-shadow: none;
+  }
+
+  .storm-event-analyzer__summary .wc-table-actions .pure-button-link[data-report-csv]:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--wc-color-accent) 60%, transparent);
+    outline-offset: 2px;
   }
 
   @media (max-width: 900px) {
@@ -72,7 +151,7 @@
     }
   }
 </style>
-<script type="module" src="{{ static_url('js/storm-event-analyzer/main.js') }}" defer></script>
+<script type="module" src="{{ static_url('js/storm-event-analyzer/main.js') }}?v=storm-event-analyzer-20260331b" defer></script>
 <script>
   window.STORM_EVENT_ANALYZER_CONTEXT = {{ {
     "omniScenarios": omni_scenarios,
@@ -226,6 +305,9 @@
   <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state data-storm-event-analyzer-events-empty>
     No storms in range yet. Select a metric to populate results.
   </p>
+  <p class="wc-text-muted storm-event-analyzer__events-loading" data-storm-event-analyzer-events-loading hidden>
+    Querying storm events...
+  </p>
 </section>
 
 <section class="wc-panel wc-stack storm-event-analyzer__hyetograph" id="storm-event-analyzer__hyetograph">
@@ -244,6 +326,9 @@
     <h2 class="wc-heading__subtitle">Storm event hydrology characteristics</h2>
     <p class="wc-text-muted">Summary updates when an event row is selected.</p>
   </header>
+  <p class="wc-text-muted" id="storm-event-analyzer-manual-date-help">
+    Enter a date (`YY-MM-DD` or `YYYY-MM-DD`) to load a specific storm event.
+  </p>
   {% if omni_scenarios %}
   <div class="wc-field" data-storm-event-analyzer-omni-controls>
     <label class="wc-field__label" for="storm-event-analyzer-omni-select">Compare to Omni Scenario</label>
@@ -271,9 +356,23 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr class="storm-event-analyzer__summary-date-row">
           <th scope="row">Date</th>
-          <td class="wc-text-right" data-storm-event-analyzer-summary="date">--</td>
+          <td class="wc-text-right storm-event-analyzer__summary-date-cell" data-storm-event-analyzer-summary="date">
+            <label class="wc-sr-only" for="storm-event-analyzer-manual-date">Event date</label>
+            <input
+              type="text"
+              id="storm-event-analyzer-manual-date"
+              class="wc-field__control storm-event-analyzer__summary-date-input"
+              inputmode="numeric"
+              autocomplete="off"
+              spellcheck="false"
+              pattern="^\\d{2,4}-\\d{2}-\\d{2}$"
+              placeholder="YY-MM-DD"
+              aria-describedby="storm-event-analyzer-manual-date-help"
+              data-storm-event-analyzer-manual-date
+            >
+          </td>
           {% if omni_scenarios %}
           <td class="wc-text-right" data-storm-event-analyzer-summary="date-scenario">--</td>
           {% endif %}
@@ -426,7 +525,7 @@
     </button>
   </div>
   <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state>
-    Select an event to view hydrology details.
+    Select an event or enter a date to view hydrology details.
   </p>
 </section>
 {% endblock %}

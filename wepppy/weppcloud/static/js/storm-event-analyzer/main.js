@@ -2,22 +2,97 @@ import {
   DEFAULT_FILTER_RANGE_PCT,
   DEFAULT_INCLUDE_WARMUP,
   INTENSITY_UNIT_KEY,
-} from './config.js';
-import { getState, initState, setState, subscribe } from './state.js';
+} from './config.js?v=storm-event-analyzer-20260331b';
+import { getState, initState, setState, subscribe } from './state.js?v=storm-event-analyzer-20260331b';
 import {
   alignFrequencyToRecurrence,
   filterIntensityRows,
   filterWeppFrequencyRows,
   loadFrequencyData,
-} from './data/frequency-data.js?v=storm-event-analyzer';
-import { createQueryEngine } from './data/query-engine.js';
-import { createEventDataManager } from './data/event-data.js';
-import { buildHyetographSeries } from './data/hyetograph-data.js';
-import { createHyetographChart } from './charts/hyetograph.js';
-import { applyNoaaAvailability, renderFrequencyTable } from './ui/frequency-table.js';
-import { bindHydrologySummaryCsv, renderHydrologySummary } from './ui/hydrology-summary.js';
-import { renderEventTable, setEventErrorBanner, updateEventSelection } from './ui/event-table.js';
-import { bindFilterControls } from './ui/filters.js';
+} from './data/frequency-data.js?v=storm-event-analyzer-20260331b';
+import { createQueryEngine } from './data/query-engine.js?v=storm-event-analyzer-20260331b';
+import { createEventDataManager } from './data/event-data.js?v=storm-event-analyzer-20260331b';
+import { buildHyetographSeries } from './data/hyetograph-data.js?v=storm-event-analyzer-20260331b';
+import { createHyetographChart } from './charts/hyetograph.js?v=storm-event-analyzer-20260331b';
+import { applyNoaaAvailability, renderFrequencyTable } from './ui/frequency-table.js?v=storm-event-analyzer-20260331b';
+import { bindHydrologySummaryCsv, renderHydrologySummary } from './ui/hydrology-summary.js?v=storm-event-analyzer-20260331b';
+import { renderEventTable, setEventErrorBanner, updateEventSelection } from './ui/event-table.js?v=storm-event-analyzer-20260331b';
+import { bindFilterControls } from './ui/filters.js?v=storm-event-analyzer-20260331b';
+
+const MANUAL_DATE_RE = /^(\d{2}|\d{4})-(\d{2})-(\d{2})$/;
+
+function isLeapYear(year) {
+  if (!Number.isFinite(year)) {
+    return false;
+  }
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
+function isValidCalendarDay(year, month, day) {
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+    return false;
+  }
+  if (month < 1 || month > 12 || day < 1) {
+    return false;
+  }
+  const monthLengths = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= monthLengths[month - 1];
+}
+
+function parseManualDateInput(value) {
+  const text = typeof value === 'string' ? value.trim() : '';
+  if (!text) {
+    return null;
+  }
+  const match = MANUAL_DATE_RE.exec(text);
+  if (!match) {
+    return null;
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+    return null;
+  }
+  if (!isValidCalendarDay(year, month, day)) {
+    return null;
+  }
+  return {
+    text,
+    year,
+    month,
+    day,
+  };
+}
+
+function ensureManualDateInput(section) {
+  let input = document.querySelector('[data-storm-event-analyzer-manual-date]');
+  if (input) {
+    return input;
+  }
+  if (!section) {
+    return null;
+  }
+  const dateCell = section.querySelector('[data-storm-event-analyzer-summary="date"]');
+  if (!dateCell) {
+    return null;
+  }
+  dateCell.textContent = '';
+  input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'wc-field__control storm-event-analyzer__summary-date-input';
+  input.setAttribute('inputmode', 'numeric');
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('spellcheck', 'false');
+  input.setAttribute('pattern', '^\\d{2,4}-\\d{2}-\\d{2}$');
+  input.setAttribute('placeholder', 'YY-MM-DD');
+  input.setAttribute('data-storm-event-analyzer-manual-date', '');
+  if (section.querySelector('#storm-event-analyzer-manual-date-help')) {
+    input.setAttribute('aria-describedby', 'storm-event-analyzer-manual-date-help');
+  }
+  dateCell.appendChild(input);
+  return input;
+}
 
 function getUnitizerClient() {
   if (typeof window === 'undefined') {
@@ -48,8 +123,10 @@ async function initStormEventAnalyzer() {
 
   const noaaMessage = document.querySelector('[data-noaa-unavailable]');
   const weppEmptyMessage = document.querySelector('[data-storm-event-analyzer-wepp-empty]');
+  const eventsSection = document.getElementById('storm-event-analyzer__events');
   const eventTable = document.getElementById('storm_event_characteristics_table');
   const eventsEmptyMessage = document.querySelector('[data-storm-event-analyzer-events-empty]');
+  const eventsLoadingMessage = document.querySelector('[data-storm-event-analyzer-events-loading]');
   const eventErrorBanner = document.querySelector('[data-storm-event-analyzer-error]');
   const hyetographSection = document.getElementById('storm-event-analyzer__hyetograph');
   const hyetographContainer = document.querySelector('[data-storm-event-analyzer-chart]');
@@ -58,6 +135,7 @@ async function initStormEventAnalyzer() {
     : null;
   const hydrologySummarySection = document.getElementById('storm-event-analyzer__summary');
   const omniSelect = document.querySelector('[data-storm-event-analyzer-omni-select]');
+  const manualDateInput = ensureManualDateInput(hydrologySummarySection);
 
   initState({
     filterRangePct: DEFAULT_FILTER_RANGE_PCT,
@@ -66,6 +144,8 @@ async function initStormEventAnalyzer() {
     eventRows: [],
     hyetographSeries: [],
     selectedEventSimDayIndex: null,
+    manualDateInput: '',
+    eventRowsLoading: false,
     eventError: null,
     tcAvailable: false,
     soilSaturationLabel: 'Top 0.1 m Saturation',
@@ -148,7 +228,8 @@ async function initStormEventAnalyzer() {
       tableKey: 'wepp',
       unitizer: unitizerClient,
       selectedMetric,
-      onSelect: (metric) => setState({ selectedMetric: metric }),
+      onSelect: (metric) =>
+        setState({ selectedMetric: metric, manualDateInput: '', eventRowsLoading: true, eventError: null }),
       unitKey: INTENSITY_UNIT_KEY,
     });
 
@@ -162,16 +243,34 @@ async function initStormEventAnalyzer() {
         tableKey: 'noaa',
         unitizer: unitizerClient,
         selectedMetric,
-        onSelect: (metric) => setState({ selectedMetric: metric }),
+        onSelect: (metric) =>
+          setState({ selectedMetric: metric, manualDateInput: '', eventRowsLoading: true, eventError: null }),
         unitKey: INTENSITY_UNIT_KEY,
       });
     }
   }
 
-  function updateEmptyStates({ rows, error }) {
+  function updateEmptyStates({ rows, error, loading }) {
     const hasRows = Array.isArray(rows) && rows.length > 0;
+    if (eventsSection) {
+      eventsSection.classList.toggle('is-loading', !!loading);
+    }
+    if (eventTable) {
+      if (loading) {
+        eventTable.setAttribute('aria-busy', 'true');
+      } else {
+        eventTable.removeAttribute('aria-busy');
+      }
+    }
+    if (eventsLoadingMessage) {
+      if (loading) {
+        eventsLoadingMessage.removeAttribute('hidden');
+      } else {
+        eventsLoadingMessage.setAttribute('hidden', 'hidden');
+      }
+    }
     if (eventsEmptyMessage) {
-      if (!hasRows && !error) {
+      if (!hasRows && !error && !loading) {
         eventsEmptyMessage.removeAttribute('hidden');
       } else {
         eventsEmptyMessage.setAttribute('hidden', 'hidden');
@@ -185,7 +284,7 @@ async function initStormEventAnalyzer() {
       }
     }
     if (hyetographEmptyMessage) {
-      if (!hasRows) {
+      if (!hasRows && !loading) {
         hyetographEmptyMessage.removeAttribute('hidden');
       } else {
         hyetographEmptyMessage.setAttribute('hidden', 'hidden');
@@ -209,7 +308,7 @@ async function initStormEventAnalyzer() {
       onSelect: (simDayIndex) => setState({ selectedEventSimDayIndex: simDayIndex }),
     });
     setEventErrorBanner({ banner: eventErrorBanner, message: state.eventError });
-    updateEmptyStates({ rows: state.eventRows, error: state.eventError });
+    updateEmptyStates({ rows: state.eventRows, error: state.eventError, loading: state.eventRowsLoading });
   }
 
   function renderSummary(state) {
@@ -232,6 +331,7 @@ async function initStormEventAnalyzer() {
       omniScenario: state.omniScenario,
       omniSummary: state.omniSummary,
       baseScenarioLabel: state.baseScenarioLabel,
+      manualDateInput: state.manualDateInput,
     });
   }
 
@@ -250,15 +350,93 @@ async function initStormEventAnalyzer() {
     });
   }
 
+  if (manualDateInput) {
+    const submitManualDate = () => {
+      const nextValue = manualDateInput.value.trim();
+      const updates = {
+        manualDateInput: nextValue,
+        selectedEventSimDayIndex: null,
+        eventRowsLoading: !!nextValue,
+      };
+      if (nextValue) {
+        updates.selectedMetric = null;
+      }
+      setState(updates);
+    };
+    manualDateInput.addEventListener('change', submitManualDate);
+    manualDateInput.addEventListener('blur', submitManualDate);
+    manualDateInput.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') {
+        return;
+      }
+      event.preventDefault();
+      submitManualDate();
+      manualDateInput.blur();
+    });
+  }
+
   let eventRequestId = 0;
   async function refreshEventRows() {
     const state = getState();
+    const manualDate = parseManualDateInput(state.manualDateInput);
+    if (state.manualDateInput) {
+      if (!manualDate) {
+        setState({
+          eventRows: [],
+          hyetographSeries: [],
+          selectedEventSimDayIndex: null,
+          eventError: 'Date must use YY-MM-DD or YYYY-MM-DD.',
+          eventRowsLoading: false,
+          tcAvailable: false,
+          soilSaturationLabel: 'Top 0.1 m Saturation',
+        });
+        return;
+      }
+
+      const requestId = (eventRequestId += 1);
+      setState({ eventError: null, eventRowsLoading: true });
+      try {
+        const result = await eventDataManager.fetchEventRowByDate({
+          year: manualDate.year,
+          month: manualDate.month,
+          day: manualDate.day,
+          includeWarmup: state.includeWarmup,
+        });
+        if (requestId !== eventRequestId) {
+          return;
+        }
+        const row = result && result.row ? result.row : null;
+        const rows = row ? [row] : [];
+        const tcAvailable = result && typeof result.tcAvailable === 'boolean' ? result.tcAvailable : false;
+        const soilSaturationLabel =
+          result && result.soilSaturationLabel ? result.soilSaturationLabel : 'Top 0.1 m Saturation';
+        const hyetographSeries = buildHyetographSeries(rows);
+        setState({
+          eventRows: rows,
+          hyetographSeries,
+          selectedEventSimDayIndex: row ? row.sim_day_index : null,
+          eventError: row ? null : `No storm event found for ${manualDate.text}.`,
+          eventRowsLoading: false,
+          tcAvailable,
+          soilSaturationLabel,
+        });
+      } catch (error) {
+        if (requestId !== eventRequestId) {
+          return;
+        }
+        const message = error && error.message ? error.message : 'Query Engine request failed.';
+        setState({ eventError: message, eventRowsLoading: false });
+      }
+      return;
+    }
+
     if (!state.selectedMetric) {
       setState({
         eventRows: [],
         hyetographSeries: [],
         selectedEventSimDayIndex: null,
         eventError: null,
+        eventRowsLoading: false,
         tcAvailable: false,
         soilSaturationLabel: 'Top 0.1 m Saturation',
       });
@@ -266,7 +444,7 @@ async function initStormEventAnalyzer() {
     }
 
     const requestId = (eventRequestId += 1);
-    setState({ eventError: null });
+    setState({ eventError: null, eventRowsLoading: true });
     try {
       const result = await eventDataManager.fetchEventRows({
         selectedMetric: state.selectedMetric,
@@ -289,6 +467,7 @@ async function initStormEventAnalyzer() {
         hyetographSeries,
         selectedEventSimDayIndex: selected,
         eventError: null,
+        eventRowsLoading: false,
         tcAvailable,
         soilSaturationLabel,
       });
@@ -300,7 +479,7 @@ async function initStormEventAnalyzer() {
       if (/sim_day_index/i.test(message)) {
         message = 'Event data is missing sim_day_index. Re-run interchange outputs for this run.';
       }
-      setState({ eventError: message });
+      setState({ eventError: message, eventRowsLoading: false });
     }
   }
 
@@ -308,7 +487,7 @@ async function initStormEventAnalyzer() {
   async function refreshOmniSummary() {
     const state = getState();
     const scenario = state.omniScenario;
-    if (!scenario || state.selectedEventSimDayIndex == null || !state.selectedMetric) {
+    if (!scenario || state.selectedEventSimDayIndex == null) {
       if (state.omniSummary !== null) {
         setState({ omniSummary: null });
       }
@@ -344,11 +523,16 @@ async function initStormEventAnalyzer() {
     refreshEventRows();
   });
 
+  subscribe(['manualDateInput'], () => {
+    refreshEventRows();
+    renderSummary(getState());
+  });
+
   subscribe(['filterRangePct', 'includeWarmup'], () => {
     refreshEventRows();
   });
 
-  subscribe(['eventRows', 'eventError'], (state) => {
+  subscribe(['eventRows', 'eventError', 'eventRowsLoading'], (state) => {
     renderEventRows(state);
     renderSummary(state);
   });

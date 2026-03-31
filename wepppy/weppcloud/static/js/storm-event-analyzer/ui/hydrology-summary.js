@@ -104,6 +104,14 @@ export function buildHydrologySummaryCsv(table) {
         if (!cell || cell.hasAttribute('hidden')) {
           return '';
         }
+        const input = cell.querySelector('input, textarea, select');
+        if (input) {
+          if (input.tagName === 'SELECT') {
+            const selectedOption = input.selectedOptions && input.selectedOptions[0];
+            return normalizeCsvText(selectedOption ? selectedOption.textContent : '');
+          }
+          return normalizeCsvText(input.value);
+        }
         return normalizeCsvText(cell.textContent);
       });
       lines.push(values.map(escapeCsvValue).join(','));
@@ -169,6 +177,44 @@ function setChangeCell(cell, value, placeholder) {
 function setUnitCell(cell, unitKey, unitizer) {
   if (!cell) return;
   applyHtml(cell, renderUnits(unitizer, unitKey));
+}
+
+function setManualDateCell(section, { hasSelection, dateValue, manualDateInput }) {
+  if (!section) {
+    return;
+  }
+  const dateCell = section.querySelector('[data-storm-event-analyzer-summary="date"]');
+  if (!dateCell) {
+    return;
+  }
+  let dateInput = dateCell.querySelector('[data-storm-event-analyzer-manual-date]');
+  if (!dateInput) {
+    dateCell.textContent = '';
+    dateInput = document.createElement('input');
+    dateInput.type = 'text';
+    dateInput.className = 'wc-field__control storm-event-analyzer__summary-date-input';
+    dateInput.setAttribute('inputmode', 'numeric');
+    dateInput.setAttribute('autocomplete', 'off');
+    dateInput.setAttribute('spellcheck', 'false');
+    dateInput.setAttribute('pattern', '^\\d{2,4}-\\d{2}-\\d{2}$');
+    dateInput.setAttribute('placeholder', 'YY-MM-DD');
+    dateInput.setAttribute('data-storm-event-analyzer-manual-date', '');
+    if (section.querySelector('#storm-event-analyzer-manual-date-help')) {
+      dateInput.setAttribute('aria-describedby', 'storm-event-analyzer-manual-date-help');
+    }
+    dateCell.appendChild(dateInput);
+  }
+  const preferredValue = hasSelection && dateValue ? String(dateValue) : normalizeCsvText(manualDateInput);
+
+  if (dateInput && document.activeElement !== dateInput) {
+    dateInput.value = preferredValue || '';
+  }
+
+  if (preferredValue) {
+    dateCell.classList.remove('wc-text-muted');
+  } else {
+    dateCell.classList.add('wc-text-muted');
+  }
 }
 
 function updateSoilSaturationLabel(section, soilSaturationLabel) {
@@ -242,6 +288,7 @@ export function renderHydrologySummary({
   omniScenario,
   omniSummary,
   baseScenarioLabel,
+  manualDateInput,
 }) {
   if (!section) {
     return;
@@ -313,16 +360,24 @@ export function renderHydrologySummary({
     'runoff-coefficient': '%',
   };
 
+  setManualDateCell(section, {
+    hasSelection,
+    dateValue: baseValues.date,
+    manualDateInput,
+  });
+
   Object.entries(baseValues).forEach(([key, value]) => {
     if (key === 'tc' && !tcAvailable) {
       return;
     }
-    const valueCell = section.querySelector(`[data-storm-event-analyzer-summary="${key}"]`);
     const scenarioCell = section.querySelector(`[data-storm-event-analyzer-summary="${key}-scenario"]`);
     const unitCell = section.querySelector(`[data-storm-event-analyzer-unit="summary-${key}"]`);
     const changeCell = section.querySelector(`[data-storm-event-analyzer-summary="${key}-change"]`);
     const unitKey = units[key];
-    setValueCell(valueCell, value, unitKey, unitizer, placeholder);
+    if (key !== 'date') {
+      const valueCell = section.querySelector(`[data-storm-event-analyzer-summary="${key}"]`);
+      setValueCell(valueCell, value, unitKey, unitizer, placeholder);
+    }
     setValueCell(scenarioCell, scenarioValues[key], unitKey, unitizer, scenarioPlaceholder);
     setUnitCell(unitCell, unitKey, unitizer);
     setChangeCell(changeCell, changeValues[key], changePlaceholder);

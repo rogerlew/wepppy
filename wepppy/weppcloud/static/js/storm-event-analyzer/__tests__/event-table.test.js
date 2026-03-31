@@ -78,6 +78,7 @@ describe('storm-event-analyzer event table rendering', () => {
 
     const selectedRadio = renderedRows[1].querySelector('input[type="radio"]');
     expect(selectedRadio).toBeTruthy();
+    expect(selectedRadio.classList.contains('storm-event-analyzer__event-radio')).toBe(true);
     expect(selectedRadio.checked).toBe(true);
     const saturationLabel = table.querySelector('[data-storm-event-analyzer-soil-saturation-label]');
     expect(saturationLabel.textContent).toBe('Soil saturation (Full Depth Soil Saturation)');

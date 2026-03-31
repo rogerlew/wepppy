@@ -103,6 +103,7 @@ export function renderEventTable({
     selectCell.className = 'storm-event-analyzer__select-cell';
     const radio = document.createElement('input');
     radio.type = 'radio';
+    radio.className = 'storm-event-analyzer__event-radio';
     radio.name = 'storm-event-analyzer-event';
     radio.value = String(row.sim_day_index);
     radio.checked = false;

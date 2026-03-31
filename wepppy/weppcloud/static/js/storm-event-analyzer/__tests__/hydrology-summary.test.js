@@ -17,7 +17,9 @@ function buildSummarySection() {
         <tbody>
           <tr>
             <th scope="row">Date</th>
-            <td data-storm-event-analyzer-summary="date">--</td>
+            <td data-storm-event-analyzer-summary="date">
+              <input type="text" data-storm-event-analyzer-manual-date>
+            </td>
             <td data-storm-event-analyzer-summary="date-scenario">--</td>
             <td data-storm-event-analyzer-unit="summary-date">--</td>
             <td data-storm-event-analyzer-summary="date-change">--</td>
@@ -282,8 +284,8 @@ describe('storm-event-analyzer hydrology summary rendering', () => {
       baseScenarioLabel: 'Undisturbed',
     });
 
-    const dateCell = section.querySelector('[data-storm-event-analyzer-summary="date"]');
-    expect(dateCell.textContent).toBe('2024-06-03:YY-MM-DD');
+    const dateInput = section.querySelector('[data-storm-event-analyzer-manual-date]');
+    expect(dateInput.value).toBe('2024-06-03');
     const selectedMeasureCell = section.querySelector('[data-storm-event-analyzer-summary="selected-measure"]');
     expect(selectedMeasureCell.textContent).toBe('30:mm/hour');
     const snowWaterCell = section.querySelector('[data-storm-event-analyzer-summary="snow-water"]');
@@ -308,6 +310,25 @@ describe('storm-event-analyzer hydrology summary rendering', () => {
     const tcCell = section.querySelector('[data-storm-event-analyzer-summary="tc"]');
     expect(tcCell.textContent).toBe('\u2014');
     expect(tcCell.classList.contains('wc-text-muted')).toBe(true);
+  });
+
+  it('keeps typed manual date text visible when no event row is selected', () => {
+    const section = buildSummarySection();
+
+    renderHydrologySummary({
+      section,
+      row: null,
+      unitizer: null,
+      tcAvailable: true,
+      selectedMetric: null,
+      omniScenario: null,
+      omniSummary: null,
+      baseScenarioLabel: 'Undisturbed',
+      manualDateInput: '96-08-04',
+    });
+
+    const dateInput = section.querySelector('[data-storm-event-analyzer-manual-date]');
+    expect(dateInput.value).toBe('96-08-04');
   });
 
   it('builds CSV without scenario columns when no scenario is selected', () => {

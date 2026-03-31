@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import {
+  buildEventDatePayload,
   buildEventFilterPayload,
   buildHydrologyPayload,
   buildSoilPayload,
@@ -44,6 +45,36 @@ describe('storm-event-analyzer event data helpers', () => {
 
     const warmupFilter = payload.filters.find((filter) => filter.column === 'ev.year');
     expect(warmupFilter).toEqual({ column: 'ev.year', operator: '>', value: 1999 });
+  });
+
+  it('builds manual date payload with exact year-month-day filters', () => {
+    const payload = buildEventDatePayload({
+      year: 96,
+      month: 8,
+      day: 4,
+      warmupYear: 95,
+    });
+
+    const yearFilter = payload.filters.find((filter) => filter.column === 'ev.year' && filter.operator !== '>');
+    expect(yearFilter).toEqual({ column: 'ev.year', operator: '=', value: 96 });
+    expect(payload.filters).toEqual(
+      expect.arrayContaining([
+        { column: 'ev.month', operator: '=', value: 8 },
+        { column: 'ev.day_of_month', operator: '=', value: 4 },
+        { column: 'ev.year', operator: '>', value: 95 },
+      ]),
+    );
+  });
+
+  it('builds manual date payload with IN operator when year aliases are provided', () => {
+    const payload = buildEventDatePayload({
+      year: [96, 1996, 2096],
+      month: 8,
+      day: 4,
+      warmupYear: null,
+    });
+    const yearFilter = payload.filters.find((filter) => filter.column === 'ev.year');
+    expect(yearFilter).toEqual({ column: 'ev.year', operator: 'IN', value: [96, 1996, 2096] });
   });
 
   it('builds soil payload using TSMF by default with legacy fallback option', () => {
@@ -194,5 +225,132 @@ describe('storm-event-analyzer event data helpers', () => {
         postQueryEngine: jest.fn(),
       });
     }).toThrow('STORM_EVENT_ANALYZER_CONTEXT.weppPaths');
+  });
+
+  it('fetches a single event row by manual date and enriches hydrology fields', async () => {
+    const postQueryEngine = jest.fn(async (payload) => {
+      const filters = Array.isArray(payload.filters) ? payload.filters : [];
+      const hasDateFilter = filters.some(
+        (filter) => filter.column === 'ev.year' && (filter.operator === '=' || filter.operator === 'IN'),
+      );
+      if (hasDateFilter) {
+        return {
+          records: [
+            {
+              sim_day_index: 42,
+              year: 96,
+              month: 8,
+              day_of_month: 4,
+              depth_mm: 20,
+              precip_mm: 20,
+              duration_hours: 2,
+              tp: 0.4,
+              ip: 5,
+              peak_intensity_10: 18,
+              peak_intensity_15: 15,
+              peak_intensity_30: 12,
+              peak_intensity_60: 8,
+            },
+          ],
+        };
+      }
+
+      const aggregations = Array.isArray(payload.aggregations) ? payload.aggregations : [];
+      if (aggregations.some((agg) => agg.alias === 'soil_saturation_pct')) {
+        return { records: [{ sim_day_index: 42, soil_saturation_pct: 55 }] };
+      }
+      if (aggregations.some((agg) => agg.alias === 'snow_coverage_t1_pct')) {
+        return { records: [{ sim_day_index: 42, snow_coverage_t1_pct: 0, snow_water_t1_mm: 0 }] };
+      }
+      if (aggregations.some((agg) => agg.alias === 'runoff_volume_m3')) {
+        return {
+          records: [{ sim_day_index: 42, runoff_volume_m3: 100, peak_discharge_m3s: 3.2, sediment_yield_kg: 40 }],
+        };
+      }
+      if (aggregations.some((agg) => agg.alias === 'precip_volume_m3')) {
+        return { records: [{ sim_day_index: 42, precip_volume_m3: 200, total_area_m2: 10000 }] };
+      }
+      if (Array.isArray(payload.columns) && payload.columns.includes('tc."Time of Conc (hr)" AS tc_hours')) {
+        return { records: [{ sim_day_index: 42, tc_hours: 1.25 }] };
+      }
+      return { records: [] };
+    });
+
+    const manager = createEventDataManager({
+      ctx: { runid: 'demo', config: 'disturbed' },
+      postQueryEngine,
+      weppPaths: TEST_WEPP_PATHS,
+    });
+    const result = await manager.fetchEventRowByDate({
+      year: 96,
+      month: 8,
+      day: 4,
+      includeWarmup: false,
+    });
+
+    expect(result.row).toEqual(
+      expect.objectContaining({
+        sim_day_index: 42,
+        date: '96-08-04',
+        measure_value: null,
+        soil_saturation_pct: 55,
+        runoff_volume_m3: 100,
+        runoff_mm: 10,
+        runoff_coefficient: 0.5,
+        tc_hours: 1.25,
+      }),
+    );
+    expect(result.tcAvailable).toBe(true);
+  });
+
+  it('accepts four-digit manual year when climate data stores two-digit years', async () => {
+    const postQueryEngine = jest.fn(async (payload) => {
+      const filters = Array.isArray(payload.filters) ? payload.filters : [];
+      const yearFilter = filters.find((filter) => filter.column === 'ev.year');
+      const monthFilter = filters.find((filter) => filter.column === 'ev.month');
+      const dayFilter = filters.find((filter) => filter.column === 'ev.day_of_month');
+      if (yearFilter && monthFilter && dayFilter) {
+        const matchesTwoDigitYear =
+          yearFilter.operator === 'IN' &&
+          Array.isArray(yearFilter.value) &&
+          yearFilter.value.includes(96) &&
+          yearFilter.value.includes(1996);
+        if (matchesTwoDigitYear && monthFilter.value === 8 && dayFilter.value === 4) {
+          return {
+            records: [
+              {
+                sim_day_index: 42,
+                year: 96,
+                month: 8,
+                day_of_month: 4,
+                depth_mm: 20,
+                precip_mm: 20,
+                duration_hours: 2,
+                tp: 0.4,
+                ip: 5,
+                peak_intensity_10: 18,
+                peak_intensity_15: 15,
+                peak_intensity_30: 12,
+                peak_intensity_60: 8,
+              },
+            ],
+          };
+        }
+      }
+      return { records: [] };
+    });
+
+    const manager = createEventDataManager({
+      ctx: { runid: 'demo', config: 'disturbed' },
+      postQueryEngine,
+      weppPaths: TEST_WEPP_PATHS,
+    });
+    const result = await manager.fetchEventRowByDate({
+      year: 1996,
+      month: 8,
+      day: 4,
+      includeWarmup: false,
+    });
+    expect(result.row).toEqual(expect.objectContaining({ sim_day_index: 42, date: '96-08-04' }));
   });
 });

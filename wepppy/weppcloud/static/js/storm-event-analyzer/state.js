@@ -9,6 +9,8 @@ const defaultState = {
   eventRows: [],
   hyetographSeries: [],
   selectedEventSimDayIndex: null,
+  manualDateInput: '',
+  eventRowsLoading: false,
   eventError: null,
   tcAvailable: false,
   soilSaturationLabel: 'Top 0.1 m Saturation',
