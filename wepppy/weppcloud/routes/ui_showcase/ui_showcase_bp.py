@@ -329,6 +329,30 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "wc_select_disabled",
+            "label": "Disabled select text vs background",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "text_vs_background",
+                    "foreground": "#theme_lab_disabled_select",
+                    "background": "#theme_lab_disabled_select",
+                }
+            ],
+        },
+        {
+            "id": "wc_input_disabled",
+            "label": "Disabled input text vs background",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "text_vs_background",
+                    "foreground": "#theme_lab_disabled_input",
+                    "background": "#theme_lab_disabled_input",
+                }
+            ],
+        },
+        {
             "id": "pure_button_disabled",
             "label": "Disabled primary button text vs background",
             "threshold": 3.0,

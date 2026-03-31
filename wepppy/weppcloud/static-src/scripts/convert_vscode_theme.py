@@ -148,6 +148,8 @@ CONTRAST_CHECKS: List[Tuple[str, str, str, float]] = [
     ("Muted Text vs Surface", "--wc-color-text-muted", "--wc-color-surface", 3.0),
     ("Link vs Surface", "--wc-color-link", "--wc-color-surface", 4.5),
     ("Link vs Surface Alt", "--wc-color-link", "--wc-color-surface-alt", 4.5),
+    ("Disabled Select Text vs Background", "--wc-select-disabled-text", "--wc-select-disabled-bg", 4.5),
+    ("Disabled Input Text vs Background", "--wc-input-disabled-text", "--wc-input-disabled-bg", 4.5),
 ]
 
 

@@ -1,4 +1,4 @@
-/* Generated from Cursor-Dark-High-Contrast-color-theme.json on 2026-01-17T18:00:59.097011+00:00 */
+/* Generated from Cursor-Dark-High-Contrast-color-theme.json on 2026-03-31T19:23:12.238210+00:00 */
 :root[data-theme="cursor-dark-high-contrast"] {
   --wc-color-accent: #88C0D0;
   --wc-color-accent-soft: rgba(136, 192, 208, 0.22);
@@ -20,11 +20,17 @@
   --wc-color-surface: #0A0A0A;
   --wc-color-surface-alt: #0A0A0A;
   --wc-color-text: #D8DEE9;
-  --wc-color-text-muted: #505050;
+  --wc-color-text-muted: #707887;
   --wc-font-size-base: 17px;
   --wc-font-size-sm: 1rem;
   --wc-font-size-xs: 0.9rem;
+  --wc-input-disabled-bg: #2A2A2A55;
+  --wc-input-disabled-border: #2A2A2A;
+  --wc-input-disabled-text: #FFFFFF;
   --wc-line-height: 1.5;
+  --wc-select-disabled-bg: #0A0A0A;
+  --wc-select-disabled-border: #2A2A2A;
+  --wc-select-disabled-text: #FFFFFF;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }

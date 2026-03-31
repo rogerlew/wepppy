@@ -97,6 +97,13 @@
   --wc-select-padding-y: calc(var(--wc-space-xs) + 1px);
   --wc-select-padding-x: var(--wc-space-sm);
   --wc-select-chevron-color: var(--wc-color-text-muted);
+  --wc-select-disabled-bg: var(--wc-color-surface-alt);
+  --wc-select-disabled-border: var(--wc-color-border);
+  --wc-select-disabled-text: var(--wc-color-text);
+  --wc-select-disabled-chevron-color: var(--wc-select-disabled-text);
+  --wc-input-disabled-bg: var(--wc-color-surface-alt);
+  --wc-input-disabled-border: var(--wc-color-border);
+  --wc-input-disabled-text: var(--wc-color-text);
   --wc-number-spin-color: var(--wc-color-text);
   --wc-button-padding-y: calc(var(--wc-space-xs) + 1px);
   --wc-button-padding-x: var(--wc-space-lg);
@@ -193,9 +200,17 @@ a:focus-visible:not(.pure-button):not(.wc-oauth-button) {
 
 :is(select, .wc-select):disabled {
   cursor: not-allowed;
-  opacity: 0.65;
-  background-color: var(--wc-color-surface);
-  color: var(--wc-color-text-muted);
+  opacity: 1;
+  background-color: var(--wc-select-disabled-bg);
+  border-color: var(--wc-select-disabled-border);
+  color: var(--wc-select-disabled-text);
+}
+
+:is(select, .wc-select):disabled:not([multiple]):not([size]),
+:is(select, .wc-select):disabled[size="1"] {
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--wc-select-disabled-chevron-color) 50%),
+    linear-gradient(135deg, var(--wc-select-disabled-chevron-color) 50%, transparent 50%);
 }
 
 :is(select, .wc-select)[multiple],
@@ -292,10 +307,11 @@ a:focus-visible:not(.pure-button):not(.wc-oauth-button) {
   ),
   textarea
 )[readonly] {
-  background-color: var(--wc-color-surface);
-  color: var(--wc-color-text-muted);
+  background-color: var(--wc-input-disabled-bg);
+  border-color: var(--wc-input-disabled-border);
+  color: var(--wc-input-disabled-text);
   cursor: not-allowed;
-  opacity: 0.65;
+  opacity: 1;
 }
 
 textarea {
@@ -355,10 +371,11 @@ input[type="file"]:focus-visible {
 }
 
 input[type="file"]:disabled {
-  color: var(--wc-color-text-muted);
-  background-color: var(--wc-color-surface);
+  color: var(--wc-input-disabled-text);
+  background-color: var(--wc-input-disabled-bg);
+  border-color: var(--wc-input-disabled-border);
   cursor: not-allowed;
-  opacity: 0.65;
+  opacity: 1;
 }
 
 input[type="file"]::file-selector-button,
@@ -1690,10 +1707,11 @@ h5:first-child {
 .wc-field__control[readonly],
 .pure-form .wc-field__control:disabled,
 .pure-form .wc-field__control[readonly] {
-  background-color: var(--wc-color-surface);
-  color: var(--wc-color-text-muted);
+  background-color: var(--wc-input-disabled-bg);
+  border-color: var(--wc-input-disabled-border);
+  color: var(--wc-input-disabled-text);
   cursor: not-allowed;
-  opacity: 0.65;
+  opacity: 1;
 }
 
 .wc-field__help {

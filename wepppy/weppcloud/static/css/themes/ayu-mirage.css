@@ -1,4 +1,4 @@
-/* Generated from ayu-mirage.json on 2026-01-17T18:00:59.093380+00:00 */
+/* Generated from ayu-mirage.json on 2026-03-31T19:23:12.234707+00:00 */
 :root[data-theme="ayu-mirage"] {
   --wc-color-accent: #ffcc66b3;
   --wc-color-accent-soft: rgba(255, 204, 102, 0.180);
@@ -24,7 +24,13 @@
   --wc-font-size-base: 17px;
   --wc-font-size-sm: 1rem;
   --wc-font-size-xs: 0.9rem;
+  --wc-input-disabled-bg: #242936;
+  --wc-input-disabled-border: #707a8c45;
+  --wc-input-disabled-text: #cccac2;
   --wc-line-height: 1.5;
+  --wc-select-disabled-bg: #242936;
+  --wc-select-disabled-border: #707a8c45;
+  --wc-select-disabled-text: #cccac2;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }

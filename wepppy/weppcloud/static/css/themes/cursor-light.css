@@ -1,4 +1,4 @@
-/* Generated from Cursor-Light-color-theme.json on 2026-01-17T18:00:59.097797+00:00 */
+/* Generated from Cursor-Light-color-theme.json on 2026-03-31T19:23:12.239195+00:00 */
 :root[data-theme="cursor-light"] {
   --wc-color-accent: #FCFCFC00;
   --wc-color-accent-soft: rgba(252, 252, 252, 0.180);
@@ -24,7 +24,13 @@
   --wc-font-size-base: 17px;
   --wc-font-size-sm: 1rem;
   --wc-font-size-xs: 0.9rem;
+  --wc-input-disabled-bg: #FCFCFC;
+  --wc-input-disabled-border: #1616181A;
+  --wc-input-disabled-text: #15151DEB;
   --wc-line-height: 1.5;
+  --wc-select-disabled-bg: #FCFCFC;
+  --wc-select-disabled-border: #0B0B2D0A;
+  --wc-select-disabled-text: #15151DEB;
   --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
 }

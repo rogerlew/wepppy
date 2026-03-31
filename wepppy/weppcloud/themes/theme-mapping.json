@@ -28,6 +28,9 @@
         "--wc-shadow-sm": "0 6px 18px rgba(0, 0, 0, 0.35)",
         "--wc-shadow-md": "0 18px 48px rgba(0, 0, 0, 0.45)",
         "--wc-color-border": "#181A1F",
+        "--wc-color-text-muted": "#7A8398",
+        "--wc-color-link": "#6AA6FF",
+        "--wc-color-link-hover": "#86B7FF",
         "--wc-color-positive": "#98C379",
         "--wc-color-positive-soft": "rgba(152, 195, 121, 0.18)"
       }
@@ -72,7 +75,9 @@
       "overrides": {
         "--wc-shadow-sm": "0 1px 2px rgba(15, 23, 42, 0.08)",
         "--wc-shadow-md": "0 6px 18px rgba(15, 23, 42, 0.12)",
-        "--wc-color-on-primary": "#1f2328"
+        "--wc-color-on-primary": "#1f2328",
+        "--wc-color-link": "#8A5A00",
+        "--wc-color-link-hover": "#6F4700"
       }
     },
     "ayu-light-bordered": {
@@ -86,7 +91,9 @@
       "overrides": {
         "--wc-shadow-sm": "0 1px 2px rgba(15, 23, 42, 0.08)",
         "--wc-shadow-md": "0 6px 18px rgba(15, 23, 42, 0.12)",
-        "--wc-color-on-primary": "#1f2328"
+        "--wc-color-on-primary": "#1f2328",
+        "--wc-color-link": "#8A5A00",
+        "--wc-color-link-hover": "#6F4700"
       }
     },
     "ayu-mirage": {
@@ -128,7 +135,8 @@
       "overrides": {
         "--wc-shadow-sm": "none",
         "--wc-shadow-md": "none",
-        "--wc-color-on-primary": "#D8DEE9"
+        "--wc-color-on-primary": "#D8DEE9",
+        "--wc-color-text-muted": "#7A828F"
       }
     },
     "cursor-dark-midnight": {
@@ -146,7 +154,8 @@
         "--wc-color-accent-soft": "rgba(143, 188, 187, 0.22)",
         "--wc-color-primary": "#8FBCBB",
         "--wc-color-primary-dark": "#6DA1A6",
-        "--wc-color-on-primary": "#1E2127"
+        "--wc-color-on-primary": "#1E2127",
+        "--wc-color-text-muted": "#8A97AE"
       },
       "extra_css": [
         ":root[data-theme=\"cursor-dark-midnight\"] {\n  --wc-button-disabled-text: var(--wc-color-text);\n}"
@@ -169,7 +178,8 @@
         "--wc-color-primary-dark": "#6FA7B8",
         "--wc-color-on-primary": "#0A0A0A",
         "--wc-color-link": "#88C0D0",
-        "--wc-color-link-hover": "#ECEFF4"
+        "--wc-color-link-hover": "#ECEFF4",
+        "--wc-color-text-muted": "#707887"
       }
     },
     "cursor-light": {
@@ -489,6 +499,68 @@
       "tokens": [
         "button.foreground",
         "editorSuggestWidget.foreground"
+      ]
+    },
+    "--wc-select-disabled-bg": {
+      "description": "Disabled select background color.",
+      "fallback": "#eef1f4",
+      "tokens": [
+        "dropdown.background",
+        "input.background",
+        "editorGroup.background",
+        "editor.background"
+      ]
+    },
+    "--wc-select-disabled-border": {
+      "description": "Disabled select border color.",
+      "fallback": "#8b949e",
+      "tokens": [
+        "dropdown.border",
+        "input.border",
+        "editorWidget.border",
+        {
+          "token": "editor.foreground",
+          "alpha": 0.35
+        }
+      ]
+    },
+    "--wc-select-disabled-text": {
+      "description": "Disabled select text color.",
+      "fallback": "#1f2328",
+      "tokens": [
+        "input.foreground",
+        "editor.foreground"
+      ]
+    },
+    "--wc-input-disabled-bg": {
+      "description": "Disabled input and textarea background color.",
+      "fallback": "#eef1f4",
+      "tokens": [
+        "input.background",
+        "dropdown.background",
+        "editorGroup.background",
+        "editor.background"
+      ]
+    },
+    "--wc-input-disabled-border": {
+      "description": "Disabled input and textarea border color.",
+      "fallback": "#8b949e",
+      "tokens": [
+        "input.border",
+        "dropdown.border",
+        "editorWidget.border",
+        {
+          "token": "editor.foreground",
+          "alpha": 0.35
+        }
+      ]
+    },
+    "--wc-input-disabled-text": {
+      "description": "Disabled input and textarea text color.",
+      "fallback": "#1f2328",
+      "tokens": [
+        "input.foreground",
+        "editor.foreground"
       ]
     },
     "--wc-shadow-sm": {
