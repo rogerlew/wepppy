@@ -61,7 +61,10 @@ def sort_numeric(value, reverse=False):
 
 
 def usersum_doc_link(category, filename, label, classes='wc-link wc-link--file'):
-    href = url_for('usersum.view_markdown', category=category, filename=filename)
+    if category == 'src':
+        href = url_for('usersum.view_src_markdown', rel_path=filename)
+    else:
+        href = url_for('usersum.view_markdown', category=category, filename=filename)
     text = f'📄 {label}'
     return Markup(
         f'<a class="{escape(classes)}" '
