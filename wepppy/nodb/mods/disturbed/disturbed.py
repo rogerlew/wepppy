@@ -1507,6 +1507,58 @@ class Disturbed(NoDbBase):
                 plant_name = man.plants[0].name
                 fp.write(f'{plant_name},{kcb},{rawb},{i+1},{description}\n')
 
+    def _resolve_source_soil_path(
+        self,
+        soils_instance: 'Soils',
+        soil_fname: str,
+        *,
+        topaz_id: str,
+        mukey: str,
+        soil_summary_dir: Optional[str] = None,
+    ) -> str:
+        if not isinstance(soil_fname, str) or not soil_fname:
+            raise FileNotFoundError(
+                f"Cannot resolve source soil file for topaz_id={topaz_id!r}, mukey={mukey!r}: missing soil filename"
+            )
+
+        local_soil_path = _join(soils_instance.soils_dir, soil_fname)
+        if _exists(local_soil_path):
+            return local_soil_path
+
+        checked_paths = [local_soil_path]
+
+        if isinstance(soil_summary_dir, str) and soil_summary_dir:
+            summary_soil_path = _join(soil_summary_dir, soil_fname)
+            if summary_soil_path not in checked_paths:
+                checked_paths.append(summary_soil_path)
+                if _exists(summary_soil_path):
+                    self.logger.info(
+                        "Using summary soil path for topaz_id=%s mukey=%s: %s",
+                        topaz_id,
+                        mukey,
+                        summary_soil_path,
+                    )
+                    return summary_soil_path
+
+        parent_wd = getattr(soils_instance, "parent_wd", None)
+        if isinstance(parent_wd, str) and parent_wd:
+            parent_soil_path = _join(parent_wd, "soils", soil_fname)
+            if parent_soil_path not in checked_paths:
+                checked_paths.append(parent_soil_path)
+                if _exists(parent_soil_path):
+                    self.logger.info(
+                        "Using parent soil path for topaz_id=%s mukey=%s: %s",
+                        topaz_id,
+                        mukey,
+                        parent_soil_path,
+                    )
+                    return parent_soil_path
+
+        checked = ", ".join(checked_paths)
+        raise FileNotFoundError(
+            f"Missing source soil file for topaz_id={topaz_id!r}, mukey={mukey!r}. Checked: {checked}"
+        )
+
     def modify_mofe_soils(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
@@ -1552,7 +1604,8 @@ class Disturbed(NoDbBase):
 
                     assert man is not None, dom
 
-                    key = (texid, man.disturbed_class)
+                    lookup_class = lookup_disturbed_class(man.disturbed_class)
+                    key = (texid, lookup_class)
                     replacements = _land_soil_replacements_d.get(key, None)
 
                     if replacements is None:  # e.g. developed low intensity
@@ -1575,11 +1628,20 @@ class Disturbed(NoDbBase):
                             if 'fire' in man.disturbed_class:
                                 _h0_max_om = self.h0_max_om
      
-                        soil_u = WeppSoilUtil(_join(soils.soils_dir, _soil.fname))
+                        soil_u = WeppSoilUtil(
+                            self._resolve_source_soil_path(
+                                soils,
+                                getattr(_soil, 'fname', None),
+                                topaz_id=str(topaz_id),
+                                mukey=str(mukey),
+                                soil_summary_dir=getattr(_soil, 'soils_dir', None),
+                            )
+                        )
+                        replacement_values = dict(replacements) if replacements is not None else None
                         if sol_ver == 7778.0:
-                            new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
+                            new = soil_u.to_7778disturbed(replacement_values, h0_max_om=_h0_max_om)
                         else:
-                            new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om, 
+                            new = soil_u.to_over9000(replacement_values, h0_max_om=_h0_max_om,
                                                      version=sol_ver)
 
                         new.write(_join(soils.soils_dir, disturbed_fn))
@@ -1694,14 +1756,22 @@ class Disturbed(NoDbBase):
             if disturbed_mukey not in soils_instance.soils:
                 self.logger.info(f'  Generating disturbed soil for topaz_id: {topaz_id}, mukey: {mukey}, dom: {dom}, disturbed_mukey: {disturbed_mukey}')
                 disturbed_fn = disturbed_mukey + '.sol'
-                replacements = _land_soil_replacements_d[key]
+                replacements = dict(_land_soil_replacements_d[key])
 
                 if 'fire' in man.disturbed_class:
                     _h0_max_om = self.h0_max_om
                 else:
                     _h0_max_om = None
 
-                soil_u = WeppSoilUtil(_join(soils_instance.soils_dir, _soil.fname))
+                soil_u = WeppSoilUtil(
+                    self._resolve_source_soil_path(
+                        soils_instance,
+                        getattr(_soil, 'fname', None),
+                        topaz_id=str(topaz_id),
+                        mukey=str(mukey),
+                        soil_summary_dir=getattr(_soil, 'soils_dir', None),
+                    )
+                )
                 if sol_ver == 7778.0:
                     new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
                 else:

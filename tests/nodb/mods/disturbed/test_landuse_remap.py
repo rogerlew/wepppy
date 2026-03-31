@@ -1,0 +1,177 @@
+from __future__ import annotations
+
+from contextlib import contextmanager
+from types import SimpleNamespace
+
+import pytest
+
+import wepppy.nodb.mods.disturbed.disturbed as disturbed_module
+from wepppy.nodb.mods.disturbed.disturbed import Disturbed
+
+pytestmark = [pytest.mark.unit, pytest.mark.nodb]
+
+
+class _NoopLogger:
+    def info(self, *_args: object, **_kwargs: object) -> None:
+        return
+
+    def warning(self, *_args: object, **_kwargs: object) -> None:
+        return
+
+
+class _ManagementSummary:
+    def __init__(self, disturbed_class: str) -> None:
+        self.disturbed_class = disturbed_class
+
+
+class _FakeLanduse:
+    _instance: "_FakeLanduse | None" = None
+
+    def __init__(self, domlc_d, managements, domlc_mofe_d=None) -> None:
+        self.domlc_d = domlc_d
+        self.managements = managements
+        self.domlc_mofe_d = domlc_mofe_d or {}
+        self.logger = _NoopLogger()
+        self.build_managements_calls = 0
+
+    @classmethod
+    def getInstance(cls, _wd: str):
+        assert cls._instance is not None
+        return cls._instance
+
+    @contextmanager
+    def locked(self):
+        yield
+
+    def build_managements(self) -> None:
+        self.build_managements_calls += 1
+
+
+def test_remap_landuse_applies_burn_classes_and_respects_flags(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, _ = disturbed_factory("remap-landuse")
+    disturbed._burn_shrubs = True
+    disturbed._burn_grass = False
+
+    landuse = _FakeLanduse(
+        domlc_d={"101": "forest-dom", "102": "shrub-dom", "103": "grass-dom", "104": "channel-dom"},
+        managements={
+            "forest-dom": _ManagementSummary("forest"),
+            "shrub-dom": _ManagementSummary("shrub"),
+            "grass-dom": _ManagementSummary("tall grass"),
+            "channel-dom": _ManagementSummary("forest"),
+        },
+    )
+    _FakeLanduse._instance = landuse
+
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(
+        Disturbed,
+        "get_disturbed_key_lookup",
+        lambda self: {
+            "forest_low_sev_fire": "forest-low",
+            "forest_moderate_sev_fire": "forest-mod",
+            "forest_high_sev_fire": "forest-high",
+            "shrub_low_sev_fire": "shrub-low",
+            "shrub_moderate_sev_fire": "shrub-mod",
+            "shrub_high_sev_fire": "shrub-high",
+            "grass_low_sev_fire": "grass-low",
+            "grass_moderate_sev_fire": "grass-mod",
+            "grass_high_sev_fire": "grass-high",
+        },
+    )
+    monkeypatch.setattr(
+        disturbed_module,
+        "identify_mode_single_raster_key",
+        lambda **_kwargs: {"101": 1, "102": 2, "103": 3, "104": 1},
+    )
+    monkeypatch.setattr(
+        disturbed_module,
+        "Watershed",
+        SimpleNamespace(getInstance=lambda _wd: SimpleNamespace(subwta="subwta.tif")),
+    )
+    monkeypatch.setattr(Disturbed, "_calc_sbs_coverage", lambda self, _sbs: None)
+    monkeypatch.setattr(
+        Disturbed,
+        "get_sbs",
+        lambda self: SimpleNamespace(class_pixel_map={"1": "131", "2": "132", "3": "133"}),
+    )
+
+    disturbed.remap_landuse()
+
+    assert landuse.domlc_d["101"] == "forest-low"
+    assert landuse.domlc_d["102"] == "shrub-mod"
+    assert landuse.domlc_d["103"] == "grass-dom"
+    assert landuse.domlc_d["104"] == "channel-dom"
+    assert landuse.build_managements_calls == 1
+
+
+def test_remap_mofe_landuse_maps_burned_classes(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, _ = disturbed_factory("remap-mofe")
+
+    landuse = _FakeLanduse(
+        domlc_d={},
+        managements={
+            "forest-dom": _ManagementSummary("forest"),
+            "shrub-dom": _ManagementSummary("shrub"),
+            "grass-dom": _ManagementSummary("tall grass"),
+        },
+        domlc_mofe_d={"101": {"1": "forest-dom", "2": "shrub-dom", "3": "grass-dom"}},
+    )
+    _FakeLanduse._instance = landuse
+
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(
+        disturbed_module,
+        "Watershed",
+        SimpleNamespace(
+            getInstance=lambda _wd: SimpleNamespace(subwta="subwta.tif", mofe_map="mofe.map")
+        ),
+    )
+    monkeypatch.setattr(Disturbed, "_calc_sbs_coverage", lambda self, _sbs: None)
+    monkeypatch.setattr(
+        Disturbed,
+        "get_sbs",
+        lambda self: SimpleNamespace(
+            build_lcgrid=lambda _subwta, _mofe_map: {"101": {"1": "131", "2": "132", "3": "133"}}
+        ),
+    )
+
+    disturbed.remap_mofe_landuse()
+
+    assert landuse.domlc_mofe_d["101"]["1"] == "106"
+    assert landuse.domlc_mofe_d["101"]["2"] == "120"
+    assert landuse.domlc_mofe_d["101"]["3"] == "129"
+    assert landuse.build_managements_calls == 1
+
+
+def test_remap_landuse_returns_early_without_sbs(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, _ = disturbed_factory("remap-no-sbs")
+
+    landuse = _FakeLanduse(
+        domlc_d={"101": "forest-dom"},
+        managements={"forest-dom": _ManagementSummary("forest")},
+    )
+    _FakeLanduse._instance = landuse
+
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "get_disturbed_key_lookup", lambda self: {})
+    monkeypatch.setattr(Disturbed, "get_sbs", lambda self: None)
+    monkeypatch.setattr(
+        disturbed_module,
+        "Watershed",
+        SimpleNamespace(getInstance=lambda _wd: SimpleNamespace(subwta="subwta.tif")),
+    )
+
+    disturbed.remap_landuse()
+
+    assert landuse.domlc_d["101"] == "forest-dom"
+    assert landuse.build_managements_calls == 0

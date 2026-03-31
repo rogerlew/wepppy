@@ -8,12 +8,18 @@ import pytest
 
 import wepppy.nodb.mods.disturbed.disturbed as disturbed_module
 import wepppy.wepp.management as management_module
+from wepppy.nodb.mods.disturbed import (
+    TREATMENT_SUFFIXES,
+    lookup_disturbed_class,
+)
 from wepppy.nodb.mods.disturbed.disturbed import (
     Disturbed,
     read_disturbed_land_soil_lookup,
     upgrade_disturbed_land_soil_lookup,
     write_disturbed_land_soil_lookup,
 )
+
+pytestmark = [pytest.mark.unit, pytest.mark.nodb]
 
 
 def _write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
@@ -35,7 +41,77 @@ def _read_audit_lines(path: Path) -> list[str]:
     return [line.strip() for line in path.read_text().splitlines() if line.strip()]
 
 
+class TestLookupDisturbedClass:
+    def test_strips_mulch_15_suffix(self) -> None:
+        assert lookup_disturbed_class("forest moderate sev fire-mulch_15") == "forest moderate sev fire"
+
+    def test_strips_mulch_30_suffix(self) -> None:
+        assert lookup_disturbed_class("shrub high sev fire-mulch_30") == "shrub high sev fire"
+
+    def test_strips_mulch_60_suffix(self) -> None:
+        assert lookup_disturbed_class("grass low sev fire-mulch_60") == "grass low sev fire"
+
+    def test_strips_thinning_suffix(self) -> None:
+        assert lookup_disturbed_class("forest high sev fire-thinning") == "forest high sev fire"
+
+    def test_strips_prescribed_fire_suffix(self) -> None:
+        assert lookup_disturbed_class("forest-prescribed_fire") == "forest"
+
+    def test_no_suffix_unchanged(self) -> None:
+        assert lookup_disturbed_class("forest moderate sev fire") == "forest moderate sev fire"
+
+    def test_none_returns_none(self) -> None:
+        assert lookup_disturbed_class(None) is None
+
+    def test_empty_string_unchanged(self) -> None:
+        assert lookup_disturbed_class("") == ""
+
+    def test_no_fire_class_unchanged(self) -> None:
+        assert lookup_disturbed_class("forest") == "forest"
+
+    def test_partial_suffix_not_stripped(self) -> None:
+        assert lookup_disturbed_class("forest moderate sev fire-mulch") == "forest moderate sev fire-mulch"
+
+
+class TestTreatmentSuffixes:
+    def test_contains_all_mulch_levels(self) -> None:
+        assert "-mulch_15" in TREATMENT_SUFFIXES
+        assert "-mulch_30" in TREATMENT_SUFFIXES
+        assert "-mulch_60" in TREATMENT_SUFFIXES
+
+    def test_contains_thinning(self) -> None:
+        assert "-thinning" in TREATMENT_SUFFIXES
+
+    def test_contains_prescribed_fire(self) -> None:
+        assert "-prescribed_fire" in TREATMENT_SUFFIXES
+
+
+class TestSoilLookupKeyGeneration:
+    def test_fire_lookup_key_for_mulch_scenario(self) -> None:
+        disturbed_class = "forest moderate sev fire-mulch_15"
+        texid = "sand loam"
+        lookup_class = lookup_disturbed_class(disturbed_class)
+        key = (texid, lookup_class)
+        assert key == ("sand loam", "forest moderate sev fire")
+
+
 @pytest.mark.unit
+def test_extended_lookup_temp_file_is_run_scoped_and_writable(tmp_path: Path) -> None:
+    disturbed = object.__new__(Disturbed)
+    disturbed.wd = str(tmp_path)
+
+    tmp_lookup = Path(disturbed._new_extended_land_soil_lookup_tmp_path())
+
+    assert tmp_lookup.parent == (tmp_path / "disturbed")
+    assert tmp_lookup.name.startswith("extended_disturbed_land_soil_lookup.")
+    assert tmp_lookup.suffix == ".csv"
+    assert "wepppy/nodb/mods/disturbed/data" not in str(tmp_lookup)
+    assert tmp_lookup.exists()
+
+    tmp_lookup.write_text("ok\n")
+    tmp_lookup.unlink()
+
+
 def test_write_lookup_replaces_table_when_payload_is_complete(tmp_path: Path) -> None:
     lookup_path = tmp_path / "lookup.csv"
     fieldnames = ["luse", "stext", "ki", "kr"]
@@ -68,7 +144,6 @@ def test_write_lookup_replaces_table_when_payload_is_complete(tmp_path: Path) ->
     assert any('"event":"lookup.write"' in line for line in audit_lines)
 
 
-@pytest.mark.unit
 def test_reset_lookup_emits_audit_record(tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
     disturbed_dir = run_dir / "disturbed"
@@ -94,7 +169,6 @@ def test_reset_lookup_emits_audit_record(tmp_path: Path) -> None:
     assert any('"reason":"test"' in line for line in audit_lines)
 
 
-@pytest.mark.unit
 def test_write_lookup_rejects_payload_missing_existing_rows(tmp_path: Path) -> None:
     lookup_path = tmp_path / "lookup.csv"
     _write_csv(
@@ -116,7 +190,6 @@ def test_write_lookup_rejects_payload_missing_existing_rows(tmp_path: Path) -> N
     assert lookup_path.read_text() == before
 
 
-@pytest.mark.unit
 def test_write_lookup_rejects_same_row_count_when_existing_key_missing(tmp_path: Path) -> None:
     lookup_path = tmp_path / "lookup.csv"
     _write_csv(
@@ -141,7 +214,6 @@ def test_write_lookup_rejects_same_row_count_when_existing_key_missing(tmp_path:
     assert lookup_path.read_text() == before
 
 
-@pytest.mark.unit
 def test_write_lookup_rejects_width_mismatch_without_overwriting_file(tmp_path: Path) -> None:
     lookup_path = tmp_path / "lookup.csv"
     _write_csv(
@@ -160,7 +232,6 @@ def test_write_lookup_rejects_width_mismatch_without_overwriting_file(tmp_path: 
     assert lookup_path.read_text() == before
 
 
-@pytest.mark.unit
 def test_write_lookup_rejects_duplicate_keys(tmp_path: Path) -> None:
     lookup_path = tmp_path / "lookup.csv"
     _write_csv(
@@ -182,7 +253,6 @@ def test_write_lookup_rejects_duplicate_keys(tmp_path: Path) -> None:
     assert lookup_path.read_text() == before
 
 
-@pytest.mark.unit
 def test_write_lookup_rejects_partial_mapping_rows(tmp_path: Path) -> None:
     lookup_path = tmp_path / "lookup.csv"
     _write_csv(
@@ -201,7 +271,6 @@ def test_write_lookup_rejects_partial_mapping_rows(tmp_path: Path) -> None:
     assert lookup_path.read_text() == before
 
 
-@pytest.mark.unit
 def test_upgrade_lookup_is_additive_and_preserves_user_modified_values(tmp_path: Path) -> None:
     default_path = tmp_path / "default_lookup.csv"
     target_path = tmp_path / "target_lookup.csv"
@@ -287,11 +356,21 @@ def test_upgrade_lookup_is_additive_and_preserves_user_modified_values(tmp_path:
     assert any('"event":"lookup.schema_upgrade"' in line for line in audit_lines)
 
 
-@pytest.mark.unit
 def test_upgrade_legacy_disturbed_class_rows_remain_readable(tmp_path: Path) -> None:
     default_path = tmp_path / "default_lookup.csv"
     target_path = tmp_path / "target_lookup.csv"
-    default_fields = ["luse", "stext", "ki", "kr", "pmet_kcb", "pmet_rawp", "rdmax", "xmxlai", "keffflag", "lkeff"]
+    default_fields = [
+        "luse",
+        "stext",
+        "ki",
+        "kr",
+        "pmet_kcb",
+        "pmet_rawp",
+        "rdmax",
+        "xmxlai",
+        "keffflag",
+        "lkeff",
+    ]
     _write_csv(
         default_path,
         default_fields,
@@ -350,8 +429,10 @@ class _IniLoopCroplandStub:
         return 0
 
 
-@pytest.mark.unit
-def test_build_extended_lookup_writes_separate_extended_csv(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_build_extended_lookup_writes_separate_extended_csv(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
     run_dir = tmp_path / "run"
     disturbed_dir = run_dir / "disturbed"
     disturbed_dir.mkdir(parents=True)
