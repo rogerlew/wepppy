@@ -5,8 +5,10 @@ import logging
 import types
 import uuid
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import pytest
+import wepppy
 
 pytest.importorskip("flask")
 from flask import Flask
@@ -210,6 +212,20 @@ def test_runs_users_returns_user_table_for_admin(runs_scope_client) -> None:
     owner_entry = next(user for user in users if user["email"] == "owner@example.com")
     assert owner_entry["alias"] == str(runs_scope_client["owner_id"])
     assert "owner@example.com" in owner_entry["search_index"]
+
+
+def test_runs2_template_requests_catalog_with_ron_meta() -> None:
+    template_path = (
+        Path(wepppy.__file__).resolve().parent
+        / "weppcloud"
+        / "templates"
+        / "user"
+        / "runs2.html"
+    )
+    template = template_path.read_text(encoding="utf-8")
+
+    assert "function buildRunsCatalogUrl()" in template
+    assert "params.set('include_ron_meta', '1');" in template
 
 
 def test_runs_catalog_ignores_alias_for_non_admin(runs_scope_client) -> None:

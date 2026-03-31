@@ -3808,6 +3808,14 @@ h5:first-child {
   margin-top: var(--wc-space-md);
 }
 
+[data-wepp-advanced] > .wc-collapse {
+  margin-bottom: 0;
+}
+
+[data-wepp-advanced] > .wc-collapse + .wc-collapse {
+  margin-top: 0;
+}
+
 .wc-collapse__summary {
   list-style: none;
   display: flex;

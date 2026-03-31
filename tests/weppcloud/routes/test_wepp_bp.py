@@ -599,6 +599,84 @@ def test_report_wepp_results_passes_export_relpaths(wepp_client, monkeypatch: py
     )
 
 
+def test_report_wepp_results_sets_storm_event_analyzer_ready_when_metric_csv_exists(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+    _touch_wepp_results(run_dir)
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("ClimateInstance", (), {"is_single_storm": False, "ss_batch_storms": None})()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+
+    def _raise_file_not_found(_wd: str):
+        raise FileNotFoundError()
+
+    monkeypatch.setattr(wepp_module.RedisPrep, "getInstance", _raise_file_not_found)
+
+    metric_path = Path(run_dir) / "climate" / "wepp_cli_pds_mean_metric.csv"
+    metric_path.parent.mkdir(parents=True, exist_ok=True)
+    metric_path.write_text("ari,metric\n2,0.1\n", encoding="utf-8")
+
+    captured: dict[str, Any] = {}
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "controls/wepp_reports.htm"
+        captured.update(kwargs)
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/results/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured["storm_event_analyzer_ready"] is True
+
+
+def test_report_wepp_results_sets_storm_event_analyzer_not_ready_when_metric_csv_missing(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+    _touch_wepp_results(run_dir)
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("ClimateInstance", (), {"is_single_storm": False, "ss_batch_storms": None})()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+
+    def _raise_file_not_found(_wd: str):
+        raise FileNotFoundError()
+
+    monkeypatch.setattr(wepp_module.RedisPrep, "getInstance", _raise_file_not_found)
+
+    captured: dict[str, Any] = {}
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "controls/wepp_reports.htm"
+        captured.update(kwargs)
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/results/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured["storm_event_analyzer_ready"] is False
+
+
 def test_report_wepp_results_returns_500_when_template_render_raises(
     wepp_client,
     monkeypatch: pytest.MonkeyPatch,

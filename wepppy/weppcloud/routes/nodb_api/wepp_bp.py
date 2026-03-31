@@ -724,6 +724,9 @@ def report_wepp_results(runid, config):
     interchange_readme_exists = _exists(
         _join(wd, 'wepp', 'output', 'interchange', 'README.md')
     )
+    storm_event_analyzer_ready = _exists(
+        _join(wd, 'climate', 'wepp_cli_pds_mean_metric.csv')
+    )
     prep_details_export_relpath = _resolve_published_export_relpath(wd, "prep-details")
     post_wepp_geopackage_export_relpath = _resolve_published_export_relpath(wd, "prep-wepp")
     post_wepp_geodatabase_export_relpath = _resolve_published_export_relpath(
@@ -772,6 +775,7 @@ def report_wepp_results(runid, config):
                                totalwatsed3_exists=totalwatsed3_exists,
                                totalwatsed2_exists=totalwatsed2_exists,
                                interchange_readme_exists=interchange_readme_exists,
+                               storm_event_analyzer_ready=storm_event_analyzer_ready,
                                prep_details_export_download_url=prep_details_export_download_url,
                                post_wepp_geopackage_export_download_url=post_wepp_geopackage_export_download_url,
                                post_wepp_geodatabase_export_download_url=post_wepp_geodatabase_export_download_url,
