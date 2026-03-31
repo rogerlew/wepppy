@@ -634,3 +634,64 @@ def test_features_export_template_exposes_required_dom_contract(jinja_env: Envir
     assert summary_group_index < export_button_index
     assert "Unitizer Selections" in rendered
     assert "Unitzer Selections" not in rendered
+
+
+def test_report_templates_use_semantic_copy_buttons() -> None:
+    template_paths = [
+        TEMPLATE_ROOT / "reports/wepp/prep_details.htm",
+        TEMPLATE_ROOT / "reports/wepp/frq_flood.htm",
+        TEMPLATE_ROOT / "reports/wepp/_return_period_simple_table.htm",
+        TEMPLATE_ROOT / "reports/wepp/_return_period_extraneous_table.htm",
+        TEMPLATE_ROOT / "reports/rhem/return_periods.htm",
+        TEMPLATE_ROOT / "reports/rhem/avg_annual_summary.htm",
+    ]
+
+    for template_path in template_paths:
+        source = template_path.read_text(encoding="utf-8")
+        assert '<a onclick="javascript:copytable(' not in source
+        assert 'onclick="copytable(' in source
+        assert "aria-label=\"Copy " in source
+
+
+def test_map_templates_do_not_use_application_role_for_canvas() -> None:
+    map_template = (TEMPLATE_ROOT / "controls/map_pure_gl.htm").read_text(encoding="utf-8")
+    runs_template = (TEMPLATE_ROOT / "user/runs2.html").read_text(encoding="utf-8")
+
+    assert 'id="mapid" class="wc-map__canvas" role="application"' not in map_template
+    assert 'id="runs-map-canvas" class="wc-map__canvas" role="application"' not in runs_template
+    assert 'id="mapid" class="wc-map__canvas" aria-label="Watershed map viewport"' in map_template
+    assert 'id="runs-map-canvas" class="wc-map__canvas" aria-label="Runs map viewport"' in runs_template
+
+
+def test_placeholder_only_controls_have_explicit_accessible_names() -> None:
+    command_bar_source = (COMMAND_BAR_TEMPLATE_ROOT / "command-bar.htm").read_text(encoding="utf-8")
+    browse_directory_source = (
+        REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "browse" / "templates" / "browse" / "directory.htm"
+    ).read_text(encoding="utf-8")
+    browse_not_found_source = (
+        REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "browse" / "templates" / "browse" / "not_found.htm"
+    ).read_text(encoding="utf-8")
+
+    assert 'placeholder="Enter command..."' in command_bar_source
+    assert 'aria-label="Command bar input"' in command_bar_source
+    assert 'placeholder="Ask Wojak about this run…"' in command_bar_source
+    assert 'aria-label="Wojak chat input"' in command_bar_source
+    assert 'id="runIdInput"' in browse_directory_source
+    assert 'aria-label="Run ID to compare"' in browse_directory_source
+    assert 'id="runIdInput"' in browse_not_found_source
+    assert 'aria-label="Run ID to compare"' in browse_not_found_source
+
+
+def test_standalone_templates_include_lang_and_iframe_titles() -> None:
+    huc_fire_source = (TEMPLATE_ROOT / "huc-fire/index.html").read_text(encoding="utf-8")
+    edit_csv_source = (TEMPLATE_ROOT / "controls/edit_csv.htm").read_text(encoding="utf-8")
+    joh_source = (TEMPLATE_ROOT / "locations/joh/index.htm").read_text(encoding="utf-8")
+
+    assert "<html lang=\"en\">" in huc_fire_source
+    assert "<html lang=\"en\">" in edit_csv_source
+    assert "<title>Edit Disturbed Lookup CSV</title>" in edit_csv_source
+
+    iframe_count = joh_source.count("<iframe")
+    iframe_titles = re.findall(r"<iframe\b[\s\S]*?\btitle=\"[^\"]+\"[\s\S]*?>", joh_source)
+    assert iframe_count > 0
+    assert len(iframe_titles) == iframe_count

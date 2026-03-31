@@ -4,6 +4,7 @@
  */
 var WCMapGlFeatureUi = (function () {
     "use strict";
+    var modalTitleSequence = 0;
 
     function createHoverTooltip() {
         if (typeof document === "undefined") {
@@ -131,6 +132,7 @@ var WCMapGlFeatureUi = (function () {
         if (typeof document === "undefined") {
             return null;
         }
+        modalTitleSequence += 1;
         var modal = document.createElement("div");
         modal.className = "wc-modal";
         modal.id = "wc-map-feature-modal";
@@ -151,7 +153,9 @@ var WCMapGlFeatureUi = (function () {
 
         var title = document.createElement("h2");
         title.className = "wc-modal__title";
+        title.id = "wc-map-feature-modal-title-" + modalTitleSequence;
         title.textContent = "";
+        dialog.setAttribute("aria-labelledby", title.id);
 
         var close = document.createElement("button");
         close.type = "button";

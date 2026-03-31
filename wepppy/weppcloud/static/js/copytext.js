@@ -60,6 +60,22 @@ function _fmt(s) {
             .replace(/^\s+|\s+$/g, '');
 }
 
+function _extract_table_title(tbl_id) {
+    var title_element = $('#' + tbl_id).prev()[0];
+    if (!title_element) {
+        return '';
+    }
+
+    var title_clone = title_element.cloneNode(true);
+    var controls = title_clone.querySelectorAll('a[onclick], button[onclick], button[data-copy-control]');
+    for (var i = 0; i < controls.length; i++) {
+        controls[i].remove();
+    }
+
+    var raw_title = title_clone.textContent || title_clone.innerText || '';
+    return raw_title.split(/\s+/).join(' ').replace(/^\s+|\s+$/g, '');
+}
+
 function copytable(tbl_id) {
 
     var rows = $('tr', '#' + tbl_id);
@@ -90,10 +106,9 @@ function copytable(tbl_id) {
 
     text = text.join('\n').replace(/&nbsp;/g,'');
 
-    var title = $('#' + tbl_id).prev()[0].innerHTML;
-    var i = title.indexOf("<a onclick");
-    if (i > 0) {
-        text = title.substring(0, i).split(/\s+/).join(' ') + '\n' + text;
+    var title = _extract_table_title(tbl_id);
+    if (title.length > 0) {
+        text = title + '\n' + text;
     }
 
     //console.log(text)

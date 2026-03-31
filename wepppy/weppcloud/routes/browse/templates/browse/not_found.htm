@@ -27,7 +27,11 @@ const config = "{{ config }}";
 </head>
 <body>
 {% include 'command-bar.htm' %}
-<input type="text" value="{{ diff_runid|e }}" id="runIdInput" placeholder="runid">
+<input type="text"
+       value="{{ diff_runid|e }}"
+       id="runIdInput"
+       placeholder="runid"
+       aria-label="Run ID to compare">
 <button onclick="redirectToDiff()">Compare project</button>
 <pre>
 {{ project_href|safe }}{{ breadcrumbs_html|safe }}{{ error_message|safe }}

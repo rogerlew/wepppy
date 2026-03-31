@@ -192,6 +192,26 @@ describe("Map GL controller", () => {
         expect(document.querySelectorAll('input[name="wc-map-basemap"]').length).toBeGreaterThan(0);
     });
 
+    test("feature modal dialog uses an explicit accessible name", () => {
+        const featureUi = global.WCMapGlFeatureUi.create({ mapCanvasElement: mapElement });
+        featureUi.openFeatureModal({
+            properties: {
+                Name: "USGS Station",
+                Description: "<p>Station details</p>",
+            },
+        });
+
+        const dialog = document.querySelector("#wc-map-feature-modal .wc-modal__dialog");
+        expect(dialog).not.toBeNull();
+        expect(dialog.getAttribute("aria-modal")).toBe("true");
+        const labelledBy = dialog.getAttribute("aria-labelledby");
+        expect(labelledBy).toBeTruthy();
+
+        const title = document.getElementById(labelledBy);
+        expect(title).not.toBeNull();
+        expect(title.textContent).toContain("USGS Station");
+    });
+
     test("setView updates map status and emits center change", () => {
         const mapInstance = global.MapController.getInstance();
 

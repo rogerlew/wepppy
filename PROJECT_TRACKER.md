@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-30  
+**Last Updated**: 2026-03-31  
 **Active Packages**: 4  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,6 +78,36 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### WCAG 2.1 AA Frontend Accessibility Remediation (Findings 1-6)
+**Proposed**: 2026-03-31  
+**Size**: Medium (2-4 focused sessions)  
+**Priority**: High  
+**Status**: Implemented - Pending baseline gate cleanup for broad-suite green status  
+**Package**: [docs/work-packages/20260331_wcag21aa_frontend_accessibility/](docs/work-packages/20260331_wcag21aa_frontend_accessibility/)  
+**Description**: Remediate six high-confidence accessibility weak points in WEPPcloud frontend templates/styles/controllers: legacy non-semantic copy controls, modal accessible-name gaps, focus indicator regressions, placeholder-only inputs, map `role="application"` semantics, and standalone `lang`/iframe-title metadata gaps.
+
+**Scope**:
+- Replace image-only anchor copy controls with semantic named interactive controls in legacy report templates.
+- Ensure all scoped dialogs have explicit accessible names and preserve keyboard modal behavior.
+- Restore visible keyboard focus indicators in affected shared/scoped styles.
+- Add explicit labels/accessibility names where placeholders are currently carrying field meaning.
+- Rework or justify `role="application"` map semantics with documented acceptance behavior.
+- Add missing standalone document semantics (`<html lang>`, iframe `title`) in scoped templates.
+- Add at least one accessibility-focused automated regression gate beyond existing contrast checks.
+
+**Dependencies**:
+- Existing modal manager and shared UI foundation tokens:
+  - `wepppy/weppcloud/controllers_js/modal.js`
+  - `wepppy/weppcloud/static/css/ui-foundation.css`
+- Existing contrast smoke baseline:
+  - `wepppy/weppcloud/static-src/tests/smoke/theme-metrics.spec.js`
+
+**Next Steps**:
+1. Resolve or explicitly disposition unrelated baseline pytest/lint failures blocking broad-suite green status.
+2. Move package status out of Backlog column after baseline gate disposition.
+
+---
 
 ### Features Export Legacy Exports Cutover (Prep Details + Geopackage)
 **Proposed**: 2026-03-29  

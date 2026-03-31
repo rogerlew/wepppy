@@ -226,6 +226,8 @@ def test_runs2_template_requests_catalog_with_ron_meta() -> None:
 
     assert "function buildRunsCatalogUrl()" in template
     assert "params.set('include_ron_meta', '1');" in template
+    assert 'id="runs-map-canvas" class="wc-map__canvas" role="application"' not in template
+    assert 'id="runs-map-canvas" class="wc-map__canvas" aria-label="Runs map viewport"' in template
 
 
 def test_runs_catalog_ignores_alias_for_non_admin(runs_scope_client) -> None:

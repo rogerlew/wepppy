@@ -106,7 +106,11 @@ const config = "{{ config }}";
 </style>
 </head>
 <body>
-<input type="text" value="{{ diff_runid|e }}" id="runIdInput" placeholder="runid">
+<input type="text"
+       value="{{ diff_runid|e }}"
+       id="runIdInput"
+       placeholder="runid"
+       aria-label="Run ID to compare">
 <button onclick="redirectToDiff()">Compare project</button>
 {% if parquet_filters_enabled %}
 <div

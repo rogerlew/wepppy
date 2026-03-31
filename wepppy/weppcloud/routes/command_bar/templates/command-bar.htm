@@ -300,7 +300,12 @@
 <div class="command-bar-container" data-command-bar>
   <div data-command-tip>Tip: Press ':' to activate the command bar, type ':help' for help</div>
   <div class="command-bar-input-wrapper" data-command-input-wrapper hidden>
-    <input type="text" class="command-bar-input" placeholder="Enter command..." data-command-input autocomplete="off">
+    <input type="text"
+           class="command-bar-input"
+           placeholder="Enter command..."
+           aria-label="Command bar input"
+           data-command-input
+           autocomplete="off">
   </div>
   <div class="command-bar-result" data-command-result hidden></div>
   <div class="command-bar-agent" data-agent-chat hidden>
@@ -314,7 +319,11 @@
     <div class="command-bar-agent__messages" data-agent-messages></div>
     <div class="command-bar-agent__typing" data-agent-typing hidden>Wojak is thinking…</div>
     <div class="command-bar-agent__composer" data-agent-composer hidden>
-      <textarea class="command-bar-agent__input" rows="2" placeholder="Ask Wojak about this run…" data-agent-input></textarea>
+      <textarea class="command-bar-agent__input"
+                rows="2"
+                placeholder="Ask Wojak about this run…"
+                aria-label="Wojak chat input"
+                data-agent-input></textarea>
       <div class="command-bar-agent__actions">
         <button type="button" class="command-bar-agent__button" data-agent-send>Send</button>
       </div>
