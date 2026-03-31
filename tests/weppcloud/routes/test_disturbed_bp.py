@@ -123,6 +123,7 @@ def disturbed_client(
             "validated": [],
             "sbs_mode": 0,
             "uniform_severity": None,
+            "active_lookup_variant": None,
             "disturbed_fn": None,
             "baer_fn": None,
         }
@@ -214,6 +215,7 @@ def test_sync_base_to_extended_lookup_uses_post(disturbed_client):
         "tasks/load_extended_land_soil_lookup",
         "tasks/delete_extended_land_soil_lookup",
         "tasks/sync_base_to_extended_land_soil_lookup",
+        "tasks/set_lookup_variant",
     ],
 )
 def test_lookup_mutation_routes_reject_get(disturbed_client, path: str):
@@ -500,6 +502,55 @@ def test_lookup_snapshot_honors_lookup_base_query_when_extended_exists(disturbed
     assert content["lookup_variant"] == "base"
     assert content["columns"] == 4
     assert "plant.data.bb" not in content["csv_text"].splitlines()[0]
+
+
+def test_set_lookup_variant_persists_selection_in_controller_state(disturbed_client):
+    client, DisturbedStub, _, _, _dispatched, run_dir = disturbed_client
+    disturbed = DisturbedStub.getInstance(run_dir)
+    Path(disturbed.lookup_fn).write_text("luse,stext,plant.data.decfct,plant.data.dropfc\nforest,loam,1,1\n")
+    Path(disturbed.extended_lookup_fn).write_text(
+        "sev_enum,landuse,disturbed_class,stext,plant.data.decfct,plant.data.dropfc,plant.data.bb\n"
+        "0,forest,forest,loam,1,1,3.6\n"
+    )
+    disturbed.active_lookup_variant = "base"
+
+    set_response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_lookup_variant",
+        json={"lookup_variant": "extended"},
+    )
+    assert set_response.status_code == 200
+    set_payload = set_response.get_json()["Content"]
+    assert set_payload["requested_lookup_variant"] == "extended"
+    assert set_payload["lookup_variant"] == "extended"
+    assert disturbed.active_lookup_variant == "extended"
+
+    meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+    assert meta_response.status_code == 200
+    assert meta_response.get_json()["Content"]["lookup_variant"] == "extended"
+
+    base_response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_lookup_variant",
+        json={"lookup_variant": "base"},
+    )
+    assert base_response.status_code == 200
+    assert disturbed.active_lookup_variant == "base"
+
+    snapshot_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_snapshot")
+    assert snapshot_response.status_code == 200
+    snapshot_payload = snapshot_response.get_json()["Content"]
+    assert snapshot_payload["lookup_variant"] == "base"
+    assert snapshot_payload["columns"] == 4
+
+
+def test_set_lookup_variant_rejects_invalid_payload(disturbed_client):
+    client, *_ = disturbed_client
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_lookup_variant",
+        json={"lookup_variant": "not-valid"},
+    )
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "lookup_variant" in payload["error"]["message"]
 
 
 def test_task_modify_disturbed_rejects_missing_if_match(disturbed_client):

@@ -6,7 +6,7 @@
 
 **Started**: 2026-03-30  
 **Current phase**: Complete  
-**Last updated**: 2026-03-30 (review remediation pass)  
+**Last updated**: 2026-03-31 (lookup persistence follow-up)  
 **Next milestone**: Archived handoff.
 
 ## Task Board
@@ -32,11 +32,13 @@
 - [x] Published canonical UI contract doc at `docs/ui-docs/disturbed-panel-ui-contract.md` and linked it from `docs/ui-docs/README.md` (2026-03-30).
 - [x] Added/updated controller, route, and template tests; full pytest and npm test gates passed (2026-03-30).
 - [x] Completed subagent code+QA review remediation for medium findings: POST-only mutating routes, run-scoped lookup radio persistence, `ModalManager` alignment in report header, and disturbed modal inclusion in legacy page container (2026-03-30).
+- [x] Migrated lookup radio persistence from browser localStorage to Disturbed NoDb disk state via `tasks/set_lookup_variant` and updated route/controller/docs contract (2026-03-31).
 
 ## Timeline
 
 - **2026-03-30** - Package created and initial scope captured.
 - **2026-03-30** - Active ExecPlan drafted and package-local UI contract note authored.
+- **2026-03-31** - Follow-up patch moved lookup variant persistence to Disturbed NoDb and updated UI contract docs/tests.
 
 ## Decisions Log
 
@@ -65,6 +67,20 @@
 **Decision**: Choose option 2 while preserving existing backend query contract and adding UI controls that make selection explicit.
 
 **Impact**: Users can choose table target deterministically without changing existing route contract assumptions.
+
+---
+
+### 2026-03-31: Persist active lookup variant in Disturbed NoDb (not localStorage)
+**Context**: Local browser storage did not provide run-scoped disk persistence or server-authoritative continuity across clients/sessions.
+
+**Options considered**:
+1. Keep localStorage as authoritative state.
+2. Persist lookup choice in Disturbed NoDb and expose explicit setter route.
+3. Persist only in query strings per request with no stored state.
+
+**Decision**: Choose option 2.
+
+**Impact**: Active lookup selection now survives process/page/client boundaries as run-scoped NoDb state while preserving explicit `lookup=` query overrides.
 
 ## Risks and Issues
 
@@ -156,6 +172,22 @@
 **Validation results**:
 - `wctl run-pytest tests/weppcloud/routes/test_disturbed_bp.py tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` (pass)
 - `wctl run-npm test -- disturbed` (pass)
+
+### 2026-03-31: NoDb lookup persistence follow-up
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added Disturbed NoDb `active_lookup_variant` persistence and `active_lookup_fn` resolver usage in disturbed lookup propagation path.
+- Added disturbed route `POST /tasks/set_lookup_variant` and wired resolver defaults to Disturbed NoDb active selection.
+- Updated disturbed controller JS to persist lookup radio changes via `tasks/set_lookup_variant` instead of localStorage.
+- Updated route and controller tests for the new persistence contract.
+- Updated canonical and package-local disturbed panel contract docs.
+
+**Validation results**:
+- `wctl run-pytest tests/weppcloud/routes/test_disturbed_bp.py --maxfail=1` (pass)
+- `wctl run-npm test -- disturbed -- disturbed lookup variant persistence` (pass)
+- `wctl doc-lint --path docs/work-packages/20260330_disturbed_panel_modal` (pass)
+- `wctl doc-lint --path docs/ui-docs/disturbed-panel-ui-contract.md` (pass)
 
 ## Communication Log
 

@@ -139,6 +139,11 @@ def _resolve_lookup_target(
     )
 
     variant = _normalize_lookup_variant(requested_variant)
+    if variant is None:
+        persisted_variant = _normalize_lookup_variant(getattr(disturbed, 'active_lookup_variant', None))
+        if persisted_variant is not None:
+            variant = persisted_variant
+
     if variant == LOOKUP_VARIANT_BASE:
         return LOOKUP_VARIANT_BASE, base_lookup_fn
     if variant == LOOKUP_VARIANT_EXTENDED:
@@ -160,6 +165,35 @@ def _resolve_lookup_target(
 def _resolve_lookup_target_from_request(disturbed: Any) -> Tuple[str, str]:
     requested_variant = request.args.get('lookup') or request.args.get('table')
     return _resolve_lookup_target(disturbed, requested_variant=requested_variant)
+
+
+@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/set_lookup_variant', methods=['POST'])
+@authorize_and_handle_with_exception_factory
+def task_set_lookup_variant(runid: str, config: str) -> Response:
+    """Persist the run-scoped active disturbed lookup variant in Disturbed NoDb."""
+    authorize(runid, config)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    disturbed = Disturbed.getInstance(wd)
+
+    payload = parse_request_payload(request)
+    requested_variant = payload.get('lookup_variant')
+    if requested_variant is None:
+        requested_variant = payload.get('lookup')
+
+    normalized_variant = _normalize_lookup_variant(requested_variant)
+    if normalized_variant is None:
+        return error_factory("lookup_variant must be one of {'base', 'extended'}", status_code=400)
+
+    disturbed.active_lookup_variant = normalized_variant
+    effective_variant, _ = _resolve_lookup_target(disturbed, requested_variant=normalized_variant)
+
+    return success_factory(
+        dict(
+            requested_lookup_variant=normalized_variant,
+            lookup_variant=effective_variant,
+        )
+    )
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/modify_disturbed')
@@ -244,6 +278,8 @@ def delete_extended_land_soil_lookup(runid: str, config: str) -> Response:
             if os.path.exists(extended_lookup_fn):
                 os.remove(extended_lookup_fn)
                 deleted = True
+
+    disturbed.active_lookup_variant = LOOKUP_VARIANT_BASE
 
     _logger.info(
         'disturbed_lookup_delete_extended runid=%s config=%s deleted=%s extended_lookup_fn=%s',

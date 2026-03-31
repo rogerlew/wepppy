@@ -48,9 +48,9 @@ Users currently find disturbed lookup actions inside the Power User panel, and e
   Rationale: Disturbed actions now have enough lifecycle and resource-management complexity to justify a dedicated modal surface.
   Date/Author: 2026-03-30 / Codex.
 
-- Decision: Persist lookup table radio preference per run/config in local storage and reconcile against `lookup_meta?lookup=<variant>` responses.
-  Rationale: Preserves user intent across modal interactions while still allowing authoritative fallback to base when extended lookup is unavailable.
-  Date/Author: 2026-03-30 / Codex.
+- Decision: Persist lookup table radio preference per run/config in Disturbed NoDb (`disturbed.nodb`) and expose a dedicated setter route.
+  Rationale: Server-authoritative, run-scoped disk persistence avoids client-local drift and makes active lookup selection available to downstream NoDb build paths.
+  Date/Author: 2026-03-31 / Codex.
 
 ## Outcomes & Retrospective
 
@@ -58,7 +58,7 @@ Users currently find disturbed lookup actions inside the Power User panel, and e
 - Disturbed lookup lifecycle now has explicit delete/sync operations in both API and controller wiring.
 - Base vs extended table visibility is explicit in UI through selector radios and explicit modify links.
 - Disturbed lookup mutating routes are POST-only (`reset`, `load`, `delete`, `sync`) and reject GET with 405.
-- Lookup radio selection now persists per run/config and metadata refresh requests honor selected lookup intent.
+- Lookup radio selection now persists per run/config in Disturbed NoDb and metadata refresh requests read server-authoritative state.
 - Report-page Disturbed/PowerUser/Unitizer buttons now use `data-modal-open` modal hooks (no legacy manual toggle path).
 - Usersum documentation links can now be generated consistently in templates via `usersum_doc_link(...)`.
 - Canonical contract doc published at `docs/ui-docs/disturbed-panel-ui-contract.md` and linked from `docs/ui-docs/README.md`.

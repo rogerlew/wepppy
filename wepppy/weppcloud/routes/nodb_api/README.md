@@ -116,9 +116,14 @@ Each blueprint section below documents:
 | Route | Methods | NoDb interactions | Notes |
 | --- | --- | --- | --- |
 | `/runs/<string:runid>/<config>/modify_disturbed` | `GET` | Disturbed (template context) | Serves legacy CSV editor; no NoDb mutation until save. |
-| `/runs/<string:runid>/<config>/tasks/reset_disturbed` | `GET, POST` | Disturbed.reset_land_soil_lookup | — |
-| `/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup` | `GET, POST` | Disturbed.build_extended_land_soil_lookup | — |
+| `/runs/<string:runid>/<config>/tasks/reset_disturbed` | `POST` | Disturbed.reset_land_soil_lookup | — |
+| `/runs/<string:runid>/<config>/tasks/load_extended_land_soil_lookup` | `POST` | Disturbed.build_extended_land_soil_lookup | — |
+| `/runs/<string:runid>/<config>/tasks/delete_extended_land_soil_lookup` | `POST` | Disturbed.extended_lookup_fn (delete), Disturbed.active_lookup_variant (set) | Idempotent delete; forces active lookup selection to base. |
+| `/runs/<string:runid>/<config>/tasks/sync_base_to_extended_land_soil_lookup` | `POST` | Disturbed.build_extended_land_soil_lookup | Rebuilds extended lookup from current base lookup table. |
+| `/runs/<string:runid>/<config>/tasks/set_lookup_variant` | `POST` | Disturbed.active_lookup_variant (set) | Persists run-scoped active lookup table selection (`base|extended`) in Disturbed NoDb. |
 | `/runs/<string:runid>/<config>/api/disturbed/has_sbs[/]` | `GET` | Disturbed.has_sbs | — |
+| `/runs/<string:runid>/<config>/api/disturbed/lookup_meta` | `GET` | Disturbed.lookup_fn / Disturbed.extended_lookup_fn / Disturbed.active_lookup_variant | Returns fingerprint metadata for the active or requested lookup table. |
+| `/runs/<string:runid>/<config>/api/disturbed/lookup_snapshot` | `GET` | Disturbed.lookup_fn / Disturbed.extended_lookup_fn / Disturbed.active_lookup_variant | Returns CSV snapshot + fingerprint for the active or requested lookup table. |
 | `/runs/<string:runid>/<config>/tasks/modify_disturbed` | `POST` | Disturbed.lookup_fn | — |
 | `/runs/<string:runid>/<config>/query/baer_wgs_map[/]` | `GET` | Disturbed.bounds, Disturbed.classes, Disturbed.has_map, Ron.mods | — |
 | `/runs/<string:runid>/<config>/view/modify_burn_class` | `GET` | Disturbed.has_map, Ron.mods | — |

@@ -198,12 +198,10 @@ describe("Disturbed controller", () => {
 });
 
 describe("Disturbed lookup variant persistence", () => {
-    const storageKey = "weppcloud:disturbed:lookup_variant:test-run:test-config";
     let httpRequestMock;
 
     beforeEach(async () => {
         jest.resetModules();
-        localStorage.clear();
         document.body.innerHTML = `
             <form id="sbs_upload_form">
                 <div id="info"></div>
@@ -230,8 +228,13 @@ describe("Disturbed lookup variant persistence", () => {
         };
 
         httpRequestMock = jest.fn((url) => {
-            const lookupVariant = url.includes("lookup=extended") ? "extended" : "base";
-            return Promise.resolve({ body: { Content: { lookup_variant: lookupVariant } } });
+            if (url === "api/disturbed/lookup_meta") {
+                return Promise.resolve({ body: { Content: { lookup_variant: "base" } } });
+            }
+            if (url === "tasks/set_lookup_variant") {
+                return Promise.resolve({ body: { Content: { lookup_variant: "extended" } } });
+            }
+            return Promise.resolve({ body: { Content: {} } });
         });
 
         const controlBaseFactory = createControlBaseStub({
@@ -257,7 +260,6 @@ describe("Disturbed lookup variant persistence", () => {
     });
 
     afterEach(() => {
-        localStorage.clear();
         jest.clearAllMocks();
         delete window.Disturbed;
         delete global.WCHttp;
@@ -281,24 +283,28 @@ describe("Disturbed lookup variant persistence", () => {
         return window.Disturbed.getInstance();
     }
 
-    test("bootstrap requests lookup metadata using persisted selection and stores server-normalized variant", async () => {
-        localStorage.setItem(storageKey, "extended");
-        httpRequestMock.mockImplementationOnce(() => Promise.resolve({ body: { Content: { lookup_variant: "base" } } }));
-
+    test("bootstrap requests lookup metadata and applies server variant", async () => {
         getController();
         await Promise.resolve();
         await Promise.resolve();
 
         expect(httpRequestMock).toHaveBeenCalledWith(
-            "api/disturbed/lookup_meta?lookup=extended",
+            "api/disturbed/lookup_meta",
             expect.objectContaining({ method: "GET" }),
         );
-        expect(localStorage.getItem(storageKey)).toBe("base");
         expect(document.querySelector('[data-disturbed-lookup-variant][value="base"]').checked).toBe(true);
     });
 
-    test("changing lookup radio persists selection and refreshes metadata with requested variant", async () => {
-        localStorage.setItem(storageKey, "base");
+    test("changing lookup radio persists selection in NoDb via task endpoint", async () => {
+        httpRequestMock.mockImplementation((url) => {
+            if (url === "api/disturbed/lookup_meta") {
+                return Promise.resolve({ body: { Content: { lookup_variant: "base" } } });
+            }
+            if (url === "tasks/set_lookup_variant") {
+                return Promise.resolve({ body: { Content: { lookup_variant: "extended" } } });
+            }
+            return Promise.resolve({ body: { Content: {} } });
+        });
 
         getController();
         await Promise.resolve();
@@ -310,10 +316,13 @@ describe("Disturbed lookup variant persistence", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(localStorage.getItem(storageKey)).toBe("extended");
         expect(httpRequestMock).toHaveBeenCalledWith(
-            "api/disturbed/lookup_meta?lookup=extended",
-            expect.objectContaining({ method: "GET" }),
+            "tasks/set_lookup_variant",
+            expect.objectContaining({
+                method: "POST",
+                json: { lookup_variant: "extended" },
+            }),
         );
+        expect(document.querySelector('[data-disturbed-lookup-variant][value="extended"]').checked).toBe(true);
     });
 });

@@ -31,7 +31,6 @@ var Disturbed = (function () {
 
     var LOOKUP_VARIANT_BASE = "base";
     var LOOKUP_VARIANT_EXTENDED = "extended";
-    var LOOKUP_VARIANT_STORAGE_KEY_PREFIX = "weppcloud:disturbed:lookup_variant:";
 
     var EVENT_NAMES = [
         "disturbed:mode:changed",
@@ -424,7 +423,7 @@ var Disturbed = (function () {
             hasSbs: undefined,
             hasSbsRequest: null,
             uniformSeverity: initialUniform,
-            lookupVariant: readLookupVariantPreference() || LOOKUP_VARIANT_BASE
+            lookupVariant: LOOKUP_VARIANT_BASE
         };
 
         function emit(name, payload) {
@@ -476,78 +475,6 @@ var Disturbed = (function () {
             return LOOKUP_VARIANT_BASE;
         }
 
-        function lookupVariantStorageKey() {
-            var runId = "";
-            var runConfig = "";
-
-            if (typeof window !== "undefined") {
-                if (typeof window.runid === "string" && window.runid.trim() !== "") {
-                    runId = window.runid.trim();
-                } else if (typeof window.runId === "string" && window.runId.trim() !== "") {
-                    runId = window.runId.trim();
-                }
-                if (typeof window.config === "string" && window.config.trim() !== "") {
-                    runConfig = window.config.trim();
-                }
-            }
-
-            if (!runId || !runConfig) {
-                return null;
-            }
-            return LOOKUP_VARIANT_STORAGE_KEY_PREFIX + runId + ":" + runConfig;
-        }
-
-        function readLookupVariantPreference() {
-            if (typeof window === "undefined" || !window.localStorage) {
-                return null;
-            }
-
-            var key = lookupVariantStorageKey();
-            if (!key) {
-                return null;
-            }
-
-            try {
-                var storedValue = window.localStorage.getItem(key);
-                if (storedValue === null || storedValue === undefined || storedValue === "") {
-                    return null;
-                }
-                return normalizeLookupVariant(storedValue);
-            } catch (_err) {
-                return null;
-            }
-        }
-
-        function persistLookupVariantPreference(variant) {
-            if (typeof window === "undefined" || !window.localStorage) {
-                return;
-            }
-
-            var key = lookupVariantStorageKey();
-            if (!key) {
-                return;
-            }
-
-            try {
-                window.localStorage.setItem(key, normalizeLookupVariant(variant));
-            } catch (_err) {
-                // LocalStorage can fail in private-browsing or quota-exceeded scenarios.
-            }
-        }
-
-        function withLookupVariantQuery(url, variant) {
-            var normalized = normalizeLookupVariant(variant);
-            var query = "lookup=" + encodeURIComponent(normalized);
-
-            if (url.indexOf("?") === -1) {
-                return url + "?" + query;
-            }
-
-            var lastChar = url.charAt(url.length - 1);
-            var separator = lastChar === "?" || lastChar === "&" ? "" : "&";
-            return url + separator + query;
-        }
-
         function setLookupVariantSelection(variant, options) {
             var opts = options || {};
             var normalized = normalizeLookupVariant(variant);
@@ -568,10 +495,6 @@ var Disturbed = (function () {
                 link.dataset.selected = matches ? "true" : "false";
             });
 
-            if (opts.persist !== false) {
-                persistLookupVariantPreference(normalized);
-            }
-
             if (opts.emit !== false) {
                 emit("disturbed:lookup:variant", { lookupVariant: normalized });
             }
@@ -583,8 +506,7 @@ var Disturbed = (function () {
                 return Promise.resolve(state.lookupVariant);
             }
 
-            var preferredVariant = normalizeLookupVariant(state.lookupVariant);
-            var lookupMetaUrl = withLookupVariantQuery(url_for_run("api/disturbed/lookup_meta"), preferredVariant);
+            var lookupMetaUrl = url_for_run("api/disturbed/lookup_meta");
 
             return http
                 .request(lookupMetaUrl, {
@@ -594,17 +516,49 @@ var Disturbed = (function () {
                 .then(function (result) {
                     var data = result.body || {};
                     var content = data.Content || data.content || data;
-                    var variant = content.lookup_variant || preferredVariant;
-                    var normalized = setLookupVariantSelection(variant, { emit: false, persist: true });
+                    var variant = content.lookup_variant || state.lookupVariant;
+                    var normalized = setLookupVariantSelection(variant, { emit: false });
                     emit("disturbed:lookup:variant", {
                         lookupVariant: normalized,
-                        requestedLookupVariant: preferredVariant,
                         source: reason || "api"
                     });
                     return normalized;
                 })
                 .catch(function (_error) {
                     return state.lookupVariant;
+                });
+        }
+
+        function setLookupVariantOnServer(variant) {
+            var requestedVariant = normalizeLookupVariant(variant);
+            setLookupStatus("Saving lookup selection...", "pending");
+            return http
+                .request(url_for_run("tasks/set_lookup_variant"), {
+                    method: "POST",
+                    json: { lookup_variant: requestedVariant },
+                    form: formElement || undefined
+                })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.error || data.errors) {
+                        setLookupStatusError(data, "Failed to save lookup selection.");
+                        return refreshLookupVariantSelection("set-lookup-variant-error");
+                    }
+                    var content = data.Content || data.content || data;
+                    var effectiveVariant = normalizeLookupVariant(content.lookup_variant || requestedVariant);
+                    setLookupVariantSelection(effectiveVariant, { emit: false });
+                    setLookupStatus("Active lookup set to " + effectiveVariant + ".", "success");
+                    emit("disturbed:lookup:variant", {
+                        lookupVariant: effectiveVariant,
+                        requestedLookupVariant: requestedVariant,
+                        source: "set-lookup-variant"
+                    });
+                    return effectiveVariant;
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    setLookupStatusError(payload, "Failed to save lookup selection.");
+                    return refreshLookupVariantSelection("set-lookup-variant-error");
                 });
         }
 
@@ -1268,14 +1222,15 @@ var Disturbed = (function () {
             });
 
             dom.delegate(document, "change", "[data-disturbed-lookup-variant]", function (_event, target) {
-                setLookupVariantSelection(target ? target.value : LOOKUP_VARIANT_BASE, { emit: true, persist: true });
-                refreshLookupVariantSelection("user-select");
+                var requestedVariant = target ? target.value : LOOKUP_VARIANT_BASE;
+                setLookupVariantSelection(requestedVariant, { emit: true });
+                setLookupVariantOnServer(requestedVariant);
             });
         }
 
         setMode(state.mode, false);
         bindHandlers();
-        setLookupVariantSelection(state.lookupVariant, { emit: false, persist: false });
+        setLookupVariantSelection(state.lookupVariant, { emit: false });
         refreshLookupVariantSelection("bootstrap");
 
         disturbed.reset_land_soil_lookup = resetLandSoilLookup;

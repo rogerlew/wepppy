@@ -67,6 +67,7 @@ Required selector controls:
 
 Implementation note:
 - Existing backend contract uses `lookup=base|extended`; selector should map directly to that query contract.
+- Selector state must be persisted in Disturbed NoDb (`disturbed.nodb`) via a task endpoint, not local browser storage.
 
 ### 3. Modify Landsoil Lookup Tables
 Required action controls:
@@ -88,6 +89,9 @@ Required documentation link behavior:
 - `GET /runs/<runid>/<config>/modify_disturbed?lookup=base|extended`
 
 ### New routes required
+- `POST /runs/<runid>/<config>/tasks/set_lookup_variant`
+  - Payload: `{"lookup_variant":"base|extended"}`
+  - Behavior: persist run-scoped active lookup variant in Disturbed NoDb for disk persistence.
 - `POST /runs/<runid>/<config>/tasks/delete_extended_land_soil_lookup`
   - Behavior: remove extended CSV if present; return success when already absent (idempotent).
 - `POST /runs/<runid>/<config>/tasks/sync_base_to_extended_land_soil_lookup`

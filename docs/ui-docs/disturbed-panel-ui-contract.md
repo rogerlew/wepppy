@@ -26,10 +26,10 @@ Define the canonical UI and route contract for the Disturbed modal that manages 
   - Base: `value="base"`
   - Extended: `value="extended"`
 - Selector hook: `data-disturbed-lookup-variant`.
-- Controller refresh source of truth: `GET api/disturbed/lookup_meta?lookup=<base|extended>`.
+- Controller refresh source of truth: `GET api/disturbed/lookup_meta`.
 - Selection persistence:
-  - Per-run preference is cached client-side in local storage.
-  - Storage key format: `weppcloud:disturbed:lookup_variant:<runid>:<config>`.
+  - Active lookup selection is persisted in Disturbed NoDb (`disturbed.nodb`) as run-scoped state.
+  - Radio change contract: `POST /runs/<runid>/<config>/tasks/set_lookup_variant` with `{"lookup_variant":"base|extended"}`.
   - On refresh, server response remains authoritative (`lookup_variant` falls back to `base` if extended is unavailable).
 
 ### 3. Modify Landsoil Lookup Tables
@@ -50,6 +50,8 @@ Define the canonical UI and route contract for the Disturbed modal that manages 
 - Mutating (POST-only):
   - `POST /runs/<runid>/<config>/tasks/reset_disturbed`
   - `POST /runs/<runid>/<config>/tasks/load_extended_land_soil_lookup`
+  - `POST /runs/<runid>/<config>/tasks/set_lookup_variant`
+    - Persists the active lookup selector (`base|extended`) in Disturbed NoDb for run-scoped disk persistence.
   - `POST /runs/<runid>/<config>/tasks/delete_extended_land_soil_lookup`
     - Idempotent: returns success even if extended file is already absent.
   - `POST /runs/<runid>/<config>/tasks/sync_base_to_extended_land_soil_lookup`
@@ -59,10 +61,11 @@ Define the canonical UI and route contract for the Disturbed modal that manages 
   - `GET /runs/<runid>/<config>/api/disturbed/lookup_meta`
 
 ## Default Lookup Preference
-- Resolver behavior remains unchanged:
+- Resolver behavior:
   - If `lookup=base|extended` is provided, honor it (extended falls back to base if missing).
-  - If no explicit lookup is provided, prefer extended when the extended CSV exists; otherwise use base.
-- Deleting the extended table restores default behavior to base.
+  - If no explicit lookup is provided, resolve from Disturbed NoDb `active_lookup_variant`.
+  - Backward compatibility: if no persisted value exists, legacy default still applies (prefer extended when extended CSV exists; otherwise base).
+- Deleting the extended table forces active selection to base.
 
 ## PowerUser Separation Contract
 - Disturbed lookup controls are no longer rendered in `poweruser_panel.htm`.

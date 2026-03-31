@@ -552,6 +552,8 @@ class InvalidProjection(Exception):
 
 class Disturbed(NoDbBase):
     __name__ = 'Disturbed'
+    LOOKUP_VARIANT_BASE = 'base'
+    LOOKUP_VARIANT_EXTENDED = 'extended'
 
     filename = 'disturbed.nodb'
 
@@ -576,6 +578,7 @@ class Disturbed(NoDbBase):
             self._is256 = None
             self._sbs_mode = 0
             self._uniform_severity = None
+            self._active_lookup_variant = None
 
             self.reset_land_soil_lookup(reason='init')
 
@@ -720,6 +723,26 @@ class Disturbed(NoDbBase):
     @nodb_setter
     def uniform_severity(self, value: Optional[int]) -> None:
         self._uniform_severity = int(value) if value is not None else None
+
+    @property
+    def active_lookup_variant(self) -> str:
+        raw_variant = getattr(self, '_active_lookup_variant', None)
+        if isinstance(raw_variant, str):
+            normalized = raw_variant.strip().lower()
+            if normalized in {self.LOOKUP_VARIANT_BASE, self.LOOKUP_VARIANT_EXTENDED}:
+                return normalized
+
+        if _exists(self.extended_lookup_fn):
+            return self.LOOKUP_VARIANT_EXTENDED
+        return self.LOOKUP_VARIANT_BASE
+
+    @active_lookup_variant.setter
+    @nodb_setter
+    def active_lookup_variant(self, value: str) -> None:
+        normalized = str(value).strip().lower()
+        if normalized not in {self.LOOKUP_VARIANT_BASE, self.LOOKUP_VARIANT_EXTENDED}:
+            raise ValueError("lookup_variant must be one of {'base', 'extended'}")
+        self._active_lookup_variant = normalized
 
     def build_uniform_sbs(self, value: int = 4) -> str:
         func_name = inspect.currentframe().f_code.co_name
@@ -1383,6 +1406,14 @@ class Disturbed(NoDbBase):
     def extended_lookup_fn(self) -> str:
         return _join(self.disturbed_dir, 'disturbed_land_soil_lookup_extended.csv')
 
+    @property
+    def active_lookup_fn(self) -> str:
+        base_lookup_fn = self.lookup_fn
+        extended_lookup_fn = self.extended_lookup_fn
+        if self.active_lookup_variant == self.LOOKUP_VARIANT_EXTENDED and _exists(extended_lookup_fn):
+            return extended_lookup_fn
+        return base_lookup_fn
+
     def ensure_land_soil_lookup_schema(self) -> None:
         upgraded = upgrade_disturbed_land_soil_lookup(
             self.lookup_fn,
@@ -1396,8 +1427,7 @@ class Disturbed(NoDbBase):
         self.ensure_land_soil_lookup_schema()
         default_fn = self.default_land_soil_lookup_fn
         base_lookup_fn = self.lookup_fn
-        extended_lookup_fn = self.extended_lookup_fn
-        active_lookup_fn = extended_lookup_fn if _exists(extended_lookup_fn) else base_lookup_fn
+        active_lookup_fn = self.active_lookup_fn
 
         lookup = read_disturbed_land_soil_lookup(active_lookup_fn)
 
