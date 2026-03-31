@@ -1,104 +1,118 @@
-# Disturbed NoDb Controller
+# Disturbed Lands Module
 
-> Orchestrates wildfire/logging disturbance scenarios by remapping landuse and regenerating WEPP management/soil artifacts from burn-severity rasters.
+> Translates wildfire burn-severity maps into WEPP-ready soil and vegetation inputs so erosion models reflect post-fire conditions.
 
-> **See also:** [AGENTS.md](../../../../AGENTS.md) for Working with NoDb Controllers.
+> **See also:** [AGENTS.md](../../../../AGENTS.md) for coding conventions. [Disturbed Land Soil Lookup](../../../weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md) for the end-user parameter reference. [SBS Map Utilities](../baer/README.sbs_map.md) for raster classification details. [Soil File Specification](../../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md) for WEPP soil format reference.
 
-## Overview
+## What This Module Does
 
-Disturbed is the NoDb controller that turns a disturbance raster (typically Soil Burn Severity) into WEPP-ready inputs for a run. It owns the run-scoped `disturbed/` directory, manages the land/soil lookup table, and coordinates landuse remapping, management selection, soil regeneration, and PMET parameter export.
+After a wildfire, hillslope soils and vegetation change dramatically. Burned soils become water-repellent (hydrophobic), ground cover disappears, and erosion rates can increase by orders of magnitude. The Disturbed module automates the translation of a **Soil Burn Severity (SBS) map** into the specific soil and management parameters that the WEPP erosion model needs.
 
-Primary users are WEPPcloud operators and BAER analysts who need repeatable post-fire parameterization tied to a geospatial raster. The controller is built to run inside a WEPPcloud run, emit progress via Redis, and persist state to `disturbed.nodb`.
+The core logic is:
 
-## Workflow
+1. **Read the burn severity map** — a GeoTIFF classifying each pixel as unburned, low, moderate, or high severity
+2. **For each hillslope**, determine its dominant burn severity and existing vegetation type (forest, shrub, or grass)
+3. **Look up replacement parameters** from a table keyed by `(vegetation type + severity, soil texture)` — this produces new erodibility values, hydraulic conductivity, cover fractions, and plant parameters
+4. **Write new WEPP input files** (`.sol` and `.man`) that reflect the post-fire state
 
-1. **Load and normalize the disturbance raster**
-   - Reprojects the raster into the run DEM grid and builds a `SoilBurnSeverityMap` (classes 130-133).
-   - Tracks coverage statistics (`noburn`, `low`, `moderate`, `high`) for UI summaries.
+The result is a complete set of WEPP inputs that model how a burned watershed will respond to rainfall — more runoff, more erosion, faster peak flows — compared to the undisturbed baseline.
 
-2. **Remap landuse to disturbed classes**
-   - Uses the current landuse mapping (typically `wepppy/wepp/management/data/disturbed.json`) to swap management keys based on burn class and the existing `disturbed_class`.
-   - Forest and young-forest are always eligible; shrubs and grass are controlled by `burn_shrubs` and `burn_grass`.
-   - Rebuilds management summaries after remap so downstream steps use the disturbed management files.
+### Who Uses This
 
-3. **Optionally override canopy cover from Treecanopy**
-   - If the Treecanopy mod is present, `cancov_override` is set per hillslope for forest/young forest classes.
+- **BAER specialists** building rapid post-fire erosion assessments
+- **Incident hydrologists** evaluating debris-flow and flooding risk
+- **Researchers** comparing treatment scenarios (mulch, seeding, prescribed fire) against burned baselines
+- **WEPPcloud operators** running standard disturbed-land projects
 
-4. **Generate PMET parameters**
-   - Writes `pmetpara.txt` using `pmet_kcb` and `pmet_rawp` from the lookup table (or defaults for unclassified/developed land).
+## Key Inputs
 
-5. **Regenerate soils**
-   - For each hillslope (and for each MOFE if enabled), computes a simplified texture from clay/sand and looks up replacement parameters.
-   - Writes disturbed `.sol` files via `WeppSoilUtil` (`to_7778disturbed` or `to_over9000` based on `sol_ver`).
-   - For MOFE runs, stacks OFE-specific disturbed soils into a synthesized `.mofe.sol` using `SoilMultipleOfeSynth`.
+### Soil Burn Severity (SBS) Map
 
-## Management and Soil File Modifications
+The primary input. Users either:
+- **Upload a raster** (`.tif` or `.img`) — typically from BARC or RAVG products
+- **Generate a uniform severity** — applies one severity level across the entire watershed (useful for scenario analysis)
 
-### Landuse remap and management selection
+The module reprojects the raster to match the watershed DEM, classifies pixels into four severity classes (unburned=130, low=131, moderate=132, high=133), and computes per-hillslope dominant severity.
 
-- `remap_landuse()` and `remap_mofe_landuse()` map SBS classes 131/132/133 to low/mod/high severity management keys.
-- The mapping is driven by the active landuse map (default is `wepppy/wepp/management/data/disturbed.json`).
-- Forest and young-forest burn classes map to:
-  - `UnDisturbed/Low_Severity_Fire.man`
-  - `UnDisturbed/Moderate_Severity_Fire.man`
-  - `UnDisturbed/High_Severity_Fire.man`
-- Shrub burn classes map to:
-  - `UnDisturbed/Shrub_Low_Severity_Fire.man`
-  - `UnDisturbed/Shrub_Moderate_Severity_Fire.man`
-  - `UnDisturbed/Shrub_High_Severity_Fire.man`
-- Grass burn classes map to:
-  - `UnDisturbed/Grass_Low_Severity_Fire.man`
-  - `UnDisturbed/Grass_Moderate_Severity_Fire.man`
-  - `UnDisturbed/Grass_High_Severity_Fire.man`
+### Disturbed Land Soil Lookup Table
 
-If a management entry defines `SoilFile`/`sol_path`, the controller copies that soil directly instead of regenerating a disturbed soil from the lookup table.
+A CSV (`disturbed/disturbed_land_soil_lookup.csv`) that maps every combination of disturbed land-use class and soil texture to WEPP parameters. Each project gets its own copy that can be edited through the PowerUser panel.
 
-### Soil regeneration and parameter replacements
+Key parameters in the lookup:
 
-- The run-scoped lookup table lives at `disturbed/disturbed_land_soil_lookup.csv` (copied from `wepppy/nodb/mods/disturbed/data/disturbed_land_soil_lookup.csv`).
-- Each row maps `(disturbed class, texture)` to replacement values used by `WeppSoilUtil`:
-  - `ki`, `kr`, `shcrit` (erodibility and critical shear)
-  - `avke` (effective hydraulic conductivity, written to the soil header)
-  - `ksatadj`, `ksatfac`, `ksatrec` (hydrophobicity adjustments for 9001/9002 soils)
-  - `lkeff` (lower bound on effective K for 9003/9005 soils)
-- For fire treatments that append suffixes (`-mulch_15`, `-thinning`, etc.), the soil lookup uses the base disturbed class (e.g., `forest moderate sev fire`).
-- If a class is missing from the lookup during MOFE processing and `sol_ver` requires 9002+, defaults are injected so the soil can still be synthesized.
+| Parameter | What It Controls | Units |
+|-----------|-----------------|-------|
+| `ki` | Interrill erodibility (raindrop/sheet-flow detachment) | kg·s/m⁴ |
+| `kr` | Rill erodibility (concentrated-flow detachment) | s/m |
+| `shcrit` | Critical shear stress to initiate rill erosion | N/m² |
+| `avke` | Effective hydraulic conductivity of surface soil | mm/h |
+| `ksatadj` | Enable hydrophobicity adjustment (0=no, 1=yes) | flag |
+| `lkeff` | Lower limit on effective conductivity (hydrophobicity floor) | mm/h |
+| `rdmax` | Maximum rooting depth | m |
+| `xmxlai` | Maximum leaf area index | — |
+| `pmet_kcb` | Basal crop coefficient for ET calculation | — |
 
-### Static management overrides (added February 2, 2026)
+### Configuration Options
 
-To keep undisturbed vs. disturbed comparisons strictly "static to static," the lookup table now supports `plant.data.decfct` and `plant.data.dropfc` overrides. For all landuses except `agriculture crops`, these are set to `1` in the default lookup so management files do not decay or drop plant material during the comparison window. This avoids unintended differences in residue/root mass (and therefore `kr` adjustment factors) that would otherwise arise from differing growth/decay timing between management templates.
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `sol_ver` | `7778.0` | Soil file version to generate (7778, 9001, 9002, 9003, 9005) |
+| `burn_shrubs` | `True` | Apply burn severity to shrub vegetation classes |
+| `burn_grass` | `False` | Apply burn severity to grass vegetation classes |
+| `fire_date` | `None` | Fire date for downstream reporting |
+| `h0_max_om` | `None` | Optional cap on first-horizon organic matter for fire classes |
 
-As part of this static-alignment work, `UnDisturbed/Shrub.man` was updated to match the Tahoe shrub template by setting `hmax=2.0` and `ini.data.sumrtm`/`ini.data.sumsrm` to `0.30`.
+## How It Works
 
-We also switched NLCD key `72` (Sedge/Herbaceous) to `UnDisturbed/Tall_Grass.man` in `wepppy/wepp/management/data/disturbed.json` to keep tall grass comparisons aligned with the static template.
+### Step 1: Landuse Remapping
 
-We are keeping `UnDisturbed/Shrub.man` in sync with `Tahoe/Tahoe_Shrub.man` (the file is treated as the canonical shrub baseline for disturbed comparisons).
+When a hillslope has forest vegetation and the SBS map shows high severity fire at that location, the module replaces the management file:
 
-## Landuse Parameterization (Forest, Shrub, Grass)
+- `UnDisturbed/Old_Forest.man` → `UnDisturbed/High_Severity_Fire.man`
 
-The tables below capture the initial conditions (`IniLoopCropland`) and plant parameters (`PlantLoopCropland`) for the management files used by disturbed classes. Values are from the `.man` files under `wepppy/wepp/management/data/` and are shown here because Disturbed remaps hillslopes directly to these classes.
+This changes canopy cover from 90% to 40%, interrill cover from 100% to 30%, and maximum LAI from 14.0 to 2.0 — reflecting a severely burned forest floor.
 
-### Forest and Young Forest
+The same logic applies to shrub and grass classes when `burn_shrubs` / `burn_grass` are enabled:
 
-**Initial conditions**
+- `UnDisturbed/Shrub.man` → `UnDisturbed/Shrub_High_Severity_Fire.man`
+- `UnDisturbed/Tall_Grass.man` → `UnDisturbed/Grass_High_Severity_Fire.man`
 
-| Disturbed class | Management file | cancov | inrcov | rilcov | rspace | rfcum | rhinit | rrinit |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| forest | `UnDisturbed/Old_Forest.man` | 0.90 | 1.00 | 1.00 | 0.00 | 400.00 | 0.10 | 0.10 |
-| young forest | `UnDisturbed/Young_Forest.man` | 0.80 | 0.96 | 0.96 | 0.00 | 400.00 | 0.08 | 0.08 |
-| forest low sev fire | `UnDisturbed/Low_Severity_Fire.man` | 0.75 | 0.85 | 0.85 | 0.00 | 400.00 | 0.04 | 0.04 |
-| forest moderate sev fire | `UnDisturbed/Moderate_Severity_Fire.man` | 0.60 | 0.60 | 0.60 | 0.00 | 400.05 | 0.04826 | 0.06 |
-| forest high sev fire | `UnDisturbed/High_Severity_Fire.man` | 0.40 | 0.30 | 0.30 | 0.00 | 400.00 | 0.06 | 0.06 |
-| forest prescribed fire | `UnDisturbed/Prescribed_Fire.man` | 0.85 | 0.85 | 0.85 | 2.00 | 400.00 | 0.06 | 0.06 |
+### Step 2: Soil Regeneration
+
+For each hillslope, the module:
+1. Determines the simplified soil texture (clay loam, loam, sand loam, or silt loam) from clay/sand percentages
+2. Looks up replacement erodibility and conductivity parameters from the lookup table
+3. Writes a new `.sol` file with the disturbed parameters, using `WeppSoilUtil` for version-aware serialization
+
+For soil versions 9003+, the `lkeff` parameter enforces a lower bound on hydraulic conductivity to simulate persistent water repellency. High severity burns typically use `lkeff=0.1 mm/h` (strong hydrophobicity), while low severity uses `lkeff=10 mm/h` (minimal effect).
+
+### Step 3: PMET Parameters
+
+Writes `pmetpara.txt` with basal crop coefficient (`pmet_kcb`) and readily-available water (`pmet_rawp`) values from the lookup table, used for ET calculations.
+
+## Vegetation Parameters by Burn Severity
+
+### Forest
+
+**Initial conditions (cover and roughness)**
+
+| Disturbed class | Management file | cancov | inrcov | rilcov |
+|----------------|----------------|--------|--------|--------|
+| forest | `Old_Forest.man` | 0.90 | 1.00 | 1.00 |
+| young forest | `Young_Forest.man` | 0.80 | 0.96 | 0.96 |
+| forest low sev fire | `Low_Severity_Fire.man` | 0.75 | 0.85 | 0.85 |
+| forest moderate sev fire | `Moderate_Severity_Fire.man` | 0.60 | 0.60 | 0.60 |
+| forest high sev fire | `High_Severity_Fire.man` | 0.40 | 0.30 | 0.30 |
+| forest prescribed fire | `Prescribed_Fire.man` | 0.85 | 0.85 | 0.85 |
 
 **Plant parameters**
 
 | Disturbed class | rdmax | xmxlai | hmax | cuthgt |
-| --- | --- | --- | --- | --- |
+|----------------|-------|--------|------|--------|
 | forest | 2.00 | 14.0 | 20.0 | 20.0 |
 | young forest | 0.60 | 12.0 | 4.0 | 20.0 |
 | forest low sev fire | 0.30 | 4.0 | 0.30 | 0.30 |
-| forest moderate sev fire | 0.29998 | 3.0 | 0.2794 | 0.29998 |
+| forest moderate sev fire | 0.30 | 3.0 | 0.28 | 0.30 |
 | forest high sev fire | 0.30 | 2.0 | 0.20 | 0.30 |
 | forest prescribed fire | 0.50 | 10.0 | 2.0 | 4.0 |
 
@@ -106,362 +120,79 @@ The tables below capture the initial conditions (`IniLoopCropland`) and plant pa
 
 **Initial conditions**
 
-| Disturbed class | Management file | cancov | inrcov | rilcov | rspace | rfcum | rhinit | rrinit |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| shrub | `UnDisturbed/Shrub.man` | 0.70 | 0.90 | 0.90 | 2.00 | 400.00 | 0.06 | 0.06 |
-| shrub low sev fire | `UnDisturbed/Shrub_Low_Severity_Fire.man` | 0.33 | 0.80 | 0.80 | 2.00 | 400.00 | 0.06 | 0.06 |
-| shrub moderate sev fire | `UnDisturbed/Shrub_Moderate_Severity_Fire.man` | 0.27 | 0.55 | 0.55 | 2.00 | 400.00 | 0.06 | 0.06 |
-| shrub high sev fire | `UnDisturbed/Shrub_High_Severity_Fire.man` | 0.05 | 0.30 | 0.30 | 2.00 | 400.00 | 0.06 | 0.06 |
-| shrub prescribed fire | `UnDisturbed/Prescribed_Fire.man` | 0.85 | 0.85 | 0.85 | 2.00 | 400.00 | 0.06 | 0.06 |
+| Disturbed class | Management file | cancov | inrcov | rilcov |
+|----------------|----------------|--------|--------|--------|
+| shrub | `Shrub.man` | 0.70 | 0.90 | 0.90 |
+| shrub low sev fire | `Shrub_Low_Severity_Fire.man` | 0.33 | 0.80 | 0.80 |
+| shrub moderate sev fire | `Shrub_Moderate_Severity_Fire.man` | 0.27 | 0.55 | 0.55 |
+| shrub high sev fire | `Shrub_High_Severity_Fire.man` | 0.05 | 0.30 | 0.30 |
 
 **Plant parameters**
 
 | Disturbed class | rdmax | xmxlai | hmax | cuthgt |
-| --- | --- | --- | --- | --- |
+|----------------|-------|--------|------|--------|
 | shrub | 0.50 | 10.0 | 2.0 | 4.0 |
 | shrub low sev fire | 0.20 | 3.0 | 1.5 | 4.0 |
 | shrub moderate sev fire | 0.20 | 2.0 | 1.0 | 4.0 |
 | shrub high sev fire | 0.20 | 1.0 | 0.5 | 4.0 |
-| shrub prescribed fire | 0.50 | 10.0 | 2.0 | 4.0 |
 
-### Test Matrix Analysis Results (February 2026)
-
-Analysis of 48 hillslope simulations across:
-- 4 soil textures (clay loam, loam, sand loam, silt loam)
-- 3 vegetation types (forest, shrub, tall grass)
-- 4 burn severities (unburned, low, moderate, high)
-
-**Climate**: MC KENZIE BRIDGE RS, OR - 100 years, ~1,194 mm/yr precipitation
-
-**Slope**: 201.68m variable profile (avg ~43% grade)
-
-**Soil format**: 9002 with hydrophobicity parameters
-
-Test script: `tests/disturbed/test_disturbed_matrix.py`
-Analysis script: `tests/disturbed/analyze_matrix.py`
-
-#### Runoff Event Counts (Burned vs Unburned)
-
-Event counts compare burned vs unburned runoff by matching day/month/year across
-all 4 soil textures. Results aggregated from 100-year simulations (48 total runs).
-
-| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|-------------:|------------------:|------:|------------------:|
-| forest | low | 1,308 | 1,122 | 17 | 169 |
-| forest | moderate | 1,240 | 966 | 31 | 243 |
-| forest | high | 1,202 | 912 | 22 | 268 |
-| shrub | low | 1,404 | 1,017 | 60 | 327 |
-| shrub | moderate | 1,392 | 1,007 | 51 | 334 |
-| shrub | high | 1,387 | 1,009 | 37 | 341 |
-| tall grass | low | 1,493 | 359 | 981 | 153 |
-| tall grass | moderate | 1,480 | 746 | 181 | 553 |
-| tall grass | high | 1,459 | 773 | 73 | 613 |
-
-#### Sediment Delivery Event Counts (Burned vs Unburned)
-
-| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|-------------:|------------------:|------:|------------------:|
-| forest | low | 1,308 | 114 | 1,191 | 3 |
-| forest | moderate | 1,240 | 134 | 1,104 | 2 |
-| forest | high | 1,202 | 236 | 966 | 0 |
-| shrub | low | 1,404 | 289 | 1,072 | 43 |
-| shrub | moderate | 1,392 | 181 | 1,146 | 65 |
-| shrub | high | 1,387 | 353 | 1,029 | 5 |
-| tall grass | low | 1,493 | 80 | 1,405 | 8 |
-| tall grass | moderate | 1,480 | 87 | 1,388 | 5 |
-| tall grass | high | 1,459 | 278 | 1,181 | 0 |
-
-#### Peakflow Event Counts (Burned vs Unburned)
-
-Event counts compare burned vs unburned peak discharge by matching
-simulation year/julian day in `H*.pass.dat` EVENT records.
-
-| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|-------------:|------------------:|------:|------------------:|
-| forest | low | 1,242 | 1,078 | 8 | 156 |
-| forest | moderate | 1,186 | 980 | 6 | 200 |
-| forest | high | 1,148 | 955 | 6 | 187 |
-| shrub | low | 1,322 | 1,035 | 10 | 277 |
-| shrub | moderate | 1,313 | 1,030 | 10 | 273 |
-| shrub | high | 1,303 | 1,028 | 10 | 265 |
-| tall grass | low | 1,415 | 820 | 80 | 515 |
-| tall grass | moderate | 1,400 | 828 | 18 | 554 |
-| tall grass | high | 1,378 | 828 | 12 | 538 |
-
-#### Runoff Descriptive Statistics (mm)
-
-Statistics aggregated across all 4 soil textures for 100-year simulations.
-
-| Veg Type | Severity | Condition | Mean | Std Dev | Median | Total |
-|----------|----------|-----------|-----:|--------:|-------:|------:|
-| forest | low | burned | 20.26 | 19.00 | 15.03 | 26,344 |
-| | | unburned | 18.90 | 17.45 | 14.09 | 24,633 |
-| forest | moderate | burned | 20.91 | 19.19 | 15.34 | 25,765 |
-| | | unburned | 19.15 | 17.69 | 14.26 | 23,663 |
-| forest | high | burned | 21.07 | 19.15 | 15.47 | 25,159 |
-| | | unburned | 19.23 | 17.86 | 14.30 | 23,023 |
-| shrub | low | burned | 20.10 | 18.49 | 14.80 | 27,996 |
-| | | unburned | 19.05 | 18.53 | 13.62 | 26,554 |
-| shrub | moderate | burned | 20.11 | 18.44 | 15.05 | 27,791 |
-| | | unburned | 19.14 | 18.57 | 13.81 | 26,463 |
-| shrub | high | burned | 19.85 | 18.34 | 14.91 | 27,332 |
-| | | unburned | 19.17 | 18.59 | 13.84 | 26,396 |
-| tall grass | low | burned | 19.00 | 18.29 | 13.51 | 28,191 |
-| | | unburned | 18.65 | 18.05 | 13.15 | 27,694 |
-| tall grass | moderate | burned | 19.15 | 18.33 | 13.65 | 28,185 |
-| | | unburned | 18.77 | 18.07 | 13.35 | 27,658 |
-| tall grass | high | burned | 19.29 | 18.35 | 14.16 | 27,972 |
-| | | unburned | 19.00 | 18.10 | 13.64 | 27,562 |
-
-#### Sediment Delivery Descriptive Statistics (kg/m)
-
-| Veg Type | Severity | Condition | Mean | Std Dev | Median | Total |
-|----------|----------|-----------|-----:|--------:|-------:|------:|
-| forest | low | burned | 0.334 | 1.447 | 0.000 | 468.5 |
-| | | unburned | 0.021 | 0.129 | 0.000 | 30.6 |
-| forest | moderate | burned | 0.888 | 3.366 | 0.000 | 1,229.2 |
-| | | unburned | 0.022 | 0.132 | 0.000 | 30.6 |
-| forest | high | burned | 4.072 | 12.020 | 0.000 | 5,338.0 |
-| | | unburned | 0.023 | 0.134 | 0.000 | 30.6 |
-| shrub | low | burned | 0.402 | 1.307 | 0.000 | 613.8 |
-| | | unburned | 0.118 | 0.403 | 0.000 | 188.4 |
-| shrub | moderate | burned | 0.819 | 3.023 | 0.000 | 1,232.3 |
-| | | unburned | 0.120 | 0.404 | 0.000 | 188.4 |
-| shrub | high | burned | 2.925 | 7.970 | 0.000 | 4,341.9 |
-| | | unburned | 0.120 | 0.405 | 0.000 | 188.4 |
-| tall grass | low | burned | 0.179 | 0.923 | 0.000 | 291.6 |
-| | | unburned | 0.149 | 0.775 | 0.000 | 242.7 |
-| tall grass | moderate | burned | 0.330 | 1.742 | 0.000 | 537.4 |
-| | | unburned | 0.151 | 0.779 | 0.000 | 242.7 |
-| tall grass | high | burned | 3.941 | 12.201 | 0.000 | 6,398.5 |
-| | | unburned | 0.153 | 0.784 | 0.000 | 242.7 |
-
-#### Peakflow Descriptive Statistics (m^3/s)
-
-| Veg Type | Severity | Condition | Mean | Std Dev | Median | Total |
-|----------|----------|-----------|-----:|--------:|-------:|------:|
-| forest | low | burned | 0.010 | 0.035 | 0.003 | 13.017 |
-| | | unburned | 0.007 | 0.022 | 0.003 | 9.364 |
-| forest | moderate | burned | 264.812 | 4,961.073 | 0.003 | 372,852.725 |
-| | | unburned | 0.008 | 0.023 | 0.003 | 9.263 |
-| forest | high | burned | 1,446.719 | 16,722.634 | 0.004 | 1,771,635.174 |
-| | | unburned | 0.008 | 0.023 | 0.003 | 9.181 |
-| shrub | low | burned | 820.003 | 12,806.408 | 0.003 | 1,198,135.224 |
-| | | unburned | 0.008 | 0.024 | 0.003 | 10.588 |
-| shrub | moderate | burned | 1,045.652 | 14,386.683 | 0.003 | 1,474,013.109 |
-| | | unburned | 0.008 | 0.024 | 0.003 | 10.576 |
-| shrub | high | burned | 3,033.479 | 24,672.485 | 0.004 | 4,227,064.262 |
-| | | unburned | 0.008 | 0.024 | 0.003 | 10.562 |
-| tall grass | low | burned | 0.009 | 0.038 | 0.003 | 13.501 |
-| | | unburned | 0.010 | 0.042 | 0.003 | 14.482 |
-| tall grass | moderate | burned | 235.805 | 4,727.188 | 0.003 | 380,113.192 |
-| | | unburned | 0.010 | 0.042 | 0.003 | 14.467 |
-| tall grass | high | burned | 1,877.968 | 16,388.666 | 0.003 | 2,935,836.255 |
-| | | unburned | 0.010 | 0.042 | 0.003 | 14.439 |
-
-#### Key Findings
-
-1. **Runoff increases with burn severity**: For forest and shrub, burned conditions consistently show more runoff events than unburned (e.g., forest low: 86% burned > unburned). Tall grass shows more variable response due to already low cover.
-
-2. **Sediment delivery increases dramatically with high severity fire**: Forest high severity shows 174x more total sediment delivery than unburned (5,338 vs 30.6 kg/m). Shrub high severity shows 23x increase (4,342 vs 188 kg/m). Tall grass shows similar patterns.
-
-3. **Directional consistency**: High severity fire produces more sediment in 100% of matched events for forest (236 burned > unburned, 0 unburned > burned) and tall grass. Shrub high severity shows 353 burned > unburned vs only 5 unburned > burned.
-
-4. **Shrub parameterization validated**: After bb=14 and severity-based hmax updates (Feb 2026), shrub burned conditions now consistently produce more sediment than unburned across all severities (289/181/353 burned > unburned for low/mod/high).
-
-#### Runoff Event Counts by Soil Texture
-
-Rows grouped by texture to highlight texture-specific response patterns.
-
-**Clay Loam**
-
-| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|------:|------------------:|------:|------------------:|
-| forest | low | 388 | 322 | 11 | 55 |
-| forest | moderate | 368 | 267 | 20 | 81 |
-| forest | high | 357 | 256 | 10 | 91 |
-| shrub | low | 413 | 286 | 21 | 106 |
-| shrub | moderate | 409 | 288 | 17 | 104 |
-| shrub | high | 408 | 293 | 11 | 104 |
-| tall grass | low | 434 | 94 | 298 | 42 |
-| tall grass | moderate | 427 | 204 | 64 | 159 |
-| tall grass | high | 421 | 222 | 22 | 177 |
-
-**Loam**
-
-| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|------:|------------------:|------:|------------------:|
-| forest | low | 349 | 301 | 4 | 44 |
-| forest | moderate | 332 | 267 | 4 | 61 |
-| forest | high | 323 | 253 | 2 | 68 |
-| shrub | low | 385 | 285 | 18 | 82 |
-| shrub | moderate | 382 | 283 | 15 | 84 |
-| shrub | high | 382 | 286 | 10 | 86 |
-| tall grass | low | 405 | 95 | 271 | 39 |
-| tall grass | moderate | 401 | 200 | 52 | 149 |
-| tall grass | high | 397 | 205 | 24 | 168 |
-
-**Sand Loam**
-
-| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|------:|------------------:|------:|------------------:|
-| forest | low | 249 | 219 | 0 | 30 |
-| forest | moderate | 235 | 192 | 2 | 41 |
-| forest | high | 227 | 181 | 4 | 42 |
-| shrub | low | 266 | 204 | 7 | 55 |
-| shrub | moderate | 264 | 199 | 5 | 60 |
-| shrub | high | 262 | 194 | 5 | 63 |
-| tall grass | low | 289 | 79 | 177 | 33 |
-| tall grass | moderate | 289 | 154 | 25 | 110 |
-| tall grass | high | 281 | 153 | 11 | 117 |
-
-**Silt Loam**
-
-| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|------:|------------------:|------:|------------------:|
-| forest | low | 322 | 280 | 2 | 40 |
-| forest | moderate | 305 | 240 | 5 | 60 |
-| forest | high | 295 | 222 | 6 | 67 |
-| shrub | low | 340 | 242 | 14 | 84 |
-| shrub | moderate | 337 | 237 | 14 | 86 |
-| shrub | high | 335 | 236 | 11 | 88 |
-| tall grass | low | 365 | 91 | 235 | 39 |
-| tall grass | moderate | 363 | 188 | 40 | 135 |
-| tall grass | high | 360 | 193 | 16 | 151 |
-
-#### Sediment Delivery Event Counts by Soil Texture
-
-**Clay Loam**
-
-| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|------:|------------------:|------:|------------------:|
-| forest | low | 388 | 68 | 319 | 1 |
-| forest | moderate | 368 | 78 | 289 | 1 |
-| forest | high | 357 | 134 | 223 | 0 |
-| shrub | low | 413 | 194 | 181 | 38 |
-| shrub | moderate | 409 | 94 | 257 | 58 |
-| shrub | high | 408 | 190 | 214 | 4 |
-| tall grass | low | 434 | 49 | 381 | 4 |
-| tall grass | moderate | 427 | 51 | 373 | 3 |
-| tall grass | high | 421 | 195 | 226 | 0 |
-
-**Loam**
-
-| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|------:|------------------:|------:|------------------:|
-| forest | low | 349 | 23 | 324 | 2 |
-| forest | moderate | 332 | 32 | 299 | 1 |
-| forest | high | 323 | 43 | 280 | 0 |
-| shrub | low | 385 | 59 | 322 | 4 |
-| shrub | moderate | 382 | 45 | 332 | 5 |
-| shrub | high | 382 | 65 | 317 | 0 |
-| tall grass | low | 405 | 21 | 381 | 3 |
-| tall grass | moderate | 401 | 25 | 374 | 2 |
-| tall grass | high | 397 | 53 | 344 | 0 |
-
-**Sand Loam**
-
-| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|------:|------------------:|------:|------------------:|
-| forest | low | 249 | 6 | 243 | 0 |
-| forest | moderate | 235 | 6 | 229 | 0 |
-| forest | high | 227 | 19 | 208 | 0 |
-| shrub | low | 266 | 11 | 255 | 0 |
-| shrub | moderate | 264 | 13 | 251 | 0 |
-| shrub | high | 262 | 39 | 223 | 0 |
-| tall grass | low | 289 | 2 | 287 | 0 |
-| tall grass | moderate | 289 | 2 | 287 | 0 |
-| tall grass | high | 281 | 12 | 269 | 0 |
-
-**Silt Loam**
-
-| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
-|----------|----------|------:|------------------:|------:|------------------:|
-| forest | low | 322 | 17 | 305 | 0 |
-| forest | moderate | 305 | 18 | 287 | 0 |
-| forest | high | 295 | 40 | 255 | 0 |
-| shrub | low | 340 | 25 | 314 | 1 |
-| shrub | moderate | 337 | 29 | 306 | 2 |
-| shrub | high | 335 | 59 | 275 | 1 |
-| tall grass | low | 365 | 8 | 356 | 1 |
-| tall grass | moderate | 363 | 9 | 354 | 0 |
-| tall grass | high | 360 | 18 | 342 | 0 |
-
-#### Texture Pattern Observations
-
-1. **Clay loam** shows the highest sediment response - more events with burned > unburned across all veg types
-2. **Sand loam** shows minimal sediment differences - high infiltration capacity reduces erosion even when burned
-3. **Shrub directional consistency**: After bb/hmax updates, shrub burned > unburned dominates across all textures (e.g., clay loam low: 194 vs 38)
-4. **Tall grass runoff** shows high "Equal" counts across all textures at low severity, indicating minimal hydrologic impact from low-severity grass fires
-
-### Grass (Tall and Short)
+### Grass
 
 **Initial conditions**
 
-| Disturbed class | Management file | cancov | inrcov | rilcov | rspace | rfcum | rhinit | rrinit |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| tall grass | `UnDisturbed/Tall_Grass.man` | 0.40 | 0.60 | 0.60 | 0.00 | 400.00 | 0.02 | 0.02 |
-| short grass | `GIS/Poor grass.man` | 0.60 | 0.40 | 0.40 | 0.00 | 400.00 | 0.04 | 0.04 |
-| grass low sev fire | `UnDisturbed/Grass_Low_Severity_Fire.man` | 0.30 | 0.60 | 0.60 | 0.00 | 400.00 | 0.02 | 0.02 |
-| grass moderate sev fire | `UnDisturbed/Grass_Moderate_Severity_Fire.man` | 0.25 | 0.35 | 0.35 | 0.00 | 400.00 | 0.02 | 0.02 |
-| grass high sev fire | `UnDisturbed/Grass_High_Severity_Fire.man` | 0.041 | 0.10 | 0.10 | 0.00 | 400.00 | 0.02 | 0.02 |
-| grass prescribed fire | `UnDisturbed/Grass_Low_Severity_Fire.man` | 0.30 | 0.60 | 0.60 | 0.00 | 400.00 | 0.02 | 0.02 |
+| Disturbed class | Management file | cancov | inrcov | rilcov |
+|----------------|----------------|--------|--------|--------|
+| tall grass | `Tall_Grass.man` | 0.40 | 0.60 | 0.60 |
+| short grass | `Poor grass.man` | 0.60 | 0.40 | 0.40 |
+| grass low sev fire | `Grass_Low_Severity_Fire.man` | 0.30 | 0.60 | 0.60 |
+| grass moderate sev fire | `Grass_Moderate_Severity_Fire.man` | 0.25 | 0.35 | 0.35 |
+| grass high sev fire | `Grass_High_Severity_Fire.man` | 0.04 | 0.10 | 0.10 |
 
 **Plant parameters**
 
 | Disturbed class | rdmax | xmxlai | hmax | cuthgt |
-| --- | --- | --- | --- | --- |
+|----------------|-------|--------|------|--------|
 | tall grass | 0.60 | 6.0 | 0.60 | 1.0 |
 | short grass | 0.40 | 9.0 | 1.0 | 4.0 |
 | grass low sev fire | 0.40 | 3.0 | 0.40 | 1.0 |
 | grass moderate sev fire | 0.30 | 2.0 | 0.30 | 1.0 |
 | grass high sev fire | 0.20 | 1.0 | 0.20 | 1.0 |
-| grass prescribed fire | 0.40 | 3.0 | 0.40 | 1.0 |
 
-### Soil lookup examples (loam texture)
+### Soil Lookup Example (Loam Texture)
 
-These rows come from `disturbed_land_soil_lookup.csv` for `stext=loam`. Other textures (clay loam, sand loam, silt loam) are defined in the same table.
+These rows from `disturbed_land_soil_lookup.csv` show how soil parameters change with severity for loam soils. Other textures (clay loam, sand loam, silt loam) follow similar patterns with texture-appropriate values.
 
-| Disturbed class | ki | kr | shcrit | avke | ksatadj | ksatfac | ksatrec | rdmax | xmxlai | lkeff |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| forest low sev fire | 1000000 | 8.00E-05 | 1 | 20 | 0 | 1.3 | 0.3 | 0.3 | 4 | 10 |
-| forest moderate sev fire | 1000000 | 8.00E-05 | 1 | 20 | 0 | 1.3 | 0.3 | 0.3 | 4 | 1 |
-| forest high sev fire | 1000000 | 0.0001 | 1 | 15 | 1 | 100 | 0.3 | 0.3 | 2 | 0.1 |
-| forest prescribed fire | 1000000 | 8.00E-05 | 1 | 20 | 0 | 1.3 | 0.3 | 0.5 | 10 | 10 |
-| shrub low sev fire | 1000000 | 8.00E-05 | 1 | 20 | 0 | 1.3 | 0.3 | 0.2 | 2 | 10 |
-| shrub moderate sev fire | 1000000 | 8.00E-05 | 1 | 20 | 0 | 1.3 | 0.3 | 0.2 | 2 | 1 |
-| shrub high sev fire | 1000000 | 0.0001 | 1 | 15 | 1 | 100 | 0.3 | 0.2 | 1 | 1 |
-| shrub prescribed fire | 1000000 | 8.00E-05 | 1 | 20 | 0 | 1.3 | 0.3 | 0.3 | 4 | 10 |
-| grass low sev fire | 1000000 | 6.00E-05 | 1 | 30 | 0 | 1.5 | 0.3 | 0.4 | 5 | -9999 |
-| grass moderate sev fire | 1000000 | 6.00E-05 | 1 | 30 | 0 | 1.5 | 0.3 | 0.4 | 5 | -9999 |
-| grass high sev fire | 1000000 | 6.00E-05 | 1 | 30 | 0 | 1.5 | 0.3 | 0.4 | 5 | -9999 |
-| grass prescribed fire | 1000000 | 6.00E-05 | 1 | 30 | 0 | 1.5 | 0.3 | 0.4 | 5 | -9999 |
+| Disturbed class | ki | kr | shcrit | avke | ksatadj | lkeff |
+|----------------|-----|------|--------|------|---------|-------|
+| forest low sev fire | 1,000,000 | 8.0e-5 | 1 | 20 | 0 | 10 |
+| forest moderate sev fire | 1,000,000 | 8.0e-5 | 1 | 20 | 0 | 1 |
+| forest high sev fire | 1,000,000 | 1.0e-4 | 1 | 15 | 1 | 0.1 |
+| shrub low sev fire | 1,000,000 | 8.0e-5 | 1 | 20 | 0 | 10 |
+| shrub moderate sev fire | 1,000,000 | 8.0e-5 | 1 | 20 | 0 | 1 |
+| shrub high sev fire | 1,000,000 | 1.0e-4 | 1 | 15 | 1 | 1 |
+| grass low sev fire | 1,000,000 | 6.0e-5 | 1 | 30 | 0 | -9999 |
+| grass moderate sev fire | 1,000,000 | 6.0e-5 | 1 | 30 | 0 | -9999 |
+| grass high sev fire | 1,000,000 | 6.0e-5 | 1 | 30 | 0 | -9999 |
 
-## Model Effects in WEPP-forest (trace)
+Note: `lkeff=-9999` means no hydrophobicity adjustment is applied (grass fires typically do not produce significant water repellency).
 
-Disturbed updates parameters that are consumed directly by the WEPP-forest Fortran kernels. Key linkages:
+## How Parameters Affect WEPP Simulations
 
-- **Canopy/interrill/rill cover** (`cancov`, `inrcov`, `rilcov`) drive hydraulic friction and rainfall interception.
-  - `frcfac.for` uses `inrcov` and `rilcov` to build Darcy friction factors, and `cancov` to add canopy friction.
-  - `idat.for` uses `cancov` with live biomass to compute rainfall interception (`plaint`).
-- **Rill spacing and width** (`rspace`, `width`) control rill area and scale interrill detachment.
-  - `frcfac.for` computes rill area as `width / rspace` to blend rill/interrill friction.
-  - `param.for` scales interrill detachment by `rspace / width`.
-- **Erodibility and critical shear** (`ki`, `kr`, `shcrit`) feed the erosion terms.
-  - `param.for` uses `ki` in interrill detachment, `kr` in rill erodibility (`eata`), and `shcrit` to compute critical shear (`tauc`).
-- **Hydraulic conductivity adjustments** (`avke`, `ksatadj`, `ksatfac`, `ksatrec`, `lkeff`).
-  - `input.for` reads these fields from the soil file (9001+ and 9003+ formats).
-  - `infpar.for` applies the hydrophobicity logic when `ksatadj=1`, computing effective K from saturation fraction and enforcing `lkeff` lower bounds for 9003/9005.
+The disturbed parameterization feeds directly into the WEPP-forest Fortran kernels:
 
-## Runoff Events
+- **Cover fractions** (`cancov`, `inrcov`, `rilcov`) reduce rainfall interception and hydraulic friction. Lower cover → more water reaches the soil surface → more runoff and erosion.
 
-WEPP computes event runoff from the daily water balance: rainfall intensity and duration drive infiltration, which is limited by effective conductivity (`Keff`) and suction across the wetting front (`Suct`). Surface storage and routing are further adjusted by random roughness (`rrinit`/`Rough`) and cover/residue (`cancov`, `inrcov`, `rilcov`, `sumrtm`, `sumsrm`). These terms evolve with antecedent soil moisture and daily state, so the runoff response is time-varying even with fixed management and soil inputs.
+- **Erodibility** (`ki`, `kr`) and **critical shear** (`shcrit`) control how easily soil detaches. Burned soils are more erodible because organic binding agents are destroyed and soil structure collapses.
 
-When `ksatadj=1`, WEPP recalculates effective conductivity from saturation fraction (`sat_frac`) and the `ksatfac`/`ksatrec` controls (or enforces `lkeff` for 9003/9005 soils). This makes `Keff` time-varying as soils wet up or dry down. When `ksatadj=0`, `Keff` tracks the surface horizon `ksat` (which is sourced from `avke` in the disturbed lookup).
+- **Hydraulic conductivity** (`avke`, `lkeff`) controls infiltration capacity. The `lkeff` lower bound simulates hydrophobic layers — waxy residues from burned organic matter that repel water. When `ksatadj=1`, WEPP dynamically adjusts conductivity based on soil saturation, allowing recovery as cumulative precipitation breaks down the hydrophobic layer.
 
-Suction (`Suct`) is computed from soil texture/porosity and current water content, so it is sensitive to antecedent wetness. Higher `Suct` increases infiltration demand and can suppress runoff; lower `Suct` does the opposite. The event count tables therefore capture not only management/soil differences but also day-to-day moisture state, which is why a minority of events can show undisturbed runoff exceeding burned runoff.
+- **Plant parameters** (`rdmax`, `xmxlai`, `hmax`) control vegetation recovery. Burned hillslopes start with reduced root depth, leaf area, and canopy height, which limits transpiration and interception.
 
-The disturbed parameterization is **directionally correct** at the regime level (burned classes lower cover and typically lower effective conductivity, so runoff and sediment delivery tend to increase), but it does **not guarantee** that every individual event will produce more runoff than the undisturbed case. A dry antecedent state can raise `Suct` and reduce runoff in burned conditions, while a wetter undisturbed state can do the opposite. This is expected behavior in the WEPP hydrology, so comparisons should focus on distributions and seasonal/annual totals rather than a per-event monotonicity assumption.
+The parameterization is **directionally correct at the regime level**: burned conditions produce more runoff and sediment than undisturbed across seasonal and annual totals. Individual storm events may occasionally show the opposite due to antecedent moisture state — a dry burned soil can still infiltrate more than a saturated undisturbed soil. This is expected WEPP hydrology behavior; compare distributions and totals rather than individual events.
+
+### Static Management Overrides
+
+To keep undisturbed vs. disturbed comparisons strictly "static to static," the lookup table sets `plant.data.decfct` and `plant.data.dropfc` to `1` for all landuses except agriculture crops. This prevents management files from decaying or dropping plant material during the comparison window, avoiding unintended differences in residue/root mass between templates.
 
 ## Quick Start
 
@@ -483,107 +214,35 @@ disturbed.remap_landuse()
 disturbed.modify_soils()
 ```
 
-## Configuration
-
-Values are read from the `disturbed` section of the run config.
-
-| Parameter | Default | Description |
-| --- | --- | --- |
-| `disturbed.land_soil_lookup` | `wepppy/nodb/mods/disturbed/data/disturbed_land_soil_lookup.csv` | Source lookup copied into `disturbed/disturbed_land_soil_lookup.csv`. |
-| `disturbed.h0_max_om` | `None` | Optional cap on first-horizon OM for fire classes. |
-| `disturbed.sol_ver` | `7778.0` | Soil file version for output (`7778`, `9001`, `9002`, `9003`, `9005`). |
-| `disturbed.fire_date` | `None` | Fire date string used by downstream reporting. |
-| `disturbed.burn_shrubs` | `True` | Whether shrub classes are remapped to burn severities. |
-| `disturbed.burn_grass` | `False` | Whether grass classes are remapped to burn severities. |
-
 ## Developer Notes
 
-- `build_extended_land_soil_lookup()` is a helper for exporting a merged lookup (management + soil parameters); it is not part of the default run workflow.
-- `lookup_disturbed_class()` strips treatment suffixes (mulch/thinning) so soils are keyed by burn severity, not treatment type.
-- For MOFE runs, each OFE gets its own disturbed soil file and is reassembled into a `.mofe.sol` via `SoilMultipleOfeSynth`.
+- `remap_landuse()` and `remap_mofe_landuse()` map SBS classes 131/132/133 to low/mod/high severity management keys using `wepppy/wepp/management/data/disturbed.json`.
+- If a management entry defines `SoilFile`/`sol_path`, the controller copies that soil directly instead of regenerating from the lookup table.
+- For treatment suffixes (`-mulch_15`, `-thinning`, etc.), `lookup_disturbed_class()` strips the suffix so soils are keyed by burn severity, not treatment type.
+- For MOFE runs, each OFE gets its own disturbed soil file, reassembled into a `.mofe.sol` via `SoilMultipleOfeSynth`.
+- `build_extended_land_soil_lookup()` exports a merged lookup (management + soil parameters); it is not part of the default run workflow.
+- All mutations must occur inside `with disturbed.locked():` blocks to respect Redis-backed locking.
 
-## Testing
+## Validation Results (48-Simulation Matrix)
 
-The disturbed module has a comprehensive test suite that validates the soil/management parameterization workflow:
+A 48-simulation matrix test (4 soil textures × 3 vegetation types × 4 burn severities, 100-year climate) validates the parameterization. Key findings:
 
-```bash
-# Run the 48-simulation matrix test (4 textures x 3 veg types x 4 severities)
-pytest tests/disturbed/test_disturbed_matrix.py -v
+1. **Runoff increases with burn severity**: Forest burned conditions show more runoff events than unburned in 86% of matched events (low severity) through 76% (high severity).
 
-# Analyze results after test completion
-python tests/disturbed/analyze_matrix.py
-```
+2. **Sediment delivery increases dramatically at high severity**: Forest high severity produces 174× more total sediment than unburned (5,338 vs 30.6 kg/m). Shrub high severity shows 23×. At high severity, 100% of matched events show burned > unburned for forest.
 
-Test artifacts:
-- `tests/disturbed/test_disturbed_matrix.py` - pytest-based matrix runner
-- `tests/disturbed/analyze_matrix.py` - post-run analysis generating event counts and statistics
-- `tests/disturbed/conftest.py` - shared fixtures (paths, run directories)
-- `tests/disturbed/analysis_results.md` - standalone results summary
+3. **Texture matters**: Clay loam shows the highest sediment response; sand loam shows minimal differences due to high infiltration capacity even when burned.
 
-### Hillslope ID Manifest
+4. **Grass response is muted at low severity**: Tall grass shows high "equal" event counts at low severity (66% of events), indicating minimal hydrologic impact from low-severity grass fires.
 
-The 48 simulations in the test archive (`disturbed_matrix_results.tar.gz`) map to hillslope IDs as follows.
-Files are named `p{id}.sol`, `p{id}.man`, `p{id}.slp`, `p{id}.cli`, `H{id}.ebe.dat`, etc.
-
-ID formula: `texture_idx * 12 + veg_idx * 4 + severity + 1`
-
-| ID | Texture | Veg Type | Severity |
-|---:|---------|----------|----------|
-| 1 | clay loam | forest | unburned |
-| 2 | clay loam | forest | low |
-| 3 | clay loam | forest | moderate |
-| 4 | clay loam | forest | high |
-| 5 | clay loam | shrub | unburned |
-| 6 | clay loam | shrub | low |
-| 7 | clay loam | shrub | moderate |
-| 8 | clay loam | shrub | high |
-| 9 | clay loam | tall grass | unburned |
-| 10 | clay loam | tall grass | low |
-| 11 | clay loam | tall grass | moderate |
-| 12 | clay loam | tall grass | high |
-| 13 | loam | forest | unburned |
-| 14 | loam | forest | low |
-| 15 | loam | forest | moderate |
-| 16 | loam | forest | high |
-| 17 | loam | shrub | unburned |
-| 18 | loam | shrub | low |
-| 19 | loam | shrub | moderate |
-| 20 | loam | shrub | high |
-| 21 | loam | tall grass | unburned |
-| 22 | loam | tall grass | low |
-| 23 | loam | tall grass | moderate |
-| 24 | loam | tall grass | high |
-| 25 | sand loam | forest | unburned |
-| 26 | sand loam | forest | low |
-| 27 | sand loam | forest | moderate |
-| 28 | sand loam | forest | high |
-| 29 | sand loam | shrub | unburned |
-| 30 | sand loam | shrub | low |
-| 31 | sand loam | shrub | moderate |
-| 32 | sand loam | shrub | high |
-| 33 | sand loam | tall grass | unburned |
-| 34 | sand loam | tall grass | low |
-| 35 | sand loam | tall grass | moderate |
-| 36 | sand loam | tall grass | high |
-| 37 | silt loam | forest | unburned |
-| 38 | silt loam | forest | low |
-| 39 | silt loam | forest | moderate |
-| 40 | silt loam | forest | high |
-| 41 | silt loam | shrub | unburned |
-| 42 | silt loam | shrub | low |
-| 43 | silt loam | shrub | moderate |
-| 44 | silt loam | shrub | high |
-| 45 | silt loam | tall grass | unburned |
-| 46 | silt loam | tall grass | low |
-| 47 | silt loam | tall grass | moderate |
-| 48 | silt loam | tall grass | high |
-
-Results from the test matrix are summarized in the [Test Matrix Analysis Results](#test-matrix-analysis-results-february-2026) section above.
+Full results: `tests/disturbed/analysis_results.md`
+Test suite: `tests/disturbed/test_disturbed_matrix.py`
 
 ## Further Reading
 
-- `wepppy/wepp/management/AGENTS.md` (management file conventions)
-- `wepppy/wepp/soils/utils/README.md` (soil migration utilities)
-- `wepppy/weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md` (parameter definitions)
-- `docs/ui-docs/control-ui-styling/sbs_controls_behavior.md` (SBS control behavior)
-- `tests/disturbed/` (disturbed matrix test suite and analysis)
+- [Disturbed Land Soil Lookup](../../../weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md) — end-user parameter reference
+- [SBS Map Utilities](../baer/README.sbs_map.md) — raster classification and color-table contracts
+- [SBS Controls Behavior](../../../../docs/ui-docs/control-ui-styling/sbs_controls_behavior.md) — UI upload/uniform mode documentation
+- [WEPP Soil Files](../../../wepp/soils/README.md) — soil file format versions and parameter definitions
+- [Management File Conventions](../../../wepp/management/AGENTS.md) — management file structure
+- [Soil Migration Utilities](../../../wepp/soils/utils/README.md) — WeppSoilUtil API
