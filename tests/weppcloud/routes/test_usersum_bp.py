@@ -72,3 +72,12 @@ def test_usersum_view_does_not_render_procedural_h1_title(usersum_client) -> Non
 
     body = response.get_data(as_text=True)
     assert "<h1>Disturbed Land Soil Lookup</h1>" not in body
+
+
+def test_usersum_view_adds_heading_ids_for_anchor_links(usersum_client) -> None:
+    response = usersum_client.get("/usersum/view/weppcloud/mods-overview.md")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert '<h1 id="mods-overview">Mods Overview</h1>' in body
+    assert '<h2 id="openet-time-series-openet_ts">' in body

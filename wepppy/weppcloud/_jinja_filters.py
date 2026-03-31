@@ -44,6 +44,7 @@ import re
 from flask import url_for
 from markupsafe import Markup, escape
 from wepppy.all_your_base import isfloat
+from wepppy.weppcloud.usersum_anchors import usersum_anchor_from_section
 
 
 def sort_numeric_keys(value, reverse=False):
@@ -60,11 +61,14 @@ def sort_numeric(value, reverse=False):
     return sorted(value, key=extract_leading_digits, reverse=reverse)
 
 
-def usersum_doc_link(category, filename, label, classes='wc-link wc-link--file'):
+def usersum_doc_link(category, filename, label, classes='wc-link wc-link--file', section=None):
     if category == 'src':
         href = url_for('usersum.view_src_markdown', rel_path=filename)
     else:
         href = url_for('usersum.view_markdown', category=category, filename=filename)
+    anchor_id = usersum_anchor_from_section(section)
+    if anchor_id is not None:
+        href = f'{href}#{anchor_id}'
     text = f'📄 {label}'
     return Markup(
         f'<a class="{escape(classes)}" '

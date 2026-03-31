@@ -9,6 +9,7 @@ from urllib.parse import unquote, urlsplit, urlunsplit
 
 from flask import Blueprint, abort, jsonify, redirect, render_template, request, url_for  # type: ignore[import-not-found]
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # type: ignore[import-not-found]
+from wepppy.weppcloud.usersum_anchors import usersum_anchor_slug
 
 usersum_bp = Blueprint('usersum', __name__, template_folder='templates')
 
@@ -32,6 +33,11 @@ _ANCHOR_HREF_RE = re.compile(
     r'(<a\b[^>]*?\bhref\s*=\s*)(["\'])(.*?)(\2)',
     re.IGNORECASE | re.DOTALL,
 )
+_HEADING_RE = re.compile(
+    r"<h(?P<level>[1-6])(?P<attrs>[^>]*)>(?P<body>.*?)</h\1>",
+    re.IGNORECASE | re.DOTALL,
+)
+_HEADING_ID_ATTR_RE = re.compile(r'\bid\s*=\s*(["\'])(?P<id>.*?)\1', re.IGNORECASE | re.DOTALL)
 
 
 class ParameterDetail(TypedDict):
@@ -187,9 +193,47 @@ def _rewrite_markdown_links(source_path: Path, content_html: str) -> str:
     return _ANCHOR_HREF_RE.sub(_replace, content_html)
 
 
+def _add_heading_anchors(content_html: str) -> str:
+    slug_counts: Dict[str, int] = {}
+
+    def _reserve_slug(slug: str) -> str:
+        count = slug_counts.get(slug, 0)
+        if count == 0:
+            slug_counts[slug] = 1
+            return slug
+
+        while True:
+            candidate = f"{slug}-{count}"
+            count += 1
+            if candidate not in slug_counts:
+                slug_counts[slug] = count
+                slug_counts[candidate] = 1
+                return candidate
+
+    def _replace(match: re.Match[str]) -> str:
+        level = match.group("level")
+        attrs = match.group("attrs") or ""
+        body = match.group("body")
+
+        existing_id_match = _HEADING_ID_ATTR_RE.search(attrs)
+        if existing_id_match is not None:
+            existing_id = existing_id_match.group("id").strip()
+            if existing_id:
+                slug_counts.setdefault(existing_id, 1)
+            return match.group(0)
+
+        base_slug = usersum_anchor_slug(body) or "section"
+        anchor_id = _reserve_slug(base_slug)
+        escaped_anchor_id = html_escape(anchor_id, quote=True)
+        return f'<h{level}{attrs} id="{escaped_anchor_id}">{body}</h{level}>'
+
+    return _HEADING_RE.sub(_replace, content_html)
+
+
 def _render_markdown_document(path: Path, *, title: str):
     markdown_source = path.read_text(encoding='utf-8')
     content_html = markdown_to_html(markdown_source)
+    content_html = _add_heading_anchors(content_html)
     content_html = _rewrite_markdown_links(path, content_html)
     return render_template(
         'usersum/view.htm',
