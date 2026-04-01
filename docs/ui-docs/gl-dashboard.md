@@ -2,7 +2,7 @@
 > WebGL-accelerated geospatial dashboard for WEPPcloud runs using deck.gl, providing interactive maps, timeseries graphs, and multi-scenario comparison
 
 **Version:** 1.0  
-**Last Updated:** 2026-02-18  
+**Last Updated:** 2026-03-31  
 **Status:** Production
 
 ## Table of Contents
@@ -508,6 +508,18 @@ gl-dashboard.js (main)
 Subcatchment overlays render as radios (single selection across categories); raster entries render as checkboxes.
 Channel overlays share their own radio group (`wepp-channel-overlay`) across Channel Order, WEPP channels, and WEPP Yearly channels; they remain independent from the subcatchment overlay group.
 
+**Label + Source Path Display:**
+- Layer rows render only the human-readable layer name (`.gl-layer-name`).
+- Source file paths are no longer rendered as visible secondary text rows.
+- Each layer label carries the source path in the `title` attribute, so file paths are hover-only tooltips.
+- This applies across Landuse/Soils/Hillslopes/Channels/WEPP/WEPP Yearly/WEPP Event/RAP/OpenET/RUSLE entries.
+
+```html
+<label for="layer-Landuse-lu-cancov" title="landuse/landuse.parquet">
+  <span class="gl-layer-name">Canopy cover (cancov)</span>
+</label>
+```
+
 **Handler Pattern:**
 1. Toggle checkbox/radio → update `layer.visible` flag in state
 2. Call `deselectAllSubcatchmentOverlays()` if switching to new category (mutually exclusive)
@@ -653,27 +665,46 @@ Graph minimized (controls disabled; slider hidden)
 - Range is an index into `openetMetadata.months` (sorted list of `{ year, month, label }`).
 - On input change → updates `openetSelectedMonthIndex` → `refreshOpenetData()` → re-renders OpenET overlay + legend.
 - Play mode: advance 1 month every 3 seconds; loops to min when exceeding max.
- - Selecting Omni/Cumulative/Climate/WEPP Yearly graphs hides the month slider even if the OpenET overlay remains selected.
+- Selecting Omni/Cumulative/Climate/WEPP Yearly graphs hides the month slider even if the OpenET overlay remains selected.
 
 #### Legends Panel
 **Element:** `#gl-legends-panel`  
 **Position:** Absolute top-right corner of map (0.75rem offset)  
 **Classes:** `.is-collapsed` (toggled via header button)  
-**Content:** `#gl-legends-content` (vertical list of `.gl-legend-item` blocks)
+**Content:** `#gl-legends-content` (vertical list of `.gl-legend-section` blocks)
 
-**Legend Format:**
+**Legend Format (Continuous):**
 ```html
-<div class="gl-legend-item" style="display: none;">
-  <h5>Runoff (mm)</h5>  <!-- Units shown: mm for water, t/ha for soil, % for cover -->
-  <div class="gl-legend-gradient">
-    <div class="gl-legend-stops">
-      <span style="background: rgb(68,1,84)"></span>
-      <span style="background: rgb(253,231,37)"></span>
+<div class="gl-legend-section">
+  <h5 class="gl-legend-section__title">RUNOFF (MM)</h5>
+  <div class="gl-legend-continuous">
+    <div class="gl-legend-continuous__bar-wrapper">
+      <div class="gl-legend-continuous__bar gl-legend-continuous__bar--winter"></div>
     </div>
-    <div class="gl-legend-labels">
+    <div class="gl-legend-continuous__labels">
       <span>0.0</span>
-      <span>100.5</span>
+      <input
+        type="number"
+        class="gl-legend-range-input"
+        data-range-kind="continuous"
+        aria-label="Runoff legend maximum" />
     </div>
+    <div class="gl-legend-continuous__unit">mm</div>
+  </div>
+</div>
+```
+
+**Legend Format (Diverging Comparison):**
+```html
+<div class="gl-legend-continuous gl-legend-diverging">
+  <div class="gl-legend-continuous__labels">
+    <span>-30.00</span>
+    <span>0</span>
+    <input
+      type="number"
+      class="gl-legend-range-input gl-legend-range-input--diverging"
+      data-range-kind="diverging"
+      aria-label="Runoff absolute difference maximum" />
   </div>
 </div>
 ```
@@ -683,11 +714,24 @@ Graph minimized (controls disabled; slider hidden)
 - Soil measures: `t/ha` (soil_loss, sediment_deposition, sediment_yield)
 - CV statistic: `%` (coefficient of variation, dimensionless percentage)
 
-**Update Trigger:** `updateLegendsPanel()` called after `applyLayers()`  
+**Update Trigger:** `updateLegendsPanel()` runs during standard `applyLayers()` calls; it is intentionally skipped during live legend typing (`skipLegendUpdate`) and refreshed on commit (`change`/`Enter`).  
 **Display Logic:**
 - Show legend for each visible layer
 - Discrete legends (NLCD, soils) → color swatches with labels
 - Continuous legends (WEPP, RAP, WATAR) → horizontal gradient bar with min/max
+
+**Editable Range Controls:**
+- Continuous legends expose an editable max input for `OpenET`, `WATAR`, `WEPP`, `WEPP Channels`, `WEPP Yearly`, `WEPP Yearly Channels`, and `WEPP Event`.
+- Diverging legends expose an editable absolute max in comparison mode; entering `X` stores `min=-X` and `max=+X`.
+- On `input`: map colors update immediately via `applyLayers({ skipLegendUpdate: true, skipGraphSync: true })` so the map redraws while focus stays in the input.
+- On `change` or `Enter`: the value is committed and the legends panel is rebuilt.
+- On `Escape`: the value reverts to the last committed range and the input blurs.
+- Invalid values are clamped to a valid range (`max > min` for continuous, `absMax > 0` for diverging).
+
+**Theme + WCAG Notes:**
+- `.gl-legend-range-input` uses theme tokens for text/background/border (`--wc-color-text`, `--wc-color-surface`, `--wc-color-border`) and focus (`--wc-color-primary`).
+- Input width is intentionally widened (`9ch`, min `4.8rem`) to reduce truncation and improve editability.
+- Contrast validation for control surfaces/borders is covered by the Theme Lab + theme metrics workflow in `docs/ui-docs/theme-system.md` and `docs/ui-docs/theme-metrics.spec.md`.
 
 ## Data Flow
 
@@ -699,7 +743,7 @@ Event handler toggles layer.visible
   ↓
 deselectAllSubcatchmentOverlays() if switching category
   ↓
-applyLayers() → layerUtils.buildLayerStack()
+applyLayers(options) → layerUtils.buildLayerStack()
   ↓
   For each visible layer:
     - Fetch summary if not cached
@@ -710,9 +754,11 @@ mapController.applyLayers(stack)
   ↓
 deck.gl re-renders
   ↓
-updateLegendsPanel() → show/hide legends
+if !options.skipLegendUpdate:
+  updateLegendsPanel() → show/hide legends
   ↓
-syncGraphLayout() → year/month slider visibility
+if !options.skipGraphSync:
+  syncGraphLayout() → year/month slider visibility
 ```
 
 ### Graph Activation Flow
@@ -813,6 +859,28 @@ openetSummary/openetRanges updated
 applyLayers() → rebuild OpenET GeoJSON overlay + legend
   ↓
 timeseriesGraph.setCurrentYear(selectedMonthX) → update cursor in OpenET graph
+```
+
+### Legend Range Edit Flow
+```
+User edits `.gl-legend-range-input`
+  ↓
+input handler parses candidate value
+  ↓
+Update range state (`weppRanges`, `watarRanges`, `openetRanges`, etc.)
+  ↓
+applyLayers({ skipLegendUpdate: true, skipGraphSync: true })
+  ↓
+deck.gl re-renders with updated `getFillColor` updateTriggers
+  ↓
+Input focus remains in place (legend DOM not rebuilt)
+
+On change / Enter:
+  - Commit value
+  - Rebuild legend (`updateLegendsPanel()`)
+
+On Escape:
+  - Revert to last committed value
 ```
 
 ## Layer System
@@ -1240,6 +1308,7 @@ function syncGraphLayout() {
 
 - **Playwright smoke tests:** Live in `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-*.spec.js`; run with `GL_DASHBOARD_URL="https://.../gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js` (or combine `SMOKE_BASE_URL` + `GL_DASHBOARD_PATH`).
 - **OpenET coverage:** `gl-dashboard-layers.spec.js` + `gl-dashboard-graph-modes.spec.js` (skip when OpenET data is missing).
+- **Renderer unit coverage:** `wepppy/weppcloud/static/js/gl-dashboard/__tests__/renderer-open-state.test.js` validates hover-only filepath tooltips, editable continuous/diverging legend ranges, and symmetric diverging min/max behavior.
 - **Fixtures:** No dedicated fixture directory; specs exercise live WEPPcloud runs with inline helpers/mocks.
 - **Exploration script:** `tests/gl-dashboard-exploration.spec.mjs` is available for manual walkthroughs and doc captures.
 - **Sanity check:** `node --check wepppy/weppcloud/static/js/gl-dashboard.js`.
@@ -1279,6 +1348,7 @@ function syncGraphLayout() {
 | Graph list | `#gl-graph-list` | Sidebar graph radios |
 | Legends panel | `#gl-legends-panel` | Floating legends overlay |
 | Legends content | `#gl-legends-content` | Legend items container |
+| Legend max input | `.gl-legend-range-input` | Editable legend upper bound (continuous/diverging) |
 | Graph panel | `#gl-graph` | Bottom graph panel |
 | Graph canvas | `#gl-graph-canvas` | Canvas element for rendering |
 | Graph tooltip | `#gl-graph-tooltip` | Hover tooltip |

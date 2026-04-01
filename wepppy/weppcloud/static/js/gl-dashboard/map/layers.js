@@ -900,6 +900,9 @@ export function createLayerUtils({
             const row = identity.key != null ? state.watarSummary[String(identity.key)] : null;
             return watarFillColor(overlay.mode, row);
           },
+          updateTriggers: {
+            getFillColor: [state.watarRanges[overlay.mode]],
+          },
         });
       });
     return activeLayers;
@@ -959,7 +962,13 @@ export function createLayerUtils({
             return weppFillColor(overlay.mode, row);
           },
           updateTriggers: {
-            getFillColor: [state.comparisonMode, state.currentScenarioPath, state.comparisonDiffRanges[overlay.mode], state.weppStatistic],
+            getFillColor: [
+              state.comparisonMode,
+              state.currentScenarioPath,
+              state.comparisonDiffRanges[overlay.mode],
+              state.weppRanges[overlay.mode],
+              state.weppStatistic,
+            ],
           },
         });
       });
@@ -1091,7 +1100,7 @@ export function createLayerUtils({
             return weppEventFillColor(overlay.mode, row);
           },
           updateTriggers: {
-            getFillColor: [state.weppEventSelectedDate],
+            getFillColor: [state.weppEventSelectedDate, state.weppEventRanges[overlay.mode]],
           },
         });
       });

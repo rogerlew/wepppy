@@ -673,8 +673,30 @@
   .gl-legend-continuous__labels {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 0.35rem;
     font-size: 0.7rem;
     color: var(--wc-color-text-muted);
+  }
+  .gl-legend-range-input {
+    width: 9ch;
+    min-width: 4.8rem;
+    max-width: 100%;
+    font: inherit;
+    line-height: 1.2;
+    text-align: right;
+    color: var(--wc-color-text);
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
+    border-radius: 4px;
+    padding: 0.05rem 0.35rem;
+  }
+  .gl-legend-range-input:focus-visible {
+    outline: 2px solid var(--wc-color-primary);
+    outline-offset: 1px;
+  }
+  .gl-legend-range-input--diverging {
+    color: #B2182B;
   }
   .gl-legend-continuous__unit {
     font-size: 0.7rem;

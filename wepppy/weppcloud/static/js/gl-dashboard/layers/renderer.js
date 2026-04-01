@@ -44,6 +44,7 @@ export function createLayerRenderer({
     NLCD_COLORMAP,
     NLCD_LABELS,
   } = constants || {};
+  const comparisonMeasures = Array.isArray(COMPARISON_MEASURES) ? COMPARISON_MEASURES : [];
 
   // SBS burn class colors and labels (matches map_gl.js / baer.py / disturbed.py)
   const SBS_CLASSES_STANDARD = [
@@ -96,6 +97,15 @@ export function createLayerRenderer({
   const layerSectionOpen = new Set();
   const RUSLE_A_UNITS = 't/ha/yr';
   const RUSLE_TOLERANCE_EPSILON = 1e-9;
+  const LEGEND_RANGE_EPSILON = 1e-9;
+  const EDITABLE_CONTINUOUS_RANGE_STATE_KEYS = Object.freeze({
+    WATAR: 'watarRanges',
+    WEPP: 'weppRanges',
+    'WEPP Channels': 'weppChannelRanges',
+    'WEPP Yearly': 'weppYearlyRanges',
+    'WEPP Yearly Channels': 'weppYearlyChannelRanges',
+    'WEPP Event': 'weppEventRanges',
+  });
 
   function isNoDataValue(value, nodata) {
     const numeric = Number(value);
@@ -172,6 +182,175 @@ export function createLayerRenderer({
     }
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : Number.NaN;
+  }
+
+  function formatLegendInputValue(value) {
+    if (!Number.isFinite(value)) return '';
+    const absVal = Math.abs(value);
+    if (absVal >= 10000) return String(Math.round(value));
+    if (absVal >= 100) return value.toFixed(1);
+    if (absVal >= 1) return value.toFixed(2);
+    return value.toFixed(3);
+  }
+
+  function resolveLegendUpperBound(minValue, candidate, fallbackMax) {
+    const parsed = Number(candidate);
+    const currentFallback = Number.isFinite(fallbackMax) ? fallbackMax : minValue + 1;
+    if (!Number.isFinite(parsed)) {
+      return currentFallback;
+    }
+    const span = Math.abs(currentFallback - minValue);
+    const minAllowed = minValue + Math.max(LEGEND_RANGE_EPSILON, span * 1e-9);
+    if (parsed <= minValue) {
+      return minAllowed;
+    }
+    return parsed;
+  }
+
+  function resolveLegendAbsoluteMax(candidate, fallbackAbs) {
+    const parsed = Number(candidate);
+    const fallback = Number.isFinite(fallbackAbs) && fallbackAbs > 0 ? fallbackAbs : 1;
+    if (!Number.isFinite(parsed)) {
+      return fallback;
+    }
+    const absValue = Math.abs(parsed);
+    return Math.max(absValue, Math.max(LEGEND_RANGE_EPSILON, fallback * 1e-9));
+  }
+
+  function updateModeRangeState(stateKey, mode, nextRange) {
+    if (!stateKey || !mode || !nextRange) return;
+    const currentState = getState();
+    const nextMap = {
+      ...(currentState[stateKey] || {}),
+      [mode]: {
+        min: nextRange.min,
+        max: nextRange.max,
+      },
+    };
+    setValue(stateKey, nextMap);
+  }
+
+  function setContinuousLegendRange(layer, mode, minValue, maxValue) {
+    if (!layer) return null;
+    const normalized = {
+      min: Number(minValue),
+      max: Number(maxValue),
+    };
+    if (!Number.isFinite(normalized.min) || !Number.isFinite(normalized.max) || normalized.max <= normalized.min) {
+      return null;
+    }
+    if (layer.category === 'OpenET') {
+      const current = getState().openetRanges || {};
+      setValue('openetRanges', {
+        ...current,
+        min: normalized.min,
+        max: normalized.max,
+      });
+      return normalized;
+    }
+    const stateKey = EDITABLE_CONTINUOUS_RANGE_STATE_KEYS[layer.category];
+    if (!stateKey || !mode) return null;
+    updateModeRangeState(stateKey, mode, normalized);
+    return normalized;
+  }
+
+  function setDivergingLegendRange(layer, mode, absMaxValue) {
+    if (!layer || !mode) return null;
+    const absMax = Number(absMaxValue);
+    if (!Number.isFinite(absMax) || absMax <= 0) return null;
+    const stateKey = layer.category === 'WEPP Yearly' ? 'weppYearlyDiffRanges' : 'comparisonDiffRanges';
+    updateModeRangeState(stateKey, mode, { min: -absMax, max: absMax });
+    return { min: -absMax, max: absMax };
+  }
+
+  function createLegendMaxInput({
+    value,
+    ariaLabel,
+    onCommit,
+    kind = 'continuous',
+    className = '',
+  }) {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = 'any';
+    input.inputMode = 'decimal';
+    input.className = `gl-legend-range-input ${className}`.trim();
+    input.setAttribute('data-range-kind', kind);
+    input.setAttribute('aria-label', ariaLabel);
+    input.value = formatLegendInputValue(value);
+    input.title = 'Set legend upper bound';
+
+    let committedValue = value;
+
+    const commit = ({ refreshLegend = true, revertOnInvalid = true } = {}) => {
+      const nextValue = onCommit(input.value, { refreshLegend });
+      if (Number.isFinite(nextValue)) {
+        committedValue = nextValue;
+      } else if (revertOnInvalid) {
+        input.value = formatLegendInputValue(committedValue);
+      }
+    };
+
+    input.addEventListener('input', () => {
+      commit({ refreshLegend: false, revertOnInvalid: false });
+    });
+    input.addEventListener('change', () => {
+      commit({ refreshLegend: true, revertOnInvalid: true });
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        commit({ refreshLegend: true, revertOnInvalid: true });
+      } else if (event.key === 'Escape') {
+        input.value = formatLegendInputValue(committedValue);
+        input.blur();
+      }
+    });
+    return input;
+  }
+
+  function resolveContinuousLegendEditor(layer, mode, minVal, maxVal) {
+    if (!layer || !Number.isFinite(minVal) || !Number.isFinite(maxVal) || maxVal <= minVal) {
+      return null;
+    }
+    const isEditableCategory = layer.category === 'OpenET' || !!EDITABLE_CONTINUOUS_RANGE_STATE_KEYS[layer.category];
+    if (!isEditableCategory) return null;
+    return {
+      maxValue: maxVal,
+      ariaLabel: `${layer.label || layer.key} legend maximum`,
+      onCommit: (candidateValue, { refreshLegend = true } = {}) => {
+        const nextMax = resolveLegendUpperBound(minVal, candidateValue, maxVal);
+        const applied = setContinuousLegendRange(layer, mode, minVal, nextMax);
+        if (!applied) return Number.NaN;
+        applyLayers({ skipLegendUpdate: true, skipGraphSync: true });
+        if (refreshLegend) {
+          updateLegendsPanel();
+        }
+        return applied.max;
+      },
+    };
+  }
+
+  function resolveDivergingLegendEditor(layer, mode, range) {
+    if (!layer || !mode || !range || !Number.isFinite(range.min) || !Number.isFinite(range.max)) {
+      return null;
+    }
+    const currentAbsMax = Math.max(Math.abs(range.min), Math.abs(range.max));
+    if (!Number.isFinite(currentAbsMax) || currentAbsMax <= 0) return null;
+    return {
+      maxValue: currentAbsMax,
+      ariaLabel: `${layer.label || layer.key} absolute difference maximum`,
+      onCommit: (candidateValue, { refreshLegend = true } = {}) => {
+        const nextAbsMax = resolveLegendAbsoluteMax(candidateValue, currentAbsMax);
+        const applied = setDivergingLegendRange(layer, mode, nextAbsMax);
+        if (!applied) return Number.NaN;
+        applyLayers({ skipLegendUpdate: true, skipGraphSync: true });
+        if (refreshLegend) {
+          updateLegendsPanel();
+        }
+        return Math.abs(applied.max);
+      },
+    };
   }
 
   function buildRusleACanvasFromValues(layer, effectiveRange) {
@@ -1110,7 +1289,7 @@ export function createLayerRenderer({
     return SBS_CLASSES_STANDARD;
   }
 
-  function renderContinuousLegend(minVal, maxVal, unit, colormap) {
+  function renderContinuousLegend(minVal, maxVal, unit, colormap, editor = null) {
     const container = document.createElement('div');
     container.className = 'gl-legend-continuous';
 
@@ -1133,8 +1312,18 @@ export function createLayerRenderer({
     labels.className = 'gl-legend-continuous__labels';
     const minLabel = document.createElement('span');
     minLabel.textContent = formatLegendValue(minVal);
-    const maxLabel = document.createElement('span');
-    maxLabel.textContent = formatLegendValue(maxVal);
+    let maxLabel;
+    if (editor && Number.isFinite(editor.maxValue) && typeof editor.onCommit === 'function') {
+      maxLabel = createLegendMaxInput({
+        value: editor.maxValue,
+        ariaLabel: editor.ariaLabel || 'Legend maximum',
+        onCommit: editor.onCommit,
+        kind: 'continuous',
+      });
+    } else {
+      maxLabel = document.createElement('span');
+      maxLabel.textContent = formatLegendValue(maxVal);
+    }
     labels.appendChild(minLabel);
     labels.appendChild(maxLabel);
     container.appendChild(labels);
@@ -1149,7 +1338,7 @@ export function createLayerRenderer({
     return container;
   }
 
-  function renderDivergingLegend(unit, label, mode, rangeOverride, state) {
+  function renderDivergingLegend(unit, label, mode, rangeOverride, state, editor = null) {
     const container = document.createElement('div');
     container.className = 'gl-legend-continuous gl-legend-diverging';
 
@@ -1161,7 +1350,8 @@ export function createLayerRenderer({
     barWrapper.appendChild(bar);
     container.appendChild(barWrapper);
 
-    const range = rangeOverride || (mode ? state.comparisonDiffRanges[mode] : null);
+    const comparisonRanges = (state && state.comparisonDiffRanges) || {};
+    const range = rangeOverride || (mode ? comparisonRanges[mode] : null);
     const hasRange = range && Number.isFinite(range.min) && Number.isFinite(range.max);
 
     function formatRangeValue(val) {
@@ -1184,9 +1374,21 @@ export function createLayerRenderer({
     centerLabel.textContent = '0';
     centerLabel.style.color = 'var(--gl-text-secondary, #8fa0c2)';
 
-    const rightLabel = document.createElement('span');
-    rightLabel.textContent = hasRange ? `+${formatRangeValue(range.max)}` : 'Base > Scenario';
-    rightLabel.style.color = '#B2182B';
+    let rightLabel;
+    if (hasRange && editor && Number.isFinite(editor.maxValue) && typeof editor.onCommit === 'function') {
+      rightLabel = createLegendMaxInput({
+        value: editor.maxValue,
+        ariaLabel: editor.ariaLabel || 'Difference maximum',
+        onCommit: editor.onCommit,
+        kind: 'diverging',
+        className: 'gl-legend-range-input--diverging',
+      });
+      rightLabel.style.color = '#B2182B';
+    } else {
+      rightLabel = document.createElement('span');
+      rightLabel.textContent = hasRange ? `+${formatRangeValue(range.max)}` : 'Base > Scenario';
+      rightLabel.style.color = '#B2182B';
+    }
 
     labels.appendChild(leftLabel);
     labels.appendChild(centerLabel);
@@ -1258,11 +1460,17 @@ export function createLayerRenderer({
     section.appendChild(title);
 
     const mode = layer.mode || '';
-    const diffRangeOverride = layer.category === 'WEPP Yearly' ? state.weppYearlyDiffRanges[mode] : null;
+    const comparisonRanges = state.comparisonDiffRanges || {};
+    const yearlyDiffRanges = state.weppYearlyDiffRanges || {};
+    const diffRangeOverride = layer.category === 'WEPP Yearly' ? yearlyDiffRanges[mode] : null;
     const divergingMode = diffRangeOverride ? mode : layer.category === 'WEPP Yearly' ? null : mode;
-    if (state.comparisonMode && COMPARISON_MEASURES.includes(mode) && state.currentScenarioPath) {
+    if (state.comparisonMode && comparisonMeasures.includes(mode) && state.currentScenarioPath) {
       const unit = LAYER_UNITS[mode] || '';
-      section.appendChild(renderDivergingLegend(unit, 'Base − Scenario', divergingMode, diffRangeOverride, state));
+      const activeRange = diffRangeOverride || (divergingMode ? comparisonRanges[divergingMode] : null);
+      const divergingEditor = resolveDivergingLegendEditor(layer, divergingMode, activeRange);
+      section.appendChild(
+        renderDivergingLegend(unit, 'Base − Scenario', divergingMode, diffRangeOverride, state, divergingEditor),
+      );
       return section;
     }
 
@@ -1413,8 +1621,8 @@ export function createLayerRenderer({
     }
 
     const colormap = layer.colormap || resolveColormapName(mode, layer.category, { WATER_MEASURES, SOIL_MEASURES });
-
-    section.appendChild(renderContinuousLegend(minVal, maxVal, unit, colormap));
+    const continuousEditor = resolveContinuousLegendEditor(layer, mode, minVal, maxVal);
+    section.appendChild(renderContinuousLegend(minVal, maxVal, unit, colormap, continuousEditor));
     return section;
   }
 

@@ -767,17 +767,21 @@
     });
   }
 
-  function applyLayers() {
+  function applyLayers({ skipLegendUpdate = false, skipGraphSync = false } = {}) {
     if (!layerUtils || !mapController) return;
     const stack = layerUtils.buildLayerStack(basemapController.getBaseLayer());
     mapController.applyLayers(stack);
-    suppressApplyLayersOnModeChange = true;
-    try {
-      syncGraphLayout();
-    } finally {
-      suppressApplyLayersOnModeChange = false;
+    if (!skipGraphSync) {
+      suppressApplyLayersOnModeChange = true;
+      try {
+        syncGraphLayout();
+      } finally {
+        suppressApplyLayersOnModeChange = false;
+      }
     }
-    updateLegendsPanel();
+    if (!skipLegendUpdate) {
+      updateLegendsPanel();
+    }
   }
 
   if (basemapController && basemapController.setApplyLayers) {
