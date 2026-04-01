@@ -42,6 +42,8 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, cast
 from wepppy.all_your_base import RGBA, isfloat
 from wepppy.all_your_base.dateutils import Julian
 
+OverrideScalar = str | int | float
+
 __all__ = [
     'WEPPPY_MAN_DIR',
     'ScenarioBase',
@@ -2287,7 +2289,83 @@ class Management(object):
         for i in range(len(self.plants)):
             self.plants[i].data.xmxlai = value
 
-    def __setitem__(self, attr: str, value: float | int) -> int:
+    @staticmethod
+    def _coerce_int_override(value: OverrideScalar, attr: str) -> int:
+        if isinstance(value, bool):
+            raise ValueError(f"Invalid {attr} override {value!r}; expected integer.")
+        if isinstance(value, int):
+            return value
+        if isinstance(value, float):
+            if value.is_integer():
+                return int(value)
+            raise ValueError(f"Invalid {attr} override {value!r}; expected integer.")
+
+        text = str(value).strip()
+        if text == "":
+            raise ValueError(f"Invalid {attr} override {value!r}; expected integer.")
+
+        try:
+            return int(text)
+        except ValueError:
+            try:
+                parsed = float(text)
+            except ValueError as exc:
+                raise ValueError(f"Invalid {attr} override {value!r}; expected integer.") from exc
+            if parsed.is_integer():
+                return int(parsed)
+            raise ValueError(f"Invalid {attr} override {value!r}; expected integer.")
+
+    @staticmethod
+    def _coerce_float_override(value: OverrideScalar, attr: str) -> float:
+        if isinstance(value, bool):
+            raise ValueError(f"Invalid {attr} override {value!r}; expected numeric.")
+
+        text = str(value).strip()
+        if text == "":
+            raise ValueError(f"Invalid {attr} override {value!r}; expected numeric.")
+
+        try:
+            return float(text)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Invalid {attr} override {value!r}; expected numeric.") from exc
+
+    def _coerce_data_override_value(
+        self,
+        data: Any,
+        attr: str,
+        raw_value: OverrideScalar,
+    ) -> Any:
+        if not hasattr(data, attr):
+            raise NotImplementedError(
+                f"Setting attribute '{attr}' is not implemented for {type(data).__name__}."
+            )
+
+        # `rcc` is represented as an optional trailing scalar in plant loops.
+        # When present, WEPP expects an integer-style token (for example `2`).
+        if attr == "rcc":
+            return self._coerce_int_override(raw_value, attr)
+
+        current_value = getattr(data, attr)
+
+        if isinstance(current_value, ScenarioReference):
+            section_type = current_value.section_type or SectionType.Plant
+            index = self._coerce_int_override(raw_value, attr)
+            return _scenario_reference_factory(index, section_type, self, data)
+
+        if isinstance(current_value, Julian):
+            day = self._coerce_int_override(raw_value, attr)
+            return _parse_julian(day)
+
+        if isinstance(current_value, int) and not isinstance(current_value, bool):
+            return self._coerce_int_override(raw_value, attr)
+
+        # Some optional legacy fields use empty-string sentinels for numeric values.
+        if isinstance(current_value, str) and current_value.strip() == "":
+            return self._coerce_float_override(raw_value, attr)
+
+        return self._coerce_float_override(raw_value, attr)
+
+    def __setitem__(self, attr: str, value: OverrideScalar) -> int:
         """
         This is a helper function to set attributes on the Management object.
         It is used to set attributes like bdtill, cancov, rdmax, and xmxlai.
@@ -2296,20 +2374,16 @@ class Management(object):
         if attr.startswith('plant.data.'):
             for i in range(len(self.plants)):
                 _attr = attr[11:]  # remove 'plant.data.'
-                if _attr in ['iresd', 'imngmt', 'rtyp']:
-                    setattr(self.plants[i].data, _attr, int(value))
-                else:
-                    setattr(self.plants[i].data, _attr, float(value))
+                coerced_value = self._coerce_data_override_value(self.plants[i].data, _attr, value)
+                setattr(self.plants[i].data, _attr, coerced_value)
 
             return 0
                 
         if attr.startswith('ini.data.'):
             for i in range(len(self.inis)):
                 _attr = attr[9:]  # remove 'ini.data.'
-                if _attr in ['mfocod', 'xmxlai']:
-                    setattr(self.inis[i].data, _attr, int(value))
-                else:
-                    setattr(self.inis[i].data, _attr, float(value))
+                coerced_value = self._coerce_data_override_value(self.inis[i].data, _attr, value)
+                setattr(self.inis[i].data, _attr, coerced_value)
 
             return 0
 
