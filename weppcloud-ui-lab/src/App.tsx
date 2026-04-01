@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils'
 const DEFAULT_RUN_DATA_PATH = './run-locations.json'
 const RUN_DATA_URL = import.meta.env.VITE_RUN_DATA_URL ?? DEFAULT_RUN_DATA_PATH
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json'
+const ACCESSIBILITY_STATEMENT_URL = '/weppcloud/usersum/view/weppcloud/accessibility-statement.md'
 const MAP_PIN_OFFSET = 800
 
 type HelpResource = {
@@ -1179,6 +1180,14 @@ const mapSubtitle =
               By using WEPPcloud, you acknowledge that simulation outputs are approximations
               subject to uncertainty and agree that you bear sole responsibility for any decisions,
               actions, or consequences arising from their use.
+            </p>
+            <p className="text-sm leading-relaxed text-slate-300">
+              <a
+                href={ACCESSIBILITY_STATEMENT_URL}
+                className="text-sky-300 transition hover:text-sky-200"
+              >
+                Accessibility Statement
+              </a>
             </p>
           </div>
         </motion.div>

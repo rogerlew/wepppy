@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 const DEFAULT_RUN_DATA_PATH = './run-locations.json'
 const RUN_DATA_URL = import.meta.env.VITE_RUN_DATA_URL ?? DEFAULT_RUN_DATA_PATH
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
+const ACCESSIBILITY_STATEMENT_URL = '/weppcloud/usersum/view/weppcloud/accessibility-statement.md'
 
 type HelpResource = {
   title: string
@@ -1087,7 +1088,12 @@ export function AppLight() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 px-4 py-6 sm:px-6">
-        <div className="mx-auto max-w-4xl text-center text-sm text-slate-600">
+        <div className="mx-auto max-w-4xl text-center text-sm text-slate-600 space-y-2">
+          <p>
+            <a href={ACCESSIBILITY_STATEMENT_URL} className="text-sky-700 hover:text-sky-800">
+              Accessibility Statement
+            </a>
+          </p>
           <p>© {new Date().getFullYear()} University of Idaho • USDA Forest Service</p>
         </div>
       </footer>

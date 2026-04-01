@@ -132,13 +132,13 @@ Archives are stored inside your project directory. Use them to preserve mileston
 
 WEPPcloud includes a **theme selector** in the header bar that lets you change the visual appearance of the interface. Choose from over a dozen light and dark themes, including:
 
-- **Default (Light)** — the standard light appearance
-- **Light High Contrast** — optimized for accessibility
+- **Default (Light)** — the standard light appearance and part of the AA-checked theme set
+- **Light High Contrast** — optimized for accessibility and part of the AA-checked theme set
 - **OneDark** — a popular dark theme inspired by Atom
-- **Ayu Dark / Ayu Mirage** — modern dark themes with flat styling
-- **Cursor Dark** — dark themes with multiple contrast levels
+- **Ayu Dark / Ayu Mirage** — modern dark themes with flat styling (`Ayu Mirage` is AA-checked)
+- **Cursor Dark** — dark themes with multiple contrast levels (`Cursor Dark (Midnight)` is AA-checked)
 
-Your theme choice is saved in your browser and applies across all your WEPPcloud sessions. Select the theme that is most comfortable for your working environment.
+Your theme choice is saved in your browser and applies across all your WEPPcloud sessions. Themes marked **AA checked** are part of the validated accessibility set. Themes marked **Sensory preference** remain available for users who prefer lower-stimulation palettes, but they are not part of the AA conformance set.
 
 <!-- ![Theme selector dropdown](static/getting-started/theme-selector.png) -->
 

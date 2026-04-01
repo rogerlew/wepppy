@@ -130,6 +130,16 @@
         color: var(--text-muted);
       }
 
+      .landing-footer {
+        padding: 16px 24px 28px;
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      .landing-footer a {
+        color: var(--accent);
+      }
+
       .map-panel {
         position: relative;
         flex: 1;
@@ -323,6 +333,13 @@
           </div>
         </div>
       </section>
+      <footer class="landing-footer">
+        <p>
+          <a href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='accessibility-statement.md') }}">
+            Accessibility statement
+          </a>
+        </p>
+      </footer>
     </div>
 
     <script>

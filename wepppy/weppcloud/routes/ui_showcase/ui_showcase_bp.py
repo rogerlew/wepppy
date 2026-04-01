@@ -10,18 +10,19 @@ ui_showcase_bp = Blueprint("ui_showcase", __name__, url_prefix="/ui/components")
 
 
 THEME_OPTIONS = [
-    ("default", "Default (Light)"),
-    ("onedark", "OneDark"),
-    ("dark-modern", "Dark Modern"),
-    ("ayu-dark", "Ayu Dark"),
-    ("ayu-mirage", "Ayu Mirage"),
-    ("ayu-light", "Ayu Light"),
-    ("ayu-dark-bordered", "Ayu Dark · Bordered"),
-    ("ayu-mirage-bordered", "Ayu Mirage · Bordered"),
-    ("ayu-light-bordered", "Ayu Light · Bordered"),
-    ("cursor-dark-anysphere", "Cursor Dark (Anysphere)"),
-    ("cursor-dark-midnight", "Cursor Dark (Midnight)"),
-    ("cursor-dark-high-contrast", "Cursor Dark (High Contrast)"),
+    ("default", "Default (Light) · AA checked"),
+    ("light-high-contrast", "High Contrast (Light) · AA checked"),
+    ("onedark", "OneDark · Sensory preference"),
+    ("dark-modern", "Dark Modern · Sensory preference"),
+    ("ayu-dark", "Ayu Dark · Sensory preference"),
+    ("ayu-mirage", "Ayu Mirage · AA checked"),
+    ("ayu-light", "Ayu Light · Sensory preference"),
+    ("ayu-dark-bordered", "Ayu Dark · Bordered · Sensory preference"),
+    ("ayu-mirage-bordered", "Ayu Mirage · Bordered · AA checked"),
+    ("ayu-light-bordered", "Ayu Light · Bordered · Sensory preference"),
+    ("cursor-dark-anysphere", "Cursor Dark (Anysphere) · Sensory preference"),
+    ("cursor-dark-midnight", "Cursor Dark (Midnight) · AA checked"),
+    ("cursor-dark-high-contrast", "Cursor Dark (High Contrast) · Sensory preference"),
 ]
 
 

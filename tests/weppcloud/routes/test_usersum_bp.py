@@ -104,3 +104,13 @@ def test_usersum_view_adds_heading_ids_for_anchor_links(usersum_client) -> None:
     body = response.get_data(as_text=True)
     assert '<h1 id="mods-overview">Mods Overview</h1>' in body
     assert '<h2 id="openet-time-series-openet_ts">' in body
+
+
+def test_usersum_view_renders_accessibility_statement(usersum_client) -> None:
+    response = usersum_client.get("/usersum/view/weppcloud/accessibility-statement.md")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "Accessibility Statement" in body
+    assert "Roger Lew" in body
+    assert "ACR/VPAT" in body

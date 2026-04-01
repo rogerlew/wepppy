@@ -36,6 +36,15 @@ def test_usersum_header_has_weppcloud_brand_and_theme_switcher() -> None:
     assert "{% include 'header/_theme_switcher.htm' %}" in contents
 
 
+def test_theme_switcher_labels_aa_checked_and_sensory_preference_themes() -> None:
+    root = Path(__file__).resolve().parents[2]
+    header = root / "wepppy" / "weppcloud" / "templates" / "header" / "_theme_switcher.htm"
+    contents = _read(header)
+
+    assert "AA checked" in contents
+    assert "Sensory preference" in contents
+
+
 def test_usersum_index_renders_weppcloud_header_and_theme_switcher() -> None:
     root = Path(__file__).resolve().parents[2]
     app_templates = root / "wepppy" / "weppcloud" / "templates"

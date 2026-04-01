@@ -6,6 +6,7 @@ This document is the single entry point for accessibility guidance, tests, and c
 
 - Unify the current accessibility-related standards and tests across `docs/`, `tests/`, UI templates, controller JS, and CI workflow specs.
 - Define a practical Section 508 strategy for this repo.
+- Distinguish internal engineering evidence, the public accessibility statement, and the separate procurement-facing ACR/VPAT artifact.
 - Keep accessibility checks manual-gate driven, not PR-blocking.
 
 ## Canonical Repo Map
@@ -33,14 +34,23 @@ This document is the single entry point for accessibility guidance, tests, and c
 
 - Product quality target: WCAG 2.1 AA for core user journeys.
 - Section 508 legal baseline for federal conformance references Revised 508 standards (which incorporate WCAG 2.0 A/AA via referenced accessibility standards).
+- Product posture for federal buyers:
+  - Section 508 conformance is the procurement baseline.
+  - This document is an internal engineering strategy and evidence map, not the formal Accessibility Conformance Report (ACR/VPAT).
+  - The public accessibility statement should summarize user-facing commitments and contact paths.
+  - The product-specific ACR/VPAT must be maintained separately as the procurement artifact.
 - Practical policy for this repo:
   - Treat WCAG 2.1 AA as the engineering bar.
   - Produce 508-friendly evidence packs from automated and manual checks.
 
 External references:
 - https://www.section508.gov/develop/applicability-conformance/
+- https://www.section508.gov/sell/acr/
+- https://www.section508.gov/sell/how-to-create-acr-with-vpat/
 - https://www.section508.gov/test/testing-overview/
+- https://www.section508.gov/test/elements-of-an-accessibility-test-report/
 - https://www.section508.gov/test/trusted-tester/
+- https://www.section508.gov/manage/governance/section-508-for-change-control-processes/
 - https://www.access-board.gov/ict/
 
 ## Current Coverage (Already in Repo)
@@ -88,16 +98,41 @@ AA enforcement policy in `theme-metrics.spec.js`:
 - Other themes are still measured/reported for user-preference visibility but do not fail the suite.
 - Optional override: `THEME_METRICS_ENFORCED_THEMES=theme1,theme2,...`.
 
+### 4) Structural page scans (axe / Playwright)
+
+Use the smoke suite to probe representative public and authenticated surfaces:
+
+```bash
+wctl run-npm smoke:a11y
+```
+
+This currently validates, at a structural level:
+- common page-level semantics across root, interfaces, profile, Theme Lab, report probe, and runs dashboard targets
+- detectable issues around labels, headings, landmark structure, color-contrast failures surfaced by axe rules, and ARIA misuse
+- authenticated runs-page coverage when agent credentials are available
+
+## Coverage-to-Requirement Map
+
+This table is an evidence map for engineering and release review. It is not a substitute for the criterion-by-criterion ACR/VPAT table.
+
+| Evidence source | Primary checks in repo | WCAG 2.1 / 2.0 criteria most directly exercised | Revised 508 / manual-method relation |
+| --- | --- | --- | --- |
+| `tests/weppcloud/routes/test_pure_controls_render.py` and `tests/weppcloud/routes/test_user_runs_admin_scope.py` | language metadata, iframe/title requirements, accessible names independent of placeholders, map semantics | 3.1.1, 1.1.1, 2.4.1, 3.3.2, 4.1.2 | Web-content conformance evidence under Revised 508's WCAG references; aligns with Trusted Tester / ICT Baseline checks for language, titles, labels, and name/role/value. |
+| `wepppy/weppcloud/controllers_js/__tests__/copytext.test.js` and `wepppy/weppcloud/controllers_js/__tests__/map_gl.test.js` | semantic buttons, modal accessible names, keyboard behavior for map-related UI | 2.1.1, 2.1.2, 2.4.3, 2.4.7, 4.1.2 | Supports software/web-application behavior checks typically confirmed with manual keyboard and assistive-technology testing. |
+| `wepppy/weppcloud/static-src/tests/smoke/theme-metrics.spec.js` | rendered text, control, and non-text contrast across the theme set | 1.4.3, 1.4.11 | Supplies repeatable contrast evidence for the validated theme set; manual review still needed for context-specific exceptions and real-page edge cases. |
+| `wepppy/weppcloud/static-src/tests/smoke/a11y/*.spec.js` | axe scans over representative anonymous and authenticated pages | partial structural coverage across 1.1.1, 1.3.1, 2.4.1, 2.4.6, 4.1.2 and related rules | Automated scan coverage only; Section 508 guidance requires manual confirmation for gaps and false positives/negatives. |
+| Manual verification checklist in this document | keyboard traversal, screen-reader spot checks, zoom/reflow, live-region behavior | 1.4.4, 1.4.10, 2.1.1, 2.4.7, 4.1.3 | Aligns with Trusted Tester / ICT Baseline style manual validation and must remain part of release evidence. |
+
 ### Universal Design Theme Policy
 
 WEPPcloud supports a mixed theme catalog for universal design and user preference:
-- **Compliance-enforced themes** (must remain WCAG AA in the metrics gate):
+- **AA-validated themes** (must remain WCAG AA in the metrics gate and are the only themes included in the conformance set):
   - `default`
   - `light-high-contrast`
   - `ayu-mirage`
   - `ayu-mirage-bordered`
   - `cursor-dark-midnight`
-- **Preference themes** (still measured/reported, intentionally allowed to be lower contrast):
+- **Sensory-preference themes** (still measured/reported, intentionally excluded from the conformance set):
   - `ayu-light`, `ayu-light-bordered`
   - `ayu-dark`, `ayu-dark-bordered`
   - `onedark`
@@ -108,7 +143,20 @@ WEPPcloud supports a mixed theme catalog for universal design and user preferenc
 Latest captured metrics snapshot (generated at **March 31, 2026**):
 - Light themes: `default` and `light-high-contrast` compliant; `ayu-light*` variants non-compliant.
 - Dark themes: `ayu-mirage*` and `cursor-dark-midnight` compliant; remaining dark preference themes non-compliant.
-- Operationally, this is acceptable under the current policy because the enforced compliance set passes.
+- Operationally, this is acceptable only if:
+  - the default remains in the AA-validated set
+  - the selector clearly labels which themes are AA-validated versus sensory-preference only
+  - the non-validated themes are not represented as part of the Section 508 conformance claim
+  - federal-buyer deployments that require a strictly conformant profile can disable or hide the sensory-preference set
+
+Rationale for retaining a sensory-preference set:
+- Research with autistic web users found that a low-contrast theme and multiple user-selectable color themes can improve access for some users, while also acknowledging that low-contrast palettes are a barrier for others and therefore cannot stand alone as the compliance baseline.
+- Research with autistic adults also reports frequent hypersensitivity to bright lights, bright colors, clutter, and busy environments, with adaptation and control over the sensory environment acting as important coping strategies.
+
+External references:
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC6485264/
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC8217662/
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC9213348/
 
 Nightly artifact workflow source:
 - `.github/forest_workflows/theme-metrics-nightly.yml`
@@ -116,16 +164,20 @@ Nightly artifact workflow source:
 ## Known Gaps
 
 - Axe coverage includes Theme Lab, report accessibility probe, WEPPcloud root, interfaces, profile, and runs0 dashboard.
-- No baseline/triage policy yet for classifying and tracking recurring axe findings across runs.
+- A formal ACR/VPAT has not yet been published for federal procurement.
+- Theme-selector labeling should stay synchronized with the AA-validated set in the theme metrics gate; dynamic artifact-driven labeling is still a follow-up improvement.
 
 ## Section 508 Strategy (Manual Gate, Non-Blocking)
 
-The repository should keep accessibility as a release-readiness gate that is run manually, not as a required PR check.
+The repository should keep accessibility as a release-readiness gate that is run manually, not as a required PR check. Non-blocking at PR time does not mean non-blocking at release time.
 
 ### Gate posture
 
 - Do not mark accessibility CI checks as required branch-protection statuses.
 - Keep accessibility workflow(s) `workflow_dispatch` (optionally also scheduled) and use pass/fail plus artifacts for reviewer signoff.
+- Treat accessibility review as a release gate:
+  - Critical accessibility defects block release until remediated, or
+  - if release proceeds under exception, the issue must be formally risk-tracked with owner, severity, affected workflow, buyer/user impact, and target remediation date.
 - Use the generated workflow system:
   - edit `.github/forest_workflows/*.yml`
   - regenerate `.github/workflows/*.yml` using `scripts/build_forest_workflows.py`
@@ -138,7 +190,10 @@ The repository should keep accessibility as a release-readiness gate that is run
    - Playwright theme metrics
 2. Run axe structural scan suite (defined below) and capture violation report.
 3. Perform manual assistive-tech and keyboard checks (Trusted Tester/ICT baseline style checks).
-4. Record outcome in release notes/work package tracker before release signoff.
+4. Classify defects by severity and determine release disposition:
+   - Critical: block release
+   - High/Moderate/Low: remediate before release when feasible, otherwise document risk and owner
+5. Record outcome in release notes/work package tracker before release signoff.
 
 ## Axe Test Setup (Implemented)
 
@@ -243,6 +298,17 @@ This workflow should be reviewed manually and treated as release evidence, not P
 - Focus visibility on all interactive controls, including dynamic drawers/modals.
 - Reflow/zoom checks at 200% for core controls and reports.
 - Non-text contrast and meaningful status announcements (`aria-live`) for run feedback.
+
+## Public-Facing Artifacts
+
+- Landing-page accessibility statement:
+  - publish a public statement linked from the landing page/footer
+  - include standards target, support/feedback contact, known limitations, alternate-format path, and last-updated date
+  - state explicitly that the statement does not replace the ACR/VPAT
+- ACR/VPAT:
+  - maintain separately using the current ITI VPAT template applicable to federal procurement
+  - update when material accessibility-impacting releases ship
+  - align evaluation methods, environments, and limitations with the release evidence described in this document
 
 ## Change Management Notes
 

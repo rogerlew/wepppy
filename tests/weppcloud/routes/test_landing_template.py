@@ -26,6 +26,8 @@ def test_landing_template_uses_run_locations_endpoint() -> None:
             return "/interfaces/"
         if endpoint == "weppcloud_site.about":
             return "/about/"
+        if endpoint == "usersum.view_markdown":
+            return "/usersum/view/weppcloud/accessibility-statement.md"
         raise AssertionError(f"Unexpected endpoint: {endpoint}")
 
     env.globals.update(url_for=url_for)
@@ -33,5 +35,7 @@ def test_landing_template_uses_run_locations_endpoint() -> None:
     rendered = template.render()
 
     assert "weppcloud_site.landing_run_locations_root" in called
+    assert "usersum.view_markdown" in called
     assert "RUN_DATA_URL" in rendered
     assert "/run-locations.json" in rendered
+    assert "/usersum/view/weppcloud/accessibility-statement.md" in rendered
