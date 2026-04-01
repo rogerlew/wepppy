@@ -90,7 +90,16 @@ def register(app: typer.Typer) -> None:
     )
     def run_stubtest(ctx: typer.Context) -> None:
         context = _context(ctx)
-        args = list(ctx.args) or ["wepppy.nodb.core"]
+        args = list(ctx.args) or [
+            "wepppy.nodb.core.climate",
+            "wepppy.nodb.core.landuse",
+            "wepppy.nodb.core.management_overrides",
+            "wepppy.nodb.core.ron",
+            "wepppy.nodb.core.soils",
+            "wepppy.nodb.core.topaz",
+            "wepppy.nodb.core.watershed",
+            "wepppy.nodb.core.wepp",
+        ]
         quoted = quote_args(args)
         command = (
             "cd /tmp && "

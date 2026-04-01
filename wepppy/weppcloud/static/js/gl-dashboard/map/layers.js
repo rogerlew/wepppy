@@ -72,6 +72,13 @@ function buildTooltipTopazLines(identity, state) {
   return `TopazID: ${identity.topazId}\n`;
 }
 
+function isRapOverlayActive(state) {
+  if (!state || typeof state !== 'object') return false;
+  if (state.rapCumulativeMode) return true;
+  const rapLayers = Array.isArray(state.rapLayers) ? state.rapLayers : [];
+  return rapLayers.some((layer) => layer && layer.visible);
+}
+
 function hexToRgba(hex, alpha) {
   const normalized = String(hex || '').replace('#', '');
   const expanded = normalized.length === 3
@@ -702,8 +709,10 @@ export function createLayerUtils({
         sumY += pt[1];
       });
       const centroid = [sumX / coords.length, sumY / coords.length];
+      const includeRunLabelInText =
+        state.dashboardMode === DASHBOARD_MODES.BATCH && identity.runLabel && !isRapOverlayActive(state);
       const text =
-        state.dashboardMode === DASHBOARD_MODES.BATCH && identity.runLabel
+        includeRunLabelInText
           ? `${identity.runLabel}:${identity.topazId}`
           : String(identity.topazId);
       labelData.push({

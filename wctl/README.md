@@ -47,7 +47,7 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl run-pytest-sharded` – executes module-level pytest shards in parallel subprocesses (no xdist), streams shard logs live, automatically reuses cached module timings for longest-first balancing when available, and prints an aggregate result summary. Start with `--workers 4` unless you have a known reason to tune higher/lower.
 - `wctl run-python` – opens the project virtualenv's Python inside the container, defaulting to an interactive REPL when no script/args are supplied.
 - `wctl issue-auth-token` / `revoke-auth-token` – mint or revoke WEPPcloud JWTs (e.g., `wctl issue-auth-token culvert-app --scope culvert:batch:submit --audience rq-engine --expires-in 7776000`).
-- `wctl run-stubtest` – runs stubtest from the container (default target `wepppy.nodb.core`).
+- `wctl run-stubtest` – runs stubtest from the container (default targets: `wepppy.nodb.core.{climate,landuse,management_overrides,ron,soils,topaz,watershed,wepp}`).
 - `wctl run-stubgen` – regenerates stubs (`python tools/sync_stubs.py`).
 - `wctl check-test-stubs` / `check-test-isolation` – launch the diagnostic scripts inside the container.
 - `wctl check-rq-contracts` – runs rq-engine route/checklist drift guards (`tools/check_endpoint_inventory.py` and `tools/check_route_contract_checklist.py`) inside the container.
