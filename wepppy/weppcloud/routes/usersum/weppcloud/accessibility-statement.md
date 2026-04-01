@@ -1,6 +1,6 @@
 # Accessibility Statement
 
-Last updated: **March 31, 2026**
+Last updated: **April 1, 2026**
 
 This statement describes WEPPcloud's current accessibility posture for users and federal buyers. It is a public-facing summary and does **not** replace the product's formal Accessibility Conformance Report (ACR/VPAT).
 
@@ -28,11 +28,11 @@ WEPPcloud provides multiple interface themes because user needs differ.
 ## Known Limitations
 
 - Some optional sensory-preference themes do not meet the same contrast requirements as the AA-validated theme set.
-- A formal product-specific **ACR/VPAT** is being prepared separately for federal procurement and release governance.
+- A formal product-specific **ACR/VPAT** is maintained separately for federal procurement and release governance.
 
 ## Feedback and Alternate Access
 
-If you encounter an accessibility barrier, need an alternate format, or want current accessibility evidence while the formal ACR/VPAT is being finalized, contact:
+If you encounter an accessibility barrier, need an alternate format, or want current accessibility evidence or procurement documentation, contact:
 
 - **Roger Lew**
 - **Email:** [rogerlew@uidaho.edu](mailto:rogerlew@uidaho.edu)
