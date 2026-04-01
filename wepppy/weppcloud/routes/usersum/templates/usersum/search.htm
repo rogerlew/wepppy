@@ -1,0 +1,60 @@
+{% extends "usersum/layout.j2" %}
+{% block body_content %}
+<p><a href="{{ url_for_run('usersum.usersum_index') }}">&larr; Back to usersum index</a></p>
+<h1>Usersum Search</h1>
+<form class="wc-usersum-search-form" action="{{ url_for_run('usersum.usersum_search') }}" method="get">
+  <label for="usersum-search-query">Search usersum docs</label>
+  <div class="wc-usersum-search-row">
+    <input
+      id="usersum-search-query"
+      class="wc-usersum-search-input"
+      type="search"
+      name="q"
+      value="{{ query }}"
+      placeholder="Search documentation"
+      required
+    >
+    <button class="pure-button wc-usersum-search-submit" type="submit">Search</button>
+  </div>
+  <label for="usersum-search-category">Category</label>
+  <select id="usersum-search-category" name="category">
+    <option value="">All categories</option>
+    {% for category in category_options %}
+      <option value="{{ category }}" {% if category in selected_categories %}selected{% endif %}>{{ category }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+{% if warning_message %}
+  <p role="status">{{ warning_message }}</p>
+{% endif %}
+{% if error_message %}
+  <p role="alert">{{ error_message }}</p>
+{% elif query %}
+  <p>{{ total }} result{% if total != 1 %}s{% endif %} for <code>{{ query }}</code>.</p>
+  {% if results %}
+    <ol start="{{ offset + 1 }}">
+      {% for result in results %}
+        <li>
+          <p><a href="{{ result.route_url }}">{{ result.title }}</a></p>
+          <p>
+            <small>
+              <strong>{{ result.category }}</strong> • {{ result.rel_path }} • min_role={{ result.min_role }} • score={{ "%.3f"|format(result.score) }}
+            </small>
+          </p>
+          {% if result.breadcrumb %}
+            <p><small>{{ result.breadcrumb|join(" › ") }}</small></p>
+          {% endif %}
+          {% if result.snippet %}
+            <p>{{ result.snippet|safe }}</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p>No matches found.</p>
+  {% endif %}
+{% else %}
+  <p>Enter a query to search usersum documentation.</p>
+{% endif %}
+{% endblock %}

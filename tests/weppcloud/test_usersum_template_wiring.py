@@ -32,7 +32,9 @@ def test_usersum_header_has_weppcloud_brand_and_theme_switcher() -> None:
     contents = _read(header)
 
     assert "WEPPcloud" in contents
-    assert "url_for('weppcloud_site.index')" in contents
+    assert "url_for_run('weppcloud_site.index')" in contents
+    assert "url_for_run('usersum.usersum_search')" in contents
+    assert "usersum-header-search" in contents
     assert "{% include 'header/_theme_switcher.htm' %}" in contents
 
 
@@ -69,3 +71,4 @@ def test_usersum_index_renders_weppcloud_header_and_theme_switcher() -> None:
     assert "WEPPcloud" in html
     assert "data-theme-select" in html
     assert "/static/js/theme.js" in html
+    assert "Usersum now serves curated, role-aware documentation" in html

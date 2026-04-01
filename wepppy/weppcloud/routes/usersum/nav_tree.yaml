@@ -1,0 +1,92 @@
+version: 1
+roots:
+  - key: usersum.db
+    title: Parameter Databases
+    collapsible: false
+    children:
+      - key: usersum.db.climate_file_parameters
+        doc_id: usersum.db.climate_file_parameters
+      - key: usersum.db.management_file_parameters
+        doc_id: usersum.db.management_file_parameters
+      - key: usersum.db.soil_file_parameters
+        doc_id: usersum.db.soil_file_parameters
+
+  - key: usersum.input_file_specifications
+    title: Input File Specifications
+    collapsible: false
+    children:
+      - key: usersum.input_file_specifications.cligenparms
+        doc_id: usersum.input_file_specifications.cligenparms
+      - key: usersum.input_file_specifications.climate_file_spec
+        doc_id: usersum.input_file_specifications.climate_file_spec
+      - key: usersum.input_file_specifications.plant_file_spec
+        doc_id: usersum.input_file_specifications.plant_file_spec
+      - key: usersum.input_file_specifications.soil_file_spec
+        doc_id: usersum.input_file_specifications.soil_file_spec
+
+  - key: usersum.weppcloud
+    title: WEPPcloud Guides
+    collapsible: false
+    children:
+      - key: usersum.weppcloud.user_guide
+        doc_id: usersum.weppcloud.user_guide
+      - key: usersum.weppcloud.getting_started
+        doc_id: usersum.weppcloud.getting_started
+      - key: usersum.weppcloud.faq
+        doc_id: usersum.weppcloud.faq
+      - key: usersum.weppcloud.mods_overview
+        doc_id: usersum.weppcloud.mods_overview
+      - key: usersum.weppcloud.wepp_model
+        doc_id: usersum.weppcloud.wepp_model
+      - key: usersum.weppcloud.wepp_advanced_options
+        doc_id: usersum.weppcloud.wepp_advanced_options
+      - key: usersum.weppcloud.climate_options
+        doc_id: usersum.weppcloud.climate_options
+      - key: usersum.weppcloud.observed_model_fitting
+        doc_id: usersum.weppcloud.observed_model_fitting
+      - key: usersum.weppcloud.disturbed_land_soil_lookup
+        doc_id: usersum.weppcloud.disturbed_land_soil_lookup
+      - key: usersum.weppcloud.ag_field_mod
+        doc_id: usersum.weppcloud.ag_field_mod
+      - key: usersum.weppcloud.bootstrap
+        doc_id: usersum.weppcloud.bootstrap
+      - key: usersum.weppcloud.data_attribution
+        doc_id: usersum.weppcloud.data_attribution
+      - key: usersum.weppcloud.references
+        doc_id: usersum.weppcloud.references
+      - key: usersum.weppcloud.accessibility_statement
+        doc_id: usersum.weppcloud.accessibility_statement
+      - key: usersum.weppcloud.profile_jwt_dataset_access_python_r
+        doc_id: usersum.weppcloud.profile_jwt_dataset_access_python_r
+      - key: usersum.weppcloud.rq_engine
+        doc_id: usersum.weppcloud.rq_engine
+      - key: usersum.weppcloud.controls
+        title: Controls
+        collapsible: true
+        children:
+          - key: usersum.weppcloud.controls.channel_delineation
+            doc_id: usersum.weppcloud.controls.channel_delineation
+
+  - key: usersum.path
+    title: PATH Cost-Effective
+    collapsible: false
+    children:
+      - key: usersum.path.quick_start
+        doc_id: usersum.path.quick_start
+
+  - key: vendor.weppcloud_wbt
+    title: WEPPcloud WBT
+    collapsible: true
+    children:
+      - key: vendor.weppcloud_wbt.hydroenforcement
+        title: Hydroenforcement
+        collapsible: true
+        children:
+          - key: vendor.weppcloud_wbt.hydroenforcement.culvert_web_app
+            doc_id: vendor.weppcloud_wbt.culvert_web_app_hydroenforcement
+      - key: vendor.weppcloud_wbt.hydro_analysis
+        title: Hydro Analysis
+        collapsible: true
+        children:
+          - key: vendor.weppcloud_wbt.hydro_analysis.hillslopes_topaz_spec
+            doc_id: vendor.weppcloud_wbt.hillslopes_topaz_spec

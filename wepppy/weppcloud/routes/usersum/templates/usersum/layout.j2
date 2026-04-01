@@ -1,6 +1,35 @@
 {% extends "base_pure.htm" %}
 
-{% block title %}{{ title or 'WEPPcloud UserSummary Documentation' }}{% endblock %}
+{% macro render_nav(nodes) %}
+  <ul class="wc-usersum-nav-list">
+    {% for node in nodes %}
+      {% if node.kind == "section" %}
+        <li class="wc-usersum-nav-section">
+          {% if node.collapsible %}
+            <details {% if node.is_expanded %}open{% endif %}>
+              <summary>{{ node.title }}</summary>
+              {{ render_nav(node.children) }}
+            </details>
+          {% else %}
+            <div class="wc-usersum-nav-heading">{{ node.title }}</div>
+            {{ render_nav(node.children) }}
+          {% endif %}
+        </li>
+      {% else %}
+        <li class="wc-usersum-nav-leaf">
+          <a
+            class="wc-usersum-nav-link {% if node.is_active %}is-active{% endif %}"
+            href="{{ url_for_run('usersum.view_doc', doc_id=node.doc_id) }}"
+          >
+            {{ node.title }}
+          </a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% block title %}{{ title or "WEPPcloud UserSummary Documentation" }}{% endblock %}
 
 {% block site_header %}
   {% include "usersum/header.htm" %}
@@ -10,90 +39,308 @@
 <link rel="stylesheet" href="{{ static_url('css/markdown-theme.css') }}">
 <style>
   .wc-usersum-shell {
-    padding-top: 1.5rem;
+    width: 100%;
+    max-width: none;
+    padding-top: 1rem;
     padding-bottom: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .wc-usersum-layout {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .wc-usersum-sidebar {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    border: 1px solid var(--wc-color-border);
+    border-radius: 0.5rem;
+    background: var(--wc-color-surface);
+    padding: 0.75rem;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--wc-color-text-muted) 55%, transparent) var(--wc-color-surface-alt);
+  }
+
+  .wc-usersum-sidebar::-webkit-scrollbar {
+    width: 0.72rem;
+  }
+
+  .wc-usersum-sidebar::-webkit-scrollbar-track {
+    background: var(--wc-color-surface-alt);
+    border-radius: 0.45rem;
+  }
+
+  .wc-usersum-sidebar::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--wc-color-text-muted) 55%, transparent);
+    border-radius: 0.45rem;
+    border: 2px solid var(--wc-color-surface-alt);
+  }
+
+  .wc-usersum-sidebar::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--wc-color-text) 55%, transparent);
+  }
+
+  .wc-usersum-main {
+    min-width: 0;
   }
 
   .wc-usersum-shell .markdown-body {
     box-sizing: border-box;
-    min-width: 200px;
     width: 100%;
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 45px;
+    max-width: none;
+    margin: 0;
+    padding: 32px;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
+    border-radius: var(--wc-radius-md);
   }
 
-  @media (max-width: 767.98px) {
-    .wc-usersum-shell .markdown-body {
-      padding: 15px;
-    }
+  .wc-usersum-nav-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--wc-color-text-muted);
+    margin: 0 0 0.5rem;
   }
 
-  .wc-usersum-shell .wc-usersum-doc-footer {
+  .wc-usersum-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .wc-usersum-nav-section > details > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--wc-color-text);
+    padding: 0.15rem 0;
+  }
+
+  .wc-usersum-nav-heading {
+    font-weight: 600;
+    color: var(--wc-color-text);
+    padding: 0.15rem 0;
+  }
+
+  .wc-usersum-nav-section .wc-usersum-nav-list {
+    margin-left: 0.7rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid var(--wc-color-border);
+  }
+
+  .wc-usersum-nav-link {
+    display: block;
+    color: var(--wc-color-text);
+    text-decoration: none;
+    border-radius: 0.3rem;
+    padding: 0.24rem 0.35rem;
+    font-size: 0.9rem;
+    line-height: 1.25;
+  }
+
+  .wc-usersum-nav-link:hover,
+  .wc-usersum-nav-link:focus-visible {
+    background: var(--wc-color-surface-alt);
+    color: var(--wc-color-link);
+  }
+
+  .wc-usersum-nav-link.is-active {
+    color: var(--wc-color-link-hover);
+    background: color-mix(in srgb, var(--wc-color-accent-soft) 75%, var(--wc-color-surface));
+    font-weight: 600;
+  }
+
+  .wc-usersum-breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin: 0 0 1rem;
+    font-size: 0.8rem;
+    color: var(--wc-color-text-muted);
+  }
+
+  .wc-usersum-breadcrumb-sep {
+    color: var(--wc-color-text-muted);
+  }
+
+  .wc-usersum-breadcrumb-link {
+    color: var(--wc-color-link);
+    text-decoration: none;
+  }
+
+  .wc-usersum-breadcrumb-link:hover,
+  .wc-usersum-breadcrumb-link:focus-visible {
+    text-decoration: underline;
+  }
+
+  .wc-usersum-doc-footer {
     margin-top: 2rem;
     padding-top: 1rem;
-    border-top: 1px solid #d0d7de;
+    border-top: 1px solid var(--wc-color-border);
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 1rem;
   }
 
-  .wc-usersum-shell .wc-usersum-doc-path {
+  .wc-usersum-doc-path {
     margin: 0;
     padding: 0;
     border: 0;
     background: none;
   }
 
-  .wc-usersum-shell .wc-usersum-doc-links {
+  .wc-usersum-doc-links {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
   }
 
-  .wc-usersum-shell .wc-usersum-doc-link {
-    color: #0969da;
+  .wc-usersum-doc-link {
+    color: var(--wc-color-link);
     text-decoration: none;
     font-size: 0.875rem;
     line-height: 1;
   }
 
-  .wc-usersum-shell .wc-usersum-doc-link:hover,
-  .wc-usersum-shell .wc-usersum-doc-link:focus-visible {
-    color: #0550ae;
+  .wc-usersum-doc-link:hover,
+  .wc-usersum-doc-link:focus-visible {
+    color: var(--wc-color-link-hover);
     text-decoration: underline;
   }
 
-  .wc-usersum-shell .wc-usersum-doc-link--icon {
+  .wc-usersum-doc-link--icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 1.25rem;
     height: 1.25rem;
-    color: #24292f;
+    color: var(--wc-color-text);
   }
 
-  .wc-usersum-shell .wc-usersum-doc-link--icon svg {
+  .wc-usersum-doc-link--icon svg {
     width: 1.125rem;
     height: 1.125rem;
     fill: currentColor;
   }
 
+  .wc-usersum-search-form {
+    margin: 1rem 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .wc-usersum-search-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .wc-usersum-search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .wc-usersum-search-submit {
+    min-width: 7rem;
+    justify-content: center;
+  }
+
+  .wc-usersum-header-inner {
+    width: 100%;
+    max-width: none;
+  }
+
+  .wc-usersum-header-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+  }
+
+  .wc-usersum-header-search input[type="search"] {
+    min-width: 16rem;
+    width: 20rem;
+    max-width: 34vw;
+    margin: 0;
+  }
+
+  .wc-usersum-header-search .pure-button {
+    min-height: 2.5rem;
+    padding-inline: 0.95rem;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .wc-header__tools .wc-theme-switcher {
+    align-self: center;
+  }
+
+  .wc-header__tools .wc-run-header__field {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 1023.98px) {
+    .wc-usersum-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .wc-usersum-sidebar {
+      position: static;
+      max-height: none;
+    }
+  }
+
   @media (max-width: 767.98px) {
-    .wc-usersum-shell .wc-usersum-doc-footer {
+    .wc-usersum-shell .markdown-body {
+      padding: 15px;
+    }
+
+    .wc-usersum-doc-footer {
       align-items: flex-start;
       flex-direction: column;
+    }
+
+    .wc-usersum-search-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .wc-usersum-header-search {
+      width: 100%;
+    }
+
+    .wc-usersum-header-search input[type="search"] {
+      min-width: 0;
+      width: 100%;
+      max-width: none;
     }
   }
 </style>
 {% endblock %}
 
-{% block body_container_class %}wc-container wc-usersum-shell{% endblock %}
+{% block body_container_class %}wc-usersum-shell{% endblock %}
 
 {% block body %}
-<article class="markdown-body">
-  {% block body_content %}{% endblock %}
-</article>
+<div class="wc-usersum-layout">
+  <aside class="wc-usersum-sidebar" aria-label="Usersum navigation">
+    <p class="wc-usersum-nav-title">Documentation</p>
+    {{ render_nav(nav_tree) }}
+  </aside>
+  <main class="wc-usersum-main">
+    <article class="markdown-body">
+      {% block body_content %}{% endblock %}
+    </article>
+  </main>
+</div>
 {% endblock %}

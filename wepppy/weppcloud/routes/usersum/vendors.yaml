@@ -1,0 +1,13 @@
+version: 1
+vendors:
+  - vendor_id: weppcloud-wbt
+    source_repo_path: /workdir/weppcloud-wbt
+    source_ref: main
+    include_globs:
+      - docs/hydroenforcement/culvert-web-app-hydroenforcement.md
+      - whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md
+    exclude_globs:
+      - "**/node_modules/**"
+      - "**/.git/**"
+    target_root: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt
+    route_prefix: /usersum/vendor/weppcloud-wbt

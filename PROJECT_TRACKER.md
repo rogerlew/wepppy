@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 4 packages ✅ **At target**
+**Current WIP**: 4 packages ✅ **At target ceiling**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -470,7 +470,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 4 packages ✅
+**Current WIP Count**: 4 packages
 
 ---
 
@@ -601,6 +601,47 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Usersum Manifest-Driven Docs Engine (GitBook Layout + Vendor + PostgreSQL Search)
+**Completed**: 2026-04-01  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260401_usersum_docs_engine/](docs/work-packages/20260401_usersum_docs_engine/)  
+**Description**: Converted usersum into a manifest-driven documentation engine with role-aware visibility, vendor sync support, GitBook-like navigation shell, and PostgreSQL FTS/`pg_trgm` search while retaining compatibility routes.
+
+**Outcome**:
+- Added machine-readable usersum contracts + generated index pipeline:
+  - `docs_manifest.yaml`, `nav_tree.yaml`, `vendors.yaml`
+  - `generated/docs_index.json`
+  - tooling: `tools/usersum_docs_tool.py` (`validate`, `sync-vendors`, `build-index`)
+- Added vendor sync for initial `weppcloud-wbt` scope and committed vendored docs under `/usersum/vendor/weppcloud-wbt/...`.
+- Refactored usersum runtime to manifest/index-backed resolution with role-enforced visibility and canonical/doc vendor routes:
+  - `GET /usersum/doc/<doc_id>`
+  - `GET /usersum/vendor/<vendor_id>/<path:filename>`
+  - compatibility routes preserved (`/usersum/view/*`, `/usersum/src/*`, `/usersum/raw/*`)
+- Implemented GitBook-like shell features:
+  - top header search (aligned with theme selector),
+  - sticky collapsible nav tree,
+  - breadcrumb links,
+  - theme-aware sidebar/buttons/scrollbar and full-width usersum shell.
+- Implemented PostgreSQL search backend integration (FTS + trigram) with explicit fallback behavior and site-prefix-safe route emission.
+- Completed required code and QA review artifacts with all medium/high findings resolved:
+  - `artifacts/code_review_findings.md`
+  - `artifacts/qa_review_findings.md`
+
+**Validation Notes**:
+- `PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py validate` (pass)
+- `PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py validate --require-vendor-files` (pass)
+- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` (pass)
+- `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py tests/weppcloud/routes/test_usersum_docs_contracts.py tests/weppcloud/routes/test_usersum_docs_index.py --maxfail=1` (`28 passed`)
+- `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` (`23 passed`)
+- Baseline broad-suite gate during package execution:
+  - `wctl run-pytest tests --maxfail=1` (`2971 passed, 36 skipped`)
+- `wctl run-npm lint` (pass)
+- `wctl run-npm test` (pass)
+
+---
 
 ### Disturbed BD Override + Rosetta WC/FC Recompute
 **Completed**: 2026-04-01  

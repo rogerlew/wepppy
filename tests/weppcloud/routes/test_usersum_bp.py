@@ -48,7 +48,7 @@ def test_usersum_view_rewrites_cross_category_markdown_links(usersum_client) -> 
     assert response.status_code == 200
 
     body = response.get_data(as_text=True)
-    assert 'href="/usersum/view/input-file-specifications/cligenparms.md"' in body
+    assert 'href="/usersum/doc/usersum.input_file_specifications.cligenparms"' in body
 
 
 def test_usersum_view_footer_exposes_doc_source_links(usersum_client) -> None:
@@ -114,3 +114,116 @@ def test_usersum_view_renders_accessibility_statement(usersum_client) -> None:
     assert "Accessibility Statement" in body
     assert "Roger Lew" in body
     assert "ACR/VPAT" in body
+
+
+def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
+    response = usersum_client.get("/usersum/")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "/usersum/doc/usersum.weppcloud.mods_overview" in body
+    assert "/usersum/doc/usersum.weppcloud.controls.channel_delineation" not in body
+
+
+def test_usersum_links_include_site_prefix_when_configured() -> None:
+    root = Path(__file__).resolve().parents[3]
+    app_templates = root / "wepppy" / "weppcloud" / "templates"
+
+    app = Flask(__name__, template_folder=str(app_templates))
+    app.config["TESTING"] = True
+    app.config["SITE_PREFIX"] = "/weppcloud"
+    app.jinja_env.globals["static_url"] = lambda filename: f"/static/{filename}"
+
+    site_bp = Blueprint("weppcloud_site", __name__)
+
+    @site_bp.route("/", endpoint="index")
+    def site_index():
+        return "ok"
+
+    app.register_blueprint(site_bp)
+    app.register_blueprint(usersum_bp)
+
+    with app.test_client() as client:
+        response = client.get("/usersum/")
+
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert '/weppcloud/usersum/doc/usersum.weppcloud.mods_overview' in body
+
+
+def test_usersum_api_search_requires_query(usersum_client) -> None:
+    response = usersum_client.get("/usersum/api/search")
+    assert response.status_code == 400
+    assert response.get_json() == {"error": {"message": 'Search query "q" is required.'}}
+
+
+def test_usersum_api_search_rejects_unauthorized_role_filter(usersum_client) -> None:
+    response = usersum_client.get("/usersum/api/search?q=openet&role=operator")
+    assert response.status_code == 403
+    assert "Requested role filter is not allowed" in response.get_json()["error"]["message"]
+
+
+def test_usersum_api_search_rejects_invalid_limit(usersum_client) -> None:
+    response = usersum_client.get("/usersum/api/search?q=openet&limit=999")
+    assert response.status_code == 400
+    assert 'Query parameter "limit" must be <= 100.' in response.get_json()["error"]["message"]
+
+
+def test_usersum_api_search_returns_results_payload(usersum_client) -> None:
+    response = usersum_client.get("/usersum/api/search?q=openet")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert payload["total"] >= 1
+    assert payload["limit"] == 20
+    assert payload["offset"] == 0
+    assert payload["results"]
+
+    first = payload["results"][0]
+    assert set(first.keys()) == {
+        "doc_id",
+        "title",
+        "rel_path",
+        "min_role",
+        "category",
+        "snippet",
+        "score",
+        "breadcrumb",
+    }
+    assert first["min_role"] == "user"
+
+
+def test_usersum_api_search_filters_category(usersum_client) -> None:
+    response = usersum_client.get("/usersum/api/search?q=mods&category=weppcloud")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert payload["total"] >= 1
+    assert any(
+        result["rel_path"].endswith("weppcloud/routes/usersum/weppcloud/mods-overview.md")
+        for result in payload["results"]
+    )
+
+
+def test_usersum_search_page_renders_results(usersum_client) -> None:
+    response = usersum_client.get("/usersum/search?q=openet")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "Usersum Search" in body
+    assert "/usersum/doc/usersum.weppcloud.mods_overview" in body
+
+
+def test_usersum_doc_route_renders_markdown(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.mods_overview")
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert "Mods Overview" in body
+    assert "doc:usersum.weppcloud.mods_overview" in body
+
+
+def test_usersum_vendor_route_renders_markdown(usersum_client) -> None:
+    response = usersum_client.get(
+        "/usersum/vendor/weppcloud-wbt/docs/hydroenforcement/culvert-web-app-hydroenforcement.md"
+    )
+    assert response.status_code == 404

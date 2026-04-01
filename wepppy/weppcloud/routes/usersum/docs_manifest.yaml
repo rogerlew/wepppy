@@ -1,0 +1,247 @@
+version: 1
+docs:
+  - doc_id: usersum.db.climate_file_parameters
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/db/climate_file.parameters.md
+    title: CLIGEN Climate File Parameters
+    min_role: user
+    category: db
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.db.climate_file_parameters
+  - doc_id: usersum.db.management_file_parameters
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/db/management_file.parameters.md
+    title: Management File Parameters
+    min_role: user
+    category: db
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.db.management_file_parameters
+  - doc_id: usersum.db.soil_file_parameters
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/db/soil_file.parameters.md
+    title: Soil File Parameters
+    min_role: user
+    category: db
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.db.soil_file_parameters
+  - doc_id: usersum.input_file_specifications.cligenparms
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/input-file-specifications/cligenparms.md
+    title: CLIGEN Station Statistics Input File Format
+    min_role: user
+    category: input-file-specifications
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.input_file_specifications.cligenparms
+  - doc_id: usersum.input_file_specifications.climate_file_spec
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/input-file-specifications/climate-file.spec.md
+    title: Climate File Specification
+    min_role: user
+    category: input-file-specifications
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.input_file_specifications.climate_file_spec
+  - doc_id: usersum.input_file_specifications.plant_file_spec
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/input-file-specifications/plant-file.spec.md
+    title: Plant File Specification
+    min_role: user
+    category: input-file-specifications
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.input_file_specifications.plant_file_spec
+  - doc_id: usersum.input_file_specifications.soil_file_spec
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md
+    title: Soil File Specification
+    min_role: user
+    category: input-file-specifications
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.input_file_specifications.soil_file_spec
+  - doc_id: usersum.path.quick_start
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/path/quick-start.md
+    title: PATH Cost-Effective Quick Start
+    min_role: user
+    category: path
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.path.quick_start
+  - doc_id: usersum.weppcloud.accessibility_statement
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/accessibility-statement.md
+    title: Accessibility Statement
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.accessibility_statement
+  - doc_id: usersum.weppcloud.ag_field_mod
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/ag_field-mod.md
+    title: Ag Field Mod
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.ag_field_mod
+  - doc_id: usersum.weppcloud.bootstrap
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md
+    title: Bootstrap
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.bootstrap
+  - doc_id: usersum.weppcloud.climate_options
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/climate-options.md
+    title: Climate Options
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.climate_options
+  - doc_id: usersum.weppcloud.controls.channel_delineation
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/controls/channel-delineation.md
+    title: Channel Delineation
+    min_role: operator
+    category: weppcloud
+    audience_tags: [operator, developer]
+    status: active
+    nav_key: usersum.weppcloud.controls.channel_delineation
+  - doc_id: usersum.weppcloud.data_attribution
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/data-attribution.md
+    title: Data Attribution
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.data_attribution
+  - doc_id: usersum.weppcloud.disturbed_land_soil_lookup
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md
+    title: Disturbed Land Soil Lookup
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.disturbed_land_soil_lookup
+  - doc_id: usersum.weppcloud.faq
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/faq.md
+    title: FAQ
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.faq
+  - doc_id: usersum.weppcloud.getting_started
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/getting-started.md
+    title: Getting Started
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.getting_started
+  - doc_id: usersum.weppcloud.mods_overview
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/mods-overview.md
+    title: Mods Overview
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.mods_overview
+  - doc_id: usersum.weppcloud.observed_model_fitting
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/observed-model-fitting.md
+    title: Observed Model Fitting
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.observed_model_fitting
+  - doc_id: usersum.weppcloud.profile_jwt_dataset_access_python_r
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/profile-jwt-dataset-access-python-r.md
+    title: Profile JWT Dataset Access (Python/R)
+    min_role: developer
+    category: weppcloud
+    audience_tags: [developer, operator]
+    status: active
+    nav_key: usersum.weppcloud.profile_jwt_dataset_access_python_r
+  - doc_id: usersum.weppcloud.references
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/references.md
+    title: References
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.references
+  - doc_id: usersum.weppcloud.rq_engine
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md
+    title: RQ Engine
+    min_role: operator
+    category: weppcloud
+    audience_tags: [operator, developer]
+    status: active
+    nav_key: usersum.weppcloud.rq_engine
+  - doc_id: usersum.weppcloud.user_guide
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/user-guide.md
+    title: User Guide
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.user_guide
+  - doc_id: usersum.weppcloud.wepp_advanced_options
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-advanced-options.md
+    title: WEPP Advanced Options
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.wepp_advanced_options
+  - doc_id: usersum.weppcloud.wepp_model
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-model.md
+    title: WEPP Model
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.wepp_model
+  - doc_id: vendor.weppcloud_wbt.culvert_web_app_hydroenforcement
+    source: vendor
+    vendor_id: weppcloud-wbt
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt/docs/hydroenforcement/culvert-web-app-hydroenforcement.md
+    title: Culvert Web App Hydroenforcement
+    min_role: operator
+    category: vendor-weppcloud-wbt
+    audience_tags: [operator]
+    status: active
+    nav_key: vendor.weppcloud_wbt.hydroenforcement.culvert_web_app
+  - doc_id: vendor.weppcloud_wbt.hillslopes_topaz_spec
+    source: vendor
+    vendor_id: weppcloud-wbt
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md
+    title: Hillslopes Topaz Specification
+    min_role: operator
+    category: vendor-weppcloud-wbt
+    audience_tags: [operator, developer]
+    status: active
+    nav_key: vendor.weppcloud_wbt.hydro_analysis.hillslopes_topaz_spec

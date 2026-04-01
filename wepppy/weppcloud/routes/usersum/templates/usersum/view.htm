@@ -1,6 +1,18 @@
 {% extends "usersum/layout.j2" %}
 {% block body_content %}
-<p><a href="{{ url_for('usersum.usersum_index') }}">&larr; Back to usersum index</a></p>
+<p><a href="{{ url_for_run('usersum.usersum_index') }}">&larr; Back to usersum index</a></p>
+{% if breadcrumbs %}
+  <nav class="wc-usersum-breadcrumbs" aria-label="Breadcrumb">
+    {% for crumb in breadcrumbs %}
+      {% if not loop.first %}<span class="wc-usersum-breadcrumb-sep">›</span>{% endif %}
+      {% if crumb.href %}
+        <a class="wc-usersum-breadcrumb-link" href="{{ crumb.href }}">{{ crumb.title }}</a>
+      {% else %}
+        <span>{{ crumb.title }}</span>
+      {% endif %}
+    {% endfor %}
+  </nav>
+{% endif %}
 {{ content_html|safe }}
 <footer class="wc-usersum-doc-footer" aria-label="Document source links">
   <pre class="wc-usersum-doc-path">{{ doc_path_label }}</pre>

@@ -13,12 +13,26 @@ Primary module: `wepppy/weppcloud/routes/usersum/`
   - `operator`
   - `developer`
   - `internal`
+- Provide a GitBook-like docs shell with:
+  - persistent header search
+  - sticky hierarchical navigation tree with collapsible sections
+  - breadcrumb context above document content
 - Define a production-ready search path using PostgreSQL full-text search (FTS) + `pg_trgm`.
+- Add first-class support for vendored docs from companion repositories under scoped usersum routes.
 - Preserve compatibility with existing usersum endpoints and command-bar integrations.
 
 ## Role Model
 
 Role labels describe intended audience and default visibility behavior.
+
+### Role assignment contract (decision)
+
+- Roles are **mutually exclusive** at the document level.
+- Each document has one canonical classification field: `min_role`.
+- Visibility uses role hierarchy:
+  - `user` < `operator` < `developer` < `internal`
+- A caller may view a document when caller role rank >= document `min_role`.
+- Optional `audience_tags` may be stored for discovery UX, but do not grant access and do not replace `min_role`.
 
 ### `user`
 
@@ -254,6 +268,129 @@ Additional coverage:
 - No canonical search API for UI + MCP clients.
 - No explicit authorization policy tied to role labels.
 
+## Information Architecture Contracts (Target)
+
+Usersum moves from implicit filesystem discovery to explicit manifest-driven docs.
+
+### Required machine-readable artifacts
+
+- `docs_manifest.yaml`
+  - Canonical allowlist of tracked docs and their metadata (`min_role`, category, status, nav binding).
+- `nav_tree.yaml`
+  - Canonical hierarchical tree used by sidebar navigation and breadcrumb derivation.
+- `vendors.yaml`
+  - Canonical vendor-source mapping and sync configuration for companion repositories.
+- `generated/docs_index.json` (generated, committed)
+  - Resolved runtime index joining manifest + nav + vendor metadata for fast load and deterministic behavior.
+
+### `docs_manifest.yaml` schema (v1)
+
+```yaml
+version: 1
+docs:
+  - doc_id: usersum.weppcloud.mods_overview
+    source: local            # local | vendor
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/mods-overview.md
+    title: Mods Overview
+    min_role: user           # user | operator | developer | internal
+    category: weppcloud
+    audience_tags: [user, developer]
+    status: active           # active | deprecated | draft
+    nav_key: weppcloud.mods.overview
+  - doc_id: vendor.weppcloud_wbt.culvert_web_app_hydroenforcement
+    source: vendor
+    vendor_id: weppcloud-wbt
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt/docs/hydroenforcement/culvert-web-app-hydroenforcement.md
+    title: Culvert Web App Hydroenforcement
+    min_role: operator
+    category: vendor-weppcloud-wbt
+    audience_tags: [operator]
+    status: active
+    nav_key: vendor.weppcloud_wbt.hydroenforcement.culvert_web_app
+  - doc_id: vendor.weppcloud_wbt.hillslopes_topaz_spec
+    source: vendor
+    vendor_id: weppcloud-wbt
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md
+    title: Hillslopes Topaz Specification
+    min_role: operator
+    category: vendor-weppcloud-wbt
+    audience_tags: [operator, developer]
+    status: active
+    nav_key: vendor.weppcloud_wbt.hydro_analysis.hillslopes_topaz_spec
+```
+
+Contract:
+
+- `doc_id` is globally unique and stable.
+- `rel_path` is repo-relative and markdown-only.
+- `min_role` is required and mutually exclusive.
+- `nav_key` must resolve to exactly one `nav_tree` node with `doc_id`.
+- Docs not present in manifest are not published in usersum navigation/search.
+
+### `nav_tree.yaml` schema (v1)
+
+```yaml
+version: 1
+roots:
+  - key: weppcloud
+    title: WEPPcloud Guides
+    collapsible: false
+    children:
+      - key: weppcloud.mods
+        title: Mods
+        collapsible: true
+        children:
+          - key: weppcloud.mods.overview
+            doc_id: usersum.weppcloud.mods_overview
+  - key: vendor.weppcloud_wbt
+    title: WEPPcloud WBT
+    collapsible: true
+    children:
+      - key: vendor.weppcloud_wbt.hydroenforcement
+        title: Hydroenforcement
+        collapsible: true
+        children:
+          - key: vendor.weppcloud_wbt.hydroenforcement.culvert_web_app
+            doc_id: vendor.weppcloud_wbt.culvert_web_app_hydroenforcement
+      - key: vendor.weppcloud_wbt.hydro_analysis
+        title: Hydro Analysis
+        collapsible: true
+        children:
+          - key: vendor.weppcloud_wbt.hydro_analysis.hillslopes_topaz_spec
+            doc_id: vendor.weppcloud_wbt.hillslopes_topaz_spec
+```
+
+Contract:
+
+- Tree nodes are one of:
+  - section node: `key`, `title`, `children[]`, optional `collapsible`
+  - leaf node: `key`, `doc_id`
+- Keys are unique across the full tree.
+- Leaf `doc_id` values must exist in `docs_manifest.yaml`.
+- Breadcrumbs are derived from ancestor titles in `nav_tree`.
+
+### `vendors.yaml` schema (v1)
+
+```yaml
+version: 1
+vendors:
+  - vendor_id: weppcloud-wbt
+    source_repo_path: /workdir/weppcloud-wbt
+    source_ref: main
+    include_globs:
+      - "docs/hydroenforcement/culvert-web-app-hydroenforcement.md"
+      - "whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md"
+    exclude_globs: ["**/node_modules/**"]
+    target_root: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt
+    route_prefix: /usersum/vendor/weppcloud-wbt
+```
+
+Contract:
+
+- `vendor_id` is stable and unique.
+- `target_root` is generated content under usersum.
+- `route_prefix` is reserved namespace for vendor docs.
+
 ## Target Specification: PostgreSQL FTS + `pg_trgm`
 
 PostgreSQL FTS + `pg_trgm` is the preferred next implementation step because PostgreSQL already exists in the stack, reducing operational complexity and new-service risk.
@@ -263,6 +400,30 @@ PostgreSQL FTS + `pg_trgm` is the preferred next implementation step because Pos
 - PostgreSQL extension: `pg_trgm` (required).
 - Optional extension: `unaccent` (recommended for better matching).
 
+## Layout and Navigation UX Contract (Target)
+
+Usersum adopts a GitBook-like shell optimized for dense documentation.
+
+- Header:
+  - fixed top header across usersum routes
+  - search input anchored top-right
+  - keyboard hint affordance (for example `Ctrl/Cmd + K`) is allowed
+- Navigation pane:
+  - left sidebar is static/sticky relative to viewport and does not scroll with document content
+  - tree is manifest/nav-driven (not raw directory listing)
+  - section nodes are collapsible
+  - active document path auto-expands ancestors
+- Content pane:
+  - breadcrumbs rendered above document title/body
+  - only content pane scrolls for long docs
+  - current heading anchors remain supported
+
+### Breadcrumb contract
+
+- Breadcrumb items derive from `nav_tree.yaml` ancestor titles, ending at the active document.
+- Breadcrumb links must target usersum routes (not raw filesystem paths).
+- If a doc is reachable from multiple branches, one canonical breadcrumb path is selected in `generated/docs_index.json`.
+
 ## Document Metadata Contract
 
 Each indexed document must have:
@@ -270,9 +431,12 @@ Each indexed document must have:
 - `doc_id` (stable unique key)
 - `rel_path` (repo-relative markdown path)
 - `title`
-- `role` (`user` | `operator` | `developer` | `internal`)
+- `min_role` (`user` | `operator` | `developer` | `internal`)
 - `category` (navigation grouping)
-- `tags` (string array)
+- `audience_tags` (string array, optional discovery labels)
+- `source` (`local` | `vendor`)
+- `vendor_id` (nullable for local docs)
+- `nav_key` (tree node binding key)
 - `status` (`active` | `deprecated` | `draft`, optional but recommended)
 - `body_markdown`
 - `body_text` (normalized plain text)
@@ -290,9 +454,12 @@ CREATE TABLE usersum_docs (
   title TEXT NOT NULL,
   title_norm TEXT NOT NULL,
   headings_text TEXT NOT NULL DEFAULT '',
-  role TEXT NOT NULL CHECK (role IN ('user', 'operator', 'developer', 'internal')),
+  min_role TEXT NOT NULL CHECK (min_role IN ('user', 'operator', 'developer', 'internal')),
   category TEXT NOT NULL,
-  tags TEXT[] NOT NULL DEFAULT '{}',
+  audience_tags TEXT[] NOT NULL DEFAULT '{}',
+  source TEXT NOT NULL CHECK (source IN ('local', 'vendor')),
+  vendor_id TEXT NULL,
+  nav_key TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'active',
   body_markdown TEXT NOT NULL,
   body_text TEXT NOT NULL,
@@ -305,21 +472,28 @@ CREATE TABLE usersum_docs (
 CREATE INDEX usersum_docs_search_tsv_gin ON usersum_docs USING GIN (search_tsv);
 CREATE INDEX usersum_docs_title_trgm_gin ON usersum_docs USING GIN (title_norm gin_trgm_ops);
 CREATE INDEX usersum_docs_headings_trgm_gin ON usersum_docs USING GIN (headings_text gin_trgm_ops);
-CREATE INDEX usersum_docs_role_idx ON usersum_docs (role);
+CREATE INDEX usersum_docs_min_role_idx ON usersum_docs (min_role);
 CREATE INDEX usersum_docs_category_idx ON usersum_docs (category);
 CREATE INDEX usersum_docs_status_idx ON usersum_docs (status);
+CREATE INDEX usersum_docs_vendor_idx ON usersum_docs (vendor_id);
 ```
 
 ## Ingestion and Indexing
 
 - Source selection is manifest-driven (explicit allowlist), not blind indexing of all repo markdown.
 - Ingestion pipeline:
-  1. Read manifest rows (`rel_path`, role, category, tags, title override).
-  2. Load markdown from repo.
-  3. Normalize to plain text.
-  4. Build `search_tsv` using weighted fields (title > headings > body).
-  5. Upsert changed documents using `content_hash`.
-  6. Mark documents absent from current manifest/file scan as tombstoned (`status='deleted'`, `deleted_at=now()`).
+  1. Read `docs_manifest.yaml` rows (`doc_id`, `rel_path`, `min_role`, category, `audience_tags`, `status`, `source`, `vendor_id`, `nav_key`, title override).
+  2. Read `nav_tree.yaml` and validate `nav_key` + `doc_id` bindings.
+  3. Read `vendors.yaml` and validate vendor references used by manifest rows.
+  4. Resolve source markdown from local or vendored roots.
+  5. Normalize markdown to plain text and headings.
+  6. Build `search_tsv` using weighted fields (title > headings > body).
+  7. Upsert changed documents using `content_hash`.
+  8. Mark documents absent from current manifest/file scan as tombstoned (`status='deleted'`, `deleted_at=now()`).
+  9. Emit `generated/docs_index.json` for runtime load (includes nav ancestry and breadcrumb path per doc).
+- Generated artifact policy:
+  - `generated/docs_index.json` is committed and treated as build output derived from manifest + nav + source content.
+  - Runtime reads the generated artifact; it does not infer tree/roles directly from arbitrary filesystem state.
 - Deletion semantics:
   - Tombstoned documents are excluded from all UI/API search and navigation results.
   - Hard-delete is allowed only in explicit maintenance jobs after retention window.
@@ -389,30 +563,30 @@ Authorization is server-enforced. Client-provided `role` filters are never trust
 ### Effective role mapping
 
 - Anonymous caller:
-  - allowed roles: `['user']`
+  - max role: `user`
 - Authenticated caller (default):
-  - allowed roles: `['user']`
+  - max role: `user`
 - Authenticated caller with operator privilege:
-  - allowed roles: `['user', 'operator']`
+  - max role: `operator`
 - Authenticated caller with developer privilege:
-  - allowed roles: `['user', 'operator', 'developer']`
+  - max role: `developer`
 - Authenticated caller with internal-docs privilege:
-  - allowed roles: `['user', 'operator', 'developer', 'internal']`
+  - max role: `internal`
 
 Exact privilege checks must be wired to WEPPcloud auth roles/claims in implementation.
 
 ### Enforcement rules
 
 - `GET /usersum/api/search`:
-  - server computes `effective_roles = requested_roles ∩ allowed_roles`
-  - if `requested_roles` includes any disallowed role, return `403`
-  - if no `role` param is provided, default query role set is `['user']`
+  - server computes effective visibility using role hierarchy and each doc's `min_role`
+  - optional `role` query filter narrows scope; requested scopes above caller max role return `403`
+  - if no `role` param is provided, default query scope is `['user']`
 - `GET /usersum/` and `GET /usersum/view/...`:
-  - navigation and direct doc views must enforce role visibility for target documents
+  - navigation and direct doc views must enforce `min_role` visibility for target documents
 - `GET /usersum/src/<path:rel_path>`:
   - production mode must require both:
     - path exists in docs manifest
-    - caller has required role for that path
+    - caller has sufficient role for document `min_role`
   - disallowed documents return `404` (do not leak existence)
 
 ### `src` route policy
@@ -429,7 +603,7 @@ Exact privilege checks must be wired to WEPPcloud auth roles/claims in implement
 Query params:
 
 - `q` (required)
-- `role` (optional, repeated or comma-separated; requested roles must be a subset of caller-allowed roles)
+- `role` (optional, repeated or comma-separated; requested scopes must not exceed caller max role)
 - `category` (optional filter)
 - `limit` (default 20, max 100)
 - `offset` (default 0)
@@ -437,15 +611,28 @@ Query params:
 Response:
 
 - `200`:
-  - `results[]` with `doc_id`, `title`, `rel_path`, `role`, `category`, `snippet`, `score`
+  - `results[]` with `doc_id`, `title`, `rel_path`, `min_role`, `category`, `snippet`, `score`, `breadcrumb[]`
   - `total`, `limit`, `offset`
 - `400` for missing/invalid query args.
-- `403` when caller requests unauthorized roles.
+- `403` when caller requests unauthorized role scope.
 
 ### `GET /usersum/search`
 
 - HTML search page using same backend query contract.
 - Supports role/category filters and pagination.
+
+### `GET /usersum/vendor/<vendor_id>/<path:filename>`
+
+- Renders vendored markdown under the configured vendor namespace.
+- Path must resolve under vendor `target_root` configured in `vendors.yaml`.
+- Document must exist in `docs_manifest.yaml` and pass `min_role` visibility checks.
+- Unknown vendor, missing file, manifest mismatch, or unauthorized access returns `404`.
+
+### `GET /usersum/doc/<doc_id>` (recommended canonical route)
+
+- Resolves and renders docs by stable manifest identity (`doc_id`).
+- Supports canonical link generation for breadcrumbs/search results.
+- Existing category/path routes may remain as compatibility aliases during migration.
 
 ## Compatibility Requirements
 
@@ -459,6 +646,34 @@ Response:
   - `/usersum/api/keyword`
 - Existing command bar `usersum` behaviors remain valid.
 - Role metadata rollout must be additive and backward-compatible.
+- During migration, `/usersum/view/<category>/<path:filename>` and `/usersum/src/<path:rel_path>` may remain compatibility surfaces mapped to canonical manifest docs.
+
+## Vendor Documentation Sync and Authoring Policy (Target)
+
+### Sync model
+
+- Vendor docs are synchronized by a dedicated build/sync script (for example `tools/usersum_sync_vendors.py`).
+- Sync process:
+  1. Read `vendors.yaml`.
+  2. Pull/copy allowlisted markdown from each vendor source.
+  3. Write generated files to `wepppy/weppcloud/routes/usersum/vendor/<vendor_id>/`.
+  4. Regenerate `generated/docs_index.json`.
+  5. Emit sync metadata (source ref/commit) for review traceability.
+- Generated vendor docs are committed to `wepppy` for deterministic deploy/runtime behavior.
+
+### Authoring policy
+
+- Do not directly author generated vendor markdown under `usersum/vendor/**`.
+- Canonical edits occur in the source vendor repository (for example `/workdir/weppcloud-wbt`), then synced into `wepppy`.
+- CI/presubmit must detect unsynced drift between generated content and sync script output.
+- Exceptions (emergency hotfix edits in vendored copy) require follow-up backport to source repo and immediate re-sync.
+
+### Initial vendor scope (confirmed)
+
+- `/workdir/weppcloud-wbt/docs/hydroenforcement/culvert-web-app-hydroenforcement.md`
+  - publish with `min_role: operator`
+- `/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md`
+  - publish with `min_role: operator`
 
 ## Role-Aware Visibility Rules (Target)
 
@@ -467,7 +682,9 @@ Default behavior for unauthenticated/general users:
 - Include: `user`
 - Exclude by default: `operator`, `developer`, `internal`
 
-Authenticated or privileged contexts may opt in additional roles only when server-side authorization allows it.
+Authenticated or privileged contexts may opt in additional scopes only when server-side authorization allows it.
+
+Visibility check uses role hierarchy against each document `min_role`.
 
 ## MCP-Oriented Capability (Target)
 
@@ -479,6 +696,15 @@ Expose docs search/retrieval via MCP-friendly surface after API stabilization:
 
 This supports agent workflows without requiring full HTML page scraping.
 
+## Phased Delivery Plan (Specification-Level)
+
+1. Define and validate schemas for `docs_manifest.yaml`, `nav_tree.yaml`, and `vendors.yaml` (with strict validation tooling).
+2. Implement vendor sync/build pipeline and generated index artifact (`generated/docs_index.json`).
+3. Switch usersum runtime to manifest/nav-index-backed resolution for browse/view/search.
+4. Implement GitBook-like shell: fixed header search, sticky collapsible nav tree, breadcrumbs.
+5. Wire PostgreSQL FTS + `pg_trgm` search backend against manifest-curated corpus.
+6. Keep compatibility routes active until canonical `doc_id`/vendor routes are fully adopted.
+
 ## Non-Goals (This Spec)
 
 - Replacing usersum with a separate external docs site generator.
@@ -488,10 +714,16 @@ This supports agent workflows without requiring full HTML page scraping.
 ## Acceptance Criteria
 
 - Users can search and open curated docs from `/weppcloud/usersum/`.
+- Usersum pages provide:
+  - header search in top-right
+  - sticky/collapsible tree navigation pane
+  - breadcrumb links above content
 - Search returns relevant results with typo tolerance and snippets.
 - Document roles are enforced in search/navigation visibility.
 - Existing command-bar parameter lookup continues to work unchanged.
 - New search endpoints are stable enough to back a future MCP tool.
+- Vendor docs from configured companion repositories are available under scoped routes (for example `/usersum/vendor/weppcloud-wbt/...`) and respect the same role/nav/search contracts.
+- Vendored content drift is enforceable by sync tooling and CI checks.
 - `GET /usersum/api/search` p95 latency <= 250 ms and p99 <= 500 ms on production-like hardware at target corpus size.
 - `GET /usersum/api/search` monthly availability >= 99.9% and 5xx error rate < 0.5%.
 - Incremental index freshness SLO <= 5 minutes from indexed content change to searchable availability.

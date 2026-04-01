@@ -1,11 +1,22 @@
 <header class="wc-header">
-  <div class="wc-header__inner wc-container">
-    <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
+  <div class="wc-header__inner wc-usersum-header-inner">
+    <a class="wc-brand" href="{{ url_for_run('weppcloud_site.index') }}">WEPPcloud</a>
     <div class="wc-header__nav">
-      <a class="wc-link" href="{{ url_for('usersum.usersum_index') }}">UserSummary Docs</a>
+      <a class="wc-link" href="{{ url_for_run('usersum.usersum_index') }}">UserSummary Docs</a>
     </div>
     <div class="wc-header__tools">
       {% include 'header/_theme_switcher.htm' %}
+      <form class="wc-usersum-header-search" action="{{ url_for_run('usersum.usersum_search') }}" method="get" role="search">
+        <input
+          id="usersum-header-search"
+          type="search"
+          name="q"
+          value="{{ header_search_query }}"
+          placeholder="Search docs..."
+          aria-label="Search docs"
+        >
+        <button type="submit" class="pure-button">Search</button>
+      </form>
     </div>
   </div>
 </header>

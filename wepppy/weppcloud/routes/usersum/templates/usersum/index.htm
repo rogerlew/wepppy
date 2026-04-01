@@ -1,18 +1,33 @@
 {% extends "usersum/layout.j2" %}
 {% block body_content %}
 <h1>WEPPcloud UserSummary Documentation</h1>
-<p>The usersum catalog exposes markdown documentation from <code>input-file-specifications</code> and curated parameter databases under <code>db</code>. Use the links below to browse the source documentation.</p>
+<p>Usersum now serves curated, role-aware documentation from a manifest-backed index. Use the navigation tree on the left or search from the header to find documents.</p>
+<form class="wc-usersum-search-form" action="{{ url_for_run('usersum.usersum_search') }}" method="get">
+  <label for="usersum-search-query">Search usersum docs</label>
+  <div class="wc-usersum-search-row">
+    <input
+      id="usersum-search-query"
+      class="wc-usersum-search-input"
+      type="search"
+      name="q"
+      placeholder="Search documentation"
+      required
+    >
+    <button class="pure-button wc-usersum-search-submit" type="submit">Search</button>
+  </div>
+</form>
+
 {% for section in sections %}
   <h2>{{ section.title }}</h2>
   <ul>
-  {% for item in section.entries %}
-    <li>
-      <a href="{{ item.url }}">{{ item.display_name }}</a>
-      <small>({{ item.filename }})</small>
-    </li>
-  {% endfor %}
+    {% for item in section.entries %}
+      <li>
+        <a href="{{ item.url }}">{{ item.title }}</a>
+        <small>({{ item.doc_id }}, min_role={{ item.min_role }})</small>
+      </li>
+    {% endfor %}
   </ul>
 {% else %}
-  <p>No documentation files found.</p>
+  <p>No visible documentation files found.</p>
 {% endfor %}
 {% endblock %}
