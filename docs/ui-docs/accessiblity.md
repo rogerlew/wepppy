@@ -22,6 +22,7 @@ This document is the single entry point for accessibility guidance, tests, and c
 | Route-level map semantics assertion | `tests/weppcloud/routes/test_user_runs_admin_scope.py` | Guards map canvas semantics in runs template rendering. |
 | Controller accessibility assertions | `wepppy/weppcloud/controllers_js/__tests__/map_gl.test.js` | Modal accessible-name and keyboard behavior coverage in map surfaces. |
 | Copy control accessibility regression | `wepppy/weppcloud/controllers_js/__tests__/copytext.test.js` | Ensures semantic copy button behavior remains compatible. |
+| Report accessibility probe page | `wepppy/weppcloud/templates/ui_showcase/report_accessibility_probe.htm` | Synthetic-but-representative report structures (tables, chart, filters, status, actions) used by axe smoke. |
 | Rendered contrast smoke test | `wepppy/weppcloud/static-src/tests/smoke/theme-metrics.spec.js` | Theme-level WCAG AA contrast metrics from real DOM rendering. |
 | Workflow spec (generated source) | `.github/forest_workflows/theme-metrics-nightly.yml` | Nightly contrast artifact run. |
 | Workflow spec (generated source) | `.github/forest_workflows/playwright-controllers-nightly.yml` | Nightly controller-level UI regression coverage. |
@@ -114,7 +115,7 @@ Nightly artifact workflow source:
 
 ## Known Gaps
 
-- Axe coverage currently includes Theme Lab and runs0 dashboard only; expand to additional high-risk flows over time (GL dashboard variants, report-heavy pages, and advanced modals).
+- Axe coverage includes Theme Lab, report accessibility probe, WEPPcloud root, interfaces, profile, and runs0 dashboard.
 - No baseline/triage policy yet for classifying and tracking recurring axe findings across runs.
 
 ## Section 508 Strategy (Manual Gate, Non-Blocking)
@@ -159,6 +160,8 @@ Current spec:
 
 - WEPPcloud root (`/weppcloud/`)
 - Interfaces landing (`/weppcloud/interfaces/`)
+- Profile page (`/weppcloud/profile/`)
+- Report accessibility probe (`/weppcloud/ui/components/report-a11y`)
 - Runs page (`SMOKE_RUN_PATH` target)
 - Map view (`map_gl` surface with modals/overlays)
 - UI components showcase (`/ui/components/#theme-lab`)
@@ -204,6 +207,7 @@ Legacy compatibility:
 
 Optional strict mode:
 - `SMOKE_AGENT_REQUIRED=true` to fail/skip fast when agent credentials are missing.
+- In OAuth-only deployments where local password login is disabled, the `/weppcloud/profile/` axe target is kept in the suite but will be marked skipped with an explicit auth reason unless a pre-authenticated browser session is supplied.
 
 ## Recommended Accessibility Workflow
 

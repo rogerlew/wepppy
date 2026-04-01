@@ -261,7 +261,14 @@ async function ensureAgentSession(page) {
 
   const loginForm = page.locator('form[name="login_user_form"]');
   if ((await loginForm.count()) === 0) {
-    return { authenticated: true, reason: `${agentAccountLabel} session already active.` };
+    const probe = await probeAuthenticatedSession(page);
+    if (probe.authenticated) {
+      return { authenticated: true, reason: `${agentAccountLabel} session already active.` };
+    }
+    return {
+      authenticated: false,
+      reason: `${agentAccountLabel} session unavailable: local password login form not rendered and auth probe failed (${probe.reason}).`,
+    };
   }
 
   const emailField = loginForm.locator('input[name="email"]');
@@ -328,6 +335,30 @@ async function ensureAgentSession(page) {
   }
 
   return { authenticated: false, reason: `${agentAccountLabel} login failed (${authProbe.reason})` };
+}
+
+async function ensureProfilePageReady(page) {
+  const profileUrl = buildUrl(withSitePrefix('/profile/'));
+  await page.goto(profileUrl, { waitUntil: 'networkidle' });
+
+  const profileRoot = page.locator('.wc-profile');
+  if ((await profileRoot.count()) > 0) {
+    return { ready: true, reason: '' };
+  }
+
+  const relogin = await ensureAgentSession(page);
+  if (relogin.authenticated) {
+    await page.goto(profileUrl, { waitUntil: 'networkidle' });
+    if ((await page.locator('.wc-profile').count()) > 0) {
+      return { ready: true, reason: '' };
+    }
+  }
+
+  const authProbe = await probeAuthenticatedSession(page);
+  return {
+    ready: false,
+    reason: `profile route is still unauthenticated after login attempt (${authProbe.reason})`,
+  };
 }
 
 async function ensureRunTarget(page) {
@@ -605,6 +636,20 @@ test.describe('axe accessibility smoke', () => {
     console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
   });
 
+  test('axe accessibility scan for report accessibility probe', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    if (agentCredentials) {
+      await ensureAgentSession(page);
+    }
+
+    const reportProbeUrl = buildUrl(withSitePrefix('/ui/components/report-a11y'));
+    await page.goto(reportProbeUrl, { waitUntil: 'networkidle' });
+    await expect(page.locator('#reportAccessibilityProbe')).toBeVisible();
+
+    const entry = await runAxeScan(page, 'ui-components-report-a11y');
+    console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
+  });
+
   test('axe accessibility scan for weppcloud root', async ({ page }) => {
     await page.setExtraHTTPHeaders(forwardedProtoHeader);
     if (agentCredentials) {
@@ -630,6 +675,23 @@ test.describe('axe accessibility smoke', () => {
     await expect(page.locator('body')).toBeVisible();
 
     const entry = await runAxeScan(page, 'weppcloud-interfaces');
+    console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
+  });
+
+  test('axe accessibility scan for weppcloud profile', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const loginResult = await ensureAgentSession(page);
+    if (!loginResult.authenticated) {
+      test.skip(true, `Profile scan skipped: ${loginResult.reason}`);
+    }
+
+    const profileReady = await ensureProfilePageReady(page);
+    if (!profileReady.ready) {
+      test.skip(true, `Profile scan skipped: ${profileReady.reason}`);
+    }
+    await expect(page.locator('.wc-profile')).toBeVisible();
+
+    const entry = await runAxeScan(page, 'weppcloud-profile');
     console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
   });
 

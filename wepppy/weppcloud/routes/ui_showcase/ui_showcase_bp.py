@@ -176,6 +176,20 @@ def component_gallery() -> str:
                     "name": "text_vs_background",
                     "foreground": "#theme_lab_secondary_button",
                     "background": "#theme_lab_secondary_button",
+                },
+                {
+                    "name": "border_vs_background",
+                    "foreground": "#theme_lab_secondary_button",
+                    "background": "#theme_lab_secondary_button",
+                    "foreground_mode": "border",
+                    "aa_kind": "non_text",
+                },
+                {
+                    "name": "disabled_border_vs_background",
+                    "foreground": "#theme_lab_secondary_button_disabled",
+                    "background": "#theme_lab_secondary_button_disabled",
+                    "foreground_mode": "border",
+                    "aa_kind": "non_text",
                 }
             ],
         },
@@ -464,4 +478,43 @@ def component_gallery() -> str:
         theme_contrast_targets=theme_contrast_targets,
         cap_base_url=cap_base_url,
         cap_site_key=cap_site_key,
+    )
+
+
+@ui_showcase_bp.route("/report-a11y", methods=["GET"])
+def report_accessibility_probe() -> str:
+    """Render a report-like accessibility probe page for axe scans."""
+    summary_cards = [
+        {"label": "Runoff depth", "value": "42.7 mm", "change": "12% below baseline"},
+        {"label": "Sediment yield", "value": "0.31 t/ha", "change": "8% above baseline"},
+        {"label": "Peak discharge", "value": "1.92 m³/s", "change": "3-year recurrence"},
+        {"label": "Simulation years", "value": "2005-2025", "change": "21 annual events"},
+    ]
+
+    outlet_rows = [
+        {"metric": "Runoff", "value": "42.7", "units": "mm", "per_area": "427", "per_area_units": "m³/ha"},
+        {"metric": "Sediment yield", "value": "0.31", "units": "t/ha", "per_area": "0.31", "per_area_units": "t/ha"},
+        {"metric": "Peak discharge", "value": "1.92", "units": "m³/s", "per_area": "0.019", "per_area_units": "m³/s/ha"},
+        {"metric": "Total phosphorus", "value": "0.84", "units": "kg", "per_area": "0.008", "per_area_units": "kg/ha"},
+    ]
+
+    hillslope_rows = [
+        {"id": "H01", "length": "112", "slope": "0.18", "runoff": "38.6", "sediment": "0.22"},
+        {"id": "H02", "length": "146", "slope": "0.21", "runoff": "44.1", "sediment": "0.37"},
+        {"id": "H03", "length": "98", "slope": "0.16", "runoff": "40.2", "sediment": "0.28"},
+    ]
+
+    month_filters = [
+        {"value": "11", "label": "November", "checked": True},
+        {"value": "12", "label": "December", "checked": True},
+        {"value": "1", "label": "January", "checked": False},
+        {"value": "2", "label": "February", "checked": False},
+    ]
+
+    return render_template(
+        "ui_showcase/report_accessibility_probe.htm",
+        summary_cards=summary_cards,
+        outlet_rows=outlet_rows,
+        hillslope_rows=hillslope_rows,
+        month_filters=month_filters,
     )

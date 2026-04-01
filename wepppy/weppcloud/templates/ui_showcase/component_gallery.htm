@@ -133,6 +133,7 @@
   <nav class="wc-button-row wc-theme-demo-nav" aria-label="Showcase sections">
     <a class="pure-button" href="#component-gallery">Component gallery</a>
     <a class="pure-button pure-button-secondary" href="#theme-lab">Theme lab</a>
+    <a class="pure-button pure-button-secondary" href="{{ url_for('ui_showcase.report_accessibility_probe') }}">Report a11y probe</a>
   </nav>
 
   <section id="component-gallery" class="wc-stack">
@@ -464,9 +465,15 @@
             <h3 class="wc-card__title">Secondary action</h3>
             <p class="wc-card__description">`.pure-button.pure-button-secondary` for cancel/reset flows.</p>
           </header>
-          <div class="wc-card__body">
+          <div class="wc-card__body wc-stack">
             <button id="theme_lab_secondary_button" type="button" class="pure-button pure-button-secondary">
               Cancel
+            </button>
+            <button id="theme_lab_secondary_button_disabled"
+                    type="button"
+                    class="pure-button pure-button-secondary"
+                    disabled>
+              Delete selected
             </button>
           </div>
         </article>

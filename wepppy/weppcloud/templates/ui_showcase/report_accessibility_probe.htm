@@ -1,0 +1,282 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}Run Report Accessibility Probe{% endblock %}
+
+{% block head_extras %}
+  {{ super() }}
+  <style>
+    .report-probe-summary-grid {
+      display: grid;
+      gap: var(--wc-space-sm);
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .report-probe-card {
+      border: 1px solid var(--wc-color-border);
+      border-radius: var(--wc-radius-sm);
+      background: var(--wc-color-surface);
+      padding: var(--wc-space-sm) var(--wc-space-md);
+    }
+
+    .report-probe-card__label {
+      display: block;
+      font-size: var(--wc-font-size-sm);
+      color: var(--wc-color-text-muted);
+      margin-bottom: var(--wc-space-2xs);
+    }
+
+    .report-probe-card__value {
+      font-size: var(--wc-font-size-lg);
+      font-weight: 600;
+      color: var(--wc-color-text);
+      margin: 0;
+    }
+
+    .report-probe-card__meta {
+      margin: var(--wc-space-2xs) 0 0;
+      font-size: var(--wc-font-size-sm);
+      color: var(--wc-color-text-muted);
+    }
+
+    .report-probe-month-grid {
+      display: grid;
+      gap: var(--wc-space-xs);
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .report-probe-chart {
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--wc-color-border);
+      border-radius: var(--wc-radius-sm);
+      background: var(--wc-color-surface);
+    }
+
+    .report-probe-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--wc-space-sm);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--wc-color-text-muted);
+    }
+
+    .report-probe-legend__swatch {
+      display: inline-block;
+      width: 0.85rem;
+      height: 0.85rem;
+      border-radius: 2px;
+      margin-right: var(--wc-space-2xs);
+      vertical-align: -1px;
+    }
+
+    .report-probe-legend__swatch--runoff {
+      background: #2a68c9;
+    }
+
+    .report-probe-legend__swatch--precip {
+      background: #5aa9ff;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <article id="reportAccessibilityProbe" class="wc-stack">
+    <header class="wc-stack">
+      <h1 class="wc-heading__title">Run Report Accessibility Probe</h1>
+      <p class="wc-text-muted">
+        This page mirrors common WEPP report structures used across run summaries, water-balance outputs, and
+        return-period tables so the axe suite can catch structural regressions before they land in production reports.
+      </p>
+    </header>
+
+    <nav class="wc-button-row" aria-label="Report accessibility probe navigation">
+      <a class="pure-button pure-button-secondary" href="{{ url_for('ui_showcase.component_gallery') }}">Back to Component Gallery</a>
+      <a class="pure-button" href="#reportProbeTables">Tables</a>
+      <a class="pure-button" href="#reportProbeFilters">Filters</a>
+      <a class="pure-button" href="#reportProbeChart">Chart</a>
+    </nav>
+
+    <section class="wc-panel wc-stack" aria-labelledby="reportProbeOverviewTitle">
+      <header class="wc-stack">
+        <h2 id="reportProbeOverviewTitle" class="wc-heading__subtitle">Report overview cards</h2>
+        <p class="wc-text-muted">Summary cards emulate at-a-glance report metrics often shown above tables.</p>
+      </header>
+      <div class="report-probe-summary-grid">
+        {% for card in summary_cards %}
+          <article class="report-probe-card">
+            <span class="report-probe-card__label">{{ card.label }}</span>
+            <p class="report-probe-card__value">{{ card.value }}</p>
+            <p class="report-probe-card__meta">{{ card.change }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="wc-panel wc-stack" id="reportProbeStatus" aria-labelledby="reportProbeStatusTitle">
+      <header class="wc-stack">
+        <h2 id="reportProbeStatusTitle" class="wc-heading__subtitle">Run status</h2>
+      </header>
+      <p id="reportProbeStatusLive" role="status" aria-live="polite">
+        Report artifacts loaded successfully. Display units are synchronized with the current unitizer preference.
+      </p>
+    </section>
+
+    <section class="wc-panel wc-stack" id="reportProbeTables" aria-labelledby="reportProbeTablesTitle">
+      <header class="wc-stack">
+        <h2 id="reportProbeTablesTitle" class="wc-heading__subtitle">Outlet summary table</h2>
+        <p class="wc-text-muted">Dense, sortable report table with unit rows and CSV/copy actions.</p>
+      </header>
+      <div class="wc-table-wrapper wc-table-wrapper--compact">
+        <table class="wc-table wc-table--dense wc-table--compact wc-table--striped sortable" id="report_probe_outlet_tbl">
+          <caption>Outlet metrics and per-area values</caption>
+          <thead>
+            <tr>
+              <th scope="col">Metric</th>
+              <th scope="col">Value</th>
+              <th scope="col">Units</th>
+              <th scope="col">Per unit area</th>
+              <th scope="col">Per unit area units</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in outlet_rows %}
+              <tr>
+                <th scope="row">{{ row.metric }}</th>
+                <td>{{ row.value }}</td>
+                <td>{{ row.units }}</td>
+                <td>{{ row.per_area }}</td>
+                <td>{{ row.per_area_units }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="wc-table-actions">
+        <button type="button"
+                class="pure-button pure-button-link"
+                data-report-csv="report_probe_outlet_tbl"
+                data-report-url="#"
+                data-report-table="outlet-summary">
+          Download CSV
+        </button>
+        <button type="button" class="pure-button pure-button-link" aria-label="Copy outlet summary table">
+          <img src="{{ static_url('open-iconic/png/clipboard-2x.png') }}" alt="" aria-hidden="true" />
+          Copy table
+        </button>
+      </div>
+    </section>
+
+    <section class="wc-panel wc-stack" aria-labelledby="reportProbeHillslopeTitle">
+      <header class="wc-stack">
+        <h2 id="reportProbeHillslopeTitle" class="wc-heading__subtitle">Hillslope detail table</h2>
+      </header>
+      <div class="wc-table-wrapper">
+        <table class="wc-table wc-table--dense wc-table--striped sortable" id="report_probe_hillslope_tbl">
+          <caption>Per-hillslope metrics</caption>
+          <thead>
+            <tr>
+              <th scope="col">Hillslope ID</th>
+              <th scope="col">Length (m)</th>
+              <th scope="col">Slope</th>
+              <th scope="col">Runoff (mm)</th>
+              <th scope="col">Sediment yield (t/ha)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in hillslope_rows %}
+              <tr>
+                <th scope="row">{{ row.id }}</th>
+                <td>{{ row.length }}</td>
+                <td>{{ row.slope }}</td>
+                <td>{{ row.runoff }}</td>
+                <td>{{ row.sediment }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="wc-panel wc-stack" id="reportProbeFilters" aria-labelledby="reportProbeFiltersTitle">
+      <header class="wc-stack">
+        <h2 id="reportProbeFiltersTitle" class="wc-heading__subtitle">Advanced report filters</h2>
+      </header>
+      <details class="wc-collapse" open>
+        <summary class="wc-collapse__summary">Exclude months and rerun report</summary>
+        <form class="wc-stack" action="#" method="get">
+          <fieldset class="wc-stack">
+            <legend>Exclude months</legend>
+            <p id="reportProbeMonthHelp" class="wc-text-muted">
+              Selected months are excluded from return-period calculations.
+            </p>
+            <div class="report-probe-month-grid">
+              {% for month in month_filters %}
+                <label class="pure-checkbox">
+                  <input type="checkbox"
+                         name="exclude_months"
+                         value="{{ month.value }}"
+                         {% if month.checked %}checked{% endif %}
+                         aria-describedby="reportProbeMonthHelp" />
+                  {{ month.label }}
+                </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <div class="wc-button-row">
+            <button type="submit" class="pure-button pure-button-secondary">Run report</button>
+            <button type="button" class="pure-button pure-button-link">Clear all</button>
+            <button type="button" class="pure-button pure-button-link">Select all</button>
+          </div>
+        </form>
+      </details>
+    </section>
+
+    <section class="wc-panel wc-stack" id="reportProbeChart" aria-labelledby="reportProbeChartTitle">
+      <header class="wc-stack">
+        <h2 id="reportProbeChartTitle" class="wc-heading__subtitle">Hydrograph preview</h2>
+        <p class="wc-text-muted">Representative inline SVG chart used in several report views.</p>
+      </header>
+      <figure class="wc-stack">
+        <figcaption id="reportProbeChartCaption">Daily runoff depth with precipitation pulses</figcaption>
+        <svg class="report-probe-chart"
+             viewBox="0 0 780 260"
+             role="img"
+             aria-labelledby="reportProbeChartSvgTitle reportProbeChartSvgDesc">
+          <title id="reportProbeChartSvgTitle">Hydrograph and precipitation bars</title>
+          <desc id="reportProbeChartSvgDesc">
+            Blue bars indicate precipitation events and the darker line indicates runoff depth over time.
+          </desc>
+          <rect x="56" y="22" width="690" height="190" fill="none" stroke="currentColor" opacity="0.25" />
+          <line x1="56" y1="212" x2="746" y2="212" stroke="currentColor" opacity="0.6" />
+          <line x1="56" y1="22" x2="56" y2="212" stroke="currentColor" opacity="0.6" />
+          <rect x="116" y="128" width="18" height="84" fill="#5aa9ff" opacity="0.8" />
+          <rect x="214" y="96" width="18" height="116" fill="#5aa9ff" opacity="0.8" />
+          <rect x="312" y="82" width="18" height="130" fill="#5aa9ff" opacity="0.8" />
+          <rect x="410" y="108" width="18" height="104" fill="#5aa9ff" opacity="0.8" />
+          <rect x="508" y="142" width="18" height="70" fill="#5aa9ff" opacity="0.8" />
+          <path d="M56 188 L140 170 L224 158 L308 142 L392 136 L476 128 L560 146 L644 154 L728 166"
+                fill="none"
+                stroke="#2a68c9"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round" />
+          <text x="66" y="18" font-size="12">Runoff (mm)</text>
+          <text x="670" y="244" font-size="12">Time (days)</text>
+        </svg>
+      </figure>
+      <ul class="report-probe-legend" aria-label="Hydrograph legend">
+        <li><span class="report-probe-legend__swatch report-probe-legend__swatch--runoff" aria-hidden="true"></span>Runoff depth</li>
+        <li><span class="report-probe-legend__swatch report-probe-legend__swatch--precip" aria-hidden="true"></span>Precipitation</li>
+      </ul>
+    </section>
+
+    <section class="wc-panel wc-panel--warning wc-stack" role="status" aria-live="polite">
+      <h2 class="wc-heading__subtitle">No-data placeholder</h2>
+      <p class="wc-text-muted">
+        No events matched the selected filters. Adjust the exclusion set, then rerun the report.
+      </p>
+    </section>
+  </article>
+{% endblock %}
