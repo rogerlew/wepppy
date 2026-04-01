@@ -11,7 +11,13 @@ Notes:
 - Do not store secrets under `/wc1` or any browseable/exportable directory.
 
 Smoke/axe local auth convention:
-- `ally-agent-smoke.env` may be stored here for Playwright accessibility runs.
-- Expected keys:
-  - `ALLY_AGENT_EMAIL`
-  - `ALLY_AGENT_PASSWORD`
+- Preferred file: `dev-agent.env`
+  - Expected keys:
+    - `DEV_AGENT_EMAIL`
+    - `DEV_AGENT_PASSWORD`
+    - `SMOKE_AGENT_EMAIL`
+    - `SMOKE_AGENT_PASSWORD`
+- Legacy compatibility file: `ally-agent-smoke.env`
+  - Expected keys:
+    - `ALLY_AGENT_EMAIL`
+    - `ALLY_AGENT_PASSWORD`

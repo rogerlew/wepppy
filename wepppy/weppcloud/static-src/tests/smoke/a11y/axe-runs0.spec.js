@@ -8,7 +8,8 @@ import { test, expect } from '@playwright/test';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..', '..', '..', '..', '..');
-const defaultAgentCredentialsFile = path.join(repoRoot, 'docker', 'secrets', 'ally-agent-smoke.env');
+const preferredAgentCredentialsFile = path.join(repoRoot, 'docker', 'secrets', 'dev-agent.env');
+const legacyAgentCredentialsFile = path.join(repoRoot, 'docker', 'secrets', 'ally-agent-smoke.env');
 
 const baseURL = process.env.SMOKE_BASE_URL || 'http://localhost:8080';
 const shouldProvision = process.env.SMOKE_CREATE_RUN !== 'false';
@@ -18,11 +19,11 @@ const reportDir = process.env.AXE_OUTPUT_DIR || path.join('test-results', 'a11y'
 const axeTags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const disabledRules = ['color-contrast'];
 const forwardedProtoHeader = { 'X-Forwarded-Proto': 'https' };
-const agentAccountLabel = process.env.SMOKE_AGENT_ACCOUNT_LABEL || 'ally-agent';
+const agentAccountLabel = process.env.SMOKE_AGENT_ACCOUNT_LABEL || 'dev-agent';
 const requireAgentCredentials = ['1', 'true', 'yes'].includes(
   String(process.env.SMOKE_AGENT_REQUIRED || '').trim().toLowerCase()
 );
-const agentCredentialsFile = process.env.SMOKE_AGENT_CREDENTIALS_FILE || defaultAgentCredentialsFile;
+const agentCredentialsFileOverride = process.env.SMOKE_AGENT_CREDENTIALS_FILE || '';
 
 const sitePrefix = (() => {
   const hasSmokePrefix = Object.prototype.hasOwnProperty.call(process.env, 'SMOKE_SITE_PREFIX');
@@ -124,8 +125,12 @@ function firstNonEmpty(values) {
 }
 
 async function resolveAgentCredentials() {
-  const envEmail = firstNonEmpty([process.env.ALLY_AGENT_EMAIL, process.env.SMOKE_AGENT_EMAIL]);
-  const envPassword = firstNonEmpty([process.env.ALLY_AGENT_PASSWORD, process.env.SMOKE_AGENT_PASSWORD]);
+  const envEmail = firstNonEmpty([process.env.DEV_AGENT_EMAIL, process.env.SMOKE_AGENT_EMAIL, process.env.ALLY_AGENT_EMAIL]);
+  const envPassword = firstNonEmpty([
+    process.env.DEV_AGENT_PASSWORD,
+    process.env.SMOKE_AGENT_PASSWORD,
+    process.env.ALLY_AGENT_PASSWORD,
+  ]);
   if (envEmail && envPassword) {
     return {
       credentials: { email: envEmail, password: envPassword },
@@ -133,20 +138,30 @@ async function resolveAgentCredentials() {
     };
   }
 
-  try {
-    const fileContent = await fs.readFile(agentCredentialsFile, 'utf-8');
-    const parsed = parseEnvFile(fileContent);
-    const fileEmail = firstNonEmpty([parsed.ALLY_AGENT_EMAIL, parsed.SMOKE_AGENT_EMAIL]);
-    const filePassword = firstNonEmpty([parsed.ALLY_AGENT_PASSWORD, parsed.SMOKE_AGENT_PASSWORD]);
-    if (fileEmail && filePassword) {
-      return {
-        credentials: { email: fileEmail, password: filePassword },
-        source: agentCredentialsFile,
-      };
-    }
-  } catch (err) {
-    if (err && err.code !== 'ENOENT') {
-      throw err;
+  const credentialFiles = agentCredentialsFileOverride
+    ? [agentCredentialsFileOverride]
+    : [preferredAgentCredentialsFile, legacyAgentCredentialsFile];
+
+  for (const credentialFile of credentialFiles) {
+    try {
+      const fileContent = await fs.readFile(credentialFile, 'utf-8');
+      const parsed = parseEnvFile(fileContent);
+      const fileEmail = firstNonEmpty([parsed.DEV_AGENT_EMAIL, parsed.SMOKE_AGENT_EMAIL, parsed.ALLY_AGENT_EMAIL]);
+      const filePassword = firstNonEmpty([
+        parsed.DEV_AGENT_PASSWORD,
+        parsed.SMOKE_AGENT_PASSWORD,
+        parsed.ALLY_AGENT_PASSWORD,
+      ]);
+      if (fileEmail && filePassword) {
+        return {
+          credentials: { email: fileEmail, password: filePassword },
+          source: credentialFile,
+        };
+      }
+    } catch (err) {
+      if (err && err.code !== 'ENOENT') {
+        throw err;
+      }
     }
   }
 
@@ -237,7 +252,7 @@ async function ensureAgentSession(page) {
   if (!agentCredentials) {
     return {
       authenticated: false,
-      reason: `No ${agentAccountLabel} credentials found. Set ALLY_AGENT_EMAIL/ALLY_AGENT_PASSWORD or populate ${agentCredentialsFile}.`,
+      reason: `No ${agentAccountLabel} credentials found. Set DEV_AGENT_EMAIL/DEV_AGENT_PASSWORD, SMOKE_AGENT_EMAIL/SMOKE_AGENT_PASSWORD, or ALLY_AGENT_EMAIL/ALLY_AGENT_PASSWORD.`,
     };
   }
 
@@ -630,8 +645,9 @@ test.describe('axe accessibility smoke', () => {
     try {
       await page.goto(targetRunPath, { waitUntil: 'networkidle' });
       if ((await page.locator('#cap-gate h1:has-text("Verification required")').count()) > 0) {
+        const credentialHint = agentCredentialsFileOverride || `${preferredAgentCredentialsFile} (fallback: ${legacyAgentCredentialsFile})`;
         throw new Error(
-          `CAP gate still active for runs0. Configure ${agentAccountLabel} credentials via ${agentCredentialsFile}.`
+          `CAP gate still active for runs0. Configure ${agentAccountLabel} credentials via ${credentialHint}.`
         );
       }
 

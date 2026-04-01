@@ -110,6 +110,18 @@ Common route-level status requirements are enforced by
 4. On failure/debug needs, fetch `GET /api/jobinfo/{job_id}`.
 5. Optionally cancel with `POST /api/canceljob/{job_id}`.
 
+## Dev-Agent Local Workflow
+- Canonical local account + credential-file convention:
+  - `wepppy/weppcloud/static-src/tests/smoke/AGENTS.md`
+- Preferred local secret file:
+  - `docker/secrets/dev-agent.env`
+- Typical setup:
+  1. Sign in as `dev-agent@example.com`.
+  2. Mint a bearer token from `POST /weppcloud/profile/mint-token` (session + CSRF).
+  3. Use that token for `/rq-engine/api/*` calls.
+- Admin sanity endpoint for role/scope verification:
+  - `GET /rq-engine/api/admin/recently-completed-jobs`
+
 ## Correlation ID Debugging
 
 - Send `X-Correlation-ID` on submission requests to make cross-service tracing deterministic.

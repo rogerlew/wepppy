@@ -108,6 +108,7 @@
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
 - Vulture dead-code gate standard: `docs/standards/vulture-dead-code-gate-standard.md`
+- Docker/local secret conventions: `docker/secrets/README.md`
 
 ## Subsystem Maps (Nearest AGENTS Wins)
 - NoDb controllers and module contracts: `wepppy/nodb/AGENTS.md`

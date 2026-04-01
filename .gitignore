@@ -40,6 +40,7 @@ docker/secrets/*
 !docker/secrets/README.md
 # Explicit smoke auth secret convention (already covered by wildcard above).
 docker/secrets/ally-agent-smoke.env
+docker/secrets/dev-agent.env
 
 # Playwright test artifacts
 wepppy/weppcloud/static-src/test-results/

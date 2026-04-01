@@ -189,13 +189,18 @@ wctl run-npm smoke:a11y
 
 For CAP-gated runs0 scans, use an authenticated agent account:
 
-1. Create `docker/secrets/ally-agent-smoke.env` (gitignored):
-   - `ALLY_AGENT_EMAIL=<ally-agent email>`
-   - `ALLY_AGENT_PASSWORD=<ally-agent password>`
+1. Create `docker/secrets/dev-agent.env` (gitignored):
+   - `DEV_AGENT_EMAIL=<dev-agent email>`
+   - `DEV_AGENT_PASSWORD=<dev-agent password>`
+   - `SMOKE_AGENT_EMAIL=<dev-agent email>`
+   - `SMOKE_AGENT_PASSWORD=<dev-agent password>`
 2. Set file permissions:
-   - `chmod 600 docker/secrets/ally-agent-smoke.env`
+   - `chmod 600 docker/secrets/dev-agent.env`
 3. Run the suite (it auto-loads this file by default), or override with:
    - `SMOKE_AGENT_CREDENTIALS_FILE=/path/to/file.env`
+
+Legacy compatibility:
+- `docker/secrets/ally-agent-smoke.env` with `ALLY_AGENT_EMAIL` / `ALLY_AGENT_PASSWORD` is still supported.
 
 Optional strict mode:
 - `SMOKE_AGENT_REQUIRED=true` to fail/skip fast when agent credentials are missing.

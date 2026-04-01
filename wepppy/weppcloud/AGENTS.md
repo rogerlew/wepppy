@@ -10,7 +10,8 @@ If your change touches `wepppy/weppcloud/controllers_js/*`, read
 focused and does not replace controller-specific guidance.
 If your change touches Playwright smoke tests, axe scans, or CAP-gated auth
 flows, read `wepppy/weppcloud/static-src/tests/smoke/AGENTS.md` for agent-account
-provisioning and credential-file conventions.
+provisioning and credential-file conventions (`dev-agent` is the canonical
+account for authenticated CAP bypass and rq-engine token mint flows).
 
 ## Task Start: Route or Blueprint Changes
 - First-hop files:

@@ -37,6 +37,21 @@ this service as the canonical async interface for run-scoped operations.
 - `require_jwt()` sets the auth actor; `install_rq_auth_actor_hook()` writes that
   payload into `job.meta["auth_actor"]` for auditing.
 
+## Dev-Agent Auth Workflow (Local/Shared Dev)
+- Canonical credential playbook:
+  - `wepppy/weppcloud/static-src/tests/smoke/AGENTS.md`
+- Preferred local secret file:
+  - `docker/secrets/dev-agent.env` (gitignored, mode `0600`)
+- Expected account:
+  - `dev-agent@example.com` with roles `User`, `Admin`, `Root`, `PowerUser`
+- Fast path to test rq-engine from a browser-backed session:
+  1. Sign in at `/weppcloud/login` as `dev-agent`.
+  2. Mint bearer token via `POST /weppcloud/profile/mint-token` (requires CSRF header).
+  3. Call rq-engine with `Authorization: Bearer <token>`.
+- Admin route sanity checks (role + scope coverage):
+  - `GET /rq-engine/api/admin/recently-completed-jobs`
+  - `GET /rq-engine/api/admin/jobs-detail`
+
 ## Response Contract (Must)
 - Follow `docs/schemas/rq-response-contract.md`.
 - Use canonical keys (`job_id`, `job_ids`, `message`, `warnings`, `result`).
