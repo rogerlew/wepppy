@@ -135,7 +135,7 @@ Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_C
   - AA enforcement defaults to: `default`, `light-high-contrast`, `ayu-mirage`, `ayu-mirage-bordered`, `cursor-dark-midnight`.
   - Non-enforced themes are still measured and reported, but do not fail the suite.
   - Override enforcement list when needed with `THEME_METRICS_ENFORCED_THEMES=theme1,theme2,...`.
-- `a11y/axe-runs0.spec.js`: Axe-core structural accessibility scan for Theme Lab and runs0 dashboard, with JSON/Markdown artifacts under `test-results/a11y/`.
+- `a11y/axe-runs0.spec.js`: Axe-core structural accessibility scan for WEPPcloud root, interfaces landing, Theme Lab, and runs0 dashboard, with JSON/Markdown artifacts under `test-results/a11y/`.
   - For CAP-gated runs0 scans, prefer the `ally-agent` account via `docker/secrets/ally-agent-smoke.env`:
     ```bash
     # gitignored path (see root .gitignore docker/secrets/*)

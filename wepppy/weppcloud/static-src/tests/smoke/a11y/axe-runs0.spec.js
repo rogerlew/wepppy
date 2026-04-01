@@ -590,6 +590,34 @@ test.describe('axe accessibility smoke', () => {
     console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
   });
 
+  test('axe accessibility scan for weppcloud root', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    if (agentCredentials) {
+      await ensureAgentSession(page);
+    }
+
+    const rootUrl = buildUrl(withSitePrefix('/'));
+    await page.goto(rootUrl, { waitUntil: 'networkidle' });
+    await expect(page.locator('body')).toBeVisible();
+
+    const entry = await runAxeScan(page, 'weppcloud-root');
+    console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
+  });
+
+  test('axe accessibility scan for weppcloud interfaces', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    if (agentCredentials) {
+      await ensureAgentSession(page);
+    }
+
+    const interfacesUrl = buildUrl(withSitePrefix('/interfaces/'));
+    await page.goto(interfacesUrl, { waitUntil: 'networkidle' });
+    await expect(page.locator('body')).toBeVisible();
+
+    const entry = await runAxeScan(page, 'weppcloud-interfaces');
+    console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
+  });
+
   test('axe accessibility scan for runs0 dashboard', async ({ page }) => {
     await page.setExtraHTTPHeaders(forwardedProtoHeader);
     await ensureRunTarget(page);

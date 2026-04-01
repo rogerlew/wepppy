@@ -157,6 +157,8 @@ Current spec:
 
 ### Suggested test targets
 
+- WEPPcloud root (`/weppcloud/`)
+- Interfaces landing (`/weppcloud/interfaces/`)
 - Runs page (`SMOKE_RUN_PATH` target)
 - Map view (`map_gl` surface with modals/overlays)
 - UI components showcase (`/ui/components/#theme-lab`)
