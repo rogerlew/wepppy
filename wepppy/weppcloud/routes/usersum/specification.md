@@ -55,6 +55,7 @@ Usersum index currently enumerates markdown files from:
 - `wepppy/weppcloud/routes/usersum/db`
 - `wepppy/weppcloud/routes/usersum/input-file-specifications`
 - `wepppy/weppcloud/routes/usersum/weppcloud`
+- `wepppy/weppcloud/routes/usersum/path`
 
 Index listing is generated dynamically from `*.md` files in each root.
 
@@ -72,7 +73,78 @@ Notes:
 - `layout.j2` extends `base_pure.htm` and inherits shared WEPPcloud theme bootstrap/runtime (including `theme.js`).
 - Usersum header uses WEPPcloud branding and includes shared theme picker (`header/_theme_switcher.htm`).
 - Child templates (`index.htm`, `view.htm`) render into `layout.j2` via `body_content` block for consistent shell/header behavior.
+- In-page heading anchors (`id` on `h1..h6`) are injected server-side at render time using `usersum_anchor_slug(...)`.
+- In-repo markdown links are rewritten to usersum routes (`/usersum/view/...` or `/usersum/src/...`) while preserving query/fragment components.
 - No role-based content filtering is currently applied.
+
+## `usersum_doc_link` Helper Contract (Current State)
+
+Helper location:
+
+- `wepppy/weppcloud/_jinja_filters.py`
+
+Current signature:
+
+```jinja2
+usersum_doc_link(category, filename, label, classes='wc-link wc-link--file', section=None)
+```
+
+Current behavior:
+
+- `category == 'src'` routes to `usersum.view_src_markdown`.
+- Otherwise routes to `usersum.view_markdown` with `<category>/<filename>`.
+- Optional `section` is normalized with `usersum_anchor_from_section(...)` and appended as a URL fragment.
+- Link output includes:
+  - `target="_blank"`
+  - `rel="noopener"`
+  - `data-open-tab-pref`
+
+Guidance:
+
+- Use category routes (`db`, `input-file-specifications`, `weppcloud`, `path`) for documents already under usersum content roots.
+- Use `category='src'` for in-repo markdown outside usersum roots (for example module READMEs).
+- Prefer human-readable heading text for `section` (for example `"PowerUser Panel"`), not hand-built slug strings.
+- If an explicit heading id already exists, `section` may include it with or without `#`.
+
+Examples:
+
+```jinja2
+{{ usersum_doc_link('weppcloud', 'wepp-model.md', 'WEPP Model overview') }}
+{{ usersum_doc_link('src', 'wepppy/nodb/mods/roads/README.md', 'Roads documentation') }}
+{{ usersum_doc_link('src', 'wepppy/nodb/mods/baer/README.sbs_map.md', 'SBS map preparation guidance', section='Preparing SBS Map for wepp.cloud') }}
+```
+
+## Anchor Contract (Current State)
+
+- Rendered markdown headings (`h1..h6`) are assigned deterministic ids when missing.
+- Slug normalization behavior (`usersum_anchor_slug`):
+  - HTML tags stripped
+  - whitespace collapsed
+  - lowercase
+  - non-word/non-hyphen characters removed
+  - spaces converted to hyphen
+  - repeated hyphens collapsed
+- Duplicate heading ids are disambiguated with numeric suffixes (`-1`, `-2`, ...).
+- `usersum_doc_link(..., section=...)` uses the same normalization path, so helper-generated fragments match rendered heading ids.
+
+## Document Footer Contract (Current State)
+
+Each rendered usersum doc page includes a source footer in `templates/usersum/view.htm`:
+
+- Scoped path label:
+  - `view:<category>/<filename>` for category-routed docs
+  - `src:<repo-relative-path>` for source-routed docs
+- GitHub link:
+  - built from `_GITHUB_BLOB_BASE_URL` + URL-encoded repo-relative markdown path
+  - current base: `https://github.com/rogerlew/wepppy/blob/master`
+- Raw markdown link:
+  - `.md` footer link points to `/usersum/raw/<repo-relative-path>`
+  - response content-type is `text/markdown`
+
+Guidance:
+
+- Do not hardcode GitHub/blob/raw links in usersum content for in-repo docs; rely on the footer contract.
+- Keep markdown references inside docs as normal `.md` links; usersum rewrites them to routed links at render time.
 
 ## Template and Theme Regression Coverage (Current State)
 
@@ -83,6 +155,18 @@ Notes:
   - markdown stylesheet wiring is present.
   - header includes WEPPcloud brand link and theme switcher include.
   - `/usersum/` render smoke test verifies header + theme selector + `theme.js` wiring.
+
+Additional coverage:
+
+- `tests/weppcloud/routes/test_usersum_bp.py`
+  - markdown link rewriting for category and source docs
+  - footer scoped path labels + GitHub/raw links
+  - canonical/legacy src route behavior
+  - heading anchor id injection
+  - raw markdown endpoint behavior
+- `tests/weppcloud/test_jinja_filters.py`
+  - `usersum_doc_link` route generation
+  - `section` fragment normalization for both category and source routes
 
 ## HTTP Endpoints
 
@@ -97,12 +181,13 @@ Notes:
   - `db`
   - `input-file-specifications`
   - `weppcloud`
+  - `path`
 - 404 behavior:
   - Unknown category
   - File missing
   - Path traversal attempt outside category root
 
-### `GET /usersum/src//<path:rel_path>`
+### `GET /usersum/src/<path:rel_path>`
 
 - Renders arbitrary in-repo markdown file by repo-relative path.
 - Constraints:
@@ -113,6 +198,17 @@ Notes:
   - This endpoint can render markdown outside usersum content roots, as long as it is an in-repo `.md` file.
 - Current security posture:
   - No role-based access controls are applied at this endpoint in current implementation.
+
+### `GET /usersum/src//<path:rel_path>`
+
+- Legacy compatibility endpoint.
+- Behavior: permanent redirect (`308`) to canonical `/usersum/src/<path:rel_path>`.
+
+### `GET /usersum/raw/<path:rel_path>`
+
+- Returns raw markdown bytes for a repo-relative markdown file.
+- Uses the same in-repo path validation constraints as `/usersum/src/<path:rel_path>`.
+- Response content type: `text/markdown`.
 
 ### `GET /usersum/api/parameter?name=<parameter>[&extended=1]`
 
@@ -148,6 +244,7 @@ Notes:
   - `/usersum/api/keyword`
 - Hover previews for `data-usersum="<parameter>"` call `/usersum/api/parameter`.
 - UI links currently point to usersum from multiple pages (for example, header and power-user panel).
+- Control descriptions and UI text can deep-link usersum docs through `usersum_doc_link(...)`, including optional section anchors.
 
 ## Gaps (Current State vs Target)
 
@@ -357,6 +454,7 @@ Response:
   - `/usersum/view/...`
   - `/usersum/src/...` (canonical)
   - `/usersum/src//...` (compatibility redirect)
+  - `/usersum/raw/...`
   - `/usersum/api/parameter`
   - `/usersum/api/keyword`
 - Existing command bar `usersum` behaviors remain valid.
