@@ -20,10 +20,21 @@ const CHANNEL_LINE_OPACITY = 0.6;
 const CHANNEL_FILL_OPACITY = 0.9;
 const CHANNEL_DEFAULT_ORDER = 4;
 const CHANNEL_MAX_ORDER = 7;
-const CHANNEL_LABEL_COLOR = [26, 115, 232, 255];
-const CHANNEL_LABEL_OUTLINE_COLOR = [255, 255, 255, 255];
-const CHANNEL_LABEL_OUTLINE_WIDTH = 3;
-const CHANNEL_LABEL_FONT_SIZE = 16;
+const LABEL_FONT_FAMILY = 'system-ui, -apple-system, sans-serif';
+const LABEL_FONT_WEIGHT = '600';
+const SUBCATCHMENT_LABEL_FONT_SIZE = 12;
+const SUBCATCHMENT_LABEL_OUTLINE_WIDTH = 2;
+const CHANNEL_LABEL_OUTLINE_WIDTH = 2;
+const CHANNEL_LABEL_FONT_SIZE = 13;
+const LABEL_OUTLINE_ALPHA = 245;
+const LABEL_MIN_CONTRAST_RATIO = 4.5;
+const LABEL_TARGET_CONTRAST_RATIO = 5;
+const FALLBACK_LABEL_THEME = Object.freeze({
+  textColor: [95, 105, 120, 255],
+  outlineColor: [255, 255, 255, LABEL_OUTLINE_ALPHA],
+});
+let cachedLabelThemeSignature = null;
+let cachedLabelTheme = null;
 const D8_DIRECTION_COLOR = [255, 105, 180, 230];
 const D8_DIRECTION_ICON_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path fill="white" d="M8 29.5H38.4V22L56 32L38.4 42V34.5H8Z"/></svg>';
@@ -71,6 +82,219 @@ function hexToRgba(hex, alpha) {
     return [0, 0, 0, Math.round(alpha * 255)];
   }
   return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, Math.round(alpha * 255)];
+}
+
+function clampByte(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return null;
+  return Math.max(0, Math.min(255, Math.round(num)));
+}
+
+function clampUnitInterval(value) {
+  if (!Number.isFinite(value)) return null;
+  return Math.max(0, Math.min(1, value));
+}
+
+function parseHexColor(raw) {
+  const hex = String(raw || '').trim().replace('#', '');
+  if (![3, 4, 6, 8].includes(hex.length)) return null;
+  const expanded = hex.length <= 4
+    ? hex.split('').map((ch) => ch + ch).join('')
+    : hex;
+  if (expanded.length === 6) {
+    const intVal = Number.parseInt(expanded, 16);
+    if (!Number.isFinite(intVal)) return null;
+    return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, 255];
+  }
+  const r = Number.parseInt(expanded.slice(0, 2), 16);
+  const g = Number.parseInt(expanded.slice(2, 4), 16);
+  const b = Number.parseInt(expanded.slice(4, 6), 16);
+  const a = Number.parseInt(expanded.slice(6, 8), 16);
+  if (![r, g, b, a].every(Number.isFinite)) return null;
+  return [r, g, b, a];
+}
+
+function parseRgbComponent(part) {
+  const value = String(part || '').trim();
+  if (!value) return null;
+  if (value.endsWith('%')) {
+    const pct = Number.parseFloat(value.slice(0, -1));
+    if (!Number.isFinite(pct)) return null;
+    return clampByte((pct / 100) * 255);
+  }
+  return clampByte(Number.parseFloat(value));
+}
+
+function parseAlphaComponent(part) {
+  const value = String(part || '').trim();
+  if (!value) return null;
+  if (value.endsWith('%')) {
+    const pct = Number.parseFloat(value.slice(0, -1));
+    if (!Number.isFinite(pct)) return null;
+    return clampUnitInterval(pct / 100);
+  }
+  const num = Number.parseFloat(value);
+  if (!Number.isFinite(num)) return null;
+  if (num > 1) {
+    return clampUnitInterval(num / 255);
+  }
+  return clampUnitInterval(num);
+}
+
+function parseRgbColor(raw) {
+  const match = String(raw || '').trim().match(/^rgba?\((.*)\)$/i);
+  if (!match) return null;
+  const body = match[1].trim();
+  if (!body) return null;
+  let alphaPart = null;
+  let rgbPart = body;
+  if (body.includes('/')) {
+    const split = body.split('/');
+    if (split.length !== 2) return null;
+    rgbPart = split[0].trim();
+    alphaPart = split[1].trim();
+  }
+  let rgbParts;
+  if (rgbPart.includes(',')) {
+    rgbParts = rgbPart.split(',').map((s) => s.trim()).filter(Boolean);
+  } else {
+    rgbParts = rgbPart.split(/\s+/).filter(Boolean);
+  }
+  if (rgbParts.length < 3) return null;
+  if (rgbParts.length > 3 && alphaPart == null) {
+    alphaPart = rgbParts[3];
+  }
+  const r = parseRgbComponent(rgbParts[0]);
+  const g = parseRgbComponent(rgbParts[1]);
+  const b = parseRgbComponent(rgbParts[2]);
+  if (![r, g, b].every(Number.isFinite)) return null;
+  const alpha = alphaPart == null ? 1 : parseAlphaComponent(alphaPart);
+  if (!Number.isFinite(alpha)) return null;
+  return [r, g, b, Math.round(alpha * 255)];
+}
+
+function parseCssColor(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return null;
+  if (value.startsWith('#')) return parseHexColor(value);
+  if (value.toLowerCase().startsWith('rgb')) return parseRgbColor(value);
+  return null;
+}
+
+function compositeRgbaOverRgb(colorRgba, backgroundRgb) {
+  if (!Array.isArray(colorRgba) || colorRgba.length < 4) return backgroundRgb.slice();
+  const alpha = clampUnitInterval((colorRgba[3] || 0) / 255);
+  if (alpha == null) return backgroundRgb.slice();
+  const inv = 1 - alpha;
+  return [
+    Math.round(colorRgba[0] * alpha + backgroundRgb[0] * inv),
+    Math.round(colorRgba[1] * alpha + backgroundRgb[1] * inv),
+    Math.round(colorRgba[2] * alpha + backgroundRgb[2] * inv),
+  ];
+}
+
+function relativeLuminance(rgb) {
+  const channels = rgb.map((channel) => {
+    const s = channel / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+}
+
+function contrastRatio(a, b) {
+  const l1 = relativeLuminance(a);
+  const l2 = relativeLuminance(b);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function blendRgb(foreground, background, backgroundWeight) {
+  const weight = clampUnitInterval(backgroundWeight);
+  if (weight == null) return foreground.slice();
+  const fgWeight = 1 - weight;
+  return [
+    Math.round(foreground[0] * fgWeight + background[0] * weight),
+    Math.round(foreground[1] * fgWeight + background[1] * weight),
+    Math.round(foreground[2] * fgWeight + background[2] * weight),
+  ];
+}
+
+function pickAccessibleTextColor({ mutedRgb, textRgb, surfaceRgb }) {
+  const candidates = [
+    mutedRgb,
+    textRgb,
+    FALLBACK_LABEL_THEME.textColor.slice(0, 3),
+    [17, 24, 39],
+    [255, 255, 255],
+  ].filter((c) => Array.isArray(c) && c.length === 3);
+  let bestColor = FALLBACK_LABEL_THEME.textColor.slice(0, 3);
+  let bestContrast = 0;
+  for (const candidate of candidates) {
+    const ratio = contrastRatio(candidate, surfaceRgb);
+    if (ratio > bestContrast) {
+      bestContrast = ratio;
+      bestColor = candidate;
+    }
+    if (ratio >= LABEL_MIN_CONTRAST_RATIO) {
+      return candidate;
+    }
+  }
+  return bestColor;
+}
+
+function reduceContrastToTarget(textRgb, surfaceRgb) {
+  const currentContrast = contrastRatio(textRgb, surfaceRgb);
+  if (currentContrast <= LABEL_TARGET_CONTRAST_RATIO) return textRgb;
+  let low = 0;
+  let high = 1;
+  let best = textRgb;
+  for (let i = 0; i < 16; i += 1) {
+    const mid = (low + high) / 2;
+    const candidate = blendRgb(textRgb, surfaceRgb, mid);
+    const ratio = contrastRatio(candidate, surfaceRgb);
+    if (ratio >= LABEL_TARGET_CONTRAST_RATIO) {
+      low = mid;
+      best = candidate;
+    } else {
+      high = mid;
+    }
+  }
+  if (contrastRatio(best, surfaceRgb) < LABEL_MIN_CONTRAST_RATIO) return textRgb;
+  return best;
+}
+
+function resolveLabelThemeStyles() {
+  if (typeof document === 'undefined' || typeof getComputedStyle !== 'function' || !document.documentElement) {
+    return FALLBACK_LABEL_THEME;
+  }
+  const rootStyle = getComputedStyle(document.documentElement);
+  const mutedRaw = rootStyle.getPropertyValue('--wc-color-text-muted').trim();
+  const textRaw = rootStyle.getPropertyValue('--wc-color-text').trim();
+  const surfaceRaw = rootStyle.getPropertyValue('--wc-color-surface').trim();
+  const surfaceAltRaw = rootStyle.getPropertyValue('--wc-color-surface-alt').trim();
+  const pageRaw = rootStyle.getPropertyValue('--wc-color-page').trim();
+  const signature = [mutedRaw, textRaw, surfaceRaw, surfaceAltRaw, pageRaw].join('|');
+  if (cachedLabelThemeSignature === signature && cachedLabelTheme) {
+    return cachedLabelTheme;
+  }
+  const fallbackSurfaceRgb = FALLBACK_LABEL_THEME.outlineColor.slice(0, 3);
+  const pageColor = parseCssColor(pageRaw) || parseCssColor(surfaceAltRaw) || [...fallbackSurfaceRgb, 255];
+  const pageRgb = compositeRgbaOverRgb(pageColor, fallbackSurfaceRgb);
+  const surfaceColor = parseCssColor(surfaceRaw) || parseCssColor(surfaceAltRaw) || [...fallbackSurfaceRgb, 255];
+  const surfaceRgb = compositeRgbaOverRgb(surfaceColor, pageRgb);
+  const mutedColor = parseCssColor(mutedRaw);
+  const textColor = parseCssColor(textRaw);
+  const mutedRgb = mutedColor ? compositeRgbaOverRgb(mutedColor, surfaceRgb) : null;
+  const textRgb = textColor ? compositeRgbaOverRgb(textColor, surfaceRgb) : null;
+  const chosenText = pickAccessibleTextColor({ mutedRgb, textRgb, surfaceRgb });
+  const tunedText = reduceContrastToTarget(chosenText, surfaceRgb);
+  cachedLabelTheme = {
+    textColor: [...tunedText, 255],
+    outlineColor: [...surfaceRgb, LABEL_OUTLINE_ALPHA],
+  };
+  cachedLabelThemeSignature = signature;
+  return cachedLabelTheme;
 }
 
 function getSbsRgbKey(r, g, b) {
@@ -451,6 +675,7 @@ export function createLayerUtils({
     if (!state.subcatchmentLabelsVisible || !state.subcatchmentsVisible || !state.subcatchmentsGeoJson) {
       return [];
     }
+    const labelTheme = resolveLabelThemeStyles();
     const labelData = [];
     const seenIds = new Set();
     const features = state.subcatchmentsGeoJson.features || [];
@@ -492,14 +717,14 @@ export function createLayerUtils({
         data: labelData,
         getPosition: (d) => d.position,
         getText: (d) => d.text,
-        getSize: 14,
-        getColor: [255, 255, 255, 255],
+        getSize: SUBCATCHMENT_LABEL_FONT_SIZE,
+        getColor: labelTheme.textColor,
         getTextAnchor: 'middle',
         getAlignmentBaseline: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontWeight: 'bold',
-        outlineColor: [0, 0, 0, 200],
-        outlineWidth: 2,
+        fontFamily: LABEL_FONT_FAMILY,
+        fontWeight: LABEL_FONT_WEIGHT,
+        outlineColor: labelTheme.outlineColor,
+        outlineWidth: SUBCATCHMENT_LABEL_OUTLINE_WIDTH,
         billboard: false,
         sizeUnits: 'pixels',
         pickable: false,
@@ -530,6 +755,7 @@ export function createLayerUtils({
     if (!state.channelLabelsVisible || !state.channelsVisible) return [];
     const labelData = Array.isArray(state.channelLabelsData) ? state.channelLabelsData : [];
     if (!labelData.length) return [];
+    const labelTheme = resolveLabelThemeStyles();
     return [
       new deck.TextLayer({
         id: 'channel-labels',
@@ -537,12 +763,12 @@ export function createLayerUtils({
         getPosition: (d) => d.position,
         getText: (d) => d.text,
         getSize: CHANNEL_LABEL_FONT_SIZE,
-        getColor: CHANNEL_LABEL_COLOR,
+        getColor: labelTheme.textColor,
         getTextAnchor: 'middle',
         getAlignmentBaseline: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontWeight: 'bold',
-        outlineColor: CHANNEL_LABEL_OUTLINE_COLOR,
+        fontFamily: LABEL_FONT_FAMILY,
+        fontWeight: LABEL_FONT_WEIGHT,
+        outlineColor: labelTheme.outlineColor,
         outlineWidth: CHANNEL_LABEL_OUTLINE_WIDTH,
         billboard: false,
         sizeUnits: 'pixels',
