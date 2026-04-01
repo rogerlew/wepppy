@@ -41,6 +41,25 @@ def _read_audit_lines(path: Path) -> list[str]:
     return [line.strip() for line in path.read_text().splitlines() if line.strip()]
 
 
+def test_canonical_disturbed_lookup_includes_bd_after_avke_with_blank_defaults() -> None:
+    lookup_path = (
+        Path(disturbed_module.__file__).resolve().parent
+        / "data"
+        / "disturbed_land_soil_lookup.csv"
+    )
+
+    with lookup_path.open() as fp:
+        reader = csv.DictReader(fp)
+        fieldnames = list(reader.fieldnames or [])
+        rows = list(reader)
+
+    assert "avke" in fieldnames
+    assert "bd" in fieldnames
+    assert fieldnames.index("bd") == fieldnames.index("avke") + 1
+    assert rows, "Canonical disturbed lookup should not be empty."
+    assert all((row.get("bd") or "").strip() == "" for row in rows)
+
+
 class TestLookupDisturbedClass:
     def test_strips_mulch_15_suffix(self) -> None:
         assert lookup_disturbed_class("forest moderate sev fire-mulch_15") == "forest moderate sev fire"
@@ -531,6 +550,72 @@ def test_upgrade_lookup_is_additive_and_preserves_user_modified_values(tmp_path:
     assert changed_again is False
     audit_lines = _read_audit_lines(tmp_path / "disturbed_lookup_audit.jsonl")
     assert any('"event":"lookup.schema_upgrade"' in line for line in audit_lines)
+
+
+def test_upgrade_lookup_adds_bd_column_after_avke_with_blank_default(tmp_path: Path) -> None:
+    default_path = tmp_path / "default_lookup.csv"
+    target_path = tmp_path / "target_lookup.csv"
+
+    default_fields = [
+        "luse",
+        "stext",
+        "ki",
+        "kr",
+        "shcrit",
+        "avke",
+        "bd",
+        "pmet_kcb",
+        "pmet_rawp",
+        "rdmax",
+        "xmxlai",
+        "keffflag",
+        "lkeff",
+    ]
+    _write_csv(
+        default_path,
+        default_fields,
+        [
+            {
+                "luse": "forest moderate sev fire",
+                "stext": "loam",
+                "ki": "110",
+                "kr": "1",
+                "shcrit": "0.5",
+                "avke": "20",
+                "bd": "",
+                "pmet_kcb": "0.95",
+                "pmet_rawp": "0.8",
+                "rdmax": "0.3",
+                "xmxlai": "4",
+                "keffflag": "1",
+                "lkeff": "1",
+            }
+        ],
+    )
+
+    _write_csv(
+        target_path,
+        ["luse", "stext", "ki", "kr", "shcrit", "avke"],
+        [
+            {
+                "luse": "forest moderate sev fire",
+                "stext": "loam",
+                "ki": "777",
+                "kr": "2",
+                "shcrit": "1.5",
+                "avke": "13",
+            }
+        ],
+    )
+
+    changed = upgrade_disturbed_land_soil_lookup(str(target_path), str(default_path))
+    assert changed is True
+
+    fieldnames, rows = _read_csv(target_path)
+    assert fieldnames.index("bd") == fieldnames.index("avke") + 1
+    row = rows[0]
+    assert row["ki"] == "777"
+    assert row["bd"] == ""
 
 
 def test_upgrade_legacy_disturbed_class_rows_remain_readable(tmp_path: Path) -> None:

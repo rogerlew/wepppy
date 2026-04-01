@@ -112,7 +112,13 @@ def test_modify_soil_uses_parent_soil_source_when_local_file_missing(
             self.clay = 30.0
             self.sand = 40.0
 
-        def to_over9000(self, replacements, h0_max_om=None, version=None):
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
             return _FakeWriter(writes)
 
     monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
@@ -151,7 +157,13 @@ def test_modify_soil_strips_treatment_suffix_for_lookup(
             self.clay = 30.0
             self.sand = 40.0
 
-        def to_over9000(self, replacements, h0_max_om=None, version=None):
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
             seen_replacements.append(dict(replacements))
             return _FakeWriter([])
 
@@ -189,7 +201,13 @@ def test_modify_soil_passes_copy_of_lookup_replacements(
             self.clay = 30.0
             self.sand = 40.0
 
-        def to_over9000(self, replacements, h0_max_om=None, version=None):
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
             replacements["ki"] = "mutated-by-converter"
             return _FakeWriter([])
 
@@ -202,6 +220,101 @@ def test_modify_soil_passes_copy_of_lookup_replacements(
     disturbed.modify_soil("101", landuse, soils, lookup)
 
     assert lookup_row["ki"] == "original"
+
+
+def test_modify_soil_forwards_rosetta_bd_toggle_to_converter(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-soil-rosetta-toggle")
+
+    source_file = run_dir / "soils" / "src.sol"
+    source_file.write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+    )
+    soils.rosetta_wc_fc_from_disturbed_bd_override = True
+    landuse = _FakeLanduse(
+        domlc_d={"101": "dom-1"},
+        managements={"dom-1": _ManagementSummary("forest high sev fire")},
+    )
+
+    forwarded_flags: list[bool] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            forwarded_flags.append(bool(recompute_wp_fc_using_rosetta_on_bd_override))
+            return _FakeWriter([])
+
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+
+    lookup = {("mock-texture", "forest high sev fire"): {"ki": "2", "bd": "1.6"}}
+    disturbed.modify_soil("101", landuse, soils, lookup)
+
+    assert forwarded_flags == [True]
+
+
+def test_modify_soil_forwards_rosetta_bd_toggle_to_7778_converter(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-soil-rosetta-toggle-7778")
+    disturbed._sol_ver = 7778.0
+
+    source_file = run_dir / "soils" / "src.sol"
+    source_file.write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+    )
+    soils.rosetta_wc_fc_from_disturbed_bd_override = True
+    landuse = _FakeLanduse(
+        domlc_d={"101": "dom-1"},
+        managements={"dom-1": _ManagementSummary("forest high sev fire")},
+    )
+
+    forwarded_flags: list[bool] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_7778disturbed(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+        ):
+            forwarded_flags.append(bool(recompute_wp_fc_using_rosetta_on_bd_override))
+            return _FakeWriter([])
+
+        def to_over9000(self, *args, **kwargs):  # pragma: no cover - defensive guard
+            raise AssertionError("to_over9000 should not be called for 7778 runs")
+
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+
+    lookup = {("mock-texture", "forest high sev fire"): {"ki": "2", "bd": "1.6"}}
+    disturbed.modify_soil("101", landuse, soils, lookup)
+
+    assert forwarded_flags == [True]
 
 
 def test_modify_soils_recomputes_area_and_pct_coverage(

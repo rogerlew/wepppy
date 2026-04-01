@@ -249,6 +249,7 @@ def test_clip_soils_advanced_template_renders_dual_depth_controls(
             clip_soils_depth=300,
             clip_soils_minimum=True,
             clip_soils_minimum_depth=150,
+            rosetta_wc_fc_from_disturbed_bd_override=True,
             initial_sat=0.75,
         )
     )
@@ -257,10 +258,12 @@ def test_clip_soils_advanced_template_renders_dual_depth_controls(
     assert "Soils Maximum Depth" in rendered
     assert "Clip Soils Minimum Depth" in rendered
     assert "Soils Minimum Depth" in rendered
+    assert "Estimate wc and fc using Rosetta when soils have bd override" in rendered
     assert 'id="clip_soils"' in rendered
     assert 'id="clip_soils_depth"' in rendered
     assert 'id="clip_soils_minimum"' in rendered
     assert 'id="clip_soils_minimum_depth"' in rendered
+    assert 'id="rosetta_wc_fc_from_disturbed_bd_override"' in rendered
 
 
 def test_poweruser_panel_parquet_table_links_do_not_append_trailing_slash(

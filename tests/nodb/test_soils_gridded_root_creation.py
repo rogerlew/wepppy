@@ -6,6 +6,7 @@ from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
+import jsonpickle
 import pytest
 
 from wepppy.nodb.core.soils import Soils
@@ -347,3 +348,30 @@ def test_init_reads_depth_config_keys_with_expected_names(
 
     assert ("soils", "clip_soils_depth", 1000) in float_calls
     assert ("soils", "clip_soils_minimum_depth", 0) in float_calls
+
+
+def test_rosetta_bd_toggle_round_trips_through_soils_nodb(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr("wepppy.nodb.base.redis_nodb_cache_client", None)
+
+    soils_nodb = wd / Soils.filename
+
+    payload = Soils.__new__(Soils)
+    payload.wd = str(wd)
+    payload._config = "dummy.cfg"
+    payload._rosetta_wc_fc_from_disturbed_bd_override = True
+
+    soils_nodb.write_text(jsonpickle.encode(payload), encoding="utf-8")
+
+    loaded = Soils.getInstance(str(wd), ignore_lock=True)
+    assert loaded.rosetta_wc_fc_from_disturbed_bd_override is True
+
+    loaded._rosetta_wc_fc_from_disturbed_bd_override = False
+    soils_nodb.write_text(jsonpickle.encode(loaded), encoding="utf-8")
+
+    loaded_again = Soils.getInstance(str(wd), ignore_lock=True)
+    assert loaded_again.rosetta_wc_fc_from_disturbed_bd_override is False

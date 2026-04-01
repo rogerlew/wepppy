@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-03-31  
+**Last Updated**: 2026-04-01  
 **Active Packages**: 4  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 5 packages ⚠️ **Above target**
+**Current WIP**: 4 packages ✅ **At target**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -601,6 +601,37 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Disturbed BD Override + Rosetta WC/FC Recompute
+**Completed**: 2026-04-01  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260401_disturbed_bd_rosetta_wc_fc/](docs/work-packages/20260401_disturbed_bd_rosetta_wc_fc/)  
+**Description**: Added disturbed lookup `bd` override support and an opt-in WEPP advanced option that recomputes top-horizon `wp/fc` using Rosetta when numeric disturbed `bd` overrides are present.
+
+**Outcome**:
+- Added canonical disturbed lookup schema change (`bd` after `avke`) with blank defaults and additive upgrade coverage.
+- Added persisted Soils flag `rosetta_wc_fc_from_disturbed_bd_override` plus WEPP advanced-options checkbox with exact requested label.
+- Wired checkbox serialization/persistence through rq-engine WEPP run/prep routes.
+- Implemented strict disturbed `bd` parsing/validation:
+  - empty value = no override,
+  - malformed non-numeric text = hard error,
+  - numeric bounds = `0.6-2.2 g/cm^3`.
+- Implemented top-horizon-only `bd` override + optional top-horizon Rosetta `wp/fc` recomputation in disturbed soil conversion.
+- Completed mandatory `reviewer` and `qa_reviewer` passes and resolved all medium/high findings with artifact capture.
+
+**Validation Notes**:
+- `wctl run-pytest tests/nodb/mods/disturbed/test_lookup_contract.py tests/nodb/mods/disturbed/test_modify_soils_single_ofe.py tests/nodb/mods/disturbed/test_modify_soils_mofe.py tests/wepp/soils/utils/test_wepp_soil_util.py tests/microservices/test_rq_engine_wepp_routes.py tests/nodb/test_soils_gridded_root_creation.py tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` (`154 passed`)
+- `wctl run-pytest tests/microservices/test_rq_engine_wepp_routes.py tests/microservices/test_rq_engine_soils_routes.py --maxfail=1` (`23 passed`)
+- `wctl run-pytest tests --maxfail=1` (`2952 passed, 36 skipped`)
+- `wctl run-npm lint` (pass)
+- `wctl run-npm test -- wepp` (pass)
+- `wctl check-test-stubs` (pass)
+- `wctl run-stubtest wepppy.wepp.soils.utils.wepp_soil_util` (pass)
+- `wctl run-stubtest wepppy.nodb.core.soils` (pass)
+
+---
 
 ### Disturbed Panel Modal and Landsoil Lookup UX Contract
 **Completed**: 2026-03-30  

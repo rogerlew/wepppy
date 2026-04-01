@@ -15,6 +15,9 @@ from typing import Any, Dict, List, Optional
 
 from wepppy.all_your_base import isfloat, try_parse, try_parse_float
 
+DISTURBED_BD_MIN_G_CM3 = 0.6
+DISTURBED_BD_MAX_G_CM3 = 2.2
+
 
 def _replace_parameter(original: Any, replacement: Any) -> Any:
     """Replace a parameter value, supporting multiplicative overrides like ``*1.2``."""
@@ -40,6 +43,67 @@ def _pars_to_string(d: Dict[str, Any]) -> str:
         else:
             kv_pairs.append(f"{k}={v}")
     return f"({', '.join(kv_pairs)})"
+
+
+def _parse_disturbed_bd_override(raw_bd: Any) -> Optional[float]:
+    """Parse an optional disturbed lookup bd override, enforcing strict bounds."""
+    if raw_bd is None:
+        return None
+
+    if isinstance(raw_bd, bool):
+        raise ValueError(
+            f"Invalid disturbed bd override {raw_bd!r}; expected numeric bulk density in g/cm^3."
+        )
+
+    raw_text = str(raw_bd).strip()
+    if raw_text == "":
+        return None
+
+    try:
+        bd_value = float(raw_text)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            f"Invalid disturbed bd override {raw_bd!r}; expected numeric bulk density in g/cm^3."
+        ) from exc
+
+    if not (DISTURBED_BD_MIN_G_CM3 <= bd_value <= DISTURBED_BD_MAX_G_CM3):
+        raise ValueError(
+            "Disturbed bd override out of bounds: "
+            f"{bd_value}. Expected {DISTURBED_BD_MIN_G_CM3}-{DISTURBED_BD_MAX_G_CM3} g/cm^3."
+        )
+
+    return bd_value
+
+
+def _compute_rosetta_wp_fc(horizon: Dict[str, Any]) -> tuple[float, float]:
+    """Compute wp/fc from Rosetta3 using top-horizon texture and bulk density."""
+    from rosetta import Rosetta3
+
+    clay = horizon.get("clay")
+    sand = horizon.get("sand")
+    bd = horizon.get("bd")
+    if not (isfloat(clay) and isfloat(sand) and isfloat(bd)):
+        raise ValueError(
+            "Cannot recompute disturbed wp/fc with Rosetta: top horizon requires numeric "
+            f"clay/sand/bd, got clay={clay!r}, sand={sand!r}, bd={bd!r}."
+        )
+
+    clay_f = float(clay)
+    sand_f = float(sand)
+    bd_f = float(bd)
+    silt_f = 100.0 - clay_f - sand_f
+
+    r3 = Rosetta3()
+    prediction = r3.predict_kwargs(clay=clay_f, sand=sand_f, silt=silt_f, bd=bd_f)
+    wp = prediction.get("wp")
+    fc = prediction.get("fc")
+    if not (isfloat(wp) and isfloat(fc)):
+        raise ValueError(
+            "Rosetta wp/fc recomputation returned non-numeric values: "
+            f"wp={wp!r}, fc={fc!r}."
+        )
+
+    return float(wp), float(fc)
 
 
 class WeppSoilUtil(object):
@@ -637,6 +701,7 @@ class WeppSoilUtil(object):
         h0_min_depth: Optional[float] = None,
         h0_max_om: Optional[float] = None,
         hostname: str = '',
+        recompute_wp_fc_using_rosetta_on_bd_override: bool = False,
     ) -> 'WeppSoilUtil':
         """Create a 7778-format soil tuned for disturbed (burn severity) scenarios.
 
@@ -697,6 +762,7 @@ class WeppSoilUtil(object):
         _kslast = replacements.get('kslast', None)
         _luse = replacements.get('luse', None)
         _stext = replacements.get('stext', None)
+        _bd_override = _parse_disturbed_bd_override(replacements.get('bd', None))
 
         ofes = []
         for i, ofe in enumerate(new.obj['ofes']):
@@ -735,6 +801,16 @@ class WeppSoilUtil(object):
 
             ofe['horizons'] = horizons
             ofe['nsl'] = len(horizons)
+
+            if _bd_override is not None and horizons:
+                top_horizon = horizons[0]
+                top_horizon['bd'] = _bd_override
+                header.append(f'ofe={i},horizon=0 bd set to {_bd_override}')
+                if recompute_wp_fc_using_rosetta_on_bd_override:
+                    wp, fc = _compute_rosetta_wp_fc(top_horizon)
+                    top_horizon['wp'] = round(wp, 4)
+                    top_horizon['fc'] = round(fc, 4)
+                    header.append(f'ofe={i},horizon=0 wp/fc recomputed using Rosetta3 with bd={_bd_override}')
 
             ofe['res_lyr']['kslast'] = _replace_parameter(ofe['res_lyr']['kslast'], _kslast)
             ofes.append(ofe)
@@ -802,6 +878,7 @@ class WeppSoilUtil(object):
         h0_max_om: Optional[float] = None,
         hostname: str = '',
         version: int = 9002,
+        recompute_wp_fc_using_rosetta_on_bd_override: bool = False,
     ) -> 'WeppSoilUtil':
         """Return a new migrated copy in the requested 900x WEPP soil format.
 
@@ -811,6 +888,9 @@ class WeppSoilUtil(object):
             h0_max_om: Optional cap on the first horizon's organic matter.
             hostname: Host identifier recorded for provenance.
             version: Target WEPP 900x version number (9001, 9002, 9003, 9005).
+            recompute_wp_fc_using_rosetta_on_bd_override:
+                Recompute top-horizon wp/fc from Rosetta when a numeric disturbed
+                bd override is present.
 
         Returns:
             A migrated :class:`WeppSoilUtil` copy configured for the requested
@@ -858,6 +938,7 @@ class WeppSoilUtil(object):
         _stext = replacements.get('stext', None)
         _lkeff = replacements.get('lkeff', '')
         _uksat = replacements.get('uksat', '')
+        _bd_override = _parse_disturbed_bd_override(replacements.get('bd', None))
 
         if _lkeff == '':
             _lkeff = '-9999'
@@ -917,6 +998,16 @@ class WeppSoilUtil(object):
 
             ofe['horizons'] = horizons
             ofe['nsl'] = len(horizons)
+
+            if _bd_override is not None and horizons:
+                top_horizon = horizons[0]
+                top_horizon['bd'] = _bd_override
+                header.append(f'ofe={i},horizon=0 bd set to {_bd_override}')
+                if recompute_wp_fc_using_rosetta_on_bd_override:
+                    wp, fc = _compute_rosetta_wp_fc(top_horizon)
+                    top_horizon['wp'] = round(wp, 4)
+                    top_horizon['fc'] = round(fc, 4)
+                    header.append(f'ofe={i},horizon=0 wp/fc recomputed using Rosetta3 with bd={_bd_override}')
 
             ofe['res_lyr']['kslast'] = _replace_parameter(ofe['res_lyr']['kslast'], _kslast)
             ofes.append(ofe)

@@ -100,7 +100,13 @@ def test_modify_mofe_soils_uses_base_lookup_class_for_treatments(
             self.clay = 30.0
             self.sand = 40.0
 
-        def to_over9000(self, replacements, h0_max_om=None, version=None):
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
             replacements_seen.append(dict(replacements))
             return _FakeWriter(write_paths)
 
@@ -159,7 +165,13 @@ def test_modify_mofe_soils_passes_copy_of_lookup_replacements(
             self.clay = 30.0
             self.sand = 40.0
 
-        def to_over9000(self, replacements, h0_max_om=None, version=None):
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
             replacements["ki"] = "mutated"
             return _FakeWriter([])
 
@@ -214,7 +226,13 @@ def test_modify_mofe_soils_sets_zero_pct_when_total_area_is_zero(
             self.clay = 30.0
             self.sand = 40.0
 
-        def to_over9000(self, replacements, h0_max_om=None, version=None):
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
             return _FakeWriter([])
 
     class _FakeMofeSynth:
@@ -240,3 +258,129 @@ def test_modify_mofe_soils_sets_zero_pct_when_total_area_is_zero(
     disturbed.modify_mofe_soils()
 
     assert all(soil.pct_coverage == 0.0 for soil in soils.soils.values())
+
+
+def test_modify_mofe_soils_forwards_rosetta_bd_toggle_to_converter(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-rosetta-toggle")
+    disturbed._sol_ver = 9005.0
+    (run_dir / "soils" / "src.sol").write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+    )
+    soils.rosetta_wc_fc_from_disturbed_bd_override = True
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1"}},
+        managements={"dom-1": _ManagementSummary("forest high sev fire")},
+    )
+    watershed = _FakeWatershed({"101": 1.0})
+
+    forwarded_flags: list[bool] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            forwarded_flags.append(bool(recompute_wp_fc_using_rosetta_on_bd_override))
+            return _FakeWriter([])
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            self.stack = stack
+
+        def write(self, path: str) -> None:
+            return
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(
+        Disturbed,
+        "land_soil_replacements_d",
+        property(lambda self: {("mock-texture", "forest high sev fire"): {"ki": "1", "bd": "1.6"}}),
+    )
+
+    disturbed.modify_mofe_soils()
+
+    assert forwarded_flags == [True]
+
+
+def test_modify_mofe_soils_forwards_rosetta_bd_toggle_to_7778_converter(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-rosetta-toggle-7778")
+    disturbed._sol_ver = 7778.0
+    (run_dir / "soils" / "src.sol").write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+    )
+    soils.rosetta_wc_fc_from_disturbed_bd_override = True
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1"}},
+        managements={"dom-1": _ManagementSummary("forest high sev fire")},
+    )
+    watershed = _FakeWatershed({"101": 1.0})
+
+    forwarded_flags: list[bool] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_7778disturbed(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+        ):
+            forwarded_flags.append(bool(recompute_wp_fc_using_rosetta_on_bd_override))
+            return _FakeWriter([])
+
+        def to_over9000(self, *args, **kwargs):  # pragma: no cover - defensive guard
+            raise AssertionError("to_over9000 should not be called for 7778 runs")
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            self.stack = stack
+
+        def write(self, path: str) -> None:
+            return
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(
+        Disturbed,
+        "land_soil_replacements_d",
+        property(lambda self: {("mock-texture", "forest high sev fire"): {"ki": "1", "bd": "1.6"}}),
+    )
+
+    disturbed.modify_mofe_soils()
+
+    assert forwarded_flags == [True]

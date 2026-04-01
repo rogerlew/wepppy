@@ -94,6 +94,9 @@ async def _handle_run_wepp_request(
 
         clip_soils = bool(_pop_scalar(controller_payload, "clip_soils", False))
         soils.clip_soils = clip_soils
+        soils.rosetta_wc_fc_from_disturbed_bd_override = bool(
+            _pop_scalar(controller_payload, "rosetta_wc_fc_from_disturbed_bd_override", False)
+        )
 
         clip_soils_depth = _parse_int(_pop_scalar(controller_payload, "clip_soils_depth"))
         if clip_soils_depth is not None:
@@ -238,6 +241,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     boolean_fields = {
         "clip_soils",
         "clip_soils_minimum",
+        "rosetta_wc_fc_from_disturbed_bd_override",
         "clip_hillslopes",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",
@@ -290,6 +294,7 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
     boolean_fields = {
         "clip_soils",
         "clip_soils_minimum",
+        "rosetta_wc_fc_from_disturbed_bd_override",
         "clip_hillslopes",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",
@@ -342,6 +347,7 @@ async def prep_wepp_watershed(runid: str, config: str, request: Request) -> JSON
     boolean_fields = {
         "clip_soils",
         "clip_soils_minimum",
+        "rosetta_wc_fc_from_disturbed_bd_override",
         "clip_hillslopes",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",

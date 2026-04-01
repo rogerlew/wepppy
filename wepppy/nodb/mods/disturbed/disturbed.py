@@ -1610,6 +1610,9 @@ class Disturbed(NoDbBase):
         soils = self.soils_instance
 
         _land_soil_replacements_d = self.land_soil_replacements_d
+        recompute_wp_fc_using_rosetta_on_bd_override = bool(
+            getattr(soils, 'rosetta_wc_fc_from_disturbed_bd_override', False)
+        )
 
         soils.logger.info(f'Disturbed::modify_mofe_soils, sol_ver: {sol_ver}')
 
@@ -1678,10 +1681,22 @@ class Disturbed(NoDbBase):
                         )
                         replacement_values = dict(replacements) if replacements is not None else None
                         if sol_ver == 7778.0:
-                            new = soil_u.to_7778disturbed(replacement_values, h0_max_om=_h0_max_om)
+                            new = soil_u.to_7778disturbed(
+                                replacement_values,
+                                h0_max_om=_h0_max_om,
+                                recompute_wp_fc_using_rosetta_on_bd_override=(
+                                    recompute_wp_fc_using_rosetta_on_bd_override
+                                ),
+                            )
                         else:
-                            new = soil_u.to_over9000(replacement_values, h0_max_om=_h0_max_om,
-                                                     version=sol_ver)
+                            new = soil_u.to_over9000(
+                                replacement_values,
+                                h0_max_om=_h0_max_om,
+                                recompute_wp_fc_using_rosetta_on_bd_override=(
+                                    recompute_wp_fc_using_rosetta_on_bd_override
+                                ),
+                                version=sol_ver,
+                            )
 
                         new.write(_join(soils.soils_dir, disturbed_fn))
 
@@ -1749,6 +1764,9 @@ class Disturbed(NoDbBase):
         mukey = soils_instance.domsoil_d[topaz_id]
         dom = landuse_instance.domlc_d[topaz_id]
         man = landuse_instance.managements[dom]
+        recompute_wp_fc_using_rosetta_on_bd_override = bool(
+            getattr(soils_instance, 'rosetta_wc_fc_from_disturbed_bd_override', False)
+        )
 
         soils_instance.logger.info(f'  Disturbed:: Disturbed.modify_soil(topaz_id={topaz_id}, mukey={mukey}, dom={dom})')
 
@@ -1812,10 +1830,22 @@ class Disturbed(NoDbBase):
                     )
                 )
                 if sol_ver == 7778.0:
-                    new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
+                    new = soil_u.to_7778disturbed(
+                        replacements,
+                        h0_max_om=_h0_max_om,
+                        recompute_wp_fc_using_rosetta_on_bd_override=(
+                            recompute_wp_fc_using_rosetta_on_bd_override
+                        ),
+                    )
                 else:
-                    new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om,
-                                                version=sol_ver)
+                    new = soil_u.to_over9000(
+                        replacements,
+                        h0_max_om=_h0_max_om,
+                        recompute_wp_fc_using_rosetta_on_bd_override=(
+                            recompute_wp_fc_using_rosetta_on_bd_override
+                        ),
+                        version=sol_ver,
+                    )
 
                 new.write(_join(soils_instance.soils_dir, disturbed_fn))
 

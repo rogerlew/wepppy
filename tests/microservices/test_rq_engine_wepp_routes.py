@@ -64,6 +64,7 @@ def _stub_wepp_stack(
         clip_soils_depth = None
         clip_soils_minimum = False
         clip_soils_minimum_depth = 0.0
+        rosetta_wc_fc_from_disturbed_bd_override = False
         initial_sat = None
 
     class DummyWatershed:
@@ -132,6 +133,7 @@ def test_run_wepp_persists_minimum_clip_fields(monkeypatch: pytest.MonkeyPatch) 
                 "clip_soils_depth": 300,
                 "clip_soils_minimum": True,
                 "clip_soils_minimum_depth": 120.5,
+                "rosetta_wc_fc_from_disturbed_bd_override": True,
             },
         )
 
@@ -142,6 +144,37 @@ def test_run_wepp_persists_minimum_clip_fields(monkeypatch: pytest.MonkeyPatch) 
     assert soils.clip_soils_depth == 300
     assert soils.clip_soils_minimum is True
     assert soils.clip_soils_minimum_depth == 120.5
+    assert soils.rosetta_wc_fc_from_disturbed_bd_override is True
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp",
+        "/api/runs/run-1/cfg/run-wepp-watershed",
+        "/api/runs/run-1/cfg/prep-wepp-watershed",
+    ],
+)
+def test_wepp_endpoints_persist_rosetta_bd_toggle(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-rosetta")
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            endpoint,
+            json={"rosetta_wc_fc_from_disturbed_bd_override": True},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-rosetta"
+    assert capture["soils"].rosetta_wc_fc_from_disturbed_bd_override is True
 
 
 @pytest.mark.parametrize(

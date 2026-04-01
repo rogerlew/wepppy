@@ -25,6 +25,7 @@ describe("Wepp controller", () => {
                 <input name="clip_soils" type="checkbox" checked>
                 <input name="clip_soils_minimum" type="checkbox">
                 <input name="clip_soils_minimum_depth" type="number" value="200">
+                <input name="rosetta_wc_fc_from_disturbed_bd_override" type="checkbox" checked>
                 <input name="clip_hillslopes" type="checkbox">
                 <input name="initial_sat" type="number" value="0.3">
                 <select id="channel_critical_shear">
@@ -149,6 +150,7 @@ describe("Wepp controller", () => {
                 clip_soils: true,
                 clip_soils_minimum: false,
                 clip_soils_minimum_depth: "200",
+                rosetta_wc_fc_from_disturbed_bd_override: true,
                 initial_sat: "0.3"
             }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
@@ -191,6 +193,7 @@ describe("Wepp controller", () => {
                 clip_soils: true,
                 clip_soils_minimum: false,
                 clip_soils_minimum_depth: "200",
+                rosetta_wc_fc_from_disturbed_bd_override: true,
                 initial_sat: "0.3"
             }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
@@ -217,6 +220,7 @@ describe("Wepp controller", () => {
                 clip_soils: true,
                 clip_soils_minimum: false,
                 clip_soils_minimum_depth: "200",
+                rosetta_wc_fc_from_disturbed_bd_override: true,
                 initial_sat: "0.3"
             }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
@@ -274,6 +278,7 @@ describe("Wepp controller", () => {
                 clip_soils: true,
                 clip_soils_minimum: false,
                 clip_soils_minimum_depth: "200",
+                rosetta_wc_fc_from_disturbed_bd_override: true,
                 initial_sat: "0.3"
             }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })

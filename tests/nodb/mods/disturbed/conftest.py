@@ -9,6 +9,15 @@ import pytest
 from wepppy.nodb.mods.disturbed.disturbed import Disturbed
 
 
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--live-disturbed-lookup-e2e",
+        action="store_true",
+        default=False,
+        help="Run the live disturbed lookup E2E suite against the configured remote service.",
+    )
+
+
 class NoopLogger:
     def info(self, *_args: object, **_kwargs: object) -> None:
         return

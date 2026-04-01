@@ -623,6 +623,96 @@ def test_to_over9000_prefers_ksat_when_avke_is_falsey(make_soil_util):
     assert disturbed.obj["ofes"][0]["horizons"][0]["ksat"] == "7.5"
 
 
+def test_to_over9000_applies_bd_override_only_to_top_horizon(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={"bd": "1.65"},
+        version=9002,
+    )
+
+    horizons = disturbed.obj["ofes"][0]["horizons"]
+    assert horizons[0]["bd"] == pytest.approx(1.65)
+    assert horizons[1]["bd"] == 1.3
+
+
+def test_to_over9000_blank_bd_override_is_noop_even_when_recompute_enabled(make_soil_util):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(
+        replacements={"bd": ""},
+        recompute_wp_fc_using_rosetta_on_bd_override=True,
+        version=9002,
+    )
+
+    top_horizon = disturbed.obj["ofes"][0]["horizons"][0]
+    assert top_horizon["bd"] == 1.2
+    assert top_horizon["wp"] == 0.1
+    assert top_horizon["fc"] == 0.3
+
+
+def test_to_over9000_rejects_non_numeric_bd_override(make_soil_util):
+    util = make_soil_util()
+
+    with pytest.raises(ValueError, match="Invalid disturbed bd override"):
+        util.to_over9000(replacements={"bd": "10.0.0"}, version=9002)
+
+
+def test_to_over9000_rejects_out_of_bounds_bd_override(make_soil_util):
+    util = make_soil_util()
+
+    with pytest.raises(ValueError, match="Disturbed bd override out of bounds"):
+        util.to_over9000(replacements={"bd": "2.3"}, version=9002)
+
+
+@pytest.mark.parametrize("bd_value", ["0.6", "2.2"])
+def test_to_over9000_accepts_boundary_bd_override_values(make_soil_util, bd_value):
+    util = make_soil_util()
+
+    disturbed = util.to_over9000(replacements={"bd": bd_value}, version=9002)
+
+    assert disturbed.obj["ofes"][0]["horizons"][0]["bd"] == pytest.approx(float(bd_value))
+
+
+def test_to_7778disturbed_rejects_non_numeric_bd_override(make_soil_util):
+    util = make_soil_util()
+
+    with pytest.raises(ValueError, match="Invalid disturbed bd override"):
+        util.to_7778disturbed(replacements={"bd": "10.0.0"})
+
+
+def test_to_over9000_recomputes_wp_fc_with_rosetta_for_top_horizon_only(
+    make_soil_util,
+    monkeypatch,
+):
+    util = make_soil_util()
+    rosetta_calls = []
+
+    class _FakeRosetta3:
+        def predict_kwargs(self, **kwargs):
+            rosetta_calls.append(kwargs)
+            return {"wp": 0.21987, "fc": 0.41234}
+
+    rosetta_stub = types.ModuleType("rosetta")
+    rosetta_stub.Rosetta3 = _FakeRosetta3
+    monkeypatch.setitem(sys.modules, "rosetta", rosetta_stub)
+
+    disturbed = util.to_over9000(
+        replacements={"bd": "1.6"},
+        recompute_wp_fc_using_rosetta_on_bd_override=True,
+        version=9002,
+    )
+
+    horizons = disturbed.obj["ofes"][0]["horizons"]
+    assert horizons[0]["bd"] == pytest.approx(1.6)
+    assert horizons[0]["wp"] == pytest.approx(0.2199)
+    assert horizons[0]["fc"] == pytest.approx(0.4123)
+    assert horizons[1]["wp"] == 0.12
+    assert horizons[1]["fc"] == 0.35
+    assert len(rosetta_calls) == 1
+    assert rosetta_calls[0]["bd"] == pytest.approx(1.6)
+
+
 @pytest.mark.parametrize("version", [9001, 9002])
 def test_to_over9000_versions_9001_9002_update_ksatfac_ksatrec(
     make_soil_util,

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+DISTURBED_BD_MIN_G_CM3: float
+DISTURBED_BD_MAX_G_CM3: float
+
 class WeppSoilUtil:
     obj: Dict[str, Any]
     fn: str
@@ -23,6 +26,7 @@ class WeppSoilUtil:
         h0_min_depth: Optional[float] = ...,
         h0_max_om: Optional[float] = ...,
         hostname: str = ...,
+        recompute_wp_fc_using_rosetta_on_bd_override: bool = ...,
     ) -> WeppSoilUtil: ...
     def to9001(self, replacements: Optional[Dict[str, Any]], h0_min_depth: Optional[float] = ..., h0_max_om: Optional[float] = ..., hostname: str = ...) -> WeppSoilUtil: ...
     def to9002(self, replacements: Optional[Dict[str, Any]], h0_min_depth: Optional[float] = ..., h0_max_om: Optional[float] = ..., hostname: str = ...) -> WeppSoilUtil: ...
@@ -35,6 +39,7 @@ class WeppSoilUtil:
         h0_max_om: Optional[float] = ...,
         hostname: str = ...,
         version: int = ...,
+        recompute_wp_fc_using_rosetta_on_bd_override: bool = ...,
     ) -> WeppSoilUtil: ...
     def dump_bson(self, dst: str) -> None: ...
     def write(self, fn: str) -> None: ...

@@ -225,6 +225,11 @@ class Soils(NoDbBase):
             self._clip_soils_depth = self.config_get_float('soils', 'clip_soils_depth', 1000)
             self._clip_soils_minimum = self.config_get_bool('soils', 'clip_soils_minimum', False)
             self._clip_soils_minimum_depth = self.config_get_float('soils', 'clip_soils_minimum_depth', 0)
+            self._rosetta_wc_fc_from_disturbed_bd_override = self.config_get_bool(
+                'soils',
+                'rosetta_wc_fc_from_disturbed_bd_override',
+                False,
+            )
             self._soils_is_vrt = False
 
             self._soils_map = self.config_get_path('soils', 'soils_map', None)
@@ -297,6 +302,15 @@ class Soils(NoDbBase):
     @nodb_setter
     def initial_sat(self, value: float) -> None:
         self._initial_sat = value
+
+    @property
+    def rosetta_wc_fc_from_disturbed_bd_override(self) -> bool:
+        return bool(getattr(self, '_rosetta_wc_fc_from_disturbed_bd_override', False))
+
+    @rosetta_wc_fc_from_disturbed_bd_override.setter
+    @nodb_setter
+    def rosetta_wc_fc_from_disturbed_bd_override(self, value: bool) -> None:
+        self._rosetta_wc_fc_from_disturbed_bd_override = bool(value)
 
     @property
     def ksflag(self) -> bool:
