@@ -56,6 +56,10 @@ jobs:
       run: |
         set -euo pipefail
         wctl run-npm install
+    - name: Install Playwright browsers
+      run: |
+        set -euo pipefail
+        wctl run-npm exec -- playwright install chromium
     - name: Run targeted accessibility pytest assertions
       run: |
         set -euo pipefail

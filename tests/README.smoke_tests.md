@@ -10,7 +10,7 @@ This document explains how to run the UI smoke suite, provision disposable runs,
   npm install
   npx playwright install
   ```
-  (or via `wctl run-npm install` + `wctl run-npm exec -- npx playwright install`).
+  (or via `wctl run-npm install` + `wctl run-npm exec -- playwright install`).
 
 ## 2. Profiles and `wctl run-smoke`
 
