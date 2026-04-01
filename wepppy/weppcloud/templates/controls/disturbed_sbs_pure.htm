@@ -47,6 +47,10 @@
     Raster uploads should use <abbr title="unsigned 8-bit integer">uint8</abbr> or short integer values, preferably in UTM projection.
     Maps with color tables automatically adopt their color scale for severity classes.
   </p>
+  <p class="wc-text-muted">
+    For the upload checklist (single-band integer raster, valid projection, class-count limit, and common validation fixes), see
+    {{ usersum_doc_link('src', 'wepppy/nodb/mods/baer/README.sbs_map.md', 'SBS map preparation guidance', section='Preparing SBS Map for wepp.cloud') }}.
+  </p>
 {% endset %}
 
 {% call ui.control_shell(
