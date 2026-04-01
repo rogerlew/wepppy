@@ -60,10 +60,21 @@
   "July", "August", "September", "October", "November", "December"
 ] %}
 {% set monthly_scale_factors = climate.precip_monthly_scale_factors if climate.precip_monthly_scale_factors else [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] %}
+{% set description %}
+  <p class="wc-text-muted">
+    Configure climate source, station selection, spatial climate handling, and optional precipitation/wind adjustments
+    before running WEPP.
+  </p>
+  <p class="wc-text-muted">
+    For detailed guidance on every climate option, station mode, spatial mode, and advanced setting, see
+    {{ usersum_doc_link('weppcloud', 'climate-options.md', 'Climate Options documentation') }}.
+  </p>
+{% endset %}
 
 {% call ui.control_shell(
      form_id="climate_form",
      title="Climate Options",
+     description=description,
      form_attrs={"data-controller": "climate"},
      collapsible=True,
      status_panel_options={"id": "climate_status_panel"},
