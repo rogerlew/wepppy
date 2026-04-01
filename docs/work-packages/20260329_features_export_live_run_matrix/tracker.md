@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Started**: 2026-03-29  
-**Current phase**: Complete (Phase 2 Omni scenario/contrast matrix closed)  
-**Last updated**: 2026-03-29  
+**Current phase**: Complete (Phase 3 bd variant rerun closed)  
+**Last updated**: 2026-04-01  
 **Next milestone**: Optional follow-up package for SWAT/AgFields live-run matrix parity.
 
 ## Task Board
@@ -47,6 +47,14 @@
   - `artifacts/manual_sanity_notes_phase2_omni.md`
   - `artifacts/defect_log_phase2_omni.md`
   (2026-03-29)
+- [x] Added disturbed lookup `bd` variant matrix group `I1` in harness (`base|extended` x `blank|numeric`) with lookup precondition plumbing and state restore guards. (2026-04-01)
+- [x] Executed full rerun matrix (Phase 1 + expansion + Phase 2 Omni) with timestamped rerun artifacts:
+  - `artifacts/matrix_results_rerun_20260401_023942.jsonl` (140 rows, 0 failures)
+  - `artifacts/manual_sanity_notes_rerun_20260401_023942_phase1.md`
+  - `artifacts/defect_log_rerun_20260401_023942_phase1.md`
+  - `artifacts/manual_sanity_notes_rerun_20260401_023942_phase2_omni.md`
+  - `artifacts/defect_log_rerun_20260401_023942_phase2_omni.md`
+  (2026-04-01)
 
 ## Timeline
 
@@ -58,6 +66,8 @@
 - **2026-03-29** - Completed required pytest/Jest validation commands.
 - **2026-03-29** - Reopened package as Phase 2 to execute Omni scenarios/contrasts validation on `walk-in-obsessive-compulsive/disturbed9002_wbt` (single OFE context).
 - **2026-03-29** - Completed Phase 2 Omni matrix execution (`H1-H4`: 26/26 pass) and published dedicated Omni evidence artifacts.
+- **2026-04-01** - Extended matrix harness with disturbed lookup `bd` variant group `I1` (`base|extended` x `blank|numeric`) and lookup snapshot/restore safety.
+- **2026-04-01** - Executed full rerun matrix with timestamped artifacts (`matrix_results_rerun_20260401_023942.jsonl`: 140/140 pass, includes `I1` 4/4).
 
 ## Decisions
 
@@ -107,6 +117,17 @@
 
 **Impact**: Removed selector drift risk and guaranteed `H1-H4` coverage targets selectors with materializable source files.
 
+### 2026-04-01: Model `bd` variant coverage as matrix preconditions, not payload mutations
+**Context**: Need matrix coverage for disturbed lookup `bd` blank/numeric behavior across both lookup variants without changing features_export request contracts.
+
+**Options considered**:
+1. Add request payload parameters to control disturbed lookup variant and `bd` mode.
+2. Apply deterministic disturbed lookup preconditions in the runner before each case and keep payload contract unchanged.
+
+**Decision**: Add runner-level preconditions (`lookup_variant`, `bd_mode`) and restore disturbed lookup files + active variant after execution.
+
+**Impact**: Added targeted `I1` coverage while preserving export API contracts and preventing lookup-state leakage across matrix runs.
+
 ## Risks and Mitigations
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -124,6 +145,9 @@
 - [x] `wctl run-pytest tests/microservices/test_rq_engine_features_export_routes.py --maxfail=1`
 - [x] `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1`
 - [x] `wctl run-npm test -- features_export`
+- [x] Full rerun matrix (timestamped artifacts):
+  - `wctl run-python -- docs/work-packages/20260329_features_export_live_run_matrix/artifacts/run_live_matrix.py --runid clogging-starch --config disturbed9002-wbt-mofe --results-path docs/work-packages/20260329_features_export_live_run_matrix/artifacts/matrix_results_rerun_20260401_023942.jsonl --manual-notes-path docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_rerun_20260401_023942_phase1.md --defect-log-path docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_rerun_20260401_023942_phase1.md`
+  - `wctl run-python -- docs/work-packages/20260329_features_export_live_run_matrix/artifacts/run_live_matrix.py --phase phase2_omni --runid walk-in-obsessive-compulsive --config disturbed9002_wbt --results-path docs/work-packages/20260329_features_export_live_run_matrix/artifacts/matrix_results_rerun_20260401_023942.jsonl --append-results --manual-notes-path docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_rerun_20260401_023942_phase2_omni.md --defect-log-path docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_rerun_20260401_023942_phase2_omni.md`
 
 ### Manual Sanity Evidence
 - [x] `Gate-1`: one successful manual case per format with evidence under `artifacts/`.
@@ -198,3 +222,30 @@
 
 **Next Steps**:
 - None in this package. Ready for final reviewer handoff.
+
+### 2026-04-01 - Phase 3 Rerun (Disturbed `bd` Variant Coverage)
+**Agent**: Codex
+
+**Completed**:
+- Extended `artifacts/run_live_matrix.py` with `I1` matrix group:
+  - `i1_bd_base_blank`
+  - `i1_bd_base_numeric`
+  - `i1_bd_extended_blank`
+  - `i1_bd_extended_numeric`
+- Added disturbed lookup precondition plumbing to set target `bd` cell values per case and switch lookup variant deterministically.
+- Added snapshot/restore of disturbed lookup state (`base`, `extended`, `active_lookup_variant`) so reruns are state-safe.
+- Executed full matrix rerun with timestamped artifacts:
+  - Total rows: 140
+  - Passed: 140
+  - Failed: 0
+  - `I1`: 4/4
+
+**Evidence**:
+- `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/matrix_results_rerun_20260401_023942.jsonl`
+- `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_rerun_20260401_023942_phase1.md`
+- `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_rerun_20260401_023942_phase1.md`
+- `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_rerun_20260401_023942_phase2_omni.md`
+- `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_rerun_20260401_023942_phase2_omni.md`
+
+**Next Steps**:
+- None in this package. Rerun closure evidence is complete.

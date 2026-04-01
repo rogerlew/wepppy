@@ -26,6 +26,8 @@ This plan establishes release-confidence for Features Export by validating real 
 - [x] (2026-03-29) Defined Omni scenario and Omni contrast case groups on `walk-in-obsessive-compulsive/disturbed9002_wbt` (single-OFE run).
 - [x] (2026-03-29) Executed Omni `Gate-1` sentinel exports and captured artifacts.
 - [x] (2026-03-29) Executed Omni expansion matrix groups and appended evidence/results.
+- [x] (2026-04-01) Extended expansion matrix with disturbed lookup `bd` variant group `I1` (`base|extended` x `blank|numeric`) via runner preconditions.
+- [x] (2026-04-01) Executed full rerun matrix with timestamped artifacts; all 140 rows passed (`I1`: 4/4).
 
 ## Surprises & Discoveries
 
@@ -52,6 +54,9 @@ This plan establishes release-confidence for Features Export by validating real 
 
 - Observation: Omni scope-invariant exports continue to emit backend `scope_not_applicable` warnings when `output_scopes=["baseline","roads"]`; these are informational and do not affect artifact correctness.
   Evidence: `h4_scope_roads_scenario` and `h4_scope_roads_contrast` warning-code assertions.
+
+- Observation: Disturbed lookup mutation for `I1` requires explicit state restoration to avoid leaking lookup variant/CSV edits into subsequent matrix runs.
+  Evidence: `run_live_matrix.py` now snapshots and restores `disturbed.active_lookup_variant` and both lookup CSV files in `finally` around execution.
 
 ## Decision Log
 
@@ -99,6 +104,10 @@ This plan establishes release-confidence for Features Export by validating real 
   Rationale: Current specification requires explicit materialization failure when required sources cannot satisfy requested temporal selectors.
   Date/Author: 2026-03-29 / Codex.
 
+- Decision: Add disturbed `bd` coverage using runner-level preconditions (`lookup_variant`, `bd_mode`) instead of introducing new Features Export request fields.
+  Rationale: Coverage requirement targets disturbed lookup state, and payload contract changes were out of scope.
+  Date/Author: 2026-04-01 / Codex.
+
 ## Outcomes & Retrospective
 
 Phase 1 matrix execution completed with strict gate order:
@@ -135,6 +144,19 @@ Phase 2 status:
   - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_phase2_omni.md`
 - Shared matrix ledger appended with Omni rows:
   - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/matrix_results.jsonl` now contains 136 rows total (110 Phase-1 + 26 Phase-2), 0 new failures.
+- Phase 3 rerun status:
+  - Disturbed lookup `bd` variant coverage added as group `I1`:
+    - `i1_bd_base_blank`
+    - `i1_bd_base_numeric`
+    - `i1_bd_extended_blank`
+    - `i1_bd_extended_numeric`
+  - Full rerun artifacts (`20260401_023942`) show 140/140 passed rows, including `I1` 4/4.
+  - Rerun evidence:
+    - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/matrix_results_rerun_20260401_023942.jsonl`
+    - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_rerun_20260401_023942_phase1.md`
+    - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_rerun_20260401_023942_phase1.md`
+    - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_rerun_20260401_023942_phase2_omni.md`
+    - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_rerun_20260401_023942_phase2_omni.md`
 
 ## Context and Orientation
 
@@ -203,9 +225,10 @@ Artifacts are zip bundles. Valid exports must include `manifest.json`, `profile.
 - F2: 8 runs (additional negative payload contract)
 - G1: 4 runs (units numeric oracle checks)
 - G2: UI regression checks via Jest/route suites (no export job submissions)
+- I1: 4 runs (disturbed lookup `bd` variant coverage: `base|extended` x `blank|numeric`)
 
 Core total (`A-E`): 78 runs (77 positive + 1 negative).  
-Expanded total (`A-G`): 97 export-job runs + UI regression test suites.
+Expanded total (`A-G+I1`): 101 export-job runs + UI regression test suites.
 
 Phase 2 Omni reopen additions:
 - H1: Omni scenario exports on single-OFE run (`omni_scenarios` family).
@@ -310,6 +333,7 @@ Target artifacts to capture:
 - `matrix_results.jsonl` with one row per case.
 - `manual_sanity_notes.md` with 7 format spot checks.
 - `defect_log.md` with bug -> fix -> rerun evidence.
+- timestamped rerun artifacts when full-matrix reruns are executed (for example `matrix_results_rerun_20260401_023942.jsonl` with paired phase1/phase2 notes and defect logs).
 
 ## Interfaces and Dependencies
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import io
@@ -21,6 +22,7 @@ import pandas as pd
 
 from wepppy.nodb.mods.features_export.contracts import FeaturesExportValidationError
 from wepppy.nodb.mods.features_export.service import FeaturesExportServiceError, execute_features_export
+from wepppy.nodb.mods.disturbed.disturbed import Disturbed
 
 SPATIAL_FORMATS = ("geojson", "geoparquet", "kmz", "geopackage", "geodatabase")
 TABULAR_FORMATS = ("parquet", "csv")
@@ -45,6 +47,8 @@ DATE_WIDE_RE = re.compile(r"_\d{4}_\d{2}_\d{2}$")
 PHASE1_PLAN = "phase1"
 PHASE2_OMNI_PLAN = "phase2_omni"
 ASH_WATAR_LAYER_ID = "ash.transport.hillslope_annuals"
+DISTURBED_LOOKUP_VARIANTS = ("base", "extended")
+DISTURBED_BD_MODES = ("blank", "numeric")
 
 
 @dataclass(frozen=True)
@@ -59,6 +63,17 @@ class MatrixCase:
     expected_code: str | None = None
     expect_cache_hit: bool | None = None
     reference_case_id: str | None = None
+    lookup_variant: str | None = None
+    bd_mode: str | None = None
+
+
+@dataclass(frozen=True)
+class DisturbedLookupSnapshot:
+    active_lookup_variant: str
+    base_exists: bool
+    base_bytes: bytes | None
+    extended_exists: bool
+    extended_bytes: bytes | None
 
 
 def _utc_now_iso() -> str:
@@ -150,6 +165,114 @@ def _payload(
     if contrast_ids:
         payload["contrast_ids"] = contrast_ids
     return payload
+
+
+def _read_lookup_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        fieldnames = list(reader.fieldnames or [])
+        rows = [dict(row) for row in reader]
+    return fieldnames, rows
+
+
+def _write_lookup_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _set_lookup_bd_mode(lookup_csv: Path, bd_mode: str) -> dict[str, str]:
+    if bd_mode not in DISTURBED_BD_MODES:
+        raise ValueError(f"Unsupported bd_mode {bd_mode!r}; expected one of {DISTURBED_BD_MODES}.")
+
+    fieldnames, rows = _read_lookup_csv(lookup_csv)
+    if "bd" not in fieldnames:
+        raise ValueError(f"Lookup file {lookup_csv} does not contain required 'bd' column.")
+    if not rows:
+        raise ValueError(f"Lookup file {lookup_csv} has no rows.")
+
+    target_row: dict[str, str] | None = None
+    for row in rows:
+        if str(row.get("luse", "")).strip() == "forest moderate sev fire" and str(row.get("stext", "")).strip() == "loam":
+            target_row = row
+            break
+    if target_row is None:
+        target_row = rows[0]
+
+    target_row["bd"] = "" if bd_mode == "blank" else "1.6"
+    _write_lookup_csv(lookup_csv, fieldnames, rows)
+    return {
+        "target_luse": str(target_row.get("luse", "")),
+        "target_stext": str(target_row.get("stext", "")),
+        "bd_value": str(target_row.get("bd", "")),
+    }
+
+
+def _capture_disturbed_lookup_snapshot(wd: Path) -> DisturbedLookupSnapshot:
+    disturbed = Disturbed.getInstance(str(wd))
+    base_lookup = Path(disturbed.lookup_fn)
+    extended_lookup = Path(disturbed.extended_lookup_fn)
+
+    return DisturbedLookupSnapshot(
+        active_lookup_variant=disturbed.active_lookup_variant,
+        base_exists=base_lookup.exists(),
+        base_bytes=base_lookup.read_bytes() if base_lookup.exists() else None,
+        extended_exists=extended_lookup.exists(),
+        extended_bytes=extended_lookup.read_bytes() if extended_lookup.exists() else None,
+    )
+
+
+def _restore_disturbed_lookup_snapshot(wd: Path, snapshot: DisturbedLookupSnapshot) -> None:
+    disturbed = Disturbed.getInstance(str(wd))
+    base_lookup = Path(disturbed.lookup_fn)
+    extended_lookup = Path(disturbed.extended_lookup_fn)
+
+    if snapshot.base_exists:
+        assert snapshot.base_bytes is not None
+        base_lookup.write_bytes(snapshot.base_bytes)
+    elif base_lookup.exists():
+        base_lookup.unlink()
+
+    if snapshot.extended_exists:
+        assert snapshot.extended_bytes is not None
+        extended_lookup.write_bytes(snapshot.extended_bytes)
+    elif extended_lookup.exists():
+        extended_lookup.unlink()
+
+    disturbed.active_lookup_variant = snapshot.active_lookup_variant
+
+
+def _apply_disturbed_bd_precondition(
+    *,
+    wd: Path,
+    lookup_variant: str,
+    bd_mode: str,
+) -> dict[str, str]:
+    if lookup_variant not in DISTURBED_LOOKUP_VARIANTS:
+        raise ValueError(
+            f"Unsupported lookup_variant {lookup_variant!r}; expected one of {DISTURBED_LOOKUP_VARIANTS}."
+        )
+
+    disturbed = Disturbed.getInstance(str(wd))
+    disturbed.ensure_land_soil_lookup_schema()
+
+    if lookup_variant == "extended":
+        if not Path(disturbed.extended_lookup_fn).exists():
+            disturbed.build_extended_land_soil_lookup()
+        target_lookup = Path(disturbed.extended_lookup_fn)
+    else:
+        target_lookup = Path(disturbed.lookup_fn)
+
+    bd_target = _set_lookup_bd_mode(target_lookup, bd_mode)
+    disturbed.active_lookup_variant = lookup_variant
+
+    return {
+        "lookup_variant": lookup_variant,
+        "lookup_path": str(target_lookup),
+        "bd_mode": bd_mode,
+        **bd_target,
+    }
 
 
 def build_gate1_cases() -> list[MatrixCase]:
@@ -758,6 +881,29 @@ def build_expansion_cases(*, include_ash_watar: bool = False) -> list[MatrixCase
             ),
         ]
     )
+
+    for lookup_variant in DISTURBED_LOOKUP_VARIANTS:
+        for bd_mode in DISTURBED_BD_MODES:
+            cases.append(
+                MatrixCase(
+                    case_id=f"i1_bd_{lookup_variant}_{bd_mode}",
+                    gate="expansion",
+                    group="I1",
+                    description=(
+                        "Disturbed lookup bd matrix coverage "
+                        f"({lookup_variant}, {bd_mode})."
+                    ),
+                    payload=_payload(
+                        format_token="parquet",
+                        layers=["wepp.summary.hillslopes"],
+                        units="si",
+                        crs="wgs",
+                        tabular={"concatenate_tables": False, "temporal_layout": "wide"},
+                    ),
+                    lookup_variant=lookup_variant,
+                    bd_mode=bd_mode,
+                )
+            )
 
     return cases
 
@@ -1498,6 +1644,17 @@ def execute_cases(
         row["job_id"] = job_id
 
         try:
+            if case.lookup_variant is not None or case.bd_mode is not None:
+                if case.lookup_variant is None or case.bd_mode is None:
+                    raise ValueError(
+                        f"Case {case.case_id} must define both lookup_variant and bd_mode when using bd preconditions."
+                    )
+                row["lookup_precondition"] = _apply_disturbed_bd_precondition(
+                    wd=wd,
+                    lookup_variant=case.lookup_variant,
+                    bd_mode=case.bd_mode,
+                )
+
             result = execute_features_export(
                 wd,
                 runid=runid,
@@ -1662,6 +1819,15 @@ def _write_manual_sanity_notes(
         ],
         "Ash/WATAR Coverage",
     )
+    append_case_details(
+        [
+            "i1_bd_base_blank",
+            "i1_bd_base_numeric",
+            "i1_bd_extended_blank",
+            "i1_bd_extended_numeric",
+        ],
+        "Disturbed BD Variant Coverage (I1)",
+    )
 
     notes_path.write_text("\n".join(lines), encoding="utf-8")
 
@@ -1776,37 +1942,96 @@ def main() -> int:
     else:
         print("No ash assets detected in run path; skipping optional Ash/WATAR matrix cases (A3/F3).")
     result_by_case_id: dict[str, dict[str, Any]] = {}
+    disturbed_lookup_snapshot = _capture_disturbed_lookup_snapshot(wd)
 
-    if args.phase == PHASE2_OMNI_PLAN:
-        scenario_ids, contrast_ids = discover_omni_phase2_selectors(wd)
-        phase2_cases = build_phase2_omni_cases(
-            scenario_ids=scenario_ids,
-            contrast_ids=contrast_ids,
-        )
-        sentinel_cases = [case for case in phase2_cases if case.gate == "phase2_gate1"]
-        expansion_cases = [case for case in phase2_cases if case.gate == "phase2_expansion"]
+    try:
+        if args.phase == PHASE2_OMNI_PLAN:
+            scenario_ids, contrast_ids = discover_omni_phase2_selectors(wd)
+            phase2_cases = build_phase2_omni_cases(
+                scenario_ids=scenario_ids,
+                contrast_ids=contrast_ids,
+            )
+            sentinel_cases = [case for case in phase2_cases if case.gate == "phase2_gate1"]
+            expansion_cases = [case for case in phase2_cases if case.gate == "phase2_expansion"]
 
-        sentinel_ok = execute_cases(
-            cases=sentinel_cases,
-            wd=wd,
-            runid=args.runid,
-            config=args.config,
-            results_path=results_path,
-            result_by_case_id=result_by_case_id,
-            oracle_topaz_ids=oracle_topaz_ids,
-            oracle_wepp_ids=oracle_wepp_ids,
-        )
-        if not sentinel_ok:
+            sentinel_ok = execute_cases(
+                cases=sentinel_cases,
+                wd=wd,
+                runid=args.runid,
+                config=args.config,
+                results_path=results_path,
+                result_by_case_id=result_by_case_id,
+                oracle_topaz_ids=oracle_topaz_ids,
+                oracle_wepp_ids=oracle_wepp_ids,
+            )
+            if not sentinel_ok:
+                _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
+                _write_defect_log(
+                    defect_path=defect_log_path,
+                    result_by_case_id=result_by_case_id,
+                    numeric_oracle_row=None,
+                )
+                return 1
+
+            expansion_ok = execute_cases(
+                cases=expansion_cases,
+                wd=wd,
+                runid=args.runid,
+                config=args.config,
+                results_path=results_path,
+                result_by_case_id=result_by_case_id,
+                oracle_topaz_ids=oracle_topaz_ids,
+                oracle_wepp_ids=oracle_wepp_ids,
+            )
+
             _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
             _write_defect_log(
                 defect_path=defect_log_path,
                 result_by_case_id=result_by_case_id,
                 numeric_oracle_row=None,
             )
+            return 0 if expansion_ok else 1
+
+        gate1_ok = execute_cases(
+            cases=build_gate1_cases(),
+            wd=wd,
+            runid=args.runid,
+            config=args.config,
+            results_path=results_path,
+            result_by_case_id=result_by_case_id,
+            oracle_topaz_ids=oracle_topaz_ids,
+            oracle_wepp_ids=oracle_wepp_ids,
+        )
+        if not gate1_ok:
+            _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
+            _write_defect_log(
+                defect_path=defect_log_path,
+                result_by_case_id=result_by_case_id,
+                numeric_oracle_row={"passed": False, "checks": {}, "check_failures": ["gate1_failed"]},
+            )
+            return 1
+
+        gate2_ok = execute_cases(
+            cases=build_gate2_cases(include_ash_watar=include_ash_watar),
+            wd=wd,
+            runid=args.runid,
+            config=args.config,
+            results_path=results_path,
+            result_by_case_id=result_by_case_id,
+            oracle_topaz_ids=oracle_topaz_ids,
+            oracle_wepp_ids=oracle_wepp_ids,
+        )
+        if not gate2_ok:
+            _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
+            _write_defect_log(
+                defect_path=defect_log_path,
+                result_by_case_id=result_by_case_id,
+                numeric_oracle_row={"passed": False, "checks": {}, "check_failures": ["gate2_failed"]},
+            )
             return 1
 
         expansion_ok = execute_cases(
-            cases=expansion_cases,
+            cases=build_expansion_cases(include_ash_watar=include_ash_watar),
             wd=wd,
             runid=args.runid,
             config=args.config,
@@ -1816,144 +2041,89 @@ def main() -> int:
             oracle_wepp_ids=oracle_wepp_ids,
         )
 
+        numeric_passed, numeric_checks, numeric_failures = _run_numeric_oracles(
+            wd=wd,
+            result_by_case_id=result_by_case_id,
+        )
+        numeric_row = {
+            "timestamp_utc": _utc_now_iso(),
+            "case_id": "g1_numeric_oracles",
+            "gate": "expansion",
+            "group": "G1",
+            "description": "Cross-case numeric conversion oracle checks.",
+            "expect_success": True,
+            "outcome": "success",
+            "checks": numeric_checks,
+            "check_failures": numeric_failures,
+            "passed": numeric_passed,
+        }
+        with results_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(numeric_row, sort_keys=True) + "\n")
+        result_by_case_id["g1_numeric_oracles"] = numeric_row
+
+        # Group E synthesized audits from all successful core cases.
+        core_rows = [
+            row
+            for row in result_by_case_id.values()
+            if row.get("gate") == "gate2" and row.get("expect_success") and row.get("outcome") == "success"
+        ]
+        e1_failures: list[str] = []
+        e2_failures: list[str] = []
+        for row in core_rows:
+            failures = row.get("check_failures") or []
+            for failure in failures:
+                if "identity" in failure or "domain" in failure:
+                    e1_failures.append(f"{row.get('case_id')}:{failure}")
+                if "manifest" in failure or "bundle" in failure:
+                    e2_failures.append(f"{row.get('case_id')}:{failure}")
+        e1_row = {
+            "timestamp_utc": _utc_now_iso(),
+            "case_id": "e1_integrity_audit",
+            "gate": "gate2",
+            "group": "E1",
+            "description": "Cross-run identity/data-integrity audit.",
+            "expect_success": True,
+            "outcome": "success",
+            "checks": {"core_success_case_count": len(core_rows)},
+            "check_failures": e1_failures,
+            "passed": len(e1_failures) == 0,
+        }
+        e2_row = {
+            "timestamp_utc": _utc_now_iso(),
+            "case_id": "e2_manifest_audit",
+            "gate": "gate2",
+            "group": "E2",
+            "description": "Cross-run manifest integrity audit.",
+            "expect_success": True,
+            "outcome": "success",
+            "checks": {"core_success_case_count": len(core_rows)},
+            "check_failures": e2_failures,
+            "passed": len(e2_failures) == 0,
+        }
+        with results_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(e1_row, sort_keys=True) + "\n")
+            handle.write(json.dumps(e2_row, sort_keys=True) + "\n")
+        result_by_case_id[e1_row["case_id"]] = e1_row
+        result_by_case_id[e2_row["case_id"]] = e2_row
+
         _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
         _write_defect_log(
             defect_path=defect_log_path,
             result_by_case_id=result_by_case_id,
-            numeric_oracle_row=None,
+            numeric_oracle_row=numeric_row,
         )
-        return 0 if expansion_ok else 1
 
-    gate1_ok = execute_cases(
-        cases=build_gate1_cases(),
-        wd=wd,
-        runid=args.runid,
-        config=args.config,
-        results_path=results_path,
-        result_by_case_id=result_by_case_id,
-        oracle_topaz_ids=oracle_topaz_ids,
-        oracle_wepp_ids=oracle_wepp_ids,
-    )
-    if not gate1_ok:
-        _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
-        _write_defect_log(
-            defect_path=defect_log_path,
-            result_by_case_id=result_by_case_id,
-            numeric_oracle_row={"passed": False, "checks": {}, "check_failures": ["gate1_failed"]},
+        all_passed = (
+            gate1_ok
+            and gate2_ok
+            and expansion_ok
+            and numeric_row["passed"]
+            and e1_row["passed"]
+            and e2_row["passed"]
         )
-        return 1
-
-    gate2_ok = execute_cases(
-        cases=build_gate2_cases(include_ash_watar=include_ash_watar),
-        wd=wd,
-        runid=args.runid,
-        config=args.config,
-        results_path=results_path,
-        result_by_case_id=result_by_case_id,
-        oracle_topaz_ids=oracle_topaz_ids,
-        oracle_wepp_ids=oracle_wepp_ids,
-    )
-    if not gate2_ok:
-        _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
-        _write_defect_log(
-            defect_path=defect_log_path,
-            result_by_case_id=result_by_case_id,
-            numeric_oracle_row={"passed": False, "checks": {}, "check_failures": ["gate2_failed"]},
-        )
-        return 1
-
-    expansion_ok = execute_cases(
-        cases=build_expansion_cases(include_ash_watar=include_ash_watar),
-        wd=wd,
-        runid=args.runid,
-        config=args.config,
-        results_path=results_path,
-        result_by_case_id=result_by_case_id,
-        oracle_topaz_ids=oracle_topaz_ids,
-        oracle_wepp_ids=oracle_wepp_ids,
-    )
-
-    numeric_passed, numeric_checks, numeric_failures = _run_numeric_oracles(
-        wd=wd,
-        result_by_case_id=result_by_case_id,
-    )
-    numeric_row = {
-        "timestamp_utc": _utc_now_iso(),
-        "case_id": "g1_numeric_oracles",
-        "gate": "expansion",
-        "group": "G1",
-        "description": "Cross-case numeric conversion oracle checks.",
-        "expect_success": True,
-        "outcome": "success",
-        "checks": numeric_checks,
-        "check_failures": numeric_failures,
-        "passed": numeric_passed,
-    }
-    with results_path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(numeric_row, sort_keys=True) + "\n")
-    result_by_case_id["g1_numeric_oracles"] = numeric_row
-
-    # Group E synthesized audits from all successful core cases.
-    core_rows = [
-        row
-        for row in result_by_case_id.values()
-        if row.get("gate") == "gate2" and row.get("expect_success") and row.get("outcome") == "success"
-    ]
-    e1_failures: list[str] = []
-    e2_failures: list[str] = []
-    for row in core_rows:
-        failures = row.get("check_failures") or []
-        for failure in failures:
-            if "identity" in failure or "domain" in failure:
-                e1_failures.append(f"{row.get('case_id')}:{failure}")
-            if "manifest" in failure or "bundle" in failure:
-                e2_failures.append(f"{row.get('case_id')}:{failure}")
-    e1_row = {
-        "timestamp_utc": _utc_now_iso(),
-        "case_id": "e1_integrity_audit",
-        "gate": "gate2",
-        "group": "E1",
-        "description": "Cross-run identity/data-integrity audit.",
-        "expect_success": True,
-        "outcome": "success",
-        "checks": {"core_success_case_count": len(core_rows)},
-        "check_failures": e1_failures,
-        "passed": len(e1_failures) == 0,
-    }
-    e2_row = {
-        "timestamp_utc": _utc_now_iso(),
-        "case_id": "e2_manifest_audit",
-        "gate": "gate2",
-        "group": "E2",
-        "description": "Cross-run manifest integrity audit.",
-        "expect_success": True,
-        "outcome": "success",
-        "checks": {"core_success_case_count": len(core_rows)},
-        "check_failures": e2_failures,
-        "passed": len(e2_failures) == 0,
-    }
-    with results_path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(e1_row, sort_keys=True) + "\n")
-        handle.write(json.dumps(e2_row, sort_keys=True) + "\n")
-    result_by_case_id[e1_row["case_id"]] = e1_row
-    result_by_case_id[e2_row["case_id"]] = e2_row
-
-    _write_manual_sanity_notes(notes_path=manual_notes_path, result_by_case_id=result_by_case_id)
-    _write_defect_log(
-        defect_path=defect_log_path,
-        result_by_case_id=result_by_case_id,
-        numeric_oracle_row=numeric_row,
-    )
-
-    all_passed = (
-        gate1_ok
-        and gate2_ok
-        and expansion_ok
-        and numeric_row["passed"]
-        and e1_row["passed"]
-        and e2_row["passed"]
-    )
-    return 0 if all_passed else 1
+        return 0 if all_passed else 1
+    finally:
+        _restore_disturbed_lookup_snapshot(wd, disturbed_lookup_snapshot)
 
 
 if __name__ == "__main__":

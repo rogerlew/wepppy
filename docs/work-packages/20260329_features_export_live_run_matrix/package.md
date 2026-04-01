@@ -1,6 +1,6 @@
 # Features Export Live-Run E2E Matrix (Phase 2: Omni Scenarios/Contrasts)
 
-**Status**: Completed (Phase 2 closed 2026-03-29 after Omni scenario/contrast matrix execution)
+**Status**: Completed (Phase 3 closed 2026-04-01 after bd variant matrix rerun)
 
 ## Overview
 This package validates `features_export` end-to-end against real runs. Phase 1 completed on `clogging-starch/disturbed9002-wbt-mofe`. Phase 2 reopens the package to validate Omni scenarios/contrasts behavior on `walk-in-obsessive-compulsive/disturbed9002_wbt` (single OFE context). It remains a manual-plus-automated quality gate focused on output correctness, format integrity, CRS behavior, Unitizer-driven units, temporal selection behavior, and identity-key normalization.
@@ -8,6 +8,10 @@ This package validates `features_export` end-to-end against real runs. Phase 1 c
 The package now uses two anchors:
 - Phase 1 anchor: roads-capable run (`clogging-starch/disturbed9002-wbt-mofe`).
 - Phase 2 anchor: Omni-inclusive single-OFE run (`walk-in-obsessive-compulsive/disturbed9002_wbt`).
+
+The harness also includes disturbed lookup `bd` variant coverage:
+- lookup variant axis: `base`, `extended`
+- `bd` mode axis: blank (`""`), numeric (`"1.6"`)
 
 ## Objectives
 - Establish two execution gates:
@@ -22,6 +26,7 @@ The package now uses two anchors:
 - Verify temporal controls (`annual_average`, `yearly`, `event`, year selection options) across single- and multi-layer requests including atemporal+temporal mixes.
 - Verify cache behavior by replaying identical payloads and asserting `cache_hit`, `source_job_id`, and stable artifact mapping.
 - Expand negative-path coverage for invalid payload/selector combinations.
+- Verify disturbed lookup `bd` variant coverage for both lookup variants (`base`, `extended`) and both `bd` modes (blank, numeric).
 - Capture manual sanity evidence first, then codify deterministic pytest coverage.
 
 ## Scope
@@ -45,6 +50,7 @@ The package now uses two anchors:
 - Follow-up pytest/Jest additions for stable matrix subsets.
 - Omni scenario and Omni contrast export validation on `walk-in-obsessive-compulsive/disturbed9002_wbt`.
 - Omni selector-contract coverage where scenario vs contrast families are validated independently with single-OFE geometry.
+- Disturbed lookup matrix preconditions covering `bd` blank/numeric behavior across both `base` and `extended` lookup variants.
 
 ### Explicitly Out of Scope
 - New export families or catalog redesign.
@@ -132,11 +138,12 @@ The package now uses two anchors:
 | F3 Ash/WATAR scope/cache contract (optional) | 2 | 2 | `format=parquet`, layer=`ash.transport.hillslope_annuals`, scope replay and cache replay | Scope-invariant roads warning (`scope_not_applicable`) and deterministic cache-hit replay |
 | G1 Units numeric oracle checks | 4 | 4 | selected conversions across `project`, `si`, `english` on stable fields | conversion magnitudes/tolerances match expected unit transforms |
 | G2 UI regression checks | Jest/route tests | 0 export jobs | copy + behavior regression checks | label copy, no reload on temporal change, unlock behavior remain correct |
+| I1 Disturbed lookup bd variants | 4 | 4 | `lookup_variant in {base,extended}` x `bd_mode in {blank,numeric}`; `format=parquet`, layer=`wepp.summary.hillslopes` | Disturbed lookup precondition wiring applies target variant + `bd` mode and end-to-end export remains valid |
 
 **Planned job count**:
 - Core (`A-E`): 78 jobs (77 successful + 1 negative) for baseline WEPP/watershed matrix, plus optional `A3` (+7) when AshPost assets are present in the run path.
-- Expansion (`F-G`): 19 jobs (11 successful + 8 negative) plus UI regression test runs, plus optional `F3` (+2) when AshPost assets are present.
-- Total planned export job executions: **97 baseline**, **106 when optional Ash/WATAR groups are enabled**.
+- Expansion (`F-G + I1`): 23 jobs (15 successful + 8 negative) plus UI regression test runs, plus optional `F3` (+2) when AshPost assets are present.
+- Total planned export job executions: **101 baseline**, **110 when optional Ash/WATAR groups are enabled**.
 
 **Phase 2 Omni extension**:
 - `H1`: Omni scenario sentinel across all formats (7).
@@ -226,3 +233,19 @@ Phase 2 closure note (2026-03-29):
 - Phase 2 artifacts:
   - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_phase2_omni.md`
   - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_phase2_omni.md`
+
+Phase 3 rerun closure note (2026-04-01):
+- Matrix harness extended with disturbed lookup `bd` precondition group:
+  - `I1`: 4/4 (`base|extended` x `blank|numeric`)
+- Full matrix rerun executed in two passes with timestamped artifacts:
+  - Phase 1 + expansion (including `I1`) on `clogging-starch/disturbed9002-wbt-mofe`
+  - Phase 2 Omni on `walk-in-obsessive-compulsive/disturbed9002_wbt`
+- Rerun outcomes:
+  - Total rows: 140/140 passed (0 failures)
+  - Shared baseline groups remained green while adding `I1` coverage.
+- Phase 3 rerun artifacts:
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/matrix_results_rerun_20260401_023942.jsonl`
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_rerun_20260401_023942_phase1.md`
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_rerun_20260401_023942_phase1.md`
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/manual_sanity_notes_rerun_20260401_023942_phase2_omni.md`
+  - `docs/work-packages/20260329_features_export_live_run_matrix/artifacts/defect_log_rerun_20260401_023942_phase2_omni.md`
