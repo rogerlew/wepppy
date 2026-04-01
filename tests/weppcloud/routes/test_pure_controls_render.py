@@ -73,7 +73,7 @@ def jinja_env() -> Environment:
         url_for_run=lambda *args, **kwargs: "",
         static_url=lambda *args, **kwargs: "",
         site_prefix="",
-        usersum_doc_link=lambda category, filename, label: (
+        usersum_doc_link=lambda category, filename, label, *args, **kwargs: (
             f'<a href="/usersum/view/{category}/{filename}" target="_blank" rel="noopener">📄 {label}</a>'
         ),
         user=stub_user,
