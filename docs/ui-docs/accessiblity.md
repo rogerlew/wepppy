@@ -17,6 +17,9 @@ This document is the single entry point for accessibility guidance, tests, and c
 | Controller accessibility contract | `docs/ui-docs/controller-contract.md` | Required `aria-live` usage, modal/focus expectations, and resilient controller behavior. |
 | Theme accessibility | `docs/ui-docs/theme-system.md` | Theme token model plus contrast guidance and operational workflow. |
 | Contrast harness spec | `docs/ui-docs/theme-metrics.spec.md` | Rendered contrast measurement scope, reporting, and CI artifact model. |
+| Manual AT pass evidence | `docs/ui-docs/manual-at-pass-20260331.md` | March 31, 2026 keyboard and accessibility-tree pass for core anonymous and authenticated workflows. |
+| ACR draft worksheet | `docs/ui-docs/acr-draft-int.md` | Conservative source worksheet for later transfer into the formal `VPAT 2.5Rev INT` template. |
+| VPAT workspace | `docs/ui-docs/vpats/README.md` | Runbook, mutable staging package, immutable issue archive, and template provenance for buyer-facing VPAT / ACR work. |
 | Findings 1-6 remediation package | `docs/work-packages/20260331_wcag21aa_frontend_accessibility/package.md` | Scope and acceptance criteria for recent WCAG remediation. |
 | Findings 1-6 execution evidence | `docs/work-packages/20260331_wcag21aa_frontend_accessibility/tracker.md` | Validation history, risks, and current caveats. |
 | Template-level accessibility assertions | `tests/weppcloud/routes/test_pure_controls_render.py` | Semantic copy controls, map role changes, placeholder labels, standalone metadata checks. |
@@ -147,7 +150,7 @@ Latest captured metrics snapshot (generated at **March 31, 2026**):
   - the default remains in the AA-validated set
   - the selector clearly labels which themes are AA-validated versus sensory-preference only
   - the non-validated themes are not represented as part of the Section 508 conformance claim
-  - federal-buyer deployments that require a strictly conformant profile can disable or hide the sensory-preference set
+  - federal-buyer deployments may keep the sensory-preference set visible only as supplemental user-choice themes outside the conformance set
 
 Rationale for retaining a sensory-preference set:
 - Research with autistic web users found that a low-contrast theme and multiple user-selectable color themes can improve access for some users, while also acknowledging that low-contrast palettes are a barrier for others and therefore cannot stand alone as the compliance baseline.
@@ -158,6 +161,58 @@ External references:
 - https://pmc.ncbi.nlm.nih.gov/articles/PMC8217662/
 - https://pmc.ncbi.nlm.nih.gov/articles/PMC9213348/
 
+### Literature Review: Neurodivergent Sensory-Preference Themes
+
+This subsection records the current research basis for keeping optional sensory-preference themes in WEPPcloud while limiting the Section 508 conformance claim to the AA-validated theme set.
+
+#### Working conclusion
+
+- Current evidence supports optional, user-selectable sensory-preference themes as a supplemental accommodation for some neurodivergent users.
+- Current evidence does not support treating low contrast itself as a generally superior accessibility baseline, or counting non-AA themes as part of the conformance claim.
+- The strongest defensible claim is about user control over visual intensity, glare, saturation, clutter, and predictability, not about low contrast in isolation.
+
+#### Strongest direct web/UI evidence
+
+- The most directly relevant study is the participatory AASPIRE web-guidelines paper for autistic web users. It recommends:
+  - at least one low-contrast neutral palette option for sensitive vision
+  - multiple palette choices, including dark and light options
+  - a visually simple and clutter-free interface
+  - predictable navigation and layout
+- The same paper also records the limiting caveat that low-contrast palettes can be an accessibility barrier for users with low vision. Its design response was not "use low contrast by default," but "offer multiple themes, including WCAG-conformant high-contrast options."
+
+#### Broader sensory-environment evidence
+
+- Qualitative research on autistic adults' visual experiences reports frequent difficulty with bright, flickering, fluorescent, and spot lighting; bright reds and yellows; cluttered or visually busy environments; and combinations of color, contrast, and pattern that become hard to tolerate or read.
+- That work also found substantial person-to-person variation. Participants reported that the effect of color could not be predicted from hue alone because surrounding contrast, patterns, and color combinations changed the experience.
+- Research on autistic adults in public spaces extends the same theme beyond color selection alone: disabling sensory environments were associated with sensory burden, busy/crowded spaces, lack of predictability, limited adjustments, and difficulty recovering from overload.
+- Mixed-methods and systematic-review work on autistic sensory experience also points in the same direction: sensory hyperreactivity is common, but triggers and helpful adaptations are highly individual, which argues for personalization rather than a single palette strategy.
+
+#### Evidence outside autism
+
+- Evidence for other neurodivergent groups is weaker but still relevant. A 2014 ADHD study reported substantially higher self-reported photophobia among adults with ADHD symptoms than controls.
+- That finding is useful as supporting plausibility for lower-intensity or glare-reducing options, but it is not enough to justify a broad claim that low-contrast themes are generally preferable across neurodivergent users.
+
+#### Design implications for WEPPcloud
+
+- Keep AA-validated themes as the default and the conformance baseline.
+- Keep sensory-preference themes available as optional user settings for users who benefit from calmer or lower-intensity presentation.
+- Describe the benefit in terms of sensory accommodation and user control, not as an alternative compliance path.
+- Prefer a broader sensory-control posture where feasible: reduced motion, lower saturation, calmer layout density, predictable placement, and dark/light AA-compliant variants.
+- Federal-buyer deployments for the current product posture keep sensory-preference themes user-visible, but only as supplemental user-choice themes outside the AA-validated conformance set.
+
+#### Limits and follow-up
+
+- Most cited evidence is strongest for autistic adults; evidence for ADHD and other neurodivergent groups is thinner.
+- Much of the evidence is qualitative or mixed-methods rather than controlled product-UI trials.
+- The literature supports personalization and sensory-load reduction, but it does not provide a basis to weaken WCAG AA contrast requirements for the conformance set.
+- If WEPPcloud wants to make a stronger product-specific claim later, the next step is a small usability study comparing AA-validated themes and sensory-preference themes for comfort, readability, task completion, and error rate.
+
+Additional references:
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC10726197/
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC9201716/
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC4261727/
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC12715023/
+
 Nightly artifact workflow source:
 - `.github/forest_workflows/theme-metrics-nightly.yml`
 
@@ -166,6 +221,15 @@ Nightly artifact workflow source:
 - Axe coverage includes Theme Lab, report accessibility probe, WEPPcloud root, interfaces, profile, and runs0 dashboard.
 - A formal ACR/VPAT has not yet been published for federal procurement.
 - Theme-selector labeling should stay synchronized with the AA-validated set in the theme metrics gate; dynamic artifact-driven labeling is still a follow-up improvement.
+- The March 31, 2026 core-flow manual pass now includes a formal local browser / operating system / assistive-technology matrix, and no separate spoken-screen-reader matrix is currently planned for the buyer issue unless scope changes.
+
+## VPAT Lifecycle
+
+- Maintain one mutable staging package in `docs/ui-docs/vpats/current/`.
+- Archive only buyer-facing issues in `docs/ui-docs/vpats/issued/`.
+- Refresh the staging package when conformance-impacting UI behavior, authentication UX, theme baseline, support docs/channels, scope, environment matrix, major remediation, or the official template version changes.
+- Stack related pre-production changes into the same staging package.
+- Before production deployment, if any tracked conformance trigger changed since the last issued package, refresh `current/` and cut a new issue package for the frozen deployment snapshot.
 
 ## Section 508 Strategy (Manual Gate, Non-Blocking)
 
@@ -298,6 +362,10 @@ This workflow should be reviewed manually and treated as release evidence, not P
 - Focus visibility on all interactive controls, including dynamic drawers/modals.
 - Reflow/zoom checks at 200% for core controls and reports.
 - Non-text contrast and meaningful status announcements (`aria-live`) for run feedback.
+
+Latest recorded evidence:
+
+- `docs/ui-docs/manual-at-pass-20260331.md`
 
 ## Public-Facing Artifacts
 

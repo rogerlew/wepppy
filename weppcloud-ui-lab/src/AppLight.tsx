@@ -704,6 +704,7 @@ export function AppLight() {
                 </label>
                 <select
                   className="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-500 focus:outline-none"
+                  aria-label="Run year filter"
                   value={yearFilter}
                   onChange={(event) => setYearFilter(event.target.value)}
                 >

@@ -730,6 +730,7 @@ const mapSubtitle =
                     Year
                     <select
                       className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 shadow-none transition focus:border-sky-400 focus:outline-none"
+                      aria-label="Run year filter"
                       value={yearFilter}
                       onChange={(event) => setYearFilter(event.target.value)}
                     >
