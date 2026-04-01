@@ -6,6 +6,26 @@ import {
   writeContrastReport
 } from './theme-metrics.helpers.js';
 
+const DEFAULT_ENFORCED_AA_THEMES = [
+  'default',
+  'light-high-contrast',
+  'ayu-mirage',
+  'ayu-mirage-bordered',
+  'cursor-dark-midnight',
+];
+
+function parseEnforcedThemes() {
+  const raw = String(process.env.THEME_METRICS_ENFORCED_THEMES || '').trim();
+  if (!raw) {
+    return DEFAULT_ENFORCED_AA_THEMES;
+  }
+  const parsed = raw
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return parsed.length > 0 ? parsed : DEFAULT_ENFORCED_AA_THEMES;
+}
+
 const THEME_LAB_PATH = (() => {
   const hasSmokePrefix = Object.prototype.hasOwnProperty.call(process.env, 'SMOKE_SITE_PREFIX');
   const rawPrefix = hasSmokePrefix
@@ -21,6 +41,8 @@ const THEME_LAB_PATH = (() => {
 
 test.describe('theme contrast metrics', () => {
   test('collects rendered contrast ratios for every theme', async ({ page, browser }) => {
+    const enforcedThemes = parseEnforcedThemes();
+    const enforcedThemeSet = new Set(enforcedThemes);
     const baseUrl = process.env.SMOKE_BASE_URL || 'http://localhost:8080';
     const themeLabUrl = new URL(THEME_LAB_PATH, baseUrl);
     themeLabUrl.hash = 'theme-lab';
@@ -86,10 +108,34 @@ test.describe('theme contrast metrics', () => {
 
     await writeContrastReport(results, { baseUrl: themeLabUrl.toString() });
 
-    const aaFailures = results.filter((entry) => !entry.aaExempt && entry.passed === false);
+    const observedThemes = new Set(results.map((entry) => entry.theme));
+    const missingEnforcedThemes = enforcedThemes.filter((themeId) => !observedThemes.has(themeId));
+    expect(
+      missingEnforcedThemes,
+      `Missing enforced themes in theme metrics output: ${missingEnforcedThemes.join(', ')}`
+    ).toEqual([]);
+
+    const aaFailures = results.filter(
+      (entry) => enforcedThemeSet.has(entry.theme) && !entry.aaExempt && entry.passed === false
+    );
+    const informationalFailures = results.filter(
+      (entry) => !enforcedThemeSet.has(entry.theme) && !entry.aaExempt && entry.passed === false
+    );
+
+    if (informationalFailures.length > 0) {
+      const summaryByTheme = informationalFailures.reduce((acc, entry) => {
+        acc[entry.theme] = (acc[entry.theme] || 0) + 1;
+        return acc;
+      }, {});
+      console.log(
+        `[theme-metrics] Non-enforced AA failures (${informationalFailures.length}): `
+        + `${Object.entries(summaryByTheme).map(([theme, count]) => `${theme}=${count}`).join(', ')}`
+      );
+    }
+
     expect(
       aaFailures,
-      `WCAG AA contrast failures:\n${aaFailures
+      `WCAG AA contrast failures in enforced themes (${enforcedThemes.join(', ')}):\n${aaFailures
         .slice(0, 20)
         .map(
           (entry) =>

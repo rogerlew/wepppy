@@ -132,6 +132,9 @@ Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_C
 - `gl-dashboard-state-transitions.spec.js`: Basemap changes, RAP/WEPP/Climate graph toggles, cumulative contribution workflow, year-slider visibility rules, and RAP year updates.
 - `gl-dashboard-graph-modes.spec.js`: Graph mode/slider placement (WEPP split vs. Climate full), cumulative contribution stability, year-slider playback, graph-focus map hiding, and legend rendering (comparison diverging legend assertion skips when no scenario supports it).
 - `theme-metrics.spec.js`: Theme contrast/metrics sampling for WC theme system.
+  - AA enforcement defaults to: `default`, `light-high-contrast`, `ayu-mirage`, `ayu-mirage-bordered`, `cursor-dark-midnight`.
+  - Non-enforced themes are still measured and reported, but do not fail the suite.
+  - Override enforcement list when needed with `THEME_METRICS_ENFORCED_THEMES=theme1,theme2,...`.
 - `a11y/axe-runs0.spec.js`: Axe-core structural accessibility scan for Theme Lab and runs0 dashboard, with JSON/Markdown artifacts under `test-results/a11y/`.
   - For CAP-gated runs0 scans, prefer the `ally-agent` account via `docker/secrets/ally-agent-smoke.env`:
     ```bash

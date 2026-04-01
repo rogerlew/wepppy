@@ -82,6 +82,11 @@ This produces contrast artifacts in:
 - `wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.json`
 - `wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.md`
 
+AA enforcement policy in `theme-metrics.spec.js`:
+- Enforced themes: `default`, `light-high-contrast`, `ayu-mirage`, `ayu-mirage-bordered`, `cursor-dark-midnight`.
+- Other themes are still measured/reported for user-preference visibility but do not fail the suite.
+- Optional override: `THEME_METRICS_ENFORCED_THEMES=theme1,theme2,...`.
+
 Nightly artifact workflow source:
 - `.github/forest_workflows/theme-metrics-nightly.yml`
 

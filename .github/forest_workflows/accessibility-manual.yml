@@ -49,7 +49,6 @@ jobs:
           wctl run-npm test -- copytext map_gl
 
       - name: Run theme contrast metrics suite
-        continue-on-error: true
         run: |
           set -euo pipefail
           wctl run-playwright \
