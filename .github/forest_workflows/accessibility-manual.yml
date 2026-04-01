@@ -29,6 +29,7 @@ jobs:
       - name: Install Playwright browsers
         run: |
           set -euo pipefail
+          export PLAYWRIGHT_BROWSERS_PATH="${GITHUB_WORKSPACE}/wepppy/weppcloud/static-src/.playwright-browsers"
           wctl run-npm exec -- playwright install chromium
 
       - name: Run targeted accessibility pytest assertions
@@ -50,7 +51,10 @@ jobs:
       - name: Run theme contrast metrics suite
         run: |
           set -euo pipefail
-          wctl run-playwright --suite theme-metrics --workers 1
+          wctl run-playwright \
+            --suite theme-metrics \
+            --workers 1 \
+            --browsers-path "${GITHUB_WORKSPACE}/wepppy/weppcloud/static-src/.playwright-browsers"
 
       - name: Run axe accessibility smoke suite
         run: |
@@ -59,6 +63,7 @@ jobs:
             --suite full \
             --grep "axe accessibility" \
             --workers 1 \
+            --browsers-path "${GITHUB_WORKSPACE}/wepppy/weppcloud/static-src/.playwright-browsers" \
             --report-path "$PLAYWRIGHT_A11Y_REPORT_PATH"
 
       - name: Upload Playwright accessibility report
