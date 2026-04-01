@@ -9,3 +9,9 @@ IDs live in `docs/infrastructure/secrets.md`.
 Notes:
 - Keep files mode `0600` on the host.
 - Do not store secrets under `/wc1` or any browseable/exportable directory.
+
+Smoke/axe local auth convention:
+- `ally-agent-smoke.env` may be stored here for Playwright accessibility runs.
+- Expected keys:
+  - `ALLY_AGENT_EMAIL`
+  - `ALLY_AGENT_PASSWORD`

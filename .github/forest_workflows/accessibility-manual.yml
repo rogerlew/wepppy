@@ -1,0 +1,94 @@
+name: Accessibility Manual
+on:
+  workflow_dispatch: null
+  schedule:
+    # 04:30 AM Pacific (manual gate still uses workflow_dispatch)
+    - cron: 30 11 * * 1
+jobs:
+  accessibility-manual:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 75
+    env:
+      PLAYWRIGHT_A11Y_REPORT_PATH: test-results/playwright-a11y-report
+      AXE_OUTPUT_DIR: test-results/a11y
+      SMOKE_BASE_URL: https://wc.bearhive.duckdns.org
+      SMOKE_SITE_PREFIX: /weppcloud
+      ALLY_AGENT_EMAIL: ${{ secrets.ALLY_AGENT_EMAIL }}
+      ALLY_AGENT_PASSWORD: ${{ secrets.ALLY_AGENT_PASSWORD }}
+      SMOKE_AGENT_REQUIRED: "true"
+    steps:
+      - name: Install npm dependencies
+        run: |
+          set -euo pipefail
+          wctl run-npm install
+
+      - name: Run targeted accessibility pytest assertions
+        run: |
+          set -euo pipefail
+          wctl run-pytest \
+            tests/weppcloud/routes/test_pure_controls_render.py::test_report_templates_use_semantic_copy_buttons \
+            tests/weppcloud/routes/test_pure_controls_render.py::test_map_templates_do_not_use_application_role_for_canvas \
+            tests/weppcloud/routes/test_pure_controls_render.py::test_placeholder_only_controls_have_explicit_accessible_names \
+            tests/weppcloud/routes/test_pure_controls_render.py::test_standalone_templates_include_lang_and_iframe_titles \
+            tests/weppcloud/routes/test_user_runs_admin_scope.py::test_runs2_template_requests_catalog_with_ron_meta \
+            --maxfail=1
+
+      - name: Run targeted accessibility JS tests
+        run: |
+          set -euo pipefail
+          wctl run-npm test -- copytext map_gl
+
+      - name: Run theme contrast metrics suite
+        run: |
+          set -euo pipefail
+          wctl run-playwright --suite theme-metrics --workers 1
+
+      - name: Run axe accessibility smoke suite
+        run: |
+          set -euo pipefail
+          wctl run-playwright \
+            --suite full \
+            --grep "axe accessibility" \
+            --workers 1 \
+            --report-path "$PLAYWRIGHT_A11Y_REPORT_PATH"
+
+      - name: Upload Playwright accessibility report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-accessibility-report
+          path: wepppy/weppcloud/static-src/${{ env.PLAYWRIGHT_A11Y_REPORT_PATH }}
+          if-no-files-found: warn
+
+      - name: Upload axe scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-scan-artifacts
+          path: wepppy/weppcloud/static-src/${{ env.AXE_OUTPUT_DIR }}
+          if-no-files-found: warn
+
+      - name: Publish accessibility summary
+        if: always()
+        run: |
+          {
+            echo '## Accessibility Summary'
+            if [ -f "wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.md" ]; then
+              echo ''
+              echo '### Theme Contrast'
+              echo '```text'
+              cat wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.md
+              echo '```'
+            fi
+            if [ -f "wepppy/weppcloud/static-src/${AXE_OUTPUT_DIR}/axe-summary.md" ]; then
+              echo ''
+              echo '### Axe Structural Scan'
+              echo '```text'
+              cat "wepppy/weppcloud/static-src/${AXE_OUTPUT_DIR}/axe-summary.md"
+              echo '```'
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"

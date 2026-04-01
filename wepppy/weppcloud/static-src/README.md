@@ -12,7 +12,9 @@
   - `SMOKE_RUN_OVERRIDES` optional JSON for config query params (e.g., `{ "general:dem_db": "ned1/2016" }`).
   - `SMOKE_RUN_PATH` to point at an existing run (skips provisioning).
   - `SMOKE_KEEP_RUN=true` keeps the provisioned run after the suite completes.
-  - `SMOKE_BASE_URL` and `SMOKE_HEADLESS=false` adjust backend origin and browser mode.
+  - `ALLY_AGENT_EMAIL` + `ALLY_AGENT_PASSWORD` (or `SMOKE_AGENT_EMAIL` + `SMOKE_AGENT_PASSWORD`) enable authenticated smoke runs that bypass CAP for UI scans.
+  - `SMOKE_AGENT_CREDENTIALS_FILE` points to an env-style credentials file. Default is `docker/secrets/ally-agent-smoke.env` (gitignored by policy).
+  - `SMOKE_BASE_URL`, `SMOKE_SITE_PREFIX` (typically `/weppcloud`), and `SMOKE_HEADLESS=false` adjust backend origin, route prefixing, and browser mode.
 - GL dashboard smoke specs skip RAP or comparison assertions automatically when the target run lacks those datasets; expect occasional `skipped` results rather than failures.
 - Some runs legitimately lack RAP or comparison data; skips in those specs are expected and not treated as failures.
 - `npm run smoke:theme-metrics` runs the Theme Lab contrast harness. It only needs the UI showcase route (`/ui/components/#theme-lab`) online, so no run provisioning is required. Reports land in `test-results/theme-metrics/` as both JSON and Markdown (consumed by CI and reviewers). You can drive the same run through `wctl run-playwright --suite theme-metrics --env local`.

@@ -93,13 +93,15 @@ Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_C
 - **For testing against dev/staging environments**, ensure `TEST_SUPPORT_ENABLED=true` is set in the backend environment and restart the service. Then:
   ```bash
   cd wepppy/weppcloud/static-src
-  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org/weppcloud \
+  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org \
+  SMOKE_SITE_PREFIX=/weppcloud \
   SMOKE_RUN_CONFIG=disturbed9002_wbt \
   npm run test:playwright -- --project=runs0
   ```
-  **Note:** The dev domain (wc.bearhive.duckdns.org) uses HTTPS with a `/weppcloud` prefix. The test suite handles this automatically via the `buildUrl()` helper. Example run with all tests passing (8 passed, 1 skipped):
+  **Note:** The dev domain (wc.bearhive.duckdns.org) uses HTTPS with a `/weppcloud` prefix. Use `SMOKE_SITE_PREFIX=/weppcloud` to keep route resolution explicit. Example run with all tests passing (8 passed, 1 skipped):
   ```bash
-  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org/weppcloud \
+  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org \
+  SMOKE_SITE_PREFIX=/weppcloud \
   SMOKE_RUN_CONFIG=disturbed9002_wbt \
   npm run test:playwright -- --project=runs0 --workers=1
   ```
@@ -114,8 +116,13 @@ Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_C
 | `SMOKE_RUN_PATH` | _(unset)_ | Full runs0 URL to test (skips provisioning). |
 | `SMOKE_RUN_ROOT` | _(unset)_ | Optional root directory for provisioning (e.g., `/tmp/weppcloud_smoke`, `/dev/shm/weppcloud_smoke`). |
 | `SMOKE_BASE_URL` | `http://localhost:8080` | Backend origin. Use `http://localhost:8000` for direct Flask (no Caddy), or `http://localhost:8000/weppcloud` when the base includes the app prefix. |
+| `SMOKE_SITE_PREFIX` | `/weppcloud` | Site path prefix appended by smoke specs for app routes (`/login`, `/runs/...`, `/ui/components/...`) when `SMOKE_BASE_URL` does not include the prefix. |
 | `SMOKE_HEADLESS` | `true` | Set to `false` to watch executions. |
 | `SMOKE_KEEP_RUN` | `false` | Keeps the provisioned run after completion. |
+| `ALLY_AGENT_EMAIL` / `ALLY_AGENT_PASSWORD` | _(unset)_ | Preferred credentials for authenticated UI smoke runs (CAP bypass by login). |
+| `SMOKE_AGENT_EMAIL` / `SMOKE_AGENT_PASSWORD` | _(unset)_ | Generic aliases accepted by the axe suite. |
+| `SMOKE_AGENT_CREDENTIALS_FILE` | `docker/secrets/ally-agent-smoke.env` | Env-style file for agent credentials; supports `ALLY_AGENT_*` and `SMOKE_AGENT_*` keys. |
+| `SMOKE_AGENT_REQUIRED` | `false` | When true, axe run scans skip/fail fast if agent credentials are missing. |
 
 ### Current Coverage (Playwright)
 - `page-load.spec.js`: Quick health check that provisions/reuses a run, loads the runs0 dashboard, verifies core controllers render, and fails fast on unexpected console errors.
@@ -125,6 +132,16 @@ Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_C
 - `gl-dashboard-state-transitions.spec.js`: Basemap changes, RAP/WEPP/Climate graph toggles, cumulative contribution workflow, year-slider visibility rules, and RAP year updates.
 - `gl-dashboard-graph-modes.spec.js`: Graph mode/slider placement (WEPP split vs. Climate full), cumulative contribution stability, year-slider playback, graph-focus map hiding, and legend rendering (comparison diverging legend assertion skips when no scenario supports it).
 - `theme-metrics.spec.js`: Theme contrast/metrics sampling for WC theme system.
+- `a11y/axe-runs0.spec.js`: Axe-core structural accessibility scan for Theme Lab and runs0 dashboard, with JSON/Markdown artifacts under `test-results/a11y/`.
+  - For CAP-gated runs0 scans, prefer the `ally-agent` account via `docker/secrets/ally-agent-smoke.env`:
+    ```bash
+    # gitignored path (see root .gitignore docker/secrets/*)
+    cat > docker/secrets/ally-agent-smoke.env <<'EOF'
+    ALLY_AGENT_EMAIL=ally-agent@example.com
+    ALLY_AGENT_PASSWORD=replace-with-local-secret
+    EOF
+    chmod 600 docker/secrets/ally-agent-smoke.env
+    ```
 
 All tests use request interception to mock 500 errors instead of backend failure injection. Console error checks filter expected bootstrap failures for optional controllers (debris_flow, treatments) that may not exist in all configs.
 
