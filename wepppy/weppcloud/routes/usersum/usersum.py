@@ -5,9 +5,9 @@ from functools import lru_cache
 from html import escape as html_escape, unescape as html_unescape
 from pathlib import Path
 from typing import Dict, List, Tuple, TypedDict, Set
-from urllib.parse import unquote, urlsplit, urlunsplit
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
-from flask import Blueprint, abort, jsonify, redirect, render_template, request, url_for  # type: ignore[import-not-found]
+from flask import Blueprint, Response, abort, jsonify, redirect, render_template, request, url_for  # type: ignore[import-not-found]
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # type: ignore[import-not-found]
 from wepppy.weppcloud.usersum_anchors import usersum_anchor_slug
 
@@ -19,6 +19,7 @@ _DB_DIR = _BASE_DIR / 'db'
 _SPEC_DIR = _BASE_DIR / 'input-file-specifications'
 _WEPPCLOUD_DIR = _BASE_DIR / 'weppcloud'
 _PATH_DIR = _BASE_DIR / 'path'
+_GITHUB_BLOB_BASE_URL = 'https://github.com/rogerlew/wepppy/blob/master'
 _CATEGORY_ROOTS: Dict[str, Path] = {
     'db': _DB_DIR,
     'input-file-specifications': _SPEC_DIR,
@@ -137,6 +138,14 @@ def _route_for_repo_markdown(path: Path) -> str | None:
     return None
 
 
+def _repo_relative_markdown_path(path: Path) -> str:
+    return path.resolve().relative_to(_REPO_ROOT).as_posix()
+
+
+def _github_blob_url(path: Path) -> str:
+    return f"{_GITHUB_BLOB_BASE_URL}/{quote(_repo_relative_markdown_path(path))}"
+
+
 def _resolve_linked_markdown_path(source_path: Path, href_path: str) -> Path | None:
     rel_token = href_path.strip()
     if not rel_token:
@@ -230,35 +239,56 @@ def _add_heading_anchors(content_html: str) -> str:
     return _HEADING_RE.sub(_replace, content_html)
 
 
-def _render_markdown_document(path: Path, *, title: str):
+def _render_markdown_document(path: Path, *, title: str, doc_path_label: str):
     markdown_source = path.read_text(encoding='utf-8')
     content_html = markdown_to_html(markdown_source)
     content_html = _add_heading_anchors(content_html)
     content_html = _rewrite_markdown_links(path, content_html)
+    repo_rel_path = _repo_relative_markdown_path(path)
     return render_template(
         'usersum/view.htm',
         title=title,
         content_html=content_html,
+        doc_path_label=doc_path_label,
+        github_file_url=_github_blob_url(path),
+        raw_markdown_url=url_for('usersum.raw_markdown', rel_path=repo_rel_path),
     )
 
 
 @usersum_bp.route('/usersum/view/<category>/<path:filename>')
 def view_markdown(category: str, filename: str):
     path = _resolve_markdown_path(category, filename)
+    root = _CATEGORY_ROOTS[category].resolve()
+    rel_filename = path.relative_to(root).as_posix()
     display_name = _friendly_display_name(path.name)
-    return _render_markdown_document(path, title=display_name)
+    return _render_markdown_document(
+        path,
+        title=display_name,
+        doc_path_label=f'view:{category}/{rel_filename}',
+    )
 
 
 @usersum_bp.route('/usersum/src/<path:rel_path>')
 def view_src_markdown(rel_path: str):
     path = _resolve_src_markdown_path(rel_path)
-    display_name = str(path.relative_to(_REPO_ROOT))
-    return _render_markdown_document(path, title=display_name)
+    repo_rel_path = _repo_relative_markdown_path(path)
+    return _render_markdown_document(
+        path,
+        title=repo_rel_path,
+        doc_path_label=f'src:{repo_rel_path}',
+    )
 
 
 @usersum_bp.route('/usersum/src//<path:rel_path>')
 def view_src_markdown_legacy(rel_path: str):
     return redirect(url_for('usersum.view_src_markdown', rel_path=rel_path), code=308)
+
+
+@usersum_bp.route('/usersum/raw/<path:rel_path>')
+def raw_markdown(rel_path: str):
+    path = _resolve_src_markdown_path(rel_path)
+    markdown_source = path.read_text(encoding='utf-8')
+    return Response(markdown_source, mimetype='text/markdown')
 
 
 def _normalise_spaces(value: str) -> str:

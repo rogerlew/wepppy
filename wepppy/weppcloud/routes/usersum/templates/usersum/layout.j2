@@ -28,6 +28,65 @@
       padding: 15px;
     }
   }
+
+  .wc-usersum-shell .wc-usersum-doc-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #d0d7de;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .wc-usersum-shell .wc-usersum-doc-path {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .wc-usersum-shell .wc-usersum-doc-links {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .wc-usersum-shell .wc-usersum-doc-link {
+    color: #0969da;
+    text-decoration: none;
+    font-size: 0.875rem;
+    line-height: 1;
+  }
+
+  .wc-usersum-shell .wc-usersum-doc-link:hover,
+  .wc-usersum-shell .wc-usersum-doc-link:focus-visible {
+    color: #0550ae;
+    text-decoration: underline;
+  }
+
+  .wc-usersum-shell .wc-usersum-doc-link--icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #24292f;
+  }
+
+  .wc-usersum-shell .wc-usersum-doc-link--icon svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    fill: currentColor;
+  }
+
+  @media (max-width: 767.98px) {
+    .wc-usersum-shell .wc-usersum-doc-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
 </style>
 {% endblock %}
 

@@ -51,6 +51,19 @@ def test_usersum_view_rewrites_cross_category_markdown_links(usersum_client) -> 
     assert 'href="/usersum/view/input-file-specifications/cligenparms.md"' in body
 
 
+def test_usersum_view_footer_exposes_doc_source_links(usersum_client) -> None:
+    response = usersum_client.get("/usersum/view/db/climate_file.parameters.md")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "view:db/climate_file.parameters.md" in body
+    assert (
+        'href="https://github.com/rogerlew/wepppy/blob/master/'
+        'wepppy/weppcloud/routes/usersum/db/climate_file.parameters.md"'
+    ) in body
+    assert 'href="/usersum/raw/wepppy/weppcloud/routes/usersum/db/climate_file.parameters.md"' in body
+
+
 def test_usersum_src_legacy_double_slash_redirects(usersum_client) -> None:
     response = usersum_client.get(
         "/usersum/src//wepppy/nodb/mods/openet/README.md",
@@ -63,6 +76,16 @@ def test_usersum_src_legacy_double_slash_redirects(usersum_client) -> None:
 def test_usersum_src_route_renders_markdown(usersum_client) -> None:
     response = usersum_client.get("/usersum/src/wepppy/nodb/mods/openet/README.md")
     assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert "OpenET Climate Engine Mod" in body
+    assert "src:wepppy/nodb/mods/openet/README.md" in body
+    assert 'href="/usersum/raw/wepppy/nodb/mods/openet/README.md"' in body
+
+
+def test_usersum_raw_route_returns_markdown(usersum_client) -> None:
+    response = usersum_client.get("/usersum/raw/wepppy/nodb/mods/openet/README.md")
+    assert response.status_code == 200
+    assert response.headers["Content-Type"].startswith("text/markdown")
     assert "OpenET Climate Engine Mod" in response.get_data(as_text=True)
 
 
