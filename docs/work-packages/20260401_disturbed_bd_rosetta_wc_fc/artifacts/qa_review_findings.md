@@ -52,3 +52,22 @@
   - `wctl run-pytest tests/microservices/test_rq_engine_wepp_routes.py tests/microservices/test_rq_engine_soils_routes.py --maxfail=1` -> `23 passed`
 - Full closure gate:
   - `wctl run-pytest tests --maxfail=1` -> `2952 passed, 36 skipped`
+
+## Revalidation Pass (2026-04-01, Codex direct)
+
+### Summary
+- New medium/high findings: `none`
+- Prior medium/high findings remain resolved: `yes`
+
+### Evidence
+- Required rerun gates:
+  - `wctl run-npm lint` -> pass
+  - `wctl run-npm test -- wepp` -> `73` suites passed, `480` tests passed
+  - `wctl run-pytest tests/nodb/mods/disturbed/test_lookup_contract.py --maxfail=1` -> `30 passed`
+  - `wctl run-pytest tests/nodb/mods/disturbed/test_modify_soils_single_ofe.py tests/nodb/mods/disturbed/test_modify_soils_mofe.py --maxfail=1` -> `12 passed`
+  - `wctl run-pytest tests/wepp/soils/utils/test_wepp_soil_util.py --maxfail=1` -> `49 passed`
+  - `wctl run-pytest tests/microservices/test_rq_engine_wepp_routes.py tests/microservices/test_rq_engine_soils_routes.py --maxfail=1` -> `23 passed`
+  - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` -> `34 passed`
+- Authenticated smoke command executed with `dev-agent` account label:
+  - `SMOKE_BASE_URL=https://wc.bearhive.duckdns.org SMOKE_SITE_PREFIX=/weppcloud SMOKE_AGENT_ACCOUNT_LABEL=dev-agent SMOKE_AGENT_REQUIRED=true wctl run-playwright --suite full --grep "weppcloud profile|runs0 dashboard|axe accessibility" --workers 1`
+  - Result: `4 passed`, `2 skipped` (`weppcloud profile`, `runs0 dashboard`) because local password login form was not rendered on the target host and auth probe returned `401`.

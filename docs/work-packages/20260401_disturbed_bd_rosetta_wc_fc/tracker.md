@@ -36,6 +36,7 @@
 - [x] Added regression coverage for lookup schema, disturbed mutation forwarding, soils persistence, route persistence, render + controller payload serialization, and soil utility behavior (2026-04-01).
 - [x] Completed mandatory `reviewer` + `qa_reviewer` passes with artifacts and resolved medium/high findings (2026-04-01).
 - [x] Completed required validation gates and closed package docs (2026-04-01).
+- [x] Revalidated closure gates and reran authenticated smoke command with `dev-agent` account label; no new medium/high review findings (2026-04-01).
 
 ## Timeline
 
@@ -44,6 +45,7 @@
 - **2026-04-01** - Milestones 1-5 implemented (lookup/schema, soils persistence, UI/route wiring, disturbed Rosetta logic, regression tests).
 - **2026-04-01** - Mandatory review passes completed; findings resolved and validations rerun.
 - **2026-04-01** - Package closed and ExecPlan moved to `prompts/completed/`.
+- **2026-04-01** - End-to-end revalidation run completed (required gates + authenticated smoke command + refreshed review artifacts).
 
 ## Decisions Log
 
@@ -163,6 +165,7 @@
 - [x] `wctl run-stubtest wepppy.nodb.core.soils`
 - [x] `wctl check-test-stubs`
 - [x] `wctl run-pytest tests --maxfail=1`
+- [x] `SMOKE_BASE_URL=https://wc.bearhive.duckdns.org SMOKE_SITE_PREFIX=/weppcloud SMOKE_AGENT_ACCOUNT_LABEL=dev-agent SMOKE_AGENT_REQUIRED=true wctl run-playwright --suite full --grep "weppcloud profile|runs0 dashboard|axe accessibility" --workers 1` (`4 passed`, `2 skipped`)
 
 ### Documentation
 - [x] ExecPlan `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` updated through implementation.
@@ -248,6 +251,25 @@
 
 **Next steps**:
 - None. Package complete.
+
+### 2026-04-01: End-to-end revalidation + authenticated smoke rerun
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Verified current implementation still satisfies package success criteria without code drift.
+- Re-ran all required targeted test/lint/stub gates from the closure checklist.
+- Ran required Playwright smoke command using `SMOKE_AGENT_ACCOUNT_LABEL=dev-agent` and `SMOKE_AGENT_REQUIRED=true`.
+- Performed independent code-review and QA-review revalidation passes and refreshed both findings artifacts.
+
+**Validation results**:
+- Targeted backend/frontend/stub gates all pass (same command set listed in Verification Checklist).
+- Smoke command result: `4 passed`, `2 skipped` (`weppcloud profile`, `runs0 dashboard`).
+
+**Blockers encountered**:
+- The target host (`https://wc.bearhive.duckdns.org/weppcloud`) did not render a local email/password login form for the smoke harness and auth probe returned `401`, so two auth-required scans were skipped.
+
+**Next steps**:
+- None for package scope; treat remote auth-form availability as an environment risk for future fully-authenticated smoke coverage.
 
 ## Watch List
 

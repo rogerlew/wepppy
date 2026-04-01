@@ -51,3 +51,29 @@ Disposition:
 - `wctl run-pytest tests --maxfail=1` -> `2952 passed, 36 skipped`
 - `wctl run-npm lint` -> pass
 - `wctl run-npm test -- wepp` -> pass
+
+## Revalidation Pass (2026-04-01, Codex direct)
+
+### Summary
+- New high/medium findings: `none`
+- Prior high/medium findings remain resolved: `yes`
+
+### Scope Reviewed
+- `wepppy/nodb/mods/disturbed/data/disturbed_land_soil_lookup.csv`
+- `wepppy/nodb/mods/disturbed/disturbed.py`
+- `wepppy/nodb/core/soils.py`
+- `wepppy/wepp/soils/utils/wepp_soil_util.py`
+- `wepppy/microservices/rq_engine/wepp_routes.py`
+- `wepppy/weppcloud/templates/controls/wepp_pure_advanced_options/clip_soils_depth.htm`
+
+### Evidence
+- Canonical lookup CSV still includes `bd` immediately after `avke` with default blank row values (`96` rows, `0` non-blank `bd` values).
+- Required validation reruns remain green:
+  - `wctl run-pytest tests/nodb/mods/disturbed/test_lookup_contract.py --maxfail=1` -> `30 passed`
+  - `wctl run-pytest tests/nodb/mods/disturbed/test_modify_soils_single_ofe.py tests/nodb/mods/disturbed/test_modify_soils_mofe.py --maxfail=1` -> `12 passed`
+  - `wctl run-pytest tests/wepp/soils/utils/test_wepp_soil_util.py --maxfail=1` -> `49 passed`
+  - `wctl run-pytest tests/microservices/test_rq_engine_wepp_routes.py tests/microservices/test_rq_engine_soils_routes.py --maxfail=1` -> `23 passed`
+  - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` -> `34 passed`
+  - `wctl run-stubtest wepppy.wepp.soils.utils.wepp_soil_util` -> pass
+  - `wctl run-stubtest wepppy.nodb.core.soils` -> pass
+  - `wctl check-test-stubs` -> pass
