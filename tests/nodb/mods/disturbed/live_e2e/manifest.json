@@ -1,0 +1,67 @@
+{
+  "service": {
+    "base_url": "https://wc.bearhive.duckdns.org",
+    "session_origin": "http://wc.bearhive.duckdns.org"
+  },
+  "source_run": {
+    "runid": "assisted-weakness",
+    "config": "disturbed9002_wbt"
+  },
+  "target_row": {
+    "luse": "tall grass",
+    "stext": "loam",
+    "pmet_description": "loam-tall_grass"
+  },
+  "patches": {
+    "base": {
+      "pmet_kcb": "0.42",
+      "pmet_rawp": "0.17",
+      "rdmax": "7.77",
+      "xmxlai": "6.66",
+      "keffflag": "1",
+      "lkeff": "88.8"
+    },
+    "extended": {
+      "pmet_kcb": "0.33",
+      "pmet_rawp": "0.27",
+      "rdmax": "3.21",
+      "xmxlai": "2.34",
+      "keffflag": "1",
+      "lkeff": "44.4",
+      "plant.data.decfct": "0.123",
+      "plant.data.dropfc": "0.456",
+      "ini.data.cancov": "0.654"
+    }
+  },
+  "negative_cases": {
+    "stale_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "timeouts": {
+    "request_seconds": 60,
+    "fork_seconds": 300,
+    "build_soils_seconds": 1800,
+    "prep_wepp_seconds": 1800,
+    "poll_interval_seconds": 5
+  },
+  "artifacts": {
+    "required_subpaths": [
+      "wepp/runs/pmetpara.txt"
+    ],
+    "target_management_fields": [
+      "plant.data.decfct",
+      "plant.data.dropfc",
+      "ini.data.cancov"
+    ],
+    "target_sol_fields": [
+      "pmet_kcb",
+      "pmet_rawp",
+      "rdmax",
+      "xmxlai",
+      "keffflag",
+      "lkeff"
+    ]
+  },
+  "inputs": {
+    "dev_agent_credentials_file": "/workdir/wepppy/docker/secrets/dev-agent.env"
+  }
+}
