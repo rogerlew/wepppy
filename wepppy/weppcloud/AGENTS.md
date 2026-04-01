@@ -8,6 +8,9 @@ Caddy fronts the app with `handle_path /weppcloud*`, which **strips the `/weppcl
 If your change touches `wepppy/weppcloud/controllers_js/*`, read
 `wepppy/weppcloud/controllers_js/AGENTS.md` first. This file is route-blueprint
 focused and does not replace controller-specific guidance.
+If your change touches Playwright smoke tests, axe scans, or CAP-gated auth
+flows, read `wepppy/weppcloud/static-src/tests/smoke/AGENTS.md` for agent-account
+provisioning and credential-file conventions.
 
 ## Task Start: Route or Blueprint Changes
 - First-hop files:

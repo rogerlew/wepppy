@@ -115,6 +115,7 @@
 - Controller JS specifics: `wepppy/weppcloud/controllers_js/AGENTS.md`
 - GL dashboard specifics: `wepppy/weppcloud/static/js/gl-dashboard/AGENTS.md`
 - WEPP report templates: `wepppy/weppcloud/templates/reports/wepp/AGENTS.md`
+- Playwright smoke tests and agent auth accounts: `wepppy/weppcloud/static-src/tests/smoke/AGENTS.md`
 - RQ engine microservice: `wepppy/microservices/rq_engine/AGENTS.md`
 - Test fixtures, stubs, markers, isolation: `tests/AGENTS.md`
 - Docker stack conventions: `docker/AGENTS.md`
