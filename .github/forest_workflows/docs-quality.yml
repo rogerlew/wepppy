@@ -134,7 +134,32 @@ jobs:
     - name: Run markdown-doc benchmarks
       run: |
         set -euo pipefail
-        wctl doc-bench --path docs --warmup 0 --iterations 1
+
+        discover_workspace() {
+          if [ -n "${MARKDOWN_DOC_WORKSPACE:-}" ] && [ -f "${MARKDOWN_DOC_WORKSPACE}/Cargo.toml" ]; then
+            echo "${MARKDOWN_DOC_WORKSPACE}"
+            return
+          fi
+          for candidate in markdown-extract /usr/local/src/markdown-extract /workdir/markdown-extract /opt/markdown-extract; do
+            if [ -f "${GITHUB_WORKSPACE}/${candidate}/Cargo.toml" ]; then
+              echo "${GITHUB_WORKSPACE}/${candidate}"
+              return
+            elif [ -f "${candidate}/Cargo.toml" ]; then
+              echo "${candidate}"
+              return
+            fi
+          done
+        }
+
+        WORKSPACE="$(discover_workspace || true)"
+        if [ -z "${WORKSPACE}" ]; then
+          echo "markdown-doc workspace not found (set MARKDOWN_DOC_WORKSPACE or ensure Cargo project is available). Skipping benchmarks." >&2
+          exit 0
+        fi
+
+        echo "Using markdown-doc workspace: ${WORKSPACE}"
+        cd "${WORKSPACE}"
+        cargo run -p markdown-doc-bench --locked -- --path docs --warmup 0 --iterations 1
     - name: Upload SARIF results
       uses: github/codeql-action/upload-sarif@v3
       if: always()
