@@ -35,6 +35,7 @@ def test_usersum_header_has_weppcloud_brand_and_theme_switcher() -> None:
     assert "url_for_run('weppcloud_site.index')" in contents
     assert "url_for_run('usersum.usersum_search')" in contents
     assert "usersum-header-search" in contents
+    assert "SEARCH" in contents
     assert "{% include 'header/_theme_switcher.htm' %}" in contents
 
 

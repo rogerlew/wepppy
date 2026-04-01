@@ -193,6 +193,17 @@ def test_usersum_api_search_returns_results_payload(usersum_client) -> None:
     assert first["min_role"] == "user"
 
 
+def test_usersum_api_search_returns_html_snippets(usersum_client) -> None:
+    response = usersum_client.get("/usersum/api/search?q=openet")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    snippets = [result["snippet"] for result in payload["results"] if result.get("snippet")]
+    assert snippets
+    assert snippets[0].strip().startswith("<p>")
+    assert "&lt;p&gt;" not in snippets[0]
+
+
 def test_usersum_api_search_filters_category(usersum_client) -> None:
     response = usersum_client.get("/usersum/api/search?q=mods&category=weppcloud")
     assert response.status_code == 200

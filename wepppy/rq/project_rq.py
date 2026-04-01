@@ -505,6 +505,27 @@ def compile_dot_logs_rq(
 
 
 @with_exception_logging
+def index_usersum_docs_rq(
+    *,
+    usersum_base_dir: Optional[str] = None,
+    repo_root: Optional[str] = None,
+    write_index: bool = True,
+    require_vendor_files: bool = False,
+    sync_postgres: bool = True,
+    db_url: Optional[str] = None,
+) -> Mapping[str, Any]:
+    return _delete_helpers.index_usersum_docs_rq(
+        usersum_base_dir=usersum_base_dir,
+        repo_root=repo_root,
+        write_index=write_index,
+        require_vendor_files=require_vendor_files,
+        sync_postgres=sync_postgres,
+        db_url=db_url,
+        runtime=_delete_runtime(),
+    )
+
+
+@with_exception_logging
 def init_sbs_map_rq(runid: str, sbs_map: str) -> None:
     """Persist an SBS map selection and timestamp the prep step.
 

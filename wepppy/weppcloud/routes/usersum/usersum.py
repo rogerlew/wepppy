@@ -613,6 +613,13 @@ def _snippet_from_text(text: str, query: str, tokens: Sequence[str]) -> str:
     return snippet
 
 
+def _render_search_snippet_html(snippet_text: str) -> str:
+    normalized = _normalise_spaces(snippet_text)
+    if not normalized:
+        return ""
+    return markdown_to_html(normalized).strip()
+
+
 def _postgres_search_backend() -> PostgresUsersumSearchBackend | None:
     if _coerce_bool(current_app.config.get("USERSUM_SEARCH_DISABLE_POSTGRES")):
         return None
@@ -670,7 +677,7 @@ def _search_documents(
                         rel_path=row["rel_path"],
                         min_role=row["min_role"],
                         category=row["category"],
-                        snippet=row["snippet"],
+                        snippet=_render_search_snippet_html(str(row["snippet"])),
                         score=round(float(row["score"]), 6),
                         route_url=_doc_route_url(doc),
                         breadcrumb=[item["title"] for item in doc["breadcrumbs"]],
@@ -703,7 +710,9 @@ def _search_documents(
                 rel_path=doc["rel_path"],
                 min_role=doc["min_role"],
                 category=doc["category"],
-                snippet=_snippet_from_text(doc["body_text"], normalized_query, tokens),
+                snippet=_render_search_snippet_html(
+                    _snippet_from_text(doc["body_text"], normalized_query, tokens)
+                ),
                 score=round(score, 6),
                 route_url=_doc_route_url(doc),
                 breadcrumb=[item["title"] for item in doc["breadcrumbs"]],

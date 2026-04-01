@@ -190,3 +190,73 @@ def test_gc_runs_rq_deferred_delete_suppresses_messages(
     assert not any("delete deferred" in message for message in published)
     assert not any("delete retry" in message for message in published)
     assert not any("delete failed" in message for message in published)
+
+
+def test_index_usersum_docs_rq_builds_index_without_postgres(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    usersum_dir = repo_root / "wepppy" / "weppcloud" / "routes" / "usersum"
+    usersum_dir.mkdir(parents=True, exist_ok=True)
+
+    markdown_path = usersum_dir / "weppcloud" / "example.md"
+    markdown_path.parent.mkdir(parents=True, exist_ok=True)
+    markdown_path.write_text("# Example\n\nSearchable content.\n", encoding="utf-8")
+
+    (usersum_dir / "docs_manifest.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "docs:",
+                "  - doc_id: usersum.weppcloud.example",
+                "    source: local",
+                "    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/example.md",
+                "    title: Example Doc",
+                "    min_role: user",
+                "    category: weppcloud",
+                "    audience_tags: []",
+                "    status: active",
+                "    nav_key: usersum.weppcloud.example",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (usersum_dir / "nav_tree.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "roots:",
+                "  - key: usersum.weppcloud.section",
+                "    title: WEPPcloud",
+                "    collapsible: true",
+                "    children:",
+                "      - key: usersum.weppcloud.example",
+                "        doc_id: usersum.weppcloud.example",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (usersum_dir / "vendors.yaml").write_text("version: 1\nvendors: []\n", encoding="utf-8")
+
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    result = project_rq.index_usersum_docs_rq(
+        usersum_base_dir=str(usersum_dir),
+        repo_root=str(repo_root),
+        sync_postgres=False,
+    )
+
+    assert result["documents"] == 1
+    assert result["index_written"] is True
+    assert result["postgres_synced"] is False
+    assert (usersum_dir / "generated" / "docs_index.json").is_file()
+    assert any("STARTED index_usersum_docs_rq" in message for _, message in published)
+    assert any("COMPLETED index_usersum_docs_rq" in message for _, message in published)

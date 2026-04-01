@@ -46,7 +46,7 @@
             <p><small>{{ result.breadcrumb|join(" › ") }}</small></p>
           {% endif %}
           {% if result.snippet %}
-            <p>{{ result.snippet|safe }}</p>
+            <div class="wc-usersum-search-snippet">{{ result.snippet|safe }}</div>
           {% endif %}
         </li>
       {% endfor %}

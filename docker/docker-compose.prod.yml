@@ -788,14 +788,20 @@ services:
   scheduler:
     <<: *wepppy-service
     container_name: wepppy-scheduler
+    secrets:
+      - redis_password
+      - postgres_password
     depends_on:
       redis:
         condition: service_started
+      postgres:
+        condition: service_healthy
     environment:
       <<: *wepppy-env
       SCHEDULE_CONFIG: /workdir/wepppy/docker/scheduled-tasks.yml
       SCHEDULE_SLEEP_SECONDS: "30"
       SCHEDULE_LOG_LEVEL: INFO
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     command:
       - python
       - -m

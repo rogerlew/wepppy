@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import random
+import re
 import signal
 import time
 from dataclasses import dataclass
@@ -21,6 +22,8 @@ except ImportError as exc:  # pragma: no cover - fail fast if YAML config is use
     YAML_IMPORT_ERROR = exc
 else:
     YAML_IMPORT_ERROR = None
+
+_ENV_TOKEN_RE = re.compile(r"^\$\{(?P<name>[A-Za-z_][A-Za-z0-9_]*)(?::-(?P<default>[^}]*))?\}$")
 
 
 @dataclass
@@ -72,6 +75,19 @@ def _resolve_callable(dotted_path: str) -> Callable[..., Any]:
 
 
 def _as_int(value: Any, *, name: str) -> int:
+    if isinstance(value, str):
+        token = value.strip()
+        token_match = _ENV_TOKEN_RE.fullmatch(token)
+        if token_match is not None:
+            env_name = token_match.group("name")
+            default_value = token_match.group("default")
+            resolved_env = os.getenv(env_name)
+            if resolved_env is None or resolved_env.strip() == "":
+                if default_value is None:
+                    raise ValueError(f"{name} references {env_name} but no value is set")
+                value = default_value
+            else:
+                value = resolved_env
     if isinstance(value, bool) or value is None:
         raise ValueError(f"{name} must be an integer")
     try:

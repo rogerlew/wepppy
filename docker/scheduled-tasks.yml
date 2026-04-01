@@ -20,3 +20,9 @@ tasks:
     queue: batch
     job_timeout: 36000
     result_ttl: 86400
+  - name: usersum_docs_index
+    func: wepppy.rq.project_rq.index_usersum_docs_rq
+    interval_seconds: "${USERSUM_INDEX_INTERVAL_SECONDS:-14400}"
+    queue: batch
+    job_timeout: 3600
+    result_ttl: 86400

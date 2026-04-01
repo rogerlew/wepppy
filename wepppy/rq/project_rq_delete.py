@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import errno
 import logging
+import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -361,4 +362,126 @@ def compile_dot_logs_rq(
         ),
     )
 
+    return result
+
+
+def _resolve_usersum_postgres_db_url(db_url: str | None) -> str:
+    if db_url is not None and db_url.strip():
+        return db_url.strip()
+
+    env_sqlalchemy_uri = (os.getenv("SQLALCHEMY_DATABASE_URI") or "").strip()
+    if env_sqlalchemy_uri:
+        return env_sqlalchemy_uri
+
+    env_database_url = (os.getenv("DATABASE_URL") or "").strip()
+    if env_database_url:
+        return env_database_url
+
+    try:
+        from wepppy.weppcloud.configuration import _build_postgres_uri
+
+        built = _build_postgres_uri().strip()
+        if built:
+            return built
+    except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:393", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        pass
+
+    return ""
+
+
+def index_usersum_docs_rq(
+    *,
+    usersum_base_dir: str | None = None,
+    repo_root: str | None = None,
+    write_index: bool = True,
+    require_vendor_files: bool = False,
+    sync_postgres: bool = True,
+    db_url: str | None = None,
+    runtime: DeleteRuntime,
+) -> Mapping[str, Any]:
+    """Build usersum docs index and sync PostgreSQL search index."""
+    job = runtime.get_current_job()
+    job_id = getattr(job, "id", "sync")
+    func_name = "index_usersum_docs_rq"
+    status_channel = "maintenance:usersum_index"
+    started_at = time.perf_counter()
+
+    _publish(
+        runtime,
+        status_channel,
+        f"rq:{job_id} STARTED {func_name}",
+    )
+
+    try:
+        from wepppy.weppcloud.usersum_docs.docs_contracts import load_and_validate_contracts
+        from wepppy.weppcloud.usersum_docs.docs_index import build_generated_index, write_generated_index
+        from wepppy.weppcloud.usersum_docs.pg_search import PostgresUsersumSearchBackend
+    except Exception as exc:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:432", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        _publish(
+            runtime,
+            status_channel,
+            f"rq:{job_id} EXCEPTION {func_name}({exc})",
+        )
+        raise
+
+    repo_root_path = Path(repo_root).resolve() if repo_root is not None else Path(__file__).resolve().parents[2]
+    usersum_base_path = (
+        Path(usersum_base_dir).resolve()
+        if usersum_base_dir is not None
+        else repo_root_path / "wepppy" / "weppcloud" / "routes" / "usersum"
+    )
+
+    try:
+        contracts = load_and_validate_contracts(
+            base_dir=usersum_base_path,
+            repo_root=repo_root_path,
+            require_local_files=True,
+            require_vendor_files=require_vendor_files,
+        )
+        index = build_generated_index(contracts, repo_root=repo_root_path)
+
+        index_path = usersum_base_path / "generated" / "docs_index.json"
+        if write_index:
+            write_generated_index(index, index_path)
+
+        postgres_synced = False
+        if sync_postgres:
+            resolved_db_url = _resolve_usersum_postgres_db_url(db_url)
+            if not resolved_db_url.lower().startswith("postgresql"):
+                raise RuntimeError("Usersum indexing requires a PostgreSQL database URL when sync_postgres=true.")
+            backend = PostgresUsersumSearchBackend(resolved_db_url)
+            backend.ensure_synced(index.documents)
+            postgres_synced = True
+
+    except Exception as exc:
+        elapsed = time.perf_counter() - started_at
+        _publish(
+            runtime,
+            status_channel,
+            f"rq:{job_id} EXCEPTION {func_name}({exc}) elapsed_s={elapsed:.1f}",
+        )
+        raise
+
+    elapsed = time.perf_counter() - started_at
+    result: dict[str, Any] = {
+        "documents": len(index.documents),
+        "index_path": str(index_path),
+        "index_written": bool(write_index),
+        "postgres_synced": postgres_synced,
+        "elapsed_s": round(elapsed, 3),
+    }
+
+    _publish(
+        runtime,
+        status_channel,
+        (
+            f"rq:{job_id} COMPLETED {func_name}"
+            f"(documents={result['documents']}, index_written={str(result['index_written']).lower()},"
+            f" postgres_synced={str(result['postgres_synced']).lower()}, elapsed_s={elapsed:.1f})"
+        ),
+    )
     return result

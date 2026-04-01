@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 class DeleteRuntime:
+    __match_args__: tuple[str, ...]
     get_current_job: Callable[[], Any]
     get_wd: Callable[[str], str]
     publish_status: Callable[[str, str], None]
@@ -43,5 +44,16 @@ def compile_dot_logs_rq(
     run_locations_path: str | None = ...,
     run_roots: list[str] | None = ...,
     legacy_roots: list[str] | None = ...,
+    runtime: DeleteRuntime,
+) -> Mapping[str, Any]: ...
+
+def index_usersum_docs_rq(
+    *,
+    usersum_base_dir: str | None = ...,
+    repo_root: str | None = ...,
+    write_index: bool = ...,
+    require_vendor_files: bool = ...,
+    sync_postgres: bool = ...,
+    db_url: str | None = ...,
     runtime: DeleteRuntime,
 ) -> Mapping[str, Any]: ...
