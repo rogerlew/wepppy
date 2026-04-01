@@ -1,8 +1,8 @@
 # Storm Event Analyzer Specification
 > Interactive report that replaces single-storm analysis by letting users filter and inspect storms for climate and hydrology measures.
 
-**Version:** 0.1  
-**Last Updated:** 2026-02-XX  
+**Version:** 0.2  
+**Last Updated:** 2026-04-01  
 **Status:** Draft
 
 ## Table of Contents
@@ -99,14 +99,32 @@ Below the hyetograph:
 
 This section updates when a row is selected.
 
+Date input spec for the `Date` line:
+- Replace static Date value with an editable text input in the base column cell.
+- Accepted formats: `YY-MM-DD` and `YYYY-MM-DD`.
+- Input is right-aligned, theme-aware (`wc-field__control`), and supports keyboard submit (`Enter`) and blur submit.
+- If a selected row exists, the input mirrors the selected row date.
+- If no row is selected, the input retains the user-entered date text.
+
 ## Interaction Flow
+Primary flow (metric-first):
 1. User clicks a metric cell (e.g., 10-min intensity, 10-year ARI).
 2. UI captures the selected metric and value in base units.
 3. Filter range (default +/-10%) is applied to compute min/max target range.
-4. Query Engine fetches storms within that range.
-5. Event Characteristics table renders results and sorts by the selected measure.
-6. Hyetograph renders cumulative curves for all listed events.
-7. User selects an event row -> highlight row + line, update Hydrology Characteristics section.
+4. UI immediately shows event-query loading feedback.
+5. Query Engine fetches storms within that range.
+6. Event Characteristics table renders results and sorts by the selected measure.
+7. Hyetograph renders cumulative curves for all listed events.
+8. User selects an event row -> highlight row + line, update Hydrology Characteristics section.
+
+Alternate flow (manual date-first):
+1. User enters a date in the Hydrology Characteristics `Date` input (`YY-MM-DD` or `YYYY-MM-DD`).
+2. UI switches to manual-date mode (no selected frequency metric required).
+3. UI immediately shows event-query loading feedback.
+4. Query Engine looks up a matching storm day by year/month/day, supporting both 2-digit and 4-digit year aliases.
+5. If found, a single event row is rendered/selected and the hyetograph is drawn for that event.
+6. If not found (or invalid input), the event table/hyetograph stay empty and an explicit error/empty message is shown.
+7. Clicking a frequency metric clears manual-date mode and returns to the primary flow.
 
 ## Data Model and Query Engine
 All filtering and aggregation uses Query Engine (`/query-engine/runs/{runid}/{config}/query`).
@@ -192,10 +210,12 @@ Suggested state keys:
     unitKey: "mm/hour"
   },
   filterRangePct: 10,
+  manualDateInput: "",
+  eventRowsLoading: false,
   eventRows: [],
   selectedEventSimDayIndex: null,
   hyetographSeries: [],
-  hydrologySummary: null,
+  eventError: null,
   unitPrefs: { ... } // from unitizer
 }
 ```
@@ -248,8 +268,11 @@ wepppy/tests/query_engine/
 
 ## Error and Empty States
 - No data for selected metric: show an empty table message ("No storms in range") and blank hyetograph.
+- Invalid manual date input: show a validation error ("Date must use YY-MM-DD or YYYY-MM-DD.").
+- Manual date with no matching event: show explicit no-match feedback and keep table/hyetograph empty.
 - Missing `tc_out.parquet`: hide Tc row or display "n/a".
 - Missing snow cover or soil saturation: show "n/a" with muted styling, keep row clickable.
+- During metric/date queries: show an immediate loading indicator and mark the event table busy until the request resolves.
 - Query Engine errors: surface a banner with the error message and keep previous results until the next successful query.
 
 ## Implementation Plan
