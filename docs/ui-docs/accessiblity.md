@@ -87,6 +87,28 @@ AA enforcement policy in `theme-metrics.spec.js`:
 - Other themes are still measured/reported for user-preference visibility but do not fail the suite.
 - Optional override: `THEME_METRICS_ENFORCED_THEMES=theme1,theme2,...`.
 
+### Universal Design Theme Policy
+
+WEPPcloud supports a mixed theme catalog for universal design and user preference:
+- **Compliance-enforced themes** (must remain WCAG AA in the metrics gate):
+  - `default`
+  - `light-high-contrast`
+  - `ayu-mirage`
+  - `ayu-mirage-bordered`
+  - `cursor-dark-midnight`
+- **Preference themes** (still measured/reported, intentionally allowed to be lower contrast):
+  - `ayu-light`, `ayu-light-bordered`
+  - `ayu-dark`, `ayu-dark-bordered`
+  - `onedark`
+  - `dark-modern`
+  - `cursor-dark-anysphere`
+  - `cursor-dark-high-contrast`
+
+Latest captured metrics snapshot (generated at **March 31, 2026**):
+- Light themes: `default` and `light-high-contrast` compliant; `ayu-light*` variants non-compliant.
+- Dark themes: `ayu-mirage*` and `cursor-dark-midnight` compliant; remaining dark preference themes non-compliant.
+- Operationally, this is acceptable under the current policy because the enforced compliance set passes.
+
 Nightly artifact workflow source:
 - `.github/forest_workflows/theme-metrics-nightly.yml`
 
@@ -176,9 +198,9 @@ For CAP-gated runs0 scans, use an authenticated agent account:
 Optional strict mode:
 - `SMOKE_AGENT_REQUIRED=true` to fail/skip fast when agent credentials are missing.
 
-## Recommended Manual CI Workflow
+## Recommended Accessibility Workflow
 
-Implemented non-blocking workflow spec:
+Implemented workflow spec:
 - `.github/forest_workflows/accessibility-manual.yml`
 
 Generated workflow:
@@ -186,7 +208,7 @@ Generated workflow:
 
 Recommended triggers:
 - `workflow_dispatch` (required)
-- optional weekly schedule
+- nightly schedule at 11 PM Pacific (`America/Los_Angeles`)
 
 Recommended steps:
 1. `wctl run-npm install`

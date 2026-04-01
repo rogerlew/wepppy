@@ -1,11 +1,12 @@
-name: Accessibility Manual
+name: Accessibility Nightly
 on:
   workflow_dispatch: null
   schedule:
-    # 04:30 AM Pacific (manual gate still uses workflow_dispatch)
-    - cron: 30 11 * * 1
+    # GitHub cron uses UTC; run both offsets and gate to 11:00 PM America/Los_Angeles in-step.
+    - cron: 0 6 * * *
+    - cron: 0 7 * * *
 jobs:
-  accessibility-manual:
+  accessibility-nightly:
     runs-on:
       - self-hosted
       - Linux
@@ -21,18 +22,47 @@ jobs:
       ALLY_AGENT_PASSWORD: ${{ secrets.ALLY_AGENT_PASSWORD }}
       SMOKE_AGENT_REQUIRED: "true"
     steps:
+      - name: Determine Pacific run window
+        id: pacific_window
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "Manual dispatch detected; running full workflow."
+            exit 0
+          fi
+          pacific_time="$(TZ=America/Los_Angeles date '+%Y-%m-%d %H:%M %Z')"
+          pacific_hour="$(TZ=America/Los_Angeles date '+%H')"
+          echo "Pacific time at trigger: ${pacific_time}"
+          if [ "${pacific_hour}" = "23" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "Scheduled run is within 11 PM Pacific window."
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "Scheduled run is outside 11 PM Pacific window; skipping."
+          fi
+
+      - name: Skip run outside 11 PM Pacific
+        if: steps.pacific_window.outputs.should_run != 'true'
+        run: |
+          set -euo pipefail
+          echo "No-op for this UTC trigger; waiting for 11 PM Pacific slot."
+
       - name: Install npm dependencies
+        if: steps.pacific_window.outputs.should_run == 'true'
         run: |
           set -euo pipefail
           wctl run-npm install
 
       - name: Install Playwright browsers
+        if: steps.pacific_window.outputs.should_run == 'true'
         run: |
           set -euo pipefail
           export PLAYWRIGHT_BROWSERS_PATH="${GITHUB_WORKSPACE}/wepppy/weppcloud/static-src/.playwright-browsers"
           wctl run-npm exec -- playwright install chromium
 
       - name: Run targeted accessibility pytest assertions
+        if: steps.pacific_window.outputs.should_run == 'true'
         run: |
           set -euo pipefail
           wctl run-pytest \
@@ -44,11 +74,13 @@ jobs:
             --maxfail=1
 
       - name: Run targeted accessibility JS tests
+        if: steps.pacific_window.outputs.should_run == 'true'
         run: |
           set -euo pipefail
           wctl run-npm test -- copytext map_gl
 
       - name: Run theme contrast metrics suite
+        if: steps.pacific_window.outputs.should_run == 'true'
         run: |
           set -euo pipefail
           wctl run-playwright \
@@ -57,6 +89,7 @@ jobs:
             --browsers-path "${GITHUB_WORKSPACE}/wepppy/weppcloud/static-src/.playwright-browsers"
 
       - name: Run axe accessibility smoke suite
+        if: steps.pacific_window.outputs.should_run == 'true'
         run: |
           set -euo pipefail
           wctl run-playwright \
@@ -67,7 +100,7 @@ jobs:
             --report-path "$PLAYWRIGHT_A11Y_REPORT_PATH"
 
       - name: Upload Playwright accessibility report
-        if: always()
+        if: always() && steps.pacific_window.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-accessibility-report
@@ -75,7 +108,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload axe scan artifacts
-        if: always()
+        if: always() && steps.pacific_window.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: axe-scan-artifacts
@@ -83,7 +116,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Publish accessibility summary
-        if: always()
+        if: always() && steps.pacific_window.outputs.should_run == 'true'
         run: |
           {
             echo '## Accessibility Summary'
