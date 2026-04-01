@@ -254,8 +254,28 @@ export function createLayerRenderer({
     });
   }
 
+  function setLayerLabelContent(label, { name, path, nameFontSize }) {
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'gl-layer-name';
+    nameSpan.textContent = name;
+    if (nameFontSize) {
+      nameSpan.style.fontSize = nameFontSize;
+    }
+    label.replaceChildren(nameSpan);
+    const pathText = String(path || '').trim();
+    if (pathText) {
+      label.title = pathText;
+    } else {
+      label.removeAttribute('title');
+    }
+  }
+
   function renderRapSection(details, section) {
     const state = getState();
+    const rapDatasetPath =
+      Array.isArray(section.items) && section.items.length
+        ? String(section.items[0].path || '').trim()
+        : '';
     const itemList = document.createElement('ul');
     itemList.className = 'gl-layer-items';
 
@@ -299,8 +319,10 @@ export function createLayerRenderer({
     });
     const cumulativeLabel = document.createElement('label');
     cumulativeLabel.setAttribute('for', 'layer-RAP-cumulative');
-    cumulativeLabel.innerHTML =
-      '<span class="gl-layer-name">Cumulative Cover</span><br><span class="gl-layer-path">Sum of selected bands (0-100%)</span>';
+    cumulativeLabel.innerHTML = '<span class="gl-layer-name">Cumulative Cover</span>';
+    if (rapDatasetPath) {
+      cumulativeLabel.title = rapDatasetPath;
+    }
     cumulativeLi.appendChild(cumulativeInput);
     cumulativeLi.appendChild(cumulativeLabel);
     itemList.appendChild(cumulativeLi);
@@ -334,7 +356,8 @@ export function createLayerRenderer({
       const label = document.createElement('label');
       label.setAttribute('for', input.id);
       const name = layer.label || layer.key;
-      label.innerHTML = `<span class="gl-layer-name" style="font-size:0.85rem;">${name}</span>`;
+      const bandPath = String(layer.path || '').trim() || rapDatasetPath;
+      setLayerLabelContent(label, { name, path: bandPath, nameFontSize: '0.85rem' });
       li.appendChild(input);
       li.appendChild(label);
       bandList.appendChild(li);
@@ -498,7 +521,7 @@ export function createLayerRenderer({
       label.setAttribute('for', input.id);
       const name = layer.label || layer.key;
       const path = layer.path || '';
-      label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+      setLayerLabelContent(label, { name, path });
       li.appendChild(input);
       li.appendChild(label);
       itemList.appendChild(li);
@@ -875,7 +898,7 @@ export function createLayerRenderer({
         label.setAttribute('for', input.id);
         const name = layer.label || layer.key;
         const path = layer.path || '';
-        label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+        setLayerLabelContent(label, { name, path });
         li.appendChild(input);
         li.appendChild(label);
         itemList.appendChild(li);
@@ -925,7 +948,7 @@ export function createLayerRenderer({
           label.setAttribute('for', input.id);
           const name = layer.label || layer.key;
           const path = layer.path || '';
-          label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+          setLayerLabelContent(label, { name, path });
           li.appendChild(input);
           li.appendChild(label);
           channelList.appendChild(li);
@@ -976,7 +999,7 @@ export function createLayerRenderer({
           label.setAttribute('for', input.id);
           const name = layer.label || layer.key;
           const path = layer.path || '';
-          label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+          setLayerLabelContent(label, { name, path });
           li.appendChild(input);
           li.appendChild(label);
           channelList.appendChild(li);

@@ -23,7 +23,7 @@ function contrastRatio(a, b) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-function buildLabelLayers() {
+function buildLabelLayers(overrides = {}) {
   const state = {
     dashboardMode: 'batch',
     subcatchmentLabelsVisible: true,
@@ -60,6 +60,7 @@ function buildLabelLayers() {
     weppEventLayers: [],
     openetLayers: [],
     rapLayers: [],
+    ...overrides,
   };
 
   const layerUtils = createLayerUtils({
@@ -117,6 +118,7 @@ describe('gl-dashboard map label styling', () => {
     expect(channelLabels).toBeDefined();
     expect(subcatchmentLabels.getSize).toBe(12);
     expect(channelLabels.getSize).toBe(13);
+    expect(subcatchmentLabels.data[0].text).toBe('run-1:1');
 
     const subcatchContrast = contrastRatio(
       subcatchmentLabels.getColor.slice(0, 3),
@@ -130,6 +132,23 @@ describe('gl-dashboard map label styling', () => {
     expect(subcatchContrast).toBeGreaterThanOrEqual(4.5);
     expect(channelContrast).toBeGreaterThanOrEqual(4.5);
     expect(channelLabels.getColor).not.toEqual([26, 115, 232, 255]);
+  });
+
+  it('shows RAP batch filenames on hover tooltips, not always-on map labels', () => {
+    setThemeTokens({
+      '--wc-color-page': '#ffffff',
+      '--wc-color-surface': '#ffffff',
+      '--wc-color-surface-alt': '#f3f4f5',
+      '--wc-color-text': '#1f2328',
+      '--wc-color-text-muted': '#4b5563',
+    });
+
+    const { subcatchmentLabels } = buildLabelLayers({
+      rapCumulativeMode: true,
+      rapLayers: [{ key: 'rap-tree', visible: true }],
+    });
+
+    expect(subcatchmentLabels.data[0].text).toBe('1');
   });
 
   it('promotes low-alpha muted theme values to AA contrast', () => {

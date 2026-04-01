@@ -149,6 +149,137 @@ describe('gl-dashboard layer renderer', () => {
     expect(swatches[1].style.backgroundColor).toContain('86, 180, 233');
   });
 
+  it('keeps RAP dataset filenames in hover tooltips instead of visible labels', () => {
+    const layerListEl = document.createElement('ul');
+    const layerEmptyEl = document.createElement('div');
+    const state = {
+      landuseLayers: [],
+      soilsLayers: [],
+      hillslopesLayers: [],
+      channelsLayers: [],
+      weppLayers: [],
+      weppChannelLayers: [],
+      weppYearlyLayers: [],
+      weppYearlyChannelLayers: [],
+      weppEventLayers: [],
+      watarLayers: [],
+      openetLayers: [],
+      detectedLayers: [],
+      rapCumulativeMode: false,
+      rapLayers: [
+        { key: 'rap-tree', label: 'Tree Cover', path: 'rap/rap_subcatchment.parquet', selected: true, visible: false },
+        { key: 'rap-shrub', label: 'Shrub Cover', path: 'rap/rap_subcatchment.parquet', selected: true, visible: false },
+      ],
+      weppStatistic: 'mean',
+    };
+
+    const renderer = createLayerRenderer({
+      getState: () => state,
+      setValue: jest.fn(),
+      layerUtils: { getActiveLayersForLegend: () => [] },
+      domRefs: { layerListEl, layerEmptyEl },
+      yearSlider: { setRange: jest.fn(), show: jest.fn() },
+      deselectAllSubcatchmentOverlays: jest.fn(),
+      activateWeppYearlyLayer: jest.fn(),
+      activateWeppYearlyChannelLayer: jest.fn(),
+      refreshWeppStatisticData: jest.fn(),
+      refreshRapData: jest.fn(),
+      refreshOpenetData: jest.fn(),
+      refreshWeppEventData: jest.fn(),
+      loadRapTimeseriesData: jest.fn(),
+      loadWeppYearlyTimeseriesData: jest.fn(),
+      loadOpenetTimeseriesData: jest.fn(),
+      applyLayers: jest.fn(),
+      syncGraphLayout: jest.fn(),
+      clearGraphModeOverride: jest.fn(),
+      setGraphFocus: jest.fn(),
+      setGraphCollapsed: jest.fn(),
+      pickActiveWeppEventLayer: jest.fn(),
+      soilColorForValue: jest.fn(),
+      constants: {},
+    });
+
+    renderer.updateLayerList();
+    const rapDetails = findDetailsForTitle(layerListEl, 'RAP');
+    expect(rapDetails).not.toBeNull();
+
+    const cumulativeLabel = rapDetails.querySelector('label[for="layer-RAP-cumulative"]');
+    expect(cumulativeLabel).not.toBeNull();
+    expect(cumulativeLabel.title).toBe('rap/rap_subcatchment.parquet');
+
+    const treeLabel = rapDetails.querySelector('label[for="layer-RAP-band-rap-tree"]');
+    expect(treeLabel).not.toBeNull();
+    expect(treeLabel.textContent).toContain('Tree Cover');
+    expect(treeLabel.textContent).not.toContain('rap/rap_subcatchment.parquet');
+    expect(treeLabel.title).toBe('rap/rap_subcatchment.parquet');
+    expect(layerListEl.querySelectorAll('.gl-layer-path')).toHaveLength(0);
+  });
+
+  it('hides visible filepath rows and keeps filepaths as hover-only tooltips', () => {
+    const layerListEl = document.createElement('ul');
+    const layerEmptyEl = document.createElement('div');
+    const state = {
+      landuseLayers: [{ key: 'lu-cancov', label: 'Canopy cover (cancov)', path: 'landuse/landuse.parquet', visible: true }],
+      soilsLayers: [],
+      hillslopesLayers: [],
+      channelsLayers: [{ key: 'channels_order', label: 'Channel Order', path: 'resources/channels.json', visible: true }],
+      weppLayers: [],
+      weppChannelLayers: [],
+      weppYearlyLayers: [],
+      weppYearlyChannelLayers: [],
+      weppEventLayers: [{ key: 'event-q', label: 'Runoff (Q)', path: 'wepp/event.parquet', visible: false }],
+      watarLayers: [],
+      rapLayers: [],
+      openetLayers: [],
+      detectedLayers: [],
+      rapCumulativeMode: false,
+      weppStatistic: 'mean',
+      weppEventSelectedDate: null,
+      weppEventMetadata: null,
+    };
+
+    const renderer = createLayerRenderer({
+      getState: () => state,
+      setValue: jest.fn(),
+      layerUtils: { getActiveLayersForLegend: () => [] },
+      domRefs: { layerListEl, layerEmptyEl },
+      yearSlider: { setRange: jest.fn() },
+      deselectAllSubcatchmentOverlays: jest.fn(),
+      activateWeppYearlyLayer: jest.fn(),
+      activateWeppYearlyChannelLayer: jest.fn(),
+      refreshWeppStatisticData: jest.fn(),
+      refreshRapData: jest.fn(),
+      refreshOpenetData: jest.fn(),
+      refreshWeppEventData: jest.fn(),
+      loadRapTimeseriesData: jest.fn(),
+      loadWeppYearlyTimeseriesData: jest.fn(),
+      loadOpenetTimeseriesData: jest.fn(),
+      applyLayers: jest.fn(),
+      syncGraphLayout: jest.fn(),
+      clearGraphModeOverride: jest.fn(),
+      setGraphFocus: jest.fn(),
+      setGraphCollapsed: jest.fn(),
+      pickActiveWeppEventLayer: jest.fn(),
+      soilColorForValue: jest.fn(),
+      constants: {},
+    });
+
+    renderer.updateLayerList();
+
+    expect(layerListEl.querySelectorAll('.gl-layer-path')).toHaveLength(0);
+    const landuseLabel = layerListEl.querySelector('label[for="layer-Landuse-lu-cancov"]');
+    expect(landuseLabel).not.toBeNull();
+    expect(landuseLabel.title).toBe('landuse/landuse.parquet');
+
+    const channelsLabel = layerListEl.querySelector('label[for="layer-Channels-channels_order"]');
+    expect(channelsLabel).not.toBeNull();
+    expect(channelsLabel.title).toBe('resources/channels.json');
+
+    const weppEventLabel = layerListEl.querySelector('label[for="layer-WEPP-Event-event-q"]');
+    expect(weppEventLabel).not.toBeNull();
+    expect(weppEventLabel.title).toBe('wepp/event.parquet');
+  });
+
   it('renders RUSLE section after WEPP and honors explicit raster colormaps in legend', () => {
     const layerListEl = document.createElement('ul');
     const layerEmptyEl = document.createElement('div');
