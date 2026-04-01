@@ -112,8 +112,12 @@
   --wc-button-primary-text: var(--wc-color-on-primary);
   --wc-button-secondary-bg: var(--wc-color-surface);
   --wc-button-secondary-bg-hover: var(--wc-color-surface-alt);
-  --wc-button-secondary-border: var(--wc-color-border);
+  --wc-button-secondary-border: var(--wc-color-text);
+  --wc-button-secondary-border-hover: var(--wc-color-text);
   --wc-button-secondary-text: var(--wc-color-text);
+  --wc-button-secondary-disabled-bg: var(--wc-color-surface-alt);
+  --wc-button-secondary-disabled-border: var(--wc-color-text);
+  --wc-button-secondary-disabled-text: color-mix(in srgb, var(--wc-color-text) 82%, var(--wc-color-text-muted));
   --wc-button-link-color: var(--wc-color-link);
   --wc-button-link-hover: var(--wc-color-link-hover);
   --wc-button-disabled-bg: var(--wc-color-border);
@@ -578,9 +582,17 @@ input[type="file"]:disabled::-webkit-file-upload-button {
 .pure-button.pure-button-secondary:hover:not(:disabled):not(.pure-button-disabled),
 .pure-button.pure-button-secondary:focus-visible:not(:disabled):not(.pure-button-disabled) {
   background-color: var(--wc-button-secondary-bg-hover);
-  border-color: var(--wc-color-border-strong);
+  border-color: var(--wc-button-secondary-border-hover, var(--wc-button-secondary-border));
   color: var(--wc-button-secondary-text) !important;
   box-shadow: none;
+}
+
+.pure-button.pure-button-secondary:disabled,
+.pure-button.pure-button-secondary[disabled],
+.pure-button.pure-button-secondary.pure-button-disabled {
+  background-color: var(--wc-button-secondary-disabled-bg, var(--wc-button-secondary-bg));
+  border-color: var(--wc-button-secondary-disabled-border, var(--wc-button-secondary-border));
+  color: var(--wc-button-secondary-disabled-text, var(--wc-button-secondary-text)) !important;
 }
 
 .pure-button.pure-button-link {
