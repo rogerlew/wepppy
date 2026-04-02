@@ -1708,6 +1708,33 @@ h5:first-child {
   border-color: var(--wc-color-border-strong);
 }
 
+/* Keep browser autofill aligned with the active WEPPcloud theme. */
+.wc-field__control:-webkit-autofill,
+.wc-field__control:-webkit-autofill:hover,
+.wc-field__control:-webkit-autofill:focus,
+.wc-field__control:autofill,
+.wc-field__control:-moz-autofill,
+.pure-form .wc-field__control:-webkit-autofill,
+.pure-form .wc-field__control:-webkit-autofill:hover,
+.pure-form .wc-field__control:-webkit-autofill:focus,
+.pure-form .wc-field__control:autofill,
+.pure-form .wc-field__control:-moz-autofill {
+  color: var(--wc-color-text);
+  -webkit-text-fill-color: var(--wc-color-text);
+  caret-color: var(--wc-color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--wc-color-surface-alt) inset;
+  box-shadow: 0 0 0 1000px var(--wc-color-surface-alt) inset;
+  border: 1px solid var(--wc-color-border);
+}
+
+.wc-field__control:-webkit-autofill:focus-visible,
+.pure-form .wc-field__control:-webkit-autofill:focus-visible {
+  border-color: var(--wc-color-accent);
+  box-shadow:
+    0 0 0 3px var(--wc-color-accent-soft),
+    0 0 0 1000px var(--wc-color-surface-alt) inset;
+}
+
 .wc-field__control:focus-visible,
 .pure-form .wc-field__control:focus-visible {
   outline: none;
