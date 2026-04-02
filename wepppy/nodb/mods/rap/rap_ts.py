@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import os
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
+from datetime import datetime
 from os.path import exists as _exists
 from os.path import join as _join
 from typing import Any, ClassVar, Dict, Iterator, Optional, Tuple, TypeAlias
@@ -64,6 +65,20 @@ __all__ = [
     'RAPNoDbLockedException',
     'RAP_TS',
 ]
+
+
+def _parse_fire_year(fire_date: str) -> int:
+    """Parse fire-date strings used by Disturbed into a four-digit year."""
+    normalized = str(fire_date).strip().replace('-', ' ').replace('/', ' ').replace('.', ' ')
+    normalized = ' '.join(normalized.split())
+
+    for fmt in ('%Y %m %d', '%m %d %Y', '%m %d %y'):
+        try:
+            return datetime.strptime(normalized, fmt).year
+        except ValueError:
+            continue
+
+    raise ValueError(f"Unsupported fire date format: {fire_date!r}")
 
 YearKey: TypeAlias = int | str
 TopazId: TypeAlias = int | str
@@ -569,8 +584,7 @@ class RAP_TS(NoDbBase):
             fp.write("")
 
         years = sorted([yr for yr in data[RAP_Band.TREE]])
-        fire_mo, fire_da, fire_year = fire_date.replace('-', ' ').replace('/', ' ').split()
-        fire_year = int(fire_year)
+        fire_year = _parse_fire_year(fire_date)
         fire_years = {str(yr): int(yr) - fire_year for yr in years}
 
         for wepp_id in translator.iter_wepp_sub_ids():
@@ -597,6 +611,14 @@ class RAP_TS(NoDbBase):
                             self.logger.info(f'  topaz_id={topaz_id}, mofe_id={mofe_id}, burn_class={burn_class}, rap_band={name}\n')
                             
                             if key in cover_transform:
+                                curve = cover_transform[key]
+                                if len(curve) == 0:
+                                    raise ValueError(f'Cover transform is empty for {key!r}.')
+                                source_year_key: YearKey = str(fire_year)
+                                if source_year_key not in data[band]:
+                                    source_year_key = fire_year
+                                if source_year_key not in data[band]:
+                                    raise KeyError(f'RAP data missing fire year {fire_year!r} for band {band!r}.')
                                 x = []
                                 for yr in years:
                                     indx = fire_years.get(str(yr), None)
@@ -605,11 +627,11 @@ class RAP_TS(NoDbBase):
                                         x.append(data[band][yr][topaz_id][mofe_id])
                                         continue
 
-                                    if indx is None:
-                                        scale = cover_transform[key][-1]
+                                    if indx is None or indx >= len(curve):
+                                        scale = curve[-1]
                                     else:
-                                        scale = cover_transform[key][indx]
-                                    x.append(data[band][str(fire_year)][topaz_id][mofe_id] * scale)
+                                        scale = curve[indx]
+                                    x.append(data[band][source_year_key][topaz_id][mofe_id] * scale)
                                 fp.write(' \t'.join([f'{v:0.1f}' for v in x]))
                             else:
                                 fp.write(' \t'.join([str(data[band][yr][topaz_id][mofe_id]) for yr in years]))
@@ -630,6 +652,14 @@ class RAP_TS(NoDbBase):
                         self.logger.info(f'  topaz_id={topaz_id}, burn_class={burn_class}, rap_band={name}\n')
 
                         if key in cover_transform:
+                            curve = cover_transform[key]
+                            if len(curve) == 0:
+                                raise ValueError(f'Cover transform is empty for {key!r}.')
+                            source_year_key = str(fire_year)
+                            if source_year_key not in data[band]:
+                                source_year_key = fire_year
+                            if source_year_key not in data[band]:
+                                raise KeyError(f'RAP data missing fire year {fire_year!r} for band {band!r}.')
                             x = []
                             for yr in years:
                                 indx = fire_years.get(str(yr), None)
@@ -638,11 +668,11 @@ class RAP_TS(NoDbBase):
                                     x.append(data[band][yr][topaz_id])
                                     continue
 
-                                if indx is None:
-                                    scale = cover_transform[key][-1]
+                                if indx is None or indx >= len(curve):
+                                    scale = curve[-1]
                                 else:
-                                    scale = cover_transform[key][indx]
-                                x.append(data[band][str(fire_year)][topaz_id] * scale)
+                                    scale = curve[indx]
+                                x.append(data[band][source_year_key][topaz_id] * scale)
                             fp.write(' \t'.join([f'{v:0.1f}' for v in x]))
                         else:
                             fp.write(' \t'.join([str(data[band][yr][topaz_id]) for yr in years]))
