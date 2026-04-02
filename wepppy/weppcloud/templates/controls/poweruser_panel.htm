@@ -282,7 +282,11 @@
               </button>
             {% endif %}
           </div>
-          {% if current_user.has_role('Admin') or current_user.has_role('Root') %}
+          {% set can_mint_run_token = current_user.has_role('Admin')
+              or current_user.has_role('Root')
+              or current_user.has_role('admin')
+              or current_user.has_role('root') %}
+          {% if can_mint_run_token %}
             <section
               class="wc-profile-token"
               data-run-token-root
@@ -548,7 +552,7 @@
   });
 </script>
 
-{% if current_user.has_role('Admin') or current_user.has_role('Root') %}
+{% if can_mint_run_token %}
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
     var root = document.querySelector('[data-run-token-root]');

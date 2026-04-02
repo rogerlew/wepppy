@@ -69,6 +69,10 @@ PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES = ('Admin', 'PowerUser', 'Dev', 'Root')
 PROFILE_USER_TOKEN_MINT_ALLOWED_ROLE_SET = frozenset(
     role.casefold() for role in PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES
 )
+ADMIN_RUNS_VIEWER_ALLOWED_ROLES = ('Admin', 'Root')
+ADMIN_RUNS_VIEWER_ALLOWED_ROLE_SET = frozenset(
+    role.casefold() for role in ADMIN_RUNS_VIEWER_ALLOWED_ROLES
+)
 RUN_TOKEN_TTL_SECONDS = 24 * 60 * 60
 RUN_TOKEN_SCOPES = (
     'runs:read',
@@ -387,7 +391,18 @@ def _can_mint_profile_user_token(role_names: Optional[List[str]] = None) -> bool
 
 
 def _is_admin_runs_viewer() -> bool:
-    return bool(current_user.has_role('Admin') or current_user.has_role('Root'))
+    role_names = _current_user_roles()
+    if any(
+        role.casefold() in ADMIN_RUNS_VIEWER_ALLOWED_ROLE_SET
+        for role in role_names
+    ):
+        return True
+    return bool(
+        current_user.has_role('Admin')
+        or current_user.has_role('Root')
+        or current_user.has_role('admin')
+        or current_user.has_role('root')
+    )
 
 
 def _normalize_alias(raw_alias: Optional[str]) -> Optional[str]:

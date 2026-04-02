@@ -287,6 +287,30 @@ def test_run_token_mint_issues_24_hour_service_token(
     assert claims["exp"] - claims["iat"] == 24 * 60 * 60
 
 
+def test_run_token_mint_allows_lowercase_admin_role(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    authorize_calls: list[tuple[str, str]] = []
+
+    _configure_jwt_env(monkeypatch, module)
+    _grant_role(profile_auth_client, "admin")
+    monkeypatch.setattr(module, "authorize", lambda runid, config: authorize_calls.append((runid, config)))
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post("/runs/run-1/cfg/mint-run-token")
+
+    assert response.status_code == 200
+    assert authorize_calls == [("run-1", "cfg")]
+    payload = response.get_json()
+    content = payload["Content"]
+    claims = module.auth_tokens.decode_token(content["token"], audience="rq-engine")
+    assert set(claims["roles"]) == {"admin", "User"}
+
+
 def test_profile_token_mint_errors_without_jwt_secret(
     profile_auth_client,
     monkeypatch: pytest.MonkeyPatch,
