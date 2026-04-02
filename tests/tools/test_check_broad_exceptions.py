@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -226,6 +227,60 @@ def test_parse_git_name_status_z_supports_rename_add_delete() -> None:
         ("A", None, "services/new_service.py"),
         ("D", "wepppy/dead.py", None),
     ]
+
+
+def test_git_merge_base_falls_back_to_resolved_base_ref_when_merge_base_is_unavailable(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    calls: list[list[str]] = []
+
+    def _fake_run(
+        args: list[str], *, cwd: str, text: bool, capture_output: bool, check: bool
+    ) -> subprocess.CompletedProcess[str]:
+        assert cwd == str(tmp_path)
+        assert text is True
+        assert capture_output is True
+        assert check is False
+        calls.append(args)
+        if args[:3] == ["git", "merge-base", "HEAD"]:
+            return subprocess.CompletedProcess(args=args, returncode=1, stdout="", stderr="")
+        if args[:4] == ["git", "rev-parse", "--verify", "--quiet"]:
+            return subprocess.CompletedProcess(
+                args=args,
+                returncode=0,
+                stdout="cafebabecafebabecafebabecafebabecafebabe\n",
+                stderr="",
+            )
+        raise AssertionError(f"Unexpected subprocess args: {args}")
+
+    monkeypatch.setattr(cbe.subprocess, "run", _fake_run)
+    resolved = cbe._git_merge_base(tmp_path, base_ref="deadbeef")
+    assert resolved == "cafebabecafebabecafebabecafebabecafebabe"
+    assert calls == [
+        ["git", "merge-base", "HEAD", "deadbeef"],
+        ["git", "rev-parse", "--verify", "--quiet", "deadbeef^{commit}"],
+    ]
+
+
+def test_git_merge_base_raises_when_no_merge_base_and_base_ref_is_missing(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    def _fake_run(
+        args: list[str], *, cwd: str, text: bool, capture_output: bool, check: bool
+    ) -> subprocess.CompletedProcess[str]:
+        assert cwd == str(tmp_path)
+        assert text is True
+        assert capture_output is True
+        assert check is False
+        if args[:3] == ["git", "merge-base", "HEAD"]:
+            return subprocess.CompletedProcess(args=args, returncode=1, stdout="", stderr="")
+        if args[:4] == ["git", "rev-parse", "--verify", "--quiet"]:
+            return subprocess.CompletedProcess(args=args, returncode=1, stdout="", stderr="")
+        raise AssertionError(f"Unexpected subprocess args: {args}")
+
+    monkeypatch.setattr(cbe.subprocess, "run", _fake_run)
+    with pytest.raises(RuntimeError, match="git merge-base failed"):
+        cbe._git_merge_base(tmp_path, base_ref="deadbeef")
 
 
 def test_build_enforcement_file_report_counts_only_net_new_unsuppressed() -> None:

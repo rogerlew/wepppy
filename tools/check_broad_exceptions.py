@@ -191,6 +191,20 @@ def _git_ls_files(repo_root: Path, paths: Sequence[str]) -> list[Path]:
     return [repo_root / entry for entry in entries]
 
 
+def _git_rev_parse_commit(repo_root: Path, *, ref: str) -> str | None:
+    proc = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
+        cwd=str(repo_root),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        return None
+    resolved = proc.stdout.strip()
+    return resolved or None
+
+
 def _git_merge_base(repo_root: Path, *, base_ref: str) -> str:
     proc = subprocess.run(
         ["git", "merge-base", "HEAD", base_ref],
@@ -199,16 +213,28 @@ def _git_merge_base(repo_root: Path, *, base_ref: str) -> str:
         capture_output=True,
         check=False,
     )
-    if proc.returncode != 0:
+    merge_base = proc.stdout.strip()
+    if proc.returncode == 0 and merge_base:
+        return merge_base
+
+    if proc.returncode == 1:
+        # Shallow/history-limited checkouts can fail to compute merge-base even
+        # when the requested base ref resolves to a commit. In that case,
+        # compare directly against the resolved base commit rather than aborting.
+        resolved_base_ref = _git_rev_parse_commit(repo_root, ref=base_ref)
+        if resolved_base_ref is not None:
+            return resolved_base_ref
+
+    if proc.returncode != 0 or not merge_base:
         stderr = proc.stderr.strip()
-        stdout = proc.stdout.strip()
+        stdout = merge_base
         details = [f"base_ref={base_ref!r}", f"returncode={proc.returncode}"]
         if stderr:
             details.append(f"stderr={stderr}")
         if stdout:
             details.append(f"stdout={stdout}")
         raise RuntimeError(f"git merge-base failed ({', '.join(details)})")
-    return proc.stdout.strip()
+    return merge_base
 
 
 def _git_diff_name_status_z(repo_root: Path, *, base_commit: str, pathspecs: Sequence[str]) -> str:
