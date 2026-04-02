@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.exceptions import HTTPException
 from werkzeug.routing import BuildError
 
 import wepppy
@@ -68,6 +69,20 @@ PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES = ('Admin', 'PowerUser', 'Dev', 'Root')
 PROFILE_USER_TOKEN_MINT_ALLOWED_ROLE_SET = frozenset(
     role.casefold() for role in PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES
 )
+RUN_TOKEN_TTL_SECONDS = 24 * 60 * 60
+RUN_TOKEN_SCOPES = (
+    'runs:read',
+    'queries:validate',
+    'queries:execute',
+    'rq:status',
+    'rq:enqueue',
+    'rq:export',
+    'bootstrap:enable',
+    'bootstrap:token:mint',
+    'bootstrap:read',
+    'bootstrap:checkout',
+)
+RUN_TOKEN_AUDIENCES = ('rq-engine', 'query-engine')
 CATALOG_RON_META_MAX_RUNS = max(
     1,
     int(os.getenv("WEPPCLOUD_RUNS_CATALOG_RON_META_MAX_RUNS", "200")),
@@ -487,6 +502,66 @@ def mint_profile_token():
             getattr(current_user, "email", None),
         )
         return error_factory("Internal server error.", status_code=500)
+
+
+@user_bp.route('/runs/<string:runid>/<config>/mint-run-token', methods=['POST'])
+@login_required
+def mint_run_token(runid: str, config: str):
+    try:
+        authorize(runid, config)
+
+        if not _is_admin_runs_viewer():
+            return error_factory(
+                'Minting run-scoped tokens requires Admin or Root role.',
+                status_code=403,
+            )
+
+        user_id = getattr(current_user, 'id', None)
+        if user_id is None:
+            return error_factory('Current user is missing an id.', status_code=400)
+
+        email = str(getattr(current_user, 'email', '') or '').strip()
+        if not email:
+            return error_factory('Current user is missing an email address.', status_code=400)
+
+        role_names = _current_user_roles()
+        group_names = _current_user_groups()
+        result = auth_tokens.issue_token(
+            f'admin-run-token:{user_id}',
+            scopes=RUN_TOKEN_SCOPES,
+            runs=[runid],
+            audience=RUN_TOKEN_AUDIENCES,
+            expires_in=RUN_TOKEN_TTL_SECONDS,
+            extra_claims={
+                'token_class': 'service',
+                'email': email,
+                'roles': role_names,
+                'groups': group_names,
+                'service_groups': ['admin-run-token'],
+            },
+        )
+        claims = result.get('claims', {})
+        response = success_factory(
+            {
+                'runid': runid,
+                'config': config,
+                'token': result.get('token'),
+                'token_class': 'service',
+                'audience': claims.get('aud'),
+                'runs': claims.get('runs') or [runid],
+                'scopes': list(RUN_TOKEN_SCOPES),
+                'expires_at': claims.get('exp'),
+                'issued_at': claims.get('iat'),
+                'expires_in': RUN_TOKEN_TTL_SECONDS,
+            }
+        )
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+    except HTTPException:
+        raise
+    except auth_tokens.JWTConfigurationError as exc:
+        logger.exception("mint_run_token failed due to JWT configuration")
+        return error_factory(str(exc), status_code=500)
 
 
 @user_bp.route("/runs/users", strict_slashes=False)

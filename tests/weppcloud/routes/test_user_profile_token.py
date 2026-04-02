@@ -5,6 +5,7 @@ import logging
 import uuid
 
 import pytest
+from werkzeug.exceptions import Forbidden
 
 pytest.importorskip("flask")
 from flask import Flask
@@ -126,6 +127,14 @@ def test_profile_token_mint_requires_login(profile_auth_client) -> None:
     assert response.status_code == 401
 
 
+def test_run_token_mint_requires_login(profile_auth_client) -> None:
+    client = profile_auth_client["client"]
+
+    response = client.post("/runs/run-1/cfg/mint-run-token")
+
+    assert response.status_code == 401
+
+
 def test_profile_token_mint_requires_privileged_role(
     profile_auth_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -142,6 +151,45 @@ def test_profile_token_mint_requires_privileged_role(
     assert response.status_code == 403
     payload = response.get_json()
     assert "requires one of these roles" in payload["error"]["message"]
+
+
+def test_run_token_mint_requires_admin_role(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+
+    _configure_jwt_env(monkeypatch, module)
+    monkeypatch.setattr(module, "authorize", lambda runid, config: None)
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post("/runs/run-1/cfg/mint-run-token")
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Minting run-scoped tokens requires Admin or Root role."
+
+
+def test_run_token_mint_preserves_authorize_forbidden(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+
+    _configure_jwt_env(monkeypatch, module)
+    _grant_role(profile_auth_client, "Admin")
+    def _forbidden_authorize(runid: str, config: str) -> None:
+        raise Forbidden()
+
+    monkeypatch.setattr(module, "authorize", _forbidden_authorize)
+    client.get(f"/test-login/{user_id}")
+
+    with pytest.raises(Forbidden):
+        client.post("/runs/run-1/cfg/mint-run-token")
 
 
 def test_profile_token_mint_issues_90_day_user_token(
@@ -185,6 +233,60 @@ def test_profile_token_mint_issues_90_day_user_token(
     assert claims["exp"] - claims["iat"] == 90 * 24 * 60 * 60
 
 
+def test_run_token_mint_issues_24_hour_service_token(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    authorize_calls: list[tuple[str, str]] = []
+
+    _configure_jwt_env(monkeypatch, module)
+    _grant_role(profile_auth_client, "Admin")
+    monkeypatch.setattr(module, "authorize", lambda runid, config: authorize_calls.append((runid, config)))
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post("/runs/run-1/cfg/mint-run-token")
+
+    assert response.status_code == 200
+    assert response.headers.get("Cache-Control") == "no-store"
+    assert authorize_calls == [("run-1", "cfg")]
+
+    payload = response.get_json()
+    content = payload["Content"]
+    token = content["token"]
+    claims = module.auth_tokens.decode_token(token, audience="rq-engine")
+
+    assert content["runid"] == "run-1"
+    assert content["config"] == "cfg"
+    assert content["token_class"] == "service"
+    assert content["expires_in"] == 24 * 60 * 60
+    assert content["audience"] == ["rq-engine", "query-engine"]
+    assert content["runs"] == ["run-1"]
+    assert content["scopes"] == [
+        "runs:read",
+        "queries:validate",
+        "queries:execute",
+        "rq:status",
+        "rq:enqueue",
+        "rq:export",
+        "bootstrap:enable",
+        "bootstrap:token:mint",
+        "bootstrap:read",
+        "bootstrap:checkout",
+    ]
+
+    assert claims["token_class"] == "service"
+    assert claims["sub"] == f"admin-run-token:{user_id}"
+    assert claims["email"] == "user@example.com"
+    assert claims["runs"] == ["run-1"]
+    assert claims["service_groups"] == ["admin-run-token"]
+    assert set(claims["roles"]) == {"Admin", "User"}
+    assert claims["groups"] == []
+    assert claims["exp"] - claims["iat"] == 24 * 60 * 60
+
+
 def test_profile_token_mint_errors_without_jwt_secret(
     profile_auth_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -200,6 +302,28 @@ def test_profile_token_mint_errors_without_jwt_secret(
     client.get(f"/test-login/{user_id}")
 
     response = client.post("/profile/mint-token")
+
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert "WEPP_AUTH_JWT_SECRET must be set to issue tokens" in payload["error"]["message"]
+
+
+def test_run_token_mint_errors_without_jwt_secret(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRET", raising=False)
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRETS", raising=False)
+    _grant_role(profile_auth_client, "Admin")
+    monkeypatch.setattr(module, "authorize", lambda runid, config: None)
+    module.auth_tokens.get_jwt_config.cache_clear()
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post("/runs/run-1/cfg/mint-run-token")
 
     assert response.status_code == 500
     payload = response.get_json()

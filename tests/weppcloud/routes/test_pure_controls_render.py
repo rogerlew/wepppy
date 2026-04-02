@@ -315,6 +315,44 @@ def test_poweruser_panel_no_longer_renders_disturbed_lookup_actions(jinja_env: E
     assert 'data-disturbed-action="load-extended-lookup"' not in rendered
 
 
+def test_poweruser_panel_hides_run_token_controls_for_non_admin(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/poweruser_panel.htm")
+    non_admin = SimpleNamespace(has_role=lambda role: False, roles=["User"], is_authenticated=True)
+    rendered = template.render(current_user=non_admin, user=non_admin)
+
+    assert "Mint Run Token" not in rendered
+    assert 'data-run-token-root' not in rendered
+    assert 'data-run-token-action="mint"' not in rendered
+
+
+def test_poweruser_panel_shows_run_token_controls_for_admin(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/poweruser_panel.htm")
+    admin_user = SimpleNamespace(
+        has_role=lambda role: role in {"Admin", "Root"},
+        roles=["Admin"],
+        is_authenticated=True,
+    )
+
+    def _url_for_run(endpoint: str, **values) -> str:
+        if endpoint == "user.mint_run_token":
+            return f"/runs/{values['runid']}/{values['config']}/mint-run-token"
+        return f"/mock/{endpoint}"
+
+    rendered = template.render(
+        current_user=admin_user,
+        user=admin_user,
+        runid="test-run",
+        config="test-config",
+        url_for_run=_url_for_run,
+    )
+
+    assert "Mint Run Token" in rendered
+    assert 'data-run-token-root' in rendered
+    assert 'data-mint-endpoint="/runs/test-run/test-config/mint-run-token"' in rendered
+    assert 'data-run-token-action="mint"' in rendered
+    assert 'data-run-token-action="copy-token"' in rendered
+
+
 def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/disturbed_modal.htm")
     rendered = template.render(

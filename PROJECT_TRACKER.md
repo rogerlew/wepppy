@@ -602,6 +602,40 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Admin Run-Scoped Token Minting for Sync and Debug Workflows
+**Completed**: 2026-04-01  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260401_admin_run_token_minting/](docs/work-packages/20260401_admin_run_token_minting/)  
+**Description**: Added an admin-only run-scoped token minting workflow (24-hour TTL) in PowerUser Actions for credentialed run sync and debugging.
+
+**Outcome**:
+- Added `POST /runs/<runid>/<config>/mint-run-token` in `wepppy/weppcloud/routes/user.py`:
+  - requires auth + run authorization + `Admin`/`Root` role,
+  - issues `token_class=service` JWT scoped to `runs=[runid]`,
+  - fixed TTL `86400` seconds,
+  - audiences `rq-engine` and `query-engine`,
+  - returns canonical payload with `Cache-Control: no-store`.
+- Added admin-only PowerUser "Mint Run Token" card in `wepppy/weppcloud/templates/controls/poweruser_panel.htm` with mint/copy/status/expiry UX using profile-token styling classes.
+- Updated tests:
+  - `tests/weppcloud/routes/test_user_profile_token.py`
+  - `tests/weppcloud/routes/test_pure_controls_render.py`
+- Updated docs:
+  - `docs/dev-notes/auth-token.spec.md`
+  - `wepppy/weppcloud/routes/usersum/weppcloud/getting-started.md`
+- Completed code/QA review artifacts with medium/high findings resolved:
+  - `docs/work-packages/20260401_admin_run_token_minting/artifacts/code_review_findings.md`
+  - `docs/work-packages/20260401_admin_run_token_minting/artifacts/qa_review_findings.md`
+
+**Validation Notes**:
+- `wctl run-pytest tests/weppcloud/routes/test_user_profile_token.py tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` (`49 passed`)
+- `wctl run-pytest tests/weppcloud/routes --maxfail=1` (`432 passed`)
+- `wctl doc-lint --path docs/dev-notes/auth-token.spec.md --path wepppy/weppcloud/routes/usersum/weppcloud/getting-started.md --path docs/work-packages/20260401_admin_run_token_minting` (`5 files validated, 0 errors, 0 warnings`)
+- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` (`PASS`)
+
+---
+
 ### Usersum Manifest-Driven Docs Engine (GitBook Layout + Vendor + PostgreSQL Search)
 **Completed**: 2026-04-01  
 **Duration**: 1 focused session  

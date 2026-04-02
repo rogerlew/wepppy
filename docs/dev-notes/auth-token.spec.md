@@ -248,6 +248,32 @@ If validation fails a `JWTDecodeError` is raised.
   - Sets scopes to `runs:read`, `queries:validate`, `queries:execute`, `rq:status`, `rq:enqueue`, `rq:export`.
   - Uses a fixed TTL of 90 days (`7776000` seconds).
 
+## Admin run token issuance
+- Endpoint: `POST /runs/<runid>/<config>/mint-run-token` (Flask route, authenticated user required).
+- Behavior:
+  - Route authorization MUST pass for the target run (`authorize(runid, config)`).
+  - Caller MUST have role `Admin` or `Root`; non-admin callers receive `403`.
+  - Issues a service JWT (`token_class=service`) with subject format `admin-run-token:<user_id>`.
+  - Includes service claims:
+    - `runs=[runid]`
+    - `service_groups=["admin-run-token"]`
+    - `email`, `roles`, `groups` from current caller identity.
+  - Sets audiences to `rq-engine` and `query-engine`.
+  - Sets scopes to:
+    - `runs:read`
+    - `queries:validate`
+    - `queries:execute`
+    - `rq:status`
+    - `rq:enqueue`
+    - `rq:export`
+    - `bootstrap:enable`
+    - `bootstrap:token:mint`
+    - `bootstrap:read`
+    - `bootstrap:checkout`
+  - Uses a fixed TTL of 24 hours (`86400` seconds).
+  - Returns canonical `success_factory` payload with `runid`, `config`, `token`, `token_class`, `audience`, `runs`, `scopes`, `issued_at`, `expires_at`, and `expires_in`.
+  - Response MUST include `Cache-Control: no-store`.
+
 ## Revocation and rotation
 - Services MUST enforce `jti` denylist checks.
 - Revoked `jti` values live in Redis with TTL matching `exp`.

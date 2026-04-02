@@ -210,6 +210,8 @@ A convenience toggle that controls whether navigation links open in the current 
 
 An advanced panel that provides direct access to all project resources, detailed parameters, and diagnostic tools. Most users will not need this, but it is available for researchers who want to inspect or fine-tune model inputs at a granular level.
 
+For administrators, the Actions column also includes **Mint Run Token**, which issues a 24-hour run-scoped JWT for operational workflows such as credentialed syncing and API debugging. Treat minted tokens as secrets and rotate them after use.
+
 ### Profile and Runs
 
 Quick links to your **user profile** (account settings, API tokens) and your **runs dashboard** (a list of all your projects).
