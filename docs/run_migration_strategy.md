@@ -48,7 +48,7 @@
 - Scripts and dashboards read the marker for on-disk provenance and the Flask table for fleet-wide reporting/filtering; runtime loaders ignore both.
 
 ## Admin run-sync dashboard + RQ job
-- Admin-only panel to import runs from a source host (default `wepp.cloud`) using the wget script or HTTP. Inputs: host, runid, config, target path (defaults to standard root), auth token if needed.
+- Admin-only panel to import runs from a source host (default `wepp.cloud`) using the wget script or HTTP. Inputs: host, runid, config, target path (defaults to standard root), source run token (optional) for private-run sources.
 - Focus action: “Sync + register” → uses `run_sync_rq` to download via aria2c inside the container, write `.provenance.json`, and register the run in the migrations table if not already present. Include an owner email field so an admin can assign/run ownership on import.
 - Backed by an `run_sync_rq` job emitting to `<runid>:run_sync` channel: steps include aria2c download, checksum/size verification, provenance write, and registration; trait scans/migrations remain separate follow-up actions.
 - Dev → prod: admins can point the host to `wc.bearhive.duckdns.org` to push a dev run upstream; keep this guarded by an explicit “allow push” flag.
@@ -58,7 +58,7 @@
 - **Data model:** New Flask DB table (migration) with columns listed in “Provenance tracking” above; add Alembic migration. Seed `owner_email` nullable string; `traits_detected` JSON; `last_status` enum/string.
 - **RQ job (`run_sync_rq`):**
   - Location: `wepppy/rq/run_sync_rq.py` (+ stub `.pyi`).
-  - Inputs: `runid`, `config`, `source_host`, `owner_email`, `target_root` (default `/wc1/runs`), optional `auth_token`, `allow_push` bool.
+  - Inputs: `runid`, `config`, `source_host`, `owner_email`, `target_root` (default `/wc1/runs`), optional `source_run_token`, `allow_push` bool.
   - Steps: build source URL, run aria2c (within container) to mirror into target path; verify size/checksum if provided; write `.provenance.json`; upsert migrations table row; emit status to `<runid>:run_sync`; handle errors with TRIGGER `EXCEPTION`.
   - Helper: reuse archive helpers for path safety; ensure READONLY runs are skipped.
 - **Blueprint/UI:**
@@ -68,7 +68,7 @@
     - `POST /rq-engine/api/run-sync` → enqueue `run_sync_rq`.
     - `GET /rq-engine/api/run-sync/status` → list recent sync jobs + DB records for filtering.
   - Controller JS: add small controller to `controllers_js/` (Pure style) to submit form, stream websocket logs from `<runid>:run_sync`, and refresh status table.
-  - Form fields: source host (default `wepp.cloud`), runid, config, target root (default), owner email, auth token (optional), allow push toggle.
+  - Form fields: source host (default `wepp.cloud`), runid, config, target root (default), owner email, source run token (optional), allow push toggle.
 - **Provenance writing:**
   - `.provenance.json` content: `source_host`, `pulled_at`, `original_url`, `owner_email`, `version_at_pull`, `notes` (optional), `runid`, `config`.
   - DB upsert on sync completion; set `last_status` and timestamps.

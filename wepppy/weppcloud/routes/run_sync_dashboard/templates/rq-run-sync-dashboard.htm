@@ -68,6 +68,13 @@
              'Owner email',
              help='Optional owner email captured in provenance and the migrations table.'
            ) }}
+        {{ ui.text_field(
+             'source_run_token',
+             'Source run token',
+             type='password',
+             attrs={'autocomplete': 'off'},
+             help='Optional admin run token minted on the source host for private-run sync.'
+           ) }}
         {{ ui.checkbox_field(
              'run_migrations',
              'Run migrations after sync',

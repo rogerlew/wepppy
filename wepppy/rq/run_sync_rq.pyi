@@ -12,4 +12,5 @@ def run_sync_rq(
     owner_email: Optional[str] = ...,
     target_root: str = ...,
     config: Optional[str] = ...,
+    source_run_token: Optional[str] = ...,
 ) -> Dict[str, Any]: ...

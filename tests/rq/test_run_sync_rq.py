@@ -27,6 +27,7 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
     spec_file = tmp_path / "spec.aria2"
 
     def fake_download_spec(url: str, headers: dict[str, str] | None, target_dir: Path | None = None) -> Path:
+        assert headers == {}
         if target_dir is not None:
             target_dir.mkdir(parents=True, exist_ok=True)
             spec_path = target_dir / ".aria2c.spec"
@@ -43,6 +44,7 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
         headers: dict[str, str] | None,
         status_callback=None,
     ) -> None:
+        assert headers == {}
         target_dir.mkdir(parents=True, exist_ok=True)
         if status_callback:
             status_callback("aria2-progress")
@@ -88,3 +90,71 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
     statuses = [args[7] for args, _ in upserts]
     assert "DOWNLOADING" in statuses
     assert "REGISTERED" in statuses
+
+
+def test_run_sync_rq_uses_source_run_token_header(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(run_sync.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
+
+    class FakeRedisConn:
+        def __init__(self) -> None:
+            self.values = {"rq:run-sync:source-token:key-1": b"source-token-xyz"}
+            self.getdel_calls: list[str] = []
+
+        def getdel(self, key: str):
+            self.getdel_calls.append(key)
+            return self.values.pop(key, None)
+
+    redis_conn = FakeRedisConn()
+    job = SimpleNamespace(id="job-43", meta={"source_run_token_key": "rq:run-sync:source-token:key-1"}, connection=redis_conn)
+
+    def _save() -> None:
+        job.meta["_saved"] = True
+
+    job.save = _save  # type: ignore[attr-defined]
+    monkeypatch.setattr(run_sync, "get_current_job", lambda: job)
+    monkeypatch.setattr(run_sync, "lock_statuses", lambda runid: {})
+
+    header_calls: list[dict[str, str] | None] = []
+
+    def fake_download_spec(url: str, headers: dict[str, str] | None, target_dir: Path | None = None) -> Path:
+        header_calls.append(headers)
+        assert target_dir is not None
+        target_dir.mkdir(parents=True, exist_ok=True)
+        spec_path = target_dir / ".aria2c.spec"
+        spec_path.write_text("url", encoding="utf-8")
+        return spec_path
+
+    monkeypatch.setattr(run_sync, "_download_spec", fake_download_spec)
+
+    def fake_aria2(
+        input_file: Path,
+        target_dir: Path,
+        headers: dict[str, str] | None,
+        status_callback=None,
+    ) -> None:
+        header_calls.append(headers)
+        target_dir.mkdir(parents=True, exist_ok=True)
+        if status_callback:
+            status_callback("aria2-progress")
+        (target_dir / "ron.nodb").write_text("nodb", encoding="utf-8")
+
+    monkeypatch.setattr(run_sync, "_run_aria2c", fake_aria2)
+    monkeypatch.setattr(run_sync, "_verify_download", lambda *args, **kwargs: None)
+    monkeypatch.setattr(run_sync, "read_version", lambda path: 999)
+    monkeypatch.setattr(run_sync, "_upsert_migration_row", lambda *args, **kwargs: None)
+
+    target_root = tmp_path / "runs"
+    run_sync.run_sync_rq(
+        "demo-run",
+        "wepp.cloud",
+        "owner@example.com",
+        str(target_root),
+        None,
+    )
+
+    assert header_calls == [
+        {"Authorization": "Bearer source-token-xyz"},
+        {"Authorization": "Bearer source-token-xyz"},
+    ]
+    assert redis_conn.getdel_calls == ["rq:run-sync:source-token:key-1"]

@@ -438,6 +438,7 @@
                 config: payload.config ? String(payload.config).trim() : null,
                 target_root: payload.target_root || defaults.defaultRoot,
                 owner_email: payload.owner_email || null,
+                source_run_token: payload.source_run_token ? String(payload.source_run_token).trim() : null,
                 run_migrations: payload.run_migrations !== false,
                 archive_before: payload.archive_before === true
             };

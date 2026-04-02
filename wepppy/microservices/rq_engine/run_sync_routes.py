@@ -5,6 +5,7 @@ import os
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Any, Dict, List
+from uuid import uuid4
 
 import redis
 from fastapi import APIRouter, Request
@@ -29,6 +30,8 @@ router = APIRouter()
 
 RUN_SYNC_TIMEOUT = int(os.getenv("RQ_ENGINE_RUN_SYNC_TIMEOUT", "86400"))
 MIGRATIONS_TIMEOUT = int(os.getenv("RQ_ENGINE_MIGRATIONS_TIMEOUT", "7200"))
+SOURCE_RUN_TOKEN_TTL = int(os.getenv("RQ_ENGINE_SOURCE_RUN_TOKEN_TTL", "86400"))
+SOURCE_RUN_TOKEN_KEY_PREFIX = "rq:run-sync:source-token"
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
 
@@ -62,8 +65,8 @@ def _serialize_job(job: Job, status_label: str) -> Dict[str, Any]:
     meta = job.meta or {}
     args = list(job.args or [])
     runid = meta.get("runid") or (args[0] if len(args) > 0 else None)
-    config = meta.get("config") or (args[1] if len(args) > 1 else None)
-    source_host = meta.get("source_host") or (args[2] if len(args) > 2 else None)
+    config = meta.get("config") or (args[4] if len(args) > 4 else None)
+    source_host = meta.get("source_host") or (args[1] if len(args) > 1 else None)
     return {
         "id": job.id,
         "status": status_label,
@@ -141,6 +144,25 @@ def _load_migrations() -> list[Dict[str, Any]]:
         return [_serialize_migration(record) for record in records]
 
 
+def _store_source_run_token(redis_conn: redis.Redis, source_run_token: str | None) -> str | None:
+    normalized_source_run_token = (source_run_token or "").strip()
+    if not normalized_source_run_token:
+        return None
+
+    source_run_token_key = f"{SOURCE_RUN_TOKEN_KEY_PREFIX}:{uuid4().hex}"
+    redis_conn.setex(source_run_token_key, SOURCE_RUN_TOKEN_TTL, normalized_source_run_token)
+    return source_run_token_key
+
+
+def _cleanup_source_run_token(redis_conn: redis.Redis, source_run_token_key: str | None) -> None:
+    if not source_run_token_key:
+        return
+    try:
+        redis_conn.delete(source_run_token_key)
+    except (OSError, redis.exceptions.RedisError) as exc:
+        logger.warning("rq-engine failed to cleanup source run token key", exc_info=exc)
+
+
 @router.post("/run-sync")
 async def run_sync(request: Request) -> JSONResponse:
     try:
@@ -169,17 +191,28 @@ async def run_sync(request: Request) -> JSONResponse:
     target_root = payload.get("target_root") or DEFAULT_TARGET_ROOT
     owner_email = payload.get("owner_email") or None
     config = payload.get("config") or None
+    source_run_token = payload.get("source_run_token")
+    if source_run_token is not None:
+        source_run_token = str(source_run_token).strip() or None
     run_migrations = payload.get("run_migrations", True)
     archive_before = payload.get("archive_before", False)
 
     try:
         with _redis_conn() as redis_conn:
             queue = Queue(connection=redis_conn)
-            sync_job = queue.enqueue_call(
-                run_sync_rq,
-                (runid, source_host, owner_email, target_root, config),
-                timeout=RUN_SYNC_TIMEOUT,
-            )
+            source_run_token_key = _store_source_run_token(redis_conn, source_run_token)
+            meta = {"source_run_token_key": source_run_token_key} if source_run_token_key else None
+
+            try:
+                sync_job = queue.enqueue_call(
+                    run_sync_rq,
+                    (runid, source_host, owner_email, target_root, config),
+                    timeout=RUN_SYNC_TIMEOUT,
+                    meta=meta,
+                )
+            except Exception:
+                _cleanup_source_run_token(redis_conn, source_run_token_key)
+                raise
 
             jobs_info: Dict[str, Any] = {
                 "sync_job_id": sync_job.id,

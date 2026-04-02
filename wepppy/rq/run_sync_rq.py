@@ -316,6 +316,55 @@ def _write_provenance(
     return target
 
 
+def _consume_source_run_token_from_job(
+    job: Any,
+    source_run_token: Optional[str] = None,
+) -> str | None:
+    """Load and delete a source run token from Redis via an opaque job-meta key.
+
+    `source_run_token` is retained as a legacy fallback for in-flight jobs
+    enqueued before the key-based handoff was introduced.
+    """
+    normalized_source_run_token = (source_run_token or "").strip()
+    if normalized_source_run_token:
+        return normalized_source_run_token
+
+    if job is None:
+        return None
+
+    meta = getattr(job, "meta", {}) or {}
+    source_run_token_key = str(meta.get("source_run_token_key") or "").strip()
+    if not source_run_token_key:
+        return None
+
+    redis_conn = getattr(job, "connection", None)
+    if redis_conn is None:
+        raise RuntimeError("source_run_token_key provided but job connection is unavailable")
+
+    getdel = getattr(redis_conn, "getdel", None)
+    if callable(getdel):
+        source_run_token_value = getdel(source_run_token_key)
+    else:
+        pipeline = redis_conn.pipeline()
+        pipeline.get(source_run_token_key)
+        pipeline.delete(source_run_token_key)
+        source_run_token_value = pipeline.execute()[0]
+
+    if source_run_token_value is None:
+        raise RuntimeError("source run token was not found or expired before download started")
+
+    if isinstance(source_run_token_value, bytes):
+        decoded_source_run_token = source_run_token_value.decode("utf-8", errors="strict")
+    else:
+        decoded_source_run_token = str(source_run_token_value)
+
+    normalized_decoded_source_run_token = decoded_source_run_token.strip()
+    if not normalized_decoded_source_run_token:
+        raise RuntimeError("source run token was empty")
+
+    return normalized_decoded_source_run_token
+
+
 def _upsert_migration_row(
     run_root: Path,
     runid: str,
@@ -353,6 +402,8 @@ def run_sync_rq(
     owner_email: Optional[str] = None,
     target_root: str = DEFAULT_TARGET_ROOT,
     config: Optional[str] = None,
+    # Legacy fallback for already-enqueued jobs that passed token as arg.
+    source_run_token: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Download a run from a remote WEPPcloud host and register provenance."""
     job = get_current_job()
@@ -377,7 +428,10 @@ def run_sync_rq(
         job.meta["source_host"] = normalized_host
         job.save()
 
+    normalized_source_run_token = _consume_source_run_token_from_job(job, source_run_token)
     headers: dict[str, str] = {}
+    if normalized_source_run_token:
+        headers["Authorization"] = f"Bearer {normalized_source_run_token}"
 
     run_root = _resolve_run_root(target_root, normalized_runid, normalized_config)
     pulled_at = datetime.now(timezone.utc)

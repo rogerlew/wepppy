@@ -602,6 +602,45 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Run Sync Dashboard Source Token Integration
+**Completed**: 2026-04-01  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260401_run_sync_source_token_integration/](docs/work-packages/20260401_run_sync_source_token_integration/)  
+**Description**: Integrated optional source run token support into Run Sync Dashboard and run-sync backend so private source runs can sync with bearer authentication.
+
+**Outcome**:
+- Added optional source token form field in:
+  - `wepppy/weppcloud/routes/run_sync_dashboard/templates/rq-run-sync-dashboard.htm`
+- Added dashboard payload wiring in:
+  - `wepppy/weppcloud/controllers_js/run_sync_dashboard.js`
+- Updated rq-engine enqueue payload handling in:
+  - `wepppy/microservices/rq_engine/run_sync_routes.py`
+  - optional `source_run_token` parsing and propagation to `run_sync_rq`.
+- Updated worker auth behavior in:
+  - `wepppy/rq/run_sync_rq.py`
+  - `wepppy/rq/run_sync_rq.pyi`
+  - worker now adds `Authorization: Bearer <token>` headers for `aria2c.spec` and aria2 requests when token is provided.
+- Fixed and tested run-sync status serialization fallback arg indexes for `config` and `source_host`.
+- Updated docs and queue graph artifacts:
+  - `docs/run_migration_strategy.md`
+  - `wepppy/rq/job-dependencies-catalog.md`
+  - `wepppy/rq/job-dependency-graph.static.json`
+  - `docs/standards/broad-exception-boundary-allowlist.md`
+- Completed code/QA review artifacts with no open medium/high findings:
+  - `docs/work-packages/20260401_run_sync_source_token_integration/artifacts/code_review_findings.md`
+  - `docs/work-packages/20260401_run_sync_source_token_integration/artifacts/qa_review_findings.md`
+
+**Validation Notes**:
+- `wctl run-pytest tests/microservices/test_rq_engine_run_sync_routes.py tests/rq/test_run_sync_rq.py --maxfail=1` (`7 passed`)
+- `wctl run-npm lint` (pass)
+- `wctl check-rq-graph` (pass; artifacts refreshed)
+- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` (`PASS`)
+- `wctl doc-lint --path docs/run_migration_strategy.md --path wepppy/rq/job-dependencies-catalog.md --path docs/standards/broad-exception-boundary-allowlist.md --path docs/work-packages/20260401_run_sync_source_token_integration --path PROJECT_TRACKER.md` (`7 files validated, 0 errors, 0 warnings`)
+
+---
+
 ### Admin Run-Scoped Token Minting for Sync and Debug Workflows
 **Completed**: 2026-04-01  
 **Duration**: 1 focused session  
