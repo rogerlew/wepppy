@@ -16,6 +16,14 @@ WEPPcloud is a free, online platform that predicts how water and soil move throu
 
 **Interactive maps and exportable results.** Outputs are displayed on interactive 3D maps where you can visualize erosion, runoff, soils, and land cover by subcatchment, filter by year, and compare scenarios spatially. Results are also exportable as GIS datasets (Shapefile, GeoJSON, GeoParquet), HEC-DSS files for integration with Army Corps and FEMA workflows, and tabular summaries.
 
+### Use Cases
+
+- **Academic research.** WEPPcloud is documented in peer-reviewed literature, including the two-part 2022 *Journal of Hydrology* WEPPcloud papers.
+- **Post-fire response modeling (BAER teams).** WEPPcloud supports post-fire workflows (including burn-severity-driven scenarios), and the broader WEPP model suite is used by BAER teams for rapid post-fire erosion and runoff risk assessment.
+- **Pre-fire land-use management.** WEPPcloud is used to compare management scenarios such as thinning and prescribed fire before wildfire, then evaluate post-fire outcomes.
+- **Utility watershed management.** WEPPcloud includes municipal watershed interfaces (for example, Seattle and Portland municipal watershed resources) used to evaluate watershed conditions, fire scenarios, and treatment alternatives.
+- **Agriculture.** The WEPPcloud framework is applicable to cropland conditions (alongside forest and rangeland), supporting runoff and erosion analysis for agricultural land-management planning.
+
 ### Who develops WEPPcloud?
 
 WEPPcloud was developed primarily for forestry applications as a joint effort between the University of Idaho and the USDA Forest Service Rocky Mountain Research Station. Additional contributions come from USDA Agricultural Research Service (ARS), Swansea University, and Michigan Technological University. The European interface was funded in part by the European Union's Horizon 2020 research and innovation program (grant agreement No. 10100389).
