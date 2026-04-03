@@ -8,7 +8,14 @@
 
 The `Revegetation` mod is a small NoDb-backed controller used to apply scenario-based vegetation recovery assumptions after a disturbance (for example, wildfire).
 
-When enabled alongside `disturbed` and `rap_ts`, the model workflow can:
+When enabled alongside `disturbed` and `rap_ts`, the model workflow supports two modeling paradigms:
+- **Historic wildfire (observed recovery):** use observed RAP cover time series directly and assume RAP captures post-fire recovery dynamics.
+- **Hypothetical historic fire (scenario recovery):** apply a cover-transform curve so post-fire RAP cover is adjusted from the fire-year baseline to represent assumed disturbance/recovery trajectories.
+
+Current scope limit:
+- Revegetation is constrained to the years available in RAP/climate inputs for the run. Selecting a `20-yr_*` scenario does not extend simulation years beyond available observed RAP years.
+
+Core workflow capabilities:
 - Select a built-in cover-transform scenario (for example, a 20-year recovery curve), or accept a user-uploaded transform CSV.
 - Persist the selected transform into the run working directory for reproducibility.
 - Provide a parsed `cover_transform` mapping that `RAP_TS` uses to generate transformed `.cov` time series used by WEPP preparation.
