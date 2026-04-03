@@ -15,6 +15,11 @@ When enabled alongside `disturbed` and `rap_ts`, the model workflow can:
 
 This mod does **not** directly run WEPP/RHEM; it supplies metadata and transforms used by other controllers during prep.
 
+Important semantics:
+- The revegetation scenario does **not** change simulation length. WEPP still runs for the years present in the climate inputs.
+- At prep time, observed RAP vs transformed RAP is a mutually exclusive branch (`prep_cover` chooses one writer path).
+- In the WEPP engine, RAP/curve cover series are used as canopy constraints in growth logic (cap behavior), not as unconditional canopy replacement on every day.
+
 ## Workflow
 
 1. **User selects a scenario (or uploads a CSV).**
@@ -29,6 +34,7 @@ This mod does **not** directly run WEPP/RHEM; it supplies metadata and transform
 3. **`RAP_TS.prep_cover()` decides whether to transform.**
    - If both `Disturbed.fire_date` and `Revegetation.cover_transform` are present, RAP cover is rescaled relative to the fire-year cover and written to `p*.cov` via `RAP_TS._prep_transformed_cover()`.
    - Otherwise, RAP cover is written without transformation.
+   - Only years represented in RAP/climate for that run are written and consumed by WEPP (`nyear`/`numyrs`), even when the selected curve file contains 20 years.
 
 ## Core API
 
@@ -74,6 +80,7 @@ Notes:
 - `RAP_TS` currently looks up transform keys for the labels: `Tree`, `Shrub`, `Perennial`, `Annual`, `Litter`, `Bare`. If a key is missing, that band is left untransformed.
 - If the RAP time series extends beyond the number of scale-factor rows, `RAP_TS` uses the **last** scale factor.
 - Years *before* the fire year are not transformed.
+- For keys present in the transform, post-fire values are derived from the RAP fire-year baseline multiplied by the curve scale factor (not from each year's observed RAP value).
 
 ## Outputs
 
@@ -142,6 +149,8 @@ assert reveg.user_defined_cover_transform is True
 - `Revegetation.clean()` deletes the entire `<wd>/revegetation/` directory; it is called during controller initialization.
 - `validate_user_defined_cover_transform(...)` only checks that the file exists under `<wd>/revegetation/` and records its name; it does not parse/validate the CSV schema beyond what `cover_transform` will later attempt to load.
 - `cover_transform` treats the first two rows as headers and does not enforce numeric types until converting values to `float32`.
+- Naming a scenario `20-yr_*` describes curve length, not guaranteed simulation duration. The run length still comes from climate years and matching RAP years.
+- In WEPP Fortran RAP mode, the `p*.cov` series is applied as a canopy upper bound in the relevant growth branches (`if(cancov > threshold) cancov = threshold`). This is why transformed scenarios may show little or no sediment difference when modeled canopy rarely exceeds that bound.
 
 ## Further reading
 
