@@ -56,7 +56,7 @@ def test_usersum_view_footer_exposes_doc_source_links(usersum_client) -> None:
     assert response.status_code == 200
 
     body = response.get_data(as_text=True)
-    assert "view:db/climate_file.parameters.md" in body
+    assert "view /db/climate_file.parameters.md" in body
     assert (
         'href="https://github.com/rogerlew/wepppy/blob/master/'
         'wepppy/weppcloud/routes/usersum/db/climate_file.parameters.md"'
@@ -78,7 +78,7 @@ def test_usersum_src_route_renders_markdown(usersum_client) -> None:
     assert response.status_code == 200
     body = response.get_data(as_text=True)
     assert "OpenET Climate Engine Mod" in body
-    assert "src:wepppy/nodb/mods/openet/README.md" in body
+    assert "src /wepppy/nodb/mods/openet/README.md" in body
     assert 'href="/usersum/raw/wepppy/nodb/mods/openet/README.md"' in body
 
 
@@ -230,7 +230,7 @@ def test_usersum_doc_route_renders_markdown(usersum_client) -> None:
     assert response.status_code == 200
     body = response.get_data(as_text=True)
     assert "Mods Overview" in body
-    assert "doc:usersum.weppcloud.mods_overview" in body
+    assert "view /weppcloud/mods-overview.md" in body
 
 
 def test_usersum_vendor_route_renders_markdown(usersum_client) -> None:
