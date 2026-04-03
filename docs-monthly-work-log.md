@@ -1,16 +1,130 @@
-# Monthly Work Log: October 2025 – January 2026
+# Monthly Work Log: May 2025 – March 2026
 
-## Summary
+Retroactive summaries of WEPPpy development activity by month, constructed from git history. Commit counts are non-merge commits on master.
 
-| Month | wepppy | weppcloud-wbt | peridot | wepp-forest | Total Commits |
-|-------|--------|---------------|---------|-------------|---------------|
-| Oct 2025 | 661 commits, +304K / −103M* | — | 14 commits, +2.8K / −4.1K | 3 commits, +486 / −32 | **678** |
-| Nov 2025 | 363 commits, +410K / −329K | — | — | — | **363** |
-| Dec 2025 | 282 commits, +136K / −56K | 1 commit, +347K / −0 | 1 commit, +44 / −1 | — | **284** |
-| Jan 2026 | 286 commits, +744K / −21K | 16 commits, +147K / −550 | 5 commits, +1.9K / −213 | — | **307** |
+---
 
-\* October deletions dominated by removal of legacy code, submodules, and deprecated `wepp.out` parsers (103M lines removed).
-LOC figures include generated assets (package-lock.json, test fixtures, SVGs). See per-month notes for context on large outliers.
+## May 2025 (72 commits)
+
+**Theme: DuckDB integration, Omni scenarios, fire season prep**
+
+- Integrated DuckDB into NoDb pipeline for accelerated data queries
+- Built `land_and_soils` API with RQ routing for landuse/soil validation
+- Overhauled GeoPackage export (`gpkg_export`) to use watershed parquet files and handle `.gdb` naming
+- Launched Omni scenario framework (scenario descriptions, dependency state sync, Redis integration)
+- SBS map hardening: float64 support without colortables, sanity checking for float maps, 4-class export
+- ERMIT/disturbed input revisions (clip hillslope length to 300m, min 10% rock content)
+- Return periods export and watershed CSV file improvements
+- Updated SSURGO to 2025 revision
+- Revised climate `_ss_time_to_peak_intensity_pct` default from 0.4 to 40
+- ClimateNA API client (WIP)
+- WeppCloud app health filter and browse fixes
+- Disturbed management mapping: herbaceous to tall grass, `disturbed_class` safeguards
+
+---
+
+## June 2025 (35 commits)
+
+**Theme: WhiteboxTools topaz emulator, parquet pipelines, daily streamflow**
+
+- WhiteboxTools (WBT) Topaz Emulator: functional integration exporting `taspec.tif`, fill-or-breach option
+- Extended disturbed land-soil lookup for fire series with external CSV parameters
+- Daily streamflow graph rewrite: D3 v7 migration, hyetograph overlay, rain+melt, overlapping area bars
+- Dump landuse and soils parquet with NoDb lifecycle (`dump_and_unlock`, `dump_landuse_parquet`)
+- 15-min precip intensity for return periods
+- Standardized thinning disturbed classes across US, EU, AU, and revegetation configs
+- Omni: compile hillslope and channel summaries, mulch troubleshooting
+- WeppCloud map: hillslope flash identify feature, fix `cmap_canvas_loss_min` display
+- Updated EU-CORINE disturbed classes
+- Runs 2.0 user page with pagination and self-hosted `sorttable.js`
+- Added `last_accessed` and `last_modified` to Run data model with Alembic migration
+- `db_api` to update postgres; `NoDbBase.dump` calls `update_last_modified`
+
+---
+
+## July 2025 (55 commits)
+
+**Theme: Containerization, query engine, WEPP interchange**
+
+- Full Docker Compose containerization: Caddy TLS termination, `wctl` CLI, service files, Gunicorn production config
+- Query engine inception: core SQL-like parser, aggregators, group-by, order-by, catalog hooks, GeoJSON support
+- WEPP interchange pipeline: hillslope and watershed interchange writers with ProcessPoolExecutor + streaming writer queue
+- Removed legacy `wepppost` module (yeeted across ~10 commits)
+- Migrated microservices from weppcloud2 to wepppy; Gunicorn installation
+- `preflight2` and `status2` rewritten as Go apps; removed Python microservice predecessors
+- `totalwatsed3` derived from WEPP interchange; daily streamflow via query engine
+- Consolidated Redis config; Redis settings module
+- WeppCloudR Docker container with optimized binary installation
+- Interchange DSS exports; refactored ash to use interchange
+- Removed legacy submodules (portland, seattle, taudem, county_db, cligen-ghcn-daily)
+- NoDb atomic Redis locks with docs and tests
+- AgFields module: functional sub-field running, management rotation stack/synth
+- Batch runner: CLI monitor, generation GeoJSON boundary per watershed
+
+---
+
+## August 2025 (113 commits)
+
+**Theme: Batch runner, ProxyFix, climate fixes, WATAR model**
+
+- Batch runner phases 0-2: manifest handling, initialization refactoring, yeet manifest
+- `weppcloud.app` ProxyFix for reverse proxy URL generation; fork links to new projects
+- Alex WATAR Excel spreadsheet model integration (serialized features, static transport model)
+- Ash model: Srivastava2023 vs Watanabe2025 selection, revised contaminant concentration
+- Omni: `run_contrast` method, `clone_sibling`, worker pool integration
+- Climate fixes: `par_mod` hotfix for very low precip, PRISM minimum monthly precip to 0.01
+- Multi-OFE landuse building fix; MOFE hotfixes for soil building
+- Combined watershed generator with Glify viewer
+- Multiple channel-of-interest support for Ebe/ReturnPeriods
+- Return period advanced options; Hill Streamflow in mm and m^3; Hill Sed Del in tonne
+- Channel width hard minimum enforcement; channel slopes wrap aspect
+- NLCD 2024 added; peridot bins updated
+- Daymet: `daily_interpolation` validation for `identify_pixel_coords`
+- Web push notifications (functional)
+- Omni contrasts: NDJSON logging, Pareto validation script
+- `weppcloud.app` refactored to conda env; updated `wepppy310-env.yml`
+
+---
+
+## September 2025 (396 commits)
+
+**Theme: Massive platform modernization -- NoDb Redis cache, command bar, logging refactor, Flask security, blueprint reorg, CI Samurai**
+
+### NoDb & Redis
+- Unified NoDb loader logic; Redis caching of project `.nodb` files (DB 13, 72h TTL)
+- `NoDbBase` refactored: file locking moved to Redis, `dump_and_unlock`, `ClassVar` for filename
+- `StatusMessengerHandler` for logging to Redis channels
+- `nodb_setter` decorator applied across dozens of properties for logging and locking
+- `ProcessPoolExecutor` with spawn context for improved multiprocessing
+- `tryGetInstance` refactored across NoDb API routes
+- NoDb lock management: `clear_locks` command, lock statuses in preflight payload
+
+### UI & UX
+- Command bar: proof of concept through full implementation (browse, set, help, log-level, outlet commands, keyboard shortcuts)
+- Poweruser panel: resource lock icons, tooltip functionality, restore button for anonymous users
+- Blueprint reorganization: browse, archive-dashboard, fork-console, rq-archive-dashboard, runs0, create
+- Flask security rewrite from scratch; authorization refactoring
+- `controllers_js` reorganized with Gunicorn `on_start` compositing
+- Usersum for soil files and automated indexing
+
+### Logging & Observability
+- Complete logging refactor: removed `LogMixin`/`Logger`, added Redis log handlers (from Iglesys347)
+- Redis connection handling refactored to connection pool
+- `timed` context manager in NoDbBase for performance measurement
+- Comprehensive logging added to Climate, Soils, Landuse, Disturbed modules
+
+### Infrastructure
+- CI Samurai: end-to-end workflow, prompt tuning, Codex authoring pass, GPT-5 deep research
+- `wctl` CLI tool: installer, shims for workflows, reorganization
+- Profile recorder: end-to-end logging, playback engine
+- Omni: Redis integration, locked NoDb files against parent run
+
+### Other
+- `wmesque2` migrated to FastAPI with benchmark
+- SBS map hotfixes (series of 7)
+- DSS export: chan.out export, start/end dates
+- SSURGO: in-memory data views (Roger's idea, Gemini 2.5 Pro implementation)
+- Revised `dem_db` default to `ned1/2024`
 
 ---
 
@@ -230,31 +344,157 @@ LOC figures include generated assets (package-lock.json, test fixtures, SVGs). S
 
 ---
 
-## Four-Month Totals
+## February 2026
 
-| Metric | Oct 2025 | Nov 2025 | Dec 2025 | Jan 2026 | **Total** |
-|--------|----------|----------|----------|----------|-----------|
-| Commits (all repos) | 678 | 363 | 284 | 307 | **1,632** |
-| Lines added (wepppy) | ~304K | ~410K | ~136K | ~744K | **~1.59M** |
-| Lines removed (wepppy) | ~103M* | ~329K | ~56K | ~21K | — |
+### Features
+
+- **NoDir Reversal Completion** — Completed the NoDir reversal across runtime, tests, and documentation, including materialization/thaw-freeze contract work and cleanup of legacy compatibility paths.
+  *(~45 commits)*
+
+- **Browse/Auth/Session Hardening** — Hardened cross-service auth boundaries: cookie/bearer fallback parity tests, CSRF coverage for legacy flows, token scoping, stale-session recovery, and route contract documentation.
+  *(~40 commits)*
+
+- **Omni + Batch/Composite Reliability** — Continued Omni refactors and contrast workflows, with durability fixes for composite runids, clone/reset behavior, dir-root mutations, and missing-source recovery in batch contexts.
+  *(~35 commits)*
+
+- **Culvert Batch Integration** — Added queue wiring and orchestration for Culvert batch finalization, privileged admin token handling for downloads, and lock/race hardening in batch workers.
+  *(~20 commits)*
+
+- **rq-engine Surface Expansion** — Extended rq-engine/UI integration with admin job detail endpoints, token URL fallback fixes, and improved route wiring for queued workflows.
+  *(~20 commits)*
+
+- **SWAT Controller Integration** — Advanced SWAT NoDb integration with controller mixin splits, interchange handling updates, hydraulic-sediment option plumbing, and UI/file-browsing support.
+  *(~10 commits)*
+
+- **Topaz/DEM Resilience** — Hardened Topaz execution loops (`dednm` PRUNE fix, subprocess guardrails), plus NED1 VRT alignment tooling and GDAL openability wait checks.
+  *(~6 commits)*
+
+### Debugging & QA
+
+- Fixed DEVAL `weppcloudR` argument compatibility and R expression parsing
+- Fixed CSRF on disturbed CSV save and expanded legacy POST CSRF coverage
+- Fixed batch browse auth flow and composite runid browse cookie scoping
+- Fixed batch runner workspace reset behavior and stale batch GeoJSON cache refresh
+- Fixed Omni dir-root cloning edge cases and root projection/soils path durability
+- Fixed climate prep race conditions and malformed `srad` start-date URL handling
+- Fixed WEPP completion event handling and report triggering when interchange invalidates `loss_pw0.txt`
+- Fixed culvert batch lock race and added retry for missing clipped raster outputs
+- Fixed CAP/rq-engine environment propagation and secrets-migration startup regressions
+- Hardened JWT/session lifecycle, route auth fallback behavior, and Firefox session recovery
+
+### Cross-repo: weppcloud-wbt (4 commits, +971 / −124)
+
+- Enhanced `UnnestBasins` with hierarchy sidecar output and faster order mapping
+- Added bibliography references (including Lindsay 2015/2016) and description cleanup
+- Removed persistent environment snapshot behavior in WhiteboxTools wrapper
+
+### Cross-repo: peridot (2 commits, +2.7K / −454)
+
+- Fixed zero-elevation channel panic and added `sooke03` regression tests
+- Applied rustfmt/style cleanup
+
+### Cross-repo: wepp-forest (1 commit, +53 / −35)
+
+- Added TSMF soil output column and saturation guard logic
+
+---
+
+## March 2026
+
+### Features
+
+- **Usersum Docs Engine** — Shipped a manifest-driven usersum documentation engine with richer linking contracts, searchable snippets, source footers, and expanded in-app guide coverage.
+  *(~17 commits)*
+
+- **RUSLE Integration** — Delivered RUSLE NoDb + UI integration with climatology datasets, canonical selectors (`r_mode`, MOMM), slope-length controls, and GL dashboard visualization support.
+  *(~34 commits)*
+
+- **Roads NoDb Workflow** — Implemented Roads NoDb end-to-end workflow in WEPPcloud and aligned it with peridot trace-core work, routing rules, and execution contracts.
+  *(~19 commits)*
+
+- **WEPP:Road Patches & Tests (`fswepp-docker`)** — Fixed WEPP:Road batch slope-type handling and added parity-matrix tests for OU/native/high behavior alignment in the containerized toolchain.
+  *(2 commits in `rogerlew/fswepp-docker` during March 2026)*
+
+- **FSWEPP Run ZIP Download API (`fswepp-docker`)** — Added API/CGI endpoint support for downloading zipped FSWEPP (ERMiT) run outputs, including deployment/security notes and downloader-script integration.
+  *(2 commits in `rogerlew/fswepp-docker` during March 2026)*
+
+- **Features Export Matrix Cutover** — Hardened features export contracts (temporal/unit/CRS handling), added deterministic artifact packaging, and retired legacy export writer paths.
+  *(~25 commits)*
+
+- **Disturbed Lookup Expansion** — Added disturbed lookup live E2E harnessing, extended/base variant persistence in NoDb, and panel workflow refinements for rerun scenarios.
+  *(~20 commits)*
+
+- **Accessibility / Section 508 Package** — Published accessibility statement updates, VPAT workspace artifacts, manual `axe` smoke suite, and nightly accessibility workflow coverage.
+  *(~12 commits)*
+
+- **GL Dashboard UX Refinements** — Added editable legend ranges, tooltip-only filepath exposure, and RUSLE raster visualization improvements.
+  *(~5 commits)*
+
+### Debugging & QA
+
+- Fixed disturbed CSV editor freeze-column and viewport sizing behavior
+- Fixed `usersum_doc_link` callback signature and markdown link resolution issues
+- Fixed baseline route tests and disturbed lint assertions during extended lookup rollout
+- Fixed Caddy routing for published feature-download endpoints
+- Fixed GeoParquet writer output and `.geoparquet` browse support
+- Fixed MOMM split-county RUSLE selection and escaped RUSLE help text
+- Fixed Tenerife soil token replacement regressions and NoDb locale-path expansion
+- Fixed Omni contrast rerun behavior for existing scenarios and dependency path checks
+- Fixed `totalwatsed3` sediment delivery handling with interchange README reliability updates
+- Fixed rq-engine create flow fallback for expired RQ tokens
+
+### Cross-repo: weppcloud-wbt (4 commits, +4.6K / −4)
+
+- Added `RaiseRoads` tool with CRS reprojection and fixture validation
+- Added `RusleLsFactor` terrain tool and bindings
+- Refreshed WhiteboxTools integration metadata and prompt tracking
+
+### Cross-repo: peridot (7 commits, +2.0K / −73)
+
+- Added shared roads downslope trace core and CLI
+- Added watershed Parquet tabular outputs plus manifest generation/slope-bundle summaries
+- Updated watershed abstraction binaries and slope-scalar derivation (`zonal median fvslope`)
+
+### Cross-repo: wepp-forest (13 commits, +15.9K / −199)
+
+- Switched default builds to gfortran with pinned rebuild scripts/artifacts
+- Widened hillslope/channel ID output fields and fixed watershed-pass metadata parsing
+- Added WEPP run comparison tools + tests and daily runoff partitioning updates
+- Added instability regression fixtures, refreshed oneAPI builds, and documented ELF loader compatibility gates
+
+---
+
+## Six-Month Totals
+
+| Metric | Oct 2025 | Nov 2025 | Dec 2025 | Jan 2026 | Feb 2026 | Mar 2026 | **Total** |
+|--------|----------|----------|----------|----------|----------|----------|-----------|
+| Commits (all repos) | 678 | 363 | 284 | 307 | 443 | 326 | **2,401** |
+| Lines added (wepppy) | ~304K | ~410K | ~136K | ~744K | ~304K | ~711K | **~2.61M** |
+| Lines removed (wepppy) | ~103M* | ~329K | ~56K | ~21K | ~46K | ~13K | — |
 
 \* The 103M deletion figure reflects removal of legacy submodules, deprecated `wepp.out` parsers, and old binary test data. Net new functional code for October is approximately 225K lines.
 
 ### Key Themes Across the Period
 
-1. **Interchange & Query Engine** (Oct–Nov): Wholesale migration from text-file WEPP output parsing to typed Parquet interchange, enabling the query engine and downstream analytics.
+1. **Interchange & Query Engine** (Oct–Mar): Migration from text-file WEPP parsing to typed Parquet interchange, then continued stabilization/hardening in downstream analytics and export paths.
 
-2. **Containerization & DevOps** (Oct–Dec): Full Docker Compose production stack, Go microservices for preflight/status, Caddy reverse proxy, Python 3.12 migration, deploy automation.
+2. **Containerization & DevOps** (Oct–Mar): Full Docker Compose stack plus ongoing deploy/runtime hardening, secrets wiring, rq-engine integration, and service startup reliability fixes.
 
-3. **Modern Frontend** (Nov–Dec): Leaflet→deck.gl map migration, GL Dashboard for interactive watershed analysis, Pure CSS controls replacing Bootstrap/jQuery.
+3. **Modern Frontend** (Nov–Mar): Leaflet→deck.gl migration followed by GL dashboard refinements (contrast UX, legend controls, RUSLE raster views) and controller usability polish.
 
-4. **Culvert-at-Risk Integration** (Jan): Cross-application integration bringing culvert vulnerability assessment into WEPPcloud with batch processing and native CRS support.
+4. **Culvert-at-Risk Integration** (Jan–Feb): Culvert-Web-App integration matured with batch finalization queueing, token-auth boundaries, race-condition fixes, and audit/test coverage.
 
-5. **QA & CI Infrastructure** (Oct–Jan): Profile playback system, Playwright test suites, pytest/NPM coverage nightly runs, CI Samurai automation, error schema standardization.
+5. **NoDir + Auth Boundary Hardening** (Feb): NoDir reversal completion paired with extensive CSRF/session/cookie-bearer fallback contract hardening and regression coverage.
 
-6. **Rust Acceleration** (Oct–Jan): RHEM storm file via wepppyo3 (400× speedup), SBS map Rust helpers, peridot VRT support, weppcloud-wbt binary output and VRT support.
+6. **Omni/Batch/Export Maturity** (Jan–Mar): Continued Omni contrast and batch orchestration improvements, culminating in hardened features-export matrix contracts and legacy export cutover.
 
-7. **Batch Processing & Omni Scenarios/Contrasts** (Oct–Jan): Batch runner framework for multi-watershed execution with CLI dashboard, omni scenario management for side-by-side watershed comparisons (e.g., pre-fire vs. post-fire vs. revegetation), user-defined hillslope group contrasts, stream-order pruning contrasts, and difference mapping in the GL Dashboard.
+7. **RUSLE + Roads Modeling Stack** (Mar): New RUSLE capabilities and Roads NoDb workflow landed with companion tooling in weppcloud-wbt/peridot and UI/dashboard integration.
+
+8. **Usersum as In-Product Documentation** (Mar): Manifest-driven usersum engine and broad guide-link coverage moved documentation closer to where controls are configured.
+
+9. **Accessibility & Compliance Evidence** (Mar): Section 508 statement updates, VPAT workspace packaging, and automated/manual accessibility smoke checks expanded release evidence.
+
+10. **Rust/Fortran Performance Baseline** (Oct–Mar): Continued investment in owned native components (`weppcloud-wbt`, `peridot`, `wepp-forest`) for geometry, roads, and stable WEPP binary workflows.
 
 ---
 
