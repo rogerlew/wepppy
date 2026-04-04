@@ -276,6 +276,7 @@
         }
         if (modFlags.roads) {
             add("roads", typeof Roads !== "undefined" ? Roads : null);
+            add("roadsMapOverlay", typeof RoadsMapOverlay !== "undefined" ? RoadsMapOverlay : null);
         }
         if (modFlags.features_export) {
             add("featuresExport", typeof FeaturesExport !== "undefined" ? FeaturesExport : null);

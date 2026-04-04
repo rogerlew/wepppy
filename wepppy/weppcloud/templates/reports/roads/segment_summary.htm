@@ -1,0 +1,67 @@
+<div class="wc-summary-pane">
+  <dl class="wc-summary-pane__list">
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Road Segment</dt>
+      <dd class="wc-summary-pane__definition"><code>{{ d.segment_id }}</code></dd>
+    </div>
+
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Design / Surface / Traffic</dt>
+      <dd class="wc-summary-pane__definition">
+        {{ d.design or "n/a" }} / {{ d.surface or "n/a" }} / {{ d.traffic or "n/a" }}
+      </dd>
+    </div>
+
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Soil Texture / RFG / Width</dt>
+      <dd class="wc-summary-pane__definition">
+        {{ d.soil_texture or "n/a" }} /
+        {% if d.rfg_pct is not none %}{{ "%.2f"|format(d.rfg_pct) }} %{% else %}n/a{% endif %} /
+        {% if d.road_width_m is not none %}{{ "%.2f"|format(d.road_width_m) }} m{% else %}n/a{% endif %}
+      </dd>
+    </div>
+
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Length / Slope (raw, clamped)</dt>
+      <dd class="wc-summary-pane__definition">
+        {% if d.segment_length_m is not none %}{{ "%.2f"|format(d.segment_length_m) }} m{% else %}n/a{% endif %} /
+        {% if d.slope_pct_raw is not none %}{{ "%.2f"|format(d.slope_pct_raw) }} %{% else %}n/a{% endif %},
+        {% if d.slope_pct_clamped is not none %}{{ "%.2f"|format(d.slope_pct_clamped) }} %{% else %}n/a{% endif %}
+      </dd>
+    </div>
+
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Lowpoint Routing</dt>
+      <dd class="wc-summary-pane__definition">
+        mode={{ d.routing_mode or "n/a" }}, eligibility={{ d.routing_eligibility or "n/a" }},
+        chn={{ d.topaz_id_chn_lowpoint if d.topaz_id_chn_lowpoint is not none else "n/a" }},
+        hill={{ d.topaz_id_hill_lowpoint if d.topaz_id_hill_lowpoint is not none else "n/a" }}
+      </dd>
+    </div>
+
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Buffer / Fill Length Equivalents</dt>
+      <dd class="wc-summary-pane__definition">
+        buffer_length={% if d.buffer_length_m is not none %}{{ "%.2f"|format(d.buffer_length_m) }} m{% else %}n/a{% endif %},
+        buffer_slope={% if d.buffer_slope_pct is not none %}{{ "%.2f"|format(d.buffer_slope_pct) }} %{% else %}n/a{% endif %},
+        fill_length={% if d.fill_length_m is not none %}{{ "%.2f"|format(d.fill_length_m) }} m{% else %}n/a{% endif %}
+      </dd>
+    </div>
+
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Run Status</dt>
+      <dd class="wc-summary-pane__definition">
+        status={{ d.execution_status or "not_run" }},
+        segment_run_id={{ d.segment_run_id if d.segment_run_id is not none else "n/a" }},
+        target_hillslope_wepp_id={{ d.target_hillslope_wepp_id if d.target_hillslope_wepp_id is not none else "n/a" }}
+      </dd>
+    </div>
+
+    {% if d.profile_error %}
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Profile Note</dt>
+      <dd class="wc-summary-pane__definition">{{ d.profile_error }}</dd>
+    </div>
+    {% endif %}
+  </dl>
+</div>

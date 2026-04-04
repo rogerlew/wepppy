@@ -1475,6 +1475,17 @@ var MapController = (function () {
                 var queryUrl = window.url_for_run("report/chn_summary/" + topazId + "/");
                 map.hillQuery(queryUrl);
             },
+            roadQuery: function (segmentId) {
+                if (segmentId === undefined || segmentId === null) {
+                    return;
+                }
+                var normalized = String(segmentId).trim();
+                if (!normalized) {
+                    return;
+                }
+                var queryUrl = window.url_for_run("report/roads/segment_summary/" + encodeURIComponent(normalized) + "/");
+                map.hillQuery(queryUrl);
+            },
             findByTopazId: function () {
                 var helper = ensureFindAndFlashHelper();
                 if (!helper) {

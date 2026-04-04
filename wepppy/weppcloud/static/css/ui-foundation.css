@@ -51,6 +51,9 @@
   --wc-color-primary: #1f6feb;
   --wc-color-primary-dark: #0d4bcf;
   --wc-color-on-primary: #ffffff;
+  --wc-map-roads-color: #ff00c8;
+  --wc-map-roads-hover-color: #ff7be5;
+  --wc-map-road-label-color: #b1008d;
   /* Status surfaces */
   --wc-status-text: var(--wc-color-text);
   --wc-status-text-muted: color-mix(in srgb, var(--wc-color-text) 80%, var(--wc-color-text-muted));

@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-01  
-**Active Packages**: 4  
+**Last Updated**: 2026-04-03  
+**Active Packages**: 5  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -470,7 +470,27 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 4 packages
+**Current WIP Count**: 5 packages
+
+---
+
+### Roads Map Visualization and Drilldown Parity
+**Started**: 2026-04-03  
+**Status**: Implementation in progress (ExecPlan active)  
+**Size**: Medium (1-2 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260403_roads_map_drilldown/](docs/work-packages/20260403_roads_map_drilldown/)  
+**Description**: Add Roads map overlay + Road Labels visibility after prepare, segment hover highlighting, and click-to-DrillDown behavior matching Channels/Subcatchments UX patterns.
+
+**Current Status**:
+- Package scaffold and active ExecPlan are authored.
+- Backend/frontend implementation is in progress with targeted route/controller/map tests.
+- Required validation and mandatory reviewer + QA reviewer subagent gates are planned in final phase.
+
+**Next Steps**:
+1. Implement backend roads map/drilldown payload contract and route/template coverage.
+2. Implement frontend Roads overlays, labels, hover, and click drilldown wiring + Jest coverage.
+3. Run required validation commands and mandatory review subagents, then disposition findings.
 
 ---
 

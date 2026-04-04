@@ -23,6 +23,7 @@ from wepppy.rq.roads_rq import (
     run_roads_prepare_rq,
     run_roads_rq,
 )
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
 
 from .._common import *  # noqa: F401,F403
@@ -449,6 +450,52 @@ def query_roads_summary(runid: str, config: str) -> Response:
     return jsonify(controller.query_summary())
 
 
+@roads_bp.route("/runs/<string:runid>/<config>/resources/roads.json", methods=["GET"])
+@roads_bp.route("/runs/<string:runid>/<config>/resources/roads.json/", methods=["GET"])
+@authorize_and_handle_with_exception_factory
+def resources_roads_geojson(runid: str, config: str) -> Response:
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
+    disabled_response = _require_enabled(controller)
+    if disabled_response is not None:
+        return disabled_response
+
+    try:
+        return jsonify(controller.query_map_segments_geojson())
+    except FileNotFoundError as exc:
+        response = error_factory(str(exc))
+        response.status_code = 404
+        return response
+    except ValueError as exc:
+        return error_factory(str(exc))
+
+
+@roads_bp.route("/runs/<string:runid>/<config>/query/roads/segment/<segment_id>", methods=["GET"])
+@roads_bp.route("/runs/<string:runid>/<config>/query/roads/segment/<segment_id>/", methods=["GET"])
+@authorize_and_handle_with_exception_factory
+def query_roads_segment_detail(runid: str, config: str, segment_id: str) -> Response:
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
+    disabled_response = _require_enabled(controller)
+    if disabled_response is not None:
+        return disabled_response
+
+    try:
+        return jsonify(controller.query_segment_detail(segment_id))
+    except FileNotFoundError as exc:
+        response = error_factory(str(exc))
+        response.status_code = 404
+        return response
+    except KeyError as exc:
+        response = error_factory(str(exc))
+        response.status_code = 404
+        return response
+    except ValueError as exc:
+        return error_factory(str(exc))
+
+
 @roads_bp.route("/runs/<string:runid>/<config>/report/roads/summary")
 @roads_bp.route("/runs/<string:runid>/<config>/report/roads/summary/")
 @authorize_and_handle_with_exception_factory
@@ -480,5 +527,39 @@ def report_roads_results(runid: str, config: str) -> Response:
         config=config,
         run_results_title="Run Results",
         **context,
+        user=current_user,
+    )
+
+
+@roads_bp.route("/runs/<string:runid>/<config>/report/roads/segment_summary/<segment_id>")
+@roads_bp.route("/runs/<string:runid>/<config>/report/roads/segment_summary/<segment_id>/")
+@authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
+def report_roads_segment_summary(runid: str, config: str, segment_id: str) -> Response:
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
+    disabled_response = _require_enabled(controller)
+    if disabled_response is not None:
+        return disabled_response
+
+    try:
+        segment_detail = controller.query_segment_detail(segment_id)
+    except FileNotFoundError as exc:
+        response = error_factory(str(exc))
+        response.status_code = 404
+        return response
+    except KeyError as exc:
+        response = error_factory(str(exc))
+        response.status_code = 404
+        return response
+    except ValueError as exc:
+        return error_factory(str(exc))
+
+    return render_template(
+        "reports/roads/segment_summary.htm",
+        runid=runid,
+        config=config,
+        d=segment_detail,
         user=current_user,
     )

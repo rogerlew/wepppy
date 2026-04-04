@@ -175,6 +175,27 @@ var WCMapGlLayerControl = (function () {
         if (name.indexOf(options.sbsLayerName) !== -1) {
             return 3;
         }
+        if (name.indexOf("Subcatchments") !== -1) {
+            return 4;
+        }
+        if (name.indexOf("Channels") !== -1) {
+            return 5;
+        }
+        if (name.indexOf("Roads") !== -1) {
+            return 6;
+        }
+        if (name.indexOf("Outlet") !== -1) {
+            return 7;
+        }
+        if (name.indexOf("Subcatchment Labels") !== -1) {
+            return 8;
+        }
+        if (name.indexOf("Channel Labels") !== -1) {
+            return 9;
+        }
+        if (name.indexOf("Road Labels") !== -1) {
+            return 10;
+        }
         return 99;
     }
 
@@ -198,6 +219,9 @@ var WCMapGlLayerControl = (function () {
         if (label.indexOf("Channel Labels") !== -1) {
             return 90;
         }
+        if (label.indexOf("Road Labels") !== -1) {
+            return 92;
+        }
         if (label.indexOf("Subcatchments") !== -1) {
             return 30;
         }
@@ -206,6 +230,9 @@ var WCMapGlLayerControl = (function () {
         }
         if (label.indexOf("Channels") !== -1) {
             return 40;
+        }
+        if (label.indexOf("Roads") !== -1) {
+            return 45;
         }
         if (label.indexOf(options.usgsLayerName) !== -1) {
             return 50;

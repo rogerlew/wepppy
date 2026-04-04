@@ -1098,6 +1098,306 @@ class Roads(NoDbBase):
         )
         return features
 
+    def _load_prepared_segments_geojson(self) -> Dict[str, Any]:
+        segment_path = Path(self.roads_monotonic_geojson_path)
+        if not segment_path.exists():
+            raise FileNotFoundError(
+                "Prepared roads segments not found. Run prepare_segments first."
+            )
+
+        payload = json.loads(segment_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError("Prepared roads segment GeoJSON is malformed.")
+        if payload.get("type") != "FeatureCollection":
+            raise ValueError("Prepared roads segment payload must be a FeatureCollection.")
+        features = payload.get("features")
+        if not isinstance(features, list):
+            raise ValueError("Prepared roads segment payload is missing features.")
+        return dict(payload)
+
+    @staticmethod
+    def _find_segment_feature(
+        payload: Mapping[str, Any],
+        *,
+        segment_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        features = payload.get("features")
+        if not isinstance(features, list):
+            return None
+        for feature_index, feature in enumerate(features):
+            if not isinstance(feature, Mapping):
+                continue
+            candidate = Roads._segment_key(feature, fallback_index=feature_index)
+            if str(candidate) == segment_id:
+                return dict(feature)
+        return None
+
+    def _load_segment_execution_manifest(self) -> Dict[str, Dict[str, Any]]:
+        manifest_path = Path(self.roads_segment_pass_manifest_path)
+        if not manifest_path.exists():
+            return {}
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, list):
+            raise ValueError("Roads segment pass manifest is malformed.")
+        records: Dict[str, Dict[str, Any]] = {}
+        for row in payload:
+            if not isinstance(row, Mapping):
+                continue
+            segment_id = str(row.get("segment_id") or "").strip()
+            if not segment_id:
+                continue
+            records[segment_id] = dict(row)
+        return records
+
+    def _build_segment_profile_for_query(
+        self,
+        *,
+        feature: Mapping[str, Any],
+        params: Mapping[str, Any],
+    ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+        input_crs_raw = str(params.get("input_crs") or "EPSG:4326")
+        try:
+            input_crs = CRS.from_user_input(input_crs_raw)
+        except Exception as exc:
+            return None, f"Unable to parse Roads input CRS {input_crs_raw!r}: {exc}"
+
+        try:
+            raster_paths = self._resolve_prepare_raster_paths()
+        except Exception as exc:
+            return None, f"Unable to resolve Roads DEM path: {exc}"
+
+        try:
+            with rasterio.open(raster_paths["dem_path"]) as dem_dataset:
+                if dem_dataset.crs is None:
+                    return None, "Roads DEM is missing CRS metadata."
+                dem_crs = CRS.from_user_input(dem_dataset.crs)
+                input_to_wgs84 = Transformer.from_crs(input_crs, CRS.from_epsg(4326), always_xy=True)
+                input_to_dem = Transformer.from_crs(input_crs, dem_crs, always_xy=True)
+                geod = Geod(ellps="WGS84")
+                profile = self._build_segment_profile(
+                    feature=feature,
+                    input_crs=input_crs,
+                    dem_dataset=dem_dataset,
+                    input_to_wgs84=input_to_wgs84,
+                    input_to_dem=input_to_dem,
+                    geod=geod,
+                )
+        except (RasterioIOError, ValueError) as exc:
+            return None, str(exc)
+
+        return profile, None
+
+    @staticmethod
+    def _derive_routing_mode_hint(properties: Mapping[str, Any]) -> str:
+        routing_eligibility = str(properties.get("_roads_routing_eligibility") or "").strip()
+        chn_lowpoint = properties.get("topaz_id_chn_lowpoint")
+        hill_lowpoint = properties.get("topaz_id_hill_lowpoint")
+        if chn_lowpoint is not None and hill_lowpoint is not None:
+            return "channel_associated"
+        if routing_eligibility == "non_channel_routable":
+            return "non_channel_routed"
+        if routing_eligibility:
+            return routing_eligibility
+        return "unknown"
+
+    def query_map_segments_geojson(self) -> Dict[str, Any]:
+        payload = self._load_prepared_segments_geojson()
+        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+        attribute_field_map = self._normalize_attribute_field_map(
+            params.get("attribute_field_map"),
+            known_fields=None,
+        )
+
+        features_raw = payload.get("features", [])
+        features_out: List[Dict[str, Any]] = []
+        for feature_index, feature in enumerate(features_raw):
+            if not isinstance(feature, Mapping):
+                continue
+            geometry = feature.get("geometry")
+            properties_raw = feature.get("properties")
+            properties: Dict[str, Any] = dict(properties_raw) if isinstance(properties_raw, Mapping) else {}
+            segment_id = self._segment_key(feature, fallback_index=feature_index)
+            properties["segment_id"] = segment_id
+            design, _ = self._resolve_design_for_feature(
+                properties=properties,
+                attribute_field_map=attribute_field_map,
+            )
+            if isinstance(design, str) and design:
+                properties["design"] = design
+            properties["routing_mode_hint"] = self._derive_routing_mode_hint(properties)
+            properties["non_channel_routable"] = self._is_truthy_property(properties.get("_roads_non_channel_routable"))
+            features_out.append(
+                {
+                    "type": "Feature",
+                    "geometry": geometry,
+                    "properties": properties,
+                }
+            )
+
+        response_payload: Dict[str, Any] = {
+            "type": "FeatureCollection",
+            "features": features_out,
+        }
+        if isinstance(payload.get("name"), str) and payload.get("name"):
+            response_payload["name"] = payload["name"]
+        self._append_roads_log(
+            "query",
+            "query_map_segments_geojson",
+            {
+                "feature_count": len(features_out),
+                "roads_monotonic_geojson_relpath": os.path.relpath(self.roads_monotonic_geojson_path, self.wd),
+            },
+        )
+        return response_payload
+
+    def query_segment_detail(self, segment_id: str) -> Dict[str, Any]:
+        segment_key = str(segment_id or "").strip()
+        if not segment_key:
+            raise ValueError("segment_id is required.")
+
+        payload = self._load_prepared_segments_geojson()
+        feature = self._find_segment_feature(payload, segment_id=segment_key)
+        if feature is None:
+            raise KeyError(f"Road segment {segment_key!r} was not found in prepared roads artifacts.")
+
+        properties_raw = feature.get("properties")
+        properties: Dict[str, Any] = dict(properties_raw) if isinstance(properties_raw, Mapping) else {}
+        properties["segment_id"] = segment_key
+
+        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+        attribute_field_map = self._normalize_attribute_field_map(
+            params.get("attribute_field_map"),
+            known_fields=None,
+        )
+
+        warning_counts: Counter[str] = Counter()
+        warning_examples: List[Dict[str, Any]] = []
+        design, design_source_key = self._resolve_design_for_feature(
+            properties=properties,
+            attribute_field_map=attribute_field_map,
+            warning_counts=warning_counts,
+            warning_examples=warning_examples,
+            warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT,
+            segment_id=segment_key,
+        )
+
+        resolved_inputs: Optional[Dict[str, Any]] = None
+        if design is not None:
+            resolved_inputs = self._resolve_segment_run_inputs(
+                properties=properties,
+                params=params,
+                segment_id=segment_key,
+                design=design,
+                warning_counts=warning_counts,
+                warning_examples=warning_examples,
+                warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT,
+            )
+            resolved_inputs["resolution_sources"]["design"] = (
+                "mapped_primary" if design_source_key == attribute_field_map.get("design") else "segment_property"
+            )
+
+        execution_records = self._load_segment_execution_manifest()
+        execution_record = execution_records.get(segment_key)
+        if not isinstance(execution_record, Mapping):
+            execution_record = {}
+
+        profile_values: Dict[str, Optional[float]] = {
+            "segment_length_m": self._as_float_or_none(execution_record.get("segment_length_m")),
+            "slope_pct_raw": self._as_float_or_none(execution_record.get("slope_pct_raw")),
+            "slope_pct_clamped": self._as_float_or_none(execution_record.get("slope_pct_clamped")),
+            "elevation_high_m": self._as_float_or_none(execution_record.get("elevation_high_m")),
+            "elevation_low_m": self._as_float_or_none(execution_record.get("elevation_low_m")),
+        }
+        profile_error: Optional[str] = None
+        if all(value is None for value in profile_values.values()) and design is not None:
+            computed_profile, profile_error = self._build_segment_profile_for_query(
+                feature=feature,
+                params=params,
+            )
+            if computed_profile is not None:
+                profile_values = {
+                    "segment_length_m": self._as_float_or_none(computed_profile.get("segment_length_m")),
+                    "slope_pct_raw": self._as_float_or_none(computed_profile.get("raw_slope_pct")),
+                    "slope_pct_clamped": self._as_float_or_none(computed_profile.get("slope_pct")),
+                    "elevation_high_m": self._as_float_or_none(computed_profile.get("elevation_high_m")),
+                    "elevation_low_m": self._as_float_or_none(computed_profile.get("elevation_low_m")),
+                }
+
+        topaz_id_chn_lowpoint = self._as_int_or_none(
+            execution_record.get("topaz_id_chn_lowpoint", properties.get("topaz_id_chn_lowpoint"))
+        )
+        topaz_id_hill_lowpoint = self._as_int_or_none(
+            execution_record.get("topaz_id_hill_lowpoint", properties.get("topaz_id_hill_lowpoint"))
+        )
+        routing_eligibility = str(
+            execution_record.get("routing_eligibility")
+            or properties.get("_roads_routing_eligibility")
+            or ""
+        )
+        routing_mode = str(execution_record.get("routing_mode") or self._derive_routing_mode_hint(properties))
+        non_channel_routable = self._is_truthy_property(properties.get("_roads_non_channel_routable"))
+        if routing_mode == "non_channel_routed":
+            non_channel_routable = True
+
+        result: Dict[str, Any] = {
+            "segment_id": segment_key,
+            "design": str(execution_record.get("design") or (resolved_inputs or {}).get("design") or design or ""),
+            "surface": str(execution_record.get("surface") or (resolved_inputs or {}).get("surface") or ""),
+            "traffic": str(execution_record.get("traffic") or (resolved_inputs or {}).get("traffic") or ""),
+            "soil_texture": str(
+                execution_record.get("soil_texture") or (resolved_inputs or {}).get("soil_texture") or ""
+            ),
+            "rfg_pct": self._as_float_or_none(execution_record.get("rfg_pct", (resolved_inputs or {}).get("rfg_pct"))),
+            "road_width_m": self._as_float_or_none(
+                execution_record.get("road_width_m", (resolved_inputs or {}).get("road_width_m"))
+            ),
+            "segment_length_m": profile_values["segment_length_m"],
+            "slope_pct_raw": profile_values["slope_pct_raw"],
+            "slope_pct_clamped": profile_values["slope_pct_clamped"],
+            "elevation_high_m": profile_values["elevation_high_m"],
+            "elevation_low_m": profile_values["elevation_low_m"],
+            "topaz_id_chn_lowpoint": topaz_id_chn_lowpoint,
+            "topaz_id_hill_lowpoint": topaz_id_hill_lowpoint,
+            "routing_eligibility": routing_eligibility,
+            "routing_mode": routing_mode,
+            "channel_associated": routing_mode == "channel_associated",
+            "non_channel_routable": bool(non_channel_routable),
+            "target_hillslope_wepp_id": self._as_int_or_none(execution_record.get("target_hillslope_wepp_id")),
+            "segment_run_id": self._as_int_or_none(execution_record.get("segment_run_id")),
+            "execution_status": str(execution_record.get("status") or ""),
+            "buffer_length_m": self._as_float_or_none(
+                execution_record.get("buffer_length_m", properties.get("buffer_length_m"))
+            ),
+            "buffer_slope_pct": self._as_float_or_none(
+                execution_record.get("buffer_slope_pct", properties.get("buffer_slope_pct"))
+            ),
+            "fill_length_m": self._as_float_or_none(
+                execution_record.get("fill_length_m", properties.get("fill_length_m"))
+            ),
+            "trace_path_length_m": self._as_float_or_none(execution_record.get("trace_path_length_m")),
+            "trace_mean_slope": self._as_float_or_none(execution_record.get("trace_mean_slope")),
+            "trace_drop_m": self._as_float_or_none(execution_record.get("trace_drop_m")),
+            "trace_termination_reason": str(execution_record.get("trace_termination_reason") or ""),
+            "resolution_sources": dict((resolved_inputs or {}).get("resolution_sources", {})),
+            "mapping_warning_counts": dict(sorted(warning_counts.items())),
+            "mapping_warning_examples": warning_examples,
+            "design_source_key": design_source_key,
+            "roads_params_signature": self._params_signature(params),
+            "profile_error": profile_error,
+            "feature_properties": properties,
+        }
+        self._append_roads_log(
+            "query",
+            "query_segment_detail",
+            {
+                "segment_id": segment_key,
+                "routing_mode": result["routing_mode"],
+                "execution_status": result["execution_status"] or "not_run",
+                "profile_error": profile_error,
+            },
+        )
+        return result
+
     def prepare_segments(self) -> Dict[str, Any]:
         try:
             if not self.enabled:
@@ -1204,9 +1504,9 @@ class Roads(NoDbBase):
             routing_eligibility_counts: Counter[str] = Counter()
             warning_counts: Counter[str] = Counter()
             warning_examples: List[Dict[str, Any]] = []
-            for feature in features:
+            for feature_index, feature in enumerate(features):
                 properties = feature.get("properties", {}) if isinstance(feature, Mapping) else {}
-                segment_id = self._segment_key(feature)
+                segment_id = self._segment_key(feature, fallback_index=feature_index)
                 design_value, _ = self._resolve_design_for_feature(
                     properties=properties,
                     attribute_field_map=attribute_field_map,
@@ -1323,11 +1623,15 @@ class Roads(NoDbBase):
             return "copy"
 
     @staticmethod
-    def _segment_key(feature: Mapping[str, Any]) -> str:
+    def _segment_key(feature: Mapping[str, Any], *, fallback_index: Optional[int] = None) -> str:
         properties = feature.get("properties", {}) if isinstance(feature, Mapping) else {}
         segment_id = properties.get("segment_id")
-        if isinstance(segment_id, str) and segment_id:
-            return segment_id
+        if isinstance(segment_id, str):
+            normalized = segment_id.strip()
+            if normalized:
+                return normalized
+        if isinstance(fallback_index, int) and fallback_index >= 0:
+            return f"roads-seg-missing-{fallback_index + 1:06d}"
         return "roads-seg-unknown"
 
     @staticmethod
@@ -2839,9 +3143,9 @@ class Roads(NoDbBase):
                 trace_context: Optional[Dict[str, Any]] = None
                 trace_fn = None
 
-                for feature in features:
+                for feature_index, feature in enumerate(features):
                     properties = feature.get("properties", {}) if isinstance(feature, Mapping) else {}
-                    segment_id = self._segment_key(feature)
+                    segment_id = self._segment_key(feature, fallback_index=feature_index)
                     design, design_source = self._resolve_design_for_feature(
                         properties=properties,
                         attribute_field_map=attribute_field_map,

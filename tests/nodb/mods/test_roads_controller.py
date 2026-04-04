@@ -48,6 +48,18 @@ def _seed_prepared_state(controller: Roads, *, upload_sha: str = "seed-upload-sh
         controller._status = "prepared"
 
 
+def _write_prepared_segments(controller: Roads, payload: dict[str, object]) -> None:
+    path = Path(controller.roads_monotonic_geojson_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _write_segment_manifest(controller: Roads, rows: list[dict[str, object]]) -> None:
+    path = Path(controller.roads_segment_pass_manifest_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(rows), encoding="utf-8")
+
+
 def _ready_report_resources_stub(controller: Roads) -> dict[str, object]:
     relpath = "wepp/roads/output/interchange/README.md"
     return {
@@ -2111,3 +2123,186 @@ def test_build_roads_segment_loss_summary_parquet_rejects_non_list_manifest(tmp_
 
     with pytest.raises(ValueError, match="must be a JSON list"):
         controller._build_roads_segment_loss_summary_parquet(interchange_dir=interchange_dir)
+
+
+def test_query_map_segments_geojson_returns_roads_feature_collection(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    controller.set_params({"attribute_field_map": {"design": "DESIGN"}})
+    _write_prepared_segments(
+        controller,
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "LineString", "coordinates": [[-117.1, 46.1], [-117.0, 46.0]]},
+                    "properties": {
+                        "segment_id": "roads-seg-000501",
+                        "DESIGN": "Inslope_bd",
+                        "_roads_routing_eligibility": "channel_associated",
+                        "_roads_non_channel_routable": False,
+                    },
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "LineString", "coordinates": [[-117.2, 46.2], [-117.1, 46.1]]},
+                    "properties": {
+                        "DESIGN": "Inslope_rd",
+                        "_roads_routing_eligibility": "non_channel_routable",
+                        "_roads_non_channel_routable": True,
+                    },
+                },
+            ],
+        },
+    )
+
+    payload = controller.query_map_segments_geojson()
+
+    assert payload["type"] == "FeatureCollection"
+    assert len(payload["features"]) == 2
+    first = payload["features"][0]["properties"]
+    second = payload["features"][1]["properties"]
+    assert first["segment_id"] == "roads-seg-000501"
+    assert first["design"] == "inslope_bd"
+    assert first["routing_mode_hint"] == "channel_associated"
+    assert second["segment_id"] == "roads-seg-missing-000002"
+    assert second["routing_mode_hint"] == "non_channel_routed"
+    assert second["non_channel_routable"] is True
+
+
+def test_query_segment_detail_returns_manifest_and_wepp_fields(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    controller.set_params({"attribute_field_map": {"design": "DESIGN"}})
+    _write_prepared_segments(
+        controller,
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "LineString", "coordinates": [[-117.0, 46.0], [-117.002, 46.003]]},
+                    "properties": {
+                        "segment_id": "roads-seg-000601",
+                        "DESIGN": "Inslope_bd",
+                        "SURFACE": "Gravel",
+                        "TRAFFIC": "low",
+                        "SOIL_TEXTURE": "Loam",
+                        "RFG_PCT": 18.0,
+                        "WIDTH_M": 4.2,
+                        "buffer_length_m": 32.0,
+                        "buffer_slope_pct": 7.2,
+                        "fill_length_m": 12.0,
+                        "_roads_routing_eligibility": "channel_associated",
+                        "topaz_id_chn_lowpoint": 33,
+                        "topaz_id_hill_lowpoint": 331,
+                    },
+                }
+            ],
+        },
+    )
+    _write_segment_manifest(
+        controller,
+        [
+            {
+                "segment_id": "roads-seg-000601",
+                "status": "completed",
+                "segment_run_id": 9012,
+                "target_hillslope_wepp_id": 331,
+                "routing_mode": "channel_associated",
+                "segment_length_m": 250.5,
+                "slope_pct_raw": 8.4,
+                "slope_pct_clamped": 8.4,
+                "elevation_high_m": 1410.0,
+                "elevation_low_m": 1389.0,
+                "surface": "gravel",
+                "traffic": "low",
+                "soil_texture": "loam",
+                "rfg_pct": 18.0,
+                "road_width_m": 4.2,
+            }
+        ],
+    )
+
+    detail = controller.query_segment_detail("roads-seg-000601")
+
+    assert detail["segment_id"] == "roads-seg-000601"
+    assert detail["design"] == "inslope_bd"
+    assert detail["surface"] == "gravel"
+    assert detail["traffic"] == "low"
+    assert detail["soil_texture"] == "loam"
+    assert detail["rfg_pct"] == pytest.approx(18.0)
+    assert detail["road_width_m"] == pytest.approx(4.2)
+    assert detail["segment_length_m"] == pytest.approx(250.5)
+    assert detail["slope_pct_raw"] == pytest.approx(8.4)
+    assert detail["slope_pct_clamped"] == pytest.approx(8.4)
+    assert detail["routing_mode"] == "channel_associated"
+    assert detail["execution_status"] == "completed"
+    assert detail["buffer_length_m"] == pytest.approx(32.0)
+    assert detail["buffer_slope_pct"] == pytest.approx(7.2)
+    assert detail["fill_length_m"] == pytest.approx(12.0)
+    assert detail["segment_run_id"] == 9012
+    assert detail["target_hillslope_wepp_id"] == 331
+
+
+def test_query_segment_detail_uses_unique_fallback_segment_ids_for_missing_ids(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    _write_prepared_segments(
+        controller,
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "LineString", "coordinates": [[-117.0, 46.0], [-117.01, 46.02]]},
+                    "properties": {
+                        "DESIGN": "Inslope_rd",
+                        "SURFACE": "paved",
+                        "TRAFFIC": "high",
+                        "_roads_routing_eligibility": "non_channel_routable",
+                        "_roads_non_channel_routable": True,
+                    },
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "LineString", "coordinates": [[-117.2, 46.2], [-117.21, 46.23]]},
+                    "properties": {
+                        "DESIGN": "Inslope_rd",
+                        "SURFACE": "gravel",
+                        "TRAFFIC": "low",
+                        "_roads_routing_eligibility": "non_channel_routable",
+                        "_roads_non_channel_routable": True,
+                    },
+                }
+            ],
+        },
+    )
+    _write_segment_manifest(
+        controller,
+        [
+            {
+                "segment_id": "roads-seg-missing-000001",
+                "status": "completed",
+                "routing_mode": "non_channel_routed",
+                "segment_length_m": 100.0,
+                "slope_pct_raw": 4.0,
+                "slope_pct_clamped": 4.0,
+                "surface": "paved",
+            },
+            {
+                "segment_id": "roads-seg-missing-000002",
+                "status": "completed",
+                "routing_mode": "non_channel_routed",
+                "segment_length_m": 120.0,
+                "slope_pct_raw": 5.0,
+                "slope_pct_clamped": 5.0,
+                "surface": "gravel",
+            }
+        ],
+    )
+
+    detail = controller.query_segment_detail("roads-seg-missing-000002")
+
+    assert detail["segment_id"] == "roads-seg-missing-000002"
+    assert detail["routing_mode"] == "non_channel_routed"
+    assert detail["non_channel_routable"] is True
+    assert detail["surface"] == "gravel"

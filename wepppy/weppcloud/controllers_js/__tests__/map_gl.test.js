@@ -642,6 +642,23 @@ describe("Map GL controller", () => {
         expect(emittedEvents.some((evt) => evt.name === "map:drilldown:loaded")).toBe(true);
     });
 
+    test("roadQuery loads roads segment drilldown HTML", async () => {
+        const mapInstance = global.MapController.getInstance();
+
+        global.WCHttp.request.mockResolvedValueOnce({ body: "<div>Road Segment Summary</div>" });
+
+        mapInstance.roadQuery("roads-seg-000101");
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(global.WCHttp.request).toHaveBeenCalledWith(
+            "/runs/test-run/cfg/report/roads/segment_summary/roads-seg-000101/",
+            expect.objectContaining({ method: "GET" }),
+        );
+        const drilldown = document.getElementById("drilldown");
+        expect(drilldown.innerHTML).toContain("Road Segment Summary");
+    });
+
     test("findByTopazId delegates to WEPP_FIND_AND_FLASH and calls subQuery", async () => {
         const mapInstance = global.MapController.getInstance();
         const subQuerySpy = jest.spyOn(mapInstance, "subQuery");

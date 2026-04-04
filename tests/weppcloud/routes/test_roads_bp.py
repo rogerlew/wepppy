@@ -10,6 +10,7 @@ import pytest
 from flask import Flask
 
 import wepppy.weppcloud.routes.nodb_api.roads_bp as roads_module
+from wepppy.weppcloud.utils import cap_guard
 from tests.factories.singleton import LockedMixin, singleton_factory
 
 pytestmark = pytest.mark.routes
@@ -43,6 +44,39 @@ class RoadsStub(LockedMixin):
         self._errors: list[str] = []
         self._prepare_summary: Optional[Dict[str, Any]] = None
         self._run_summary: Optional[Dict[str, Any]] = None
+        self._roads_segments_payload: Dict[str, Any] = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "LineString", "coordinates": [[-117.0, 46.0], [-117.001, 46.001]]},
+                    "properties": {
+                        "segment_id": "roads-seg-000101",
+                        "design": "inslope_bd",
+                        "surface": "gravel",
+                        "traffic": "low",
+                    },
+                }
+            ],
+        }
+        self._segment_detail_payloads: Dict[str, Dict[str, Any]] = {
+            "roads-seg-000101": {
+                "segment_id": "roads-seg-000101",
+                "design": "inslope_bd",
+                "surface": "gravel",
+                "traffic": "low",
+                "soil_texture": "loam",
+                "rfg_pct": 12.0,
+                "road_width_m": 4.5,
+                "segment_length_m": 210.0,
+                "slope_pct_raw": 6.1,
+                "slope_pct_clamped": 6.1,
+                "routing_mode": "channel_associated",
+                "execution_status": "completed",
+            }
+        }
+        self._segments_not_prepared = False
+        self._segment_missing_ids: set[str] = set()
         type(self)._instances[wd] = self
 
     @classmethod
@@ -166,6 +200,24 @@ class RoadsStub(LockedMixin):
             "status": self._status,
             "errors": list(self._errors),
         }
+
+    def query_map_segments_geojson(self) -> Dict[str, Any]:
+        if self._segments_not_prepared:
+            raise FileNotFoundError("Prepared roads segments not found. Run prepare_segments first.")
+        return self._roads_segments_payload
+
+    def query_segment_detail(self, segment_id: str) -> Dict[str, Any]:
+        segment_key = str(segment_id).strip()
+        if not segment_key:
+            raise ValueError("segment_id is required.")
+        if self._segments_not_prepared:
+            raise FileNotFoundError("Prepared roads segments not found. Run prepare_segments first.")
+        if segment_key in self._segment_missing_ids:
+            raise KeyError(f"Road segment {segment_key!r} was not found in prepared roads artifacts.")
+        payload = self._segment_detail_payloads.get(segment_key)
+        if payload is None:
+            raise KeyError(f"Road segment {segment_key!r} was not found in prepared roads artifacts.")
+        return dict(payload)
 
 
 @pytest.fixture()
@@ -555,3 +607,130 @@ def test_report_roads_results_hides_non_single_storm_links_when_resources_absent
     assert f"/runs/{RUN_ID}/{CONFIG}/plot/wepp/streamflow?output_scope=roads" not in hrefs
     assert f"/runs/{RUN_ID}/{CONFIG}/gl-dashboard?output_scope=roads" in hrefs
     assert f"/runs/{RUN_ID}/{CONFIG}/storm-event-analyzer?output_scope=roads" in hrefs
+
+
+def test_resources_roads_geojson_returns_feature_collection(roads_client):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/roads.json")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["type"] == "FeatureCollection"
+    assert payload["features"][0]["properties"]["segment_id"] == "roads-seg-000101"
+
+
+def test_resources_roads_geojson_returns_404_when_prepare_missing(roads_client):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+    controller._segments_not_prepared = True
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/resources/roads.json")
+
+    assert response.status_code == 404
+    payload = response.get_json()
+    assert "prepare_segments" in payload["error"]["message"]
+
+
+def test_query_roads_segment_detail_returns_payload(roads_client):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/roads/segment/roads-seg-000101")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["segment_id"] == "roads-seg-000101"
+    assert payload["design"] == "inslope_bd"
+    assert payload["surface"] == "gravel"
+    assert payload["traffic"] == "low"
+
+
+def test_query_roads_segment_detail_returns_404_when_missing(roads_client):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+    controller._segment_missing_ids.add("roads-seg-009999")
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/roads/segment/roads-seg-009999")
+
+    assert response.status_code == 404
+    payload = response.get_json()
+    assert "was not found" in payload["error"]["message"]
+
+
+def test_report_roads_segment_summary_renders_template(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+
+    captured: Dict[str, Any] = {}
+
+    def _fake_render(template_name: str, **kwargs):
+        captured["template_name"] = template_name
+        captured["kwargs"] = kwargs
+        return "ok"
+
+    monkeypatch.setattr(roads_module, "render_template", _fake_render)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/roads/segment_summary/roads-seg-000101")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured["template_name"] == "reports/roads/segment_summary.htm"
+    assert captured["kwargs"]["d"]["segment_id"] == "roads-seg-000101"
+    assert captured["kwargs"]["d"]["routing_mode"] == "channel_associated"
+
+
+def test_report_roads_segment_summary_requires_cap_for_anonymous_users(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+
+    captured: Dict[str, Any] = {}
+
+    monkeypatch.setattr(cap_guard, "current_user", SimpleNamespace(is_authenticated=False), raising=False)
+
+    def _fake_cap_gate_response(next_url=None, reason=None):
+        captured["next_url"] = next_url
+        captured["reason"] = reason
+        return "cap-gate"
+
+    monkeypatch.setattr(cap_guard, "cap_gate_response", _fake_cap_gate_response)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/roads/segment_summary/roads-seg-000101")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "cap-gate"
+    assert captured["reason"] == "Complete verification to view WEPP reports."
+    assert "next_url" in captured
+
+
+def test_report_roads_segment_summary_returns_404_when_missing(roads_client):
+    client, RoadsStub, _RonStub, *_rest = roads_client
+    run_dir = _rest[-1]
+    controller = RoadsStub.getInstance(run_dir)
+    controller.set_enabled(True)
+    controller._segment_missing_ids.add("roads-seg-000404")
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/roads/segment_summary/roads-seg-000404")
+
+    assert response.status_code == 404
+    payload = response.get_json()
+    assert "was not found" in payload["error"]["message"]
