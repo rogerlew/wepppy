@@ -603,6 +603,7 @@ services:
     volumes:
       - ${CADDY_FILE:-./caddy/Caddyfile}:/etc/caddy/Caddyfile:ro
       - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
+      - ../wepppy/weppcloud/routes/usersum/static:/srv/usersum/static:ro
     depends_on:
       weppcloud:
         condition: service_started

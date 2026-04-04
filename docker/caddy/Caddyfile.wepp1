@@ -120,6 +120,16 @@ wepp.cloud {
         file_server
     }
 
+    handle_path /weppcloud/usersum/static/* {
+        root * /srv/usersum/static
+        file_server
+    }
+
+    handle_path /usersum/static/* {
+        root * /srv/usersum/static
+        file_server
+    }
+
     handle /favicon.ico {
         root * /srv/weppcloud/static
         rewrite * /favicon.ico

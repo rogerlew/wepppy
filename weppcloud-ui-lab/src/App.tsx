@@ -98,7 +98,7 @@ const HELP_RESOURCES: HelpResource[] = [
   {
     title: 'User Summary Documentation',
     description: 'WEPPcloud Documentation',
-    href: '/weppcloud/usersum/',
+    href: '/weppcloud/usersum/doc/usersum.weppcloud.references',
     icon: 'zap',
   },
   {
@@ -172,10 +172,10 @@ const CONTACTS: Contact[] = [
   },
   {
     name: 'Jackson Nakae',
-    title: 'PATH-CE',
+    title: 'PATH-Cost Effective',
     institution: 'USDA Forest Service, Rocky Mountain Research Station',
     email: 'Jackson.Nakae@usda.gov',
-    expertise: ['PATH-CE'],
+    expertise: ['PATH-Cost Effective'],
     icon: 'fileText',
     accent: 'amber',
   },
@@ -618,10 +618,27 @@ const mapSubtitle =
           <p className="text-xs uppercase tracking-[0.4em] text-sky-200">About</p>
           <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">What is WEPPcloud?</h2>
           <p className="mt-6 text-lg leading-relaxed text-slate-300">
-            WEPPcloud is an online interface for running WEPP (Water Erosion Prediction Project) Model. WEPP is a
-            physically based erosion model built to replace the Universal Soil Loss Equation (USLE) model. The interface
-            simplifies the acquisition and preparation of topography, soil, management, and climate inputs for WEPP.
+            WEPPcloud is an open-source, online watershed modeling platform that automates the acquisition and
+            processing of geospatial resources and performs process-based modeling to predict runoff, erosion, and
+            sediment delivery in minutes. Users can select from a variety of processing options for climate inputs,
+            wildfire, treatments, and land-management scenarios to support side-by-side comparisons and model
+            calibration. They can then analyze and view results through interface reports and maps, and export
+            results for planning, research, and post-fire response.
           </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm font-medium">
+            <a
+              href="/weppcloud/usersum/doc/usersum.weppcloud.wepp_model"
+              className="text-sky-300 transition hover:text-sky-200"
+            >
+              WEPP Model
+            </a>
+            <a
+              href="/weppcloud/usersum/doc/usersum.weppcloud.faq"
+              className="text-sky-300 transition hover:text-sky-200"
+            >
+              FAQ
+            </a>
+          </div>
         </motion.div>
       </section>
 
@@ -1175,17 +1192,17 @@ const mapSubtitle =
               judgment or site-specific field assessment.
             </p>
             <p className="text-sm leading-relaxed text-slate-300">
-              THIS SOFTWARE AND ITS OUTPUTS ARE PROVIDED &ldquo;AS IS&rdquo; WITHOUT WARRANTY OF
-              ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-              MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT
-              SHALL THE UNIVERSITY OF IDAHO, USDA FOREST SERVICE, OR ANY CONTRIBUTING INSTITUTION,
-              DEVELOPER, OR CONTRIBUTOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-              EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, LOSS OF DATA,
-              PROPERTY DAMAGE, ENVIRONMENTAL HARM, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR
-              FINANCIAL LOSS) ARISING FROM THE USE OF OR RELIANCE ON WEPPCLOUD OR ITS OUTPUTS,
-              HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-              OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE), EVEN IF ADVISED OF THE POSSIBILITY OF
-              SUCH DAMAGE.
+              This software and its outputs are provided &ldquo;as is&rdquo; without warranty of
+              any kind, express or implied, including but not limited to the warranties of
+              merchantability, fitness for a particular purpose, and noninfringement. In no event
+              shall the University of Idaho, USDA Forest Service, or any contributing institution,
+              developer, or contributor be liable for any direct, indirect, incidental, special,
+              exemplary, or consequential damages (including, but not limited to, loss of data,
+              property damage, environmental harm, procurement of substitute goods or services, or
+              financial loss) arising from the use of or reliance on WEPPcloud or its outputs,
+              however caused and on any theory of liability, whether in contract, strict liability,
+              or tort (including negligence or otherwise), even if advised of the possibility of
+              such damage.
             </p>
             <p className="text-sm leading-relaxed text-slate-300">
               By using WEPPcloud, you acknowledge that simulation outputs are approximations

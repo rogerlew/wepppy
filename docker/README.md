@@ -273,6 +273,7 @@ docker rm wepppy-rq-worker-batch-2
 - All services share the default Compose network; Caddy resolves others by container name.
 - External access happens through Caddy on `http://localhost:8080`. It proxies:
 - `/weppcloud/static/*` directly from the mounted repo (`wepppy/weppcloud/static`) using Caddy’s `file_server`.
+- `/weppcloud/usersum/static/*` directly from the mounted repo (`wepppy/weppcloud/routes/usersum/static`) for Usersum-bundled reference assets.
 - `/weppcloud/*` to the Flask app, preserving `X-Forwarded-*` headers.
 - `/rq-engine/*` to the rq-engine FastAPI service for jobstatus/jobinfo polling and upload-capable endpoints (Caddy strips `/rq-engine` and forwards `X-Forwarded-Prefix: /rq-engine`; extended upstream timeouts apply there).
 - `/weppcloud/runs/.../(browse|download|aria2c.spec|gdalinfo)` to the Starlette browse microservice.
@@ -283,6 +284,7 @@ docker rm wepppy-rq-worker-batch-2
 - Source code (`../`) plus sibling repositories (`../../wepppy2`, `../../weppcloud-wbt`, etc.) are bind-mounted read-write into every Python container so code changes reflect instantly.
 - Redis and Postgres use dedicated host directories under `../.docker-data/` for persistence.
 - Caddy mounts the static assets read-only (`../wepppy/weppcloud/static:/srv/weppcloud/static:ro`).
+- Caddy also mounts Usersum static assets read-only (`../wepppy/weppcloud/routes/usersum/static:/srv/usersum/static:ro`).
 - The `weppcloudr` container binds the R service repo (`../weppcloudR`), the legacy template repo (`../WEPPcloudR`), run storage mounts (`${GEODATA_DIR}`, `${WC1_DIR}`), and a persistent `weppcloudr-renv-cache` volume for R package caches.
 
 ## Runtime User and Group

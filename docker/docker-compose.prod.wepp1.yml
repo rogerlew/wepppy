@@ -47,6 +47,7 @@ services:
     volumes:
       - /workdir/wepppy/docker/caddy/Caddyfile.wepp1:/etc/caddy/Caddyfile:ro
       - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
+      - ../wepppy/weppcloud/routes/usersum/static:/srv/usersum/static:ro
       - /geodata:/geodata:ro
       - caddy-data:/data
       - caddy-config:/config
