@@ -146,6 +146,8 @@ roots:
     title: Advanced and Operations
     collapsible: true
     children:
+      - key: usersum.weppcloud.enduser_authoring_guide
+        doc_id: usersum.weppcloud.enduser_authoring_guide
       - key: usersum.weppcloud.profile_jwt_dataset_access_python_r
         doc_id: usersum.weppcloud.profile_jwt_dataset_access_python_r
       - key: usersum.weppcloud.rq_engine

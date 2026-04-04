@@ -61,6 +61,7 @@ _INDEX_DOC_DESCRIPTIONS: Dict[str, str] = {
     "usersum.weppcloud.controls.channel_delineation": "Documents the channel delineation control and the advanced settings used to derive channel networks.",
     "usersum.weppcloud.data_attribution": "Lists the datasets, map services, and regional sources that WEPPcloud depends on.",
     "usersum.weppcloud.disturbed_land_soil_lookup": "Explains how disturbed land classes map to soil properties and calibration assumptions.",
+    "usersum.weppcloud.enduser_authoring_guide": "Defines how to write ENDUSER.md documentation for non-developer WEPPcloud audiences using plain language, clear workflows, and explicit interpretation guidance.",
     "usersum.weppcloud.faq": "Answers common questions about WEPPcloud workflows, assumptions, outputs, and model behavior.",
     "usersum.weppcloud.getting_started": "Provides the fastest path from a new run to a working project with core controls explained.",
     "usersum.weppcloud.mods_overview": "Introduces the optional modules that extend WEPPcloud with additional workflows and domain capabilities.",

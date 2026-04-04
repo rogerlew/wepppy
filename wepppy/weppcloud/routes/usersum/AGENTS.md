@@ -9,6 +9,7 @@
 - Applies to:
   - `wepppy/weppcloud/routes/usersum/usersum.py`
   - `wepppy/weppcloud/routes/usersum/templates/usersum/*`
+  - developer authoring guide: `wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md`
   - Usersum markdown content roots:
     - `wepppy/weppcloud/routes/usersum/db/`
     - `wepppy/weppcloud/routes/usersum/input-file-specifications/`
@@ -42,4 +43,3 @@
   - `tests/weppcloud/test_usersum_template_wiring.py`
 - Run after usersum route/template/link logic edits:
   - `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py`
-

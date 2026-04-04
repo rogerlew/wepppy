@@ -180,6 +180,15 @@ docs:
     audience_tags: [developer, operator]
     status: active
     nav_key: usersum.weppcloud.profile_jwt_dataset_access_python_r
+  - doc_id: usersum.weppcloud.enduser_authoring_guide
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md
+    title: ENDUSER.md Authoring Guide
+    min_role: developer
+    category: weppcloud
+    audience_tags: [developer]
+    status: active
+    nav_key: usersum.weppcloud.enduser_authoring_guide
   - doc_id: usersum.weppcloud.references
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/references.md
