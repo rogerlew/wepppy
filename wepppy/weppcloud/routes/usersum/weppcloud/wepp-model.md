@@ -10,14 +10,21 @@ The following is a brief description of model components and processes.
 
 ### Watershed Delineation
 
+Watershed delineation is the set of topographic analysis and processing steps used to turn a digital elevation model (DEM) into a hydrologically connected watershed representation. The process includes:
+
+1. Correcting the DEM so water drains downhill by filling or breaching depressions.
+2. Deriving flow accumulation and using user-defined settings to identify the channel network.
+3. Defining the watershed boundary.
+4. Dividing the area into hillslopes within that boundary.
+5. Determining how each hillslope drains to the channel network.
+
 Watershed delineation can be performed by TOPAZ or WEPPcloud-WBT.
 
 #### TOPAZ
 
 - Topographic Parameterization (TOPAZ) is used to derive topographic features (slope length, width, aspect, slopes) from the Digital Elevation Model (DEM).
 - TOPAZ characterizes watersheds as representative hillslopes and channels, and links hillslopes to channel networks.
-- A Python watershed abstraction routine (`wepppy.watershed_abstraction`) parameterizes representative hillslopes by walking the flowpaths for each subcatchment identified by TOPAZ.
-- Output grids and tables from TOPAZ are included in archived project downloads. Descriptions of these products are available in the [TOPAZ Manual](https://www.ars.usda.gov/ARSUserFiles/30700510/TOPAZ_User-Manual2.pdf).
+- Output grids and tables from TOPAZ are included in archived project downloads. Descriptions of these products are available in the [TOPAZ Manual](/weppcloud/usersum/static/topaz/TOPAZ_User-Manual2.pdf).
 
 #### WEPPcloud-WBT
 
@@ -27,31 +34,83 @@ Watershed delineation can be performed by TOPAZ or WEPPcloud-WBT.
 - The `FindOutlet` tool derives a stream outlet pour point by tracing D8 flow and supports requested start locations for interactive outlet selection.
 - The `StreamJunctionIdentifier` and `PruneStrahlerStreamOrder` tools support confluence/junction analysis and stream-order pruning workflows used by WEPPcloud modules.
 
+### Watershed Abstraction
+
+WEPP represents hillslopes as rectangular elements with a width, a length, and a slope profile. Watershed abstraction is the process of converting delineated topographic data into those WEPP-ready hillslopes and channels. The process includes:
+
+1. Using the delineated watershed to identify the cells that belong to each hillslope and channel.
+2. Walking downslope flowpaths to measure how slope changes with distance to the channel.
+3. Aggregating those flowpaths into a representative rectangular WEPP hillslope with a width, a length, and a slope profile.
+4. Tracing channels to define channel length, routing direction, and slope from flow-vector slopes.
+5. Estimating channel width using the Bieger (2015) empirical model when that option is enabled.
+
+In WEPPcloud, watershed abstraction is performed by PERIDOT.
+
+#### PERIDOT
+
+- [PERIDOT](https://github.com/wepp-in-the-woods/peridot) is a Rust watershed abstraction toolkit that generates WEPP-ready slope profiles and tabular summaries from TOPAZ and WEPPcloud-WBT outputs.
+- Its `abstract_watershed` and `wbt_abstract_watershed` workflows walk flowpaths within each delineated hillslope, aggregate them into representative slope profiles using weighted slope averaging, and derive rectangular hillslope dimensions for WEPP.
+- Channels are abstracted separately by tracing the channel network, deriving channel slopes from flow-vector slope grids, and estimating channel widths from drainage area with the Bieger (2015) empirical model when that option is enabled.
+
 ### Hydrology and Hydraulics
 
 WEPP first executes hydrologic and erosion calculations for each hillslope and channel. The flow and sediment yield from each hillslope are fed into associated channels and routed through the channel network to the watershed outlet.
 
+![Diagram of the hydrologic cycle showing precipitation, interception, infiltration, evapotranspiration, surface runoff, subsurface flow, deep percolation, and streamflow pathways represented in WEPP.](/weppcloud/usersum/static/weppcloud/hydrologic-cycle.png)
+
+*Figure: Hydrologic cycle processes represented in WEPP.*
+
 - WEPP simulates surface hydrology and hydraulics, subsurface hydrology, vegetation growth and residue decomposition, and sediment detachment and transport along each hillslope and channel segment using four major input files: climate, slope, soil, and vegetation.
-- Climate: Requires precipitation amount and its characteristics (duration, peak intensity, and time-to-peak intensity). Other variables include maximum and minimum temperatures, dew point temperature, solar radiation, wind speed, and wind direction.
-- Winter hydrology: Snow accumulation, snowmelt, frost, and thaw. These processes are performed internally by the model on an hourly basis.
-- Surface hydrology: Calculates infiltration, rainfall excess, depression storage, and peak discharge. Rainfall excess is calculated at 1-minute intervals following the modified Green-Ampt-Mein-Larson equation.
-- Hydraulics: Overland flow and peak discharge are computed using a modified kinematic wave equation.
-- Percolation: Uses storage routing techniques to predict flow through soil layers.
-- Plant growth: Follows EPIC’s model approach for vegetation growth. The model estimates biomass accumulation based on heat units and photosynthetically active radiation. Plant growth accounts for water and temperature stress. Variables include growing degree days, vegetative dry matter, canopy cover and height, root growth, and leaf area index.
-- Evapotranspiration: Uses the Penman equation for potential evapotranspiration. Another available method is FAO 56 Penman-Monteith.
-- Subsurface flow: Subsurface lateral flow from hillslopes is estimated using Darcy’s law.
+- Climate:
+  - Requires precipitation amount and its characteristics (duration, peak intensity, and time-to-peak intensity).
+  - Other variables include maximum and minimum temperatures, dew point temperature, solar radiation, wind speed, and wind direction.
+- Winter hydrology:
+  - Snow accumulation, snowmelt, frost, and thaw.
+  - These processes are performed internally by the model on an hourly basis.
+- Surface hydrology:
+  - Calculates infiltration, rainfall excess, depression storage, and peak discharge.
+  - Rainfall excess is calculated at 1-minute intervals following the modified Green-Ampt-Mein-Larson equation.
+- Hydraulics:
+  - Overland flow and peak discharge are computed using a modified kinematic wave equation.
+- Percolation:
+  - Uses storage routing techniques to predict flow through soil layers.
+- Plant growth:
+  - Follows EPIC’s model approach for vegetation growth.
+  - The model estimates biomass accumulation based on heat units and photosynthetically active radiation.
+  - Plant growth accounts for water and temperature stress.
+  - Variables include growing degree days, vegetative dry matter, canopy cover and height, root growth, and leaf area index.
+- Evapotranspiration:
+  - Uses the Penman equation for potential evapotranspiration.
+  - Another available method is FAO 56 Penman-Monteith.
+- Subsurface flow:
+  - Subsurface lateral flow from hillslopes is estimated using Darcy’s law.
 - WEPP maintains a continuous daily water balance of surface runoff, subsurface lateral flow, soil evaporation, plant transpiration, residue evaporation, total soil water, deep percolation, snow accumulation and melt, and frost and thaw.
 
 ### Hillslope Erosion
 
-- WEPP-simulated soil erosion on a hillslope profile is represented in two ways: 1) detachment and delivery of soil particles by raindrop impact and shallow sheet flow on interrill areas, and 2) soil particle detachment, transport, and deposition by concentrated flow in rill areas.
-- Rill erosion is modeled as a function of the flow’s capacity to detach and transport soil versus the existing sediment load in the flow. WEPP uses a steady-state sediment continuity equation for erosion computations. Soil detachment in rills occurs when the flow hydraulic shear stress exceeds the critical shear stress of the soil, and when sediment load is less than sediment transport capacity.
-- Deposition occurs when sediment load in rill flow is greater than flow sediment transport capacity. Sediment transport capacity is calculated using a modified Yalin equation.
+- WEPP-simulated soil erosion on a hillslope profile is represented in two ways:
+  1. detachment and delivery of soil particles by raindrop impact and shallow sheet flow on interrill areas
+  2. soil particle detachment, transport, and deposition by concentrated flow in rill areas
+- Rill erosion is modeled as a function of the flow’s capacity to detach and transport soil versus the existing sediment load in the flow.
+- WEPP uses a steady-state sediment continuity equation for erosion computations.
+- Soil detachment in rills occurs when:
+  - the flow hydraulic shear stress exceeds the critical shear stress of the soil
+  - sediment load is less than sediment transport capacity
+- Deposition occurs when sediment load in rill flow is greater than flow sediment transport capacity.
+- Sediment transport capacity is calculated using a modified Yalin equation.
 
 ### Channel Hydrology and Erosion
 
-- Peak runoff rates are computed using: 1) modified EPIC, 2) CREAMS, 3) Kinematic Wave, 4) Muskingum-Cunge, and 5) Muskingum-Cunge (variable). The last three routing methods support simulations of perennial channels/streams.
-- The channel erosion routine in WEPP is similar to rill erosion simulation on hillslopes, except that flow shear stress is calculated using regression equations that approximate spatially varied flow equations, and only entrainment, transport, and deposition by concentrated flow are considered.
+- Peak runoff rates are computed using:
+  1. modified EPIC
+  2. CREAMS
+  3. Kinematic Wave
+  4. Muskingum-Cunge
+  5. Muskingum-Cunge (variable)
+- The last three routing methods support simulations of perennial channels/streams.
+- The channel erosion routine in WEPP is similar to rill erosion simulation on hillslopes, except that:
+  - flow shear stress is calculated using regression equations that approximate spatially varied flow equations
+  - only entrainment, transport, and deposition by concentrated flow are considered
 - Detachment is assumed to occur from the channel bottom until the nonerodible layer is reached, after which the channel starts to widen and the erosion rate decreases with time until flow is too shallow to cause detachment.
 
 ### Recent Developments
