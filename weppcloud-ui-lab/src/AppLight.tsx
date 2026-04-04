@@ -94,9 +94,9 @@ type Contact = {
 
 const HELP_RESOURCES: HelpResource[] = [
   {
-    title: 'Quick Start',
-    description: 'Follow the walkthrough to configure a run end-to-end.',
-    href: 'https://doc.wepp.cloud/QuickStart.html',
+    title: 'User Summary Documentation',
+    description: 'WEPPcloud Documentation',
+    href: '/weppcloud/usersum/',
     icon: 'zap',
   },
   {
@@ -167,6 +167,15 @@ const CONTACTS: Contact[] = [
     expertise: ['Hydrology', 'Fire response modeling'],
     icon: 'fileText',
     accent: 'cyan',
+  },
+  {
+    name: 'Jackson Nakae',
+    title: 'PATH-CE',
+    institution: 'USDA Forest Service, Rocky Mountain Research Station',
+    email: 'Jackson.Nakae@usda.gov',
+    expertise: ['PATH-CE'],
+    icon: 'fileText',
+    accent: 'amber',
   },
 ]
 
@@ -268,6 +277,7 @@ const CONTRIBUTORS = [
   'William Elliot',
   'Ames Fowler',
   'Jim Frakenberger',
+  'Jackson Nakae',
   'Roger Lew',
   'Mary E. Miller',
   'Jonay Neris',

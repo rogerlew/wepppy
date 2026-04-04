@@ -72,4 +72,5 @@ def test_usersum_index_renders_weppcloud_header_and_theme_switcher() -> None:
     assert "WEPPcloud" in html
     assert "data-theme-select" in html
     assert "/static/js/theme.js" in html
-    assert "Usersum now serves curated, role-aware documentation" in html
+    assert "Browse the sections below or use the navigation tree on the left" in html
+    assert "Module guides marked as source stubs" not in html

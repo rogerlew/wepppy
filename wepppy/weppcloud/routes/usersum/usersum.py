@@ -46,6 +46,52 @@ _DEFAULT_SEARCH_ROLE = "user"
 _DEFAULT_SEARCH_LIMIT = 20
 _MAX_SEARCH_LIMIT = 100
 
+_INDEX_DOC_DESCRIPTIONS: Dict[str, str] = {
+    "usersum.db.climate_file_parameters": "Explains each field in a CLIGEN climate file and how WEPPcloud interprets it.",
+    "usersum.db.management_file_parameters": "Defines the management file parameters that control operations, vegetation, residue, and disturbance behavior.",
+    "usersum.db.soil_file_parameters": "Defines the soil file parameters that control infiltration, erodibility, hydraulic behavior, and profile structure.",
+    "usersum.input_file_specifications.cligenparms": "Describes the CLIGEN station statistics file format used to generate stochastic climate inputs.",
+    "usersum.input_file_specifications.climate_file_spec": "Describes the daily climate file structure that WEPP reads during simulation.",
+    "usersum.input_file_specifications.plant_file_spec": "Describes the plant and management file format used to represent vegetation, operations, and scenarios.",
+    "usersum.input_file_specifications.soil_file_spec": "Describes the WEPP soil file format, including layers, texture, and hydraulic properties.",
+    "usersum.path.quick_start": "Walks through the PATH Cost-Effective workflow for evaluating treatment options and erosion outcomes.",
+    "usersum.weppcloud.accessibility_statement": "Summarizes WEPPcloud accessibility commitments, current conformance evidence, and known limitations.",
+    "usersum.weppcloud.ag_field_mod": "Introduces the agricultural field workflow and the inputs needed for field-scale WEPP modeling.",
+    "usersum.weppcloud.bootstrap": "Explains the bootstrap workflow for repeated runs, uncertainty exploration, and comparative analysis.",
+    "usersum.weppcloud.climate_options": "Explains climate data sources, weather-generation choices, and configuration options used by WEPPcloud.",
+    "usersum.weppcloud.controls.channel_delineation": "Documents the channel delineation control and the advanced settings used to derive channel networks.",
+    "usersum.weppcloud.data_attribution": "Lists the datasets, map services, and regional sources that WEPPcloud depends on.",
+    "usersum.weppcloud.disturbed_land_soil_lookup": "Explains how disturbed land classes map to soil properties and calibration assumptions.",
+    "usersum.weppcloud.faq": "Answers common questions about WEPPcloud workflows, assumptions, outputs, and model behavior.",
+    "usersum.weppcloud.getting_started": "Provides the fastest path from a new run to a working project with core controls explained.",
+    "usersum.weppcloud.mods_overview": "Introduces the optional modules that extend WEPPcloud with additional workflows and domain capabilities.",
+    "usersum.weppcloud.observed_model_fitting": "Explains how to compare model output against observations and tune runs with observed data.",
+    "usersum.weppcloud.profile_jwt_dataset_access_python_r": "Shows how advanced users can access WEPPcloud datasets programmatically from Python or R.",
+    "usersum.weppcloud.references": "Collects the core technical and scientific references behind WEPPcloud and related workflows.",
+    "usersum.weppcloud.rq_engine": "Documents the queue-backed execution layer that runs background jobs and asynchronous workflows.",
+    "usersum.weppcloud.user_guide": "Provides a broader tour of the WEPPcloud interface, workflows, and expected user actions.",
+    "usersum.weppcloud.wepp_advanced_options": "Explains advanced WEPP settings that affect hydrology, erosion, soils, and calibration behavior.",
+    "usersum.weppcloud.wepp_model": "Introduces the WEPP model, what it simulates, and how its outputs should be interpreted.",
+    "usersum.source.nodb": "Introduces the NoDb run-state system that underpins WEPPcloud project configuration and persistence.",
+    "usersum.source.ash_transport": "Describes the ash transport module, its assumptions, and how ash-related outputs are managed.",
+    "usersum.source.sbs_map_prep": "Explains how to prepare and validate burn severity maps for disturbed-land workflows.",
+    "usersum.source.debris_flow": "Describes the debris flow module, required inputs, and the outputs it produces.",
+    "usersum.source.disturbed": "Describes the disturbed lands module and how it manages burn severity, cover transforms, and related inputs.",
+    "usersum.source.features_export": "Explains how to export geospatial features, attributes, and derived datasets from a run.",
+    "usersum.source.observed": "Describes the observed-data controller used to load and work with calibration or validation datasets.",
+    "usersum.source.omni": "Describes the omni scenario system for orchestrating scenario sets and comparative analyses.",
+    "usersum.source.openet": "Explains how OpenET-derived evapotranspiration data are incorporated into climate and analysis workflows.",
+    "usersum.source.rap": "Explains how Rangeland Analysis Platform cover data are integrated into WEPPcloud workflows.",
+    "usersum.source.rhem": "Describes the RHEM workflow and how rangeland erosion modeling is configured in WEPPcloud.",
+    "usersum.source.roads": "Describes the roads workflow for road-network erosion, delivery, and reporting outputs.",
+    "usersum.source.rusle": "Describes the RUSLE workflow and how empirical erosion estimates are configured and reported.",
+    "usersum.source.treatments": "Explains the treatments module used to define, compare, and apply management treatments.",
+    "usersum.source.revegetation": "Explains revegetation cover transforms and how post-disturbance recovery scenarios are configured.",
+    "usersum.source.soils": "Summarizes the soil datasets, file handling, and package-level utilities used in WEPP soil preparation.",
+    "vendor.weppcloud_wbt.culvert_web_app_hydroenforcement": "Documents the culvert hydroenforcement workflow used to condition drainage for terrain analysis.",
+    "vendor.weppcloud_wbt.hillslopes_topaz_spec": "Documents the Hillslopes TOPAZ-style derivation workflow used in terrain and watershed preprocessing.",
+}
+
 _PARAM_HEADER_RE = re.compile(r"^#### `([^`]+)` —\s*(.+)$")
 _DETAIL_RE = re.compile(r"^- \*\*([^*]+)\*\*: ?(.*)$")
 _WHITESPACE_RE = re.compile(r"\s+")
@@ -253,6 +299,26 @@ def _doc_route_url(doc: RuntimeDoc) -> str:
     return url_for_run("usersum.view_doc", doc_id=doc["doc_id"])
 
 
+def _default_index_description(title: str) -> str:
+    return f"Open documentation for {title}."
+
+
+def _annotate_nav_tree_for_index(nodes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    annotated: List[Dict[str, Any]] = []
+    for node in nodes:
+        payload = dict(node)
+        if payload.get("kind") == "section":
+            payload["children"] = _annotate_nav_tree_for_index(payload.get("children", []))
+        else:
+            doc_id = str(payload["doc_id"])
+            payload["description"] = _INDEX_DOC_DESCRIPTIONS.get(
+                doc_id,
+                _default_index_description(str(payload["title"])),
+            )
+        annotated.append(payload)
+    return annotated
+
+
 def _rewrite_markdown_href(source_path: Path, href: str) -> str:
     parsed = urlsplit(href)
     if parsed.scheme or parsed.netloc:
@@ -349,6 +415,7 @@ def _render_with_usersum_shell(
         caller_max_role=caller_max_role,
         active_doc_id=active_doc["doc_id"] if active_doc else None,
     )
+    nav_tree = _annotate_nav_tree_for_index(nav_tree)
     return render_template(
         template_name,
         nav_tree=nav_tree,
@@ -421,30 +488,10 @@ def _resolve_doc_or_404(doc_id: str, caller_max_role: str) -> RuntimeDoc:
 @usersum_bp.route("/usersum/", strict_slashes=False)
 def usersum_index():
     caller_max_role = _caller_max_role()
-    visible_docs = _catalog().visible_docs(caller_max_role)
-    by_category: Dict[str, List[RuntimeDoc]] = {}
-    for doc in visible_docs:
-        by_category.setdefault(doc["category"], []).append(doc)
-
-    sections: List[Dict[str, Any]] = []
-    for category in sorted(by_category):
-        entries = [
-            {
-                "title": doc["title"],
-                "url": _doc_route_url(doc),
-                "doc_id": doc["doc_id"],
-                "rel_path": doc["rel_path"],
-                "min_role": doc["min_role"],
-            }
-            for doc in sorted(by_category[category], key=lambda item: item["title"].lower())
-        ]
-        sections.append({"title": category, "entries": entries})
-
     return _render_with_usersum_shell(
         "usersum/index.htm",
         caller_max_role=caller_max_role,
         title="WEPPcloud UserSummary Documentation",
-        sections=sections,
     )
 
 

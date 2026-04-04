@@ -1,7 +1,24 @@
 {% extends "usersum/layout.j2" %}
+{% macro render_index_tree(nodes) %}
+  <ul class="wc-usersum-index-list">
+    {% for node in nodes %}
+      {% if node.kind == "section" %}
+        <li class="wc-usersum-index-list__section">
+          <div class="wc-usersum-index-list__heading">{{ node.title }}</div>
+          {{ render_index_tree(node.children) }}
+        </li>
+      {% else %}
+        <li class="wc-usersum-index-list__item">
+          <a href="{{ url_for_run('usersum.view_doc', doc_id=node.doc_id) }}">{{ node.title }}</a>
+          <p>{{ node.description }}</p>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endmacro %}
 {% block body_content %}
 <h1>WEPPcloud UserSummary Documentation</h1>
-<p>Usersum now serves curated, role-aware documentation from a manifest-backed index. Use the navigation tree on the left or search from the header to find documents.</p>
+<p>Browse the sections below or use the navigation tree on the left to find end-user guides, workflow references, and technical documentation.</p>
 <form class="wc-usersum-search-form" action="{{ url_for_run('usersum.usersum_search') }}" method="get">
   <label for="usersum-search-query">Search usersum docs</label>
   <div class="wc-usersum-search-row">
@@ -17,16 +34,62 @@
   </div>
 </form>
 
-{% for section in sections %}
-  <h2>{{ section.title }}</h2>
-  <ul>
-    {% for item in section.entries %}
-      <li>
-        <a href="{{ item.url }}">{{ item.title }}</a>
-        <small>({{ item.doc_id }}, min_role={{ item.min_role }})</small>
-      </li>
-    {% endfor %}
-  </ul>
+<style>
+  .wc-usersum-index-section {
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--wc-color-border);
+    border-radius: 0.5rem;
+    background: var(--wc-color-surface);
+  }
+
+  .wc-usersum-index-section h2 {
+    margin-top: 0;
+  }
+
+  .wc-usersum-index-list {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .wc-usersum-index-list .wc-usersum-index-list {
+    margin-top: 0.5rem;
+    margin-left: 1rem;
+    padding-left: 0.85rem;
+    border-left: 1px solid var(--wc-color-border);
+  }
+
+  .wc-usersum-index-list__heading {
+    font-weight: 600;
+    color: var(--wc-color-text);
+  }
+
+  .wc-usersum-index-list__item a {
+    color: var(--wc-color-link);
+    text-decoration: none;
+  }
+
+  .wc-usersum-index-list__item p {
+    margin: 0.2rem 0 0;
+    color: var(--wc-color-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+
+  .wc-usersum-index-list__item a:hover,
+  .wc-usersum-index-list__item a:focus-visible {
+    text-decoration: underline;
+  }
+</style>
+
+{% for section in nav_tree %}
+  <section class="wc-usersum-index-section">
+    <h2>{{ section.title }}</h2>
+    {{ render_index_tree(section.children) }}
+  </section>
 {% else %}
   <p>No visible documentation files found.</p>
 {% endfor %}

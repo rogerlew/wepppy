@@ -149,7 +149,6 @@ def filter_nav_tree_for_visibility(
                 "key": node["key"],
                 "doc_id": doc["doc_id"],
                 "title": doc["title"],
-                "href": doc["route_path"],
                 "is_active": is_active,
             }
             return payload, is_active

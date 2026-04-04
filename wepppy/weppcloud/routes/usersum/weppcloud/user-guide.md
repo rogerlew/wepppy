@@ -60,9 +60,8 @@ The easiest way to use WEPPcloud is to sign in through an existing account with 
 
 - **Google** — sign in with your Google account
 - **GitHub** — sign in with your GitHub account
-- **ORCID** — sign in with your ORCID researcher identifier
 
-When you use OAuth, you authenticate directly with the provider (Google, GitHub, or ORCID). WEPPcloud receives only your name and email address to create or link your account. Your password is never shared with WEPPcloud. You can connect multiple OAuth providers to the same WEPPcloud account and disconnect them at any time from your profile page.
+When you use OAuth, you authenticate directly with the provider (Google or GitHub). WEPPcloud receives only your name and email address to create or link your account. Your password is never shared with WEPPcloud. You can connect multiple OAuth providers to the same WEPPcloud account and disconnect them at any time from your profile page.
 
 ---
 

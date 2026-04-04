@@ -39,7 +39,7 @@ def test_usersum_view_rewrites_repo_markdown_links(usersum_client) -> None:
     assert response.status_code == 200
 
     body = response.get_data(as_text=True)
-    assert 'href="/usersum/src/wepppy/nodb/mods/openet/README.md"' in body
+    assert 'href="/usersum/doc/usersum.source.openet"' in body
     assert 'href="../../../../nodb/mods/openet/README.md"' not in body
 
 
@@ -123,6 +123,8 @@ def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
     body = response.get_data(as_text=True)
     assert "/usersum/doc/usersum.weppcloud.mods_overview" in body
     assert "/usersum/doc/usersum.weppcloud.controls.channel_delineation" not in body
+    assert "Provides the fastest path from a new run to a working project with core controls explained." in body
+    assert "Explains how OpenET-derived evapotranspiration data are incorporated into climate and analysis workflows." in body
 
 
 def test_usersum_links_include_site_prefix_when_configured() -> None:
@@ -149,6 +151,8 @@ def test_usersum_links_include_site_prefix_when_configured() -> None:
     assert response.status_code == 200
     body = response.get_data(as_text=True)
     assert '/weppcloud/usersum/doc/usersum.weppcloud.mods_overview' in body
+    assert 'href="/weppcloud/usersum/doc/usersum.weppcloud.getting_started"' in body
+    assert 'href="/usersum/doc/usersum.weppcloud.getting_started"' not in body
 
 
 def test_usersum_api_search_requires_query(usersum_client) -> None:

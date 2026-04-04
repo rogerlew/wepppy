@@ -225,6 +225,150 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.wepp_model
+  - doc_id: usersum.source.nodb
+    source: local
+    rel_path: wepppy/nodb/README.md
+    title: NoDb Platform Overview
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.nodb
+  - doc_id: usersum.source.ash_transport
+    source: local
+    rel_path: wepppy/nodb/mods/ash_transport/README.md
+    title: Ash Transport
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.ash_transport
+  - doc_id: usersum.source.sbs_map_prep
+    source: local
+    rel_path: wepppy/nodb/mods/baer/README.sbs_map.md
+    title: SBS Map Preparation
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.sbs_map_prep
+  - doc_id: usersum.source.debris_flow
+    source: local
+    rel_path: wepppy/nodb/mods/debris_flow/README.md
+    title: Debris Flow
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.debris_flow
+  - doc_id: usersum.source.disturbed
+    source: local
+    rel_path: wepppy/nodb/mods/disturbed/README.md
+    title: Disturbed Lands Module
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.disturbed
+  - doc_id: usersum.source.features_export
+    source: local
+    rel_path: wepppy/nodb/mods/features_export/README.md
+    title: Features Export
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.features_export
+  - doc_id: usersum.source.observed
+    source: local
+    rel_path: wepppy/nodb/mods/observed/README.md
+    title: Observed Model Fit
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.observed
+  - doc_id: usersum.source.omni
+    source: local
+    rel_path: wepppy/nodb/mods/omni/README.md
+    title: Omni Scenarios and Contrasts
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.omni
+  - doc_id: usersum.source.openet
+    source: local
+    rel_path: wepppy/nodb/mods/openet/README.md
+    title: OpenET
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.openet
+  - doc_id: usersum.source.rap
+    source: local
+    rel_path: wepppy/nodb/mods/rap/README.md
+    title: RAP
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.rap
+  - doc_id: usersum.source.rhem
+    source: local
+    rel_path: wepppy/nodb/mods/rhem/README.md
+    title: RHEM
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.rhem
+  - doc_id: usersum.source.roads
+    source: local
+    rel_path: wepppy/nodb/mods/roads/README.md
+    title: Roads
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.roads
+  - doc_id: usersum.source.rusle
+    source: local
+    rel_path: wepppy/nodb/mods/rusle/README.md
+    title: RUSLE
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.rusle
+  - doc_id: usersum.source.treatments
+    source: local
+    rel_path: wepppy/nodb/mods/treatments/README.md
+    title: Treatments
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.treatments
+  - doc_id: usersum.source.revegetation
+    source: local
+    rel_path: wepppy/nodb/mods/revegetation/README.md
+    title: Revegetation and Cover Transform
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.revegetation
+  - doc_id: usersum.source.soils
+    source: local
+    rel_path: wepppy/wepp/soils/README.md
+    title: Soil Dataset and File Reference
+    min_role: user
+    category: source-guides
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.source.soils
   - doc_id: vendor.weppcloud_wbt.culvert_web_app_hydroenforcement
     source: vendor
     vendor_id: weppcloud-wbt
