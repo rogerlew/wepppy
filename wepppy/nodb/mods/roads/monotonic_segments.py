@@ -62,17 +62,42 @@ def _iter_linestring_parts(geometry_obj: Any) -> Iterable[LineString]:
     raise ValueError(f"Unsupported geometry type for roads monotonic conversion: {geometry_obj.geom_type}")
 
 
+def _first_nonfinite_xy_vertex_index(line: LineString) -> Optional[int]:
+    coords = np.asarray(line.coords, dtype=float)
+    if coords.ndim != 2 or coords.shape[0] == 0:
+        return 0
+
+    invalid_rows = np.flatnonzero(~np.isfinite(coords[:, :2]).all(axis=1))
+    if invalid_rows.size == 0:
+        return None
+    return int(invalid_rows[0])
+
+
 def _sample_profile(
     line_dem: LineString,
     *,
     dem_dataset: rasterio.io.DatasetReader,
     sample_step_m: float,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    if line_dem.length <= EPSILON:
+    invalid_vertex_index = _first_nonfinite_xy_vertex_index(line_dem)
+    if invalid_vertex_index is not None:
+        raise ValueError(
+            "Road segment geometry contains non-finite DEM coordinates before sampling. "
+            "This usually means the road coordinates or declared input_crs are invalid."
+        )
+
+    line_length = float(line_dem.length)
+    if not np.isfinite(line_length):
+        raise ValueError(
+            "Road segment geometry has a non-finite DEM length before sampling. "
+            "This usually means the road coordinates or declared input_crs are invalid."
+        )
+
+    if line_length <= EPSILON:
         raise ValueError("Cannot sample a zero-length road segment.")
 
-    n_steps = max(int(np.ceil(line_dem.length / sample_step_m)), 1)
-    distances = np.linspace(0.0, line_dem.length, n_steps + 1, dtype=float)
+    n_steps = max(int(np.ceil(line_length / sample_step_m)), 1)
+    distances = np.linspace(0.0, line_length, n_steps + 1, dtype=float)
     points = [line_dem.interpolate(float(distance_m)) for distance_m in distances]
     sampled = np.fromiter(
         (
@@ -164,9 +189,27 @@ def _split_line_to_monotonic_segments(
     dem_dataset: rasterio.io.DatasetReader,
     sample_step_m: float,
     tolerance_m: float,
+    input_crs: str,
+    feature_index: int,
+    part_index: int,
 ) -> List[Tuple[LineString, LineString]]:
     line_dem = transform(to_dem.transform, line_src)
-    distances, elevations = _sample_profile(line_dem, dem_dataset=dem_dataset, sample_step_m=sample_step_m)
+    invalid_vertex_index = _first_nonfinite_xy_vertex_index(line_dem)
+    if invalid_vertex_index is not None:
+        raise ValueError(
+            f"Road feature at index {feature_index} part {part_index} transformed to non-finite DEM "
+            f"coordinates at vertex {invalid_vertex_index}. This usually means the uploaded road "
+            f"coordinates do not match roads input_crs={input_crs!r}."
+        )
+    try:
+        distances, elevations = _sample_profile(line_dem, dem_dataset=dem_dataset, sample_step_m=sample_step_m)
+    except ValueError as exc:
+        if str(exc) == "Road segment sampling encountered no valid DEM values.":
+            raise ValueError(
+                f"Road feature at index {feature_index} part {part_index} has no valid DEM samples. "
+                "This usually means that road geometry does not overlap the project's DEM extent."
+            ) from exc
+        raise
     valid_start_distance = float(distances[0])
     valid_end_distance = float(distances[-1])
     if valid_end_distance - valid_start_distance <= EPSILON:
@@ -609,6 +652,8 @@ def _convert_geojson_to_monotonic_segments_internal(
 
     split_feature_count = 0
     segment_counter = 0
+    total_source_parts = 0
+    skipped_no_dem_sample_parts: List[Tuple[int, int]] = []
 
     channel_lookup = _load_channel_lookup(
         dem_path=dem_path,
@@ -642,14 +687,24 @@ def _convert_geojson_to_monotonic_segments_internal(
             emitted_for_feature = 0
 
             for part_index, part in enumerate(source_parts):
-                monotonic_parts = _split_line_to_monotonic_segments(
-                    part,
-                    to_dem=to_dem,
-                    from_dem=from_dem,
-                    dem_dataset=dem_dataset,
-                    sample_step_m=effective_step_m,
-                    tolerance_m=tolerance_m,
-                )
+                total_source_parts += 1
+                try:
+                    monotonic_parts = _split_line_to_monotonic_segments(
+                        part,
+                        to_dem=to_dem,
+                        from_dem=from_dem,
+                        dem_dataset=dem_dataset,
+                        sample_step_m=effective_step_m,
+                        tolerance_m=tolerance_m,
+                        input_crs=input_crs,
+                        feature_index=feature_index,
+                        part_index=part_index,
+                    )
+                except ValueError as exc:
+                    if "has no valid DEM samples" in str(exc):
+                        skipped_no_dem_sample_parts.append((feature_index, part_index))
+                        continue
+                    raise
 
                 for segment_index, (segment_src, segment_dem) in enumerate(monotonic_parts):
                     segment_counter += 1
@@ -818,6 +873,17 @@ def _convert_geojson_to_monotonic_segments_internal(
 
     output_geojson["features"] = output_features
     low_points_geojson["features"] = low_point_features
+
+    if not output_features and skipped_no_dem_sample_parts:
+        examples = ", ".join(
+            f"feature {feature_index} part {part_index}"
+            for feature_index, part_index in skipped_no_dem_sample_parts[:5]
+        )
+        raise ValueError(
+            "Road monotonic conversion found no segments overlapping valid DEM cells "
+            f"(skipped {len(skipped_no_dem_sample_parts)}/{total_source_parts} source parts; "
+            f"examples: {examples}). Check that uploaded roads overlap the project DEM extent."
+        )
 
     summary = MonotonicConversionSummary(
         input_feature_count=len(features),

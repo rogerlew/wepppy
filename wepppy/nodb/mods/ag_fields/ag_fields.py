@@ -10,6 +10,7 @@ drive agricultural dashboards and treatment comparisons.
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import os
 import re
@@ -30,6 +31,7 @@ from wepp_runner.wepp_runner import run_hillslope
 from wepppy.all_your_base.all_your_base import isint
 from wepppy.nodb.base import NoDbBase, nodb_setter
 from wepppy.nodb.core import Climate, Landuse, Watershed
+from wepppy.nodb.geojson_crs_inference import infer_geojson_crs
 from wepppy.topo.peridot.peridot_runner import (
     post_abstract_sub_fields,
     run_peridot_wbt_sub_fields_abstraction,
@@ -295,12 +297,6 @@ class AgFields(NoDbBase):
             duplicates = gdf[gdf[self.field_id_key].duplicated()][self.field_id_key].tolist()
             self.logger.warning(f'Duplicate values found for field_id_key "{self.field_id_key}": {set(duplicates)}')
 
-        if gdf.crs is None:
-            raise ValueError(f'Field boundary GeoJSON "{geojson_path}" lacks a coordinate reference system; one is required to rasterize.')
-
-        original_bounds = gdf.total_bounds
-        has_nonzero_field_ids = bool((gdf[self.field_id_key] != 0).any())
-
         # Open the template DEM to get its metadata (CRS, transform, dimensions)
         with rasterio.open(template_filepath) as src:
             meta = src.meta.copy()
@@ -309,6 +305,31 @@ class AgFields(NoDbBase):
 
             if template_crs is None:
                 raise ValueError(f'DEM "{template_filepath}" lacks a coordinate reference system; unable to rasterize fields.')
+
+            template_bounds_tuple = (
+                float(template_bounds.left),
+                float(template_bounds.bottom),
+                float(template_bounds.right),
+                float(template_bounds.top),
+            )
+            if gdf.crs is None:
+                payload = json.loads(Path(geojson_path).read_text(encoding='utf-8'))
+                crs_inference = infer_geojson_crs(
+                    payload,
+                    explicit_crs=None,
+                    project_crs=str(template_crs),
+                    configured_crs="EPSG:4326",
+                    project_bounds=template_bounds_tuple,
+                )
+                gdf = gdf.set_crs(crs_inference.crs, allow_override=True)
+                self.logger.info(
+                    'Field boundary GeoJSON missing CRS; inferred %s (%s).',
+                    crs_inference.crs,
+                    crs_inference.source,
+                )
+
+            original_bounds = gdf.total_bounds
+            has_nonzero_field_ids = bool((gdf[self.field_id_key] != 0).any())
 
             if gdf.crs != template_crs:
                 self.logger.info(

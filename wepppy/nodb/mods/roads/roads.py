@@ -15,6 +15,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set, 
 
 import numpy as np
 import rasterio
+from rasterio.errors import RasterioIOError
 from pyproj import CRS, Geod, Transformer
 from wepp_runner.wepp_runner import (
     make_hillslope_run,
@@ -24,6 +25,7 @@ from wepp_runner.wepp_runner import (
 )
 
 from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.geojson_crs_inference import GeoBounds, infer_geojson_crs
 from wepppy.nodb.mods.roads.monotonic_segments import convert_geojson_file_to_monotonic_segments
 
 __all__ = ["Roads"]
@@ -624,6 +626,37 @@ class Roads(NoDbBase):
             raise ValueError("Roads GeoJSON `crs.properties.name` must be a non-empty string.")
         return name.strip()
 
+    @staticmethod
+    def _is_projection_resolution_error(exc: Exception) -> bool:
+        message = str(exc).lower()
+        return "non-finite dem coordinates" in message or "non-finite dem length" in message
+
+    @staticmethod
+    def _read_dataset_metadata(path: str, *, label: str) -> Tuple[str, GeoBounds]:
+        with rasterio.open(path) as dataset:
+            dataset_crs = dataset.crs
+            dataset_bounds = dataset.bounds
+        if dataset_crs is None:
+            raise ValueError(f"{label} must have a CRS.")
+        try:
+            CRS.from_user_input(dataset_crs)
+        except Exception as exc:
+            raise ValueError(f"{label} CRS is invalid: {exc}") from exc
+        return (
+            str(dataset_crs),
+            (
+                float(dataset_bounds.left),
+                float(dataset_bounds.bottom),
+                float(dataset_bounds.right),
+                float(dataset_bounds.top),
+            ),
+        )
+
+    @classmethod
+    def _read_dataset_crs(cls, path: str, *, label: str) -> str:
+        dataset_crs, _ = cls._read_dataset_metadata(path, label=label)
+        return dataset_crs
+
     def _require_prepare_state_current(self) -> None:
         status = str(getattr(self, "_status", "idle"))
         if status == "running":
@@ -966,6 +999,29 @@ class Roads(NoDbBase):
             except Exception as exc:
                 raise ValueError(f"Roads GeoJSON CRS is invalid ({source_crs!r}): {exc}") from exc
 
+        project_crs: Optional[str] = None
+        project_bounds: Optional[GeoBounds] = None
+        try:
+            raster_paths = self._resolve_prepare_raster_paths()
+            project_crs, project_bounds = self._read_dataset_metadata(
+                raster_paths["dem_path"],
+                label="Roads prepare DEM",
+            )
+        except (FileNotFoundError, ValueError, RasterioIOError):
+            project_crs = None
+            project_bounds = None
+
+        crs_inference = infer_geojson_crs(
+            payload,
+            explicit_crs=source_crs,
+            project_crs=project_crs,
+            configured_crs=configured_input_crs,
+            project_bounds=project_bounds,
+        )
+        params["input_crs"] = crs_inference.crs
+        effective_input_crs = crs_inference.crs
+        input_crs_source = crs_inference.source
+
         self._ensure_roads_dirs()
         target_path = Path(self.roads_upload_dir) / "roads.uploaded.geojson"
         shutil.copy2(source_path, target_path)
@@ -1000,6 +1056,8 @@ class Roads(NoDbBase):
                 "uploaded_at": now,
                 "configured_input_crs": configured_input_crs,
                 "source_crs": source_crs,
+                "effective_input_crs": effective_input_crs,
+                "input_crs_source": input_crs_source,
                 "discovered_attribute_field_count": int(attribute_catalog.get("field_count", 0)),
                 "attribute_field_map": discovered_map,
                 "status": status,
@@ -1013,6 +1071,8 @@ class Roads(NoDbBase):
             "uploaded_at": now,
             "configured_input_crs": configured_input_crs,
             "source_crs": source_crs,
+            "effective_input_crs": effective_input_crs,
+            "input_crs_source": input_crs_source,
             "discovered_attribute_catalog": attribute_catalog,
             "attribute_field_map": discovered_map,
         }
@@ -1066,9 +1126,9 @@ class Roads(NoDbBase):
                 + list(LEGACY_DESIGN_KEYS)
             )
             warning_limit = DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT
-            input_crs_value = str(params.get("input_crs") or "EPSG:4326")
+            configured_input_crs = str(params.get("input_crs") or "EPSG:4326")
             try:
-                CRS.from_user_input(input_crs_value)
+                CRS.from_user_input(configured_input_crs)
             except Exception as exc:
                 raise ValueError(f"Roads input_crs is invalid: {exc}") from exc
             raster_paths = self._resolve_prepare_raster_paths()
@@ -1081,19 +1141,60 @@ class Roads(NoDbBase):
                     "topaz_id_raster_path": self._path_for_summary(raster_paths["topaz_id_raster_path"]),
                 },
             )
-
-            summary = convert_geojson_file_to_monotonic_segments(
-                input_geojson_path=staged_path,
-                dem_path=raster_paths["dem_path"],
-                output_geojson_path=self.roads_monotonic_geojson_path,
-                low_points_output_geojson_path=self.roads_low_points_geojson_path,
-                input_crs=input_crs_value,
-                sample_step_m=params.get("sample_step_m"),
-                tolerance_m=float(params.get("tolerance_m", 0.5)),
-                channel_raster_path=raster_paths["channel_raster_path"],
-                topaz_id_raster_path=raster_paths["topaz_id_raster_path"],
-                design_property_keys=design_property_keys,
+            staged_payload = json.loads(Path(staged_path).read_text(encoding="utf-8"))
+            source_crs = self._extract_geojson_crs(staged_payload)
+            dem_input_crs: Optional[str] = None
+            dem_bounds: Optional[GeoBounds] = None
+            try:
+                dem_input_crs, dem_bounds = self._read_dataset_metadata(
+                    raster_paths["dem_path"],
+                    label="Roads prepare DEM",
+                )
+            except RasterioIOError:
+                dem_input_crs = None
+                dem_bounds = None
+            crs_inference = infer_geojson_crs(
+                staged_payload,
+                explicit_crs=source_crs,
+                project_crs=dem_input_crs,
+                configured_crs=configured_input_crs,
+                project_bounds=dem_bounds,
             )
+            input_crs_value = crs_inference.crs
+            input_crs_source = crs_inference.source
+            convert_kwargs = {
+                "input_geojson_path": staged_path,
+                "dem_path": raster_paths["dem_path"],
+                "output_geojson_path": self.roads_monotonic_geojson_path,
+                "low_points_output_geojson_path": self.roads_low_points_geojson_path,
+                "input_crs": input_crs_value,
+                "sample_step_m": params.get("sample_step_m"),
+                "tolerance_m": float(params.get("tolerance_m", 0.5)),
+                "channel_raster_path": raster_paths["channel_raster_path"],
+                "topaz_id_raster_path": raster_paths["topaz_id_raster_path"],
+                "design_property_keys": design_property_keys,
+            }
+            try:
+                summary = convert_geojson_file_to_monotonic_segments(**convert_kwargs)
+            except ValueError as exc:
+                if source_crs is not None or not self._is_projection_resolution_error(exc):
+                    raise
+                if dem_input_crs is None or dem_input_crs == input_crs_value:
+                    raise
+                self._append_roads_log(
+                    "prepare",
+                    "retry_with_dem_crs_input_crs",
+                    {
+                        "configured_input_crs": configured_input_crs,
+                        "dem_input_crs": dem_input_crs,
+                        "reason": str(exc),
+                    },
+                )
+                convert_kwargs["input_crs"] = dem_input_crs
+                summary = convert_geojson_file_to_monotonic_segments(**convert_kwargs)
+                input_crs_value = dem_input_crs
+                input_crs_source = "dem_crs_fallback"
+            params["input_crs"] = input_crs_value
 
             segment_payload = json.loads(Path(self.roads_monotonic_geojson_path).read_text(encoding="utf-8"))
             features = segment_payload.get("features", [])
@@ -1157,6 +1258,9 @@ class Roads(NoDbBase):
                 "summary_relpath": os.path.relpath(self.roads_summary_path, self.wd),
                 "roads_log_relpath": os.path.relpath(self.roads_log_path, self.wd),
                 "input_crs": input_crs_value,
+                "configured_input_crs": configured_input_crs,
+                "source_crs": source_crs,
+                "input_crs_source": input_crs_source,
                 "design_property_keys": list(design_property_keys),
                 "attribute_field_map": dict(attribute_field_map),
                 "roads_params_signature": self._params_signature(params),
@@ -1191,6 +1295,7 @@ class Roads(NoDbBase):
                 )
 
             with self.locked():
+                self._roads_params = params
                 self._last_prepare_summary = prepare_summary
                 self._last_run_summary = None
                 self._status = "prepared"

@@ -221,6 +221,92 @@ def test_converter_trims_edge_nodata_samples(tmp_path: Path) -> None:
     assert features[0]["geometry"]["coordinates"][0] == pytest.approx([1.5, 0.5])
 
 
+def test_converter_raises_actionable_error_for_input_crs_mismatch(tmp_path: Path) -> None:
+    dem_path = _write_dem(tmp_path, [0.0, 1.0, 2.0])
+    roads_path = _write_line_geojson(
+        tmp_path,
+        line_coords=[[464000.0, 5024000.0], [464010.0, 5024010.0]],
+        properties={"road_id": "bad-crs"},
+    )
+    output_path = tmp_path / "roads.monotonic.bad-crs.geojson"
+
+    with pytest.raises(ValueError) as excinfo:
+        convert_geojson_file_to_monotonic_segments(
+            input_geojson_path=roads_path,
+            dem_path=dem_path,
+            output_geojson_path=output_path,
+            input_crs="EPSG:4326",
+            sample_step_m=1.0,
+            tolerance_m=0.0,
+        )
+
+    message = str(excinfo.value)
+    assert "Road feature at index 0 part 0 transformed to non-finite DEM coordinates" in message
+    assert "roads input_crs='EPSG:4326'" in message
+
+
+def test_converter_skips_out_of_dem_parts_when_other_parts_are_valid(tmp_path: Path) -> None:
+    dem_path = _write_dem(tmp_path, [0.0, 1.0, 2.0, 3.0, 4.0])
+    roads_path = tmp_path / "roads.geojson"
+    payload = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[20.0, 0.5], [24.0, 0.5]]},
+                "properties": {"road_id": "outside"},
+            },
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[0.5, 0.5], [4.5, 0.5]]},
+                "properties": {"road_id": "inside"},
+            },
+        ],
+    }
+    roads_path.write_text(json.dumps(payload), encoding="utf-8")
+    output_path = tmp_path / "roads.monotonic.geojson"
+
+    summary = convert_geojson_file_to_monotonic_segments(
+        input_geojson_path=roads_path,
+        dem_path=dem_path,
+        output_geojson_path=output_path,
+        input_crs="EPSG:32610",
+        sample_step_m=1.0,
+        tolerance_m=0.0,
+    )
+
+    output = json.loads(output_path.read_text(encoding="utf-8"))
+    features = output["features"]
+    assert summary.input_feature_count == 2
+    assert summary.output_feature_count == 1
+    assert len(features) == 1
+    assert features[0]["properties"]["road_id"] == "inside"
+
+
+def test_converter_raises_clear_error_when_all_parts_outside_dem(tmp_path: Path) -> None:
+    dem_path = _write_dem(tmp_path, [0.0, 1.0, 2.0, 3.0, 4.0])
+    roads_path = _write_line_geojson(
+        tmp_path,
+        line_coords=[[20.0, 0.5], [24.0, 0.5]],
+        properties={"road_id": "outside"},
+    )
+    output_path = tmp_path / "roads.monotonic.geojson"
+
+    with pytest.raises(ValueError) as excinfo:
+        convert_geojson_file_to_monotonic_segments(
+            input_geojson_path=roads_path,
+            dem_path=dem_path,
+            output_geojson_path=output_path,
+            input_crs="EPSG:32610",
+            sample_step_m=1.0,
+            tolerance_m=0.0,
+        )
+
+    message = str(excinfo.value)
+    assert "no segments overlapping valid DEM cells" in message
+    assert "feature 0 part 0" in message
+
+
 def test_converter_writes_low_point_feature_collection(tmp_path: Path) -> None:
     dem_path = _write_dem(tmp_path, [0.0, 1.0, 2.0, 1.0, 0.0])
     roads_path = _write_line_geojson(
