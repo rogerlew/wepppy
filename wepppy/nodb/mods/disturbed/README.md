@@ -2,7 +2,7 @@
 
 > Translates wildfire burn-severity maps into WEPP-ready soil and vegetation inputs so erosion models reflect post-fire conditions.
 
-> **See also:** [AGENTS.md](../../../../AGENTS.md) for coding conventions. [Disturbed Land Soil Lookup](../../../weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md) for the end-user parameter reference. [SBS Map Utilities](../baer/README.sbs_map.md) for raster classification details. [Soil File Specification](../../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md) for WEPP soil format reference.
+> **See also:** [ENDUSER.md](./ENDUSER.md) for the user-facing workflow guide. [AGENTS.md](../../../../AGENTS.md) for coding conventions. [Disturbed Land Soil Lookup](../../../weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md) for the end-user parameter reference. [SBS Map Utilities](../baer/README.sbs_map.md) for raster classification details. [Soil File Specification](../../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md) for WEPP soil format reference.
 
 ## What This Module Does
 

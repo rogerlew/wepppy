@@ -881,57 +881,42 @@
       "audience_tags": [
         "user"
       ],
-      "body_text": "Disturbed Lands Module Translates wildfire burn-severity maps into WEPP-ready soil and vegetation inputs so erosion models reflect post-fire conditions. **See also:** AGENTS.md for coding conventions. Disturbed Land Soil Lookup for the end-user parameter reference. SBS Map Utilities for raster classification details. Soil File Specification for WEPP soil format reference. What This Module Does After a wildfire, hillslope soils and vegetation change dramatically. Burned soils become water-repellent (hydrophobic), ground cover disappears, and erosion rates can increase by orders of magnitude. The Disturbed module automates the translation of a **Soil Burn Severity (SBS) map** into the specific soil and management parameters that the WEPP erosion model needs. The core logic is: 1. **Read the burn severity map** \u2014 a GeoTIFF classifying each pixel as unburned, low, moderate, or high severity 2. **For each hillslope**, determine its dominant burn severity and existing vegetation type (forest, shrub, or grass) 3. **Look up replacement parameters** from a table keyed by (vegetation type + severity, soil texture) \u2014 this produces new erodibility values, hydraulic conductivity, cover fractions, and plant parameters 4. **Write new WEPP input files** (.sol and .man) that reflect the post-fire state The result is a complete set of WEPP inputs that model how a burned watershed will respond to rainfall \u2014 more runoff, more erosion, faster peak flows \u2014 compared to the undisturbed baseline. Who Uses This **BAER specialists** building rapid post-fire erosion assessments **Incident hydrologists** evaluating debris-flow and flooding risk **Researchers** comparing treatment scenarios (mulch, seeding, prescribed fire) against burned baselines **WEPPcloud operators** running standard disturbed-land projects Key Inputs Soil Burn Severity (SBS) Map The primary input. Users either: **Upload a raster** (.tif or .img) \u2014 typically from BARC or RAVG products **Generate a uniform severity** \u2014 applies one severity level across the entire watershed (useful for scenario analysis) The module reprojects the raster to match the watershed DEM, classifies pixels into four severity classes (unburned=130, low=131, moderate=132, high=133), and computes per-hillslope dominant severity. Disturbed Land Soil Lookup Table A CSV (disturbed/disturbed_land_soil_lookup.csv) that maps every combination of disturbed land-use class and soil texture to WEPP parameters. Each project gets its own copy that can be edited through the PowerUser panel. Key parameters in the lookup: Parameter What It Controls Units ----------- ----------------- ------- ki Interrill erodibility (raindrop/sheet-flow detachment) kg\u00b7s/m\u2074 kr Rill erodibility (concentrated-flow detachment) s/m shcrit Critical shear stress to initiate rill erosion N/m\u00b2 avke Effective hydraulic conductivity of surface soil mm/h ksatadj Enable hydrophobicity adjustment (0=no, 1=yes) flag lkeff Lower limit on effective conductivity (hydrophobicity floor) mm/h rdmax Maximum rooting depth m xmxlai Maximum leaf area index \u2014 pmet_kcb Basal crop coefficient for ET calculation \u2014 Configuration Options Parameter Default Description ----------- --------- ------------- sol_ver 7778.0 Soil file version to generate (7778, 9001, 9002, 9003, 9005) burn_shrubs True Apply burn severity to shrub vegetation classes burn_grass False Apply burn severity to grass vegetation classes fire_date None Fire date for downstream reporting h0_max_om None Optional cap on first-horizon organic matter for fire classes How It Works Step 1: Landuse Remapping When a hillslope has forest vegetation and the SBS map shows high severity fire at that location, the module replaces the management file: UnDisturbed/Old_Forest.man \u2192 UnDisturbed/High_Severity_Fire.man This changes canopy cover from 90% to 40%, interrill cover from 100% to 30%, and maximum LAI from 14.0 to 2.0 \u2014 reflecting a severely burned forest floor. The same logic applies to shrub and grass classes when burn_shrubs / burn_grass are enabled: UnDisturbed/Shrub.man \u2192 UnDisturbed/Shrub_High_Severity_Fire.man UnDisturbed/Tall_Grass.man \u2192 UnDisturbed/Grass_High_Severity_Fire.man Step 2: Soil Regeneration For each hillslope, the module: 1. Determines the simplified soil texture (clay loam, loam, sand loam, or silt loam) from clay/sand percentages 2. Looks up replacement erodibility and conductivity parameters from the lookup table 3. Writes a new .sol file with the disturbed parameters, using WeppSoilUtil for version-aware serialization For soil versions 9003+, the lkeff parameter enforces a lower bound on hydraulic conductivity to simulate persistent water repellency. High severity burns typically use lkeff=0.1 mm/h (strong hydrophobicity), while low severity uses lkeff=10 mm/h (minimal effect). Step 3: PMET Parameters Writes pmetpara.txt with basal crop coefficient (pmet_kcb) and readily-available water (pmet_rawp) values from the lookup table, used for ET calculations. Vegetation Parameters by Burn Severity Forest **Initial conditions (cover and roughness)** Disturbed class Management file cancov inrcov rilcov ---------------- ---------------- -------- -------- -------- forest Old_Forest.man 0.90 1.00 1.00 young forest Young_Forest.man 0.80 0.96 0.96 forest low sev fire Low_Severity_Fire.man 0.75 0.85 0.85 forest moderate sev fire Moderate_Severity_Fire.man 0.60 0.60 0.60 forest high sev fire High_Severity_Fire.man 0.40 0.30 0.30 forest prescribed fire Prescribed_Fire.man 0.85 0.85 0.85 **Plant parameters** Disturbed class rdmax xmxlai hmax cuthgt ---------------- ------- -------- ------ -------- forest 2.00 14.0 20.0 20.0 young forest 0.60 12.0 4.0 20.0 forest low sev fire 0.30 4.0 0.30 0.30 forest moderate sev fire 0.30 3.0 0.28 0.30 forest high sev fire 0.30 2.0 0.20 0.30 forest prescribed fire 0.50 10.0 2.0 4.0 Shrub **Initial conditions** Disturbed class Management file cancov inrcov rilcov ---------------- ---------------- -------- -------- -------- shrub Shrub.man 0.70 0.90 0.90 shrub low sev fire Shrub_Low_Severity_Fire.man 0.33 0.80 0.80 shrub moderate sev fire Shrub_Moderate_Severity_Fire.man 0.27 0.55 0.55 shrub high sev fire Shrub_High_Severity_Fire.man 0.05 0.30 0.30 **Plant parameters** Disturbed class rdmax xmxlai hmax cuthgt ---------------- ------- -------- ------ -------- shrub 0.50 10.0 2.0 4.0 shrub low sev fire 0.20 3.0 1.5 4.0 shrub moderate sev fire 0.20 2.0 1.0 4.0 shrub high sev fire 0.20 1.0 0.5 4.0 Grass **Initial conditions** Disturbed class Management file cancov inrcov rilcov ---------------- ---------------- -------- -------- -------- tall grass Tall_Grass.man 0.40 0.60 0.60 short grass Poor grass.man 0.60 0.40 0.40 grass low sev fire Grass_Low_Severity_Fire.man 0.30 0.60 0.60 grass moderate sev fire Grass_Moderate_Severity_Fire.man 0.25 0.35 0.35 grass high sev fire Grass_High_Severity_Fire.man 0.04 0.10 0.10 **Plant parameters** Disturbed class rdmax xmxlai hmax cuthgt ---------------- ------- -------- ------ -------- tall grass 0.60 6.0 0.60 1.0 short grass 0.40 9.0 1.0 4.0 grass low sev fire 0.40 3.0 0.40 1.0 grass moderate sev fire 0.30 2.0 0.30 1.0 grass high sev fire 0.20 1.0 0.20 1.0 Soil Lookup Example (Loam Texture) These rows from disturbed_land_soil_lookup.csv show how soil parameters change with severity for loam soils. Other textures (clay loam, sand loam, silt loam) follow similar patterns with texture-appropriate values. Disturbed class ki kr shcrit avke ksatadj lkeff ---------------- ----- ------ -------- ------ --------- ------- forest low sev fire 1,000,000 8.0e-5 1 20 0 10 forest moderate sev fire 1,000,000 8.0e-5 1 20 0 1 forest high sev fire 1,000,000 1.0e-4 1 15 1 0.1 shrub low sev fire 1,000,000 8.0e-5 1 20 0 10 shrub moderate sev fire 1,000,000 8.0e-5 1 20 0 1 shrub high sev fire 1,000,000 1.0e-4 1 15 1 1 grass low sev fire 1,000,000 6.0e-5 1 30 0 -9999 grass moderate sev fire 1,000,000 6.0e-5 1 30 0 -9999 grass high sev fire 1,000,000 6.0e-5 1 30 0 -9999 Note: lkeff=-9999 means no hydrophobicity adjustment is applied (grass fires typically do not produce significant water repellency). How Parameters Affect WEPP Simulations The disturbed parameterization feeds directly into the WEPP-forest Fortran kernels: **Cover fractions** (cancov, inrcov, rilcov) reduce rainfall interception and hydraulic friction. Lower cover \u2192 more water reaches the soil surface \u2192 more runoff and erosion. **Erodibility** (ki, kr) and **critical shear** (shcrit) control how easily soil detaches. Burned soils are more erodible because organic binding agents are destroyed and soil structure collapses. **Hydraulic conductivity** (avke, lkeff) controls infiltration capacity. The lkeff lower bound simulates hydrophobic layers \u2014 waxy residues from burned organic matter that repel water. When ksatadj=1, WEPP dynamically adjusts conductivity based on soil saturation, allowing recovery as cumulative precipitation breaks down the hydrophobic layer. **Plant parameters** (rdmax, xmxlai, hmax) control vegetation recovery. Burned hillslopes start with reduced root depth, leaf area, and canopy height, which limits transpiration and interception. The parameterization is **directionally correct at the regime level**: burned conditions produce more runoff and sediment than undisturbed across seasonal and annual totals. Individual storm events may occasionally show the opposite due to antecedent moisture state \u2014 a dry burned soil can still infiltrate more than a saturated undisturbed soil. This is expected WEPP hydrology behavior; compare distributions and totals rather than individual events. Static Management Overrides To keep undisturbed vs. disturbed comparisons strictly \"static to static,\" the lookup table sets plant.data.decfct and plant.data.dropfc to 1 for all landuses except agriculture crops. This prevents management files from decaying or dropping plant material during the comparison window, avoiding unintended differences in residue/root mass between templates. Quick Start Developer Notes remap_landuse() and remap_mofe_landuse() map SBS classes 131/132/133 to low/mod/high severity management keys using wepppy/wepp/management/data/disturbed.json. If a management entry defines SoilFile/sol_path, the controller copies that soil directly instead of regenerating from the lookup table. For treatment suffixes (-mulch_15, -thinning, etc.), lookup_disturbed_class() strips the suffix so soils are keyed by burn severity, not treatment type. For MOFE runs, each OFE gets its own disturbed soil file, reassembled into a .mofe.sol via SoilMultipleOfeSynth. build_extended_land_soil_lookup() exports a merged lookup (management + soil parameters); it is not part of the default run workflow. All mutations must occur inside with disturbed.locked(): blocks to respect Redis-backed locking. Validation Results (48-Simulation Matrix) A 48-simulation matrix test (4 soil textures \u00d7 3 vegetation types \u00d7 4 burn severities, 100-year climate) validates the parameterization. Key findings: 1. **Runoff increases with burn severity**: Forest burned conditions show more runoff events than unburned in 86% of matched events (low severity) through 76% (high severity). 2. **Sediment delivery increases dramatically at high severity**: Forest high severity produces 174\u00d7 more total sediment than unburned (5,338 vs 30.6 kg/m). Shrub high severity shows 23\u00d7. At high severity, 100% of matched events show burned > unburned for forest. 3. **Texture matters**: Clay loam shows the highest sediment response; sand loam shows minimal differences due to high infiltration capacity even when burned. 4. **Grass response is muted at low severity**: Tall grass shows high \"equal\" event counts at low severity (66% of events), indicating minimal hydrologic impact from low-severity grass fires. Full results: tests/disturbed/analysis_results.md Test suite: tests/disturbed/test_disturbed_matrix.py Further Reading Disturbed Land Soil Lookup \u2014 end-user parameter reference SBS Map Utilities \u2014 raster classification and color-table contracts SBS Controls Behavior \u2014 UI upload/uniform mode documentation WEPP Soil Files \u2014 soil file format versions and parameter definitions Management File Conventions \u2014 management file structure Soil Migration Utilities \u2014 WeppSoilUtil API",
+      "body_text": "Disturbed Lands In WEPPcloud's (Un)Disturbed interfaces, the Disturbed module is part of the normal landuse and soil-building workflow. It parameterizes hillslopes using disturbed class and burn severity so the interface can represent both unburned and burned conditions with one consistent framework. What This Is For In the (Un)Disturbed interfaces, Disturbed is the layer that translates vegetation type and burn severity into WEPP-ready management and soil parameters. It is used for: unburned conditions, low-, moderate-, and high-severity fire conditions, comparisons across forests, shrublands, and grass-dominated hillslopes, treatment and calibration workflows that need one consistent parameterization system. That means the Disturbed workflow is not only for post-fire maps. It also provides the default landuse and soil parameterization for unburned runs inside these interfaces. In practice, the module does four things: 1. reads a soil burn severity (SBS) raster or a uniform severity choice, 2. combines that severity information with disturbed class information such as forest, shrub, or grass, 3. assigns lookup-based landuse and soil parameters to modeled hillslopes or OFEs, 4. updates the WEPP inputs used by the run. The intended benefit is directional realism across heterogeneous ecosystems. In general, more severely burned parameterizations should produce more runoff and erosion than unburned parameterizations on the same hillslope, while still preserving the effects of vegetation type, soils, topography, and climate. How It Fits in (Un)Disturbed Interfaces If you are using a WEPPcloud (Un)Disturbed interface, you are already using this workflow. Users do not normally add or remove the Disturbed module as a separate step. Your practical choices are usually: which severity input represents the watershed best, whether to upload an SBS raster or use a uniform severity scenario, whether the default parameterization is adequate for the question you are asking, whether advanced calibration changes are needed. For an unburned project, the workflow still runs. In that case, hillslopes are parameterized with unburned disturbed classes rather than bypassing the disturbed system entirely. What You Need to Review The most important inputs to review are: the burn-severity input for the run, the vegetation classes present in the watershed, whether the results need only default directional behavior or more explicit calibration, whether the disturbed lookup table should remain at project defaults. If you are uploading an SBS raster, the safest input is a single-band integer GeoTIFF with a valid projected coordinate system. For preparation details, see SBS Map Utilities. Key Terms and Settings Setting or term What it means Typical values Why it matters --- --- --- --- SBS map A soil burn severity raster used to classify burn effects across the watershed Unburned, low, moderate, high This is the main spatial input that drives post-fire parameter changes Uniform severity A single severity level applied everywhere in the watershed Low, moderate, or high Useful for sensitivity testing or when you do not have a mapped SBS product Disturbed class The vegetation or landuse class used by the disturbed parameterization Forest, shrub, grass, and related classes Disturbed class determines which management and soil adjustments apply before severity is considered Dominant hillslope severity The severity class that occupies the largest area on a modeled hillslope in standard single-OFE workflows One class per hillslope WEPP inputs are usually assigned at the hillslope scale, so sub-hillslope mosaics are simplified unless a workflow preserves multiple OFEs burn_shrubs Whether shrub hillslopes are remapped to burned shrub classes True or False Affects how shrub-dominated hillslopes respond in advanced or platform-level configurations burn_grass Whether grass hillslopes are remapped to burned grass classes True or False Affects how grass-dominated hillslopes respond in advanced or platform-level configurations; the current default is off Disturbed land-soil lookup table The per-project table of disturbed soil and vegetation parameters User-editable CSV Controls erodibility, effective hydraulic conductivity, hydrophobicity, and plant parameters, and also serves as a global calibration harness Hydrophobicity Water repellency after fire, represented through lookup-table soil parameters Usually strongest in high-severity fire classes Stronger hydrophobicity generally means less infiltration and more surface runoff Steps 1. Start the project in a WEPPcloud (Un)Disturbed interface. Expect the interface to use the disturbed parameterization during landuse and soil building, even if the scenario is unburned. 2. Provide the severity input for the scenario. This may be an uploaded SBS raster or a uniform severity choice, depending on the workflow and question. 3. Upload or validate the disturbed map when a raster is being used. Expect WEPPcloud to generate preview products and a normalized 4-class severity map. 4. Review whether the severity input and its coverage match the watershed you intend to model. In standard single-OFE workflows, expect each modeled hillslope to receive one dominant severity class based on the uploaded raster. 5. Let WEPPcloud build landuse and soil inputs through the disturbed parameterization. Expect management and soil inputs to be assigned from disturbed class, severity, and soil texture rather than from a separate unburned-versus-burned module choice. 6. Optional: review or edit the disturbed land-soil lookup table only if you have defensible local calibration information. This is the main global calibration harness for adjusting landuse and soil behavior across disturbed classes and severity classes. 7. Rebuild or rerun the project after the disturbed inputs are set. Expect WEPPcloud to generate lookup-based management and soil inputs for the modeled hillslopes. 8. Compare unburned and burned outputs. Expect the largest differences in cover, infiltration, runoff, and sediment delivery where severity is moderate or high, especially on forested hillslopes. What the Module Changes Output or change What it represents Units or format How to interpret it --- --- --- --- Disturbed management files (.man) Management parameterization derived from disturbed class and severity WEPP management files Burned classes usually reduce cover and recovery-related vegetation settings relative to unburned classes Disturbed soil files (.sol) Soil parameterization derived from disturbed class, severity, and texture WEPP soil files Higher severity classes usually lower infiltration and increase erodibility relative to unburned classes Normalized 4-class SBS map The validated burn-severity map used by the run Raster classes Confirms the classes actually entering the disturbed workflow Hillslope runoff and sediment response The simulated hydrologic and erosion response from the chosen disturbed parameterization Model outputs such as runoff depth, sediment yield, or delivery Compare across unburned and burned scenarios to understand the size and location of disturbance effects Interpreting Results The disturbed parameterization is intended to be directionally correct across mixed vegetation and soil settings. In practical terms, that means: unburned classes should generally behave less aggressively than burned classes, high-severity classes should generally produce more runoff and erosion than low-severity classes on the same hillslope, forest, shrub, and grass classes should still retain distinct response patterns. High-severity fire classes usually produce the largest changes because they combine lower cover with stronger changes to infiltration and erodibility. In practical terms, this often means: more surface runoff, more frequent or larger sediment delivery, higher sensitivity to intense rainfall, larger differences between burned and unburned scenarios. Moderate and low severity classes usually show smaller shifts, but the response still depends on vegetation type, soil texture, slope, and climate. Forest hillslopes often show larger post-fire changes than grass hillslopes because the drop in cover and interception is larger. If results change only a little across severity scenarios, common explanations include: most hillslopes remained unburned, the dominant class on many hillslopes is still unburned or low severity, the watershed is dominated by vegetation or soils with weaker severity contrasts, grass burning was left off in a workflow where that distinction matters, even under burned parameterization, the watershed may still infiltrate enough water to limit large changes in runoff and erosion events, local soils already had low infiltration or high runoff in the baseline case. Interpret outputs as modeled scenarios, not field measurements. The strongest comparisons are usually: burned versus unburned annual totals, hillslope-to-hillslope spatial patterns, frequency of runoff or sediment-producing events, treatment-versus-burned comparisons using the same climate inputs. Single storm events can still behave unexpectedly because antecedent moisture matters. A more severely parameterized hillslope does not guarantee a larger response in every individual event. The lookup table can also be used as a calibration harness. When that table is edited carefully, it lets advanced users change landuse and soil behavior globally across disturbed classes instead of tuning one hillslope at a time. Assumptions and Limits In standard single-OFE workflows, the module assigns one dominant severity class per modeled hillslope. Fine-scale burn mosaics inside a hillslope are simplified. Multi-OFE workflows can preserve more within-hillslope variation, but they still use lookup-based disturbed classes rather than direct measurement of every soil property. The current empirical basis for the default parameterization is strongest in Rocky Mountain and Pacific Northwest coniferous forest settings. Results may be less reasonable in ecosystems with very different vegetation, soils, fuels, or post-fire hydrologic response. Output quality depends on the quality of the SBS map, the watershed delineation, the baseline soils, and the baseline land-cover classification. Fire effects are represented through lookup-table parameter changes, not through direct measurement of water repellency or erosion at each site. Even unburned conditions in these interfaces are represented through the disturbed parameterization. The question is not whether Disturbed is active, but which disturbed classes and severities best represent the scenario. By default, the strongest hydrophobicity effects are typically represented in high-severity fire classes. If the lookup table is edited, that behavior can change. Shrub and grass responses depend on the burn_shrubs and burn_grass settings. If those are off, those hillslopes may remain closer to baseline conditions. This workflow is designed for post-disturbance scenario modeling. It should not replace field validation, local professional judgment, or calibration when decisions are high stakes. Feedback on cases where the default parameterization does not transfer well to other regions or vegetation communities is welcome. Troubleshooting Problem What it usually means What to check --- --- --- The map fails validation The SBS raster is missing projection metadata, uses non-integer values, has too many classes, or has an unrecognized color table Reproject to a valid projected coordinate system, export as a single-band integer GeoTIFF, and review SBS Map Utilities Results do not change much after applying disturbance The watershed may be mostly unburned, the dominant class may still be unburned on many hillslopes, shrub/grass burning may be disabled, or the watershed may still infiltrate enough water to limit large runoff and erosion changes even under burned parameterization Check the normalized SBS map, hillslope coverage, the shrub/grass settings, and whether local soils and slopes are likely to remain infiltration-dominated Results change too much High-severity area may be overrepresented or the lookup table may have been edited aggressively Review the disturbed land-soil lookup table and compare against project defaults A local calibration does not match field observations The default lookup table is generalized and may not represent local soils, fuels, or recovery conditions exactly Use field evidence carefully, document any lookup-table changes, and compare against the baseline run Related Docs Disturbed Lands Module README Disturbed Land Soil Lookup SBS Map Utilities Soil File Specification",
       "breadcrumbs": [
         {
-          "key": "usersum.module_source_guides",
-          "title": "Module Guides (Source Stubs)"
-        },
-        {
-          "key": "usersum.module_source_guides.disturbance",
-          "title": "Disturbance and Recovery"
+          "key": "usersum.modeling_basics",
+          "title": "Modeling Basics and Tuning"
         },
         {
           "key": "usersum.source.disturbed",
-          "title": "Disturbed Lands Module"
+          "title": "(Un)Disturbed Landuse and Soil Parameterization"
         }
       ],
       "category": "source-guides",
-      "content_hash": "c2153a3a1766b33b5ad6ac19f2cb82a81317a62a6a7afd364da244dd274abb88",
+      "content_hash": "6bf3ce2c717eeaddc47eea1ff55fc163a9557e0cd821ef3ed1918f98fb75b798",
       "doc_id": "usersum.source.disturbed",
       "headings": [
-        "Disturbed Lands Module",
-        "What This Module Does",
-        "Who Uses This",
-        "Key Inputs",
-        "Soil Burn Severity (SBS) Map",
-        "Disturbed Land Soil Lookup Table",
-        "Configuration Options",
-        "How It Works",
-        "Step 1: Landuse Remapping",
-        "Step 2: Soil Regeneration",
-        "Step 3: PMET Parameters",
-        "Vegetation Parameters by Burn Severity",
-        "Forest",
-        "Shrub",
-        "Grass",
-        "Soil Lookup Example (Loam Texture)",
-        "How Parameters Affect WEPP Simulations",
-        "Static Management Overrides",
-        "Quick Start",
-        "Developer Notes",
-        "Validation Results (48-Simulation Matrix)",
-        "Further Reading"
+        "Disturbed Lands",
+        "What This Is For",
+        "How It Fits in (Un)Disturbed Interfaces",
+        "What You Need to Review",
+        "Key Terms and Settings",
+        "Steps",
+        "What the Module Changes",
+        "Interpreting Results",
+        "Assumptions and Limits",
+        "Troubleshooting",
+        "Related Docs"
       ],
-      "legacy_route_path": "/usersum/src/wepppy/nodb/mods/disturbed/README.md",
+      "legacy_route_path": "/usersum/src/wepppy/nodb/mods/disturbed/ENDUSER.md",
       "min_role": "user",
       "nav_key": "usersum.source.disturbed",
-      "rel_path": "wepppy/nodb/mods/disturbed/README.md",
+      "rel_path": "wepppy/nodb/mods/disturbed/ENDUSER.md",
       "route_path": "/usersum/doc/usersum.source.disturbed",
       "source": "local",
       "status": "active",
-      "title": "Disturbed Lands Module",
-      "updated_at": "2026-03-31T22:26:05.800022+00:00",
+      "title": "(Un)Disturbed Landuse and Soil Parameterization",
+      "updated_at": "2026-04-04T23:32:14.403105+00:00",
       "vendor_id": null,
       "vendor_route_path": null
     },
@@ -1076,15 +1061,11 @@
       "audience_tags": [
         "user"
       ],
-      "body_text": "Omni Scenario Orchestration Module Compare post-fire treatment strategies and evaluate erosion mitigation effectiveness across multiple \"what-if\" scenarios\u2014without manually rebuilding your entire WEPPcloud project for each analysis. **See also:** AGENTS.md for developer patterns and coding conventions. Overview Omni helps land managers and hydrologists answer critical post-fire planning questions: **\"What if we apply mulch at 1 ton/acre to high-severity burned areas?\"** **\"How does thinning to 65% canopy cover compare to prescribed fire?\"** **\"Which hillslopes contribute the most runoff, and what happens if we treat them?\"** Instead of manually creating separate WEPPcloud projects for each treatment scenario, Omni automates the process: it clones your base project, applies different burn severities or treatments, runs WEPP simulations, and compiles results into side-by-side comparisons. Developer Routing Notes The contrast-build facade/router now keeps responsibilities split by concern: wepppy/nodb/mods/omni/omni_build_router.py: facade routing for build and dry-run entry points, lock-scoped persistence, and facade contract seams. wepppy/nodb/mods/omni/omni_contrast_status_report_service.py: contrast status payload assembly and selection-mode-specific report shaping. Key Capabilities Capability Description ------------ ------------- **Scenario modeling** Create multiple scenarios from a single project: uniform burn severities (low/moderate/high), custom burn severity maps, undisturbed baseline, thinning, mulching, and prescribed fire **Automatic rebuilding** Omni detects when inputs change and only reruns affected scenarios, saving computation time **Contrast analysis** Identify your highest-risk hillslopes (by runoff or soil loss) and evaluate targeted treatments **Comparative reports** Export scenario results to spreadsheet-friendly formats for downstream analysis Who Uses Omni? **BAER Teams**: Rapidly evaluate mulching, seeding, or thinning effectiveness after wildfires **Forest Service Planners**: Compare pre-fire prescribed burns versus post-fire treatment options **Hydrologists**: Analyze how erosion and runoff vary across different burn severity distributions **Researchers**: Run sensitivity analyses for treatment timing, coverage, and spatial configuration Getting Started (Web Interface) Enabling the Omni Module Omni is an optional module that must be added to your project before use: 1. Open your WEPPcloud project 2. Click the **Mods** dropdown menu in the control panel 3. Select **Omni Scenarios** from the list 4. The Omni Scenarios panel will appear in your project controls Creating Scenarios 1. Navigate to the **Omni Scenarios** panel 2. Select scenario types to add: **Uniform Low/Moderate/High**: Apply the same burn severity to all hillslopes **Undisturbed**: Baseline with no fire effects **Thinning**: Pre-fire forest treatment (specify canopy cover and harvest method) **Mulch**: Post-fire ground cover treatment (specify application rate and base scenario) **Prescribed Fire**: Low-intensity burn for mature forests 3. Click **Run Scenarios** to execute all scenarios Understanding Scenario Results After scenarios complete, view results in the **Scenarios Report** (accessible via the report link in the Omni panel or at /report/omni_scenarios/). **Key metrics reported:** Metric Description Units -------- ------------- ------- Soil Loss Material detached from hillslope surface kg/ha/year Sediment Yield Net sediment export after deposition kg/ha/year Runoff Surface water depth mm/year Runoff Volume Total water volume m\u00b3/year Compare scenarios side-by-side to see how treatments affect erosion and runoff at both hillslope and watershed scales. **Where to find output files:** Omni stores all scenario data under the _pups/omni/ directory in your project: **Aggregated output files:** File Contents ------ ---------- scenarios.out.parquet Watershed-level metrics for all scenarios (outlet discharge, total soil loss) scenarios.hillslope_summaries.parquet Per-hillslope metrics for all scenarios contrasts.out.parquet Control vs. treatment comparisons with computed differences These Parquet files can be opened in Python (pandas), R, or tools like DuckDB for custom analysis. CSV exports are also available through the web reports. Running Contrast Analyses Contrast analysis helps you evaluate targeted treatments on your highest-impact hillslopes: 1. Navigate to the **Omni Contrasts** panel 2. Select a **control scenario** (e.g., uniform high severity\u2014your \"worst case\") 3. Select a **contrast scenario** (e.g., mulch treatment\u2014your \"with treatment\" case) 4. Choose how to select hillslopes: **Cumulative contribution**: Automatically select hillslopes that contribute the most runoff or soil loss (up to a threshold you specify) **User-defined areas**: Upload a polygon file (GeoJSON) defining treatment zones **User-defined hillslope groups**: Manually specify hillslope IDs **Stream-order grouping**: Group hillslopes by drainage network structure (WhiteboxTools watersheds only) 5. Click **Run Contrasts** to simulate treating only the selected hillslopes The contrast report shows how watershed-level erosion and runoff change when you treat specific areas versus leaving them untreated. Scenario Types Uniform Burn Severity Scenarios Apply the same soil burn severity (SBS) class to all hillslopes: Scenario Description ---------- ------------- uniform_low All hillslopes at low severity (litter/duff mostly intact) uniform_moderate All hillslopes at moderate severity (litter consumed, possible water repellency) uniform_high All hillslopes at high severity (organic matter consumed, strong water repellency) undisturbed No fire effects\u2014baseline vegetation and soils Custom Burn Severity Map Upload your own soil burn severity raster (GeoTIFF or IMG format) to capture spatial variability from BAER field mapping. Treatment Scenarios Thinning Pre-fire mechanical treatment that reduces canopy density and fuel loads. Configure: **Target canopy cover**: 40% (aggressive) or 65% (moderate) **Ground cover retention**: Depends on harvest equipment 93% = Cable yarding (minimal ground disturbance) 90% = Forwarder 85% = Skidder 75% = Ground-based (maximum disturbance) *Example*: thinning_65_90 means reducing canopy to 65% cover using a forwarder, retaining 90% ground cover. Mulch Post-fire straw or wood chip application to increase ground cover and reduce erosion. Options: Treatment Application Rate Ground Cover Effect ----------- ------------------ --------------------- mulch_15 0.5 tons/acre Light\u2014modest cover increase mulch_30 1.0 tons/acre Standard BAER recommendation mulch_60 2.0 tons/acre Heavy\u2014maximum cover increase Mulch scenarios require a **base scenario** (typically a burn severity scenario) because mulch is applied *after* fire. Prescribed Fire Low-intensity burns in mature forests that reduce ladder fuels and understory without triggering high-severity soil heating. Omni applies prescribed fire management only to forest vegetation types. Prescribed fire scenarios require an **undisturbed** clone context (no SBS map). In Omni, this is enforced by running prescribed fire from the undisturbed scenario when needed. Scenario Dependency Behavior Mulch scenarios depend on a selected base scenario (uniform_low, uniform_moderate, uniform_high, or sbs_map) and run in a later pass after base scenarios are processed. Thinning and prescribed_fire run in an undisturbed context. If the project base is sbs_map, include/run an undisturbed Omni scenario so those treatments can clone from it. Scenario list order does not control execution order; Omni resolves dependencies internally. Contrast Analysis Modes Cumulative Contribution Automatically selects hillslopes that contribute the most to your chosen metric (runoff or soil loss): 1. Hillslopes are ranked by their contribution to watershed totals 2. Selection continues until you reach your specified threshold (e.g., \"hillslopes contributing 75% of total runoff\") 3. Each selected hillslope becomes a separate contrast run This mode answers: *\"What happens if I treat the hillslopes responsible for most of my erosion problem?\"* User-Defined Areas (GeoJSON) Upload a polygon file defining treatment zones: Each polygon becomes a treatment area Hillslopes are included if at least 50% of their area falls within a polygon You can define multiple polygons with different names (via a feature property) Overlapping polygons are allowed This mode answers: *\"What happens if I treat these specific areas I've identified?\"* User-Defined Hillslope Groups Manually specify hillslope IDs in a text box: Enter one group per line Separate IDs with commas or spaces Each line becomes a contrast run This mode answers: *\"What happens if I treat these exact hillslopes?\"* Stream-Order Grouping (WhiteboxTools only) Groups hillslopes based on drainage network structure: Specify how many stream orders to prune (simplify the network) Hillslopes draining to the same channel segment become a group Useful for targeting treatments by subcatchment This mode answers: *\"What happens if I treat entire subcatchments?\"* Understanding Results Scenario Reports The scenarios report (/report/omni_scenarios/) shows WEPP outputs for each scenario: **Watershed totals**: Sediment yield and runoff at the outlet **Hillslope summaries**: Per-hillslope soil loss, runoff, and contributing area **Downloadable data**: Export to CSV or Parquet for analysis in Excel, R, or Python Contrast Reports The contrasts report (/report/omni_contrasts/) compares control versus treated outcomes: Column Description -------- ------------- Contrast ID Identifier for the contrast run Control metrics Erosion/runoff without treatment Treated metrics Erosion/runoff with treatment applied Difference Change from control (negative = reduction) Interpreting Treatment Effectiveness When comparing scenarios: **Soil loss reduction**: Lower values after treatment indicate effective erosion control **Runoff reduction**: Lower values suggest improved infiltration or water retention **Cost-benefit**: Compare treatment costs (from BAER catalogs) against predicted erosion reduction *Example interpretation*: If uniform high severity predicts 15,000 kg/ha/year soil loss and mulch treatment reduces it to 8,000 kg/ha/year, you've achieved a 47% reduction in hillslope erosion. Background: Wildfire Erosion Science Why Post-Fire Erosion Matters Wildfires dramatically increase erosion risk by: Consuming protective ground cover (litter, duff, vegetation) Creating water-repellent soil layers that prevent infiltration Altering soil structure and reducing aggregate stability First-year post-fire erosion rates can be 10\u2013100\u00d7 higher than pre-fire conditions, threatening water quality, infrastructure, and aquatic habitat. Soil Burn Severity (SBS) Classification BAER teams classify burn severity using field indicators: Class Field Indicators Erosion Risk ------- ------------------ -------------- **Unburned/Low** Litter and duff mostly intact, minimal water repellency Low **Moderate** Litter consumed, some charred duff, water-repellent layer possible Moderate **High** All organic matter consumed, altered soil structure, strong water repellency High Treatment Effectiveness Post-fire treatments reduce erosion by restoring ground cover: **Mulching**: Straw or wood chips protect soil from raindrop impact and slow overland flow. ERMiT guidelines recommend 1 ton/acre (60% cover) as standard. **Seeding**: Establishes vegetation for long-term cover (slower than mulch but self-sustaining) **Contour-felled logs**: Intercept runoff and trap sediment on steep slopes Pre-fire treatments reduce fire severity: **Thinning**: Removes ladder fuels, reduces crown fire risk **Prescribed fire**: Consumes surface fuels under controlled conditions Troubleshooting Scenarios Won't Run **Check**: Does your base project have valid climate, watershed, and soils data? Omni clones your project, so missing inputs will cause failures. **Check**: Look at the scenario status panel for error messages. Common issues include missing soil files or invalid management assignments. Contrast Results Missing Hillslopes **Check**: Your cumulative threshold may be too low. Try increasing the threshold percentage or hillslope limit. **Check**: For user-defined areas, ensure your polygons overlap with hillslopes in your watershed. Results Don't Change Between Scenarios **Check**: Treatments only apply to appropriate vegetation types. Mulch only affects fire-disturbed areas; thinning only affects forests. **Check**: Your scenarios may have identical inputs. Review scenario parameters to ensure they differ. --- Developer Notes *This section contains technical implementation details for developers extending or maintaining the Omni module.* Architecture Omni follows the NoDb singleton pattern. The controller persists state in omni.nodb and uses Redis DB 13 for 72-hour caching. Contrast mappings are stored as ASCII sidecar TSVs under omni/contrasts/ to avoid bloating the NoDb payload. All scenario workspaces live under /_pups/omni/scenarios/ and are themselves valid WEPPcloud projects (symlinked climate/watershed directories; copied disturbed/landuse/soils). Components Scenario Execution Flow 1. **Definition**: User selects scenarios via UI or programmatically (omni.parse_scenarios([...])) 2. **Cloning**: _omni_clone() creates _pups/omni/scenarios/ , symlinks shared directory inputs, copies mutable state 3. **Treatment Application**: For thinning/mulching/prescribed fire, Treatments.getInstance(scenario_wd) modifies landuse/soils 4. **WEPP Execution**: Scenario workspace calls Wepp.prep_hillslopes(), Wepp.run_hillslopes(), Wepp.run_watershed() 5. **Reporting**: Omni.scenarios_report() concatenates per-scenario output files into a unified DataFrame 6. **Dependency Updates**: SHA1 hashes of dependency outputs are stored; subsequent runs skip unchanged scenarios Contrast Execution Flow 1. **Definition**: User selects control/contrast scenarios, objective parameter, and selection mode 2. **Hillslope Selection**: build_contrasts() reads control scenario outputs, sorts hillslopes by objective parameter, selects based on mode 3. **Selection Sidecar**: Each contrast mapping is written to omni/contrasts/contrast_ .tsv 4. **Clone Assembly**: Creates contrast workspace, merges hillslope outputs from control + contrast scenarios 5. **WEPP Execution**: Runs watershed simulation with mixed hillslope inputs 6. **Reporting**: contrasts_report() computes deltas between control and contrast metrics Contrast Selection Mode Details Cumulative Objective Parameter Sort control-scenario hillslopes by objective parameter Select until cumulative fraction threshold reached Maximum 100 hillslopes (backend enforced) User-Defined Areas (GeoJSON) Users upload GeoJSON polygons with feature property for naming Hillslopes included if polygon covers \u226550% of area Requires contrast_pairs list for N pairs \u00d7 M polygons expansion Contrast IDs stable by signature control contrast area_label User-Defined Hillslope Groups Users paste Topaz IDs in textbox (one group per line) Parsing tolerates commas, whitespace, semicolons IDs validated against watershed translator Requires contrast_pairs for N pairs \u00d7 M groups expansion Stream-Order Pruning (WhiteboxTools Only) Uses _prune_stream_order() to simplify channel network Runs hillslopes_topaz on pruned network for subcatchment grouping Group IDs scaled (* 10) after intersection Intermediate files cached in dem/wbt/ Dependency Tracking Omni uses dependency metadata to detect when scenarios need rebuilding: **Scenario signature**: json.dumps(scenario_def, sort_keys=True) (stable serialized scenario definition) **Dependency target**: mulch depends on its declared base_scenario; all other scenarios depend on the Omni base scenario **Dependency path**: wepp/output/interchange/loss_pw0.out.parquet for the dependency target **Dependency hash**: SHA1 of that dependency path **Match logic**: RQ concurrency path: skip when signature and dependency hash match prior scenario_dependency_tree In-process path: same hash/signature check plus year-set parity (loss_pw0.all_years.class_data.parquet) with the base scenario Python API Usage Contrast API Usage NoDb Persistence (omni.nodb) Attribute Type Description ----------- ------ ------------- _scenarios List[Dict] Scenario definitions (type, parameters) _contrast_names List[Optional[str]] Contrast identifiers _control_scenario OmniScenario Control scenario for contrast analysis _contrast_scenario OmniScenario Treatment scenario for contrast analysis _contrast_object_param str Objective parameter (e.g., Runoff_mm) _scenario_dependency_tree Dict[str, Dict] SHA1 hashes for change detection _scenario_run_state List[Dict] Execution audit log RQ Task Orchestration run_omni_scenarios_rq(runid): Dispatches scenario jobs, compiles summaries run_omni_scenario_rq(runid, scenario): Executes single scenario Runtime-path maintenance locks protect mutable landuse/soils roots with path-scoped identity (effective_root_path_compat) and a 300-second wait window Dependency/contrast tree persistence retries NoDb lock acquisition (5 attempts, 1-second backoff) Process pool fallback for CPU-heavy operations Testing Extending Scenario Types To add a new scenario type (e.g., seeding): 1. Add enum value to OmniScenario in omni.py 2. Update OmniScenario.parse() and __str__() 3. Add case to run_omni_scenario() with treatment logic 4. Update SCENARIO_CATALOG in omni.js 5. Add entry to _scenario_name_from_scenario_definition() 6. Update this README Disk and Memory Considerations Each scenario duplicates ~10\u201350 MB of mutable state WEPP outputs add ~5\u2013200 MB per scenario 8 scenarios on a 1000-hillslope watershed: 2\u20135 GB total Redis caches NoDb payloads with 72-hour TTL Logging Per-scenario: /_logs/wepp.log, landuse.log Parent: /_logs/omni.log Set WEPPPY_LOG_LEVEL=DEBUG for detailed diagnostics --- Further Reading Related Modules Treatments Module \u2014 Mulching, thinning, prescribed fire implementation Disturbed Module \u2014 Burn severity mapping NoDb README \u2014 Core controller architecture External References BAER Treatment Catalog \u2014 Field guides for treatment implementation ERMiT User Manual (RMRS-GTR-188) \u2014 Treatment effectiveness research WEPP Model Documentation \u2014 Erosion model theory --- Credits **Primary Contributors**: Roger Lew (University of Idaho), William Elliot (USDA Forest Service), Pete Robichaud (USDA Forest Service) **Funding**: USDA Forest Service Rocky Mountain Research Station, National Fire Plan **License**: BSD-3 Clause (see license.txt in repository root) --- **Last Updated**: 2026-01-30 **Maintainer**: AI Coding Agents (per AGENTS.md authorship policy)",
+      "body_text": "Omni Scenarios and Contrasts Omni has two related but different features: **Omni Scenarios** create whole-run alternatives from one project so you can compare burned, unburned, and treatment cases side by side. **Omni Contrasts** apply a treatment scenario only to selected hillslopes or areas so you can test targeted treatment strategies. Most users should start with **Omni Scenarios** and stop there unless they specifically need targeted treatment placement. Scenarios are the easier and more common workflow. Contrasts are more advanced and are best used after you already understand the scenario results. What This Is For Use Omni when you want to answer questions such as: How different would this watershed look if it were unburned instead of burned? How do low-, moderate-, and high-severity scenarios compare? How much could mulch, thinning, or prescribed fire reduce runoff or erosion? What happens if I treat only the hillslopes contributing the most runoff or soil loss? Omni works by cloning your project into organized child runs under _pups/omni/, rebuilding the needed inputs, running WEPP, and collecting the results into comparison-ready outputs. When to Use It Use **Omni Scenarios** when you need full-project alternatives such as: an undisturbed companion run for a burned project, uniform low-, moderate-, or high-severity alternatives, treatment scenarios such as mulch, thinning, or prescribed fire, scenario comparisons in reports, GL-Dashboard, and Storm Event Analyzer. Use **Omni Contrasts** when you need a more specific question answered, such as: what happens if I treat only the hillslopes driving most of the runoff problem, what happens if I treat a mapped polygon area, what happens if I treat selected hillslope groups or subcatchments. For a burned-versus-unburned comparison, prefer adding an Omni undisturbed scenario instead of creating a separate forked run. That path is faster in wall time and keeps the comparison available directly in scenario-aware tools such as GL-Dashboard and Storm Event Analyzer. Before You Begin Before using Omni, make sure you have: a project that already runs successfully, a clear question you want to compare, the treatment types or severity alternatives you want to test, enough confidence in the base project inputs that comparisons are worth interpreting. If you plan to use **Contrasts**, build and review the **Scenarios** first. Contrasts depend on having meaningful control and treatment scenarios to compare. Key Terms and Settings Setting or term What it means Typical values Why it matters --- --- --- --- Scenario A full cloned run with altered burn severity or treatment settings undisturbed, uniform_low, uniform_high, mulch, thinning, prescribed_fire Scenarios are the main way to compare whole-project alternatives Contrast A targeted treatment application to selected hillslopes or areas One contrast run per selected area or group Contrasts answer where a treatment would help most Control scenario The baseline scenario used for comparison in a contrast build Often uniform_high or another burned case Defines the untreated condition Contrast scenario The treatment scenario applied to the selected hillslopes Often mulch, thinning, or undisturbed Defines the treated condition undisturbed scenario An Omni scenario with no fire effects Scenario key undisturbed The recommended companion run for burned-versus-unburned comparison Selection mode How Contrast chooses hillslopes or areas Cumulative contribution, user-defined areas, user-defined hillslope groups, stream-order grouping Controls where the treatment is applied Base scenario The scenario a dependent scenario builds from Often undisturbed or a burn scenario Important for treatment logic such as mulch or prescribed fire Omni Scenarios What Scenarios Do Omni Scenarios create complete alternative runs from one project. Each scenario becomes its own child run under _pups/omni/scenarios/, with its own WEPP inputs and outputs. This is the right tool when your question is about comparing whole-run alternatives. Recommended Scenario Workflow 1. Add the **Omni Scenarios** mod to the project. Expect a new Omni control panel to appear. 2. Start with the scenario set that answers your main question. For burned-versus-unburned comparison, start by adding undisturbed. 3. Add any additional severity or treatment scenarios you need. Common choices are uniform_low, uniform_moderate, uniform_high, mulch, thinning, and prescribed_fire. 4. Run the scenarios. Expect Omni to clone the project, rebuild the needed inputs, run WEPP, and store each scenario under _pups/omni/scenarios/. 5. Compare results in the scenario report, GL-Dashboard, or Storm Event Analyzer. Expect those tools to treat Omni scenarios as comparable alternatives rather than unrelated runs. Scenario Types Scenario type What it means When to use it --- --- --- undisturbed No fire effects Best first comparison for a burned project uniform_low Low severity everywhere Sensitivity testing or planning-level comparison uniform_moderate Moderate severity everywhere Sensitivity testing or planning-level comparison uniform_high High severity everywhere Worst-case style comparison Custom SBS map Spatially variable burn severity from a raster When you have a mapped severity product mulch Post-fire ground cover treatment When you want to test erosion reduction after fire thinning Pre-fire canopy and fuel reduction treatment When you want to test a forest treatment alternative prescribed_fire Low-intensity fire treatment in forest context When you want to compare planned low-intensity burning against wildfire outcomes Important Scenario Notes For many users, the most useful first step is adding an undisturbed scenario to a burned project. mulch scenarios depend on a burned base scenario because mulch is applied after fire. thinning and prescribed_fire run in an undisturbed context. If your project base is burned, include an Omni undisturbed scenario so those scenarios have the correct clone context. Scenario list order is not the same as execution order. Omni resolves dependencies internally. Omni Contrasts What Contrasts Do Omni Contrasts are for targeted treatment placement. Instead of treating the whole project, Contrasts apply the treatment scenario only to selected hillslopes or areas and then compare the treated result against a control scenario. This is the right tool when your question is not \"Which whole scenario is better?\" but rather \"Where should I apply the treatment?\" Recommended Contrast Workflow 1. Build and review your scenarios first. Expect to choose a control scenario and a treatment scenario from that scenario set. 2. Pick the control and contrast scenarios. A common pattern is a burned control scenario plus a treatment scenario such as mulch. 3. Choose a selection mode. This determines which hillslopes will receive the treatment in each contrast run. 4. Run the contrasts. Expect Omni to create targeted child runs under _pups/omni/contrasts/. 5. Review the contrast report. Expect watershed-level and targeted-area comparisons between the untreated control and the treated result. Contrast Selection Modes Selection mode What it does Best use --- --- --- Cumulative contribution Selects hillslopes contributing the most runoff or soil loss up to a threshold Prioritizing treatment on the most influential hillslopes User-defined areas Uses uploaded polygons to define treatment zones Testing mapped treatment areas User-defined hillslope groups Uses hillslope IDs you provide Testing known groups of hillslopes Stream-order grouping Groups hillslopes by drainage structure Testing subcatchment-scale treatment ideas User-Defined Areas If you use polygon areas, hillslopes are included when at least half of the hillslope area falls inside a polygon. This makes the result easier to interpret, but it also means polygon boundaries do not create exact partial-hillslope treatment fractions. Interpreting Results Scenario Results Scenario outputs are most useful for: burned versus unburned comparison, comparing whole-treatment alternatives, understanding how runoff and sediment respond at hillslope and watershed scale, checking scenario differences directly in GL-Dashboard and Storm Event Analyzer. Useful scenario outputs include: watershed totals, hillslope summaries, scenario report tables, scenarios.out.parquet, scenarios.hillslope_summaries.parquet. Contrast Results Contrast outputs are most useful for: estimating the benefit of treating selected hillslopes, identifying whether a small treated area can reduce a large part of the problem, comparing targeted treatment placement strategies. Useful contrast outputs include: contrast report tables, per-contrast run outputs under _pups/omni/contrasts/, contrasts.out.parquet. When interpreting contrasts, remember that the result reflects both: the quality of the underlying control and treatment scenarios, the hillslope-selection method you chose. Assumptions and Limits Omni comparisons are only as good as the base project inputs and the scenario definitions you start from. Scenarios compare whole-run alternatives. Contrasts compare targeted treatment placement and should not be confused with whole-watershed treatment scenarios. For a burned-versus-unburned comparison, Omni undisturbed is usually a better workflow than creating a separate forked run, because it keeps the runs inside one comparison system. Contrasts are more advanced and easier to misinterpret if the control scenario, treatment scenario, or selection mode is poorly chosen. User-defined area contrasts use hillslope inclusion rules, not exact partial-area treatment fractions. Scenario and contrast outputs are modeled estimates, not field measurements. They still require professional judgment. Troubleshooting Problem What it usually means What to check --- --- --- Scenario results are hard to compare Too many scenarios were built at once or the base comparison is unclear Start with undisturbed plus one or two key alternatives before expanding A treatment scenario does not behave as expected The scenario may depend on the wrong base context Check whether mulch is tied to a burned base and whether thinning or prescribed fire need undisturbed context Contrast results are confusing The scenario pair or selection mode may not match the question you are asking Recheck the control scenario, contrast scenario, and selection mode Targeted treatment seems to have little effect The selected hillslopes may not drive much runoff or sediment, or the treatment may be too limited spatially Review the selection method and compare against scenario-wide treatment results Related Docs Omni Module README Getting Started WEPP Model GL Dashboard Notes Storm Event Analyzer Notes",
       "breadcrumbs": [
         {
-          "key": "usersum.module_source_guides",
-          "title": "Module Guides (Source Stubs)"
-        },
-        {
-          "key": "usersum.module_source_guides.scenarios",
-          "title": "Scenarios and Analysis"
+          "key": "usersum.modeling_basics",
+          "title": "Modeling Basics and Tuning"
         },
         {
           "key": "usersum.source.omni",
@@ -1092,87 +1073,40 @@
         }
       ],
       "category": "source-guides",
-      "content_hash": "96d9908016021f542baad3f33e2b90c337b64b0367fcad1aec8bb0766a4de76d",
+      "content_hash": "ca6c38c5cf6990525aa9e81c477ae8c4df45bbab53a074eff4af40ff9269f614",
       "doc_id": "usersum.source.omni",
       "headings": [
-        "Omni Scenario Orchestration Module",
-        "Overview",
-        "Developer Routing Notes",
-        "Key Capabilities",
-        "Who Uses Omni?",
-        "Getting Started (Web Interface)",
-        "Enabling the Omni Module",
-        "Creating Scenarios",
-        "Understanding Scenario Results",
-        "Running Contrast Analyses",
+        "Omni Scenarios and Contrasts",
+        "What This Is For",
+        "When to Use It",
+        "Before You Begin",
+        "Key Terms and Settings",
+        "Omni Scenarios",
+        "What Scenarios Do",
+        "Recommended Scenario Workflow",
         "Scenario Types",
-        "Uniform Burn Severity Scenarios",
-        "Custom Burn Severity Map",
-        "Treatment Scenarios",
-        "Thinning",
-        "Mulch",
-        "Prescribed Fire",
-        "Scenario Dependency Behavior",
-        "Contrast Analysis Modes",
-        "Cumulative Contribution",
-        "User-Defined Areas (GeoJSON)",
-        "User-Defined Hillslope Groups",
-        "Stream-Order Grouping (WhiteboxTools only)",
-        "Understanding Results",
-        "Scenario Reports",
-        "Contrast Reports",
-        "Interpreting Treatment Effectiveness",
-        "Background: Wildfire Erosion Science",
-        "Why Post-Fire Erosion Matters",
-        "Soil Burn Severity (SBS) Classification",
-        "Treatment Effectiveness",
+        "Important Scenario Notes",
+        "Omni Contrasts",
+        "What Contrasts Do",
+        "Recommended Contrast Workflow",
+        "Contrast Selection Modes",
+        "User-Defined Areas",
+        "Interpreting Results",
+        "Scenario Results",
+        "Contrast Results",
+        "Assumptions and Limits",
         "Troubleshooting",
-        "Scenarios Won't Run",
-        "Contrast Results Missing Hillslopes",
-        "Results Don't Change Between Scenarios",
-        "Developer Notes",
-        "Architecture",
-        "Components",
-        "Scenario Execution Flow",
-        "Contrast Execution Flow",
-        "Contrast Selection Mode Details",
-        "Cumulative Objective Parameter",
-        "User-Defined Areas (GeoJSON)",
-        "User-Defined Hillslope Groups",
-        "Stream-Order Pruning (WhiteboxTools Only)",
-        "Dependency Tracking",
-        "Python API Usage",
-        "Initialize Omni controller",
-        "Define scenarios",
-        "Run scenarios",
-        "Generate report",
-        "Contrast API Usage",
-        "Define contrast analysis",
-        "Execute contrasts",
-        "Generate report",
-        "NoDb Persistence (`omni.nodb`)",
-        "RQ Task Orchestration",
-        "Testing",
-        "Unit tests",
-        "Integration tests",
-        "Frontend tests",
-        "Extending Scenario Types",
-        "Disk and Memory Considerations",
-        "Logging",
-        "Further Reading",
-        "Related Modules",
-        "External References",
-        "Credits"
+        "Related Docs"
       ],
-      "legacy_route_path": "/usersum/src/wepppy/nodb/mods/omni/README.md",
+      "legacy_route_path": "/usersum/src/wepppy/nodb/mods/omni/ENDUSER.md",
       "min_role": "user",
       "nav_key": "usersum.source.omni",
-      "rel_path": "wepppy/nodb/mods/omni/README.md",
+      "rel_path": "wepppy/nodb/mods/omni/ENDUSER.md",
       "route_path": "/usersum/doc/usersum.source.omni",
       "source": "local",
       "status": "active",
       "title": "Omni Scenarios and Contrasts",
-      "updated_at": "2026-03-10T08:16:21.456965+00:00",
+      "updated_at": "2026-04-04T23:41:45.640249+00:00",
       "vendor_id": null,
       "vendor_route_path": null
     },
@@ -1811,6 +1745,10 @@
           "title": "Modeling Basics and Tuning"
         },
         {
+          "key": "usersum.modeling_basics.wepp_calibration",
+          "title": "WEPP Calibration"
+        },
+        {
           "key": "usersum.weppcloud.bootstrap",
           "title": "Bootstrap"
         }
@@ -2024,8 +1962,12 @@
       "body_text": "Disturbed Land Soil Lookup Table (PowerUser Panel \u2192 Modify Disturbed Parameters) The disturbed land soil table in WEPPcloud contains parameters that define soil properties for various land use categories and soil textures. These parameters are essential for modeling erosion and hydrology in disturbed lands using the WEPP (Water Erosion Prediction Project) model. The table includes data for combinations of land use (e.g., agriculture crops, forest, bare) and soil texture (clay loam, loam, sand loam, silt loam). Each project has its own disturbed land-soil-lookup table that can be modified through the PowerUser Panel Table of Parameters Parameter Description Units --------------- -------------------------------------------------------------------------- -------------- luse Land use category (disturbed class from the land use map) - stext Soil texture (clay loam, loam, sand loam, silt loam) - ki Interrill erodibility kg\u00b7s/m\u2074 kr Rill erodibility s/m shcrit Critical shear stress (\u03c4c) N/m\u00b2 or Pa avke Effective hydraulic conductivity mm/h ksflag Flag to use internal hydraulic conductivity adjustments (0: no, 1: yes) {0,1} ksatadj Adjustment factor for saturated hydraulic conductivity - ksatfac ignore - will be removed - ksatrec ignore - will be removed - pmet_kcb Basal crop coefficient (Kcb) - pmet_rawp Parameter for readily available water - rdmax Maximum root depth m xmxlai Maximum leaf area index frac keffflag Flag for lower limit of effective conductivity (lkeff; 0: no, 1: yes) {0,1} lkeff Lower limit of effective conductivity (-9999 indicates no adjustment) mm/h Additional Notes and Other Parameters of Interest Effective Hydraulic Conductivity (avke) Determined from field data. Do not change unless you have a good reason. Interrill Erodibility (ki) Interrill areas are the sheet flow zones between small channels (rills) on a hillslope. Interrill erodibility measures the soil's susceptibility to detachment by raindrop impact and shallow sheet flow. It is influenced by: Soil texture Surface cover (e.g., vegetation, mulch) Soil structure and cohesion **Units**: kg\u00b7s/m\u2074 **Note**: Do not change. Rill Erodibility (kr) Rills are small channels formed by concentrated flow on hillslopes. Rill erodibility is the soil\u2019s susceptibility to detachment by concentrated flow (not raindrop impact). Rill erosion is generally more intense on steeper and/or longer slopes and can cause greater sediment transport than interrill erosion. **Units**: s/m **Note**: Do not change. Critical Shear Stress (\u03c4c) This is the minimum hydraulic shear stress required to initiate detachment of soil particles in rills. Below this threshold, the flow is not energetic enough to detach soil. It acts as a resistance parameter in rill erosion models. **Units**: N/m\u00b2 or Pa **Note**: Do not change. Basal Crop Coefficient (pmet_kcb) The Kcb parameter for the FAO Penman-Monteith equation approximates net evapotranspiration from meteorological data as a replacement for direct measurement of evapotranspiration. **Units**: None **Guidelines**: For forests, use default: 0.95 (well-watered conditions). No need to modify for disturbed conditions, as the reduction in ET is accounted for by a reduction in LAI within the model. For more information, see: Crop evapotranspiration - Guidelines for computing crop water requirements - FAO Irrigation and drainage paper 56, Chapter 7 - ETc - Dual crop coefficient (Kc = Kcb + Ke)) Rain-Snow Temperature Threshold Found under WEPP Advanced Options - Snow. **Units**: \u00b0C **Range**: -3 to 1 Underlying Bedrock Conductivity (ksat for restrictive layer - kslast) Found under WEPP Advanced Options - Bedrock **Units**: mm/h **Default**: Based on SSURGO values (ksat of the last horizon / 100, or other rules). **Range**: 0.001\u20130.1 Baseflow Coefficient Found under WEPP Advanced Options - Baseflow Processing. **Units**: per day **Range**: 0.01\u20130.10 **Guidelines**: The historical WEPPcloud limit of 0.04 came from earlier disturbed-land guidance, not a hard WEPP model limit. Some small watersheds, especially in the 40-100 ha range, may require higher coefficients such as 0.05-0.07 per day to match observed recession behavior. Start with the project default and only increase the coefficient when the simulated baseflow recession is too slow relative to observations or other defensible calibration targets. Channel Critical Shear Stress (\u03c4c) Found under WEPP Advanced Options - Channel Parameters **Units**: N/m\u00b2 or Pa **Range**: 0.05 (fine silt) and 170 coarse cobble **Guidelines**: This is the minimum shear stress required to initiate the movement of sediment particles on the bed of a channel (such as a river, stream, or canal). In simple terms, it's the threshold force per unit area that water flow must exert on the channel bed to start erosion or sediment transport. ksatadj Specifies hydrophobicity adjustment **Units**: None **Guidelines**: Currently, we set the hydrophobicity for high severity burn only. But it could be changed as desired. Note that in the model the hydrophobicity is by burn severity applied to all four soil textures of high severity. The ksatadj value of \"1\" specifies hydrophobic soils. User's can then change the lower limit of hydraulic conductivity (lkeff parameter value), which would restrict the infiltration allowing more surface runoff.",
       "breadcrumbs": [
         {
-          "key": "usersum.workflows",
-          "title": "Workflows and Modules"
+          "key": "usersum.modeling_basics",
+          "title": "Modeling Basics and Tuning"
+        },
+        {
+          "key": "usersum.modeling_basics.wepp_calibration",
+          "title": "WEPP Calibration"
         },
         {
           "key": "usersum.weppcloud.disturbed_land_soil_lookup",
@@ -2286,6 +2228,10 @@
           "title": "Modeling Basics and Tuning"
         },
         {
+          "key": "usersum.modeling_basics.wepp_calibration",
+          "title": "WEPP Calibration"
+        },
+        {
           "key": "usersum.weppcloud.observed_model_fitting",
           "title": "Observed Model Fitting"
         }
@@ -2350,6 +2296,67 @@
       "status": "active",
       "title": "Profile JWT Dataset Access (Python/R)",
       "updated_at": "2026-02-26T18:31:53.660868+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "WEPPcloud Quick Start This quick start walks a new WEPPcloud user through a standard first watershed run with the current **(Un)Disturbed** workflow. It covers: creating a new project uploading a soil burn severity (SBS) map delineating channels setting the outlet delineating subcatchments building landuse building soils building climate running WEPP This guide intentionally stays on the main happy path. It does **not** cover Omni scenarios, treatment comparisons, calibration, or advanced WEPP options. --- Before you begin Have these ready before you start: a desktop or laptop browser the approximate watershed location an SBS raster in .tif or .img format if you are modeling post-fire conditions For a first run, it is usually best to leave advanced settings at their defaults unless you already know why you need to change them. --- 1. Create a new project From the WEPPcloud landing page: 1. choose the **(Un)Disturbed** interface for your region 2. choose your unit system 3. launch the interface WEPPcloud creates a new run and opens the run page. That run page is where you will complete the rest of the workflow. You can set a **Project Name** and **Scenario** in the page header if you want to label the run before you begin. Tip: the run ID in the page header and URL is the unique identifier for your project. It is useful when you need to return to the run or report a problem. My Runs page New project landing page --- 2. Upload the SBS map (Optional) Open **Soil Burn Severity**. 1. leave **Mode** set to **Upload SBS Map** 2. click the upload control for the SBS raster 3. choose your .tif or .img burn severity raster 4. wait for the upload to finish before moving on If the upload succeeds, WEPPcloud shows the current SBS file name in the control. SBS upload note Most users will upload the SBS raster directly through the browser control. If the browser gets stuck in a system file picker, cancel the dialog and try again. If the problem persists, contact your WEPPcloud support contact rather than continuing with a half-finished upload. SBS map notes SBS uploads should be georeferenced rasters .tif and .img are accepted integer rasters are usually the safest choice rasters with a color table can often be interpreted automatically If you do **not** have an SBS raster, the interface also offers **Specify Uniform SBS**, but for a real post-fire assessment an uploaded mapped SBS raster is usually the better choice. SBS upload control --- 3. Find your watershed on the map Use the map at the top of the run page to move to your watershed: pan by clicking and dragging the map zoom with the mouse wheel or trackpad keep zooming until the full watershed area is clearly visible The default channel delineation workflow usually uses the **current map extent**, so what is visible on the map matters. Important: make sure the watershed ridgeline is fully inside the visible map extent before you build channels or subcatchments. If the watershed extends beyond the map boundary, delineation can fail or produce the wrong watershed. Zoom needs to be 11 or greater Run page map extent --- 4. Build channels Open **Channel Delineation**. For a normal first run: 1. leave **Extent mode** as **Use map extent** 2. keep the default **Minimum channel length** 3. keep the default **Critical source area** 4. if your interface uses the WBT backend, leave the default depression smoothing setting unless you have a reason to change it 5. click **Build Channels** WEPPcloud will acquire elevation data for the current extent and extract the channel network. Channel delineation tips if the **Build Channels** button is disabled, zoom in farther lower channel length or source area settings usually create a denser network for most first runs, the defaults are the right place to start if your watershed touches the map boundary, stop and reset the map extent before continuing Channel delineation control --- 5. Set the outlet Open **Outlet**. For this quick start, use the **longitude, latitude** option instead of setting the outlet interactively on the map. 1. choose **Longitude, Latitude** as the outlet input method 2. enter the outlet longitude 3. enter the outlet latitude 4. click the button that sets or applies the outlet WEPPcloud snaps the selection to the drainage network and stores the outlet location. Why use longitude and latitude? The cursor tool is available, but the longitude/latitude option is usually easier for a first walkthrough because it avoids map-click precision problems and is easier to reproduce in documentation. Outlet tips set the outlet only **after** channels have been built make sure the coordinates are near the downstream end of the mapped drainage network if the result looks wrong, update the coordinates and apply the outlet again Outlet by longitude and latitude --- 6. Build subcatchments Open **Subcatchments Delineation**. 1. leave advanced options alone for a first run 2. click **Build Subcatchments** This step delineates the watershed draining to your outlet and divides it into subcatchments and hillslopes for WEPP. If subcatchments fail A common failure is that the watershed extends outside the map extent used during channel delineation. If that happens: 1. go back to the map 2. zoom out or reposition so the full watershed fits inside the extent 3. rebuild **Channels** 4. set the **Outlet** again 5. rerun **Build Subcatchments** Subcatchments control --- 7. Build landuse Open **Landuse Options**. For a standard first run: 1. leave **Landuse mode** on **Determine per hillslope** 2. leave the default landcover dataset selected 3. click **Build Landuse** WEPPcloud assigns landuse or management classes to each hillslope using the selected landcover dataset. Landuse notes **Determine per hillslope** is the usual starting point **Single landuse for watershed** is only for cases where you intentionally want one management everywhere **Upload landcover map** is an advanced workflow and usually not needed for onboarding If you are using a disturbed run, WEPPcloud can also apply burn-related landuse effects based on the SBS map. Landuse control --- 8. Build soils Open **Soil Options**. For a standard first run: 1. leave **Soil mode** on **Determine per hillslope** 2. leave advanced settings at their defaults 3. click **Build Soils** WEPPcloud will query the configured soil sources and assign soils to the delineated hillslopes. Soil notes in disturbed workflows, hillslopes affected by burn severity can have soils adjusted for post-fire modeling the disturbed soil version selector is an advanced option; if you are new to the system, keep the default unless your project team has a preferred convention **Single soil for watershed** is mainly for special or controlled cases, not general onboarding Soils control --- 9. Build climate Open **Climate Options**. For a standard first run: 1. choose a climate dataset appropriate for your work 2. for a simple onboarding run, use the default recommended dataset already selected by the interface 3. leave **Station selection mode** on **Auto** or use **Multi-factor ranking** if you want to inspect station choices manually 4. leave **Spatial mode** at the default unless you specifically need per-hillslope climate variation 5. set the simulation years or observed date range if needed for your dataset 6. click **Build Climate** WEPPcloud will identify a station or climate source, generate the needed climate inputs, and save them into the run. Climate notes **Stochastic** datasets generate simulated weather sequences **Observed** datasets use observed historical climate records when available for a first run, avoid advanced precipitation scaling and other advanced options unless you already know why you need them the station list updates when you change station-selection mode Climate control --- 10. Run WEPP Open **WEPP**. For this quick start: 1. leave **WEPP Advanced Options** collapsed 2. leave **Bootstrap** alone 3. click **Run WEPP** WEPPcloud will prepare the required inputs and run the hillslope and watershed workflows for the project. What to expect small watersheds may finish quickly larger watersheds can take much longer status messages appear in the WEPP control while the run is processing When the run completes, result panels and map layers become available. Run WEPP control --- Recommended first-run workflow summary If you just want the short version, the sequence is: 1. create project 2. zoom to watershed 3. upload SBS map 4. **Build Channels** 5. set the **Outlet** using **Longitude, Latitude** 6. **Build Subcatchments** 7. **Build Landuse** 8. **Build Soils** 9. **Build Climate** 10. **Run WEPP** That order matters. In particular: build channels before setting the outlet set the outlet before building subcatchments build subcatchments before landuse, soils, and climate complete landuse, soils, and climate before running WEPP --- Common onboarding mistakes The watershed touches the map boundary If the watershed is clipped by the current map extent, subcatchment delineation may fail. Expand the map extent, rebuild channels, set the outlet again, and rerun subcatchments. The outlet is placed away from the stream network If the outlet coordinates are too far from the extracted channel network, the delineation result may be wrong or may fail. Re-enter coordinates closer to the watershed outlet. Too many settings changed at once For onboarding, use defaults first. Once you have a successful run, make one change at a time. Trying to use advanced modes too early Get a clean baseline run working first. After that, branch into advanced options, alternate datasets, or scenario comparisons. --- Related documentation User Guide WEPP Advanced Options rq-engine",
+      "breadcrumbs": [
+        {
+          "key": "usersum.start_here",
+          "title": "Start Here"
+        },
+        {
+          "key": "usersum.weppcloud.quick_start",
+          "title": "Quick Start"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "c59ee53978b040181ecc4a54765ebb141475e758de9acf3b67700d1927d0beff",
+      "doc_id": "usersum.weppcloud.quick_start",
+      "headings": [
+        "WEPPcloud Quick Start",
+        "Before you begin",
+        "1. Create a new project",
+        "2. Upload the SBS map (Optional)",
+        "SBS upload note",
+        "SBS map notes",
+        "3. Find your watershed on the map",
+        "4. Build channels",
+        "Channel delineation tips",
+        "5. Set the outlet",
+        "Why use longitude and latitude?",
+        "Outlet tips",
+        "6. Build subcatchments",
+        "If subcatchments fail",
+        "7. Build landuse",
+        "Landuse notes",
+        "8. Build soils",
+        "Soil notes",
+        "9. Build climate",
+        "Climate notes",
+        "10. Run WEPP",
+        "What to expect",
+        "Recommended first-run workflow summary",
+        "Common onboarding mistakes",
+        "The watershed touches the map boundary",
+        "The outlet is placed away from the stream network",
+        "Too many settings changed at once",
+        "Trying to use advanced modes too early",
+        "Related documentation"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/quick-start.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.quick_start",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/quick-start.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.quick_start",
+      "source": "local",
+      "status": "active",
+      "title": "Quick Start",
+      "updated_at": "2026-04-04T22:48:06.930940+00:00",
       "vendor_id": null,
       "vendor_route_path": null
     },
@@ -2769,7 +2776,7 @@
       "vendor_route_path": "/usersum/vendor/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md"
     }
   ],
-  "generated_at": "2026-04-04T17:53:36.538365+00:00",
+  "generated_at": "2026-04-04T23:49:20.637805+00:00",
   "nav_tree": [
     {
       "children": [
@@ -2787,6 +2794,11 @@
           "doc_id": "usersum.weppcloud.faq",
           "key": "usersum.weppcloud.faq",
           "title": "FAQ"
+        },
+        {
+          "doc_id": "usersum.weppcloud.quick_start",
+          "key": "usersum.weppcloud.quick_start",
+          "title": "Quick Start"
         }
       ],
       "collapsible": false,
@@ -2796,9 +2808,9 @@
     {
       "children": [
         {
-          "doc_id": "usersum.weppcloud.wepp_model",
-          "key": "usersum.weppcloud.wepp_model",
-          "title": "WEPP Model"
+          "doc_id": "usersum.source.disturbed",
+          "key": "usersum.source.disturbed",
+          "title": "(Un)Disturbed Landuse and Soil Parameterization"
         },
         {
           "doc_id": "usersum.weppcloud.climate_options",
@@ -2806,19 +2818,41 @@
           "title": "Climate Options"
         },
         {
+          "doc_id": "usersum.weppcloud.wepp_model",
+          "key": "usersum.weppcloud.wepp_model",
+          "title": "WEPP Model"
+        },
+        {
           "doc_id": "usersum.weppcloud.wepp_advanced_options",
           "key": "usersum.weppcloud.wepp_advanced_options",
           "title": "WEPP Advanced Options"
         },
         {
-          "doc_id": "usersum.weppcloud.bootstrap",
-          "key": "usersum.weppcloud.bootstrap",
-          "title": "Bootstrap"
+          "doc_id": "usersum.source.omni",
+          "key": "usersum.source.omni",
+          "title": "Omni Scenarios and Contrasts"
         },
         {
-          "doc_id": "usersum.weppcloud.observed_model_fitting",
-          "key": "usersum.weppcloud.observed_model_fitting",
-          "title": "Observed Model Fitting"
+          "children": [
+            {
+              "doc_id": "usersum.weppcloud.bootstrap",
+              "key": "usersum.weppcloud.bootstrap",
+              "title": "Bootstrap"
+            },
+            {
+              "doc_id": "usersum.weppcloud.observed_model_fitting",
+              "key": "usersum.weppcloud.observed_model_fitting",
+              "title": "Observed Model Fitting"
+            },
+            {
+              "doc_id": "usersum.weppcloud.disturbed_land_soil_lookup",
+              "key": "usersum.weppcloud.disturbed_land_soil_lookup",
+              "title": "Disturbed Land Soil Lookup"
+            }
+          ],
+          "collapsible": true,
+          "key": "usersum.modeling_basics.wepp_calibration",
+          "title": "WEPP Calibration"
         }
       ],
       "collapsible": false,
@@ -2831,11 +2865,6 @@
           "doc_id": "usersum.weppcloud.mods_overview",
           "key": "usersum.weppcloud.mods_overview",
           "title": "Mods Overview"
-        },
-        {
-          "doc_id": "usersum.weppcloud.disturbed_land_soil_lookup",
-          "key": "usersum.weppcloud.disturbed_land_soil_lookup",
-          "title": "Disturbed Land Soil Lookup"
         },
         {
           "doc_id": "usersum.weppcloud.ag_field_mod",
@@ -2874,11 +2903,6 @@
         {
           "children": [
             {
-              "doc_id": "usersum.source.disturbed",
-              "key": "usersum.source.disturbed",
-              "title": "Disturbed Lands Module"
-            },
-            {
               "doc_id": "usersum.source.sbs_map_prep",
               "key": "usersum.source.sbs_map_prep",
               "title": "SBS Map Preparation"
@@ -2914,11 +2938,6 @@
               "doc_id": "usersum.source.observed",
               "key": "usersum.source.observed",
               "title": "Observed Model Fit"
-            },
-            {
-              "doc_id": "usersum.source.omni",
-              "key": "usersum.source.omni",
-              "title": "Omni Scenarios and Contrasts"
             },
             {
               "doc_id": "usersum.source.features_export",

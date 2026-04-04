@@ -144,6 +144,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.faq
+  - doc_id: usersum.weppcloud.quick_start
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/quick-start.md
+    title: Quick Start
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.quick_start
   - doc_id: usersum.weppcloud.getting_started
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/getting-started.md
@@ -272,8 +281,8 @@ docs:
     nav_key: usersum.source.debris_flow
   - doc_id: usersum.source.disturbed
     source: local
-    rel_path: wepppy/nodb/mods/disturbed/README.md
-    title: Disturbed Lands Module
+    rel_path: wepppy/nodb/mods/disturbed/ENDUSER.md
+    title: (Un)Disturbed Landuse and Soil Parameterization
     min_role: user
     category: source-guides
     audience_tags: [user]
@@ -299,7 +308,7 @@ docs:
     nav_key: usersum.source.observed
   - doc_id: usersum.source.omni
     source: local
-    rel_path: wepppy/nodb/mods/omni/README.md
+    rel_path: wepppy/nodb/mods/omni/ENDUSER.md
     title: Omni Scenarios and Contrasts
     min_role: user
     category: source-guides

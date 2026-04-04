@@ -2,7 +2,7 @@
 
 > Compare post-fire treatment strategies and evaluate erosion mitigation effectiveness across multiple "what-if" scenarios—without manually rebuilding your entire WEPPcloud project for each analysis.
 
-> **See also:** [AGENTS.md](../../../../AGENTS.md) for developer patterns and coding conventions.
+> **See also:** [ENDUSER.md](./ENDUSER.md) for the user-facing workflow guide. [AGENTS.md](../../../../AGENTS.md) for developer patterns and coding conventions.
 
 ## Overview
 

@@ -116,6 +116,24 @@ def test_usersum_view_renders_accessibility_statement(usersum_client) -> None:
     assert "ACR/VPAT" in body
 
 
+def test_usersum_doc_route_renders_disturbed_enduser_guide(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.source.disturbed")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "Dominant hillslope severity" in body
+    assert "wepppy/nodb/mods/disturbed/ENDUSER.md" in body
+
+
+def test_usersum_doc_route_renders_omni_enduser_guide(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.source.omni")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "GL-Dashboard and Storm Event Analyzer" in body
+    assert "wepppy/nodb/mods/omni/ENDUSER.md" in body
+
+
 def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
     response = usersum_client.get("/usersum/")
     assert response.status_code == 200
@@ -125,6 +143,22 @@ def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
     assert "/usersum/doc/usersum.weppcloud.controls.channel_delineation" not in body
     assert "Provides the fastest path from a new run to a working project with core controls explained." in body
     assert "Explains how OpenET-derived evapotranspiration data are incorporated into climate and analysis workflows." in body
+
+    disturbed_idx = body.index("/usersum/doc/usersum.source.disturbed")
+    climate_idx = body.index("/usersum/doc/usersum.weppcloud.climate_options")
+    wepp_idx = body.index("/usersum/doc/usersum.weppcloud.wepp_model")
+    advanced_idx = body.index("/usersum/doc/usersum.weppcloud.wepp_advanced_options")
+    omni_idx = body.index("/usersum/doc/usersum.source.omni")
+    bootstrap_idx = body.index("/usersum/doc/usersum.weppcloud.bootstrap")
+    observed_idx = body.index("/usersum/doc/usersum.weppcloud.observed_model_fitting")
+    disturbed_lookup_idx = body.index("/usersum/doc/usersum.weppcloud.disturbed_land_soil_lookup")
+    calibration_idx = body.index("WEPP Calibration")
+    assert disturbed_idx < climate_idx < wepp_idx < advanced_idx < omni_idx < calibration_idx
+    assert calibration_idx < bootstrap_idx < observed_idx < disturbed_lookup_idx
+
+    faq_idx = body.index("/usersum/doc/usersum.weppcloud.faq")
+    quick_start_idx = body.index("/usersum/doc/usersum.weppcloud.quick_start")
+    assert faq_idx < quick_start_idx
 
 
 def test_usersum_links_include_site_prefix_when_configured() -> None:
