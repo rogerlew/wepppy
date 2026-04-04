@@ -33,7 +33,6 @@ _SPEC_DIR = _BASE_DIR / "input-file-specifications"
 _WEPPCLOUD_DIR = _BASE_DIR / "weppcloud"
 _PATH_DIR = _BASE_DIR / "path"
 _GITHUB_BLOB_BASE_URL = "https://github.com/rogerlew/wepppy/blob/master"
-_USERSUM_REPO_REL_PREFIX = "wepppy/weppcloud/routes/usersum/"
 _CATEGORY_ROOTS: Dict[str, Path] = {
     "db": _DB_DIR,
     "input-file-specifications": _SPEC_DIR,
@@ -146,11 +145,8 @@ def _github_blob_url(path: Path) -> str:
     return f"{_GITHUB_BLOB_BASE_URL}/{quote(_repo_relative_markdown_path(path))}"
 
 
-def _doc_path_label(scope: str, rel_path: str) -> str:
-    scoped_rel_path = rel_path
-    if scoped_rel_path.startswith(_USERSUM_REPO_REL_PREFIX):
-        scoped_rel_path = scoped_rel_path[len(_USERSUM_REPO_REL_PREFIX) :]
-    return f"{scope} /{scoped_rel_path}"
+def _doc_path_label(rel_path: str) -> str:
+    return rel_path
 
 
 @lru_cache(maxsize=1)
@@ -503,7 +499,7 @@ def view_doc(doc_id: str):
     return _render_markdown_document(
         path,
         title=doc["title"],
-        doc_path_label=_doc_path_label("view", doc["rel_path"]),
+        doc_path_label=_doc_path_label(doc["rel_path"]),
         caller_max_role=caller_max_role,
         active_doc=doc,
         breadcrumbs=_doc_breadcrumbs(doc),
@@ -525,7 +521,7 @@ def view_markdown(category: str, filename: str):
     return _render_markdown_document(
         path,
         title=doc["title"],
-        doc_path_label=_doc_path_label("view", doc["rel_path"]),
+        doc_path_label=_doc_path_label(doc["rel_path"]),
         caller_max_role=caller_max_role,
         active_doc=doc,
         breadcrumbs=_doc_breadcrumbs(doc),
@@ -546,7 +542,7 @@ def view_vendor_markdown(vendor_id: str, filename: str):
     return _render_markdown_document(
         path,
         title=doc["title"],
-        doc_path_label=_doc_path_label("view", doc["rel_path"]),
+        doc_path_label=_doc_path_label(doc["rel_path"]),
         caller_max_role=caller_max_role,
         active_doc=doc,
         breadcrumbs=_doc_breadcrumbs(doc),
@@ -574,7 +570,7 @@ def view_src_markdown(rel_path: str):
     return _render_markdown_document(
         path,
         title=title,
-        doc_path_label=_doc_path_label("src", rel_path),
+        doc_path_label=_doc_path_label(rel_path),
         caller_max_role=caller_max_role,
         active_doc=manifest_doc,
         breadcrumbs=breadcrumbs,
