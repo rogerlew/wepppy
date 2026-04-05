@@ -17,6 +17,13 @@ This page explains every option in **Climate Options** for WEPPcloud end users:
 3. Choose a climate dataset, station selection mode, and (if available) spatial mode.
 4. Expand **Advanced options** only when you need to tune behavior.
 
+## Opinionated recommendations
+
+If you want the shortest defensible answer instead of a full option review:
+
+- For **probability/risk assessments**, start with **Stochastic PRISM Modified**.
+- For **historical modeling**, start with **Observed DAYMET (GRIDMET wind)**.
+
 ## Climate Datasets (Each Climate Option)
 
 ## Vanilla CLIGEN
@@ -24,6 +31,10 @@ This page explains every option in **Climate Options** for WEPPcloud end users:
 **Suitable for**
 - Long-term stochastic (probability/risk) analysis.
 - Baseline climate generation when you do not need a specific observed historical sequence.
+
+**Recommendation**
+- Use this when you explicitly want plain CLIGEN behavior.
+- If your main goal is a probability/risk assessment and **Stochastic PRISM Modified** is available, prefer that option instead.
 
 **Data it uses**
 - CLIGEN station statistics from the selected station.
@@ -45,8 +56,13 @@ This page explains every option in **Climate Options** for WEPPcloud end users:
 ## Stochastic PRISM Modified
 
 **Suitable for**
+- Recommended default for probability/risk assessments.
 - Stochastic runs where you want PRISM-adjusted climate behavior.
 - BAER-style risk/probability workflows when strict historical replay is not required.
+
+**Recommendation**
+- Start here when your question is probabilistic: "What is the range of likely runoff/erosion response over many possible years?"
+- Prefer this over observed historical modes when you are not trying to reproduce a specific real-world period.
 
 **Data it uses**
 - CLIGEN station source + PRISM-informed adjustment workflow.
@@ -69,8 +85,13 @@ This page explains every option in **Climate Options** for WEPPcloud end users:
 ## Observed DAYMET (GRIDMET wind)
 
 **Suitable for**
+- Recommended default for historical modeling.
 - Historical/observed-condition calibration.
 - Streamflow and disturbance-validation work where observed weather is preferred.
+
+**Recommendation**
+- Start here when you want to model a real historical period rather than a stochastic climate sequence.
+- This is the opinionated first choice for hindcasting, calibration, and other observed-period analyses.
 
 **Data it uses**
 - DAYMET observed daily climate.
@@ -96,6 +117,10 @@ This page explains every option in **Climate Options** for WEPPcloud end users:
 **Suitable for**
 - Historical/observed-condition modeling using GRIDMET.
 - Workflows where observed wind/radiation/dewpoint fields from GRIDMET are desired.
+
+**Recommendation**
+- Use this when you specifically want GRIDMET-native observed fields or need to compare sensitivity against DAYMET.
+- If you want one default historical option, prefer **Observed DAYMET (GRIDMET wind)** first.
 
 **Data it uses**
 - GRIDMET observed daily climate fields.
