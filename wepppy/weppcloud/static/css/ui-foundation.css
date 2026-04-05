@@ -118,6 +118,10 @@
   --wc-button-secondary-border: var(--wc-color-text);
   --wc-button-secondary-border-hover: var(--wc-color-text);
   --wc-button-secondary-text: var(--wc-color-text);
+  --wc-return-period-measure-bg: color-mix(in srgb, var(--wc-color-surface) 94%, var(--wc-color-primary));
+  --wc-return-period-measure-header-bg: color-mix(in srgb, var(--wc-color-surface-alt) 90%, var(--wc-color-primary));
+  --wc-return-period-measure-border: color-mix(in srgb, var(--wc-color-primary) 64%, var(--wc-color-border-strong));
+  --wc-return-period-measure-text: color-mix(in srgb, var(--wc-color-text) 70%, white 30%);
   --wc-button-secondary-disabled-bg: var(--wc-color-surface-alt);
   --wc-button-secondary-disabled-border: var(--wc-color-text);
   --wc-button-secondary-disabled-text: color-mix(in srgb, var(--wc-color-text) 82%, var(--wc-color-text-muted));
@@ -4274,6 +4278,37 @@ body.wc-modal-open {
 
 .wc-table--striped thead th {
   background: color-mix(in srgb, var(--wc-color-surface-alt) 80%, var(--wc-color-surface) 20%);
+}
+
+.wc-table th.wc-return-period__measure,
+.wc-table td.wc-return-period__measure {
+  background: var(--wc-return-period-measure-bg);
+  color: var(--wc-return-period-measure-text);
+  font-weight: var(--wc-font-weight-semibold);
+  box-shadow: inset 4px 0 0 var(--wc-return-period-measure-border);
+}
+
+.wc-table thead th.wc-return-period__measure {
+  background: var(--wc-return-period-measure-header-bg);
+}
+
+.sortable-header.wc-return-period__measure[data-sort-direction="asc"],
+.sortable-header.wc-return-period__measure[data-sort-direction="desc"] {
+  background: color-mix(
+    in srgb,
+    var(--wc-return-period-measure-header-bg) 82%,
+    var(--wc-color-accent-soft) 18%
+  );
+}
+
+.wc-return-period__measure-swatch {
+  display: inline-block;
+  padding: 0 var(--wc-space-xs);
+  border-radius: var(--wc-radius-xs);
+  background: var(--wc-return-period-measure-bg);
+  color: var(--wc-return-period-measure-text);
+  font-weight: var(--wc-font-weight-semibold);
+  box-shadow: inset 4px 0 0 var(--wc-return-period-measure-border);
 }
 
 /* Dense spacing variant */

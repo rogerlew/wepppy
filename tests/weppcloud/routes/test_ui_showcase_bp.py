@@ -1,0 +1,59 @@
+from __future__ import annotations
+
+from importlib import import_module
+from pathlib import Path
+
+import pytest
+
+pytest.importorskip("flask")
+from flask import Flask
+
+try:
+    ui_showcase_module = import_module("wepppy.weppcloud.routes.ui_showcase.ui_showcase_bp")
+except ImportError:
+    pytest.skip("UI showcase blueprint dependencies missing", allow_module_level=True)
+
+
+pytestmark = pytest.mark.routes
+REPO_ROOT = Path(__file__).resolve().parents[3]
+COMPONENT_GALLERY_TEMPLATE = REPO_ROOT / "wepppy" / "weppcloud" / "templates" / "ui_showcase" / "component_gallery.htm"
+
+
+def test_component_gallery_registers_return_period_theme_lab_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_render_template(template_name: str, **context: object) -> str:
+        captured["template_name"] = template_name
+        captured["context"] = context
+        return "rendered"
+
+    monkeypatch.setattr(ui_showcase_module, "render_template", fake_render_template)
+
+    app = Flask(__name__)
+    app.config["CAP_BASE_URL"] = "/cap"
+    app.config["CAP_SITE_KEY"] = "demo"
+
+    with app.app_context():
+        result = ui_showcase_module.component_gallery()
+
+    assert result == "rendered"
+    assert captured["template_name"] == "ui_showcase/component_gallery.htm"
+
+    context = captured["context"]
+    assert isinstance(context, dict)
+    theme_targets = context["theme_contrast_targets"]
+    assert isinstance(theme_targets, list)
+
+    target = next((entry for entry in theme_targets if entry.get("id") == "wc-return-period-measure"), None)
+    assert target is not None
+    assert {pair["name"] for pair in target["pairs"]} == {
+        "header_text_vs_highlight",
+        "value_text_vs_highlight",
+    }
+
+    template_source = COMPONENT_GALLERY_TEMPLATE.read_text(encoding="utf-8")
+    assert 'data-contrast-id="wc-return-period-measure"' in template_source
+    assert 'id="theme_lab_return_period_measure_header"' in template_source
+    assert 'id="theme_lab_return_period_measure_value"' in template_source

@@ -257,6 +257,22 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "wc-return-period-measure",
+            "label": "Return-period selected measure column",
+            "pairs": [
+                {
+                    "name": "header_text_vs_highlight",
+                    "foreground": "#theme_lab_return_period_measure_header",
+                    "background": "#theme_lab_return_period_measure_header",
+                },
+                {
+                    "name": "value_text_vs_highlight",
+                    "foreground": "#theme_lab_return_period_measure_value",
+                    "background": "#theme_lab_return_period_measure_value",
+                },
+            ],
+        },
+        {
             "id": "job_hint",
             "label": "Job hint vs surface",
             "threshold": 3.0,
