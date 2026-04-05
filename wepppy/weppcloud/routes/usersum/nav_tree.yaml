@@ -111,6 +111,8 @@ roots:
     title: Technical Reference
     collapsible: true
     children:
+      - key: usersum.weppcloud.wepp_usersum_2024
+        doc_id: usersum.weppcloud.wepp_usersum_2024
       - key: usersum.technical_reference.project_files_and_maps
         title: Project Files and Maps
         collapsible: true

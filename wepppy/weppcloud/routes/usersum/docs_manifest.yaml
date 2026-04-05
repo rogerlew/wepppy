@@ -261,6 +261,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.wepp_model
+  - doc_id: usersum.weppcloud.wepp_usersum_2024
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-usersum-2024.md
+    title: Windows WEPP User Summary 2024
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.wepp_usersum_2024
   - doc_id: usersum.weppcloud.wepp_interchange
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-interchange.md

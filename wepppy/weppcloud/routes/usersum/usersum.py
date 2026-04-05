@@ -76,6 +76,7 @@ _INDEX_DOC_DESCRIPTIONS: Dict[str, str] = {
     "usersum.weppcloud.wepp_advanced_options": "Explains advanced WEPP settings that affect hydrology, erosion, soils, and calibration behavior.",
     "usersum.weppcloud.wepp_interchange": "Explains where WEPP interchange Parquet outputs live, what the main tables represent, and which files are most useful for common hillslope, watershed, and event questions.",
     "usersum.weppcloud.wepp_model": "Introduces the WEPP model, what it simulates, and how its outputs should be interpreted.",
+    "usersum.weppcloud.wepp_usersum_2024": "Preserves the Windows WEPP user summary as a cleaned technical reference with historical context and links to the current plant, soil, and climate file specifications.",
     "usersum.weppcloud.weppcloud_runs_directory_structure": "Shows where WEPPcloud stores key `.nodb`, geometry, landuse, soil, WEPP input, and interchange output files within a run directory.",
     "usersum.source.nodb": "Introduces the NoDb run-state system that underpins WEPPcloud project configuration and persistence.",
     "usersum.source.ash_transport": "Describes the ash transport module, its assumptions, and how ash-related outputs are managed.",
