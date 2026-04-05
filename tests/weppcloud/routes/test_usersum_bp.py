@@ -163,6 +163,27 @@ def test_usersum_doc_route_renders_wepp_run_results(usersum_client) -> None:
     assert "wepppy/weppcloud/routes/usersum/weppcloud/wepp-run-results.md" in body
 
 
+def test_usersum_doc_route_renders_weppcloud_calibration_guidance(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.calibration_guidance")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "Start with the most defensible hydrologic controls" in body
+    assert "WEPPcloud Calibration Guidance" in body
+    assert "wepppy/weppcloud/routes/usersum/weppcloud/weppcloud-calibration-guidance.md" in body
+
+
+def test_usersum_doc_route_renders_undisturbed_earth(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.undisturbed_earth")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "outside the current United States, Europe, and Australia regional interfaces" in body
+    assert "Copernicus DEM 30 m" in body
+    assert "WEPPcloud-WBT" in body
+    assert "wepppy/weppcloud/routes/usersum/weppcloud/undisturbed-earth.md" in body
+
+
 def test_usersum_doc_route_renders_sbs_map_preparation(usersum_client) -> None:
     response = usersum_client.get("/usersum/doc/usersum.weppcloud.sbs_map_preparation")
     assert response.status_code == 200
@@ -188,16 +209,19 @@ def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
     advanced_idx = body.index("/usersum/doc/usersum.weppcloud.wepp_advanced_options")
     run_results_idx = body.index("/usersum/doc/usersum.weppcloud.wepp_run_results")
     omni_idx = body.index("/usersum/doc/usersum.source.omni")
+    calibration_guidance_idx = body.index("/usersum/doc/usersum.weppcloud.calibration_guidance")
     bootstrap_idx = body.index("/usersum/doc/usersum.weppcloud.bootstrap")
     observed_idx = body.index("/usersum/doc/usersum.weppcloud.observed_model_fitting")
     disturbed_lookup_idx = body.index("/usersum/doc/usersum.weppcloud.disturbed_land_soil_lookup")
     calibration_idx = body.index("WEPP Calibration")
     assert disturbed_idx < climate_idx < wepp_idx < advanced_idx < run_results_idx < omni_idx < calibration_idx
-    assert calibration_idx < bootstrap_idx < observed_idx < disturbed_lookup_idx
+    assert calibration_idx < calibration_guidance_idx < bootstrap_idx < observed_idx < disturbed_lookup_idx
 
     faq_idx = body.index("/usersum/doc/usersum.weppcloud.faq")
+    getting_started_idx = body.index("/usersum/doc/usersum.weppcloud.getting_started")
+    earth_idx = body.index("/usersum/doc/usersum.weppcloud.undisturbed_earth")
     quick_start_idx = body.index("/usersum/doc/usersum.weppcloud.quick_start")
-    assert faq_idx < quick_start_idx
+    assert faq_idx < getting_started_idx < earth_idx < quick_start_idx
 
     project_files_idx = body.index("Project Files and Maps")
     runs_dir_idx = body.index("/usersum/doc/usersum.weppcloud.weppcloud_runs_directory_structure")

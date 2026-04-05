@@ -79,6 +79,12 @@ Designed for European watersheds. Uses ESDAC land use classifications, EU-SoilHy
 
 Experimental interface for Australian watersheds. Assigns land management from the Land Use of Australia 2010-11 dataset and constructs soils from ASRIS data. Climate stations are selected using AGDC monthly precipitation and temperature patterns.
 
+#### [WEPPcloud-(Un)Disturbed-Earth](undisturbed-earth.md)
+
+The global Earth interface extends the disturbed workflow to watersheds outside the dedicated United States, Europe, and Australia configurations. It uses the WBT delineation backend together with Copernicus DEM terrain, C3S land cover, ISRIC soils, and GHCN-backed CLIGEN climate selection to support first-pass watershed modeling, including optional post-fire ash transport and debris-flow screening.
+
+**Available configurations:** Global (`earth.cfg`)
+
 #### WEPPcloud-RHEM
 
 Runs the Rangeland Hydrology and Erosion Model (RHEM) across the United States. Where available, foliar and ground covers are estimated from NLCD Shrubland 2016 data, and SSURGO/STATSGO identifies soil textures.

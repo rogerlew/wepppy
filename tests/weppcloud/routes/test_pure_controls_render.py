@@ -484,6 +484,32 @@ def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(ji
     assert 'name="rq_token"' not in rendered
 
 
+def test_interfaces_template_renders_earth_launch_card(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("interfaces.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+
+    def _url_for(endpoint: str, **values) -> str:
+        if endpoint == "static":
+            return f"/static/{values.get('filename', '')}"
+        return f"/mock/{endpoint}"
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        url_for=_url_for,
+        runs_counter=Counter(),
+        commafy=lambda value: f"{value:,}",
+        rq_engine_token="token",
+    )
+
+    assert "WEPPcloud-(Un)Disturbed-Earth" in rendered
+    assert "images/interfaces/earth-interface.png" in rendered
+    assert 'name="config" value="earth"' in rendered
+    assert "Earth interface guidance" in rendered
+    assert "WEPPcloud-WBT" in rendered
+    assert rendered.index("WEPPcloud-AU") < rendered.index("WEPPcloud-(Un)Disturbed-Earth") < rendered.index("WEPPcloud-RHEM")
+
+
 def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

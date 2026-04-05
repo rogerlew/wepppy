@@ -10,6 +10,8 @@ roots:
         doc_id: usersum.weppcloud.faq
       - key: usersum.weppcloud.getting_started
         doc_id: usersum.weppcloud.getting_started
+      - key: usersum.weppcloud.undisturbed_earth
+        doc_id: usersum.weppcloud.undisturbed_earth
       - key: usersum.weppcloud.quick_start
         doc_id: usersum.weppcloud.quick_start
 
@@ -33,6 +35,8 @@ roots:
         title: WEPP Calibration
         collapsible: true
         children:
+          - key: usersum.weppcloud.calibration_guidance
+            doc_id: usersum.weppcloud.calibration_guidance
           - key: usersum.weppcloud.bootstrap
             doc_id: usersum.weppcloud.bootstrap
           - key: usersum.weppcloud.observed_model_fitting

@@ -126,6 +126,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.data_attribution
+  - doc_id: usersum.weppcloud.calibration_guidance
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/weppcloud-calibration-guidance.md
+    title: WEPPcloud Calibration Guidance
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.calibration_guidance
   - doc_id: usersum.weppcloud.disturbed_land_soil_lookup
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md
@@ -162,6 +171,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.getting_started
+  - doc_id: usersum.weppcloud.undisturbed_earth
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/undisturbed-earth.md
+    title: WEPPcloud-(Un)Disturbed-Earth
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.undisturbed_earth
   - doc_id: usersum.weppcloud.mods_overview
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/mods-overview.md

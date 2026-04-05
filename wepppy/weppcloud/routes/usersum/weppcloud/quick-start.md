@@ -265,6 +265,7 @@ WEPPcloud will prepare the required inputs and run the hillslope and watershed w
 When the run completes, result panels and map layers become available.
 
 ![Run WEPP control](/usersum/static/weppcloud/quick-start/run-wepp.png)
+![WEPP Run Results](/usersum/static/weppcloud/quick-start/wepp-run-results.png)
 
 ---
 

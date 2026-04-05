@@ -4,7 +4,7 @@
 
 ### What is WEPPcloud?
 
-WEPPcloud is a free, online platform that predicts how water and soil move through a watershed — how much soil erodes, where sediment goes, and how runoff responds to fires, land management, and climate. It runs entirely in a web browser with no software to install.
+WEPPcloud is an open-source, online platform that predicts how water and soil move through a watershed — how much soil erodes, where sediment goes, and how runoff responds to fires, land management, and climate. It runs entirely in a web browser with no software to install.
 
 **From an extent on a map to physics-based predictions in minutes.** You zoom to a location, draw a watershed boundary, and WEPPcloud does the rest: it acquires elevation data, delineates the channel network and hillslopes, pulls soils and land cover from federal databases, retrieves climate records, and runs the USDA's peer-reviewed WEPP erosion model — a process that traditionally required weeks of GIS preparation and manual model setup.
 

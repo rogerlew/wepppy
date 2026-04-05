@@ -485,6 +485,52 @@
     </article>
   </section>
 
+  <section class="wc-panel" aria-labelledby="section-earth">
+    <article class="wc-feature">
+      <div class="wc-feature__media">
+        <img src="{{ url_for('static', filename='images/interfaces/earth-interface.png') }}?v=20260405" alt="Earth interface illustration" />
+      </div>
+      <div class="wc-feature__body">
+        <h2 id="section-earth">WEPPcloud-(Un)Disturbed-Earth</h2>
+        <p>
+          The Earth interface extends the disturbed or undisturbed workflow to watersheds outside the dedicated U.S., EU, and AU
+          configurations. It uses <a href="https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM">Copernicus DEM 30 m</a>,
+          <a href="https://cds.climate.copernicus.eu/datasets/satellite-land-cover?tab=overview">C3S land cover</a>,
+          <a href="https://maps.isric.org/">ISRIC</a> soils, and climate localization from the GHCN-backed CLIGEN station catalog.
+        </p>
+        <p>
+          Watershed delineation uses the newer <a href="https://github.com/rogerlew/weppcloud-wbt">WEPPcloud-WBT</a> backend rather than
+          the older TOPAZ path. Use it when you need a first-pass watershed model in locations where no more specialized regional
+          interface is available. You can skip burn severity for undisturbed conditions or add burn severity for post-fire screening,
+          including ash transport and debris-flow workflows.
+        </p>
+        <p>
+          {{ usersum_doc_link('weppcloud', 'undisturbed-earth.md', 'Earth interface guidance') }}.
+        </p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("earth", "cap-earth", cap_base_url, cap_site_key) }}
+        {% endif %}
+        <div class="wc-feature__actions">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="earth" data-cap-required="true"{% endif %}>
+            <input type="hidden" name="config" value="earth">
+            {% if not current_user.is_authenticated %}
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
+                    title="earth"
+                    data-run-menu
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
+              Start Disturbed-Earth Run
+            </button>
+          </form>
+        </div>
+      </div>
+    </article>
+  </section>
+
   <section class="wc-panel" aria-labelledby="section-rhem">
     <article class="wc-feature">
       <div class="wc-feature__media">

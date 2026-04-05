@@ -66,6 +66,7 @@ _INDEX_DOC_DESCRIPTIONS: Dict[str, str] = {
     "usersum.weppcloud.faq": "Answers common questions about WEPPcloud workflows, assumptions, outputs, and model behavior.",
     "usersum.weppcloud.quick_start": "Walks a new user through a standard first WEPPcloud run using the current (Un)Disturbed workflow.",
     "usersum.weppcloud.getting_started": "Provides the fastest path from a new run to a working project with core controls explained.",
+    "usersum.weppcloud.undisturbed_earth": "Explains when to use the global Earth interface and what data, limits, and checks matter most before starting a run.",
     "usersum.weppcloud.mods_overview": "Introduces the optional modules that extend WEPPcloud with additional workflows and domain capabilities.",
     "usersum.weppcloud.observed_model_fitting": "Explains how to compare model output against observations and tune runs with observed data.",
     "usersum.weppcloud.profile_jwt_dataset_access_python_r": "Shows how advanced users can access WEPPcloud datasets programmatically from Python or R.",
