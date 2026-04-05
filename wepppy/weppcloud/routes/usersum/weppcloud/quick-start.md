@@ -213,7 +213,7 @@ WEPPcloud will query the configured soil sources and assign soils to the delinea
 - the disturbed soil version selector is an advanced option; if you are new to the system, keep the default unless your project team has a preferred convention
 - **Single soil for watershed** is mainly for special or controlled cases, not general onboarding
 
-![Soils control](/usersum/static/weppcloud/quick-start/soils.png)
+![Soils control](/usersum/static/weppcloud/quick-start/soils-after-build.png)
 
 ---
 
@@ -239,8 +239,9 @@ WEPPcloud will identify a station or climate source, generate the needed climate
 - for a first run, avoid advanced precipitation scaling and other advanced options unless you already know why you need them
 - the station list updates when you change station-selection mode
 
-![Climate control](/usersum/static/weppcloud/quick-start/climate.png)
+![Climate control](/usersum/static/weppcloud/quick-start/climate-control.png)
 
+![Climate build summary](/usersum/static/weppcloud/quick-start/climate-build-summary.png)
 ---
 
 ## 10. Run WEPP
