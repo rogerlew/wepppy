@@ -93,6 +93,54 @@ function buildRunUrlFromCtx(ctx, runid, relativePath) {
   return (sitePrefix ? sitePrefix + runPath : runPath) + path;
 }
 
+function formatIsoDate(year, month, day) {
+  const yearNumber = Number(year);
+  const monthNumber = Number(month);
+  const dayNumber = Number(day);
+  if (!Number.isInteger(yearNumber) || yearNumber < 1) return null;
+  if (!Number.isInteger(monthNumber) || monthNumber < 1 || monthNumber > 12) return null;
+  const maxDay = monthNumber === 2
+    ? (((yearNumber % 4 === 0 && yearNumber % 100 !== 0) || yearNumber % 400 === 0) ? 29 : 28)
+    : ([4, 6, 9, 11].includes(monthNumber) ? 30 : 31);
+  if (!Number.isInteger(dayNumber) || dayNumber < 1 || dayNumber > maxDay) return null;
+  return `${String(yearNumber).padStart(4, '0')}-${String(monthNumber).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+}
+
+function parseIsoDateParts(value, { relaxedYear = false } = {}) {
+  if (!value) return null;
+  const yearPattern = relaxedYear ? '\\d{1,}' : '\\d{4,}';
+  const match = new RegExp(`^(${yearPattern})-(\\d{1,2})-(\\d{1,2})$`).exec(String(value).trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const normalized = formatIsoDate(year, month, day);
+  if (!normalized) return null;
+  return { year, month, day, normalized };
+}
+
+function compareIsoDateParts(left, right) {
+  if (left.year !== right.year) return left.year - right.year;
+  if (left.month !== right.month) return left.month - right.month;
+  return left.day - right.day;
+}
+
+function normalizeIsoDate(value) {
+  const parts = parseIsoDateParts(value, { relaxedYear: true });
+  if (!parts) return null;
+  return formatIsoDate(parts.year, parts.month, parts.day);
+}
+
+function clampIsoDate(value, minDate, maxDate) {
+  const valueParts = parseIsoDateParts(value);
+  const minParts = parseIsoDateParts(minDate);
+  const maxParts = parseIsoDateParts(maxDate);
+  if (!valueParts || !minParts || !maxParts) return value;
+  if (compareIsoDateParts(valueParts, minParts) < 0) return minDate;
+  if (compareIsoDateParts(valueParts, maxParts) > 0) return maxDate;
+  return value;
+}
+
 async function mapWithConcurrency(items, limit, handler) {
   if (!Array.isArray(items) || !items.length) return [];
   const concurrency = Math.max(1, Math.min(Number(limit) || 1, items.length));
@@ -1468,21 +1516,40 @@ export async function detectWeppEventOverlays({
   subcatchmentsGeoJson,
 }) {
   try {
-    if (!climateCtx || !climateCtx.startYear || !climateCtx.endYear) {
+    if (!climateCtx || climateCtx.startYear == null || climateCtx.endYear == null) {
       logDetectionInfo('WEPP Event overlays unavailable: missing climate context', {
         hasClimateCtx: Boolean(climateCtx),
       });
       return null;
     }
 
-    const minYear = climateCtx.startYear;
-    const maxYear = climateCtx.endYear;
+    const minYear = Number(climateCtx.startYear);
+    const maxYear = Number(climateCtx.endYear);
+    if (!Number.isInteger(minYear) || !Number.isInteger(maxYear) || minYear > maxYear) {
+      logDetectionInfo('WEPP Event overlays unavailable: invalid climate year bounds', {
+        minYear,
+        maxYear,
+      });
+      return null;
+    }
+
+    const startDate = formatIsoDate(minYear, 1, 1);
+    const endDate = formatIsoDate(maxYear, 12, 31);
+    if (!startDate || !endDate) {
+      logDetectionInfo('WEPP Event overlays unavailable: invalid climate year bounds', {
+        minYear,
+        maxYear,
+      });
+      return null;
+    }
+
     const metadata = {
       available: true,
-      startDate: `${minYear}-01-01`,
-      endDate: `${maxYear}-12-31`,
+      startDate,
+      endDate,
     };
-    const selectedDate = currentSelectedDate || metadata.startDate;
+    const normalizedSelectedDate = normalizeIsoDate(currentSelectedDate);
+    const selectedDate = clampIsoDate(normalizedSelectedDate || metadata.startDate, metadata.startDate, metadata.endDate);
 
     const geoJson = await ensureSubcatchments(buildBaseUrl, subcatchmentsGeoJson);
     if (!geoJson) return null;
