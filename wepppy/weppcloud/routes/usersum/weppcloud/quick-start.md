@@ -48,8 +48,23 @@ You can set a **Project Name** and **Scenario** in the page header if you want t
 
 ---
 
+## 2. Find your watershed on the map
 
-## 2. Upload the SBS map (Optional)
+Use the map at the top of the run page to move to your watershed:
+
+- pan by clicking and dragging the map
+- zoom with the mouse wheel or trackpad
+- keep zooming until the full watershed area is clearly visible
+
+The default channel delineation workflow usually uses the **current map extent**, so what is visible on the map matters.
+
+> Important: make sure the watershed ridgeline is fully inside the visible map extent before you build channels or subcatchments. If the watershed extends beyond the map boundary, delineation can fail or produce the wrong watershed.
+
+![Run page map extent](/usersum/static/weppcloud/quick-start/run-page-map.png)
+
+---
+
+## 3. Upload the SBS map
 
 Open **Soil Burn Severity**.
 
@@ -76,22 +91,6 @@ If the browser gets stuck in a system file picker, cancel the dialog and try aga
 If you do **not** have an SBS raster, the interface also offers **Specify Uniform SBS**, but for a real post-fire assessment an uploaded mapped SBS raster is usually the better choice.
 
 ![SBS upload control](/usersum/static/weppcloud/quick-start/sbs-upload.png)
-
----
-
-## 3. Find your watershed on the map
-
-Use the map at the top of the run page to move to your watershed:
-
-- pan by clicking and dragging the map
-- zoom with the mouse wheel or trackpad
-- keep zooming until the full watershed area is clearly visible
-
-The default channel delineation workflow usually uses the **current map extent**, so what is visible on the map matters.
-
-> Important: make sure the watershed ridgeline is fully inside the visible map extent before you build channels or subcatchments. If the watershed extends beyond the map boundary, delineation can fail or produce the wrong watershed. Zoom needs to be 11 or greater
-
-![Run page map extent](/usersum/static/weppcloud/quick-start/run-page-map.png)
 
 ---
 
@@ -312,6 +311,6 @@ Get a clean baseline run working first. After that, branch into advanced options
 
 ## Related documentation
 
-- [User Guide](user-guide.md)
-- [WEPP Advanced Options](wepp-advanced-options.md)
-- [RQ Engine](rq-engine.md)
+- [User Guide](/usersum/view/weppcloud/user-guide.md)
+- [WEPP Advanced Options](/usersum/view/weppcloud/wepp-advanced-options.md)
+- [rq-engine](/usersum/view/weppcloud/rq-engine.md)

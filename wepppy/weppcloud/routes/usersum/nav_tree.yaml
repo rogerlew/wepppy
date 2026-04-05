@@ -4,12 +4,12 @@ roots:
     title: Start Here
     collapsible: false
     children:
-      - key: usersum.weppcloud.getting_started
-        doc_id: usersum.weppcloud.getting_started
       - key: usersum.weppcloud.user_guide
         doc_id: usersum.weppcloud.user_guide
       - key: usersum.weppcloud.faq
         doc_id: usersum.weppcloud.faq
+      - key: usersum.weppcloud.getting_started
+        doc_id: usersum.weppcloud.getting_started
       - key: usersum.weppcloud.quick_start
         doc_id: usersum.weppcloud.quick_start
 

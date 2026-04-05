@@ -2,6 +2,88 @@
 
 This guide walks you through creating your first WEPPcloud project and introduces the key features you will use along the way.
 
+## User Accounts
+
+You can use WEPPcloud with or without an account, but creating one is recommended.
+
+### Anonymous Access
+
+You can start a project without logging in. Anonymous runs require completing a CAPTCHA before launching an interface. Anonymous runs are not tied to a user profile, which means you cannot manage them from a central dashboard or generate API tokens for programmatic access.
+
+### Benefits of Having an Account
+
+- **Private projects by default** — anonymous projects are publicly visible to anyone with the link, while projects owned by a registered account are private. You can share individual projects with a group or make them public when you choose to.
+- Bypass CAPTCHAs when launching interfaces
+- View and manage all your runs from a central dashboard
+- Generate API tokens for programmatic access (Python, R)
+- Access role-based features when granted by administrators
+
+### Creating an Account
+
+You can register for a WEPPcloud account using an email address and password. Registration requires your first and last name and email confirmation.
+
+### OAuth Sign-In (Recommended)
+
+The easiest way to use WEPPcloud is to sign in through an existing account with one of the supported providers:
+
+- **Google** — sign in with your Google account
+- **GitHub** — sign in with your GitHub account
+
+When you use OAuth, you authenticate directly with the provider (Google or GitHub). WEPPcloud receives only your name and email address to create or link your account. Your password is never shared with WEPPcloud. You can connect multiple OAuth providers to the same WEPPcloud account and disconnect them at any time from your profile page.
+
+---
+
+## Interfaces
+
+### What is an Interface?
+
+An interface is a preconfigured bundle of data sources, models, and settings that defines how a WEPPcloud project is set up and run. Each interface targets a specific geographic region and use case, determining which soils databases, land cover datasets, climate sources, and model options are available. When you start a new project, you choose an interface, and WEPPcloud configures everything accordingly.
+
+All interfaces let you choose between **SI** (metric) and **English** (imperial) units when launching a project.
+
+### Active Interfaces
+
+#### WEPPcloud-(Un)Disturbed (United States)
+
+The primary interface for the continental United States, with experimental support for Hawaii and Alaska. It uses SSURGO-derived soils and NLCD land cover to parameterize runs. Users can optionally upload a burn severity map to predict post-fire erosion, or skip it to analyze unburned conditions. Fire and treatment scenarios procedurally generate soils and management files from the disturbed database using soil texture and land use class. This interface also integrates the Wildfire Ash Transport And Risk estimation tool (WATAR) for post-fire water quality assessment.
+
+**Available configurations:** CONUS, Hawaii (experimental), Alaska (experimental)
+
+#### WEPPcloud-(Un)Disturbed-WBT
+
+The successor to the original TOPAZ-based delineation workflow. It uses WEPPcloud-WBT (a WhiteboxTools fork) for watershed preprocessing and hillslope delineation. In addition to improved performance, the WBT backend produces GeoTIFF raster products and supports advanced workflows such as Omni scenario contrasts and stream-order pruning.
+
+**Available configurations:** CONUS
+
+#### WEPPcloud-Revegetation
+
+Supports burn severity uploads and leverages historical vegetative cover data from the Rangeland Analysis Platform (RAP) to model post-fire hydrology and erosion. Users can simulate stochastic wildfires, recovery trajectories, and cover transformations across perennial, annual, shrub, and tree components following a fire event.
+
+**Available configurations:** CONUS, Multiple OFE (CONUS), 10m Multiple OFE (CONUS), Alaska (experimental)
+
+#### WEPPcloud-EU (Europe)
+
+Designed for European watersheds. Uses ESDAC land use classifications, EU-SoilHydroGrids for soil properties, and E-OBS climate data to match U.S. climate stations by monthly precipitation and temperature patterns. The PeP (Post-fire Erosion and Prevention) extension adds post-fire erosion modeling and WATAR ash transport for European landscapes.
+
+#### WEPPcloud-AU (Australia)
+
+Experimental interface for Australian watersheds. Assigns land management from the Land Use of Australia 2010-11 dataset and constructs soils from ASRIS data. Climate stations are selected using AGDC monthly precipitation and temperature patterns.
+
+#### WEPPcloud-RHEM
+
+Runs the Rangeland Hydrology and Erosion Model (RHEM) across the United States. Where available, foliar and ground covers are estimated from NLCD Shrubland 2016 data, and SSURGO/STATSGO identifies soil textures.
+
+### Site-Specific Resources
+
+Some interfaces are configured for specific geographic areas with region-specific datasets:
+
+- **Lake Tahoe** — incorporates region-specific soil, phosphorus, and estimated soil burn severity datasets
+- **Hazard SEES FireEarth** — data portals for the Hazard SEES FireEarth Project, including Seattle and Portland municipal watersheds
+
+### Legacy Interfaces
+
+The original **WEPPcloud** and **WEPPcloud-PEP** interfaces are still available but have been deprecated. For new projects, use the (Un)Disturbed interface instead. The legacy WEPPcloud-PEP interface is limited to four general soils based on texture, whereas (Un)Disturbed incorporates spatial soil variability from SSURGO/STATSGO databases.
+
 ---
 
 ## Creating a Project
