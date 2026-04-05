@@ -14,6 +14,9 @@ This quick start walks a new WEPPcloud user through a standard first watershed r
 
 This guide intentionally stays on the main happy path. It does **not** cover Omni scenarios, treatment comparisons, calibration, or advanced WEPP options.
 
+To follow along with this walkthrough, download the example SBS raster:
+<a href="/weppcloud/static/resources/baer/Rattlesnake.tif">Download Example 4 Class SBS Map (Rattlesnake Fire)</a>
+
 ---
 
 ## Before you begin
@@ -44,27 +47,12 @@ You can set a **Project Name** and **Scenario** in the page header if you want t
 
 ![My Runs page](/usersum/static/weppcloud/quick-start/my-runs.png)
 
-![New project landing page](/usersum/static/weppcloud/quick-start/new-project.png)
+![New project landing page](/usersum/static/weppcloud/quick-start/interfaces-new-project.png)
 
 ---
 
-## 2. Find your watershed on the map
 
-Use the map at the top of the run page to move to your watershed:
-
-- pan by clicking and dragging the map
-- zoom with the mouse wheel or trackpad
-- keep zooming until the full watershed area is clearly visible
-
-The default channel delineation workflow usually uses the **current map extent**, so what is visible on the map matters.
-
-> Important: make sure the watershed ridgeline is fully inside the visible map extent before you build channels or subcatchments. If the watershed extends beyond the map boundary, delineation can fail or produce the wrong watershed.
-
-![Run page map extent](/usersum/static/weppcloud/quick-start/run-page-map.png)
-
----
-
-## 3. Upload the SBS map
+## 2. Upload the SBS map
 
 Open **Soil Burn Severity**.
 
@@ -91,6 +79,22 @@ If the browser gets stuck in a system file picker, cancel the dialog and try aga
 If you do **not** have an SBS raster, the interface also offers **Specify Uniform SBS**, but for a real post-fire assessment an uploaded mapped SBS raster is usually the better choice.
 
 ![SBS upload control](/usersum/static/weppcloud/quick-start/sbs-upload.png)
+
+---
+
+## 3. Find your watershed on the map
+
+Use the map at the top of the run page to move to your watershed:
+
+- pan by clicking and dragging the map
+- zoom with the mouse wheel or trackpad
+- keep zooming until the full watershed area is clearly visible
+
+The default channel delineation workflow usually uses the **current map extent**, so what is visible on the map matters.
+
+> Important: make sure the watershed ridgeline is fully inside the visible map extent before you build channels or subcatchments. If the watershed extends beyond the map boundary, delineation can fail or produce the wrong watershed.
+
+![Run page map extent](/usersum/static/weppcloud/quick-start/run-page-map.png)
 
 ---
 
@@ -123,12 +127,7 @@ WEPPcloud will acquire elevation data for the current extent and extract the cha
 
 Open **Outlet**.
 
-For this quick start, use the **longitude, latitude** option instead of setting the outlet interactively on the map.
-
-1. choose **Longitude, Latitude** as the outlet input method
-2. enter the outlet longitude
-3. enter the outlet latitude
-4. click the button that sets or applies the outlet
+Click **Use Cursor** and set the outlet location as shown in the figure below.
 
 WEPPcloud snaps the selection to the drainage network and stores the outlet location.
 
@@ -142,7 +141,8 @@ The cursor tool is available, but the longitude/latitude option is usually easie
 - make sure the coordinates are near the downstream end of the mapped drainage network
 - if the result looks wrong, update the coordinates and apply the outlet again
 
-![Outlet by longitude and latitude](/usersum/static/weppcloud/quick-start/outlet-lon-lat.png)
+![Set Outlet Control](/usersum/static/weppcloud/quick-start/set-outlet-control.png)
+![Outlet location on map](/usersum/static/weppcloud/quick-start/set-outlet-map.png)
 
 ---
 
@@ -165,7 +165,7 @@ A common failure is that the watershed extends outside the map extent used durin
 4. set the **Outlet** again
 5. rerun **Build Subcatchments**
 
-![Subcatchments control](/usersum/static/weppcloud/quick-start/subcatchments.png)
+![Subcatchments control after delineation](/usersum/static/weppcloud/quick-start/subcatchment-delineation.png)
 
 ---
 
@@ -176,7 +176,7 @@ Open **Landuse Options**.
 For a standard first run:
 
 1. leave **Landuse mode** on **Determine per hillslope**
-2. leave the default landcover dataset selected
+2. select `nlcd/ever_forest/2017` for the landcover dataset.
 3. click **Build Landuse**
 
 WEPPcloud assigns landuse or management classes to each hillslope using the selected landcover dataset.
@@ -184,12 +184,14 @@ WEPPcloud assigns landuse or management classes to each hillslope using the sele
 ### Landuse notes
 
 - **Determine per hillslope** is the usual starting point
+- Select the `ever_forest` layer when you want WEPPcloud to model landuse as forest anywhere that has ever historically been forested
+- Select `2017` because it is the year before the fire in this walkthrough, which keeps the landcover input on a pre-fire baseline
 - **Single landuse for watershed** is only for cases where you intentionally want one management everywhere
 - **Upload landcover map** is an advanced workflow and usually not needed for onboarding
 
 If you are using a disturbed run, WEPPcloud can also apply burn-related landuse effects based on the SBS map.
 
-![Landuse control](/usersum/static/weppcloud/quick-start/landuse.png)
+![Landuse control](/usersum/static/weppcloud/quick-start/landuse-after-build.png)
 
 ---
 
@@ -221,7 +223,7 @@ Open **Climate Options**.
 
 For a standard first run:
 
-1. choose a climate dataset appropriate for your work
+1. choose a climate dataset appropriate for your work. 
 2. for a simple onboarding run, use the default recommended dataset already selected by the interface
 3. leave **Station selection mode** on **Auto** or use **Multi-factor ranking** if you want to inspect station choices manually
 4. leave **Spatial mode** at the default unless you specifically need per-hillslope climate variation
@@ -311,6 +313,6 @@ Get a clean baseline run working first. After that, branch into advanced options
 
 ## Related documentation
 
-- [User Guide](/usersum/view/weppcloud/user-guide.md)
-- [WEPP Advanced Options](/usersum/view/weppcloud/wepp-advanced-options.md)
-- [rq-engine](/usersum/view/weppcloud/rq-engine.md)
+- [User Guide](user-guide.md)
+- [WEPP Advanced Options](wepp-advanced-options.md)
+- [rq-engine](rq-engine.md)
