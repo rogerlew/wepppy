@@ -58,7 +58,9 @@ WEPP first executes hydrologic and erosion calculations for each hillslope and c
 
 ![Diagram of the hydrologic cycle showing precipitation, interception, infiltration, evapotranspiration, surface runoff, subsurface flow, deep percolation, and streamflow pathways represented in WEPP.](/weppcloud/usersum/static/weppcloud/hydrologic-cycle.png)
 
-*Figure: Hydrologic cycle processes represented in WEPP.*
+*Figure 1. Hydrologic cycle processes represented in WEPP.*
+
+Extended figure descriptions for Figures 1 and 2 are provided in the `Extended Figure Descriptions` section at the end of this page.
 
 - WEPP simulates surface hydrology and hydraulics, subsurface hydrology, vegetation growth and residue decomposition, and sediment detachment and transport along each hillslope and channel segment using four major input files: climate, slope, soil, and vegetation.
 - Climate:
@@ -85,6 +87,21 @@ WEPP first executes hydrologic and erosion calculations for each hillslope and c
 - Subsurface flow:
   - Subsurface lateral flow from hillslopes is estimated using Darcy’s law.
 - WEPP maintains a continuous daily water balance of surface runoff, subsurface lateral flow, soil evaporation, plant transpiration, residue evaporation, total soil water, deep percolation, snow accumulation and melt, and frost and thaw.
+
+![A scientific diagram comparing infiltration excess overland flow, also called Hortonian runoff, in dry soil and saturation excess overland flow in saturated soil. Extended description provided at the end of this page.](/weppcloud/usersum/static/weppcloud/types-of-runoff.png)
+
+*Figure 2. Types of surface runoff relevant to WEPP infiltration and saturation processes.*
+
+WEPP models two surface-runoff mechanisms: infiltration-excess overland flow and saturation-excess overland flow. Infiltration-excess runoff occurs when rainfall intensity exceeds the soil's ability to absorb water at the surface, while saturation-excess runoff occurs when the soil profile is already full and cannot store additional water.
+
+- Infiltration-excess (Hortonian) runoff:
+  - Runoff is generated in an unsaturated soil profile when rainfall intensity exceeds the infiltration capacity of the soil.
+  - This behavior is commonly associated with parking lots, arid locations during intense rainfall, water-repellent soils, frozen soils, and crusted soils.
+  - The surface infiltration rate is limited by the hydraulic conductivity of the near-surface layer.
+  - This type of runoff occurs only while rainfall is occurring.
+- Saturation-excess runoff:
+  - Runoff occurs because the soil is saturated and cannot store any additional water.
+  - Because it is controlled by antecedent wetness and storage limits, this type of runoff can be present even on a sunny day.
 
 ### Hillslope Erosion
 
@@ -120,3 +137,44 @@ WEPP first executes hydrologic and erosion calculations for each hillslope and c
 - A FAO 56 Penman-Monteith method for reference and actual evapotranspiration (ET) developed by Allen et al. (1998) (Wu and Dun, 2004).
 - Implementation of more appropriate channel routing methods (for example kinematic wave and Muskingum-Cunge) for perennial streams (Wang et al., 2014).
 - A linear reservoir groundwater baseflow contribution from hillslopes to channel streamflow (Srivastava et al., 2017).
+
+### Extended Figure Descriptions
+
+#### Figure 1
+
+A scientific diagram illustrating hydrologic flow and transfer processes on a stylized cross-section of a sloped landscape that runs from an upland area on the left to a valley with a stream on the right.
+
+- Landscape and subsurface structure:
+  - `Topsoil layer`: A light brown soil layer is at the surface. Within this layer, a horizontal dotted line marks the lower boundary of the `Soil water` zone.
+  - `Unsaturated zone`: Below the `Soil water` boundary is a thick light brown layer labeled `Unsaturated zone`, representing a porous zone that contains both air and water.
+  - `Saturated zone and water table`: Below the unsaturated zone is a large light blue area representing the saturated zone. A curving blue line labeled `Water table` separates the two subsurface zones, follows the contour of the landscape, and connects to the stream.
+  - `Stream`: At the valley floor, a small body of water is labeled `Stream`.
+- Water input and output processes:
+  - `Precipitation` on the left: A cloud icon sits above the upland area with a downward arrow labeled `Precipitation`. Below it, an arrow labeled `Infiltration` points from the surface into the topsoil.
+  - `Precipitation` on the right: A second cloud icon and downward arrow labeled `Precipitation` show rainfall over the right side of the landscape.
+  - `Evapotranspiration`: On the right-hand slope near the valley, two tree-like plants have upward arrows labeled `Evapotranspiration`, showing water loss from plants and soil to the atmosphere.
+  - `Evaporation`: On the right-hand upland area, an upward arrow labeled `Evaporation` shows direct water loss from the soil surface to the atmosphere.
+- Subsurface flow and transfer processes:
+  - `Recharge`: Within the unsaturated zone, a downward arrow labeled `Recharge` shows water moving downward toward the `Water table`.
+  - `Lateral flow`: Within the unsaturated zone, a dotted right-pointing arrow labeled `Lateral flow` shows downslope subsurface movement above the water table.
+  - `Baseflow` in the saturated zone: Within the light blue saturated zone, a long right-pointing arrow labeled `Baseflow` shows groundwater flow through the saturated material.
+  - `Baseflow` into the stream: Near the valley floor, a second arrow labeled `Baseflow` points from the water table into the stream bed, showing groundwater discharge to the stream.
+- Surface water flow:
+  - `Surface runoff` on the main hillslope: Above the ground surface on the main slope, a right-pointing arrow labeled `Surface runoff` shows overland flow moving downslope.
+  - `Surface runoff` into the stream: On the opposite side of the stream, a shorter right-pointing arrow labeled `Surface runoff` points directly into the stream.
+  - `Stream convergence`: The `Stream` is shown as the destination for both surface runoff and baseflow, and its water surface is continuous with the water table.
+
+#### Figure 2
+
+This diagram, titled "Types of Surface Runoff," compares two side-by-side cross-sections of a sloped soil landscape and shows two different runoff mechanisms.
+
+- Left panel: Infiltration excess overland flow, also called Hortonian runoff.
+  - The soil is labeled `Dry soil` and is drawn with large pores that are not filled with water.
+  - Blue arrows labeled `Precipitation` fall onto the hillslope.
+  - A thin blue layer labeled `Runoff` moves downslope across the surface.
+  - An inset chart shows the condition `Rainfall Intensity > Infiltration Capacity`, indicating that runoff occurs because rainfall arrives faster than the dry soil can absorb it.
+- Right panel: Saturation excess overland flow.
+  - The soil is labeled `Saturated soil` and is filled with blue water, indicating that the pores are already full.
+  - Blue arrows labeled `Precipitation` fall onto the hillslope.
+  - A thicker layer labeled `Runoff` moves downslope across the surface.
+  - An inset chart states `Soil Saturated; Water Table rises to Surface`, indicating that runoff occurs because the soil cannot store any additional water.
