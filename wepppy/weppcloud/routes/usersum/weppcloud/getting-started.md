@@ -5,6 +5,7 @@ This guide walks you through creating your first WEPPcloud project and introduce
 ## User Accounts
 
 You can use WEPPcloud with or without an account, but creating one is recommended.
+Use [Register](/register) to create an account and [Login](/login) to sign in.
 
 ### Anonymous Access
 
