@@ -153,6 +153,16 @@ def test_usersum_doc_route_renders_wepp_interchange(usersum_client) -> None:
     assert "loss_pw0.out.parquet" in body
 
 
+def test_usersum_doc_route_renders_wepp_run_results(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.wepp_run_results")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "which result should I open first?" in body
+    assert "Fork Project and Run Undisturbed" in body
+    assert "wepppy/weppcloud/routes/usersum/weppcloud/wepp-run-results.md" in body
+
+
 def test_usersum_doc_route_renders_sbs_map_preparation(usersum_client) -> None:
     response = usersum_client.get("/usersum/doc/usersum.weppcloud.sbs_map_preparation")
     assert response.status_code == 200
@@ -176,12 +186,13 @@ def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
     climate_idx = body.index("/usersum/doc/usersum.weppcloud.climate_options")
     wepp_idx = body.index("/usersum/doc/usersum.weppcloud.wepp_model")
     advanced_idx = body.index("/usersum/doc/usersum.weppcloud.wepp_advanced_options")
+    run_results_idx = body.index("/usersum/doc/usersum.weppcloud.wepp_run_results")
     omni_idx = body.index("/usersum/doc/usersum.source.omni")
     bootstrap_idx = body.index("/usersum/doc/usersum.weppcloud.bootstrap")
     observed_idx = body.index("/usersum/doc/usersum.weppcloud.observed_model_fitting")
     disturbed_lookup_idx = body.index("/usersum/doc/usersum.weppcloud.disturbed_land_soil_lookup")
     calibration_idx = body.index("WEPP Calibration")
-    assert disturbed_idx < climate_idx < wepp_idx < advanced_idx < omni_idx < calibration_idx
+    assert disturbed_idx < climate_idx < wepp_idx < advanced_idx < run_results_idx < omni_idx < calibration_idx
     assert calibration_idx < bootstrap_idx < observed_idx < disturbed_lookup_idx
 
     faq_idx = body.index("/usersum/doc/usersum.weppcloud.faq")

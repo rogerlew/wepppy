@@ -25,6 +25,8 @@ roots:
         doc_id: usersum.weppcloud.wepp_model
       - key: usersum.weppcloud.wepp_advanced_options
         doc_id: usersum.weppcloud.wepp_advanced_options
+      - key: usersum.weppcloud.wepp_run_results
+        doc_id: usersum.weppcloud.wepp_run_results
       - key: usersum.source.omni
         doc_id: usersum.source.omni
       - key: usersum.modeling_basics.wepp_calibration

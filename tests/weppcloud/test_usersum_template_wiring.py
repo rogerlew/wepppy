@@ -39,6 +39,15 @@ def test_usersum_header_has_weppcloud_brand_and_theme_switcher() -> None:
     assert "{% include 'header/_theme_switcher.htm' %}" in contents
 
 
+def test_wepp_reports_template_links_to_wepp_run_results_usersum_doc() -> None:
+    root = Path(__file__).resolve().parents[2]
+    template = root / "wepppy" / "weppcloud" / "templates" / "controls" / "wepp_reports.htm"
+    contents = _read(template)
+
+    assert "wepp-run-results.md" in contents
+    assert "WEPP Run Results guidance" in contents
+
+
 def test_theme_switcher_labels_aa_checked_and_sensory_preference_themes() -> None:
     root = Path(__file__).resolve().parents[2]
     header = root / "wepppy" / "weppcloud" / "templates" / "header" / "_theme_switcher.htm"

@@ -1,0 +1,179 @@
+# WEPP Run Results
+
+WEPPcloud's **Run Results** panel is the main place to open the outputs from a completed WEPP run. It groups the most common runoff, erosion, water-balance, and export links for the current project so you can move from "the run finished" to "which result should I open first?" without browsing the run directory.
+
+Use this page as a report chooser. Start with the question you are trying to answer, then open the report family that matches that question. Not every link appears in every run. Some items depend on continuous-climate output, enabled exports, interchange conversion, or optional tools such as `Storm Event Analyzer`.
+
+## How To Use This Page
+
+The Run Results surface usually groups links into four families:
+
+| Report family | Use it when you want to... | Typical starting points |
+| --- | --- | --- |
+| `WEPP Results` | answer the main runoff and erosion questions for this run | `Watershed Loss Summary`, `Return Periods Report`, `Summary by Landuse Report`, `Sediment Characteristics Report`, `GL Dashboard` |
+| `Exports` | download supporting files for QA, GIS, or sharing | `Prep Details`, `Post WEPP Geopackage Features Export`, `Post WEPP Geodatabase (ESRI) Features Export` |
+| `Water Balance Reports` | understand how runoff, lateral flow, and baseflow behave through time | `Average Annual Report`, `Yearly Report`, `Daily Runoff / Lateral Flow / Baseflow Graph` |
+| `Fork Project and Run Undisturbed` | create a comparison run with disturbance removed | `Fork, rebuild, and run WEPP undisturbed` |
+
+A practical way to choose among them:
+
+- Start with `Watershed Loss Summary` when you need the main outlet-scale runoff and sediment numbers.
+- Use `Summary by Landuse Report` and `GL Dashboard` when you need to find likely source areas or compare spatial patterns across the watershed.
+- Use `Return Periods Report` when your question is about long-term frequency or planning-level interpretation rather than one storm.
+- Use `Storm Event Analyzer` for event-scale review when it is available. For single-storm work, that tool is preferred over legacy single-storm output links.
+- Use the CSV and export links when you need files to analyze outside the browser.
+
+Some links are conditional:
+
+| Link or section | When it is usually available |
+| --- | --- |
+| `Storm Event Analyzer` | Continuous-climate runs with the needed storm-metric data prepared |
+| `TotalWatSed3 CSV` and `Interchange README (schema + preview)` | Runs where interchange outputs were generated |
+| `TotalWatSed2 CSV` | Runs where the legacy compatibility file still exists |
+| `Exports` items | Only if that export artifact was generated and published for the run |
+| `Water Balance Reports` | Continuous-climate runs; they are generally not shown for single-storm runs |
+| `Fork, rebuild, and run WEPP undisturbed` | Disturbed runs with an SBS-based setup where an undisturbed comparison makes sense |
+
+## WEPP Results
+
+Use these links after a successful WEPP run to answer different kinds of questions about the same model output. Start with the summary reports for planning numbers, then move to the interactive tools or CSV downloads when you need more detail.
+
+### `Watershed Loss Summary`
+
+- **What it is for:** The main outlet, hillslope, and channel summary for runoff, discharge, soil loss, sediment delivery, and related watershed-scale totals.
+- **When to use it:** Use this first when you need the headline numbers for a run or want a quick outlet-scale comparison between scenarios.
+- **Cautions and limits:** For continuous runs, the values are average annual results over the simulated period. Outlet values tell you what leaves the watershed, not which hillslopes caused it.
+- **Do not confuse it with:** `Return Periods Report`, which is event-frequency oriented, or `Summary by Landuse Report`, which groups results by landuse instead of by outlet, hillslope, and channel summary tables.
+
+### `Return Periods Report`
+
+- **What it is for:** A recurrence-interval view of modeled event metrics such as precipitation, runoff, peak discharge, and sediment yield.
+- **When to use it:** Use it when you need frequency-style interpretation such as "about a 2-year" or "10-year" modeled event under the run's climate and land conditions.
+- **Cautions and limits:** These are modeled return periods from the run's event set, not observed gage statistics or a regulatory flood study. They depend on the simulated climate, exclusions, and selected metric.
+- **Do not confuse it with:** NOAA Atlas 14 precipitation products or `Storm Event Analyzer`, which helps you inspect specific storms rather than summarize recurrence intervals.
+
+### `Summary by Landuse Report`
+
+- **What it is for:** An average-annual report grouped by landuse and management description, including runoff, lateral flow, baseflow, soil loss, sediment yield, and sediment deposition.
+- **When to use it:** Use it when you want to see which landuse groups are contributing most to runoff or sediment and compare management categories.
+- **Cautions and limits:** It is a grouped summary, not a map. Large landuse groups can hide important within-group variation, and the totals are modeled averages, not observed measurements.
+- **Do not confuse it with:** `Watershed Loss Summary`, which is watershed and outlet focused, or `GL Dashboard`, which is better for spatial exploration.
+
+### `Sediment Characteristics Report`
+
+- **What it is for:** A particle-based summary of sediment leaving hillslopes and the watershed outlet, including class fractions, particle types, and average annual sediment delivery or discharge.
+- **When to use it:** Use it when particle size, organic matter fraction, or enrichment matters for interpretation, treatment planning, or downstream sediment questions.
+- **Cautions and limits:** This is about sediment composition and class distribution, not event timing. It is based on modeled sediment classes and average annual summaries.
+- **Do not confuse it with:** `Watershed Loss Summary`, which gives simpler mass totals, or `Storm Event Analyzer`, which focuses on individual storms.
+
+### `TotalWatSed3 CSV`
+
+- **What it is for:** A downloadable daily watershed table with watershed-wide water and sediment terms.
+- **When to use it:** Use it when you want to graph, filter, or analyze daily modeled results outside WEPPcloud in a spreadsheet, notebook, GIS workflow, or other analysis tool.
+- **Cautions and limits:** It is a daily watershed aggregate, not a per-hillslope table and not an event-by-event report. Column names are technical, and the file is meant for analysis rather than quick interpretation.
+- **Do not confuse it with:** `Storm Event Analyzer`, which is event-focused, or `TotalWatSed2 CSV`, which is an older compatibility export.
+
+### `TotalWatSed2 CSV`
+
+- **What it is for:** A downloadable legacy-style watershed results table kept for compatibility with older workflows.
+- **When to use it:** Use it only when an existing workflow, script, or outside collaborator specifically asks for `totalwatsed2`.
+- **Cautions and limits:** In current WEPPcloud use, this is a compatibility download rather than the main daily interchange table. For new analysis, `TotalWatSed3 CSV` is usually the better starting point.
+- **Do not confuse it with:** `TotalWatSed3 CSV`, which is the newer interchange-based daily watershed summary used by newer reports and tools.
+
+### `The Deval in the Details Report`
+
+- **What it is for:** A rendered visualization report that packages run results into a more presentation-oriented detail view than the standard WEPP tables.
+- **When to use it:** Use it when you want a richer visual narrative for review, communication, or exploratory interpretation beyond the built-in summary tables.
+- **Cautions and limits:** It may take time to render and can refresh asynchronously. Treat it as a derived presentation surface and confirm important planning numbers against the core WEPP reports.
+- **Do not confuse it with:** `GL Dashboard`, which is interactive and map-based, or the CSV downloads, which are raw analysis tables.
+
+### `GL Dashboard`
+
+- **What it is for:** An interactive map and graph dashboard for exploring WEPP outputs spatially and, when available, by year, event, or scenario.
+- **When to use it:** Use it when your main question is "where in the watershed is this happening?" or when you need to compare mapped patterns rather than read a static table.
+- **Cautions and limits:** It is an exploratory interface, not a single authoritative summary table. Available layers depend on which outputs and optional workflows exist for the run.
+- **Do not confuse it with:** `Summary by Landuse Report`, which is grouped by category rather than mapped geography, or `Storm Event Analyzer`, which is focused on storm selection and event hydrology.
+
+### `Interchange README (schema + preview)`
+
+- **What it is for:** The auto-generated guide to available interchange outputs, including table names, schemas, and a small preview of rows.
+- **When to use it:** Use it before downloading or querying interchange files when you need to know what columns exist and what each table represents.
+- **Cautions and limits:** It is schema-oriented and more technical than most end-user pages. The exact files listed vary by run, and sample rows are only a preview.
+- **Do not confuse it with:** A user interpretation guide. It helps you understand file structure, not whether the modeled result is hydrologically reasonable.
+
+### `Storm Event Analyzer`
+
+- **What it is for:** An interactive event-scale tool that helps you inspect individual modeled storms and their hydrologic behavior.
+- **When to use it:** Use it when you want to study specific modeled storms, compare event behavior, or do event-scale analysis in supported continuous-climate runs.
+- **Cautions and limits:** It is event-focused, not a long-term average summary. Availability depends on the needed event and interchange datasets being present. It is the preferred event-analysis surface; legacy single-storm WEPP runs are deprecated.
+- **Do not confuse it with:** `Return Periods Report`, which summarizes ranked recurrence intervals, or old single-storm outputs, which are legacy and not the recommended workflow.
+
+## Exports
+
+These links download shareable run artifacts. They are not live report pages, and a link can be unavailable if the export was not generated or published for that run.
+
+### `Prep Details`
+
+- **What it is for:** A tabular prep snapshot of the watershed setup used to build the run.
+- **When to use it:** Use it when you want QA on how WEPPcloud represented the watershed, or when you need a spreadsheet-style handoff for review.
+- **Cautions and limits:** This is a tabular prep export, not a mapped GIS package. It describes prepared inputs, not simulated runoff, streamflow, or sediment response.
+- **Do not confuse it with:** The post-WEPP GIS exports, which add spatial layers and WEPP summary results, or the water-balance reports, which summarize modeled hydrology after the run.
+
+### `Post WEPP Geopackage Features Export`
+
+- **What it is for:** A spatial post-run export for GIS users who want the watershed and WEPP summary layers in one package.
+- **When to use it:** Use it when you need watershed, channel, landuse, soil, and WEPP summary layers in one spatial package for mapping, symbology, or sharing.
+- **Cautions and limits:** This is a download artifact for the completed run, not the full raw WEPP output directory. It reflects the run that produced it, so rerun the project if inputs changed and you need fresh mapped outputs.
+- **Do not confuse it with:** `Average Annual Report` or `Yearly Report`, which are report pages, or the ESRI geodatabase export, which is similar content in a different GIS container.
+
+### `Post WEPP Geodatabase (ESRI) Features Export`
+
+- **What it is for:** An ArcGIS-oriented version of the post-WEPP spatial export.
+- **When to use it:** Use it when you need the same kind of mapped post-WEPP layers as the GeoPackage export but in an ESRI-native bundle for ArcGIS users.
+- **Cautions and limits:** This is mainly a delivery-format choice, not a different analysis. Availability depends on that geodatabase artifact being published for the run.
+- **Do not confuse it with:** The older shapefile-style ArcMap export, or the GeoPackage export. Those are format differences, not different model runs.
+
+## Water Balance Reports
+
+These links appear for continuous-climate WEPP runs and help explain where water is going in the modeled watershed. They do not replace sediment or outlet-loss reports, and they are generally not shown for single-storm runs.
+
+### `Average Annual Report`
+
+- **What it is for:** A multi-year average water-balance summary by modeled element.
+- **When to use it:** Use it when you are comparing scenarios and want the long-run average pattern of precipitation partitioning into evapotranspiration, runoff, lateral flow, percolation, and baseflow.
+- **Cautions and limits:** Averages smooth out wet years, dry years, and extremes. A similar average can hide very different year-to-year behavior.
+- **Do not confuse it with:** `Summary by Landuse Report`, which groups by land cover class, or `Yearly Report`, which keeps each water year separate.
+
+### `Yearly Report`
+
+- **What it is for:** A year-by-year watershed water-balance table with summary rows.
+- **When to use it:** Use it when you want to identify unusually wet or dry years, compare scenarios year by year, or test whether excluding the first one, two, or five simulation years changes the interpretation.
+- **Cautions and limits:** This is a watershed-scale table, not a mapped hillslope breakdown. Early years can reflect startup or initial-condition effects, so the exclusion control is often useful.
+- **Do not confuse it with:** `Average Annual Report`, which collapses the run into multi-year averages, or the daily graph, which focuses on timing within years.
+
+### `Daily Runoff / Lateral Flow / Baseflow Graph`
+
+- **What it is for:** An interactive daily hydrograph for the modeled watershed.
+- **When to use it:** Use it when you want to see whether peaks are driven mainly by surface runoff, sustained by lateral flow, or supported by baseflow, and how those patterns line up with precipitation or rain plus melt.
+- **Cautions and limits:** This is a watershed-scale graph in depth units, not an observed gage comparison and not a sediment-event plot. Early simulation years can be excluded if startup effects distract from the pattern.
+- **Do not confuse it with:** `Storm Event Analyzer` for event-focused work, or observed model-fit plots that compare simulated and measured streamflow.
+
+## Fork Project and Run Undisturbed
+
+### `Fork, rebuild, and run WEPP undisturbed`
+
+This action opens the fork workflow with the undisturbed option already selected. WEPPcloud creates a new derived run, removes the soil burn severity input, rebuilds landuse and soils, and reruns WEPP so the fork becomes an undisturbed comparison project. Your original run is not changed.
+
+| Topic | Guidance |
+| --- | --- |
+| What it does | Makes a copy of the current project, removes SBS-based disturbance, rebuilds the affected inputs, and runs WEPP again in an undisturbed scenario. |
+| When to use it | Use it when you want a quick pre-fire or no-disturbance comparison built from the same watershed, climate, and general project setup as the disturbed run. |
+| Common mistakes | Do not treat it as an edit to the current project; it creates a separate run. Do not assume it removes every other scenario choice you made earlier. Non-disturbance settings copied into the fork may still need review. |
+| Limits | This option is only relevant for disturbed projects that include an SBS map. It is not a substitute for rebuilding a project with different delineation, climate, or treatment assumptions. The new fork still needs time to rerun before its results are ready. |
+
+## Related Docs
+
+- [WEPP Model](wepp-model.md)
+- [WEPP Advanced Options](wepp-advanced-options.md)
+- [WEPP Interchange Outputs](wepp-interchange.md)
+- [Getting Started](getting-started.md)

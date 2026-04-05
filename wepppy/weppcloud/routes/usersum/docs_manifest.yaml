@@ -351,6 +351,15 @@ docs:
     audience_tags: [user, operator]
     status: active
     nav_key: usersum.weppcloud.wepp_advanced_options
+  - doc_id: usersum.weppcloud.wepp_run_results
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-run-results.md
+    title: WEPP Run Results
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.wepp_run_results
   - doc_id: usersum.weppcloud.wepp_model
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-model.md
