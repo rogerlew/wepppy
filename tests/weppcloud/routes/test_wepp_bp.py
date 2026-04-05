@@ -1012,6 +1012,7 @@ def test_streamflow_supports_roads_output_scope(wepp_client, monkeypatch: pytest
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "ok"
     assert captured_query["payload"]["datasets"][0]["path"] == "wepp/roads/output/interchange/totalwatsed3.parquet"
+    assert captured_query["payload"]["computed_columns"][0]["sql"] == "MAKE_DATE(stream.year, 1, 1) + (stream.julian - 1)"
     assert captured_template["template_name"] == "reports/wepp/daily_streamflow_graph.htm"
     assert captured_template["kwargs"]["output_scope"] == "roads"
 

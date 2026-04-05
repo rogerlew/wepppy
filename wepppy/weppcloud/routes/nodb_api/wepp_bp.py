@@ -95,6 +95,17 @@ def _resolve_output_scope():
         return response
 
 
+def _daily_simulation_date_sql(dataset_alias: str) -> str:
+    """Build a stable date expression for daily WEPP interchange datasets.
+
+    Some daily interchange rows can carry a terminal overflow month/day pair
+    (for example `month=13`, `day_of_month=1`) while `year` and `julian`
+    remain ordered and usable. Constructing the chart index from `year` and
+    `julian` keeps the streamflow query resilient to that overflow row.
+    """
+    return f"MAKE_DATE({dataset_alias}.year, 1, 1) + ({dataset_alias}.julian - 1)"
+
+
 def _safe_gt_timestamp(a, b) -> bool:
     if a is None or b is None:
         return False
@@ -1216,11 +1227,7 @@ def plot_wepp_streamflow(runid, config):
         "computed_columns": [
             {
                 "alias": "flow_date",
-                "date_parts": {
-                    "year": "stream.year",
-                    "month": "stream.month",
-                    "day": "stream.day_of_month",
-                },
+                "sql": _daily_simulation_date_sql("stream"),
             }
         ],
         "order_by": ["flow_date"],
