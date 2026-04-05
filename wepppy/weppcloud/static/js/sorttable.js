@@ -17,6 +17,7 @@
   const CUSTOM_KEY_ATTR = 'sorttable_customkey';
   const TYPE_DATA_ATTR = 'sortType';
   const DEFAULT_DIR_ATTR = 'sortDefault';
+  const HIDDEN_CONTENT_SELECTOR = '.invisible,[hidden],[aria-hidden="true"],script,style,template';
 
   const TYPE_NUMERIC = 'numeric';
   const TYPE_DATE = 'date';
@@ -229,7 +230,13 @@
     if (custom !== null) {
       return custom;
     }
-    return cell.textContent || cell.innerText || '';
+    if (!cell.querySelector(HIDDEN_CONTENT_SELECTOR)) {
+      return cell.textContent || cell.innerText || '';
+    }
+
+    const clone = cell.cloneNode(true);
+    clone.querySelectorAll(HIDDEN_CONTENT_SELECTOR).forEach((node) => node.remove());
+    return clone.textContent || clone.innerText || '';
   }
 
   function parseNumeric(value) {
