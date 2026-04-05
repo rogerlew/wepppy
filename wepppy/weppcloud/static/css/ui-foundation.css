@@ -3451,6 +3451,62 @@ h5:first-child {
   box-shadow: inset 0 0 0 2px var(--wc-color-accent-soft);
 }
 
+.wc-map-scale-control {
+  position: absolute;
+  left: var(--wc-space-sm);
+  bottom: var(--wc-space-sm);
+  z-index: 1001;
+  display: grid;
+  gap: 4px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  box-shadow: var(--wc-shadow-sm);
+  color: var(--wc-color-text);
+  pointer-events: none;
+}
+
+.wc-map-scale-control[hidden] {
+  display: none;
+}
+
+.wc-map-scale-control__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.wc-map-scale-control__bar {
+  display: flex;
+  align-items: center;
+}
+
+.wc-map-scale-control__line {
+  position: relative;
+  display: block;
+  height: 0;
+  border-top: 2px solid currentColor;
+}
+
+.wc-map-scale-control__line::before,
+.wc-map-scale-control__line::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  width: 0;
+  height: 10px;
+  border-left: 2px solid currentColor;
+}
+
+.wc-map-scale-control__line::before {
+  left: 0;
+}
+
+.wc-map-scale-control__line::after {
+  right: 0;
+}
+
 .wc-map .deck-widget-icon-button + .deck-widget-icon-button {
   border-left: 1px solid var(--wc-color-border);
 }

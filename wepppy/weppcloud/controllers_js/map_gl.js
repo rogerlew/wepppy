@@ -22,6 +22,13 @@ var MapController = (function () {
         return window.WCMapGlLayerControl;
     }
 
+    function getMapGlScaleControlHelpers() {
+        if (!window.WCMapGlScaleControl) {
+            throw new Error("Map GL controller requires WCMapGlScaleControl helpers.");
+        }
+        return window.WCMapGlScaleControl;
+    }
+
     function getMapGlFeatureUiHelpers() {
         if (!window.WCMapGlFeatureUi) {
             throw new Error("Map GL controller requires WCMapGlFeatureUi helpers.");
@@ -67,6 +74,7 @@ var MapController = (function () {
 
         var shared = getMapGlShared();
         var layerControlHelpers = getMapGlLayerControlHelpers();
+        var scaleControlHelpers = getMapGlScaleControlHelpers();
         var featureUiHelpers = getMapGlFeatureUiHelpers();
 
         var EVENT_NAMES = shared.EVENT_NAMES;
@@ -158,6 +166,13 @@ var MapController = (function () {
         var formElement = dom.qs("#setloc_form");
         var centerInput = dom.qs("#input_centerloc", formElement);
         var mapCanvasElement = dom.qs("#mapid");
+        var mapHostElement = null;
+        if (mapCanvasElement) {
+            mapHostElement = mapCanvasElement.closest ? mapCanvasElement.closest(".wc-map") : null;
+            if (!mapHostElement) {
+                mapHostElement = mapCanvasElement.parentElement || null;
+            }
+        }
         var drilldownElement = dom.qs("#drilldown");
         var subLegendElement = dom.qs("#sub_legend");
         var sbsLegendElement = dom.qs("#sbs_legend");
@@ -183,6 +198,7 @@ var MapController = (function () {
         var panes = {};
         var mapHandlers = {};
         var deckgl = null;
+        var scaleControl = null;
         var isApplyingViewState = false;
         var baseLayer = null;
         var baseLayerKey = basemapDefs.googleTerrain.key;
@@ -539,6 +555,9 @@ var MapController = (function () {
 
         function updateMapStatus() {
             if (!mapStatusElement && !mapStatusCenterElement && !mapStatusZoomElement && !mapStatusWidthElement) {
+                if (scaleControl && typeof scaleControl.update === "function") {
+                    scaleControl.update();
+                }
                 return;
             }
             var center = state.center;
@@ -554,6 +573,9 @@ var MapController = (function () {
             }
             if (mapStatusWidthElement) {
                 dom.setText(mapStatusWidthElement, width + "px");
+            }
+            if (scaleControl && typeof scaleControl.update === "function") {
+                scaleControl.update();
             }
         }
 
@@ -2445,6 +2467,27 @@ var MapController = (function () {
             longitude: state.center.lng,
             latitude: state.center.lat,
             zoom: state.zoom
+        });
+
+        scaleControl = scaleControlHelpers.ensureScaleControl({
+            hostElement: mapHostElement,
+            getCanvasSize: getCanvasSize,
+            getBounds: buildBounds,
+            getCenter: function () {
+                return { lat: state.center.lat, lng: state.center.lng };
+            },
+            calculateDistanceMeters: calculateDistanceMeters,
+            unproject: function (coordinate) {
+                if (!deckgl || typeof deckgl.unproject !== "function") {
+                    return null;
+                }
+                try {
+                    return deckgl.unproject(coordinate);
+                } catch (error) {
+                    console.warn("[Map Scale] Failed to unproject screen coordinate", error);
+                    return null;
+                }
+            }
         });
 
         var size = getCanvasSize();

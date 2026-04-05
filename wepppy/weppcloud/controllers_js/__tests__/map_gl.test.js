@@ -108,7 +108,25 @@ describe("Map GL controller", () => {
             this.setProps = jest.fn((next) => {
                 this.props = Object.assign({}, this.props, next);
             });
-            this.unproject = jest.fn(() => [-120.5, 45.25]);
+            this.unproject = jest.fn((coordinate) => {
+                const point = Array.isArray(coordinate) ? coordinate : [0, 0];
+                const width = Number.isFinite(this.props.width) ? this.props.width : 640;
+                const height = Number.isFinite(this.props.height) ? this.props.height : 480;
+                const viewState = this.props.viewState || this.props.initialViewState || {};
+                const zoom = Number.isFinite(viewState.zoom) ? viewState.zoom : 6;
+                const delta = 64 / Math.pow(2, zoom);
+                const centerLng = Number.isFinite(viewState.longitude) ? viewState.longitude : 0;
+                const centerLat = Number.isFinite(viewState.latitude) ? viewState.latitude : 0;
+                let lng = centerLng - delta + ((Number(point[0]) || 0) / width) * (delta * 2);
+                const lat = centerLat + delta - ((Number(point[1]) || 0) / height) * (delta * 2);
+                while (lng > 180) {
+                    lng -= 360;
+                }
+                while (lng < -180) {
+                    lng += 360;
+                }
+                return [lng, lat];
+            });
             deckInstance = this;
         }
         function MapView() {}
@@ -123,11 +141,13 @@ describe("Map GL controller", () => {
         }
         function WebMercatorViewport(opts) {
             this.opts = opts || {};
+            const zoom = Number.isFinite(this.opts.zoom) ? this.opts.zoom : 6;
+            const delta = 64 / Math.pow(2, zoom);
             this.getBounds = () => [
-                (this.opts.longitude || 0) - 1,
-                (this.opts.latitude || 0) - 1,
-                (this.opts.longitude || 0) + 1,
-                (this.opts.latitude || 0) + 1,
+                (this.opts.longitude || 0) - delta,
+                (this.opts.latitude || 0) - delta,
+                (this.opts.longitude || 0) + delta,
+                (this.opts.latitude || 0) + delta,
             ];
         }
         function FlyToInterpolator() {}
@@ -144,6 +164,7 @@ describe("Map GL controller", () => {
 
         await import("../map_gl_shared.js");
         await import("../map_gl_layer_control.js");
+        await import("../map_gl_scale_control.js");
         await import("../map_gl_feature_ui.js");
         await import("../map_gl.js");
     });
@@ -167,10 +188,12 @@ describe("Map GL controller", () => {
             delete global.window.createImageBitmap;
             delete global.window.WCMapGlShared;
             delete global.window.WCMapGlLayerControl;
+            delete global.window.WCMapGlScaleControl;
             delete global.window.WCMapGlFeatureUi;
         }
         delete global.WCMapGlShared;
         delete global.WCMapGlLayerControl;
+        delete global.WCMapGlScaleControl;
         delete global.WCMapGlFeatureUi;
         emittedEvents = [];
     });
@@ -189,7 +212,95 @@ describe("Map GL controller", () => {
         expect(Array.isArray(deckInstance.props.layers)).toBe(true);
         expect(deckInstance.props.layers.length).toBeGreaterThan(0);
         expect(document.querySelector('[data-map-layer-control="true"]')).not.toBeNull();
+        expect(document.querySelector('[data-map-scale-control="true"]')).not.toBeNull();
         expect(document.querySelectorAll('input[name="wc-map-basemap"]').length).toBeGreaterThan(0);
+    });
+
+    test("scale control updates label as zoom changes", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.bootstrap({ map: { center: [44.0, -116.0], zoom: 6 } });
+
+        const scaleLabel = document.querySelector(".wc-map-scale-control__label");
+        const scaleLine = document.querySelector(".wc-map-scale-control__line");
+        expect(scaleLabel).not.toBeNull();
+        expect(scaleLine).not.toBeNull();
+        const initialLabel = scaleLabel.textContent;
+        const initialWidth = scaleLine.style.width;
+
+        mapInstance.setView([44.0, -116.0], 10);
+
+        expect(scaleLabel.textContent).not.toBe(initialLabel);
+        expect(scaleLine.style.width).not.toBe(initialWidth);
+        expect(scaleLabel.textContent).toMatch(/m|km/);
+    });
+
+    test("scale control switches to english labels when unitizer distance prefers miles", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.bootstrap({ map: { center: [44.0, -116.0], zoom: 6 } });
+
+        const scaleLabel = document.querySelector(".wc-map-scale-control__label");
+        expect(scaleLabel.textContent).toMatch(/m|km/);
+
+        document.dispatchEvent(new CustomEvent("unitizer:preferences-changed", {
+            detail: {
+                preferences: { distance: "mi" },
+                tokens: { distance: "mi" }
+            }
+        }));
+
+        expect(scaleLabel.textContent).toMatch(/ft|mi/);
+    });
+
+    test("scale control applies async unitizer hydration when the client becomes ready", async () => {
+        global.UnitizerClient = {
+            getClientSync: jest.fn(() => null),
+            ready: jest.fn(() => Promise.resolve({
+                getPreferencePayload: () => ({ distance: "mi" }),
+            })),
+        };
+        global.window.UnitizerClient = global.UnitizerClient;
+
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.bootstrap({ map: { center: [44.0, -116.0], zoom: 6 } });
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const scaleLabel = document.querySelector(".wc-map-scale-control__label");
+        expect(scaleLabel.textContent).toMatch(/ft|mi/);
+    });
+
+    test("scale control hides when the viewport is too narrow", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.bootstrap({ map: { center: [44.0, -116.0], zoom: 6 } });
+
+        mapElement.getBoundingClientRect = () => ({
+            width: 90,
+            height: 480,
+            left: 0,
+            top: 0,
+        });
+
+        mapInstance.onMapChange();
+
+        const scaleRoot = document.querySelector('[data-map-scale-control="true"]');
+        expect(scaleRoot).not.toBeNull();
+        expect(scaleRoot.hidden).toBe(true);
+    });
+
+    test("scale control remains visible at zoom 0 near the antimeridian", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.bootstrap({ map: { center: [0, 179], zoom: 0 } });
+
+        const scaleRoot = document.querySelector('[data-map-scale-control="true"]');
+        const scaleLabel = document.querySelector(".wc-map-scale-control__label");
+        const scaleLine = document.querySelector(".wc-map-scale-control__line");
+
+        expect(scaleRoot).not.toBeNull();
+        expect(scaleRoot.hidden).toBe(false);
+        expect(scaleLabel.textContent).toMatch(/m|km/);
+        expect(scaleLine.style.width).not.toBe("");
+        expect(Number.parseInt(scaleLine.style.width, 10)).toBeGreaterThan(0);
     });
 
     test("feature modal dialog uses an explicit accessible name", () => {
