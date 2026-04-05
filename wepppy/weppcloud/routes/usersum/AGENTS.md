@@ -11,7 +11,7 @@
   - `wepppy/weppcloud/routes/usersum/templates/usersum/*`
   - developer authoring guides:
     - `wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md`
-    - `wepppy/weppcloud/routes/usersum/weppcloud/enduser_stub_authoring_guide.md`
+    - `wepppy/weppcloud/routes/usersum/weppcloud/enduser-stub-authoring-guide.md`
   - Usersum markdown content roots:
     - `wepppy/weppcloud/routes/usersum/db/`
     - `wepppy/weppcloud/routes/usersum/input-file-specifications/`

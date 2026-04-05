@@ -178,5 +178,5 @@ Relevant commands:
 ```bash
 PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py validate --require-vendor-files
 PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py build-index --write --require-vendor-files
-wctl doc-lint --path wepppy/weppcloud/routes/usersum/weppcloud/enduser_stub_authoring_guide.md
+wctl doc-lint --path wepppy/weppcloud/routes/usersum/weppcloud/enduser-stub-authoring-guide.md
 ```

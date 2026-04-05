@@ -200,7 +200,7 @@ docs:
     nav_key: usersum.weppcloud.enduser_authoring_guide
   - doc_id: usersum.weppcloud.enduser_stub_authoring_guide
     source: local
-    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/enduser_stub_authoring_guide.md
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/enduser-stub-authoring-guide.md
     title: ENDUSER Stub Authoring Guide
     min_role: developer
     category: weppcloud

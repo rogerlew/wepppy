@@ -2025,7 +2025,7 @@
         }
       ],
       "category": "weppcloud",
-      "content_hash": "b3847dcf0a9f931d60cd9046705e75a2b44fe53274ee800b88d3073a5f3f1d24",
+      "content_hash": "f6ead5158860680afa99b8355d7a6a7344ad214222889ba71bd5b3893c421087",
       "doc_id": "usersum.weppcloud.enduser_stub_authoring_guide",
       "headings": [
         "ENDUSER Stub Authoring Guide",
@@ -2057,15 +2057,15 @@
         "Review Checklist",
         "Usersum Publication Rules"
       ],
-      "legacy_route_path": "/usersum/view/weppcloud/enduser_stub_authoring_guide.md",
+      "legacy_route_path": "/usersum/view/weppcloud/enduser-stub-authoring-guide.md",
       "min_role": "developer",
       "nav_key": "usersum.weppcloud.enduser_stub_authoring_guide",
-      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/enduser_stub_authoring_guide.md",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/enduser-stub-authoring-guide.md",
       "route_path": "/usersum/doc/usersum.weppcloud.enduser_stub_authoring_guide",
       "source": "local",
       "status": "active",
       "title": "ENDUSER Stub Authoring Guide",
-      "updated_at": "2026-04-05T00:05:07.026066+00:00",
+      "updated_at": "2026-04-05T02:56:04.081188+00:00",
       "vendor_id": null,
       "vendor_route_path": null
     },
@@ -3082,7 +3082,7 @@
       "vendor_route_path": "/usersum/vendor/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md"
     }
   ],
-  "generated_at": "2026-04-05T02:52:47.052995+00:00",
+  "generated_at": "2026-04-05T02:56:22.704843+00:00",
   "nav_tree": [
     {
       "children": [
