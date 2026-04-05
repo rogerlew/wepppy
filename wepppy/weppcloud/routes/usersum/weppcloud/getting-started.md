@@ -5,7 +5,7 @@ This guide walks you through creating your first WEPPcloud project and introduce
 ## User Accounts
 
 You can use WEPPcloud with or without an account, but creating one is recommended.
-Use [Register](/register) to create an account and [Login](/login) to sign in.
+Use [Register](/weppcloud/register/) to create an account and [Login](/weppcloud/login/) to sign in.
 
 ### Anonymous Access
 
@@ -38,9 +38,9 @@ When you use OAuth, you authenticate directly with the provider (Google or GitHu
 
 ### What is an Interface?
 
-An interface is a preconfigured bundle of data sources, models, and settings that defines how a WEPPcloud project is set up and run. Each interface targets a specific geographic region and use case, determining which soils databases, land cover datasets, climate sources, and model options are available. When you start a new project, you choose an interface, and WEPPcloud configures everything accordingly.
+An interface is a preconfigured bundle of data sources, models, and settings that defines how a WEPPcloud project is set up and run. Each interface targets a specific geographic region and use case, determining which soils databases, land cover datasets, climate sources, and model options are available. When you start a new project, you choose an interface from the [interfaces page](/weppcloud/interfaces/), and WEPPcloud configures everything accordingly.
 
-All interfaces let you choose between **SI** (metric) and **English** (imperial) units when launching a project.
+All interfaces let you choose between **SI** (metric) and **English** (imperial) units when launching a project by right-clicking on a **Start** link.
 
 ### Active Interfaces
 
@@ -74,13 +74,6 @@ Experimental interface for Australian watersheds. Assigns land management from t
 
 Runs the Rangeland Hydrology and Erosion Model (RHEM) across the United States. Where available, foliar and ground covers are estimated from NLCD Shrubland 2016 data, and SSURGO/STATSGO identifies soil textures.
 
-### Site-Specific Resources
-
-Some interfaces are configured for specific geographic areas with region-specific datasets:
-
-- **Lake Tahoe** — incorporates region-specific soil, phosphorus, and estimated soil burn severity datasets
-- **Hazard SEES FireEarth** — data portals for the Hazard SEES FireEarth Project, including Seattle and Portland municipal watersheds
-
 ### Legacy Interfaces
 
 The original **WEPPcloud** and **WEPPcloud-PEP** interfaces are still available but have been deprecated. For new projects, use the (Un)Disturbed interface instead. The legacy WEPPcloud-PEP interface is limited to four general soils based on texture, whereas (Un)Disturbed incorporates spatial soil variability from SSURGO/STATSGO databases.
@@ -107,7 +100,7 @@ Run IDs make it easy to reference a project in conversation, in reports, or when
 
 ## How Projects Work
 
-A WEPPcloud project is **directory-based**. When you create a project, WEPPcloud sets up a folder on the server that stores everything related to your run: elevation data, soils, land cover, climate files, model inputs, simulation outputs, and any files you upload.
+A WEPPcloud project is **directory-based**. See [WEPPcloud Runs Directory Structure](weppcloud-runs-directory-structure.md) for a file-level reference. When you create a project, WEPPcloud sets up a folder on the server that stores everything related to your run: elevation data, soils, land cover, climate files, model inputs, simulation outputs, and any files you upload.
 
 As you work through each section of the run page — delineating a watershed, building landuse, configuring soils, selecting climate data, and running the WEPP model — you are **acquiring, processing, and saving resources** into your project directory. Each step builds on the previous one, gradually assembling a complete watershed model.
 
@@ -305,8 +298,7 @@ Quick links to your **user profile** (account settings, API tokens) and your **r
 
 ## Tips for New Users
 
-- **Save your work as you go.** Each Build step saves its results automatically, but consider creating an **Archive** snapshot before running the WEPP model or making significant changes.
 - **Use the README** to document your assumptions and decisions — your future self will thank you.
-- **Fork before experimenting.** If you want to try a different scenario, fork your project first so you can always return to the original.
 - **Browse your project files** to understand what WEPPcloud is producing at each step. The file browser is a great learning tool.
-- **Start simple.** Run a basic undisturbed project before adding modules like Ash Transport or Omni Scenarios.
+- **Start Simple and small.** Learn WEPPcloud with smaller projects before moving to larger watersheds or more advanced modules like Ash Transport or Omni Scenarios.
+- **Reach out for help.** If you need help, guidance, or want to discuss collaboration, contact the WEPPcloud team through [Help and Feedback](user-guide.md#help-and-feedback).
