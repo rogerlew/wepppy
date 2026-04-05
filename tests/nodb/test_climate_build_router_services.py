@@ -265,6 +265,7 @@ def _mode_service_climate(mode: ClimateMode, spatial_mode: ClimateSpatialMode):
     "mode,spatial_mode,expected",
     [
         (ClimateMode.Vanilla, ClimateSpatialMode.Single, ["vanilla"]),
+        (ClimateMode.Observed, ClimateSpatialMode.Single, ["observed_daymet"]),
         (ClimateMode.PRISM, ClimateSpatialMode.Multiple, ["prism", "prism_revision"]),
         (
             ClimateMode.ObservedPRISM,

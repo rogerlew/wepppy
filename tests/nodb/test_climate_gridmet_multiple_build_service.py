@@ -101,3 +101,31 @@ def test_worker_count_honors_env_override(monkeypatch: pytest.MonkeyPatch) -> No
 
     monkeypatch.setenv("WEPPPY_NCPU", "1")
     assert service._worker_count(default_workers=12, ncpu=8) == 8
+
+
+def test_build_rejects_invalid_observed_year_bounds(monkeypatch: pytest.MonkeyPatch) -> None:
+    service = ClimateGridmetMultipleBuildService()
+
+    monkeypatch.setattr(
+        service,
+        "_load_gridmet_client_functions",
+        lambda: (object(), object(), object(), object(), object()),
+    )
+    monkeypatch.setattr(service, "_build_measures", lambda _enum: [])
+    monkeypatch.setattr(service, "_build_interpolation_spec", lambda: {})
+
+    climate = SimpleNamespace(
+        logger=_RecordingLogger(),
+        watershed_instance=SimpleNamespace(centroid=(-116.0, 43.0)),
+        cli_dir="/tmp",
+        _require_observed_year_bounds_for_build=lambda: (_ for _ in ()).throw(
+            ValueError("observed_end_year must be an integer year")
+        ),
+    )
+
+    with pytest.raises(ValueError, match="observed_end_year must be an integer year"):
+        service.build(
+            climate,
+            build_observed_gridmet_interpolated_fn=lambda *_args, **_kwargs: "unused",
+            ncpu=1,
+        )

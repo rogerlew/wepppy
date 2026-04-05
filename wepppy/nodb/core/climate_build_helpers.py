@@ -595,16 +595,13 @@ def run_depnexrad_build(climate: "Climate", verbose: bool = False, attrs: Option
 
         cli_dir = os.path.abspath(climate.cli_dir)
         watershed = climate.watershed_instance
+        start_year, end_year = climate._require_observed_year_bounds_for_build()
 
         lng, lat = watershed.centroid
         climate.par_fn = ".par"
         climate.cli_fn = cli_fn = f"{lng:.02f}x{lat:.02f}.cli"
         url = f"https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}"
         download_file(url, _join(cli_dir, cli_fn))
-
-        start_year = int(climate.observed_start_year)
-        end_year = int(climate.observed_end_year)
-        assert end_year >= start_year, (start_year, end_year)
 
         cli = _clip_cli_to_observed_years(cli_dir, cli_fn, start_year, end_year)
         climate.logger.info("Calculating monthlies...")
@@ -963,7 +960,7 @@ def _prepare_daymet_multiple_context(climate: "Climate") -> tuple[Any, float, fl
     watershed = climate.watershed_instance
     ws_lng, ws_lat = watershed.centroid
     cli_dir = climate.cli_dir
-    start_year, end_year = climate._observed_start_year, climate._observed_end_year
+    start_year, end_year = climate._require_observed_year_bounds_for_build()
     assert end_year <= climate.daymet_last_available_year, end_year
     climate._input_years = end_year - start_year + 1
 

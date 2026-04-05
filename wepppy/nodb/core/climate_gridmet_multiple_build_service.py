@@ -38,7 +38,7 @@ class ClimateGridmetMultipleBuildService:
         watershed = climate.watershed_instance
         ws_lng, ws_lat = watershed.centroid
         cli_dir = climate.cli_dir
-        start_year, end_year = climate._observed_start_year, climate._observed_end_year
+        start_year, end_year = climate._require_observed_year_bounds_for_build()
         climate._input_years = end_year - start_year + 1
 
         station_manager = CligenStationsManager(version=climate.cligen_db)

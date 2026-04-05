@@ -673,6 +673,39 @@ class Climate(NoDbBase):
     def observed_end_year(self) -> Union[str, int]:
         return self._observed_end_year
 
+    def _require_observed_year_bounds_for_build(self) -> Tuple[int, int]:
+        """Return observed year bounds as integers for build paths.
+
+        Historical run state may persist these fields as strings. Observed
+        climate builders require integer bounds, so normalize here and persist
+        the normalized values back onto the controller.
+        """
+
+        def _parse_year(raw_value: Union[str, int], field_name: str) -> int:
+            if isinstance(raw_value, bool):
+                raise ValueError(f"{field_name} must be an integer year, got {raw_value!r}")
+            if isinstance(raw_value, str):
+                raw_value = raw_value.strip()
+                if raw_value == "":
+                    raise ValueError(f"{field_name} must be an integer year, got empty string")
+            try:
+                return int(raw_value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"{field_name} must be an integer year, got {raw_value!r}") from exc
+
+        start_year = _parse_year(self._observed_start_year, "observed_start_year")
+        end_year = _parse_year(self._observed_end_year, "observed_end_year")
+        if end_year < start_year:
+            raise ValueError(
+                "observed_end_year must be greater than or equal to observed_start_year "
+                f"({end_year} < {start_year})"
+            )
+
+        # Canonicalize persisted controller state after successful coercion.
+        self._observed_start_year = start_year
+        self._observed_end_year = end_year
+        return start_year, end_year
+
     @property
     def future_start_year(self) -> Union[str, int]:
         return self._future_start_year
@@ -1080,7 +1113,12 @@ class Climate(NoDbBase):
             except (TypeError, ValueError) as e:
                 pass
 
-            if self.climate_mode == ClimateMode.Observed:
+            if self.climate_mode in (
+                ClimateMode.Observed,
+                ClimateMode.ObservedPRISM,
+                ClimateMode.GridMetPRISM,
+                ClimateMode.DepNexrad,
+            ):
                 assert isint(start_year)
                 assert start_year >= 1980
                 #assert start_year <= 2017
@@ -1349,7 +1387,7 @@ class Climate(NoDbBase):
             ws_lng, ws_lat = watershed.centroid
 
             cli_dir = self.cli_dir
-            start_year, end_year = self._observed_start_year, self._observed_end_year
+            start_year, end_year = self._require_observed_year_bounds_for_build()
             assert end_year <= self.daymet_last_available_year, end_year
 
             self._input_years = end_year - start_year + 1
@@ -1397,7 +1435,7 @@ class Climate(NoDbBase):
             ws_lng, ws_lat = watershed.centroid
 
             cli_dir = self.cli_dir
-            start_year, end_year = self._observed_start_year, self._observed_end_year
+            start_year, end_year = self._require_observed_year_bounds_for_build()
 
             self._input_years = end_year - start_year + 1
 

@@ -58,6 +58,7 @@ class _ClimateStub:
         self.climate_spatialmode = 0  # ClimateSpatialMode.Single
         self.attrs_seen: list[object] = []
         self.dump_called = False
+        self.year_bounds_calls = 0
 
     @contextlib.contextmanager
     def locked(self):
@@ -69,6 +70,10 @@ class _ClimateStub:
 
     def set_attrs(self, attrs):
         self.attrs_seen.append(attrs)
+
+    def _require_observed_year_bounds_for_build(self) -> tuple[int, int]:
+        self.year_bounds_calls += 1
+        return int(self.observed_start_year), int(self.observed_end_year)
 
     def dump(self) -> None:
         self.dump_called = True
@@ -136,6 +141,7 @@ def test_run_depnexrad_build_sets_expected_single_mode_state(
     assert climate.cli_fn is not None and climate.cli_fn.endswith(".cli")
     assert climate._input_years == 2
     assert climate.monthlies == [1.0] * 12
+    assert climate.year_bounds_calls == 1
     assert len(downloaded) == 1
 
 
@@ -156,8 +162,26 @@ def test_run_depnexrad_build_assigns_multiple_mode_maps(
 
     helper_module.run_depnexrad_build(climate)
 
+    assert climate.year_bounds_calls == 1
     assert climate.sub_par_fns == {"1": ".par"}
     assert climate.sub_cli_fns == {"1": "a.cli"}
+
+
+def test_run_depnexrad_build_rejects_invalid_observed_year_bounds_before_download(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _ClimateStub(tmp_path)
+    climate.observed_start_year = ""
+    downloads: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(helper_module, "download_file", lambda url, dst: downloads.append((url, dst)))
+
+    with pytest.raises(ValueError):
+        helper_module.run_depnexrad_build(climate)
+
+    assert climate.year_bounds_calls == 1
+    assert downloads == []
 
 
 def test_run_prism_revision_updates_catalog_and_sub_maps(

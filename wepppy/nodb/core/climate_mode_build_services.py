@@ -41,7 +41,7 @@ class ClimateModeBuildServices:
             climate._build_climate_vanilla(verbose=verbose, attrs=attrs)
             self._run_prism_revision_if_multiple(climate, verbose=verbose)
 
-        elif climate_mode == ClimateMode.ObservedPRISM:
+        elif climate_mode in (ClimateMode.Observed, ClimateMode.ObservedPRISM):
             if climate.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
                 # Maintains current compatibility behavior for legacy naming.
                 climate._build_climate_observed_daymet_multiple(verbose=verbose, attrs=attrs)

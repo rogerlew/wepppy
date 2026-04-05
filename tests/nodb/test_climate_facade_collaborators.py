@@ -205,6 +205,85 @@ def test_gridmet_multiple_build_delegates_to_service(
     assert captured["ncpu"] == climate_module.NCPU
 
 
+def test_gridmet_single_build_uses_normalized_observed_year_bounds(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.gridmet_single")
+    captured: dict[str, object] = {}
+
+    @contextlib.contextmanager
+    def _noop_locked(_self):
+        yield
+
+    def _set_attrs(attrs):
+        captured["attrs"] = attrs
+
+    def _require_years() -> tuple[int, int]:
+        captured["year_bounds_called"] = True
+        return 1999, 2000
+
+    class _StationManager:
+        def __init__(self, version: str):
+            captured["station_db"] = version
+
+        def get_station_fromid(self, station_id: str):
+            captured["station_id"] = station_id
+            return types.SimpleNamespace(par="station.par")
+
+    class _Cligen:
+        def __init__(self, _station_meta, wd: str):
+            captured["cligen_wd"] = wd
+
+    class _ClimateFile:
+        def __init__(self, path: str):
+            captured["climate_file_path"] = path
+
+        def calc_monthlies(self):
+            return [2.0] * 12
+
+    def _fake_build_observed_gridmet(
+        _cligen,
+        ws_lng: float,
+        ws_lat: float,
+        start_year: int,
+        end_year: int,
+        cli_dir: str,
+        prn_fn: str,
+        cli_fn: str,
+        *,
+        adjust_mx_pt5: bool,
+    ) -> None:
+        captured["build_args"] = (ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn, adjust_mx_pt5)
+
+    climate.locked = types.MethodType(_noop_locked, climate)
+    climate.set_attrs = _set_attrs
+    climate._require_observed_year_bounds_for_build = _require_years
+    monkeypatch.setattr(
+        climate_module.Climate,
+        "watershed_instance",
+        property(lambda _self: types.SimpleNamespace(centroid=(-116.2, 43.6))),
+    )
+    monkeypatch.setattr(climate_module.Climate, "cli_dir", property(lambda _self: str(tmp_path)))
+    monkeypatch.setattr(climate_module.Climate, "cligen_db", property(lambda _self: "2015_stations.db"))
+    climate._climatestation = "STA-1"
+    climate._adjust_mx_pt5 = False
+
+    monkeypatch.setattr(climate_module, "CligenStationsManager", _StationManager)
+    monkeypatch.setattr(climate_module, "Cligen", _Cligen)
+    monkeypatch.setattr(climate_module, "ClimateFile", _ClimateFile)
+    monkeypatch.setattr(climate_module, "build_observed_gridmet", _fake_build_observed_gridmet)
+
+    climate._build_climate_observed_gridmet(attrs={"mode": "gridmet"})
+
+    assert captured["attrs"] == {"mode": "gridmet"}
+    assert captured["year_bounds_called"] is True
+    assert captured["build_args"] == (-116.2, 43.6, 1999, 2000, str(tmp_path), "ws.prn", "wepp.cli", False)
+    assert climate.par_fn == "station.par"
+    assert climate.cli_fn == "wepp.cli"
+    assert climate.monthlies == [2.0] * 12
+
+
 def test_depnexrad_build_delegates_to_helper(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
