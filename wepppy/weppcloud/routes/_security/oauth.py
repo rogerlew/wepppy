@@ -10,6 +10,7 @@ from urllib.parse import urlsplit
 
 import re
 
+from authlib.integrations.base_client.errors import OAuthError
 from flask import flash, session
 from flask_security import current_user
 from flask_security.utils import login_user, hash_password
@@ -391,6 +392,15 @@ def _resolve_next(provider: str) -> Optional[str]:
     return _sanitize_next_url(next_hint) or _sanitize_next_url(request.args.get("next"))
 
 
+def _callback_provider_error() -> Optional[Tuple[str, str]]:
+    error = request.args.get("error")
+    if error is None:
+        return None
+    error_code = str(error).strip()
+    error_description = str(request.args.get("error_description") or "").strip()
+    return error_code, error_description
+
+
 @security_oauth_bp.route("/oauth/<provider>/login", methods=["GET"], strict_slashes=False)
 def oauth_login(provider: str):
     provider_settings = _get_provider_settings(provider)
@@ -432,6 +442,24 @@ def callback(provider: str):
     if not provider_enabled(provider_settings):
         abort(404)
 
+    provider_error = _callback_provider_error()
+    if provider_error:
+        error_code, error_description = provider_error
+        _pop_session_value(_SESSION_PKCE_KEY, provider)
+        _pop_session_value(_SESSION_NEXT_KEY, provider)
+        if error_code.lower() == "access_denied":
+            logger.info("OAuth callback canceled by user for provider=%s", provider)
+            flash("Sign-in was canceled.", "warning")
+        else:
+            logger.warning(
+                "OAuth callback returned provider error for provider=%s error=%s description=%s",
+                provider,
+                error_code,
+                error_description or "<empty>",
+            )
+            flash("Login failed at the identity provider.", "error")
+        return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
+
     client = ensure_oauth_client(provider, provider_settings)
     if client is None:
         abort(404)
@@ -443,9 +471,12 @@ def callback(provider: str):
 
     try:
         token = client.authorize_access_token(code_verifier=code_verifier)
-    except (RequestException, TypeError, ValueError) as exc:
+    except (OAuthError, RequestException, TypeError, ValueError) as exc:
         logger.warning("OAuth callback token exchange failed for provider=%s: %s", provider, exc)
-        flash("Login failed while contacting the identity provider.", "error")
+        if isinstance(exc, OAuthError) and (exc.error or "").lower() == "access_denied":
+            flash("Sign-in was canceled.", "warning")
+        else:
+            flash("Login failed while contacting the identity provider.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
 
     try:

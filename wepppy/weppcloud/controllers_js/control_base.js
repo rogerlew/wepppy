@@ -958,7 +958,7 @@ function controlBase() {
                 if (lines.some(function (value) { return typeof value === "string" && value.includes("lock() called on an already locked nodb"); })) {
                     appendHtml(
                         self.stacktrace,
-                        '<a href="https://doc.wepp.cloud/AdvancedTopics.html#Clearing-Locks">Clearing Locks</a>'
+                        '<a href="/usersum/doc/usersum.weppcloud.clearing_locks">Clearing Locks</a>'
                     );
                 }
             }
