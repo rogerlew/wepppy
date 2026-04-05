@@ -1,4 +1,4 @@
-# Disturbed Lands
+# (Un)Disturbed Landuse and Soil Parameterization
 
 In WEPPcloud's `(Un)Disturbed` interfaces, the Disturbed module is part of the normal landuse and soil-building workflow. It parameterizes hillslopes using disturbed class and burn severity so the interface can represent both unburned and burned conditions with one consistent framework.
 
