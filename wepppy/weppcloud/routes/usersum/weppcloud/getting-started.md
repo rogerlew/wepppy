@@ -2,6 +2,15 @@
 
 This guide walks you through creating your first WEPPcloud project and introduces the key features you will use along the way.
 
+## Hardware and Browser Requirements
+
+WEPPcloud is optimized for a desktop user experience.
+
+- Use a modern browser: Chrome, Firefox, Safari, or Microsoft Edge
+- Recommended bandwidth: 100 Mbps download / 20 Mbps upload (aligned with the FCC fixed broadband definition)
+- Minimum display resolution: 1280 x 720
+- Recommended display resolution: 1920 x 1080
+
 ## User Accounts
 
 You can use WEPPcloud with or without an account, but creating one is recommended.
