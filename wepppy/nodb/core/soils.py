@@ -1397,6 +1397,7 @@ class Soils(NoDbBase):
         """
         used_soils = set([str(x) for x in self.domsoil_d.values()])
         report = [s for s in list(self.soils.values()) if str(s.mukey) in used_soils]
+        report.sort(key=lambda soil: soil.pct_coverage or 0, reverse=True)
 
         return [soil.as_dict(abbreviated=True) for soil in report]
 
