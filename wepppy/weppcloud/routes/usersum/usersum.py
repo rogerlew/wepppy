@@ -57,6 +57,7 @@ _INDEX_DOC_DESCRIPTIONS: Dict[str, str] = {
     "usersum.weppcloud.accessibility_statement": "Summarizes WEPPcloud accessibility commitments, current conformance evidence, and known limitations.",
     "usersum.weppcloud.ag_field_mod": "Introduces the agricultural field workflow and the inputs needed for field-scale WEPP modeling.",
     "usersum.weppcloud.bootstrap": "Explains the bootstrap workflow for repeated runs, uncertainty exploration, and comparative analysis.",
+    "usersum.weppcloud.clearing_locks": "Shows how to recover from lock-related errors by opening the PowerUser panel and using the Clear Locks action.",
     "usersum.weppcloud.climate_options": "Explains climate data sources, weather-generation choices, and configuration options used by WEPPcloud.",
     "usersum.weppcloud.controls.channel_delineation": "Documents the channel delineation control and the advanced settings used to derive channel networks.",
     "usersum.weppcloud.data_attribution": "Lists the datasets, map services, and regional sources that WEPPcloud depends on.",

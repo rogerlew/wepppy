@@ -108,6 +108,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.climate_options
+  - doc_id: usersum.weppcloud.clearing_locks
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/clearing-locks.md
+    title: Clearing Locks
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.clearing_locks
   - doc_id: usersum.weppcloud.controls.channel_delineation
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/controls/channel-delineation.md
