@@ -846,6 +846,55 @@ class SoilBurnSeverityMap(LandcoverMap):
         return dict(counter)
 
     @property
+    def color_coverage_pcts(self) -> dict[RGBColor, float]:
+        """Return per-color coverage percentages for color-table SBS rasters."""
+        if self.ct is None:
+            return {}
+
+        ds = gdal.Open(self.fname)
+        if ds is None:
+            raise RuntimeError(f"Failed to open {self.fname}")
+
+        band = ds.GetRasterBand(1)
+        raster_ct = band.GetRasterColorTable()
+        if raster_ct is None:
+            ds = None
+            return {}
+
+        nodata_values = {int(v) for v in self.nodata_vals if isint(v)}
+        color_counts: Counter[RGBColor] = Counter()
+        total_count = 0
+
+        for value, count in self.counts:
+            if not isint(value):
+                continue
+
+            pixel_value = int(value)
+            if pixel_value in nodata_values:
+                continue
+
+            if pixel_value < 0 or pixel_value >= raster_ct.GetCount():
+                continue
+
+            entry = raster_ct.GetColorEntry(pixel_value)
+            if entry is None:
+                continue
+
+            rgb: RGBColor = (int(entry[0]), int(entry[1]), int(entry[2]))
+            color_counts[rgb] += int(count)
+            total_count += int(count)
+
+        ds = None
+
+        if total_count == 0:
+            return {rgb: 0.0 for rgb in color_counts}
+
+        return {
+            rgb: (100.0 * count / total_count)
+            for rgb, count in color_counts.items()
+        }
+
+    @property
     def data(self) -> NDArray[np.uint8]:
         """Return the SBS raster values reclassified into 4 severity buckets."""
         if self._data is not None:

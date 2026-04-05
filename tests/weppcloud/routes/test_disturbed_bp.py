@@ -10,7 +10,7 @@ from typing import Any, Dict
 import pytest
 
 pytest.importorskip("flask")
-from flask import Flask, Response
+from flask import Flask, Response, render_template
 
 import wepppy.weppcloud.routes.nodb_api.disturbed_bp as disturbed_module
 from wepppy.nodb.redis_prep import TaskEnum
@@ -427,6 +427,34 @@ def test_modify_disturbed_page_emits_csrf_token_for_save(
 
     assert captured["path"] == str(lookup_csv)
     assert captured["rows"] == [["forest", "loam"]]
+
+
+def test_classify_template_renders_color_coverage_column() -> None:
+    template_dir = Path(__file__).resolve().parents[3] / "wepppy" / "weppcloud" / "templates"
+    app = Flask(__name__, template_folder=str(template_dir))
+
+    baer_context = SimpleNamespace(
+        sbs_mode=0,
+        uniform_severity=None,
+        ct={"low": [1]},
+        color_to_severity_map={
+            (0, 115, 74): "unburned",
+            (127, 255, 212): "low",
+        },
+        color_coverage_pcts={
+            (0, 115, 74): 30.0,
+            (127, 255, 212): 70.0,
+        },
+        class_map=[],
+    )
+
+    with app.app_context():
+        rendered = render_template("mods/baer/classify.htm", baer=baer_context)
+
+    assert "Using color table to set burn severity." in rendered
+    assert "Coverage %" in rendered
+    assert "30.0%" in rendered
+    assert "70.0%" in rendered
 
 
 def test_query_baer_wgs_map_returns_metadata(disturbed_client):

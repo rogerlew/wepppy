@@ -92,12 +92,14 @@
   <p id="hint_modify_baer_classes" class="wc-field__help" aria-live="polite"></p>
   {% else %}
   <h5>Using color table to set burn severity.</h5>
+  {% set color_coverage_pcts = baer.color_coverage_pcts %}
   <table class="wc-table wc-baer-classify__table">
     <thead>
       <tr>
         <th scope="col">RGB values</th>
         <th scope="col">Color</th>
         <th scope="col">Assigned burn severity</th>
+        <th scope="col" class="wc-text-right">Coverage %</th>
       </tr>
     </thead>
     <tbody>
@@ -121,6 +123,7 @@
             <option value="high" {% if severity=='high' %}selected{% endif %}>high</option>
           </select>
         </td>
+        <td class="wc-text-right">{{ '%.1f'|format(color_coverage_pcts.get(rgb, 0.0)) }}%</td>
       </tr>
       {% endfor %}
       {% endif %}

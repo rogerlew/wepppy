@@ -576,6 +576,9 @@ class Disturbed(NoDbBase):
             self._counts = None
             self._nodata_vals = None
             self._is256 = None
+            self._ct = None
+            self._color_map = None
+            self._color_coverage_pcts = None
             self._sbs_mode = 0
             self._uniform_severity = None
             self._active_lookup_variant = None
@@ -938,6 +941,21 @@ class Disturbed(NoDbBase):
 
         return {tuple(map(int, rgb.split('_'))): v for rgb, v in color_map.items()}
 
+    @property
+    def color_coverage_pcts(self) -> Dict[Tuple[int, int, int], float]:
+        if getattr(self, '_ct', None) is None:
+            return {}
+
+        coverage_map = getattr(self, '_color_coverage_pcts', None)
+        if coverage_map is None:
+            self.validate(self.disturbed_path, self.breaks, self._nodata_vals)
+            coverage_map = getattr(self, '_color_coverage_pcts', None)
+
+        if coverage_map is None:
+            return {}
+
+        return {tuple(map(int, rgb.split('_'))): float(v) for rgb, v in coverage_map.items()}
+
     def remove_sbs(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
@@ -956,6 +974,9 @@ class Disturbed(NoDbBase):
             self._classes = None
             self._counts = None
             self._breaks = None
+            self._ct = None
+            self._color_map = None
+            self._color_coverage_pcts = None
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -1005,8 +1026,13 @@ class Disturbed(NoDbBase):
             self._counts = sbs.burn_class_counts
             if sbs.color_map is None:
                 self._color_map = None
+                self._color_coverage_pcts = None
             else:
                 self._color_map = {'_'.join(str(x) for x in rgb): v for rgb, v in sbs.color_map.items()}
+                self._color_coverage_pcts = {
+                    '_'.join(str(x) for x in rgb): pct
+                    for rgb, pct in sbs.color_coverage_pcts.items()
+                }
             self._breaks = sbs.breaks
             self._nodata_vals = sbs.nodata_vals
             if mode is not None:

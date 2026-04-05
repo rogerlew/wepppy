@@ -373,6 +373,27 @@ class TestColorTableMaps(unittest.TestCase):
         self.assertIn(2, ct_dict['mod'])
         self.assertIn(3, ct_dict['high'])
 
+    def test_color_table_coverage_percentages(self):
+        """Per-color coverage should match observed color-table pixel frequencies."""
+        filename = os.path.join(self.temp_dir, 'ct_coverage.tif')
+
+        data = np.array([
+            [0, 0, 0, 1, 1],
+            [2, 3, 3, 3, 3],
+        ], dtype=np.uint8)
+
+        ct = GeoTiffTestHelper.create_standard_sbs_color_table()
+        GeoTiffTestHelper.create_geotiff(filename, data, color_table=ct)
+
+        sbs_map = SoilBurnSeverityMap(filename)
+        coverage = sbs_map.color_coverage_pcts
+
+        self.assertAlmostEqual(coverage[(0, 115, 74)], 30.0, places=6)
+        self.assertAlmostEqual(coverage[(127, 255, 212)], 20.0, places=6)
+        self.assertAlmostEqual(coverage[(255, 255, 0)], 10.0, places=6)
+        self.assertAlmostEqual(coverage[(255, 0, 0)], 40.0, places=6)
+        self.assertAlmostEqual(sum(coverage.values()), 100.0, places=6)
+
 
 class TestNonColorTableMaps(unittest.TestCase):
     """Test SBS maps without color tables."""
