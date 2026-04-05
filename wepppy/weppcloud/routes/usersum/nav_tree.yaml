@@ -44,6 +44,32 @@ roots:
     children:
       - key: usersum.weppcloud.mods_overview
         doc_id: usersum.weppcloud.mods_overview
+      - key: usersum.weppcloud.model_guides
+        title: Model Guides
+        collapsible: true
+        children:
+          - key: usersum.weppcloud.models.wepp
+            doc_id: usersum.weppcloud.models.wepp
+          - key: usersum.weppcloud.models.ash_transport
+            doc_id: usersum.weppcloud.models.ash_transport
+          - key: usersum.weppcloud.models.debris_flow
+            doc_id: usersum.weppcloud.models.debris_flow
+          - key: usersum.weppcloud.models.gridded_rusle
+            doc_id: usersum.weppcloud.models.gridded_rusle
+          - key: usersum.weppcloud.models.culvert_modeling
+            doc_id: usersum.weppcloud.models.culvert_modeling
+          - key: usersum.weppcloud.models.roads
+            doc_id: usersum.weppcloud.models.roads
+          - key: usersum.weppcloud.models.revegetation
+            doc_id: usersum.weppcloud.models.revegetation
+          - key: usersum.weppcloud.models.rhem
+            doc_id: usersum.weppcloud.models.rhem
+          - key: usersum.weppcloud.models.agricultural_fields
+            doc_id: usersum.weppcloud.models.agricultural_fields
+          - key: usersum.weppcloud.models.wepp_swat
+            doc_id: usersum.weppcloud.models.wepp_swat
+          - key: usersum.weppcloud.models.hec_dss_export
+            doc_id: usersum.weppcloud.models.hec_dss_export
       - key: usersum.weppcloud.ag_field_mod
         doc_id: usersum.weppcloud.ag_field_mod
       - key: usersum.path.quick_start

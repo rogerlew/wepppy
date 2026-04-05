@@ -2191,6 +2191,572 @@
     },
     {
       "audience_tags": [
+        "user"
+      ],
+      "body_text": "Agricultural Fields (AgFields) AgFields models agricultural fields inside a WEPPcloud project by converting uploaded field boundaries into hydrologic sub-fields and then running WEPP for each sub-field. Use it when watershed totals alone are too coarse and you need field-by-field or within-field comparisons tied to crop rotations. What This Is For AgFields is for questions such as: Which fields contribute the most runoff or sediment? Which parts of one mapped field behave differently because they drain through different hillslopes? How do crop rotations change modeled response from year to year? This is a field-management workflow layered onto a WEPPcloud watershed project. It is not a replacement for the watershed model, and it does not assume each mapped field behaves as one uniform hydrologic unit. The User-Facing Setup Flow AgFields currently behaves more like a staged setup-and-prep workflow than a single one-click model control. The user-facing decisions are centered on uploaded files, file columns, and required support tables. The core setup sequence is: 1. provide a field-boundary GeoJSON, 2. confirm the field ID column, 3. define the crop-year column pattern, 4. rasterize fields onto the project DEM grid, 5. abstract hydrologic sub-fields, 6. polygonize sub-fields, 7. provide the crop-to-management lookup, 8. run WEPP per sub-field. If you automate or troubleshoot this workflow, those stages map directly to controller actions: validate_field_boundary_geojson(...) set_field_id_key(...) set_rotation_accessor(...) rasterize_field_boundaries_geojson() peridot_abstract_sub_fields(...) polygonize_sub_fields() validate_rotation_lookup() run_wepp_ag_fields(...) Those prep stages matter because later steps assume the earlier ones already succeeded. If the field IDs, crop columns, rasterized boundaries, or sub-field abstractions are wrong, the WEPP runs are still likely to finish but the answers will be attached to the wrong field logic. What You Need To Supply The current AgFields workflow expects these user-provided inputs: User-supplied input What it must contain Why it matters --- --- --- Field boundary GeoJSON Polygon boundaries for fields in the project area Defines where fields exist spatially field_id attribute A stable unique identifier in the GeoJSON Used to join geometry, crop schedule rows, sub-fields, and outputs Crop-year columns One crop value for every modeled observed year, using a repeatable pattern such as Crop2008, Crop2009, and so on Supplies the crop sequence that becomes management inputs ag_fields/rotation_lookup.tsv crop_name, database, rotation_id Tells WEPPcloud how each crop name maps to a management file or WEPPcloud rotation Optional plant database zip .man files, including 2017.1 files if needed Lets you use custom or external management files Important current rules: the boundary GeoJSON must contain a field_id column during validation, the crop-year pattern must work for every observed climate year, crop names in the schedule must match rotation_lookup.tsv, the field geometry must overlap the project DEM extent after CRS handling. Key Choices You Actually Make Field boundary upload The boundary upload is not just geometry input. During validation, AgFields normalizes the file into ag_fields/fields.WGS.geojson and extracts the non-geometry attributes into ag_fields/rotation_schedule.parquet. That means one uploaded GeoJSON is carrying two jobs at once: field geometry, the rotation schedule table. If the uploaded file has the right polygons but the wrong or incomplete attribute table, the geometry may look fine while the crop schedule still fails later. Field ID column The field ID is the backbone of the workflow. The system uses it to: burn fields into field_boundaries.tif, join rotation rows back to the right field, connect sub-fields to their parent field, organize field and sub-field outputs. Duplicate IDs are not fatal at validation time, but they are a warning sign. If one ID refers to multiple distinct field records, later summaries become much harder to interpret. Crop-year column pattern AgFields uses a user-defined pattern such as Crop{} to find the per-year crop columns. This choice is checked against the run's observed climate years. That means the crop schedule is not free-form. If the climate is observed from 2008 through 2015, the chosen accessor must resolve to valid columns for every year in that range. If one year is missing, the later WEPP run step fails when it tries to build the crop rotation schedule for that field. Crop-to-management lookup rotation_lookup.tsv tells the system how to turn crop names into WEPP management files. The database column can currently point to: weppcloud plant_file_db Use weppcloud when the crop should map to a WEPPcloud management ID. Use plant_file_db when the crop should map to a .man file stored under ag_fields/plant_files/. This lookup is where many \"the model ran but the management is wrong\" problems actually begin. If the crop spelling in the uploaded schedule does not match the lookup spelling, the crop cannot be mapped cleanly. Why API-Backed Prep Matters AgFields has several preprocessing steps that materially change what gets modeled. They are not bookkeeping. Prep stage What the system creates Why the result changes the model --- --- --- Validate boundaries fields.WGS.geojson, rotation_schedule.parquet Freezes the geometry and schedule table the rest of the workflow uses Rasterize boundaries field_boundaries.tif Aligns fields to the project DEM grid so field extents match the hydrologic raster stack Abstract sub-fields with Peridot sub_field_id_map.tif, fields.parquet, slope files Splits mapped fields into hydrologically meaningful pieces Polygonize sub-fields sub_fields.geojson, sub_fields.WGS.geojson Turns the raster abstraction into polygons you can inspect and export Run WEPP per sub-field wepp/ag_fields/runs/*, wepp/ag_fields/output/* Produces the actual sub-field simulations and output tables For end users, the practical lesson is simple: if the prep products do not look reasonable, the final WEPP results will not become more trustworthy by rerunning them. Field And Sub-Field Assumptions AgFields does not assume one polygon equals one hydrologically uniform field. Instead, it assumes: a user-defined field may cross multiple hydrologic units, those intersections can be represented as separate sub-fields, each sub-field can be modeled with a representative hillslope profile, each sub-field inherits climate, soils, and routing context from the watershed structure it intersects. This is why one mapped field may become several modeled sub-fields. That behavior is intentional. A large field that crosses more than one drainage setting can have materially different slope length, contributing area, and erosion response in different parts of the same mapped parcel. Current simplifications to keep in mind: sub-fields are treated as hydrologically disconnected modeled units in this workflow, very small sub-fields can be filtered with sub_field_min_area_threshold_m2, representative slope files simplify local variation within each sub-field, operations such as terraces, turn rows, irrigation features, and temporary traffic patterns are not automatically inferred from the field polygon. How To Work Through An AgFields Run 1. Prepare the base WEPPcloud project first. AgFields depends on the normal project DEM, watershed, soils, landuse context, and observed climate range. 2. Upload a field-boundary GeoJSON that includes field_id and crop-year columns. Expect the workflow to extract the attribute table into rotation_schedule.parquet. 3. Confirm the ID field and crop-year pattern. The ID must be stable across the workflow, and the crop-year pattern must match every observed climate year in the run. 4. Rasterize the field boundaries. This is where CRS mistakes and extent mismatches usually become obvious. If the fields do not overlap the DEM grid, stop and fix that before continuing. 5. Run sub-field abstraction. Expect fields that span more than one hydrologic setting to split into multiple sub-fields. That is normal and often the point of using AgFields. 6. Review the sub-field products before running WEPP. Check whether the resulting sub-fields match your understanding of field drainage structure. 7. Build or review rotation_lookup.tsv, and upload plant files if needed. This is the management-translation step. A clean crop lookup is more important than squeezing in every possible crop label variation. 8. Run WEPP per sub-field. Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. What Outputs To Look At The most useful AgFields outputs are usually: ag_fields/sub_fields/sub_fields.geojson or sub_fields.WGS.geojson for inspecting the modeled sub-field layout, ag_fields/sub_fields/fields.parquet for the sub-field metadata table, wepp/ag_fields/output/ for the actual WEPP result files, AgFields Spatial and AgFields Metrics in export-oriented tooling when available. Interpret results at the right scale: compare one field to another when the management question is field prioritization, compare sub-fields inside one field when the question is internal variability, compare years when the question is crop-rotation effect. A large difference between two sub-fields in the same mapped field usually means the field spans different hydrologic settings, not that the model is unstable. Assumptions And Limits AgFields requires observed climate years because the crop schedule is checked against explicit year columns. The uploaded GeoJSON must carry both usable geometry and a usable rotation table. field_id is required and should be stable and effectively unique for interpretation to remain clear. Crop names must match rotation_lookup.tsv; near-matches are still mismatches. Sub-fields are representative hydrologic units, not full operational replicas of every within-field feature. Results inherit the strengths and weaknesses of the underlying watershed, soils, climate, and management data. Related Docs WEPP Ag Field Mod Getting Started",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.agricultural_fields",
+          "title": "Agricultural Fields (AgFields API)"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "a7ca0bfb74ff21949446e00036ed8c539ecfe8ee2f2b3ceee87f827e018de823",
+      "doc_id": "usersum.weppcloud.models.agricultural_fields",
+      "headings": [
+        "Agricultural Fields (AgFields)",
+        "What This Is For",
+        "The User-Facing Setup Flow",
+        "What You Need To Supply",
+        "Key Choices You Actually Make",
+        "Field boundary upload",
+        "Field ID column",
+        "Crop-year column pattern",
+        "Crop-to-management lookup",
+        "Why API-Backed Prep Matters",
+        "Field And Sub-Field Assumptions",
+        "How To Work Through An AgFields Run",
+        "What Outputs To Look At",
+        "Assumptions And Limits",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/agricultural-fields/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.agricultural_fields",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/agricultural-fields/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.agricultural_fields",
+      "source": "local",
+      "status": "active",
+      "title": "Agricultural Fields (AgFields API)",
+      "updated_at": "2026-04-05T06:25:06.539129+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "Ash Transport (WATAR) Use the Wildfire Ash Transport And Risk (WATAR) control when you need post-fire ash movement estimates that build on an existing WEPPcloud fire run. In WEPPcloud, this is a hillslope-and-watershed ash screening workflow that uses the run's hydrologic context from WEPP and then applies ash-specific transport assumptions on top of it. What This Is For Use Ash Transport to answer questions such as: How much ash is likely to move off burned hillslopes? Which parts of the watershed contribute the most transported ash? How do ash loads change through time after a fire? How sensitive are results to different ash-calibration choices? Which scenarios suggest greater contaminant-loading concern after wildfire? This workflow is for post-fire screening and comparison. It is not a replacement for field sampling, drinking-water compliance testing, or a full water-quality fate model. What You Actually See In The UI The control card is titled Wildfire Ash Transport And Risk (WATAR). The visible run controls are: UI control What the user sees Why it matters --- --- --- Fire day for ash model (month/day) Fire timing input Anchors when the ash model starts relative to the post-fire simulation period Ash depth mode Specify Depth, Specify Load, Upload Maps Chooses whether you enter ash as depths, loads, or raster inputs Initial ash depth \u2013 moderate/low severity and Initial ash depth \u2013 high severity Only shown in Specify Depth mode Directly sets the starting ash depth by severity class Initial ash load \u2013 high severity and Initial ash load \u2013 moderate/low severity Only shown in Specify Load mode Sets ash as surface load instead of depth Load map (tonne/ha) Only shown in Upload Maps mode Required raster input for gridded ash loads Ash type map (optional) Only shown in Upload Maps mode Optional raster where 0 = none, 1 = black ash, 2 = white ash Field-measured ash bulk density \u2013 low/moderate severity and Field-measured ash bulk density \u2013 high severity Always visible Used directly in load-based setup and as ash-property context Run Model Main action button Starts the ash run or, in batch/base-project contexts, saves ash settings for later processing Under Advanced options, the user also sees: Run wind transport Ash model Transport mode when Ash model = Watanabe2025 white-ash and black-ash property fields such as bulk density, particle density, decomposition factor, roughness limit, and model-specific transport parameters What Each Ash depth mode Means Specify Depth Use this when you already want to enter ash thickness directly in millimeters. The visible fields are: Initial ash depth \u2013 moderate/low severity Initial ash depth \u2013 high severity This is the simplest setup path when you have defensible depth assumptions by severity class. Specify Load Use this when your initial ash information is better expressed as surface mass rather than thickness. The visible fields are: Initial ash load \u2013 high severity Initial ash load \u2013 moderate/low severity Field-measured ash bulk density \u2013 low/moderate severity Field-measured ash bulk density \u2013 high severity In the current rq-engine route, WEPPcloud converts the entered loads to ash depth before enqueueing the run. That means bulk density is not just metadata in this mode; it changes the starting ash depth the model actually uses. Upload Maps Use this when the ash distribution is spatially variable enough that one value for the whole burned area is too coarse. The visible fields are: Load map (tonne/ha) required Ash type map (optional) The upload help is explicit that raster uploads should remain under 100 MB and retain source projection. In the current route, Upload Maps fails if the load map is missing. The ash-type map is optional. Practical caution The top-level setup fields are labeled by burn-severity grouping, while many advanced fields are labeled by white ash and black ash. Treat those as one connected parameterization, not as unrelated inputs. If you are calibrating carefully, keep your severity-based setup assumptions and your white/black ash property assumptions internally consistent. Available Models In Advanced options, the Ash model dropdown currently shows: Srivastava2023 Watanabe2025 If you choose Watanabe2025, a second dropdown appears: Transport mode, with: Dynamic Static Both model families use the same watershed, climate, burn-severity, and WEPP runoff context. The difference is how they convert ash availability and runoff conditions into transported ash. UI option Additional UI option Main assumption Mode-specific fields the user sees --- --- --- --- Srivastava2023 None Simpler depletion-style ash transport formulation Initial erodibility (white ash), Initial erodibility (black ash), Final erodibility (white ash), Final erodibility (black ash) Watanabe2025 + Dynamic Transport mode = Dynamic The UI text says Dynamic formulation with K(x) and states transport capacity responds to shear stress, organic matter, and ash availability Organic matter (white ash, fraction), Organic matter (black ash, fraction) Watanabe2025 + Static Transport mode = Static The UI text says Static exponential formulation (A, B) and states transport follows a fixed exponential decay controlled by initial capacity A and depletion coefficient B Initial transport capacity (white ash, t ha^-1 mm^-1), Initial transport capacity (black ash, t ha^-1 mm^-1), Depletion coefficient (white ash, mm^-1), Depletion coefficient (black ash, mm^-1) All three model choices still share a large common set of ash-property fields, including: Initial bulk density (white ash) and Initial bulk density (black ash) Final bulk density (white ash) and Final bulk density (black ash) Bulk density factor (white ash) and Bulk density factor (black ash) Particle density (white ash) and Particle density (black ash) Ash decomposition factor (white ash, 1/day) and Ash decomposition factor (black ash, 1/day) Roughness limit (white ash) and Roughness limit (black ash) The control description above the form also states that ash depths below the roughness limit are treated as non-transportable. How The Model Choices Differ Srivastava2023 is the simpler baseline option. It keeps the older depletion-style structure and exposes explicit erodibility terms. Watanabe2025 with Dynamic is the more process-sensitive option. The visible UI description says transport capacity responds to shear stress, organic matter, and ash availability. Use it when you want the newer calibration family and the more dynamic transport-capacity formulation. Watanabe2025 with Static stays in the Watanabe family but switches to the fixed A, B style transport-capacity decline shown in the UI text. Use it when you want the newer family without the dynamic K(x) formulation. If you compare Srivastava2023, Watanabe2025 Dynamic, and Watanabe2025 Static on the same watershed, treat the differences as model-structure uncertainty. A difference across those runs means the answer is sensitive to the transport assumptions, not that one option is automatically correct by itself. What The Button Actually Does Run Model Clicking Run Model submits a multipart form request to: POST /rq-engine/api/runs/ / /run-ash The rq-engine route requires: ash_depth_mode depth fields when ash_depth_mode = 1 load and bulk-density fields when ash_depth_mode = 0 a Load map (tonne/ha) upload when ash_depth_mode = 2 If validation passes, WEPPcloud updates the Ash controller state, stores uploads when present, and either: enqueues run_ash_rq for a normal run, or returns Set ash inputs for batch processing when the run is in batch/base-project context Run wind transport This checkbox is not only submitted on the next full run. In the current controller, changing it posts immediately to: /runs/ / /tasks/set_ash_wind_transport/ Use it when you want the ash workflow to include wind-driven removal in addition to water-driven transport. If you are comparing scenarios, keep this setting consistent unless wind transport itself is the thing you are testing. What You See In Results After a successful run, the ash run-summary surface shows: View Watershed Ash Transport Model Results Contaminant and Reservoir Loading Analysis If the watershed has no burned hillslopes, the run summary instead says: Watershed does not have burned hillslopes. These are report surfaces, not setup controls. The watershed and contaminant reports are where the user interprets results after the background job completes. Interpreting Results The most useful outputs are usually: hillslope patterns showing likely ash source areas, daily or annual transport totals, cumulative transported ash over the modeled period, burn-severity summaries, contaminant-loading summaries when those outputs are configured, wind-transport totals when Run wind transport is enabled High ash transport usually reflects some combination of: more starting ash available, stronger runoff forcing from the WEPP side, model settings that keep ash transportable for longer, less ash being trapped below the roughness limit If values are low, that can mean either ash supply was limited or the selected transport assumptions made ash less available for movement. Assumptions And Limits Ash Transport is a post-fire comparison workflow that depends on the existing WEPP hydrologic context. If the WEPP fire run is weak, the ash results will be weak too. Ash model and, for Watanabe2025, Transport mode materially affect results. They can change both total transport and source-area ranking. Specify Load is not just another way to enter the same thing. The route converts load and bulk density into the starting depth used for the run. Upload Maps requires a load map. The ash-type map is optional. Run wind transport changes the process assumptions. Compare like with like if your goal is scenario ranking rather than process sensitivity. The UI mixes severity-based setup labels with white/black ash property labels. Use care when mapping your field assumptions into the visible controls. Contaminant outputs indicate modeled ash-associated loading potential, not confirmed concentration at a real sampling point. Related Docs WEPP Getting Started Mods Overview",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.ash_transport",
+          "title": "Ash Transport (WATAR)"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "dc6b5f5703a5271f90a130ee3b5bc337337bd6875ff418896ace7975836ab77e",
+      "doc_id": "usersum.weppcloud.models.ash_transport",
+      "headings": [
+        "Ash Transport (WATAR)",
+        "What This Is For",
+        "What You Actually See In The UI",
+        "What Each `Ash depth mode` Means",
+        "`Specify Depth`",
+        "`Specify Load`",
+        "`Upload Maps`",
+        "Practical caution",
+        "Available Models",
+        "How The Model Choices Differ",
+        "What The Button Actually Does",
+        "`Run Model`",
+        "`Run wind transport`",
+        "What You See In Results",
+        "Interpreting Results",
+        "Assumptions And Limits",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/ash-transport/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.ash_transport",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/ash-transport/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.ash_transport",
+      "source": "local",
+      "status": "active",
+      "title": "Ash Transport (WATAR)",
+      "updated_at": "2026-04-05T06:24:13.705147+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "Culvert Modeling Culvert modeling in the current WEPPcloud ecosystem is a hydro-enforcement and batch-analysis workflow for engineered crossings. Use it when roads block or redirect drainage and you need the terrain-conditioning step to represent flow passing through known crossing locations instead of treating the road prism as an uninterrupted barrier. What This Is For This workflow is for questions such as: Does a crossing change where flow leaves the road corridor? Does hydro-enforcement materially change watershed boundaries or outlet locations near engineered crossings? Which culvert catchments should move forward into WEPPcloud batch analysis? It is not a culvert-sizing tool, a hydraulic-capacity calculator, or a structural safety certification workflow. The Current User-Facing Surface The culvert workflow spans two user-facing surfaces: 1. the watershed delineation and hydro-enforcement form from the Culvert web app, where the user chooses hydro-conditioning behavior and prepares the batch inputs; 2. the WEPPcloud culvert batch API, where the prepared payload is submitted, retried, finalized, browsed, and downloaded. The hydro-enforcement documentation available in this repo exposes the active form fields and defaults even though the original ws_deln.html template is not vendored here. The documented user-facing fields are: Documented form field Purpose Current default --- --- --- hydroEnforcementSelect Turns hydro-enforcement on or off for the delineation branch user choice required flowAccumThreshold or flowAccumThreshold_nohydro Stream extraction threshold 100 pourPointSnapDistanceM or pourPointSnapDistanceM_nohydro Snap distance from pour point to road or intersection 20 m filterWatershedMinAreaHa or filterWatershedMinAreaHa_nohydro Minimum watershed area retained 2 ha flagWatershedAreaOutsideBoundaryHa or _nohydro Flag threshold for outside-boundary drainage area 0.5 ha roadFillDemByM Amount added to the DEM along roads 5 m roadFillDemBufferM Buffer width used for road fill 2 m breaklineOffsetM Breakline length/offset at crossings 10 m breaklineBurnDemByM Amount burned into the DEM along breaklines 10 m breaklineBurnDemBufferM Buffer width used for breakline burn 1 m For traceability, the workflow also branches on the documented pour-point selection field pourPointDataSelect, with distinct logic for: both or culvert pour_pt_NA gauging What Hydro-Enforcement Actually Assumes The core modeling assumption is that roads can block drainage unless the workflow creates a deliberate crossing path through or across the road barrier. When hydro-enforcement is enabled in the both or culvert branch, the workflow does this: 1. snaps pour points to nearby roads, 2. creates breaklines from those snapped crossing locations, 3. raises the DEM along roads using roadFillDemByM and roadFillDemBufferM, 4. burns the DEM along breaklines using breaklineBurnDemByM and breaklineBurnDemBufferM, 5. breaches or fills remaining depressions, 6. recomputes D8 flow direction, flow accumulation, and streams, 7. snaps final pour points to road-stream intersections and delineates nested watersheds. This means the conditioned DEM is not intended to reproduce the exact physical culvert barrel. It is building a routing surrogate: roads are treated as raised barriers, breaklines are treated as intentional openings or passage corridors, the final stream and watershed products depend on that edited terrain. When hydro-enforcement is not enabled, those road-fill and breakline edits are skipped and the workflow conditions the clipped DEM directly. That usually preserves a more natural DEM-derived drainage pattern, but it can miss crossings the user knows should convey flow beneath the road. Conditioning Choices That Matter Most hydroEnforcementSelect This is the most important choice in the workflow. Use hydro-enforcement when: the road clearly interrupts drainage in the DEM, known culverts or engineered crossings should pass flow, watershed boundaries are sensitive to crossing placement. Leave hydro-enforcement off when: the DEM already represents drainage credibly near the crossing, you are screening broad areas and do not want the extra assumptions introduced by road fill and breakline burn, you do not trust the crossing locations enough to modify the terrain. flowAccumThreshold This threshold controls how much contributing area is needed before the workflow extracts a stream. Higher thresholds usually produce fewer mapped channels. Lower thresholds usually produce denser stream networks. That choice affects: where road-stream intersections exist, which pour points can be snapped to those intersections, how many watersheds are eventually delineated. pourPointSnapDistanceM This controls how far the workflow will move a pour point to connect it to the nearest road or road-stream intersection. If the snap distance is too small, valid crossings may fail to connect. If it is too large, the workflow may connect a point to the wrong road or stream crossing. filterWatershedMinAreaHa and flagWatershedAreaOutsideBoundaryHa These are screening controls, not hydro-conditioning controls. Use them to: drop very small catchments that are likely noise or artifacts, flag watersheds whose drainage extends materially outside the analysis boundary. They matter because culvert inventories often include many very small or awkwardly placed catchments that are not equally useful for WEPP-style follow-on analysis. roadFill... and breakline... controls These fields are only relevant when hydro-enforcement is enabled. They control the terrain edits directly: the roadFill... settings make the road more of a barrier, the breakline... settings define where that barrier is cut or burned open. Use conservative values unless you have a reason not to. Large fill or burn adjustments can force routing behavior that looks precise but is really being driven by aggressive conditioning choices rather than source data quality. Important Branch Differences The workflow does not use the same conditioning sequence in every branch. both or culvert This is the most complete engineered-crossing workflow in the current documentation. With hydro-enforcement enabled, it includes both: road fill, breakline burn. This is the best fit when the crossing is explicitly tied to a road and culvert-style passage is the point of the analysis. pour_pt_NA This branch runs a baseline flow stack first and, if hydro-enforcement is required, applies road fill and breakline burn afterward and recomputes the flow products. Use this mental model: the workflow first learns the untreated drainage structure, then edits it around road-stream intersections. gauging This branch is different in an important way: the documented implementation burns breaklines but does not include the road-fill step used in the both or culvert branch. That means the conditioned terrain assumption is not the same as the main culvert branch. If you compare results across branches, do not assume the only difference is the point type. Workflow Assumptions Near Engineered Crossings The current workflow assumes: crossing locations are accurate enough to snap to roads and intersections, the DEM and road network align spatially, road width is known from uploaded road_width, inferred from OSM road class, or allowed to fall back to 10.0, a crossing can be represented adequately by raised-road and burned-breakline terrain edits, nested watersheds are the correct conceptual output for WEPPcloud batch analysis. It does not automatically know: whether the culvert is blocked, whether inlet or outlet conditions are damaged, whether hydraulic capacity is sufficient for a design storm, whether the road prism or channel geometry has changed since the source data were created. The WEPPcloud Batch Actions You Trigger After the watershed delineation and conditioning step produces the required files, the WEPPcloud-facing actions are API-backed and explicit. Submit a batch POST /rq-engine/api/culverts-wepp-batch/ This upload expects a payload.zip containing: topo/breached_filled_DEM_UTM.tif topo/streams.tif culverts/culvert_points.geojson culverts/watersheds.geojson metadata.json model-parameters.json The response returns: job_id culvert_batch_uuid status_url browse_token browse_token_expires_at That is the handoff from terrain-conditioned culvert prep into WEPPcloud batch processing. Retry one point POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id} Use this when one culvert needs to be rerun without resubmitting the entire batch. Finalize the batch POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/finalize Use this to rebuild the batch-level rollup artifacts after retry or repair work. Browse and download Use the returned browse_token to access: /weppcloud/culverts/{batch_uuid}/browse/* /weppcloud/culverts/{batch_uuid}/download/{subpath} This is how users inspect the generated run skeletons and other batch artifacts after submission. Data Contracts That Matter To End Users The most important culvert payload rules are: all payload layers must use the same projected UTM CRS, both culvert_points.geojson and watersheds.geojson must carry Point_ID, Point_ID values must be non-empty, valid, and consistent across both files, the payload must include nested watershed polygons that correspond to the prepared culvert points. If these contracts are wrong, the batch fails early or specific culvert runs are skipped. Interpreting Results The first question is not \"did the model finish?\" It is \"did hydro-enforcement create a more defensible drainage path near the crossing?\" Start by checking whether the conditioned outputs show: plausible road-stream intersections, pour points snapped where you expect, watershed polygons that make sense relative to the crossing, no obvious over-conditioning caused by aggressive fill or burn values. Then interpret the WEPPcloud batch results as crossing-centered watershed scenarios. Those results are only as meaningful as the conditioned watershed geometry that produced them. Assumptions And Limits Hydro-enforcement is a terrain-conditioning approximation, not a direct culvert hydraulics model. Results are sensitive to crossing location, road geometry, DEM quality, and the conditioning parameters. The gauging branch does not currently use the same road-fill logic as the main both or culvert branch. If no road layer is uploaded, the workflow may use OSM roads instead, which can be good enough for screening but weak for site-specific decisions. Nested watershed and Point_ID consistency are required for reliable WEPPcloud batch processing. Conditioned drainage paths should still be checked against site knowledge before using them for design, permitting, or safety-critical decisions. Related Docs Roads WEPP Culvert Web App Hydroenforcement",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.culvert_modeling",
+          "title": "Culvert Modeling (API)"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "6b25d51aca6dd4993bbac5a871b360dcb7030ab74384f4b87abbcaf9be0f6dc2",
+      "doc_id": "usersum.weppcloud.models.culvert_modeling",
+      "headings": [
+        "Culvert Modeling",
+        "What This Is For",
+        "The Current User-Facing Surface",
+        "What Hydro-Enforcement Actually Assumes",
+        "Conditioning Choices That Matter Most",
+        "`hydroEnforcementSelect`",
+        "`flowAccumThreshold`",
+        "`pourPointSnapDistanceM`",
+        "`filterWatershedMinAreaHa` and `flagWatershedAreaOutsideBoundaryHa`",
+        "`roadFill...` and `breakline...` controls",
+        "Important Branch Differences",
+        "`both` or `culvert`",
+        "`pour_pt_NA`",
+        "`gauging`",
+        "Workflow Assumptions Near Engineered Crossings",
+        "The WEPPcloud Batch Actions You Trigger",
+        "Submit a batch",
+        "Retry one point",
+        "Finalize the batch",
+        "Browse and download",
+        "Data Contracts That Matter To End Users",
+        "Interpreting Results",
+        "Assumptions And Limits",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/culvert-modeling/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.culvert_modeling",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/culvert-modeling/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.culvert_modeling",
+      "source": "local",
+      "status": "active",
+      "title": "Culvert Modeling (API)",
+      "updated_at": "2026-04-05T04:41:14.171085+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "Debris Flow Use **Debris Flow Analysis** when you need a fast post-fire hazard screen for whether a burned watershed is likely to produce a debris flow, and how large that event could be under different storm frequencies and storm durations. In WEPPcloud this is an empirical screening workflow built around the Cannon et al. (2010) probability and volume equations, not a physics-based runout or inundation model. What This Is For Use this workflow to answer questions such as: Is this burned basin likely to produce a debris flow under short, intense rainfall? How does the answer change if I use NOAA precipitation-frequency data instead of the Holden WRF Atlas? Does the result change materially if I override the default soil clay content or liquid limit? This tool is best for screening and prioritization. It helps decide where field review, warning planning, or more detailed hazard analysis is warranted. What You See In The UI The control card is titled **Debris Flow Analysis**. The user-facing controls are: UI control What the user sees Why it matters --- --- --- Clay Content Override (%) Optional numeric field Replaces the clay percentage derived from the Soils workflow. Higher clay content increases the probability term in the current empirical equation. Leave blank to use the soil-derived value. Liquid Limit Override (%) Optional numeric field Replaces the soil-derived liquid limit. Higher liquid limit lowers the probability term in the current equation. Leave blank to use the soil-derived value. Precipitation Datasource Automatic (use available precipitation sources), NOAA Precipitation Frequency Data Server, or Holden WRF Atlas Controls which precipitation-frequency table drives the storm totals and intensities used in the screening equations. Run Model Main action button Starts the debris-flow job for the current watershed. If you leave **Precipitation Datasource** on Automatic (use available precipitation sources), WEPPcloud fetches available precipitation-frequency data and chooses the default active source automatically. In the current implementation, NOAA is preferred when available; otherwise Holden becomes the active source. Before You Run It Review these prerequisites first: The watershed geometry must already exist for the run. Burn severity must be available. The model uses moderate and high severity burned area from BAER or from the Disturbed workflow. Soils should already be built if you want the default clay-content and liquid-limit values to be meaningful. This workflow uses precipitation-frequency data at the watershed centroid, so very large or topographically complex basins may need extra judgment when comparing datasources. What The Button Actually Does When you click **Run Model**, the UI submits a background request to the debris-flow rq-engine endpoint: POST /rq-engine/api/runs/{runid}/{config}/run-debris-flow The submitted payload can include: clay_pct liquid_limit datasource Blank override fields are omitted from the request. The route validates clay_pct and liquid_limit as numeric values, trims the datasource string, and then queues the debris-flow run. The job calculates watershed inputs, fetches precipitation-frequency tables, and computes debris-flow **probability of occurrence** and **volume** matrices for each available datasource. Choosing A Precipitation Datasource The datasource choice is often the most important user decision in this workflow. Automatic (use available precipitation sources) Use this when you want WEPPcloud to pick the first usable precipitation-frequency source for the basin. This is the least opinionated starting point and is appropriate for quick screening. NOAA Precipitation Frequency Data Server Use this when you want the screening tied to NOAA precipitation-frequency values at the watershed centroid. In the current workflow, NOAA precipitation totals are converted to millimeters and then to rainfall intensity in mm/hr for each duration. Holden WRF Atlas Use this when Holden WRF Atlas coverage is available and better matches your planning context. WEPPcloud reshapes Holden precipitation totals into duration-by-recurrence tables and then converts them to intensity in mm/hr. Practical guidance If both NOAA and Holden are available, compare both before making a management decision. If one datasource produces much higher short-duration intensity, it can materially raise the modeled probability. A datasource difference does not mean one answer is \"correct\" and the other is \"wrong.\" It means the rainfall-frequency input assumption changed. Interpreting Probability And Volume The report separates the two outputs because they answer different questions. Probability of occurrence This is the modeled chance that a debris-flow-triggering event occurs for the listed storm duration and recurrence interval. Read it as a conditional screening probability for that storm scenario. Do not read it as: the probability that debris flow happens this year, the probability that debris flow occurs somewhere on the map regardless of storm type, a guarantee that a debris flow will or will not happen. Predicted volume This is the modeled debris-flow volume, shown in m^3, for the same storm scenario. It is an estimate of event magnitude from the empirical equation. It is not a mapped runout volume, deposition thickness, or channel-bulking simulation. Read them together High probability and high volume is a stronger screening concern than either metric alone. High probability with modest volume can still matter for infrastructure or channel blockage. Lower probability with very large volume can still justify field review where consequences are high. What You See In Results After a successful run, the debris-flow report shows: **Debris Flow Summary** with Watershed Area, Area >= 30% Slope (A), Moderate & High Burn (B), Ruggedness (R), Clay Content (C), and Liquid Limit (LL). **Probability and Volume Estimates**, organized by storm duration and recurrence interval. **Storm Intensity and Total Precipitation**, showing intensity in mm/hr and total storm depth in mm. The report highlights cells when probability is at least 50 percent. Treat that as a visual cue, not as a formal hazard threshold. The summary terms matter because they are the actual equation inputs: A is the basin area with slopes greater than or equal to 30 percent. B is the basin area burned at moderate and high severity. R is basin ruggedness. C is clay content. LL is liquid limit. Assumptions And Limits This is an empirical screening model based on watershed summary variables and precipitation-frequency inputs. It does not simulate debris-flow routing, travel path, deposition pattern, or inundation area. It does not replace a runout model, field reconnaissance, or consequence analysis. It relies on the quality of the burn severity map, watershed geometry, and soil properties already present in the run. If soil properties are missing or unusable, the controller falls back to default values for clay content and liquid limit. That makes the run possible, but confidence is lower than when real soil properties are available. Results are storm-scenario based. A 10-year recurrence row and a 100-year recurrence row are different conditional scenarios, not forecasts of exactly when a debris flow will occur. The UI itself notes that results may differ from newer formulations such as Staley (2016, 2017). Use that warning seriously if you are comparing methods across studies or agencies. When Not To Use This Alone Do not use this workflow by itself when you need: a debris-flow path or runout map, a design-level estimate for infrastructure sizing, a regulatory or public-warning decision with no supporting field evidence, an event-by-event simulation tied to observed storm hyetographs at a specific site. Related Docs WEPP Ash Transport Getting Started",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.debris_flow",
+          "title": "Debris Flow"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "e02ca88e367494f88c36ce863d943a7062d55c245d0a3d1d67f74bfef4032506",
+      "doc_id": "usersum.weppcloud.models.debris_flow",
+      "headings": [
+        "Debris Flow",
+        "What This Is For",
+        "What You See In The UI",
+        "Before You Run It",
+        "What The Button Actually Does",
+        "Choosing A Precipitation Datasource",
+        "`Automatic (use available precipitation sources)`",
+        "`NOAA Precipitation Frequency Data Server`",
+        "`Holden WRF Atlas`",
+        "Practical guidance",
+        "Interpreting Probability And Volume",
+        "Probability of occurrence",
+        "Predicted volume",
+        "Read them together",
+        "What You See In Results",
+        "Assumptions And Limits",
+        "When Not To Use This Alone",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/debris-flow/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.debris_flow",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/debris-flow/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.debris_flow",
+      "source": "local",
+      "status": "active",
+      "title": "Debris Flow",
+      "updated_at": "2026-04-05T04:39:44.536460+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "Gridded RUSLE Use **RUSLE** when you want a map of long-term sheet-and-rill detachment potential across the watershed. In WEPPcloud, this workflow builds gridded factors for A = R * K * LS * C * P and then writes a final A raster for the factor choices you selected. It is a prioritization and interpretation layer, not a sediment-delivery model. What This Is For Use Gridded RUSLE to answer questions such as: Where are the likely hillslope detachment hotspots in this watershed? How much do the hotspot patterns change if I use observed cover versus a scenario burn-severity lookup? How sensitive is the final A map to the K-factor method or to the R-factor source? This tool is most useful when you need a fast, spatially explicit planning layer that complements WEPP rather than replaces it. What You See In The UI The control card is titled **RUSLE**. The user-facing build options are: UI control Values shown in the UI Why it matters --- --- --- R factor mode WEPP Climate-Derived R, Momm 2025 County Climatology, Canonical RUSLE2 Chooses the rainfall-erosivity source used for the whole run. C factor mode Observed RAP, Scenario SBS Chooses whether cover comes from observed RAP cover data or from a scenario lookup based on disturbed class and soil burn severity. RAP year Year selector Only shown when Observed RAP is selected. Picks which observed RAP year supplies the cover condition. K factor modes POLARIS Nomograph, POLARIS EPIC Chooses which K rasters to build. You can build both for comparison. Default K mode for final A POLARIS Nomograph or POLARIS EPIC Chooses which of the built K rasters is actually used in the final A raster. Maximum slope length cap Numeric field in meters Limits slope length before the LS calculation. P factor scalar Numeric field Applies one run-wide support-practice multiplier. Force POLARIS refresh before build Checkbox Reacquires POLARIS inputs instead of reusing apparently aligned layers. Build RUSLE Main action button Starts the asynchronous factor build and final A raster generation. How To Choose The Build Options R factor mode WEPP Climate-Derived R Use this when you want the R factor tied to the WEPP climate already associated with the run. This is usually the most internally consistent choice when you are comparing RUSLE with WEPP outputs from the same project. Momm 2025 County Climatology Use this when you want a planning-climatology reference based on the watershed centroid. This is a reference-style R choice rather than a run-specific WEPP climate reconstruction. Canonical RUSLE2 Use this when you want a more canonical RUSLE2-style reference climatology at the watershed centroid. This is useful for method comparison, but it is still a planning climatology rather than an event simulation. C factor mode Observed RAP Use this when you want current or historical observed cover conditions from the **Rangeland Analysis Platform**. The RAP year selector appears only in this mode. This is the best choice when your question is about actual observed ground-cover condition for a known year. Scenario SBS Use this when you want a planning scenario driven by land-cover family and soil-burn-severity class rather than observed RAP cover. In the UI help text, this mode uses landcover plus SBS classes, or unburned defaults when no SBS map is present. Use this mode for pre-fire/post-fire comparisons, treatment planning, or scenario work where you want the same scenario logic applied consistently across the watershed. K factor modes POLARIS Nomograph This is the default K estimator and is the closest fit to classic RUSLE-style K semantics. Use it when you want a RUSLE-facing soil erodibility interpretation. POLARIS EPIC Use this as a sensitivity or alternate method path. It is a valid built option, but it is less directly comparable to standard NRCS-style K interpretations than the nomograph approach. Default K mode for final A This setting matters more than many users expect. You can build both K rasters, but the final A raster uses only the one selected here. If you change the default K mode, the final A map can change even when every other input stays the same. Maximum slope length cap The default is 304.8 m (1000 ft), which the UI help ties to the RUSLE2 handbook basis. Change this only if you are deliberately testing sensitivity. Raising or lowering it changes LS and can shift where the largest A values appear. P factor scalar This is a single run-wide multiplier for support practices. The default is typically 1.0, meaning no reduction from support practices. Lower values reduce A; higher values increase it. Force POLARIS refresh before build Use this when you suspect the cached POLARIS layers are stale, misaligned, or otherwise not the layers you want to rely on for the new build. What The Button Actually Does When you click **Build RUSLE**, the UI submits a background request to: POST /rq-engine/api/runs/{runid}/{config}/build-rusle The payload includes the user-facing selections: r_mode c_mode rap_year when Observed RAP is selected k_modes default_k_mode max_slope_length_m p_value force_polaris_refresh The controller enforces at least one K mode, keeps Default K mode for final A synchronized with the checked K modes, removes rap_year from the payload when Scenario SBS is selected, and then queues the build. When the job completes, the UI refreshes the **Run Results** area and loads links to: GL Dashboard View RUSLE Outputs Directory Those are the main user-facing places to inspect the finished artifacts. Interpreting A Versus Delivered Sediment The most important interpretation rule is this: A is modeled long-term average sheet-and-rill detachment potential. A is not delivered sediment at the channel. A is not delivered sediment at the watershed outlet. If a cell has high A, it means the factor combination predicts high detachment potential there. It does not mean all of that sediment reaches a stream, survives channel routing, or leaves the basin. Use **Gridded RUSLE** when the decision is about: hotspot identification, scenario comparison, understanding why one part of the landscape is more erosion-prone than another. Use **WEPP** or another routing-capable workflow when the decision is about: runoff generation through time, sediment delivery to channels or the outlet, channel processes, treatment effects on delivered sediment rather than detachment potential alone. What The Factor Maps Mean R is rainfall erosivity. In this workflow it is a run-wide scalar, not a storm-by-storm map. K is soil erodibility from the selected POLARIS method. LS is the slope-length and steepness factor. This often explains why steep converging terrain lights up even when the other factors are moderate. C is the cover-management factor from either observed RAP cover or the scenario SBS lookup. P is the support-practice factor, applied here as one scalar for the run. If the final A pattern looks surprising, inspect LS, K, and C first. Those three usually explain most of the spatial pattern. Assumptions And Limits This is a long-term average RUSLE-style detachment workflow, not an event simulation. It is explicitly not a sediment-delivery model, deposition model, channel erosion model, or gully erosion model. The current implementation is for WBT-based runs. TOPAZ-only runs are not the intended target. Some important data sources are US-specific in the current implementation, especially POLARIS and RAP-backed paths. Scenario SBS is a scenario-building path, not an observed-condition path. Observed RAP is best for actual condition by year, but only where RAP is appropriate for the site and question. The workflow is not a full clone of desktop RUSLE2. Treat it as a defensible gridded planning layer inside WEPPcloud, not as a one-for-one substitute. When To Prefer WEPP Instead Prefer WEPP over Gridded RUSLE when you need: storm-event runoff and erosion timing, hillslope and watershed sediment delivery, channel routing effects, comparisons tied to full WEPP management and hydrology behavior. Gridded RUSLE is strongest when you want a fast, transparent factor-based map to explain spatial vulnerability. Related Docs WEPP Revegetation Mods Overview",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.gridded_rusle",
+          "title": "Gridded RUSLE"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "8ac812e8c0aea9070e8d249d12766c4af7838f334b0e1e4b0fc2deb7779e764b",
+      "doc_id": "usersum.weppcloud.models.gridded_rusle",
+      "headings": [
+        "Gridded RUSLE",
+        "What This Is For",
+        "What You See In The UI",
+        "How To Choose The Build Options",
+        "`R factor mode`",
+        "`WEPP Climate-Derived R`",
+        "`Momm 2025 County Climatology`",
+        "`Canonical RUSLE2`",
+        "`C factor mode`",
+        "`Observed RAP`",
+        "`Scenario SBS`",
+        "`K factor modes`",
+        "`POLARIS Nomograph`",
+        "`POLARIS EPIC`",
+        "`Default K mode for final A`",
+        "`Maximum slope length cap`",
+        "`P factor scalar`",
+        "`Force POLARIS refresh before build`",
+        "What The Button Actually Does",
+        "Interpreting `A` Versus Delivered Sediment",
+        "What The Factor Maps Mean",
+        "Assumptions And Limits",
+        "When To Prefer WEPP Instead",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/gridded-rusle/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.gridded_rusle",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/gridded-rusle/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.gridded_rusle",
+      "source": "local",
+      "status": "active",
+      "title": "Gridded RUSLE",
+      "updated_at": "2026-04-05T04:39:44.537460+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "HEC-DSS Export The Partitioned DSS Export for HEC workflow packages existing routed WEPP outputs into HEC-DSS files and supporting sidecar files for downstream HEC workflows. It is an export step, not a new model run. What You Actually See In The UI The DSS export control is titled Partitioned DSS Export for HEC. The user-facing inputs are: Start date (optional) End date (optional) Export mode Export select channels Export based on channel order when Export select channels is chosen: Channel Topaz IDs to export when Export based on channel order is chosen: Exclude channel orders with checkboxes 1 through 5 Export DSS The download link appears only after the job completes: Download DSS Export Results (.zip) What Each Export Option Means UI control What it means When to use it --- --- --- Start date (optional) Lower date bound for the exported series Use when you only need part of the modeled record End date (optional) Upper date bound for the exported series Use when your HEC study window is shorter than the full WEPP run Export select channels Export only the channels you name explicitly Use when you already know the exact Topaz channel IDs you need Channel Topaz IDs to export Comma-separated list of channel IDs Use for tightly targeted exports Export based on channel order Export every eligible channel except the orders you exclude Use when you want a broad export filtered by network size/order Exclude channel orders Removes selected Strahler orders from the export set Use to omit small headwater channels or other orders you do not want in the package For stochastic climates, the help text matters: use simulation year numbering in the DSS date fields rather than real calendar years. What The Export Button Triggers Clicking Export DSS posts the current export settings to: /rq-engine/api/runs/ / /post-dss-export-rq The controller normalizes the form before submitting: channel lists are parsed into positive integer channel IDs, excluded orders are collected into an order list, dates are passed as optional strings, mode 2 derives the actual channel list from watershed channel order rather than using a manual list. The route validates: dates must be MM/DD/YYYY, start date must be on or before end date, channel IDs must be positive integers. If validation passes, WEPPcloud stores the DSS export settings on the run, queues the DSS export job, and publishes the finished zip under browse/export/dss.zip. What You Get In The Zip Package The package is centered on export/dss.zip. The export directory typically contains: totalwatsed3_chan_ .dss daily DSS series for each exported channel peak_chan_ .dss irregular peak-flow DSS series derived from channel output sed_vol_conc_by_event_and_chn_id.csv per-channel tabular sidecar with sediment and ash concentration fields when available dss_channels.geojson exported channel geometries plus DSS/HEC metadata boundaries/bc_ .gml and boundary shapefile sidecars boundary-condition helper files for downstream HEC work README.dss_export.md export-specific technical notes copied into the package Some runs may also include channel-buffer products when that generation step succeeds. What You Are Not Getting This package does **not** give you a complete HEC-RAS or HEC-HMS project. In particular, the export is not: a rerun of WEPP, observed gage data, surveyed geometry, cross sections, terrain, or a finished hydraulic model, a guarantee that channel names match your local naming convention. It is a WEPP-derived time-series package plus helper geometry and boundary sidecars. How To Choose An Export Mode Use Export select channels when: you already know the exact Topaz IDs you need, you are handing off only a few locations, you do not want small upstream channels included accidentally. Use Export based on channel order when: you want a systematic export for many channels, order is a better filter than hand-entering IDs, you want to exclude the smallest or least relevant channels quickly. How To Interpret The Results The DSS files contain modeled WEPP outputs. Treat them as scenario-based hydrologic inputs, not measurements. Two series types matter: totalwatsed3_chan_ .dss daily channel series suitable for continuous-style review peak_chan_ .dss irregular peak-flow series derived from channel routing output Before using the package downstream, verify: the channel set is the one you intended, the date range matches the study window, your HEC workflow is using daily versus peak series for the right purpose. Core Assumptions And Limits The export is only as good as the underlying WEPP run. Channel IDs follow the modeled watershed structure in WEPPcloud. Filtering by channel order is based on modeled network order, not on local naming or management importance. Missing or weak WEPP channel outputs will carry directly into the DSS package. The package helps with HEC handoff, but it does not remove the need for downstream hydraulic setup and review. Related Docs WEPP Mods Overview WEPP Interchange Outputs",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.hec_dss_export",
+          "title": "WEPP DSS Export for HEC-RAS"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "2ac9231a1d0a856a31e40dedbfc77afa6ebe1071f24353901bf302404f1abba8",
+      "doc_id": "usersum.weppcloud.models.hec_dss_export",
+      "headings": [
+        "HEC-DSS Export",
+        "What You Actually See In The UI",
+        "What Each Export Option Means",
+        "What The Export Button Triggers",
+        "What You Get In The Zip Package",
+        "What You Are Not Getting",
+        "How To Choose An Export Mode",
+        "How To Interpret The Results",
+        "Core Assumptions And Limits",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/hec-dss-export/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.hec_dss_export",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/hec-dss-export/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.hec_dss_export",
+      "source": "local",
+      "status": "active",
+      "title": "WEPP DSS Export for HEC-RAS",
+      "updated_at": "2026-04-05T06:22:49.295585+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "Revegetation Revegetation lets you replace the default \"use observed post-fire cover as-is\" assumption with an explicit cover-recovery scenario before running WEPP. It is for users who want to test how different vegetation recovery paths change modeled runoff and erosion after disturbance. What You Actually See In The UI When the workflow is enabled, the control appears under WEPP Advanced Options as Revegetation Scenarios. The user-facing controls are: Cover transformation scenario Observed 20-Year Recovery 20-Year Partial Recovery User-Defined Transform Upload cover transform file (.csv) which only appears after User-Defined Transform is selected These are the labels the user sees. The run is still executed from the normal WEPP controls. When To Use Each Scenario Option UI option What it means Best use --- --- --- Observed Uses the available RAP-derived cover time series without applying a transform; the underlying API value is an empty reveg_scenario Use when you want the project to follow the observed cover record directly 20-Year Recovery Applies the built-in full-recovery style transform curve; the underlying built-in file is 20-yr_Recovery.csv Use when you want a stronger assumed recovery trajectory than the observed record 20-Year Partial Recovery Applies the built-in partial-recovery curve; the underlying built-in file is 20-yr_PartialRecovery.csv Use when you expect slower or incomplete recovery User-Defined Transform Lets you upload your own transform CSV; the selector uses the user_cover_transform mode until a file is uploaded Use when local expertise, field evidence, or planning assumptions justify a custom recovery curve What The UI Actions Trigger There are two separate user actions: 1. Choosing a built-in scenario The selection is sent with the next WEPP action as reveg_scenario to the WEPP run or prep endpoints such as /rq-engine/api/runs/ / /run-wepp or /rq-engine/api/runs/ / /prep-wepp-watershed. 2. Uploading a custom CSV The file upload happens immediately when you choose a file. The browser posts it to /rq-engine/api/runs/ / /tasks/upload-cover-transform, which saves the CSV under the run and marks it as the active user-defined transform. That means picking User-Defined Transform by itself does not change the model. The uploaded file becomes active, and the change takes effect on the next WEPP prep or run. Likewise, simply changing the dropdown to a built-in scenario does not execute anything until the next WEPP prep or run submits that selection. How The Cover Transform Actually Works This workflow does not create a new vegetation model. It rescales the post-fire RAP cover trajectory that WEPP preparation uses. At a practical end-user level: the transform is anchored to the fire-year cover baseline, years before the fire are left alone, years after the fire are scaled by the scenario curve, only the years already available in the run's RAP and climate data are modeled. Important consequences: choosing a 20-Year ... scenario does not make the project run for 20 years if the climate and RAP inputs are shorter, the transform changes cover assumptions, not soils, topography, or climate, if your custom CSV does not include every burn-class and vegetation-class combination, the missing combinations are left unchanged. User-Defined Transform Upload Guidance Use User-Defined Transform only if you can defend the curve you are uploading. The current upload path expects a .csv file and stores it under the run's revegetation/ folder. The downstream parser expects: the first row to identify burn-severity classes, the second row to identify vegetation labels, later rows to hold year-by-year scale factors. For end users, the important operational limits are: upload validation is light at upload time, a file can upload successfully and still produce poor or confusing results later if the class names or structure do not match what preparation expects, if the curve ends before the modeled period ends, the last factor is carried forward. How To Interpret Results Read revegetation as a scenario-comparison tool, not a source of truth. In general: earlier or stronger cover recovery usually reduces runoff and sediment, slower or partial recovery usually keeps post-fire response elevated for longer, small differences between scenarios do not necessarily mean the transform failed. Small differences can happen when: the modeled period is short, cover is not the dominant control in that watershed, the transformed cover does not change the limiting canopy condition enough to change erosion materially. Core Assumptions And Limits Revegetation does not extend simulation length beyond the available climate and RAP years. It changes post-fire cover assumptions only. It does not directly change weather, soils, burn severity mapping, or treatment effects. The transform is based on burn class and vegetation class, not on a fully dynamic plant-community process model. In WEPP, the resulting cover series acts as a canopy constraint in the growth logic rather than a guarantee that field canopy will exactly match the uploaded percentages every day. If the fire date or disturbance context is wrong, the scenario comparison will also be wrong. Decision Guidance Use Observed when your main goal is to honor the available record. Use 20-Year Recovery or 20-Year Partial Recovery when you need structured planning scenarios and do not have a site-specific curve. Use User-Defined Transform only when you can explain where the curve came from and why it is more appropriate than the built-in choices. Related Docs WEPP WEPP Advanced Options Getting Started",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.revegetation",
+          "title": "Revegetation"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "c143ae3f922c8915a492f79773d491aa5950a43f7e9b25d15e896c4be2a33a4f",
+      "doc_id": "usersum.weppcloud.models.revegetation",
+      "headings": [
+        "Revegetation",
+        "What You Actually See In The UI",
+        "When To Use Each Scenario Option",
+        "What The UI Actions Trigger",
+        "How The Cover Transform Actually Works",
+        "User-Defined Transform Upload Guidance",
+        "How To Interpret Results",
+        "Core Assumptions And Limits",
+        "Decision Guidance",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/revegetation/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.revegetation",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/revegetation/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.revegetation",
+      "source": "local",
+      "status": "active",
+      "title": "Revegetation",
+      "updated_at": "2026-04-05T04:47:32.970130+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "RHEM Use **RHEM** when your question is specifically about runoff and erosion from rangeland hillslopes. In WEPPcloud, this workflow runs the **Rangeland Hydrology and Erosion Model** across the TOPAZ subcatchments in the project, then summarizes the results as hillslope-level average annuals and watershed-level return-period tables. What This Is For Use RHEM to answer questions such as: Which rangeland hillslopes are the largest runoff sources? Which hillslopes are the main sediment-yield or soil-loss contributors? How do watershed-scale runoff, sediment yield, and soil loss change across return periods? RHEM is the right workflow when the land cover and management question is rangeland-focused. It is not the best first choice for forest treatment, roads, or post-fire channel-routing questions. What You See In The UI The main control card is intentionally simple: UI element What the user sees Why it matters --- --- --- RHEM Control card title Identifies the rangeland-specific model workflow. Run RHEM Main action button Starts the full RHEM preparation and run sequence. After a successful run, the report panel exposes three user-facing links: Average Annuals by Hillslope Return Periods Report Run Log Those links are the main user-visible outputs of the workflow. Before You Run It The UI description is explicit: **Execute WEPP first so base hydrology is available.** In practice, RHEM expects the run to already have usable: watershed delineation and TOPAZ subcatchments, soils, climate, rangeland cover data. If those inputs are missing, the background job will fail because RHEM builds one hillslope input set per subcatchment from those existing project layers. What The Button Actually Does When you click **Run RHEM**, the UI posts to: POST /rq-engine/api/runs/{runid}/{config}/run-rhem The normal UI does not show advanced toggles. It submits the run with the default full workflow: clean previous RHEM run folders, prepare hillslope input files, execute the RHEM binary, post-process results into reports and queryable summaries. The API can accept advanced boolean flags such as clean, prep, and run or their _hillslopes aliases, but those controls are not exposed in the standard end-user card. In normal UI use, **Run RHEM** means \"do the whole sequence.\" How The Rangeland Workflow Differs From WEPP RHEM and WEPP are not interchangeable, even when they use the same watershed geometry. Use RHEM when the watershed is primarily shrubland, grassland, or other rangeland, your question is about rangeland runoff and erosion response, you want hillslope-by-hillslope rangeland summaries and return-period reporting. Use WEPP when the question is mainly forest, roads, or post-fire WEPP response, you need the broader WEPP hillslope and watershed workflow, you care about WEPP-specific management files, channels, or other WEPP routing products. Practical interpretation RHEM is a rangeland-specific hillslope model aggregated across the watershed. WEPP is the core WEPPcloud hydrology and erosion framework. If your land cover and management setting is truly rangeland, RHEM is usually the more appropriate erosion model to consult first. If your question is about broader WEPP outputs or non-rangeland behavior, stay with WEPP. What RHEM Builds Behind The Scenes For each TOPAZ subcatchment, the workflow prepares: a parameter file based on slope, soils, and rangeland cover, a storm file derived from the run climate, a run file for the RHEM binary. It then runs each hillslope and aggregates the outputs into watershed summaries. This is why the workflow is end-user simple but still depends heavily on the upstream project being prepared correctly. What The Reports Mean Average Annuals by Hillslope This report lists each Topaz ID and shows: Runoff Sediment Yield Soil Loss Rain Each measure is reported both: over hill per unit That distinction matters: over hill is the total for the whole hillslope area. per unit normalizes by area, which is usually better for comparing hillslopes of different sizes. The report also includes a watershed row, so you can compare individual source areas against the watershed total. Return Periods Report This report summarizes watershed-scale: Rain Runoff Sediment Yield Soil Loss for the return periods available in the run. Values are shown both as totals and as area-normalized forms where applicable. Use this report when the question is, \"How large is the watershed response under more frequent versus rarer storm conditions?\" Run Log Use this when the run finishes with missing outputs, incomplete hillslope summaries, or a result that looks inconsistent with the project setup. It is the user-visible way to inspect run progress and failures. Additional Query Outputs After RHEM post-processing completes, WEPPcloud also exposes subcatchment query layers for: runoff, sediment yield, soil loss. These are the values used for map-style source-area summaries by subcatchment. They are reported as annualized per-area measures for each TOPAZ hillslope. How To Interpret Runoff, Sediment Yield, And Soil Loss Runoff is water leaving the hillslope. Sediment Yield is sediment leaving the hillslope. Soil Loss is sediment detached from the hillslope. Do not treat Sediment Yield and Soil Loss as identical: Soil Loss is what was detached on the hillslope. Sediment Yield is what left the hillslope. If soil loss is much larger than sediment yield, the hillslope is detaching material that is not all leaving the slope. If both are high, that hillslope is both eroding and exporting sediment efficiently. Assumptions And Limits RHEM is intended for rangeland-dominated settings. It depends on the quality of rangeland cover fractions, soils, slope geometry, and climate already prepared in the run. The workflow runs hillslopes independently and then aggregates them. Treat watershed totals as a model summary of hillslope behavior, not as a complete substitute for every WEPP routing product. Return-period outputs are modeled scenario summaries, not guarantees that a storm of that exact response will occur on schedule. Missing or incomplete hillslope outputs can reduce confidence in the watershed summary. If a report looks incomplete, check the Run Log. When Not To Use RHEM Alone Do not rely on RHEM alone when you need: a forest-oriented erosion workflow, road or crossing analysis, a non-rangeland management interpretation, a direct substitute for all WEPP watershed-routing outputs. Related Docs WEPP Gridded RUSLE Getting Started",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.rhem",
+          "title": "RHEM"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "ecee1d767c48a04abf0dd2b3e6b9c473dac6fd8c28e77cea6a80a428e3440609",
+      "doc_id": "usersum.weppcloud.models.rhem",
+      "headings": [
+        "RHEM",
+        "What This Is For",
+        "What You See In The UI",
+        "Before You Run It",
+        "What The Button Actually Does",
+        "How The Rangeland Workflow Differs From WEPP",
+        "Use RHEM when",
+        "Use WEPP when",
+        "Practical interpretation",
+        "What RHEM Builds Behind The Scenes",
+        "What The Reports Mean",
+        "`Average Annuals by Hillslope`",
+        "`Return Periods Report`",
+        "`Run Log`",
+        "Additional Query Outputs",
+        "How To Interpret Runoff, Sediment Yield, And Soil Loss",
+        "Assumptions And Limits",
+        "When Not To Use RHEM Alone",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/rhem/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.rhem",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/rhem/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.rhem",
+      "source": "local",
+      "status": "active",
+      "title": "RHEM",
+      "updated_at": "2026-04-05T04:39:44.537460+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "Roads Use the **Roads** control when you want to test how mapped road segments change runoff, routing, and sediment relative to an existing WEPPcloud watershed run. This workflow keeps the original watershed run as the baseline and writes a separate Roads-specific result set for comparison. What This Is For Roads is for questions such as: Which road segments are likely to contribute the most road-related loss? How much do inslope roads change watershed results compared with the no-roads baseline? How sensitive are results to road design, surface, and traffic assumptions in the uploaded linework? It is not a general road inventory tool and it does not replace the baseline WEPP watershed model. When to Use It Use Roads when: the run already has a completed baseline WEPP solution, the project uses the WBT delineation backend, you have road centerlines in GeoJSON form, the uploaded road attributes can be mapped to road meaning the model understands. Before You Begin Before opening the **Roads** control, make sure you have: a baseline WEPP run you trust enough to use as the no-roads comparison, a roads GeoJSON FeatureCollection with LineString or MultiLineString features, road attributes that can identify road design and, ideally, surface and traffic, realistic expectations about which uploaded roads are actually in-scope. In the current Roads model, only inslope designs that resolve to Inslope_bd or Inslope_rd are eligible for segment preparation and Roads WEPP runs. Other uploaded roads may remain in the file but will not become modeled Roads segments. What You See In The UI The **Roads** control has four user-facing stages: Visible control What you choose or do What WEPPcloud does behind the scenes Why it matters --- --- --- --- Upload roads GeoJSON and Upload Roads GeoJSON Choose and upload the linework file Posts the file to tasks/roads/upload_geojson, validates geometry, stages roads.uploaded.geojson, discovers top-level attributes, and tries to auto-map fields A bad upload blocks everything else; a good upload populates the mapping controls with real fields from your file Attribute Mapping Choose Design field, Surface field, Surface fallback value, Traffic field, and Traffic fallback value, then click Apply Attribute Mapping Posts the selected mapping and defaults to tasks/roads/set_params, persists them, and clears stale prepare/run state This step controls how WEPPcloud interprets your road attributes and whether features are eligible later Prepare Segment Candidates Start preprocessing Queues tasks/roads/prepare_segments and creates monotonic segments, low points, routing diagnostics, and eligibility summaries Preparation is where linework becomes modeled road segments Run WEPPcloud Roads Start the Roads scenario run Queues tasks/roads/run and runs the prepared segments, combines pass effects, reroutes watershed results, and regenerates Roads-scoped reports This is the actual Roads scenario execution step The control also shows a summary panel and a Roads results panel. After a run finishes, the results panel reports: Controller state Run summary Resources Those status values tell you whether report links are ready or whether you still need to rerun or regenerate Roads resources. Upload Mapping: What The Controls Mean The mapping controls use the labels the user sees in the Roads form: UI label What Roads expects How to choose --- --- --- Design field The upload property that identifies road design eligibility Point this at the field containing values such as Inslope_bd or Inslope_rd if those are your intended modeled roads Surface field The upload property describing road surfacing Use the field that best distinguishes gravel-like versus paved behavior Surface fallback value The fallback used when the mapped surface field is blank, missing, or unrecognized Choose the more defensible default for unmapped segments; do not use this to hide poor source data Traffic field The upload property describing traffic class Use the field that best separates high, low, and none style use Traffic fallback value The fallback used when the mapped traffic field is blank, missing, or unrecognized Pick the least misleading default for the roads you expect to remain after eligibility filtering Important mapping behavior: Roads only discovers top-level feature.properties keys from the uploaded GeoJSON. If mapping is unset, legacy property keys are still checked. If mapping is set but a value is missing or invalid, the selected fallback value is used. Changing mapping or fallback choices clears stale prepared and run summaries. If you change them, prepare again before running. Prepare And Run Are Different Steps Do not treat **Prepare Segment Candidates** and **Run WEPPcloud Roads** as interchangeable. Prepare Segment Candidates is the deterministic preprocessing step. It: splits uploaded roads into monotonic segments, orients each segment from high point to low point, identifies low points, attributes low points to channel and receiving hillslope context, records routing and mapping diagnostics. Run WEPPcloud Roads uses only the prepared state. It assumes the latest upload and mapping choices are already reflected in the prepared segments. If the upload changed, or the Roads parameters changed, the run is intentionally blocked until you prepare again. This separation matters because many apparent \"run problems\" are really preparation problems: the wrong Design field means no eligible segments, poor geometry can create unexpected segmentation, low points may be found but not mapped into routing context, changing upload or mapping after prepare makes the prepared segments stale by design. How To Work Through A Roads Run 1. Run baseline WEPP first. Roads is a comparison workflow. The baseline watershed run provides the no-roads reference case and the watershed context Roads builds on. 2. In **Roads**, upload the linework with Upload Roads GeoJSON. Expect the control to discover fields from the uploaded GeoJSON and repopulate the Attribute Mapping section. 3. Review Attribute Mapping before you prepare anything. Start with Design field. If this is wrong, the prepare stage may find linework but very few or no eligible segments. 4. Click Apply Attribute Mapping. This saves the mapping and fallback defaults. If you are iterating, remember that this invalidates stale prepare/run state. 5. Click Prepare Segment Candidates. Expect a summary that reports counts such as Eligible segments, Mapped lowpoints, and lowpoint decision totals. This is the first place to check whether your upload and mapping are behaving as intended. 6. Review the map and diagnostics before running. Only segment candidates with mapped lowpoint decisions are eligible for Roads WEPP runs. Segments that are eligible but not mapped still tell you something important about coverage gaps or routing ambiguity. 7. Click Run WEPPcloud Roads. Expect a Roads-scoped run summary, Roads results links, and regenerated outputs under the Roads output tree rather than the baseline watershed output tree. How To Compare Baseline And Roads Results Roads is most useful when you make a clean baseline-versus-roads comparison. That comparison assumes: the same watershed delineation is being used, the same climate and baseline hillslope/channel setup are being used, the only intended change is the addition of the prepared road segments and their routing effects, you are comparing baseline outputs to Roads-scoped outputs, not mixing files from different runs or different prep states. In practical terms: baseline content stays under the normal watershed output tree, Roads writes a separate Roads-scoped output tree under wepp/roads/output/, Roads report links appear only when the Roads run and Roads resources are ready. If the baseline run itself changes, or if you change the uploaded roads after preparing, you no longer have a clean apples-to-apples comparison. Interpreting Results Start with the prepare summary, then the run summary. The prepare summary answers: How many uploaded features became eligible road segments? How many of those segments received usable lowpoint routing context? Why were some low points skipped or marked non-routable? The run summary answers: How many mapped segments were actually run? How many hillslopes were targeted by the Roads scenario? Which skip reasons remained after preparation? Then use the Roads results links to compare watershed-scale changes against baseline outputs. The most decision-relevant pattern is usually not one absolute number but whether adding the modeled road network materially changes: runoff delivery, sediment delivery, source-area ranking, the identity of priority road segments or hillslopes. Assumptions And Limits Roads is a phase-1 inslope-road workflow, not a universal road process model. Only designs resolving to Inslope_bd or Inslope_rd are currently eligible for modeled segment processing. Surface and traffic behavior are simplified into the values the Roads model recognizes after normalization. Results depend strongly on clean linework, reasonable CRS interpretation, and correct attribute mapping. Only segments with enough lowpoint and routing context can become fully modeled Roads segments. Roads-scoped outputs are comparison outputs. They do not overwrite or \"fix\" the original baseline watershed run. Results are decision support, not field verification. Segment priorities should still be checked against real road drainage features and local knowledge. Related Docs WEPP Culvert Modeling Mods Overview FAQ",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.roads",
+          "title": "Roads"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "fe29086815794a0e2c5f4bc918c5b090d78dd402948610181b6d9eb94c3f6b6a",
+      "doc_id": "usersum.weppcloud.models.roads",
+      "headings": [
+        "Roads",
+        "What This Is For",
+        "When to Use It",
+        "Before You Begin",
+        "What You See In The UI",
+        "Upload Mapping: What The Controls Mean",
+        "Prepare And Run Are Different Steps",
+        "How To Work Through A Roads Run",
+        "How To Compare Baseline And Roads Results",
+        "Interpreting Results",
+        "Assumptions And Limits",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/roads/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.roads",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/roads/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.roads",
+      "source": "local",
+      "status": "active",
+      "title": "Roads",
+      "updated_at": "2026-04-05T04:39:35.528298+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "WEPP WEPP is the main runoff and erosion model used by most WEPPcloud watershed projects. In WEPPcloud, it turns your delineated watershed, soils, land cover, disturbance inputs, and climate into modeled hillslope runoff, sediment production, channel routing, and watershed-outlet summaries. What This Is For Use WEPP when your question is about runoff, erosion, or sediment delivery under a specific landscape condition, such as: current conditions versus burned conditions, treated versus untreated conditions, observed recovery versus assumed recovery, how much sediment comes from hillslopes versus what reaches the outlet. In most projects, this is the central model run that all later reports and exports depend on. What You Actually Control In The UI On the run page, the main control is titled WEPP or WEPP-SWAT+. The top-level buttons the user actually sees are: Visible action Where it appears What it does --- --- --- Run WEPP main WEPP card Submits the whole current WEPP form, including any enabled advanced options Prep Only WEPP Advanced Options > WEPP Exec Builds hillslope and watershed inputs without executing the WEPP binary Run WEPP Watershed WEPP Advanced Options > WEPP Exec Runs the watershed/channel routing phase using existing hillslope outputs Run WEPP Hillslopes and Watershed Bootstrap > Run (No Prep) Runs the bootstrapped WEPP inputs exactly as checked out, without rebuilding inputs in the browser Run WEPP Watershed Bootstrap > Run (No Prep) Runs only the bootstrapped watershed/channel routing step WEPP Advanced Options is where most result-changing assumptions live. These are the visible cards and controls the user actually works with: Advanced card User-facing controls Why an end user would touch it --- --- --- WEPP UI - Hourly Seepage Run hourly seepage (wepp_ui.txt) Use only for runs where hourly seepage behavior is relevant; the card itself notes this is for 7778 soils and not WEPP-PEP Potential ET (PMET) Basal crop coefficient ratio (kcb), Readily available water fraction (rawp), Run PMET (pmetpara.txt) Switches from the default Penman ET treatment to Penman-Monteith and exposes crop-water assumptions Frost Write frost inputs (frost.txt) plus wintRed, fineTop, fineBot, ksnowf, kresf, ksoilf, kfactor(1), kfactor(2), kfactor(3) Only for cold-region runs where frozen-soil behavior is materially important Snow Write snow inputs (snow.txt), Rain/snow threshold temperature, Density of new snow, Snow settling density Only when snow accumulation and melt assumptions matter Baseflow Processing Initial groundwater storage, Baseflow coefficient, Deep seepage coefficient, Watershed groundwater baseflow threshold area Important for continuous simulations when low-flow or delayed-flow behavior matters Channel Inputs (chan.inp) Output interval override (dtchr_override, seconds), Channel hydrograph output (ichout_override), Channel TOPAZ IDs of interest (chn_topaz_ids_of_interest) Use when you need more or less channel hydrograph detail or want outputs only for selected channels Channel Parameters Use variable channel critical shear as a function of channel slope (tcr.txt), Critical shear, Channel erodibility, Minimum channel width, Total Manning roughness coefficient allowing for vegetation (chnn), Manning roughness coefficient for bare soil in the channel (chnnbr), and optional taumin, taumax, k, n Important when channel erosion or routing behavior is a major decision driver Bedrock Hydraulic conductivity for restrictive layer (kslast) Use when shallow restrictive layers or perched-water assumptions are important Clip Hillslopes Clip hillslopes, Hillslope clip length Useful when very long representative hillslopes appear to overstate erosion Soil Options Clip Soils Maximum Depth, Soils Maximum Depth, Clip Soils Minimum Depth, Soils Minimum Depth, Estimate wc and fc using Rosetta when soils have bd override, Initial soil saturation Use when the default soil-depth or starting-wetness assumptions are not defensible Phosphorus Surface runoff concentration, Subsurface lateral flow concentration, Baseflow concentration, Sediment concentration Optional pollutant-sidecar settings for runs that need phosphorus output assumptions Export Configuration Prep details, Geopackage export (.gpkg), Legacy ArcMap export (.shp) Choose which deliverables should be generated automatically when a run completes Interchange Delete raw WEPP outputs after successful interchange conversion Storage-management choice; keeps interchange products while discarding raw text outputs WEPP Exec WEPP binary version, Run WEPP Watershed checkbox, Prep Only button, Run WEPP Watershed button Execution-mode controls, including whether the main run should include channel/watershed routing Revegetation Scenarios Cover transformation scenario, Upload cover transform file (.csv) Post-fire cover-recovery scenario control when revegetation is enabled The most important practical distinctions are: Run WEPP Watershed inside WEPP Exec controls whether the main Run WEPP submission includes watershed/channel routing, not just hillslope execution. Prep Only and the Bootstrap no-prep buttons are advanced workflows for QA, export, or intentionally edited input files. They are not the normal starting point for scenario comparison. Most users should leave Frost, Snow, PMET, Bedrock, and Phosphorus at defaults unless they have a specific hydrologic reason to override them. What Happens When You Click Run The visible buttons trigger different API-backed actions: 1. Run WEPP This submits the serialized form to /rq-engine/api/runs/ / /run-wepp. The payload includes any enabled advanced-option values, such as soil clipping, baseflow settings, export flags, and reveg_scenario. WEPPcloud stores those run settings, queues the WEPP hillslope workflow, and then loads the run-summary and results panels when the job finishes. 2. Prep Only This submits to /rq-engine/api/runs/ / /prep-wepp-watershed. It builds hillslope and watershed inputs only. It does not execute the full model. 3. Run WEPP Watershed This submits to /rq-engine/api/runs/ / /run-wepp-watershed. Use it when hillslope outputs already exist and you want only the watershed/channel routing pass. The UI itself warns that this requires a prior full WEPP run. 4. Bootstrap Run WEPP Hillslopes and Watershed or Run WEPP Watershed These use the no-prep bootstrap routes /rq-engine/api/runs/ / /run-wepp-npprep and /rq-engine/api/runs/ / /run-wepp-watershed-no-prep. They assume you have already cloned, edited, committed, and checked out the desired input files through Bootstrap. They skip normal preparation and rerun with the current bootstrapped inputs. After a successful run, the controller fetches: /runs/ / /report/wepp/results/ /runs/ / /report/wepp/run_summary/ That is why the Run Results area updates only after the queued job completes. Run, Prep, And Report Surfaces Run surface The run surface is where you configure and queue model execution. This is where scenario choices, advanced options, and export-on-completion choices are submitted. Prep surface Prep Only is the user-facing way to build WEPP inputs without executing the model. This is most useful when: you are checking whether inputs were built correctly, you want prep artifacts for QA or export, you are using bootstrap and plan to edit inputs outside the browser. Report surface After a successful run, Run Results exposes the outputs users typically need first: Watershed Loss Summary Return Periods Report Summary by Landuse Report Sediment Characteristics Report TotalWatSed3 CSV TotalWatSed2 CSV The Deval in the Details Report GL Dashboard Storm Event Analyzer when available Prep Details Post WEPP Geopackage Features Export Post WEPP Geodatabase (ESRI) Features Export Average Annual Report Yearly Report Daily Runoff / Lateral Flow / Baseflow Graph Read these as different views of the same run: use Watershed Loss Summary for outlet-scale planning numbers, use Summary by Landuse Report and mapped outputs to find source areas, use Return Periods Report for frequency-style interpretation, use the water-balance reports to understand whether a result is being driven by runoff generation, lateral flow, or baseflow. Single-storm output is explicitly flagged in the UI as deprecated and unsupported. For event-scale work, the page points users to Storm Event Analyzer instead. How To Interpret WEPP Results The most important distinction is scale: hillslope outputs tell you where runoff and sediment are generated, channel and watershed outputs tell you what is routed downstream, outlet values do not tell you which hillslopes caused the problem by themselves. The second distinction is time scale: event-style outputs help explain storm behavior, annual and return-period outputs are better for planning and comparison, a single dramatic event can coexist with moderate long-term averages. The strongest end-user use of WEPP is usually comparative: baseline versus burned, untreated versus treated, observed recovery versus assumed recovery, one advanced-option choice versus another. Core Model Assumptions And Limits WEPP is a physically based model, but it still simplifies the watershed into representative hillslopes and channels rather than modeling every field feature directly. Runoff is generated through infiltration-excess and saturation-excess mechanisms, so soil properties and starting wetness matter. Channel routing is only included when watershed/channel routing is enabled. Many advanced cards only write optional WEPP text inputs such as frost.txt, snow.txt, tcr.txt, or pmetpara.txt. If you enable them, you are replacing the default internal behavior with your chosen override values. Baseflow Processing is not implemented for single-storm climates. Very local features such as short road ditches, small berms, culverts, or engineered controls may not be represented unless another workflow models them explicitly. Results are only as defensible as the watershed delineation, soil inputs, climate record, land cover, burn severity, and treatment scenario behind them. A good outlet number does not prove the source-area pattern is correct. Review hillslope and channel outputs too. Related Docs WEPP Model WEPP Advanced Options Getting Started",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.wepp",
+          "title": "WEPP"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "a0e647b85379b71a6fe81cf482650d9ae22616ac074eb92e2d051c842681e7a7",
+      "doc_id": "usersum.weppcloud.models.wepp",
+      "headings": [
+        "WEPP",
+        "What This Is For",
+        "What You Actually Control In The UI",
+        "What Happens When You Click Run",
+        "Run, Prep, And Report Surfaces",
+        "Run surface",
+        "Prep surface",
+        "Report surface",
+        "How To Interpret WEPP Results",
+        "Core Model Assumptions And Limits",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/wepp/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.wepp",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/wepp/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.wepp",
+      "source": "local",
+      "status": "active",
+      "title": "WEPP",
+      "updated_at": "2026-04-05T04:47:47.285400+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
+        "user"
+      ],
+      "body_text": "WEPP-SWAT+ WEPP-SWAT+ combines two model layers in one workflow: WEPP generates daily hillslope runoff and sediment, and SWAT+ routes those hillslope loads through the channel network. Use it when plain WEPP is not enough because channel-routing behavior is part of the question you need to answer. What Extends Beyond Standard WEPP Standard WEPP already gives you hillslope results and, when enabled, watershed/channel routing within WEPP. WEPP-SWAT+ adds a second routing stage: WEPP remains the hillslope generator, SWAT+ receives WEPP daily outputs as recall inputs, SWAT+ routes water and sediment through its channel network. That means a WEPP-SWAT+ result should be read as: 1. hillslope generation from WEPP, then 2. channel routing from SWAT+. What You Actually See In The UI When a run is SWAT-enabled, the main control title becomes WEPP-SWAT+ and the main run button becomes Run WEPP-SWAT+. The additional user-facing SWAT controls appear under SWAT+ Advanced Options: Hydraulic-Sediment Parameters Channel Manning's n (mann) Floodplain Manning's n (fpn) Channel erodibility factor (erod_fact) Channel cover factor (cov_fact) Median bed material size (d50) SWAT Print.prt header fields such as nyskip, day_start, yrc_start, day_end, yrc_end, interval per-object output toggles for daily, monthly, yearly, and avann SWAT Exec Run SWAT+ If Bootstrap is enabled, users can also see: Run SWAT+ Channel Routing The visible SWAT controls are not per-channel editors. They are run-scoped controls layered on top of the existing WEPP form: UI control What the user is changing Why it matters --- --- --- Channel Manning's n (mann) A uniform roughness override applied to all SWAT-DEG channel records in hyd-sed-lte.cha Higher roughness generally slows routing and attenuates peaks Floodplain Manning's n (fpn) A uniform floodplain roughness override Only matters when overbank routing is important; leaving it blank preserves the template default Channel erodibility factor (erod_fact) A uniform channel erodibility override Higher erodibility generally raises routed sediment production Channel cover factor (cov_fact) A uniform SWAT channel cover/armoring parameter This is calibration-sensitive and can materially change routed sediment behavior; treat it as a routing parameter, not a simple land-cover label Median bed material size (d50) A uniform bed-material-size override in millimeters Larger material generally reduces transport efficiency and makes the bed harder to move nyskip, day_start, yrc_start, day_end, yrc_end, interval The output window and write cadence for print.prt Controls how much SWAT output is written and for which years or dates Per-object daily, monthly, yearly, avann checkboxes Which time scales are written for each SWAT object row Useful for QA and routing review; does not change model physics The key assumption behind this UI is that the five hydraulic-sediment parameters are **uniform overrides**. The standard end-user surface does not expose per-order, per-reach, or per-material parameterization. What The UI Actions Trigger Several visible controls trigger different API-backed actions: 1. Run WEPP-SWAT+ This posts the current form to /rq-engine/api/runs/ / /run-wepp. In other words, the main combined button is still backed by the WEPP run route. In a SWAT-enabled run, the submitted form includes both WEPP settings and any SWAT channel-parameter overrides currently shown in the form. 2. Run SWAT+ This posts to /rq-engine/api/runs/ / /run-swat. Use it when WEPP hillslope outputs already exist and you want to rebuild/run the SWAT+ routing side without rerunning hillslopes. 3. Run SWAT+ Channel Routing in Bootstrap This uses /rq-engine/api/runs/ / /run-swat-noprep and assumes you already have a bootstrapped input checkout that you intentionally edited. 4. Changing SWAT Print.prt These edits are saved immediately, not only on full run. Object checkboxes post to /rq-engine/api/runs/ / /swat/print-prt, and the print header fields post to /rq-engine/api/runs/ / /swat/print-prt/meta. The Most Important UI Controls UI control What it means Why it matters --- --- --- Channel Manning's n (mann) Roughness for the routed channel Higher values generally slow routing and dampen peaks Floodplain Manning's n (fpn) Roughness for floodplain flow when overbank routing matters Higher values increase overbank resistance Channel erodibility factor (erod_fact) Ease of erosion in the routed channel Higher values generally increase routed sediment production Channel cover factor (cov_fact) SWAT channel cover or armoring parameter Treat this as a calibration-sensitive sediment-routing parameter rather than a simple \"more cover/less cover\" switch Median bed material size (d50) Representative bed-material size Larger material generally makes transport and detachment harder SWAT Print.prt header fields Which years or dates are written and how often Useful when you only need a subset of the record or want to avoid oversized outputs SWAT Print.prt toggles Which SWAT outputs are written and at what time scale Useful for QA, routing review, and keeping outputs manageable What The SWAT Print.prt Fields Actually Do The SWAT Print.prt table is easy to misread because it looks technical and does not change routing directly. nyskip controls how many early years SWAT skips before writing outputs. day_start and yrc_start define the first day and year written. day_end and yrc_end define the last day and year written. interval controls the write interval for supported output frequencies. The object rows are raw SWAT object names. Their daily, monthly, yearly, and avann checkboxes only control which text outputs SWAT writes on the next build. Use these controls to inspect the WEPP-to-SWAT handoff, channel routing response, or recall outputs. Do not expect them to fix routing behavior by themselves. How To Use It Well Use the workflow in this order: 1. Make sure the WEPP hillslope setup is already defensible. If the hillslope forcing is wrong, better SWAT routing will not fix that. 2. Decide whether you need a combined run or a SWAT-only rerun. Use Run WEPP-SWAT+ when hillslope inputs or WEPP options changed. Use Run SWAT+ when the hillslope outputs already exist and you only changed SWAT-side settings. This distinction matters because the main combined button is still backed by the WEPP route, while Run SWAT+ is the explicit SWAT rerun surface. 3. Adjust only the SWAT channel parameters you can defend. Manning roughness, erodibility, cover factor, and D50 can change results substantially. 4. Turn on extra SWAT Print.prt outputs only when they answer a question. For example, enable recall outputs when you need to verify the WEPP-to-SWAT handoff. Core Assumptions And Remaining Limits The handoff from WEPP to SWAT+ is daily, not sub-daily. This is a routing workflow built on daily hillslope forcing. WEPP provides the hillslope runoff and sediment time series; SWAT+ does not replace WEPP hillslope physics. The current handoff focuses on hydrology and sediment. Nutrients, pesticides, and similar constituents are set to zero unless explicitly supported. Channel connectivity is derived from the watershed abstraction and hillslope-to-channel mapping, not from a separate surveyed hydraulic network. Channel geometry is partly derived from watershed geometry and empirical relationships; some channel properties still need literature-based selection or calibration. The visible Hydraulic-Sediment Parameters are uniform overrides applied across the routed network. The default UI does not let you vary them by reach, order, or material class. SWAT routing uses the SWAT-DEG channel object set. That is an implementation choice with its own assumptions about channel representation. Changing print.prt changes what SWAT writes out, not how the model routes flow. How To Interpret Results A difference between WEPP and WEPP-SWAT+ does not automatically mean one model is \"right\" and the other is \"wrong.\" It often means: the hillslope forcing is the same, but the channel-routing assumptions differ. That is why the most useful interpretation is usually: what changed after routing, whether those changes are physically plausible, whether the SWAT-side channel assumptions are strong enough for the decision you are making. Related Docs WEPP Mods Overview Getting Started",
+      "breadcrumbs": [
+        {
+          "key": "usersum.workflows",
+          "title": "Workflows and Modules"
+        },
+        {
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
+        },
+        {
+          "key": "usersum.weppcloud.models.wepp_swat",
+          "title": "WEPP-SWAT+"
+        }
+      ],
+      "category": "weppcloud",
+      "content_hash": "3668bea2a8ac6a1d0d11e8bbe38917fb64e0d34b7d23ea4cb03f38a23d8c36fd",
+      "doc_id": "usersum.weppcloud.models.wepp_swat",
+      "headings": [
+        "WEPP-SWAT+",
+        "What Extends Beyond Standard WEPP",
+        "What You Actually See In The UI",
+        "What The UI Actions Trigger",
+        "The Most Important UI Controls",
+        "What The `SWAT Print.prt` Fields Actually Do",
+        "How To Use It Well",
+        "Core Assumptions And Remaining Limits",
+        "How To Interpret Results",
+        "Related Docs"
+      ],
+      "legacy_route_path": "/usersum/view/weppcloud/models/wepp-swat/ENDUSER.md",
+      "min_role": "user",
+      "nav_key": "usersum.weppcloud.models.wepp_swat",
+      "rel_path": "wepppy/weppcloud/routes/usersum/weppcloud/models/wepp-swat/ENDUSER.md",
+      "route_path": "/usersum/doc/usersum.weppcloud.models.wepp_swat",
+      "source": "local",
+      "status": "active",
+      "title": "WEPP-SWAT+",
+      "updated_at": "2026-04-05T04:47:32.970130+00:00",
+      "vendor_id": null,
+      "vendor_route_path": null
+    },
+    {
+      "audience_tags": [
         "user",
         "operator"
       ],
@@ -2525,7 +3091,7 @@
         }
       ],
       "category": "weppcloud",
-      "content_hash": "729f83f2c0deb2a1f7a63efb9a7faf5975eb24f6fb5b50d05c497f8f4aff7799",
+      "content_hash": "679219a00569e4e616ee68f3fe50ccf93f4596fd1e73191ab197f30c23f1f6e1",
       "doc_id": "usersum.weppcloud.user_guide",
       "headings": [
         "WEPPcloud User Guide",
@@ -2547,7 +3113,7 @@
       "source": "local",
       "status": "active",
       "title": "User Guide",
-      "updated_at": "2026-04-05T02:52:33.999320+00:00",
+      "updated_at": "2026-04-05T03:56:29.348035+00:00",
       "vendor_id": null,
       "vendor_route_path": null
     },
@@ -3081,7 +3647,7 @@
       "vendor_route_path": "/usersum/vendor/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md"
     }
   ],
-  "generated_at": "2026-04-05T03:12:46.236340+00:00",
+  "generated_at": "2026-04-05T06:26:07.414433+00:00",
   "nav_tree": [
     {
       "children": [
@@ -3170,6 +3736,68 @@
           "doc_id": "usersum.weppcloud.mods_overview",
           "key": "usersum.weppcloud.mods_overview",
           "title": "Mods Overview"
+        },
+        {
+          "children": [
+            {
+              "doc_id": "usersum.weppcloud.models.wepp",
+              "key": "usersum.weppcloud.models.wepp",
+              "title": "WEPP"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.ash_transport",
+              "key": "usersum.weppcloud.models.ash_transport",
+              "title": "Ash Transport (WATAR)"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.debris_flow",
+              "key": "usersum.weppcloud.models.debris_flow",
+              "title": "Debris Flow"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.gridded_rusle",
+              "key": "usersum.weppcloud.models.gridded_rusle",
+              "title": "Gridded RUSLE"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.culvert_modeling",
+              "key": "usersum.weppcloud.models.culvert_modeling",
+              "title": "Culvert Modeling (API)"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.roads",
+              "key": "usersum.weppcloud.models.roads",
+              "title": "Roads"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.revegetation",
+              "key": "usersum.weppcloud.models.revegetation",
+              "title": "Revegetation"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.rhem",
+              "key": "usersum.weppcloud.models.rhem",
+              "title": "RHEM"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.agricultural_fields",
+              "key": "usersum.weppcloud.models.agricultural_fields",
+              "title": "Agricultural Fields (AgFields API)"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.wepp_swat",
+              "key": "usersum.weppcloud.models.wepp_swat",
+              "title": "WEPP-SWAT+"
+            },
+            {
+              "doc_id": "usersum.weppcloud.models.hec_dss_export",
+              "key": "usersum.weppcloud.models.hec_dss_export",
+              "title": "WEPP DSS Export for HEC-RAS"
+            }
+          ],
+          "collapsible": true,
+          "key": "usersum.weppcloud.model_guides",
+          "title": "Model Guides"
         },
         {
           "doc_id": "usersum.weppcloud.ag_field_mod",

@@ -243,6 +243,105 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.user_guide
+  - doc_id: usersum.weppcloud.models.wepp
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/wepp/ENDUSER.md
+    title: WEPP
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.wepp
+  - doc_id: usersum.weppcloud.models.ash_transport
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/ash-transport/ENDUSER.md
+    title: Ash Transport (WATAR)
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.ash_transport
+  - doc_id: usersum.weppcloud.models.debris_flow
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/debris-flow/ENDUSER.md
+    title: Debris Flow
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.debris_flow
+  - doc_id: usersum.weppcloud.models.gridded_rusle
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/gridded-rusle/ENDUSER.md
+    title: Gridded RUSLE
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.gridded_rusle
+  - doc_id: usersum.weppcloud.models.culvert_modeling
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/culvert-modeling/ENDUSER.md
+    title: Culvert Modeling (API)
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.culvert_modeling
+  - doc_id: usersum.weppcloud.models.roads
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/roads/ENDUSER.md
+    title: Roads
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.roads
+  - doc_id: usersum.weppcloud.models.revegetation
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/revegetation/ENDUSER.md
+    title: Revegetation
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.revegetation
+  - doc_id: usersum.weppcloud.models.rhem
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/rhem/ENDUSER.md
+    title: RHEM
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.rhem
+  - doc_id: usersum.weppcloud.models.agricultural_fields
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/agricultural-fields/ENDUSER.md
+    title: Agricultural Fields (AgFields API)
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.agricultural_fields
+  - doc_id: usersum.weppcloud.models.wepp_swat
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/wepp-swat/ENDUSER.md
+    title: WEPP-SWAT+
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.wepp_swat
+  - doc_id: usersum.weppcloud.models.hec_dss_export
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/hec-dss-export/ENDUSER.md
+    title: WEPP DSS Export for HEC-RAS
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.models.hec_dss_export
   - doc_id: usersum.weppcloud.wepp_advanced_options
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-advanced-options.md
