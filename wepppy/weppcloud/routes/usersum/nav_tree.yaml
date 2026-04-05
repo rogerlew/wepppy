@@ -65,8 +65,6 @@ roots:
         title: Disturbance and Recovery
         collapsible: true
         children:
-          - key: usersum.source.sbs_map_prep
-            doc_id: usersum.source.sbs_map_prep
           - key: usersum.source.ash_transport
             doc_id: usersum.source.ash_transport
           - key: usersum.source.debris_flow
@@ -113,6 +111,16 @@ roots:
     title: Technical Reference
     collapsible: true
     children:
+      - key: usersum.technical_reference.project_files_and_maps
+        title: Project Files and Maps
+        collapsible: true
+        children:
+          - key: usersum.weppcloud.weppcloud_runs_directory_structure
+            doc_id: usersum.weppcloud.weppcloud_runs_directory_structure
+          - key: usersum.weppcloud.wepp_interchange
+            doc_id: usersum.weppcloud.wepp_interchange
+          - key: usersum.weppcloud.sbs_map_preparation
+            doc_id: usersum.weppcloud.sbs_map_preparation
       - key: usersum.technical_reference.plant_management
         title: WEPP Plant/Management Files
         collapsible: true
@@ -154,6 +162,8 @@ roots:
     children:
       - key: usersum.weppcloud.enduser_authoring_guide
         doc_id: usersum.weppcloud.enduser_authoring_guide
+      - key: usersum.weppcloud.enduser_stub_authoring_guide
+        doc_id: usersum.weppcloud.enduser_stub_authoring_guide
       - key: usersum.weppcloud.profile_jwt_dataset_access_python_r
         doc_id: usersum.weppcloud.profile_jwt_dataset_access_python_r
       - key: usersum.weppcloud.rq_engine

@@ -134,6 +134,34 @@ def test_usersum_doc_route_renders_omni_enduser_guide(usersum_client) -> None:
     assert "wepppy/nodb/mods/omni/ENDUSER.md" in body
 
 
+def test_usersum_doc_route_renders_runs_directory_structure(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.weppcloud_runs_directory_structure")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "ron.nodb" in body
+    assert "wepp/output/interchange/" in body
+    assert "saved project state that WEPPcloud uses for modeling" in body
+
+
+def test_usersum_doc_route_renders_wepp_interchange(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.wepp_interchange")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "H.wat.parquet" in body
+    assert "loss_pw0.out.parquet" in body
+
+
+def test_usersum_doc_route_renders_sbs_map_preparation(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.sbs_map_preparation")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "single-band integer file" in body
+    assert "Map has non-integer classes" in body
+
+
 def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
     response = usersum_client.get("/usersum/")
     assert response.status_code == 200
@@ -159,6 +187,12 @@ def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
     faq_idx = body.index("/usersum/doc/usersum.weppcloud.faq")
     quick_start_idx = body.index("/usersum/doc/usersum.weppcloud.quick_start")
     assert faq_idx < quick_start_idx
+
+    project_files_idx = body.index("Project Files and Maps")
+    runs_dir_idx = body.index("/usersum/doc/usersum.weppcloud.weppcloud_runs_directory_structure")
+    interchange_idx = body.index("/usersum/doc/usersum.weppcloud.wepp_interchange")
+    sbs_idx = body.index("/usersum/doc/usersum.weppcloud.sbs_map_preparation")
+    assert project_files_idx < runs_dir_idx < interchange_idx < sbs_idx
 
 
 def test_usersum_links_include_site_prefix_when_configured() -> None:

@@ -198,6 +198,15 @@ docs:
     audience_tags: [developer]
     status: active
     nav_key: usersum.weppcloud.enduser_authoring_guide
+  - doc_id: usersum.weppcloud.enduser_stub_authoring_guide
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/enduser_stub_authoring_guide.md
+    title: ENDUSER Stub Authoring Guide
+    min_role: developer
+    category: weppcloud
+    audience_tags: [developer]
+    status: active
+    nav_key: usersum.weppcloud.enduser_stub_authoring_guide
   - doc_id: usersum.weppcloud.references
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/references.md
@@ -216,6 +225,15 @@ docs:
     audience_tags: [operator, developer]
     status: active
     nav_key: usersum.weppcloud.rq_engine
+  - doc_id: usersum.weppcloud.sbs_map_preparation
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/sbs-map-preparation.md
+    title: SBS Map Preparation
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.sbs_map_preparation
   - doc_id: usersum.weppcloud.user_guide
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/user-guide.md
@@ -243,6 +261,24 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.wepp_model
+  - doc_id: usersum.weppcloud.wepp_interchange
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-interchange.md
+    title: WEPP Interchange Outputs
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.wepp_interchange
+  - doc_id: usersum.weppcloud.weppcloud_runs_directory_structure
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/weppcloud-runs-directory-structure.md
+    title: WEPPcloud Runs Directory Structure
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.weppcloud_runs_directory_structure
   - doc_id: usersum.source.nodb
     source: local
     rel_path: wepppy/nodb/README.md
@@ -261,15 +297,6 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.source.ash_transport
-  - doc_id: usersum.source.sbs_map_prep
-    source: local
-    rel_path: wepppy/nodb/mods/baer/README.sbs_map.md
-    title: SBS Map Preparation
-    min_role: user
-    category: source-guides
-    audience_tags: [user]
-    status: active
-    nav_key: usersum.source.sbs_map_prep
   - doc_id: usersum.source.debris_flow
     source: local
     rel_path: wepppy/nodb/mods/debris_flow/README.md
