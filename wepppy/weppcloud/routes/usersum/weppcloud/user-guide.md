@@ -28,17 +28,17 @@ WEPPcloud is a free, online platform that predicts how water and soil move throu
 
 WEPPcloud supports a mix of core models, optional modules, interface-specific workflows, and API-backed integrations:
 
-- **WEPP** — the core hydrology and erosion model used to simulate runoff, hillslope erosion, channel processes, and sediment delivery.
-- **Ash Transport (WATAR)** — post-fire ash and contaminant transport modeling for watershed-scale ash and water-quality assessment after wildfire.
-- **Debris Flow** — post-fire debris-flow probability and volume estimation using watershed properties, burn severity, soils, slope, and precipitation inputs.
-- **Gridded RUSLE** — gridded RUSLE factor and annual detachment mapping for spatial erosion-potential analysis.
-- **Culvert Modeling (API)** — an API-backed culvert and hydroenforcement workflow used to condition terrain and drainage paths around engineered crossings.
-- **Roads** — road and stream-crossing erosion analysis integrated with the watershed workflow.
-- **Revegetation** — a WEPPcloud interface and scenario workflow for modeling post-fire vegetation recovery and cover-transform effects before running WEPP.
-- **RHEM** — the Rangeland Hydrology and Erosion Model interface for rangeland runoff and erosion analysis.
-- **Agricultural Fields (AgFields API)** — an API-backed workflow for modeling mapped crop fields and generating field- or sub-field-scale WEPP results.
-- **WEPP-SWAT+** — a combined workflow that extends WEPP results with optional SWAT+ channel-routing steps.
-- **WEPP DSS Export for HEC-RAS** — export of WEPP channel and outlet time series to HEC-DSS for downstream HEC workflows such as HEC-RAS.
+- **[WEPP](models/wepp/ENDUSER.md)** — the core hydrology and erosion model used to simulate runoff, hillslope erosion, channel processes, and sediment delivery.
+- **[Ash Transport (WATAR)](models/ash-transport/ENDUSER.md)** — post-fire ash and contaminant transport modeling for watershed-scale ash and water-quality assessment after wildfire.
+- **[Debris Flow](models/debris-flow/ENDUSER.md)** — post-fire debris-flow probability and volume estimation using watershed properties, burn severity, soils, slope, and precipitation inputs.
+- **[Gridded RUSLE](models/gridded-rusle/ENDUSER.md)** — gridded RUSLE factor and annual detachment mapping for spatial erosion-potential analysis.
+- **[Culvert Modeling (API)](models/culvert-modeling/ENDUSER.md)** — an API-backed culvert and hydroenforcement workflow used to condition terrain and drainage paths around engineered crossings.
+- **[Roads](models/roads/ENDUSER.md)** — road and stream-crossing erosion analysis integrated with the watershed workflow.
+- **[Revegetation](models/revegetation/ENDUSER.md)** — a WEPPcloud interface and scenario workflow for modeling post-fire vegetation recovery and cover-transform effects before running WEPP.
+- **[RHEM](models/rhem/ENDUSER.md)** — the Rangeland Hydrology and Erosion Model interface for rangeland runoff and erosion analysis.
+- **[Agricultural Fields (AgFields API)](models/agricultural-fields/ENDUSER.md)** — an API-backed workflow for modeling mapped crop fields and generating field- or sub-field-scale WEPP results.
+- **[WEPP-SWAT+](models/wepp-swat/ENDUSER.md)** — a combined workflow that extends WEPP results with optional SWAT+ channel-routing steps.
+- **[WEPP DSS Export for HEC-RAS](models/hec-dss-export/ENDUSER.md)** — export of WEPP channel and outlet time series to HEC-DSS for downstream HEC workflows such as HEC-RAS.
 
 ### Who develops WEPPcloud?
 
