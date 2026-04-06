@@ -87,6 +87,7 @@ _INDEX_DOC_DESCRIPTIONS: Dict[str, str] = {
     "usersum.weppcloud.models.wepp_swat": "Explains the WEPP-SWAT+ routing workflow and how to interpret SWAT+ channel routing as an extension of WEPP hillslope outputs.",
     "usersum.weppcloud.models.hec_dss_export": "Explains how WEPP channel and outlet time series are exported to HEC-DSS for downstream HEC workflows such as HEC-RAS.",
     "usersum.weppcloud.wepp_advanced_options": "Explains advanced WEPP settings that affect hydrology, erosion, soils, and calibration behavior.",
+    "usersum.weppcloud.wepp_forest_change_log": "Tracks WEPP-forest binary build history, compiler lineage, and release notes for executable version selection.",
     "usersum.weppcloud.wepp_interchange": "Explains where WEPP interchange Parquet outputs live, what the main tables represent, and which files are most useful for common hillslope, watershed, and event questions.",
     "usersum.weppcloud.wepp_model": "Introduces the WEPP model, what it simulates, and how its outputs should be interpreted.",
     "usersum.weppcloud.wepp_usersum_2024": "Preserves the Windows WEPP user summary as a cleaned technical reference with historical context and links to the current plant, soil, and climate file specifications.",

@@ -147,6 +147,8 @@ roots:
     children:
       - key: usersum.weppcloud.wepp_usersum_2024
         doc_id: usersum.weppcloud.wepp_usersum_2024
+      - key: usersum.weppcloud.wepp_forest_change_log
+        doc_id: usersum.weppcloud.wepp_forest_change_log
       - key: usersum.technical_reference.project_files_and_maps
         title: Project Files and Maps
         collapsible: true
