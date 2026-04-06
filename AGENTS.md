@@ -21,6 +21,7 @@
 - Do not add fallback wrappers that silently mask missing required dependencies.
 - Prefer explicit failures over hidden recovery paths for easier debugging.
 - Do not create or switch to a new git branch unless the user explicitly asks for it.
+- Always ignore `wepppy/weppcloud/routes/usersum/generated/docs_index.json` when it is dirty unless explicitly asked to modify it.
 
 ## Agent Feedback Loop
 - Treat avoidable friction as diagnostic signal about the codebase, docs, tooling, or task framing.
