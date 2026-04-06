@@ -73,6 +73,12 @@ WEPPcloud collects only the information necessary to operate the platform and su
 
 **Run data.** Watershed delineations, model inputs, simulation outputs, and uploaded files (such as burn severity maps) are stored on WEPPcloud servers for as long as the project exists. Run data includes geographic coordinates of your watershed area.
 
+**Project TTL (Time To Live).** WEPPcloud uses a project TTL (Time To Live), which is an inactivity timer for project data. By default, each project has a rolling 90-day TTL. If a project is not accessed before the timer expires, it is queued for deletion.
+
+**How TTL resets.** When a project is accessed, WEPPcloud refreshes the project's last-access timestamp and extends the expiration window by another 90 days.
+
+**Disabling TTL deletion.** Logged-in users with `PowerUser`, `Admin`, or `Root` permissions can disable TTL deletion for a project from the run header: **More -> Disable TTL Deletion**. If TTL deletion is turned back on, the project starts a fresh 90-day TTL window.
+
 **Usage data.** WEPPcloud records basic access information such as login timestamps and run access counts for operational monitoring. This data is used to maintain service reliability and track platform usage metrics displayed on the landing page.
 
 **What WEPPcloud does not do:**
@@ -80,7 +86,7 @@ WEPPcloud collects only the information necessary to operate the platform and su
 - Use your data for advertising
 - Require more personal information than what is needed to operate your account
 
-**Data retention.** Account and run data are retained until you delete your account or projects. If you have questions about your data, contact rogerlew@uidaho.edu.
+**Data retention.** Account data are retained until you delete your account. Run data are retained while projects remain active, unless you delete them manually; inactive projects may be deleted under the project TTL policy above. If you have questions about your data, contact rogerlew@uidaho.edu.
 
 ---
 
