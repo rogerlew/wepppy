@@ -171,7 +171,7 @@ const CONTACTS: Contact[] = [
   {
     name: 'Jackson Nakae',
     title: 'PATH-Cost Effective',
-    institution: 'USDA Forest Service, Rocky Mountain Research Station',
+    institution: 'Oak Ridge Institute for Science and Education (ORISE)',
     email: 'Jackson.Nakae@usda.gov',
     expertise: ['PATH-Cost Effective'],
     icon: 'fileText',
@@ -184,6 +184,7 @@ type Affiliation = {
   caption: string
   logo: string
   link: string
+  hasLightBackground?: boolean
 }
 
 const AFFILIATIONS: Affiliation[] = [
@@ -228,6 +229,13 @@ const AFFILIATIONS: Affiliation[] = [
     caption: 'World-class research university dedicated to solving problems and improving lives',
     logo: '/weppcloud/static/images/Washington-State-University-Logo.png',
     link: 'https://www.wsu.edu/',
+  },
+  {
+    name: 'Oak Ridge Institute for Science and Education (ORISE)',
+    caption: 'Shaping the Future of Science',
+    logo: '/weppcloud/static/images/orise-logo.png',
+    link: 'https://orise.orau.gov/',
+    hasLightBackground: true,
   },
 ]
 
@@ -892,7 +900,10 @@ export function AppLight() {
                 <img
                   src={affiliation.logo}
                   alt={affiliation.name}
-                  className="max-h-16 w-auto object-contain"
+                  className={cn(
+                    "max-h-16 w-auto object-contain",
+                    affiliation.hasLightBackground && "rounded bg-white p-1 ring-1 ring-slate-200"
+                  )}
                 />
               </div>
               <p className="text-center text-xs text-slate-500">{affiliation.caption}</p>

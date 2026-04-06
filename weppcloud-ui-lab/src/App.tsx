@@ -173,7 +173,7 @@ const CONTACTS: Contact[] = [
   {
     name: 'Jackson Nakae',
     title: 'PATH-Cost Effective',
-    institution: 'USDA Forest Service, Rocky Mountain Research Station',
+    institution: 'Oak Ridge Institute for Science and Education (ORISE)',
     email: 'Jackson.Nakae@usda.gov',
     expertise: ['PATH-Cost Effective'],
     icon: 'fileText',
@@ -186,6 +186,7 @@ type Affiliation = {
   caption: string
   logo: string
   link: string
+  hasLightBackground?: boolean
 }
 
 const AFFILIATIONS: Affiliation[] = [
@@ -230,6 +231,13 @@ const AFFILIATIONS: Affiliation[] = [
     caption: 'World-class research university dedicated to solving problems and improving lives',
     logo: '/weppcloud/static/images/Washington-State-University-Logo.png',
     link: 'https://www.wsu.edu/',
+  },
+  {
+    name: 'Oak Ridge Institute for Science and Education (ORISE)',
+    caption: 'Shaping the Future of Science',
+    logo: '/weppcloud/static/images/orise-logo.png',
+    link: 'https://orise.orau.gov/',
+    hasLightBackground: true,
   },
 ]
 
@@ -999,7 +1007,9 @@ const mapSubtitle =
                   alt={affiliation.name}
                   className={cn(
                     "max-h-20 w-auto object-contain grayscale",
-                    affiliation.name === "Michigan Technological University"
+                    affiliation.hasLightBackground
+                      ? "rounded-md border border-slate-200/25 bg-white p-1 grayscale-0 opacity-95 contrast-100"
+                      : affiliation.name === "Michigan Technological University"
                       ? "brightness-[2] opacity-90 contrast-125"
                       : "invert opacity-60 contrast-125"
                   )}
