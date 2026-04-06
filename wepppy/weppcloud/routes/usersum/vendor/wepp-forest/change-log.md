@@ -1,6 +1,6 @@
-# WEPP-Forest Change Log
+# Change Log
 
-Canonical WEPP build/version history from `/workdir/wepp-forest/change-log.md`.
+Canonical WEPP build/version history for `wepp-forest`.
 
 Required maintenance rule:
 - update this file whenever a new build or rebuild is made (including new

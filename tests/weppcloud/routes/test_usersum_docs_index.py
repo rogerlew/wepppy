@@ -47,6 +47,11 @@ def test_generated_usersum_index_includes_vendor_routes_and_breadcrumbs() -> Non
     assert vendor_doc["breadcrumbs"]
     assert vendor_doc["breadcrumbs"][-1]["title"] == "Culvert Web App Hydroenforcement"
 
+    wepp_forest_doc = by_doc_id["usersum.weppcloud.wepp_forest_change_log"]
+    assert wepp_forest_doc["source"] == "vendor"
+    assert wepp_forest_doc["vendor_route_path"] == "/usersum/vendor/wepp-forest/change-log.md"
+    assert wepp_forest_doc["legacy_route_path"] == "/usersum/view/weppcloud/wepp-forest-change-log.md"
+
     local_doc = by_doc_id["usersum.weppcloud.mods_overview"]
     assert local_doc["legacy_route_path"] == "/usersum/view/weppcloud/mods-overview.md"
     assert local_doc["route_path"] == "/usersum/doc/usersum.weppcloud.mods_overview"

@@ -447,7 +447,7 @@ Controls binary selection and whether watershed/channel execution is included.
 
 - Reproducibility checks against prior runs.
 - Troubleshooting version-specific behavior.
-- Verifying binary lineage and compiler history using the [WEPP-Forest Change Log](./wepp-forest-change-log.md).
+- Verifying binary lineage and compiler history using the [WEPP-Forest Change Log](../vendor/wepp-forest/change-log.md).
 
 ### Cautions
 

@@ -260,3 +260,194 @@ def test_index_usersum_docs_rq_builds_index_without_postgres(
     assert (usersum_dir / "generated" / "docs_index.json").is_file()
     assert any("STARTED index_usersum_docs_rq" in message for _, message in published)
     assert any("COMPLETED index_usersum_docs_rq" in message for _, message in published)
+
+
+def test_index_usersum_docs_rq_syncs_vendor_docs_before_require_vendor_validation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    usersum_dir = repo_root / "wepppy" / "weppcloud" / "routes" / "usersum"
+    usersum_dir.mkdir(parents=True, exist_ok=True)
+
+    forest_repo = tmp_path / "wepp-forest"
+    forest_repo.mkdir(parents=True, exist_ok=True)
+    (forest_repo / "change-log.md").write_text(
+        "# Change Log\n\n| Date | Commit Hash | Compiler | Version | Notes |\n",
+        encoding="utf-8",
+    )
+
+    (usersum_dir / "docs_manifest.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "docs:",
+                "  - doc_id: usersum.weppcloud.wepp_forest_change_log",
+                "    source: vendor",
+                "    vendor_id: wepp-forest",
+                "    rel_path: wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md",
+                "    title: WEPP-Forest Change Log",
+                "    min_role: user",
+                "    category: weppcloud",
+                "    audience_tags: [user]",
+                "    status: active",
+                "    nav_key: usersum.weppcloud.wepp_forest_change_log",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (usersum_dir / "nav_tree.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "roots:",
+                "  - key: usersum.technical_reference",
+                "    title: Technical Reference",
+                "    collapsible: true",
+                "    children:",
+                "      - key: usersum.weppcloud.wepp_forest_change_log",
+                "        doc_id: usersum.weppcloud.wepp_forest_change_log",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (usersum_dir / "vendors.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "vendors:",
+                "  - vendor_id: wepp-forest",
+                f"    source_repo_path: {forest_repo}",
+                "    source_ref: main",
+                "    include_globs: [\"change-log.md\"]",
+                "    exclude_globs: [\"**/.git/**\"]",
+                "    target_root: wepppy/weppcloud/routes/usersum/vendor/wepp-forest",
+                "    route_prefix: /usersum/vendor/wepp-forest",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    vendored_copy = usersum_dir / "vendor" / "wepp-forest" / "change-log.md"
+    assert not vendored_copy.exists()
+
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    result = project_rq.index_usersum_docs_rq(
+        usersum_base_dir=str(usersum_dir),
+        repo_root=str(repo_root),
+        require_vendor_files=True,
+        sync_postgres=False,
+    )
+
+    assert vendored_copy.is_file()
+    assert result["documents"] == 1
+    assert result["vendors_synced"] == 1
+    assert result["vendors_skipped"] == 0
+    assert any("COMPLETED index_usersum_docs_rq" in message for _, message in published)
+
+
+def test_index_usersum_docs_rq_syncs_vendor_docs_when_write_index_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    usersum_dir = repo_root / "wepppy" / "weppcloud" / "routes" / "usersum"
+    usersum_dir.mkdir(parents=True, exist_ok=True)
+
+    forest_repo = tmp_path / "wepp-forest"
+    forest_repo.mkdir(parents=True, exist_ok=True)
+    (forest_repo / "change-log.md").write_text(
+        "# Change Log\n\n| Date | Commit Hash | Compiler | Version | Notes |\n",
+        encoding="utf-8",
+    )
+
+    (usersum_dir / "docs_manifest.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "docs:",
+                "  - doc_id: usersum.weppcloud.wepp_forest_change_log",
+                "    source: vendor",
+                "    vendor_id: wepp-forest",
+                "    rel_path: wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md",
+                "    title: WEPP-Forest Change Log",
+                "    min_role: user",
+                "    category: weppcloud",
+                "    audience_tags: [user]",
+                "    status: active",
+                "    nav_key: usersum.weppcloud.wepp_forest_change_log",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (usersum_dir / "nav_tree.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "roots:",
+                "  - key: usersum.technical_reference",
+                "    title: Technical Reference",
+                "    collapsible: true",
+                "    children:",
+                "      - key: usersum.weppcloud.wepp_forest_change_log",
+                "        doc_id: usersum.weppcloud.wepp_forest_change_log",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (usersum_dir / "vendors.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "vendors:",
+                "  - vendor_id: wepp-forest",
+                f"    source_repo_path: {forest_repo}",
+                "    source_ref: main",
+                "    include_globs: [\"change-log.md\"]",
+                "    exclude_globs: [\"**/.git/**\"]",
+                "    target_root: wepppy/weppcloud/routes/usersum/vendor/wepp-forest",
+                "    route_prefix: /usersum/vendor/wepp-forest",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    vendored_copy = usersum_dir / "vendor" / "wepp-forest" / "change-log.md"
+    index_path = usersum_dir / "generated" / "docs_index.json"
+    assert not vendored_copy.exists()
+    assert not index_path.exists()
+
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    result = project_rq.index_usersum_docs_rq(
+        usersum_base_dir=str(usersum_dir),
+        repo_root=str(repo_root),
+        write_index=False,
+        require_vendor_files=True,
+        sync_postgres=False,
+    )
+
+    assert vendored_copy.is_file()
+    assert not index_path.exists()
+    assert result["documents"] == 1
+    assert result["index_written"] is False
+    assert result["vendors_synced"] == 1
+    assert result["vendors_skipped"] == 0
+    assert any("COMPLETED index_usersum_docs_rq" in message for _, message in published)

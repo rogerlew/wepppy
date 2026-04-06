@@ -418,6 +418,7 @@ def index_usersum_docs_rq(
         from wepppy.weppcloud.usersum_docs.docs_contracts import load_and_validate_contracts
         from wepppy.weppcloud.usersum_docs.docs_index import build_generated_index, write_generated_index
         from wepppy.weppcloud.usersum_docs.pg_search import PostgresUsersumSearchBackend
+        from wepppy.weppcloud.usersum_docs.vendor_sync import sync_vendor_docs
     except Exception as exc:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:432", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -436,6 +437,21 @@ def index_usersum_docs_rq(
     )
 
     try:
+        contracts_for_sync = load_and_validate_contracts(
+            base_dir=usersum_base_path,
+            repo_root=repo_root_path,
+            require_local_files=True,
+            require_vendor_files=False,
+        )
+        # Keep vendored markdown current whenever downstream index/search work depends on it.
+        write_vendors = write_index or require_vendor_files or sync_postgres
+        sync_actions = sync_vendor_docs(
+            contracts_for_sync,
+            repo_root=repo_root_path,
+            write=write_vendors,
+            clean=False,
+            allow_missing_source_repos=True,
+        )
         contracts = load_and_validate_contracts(
             base_dir=usersum_base_path,
             repo_root=repo_root_path,
@@ -467,11 +483,15 @@ def index_usersum_docs_rq(
         raise
 
     elapsed = time.perf_counter() - started_at
+    synced_vendor_count = sum(1 for action, _ in sync_actions if action == "vendor")
+    skipped_vendor_count = sum(1 for action, _ in sync_actions if action == "skip")
     result: dict[str, Any] = {
         "documents": len(index.documents),
         "index_path": str(index_path),
         "index_written": bool(write_index),
         "postgres_synced": postgres_synced,
+        "vendors_synced": synced_vendor_count,
+        "vendors_skipped": skipped_vendor_count,
         "elapsed_s": round(elapsed, 3),
     }
 
@@ -481,7 +501,9 @@ def index_usersum_docs_rq(
         (
             f"rq:{job_id} COMPLETED {func_name}"
             f"(documents={result['documents']}, index_written={str(result['index_written']).lower()},"
-            f" postgres_synced={str(result['postgres_synced']).lower()}, elapsed_s={elapsed:.1f})"
+            f" postgres_synced={str(result['postgres_synced']).lower()},"
+            f" vendors_synced={result['vendors_synced']}, vendors_skipped={result['vendors_skipped']},"
+            f" elapsed_s={elapsed:.1f})"
         ),
     )
     return result

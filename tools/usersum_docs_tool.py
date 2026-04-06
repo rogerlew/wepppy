@@ -2,83 +2,18 @@
 from __future__ import annotations
 
 import argparse
-from fnmatch import fnmatch
-import shutil
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 from wepppy.weppcloud.usersum_docs.docs_contracts import (
-    UsersumContracts,
-    UsersumContractsValidationError,
-    VendorSpec,
     load_and_validate_contracts,
 )
 from wepppy.weppcloud.usersum_docs.docs_index import build_generated_index, write_generated_index
+from wepppy.weppcloud.usersum_docs.vendor_sync import sync_vendor_docs
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 USERSUM_DIR = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "usersum"
 GENERATED_INDEX_PATH = USERSUM_DIR / "generated" / "docs_index.json"
-
-
-def _iter_vendor_source_files(vendor: VendorSpec) -> List[Path]:
-    source_root = Path(vendor["source_repo_path"]).resolve()
-    if not source_root.is_dir():
-        raise UsersumContractsValidationError(
-            f"Vendor source path does not exist or is not a directory: {source_root}"
-        )
-
-    selected: Dict[str, Path] = {}
-    for include_glob in vendor["include_globs"]:
-        for candidate in source_root.glob(include_glob):
-            if not candidate.is_file():
-                continue
-            rel = candidate.relative_to(source_root).as_posix()
-            if candidate.suffix.lower() != ".md":
-                raise UsersumContractsValidationError(
-                    f"Vendor include matched non-markdown file: {source_root / rel}"
-                )
-            excluded = any(fnmatch(rel, pattern) for pattern in vendor["exclude_globs"])
-            if excluded:
-                continue
-            selected[rel] = candidate
-
-    if not selected:
-        raise UsersumContractsValidationError(
-            f"Vendor {vendor['vendor_id']!r} include_globs selected no markdown files"
-        )
-    return [selected[key] for key in sorted(selected)]
-
-
-def _sync_vendor_docs(
-    contracts: UsersumContracts,
-    *,
-    repo_root: Path,
-    write: bool,
-    clean: bool,
-) -> List[Tuple[str, str]]:
-    actions: List[Tuple[str, str]] = []
-
-    for vendor_id, vendor in contracts.vendors.items():
-        target_root = (repo_root / vendor["target_root"]).resolve()
-        source_root = Path(vendor["source_repo_path"]).resolve()
-        source_files = _iter_vendor_source_files(vendor)
-
-        if write and clean and target_root.exists():
-            shutil.rmtree(target_root)
-            actions.append(("clean", str(target_root)))
-
-        for source_file in source_files:
-            rel_path = source_file.relative_to(source_root)
-            target_path = target_root / rel_path
-            actions.append(("copy", f"{source_file} -> {target_path}"))
-            if write:
-                target_path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source_file, target_path)
-
-        actions.append(("vendor", f"{vendor_id}: {len(source_files)} file(s)"))
-
-    return actions
 
 
 def cmd_validate(args: argparse.Namespace) -> int:
@@ -102,7 +37,7 @@ def cmd_sync_vendors(args: argparse.Namespace) -> int:
         require_local_files=True,
         require_vendor_files=False,
     )
-    actions = _sync_vendor_docs(
+    actions = sync_vendor_docs(
         contracts,
         repo_root=REPO_ROOT,
         write=args.write,
@@ -115,6 +50,24 @@ def cmd_sync_vendors(args: argparse.Namespace) -> int:
 
 
 def cmd_build_index(args: argparse.Namespace) -> int:
+    contracts_for_sync = load_and_validate_contracts(
+        base_dir=USERSUM_DIR,
+        repo_root=REPO_ROOT,
+        require_local_files=True,
+        require_vendor_files=False,
+    )
+    if not args.skip_vendor_sync:
+        sync_actions = sync_vendor_docs(
+            contracts_for_sync,
+            repo_root=REPO_ROOT,
+            write=args.write,
+            clean=False,
+            allow_missing_source_repos=True,
+        )
+        for action, detail in sync_actions:
+            prefix = "[WRITE]" if args.write else "[DRYRUN]"
+            print(f"{prefix} {action}: {detail}")
+
     contracts = load_and_validate_contracts(
         base_dir=USERSUM_DIR,
         repo_root=REPO_ROOT,
@@ -177,6 +130,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--require-vendor-files",
         action="store_true",
         help="Require vendored markdown files to exist when building index.",
+    )
+    build_parser_cmd.add_argument(
+        "--skip-vendor-sync",
+        action="store_true",
+        help="Skip automatic vendor sync that runs before index generation.",
     )
     build_parser_cmd.set_defaults(func=cmd_build_index)
 

@@ -275,9 +275,8 @@ Current setup is intentionally discoverable in-code and command-line tooling:
 
     `PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py validate`
 
-2. Sync vendors and build index:
+2. Build index (auto-syncs configured vendor docs first):
 
-    `PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py sync-vendors --write`  
     `PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py build-index --write --require-vendor-files`
 
 3. Trigger search use once (API/search page) to bootstrap DDL and sync content.
@@ -328,15 +327,16 @@ Vendor docs are generated/synced content.
 - source-of-truth edits happen in vendor repos (for example `/workdir/weppcloud-wbt`).
 - vendored copies under `wepppy/weppcloud/routes/usersum/vendor/**` are not hand-authored by default.
 - approved sync flow:
-  - `tools/usersum_docs_tool.py sync-vendors --write`
-  - `tools/usersum_docs_tool.py build-index --write`
+  - `tools/usersum_docs_tool.py build-index --write` (auto-syncs vendors first)
+  - optional explicit sync preview/apply:
+    - `tools/usersum_docs_tool.py sync-vendors`
+    - `tools/usersum_docs_tool.py sync-vendors --write`
 
 Initial vendor scope:
 
 - `/workdir/weppcloud-wbt/docs/hydroenforcement/culvert-web-app-hydroenforcement.md`
 - `/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md`
-
-Both are published as `min_role: operator`.
+- `/workdir/wepp-forest/change-log.md`
 
 ## Compatibility Contract
 

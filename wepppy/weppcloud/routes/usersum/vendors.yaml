@@ -11,3 +11,12 @@ vendors:
       - "**/.git/**"
     target_root: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt
     route_prefix: /usersum/vendor/weppcloud-wbt
+  - vendor_id: wepp-forest
+    source_repo_path: /workdir/wepp-forest
+    source_ref: main
+    include_globs:
+      - change-log.md
+    exclude_globs:
+      - "**/.git/**"
+    target_root: wepppy/weppcloud/routes/usersum/vendor/wepp-forest
+    route_prefix: /usersum/vendor/wepp-forest

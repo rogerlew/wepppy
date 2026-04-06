@@ -21,6 +21,9 @@ _MARKDOWN_BLOCKQUOTE_PREFIX_RE = re.compile(r"^\s*>\s?", re.MULTILINE)
 _MARKDOWN_HEADING_PREFIX_RE = re.compile(r"^\s{0,3}#{1,6}\s*", re.MULTILINE)
 _MARKDOWN_HTML_TAG_RE = re.compile(r"<[^>]+>")
 _WHITESPACE_RE = re.compile(r"\s+")
+_LEGACY_ROUTE_PATH_OVERRIDES = {
+    "usersum.weppcloud.wepp_forest_change_log": "/usersum/view/weppcloud/wepp-forest-change-log.md",
+}
 
 
 class BreadcrumbItem(TypedDict):
@@ -123,6 +126,10 @@ def _canonical_route_path(doc_id: str) -> str:
 
 
 def _legacy_route_path(doc: UsersumDoc) -> str | None:
+    override = _LEGACY_ROUTE_PATH_OVERRIDES.get(doc["doc_id"])
+    if override is not None:
+        return override
+
     rel_path = doc["rel_path"]
     category_root = "wepppy/weppcloud/routes/usersum/"
     if rel_path.startswith(category_root):

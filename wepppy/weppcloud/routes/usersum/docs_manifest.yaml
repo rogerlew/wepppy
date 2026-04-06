@@ -379,8 +379,9 @@ docs:
     status: active
     nav_key: usersum.weppcloud.wepp_advanced_options
   - doc_id: usersum.weppcloud.wepp_forest_change_log
-    source: local
-    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-forest-change-log.md
+    source: vendor
+    vendor_id: wepp-forest
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md
     title: WEPP-Forest Change Log
     min_role: user
     category: weppcloud

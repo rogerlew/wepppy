@@ -116,6 +116,16 @@ def test_usersum_view_renders_accessibility_statement(usersum_client) -> None:
     assert "ACR/VPAT" in body
 
 
+def test_usersum_view_legacy_wepp_forest_change_log_alias_renders(usersum_client) -> None:
+    response = usersum_client.get("/usersum/view/weppcloud/wepp-forest-change-log.md")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "WEPP-Forest Change Log" in body
+    assert "Canonical WEPP build/version history for" in body
+    assert "wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md" in body
+
+
 def test_usersum_doc_route_renders_disturbed_enduser_guide(usersum_client) -> None:
     response = usersum_client.get("/usersum/doc/usersum.source.disturbed")
     assert response.status_code == 200

@@ -16,6 +16,7 @@
     - `wepppy/weppcloud/routes/usersum/db/`
     - `wepppy/weppcloud/routes/usersum/input-file-specifications/`
     - `wepppy/weppcloud/routes/usersum/weppcloud/`
+    - `wepppy/weppcloud/routes/usersum/vendor/`
 
 ## Link Resolution Contract (Required)
 - Usersum renders markdown via `cmarkgfm`, then rewrites markdown anchor `href` values for in-repo `.md` links.
@@ -38,6 +39,18 @@
 - Do not hand-author `/usersum/src//...` links; canonical route is single-slash `/usersum/src/...`.
 - Keep links as `.md` targets when you want usersum rendering; rewriter only promotes markdown links.
 - Do not add docs to the nav sections `Start Here`, `Modeling Basics and Tuning`, or `Data, Sources, and Policy` without explicit user permission in the current task.
+
+## Vendor Docs Workflow (Required)
+- Treat files under `wepppy/weppcloud/routes/usersum/vendor/**` as synced artifacts; source-of-truth edits belong in vendor repos.
+- Add/update vendor sources in `wepppy/weppcloud/routes/usersum/vendors.yaml`.
+- For vendored docs in `docs_manifest.yaml`, use `source: vendor`, set `vendor_id`, and keep `rel_path` under the vendor `target_root`.
+- Current WEPP-Forest changelog publishing contract:
+  - source file: `/workdir/wepp-forest/change-log.md`
+  - vendored file: `wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md`
+  - doc id: `usersum.weppcloud.wepp_forest_change_log`
+- Preferred rebuild flow after vendor-repo updates:
+  - `PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py build-index --write --require-vendor-files`
+  - `build-index` auto-syncs vendors; use `--skip-vendor-sync` only when intentionally avoiding sync.
 
 ## Validation
 - Route-level regression tests:
