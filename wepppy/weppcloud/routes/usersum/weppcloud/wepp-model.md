@@ -24,12 +24,17 @@ Watershed delineation can be performed by TOPAZ or WEPPcloud-WBT.
 
 - Topographic Parameterization (TOPAZ) is used to derive topographic features (slope length, width, aspect, slopes) from the Digital Elevation Model (DEM).
 - TOPAZ characterizes watersheds as representative hillslopes and channels, and links hillslopes to channel networks.
+- Fill hydroenforcement only.
+- Legacy, unmaintained fixed Fortran source code.
 - Output grids and tables from TOPAZ are included in archived project downloads. Descriptions of these products are available in the [TOPAZ Manual](/weppcloud/usersum/static/topaz/TOPAZ_User-Manual2.pdf).
 
 #### WEPPcloud-WBT
 
 - [WEPPcloud-WBT](https://github.com/rogerlew/weppcloud-wbt) is a WEPPcloud-maintained fork of WhiteboxTools used operationally for watershed preprocessing and delineation.
 - It provides modern DEM-based hydrologic preprocessing (for example D8 flow direction, flow accumulation, and stream extraction) and is designed for larger catchments and high-performance raster workflows.
+- Fill and breach hydroenforcement, including road-aware embankment breaching.
+- Supports DEMs with `nodata` values.
+- Actively maintained as part of the WEPPcloud stack.
 - The `HillslopesTopaz` tool implements Garbrecht and Martz TOPAZ-style stream and hillslope identifiers for a single watershed and emits WEPPcloud-ready channel metadata tables (`netw.tsv`, `netw_props.tsv`) plus left/right/top hillslope rasters.
 - The `FindOutlet` tool derives a stream outlet pour point by tracing D8 flow and supports requested start locations for interactive outlet selection.
 - The `StreamJunctionIdentifier` and `PruneStrahlerStreamOrder` tools support confluence/junction analysis and stream-order pruning workflows used by WEPPcloud modules.
