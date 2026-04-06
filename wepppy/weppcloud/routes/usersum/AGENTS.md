@@ -37,6 +37,7 @@
 - Do not hardcode `/nodb/...` or other non-usersum absolute app paths for markdown docs.
 - Do not hand-author `/usersum/src//...` links; canonical route is single-slash `/usersum/src/...`.
 - Keep links as `.md` targets when you want usersum rendering; rewriter only promotes markdown links.
+- Do not add docs to the nav sections `Start Here`, `Modeling Basics and Tuning`, or `Data, Sources, and Policy` without explicit user permission in the current task.
 
 ## Validation
 - Route-level regression tests:

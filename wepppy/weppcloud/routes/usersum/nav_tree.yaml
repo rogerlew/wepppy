@@ -10,8 +10,6 @@ roots:
         doc_id: usersum.weppcloud.faq
       - key: usersum.weppcloud.getting_started
         doc_id: usersum.weppcloud.getting_started
-      - key: usersum.weppcloud.undisturbed_earth
-        doc_id: usersum.weppcloud.undisturbed_earth
       - key: usersum.weppcloud.quick_start
         doc_id: usersum.weppcloud.quick_start
 
@@ -54,6 +52,8 @@ roots:
         title: Model Guides
         collapsible: true
         children:
+          - key: usersum.weppcloud.undisturbed_earth
+            doc_id: usersum.weppcloud.undisturbed_earth
           - key: usersum.weppcloud.models.wepp
             doc_id: usersum.weppcloud.models.wepp
           - key: usersum.weppcloud.models.ash_transport

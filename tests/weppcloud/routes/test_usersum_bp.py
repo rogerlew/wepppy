@@ -219,9 +219,11 @@ def test_usersum_index_lists_nested_markdown_documents(usersum_client) -> None:
 
     faq_idx = body.index("/usersum/doc/usersum.weppcloud.faq")
     getting_started_idx = body.index("/usersum/doc/usersum.weppcloud.getting_started")
-    earth_idx = body.index("/usersum/doc/usersum.weppcloud.undisturbed_earth")
     quick_start_idx = body.index("/usersum/doc/usersum.weppcloud.quick_start")
-    assert faq_idx < getting_started_idx < earth_idx < quick_start_idx
+    mods_overview_idx = body.index("/usersum/doc/usersum.weppcloud.mods_overview")
+    earth_idx = body.index("/usersum/doc/usersum.weppcloud.undisturbed_earth")
+    assert faq_idx < getting_started_idx < quick_start_idx
+    assert mods_overview_idx < earth_idx
 
     project_files_idx = body.index("Project Files and Maps")
     runs_dir_idx = body.index("/usersum/doc/usersum.weppcloud.weppcloud_runs_directory_structure")
