@@ -4,7 +4,11 @@
 
 The WEPP model is a process-based model where most of the key parameters can be directly measured, estimated, or acquired from common spatially explicit data sources (for example, STATSGO and SSURGO). Many improvements to the web interface have focused on providing the model with high-resolution spatial weather data using publicly available mapping datasets, since a key issue in hydrologic models is capturing variability in precipitation and temperature across a landscape. Soil parameters are extracted directly from the soil survey and do not rely on statistical decay coefficients or exponents that can only be fixed using historic observed data.
 
-This approach is commonly used because the model is often applied as a decision-support tool in ungauged basins where calibration is not possible. Manual and automated calibration can be performed (for example with PEST), but reasonable predictions are often obtained without extensive calibration, especially for runoff.
+This approach is commonly used because the model is often applied as a decision-support tool in ungauged basins where calibration is not possible. Manual and automated calibration can be performed, but reasonable predictions are often obtained without extensive calibration, especially for runoff.
+
+In WEPPcloud, [Disturbed](/weppcloud/usersum/doc/usersum.source.disturbed) and [WEPP Advanced Options](/weppcloud/usersum/doc/usersum.weppcloud.wepp_advanced_options) are provided as calibration harnesses.
+
+WEPPcloud [Bootstrap](/weppcloud/usersum/doc/usersum.weppcloud.bootstrap) provides low-level WEPP input mutations through Git.
 
 ## How accurate is the WEPP model?
 
