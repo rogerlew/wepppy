@@ -82,6 +82,18 @@ If you do **not** have an SBS raster, the interface also offers **Specify Unifor
 
 ---
 
+## Preflight and Navigation
+
+The **Preflight and Navigation** panel shows what WEPPcloud tasks have been completed and also serves as a table of contents for the workflow controls.
+
+For this quick-start workflow, complete tasks from **Soil Burn Severity Upload** through **WEPP** in order. Going back and redoing a previous task invalidates later tasks, so you should rerun downstream steps after making earlier changes.
+
+The symbols in the panel provide a preflight checklist of what has been completed.
+
+![Preflight and Navigation panel](/usersum/static/weppcloud/quick-start/preflight-navigation.png)
+
+---
+
 ## 3. Find your watershed on the map
 
 Use the map at the top of the run page to move to your watershed:
