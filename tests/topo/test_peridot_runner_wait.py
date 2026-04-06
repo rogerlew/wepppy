@@ -313,6 +313,319 @@ def test_post_abstract_watershed_requires_primary_tables(
 
 
 @pytest.mark.unit
+def test_post_abstract_watershed_retries_empty_ids_until_finalized(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "watershed").mkdir(parents=True)
+    attempts = {"hillslopes": 0, "channels": 0}
+    hills_path = tmp_path / "watershed" / "hillslopes.parquet"
+    chn_path = tmp_path / "watershed" / "channels.parquet"
+
+    def _fake_load(_watershed_dir: Path, stem: str):
+        if stem == "hillslopes":
+            attempts["hillslopes"] += 1
+            if attempts["hillslopes"] == 1:
+                return (
+                    pd.DataFrame(
+                        {
+                            "topaz_id": pd.Series([], dtype="Int32"),
+                            "area": pd.Series([], dtype="float64"),
+                            "centroid_lon": pd.Series([], dtype="float64"),
+                            "centroid_lat": pd.Series([], dtype="float64"),
+                        }
+                    ),
+                    hills_path,
+                )
+            return (
+                pd.DataFrame(
+                    {
+                        "topaz_id": [11],
+                        "area": [10.0],
+                        "centroid_lon": [-116.8],
+                        "centroid_lat": [46.8],
+                    }
+                ),
+                hills_path,
+            )
+
+        if stem == "channels":
+            attempts["channels"] += 1
+            return (
+                pd.DataFrame(
+                    {
+                        "topaz_id": [14],
+                        "area": [5.0],
+                        "centroid_lon": [-116.7],
+                        "centroid_lat": [46.7],
+                    }
+                ),
+                chn_path,
+            )
+
+        return None, None
+
+    monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
+    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.2")
+    monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
+
+    sub_area, chn_area, ws_centroid, sub_ids, chn_ids = peridot_runner.post_abstract_watershed(
+        str(tmp_path),
+        verbose=False,
+    )
+
+    assert attempts["hillslopes"] >= 2
+    assert attempts["channels"] >= 2
+    assert sub_area == pytest.approx(10.0)
+    assert chn_area == pytest.approx(5.0)
+    assert ws_centroid == pytest.approx((-116.75, 46.75))
+    assert sub_ids == [11]
+    assert chn_ids == [14]
+
+
+@pytest.mark.unit
+def test_post_abstract_watershed_retries_transient_table_read_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "watershed").mkdir(parents=True)
+    attempts = {"calls": 0}
+    hills_path = tmp_path / "watershed" / "hillslopes.parquet"
+    chn_path = tmp_path / "watershed" / "channels.parquet"
+
+    def _fake_load(_watershed_dir: Path, stem: str):
+        attempts["calls"] += 1
+        if attempts["calls"] == 1:
+            raise OSError("transient parquet read error")
+        if stem == "hillslopes":
+            return (
+                pd.DataFrame(
+                    {
+                        "topaz_id": [11],
+                        "area": [10.0],
+                        "centroid_lon": [-116.8],
+                        "centroid_lat": [46.8],
+                    }
+                ),
+                hills_path,
+            )
+        if stem == "channels":
+            return (
+                pd.DataFrame(
+                    {
+                        "topaz_id": [14],
+                        "area": [5.0],
+                        "centroid_lon": [-116.7],
+                        "centroid_lat": [46.7],
+                    }
+                ),
+                chn_path,
+            )
+        return None, None
+
+    monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
+    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.2")
+    monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
+
+    sub_area, chn_area, ws_centroid, sub_ids, chn_ids = peridot_runner.post_abstract_watershed(
+        str(tmp_path),
+        verbose=False,
+    )
+
+    assert attempts["calls"] >= 3
+    assert sub_area == pytest.approx(10.0)
+    assert chn_area == pytest.approx(5.0)
+    assert ws_centroid == pytest.approx((-116.75, 46.75))
+    assert sub_ids == [11]
+    assert chn_ids == [14]
+
+
+@pytest.mark.unit
+def test_post_abstract_watershed_fails_fast_on_loader_schema_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "watershed").mkdir(parents=True)
+    sleep_calls = {"count": 0}
+
+    def _fake_load(_watershed_dir: Path, _stem: str):
+        raise ValueError("forced loader schema failure")
+
+    def _sleep(_seconds: float):
+        sleep_calls["count"] += 1
+
+    monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
+    monkeypatch.setattr(peridot_runner.time, "sleep", _sleep)
+    monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.2")
+    monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
+
+    with pytest.raises(ValueError, match="forced loader schema failure"):
+        peridot_runner.post_abstract_watershed(str(tmp_path), verbose=False)
+
+    assert sleep_calls["count"] == 0
+
+
+@pytest.mark.unit
+def test_post_abstract_watershed_fails_fast_on_type_contract_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "watershed").mkdir(parents=True)
+    hills_path = tmp_path / "watershed" / "hillslopes.parquet"
+    chn_path = tmp_path / "watershed" / "channels.parquet"
+    sleep_calls = {"count": 0}
+
+    def _fake_load(_watershed_dir: Path, stem: str):
+        if stem == "hillslopes":
+            return (
+                pd.DataFrame(
+                    {
+                        "topaz_id": [11],
+                        "area": [10.0],
+                        "centroid_lon": [-116.8],
+                        "centroid_lat": [46.8],
+                    }
+                ),
+                hills_path,
+            )
+        if stem == "channels":
+            return (
+                pd.DataFrame(
+                    {
+                        "topaz_id": [14],
+                        "area": [5.0],
+                        "centroid_lon": [-116.7],
+                        "centroid_lat": [46.7],
+                    }
+                ),
+                chn_path,
+            )
+        return None, None
+
+    def _boom(*_args, **_kwargs):
+        raise TypeError("forced type contract failure")
+
+    def _sleep(_seconds: float):
+        sleep_calls["count"] += 1
+
+    monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
+    monkeypatch.setattr(peridot_runner, "_extract_int32_column", _boom)
+    monkeypatch.setattr(peridot_runner.time, "sleep", _sleep)
+    monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.2")
+    monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
+
+    with pytest.raises(TypeError, match="forced type contract failure"):
+        peridot_runner.post_abstract_watershed(str(tmp_path), verbose=False)
+
+    assert sleep_calls["count"] == 0
+
+
+@pytest.mark.unit
+def test_post_abstract_watershed_times_out_on_persistent_transient_read_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "watershed").mkdir(parents=True)
+
+    def _fake_load(_watershed_dir: Path, _stem: str):
+        raise OSError("persistent transient read error")
+
+    monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
+    monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.03")
+    monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
+
+    with pytest.raises(RuntimeError, match="Failed to read finalized watershed tables") as excinfo:
+        peridot_runner.post_abstract_watershed(str(tmp_path), verbose=False)
+
+    assert isinstance(excinfo.value.__cause__, OSError)
+
+
+@pytest.mark.unit
+def test_post_abstract_watershed_times_out_when_ids_never_finalize(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "watershed").mkdir(parents=True)
+    hills_path = tmp_path / "watershed" / "hillslopes.parquet"
+    chn_path = tmp_path / "watershed" / "channels.parquet"
+
+    def _fake_load(_watershed_dir: Path, stem: str):
+        if stem == "hillslopes":
+            return (
+                pd.DataFrame(
+                    {
+                        "topaz_id": pd.Series([], dtype="Int32"),
+                        "area": pd.Series([], dtype="float64"),
+                        "centroid_lon": pd.Series([], dtype="float64"),
+                        "centroid_lat": pd.Series([], dtype="float64"),
+                    }
+                ),
+                hills_path,
+            )
+        if stem == "channels":
+            return (
+                pd.DataFrame(
+                    {
+                        "topaz_id": [14],
+                        "area": [5.0],
+                        "centroid_lon": [-116.7],
+                        "centroid_lat": [46.7],
+                    }
+                ),
+                chn_path,
+            )
+        return None, None
+
+    monkeypatch.setattr(peridot_runner, "_load_watershed_table", _fake_load)
+    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    monkeypatch.setenv("PERIDOT_INPUT_WAIT_S", "0.03")
+    monkeypatch.setenv("PERIDOT_INPUT_POLL_S", "0.01")
+
+    with pytest.raises(RuntimeError, match="empty watershed IDs"):
+        peridot_runner.post_abstract_watershed(str(tmp_path), verbose=False)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("hill_centroid_lon", "hill_centroid_lat", "chn_centroid_lon", "chn_centroid_lat"),
+    [
+        (float("nan"), 46.8, -116.7, 46.7),
+        (float("inf"), 46.8, -116.7, 46.7),
+        (200.0, 46.8, 200.0, 46.7),
+        (200.0, 46.8, -200.0, 46.7),
+        (-116.8, 95.0, -116.7, 95.0),
+    ],
+)
+def test_post_abstract_watershed_rejects_invalid_centroid(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    hill_centroid_lon: float,
+    hill_centroid_lat: float,
+    chn_centroid_lon: float,
+    chn_centroid_lat: float,
+) -> None:
+    watershed_dir = tmp_path / "watershed"
+    watershed_dir.mkdir(parents=True)
+    pd.DataFrame(
+        {
+            "topaz_id": [11],
+            "area": [10.0],
+            "centroid_lon": [hill_centroid_lon],
+            "centroid_lat": [hill_centroid_lat],
+        }
+    ).to_parquet(watershed_dir / "hillslopes.parquet", index=False)
+    pd.DataFrame(
+        {
+            "topaz_id": [14],
+            "area": [5.0],
+            "centroid_lon": [chn_centroid_lon],
+            "centroid_lat": [chn_centroid_lat],
+        }
+    ).to_parquet(watershed_dir / "channels.parquet", index=False)
+
+    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+
+    with pytest.raises(ValueError, match="Invalid watershed centroid"):
+        peridot_runner.post_abstract_watershed(str(tmp_path), verbose=False)
+
+
+@pytest.mark.unit
 def test_migrate_watershed_outputs_from_legacy_csv(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

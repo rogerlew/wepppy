@@ -334,61 +334,150 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
 
     from wepppy.topo.watershed_abstraction import WeppTopTranslator
 
+    def _validated_centroid_values(
+        df: pd.DataFrame,
+        *,
+        column: str,
+        min_value: float,
+        max_value: float,
+        source_name: str,
+    ) -> np.ndarray:
+        values = pd.to_numeric(df[column], errors="raise").to_numpy(dtype="float64")
+        invalid_mask = ~np.isfinite(values) | (values < min_value) | (values > max_value)
+        if invalid_mask.any():
+            bad_idx = int(np.where(invalid_mask)[0][0])
+            bad_value = values[bad_idx]
+            raise ValueError(
+                "Invalid watershed centroid source values: "
+                f"{source_name}.{column}[{bad_idx}]={bad_value!r}"
+            )
+        return values
+
     watershed_dir = Path(wd) / "watershed"
-    hill_df_raw, hill_source = _load_watershed_table(watershed_dir, "hillslopes")
-    chn_df_raw, chn_source = _load_watershed_table(watershed_dir, "channels")
+    timeout_s = get_peridot_input_wait_s()
+    poll_s = get_peridot_input_poll_s()
+    deadline = time.monotonic() + timeout_s
+    first_pass = True
 
-    if hill_df_raw is None:
-        raise FileNotFoundError(
-            "Missing watershed hillslope table; expected watershed/hillslopes.parquet "
-            "or watershed/hillslopes.csv"
-        )
-    if chn_df_raw is None:
-        raise FileNotFoundError(
-            "Missing watershed channel table; expected watershed/channels.parquet "
-            "or watershed/channels.csv"
-        )
+    while True:
+        try:
+            hill_df_raw, hill_source = _load_watershed_table(watershed_dir, "hillslopes")
+            chn_df_raw, chn_source = _load_watershed_table(watershed_dir, "channels")
 
-    if hill_source is not None and hill_source.suffix.lower() == ".csv":
+            if hill_df_raw is None:
+                raise FileNotFoundError(
+                    "Missing watershed hillslope table; expected watershed/hillslopes.parquet "
+                    "or watershed/hillslopes.csv"
+                )
+            if chn_df_raw is None:
+                raise FileNotFoundError(
+                    "Missing watershed channel table; expected watershed/channels.parquet "
+                    "or watershed/channels.csv"
+                )
+
+            if first_pass and hill_source is not None and hill_source.suffix.lower() == ".csv":
+                LOGGER.warning(
+                    "Legacy fallback path active: using watershed/hillslopes.csv because "
+                    "watershed/hillslopes.parquet is missing for %s",
+                    wd,
+                )
+            if first_pass and chn_source is not None and chn_source.suffix.lower() == ".csv":
+                LOGGER.warning(
+                    "Legacy fallback path active: using watershed/channels.csv because "
+                    "watershed/channels.parquet is missing for %s",
+                    wd,
+                )
+
+            hill_df = hill_df_raw.copy()
+            chn_df = chn_df_raw.copy()
+            hill_df['topaz_id'] = _extract_int32_column(hill_df, 'topaz_id', ('TopazID',))
+            chn_df['topaz_id'] = _extract_int32_column(chn_df, 'topaz_id', ('TopazID',))
+            sub_ids = sorted([int(x) for x in hill_df['topaz_id']])
+            chn_ids = sorted([int(x) for x in chn_df['topaz_id']])
+        except (KeyError, ValueError, TypeError, OverflowError, FileNotFoundError):
+            raise
+        except OSError as exc:  # I/O boundary: filesystem/read availability can be transient while writes finalize.
+            if time.monotonic() >= deadline:
+                raise RuntimeError(
+                    "Failed to read finalized watershed tables for peridot post-processing "
+                    f"within {timeout_s:.2f}s"
+                ) from exc
+            LOGGER.warning(
+                "Transient watershed table read failure for %s; retrying in %.2fs",
+                wd,
+                poll_s,
+                exc_info=True,
+            )
+            time.sleep(poll_s)
+            first_pass = False
+            continue
+
+        if len(sub_ids) > 0 and len(chn_ids) > 0:
+            break
+
+        if time.monotonic() >= deadline:
+            raise RuntimeError(
+                "Peridot post-processing found empty watershed IDs after waiting "
+                f"{timeout_s:.2f}s (sub_ids={len(sub_ids)}, chn_ids={len(chn_ids)})"
+            )
+
         LOGGER.warning(
-            "Legacy fallback path active: using watershed/hillslopes.csv because "
-            "watershed/hillslopes.parquet is missing for %s",
+            "Watershed IDs not finalized for %s (sub_ids=%d, chn_ids=%d); retrying in %.2fs",
             wd,
+            len(sub_ids),
+            len(chn_ids),
+            poll_s,
         )
-    if chn_source is not None and chn_source.suffix.lower() == ".csv":
-        LOGGER.warning(
-            "Legacy fallback path active: using watershed/channels.csv because "
-            "watershed/channels.parquet is missing for %s",
-            wd,
-        )
-
-    hill_df = hill_df_raw.copy()
-    chn_df = chn_df_raw.copy()
-
-    hill_df['topaz_id'] = _extract_int32_column(hill_df, 'topaz_id', ('TopazID',))
-    chn_df['topaz_id'] = _extract_int32_column(chn_df, 'topaz_id', ('TopazID',))
-
-    sub_ids = sorted([int(x) for x in hill_df['topaz_id']])
-    chn_ids = sorted([int(x) for x in  chn_df['topaz_id']])
+        time.sleep(poll_s)
+        first_pass = False
 
     translator = WeppTopTranslator(sub_ids, chn_ids)
     get_wepp_id = lambda topaz_id: translator.wepp(topaz_id)
     get_chn_enum = lambda topaz_id: translator.chn_enum(top=topaz_id)
 
+    hill_lngs = _validated_centroid_values(
+        hill_df,
+        column="centroid_lon",
+        min_value=-180.0,
+        max_value=180.0,
+        source_name="hillslopes",
+    )
+    hill_lats = _validated_centroid_values(
+        hill_df,
+        column="centroid_lat",
+        min_value=-90.0,
+        max_value=90.0,
+        source_name="hillslopes",
+    )
+    chn_lngs = _validated_centroid_values(
+        chn_df,
+        column="centroid_lon",
+        min_value=-180.0,
+        max_value=180.0,
+        source_name="channels",
+    )
+    chn_lats = _validated_centroid_values(
+        chn_df,
+        column="centroid_lat",
+        min_value=-90.0,
+        max_value=90.0,
+        source_name="channels",
+    )
+
     hill_df['wepp_id'] = hill_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
 
     hill_df.to_parquet(_join(wd, 'watershed/hillslopes.parquet'), index=False)
     sub_area = float(hill_df['area'].sum())
-    lngs = hill_df['centroid_lon'].to_numpy()
-    lats = hill_df['centroid_lat'].to_numpy()
+    lngs = hill_lngs
+    lats = hill_lats
 
     chn_df['wepp_id'] = chn_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
     chn_df['chn_enum'] = chn_df['topaz_id'].apply(lambda top: get_chn_enum(int(top))).astype('Int32')
 
     chn_df.to_parquet(_join(wd, 'watershed/channels.parquet'), index=False)
     chn_area = float(chn_df['area'].sum())
-    lngs = np.concatenate((lngs, chn_df['centroid_lon'].to_numpy()))
-    lats = np.concatenate((lats, chn_df['centroid_lat'].to_numpy()))
+    lngs = np.concatenate((lngs, chn_lngs))
+    lats = np.concatenate((lats, chn_lats))
 
     # Handle flowpaths metadata. This may be absent when skip-flowpaths mode is enabled.
     flowpaths_parquet = _join(wd, 'watershed/flowpaths.parquet')
@@ -429,6 +518,16 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
             LOGGER.warning("Failed to refresh catalog for watershed outputs in %s", wd, exc_info=True)
 
     ws_centroid = float(np.mean(lngs)), float(np.mean(lats))
+    if (
+        not math.isfinite(ws_centroid[0])
+        or not math.isfinite(ws_centroid[1])
+        or not (-180.0 <= ws_centroid[0] <= 180.0)
+        or not (-90.0 <= ws_centroid[1] <= 90.0)
+    ):
+        raise ValueError(
+            "Invalid watershed centroid computed from abstraction outputs: "
+            f"lng={ws_centroid[0]!r}, lat={ws_centroid[1]!r}"
+        )
     return sub_area, chn_area, ws_centroid, sub_ids, chn_ids
 
 
