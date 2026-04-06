@@ -1,8 +1,5 @@
 # WEPPcloud FAQ (Legacy Draft)
 
-> Migrated from `/workdir/ui-weppcloud.github.io/FAQ.md` on 2026-03-30.  
-> This content preserves legacy FAQ wording and is pending focused review against current WEPPcloud behavior.
-
 ## How do you calibrate the WEPP model?
 
 The WEPP model is a process-based model where most of the key parameters can be directly measured, estimated, or acquired from common spatially explicit data sources (for example, STATSGO and SSURGO). Many improvements to the web interface have focused on providing the model with high-resolution spatial weather data using publicly available mapping datasets, since a key issue in hydrologic models is capturing variability in precipitation and temperature across a landscape. Soil parameters are extracted directly from the soil survey and do not rely on statistical decay coefficients or exponents that can only be fixed using historic observed data.
