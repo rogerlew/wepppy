@@ -547,7 +547,7 @@ const mapSubtitle =
   const navItems = useMemo(
     () => [
       { label: 'Docs', href: '/weppcloud/usersum/' },
-      { label: 'Research', href: 'https://forest.moscowfsl.wsu.edu/library/', external: true },
+      { label: 'Research', href: '/weppcloud/usersum/doc/usersum.weppcloud.references', external: false },
       { label: 'Interfaces', href: '/weppcloud/interfaces/' },
       {
         label: isAuthenticated ? 'My Runs' : 'Login',
