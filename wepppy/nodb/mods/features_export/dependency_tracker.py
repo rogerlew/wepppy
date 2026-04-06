@@ -6,6 +6,7 @@ import collections.abc as cabc
 from dataclasses import dataclass
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import string
 
@@ -480,14 +481,53 @@ def _normalize_relpath(path_value: str, wd_path: Path) -> str:
     else:
         resolved = (wd_path / candidate).resolve(strict=False)
 
-    try:
-        relpath = resolved.relative_to(wd_path)
-    except ValueError as exc:
-        raise DependencyResolutionError(
-            f"Resolved dependency path {resolved} escapes working directory {wd_path}."
-        ) from exc
+    allowed_roots = _allowed_dependency_roots(wd_path)
+    for allowed_root in allowed_roots:
+        try:
+            resolved.relative_to(allowed_root)
+        except ValueError:
+            continue
+        return Path(os.path.relpath(resolved, wd_path)).as_posix()
 
-    return relpath.as_posix()
+    allowed_tokens = ", ".join(str(path) for path in allowed_roots)
+    raise DependencyResolutionError(
+        f"Resolved dependency path {resolved} escapes allowed roots ({allowed_tokens}) "
+        f"for working directory {wd_path}."
+    )
+
+
+def _allowed_dependency_roots(wd_path: Path) -> tuple[Path, ...]:
+    roots: list[Path] = [wd_path]
+    parent_run_root = _find_parent_run_root(wd_path)
+    if parent_run_root is not None:
+        resolved_parent = parent_run_root.resolve(strict=False)
+        if resolved_parent not in roots:
+            roots.append(resolved_parent)
+    return tuple(roots)
+
+
+def _find_parent_run_root(wd_path: Path) -> Path | None:
+    """Infer parent run root when wd points at a child `_pups` workspace."""
+
+    parts = wd_path.parts
+    for pups_index in range(len(parts) - 1, -1, -1):
+        if parts[pups_index] != "_pups":
+            continue
+        if pups_index <= 1:
+            continue
+
+        tail = parts[pups_index + 1 :]
+        if len(tail) != 3:
+            continue
+        if tail[0] != "omni" or tail[1] not in {"scenarios", "contrasts"}:
+            continue
+
+        parent_root = Path(*parts[:pups_index])
+        if parent_root == Path(parent_root.anchor):
+            continue
+        return parent_root
+
+    return None
 
 
 def _build_entry_for_relpath(

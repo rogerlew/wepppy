@@ -99,6 +99,10 @@ Locator contract (strict):
 - `value`: locator value string
 - Locator aliases such as `path`, `path_ref`, `path_template`, or `source_ref` are not allowed.
 - `path_template` expansion variables are defined in `metadata.resolver_contract.path_template_vars`.
+- Resolved locator paths must stay inside allowed dependency roots:
+  - default allowed root is the active working directory (`wd`);
+  - for canonical Omni child runs (`_pups/omni/scenarios/*` and `_pups/omni/contrasts/*`), the parent run root (path segment before `_pups`) is also allowed.
+- Canonical dependency `relpath` values are recorded relative to `wd`; parent-run references are therefore expected to include `../` segments for Omni child runs.
 
 Initial layer families:
 - Watershed: subcatchments, channels.
@@ -351,6 +355,7 @@ Dependency resolver contract:
 - Build dependency entries from actual resolved `geometry.locator`, `sources`, and `dependencies` in `layer_catalog.yaml`, including `unitizer.nodb` when `units=project`.
 - Include `layer_catalog.yaml` metadata/version signature in dependency resolution.
 - Fingerprint each dependency entry from canonical relpath plus file metadata (`size`, `mtime_ns`) and optional content hash when configured.
+- Parent-run dependencies for canonical Omni child runs are valid cache dependencies when the resolved path stays within the inferred parent run root.
 - Build the final dependency fingerprint from ordered dependency entries serialized in canonical JSON.
 
 ### 6.3 AgFields Interchange Auto-Preparation (Parity+)
