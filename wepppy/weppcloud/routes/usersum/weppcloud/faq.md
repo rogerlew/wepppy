@@ -22,6 +22,10 @@ Other than precipitation and temperature inputs, soil parameters (soil depth, hy
 
 For soil erosion rates, sensitive parameters commonly include soil surface cover, interrill erodibility, rill erodibility, and critical shear. Late-summer streamflows and hydrograph shape are often sensitive to lateral hydraulic conductivity and the baseflow recession coefficient. The baseflow recession coefficient is typically stable across a region and can be constrained using streamflow from a nearby gage. Soil surface cover is relatively easy to measure and generally requires estimating recovery or disturbance impacts to ground cover.
 
+## Is carbon/nitrogen cycling included in the model?
+
+No. The WEPP watershed interface does not simulate changes in soil carbon or nitrogen cycling. Beta versions with related algorithms have existed in research contexts but are still under development.
+
 ## How is vegetative recovery and residue decay simulated?
 
 Without nitrogen and carbon cycling, vegetative growth and residue decay are based on soil-moisture and temperature relationships. Other models such as RHESSYS can be used to predict vegetative regrowth. With RHESSYS, either direct vegetative characteristic maps (for example, LAI and canopy cover) can be fed to WEPP, or regrowth curves can be extracted if time-series outputs are desired rather than probabilistic outputs.
@@ -31,10 +35,6 @@ Without nitrogen and carbon cycling, vegetative growth and residue decay are bas
 Stream channel erosion in WEPP is simulated using a simpler approach than advanced hydrodynamic stream channel models (for example, CONCEPTS, CCHE1D, HEC-6), because stream cross-sectional characteristics are empirically assigned by stream order.
 
 Particle size of the bed, critical shear, bank/bed erodibility, and depth to an impermeable layer are defined for each stream based on dominant soil type along the channel and stream order. Channel erosion simulation capability has historically been tested for watersheds greater than 1 square mile. Results from forested watersheds in Idaho, Arizona, and Lake Tahoe, California have indicated agreement between measured and observed sediment load and treatment or wildfire response in sediment load.
-
-## Is carbon/nitrogen cycling included in the model?
-
-No. The WEPP watershed interface does not simulate changes in soil carbon or nitrogen cycling. Beta versions with related algorithms have existed in research contexts but are still under development.
 
 ## How does the model generate probabilistic runoff and erosion output for each year following a disturbance (for example, post-fire)?
 
