@@ -28,6 +28,7 @@
 [Who cares about this work? Who needs to review or approve?]
 - **Primary**: [Team or role that will use/maintain this]
 - **Reviewers**: [Who needs to approve the work]
+- **Security Reviewer**: [Required when security impact triage says dedicated review is needed]
 - **Informed**: [Who should be kept in the loop]
 
 ## Success Criteria
@@ -58,6 +59,16 @@
 - **Expected duration**: [e.g., "2-3 weeks", "4-6 sprints"]
 - **Complexity**: [Low/Medium/High]
 - **Risk level**: [Low/Medium/High]
+
+## Security Impact and Review Gate
+[Always complete security impact triage. Require a dedicated security review artifact when the package changes attack surface.]
+
+- **Security impact triage**: `none | low | high`
+- **Dedicated security review required**: `yes | no`
+- **Triage rationale**: [Why the package is or is not security-sensitive]
+- **Security review artifact**: `docs/work-packages/<package>/artifacts/<date>_security_review.md` (required when triage is `high`)
+
+Use `docs/prompt_templates/security_review_template.md` for the security artifact format and by-surface checks.
 
 ## References
 [Links to relevant documentation, designs, or context]

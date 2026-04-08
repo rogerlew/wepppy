@@ -128,6 +128,7 @@
 - Never commit secrets or tokens. Keep secrets in gitignored files and runtime env.
 - Preserve run-scoped access expectations and auth checks when editing endpoints.
 - Do not weaken validation, locking, or serialization safeguards in NoDb/RQ flows.
+- Security-sensitive work packages require a dedicated security review artifact per `docs/work-packages/README.md` (see "Security Review Gate").
 
 ## Root Exclusions
 - Do not place long tutorials in this file (NoDb internals, frontend migration guides, route catalogs, or markdown tooling manuals).

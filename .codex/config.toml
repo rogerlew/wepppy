@@ -32,6 +32,10 @@ config_file = "agents/governance_control_agent.toml"
 description = "Independent control reviewer for operations, data integrity, security, containment, and rollback safety."
 config_file = "agents/ops_security_control_agent.toml"
 
+[agents.security_reviewer]
+description = "Dedicated security reviewer for attack-surface changes and threat-model-driven findings closure."
+config_file = "agents/security_reviewer.toml"
+
 [agents.qa_reviewer]
 description = "Secondary QA reviewer for maintainability, readability, and test quality after correctness review."
 config_file = "agents/qa_reviewer.toml"

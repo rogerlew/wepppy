@@ -7,7 +7,10 @@
 **Started**: YYYY-MM-DD  
 **Current phase**: [Discovery/Implementation/Testing/Documentation/Closing]  
 **Last updated**: YYYY-MM-DD  
-**Next milestone**: [Brief description of next major checkpoint]
+**Next milestone**: [Brief description of next major checkpoint]  
+**Security impact**: `none | low | high`  
+**Dedicated security review**: `yes | no`  
+**Security artifact**: `docs/work-packages/<package>/artifacts/<date>_security_review.md` or `N/A`
 
 ## Task Board
 
@@ -78,6 +81,13 @@ Pre-closure validation steps. Check these off as the package nears completion.
 - [ ] Linting clean (`wctl run-npm lint`)
 - [ ] Type checking clean (`wctl run-stubtest <module>`)
 - [ ] No new security vulnerabilities
+
+### Security
+- [ ] Security impact triage recorded (`none | low | high`) with rationale.
+- [ ] If triage is `high`, dedicated security review artifact is present and complete.
+- [ ] No unresolved medium/high security findings remain in the security artifact.
+- [ ] Attack-surface changes (auth, secrets, input/path, queue/subprocess, CI, egress) are explicitly reviewed.
+- [ ] Residual risks and follow-up mitigation actions are recorded.
 
 ### Documentation
 - [ ] README.md updated for affected modules

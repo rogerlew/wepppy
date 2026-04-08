@@ -7,6 +7,7 @@ This directory groups long-running initiatives into self-contained "work package
 **Quick links:**
 - [`PROJECT_TRACKER.md`](../../PROJECT_TRACKER.md) (root) — Kanban board showing active/backlog/completed packages
 - [`docs/prompt_templates/`](../prompt_templates/) — Templates for package.md, tracker.md, and prompts
+- [`docs/prompt_templates/security_review_template.md`](../prompt_templates/security_review_template.md) — Dedicated security review checklist and artifact template
 - [`docs/god-tier-prompting-strategy.md`](../god-tier-prompting-strategy.md) — Guide to writing effective prompts for work packages
 
 ## Naming convention
@@ -32,10 +33,12 @@ Feel free to omit `notes/` or `artifacts/` if the package stays simple.
 ## Workflow guidelines
 1. Create a new package when a feature, migration, or documentation effort will span multiple PRs or agents or is high risk.
 2. Fill in `package.md` with the problem statement, scope, stakeholders, and exit criteria (use template from `docs/prompt_templates/package_template.md`).
-3. Track all actions in `tracker.md` (Kanban list, decision log, verification checklist, etc.) — use template from `docs/prompt_templates/tracker_template.md`.
-4. Drop prompts or automation scripts in `prompts/active/`; when they finish, move them to `prompts/completed/` with a brief outcome summary (inline at top of file or as `<prompt>_outcome.md`).
-5. **Update `PROJECT_TRACKER.md`** (root) when starting, progressing, or closing packages so other agents can discover active work.
-6. When the initiative ends, update `package.md` with the closure date and highlight deliverables or follow-ups.
+3. Complete security impact triage in `package.md` (`none | low | high`) and record whether a dedicated security review artifact is required.
+4. Track all actions in `tracker.md` (Kanban list, decision log, verification checklist, etc.) — use template from `docs/prompt_templates/tracker_template.md`.
+5. If security impact is `high`, create `artifacts/<date>_security_review.md` using `docs/prompt_templates/security_review_template.md` and close all medium/high findings before package closeout.
+6. Drop prompts or automation scripts in `prompts/active/`; when they finish, move them to `prompts/completed/` with a brief outcome summary (inline at top of file or as `<prompt>_outcome.md`).
+7. **Update `PROJECT_TRACKER.md`** (root) when starting, progressing, or closing packages so other agents can discover active work.
+8. When the initiative ends, update `package.md` with the closure date and highlight deliverables or follow-ups.
 
 Keeping everything inside one folder makes handoffs easier and lets us archive the package without losing the history.
 
@@ -136,7 +139,24 @@ Work packages should align with the standard development workflow:
 - All code changes must include tests
 - Run full test suite before marking package as complete: `wctl run-pytest tests --maxfail=1`
 - Frontend changes require lint + test: `wctl run-npm lint && wctl run-npm test`
+- Security-sensitive packages require a dedicated security review artifact with by-surface checks before closure
 - Document any new test fixtures or patterns in package artifacts
+
+## Security Review Gate
+
+Every package must record security impact triage:
+- `none`: no attack-surface change; no dedicated security artifact required.
+- `low`: limited attack-surface change; dedicated security artifact optional but recommended.
+- `high`: clear attack-surface change; dedicated security artifact required.
+
+Treat the following as `high` by default:
+- auth/session/JWT/CSRF/OAuth changes
+- secrets handling, token mint/verify, runtime config of secrets
+- public route handlers, uploads/downloads, file/path handling, markdown rendering/fetching
+- queue wiring, worker subprocess/shell execution, agent tooling and MCP permissions
+- CI/CD runner permissions, deployment wiring, or external egress surfaces
+
+For `high` packages, use `docs/prompt_templates/security_review_template.md` and require no unresolved medium/high findings before closure.
 
 ## Size and Scope Guidelines
 
