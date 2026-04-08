@@ -44,6 +44,12 @@ _VALID_DOC_ROLES = set(_ROLE_RANK)
 _DEFAULT_SEARCH_ROLE = "user"
 _DEFAULT_SEARCH_LIMIT = 20
 _MAX_SEARCH_LIMIT = 100
+_RANK_TO_ROLE = {rank: role for role, rank in _ROLE_RANK.items()}
+_HEADER_ROLE_OPTIONS_BY_WEPPCLOUD_ROLE: Dict[str, Tuple[str, ...]] = {
+    "poweruser": ("user", "operator"),
+    "admin": ("user", "operator", "developer"),
+    "root": ("user", "operator", "developer", "internal"),
+}
 
 _INDEX_DOC_DESCRIPTIONS: Dict[str, str] = {
     "usersum.db.climate_file_parameters": "Explains each field in a CLIGEN climate file and how WEPPcloud interprets it.",
@@ -181,39 +187,104 @@ def _coerce_bool(value: str | None) -> bool:
     return lowered in {"1", "true", "yes", "on", "extended", "-e", "--extended"}
 
 
-def _caller_max_role() -> str:
+def _highest_role_ceiling(roles: Sequence[str]) -> str:
+    return max(roles, key=lambda role: _ROLE_RANK[role])
+
+
+def _roles_up_to_ceiling(role_ceiling: str) -> Set[str]:
+    ceiling_rank = _ROLE_RANK[role_ceiling]
+    return {role for role, rank in _ROLE_RANK.items() if rank <= ceiling_rank}
+
+
+def _normalise_role_token(raw_role: Any) -> str:
+    if isinstance(raw_role, str):
+        return raw_role.strip().lower()
+    role_name = getattr(raw_role, "name", None)
+    if role_name is not None:
+        return str(role_name).strip().lower()
+    return str(raw_role).strip().lower()
+
+
+def _caller_weppcloud_role_context() -> Tuple[bool, Set[str]]:
     try:
         from flask_login import current_user  # type: ignore[import-not-found]
     except ImportError:
-        return "user"
+        return False, set()
 
     is_authenticated = bool(getattr(current_user, "is_authenticated", False))
     if not is_authenticated:
-        return "user"
+        return False, set()
 
-    role_signals: List[str] = []
+    role_tokens: Set[str] = set()
     roles_attr = getattr(current_user, "roles", None)
     if roles_attr is not None:
-        if isinstance(roles_attr, (list, tuple, set)):
-            role_signals.extend(str(item).lower() for item in roles_attr)
-        else:
-            role_signals.append(str(roles_attr).lower())
+        role_items = roles_attr if isinstance(roles_attr, (list, tuple, set)) else [roles_attr]
+        for role_item in role_items:
+            token = _normalise_role_token(role_item)
+            if token:
+                role_tokens.add(token)
 
-    permission_attrs = {
-        "internal": ["is_internal_docs", "is_internal", "can_view_internal_docs"],
-        "developer": ["is_developer", "can_develop", "is_poweruser"],
-        "operator": ["is_operator", "is_admin", "can_operate"],
+    attr_role_map = {
+        "is_root": "root",
+        "is_admin": "admin",
+        "is_poweruser": "poweruser",
+        "is_operator": "operator",
+        "can_operate": "operator",
+        "is_developer": "developer",
+        "can_develop": "developer",
+        "is_internal_docs": "internal",
+        "is_internal": "internal",
+        "can_view_internal_docs": "internal",
     }
-    for role_name, attrs in permission_attrs.items():
-        if any(bool(getattr(current_user, attr, False)) for attr in attrs):
-            role_signals.append(role_name)
+    for attr_name, token in attr_role_map.items():
+        if bool(getattr(current_user, attr_name, False)):
+            role_tokens.add(token)
 
-    normalized = set(role_signals)
-    if {"internal", "internal-docs", "internal_docs"} & normalized:
+    return True, role_tokens
+
+
+def _header_role_options() -> List[str]:
+    is_authenticated, role_tokens = _caller_weppcloud_role_context()
+    if not is_authenticated:
+        return []
+    for weppcloud_role in ("root", "admin", "poweruser"):
+        if weppcloud_role in role_tokens:
+            return list(_HEADER_ROLE_OPTIONS_BY_WEPPCLOUD_ROLE[weppcloud_role])
+    return []
+
+
+def _requested_role_ceiling_or_default(raw_values: Sequence[str]) -> str:
+    requested_roles = _split_csv_values(raw_values)
+    valid_roles = [role for role in requested_roles if role in _VALID_DOC_ROLES]
+    if not valid_roles:
+        return _DEFAULT_SEARCH_ROLE
+    return _highest_role_ceiling(valid_roles)
+
+
+def _discovery_role_ceiling(
+    *,
+    caller_max_role: str,
+    header_role_options: Sequence[str],
+    header_selected_role: str,
+) -> str:
+    if not header_role_options:
+        return _DEFAULT_SEARCH_ROLE
+
+    selected_role = header_selected_role if header_selected_role in header_role_options else _DEFAULT_SEARCH_ROLE
+    effective_rank = min(_ROLE_RANK[selected_role], _ROLE_RANK[caller_max_role])
+    return _RANK_TO_ROLE[effective_rank]
+
+
+def _caller_max_role() -> str:
+    is_authenticated, role_tokens = _caller_weppcloud_role_context()
+    if not is_authenticated:
+        return "user"
+
+    if {"root", "internal", "internal-docs", "internal_docs"} & role_tokens:
         return "internal"
-    if {"developer", "dev", "poweruser"} & normalized:
+    if {"admin", "developer", "dev"} & role_tokens:
         return "developer"
-    if {"operator", "admin", "ops"} & normalized:
+    if {"operator", "ops", "poweruser"} & role_tokens:
         return "operator"
     return "user"
 
@@ -232,26 +303,26 @@ def _split_csv_values(raw_values: Sequence[str]) -> List[str]:
     return values
 
 
-def _parse_search_roles(raw_values: Sequence[str], *, caller_max_role: str) -> Set[str]:
+def _parse_search_role_ceiling(raw_values: Sequence[str], *, caller_max_role: str) -> str:
     requested_roles = _split_csv_values(raw_values)
     if not requested_roles:
-        requested_roles = [_DEFAULT_SEARCH_ROLE]
+        return _DEFAULT_SEARCH_ROLE
 
     invalid_roles = sorted({role for role in requested_roles if role not in _VALID_DOC_ROLES})
     if invalid_roles:
         raise ValueError(f'Invalid role filter: {", ".join(invalid_roles)}.')
 
-    disallowed_roles = sorted(
-        {
-            role
-            for role in requested_roles
-            if _ROLE_RANK[role] > _ROLE_RANK[caller_max_role]
-        }
-    )
-    if disallowed_roles:
-        raise PermissionError(f'Requested role filter is not allowed: {", ".join(disallowed_roles)}.')
+    requested_ceiling = _highest_role_ceiling(requested_roles)
+    caller_rank = _ROLE_RANK[caller_max_role]
+    requested_rank = _ROLE_RANK[requested_ceiling]
 
-    return set(requested_roles)
+    if requested_rank > caller_rank:
+        raise PermissionError(
+            f"Requested role filter ceiling is not allowed: {requested_ceiling} (max allowed: {caller_max_role})."
+        )
+
+    effective_rank = min(requested_rank, caller_rank)
+    return _RANK_TO_ROLE[effective_rank]
 
 
 def _parse_search_categories(raw_values: Sequence[str]) -> Set[str] | None:
@@ -425,10 +496,23 @@ def _render_with_usersum_shell(
     **template_kwargs: Any,
 ):
     catalog = _catalog()
+    header_role_options = _header_role_options()
+    header_selected_role = template_kwargs.pop(
+        "header_selected_role",
+        _requested_role_ceiling_or_default(request.args.getlist("role")),
+    )
+    if header_role_options and header_selected_role not in header_role_options:
+        header_selected_role = _DEFAULT_SEARCH_ROLE
+    discovery_role_ceiling = _discovery_role_ceiling(
+        caller_max_role=caller_max_role,
+        header_role_options=header_role_options,
+        header_selected_role=header_selected_role,
+    )
+
     nav_tree = filter_nav_tree_for_visibility(
         catalog.nav_tree,
         docs_by_id=catalog.docs_by_id,
-        caller_max_role=caller_max_role,
+        caller_max_role=discovery_role_ceiling,
         active_doc_id=active_doc["doc_id"] if active_doc else None,
     )
     nav_tree = _annotate_nav_tree_for_index(nav_tree)
@@ -438,6 +522,8 @@ def _render_with_usersum_shell(
         breadcrumbs=breadcrumbs or [],
         active_doc=active_doc,
         header_search_query=request.args.get("q", "").strip(),
+        header_role_options=header_role_options,
+        header_selected_role=header_selected_role,
         url_for_run=url_for_run,
         **template_kwargs,
     )
@@ -712,7 +798,7 @@ def _cached_postgres_search_backend(db_url: str) -> PostgresUsersumSearchBackend
 def _search_documents(
     query: str,
     *,
-    roles: Set[str],
+    role_ceiling: str,
     categories: Set[str] | None,
     limit: int,
     offset: int,
@@ -722,6 +808,7 @@ def _search_documents(
     normalized_query = _normalise_spaces(query)
     if not normalized_query:
         return [], 0, None
+    role_scope = _roles_up_to_ceiling(role_ceiling)
 
     backend = _postgres_search_backend()
     if backend is not None:
@@ -729,7 +816,7 @@ def _search_documents(
             backend.ensure_synced(catalog.docs)
             pg_results, total = backend.search(
                 query=normalized_query,
-                roles=sorted(roles),
+                roles=sorted(role_scope, key=lambda role: _ROLE_RANK[role]),
                 categories=sorted(categories) if categories else None,
                 limit=limit,
                 offset=offset,
@@ -767,7 +854,7 @@ def _search_documents(
     tokens = _tokenize_search_query(normalized_query)
     matches: List[SearchResult] = []
     for doc in catalog.visible_docs(caller_max_role):
-        if doc["min_role"] not in roles:
+        if doc["min_role"] not in role_scope:
             continue
         if categories is not None and doc["category"] not in categories:
             continue
@@ -944,7 +1031,7 @@ def usersum_api_search():
 
     caller_max_role = _caller_max_role()
     try:
-        roles = _parse_search_roles(request.args.getlist("role"), caller_max_role=caller_max_role)
+        role_ceiling = _parse_search_role_ceiling(request.args.getlist("role"), caller_max_role=caller_max_role)
         categories = _parse_search_categories(request.args.getlist("category"))
         limit = _parse_int_query_arg("limit", default=_DEFAULT_SEARCH_LIMIT, min_value=1, max_value=_MAX_SEARCH_LIMIT)
         offset = _parse_int_query_arg("offset", default=0, min_value=0)
@@ -956,7 +1043,7 @@ def usersum_api_search():
     try:
         results, total, warning = _search_documents(
             query,
-            roles=roles,
+            role_ceiling=role_ceiling,
             categories=categories,
             limit=limit,
             offset=offset,
@@ -993,14 +1080,14 @@ def usersum_search():
     query = request.args.get("q", "").strip()
     caller_max_role = _caller_max_role()
     categories: Set[str] | None = None
-    roles = {_DEFAULT_SEARCH_ROLE}
+    role_ceiling = _DEFAULT_SEARCH_ROLE
     limit = _DEFAULT_SEARCH_LIMIT
     offset = 0
     error_message: str | None = None
     warning_message: str | None = None
 
     try:
-        roles = _parse_search_roles(request.args.getlist("role"), caller_max_role=caller_max_role)
+        role_ceiling = _parse_search_role_ceiling(request.args.getlist("role"), caller_max_role=caller_max_role)
         categories = _parse_search_categories(request.args.getlist("category"))
         limit = _parse_int_query_arg("limit", default=_DEFAULT_SEARCH_LIMIT, min_value=1, max_value=_MAX_SEARCH_LIMIT)
         offset = _parse_int_query_arg("offset", default=0, min_value=0)
@@ -1013,7 +1100,7 @@ def usersum_search():
         try:
             results, total, warning_message = _search_documents(
                 query,
-                roles=roles,
+                role_ceiling=role_ceiling,
                 categories=categories,
                 limit=limit,
                 offset=offset,
@@ -1028,6 +1115,8 @@ def usersum_search():
         caller_max_role=caller_max_role,
         title="Usersum Search",
         query=query,
+        selected_role=role_ceiling,
+        header_selected_role=role_ceiling,
         category_options=category_options,
         selected_categories=sorted(categories) if categories else [],
         results=results,

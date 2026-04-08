@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-03  
-**Active Packages**: 5  
+**Last Updated**: 2026-04-08  
+**Active Packages**: 6  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 4 packages ✅ **At target ceiling**
+**Current WIP**: 6 packages ⚠️ **Above target ceiling**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -470,7 +470,30 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 5 packages
+**Current WIP Count**: 6 packages
+
+---
+
+### Usersum Header ROLE Filter and Threshold Search Ceiling
+**Started**: 2026-04-08  
+**Status**: Implementation complete (follow-up fix validated + QA re-pass complete; pending merge)  
+**Size**: Medium (1 focused session)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260408_usersum_role_filter/](docs/work-packages/20260408_usersum_role_filter/)  
+**Description**: Add a conditional usersum header `ROLE` discovery selector for PowerUser/Admin/Root and align usersum role/search semantics to threshold role ceilings with preserved `/usersum/search` refinement behavior.
+
+**Current Status**:
+- Backend usersum role resolution and threshold ceiling semantics are implemented, including explicit `Root` mapping.
+- Header/search template wiring is complete (`ROLE` selector visibility/options + role persistence on `/usersum/search`).
+- Follow-up layout refinement shipped: usersum doc pages now self-report `min_role` under breadcrumbs.
+- Follow-up discovery fix shipped: selected `ROLE` ceiling now also filters usersum shell/nav visibility for privileged users.
+- Targeted validation passed: `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` (`50 passed`).
+- In-container verification with `dev-agent@example.com` role set confirmed role-dependent API and nav behavior.
+- Explicit QA re-review completed with no open medium/high findings.
+
+**Next Steps**:
+1. Merge and monitor in broader integration flow.
+2. Close package docs after merge if no follow-up fixes are required.
 
 ---
 

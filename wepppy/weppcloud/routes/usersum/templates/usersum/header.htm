@@ -7,8 +7,24 @@
     <div class="wc-header__tools">
       {% include 'header/_theme_switcher.htm' %}
       <form class="wc-usersum-header-search" action="{{ url_for_run('usersum.usersum_search') }}" method="get" role="search">
-        <div class="wc-usersum-header-search-field">
-          <label class="wc-usersum-header-search-label" for="usersum-header-search">SEARCH</label>
+        {% if header_role_options %}
+          <label class="wc-run-header__field" for="usersum-header-role">
+            <span>ROLE</span>
+            <select
+              id="usersum-header-role"
+              name="role"
+              class="wc-theme-switcher__select wc-run-header__input"
+              onchange="if (this.form.requestSubmit) { this.form.requestSubmit(); } else { this.form.submit(); }"
+              aria-label="Usersum role discovery filter"
+            >
+              {% for role in header_role_options %}
+                <option value="{{ role }}" {% if role == header_selected_role %}selected{% endif %}>{{ role }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        {% endif %}
+        <label class="wc-usersum-header-search-field wc-run-header__field" for="usersum-header-search">
+          <span>SEARCH</span>
           <input
             id="usersum-header-search"
             type="search"
@@ -17,7 +33,7 @@
             placeholder="Search docs..."
             aria-label="Search docs"
           >
-        </div>
+        </label>
         <button type="submit" class="pure-button">Search</button>
       </form>
     </div>

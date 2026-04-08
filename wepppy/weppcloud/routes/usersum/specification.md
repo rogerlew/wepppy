@@ -1,6 +1,6 @@
 # Usersum Documentation Engine Specification
 
-Status: Implemented v1 (2026-04-01)  
+Status: Implemented v1.1 (2026-04-08)  
 Scope: WEPPcloud in-app documentation at `/weppcloud/usersum/`  
 Primary module: `wepppy/weppcloud/routes/usersum/`
 
@@ -25,15 +25,44 @@ Usersum roles are mutually exclusive at the document level.
 - Hierarchy: `user` < `operator` < `developer` < `internal`
 - Visibility rule: caller can see a doc when caller max role rank >= doc `min_role`
 - `audience_tags` is discovery metadata only; it does not grant access.
+- Distinguish WEPPcloud user roles from usersum document roles:
+  - WEPPcloud user roles and attributes determine what the caller is allowed to see.
+  - usersum roles (`user`, `operator`, `developer`, `internal`) are the documentation visibility model and the values used by docs/search filters.
 
-Role resolution is implemented in `wepppy/weppcloud/routes/usersum/usersum.py::_caller_max_role()` and checks:
+Role resolution is implemented in:
+
+- `wepppy/weppcloud/routes/usersum/usersum.py::_caller_weppcloud_role_context()`
+- `wepppy/weppcloud/routes/usersum/usersum.py::_caller_max_role()`
+
+Current checks:
 
 - anonymous -> `user`
 - authenticated defaults -> `user`
-- elevated signals via `current_user.roles` and attributes:
-  - operator-ish: `is_operator`, `is_admin`, `can_operate`
-  - developer-ish: `is_developer`, `can_develop`, `is_poweruser`
-  - internal-ish: `is_internal_docs`, `is_internal`, `can_view_internal_docs`
+- elevated signals are collected from normalized `current_user.roles` values and user attributes:
+  - `is_root`, `is_admin`, `is_poweruser`
+  - `is_operator`, `can_operate`
+  - `is_developer`, `can_develop`
+  - `is_internal_docs`, `is_internal`, `can_view_internal_docs`
+- effective usersum ceiling mapping:
+  - `Root` -> `internal`
+  - `Admin` -> `developer`
+  - `PowerUser` -> `operator`
+  - otherwise -> `user`
+
+### Header role selector policy
+
+The header `ROLE` selector is a discovery filter, not an authorization override.
+
+- It renders only for authenticated users with WEPPcloud roles `PowerUser`, `Admin`, or `Root`.
+- Its option values come from the usersum role model, not from raw WEPPcloud role names.
+- It exposes a curated subset of usersum roles based on the caller's WEPPcloud role:
+  - `PowerUser` sees: `user`, `operator`
+  - `Admin` sees: `user`, `operator`, `developer`
+  - `Root` sees: `user`, `operator`, `developer`, `internal`
+- It submits through the existing usersum search flow on change (`requestSubmit()` with `submit()` fallback).
+- The selected role is preserved across `/usersum/search` refinement requests.
+- The selected role ceiling is also applied to usersum shell discovery/nav rendering.
+- The selector does not grant access to docs the caller could not otherwise view through the normal visibility gate.
 
 ## Machine-Readable Contracts
 
@@ -134,8 +163,11 @@ Implemented UX behavior:
 
 - header includes shared theme selector and usersum search controls.
 - search label is uppercase `SEARCH` and sits above the search input for field consistency with `THEMES`.
+- header includes a conditional `ROLE` selector to the left of `SEARCH` for authenticated `PowerUser`/`Admin`/`Root` callers.
+- the `ROLE` selector uses the same select/input classes as the shared theme selector for visual consistency.
 - left sidebar is sticky and supports collapsible nav sections.
 - breadcrumbs render above page content.
+- doc view pages self-report active doc role as `Role: <min_role>` directly under breadcrumbs.
 - usersum shell is full width.
 - sidebar/background/buttons/scrollbar follow theme tokens.
 
@@ -146,7 +178,7 @@ Implemented UX behavior:
 Query parameters:
 
 - `q` required
-- `role` optional (repeated and/or comma-separated)
+- `role` optional usersum role ceiling (`user`, `operator`, `developer`, `internal`)
 - `category` optional (repeated and/or comma-separated)
 - `limit` optional, default `20`, max `100`
 - `offset` optional, default `0`
@@ -154,8 +186,11 @@ Query parameters:
 Rules:
 
 - invalid args -> `400`
-- requested roles above caller max role -> `403`
-- default role filter if omitted -> `["user"]`
+- requested role ceiling above caller max role -> `403`
+- default role ceiling if omitted -> `user`
+- `role=X` should mean "show docs with `min_role` up to `X`", not "show only docs whose `min_role` exactly equals `X`"
+- threshold matching should therefore include any doc where `doc.min_role <= requested_role_ceiling`
+- repeated and/or comma-separated `role` values are accepted; effective requested ceiling is the highest valid requested usersum role.
 
 Response payload:
 
@@ -177,7 +212,9 @@ Response payload:
 ### `GET /usersum/search`
 
 - server-rendered HTML search page that uses the same backend/search logic.
-- currently exposes category filtering in UI; role filtering is supported by query parsing but not surfaced as a dedicated page control.
+- exposes category filtering in-page and uses the shared header `ROLE` control for role-ceiling filtering.
+- preserves selected role during search refinement.
+- for unauthorized requested role ceilings, renders the current page-level error path (instead of returning API JSON).
 
 ## PostgreSQL Search Backend Contract
 

@@ -16,6 +16,9 @@
     >
     <button class="pure-button wc-usersum-search-submit" type="submit">Search</button>
   </div>
+  {% if selected_role %}
+    <input type="hidden" name="role" value="{{ selected_role }}">
+  {% endif %}
   <label for="usersum-search-category">Category</label>
   <select id="usersum-search-category" name="category">
     <option value="">All categories</option>

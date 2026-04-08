@@ -279,6 +279,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.models.wepp
+  - doc_id: usersum.weppcloud.models.batch_runs
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/batch-runs/ENDUSER.md
+    title: Batch Runs Operator Guide
+    min_role: operator
+    category: weppcloud
+    audience_tags: [operator]
+    status: active
+    nav_key: usersum.weppcloud.models.batch_runs
   - doc_id: usersum.weppcloud.models.ash_transport
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/ash-transport/ENDUSER.md

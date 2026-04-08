@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -10,6 +11,8 @@ from flask import Blueprint, Flask
 from wepppy.weppcloud.routes.usersum import usersum_bp
 
 pytestmark = pytest.mark.routes
+
+_ROLE_RANK = {"user": 0, "operator": 1, "developer": 2, "internal": 3}
 
 
 @pytest.fixture()
@@ -32,6 +35,19 @@ def usersum_client():
 
     with app.test_client() as client:
         yield client
+
+
+@pytest.fixture()
+def set_usersum_current_user(monkeypatch: pytest.MonkeyPatch):
+    import flask_login
+
+    def _set(*, roles: tuple[str, ...] = (), is_authenticated: bool = True, **attrs: object) -> SimpleNamespace:
+        role_items = [SimpleNamespace(name=role) for role in roles]
+        user = SimpleNamespace(is_authenticated=is_authenticated, roles=role_items, **attrs)
+        monkeypatch.setattr(flask_login, "current_user", user)
+        return user
+
+    return _set
 
 
 def test_usersum_view_rewrites_repo_markdown_links(usersum_client) -> None:
@@ -279,7 +295,86 @@ def test_usersum_api_search_requires_query(usersum_client) -> None:
 def test_usersum_api_search_rejects_unauthorized_role_filter(usersum_client) -> None:
     response = usersum_client.get("/usersum/api/search?q=openet&role=operator")
     assert response.status_code == 403
-    assert "Requested role filter is not allowed" in response.get_json()["error"]["message"]
+    assert "Requested role filter ceiling is not allowed" in response.get_json()["error"]["message"]
+
+
+def test_usersum_api_search_role_threshold_includes_lower_roles(
+    usersum_client,
+    set_usersum_current_user,
+) -> None:
+    set_usersum_current_user(roles=("PowerUser",))
+
+    response = usersum_client.get("/usersum/api/search?q=openet&role=operator")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert payload["total"] >= 1
+    assert payload["results"]
+    assert any(result["min_role"] == "user" for result in payload["results"])
+    assert all(_ROLE_RANK[result["min_role"]] <= _ROLE_RANK["operator"] for result in payload["results"])
+
+
+def test_usersum_api_search_omitted_role_defaults_to_user_ceiling_for_admin(
+    usersum_client,
+    set_usersum_current_user,
+) -> None:
+    set_usersum_current_user(roles=("Admin",))
+
+    response = usersum_client.get("/usersum/api/search?q=delineation")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert all(result["min_role"] == "user" for result in payload["results"])
+
+
+def test_usersum_api_search_repeated_role_values_use_highest_ceiling(
+    usersum_client,
+    set_usersum_current_user,
+) -> None:
+    set_usersum_current_user(roles=("Admin",))
+
+    response = usersum_client.get("/usersum/api/search?q=delineation&role=user,developer")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert payload["total"] >= 1
+    assert any(result["min_role"] == "operator" for result in payload["results"])
+
+
+def test_usersum_api_search_poweruser_ceiling_mapping(
+    usersum_client,
+    set_usersum_current_user,
+) -> None:
+    set_usersum_current_user(roles=("PowerUser",))
+
+    allowed = usersum_client.get("/usersum/api/search?q=openet&role=operator")
+    assert allowed.status_code == 200
+
+    forbidden = usersum_client.get("/usersum/api/search?q=openet&role=developer")
+    assert forbidden.status_code == 403
+
+
+def test_usersum_api_search_admin_ceiling_mapping(
+    usersum_client,
+    set_usersum_current_user,
+) -> None:
+    set_usersum_current_user(roles=("Admin",))
+
+    allowed = usersum_client.get("/usersum/api/search?q=authoring&role=developer")
+    assert allowed.status_code == 200
+
+    forbidden = usersum_client.get("/usersum/api/search?q=openet&role=internal")
+    assert forbidden.status_code == 403
+
+
+def test_usersum_api_search_root_ceiling_mapping(
+    usersum_client,
+    set_usersum_current_user,
+) -> None:
+    set_usersum_current_user(roles=("Root",))
+
+    response = usersum_client.get("/usersum/api/search?q=openet&role=internal")
+    assert response.status_code == 200
 
 
 def test_usersum_api_search_rejects_invalid_limit(usersum_client) -> None:
@@ -344,12 +439,76 @@ def test_usersum_search_page_renders_results(usersum_client) -> None:
     assert "/usersum/doc/usersum.weppcloud.mods_overview" in body
 
 
+def test_usersum_search_page_preserves_selected_role(usersum_client, set_usersum_current_user) -> None:
+    set_usersum_current_user(roles=("Admin",))
+
+    response = usersum_client.get("/usersum/search?q=openet&role=developer")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert 'id="usersum-header-role"' in body
+    assert '<option value="developer" selected' in body
+    assert 'type="hidden" name="role" value="developer"' in body
+
+
+def test_usersum_shell_nav_respects_selected_role_ceiling(usersum_client, set_usersum_current_user) -> None:
+    set_usersum_current_user(roles=("Root",))
+
+    user_response = usersum_client.get("/usersum/?role=user")
+    assert user_response.status_code == 200
+    user_body = user_response.get_data(as_text=True)
+    assert "/usersum/doc/usersum.weppcloud.rq_engine" not in user_body
+    assert "/usersum/doc/usersum.weppcloud.enduser_authoring_guide" not in user_body
+
+    operator_response = usersum_client.get("/usersum/?role=operator")
+    assert operator_response.status_code == 200
+    operator_body = operator_response.get_data(as_text=True)
+    assert "/usersum/doc/usersum.weppcloud.rq_engine" in operator_body
+    assert "/usersum/doc/usersum.weppcloud.enduser_authoring_guide" not in operator_body
+
+    developer_response = usersum_client.get("/usersum/?role=developer")
+    assert developer_response.status_code == 200
+    developer_body = developer_response.get_data(as_text=True)
+    assert "/usersum/doc/usersum.weppcloud.rq_engine" in developer_body
+    assert "/usersum/doc/usersum.weppcloud.enduser_authoring_guide" in developer_body
+
+
+def test_usersum_search_page_uses_error_path_for_unauthorized_role(usersum_client, set_usersum_current_user) -> None:
+    set_usersum_current_user(roles=("PowerUser",))
+
+    response = usersum_client.get("/usersum/search?q=openet&role=developer")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    assert "Requested role filter ceiling is not allowed" in body
+
+
 def test_usersum_doc_route_renders_markdown(usersum_client) -> None:
     response = usersum_client.get("/usersum/doc/usersum.weppcloud.mods_overview")
     assert response.status_code == 200
     body = response.get_data(as_text=True)
     assert "Mods Overview" in body
     assert "wepppy/weppcloud/routes/usersum/weppcloud/mods-overview.md" in body
+
+
+def test_usersum_doc_route_reports_doc_role_below_breadcrumb(usersum_client) -> None:
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.mods_overview")
+    assert response.status_code == 200
+
+    body = response.get_data(as_text=True)
+    breadcrumb_idx = body.index('class="wc-usersum-breadcrumbs"')
+    role_idx = body.index('class="wc-usersum-doc-role"')
+    assert breadcrumb_idx < role_idx
+    assert "Role: <code>user</code>" in body
+
+
+def test_usersum_doc_route_reports_operator_role_for_operator_doc(usersum_client, set_usersum_current_user) -> None:
+    set_usersum_current_user(roles=("Admin",))
+
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.rq_engine")
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert "Role: <code>operator</code>" in body
 
 
 def test_usersum_vendor_route_renders_markdown(usersum_client) -> None:
