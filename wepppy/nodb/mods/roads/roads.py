@@ -49,6 +49,25 @@ ELIGIBLE_POINT_SOURCE_DESIGNS: frozenset[str] = frozenset(
 
 OUTSLOPE_UNRUTTED_AREA_EPSILON_M2 = 0.001
 OUTSLOPE_UNRUTTED_LANDUSE_MIN_LENGTH_M = 10.0
+OUTSLOPE_UNRUTTED_REQUIRED_FIELD_KEYS: Dict[str, Tuple[str, ...]] = {
+    "fill_length_m": ("FILL_LENGTH_M", "fill_length_m", "FILL_LEN_M", "fill_len_m"),
+    "fill_slope_pct": (
+        "FILL_SLOPE_PCT",
+        "fill_slope_pct",
+        "FILL_SLOPE",
+        "fill_slope",
+        "FILL_GRADE_PCT",
+        "fill_grade_pct",
+    ),
+    "buffer_length_m": ("BUFFER_LENGTH_M", "buffer_length_m", "BUFFER_LEN_M", "buffer_len_m"),
+    "buffer_slope_pct": ("BUFFER_SLOPE_PCT", "buffer_slope_pct", "BUFFER_SLOPE", "buffer_slope"),
+}
+OUTSLOPE_UNRUTTED_BOUNDS: Dict[str, Tuple[float, float]] = {
+    "fill_length_m": (0.3, 100.0),
+    "fill_slope_pct": (0.1, 150.0),
+    "buffer_length_m": (0.3, 300.0),
+    "buffer_slope_pct": (0.1, 100.0),
+}
 
 
 def _normalize_design(value: Any) -> Optional[str]:
@@ -211,7 +230,7 @@ class Roads(NoDbBase):
             "soil_texture_default": "loam",
             "surface_default": "gravel",
             "traffic_default": "low",
-            "rfg_pct_default": 15.0,
+            "rfg_pct_default": 20.0,
             "road_width_m_default": 4.0,
             "fill_length_default_m": 30.0,
             "fill_slope_default_pct": 10.0,
@@ -880,12 +899,20 @@ class Roads(NoDbBase):
                 numeric = float(value)
             except (TypeError, ValueError):
                 raise ValueError(f"{key} must be numeric.")
-            if key != "tolerance_m" and numeric <= 0:
-                raise ValueError(f"{key} must be > 0.")
             if key == "tolerance_m" and numeric < 0:
                 raise ValueError("tolerance_m must be >= 0.")
+            if key == "sample_step_m" and numeric <= 0:
+                raise ValueError("sample_step_m must be > 0.")
+            if key == "rfg_pct_default" and not (0.0 <= numeric <= 100.0):
+                raise ValueError("rfg_pct_default must be between 0 and 100.")
+            if key == "road_width_m_default" and not (0.3 <= numeric <= 100.0):
+                raise ValueError("road_width_m_default must be between 0.3 and 100.")
+            if key == "fill_length_default_m" and not (0.3 <= numeric <= 100.0):
+                raise ValueError("fill_length_default_m must be between 0.3 and 100.")
             if key == "fill_slope_default_pct":
-                numeric = self._clamp_percent_slope(numeric)
+                if not (0.1 <= numeric <= 150.0):
+                    raise ValueError("fill_slope_default_pct must be between 0.1 and 150.")
+                numeric = self._clamp_fill_slope_pct(numeric)
             params[key] = numeric
 
         if "trace_max_steps" in payload:
@@ -1697,21 +1724,8 @@ class Roads(NoDbBase):
 
     @classmethod
     def _missing_outslope_unrutted_required_fields(cls, properties: Mapping[str, Any]) -> List[str]:
-        required_fields = {
-            "fill_length_m": ("FILL_LENGTH_M", "fill_length_m", "FILL_LEN_M", "fill_len_m"),
-            "fill_slope_pct": (
-                "FILL_SLOPE_PCT",
-                "fill_slope_pct",
-                "FILL_SLOPE",
-                "fill_slope",
-                "FILL_GRADE_PCT",
-                "fill_grade_pct",
-            ),
-            "buffer_length_m": ("BUFFER_LENGTH_M", "buffer_length_m", "BUFFER_LEN_M", "buffer_len_m"),
-            "buffer_slope_pct": ("BUFFER_SLOPE_PCT", "buffer_slope_pct", "BUFFER_SLOPE", "buffer_slope"),
-        }
         missing: List[str] = []
-        for field_name, keys in required_fields.items():
+        for field_name, keys in OUTSLOPE_UNRUTTED_REQUIRED_FIELD_KEYS.items():
             if not cls._has_non_empty_property(properties, keys):
                 missing.append(field_name)
         return missing
@@ -1724,6 +1738,48 @@ class Roads(NoDbBase):
             return float(value)
         except (TypeError, ValueError):
             return None
+
+    def _resolve_outslope_unrutted_required_profiles(
+        self,
+        *,
+        properties: Mapping[str, Any],
+    ) -> Tuple[Optional[Dict[str, float]], Optional[Dict[str, float]], List[str]]:
+        missing_or_invalid_fields: List[str] = self._missing_outslope_unrutted_required_fields(properties)
+        parsed_values: Dict[str, float] = {}
+
+        for field_name, keys in OUTSLOPE_UNRUTTED_REQUIRED_FIELD_KEYS.items():
+            raw_value = self._first_non_empty_property(properties, keys)
+            if raw_value is None:
+                continue
+            parsed = self._coerce_float(raw_value)
+            if parsed is None or not np.isfinite(parsed):
+                missing_or_invalid_fields.append(field_name)
+                continue
+            parsed_values[field_name] = float(parsed)
+
+        for field_name, (min_value, max_value) in OUTSLOPE_UNRUTTED_BOUNDS.items():
+            value = parsed_values.get(field_name)
+            if value is None:
+                continue
+            if not (float(min_value) <= float(value) <= float(max_value)):
+                missing_or_invalid_fields.append(field_name)
+
+        if missing_or_invalid_fields:
+            return None, None, sorted(set(missing_or_invalid_fields))
+
+        fill_profile = {
+            "fill_length_m": float(parsed_values["fill_length_m"]),
+            "fill_slope_pct": float(parsed_values["fill_slope_pct"]),
+            "fill_slope_fraction": float(parsed_values["fill_slope_pct"] / 100.0),
+        }
+        buffer_profile = {
+            "buffer_length_m": float(parsed_values["buffer_length_m"]),
+            "buffer_slope_pct": float(parsed_values["buffer_slope_pct"]),
+            "buffer_slope_fraction": float(parsed_values["buffer_slope_pct"] / 100.0),
+            "buffer_length_source": "segment_property",
+            "buffer_slope_source": "segment_property",
+        }
+        return fill_profile, buffer_profile, []
 
     def _normalize_surface(self, value: Optional[str], default_value: str) -> str:
         if value is None:
@@ -1904,15 +1960,20 @@ class Roads(NoDbBase):
             str(params.get("soil_texture_default", "loam")),
             "loam",
         )
-        default_rfg = float(params.get("rfg_pct_default", 15.0))
+        default_rfg = float(params.get("rfg_pct_default", 20.0))
+        if not np.isfinite(default_rfg):
+            default_rfg = 20.0
+        default_rfg = max(0.0, min(100.0, float(default_rfg)))
         default_width = float(params.get("road_width_m_default", 4.0))
+        if not np.isfinite(default_width) or not (0.3 <= float(default_width) <= 100.0):
+            default_width = 4.0
         default_fill_length_m = float(params.get("fill_length_default_m", 30.0))
-        if default_fill_length_m <= 0:
+        if not np.isfinite(default_fill_length_m) or not (0.3 <= float(default_fill_length_m) <= 100.0):
             default_fill_length_m = 30.0
         default_fill_slope_pct = self._as_float_or_none(params.get("fill_slope_default_pct"))
         if default_fill_slope_pct is None:
             default_fill_slope_pct = 10.0
-        default_fill_slope_pct = self._clamp_percent_slope(float(default_fill_slope_pct))
+        default_fill_slope_pct = self._clamp_fill_slope_pct(float(default_fill_slope_pct))
 
         attribute_field_map = self._normalize_attribute_field_map(
             params.get("attribute_field_map"),
@@ -1968,7 +2029,7 @@ class Roads(NoDbBase):
         road_width_m = self._coerce_float(width_raw)
         if road_width_m is None:
             road_width_m = default_width
-        if road_width_m <= 0:
+        if not (0.3 <= float(road_width_m) <= 100.0):
             road_width_m = default_width
 
         fill_length_m = self._coerce_float(fill_length_raw)
@@ -1982,7 +2043,7 @@ class Roads(NoDbBase):
         if fill_slope_pct is None or fill_slope_pct <= 0:
             fill_slope_pct = default_fill_slope_pct
             fill_slope_source = "roads_default"
-        fill_slope_pct = self._clamp_percent_slope(float(fill_slope_pct))
+        fill_slope_pct = self._clamp_fill_slope_pct(float(fill_slope_pct))
 
         return {
             "design": design,
@@ -2289,6 +2350,14 @@ class Roads(NoDbBase):
     def _clamp_percent_slope(value: float) -> float:
         return max(0.1, min(40.0, float(value)))
 
+    @staticmethod
+    def _clamp_fill_slope_pct(value: float) -> float:
+        return max(0.1, min(150.0, float(value)))
+
+    @staticmethod
+    def _clamp_buffer_slope_pct(value: float) -> float:
+        return max(0.1, min(100.0, float(value)))
+
     def _build_segment_profile(
         self,
         *,
@@ -2399,9 +2468,9 @@ class Roads(NoDbBase):
                 buffer_slope_pct = float(road_slope_pct) * 0.5
             buffer_slope_source = "derived_default"
 
-        buffer_slope_pct = self._clamp_percent_slope(float(buffer_slope_pct))
+        buffer_slope_pct = self._clamp_buffer_slope_pct(float(buffer_slope_pct))
         return {
-            "buffer_length_m": max(0.3, float(buffer_length_m)),
+            "buffer_length_m": max(0.3, min(300.0, float(buffer_length_m))),
             "buffer_slope_pct": float(buffer_slope_pct),
             "buffer_slope_fraction": float(buffer_slope_pct / 100.0),
             "buffer_length_source": buffer_length_source,
@@ -2410,8 +2479,8 @@ class Roads(NoDbBase):
 
     @staticmethod
     def _derive_fill_profile_from_inputs(*, fill_length_m: float, fill_slope_pct: float) -> Dict[str, float]:
-        fill_length = max(0.3, float(fill_length_m))
-        slope_pct = max(0.1, min(40.0, float(fill_slope_pct)))
+        fill_length = max(0.3, min(100.0, float(fill_length_m)))
+        slope_pct = Roads._clamp_fill_slope_pct(float(fill_slope_pct))
         return {
             "fill_length_m": float(fill_length),
             "fill_slope_pct": float(slope_pct),
@@ -4784,7 +4853,11 @@ class Roads(NoDbBase):
                                 )
                                 segment_inputs["resolution_sources"]["design"] = "segment_property"
 
-                                missing_fields = self._missing_outslope_unrutted_required_fields(properties)
+                                fill_profile, routed_buffer_profile, missing_fields = (
+                                    self._resolve_outslope_unrutted_required_profiles(
+                                        properties=properties,
+                                    )
+                                )
                                 if missing_fields:
                                     _move_outslope_candidate_to_status(candidate, "failed_missing_parameter")
                                     skipped_segments.append(
@@ -4899,14 +4972,53 @@ class Roads(NoDbBase):
                                     road_slope_pct=float(profile["slope_pct"]),
                                 )
 
-                                fill_profile = self._derive_fill_profile_from_inputs(
-                                    fill_length_m=segment_inputs["fill_length_m"],
-                                    fill_slope_pct=segment_inputs["fill_slope_pct"],
-                                )
-                                routed_buffer_profile = self._derive_buffer_profile_from_feature_or_defaults(
-                                    properties=properties,
-                                    road_profile=profile,
-                                )
+                                if fill_profile is None or routed_buffer_profile is None:
+                                    _move_outslope_candidate_to_status(candidate, "failed_missing_parameter")
+                                    skipped_segments.append(
+                                        {
+                                            "segment_id": source_segment_id,
+                                            "segment_hillslope_id": segment_hillslope_id,
+                                            "reason": "failed_missing_parameter",
+                                            "missing_fields": ["fill_or_buffer_profile"],
+                                        }
+                                    )
+                                    segment_execution_records.append(
+                                        {
+                                            "segment_id": source_segment_id,
+                                            "segment_hillslope_id": segment_hillslope_id,
+                                            "target_hillslope_wepp_id": int(wepp_id_int),
+                                            "target_hillslope_topaz_id": int(topaz_id_hill),
+                                            "status": "failed",
+                                            "routing_mode": "outslope_unrutted_replacement",
+                                            "reason": "failed_missing_parameter",
+                                            "missing_fields": ["fill_or_buffer_profile"],
+                                            "design": "outslope_unrutted",
+                                            "overlap_length_m": overlap_length_m,
+                                            "inclusion_ratio": inclusion_ratio,
+                                        }
+                                    )
+                                    failed_segment_records.append(
+                                        {
+                                            "segment_id": source_segment_id,
+                                            "segment_hillslope_id": segment_hillslope_id,
+                                            "target_hillslope_wepp_id": int(wepp_id_int),
+                                            "routing_mode": "outslope_unrutted_replacement",
+                                            "reason": "failed_missing_parameter",
+                                            "missing_fields": ["fill_or_buffer_profile"],
+                                        }
+                                    )
+                                    self._append_roads_log(
+                                        "run",
+                                        "segment_skipped",
+                                        {
+                                            "segment_id": source_segment_id,
+                                            "segment_hillslope_id": segment_hillslope_id,
+                                            "reason": "failed_missing_parameter",
+                                            "missing_fields": ["fill_or_buffer_profile"],
+                                        },
+                                    )
+                                    strip_failure = True
+                                    continue
 
                                 overlap_geometry_wgs84 = candidate.get("overlap_geometry_wgs84")
                                 discha_median_m = None
@@ -5002,6 +5114,14 @@ class Roads(NoDbBase):
 
                             if strip_failure or not strip_plans:
                                 continue
+
+                            strip_plans = sorted(
+                                strip_plans,
+                                key=lambda plan: (
+                                    -float(plan["discha_median_m"]),
+                                    str(plan["segment_hillslope_id"]),
+                                ),
+                            )
 
                             width_sum_before_scaling = float(sum(float(plan["strip_width_m"]) for plan in strip_plans))
                             if width_sum_before_scaling <= 0.0:

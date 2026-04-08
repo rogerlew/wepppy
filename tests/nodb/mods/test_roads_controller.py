@@ -305,6 +305,53 @@ def test_set_params_rejects_invalid_fill_defaults(tmp_path: Path) -> None:
         controller.set_params({"fill_slope_default_pct": "nan-text"})
 
 
+def test_set_params_enforces_phase4_numeric_bounds(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    assert controller.query_summary()["roads_params"]["rfg_pct_default"] == pytest.approx(20.0)
+
+    with pytest.raises(ValueError, match="rfg_pct_default"):
+        controller.set_params({"rfg_pct_default": 101})
+    with pytest.raises(ValueError, match="road_width_m_default"):
+        controller.set_params({"road_width_m_default": 0.2})
+    with pytest.raises(ValueError, match="fill_length_default_m"):
+        controller.set_params({"fill_length_default_m": 101})
+    with pytest.raises(ValueError, match="fill_slope_default_pct"):
+        controller.set_params({"fill_slope_default_pct": 151})
+
+
+def test_resolve_outslope_unrutted_required_profiles_validates_bounds(tmp_path: Path) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    fill_profile, buffer_profile, errors = controller._resolve_outslope_unrutted_required_profiles(
+        properties={
+            "FILL_LENGTH_M": 20.0,
+            "FILL_SLOPE_PCT": 120.0,
+            "BUFFER_LENGTH_M": 50.0,
+            "BUFFER_SLOPE_PCT": 80.0,
+        }
+    )
+
+    assert errors == []
+    assert fill_profile is not None
+    assert buffer_profile is not None
+    assert fill_profile["fill_slope_pct"] == pytest.approx(120.0)
+    assert buffer_profile["buffer_slope_pct"] == pytest.approx(80.0)
+
+    fill_profile, buffer_profile, errors = controller._resolve_outslope_unrutted_required_profiles(
+        properties={
+            "FILL_LENGTH_M": 120.0,
+            "FILL_SLOPE_PCT": "not-a-number",
+            "BUFFER_LENGTH_M": 50.0,
+            "BUFFER_SLOPE_PCT": 120.0,
+        }
+    )
+
+    assert fill_profile is None
+    assert buffer_profile is None
+    assert set(errors) == {"fill_length_m", "fill_slope_pct", "buffer_slope_pct"}
+
+
 def test_run_roads_wepp_rejects_stale_prepare_summary(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
     monkeypatch.setattr(
@@ -3187,10 +3234,13 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
 
     monkeypatch.setattr(roads_module.rasterio, "open", lambda _path: _FakeDataset())
 
+    expected_segment_order: list[str] = []
+
     def _fake_select(self, *, pending_segments, **_kwargs):
         pending = pending_segments[0]
         seg_a = f"{pending['segment_id']}::h21::a"
         seg_b = f"{pending['segment_id']}::h21::b"
+        expected_segment_order[:] = [seg_b, seg_a]
         candidate_a = {
             "segment_hillslope_id": seg_a,
             "source_segment_id": pending["segment_id"],
@@ -3268,7 +3318,7 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
     monkeypatch.setattr(
         Roads,
         "_sample_discha_median_from_wgs84_geometry",
-        lambda self, *_args, **_kwargs: 100.0,
+        (lambda _values=iter([50.0, 150.0]): (lambda self, *_args, **_kwargs: next(_values)))(),
     )
 
     management_template_path = tmp_path / "roads" / "3inslope.man"
@@ -3346,6 +3396,12 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
     assert len(combine_calls) == 1
     assert combine_calls[0]["strategy"] == "phase4"
     assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "combined replacement pass"
+    executed_outslope_segments = [
+        record["segment_hillslope_id"]
+        for record in summary["segment_execution_records"]
+        if record.get("design") == "outslope_unrutted" and record.get("status") == "completed"
+    ]
+    assert executed_outslope_segments[:2] == expected_segment_order
 
 
 def test_run_roads_wepp_outslope_unrutted_missing_discha_with_no_selected_candidates(

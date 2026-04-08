@@ -1,6 +1,6 @@
 # Roads Outslope Unrutted MOFE Hillslope Replacement
 
-**Status**: Open (2026-03-27)
+**Status**: Complete (2026-04-08)
 
 ## Overview
 This package implements step 4: `outslope_unrutted` as a sheet-flow abstraction using MOFE hillslope replacement, not additive delta injection. Targeted hillslopes are replaced by roads-aware synthetic contributors with explicit ordering `hill -> road -> fill -> hill` and strict no-double-counting invariants.
@@ -35,15 +35,15 @@ This package implements only `outslope_unrutted` hillslope replacement semantics
 - **Informed**: Operations and report-route maintainers.
 
 ## Success Criteria
-- [ ] `outslope_unrutted` runs with replacement semantics (no additive double counting on targeted hillslopes).
-- [ ] Contributor decomposition enforces ordering `hill -> road -> fill -> hill`.
-- [ ] Area conservation checks pass for each targeted hillslope.
-- [ ] Untouched hillslopes remain baseline pass files.
-- [ ] Watershed rerun succeeds with mixed replacement + baseline pass staging.
-- [ ] Summaries include replacement-hillslope inventory and area-conservation diagnostics.
-- [ ] Targeted and full validation suites pass.
-- [ ] Code review artifact has no unresolved medium/high findings.
-- [ ] QA review artifact has no unresolved medium/high findings.
+- [x] `outslope_unrutted` runs with replacement semantics (no additive double counting on targeted hillslopes).
+- [x] Contributor decomposition enforces ordering `hill -> road -> fill -> hill`.
+- [x] Area conservation checks pass for each targeted hillslope.
+- [x] Untouched hillslopes remain baseline pass files.
+- [x] Watershed rerun succeeds with mixed replacement + baseline pass staging.
+- [x] Summaries include replacement-hillslope inventory and area-conservation diagnostics.
+- [x] Targeted and full validation suites pass.
+- [x] Code review artifact has no unresolved medium/high findings.
+- [x] QA review artifact has no unresolved medium/high findings.
 
 ## Dependencies
 

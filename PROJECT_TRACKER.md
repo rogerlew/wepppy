@@ -243,7 +243,7 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 **Proposed**: 2026-03-27  
 **Size**: Very Large (5-9 focused sessions)  
 **Priority**: High  
-**Status**: Scoped - Ready to Start (after steps 1-3)  
+**Status**: Complete (2026-04-08)  
 **Package**: [docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/](docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/)  
 **Description**: Implement `outslope_unrutted` as sheet-flow MOFE hillslope replacement (`hill -> road -> fill -> hill`) with strict replacement semantics, area conservation, and no double counting.
 
@@ -259,9 +259,9 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 - `docs/work-packages/20260327_roads_point_source_outslope_rutted/`
 
 **Next Steps**:
-1. Lock decomposition and replacement invariants in code/spec.
-2. Implement replacement pass aggregation and conservation checks.
-3. Complete review gates and full validation suites.
+1. Monitor runtime on additional fixture-backed e2e runs.
+2. Track and resolve pre-existing `wctl run-stubtest wepppy.nodb.mods.roads.roads` typing debt outside this package.
+3. Use this package as baseline contract for follow-on roads diagnostics/reporting enhancements.
 
 ---
 

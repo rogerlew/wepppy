@@ -12,14 +12,14 @@ After this package, `outslope_unrutted` is modeled as a sheet-flow MOFE replacem
 
 - [x] (2026-03-27 00:00Z) Authored package/tracker/ExecPlan scaffold for step-4 scope.
 - [x] Milestone 1: Implement decomposition contract for targeted hillslopes (`affected strips` + `unaffected remainder`).
-- [ ] Milestone 2: Build MOFE contributors with fixed ordering `hill -> road -> fill -> hill`.
-- [ ] Milestone 3: Aggregate contributors into one replacement pass per targeted hillslope.
+- [x] Milestone 2: Build MOFE contributors with fixed ordering `hill -> road -> fill -> hill`.
+- [x] Milestone 3: Aggregate contributors into one replacement pass per targeted hillslope.
 - [x] Milestone 4: Stage replacement pass files with strict replacement (no additive double counting).
-- [ ] Milestone 5: Add area-conservation/topology validation and diagnostics.
-- [ ] Milestone 6: Extend regression coverage to full MOFE contributor assembly and area-closure invariants.
-- [ ] Milestone 7: Complete code-review artifact and resolve medium/high findings.
-- [ ] Milestone 8: Complete QA-review artifact and resolve medium/high findings.
-- [ ] Milestone 9: Run final gates and update handoff docs.
+- [x] Milestone 5: Add area-conservation/topology validation and diagnostics.
+- [x] Milestone 6: Extend regression coverage to full MOFE contributor assembly and area-closure invariants.
+- [x] Milestone 7: Complete code-review artifact and resolve medium/high findings.
+- [x] Milestone 8: Complete QA-review artifact and resolve medium/high findings.
+- [x] Milestone 9: Run final gates and update handoff docs.
 - [x] (2026-04-08 00:00Z) Locked step-4 decomposition contract details: physical-length thresholds, 4% geometry parity, raster-burn hillslope segmentation, and multi-road (`N`) contributor support.
 - [x] (2026-04-08 08:30Z) Implemented eligibility normalization, vector-overlap inclusion/cap selection, replacement-first pass staging, and summary diagnostics propagation in `roads.py`; added targeted regression tests.
 - [x] (2026-04-08 23:40Z) Fixed routed three-OFE slope serialization for outslope-unrutted replacement (point-count token mismatch), added regression coverage, and revalidated end-to-end on `/wc1/runs/cl/clogging-starch-outslope-unrutted-e2e-20260407-232343` with 5 successful replacement segments.
@@ -41,8 +41,8 @@ After this package, `outslope_unrutted` is modeled as a sheet-flow MOFE replacem
 - Observation: `outslope_unrutted` should use its own hillslope decomposition path built from a burned roads raster, not monotonic strip assumptions.
   Evidence: user direction to burn roads into raster and evaluate inclusion hillslope-by-hillslope.
 
-- Observation: Pass aggregation substrate currently only exposes `combine_hillslope_pass_files(..., strategy="phase1")`; there is no phase-4 replacement strategy in `wepppyo3` yet.
-  Evidence: `/workdir/wepppyo3/wepp_interchange/src/hill_pass_combine.rs` rejects non-`phase1` strategies.
+- Observation: Pass aggregation substrate originally lacked an explicit phase-4 strategy branch.
+  Evidence: previous `wepppyo3` combine path shared a single `phase1|phase4` branch.
 
 - Observation: WEPP slope files interpret the leading per-OFE integer as the number of profile coordinate pairs, not an OFE identifier; `outslope_unrutted` three-OFE writer emitted `4` while writing 3 pairs for the buffer OFE, triggering `forrtl: severe (24)` EOF failures.
   Evidence: failed runs in `/wc1/runs/cl/clogging-starch-outslope-unrutted-e2e-20260407-232343/wepp/roads/runs/p90000x.err` and generated `p900001.slp`.
@@ -119,21 +119,22 @@ After this package, `outslope_unrutted` is modeled as a sheet-flow MOFE replacem
 
 ## Outcomes & Retrospective
 
-Partially complete.
+Complete.
 
 Delivered in this pass:
 - eligibility normalization for `outslope_unrutted` aliases in Roads run/prepare flow,
 - vector-overlap hillslope selection with settled thresholds and cap-at-3 behavior,
 - replacement-first pass staging precedence and additive suppression for replacement-targeted hillslopes,
+- MOFE contributor assembly and replacement aggregation with fixed ordering `hill -> road -> fill -> hill`,
+- absolute area closure with top-OFE compensation and strict invariant failure paths,
 - minimum diagnostics schema propagation into run summaries,
 - focused regression tests covering alias eligibility, selection/cap behavior, and replacement staging,
 - routed three-OFE slope writer correction to maintain per-OFE point-count consistency for WEPP parsing,
-- fixture-backed end-to-end rerun on `/wc1/runs/cl/clogging-starch-outslope-unrutted-e2e-20260407-232343` proving 5/5 selected outslope-unrutted replacement segments executed successfully.
+- fixture-backed end-to-end rerun on `/wc1/runs/cl/clogging-starch-outslope-unrutted-e2e-20260407-232343` proving 5/5 selected outslope-unrutted replacement segments executed successfully,
+- explicit `phase4` combiner hook in `wepppyo3`,
+- published code/QA review artifacts with no unresolved medium/high findings.
 
-Still required for final closure:
-- full MOFE contributor assembly (`hill -> road -> fill -> hill`) with area-closure compensation at top OFE,
-- replacement aggregation semantics beyond phase-1 combiner assumptions,
-- remaining broad validation/review milestones (6-9).
+No remaining mandatory closure items for this package.
 
 ## Context and Orientation
 
@@ -285,3 +286,4 @@ Revision note (2026-04-08 00:45Z): Finalized area-closure/top-OFE rule, removed 
 Revision note (2026-04-08 01:00Z): Adopted minimum diagnostics schema contract and closed remaining phase-4 decision gates for outslope-unrutted replacement docs.
 
 Revision note (2026-04-08 08:30Z): Implemented initial step-4 code path (alias normalization, vector-overlap gating/cap, replacement staging precedence, and targeted tests); full MOFE contributor assembly remains open.
+Revision note (2026-04-08 23:59Z): Closed Milestones 2/3/5-9 with strict phase-4 defaults/bounds enforcement, deterministic `D_med` ordering, explicit `phase4` combiner hook, synchronized Roads spec/end-user docs, and completed code/QA review artifacts.

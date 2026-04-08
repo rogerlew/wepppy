@@ -7,7 +7,7 @@ Use the **Roads** control when you want to test how mapped road segments change 
 Roads is for questions such as:
 
 - Which road segments are likely to contribute the most road-related loss?
-- How much do inslope roads change watershed results compared with the no-roads baseline?
+- How much do inslope and outslope roads change watershed results compared with the no-roads baseline?
 - How sensitive are results to road design, surface, and traffic assumptions in the uploaded linework?
 
 It is not a general road inventory tool and it does not replace the baseline WEPP watershed model.
@@ -30,7 +30,13 @@ Before opening the **Roads** control, make sure you have:
 - road attributes that can identify road design and, ideally, surface and traffic,
 - realistic expectations about which uploaded roads are actually in-scope.
 
-In the current Roads model, only inslope designs that resolve to `Inslope_bd` or `Inslope_rd` are eligible for segment preparation and Roads WEPP runs. Other uploaded roads may remain in the file but will not become modeled Roads segments.
+Current Roads design support:
+
+- `Inslope_bd` and `Inslope_rd` run as point-source road contributors.
+- `Outslope_rutted` runs as a routed `road -> fill -> buffer` point-source contributor.
+- `Outslope_unrutted` runs as a hillslope replacement workflow (`landuse -> road -> fill` or `landuse -> road -> fill -> landuse`, depending on downslope buffer length).
+
+Roads with other design values remain in the uploaded file but are excluded from modeled segment execution.
 
 ## What You See In The UI
 
@@ -57,7 +63,7 @@ The mapping controls use the labels the user sees in the Roads form:
 
 | UI label | What Roads expects | How to choose |
 | --- | --- | --- |
-| `Design field` | The upload property that identifies road design eligibility | Point this at the field containing values such as `Inslope_bd` or `Inslope_rd` if those are your intended modeled roads |
+| `Design field` | The upload property that identifies road design eligibility | Point this at the field containing values such as `Inslope_bd`, `Inslope_rd`, `Outslope_rutted`, or `Outslope_unrutted` |
 | `Surface field` | The upload property describing road surfacing | Use the field that best distinguishes gravel-like versus paved behavior |
 | `Surface fallback value` | The fallback used when the mapped surface field is blank, missing, or unrecognized | Choose the more defensible default for unmapped segments; do not use this to hide poor source data |
 | `Traffic field` | The upload property describing traffic class | Use the field that best separates `high`, `low`, and `none` style use |
@@ -109,7 +115,7 @@ This separation matters because many apparent "run problems" are really preparat
    Expect a summary that reports counts such as `Eligible segments`, `Mapped lowpoints`, and lowpoint decision totals. This is the first place to check whether your upload and mapping are behaving as intended.
 
 6. Review the map and diagnostics before running.
-   Only segment candidates with `mapped` lowpoint decisions are eligible for Roads WEPP runs. Segments that are eligible but not mapped still tell you something important about coverage gaps or routing ambiguity.
+   Point-source designs require mapped routing context. `Outslope_unrutted` uses hillslope-overlap inclusion rules (`60%` overlap ratio and `>=10 m` overlap length), with a cap of `3` qualifying crossings per hillslope.
 
 7. Click `Run WEPPcloud Roads`.
    Expect a Roads-scoped run summary, Roads results links, and regenerated outputs under the Roads output tree rather than the baseline watershed output tree.
@@ -158,11 +164,11 @@ Then use the Roads results links to compare watershed-scale changes against base
 
 ## Assumptions And Limits
 
-- Roads is a phase-1 inslope-road workflow, not a universal road process model.
-- Only designs resolving to `Inslope_bd` or `Inslope_rd` are currently eligible for modeled segment processing.
+- Roads is a scenario workflow for supported road designs, not a universal road process model.
+- Supported modeled designs are `Inslope_bd`, `Inslope_rd`, `Outslope_rutted`, and `Outslope_unrutted`.
 - Surface and traffic behavior are simplified into the values the Roads model recognizes after normalization.
 - Results depend strongly on clean linework, reasonable CRS interpretation, and correct attribute mapping.
-- Only segments with enough lowpoint and routing context can become fully modeled Roads segments.
+- Point-source designs depend on lowpoint and routing context; `Outslope_unrutted` depends on hillslope overlap and required fill/buffer attributes.
 - Roads-scoped outputs are comparison outputs. They do not overwrite or "fix" the original baseline watershed run.
 - Results are decision support, not field verification. Segment priorities should still be checked against real road drainage features and local knowledge.
 

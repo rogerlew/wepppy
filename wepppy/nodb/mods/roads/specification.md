@@ -1,8 +1,8 @@
-# Roads NoDb Point-Source Integration Specification
+# Roads NoDb Integration Specification
 
-Status: Implemented (Phase 2 Step-3)  
-Last Updated: 2026-04-07  
-Scope: `Inslope_bd`, `Inslope_rd`, and `Outslope_rutted` point-source road designs for WEPPcloud Roads NoDb integration.
+Status: Implemented (Phase 2 Step-4)  
+Last Updated: 2026-04-08  
+Scope: `Inslope_bd`, `Inslope_rd`, and `Outslope_rutted` point-source routing plus `Outslope_unrutted` MOFE hillslope replacement for WEPPcloud Roads NoDb integration.
 Canonical cross-route `output_scope` contract: `docs/schemas/output-scope-contract.md`.
 
 ## Goal
@@ -14,7 +14,7 @@ Implement a repeatable pipeline that:
 3. Tags each segment with channel and receiving-hillslope Topaz IDs near its low point.
 4. Runs road-segment WEPP hillslopes and injects their effects into watershed routing via pass-file combination.
 
-Current implementation includes inslope bare-ditch/rocked-ditch and outslope-rutted point-source behavior.
+Current implementation includes point-source designs plus `outslope_unrutted` replacement semantics.
 
 ## WEPPcloud User Story (Current Point-Source Phase)
 
@@ -795,17 +795,16 @@ Notes:
 7. Integrated pass combiner in `wepppyo3`, then wired watershed rerun assembly with `make_watershed_omni_contrasts_run`.
 8. Added diagnostics/reporting, roads-scoped report-resource regeneration, and end-to-end validation on fixture runs.
 
-## Non-Goals (Current Point-Source Phase)
+## Non-Goals (Current Scope)
 
-- `Outslope_unrutted` MOFE hillslope replacement (deferred to step-4 package).
 - Exact replication of legacy WEPP:Road hillslope replacement behavior in the current additive point-source phase.
 - Advanced physics-based hydrograph merge beyond the documented phase-1 approximation.
 
-## Future Concept Draft: `Outslope_unrutted` MOFE Hillslope Replacement
+## Implemented Step-4: `Outslope_unrutted` MOFE Hillslope Replacement
 
-Status: concept draft only (not implemented in phase 1).
+Status: implemented in phase 2 step-4 (2026-04-08).
 
-This concept treats Roads as an enhanced scenario model, not a baseline-vs-roads delta workflow.
+This workflow treats Roads as an enhanced scenario model, not a baseline-vs-roads delta workflow.
 
 ### Intent
 
@@ -813,7 +812,7 @@ This concept treats Roads as an enhanced scenario model, not a baseline-vs-roads
 - replace targeted receiving hillslope pass files with synthetic roads-aware pass files.
 - avoid additive double counting by replacing (not adding to) the targeted hillslope response.
 
-### Flow Regime and Routing Semantics (Concept Draft)
+### Flow Regime and Routing Semantics
 
 Design-regime mapping:
 
@@ -826,9 +825,10 @@ Physical assumptions:
 - inslope point-source cases assume ditch/culvert bypass of fill-slope dynamics.
 - outslope rutted assumes no culvert bypass; concentrated flow can erode across fill slope before entering downslope buffer.
 
-Current implementation boundary (phase 2 step-3):
+Current implementation boundary:
 
 - implemented point-source designs are `inslope_bd`, `inslope_rd`, and `outslope_rutted`.
+- implemented replacement design is `outslope_unrutted` (MOFE hillslope-pass replacement).
 - channel-associated low points keep the prepare-stage mapping contract (`topaz_id_chn_lowpoint` + `topaz_id_hill_lowpoint`).
 - non-channel low points are routable when the low-point `subwta` suffix is `1|2|3`; run-stage tracing routes those segments to channel.
 - routed contributors are merged through the existing pass-combine flow using traced receiving-hillslope attribution.
@@ -852,7 +852,7 @@ Step-3 as-implemented contract notes (2026-04-07 review):
 - run summary diagnostics include `trace_invocation_count`, `trace_reached_channel_count`, `trace_termination_reason_counts`, `segment_routing_mode_counts`, `segment_design_counts`, and `fill_default_usage_counts`.
 - run input parameter `trace_max_steps` (default `20000`) remains exposed and validated as a positive integer.
 
-### High-Fidelity Concept (Top-Level)
+### Top-Level Implementation Summary
 
 1. For `outslope_unrutted`, burn all eligible road strips into an analysis raster aligned to watershed rasters (`subwta`, `discha`); monotonic segment geometry is not required for this path.
 2. Evaluate overlap hillslope-by-hillslope, then partition included strips by receiving WEPP hillslope ID so each contributor maps deterministically.
@@ -863,7 +863,7 @@ Step-3 as-implemented contract notes (2026-04-07 review):
 6. Stage synthetic hillslope pass files as replacements for affected hillslopes; keep baseline pass files for untouched hillslopes.
 7. Run watershed routing once using the full set of staged pass files.
 
-### Fidelity Invariants
+### Fidelity Invariants (Implemented)
 
 - **Replacement semantics**: targeted hillslope response is replaced, not incrementally added.
 - **Area conservation**: affected-strip plus unaffected remainder area equals original hillslope area.
@@ -871,7 +871,7 @@ Step-3 as-implemented contract notes (2026-04-07 review):
 - **Topology preservation**: watershed structure remains unchanged (`left/right/top` hillslope-channel linkage stays canonical).
 - **Road geometry parity**: `Outslope_unrutted` road OFE parameterization follows legacy outslope geometry intent (including area-preserving transform behavior).
 
-### Settled Step-4 Contract Details (2026-04-08)
+### Settled Step-4 Contract Details (Implemented 2026-04-08)
 
 Inclusion and minimum-length rules (physical-length based):
 
@@ -925,11 +925,11 @@ Parameter source and default contract:
   - outslope constant: `0.04`.
   - `rfg_pct` default: `20`.
   - validation bounds: road slope `[0.1, 40]`, road length `[1, 300]`, road width `[0.3, 100]`, fill slope `[0.1, 150]`, fill length `[0.3, 100]`, buffer slope `[0.1, 100]`, buffer length `[0.3, 300]`.
-- Fields without explicit fswepp2 defaults are required for contributor assembly; missing values must fail explicitly for the segment (no silent fallback).
+- Fields without explicit fswepp2 defaults are required for contributor assembly; missing or invalid values must fail explicitly for the segment (no silent fallback).
 
 Aggregation and design-activation decisions:
 
-- Use a phase-4 replacement combiner (not phase-1 additive combiner) with explicit handling for depth/concentration recomputation and diagnostics.
+- Use a phase-4 replacement combiner (not phase-1 additive combiner). Current `phase4` implementation uses the same hydrograph recomputation core as `phase1`, but via an explicit strategy hook reserved for phase-4-specific divergence.
 - Normalize legacy aliases unconditionally (for example `Outslope`, `outunrut`) to canonical `outslope_unrutted` during parse/prepare; no feature-flag rollout is required.
 
 Performance guardrail and multi-road support:
