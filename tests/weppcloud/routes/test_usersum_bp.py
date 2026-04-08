@@ -105,6 +105,31 @@ def test_usersum_raw_route_returns_markdown(usersum_client) -> None:
     assert "OpenET Climate Engine Mod" in response.get_data(as_text=True)
 
 
+def test_usersum_src_route_rejects_noncanonical_path_variant(usersum_client, set_usersum_current_user) -> None:
+    set_usersum_current_user(roles=("Admin",))
+
+    canonical = usersum_client.get("/usersum/src/wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md")
+    assert canonical.status_code == 200
+
+    noncanonical = usersum_client.get(
+        "/usersum/src/wepppy/weppcloud/routes/usersum/weppcloud/../weppcloud/enduser-authoring-guide.md"
+    )
+    assert noncanonical.status_code == 404
+
+
+def test_usersum_raw_route_rejects_noncanonical_path_variant(usersum_client, set_usersum_current_user) -> None:
+    set_usersum_current_user(roles=("Admin",))
+
+    canonical = usersum_client.get("/usersum/raw/wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md")
+    assert canonical.status_code == 200
+    assert "ENDUSER.md Authoring Guide" in canonical.get_data(as_text=True)
+
+    noncanonical = usersum_client.get(
+        "/usersum/raw/wepppy/weppcloud/routes/usersum/weppcloud/../weppcloud/enduser-authoring-guide.md"
+    )
+    assert noncanonical.status_code == 404
+
+
 def test_usersum_view_does_not_render_procedural_h1_title(usersum_client) -> None:
     response = usersum_client.get("/usersum/view/weppcloud/disturbed-land-soil-lookup.md")
     assert response.status_code == 200

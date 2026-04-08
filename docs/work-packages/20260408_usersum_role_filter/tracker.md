@@ -5,7 +5,7 @@
 ## Quick Status
 
 **Started**: 2026-04-08  
-**Current phase**: QA Complete / Ready for handoff  
+**Current phase**: Security review complete (gate pass) / ready for handoff  
 **Last updated**: 2026-04-08  
 **Next milestone**: Package handoff summary.
 
@@ -32,6 +32,8 @@
 - [x] Verified behavior with the real `dev-agent@example.com` role set via in-container app test-client check.
 - [x] Updated `wepppy/weppcloud/routes/usersum/specification.md` to match implemented role/nav/search behavior.
 - [x] Ran docs lint for updated usersum spec.
+- [x] Ran dedicated security review trial artifact and captured findings.
+- [x] Remediated `SEC-01` src/raw non-canonical path bypass and re-ran security gate.
 
 ## Timeline
 
@@ -44,6 +46,8 @@
 - **2026-04-08** - Follow-up fix shipped for role-ceiling nav discovery filtering; required targeted pytest re-run passed (`50 passed`).
 - **2026-04-08** - In-container validation run against `dev-agent@example.com` confirmed role-dependent API/search/nav behavior.
 - **2026-04-08** - Usersum specification synced to implemented behavior; `wctl doc-lint --path wepppy/weppcloud/routes/usersum/specification.md` passed.
+- **2026-04-08** - Dedicated security review artifact added; gate failed on high finding `SEC-01` (src/raw role-bypass via non-canonical path variants).
+- **2026-04-08** - `SEC-01` fixed by canonical path enforcement before source/raw visibility checks; security gate now passes.
 
 ## Decisions Log
 
@@ -108,6 +112,8 @@
 - [x] Perform second-pass QA review in code-review mindset.
 - [x] Record findings/disposition in tracker.
 - [x] Fix all discovered correctness/contract issues before handoff.
+- [x] Run dedicated security review artifact for trial gate.
+- [x] Resolve open high security finding `SEC-01` before package closeout.
 
 ## Progress Notes
 
@@ -243,6 +249,59 @@
 
 **Validation results**:
 - `wctl doc-lint --path wepppy/weppcloud/routes/usersum/specification.md` -> `✅ 1 files validated, 0 errors, 0 warnings`.
+
+### 2026-04-08: Security review trial gate
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added dedicated security review artifact:
+  - `docs/work-packages/20260408_usersum_role_filter/artifacts/20260408_security_review.md`
+- Ran expanded usersum test set:
+  - `tests/weppcloud/routes/test_usersum_bp.py`
+  - `tests/weppcloud/routes/test_usersum_docs_contracts.py`
+  - `tests/weppcloud/routes/test_usersum_docs_index.py`
+  - `tests/weppcloud/test_usersum_template_wiring.py`
+- Performed manual exploit reproduction against source/raw routes for a developer-only doc.
+
+**Findings**:
+- High severity `SEC-01` opened: `/usersum/src` and `/usersum/raw` perform manifest role checks before path canonicalization; non-canonical `..` variants bypass `min_role` visibility.
+- Security gate status: `fail` until remediation.
+
+**Next steps**:
+- Canonicalize source/raw `rel_path` before manifest lookup and role checks.
+- Add regression tests to prevent non-canonical bypass for restricted docs.
+- Re-run security artifact and close `SEC-01`.
+
+**Test results**:
+- `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/routes/test_usersum_docs_contracts.py tests/weppcloud/routes/test_usersum_docs_index.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` -> `56 passed`.
+
+### 2026-04-08: Security remediation - close SEC-01 source/raw canonicalization bypass
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Updated `wepppy/weppcloud/routes/usersum/usersum.py` so `/usersum/src` and `/usersum/raw`:
+  - resolve to canonical repo-relative markdown paths first,
+  - reject non-canonical request variants,
+  - perform manifest visibility checks against canonical paths.
+- Added route regressions in `tests/weppcloud/routes/test_usersum_bp.py`:
+  - `test_usersum_src_route_rejects_noncanonical_path_variant`
+  - `test_usersum_raw_route_rejects_noncanonical_path_variant`
+- Re-ran dedicated security artifact and marked `SEC-01` resolved.
+
+**Findings**:
+- `SEC-01` is closed: non-canonical traversal variants no longer bypass role visibility for manifested restricted docs.
+- Security gate status: `pass`.
+
+**Next steps**:
+- Optional follow-up: add explicit telemetry/alerting for repeated denied non-canonical source/raw path probes.
+
+**Test results**:
+- `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/routes/test_usersum_docs_contracts.py tests/weppcloud/routes/test_usersum_docs_index.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` -> `58 passed`.
+- Manual repro (anonymous context):
+  - `src_normal 404`
+  - `src_bypass 404`
+  - `raw_normal 404`
+  - `raw_bypass 404`
 
 ## Watch List
 

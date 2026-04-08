@@ -23,6 +23,7 @@ This is observable by opening `/usersum/` or `/usersum/search` as test users wit
 - [x] (2026-04-08 21:20Z) Applied follow-up UX fix: header role select now submits on change (with `submit()` fallback for older browsers); reran targeted usersum tests (`49 passed`).
 - [x] (2026-04-08 22:15Z) Fixed role-selector discovery mismatch by applying selected role ceiling to shell/nav visibility; reran targeted usersum tests (`50 passed`) and verified behavior with `dev-agent@example.com` role set.
 - [x] (2026-04-08 22:33Z) Synced `wepppy/weppcloud/routes/usersum/specification.md` to implemented role/nav/search behavior and ran docs lint (`0 errors`, `0 warnings`).
+- [x] (2026-04-08 23:35Z) Closed `SEC-01` by enforcing canonical source/raw path handling before manifest visibility checks; added traversal-variant regressions and reran expanded usersum suite (`58 passed`).
 
 ## Surprises & Discoveries
 
@@ -32,6 +33,8 @@ This is observable by opening `/usersum/` or `/usersum/search` as test users wit
   Evidence: New regression `tests/weppcloud/routes/test_usersum_bp.py::test_usersum_api_search_root_ceiling_mapping` validates `role=internal` access for root users.
 - Observation: Header `ROLE` defaulted and submitted correctly, but shell nav rendering still used caller max visibility, which made the selector appear ineffective for privileged users.
   Evidence: Follow-up regression `tests/weppcloud/routes/test_usersum_bp.py::test_usersum_shell_nav_respects_selected_role_ceiling` now verifies role-ceiling nav filtering.
+- Observation: Source/raw route visibility checks previously keyed off raw path tokens before canonicalization, enabling `..` variants to bypass restricted manifest role checks.
+  Evidence: Manual repro showed `src_bypass/raw_bypass` returning `200` for a developer-only doc pre-fix; post-fix both return `404`.
 
 ## Decision Log
 
@@ -40,6 +43,9 @@ This is observable by opening `/usersum/` or `/usersum/search` as test users wit
   Date/Author: 2026-04-08 / Codex.
 - Decision: Keep repeated/comma-separated `role` parsing for compatibility, and interpret it as one ceiling by selecting the highest requested usersum role rank.
   Rationale: This is the smallest contract-aligned change from prior parsing behavior while moving to threshold semantics.
+  Date/Author: 2026-04-08 / Codex.
+- Decision: Reject non-canonical `/usersum/src` and `/usersum/raw` request paths and perform visibility checks only against canonical repo-relative markdown paths.
+  Rationale: Removes traversal-variant bypass behavior and ensures one stable authorization key for manifested docs.
   Date/Author: 2026-04-08 / Codex.
 
 ## Outcomes & Retrospective
@@ -62,9 +68,12 @@ This is observable by opening `/usersum/` or `/usersum/search` as test users wit
 - Follow-up UX fix: usersum header role select now uses change-triggered submit to execute existing search flow immediately.
 - Follow-up discovery fix: usersum shell navigation now applies the selected header role ceiling (discovery-only) so privileged users no longer see all docs when lower ceilings are selected.
 - Follow-up doc sync: `wepppy/weppcloud/routes/usersum/specification.md` now reflects implemented role resolution, selector behavior, threshold semantics, and shell discovery filtering.
+- Security remediation: `/usersum/src` and `/usersum/raw` now canonicalize and reject non-canonical rel-path variants before manifest visibility checks; regression tests cover canonical-allowed vs non-canonical-denied behavior for restricted docs.
 - Validation:
   - `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` -> `50 passed` after follow-up nav-ceiling fix.
+  - `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/routes/test_usersum_docs_contracts.py tests/weppcloud/routes/test_usersum_docs_index.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` -> `58 passed` after security remediation.
   - In-container role verification run with `dev-agent@example.com` confirmed API and shell/nav behavior by selected role ceiling.
+  - Manual source/raw bypass repro now returns `404` for non-canonical variants targeting restricted docs.
   - `wctl doc-lint --path wepppy/weppcloud/routes/usersum/specification.md` -> `✅ 1 files validated, 0 errors, 0 warnings`.
 - QA review:
   - Second-pass correctness/regression/contract review completed with no open medium/high findings; follow-up discovery mismatch finding resolved.
@@ -158,3 +167,4 @@ No new external dependencies are introduced.
 Revision Note (2026-04-08 / Codex): Initial active ExecPlan authored at package kickoff.
 Revision Note (2026-04-08 / Codex): Updated after implementation/testing/QA completion with final decisions, outcomes, and validation evidence.
 Revision Note (2026-04-08 / Codex): Updated for post-handoff follow-up fix: role-ceiling nav discovery filtering and dev-agent verification evidence.
+Revision Note (2026-04-08 / Codex): Updated for security trial remediation: closed source/raw non-canonical path bypass (`SEC-01`) and recorded expanded validation evidence.

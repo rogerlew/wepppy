@@ -658,7 +658,13 @@ def view_vendor_markdown(vendor_id: str, filename: str):
 @usersum_bp.route("/usersum/src/<path:rel_path>")
 def view_src_markdown(rel_path: str):
     caller_max_role = _caller_max_role()
-    manifest_doc = _catalog().docs_by_rel_path.get(rel_path)
+    path = _resolve_repo_markdown_path(rel_path)
+    canonical_rel_path = _repo_relative_markdown_path(path)
+    if rel_path != canonical_rel_path:
+        abort(404)
+        raise RuntimeError("unreachable")
+
+    manifest_doc = _catalog().docs_by_rel_path.get(canonical_rel_path)
     if manifest_doc is not None and not _is_doc_visible(manifest_doc, caller_max_role):
         abort(404)
         raise RuntimeError("unreachable")
@@ -670,13 +676,12 @@ def view_src_markdown(rel_path: str):
         abort(404)
         raise RuntimeError("unreachable")
 
-    path = _resolve_repo_markdown_path(rel_path)
-    title = manifest_doc["title"] if manifest_doc is not None else rel_path
+    title = manifest_doc["title"] if manifest_doc is not None else canonical_rel_path
     breadcrumbs = _doc_breadcrumbs(manifest_doc) if manifest_doc is not None else []
     return _render_markdown_document(
         path,
         title=title,
-        doc_path_label=_doc_path_label(rel_path),
+        doc_path_label=_doc_path_label(canonical_rel_path),
         caller_max_role=caller_max_role,
         active_doc=manifest_doc,
         breadcrumbs=breadcrumbs,
@@ -691,11 +696,16 @@ def view_src_markdown_legacy(rel_path: str):
 @usersum_bp.route("/usersum/raw/<path:rel_path>")
 def raw_markdown(rel_path: str):
     caller_max_role = _caller_max_role()
-    manifest_doc = _catalog().docs_by_rel_path.get(rel_path)
+    path = _resolve_repo_markdown_path(rel_path)
+    canonical_rel_path = _repo_relative_markdown_path(path)
+    if rel_path != canonical_rel_path:
+        abort(404)
+        raise RuntimeError("unreachable")
+
+    manifest_doc = _catalog().docs_by_rel_path.get(canonical_rel_path)
     if manifest_doc is not None and not _is_doc_visible(manifest_doc, caller_max_role):
         abort(404)
         raise RuntimeError("unreachable")
-    path = _resolve_repo_markdown_path(rel_path)
     markdown_source = path.read_text(encoding="utf-8")
     return Response(markdown_source, mimetype="text/markdown")
 
