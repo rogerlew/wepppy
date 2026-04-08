@@ -2915,10 +2915,15 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     (baseline_output_dir / "H2.pass.dat").write_text("h2 baseline", encoding="utf-8")
 
     translator = SimpleNamespace(top2wepp={21: 1}, iter_wepp_sub_ids=lambda: iter([1, 2]))
+    discha_path = tmp_path / "dem" / "discha.tif"
+    discha_path.parent.mkdir(parents=True, exist_ok=True)
+    discha_path.write_text("stub", encoding="utf-8")
     watershed_instance = SimpleNamespace(
         delineation_backend_is_wbt=True,
         translator_factory=lambda: translator,
         hillslope_length=lambda _topaz_id: 300.0,
+        hillslope_width=lambda _topaz_id: 100.0,
+        discha=str(discha_path),
     )
     wepp_instance = SimpleNamespace(
         runs_dir=str(baseline_runs_dir),
@@ -2966,6 +2971,7 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
             "overlap_length_m": 111.0,
             "hillslope_width_m": 100.0,
             "inclusion_ratio": 1.11,
+            "overlap_geometry_wgs84": pending["feature"]["geometry"],
             "feature": pending["feature"],
             "properties": pending["properties"],
         }
@@ -3006,12 +3012,29 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
         },
     )
 
-    management_template_path = tmp_path / "roads" / "3inslope.routed_three_ofe.man"
-    management_template_path.parent.mkdir(parents=True, exist_ok=True)
-    management_template_path.write_text("management", encoding="utf-8")
     monkeypatch.setattr(
         Roads,
-        "_materialize_routed_three_ofe_management_template",
+        "_apply_outslope_unrutted_geometry_parity",
+        lambda self, **_kwargs: {
+            "sim_length_m": 80.0,
+            "sim_width_m": 100.0,
+            "road_slope_fraction": 0.04,
+            "road_slope_pct": 4.0,
+            "geometry_scale": 1.0,
+        },
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_sample_discha_median_from_wgs84_geometry",
+        lambda self, *_args, **_kwargs: 100.0,
+    )
+
+    management_template_path = tmp_path / "roads" / "3inslope.man"
+    management_template_path.parent.mkdir(parents=True, exist_ok=True)
+    management_template_path.write_text("management template", encoding="utf-8")
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_legacy_management_template_path",
         lambda self, **_kwargs: management_template_path,
     )
 
@@ -3024,12 +3047,22 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     )
     monkeypatch.setattr(
         Roads,
-        "_build_routed_three_ofe_soil_file",
+        "_build_routed_mofe_management_file",
+        lambda self, *, output_path, **_kwargs: Path(output_path).write_text("management", encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_build_routed_mofe_soil_file",
         lambda self, *, output_path, **_kwargs: Path(output_path).write_text("soil", encoding="utf-8"),
     )
     monkeypatch.setattr(
         Roads,
-        "_write_routed_three_ofe_slope_file",
+        "_write_routed_three_ofe_landuse_road_fill_slope_file",
+        lambda self, path, **_kwargs: Path(path).write_text("slope", encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_write_routed_four_ofe_landuse_road_fill_hill_slope_file",
         lambda self, path, **_kwargs: Path(path).write_text("slope", encoding="utf-8"),
     )
     monkeypatch.setattr(
@@ -3065,3 +3098,396 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     assert summary["outslope_unrutted_excluded_segment_count"] == 0
     assert summary["outslope_unrutted_capped_segment_count"] == 0
     assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "replacement pass"
+
+
+def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    monotonic_feature = {
+        "type": "Feature",
+        "geometry": {
+            "type": "LineString",
+            "coordinates": [[0.0, 0.0], [0.001, 0.0]],
+        },
+        "properties": {
+            "segment_id": "roads-seg-007002",
+            "DESIGN": "outslope_unrutted",
+            "SURFACE": "gravel",
+            "TRAFFIC": "low",
+            "SOIL_TEXTURE": "loam",
+            "RFG_PCT": 20.0,
+            "WIDTH_M": 4.0,
+            "FILL_LENGTH_M": 20.0,
+            "FILL_SLOPE_PCT": 12.0,
+            "BUFFER_LENGTH_M": 30.0,
+            "BUFFER_SLOPE_PCT": 6.0,
+        },
+    }
+    Path(controller.roads_monotonic_geojson_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(controller.roads_monotonic_geojson_path).write_text(
+        json.dumps({"type": "FeatureCollection", "features": [monotonic_feature]}),
+        encoding="utf-8",
+    )
+
+    baseline_runs_dir = tmp_path / "wepp" / "runs"
+    baseline_output_dir = tmp_path / "wepp" / "output"
+    baseline_runs_dir.mkdir(parents=True, exist_ok=True)
+    baseline_output_dir.mkdir(parents=True, exist_ok=True)
+    (baseline_runs_dir / "baseline.txt").write_text("baseline", encoding="utf-8")
+    (baseline_runs_dir / "p1.cli").write_text("climate", encoding="utf-8")
+    (baseline_output_dir / "H1.pass.dat").write_text("h1 baseline", encoding="utf-8")
+    (baseline_output_dir / "H2.pass.dat").write_text("h2 baseline", encoding="utf-8")
+
+    translator = SimpleNamespace(top2wepp={21: 1}, iter_wepp_sub_ids=lambda: iter([1, 2]))
+    discha_path = tmp_path / "dem" / "discha.tif"
+    discha_path.parent.mkdir(parents=True, exist_ok=True)
+    discha_path.write_text("stub", encoding="utf-8")
+    watershed_instance = SimpleNamespace(
+        delineation_backend_is_wbt=True,
+        translator_factory=lambda: translator,
+        hillslope_length=lambda _topaz_id: 300.0,
+        hillslope_width=lambda _topaz_id: 100.0,
+        discha=str(discha_path),
+    )
+    wepp_instance = SimpleNamespace(
+        runs_dir=str(baseline_runs_dir),
+        output_dir=str(baseline_output_dir),
+        climate_instance=SimpleNamespace(input_years=25),
+        wepp_bin="wepp",
+    )
+
+    monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
+    monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_prepare_raster_paths",
+        lambda self: {
+            "dem_path": str(tmp_path / "dem" / "relief.tif"),
+            "channel_raster_path": str(tmp_path / "dem" / "netful.tif"),
+            "topaz_id_raster_path": str(tmp_path / "dem" / "subwta.tif"),
+        },
+    )
+
+    class _FakeDataset:
+        crs = "EPSG:4326"
+        nodata = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        @staticmethod
+        def sample(_coords):
+            return iter(([100.0],))
+
+    monkeypatch.setattr(roads_module.rasterio, "open", lambda _path: _FakeDataset())
+
+    def _fake_select(self, *, pending_segments, **_kwargs):
+        pending = pending_segments[0]
+        seg_a = f"{pending['segment_id']}::h21::a"
+        seg_b = f"{pending['segment_id']}::h21::b"
+        candidate_a = {
+            "segment_hillslope_id": seg_a,
+            "source_segment_id": pending["segment_id"],
+            "topaz_id_hill": 21,
+            "hillslope_wepp_id": 1,
+            "overlap_length_m": 90.0,
+            "hillslope_width_m": 100.0,
+            "inclusion_ratio": 0.90,
+            "overlap_geometry_wgs84": pending["feature"]["geometry"],
+            "feature": pending["feature"],
+            "properties": pending["properties"],
+        }
+        candidate_b = {
+            "segment_hillslope_id": seg_b,
+            "source_segment_id": pending["segment_id"],
+            "topaz_id_hill": 21,
+            "hillslope_wepp_id": 1,
+            "overlap_length_m": 80.0,
+            "hillslope_width_m": 100.0,
+            "inclusion_ratio": 0.80,
+            "overlap_geometry_wgs84": pending["feature"]["geometry"],
+            "feature": pending["feature"],
+            "properties": pending["properties"],
+        }
+        diagnostics = {
+            "outslope_unrutted_targeted_hillslope_count": 1,
+            "outslope_unrutted_included_segment_count": 2,
+            "outslope_unrutted_excluded_segment_count": 0,
+            "outslope_unrutted_capped_segment_count": 0,
+            "outslope_unrutted_hillslope_records": [
+                {
+                    "topaz_id_hill": 21,
+                    "wepp_id_hill": 1,
+                    "segment_ids_included": [seg_a, seg_b],
+                    "segment_ids_excluded": [],
+                    "segment_ids_capped": [],
+                    "inclusion_ratio_by_segment": {seg_a: 0.90, seg_b: 0.80},
+                    "top_ofe_compensation_m": 0.0,
+                    "area_error_before_compensation_m2": 0.0,
+                    "area_error_after_compensation_m2": 0.0,
+                }
+            ],
+        }
+        status_map = {
+            seg_a: {**candidate_a, "status": "included"},
+            seg_b: {**candidate_b, "status": "included"},
+        }
+        return {1: [candidate_a, candidate_b]}, diagnostics, status_map
+
+    monkeypatch.setattr(Roads, "_select_outslope_unrutted_hillslope_segments", _fake_select)
+    monkeypatch.setattr(
+        Roads,
+        "_build_segment_profile",
+        lambda self, **_kwargs: {
+            "segment_length_m": 100.0,
+            "elevation_high_m": 1400.0,
+            "elevation_low_m": 1392.0,
+            "raw_slope_pct": 8.0,
+            "slope_pct": 8.0,
+            "high_point": [0.0, 0.0],
+            "low_point": [0.001, 0.0],
+        },
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_apply_outslope_unrutted_geometry_parity",
+        lambda self, **_kwargs: {
+            "sim_length_m": 80.0,
+            "sim_width_m": 50.0,
+            "road_slope_fraction": 0.04,
+            "road_slope_pct": 4.0,
+            "geometry_scale": 1.0,
+        },
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_sample_discha_median_from_wgs84_geometry",
+        lambda self, *_args, **_kwargs: 100.0,
+    )
+
+    management_template_path = tmp_path / "roads" / "3inslope.man"
+    management_template_path.parent.mkdir(parents=True, exist_ok=True)
+    management_template_path.write_text("management template", encoding="utf-8")
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_legacy_management_template_path",
+        lambda self, **_kwargs: management_template_path,
+    )
+
+    soil_template_path = tmp_path / "roads" / "3gloam2.sol"
+    soil_template_path.write_text("soil template", encoding="utf-8")
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_legacy_soil_template_path",
+        lambda self, **_kwargs: soil_template_path,
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_build_routed_mofe_management_file",
+        lambda self, *, output_path, **_kwargs: Path(output_path).write_text("management", encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_build_routed_mofe_soil_file",
+        lambda self, *, output_path, **_kwargs: Path(output_path).write_text("soil", encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_write_routed_three_ofe_landuse_road_fill_slope_file",
+        lambda self, path, **_kwargs: Path(path).write_text("slope", encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_write_routed_four_ofe_landuse_road_fill_hill_slope_file",
+        lambda self, path, **_kwargs: Path(path).write_text("slope", encoding="utf-8"),
+    )
+
+    monkeypatch.setattr(
+        Roads,
+        "_run_segment_hillslope",
+        lambda self, *, segment_run_id, **_kwargs: (Path(self.roads_output_dir) / f"H{segment_run_id}.pass.dat").write_text(
+            f"replacement pass {segment_run_id}",
+            encoding="utf-8",
+        ),
+    )
+
+    combine_calls = []
+
+    def _fake_combine(self, *, base_pass_path, road_pass_paths, output_pass_path, strategy="phase1"):
+        combine_calls.append(
+            {
+                "base_pass_path": str(base_pass_path),
+                "road_pass_paths": list(road_pass_paths),
+                "output_pass_path": str(output_pass_path),
+                "strategy": strategy,
+            }
+        )
+        Path(output_pass_path).write_text("combined replacement pass", encoding="utf-8")
+
+    monkeypatch.setattr(Roads, "_combine_target_hillslope_pass", _fake_combine)
+    monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
+
+    controller.set_enabled(True)
+    _seed_prepared_state(controller)
+
+    summary = controller.run_roads_wepp()
+
+    assert summary["executed_outslope_unrutted_segment_count"] == 2
+    assert summary["segment_design_counts"]["outslope_unrutted"] == 2
+    assert summary["pass_staging_strategy"]["1"] == "replacement_combined"
+    assert len(combine_calls) == 1
+    assert combine_calls[0]["strategy"] == "phase4"
+    assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "combined replacement pass"
+
+
+def test_run_roads_wepp_outslope_unrutted_missing_discha_with_no_selected_candidates(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    monotonic_feature = {
+        "type": "Feature",
+        "geometry": {
+            "type": "LineString",
+            "coordinates": [[0.0, 0.0], [0.001, 0.0]],
+        },
+        "properties": {
+            "segment_id": "roads-seg-007003",
+            "DESIGN": "outslope_unrutted",
+            "SURFACE": "gravel",
+            "TRAFFIC": "low",
+            "SOIL_TEXTURE": "loam",
+            "RFG_PCT": 20.0,
+            "WIDTH_M": 4.0,
+            "FILL_LENGTH_M": 20.0,
+            "FILL_SLOPE_PCT": 12.0,
+            "BUFFER_LENGTH_M": 30.0,
+            "BUFFER_SLOPE_PCT": 6.0,
+        },
+    }
+    Path(controller.roads_monotonic_geojson_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(controller.roads_monotonic_geojson_path).write_text(
+        json.dumps({"type": "FeatureCollection", "features": [monotonic_feature]}),
+        encoding="utf-8",
+    )
+
+    baseline_runs_dir = tmp_path / "wepp" / "runs"
+    baseline_output_dir = tmp_path / "wepp" / "output"
+    baseline_runs_dir.mkdir(parents=True, exist_ok=True)
+    baseline_output_dir.mkdir(parents=True, exist_ok=True)
+    (baseline_runs_dir / "baseline.txt").write_text("baseline", encoding="utf-8")
+    (baseline_runs_dir / "p1.cli").write_text("climate", encoding="utf-8")
+    (baseline_output_dir / "H1.pass.dat").write_text("h1 baseline", encoding="utf-8")
+    (baseline_output_dir / "H2.pass.dat").write_text("h2 baseline", encoding="utf-8")
+
+    translator = SimpleNamespace(top2wepp={21: 1}, iter_wepp_sub_ids=lambda: iter([1, 2]))
+    watershed_instance = SimpleNamespace(
+        delineation_backend_is_wbt=True,
+        translator_factory=lambda: translator,
+        hillslope_length=lambda _topaz_id: 300.0,
+        hillslope_width=lambda _topaz_id: 100.0,
+        discha=None,
+    )
+    wepp_instance = SimpleNamespace(
+        runs_dir=str(baseline_runs_dir),
+        output_dir=str(baseline_output_dir),
+        climate_instance=SimpleNamespace(input_years=25),
+        wepp_bin="wepp",
+    )
+
+    monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
+    monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_prepare_raster_paths",
+        lambda self: {
+            "dem_path": str(tmp_path / "dem" / "relief.tif"),
+            "channel_raster_path": str(tmp_path / "dem" / "netful.tif"),
+            "topaz_id_raster_path": str(tmp_path / "dem" / "subwta.tif"),
+        },
+    )
+
+    class _FakeDataset:
+        crs = "EPSG:4326"
+        nodata = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        @staticmethod
+        def sample(_coords):
+            return iter(([100.0],))
+
+    monkeypatch.setattr(roads_module.rasterio, "open", lambda _path: _FakeDataset())
+
+    def _fake_select(self, *, pending_segments, **_kwargs):
+        pending = pending_segments[0]
+        segment_hillslope_id = f"{pending['segment_id']}::h21"
+        diagnostics = {
+            "outslope_unrutted_targeted_hillslope_count": 0,
+            "outslope_unrutted_included_segment_count": 0,
+            "outslope_unrutted_excluded_segment_count": 1,
+            "outslope_unrutted_capped_segment_count": 0,
+            "outslope_unrutted_hillslope_records": [
+                {
+                    "topaz_id_hill": 21,
+                    "wepp_id_hill": 1,
+                    "segment_ids_included": [],
+                    "segment_ids_excluded": [segment_hillslope_id],
+                    "segment_ids_capped": [],
+                    "inclusion_ratio_by_segment": {segment_hillslope_id: 0.1},
+                    "top_ofe_compensation_m": 0.0,
+                    "area_error_before_compensation_m2": 0.0,
+                    "area_error_after_compensation_m2": 0.0,
+                }
+            ],
+        }
+        status_map = {
+            segment_hillslope_id: {
+                "segment_hillslope_id": segment_hillslope_id,
+                "source_segment_id": pending["segment_id"],
+                "topaz_id_hill": 21,
+                "hillslope_wepp_id": 1,
+                "overlap_length_m": 5.0,
+                "hillslope_width_m": 100.0,
+                "inclusion_ratio": 0.1,
+                "feature": pending["feature"],
+                "properties": pending["properties"],
+                "status": "excluded_inclusion_ratio",
+            }
+        }
+        return {}, diagnostics, status_map
+
+    monkeypatch.setattr(Roads, "_select_outslope_unrutted_hillslope_segments", _fake_select)
+    monkeypatch.setattr(
+        Roads,
+        "_combine_target_hillslope_pass",
+        lambda self, **_kwargs: (_ for _ in ()).throw(AssertionError("combine should not run when no replacements are selected")),
+    )
+    monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
+
+    controller.set_enabled(True)
+    _seed_prepared_state(controller)
+
+    summary = controller.run_roads_wepp()
+
+    assert summary["executed_outslope_unrutted_segment_count"] == 0
+    assert summary["outslope_unrutted_targeted_hillslope_count"] == 0
+    assert summary["outslope_unrutted_included_segment_count"] == 0
+    assert summary["outslope_unrutted_excluded_segment_count"] == 1
+    assert summary["outslope_unrutted_capped_segment_count"] == 0
+    assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "h1 baseline"
