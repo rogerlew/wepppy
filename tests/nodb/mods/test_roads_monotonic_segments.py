@@ -573,3 +573,29 @@ def test_hillslope_lowpoint_tie_break_prefers_center_then_right_then_left(tmp_pa
     assert all(value == 24 for value in chn_ids)
     assert all(value == 21 for value in hillslope_ids)
     assert all(value == "mapped" for value in decisions)
+
+
+def test_custom_design_property_keys_accept_outslope_unrutted_alias(tmp_path: Path) -> None:
+    dem_path = _write_dem(tmp_path, [0.0, 1.0, 2.0, 3.0, 4.0])
+    roads_path = _write_line_geojson(
+        tmp_path,
+        line_coords=[[0.5, 0.5], [4.5, 0.5]],
+        properties={"road_id": "E4", "ROADTYPE": "Outslope"},
+    )
+    output_path = tmp_path / "roads.monotonic.outslope.geojson"
+
+    summary = convert_geojson_file_to_monotonic_segments(
+        input_geojson_path=roads_path,
+        dem_path=dem_path,
+        output_geojson_path=output_path,
+        input_crs="EPSG:32610",
+        sample_step_m=1.0,
+        tolerance_m=0.0,
+        design_property_keys=("ROADTYPE", "DESIGN", "design"),
+    )
+
+    output = json.loads(output_path.read_text(encoding="utf-8"))
+    assert summary.output_feature_count == 1
+    assert len(output["features"]) == 1
+    props = output["features"][0]["properties"]
+    assert props["_roads_design_source_key"] == "ROADTYPE"

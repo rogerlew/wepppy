@@ -854,8 +854,8 @@ Step-3 as-implemented contract notes (2026-04-07 review):
 
 ### High-Fidelity Concept (Top-Level)
 
-1. Identify outsloped road discharge strips and trace downslope delivery paths to the channel network.
-2. Partition traced strips by receiving WEPP hillslope ID so each contributor maps deterministically.
+1. For `outslope_unrutted`, burn all eligible road strips into an analysis raster aligned to watershed rasters (`subwta`, `discha`); monotonic segment geometry is not required for this path.
+2. Evaluate overlap hillslope-by-hillslope, then partition included strips by receiving WEPP hillslope ID so each contributor maps deterministically.
 3. For each affected strip, build a roads-aware MOFE profile with ordering:
    - upslope hillslope segment -> road -> fill -> downslope buffer segment.
 4. For each affected receiving hillslope, represent unaffected remainder area with non-road hillslope contributor profile(s).
@@ -871,13 +871,110 @@ Step-3 as-implemented contract notes (2026-04-07 review):
 - **Topology preservation**: watershed structure remains unchanged (`left/right/top` hillslope-channel linkage stays canonical).
 - **Road geometry parity**: `Outslope_unrutted` road OFE parameterization follows legacy outslope geometry intent (including area-preserving transform behavior).
 
-### Deferred Details (To Be Specified Later)
+### Settled Step-4 Contract Details (2026-04-08)
 
-- exact strip delineation and flowpath tracing rules.
-- hillslope-boundary splitting when a traced strip crosses multiple hillslopes.
-- contributor aggregation math for hydrograph-shape terms in replacement mode.
-- parameter defaults and per-segment overrides for outsloped designs.
-- handling for segments that terminate on channels vs within hillslope interiors.
+Inclusion and minimum-length rules (physical-length based):
+
+- A hillslope `h` is included for `outslope_unrutted` replacement when:
+  - `L_overlap_h / W_h >= 0.60`, and
+  - `L_overlap_h >= 10 m`.
+- Definitions:
+  - `L_overlap_h`: physical road-overlap length computed from vector intersection length between roads geometry and hillslope geometry for `h`.
+  - `W_h`: abstracted hillslope width used by the watershed profile (`watershed_mixins.hillslope_width(topaz_id)` contract).
+- Minimum landuse OFE length is physical, not cell-count based:
+  - `L_landuse_min = 10 m`.
+
+Cross-hillslope segmentation and IDs:
+
+- Segment `outslope_unrutted` roads per hillslope (distinct segment ID per `(source_segment_id, receiving_hillslope_topaz_id)`).
+- Apply the `60%` inclusion rule independently per hillslope-specific segment.
+- Preserve area conservation per replaced hillslope; preserving aggregate road area across hillslopes is not required.
+
+Road/fill placement in profile:
+
+- Determine road-position anchor from the overlap zone using `discha.tif` values and a length-weighted median `D_med`.
+- Build contributor geometry in deterministic upslope-to-downslope order using `D_med` ranking.
+- Use 4-OFE form (`landuse -> road -> fill -> landuse`) when downslope landuse length is at least `L_landuse_min`.
+- Collapse to 3-OFE form (`landuse -> road -> fill`) when downslope landuse length is below `L_landuse_min`.
+
+Road geometry parity rule:
+
+- Use fixed outslope parity of `4%` (`0.04`) for `outslope_unrutted`.
+- Preserve legacy area-preserving transform behavior from `/workdir/fswepp2/api/wepproad.py`:
+  - `sim_length_m = length_m * (slope / 0.04)`
+  - `sim_width_m = width_m / (slope / 0.04)`
+  - with legacy road-slope expression used by that path for compatibility.
+
+Area-conservation closure contract:
+
+- Use absolute area closure by construction.
+- After contributor assembly for each targeted hillslope, compute residual area error and compensate using the top (upslope) landuse OFE length.
+- If compensation would create a non-positive top landuse OFE length, fail the replacement for that hillslope explicitly.
+- Relative tolerance terms are not used.
+
+Routing and replacement contract:
+
+- `outslope_unrutted` executes as a direct hillslope-pass replacement workflow.
+- Multi-OFE contributor pass output replaces the existing hillslope pass for targeted hillslopes.
+- Additional downslope/channel tracing is not required for `outslope_unrutted` replacement contributors.
+
+Parameter source and default contract:
+
+- Parameter precedence: segment `.geojson` attributes first, then phase-4 defaults.
+- Adopt defaults/constraints from `/workdir/fswepp2/api/wepproad.py` for phase-4 parameterization:
+  - outslope constant: `0.04`.
+  - `rfg_pct` default: `20`.
+  - validation bounds: road slope `[0.1, 40]`, road length `[1, 300]`, road width `[0.3, 100]`, fill slope `[0.1, 150]`, fill length `[0.3, 100]`, buffer slope `[0.1, 100]`, buffer length `[0.3, 300]`.
+- Fields without explicit fswepp2 defaults are required for contributor assembly; missing values must fail explicitly for the segment (no silent fallback).
+
+Aggregation and design-activation decisions:
+
+- Use a phase-4 replacement combiner (not phase-1 additive combiner) with explicit handling for depth/concentration recomputation and diagnostics.
+- Normalize legacy aliases unconditionally (for example `Outslope`, `outunrut`) to canonical `outslope_unrutted` during parse/prepare; no feature-flag rollout is required.
+
+Performance guardrail and multi-road support:
+
+- Cap qualifying `outslope_unrutted` road crossings at `3` per hillslope.
+- When more than `3` crossings qualify, keep the deterministic top-3 by overlap length (descending, tie-break by segment ID ascending) and record truncation diagnostics.
+- Replacement aggregation must preserve:
+  - deterministic contributor ordering,
+  - area conservation,
+  - no-double-counting semantics.
+
+Diagnostics schema contract (minimum):
+
+Run-summary payload must include a minimal `outslope_unrutted` replacement diagnostics object with these keys:
+
+- `outslope_unrutted_targeted_hillslope_count`
+- `outslope_unrutted_included_segment_count`
+- `outslope_unrutted_excluded_segment_count`
+- `outslope_unrutted_capped_segment_count`
+- `outslope_unrutted_hillslope_records`
+
+Each record in `outslope_unrutted_hillslope_records` must include:
+
+- `topaz_id_hill`
+- `wepp_id_hill`
+- `segment_ids_included`
+- `segment_ids_excluded`
+- `segment_ids_capped`
+- `inclusion_ratio_by_segment`
+- `top_ofe_compensation_m`
+- `area_error_before_compensation_m2`
+- `area_error_after_compensation_m2`
+
+Per-segment replacement status codes are limited to:
+
+- `included`
+- `excluded_inclusion_ratio`
+- `excluded_overlap_length_min`
+- `excluded_cap_limit`
+- `failed_missing_parameter`
+- `failed_non_positive_top_ofe`
+
+### Remaining Deferred Details
+
+- none.
 
 ## Point-Source Flowpath Trace Contract in Rust
 

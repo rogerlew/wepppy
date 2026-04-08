@@ -11,15 +11,18 @@ After this package, `outslope_unrutted` is modeled as a sheet-flow MOFE replacem
 ## Progress
 
 - [x] (2026-03-27 00:00Z) Authored package/tracker/ExecPlan scaffold for step-4 scope.
-- [ ] Milestone 1: Implement decomposition contract for targeted hillslopes (`affected strips` + `unaffected remainder`).
+- [x] Milestone 1: Implement decomposition contract for targeted hillslopes (`affected strips` + `unaffected remainder`).
 - [ ] Milestone 2: Build MOFE contributors with fixed ordering `hill -> road -> fill -> hill`.
 - [ ] Milestone 3: Aggregate contributors into one replacement pass per targeted hillslope.
-- [ ] Milestone 4: Stage replacement pass files with strict replacement (no additive double counting).
+- [x] Milestone 4: Stage replacement pass files with strict replacement (no additive double counting).
 - [ ] Milestone 5: Add area-conservation/topology validation and diagnostics.
-- [ ] Milestone 6: Add regression tests and fixture-backed validation.
+- [ ] Milestone 6: Extend regression coverage to full MOFE contributor assembly and area-closure invariants.
 - [ ] Milestone 7: Complete code-review artifact and resolve medium/high findings.
 - [ ] Milestone 8: Complete QA-review artifact and resolve medium/high findings.
 - [ ] Milestone 9: Run final gates and update handoff docs.
+- [x] (2026-04-08 00:00Z) Locked step-4 decomposition contract details: physical-length thresholds, 4% geometry parity, raster-burn hillslope segmentation, and multi-road (`N`) contributor support.
+- [x] (2026-04-08 08:30Z) Implemented eligibility normalization, vector-overlap inclusion/cap selection, replacement-first pass staging, and summary diagnostics propagation in `roads.py`; added targeted regression tests.
+- [x] (2026-04-08 23:40Z) Fixed routed three-OFE slope serialization for outslope-unrutted replacement (point-count token mismatch), added regression coverage, and revalidated end-to-end on `/wc1/runs/cl/clogging-starch-outslope-unrutted-e2e-20260407-232343` with 5 successful replacement segments.
 
 ## Surprises & Discoveries
 
@@ -31,6 +34,18 @@ After this package, `outslope_unrutted` is modeled as a sheet-flow MOFE replacem
 
 - Observation: Buffer-effect fidelity at lower hillslope reaches is a key user requirement for `outslope_unrutted`.
   Evidence: user rejected simplified delta approach due to poor buffer representation.
+
+- Observation: Cell-size-dependent inclusion/minimum-length thresholds are not acceptable for this package.
+  Evidence: user direction requires physical-length thresholds because raster cell sizes can vary materially.
+
+- Observation: `outslope_unrutted` should use its own hillslope decomposition path built from a burned roads raster, not monotonic strip assumptions.
+  Evidence: user direction to burn roads into raster and evaluate inclusion hillslope-by-hillslope.
+
+- Observation: Pass aggregation substrate currently only exposes `combine_hillslope_pass_files(..., strategy="phase1")`; there is no phase-4 replacement strategy in `wepppyo3` yet.
+  Evidence: `/workdir/wepppyo3/wepp_interchange/src/hill_pass_combine.rs` rejects non-`phase1` strategies.
+
+- Observation: WEPP slope files interpret the leading per-OFE integer as the number of profile coordinate pairs, not an OFE identifier; `outslope_unrutted` three-OFE writer emitted `4` while writing 3 pairs for the buffer OFE, triggering `forrtl: severe (24)` EOF failures.
+  Evidence: failed runs in `/wc1/runs/cl/clogging-starch-outslope-unrutted-e2e-20260407-232343/wepp/roads/runs/p90000x.err` and generated `p900001.slp`.
 
 ## Decision Log
 
@@ -46,9 +61,79 @@ After this package, `outslope_unrutted` is modeled as a sheet-flow MOFE replacem
   Rationale: replacement model correctness depends on matching original hillslope area.
   Date/Author: 2026-03-27 / Codex.
 
+- Decision: Inclusion gate for `outslope_unrutted` uses physical overlap thresholds (`L_overlap_h / W_h >= 0.60` and `L_overlap_h >= 10 m`).
+  Rationale: keeps eligibility physically meaningful and independent of raster cell size variability.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: Minimum landuse OFE length is physical and fixed (`L_landuse_min = 10 m`).
+  Rationale: avoid cell-count-based behavior drift across rasters with different resolution.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: `outslope_unrutted` road geometry parity uses fixed 4% outslope and legacy area-preserving transform behavior.
+  Rationale: maintain legacy WEPP:Road compatibility for the road prism representation.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: `outslope_unrutted` decomposition is raster-burn and hillslope-local, with support for `N` road crossings per hillslope via contributor aggregation.
+  Rationale: supports non-monotonic crossings and avoids single-profile OFE explosion while preserving replacement semantics.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: `L_overlap_h` for inclusion is measured via vector road-length intersection against hillslope geometry (Option B), not raster-cell-length approximation.
+  Rationale: simplest physically meaningful implementation and avoids cell-size dependence.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: Cross-hillslope handling splits `outslope_unrutted` into distinct hillslope-specific segment IDs and applies the `60%` inclusion gate independently per hillslope.
+  Rationale: preserves per-hillslope replacement contracts while allowing independent inclusion outcomes across crossed hillslopes.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: Per-hillslope area conservation remains mandatory; aggregate road-area conservation across all crossed hillslopes is not required.
+  Rationale: protect watershed hillslope response integrity without overconstraining cross-hillslope road accounting.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: `outslope_unrutted` replacement does not require additional downslope/channel trace logic.
+  Rationale: replacement pass routing is handled by existing watershed routing once hillslope pass replacement is staged.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: Phase-4 parameter defaults/constraints follow `/workdir/fswepp2/api/wepproad.py`, with `.geojson` attributes as primary parameter source.
+  Rationale: align with legacy WEPP:Road behavior while preserving segment-level explicitness from uploaded data.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: Accept Gate-3 and Gate-6 recommendations: use a phase-4 replacement combiner and alias normalization for `outslope_unrutted` activation.
+  Rationale: required for replacement fidelity and safe rollout from current point-source-only eligibility.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: Area conservation uses absolute closure with top-OFE compensation.
+  Rationale: user requested absolute handling and explicit compensation at the top landuse OFE.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: No feature-flag retirement workflow is required for outslope-unrutted activation.
+  Rationale: this path has not shipped; keep activation simple by unconditional alias normalization.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: Cap qualifying outslope-unrutted road crossings at 3 per hillslope.
+  Rationale: explicit complexity/performance bound from user direction.
+  Date/Author: 2026-04-08 / User + Codex.
+
+- Decision: Adopt the minimum diagnostics schema for `outslope_unrutted` replacement summaries.
+  Rationale: close the final phase-4 decision gate with the smallest stable payload needed for gating, troubleshooting, and deterministic audits.
+  Date/Author: 2026-04-08 / User + Codex.
+
 ## Outcomes & Retrospective
 
-Not complete yet. Fill during implementation milestones and final closure.
+Partially complete.
+
+Delivered in this pass:
+- eligibility normalization for `outslope_unrutted` aliases in Roads run/prepare flow,
+- vector-overlap hillslope selection with settled thresholds and cap-at-3 behavior,
+- replacement-first pass staging precedence and additive suppression for replacement-targeted hillslopes,
+- minimum diagnostics schema propagation into run summaries,
+- focused regression tests covering alias eligibility, selection/cap behavior, and replacement staging,
+- routed three-OFE slope writer correction to maintain per-OFE point-count consistency for WEPP parsing,
+- fixture-backed end-to-end rerun on `/wc1/runs/cl/clogging-starch-outslope-unrutted-e2e-20260407-232343` proving 5/5 selected outslope-unrutted replacement segments executed successfully.
+
+Still required for final closure:
+- full MOFE contributor assembly (`hill -> road -> fill -> hill`) with area-closure compensation at top OFE,
+- replacement aggregation semantics beyond phase-1 combiner assumptions,
+- remaining broad validation/review milestones (6-9).
 
 ## Context and Orientation
 
@@ -157,6 +242,11 @@ Acceptance requires:
 - Watershed rerun succeeds with mixed replacement + baseline pass files.
 - Required suites pass.
 - Code and QA review artifacts exist with no unresolved medium/high findings.
+- Inclusion gating uses physical thresholds (`L_overlap_h / W_h >= 0.60` and `L_overlap_h >= 10 m`).
+- Multiple road crossings per hillslope (`N`) are supported via contributor aggregation with no double counting.
+- Inclusion overlap metric uses vector road-length intersection against hillslope geometry (not raster-cell-length approximation).
+- Cross-hillslope crossings are segmented into distinct hillslope-specific IDs with independent inclusion evaluation.
+- `outslope_unrutted` replacement path runs without additional phase-4 trace-to-channel requirements.
 
 ## Idempotence and Recovery
 
@@ -188,3 +278,10 @@ Dependency requirement:
 ---
 
 Revision note (2026-03-27 00:00Z): Initial step-4 ExecPlan authored with replacement semantics, area-conservation gates, and mandatory code/QA review milestones.
+
+Revision note (2026-04-08 00:00Z): Added physical-length inclusion/minimum thresholds, fixed 4% geometry parity, raster-burn decomposition contract, and multi-road (`N`) support decisions.
+Revision note (2026-04-08 00:30Z): Adopted gate selections: vector-overlap metric (Gate 1), independent hillslope segmentation (Gate 2), no extra tracing (Gate 4), fswepp2+geojson parameter contract (Gate 5), and accepted Gate 3/6 recommendations.
+Revision note (2026-04-08 00:45Z): Finalized area-closure/top-OFE rule, removed feature-flag retirement gate, and set crossing cap to 3 per hillslope; diagnostics schema remains the only open decision gate.
+Revision note (2026-04-08 01:00Z): Adopted minimum diagnostics schema contract and closed remaining phase-4 decision gates for outslope-unrutted replacement docs.
+
+Revision note (2026-04-08 08:30Z): Implemented initial step-4 code path (alias normalization, vector-overlap gating/cap, replacement staging precedence, and targeted tests); full MOFE contributor assembly remains open.

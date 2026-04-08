@@ -433,13 +433,27 @@ def _lookup_topaz_id_at_lowpoint_cell(
     return topaz_id, diagnostics
 
 
-ELIGIBLE_POINT_SOURCE_DESIGNS: frozenset[str] = frozenset(
-    {"inslope_bd", "inslope_rd", "outslope_rutted"}
-)
+DESIGN_ALIASES: Dict[str, str] = {
+    "inslope_bd": "inslope_bd",
+    "inslope_rd": "inslope_rd",
+    "outslope_rutted": "outslope_rutted",
+    "outrut": "outslope_rutted",
+    "outslope_unrutted": "outslope_unrutted",
+    "outslope": "outslope_unrutted",
+    "outunrut": "outslope_unrutted",
+}
+
+ELIGIBLE_ROADS_DESIGNS: frozenset[str] = frozenset(DESIGN_ALIASES.values())
+
+
+def _normalize_design(design_value: Any) -> Optional[str]:
+    if not isinstance(design_value, str):
+        return None
+    return DESIGN_ALIASES.get(design_value.strip().lower())
 
 
 def _is_eligible_inslope_design(design_value: Any) -> bool:
-    return isinstance(design_value, str) and design_value.lower() in ELIGIBLE_POINT_SOURCE_DESIGNS
+    return _normalize_design(design_value) in ELIGIBLE_ROADS_DESIGNS
 
 
 def _resolve_eligible_inslope_design(
@@ -451,11 +465,10 @@ def _resolve_eligible_inslope_design(
         raw_value = properties.get(key)
         if raw_value is None:
             continue
-        design_value = str(raw_value).strip()
-        if not design_value:
+        normalized_design = _normalize_design(raw_value)
+        if normalized_design is None:
             continue
-        if _is_eligible_inslope_design(design_value):
-            return design_value, key
+        return normalized_design, key
     return None, None
 
 
@@ -570,10 +583,10 @@ def convert_geojson_to_monotonic_segments(
     channel_raster_path/topaz_id_raster_path:
         Optional rasters for channel-neighbor lookup at segment low points.
         Adds `topaz_id_chn_lowpoint` and `topaz_id_hill_lowpoint` to each segment
-        (defaults null; set for DESIGN in `Inslope_bd`/`Inslope_rd`/`Outslope_rutted` when a
+        (defaults null; set for DESIGN in `Inslope_bd`/`Inslope_rd`/`Outslope_rutted`/`Outslope_unrutted` when a
         deterministic nearby channel and receiving hillslope are found).
     design_property_keys:
-        Ordered property keys checked for point-source design eligibility.
+        Ordered property keys checked for Roads design eligibility.
         Defaults to `("DESIGN", "design")`.
     """
 

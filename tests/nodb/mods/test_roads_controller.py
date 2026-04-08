@@ -6,6 +6,7 @@ from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 import numpy as np
+from pyproj import CRS, Geod
 
 import pytest
 
@@ -433,11 +434,16 @@ def test_write_routed_three_ofe_slope_file_writes_three_ofes(tmp_path: Path) -> 
     )
 
     text = output_path.read_text(encoding="utf-8")
-    assert "97.3" in text
-    assert "3\n" in text
-    assert "2 120.000" in text
-    assert "3 18.000" in text
-    assert "4 30.000" in text
+    lines = text.splitlines()
+
+    assert lines[0] == "97.3"
+    assert lines[1] == "3"
+    assert lines[3] == "2 120.000"
+    assert lines[5] == "3 18.000"
+    assert lines[7] == "3 30.000"
+    assert lines[4].count(",") == 2
+    assert lines[6].count(",") == 3
+    assert lines[8].count(",") == 3
 
 
 def test_build_routed_two_ofe_management_file_keeps_road_and_buffer(tmp_path: Path) -> None:
@@ -526,7 +532,7 @@ def test_prepare_segments_writes_summary_and_marks_prepared(
                             "geometry": {"type": "LineString", "coordinates": [[1.0, 1.0], [2.0, 2.0]]},
                             "properties": {
                                 "segment_id": "roads-seg-000002",
-                                "DESIGN": "Outslope",
+                                "DESIGN": "NotEligible",
                                 "topaz_id_chn_lowpoint": None,
                                 "topaz_id_hill_lowpoint": None,
                                 "_roads_routing_eligibility": "design_not_eligible",
@@ -940,7 +946,7 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
                         "geometry": {"type": "LineString", "coordinates": [[1.0, 1.0], [2.0, 2.0]]},
                         "properties": {
                             "segment_id": "roads-seg-000002",
-                            "DESIGN": "Outslope",
+                            "DESIGN": "NotEligible",
                             "topaz_id_chn_lowpoint": None,
                             "topaz_id_hill_lowpoint": None,
                         },
@@ -2767,3 +2773,295 @@ def test_query_segment_detail_uses_unique_fallback_segment_ids_for_missing_ids(t
     assert detail["routing_mode"] == "non_channel_routed"
     assert detail["non_channel_routable"] is True
     assert detail["surface"] == "gravel"
+
+
+def test_select_outslope_unrutted_hillslope_segments_applies_minimum_ratio_and_cap(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    hillslope_geojson_path = tmp_path / "watershed" / "subwta.geojson"
+    hillslope_geojson_path.parent.mkdir(parents=True, exist_ok=True)
+    hillslope_geojson_path.write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {"TopazID": 21},
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [
+                                    [-0.0002, -0.0005],
+                                    [0.0012, -0.0005],
+                                    [0.0012, 0.0005],
+                                    [-0.0002, 0.0005],
+                                    [-0.0002, -0.0005],
+                                ]
+                            ],
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    watershed_instance = SimpleNamespace(
+        subwta_shp=str(hillslope_geojson_path),
+        hillslope_width=lambda _topaz_id: 100.0,
+    )
+    monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
+
+    def _pending(segment_id: str, x_end: float) -> dict[str, object]:
+        feature = {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[0.0, 0.0], [x_end, 0.0]],
+            },
+            "properties": {
+                "segment_id": segment_id,
+                "DESIGN": "outslope_unrutted",
+                "FILL_LENGTH_M": 20.0,
+                "FILL_SLOPE_PCT": 12.0,
+                "BUFFER_LENGTH_M": 30.0,
+                "BUFFER_SLOPE_PCT": 6.0,
+            },
+        }
+        return {
+            "segment_id": segment_id,
+            "feature": feature,
+            "properties": feature["properties"],
+            "design_source": "DESIGN",
+        }
+
+    pending_segments = [
+        _pending("seg-a", 0.0010),
+        _pending("seg-b", 0.0009),
+        _pending("seg-c", 0.0008),
+        _pending("seg-d", 0.0007),
+        _pending("seg-short", 0.00004),
+    ]
+
+    selected_by_wepp, diagnostics, candidate_status = controller._select_outslope_unrutted_hillslope_segments(
+        pending_segments=pending_segments,
+        input_crs=CRS.from_epsg(4326),
+        geod=Geod(ellps="WGS84"),
+        top2wepp={21: 1},
+    )
+
+    assert sorted(selected_by_wepp) == [1]
+    included_ids = {row["segment_hillslope_id"] for row in selected_by_wepp[1]}
+    assert included_ids == {"seg-a::h21", "seg-b::h21", "seg-c::h21"}
+
+    assert candidate_status["seg-d::h21"]["status"] == "excluded_cap_limit"
+    assert candidate_status["seg-short::h21"]["status"] == "excluded_overlap_length_min"
+
+    assert diagnostics["outslope_unrutted_targeted_hillslope_count"] == 1
+    assert diagnostics["outslope_unrutted_included_segment_count"] == 3
+    assert diagnostics["outslope_unrutted_excluded_segment_count"] == 1
+    assert diagnostics["outslope_unrutted_capped_segment_count"] == 1
+
+    record = diagnostics["outslope_unrutted_hillslope_records"][0]
+    assert record["topaz_id_hill"] == 21
+    assert record["wepp_id_hill"] == 1
+    assert set(record["segment_ids_included"]) == {"seg-a::h21", "seg-b::h21", "seg-c::h21"}
+    assert record["segment_ids_capped"] == ["seg-d::h21"]
+
+
+def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    monotonic_feature = {
+        "type": "Feature",
+        "geometry": {
+            "type": "LineString",
+            "coordinates": [[0.0, 0.0], [0.001, 0.0]],
+        },
+        "properties": {
+            "segment_id": "roads-seg-007001",
+            "DESIGN": "outslope_unrutted",
+            "SURFACE": "gravel",
+            "TRAFFIC": "low",
+            "SOIL_TEXTURE": "loam",
+            "RFG_PCT": 20.0,
+            "WIDTH_M": 4.0,
+            "FILL_LENGTH_M": 20.0,
+            "FILL_SLOPE_PCT": 12.0,
+            "BUFFER_LENGTH_M": 30.0,
+            "BUFFER_SLOPE_PCT": 6.0,
+        },
+    }
+    Path(controller.roads_monotonic_geojson_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(controller.roads_monotonic_geojson_path).write_text(
+        json.dumps({"type": "FeatureCollection", "features": [monotonic_feature]}),
+        encoding="utf-8",
+    )
+
+    baseline_runs_dir = tmp_path / "wepp" / "runs"
+    baseline_output_dir = tmp_path / "wepp" / "output"
+    baseline_runs_dir.mkdir(parents=True, exist_ok=True)
+    baseline_output_dir.mkdir(parents=True, exist_ok=True)
+    (baseline_runs_dir / "baseline.txt").write_text("baseline", encoding="utf-8")
+    (baseline_runs_dir / "p1.cli").write_text("climate", encoding="utf-8")
+    (baseline_output_dir / "H1.pass.dat").write_text("h1 baseline", encoding="utf-8")
+    (baseline_output_dir / "H2.pass.dat").write_text("h2 baseline", encoding="utf-8")
+
+    translator = SimpleNamespace(top2wepp={21: 1}, iter_wepp_sub_ids=lambda: iter([1, 2]))
+    watershed_instance = SimpleNamespace(
+        delineation_backend_is_wbt=True,
+        translator_factory=lambda: translator,
+        hillslope_length=lambda _topaz_id: 300.0,
+    )
+    wepp_instance = SimpleNamespace(
+        runs_dir=str(baseline_runs_dir),
+        output_dir=str(baseline_output_dir),
+        climate_instance=SimpleNamespace(input_years=25),
+        wepp_bin="wepp",
+    )
+
+    monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
+    monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_prepare_raster_paths",
+        lambda self: {
+            "dem_path": str(tmp_path / "dem" / "relief.tif"),
+            "channel_raster_path": str(tmp_path / "dem" / "netful.tif"),
+            "topaz_id_raster_path": str(tmp_path / "dem" / "subwta.tif"),
+        },
+    )
+
+    class _FakeDataset:
+        crs = "EPSG:4326"
+        nodata = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        @staticmethod
+        def sample(_coords):
+            return iter(([100.0],))
+
+    monkeypatch.setattr(roads_module.rasterio, "open", lambda _path: _FakeDataset())
+
+    def _fake_select(self, *, pending_segments, **_kwargs):
+        pending = pending_segments[0]
+        segment_hillslope_id = f"{pending['segment_id']}::h21"
+        candidate = {
+            "segment_hillslope_id": segment_hillslope_id,
+            "source_segment_id": pending["segment_id"],
+            "topaz_id_hill": 21,
+            "hillslope_wepp_id": 1,
+            "overlap_length_m": 111.0,
+            "hillslope_width_m": 100.0,
+            "inclusion_ratio": 1.11,
+            "feature": pending["feature"],
+            "properties": pending["properties"],
+        }
+        diagnostics = {
+            "outslope_unrutted_targeted_hillslope_count": 1,
+            "outslope_unrutted_included_segment_count": 1,
+            "outslope_unrutted_excluded_segment_count": 0,
+            "outslope_unrutted_capped_segment_count": 0,
+            "outslope_unrutted_hillslope_records": [
+                {
+                    "topaz_id_hill": 21,
+                    "wepp_id_hill": 1,
+                    "segment_ids_included": [segment_hillslope_id],
+                    "segment_ids_excluded": [],
+                    "segment_ids_capped": [],
+                    "inclusion_ratio_by_segment": {segment_hillslope_id: 1.11},
+                    "top_ofe_compensation_m": 0.0,
+                    "area_error_before_compensation_m2": 0.0,
+                    "area_error_after_compensation_m2": 0.0,
+                }
+            ],
+        }
+        status_map = {segment_hillslope_id: {**candidate, "status": "included"}}
+        return {1: [candidate]}, diagnostics, status_map
+
+    monkeypatch.setattr(Roads, "_select_outslope_unrutted_hillslope_segments", _fake_select)
+    monkeypatch.setattr(
+        Roads,
+        "_build_segment_profile",
+        lambda self, **_kwargs: {
+            "segment_length_m": 111.0,
+            "elevation_high_m": 1400.0,
+            "elevation_low_m": 1391.0,
+            "raw_slope_pct": 8.0,
+            "slope_pct": 8.0,
+            "high_point": [0.0, 0.0],
+            "low_point": [0.001, 0.0],
+        },
+    )
+
+    management_template_path = tmp_path / "roads" / "3inslope.routed_three_ofe.man"
+    management_template_path.parent.mkdir(parents=True, exist_ok=True)
+    management_template_path.write_text("management", encoding="utf-8")
+    monkeypatch.setattr(
+        Roads,
+        "_materialize_routed_three_ofe_management_template",
+        lambda self, **_kwargs: management_template_path,
+    )
+
+    soil_template_path = tmp_path / "roads" / "3gloam2.sol"
+    soil_template_path.write_text("soil template", encoding="utf-8")
+    monkeypatch.setattr(
+        Roads,
+        "_resolve_legacy_soil_template_path",
+        lambda self, **_kwargs: soil_template_path,
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_build_routed_three_ofe_soil_file",
+        lambda self, *, output_path, **_kwargs: Path(output_path).write_text("soil", encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_write_routed_three_ofe_slope_file",
+        lambda self, path, **_kwargs: Path(path).write_text("slope", encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_run_segment_hillslope",
+        lambda self, *, segment_run_id, **_kwargs: (Path(self.roads_output_dir) / f"H{segment_run_id}.pass.dat").write_text(
+            "replacement pass",
+            encoding="utf-8",
+        ),
+    )
+    monkeypatch.setattr(
+        Roads,
+        "_combine_target_hillslope_pass",
+        lambda self, **_kwargs: (_ for _ in ()).throw(AssertionError("combine should not run for single replacement pass")),
+    )
+
+    monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(roads_module, "run_watershed", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(Roads, "_regenerate_roads_report_resources", _ready_report_resources_stub)
+
+    controller.set_enabled(True)
+    _seed_prepared_state(controller)
+
+    summary = controller.run_roads_wepp()
+
+    assert summary["executed_outslope_unrutted_segment_count"] == 1
+    assert summary["segment_design_counts"]["outslope_unrutted"] == 1
+    assert summary["replacement_targeted_hillslope_wepp_ids"] == [1]
+    assert summary["additive_targeted_hillslope_wepp_ids"] == []
+    assert summary["pass_staging_strategy"]["1"] in {"replacement_copy", "replacement_symlink"}
+    assert summary["outslope_unrutted_targeted_hillslope_count"] == 1
+    assert summary["outslope_unrutted_included_segment_count"] == 1
+    assert summary["outslope_unrutted_excluded_segment_count"] == 0
+    assert summary["outslope_unrutted_capped_segment_count"] == 0
+    assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "replacement pass"

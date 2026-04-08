@@ -17,6 +17,8 @@ import numpy as np
 import rasterio
 from rasterio.errors import RasterioIOError
 from pyproj import CRS, Geod, Transformer
+from shapely.geometry import GeometryCollection, LineString, MultiLineString, shape
+from shapely.ops import transform as shapely_transform
 from wepp_runner.wepp_runner import (
     make_hillslope_run,
     make_watershed_omni_contrasts_run,
@@ -31,13 +33,33 @@ from wepppy.nodb.mods.roads.monotonic_segments import convert_geojson_file_to_mo
 __all__ = ["Roads"]
 
 
+DESIGN_ALIASES: Dict[str, str] = {
+    "inslope_bd": "inslope_bd",
+    "inslope_rd": "inslope_rd",
+    "outslope_rutted": "outslope_rutted",
+    "outrut": "outslope_rutted",
+    "outslope_unrutted": "outslope_unrutted",
+    "outslope": "outslope_unrutted",
+    "outunrut": "outslope_unrutted",
+}
+
+ELIGIBLE_ROADS_DESIGNS: frozenset[str] = frozenset(DESIGN_ALIASES.values())
 ELIGIBLE_POINT_SOURCE_DESIGNS: frozenset[str] = frozenset(
     {"inslope_bd", "inslope_rd", "outslope_rutted"}
 )
 
 
+def _normalize_design(value: Any) -> Optional[str]:
+    if not isinstance(value, str):
+        return None
+    normalized = DESIGN_ALIASES.get(value.strip().lower())
+    if normalized is None:
+        return None
+    return str(normalized)
+
+
 def _is_eligible_design(value: Any) -> bool:
-    return isinstance(value, str) and value.lower() in ELIGIBLE_POINT_SOURCE_DESIGNS
+    return _normalize_design(value) in ELIGIBLE_ROADS_DESIGNS
 
 
 def _is_hillslope_topaz_id(value: Any) -> bool:
@@ -473,9 +495,10 @@ class Roads(NoDbBase):
                         segment_id=segment_id,
                         field_name=mapped_design_key,
                     )
-            elif _is_eligible_design(mapped_design_raw):
-                return mapped_design_raw.strip().lower(), mapped_design_key
             else:
+                normalized_design = _normalize_design(mapped_design_raw)
+                if normalized_design is not None:
+                    return normalized_design, mapped_design_key
                 if mapped_design_is_custom and warning_counts is not None and warning_examples is not None:
                     self._collect_warning(
                         warning_counts,
@@ -483,7 +506,7 @@ class Roads(NoDbBase):
                         code="design_mapped_field_not_eligible",
                         message=(
                             f"Mapped design field {mapped_design_key!r} value {mapped_design_raw!r} "
-                            "is not an eligible inslope design; using fallback keys."
+                            "is not an eligible roads design; using fallback keys."
                         ),
                         limit=warning_limit,
                         segment_id=segment_id,
@@ -494,8 +517,9 @@ class Roads(NoDbBase):
             raw_value, _ = self._first_non_empty_property_with_key(properties, (key,))
             if raw_value is None:
                 continue
-            if _is_eligible_design(raw_value):
-                return raw_value.strip().lower(), key
+            normalized_design = _normalize_design(raw_value)
+            if normalized_design is not None:
+                return normalized_design, key
         return None, None
 
     @property
@@ -1664,6 +1688,32 @@ class Roads(NoDbBase):
                 return text
         return None
 
+
+    @staticmethod
+    def _has_non_empty_property(properties: Mapping[str, Any], keys: Iterable[str]) -> bool:
+        return Roads._first_non_empty_property(properties, keys) is not None
+
+    @classmethod
+    def _missing_outslope_unrutted_required_fields(cls, properties: Mapping[str, Any]) -> List[str]:
+        required_fields = {
+            "fill_length_m": ("FILL_LENGTH_M", "fill_length_m", "FILL_LEN_M", "fill_len_m"),
+            "fill_slope_pct": (
+                "FILL_SLOPE_PCT",
+                "fill_slope_pct",
+                "FILL_SLOPE",
+                "fill_slope",
+                "FILL_GRADE_PCT",
+                "fill_grade_pct",
+            ),
+            "buffer_length_m": ("BUFFER_LENGTH_M", "buffer_length_m", "BUFFER_LEN_M", "buffer_len_m"),
+            "buffer_slope_pct": ("BUFFER_SLOPE_PCT", "buffer_slope_pct", "BUFFER_SLOPE", "buffer_slope"),
+        }
+        missing: List[str] = []
+        for field_name, keys in required_fields.items():
+            if not cls._has_non_empty_property(properties, keys):
+                missing.append(field_name)
+        return missing
+
     @staticmethod
     def _coerce_float(value: Any) -> Optional[float]:
         if value in (None, ""):
@@ -1836,7 +1886,7 @@ class Roads(NoDbBase):
         warning_examples: List[Dict[str, Any]],
         warning_limit: int,
     ) -> Dict[str, Any]:
-        if design not in ELIGIBLE_POINT_SOURCE_DESIGNS:
+        if design not in ELIGIBLE_ROADS_DESIGNS:
             raise ValueError(f"Unsupported Roads design for segment execution: {design!r}")
 
         default_surface = self._normalize_surface(
@@ -1988,6 +2038,236 @@ class Roads(NoDbBase):
             lats.append(lat)
         return float(geod.line_length(lons, lats))
 
+
+    @staticmethod
+    def _iter_linestring_geometries(geometry_obj: Any) -> Iterable[LineString]:
+        if geometry_obj is None:
+            return
+        if isinstance(geometry_obj, LineString):
+            if not geometry_obj.is_empty:
+                yield geometry_obj
+            return
+        if isinstance(geometry_obj, MultiLineString):
+            for line in geometry_obj.geoms:
+                if isinstance(line, LineString) and not line.is_empty:
+                    yield line
+            return
+        if isinstance(geometry_obj, GeometryCollection):
+            for part in geometry_obj.geoms:
+                yield from Roads._iter_linestring_geometries(part)
+
+    @staticmethod
+    def _geometry_line_length_m_wgs84(geometry_obj: Any, *, geod: Geod) -> float:
+        total = 0.0
+        for line in Roads._iter_linestring_geometries(geometry_obj):
+            coords = list(line.coords)
+            if len(coords) < 2:
+                continue
+            lons = [float(point[0]) for point in coords]
+            lats = [float(point[1]) for point in coords]
+            total += float(geod.line_length(lons, lats))
+        return float(max(total, 0.0))
+
+    @staticmethod
+    def _resolve_topaz_id_from_properties(properties: Mapping[str, Any]) -> Optional[int]:
+        for key in ("TopazID", "TOPAZID", "topaz_id", "topazId", "TOPAZ_ID"):
+            try:
+                raw_value = properties.get(key)
+            except Exception:
+                raw_value = None
+            topaz_id = Roads._as_int_or_none(raw_value)
+            if topaz_id is not None:
+                return int(topaz_id)
+        return None
+
+    @staticmethod
+    def _build_segment_hillslope_id(segment_id: str, topaz_id_hill: int) -> str:
+        return f"{segment_id}::h{int(topaz_id_hill)}"
+
+    def _load_hillslope_geometries_wgs84(self) -> List[Dict[str, Any]]:
+        hillslope_geojson_path = self._normalize_existing_path(getattr(self.watershed_instance, "subwta_shp", None))
+        if hillslope_geojson_path is None:
+            raise FileNotFoundError("Roads outslope_unrutted replacement requires watershed subcatchments WGS GeoJSON.")
+
+        payload = json.loads(Path(hillslope_geojson_path).read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping) or payload.get("type") != "FeatureCollection":
+            raise ValueError("Watershed subcatchments payload is malformed; expected FeatureCollection.")
+
+        features = payload.get("features")
+        if not isinstance(features, list):
+            raise ValueError("Watershed subcatchments payload is missing a features array.")
+
+        hillslopes: List[Dict[str, Any]] = []
+        for feature in features:
+            if not isinstance(feature, Mapping):
+                continue
+            properties = feature.get("properties")
+            geometry_payload = feature.get("geometry")
+            if not isinstance(properties, Mapping) or not isinstance(geometry_payload, Mapping):
+                continue
+
+            topaz_id_hill = self._resolve_topaz_id_from_properties(properties)
+            if topaz_id_hill is None or not _is_hillslope_topaz_id(topaz_id_hill):
+                continue
+
+            geometry = shape(geometry_payload)
+            if geometry.is_empty:
+                continue
+
+            hillslopes.append(
+                {
+                    "topaz_id_hill": int(topaz_id_hill),
+                    "geometry_wgs84": geometry,
+                }
+            )
+
+        if not hillslopes:
+            raise ValueError("No hillslope geometries were resolved from watershed subcatchments.")
+
+        return hillslopes
+
+    def _select_outslope_unrutted_hillslope_segments(
+        self,
+        *,
+        pending_segments: Sequence[Dict[str, Any]],
+        input_crs: CRS,
+        geod: Geod,
+        top2wepp: Mapping[int, Any],
+    ) -> Tuple[Dict[int, List[Dict[str, Any]]], Dict[str, Any], Dict[str, Dict[str, Any]]]:
+        inclusion_ratio_threshold = 0.60
+        overlap_length_min_m = 10.0
+        max_crossings_per_hillslope = 3
+
+        input_to_wgs84 = Transformer.from_crs(input_crs, CRS.from_epsg(4326), always_xy=True)
+        hillslope_geometries = self._load_hillslope_geometries_wgs84()
+
+        hillslope_records: Dict[int, Dict[str, Any]] = {}
+        candidate_status_by_id: Dict[str, Dict[str, Any]] = {}
+        included_pre_cap_by_hillslope: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
+
+        for pending in pending_segments:
+            source_segment_id = str(pending["segment_id"])
+            feature = pending["feature"]
+            properties = pending["properties"]
+            geometry_payload = feature.get("geometry") if isinstance(feature, Mapping) else None
+            if not isinstance(geometry_payload, Mapping):
+                continue
+
+            geometry_input = shape(geometry_payload)
+            if geometry_input.is_empty:
+                continue
+
+            geometry_wgs84 = shapely_transform(input_to_wgs84.transform, geometry_input)
+            if geometry_wgs84.is_empty:
+                continue
+
+            for hillslope in hillslope_geometries:
+                topaz_id_hill = int(hillslope["topaz_id_hill"])
+                hillslope_geometry_wgs84 = hillslope["geometry_wgs84"]
+                overlap_geometry = geometry_wgs84.intersection(hillslope_geometry_wgs84)
+                overlap_length_m = self._geometry_line_length_m_wgs84(overlap_geometry, geod=geod)
+                if overlap_length_m <= 0.0:
+                    continue
+
+                try:
+                    hillslope_width_m = float(self.watershed_instance.hillslope_width(topaz_id_hill))
+                except Exception:
+                    hillslope_width_m = 0.0
+                inclusion_ratio = float(overlap_length_m / hillslope_width_m) if hillslope_width_m > 0 else 0.0
+
+                segment_hillslope_id = self._build_segment_hillslope_id(source_segment_id, topaz_id_hill)
+                hillslope_wepp_id = self._as_int_or_none(top2wepp.get(int(topaz_id_hill)))
+
+                record = hillslope_records.setdefault(
+                    topaz_id_hill,
+                    {
+                        "topaz_id_hill": int(topaz_id_hill),
+                        "wepp_id_hill": int(hillslope_wepp_id) if hillslope_wepp_id is not None else None,
+                        "segment_ids_included": [],
+                        "segment_ids_excluded": [],
+                        "segment_ids_capped": [],
+                        "inclusion_ratio_by_segment": {},
+                        "top_ofe_compensation_m": 0.0,
+                        "area_error_before_compensation_m2": 0.0,
+                        "area_error_after_compensation_m2": 0.0,
+                    },
+                )
+                record["inclusion_ratio_by_segment"][segment_hillslope_id] = float(inclusion_ratio)
+
+                status = "included"
+                if overlap_length_m < overlap_length_min_m:
+                    status = "excluded_overlap_length_min"
+                elif inclusion_ratio < inclusion_ratio_threshold:
+                    status = "excluded_inclusion_ratio"
+
+                candidate_payload = {
+                    "segment_hillslope_id": segment_hillslope_id,
+                    "source_segment_id": source_segment_id,
+                    "topaz_id_hill": int(topaz_id_hill),
+                    "hillslope_wepp_id": int(hillslope_wepp_id) if hillslope_wepp_id is not None else None,
+                    "overlap_length_m": float(overlap_length_m),
+                    "hillslope_width_m": float(hillslope_width_m),
+                    "inclusion_ratio": float(inclusion_ratio),
+                    "feature": feature,
+                    "properties": properties,
+                }
+                candidate_status_by_id[segment_hillslope_id] = {
+                    **candidate_payload,
+                    "status": status,
+                }
+
+                if status == "included" and hillslope_wepp_id is not None:
+                    included_pre_cap_by_hillslope[int(topaz_id_hill)].append(candidate_payload)
+                else:
+                    record["segment_ids_excluded"].append(segment_hillslope_id)
+
+        selected_by_wepp: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
+        capped_segment_count = 0
+
+        for topaz_id_hill, candidates in included_pre_cap_by_hillslope.items():
+            candidates_sorted = sorted(
+                candidates,
+                key=lambda row: (-float(row["overlap_length_m"]), str(row["segment_hillslope_id"])),
+            )
+            record = hillslope_records[topaz_id_hill]
+
+            for index, candidate in enumerate(candidates_sorted):
+                segment_hillslope_id = str(candidate["segment_hillslope_id"])
+                if index < max_crossings_per_hillslope:
+                    record["segment_ids_included"].append(segment_hillslope_id)
+                    wepp_id_hill = self._as_int_or_none(candidate.get("hillslope_wepp_id"))
+                    if wepp_id_hill is not None:
+                        selected_by_wepp[int(wepp_id_hill)].append(candidate)
+                else:
+                    capped_segment_count += 1
+                    record["segment_ids_capped"].append(segment_hillslope_id)
+                    record["segment_ids_excluded"].append(segment_hillslope_id)
+                    candidate_status_by_id[segment_hillslope_id]["status"] = "excluded_cap_limit"
+
+        included_segment_count = 0
+        excluded_segment_count = 0
+        for candidate in candidate_status_by_id.values():
+            status = str(candidate.get("status") or "")
+            if status == "included":
+                included_segment_count += 1
+            elif status.startswith("excluded_") and status != "excluded_cap_limit":
+                excluded_segment_count += 1
+
+        diagnostics = {
+            "outslope_unrutted_targeted_hillslope_count": int(
+                sum(1 for value in selected_by_wepp.values() if value)
+            ),
+            "outslope_unrutted_included_segment_count": int(included_segment_count),
+            "outslope_unrutted_excluded_segment_count": int(excluded_segment_count),
+            "outslope_unrutted_capped_segment_count": int(capped_segment_count),
+            "outslope_unrutted_hillslope_records": [
+                hillslope_records[topaz_id]
+                for topaz_id in sorted(hillslope_records)
+            ],
+        }
+
+        return selected_by_wepp, diagnostics, candidate_status_by_id
+
     @staticmethod
     def _sample_dem_elevation(
         dataset: rasterio.io.DatasetReader,
@@ -2135,6 +2415,30 @@ class Roads(NoDbBase):
             "fill_slope_fraction": float(slope_pct / 100.0),
         }
 
+
+    @staticmethod
+    def _apply_outslope_unrutted_geometry_parity(
+        *,
+        road_length_m: float,
+        road_width_m: float,
+        road_slope_pct: float,
+    ) -> Dict[str, float]:
+        outslope_fraction = 0.04
+        longitudinal_fraction = max(0.001, float(road_slope_pct) / 100.0)
+        road_slope_fraction = (outslope_fraction**2.0) + (longitudinal_fraction**2.0)
+        scale = max(road_slope_fraction / outslope_fraction, 1e-6)
+
+        sim_length_m = max(1.0, min(300.0, float(road_length_m) * scale))
+        sim_width_m = max(0.3, min(100.0, float(road_width_m) / scale))
+
+        return {
+            "sim_length_m": float(sim_length_m),
+            "sim_width_m": float(sim_width_m),
+            "road_slope_fraction": float(road_slope_fraction),
+            "road_slope_pct": float(road_slope_fraction * 100.0),
+            "geometry_scale": float(scale),
+        }
+
     @staticmethod
     def _write_routed_two_ofe_slope_file(
         path: Path,
@@ -2181,7 +2485,7 @@ class Roads(NoDbBase):
             f"0.00, {road_slope_fraction:.6f} 1.00, {road_slope_fraction:.6f}",
             f"3 {float(fill_length_m):.3f}",
             f"0.00, {road_slope_fraction:.6f} 0.05, {fill_slope_fraction:.6f} 1.00, {fill_slope_fraction:.6f}",
-            f"4 {float(buffer_length_m):.3f}",
+            f"3 {float(buffer_length_m):.3f}",
             f"0.00, {fill_slope_fraction:.6f} 0.05, {buffer_slope_fraction:.6f} 1.00, {buffer_slope_fraction:.6f}",
         ]
         path.write_text("\n".join(content) + "\n", encoding="utf-8")
@@ -3376,6 +3680,16 @@ class Roads(NoDbBase):
             mapping_warning_examples: List[Dict[str, Any]] = []
             design_execution_counts: Counter[str] = Counter()
             fill_default_usage_counts: Counter[str] = Counter()
+            replacement_pass_paths_by_wepp: Dict[int, List[str]] = defaultdict(list)
+            outslope_unrutted_pending_segments: List[Dict[str, Any]] = []
+            outslope_unrutted_candidate_status: Dict[str, Dict[str, Any]] = {}
+            outslope_unrutted_diagnostics: Dict[str, Any] = {
+                "outslope_unrutted_targeted_hillslope_count": 0,
+                "outslope_unrutted_included_segment_count": 0,
+                "outslope_unrutted_excluded_segment_count": 0,
+                "outslope_unrutted_capped_segment_count": 0,
+                "outslope_unrutted_hillslope_records": [],
+            }
 
             current_stage = "segment_runs"
             with rasterio.open(dem_path) as dem_dataset:
@@ -3414,6 +3728,17 @@ class Roads(NoDbBase):
                         continue
 
                     eligible_segment_count += 1
+                    if design == "outslope_unrutted":
+                        outslope_unrutted_pending_segments.append(
+                            {
+                                "segment_id": segment_id,
+                                "feature": feature,
+                                "properties": properties,
+                                "design_source": design_source,
+                            }
+                        )
+                        continue
+
                     routing_eligibility = str(properties.get("_roads_routing_eligibility") or "unknown")
                     channel_hill_topaz = self._as_int_or_none(properties.get("topaz_id_hill_lowpoint"))
                     channel_chn_topaz = self._as_int_or_none(properties.get("topaz_id_chn_lowpoint"))
@@ -3976,6 +4301,437 @@ class Roads(NoDbBase):
                     segment_execution_records.append(execution_record)
                     self._append_roads_log("run", "segment_run_completed", execution_record)
 
+                if outslope_unrutted_pending_segments:
+                    selected_outslope_by_wepp, outslope_unrutted_diagnostics, outslope_unrutted_candidate_status = (
+                        self._select_outslope_unrutted_hillslope_segments(
+                            pending_segments=outslope_unrutted_pending_segments,
+                            input_crs=input_crs,
+                            geod=geod,
+                            top2wepp=top2wepp,
+                        )
+                    )
+
+                    hillslope_records_by_topaz = {
+                        int(record["topaz_id_hill"]): record
+                        for record in outslope_unrutted_diagnostics.get("outslope_unrutted_hillslope_records", [])
+                        if isinstance(record, Mapping)
+                    }
+
+                    def _move_outslope_candidate_to_status(candidate: Mapping[str, Any], status: str) -> None:
+                        segment_hillslope_id = str(candidate["segment_hillslope_id"])
+                        topaz_id_hill = int(candidate["topaz_id_hill"])
+                        candidate_row = outslope_unrutted_candidate_status.get(segment_hillslope_id)
+                        if candidate_row is not None:
+                            candidate_row["status"] = status
+                        record = hillslope_records_by_topaz.get(topaz_id_hill)
+                        if record is None:
+                            return
+                        included_ids = record.get("segment_ids_included") or []
+                        excluded_ids = record.get("segment_ids_excluded") or []
+                        try:
+                            while segment_hillslope_id in included_ids:
+                                included_ids.remove(segment_hillslope_id)
+                        except Exception:
+                            pass
+                        if segment_hillslope_id not in excluded_ids:
+                            excluded_ids.append(segment_hillslope_id)
+
+                    for wepp_id_int in sorted(selected_outslope_by_wepp):
+                        candidates = sorted(
+                            selected_outslope_by_wepp[wepp_id_int],
+                            key=lambda row: str(row["segment_hillslope_id"]),
+                        )
+                        for candidate in candidates:
+                            segment_hillslope_id = str(candidate["segment_hillslope_id"])
+                            source_segment_id = str(candidate["source_segment_id"])
+                            topaz_id_hill = int(candidate["topaz_id_hill"])
+                            feature = candidate["feature"]
+                            properties = candidate["properties"]
+                            overlap_length_m = float(candidate["overlap_length_m"])
+                            inclusion_ratio = float(candidate["inclusion_ratio"])
+
+                            mapped_segment_count += 1
+
+                            segment_inputs = self._resolve_segment_run_inputs(
+                                properties=properties,
+                                params=params,
+                                segment_id=segment_hillslope_id,
+                                design="outslope_unrutted",
+                                warning_counts=mapping_warning_counts,
+                                warning_examples=mapping_warning_examples,
+                                warning_limit=warning_limit,
+                            )
+                            segment_inputs["resolution_sources"]["design"] = "segment_property"
+
+                            missing_fields = self._missing_outslope_unrutted_required_fields(properties)
+                            if missing_fields:
+                                _move_outslope_candidate_to_status(candidate, "failed_missing_parameter")
+                                skipped_segments.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "reason": "failed_missing_parameter",
+                                        "missing_fields": missing_fields,
+                                    }
+                                )
+                                segment_execution_records.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "target_hillslope_topaz_id": int(topaz_id_hill),
+                                        "status": "failed",
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "reason": "failed_missing_parameter",
+                                        "missing_fields": missing_fields,
+                                        "design": "outslope_unrutted",
+                                        "overlap_length_m": overlap_length_m,
+                                        "inclusion_ratio": inclusion_ratio,
+                                    }
+                                )
+                                self._append_roads_log(
+                                    "run",
+                                    "segment_skipped",
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "reason": "failed_missing_parameter",
+                                        "missing_fields": missing_fields,
+                                    },
+                                )
+                                continue
+
+                            try:
+                                profile = self._build_segment_profile(
+                                    feature=feature,
+                                    input_crs=input_crs,
+                                    dem_dataset=dem_dataset,
+                                    input_to_wgs84=input_to_wgs84,
+                                    input_to_dem=input_to_dem,
+                                    geod=geod,
+                                )
+                            except ValueError as exc:
+                                skipped_segments.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "reason": "segment_profile_unavailable",
+                                    }
+                                )
+                                segment_execution_records.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "target_hillslope_topaz_id": int(topaz_id_hill),
+                                        "status": "skipped",
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "reason": "segment_profile_unavailable",
+                                        "error": str(exc),
+                                        "design": "outslope_unrutted",
+                                        "overlap_length_m": overlap_length_m,
+                                        "inclusion_ratio": inclusion_ratio,
+                                    }
+                                )
+                                self._append_roads_log(
+                                    "run",
+                                    "segment_skipped",
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "reason": "segment_profile_unavailable",
+                                        "error": str(exc),
+                                    },
+                                )
+                                continue
+
+                            profile = dict(profile)
+                            profile["segment_length_m"] = max(1.0, float(overlap_length_m))
+                            parity_profile = self._apply_outslope_unrutted_geometry_parity(
+                                road_length_m=float(profile["segment_length_m"]),
+                                road_width_m=float(segment_inputs["road_width_m"]),
+                                road_slope_pct=float(profile["slope_pct"]),
+                            )
+
+                            fill_profile = self._derive_fill_profile_from_inputs(
+                                fill_length_m=segment_inputs["fill_length_m"],
+                                fill_slope_pct=segment_inputs["fill_slope_pct"],
+                            )
+                            routed_buffer_profile = self._derive_buffer_profile_from_feature_or_defaults(
+                                properties=properties,
+                                road_profile=profile,
+                            )
+
+                            try:
+                                hillslope_length_m = float(self.watershed_instance.hillslope_length(topaz_id_hill))
+                            except Exception:
+                                hillslope_length_m = None
+
+                            if (
+                                hillslope_length_m is not None
+                                and (hillslope_length_m - parity_profile["sim_length_m"] - fill_profile["fill_length_m"]) <= 0.0
+                            ):
+                                _move_outslope_candidate_to_status(candidate, "failed_non_positive_top_ofe")
+                                skipped_segments.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "reason": "failed_non_positive_top_ofe",
+                                    }
+                                )
+                                segment_execution_records.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "target_hillslope_topaz_id": int(topaz_id_hill),
+                                        "status": "failed",
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "reason": "failed_non_positive_top_ofe",
+                                        "design": "outslope_unrutted",
+                                        "overlap_length_m": overlap_length_m,
+                                        "inclusion_ratio": inclusion_ratio,
+                                    }
+                                )
+                                self._append_roads_log(
+                                    "run",
+                                    "segment_skipped",
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "reason": "failed_non_positive_top_ofe",
+                                    },
+                                )
+                                continue
+
+                            segment_sequence += 1
+                            segment_run_id = 900000 + segment_sequence
+                            soil_template_path = self._resolve_legacy_soil_template_path(
+                                design="outslope_rutted",
+                                surface=segment_inputs["surface"],
+                                soil_texture=segment_inputs["soil_texture"],
+                            )
+                            segment_soil_path = Path(self.roads_runs_dir) / f"p{segment_run_id}.routed_three_ofe.sol"
+                            segment_slope_path = Path(self.roads_runs_dir) / f"p{segment_run_id}.slp"
+                            management_path = routed_three_ofe_management_cache_by_traffic.get(segment_inputs["traffic"])
+                            if management_path is None:
+                                management_path = self._materialize_routed_three_ofe_management_template(
+                                    traffic=segment_inputs["traffic"]
+                                )
+                                routed_three_ofe_management_cache_by_traffic[segment_inputs["traffic"]] = management_path
+
+                            self._build_routed_three_ofe_soil_file(
+                                template_path=soil_template_path,
+                                output_path=segment_soil_path,
+                                traffic=segment_inputs["traffic"],
+                                surface=segment_inputs["surface"],
+                                rfg_pct=segment_inputs["rfg_pct"],
+                            )
+                            self._write_routed_three_ofe_slope_file(
+                                segment_slope_path,
+                                width_m=parity_profile["sim_width_m"],
+                                road_length_m=parity_profile["sim_length_m"],
+                                road_slope_pct=parity_profile["road_slope_pct"],
+                                fill_length_m=fill_profile["fill_length_m"],
+                                fill_slope_pct=fill_profile["fill_slope_pct"],
+                                buffer_length_m=routed_buffer_profile["buffer_length_m"],
+                                buffer_slope_pct=routed_buffer_profile["buffer_slope_pct"],
+                            )
+
+                            self._append_roads_log(
+                                "run",
+                                "segment_inputs_ready",
+                                {
+                                    "segment_id": source_segment_id,
+                                    "segment_hillslope_id": segment_hillslope_id,
+                                    "segment_run_id": segment_run_id,
+                                    "routing_mode": "outslope_unrutted_replacement",
+                                    "target_hillslope_wepp_id": int(wepp_id_int),
+                                    "target_hillslope_topaz_id": int(topaz_id_hill),
+                                    "design": "outslope_unrutted",
+                                    "surface": segment_inputs["surface"],
+                                    "traffic": segment_inputs["traffic"],
+                                    "soil_texture": segment_inputs["soil_texture"],
+                                    "rfg_pct": segment_inputs["rfg_pct"],
+                                    "road_width_m": segment_inputs["road_width_m"],
+                                    "fill_length_m": fill_profile["fill_length_m"],
+                                    "fill_slope_pct": fill_profile["fill_slope_pct"],
+                                    "segment_length_m": profile["segment_length_m"],
+                                    "overlap_length_m": overlap_length_m,
+                                    "inclusion_ratio": inclusion_ratio,
+                                    **parity_profile,
+                                    **routed_buffer_profile,
+                                },
+                            )
+
+                            try:
+                                sim_years = int(self.wepp_instance.climate_instance.input_years)
+                                self._run_segment_hillslope(
+                                    segment_run_id=segment_run_id,
+                                    climate_wepp_id=int(wepp_id_int),
+                                    sim_years=sim_years,
+                                    wepp_bin=getattr(self.wepp_instance, "wepp_bin", None),
+                                    single_ofe_management_path=management_path,
+                                    single_ofe_soil_path=segment_soil_path,
+                                    single_ofe_slope_path=segment_slope_path,
+                                )
+                            except Exception as exc:
+                                skipped_segments.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "reason": "segment_run_failed",
+                                    }
+                                )
+                                segment_execution_records.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "segment_run_id": segment_run_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "target_hillslope_topaz_id": int(topaz_id_hill),
+                                        "status": "failed",
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "reason": "segment_run_failed",
+                                        "error": str(exc),
+                                        "design": "outslope_unrutted",
+                                        "overlap_length_m": overlap_length_m,
+                                        "inclusion_ratio": inclusion_ratio,
+                                    }
+                                )
+                                failed_segment_records.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "segment_run_id": segment_run_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "reason": "segment_run_failed",
+                                        "error": str(exc),
+                                    }
+                                )
+                                self._append_roads_log(
+                                    "run",
+                                    "segment_run_failed",
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "segment_run_id": segment_run_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "error": str(exc),
+                                    },
+                                )
+                                continue
+
+                            segment_pass_path = Path(self.roads_output_dir) / f"H{segment_run_id}.pass.dat"
+                            if not segment_pass_path.exists():
+                                skipped_segments.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "reason": "segment_pass_missing",
+                                    }
+                                )
+                                segment_execution_records.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "segment_run_id": segment_run_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "target_hillslope_topaz_id": int(topaz_id_hill),
+                                        "status": "failed",
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "reason": "segment_pass_missing",
+                                        "design": "outslope_unrutted",
+                                        "overlap_length_m": overlap_length_m,
+                                        "inclusion_ratio": inclusion_ratio,
+                                    }
+                                )
+                                failed_segment_records.append(
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "segment_run_id": segment_run_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "reason": "segment_pass_missing",
+                                    }
+                                )
+                                self._append_roads_log(
+                                    "run",
+                                    "segment_run_failed",
+                                    {
+                                        "segment_id": source_segment_id,
+                                        "segment_hillslope_id": segment_hillslope_id,
+                                        "segment_run_id": segment_run_id,
+                                        "target_hillslope_wepp_id": int(wepp_id_int),
+                                        "routing_mode": "outslope_unrutted_replacement",
+                                        "reason": "segment_pass_missing",
+                                    },
+                                )
+                                continue
+
+                            successful_segment_count += 1
+                            routing_mode_counts["outslope_unrutted_replacement"] += 1
+                            design_execution_counts["outslope_unrutted"] += 1
+                            replacement_pass_paths_by_wepp[int(wepp_id_int)].append(str(segment_pass_path))
+
+                            execution_record = {
+                                "segment_id": source_segment_id,
+                                "segment_hillslope_id": segment_hillslope_id,
+                                "segment_run_id": segment_run_id,
+                                "target_hillslope_wepp_id": int(wepp_id_int),
+                                "target_hillslope_topaz_id": int(topaz_id_hill),
+                                "status": "completed",
+                                "routing_mode": "outslope_unrutted_replacement",
+                                "routing_eligibility": "outslope_unrutted_replacement",
+                                "design": "outslope_unrutted",
+                                "surface": segment_inputs["surface"],
+                                "traffic": segment_inputs["traffic"],
+                                "soil_texture": segment_inputs["soil_texture"],
+                                "rfg_pct": segment_inputs["rfg_pct"],
+                                "road_width_m": segment_inputs["road_width_m"],
+                                "fill_length_m": fill_profile["fill_length_m"],
+                                "fill_slope_pct": fill_profile["fill_slope_pct"],
+                                "segment_length_m": profile["segment_length_m"],
+                                "slope_pct_raw": profile["raw_slope_pct"],
+                                "slope_pct_clamped": profile["slope_pct"],
+                                "elevation_high_m": profile["elevation_high_m"],
+                                "elevation_low_m": profile["elevation_low_m"],
+                                "overlap_length_m": overlap_length_m,
+                                "inclusion_ratio": inclusion_ratio,
+                                "segment_pass_relpath": os.path.relpath(segment_pass_path, self.wd),
+                                **parity_profile,
+                                **fill_profile,
+                                **routed_buffer_profile,
+                            }
+                            segment_execution_records.append(execution_record)
+                            self._append_roads_log("run", "segment_run_completed", execution_record)
+
+                    included_count = 0
+                    excluded_count = 0
+                    capped_count = 0
+                    for candidate_row in outslope_unrutted_candidate_status.values():
+                        status_value = str(candidate_row.get("status") or "")
+                        if status_value == "included":
+                            included_count += 1
+                        elif status_value == "excluded_cap_limit":
+                            capped_count += 1
+                        elif status_value.startswith("excluded_"):
+                            excluded_count += 1
+
+                    outslope_unrutted_diagnostics["outslope_unrutted_included_segment_count"] = int(included_count)
+                    outslope_unrutted_diagnostics["outslope_unrutted_excluded_segment_count"] = int(excluded_count)
+                    outslope_unrutted_diagnostics["outslope_unrutted_capped_segment_count"] = int(capped_count)
+                    outslope_unrutted_diagnostics["outslope_unrutted_targeted_hillslope_count"] = int(
+                        sum(
+                            1
+                            for record in outslope_unrutted_diagnostics.get("outslope_unrutted_hillslope_records", [])
+                            if isinstance(record, Mapping) and bool(record.get("segment_ids_included"))
+                        )
+                    )
+
             Path(self.roads_segment_pass_manifest_path).write_text(
                 json.dumps(segment_execution_records, indent=2, sort_keys=True),
                 encoding="utf-8",
@@ -4005,6 +4761,17 @@ class Roads(NoDbBase):
                 )
 
             if failed_segment_records:
+                additive_targeted_ids = sorted(
+                    int(wepp_id)
+                    for wepp_id, paths in segment_pass_paths_by_wepp.items()
+                    if paths
+                )
+                replacement_targeted_ids = sorted(
+                    int(wepp_id)
+                    for wepp_id, paths in replacement_pass_paths_by_wepp.items()
+                    if paths
+                )
+                targeted_ids = sorted(set(additive_targeted_ids) | set(replacement_targeted_ids))
                 failed_run_summary = {
                     "eligible_segment_count": eligible_segment_count,
                     "mapped_segment_count": mapped_segment_count,
@@ -4013,13 +4780,18 @@ class Roads(NoDbBase):
                     "executed_non_channel_routed_segment_count": int(routing_mode_counts.get("non_channel_routed", 0)),
                     "segment_routing_mode_counts": dict(sorted(routing_mode_counts.items())),
                     "executed_outslope_rutted_segment_count": int(design_execution_counts.get("outslope_rutted", 0)),
+                    "executed_outslope_unrutted_segment_count": int(
+                        design_execution_counts.get("outslope_unrutted", 0)
+                    ),
                     "segment_design_counts": dict(sorted(design_execution_counts.items())),
                     "fill_default_usage_counts": dict(sorted(fill_default_usage_counts.items())),
                     "trace_invocation_count": int(trace_invocation_count),
                     "trace_reached_channel_count": int(trace_reaches_channel_count),
                     "trace_termination_reason_counts": dict(sorted(trace_termination_reason_counts.items())),
-                    "targeted_hillslope_count": 0,
-                    "targeted_hillslope_wepp_ids": [],
+                    "targeted_hillslope_count": len(targeted_ids),
+                    "targeted_hillslope_wepp_ids": targeted_ids,
+                    "additive_targeted_hillslope_wepp_ids": additive_targeted_ids,
+                    "replacement_targeted_hillslope_wepp_ids": replacement_targeted_ids,
                     "skipped_segments": skipped_segments,
                     "skipped_segment_reason_counts": dict(sorted(skipped_reason_counts.items())),
                     "segment_execution_records": segment_execution_records,
@@ -4033,6 +4805,7 @@ class Roads(NoDbBase):
                     "mapping_warning_counts": mapping_warning_counts_dict,
                     "mapping_warning_examples": mapping_warning_examples,
                     "attribute_field_map": dict(attribute_field_map),
+                    **outslope_unrutted_diagnostics,
                     "status": "failed",
                     "failed_stage": "segment_runs",
                     "failed_segment_count": len(failed_segment_records),
@@ -4061,7 +4834,21 @@ class Roads(NoDbBase):
                 raise FileNotFoundError(f"Missing baseline WEPP output directory: {baseline_output_dir}")
 
             staged_strategy: Dict[str, str] = {}
-            targeted_ids = sorted(segment_pass_paths_by_wepp)
+            additive_targeted_ids = sorted(
+                int(wepp_id)
+                for wepp_id, paths in segment_pass_paths_by_wepp.items()
+                if paths
+            )
+            replacement_targeted_ids = sorted(
+                int(wepp_id)
+                for wepp_id, paths in replacement_pass_paths_by_wepp.items()
+                if paths
+            )
+            replacement_targeted_id_set = set(replacement_targeted_ids)
+            additive_targeted_without_replacement_ids = sorted(
+                wepp_id for wepp_id in additive_targeted_ids if wepp_id not in replacement_targeted_id_set
+            )
+            targeted_ids = sorted(set(additive_targeted_ids) | set(replacement_targeted_ids))
             all_hillslope_wepp_ids = sorted(int(value) for value in translator.iter_wepp_sub_ids())
 
             current_stage = "pass_combination"
@@ -4083,7 +4870,7 @@ class Roads(NoDbBase):
                     },
                 )
 
-            for wepp_id in targeted_ids:
+            for wepp_id in additive_targeted_without_replacement_ids:
                 base_pass_path = baseline_output_dir / f"H{wepp_id}.pass.dat"
                 output_pass_path = Path(self.roads_output_dir) / f"H{wepp_id}.pass.dat"
                 output_was_symlink = output_pass_path.is_symlink()
@@ -4117,6 +4904,64 @@ class Roads(NoDbBase):
                     },
                 )
 
+            for wepp_id in replacement_targeted_ids:
+                replacement_paths = list(replacement_pass_paths_by_wepp.get(wepp_id, []))
+                if not replacement_paths:
+                    continue
+                output_pass_path = Path(self.roads_output_dir) / f"H{wepp_id}.pass.dat"
+                output_was_symlink = output_pass_path.is_symlink()
+                if output_pass_path.exists() or output_was_symlink:
+                    output_pass_path.unlink()
+
+                additive_count = len(segment_pass_paths_by_wepp.get(wepp_id, []))
+                if additive_count:
+                    self._append_roads_log(
+                        "run",
+                        "replacement_supersedes_additive",
+                        {
+                            "wepp_id": int(wepp_id),
+                            "additive_pass_count": int(additive_count),
+                            "replacement_pass_count": len(replacement_paths),
+                        },
+                    )
+
+                self._append_roads_log(
+                    "run",
+                    "replacement_target_hillslope_start",
+                    {
+                        "wepp_id": int(wepp_id),
+                        "replacement_pass_count": len(replacement_paths),
+                        "replacement_pass_relpaths": [
+                            os.path.relpath(path, self.wd) for path in replacement_paths
+                        ],
+                        "output_pass_relpath": os.path.relpath(output_pass_path, self.wd),
+                        "output_was_symlink": output_was_symlink,
+                    },
+                )
+
+                if len(replacement_paths) == 1:
+                    staged_strategy[str(wepp_id)] = (
+                        f"replacement_{self._safe_link_or_copy(replacement_paths[0], str(output_pass_path))}"
+                    )
+                else:
+                    self._combine_target_hillslope_pass(
+                        base_pass_path=str(replacement_paths[0]),
+                        road_pass_paths=replacement_paths[1:],
+                        output_pass_path=str(output_pass_path),
+                    )
+                    staged_strategy[str(wepp_id)] = "replacement_combined"
+
+                self._append_roads_log(
+                    "run",
+                    "replacement_hillslope_pass_staged",
+                    {
+                        "wepp_id": int(wepp_id),
+                        "replacement_pass_count": len(replacement_paths),
+                        "staged_strategy": staged_strategy[str(wepp_id)],
+                        "staged_pass_relpath": os.path.relpath(output_pass_path, self.wd),
+                    },
+                )
+
             run_summary_base = {
                 "eligible_segment_count": eligible_segment_count,
                 "mapped_segment_count": mapped_segment_count,
@@ -4125,6 +4970,7 @@ class Roads(NoDbBase):
                 "executed_non_channel_routed_segment_count": int(routing_mode_counts.get("non_channel_routed", 0)),
                 "segment_routing_mode_counts": dict(sorted(routing_mode_counts.items())),
                 "executed_outslope_rutted_segment_count": int(design_execution_counts.get("outslope_rutted", 0)),
+                "executed_outslope_unrutted_segment_count": int(design_execution_counts.get("outslope_unrutted", 0)),
                 "segment_design_counts": dict(sorted(design_execution_counts.items())),
                 "fill_default_usage_counts": dict(sorted(fill_default_usage_counts.items())),
                 "trace_invocation_count": int(trace_invocation_count),
@@ -4132,6 +4978,8 @@ class Roads(NoDbBase):
                 "trace_termination_reason_counts": dict(sorted(trace_termination_reason_counts.items())),
                 "targeted_hillslope_count": len(targeted_ids),
                 "targeted_hillslope_wepp_ids": targeted_ids,
+                "additive_targeted_hillslope_wepp_ids": additive_targeted_ids,
+                "replacement_targeted_hillslope_wepp_ids": replacement_targeted_ids,
                 "skipped_segments": skipped_segments,
                 "skipped_segment_reason_counts": dict(sorted(skipped_reason_counts.items())),
                 "segment_execution_records": segment_execution_records,
@@ -4145,6 +4993,7 @@ class Roads(NoDbBase):
                 "mapping_warning_counts": mapping_warning_counts_dict,
                 "mapping_warning_examples": mapping_warning_examples,
                 "attribute_field_map": dict(attribute_field_map),
+                **outslope_unrutted_diagnostics,
                 "watershed_run_relpath": os.path.relpath(
                     os.path.join(self.roads_runs_dir, "pw0.run"),
                     self.wd,

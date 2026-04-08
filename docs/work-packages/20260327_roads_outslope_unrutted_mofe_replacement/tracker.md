@@ -5,20 +5,18 @@
 ## Quick Status
 
 **Started**: 2026-03-27  
-**Current phase**: Planning Complete - Implementation Ready  
-**Last updated**: 2026-03-27  
+**Current phase**: Milestones 1 and 4 implemented (selection + replacement staging); MOFE assembly milestones pending  
+**Last updated**: 2026-04-08  
 **Active ExecPlan**: `prompts/active/roads_outslope_unrutted_mofe_replacement_execplan.md`  
-**Next milestone**: Milestone 1 - lock replacement decomposition and area-conservation contracts
+**Next milestone**: Milestone 2 implementation - MOFE contributor assembly and area-conservation closure
 
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Milestone 1: Implement targeted hillslope decomposition contract (`affected strip` + `unaffected remainder`).
 - [ ] Milestone 2: Build MOFE contributors with ordering `hill -> road -> fill -> hill`.
 - [ ] Milestone 3: Aggregate contributors to one replacement pass per targeted hillslope.
-- [ ] Milestone 4: Stage replacement pass files with strict no-double-counting behavior.
 - [ ] Milestone 5: Add area-conservation and topology-preservation validations.
-- [ ] Milestone 6: Add regression tests and fixture-backed validation.
+- [ ] Milestone 6: Extend regression coverage to MOFE contributor assembly and area-conservation closure.
 - [ ] Milestone 7: Complete independent code review and resolve medium/high findings.
 - [ ] Milestone 8: Complete independent QA review and resolve medium/high findings.
 - [ ] Milestone 9: Run final gates and handoff updates.
@@ -27,15 +25,27 @@
 - [ ] None.
 
 ### Blocked
-- [ ] Await step-1/2/3 completion and stable contributor contracts.
+
+- [ ] None.
 
 ### Done
 - [x] Authored package scaffold, tracker, and active ExecPlan (2026-03-27).
 - [x] Added package entry to `PROJECT_TRACKER.md` backlog (2026-03-27).
+- [x] Locked step-4 contract decisions for physical-length thresholds, fixed 4% geometry parity, raster-burn hillslope segmentation, and multi-road (`N`) support (2026-04-08).
+- [x] Adopted minimum diagnostics schema and closed remaining phase-4 decision gates (2026-04-08).
+- [x] Implemented outslope-unrutted eligibility normalization, hillslope intersection gating (`60%` + `10 m`), and cap-at-3 selection diagnostics in `roads.py` (2026-04-08).
+- [x] Implemented replacement-first pass staging with additive suppression on targeted hillslopes and run-summary diagnostics propagation (2026-04-08).
+- [x] Added targeted regression tests for outslope-unrutted alias eligibility, selection/cap logic, and replacement staging path (2026-04-08).
+- [x] Fixed routed three-OFE slope serialization bug (buffer point-count mismatch) and validated fixture-backed e2e replacement run with 5 successful outslope-unrutted segments on `clogging-starch-outslope-unrutted-e2e-20260407-232343` (2026-04-08).
 
 ## Timeline
 
 - **2026-03-27** - Package authored and scoped as Roads step-4 work.
+- **2026-04-08** - Locked decomposition/inclusion contracts for physical-length gating, 4% geometry parity, and multi-road hillslope handling.
+- **2026-04-08** - Adopted minimum diagnostics schema and closed remaining phase-4 decision gates in Roads step-4 docs.
+- **2026-04-08** - Implemented `outslope_unrutted` hillslope intersection gating/cap logic plus replacement-pass staging in `wepppy/nodb/mods/roads/roads.py`.
+- **2026-04-08** - Added targeted regression tests for selection/cap behavior and replacement staging summaries.
+- **2026-04-08** - Corrected routed three-OFE slope serialization (`3` point-count for buffer OFE) and revalidated on cloned fixture run `clogging-starch-outslope-unrutted-e2e-20260407-232343` with 5 successful replacement segment executions.
 
 ## Decisions
 
@@ -63,6 +73,176 @@
 
 **Impact**: Higher fidelity with more implementation complexity and stronger validation needs.
 
+---
+
+### 2026-04-08: Inclusion gating uses physical thresholds
+**Context**: User rejected cell-size-based thresholds due to variable raster resolution.
+
+**Options considered**:
+1. Mixed ratio + cell-size guardrails.
+2. Physical-length overlap rules with fixed minimums.
+
+**Decision**: Option 2 (`L_overlap_h / W_h >= 0.60` and `L_overlap_h >= 10 m`).
+
+**Impact**: Stable eligibility behavior across raster resolutions.
+
+---
+
+### 2026-04-08: Minimum landuse OFE length is physical
+**Context**: Cell-size-dependent minimums drift with grid resolution.
+
+**Options considered**:
+1. Cell-count-derived minimum.
+2. Fixed physical minimum.
+
+**Decision**: Option 2 (`L_landuse_min = 10 m`).
+
+**Impact**: Consistent contributor geometry and clearer acceptance checks.
+
+---
+
+### 2026-04-08: Outslope-unrutted segmentation is raster-burn and hillslope-local
+**Context**: User directed this case should not rely on monotonic strip assumptions.
+
+**Options considered**:
+1. Reuse monotonic segmentation pathway.
+2. Burn roads to raster, evaluate overlap hillslope-by-hillslope, then decompose.
+
+**Decision**: Option 2.
+
+**Impact**: Supports non-monotonic crossings and aligns decomposition with raster context.
+
+---
+
+### 2026-04-08: Multi-road (`N`) crossings per hillslope are required
+**Context**: A hillslope can be crossed by multiple roads and fill segments.
+
+**Options considered**:
+1. Limit to one road crossing per hillslope.
+2. Support `N` crossings via multiple contributors and replacement aggregation.
+
+**Decision**: Option 2.
+
+**Impact**: Enables patterns like repeated `landuse/road/fill` blocks while preserving replacement semantics.
+
+---
+
+### 2026-04-08: Inclusion length metric uses vector overlap (Gate 1)
+**Context**: User rejected hybrid overlap measurement as unnecessary complexity.
+
+**Options considered**:
+1. Raster-cell approximation.
+2. Vector intersection length (chosen).
+3. Hybrid raster membership + vector measurement.
+
+**Decision**: Option 2.
+
+**Impact**: Simpler implementation while preserving physical-length semantics.
+
+---
+
+### 2026-04-08: Cross-hillslope segmentation and inclusion are independent per hillslope (Gate 2)
+**Context**: User requires preserving hillslope replacement area contracts but allows non-conservative aggregate road area across crossed hillslopes.
+
+**Options considered**:
+1. Global multi-hillslope balancing.
+2. Independent hillslope-specific segments with independent inclusion gates (chosen).
+
+**Decision**: Option 2, with distinct outslope-unrutted segment IDs per hillslope.
+
+**Impact**: Deterministic segmentation and cleaner per-hillslope replacement bookkeeping.
+
+---
+
+### 2026-04-08: No additional trace requirement for outslope-unrutted replacement (Gate 4)
+**Context**: User requires simple replacement-pass semantics without extra phase-4 channel tracing logic.
+
+**Options considered**:
+1. Add new trace-to-channel requirement for replacement contributors.
+2. Use hillslope-pass replacement and let watershed routing handle delivery (chosen).
+
+**Decision**: Option 2.
+
+**Impact**: Lower implementation complexity and alignment with replacement workflow intent.
+
+---
+
+### 2026-04-08: Parameter defaults/constraints sourced from fswepp2 and geojson (Gate 5)
+**Context**: User requested phase-4 parameter contracts align to legacy WEPP:Road implementation and prefer segment `.geojson` values.
+
+**Options considered**:
+1. Reuse existing Roads point-source defaults.
+2. New phase-4 contract based on fswepp2 defaults/validators plus `.geojson` precedence (chosen).
+
+**Decision**: Option 2.
+
+**Impact**: Better legacy parity and explicit segment-level parameterization.
+
+---
+
+### 2026-04-08: Gate 3 and Gate 6 recommendations accepted
+**Context**: User accepted recommended path for aggregation math and design activation.
+
+**Options considered**:
+1. Keep phase-1 additive combiner and direct activation.
+2. Use phase-4 replacement combiner plus feature-flagged alias normalization (chosen).
+
+**Decision**: Option 2.
+
+**Impact**: Safer rollout and higher-fidelity replacement behavior.
+
+---
+
+### 2026-04-08: Absolute area closure with top-OFE compensation (Gate 1 finalization)
+**Context**: User required absolute area handling and explicit compensation target.
+
+**Options considered**:
+1. Relative/combined tolerance.
+2. Absolute closure with top-OFE compensation (chosen).
+
+**Decision**: Option 2.
+
+**Impact**: Deterministic per-hillslope closure behavior aligned with user expectation.
+
+---
+
+### 2026-04-08: No feature-flag retirement workflow (Gate 3 simplification)
+**Context**: User rejected feature-flag retirement complexity because the path has not shipped.
+
+**Options considered**:
+1. Feature-flag lifecycle with retirement criteria.
+2. Immediate unconditional alias normalization (chosen).
+
+**Decision**: Option 2.
+
+**Impact**: Simpler rollout and fewer activation states.
+
+---
+
+### 2026-04-08: Performance cap set to 3 crossings per hillslope (Gate 4 finalization)
+**Context**: User set explicit cap for outslope-unrutted crossing complexity.
+
+**Options considered**:
+1. Dynamic cap/performance heuristics.
+2. Fixed cap = 3 (chosen).
+
+**Decision**: Option 2.
+
+**Impact**: Predictable runtime envelope and bounded contributor growth.
+
+---
+
+### 2026-04-08: Minimum diagnostics schema adopted (remaining gate closure)
+**Context**: User directed adoption of the minimum schema for phase-4 diagnostics payloads.
+
+**Options considered**:
+1. Rich diagnostics schema with expanded contributor payload contracts.
+2. Minimum diagnostics schema with required run-summary counts, per-hillslope records, and bounded status codes (chosen).
+
+**Decision**: Option 2.
+
+**Impact**: Closes the final phase-4 decision gate with a stable and implementation-light contract.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -75,8 +255,8 @@
 ## Verification Checklist
 
 ### Targeted Tests
-- [ ] `cd /workdir/wepppy && wctl run-pytest tests/nodb/mods/test_roads_controller.py --maxfail=1`
-- [ ] `cd /workdir/wepppy && wctl run-pytest tests/nodb/mods/test_roads_monotonic_segments.py --maxfail=1`
+- [x] `cd /workdir/wepppy && wctl run-pytest tests/nodb/mods/test_roads_controller.py --maxfail=1`
+- [x] `cd /workdir/wepppy && wctl run-pytest tests/nodb/mods/test_roads_monotonic_segments.py --maxfail=1`
 - [ ] `cd /workdir/wepppy && wctl run-pytest tests/wepp/reports --maxfail=1`
 
 ### Broader Validation
@@ -109,3 +289,72 @@
 
 **Test results**:
 - Documentation authoring session; implementation tests not run yet.
+
+### 2026-04-08: Contract lock update
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Updated Roads specification with settled step-4 contracts for inclusion gating, physical minimum lengths, 4% geometry parity, and `N`-road support.
+- Updated active ExecPlan and tracker decision logs with the same contracts.
+
+**Blockers encountered**:
+- No runtime blockers; implementation remains pending for Milestone 1 code changes.
+
+**Next steps**:
+- Implement hillslope decomposition from burned roads raster and enforce inclusion/length contracts in `roads.py`.
+
+**Test results**:
+- Documentation-only update session; executed markdown lint only.
+
+### 2026-04-08: User gate selection confirmation
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Captured user-selected Gate-1/2/4/5 decisions and accepted Gate-3/6 recommendations in spec, tracker, and active ExecPlan.
+- Updated deferred-details list to only unresolved contracts.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- Implement Milestone 1 decomposition using vector overlap metrics and hillslope-specific segmentation IDs.
+
+**Test results**:
+- Documentation-only update session; executed markdown lint only.
+
+### 2026-04-08: Minimum diagnostics schema adoption
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added minimum diagnostics schema contract to Roads specification for `outslope_unrutted` replacement summaries.
+- Updated deferred-details section to `none` and synchronized active ExecPlan/tracker decision logs.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- Begin Milestone 1 implementation in code against the now-locked phase-4 contract set.
+
+**Test results**:
+- Documentation-only update session; executed markdown lint only.
+
+
+### 2026-04-08: Initial code implementation pass
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Enabled canonical design alias normalization so `Outslope`/`outunrut` map to `outslope_unrutted` in Roads run eligibility.
+- Implemented hillslope-local outslope-unrutted selection via vector overlap length with settled thresholds (`L_overlap/W >= 0.60`, `L_overlap >= 10 m`) and deterministic cap at 3 crossings per hillslope.
+- Added replacement-pass staging precedence: targeted hillslopes now stage replacement outputs (single-pass copy/symlink or replacement-only combine) and suppress additive combines for those same hillslopes.
+- Propagated minimum diagnostics payload into both success and failure run summaries.
+- Added regression tests for alias eligibility, selection/cap behavior, and replacement staging summary fields.
+
+**Blockers encountered**:
+- `wepppyo3.wepp_interchange.combine_hillslope_pass_files` currently only exposes `strategy='phase1'`; no phase-4 replacement strategy exists yet.
+
+**Next steps**:
+- Implement Milestones 2/3/5: MOFE contributor assembly (`hill -> road -> fill -> hill`), per-hillslope area-closure compensation at top OFE, and replacement aggregation contracts.
+
+**Test results**:
+- `wctl run-pytest tests/nodb/mods/test_roads_monotonic_segments.py tests/nodb/mods/test_roads_controller.py --maxfail=1` (pass).
+
