@@ -1,4 +1,4 @@
-"""Roads NoDb controller for inslope point-source routing workflows."""
+"""Roads NoDb controller for Roads point-source routing workflows."""
 
 from __future__ import annotations
 
@@ -31,8 +31,13 @@ from wepppy.nodb.mods.roads.monotonic_segments import convert_geojson_file_to_mo
 __all__ = ["Roads"]
 
 
+ELIGIBLE_POINT_SOURCE_DESIGNS: frozenset[str] = frozenset(
+    {"inslope_bd", "inslope_rd", "outslope_rutted"}
+)
+
+
 def _is_eligible_design(value: Any) -> bool:
-    return isinstance(value, str) and value.lower() in {"inslope_bd", "inslope_rd"}
+    return isinstance(value, str) and value.lower() in ELIGIBLE_POINT_SOURCE_DESIGNS
 
 
 def _is_hillslope_topaz_id(value: Any) -> bool:
@@ -184,6 +189,8 @@ class Roads(NoDbBase):
             "traffic_default": "low",
             "rfg_pct_default": 15.0,
             "road_width_m_default": 4.0,
+            "fill_length_default_m": 30.0,
+            "fill_slope_default_pct": 10.0,
             "trace_max_steps": 20000,
             "max_upload_mb": 50,
             "attribute_field_map": {
@@ -829,7 +836,14 @@ class Roads(NoDbBase):
                 raise ValueError(f"input_crs is invalid: {exc}") from exc
             params["input_crs"] = value
 
-        for key in ("sample_step_m", "tolerance_m", "rfg_pct_default", "road_width_m_default"):
+        for key in (
+            "sample_step_m",
+            "tolerance_m",
+            "rfg_pct_default",
+            "road_width_m_default",
+            "fill_length_default_m",
+            "fill_slope_default_pct",
+        ):
             if key not in payload:
                 continue
             value = payload[key]
@@ -844,6 +858,8 @@ class Roads(NoDbBase):
                 raise ValueError(f"{key} must be > 0.")
             if key == "tolerance_m" and numeric < 0:
                 raise ValueError("tolerance_m must be >= 0.")
+            if key == "fill_slope_default_pct":
+                numeric = self._clamp_percent_slope(numeric)
             params[key] = numeric
 
         if "trace_max_steps" in payload:
@@ -1372,7 +1388,10 @@ class Roads(NoDbBase):
                 execution_record.get("buffer_slope_pct", properties.get("buffer_slope_pct"))
             ),
             "fill_length_m": self._as_float_or_none(
-                execution_record.get("fill_length_m", properties.get("fill_length_m"))
+                execution_record.get("fill_length_m", (resolved_inputs or {}).get("fill_length_m", properties.get("fill_length_m")))
+            ),
+            "fill_slope_pct": self._as_float_or_none(
+                execution_record.get("fill_slope_pct", (resolved_inputs or {}).get("fill_slope_pct", properties.get("fill_slope_pct")))
             ),
             "trace_path_length_m": self._as_float_or_none(execution_record.get("trace_path_length_m")),
             "trace_mean_slope": self._as_float_or_none(execution_record.get("trace_mean_slope")),
@@ -1817,7 +1836,7 @@ class Roads(NoDbBase):
         warning_examples: List[Dict[str, Any]],
         warning_limit: int,
     ) -> Dict[str, Any]:
-        if design not in {"inslope_bd", "inslope_rd"}:
+        if design not in ELIGIBLE_POINT_SOURCE_DESIGNS:
             raise ValueError(f"Unsupported Roads design for segment execution: {design!r}")
 
         default_surface = self._normalize_surface(
@@ -1835,6 +1854,13 @@ class Roads(NoDbBase):
         )
         default_rfg = float(params.get("rfg_pct_default", 15.0))
         default_width = float(params.get("road_width_m_default", 4.0))
+        default_fill_length_m = float(params.get("fill_length_default_m", 30.0))
+        if default_fill_length_m <= 0:
+            default_fill_length_m = 30.0
+        default_fill_slope_pct = self._as_float_or_none(params.get("fill_slope_default_pct"))
+        if default_fill_slope_pct is None:
+            default_fill_slope_pct = 10.0
+        default_fill_slope_pct = self._clamp_percent_slope(float(default_fill_slope_pct))
 
         attribute_field_map = self._normalize_attribute_field_map(
             params.get("attribute_field_map"),
@@ -1871,6 +1897,14 @@ class Roads(NoDbBase):
             properties,
             ("WIDTH_M", "width_m", "ROAD_WIDTH_M", "road_width_m"),
         )
+        fill_length_raw = self._first_non_empty_property(
+            properties,
+            ("FILL_LENGTH_M", "fill_length_m", "FILL_LEN_M", "fill_len_m"),
+        )
+        fill_slope_raw = self._first_non_empty_property(
+            properties,
+            ("FILL_SLOPE_PCT", "fill_slope_pct", "FILL_SLOPE", "fill_slope", "FILL_GRADE_PCT", "fill_grade_pct"),
+        )
 
         resolved_texture = self._normalize_soil_texture(texture_raw, default_texture)
 
@@ -1885,6 +1919,19 @@ class Roads(NoDbBase):
         if road_width_m <= 0:
             road_width_m = default_width
 
+        fill_length_m = self._coerce_float(fill_length_raw)
+        fill_length_source = "segment_property"
+        if fill_length_m is None or fill_length_m <= 0:
+            fill_length_m = default_fill_length_m
+            fill_length_source = "roads_default"
+
+        fill_slope_pct = self._coerce_float(fill_slope_raw)
+        fill_slope_source = "segment_property"
+        if fill_slope_pct is None or fill_slope_pct <= 0:
+            fill_slope_pct = default_fill_slope_pct
+            fill_slope_source = "roads_default"
+        fill_slope_pct = self._clamp_percent_slope(float(fill_slope_pct))
+
         return {
             "design": design,
             "surface": resolved_surface,
@@ -1892,12 +1939,16 @@ class Roads(NoDbBase):
             "soil_texture": resolved_texture,
             "rfg_pct": float(rfg_pct),
             "road_width_m": float(road_width_m),
+            "fill_length_m": float(fill_length_m),
+            "fill_slope_pct": float(fill_slope_pct),
             "resolution_sources": {
                 "surface": surface_source,
                 "traffic": traffic_source,
                 "soil_texture": "segment_property" if texture_raw else "roads_default",
                 "rfg_pct": "segment_property" if rfg_raw else "roads_default",
                 "road_width_m": "segment_property" if width_raw else "roads_default",
+                "fill_length_m": fill_length_source,
+                "fill_slope_pct": fill_slope_source,
             },
         }
 
@@ -2030,6 +2081,60 @@ class Roads(NoDbBase):
             "buffer_slope_fraction": float(slope_pct / 100.0),
         }
 
+    def _derive_buffer_profile_from_feature_or_defaults(
+        self,
+        *,
+        properties: Mapping[str, Any],
+        road_profile: Mapping[str, Any],
+    ) -> Dict[str, Any]:
+        buffer_length_raw = self._first_non_empty_property(
+            properties,
+            ("BUFFER_LENGTH_M", "buffer_length_m", "BUFFER_LEN_M", "buffer_len_m"),
+        )
+        buffer_slope_raw = self._first_non_empty_property(
+            properties,
+            ("BUFFER_SLOPE_PCT", "buffer_slope_pct", "BUFFER_SLOPE", "buffer_slope"),
+        )
+
+        buffer_length_source = "segment_property"
+        buffer_length_m = self._coerce_float(buffer_length_raw)
+        if buffer_length_m is None or buffer_length_m <= 0:
+            segment_length_m = self._as_float_or_none(road_profile.get("segment_length_m"))
+            if segment_length_m is None or segment_length_m <= 0:
+                buffer_length_m = 30.0
+            else:
+                buffer_length_m = max(0.3, min(float(segment_length_m), 30.0))
+            buffer_length_source = "derived_default"
+
+        buffer_slope_source = "segment_property"
+        buffer_slope_pct = self._coerce_float(buffer_slope_raw)
+        if buffer_slope_pct is None or buffer_slope_pct <= 0:
+            road_slope_pct = self._as_float_or_none(road_profile.get("slope_pct"))
+            if road_slope_pct is None or road_slope_pct <= 0:
+                buffer_slope_pct = 6.0
+            else:
+                buffer_slope_pct = float(road_slope_pct) * 0.5
+            buffer_slope_source = "derived_default"
+
+        buffer_slope_pct = self._clamp_percent_slope(float(buffer_slope_pct))
+        return {
+            "buffer_length_m": max(0.3, float(buffer_length_m)),
+            "buffer_slope_pct": float(buffer_slope_pct),
+            "buffer_slope_fraction": float(buffer_slope_pct / 100.0),
+            "buffer_length_source": buffer_length_source,
+            "buffer_slope_source": buffer_slope_source,
+        }
+
+    @staticmethod
+    def _derive_fill_profile_from_inputs(*, fill_length_m: float, fill_slope_pct: float) -> Dict[str, float]:
+        fill_length = max(0.3, float(fill_length_m))
+        slope_pct = max(0.1, min(40.0, float(fill_slope_pct)))
+        return {
+            "fill_length_m": float(fill_length),
+            "fill_slope_pct": float(slope_pct),
+            "fill_slope_fraction": float(slope_pct / 100.0),
+        }
+
     @staticmethod
     def _write_routed_two_ofe_slope_file(
         path: Path,
@@ -2050,6 +2155,34 @@ class Roads(NoDbBase):
             f"0.00, {road_slope_fraction:.6f} 1.00, {road_slope_fraction:.6f}",
             f"3 {float(buffer_length_m):.3f}",
             f"0.00, {road_slope_fraction:.6f} 0.05, {buffer_slope_fraction:.6f} 1.00, {buffer_slope_fraction:.6f}",
+        ]
+        path.write_text("\n".join(content) + "\n", encoding="utf-8")
+
+    @staticmethod
+    def _write_routed_three_ofe_slope_file(
+        path: Path,
+        *,
+        width_m: float,
+        road_length_m: float,
+        road_slope_pct: float,
+        fill_length_m: float,
+        fill_slope_pct: float,
+        buffer_length_m: float,
+        buffer_slope_pct: float,
+    ) -> None:
+        road_slope_fraction = float(road_slope_pct) / 100.0
+        fill_slope_fraction = float(fill_slope_pct) / 100.0
+        buffer_slope_fraction = float(buffer_slope_pct) / 100.0
+        content = [
+            "97.3",
+            "3",
+            f"180.0 {float(width_m):.3f}",
+            f"2 {float(road_length_m):.3f}",
+            f"0.00, {road_slope_fraction:.6f} 1.00, {road_slope_fraction:.6f}",
+            f"3 {float(fill_length_m):.3f}",
+            f"0.00, {road_slope_fraction:.6f} 0.05, {fill_slope_fraction:.6f} 1.00, {fill_slope_fraction:.6f}",
+            f"4 {float(buffer_length_m):.3f}",
+            f"0.00, {fill_slope_fraction:.6f} 0.05, {buffer_slope_fraction:.6f} 1.00, {buffer_slope_fraction:.6f}",
         ]
         path.write_text("\n".join(content) + "\n", encoding="utf-8")
 
@@ -2169,6 +2302,112 @@ class Roads(NoDbBase):
         out.append(buffer_horizon_line)
         output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
+    def _build_routed_three_ofe_soil_file(
+        self,
+        *,
+        template_path: Path,
+        output_path: Path,
+        traffic: str,
+        surface: str,
+        rfg_pct: float,
+    ) -> None:
+        lines = template_path.read_text(encoding="utf-8").splitlines()
+        if len(lines) < 10:
+            raise ValueError(f"Roads soil template is malformed: {template_path}")
+
+        out: List[str] = []
+        i = 0
+        out.append(lines[i])
+        i += 1
+
+        while i < len(lines) and lines[i].startswith("#"):
+            out.append(lines[i])
+            i += 1
+
+        if i >= len(lines):
+            raise ValueError(f"Roads soil template is malformed (missing soil comment): {template_path}")
+        out.append(lines[i])
+        i += 1
+
+        while i < len(lines) and not lines[i].strip():
+            out.append(lines[i])
+            i += 1
+
+        if i >= len(lines):
+            raise ValueError(f"Roads soil template is malformed (missing ntemp line): {template_path}")
+        ntemp_tokens = lines[i].split()
+        ksflag = ntemp_tokens[1] if len(ntemp_tokens) > 1 else "0"
+        out.append(f"3 {ksflag}")
+        i += 1
+
+        while i < len(lines) and not lines[i].strip():
+            i += 1
+
+        ofe_pairs: List[Tuple[str, str]] = []
+        while i < len(lines):
+            if not lines[i].strip():
+                i += 1
+                continue
+            if i + 1 >= len(lines):
+                raise ValueError(f"Roads soil template has incomplete OFE pair: {template_path}")
+            ofe_pairs.append((lines[i], lines[i + 1]))
+            i += 2
+
+        if len(ofe_pairs) < 3:
+            raise ValueError(f"Roads soil template must include at least three OFEs: {template_path}")
+
+        road_header, road_horizon = ofe_pairs[0]
+        fill_header, fill_horizon = ofe_pairs[1]
+        buffer_header, buffer_horizon = ofe_pairs[2]
+
+        road_tokens = shlex.split(road_header)
+        if len(road_tokens) < 8:
+            raise ValueError(f"Roads soil template has malformed road OFE header: {template_path}")
+        slid, texid = road_tokens[0], road_tokens[1]
+        nsl, salb, sat, ki, kr, shcrit = road_tokens[2:8]
+        avke = road_tokens[8] if len(road_tokens) > 8 else None
+
+        ki_value = float(ki)
+        kr_value = float(kr)
+        if traffic != "high":
+            ki_value /= 4.0
+            kr_value /= 4.0
+
+        road_header_line = (
+            f"'{slid}' '{texid}' {nsl} {salb} {sat} {ki_value:.6g} {kr_value:.6g} {shcrit}"
+        )
+        if avke is not None:
+            road_header_line += f" {avke}"
+
+        urr_ref = 95.0 if surface == "paved" else 65.0
+        ufr_ref = (float(rfg_pct) + 65.0) / 2.0
+        road_horizon_line = self._replace_soil_marker(
+            road_horizon,
+            urr_ref=urr_ref,
+            ufr_ref=ufr_ref,
+            ubr_value=float(rfg_pct),
+        )
+        fill_horizon_line = self._replace_soil_marker(
+            fill_horizon,
+            urr_ref=urr_ref,
+            ufr_ref=ufr_ref,
+            ubr_value=float(rfg_pct),
+        )
+        buffer_horizon_line = self._replace_soil_marker(
+            buffer_horizon,
+            urr_ref=urr_ref,
+            ufr_ref=ufr_ref,
+            ubr_value=float(rfg_pct),
+        )
+
+        out.append(road_header_line)
+        out.append(road_horizon_line)
+        out.append(fill_header)
+        out.append(fill_horizon_line)
+        out.append(buffer_header)
+        out.append(buffer_horizon_line)
+        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+
     @staticmethod
     def _strip_management_scenario_block(
         lines: List[str], *, start_marker: str, end_marker: str
@@ -2263,6 +2502,13 @@ class Roads(NoDbBase):
         self._build_routed_two_ofe_management_file(template_path=source_path, output_path=output_path)
         return output_path
 
+    def _materialize_routed_three_ofe_management_template(self, *, traffic: str) -> Path:
+        source_path = self._resolve_legacy_management_template_path(traffic=traffic)
+        output_path = Path(self.roads_runs_dir) / f"{source_path.stem}.routed_three_ofe.man"
+        if source_path.resolve() != output_path.resolve():
+            shutil.copy2(source_path, output_path)
+        return output_path
+
     def _resolve_trace_receiving_hillslope_topaz(
         self,
         *,
@@ -2319,7 +2565,7 @@ class Roads(NoDbBase):
     def _resolve_legacy_soil_template_path(self, *, design: str, surface: str, soil_texture: str) -> Path:
         if design == "inslope_rd":
             tau_value = "10"
-        elif design == "inslope_bd" and surface == "paved":
+        elif design in {"inslope_bd", "outslope_rutted"} and surface == "paved":
             tau_value = "1"
         else:
             tau_value = "2"
@@ -3128,6 +3374,8 @@ class Roads(NoDbBase):
             failed_segment_records: List[Dict[str, Any]] = []
             mapping_warning_counts: Counter[str] = Counter()
             mapping_warning_examples: List[Dict[str, Any]] = []
+            design_execution_counts: Counter[str] = Counter()
+            fill_default_usage_counts: Counter[str] = Counter()
 
             current_stage = "segment_runs"
             with rasterio.open(dem_path) as dem_dataset:
@@ -3136,6 +3384,7 @@ class Roads(NoDbBase):
                 input_to_wgs84 = Transformer.from_crs(input_crs, CRS.from_epsg(4326), always_xy=True)
                 input_to_dem = Transformer.from_crs(input_crs, dem_dataset.crs, always_xy=True)
                 routed_management_cache_by_traffic: Dict[str, Path] = {}
+                routed_three_ofe_management_cache_by_traffic: Dict[str, Path] = {}
                 routing_mode_counts: Counter[str] = Counter()
                 trace_invocation_count = 0
                 trace_reaches_channel_count = 0
@@ -3483,9 +3732,56 @@ class Roads(NoDbBase):
                     management_path: Path
                     segment_soil_path = Path(self.roads_runs_dir) / f"p{segment_run_id}.single_ofe.sol"
                     segment_slope_path = Path(self.roads_runs_dir) / f"p{segment_run_id}.slp"
-                    routed_buffer_profile: Dict[str, float] = {}
+                    routed_buffer_profile: Dict[str, Any] = {}
+                    fill_profile: Dict[str, float] = {}
+                    is_outslope_rutted = segment_inputs["design"] == "outslope_rutted"
 
-                    if routing_mode == "channel_associated":
+                    if is_outslope_rutted:
+                        if segment_inputs["resolution_sources"].get("fill_length_m") == "roads_default":
+                            fill_default_usage_counts["fill_length_m"] += 1
+                        if segment_inputs["resolution_sources"].get("fill_slope_pct") == "roads_default":
+                            fill_default_usage_counts["fill_slope_pct"] += 1
+
+                        fill_profile = self._derive_fill_profile_from_inputs(
+                            fill_length_m=segment_inputs["fill_length_m"],
+                            fill_slope_pct=segment_inputs["fill_slope_pct"],
+                        )
+                        segment_soil_suffix = "routed_three_ofe"
+                        segment_soil_path = Path(self.roads_runs_dir) / f"p{segment_run_id}.routed_three_ofe.sol"
+                        management_path = routed_three_ofe_management_cache_by_traffic.get(segment_inputs["traffic"])
+                        if management_path is None:
+                            management_path = self._materialize_routed_three_ofe_management_template(
+                                traffic=segment_inputs["traffic"]
+                            )
+                            routed_three_ofe_management_cache_by_traffic[segment_inputs["traffic"]] = management_path
+                        self._build_routed_three_ofe_soil_file(
+                            template_path=soil_template_path,
+                            output_path=segment_soil_path,
+                            traffic=segment_inputs["traffic"],
+                            surface=segment_inputs["surface"],
+                            rfg_pct=segment_inputs["rfg_pct"],
+                        )
+
+                        if routing_mode == "channel_associated":
+                            routed_buffer_profile = self._derive_buffer_profile_from_feature_or_defaults(
+                                properties=properties,
+                                road_profile=profile,
+                            )
+                        else:
+                            assert trace_result is not None
+                            routed_buffer_profile = self._derive_buffer_profile_from_trace(trace_result)
+
+                        self._write_routed_three_ofe_slope_file(
+                            segment_slope_path,
+                            width_m=segment_inputs["road_width_m"],
+                            road_length_m=profile["segment_length_m"],
+                            road_slope_pct=profile["slope_pct"],
+                            fill_length_m=fill_profile["fill_length_m"],
+                            fill_slope_pct=fill_profile["fill_slope_pct"],
+                            buffer_length_m=routed_buffer_profile["buffer_length_m"],
+                            buffer_slope_pct=routed_buffer_profile["buffer_slope_pct"],
+                        )
+                    elif routing_mode == "channel_associated":
                         management_path = management_cache_by_traffic.get(segment_inputs["traffic"])
                         if management_path is None:
                             management_path = self._materialize_single_ofe_management_template(
@@ -3550,7 +3846,10 @@ class Roads(NoDbBase):
                             "rfg_pct": segment_inputs["rfg_pct"],
                             "soil_file_variant": segment_soil_suffix,
                             "road_width_m": segment_inputs["road_width_m"],
+                            "fill_length_m": fill_profile.get("fill_length_m", segment_inputs.get("fill_length_m")),
+                            "fill_slope_pct": fill_profile.get("fill_slope_pct", segment_inputs.get("fill_slope_pct")),
                             "segment_length_m": profile["segment_length_m"],
+                            **fill_profile,
                             "slope_pct_raw": profile["raw_slope_pct"],
                             "slope_pct_clamped": profile["slope_pct"],
                             "high_point": profile["high_point"],
@@ -3645,6 +3944,7 @@ class Roads(NoDbBase):
                         continue
 
                     successful_segment_count += 1
+                    design_execution_counts[segment_inputs["design"]] += 1
                     segment_pass_paths_by_wepp[wepp_id_int].append(str(segment_pass_path))
                     execution_record = {
                         "segment_id": segment_id,
@@ -3661,12 +3961,15 @@ class Roads(NoDbBase):
                         "soil_texture": segment_inputs["soil_texture"],
                         "rfg_pct": segment_inputs["rfg_pct"],
                         "road_width_m": segment_inputs["road_width_m"],
+                        "fill_length_m": fill_profile.get("fill_length_m", segment_inputs.get("fill_length_m")),
+                        "fill_slope_pct": fill_profile.get("fill_slope_pct", segment_inputs.get("fill_slope_pct")),
                         "segment_length_m": profile["segment_length_m"],
                         "slope_pct_raw": profile["raw_slope_pct"],
                         "slope_pct_clamped": profile["slope_pct"],
                         "elevation_high_m": profile["elevation_high_m"],
                         "elevation_low_m": profile["elevation_low_m"],
                         "segment_pass_relpath": os.path.relpath(segment_pass_path, self.wd),
+                        **fill_profile,
                         **trace_summary,
                         **routed_buffer_profile,
                     }
@@ -3709,6 +4012,9 @@ class Roads(NoDbBase):
                     "executed_channel_associated_segment_count": int(routing_mode_counts.get("channel_associated", 0)),
                     "executed_non_channel_routed_segment_count": int(routing_mode_counts.get("non_channel_routed", 0)),
                     "segment_routing_mode_counts": dict(sorted(routing_mode_counts.items())),
+                    "executed_outslope_rutted_segment_count": int(design_execution_counts.get("outslope_rutted", 0)),
+                    "segment_design_counts": dict(sorted(design_execution_counts.items())),
+                    "fill_default_usage_counts": dict(sorted(fill_default_usage_counts.items())),
                     "trace_invocation_count": int(trace_invocation_count),
                     "trace_reached_channel_count": int(trace_reaches_channel_count),
                     "trace_termination_reason_counts": dict(sorted(trace_termination_reason_counts.items())),
@@ -3818,6 +4124,9 @@ class Roads(NoDbBase):
                 "executed_channel_associated_segment_count": int(routing_mode_counts.get("channel_associated", 0)),
                 "executed_non_channel_routed_segment_count": int(routing_mode_counts.get("non_channel_routed", 0)),
                 "segment_routing_mode_counts": dict(sorted(routing_mode_counts.items())),
+                "executed_outslope_rutted_segment_count": int(design_execution_counts.get("outslope_rutted", 0)),
+                "segment_design_counts": dict(sorted(design_execution_counts.items())),
+                "fill_default_usage_counts": dict(sorted(fill_default_usage_counts.items())),
                 "trace_invocation_count": int(trace_invocation_count),
                 "trace_reached_channel_count": int(trace_reaches_channel_count),
                 "trace_termination_reason_counts": dict(sorted(trace_termination_reason_counts.items())),

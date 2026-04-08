@@ -433,8 +433,13 @@ def _lookup_topaz_id_at_lowpoint_cell(
     return topaz_id, diagnostics
 
 
+ELIGIBLE_POINT_SOURCE_DESIGNS: frozenset[str] = frozenset(
+    {"inslope_bd", "inslope_rd", "outslope_rutted"}
+)
+
+
 def _is_eligible_inslope_design(design_value: Any) -> bool:
-    return isinstance(design_value, str) and design_value.lower() in {"inslope_bd", "inslope_rd"}
+    return isinstance(design_value, str) and design_value.lower() in ELIGIBLE_POINT_SOURCE_DESIGNS
 
 
 def _resolve_eligible_inslope_design(
@@ -565,10 +570,10 @@ def convert_geojson_to_monotonic_segments(
     channel_raster_path/topaz_id_raster_path:
         Optional rasters for channel-neighbor lookup at segment low points.
         Adds `topaz_id_chn_lowpoint` and `topaz_id_hill_lowpoint` to each segment
-        (defaults null; set for DESIGN in `Inslope_bd`/`Inslope_rd` when a
+        (defaults null; set for DESIGN in `Inslope_bd`/`Inslope_rd`/`Outslope_rutted` when a
         deterministic nearby channel and receiving hillslope are found).
     design_property_keys:
-        Ordered property keys checked for inslope design eligibility.
+        Ordered property keys checked for point-source design eligibility.
         Defaults to `("DESIGN", "design")`.
     """
 

@@ -1,6 +1,6 @@
 # Roads Point-Source Outslope Rutted with Fill OFE
 
-**Status**: Open (2026-03-27)
+**Status**: Completed (2026-04-07)
 
 ## Overview
 This package implements step 3 of Roads modeling: `outslope_rutted` as a point-source design with explicit fill slope dynamics. It covers both channel-associated and non-channel low points and models routed contributors as `road OFE + fill OFE + flowpath buffer OFE`.
@@ -35,15 +35,15 @@ This package implements only `outslope_rutted` point-source behavior.
 - **Informed**: WEPPcloud route/report maintainers and operations.
 
 ## Success Criteria
-- [ ] `outslope_rutted` segments are eligible in prepare and run flows.
-- [ ] Run path builds `road -> fill -> buffer` contributors for `outslope_rutted`.
-- [ ] Fill OFE parameters are sourced from segment attributes with documented defaults (`fill_length_m` and `fill_slope_pct`).
-- [ ] Channel-associated and non-channel cases are both handled with explicit diagnostics.
-- [ ] Inslope and other existing designs remain regression-stable.
-- [ ] `last_run_summary` includes outslope-rutted routed counts and fill-default usage counts.
-- [ ] Targeted and full regression suites pass.
-- [ ] Code review artifact has no unresolved medium/high findings.
-- [ ] QA review artifact has no unresolved medium/high findings.
+- [x] `outslope_rutted` segments are eligible in prepare and run flows.
+- [x] Run path builds `road -> fill -> buffer` contributors for `outslope_rutted`.
+- [x] Fill OFE parameters are sourced from segment attributes with documented defaults (`fill_length_m` and `fill_slope_pct`).
+- [x] Channel-associated and non-channel cases are both handled with explicit diagnostics.
+- [x] Inslope and other existing designs remain regression-stable.
+- [x] `last_run_summary` includes outslope-rutted routed counts and fill-default usage counts.
+- [x] Targeted and full regression suites pass.
+- [x] Code review artifact has no unresolved medium/high findings.
+- [x] QA review artifact has no unresolved medium/high findings.
 
 ## Dependencies
 

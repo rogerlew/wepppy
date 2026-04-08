@@ -1,8 +1,8 @@
-# Roads NoDb Inslope Integration Specification
+# Roads NoDb Point-Source Integration Specification
 
-Status: Implemented (Phase 2 Step-2)  
-Last Updated: 2026-03-27  
-Scope: `Inslope_bd` and `Inslope_rd` road designs for the first WEPPcloud Roads NoDb integration.
+Status: Implemented (Phase 2 Step-3)  
+Last Updated: 2026-04-07  
+Scope: `Inslope_bd`, `Inslope_rd`, and `Outslope_rutted` point-source road designs for WEPPcloud Roads NoDb integration.
 Canonical cross-route `output_scope` contract: `docs/schemas/output-scope-contract.md`.
 
 ## Goal
@@ -14,9 +14,9 @@ Implement a repeatable pipeline that:
 3. Tags each segment with channel and receiving-hillslope Topaz IDs near its low point.
 4. Runs road-segment WEPP hillslopes and injects their effects into watershed routing via pass-file combination.
 
-This phase targets only inslope bare-ditch and inslope rocked-ditch designs.
+Current implementation includes inslope bare-ditch/rocked-ditch and outslope-rutted point-source behavior.
 
-## WEPPcloud User Story (Phase 1)
+## WEPPcloud User Story (Current Point-Source Phase)
 
 1. User runs WEPP normally (existing WEPPcloud workflow).
 2. User enables `Roads` from the `Mods` dropdown; this instantiates a Roads controller for the run.
@@ -26,12 +26,12 @@ This phase targets only inslope bare-ditch and inslope rocked-ditch designs.
 6. System executes Roads pipeline:
    - monotonic segmentation and lowpoint attribution,
    - segment-to-hillslope/channel mapping,
-   - single-OFE road segment WEPP runs,
+   - point-source road segment WEPP runs (`road`, `road+buffer`, or `road+fill+buffer` by design/routing branch),
    - pass-file combination against mapped hillslopes,
    - watershed rerun with combined pass files.
 7. User sees Roads run status and Roads-vs-baseline diagnostics/reports.
 
-## Roads NoDb Controller Integration (Phase 1 In Scope)
+## Roads NoDb Controller Integration (Current Scope)
 
 Roads is in-scope as a first-class NoDb controller for this phase.
 
@@ -639,9 +639,9 @@ Layout rationale:
 
 ## Segment Selection for WEPP Runs
 
-Operational filter for inslope step-2:
+Operational filter for point-source step-3:
 
-- `DESIGN` in `{Inslope_bd, Inslope_rd}`
+- `DESIGN` in `{Inslope_bd, Inslope_rd, Outslope_rutted}`
 - channel-associated execution path:
   - `topaz_id_chn_lowpoint` is not null,
   - `topaz_id_hill_lowpoint` is not null.
@@ -650,6 +650,18 @@ Operational filter for inslope step-2:
   - run-stage trace reaches channel,
   - traced receiving hillslope resolves to `subwta` suffix `1|2|3`,
   - traced receiving hillslope maps through `top2wepp`.
+
+Contributor contract by design/routing branch:
+
+- `Inslope_bd`/`Inslope_rd` channel-associated: single-OFE `road`.
+- `Inslope_bd`/`Inslope_rd` non-channel routed: routed two-OFE `road -> buffer`.
+- `Outslope_rutted` (channel-associated and non-channel routed): routed three-OFE `road -> fill -> buffer`.
+
+Fill parameter contract for `Outslope_rutted`:
+
+- segment attributes: `FILL_LENGTH_M`/`fill_length_m` and `FILL_SLOPE_PCT`/`fill_slope_pct` (plus aliases in controller parser).
+- roads defaults: `fill_length_default_m = 30.0`, `fill_slope_default_pct = 10.0`.
+- run summaries track `fill_default_usage_counts` whenever defaults are consumed.
 
 Non-selected segments are recorded but not executed.
 
@@ -779,15 +791,14 @@ Notes:
    - Roads controls panel with upload/config/run actions,
    - summary + run-results report endpoints/templates.
 5. Added RQ workers for `prepare_segments` and `run` orchestration.
-6. Implemented single-OFE segment WEPP run assembly under `wepp/roads/{runs,output}/` using this parameterization contract.
+6. Implemented segment WEPP run assembly under `wepp/roads/{runs,output}/` across single-OFE (`road`), routed two-OFE (`road -> buffer`), and routed three-OFE (`road -> fill -> buffer`) point-source contracts.
 7. Integrated pass combiner in `wepppyo3`, then wired watershed rerun assembly with `make_watershed_omni_contrasts_run`.
 8. Added diagnostics/reporting, roads-scoped report-resource regeneration, and end-to-end validation on fixture runs.
 
-## Non-Goals (Phase 1)
+## Non-Goals (Current Point-Source Phase)
 
-- Non-inslope designs (`Outslope_*`, etc.).
-- Exact replication of legacy 3-OFE WEPP:Road behavior.
-- Full WEPP:Road 3-OFE decomposition (road/fill/buffer) inside Roads phase 1.
+- `Outslope_unrutted` MOFE hillslope replacement (deferred to step-4 package).
+- Exact replication of legacy WEPP:Road hillslope replacement behavior in the current additive point-source phase.
 - Advanced physics-based hydrograph merge beyond the documented phase-1 approximation.
 
 ## Future Concept Draft: `Outslope_unrutted` MOFE Hillslope Replacement
@@ -815,30 +826,31 @@ Physical assumptions:
 - inslope point-source cases assume ditch/culvert bypass of fill-slope dynamics.
 - outslope rutted assumes no culvert bypass; concentrated flow can erode across fill slope before entering downslope buffer.
 
-Current implementation boundary (phase 2 step-2):
+Current implementation boundary (phase 2 step-3):
 
-- only inslope designs are implemented.
-- channel-associated low points keep the phase-1 behavior (`topaz_id_chn_lowpoint` + `topaz_id_hill_lowpoint` prepare mapping).
-- non-channel low points are now routable when the low-point `subwta` suffix is `1|2|3`; run-stage tracing routes those segments to channel and executes routed contributors as `road OFE + buffer OFE`.
+- implemented point-source designs are `inslope_bd`, `inslope_rd`, and `outslope_rutted`.
+- channel-associated low points keep the prepare-stage mapping contract (`topaz_id_chn_lowpoint` + `topaz_id_hill_lowpoint`).
+- non-channel low points are routable when the low-point `subwta` suffix is `1|2|3`; run-stage tracing routes those segments to channel.
 - routed contributors are merged through the existing pass-combine flow using traced receiving-hillslope attribution.
 
-Implemented step-2 non-channel low-point path:
+Implemented step-3 point-source routing path:
 
 1. If low point is not channel-associated, evaluate low-point cell in `subwta`.
 2. If `subwta` value is a hillslope pixel (`int` value ending in `1|2|3`), mark segment as non-channel routable in prepare outputs.
 3. During run, trace routable low points to channel via `wepppyo3.roads_flowpath.trace_downslope_flowpath(...)`.
-4. If trace reaches channel, build routed contributor profile as `road OFE + flowpath buffer OFE`:
-   - road OFE from existing inslope segment parameterization,
-   - buffer OFE from trace path length/slope.
-5. Resolve receiving hillslope from traced pre-channel cell (`subwta` suffix `1|2|3`) and merge resulting contributor pass into mapped hillslope output.
-6. If trace does not reach channel, skip contributor generation and persist explicit diagnostics in run summary/logs.
+4. If trace reaches channel, execute design-specific contributor assembly:
+   - inslope designs: `road OFE + flowpath buffer OFE` for non-channel routed; single-OFE `road` for channel-associated.
+   - `outslope_rutted`: `road OFE + fill OFE + buffer OFE` for both channel-associated and non-channel routed branches.
+5. For `outslope_rutted`, source fill geometry from segment attributes/defaults and track default usage in run summary.
+6. Resolve receiving hillslope from traced pre-channel cell (`subwta` suffix `1|2|3`) and merge resulting contributor pass into mapped hillslope output.
+7. If trace does not reach channel, skip contributor generation and persist explicit diagnostics in run summary/logs.
 
-Step-2 as-implemented contract notes (2026-03-27 review):
+Step-3 as-implemented contract notes (2026-04-07 review):
 
-- point-source contributor execution currently requires channel delivery (`trace_reaches_channel == true`); traces that terminate on hillslope interior are explicitly skipped (`trace_did_not_reach_channel`).
-- run summary diagnostics include `trace_invocation_count`, `trace_reached_channel_count`, `trace_termination_reason_counts`, and `segment_routing_mode_counts` for deterministic branch accounting.
-- run input parameter `trace_max_steps` (default `20000`) is exposed and validated as a positive integer.
-- this behavior applies only to inslope point-source designs in step-2; `outslope_rutted` and `outslope_unrutted` remain follow-on implementations.
+- point-source contributor execution requires channel delivery (`trace_reaches_channel == true`) for non-channel routed branches; traces that terminate on hillslope interior are explicitly skipped (`trace_did_not_reach_channel`).
+- `outslope_rutted` contributors always execute as routed three-OFE paths (`road -> fill -> buffer`) with explicit fill defaults (`30 m`, `10%`) when feature attributes are missing/invalid.
+- run summary diagnostics include `trace_invocation_count`, `trace_reached_channel_count`, `trace_termination_reason_counts`, `segment_routing_mode_counts`, `segment_design_counts`, and `fill_default_usage_counts`.
+- run input parameter `trace_max_steps` (default `20000`) remains exposed and validated as a positive integer.
 
 ### High-Fidelity Concept (Top-Level)
 
@@ -919,5 +931,5 @@ v1 integration constraints:
 
 ### Ordered Follow-On Plan
 
-1. Implement `outslope_rutted` point-source routing for both channel-associated and non-channel low points, including explicit fill OFE handling.
+1. [Completed 2026-04-07] Implement `outslope_rutted` point-source routing for both channel-associated and non-channel low points, including explicit fill OFE handling.
 2. Implement `outslope_unrutted` as MOFE hillslope replacement (`hill -> road -> fill -> hill`) with replacement semantics (no double counting).

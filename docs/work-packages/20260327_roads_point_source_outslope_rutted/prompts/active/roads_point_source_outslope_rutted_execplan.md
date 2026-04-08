@@ -12,24 +12,24 @@ After this package, `outslope_rutted` is modeled as a point-source Roads design 
 
 - [x] (2026-03-27 00:00Z) Authored package/tracker/ExecPlan scaffold for step-3 scope.
 - [x] (2026-03-27 23:40Z) Step-1 and step-2 dependencies confirmed complete; package activated as current Roads ExecPlan.
-- [ ] Milestone 1: Implement design eligibility and fill-parameter contract.
-- [ ] Milestone 2: Integrate run-stage `outslope_rutted` contributor builder (`road -> fill -> buffer`).
-- [ ] Milestone 3: Implement channel-associated and non-channel branch behavior with diagnostics.
-- [ ] Milestone 4: Add tests and fixture-backed validation.
-- [ ] Milestone 5: Complete code-review artifact and resolve medium/high findings.
-- [ ] Milestone 6: Complete QA-review artifact and resolve medium/high findings.
-- [ ] Milestone 7: Run final gates and update handoff docs.
+- [x] (2026-04-07 18:05Z) Milestone 1: Implemented design eligibility and fill-parameter contract.
+- [x] (2026-04-07 18:15Z) Milestone 2: Integrated run-stage `outslope_rutted` contributor builder (`road -> fill -> buffer`).
+- [x] (2026-04-07 18:25Z) Milestone 3: Implemented channel-associated and non-channel branch behavior with diagnostics.
+- [x] (2026-04-07 18:35Z) Milestone 4: Added tests and fixture-backed validation.
+- [x] (2026-04-07 18:40Z) Milestone 5: Completed code-review artifact and resolved medium/high findings.
+- [x] (2026-04-07 18:45Z) Milestone 6: Completed QA-review artifact and resolved medium/high findings.
+- [x] (2026-04-07 18:55Z) Milestone 7: Final gates green and handoff docs synchronized.
 
 ## Surprises & Discoveries
 
-- Observation: Current phase-1 design eligibility intentionally restricts to inslope designs.
-  Evidence: `Roads._is_eligible_design` and prepare-stage design checks.
+- Observation: Existing legacy roads soil templates already contain distinct road/fill/buffer OFE headers, which allowed a low-risk routed three-OFE soil transform.
+  Evidence: `3gloam2.sol` template shape and `_build_routed_three_ofe_soil_file` tests.
 
-- Observation: Roads phase-1 run assembly is built around single-OFE segment templates.
-  Evidence: segment soil/slope/man assembly paths in `wepppy/nodb/mods/roads/roads.py`.
+- Observation: Channel-associated `outslope_rutted` segments cannot always rely on trace-derived buffer geometry.
+  Evidence: run branch contracts use prepare lowpoint IDs without mandatory trace invocation for channel-associated flow.
 
-- Observation: DEM resolution is insufficient to infer real fill geometry reliably at road scale.
-  Evidence: user direction captured in Roads specification future-architecture section.
+- Observation: Step-3 changes stayed regression-safe across the full suite.
+  Evidence: `wctl run-pytest tests --maxfail=1` completed with 3097 passed / 36 skipped on 2026-04-07.
 
 ## Decision Log
 
@@ -47,7 +47,30 @@ After this package, `outslope_rutted` is modeled as a point-source Roads design 
 
 ## Outcomes & Retrospective
 
-Not complete yet. Fill during milestone closure and final handoff.
+Step-3 completed on 2026-04-07.
+
+Implemented outcomes:
+
+- `outslope_rutted` is now an eligible point-source design in prepare and run paths.
+- Run-stage contributor assembly now supports routed three-OFE `road -> fill -> buffer` for `outslope_rutted` in both channel-associated and non-channel routed branches.
+- Fill defaults/overrides (`fill_length_default_m`, `fill_slope_default_pct`) are validated, surfaced in run records, and tracked with `fill_default_usage_counts`.
+- Run summaries now include `executed_outslope_rutted_segment_count` and `segment_design_counts`.
+- Regression coverage added for three-OFE builders, fill parsing/defaults, and branch routing behavior.
+- Roads specification and package docs were updated to current step-3 contract.
+
+Validation summary:
+
+- `wctl run-pytest tests/nodb/mods/test_roads_controller.py --maxfail=1` (pass, 37 tests)
+- `wctl run-pytest tests/nodb/mods/test_roads_monotonic_segments.py --maxfail=1` (pass, 14 tests)
+- `wctl run-pytest tests/weppcloud/routes/test_roads_bp.py --maxfail=1` (pass, 18 tests)
+- `wctl run-npm test -- roads` (pass, 19 tests)
+- `wctl run-npm lint` (pass)
+- `wctl run-pytest tests --maxfail=1` (pass, 3097 passed / 36 skipped)
+
+Review-gate closure:
+
+- Code review artifact created: `artifacts/20260327_code_review.md` with no unresolved medium/high findings.
+- QA review artifact created: `artifacts/20260327_qa_review.md` with no unresolved medium/high findings.
 
 ## Context and Orientation
 
@@ -182,3 +205,4 @@ Revision notes:
 
 - 2026-03-27 00:00Z: Initial step-3 ExecPlan authored with explicit fill OFE contract and mandatory code/QA review gates.
 - 2026-03-27 23:40Z: Activated as current Roads ExecPlan after step-1/step-2 completion handoff.
+- 2026-04-07 18:55Z: Completed step-3 implementation end-to-end, validated gates, and synchronized package/review artifacts.

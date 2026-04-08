@@ -422,6 +422,39 @@ def test_inslope_rd_segments_get_channel_and_hillslope_lowpoint_ids(tmp_path: Pa
     )
 
 
+def test_outslope_rutted_segments_get_channel_and_hillslope_lowpoint_ids(tmp_path: Path) -> None:
+    dem_path = _write_dem(tmp_path, [0.0, 1.0, 2.0, 1.0, 0.0])
+    channel_path, topaz_path = _write_channel_topaz_rasters(
+        tmp_path,
+        channel_values=[0.0, 0.0, 0.0, 1.0, 0.0],
+        topaz_values=[11.0, 12.0, 13.0, 24.0, 21.0],
+    )
+    roads_path = _write_line_geojson(
+        tmp_path,
+        line_coords=[[0.5, 0.5], [4.5, 0.5]],
+        properties={"road_id": "E2C", "DESIGN": "Outslope_rutted"},
+    )
+    output_path = tmp_path / "roads.monotonic.geojson"
+
+    convert_geojson_file_to_monotonic_segments(
+        input_geojson_path=roads_path,
+        dem_path=dem_path,
+        output_geojson_path=output_path,
+        input_crs="EPSG:32610",
+        sample_step_m=1.0,
+        tolerance_m=0.0,
+        channel_raster_path=channel_path,
+        topaz_id_raster_path=topaz_path,
+    )
+
+    output = json.loads(output_path.read_text(encoding="utf-8"))
+    rows = [feature["properties"] for feature in output["features"]]
+
+    assert any(row.get("topaz_id_chn_lowpoint") == 24 for row in rows)
+    assert any(row.get("topaz_id_hill_lowpoint") == 21 for row in rows)
+    assert any(row.get("_roads_routing_eligibility") == "channel_associated" for row in rows)
+
+
 def test_non_channel_lowpoint_is_not_routable_when_lowpoint_cell_is_not_hillslope(tmp_path: Path) -> None:
     dem_path = _write_dem(tmp_path, [4.0, 3.0, 2.0, 1.0, 0.0])
     channel_path, topaz_path = _write_channel_topaz_rasters(

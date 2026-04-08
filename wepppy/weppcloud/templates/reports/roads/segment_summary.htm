@@ -44,7 +44,8 @@
       <dd class="wc-summary-pane__definition">
         buffer_length={% if d.buffer_length_m is not none %}{{ "%.2f"|format(d.buffer_length_m) }} m{% else %}n/a{% endif %},
         buffer_slope={% if d.buffer_slope_pct is not none %}{{ "%.2f"|format(d.buffer_slope_pct) }} %{% else %}n/a{% endif %},
-        fill_length={% if d.fill_length_m is not none %}{{ "%.2f"|format(d.fill_length_m) }} m{% else %}n/a{% endif %}
+        fill_length={% if d.fill_length_m is not none %}{{ "%.2f"|format(d.fill_length_m) }} m{% else %}n/a{% endif %},
+        fill_slope={% if d.fill_slope_pct is not none %}{{ "%.2f"|format(d.fill_slope_pct) }} %{% else %}n/a{% endif %}
       </dd>
     </div>
 
