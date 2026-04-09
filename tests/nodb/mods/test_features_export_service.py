@@ -1875,7 +1875,7 @@ def test_backfill_identity_from_geometry_key_fills_missing_event_identity_values
     assert result["topaz_id"].tolist() == [93.0, 22.0, 23.0]
 
 
-def test_align_carrier_identity_join_key_preserves_wepp_join_for_subcatchments(
+def test_align_carrier_identity_join_key_prefers_topaz_join_for_subcatchments(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -1900,9 +1900,9 @@ def test_align_carrier_identity_join_key_preserves_wepp_join_for_subcatchments(
     )
     assert existing_join_result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["1", "2", "3"]
 
-    # Do not retarget the canonical join domain when topaz/wepp are one-to-one
-    # but carry different values; geometry key resolution relies on preserving
-    # the resolved source join key domain.
+    # Retarget onto topaz_id when wepp/topaz are one-to-one and topaz values are
+    # available; geometry carriers for subcatchments resolve canonical geometry
+    # on TopazID-compatible keys.
     one_to_one_identity_frame = pd.DataFrame(
         {
             service._CONSOLIDATED_JOIN_KEY_COLUMN: ["1", "2", "3"],
@@ -1916,7 +1916,28 @@ def test_align_carrier_identity_join_key_preserves_wepp_join_for_subcatchments(
         carrier_layer="sbs_map-subcatchments",
         cache={},
     )
-    assert one_to_one_identity_result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["1", "2", "3"]
+    assert one_to_one_identity_result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == [
+        "101",
+        "102",
+        "103",
+    ]
+
+    # Production regression guard: if the incoming join key is already in the
+    # TopazID domain while wepp_id differs one-to-one, preserve TopazID domain.
+    topaz_domain_frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["71", "72", "82"],
+            "wepp_id": [13, 14, 17],
+            "topaz_id": [71, 72, 82],
+        }
+    )
+    topaz_domain_result = service._align_carrier_identity_join_key(
+        frame=topaz_domain_frame,
+        wd=tmp_path,
+        carrier_layer="sbs_map-subcatchments",
+        cache={},
+    )
+    assert topaz_domain_result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["71", "72", "82"]
 
     missing_join_frame = pd.DataFrame(
         {
@@ -1932,6 +1953,32 @@ def test_align_carrier_identity_join_key_preserves_wepp_join_for_subcatchments(
         cache={},
     )
     assert missing_join_result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["1", "2", "3"]
+
+
+def test_align_carrier_identity_join_key_retargets_to_backfilled_topaz_ids(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    def _fake_backfill(**kwargs):
+        frame = kwargs["frame"].copy()
+        frame["topaz_id"] = [71, 72, 82]
+        return frame
+
+    monkeypatch.setattr(service, "_backfill_tabular_identity_from_watershed", _fake_backfill)
+
+    frame = pd.DataFrame(
+        {
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: ["13", "14", "17"],
+            "wepp_id": [13, 14, 17],
+        }
+    )
+    result = service._align_carrier_identity_join_key(
+        frame=frame,
+        wd=tmp_path,
+        carrier_layer="sbs_map-subcatchments",
+        cache={},
+    )
+    assert result[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["71", "72", "82"]
 
 
 def test_apply_unitized_column_suffixes_appends_canonical_unit_token() -> None:

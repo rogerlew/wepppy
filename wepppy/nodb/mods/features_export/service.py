@@ -1622,14 +1622,12 @@ def _align_carrier_identity_join_key(
     )
 
     normalized_join = result[_CONSOLIDATED_JOIN_KEY_COLUMN].map(_canonical_join_value)
-    preferred_identity_order = (
-        (_WEPP_ID_COLUMN, _TOPAZ_ID_COLUMN)
-        if carrier_token == "sbs_map-subcatchments"
-        else (_TOPAZ_ID_COLUMN, _WEPP_ID_COLUMN)
-    )
+    preferred_identity_order = (_TOPAZ_ID_COLUMN, _WEPP_ID_COLUMN)
+    # Allow retargeting onto synthesized identity columns when watershed lookup
+    # backfill resolved them and the one-to-one guardrails below are satisfied.
     retargetable_identity_columns = {
-        _TOPAZ_ID_COLUMN: has_topaz,
-        _WEPP_ID_COLUMN: has_wepp,
+        _TOPAZ_ID_COLUMN: bool(result[_TOPAZ_ID_COLUMN].map(_canonical_join_value).notna().any()),
+        _WEPP_ID_COLUMN: bool(result[_WEPP_ID_COLUMN].map(_canonical_join_value).notna().any()),
     }
 
     existing_join_non_null = normalized_join.dropna()
