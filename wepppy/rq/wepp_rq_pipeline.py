@@ -542,6 +542,10 @@ def enqueue_wepp_noprep_pipeline(
     tasks: Any,
     timeout: int,
 ) -> Job:
+    # Bootstrap no-prep contract:
+    # - run against current checked-out WEPP inputs under `wepp/runs/`
+    # - never enqueue prep/regeneration jobs (for example `_prep_watershed_rq`)
+    #   that could rewrite tracked input files
     jobs1_hillslopes = _enqueue(
         q,
         parent_job,
@@ -887,6 +891,9 @@ def enqueue_watershed_noprep_pipeline(
     has_hillslope_outputs: bool,
     publish_status: Callable[[str], None] | None = None,
 ) -> Job:
+    # Bootstrap no-prep contract:
+    # - execute watershed using checked-out inputs as-is
+    # - do not enqueue `_prep_watershed_rq` in this path
     jobs3_watersheds: list[Job] = []
     if climate.climate_mode == tasks.ClimateMode.SingleStormBatch:
         for storm in climate.ss_batch_storms:

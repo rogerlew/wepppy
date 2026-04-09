@@ -216,6 +216,14 @@ rq-engine with:
 These routes run against the currently checked-out commit and must not switch
 branches or regenerate input files.
 
+Contract requirements for bootstrap no-prep endpoints:
+- They **MUST NOT** enqueue prep/regeneration tasks that rewrite tracked model
+  input files (`wepp/runs/`, `swat/TxtInOut/`).
+- They **MUST** execute using the currently checked-out tracked input files
+  exactly as present on disk at enqueue time.
+- If request payload/options are accepted, they are controller metadata only;
+  they **MUST NOT** mutate tracked input files in no-prep mode.
+
 ### Integration Point: Wepp NoDb Controller
 
 Bootstrap is **not a separate mod**. It is integrated directly into the existing
@@ -285,6 +293,8 @@ changes landuse, rebuilds soils, regenerates climate), the pipeline should
 ensure `main` is checked out at the beginning. This applies to the standard
 run endpoints (non-bootstrap), and those paths auto-commit rebuilt inputs.
 Bootstrap no-prep routes do not switch branches and do not auto-commit.
+They also do not regenerate tracked input files; execution uses the checked-out
+inputs exactly as-is.
 
 ```python
 # At start of pipeline (non-bootstrap endpoints only):

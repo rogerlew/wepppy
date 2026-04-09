@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any
 
 import redis
 from fastapi import APIRouter, Request
@@ -11,7 +10,6 @@ from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron, Soils, Watershed, Wepp
-from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.wepp_rq import prep_wepp_watershed_rq, run_wepp_rq, run_wepp_watershed_rq
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -20,6 +18,11 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from .wepp_run_payload import (
+    WEPP_BOOLEAN_FIELDS,
+    WeppRunPayloadValidationError,
+    apply_wepp_run_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,55 +38,6 @@ def _is_base_project_context(runid: str, config: str) -> bool:
     return runid_leaf == "_base" or config_token == "_base"
 
 
-def _pop_scalar(mapping: dict[str, Any], key: str, default: Any = None) -> Any:
-    if key not in mapping:
-        return default
-    value = mapping.pop(key)
-    if isinstance(value, (list, tuple, set)):
-        for item in value:
-            if item not in (None, ""):
-                return item
-        return default
-    return value
-
-
-def _parse_int(value: Any) -> int | None:
-    if value in (None, "", False):
-        return None
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _parse_float(value: Any) -> float | None:
-    if value in (None, "", False):
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-_ROUTINE_CHECKBOX_ATTRS: dict[str, str] = {
-    "checkbox_hourly_seepage": "_run_wepp_ui",
-    "checkbox_wepp_watershed": "_run_wepp_watershed",
-    "checkbox_wepp_pmet": "_run_pmet",
-    "checkbox_wepp_frost": "_run_frost",
-    "checkbox_wepp_tcr": "_run_tcr",
-    "checkbox_wepp_snow": "_run_snow",
-}
-
-
-def _apply_swat_channel_params(wd: str, payload: dict[str, Any]) -> None:
-    ron = Ron.getInstance(wd)
-    mods = ron.mods or []
-    if "swat" not in mods:
-        return
-    swat = Swat.getInstance(wd)
-    swat.parse_inputs(payload)
-
-
 async def _handle_run_wepp_request(
     runid: str,
     config: str,
@@ -91,129 +45,32 @@ async def _handle_run_wepp_request(
     *,
     job_fn,
     job_key: str,
-    boolean_fields: set[str],
 ) -> JSONResponse:
     try:
         wd = get_wd(runid)
-        wepp = Wepp.getInstance(wd)
-        soils = Soils.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
-
-        payload = await parse_request_payload(request, boolean_fields=boolean_fields)
-        controller_payload: dict[str, Any] = dict(payload)
-
-        clip_soils = bool(_pop_scalar(controller_payload, "clip_soils", False))
-        soils.clip_soils = clip_soils
-        soils.rosetta_wc_fc_from_disturbed_bd_override = bool(
-            _pop_scalar(controller_payload, "rosetta_wc_fc_from_disturbed_bd_override", False)
-        )
-
-        clip_soils_depth = _parse_int(_pop_scalar(controller_payload, "clip_soils_depth"))
-        if clip_soils_depth is not None:
-            soils.clip_soils_depth = clip_soils_depth
-
-        clip_soils_minimum = bool(_pop_scalar(controller_payload, "clip_soils_minimum", False))
-        soils.clip_soils_minimum = clip_soils_minimum
-
-        clip_soils_minimum_depth = _parse_float(
-            _pop_scalar(controller_payload, "clip_soils_minimum_depth")
-        )
-        if clip_soils_minimum_depth is not None:
-            soils.clip_soils_minimum_depth = clip_soils_minimum_depth
-
-        if clip_soils and clip_soils_minimum:
-            max_depth = float(soils.clip_soils_depth)
-            min_depth = float(soils.clip_soils_minimum_depth)
-            if min_depth > max_depth:
-                return error_response(
-                    "Invalid soil depth clipping range",
-                    status_code=400,
-                    code="invalid_soil_depth_range",
-                    details=(
-                        "clip_soils_minimum_depth must be less than or equal to "
-                        "clip_soils_depth when both clipping options are enabled."
-                    ),
-                )
-
-        clip_hillslopes = bool(_pop_scalar(controller_payload, "clip_hillslopes", False))
-        watershed.clip_hillslopes = clip_hillslopes
-
-        # UI currently submits `hillslope_clip_length`; accept the historical
-        # `clip_hillslope_length` key for backward compatibility.
-        clip_hillslope_length_raw = _pop_scalar(controller_payload, "hillslope_clip_length", None)
-        if clip_hillslope_length_raw is None:
-            clip_hillslope_length_raw = _pop_scalar(
-                controller_payload, "clip_hillslope_length", None
-            )
-
-        clip_hillslope_length = _parse_int(clip_hillslope_length_raw)
-        if clip_hillslope_length is not None:
-            watershed.clip_hillslope_length = clip_hillslope_length
-
-        routine_overrides: dict[str, bool] = {}
-        for payload_key, attr_name in _ROUTINE_CHECKBOX_ATTRS.items():
-            if payload_key not in controller_payload:
-                continue
-            routine_state = _pop_scalar(controller_payload, payload_key, None)
-            if isinstance(routine_state, bool):
-                routine_overrides[attr_name] = bool(routine_state)
-
-        initial_sat = _parse_float(_pop_scalar(controller_payload, "initial_sat"))
-        if initial_sat is not None:
-            soils.initial_sat = initial_sat
-
-        reveg_scenario = _pop_scalar(controller_payload, "reveg_scenario", None)
-        if isinstance(reveg_scenario, str):
-            reveg_scenario = reveg_scenario.strip()
-        if reveg_scenario is not None:
-            from wepppy.nodb.mods.revegetation import Revegetation
-
-            reveg = Revegetation.getInstance(wd)
-            reveg.load_cover_transform(reveg_scenario)
-
-        prep_details_on_run_completion = bool(
-            _pop_scalar(controller_payload, "prep_details_on_run_completion", False)
-        )
-        arc_export_on_run_completion = bool(
-            _pop_scalar(controller_payload, "arc_export_on_run_completion", False)
-        )
-        legacy_arc_export_on_run_completion = bool(
-            _pop_scalar(controller_payload, "legacy_arc_export_on_run_completion", False)
-        )
-        dss_export_on_run_completion = bool(
-            _pop_scalar(controller_payload, "dss_export_on_run_completion", False)
-        )
-
-        dss_export_exclude_orders: list[int] = []
-        exclude_orders_supplied = False
-        for i in range(1, 6):
-            key = f"dss_export_exclude_order_{i}"
-            if key not in controller_payload:
-                continue
-            exclude_orders_supplied = True
-            if bool(_pop_scalar(controller_payload, key, False)):
-                dss_export_exclude_orders.append(i)
-        if not exclude_orders_supplied:
-            dss_export_exclude_orders = wepp.dss_excluded_channel_orders
+        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
 
         try:
-            wepp.parse_inputs(controller_payload)
+            wepp = apply_wepp_run_payload(
+                wd,
+                payload,
+                wepp_cls=Wepp,
+                soils_cls=Soils,
+                watershed_cls=Watershed,
+                ron_cls=Ron,
+            )
+        except WeppRunPayloadValidationError as exc:
+            return error_response(
+                str(exc),
+                status_code=400,
+                code=exc.code,
+                details=exc.details,
+            )
         except ValueError as exc:
             return error_response(str(exc), status_code=400)
         except Exception as exc:
             logger.exception("rq-engine run-wepp parse failed")
-            return error_response_with_traceback(str(exc))
-
-        _apply_swat_channel_params(wd, controller_payload)
-
-        with wepp.locked():
-            for attr_name, routine_state in routine_overrides.items():
-                setattr(wepp, attr_name, bool(routine_state))
-            wepp._prep_details_on_run_completion = prep_details_on_run_completion
-            wepp._arc_export_on_run_completion = arc_export_on_run_completion
-            wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
-            wepp._dss_export_on_run_completion = dss_export_on_run_completion
-            wepp._dss_excluded_channel_orders = dss_export_exclude_orders
+            return error_response_with_traceback("Error preparing WEPP run request")
     except Exception:
         logger.exception("rq-engine run-wepp request preparation failed")
         return error_response_with_traceback("Error preparing WEPP run request")
@@ -266,32 +123,12 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         logger.exception("rq-engine run-wepp auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
-    boolean_fields = {
-        "clip_soils",
-        "clip_soils_minimum",
-        "rosetta_wc_fc_from_disturbed_bd_override",
-        "clip_hillslopes",
-        "checkbox_hourly_seepage",
-        "checkbox_wepp_watershed",
-        "checkbox_wepp_pmet",
-        "checkbox_wepp_frost",
-        "checkbox_wepp_tcr",
-        "checkbox_wepp_snow",
-        "prep_details_on_run_completion",
-        "arc_export_on_run_completion",
-        "legacy_arc_export_on_run_completion",
-        "dss_export_on_run_completion",
-    }
-    for i in range(1, 6):
-        boolean_fields.add(f"dss_export_exclude_order_{i}")
-
     return await _handle_run_wepp_request(
         runid,
         config,
         request,
         job_fn=run_wepp_rq,
         job_key="run_wepp_rq",
-        boolean_fields=boolean_fields,
     )
 
 
@@ -325,32 +162,12 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         logger.exception("rq-engine run-wepp-watershed auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
-    boolean_fields = {
-        "clip_soils",
-        "clip_soils_minimum",
-        "rosetta_wc_fc_from_disturbed_bd_override",
-        "clip_hillslopes",
-        "checkbox_hourly_seepage",
-        "checkbox_wepp_watershed",
-        "checkbox_wepp_pmet",
-        "checkbox_wepp_frost",
-        "checkbox_wepp_tcr",
-        "checkbox_wepp_snow",
-        "prep_details_on_run_completion",
-        "arc_export_on_run_completion",
-        "legacy_arc_export_on_run_completion",
-        "dss_export_on_run_completion",
-    }
-    for i in range(1, 6):
-        boolean_fields.add(f"dss_export_exclude_order_{i}")
-
     return await _handle_run_wepp_request(
         runid,
         config,
         request,
         job_fn=run_wepp_watershed_rq,
         job_key="run_wepp_watershed_rq",
-        boolean_fields=boolean_fields,
     )
 
 
@@ -384,32 +201,12 @@ async def prep_wepp_watershed(runid: str, config: str, request: Request) -> JSON
         logger.exception("rq-engine prep-wepp-watershed auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
-    boolean_fields = {
-        "clip_soils",
-        "clip_soils_minimum",
-        "rosetta_wc_fc_from_disturbed_bd_override",
-        "clip_hillslopes",
-        "checkbox_hourly_seepage",
-        "checkbox_wepp_watershed",
-        "checkbox_wepp_pmet",
-        "checkbox_wepp_frost",
-        "checkbox_wepp_tcr",
-        "checkbox_wepp_snow",
-        "prep_details_on_run_completion",
-        "arc_export_on_run_completion",
-        "legacy_arc_export_on_run_completion",
-        "dss_export_on_run_completion",
-    }
-    for i in range(1, 6):
-        boolean_fields.add(f"dss_export_exclude_order_{i}")
-
     return await _handle_run_wepp_request(
         runid,
         config,
         request,
         job_fn=prep_wepp_watershed_rq,
         job_key="prep_wepp_watershed_rq",
-        boolean_fields=boolean_fields,
     )
 
 

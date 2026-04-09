@@ -28,7 +28,13 @@ from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
+from .payloads import parse_request_payload
 from .responses import error_response
+from .wepp_run_payload import (
+    WEPP_BOOLEAN_FIELDS,
+    WeppRunPayloadValidationError,
+    apply_wepp_run_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -110,12 +116,24 @@ async def _safe_json(request: Request) -> dict[str, Any]:
     return {}
 
 
-def _enqueue_no_prep_job(runid: str, *, job_fn, job_key: str, reset_tasks: list[TaskEnum]) -> JSONResponse:
-    wd = get_wd(runid, prefer_active=False)
-    wepp = Wepp.getInstance(wd)
-    _ensure_bootstrap_enabled(wepp)
+def _enqueue_no_prep_job(
+    runid: str,
+    *,
+    job_fn,
+    job_key: str,
+    reset_tasks: list[TaskEnum],
+    wd: str | None = None,
+    wepp: Wepp | None = None,
+) -> JSONResponse:
+    # Bootstrap no-prep contract: enqueue execution against the currently
+    # checked-out tracked inputs exactly as they exist on disk. This helper is
+    # intentionally queue-only; it must never run any prep/regeneration path
+    # that would rewrite `wepp/runs/` or `swat/TxtInOut/`.
+    resolved_wd = wd if wd is not None else get_wd(runid, prefer_active=False)
+    resolved_wepp = wepp if wepp is not None else Wepp.getInstance(resolved_wd)
+    _ensure_bootstrap_enabled(resolved_wepp)
 
-    prep = RedisPrep.getInstance(wd)
+    prep = RedisPrep.getInstance(resolved_wd)
     for task in reset_tasks:
         prep.remove_timestamp(task)
 
@@ -350,6 +368,31 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response("Failed to authorize request", status_code=401)
 
     try:
+        wd = get_wd(runid, prefer_active=False)
+        wepp = Wepp.getInstance(wd)
+        _ensure_bootstrap_enabled(wepp)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception:
+        logger.exception("rq-engine run-wepp-npprep bootstrap precheck failed")
+        return error_response("Error preparing WEPP no-prep request", status_code=500)
+
+    try:
+        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+        if payload:
+            # Do not regenerate tracked WEPP inputs in bootstrap no-prep mode.
+            # This updates controller metadata only; execution still uses the
+            # currently checked-out `wepp/runs/` files as-is.
+            apply_wepp_run_payload(wd, payload)
+    except WeppRunPayloadValidationError as exc:
+        return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception:
+        logger.exception("rq-engine run-wepp-npprep payload apply failed")
+        return error_response("Error preparing WEPP no-prep request", status_code=500)
+
+    try:
         return _enqueue_no_prep_job(
             runid,
             job_fn=run_wepp_noprep_rq,
@@ -360,6 +403,8 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
                 TaskEnum.run_omni_scenarios,
                 TaskEnum.run_path_cost_effective,
             ],
+            wd=wd,
+            wepp=wepp,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
@@ -396,11 +441,38 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response("Failed to authorize request", status_code=401)
 
     try:
+        wd = get_wd(runid, prefer_active=False)
+        wepp = Wepp.getInstance(wd)
+        _ensure_bootstrap_enabled(wepp)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception:
+        logger.exception("rq-engine run-wepp-watershed-no-prep bootstrap precheck failed")
+        return error_response("Error preparing WEPP no-prep request", status_code=500)
+
+    try:
+        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+        if payload:
+            # Do not regenerate tracked WEPP inputs in bootstrap no-prep mode.
+            # This updates controller metadata only; execution still uses the
+            # currently checked-out `wepp/runs/` files as-is.
+            apply_wepp_run_payload(wd, payload)
+    except WeppRunPayloadValidationError as exc:
+        return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception:
+        logger.exception("rq-engine run-wepp-watershed-no-prep payload apply failed")
+        return error_response("Error preparing WEPP no-prep request", status_code=500)
+
+    try:
         return _enqueue_no_prep_job(
             runid,
             job_fn=run_wepp_watershed_noprep_rq,
             job_key="run_wepp_watershed_noprep_rq",
             reset_tasks=[TaskEnum.run_wepp_watershed],
+            wd=wd,
+            wepp=wepp,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)

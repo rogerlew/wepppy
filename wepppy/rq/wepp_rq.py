@@ -490,6 +490,9 @@ def run_wepp_noprep_rq(runid: str) -> Job:
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
+            # Bootstrap no-prep contract: execute exactly the existing checked-out
+            # WEPP inputs. This path intentionally avoids prep stages that can
+            # regenerate `wepp/runs/`.
             job6_finalfinal = _pipeline.enqueue_wepp_noprep_pipeline(
                 q,
                 job,
@@ -711,6 +714,8 @@ def run_wepp_watershed_noprep_rq(runid: str) -> Job:
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
             has_hillslope_outputs = bool(glob(_join(wepp.output_dir, "H*")))
+            # Bootstrap no-prep contract: execute watershed using current checked-out
+            # inputs only; no watershed prep task should run in this pipeline.
             job6_finalfinal = _pipeline.enqueue_watershed_noprep_pipeline(
                 q,
                 job,
