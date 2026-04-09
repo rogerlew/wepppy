@@ -133,6 +133,58 @@ For the St. Joe project, this two-node architecture enables parallel modeling: o
 
 ---
 
+## Lemhi (C3+3) Feasibility Assessment
+
+### Summary Conclusion
+
+Using Lemhi as a direct replacement for WEPPcloud production worker hosts is **not currently viable**. Lemhi is a shared high-performance computing (HPC) system for scheduled research jobs, but WEPPcloud's production worker architecture is designed around always-on service containers, continuously connected queue workers, and run-directory mounts that behave like dedicated infrastructure.
+
+### Plain-Language Architecture Comparison
+
+| WEPPcloud production worker model | Lemhi (C3+3) operating model |
+|---|---|
+| Long-running `rq-worker` containers continuously pull jobs from a Redis Queue (RQ). | Compute is allocated through scheduled Slurm jobs (`srun`/`sbatch`) with partition/runtime policies and fair-share scheduling. |
+| Worker hosts mount shared run/geodata paths (`/wc1`, `/geodata`) with stable write permissions and path contracts. | Users run in shared Lustre-backed storage with quota and contention controls; path and permission model is not a drop-in match for WEPPcloud host mounts. |
+| Worker jobs may call external APIs (for example topography and climate providers) during execution. | Cluster guidance indicates compute nodes do not generally have internet access; dependency/data staging is expected before job execution. |
+| Worker stack includes container assumptions such as local Docker socket and optional local `weppcloudr` service for some job paths. | HPC centers typically optimize for scheduler-managed jobs, not persistent rootful Docker daemon workflows across shared compute nodes. |
+
+### Primary Architectural Barriers
+
+1. **RQ service model mismatch**
+WEPPcloud workers are designed as persistent services that stay online and attached to the queue. Lemhi is designed for scheduled jobs with time limits and queue fairness, not for always-on daemon pools as primary infrastructure.
+
+2. **Required WEPPcloud mount contracts (`/wc1`, `/geodata`)**
+The WEPPcloud worker deployment contract requires shared mounts at canonical paths with stable permissions and ownership semantics. This is a hard requirement for run-directory discovery, NoDb state, and output write paths. Recreating that contract on a shared HPC filesystem would require non-trivial storage and permission exceptions.
+
+3. **Small-file I/O behavior conflicts with Lustre guidance**
+WEPP workloads generate very large numbers of small files and metadata operations. C3+3 Lustre guidance explicitly warns that small-file-heavy patterns and high metadata pressure create contention and degrade shared filesystem performance. This is the opposite of the local high-IOPS worker storage model described in this request.
+
+4. **Networking and secure queue connectivity**
+WEPPcloud remote workers require secure connectivity to the RQ Redis server and shared secrets alignment. On Lemhi, compute-node network constraints and security boundaries make persistent external queue attachment operationally difficult.
+
+5. **Internet-restricted compute nodes block some worker tasks**
+Some WEPPcloud worker paths call public APIs to acquire source data. If compute nodes cannot reach the internet, those tasks fail unless data is pre-staged or architecture is redesigned.
+
+6. **Policy and intended-use mismatch**
+C3+3 documentation explicitly warns users not to run heavy compute on shared login/OnDemand nodes; heavy work is expected through scheduled compute jobs. WEPPcloud production workers, however, are designed as continuously running service components rather than ad hoc scheduled research jobs.
+
+7. **Container runtime expectations differ (Docker daemon vs HPC runtimes)**
+Lemhi documentation does not explicitly advertise Docker daemon support for user workloads. In HPC practice, this usually means running containers through Apptainer/Singularity under Slurm. Apptainer is designed for HPC and supports Docker/OCI images, so containerized execution is still possible, but only with adaptation of runtime, scheduling, and service-lifecycle assumptions compared with WEPPcloud's Docker Compose worker-host model.
+
+### Practical Implication for This Procurement
+
+Lemhi may still be useful for specific, tightly scoped research workflows that are explicitly rewritten for Slurm-native batch execution. However, it is not a drop-in host for the WEPPcloud production worker stack needed for reliable St. Joe calibration/scenario throughput and BAER-adjacent service continuity. The dedicated server procurement remains the correct architecture-aligned path.
+
+### External References
+
+- C3+3 Getting Started: <https://docs.c3plus3.org/docs/help/Getting_Started/>
+- C3+3 Partitions/Slurm usage: <https://docs.c3plus3.org/docs/help/Tutorials/Partitions.html>
+- C3+3 Linux workshop (shared node guidance): <https://docs.c3plus3.org/docs/workshops/Linux/>
+- C3+3 R tutorial (compute node internet note): <https://docs.c3plus3.org/docs/help/Tutorials/R.html>
+- C3+3 Lustre guidance (small-file contention): <https://docs.c3plus3.org/docs/help/Tutorials/Lustre.html>
+
+---
+
 ## Hardware Specifications and Justification
 
 ### Proposed Configuration (per server)
