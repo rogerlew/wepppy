@@ -170,18 +170,23 @@ def apply_wepp_run_payload(
     soils = soils_cls.getInstance(wd)
     watershed = watershed_cls.getInstance(wd)
 
-    clip_soils = bool(_pop_scalar(controller_payload, "clip_soils", False))
-    soils.clip_soils = clip_soils
-    soils.rosetta_wc_fc_from_disturbed_bd_override = bool(
-        _pop_scalar(controller_payload, "rosetta_wc_fc_from_disturbed_bd_override", False)
-    )
+    clip_soils = bool(getattr(soils, "clip_soils", False))
+    if "clip_soils" in controller_payload:
+        clip_soils = bool(_pop_scalar(controller_payload, "clip_soils", False))
+        soils.clip_soils = clip_soils
+    if "rosetta_wc_fc_from_disturbed_bd_override" in controller_payload:
+        soils.rosetta_wc_fc_from_disturbed_bd_override = bool(
+            _pop_scalar(controller_payload, "rosetta_wc_fc_from_disturbed_bd_override", False)
+        )
 
     clip_soils_depth = _parse_int(_pop_scalar(controller_payload, "clip_soils_depth"))
     if clip_soils_depth is not None:
         soils.clip_soils_depth = clip_soils_depth
 
-    clip_soils_minimum = bool(_pop_scalar(controller_payload, "clip_soils_minimum", False))
-    soils.clip_soils_minimum = clip_soils_minimum
+    clip_soils_minimum = bool(getattr(soils, "clip_soils_minimum", False))
+    if "clip_soils_minimum" in controller_payload:
+        clip_soils_minimum = bool(_pop_scalar(controller_payload, "clip_soils_minimum", False))
+        soils.clip_soils_minimum = clip_soils_minimum
 
     clip_soils_minimum_depth = _parse_float(_pop_scalar(controller_payload, "clip_soils_minimum_depth"))
     if clip_soils_minimum_depth is not None:
@@ -200,8 +205,8 @@ def apply_wepp_run_payload(
                 ),
             )
 
-    clip_hillslopes = bool(_pop_scalar(controller_payload, "clip_hillslopes", False))
-    watershed.clip_hillslopes = clip_hillslopes
+    if "clip_hillslopes" in controller_payload:
+        watershed.clip_hillslopes = bool(_pop_scalar(controller_payload, "clip_hillslopes", False))
 
     # UI currently submits `hillslope_clip_length`; accept the historical
     # `clip_hillslope_length` key for backward compatibility.
@@ -235,15 +240,49 @@ def apply_wepp_run_payload(
         reveg.load_cover_transform(reveg_scenario)
 
     prep_details_on_run_completion = bool(
-        _pop_scalar(controller_payload, "prep_details_on_run_completion", False)
+        getattr(
+            wepp,
+            "prep_details_on_run_completion",
+            getattr(wepp, "_prep_details_on_run_completion", False),
+        )
     )
-    arc_export_on_run_completion = bool(_pop_scalar(controller_payload, "arc_export_on_run_completion", False))
+    if "prep_details_on_run_completion" in controller_payload:
+        prep_details_on_run_completion = bool(
+            _pop_scalar(controller_payload, "prep_details_on_run_completion", False)
+        )
+    arc_export_on_run_completion = bool(
+        getattr(
+            wepp,
+            "arc_export_on_run_completion",
+            getattr(wepp, "_arc_export_on_run_completion", False),
+        )
+    )
+    if "arc_export_on_run_completion" in controller_payload:
+        arc_export_on_run_completion = bool(
+            _pop_scalar(controller_payload, "arc_export_on_run_completion", False)
+        )
     legacy_arc_export_on_run_completion = bool(
-        _pop_scalar(controller_payload, "legacy_arc_export_on_run_completion", False)
+        getattr(
+            wepp,
+            "legacy_arc_export_on_run_completion",
+            getattr(wepp, "_legacy_arc_export_on_run_completion", False),
+        )
     )
+    if "legacy_arc_export_on_run_completion" in controller_payload:
+        legacy_arc_export_on_run_completion = bool(
+            _pop_scalar(controller_payload, "legacy_arc_export_on_run_completion", False)
+        )
     dss_export_on_run_completion = bool(
-        _pop_scalar(controller_payload, "dss_export_on_run_completion", False)
+        getattr(
+            wepp,
+            "dss_export_on_run_completion",
+            getattr(wepp, "_dss_export_on_run_completion", False),
+        )
     )
+    if "dss_export_on_run_completion" in controller_payload:
+        dss_export_on_run_completion = bool(
+            _pop_scalar(controller_payload, "dss_export_on_run_completion", False)
+        )
 
     dss_export_exclude_orders: list[int] = []
     exclude_orders_supplied = False

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import time
 
 import pytest
@@ -9,6 +10,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import bootstrap_routes
+from wepppy.microservices.rq_engine import wepp_run_payload
 from wepppy.nodb.redis_prep import TaskEnum
 from wepppy.weppcloud.bootstrap.api_shared import BootstrapOperationError, BootstrapOperationResult
 from wepppy.weppcloud.utils import auth_tokens
@@ -355,6 +357,110 @@ def test_bootstrap_run_wepp_npprep_enqueues(monkeypatch: pytest.MonkeyPatch) -> 
         TaskEnum.run_omni_scenarios,
         TaskEnum.run_path_cost_effective,
     }
+
+
+def test_bootstrap_run_wepp_npprep_sparse_payload_preserves_existing_booleans(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-78")
+
+    tasks: list[TaskEnum] = []
+    _stub_prep(monkeypatch, tasks)
+
+    class DummySoils:
+        clip_soils = True
+        clip_soils_depth = 300
+        clip_soils_minimum = True
+        clip_soils_minimum_depth = 120.0
+        rosetta_wc_fc_from_disturbed_bd_override = True
+        initial_sat = None
+
+    class DummyWatershed:
+        clip_hillslopes = True
+        clip_hillslope_length = 222
+
+    class DummyWepp:
+        bootstrap_enabled = True
+        dss_excluded_channel_orders = [1, 2]
+        _prep_details_on_run_completion = True
+        _arc_export_on_run_completion = True
+        _legacy_arc_export_on_run_completion = True
+        _dss_export_on_run_completion = True
+
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        @contextlib.contextmanager
+        def locked(self):
+            yield self
+
+    dummy_soils = DummySoils()
+    dummy_watershed = DummyWatershed()
+    dummy_wepp = DummyWepp()
+
+    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: dummy_wepp)
+
+    wepp_cls = type("DummyWeppClass", (), {"getInstance": staticmethod(lambda wd: dummy_wepp)})
+    soils_cls = type("DummySoilsClass", (), {"getInstance": staticmethod(lambda wd: dummy_soils)})
+    watershed_cls = type(
+        "DummyWatershedClass",
+        (),
+        {"getInstance": staticmethod(lambda wd: dummy_watershed)},
+    )
+    ron_cls = type("DummyRonClass", (), {"getInstance": staticmethod(lambda wd: type("R", (), {"mods": []})())})
+
+    def _apply_payload(wd: str, payload: dict):
+        return wepp_run_payload.apply_wepp_run_payload(
+            wd,
+            payload,
+            wepp_cls=wepp_cls,
+            soils_cls=soils_cls,
+            watershed_cls=watershed_cls,
+            ron_cls=ron_cls,
+        )
+
+    monkeypatch.setattr(bootstrap_routes, "apply_wepp_run_payload", _apply_payload)
+
+    with TestClient(rq_engine.app) as client:
+        sparse_response = client.post(
+            "/api/runs/run-1/cfg/run-wepp-npprep",
+            json={"initial_sat": 0.2},
+        )
+        assert sparse_response.status_code == 200
+        assert dummy_soils.clip_soils is True
+        assert dummy_soils.clip_soils_minimum is True
+        assert dummy_soils.rosetta_wc_fc_from_disturbed_bd_override is True
+        assert dummy_watershed.clip_hillslopes is True
+        assert dummy_wepp._prep_details_on_run_completion is True
+        assert dummy_wepp._arc_export_on_run_completion is True
+        assert dummy_wepp._legacy_arc_export_on_run_completion is True
+        assert dummy_wepp._dss_export_on_run_completion is True
+
+        clear_response = client.post(
+            "/api/runs/run-1/cfg/run-wepp-npprep",
+            json={
+                "clip_soils": False,
+                "clip_soils_minimum": False,
+                "rosetta_wc_fc_from_disturbed_bd_override": False,
+                "clip_hillslopes": False,
+                "prep_details_on_run_completion": False,
+                "arc_export_on_run_completion": False,
+                "legacy_arc_export_on_run_completion": False,
+                "dss_export_on_run_completion": False,
+            },
+        )
+
+    assert clear_response.status_code == 200
+    assert dummy_soils.clip_soils is False
+    assert dummy_soils.clip_soils_minimum is False
+    assert dummy_soils.rosetta_wc_fc_from_disturbed_bd_override is False
+    assert dummy_watershed.clip_hillslopes is False
+    assert dummy_wepp._prep_details_on_run_completion is False
+    assert dummy_wepp._arc_export_on_run_completion is False
+    assert dummy_wepp._legacy_arc_export_on_run_completion is False
+    assert dummy_wepp._dss_export_on_run_completion is False
 
 
 def test_bootstrap_run_swat_noprep_rejects_when_disabled(monkeypatch: pytest.MonkeyPatch) -> None:

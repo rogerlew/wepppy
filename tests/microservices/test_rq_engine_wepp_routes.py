@@ -301,6 +301,70 @@ def test_run_wepp_persists_routine_checkbox_overrides_from_payload(
     assert "checkbox_wepp_snow" not in parsed_payload
 
 
+def test_run_wepp_sparse_payload_preserves_existing_boolean_flags(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-sparse-preserve")
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    soils = capture["soils"]
+    watershed = capture["watershed"]
+    wepp = capture["wepp"]
+    soils.clip_soils = True
+    soils.clip_soils_depth = 300
+    soils.clip_soils_minimum = True
+    soils.clip_soils_minimum_depth = 100.0
+    soils.rosetta_wc_fc_from_disturbed_bd_override = True
+    watershed.clip_hillslopes = True
+    wepp._prep_details_on_run_completion = True
+    wepp._arc_export_on_run_completion = True
+    wepp._legacy_arc_export_on_run_completion = True
+    wepp._dss_export_on_run_completion = True
+
+    with TestClient(rq_engine.app) as client:
+        sparse_response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={"initial_sat": 0.42},
+        )
+        assert sparse_response.status_code == 200
+        assert soils.clip_soils is True
+        assert soils.clip_soils_minimum is True
+        assert soils.rosetta_wc_fc_from_disturbed_bd_override is True
+        assert watershed.clip_hillslopes is True
+        assert wepp._prep_details_on_run_completion is True
+        assert wepp._arc_export_on_run_completion is True
+        assert wepp._legacy_arc_export_on_run_completion is True
+        assert wepp._dss_export_on_run_completion is True
+
+        clear_response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={
+                "clip_soils": False,
+                "clip_soils_minimum": False,
+                "rosetta_wc_fc_from_disturbed_bd_override": False,
+                "clip_hillslopes": False,
+                "prep_details_on_run_completion": False,
+                "arc_export_on_run_completion": False,
+                "legacy_arc_export_on_run_completion": False,
+                "dss_export_on_run_completion": False,
+            },
+        )
+
+    assert clear_response.status_code == 200
+    assert soils.clip_soils is False
+    assert soils.clip_soils_minimum is False
+    assert soils.rosetta_wc_fc_from_disturbed_bd_override is False
+    assert watershed.clip_hillslopes is False
+    assert wepp._prep_details_on_run_completion is False
+    assert wepp._arc_export_on_run_completion is False
+    assert wepp._legacy_arc_export_on_run_completion is False
+    assert wepp._dss_export_on_run_completion is False
+
+
 @pytest.mark.parametrize(
     "endpoint",
     [
