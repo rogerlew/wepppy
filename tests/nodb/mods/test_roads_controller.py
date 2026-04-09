@@ -13,6 +13,7 @@ import pytest
 import wepppy.nodb.wepp_nodb_post_utils as post_utils_module
 import wepppy.nodb.mods.roads.roads as roads_module
 import wepppy.wepp.interchange as interchange_module
+import wepppyo3.wepp_interchange as wepp_interchange_module
 from wepppy.nodb.mods.roads.monotonic_segments import MonotonicConversionSummary
 from wepppy.nodb.mods.roads.roads import Roads
 
@@ -59,6 +60,24 @@ def _write_segment_manifest(controller: Roads, rows: list[dict[str, object]]) ->
     path = Path(controller.roads_segment_pass_manifest_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(rows), encoding="utf-8")
+
+
+def _write_minimal_pass(path: Path, *, climate_token: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "\n".join(
+            [
+                climate_token,
+                "   16      2000",
+                ".44409E+04",
+                "  5    0.20000E-05 0.10000E-04 0.30000E-04 0.30600E-03 0.20000E-03",
+                "    0.00     0.00     0.00     0.00",
+                "NO EVENT   2000     1      0.64000E-01 0.00000E+00",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def _ready_report_resources_stub(controller: Roads) -> dict[str, object]:
@@ -3547,3 +3566,80 @@ def test_run_roads_wepp_outslope_unrutted_missing_discha_with_no_selected_candid
     assert summary["outslope_unrutted_excluded_segment_count"] == 1
     assert summary["outslope_unrutted_capped_segment_count"] == 0
     assert (Path(controller.roads_output_dir) / "H1.pass.dat").read_text(encoding="utf-8") == "h1 baseline"
+
+
+def test_combine_target_hillslope_pass_normalizes_alias_climate_tokens(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    base_pass_path = tmp_path / "wepp" / "output" / "H15.pass.dat"
+    road_pass_path = tmp_path / "wepp" / "roads" / "output" / "H900003.pass.dat"
+    out_pass_path = tmp_path / "wepp" / "roads" / "output" / "H15.combined.pass.dat"
+    base_cli_path = tmp_path / "wepp" / "runs" / "p15.cli"
+    road_cli_path = tmp_path / "wepp" / "roads" / "runs" / "p900003.cli"
+
+    base_cli_path.parent.mkdir(parents=True, exist_ok=True)
+    road_cli_path.parent.mkdir(parents=True, exist_ok=True)
+    base_cli_path.write_text("shared-climate", encoding="utf-8")
+    road_cli_path.symlink_to(base_cli_path)
+
+    _write_minimal_pass(base_pass_path, climate_token="p15.cli")
+    _write_minimal_pass(road_pass_path, climate_token="p900003.cli")
+
+    captured: dict[str, object] = {}
+
+    def _fake_combine(**kwargs) -> None:
+        captured.update(kwargs)
+        Path(kwargs["out_pass"]).write_text("combined", encoding="utf-8")
+
+    monkeypatch.setattr(wepp_interchange_module, "combine_hillslope_pass_files", _fake_combine)
+
+    controller._combine_target_hillslope_pass(
+        base_pass_path=str(base_pass_path),
+        road_pass_paths=[str(road_pass_path)],
+        output_pass_path=str(out_pass_path),
+    )
+
+    assert captured["base_pass"] == str(base_pass_path)
+    assert captured["road_passes"] == [str(road_pass_path)]
+    assert captured["strategy"] == "phase1"
+    assert road_pass_path.read_text(encoding="utf-8").splitlines()[0] == "p15.cli"
+    assert out_pass_path.read_text(encoding="utf-8") == "combined"
+
+
+def test_combine_target_hillslope_pass_rejects_distinct_climate_tokens(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    base_pass_path = tmp_path / "wepp" / "output" / "H15.pass.dat"
+    road_pass_path = tmp_path / "wepp" / "roads" / "output" / "H900003.pass.dat"
+    out_pass_path = tmp_path / "wepp" / "roads" / "output" / "H15.combined.pass.dat"
+    base_cli_path = tmp_path / "wepp" / "runs" / "p15.cli"
+    road_cli_path = tmp_path / "wepp" / "roads" / "runs" / "p900003.cli"
+
+    base_cli_path.parent.mkdir(parents=True, exist_ok=True)
+    road_cli_path.parent.mkdir(parents=True, exist_ok=True)
+    base_cli_path.write_text("base-climate", encoding="utf-8")
+    road_cli_path.write_text("different-climate", encoding="utf-8")
+
+    _write_minimal_pass(base_pass_path, climate_token="p15.cli")
+    _write_minimal_pass(road_pass_path, climate_token="p900003.cli")
+
+    monkeypatch.setattr(
+        wepp_interchange_module,
+        "combine_hillslope_pass_files",
+        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("combine should not be called")),
+    )
+
+    with pytest.raises(ValueError, match="could not be normalized"):
+        controller._combine_target_hillslope_pass(
+            base_pass_path=str(base_pass_path),
+            road_pass_paths=[str(road_pass_path)],
+            output_pass_path=str(out_pass_path),
+        )
+
+    assert road_pass_path.read_text(encoding="utf-8").splitlines()[0] == "p900003.cli"

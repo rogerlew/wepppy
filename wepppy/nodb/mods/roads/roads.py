@@ -3451,6 +3451,88 @@ class Roads(NoDbBase):
         self._build_single_ofe_management_file(template_path=source_path, output_path=output_path)
         return output_path
 
+    @staticmethod
+    def _read_pass_header_climate_line(pass_path: Path) -> str:
+        with pass_path.open("r", encoding="utf-8") as handle:
+            first_line = handle.readline()
+        if not first_line:
+            raise ValueError(f"{pass_path}: PASS file missing climate-file token on line 1")
+        return first_line.rstrip("\r\n")
+
+    @staticmethod
+    def _rewrite_pass_header_climate_line(pass_path: Path, climate_line: str) -> None:
+        lines = pass_path.read_text(encoding="utf-8").splitlines(keepends=True)
+        if not lines:
+            raise ValueError(f"{pass_path}: PASS file missing climate-file token on line 1")
+        newline = "\n"
+        if lines[0].endswith("\r\n"):
+            newline = "\r\n"
+        elif lines[0].endswith("\n"):
+            newline = "\n"
+        lines[0] = f"{climate_line}{newline}"
+        pass_path.write_text("".join(lines), encoding="utf-8")
+
+    @staticmethod
+    def _resolve_pass_header_climate_path(pass_path: Path, climate_token: str) -> Optional[Path]:
+        token = climate_token.strip()
+        if not token:
+            return None
+        runs_dir = pass_path.parent.parent / "runs"
+        climate_path = runs_dir / token
+        if not climate_path.exists():
+            return None
+        try:
+            return climate_path.resolve(strict=True)
+        except (FileNotFoundError, OSError):
+            return None
+
+    def _normalize_road_pass_header_climate_tokens(
+        self,
+        *,
+        base_pass_path: Path,
+        road_pass_paths: Iterable[Path],
+    ) -> None:
+        base_climate_line = self._read_pass_header_climate_line(base_pass_path)
+        base_climate_token = base_climate_line.strip()
+        if not base_climate_token:
+            raise ValueError(
+                f"{base_pass_path}: PASS header climate-file token is empty; cannot combine roads PASS data"
+            )
+
+        base_climate_path = self._resolve_pass_header_climate_path(base_pass_path, base_climate_token)
+        if base_climate_path is None:
+            raise ValueError(
+                f"{base_pass_path}: PASS header climate-file token '{base_climate_token}' does not resolve under runs/"
+            )
+
+        for road_pass_path in road_pass_paths:
+            source_climate_line = self._read_pass_header_climate_line(road_pass_path)
+            source_climate_token = source_climate_line.strip()
+            if source_climate_token == base_climate_token:
+                continue
+
+            source_climate_path = self._resolve_pass_header_climate_path(
+                road_pass_path, source_climate_token
+            )
+            if source_climate_path is None or source_climate_path != base_climate_path:
+                raise ValueError(
+                    f"{road_pass_path}: PASS header climate-file token mismatch could not be normalized "
+                    f"(base={base_climate_token} source={source_climate_token} "
+                    f"base_cli={base_climate_path} source_cli={source_climate_path})"
+                )
+
+            self._rewrite_pass_header_climate_line(road_pass_path, base_climate_line)
+            self._append_roads_log(
+                "run",
+                "normalized_road_pass_climate_token",
+                {
+                    "base_pass_relpath": os.path.relpath(base_pass_path, self.wd),
+                    "road_pass_relpath": os.path.relpath(road_pass_path, self.wd),
+                    "base_climate_token": base_climate_token,
+                    "source_climate_token": source_climate_token,
+                },
+            )
+
     def _combine_target_hillslope_pass(
         self,
         *,
@@ -3461,9 +3543,17 @@ class Roads(NoDbBase):
     ) -> None:
         from wepppyo3.wepp_interchange import combine_hillslope_pass_files
 
+        base_path = Path(base_pass_path)
+        road_paths = [Path(path) for path in road_pass_paths]
+        if road_paths:
+            self._normalize_road_pass_header_climate_tokens(
+                base_pass_path=base_path,
+                road_pass_paths=road_paths,
+            )
+
         combine_hillslope_pass_files(
-            base_pass=str(base_pass_path),
-            road_passes=[str(path) for path in road_pass_paths],
+            base_pass=str(base_path),
+            road_passes=[str(path) for path in road_paths],
             out_pass=str(output_pass_path),
             strategy=str(strategy),
         )
