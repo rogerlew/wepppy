@@ -20,6 +20,7 @@ class _DummyWepp:
         self.snow_opts = _DummyOpts()
         self.frost_opts = _DummyOpts()
         self._delete_after_interchange = delete_after_interchange
+        self._channel_critical_shear_overridden = False
         self.guard_calls = 0
 
     def _guard_unitized_bounds(self) -> None:
@@ -95,3 +96,23 @@ def test_parse_sets_delete_after_interchange_without_invoking_property_setter() 
     parser.parse(wepp, {"delete_after_interchange": True})
 
     assert wepp._delete_after_interchange is True
+
+
+def test_parse_marks_channel_critical_shear_as_overridden_when_value_is_valid() -> None:
+    parser = WeppInputParser()
+    wepp = _DummyWepp()
+
+    parser.parse(wepp, {"channel_critical_shear": "42.5"})
+
+    assert wepp._channel_critical_shear == pytest.approx(42.5)
+    assert wepp._channel_critical_shear_overridden is True
+
+
+def test_parse_does_not_mark_channel_critical_shear_override_for_invalid_value() -> None:
+    parser = WeppInputParser()
+    wepp = _DummyWepp()
+
+    parser.parse(wepp, {"channel_critical_shear": "not-a-number"})
+
+    assert not hasattr(wepp, "_channel_critical_shear")
+    assert wepp._channel_critical_shear_overridden is False

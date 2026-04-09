@@ -718,8 +718,11 @@ class WeppPrepService:
 
         watershed = wepp.watershed_instance
         translator = watershed.translator_factory()
+        critical_shear_overridden = bool(
+            getattr(wepp, "_channel_critical_shear_overridden", False)
+        )
 
-        if critical_shear is None:
+        if critical_shear is None and not critical_shear_overridden:
             crit_shear_map = getattr(wepp, "channel_critical_shear_map", None)
 
             if crit_shear_map is not None:

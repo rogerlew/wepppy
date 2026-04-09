@@ -65,6 +65,16 @@ def _parse_float(value: Any) -> float | None:
         return None
 
 
+_ROUTINE_CHECKBOX_ATTRS: dict[str, str] = {
+    "checkbox_hourly_seepage": "_run_wepp_ui",
+    "checkbox_wepp_watershed": "_run_wepp_watershed",
+    "checkbox_wepp_pmet": "_run_pmet",
+    "checkbox_wepp_frost": "_run_frost",
+    "checkbox_wepp_tcr": "_run_tcr",
+    "checkbox_wepp_snow": "_run_snow",
+}
+
+
 def _apply_swat_channel_params(wd: str, payload: dict[str, Any]) -> None:
     ron = Ron.getInstance(wd)
     mods = ron.mods or []
@@ -128,9 +138,25 @@ async def _handle_run_wepp_request(
         clip_hillslopes = bool(_pop_scalar(controller_payload, "clip_hillslopes", False))
         watershed.clip_hillslopes = clip_hillslopes
 
-        clip_hillslope_length = _parse_int(_pop_scalar(controller_payload, "clip_hillslope_length"))
+        # UI currently submits `hillslope_clip_length`; accept the historical
+        # `clip_hillslope_length` key for backward compatibility.
+        clip_hillslope_length_raw = _pop_scalar(controller_payload, "hillslope_clip_length", None)
+        if clip_hillslope_length_raw is None:
+            clip_hillslope_length_raw = _pop_scalar(
+                controller_payload, "clip_hillslope_length", None
+            )
+
+        clip_hillslope_length = _parse_int(clip_hillslope_length_raw)
         if clip_hillslope_length is not None:
             watershed.clip_hillslope_length = clip_hillslope_length
+
+        routine_overrides: dict[str, bool] = {}
+        for payload_key, attr_name in _ROUTINE_CHECKBOX_ATTRS.items():
+            if payload_key not in controller_payload:
+                continue
+            routine_state = _pop_scalar(controller_payload, payload_key, None)
+            if isinstance(routine_state, bool):
+                routine_overrides[attr_name] = bool(routine_state)
 
         initial_sat = _parse_float(_pop_scalar(controller_payload, "initial_sat"))
         if initial_sat is not None:
@@ -181,6 +207,8 @@ async def _handle_run_wepp_request(
         _apply_swat_channel_params(wd, controller_payload)
 
         with wepp.locked():
+            for attr_name, routine_state in routine_overrides.items():
+                setattr(wepp, attr_name, bool(routine_state))
             wepp._prep_details_on_run_completion = prep_details_on_run_completion
             wepp._arc_export_on_run_completion = arc_export_on_run_completion
             wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
@@ -243,6 +271,12 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         "clip_soils_minimum",
         "rosetta_wc_fc_from_disturbed_bd_override",
         "clip_hillslopes",
+        "checkbox_hourly_seepage",
+        "checkbox_wepp_watershed",
+        "checkbox_wepp_pmet",
+        "checkbox_wepp_frost",
+        "checkbox_wepp_tcr",
+        "checkbox_wepp_snow",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",
         "legacy_arc_export_on_run_completion",
@@ -296,6 +330,12 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         "clip_soils_minimum",
         "rosetta_wc_fc_from_disturbed_bd_override",
         "clip_hillslopes",
+        "checkbox_hourly_seepage",
+        "checkbox_wepp_watershed",
+        "checkbox_wepp_pmet",
+        "checkbox_wepp_frost",
+        "checkbox_wepp_tcr",
+        "checkbox_wepp_snow",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",
         "legacy_arc_export_on_run_completion",
@@ -349,6 +389,12 @@ async def prep_wepp_watershed(runid: str, config: str, request: Request) -> JSON
         "clip_soils_minimum",
         "rosetta_wc_fc_from_disturbed_bd_override",
         "clip_hillslopes",
+        "checkbox_hourly_seepage",
+        "checkbox_wepp_watershed",
+        "checkbox_wepp_pmet",
+        "checkbox_wepp_frost",
+        "checkbox_wepp_tcr",
+        "checkbox_wepp_snow",
         "prep_details_on_run_completion",
         "arc_export_on_run_completion",
         "legacy_arc_export_on_run_completion",

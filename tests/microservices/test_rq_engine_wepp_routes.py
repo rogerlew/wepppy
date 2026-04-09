@@ -74,10 +74,19 @@ def _stub_wepp_stack(
     class DummyWepp:
         run_group = ""
         dss_excluded_channel_orders = [1, 2]
+        _run_wepp_ui = True
+        _run_wepp_watershed = True
+        _run_pmet = True
+        _run_frost = False
+        _run_tcr = False
+        _run_snow = True
 
         def parse_inputs(self, payload) -> None:
             if parse_error:
                 raise ValueError("bad payload")
+            self.last_parse_payload = dict(payload)
+            if capture is not None:
+                capture["parse_payload"] = dict(payload)
             return None
 
         @contextlib.contextmanager
@@ -145,6 +154,151 @@ def test_run_wepp_persists_minimum_clip_fields(monkeypatch: pytest.MonkeyPatch) 
     assert soils.clip_soils_minimum is True
     assert soils.clip_soils_minimum_depth == 120.5
     assert soils.rosetta_wc_fc_from_disturbed_bd_override is True
+
+
+def test_run_wepp_propagates_channel_advanced_options_to_wepp_parser(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-channel-propagation")
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    payload = {
+        "channel_critical_shear": 4.5,
+        "channel_erodibility": 0.00001,
+        "channel_manning_roughness_coefficient_bare": 0.031,
+        "channel_manning_roughness_coefficient_veg": 0.041,
+        "minimum_channel_width_m": 0.306,
+        "tcr_opts_taumin": 35.0,
+        "tcr_opts_taumax": 70.0,
+        "tcr_opts_kch": 0.02,
+        "tcr_opts_nch": 1.0,
+        "baseflow_opts_gwstorage": 200.0,
+        "baseflow_opts_bfcoeff": 0.05,
+        "baseflow_opts_dscoeff": 0.0,
+        "baseflow_opts_bfthreshold": 1.0,
+        "snow_opts_rst": 0.0,
+        "snow_opts_newsnw": 100.0,
+        "snow_opts_ssd": 250.0,
+        "frost_opts_wintRed": 1,
+        "frost_opts_fineTop": 10,
+        "frost_opts_fineBot": 10,
+        "frost_opts_ksnowf": 1.0,
+        "frost_opts_kresf": 1.0,
+        "frost_opts_ksoilf": 1.0,
+        "frost_opts_kfactor1": 1e-5,
+        "frost_opts_kfactor2": 1e-5,
+        "frost_opts_kfactor3": 0.5,
+        "pmet_kcb": 0.95,
+        "pmet_rawp": 0.8,
+        "kslast": "",
+        "wepp_bin": "wepp_260324",
+        "dtchr_override": 120,
+        "ichout_override": 3,
+        "chn_topaz_ids_of_interest": "24 34 44",
+        "delete_after_interchange": True,
+        "surf_runoff": 0.004,
+        "lateral_flow": 0.005,
+        "baseflow": 0.006,
+        "sediment": 800,
+        "clip_hillslopes": True,
+        "hillslope_clip_length": 123,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-wepp", json=payload)
+
+    assert response.status_code == 200
+    parsed_payload = capture["parse_payload"]
+    assert parsed_payload["channel_critical_shear"] == 4.5
+    assert parsed_payload["channel_erodibility"] == 0.00001
+    assert parsed_payload["channel_manning_roughness_coefficient_bare"] == 0.031
+    assert parsed_payload["channel_manning_roughness_coefficient_veg"] == 0.041
+    assert parsed_payload["minimum_channel_width_m"] == 0.306
+    assert parsed_payload["tcr_opts_taumin"] == 35.0
+    assert parsed_payload["baseflow_opts_bfcoeff"] == 0.05
+    assert parsed_payload["snow_opts_newsnw"] == 100.0
+    assert parsed_payload["frost_opts_wintRed"] == 1
+    assert parsed_payload["pmet_kcb"] == 0.95
+    assert parsed_payload["wepp_bin"] == "wepp_260324"
+    assert parsed_payload["dtchr_override"] == 120
+    assert parsed_payload["ichout_override"] == 3
+    assert parsed_payload["delete_after_interchange"] is True
+    assert parsed_payload["surf_runoff"] == 0.004
+    assert parsed_payload["lateral_flow"] == 0.005
+    assert parsed_payload["baseflow"] == 0.006
+    assert parsed_payload["sediment"] == 800
+    assert "hillslope_clip_length" not in parsed_payload
+    assert "clip_hillslope_length" not in parsed_payload
+
+
+@pytest.mark.parametrize("clip_length_key", ["hillslope_clip_length", "clip_hillslope_length"])
+def test_run_wepp_accepts_hillslope_clip_length_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+    clip_length_key: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-hillslope-alias")
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={
+                "clip_hillslopes": True,
+                clip_length_key: 222,
+            },
+        )
+
+    assert response.status_code == 200
+    assert capture["watershed"].clip_hillslopes is True
+    assert capture["watershed"].clip_hillslope_length == 222
+
+
+def test_run_wepp_persists_routine_checkbox_overrides_from_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-routine-overrides")
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={
+                "checkbox_hourly_seepage": False,
+                "checkbox_wepp_watershed": False,
+                "checkbox_wepp_pmet": False,
+                "checkbox_wepp_frost": True,
+                "checkbox_wepp_tcr": True,
+                "checkbox_wepp_snow": False,
+            },
+        )
+
+    assert response.status_code == 200
+    wepp = capture["wepp"]
+    assert wepp._run_wepp_ui is False
+    assert wepp._run_wepp_watershed is False
+    assert wepp._run_pmet is False
+    assert wepp._run_frost is True
+    assert wepp._run_tcr is True
+    assert wepp._run_snow is False
+    parsed_payload = capture["parse_payload"]
+    assert "checkbox_hourly_seepage" not in parsed_payload
+    assert "checkbox_wepp_watershed" not in parsed_payload
+    assert "checkbox_wepp_pmet" not in parsed_payload
+    assert "checkbox_wepp_frost" not in parsed_payload
+    assert "checkbox_wepp_tcr" not in parsed_payload
+    assert "checkbox_wepp_snow" not in parsed_payload
 
 
 @pytest.mark.parametrize(

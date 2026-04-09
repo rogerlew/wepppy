@@ -48,6 +48,7 @@ class WeppInputParser:
         _channel_critical_shear = kwds.get("channel_critical_shear", None)
         if isfloat(_channel_critical_shear):
             wepp._channel_critical_shear = float(_channel_critical_shear)
+            wepp._channel_critical_shear_overridden = True
 
         _channel_erodibility = kwds.get("channel_erodibility", None)
         if isfloat(_channel_erodibility):
