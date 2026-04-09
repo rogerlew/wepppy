@@ -160,7 +160,7 @@ The WEPPcloud worker deployment contract requires shared mounts at canonical pat
 WEPP workloads generate very large numbers of small files and metadata operations. C3+3 Lustre guidance explicitly warns that small-file-heavy patterns and high metadata pressure create contention and degrade shared filesystem performance. This is the opposite of the local high-IOPS worker storage model described in this request.
 
 4. **Networking and secure queue connectivity**
-WEPPcloud remote workers require secure connectivity to the RQ Redis server and shared secrets alignment. On Lemhi, compute-node network constraints and security boundaries make persistent external queue attachment operationally difficult.
+WEPPcloud remote workers require secure connectivity to the RQ Redis server on wepp.cloud and shared secrets alignment. On Lemhi, compute-node network constraints and security boundaries make persistent external queue attachment operationally difficult.
 
 5. **Internet-restricted compute nodes block some worker tasks**
 Some WEPPcloud worker paths call public APIs to acquire source data. If compute nodes cannot reach the internet, those tasks fail unless data is pre-staged or architecture is redesigned.
