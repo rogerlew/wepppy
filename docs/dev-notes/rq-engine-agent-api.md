@@ -77,6 +77,8 @@ rq-engine responses must follow `docs/schemas/rq-response-contract.md`.
 
 Submission/command responses:
 - Async submit commonly returns `job_id` and `status_url`.
+- Async status codes vary by endpoint contract (`200` or `202`); treat
+  `job_id`/`job_ids` as the canonical async signal.
 - Sync operations return `message` and optional `result`.
 - Keys use `lower_snake_case`.
 
@@ -150,7 +152,8 @@ Notes:
   `docs/schemas/weppcloud-csrf-contract.md`.
 
 ## Endpoint Families (Agent-Facing)
-For the exact 51-route frozen list, use the contract checklist artifact. The
+For the exact frozen route list (currently 61 routes), use the contract
+checklist artifact. The
 table below is the practical family map used by agent clients.
 
 | Family | Paths | Typical Execution | Primary Scope |
@@ -168,7 +171,7 @@ table below is the practical family map used by agent clients.
 
 ## Internal Admin Debug Endpoints
 These routes are intentionally **internal/admin** and are not part of the
-frozen 51-route agent-facing checklist.
+frozen 61-route agent-facing checklist.
 
 | Method | Path | Purpose | Auth |
 |---|---|---|---|

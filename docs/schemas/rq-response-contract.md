@@ -9,7 +9,10 @@
 
 ## Auth expectations
 - Export endpoints require `rq:export` and run access checks.
-- Job polling endpoints require `rq:status`.
+- Job polling endpoints are open by default under
+  `RQ_ENGINE_POLL_AUTH_MODE=open`.
+- When polling auth mode validates bearer tokens
+  (`token_optional`/`required`), tokens must include `rq:status`.
 
 ## Canonical keys
 - All keys use lower_snake_case.
@@ -17,7 +20,11 @@
 - Optional helper keys: `status_url`, `message`, `warnings`, `result`.
 
 ## Job submission responses
-- Use HTTP 202 for async job submission; 200 only for synchronous updates (no job enqueued).
+- Async job submission endpoints may return HTTP `200` or `202` depending on
+  the route contract; async responses must include canonical job keys
+  (`job_id` or `job_ids`).
+- Prefer HTTP `202` for new async endpoints when contract changes are
+  acceptable.
 - Synchronous 200 responses must use `message` (and optional `result`/`warnings`); do not return legacy keys like `Content`.
 - Single job:
   - Required: `job_id`

@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **81**
-- Classification counts: **agent-facing 58**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 78**, **Flask wrapper 3**
+- Total endpoints inventoried: **84**
+- Classification counts: **agent-facing 61**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 81**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -141,7 +141,7 @@ Snapshot summary:
   - Auth mode switch: `open` (default), `token_optional`, `required` via
     `RQ_ENGINE_POLL_AUTH_MODE`.
   - Rate limit defaults:
-    - `RQ_ENGINE_POLL_RATE_LIMIT_COUNT=120`
+    - `RQ_ENGINE_POLL_RATE_LIMIT_COUNT=400`
     - `RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS=60`
   - Structured audit logging now records endpoint, outcome, job id, caller,
     and client IP.
