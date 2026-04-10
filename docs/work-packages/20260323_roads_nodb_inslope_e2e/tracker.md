@@ -5,10 +5,10 @@
 ## Quick Status
 
 **Started**: 2026-03-23
-**Current phase**: Comprehensive review closeout + handoff packaging
-**Last updated**: 2026-03-24
-**Active ExecPlan**: `prompts/active/roads_nodb_inslope_e2e_execplan.md`
-**Next milestone**: Finalize rollback notes and close package handoff
+**Current phase**: Closed (closeout complete)
+**Last updated**: 2026-04-10
+**Active ExecPlan**: `prompts/completed/roads_nodb_inslope_e2e_execplan.md`
+**Next milestone**: None (package closed)
 
 ## Task Board
 
@@ -39,6 +39,7 @@
 - [x] Resolved watershed rerun runtime blocker by fixing pass-staging symlink overwrite semantics, updating `wepppyo3` pass writer to WEPP Fortran fixed-format grouping/continuation output, and rebuilding `wepp_interchange_rust.so` (2026-03-24).
 - [x] Expanded Roads observability to append-only lifecycle/config/upload/query/run logging and verified fixture rerun success on `clogging-starch` (`status=completed`, `executed_segment_count=23`, `targeted_hillslope_count=14`) (2026-03-24).
 - [x] Completed componentized comprehensive review (UI controller, NoDb controller, API/queue surfaces, `wepppyo3` combiner), resolved all high/medium findings, and revalidated full repository gates (`wctl run-pytest tests --maxfail=1` => `2499 passed, 34 skipped`) (2026-03-24).
+- [x] Final closeout complete: validated rollback workflow (`mod disable` roundtrip with `roads.nodb` restore hash parity), confirmed roads artifact isolation contract and queue-lock clear state on `clogging-starch`, reran targeted rollback-related tests, and moved package to closed lifecycle state (2026-04-10).
 
 ## Timeline
 
@@ -52,6 +53,7 @@
 - **2026-03-24** - Fidelity closeout complete: fixture Roads run executes mapped single-OFE segments, writes merged hillslope pass artifacts, and now persists failed run summaries when watershed rerun errors.
 - **2026-03-24** - Runtime closeout complete: pass combine writer + staging fixes remove `forrtl severe(64)` blocker and fixture Roads watershed rerun now completes.
 - **2026-03-24** - Componentized comprehensive review complete: medium/high findings remediated across UI/NoDb/API-RQ/Rust combiner with full-gate revalidation.
+- **2026-04-10** - Package closure complete after rollback validation evidence capture and prompt archival.
 
 ## Decisions
 
@@ -234,9 +236,30 @@
 
 ### Deployment/Operations
 - [x] Local stack validation completed with canonical compose/wctl workflows.
-- [ ] Rollback steps validated (mod disable, artifact isolation under `wepp/roads`, queue rollback).
+- [x] Rollback steps validated (mod disable, artifact isolation under `wepp/roads`, queue rollback).
 
 ## Progress Notes
+
+### 2026-04-10: Closeout rollback validation and package closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Validated `mod disable` rollback path by executing `_disable_mod_for_run(..., "roads")` and `_enable_mod_for_run(..., "roads")` on `clogging-starch`; confirmed `roads.nodb` backup/restore behavior and hash parity after re-enable.
+- Validated queue rollback state for `clogging-starch`: no active Roads RQ job and no submit/runtime lock residue in Redis lock DB.
+- Validated roads artifact isolation contract for report resources (`required_relpaths` all under `wepp/roads/*`) and recorded expected cross-scope cache artifacts under `wepp/reports/cache/*roads*`.
+- Ran targeted rollback-related test subset and recorded results.
+- Updated `package.md`, `tracker.md`, and `PROJECT_TRACKER.md` to closed lifecycle state; moved ExecPlan to `prompts/completed/`; added rollback closeout artifact note.
+
+**Blockers encountered**:
+- None.
+
+**Test/validation results**:
+- `wctl exec weppcloud python - <<'PY' ... _disable_mod_for_run/_enable_mod_for_run ...` on `clogging-starch` (pass; disable/remove + backup, re-enable/restore, `roads.nodb` hash parity).
+- `wctl exec weppcloud python - <<'PY' ... roads status/report-resources + lock checks ...` on `clogging-starch` (pass; `active_roads_job=null`, `roads:{submit_lock,runtime_lock}:clogging-starch=null`, report relpaths under `wepp/roads/*`).
+- `wctl run-pytest tests/weppcloud/routes/test_project_bp.py -k \"set_mod_roads_allows_when_wbt_backend or set_mod_disables_module_when_no_guards\" --maxfail=1` (pass; 2 tests).
+- `wctl run-pytest tests/rq/test_roads_rq.py --maxfail=1` (pass; 4 tests).
+- `wctl run-pytest tests/nodb/mods/test_roads_controller.py -k \"test_regenerate_roads_report_resources_uses_roads_scope_outputs\" --maxfail=1` (pass; 1 test).
+- `wctl doc-lint --path docs/work-packages/20260323_roads_nodb_inslope_e2e/package.md --path docs/work-packages/20260323_roads_nodb_inslope_e2e/tracker.md --path docs/work-packages/20260323_roads_nodb_inslope_e2e/prompts/completed/roads_nodb_inslope_e2e_execplan.md --path docs/work-packages/20260323_roads_nodb_inslope_e2e/artifacts/20260410_closeout_rollback_validation.md --path PROJECT_TRACKER.md` (pass; 5 files, 0 errors, 0 warnings).
 
 ### 2026-03-24: Componentized comprehensive review remediation pass
 **Agent/Contributor**: Codex
@@ -475,3 +498,8 @@
 **Participants**: User, Codex
 **Question/Topic**: Implement Milestones 1-5 without pause, keep ExecPlan/tracker synchronized, enforce governance checks, and run listed validation gates.
 **Outcome**: Milestones 1-5 executed to completion; governance artifacts synchronized; fixture e2e command path validated; full required gates passed.
+
+### 2026-04-10: User request to close package lifecycle
+**Participants**: User, Codex
+**Question/Topic**: Confirm whether `20260323_roads_nodb_inslope_e2e` can be closed out and complete remaining closeout tasks.
+**Outcome**: Rollback workflow evidence captured (mod disable/restore, roads artifact isolation, queue rollback hygiene), targeted rollback-related tests revalidated, package docs updated to closed state, ExecPlan archived to `prompts/completed/`, and `PROJECT_TRACKER.md` moved the package to Done.

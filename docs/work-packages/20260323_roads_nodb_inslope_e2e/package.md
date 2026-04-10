@@ -1,6 +1,6 @@
 # Roads NoDb Inslope End-to-End Implementation
 
-**Status**: Open (2026-03-23)
+**Status**: Closed (2026-04-10)
 
 ## Overview
 This work package plans and then executes the first end-to-end WEPPcloud Roads NoDb integration for inslope road designs (`Inslope_bd`, `Inslope_rd`). The goal is to deliver a complete, queue-backed Roads workflow that starts from uploaded road GeoJSON, produces segment WEPP runs, injects road effects into watershed routing, and exposes observable run-page/preflight/report behavior.
@@ -39,15 +39,15 @@ This package includes all implementation and validation work required by `wepppy
 - **Informed**: Preflight service maintainers, operations owners monitoring queue/job graph drift.
 
 ## Success Criteria
-- [ ] `Roads(NoDbBase)` exists with the specified state contract and lifecycle transitions.
-- [ ] Roads can be enabled only via `/tasks/set_mod` and returns an explicit error on non-WBT runs.
-- [ ] Run header `Mods` includes Roads and run page renders Roads immediately after Debris Flow (TOC + content).
-- [ ] `TaskEnum.run_roads` (`🚗`) and preflight checklist key `roads` are integrated, with Roads completion dependent on WEPP completion.
-- [ ] Roads API/blueprint routes and rq-engine/RQ jobs execute prepare + run stages asynchronously with observable status updates.
-- [ ] Segment utility meets inslope parity/invariant requirements from the Roads spec (`topaz_id_chn_lowpoint`, `topaz_id_hill_lowpoint`).
-- [ ] Single-OFE run assembly and pass combiner produce a successful watershed rerun with all hillslope pass references resolved from `wepp/roads/output`.
-- [ ] Queue governance checks pass (`wepppy/rq/job-dependencies-catalog.md` updated, `wctl check-rq-graph` clean).
-- [ ] Required targeted tests, lint/doc checks, and fixture e2e checks pass using `clogging-starch` defaults.
+- [x] `Roads(NoDbBase)` exists with the specified state contract and lifecycle transitions.
+- [x] Roads can be enabled only via `/tasks/set_mod` and returns an explicit error on non-WBT runs.
+- [x] Run header `Mods` includes Roads and run page renders Roads immediately after Debris Flow (TOC + content).
+- [x] `TaskEnum.run_roads` (`🚗`) and preflight checklist key `roads` are integrated, with Roads completion dependent on WEPP completion.
+- [x] Roads API/blueprint routes and rq-engine/RQ jobs execute prepare + run stages asynchronously with observable status updates.
+- [x] Segment utility meets inslope parity/invariant requirements from the Roads spec (`topaz_id_chn_lowpoint`, `topaz_id_hill_lowpoint`).
+- [x] Single-OFE run assembly and pass combiner produce a successful watershed rerun with all hillslope pass references resolved from `wepp/roads/output`.
+- [x] Queue governance checks pass (`wepppy/rq/job-dependencies-catalog.md` updated, `wctl check-rq-graph` clean).
+- [x] Required targeted tests, lint/doc checks, and fixture e2e checks pass using `clogging-starch` defaults.
 
 ## Dependencies
 
@@ -88,12 +88,25 @@ This package includes all implementation and validation work required by `wepppy
   - DEM: `/wc1/runs/cl/clogging-starch/dem/wbt/relief.tif`
 
 ## Deliverables
-- Active ExecPlan: `prompts/active/roads_nodb_inslope_e2e_execplan.md`.
+- Completed ExecPlan: `prompts/completed/roads_nodb_inslope_e2e_execplan.md`.
 - Package tracker with milestones, risks, and validation checklist: `tracker.md`.
 - Implemented Roads phase-1 code and tests across NoDb, WEPPcloud, rq-engine, RQ, preflight2, and `wepppyo3`.
 - Validation artifacts (e2e logs, review notes, final validation summary) under `artifacts/`.
+- Closeout rollback evidence: `artifacts/20260410_closeout_rollback_validation.md`.
 
 ## Follow-up Work
 - Road designs beyond `Inslope_bd` and `Inslope_rd`.
 - Physics-aware hydrograph merge beyond phase-1 approximation rules.
 - Additional production hardening from post-implementation telemetry.
+
+## Closure Notes
+
+**Closed**: 2026-04-10
+
+**Summary**: Delivered full Roads phase-1 inslope NoDb integration end-to-end across NoDb controller state/lifecycle, WEPPcloud routes/templates/controllers, rq-engine/RQ queue surfaces, preflight/task wiring, and `wepppyo3` pass combination integration. Post-implementation review remediation and runtime fixes were completed, including watershed rerun pass formatting/staging correctness and queue single-flight protections.
+
+Closeout included explicit rollback validation on `clogging-starch`: `roads` mod disable/enable roundtrip with `roads.nodb` backup/restore hash parity, verification that Roads output/report resource relpaths stay under `wepp/roads/*`, and queue rollback hygiene checks (no active Roads job and no residual submit/runtime lock keys). Targeted rollback-related route/RQ/controller tests were re-run and passing.
+
+**Lessons Learned**: Closeout should reserve explicit time for rollback-path evidence even when implementation and full-gate validation are already complete; capturing this earlier would have reduced lifecycle drift in tracker status.
+
+**Archive Status**: Package remains in `docs/work-packages/20260323_roads_nodb_inslope_e2e/` with tracker, completed ExecPlan, and closeout artifact retained for historical reference.

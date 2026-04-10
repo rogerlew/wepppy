@@ -1,5 +1,10 @@
 # Roads NoDb Inslope End-to-End Implementation
 
+## Outcome Summary (2026-04-10)
+
+- Completed all planned milestones plus post-closeout runtime/review remediation.
+- Captured rollback validation evidence (`mod disable` roundtrip, roads artifact isolation checks, queue lock/job rollback hygiene).
+- Archived this ExecPlan from `prompts/active/` to `prompts/completed/` as part of package closure.
 
 This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept up to date as work proceeds.
 
@@ -36,6 +41,7 @@ All commands and examples in this plan use the canonical fixture run unless expl
 - [x] (2026-03-24 01:29Z) Re-ran remaining ExecPlan validation gates: `wctl run-npm lint`, `wctl run-npm test`, `wctl run-preflight-tests ./internal/checklist`, `python tools/check_endpoint_inventory.py`, `python tools/check_route_contract_checklist.py`, `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master`, and doc lint for package/tracker/active ExecPlan.
 - [x] (2026-03-24 01:52Z) Runtime closeout complete: fixed Roads pass staging/combine runtime defects (append-only lifecycle `roads.log`, targeted-pass symlink unlink before combine, WEPP fixed-format pass writer in `wepppyo3`), rebuilt `wepp_interchange_rust.so`, and verified `clogging-starch` Roads rerun completes (`status=completed`, `executed_segment_count=23`, `targeted_hillslope_count=14`).
 - [x] (2026-03-24 03:36Z) Componentized comprehensive review closeout complete (UI controller, NoDb controller, API/queue, `wepppyo3` combiner): resolved all high/medium findings (multipart-only upload contract, queue single-flight governance + 409 conflicts, stale-prepare guards, strict param validation, UI active-job correlation, NO EVENT groundwater merge correctness + header/calendar checks), regenerated queue graph/catalog, and re-ran full validation gates (`wctl run-pytest tests --maxfail=1` => `2499 passed, 34 skipped`).
+- [x] (2026-04-10 16:40Z) Package closeout finalized: rollback validation captured (`mod disable` backup/restore parity, queue lock/job rollback checks, roads artifact isolation verification), targeted rollback-related tests re-run, and ExecPlan archived under `prompts/completed/`.
 
 ## Surprises & Discoveries
 
@@ -393,3 +399,4 @@ Revision note (2026-03-23 23:35Z): Updated artifact-layout contract from `_pups/
 Revision note (2026-03-24 00:30Z): Added post-closeout regression fixes for explicit WBT raster resolution in Roads prepare, lowpoint decision observability fields/counts, upload-first Roads UI wording alignment, and updated fixture validation outcomes (`mapped` segments now observed on `clogging-starch`).
 Revision note (2026-03-24 01:25Z): Added Milestone 4 execution-fidelity closeout (real single-OFE segment runs and road-only soil OFE outputs), failed-run summary persistence for watershed rerun errors, and refreshed full validation outcomes (`2491 passed, 34 skipped`).
 Revision note (2026-03-24 01:29Z): Refreshed remaining ExecPlan validation gates (npm, preflight checklist, route governance guards, broad-exception guard, and doc lint) after final Roads fidelity/observability changes.
+Revision note (2026-04-10 16:40Z): Added closeout rollback validation outcomes and archived ExecPlan from `prompts/active/` to `prompts/completed/`.

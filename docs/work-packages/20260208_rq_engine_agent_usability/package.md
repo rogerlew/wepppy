@@ -1,6 +1,6 @@
 # RQ-Engine Agent Usability and Documentation Hardening
 
-**Status**: Ready for Review (2026-02-08)
+**Status**: Closed (2026-04-10 06:08 UTC)
 
 ## Overview
 RQ-engine now carries core agent-facing operations, but contract quality and documentation are still uneven across route modules and audiences. This package hardens the API contract, OpenAPI metadata, and supporting docs so agents and users can run Bootstrap and queue workflows without reverse-engineering implementation details.
@@ -26,6 +26,11 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
 - Building a separate external API gateway.
 - Reworking unrelated WEPPcloud UI controls.
 - Changing RQ execution internals beyond usability/documentation requirements.
+
+## Security Impact
+- **Triage**: high
+- **Rationale**: This package hardens auth and token scopes for agent-facing bootstrap and queue routes, including polling access posture.
+- **Security review artifact**: `artifacts/2026-04-10_security_review.md`
 
 ## Stakeholders
 - **Primary**: WEPPcloud/rq-engine maintainers, agent integrators
@@ -77,10 +82,12 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
     `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
   - Contract checklist artifact:
     `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
+  - Security review artifact:
+    `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/2026-04-10_security_review.md`
 - Route documentation and OpenAPI metadata updates in `wepppy/microservices/rq_engine/*`.
 - Updated docs for auth and Bootstrap workflows:
   - `docs/dev-notes/auth-token.spec.md`
-  - `docs/dev-notes/rq-engine-agent-api.md`
+  - `docs/schemas/rq-engine-agent-api-contract.md`
   - `docs/weppcloud-bootstrap-spec.md`
   - `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md`
   - `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`
@@ -104,10 +111,13 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
 
 ## Closure Notes
 
-**Closed**: YYYY-MM-DD
+**Closed**: 2026-04-10 06:08 UTC
 
-**Summary**: [Fill in at closure]
+**Summary**: Closed after independent reviewer, QA, and security subagent closeout review. Documentation and contract artifacts are aligned, route/checklist guard tooling is operational, and closure documentation now records explicit security-risk disposition.
 
-**Lessons Learned**: [Fill in at closure]
+**Lessons Learned**:
+- Endpoint and route-contract freeze artifacts prevented ownership/auth drift while metadata hardening was in flight.
+- Guard automation (`wctl check-rq-contracts` + CI workflow) is valuable as a standing closure criterion for route-contract packages.
+- Security-sensitive documentation packages need explicit risk disposition text (mitigated vs accepted with owner/revisit) before closure.
 
-**Archive Status**: [Fill in at closure]
+**Archive Status**: Closed in place; no active prompts to archive (only `.gitkeep` placeholders in `prompts/active` and `prompts/completed`).

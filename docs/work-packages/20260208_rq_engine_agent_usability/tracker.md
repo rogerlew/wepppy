@@ -5,16 +5,17 @@
 ## Quick Status
 
 **Started**: 2026-02-08  
-**Current phase**: Ready for review  
-**Last updated**: 2026-02-08  
-**Next milestone**: Reviewer sign-off and package archive
+**Current phase**: Closed  
+**Last updated**: 2026-04-10 06:08 UTC  
+**Next milestone**: None (package closed)
 
 ## Review Readiness
 
-- **Status**: Ready for review.
+- **Status**: Closed after reviewer + QA + security closeout review.
 - **Contract completeness**: Endpoint freeze, checklist artifact, and OpenAPI metadata guard coverage are in place.
 - **Operational checks**: `wctl check-rq-contracts` and CI workflow `rq-engine-contract-guards` are implemented.
-- **Documentation split**: Developer contract (`docs/dev-notes/rq-engine-agent-api.md`) and usersum workflow page (`wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`) are published.
+- **Documentation split**: Developer contract (`docs/schemas/rq-engine-agent-api-contract.md`) and usersum workflow page (`wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`) are published.
+- **Security review**: `artifacts/2026-04-10_security_review.md` (no unresolved medium/high findings).
 - **Residual non-blocking notes**:
   - `scripts/build_forest_workflows.py` currently exits non-zero in this repository state because `readme.md` lacks the expected "Dev Server Nightly Profile Tests" section; generated workflow output for this package was still produced.
 
@@ -44,6 +45,7 @@
 - [x] Added usersum companion doc for rq-engine concepts/workflows (2026-02-08).
 - [x] Operationalized route/checklist guards in `wctl` and CI workflow (2026-02-08).
 - [x] Marked package status as ready for review (2026-02-08).
+- [x] Completed independent reviewer, QA, and security closeout reviews; dispositioned findings and closed package docs (2026-04-10 06:08 UTC).
 
 ## Timeline
 
@@ -55,10 +57,11 @@
 - **2026-02-08** - Freeze-review remediations landed for Bootstrap scopes, wrapper parity, polling hardening, and inventory drift guard.
 - **2026-02-08** - OpenAPI metadata standardized for frozen agent-facing routes with contract/size budget tests.
 - **2026-02-08** - Route contract checklist artifact published with automated drift guard.
-- **2026-02-08** - Added `docs/dev-notes/rq-engine-agent-api.md` as the canonical developer-facing rq-engine agent contract.
+- **2026-02-08** - Added `docs/schemas/rq-engine-agent-api-contract.md` as the canonical developer-facing rq-engine agent contract.
 - **2026-02-08** - Added usersum `rq-engine.md` and cross-linked usersum/dev-note Bootstrap and rq-engine docs.
 - **2026-02-08** - Added `wctl check-rq-contracts` and CI workflow `rq-engine-contract-guards`.
 - **2026-02-08** - Marked work package as ready for review.
+- **2026-04-10 06:08 UTC** - Closed package after reviewer/QA/security closeout pass and risk disposition updates.
 
 ## Decisions Log
 
@@ -132,10 +135,11 @@ handoff point for further API usability work.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Route ownership drift between Flask and rq-engine | High | Medium | Converge agent endpoints in rq-engine and document ownership in tracker + package | Open |
-| OpenAPI drift from implemented behavior | Medium | Medium | Add route-level schema checks and regression assertions against documented responses | Open |
-| Scope checks inconsistent across endpoints | High | Medium | Enforce common auth helper usage and add targeted `401/403` tests | Open |
-| Lock semantics under concurrent agents may regress | Medium | Medium | Add lock contention tests and publish retry guidance in docs | Open |
+| Route ownership drift between Flask and rq-engine | High | Medium | Converged ownership and added inventory/checklist drift guards with CI + `wctl` enforcement | Closed |
+| OpenAPI drift from implemented behavior | Medium | Medium | Added OpenAPI contract metadata tests and checklist guard | Closed |
+| Scope checks inconsistent across endpoints | High | Medium | Applied explicit bootstrap scopes and route-level auth regression coverage | Closed |
+| Lock semantics under concurrent agents may regress | Medium | Medium | Added lock-contention coverage and documented retry guidance | Closed |
+| Open polling mode may expose job metadata under identifier leakage | Medium | Low | Accepted residual risk with controls: UUID4 job IDs, read-only polling responses, and in-process rate limiting; revisit in follow-on threat-model review | Accepted (owner: Roger, review-by: 2026-06-30) |
 
 ## Verification Checklist
 
@@ -155,6 +159,11 @@ handoff point for further API usability work.
 - [x] Invalid/expired/audience-mismatch token cases covered.
 - [x] Async enable `queued -> finished/failed` behavior covered.
 - [x] Lock contention and canonical error payloads covered.
+
+### Security
+- [x] Dedicated security review artifact authored: `artifacts/2026-04-10_security_review.md`.
+- [x] No unresolved medium/high security findings remain.
+- [x] Residual open polling risk explicitly accepted with owner/revisit date.
 
 ### Deployment
 - [x] Changes validated in `docker-compose.dev.yml` environment.
@@ -177,6 +186,21 @@ handoff point for further API usability work.
 - Start endpoint inventory pass and define first implementation artifact.
 
 **Test results**: `wctl doc-lint` passed for `package.md`, `tracker.md`, and `PROJECT_TRACKER.md`.
+
+### 2026-04-10 06:08 UTC: Closeout review and package closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Ran independent `reviewer`, `qa_reviewer`, and `security_reviewer` subagent closeout review.
+- Dispositioned findings by completing closure metadata, updating risk-status table, and adding explicit security-risk acceptance text for open polling mode.
+- Added package security review artifact and updated package status to closed.
+- Revalidated route/checklist guard automation (`wctl check-rq-contracts`).
+
+**Blockers encountered**:
+- None.
+
+**Test results**:
+- `wctl check-rq-contracts` (pass; endpoint inventory + route checklist checks passed).
 
 ### 2026-02-08: Bootstrap Phase 2 wrap-up capture
 **Agent/Contributor**: Codex
@@ -302,7 +326,7 @@ handoff point for further API usability work.
 **Agent/Contributor**: Codex
 
 **Work completed**:
-- Added `docs/dev-notes/rq-engine-agent-api.md` with:
+- Added `docs/schemas/rq-engine-agent-api-contract.md` with:
   - canonical rq-engine API surface and OpenAPI access paths
   - auth model and polling mode contract
   - scope contract summary
@@ -314,7 +338,7 @@ handoff point for further API usability work.
 - Add the complementary usersum page for non-API user workflow framing.
 
 **Validation results**:
-- `wctl doc-lint --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
+- `wctl doc-lint --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
   - Result: `3 files validated, 0 errors, 0 warnings`
 
 ### 2026-02-08: rq-engine usersum companion doc
@@ -326,14 +350,14 @@ handoff point for further API usability work.
 - Added cross-link from Bootstrap usersum page:
   - `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md`
 - Added reciprocal link from developer contract:
-  - `docs/dev-notes/rq-engine-agent-api.md`
+  - `docs/schemas/rq-engine-agent-api-contract.md`
 - Updated package deliverables list to include the usersum document.
 
 **Open follow-ups**:
 - None.
 
 **Validation results**:
-- `wctl doc-lint --path wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md --path wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
+- `wctl doc-lint --path wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md --path wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
   - Result: `5 files validated, 0 errors, 0 warnings`
 
 ### 2026-02-08: Guard operationalization (wctl + CI)

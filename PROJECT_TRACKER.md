@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-10  
-**Active Packages**: 3  
+**Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 3 packages ✅ **Within target range**
+**Current WIP**: 2 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -79,37 +79,6 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-
-### RQ-Engine Agent Usability and Documentation Hardening
-**Proposed**: 2026-02-08  
-**Size**: Medium (1-2 weeks)  
-**Priority**: High  
-**Status**: Ready for Review (reviewer sign-off + archive pending)  
-**Package**: [docs/work-packages/20260208_rq_engine_agent_usability/](docs/work-packages/20260208_rq_engine_agent_usability/)  
-**Description**: Establish rq-engine as the canonical agent API for Bootstrap and queue workflows, harden OpenAPI route metadata, and align docs/tests across developer and user audiences.
-
-**Scope**:
-- Converge agent-facing Bootstrap endpoints into `/rq-engine/api/*` ownership.
-- Standardize OpenAPI metadata (`summary`, `description`, `operation_id`, schemas, examples, auth notes).
-- Align token/scope documentation with enforced behavior (`bootstrap:enable`, `bootstrap:token:mint`, `bootstrap:read`, `bootstrap:checkout`).
-- Expand regression coverage for auth failures, async enable lifecycle, lock contention, and canonical errors.
-
-**Strategic Value**:
-- Gives agents one discoverable API surface and reduces Flask/rq-engine contract drift.
-- Improves automation reliability through explicit route contracts and examples.
-- Makes Bootstrap workflows auditable, reproducible, and supportable for both users and tooling.
-
-**Dependencies**:
-- Existing rq response contract (`docs/schemas/rq-response-contract.md`)
-- Bootstrap Phase 2 endpoint baseline in rq-engine
-- Current token policy docs (`docs/dev-notes/auth-token.spec.md`)
-
-**Next Steps**:
-1. Complete reviewer sign-off for package closeout.
-2. Fill `Closure Notes` in `package.md` and archive prompts as completed.
-3. Move to done lifecycle after review acceptance.
-
----
 
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
@@ -207,7 +176,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 3 packages
+**Current WIP Count**: 2 packages
 
 ---
 
@@ -278,26 +247,6 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### Roads NoDb Inslope End-to-End Implementation
-**Started**: 2026-03-23  
-**Status**: Closeout in progress (rollback validation + handoff packaging pending)  
-**Size**: Large (1-2 weeks)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260323_roads_nodb_inslope_e2e/](docs/work-packages/20260323_roads_nodb_inslope_e2e/)  
-**Description**: Deliver phase-1 Roads integration from `wepppy/nodb/mods/roads/specification.md`, including `Roads(NoDbBase)`, mod enablement/WBT guard, run-page/header/preflight wiring, Roads routes + RQ jobs, single-OFE road runs, pass combination, and queue governance updates.
-
-**Current Status**:
-- Core implementation and comprehensive review remediation are complete.
-- Full-gate validation and fixture-backed roads execution evidence are recorded.
-- Remaining open checklist item is explicit rollback-step validation for closeout.
-
-**Next Steps**:
-1. Validate rollback steps (`mod disable`, `wepp/roads` artifact isolation, queue rollback).
-2. Update package closure notes and move active prompt to completed.
-3. Move to done lifecycle state after rollback evidence is captured.
-
----
-
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
@@ -319,6 +268,25 @@ Recently completed work packages. Archived immediately upon completion.
 - [docs/work-packages/20260124_sbs_map_refactor/](docs/work-packages/20260124_sbs_map_refactor/) — Closed (2026-01-24)
 - [docs/work-packages/20251028_wojak_lives/](docs/work-packages/20251028_wojak_lives/) — Closed - Deferred Follow-On (2026-04-10 05:50 UTC)
 - [docs/work-packages/20260331_wcag21aa_frontend_accessibility/](docs/work-packages/20260331_wcag21aa_frontend_accessibility/) — Closed (2026-04-10 05:50 UTC)
+- [docs/work-packages/20260208_rq_engine_agent_usability/](docs/work-packages/20260208_rq_engine_agent_usability/) — Closed (2026-04-10 06:08 UTC)
+
+---
+
+### Roads NoDb Inslope End-to-End Implementation
+**Completed**: 2026-04-10  
+**Duration**: Multi-milestone package (implementation + closeout validation)  
+**Status**: ✅ **CLOSED**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260323_roads_nodb_inslope_e2e/](docs/work-packages/20260323_roads_nodb_inslope_e2e/)  
+**Description**: Closed phase-1 Roads inslope integration package after explicit rollback validation and package handoff completion.
+
+**Outcome**:
+- Rollback validation captured for `mod disable` roundtrip (`roads.nodb` backup/restore hash parity), roads artifact isolation contract, and queue rollback hygiene (no active Roads job, no residual submit/runtime locks).
+- Targeted rollback-related tests re-run and passing:
+  - `tests/weppcloud/routes/test_project_bp.py` (`set_mod` subset)
+  - `tests/rq/test_roads_rq.py`
+  - `tests/nodb/mods/test_roads_controller.py` (`roads-scope resource` assertion)
+- Package docs closed, rollback artifact added, and ExecPlan archived to `prompts/completed/`.
 
 ---
 
