@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 2 packages ✅ **Within target range**
+**Current WIP**: 1 package ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -316,6 +316,41 @@ Recently completed work packages. Archived immediately upon completion.
 
 **Validation Notes**:
 - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md` (pass)
+
+---
+
+### RQ Controller State Setup Discovery
+**Completed**: 2026-04-10  
+**Duration**: 1 focused session  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260410_rq_controller_state_setup_discovery/](docs/work-packages/20260410_rq_controller_state_setup_discovery/)  
+**Description**: Implemented non-run-scoped setup-discovery endpoints and contract/test/documentation guardrails so agents can discover valid create configs and setup operation contracts without out-of-band docs.
+
+**Outcome**:
+- Added setup-discovery endpoints in rq-engine:
+  - `GET /api/configs`
+  - `GET /api/configs/{config}`
+  - `GET /api/endpoints`
+  - `GET /api/endpoints/{operation_id}/schema`
+  - `GET /api/endpoints/{operation_id}/defaults`
+  - `GET /api/endpoints/{operation_id}/errors`
+- Added route/openapi coverage for auth matrix, strict payload contract checks, not-found taxonomy parity, and canonical handled-500 behavior.
+- Updated frozen route artifacts and guard mappings for six new agent-facing setup routes.
+- Closed medium/high reviewer + QA + security findings (metadata/runtime parity, error-contract boundaries, auth/test coverage).
+- Package lifecycle closed with archived ExecPlan and required security artifact:
+  - `docs/work-packages/20260410_rq_controller_state_setup_discovery/prompts/completed/rq_controller_state_setup_discovery_execplan.md`
+  - `docs/work-packages/20260410_rq_controller_state_setup_discovery/prompts/completed/rq_controller_state_setup_discovery_execplan_outcome.md`
+  - `docs/work-packages/20260410_rq_controller_state_setup_discovery/artifacts/2026-04-10_security_review.md`
+- Lifecycle recorded: Backlog -> In Progress (2026-04-10 06:58 UTC) -> Done (2026-04-10 07:29 UTC).
+
+**Validation Notes**:
+- `wctl run-pytest tests/microservices/test_rq_engine_setup_discovery_routes.py --maxfail=1` (`28 passed`)
+- `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` (`9 passed`)
+- `python tools/check_endpoint_inventory.py` (pass)
+- `python tools/check_route_contract_checklist.py` (pass)
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py --maxfail=1` (`2 passed`)
+- `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md --path docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md --path docs/work-packages/20260410_rq_controller_state_setup_discovery/package.md --path docs/work-packages/20260410_rq_controller_state_setup_discovery/tracker.md --path docs/work-packages/20260410_rq_controller_state_setup_discovery/prompts/completed/rq_controller_state_setup_discovery_execplan.md --path docs/work-packages/20260410_rq_controller_state_setup_discovery/prompts/completed/rq_controller_state_setup_discovery_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_setup_discovery/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md` (pass)
 
 ---
 

@@ -7,16 +7,22 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **61**
+- Total frozen routes covered: **67**
 
 ## Contract Matrix
 
 | Method | Path | Auth | Scope | Mutates | Execution | Required Responses | Contract Coverage |
 |---|---|---|---|---|---|---|---|
 | `POST` | `/api/canceljob/{job_id}` | JWT Bearer | rq:status | mutating | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `GET` | `/api/configs` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
+| `GET` | `/api/configs/{config}` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
 | `POST` | `/api/culverts-wepp-batch/` | JWT Bearer | culvert:batch:submit | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/culverts-wepp-batch/{batch_uuid}/finalize` | JWT Bearer | culvert:batch:retry | mutating | async enqueue | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` | JWT Bearer | culvert:batch:retry | mutating | async enqueue | `200, 400, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `GET` | `/api/endpoints` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
+| `GET` | `/api/endpoints/{operation_id}/defaults` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
+| `GET` | `/api/endpoints/{operation_id}/errors` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
+| `GET` | `/api/endpoints/{operation_id}/schema` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
 | `POST` | `/api/jobinfo` | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | sync | `200, 401, 403, 429, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_jobinfo.py` |
 | `GET` | `/api/jobinfo/{job_id}` | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | sync | `200, 401, 403, 404, 429, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_jobinfo.py` |
 | `GET` | `/api/jobstatus/{job_id}` | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | sync | `200, 401, 403, 404, 429, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_jobinfo.py` |
@@ -73,7 +79,7 @@ Guarded by:
 | `POST` | `/api/runs/{runid}/{config}/tasks/upload-cover-transform` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/tasks/upload-dem/` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/tasks/upload-sbs/` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
-| `POST` | `/create/` | JWT/rq_token or CAPTCHA | `rq:enqueue` (token-auth paths) | mutating | sync redirect | `303, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `POST` | `/create/` | JWT/rq_token, same-origin session cookie, or CAPTCHA | `rq:enqueue` (token-auth paths) | mutating | sync redirect | `303, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 
 ## Notes
 

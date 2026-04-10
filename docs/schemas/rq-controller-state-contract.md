@@ -1,6 +1,6 @@
 # RQ Controller State Contract (Draft)
 > Proposed additive contract for agent-friendly controller state, parameter metadata, and run orchestration signals.
-> **Status:** Draft proposal only; no rq-engine endpoint in this document is implemented yet.
+> **Status:** Draft with partial implementation; setup discovery endpoints (`/api/configs`, `/api/endpoints*`) are implemented, remaining controller-state surfaces are planned.
 > **See also:** `docs/schemas/rq-engine-agent-api-contract.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`
 
 ## Purpose
@@ -23,7 +23,7 @@
 - Does not replace existing mutation endpoints.
 
 ## Non-Goals
-- No immediate runtime behavior changes are made by this document alone.
+- This document does not by itself change runtime behavior beyond explicitly implemented roadmap packages.
 - No UI rendering prescriptions beyond optional hint metadata.
 
 ## Frozen Baseline vs Target Profile
@@ -222,7 +222,7 @@
     - `supported`
     - `key_locations` (for example `header:Idempotency-Key`)
     - `dedupe_window_seconds`
-    - `replay_behavior` (`return_original_success`, `reject_duplicate`)
+    - `replay_behavior` (`return_original_success`, `reject_duplicate`, `not_supported`)
     - `duplicate_replay_status_code` (required when `replay_behavior=reject_duplicate`)
     - `duplicate_replay_error_code` (required when `replay_behavior=reject_duplicate`)
     - `mismatch_status_code`
@@ -861,17 +861,13 @@ the 2026-02-08 freeze artifacts.
       "run_scoped": false,
       "method": "GET",
       "path": "/api/configs",
-      "accepted_auth": ["session_cookie_same_origin", "bearer_jwt"],
+      "accepted_auth": ["bearer_jwt"],
       "auth_requirements": {
         "bearer_jwt": {
-          "required_scope": ["rq:read"]
-        },
-        "session_cookie_same_origin": {
-          "same_origin_required": true
+          "required_any_scope": ["rq:read", "rq:status"]
         }
       },
-      "bootstrap_access_note": "Deployments MAY expose this endpoint in open-read mode; if JWT is required, clients need a pre-run token before discovery.",
-      "error_catalog_url": "/rq-engine/api/endpoints/rq_engine_list_configs/errors",
+      "error_catalog_url": "/api/endpoints/rq_engine_list_configs/errors",
       "write_precondition": {
         "required": false,
         "accepted": [],
@@ -912,8 +908,8 @@ the 2026-02-08 freeze artifacts.
       "run_scoped": false,
       "method": "POST",
       "path": "/create/",
-      "config_catalog_url": "/rq-engine/api/configs",
-      "accepted_auth": ["rq_token", "bearer_jwt", "captcha"],
+      "config_catalog_url": "/api/configs",
+      "accepted_auth": ["rq_token", "bearer_jwt", "session_cookie_same_origin", "captcha"],
       "auth_requirements": {
         "rq_token": {
           "required_scope": ["rq:enqueue"]
@@ -921,12 +917,15 @@ the 2026-02-08 freeze artifacts.
         "bearer_jwt": {
           "required_scope": ["rq:enqueue"]
         },
+        "session_cookie_same_origin": {
+          "same_origin_required": true
+        },
         "captcha": {
           "challenge_required": true,
           "required_if_no_authenticated_token": true
         }
       },
-      "error_catalog_url": "/rq-engine/api/endpoints/rq_engine_create/errors",
+      "error_catalog_url": "/api/endpoints/rq_engine_create/errors",
       "write_precondition": {
         "required": false,
         "accepted": [],
@@ -934,10 +933,10 @@ the 2026-02-08 freeze artifacts.
         "conflict_error_code": "stale_run_state"
       },
       "idempotency_policy": {
-        "supported": true,
-        "key_locations": ["header:Idempotency-Key", "body:idempotency_key"],
-        "dedupe_window_seconds": 86400,
-        "replay_behavior": "return_original_success",
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "not_supported",
         "mismatch_status_code": 409,
         "mismatch_error_code": "idempotency_key_conflict"
       },
@@ -950,17 +949,7 @@ the 2026-02-08 freeze artifacts.
       "response_mode": "redirect",
       "result_contract": {
         "kind": "sync_redirect",
-        "required_response_fields": [
-          "message",
-          "result.run_context.runid",
-          "result.run_context.config",
-          "result.run_context.run_url",
-          "result.run_context.run_api_base_url",
-          "result.run_context.endpoints_url",
-          "result.run_context.pipeline_url",
-          "result.run_context.readiness_url",
-          "result.run_context.outputs_url"
-        ],
+        "required_response_fields": [],
         "location_header_required": true,
         "terminal_signal": "http_status_303"
       },
@@ -1698,7 +1687,7 @@ value semantics where classification rasters are expected).
 - Responses SHOULD avoid direct PII. If identity context is needed for hints/defaults, use role/capability booleans.
 
 ## Suggested Rollout Order
-1. Setup bootstrap discovery: `/api/configs`, setup endpoint catalog/schema/defaults.
+1. Setup bootstrap discovery: `/api/configs`, setup endpoint catalog/schema/defaults. (Implemented in package `20260410_rq_controller_state_setup_discovery`.)
 2. `pipeline` and `readiness` endpoints (orchestration substrate).
 3. Endpoint-level schemas/defaults for `build-climate`, `build-landuse`, `build-soils`, `run-wepp`.
 4. Upload operation metadata hardening (`upload-dem`, `upload-cli`, `upload-sbs`, `upload-cover-transform`).
@@ -1720,7 +1709,7 @@ When a package is closed, its active ExecPlan SHOULD be archived to
 | Order | Proposed Work-Package Folder | Primary Scope | Exit Criteria | Depends On | Progress State |
 |---|---|---|---|---|---|
 | 1 | `20260410_rq_controller_state_foundation` | Freeze contract join keys and descriptor invariants (`operation_id`, `step_id`, descriptor required fields), plus OpenAPI alignment plan. | Contract sections stabilized; unresolved schema ambiguities closed; implementation checklist accepted. | none | Complete |
-| 2 | `20260410_rq_controller_state_setup_discovery` | Implement non-run-scoped setup surfaces: `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, setup schema/defaults/errors endpoints. | Agent can discover valid configs and call `create` without out-of-band docs; setup discovery tests pass. | 1 | Planned |
+| 2 | `20260410_rq_controller_state_setup_discovery` | Implement non-run-scoped setup surfaces: `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, setup schema/defaults/errors endpoints. | Agent can discover valid configs and call `create` without out-of-band docs; setup discovery tests pass. | 1 | Complete |
 | 3 | `20260410_rq_controller_state_orchestration_reads` | Implement run-scoped orchestration reads: `/pipeline`, `/readiness`, step state machine fields, invalidation lineage, next-action semantics. | Deterministic readiness->next_actionable_steps loop verified for baseline and disturbed configs. | 1 | Planned |
 | 4 | `20260410_rq_controller_state_schema_defaults` | Implement controller and endpoint schema/default surfaces with `constraint_mode`, predicate grammar, and run-resolved defaults. | Schema/default endpoints provide machine-checkable constraints for core build/run operations. | 1, 3 | Planned |
 | 5 | `20260410_rq_controller_state_geospatial_uploads` | Implement `/geospatial-metadata` and upload metadata contracts (format/CRS/extent/resolution/value semantics). | Agent can resolve first-step geospatial defaults and validate upload payloads pre-submit. | 2, 4 | Planned |
@@ -1757,7 +1746,7 @@ When a package is closed, its active ExecPlan SHOULD be archived to
 4. Export/download output discovery via `outputs` and export operations.
 
 ## Change Management
-- When this draft is implemented:
+- As this draft is implemented package-by-package:
   - add endpoints to `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
   - add route rows to `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
   - update `docs/schemas/rq-engine-agent-api-contract.md`

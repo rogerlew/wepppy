@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **84**
-- Classification counts: **agent-facing 61**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 81**, **Flask wrapper 3**
+- Total endpoints inventoried: **90**
+- Classification counts: **agent-facing 67**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 87**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -20,9 +20,15 @@ Snapshot summary:
 | POST | `/api/batch/_/{batch_name}/upload-geojson` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `upload_geojson` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Role gate: `["Admin"]`. Synchronous BatchRunner resource mutation; no queue. |
 | POST | `/api/batch/_/{batch_name}/upload-sbs-map` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `upload_sbs_map` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Role gate: `["Admin"]`. Synchronous BatchRunner resource mutation; no queue. |
 | POST | `/api/canceljob/{job_id}` | `wepppy/microservices/rq_engine/job_routes.py` | `canceljob` | agent-facing | rq-engine | JWT Bearer | `rq:status` | mutating | If fetched job metadata includes a run ID, enforces `require_session_marker`. No enqueue; cancels existing RQ job(s). |
+| GET | `/api/configs` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `list_configs` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup discovery catalog for valid `create` config IDs and setup metadata; no queue. |
+| GET | `/api/configs/{config}` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `get_config` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup discovery metadata for one config ID; returns canonical `404` when config is unknown. |
 | POST | `/api/culverts-wepp-batch/` | `wepppy/microservices/rq_engine/culvert_routes.py` | `culverts_wepp_batch` | agent-facing | rq-engine | JWT Bearer | `culvert:batch:submit` | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/culverts-wepp-batch/{batch_uuid}/finalize` | `wepppy/microservices/rq_engine/culvert_routes.py` | `culverts_finalize_batch` | agent-facing | rq-engine | JWT Bearer | `culvert:batch:retry` | mutating | Async enqueue; rebuilds batch rollup artifacts after retry/repair runs. |
 | POST | `/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` | `wepppy/microservices/rq_engine/culvert_routes.py` | `culverts_retry_run` | agent-facing | rq-engine | JWT Bearer | `culvert:batch:retry` | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| GET | `/api/endpoints` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `list_setup_endpoints` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup operation descriptor catalog (includes `rq_engine_create` and setup discovery operation IDs); no queue. |
+| GET | `/api/endpoints/{operation_id}/defaults` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `get_setup_endpoint_defaults` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup defaults for one operation descriptor; returns canonical `404` for unknown operation IDs. |
+| GET | `/api/endpoints/{operation_id}/errors` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `get_setup_endpoint_errors` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup error taxonomy for one operation descriptor; returns canonical `404` for unknown operation IDs. |
+| GET | `/api/endpoints/{operation_id}/schema` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `get_setup_endpoint_schema` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup request schema + descriptor for one operation ID; returns canonical `404` for unknown operation IDs. |
 | POST | `/api/huc-fire/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_huc_fire_routes.py` | `upload_huc_fire_sbs` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Creates a new disturbed run synchronously from upload payload; no queue. |
 | POST | `/api/jobinfo` | `wepppy/microservices/rq_engine/job_routes.py` | `jobinfo_batch` | agent-facing | rq-engine | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | Polling remains open in default mode; optional/required JWT modes plus rate limiting + audit logging are now available. |
 | GET | `/api/jobinfo/{job_id}` | `wepppy/microservices/rq_engine/job_routes.py` | `jobinfo` | agent-facing | rq-engine | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | Polling remains open in default mode; optional/required JWT modes plus rate limiting + audit logging are now available. |
@@ -87,7 +93,7 @@ Snapshot summary:
 | POST | `/api/runs/{runid}/{config}/tasks/upload-cover-transform` | `wepppy/microservices/rq_engine/upload_disturbed_routes.py` | `upload_cover_transform` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronous upload/validation mutation; no queue. |
 | POST | `/api/runs/{runid}/{config}/tasks/upload-dem/` | `wepppy/microservices/rq_engine/watershed_routes.py` | `upload_dem` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronous upload/validation mutation; no queue. |
 | POST | `/api/runs/{runid}/{config}/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_disturbed_routes.py` | `upload_sbs` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronous upload/validation mutation; no queue. |
-| POST | `/create/` | `wepppy/microservices/rq_engine/project_routes.py` | `create` | agent-facing | rq-engine | JWT/rq_token or CAPTCHA | `rq:enqueue` (token-auth paths) | mutating | Creates run directory + Ron config + TTL, then redirects (`303`) to run URL. No queue. |
+| POST | `/create/` | `wepppy/microservices/rq_engine/project_routes.py` | `create` | agent-facing | rq-engine | JWT/rq_token, same-origin session cookie, or CAPTCHA | `rq:enqueue` (token-auth paths) | mutating | Creates run directory + Ron config + TTL, then redirects (`303`) to run URL. No queue. |
 | GET | `/health` | `wepppy/microservices/rq_engine/__init__.py` | `health` | internal | rq-engine | Open | - | read-only | Service liveness endpoint. |
 | GET | `/api/bootstrap/verify-token` | `wepppy/weppcloud/routes/bootstrap.py` | `verify_token` | internal | Flask wrapper | HTTP Basic + bootstrap JWT | n/a (audience + runid claims) | read-only | Caddy `forward_auth` endpoint. Validates forwarded git path, bootstrap JWT audience/runid, run eligibility, and bootstrap opt-in. |
 | POST | `/api/bootstrap/verify-token` | `wepppy/weppcloud/routes/bootstrap.py` | `verify_token` | internal | Flask wrapper | HTTP Basic + bootstrap JWT | n/a (audience + runid claims) | read-only | Caddy `forward_auth` endpoint. Same behavior as GET variant. |

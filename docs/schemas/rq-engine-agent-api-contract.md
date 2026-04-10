@@ -61,7 +61,8 @@ Core scopes used by agent-facing routes:
 
 | Scope | Used for |
 |---|---|
-| `rq:status` | Job polling (`jobstatus`, `jobinfo`) and `canceljob`; also bearer path for session-token issuance. |
+| `rq:status` | Job polling (`jobstatus`, `jobinfo`) and `canceljob`; also bearer path for session-token issuance and setup-discovery compatibility (`/api/configs`, `/api/endpoints*`). |
+| `rq:read` | Read-only setup/controller-state metadata surfaces (`/api/configs`, `/api/endpoints*`, and planned run-scoped controller-state reads). |
 | `rq:enqueue` | Most run mutations that enqueue background jobs or perform run mutations under rq-engine routes. |
 | `rq:export` | Export artifact endpoints under `/runs/{runid}/{config}/export/*`. |
 | `bootstrap:enable` | Bootstrap enable endpoint. |
@@ -72,9 +73,9 @@ Core scopes used by agent-facing routes:
 | `culvert:batch:retry` | Culvert batch retry endpoint. |
 
 Bootstrap routes do not accept `rq:enqueue` as a substitute for `bootstrap:*`.
-- `rq:read` is reserved for the proposed controller-state read surfaces in
-  `docs/schemas/rq-controller-state-contract.md`; it is not part of the frozen
-  61-route baseline in this document.
+- Setup-discovery endpoints implemented in package
+  `20260410_rq_controller_state_setup_discovery` accept `rq:status` and
+  `rq:read` during rollout compatibility.
 - During the additive controller-state rollout, bearer flows that currently rely
   on `rq:status` for read access MUST remain backward-compatible until package
   `20260410_rq_controller_state_auth_concurrency` completes.
@@ -171,13 +172,14 @@ Notes:
   `docs/schemas/weppcloud-csrf-contract.md`.
 
 ## Endpoint Families (Agent-Facing)
-For the exact frozen route list (currently 61 routes), use the contract
+For the exact frozen route list (currently 67 routes), use the contract
 checklist artifact. The
 table below is the practical family map used by agent clients.
 
 | Family | Paths | Typical Execution | Primary Scope |
 |---|---|---|---|
 | Job control | `/api/jobstatus/{job_id}`, `/api/jobinfo/{job_id}`, `/api/jobinfo`, `/api/canceljob/{job_id}` | Polling is sync/read-only; cancel is sync mutation | `rq:status` (cancel also accepts `culvert:batch:submit`) |
+| Setup discovery | `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, `/api/endpoints/{operation_id}/{schema\\|defaults\\|errors}` | Sync read-only discovery | `rq:status` or `rq:read` |
 | Bootstrap | `/api/runs/{runid}/{config}/bootstrap/*` plus `run-*-noprep` endpoints | Mix of sync no-queue (`checkout`, reads, mint) and async (`enable`, no-prep runs) | `bootstrap:*` and `rq:enqueue` |
 | Build/prep | `/api/runs/{runid}/{config}/build-*`, `fetch-dem-and-build-channels`, `set-outlet` | Mostly async enqueue | `rq:enqueue` |
 | Model runs | `/api/runs/{runid}/{config}/run-*` (`wepp`, `wepp-watershed`, `swat`, `rhem`, `ash`, `debris-flow`, `omni`) | Mostly async enqueue; some sync dry-run paths | `rq:enqueue` |
@@ -190,7 +192,7 @@ table below is the practical family map used by agent clients.
 
 ## Internal Admin Debug Endpoints
 These routes are intentionally **internal/admin** and are not part of the
-frozen 61-route agent-facing checklist.
+frozen 67-route agent-facing checklist.
 
 | Method | Path | Purpose | Auth |
 |---|---|---|---|
@@ -221,16 +223,15 @@ reasons:
   - this document when behavior changes for clients
 
 ## Planned Additive Contract
-- Draft controller-state/schema/orchestration endpoints for agent clients are
-  specified in:
-  - `docs/schemas/rq-controller-state-contract.md`
-- Draft scope includes:
-  - controller state/schema/hints/templates
-  - endpoint-level schema/default discovery
+- Controller-state/schema/orchestration endpoints for agent clients are tracked
+  in `docs/schemas/rq-controller-state-contract.md`.
+- Implemented subset:
+  - setup discovery surfaces (`/api/configs`, `/api/endpoints*`) shipped in
+    `20260410_rq_controller_state_setup_discovery`.
+- Remaining planned scope:
+  - run-scoped controller state/schema/hints/templates
+  - run-scoped endpoint-level schema/default discovery
   - config/mod-aware `pipeline` DAG and `readiness` surfaces
-- Foundation freeze requirements for that draft (identifier model, descriptor
-  invariants, and dependency ordering) are tracked in work package
-  `20260410_rq_controller_state_foundation` and MUST be treated as the entry
-  gate before implementation packages start.
-- The draft document is intentionally marked "proposed" and is not implemented
-  by current rq-engine routes.
+- Foundation freeze requirements (identifier model, descriptor invariants, and
+  dependency ordering) remain tracked in
+  `20260410_rq_controller_state_foundation`.

@@ -249,7 +249,8 @@ def _collect_overrides(payload: Mapping[str, Any], query_params: Mapping[str, An
     "/create/",
     summary="Create a new run",
     description=(
-        "Supports `rq_token`, Bearer auth (`rq:enqueue`), or CAPTCHA verification. "
+        "Supports `rq_token`, Bearer auth (`rq:enqueue`), same-origin session-cookie fallback, "
+        "or CAPTCHA verification. "
         "Synchronously creates run directory/config metadata and responds with a redirect to the new run URL."
     ),
     tags=["rq-engine", "project"],

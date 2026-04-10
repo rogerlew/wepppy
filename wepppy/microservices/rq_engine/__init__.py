@@ -34,6 +34,7 @@ from .rhem_routes import router as rhem_router
 from .roads_routes import router as roads_router
 from .rusle_routes import router as rusle_router
 from .session_routes import router as session_router
+from .setup_discovery_routes import router as setup_discovery_router
 from .soils_routes import router as soils_router
 from .swat_routes import router as swat_router
 from .treatments_routes import router as treatments_router
@@ -85,6 +86,7 @@ app.include_router(batch_router, prefix="/api")
 app.include_router(bootstrap_router, prefix="/api")
 app.include_router(culvert_router, prefix="/api")
 app.include_router(session_router, prefix="/api")
+app.include_router(setup_discovery_router, prefix="/api")
 app.include_router(debug_router, prefix="/api")
 app.include_router(landuse_soils_router, prefix="/api")
 app.include_router(landuse_router, prefix="/api")
