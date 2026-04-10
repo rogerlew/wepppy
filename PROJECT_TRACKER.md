@@ -180,28 +180,6 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### Usersum Header ROLE Filter and Threshold Search Ceiling
-**Started**: 2026-04-08  
-**Status**: Implementation complete (follow-up fix validated + QA re-pass complete; pending merge)  
-**Size**: Medium (1 focused session)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260408_usersum_role_filter/](docs/work-packages/20260408_usersum_role_filter/)  
-**Description**: Add a conditional usersum header `ROLE` discovery selector for PowerUser/Admin/Root and align usersum role/search semantics to threshold role ceilings with preserved `/usersum/search` refinement behavior.
-
-**Current Status**:
-- Backend usersum role resolution and threshold ceiling semantics are implemented, including explicit `Root` mapping.
-- Header/search template wiring is complete (`ROLE` selector visibility/options + role persistence on `/usersum/search`).
-- Follow-up layout refinement shipped: usersum doc pages now self-report `min_role` under breadcrumbs.
-- Follow-up discovery fix shipped: selected `ROLE` ceiling now also filters usersum shell/nav visibility for privileged users.
-- Targeted validation passed: `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` (`50 passed`).
-- In-container verification with `dev-agent@example.com` role set confirmed role-dependent API and nav behavior.
-- Explicit QA re-review completed with no open medium/high findings.
-
-**Next Steps**:
-1. Merge and monitor in broader integration flow.
-2. Close package docs after merge if no follow-up fixes are required.
-
----
 
 ### markdown-doc Toolkit Integration
 **Started**: 2025-10-25  
@@ -287,6 +265,28 @@ Recently completed work packages. Archived immediately upon completion.
   - `tests/rq/test_roads_rq.py`
   - `tests/nodb/mods/test_roads_controller.py` (`roads-scope resource` assertion)
 - Package docs closed, rollback artifact added, and ExecPlan archived to `prompts/completed/`.
+
+---
+
+### Usersum Header ROLE Filter and Threshold Search Ceiling
+**Completed**: 2026-04-09  
+**Duration**: 1 focused session + follow-up fixes  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260408_usersum_role_filter/](docs/work-packages/20260408_usersum_role_filter/)  
+**Description**: Closed usersum role-filter package delivering header `ROLE` discovery filtering, threshold role-ceiling semantics, nav alignment, spec sync, and source/raw canonical-path security hardening.
+
+**Outcome**:
+- Header `ROLE` selector shipped with PowerUser/Admin/Root option contracts and selected-role persistence.
+- Role filter semantics now use threshold ceilings with explicit unauthorized-ceiling handling (`403` API + page error path).
+- Discovery/nav now honors selected role ceiling; doc pages self-report `min_role` under breadcrumbs.
+- Security finding `SEC-01` closed by canonicalizing `/usersum/src` and `/usersum/raw` rel-path handling before manifest visibility checks.
+- Package lifecycle closed: package/tracker updated, ExecPlan moved to `prompts/completed/` with outcome summary.
+
+**Validation Notes**:
+- `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` (`50 passed`)
+- `wctl run-pytest tests/weppcloud/routes/test_usersum_bp.py tests/weppcloud/routes/test_usersum_docs_contracts.py tests/weppcloud/routes/test_usersum_docs_index.py tests/weppcloud/test_usersum_template_wiring.py --maxfail=1` (`58 passed`)
+- `wctl doc-lint --path wepppy/weppcloud/routes/usersum/specification.md` (`1 file validated, 0 errors, 0 warnings`)
 
 ---
 

@@ -5,9 +5,9 @@
 ## Quick Status
 
 **Started**: 2026-04-08  
-**Current phase**: Security review complete (gate pass) / ready for handoff  
-**Last updated**: 2026-04-08  
-**Next milestone**: Package handoff summary.
+**Current phase**: Closed (2026-04-09)  
+**Last updated**: 2026-04-09  
+**Next milestone**: None.
 
 ## Task Board
 
@@ -22,6 +22,7 @@
 
 ### Done
 - [x] Created work-package scaffold (`package.md`, `tracker.md`, active ExecPlan).
+- [x] Closed package lifecycle docs (`package.md`, `tracker.md`, `PROJECT_TRACKER.md`) and moved ExecPlan to `prompts/completed/` with outcome summary.
 - [x] Loaded required AGENTS/process/spec guidance and scoped required file touchpoints.
 - [x] Implemented usersum role-ceiling backend contract alignment (`Root` mapping + threshold semantics + 403 behavior).
 - [x] Implemented shared header `ROLE` select and `/usersum/search` role preservation wiring.
@@ -48,6 +49,7 @@
 - **2026-04-08** - Usersum specification synced to implemented behavior; `wctl doc-lint --path wepppy/weppcloud/routes/usersum/specification.md` passed.
 - **2026-04-08** - Dedicated security review artifact added; gate failed on high finding `SEC-01` (src/raw role-bypass via non-canonical path variants).
 - **2026-04-08** - `SEC-01` fixed by canonical path enforcement before source/raw visibility checks; security gate now passes.
+- **2026-04-09** - Package lifecycle closed; ExecPlan moved from `prompts/active` to `prompts/completed`, package status set to closed, and `PROJECT_TRACKER.md` moved package to Done.
 
 ## Decisions Log
 
@@ -302,6 +304,18 @@
   - `src_bypass 404`
   - `raw_normal 404`
   - `raw_bypass 404`
+
+### 2026-04-09 19:10 UTC: Package closeout
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Closed `package.md` status and checked all success criteria.
+- Moved ExecPlan from `prompts/active/usersum_role_filter_execplan.md` to `prompts/completed/usersum_role_filter_execplan.md`.
+- Added closeout outcome summary and final lifecycle notes.
+- Updated `PROJECT_TRACKER.md` to move this package from `In Progress` to `Done`.
+
+**Validation results**:
+- `wctl doc-lint --path docs/work-packages/20260408_usersum_role_filter --path PROJECT_TRACKER.md` -> pass (`5 files validated, 0 errors, 0 warnings`).
 
 ## Watch List
 

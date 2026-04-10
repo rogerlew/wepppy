@@ -1,6 +1,6 @@
 # Usersum Header ROLE Filter and Threshold Search Ceiling
 
-**Status**: Open (2026-04-08)
+**Status**: Closed (2026-04-09)
 
 ## Overview
 This package adds a usersum `ROLE` discovery filter in the shared usersum header and aligns backend search/filter behavior with the updated usersum role-ceiling specification. The goal is to keep role-based discovery predictable for PowerUser/Admin/Root audiences while preserving strict authorization and min-role visibility gates.
@@ -35,13 +35,13 @@ This package covers usersum route logic, usersum header/search templates, target
 - **Informed**: Docs maintainers relying on usersum discoverability and role gating.
 
 ## Success Criteria
-- [ ] Header `ROLE` select renders only for authenticated `PowerUser`/`Admin`/`Root` callers.
-- [ ] Header `ROLE` select exposes exact required option subsets per WEPPcloud role.
-- [ ] `/usersum/api/search` and `/usersum/search` use threshold role-ceiling semantics.
-- [ ] Requested role ceilings above caller ceiling return `403` in API and error path in page route.
-- [ ] Default omitted role behavior remains `user` ceiling.
-- [ ] Selected role is preserved through usersum search flow and page refinements.
-- [ ] Required tests pass and QA review findings are fully dispositioned.
+- [x] Header `ROLE` select renders only for authenticated `PowerUser`/`Admin`/`Root` callers.
+- [x] Header `ROLE` select exposes exact required option subsets per WEPPcloud role.
+- [x] `/usersum/api/search` and `/usersum/search` use threshold role-ceiling semantics.
+- [x] Requested role ceilings above caller ceiling return `403` in API and error path in page route.
+- [x] Default omitted role behavior remains `user` ceiling.
+- [x] Selected role is preserved through usersum search flow and page refinements.
+- [x] Required tests pass and QA review findings are fully dispositioned.
 
 ## Dependencies
 
@@ -75,7 +75,27 @@ This package covers usersum route logic, usersum header/search templates, target
 - New work package docs:
   - `docs/work-packages/20260408_usersum_role_filter/package.md`
   - `docs/work-packages/20260408_usersum_role_filter/tracker.md`
-  - `docs/work-packages/20260408_usersum_role_filter/prompts/active/usersum_role_filter_execplan.md`
+  - `docs/work-packages/20260408_usersum_role_filter/prompts/completed/usersum_role_filter_execplan.md`
+
+## Outcome Summary
+- Implemented usersum role-ceiling discovery behavior end-to-end:
+  - conditional header `ROLE` selector with required option sets for `PowerUser`/`Admin`/`Root`,
+  - threshold role semantics for `/usersum/api/search` and `/usersum/search`,
+  - selected role persistence during search refinement and change-submit behavior.
+- Added follow-up UX and correctness refinements:
+  - doc role self-report under breadcrumbs,
+  - shell/nav discovery filtered by selected `ROLE`,
+  - canonicalized source/raw rel-path checks to close non-canonical visibility bypass (`SEC-01`).
+- Updated usersum docs contracts and spec for shipped behavior:
+  - `wepppy/weppcloud/routes/usersum/specification.md`,
+  - `wepppy/weppcloud/routes/usersum/docs_manifest.yaml`,
+  - `wepppy/weppcloud/routes/usersum/nav_tree.yaml`,
+  - `wepppy/weppcloud/routes/usersum/weppcloud/models/batch-runs/ENDUSER.md`.
+- Validation and review closure:
+  - targeted usersum route/template suite passed (`50 passed`),
+  - expanded usersum suite after security remediation passed (`58 passed`),
+  - usersum spec doc-lint passed (`0 errors`, `0 warnings`),
+  - QA and security review gates closed with no unresolved medium/high findings.
 
 ## Follow-up Work
-- Optional future package to add explicit usersum UI messaging clarifying discovery filter vs authorization ceiling behavior.
+- Optional future package to add explicit telemetry/alerting for repeated denied non-canonical `/usersum/src` and `/usersum/raw` probes.

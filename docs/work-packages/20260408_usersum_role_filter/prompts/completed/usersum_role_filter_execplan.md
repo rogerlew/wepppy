@@ -1,4 +1,6 @@
 # Usersum Header ROLE Filter and Threshold Search Ceiling
+> Outcome Summary (2026-04-09): Package closed after delivering header ROLE discovery filtering, threshold role-ceiling search semantics, nav discovery role-ceiling alignment, doc role self-report, specification sync, and security remediation for non-canonical source/raw path bypass (`SEC-01`) with expanded regression coverage.
+
 
 This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept up to date as work proceeds.
 
@@ -149,7 +151,7 @@ Changes are additive and safe to rerun. If tests fail, iterate on affected files
 ## Artifacts and Notes
 
 - Work package: `docs/work-packages/20260408_usersum_role_filter/`
-- Active plan: `docs/work-packages/20260408_usersum_role_filter/prompts/active/usersum_role_filter_execplan.md`
+- Completed plan: `docs/work-packages/20260408_usersum_role_filter/prompts/completed/usersum_role_filter_execplan.md`
 - Tracker: `docs/work-packages/20260408_usersum_role_filter/tracker.md`
 
 ## Interfaces and Dependencies
