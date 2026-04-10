@@ -55,6 +55,8 @@ SCHEMA_DEFAULTS_ALLOWED_SCOPES = frozenset({"rq:read", "rq:status"})
 UNKNOWN_UPDATED_AT = "1970-01-01T00:00:00Z"
 UNKNOWN_SOURCE_RUN_STATE_REVISION = "unknown"
 FEATURES_EXPORT_JOB_KEY = "features_export"
+SESSION_TOKEN_IDEMPOTENCY_TTL_ENV = "RQ_ENGINE_SESSION_TOKEN_IDEMPOTENCY_TTL_SECONDS"
+SESSION_TOKEN_IDEMPOTENCY_TTL_DEFAULT = 86400
 
 
 class RunConfigMismatchError(ValueError):
@@ -79,6 +81,16 @@ def _utc_timestamp() -> str:
 def _deployment_revision() -> str:
     value = str(os.getenv(DEPLOYMENT_REVISION_ENV) or DEFAULT_DEPLOYMENT_REVISION).strip()
     return value or DEFAULT_DEPLOYMENT_REVISION
+
+
+def _session_token_idempotency_window_seconds() -> int:
+    raw = str(os.getenv(SESSION_TOKEN_IDEMPOTENCY_TTL_ENV) or "").strip()
+    if not raw:
+        return SESSION_TOKEN_IDEMPOTENCY_TTL_DEFAULT
+    try:
+        return max(1, int(raw))
+    except (TypeError, ValueError):
+        return SESSION_TOKEN_IDEMPOTENCY_TTL_DEFAULT
 
 
 def _base_payload(runtime: RuntimeState) -> dict[str, Any]:
@@ -430,7 +442,9 @@ def _base_run_mutation_descriptor(
     auth_requirements: dict[str, Any] | None = None,
     accepted_auth: list[str] | None = None,
     write_precondition_required: bool = False,
+    write_precondition_accepted: list[str] | None = None,
     idempotency_supported: bool = False,
+    idempotency_dedupe_window_seconds: int | None = None,
     replay_behavior: str = "return_original_success",
     required_if: list[dict[str, Any]] | None = None,
     available_if: list[dict[str, Any]] | None = None,
@@ -444,16 +458,29 @@ def _base_run_mutation_descriptor(
         }
     }
     descriptor_accepted_auth = accepted_auth or ["bearer_jwt"]
+    accepted_preconditions = (
+        write_precondition_accepted
+        if write_precondition_accepted is not None
+        else (["x_run_state_match", "expected_run_state_revision"] if write_precondition_required else [])
+    )
+
+    resolved_replay_behavior = replay_behavior if idempotency_supported else "not_supported"
+
+    dedupe_window_seconds = (
+        int(idempotency_dedupe_window_seconds)
+        if idempotency_dedupe_window_seconds is not None and idempotency_supported
+        else 86400
+    )
 
     idempotency_policy: dict[str, Any] = {
         "supported": idempotency_supported,
         "key_locations": ["header:Idempotency-Key"] if idempotency_supported else [],
-        "dedupe_window_seconds": 86400 if idempotency_supported else 0,
-        "replay_behavior": replay_behavior,
+        "dedupe_window_seconds": dedupe_window_seconds if idempotency_supported else 0,
+        "replay_behavior": resolved_replay_behavior,
         "mismatch_status_code": 409,
         "mismatch_error_code": "idempotency_key_conflict",
     }
-    if not idempotency_supported and replay_behavior == "reject_duplicate":
+    if idempotency_supported and resolved_replay_behavior == "reject_duplicate":
         idempotency_policy["duplicate_replay_status_code"] = 409
         idempotency_policy["duplicate_replay_error_code"] = "idempotency_replay_rejected"
 
@@ -493,7 +520,7 @@ def _base_run_mutation_descriptor(
         ),
         "write_precondition": {
             "required": write_precondition_required,
-            "accepted": ["x_run_state_match", "expected_run_state_revision"] if write_precondition_required else [],
+            "accepted": accepted_preconditions,
             "conflict_status_code": 409,
             "conflict_error_code": "stale_run_state",
         },
@@ -987,6 +1014,8 @@ def _build_operation_error_catalog(
     execution_mode = str(descriptor_map.get("execution_mode") or "").strip().lower()
     write_precondition = descriptor_map.get("write_precondition")
     write_precondition_map = write_precondition if isinstance(write_precondition, Mapping) else {}
+    idempotency_policy = descriptor_map.get("idempotency_policy")
+    idempotency_policy_map = idempotency_policy if isinstance(idempotency_policy, Mapping) else {}
     required_fields = _operation_required_fields(operation_docs)
 
     list_run_endpoints_id = rq_operation_id("list_run_endpoints")
@@ -1011,7 +1040,9 @@ def _build_operation_error_catalog(
             }
         )
 
-        if bool(write_precondition_map.get("required")):
+        accepted_preconditions = write_precondition_map.get("accepted")
+        has_accepted_preconditions = isinstance(accepted_preconditions, list) and len(accepted_preconditions) > 0
+        if bool(write_precondition_map.get("required")) or has_accepted_preconditions:
             errors.append(
                 {
                     "error_code": "stale_run_state",
@@ -1025,6 +1056,33 @@ def _build_operation_error_catalog(
                     ],
                 }
             )
+
+        if bool(idempotency_policy_map.get("supported")):
+            mismatch_status_code = int(idempotency_policy_map.get("mismatch_status_code") or 409)
+            mismatch_error_code = str(idempotency_policy_map.get("mismatch_error_code") or "idempotency_key_conflict")
+            errors.append(
+                {
+                    "error_code": mismatch_error_code,
+                    "recoverable": True,
+                    "http_statuses": [mismatch_status_code],
+                    "recovery_actions": [{"operation_id": operation_id, "required_fields": required_fields}],
+                }
+            )
+
+            replay_behavior = str(idempotency_policy_map.get("replay_behavior") or "").strip().lower()
+            if replay_behavior == "reject_duplicate":
+                duplicate_status_code = int(idempotency_policy_map.get("duplicate_replay_status_code") or 409)
+                duplicate_error_code = str(
+                    idempotency_policy_map.get("duplicate_replay_error_code") or "idempotency_replay_rejected"
+                )
+                errors.append(
+                    {
+                        "error_code": duplicate_error_code,
+                        "recoverable": True,
+                        "http_statuses": [duplicate_status_code],
+                        "recovery_actions": [{"operation_id": operation_id, "required_fields": required_fields}],
+                    }
+                )
 
         if execution_mode == "async":
             errors.append(
@@ -2301,13 +2359,25 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 },
                 accepted_auth=["bearer_jwt", "session_cookie_same_origin"],
                 write_precondition_required=False,
-                idempotency_supported=False,
+                write_precondition_accepted=["x_run_state_match", "expected_run_state_revision"],
+                idempotency_supported=True,
+                idempotency_dedupe_window_seconds=_session_token_idempotency_window_seconds(),
                 replay_behavior="reject_duplicate",
                 content_types=["application/json"],
             ),
             "schema": {
                 "schema_version": 1,
-                "request": _empty_request_schema(),
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "expected_run_state_revision": {
+                            "type": "string",
+                            "constraint_mode": "run_resolved",
+                            "constraint_source": "run_state_revision",
+                        }
+                    },
+                    "additional_properties": True,
+                },
                 "responses": {
                     "success": {
                         "required": ["token", "session_id", "runid", "config", "scopes"],

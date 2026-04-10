@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import os
 import pickle
@@ -32,13 +34,19 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 SESSION_TOKEN_TTL_SECONDS = 4 * 24 * 60 * 60
-SESSION_TOKEN_SCOPES = ["rq:status", "rq:enqueue", "rq:export"]
+SESSION_TOKEN_SCOPES = ["rq:read", "rq:status", "rq:enqueue", "rq:export"]
 SESSION_TOKEN_REQUIRED_SCOPES = ["rq:status"]
 SESSION_KEY_PREFIX = "session:"
 DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
 BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
 DEFAULT_SITE_PREFIX = "/weppcloud"
 TRUST_FORWARDED_ORIGIN_HEADERS_ENV = "RQ_ENGINE_TRUST_FORWARDED_ORIGIN_HEADERS"
+IDEMPOTENCY_KEY_HEADER = "Idempotency-Key"
+RUN_STATE_MATCH_HEADER = "X-Run-State-Match"
+IDEMPOTENCY_REPLAY_REJECTED_CODE = "idempotency_replay_rejected"
+IDEMPOTENCY_MISMATCH_CODE = "idempotency_key_conflict"
+STALE_RUN_STATE_CODE = "stale_run_state"
+DEFAULT_IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
 
 
 def _bool_env(name: str, *, default: bool) -> bool:
@@ -473,6 +481,285 @@ def _session_cookie_secure(request: Request) -> bool:
     return _bool_env("WEPP_AUTH_SESSION_COOKIE_SECURE", default=default_secure)
 
 
+def _idempotency_ttl_seconds() -> int:
+    raw = str(os.getenv("RQ_ENGINE_SESSION_TOKEN_IDEMPOTENCY_TTL_SECONDS") or "").strip()
+    if not raw:
+        return DEFAULT_IDEMPOTENCY_TTL_SECONDS
+    try:
+        return max(1, int(raw))
+    except (TypeError, ValueError):
+        return DEFAULT_IDEMPOTENCY_TTL_SECONDS
+
+
+def _normalize_idempotency_key(raw_value: str | None) -> str | None:
+    if raw_value is None:
+        return None
+    value = str(raw_value).strip()
+    if not value:
+        return None
+    if len(value) > 200:
+        raise AuthError(
+            "Idempotency key exceeds maximum length (200).",
+            status_code=400,
+            code="validation_error",
+        )
+    return value
+
+
+def _extract_expected_run_state_revision(request: Request, payload: Mapping[str, Any]) -> str | None:
+    header_value = str(request.headers.get(RUN_STATE_MATCH_HEADER) or "").strip()
+    if header_value:
+        return header_value
+
+    raw_value = payload.get("expected_run_state_revision")
+    if raw_value is None:
+        return None
+    value = str(raw_value).strip()
+    return value or None
+
+
+def _request_has_body(request: Request) -> bool:
+    content_length = str(request.headers.get("Content-Length") or "").strip()
+    if content_length:
+        try:
+            return int(content_length) > 0
+        except (TypeError, ValueError):
+            return True
+    transfer_encoding = str(request.headers.get("Transfer-Encoding") or "").strip()
+    return bool(transfer_encoding)
+
+
+def _content_type_token(request: Request) -> str:
+    return str(request.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+
+
+async def _parse_optional_json_payload(request: Request) -> dict[str, Any]:
+    if not _request_has_body(request):
+        return {}
+
+    content_type = _content_type_token(request)
+    if content_type != "application/json":
+        raise AuthError(
+            "Session-token request body must use application/json.",
+            status_code=400,
+            code="validation_error",
+        )
+
+    try:
+        raw_payload = await request.json()
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise AuthError(
+            "Malformed JSON request body.",
+            status_code=400,
+            code="validation_error",
+        ) from exc
+
+    if raw_payload is None:
+        return {}
+    if not isinstance(raw_payload, Mapping):
+        raise AuthError(
+            "JSON request body must be an object.",
+            status_code=400,
+            code="validation_error",
+        )
+
+    return {str(key): value for key, value in raw_payload.items()}
+
+
+def _canonicalize_payload_for_hash(value: Any) -> Any:
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+    if isinstance(value, Mapping):
+        return {
+            str(key): _canonicalize_payload_for_hash(inner)
+            for key, inner in sorted(value.items(), key=lambda item: str(item[0]))
+        }
+    if isinstance(value, list):
+        return [_canonicalize_payload_for_hash(item) for item in value]
+    if isinstance(value, tuple):
+        return [_canonicalize_payload_for_hash(item) for item in value]
+    if isinstance(value, set):
+        normalized = [_canonicalize_payload_for_hash(item) for item in value]
+        return sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True, default=str))
+    return str(value)
+
+
+def _load_run_state_revision(runid: str, config: str) -> str:
+    from . import schema_defaults_routes
+
+    try:
+        runtime = schema_defaults_routes._load_runtime_state(runid, config)
+    except ValueError as exc:
+        raise AuthError("Run not found", status_code=404, code="not_found") from exc
+    except FileNotFoundError as exc:
+        raise AuthError("Run not found", status_code=404, code="not_found") from exc
+    except schema_defaults_routes.RunConfigMismatchError as exc:
+        raise AuthError("Run not found", status_code=404, code="not_found") from exc
+    return str(runtime.run_state_revision)
+
+
+def _stale_run_state_response(*, expected: str, current: str) -> JSONResponse:
+    return JSONResponse(
+        {
+            "error": {
+                "message": "Run state changed since last read.",
+                "code": STALE_RUN_STATE_CODE,
+                "details": f"expected={expected} current={current}",
+            },
+            "current_run_state_revision": current,
+        },
+        status_code=409,
+    )
+
+
+def _idempotency_fingerprint(
+    *,
+    runid: str,
+    config: str,
+    auth_mode: str,
+    claims: Mapping[str, Any] | None,
+    user_id: int | None,
+    roles: Sequence[str],
+    payload: Mapping[str, Any],
+    expected_run_state_revision: str | None,
+) -> str:
+    source = {
+        "runid": runid,
+        "config": config,
+        "auth_mode": auth_mode,
+        "token_class": str((claims or {}).get("token_class") or ""),
+        "subject": str((claims or {}).get("sub") or ""),
+        "user_id": user_id,
+        "roles": list(roles),
+        "payload": _canonicalize_payload_for_hash(dict(payload)),
+        "expected_run_state_revision": expected_run_state_revision,
+    }
+    digest_input = json.dumps(source, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(digest_input).hexdigest()
+
+
+def _idempotency_storage_key(runid: str, config: str, idempotency_key: str, *, principal_namespace: str) -> str:
+    token = f"{runid}\n{config}\n{principal_namespace}\n{idempotency_key}".encode("utf-8")
+    digest = hashlib.sha256(token).hexdigest()
+    return f"auth:idempotency:rq_engine_issue_session_token:{digest}"
+
+
+def _idempotency_principal_namespace(
+    *,
+    auth_mode: str,
+    claims: Mapping[str, Any] | None,
+    user_id: int | None,
+    session_id: str,
+    anonymous_public_fallback: bool,
+) -> str:
+    if claims is not None:
+        subject = str(claims.get("sub") or "").strip()
+        if subject:
+            return f"{auth_mode}:{subject}"
+    if user_id is not None:
+        return f"{auth_mode}:user:{user_id}"
+    if anonymous_public_fallback:
+        return f"{auth_mode}:public_anonymous"
+    return f"{auth_mode}:session:{session_id}"
+
+
+def _decode_idempotency_payload(raw_value: Any) -> Mapping[str, Any]:
+    if raw_value is None:
+        return {}
+    if isinstance(raw_value, bytes):
+        text = raw_value.decode("utf-8", errors="replace")
+    else:
+        text = str(raw_value)
+    try:
+        payload = json.loads(text)
+    except (TypeError, ValueError):
+        return {}
+    if isinstance(payload, Mapping):
+        return payload
+    return {}
+
+
+def _reserve_idempotency_key(
+    *,
+    runid: str,
+    config: str,
+    principal_namespace: str,
+    idempotency_key: str,
+    fingerprint: str,
+) -> tuple[str | None, JSONResponse | None]:
+    storage_key = _idempotency_storage_key(
+        runid,
+        config,
+        idempotency_key,
+        principal_namespace=principal_namespace,
+    )
+    ttl_seconds = _idempotency_ttl_seconds()
+    serialized = json.dumps({"fingerprint": fingerprint}, sort_keys=True, separators=(",", ":"))
+    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
+        existing = _decode_idempotency_payload(redis_conn.get(storage_key))
+        if existing:
+            existing_fingerprint = str(existing.get("fingerprint") or "")
+            if existing_fingerprint == fingerprint:
+                return (
+                    None,
+                    error_response(
+                        "Duplicate idempotent replay rejected.",
+                        status_code=409,
+                        code=IDEMPOTENCY_REPLAY_REJECTED_CODE,
+                    ),
+                )
+            return (
+                None,
+                error_response(
+                    "Idempotency key reused with a different request payload.",
+                    status_code=409,
+                    code=IDEMPOTENCY_MISMATCH_CODE,
+                ),
+            )
+
+        if redis_conn.set(storage_key, serialized, ex=ttl_seconds, nx=True):
+            return (storage_key, None)
+
+        raced = _decode_idempotency_payload(redis_conn.get(storage_key))
+        raced_fingerprint = str(raced.get("fingerprint") or "")
+        if raced_fingerprint == fingerprint:
+            return (
+                None,
+                error_response(
+                    "Duplicate idempotent replay rejected.",
+                    status_code=409,
+                    code=IDEMPOTENCY_REPLAY_REJECTED_CODE,
+                ),
+            )
+        return (
+            None,
+            error_response(
+                "Idempotency key reused with a different request payload.",
+                status_code=409,
+                code=IDEMPOTENCY_MISMATCH_CODE,
+            ),
+        )
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
+
+
+def _release_idempotency_key(storage_key: str | None) -> None:
+    if not storage_key:
+        return
+    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
+        redis_conn.delete(storage_key)
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
+
+
 def _set_session_jwt_cookie(
     response: JSONResponse,
     *,
@@ -496,9 +783,10 @@ def _set_session_jwt_cookie(
     "/runs/{runid}/{config}/session-token",
     summary="Issue a run-scoped session token",
     description=(
-        "Supports Bearer or Flask session-cookie auth. Bearer path requires scope `rq:status`; "
-        "cookie path validates the server session marker with public-run fallback. "
-        "Synchronously mints a run-scoped session token and sets an HttpOnly browse cookie."
+        "Supports Bearer or same-origin session-cookie auth. Bearer path requires `rq:status`; "
+        "cookie path validates a server session marker with public-run fallback. "
+        "Optional `X-Run-State-Match` and `Idempotency-Key` checks. "
+        "Synchronously mints a run-scoped session token cookie."
     ),
     tags=["rq-engine", "session"],
     operation_id=rq_operation_id("issue_session_token"),
@@ -507,11 +795,14 @@ def _set_session_jwt_cookie(
         success_description="Session token issued.",
     ),
 )
-def issue_session_token(runid: str, config: str, request: Request) -> JSONResponse:
+async def issue_session_token(runid: str, config: str, request: Request) -> JSONResponse:
+    idempotency_storage_key: str | None = None
     try:
         user_id: int | None = None
         roles: list[str] = []
+        anonymous_public_fallback = False
         claims = _resolve_bearer_claims(request)
+        auth_mode = "bearer_jwt" if claims is not None else "session_cookie_same_origin"
         if claims is not None:
             authorize_run_access(claims, runid)
             _ensure_identifier_claim(claims, runid)
@@ -540,8 +831,48 @@ def issue_session_token(runid: str, config: str, request: Request) -> JSONRespon
                     session_id = uuid.uuid4().hex
                     user_id = None
                     roles = []
+                    anonymous_public_fallback = True
                 else:
                     raise
+
+        request_payload = await _parse_optional_json_payload(request)
+        expected_run_state_revision = _extract_expected_run_state_revision(request, request_payload)
+        if expected_run_state_revision is not None:
+            current_run_state_revision = _load_run_state_revision(runid, config)
+            if expected_run_state_revision != current_run_state_revision:
+                return _stale_run_state_response(
+                    expected=expected_run_state_revision,
+                    current=current_run_state_revision,
+                )
+
+        idempotency_key = _normalize_idempotency_key(request.headers.get(IDEMPOTENCY_KEY_HEADER))
+        if idempotency_key is not None:
+            principal_namespace = _idempotency_principal_namespace(
+                auth_mode=auth_mode,
+                claims=claims,
+                user_id=user_id,
+                session_id=session_id,
+                anonymous_public_fallback=anonymous_public_fallback,
+            )
+            fingerprint = _idempotency_fingerprint(
+                runid=runid,
+                config=config,
+                auth_mode=auth_mode,
+                claims=claims,
+                user_id=user_id,
+                roles=roles,
+                payload=request_payload,
+                expected_run_state_revision=expected_run_state_revision,
+            )
+            idempotency_storage_key, conflict_response = _reserve_idempotency_key(
+                runid=runid,
+                config=config,
+                principal_namespace=principal_namespace,
+                idempotency_key=idempotency_key,
+                fingerprint=fingerprint,
+            )
+            if conflict_response is not None:
+                return conflict_response
 
         extra_claims: dict[str, Any] = {
             "token_class": "session",
@@ -591,10 +922,13 @@ def issue_session_token(runid: str, config: str, request: Request) -> JSONRespon
             )
         return response
     except AuthError as exc:
+        _release_idempotency_key(idempotency_storage_key)
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except auth_tokens.JWTConfigurationError as exc:
+        _release_idempotency_key(idempotency_storage_key)
         return error_response(f"JWT configuration error: {exc}", status_code=500)
     except Exception:
+        _release_idempotency_key(idempotency_storage_key)
         logger.exception("rq-engine session token issuance failed")
         return error_response_with_traceback("Failed to issue session token", status_code=500)
 

@@ -45,6 +45,7 @@ def test_session_token_issues_with_bearer(monkeypatch: pytest.MonkeyPatch) -> No
     assert payload["runid"] == "run-1"
     assert payload["config"] == "cfg"
     assert payload["token"]
+    assert "rq:read" in payload["scopes"]
     assert "set-cookie" in response.headers
     assert "HttpOnly" in response.headers["set-cookie"]
     assert "Path=/weppcloud/runs/run-1/cfg/" in response.headers["set-cookie"]

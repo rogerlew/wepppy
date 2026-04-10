@@ -228,6 +228,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### RQ Controller State Auth and Concurrency (2026-04-10)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260410_rq_controller_state_auth_concurrency/](docs/work-packages/20260410_rq_controller_state_auth_concurrency/)  
+**Summary**: Hardened controller-state auth/concurrency semantics by shipping `rq:read` rollout parity, session-token write-precondition enforcement, and idempotency replay/mismatch parity with descriptor/OpenAPI metadata. All required code gates and independent `reviewer`/`qa_reviewer`/`security_reviewer` gates passed; security closeout recorded one accepted residual design risk and no unresolved medium/high defects.
+
 ### RQ Controller State Errors, Progress, and Outputs (2026-04-10)
 **Status**: ✅ **COMPLETE**  
 **Link**: [docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/](docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/)  

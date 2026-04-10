@@ -1,6 +1,6 @@
 # RQ Controller State Contract (Draft)
 > Proposed additive contract for agent-friendly controller state, parameter metadata, and run orchestration signals.
-> **Status:** Draft with partial implementation; setup discovery, orchestration-read, schema/default metadata, and geospatial/upload metadata surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults}`, `/api/runs/{runid}/{config}/geospatial-metadata`), remaining controller-state surfaces are planned.
+> **Status:** Draft with partial implementation; setup discovery, orchestration-read, schema/default metadata, geospatial/upload metadata, and errors/progress/outputs surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults|errors}`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`), remaining controller-state surfaces are planned.
 > **See also:** `docs/schemas/rq-engine-agent-api-contract.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`
 
 ## Purpose
@@ -810,14 +810,14 @@ the 2026-02-08 freeze artifacts.
       "error_catalog_url": "/rq-engine/api/runs/abc123/disturbed9002_wbt/endpoints/rq_engine_issue_session_token/errors",
       "write_precondition": {
         "required": false,
-        "accepted": [],
+        "accepted": ["x_run_state_match", "expected_run_state_revision"],
         "conflict_status_code": 409,
         "conflict_error_code": "stale_run_state"
       },
       "idempotency_policy": {
-        "supported": false,
-        "key_locations": [],
-        "dedupe_window_seconds": 0,
+        "supported": true,
+        "key_locations": ["header:Idempotency-Key"],
+        "dedupe_window_seconds": 86400,
         "replay_behavior": "reject_duplicate",
         "duplicate_replay_status_code": 409,
         "duplicate_replay_error_code": "idempotency_replay_rejected",
@@ -1713,8 +1713,8 @@ When a package is closed, its active ExecPlan SHOULD be archived to
 | 3 | `20260410_rq_controller_state_orchestration_reads` | Implement run-scoped orchestration reads: `/pipeline`, `/readiness`, step state machine fields, invalidation lineage, next-action semantics. | Deterministic readiness->next_actionable_steps loop verified for baseline and disturbed configs. | 1 | Complete |
 | 4 | `20260410_rq_controller_state_schema_defaults` | Implement controller and endpoint schema/default surfaces with `constraint_mode`, predicate grammar, and run-resolved defaults. | Schema/default endpoints provide machine-checkable constraints for core build/run operations. | 1, 3 | Complete |
 | 5 | `20260410_rq_controller_state_geospatial_uploads` | Implement `/geospatial-metadata` and upload metadata contracts (format/CRS/extent/resolution/value semantics). | Agent can resolve first-step geospatial defaults and validate upload payloads pre-submit. | 2, 4 | Complete |
-| 6 | `20260410_rq_controller_state_errors_progress_outputs` | Implement operation error catalogs, async progress signals, and `/outputs` artifact index with trust/provenance metadata. | Agent can recover from cataloged errors, poll with progress, and fetch artifacts from `outputs` only. | 3, 4, 5 | Planned |
-| 7 | `20260410_rq_controller_state_auth_concurrency` | Enforce/auth-rollout for `rq:read` aliasing, accepted-auth metadata parity, optimistic concurrency, and idempotency behavior. | Mutation/read preconditions and auth modes match descriptor metadata in tests. | 2, 3, 4, 6 | Planned |
+| 6 | `20260410_rq_controller_state_errors_progress_outputs` | Implement operation error catalogs, async progress signals, and `/outputs` artifact index with trust/provenance metadata. | Agent can recover from cataloged errors, poll with progress, and fetch artifacts from `outputs` only. | 3, 4, 5 | Complete |
+| 7 | `20260410_rq_controller_state_auth_concurrency` | Enforce/auth-rollout for `rq:read` aliasing, accepted-auth metadata parity, optimistic concurrency, and idempotency behavior. | Mutation/read preconditions and auth modes match descriptor metadata in tests. | 2, 3, 4, 6 | Complete |
 | 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed. | 2, 3, 4, 5, 6, 7 | Planned |
 
 - Progress state vocabulary for this roadmap:
