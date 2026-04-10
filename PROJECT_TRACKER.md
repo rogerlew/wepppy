@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-10  
-**Active Packages**: 7  
+**Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 7 packages ⚠️ **Above target ceiling**
+**Current WIP**: 3 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -109,209 +109,11 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 
 ---
 
-### Features Export Legacy Exports Cutover (Prep Details + Geopackage)
-**Proposed**: 2026-03-29  
-**Size**: Large (3-6 focused sessions)  
-**Priority**: High  
-**Status**: Scoped - Ready to Start  
-**Package**: [docs/work-packages/20260329_features_export_legacy_exports_cutover/](docs/work-packages/20260329_features_export_legacy_exports_cutover/)  
-**Description**: Replace legacy `prep_details` and `geopackage`/`geodatabase` export flows with `features_export`, standardize download contracts around explicit job and published profile endpoints, and retire legacy writer modules only after parity evidence and explicit human approval.
-
-**Scope**:
-- Canonical download routes:
-  - `/rq-engine/api/runs/{runid}/{config}/export/features/job/{job_id}/download`
-  - `/rq-engine/api/runs/{runid}/{config}/export/features/published/{profile}/download`
-- Publication registry source-of-truth at `export/features/published/index.json` for profile IDs `prep-wepp` and `prep-details`.
-- Legacy endpoint and run-completion hook rewiring to `features_export` profile execution.
-- Artifact packaging simplification (payload members + `manifest.json` + generated `README.md`, no bundled profile files).
-- Human approval gate artifact before deleting `wepppy/export/gpkg_export.py` and `wepppy/export/prep_details.py`.
-
-**Dependencies**:
-- `docs/work-packages/20260328_features_export_service_compliance_refactor/`
-- `wepppy/nodb/mods/features_export/specification.md`
-
-**Next Steps**:
-1. Implement route and publication-registry collaborators with focused route/service tests.
-2. Rewire legacy prep/geopackage callsites to features-export profiles and validate parity.
-3. Capture e2e evidence, secure human approval, then delete legacy modules and run final regressions.
-
----
-
-### Features Export Live-Run E2E Matrix (clogging-starch)
-**Proposed**: 2026-03-29  
-**Size**: Large (2-4 focused sessions)  
-**Priority**: High  
-**Status**: Scoped - Ready to Start  
-**Package**: [docs/work-packages/20260329_features_export_live_run_matrix/](docs/work-packages/20260329_features_export_live_run_matrix/)  
-**Description**: Execute a systematic manual-plus-automated verification matrix for Features Export against `clogging-starch/disturbed9002-wbt-mofe`, covering all formats, CRS behavior, Unitizer units behavior, temporal combinations, roads scope handling, and identity/null data integrity checks before locking in expanded regression tests.
-
-**Scope**:
-- Full format matrix (`geojson`, `geoparquet`, `parquet`, `csv`, `kmz`, `geopackage`, `geodatabase`) with artifact signature/file-count validation.
-- CRS validation (`wgs`, `utm`) across spatial formats and tabular CRS no-op contract validation.
-- Units validation (`project`, `si`, `english`) including UI copy correction to `Unitizer Selections`.
-- Temporal matrix coverage (`annual_average`, `yearly`, `event`, year selection variants, mixed atemporal+temporal, mixed event+yearly rejection for long layout).
-- Data quality checks for row/feature/column counts, `topaz_id`/`wepp_id` normalization, and missing-data irregularities.
-
-**Dependencies**:
-- `docs/work-packages/20260328_features_export_profiles_provenance_zip/`
-- `wepppy/nodb/mods/features_export/specification.md`
-
-**Next Steps**:
-1. Build matrix runner and artifact auditor utilities.
-2. Execute manual pilot (one representative case per format) with evidence capture.
-3. Run full matrix, triage defects, and lock critical slices into pytest/Jest coverage.
-
----
-
-### Features Export Artifact README Metadata Packaging
-**Proposed**: 2026-03-29  
-**Size**: Medium (2-4 focused sessions)  
-**Priority**: High  
-**Status**: Scoped - Ready to Start  
-**Package**: [docs/work-packages/20260329_features_export_artifact_readme_metadata/](docs/work-packages/20260329_features_export_artifact_readme_metadata/)  
-**Description**: Generate deterministic, standards-aligned artifact `README.md` files from resolved features-export metadata and include them in all zip artifacts while keeping `manifest.json` as canonical machine-readable provenance.
-
-**Scope**:
-- Add README builder/helper for deterministic Markdown rendering from manifest/request/layer/dependency metadata.
-- Integrate README generation into cache-miss artifact publication path and include README in zip bundle members.
-- Keep bundles profile-file-free (`profile.yml`, built-in profile files excluded).
-- Add regression tests for zip membership and README/manifest consistency.
-
-**Dependencies**:
-- `docs/work-packages/20260328_features_export_service_compliance_refactor/`
-- `docs/work-packages/20260329_features_export_legacy_exports_cutover/`
-- `wepppy/nodb/mods/features_export/specification.md`
-
-**Next Steps**:
-1. Implement README builder and deterministic section/table ordering.
-2. Wire README generation into service packaging flow and validate cache-hit reuse behavior.
-3. Extend tests and run targeted validation/doc-lint gates.
-
----
-
-### Roads Step-2: Inslope Non-Channel Point-Source Routing
-**Proposed**: 2026-03-27  
-**Size**: Large (3-5 focused sessions)  
-**Priority**: High  
-**Status**: Scoped - Ready to Start (after step-1 API completion)  
-**Package**: [docs/work-packages/20260327_roads_point_source_inslope_non_channel/](docs/work-packages/20260327_roads_point_source_inslope_non_channel/)  
-**Description**: Extend Roads inslope (`inslope_bd`, `inslope_rd`) so non-channel low points on hillslope pixels are traced to channel and modeled as point-source MOFE contributors (`road -> buffer`) before pass merge.
-
-**Scope**:
-- Prepare-stage routable non-channel low-point classification (`subwta` suffix `1|2|3`).
-- Run-stage trace integration and routed contributor generation for inslope designs.
-- Pass-merge integration, diagnostics, and regression tests.
-- Mandatory code and QA review milestones.
-
-**Dependencies**:
-- `docs/work-packages/20260327_roads_peridot_trace_core/`
-- `wepppy/nodb/mods/roads/specification.md`
-
-**Next Steps**:
-1. Freeze step-1 trace API contract and add Roads adapter checks.
-2. Implement inslope routed contributor run path (`road -> buffer`) and tests.
-3. Complete review gates and full validation suites.
-
----
-
-### Roads Step-3: Outslope Rutted Point Source with Fill OFE
-**Proposed**: 2026-03-27  
-**Size**: Large (3-6 focused sessions)  
-**Priority**: High  
-**Status**: Scoped - Ready to Start (after steps 1-2)  
-**Package**: [docs/work-packages/20260327_roads_point_source_outslope_rutted/](docs/work-packages/20260327_roads_point_source_outslope_rutted/)  
-**Description**: Implement `outslope_rutted` as point-source contributor path with explicit `road -> fill -> buffer` modeling, including channel-associated and non-channel low points plus fill-parameter defaults sourced from roads vectors.
-
-**Scope**:
-- Enable `outslope_rutted` prepare/run eligibility.
-- Add fill parameter contracts with defaults (`fill_length_m`, `fill_slope_pct`).
-- Build branch-specific routed contributor logic and diagnostics.
-- Mandatory code and QA review milestones.
-
-**Dependencies**:
-- `docs/work-packages/20260327_roads_peridot_trace_core/`
-- `docs/work-packages/20260327_roads_point_source_inslope_non_channel/`
-
-**Next Steps**:
-1. Lock fill attribute/default contract in Roads params/spec.
-2. Implement run-stage `road -> fill -> buffer` contributor builder and branch diagnostics.
-3. Complete review gates and validation suites.
-
----
-
-### Roads Step-4: Outslope Unrutted MOFE Hillslope Replacement
-**Proposed**: 2026-03-27  
-**Size**: Very Large (5-9 focused sessions)  
-**Priority**: High  
-**Status**: Complete (2026-04-08)  
-**Package**: [docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/](docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/)  
-**Description**: Implement `outslope_unrutted` as sheet-flow MOFE hillslope replacement (`hill -> road -> fill -> hill`) with strict replacement semantics, area conservation, and no double counting.
-
-**Scope**:
-- Build targeted hillslope decomposition (`affected strip` + `unaffected remainder`).
-- Assemble roads-aware replacement contributors and aggregate replacement pass files.
-- Stage replacement pass sets for watershed rerun while preserving untouched hillslopes.
-- Mandatory code and QA review milestones.
-
-**Dependencies**:
-- `docs/work-packages/20260327_roads_peridot_trace_core/`
-- `docs/work-packages/20260327_roads_point_source_inslope_non_channel/`
-- `docs/work-packages/20260327_roads_point_source_outslope_rutted/`
-
-**Next Steps**:
-1. Monitor runtime on additional fixture-backed e2e runs.
-2. Track and resolve pre-existing `wctl run-stubtest wepppy.nodb.mods.roads.roads` typing debt outside this package.
-3. Use this package as baseline contract for follow-on roads diagnostics/reporting enhancements.
-
----
-
-### RUSLE Momm 2025 R-Mode Integration
-**Proposed**: 2026-03-25  
-**Size**: Medium (1-2 weeks after decision checkpoint)  
-**Priority**: High  
-**Status**: Complete (2026-03-26)  
-**Package**: [docs/work-packages/20260325_rusle_momm2025_r_mode/](docs/work-packages/20260325_rusle_momm2025_r_mode/)  
-**Description**: Add Momm et al. (2025) county or region monthly erosivity as a
-second `R`-estimation path for the RUSLE NoDb mod while keeping
-`cligen_static` as the WEPP-aligned default.
-
-**Scope**:
-- Vendor the public Momm 2025 dataset as repo-native Parquet plus a matching
-  county GeoParquet companion.
-- Update the RUSLE specification so `cligen_static` is explicitly the
-  WEPP-aligned approximation path and Momm 2025 is a separate
-  planning-climatology path.
-- Define and implement a new `r_mode` with explicit provenance, AOI selection,
-  and split-county `REGION` handling.
-- Add targeted tests for county selection, manifest semantics, and backward
-  compatibility with `cligen_static`.
-
-**Strategic Value**:
-- Adds a published RUSLE2 planning climatology path without conflating it with
-  the run's WEPP climate record.
-- Makes the public Momm 2025 supplement reproducibly available inside the repo.
-- Surfaces a clean science or product boundary between WEPP-aligned erosivity
-  and RUSLE2 planning isoerodents.
-
-**Dependencies**:
-- `docs/work-packages/20260320_rusle_r_static_hyetograph_api/`
-- `wepppy/nodb/mods/rusle/specification.md`
-- Vendored data under `wepppy/nodb/mods/rusle/data/momm2025/`
-
-**Outcome**:
-- Split-county `REGION` and canonical polygon-backed contracts were locked.
-- `momm2025_county_region` and `canonical_rusle2` `r_mode` paths were
-  implemented in `Rusle` with explicit provenance and explicit unsupported-case
-  errors.
-- UI, rq-engine payload support, and focused regression coverage were delivered.
-
----
-
 ### RQ-Engine Agent Usability and Documentation Hardening
 **Proposed**: 2026-02-08  
 **Size**: Medium (1-2 weeks)  
 **Priority**: High  
-**Status**: Scoped - Ready to Start  
+**Status**: Ready for Review (reviewer sign-off + archive pending)  
 **Package**: [docs/work-packages/20260208_rq_engine_agent_usability/](docs/work-packages/20260208_rq_engine_agent_usability/)  
 **Description**: Establish rq-engine as the canonical agent API for Bootstrap and queue workflows, harden OpenAPI route metadata, and align docs/tests across developer and user audiences.
 
@@ -332,9 +134,9 @@ second `R`-estimation path for the RUSLE NoDb mod while keeping
 - Current token policy docs (`docs/dev-notes/auth-token.spec.md`)
 
 **Next Steps**:
-1. Freeze endpoint inventory and classify `agent-facing` vs `internal` routes.
-2. Apply OpenAPI metadata pass on agent-critical modules.
-3. Close test and docs drift gaps with targeted suites and artifacts.
+1. Complete reviewer sign-off for package closeout.
+2. Fill `Closure Notes` in `package.md` and archive prompts as completed.
+3. Move to done lifecycle after review acceptance.
 
 ---
 
@@ -395,7 +197,6 @@ second `R`-estimation path for the RUSLE NoDb mod while keeping
 
 ---
 
-
 ### Jinja Template Lint Error Resolution
 **Proposed**: 2025-10-27  
 **Size**: Small (1-2 days)  
@@ -443,7 +244,6 @@ second `R`-estimation path for the RUSLE NoDb mod while keeping
 
 **Next Steps**: Quick rename when convenient; very low risk
 
-
 ### Kubernetes Migration (Pending)
 When resuming Kubernetes work:
 - Duplicate static build stage for proxy image
@@ -470,7 +270,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 7 packages
+**Current WIP Count**: 3 packages
 
 ---
 
@@ -494,26 +294,6 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 **Next Steps**:
 1. Merge and monitor in broader integration flow.
 2. Close package docs after merge if no follow-up fixes are required.
-
----
-
-### Roads Map Visualization and Drilldown Parity
-**Started**: 2026-04-03  
-**Status**: Implementation in progress (ExecPlan active)  
-**Size**: Medium (1-2 focused sessions)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260403_roads_map_drilldown/](docs/work-packages/20260403_roads_map_drilldown/)  
-**Description**: Add Roads map overlay + Road Labels visibility after prepare, segment hover highlighting, and click-to-DrillDown behavior matching Channels/Subcatchments UX patterns.
-
-**Current Status**:
-- Package scaffold and active ExecPlan are authored.
-- Backend/frontend implementation is in progress with targeted route/controller/map tests.
-- Required validation and mandatory reviewer + QA reviewer subagent gates are planned in final phase.
-
-**Next Steps**:
-1. Implement backend roads map/drilldown payload contract and route/template coverage.
-2. Implement frontend Roads overlays, labels, hover, and click drilldown wiring + Jest coverage.
-3. Run required validation commands and mandatory review subagents, then disposition findings.
 
 ---
 
@@ -561,89 +341,47 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### Roads Point-Source Flowpath Trace Core (Peridot + PyO3)
-**Started**: 2026-03-27  
-**Status**: Planning Complete - Implementation Ready (ExecPlan active)  
-**Size**: Large (3-6 focused sessions)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260327_roads_peridot_trace_core/](docs/work-packages/20260327_roads_peridot_trace_core/)  
-**Description**: Implement Roads step-1 substrate for one-point downslope tracing in shared Rust `peridot` core, surface it through `wepppyo3` (`pyo3`), and lock a deterministic trace contract for later non-channel point-source integration.
-
-**Current Status**:
-- Package scaffold, tracker, and active ExecPlan are authored.
-- Active plan defines one-core/two-interface architecture (`peridot` core + CLI + `wepppyo3` binding).
-- Milestone-level acceptance includes explicit termination semantics, profile arrays, and mandatory review artifacts.
-
-**Next Steps**:
-1. Implement `peridot` trace core and CLI with deterministic JSON contract.
-2. Implement `wepppyo3` binding over shared core and release-tree module packaging.
-3. Complete code review + QA review artifacts and resolve all medium/high findings.
-
----
-
-### Roads WEPP Report Regeneration and Run Results Summary
-**Started**: 2026-03-23  
-**Status**: Monitoring in progress (milestones complete; post-merge observation pending)  
-**Size**: Large (3-6 focused sessions)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260323_roads_wepp_reports_regen/](docs/work-packages/20260323_roads_wepp_reports_regen/)  
-**Description**: Extend Roads runtime so `run_roads_wepp()` regenerates Roads-scoped interchange/totalwatsed/water-balance resources under `wepp/roads/output`, and add a Roads Run Results summary with links to Roads-augmented canonical WEPP outputs.
-
-**Current Status**:
-- Roads post-run regeneration now builds required Roads report resources under `wepp/roads/output/interchange` and persists readiness metadata in run summary.
-- Roads Run Results summary route/template/control links are delivered with roads-scoped canonical WEPP report links.
-- Dedicated rollover, code review, and QA review artifacts are complete with no open medium/high findings.
-- Full validation gates passed (`npm lint/test`, preflight checklist tests, broad-exception enforcement, full pytest, docs lint).
-
-**Next Steps**:
-1. Merge and monitor first production/staging runs using the Roads Run Results summary.
-2. Scope optional follow-up package for baseline-vs-roads comparative analytics.
-
----
-
 ### Roads NoDb Inslope End-to-End Implementation
 **Started**: 2026-03-23  
-**Status**: Planning Complete - Implementation Ready (ExecPlan active)  
+**Status**: Closeout in progress (rollback validation + handoff packaging pending)  
 **Size**: Large (1-2 weeks)  
 **Owner**: Codex  
 **Link**: [docs/work-packages/20260323_roads_nodb_inslope_e2e/](docs/work-packages/20260323_roads_nodb_inslope_e2e/)  
 **Description**: Deliver phase-1 Roads integration from `wepppy/nodb/mods/roads/specification.md`, including `Roads(NoDbBase)`, mod enablement/WBT guard, run-page/header/preflight wiring, Roads routes + RQ jobs, single-OFE road runs, pass combination, and queue governance updates.
 
 **Current Status**:
-- Package scaffold authored (`package.md`, `tracker.md`, active ExecPlan).
-- Implementation-ready file-level edit map and validation strategy published with `clogging-starch` as default fixture run.
-- Root/package trackers and active ExecPlan pointer synchronized.
+- Core implementation and comprehensive review remediation are complete.
+- Full-gate validation and fixture-backed roads execution evidence are recorded.
+- Remaining open checklist item is explicit rollback-step validation for closeout.
 
 **Next Steps**:
-1. Implement Milestone 1 (`Roads` controller + monotonic segment inslope parity).
-2. Wire UI/preflight/task enum + Roads blueprint/rq-engine/RQ paths.
-3. Complete `clogging-starch` e2e validation and queue/route governance checks.
-
----
-
-### SBS Map Refactor (Rust Acceleration)
-**Started**: 2026-01-24  
-**Status**: Discovery/Benchmarking  
-**Size**: Medium (multi-phase refactor)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260124_sbs_map_refactor/](docs/work-packages/20260124_sbs_map_refactor/)  
-**Description**: Replace slow Python raster scanning and per-pixel loops in `sbs_map.py` with Rust + GDAL implementations. Adds large-fixture regression tests and benchmarks on real SBS maps.
-
-**Current Status**:
-- Baseline large fixtures captured with expectations and gated regression tests.
-- Benchmarks recorded for two SBS maps; Python path is minutes long for multiple methods.
-- Rust summary + reclassification modules scoped but not implemented yet.
-
-**Next Steps**:
-1. Implement `wepppyo3.sbs_map.summarize_sbs_raster`.
-2. Wire `sbs_map_sanity_check` to Rust summary (keep Python fallback).
-3. Implement Rust reclassification + export helpers and update tests.
+1. Validate rollback steps (`mod disable`, `wepp/roads` artifact isolation, queue rollback).
+2. Update package closure notes and move active prompt to completed.
+3. Move to done lifecycle state after rollback evidence is captured.
 
 ---
 
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Lifecycle Corrections (2026-04-10)
+**Status**: ✅ **COLUMNS RECONCILED**  
+**Description**: The following work packages were still listed in `Backlog`/`In Progress` but package-level docs already recorded completion. They were moved to `Done` after subagent review + doc verification.
+
+- [docs/work-packages/20260329_features_export_legacy_exports_cutover/](docs/work-packages/20260329_features_export_legacy_exports_cutover/) — Closed (2026-03-29)
+- [docs/work-packages/20260329_features_export_live_run_matrix/](docs/work-packages/20260329_features_export_live_run_matrix/) — Completed (Phase 3 closed 2026-04-01)
+- [docs/work-packages/20260329_features_export_artifact_readme_metadata/](docs/work-packages/20260329_features_export_artifact_readme_metadata/) — Closed (2026-03-29)
+- [docs/work-packages/20260327_roads_point_source_inslope_non_channel/](docs/work-packages/20260327_roads_point_source_inslope_non_channel/) — Closed - Production Validation Verified (2026-03-28)
+- [docs/work-packages/20260327_roads_point_source_outslope_rutted/](docs/work-packages/20260327_roads_point_source_outslope_rutted/) — Completed (2026-04-07)
+- [docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/](docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/) — Complete (2026-04-08)
+- [docs/work-packages/20260325_rusle_momm2025_r_mode/](docs/work-packages/20260325_rusle_momm2025_r_mode/) — Complete (2026-03-26)
+- [docs/work-packages/20260403_roads_map_drilldown/](docs/work-packages/20260403_roads_map_drilldown/) — Handoff Ready (2026-04-04)
+- [docs/work-packages/20260327_roads_peridot_trace_core/](docs/work-packages/20260327_roads_peridot_trace_core/) — Complete - Handoff Ready (2026-03-27)
+- [docs/work-packages/20260323_roads_wepp_reports_regen/](docs/work-packages/20260323_roads_wepp_reports_regen/) — Completed (Milestones 1-10 closed, 2026-03-24)
+- [docs/work-packages/20260124_sbs_map_refactor/](docs/work-packages/20260124_sbs_map_refactor/) — Closed (2026-01-24)
+
+---
 
 ### RQ Controller State Contract Foundation
 **Completed**: 2026-04-10  
@@ -1550,9 +1288,9 @@ Track how long packages take from start to completion:
 - **Current average**: [Calculate from recent completions]
 
 ### Work in Progress
-- **Current**: 7 packages
+- **Current**: 3 packages
 - **Target**: 2-4 packages
-- **Status**: ⚠️ **Above target**
+- **Status**: ✅ **Within target**
 
 ### Throughput
 Packages completed per month:
@@ -1611,13 +1349,13 @@ If this tracker format isn't working or you have suggestions:
 
 ## 🔧 Tracker Maintenance
 
-**Last reviewed**: 2025-10-26  
-**Next review**: 2025-11-26 (monthly)
+**Last reviewed**: 2026-04-10  
+**Next review**: 2026-05-10 (monthly)
 
 **Review checklist**:
 - [ ] Move stale Done items to History
-- [ ] Update WIP count and check against limits
-- [ ] Review In Progress packages for stalls (>6 weeks)
-- [ ] Verify Backlog priorities still align with current goals
-- [ ] Check Vision items for readiness to become packages
+- [x] Update WIP count and check against limits
+- [x] Review In Progress packages for stalls (>6 weeks)
+- [x] Verify Backlog priorities still align with current goals
+- [x] Reconcile stale lifecycle state transitions in tracker columns
 - [ ] Update metrics section with recent data
