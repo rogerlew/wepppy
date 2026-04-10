@@ -25,6 +25,7 @@ from .landuse_routes import router as landuse_router
 from .landuse_soils_routes import router as landuse_soils_router
 from .migration_routes import router as migration_router
 from .omni_routes import router as omni_router
+from .orchestration_read_routes import router as orchestration_read_router
 from .openet_ts_routes import router as openet_ts_router
 from .polaris_routes import router as polaris_router
 from .project_routes import router as project_router
@@ -87,6 +88,7 @@ app.include_router(bootstrap_router, prefix="/api")
 app.include_router(culvert_router, prefix="/api")
 app.include_router(session_router, prefix="/api")
 app.include_router(setup_discovery_router, prefix="/api")
+app.include_router(orchestration_read_router, prefix="/api")
 app.include_router(debug_router, prefix="/api")
 app.include_router(landuse_soils_router, prefix="/api")
 app.include_router(landuse_router, prefix="/api")

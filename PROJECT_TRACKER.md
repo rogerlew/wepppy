@@ -79,7 +79,6 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -247,6 +246,38 @@ Recently completed work packages. Archived immediately upon completion.
 - [docs/work-packages/20251028_wojak_lives/](docs/work-packages/20251028_wojak_lives/) — Closed - Deferred Follow-On (2026-04-10 05:50 UTC)
 - [docs/work-packages/20260331_wcag21aa_frontend_accessibility/](docs/work-packages/20260331_wcag21aa_frontend_accessibility/) — Closed (2026-04-10 05:50 UTC)
 - [docs/work-packages/20260208_rq_engine_agent_usability/](docs/work-packages/20260208_rq_engine_agent_usability/) — Closed (2026-04-10 06:08 UTC)
+
+---
+
+### RQ Controller State Orchestration Reads
+**Completed**: 2026-04-10  
+**Duration**: 1 focused session + review remediation loop  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260410_rq_controller_state_orchestration_reads/](docs/work-packages/20260410_rq_controller_state_orchestration_reads/)  
+**Description**: Implemented and closed run-scoped orchestration read APIs so agents can deterministically query pipeline/readiness state and choose next actions without UI heuristics.
+
+**Outcome**:
+- Added rq-engine orchestration endpoints:
+  - `GET /api/runs/{runid}/{config}/pipeline`
+  - `GET /api/runs/{runid}/{config}/readiness`
+- Added route/openapi/guard/frozen-artifact parity updates for the two new agent-facing routes.
+- Resolved independent reviewer/QA/security findings, including:
+  - dedicated `RunConfigMismatchError` + narrow `404` mapping
+  - UTC normalization for naive timestamps
+  - deterministic empty-timeline `updated_at`
+  - child-job status/ended-at folding to prevent premature completion in fan-out job trees
+- Package lifecycle closed:
+  - tracker/package/security artifact updated
+  - ExecPlan archived to `prompts/completed/` with outcome note
+  - no unresolved medium/high QA or security findings
+
+**Validation Notes**:
+- `wctl run-pytest tests/microservices/test_rq_engine_orchestration_read_routes.py --maxfail=1` (`25 passed`)
+- `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` (`9 passed`)
+- `python tools/check_endpoint_inventory.py` (pass)
+- `python tools/check_route_contract_checklist.py` (pass)
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py --maxfail=1` (`2 passed`)
 
 ---
 

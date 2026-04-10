@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **90**
-- Classification counts: **agent-facing 67**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 87**, **Flask wrapper 3**
+- Total endpoints inventoried: **92**
+- Classification counts: **agent-facing 69**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 89**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -68,8 +68,10 @@ Snapshot summary:
 | GET | `/api/runs/{runid}/{config}/hello-world` | `wepppy/microservices/rq_engine/debug_routes.py` | `hello_world` | internal | rq-engine | Open | - | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/hello-world` | `wepppy/microservices/rq_engine/debug_routes.py` | `hello_world` | internal | rq-engine | Open | - | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/migrate-run` | `wepppy/microservices/rq_engine/migration_routes.py` | `migrate_run` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Access model: `_ensure_run_access` (Admin override + session-marker support for session tokens). Async enqueue; returns `job_id`, `status_url`, `message`, and `result`. |
+| GET | `/api/runs/{runid}/{config}/pipeline` | `wepppy/microservices/rq_engine/orchestration_read_routes.py` | `get_pipeline` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only orchestration DAG/status snapshot; no queue enqueue. |
 | POST | `/api/runs/{runid}/{config}/post-dss-export-rq` | `wepppy/microservices/rq_engine/dss_export_routes.py` | `post_dss_export` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/prep-wepp-watershed` | `wepppy/microservices/rq_engine/wepp_routes.py` | `prep_wepp_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| GET | `/api/runs/{runid}/{config}/readiness` | `wepppy/microservices/rq_engine/orchestration_read_routes.py` | `get_readiness` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only readiness summary with deterministic next-action ordering; no queue enqueue. |
 | POST | `/api/runs/{runid}/{config}/restore-archive` | `wepppy/microservices/rq_engine/fork_archive_routes.py` | `restore_archive` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/run-ash` | `wepppy/microservices/rq_engine/ash_routes.py` | `run_ash` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/run-debris-flow` | `wepppy/microservices/rq_engine/debris_flow_routes.py` | `run_debris_flow` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |

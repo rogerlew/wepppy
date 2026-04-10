@@ -18,7 +18,7 @@ INVENTORY_FILE = Path(
     "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md"
 )
 
-MAX_OPENAPI_CANONICAL_BYTES = 90_000
+MAX_OPENAPI_CANONICAL_BYTES = 92_000
 MAX_FROZEN_SUMMARY_CHARS = 72
 MAX_FROZEN_DESCRIPTION_CHARS = 280
 MAX_FROZEN_METADATA_TOTAL_CHARS = 13_250
@@ -98,8 +98,8 @@ def _canonical_size_bytes(payload: dict) -> int:
 
 
 def test_frozen_agent_route_count_is_expected(_frozen_agent_routes: list[tuple[str, str]]) -> None:
-    assert len(_frozen_agent_routes) == 67
-    assert len(set(_frozen_agent_routes)) == 67
+    assert len(_frozen_agent_routes) == 69
+    assert len(set(_frozen_agent_routes)) == 69
 
 
 def test_frozen_agent_routes_exist_in_openapi(

@@ -70,6 +70,8 @@ PATHS_REQUIRING_404 = {
     "/api/runs/{runid}/{config}/export/prep_details",
     "/api/runs/{runid}/{config}/export/prep_details/",
     "/api/runs/{runid}/{config}/fork",
+    "/api/runs/{runid}/{config}/pipeline",
+    "/api/runs/{runid}/{config}/readiness",
     "/api/runs/{runid}/{config}/restore-archive",
 }
 
