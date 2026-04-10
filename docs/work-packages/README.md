@@ -15,6 +15,9 @@ This directory groups long-running initiatives into self-contained "work package
 - Use the date the package started (or was formally scoped)
 - Keep the slug short and descriptive (e.g., `statusstream_cleanup`, `nodb_docs_refresh`)
 - If multiple packages start the same day, append a letter: `20251024_slug_a`, `20251024_slug_b`
+- Timestamp convention inside package docs (`package.md`, `tracker.md`,
+  active ExecPlan): use **UTC** and label explicitly (for example
+  `2026-04-10 07:15 UTC`).
 
 ## Standard layout
 ```
@@ -49,12 +52,12 @@ When handing off work between agents or sessions, follow these conventions in `t
 **Decision Log:**
 ```markdown
 ## Decisions
-- **YYYY-MM-DD** – Brief decision summary with rationale
+- **YYYY-MM-DD HH:MM UTC** – Brief decision summary with rationale
 ```
 
 **Progress Notes:**
 ```markdown
-## Notes – YYYY-MM-DD
+## Notes – YYYY-MM-DD HH:MM UTC
 - What was completed this session
 - What's blocked and why
 - Next steps for the following agent
@@ -65,7 +68,8 @@ When handing off work between agents or sessions, follow these conventions in `t
 - Mark `[x]` immediately upon completion
 - Add blocking issues to "Blocked" section with context
 
-Agents should timestamp all entries so others can reconstruct the narrative chronologically.
+Agents should timestamp all entries in UTC so others can reconstruct the
+narrative chronologically without timezone ambiguity.
 
 ## Prompt Lifecycle
 

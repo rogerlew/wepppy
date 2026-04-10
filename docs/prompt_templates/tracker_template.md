@@ -4,9 +4,10 @@
 
 ## Quick Status
 
-**Started**: YYYY-MM-DD  
+**Timezone**: UTC  
+**Started**: YYYY-MM-DD or YYYY-MM-DD HH:MM UTC  
 **Current phase**: [Discovery/Implementation/Testing/Documentation/Closing]  
-**Last updated**: YYYY-MM-DD  
+**Last updated**: YYYY-MM-DD HH:MM UTC  
 **Next milestone**: [Brief description of next major checkpoint]  
 **Security impact**: `none | low | high`  
 **Dedicated security review**: `yes | no`  
@@ -28,24 +29,24 @@
 - [ ] Task waiting on decision - [explain what's needed]
 
 ### Done
-- [x] Completed task 1 (YYYY-MM-DD)
-- [x] Completed task 2 (YYYY-MM-DD)
-- [x] Completed task 3 (YYYY-MM-DD)
+- [x] Completed task 1 (YYYY-MM-DD HH:MM UTC)
+- [x] Completed task 2 (YYYY-MM-DD HH:MM UTC)
+- [x] Completed task 3 (YYYY-MM-DD HH:MM UTC)
 
 ## Timeline
 
 Key events and milestones for quick reference:
 
-- **YYYY-MM-DD** – Package created, initial scoping completed
-- **YYYY-MM-DD** – First major milestone achieved (e.g., "core implementation done")
-- **YYYY-MM-DD** – Testing phase started
-- **YYYY-MM-DD** – Package closed
+- **YYYY-MM-DD HH:MM UTC** – Package created, initial scoping completed
+- **YYYY-MM-DD HH:MM UTC** – First major milestone achieved (e.g., "core implementation done")
+- **YYYY-MM-DD HH:MM UTC** – Testing phase started
+- **YYYY-MM-DD HH:MM UTC** – Package closed
 
 ## Decisions Log
 
 Record significant decisions with context so future agents understand the rationale.
 
-### YYYY-MM-DD: [Decision title]
+### YYYY-MM-DD HH:MM UTC: [Decision title]
 **Context**: [What situation prompted this decision]
 
 **Options considered**:
@@ -59,7 +60,7 @@ Record significant decisions with context so future agents understand the ration
 
 ---
 
-### YYYY-MM-DD: [Another decision]
+### YYYY-MM-DD HH:MM UTC: [Another decision]
 [Same structure as above]
 
 ## Risks and Issues
@@ -113,7 +114,7 @@ Pre-closure validation steps. Check these off as the package nears completion.
 
 Chronological log of work sessions for agent handoffs and historical context.
 
-### YYYY-MM-DD: [Session title or focus area]
+### YYYY-MM-DD HH:MM UTC: [Session title or focus area]
 **Agent/Contributor**: [GitHub Copilot / Claude / Human name]
 
 **Work completed**:
@@ -134,7 +135,7 @@ Chronological log of work sessions for agent handoffs and historical context.
 
 ---
 
-### YYYY-MM-DD: [Another session]
+### YYYY-MM-DD HH:MM UTC: [Another session]
 [Same structure as above]
 
 ## Watch List
@@ -149,7 +150,7 @@ Items requiring ongoing attention but not blocking progress.
 
 Record key discussions, questions to humans, and external coordination.
 
-### YYYY-MM-DD: [Topic]
+### YYYY-MM-DD HH:MM UTC: [Topic]
 **Participants**: [Who was involved]  
 **Question/Topic**: [What was discussed]  
 **Outcome**: [Decision, answer, or action items]
@@ -162,7 +163,7 @@ Record key discussions, questions to humans, and external coordination.
 
 **From**: [Current agent]  
 **To**: [Next agent or "any available agent"]  
-**Date**: YYYY-MM-DD
+**Date**: YYYY-MM-DD HH:MM UTC
 
 **What's complete**:
 - [Specific deliverable 1]

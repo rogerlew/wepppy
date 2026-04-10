@@ -1,6 +1,7 @@
 # [Package Title]
 
 **Status**: Open (YYYY-MM-DD) | Closed (YYYY-MM-DD)
+**Timezone**: UTC
 
 ## Overview
 [2-3 sentences describing what this work package aims to accomplish and why it's needed. Focus on the problem being solved, not implementation details.]
