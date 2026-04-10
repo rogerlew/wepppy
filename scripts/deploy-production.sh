@@ -7,6 +7,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+# Harden compose passthrough calls against occasional docker compose hangs.
+WCTL_COMPOSE_TIMEOUT_SECONDS="${WCTL_COMPOSE_TIMEOUT_SECONDS:-180}"
+WCTL_COMPOSE_RETRIES="${WCTL_COMPOSE_RETRIES:-3}"
+WCTL_COMPOSE_RETRY_DELAY_SECONDS="${WCTL_COMPOSE_RETRY_DELAY_SECONDS:-5}"
+
 read_env_value() {
     local key="$1"
     local file="$2"
@@ -26,6 +31,85 @@ read_env_value() {
     value="${value#\'}"
 
     echo "${value}"
+}
+
+run_with_timeout() {
+    local timeout_seconds="$1"
+    shift
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout --foreground --signal=TERM --kill-after=15 "${timeout_seconds}" "$@"
+        return $?
+    fi
+
+    echo "Warning: 'timeout' command not found; running without timeout protection." >&2
+    "$@"
+}
+
+run_wctl_with_retry() {
+    local timeout_seconds="$1"
+    local retries="$2"
+    local retry_delay_seconds="$3"
+    shift 3
+    local cmd=("$@")
+    local attempt=1
+    local exit_code=0
+
+    while [ "${attempt}" -le "${retries}" ]; do
+        if run_with_timeout "${timeout_seconds}" wctl "${cmd[@]}"; then
+            return 0
+        fi
+
+        exit_code=$?
+        if [ "${attempt}" -ge "${retries}" ]; then
+            echo "✗ Command failed after ${attempt} attempts: wctl ${cmd[*]} (exit ${exit_code})" >&2
+            return "${exit_code}"
+        fi
+
+        if [ "${exit_code}" -eq 124 ]; then
+            echo "    Command timed out after ${timeout_seconds}s (attempt ${attempt}/${retries}); retrying in ${retry_delay_seconds}s..." >&2
+        else
+            echo "    Command failed with exit ${exit_code} (attempt ${attempt}/${retries}); retrying in ${retry_delay_seconds}s..." >&2
+        fi
+        sleep "${retry_delay_seconds}"
+        attempt=$((attempt + 1))
+    done
+
+    return "${exit_code}"
+}
+
+capture_wctl_with_retry() {
+    local timeout_seconds="$1"
+    local retries="$2"
+    local retry_delay_seconds="$3"
+    shift 3
+    local cmd=("$@")
+    local attempt=1
+    local exit_code=0
+    local output=""
+
+    while [ "${attempt}" -le "${retries}" ]; do
+        if output="$(run_with_timeout "${timeout_seconds}" wctl "${cmd[@]}")"; then
+            printf "%s\n" "${output}"
+            return 0
+        fi
+
+        exit_code=$?
+        if [ "${attempt}" -ge "${retries}" ]; then
+            echo "✗ Command failed after ${attempt} attempts: wctl ${cmd[*]} (exit ${exit_code})" >&2
+            return "${exit_code}"
+        fi
+
+        if [ "${exit_code}" -eq 124 ]; then
+            echo "    Command timed out after ${timeout_seconds}s (attempt ${attempt}/${retries}); retrying in ${retry_delay_seconds}s..." >&2
+        else
+            echo "    Command failed with exit ${exit_code} (attempt ${attempt}/${retries}); retrying in ${retry_delay_seconds}s..." >&2
+        fi
+        sleep "${retry_delay_seconds}"
+        attempt=$((attempt + 1))
+    done
+
+    return "${exit_code}"
 }
 
 # Parse arguments
@@ -75,7 +159,13 @@ done
 
 cd "${PROJECT_ROOT}"
 
-COMPOSE_SERVICES="$(wctl docker compose config --services)"
+COMPOSE_SERVICES="$(
+    capture_wctl_with_retry \
+        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+        "${WCTL_COMPOSE_RETRIES}" \
+        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+        docker compose config --services
+)"
 HAS_WEPPCLOUD=false
 if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
     HAS_WEPPCLOUD=true
@@ -130,7 +220,11 @@ fi
 
 # Stop services
 echo ">>> Step 3: Stopping services..."
-wctl  down
+run_wctl_with_retry \
+    "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+    "${WCTL_COMPOSE_RETRIES}" \
+    "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+    down
 echo ""
 
 # Flush RQ Redis DB 9 (optional, default off)
@@ -143,7 +237,11 @@ if [ "${FLUSH_RQ_DB}" = true ]; then
     # On worker-only hosts, redis may be absent and/or remote; the flush script will best-effort skip when unreachable.
     if echo "${COMPOSE_SERVICES}" | grep -q "^redis$"; then
         echo "    Bringing up redis service for RQ flush..."
-        wctl up -d redis
+        run_wctl_with_retry \
+            "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+            "${WCTL_COMPOSE_RETRIES}" \
+            "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+            up -d redis
         echo ""
 
         if [ -z "${REDIS_PORT:-}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
@@ -217,7 +315,11 @@ fi
 
 # Start services
 echo ">>> Step 5: Starting services..."
-wctl up -d
+run_wctl_with_retry \
+    "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+    "${WCTL_COMPOSE_RETRIES}" \
+    "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+    up -d
 echo ""
 
 # Wait for health check
@@ -254,7 +356,7 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
     MAX_ATTEMPTS=30
     ATTEMPT=0
     while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-        if curl -fsS "${HEALTHCHECK_URL}" > /dev/null 2>&1; then
+        if curl --connect-timeout 5 --max-time 10 -fsS "${HEALTHCHECK_URL}" > /dev/null 2>&1; then
             echo "✓ WEPPcloud is healthy"
             break
         fi
