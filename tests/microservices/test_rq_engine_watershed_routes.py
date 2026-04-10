@@ -426,6 +426,35 @@ def test_upload_dem_success(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     assert payload["result"]["dem_filename"] == "uploaded.tif"
 
 
+def test_upload_dem_rejects_oversize_file(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: str(tmp_path))
+    monkeypatch.setattr(watershed_routes, "UPLOAD_DEM_MAX_BYTES", 4)
+
+    class DummyRon:
+        dem_dir = str(tmp_path)
+
+    class DummyWatershed:
+        pass
+
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        watershed_routes,
+        "_install_uploaded_dem",
+        lambda **kwargs: {"dem_filename": "uploaded.tif"},
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-dem/",
+            files={"input_upload_dem": ("sample.tif", b"abcdef", "image/tiff")},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "File exceeds maximum allowed size"
+
+
 def test_validate_dem_dimensions_accepts_limit() -> None:
     class DummyDs:
         RasterXSize = watershed_routes.UPLOAD_DEM_MAX_DIMENSION

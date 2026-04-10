@@ -30,6 +30,8 @@ router = APIRouter()
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
+UPLOAD_CLI_ALLOWED_EXTENSIONS = ("cli",)
+UPLOAD_CLI_MAX_BYTES = 25 * 1024 * 1024
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -115,10 +117,11 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
             "climate",
             lambda: save_upload_file(
                 upload,
-                allowed_extensions=("cli",),
+                allowed_extensions=UPLOAD_CLI_ALLOWED_EXTENSIONS,
                 dest_dir=Path(climate.cli_dir),
                 filename_transform=lambda value: value,
                 overwrite=True,
+                max_bytes=UPLOAD_CLI_MAX_BYTES,
             ),
             purpose="rq-upload-cli-save",
         )

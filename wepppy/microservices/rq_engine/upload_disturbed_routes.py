@@ -24,6 +24,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
+UPLOAD_SBS_ALLOWED_EXTENSIONS: tuple[str, ...] = ()
+UPLOAD_SBS_MAX_BYTES = 100 * 1024 * 1024
+UPLOAD_COVER_TRANSFORM_ALLOWED_EXTENSIONS = ("csv",)
+UPLOAD_COVER_TRANSFORM_MAX_BYTES = 10 * 1024 * 1024
 
 
 def _extract_upload(form, key: str) -> UploadFile | None:
@@ -84,10 +88,11 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         dest_dir = Path(baer.baer_dir)
         saved_path = save_upload_file(
             upload,
-            allowed_extensions=(),
+            allowed_extensions=UPLOAD_SBS_ALLOWED_EXTENSIONS,
             dest_dir=dest_dir,
             filename_transform=lambda value: filename,
             overwrite=True,
+            max_bytes=UPLOAD_SBS_MAX_BYTES,
         )
 
         ret, description = sbs_map_sanity_check(str(saved_path))
@@ -143,10 +148,11 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
 
         saved_path = save_upload_file(
             upload,
-            allowed_extensions=("csv",),
+            allowed_extensions=UPLOAD_COVER_TRANSFORM_ALLOWED_EXTENSIONS,
             dest_dir=Path(wd) / "revegetation",
             filename_transform=lambda value: value,
             overwrite=True,
+            max_bytes=UPLOAD_COVER_TRANSFORM_MAX_BYTES,
         )
 
         res = reveg.validate_user_defined_cover_transform(saved_path.name)

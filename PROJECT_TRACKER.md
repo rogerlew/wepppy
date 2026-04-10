@@ -249,6 +249,36 @@ Recently completed work packages. Archived immediately upon completion.
 
 ---
 
+### RQ Controller State Geospatial and Upload Metadata
+**Completed**: 2026-04-10  
+**Duration**: 1 focused session + remediation/re-review loop  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260410_rq_controller_state_geospatial_uploads/](docs/work-packages/20260410_rq_controller_state_geospatial_uploads/)  
+**Description**: Implemented run geospatial metadata and upload metadata contract hardening so agents can select first-step watershed defaults and validate upload payloads pre-submit.
+
+**Outcome**:
+- Added rq-engine endpoint:
+  - `GET /api/runs/{runid}/{config}/geospatial-metadata`
+- Hardened upload descriptor/schema/default metadata for:
+  - `rq_engine_upload_dem`
+  - `rq_engine_upload_cli`
+  - `rq_engine_upload_sbs`
+  - `rq_engine_upload_cover_transform`
+- Aligned cross-surface parity for climate/soils mode constraints and watershed defaults.
+- Added explicit runtime `max_bytes` upload enforcement + oversize regression tests for DEM/CLI/SBS/cover-transform handlers.
+- Completed reviewer/QA/security re-reviews with no unresolved medium/high findings.
+- Closed lifecycle docs, completed security artifact, and archived ExecPlan to `prompts/completed/` with outcome note.
+
+**Validation Notes**:
+- `wctl run-pytest tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py --maxfail=1` (`21 passed`)
+- `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` (`9 passed`)
+- `python tools/check_endpoint_inventory.py` (pass)
+- `python tools/check_route_contract_checklist.py` (pass)
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py --maxfail=1` (`2 passed`)
+
+---
+
 ### RQ Controller State Schema and Defaults
 **Completed**: 2026-04-10  
 **Duration**: 1 focused session + review remediation loop  

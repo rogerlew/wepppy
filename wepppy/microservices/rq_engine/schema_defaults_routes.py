@@ -12,6 +12,7 @@ from typing import Any, Mapping
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from werkzeug.utils import secure_filename
 
 from wepppy.nodb.core import Climate, Landuse, Ron, Soils, Watershed, Wepp
 from wepppy.nodb.mods.disturbed import Disturbed
@@ -22,6 +23,18 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, _normalize_scopes, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response
+from .upload_climate_routes import UPLOAD_CLI_ALLOWED_EXTENSIONS, UPLOAD_CLI_MAX_BYTES
+from .upload_disturbed_routes import (
+    UPLOAD_COVER_TRANSFORM_ALLOWED_EXTENSIONS,
+    UPLOAD_COVER_TRANSFORM_MAX_BYTES,
+    UPLOAD_SBS_ALLOWED_EXTENSIONS,
+    UPLOAD_SBS_MAX_BYTES,
+)
+from .watershed_routes import (
+    UPLOAD_DEM_ALLOWED_EXTENSIONS,
+    UPLOAD_DEM_MAX_BYTES,
+    UPLOAD_DEM_MAX_DIMENSION,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -158,17 +171,106 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         except (TypeError, ValueError):
             disturbed_sol_ver = None
 
+    map_bounds: list[float] | None = None
+    map_center: list[float] | None = None
+    map_zoom: float | None = None
+    map_resolution: float | None = None
+
+    map_obj = getattr(ron, "map", None)
+    if map_obj is not None:
+        extent = getattr(map_obj, "extent", None)
+        center = getattr(map_obj, "center", None)
+        zoom = getattr(map_obj, "zoom", None)
+        cellsize = getattr(map_obj, "cellsize", None)
+        if isinstance(extent, (list, tuple)) and len(extent) == 4:
+            try:
+                map_bounds = [float(v) for v in extent]
+            except (TypeError, ValueError):
+                map_bounds = None
+        if isinstance(center, (list, tuple)) and len(center) == 2:
+            try:
+                map_center = [float(center[0]), float(center[1])]
+            except (TypeError, ValueError):
+                map_center = None
+        try:
+            map_zoom = float(zoom) if zoom is not None else None
+        except (TypeError, ValueError):
+            map_zoom = None
+        try:
+            map_resolution = float(cellsize) if cellsize is not None else None
+        except (TypeError, ValueError):
+            map_resolution = None
+
+    if map_center is None:
+        center0 = getattr(ron, "center0", None)
+        if isinstance(center0, (list, tuple)) and len(center0) == 2:
+            try:
+                # `Ron.center0` is lat/lon while map payloads are lon/lat.
+                map_center = [float(center0[1]), float(center0[0])]
+            except (TypeError, ValueError):
+                map_center = None
+
+    if map_zoom is None:
+        zoom0 = getattr(ron, "zoom0", None)
+        try:
+            map_zoom = float(zoom0) if zoom0 is not None else 11.0
+        except (TypeError, ValueError):
+            map_zoom = 11.0
+
+    if map_resolution is None:
+        try:
+            map_resolution = float(getattr(ron, "cellsize", None) or 30.0)
+        except (TypeError, ValueError):
+            map_resolution = 30.0
+
+    watershed_csa: float | None = None
+    csa_value = getattr(watershed, "csa", None)
+    try:
+        watershed_csa = float(csa_value) if csa_value is not None else None
+    except (TypeError, ValueError):
+        watershed_csa = None
+
+    watershed_mcl: float | None = None
+    mcl_value = getattr(watershed, "mcl", None)
+    try:
+        watershed_mcl = float(mcl_value) if mcl_value is not None else None
+    except (TypeError, ValueError):
+        watershed_mcl = None
+
+    delineation_backend: str | None = None
+    backend_value = getattr(watershed, "delineation_backend", None)
+    if backend_value is not None:
+        backend_name = getattr(backend_value, "name", str(backend_value))
+        backend_text = str(backend_name or "").strip().lower()
+        delineation_backend = backend_text or None
+
     region = str(getattr(ron, "region", "") or "").strip() or None
+    if region is None:
+        locales = getattr(ron, "_locales", None)
+        if isinstance(locales, (list, tuple)) and locales:
+            region = str(locales[0] or "").strip() or None
+
+    dem_source = str(getattr(ron, "dem_db", "") or "").strip() or "unknown"
+    uploaded_dem_filename_raw = str(getattr(watershed, "uploaded_dem_filename", "") or "").strip() or None
+    uploaded_dem_filename: str | None = None
+    if uploaded_dem_filename_raw:
+        uploaded_dem_filename = secure_filename(Path(uploaded_dem_filename_raw).name) or None
+    climate_station_required = bool(getattr(climate, "has_climatestation_mode", False))
+
     states: dict[str, Any] = {
         "has_dem": bool(getattr(ron, "has_dem", False)),
         "watershed_has_channels": bool(getattr(watershed, "has_channels", False)),
         "watershed_has_outlet": bool(getattr(watershed, "has_outlet", False)),
         "watershed_is_abstracted": bool(getattr(watershed, "is_abstracted", False)),
         "watershed_subcatchment_count": int(getattr(watershed, "sub_n", 0) or 0),
+        "watershed_csa": watershed_csa,
+        "watershed_mcl": watershed_mcl,
+        "delineation_backend": delineation_backend,
         "climate_built": bool(getattr(climate, "has_climate", False)),
         "climate_mode_code": _enum_int(getattr(climate, "climate_mode", None)),
         "climate_mode": _enum_name(getattr(climate, "climate_mode", None)),
         "climate_has_station": bool(getattr(climate, "has_station", False)),
+        "climate_station_required": climate_station_required,
         "landuse_built": bool(getattr(landuse, "has_landuse", False)),
         "landuse_mode": _enum_name(getattr(landuse, "mode", None)),
         "soils_built": bool(getattr(soils, "has_soils", False)),
@@ -179,6 +281,12 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "sbs_upload_supported": sbs_upload_supported,
         "disturbed_sbs_uploaded": bool(getattr(prep, "has_sbs", False)),
         "disturbed_sol_ver": disturbed_sol_ver,
+        "map_center": map_center,
+        "map_bounds": map_bounds,
+        "map_zoom": map_zoom,
+        "map_zoom_resolution_m_per_px": map_resolution,
+        "dem_coverage_source": dem_source,
+        "uploaded_dem_filename": uploaded_dem_filename,
     }
 
     generated_at = _utc_timestamp()
@@ -429,10 +537,7 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
             defaults["sol_ver"] = runtime.states.get("disturbed_sol_ver") or 2018.0
         return defaults
     if controller == "watershed":
-        return {
-            "csa": 10,
-            "mcl": 75,
-        }
+        return _resolved_watershed_defaults(runtime)
     if controller == "wepp":
         return {
             "clip_soils": disturbed_enabled,
@@ -450,9 +555,7 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
     disturbed_enabled = bool(runtime.states.get("disturbed_enabled", False))
 
     if controller == "climate":
-        available_modes = [0, 6, 11]
-        if bool(runtime.states.get("climate_has_station", False)):
-            available_modes.insert(1, 2)
+        available_modes = _available_climate_modes(runtime)
 
         return {
             "schema_version": 1,
@@ -528,6 +631,7 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
 
     if controller == "soils":
         sol_ver_available = ["v2006", "v2018"] if disturbed_enabled else []
+        soils_modes = _supported_soils_modes()
         return {
             "schema_version": 1,
             "fields": {
@@ -535,7 +639,8 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "type": "string",
                     "required": True,
                     "constraint_mode": "static",
-                    "enum": ["ssurgo", "statsgo"],
+                    "enum": soils_modes,
+                    "enum_available": soils_modes,
                 },
                 "sol_ver": {
                     "type": "number",
@@ -841,7 +946,143 @@ def _defaults_context(runtime: RuntimeState) -> dict[str, Any]:
     }
 
 
+def _available_climate_modes(runtime: RuntimeState) -> list[int]:
+    modes = [0, 6, 11]
+    if bool(runtime.states.get("climate_has_station", False)):
+        modes.insert(1, 2)
+    return modes
+
+
+def _supported_soils_modes() -> list[str]:
+    return ["ssurgo", "statsgo"]
+
+
+def _resolved_watershed_defaults(runtime: RuntimeState) -> dict[str, float]:
+    csa_value = runtime.states.get("watershed_csa")
+    mcl_value = runtime.states.get("watershed_mcl")
+    csa = float(csa_value) if isinstance(csa_value, (int, float)) else 10.0
+    mcl = float(mcl_value) if isinstance(mcl_value, (int, float)) else 75.0
+    return {"csa": csa, "mcl": mcl}
+
+
+def _float_list(value: Any, *, expected_len: int) -> list[float] | None:
+    if not isinstance(value, (list, tuple)) or len(value) != expected_len:
+        return None
+    try:
+        return [float(v) for v in value]
+    except (TypeError, ValueError):
+        return None
+
+
+def _geospatial_payload(runtime: RuntimeState) -> dict[str, Any]:
+    map_center = _float_list(runtime.states.get("map_center"), expected_len=2)
+    map_bounds_raw = _float_list(runtime.states.get("map_bounds"), expected_len=4)
+    map_bounds = map_bounds_raw
+    map_bounds_is_run_resolved = map_bounds_raw is not None
+
+    if map_bounds is None and map_center is not None:
+        # Deterministic fallback extent for runs without a resolved DEM/map object yet.
+        lon, lat = map_center
+        map_bounds = [lon - 0.1, lat - 0.1, lon + 0.1, lat + 0.1]
+
+    try:
+        map_zoom = int(round(float(runtime.states.get("map_zoom"))))
+    except (TypeError, ValueError):
+        map_zoom = 11
+
+    try:
+        zoom_resolution = float(runtime.states.get("map_zoom_resolution_m_per_px"))
+    except (TypeError, ValueError):
+        zoom_resolution = 30.0
+
+    csa_value = runtime.states.get("watershed_csa")
+    mcl_value = runtime.states.get("watershed_mcl")
+    watershed_defaults = _resolved_watershed_defaults(runtime)
+    csa = watershed_defaults["csa"]
+    mcl = watershed_defaults["mcl"]
+
+    climate_modes = _available_climate_modes(runtime)
+
+    soils_modes_available = _supported_soils_modes()
+
+    sol_ver_available = [2006.0, 2018.0] if bool(runtime.states.get("disturbed_enabled", False)) else []
+
+    map_center_available = map_center is not None
+    map_bounds_available = map_bounds_is_run_resolved
+    csa_available = isinstance(csa_value, (int, float))
+    mcl_available = isinstance(mcl_value, (int, float))
+    station_catalog_available = bool(runtime.states.get("has_dem", False) or map_bounds_is_run_resolved)
+
+    field_availability: dict[str, dict[str, Any]] = {
+        "map_center": {
+            "state": "available" if map_center_available else "pending",
+            **({} if map_center_available else {"reason_code": "awaiting_dem_upload"}),
+        },
+        "map_bounds": {
+            "state": "available" if map_bounds_available else "pending",
+            **({} if map_bounds_available else {"reason_code": "awaiting_dem_upload"}),
+        },
+        "map_zoom": {
+            "state": "available",
+        },
+        "csa": {
+            "state": "available" if csa_available else "pending",
+            **({} if csa_available else {"reason_code": "awaiting_watershed_defaults"}),
+        },
+        "mcl": {
+            "state": "available" if mcl_available else "pending",
+            **({} if mcl_available else {"reason_code": "awaiting_watershed_defaults"}),
+        },
+        "station_catalog": {
+            "state": "available" if station_catalog_available else "pending",
+            **({} if station_catalog_available else {"reason_code": "awaiting_dem_fetch"}),
+        },
+    }
+
+    dem_coverage: dict[str, Any] = {
+        "supported": True,
+        "source": str(runtime.states.get("dem_coverage_source") or "unknown"),
+        "has_dem": bool(runtime.states.get("has_dem", False)),
+        "extent_bbox": map_bounds_raw,
+    }
+    uploaded_dem_filename = runtime.states.get("uploaded_dem_filename")
+    if isinstance(uploaded_dem_filename, str) and uploaded_dem_filename:
+        dem_coverage["uploaded_dem_filename"] = uploaded_dem_filename
+    delineation_backend = runtime.states.get("delineation_backend")
+    if isinstance(delineation_backend, str) and delineation_backend:
+        dem_coverage["delineation_backend"] = delineation_backend
+
+    return {
+        "runid": runtime.runid,
+        "config": runtime.config,
+        "region": runtime.region,
+        "dem_coverage": dem_coverage,
+        "recommended_defaults": {
+            "map_center": map_center,
+            "map_bounds": map_bounds,
+            "map_zoom": map_zoom,
+            "map_zoom_resolution_m_per_px": zoom_resolution,
+            "csa": csa,
+            "mcl": mcl,
+        },
+        "dynamic_constraints": {
+            "climate_mode": {
+                "enum_available": climate_modes,
+            },
+            "soils_mode": {
+                "enum_available": soils_modes_available,
+            },
+            "sol_ver": {
+                "enum_available": sol_ver_available,
+            },
+        },
+        "field_availability": field_availability,
+        "computed_at": runtime.generated_at,
+    }
+
+
 def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
+    geospatial_metadata_id = rq_operation_id("geospatial_metadata")
     list_controllers_id = rq_operation_id("list_controllers")
     controller_schema_id = rq_operation_id("get_controller_schema")
     controller_hints_id = rq_operation_id("get_controller_hints")
@@ -858,6 +1099,9 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
     prep_wepp_id = rq_operation_id("prep_wepp_watershed")
     run_wepp_id = rq_operation_id("run_wepp")
     run_wepp_watershed_id = rq_operation_id("run_wepp_watershed")
+    upload_dem_id = rq_operation_id("upload_dem")
+    upload_cli_id = rq_operation_id("upload_cli")
+    upload_cover_transform_id = rq_operation_id("upload_cover_transform")
     upload_sbs_id = rq_operation_id("upload_sbs")
     issue_session_token_id = rq_operation_id("issue_session_token")
 
@@ -878,6 +1122,29 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 "resolved_defaults": {},
                 "defaults_context": {
                     "controller_count": len(_controller_names(runtime)),
+                    **_defaults_context(runtime),
+                },
+            },
+        },
+        geospatial_metadata_id: {
+            "descriptor": _base_run_read_descriptor(
+                runtime=runtime,
+                operation_id=geospatial_metadata_id,
+                path="/api/runs/{runid}/{config}/geospatial-metadata",
+                required_fields=["dem_coverage", "recommended_defaults", "field_availability"],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": _empty_request_schema(),
+                "responses": {
+                    "success": {
+                        "required": ["dem_coverage", "recommended_defaults", "field_availability"],
+                    }
+                },
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": {
                     **_defaults_context(runtime),
                 },
             },
@@ -1432,6 +1699,175 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 "defaults_context": _defaults_context(runtime),
             },
         },
+        upload_dem_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=upload_dem_id,
+                path="/api/runs/{runid}/{config}/tasks/upload-dem/",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["result"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=10,
+                mutates_controllers=["watershed"],
+                invalidates_steps=[
+                    "fetch-dem-and-build-channels",
+                    "set-outlet",
+                    "build-subcatchments-and-abstract-watershed",
+                    "build-climate",
+                    "build-landuse",
+                    "build-soils",
+                    "prep-wepp-watershed",
+                    "run-wepp",
+                    "run-wepp-watershed",
+                ],
+                content_types=["multipart/form-data"],
+                file_fields=[
+                    {
+                        "name": "input_upload_dem",
+                        "required": True,
+                        "allowed_extensions": [f".{ext}" for ext in UPLOAD_DEM_ALLOWED_EXTENSIONS],
+                        "allowed_media_types": ["image/tiff", "application/geotiff", "application/x-geotiff"],
+                        "max_bytes": UPLOAD_DEM_MAX_BYTES,
+                        "crs_requirements": {
+                            "mode": "must_define_spatial_reference",
+                            "allow_reprojection": True,
+                            "preferred_projection_family": "utm",
+                        },
+                        "extent_requirements": {
+                            "mode": "must_define_georeferenced_extent",
+                        },
+                        "resolution_requirements": {
+                            "mode": "square_pixels_required",
+                            "max_dimension_px": UPLOAD_DEM_MAX_DIMENSION,
+                        },
+                        "value_semantics": {
+                            "classification_type": "continuous_elevation",
+                            "required_numeric_type": "float32_or_float64",
+                        },
+                    }
+                ],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "input_upload_dem": {
+                            "type": "string",
+                            "format": "binary",
+                            "constraint_mode": "run_resolved",
+                            "constraint_source": "geospatial_metadata",
+                            "resolved_at": runtime.generated_at,
+                        },
+                    },
+                    "required": ["input_upload_dem"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["result"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        upload_cli_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=upload_cli_id,
+                path="/api/runs/{runid}/{config}/tasks/upload-cli/",
+                execution_mode="async",
+                returns_job=True,
+                job_key="upload_cli_rq",
+                required_fields=["job_id"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=8,
+                mutates_controllers=["climate"],
+                invalidates_steps=["build-climate", "prep-wepp-watershed", "run-wepp", "run-wepp-watershed"],
+                content_types=["multipart/form-data"],
+                file_fields=[
+                    {
+                        "name": "input_upload_cli",
+                        "required": True,
+                        "allowed_extensions": [f".{ext}" for ext in UPLOAD_CLI_ALLOWED_EXTENSIONS],
+                        "allowed_media_types": ["text/plain", "application/octet-stream"],
+                        "max_bytes": UPLOAD_CLI_MAX_BYTES,
+                        "value_semantics": {
+                            "classification_type": "station_climate_timeseries",
+                        },
+                    }
+                ],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "input_upload_cli": {
+                            "type": "string",
+                            "format": "binary",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["input_upload_cli"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["job_id"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        upload_cover_transform_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=upload_cover_transform_id,
+                path="/api/runs/{runid}/{config}/tasks/upload-cover-transform",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=[],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=5,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                content_types=["multipart/form-data"],
+                file_fields=[
+                    {
+                        "name": "input_upload_cover_transform",
+                        "required": True,
+                        "allowed_extensions": [f".{ext}" for ext in UPLOAD_COVER_TRANSFORM_ALLOWED_EXTENSIONS],
+                        "allowed_media_types": ["text/csv", "application/vnd.ms-excel"],
+                        "max_bytes": UPLOAD_COVER_TRANSFORM_MAX_BYTES,
+                        "value_semantics": {
+                            "classification_type": "cover_transform_table",
+                        },
+                    }
+                ],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "input_upload_cover_transform": {
+                            "type": "string",
+                            "format": "binary",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["input_upload_cover_transform"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": []}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
         issue_session_token_id: {
             "descriptor": _base_run_mutation_descriptor(
                 runtime=runtime,
@@ -1495,9 +1931,18 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                     {
                         "name": "input_upload_sbs",
                         "required": True,
-                        "allowed_extensions": [".tif", ".tiff", ".asc"],
-                        "allowed_media_types": ["image/tiff", "application/x-aaigrid"],
-                        "max_bytes": 209715200,
+                        "allowed_extensions": [f".{ext}" for ext in UPLOAD_SBS_ALLOWED_EXTENSIONS],
+                        "allowed_media_types": [],
+                        "max_bytes": UPLOAD_SBS_MAX_BYTES,
+                        "crs_requirements": {
+                            "mode": "must_have_valid_projection",
+                        },
+                        "value_semantics": {
+                            "classification_type": "integer_class_raster",
+                            "required_integer_values": True,
+                            "max_unique_classes": 256,
+                            "color_table_mode": "optional_but_if_present_must_map_known_severity",
+                        },
                     }
                 ],
                 required_if=[_sbs_available_if()],
@@ -1512,7 +1957,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "type": "string",
                             "format": "binary",
                             "constraint_mode": "run_resolved",
-                            "constraint_source": "controller_state",
+                            "constraint_source": "geospatial_metadata",
                             "resolved_at": runtime.generated_at,
                             "required_if": _sbs_available_if(),
                         },
@@ -1539,6 +1984,49 @@ def _resolve_controller(controller: str, runtime: RuntimeState) -> str | None:
     if normalized in _controller_catalog(runtime):
         return normalized
     return None
+
+
+@router.get(
+    "/runs/{runid}/{config}/geospatial-metadata",
+    summary="Get run geospatial metadata",
+    description=(
+        "Requires JWT Bearer (`rq:status` or `rq:read`) with run access checks. "
+        "Read-only geospatial constraints/defaults metadata for run-scoped planning; no queue."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("geospatial_metadata"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Geospatial metadata returned.",
+        extra={404: "Run not found. Returns the canonical error payload."},
+    ),
+)
+def get_geospatial_metadata(runid: str, config: str, request: Request) -> JSONResponse:
+    try:
+        _require_schema_defaults_claims(request, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: route boundary contract
+        logger.exception("rq-engine geospatial-metadata auth failed")
+        return error_response("Failed to authorize request", status_code=401)
+
+    try:
+        runtime = _load_runtime_state(runid, config)
+    except FileNotFoundError:
+        return error_response("Run not found", status_code=404, code="not_found")
+    except RunConfigMismatchError:
+        return error_response("Run not found", status_code=404, code="not_found")
+    except Exception:  # broad-except: route boundary contract
+        logger.exception("rq-engine geospatial-metadata state load failed")
+        return error_response("Error Handling Request", status_code=500)
+
+    try:
+        payload = _base_payload(runtime)
+        payload.update(_geospatial_payload(runtime))
+        return JSONResponse(payload)
+    except Exception:  # broad-except: route boundary contract
+        logger.exception("rq-engine geospatial-metadata payload build failed")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.get(

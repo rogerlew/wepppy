@@ -158,3 +158,39 @@ def test_upload_cli_rejects_archive_form_root(
 
     assert response.status_code == 409
     assert response.json()["error"]["code"] == "NODIR_ARCHIVE_ACTIVE"
+
+
+def test_upload_cli_rejects_oversize_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    cli_dir = run_dir / "cli"
+    cli_dir.mkdir(parents=True)
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(upload_climate_routes, "UPLOAD_CLI_MAX_BYTES", 4)
+    monkeypatch.setattr(upload_climate_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(upload_climate_routes.Ron, "getInstance", lambda wd: object())
+    monkeypatch.setattr(
+        upload_climate_routes,
+        "mutate_root",
+        lambda wd, root, callback, purpose="rq-upload": callback(),
+    )
+
+    class DummyClimate:
+        def __init__(self, cli_dir: Path) -> None:
+            self.cli_dir = str(cli_dir)
+
+    climate = DummyClimate(cli_dir)
+    monkeypatch.setattr(upload_climate_routes.Climate, "getInstance", lambda wd: climate)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-cli/",
+            files={"input_upload_cli": ("demo.cli", b"abcdef")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "File exceeds maximum allowed size"

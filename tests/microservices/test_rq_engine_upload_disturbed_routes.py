@@ -94,3 +94,80 @@ def test_upload_cover_transform_returns_result(
     assert response.status_code == 200
     payload = response.json()
     assert payload["result"]["cover"] == "cover.csv"
+
+
+def test_upload_sbs_rejects_oversize_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    baer_dir = run_dir / "baer"
+    baer_dir.mkdir(parents=True)
+
+    monkeypatch.setattr(upload_disturbed_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(upload_disturbed_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(upload_disturbed_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(upload_disturbed_routes, "UPLOAD_SBS_MAX_BYTES", 4)
+
+    class DummyRon:
+        mods: set[str] = set()
+
+    class DummyDisturbed:
+        def __init__(self, base_dir: Path) -> None:
+            self.baer_dir = str(base_dir)
+            self.disturbed_fn = "disturbed.txt"
+
+        def validate(self, filename: str, mode: int = 0) -> None:
+            return None
+
+    monkeypatch.setattr(upload_disturbed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(
+        upload_disturbed_routes.Disturbed,
+        "getInstance",
+        lambda wd: DummyDisturbed(baer_dir),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-sbs/",
+            files={"input_upload_sbs": ("sbs.tif", b"abcdef")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "File exceeds maximum allowed size"
+
+
+def test_upload_cover_transform_rejects_oversize_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir(parents=True)
+
+    monkeypatch.setattr(upload_disturbed_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(upload_disturbed_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(upload_disturbed_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(upload_disturbed_routes, "UPLOAD_COVER_TRANSFORM_MAX_BYTES", 4)
+
+    class DummyReveg:
+        def validate_user_defined_cover_transform(self, name: str) -> dict[str, str]:
+            return {"cover": name}
+
+    import wepppy.nodb.mods.revegetation as revegetation_module
+
+    monkeypatch.setattr(
+        revegetation_module,
+        "Revegetation",
+        type("Revegetation", (), {"getInstance": lambda wd: DummyReveg()}),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-cover-transform",
+            files={"input_upload_cover_transform": ("cover.csv", b"abcdef")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "File exceeds maximum allowed size"

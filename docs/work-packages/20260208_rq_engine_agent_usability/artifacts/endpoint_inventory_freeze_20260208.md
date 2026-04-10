@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **99**
-- Classification counts: **agent-facing 76**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 96**, **Flask wrapper 3**
+- Total endpoints inventoried: **100**
+- Classification counts: **agent-facing 77**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 97**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -72,6 +72,7 @@ Snapshot summary:
 | GET | `/api/runs/{runid}/{config}/export/prep_details/` | `wepppy/microservices/rq_engine/export_routes.py` | `export_prep_details` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. May generate export artifacts synchronously before file response. |
 | POST | `/api/runs/{runid}/{config}/fetch-dem-and-build-channels` | `wepppy/microservices/rq_engine/watershed_routes.py` | `fetch_dem_and_build_channels` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/fork` | `wepppy/microservices/rq_engine/fork_archive_routes.py` | `fork_project` | agent-facing | rq-engine | Optional JWT; anonymous CAPTCHA path | `rq:enqueue` (if bearer token is used) | mutating | Optional bearer token path calls `authorize_run_access`; anonymous path requires CAPTCHA and public-run eligibility checks. Async enqueue and pre-creates target run metadata. |
+| GET | `/api/runs/{runid}/{config}/geospatial-metadata` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `get_geospatial_metadata` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only run geospatial metadata and upload-planning defaults/constraints; no queue enqueue. |
 | GET | `/api/runs/{runid}/{config}/hello-world` | `wepppy/microservices/rq_engine/debug_routes.py` | `hello_world` | internal | rq-engine | Open | - | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/hello-world` | `wepppy/microservices/rq_engine/debug_routes.py` | `hello_world` | internal | rq-engine | Open | - | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/migrate-run` | `wepppy/microservices/rq_engine/migration_routes.py` | `migrate_run` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Access model: `_ensure_run_access` (Admin override + session-marker support for session tokens). Async enqueue; returns `job_id`, `status_url`, `message`, and `result`. |

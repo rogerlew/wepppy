@@ -52,6 +52,7 @@ FETCH_DEM_AND_BUILD_CHANNELS_TIMEOUT = int(os.getenv("RQ_ENGINE_FETCH_DEM_BUILD_
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 UPLOAD_DEM_MAX_DIMENSION = 2560
 UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif",)
+UPLOAD_DEM_MAX_BYTES = 100 * 1024 * 1024
 TOPAZ_UPLOAD_DEM_NODATA_MESSAGE = (
     "TOPAZ requires maps without NoData values. Please start a new project with the "
     "WEPPcloud-WBT delineation backend"
@@ -567,6 +568,7 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
                 dest_dir=Path(ron.dem_dir),
                 filename_transform=lambda value: filename,
                 overwrite=True,
+                max_bytes=UPLOAD_DEM_MAX_BYTES,
             )
             return _install_uploaded_dem(
                 ron=ron,
