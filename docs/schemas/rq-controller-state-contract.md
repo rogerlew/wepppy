@@ -23,8 +23,20 @@
 - Does not replace existing mutation endpoints.
 
 ## Non-Goals
-- No direct behavior changes to existing mutation endpoints in this document.
+- No immediate runtime behavior changes are made by this document alone.
 - No UI rendering prescriptions beyond optional hint metadata.
+
+## Frozen Baseline vs Target Profile
+- `Frozen baseline`: current implemented route behavior captured in
+  `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
+  and
+  `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`.
+- `Target profile`: additive post-cutover behavior described in this contract for
+  controller-state endpoints and descriptor/schema hardening.
+- If target-profile requirements exceed the frozen baseline, implementation
+  packages MUST stage those changes behind the roadmap and preserve
+  backward-compatible behavior until cutover package
+  `20260410_rq_controller_state_contract_cutover`.
 
 ## Proposed Endpoint Surface
 
@@ -160,16 +172,29 @@
 ## Canonical Identifier Model
 - `operation_id` is the canonical join key across discovery, pipeline,
   readiness, and OpenAPI.
-- `operation_id` SHOULD match rq-engine OpenAPI operation IDs and therefore use
-  the `rq_engine_` prefix.
+- `operation_id` MUST match rq-engine OpenAPI operation IDs for implemented
+  routes and therefore use the `rq_engine_` prefix.
+- For proposed routes that are not yet in OpenAPI, the `operation_id` values in
+  this contract are reserved IDs and MUST be used unchanged when those routes
+  are implemented.
+- Path exceptions (for example `POST /create/` without an `/api` prefix) do not
+  change `operation_id` naming requirements.
 - `step_id` is a stable workflow-node key in the pipeline DAG.
 - A pipeline step MUST carry both:
   - `step_id` (workflow node identity)
   - `operation_id` (invokable operation identity)
 
 ## Operation Descriptor Requirements
-- Endpoint discovery payloads MUST include an `operation_descriptor` object with
-  executable contract details:
+- Endpoint discovery payloads MUST include executable descriptor details for each
+  operation.
+- Descriptor shape is endpoint-family specific:
+  - endpoint catalog payloads (`/api/endpoints`,
+    `/api/runs/{runid}/{config}/endpoints`) MUST inline descriptor fields under
+    each `operations[]` entry.
+  - endpoint schema/default payloads MUST include an `operation_descriptor`
+    object containing the same descriptor field set for the requested
+    operation.
+- Descriptor field set MUST include:
   - `operation_id`, `method`, `path`
   - `run_scoped` boolean
   - `accepted_auth` modes (for example bearer JWT, session-cookie, CAPTCHA)
@@ -213,6 +238,14 @@
     - `typical_seconds`
   - `batch_mode_behavior` / `base_project_behavior` when behavior diverges
   - `mutates_controllers` and `invalidates_steps`
+- For routes already frozen in
+  `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`,
+  descriptors MUST preserve checklist semantics for auth mode, required scope,
+  execution class, and required success status codes.
+- During rollout, mutating-vs-read-only classification remains sourced from the
+  frozen checklist artifact until contract cutover package
+  `20260410_rq_controller_state_contract_cutover` finalizes descriptor parity
+  tests.
 
 ## Pipeline Step Identity
 - Step IDs are stable contract keys, not display labels.
@@ -259,11 +292,16 @@
   operations.
 - `step_id` values are authoritative for DAG orchestration.
 
-### Non-Pipeline Run-Scoped Operations
+### Non-Pipeline Run-Scoped Operations (Orchestration-Relevant Subset)
 
-The operation IDs below are valid run-scoped actions discoverable from
-`/api/runs/{runid}/{config}/endpoints`, but they are not pipeline DAG nodes and
-MUST NOT appear in `pipeline.steps[]`.
+The operation IDs below are a non-exhaustive subset of run-scoped actions
+discoverable from `/api/runs/{runid}/{config}/endpoints`. They are listed here
+because they are common orchestration-adjacent operations, but they are not
+pipeline DAG nodes and MUST NOT appear in `pipeline.steps[]`.
+
+For the exhaustive current run-scoped inventory baseline, use:
+- `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
+- `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
 
 | Canonical Operation ID | Typical Endpoint | Class |
 |---|---|---|
@@ -304,6 +342,11 @@ MUST NOT appear in `pipeline.steps[]`.
   - `completed`, `failed`, `canceled`, `skipped`
 - For `async` steps in `running` state, payload SHOULD include `active_job_id`.
 - For `sync` steps, `active_job_id` MUST be absent.
+- If `last_attempt.outcome` is present, it MUST be one of:
+  - `finished`
+  - `failed`
+  - `stopped`
+  - `canceled`
 - `can_run_now` MUST be true only when `status=ready` and
   `preconditions_met=true`.
 - When a previously `completed` step becomes `ready` because of downstream
@@ -332,6 +375,11 @@ MUST NOT appear in `pipeline.steps[]`.
 | `skipped` | *(terminal; no transitions)* |
 
 ## Mutation Result Contract (Normative)
+
+This section specifies target-profile behavior for controller-state cutover.
+Until roadmap cutover package `20260410_rq_controller_state_contract_cutover`,
+existing frozen routes may return legacy success payload variants documented in
+the 2026-02-08 freeze artifacts.
 
 | `execution_mode` | Required Success Fields | Next Action Contract |
 |---|---|---|
@@ -858,7 +906,7 @@ MUST NOT appear in `pipeline.steps[]`.
       "method": "POST",
       "path": "/create/",
       "config_catalog_url": "/rq-engine/api/configs",
-      "accepted_auth": ["rq_token", "bearer_jwt", "session_cookie_same_origin", "captcha"],
+      "accepted_auth": ["rq_token", "bearer_jwt", "captcha"],
       "auth_requirements": {
         "rq_token": {
           "required_scope": ["rq:enqueue"],
@@ -866,9 +914,6 @@ MUST NOT appear in `pipeline.steps[]`.
         },
         "bearer_jwt": {
           "required_scope": ["rq:enqueue"]
-        },
-        "session_cookie_same_origin": {
-          "same_origin_required": true
         },
         "captcha": {
           "challenge_required": true,
@@ -1332,7 +1377,7 @@ value semantics where classification rasters are expected).
         }
       ],
       "last_attempt": {
-        "outcome": "success",
+        "outcome": "finished",
         "ended_at": "2026-04-10T09:17:11Z",
         "error_code": null,
         "error_message": null,
@@ -1673,13 +1718,16 @@ Each package MUST include:
 | 5 | `20260410_rq_controller_state_geospatial_uploads` | Implement `/geospatial-metadata` and upload metadata contracts (format/CRS/extent/resolution/value semantics). | Agent can resolve first-step geospatial defaults and validate upload payloads pre-submit. | 2, 4 | Planned |
 | 6 | `20260410_rq_controller_state_errors_progress_outputs` | Implement operation error catalogs, async progress signals, and `/outputs` artifact index with trust/provenance metadata. | Agent can recover from cataloged errors, poll with progress, and fetch artifacts from `outputs` only. | 3, 4, 5 | Planned |
 | 7 | `20260410_rq_controller_state_auth_concurrency` | Enforce/auth-rollout for `rq:read` aliasing, accepted-auth metadata parity, optimistic concurrency, and idempotency behavior. | Mutation/read preconditions and auth modes match descriptor metadata in tests. | 2, 3, 4, 6 | Planned |
-| 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed. | 2-7 | Planned |
+| 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed. | 2, 3, 4, 5, 6, 7 | Planned |
 
 - Progress state vocabulary for this roadmap:
   - `Planned`
   - `In Progress`
   - `Blocked`
   - `Complete`
+
+- `Depends On` values in this table MUST be explicit comma-separated order
+  numbers (for example `2, 3, 4`), not numeric ranges.
 
 - For each package, update:
   - `docs/work-packages/<package>/tracker.md`

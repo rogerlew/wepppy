@@ -1,7 +1,8 @@
 # RQ Controller State Contract Foundation
 
-**Status**: Open (2026-04-10)
-**Pre-scope note**: Scaffold authored on 2026-04-09 for planned 2026-04-10 kickoff (date retained to match roadmap package ID and user-requested package name).
+**Status**: Closed (2026-04-10 04:23 UTC)
+**Timezone**: UTC (all dates/times in this package documentation use UTC unless explicitly stated otherwise).
+**Pre-scope note**: Scaffold authored at 2026-04-10 03:54 UTC for planned 2026-04-10 kickoff (date retained to match roadmap package ID and user-requested package name).
 
 ## Overview
 This package establishes the implementation foundation for the RQ controller state contract before any endpoint build-out begins. It freezes canonical identifiers, descriptor invariants, and rollout assumptions so follow-on packages can implement APIs without drift between docs, OpenAPI, and route-level behavior.
@@ -32,11 +33,11 @@ This package covers contract-level design hardening, roadmap sequencing, and imp
 - **Informed**: Teams building downstream work packages in the controller-state roadmap.
 
 ## Success Criteria
-- [ ] Foundation contract sections are internally consistent and implementation-ready.
-- [ ] Canonical identifier and descriptor invariants are explicitly frozen in docs.
-- [ ] Downstream package sequence and dependencies are documented with actionable exit criteria.
-- [ ] Required verification commands are documented for follow-on package execution.
-- [ ] Tracker and ExecPlan are complete enough for stateless agent handoff.
+- [x] Foundation contract sections are internally consistent and implementation-ready.
+- [x] Canonical identifier and descriptor invariants are explicitly frozen in docs.
+- [x] Downstream package sequence and dependencies are documented with actionable exit criteria.
+- [x] Required verification commands are documented for follow-on package execution.
+- [x] Tracker and ExecPlan are complete enough for stateless agent handoff.
 
 ## Dependencies
 
@@ -49,15 +50,22 @@ This package covers contract-level design hardening, roadmap sequencing, and imp
   - `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
   - `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
 
-### Blocks
+### Blocks (Direct)
 - `20260410_rq_controller_state_setup_discovery`
 - `20260410_rq_controller_state_orchestration_reads`
 - `20260410_rq_controller_state_schema_defaults`
+
+### Downstream Dependents (Transitive)
+- `20260410_rq_controller_state_geospatial_uploads`
+- `20260410_rq_controller_state_errors_progress_outputs`
+- `20260410_rq_controller_state_auth_concurrency`
+- `20260410_rq_controller_state_contract_cutover`
 
 ## Related Packages
 - **Depends on**: none
 - **Related**: [20260208_rq_engine_agent_usability](../20260208_rq_engine_agent_usability/package.md)
 - **Follow-up**: `20260410_rq_controller_state_setup_discovery`, `20260410_rq_controller_state_orchestration_reads`, `20260410_rq_controller_state_schema_defaults`
+- **Roadmap source of truth**: `docs/schemas/rq-controller-state-contract.md` (`ExecPlan Work-Package Roadmap` table)
 
 ## Timeline Estimate
 - **Expected duration**: 1-2 focused sessions
@@ -78,14 +86,25 @@ This package covers contract-level design hardening, roadmap sequencing, and imp
 - `PROJECT_TRACKER.md` - cross-package scheduling and status board.
 
 ## Deliverables
-- Work-package scaffold:
+- Work-package scaffold and lifecycle docs:
   - `docs/work-packages/20260410_rq_controller_state_foundation/package.md`
   - `docs/work-packages/20260410_rq_controller_state_foundation/tracker.md`
   - `docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md`
-- Updated `PROJECT_TRACKER.md` entry for this package.
-- Foundation decisions and execution plan for downstream packages.
+- Updated contract docs closing confirmed foundation ambiguities:
+  - `docs/schemas/rq-controller-state-contract.md`
+  - `docs/schemas/rq-engine-agent-api-contract.md`
+- Updated `PROJECT_TRACKER.md` lifecycle entry for this package.
+- Independent reviewer subagent findings with disposition captured in tracker notes.
+
+## Closure Notes
+- Reconciled identifier model language with frozen artifacts by freezing `operation_id` alignment semantics and path-exception handling.
+- Clarified descriptor invariants by defining catalog vs schema/default descriptor shapes and checklist parity boundaries.
+- Clarified roadmap dependency notation and direct vs transitive package dependencies for handoff.
+- Completed required validation gate:
+  - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md --path PROJECT_TRACKER.md` (`6 files validated, 0 errors, 0 warnings`).
+- Root `PROJECT_TRACKER.md` entry moved from Backlog to Done.
 
 ## Follow-up Work
-- Start `20260410_rq_controller_state_setup_discovery` once this package is marked ready.
+- Start `20260410_rq_controller_state_setup_discovery` once this package is marked closed.
 - Start orchestration read endpoints package after setup discovery alignment.
 - Revisit contract freeze after first implementation package to capture discovered deltas.

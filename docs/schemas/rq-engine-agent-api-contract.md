@@ -72,6 +72,12 @@ Core scopes used by agent-facing routes:
 | `culvert:batch:retry` | Culvert batch retry endpoint. |
 
 Bootstrap routes do not accept `rq:enqueue` as a substitute for `bootstrap:*`.
+- `rq:read` is reserved for the proposed controller-state read surfaces in
+  `docs/schemas/rq-controller-state-contract.md`; it is not part of the frozen
+  61-route baseline in this document.
+- During the additive controller-state rollout, bearer flows that currently rely
+  on `rq:status` for read access MUST remain backward-compatible until package
+  `20260410_rq_controller_state_auth_concurrency` completes.
 
 ## Response Contract
 rq-engine responses must follow `docs/schemas/rq-response-contract.md`.
@@ -216,5 +222,9 @@ reasons:
   - controller state/schema/hints/templates
   - endpoint-level schema/default discovery
   - config/mod-aware `pipeline` DAG and `readiness` surfaces
+- Foundation freeze requirements for that draft (identifier model, descriptor
+  invariants, and dependency ordering) are tracked in work package
+  `20260410_rq_controller_state_foundation` and MUST be treated as the entry
+  gate before implementation packages start.
 - The draft document is intentionally marked "proposed" and is not implemented
   by current rq-engine routes.
