@@ -1664,16 +1664,22 @@ Each package MUST include:
 - `tracker.md`
 - active ExecPlan at `prompts/active/<slug>_execplan.md`
 
-| Order | Proposed Work-Package Folder | Primary Scope | Exit Criteria | Depends On |
-|---|---|---|---|---|
-| 1 | `20260410_rq_controller_state_foundation` | Freeze contract join keys and descriptor invariants (`operation_id`, `step_id`, descriptor required fields), plus OpenAPI alignment plan. | Contract sections stabilized; unresolved schema ambiguities closed; implementation checklist accepted. | none |
-| 2 | `20260410_rq_controller_state_setup_discovery` | Implement non-run-scoped setup surfaces: `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, setup schema/defaults/errors endpoints. | Agent can discover valid configs and call `create` without out-of-band docs; setup discovery tests pass. | 1 |
-| 3 | `20260410_rq_controller_state_orchestration_reads` | Implement run-scoped orchestration reads: `/pipeline`, `/readiness`, step state machine fields, invalidation lineage, next-action semantics. | Deterministic readiness->next_actionable_steps loop verified for baseline and disturbed configs. | 1 |
-| 4 | `20260410_rq_controller_state_schema_defaults` | Implement controller and endpoint schema/default surfaces with `constraint_mode`, predicate grammar, and run-resolved defaults. | Schema/default endpoints provide machine-checkable constraints for core build/run operations. | 1, 3 |
-| 5 | `20260410_rq_controller_state_geospatial_uploads` | Implement `/geospatial-metadata` and upload metadata contracts (format/CRS/extent/resolution/value semantics). | Agent can resolve first-step geospatial defaults and validate upload payloads pre-submit. | 2, 4 |
-| 6 | `20260410_rq_controller_state_errors_progress_outputs` | Implement operation error catalogs, async progress signals, and `/outputs` artifact index with trust/provenance metadata. | Agent can recover from cataloged errors, poll with progress, and fetch artifacts from `outputs` only. | 3, 4, 5 |
-| 7 | `20260410_rq_controller_state_auth_concurrency` | Enforce/auth-rollout for `rq:read` aliasing, accepted-auth metadata parity, optimistic concurrency, and idempotency behavior. | Mutation/read preconditions and auth modes match descriptor metadata in tests. | 2, 3, 4, 6 |
-| 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed. | 2-7 |
+| Order | Proposed Work-Package Folder | Primary Scope | Exit Criteria | Depends On | Progress State |
+|---|---|---|---|---|---|
+| 1 | `20260410_rq_controller_state_foundation` | Freeze contract join keys and descriptor invariants (`operation_id`, `step_id`, descriptor required fields), plus OpenAPI alignment plan. | Contract sections stabilized; unresolved schema ambiguities closed; implementation checklist accepted. | none | Planned |
+| 2 | `20260410_rq_controller_state_setup_discovery` | Implement non-run-scoped setup surfaces: `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, setup schema/defaults/errors endpoints. | Agent can discover valid configs and call `create` without out-of-band docs; setup discovery tests pass. | 1 | Planned |
+| 3 | `20260410_rq_controller_state_orchestration_reads` | Implement run-scoped orchestration reads: `/pipeline`, `/readiness`, step state machine fields, invalidation lineage, next-action semantics. | Deterministic readiness->next_actionable_steps loop verified for baseline and disturbed configs. | 1 | Planned |
+| 4 | `20260410_rq_controller_state_schema_defaults` | Implement controller and endpoint schema/default surfaces with `constraint_mode`, predicate grammar, and run-resolved defaults. | Schema/default endpoints provide machine-checkable constraints for core build/run operations. | 1, 3 | Planned |
+| 5 | `20260410_rq_controller_state_geospatial_uploads` | Implement `/geospatial-metadata` and upload metadata contracts (format/CRS/extent/resolution/value semantics). | Agent can resolve first-step geospatial defaults and validate upload payloads pre-submit. | 2, 4 | Planned |
+| 6 | `20260410_rq_controller_state_errors_progress_outputs` | Implement operation error catalogs, async progress signals, and `/outputs` artifact index with trust/provenance metadata. | Agent can recover from cataloged errors, poll with progress, and fetch artifacts from `outputs` only. | 3, 4, 5 | Planned |
+| 7 | `20260410_rq_controller_state_auth_concurrency` | Enforce/auth-rollout for `rq:read` aliasing, accepted-auth metadata parity, optimistic concurrency, and idempotency behavior. | Mutation/read preconditions and auth modes match descriptor metadata in tests. | 2, 3, 4, 6 | Planned |
+| 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed. | 2-7 | Planned |
+
+- Progress state vocabulary for this roadmap:
+  - `Planned`
+  - `In Progress`
+  - `Blocked`
+  - `Complete`
 
 - For each package, update:
   - `docs/work-packages/<package>/tracker.md`
