@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-08  
+**Last Updated**: 2026-04-10  
 **Active Packages**: 6  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,6 +78,32 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### RQ Controller State Contract Foundation
+**Proposed**: 2026-04-10  
+**Size**: Medium (1-2 focused sessions)  
+**Priority**: High  
+**Status**: Pre-scoped on 2026-04-09 - Ready to Start (planned kickoff 2026-04-10)  
+**Package**: [docs/work-packages/20260410_rq_controller_state_foundation/](docs/work-packages/20260410_rq_controller_state_foundation/)  
+**Description**: Freeze the controller-state contract foundation (`operation_id`/`step_id` invariants, descriptor requirements, and verification gates) so downstream implementation packages can execute with deterministic scope and minimal contract drift.
+
+**Scope**:
+- Foundation-only contract hardening for `docs/schemas/rq-controller-state-contract.md`.
+- Alignment checks against frozen rq-engine endpoint inventory and route checklist artifacts.
+- Active ExecPlan/tracker handoff baseline for follow-on implementation packages.
+
+**Dependencies**:
+- `docs/schemas/rq-controller-state-contract.md`
+- `docs/schemas/rq-engine-agent-api-contract.md`
+- `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
+- `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
+
+**Next Steps**:
+1. Validate and finalize foundation-level MUST/SHOULD language in the contract.
+2. Confirm dependency-ordered handoff criteria for setup discovery and orchestration packages.
+3. Close foundation package once docs lint and reviewer gates pass.
+
+---
 
 ### WCAG 2.1 AA Frontend Accessibility Remediation (Findings 1-6)
 **Proposed**: 2026-03-31  
