@@ -1,6 +1,6 @@
 # RQ Controller State Geospatial and Upload Metadata
 
-**Status**: Closed (2026-04-10 21:06 UTC)
+**Status**: Complete (closed 2026-04-10 21:06 UTC)
 **Timezone**: UTC (all dates/times in this package documentation use UTC unless explicitly stated otherwise).
 
 ## Overview

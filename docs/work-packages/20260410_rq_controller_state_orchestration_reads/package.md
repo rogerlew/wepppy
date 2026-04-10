@@ -1,6 +1,6 @@
 # RQ Controller State Orchestration Reads
 
-**Status**: Closed (2026-04-10 18:08 UTC)
+**Status**: Complete (closed 2026-04-10 18:08 UTC)
 **Timezone**: UTC (all dates/times in this package documentation use UTC unless explicitly stated otherwise).
 
 ## Overview

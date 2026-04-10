@@ -134,6 +134,15 @@
 **Test results**:
 - All required code-gate commands passed.
 
+## Verification Evidence (Command Outcomes)
+
+- `wctl run-pytest tests/microservices/test_rq_engine_errors_progress_outputs_routes.py --maxfail=1` -> `pass`
+- `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `pass`
+- `python tools/check_endpoint_inventory.py` -> `Endpoint inventory check passed`
+- `python tools/check_route_contract_checklist.py` -> `Route contract checklist check passed`
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py --maxfail=1` -> `pass`
+- `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/package.md --path docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/tracker.md --path docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/prompts/completed/rq_controller_state_errors_progress_outputs_execplan.md --path docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/prompts/completed/rq_controller_state_errors_progress_outputs_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md` -> `pass`
+
 ## Watch List
 
 - Follow-on improvement: persist concrete `source_run_state_revision` in export manifest/job result at artifact creation time (current sentinel `"unknown"` is explicit but not yet fully lineage-rich).

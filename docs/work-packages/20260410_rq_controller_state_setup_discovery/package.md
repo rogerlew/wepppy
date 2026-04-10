@@ -1,6 +1,6 @@
 # RQ Controller State Setup Discovery
 
-**Status**: Closed (2026-04-10 07:29 UTC)
+**Status**: Complete (closed 2026-04-10 07:29 UTC)
 **Timezone**: UTC (all dates/times in this package documentation use UTC unless explicitly stated otherwise).
 
 ## Overview

@@ -1,6 +1,6 @@
 # RQ Controller State Schema and Defaults
 
-**Status**: Closed (2026-04-10 19:52 UTC)
+**Status**: Complete (closed 2026-04-10 19:52 UTC)
 **Timezone**: UTC (all dates/times in this package documentation use UTC unless explicitly stated otherwise).
 
 ## Overview

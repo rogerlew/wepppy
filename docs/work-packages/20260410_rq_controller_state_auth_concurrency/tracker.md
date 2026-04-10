@@ -134,6 +134,16 @@
 **Test results**:
 - All required code-gate commands passed.
 
+## Verification Evidence (Command Outcomes)
+
+- `wctl run-pytest tests/microservices/test_rq_engine_auth_concurrency_routes.py --maxfail=1` -> `17 passed`
+- `wctl run-pytest tests/microservices/test_rq_engine_auth.py tests/microservices/test_rq_engine_session_routes.py --maxfail=1` -> `58 passed`
+- `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `9 passed`
+- `python tools/check_endpoint_inventory.py` -> `Endpoint inventory check passed`
+- `python tools/check_route_contract_checklist.py` -> `Route contract checklist check passed`
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py --maxfail=1` -> `2 passed`
+- `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/work-packages/20260410_rq_controller_state_auth_concurrency/package.md --path docs/work-packages/20260410_rq_controller_state_auth_concurrency/tracker.md --path docs/work-packages/20260410_rq_controller_state_auth_concurrency/prompts/completed/rq_controller_state_auth_concurrency_execplan.md --path docs/work-packages/20260410_rq_controller_state_auth_concurrency/prompts/completed/rq_controller_state_auth_concurrency_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_auth_concurrency/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md` -> `pass`
+
 ## Watch List
 
 - Consider policy-level least-privilege revisit in follow-on cutover package: whether session-token minting from bearer `rq:status` should continue issuing broader scopes unchanged.
