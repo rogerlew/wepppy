@@ -80,7 +80,7 @@ Before enabling blanket global CSRF middleware enforcement, the following MUST b
 - Related contract docs MUST stay aligned:
   - `docs/schemas/weppcloud-session-contract.md`
   - `docs/dev-notes/auth-token.spec.md`
-  - `docs/dev-notes/rq-engine-agent-api.md`
+  - `docs/schemas/rq-engine-agent-api-contract.md`
 
 ## Implementation References
 - `wepppy/weppcloud/app.py`
