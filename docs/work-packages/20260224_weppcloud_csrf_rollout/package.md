@@ -50,7 +50,7 @@ Implement the CSRF strategy defined in `docs/schemas/weppcloud-csrf-contract.md`
 - Existing auth/session contracts:
   - `docs/schemas/weppcloud-session-contract.md`
   - `docs/dev-notes/auth-token.spec.md`
-  - `docs/dev-notes/rq-engine-agent-api.md`
+  - `docs/schemas/rq-engine-agent-api-contract.md`
 
 ### Blocks
 
