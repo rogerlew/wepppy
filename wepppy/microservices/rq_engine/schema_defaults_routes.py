@@ -2049,7 +2049,7 @@ def list_controllers(runid: str, config: str, request: Request) -> JSONResponse:
         _require_schema_defaults_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: auth boundary contract
         logger.exception("rq-engine controllers auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -2103,7 +2103,7 @@ def get_controller_schema(runid: str, config: str, controller: str, request: Req
         _require_schema_defaults_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: auth boundary contract
         logger.exception("rq-engine controller schema auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -2162,7 +2162,7 @@ def get_controller_hints(runid: str, config: str, controller: str, request: Requ
         _require_schema_defaults_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: auth boundary contract
         logger.exception("rq-engine controller hints auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -2225,7 +2225,7 @@ def get_controller_templates(runid: str, config: str, controller: str, request: 
         _require_schema_defaults_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: auth boundary contract
         logger.exception("rq-engine controller templates auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -2284,7 +2284,7 @@ def list_run_endpoints(runid: str, config: str, request: Request) -> JSONRespons
         _require_schema_defaults_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: auth boundary contract
         logger.exception("rq-engine run-endpoints auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -2333,7 +2333,7 @@ def get_run_endpoint_schema(runid: str, config: str, operation_id: str, request:
         _require_schema_defaults_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: auth boundary contract
         logger.exception("rq-engine run-endpoint schema auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -2399,7 +2399,7 @@ def get_run_endpoint_defaults(runid: str, config: str, operation_id: str, reques
         _require_schema_defaults_claims(request, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: auth boundary contract
         logger.exception("rq-engine run-endpoint defaults auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
