@@ -1,6 +1,6 @@
 # WEPPcloud rq-engine
 > How WEPPcloud accepts run work, tracks progress, and returns results for UI users and API users.
-> **See also:** `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md` and `docs/dev-notes/rq-engine-agent-api.md`.
+> **See also:** `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md` and `docs/schemas/rq-engine-agent-api-contract.md`.
 
 ## Overview
 `rq-engine` is the API layer that starts most run work in WEPPcloud. When you
@@ -109,11 +109,11 @@ Practical guidance:
 - Polling endpoints include rate limiting.
 - Job IDs are UUID-like identifiers; keep them if you need to recover status.
 - Route-level auth and status contracts are documented in:
-  - `docs/dev-notes/rq-engine-agent-api.md`
+  - `docs/schemas/rq-engine-agent-api-contract.md`
   - `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
 
 ## When to Read Which Document
 - You are learning the platform workflow:
   - Start here, then read `bootstrap.md` if you need Git-based input control.
 - You are building an automation client:
-  - Use `docs/dev-notes/rq-engine-agent-api.md` as the primary contract.
+  - Use `docs/schemas/rq-engine-agent-api-contract.md` as the primary contract.
