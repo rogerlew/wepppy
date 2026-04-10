@@ -65,6 +65,7 @@ Warning:
 """
 
 # standard library
+import errno
 import os
 import subprocess
 from datetime import date
@@ -203,6 +204,98 @@ def _copyfile(src_fn: str, dst_fn: str) -> None:
         os.remove(dst_fn)
 
     os.link(src_fn, dst_fn)
+
+
+_CLEANUP_RETRY_ERRNOS: Set[int] = {
+    errno.EBUSY,
+    errno.ENOTEMPTY,
+    errno.EACCES,
+}
+_ESTALE_ERRNO = getattr(errno, "ESTALE", None)
+if _ESTALE_ERRNO is not None:
+    _CLEANUP_RETRY_ERRNOS.add(_ESTALE_ERRNO)
+
+
+def _is_cleanup_retryable(exc: OSError) -> bool:
+    return exc.errno in _CLEANUP_RETRY_ERRNOS
+
+
+def _rmtree_with_retry(path: str, *, logger: Any, retries: int = 3, delay_seconds: float = 0.5) -> None:
+    for attempt in range(1, max(1, retries) + 1):
+        try:
+            shutil.rmtree(path)
+            return
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            retryable = _is_cleanup_retryable(exc)
+            if not retryable or attempt >= retries:
+                raise
+
+            logger.warning(
+                "Cleanup retry %s/%s for %s after rmtree failure: %s",
+                attempt,
+                retries,
+                path,
+                exc,
+                exc_info=True,
+            )
+            sleep(delay_seconds * attempt)
+
+
+def _reset_directory_with_fallback(path: str, *, logger: Any) -> None:
+    if _exists(path):
+        try:
+            _rmtree_with_retry(path, logger=logger)
+        except OSError as exc:
+            if not _is_cleanup_retryable(exc):
+                logger.error(
+                    "Cleanup failed with non-retryable error for %s: %s",
+                    path,
+                    exc,
+                    exc_info=True,
+                )
+                raise RuntimeError(f"Failed to clean directory '{path}'") from exc
+
+            stale_dir = f"{path}.stale.{int(time.time() * 1000)}.{os.getpid()}"
+            logger.warning(
+                "Cleanup rmtree failed for %s (%s); using rename fallback: %s",
+                path,
+                exc,
+                stale_dir,
+                exc_info=True,
+            )
+            try:
+                os.replace(path, stale_dir)
+            except FileNotFoundError:
+                stale_dir = None
+            except OSError as rename_exc:
+                logger.error(
+                    "Cleanup rename fallback failed for %s: %s",
+                    path,
+                    rename_exc,
+                    exc_info=True,
+                )
+                raise RuntimeError(f"Failed to clean directory '{path}'") from rename_exc
+
+            if stale_dir is not None:
+                try:
+                    _rmtree_with_retry(stale_dir, logger=logger, retries=3, delay_seconds=0.25)
+                except OSError as stale_exc:
+                    # Boundary catch: stale NAS cleanup should not block run startup.
+                    # Tradeoff: stale directories may accumulate while NAS handles remain stuck.
+                    logger.warning(
+                        "Deferred cleanup left stale directory %s: %s",
+                        stale_dir,
+                        stale_exc,
+                        exc_info=True,
+                    )
+
+    try:
+        os.makedirs(path, exist_ok=True)
+    except OSError as exc:
+        logger.error(f'Cleanup failed to recreate {path}: {exc}', exc_info=True)
+        raise
 
 
 STORM_EVENT_ANALYZER_MIN_INTERCHANGE_VERSION = Version(major=1, minor=2)
@@ -1737,23 +1830,7 @@ class Wepp(NoDbBase):
     def clean(self) -> None:
         for _dir in (self.runs_dir, self.output_dir, self.plot_dir,
                      self.stats_dir, self.fp_runs_dir, self.fp_output_dir):
-            if _exists(_dir):
-                try:
-                    shutil.rmtree(_dir)
-                except OSError as exc:
-                    self.logger.warning(f'Cleanup unable to remove {_dir} on first attempt: {exc}', exc_info=True)
-                    sleep(1.0)
-                    try:
-                        shutil.rmtree(_dir)
-                    except OSError as retry_exc:
-                        self.logger.error(f'Cleanup failed to remove {_dir} after retry: {retry_exc}', exc_info=True)
-                        raise RuntimeError(f"Failed to clean directory '{_dir}'") from retry_exc
-
-            try:
-                os.makedirs(_dir, exist_ok=True)
-            except OSError as exc:
-                self.logger.error(f'Cleanup failed to recreate {_dir}: {exc}', exc_info=True)
-                raise
+            _reset_directory_with_fallback(_dir, logger=self.logger)
 
         climate = self.climate_instance
         if climate.climate_mode == ClimateMode.SingleStormBatch:
