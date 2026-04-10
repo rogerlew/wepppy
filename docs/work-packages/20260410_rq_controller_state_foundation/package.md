@@ -20,7 +20,7 @@ This package covers contract-level design hardening, roadmap sequencing, and imp
 - Review and finalize foundation sections in `docs/schemas/rq-controller-state-contract.md`.
 - Cross-check contract identifier vocabulary against frozen rq-engine route inventory artifacts.
 - Record explicit implementation assumptions and unresolved decisions in work-package docs.
-- Author active ExecPlan for foundation execution and handoff.
+- Author and maintain ExecPlan for foundation execution and handoff.
 
 ### Explicitly Out of Scope
 - Implementing new rq-engine routes or payload handlers.
@@ -73,10 +73,10 @@ This package covers contract-level design hardening, roadmap sequencing, and imp
 - **Risk level**: Medium
 
 ## Security Impact and Review Gate
-- **Security impact triage**: `none`
-- **Dedicated security review required**: `no`
-- **Triage rationale**: This package is planning/documentation-only and does not change runtime attack surfaces.
-- **Security review artifact**: `N/A`
+- **Security impact triage**: `high`
+- **Dedicated security review required**: `yes`
+- **Triage rationale**: Package changes include security-sensitive auth/scope contract semantics (`rq:read`/`rq:status` rollout behavior and create auth descriptor constraints) that guide downstream implementation.
+- **Security review artifact**: `docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md`
 
 ## References
 - `docs/schemas/rq-controller-state-contract.md` - proposed contract and roadmap.
@@ -89,10 +89,13 @@ This package covers contract-level design hardening, roadmap sequencing, and imp
 - Work-package scaffold and lifecycle docs:
   - `docs/work-packages/20260410_rq_controller_state_foundation/package.md`
   - `docs/work-packages/20260410_rq_controller_state_foundation/tracker.md`
-  - `docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md`
+  - `docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan.md`
+  - `docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan_outcome.md`
 - Updated contract docs closing confirmed foundation ambiguities:
   - `docs/schemas/rq-controller-state-contract.md`
   - `docs/schemas/rq-engine-agent-api-contract.md`
+- Security review artifact:
+  - `docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md`
 - Updated `PROJECT_TRACKER.md` lifecycle entry for this package.
 - Independent reviewer subagent findings with disposition captured in tracker notes.
 
@@ -101,7 +104,7 @@ This package covers contract-level design hardening, roadmap sequencing, and imp
 - Clarified descriptor invariants by defining catalog vs schema/default descriptor shapes and checklist parity boundaries.
 - Clarified roadmap dependency notation and direct vs transitive package dependencies for handoff.
 - Completed required validation gate:
-  - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md --path PROJECT_TRACKER.md` (`6 files validated, 0 errors, 0 warnings`).
+  - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md` (`8 files validated, 0 errors, 0 warnings`).
 - Root `PROJECT_TRACKER.md` entry moved from Backlog to Done.
 
 ## Follow-up Work

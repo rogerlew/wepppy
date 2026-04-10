@@ -7,11 +7,11 @@
 **Timezone**: UTC  
 **Started**: 2026-04-10 03:54 UTC (scaffold pre-scope), execution kickoff 2026-04-10 04:08 UTC  
 **Current phase**: Closed / handoff-ready  
-**Last updated**: 2026-04-10 04:23 UTC  
+**Last updated**: 2026-04-10 04:49 UTC  
 **Next milestone**: Handoff to `20260410_rq_controller_state_setup_discovery`.  
-**Security impact**: `none`  
-**Dedicated security review**: `no`  
-**Security artifact**: `N/A`
+**Security impact**: `high`  
+**Dedicated security review**: `yes`  
+**Security artifact**: `docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md`
 
 ## Task Board
 
@@ -26,7 +26,9 @@
 
 ### Done
 - [x] Created work-package directory scaffold (`package.md`, `tracker.md`, `prompts/active/`, `prompts/completed/`, `artifacts/`).
-- [x] Authored active ExecPlan (`prompts/active/rq_controller_state_foundation_execplan.md`).
+- [x] Authored and archived ExecPlan:
+  - `prompts/completed/rq_controller_state_foundation_execplan.md`
+  - `prompts/completed/rq_controller_state_foundation_execplan_outcome.md`
 - [x] Cross-checked identifier model and descriptor assumptions against frozen endpoint inventory/checklist artifacts.
 - [x] Reconciled foundation-level schema ambiguities in:
   - `docs/schemas/rq-controller-state-contract.md`
@@ -34,6 +36,7 @@
 - [x] Ran independent reviewer subagent pass and captured disposition updates.
 - [x] Ran required doc-lint validation command across scoped schema/package/tracker/ExecPlan/root tracker files.
 - [x] Transitioned `PROJECT_TRACKER.md` package entry from Backlog to Done.
+- [x] Added dedicated security review artifact and updated package security triage to `high`.
 
 ## Timeline
 
@@ -43,6 +46,7 @@
 - **2026-04-10 04:18 UTC** - Independent reviewer subagent findings received.
 - **2026-04-10 04:19 UTC** - Reviewer findings disposition applied in schema/package docs; closeout validation started.
 - **2026-04-10 04:23 UTC** - Required doc-lint gate passed; package lifecycle moved to Closed.
+- **2026-04-10 04:38 UTC** - Post-close remediation pass applied from code/QA/security subagent findings; security artifact added.
 
 ## Decisions Log
 
@@ -121,7 +125,7 @@
 4. **Medium** - Outcome vocabulary inconsistency (`success` vs `finished`): **Resolved** by adding `last_attempt.outcome` enum rule and aligning examples.
 5. **Medium** - Roadmap dependency clarity partial in package docs: **Resolved** by separating direct blockers vs transitive dependents and linking roadmap source.
 6. **Medium** - Create auth-mode inconsistency: **Resolved** by removing `session_cookie_same_origin` from create descriptor example.
-7. **Low** - Global `PROJECT_TRACKER.md` WIP/count drift outside package row: **Partially deferred**. This package updates its own lifecycle state; broad tracker hygiene is logged as residual cleanup outside this package scope.
+7. **Low** - Global `PROJECT_TRACKER.md` WIP/count drift outside package row: **Resolved** by recalculating Active/WIP counters and Work-in-Progress metrics in `PROJECT_TRACKER.md`.
 
 ## Risks and Issues
 
@@ -135,8 +139,9 @@
 ## Verification Checklist
 
 ### Documentation
-- [x] `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md --path PROJECT_TRACKER.md`
+- [x] `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md`
 - [x] `PROJECT_TRACKER.md` entry moved from Backlog to Done and aligned with package closure state.
+- [x] Closed ExecPlan archived from `prompts/active/` to `prompts/completed/` with outcome note.
 
 ### Process
 - [x] Active ExecPlan includes required living sections (`Progress`, `Surprises & Discoveries`, `Decision Log`, `Outcomes & Retrospective`).
@@ -151,7 +156,8 @@
 - Created package directory structure:
   - `docs/work-packages/20260410_rq_controller_state_foundation/package.md`
   - `docs/work-packages/20260410_rq_controller_state_foundation/tracker.md`
-  - `docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md`
+  - `docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan.md`
+  - `docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan_outcome.md`
   - `docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/`
   - `docs/work-packages/20260410_rq_controller_state_foundation/artifacts/`
 - Added backlog entry in `PROJECT_TRACKER.md` for package discoverability.
@@ -189,7 +195,7 @@
 
 **Work completed**:
 - Executed required validation command and passed cleanly:
-  - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md --path PROJECT_TRACKER.md`
+  - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md`
 - Updated package lifecycle docs to Closed state.
 - Updated root `PROJECT_TRACKER.md` entry for this package to Done.
 
@@ -200,7 +206,47 @@
 - Begin follow-on package `20260410_rq_controller_state_setup_discovery`.
 
 **Test results**:
-- `wctl doc-lint ...` -> `6 files validated, 0 errors, 0 warnings`.
+- `wctl doc-lint ...` -> `8 files validated, 0 errors, 0 warnings`.
+
+### 2026-04-10 04:38 UTC: Remediation pass from code/QA/security review
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Applied remediations for independent code/QA/security findings:
+  - roadmap state synchronization (`foundation` row now `Complete`),
+  - non-pipeline subset governance wording (`SHOULD review/update`),
+  - `create` descriptor auth fallback ambiguity removal,
+  - explicit `rq:status` alias allowlist and sunset boundary language,
+  - archived closed ExecPlan to `prompts/completed/` with outcome note.
+- Updated package security triage to `high` and added dedicated security review artifact:
+  - `docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md`
+- Updated root tracker metadata (`Active Packages`, WIP counts/metrics) to reflect current In Progress inventory.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- Final verification via subagent re-review and commit remediation patchset.
+
+**Test results**:
+- `wctl doc-lint ...` -> `8 files validated, 0 errors, 0 warnings`.
+
+### 2026-04-10 04:49 UTC: Final subagent verification after remediations
+**Agent/Contributor**: Codex + reviewer/qa/security subagents
+
+**Work completed**:
+- Ran final independent reviewer, QA, and security subagent verification on remediation edits.
+- All three verification subagents reported `No findings`.
+- Confirmed docs-only residual risk statements are captured for follow-on implementation packages.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- Commit remediation patchset.
+
+**Test results**:
+- `wctl doc-lint ...` -> `8 files validated, 0 errors, 0 warnings`.
 
 ## Watch List
 

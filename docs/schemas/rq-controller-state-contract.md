@@ -104,6 +104,13 @@
   - `rq:read` (new scope for read-only metadata/state endpoints).
 - Backward-compatible rollout option:
   - accept `rq:status` until tokens are migrated to `rq:read`.
+  - `rq:status` aliasing MUST be limited to the read-only endpoints listed in
+    `## Proposed Endpoint Surface` in this document.
+  - `rq:status` aliasing MUST NOT authorize mutation, export/download, admin, or
+    bootstrap-control surfaces outside this proposed read-only endpoint set.
+  - aliasing sunset gate: remove `rq:status` alias only after
+    `20260410_rq_controller_state_auth_concurrency` records passing auth-scope
+    parity tests for `rq:read` on the affected endpoints.
 - Session-token compatibility requirement:
   - existing session-token mint flows that currently issue `rq:status`,
     `rq:enqueue`, and `rq:export` MUST continue to read these endpoints during
@@ -321,8 +328,8 @@ For the exhaustive current run-scoped inventory baseline, use:
 | `rq_engine_issue_session_token` | `/api/runs/{runid}/{config}/session-token` | Session/auth bridge |
 
 - When new agent-facing run-scoped routes are added to the frozen route
-  checklist, this section MUST be updated in the same change (pipeline table or
-  non-pipeline table, as appropriate).
+  checklist, this section SHOULD be reviewed and updated when needed to keep
+  orchestration-relevant subset coverage accurate.
 
 ## Step Execution Semantics
 - Each pipeline step SHOULD include:
@@ -909,15 +916,14 @@ the 2026-02-08 freeze artifacts.
       "accepted_auth": ["rq_token", "bearer_jwt", "captcha"],
       "auth_requirements": {
         "rq_token": {
-          "required_scope": ["rq:enqueue"],
-          "fallback_to_session_cookie_on_expired": true
+          "required_scope": ["rq:enqueue"]
         },
         "bearer_jwt": {
           "required_scope": ["rq:enqueue"]
         },
         "captcha": {
           "challenge_required": true,
-          "required_if_no_authenticated_token_or_session": true
+          "required_if_no_authenticated_token": true
         }
       },
       "error_catalog_url": "/rq-engine/api/endpoints/rq_engine_create/errors",
@@ -1704,14 +1710,16 @@ value semantics where classification rasters are expected).
 
 Implementation of this contract SHOULD be executed as a sequenced set of
 work-packages under `docs/work-packages/` (see `docs/work-packages/README.md`).
-Each package MUST include:
+Each open/in-progress package MUST include:
 - `package.md`
 - `tracker.md`
 - active ExecPlan at `prompts/active/<slug>_execplan.md`
+When a package is closed, its active ExecPlan SHOULD be archived to
+`prompts/completed/` with an outcome note.
 
 | Order | Proposed Work-Package Folder | Primary Scope | Exit Criteria | Depends On | Progress State |
 |---|---|---|---|---|---|
-| 1 | `20260410_rq_controller_state_foundation` | Freeze contract join keys and descriptor invariants (`operation_id`, `step_id`, descriptor required fields), plus OpenAPI alignment plan. | Contract sections stabilized; unresolved schema ambiguities closed; implementation checklist accepted. | none | Planned |
+| 1 | `20260410_rq_controller_state_foundation` | Freeze contract join keys and descriptor invariants (`operation_id`, `step_id`, descriptor required fields), plus OpenAPI alignment plan. | Contract sections stabilized; unresolved schema ambiguities closed; implementation checklist accepted. | none | Complete |
 | 2 | `20260410_rq_controller_state_setup_discovery` | Implement non-run-scoped setup surfaces: `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, setup schema/defaults/errors endpoints. | Agent can discover valid configs and call `create` without out-of-band docs; setup discovery tests pass. | 1 | Planned |
 | 3 | `20260410_rq_controller_state_orchestration_reads` | Implement run-scoped orchestration reads: `/pipeline`, `/readiness`, step state machine fields, invalidation lineage, next-action semantics. | Deterministic readiness->next_actionable_steps loop verified for baseline and disturbed configs. | 1 | Planned |
 | 4 | `20260410_rq_controller_state_schema_defaults` | Implement controller and endpoint schema/default surfaces with `constraint_mode`, predicate grammar, and run-resolved defaults. | Schema/default endpoints provide machine-checkable constraints for core build/run operations. | 1, 3 | Planned |

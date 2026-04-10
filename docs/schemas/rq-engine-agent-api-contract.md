@@ -78,6 +78,12 @@ Bootstrap routes do not accept `rq:enqueue` as a substitute for `bootstrap:*`.
 - During the additive controller-state rollout, bearer flows that currently rely
   on `rq:status` for read access MUST remain backward-compatible until package
   `20260410_rq_controller_state_auth_concurrency` completes.
+- `rq:status` compatibility during that rollout MUST be bounded to the
+  read-only controller-state endpoints proposed in
+  `docs/schemas/rq-controller-state-contract.md` and MUST NOT broaden access to
+  mutation/export/admin/bootstrap-control endpoint families.
+- Sunset requirement: remove `rq:status` aliasing only after explicit auth-scope
+  parity checks verify `rq:read` coverage for all affected read-only endpoints.
 
 ## Response Contract
 rq-engine responses must follow `docs/schemas/rq-response-contract.md`.

@@ -19,6 +19,7 @@ This package makes downstream implementation predictable by freezing contract in
 - [x] (2026-04-10 04:18 UTC) Completed independent reviewer subagent pass.
 - [x] (2026-04-10 04:19 UTC) Dispositioned reviewer findings in schema/package docs.
 - [x] (2026-04-10 04:23 UTC) Ran required doc-lint command and published final closure updates (`package.md`, `tracker.md`, `PROJECT_TRACKER.md`).
+- [x] (2026-04-10 04:38 UTC) Applied remediation updates from code/QA/security review, archived ExecPlan under `prompts/completed/`, and added security review artifact.
 
 ## Surprises & Discoveries
 
@@ -51,7 +52,7 @@ This package makes downstream implementation predictable by freezing contract in
 
 - Foundation-level contract ambiguities are reconciled at the schema-doc level.
 - Independent review has been run and findings dispositioned.
-- Required doc-lint gate passed (`6 files validated, 0 errors, 0 warnings`).
+- Required doc-lint gate passed (`8 files validated, 0 errors, 0 warnings`).
 - Package lifecycle is closed and handoff to setup-discovery is unblocked.
 
 ## Context and Orientation
@@ -84,7 +85,7 @@ Working directory: `/workdir/wepppy`
    - `nl -ba docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
 3. Apply schema and package lifecycle updates.
 4. Run validation.
-   - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md --path PROJECT_TRACKER.md`
+   - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/work-packages/20260410_rq_controller_state_foundation/package.md --path docs/work-packages/20260410_rq_controller_state_foundation/tracker.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan.md --path docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md`
 5. Ensure package closure state is reflected in `package.md`, `tracker.md`, and `PROJECT_TRACKER.md`.
 
 ## Validation and Acceptance
@@ -107,7 +108,9 @@ Key artifact paths:
 
 - `docs/work-packages/20260410_rq_controller_state_foundation/package.md`
 - `docs/work-packages/20260410_rq_controller_state_foundation/tracker.md`
-- `docs/work-packages/20260410_rq_controller_state_foundation/prompts/active/rq_controller_state_foundation_execplan.md`
+- `docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan.md`
+- `docs/work-packages/20260410_rq_controller_state_foundation/prompts/completed/rq_controller_state_foundation_execplan_outcome.md`
+- `docs/work-packages/20260410_rq_controller_state_foundation/artifacts/2026-04-10_security_review.md`
 - `docs/schemas/rq-controller-state-contract.md`
 - `docs/schemas/rq-engine-agent-api-contract.md`
 
@@ -127,3 +130,4 @@ No runtime code interfaces are introduced in this package.
 - 2026-04-10 03:54 UTC / Codex: Initial ExecPlan authored for package kickoff and handoff readiness.
 - 2026-04-10 04:19 UTC / Codex: Updated living sections with ambiguity reconciliation, reviewer dispositions, and closeout validation steps.
 - 2026-04-10 04:23 UTC / Codex: Marked validation/closure completion and synchronized lifecycle updates with tracker and root project tracker.
+- 2026-04-10 04:38 UTC / Codex: Archived plan under `prompts/completed/` and updated validation artifact paths during remediation pass.
