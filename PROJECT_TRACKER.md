@@ -249,6 +249,42 @@ Recently completed work packages. Archived immediately upon completion.
 
 ---
 
+### RQ Controller State Schema and Defaults
+**Completed**: 2026-04-10  
+**Duration**: 1 focused session + review remediation loop  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260410_rq_controller_state_schema_defaults/](docs/work-packages/20260410_rq_controller_state_schema_defaults/)  
+**Description**: Implemented and closed run-scoped controller and endpoint schema/default metadata reads so agents can discover constraints and run-resolved defaults directly from rq-engine.
+
+**Outcome**:
+- Added rq-engine schema/default endpoints:
+  - `GET /api/runs/{runid}/{config}/controllers`
+  - `GET /api/runs/{runid}/{config}/controllers/{controller}/schema`
+  - `GET /api/runs/{runid}/{config}/controllers/{controller}/hints`
+  - `GET /api/runs/{runid}/{config}/controllers/{controller}/templates`
+  - `GET /api/runs/{runid}/{config}/endpoints`
+  - `GET /api/runs/{runid}/{config}/endpoints/{operation_id}/schema`
+  - `GET /api/runs/{runid}/{config}/endpoints/{operation_id}/defaults`
+- Added deterministic metadata assembly and route wiring in `schema_defaults_routes.py` + app registration.
+- Resolved reviewer/QA/security findings, including:
+  - climate default type parity (`climate_mode_code` integer defaulting)
+  - operation schema/default parity with live handlers
+  - disturbed-mod-aware `/upload-sbs` availability gating
+- Package lifecycle closed:
+  - tracker/package/security artifact updated
+  - ExecPlan archived to `prompts/completed/` with outcome note
+  - no unresolved medium/high QA or security findings
+
+**Validation Notes**:
+- `wctl run-pytest tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` (`43 passed`)
+- `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` (`9 passed`)
+- `python tools/check_endpoint_inventory.py` (pass)
+- `python tools/check_route_contract_checklist.py` (pass)
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py --maxfail=1` (`2 passed`)
+
+---
+
 ### RQ Controller State Orchestration Reads
 **Completed**: 2026-04-10  
 **Duration**: 1 focused session + review remediation loop  

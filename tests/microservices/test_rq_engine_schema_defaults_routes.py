@@ -1,0 +1,594 @@
+from __future__ import annotations
+
+import re
+from typing import Any
+
+import pytest
+
+TestClient = pytest.importorskip("fastapi.testclient").TestClient
+
+import wepppy.microservices.rq_engine as rq_engine
+from wepppy.microservices.rq_engine import schema_defaults_routes
+
+pytestmark = pytest.mark.microservice
+
+RUNID = "run-1"
+CONFIG = "disturbed9002_wbt"
+
+CONTROLLERS_PATH = f"/api/runs/{RUNID}/{CONFIG}/controllers"
+CONTROLLER_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/controllers/climate/schema"
+CONTROLLER_HINTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/controllers/climate/hints"
+CONTROLLER_TEMPLATES_PATH = f"/api/runs/{RUNID}/{CONFIG}/controllers/climate/templates"
+RUN_ENDPOINTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints"
+RUN_ENDPOINT_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_run_wepp/schema"
+RUN_ENDPOINT_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_run_wepp/defaults"
+BUILD_SOILS_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_soils/schema"
+BUILD_SOILS_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_soils/defaults"
+
+UTC_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+
+SCHEMA_DEFAULT_PATHS = (
+    CONTROLLERS_PATH,
+    CONTROLLER_SCHEMA_PATH,
+    CONTROLLER_HINTS_PATH,
+    CONTROLLER_TEMPLATES_PATH,
+    RUN_ENDPOINTS_PATH,
+    RUN_ENDPOINT_SCHEMA_PATH,
+    RUN_ENDPOINT_DEFAULTS_PATH,
+    BUILD_SOILS_SCHEMA_PATH,
+    BUILD_SOILS_DEFAULTS_PATH,
+)
+
+
+def _sample_runtime(
+    *,
+    active_mods: tuple[str, ...] = ("disturbed", "wepp"),
+    disturbed_enabled: bool = True,
+    sbs_upload_supported: bool = True,
+    initial_sat: float | None = 0.75,
+) -> schema_defaults_routes.RuntimeState:
+    return schema_defaults_routes.RuntimeState(
+        runid=RUNID,
+        config=CONFIG,
+        active_mods=active_mods,
+        region="conus",
+        states={
+            "has_dem": True,
+            "watershed_has_channels": True,
+            "watershed_has_outlet": True,
+            "watershed_is_abstracted": True,
+            "watershed_subcatchment_count": 42,
+            "climate_built": True,
+            "climate_mode_code": 11,
+            "climate_mode": "gridmet_prism",
+            "climate_has_station": True,
+            "landuse_built": True,
+            "landuse_mode": "nlcd",
+            "soils_built": True,
+            "soils_mode": "ssurgo",
+            "initial_sat": initial_sat,
+            "wepp_has_run": False,
+            "disturbed_enabled": disturbed_enabled,
+            "sbs_upload_supported": sbs_upload_supported,
+            "disturbed_sbs_uploaded": True,
+            "disturbed_sol_ver": 2018.0,
+        },
+        generated_at="2026-04-10T22:13:00Z",
+        run_state_revision="runstate:run-1:deadbeefcafe",
+    )
+
+
+def _stub_auth(monkeypatch: pytest.MonkeyPatch, scope: str, *, token_class: str = "service") -> None:
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "require_jwt",
+        lambda request: {"sub": "svc", "token_class": token_class, "scope": scope},
+    )
+    monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid: None)
+
+
+def _assert_canonical_error(payload: dict[str, Any], *, code: str | None = None) -> None:
+    assert set(payload).issuperset({"error"})
+    assert isinstance(payload["error"], dict)
+    assert isinstance(payload["error"].get("message"), str)
+    assert isinstance(payload["error"].get("details"), str)
+    if code is not None:
+        assert payload["error"].get("code") == code
+
+
+@pytest.mark.parametrize("path", SCHEMA_DEFAULT_PATHS)
+def test_schema_defaults_routes_require_auth(path: str) -> None:
+    with TestClient(rq_engine.app) as client:
+        response = client.get(path)
+
+    assert response.status_code == 401
+    _assert_canonical_error(response.json(), code="unauthorized")
+
+
+@pytest.mark.parametrize("path", SCHEMA_DEFAULT_PATHS)
+def test_schema_defaults_routes_reject_wrong_scope(monkeypatch: pytest.MonkeyPatch, path: str) -> None:
+    _stub_auth(monkeypatch, "rq:enqueue")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(path)
+
+    assert response.status_code == 403
+    payload = response.json()
+    _assert_canonical_error(payload, code="forbidden")
+    assert "rq:read" in payload["error"]["message"]
+    assert "rq:status" in payload["error"]["message"]
+
+
+@pytest.mark.parametrize("scope", ("rq:status", "rq:read"))
+def test_schema_defaults_routes_accept_supported_scopes(monkeypatch: pytest.MonkeyPatch, scope: str) -> None:
+    _stub_auth(monkeypatch, scope)
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        for path in SCHEMA_DEFAULT_PATHS:
+            response = client.get(path)
+            assert response.status_code == 200, path
+
+
+def test_schema_defaults_routes_reject_run_access_without_loading_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "require_jwt",
+        lambda request: {"sub": "svc", "token_class": "service", "scope": "rq:status"},
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "authorize_run_access",
+        lambda claims, runid: (_ for _ in ()).throw(
+            schema_defaults_routes.AuthError("run access denied", status_code=403, code="forbidden")
+        ),
+    )
+    load_calls = {"count": 0}
+
+    def _never_load(runid: str, config: str) -> schema_defaults_routes.RuntimeState:
+        load_calls["count"] += 1
+        return _sample_runtime()
+
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", _never_load)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(CONTROLLERS_PATH)
+
+    assert response.status_code == 403
+    _assert_canonical_error(response.json(), code="forbidden")
+    assert load_calls["count"] == 0
+
+
+def test_list_controllers_payload_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(CONTROLLERS_PATH)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert set(payload) == {
+        "contract_version",
+        "deployment_revision",
+        "run_state_revision",
+        "runid",
+        "config",
+        "active_mods",
+        "endpoints_url",
+        "pipeline_url",
+        "readiness_url",
+        "outputs_url",
+        "controllers",
+    }
+    assert payload["runid"] == RUNID
+    assert payload["config"] == CONFIG
+    assert payload["active_mods"] == ["disturbed", "wepp"]
+    assert payload["run_state_revision"].startswith("runstate:run-1:")
+
+    controllers = payload["controllers"]
+    assert controllers
+    names = {entry["name"] for entry in controllers}
+    assert {"climate", "landuse", "soils", "watershed", "wepp"}.issubset(names)
+    assert "disturbed" in names
+
+    climate = next(entry for entry in controllers if entry["name"] == "climate")
+    assert set(climate) == {
+        "name",
+        "enabled",
+        "schema_url",
+        "hints_url",
+        "templates_url",
+        "capabilities",
+    }
+    assert climate["enabled"] is True
+    assert climate["capabilities"] == {"schema": True, "hints": True, "templates": True}
+
+
+def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        schema_response = client.get(CONTROLLER_SCHEMA_PATH)
+        assert schema_response.status_code == 200
+        schema_payload = schema_response.json()
+        assert set(schema_payload) == {
+            "contract_version",
+            "deployment_revision",
+            "run_state_revision",
+            "controller",
+            "schema_version",
+            "fields",
+        }
+        assert schema_payload["controller"] == "climate"
+        fields = schema_payload["fields"]
+        assert fields["climate_mode"]["constraint_mode"] == "run_resolved"
+        assert fields["climatestation"]["available_if"] == {"field": "climate_mode", "op": "in", "value": [2, 6]}
+        assert fields["climatestation"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [2, 6]}
+
+        hints_response = client.get(CONTROLLER_HINTS_PATH)
+        assert hints_response.status_code == 200
+        hints_payload = hints_response.json()
+        assert set(hints_payload) == {
+            "contract_version",
+            "deployment_revision",
+            "run_state_revision",
+            "controller",
+            "schema_version",
+            "hints",
+        }
+        assert "context_fields" in hints_payload["hints"]
+        assert "groups" in hints_payload["hints"]
+        assert "field_hints" in hints_payload["hints"]
+
+        templates_response = client.get(CONTROLLER_TEMPLATES_PATH)
+        assert templates_response.status_code == 200
+        templates_payload = templates_response.json()
+        assert set(templates_payload) == {
+            "contract_version",
+            "deployment_revision",
+            "run_state_revision",
+            "controller",
+            "templates",
+            "run_resolved_defaults",
+        }
+        assert templates_payload["controller"] == "climate"
+        assert isinstance(templates_payload["templates"], list)
+        assert templates_payload["templates"]
+        assert isinstance(templates_payload["run_resolved_defaults"], dict)
+
+
+def test_controller_routes_return_404_for_unknown_controller(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        for suffix in ("schema", "hints", "templates"):
+            response = client.get(f"/api/runs/{RUNID}/{CONFIG}/controllers/unknown/{suffix}")
+            assert response.status_code == 404
+            _assert_canonical_error(response.json(), code="not_found")
+
+
+def test_list_run_endpoints_payload_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(RUN_ENDPOINTS_PATH)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert set(payload) == {
+        "contract_version",
+        "deployment_revision",
+        "run_state_revision",
+        "operations",
+    }
+
+    operations = payload["operations"]
+    assert operations
+    operation_ids = {operation["operation_id"] for operation in operations}
+    assert {
+        "rq_engine_list_controllers",
+        "rq_engine_get_controller_schema",
+        "rq_engine_get_controller_hints",
+        "rq_engine_get_controller_templates",
+        "rq_engine_list_run_endpoints",
+        "rq_engine_get_run_endpoint_schema",
+        "rq_engine_get_run_endpoint_defaults",
+        "rq_engine_build_climate",
+        "rq_engine_run_wepp",
+    }.issubset(operation_ids)
+
+    run_wepp_descriptor = next(
+        operation for operation in operations if operation["operation_id"] == "rq_engine_run_wepp"
+    )
+    assert run_wepp_descriptor["run_scoped"] is True
+    assert run_wepp_descriptor["execution_mode"] == "async"
+    assert run_wepp_descriptor["returns_job"] is True
+    assert run_wepp_descriptor["result_contract"]["kind"] == "async_job"
+
+
+def test_run_endpoint_schema_and_defaults_payload_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        schema_response = client.get(RUN_ENDPOINT_SCHEMA_PATH)
+        assert schema_response.status_code == 200
+        schema_payload = schema_response.json()
+        assert set(schema_payload) == {
+            "contract_version",
+            "deployment_revision",
+            "run_state_revision",
+            "operation_id",
+            "run_scoped",
+            "method",
+            "path",
+            "operation_descriptor",
+            "schema_version",
+            "request",
+            "responses",
+        }
+        assert schema_payload["operation_id"] == "rq_engine_run_wepp"
+        assert schema_payload["operation_descriptor"]["operation_id"] == "rq_engine_run_wepp"
+
+        request_fields = schema_payload["request"]["properties"]
+        assert request_fields["clip_soils"]["constraint_mode"] == "static"
+        assert request_fields["clip_soils_depth"]["constraint_mode"] == "static"
+        assert request_fields["initial_sat"]["constraint_mode"] == "static"
+
+        defaults_response = client.get(RUN_ENDPOINT_DEFAULTS_PATH)
+        assert defaults_response.status_code == 200
+        defaults_payload = defaults_response.json()
+        assert set(defaults_payload) == {
+            "contract_version",
+            "deployment_revision",
+            "run_state_revision",
+            "operation_id",
+            "resolved_defaults",
+            "defaults_context",
+            "computed_at",
+        }
+        assert defaults_payload["operation_id"] == "rq_engine_run_wepp"
+        assert defaults_payload["resolved_defaults"] == {
+            "clip_soils": True,
+            "clip_soils_depth": 25.0,
+        }
+        assert defaults_payload["defaults_context"] == {
+            "config": CONFIG,
+            "active_mods": ["disturbed", "wepp"],
+            "region": "conus",
+        }
+        assert UTC_TIMESTAMP_RE.match(defaults_payload["computed_at"])
+
+
+def test_run_endpoint_schema_and_defaults_exist_for_each_listed_operation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        list_response = client.get(RUN_ENDPOINTS_PATH)
+        assert list_response.status_code == 200
+        operations = list_response.json()["operations"]
+        assert operations
+
+        for operation in operations:
+            operation_id = operation["operation_id"]
+            schema_response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/schema")
+            assert schema_response.status_code == 200, operation_id
+            schema_payload = schema_response.json()
+            assert schema_payload["operation_id"] == operation_id
+            assert schema_payload["operation_descriptor"]["operation_id"] == operation_id
+            assert schema_payload["path"] == operation["path"]
+            assert isinstance(schema_payload["request"]["properties"], dict)
+
+            defaults_response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/defaults")
+            assert defaults_response.status_code == 200, operation_id
+            defaults_payload = defaults_response.json()
+            assert defaults_payload["operation_id"] == operation_id
+            defaults_context = defaults_payload["defaults_context"]
+            assert defaults_context["config"] == CONFIG
+            assert defaults_context["active_mods"] == ["disturbed", "wepp"]
+            assert defaults_context["region"] == "conus"
+
+
+def test_build_climate_defaults_emit_integer_climate_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/defaults")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert isinstance(payload["resolved_defaults"]["climate_mode"], int)
+    assert payload["resolved_defaults"]["climate_mode"] == 11
+
+
+def test_build_soils_schema_and_defaults_require_initial_sat(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        schema_response = client.get(BUILD_SOILS_SCHEMA_PATH)
+        assert schema_response.status_code == 200
+        schema_payload = schema_response.json()
+        assert schema_payload["operation_id"] == "rq_engine_build_soils"
+        assert schema_payload["request"]["required"] == ["initial_sat"]
+
+        request_fields = schema_payload["request"]["properties"]
+        assert request_fields["initial_sat"]["constraint_mode"] == "static"
+        assert request_fields["sol_ver"]["required_if"]["field"] == "context.active_mods"
+        assert request_fields["sol_ver"]["required_if"]["op"] == "contains"
+        assert request_fields["sol_ver"]["required_if"]["value"] == "disturbed"
+
+        defaults_response = client.get(BUILD_SOILS_DEFAULTS_PATH)
+        assert defaults_response.status_code == 200
+        defaults_payload = defaults_response.json()
+        assert defaults_payload["operation_id"] == "rq_engine_build_soils"
+        assert defaults_payload["resolved_defaults"]["initial_sat"] == 0.75
+        assert defaults_payload["resolved_defaults"]["sol_ver"] == 2018.0
+
+
+def test_build_soils_defaults_omit_sol_ver_when_disturbed_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(
+            active_mods=("wepp",),
+            disturbed_enabled=False,
+            sbs_upload_supported=False,
+            initial_sat=0.71,
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        defaults_response = client.get(BUILD_SOILS_DEFAULTS_PATH)
+
+    assert defaults_response.status_code == 200
+    defaults_payload = defaults_response.json()
+    assert defaults_payload["resolved_defaults"] == {"initial_sat": 0.71}
+
+
+def test_build_soils_defaults_fall_back_to_initial_sat_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(initial_sat=None),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        defaults_response = client.get(BUILD_SOILS_DEFAULTS_PATH)
+
+    assert defaults_response.status_code == 200
+    defaults_payload = defaults_response.json()
+    assert defaults_payload["resolved_defaults"]["initial_sat"] == 0.75
+
+
+def test_run_endpoints_include_upload_sbs_for_baer_mod(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(
+            active_mods=("baer", "wepp"),
+            disturbed_enabled=False,
+            sbs_upload_supported=True,
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(RUN_ENDPOINTS_PATH)
+
+    assert response.status_code == 200
+    operation_ids = {operation["operation_id"] for operation in response.json()["operations"]}
+    assert "rq_engine_upload_sbs" in operation_ids
+
+
+def test_run_endpoints_omit_upload_sbs_when_fire_mods_absent(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(
+            active_mods=("wepp",),
+            disturbed_enabled=False,
+            sbs_upload_supported=False,
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(RUN_ENDPOINTS_PATH)
+
+    assert response.status_code == 200
+    operation_ids = {operation["operation_id"] for operation in response.json()["operations"]}
+    assert "rq_engine_upload_sbs" not in operation_ids
+
+
+def test_run_endpoint_detail_routes_return_404_for_unknown_operation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        for suffix in ("schema", "defaults"):
+            response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_unknown/{suffix}")
+            assert response.status_code == 404
+            _assert_canonical_error(response.json(), code="not_found")
+
+
+def test_schema_defaults_routes_return_404_for_unknown_run(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+
+    def _missing(runid: str, config: str) -> schema_defaults_routes.RuntimeState:
+        raise FileNotFoundError("missing run")
+
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", _missing)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(CONTROLLERS_PATH)
+
+    assert response.status_code == 404
+    _assert_canonical_error(response.json(), code="not_found")
+
+
+def test_schema_defaults_routes_return_404_for_config_mismatch(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+
+    def _mismatch(runid: str, config: str) -> schema_defaults_routes.RuntimeState:
+        raise schema_defaults_routes.RunConfigMismatchError("mismatch")
+
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", _mismatch)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(RUN_ENDPOINTS_PATH)
+
+    assert response.status_code == 404
+    _assert_canonical_error(response.json(), code="not_found")
+
+
+@pytest.mark.parametrize(
+    "path,patched",
+    (
+        (CONTROLLERS_PATH, "_controller_catalog"),
+        (CONTROLLER_SCHEMA_PATH, "_controller_schema"),
+        (CONTROLLER_HINTS_PATH, "_controller_hints"),
+        (CONTROLLER_TEMPLATES_PATH, "_controller_templates"),
+        (RUN_ENDPOINTS_PATH, "_build_run_operations"),
+        (RUN_ENDPOINT_SCHEMA_PATH, "_build_run_operations"),
+        (RUN_ENDPOINT_DEFAULTS_PATH, "_build_run_operations"),
+    ),
+)
+def test_schema_defaults_route_internal_errors_return_canonical_500(
+    monkeypatch: pytest.MonkeyPatch,
+    path: str,
+    patched: str,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    def _boom(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(schema_defaults_routes, patched, _boom)
+
+    with TestClient(rq_engine.app, raise_server_exceptions=False) as client:
+        response = client.get(path)
+
+    assert response.status_code == 500
+    _assert_canonical_error(response.json())
