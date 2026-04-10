@@ -1,6 +1,6 @@
 # Wojak Lives: Interactive Agent Integration
 > Created 2025-10-28 to establish Wojak agent integration with WEPPcloud command bar
-> **Status:** Approved — Implementation Ready
+> **Status:** Closed — Deferred Follow-On (2026-04-10 05:50 UTC)
 > **Owner:** Codex
 > **Purpose:** Demonstrates production-ready architecture for secure, run-scoped interactive agent assistance in scientific modeling workflows. Establishes patterns for zero-trust agent integration, non-blocking pub/sub messaging, and JWT-based capability isolation that stakeholders can extend to broader user populations.
 
@@ -1253,7 +1253,26 @@ def replace_report_section(runid: str, report_id: str, heading_pattern: str,
 
 ---
 
+## Closure Notes (2026-04-10 05:50 UTC)
+
+This package is closed as a deferred follow-on cut, not as full MVP completion.
+
+### Shipped in this package
+- Backend foundation and headless CAO integration (`codex exec --json`) were implemented and validated in-session.
+- Command bar received structured JSON event parsing and agent output rendering.
+- Redis/status2 bridge flow was verified end-to-end for session output streaming.
+
+### Deferred to follow-on package
+- UI polish backlog for reasoning/tool delta formatting and responsive/theming finish.
+- Final end-to-end smoke/security checklist execution for closure-grade evidence.
+- Production-hardening items already listed as out-of-scope or secondary goals.
+
+### Follow-up recommendation
+- Open a dedicated follow-on work package for "Wojak Session 3 polish + smoke/security closure" and carry remaining checklist items there.
+
+---
+
 **Created:** 2025-10-28  
 **Approved:** 2025-10-28  
 **Owner:** Codex  
-**Status:** Approved — Ready for implementation
+**Status:** Closed — Deferred Follow-On (2026-04-10 05:50 UTC)

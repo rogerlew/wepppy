@@ -1,8 +1,18 @@
 # Wojak Lives: Implementation Tracker
 
-**Status:** In Progress — Backend Shipping, UI Polish + Smoke Test Remaining  
-**Last Updated:** 2025-10-28 (Codex Session 2 Complete, Session 3 Next)  
+**Status:** Closed — Deferred Follow-On (2026-04-10 05:50 UTC)  
+**Last Updated:** 2026-04-10 05:50 UTC  
 **Owner:** Codex
+
+---
+
+## Closeout Decision (2026-04-10 05:50 UTC)
+
+Package closed as a deferred-follow-on cut.
+
+- Delivered: backend/headless integration and JSON event streaming flow.
+- Deferred: Session 3 UI polish, end-to-end smoke/security checklist, and final documentation pass.
+- Follow-up action: create a new package for "Wojak Session 3 polish + smoke/security closure" before any production rollout.
 
 ---
 
@@ -129,9 +139,9 @@
 - [x] **Environment Setup** — Docker compose, CAO server wiring (Codex Session 1 ✅)
 - [x] **Critical Blocker Resolution** — Pivot to `codex exec --json` headless flow (2025-10-28 ✅)
 - [x] **Headless Integration** — Bootstrap, JSON parsing, event streaming (Codex Session 2 ✅)
-- [ ] **UI Polish** — Icons, formatting, typing indicator, responsive/theme checks (Session 3)
-- [ ] **Smoke Test** — End-to-end validation with security checklist (Session 3)
-- [ ] **Documentation** — Headless flow notes, Session 2 retrospective (Session 3)
+- [x] **UI Polish** — Deferred at package closeout; move to follow-on package (2026-04-10 05:50 UTC)
+- [x] **Smoke Test** — Deferred at package closeout; move to follow-on package (2026-04-10 05:50 UTC)
+- [x] **Documentation** — Deferred at package closeout; move to follow-on package (2026-04-10 05:50 UTC)
 
 ### Completed
 - [x] Work package creation and scoping (2025-10-28)
