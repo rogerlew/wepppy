@@ -128,7 +128,7 @@ Normative contract and docs that must remain aligned:
 - `docs/schemas/weppcloud-csrf-contract.md`
 - `docs/schemas/weppcloud-session-contract.md`
 - `docs/dev-notes/auth-token.spec.md`
-- `docs/dev-notes/rq-engine-agent-api.md`
+- `docs/schemas/rq-engine-agent-api-contract.md`
 
 ## Plan of Work
 
