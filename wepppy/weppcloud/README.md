@@ -438,7 +438,7 @@ See [tests/README.md](../../tests/README.md) and [static-src/README.md](static-s
 - [controllers_js/README.md](controllers_js/README.md) - Frontend controller architecture and bundling
 - [docker/README.md](../../docker/README.md) - Docker deployment and development workflow
 - [tests/weppcloud/README.md](../../tests/weppcloud/README.md) - Testing patterns for routes and controllers
-- [docs/dev-notes/rq-engine-agent-api.md](../../docs/dev-notes/rq-engine-agent-api.md) - rq-engine endpoint and auth contract
+- [docs/schemas/rq-engine-agent-api-contract.md](../../docs/schemas/rq-engine-agent-api-contract.md) - rq-engine endpoint and auth contract
 - [../../readme.md](../../readme.md) - Repository overview and architecture
 
 ## Credits
