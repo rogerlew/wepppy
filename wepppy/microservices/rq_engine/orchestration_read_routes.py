@@ -640,12 +640,15 @@ def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
         info = job_info_by_id.get(job_id, {})
         status = _effective_job_status(info)
         ended_at = _effective_job_ended_at(info)
+        progress = _job_progress_payload(info)
         step_job[step_id] = {
             "job_id": job_id,
             "status": status,
             "ended_at": ended_at,
             "exc_info": info.get("exc_info"),
         }
+        if progress is not None:
+            step_job[step_id]["progress"] = progress
         if step_completion_ts.get(step_id) is None:
             if status == "finished":
                 ended_ts = _parse_datetime_to_timestamp(ended_at)
@@ -743,6 +746,41 @@ def _effective_job_ended_at(job_info: Mapping[str, Any]) -> str | None:
     if latest_ended_ts is None:
         return _first_line(job_info.get("ended_at"))
     return _timestamp_to_iso(latest_ended_ts)
+
+
+def _effective_job_updated_at(job_info: Mapping[str, Any]) -> str | None:
+    all_nodes = [job_info, *_iter_child_job_nodes(job_info)]
+    latest_seen_ts: int | None = None
+    for node in all_nodes:
+        for field in ("ended_at", "started_at"):
+            seen_ts = _parse_datetime_to_timestamp(node.get(field))
+            if seen_ts is None:
+                continue
+            if latest_seen_ts is None or seen_ts > latest_seen_ts:
+                latest_seen_ts = seen_ts
+
+    if latest_seen_ts is not None:
+        return _timestamp_to_iso(latest_seen_ts)
+    return _first_line(job_info.get("ended_at")) or _first_line(job_info.get("started_at"))
+
+
+def _job_progress_payload(job_info: Mapping[str, Any]) -> dict[str, Any] | None:
+    nodes = [job_info, *_iter_child_job_nodes(job_info)]
+    statuses = [status for status in (_normalize_job_status(node.get("status")) for node in nodes) if status]
+    if not statuses:
+        return None
+
+    total = len(statuses)
+    completed = sum(1 for status in statuses if status in _TERMINAL_OUTCOMES)
+    percent = round((completed / total) * 100.0, 2)
+    updated_at = _effective_job_updated_at(job_info) or UNKNOWN_UPDATED_AT
+    return {
+        "completed": completed,
+        "total": total,
+        "unit": "jobs",
+        "percent": percent,
+        "updated_at": updated_at,
+    }
 
 
 def _last_attempt_payload(step_job: Mapping[str, Any] | None) -> dict[str, Any] | None:
@@ -975,6 +1013,9 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
 
         if step_job_info and status == "running":
             payload["active_job_id"] = step_job_info.get("job_id")
+            progress = step_job_info.get("progress")
+            if isinstance(progress, Mapping):
+                payload["progress"] = dict(progress)
 
         last_attempt = _last_attempt_payload(step_job_info)
         if last_attempt is not None:

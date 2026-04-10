@@ -67,6 +67,7 @@ PATHS_REQUIRING_404 = {
     "/api/runs/{runid}/{config}/delete-archive",
     "/api/runs/{runid}/{config}/endpoints",
     "/api/runs/{runid}/{config}/endpoints/{operation_id}/defaults",
+    "/api/runs/{runid}/{config}/endpoints/{operation_id}/errors",
     "/api/runs/{runid}/{config}/endpoints/{operation_id}/schema",
     "/api/runs/{runid}/{config}/export/ermit",
     "/api/runs/{runid}/{config}/export/features",
@@ -79,6 +80,7 @@ PATHS_REQUIRING_404 = {
     "/api/runs/{runid}/{config}/fork",
     "/api/runs/{runid}/{config}/geospatial-metadata",
     "/api/runs/{runid}/{config}/pipeline",
+    "/api/runs/{runid}/{config}/outputs",
     "/api/runs/{runid}/{config}/readiness",
     "/api/runs/{runid}/{config}/restore-archive",
 }

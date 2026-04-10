@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Helpers for introspecting RQ job trees and reporting aggregated status."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, MutableMapping, Sequence, Tuple
 
 import redis
@@ -18,6 +18,7 @@ from wepppy.config.redis_settings import (
 
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
+UNKNOWN_PROGRESS_UPDATED_AT = "1970-01-01T00:00:00Z"
 
 def _extract_exc_info(job: Job) -> str | None:
     meta = job.meta if isinstance(job.meta, dict) else {}
@@ -143,20 +144,49 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
     return results
 
 
-def _flatten_job_tree(job_info: MutableMapping[str, Any]) -> Tuple[List[Any], List[Any]]:
-    """Recursively traverse the job tree, collecting statuses and end times."""
+def _flatten_job_tree(job_info: MutableMapping[str, Any]) -> Tuple[List[Any], List[Any], List[Any]]:
+    """Recursively traverse the job tree, collecting statuses, end times, and start times."""
     statuses: List[Any] = [job_info['status']]
     end_times: List[Any] = [job_info['ended_at']]
+    start_times: List[Any] = [job_info.get('started_at')]
 
     # Recursively process children
     for order_key in job_info.get('children', {}):
         for child_job in job_info['children'][order_key]:
             if child_job:  # Child job could be None if not found
-                child_statuses, child_end_times = _flatten_job_tree(child_job)
+                child_statuses, child_end_times, child_start_times = _flatten_job_tree(child_job)
                 statuses.extend(child_statuses)
                 end_times.extend(child_end_times)
+                start_times.extend(child_start_times)
 
-    return statuses, end_times
+    return statuses, end_times, start_times
+
+
+def _parse_datetime(value: Any) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        normalized = text.replace("Z", "+00:00")
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _latest_timestamp_iso(*values: Any) -> str | None:
+    latest: datetime | None = None
+    for raw in values:
+        parsed = _parse_datetime(raw)
+        if parsed is None:
+            continue
+        if latest is None or parsed > latest:
+            latest = parsed
+    if latest is None:
+        return None
+    return latest.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
@@ -175,7 +205,7 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
         all_jobs_tree = recursive_get_job_details(job, redis_conn, now)
 
         # Walk the job tree to collect all statuses and end times
-        statuses, end_times = _flatten_job_tree(all_jobs_tree)
+        statuses, end_times, started_times = _flatten_job_tree(all_jobs_tree)
 
         # Determine the aggregated status based on priority.
         # If any job failed, the whole thing failed. If any is started, it's started.
@@ -192,11 +222,20 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
         # Find the latest 'ended_at' timestamp, but only if all jobs have completed.
         total_jobs_count = len(statuses)
         valid_end_times = [t for t in end_times if t]
+        valid_started_times = [t for t in started_times if t]
 
         if len(valid_end_times) == total_jobs_count:
-            last_ended_at = max(valid_end_times)
+            last_ended_at = _latest_timestamp_iso(*valid_end_times)
         else:
             last_ended_at = None
+
+        completed_jobs = sum(
+            1
+            for status in statuses
+            if str(status or "").strip().lower() in {'finished', 'failed', 'stopped', 'canceled'}
+        )
+        progress_total = max(1, total_jobs_count)
+        progress_updated_at = _latest_timestamp_iso(*valid_end_times, *valid_started_times) or UNKNOWN_PROGRESS_UPDATED_AT
 
         return {
             "job_id": job.id,
@@ -204,4 +243,11 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
             "status": aggregated_status,
             "started_at": str(job.started_at) if job.started_at else None,
             "ended_at": last_ended_at,
+            "progress": {
+                "completed": completed_jobs,
+                "total": progress_total,
+                "unit": "jobs",
+                "percent": round((completed_jobs / progress_total) * 100.0, 2),
+                "updated_at": progress_updated_at,
+            },
         }

@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **100**
-- Classification counts: **agent-facing 77**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 97**, **Flask wrapper 3**
+- Total endpoints inventoried: **102**
+- Classification counts: **agent-facing 79**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 99**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -60,6 +60,7 @@ Snapshot summary:
 | POST | `/api/runs/{runid}/{config}/delete-omni-contrasts` | `wepppy/microservices/rq_engine/omni_routes.py` | `delete_omni_contrasts` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | GET | `/api/runs/{runid}/{config}/endpoints` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `list_run_endpoints` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only run-scoped operation descriptor catalog including schema/default metadata operation IDs; no queue enqueue. |
 | GET | `/api/runs/{runid}/{config}/endpoints/{operation_id}/defaults` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `get_run_endpoint_defaults` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only run-resolved operation defaults; returns canonical `404` for unknown operation IDs. |
+| GET | `/api/runs/{runid}/{config}/endpoints/{operation_id}/errors` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `get_run_endpoint_errors` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only operation error catalog with stable `error_code` and recovery-action metadata; returns canonical `404` for unknown operation IDs. |
 | GET | `/api/runs/{runid}/{config}/endpoints/{operation_id}/schema` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `get_run_endpoint_schema` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only request schema + descriptor for one run-scoped operation; returns canonical `404` for unknown operation IDs. |
 | GET | `/api/runs/{runid}/{config}/export/ermit` | `wepppy/microservices/rq_engine/export_routes.py` | `export_ermit` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. May generate export artifacts synchronously before file response. |
 | POST | `/api/runs/{runid}/{config}/export/features` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_submit` | agent-facing | rq-engine | JWT Bearer | `rq:export` | mutating | Run access check: `authorize_run_access`. JSON-only async enqueue endpoint; returns `202` with `job_id`, `status_url`, and `download_url`. |
@@ -76,6 +77,7 @@ Snapshot summary:
 | GET | `/api/runs/{runid}/{config}/hello-world` | `wepppy/microservices/rq_engine/debug_routes.py` | `hello_world` | internal | rq-engine | Open | - | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/hello-world` | `wepppy/microservices/rq_engine/debug_routes.py` | `hello_world` | internal | rq-engine | Open | - | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/migrate-run` | `wepppy/microservices/rq_engine/migration_routes.py` | `migrate_run` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Access model: `_ensure_run_access` (Admin override + session-marker support for session tokens). Async enqueue; returns `job_id`, `status_url`, `message`, and `result`. |
+| GET | `/api/runs/{runid}/{config}/outputs` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `get_outputs` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only outputs/artifact index with provenance/trust fields and concrete retrieval handles when available. |
 | GET | `/api/runs/{runid}/{config}/pipeline` | `wepppy/microservices/rq_engine/orchestration_read_routes.py` | `get_pipeline` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only orchestration DAG/status snapshot; no queue enqueue. |
 | POST | `/api/runs/{runid}/{config}/post-dss-export-rq` | `wepppy/microservices/rq_engine/dss_export_routes.py` | `post_dss_export` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/prep-wepp-watershed` | `wepppy/microservices/rq_engine/wepp_routes.py` | `prep_wepp_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |

@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **77**
+- Total frozen routes covered: **79**
 
 ## Contract Matrix
 
@@ -49,6 +49,7 @@ Guarded by:
 | `POST` | `/api/runs/{runid}/{config}/delete-omni-contrasts` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `GET` | `/api/runs/{runid}/{config}/endpoints` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_schema_defaults_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/endpoints/{operation_id}/defaults` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_schema_defaults_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/endpoints/{operation_id}/errors` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_errors_progress_outputs_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/endpoints/{operation_id}/schema` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_schema_defaults_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/export/ermit` | JWT Bearer | rq:export | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `GET` | `/api/runs/{runid}/{config}/export/geodatabase` | JWT Bearer | rq:export | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
@@ -62,6 +63,7 @@ Guarded by:
 | `POST` | `/api/runs/{runid}/{config}/fetch-dem-and-build-channels` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/fork` | Optional JWT; anonymous CAPTCHA path | `rq:enqueue` (if bearer token is used) | mutating | async enqueue | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `GET` | `/api/runs/{runid}/{config}/geospatial-metadata` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/outputs` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_errors_progress_outputs_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/pipeline` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_orchestration_read_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/post-dss-export-rq` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/prep-wepp-watershed` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |

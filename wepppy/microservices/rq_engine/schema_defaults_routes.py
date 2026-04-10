@@ -4,9 +4,11 @@ import copy
 import hashlib
 import json
 import logging
+import mimetypes
 import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -14,9 +16,15 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from werkzeug.utils import secure_filename
 
+from wepppy.nodb.mods.features_export import (
+    FeaturesExportServiceError,
+    load_job_manifest,
+    resolve_download_artifact_path,
+)
 from wepppy.nodb.core import Climate, Landuse, Ron, Soils, Watershed, Wepp
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.rq.job_info import get_wepppy_rq_job_info
 from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -44,6 +52,9 @@ CONTRACT_VERSION = "1.0.0-draft"
 DEPLOYMENT_REVISION_ENV = "RQ_ENGINE_DEPLOYMENT_REVISION"
 DEFAULT_DEPLOYMENT_REVISION = "dev"
 SCHEMA_DEFAULTS_ALLOWED_SCOPES = frozenset({"rq:read", "rq:status"})
+UNKNOWN_UPDATED_AT = "1970-01-01T00:00:00Z"
+UNKNOWN_SOURCE_RUN_STATE_REVISION = "unknown"
+FEATURES_EXPORT_JOB_KEY = "features_export"
 
 
 class RunConfigMismatchError(ValueError):
@@ -946,6 +957,350 @@ def _defaults_context(runtime: RuntimeState) -> dict[str, Any]:
     }
 
 
+def _operation_required_fields(operation_docs: Mapping[str, Any]) -> list[str]:
+    schema = operation_docs.get("schema")
+    if not isinstance(schema, Mapping):
+        return []
+    request = schema.get("request")
+    if not isinstance(request, Mapping):
+        return []
+    required = request.get("required")
+    if not isinstance(required, list):
+        return []
+    fields: list[str] = []
+    for raw in required:
+        value = str(raw or "").strip()
+        if not value or value in fields:
+            continue
+        fields.append(value)
+    return fields
+
+
+def _build_operation_error_catalog(
+    *,
+    operation_id: str,
+    operation_docs: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    descriptor = operation_docs.get("descriptor")
+    descriptor_map = descriptor if isinstance(descriptor, Mapping) else {}
+    method = str(descriptor_map.get("method") or "").strip().upper()
+    execution_mode = str(descriptor_map.get("execution_mode") or "").strip().lower()
+    write_precondition = descriptor_map.get("write_precondition")
+    write_precondition_map = write_precondition if isinstance(write_precondition, Mapping) else {}
+    required_fields = _operation_required_fields(operation_docs)
+
+    list_run_endpoints_id = rq_operation_id("list_run_endpoints")
+    errors: list[dict[str, Any]] = [
+        {"error_code": "unauthorized", "recoverable": True, "http_statuses": [401], "recovery_actions": []},
+        {"error_code": "forbidden", "recoverable": True, "http_statuses": [403], "recovery_actions": []},
+        {
+            "error_code": "not_found",
+            "recoverable": True,
+            "http_statuses": [404],
+            "recovery_actions": [{"operation_id": list_run_endpoints_id, "required_fields": []}],
+        },
+    ]
+
+    if method == "POST":
+        errors.append(
+            {
+                "error_code": "validation_error",
+                "recoverable": True,
+                "http_statuses": [400],
+                "recovery_actions": [{"operation_id": operation_id, "required_fields": required_fields}],
+            }
+        )
+
+        if bool(write_precondition_map.get("required")):
+            errors.append(
+                {
+                    "error_code": "stale_run_state",
+                    "recoverable": True,
+                    "http_statuses": [409],
+                    "recovery_actions": [
+                        {
+                            "operation_id": operation_id,
+                            "required_fields": ["expected_run_state_revision"],
+                        }
+                    ],
+                }
+            )
+
+        if execution_mode == "async":
+            errors.append(
+                {
+                    "error_code": "enqueue_failed",
+                    "recoverable": True,
+                    "http_statuses": [500],
+                    "recovery_actions": [{"operation_id": operation_id, "required_fields": []}],
+                }
+            )
+
+    if operation_id == rq_operation_id("build_climate"):
+        errors.extend(
+            [
+                {
+                    "error_code": "missing_station_selection",
+                    "recoverable": True,
+                    "http_statuses": [400, 409],
+                    "recovery_actions": [{"operation_id": operation_id, "required_fields": ["climatestation"]}],
+                },
+                {
+                    "error_code": "climate_mode_unavailable_for_region",
+                    "recoverable": True,
+                    "http_statuses": [400],
+                    "recovery_actions": [{"operation_id": operation_id, "required_fields": ["climate_mode"]}],
+                },
+            ]
+        )
+
+    return errors
+
+
+def _parse_iso_datetime(value: Any) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+
+    try:
+        normalized = text.replace("Z", "+00:00")
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+@lru_cache(maxsize=256)
+def _sha256_file_cached(path_text: str, size_bytes: int, mtime_ns: int) -> str:
+    path = Path(path_text)
+    digest = hashlib.sha256()
+    with path.open("rb") as fp:
+        for chunk in iter(lambda: fp.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _sha256_file(path: Path, *, size_bytes: int | None = None, mtime_ns: int | None = None) -> str:
+    stat_result = path.stat() if (size_bytes is None or mtime_ns is None) else None
+    resolved_size = int(size_bytes if size_bytes is not None else stat_result.st_size)
+    if mtime_ns is not None:
+        resolved_mtime_ns = int(mtime_ns)
+    else:
+        raw_mtime_ns = getattr(stat_result, "st_mtime_ns", int(float(stat_result.st_mtime) * 1_000_000_000))
+        resolved_mtime_ns = int(raw_mtime_ns)
+    return _sha256_file_cached(str(path.resolve()), resolved_size, resolved_mtime_ns)
+
+
+def _artifact_kind(path: Path) -> str:
+    suffix = path.suffix.lower()
+    if suffix == ".zip":
+        return "zip"
+    if suffix == ".gpkg":
+        return "geopackage"
+    if suffix == ".gdb":
+        return "geodatabase"
+    return suffix.lstrip(".") or "artifact"
+
+
+def _build_features_export_artifact(runtime: RuntimeState, *, wd: str) -> dict[str, Any] | None:
+    try:
+        prep = RedisPrep.getInstance(wd)
+        job_id = prep.get_rq_job_id(FEATURES_EXPORT_JOB_KEY)
+        if not job_id:
+            job_id = prep.get_rq_job_ids().get(FEATURES_EXPORT_JOB_KEY)
+        if not job_id:
+            return None
+
+        job_info = get_wepppy_rq_job_info(job_id)
+        job_runid = str(job_info.get("runid") or "").strip()
+        if job_runid and job_runid != runtime.runid:
+            logger.warning(
+                "rq-engine outputs ignored features-export artifact with mismatched runid",
+                extra={"requested_runid": runtime.runid, "job_runid": job_runid, "job_id": job_id},
+            )
+            return None
+
+        job_status = str(job_info.get("status") or "").strip().lower()
+        if job_status != "finished":
+            return None
+
+        job_result = job_info.get("result")
+        if not isinstance(job_result, Mapping):
+            job_result = None
+
+        artifact_path, _artifact_relpath = resolve_download_artifact_path(
+            wd,
+            job_id=job_id,
+            job_result=job_result,
+        )
+        artifact_path = artifact_path.resolve()
+        wd_path = Path(wd).resolve()
+        if wd_path != artifact_path and wd_path not in artifact_path.parents:
+            logger.warning(
+                "rq-engine outputs ignored artifact path outside run directory",
+                extra={"runid": runtime.runid, "job_id": job_id, "artifact_path": str(artifact_path)},
+            )
+            return None
+
+        artifact_stat = artifact_path.stat()
+        manifest = load_job_manifest(wd, job_id)
+
+        produced_at = None
+        if isinstance(manifest, Mapping):
+            produced_at = _parse_iso_datetime(manifest.get("generated_at_utc"))
+        if produced_at is None:
+            produced_at = _parse_iso_datetime(job_info.get("ended_at"))
+        if produced_at is None:
+            produced_at = UNKNOWN_UPDATED_AT
+
+        source_run_state_revision = None
+        if isinstance(manifest, Mapping):
+            source_run_state_revision = str(
+                manifest.get("source_run_state_revision")
+                or manifest.get("run_state_revision")
+                or ""
+            ).strip() or None
+            if source_run_state_revision is None:
+                request_map = manifest.get("request")
+                if isinstance(request_map, Mapping):
+                    resolved_map = request_map.get("resolved")
+                    if isinstance(resolved_map, Mapping):
+                        source_run_state_revision = str(resolved_map.get("run_state_revision") or "").strip() or None
+        if source_run_state_revision is None and isinstance(job_result, Mapping):
+            source_run_state_revision = str(
+                job_result.get("source_run_state_revision")
+                or job_result.get("run_state_revision")
+                or ""
+            ).strip() or None
+        if source_run_state_revision is None:
+            source_run_state_revision = UNKNOWN_SOURCE_RUN_STATE_REVISION
+
+        artifact_id = (
+            str((job_result or {}).get("artifact_id") or "").strip()
+            if isinstance(job_result, Mapping)
+            else ""
+        )
+        if not artifact_id:
+            artifact_id = f"features_export_{job_id}"
+
+        download_url_template = "/rq-engine/api/runs/{runid}/{config}/export/features/job/{job_id}/download"
+        download_url = download_url_template.format(
+            runid=runtime.runid,
+            config=runtime.config,
+            job_id=job_id,
+        )
+        content_type = mimetypes.guess_type(str(artifact_path))[0] or "application/octet-stream"
+
+        return {
+            "id": artifact_id,
+            "kind": _artifact_kind(artifact_path),
+            "producer_operation_id": rq_operation_id("export_features_submit"),
+            "producer_step_id": "export-features",
+            "producer_job_id": job_id,
+            "produced_at": produced_at,
+            "source_run_state_revision": source_run_state_revision,
+            "expires_at": None,
+            "content_type": content_type,
+            "size_bytes": artifact_stat.st_size,
+            "sha256": _sha256_file(
+                artifact_path,
+                size_bytes=artifact_stat.st_size,
+                mtime_ns=getattr(artifact_stat, "st_mtime_ns", None),
+            ),
+            "result_source": "jobinfo.result",
+            "download_url": download_url,
+            "download_url_params": {
+                "runid": runtime.runid,
+                "config": runtime.config,
+                "job_id": job_id,
+            },
+            "download_url_template": download_url_template,
+        }
+    except (FeaturesExportServiceError, FileNotFoundError, OSError):
+        return None
+    except Exception:  # broad-except: outputs discovery best-effort boundary
+        logger.exception("rq-engine outputs features-export artifact discovery failed")
+        return None
+
+
+def _outputs_export_catalog() -> list[dict[str, Any]]:
+    return [
+        {
+            "operation_id": rq_operation_id("export_ermit"),
+            "path": "/api/runs/{runid}/{config}/export/ermit",
+            "response_mode": "file",
+        },
+        {
+            "operation_id": rq_operation_id("export_geopackage"),
+            "path": "/api/runs/{runid}/{config}/export/geopackage",
+            "response_mode": "file",
+        },
+        {
+            "operation_id": rq_operation_id("export_geodatabase"),
+            "path": "/api/runs/{runid}/{config}/export/geodatabase",
+            "response_mode": "file",
+        },
+        {
+            "operation_id": rq_operation_id("export_prep_details"),
+            "path": "/api/runs/{runid}/{config}/export/prep_details",
+            "response_mode": "file",
+        },
+        {
+            "operation_id": rq_operation_id("export_features_submit"),
+            "path": "/api/runs/{runid}/{config}/export/features",
+            "response_mode": "json",
+        },
+        {
+            "operation_id": rq_operation_id("export_features_download"),
+            "path": "/api/runs/{runid}/{config}/export/features/job/{job_id}/download",
+            "response_mode": "file",
+        },
+        {
+            "operation_id": rq_operation_id("export_features_download_published"),
+            "path": "/api/runs/{runid}/{config}/export/features/published/{profile}/download",
+            "response_mode": "file",
+        },
+    ]
+
+
+def _build_outputs_payload(runtime: RuntimeState) -> dict[str, Any]:
+    artifacts: list[dict[str, Any]] = []
+    feature_artifact = _build_features_export_artifact(runtime, wd=get_wd(runtime.runid))
+    if feature_artifact is not None:
+        artifacts.append(feature_artifact)
+
+    artifacts.sort(
+        key=lambda artifact: (
+            str(artifact.get("produced_at") or ""),
+            str(artifact.get("id") or ""),
+        ),
+        reverse=True,
+    )
+
+    exports = _outputs_export_catalog()
+    updated_candidates = [str(item.get("produced_at")) for item in artifacts if item.get("produced_at")]
+    updated_at = max(updated_candidates) if updated_candidates else UNKNOWN_UPDATED_AT
+
+    etag_input = {
+        "run_state_revision": runtime.run_state_revision,
+        "artifacts": artifacts,
+        "exports": exports,
+    }
+    etag_digest = hashlib.sha256(
+        json.dumps(etag_input, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()[:12]
+
+    return {
+        "updated_at": updated_at,
+        "etag": f'W/"outputs:{runtime.runid}:{etag_digest}"',
+        "artifacts": artifacts,
+        "exports": exports,
+    }
+
+
 def _available_climate_modes(runtime: RuntimeState) -> list[int]:
     modes = [0, 6, 11]
     if bool(runtime.states.get("climate_has_station", False)):
@@ -1090,8 +1445,10 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
     list_endpoints_id = rq_operation_id("list_run_endpoints")
     endpoint_schema_id = rq_operation_id("get_run_endpoint_schema")
     endpoint_defaults_id = rq_operation_id("get_run_endpoint_defaults")
+    endpoint_errors_id = rq_operation_id("get_run_endpoint_errors")
     pipeline_id = rq_operation_id("get_pipeline")
     readiness_id = rq_operation_id("get_readiness")
+    outputs_id = rq_operation_id("get_outputs")
 
     build_climate_id = rq_operation_id("build_climate")
     build_landuse_id = rq_operation_id("build_landuse")
@@ -1324,6 +1681,38 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 },
             },
         },
+        endpoint_errors_id: {
+            "descriptor": _base_run_read_descriptor(
+                runtime=runtime,
+                operation_id=endpoint_errors_id,
+                path="/api/runs/{runid}/{config}/endpoints/{operation_id}/errors",
+                required_fields=["operation_id", "errors"],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "operation_id": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        }
+                    },
+                    "required": ["operation_id"],
+                    "additional_properties": False,
+                },
+                "responses": {"success": {"required": ["operation_id", "errors"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {
+                    "operation_id": build_climate_id,
+                },
+                "defaults_context": {
+                    **_defaults_context(runtime),
+                    "error_catalog": "stable",
+                },
+            },
+        },
         pipeline_id: {
             "descriptor": _base_run_read_descriptor(
                 runtime=runtime,
@@ -1359,6 +1748,26 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 "resolved_defaults": {},
                 "defaults_context": {
                     **_defaults_context(runtime),
+                },
+            },
+        },
+        outputs_id: {
+            "descriptor": _base_run_read_descriptor(
+                runtime=runtime,
+                operation_id=outputs_id,
+                path="/api/runs/{runid}/{config}/outputs",
+                required_fields=["updated_at", "etag", "artifacts", "exports"],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": _empty_request_schema(),
+                "responses": {"success": {"required": ["updated_at", "etag", "artifacts", "exports"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": {
+                    **_defaults_context(runtime),
+                    "outputs_mode": "artifact_index",
                 },
             },
         },
@@ -2438,6 +2847,109 @@ def get_run_endpoint_defaults(runid: str, config: str, operation_id: str, reques
         return JSONResponse(payload)
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine run-endpoint defaults failed")
+        return error_response("Error Handling Request", status_code=500)
+
+
+@router.get(
+    "/runs/{runid}/{config}/endpoints/{operation_id}/errors",
+    summary="Get run endpoint errors",
+    description=(
+        "Requires JWT Bearer (`rq:status` or `rq:read`) with run access checks. "
+        "Read-only operation error taxonomy for one run-scoped operation; no queue."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("get_run_endpoint_errors"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Run operation error catalog returned.",
+        extra={404: "Run or operation not found. Returns the canonical error payload."},
+    ),
+)
+def get_run_endpoint_errors(runid: str, config: str, operation_id: str, request: Request) -> JSONResponse:
+    try:
+        _require_schema_defaults_claims(request, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: auth boundary contract
+        logger.exception("rq-engine run-endpoint errors auth failed")
+        return error_response("Failed to authorize request", status_code=401)
+
+    try:
+        runtime = _load_runtime_state(runid, config)
+    except FileNotFoundError:
+        return error_response("Run not found", status_code=404, code="not_found")
+    except RunConfigMismatchError:
+        return error_response("Run not found", status_code=404, code="not_found")
+    except Exception:  # broad-except: route boundary contract
+        logger.exception("rq-engine run-endpoint errors state load failed")
+        return error_response("Error Handling Request", status_code=500)
+
+    try:
+        operations = _build_run_operations(runtime)
+        operation_docs = operations.get(operation_id)
+        if operation_docs is None:
+            return error_response(
+                "Operation not found",
+                status_code=404,
+                code="not_found",
+            )
+
+        payload = _base_payload(runtime)
+        payload.update(
+            {
+                "operation_id": operation_id,
+                "errors": _build_operation_error_catalog(
+                    operation_id=operation_id,
+                    operation_docs=operation_docs,
+                ),
+            }
+        )
+        return JSONResponse(payload)
+    except Exception:  # broad-except: route boundary contract
+        logger.exception("rq-engine run-endpoint errors failed")
+        return error_response("Error Handling Request", status_code=500)
+
+
+@router.get(
+    "/runs/{runid}/{config}/outputs",
+    summary="Get run outputs",
+    description=(
+        "Requires JWT Bearer (`rq:status` or `rq:read`) with run access checks. "
+        "Read-only outputs/artifact discovery snapshot with retrieval handles and provenance metadata; no queue."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("get_outputs"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Run outputs snapshot returned.",
+        extra={404: "Run not found. Returns the canonical error payload."},
+    ),
+)
+def get_outputs(runid: str, config: str, request: Request) -> JSONResponse:
+    try:
+        _require_schema_defaults_claims(request, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: auth boundary contract
+        logger.exception("rq-engine outputs auth failed")
+        return error_response("Failed to authorize request", status_code=401)
+
+    try:
+        runtime = _load_runtime_state(runid, config)
+    except FileNotFoundError:
+        return error_response("Run not found", status_code=404, code="not_found")
+    except RunConfigMismatchError:
+        return error_response("Run not found", status_code=404, code="not_found")
+    except Exception:  # broad-except: route boundary contract
+        logger.exception("rq-engine outputs state load failed")
+        return error_response("Error Handling Request", status_code=500)
+
+    try:
+        payload = _base_payload(runtime)
+        payload.update(_build_outputs_payload(runtime))
+        return JSONResponse(payload)
+    except Exception:  # broad-except: route boundary contract
+        logger.exception("rq-engine outputs failed")
         return error_response("Error Handling Request", status_code=500)
 
 

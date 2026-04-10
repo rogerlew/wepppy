@@ -228,6 +228,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### RQ Controller State Errors, Progress, and Outputs (2026-04-10)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/](docs/work-packages/20260410_rq_controller_state_errors_progress_outputs/)  
+**Summary**: Implemented run-scoped endpoint error catalogs, async progress metadata integration, and `GET /api/runs/{runid}/{config}/outputs` with artifact trust/provenance metadata and retrieval handles. Required code gates and independent `reviewer`/`qa_reviewer`/`security_reviewer` gates passed with no unresolved medium/high findings.
+
 ### Lifecycle Corrections (2026-04-10)
 **Status**: ✅ **COLUMNS RECONCILED**  
 **Description**: The following work packages were still listed in `Backlog`/`In Progress` but package-level docs already recorded completion. They were moved to `Done` after subagent review + doc verification.
