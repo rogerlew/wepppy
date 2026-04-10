@@ -5,14 +5,14 @@
 ## Quick Status
 
 **Started**: 2026-03-31  
-**Current phase**: Implemented and regression-reviewed  
-**Last updated**: 2026-03-31  
-**Next milestone**: Final handoff with baseline gate caveat.
+**Current phase**: Closed  
+**Last updated**: 2026-04-10 05:50 UTC  
+**Next milestone**: None (package closed).
 
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Full broad-suite validation (`wctl run-pytest tests --maxfail=1`, `wctl run-npm lint`, `wctl run-npm test`) cleanly passing without unrelated baseline failures.
+- [x] Full broad-suite validation (`wctl run-pytest tests --maxfail=1`, `wctl run-npm lint`, `wctl run-npm test`) cleanly passing without unrelated baseline failures (2026-04-10 05:50 UTC).
 
 ### In Progress
 - [ ] None.
@@ -76,7 +76,7 @@
 | Focus-style changes regress visual consistency across themes | Medium | Medium | Validate with theme smoke checks and targeted keyboard focus assertions | Mitigated |
 | Map semantics change affects assistive-tech navigation unexpectedly | Medium | Medium | Document decision, add keyboard + AT-oriented acceptance checks, stage rollout | Mitigated |
 | Added automation is flaky in CI smoke environment | Medium | Low | Keep checks deterministic, scope to stable surfaces, tune selectors/timeouts | Mitigated |
-| Unrelated baseline failures block full-suite green status | Medium | High | Track and fix baseline issues separately; keep scoped WCAG checks passing | Open |
+| Unrelated baseline failures block full-suite green status | Medium | High | Baseline failures resolved; broad-suite/lint gates now green | Closed |
 
 ## Verification Checklist
 
@@ -85,8 +85,8 @@
 - [x] `wctl run-pytest tests/weppcloud/routes/test_user_runs_admin_scope.py::test_runs2_template_requests_catalog_with_ron_meta --maxfail=1`
 - [x] `wctl run-npm test -- copytext map_gl`
 - [x] Targeted ESLint on changed JS files (`map_gl_feature_ui.js`, `copytext.js`, `copytext.test.js`, `map_gl.test.js`)
-- [ ] `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py tests/weppcloud/routes/test_user_runs_admin_scope.py --maxfail=1` (blocked by unrelated existing failure in `test_disturbed_modal_renders_requested_controls`)
-- [ ] `wctl run-npm lint` (blocked by unrelated existing `jest/prefer-to-be` failure in `controllers_js/__tests__/disturbed.test.js`)
+- [x] `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py tests/weppcloud/routes/test_user_runs_admin_scope.py --maxfail=1` (pass)
+- [x] `wctl run-npm lint` (pass)
 
 ### Accessibility Validation
 - [x] New/updated accessibility-focused smoke or unit checks pass.
@@ -167,6 +167,20 @@
 - Start implementation milestone 1 (finding 1 + finding 2) and capture validation evidence in this tracker.
 
 **Test results**: Not run (documentation scaffolding only).
+
+### 2026-04-10 05:50 UTC: Closure after broad-suite green
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Recorded broad-suite/lint green status and closed prior baseline caveat.
+- Updated package/tracker lifecycle state to closed.
+- Prepared prompt lifecycle archival for completed execution plan.
+
+**Blockers encountered**:
+- None.
+
+**Test results**:
+- Broad suite/lint status confirmed green for closure.
 
 ## Communication Log
 

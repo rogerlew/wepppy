@@ -1,6 +1,6 @@
 # WCAG 2.1 AA Frontend Accessibility Remediation (Findings 1-6)
 
-**Status**: Implemented (2026-03-31)
+**Status**: Closed (2026-04-10 05:50 UTC)
 
 ## Overview
 This package remediates six high-confidence WCAG 2.1 AA weak points identified in the WEPPcloud frontend codebase: legacy non-semantic copy controls, modal accessible-name gaps, missing/weak focus indicators, placeholder-only input labeling, `role="application"` map semantics, and missing document/iframe baseline attributes in standalone templates. The goal is to remove known accessibility debt in core UI paths while preserving existing runtime behavior and contracts.
@@ -43,11 +43,9 @@ This package covers targeted frontend template, CSS, and controller changes in W
 - [x] Finding-5 map semantic decision is implemented and documented (role retained with justification and tests, or replaced).
 - [x] Finding-6 standalone HTML semantic gaps (`lang`, iframe `title`, etc.) are remediated in scoped templates.
 - [x] Automated regression coverage includes at least one accessibility-focused gate beyond contrast checks.
-- [ ] Full validation matrix passes (`pytest`, `npm lint/test`, smoke/a11y checks, doc lint).
+- [x] Full validation matrix passes (`pytest`, `npm lint/test`, smoke/a11y checks, doc lint).
 
-Validation caveat (2026-03-31): broad suite/lint gates currently fail due pre-existing unrelated failures in
-`tests/weppcloud/routes/test_pure_controls_render.py::test_disturbed_modal_renders_requested_controls` and
-`wepppy/weppcloud/controllers_js/__tests__/disturbed.test.js` (`jest/prefer-to-be`), while all new scoped WCAG checks pass.
+Validation closure note (2026-04-10 05:50 UTC): broad-suite and lint gates are now green and the prior unrelated baseline failures were resolved.
 
 ## Dependencies
 
@@ -79,13 +77,21 @@ Validation caveat (2026-03-31): broad suite/lint gates currently fail due pre-ex
 - `wepppy/weppcloud/templates/controls/map_pure_gl.htm` - map role semantics.
 - `wepppy/weppcloud/templates/huc-fire/index.html` - missing standalone `lang`.
 - `wepppy/weppcloud/templates/locations/joh/index.htm` - iframe `title` gaps.
-- `docs/work-packages/20260331_wcag21aa_frontend_accessibility/prompts/active/wcag21aa_frontend_accessibility_execplan.md` - active execution plan.
+- `docs/work-packages/20260331_wcag21aa_frontend_accessibility/prompts/completed/wcag21aa_frontend_accessibility_execplan.md` - completed execution plan.
 
 ## Deliverables
-- Active ExecPlan with milestone-level remediation and validation steps.
+- Completed ExecPlan with milestone-level remediation and validation steps.
 - Targeted frontend/template/controller fixes for findings 1-6.
 - Regression tests and accessibility-focused automation updates.
 - Updated tracker, package notes, and closure summary with evidence links.
+
+## Closure Notes
+
+**Closed**: 2026-04-10 05:50 UTC
+
+**Summary**: Findings 1-6 were implemented, regression-reviewed, and validated with green broad-suite/lint status. Package lifecycle is complete.
+
+**Lessons Learned**: Packaging accessibility fixes with explicit finding-level tests made closure robust even while unrelated baseline issues were being resolved.
 
 ## Follow-up Work
 - Full-route accessibility crawl (maps, command surfaces, report tables) with prioritized backlog.
