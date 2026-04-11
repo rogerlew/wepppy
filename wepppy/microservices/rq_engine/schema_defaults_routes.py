@@ -368,6 +368,15 @@ def _sbs_available_if() -> dict[str, Any]:
     }
 
 
+def _rusle_available_if() -> dict[str, Any]:
+    return {
+        "any": [
+            _predicate("context.active_mods", "contains", "disturbed"),
+            _predicate("context.active_mods", "contains", "baer"),
+        ]
+    }
+
+
 def _base_run_read_descriptor(
     *,
     runtime: RuntimeState,
@@ -572,7 +581,7 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
             "soils_mode": runtime.states.get("soils_mode") or "ssurgo",
         }
         if disturbed_enabled:
-            defaults["sol_ver"] = runtime.states.get("disturbed_sol_ver") or 2018.0
+            defaults["sol_ver"] = _default_disturbed_sol_ver(runtime)
         return defaults
     if controller == "watershed":
         return _resolved_watershed_defaults(runtime)
@@ -583,7 +592,7 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
         }
     if controller == "disturbed":
         return {
-            "sol_ver": runtime.states.get("disturbed_sol_ver") or 2018.0,
+            "sol_ver": _default_disturbed_sol_ver(runtime),
         }
     return {}
 
@@ -591,6 +600,12 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
 def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]:
     resolved_at = runtime.generated_at
     disturbed_enabled = bool(runtime.states.get("disturbed_enabled", False))
+    sol_ver_available = _disturbed_sol_ver_options(runtime)
+    sol_ver_labels = {
+        "2006.0": "Legacy disturbed defaults",
+        "2018.0": "Updated disturbed defaults",
+        "9002.0": "Disturbed9002 calibration defaults",
+    }
 
     if controller == "climate":
         available_modes = _available_climate_modes(runtime)
@@ -668,7 +683,6 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
         }
 
     if controller == "soils":
-        sol_ver_available = ["v2006", "v2018"] if disturbed_enabled else []
         soils_modes = _supported_soils_modes()
         return {
             "schema_version": 1,
@@ -686,10 +700,11 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "constraint_mode": "run_resolved",
                     "constraint_source": "controller_state",
                     "resolved_at": resolved_at,
-                    "enum_available": [2006.0, 2018.0] if sol_ver_available else [],
+                    "enum_available": sol_ver_available if disturbed_enabled else [],
                     "enum_labels": {
-                        "2006.0": "Legacy disturbed defaults",
-                        "2018.0": "Updated disturbed defaults",
+                        key: value
+                        for key, value in sol_ver_labels.items()
+                        if float(key) in sol_ver_available
                     },
                     "available_if": _predicate("context.active_mods", "contains", "disturbed"),
                     "required_if": _predicate("context.active_mods", "contains", "disturbed"),
@@ -762,7 +777,7 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "constraint_mode": "run_resolved",
                     "constraint_source": "controller_state",
                     "resolved_at": resolved_at,
-                    "enum_available": [2006.0, 2018.0],
+                    "enum_available": sol_ver_available,
                 },
                 "sbs_uploaded": {
                     "type": "boolean",
@@ -1370,6 +1385,48 @@ def _supported_soils_modes() -> list[str]:
     return ["ssurgo", "statsgo"]
 
 
+def _inferred_config_sol_ver(config: str) -> float | None:
+    token = str(config or "").strip().lower()
+    if "9002" in token:
+        return 9002.0
+    return None
+
+
+def _runtime_disturbed_sol_ver(runtime: RuntimeState) -> float | None:
+    raw_value = runtime.states.get("disturbed_sol_ver")
+    try:
+        value = float(raw_value) if raw_value is not None else None
+    except (TypeError, ValueError):
+        return None
+    return value if value is not None and value > 0 else None
+
+
+def _default_disturbed_sol_ver(runtime: RuntimeState) -> float:
+    runtime_value = _runtime_disturbed_sol_ver(runtime)
+    if runtime_value is not None:
+        return runtime_value
+
+    inferred = _inferred_config_sol_ver(runtime.config)
+    if inferred is not None:
+        return inferred
+
+    return 2018.0
+
+
+def _disturbed_sol_ver_options(runtime: RuntimeState) -> list[float]:
+    if not bool(runtime.states.get("disturbed_enabled", False)):
+        return []
+
+    options: list[float] = []
+    for candidate in [2006.0, 2018.0, _inferred_config_sol_ver(runtime.config), _runtime_disturbed_sol_ver(runtime)]:
+        if candidate is None:
+            continue
+        value = float(candidate)
+        if value not in options:
+            options.append(value)
+    return options
+
+
 def _resolved_watershed_defaults(runtime: RuntimeState) -> dict[str, float]:
     csa_value = runtime.states.get("watershed_csa")
     mcl_value = runtime.states.get("watershed_mcl")
@@ -1418,7 +1475,7 @@ def _geospatial_payload(runtime: RuntimeState) -> dict[str, Any]:
 
     soils_modes_available = _supported_soils_modes()
 
-    sol_ver_available = [2006.0, 2018.0] if bool(runtime.states.get("disturbed_enabled", False)) else []
+    sol_ver_available = _disturbed_sol_ver_options(runtime)
 
     map_center_available = map_center is not None
     map_bounds_available = map_bounds_is_run_resolved
@@ -1514,11 +1571,18 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
     prep_wepp_id = rq_operation_id("prep_wepp_watershed")
     run_wepp_id = rq_operation_id("run_wepp")
     run_wepp_watershed_id = rq_operation_id("run_wepp_watershed")
+    build_rusle_id = rq_operation_id("build_rusle")
+    fork_project_id = rq_operation_id("fork_project")
     upload_dem_id = rq_operation_id("upload_dem")
     upload_cli_id = rq_operation_id("upload_cli")
     upload_cover_transform_id = rq_operation_id("upload_cover_transform")
     upload_sbs_id = rq_operation_id("upload_sbs")
     issue_session_token_id = rq_operation_id("issue_session_token")
+    disturbed_enabled = bool(runtime.states.get("disturbed_enabled", False))
+    active_mod_tokens = {mod.lower() for mod in runtime.active_mods}
+    rusle_enabled = bool(active_mod_tokens.intersection({"disturbed", "baer"}))
+    disturbed_sol_ver_options = _disturbed_sol_ver_options(runtime)
+    build_soils_required_fields = ["initial_sat", "sol_ver"] if disturbed_enabled else ["initial_sat"]
 
     operations: dict[str, dict[str, Any]] = {
         list_controllers_id: {
@@ -1982,12 +2046,15 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                         },
                         "sol_ver": {
                             "type": "number",
-                            "constraint_mode": "static",
+                            "constraint_mode": "run_resolved",
+                            "constraint_source": "controller_state",
+                            "resolved_at": runtime.generated_at,
+                            "enum_available": disturbed_sol_ver_options,
                             "available_if": _predicate("context.active_mods", "contains", "disturbed"),
                             "required_if": _predicate("context.active_mods", "contains", "disturbed"),
                         },
                     },
-                    "required": ["initial_sat"],
+                    "required": build_soils_required_fields,
                     "additional_properties": True,
                 },
                 "responses": {
@@ -2010,10 +2077,10 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "sol_ver": (
                                 runtime.states.get("disturbed_sol_ver")
                                 if runtime.states.get("disturbed_sol_ver") is not None
-                                else 2018.0
+                                else _default_disturbed_sol_ver(runtime)
                             )
                         }
-                        if runtime.states.get("disturbed_enabled")
+                        if disturbed_enabled
                         else {}
                     ),
                 },
@@ -2163,6 +2230,72 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
             },
             "defaults": {
                 "resolved_defaults": _controller_defaults("wepp", runtime),
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        build_rusle_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=build_rusle_id,
+                path="/api/runs/{runid}/{config}/build-rusle",
+                execution_mode="async",
+                returns_job=True,
+                job_key="build_rusle_rq",
+                required_fields=["job_id"],
+                estimated_duration_bucket="medium",
+                estimated_duration_seconds=120,
+                mutates_controllers=["disturbed"],
+                invalidates_steps=[],
+                batch_mode_behavior="batch_returns_message_no_queue",
+                available_if=[_rusle_available_if()],
+                required_if=[_rusle_available_if()],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "r_mode": {
+                            "type": "integer",
+                            "constraint_mode": "static",
+                        },
+                        "c_mode": {
+                            "type": "integer",
+                            "constraint_mode": "static",
+                        },
+                        "rap_year": {
+                            "type": "integer",
+                            "constraint_mode": "static",
+                        },
+                        "k_modes": {
+                            "type": "array",
+                            "constraint_mode": "static",
+                        },
+                        "default_k_mode": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                        "max_slope_length_m": {
+                            "type": "number",
+                            "constraint_mode": "static",
+                        },
+                        "p_value": {
+                            "type": "number",
+                            "constraint_mode": "static",
+                        },
+                        "force_polaris_refresh": {
+                            "type": "boolean",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["job_id"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {
+                    "force_polaris_refresh": False,
+                },
                 "defaults_context": _defaults_context(runtime),
             },
         },
@@ -2389,7 +2522,62 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 "defaults_context": _defaults_context(runtime),
             },
         },
+        fork_project_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=fork_project_id,
+                path="/api/runs/{runid}/{config}/fork",
+                execution_mode="async",
+                returns_job=True,
+                job_key="fork_rq",
+                required_fields=["job_id", "new_runid", "undisturbify"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=15,
+                mutates_controllers=[],
+                invalidates_steps=[],
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                    },
+                    "captcha": {
+                        "challenge_required": True,
+                        "required_if_no_authenticated_token": True,
+                    },
+                },
+                accepted_auth=["bearer_jwt", "captcha"],
+                content_types=["application/json", "application/x-www-form-urlencoded", "multipart/form-data"],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "undisturbify": {
+                            "type": "boolean",
+                            "constraint_mode": "static",
+                        },
+                        "target_runid": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                        "cap_token": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["job_id", "new_runid", "undisturbify"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {"undisturbify": False},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
     }
+
+    if not rusle_enabled:
+        operations.pop(build_rusle_id, None)
 
     if runtime.states.get("sbs_upload_supported", False):
         operations[upload_sbs_id] = {

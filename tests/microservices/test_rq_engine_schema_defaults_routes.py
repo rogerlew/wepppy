@@ -8,7 +8,7 @@ import pytest
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
-from wepppy.microservices.rq_engine import schema_defaults_routes
+from wepppy.microservices.rq_engine import orchestration_read_routes, schema_defaults_routes
 
 pytestmark = pytest.mark.microservice
 
@@ -46,6 +46,7 @@ def _sample_runtime(
     disturbed_enabled: bool = True,
     sbs_upload_supported: bool = True,
     initial_sat: float | None = 0.75,
+    disturbed_sol_ver: float | None = 2018.0,
 ) -> schema_defaults_routes.RuntimeState:
     return schema_defaults_routes.RuntimeState(
         runid=RUNID,
@@ -71,11 +72,56 @@ def _sample_runtime(
             "disturbed_enabled": disturbed_enabled,
             "sbs_upload_supported": sbs_upload_supported,
             "disturbed_sbs_uploaded": True,
-            "disturbed_sol_ver": 2018.0,
+            "disturbed_sol_ver": disturbed_sol_ver,
         },
         generated_at="2026-04-10T22:13:00Z",
         run_state_revision="runstate:run-1:deadbeefcafe",
     )
+
+
+def _sample_orchestration_runtime_for_discovery_parity() -> dict[str, Any]:
+    return {
+        "runid": RUNID,
+        "config": CONFIG,
+        "active_mods": ("disturbed", "wepp"),
+        "states": {
+            "has_dem": True,
+            "watershed_has_channels": True,
+            "watershed_has_outlet": True,
+            "watershed_is_abstracted": True,
+            "watershed_subcatchment_count": 42,
+            "climate_built": False,
+            "climate_station_ready": True,
+            "climate_mode": None,
+            "landuse_built": False,
+            "landuse_mode": "nlcd",
+            "soils_built": False,
+            "soils_mode": "ssurgo",
+            "wepp_has_run": False,
+            "wepp_hillslopes_run": False,
+            "wepp_watershed_run": False,
+            "disturbed_enabled": True,
+            "disturbed_sbs_uploaded": True,
+            "disturbed_sol_ver_selected": True,
+        },
+        "step_completion_ts": {
+            "fetch-dem-and-build-channels": 100,
+            "set-outlet": 110,
+            "build-subcatchments-and-abstract-watershed": 120,
+            "upload-sbs": 130,
+            "build-climate": None,
+            "build-landuse": None,
+            "build-soils": None,
+            "prep-wepp-watershed": None,
+            "run-wepp": None,
+            "run-wepp-watershed": None,
+            "build-rusle": None,
+            "run-ash": None,
+            "run-debris-flow": None,
+        },
+        "step_job": {},
+        "generated_at": "2026-04-11T04:00:00Z",
+    }
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch, scope: str, *, token_class: str = "service") -> None:
@@ -300,6 +346,8 @@ def test_list_run_endpoints_payload_contract(monkeypatch: pytest.MonkeyPatch) ->
         "rq_engine_get_run_endpoint_schema",
         "rq_engine_get_run_endpoint_defaults",
         "rq_engine_build_climate",
+        "rq_engine_build_rusle",
+        "rq_engine_fork_project",
         "rq_engine_run_wepp",
     }.issubset(operation_ids)
 
@@ -411,7 +459,7 @@ def test_build_climate_defaults_emit_integer_climate_mode(monkeypatch: pytest.Mo
     assert payload["resolved_defaults"]["climate_mode"] == 11
 
 
-def test_build_soils_schema_and_defaults_require_initial_sat(
+def test_build_soils_schema_and_defaults_require_disturbed_fields(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch, "rq:status")
@@ -422,13 +470,17 @@ def test_build_soils_schema_and_defaults_require_initial_sat(
         assert schema_response.status_code == 200
         schema_payload = schema_response.json()
         assert schema_payload["operation_id"] == "rq_engine_build_soils"
-        assert schema_payload["request"]["required"] == ["initial_sat"]
+        assert schema_payload["request"]["required"] == ["initial_sat", "sol_ver"]
 
         request_fields = schema_payload["request"]["properties"]
         assert request_fields["initial_sat"]["constraint_mode"] == "static"
+        assert request_fields["sol_ver"]["constraint_mode"] == "run_resolved"
+        assert request_fields["sol_ver"]["constraint_source"] == "controller_state"
         assert request_fields["sol_ver"]["required_if"]["field"] == "context.active_mods"
         assert request_fields["sol_ver"]["required_if"]["op"] == "contains"
         assert request_fields["sol_ver"]["required_if"]["value"] == "disturbed"
+        assert 2018.0 in request_fields["sol_ver"]["enum_available"]
+        assert 9002.0 in request_fields["sol_ver"]["enum_available"]
 
         defaults_response = client.get(BUILD_SOILS_DEFAULTS_PATH)
         assert defaults_response.status_code == 200
@@ -454,7 +506,12 @@ def test_build_soils_defaults_omit_sol_ver_when_disturbed_disabled(
     )
 
     with TestClient(rq_engine.app) as client:
+        schema_response = client.get(BUILD_SOILS_SCHEMA_PATH)
         defaults_response = client.get(BUILD_SOILS_DEFAULTS_PATH)
+
+    assert schema_response.status_code == 200
+    schema_payload = schema_response.json()
+    assert schema_payload["request"]["required"] == ["initial_sat"]
 
     assert defaults_response.status_code == 200
     defaults_payload = defaults_response.json()
@@ -479,6 +536,24 @@ def test_build_soils_defaults_fall_back_to_initial_sat_default(
     assert defaults_payload["resolved_defaults"]["initial_sat"] == 0.75
 
 
+def test_build_soils_defaults_infer_sol_ver_from_disturbed9002_config_when_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(disturbed_sol_ver=None),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        defaults_response = client.get(BUILD_SOILS_DEFAULTS_PATH)
+
+    assert defaults_response.status_code == 200
+    defaults_payload = defaults_response.json()
+    assert defaults_payload["resolved_defaults"]["sol_ver"] == 9002.0
+
+
 def test_run_endpoints_include_upload_sbs_for_baer_mod(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch, "rq:status")
     monkeypatch.setattr(
@@ -497,6 +572,7 @@ def test_run_endpoints_include_upload_sbs_for_baer_mod(monkeypatch: pytest.Monke
     assert response.status_code == 200
     operation_ids = {operation["operation_id"] for operation in response.json()["operations"]}
     assert "rq_engine_upload_sbs" in operation_ids
+    assert "rq_engine_build_rusle" in operation_ids
 
 
 def test_run_endpoints_omit_upload_sbs_when_fire_mods_absent(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -517,6 +593,60 @@ def test_run_endpoints_omit_upload_sbs_when_fire_mods_absent(monkeypatch: pytest
     assert response.status_code == 200
     operation_ids = {operation["operation_id"] for operation in response.json()["operations"]}
     assert "rq_engine_upload_sbs" not in operation_ids
+    assert "rq_engine_build_rusle" not in operation_ids
+    assert "rq_engine_fork_project" in operation_ids
+
+
+def test_run_endpoint_errors_exist_for_each_listed_operation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        list_response = client.get(RUN_ENDPOINTS_PATH)
+        assert list_response.status_code == 200
+        operations = list_response.json()["operations"]
+
+        for operation in operations:
+            operation_id = operation["operation_id"]
+            errors_response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/errors")
+            assert errors_response.status_code == 200, operation_id
+            payload = errors_response.json()
+            assert payload["operation_id"] == operation_id
+            assert isinstance(payload["errors"], list)
+
+
+def test_readiness_ready_operations_are_discoverable_in_run_endpoints(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(orchestration_read_routes, "require_jwt", lambda request: {"scope": "rq:status"})
+    monkeypatch.setattr(orchestration_read_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_orchestration_runtime_for_discovery_parity(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        readiness_response = client.get(f"/api/runs/{RUNID}/{CONFIG}/readiness")
+        endpoints_response = client.get(RUN_ENDPOINTS_PATH)
+
+        assert readiness_response.status_code == 200
+        assert endpoints_response.status_code == 200
+
+        ready_operation_ids = [entry["operation_id"] for entry in readiness_response.json()["ready_operations"]]
+        endpoint_operation_ids = {operation["operation_id"] for operation in endpoints_response.json()["operations"]}
+
+        for operation_id in ready_operation_ids:
+            assert operation_id in endpoint_operation_ids, operation_id
+            for suffix in ("schema", "defaults", "errors"):
+                detail_response = client.get(
+                    f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/{suffix}"
+                )
+                assert detail_response.status_code == 200, f"{operation_id}/{suffix}"
 
 
 def test_run_endpoint_detail_routes_return_404_for_unknown_operation(
