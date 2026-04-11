@@ -499,6 +499,8 @@ register_jinja_filters(app)
 register_blueprints(app)
 # forward_auth boundary endpoint is non-browser infrastructure traffic.
 from wepppy.weppcloud.routes.bootstrap import register_csrf_exemptions as register_bootstrap_csrf_exemptions
+from wepppy.weppcloud.routes.weppcloud_site import register_csrf_exemptions as register_site_csrf_exemptions
 
 register_bootstrap_csrf_exemptions(csrf)
+register_site_csrf_exemptions(csrf)
 register_context_processors(app, get_all_runs, User, Run)

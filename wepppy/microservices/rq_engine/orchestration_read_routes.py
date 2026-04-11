@@ -31,7 +31,8 @@ CONTRACT_VERSION = "1.0.0-draft"
 DEPLOYMENT_REVISION_ENV = "RQ_ENGINE_DEPLOYMENT_REVISION"
 DEFAULT_DEPLOYMENT_REVISION = "dev"
 ORCHESTRATION_ALLOWED_SCOPES = frozenset({"rq:read", "rq:status"})
-UNKNOWN_UPDATED_AT = "1970-01-01T00:00:00Z"
+UNKNOWN_UPDATED_AT = "2000-01-01T00:00:00Z"
+RUN_STATE_DOMAIN_ORCHESTRATION = "orchestration"
 
 
 class RunConfigMismatchError(ValueError):
@@ -480,6 +481,50 @@ def _base_payload() -> dict[str, Any]:
         "contract_version": CONTRACT_VERSION,
         "deployment_revision": _deployment_revision(),
     }
+
+
+def _run_state_vector(*, orchestration_revision: str) -> dict[str, str | None]:
+    return {
+        "orchestration_revision": orchestration_revision,
+        "metadata_revision": None,
+        "outputs_revision": None,
+    }
+
+
+def _run_directory_updated_at(runid: str) -> str | None:
+    if not runid:
+        return None
+    try:
+        wd = Path(get_wd(runid))
+        if not wd.exists():
+            return None
+        now_ts = datetime.now(timezone.utc).timestamp()
+        safe_mtime = min(float(wd.stat().st_mtime), float(now_ts))
+        return _timestamp_to_iso(int(safe_mtime))
+    except OSError:
+        return None
+
+
+def _runtime_snapshot_updated_at(runtime: Mapping[str, Any]) -> str:
+    runid = str(runtime.get("runid") or "").strip()
+    run_directory_updated_at = _run_directory_updated_at(runid)
+    if run_directory_updated_at:
+        return run_directory_updated_at
+
+    generated_at = str(runtime.get("generated_at") or "").strip()
+    if generated_at:
+        return generated_at
+    return _utc_now_iso()
+
+
+def _stable_updated_at(
+    *,
+    candidate_updated_at: str | None,
+    fallback_updated_at: str,
+) -> str:
+    if candidate_updated_at:
+        return candidate_updated_at
+    return fallback_updated_at
 
 
 def _timestamp_to_iso(timestamp_value: int | None) -> str | None:
@@ -1170,13 +1215,16 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
         ended_ts = _parse_datetime_to_timestamp(info.get("ended_at"))
         if ended_ts is not None:
             timeline_candidates.append(ended_ts)
-    updated_at = _timestamp_to_iso(max(timeline_candidates)) if timeline_candidates else UNKNOWN_UPDATED_AT
+    data_updated_at = _timestamp_to_iso(max(timeline_candidates)) if timeline_candidates else None
+    fallback_updated_at = _runtime_snapshot_updated_at(runtime)
 
     state_signature = {
         "runid": runid,
         "config": config,
         "active_mods": list(active_mods),
         "states": states,
+        "data_updated_at": data_updated_at,
+        "snapshot_fallback_updated_at": fallback_updated_at if data_updated_at is None else None,
         "steps": [
             {
                 "step_id": payload["step_id"],
@@ -1197,12 +1245,23 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
     }
     digest = hashlib.sha256(json.dumps(state_signature, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()[:12]
     run_state_revision = f"runstate:{runid}:{digest}"
+    run_state_vector = _run_state_vector(orchestration_revision=run_state_revision)
+    updated_at = _stable_updated_at(
+        candidate_updated_at=data_updated_at,
+        fallback_updated_at=fallback_updated_at,
+    )
+    if data_updated_at is None:
+        data_updated_at = updated_at
 
     pipeline_payload = _base_payload()
     pipeline_payload.update(
         {
+            "run_state_domain": RUN_STATE_DOMAIN_ORCHESTRATION,
             "run_state_revision": run_state_revision,
+            "run_state_vector": run_state_vector,
             "updated_at": updated_at,
+            "data_state": "materialized",
+            "data_updated_at": data_updated_at,
             "etag": f'W/"pipeline:{runid}:{digest}"',
             "runid": runid,
             "config": config,
@@ -1215,8 +1274,12 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
     readiness_payload = _base_payload()
     readiness_payload.update(
         {
+            "run_state_domain": RUN_STATE_DOMAIN_ORCHESTRATION,
             "run_state_revision": run_state_revision,
+            "run_state_vector": run_state_vector,
             "updated_at": updated_at,
+            "data_state": "materialized",
+            "data_updated_at": data_updated_at,
             "etag": f'W/"readiness:{runid}:{digest}"',
             "run": {
                 "has_dem": bool(states.get("has_dem", False)),

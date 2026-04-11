@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+import re
 from typing import Any
 
 import pytest
@@ -20,6 +22,7 @@ CONFIG = "disturbed9002_wbt"
 RUN_ENDPOINT_ERRORS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/errors"
 OUTPUTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/outputs"
 PIPELINE_PATH = f"/api/runs/{RUNID}/{CONFIG}/pipeline"
+UTC_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 
 def _stub_schema_auth(monkeypatch: pytest.MonkeyPatch, scope: str = "rq:status") -> None:
@@ -155,9 +158,17 @@ def test_run_endpoint_errors_catalog_includes_machine_actionable_codes(
     assert set(payload) == {
         "contract_version",
         "deployment_revision",
+        "run_state_domain",
         "run_state_revision",
+        "run_state_vector",
         "operation_id",
         "errors",
+    }
+    assert payload["run_state_domain"] == "metadata"
+    assert payload["run_state_vector"] == {
+        "orchestration_revision": None,
+        "metadata_revision": payload["run_state_revision"],
+        "outputs_revision": None,
     }
     assert payload["operation_id"] == "rq_engine_build_climate"
 
@@ -222,12 +233,21 @@ def test_outputs_payload_includes_trust_provenance_and_retrieval_handles(
     assert set(payload) == {
         "contract_version",
         "deployment_revision",
+        "run_state_domain",
         "run_state_revision",
+        "run_state_vector",
         "updated_at",
+        "data_state",
+        "data_updated_at",
         "etag",
         "artifacts",
         "exports",
     }
+    assert payload["run_state_domain"] == "outputs"
+    assert payload["run_state_vector"]["metadata_revision"] == _sample_schema_runtime().run_state_revision
+    assert payload["run_state_vector"]["outputs_revision"] == payload["run_state_revision"]
+    assert payload["data_state"] == "materialized"
+    assert payload["data_updated_at"] == "2026-04-10T10:20:02Z"
     assert payload["etag"].startswith('W/"outputs:')
     assert payload["updated_at"] == "2026-04-10T10:20:02Z"
 
@@ -258,7 +278,12 @@ def test_outputs_payload_uses_empty_defaults_when_no_artifacts(
     assert response.status_code == 200
     payload = response.json()
     assert payload["artifacts"] == []
-    assert payload["updated_at"] == schema_defaults_routes.UNKNOWN_UPDATED_AT
+    assert payload["data_state"] == "not_materialized"
+    assert payload["data_updated_at"] is None
+    assert UTC_TIMESTAMP_RE.match(payload["updated_at"])
+    assert payload["updated_at"] != schema_defaults_routes.UNKNOWN_UPDATED_AT
+    updated_at = datetime.fromisoformat(payload["updated_at"].replace("Z", "+00:00"))
+    assert updated_at <= datetime.now(timezone.utc)
 
 
 def test_jobstatus_surface_adds_progress_from_job_tree(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -348,8 +373,17 @@ def test_outputs_operation_descriptor_requires_snapshot_fields() -> None:
 
     required_result_fields = outputs_docs["descriptor"]["result_contract"]["required_response_fields"]
     required_success_fields = outputs_docs["schema"]["responses"]["success"]["required"]
-    assert required_result_fields == ["updated_at", "etag", "artifacts", "exports"]
-    assert required_success_fields == ["updated_at", "etag", "artifacts", "exports"]
+    assert required_result_fields == [
+        "run_state_domain",
+        "run_state_vector",
+        "updated_at",
+        "data_state",
+        "data_updated_at",
+        "etag",
+        "artifacts",
+        "exports",
+    ]
+    assert required_success_fields == required_result_fields
 
 
 def test_outputs_artifact_source_run_revision_uses_unknown_sentinel_when_unavailable(

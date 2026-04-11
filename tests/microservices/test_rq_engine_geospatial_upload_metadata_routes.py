@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+import re
 from typing import Any
 
 import pytest
@@ -20,6 +22,7 @@ CONFIG = "disturbed9002_wbt"
 GEOSPATIAL_PATH = f"/api/runs/{RUNID}/{CONFIG}/geospatial-metadata"
 RUN_ENDPOINTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints"
 _UNSET = object()
+UTC_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 
 def _sample_runtime(
@@ -140,7 +143,13 @@ def test_geospatial_metadata_payload_contract(monkeypatch: pytest.MonkeyPatch) -
     assert set(payload) == {
         "contract_version",
         "deployment_revision",
+        "run_state_domain",
         "run_state_revision",
+        "run_state_vector",
+        "updated_at",
+        "data_state",
+        "data_updated_at",
+        "etag",
         "runid",
         "config",
         "region",
@@ -152,6 +161,16 @@ def test_geospatial_metadata_payload_contract(monkeypatch: pytest.MonkeyPatch) -
     }
     assert payload["runid"] == RUNID
     assert payload["config"] == CONFIG
+    assert payload["run_state_domain"] == "metadata"
+    assert payload["run_state_vector"] == {
+        "orchestration_revision": None,
+        "metadata_revision": payload["run_state_revision"],
+        "outputs_revision": None,
+    }
+    assert payload["data_state"] == "materialized"
+    assert payload["data_updated_at"] == payload["updated_at"]
+    assert payload["etag"].startswith('W/"geospatial:')
+    assert UTC_TIMESTAMP_RE.match(payload["updated_at"])
     assert payload["dem_coverage"]["source"] == "3dep"
     assert payload["dem_coverage"]["has_dem"] is True
     assert payload["recommended_defaults"]["map_center"] == [-116.3, 45.65]
@@ -162,7 +181,9 @@ def test_geospatial_metadata_payload_contract(monkeypatch: pytest.MonkeyPatch) -
     assert payload["dynamic_constraints"]["climate_mode"]["enum_available"] == [0, 2, 6, 11]
     assert payload["field_availability"]["map_bounds"]["state"] == "available"
     assert payload["field_availability"]["station_catalog"]["state"] == "available"
-    assert payload["computed_at"] == "2026-04-10T23:01:00Z"
+    assert payload["computed_at"] == payload["updated_at"]
+    updated_at = datetime.fromisoformat(payload["updated_at"].replace("Z", "+00:00"))
+    assert updated_at <= datetime.now(timezone.utc)
 
 
 def test_geospatial_metadata_fallbacks_when_run_resolved_fields_are_missing(

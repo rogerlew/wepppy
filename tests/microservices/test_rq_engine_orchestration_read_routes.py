@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import datetime, timezone
+import re
 from typing import Any
 
 import pytest
@@ -14,6 +16,7 @@ pytestmark = pytest.mark.microservice
 
 PIPELINE_PATH = "/api/runs/run-1/disturbed9002_wbt/pipeline"
 READINESS_PATH = "/api/runs/run-1/disturbed9002_wbt/readiness"
+UTC_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch, scope: str, *, token_class: str = "service") -> None:
@@ -198,8 +201,12 @@ def test_pipeline_payload_contract_and_invalidation_lineage(monkeypatch: pytest.
     assert set(payload) == {
         "contract_version",
         "deployment_revision",
+        "run_state_domain",
         "run_state_revision",
+        "run_state_vector",
         "updated_at",
+        "data_state",
+        "data_updated_at",
         "etag",
         "runid",
         "config",
@@ -210,7 +217,15 @@ def test_pipeline_payload_contract_and_invalidation_lineage(monkeypatch: pytest.
     assert payload["runid"] == "run-1"
     assert payload["config"] == "disturbed9002_wbt"
     assert payload["active_mods"] == ["disturbed", "debris_flow", "ash"]
+    assert payload["run_state_domain"] == "orchestration"
     assert payload["run_state_revision"].startswith("runstate:run-1:")
+    assert payload["run_state_vector"] == {
+        "orchestration_revision": payload["run_state_revision"],
+        "metadata_revision": None,
+        "outputs_revision": None,
+    }
+    assert payload["data_state"] == "materialized"
+    assert payload["data_updated_at"] == payload["updated_at"]
     assert payload["etag"].startswith('W/"pipeline:run-1:')
 
     steps_by_id = {entry["step_id"]: entry for entry in payload["steps"]}
@@ -236,6 +251,10 @@ def test_readiness_payload_has_join_safe_blocker_links(monkeypatch: pytest.Monke
 
     assert response.status_code == 200
     payload = response.json()
+    assert payload["run_state_domain"] == "orchestration"
+    assert payload["run_state_vector"]["orchestration_revision"] == payload["run_state_revision"]
+    assert payload["data_state"] == "materialized"
+    assert payload["data_updated_at"] == payload["updated_at"]
     assert payload["etag"].startswith('W/"readiness:run-1:')
     issue_ids = {issue["issue_id"] for issue in payload["blocking_issues"]}
     assert "issue_climate_station_missing" in issue_ids
@@ -510,6 +529,7 @@ def test_readiness_updated_at_and_etag_are_stable_when_timeline_is_empty(
 ) -> None:
     _stub_auth(monkeypatch, "rq:status")
     calls = {"count": 0}
+    fallback_updated_at = "2026-04-10T10:00:00Z"
 
     def _runtime(runid: str, config: str) -> dict[str, Any]:
         calls["count"] += 1
@@ -518,6 +538,11 @@ def test_readiness_updated_at_and_etag_are_stable_when_timeline_is_empty(
         return _sample_empty_timeline_runtime_state("2026-04-10T10:00:01Z")
 
     monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", _runtime)
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "_runtime_snapshot_updated_at",
+        lambda runtime: fallback_updated_at,
+    )
 
     with TestClient(rq_engine.app) as client:
         first = client.get(READINESS_PATH).json()
@@ -525,7 +550,13 @@ def test_readiness_updated_at_and_etag_are_stable_when_timeline_is_empty(
 
     assert first["etag"] == second["etag"]
     assert first["run_state_revision"] == second["run_state_revision"]
-    assert first["updated_at"] == second["updated_at"] == "1970-01-01T00:00:00Z"
+    assert first["updated_at"] == second["updated_at"]
+    assert first["data_updated_at"] == second["data_updated_at"] == first["updated_at"]
+    assert first["data_state"] == second["data_state"] == "materialized"
+    assert UTC_TIMESTAMP_RE.match(first["updated_at"])
+    assert first["updated_at"] != "1970-01-01T00:00:00Z"
+    updated_at = datetime.fromisoformat(first["updated_at"].replace("Z", "+00:00"))
+    assert updated_at <= datetime.now(timezone.utc)
 
 
 def test_orchestration_routes_internal_failures_return_canonical_500(

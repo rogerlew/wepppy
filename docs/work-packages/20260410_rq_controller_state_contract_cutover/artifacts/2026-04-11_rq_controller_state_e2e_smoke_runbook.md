@@ -29,9 +29,14 @@ Quick setup pointers:
 - Token acquisition: `docs/schemas/rq-engine-agent-api-contract.md`
   (`## Dev-Agent Local Workflow`, mint via
   `POST /weppcloud/profile/mint-token`).
-- Machine-safe operator bootstrap path is target-state work tracked in:
-  `docs/work-packages/20260411_rq_operator_experience_hardening/`.
-  Until that package closes, use pre-issued token or interim session/CSRF path.
+- Machine-safe operator bootstrap (shipped):
+  - `POST /weppcloud/api/auth/rq-engine-operator-token`
+  - Bearer-auth only, scope-constrained minting (`requested_scopes`),
+    rate-limited, and audited.
+  - Source bearer token must include `jti`; revoked tokens are rejected.
+  - Revocation backend unavailability returns `503` (retryable).
+  - Use this path for non-browser/operator flows when a pre-issued
+    bearer token is available.
 - `RUNID/CONFIG` source:
   - existing run URL (`/runs/{runid}/{config}`), or
   - create/fork flow described in

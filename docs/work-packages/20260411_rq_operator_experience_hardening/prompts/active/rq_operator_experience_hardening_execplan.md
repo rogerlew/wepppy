@@ -18,11 +18,11 @@ Observable behavior after completion:
 - [x] (2026-04-11 06:03 UTC) Created package scaffold and activated this ExecPlan.
 - [x] (2026-04-11 06:03 UTC) Added contract-level target requirements in `rq-engine-agent-api-contract.md` and `rq-controller-state-contract.md`.
 - [x] (2026-04-11 06:03 UTC) Updated smoke runbook expected-outcome wording to count-agnostic checks.
-- [ ] Define implementation-ready auth bootstrap design and endpoint contract (Milestone 1).
-- [ ] Implement machine-safe auth bootstrap route(s) and tests.
-- [ ] Implement revision-domain and freshness payload semantics across read endpoints.
-- [ ] Add route/openapi/guard coverage and scripted operator acceptance smoke.
-- [ ] Complete reviewer, qa_reviewer, and security_reviewer gates.
+- [x] (2026-04-11 06:55 UTC) Defined implementation-ready auth bootstrap design and endpoint contract (Milestone 1).
+- [x] (2026-04-11 06:55 UTC) Implemented machine-safe auth bootstrap route(s) and tests.
+- [x] (2026-04-11 06:55 UTC) Implemented revision-domain and freshness payload semantics across read endpoints.
+- [x] (2026-04-11 06:55 UTC) Added route/openapi/guard coverage and scripted operator acceptance smoke.
+- [x] (2026-04-11 07:37 UTC) Completed reviewer, qa_reviewer, and security_reviewer gates with no unresolved medium/high findings.
 
 ## Surprises & Discoveries
 
@@ -35,6 +35,12 @@ Observable behavior after completion:
 - Observation: Smoke guidance that hard-codes expected pass counts drifts quickly and causes false triage friction.
   Evidence: runbook expected `248 passed` while baseline now reports `251 passed`.
 
+- Observation: Local caddy endpoint redirects plain HTTP on `:8080` to `https://localhost`, which can fail in local environments without a mapped TLS listener.
+  Evidence: operator smoke against `http://localhost:8080/rq-engine/api/*` returned `301` to `https://localhost/...`; acceptance was executed against direct service ports (`:8042` rq-engine, `:8000` weppcloud auth) to keep the flow API-only and deterministic.
+
+- Observation: Filesystem mtimes can be ahead of current UTC in local run roots, so freshness fallback logic must clamp to `now` to keep `updated_at` non-future.
+  Evidence: first post-review smoke pass showed future `updated_at` values until mtime clamp was added and acceptance was rerun.
+
 ## Decision Log
 
 - Decision: Treat operator ergonomics as contract and implementation scope, not runbook-only polish.
@@ -45,9 +51,55 @@ Observable behavior after completion:
   Rationale: Domain-explicit semantics let agents make deterministic stale-read decisions and avoid ad hoc heuristics.
   Date/Author: 2026-04-11 / Codex.
 
+- Decision: Ship phased `run_state_vector` semantics with explicit `null` for non-local domains on each surface, while requiring domain-correct `run_state_revision` and vector self-alignment.
+  Rationale: Delivers deterministic join-safe semantics immediately without introducing tight cross-module revision-coupling in this package.
+  Date/Author: 2026-04-11 / Codex.
+
+- Decision: Apply revocation-path throttling before Redis denylist checks and return explicit `503` + `Retry-After` on revocation backend outage.
+  Rationale: Reduces outage amplification risk while preserving fail-closed auth behavior with machine-actionable retry semantics.
+  Date/Author: 2026-04-11 / Codex.
+
 ## Outcomes & Retrospective
 
-No implementation outcomes yet. Update this section at each milestone close and at package completion.
+Package implementation outcomes (2026-04-11 06:55 UTC):
+- Machine-safe operator bootstrap shipped:
+  - `POST /weppcloud/api/auth/rq-engine-operator-token`
+  - strict requested-scope allowlist + authorization intersection
+  - short TTL default, rate limiting, audit logging, and no-store responses
+  - CSRF exemption explicitly registered for bearer-only operator path.
+- Revision-domain + freshness semantics shipped across read surfaces:
+  - orchestration reads: `run_state_domain=orchestration`, phased `run_state_vector`, deterministic `updated_at`, explicit `data_state/data_updated_at`
+  - metadata reads: `run_state_domain=metadata`, phased `run_state_vector`
+  - outputs reads: `run_state_domain=outputs`, outputs-domain revision, metadata-linked vector, explicit materialization state (`not_materialized` when no artifacts).
+- Descriptor/schema metadata for snapshot reads now require:
+  - `run_state_domain`
+  - `run_state_vector`
+  - `updated_at`
+  - `data_state`
+  - `data_updated_at`
+  - `etag`
+- Maintainer preflight gate passed:
+  - consolidated microservice suite (`251 passed`)
+  - inventory/checklist parity checks passed
+  - guard tests passed.
+- Operator API-only acceptance smoke passed with UTC/redacted evidence artifact:
+  - `docs/work-packages/20260411_rq_operator_experience_hardening/artifacts/2026-04-11_operator_smoke_evidence.md`
+- Security artifact updated with controls/findings disposition:
+  - `docs/work-packages/20260411_rq_operator_experience_hardening/artifacts/2026-04-11_security_review.md`
+
+Post-review closure addendum (2026-04-11 07:37 UTC):
+- Addressed independent review findings:
+  - freshness fallback revision-coherence hardening;
+  - non-future freshness clamp;
+  - revocation outage handling (`503` + retry guidance) with pre-revocation throttling;
+  - contract/runbook alignment for required source-token `jti`.
+- Reran targeted microservice + route suites (pass) and reran operator API-only smoke with refreshed evidence.
+- Final independent `reviewer`/`qa_reviewer`/`security_reviewer` re-reviews report no unresolved medium/high findings.
+
+Final closure addendum (2026-04-11 07:40 UTC):
+- Orchestration revision signature now includes `data_updated_at` whenever timeline freshness is present, preventing freshness drift without revision movement.
+- Operator evidence snippet redacts `session_id` to match artifact redaction policy.
+- Final reviewer follow-up confirms no unresolved medium/high findings.
 
 ## Context and Orientation
 

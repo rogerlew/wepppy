@@ -1,15 +1,21 @@
-from collections import Counter
+from collections import Counter, deque
+from collections.abc import Mapping, Sequence
+import os
+import threading
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
+import uuid
 
 import json
+import redis
 from flask import send_from_directory, session
 from flask_security import current_user
 from werkzeug.routing import BuildError
 
 from ._common import *  # noqa: F401,F403
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import exception_factory, handle_with_exception_factory
 from wepppy.weppcloud.utils.rq_engine_token import issue_user_rq_engine_token
@@ -24,10 +30,272 @@ _ACCESS_LOG_DEFAULTS = [
 ]
 _RUN_LOCATIONS_FILENAME = 'runid-locations.json'
 _LANDING_STATIC_DIRNAME = 'ui-lab'
+_OPERATOR_TOKEN_ALLOWED_SCOPES = ("rq:read", "rq:status", "rq:enqueue", "rq:export")
+_OPERATOR_TOKEN_ALLOWED_SCOPE_SET = frozenset(_OPERATOR_TOKEN_ALLOWED_SCOPES)
+_OPERATOR_TOKEN_DEFAULT_TTL_SECONDS = 900
+_OPERATOR_TOKEN_TTL_SECONDS_ENV = "RQ_ENGINE_OPERATOR_TOKEN_TTL_SECONDS"
+_OPERATOR_TOKEN_RATE_LIMIT_COUNT_ENV = "RQ_ENGINE_OPERATOR_TOKEN_RATE_LIMIT_COUNT"
+_OPERATOR_TOKEN_RATE_LIMIT_WINDOW_SECONDS_ENV = "RQ_ENGINE_OPERATOR_TOKEN_RATE_LIMIT_WINDOW_SECONDS"
+_OPERATOR_TOKEN_RATE_LIMIT_MAX_BUCKETS_ENV = "RQ_ENGINE_OPERATOR_TOKEN_RATE_LIMIT_MAX_BUCKETS"
+_OPERATOR_TOKEN_REDIS_TIMEOUT_SECONDS_ENV = "RQ_ENGINE_OPERATOR_TOKEN_REDIS_TIMEOUT_SECONDS"
+_OPERATOR_TOKEN_RATE_LIMIT_LOCK = threading.Lock()
+_OPERATOR_TOKEN_RATE_LIMIT_BUCKETS: dict[str, deque[float]] = {}
 
 
 def _issue_rq_engine_token() -> str | None:
     return issue_user_rq_engine_token(current_user)
+
+
+def _safe_int_env(name: str, *, default: int, minimum: int) -> int:
+    configured = os.getenv(name, current_app.config.get(name))
+    raw = str(configured or "").strip()
+    if not raw:
+        return default
+    try:
+        return max(minimum, int(raw))
+    except (TypeError, ValueError):
+        return default
+
+
+def _operator_token_ttl_seconds() -> int:
+    return _safe_int_env(
+        _OPERATOR_TOKEN_TTL_SECONDS_ENV,
+        default=_OPERATOR_TOKEN_DEFAULT_TTL_SECONDS,
+        minimum=60,
+    )
+
+
+def _operator_token_rate_limit_count() -> int:
+    return _safe_int_env(_OPERATOR_TOKEN_RATE_LIMIT_COUNT_ENV, default=20, minimum=1)
+
+
+def _operator_token_rate_limit_window_seconds() -> int:
+    return _safe_int_env(_OPERATOR_TOKEN_RATE_LIMIT_WINDOW_SECONDS_ENV, default=60, minimum=1)
+
+
+def _operator_token_rate_limit_max_buckets() -> int:
+    return _safe_int_env(_OPERATOR_TOKEN_RATE_LIMIT_MAX_BUCKETS_ENV, default=4096, minimum=128)
+
+
+def _operator_token_redis_timeout_seconds() -> int:
+    return _safe_int_env(_OPERATOR_TOKEN_REDIS_TIMEOUT_SECONDS_ENV, default=2, minimum=1)
+
+
+def _request_has_body() -> bool:
+    content_length = str(request.headers.get("Content-Length") or "").strip()
+    if content_length:
+        try:
+            return int(content_length) > 0
+        except (TypeError, ValueError):
+            return True
+    transfer_encoding = str(request.headers.get("Transfer-Encoding") or "").strip()
+    return bool(transfer_encoding)
+
+
+def _content_type_token() -> str:
+    return str(request.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+
+
+def _extract_bearer_token() -> str | None:
+    authorization = str(request.headers.get("Authorization") or "").strip()
+    if not authorization:
+        return None
+    token_type, _, token = authorization.partition(" ")
+    if token_type.lower() != "bearer" or not token.strip():
+        return None
+    return token.strip()
+
+
+def _scopes_from_claims(claims: Mapping[str, Any]) -> set[str]:
+    scope_value = claims.get("scope")
+    separator = auth_tokens.get_jwt_config().scope_separator
+
+    def _split_scope_text(text: str) -> set[str]:
+        scopes: set[str] = set()
+        for chunk in text.split(separator):
+            for token in chunk.split():
+                cleaned = token.strip()
+                if cleaned:
+                    scopes.add(cleaned)
+        return scopes
+
+    if scope_value is None:
+        return set()
+    if isinstance(scope_value, str):
+        return _split_scope_text(scope_value)
+    if isinstance(scope_value, Sequence):
+        scopes: set[str] = set()
+        for item in scope_value:
+            if isinstance(item, str):
+                scopes.update(_split_scope_text(item))
+        return scopes
+    return set()
+
+
+def _authorized_operator_scopes(claims: Mapping[str, Any]) -> list[str]:
+    claim_scopes = _scopes_from_claims(claims)
+    return [
+        scope
+        for scope in _OPERATOR_TOKEN_ALLOWED_SCOPES
+        if scope in claim_scopes
+    ]
+
+
+def _default_requested_operator_scopes(authorized_scopes: Sequence[str]) -> list[str]:
+    authorized_set = {scope for scope in authorized_scopes}
+    for preferred_scope in ("rq:read", "rq:status"):
+        if preferred_scope in authorized_set:
+            return [preferred_scope]
+    return []
+
+
+def _parse_requested_operator_scopes(
+    raw_requested_scopes: Any,
+    *,
+    authorized_scopes: Sequence[str],
+) -> list[str]:
+    if raw_requested_scopes is None:
+        return _default_requested_operator_scopes(authorized_scopes)
+
+    tokens: list[str] = []
+    if isinstance(raw_requested_scopes, str):
+        for chunk in raw_requested_scopes.replace(",", " ").split():
+            token = chunk.strip()
+            if token:
+                tokens.append(token)
+    elif isinstance(raw_requested_scopes, Sequence):
+        for item in raw_requested_scopes:
+            if not isinstance(item, str):
+                raise ValueError("requested_scopes must contain strings only.")
+            token = item.strip()
+            if token:
+                tokens.append(token)
+    else:
+        raise ValueError("requested_scopes must be a list of scope strings.")
+
+    if not tokens:
+        raise ValueError("requested_scopes must include at least one scope.")
+
+    deduped: list[str] = []
+    for scope in tokens:
+        if scope not in deduped:
+            deduped.append(scope)
+    return deduped
+
+
+def _caller_ip() -> str:
+    if request.remote_addr:
+        return str(request.remote_addr)
+    return "unknown"
+
+
+def _operator_rate_limit_key(*, subject: str, token_class: str) -> str:
+    return f"{token_class}:{subject}:{_caller_ip()}"
+
+
+def _is_operator_token_rate_limited(*, subject: str, token_class: str) -> tuple[bool, int, int]:
+    limit_count = _operator_token_rate_limit_count()
+    window_seconds = _operator_token_rate_limit_window_seconds()
+    max_buckets = _operator_token_rate_limit_max_buckets()
+    bucket_key = _operator_rate_limit_key(subject=subject, token_class=token_class)
+
+    now = time.monotonic()
+    cutoff = now - float(window_seconds)
+    with _OPERATOR_TOKEN_RATE_LIMIT_LOCK:
+        stale_keys: list[str] = []
+        for key, candidate_bucket in _OPERATOR_TOKEN_RATE_LIMIT_BUCKETS.items():
+            while candidate_bucket and candidate_bucket[0] <= cutoff:
+                candidate_bucket.popleft()
+            if not candidate_bucket:
+                stale_keys.append(key)
+        for key in stale_keys:
+            _OPERATOR_TOKEN_RATE_LIMIT_BUCKETS.pop(key, None)
+
+        bucket = _OPERATOR_TOKEN_RATE_LIMIT_BUCKETS.get(bucket_key)
+        if bucket is None:
+            if len(_OPERATOR_TOKEN_RATE_LIMIT_BUCKETS) >= max_buckets:
+                return True, limit_count, window_seconds
+            bucket = deque()
+            _OPERATOR_TOKEN_RATE_LIMIT_BUCKETS[bucket_key] = bucket
+        while bucket and bucket[0] <= cutoff:
+            bucket.popleft()
+        if len(bucket) >= limit_count:
+            return True, limit_count, window_seconds
+        bucket.append(now)
+    return False, limit_count, window_seconds
+
+
+def _operator_token_is_revoked(jti: str) -> bool:
+    key = f"auth:jwt:revoked:{jti}"
+    conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
+    timeout_seconds = float(_operator_token_redis_timeout_seconds())
+    conn_kwargs.setdefault("socket_timeout", timeout_seconds)
+    conn_kwargs.setdefault("socket_connect_timeout", timeout_seconds)
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
+        exists_fn = getattr(redis_conn, "exists", None)
+        if callable(exists_fn):
+            return bool(exists_fn(key))
+        get_fn = getattr(redis_conn, "get", None)
+        return bool(callable(get_fn) and get_fn(key))
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
+
+
+def _audit_operator_token_event(
+    *,
+    outcome: str,
+    status_code: int,
+    subject: str,
+    token_class: str,
+    requested_scopes: Sequence[str],
+    granted_scopes: Sequence[str],
+) -> None:
+    current_app.logger.info(
+        "rq_engine_operator_token_audit outcome=%s status_code=%s token_class=%s subject=%s requested_scopes=%s granted_scopes=%s ip=%s",
+        outcome,
+        status_code,
+        token_class,
+        subject,
+        list(requested_scopes),
+        list(granted_scopes),
+        _caller_ip(),
+    )
+
+
+def _issue_operator_rq_engine_token(
+    *,
+    claims: Mapping[str, Any],
+    scopes: Sequence[str],
+) -> Mapping[str, Any]:
+    token_class = str(claims.get("token_class") or "").strip().lower()
+    subject = str(claims.get("sub") or "").strip()
+    extra_claims: dict[str, Any] = {
+        "token_class": token_class,
+        "jti": uuid.uuid4().hex,
+    }
+
+    for passthrough_claim in ("email", "roles", "groups", "service_groups", "runid", "config"):
+        value = claims.get(passthrough_claim)
+        if value is not None:
+            extra_claims[passthrough_claim] = value
+
+    runs = claims.get("runs")
+    if isinstance(runs, Sequence) and not isinstance(runs, str):
+        runs = [str(run).strip() for run in runs if str(run).strip()]
+    else:
+        runs = None
+
+    return auth_tokens.issue_token(
+        subject,
+        scopes=list(scopes),
+        audience="rq-engine",
+        expires_in=_operator_token_ttl_seconds(),
+        runs=runs,
+        extra_claims=extra_claims,
+    )
 
 
 def _normalized_origin(value: str) -> tuple[str, str, int] | None:
@@ -130,6 +398,327 @@ def issue_rq_engine_token():
         return response
 
     return jsonify({"token": token})
+
+
+@weppcloud_site_bp.route('/api/auth/rq-engine-operator-token', methods=['POST'])
+def issue_rq_engine_operator_token():
+    bearer_token = _extract_bearer_token()
+    if bearer_token is None:
+        _audit_operator_token_event(
+            outcome="unauthorized",
+            status_code=401,
+            subject="unknown",
+            token_class="unknown",
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory("Bearer token required.")
+        response.status_code = 401
+        return response
+
+    try:
+        claims = auth_tokens.decode_token(bearer_token, audience="rq-engine")
+    except auth_tokens.JWTConfigurationError as exc:
+        current_app.logger.exception("rq-engine operator token bootstrap configuration failure")
+        _audit_operator_token_event(
+            outcome="error",
+            status_code=500,
+            subject="unknown",
+            token_class="unknown",
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory(f"JWT configuration error: {exc}")
+        response.status_code = 500
+        return response
+    except auth_tokens.JWTDecodeError:
+        _audit_operator_token_event(
+            outcome="unauthorized",
+            status_code=401,
+            subject="unknown",
+            token_class="unknown",
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory("Invalid bearer token.")
+        response.status_code = 401
+        return response
+    except Exception:
+        current_app.logger.exception("rq-engine operator token bootstrap decode failure")
+        _audit_operator_token_event(
+            outcome="unauthorized",
+            status_code=401,
+            subject="unknown",
+            token_class="unknown",
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory("Failed to validate bearer token.")
+        response.status_code = 401
+        return response
+
+    subject = str(claims.get("sub") or "").strip()
+    token_class = str(claims.get("token_class") or "").strip().lower()
+    jti = str(claims.get("jti") or "").strip()
+    if not subject:
+        _audit_operator_token_event(
+            outcome="unauthorized",
+            status_code=401,
+            subject="unknown",
+            token_class=token_class or "unknown",
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory("Bearer token missing subject claim.")
+        response.status_code = 401
+        return response
+    if not jti:
+        _audit_operator_token_event(
+            outcome="unauthorized",
+            status_code=401,
+            subject=subject,
+            token_class=token_class or "unknown",
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory("Bearer token missing jti claim.")
+        response.status_code = 401
+        return response
+    if token_class not in {"user", "service"}:
+        _audit_operator_token_event(
+            outcome="forbidden",
+            status_code=403,
+            subject=subject,
+            token_class=token_class or "unknown",
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory("Bearer token class not authorized for operator bootstrap.")
+        response.status_code = 403
+        return response
+
+    limited, limit_count, window_seconds = _is_operator_token_rate_limited(subject=subject, token_class=token_class)
+    if limited:
+        response = error_factory(
+            f"Rate limit exceeded: {limit_count} requests per {window_seconds} seconds.",
+            status_code=429,
+        )
+        _audit_operator_token_event(
+            outcome="rate_limited",
+            status_code=429,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        return response
+
+    try:
+        if _operator_token_is_revoked(jti):
+            _audit_operator_token_event(
+                outcome="forbidden",
+                status_code=403,
+                subject=subject,
+                token_class=token_class,
+                requested_scopes=[],
+                granted_scopes=[],
+            )
+            response = error_factory("Bearer token has been revoked.", status_code=403)
+            return response
+    except redis.RedisError:
+        current_app.logger.exception("rq-engine operator token bootstrap revocation service unavailable")
+        _audit_operator_token_event(
+            outcome="error",
+            status_code=503,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory(
+            "Token revocation service unavailable. Retry with backoff.",
+            status_code=503,
+        )
+        response.headers["Retry-After"] = "5"
+        return response
+    except Exception:
+        current_app.logger.exception("rq-engine operator token bootstrap revocation check failure")
+        _audit_operator_token_event(
+            outcome="error",
+            status_code=500,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        response = error_factory("Failed to validate bearer token revocation status.", status_code=500)
+        return response
+
+    request_payload: Mapping[str, Any] = {}
+    if _request_has_body():
+        if _content_type_token() != "application/json":
+            response = error_factory("Operator token bootstrap request body must use application/json.", status_code=400)
+            _audit_operator_token_event(
+                outcome="validation_error",
+                status_code=400,
+                subject=subject,
+                token_class=token_class,
+                requested_scopes=[],
+                granted_scopes=[],
+            )
+            return response
+        parsed_payload = request.get_json(silent=True)
+        if parsed_payload is None:
+            response = error_factory("Malformed JSON request body.", status_code=400)
+            _audit_operator_token_event(
+                outcome="validation_error",
+                status_code=400,
+                subject=subject,
+                token_class=token_class,
+                requested_scopes=[],
+                granted_scopes=[],
+            )
+            return response
+        if not isinstance(parsed_payload, Mapping):
+            response = error_factory("JSON request body must be an object.", status_code=400)
+            _audit_operator_token_event(
+                outcome="validation_error",
+                status_code=400,
+                subject=subject,
+                token_class=token_class,
+                requested_scopes=[],
+                granted_scopes=[],
+            )
+            return response
+        request_payload = parsed_payload
+
+    authorized_scopes = _authorized_operator_scopes(claims)
+    if not authorized_scopes:
+        response = error_factory("Bearer token does not authorize operator bootstrap scopes.", status_code=403)
+        _audit_operator_token_event(
+            outcome="forbidden",
+            status_code=403,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        return response
+
+    try:
+        requested_scopes = _parse_requested_operator_scopes(
+            request_payload.get("requested_scopes"),
+            authorized_scopes=authorized_scopes,
+        )
+    except ValueError as exc:
+        response = error_factory(str(exc), status_code=400)
+        _audit_operator_token_event(
+            outcome="validation_error",
+            status_code=400,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=[],
+            granted_scopes=[],
+        )
+        return response
+
+    unknown_scopes = [scope for scope in requested_scopes if scope not in _OPERATOR_TOKEN_ALLOWED_SCOPE_SET]
+    if unknown_scopes:
+        response = error_factory(
+            f"Unknown requested scope(s): {', '.join(unknown_scopes)}.",
+            status_code=400,
+        )
+        _audit_operator_token_event(
+            outcome="validation_error",
+            status_code=400,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=requested_scopes,
+            granted_scopes=[],
+        )
+        return response
+
+    unauthorized_requested_scopes = [scope for scope in requested_scopes if scope not in set(authorized_scopes)]
+    if unauthorized_requested_scopes:
+        response = error_factory(
+            f"Unauthorized requested scope(s): {', '.join(unauthorized_requested_scopes)}.",
+            status_code=403,
+        )
+        _audit_operator_token_event(
+            outcome="forbidden",
+            status_code=403,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=requested_scopes,
+            granted_scopes=[],
+        )
+        return response
+
+    granted_scopes = [scope for scope in requested_scopes if scope in set(authorized_scopes)]
+    if not granted_scopes:
+        response = error_factory("No authorized scopes available for operator bootstrap.", status_code=403)
+        _audit_operator_token_event(
+            outcome="forbidden",
+            status_code=403,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=requested_scopes,
+            granted_scopes=[],
+        )
+        return response
+
+    try:
+        token_payload = _issue_operator_rq_engine_token(claims=claims, scopes=granted_scopes)
+    except auth_tokens.JWTConfigurationError as exc:
+        current_app.logger.exception("rq-engine operator token bootstrap issuance failure")
+        _audit_operator_token_event(
+            outcome="error",
+            status_code=500,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=requested_scopes,
+            granted_scopes=[],
+        )
+        response = error_factory(f"JWT configuration error: {exc}")
+        response.status_code = 500
+        return response
+    except Exception:
+        current_app.logger.exception("rq-engine operator token bootstrap issuance failure")
+        _audit_operator_token_event(
+            outcome="error",
+            status_code=500,
+            subject=subject,
+            token_class=token_class,
+            requested_scopes=requested_scopes,
+            granted_scopes=[],
+        )
+        response = error_factory("Failed to issue operator token.")
+        response.status_code = 500
+        return response
+
+    issued_claims = token_payload.get("claims", {})
+    response = jsonify(
+        {
+            "token": token_payload.get("token"),
+            "token_class": issued_claims.get("token_class"),
+            "audience": issued_claims.get("aud"),
+            "requested_scopes": requested_scopes,
+            "granted_scopes": granted_scopes,
+            "expires_at": issued_claims.get("exp"),
+            "issued_at": issued_claims.get("iat"),
+            "expires_in": _operator_token_ttl_seconds(),
+        }
+    )
+    response.headers["Cache-Control"] = "no-store"
+    _audit_operator_token_event(
+        outcome="issued",
+        status_code=200,
+        subject=subject,
+        token_class=token_class,
+        requested_scopes=requested_scopes,
+        granted_scopes=granted_scopes,
+    )
+    return response
 
 
 @weppcloud_site_bp.route('/api/auth/session-heartbeat', methods=['POST'])
@@ -583,3 +1172,8 @@ def landing_static_vite_icon():
 @handle_with_exception_factory
 def landing_static_vite_icon_root():
     return landing_static_vite_icon()
+
+
+def register_csrf_exemptions(csrf) -> None:
+    # Bearer-auth operator bootstrap does not rely on browser cookies.
+    csrf.exempt(issue_rq_engine_operator_token)

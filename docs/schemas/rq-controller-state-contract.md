@@ -1,7 +1,7 @@
 # RQ Controller State Contract (Draft)
 > Proposed additive contract for agent-friendly controller state, parameter metadata, and run orchestration signals.
-> **Status:** Draft target profile with row-8 cutover reconciliation completed on 2026-04-11; setup discovery, orchestration-read, schema/default metadata, geospatial/upload metadata, and errors/progress/outputs surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults|errors}`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`); remaining additive controller-state surfaces are planned.
-> **Hardening track (2026-04-11):** operator-token bootstrap ergonomics, state-revision coherence, and snapshot freshness semantics are scoped in `docs/work-packages/20260411_rq_operator_experience_hardening/`.
+> **Status:** Draft target profile with row-8 cutover and row-9 operator hardening completed on 2026-04-11; setup discovery, orchestration-read, schema/default metadata, geospatial/upload metadata, and errors/progress/outputs surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults|errors}`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`); remaining additive controller-state surfaces are planned.
+> **Hardening track (2026-04-11):** operator-token bootstrap ergonomics, state-revision coherence, and snapshot freshness semantics shipped via `docs/work-packages/20260411_rq_operator_experience_hardening/`.
 > **See also:** `docs/schemas/rq-engine-agent-api-contract.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`
 
 ## Purpose
@@ -1762,9 +1762,7 @@ value semantics where classification rasters are expected).
 - Run-scoped endpoints in this contract MUST emit:
   - `run_state_domain`
   - domain-correct `run_state_revision`
-  - `run_state_vector` with phased requirement:
-    - before `20260411_rq_operator_experience_hardening` closes: `SHOULD`
-    - after `20260411_rq_operator_experience_hardening` closes: `MUST`
+  - `run_state_vector`
 - For stable run snapshots, `run_state_vector` values MUST be internally
   consistent and monotonic per domain.
 - Agents performing multi-call planning SHOULD treat either
@@ -1772,11 +1770,10 @@ value semantics where classification rasters are expected).
   stale-read boundaries and re-fetch planning surfaces (`pipeline`,
   `readiness`, `outputs`, and operation defaults) before enqueueing the next
   step.
-- Known baseline gap (observed in API acceptance on 2026-04-11): some deployed
-  surfaces emit inconsistent revisions across orchestration versus metadata
-  reads without explicit domain annotation. This behavior is non-compliant with
-  the target profile and is owned by
-  `20260411_rq_operator_experience_hardening`.
+- Historical note: the baseline revision-domain gap observed on 2026-04-11
+  (orchestration vs metadata ambiguity) was closed in
+  `20260411_rq_operator_experience_hardening` by shipping explicit
+  `run_state_domain` and phased `run_state_vector` payload semantics.
 
 ## Compatibility Rules
 - Additive fields are allowed in payloads.
@@ -1817,7 +1814,7 @@ When a package is closed, its active ExecPlan SHOULD be archived to
 | 6 | `20260410_rq_controller_state_errors_progress_outputs` | Implement operation error catalogs, async progress signals, and `/outputs` artifact index with trust/provenance metadata. | Agent can recover from cataloged errors, poll with progress, and fetch artifacts from `outputs` only. | 3, 4, 5 | Complete |
 | 7 | `20260410_rq_controller_state_auth_concurrency` | Enforce/auth-rollout for `rq:read` aliasing, accepted-auth metadata parity, optimistic concurrency, and idempotency behavior. | Mutation/read preconditions and auth modes match descriptor metadata in tests. | 2, 3, 4, 6 | Complete |
 | 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed; package 1-7 gate evidence includes command outcomes; accepted auth least-privilege bridge (`rq:status` -> minted broader session scopes) has explicit cutover decision; row 6-7 watch-list items dispositioned (resolved or explicitly accepted). | 2, 3, 4, 5, 6, 7 | Complete |
-| 9 | `20260411_rq_operator_experience_hardening` | Harden operator experience end-to-end: machine-safe token bootstrap (no `wctl` dependency), run-state revision coherence metadata (`run_state_domain`/`run_state_vector`), strict freshness semantics (`updated_at`, `data_state`, `data_updated_at`), and smoke-runbook reliability rules. | API operators can execute auth bootstrap + controller-state smoke entirely via HTTP clients; revision/freshness fields are deterministic and contract-guarded; smoke runbook gating no longer depends on hard-coded pass counts. | 8 | Planned |
+| 9 | `20260411_rq_operator_experience_hardening` | Harden operator experience end-to-end: machine-safe token bootstrap (no `wctl` dependency), run-state revision coherence metadata (`run_state_domain`/`run_state_vector`), strict freshness semantics (`updated_at`, `data_state`, `data_updated_at`), and smoke-runbook reliability rules. | API operators can execute auth bootstrap + controller-state smoke entirely via HTTP clients; revision/freshness fields are deterministic and contract-guarded; smoke runbook gating no longer depends on hard-coded pass counts. | 8 | Complete |
 
 ### Row 8 Cutover Dispositions (2026-04-10)
 

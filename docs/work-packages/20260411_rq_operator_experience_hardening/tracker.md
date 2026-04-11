@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-11 06:03 UTC  
-**Current phase**: Discovery/Planning  
-**Last updated**: 2026-04-11 06:03 UTC  
-**Next milestone**: Approve and begin Milestone 1 (machine-safe token bootstrap implementation)  
+**Current phase**: Complete (implementation + validation + review gates)  
+**Last updated**: 2026-04-11 07:40 UTC  
+**Next milestone**: Archive active ExecPlan and package handoff  
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
 **Security artifact**: `docs/work-packages/20260411_rq_operator_experience_hardening/artifacts/2026-04-11_security_review.md`
@@ -16,12 +16,12 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Implement machine-safe operator token bootstrap path and document curl/python flow.
-- [ ] Add route/descriptor/openapi support for revision-domain metadata (`run_state_domain`, `run_state_vector`).
-- [ ] Enforce strict snapshot freshness semantics (`updated_at`, `data_state`, `data_updated_at`) on controller-state read surfaces.
-- [ ] Add/extend regression tests and guard checks for auth bootstrap ergonomics + revision/freshness invariants.
-- [ ] Update operator smoke automation/runbook to count-agnostic gates and API-only evidence collection.
-- [ ] Complete independent reviewer/qa/security passes and disposition findings.
+- [x] Implement machine-safe operator token bootstrap path and document curl/python flow.
+- [x] Add route/descriptor/openapi support for revision-domain metadata (`run_state_domain`, `run_state_vector`).
+- [x] Enforce strict snapshot freshness semantics (`updated_at`, `data_state`, `data_updated_at`) on controller-state read surfaces.
+- [x] Add/extend regression tests and guard checks for auth bootstrap ergonomics + revision/freshness invariants.
+- [x] Update operator smoke automation/runbook to count-agnostic gates and API-only evidence collection.
+- [x] Complete independent reviewer/qa/security passes and disposition findings.
 
 ### In Progress
 - [ ] None.
@@ -40,6 +40,13 @@
 - **2026-04-11 06:03 UTC** - Package scaffolded (`package.md`, `tracker.md`, active ExecPlan).
 - **2026-04-11 06:03 UTC** - Contract hardening requirements added to `rq-engine-agent-api-contract.md` and `rq-controller-state-contract.md`.
 - **2026-04-11 06:03 UTC** - Smoke runbook reliability guidance updated to exit-code/count-agnostic expectations.
+- **2026-04-11 06:55 UTC** - Machine-safe bootstrap endpoint implemented with rate limit/audit/scope-intersection behavior and CSRF exemption wiring.
+- **2026-04-11 06:55 UTC** - Revision-domain + freshness semantics implemented across `pipeline`, `readiness`, `geospatial-metadata`, and `outputs` payload/descriptor surfaces.
+- **2026-04-11 06:55 UTC** - Maintainer preflight + operator API-only smoke gates completed; evidence/security artifacts updated.
+- **2026-04-11 07:18 UTC** - Post-review hardening shipped: required `jti` contract alignment, explicit revocation-outage `503` behavior (`Retry-After`), and deterministic non-future fallback timestamp handling.
+- **2026-04-11 07:33 UTC** - Operator API-only smoke rerun with refreshed UTC/redacted evidence; parity checks confirmed with non-future freshness values.
+- **2026-04-11 07:37 UTC** - Independent `reviewer`, `qa_reviewer`, and `security_reviewer` re-reviews closed with no unresolved medium/high findings.
+- **2026-04-11 07:40 UTC** - Final reviewer follow-up closed after revision-coherence tweak (`data_updated_at` included in orchestration revision signature) and evidence `session_id` redaction; no unresolved medium/high findings remain.
 
 ## Decisions Log
 
@@ -68,35 +75,61 @@
 
 **Impact**: Removes ambiguity for autonomous planning loops and enables targeted stale-read detection.
 
+---
+
+### 2026-04-11 06:55 UTC: Ship phased run-state vector with explicit nulls for non-local domains
+**Context**: Orchestration and metadata/outputs revisions are produced by separate route families. For this package, deterministic domain annotation and join-safe vectors were required without introducing cross-module dependency coupling.
+
+**Options considered**:
+1. Compute all three domain revisions on every endpoint response (cross-module coupling).
+2. Emit domain-correct revision plus phased vector keys with explicit `null` for domains not computed by that surface.
+
+**Decision**: Option 2.
+
+**Impact**: Delivers deterministic cross-endpoint coherence semantics immediately, keeps route modules decoupled, and preserves the contract path to full non-null vectors in future follow-on work.
+
+---
+
+### 2026-04-11 07:18 UTC: Fail closed with explicit retry guidance for revocation outages
+**Context**: Independent security review identified that revocation backend failures should avoid ambiguous 500s and provide clear retry semantics.
+
+**Options considered**:
+1. Keep generic `500` behavior on revocation check failure.
+2. Return explicit `503` with retry guidance and bounded Redis timeouts.
+
+**Decision**: Option 2.
+
+**Impact**: Preserves fail-closed auth posture while making outage behavior machine-actionable for operators.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| New token bootstrap path widens auth attack surface | High | Medium | Security-first design + dedicated security review + strict scope constraints | Open |
-| Revision-domain model introduces client confusion if partially rolled out | High | Medium | Add compatibility rules + descriptor docs + endpoint tests before rollout | Open |
-| Freshness semantics change causes downstream parsing regressions | Medium | Medium | Add additive fields first, preserve backward compatibility, gate with route tests | Open |
-| Smoke reliability fixes remain doc-only without executable validation | Medium | Medium | Add scripted API smoke gate and enforce in package acceptance | Open |
+| New token bootstrap path widens auth attack surface | High | Medium | Security-first design + dedicated security review + strict scope constraints | Mitigated |
+| Revision-domain model introduces client confusion if partially rolled out | High | Medium | Add compatibility rules + descriptor docs + endpoint tests before rollout | Mitigated |
+| Freshness semantics change causes downstream parsing regressions | Medium | Medium | Add additive fields first, preserve backward compatibility, gate with route tests | Mitigated |
+| Smoke reliability fixes remain doc-only without executable validation | Medium | Medium | Add scripted API smoke gate and enforce in package acceptance | Mitigated |
 
 ## Verification Checklist
 
 ### Code/Contract
-- [ ] Route/descriptors/OpenAPI updated for machine-safe token bootstrap.
-- [ ] Route/descriptors/OpenAPI updated for revision-domain + freshness semantics.
-- [ ] Required microservice tests pass.
-- [ ] Inventory/checklist guards pass.
+- [x] Route/descriptors/OpenAPI updated for machine-safe token bootstrap.
+- [x] Route/descriptors/OpenAPI updated for revision-domain + freshness semantics.
+- [x] Required microservice tests pass.
+- [x] Inventory/checklist guards pass.
 
 ### Security
-- [ ] Security impact triage validated in implementation scope.
-- [ ] `artifacts/2026-04-11_security_review.md` completed.
-- [ ] No unresolved medium/high security findings remain.
+- [x] Security impact triage validated in implementation scope.
+- [x] `artifacts/2026-04-11_security_review.md` completed.
+- [x] No unresolved medium/high security findings remain.
 
 ### Docs
-- [ ] Schema docs and runbook updated to final shipped behavior.
-- [ ] `wctl doc-lint` passes on changed docs.
+- [x] Schema docs and runbook updated to final shipped behavior.
+- [x] `wctl doc-lint` passes on changed docs.
 
 ### Operator Acceptance
-- [ ] API-only smoke (no `wctl`) passes with UTC call evidence.
-- [ ] Source vs target parity checks pass under hardened contract semantics.
+- [x] API-only smoke (no `wctl`) passes with UTC call evidence.
+- [x] Source vs target parity checks pass under hardened contract semantics.
 
 ## Progress Notes
 
@@ -122,6 +155,60 @@
 - Define concrete compatibility rollout for `run_state_domain`/`run_state_vector` and freshness fields.
 
 **Test results**: Not run yet in this package (planning/docs session only).
+
+### 2026-04-11 06:55 UTC: Implementation, validation, and evidence closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Implemented machine-safe bootstrap route:
+  - `POST /weppcloud/api/auth/rq-engine-operator-token`
+  - strict scope intersection semantics, token-class gate (`user`/`service`), rate limiting, audit logging, `Cache-Control: no-store`, and CSRF exemption registration.
+- Implemented revision/freshness contract semantics in run-scoped snapshot reads:
+  - `pipeline` / `readiness` now emit `run_state_domain=orchestration`, phased `run_state_vector`, deterministic `updated_at`, and `data_state` / `data_updated_at`.
+  - metadata surfaces emit `run_state_domain=metadata` + phased `run_state_vector`.
+  - outputs surface now emits `run_state_domain=outputs`, outputs-domain revision, vector linkage to metadata revision, and explicit freshness state (`not_materialized` when no artifacts).
+- Updated operation descriptors/schemas for snapshot read required fields.
+- Updated tests across microservice + weppcloud route suites for new contract fields/semantics.
+- Ran maintainer preflight gate (Phase A), operator API-only acceptance smoke, and generated required evidence artifact:
+  - `docs/work-packages/20260411_rq_operator_experience_hardening/artifacts/2026-04-11_operator_smoke_evidence.md`
+- Updated security artifact with threat model, controls, evidence, and findings disposition.
+
+**Blockers encountered**:
+- None.
+
+**Test results**:
+- `wctl run-pytest` consolidated Phase A command set: **251 passed**.
+- Route inventory + checklist checks: **pass**.
+- Guard tests: **2 passed**.
+- Bootstrap/CSRF route tests: **34 passed**.
+
+**Outcome status**:
+- Package acceptance criteria satisfied.
+
+### 2026-04-11 07:37 UTC: Post-review remediation and independent gate closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Resolved independent review findings:
+  - freshness fallback now revision-coherent and non-future-clamped;
+  - revocation failure path now pre-throttled and returns explicit `503` + `Retry-After`;
+  - machine-safe bootstrap `jti` requirement documented in canonical contract/runbook.
+- Added/updated tests for:
+  - revocation backend unavailability (`503` contract);
+  - non-future freshness assertions on fallback paths.
+- Reran operator API-only smoke and refreshed:
+  - `artifacts/2026-04-11_operator_smoke_evidence.md`
+- Completed independent re-reviews (`reviewer`, `qa_reviewer`, `security_reviewer`) with no unresolved medium/high findings.
+
+**Blockers encountered**:
+- None.
+
+**Test results**:
+- `wctl run-pytest tests/weppcloud/routes/test_rq_engine_token_api.py tests/weppcloud/routes/test_csrf_rollout.py --maxfail=1` -> **43 passed**
+- `wctl run-pytest tests/microservices/test_rq_engine_orchestration_read_routes.py tests/microservices/test_rq_engine_errors_progress_outputs_routes.py tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` -> **102 passed**
+
+**Outcome status**:
+- Package acceptance criteria remain satisfied; independent gates closed.
 
 ## Watch List
 

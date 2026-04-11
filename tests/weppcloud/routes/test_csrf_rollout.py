@@ -19,8 +19,9 @@ def _build_site_app() -> Flask:
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.secret_key = "csrf-test-secret"
-    CSRFProtect(app)
+    csrf = CSRFProtect(app)
     app.register_blueprint(weppcloud_site_bp, url_prefix="/weppcloud")
+    weppcloud_site_module.register_csrf_exemptions(csrf)
 
     @app.errorhandler(CSRFError)
     def csrf_error(_exc):
@@ -166,6 +167,40 @@ def test_rq_engine_token_accepts_valid_csrf(monkeypatch: pytest.MonkeyPatch) -> 
 
     assert response.status_code == 200
     assert response.get_json() == {"token": "rq-user-token"}
+
+
+def test_operator_rq_engine_token_is_csrf_exempt(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_site_app()
+
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "42",
+            "token_class": "user",
+            "jti": "source-jti-1",
+            "scope": "rq:read rq:status",
+        },
+    )
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "issue_token",
+        lambda subject, **kwargs: {
+            "token": "operator-token",
+            "claims": {"token_class": "user", "aud": "rq-engine", "iat": 1700000000, "exp": 1700000900},
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+            json={},
+        )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["token"] == "operator-token"
 
 
 def test_bootstrap_verify_token_is_csrf_exempt(monkeypatch: pytest.MonkeyPatch) -> None:

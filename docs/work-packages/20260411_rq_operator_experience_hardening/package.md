@@ -1,6 +1,6 @@
 # RQ Operator Experience Hardening
 
-**Status**: Open (2026-04-11 06:03 UTC)
+**Status**: Complete (2026-04-11 07:37 UTC)
 **Timezone**: UTC (all timestamps in this package use UTC)
 
 ## Overview
@@ -39,12 +39,12 @@ This package spans contract docs, route/descriptors/OpenAPI metadata, and API sm
 - **Informed**: downstream work-package owners using rq controller-state smoke workflows.
 
 ## Success Criteria
-- [ ] API operators can mint or acquire required JWTs via a documented machine-safe flow without `wctl` or HTML parsing.
-- [ ] Run-scoped controller-state responses expose deterministic revision-domain metadata that supports reliable multi-endpoint consistency checks.
-- [ ] Snapshot endpoints no longer emit `null`/epoch freshness sentinels and instead expose explicit materialization semantics.
-- [ ] Contract/openapi/route tests cover the new semantics and fail on regression.
-- [ ] Smoke runbook pass/fail criteria are deterministic and count-agnostic.
-- [ ] Security review artifact is complete with no unresolved medium/high findings.
+- [x] API operators can mint or acquire required JWTs via a documented machine-safe flow without `wctl` or HTML parsing.
+- [x] Run-scoped controller-state responses expose deterministic revision-domain metadata that supports reliable multi-endpoint consistency checks.
+- [x] Snapshot endpoints no longer emit `null`/epoch freshness sentinels and instead expose explicit materialization semantics.
+- [x] Contract/openapi/route tests cover the new semantics and fail on regression.
+- [x] Smoke runbook pass/fail criteria are deterministic and count-agnostic.
+- [x] Security review artifact is complete with no unresolved medium/high findings.
 
 ## Dependencies
 

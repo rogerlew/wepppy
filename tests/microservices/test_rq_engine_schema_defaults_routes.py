@@ -219,7 +219,9 @@ def test_list_controllers_payload_contract(monkeypatch: pytest.MonkeyPatch) -> N
     assert set(payload) == {
         "contract_version",
         "deployment_revision",
+        "run_state_domain",
         "run_state_revision",
+        "run_state_vector",
         "runid",
         "config",
         "active_mods",
@@ -232,7 +234,13 @@ def test_list_controllers_payload_contract(monkeypatch: pytest.MonkeyPatch) -> N
     assert payload["runid"] == RUNID
     assert payload["config"] == CONFIG
     assert payload["active_mods"] == ["disturbed", "wepp"]
+    assert payload["run_state_domain"] == "metadata"
     assert payload["run_state_revision"].startswith("runstate:run-1:")
+    assert payload["run_state_vector"] == {
+        "orchestration_revision": None,
+        "metadata_revision": payload["run_state_revision"],
+        "outputs_revision": None,
+    }
 
     controllers = payload["controllers"]
     assert controllers
@@ -264,11 +272,14 @@ def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPa
         assert set(schema_payload) == {
             "contract_version",
             "deployment_revision",
+            "run_state_domain",
             "run_state_revision",
+            "run_state_vector",
             "controller",
             "schema_version",
             "fields",
         }
+        assert schema_payload["run_state_domain"] == "metadata"
         assert schema_payload["controller"] == "climate"
         fields = schema_payload["fields"]
         assert fields["climate_mode"]["constraint_mode"] == "run_resolved"
@@ -281,11 +292,14 @@ def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPa
         assert set(hints_payload) == {
             "contract_version",
             "deployment_revision",
+            "run_state_domain",
             "run_state_revision",
+            "run_state_vector",
             "controller",
             "schema_version",
             "hints",
         }
+        assert hints_payload["run_state_domain"] == "metadata"
         assert "context_fields" in hints_payload["hints"]
         assert "groups" in hints_payload["hints"]
         assert "field_hints" in hints_payload["hints"]
@@ -296,11 +310,14 @@ def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPa
         assert set(templates_payload) == {
             "contract_version",
             "deployment_revision",
+            "run_state_domain",
             "run_state_revision",
+            "run_state_vector",
             "controller",
             "templates",
             "run_resolved_defaults",
         }
+        assert templates_payload["run_state_domain"] == "metadata"
         assert templates_payload["controller"] == "climate"
         assert isinstance(templates_payload["templates"], list)
         assert templates_payload["templates"]
@@ -330,9 +347,12 @@ def test_list_run_endpoints_payload_contract(monkeypatch: pytest.MonkeyPatch) ->
     assert set(payload) == {
         "contract_version",
         "deployment_revision",
+        "run_state_domain",
         "run_state_revision",
+        "run_state_vector",
         "operations",
     }
+    assert payload["run_state_domain"] == "metadata"
 
     operations = payload["operations"]
     assert operations
@@ -371,7 +391,9 @@ def test_run_endpoint_schema_and_defaults_payload_contract(monkeypatch: pytest.M
         assert set(schema_payload) == {
             "contract_version",
             "deployment_revision",
+            "run_state_domain",
             "run_state_revision",
+            "run_state_vector",
             "operation_id",
             "run_scoped",
             "method",
@@ -381,6 +403,7 @@ def test_run_endpoint_schema_and_defaults_payload_contract(monkeypatch: pytest.M
             "request",
             "responses",
         }
+        assert schema_payload["run_state_domain"] == "metadata"
         assert schema_payload["operation_id"] == "rq_engine_run_wepp"
         assert schema_payload["operation_descriptor"]["operation_id"] == "rq_engine_run_wepp"
 
@@ -395,12 +418,15 @@ def test_run_endpoint_schema_and_defaults_payload_contract(monkeypatch: pytest.M
         assert set(defaults_payload) == {
             "contract_version",
             "deployment_revision",
+            "run_state_domain",
             "run_state_revision",
+            "run_state_vector",
             "operation_id",
             "resolved_defaults",
             "defaults_context",
             "computed_at",
         }
+        assert defaults_payload["run_state_domain"] == "metadata"
         assert defaults_payload["operation_id"] == "rq_engine_run_wepp"
         assert defaults_payload["resolved_defaults"] == {
             "clip_soils": True,

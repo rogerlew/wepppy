@@ -57,6 +57,8 @@ UNKNOWN_SOURCE_RUN_STATE_REVISION = "unknown"
 FEATURES_EXPORT_JOB_KEY = "features_export"
 SESSION_TOKEN_IDEMPOTENCY_TTL_ENV = "RQ_ENGINE_SESSION_TOKEN_IDEMPOTENCY_TTL_SECONDS"
 SESSION_TOKEN_IDEMPOTENCY_TTL_DEFAULT = 86400
+RUN_STATE_DOMAIN_METADATA = "metadata"
+RUN_STATE_DOMAIN_OUTPUTS = "outputs"
 
 
 class RunConfigMismatchError(ValueError):
@@ -98,6 +100,74 @@ def _base_payload(runtime: RuntimeState) -> dict[str, Any]:
         "contract_version": CONTRACT_VERSION,
         "deployment_revision": _deployment_revision(),
         "run_state_revision": runtime.run_state_revision,
+        "run_state_domain": RUN_STATE_DOMAIN_METADATA,
+        "run_state_vector": _run_state_vector(metadata_revision=runtime.run_state_revision),
+    }
+
+
+def _run_state_vector(
+    *,
+    metadata_revision: str,
+    outputs_revision: str | None = None,
+) -> dict[str, str | None]:
+    return {
+        "orchestration_revision": None,
+        "metadata_revision": metadata_revision,
+        "outputs_revision": outputs_revision,
+    }
+
+
+def _run_directory_updated_at(runid: str) -> str | None:
+    if not runid:
+        return None
+    try:
+        wd = Path(get_wd(runid))
+        if not wd.exists():
+            return None
+        now_ts = datetime.now(timezone.utc).timestamp()
+        safe_mtime = min(float(wd.stat().st_mtime), float(now_ts))
+        return datetime.fromtimestamp(safe_mtime, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except OSError:
+        return None
+
+
+def _runtime_snapshot_updated_at(*, runid: str, generated_at: str) -> str:
+    run_directory_updated_at = _run_directory_updated_at(runid)
+    if run_directory_updated_at:
+        return run_directory_updated_at
+
+    generated_text = str(generated_at or "").strip()
+    if generated_text:
+        return generated_text
+    return _utc_timestamp()
+
+
+def _stable_updated_at(
+    *,
+    candidate_updated_at: str | None,
+    fallback_updated_at: str,
+) -> str:
+    if candidate_updated_at:
+        return candidate_updated_at
+    return fallback_updated_at
+
+
+def _snapshot_freshness(
+    *,
+    data_state: str,
+    data_updated_at: str | None,
+    fallback_updated_at: str,
+) -> dict[str, Any]:
+    updated_at = _stable_updated_at(
+        candidate_updated_at=data_updated_at,
+        fallback_updated_at=fallback_updated_at,
+    )
+    if data_state in {"materialized", "stale", "error"} and data_updated_at is None:
+        data_updated_at = updated_at
+    return {
+        "updated_at": updated_at,
+        "data_state": data_state,
+        "data_updated_at": data_updated_at,
     }
 
 
@@ -313,11 +383,16 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
     }
 
     generated_at = _utc_timestamp()
+    snapshot_fallback_updated_at = _runtime_snapshot_updated_at(
+        runid=runid,
+        generated_at=generated_at,
+    )
     revision_source = {
         "config": actual_config or requested_config or config,
         "active_mods": list(active_mods),
         "region": region,
         "states": states,
+        "snapshot_fallback_updated_at": snapshot_fallback_updated_at,
     }
     run_state_revision = _compute_run_state_revision(runid, revision_source)
 
@@ -1354,21 +1429,37 @@ def _build_outputs_payload(runtime: RuntimeState) -> dict[str, Any]:
     )
 
     exports = _outputs_export_catalog()
-    updated_candidates = [str(item.get("produced_at")) for item in artifacts if item.get("produced_at")]
-    updated_at = max(updated_candidates) if updated_candidates else UNKNOWN_UPDATED_AT
+    data_updated_candidates = [str(item.get("produced_at")) for item in artifacts if item.get("produced_at")]
+    data_updated_at = max(data_updated_candidates) if data_updated_candidates else None
+    data_state = "materialized" if artifacts else "not_materialized"
 
-    etag_input = {
-        "run_state_revision": runtime.run_state_revision,
+    revision_input = {
+        "metadata_revision": runtime.run_state_revision,
         "artifacts": artifacts,
         "exports": exports,
     }
-    etag_digest = hashlib.sha256(
-        json.dumps(etag_input, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    revision_digest = hashlib.sha256(
+        json.dumps(revision_input, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()[:12]
+    outputs_revision = f"runstate:{runtime.runid}:{revision_digest}"
+    freshness = _snapshot_freshness(
+        data_state=data_state,
+        data_updated_at=data_updated_at,
+        fallback_updated_at=_runtime_snapshot_updated_at(
+            runid=runtime.runid,
+            generated_at=runtime.generated_at,
+        ),
+    )
 
     return {
-        "updated_at": updated_at,
-        "etag": f'W/"outputs:{runtime.runid}:{etag_digest}"',
+        "run_state_domain": RUN_STATE_DOMAIN_OUTPUTS,
+        "run_state_revision": outputs_revision,
+        "run_state_vector": _run_state_vector(
+            metadata_revision=runtime.run_state_revision,
+            outputs_revision=outputs_revision,
+        ),
+        **freshness,
+        "etag": f'W/"outputs:{runtime.runid}:{revision_digest}"',
         "artifacts": artifacts,
         "exports": exports,
     }
@@ -1610,14 +1701,34 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 runtime=runtime,
                 operation_id=geospatial_metadata_id,
                 path="/api/runs/{runid}/{config}/geospatial-metadata",
-                required_fields=["dem_coverage", "recommended_defaults", "field_availability"],
+                required_fields=[
+                    "run_state_domain",
+                    "run_state_vector",
+                    "updated_at",
+                    "data_state",
+                    "data_updated_at",
+                    "etag",
+                    "dem_coverage",
+                    "recommended_defaults",
+                    "field_availability",
+                ],
             ),
             "schema": {
                 "schema_version": 1,
                 "request": _empty_request_schema(),
                 "responses": {
                     "success": {
-                        "required": ["dem_coverage", "recommended_defaults", "field_availability"],
+                        "required": [
+                            "run_state_domain",
+                            "run_state_vector",
+                            "updated_at",
+                            "data_state",
+                            "data_updated_at",
+                            "etag",
+                            "dem_coverage",
+                            "recommended_defaults",
+                            "field_availability",
+                        ],
                     }
                 },
             },
@@ -1840,12 +1951,32 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 runtime=runtime,
                 operation_id=pipeline_id,
                 path="/api/runs/{runid}/{config}/pipeline",
-                required_fields=["steps"],
+                required_fields=[
+                    "run_state_domain",
+                    "run_state_vector",
+                    "updated_at",
+                    "data_state",
+                    "data_updated_at",
+                    "etag",
+                    "steps",
+                ],
             ),
             "schema": {
                 "schema_version": 1,
                 "request": _empty_request_schema(),
-                "responses": {"success": {"required": ["steps"]}},
+                "responses": {
+                    "success": {
+                        "required": [
+                            "run_state_domain",
+                            "run_state_vector",
+                            "updated_at",
+                            "data_state",
+                            "data_updated_at",
+                            "etag",
+                            "steps",
+                        ]
+                    }
+                },
             },
             "defaults": {
                 "resolved_defaults": {},
@@ -1859,12 +1990,32 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 runtime=runtime,
                 operation_id=readiness_id,
                 path="/api/runs/{runid}/{config}/readiness",
-                required_fields=["next_actionable_steps"],
+                required_fields=[
+                    "run_state_domain",
+                    "run_state_vector",
+                    "updated_at",
+                    "data_state",
+                    "data_updated_at",
+                    "etag",
+                    "next_actionable_steps",
+                ],
             ),
             "schema": {
                 "schema_version": 1,
                 "request": _empty_request_schema(),
-                "responses": {"success": {"required": ["next_actionable_steps"]}},
+                "responses": {
+                    "success": {
+                        "required": [
+                            "run_state_domain",
+                            "run_state_vector",
+                            "updated_at",
+                            "data_state",
+                            "data_updated_at",
+                            "etag",
+                            "next_actionable_steps",
+                        ]
+                    }
+                },
             },
             "defaults": {
                 "resolved_defaults": {},
@@ -1878,12 +2029,34 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 runtime=runtime,
                 operation_id=outputs_id,
                 path="/api/runs/{runid}/{config}/outputs",
-                required_fields=["updated_at", "etag", "artifacts", "exports"],
+                required_fields=[
+                    "run_state_domain",
+                    "run_state_vector",
+                    "updated_at",
+                    "data_state",
+                    "data_updated_at",
+                    "etag",
+                    "artifacts",
+                    "exports",
+                ],
             ),
             "schema": {
                 "schema_version": 1,
                 "request": _empty_request_schema(),
-                "responses": {"success": {"required": ["updated_at", "etag", "artifacts", "exports"]}},
+                "responses": {
+                    "success": {
+                        "required": [
+                            "run_state_domain",
+                            "run_state_vector",
+                            "updated_at",
+                            "data_state",
+                            "data_updated_at",
+                            "etag",
+                            "artifacts",
+                            "exports",
+                        ]
+                    }
+                },
             },
             "defaults": {
                 "resolved_defaults": {},
@@ -2688,8 +2861,32 @@ def get_geospatial_metadata(runid: str, config: str, request: Request) -> JSONRe
         return error_response("Error Handling Request", status_code=500)
 
     try:
+        geospatial_payload = _geospatial_payload(runtime)
+        etag_input = {
+            "run_state_revision": runtime.run_state_revision,
+            "geospatial": {
+                key: value
+                for key, value in geospatial_payload.items()
+                if key != "computed_at"
+            },
+        }
+        etag_digest = hashlib.sha256(
+            json.dumps(etag_input, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()[:12]
+        freshness = _snapshot_freshness(
+            data_state="materialized",
+            data_updated_at=None,
+            fallback_updated_at=_runtime_snapshot_updated_at(
+                runid=runtime.runid,
+                generated_at=runtime.generated_at,
+            ),
+        )
+
         payload = _base_payload(runtime)
-        payload.update(_geospatial_payload(runtime))
+        payload.update(geospatial_payload)
+        payload.update(freshness)
+        payload["etag"] = f'W/"geospatial:{runtime.runid}:{etag_digest}"'
+        payload["computed_at"] = freshness["updated_at"]
         return JSONResponse(payload)
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine geospatial-metadata payload build failed")

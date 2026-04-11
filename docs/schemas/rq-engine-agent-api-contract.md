@@ -1,7 +1,7 @@
 # RQ-Engine Agent API Contract
 > Canonical contract for agent clients using the WEPPcloud rq-engine.
 > **Status:** Canonical path under `docs/schemas/` as of 2026-04-10 (moved from `docs/dev-notes/`).
-> **Operator usability note (2026-04-11):** API-operator hardening for non-browser token bootstrap and smoke reliability is tracked in `docs/work-packages/20260411_rq_operator_experience_hardening/`.
+> **Operator usability note (2026-04-11):** API-operator hardening for non-browser token bootstrap and smoke reliability shipped in `docs/work-packages/20260411_rq_operator_experience_hardening/`.
 > **See also:** `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/correlation-id-debugging.md`, `docs/schemas/rq-controller-state-contract.md`, `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`, and user-facing `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`.
 
 ## Purpose
@@ -178,26 +178,35 @@ Target-profile requirements (owned by `20260411_rq_operator_experience_hardening
   - read-oriented operator flows SHOULD default to `rq:read` (and include
     `rq:status` only when polling compatibility is required and documented).
 
-Current baseline and gap:
-- `POST /weppcloud/profile/mint-token` is usable via API but currently depends
-  on session + CSRF choreography typically sourced from HTML pages.
-- This HTML-coupled bootstrap is an accepted interim path only and is not the
-  target operator experience.
-- Existing compatibility bridges that mint broader scope bundles for specific
-  legacy flows remain explicitly accepted residual behavior until
-  `20260411_rq_operator_experience_hardening` lands route + descriptor +
-  contract updates together.
-- Follow-on package `20260411_rq_operator_experience_hardening` owns the
-  machine-first bootstrap contract and implementation alignment.
+Shipped machine-safe bootstrap surface:
+- `POST /weppcloud/api/auth/rq-engine-operator-token`
+  - bearer-auth only (`Authorization: Bearer <token>`, audience `rq-engine`);
+  - source bearer token MUST include a `jti` claim (missing `jti` returns `401`);
+  - source bearer token revocation is checked against the JWT denylist
+    (`revoked` returns `403`);
+  - accepted caller token classes: `user`, `service`;
+  - allowed operator scopes: `rq:read`, `rq:status`, `rq:enqueue`, `rq:export`;
+  - request body (optional): `{"requested_scopes":[...]}`.
+- Scope grant semantics are strict:
+  - `granted_scopes = requested_scopes ∩ authorized_scopes`;
+  - no silent scope expansion;
+  - unknown requested scopes return `400`;
+  - unauthorized requested scopes return `403`.
+- Defaults and guardrails:
+  - defaults to read-oriented scope when request body omits `requested_scopes`;
+  - short-lived token default (`900s`, env-tunable);
+  - rate limited and audit logged;
+  - revocation backend unavailability returns `503` with retry guidance (`Retry-After`);
+  - response uses `Cache-Control: no-store`.
+- Run-scoped passthrough:
+  - when caller token includes `runid`/`config`/`runs`, minted token preserves
+    those claims to maintain rq-engine run authorization behavior.
 
-Current baseline status:
-- A dedicated machine-safe bootstrap endpoint contract is not yet shipped.
-- Operators currently use either:
-  - pre-issued bearer tokens, or
-  - interim session/CSRF choreography via profile mint routes.
-- Until package `20260411_rq_operator_experience_hardening` closes, treat the
-  machine-safe bootstrap rules above as required target behavior, not completed
-  baseline behavior.
+Browser/session compatibility surface (still supported):
+- `POST /weppcloud/profile/mint-token` remains valid for browser-oriented
+  session + CSRF flows.
+- Browser renewal bridge (`/weppcloud/api/auth/rq-engine-token`) remains for UI
+  compatibility and should be treated as browser/session-bound.
 
 ## Correlation ID Debugging
 

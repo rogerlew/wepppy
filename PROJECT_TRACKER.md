@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-11  
-**Active Packages**: 2  
+**Active Packages**: 1  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -175,32 +175,9 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 2 packages
+**Current WIP Count**: 1 package
 
 ---
-
-### RQ Operator Experience Hardening
-**Started**: 2026-04-11  
-**Status**: Discovery/Planning (kickoff complete, implementation pending)  
-**Size**: Large (2-4 focused sessions)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260411_rq_operator_experience_hardening/](docs/work-packages/20260411_rq_operator_experience_hardening/)  
-**Description**: Hardens rq-engine API operator experience with machine-safe token bootstrap semantics, revision-domain coherence (`run_state_domain`/`run_state_vector`), strict snapshot freshness semantics, and deterministic operator smoke evidence rules.
-
-**Current Status**:
-- Contract and package scaffolding complete.
-- Active ExecPlan created:
-  `docs/work-packages/20260411_rq_operator_experience_hardening/prompts/active/rq_operator_experience_hardening_execplan.md`
-- Security artifact scaffold created:
-  `docs/work-packages/20260411_rq_operator_experience_hardening/artifacts/2026-04-11_security_review.md`
-
-**Next Steps**:
-1. Implement Milestone 1 machine-safe bootstrap route/contract.
-2. Implement revision/freshness metadata rollout and route/openapi tests.
-3. Execute maintainer preflight + API-only operator acceptance gates.
-
----
-
 
 ### markdown-doc Toolkit Integration
 **Started**: 2025-10-25  
@@ -249,6 +226,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### RQ Operator Experience Hardening (2026-04-11)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260411_rq_operator_experience_hardening/](docs/work-packages/20260411_rq_operator_experience_hardening/)  
+**Summary**: Completed end-to-end operator hardening across auth bootstrap, revision coherence, freshness semantics, and smoke reliability. Shipped machine-safe bootstrap endpoint `POST /weppcloud/api/auth/rq-engine-operator-token` (scope-intersection enforcement, pre-revocation throttling, denylist revocation checks with explicit `503`+`Retry-After` outage contract, audit logging, short TTL/no-store response, CSRF exemption for bearer flow), added `run_state_domain` + phased `run_state_vector` semantics across run-scoped snapshot reads, enforced explicit freshness semantics (`updated_at`, `data_state`, `data_updated_at`) with revision-coherent/non-future behavior, and updated descriptor/schema contract fields and regression tests. Maintainer preflight gate passed (`251` microservice tests + parity guards), API-only operator acceptance evidence was rerun and captured with UTC/redacted logging, and independent `reviewer`/`qa_reviewer`/`security_reviewer` re-reviews closed with no unresolved medium/high findings.
 
 ### RQ Controller State Contract Cutover (2026-04-11)
 **Status**: ✅ **COMPLETE**  

@@ -22,6 +22,11 @@ def _build_app() -> Flask:
     return app
 
 
+def _reset_operator_rate_limit_state() -> None:
+    with weppcloud_site_module._OPERATOR_TOKEN_RATE_LIMIT_LOCK:
+        weppcloud_site_module._OPERATOR_TOKEN_RATE_LIMIT_BUCKETS.clear()
+
+
 def test_issue_rq_engine_token_requires_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     app = _build_app()
     monkeypatch.setattr(
@@ -218,6 +223,486 @@ def test_issue_rq_engine_token_handles_jwt_config_error(monkeypatch: pytest.Monk
     assert response.status_code == 500
     payload = response.get_json()
     assert payload["error"]["message"] == "JWT configuration error: missing secret"
+
+
+def test_issue_rq_engine_operator_token_requires_bearer_auth() -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+
+    with app.test_client() as client:
+        response = client.post("/weppcloud/api/auth/rq-engine-operator-token")
+
+    assert response.status_code == 401
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Bearer token required."
+
+
+def test_issue_rq_engine_operator_token_rejects_missing_subject(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "token_class": "service",
+            "jti": "jti-1",
+            "scope": "rq:read",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+        )
+
+    assert response.status_code == 401
+    assert response.get_json()["error"]["message"] == "Bearer token missing subject claim."
+
+
+def test_issue_rq_engine_operator_token_rejects_missing_jti(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "svc-1",
+            "token_class": "service",
+            "scope": "rq:read",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+        )
+
+    assert response.status_code == 401
+    assert response.get_json()["error"]["message"] == "Bearer token missing jti claim."
+
+
+def test_issue_rq_engine_operator_token_rejects_disallowed_token_class(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "session-1",
+            "token_class": "session",
+            "jti": "jti-1",
+            "scope": "rq:read",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+        )
+
+    assert response.status_code == 403
+    assert response.get_json()["error"]["message"] == "Bearer token class not authorized for operator bootstrap."
+
+
+def test_issue_rq_engine_operator_token_rejects_revoked_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "svc-1",
+            "token_class": "service",
+            "jti": "revoked-jti",
+            "scope": "rq:read",
+        },
+    )
+    monkeypatch.setattr(weppcloud_site_module, "_operator_token_is_revoked", lambda jti: True)
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+        )
+
+    assert response.status_code == 403
+    assert response.get_json()["error"]["message"] == "Bearer token has been revoked."
+
+
+def test_issue_rq_engine_operator_token_handles_revocation_service_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "svc-1",
+            "token_class": "service",
+            "jti": "revocation-jti",
+            "scope": "rq:read",
+        },
+    )
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "_operator_token_is_revoked",
+        lambda jti: (_ for _ in ()).throw(weppcloud_site_module.redis.RedisError("redis down")),
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+        )
+
+    assert response.status_code == 503
+    assert response.get_json()["error"]["message"] == "Token revocation service unavailable. Retry with backoff."
+    assert response.headers.get("Retry-After") == "5"
+
+
+def test_issue_rq_engine_operator_token_rejects_invalid_bearer(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: (_ for _ in ()).throw(auth_tokens.JWTDecodeError("bad token")),
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer invalid"},
+        )
+
+    assert response.status_code == 401
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Invalid bearer token."
+
+
+def test_issue_rq_engine_operator_token_rejects_non_json_body_with_content(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "42",
+            "token_class": "user",
+            "jti": "jti-1",
+            "scope": "rq:read rq:status",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token", "Content-Type": "text/plain"},
+            data="requested_scopes=rq:read",
+        )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"]["message"] == "Operator token bootstrap request body must use application/json."
+
+
+def test_issue_rq_engine_operator_token_rejects_malformed_json_body(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "42",
+            "token_class": "user",
+            "jti": "jti-1",
+            "scope": "rq:read rq:status",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token", "Content-Type": "application/json"},
+            data="{bad-json",
+        )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"]["message"] == "Malformed JSON request body."
+
+
+def test_issue_rq_engine_operator_token_rejects_non_object_json_body(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "42",
+            "token_class": "user",
+            "jti": "jti-1",
+            "scope": "rq:read rq:status",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token", "Content-Type": "application/json"},
+            data='["rq:read"]',
+        )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"]["message"] == "JSON request body must be an object."
+
+
+def test_issue_rq_engine_operator_token_defaults_to_read_scope_when_available(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "42",
+            "token_class": "user",
+            "jti": "jti-1",
+            "scope": "rq:read rq:status rq:enqueue",
+            "email": "user@example.com",
+            "roles": ["Admin"],
+            "groups": ["ops"],
+        },
+    )
+
+    captured: dict[str, object] = {}
+
+    def _fake_issue_token(subject: str, **kwargs):
+        captured["subject"] = subject
+        captured["kwargs"] = kwargs
+        return {
+            "token": "operator-token",
+            "claims": {
+                "token_class": "user",
+                "aud": "rq-engine",
+                "iat": 1700000000,
+                "exp": 1700000900,
+            },
+        }
+
+    monkeypatch.setattr(weppcloud_site_module.auth_tokens, "issue_token", _fake_issue_token)
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+            json={},
+        )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["requested_scopes"] == ["rq:read"]
+    assert payload["granted_scopes"] == ["rq:read"]
+    assert payload["token"] == "operator-token"
+    assert response.headers.get("Cache-Control") == "no-store"
+
+    assert captured["subject"] == "42"
+    kwargs = captured["kwargs"]
+    assert kwargs["scopes"] == ["rq:read"]
+    assert kwargs["audience"] == "rq-engine"
+
+
+def test_issue_rq_engine_operator_token_rejects_unknown_requested_scopes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "42",
+            "token_class": "user",
+            "jti": "jti-1",
+            "scope": "rq:read rq:status",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+            json={"requested_scopes": ["rq:read", "rq:bogus"]},
+        )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert "Unknown requested scope(s): rq:bogus." == payload["error"]["message"]
+
+
+def test_issue_rq_engine_operator_token_rejects_unauthorized_requested_scopes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "42",
+            "token_class": "user",
+            "jti": "jti-1",
+            "scope": "rq:status",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+            json={"requested_scopes": ["rq:enqueue"]},
+        )
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Unauthorized requested scope(s): rq:enqueue."
+
+
+def test_issue_rq_engine_operator_token_requires_explicit_requested_scope_when_read_default_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "svc-1",
+            "token_class": "service",
+            "jti": "jti-1",
+            "scope": "rq:enqueue",
+        },
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+            json={},
+        )
+
+    assert response.status_code == 403
+    assert response.get_json()["error"]["message"] == "No authorized scopes available for operator bootstrap."
+
+
+def test_issue_rq_engine_operator_token_rate_limits_repeat_requests(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setenv("RQ_ENGINE_OPERATOR_TOKEN_RATE_LIMIT_COUNT", "1")
+    monkeypatch.setenv("RQ_ENGINE_OPERATOR_TOKEN_RATE_LIMIT_WINDOW_SECONDS", "60")
+
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "42",
+            "token_class": "user",
+            "jti": "jti-1",
+            "scope": "rq:read rq:status",
+        },
+    )
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "issue_token",
+        lambda subject, **kwargs: {
+            "token": "operator-token",
+            "claims": {
+                "token_class": "user",
+                "aud": "rq-engine",
+                "iat": 1700000000,
+                "exp": 1700000900,
+            },
+        },
+    )
+
+    with app.test_client() as client:
+        first = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+            json={},
+        )
+        second = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+            json={},
+        )
+
+    assert first.status_code == 200
+    assert second.status_code == 429
+    payload = second.get_json()
+    assert "Rate limit exceeded:" in payload["error"]["message"]
+
+
+def test_issue_rq_engine_operator_token_preserves_service_run_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {
+            "sub": "svc-1",
+            "token_class": "service",
+            "jti": "jti-1",
+            "scope": "rq:status rq:read",
+            "runs": ["run-1"],
+            "service_groups": ["admin-run-token"],
+        },
+    )
+
+    captured: dict[str, object] = {}
+
+    def _fake_issue_token(subject: str, **kwargs):
+        captured["subject"] = subject
+        captured["kwargs"] = kwargs
+        return {
+            "token": "operator-token",
+            "claims": {
+                "token_class": "service",
+                "aud": "rq-engine",
+                "iat": 1700000000,
+                "exp": 1700000900,
+            },
+        }
+
+    monkeypatch.setattr(weppcloud_site_module.auth_tokens, "issue_token", _fake_issue_token)
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+            json={"requested_scopes": ["rq:status"]},
+        )
+
+    assert response.status_code == 200
+    assert captured["subject"] == "svc-1"
+    kwargs = captured["kwargs"]
+    assert kwargs["runs"] == ["run-1"]
+    assert kwargs["scopes"] == ["rq:status"]
 
 
 def test_session_heartbeat_requires_auth(monkeypatch: pytest.MonkeyPatch) -> None:
