@@ -1,6 +1,7 @@
 # RQ Controller State Contract (Draft)
 > Proposed additive contract for agent-friendly controller state, parameter metadata, and run orchestration signals.
 > **Status:** Draft target profile with row-8 cutover reconciliation completed on 2026-04-11; setup discovery, orchestration-read, schema/default metadata, geospatial/upload metadata, and errors/progress/outputs surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults|errors}`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`); remaining additive controller-state surfaces are planned.
+> **Hardening track (2026-04-11):** operator-token bootstrap ergonomics, state-revision coherence, and snapshot freshness semantics are scoped in `docs/work-packages/20260411_rq_operator_experience_hardening/`.
 > **See also:** `docs/schemas/rq-engine-agent-api-contract.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`
 
 ## Purpose
@@ -119,6 +120,35 @@
   - `docs/schemas/weppcloud-csrf-contract.md`
   - `docs/schemas/weppcloud-session-contract.md`
 
+## Operator Bootstrap And Execution Ergonomics
+- API operator flows covered by this contract MUST be executable without
+  `wctl`, using standard HTTP clients only.
+- The contract surface (`/api/configs` through run-scoped read + mutation
+  routes) MUST have at least one documented machine-safe token bootstrap path
+  that does not require HTML scraping.
+- Machine-safe token bootstrap MUST require a strong authenticated caller
+  boundary (authenticated user principal, trusted service principal, or
+  equivalent); anonymous minting is prohibited.
+- Cookie-auth token bootstrap paths MUST enforce same-origin/CSRF rules per
+  `docs/schemas/weppcloud-csrf-contract.md`.
+- Machine-safe token bootstrap endpoints MUST be `POST`-only, rate-limited, and
+  audited.
+- Scope-grant rules for machine-safe bootstrap MUST enforce:
+  - `granted_scopes = requested_scopes ∩ authorized_scopes`
+  - no silent scope expansion
+  - canonical `4xx` rejection for unknown/unauthorized requested scopes
+- Browser/session-oriented mint paths MAY coexist for UI traffic but MUST be
+  labeled as browser-only in descriptors/docs and MUST provide a machine-safe
+  alternative for autonomous operators.
+- All operator runbooks for this contract MUST provide:
+  - API-only token bootstrap instructions,
+  - method/path/status evidence capture with UTC timestamps,
+  - redaction rules for credentials/tokens.
+- Current baseline note: these bootstrap requirements are target-profile
+  requirements owned by `20260411_rq_operator_experience_hardening`; legacy
+  session/CSRF bootstrap paths remain interim compatibility behavior until that
+  package closes.
+
 ### Accepted Auth Modes
 - `accepted_auth` values in operation descriptors SHOULD use a stable taxonomy:
   - `bearer_jwt`
@@ -135,23 +165,80 @@
   - `deployment_revision`
 - Run-scoped success payloads MUST include:
   - `run_state_revision`
+  - `run_state_domain`
+- `run_state_domain` MUST be one of:
+  - `orchestration`
+  - `metadata`
+  - `outputs`
+- Run-scoped snapshot read payloads SHOULD include `run_state_vector` with:
+  - `orchestration_revision`
+  - `metadata_revision`
+  - `outputs_revision`
+- Rollout semantics for `run_state_vector`:
+  - before `20260411_rq_operator_experience_hardening` closes: `SHOULD`;
+  - after `20260411_rq_operator_experience_hardening` closes: `MUST`.
+- When `run_state_vector` is present, `run_state_revision` MUST equal the
+  revision for `run_state_domain`.
+  Example (minimal):
+  ```json
+  {
+    "run_state_domain": "orchestration",
+    "run_state_revision": "runstate:abc123:o481",
+    "run_state_vector": {
+      "orchestration_revision": "runstate:abc123:o481",
+      "metadata_revision": "runstate:abc123:m133",
+      "outputs_revision": "runstate:abc123:y019"
+    }
+  }
+  ```
 - Payloads that expose mutable state or schemas MUST include:
   - `state_version` (for state payloads)
   - `schema_version` (for schema payloads)
 - Snapshot-producing read endpoints (`controller/state`, `pipeline`, `readiness`,
-  `outputs`) MUST include:
+  `geospatial-metadata`, `outputs`) MUST include:
   - `updated_at`
   - `etag`
+- `updated_at` semantics are strict:
+  - MUST be RFC3339 UTC (`...Z`);
+  - MUST represent snapshot materialization time for the returned payload (not
+    request-serve time);
+  - MUST remain stable while the relevant domain `run_state_revision` is
+    unchanged;
+  - MUST NOT be `null`;
+  - MUST NOT use epoch sentinel values such as `1970-01-01T00:00:00Z`.
+- Snapshot-producing read endpoints MUST include:
+  - `data_state` (`materialized`, `not_materialized`, `pending`, `stale`,
+    `error`)
+  - `data_updated_at` (RFC3339 UTC when materialized/stale; `null` allowed only
+    for `not_materialized`/`pending`; for `error`, MUST be the timestamp of the
+    most recent failed materialization attempt and MUST NOT be `null`)
+  Example (outputs not generated yet):
+  ```json
+  {
+    "updated_at": "2026-04-11T04:15:05Z",
+    "data_state": "not_materialized",
+    "data_updated_at": null
+  }
+  ```
+  Example (`data_state=error`):
+  ```json
+  {
+    "updated_at": "2026-04-11T04:19:02Z",
+    "data_state": "error",
+    "data_updated_at": "2026-04-11T04:19:02Z"
+  }
+  ```
 - `deployment_revision` and `run_state_revision` have distinct semantics:
   - `deployment_revision`: deployment/configuration snapshot revision.
-  - `run_state_revision`: run-state snapshot revision.
+  - `run_state_revision`: domain-scoped run-state snapshot revision identified
+    by `run_state_domain`.
 - Non-run-scoped setup endpoints MAY omit `run_state_revision`.
-- `run_state_revision` MUST change whenever a mutation or background job changes
-  state visible through this contract (for example controller state, pipeline
-  status, readiness blockers, defaults, or outputs).
-- Clients that compose multiple endpoint reads SHOULD verify
-  `deployment_revision` and `run_state_revision` remain stable across those
-  reads.
+- For each domain, `run_state_revision` MUST change whenever a mutation or
+  background job changes state visible in that domain.
+- Clients that compose multi-endpoint reads SHOULD verify:
+  - `deployment_revision` stability,
+  - stability of the relevant domain revision(s) in `run_state_vector` (or
+    `run_state_revision` + `run_state_domain` when vector is absent).
 
 ## Orchestration Requirements (Agent-Critical)
 - Pipeline endpoint MUST expose:
@@ -1666,16 +1753,30 @@ value semantics where classification rasters are expected).
 - Endpoints SHOULD return `ETag`.
 - Clients MAY use `If-None-Match`.
 - Servers SHOULD return `304` when payloads are unchanged.
+- For snapshot reads, unchanged payload means `etag`, `run_state_revision`, and
+  `updated_at` remain stable for the same domain snapshot.
 
 ## Cross-Endpoint Consistency
 - All endpoints in this contract MUST emit the same `deployment_revision` for
   a stable deployment/configuration snapshot.
-- Run-scoped endpoints in this contract MUST emit the same
-  `run_state_revision` for a stable run-state snapshot.
-- Agents performing multi-call planning SHOULD treat either revision changing as
-  a stale-read boundary and re-fetch planning surfaces (`pipeline`,
+- Run-scoped endpoints in this contract MUST emit:
+  - `run_state_domain`
+  - domain-correct `run_state_revision`
+  - `run_state_vector` with phased requirement:
+    - before `20260411_rq_operator_experience_hardening` closes: `SHOULD`
+    - after `20260411_rq_operator_experience_hardening` closes: `MUST`
+- For stable run snapshots, `run_state_vector` values MUST be internally
+  consistent and monotonic per domain.
+- Agents performing multi-call planning SHOULD treat either
+  `deployment_revision` changes or relevant `run_state_vector` domain changes as
+  stale-read boundaries and re-fetch planning surfaces (`pipeline`,
   `readiness`, `outputs`, and operation defaults) before enqueueing the next
   step.
+- Known baseline gap (observed in API acceptance on 2026-04-11): some deployed
+  surfaces emit inconsistent revisions across orchestration versus metadata
+  reads without explicit domain annotation. This behavior is non-compliant with
+  the target profile and is owned by
+  `20260411_rq_operator_experience_hardening`.
 
 ## Compatibility Rules
 - Additive fields are allowed in payloads.
@@ -1716,6 +1817,7 @@ When a package is closed, its active ExecPlan SHOULD be archived to
 | 6 | `20260410_rq_controller_state_errors_progress_outputs` | Implement operation error catalogs, async progress signals, and `/outputs` artifact index with trust/provenance metadata. | Agent can recover from cataloged errors, poll with progress, and fetch artifacts from `outputs` only. | 3, 4, 5 | Complete |
 | 7 | `20260410_rq_controller_state_auth_concurrency` | Enforce/auth-rollout for `rq:read` aliasing, accepted-auth metadata parity, optimistic concurrency, and idempotency behavior. | Mutation/read preconditions and auth modes match descriptor metadata in tests. | 2, 3, 4, 6 | Complete |
 | 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed; package 1-7 gate evidence includes command outcomes; accepted auth least-privilege bridge (`rq:status` -> minted broader session scopes) has explicit cutover decision; row 6-7 watch-list items dispositioned (resolved or explicitly accepted). | 2, 3, 4, 5, 6, 7 | Complete |
+| 9 | `20260411_rq_operator_experience_hardening` | Harden operator experience end-to-end: machine-safe token bootstrap (no `wctl` dependency), run-state revision coherence metadata (`run_state_domain`/`run_state_vector`), strict freshness semantics (`updated_at`, `data_state`, `data_updated_at`), and smoke-runbook reliability rules. | API operators can execute auth bootstrap + controller-state smoke entirely via HTTP clients; revision/freshness fields are deterministic and contract-guarded; smoke runbook gating no longer depends on hard-coded pass counts. | 8 | Planned |
 
 ### Row 8 Cutover Dispositions (2026-04-10)
 

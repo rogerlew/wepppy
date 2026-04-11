@@ -1,6 +1,7 @@
 # RQ-Engine Agent API Contract
 > Canonical contract for agent clients using the WEPPcloud rq-engine.
 > **Status:** Canonical path under `docs/schemas/` as of 2026-04-10 (moved from `docs/dev-notes/`).
+> **Operator usability note (2026-04-11):** API-operator hardening for non-browser token bootstrap and smoke reliability is tracked in `docs/work-packages/20260411_rq_operator_experience_hardening/`.
 > **See also:** `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/correlation-id-debugging.md`, `docs/schemas/rq-controller-state-contract.md`, `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`, and user-facing `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`.
 
 ## Purpose
@@ -143,6 +144,61 @@ Common route-level status requirements are enforced by
 - Admin sanity endpoint for role/scope verification:
   - `GET /rq-engine/api/admin/recently-completed-jobs`
 
+## API Operator Bootstrap Contract (No `wctl`)
+
+For non-developer API operators, auth bootstrap MUST be executable with standard
+HTTP clients (`curl`, `python requests`, or equivalent) and MUST NOT require
+`wctl`.
+
+Target-profile requirements (owned by `20260411_rq_operator_experience_hardening`):
+- Token bootstrap for API operators MUST have at least one documented machine
+  path that does not depend on browser DOM/HTML scraping.
+- Runbooks and schema docs MUST include a fully API-only bootstrap example with
+  redaction guidance for secrets/tokens.
+- Operator bootstrap MUST support least-privilege scope selection for the
+  target action family (`rq:read`, `rq:status`, `rq:enqueue`, `rq:export`) and
+  MUST document required scopes per flow.
+- Machine-safe bootstrap MUST require a strong authenticated caller boundary
+  (authenticated user principal, trusted service principal, or equivalent);
+  anonymous token minting is prohibited.
+- Cookie-auth bootstrap paths MUST enforce same-origin/CSRF rules per
+  `docs/schemas/weppcloud-csrf-contract.md`.
+- Machine-safe bootstrap endpoints MUST be `POST`-only, rate-limited, and
+  audited.
+- Machine-safe bootstrap tokens SHOULD default to short TTL unless an explicit
+  longer-lived policy is documented for that flow.
+- If a route remains browser/session-bound (for example CSRF-gated same-origin
+  flows), docs MUST label it explicitly as browser-oriented and MUST provide
+  the machine-safe alternative.
+- Scope grant contract for machine-safe bootstrap:
+  - `granted_scopes = requested_scopes ∩ authorized_scopes`;
+  - mint routes MUST NOT silently add scopes not present in `requested_scopes`;
+  - unknown or unauthorized requested scopes MUST return canonical `4xx`
+    errors;
+  - read-oriented operator flows SHOULD default to `rq:read` (and include
+    `rq:status` only when polling compatibility is required and documented).
+
+Current baseline and gap:
+- `POST /weppcloud/profile/mint-token` is usable via API but currently depends
+  on session + CSRF choreography typically sourced from HTML pages.
+- This HTML-coupled bootstrap is an accepted interim path only and is not the
+  target operator experience.
+- Existing compatibility bridges that mint broader scope bundles for specific
+  legacy flows remain explicitly accepted residual behavior until
+  `20260411_rq_operator_experience_hardening` lands route + descriptor +
+  contract updates together.
+- Follow-on package `20260411_rq_operator_experience_hardening` owns the
+  machine-first bootstrap contract and implementation alignment.
+
+Current baseline status:
+- A dedicated machine-safe bootstrap endpoint contract is not yet shipped.
+- Operators currently use either:
+  - pre-issued bearer tokens, or
+  - interim session/CSRF choreography via profile mint routes.
+- Until package `20260411_rq_operator_experience_hardening` closes, treat the
+  machine-safe bootstrap rules above as required target behavior, not completed
+  baseline behavior.
+
 ## Correlation ID Debugging
 
 - Send `X-Correlation-ID` on submission requests to make cross-service tracing deterministic.
@@ -247,3 +303,9 @@ reasons:
   - deterministic pre-smoke contract/guard regression checks,
   - manual end-to-end API surface smoke sequence (`/api/configs` through
     run-scoped controller-state endpoints and outputs).
+- Smoke-runbook contract requirements:
+  - pass/fail assertions MUST be based on command exit status and contract-shape
+    checks, not hard-coded historical pass counts;
+  - expected test-count strings MAY be reported as examples but MUST NOT be the
+    correctness gate;
+  - endpoint-call evidence MUST record method/path/status with UTC timestamps.
