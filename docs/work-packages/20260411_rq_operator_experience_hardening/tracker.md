@@ -4,13 +4,13 @@
 
 ## Quick Status
 
-**Timezone**: UTC  
-**Started**: 2026-04-11 06:03 UTC  
-**Current phase**: Complete (implementation + validation + review gates)  
-**Last updated**: 2026-04-11 07:40 UTC  
-**Next milestone**: Archive active ExecPlan and package handoff  
-**Security impact**: `high`  
-**Dedicated security review**: `yes`  
+**Timezone**: UTC
+**Started**: 2026-04-11 06:03 UTC
+**Current phase**: Follow-up remediation complete (validation + review gate closure)
+**Last updated**: 2026-04-11 16:20 UTC
+**Next milestone**: Final package handoff with second-acceptance prompt update
+**Security impact**: `high`
+**Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260411_rq_operator_experience_hardening/artifacts/2026-04-11_security_review.md`
 
 ## Task Board
@@ -34,6 +34,9 @@
 - [x] Revised canonical schema docs to define target hardening requirements for operator bootstrap, revision coherence, and freshness semantics (2026-04-11 06:03 UTC).
 - [x] Corrected smoke runbook pass/fail guidance to avoid hard-coded test-count drift (2026-04-11 06:03 UTC).
 - [x] Scaffolded package docs and active ExecPlan (2026-04-11 06:03 UTC).
+- [x] Implemented climate parse hardening to remove `KeyError` blocker and return contract-consistent validation payloads (2026-04-11 15:58 UTC).
+- [x] Added batched endpoint discovery snapshot (`include_operation_docs=true`) to reduce operator discovery call volume (2026-04-11 15:58 UTC).
+- [x] Updated schema/runbook docs for climate-mode alignment and batched discovery semantics (2026-04-11 15:58 UTC).
 
 ## Timeline
 
@@ -47,6 +50,9 @@
 - **2026-04-11 07:33 UTC** - Operator API-only smoke rerun with refreshed UTC/redacted evidence; parity checks confirmed with non-future freshness values.
 - **2026-04-11 07:37 UTC** - Independent `reviewer`, `qa_reviewer`, and `security_reviewer` re-reviews closed with no unresolved medium/high findings.
 - **2026-04-11 07:40 UTC** - Final reviewer follow-up closed after revision-coherence tweak (`data_updated_at` included in orchestration revision signature) and evidence `session_id` redaction; no unresolved medium/high findings remain.
+- **2026-04-11 15:58 UTC** - Follow-up acceptance blocker remediation shipped: `build-climate` parse path now returns structured validation payloads, climate schema/defaults aligned for mode coverage (`0,2,3,5,6,11`), and `include_operation_docs=true` batched endpoint discovery added.
+- **2026-04-11 15:58 UTC** - Follow-up validation gates passed: targeted parser/climate/schema suites, setup/openapi parity suites, endpoint/checklist guards, and docs lint.
+- **2026-04-11 16:20 UTC** - Final remediation hardening shipped: mode-switch year-bound updates are atomic (no partial mutation on validation failure), OpenAPI boolean query param contract finalized for `include_operation_docs`, and independent `reviewer`/`qa_reviewer`/`security_reviewer` re-reviews confirmed no unresolved medium/high findings.
 
 ## Decisions Log
 
@@ -100,6 +106,45 @@
 **Decision**: Option 2.
 
 **Impact**: Preserves fail-closed auth posture while making outage behavior machine-actionable for operators.
+
+---
+
+### 2026-04-11 15:58 UTC: Prefer contract-consistent validation errors over traceback details on climate parse failures
+**Context**: Second acceptance halted at `build-climate` with parser `KeyError` details exposed to operators.
+
+**Options considered**:
+1. Keep traceback-based `400` responses and update runbook workaround only.
+2. Normalize route boundary to canonical `validation_error` payloads with field-level missing-key details.
+
+**Decision**: Option 2.
+
+**Impact**: Removes brittle traceback coupling, enables machine remediation, and closes the blocker root cause.
+
+---
+
+### 2026-04-11 15:58 UTC: Add batched run-endpoint discovery payload to reduce orchestration chatter
+**Context**: Second acceptance friction log reported high call volume due per-operation schema/default/error fetch loops.
+
+**Options considered**:
+1. Keep per-operation discovery only.
+2. Add optional batched payload on existing run-endpoint catalog route.
+
+**Decision**: Option 2 (`GET .../endpoints?include_operation_docs=true`).
+
+**Impact**: One-call schema/default/error snapshot available for discovery-first agents without introducing a new route family.
+
+---
+
+### 2026-04-11 16:20 UTC: Enforce parse atomicity for future-mode validation failures
+**Context**: QA re-review identified that future-mode parse failures could clear observed year bounds before returning `400`.
+
+**Options considered**:
+1. Keep current behavior and rely on retries to rehydrate state.
+2. Validate required future fields before mutating any year-bound controller state.
+
+**Decision**: Option 2.
+
+**Impact**: Removes partial-state mutation on invalid payloads and closes the last high-severity follow-up finding.
 
 ## Risks and Issues
 
@@ -210,6 +255,55 @@
 **Outcome status**:
 - Package acceptance criteria remain satisfied; independent gates closed.
 
+### 2026-04-11 15:58 UTC: Second-acceptance blocker/friction remediation
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Hardened climate parse boundary to return canonical `validation_error` payloads with machine-actionable missing field entries (no traceback detail leakage).
+- Updated climate input parsing semantics to require future year bounds only for `ClimateMode.Future` and avoid unconditional `future_*` key access.
+- Aligned climate schema/defaults for route discovery and defaults:
+  - mode coverage includes `0,2,3,5,6,11`;
+  - observed-year requirement narrowed to observed/gridmet modes;
+  - future-year fields added with mode-conditional requirements;
+  - run-resolved climate defaults now emit future year defaults when run mode is future.
+- Added optional batched discovery response:
+  - `GET /api/runs/{runid}/{config}/endpoints?include_operation_docs=true`
+  - includes per-operation descriptor + schema + defaults + errors snapshot in one payload.
+- Updated contract/runbook docs for new climate and discovery semantics.
+
+**Blockers encountered**:
+- None (local remediation and validation path completed).
+
+**Test results**:
+- `wctl run-pytest tests/nodb/test_climate_input_parser_service.py tests/microservices/test_rq_engine_climate_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` -> **65 passed**
+- `wctl run-pytest tests/microservices/test_rq_engine_setup_discovery_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/microservices/test_rq_engine_climate_routes.py tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> **95 passed**
+- `python tools/check_endpoint_inventory.py && python tools/check_route_contract_checklist.py` -> **pass**
+- `wctl doc-lint --path ...` (5 updated docs) -> **0 errors, 0 warnings**
+
+**Outcome status**:
+- Acceptance blocker root cause remediated in code/contracts; follow-up independent reviewer gates executed before handoff.
+
+### 2026-04-11 16:20 UTC: Follow-up reviewer gate closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Fixed final QA-identified atomicity gap in future-mode parsing (validate before clearing observed years).
+- Declared `include_operation_docs` as explicit boolean query parameter in FastAPI/OpenAPI and added contract assertion test.
+- Added additional parser regressions for mode-switch determinism and no-mutation-on-validation-failure behavior.
+- Executed independent re-reviews:
+  - `reviewer`
+  - `qa_reviewer`
+  - `security_reviewer`
+
+**Blockers encountered**:
+- None.
+
+**Test results**:
+- `wctl run-pytest tests/microservices/test_rq_engine_setup_discovery_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/microservices/test_rq_engine_climate_routes.py tests/nodb/test_climate_input_parser_service.py tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> **109 passed**
+
+**Outcome status**:
+- Reviewer gates closed; no unresolved medium/high findings remain.
+
 ## Watch List
 
 - Ensure operator bootstrap design remains compatible with existing browser/session flows.
@@ -218,6 +312,6 @@
 ## Communication Log
 
 ### 2026-04-11 06:03 UTC: User directive
-**Participants**: User, Codex  
-**Question/Topic**: Revise schema docs and create robust work-package for low-friction/high-quality agent operation, explicitly without `wctl` dependency for operators.  
+**Participants**: User, Codex
+**Question/Topic**: Revise schema docs and create robust work-package for low-friction/high-quality agent operation, explicitly without `wctl` dependency for operators.
 **Outcome**: Contract revisions drafted and package/ExecPlan scaffolded for implementation.

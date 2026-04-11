@@ -74,6 +74,28 @@
 - No unresolved **medium** or **high** security findings identified in implementation-owner review.
 - Accepted **low** residual risks (`SR-01`, `SR-02`) documented above.
 
+## Follow-Up Addendum (2026-04-11 15:58 UTC)
+Second acceptance remediation touched climate parse and discovery surfaces:
+- `POST /rq-engine/api/runs/{runid}/{config}/build-climate`
+  - parse failures now return canonical `validation_error` payloads;
+  - traceback details are no longer emitted to operator clients;
+  - missing-field failures include machine-actionable field entries.
+- `GET /rq-engine/api/runs/{runid}/{config}/endpoints?include_operation_docs=true`
+  - additive read-only batching of descriptor/schema/defaults/errors;
+  - query flag is strictly parsed as boolean (`validation_error` on invalid values);
+  - no auth scope broadening (`rq:status`/`rq:read` contract unchanged).
+
+Security posture impact:
+- Improves information-exposure posture by removing parser traceback leakage.
+- No new write/mutation surface added.
+- No change to token/bootstrap trust boundaries.
+
+Follow-up findings:
+- No unresolved **medium/high** security findings for this addendum.
+- Final independent security re-review (2026-04-11 16:20 UTC) confirmed
+  no unresolved medium/high findings after parser atomicity and OpenAPI
+  query-contract follow-up fixes.
+
 ## Independent Security Review Gate
 - `security_reviewer` pass: **Complete**
   - Re-review confirmed **no medium/high findings remain**.

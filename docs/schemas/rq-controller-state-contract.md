@@ -607,19 +607,20 @@ remain historical references and are not the normative target profile.
       "constraint_mode": "run_resolved",
       "constraint_source": "geospatial_metadata",
       "resolved_at": "2026-04-10T10:22:28Z",
-      "enum": [0, 2, 6, 7, 11],
+      "enum": [0, 2, 3, 5, 6, 11],
       "enum_labels": {
         "0": "Vanilla (synthetic CLIGEN)",
         "2": "Observed (station file)",
+        "3": "Future CMIP5",
+        "5": "Stochastic PRISM",
         "6": "Observed Database",
-        "7": "Future Database",
         "11": "GridMet+PRISM"
       },
-      "enum_available": [0, 6, 11],
+      "enum_available": [0, 5, 6, 11],
       "enum_requires": {
         "2": ["observed_start_year", "observed_end_year"],
-        "6": ["observed_start_year", "observed_end_year"],
-        "7": ["future_start_year", "future_end_year"]
+        "11": ["observed_start_year", "observed_end_year"],
+        "3": ["future_start_year", "future_end_year"]
       }
     },
     "climatestation": {
@@ -1269,7 +1270,7 @@ value semantics where classification rasters are expected).
   },
   "dynamic_constraints": {
     "climate_mode": {
-      "enum_available": [0, 6, 11]
+      "enum_available": [0, 5, 6, 11]
     },
     "soils_mode": {
       "enum_available": ["ssurgo"]
@@ -1291,6 +1292,47 @@ value semantics where classification rasters are expected).
     }
   },
   "computed_at": "2026-04-10T10:22:31Z"
+}
+```
+
+### Batched Operation Docs Snapshot (Optional)
+
+- `GET /api/runs/{runid}/{config}/endpoints` accepts optional query param
+  `include_operation_docs=true`.
+- When enabled, payload includes `operation_docs` keyed by `operation_id`, with:
+  - `operation_descriptor`
+  - `request` + `responses` + `schema_version`
+  - `resolved_defaults` + `defaults_context` + `computed_at`
+  - `errors`
+- This batched snapshot is intended to reduce per-operation discovery chatter
+  for discovery-first operator/agent loops.
+
+```json
+{
+  "operations": [
+    {"operation_id": "rq_engine_build_climate"}
+  ],
+  "operation_docs": {
+    "rq_engine_build_climate": {
+      "schema_version": 1,
+      "request": {"type": "object"},
+      "responses": {"success": {"required": ["job_id"]}},
+      "resolved_defaults": {
+        "climate_mode": 11,
+        "observed_start_year": 1990,
+        "observed_end_year": 2020
+      },
+      "defaults_context": {
+        "config": "disturbed9002_wbt",
+        "active_mods": ["disturbed", "wepp"],
+        "region": "conus"
+      },
+      "computed_at": "2026-04-11T15:35:10Z",
+      "errors": [
+        {"error_code": "validation_error"}
+      ]
+    }
+  }
 }
 ```
 

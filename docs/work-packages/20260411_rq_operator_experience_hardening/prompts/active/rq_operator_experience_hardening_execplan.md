@@ -23,6 +23,9 @@ Observable behavior after completion:
 - [x] (2026-04-11 06:55 UTC) Implemented revision-domain and freshness payload semantics across read endpoints.
 - [x] (2026-04-11 06:55 UTC) Added route/openapi/guard coverage and scripted operator acceptance smoke.
 - [x] (2026-04-11 07:37 UTC) Completed reviewer, qa_reviewer, and security_reviewer gates with no unresolved medium/high findings.
+- [x] (2026-04-11 15:58 UTC) Closed second-acceptance blocker by hardening climate parse validation and aligning climate schema/default semantics.
+- [x] (2026-04-11 15:58 UTC) Added batched run-endpoint discovery snapshot (`include_operation_docs=true`) to reduce per-operation discovery chatter.
+- [x] (2026-04-11 16:20 UTC) Closed follow-up QA atomicity finding and re-closed reviewer/qa/security gates with no unresolved medium/high findings.
 
 ## Surprises & Discoveries
 
@@ -41,6 +44,12 @@ Observable behavior after completion:
 - Observation: Filesystem mtimes can be ahead of current UTC in local run roots, so freshness fallback logic must clamp to `now` to keep `updated_at` non-future.
   Evidence: first post-review smoke pass showed future `updated_at` values until mtime clamp was added and acceptance was rerun.
 
+- Observation: `build-climate` route still surfaced parser traceback detail on malformed payloads (`KeyError: future_start_year`) even when endpoint-level schema/default discovery succeeded.
+  Evidence: second acceptance run (`foaming-chervil/disturbed9002_wbt`) failed at `build-climate` with `400` parse error payload containing parser internals.
+
+- Observation: Discovery-first agents incur unnecessary call volume when they must fetch schema/defaults/errors operation-by-operation after listing `/endpoints`.
+  Evidence: second acceptance friction log reported 107 calls for one flow and specifically requested a batched operation snapshot.
+
 ## Decision Log
 
 - Decision: Treat operator ergonomics as contract and implementation scope, not runbook-only polish.
@@ -57,6 +66,14 @@ Observable behavior after completion:
 
 - Decision: Apply revocation-path throttling before Redis denylist checks and return explicit `503` + `Retry-After` on revocation backend outage.
   Rationale: Reduces outage amplification risk while preserving fail-closed auth behavior with machine-actionable retry semantics.
+  Date/Author: 2026-04-11 / Codex.
+
+- Decision: Treat climate parse failures as contract-level validation failures and return canonical `validation_error` payloads with machine-actionable missing-field entries.
+  Rationale: Prevents traceback leakage, improves automation reliability, and directly addresses the `build-climate` blocker.
+  Date/Author: 2026-04-11 / Codex.
+
+- Decision: Add optional batched endpoint-doc snapshot on existing run endpoint catalog (`include_operation_docs=true`) instead of adding a new route family.
+  Rationale: Smallest additive change that materially reduces discovery call count for operator agents.
   Date/Author: 2026-04-11 / Codex.
 
 ## Outcomes & Retrospective
@@ -100,6 +117,27 @@ Final closure addendum (2026-04-11 07:40 UTC):
 - Orchestration revision signature now includes `data_updated_at` whenever timeline freshness is present, preventing freshness drift without revision movement.
 - Operator evidence snippet redacts `session_id` to match artifact redaction policy.
 - Final reviewer follow-up confirms no unresolved medium/high findings.
+
+Second acceptance remediation addendum (2026-04-11 15:58 UTC):
+- Climate parse boundary now emits canonical `validation_error` payloads (no traceback details) with missing-field entries for machine remediation.
+- Climate schema/default contract aligned for mode coverage and mode-conditional year fields:
+  - supported schema enum: `0,2,3,5,6,11`
+  - observed-year requirements: observed/gridmet modes
+  - future-year requirements: future mode
+  - defaults switch to future-year defaults when run mode is future.
+- Batched discovery support added:
+  - `GET /api/runs/{runid}/{config}/endpoints?include_operation_docs=true`
+  - response includes per-operation descriptor + schema + defaults + errors snapshot.
+- Validation gates for this addendum passed:
+  - parser/climate/schema suites
+  - setup/openapi parity suite
+  - endpoint/checklist guard checks
+  - docs lint on updated contract/runbook/work-package docs.
+
+Final remediation closure addendum (2026-04-11 16:20 UTC):
+- Future-mode parse ordering now validates required future years before clearing observed-year state, preventing partial state mutation on invalid payloads.
+- `include_operation_docs` query parameter is now explicit boolean in FastAPI/OpenAPI, with contract test coverage.
+- Independent `reviewer`, `qa_reviewer`, and `security_reviewer` re-reviews confirm no unresolved medium/high findings remain for the follow-up delta.
 
 ## Context and Orientation
 

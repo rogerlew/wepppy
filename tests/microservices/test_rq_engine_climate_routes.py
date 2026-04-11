@@ -73,7 +73,42 @@ def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["error"]["message"] == "Error parsing climate inputs"
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error"]["message"] == "Validation failed"
+    assert payload["errors"][0]["message"] == "Invalid climate field values."
+
+
+def test_build_climate_parse_missing_field_key_error_returns_structured_validation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyClimate:
+        run_group = "default"
+
+        def parse_inputs(self, payload) -> None:
+            raise KeyError("future_start_year")
+
+    monkeypatch.setattr(
+        climate_routes.Climate,
+        "getInstance",
+        lambda wd: DummyClimate(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-climate", json={})
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["errors"] == [
+        {
+            "field": "future_start_year",
+            "code": "missing_required_field",
+            "message": "Missing required field: future_start_year",
+        }
+    ]
 
 
 def test_build_climate_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:

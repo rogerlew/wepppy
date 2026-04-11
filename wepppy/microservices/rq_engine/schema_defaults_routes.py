@@ -12,7 +12,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 from werkzeug.utils import secure_filename
 
@@ -59,6 +59,7 @@ SESSION_TOKEN_IDEMPOTENCY_TTL_ENV = "RQ_ENGINE_SESSION_TOKEN_IDEMPOTENCY_TTL_SEC
 SESSION_TOKEN_IDEMPOTENCY_TTL_DEFAULT = 86400
 RUN_STATE_DOMAIN_METADATA = "metadata"
 RUN_STATE_DOMAIN_OUTPUTS = "outputs"
+LIST_RUN_ENDPOINTS_INCLUDE_DOCS_PARAM = "include_operation_docs"
 
 
 class RunConfigMismatchError(ValueError):
@@ -642,11 +643,24 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
 
     if controller == "climate":
         resolved_mode = climate_mode if climate_mode is not None else default_climate_mode
-        return {
+        defaults: dict[str, Any] = {
             "climate_mode": resolved_mode,
-            "observed_start_year": 1990,
-            "observed_end_year": 2020,
         }
+        if resolved_mode == 3:
+            defaults.update(
+                {
+                    "future_start_year": 2040,
+                    "future_end_year": 2060,
+                }
+            )
+        else:
+            defaults.update(
+                {
+                    "observed_start_year": 1990,
+                    "observed_end_year": 2020,
+                }
+            )
+        return defaults
     if controller == "landuse":
         return {
             "landuse_mode": runtime.states.get("landuse_mode") or "nlcd",
@@ -694,11 +708,13 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "constraint_mode": "run_resolved",
                     "constraint_source": "controller_state",
                     "resolved_at": resolved_at,
-                    "enum": [0, 2, 6, 11],
+                    "enum": [0, 2, 3, 5, 6, 11],
                     "enum_available": available_modes,
                     "enum_labels": {
                         "0": "Synthetic CLIGEN",
                         "2": "Observed station",
+                        "3": "Future CMIP5",
+                        "5": "Stochastic PRISM",
                         "6": "Observed database",
                         "11": "GridMet+PRISM",
                     },
@@ -717,14 +733,28 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "minimum": 1900,
                     "maximum": 2100,
                     "constraint_mode": "static",
-                    "required_if": _predicate("climate_mode", "in", [2, 6]),
+                    "required_if": _predicate("climate_mode", "in", [2, 11]),
                 },
                 "observed_end_year": {
                     "type": "integer",
                     "minimum": 1900,
                     "maximum": 2100,
                     "constraint_mode": "static",
-                    "required_if": _predicate("climate_mode", "in", [2, 6]),
+                    "required_if": _predicate("climate_mode", "in", [2, 11]),
+                },
+                "future_start_year": {
+                    "type": "integer",
+                    "minimum": 2006,
+                    "maximum": 2099,
+                    "constraint_mode": "static",
+                    "required_if": _predicate("climate_mode", "eq", 3),
+                },
+                "future_end_year": {
+                    "type": "integer",
+                    "minimum": 2006,
+                    "maximum": 2099,
+                    "constraint_mode": "static",
+                    "required_if": _predicate("climate_mode", "eq", 3),
                 },
             },
         }
@@ -883,6 +913,11 @@ def _controller_hints(controller: str) -> dict[str, Any]:
                     "label": "Observed window",
                     "fields": ["observed_start_year", "observed_end_year"],
                 },
+                {
+                    "id": "future_window",
+                    "label": "Future window",
+                    "fields": ["future_start_year", "future_end_year"],
+                },
             ],
             "field_hints": {
                 "climate_mode": {
@@ -892,6 +927,14 @@ def _controller_hints(controller: str) -> dict[str, Any]:
                 "climatestation": {
                     "label": "Climate station",
                     "help": "Required only for observed station/database modes.",
+                },
+                "future_start_year": {
+                    "label": "Future start year",
+                    "help": "Required only for future climate mode.",
+                },
+                "future_end_year": {
+                    "label": "Future end year",
+                    "help": "Required only for future climate mode.",
                 },
             },
         },
@@ -1205,6 +1248,32 @@ def _build_operation_error_catalog(
     return errors
 
 
+def _build_operation_docs_snapshot(
+    *,
+    operations: Mapping[str, Mapping[str, Any]],
+    computed_at: str,
+) -> dict[str, dict[str, Any]]:
+    snapshot: dict[str, dict[str, Any]] = {}
+    for operation_id, operation_docs in operations.items():
+        descriptor = copy.deepcopy(operation_docs["descriptor"])
+        schema = copy.deepcopy(operation_docs["schema"])
+        defaults_doc = copy.deepcopy(operation_docs["defaults"])
+        snapshot[operation_id] = {
+            "operation_descriptor": descriptor,
+            "schema_version": schema["schema_version"],
+            "request": schema["request"],
+            "responses": schema["responses"],
+            "resolved_defaults": defaults_doc["resolved_defaults"],
+            "defaults_context": defaults_doc["defaults_context"],
+            "computed_at": computed_at,
+            "errors": _build_operation_error_catalog(
+                operation_id=operation_id,
+                operation_docs=operation_docs,
+            ),
+        }
+    return snapshot
+
+
 def _parse_iso_datetime(value: Any) -> str | None:
     text = str(value or "").strip()
     if not text:
@@ -1466,9 +1535,33 @@ def _build_outputs_payload(runtime: RuntimeState) -> dict[str, Any]:
 
 
 def _available_climate_modes(runtime: RuntimeState) -> list[int]:
-    modes = [0, 6, 11]
+    modes = [0, 5, 6, 11]
     if bool(runtime.states.get("climate_has_station", False)):
         modes.insert(1, 2)
+
+    supported_runtime_modes = {
+        0,  # Vanilla
+        2,  # Observed
+        3,  # Future
+        5,  # PRISM
+        6,  # ObservedDb
+        7,  # FutureDb
+        8,  # EOBS
+        9,  # ObservedPRISM
+        10,  # AGDC
+        11,  # GridMetPRISM
+        12,  # UserDefined
+        13,  # DepNexrad
+    }
+
+    current_mode_raw = runtime.states.get("climate_mode_code")
+    try:
+        current_mode = int(current_mode_raw) if current_mode_raw is not None else None
+    except (TypeError, ValueError):
+        current_mode = None
+    if current_mode is not None and current_mode in supported_runtime_modes and current_mode not in modes:
+        modes.append(current_mode)
+
     return modes
 
 
@@ -1851,7 +1944,18 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
             ),
             "schema": {
                 "schema_version": 1,
-                "request": _empty_request_schema(),
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        LIST_RUN_ENDPOINTS_INCLUDE_DOCS_PARAM: {
+                            "type": "boolean",
+                            "constraint_mode": "static",
+                            "required": False,
+                            "default": False,
+                        }
+                    },
+                    "additional_properties": False,
+                },
                 "responses": {"success": {"required": ["operations"]}},
             },
             "defaults": {
@@ -2361,7 +2465,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "constraint_mode": "run_resolved",
                             "constraint_source": "controller_state",
                             "resolved_at": runtime.generated_at,
-                            "enum": [0, 2, 6, 11],
+                            "enum": [0, 2, 3, 5, 6, 11],
                         },
                         "climatestation": {
                             "type": "string",
@@ -2375,14 +2479,28 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "minimum": 1900,
                             "maximum": 2100,
                             "constraint_mode": "static",
-                            "required_if": _predicate("climate_mode", "in", [2, 6]),
+                            "required_if": _predicate("climate_mode", "in", [2, 11]),
                         },
                         "observed_end_year": {
                             "type": "integer",
                             "minimum": 1900,
                             "maximum": 2100,
                             "constraint_mode": "static",
-                            "required_if": _predicate("climate_mode", "in", [2, 6]),
+                            "required_if": _predicate("climate_mode", "in", [2, 11]),
+                        },
+                        "future_start_year": {
+                            "type": "integer",
+                            "minimum": 2006,
+                            "maximum": 2099,
+                            "constraint_mode": "static",
+                            "required_if": _predicate("climate_mode", "eq", 3),
+                        },
+                        "future_end_year": {
+                            "type": "integer",
+                            "minimum": 2006,
+                            "maximum": 2099,
+                            "constraint_mode": "static",
+                            "required_if": _predicate("climate_mode", "eq", 3),
                         },
                     },
                     "additional_properties": True,
@@ -3403,7 +3521,8 @@ def get_controller_templates(runid: str, config: str, controller: str, request: 
     summary="List run endpoints",
     description=(
         "Requires JWT Bearer (`rq:status` or `rq:read`) with run access checks. "
-        "Read-only run-scoped operation catalog; no queue."
+        "Read-only run-scoped operation catalog; no queue. "
+        f"Set `{LIST_RUN_ENDPOINTS_INCLUDE_DOCS_PARAM}=true` to include per-operation schema/defaults/errors in one response."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("list_run_endpoints"),
@@ -3413,7 +3532,18 @@ def get_controller_templates(runid: str, config: str, controller: str, request: 
         extra={404: "Run not found. Returns the canonical error payload."},
     ),
 )
-def list_run_endpoints(runid: str, config: str, request: Request) -> JSONResponse:
+def list_run_endpoints(
+    runid: str,
+    config: str,
+    request: Request,
+    include_operation_docs: bool = Query(
+        default=False,
+        description=(
+            "Optional boolean. When true, include per-operation schema/defaults/errors snapshot "
+            "under `operation_docs`."
+        ),
+    ),
+) -> JSONResponse:
     try:
         _require_schema_defaults_claims(request, runid)
     except AuthError as exc:
@@ -3434,13 +3564,15 @@ def list_run_endpoints(runid: str, config: str, request: Request) -> JSONRespons
 
     try:
         operations = _build_run_operations(runtime)
+        operation_descriptors = [copy.deepcopy(operation["descriptor"]) for operation in operations.values()]
 
         payload = _base_payload(runtime)
-        payload.update(
-            {
-                "operations": [copy.deepcopy(operation["descriptor"]) for operation in operations.values()],
-            }
-        )
+        payload["operations"] = operation_descriptors
+        if include_operation_docs:
+            payload["operation_docs"] = _build_operation_docs_snapshot(
+                operations=operations,
+                computed_at=_utc_timestamp(),
+            )
         return JSONResponse(payload)
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine run-endpoints payload build failed")

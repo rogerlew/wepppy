@@ -126,23 +126,110 @@ class ClimateInputParsingService:
     ) -> None:
         from wepppy.nodb.core.climate import ClimateMode
 
-        climate.set_observed_pars(
-            **dict(
-                start_year=kwds["observed_start_year"],
-                end_year=kwds["observed_end_year"],
-            )
-        )
+        observed_required_modes = {
+            ClimateMode.Observed,
+            ClimateMode.ObservedPRISM,
+            ClimateMode.GridMetPRISM,
+            ClimateMode.DepNexrad,
+        }
+        future_required_modes = {
+            ClimateMode.Future,
+        }
 
-        climate.set_future_pars(
-            **dict(
-                start_year=kwds["future_start_year"],
-                end_year=kwds["future_end_year"],
+        if climate_mode in future_required_modes:
+            future_pars = self._resolve_year_bounds(
+                kwds=kwds,
+                start_key="future_start_year",
+                end_key="future_end_year",
+                required=True,
             )
-        )
+            self._clear_year_bounds(
+                climate=climate,
+                start_attr="_observed_start_year",
+                end_attr="_observed_end_year",
+            )
+            climate.set_future_pars(**future_pars)
+        else:
+            observed_pars = self._resolve_year_bounds(
+                kwds=kwds,
+                start_key="observed_start_year",
+                end_key="observed_end_year",
+                required=climate_mode in observed_required_modes,
+            )
+            if observed_pars is not None:
+                climate.set_observed_pars(**observed_pars)
+            else:
+                self._clear_year_bounds(
+                    climate=climate,
+                    start_attr="_observed_start_year",
+                    end_attr="_observed_end_year",
+                )
+            self._clear_year_bounds(
+                climate=climate,
+                start_attr="_future_start_year",
+                end_attr="_future_end_year",
+            )
 
         if climate_mode in (
             ClimateMode.SingleStorm,
             ClimateMode.SingleStormBatch,
             ClimateMode.UserDefinedSingleStorm,
         ):
-            climate.set_single_storm_pars(**kwds)
+            single_storm_required_fields = (
+                "ss_storm_date",
+                "ss_design_storm_amount_inches",
+                "ss_duration_of_storm_in_hours",
+                "ss_time_to_peak_intensity_pct",
+                "ss_max_intensity_inches_per_hour",
+            )
+            missing = [
+                field
+                for field in single_storm_required_fields
+                if kwds.get(field) in (None, "")
+            ]
+            if missing:
+                raise ValueError(
+                    f"Missing required climate field(s): {', '.join(missing)}"
+                )
+            single_storm_payload = dict(kwds)
+            single_storm_payload.setdefault("ss_batch", "")
+            climate.set_single_storm_pars(**single_storm_payload)
+
+    @staticmethod
+    def _resolve_year_bounds(
+        *,
+        kwds: dict[str, Any],
+        start_key: str,
+        end_key: str,
+        required: bool,
+    ) -> dict[str, Any] | None:
+        start_value = kwds.get(start_key)
+        end_value = kwds.get(end_key)
+
+        missing = [
+            key
+            for key, value in ((start_key, start_value), (end_key, end_value))
+            if value in (None, "")
+        ]
+        if missing:
+            if required:
+                raise ValueError(f"Missing required climate field(s): {', '.join(missing)}")
+            if len(missing) == 1:
+                raise ValueError(f"Missing required climate field(s): {', '.join(missing)}")
+            return None
+
+        return {
+            "start_year": start_value,
+            "end_year": end_value,
+        }
+
+    @staticmethod
+    def _clear_year_bounds(
+        *,
+        climate: "Climate",
+        start_attr: str,
+        end_attr: str,
+    ) -> None:
+        with climate.locked():
+            setattr(climate, start_attr, "")
+            setattr(climate, end_attr, "")

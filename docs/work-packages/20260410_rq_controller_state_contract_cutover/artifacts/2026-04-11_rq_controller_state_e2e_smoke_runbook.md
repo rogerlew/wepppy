@@ -173,14 +173,18 @@ jq '.controller' "$LAST_BODY_FILE"
 api_call GET "/runs/$RUNID/$CONFIG/endpoints" "endpoints_run"
 jq '.operations | length' "$LAST_BODY_FILE"
 
-api_call GET "/runs/$RUNID/$CONFIG/endpoints/rq_engine_build_climate/schema" "endpoint_build_climate_schema"
-jq '.operation_descriptor.operation_id' "$LAST_BODY_FILE"
+api_call GET "/runs/$RUNID/$CONFIG/endpoints?include_operation_docs=true" "endpoints_run_with_docs"
+jq '.operation_docs.rq_engine_build_climate.operation_descriptor.operation_id' "$LAST_BODY_FILE"
+jq '.operation_docs.rq_engine_build_climate.resolved_defaults' "$LAST_BODY_FILE"
+jq '.operation_docs.rq_engine_build_climate.errors | length' "$LAST_BODY_FILE"
 
-api_call GET "/runs/$RUNID/$CONFIG/endpoints/rq_engine_build_climate/defaults" "endpoint_build_climate_defaults"
-jq '.operation_id' "$LAST_BODY_FILE"
-
-api_call GET "/runs/$RUNID/$CONFIG/endpoints/rq_engine_build_climate/errors" "endpoint_build_climate_errors"
-jq '.operation_id' "$LAST_BODY_FILE"
+# Fallback (legacy per-operation discovery path):
+# api_call GET "/runs/$RUNID/$CONFIG/endpoints/rq_engine_build_climate/schema" "endpoint_build_climate_schema"
+# jq '.operation_descriptor.operation_id' "$LAST_BODY_FILE"
+# api_call GET "/runs/$RUNID/$CONFIG/endpoints/rq_engine_build_climate/defaults" "endpoint_build_climate_defaults"
+# jq '.operation_id' "$LAST_BODY_FILE"
+# api_call GET "/runs/$RUNID/$CONFIG/endpoints/rq_engine_build_climate/errors" "endpoint_build_climate_errors"
+# jq '.operation_id' "$LAST_BODY_FILE"
 
 api_call GET "/runs/$RUNID/$CONFIG/geospatial-metadata" "geospatial_metadata"
 jq '.runid' "$LAST_BODY_FILE"

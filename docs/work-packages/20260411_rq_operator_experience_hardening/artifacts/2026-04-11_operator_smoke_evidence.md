@@ -195,3 +195,33 @@ Terminal poll excerpt:
 - Token-bearing payloads were redacted to contract-shape fields only.
 - Evidence records UTC timestamp + method + path + status for every operator call.
 - Raw evidence directory for this run: `/tmp/rq_operator_smoke_20260411T073319Z`.
+
+## Follow-Up Addendum (Second Acceptance Intake + Remediation)
+
+Second acceptance intake (user-supplied UTC/redacted evidence):
+- Run: `foaming-chervil/disturbed9002_wbt`
+- Window: `2026-04-11T15:22:27Z` to `2026-04-11T15:23:46Z`
+- Reported blocker:
+  - `POST /rq-engine/api/runs/{runid}/{config}/build-climate` -> `400`
+  - details contained parser `KeyError: 'future_start_year'`
+- Source evidence pointers:
+  - `/tmp/operator_acceptance_second_20260411T152227Z/final_summary.json`
+  - `/tmp/operator_acceptance_second_20260411T152227Z/api_calls.ndjson`
+  - `/tmp/operator_acceptance_second_20260411T152227Z/calls/0107_mutation_build-climate/request.json`
+  - `/tmp/operator_acceptance_second_20260411T152227Z/calls/0107_mutation_build-climate/response.json`
+
+Remediation implemented (2026-04-11 15:58 UTC):
+- climate parse boundary now emits canonical `validation_error` payloads with field-level errors;
+- parser no longer unconditionally reads `future_*` keys outside future mode;
+- climate schema/defaults aligned for mode-conditional observed/future year fields;
+- batched endpoint discovery added via
+  `GET /api/runs/{runid}/{config}/endpoints?include_operation_docs=true`.
+
+Follow-up verification evidence (local gates):
+- `wctl run-pytest tests/nodb/test_climate_input_parser_service.py tests/microservices/test_rq_engine_climate_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` -> `65 passed`
+- `wctl run-pytest tests/microservices/test_rq_engine_setup_discovery_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/microservices/test_rq_engine_climate_routes.py tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `95 passed`
+- `python tools/check_endpoint_inventory.py && python tools/check_route_contract_checklist.py` -> pass
+
+Final follow-up gate (2026-04-11 16:20 UTC):
+- `wctl run-pytest tests/microservices/test_rq_engine_setup_discovery_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/microservices/test_rq_engine_climate_routes.py tests/nodb/test_climate_input_parser_service.py tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `109 passed`
+- Independent `reviewer` / `qa_reviewer` / `security_reviewer` re-reviews: no unresolved medium/high findings.

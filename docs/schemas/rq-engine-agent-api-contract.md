@@ -123,6 +123,13 @@ Errors:
 Common route-level status requirements are enforced by
 `tests/microservices/test_rq_engine_openapi_contract.py`.
 
+Climate-parse validation contract:
+- `POST /api/runs/{runid}/{config}/build-climate` returns canonical
+  `validation_error` payloads for invalid/missing climate fields.
+- Missing-field failures SHOULD surface machine-actionable field entries under
+  top-level `errors` (for example `future_start_year`, `future_end_year`)
+  instead of traceback text in `error.details`.
+
 ## Agent Workflow (Recommended)
 1. Acquire a token:
    - User/service token (pre-issued), or
@@ -248,7 +255,7 @@ table below is the practical family map used by agent clients.
 | Family | Paths | Typical Execution | Primary Scope |
 |---|---|---|---|
 | Job control | `/api/jobstatus/{job_id}`, `/api/jobinfo/{job_id}`, `/api/jobinfo`, `/api/canceljob/{job_id}` | Polling is sync/read-only; cancel is sync mutation | `rq:status` (cancel also accepts `culvert:batch:submit`) |
-| Setup discovery | `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, `/api/endpoints/{operation_id}/{schema\\|defaults\\|errors}` | Sync read-only discovery | `rq:status` or `rq:read` |
+| Setup discovery | `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, `/api/endpoints/{operation_id}/{schema\\|defaults\\|errors}`, `/api/runs/{runid}/{config}/endpoints?include_operation_docs=true` | Sync read-only discovery | `rq:status` or `rq:read` |
 | Bootstrap | `/api/runs/{runid}/{config}/bootstrap/*` plus `run-*-noprep` endpoints | Mix of sync no-queue (`checkout`, reads, mint) and async (`enable`, no-prep runs) | `bootstrap:*` and `rq:enqueue` |
 | Build/prep | `/api/runs/{runid}/{config}/build-*`, `fetch-dem-and-build-channels`, `set-outlet` | Mostly async enqueue | `rq:enqueue` |
 | Model runs | `/api/runs/{runid}/{config}/run-*` (`wepp`, `wepp-watershed`, `swat`, `rhem`, `ash`, `debris-flow`, `omni`) | Mostly async enqueue; some sync dry-run paths | `rq:enqueue` |

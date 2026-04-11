@@ -282,9 +282,14 @@ def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPa
         assert schema_payload["run_state_domain"] == "metadata"
         assert schema_payload["controller"] == "climate"
         fields = schema_payload["fields"]
+        assert fields["climate_mode"]["enum"] == [0, 2, 3, 5, 6, 11]
         assert fields["climate_mode"]["constraint_mode"] == "run_resolved"
         assert fields["climatestation"]["available_if"] == {"field": "climate_mode", "op": "in", "value": [2, 6]}
         assert fields["climatestation"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [2, 6]}
+        assert fields["observed_start_year"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [2, 11]}
+        assert fields["observed_end_year"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [2, 11]}
+        assert fields["future_start_year"]["required_if"] == {"field": "climate_mode", "op": "eq", "value": 3}
+        assert fields["future_end_year"]["required_if"] == {"field": "climate_mode", "op": "eq", "value": 3}
 
         hints_response = client.get(CONTROLLER_HINTS_PATH)
         assert hints_response.status_code == 200
@@ -544,6 +549,113 @@ def test_build_climate_defaults_emit_integer_climate_mode(monkeypatch: pytest.Mo
     payload = response.json()
     assert isinstance(payload["resolved_defaults"]["climate_mode"], int)
     assert payload["resolved_defaults"]["climate_mode"] == 11
+
+
+def test_build_climate_defaults_switch_to_future_years_for_future_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    runtime = _sample_runtime()
+    runtime.states["climate_mode_code"] = 3
+    runtime.states["climate_mode"] = "future"
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: runtime)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/defaults")
+
+    assert response.status_code == 200
+    resolved_defaults = response.json()["resolved_defaults"]
+    assert resolved_defaults["climate_mode"] == 3
+    assert resolved_defaults["future_start_year"] == 2040
+    assert resolved_defaults["future_end_year"] == 2060
+    assert "observed_start_year" not in resolved_defaults
+    assert "observed_end_year" not in resolved_defaults
+
+
+def test_build_climate_schema_includes_future_window_fields(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema")
+
+    assert response.status_code == 200
+    payload = response.json()
+    request_fields = payload["request"]["properties"]
+    assert request_fields["climate_mode"]["enum"] == [0, 2, 3, 5, 6, 11]
+    assert request_fields["observed_start_year"]["required_if"] == {
+        "field": "climate_mode",
+        "op": "in",
+        "value": [2, 11],
+    }
+    assert request_fields["future_start_year"]["required_if"] == {
+        "field": "climate_mode",
+        "op": "eq",
+        "value": 3,
+    }
+    assert request_fields["future_end_year"]["required_if"] == {
+        "field": "climate_mode",
+        "op": "eq",
+        "value": 3,
+    }
+
+
+def test_controller_schema_does_not_expose_unknown_runtime_climate_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    runtime = _sample_runtime()
+    runtime.states["climate_mode_code"] = 999
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: runtime)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(CONTROLLER_SCHEMA_PATH)
+
+    assert response.status_code == 200
+    enum_available = response.json()["fields"]["climate_mode"]["enum_available"]
+    assert 999 not in enum_available
+
+
+def test_list_run_endpoints_can_include_operation_docs_snapshot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"{RUN_ENDPOINTS_PATH}?include_operation_docs=true")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert "operation_docs" in payload
+    operation_docs = payload["operation_docs"]
+    assert isinstance(operation_docs, dict)
+    assert "rq_engine_build_climate" in operation_docs
+
+    climate_doc = operation_docs["rq_engine_build_climate"]
+    assert climate_doc["operation_descriptor"]["operation_id"] == "rq_engine_build_climate"
+    assert "resolved_defaults" in climate_doc
+    assert "defaults_context" in climate_doc
+    assert "computed_at" in climate_doc
+    assert isinstance(climate_doc["errors"], list)
+
+
+def test_list_run_endpoints_rejects_invalid_include_operation_docs_value(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"{RUN_ENDPOINTS_PATH}?include_operation_docs=maybe")
+
+    assert response.status_code == 422
+    payload = response.json()
+    assert isinstance(payload.get("detail"), list)
+    assert any(
+        isinstance(item, dict) and item.get("loc", [None])[-1] == "include_operation_docs"
+        for item in payload["detail"]
+    )
 
 
 def test_build_soils_schema_and_defaults_require_disturbed_fields(

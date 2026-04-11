@@ -247,3 +247,18 @@ def test_frozen_agent_metadata_size_budgets(
         "Frozen agent-route OpenAPI metadata exceeded aggregate budget. "
         f"total_chars={total_chars} budget={MAX_FROZEN_METADATA_TOTAL_CHARS}"
     )
+
+
+def test_list_run_endpoints_declares_include_operation_docs_query_param(
+    _openapi_doc: dict,
+) -> None:
+    operation = _openapi_doc["paths"]["/api/runs/{runid}/{config}/endpoints"]["get"]
+    parameters = operation.get("parameters", [])
+
+    include_param = next(
+        (param for param in parameters if param.get("name") == "include_operation_docs"),
+        None,
+    )
+    assert include_param is not None
+    assert include_param.get("in") == "query"
+    assert include_param.get("schema", {}).get("type") == "boolean"

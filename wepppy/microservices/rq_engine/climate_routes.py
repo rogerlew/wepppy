@@ -24,7 +24,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
-from .responses import error_response, error_response_with_traceback
+from .responses import error_response, error_response_with_traceback, validation_error_response
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,42 @@ def _require_directory_root(wd: str, root: str) -> None:
             code="NODIR_ARCHIVE_ACTIVE",
             message=f"{root} root is archive-backed; directory root required",
         )
+
+
+def _build_climate_validation_errors(exc: Exception) -> list[dict[str, str]]:
+    message = str(exc).strip()
+
+    if isinstance(exc, KeyError):
+        missing_field = str(exc.args[0]).strip().strip("'\"")
+        if missing_field:
+            return [
+                {
+                    "field": missing_field,
+                    "code": "missing_required_field",
+                    "message": f"Missing required field: {missing_field}",
+                }
+            ]
+
+    prefix = "Missing required climate field(s):"
+    if message.startswith(prefix):
+        field_list = message[len(prefix) :].strip()
+        fields = [field.strip() for field in field_list.split(",") if field.strip()]
+        if fields:
+            return [
+                {
+                    "field": field,
+                    "code": "missing_required_field",
+                    "message": f"Missing required field: {field}",
+                }
+                for field in fields
+            ]
+
+    return [
+        {
+            "code": "invalid_request",
+            "message": "Invalid climate field values.",
+        }
+    ]
 
 
 @router.post(
@@ -88,13 +124,21 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
         climate = Climate.getInstance(wd)
         payload = await parse_request_payload(request)
         climate.parse_inputs(payload)
+    except (AssertionError, KeyError, TypeError, ValueError) as exc:
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.info(
+            "rq-engine build-climate validation failed",
+            extra={"runid": runid, "config": config, "error": str(exc)},
+        )
+        return validation_error_response(_build_climate_validation_errors(exc))
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
             return nodir_response
-        # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception("rq-engine build-climate payload parse failed", extra={"runid": runid, "config": config})
-        return error_response_with_traceback("Error parsing climate inputs", status_code=400)
+        return error_response("Error parsing climate inputs", status_code=400)
 
     if climate.run_group == "batch":
         return JSONResponse({"message": "Set climate inputs for batch processing"})

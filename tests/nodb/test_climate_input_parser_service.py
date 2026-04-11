@@ -26,6 +26,10 @@ class _DummyClimate:
         self._precip_monthly_scale_factors = None
         self._precip_scaling_reference = None
         self._precip_scale_factor_map = None
+        self._observed_start_year = ""
+        self._observed_end_year = ""
+        self._future_start_year = ""
+        self._future_end_year = ""
 
     @contextmanager
     def locked(self):
@@ -140,4 +144,112 @@ def test_parse_inputs_keeps_lock_scope_around_core_parsing_only() -> None:
     assert climate.events[0] == "lock-enter"
     assert climate.events[1] == "lock-exit"
     assert climate.events[2][0] == "observed"
-    assert climate.events[3][0] == "future"
+    assert all(not (isinstance(event, tuple) and event[0] == "future") for event in climate.events)
+
+
+def test_parse_inputs_prism_mode_allows_missing_future_year_bounds() -> None:
+    parser = ClimateInputParsingService()
+    climate = _DummyClimate()
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.PRISM))
+    payload.pop("future_start_year")
+    payload.pop("future_end_year")
+
+    parser.parse_inputs(climate, payload)
+
+    observed_events = [event for event in climate.events if isinstance(event, tuple) and event[0] == "observed"]
+    future_events = [event for event in climate.events if isinstance(event, tuple) and event[0] == "future"]
+    assert observed_events
+    assert future_events == []
+
+
+def test_parse_inputs_future_mode_requires_future_year_bounds() -> None:
+    parser = ClimateInputParsingService()
+    climate = _DummyClimate()
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Future))
+    payload.pop("future_end_year")
+
+    with pytest.raises(ValueError, match="future_end_year"):
+        parser.parse_inputs(climate, payload)
+
+
+def test_parse_inputs_future_mode_validation_failure_does_not_mutate_observed_year_bounds() -> None:
+    parser = ClimateInputParsingService()
+    climate = _DummyClimate()
+    climate._observed_start_year = 1995
+    climate._observed_end_year = 2005
+
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Future))
+    payload.pop("future_end_year")
+
+    with pytest.raises(ValueError, match="future_end_year"):
+        parser.parse_inputs(climate, payload)
+
+    assert climate._observed_start_year == 1995
+    assert climate._observed_end_year == 2005
+
+
+def test_parse_inputs_future_mode_clears_stale_observed_year_bounds() -> None:
+    parser = ClimateInputParsingService()
+    climate = _DummyClimate()
+    climate._observed_start_year = 1990
+    climate._observed_end_year = 2020
+
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Future))
+    payload.pop("observed_start_year")
+    payload.pop("observed_end_year")
+
+    parser.parse_inputs(climate, payload)
+
+    assert climate._observed_start_year == ""
+    assert climate._observed_end_year == ""
+
+
+def test_parse_inputs_future_mode_ignores_and_clears_observed_year_fields() -> None:
+    parser = ClimateInputParsingService()
+    climate = _DummyClimate()
+    climate._observed_start_year = 1990
+    climate._observed_end_year = 2020
+
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Future))
+
+    parser.parse_inputs(climate, payload)
+
+    assert climate._observed_start_year == ""
+    assert climate._observed_end_year == ""
+
+
+def test_parse_inputs_non_future_mode_clears_stale_future_year_bounds() -> None:
+    parser = ClimateInputParsingService()
+    climate = _DummyClimate()
+    climate._future_start_year = 2030
+    climate._future_end_year = 2040
+
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.PRISM))
+    payload.pop("future_start_year")
+    payload.pop("future_end_year")
+
+    parser.parse_inputs(climate, payload)
+
+    assert climate._future_start_year == ""
+    assert climate._future_end_year == ""
+
+
+def test_parse_inputs_non_future_mode_ignores_future_year_fields_when_provided() -> None:
+    parser = ClimateInputParsingService()
+    climate = _DummyClimate()
+    climate._future_start_year = 2030
+    climate._future_end_year = 2040
+
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.PRISM))
+
+    parser.parse_inputs(climate, payload)
+
+    assert climate._future_start_year == ""
+    assert climate._future_end_year == ""
