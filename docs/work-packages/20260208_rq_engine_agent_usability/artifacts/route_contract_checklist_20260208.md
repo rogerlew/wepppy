@@ -9,6 +9,13 @@ Guarded by:
 
 - Total frozen routes covered: **79**
 
+Cutover reconciliation note (2026-04-10):
+- Row-8 contract cutover package
+  `20260410_rq_controller_state_contract_cutover` verified this checklist as
+  the frozen contract baseline for agent-facing rq-engine routes.
+- No checklist-row additions/removals were required at cutover closure; guard
+  checks continue to enforce checklist parity and response-code contracts.
+
 ## Contract Matrix
 
 | Method | Path | Auth | Scope | Mutates | Execution | Required Responses | Contract Coverage |

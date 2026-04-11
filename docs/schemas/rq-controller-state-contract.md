@@ -1,6 +1,6 @@
 # RQ Controller State Contract (Draft)
 > Proposed additive contract for agent-friendly controller state, parameter metadata, and run orchestration signals.
-> **Status:** Draft with partial implementation; setup discovery, orchestration-read, schema/default metadata, geospatial/upload metadata, and errors/progress/outputs surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults|errors}`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`), remaining controller-state surfaces are planned.
+> **Status:** Draft target profile with row-8 cutover reconciliation completed on 2026-04-10; setup discovery, orchestration-read, schema/default metadata, geospatial/upload metadata, and errors/progress/outputs surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults|errors}`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`); remaining additive controller-state surfaces are planned.
 > **See also:** `docs/schemas/rq-engine-agent-api-contract.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`
 
 ## Purpose
@@ -249,10 +249,9 @@
   `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`,
   descriptors MUST preserve checklist semantics for auth mode, required scope,
   execution class, and required success status codes.
-- During rollout, mutating-vs-read-only classification remains sourced from the
-  frozen checklist artifact until contract cutover package
-  `20260410_rq_controller_state_contract_cutover` finalizes descriptor parity
-  tests.
+- Post-cutover baseline (`20260410_rq_controller_state_contract_cutover`,
+  closed 2026-04-10): mutating-vs-read-only classification is sourced from the
+  frozen checklist artifact and enforced by descriptor/OpenAPI parity tests.
 
 ## Pipeline Step Identity
 - Step IDs are stable contract keys, not display labels.
@@ -383,10 +382,11 @@ For the exhaustive current run-scoped inventory baseline, use:
 
 ## Mutation Result Contract (Normative)
 
-This section specifies target-profile behavior for controller-state cutover.
-Until roadmap cutover package `20260410_rq_controller_state_contract_cutover`,
-existing frozen routes may return legacy success payload variants documented in
-the 2026-02-08 freeze artifacts.
+This section specifies the cutover baseline for controller-state mutation
+result behavior. Roadmap row 8
+(`20260410_rq_controller_state_contract_cutover`) closed on 2026-04-10.
+Legacy success payload variants documented in the 2026-02-08 freeze artifacts
+remain historical references and are not the normative target profile.
 
 | `execution_mode` | Required Success Fields | Next Action Contract |
 |---|---|---|
@@ -1715,7 +1715,26 @@ When a package is closed, its active ExecPlan SHOULD be archived to
 | 5 | `20260410_rq_controller_state_geospatial_uploads` | Implement `/geospatial-metadata` and upload metadata contracts (format/CRS/extent/resolution/value semantics). | Agent can resolve first-step geospatial defaults and validate upload payloads pre-submit. | 2, 4 | Complete |
 | 6 | `20260410_rq_controller_state_errors_progress_outputs` | Implement operation error catalogs, async progress signals, and `/outputs` artifact index with trust/provenance metadata. | Agent can recover from cataloged errors, poll with progress, and fetch artifacts from `outputs` only. | 3, 4, 5 | Complete |
 | 7 | `20260410_rq_controller_state_auth_concurrency` | Enforce/auth-rollout for `rq:read` aliasing, accepted-auth metadata parity, optimistic concurrency, and idempotency behavior. | Mutation/read preconditions and auth modes match descriptor metadata in tests. | 2, 3, 4, 6 | Complete |
-| 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed; package 1-7 gate evidence includes command outcomes; accepted auth least-privilege bridge (`rq:status` -> minted broader session scopes) has explicit cutover decision; row 6-7 watch-list items dispositioned (resolved or explicitly accepted). | 2, 3, 4, 5, 6, 7 | Planned |
+| 8 | `20260410_rq_controller_state_contract_cutover` | Contract freeze and cutover: update inventory/checklist artifacts, OpenAPI contract tests, docs pointers, and rollout notes. | All new endpoints present in frozen inventory/checklist; contract tests green; legacy doc pointers rehomed; package 1-7 gate evidence includes command outcomes; accepted auth least-privilege bridge (`rq:status` -> minted broader session scopes) has explicit cutover decision; row 6-7 watch-list items dispositioned (resolved or explicitly accepted). | 2, 3, 4, 5, 6, 7 | Complete |
+
+### Row 8 Cutover Dispositions (2026-04-10)
+
+- Auth least-privilege bridge (`rq:status` bearer requirement on
+  `/session-token` mint with broader minted session scopes) is accepted as a
+  compatibility residual/design risk for the current frozen baseline.
+  Any policy change requires synchronized route, descriptor, and contract
+  updates in a follow-on package.
+  Owner: rq-engine API contract maintainers.
+- Row-6 watch-list item: `source_run_state_revision` provenance sentinel is
+  explicitly accepted as `"unknown"` when upstream export metadata does not yet
+  persist source run revision. This remains deterministic and contract-visible
+  until provenance persistence is implemented.
+  Owner: outputs/export contract maintainers.
+- Row-6 watch-list item: open polling visibility policy remains unchanged at
+  cutover (`RQ_ENGINE_POLL_AUTH_MODE=open` default with optional token modes,
+  rate limiting, and audit logging). No additional open-read surfaces were
+  introduced; policy changes require a separate scoped package.
+  Owner: rq-engine auth/polling maintainers.
 
 - Progress state vocabulary for this roadmap:
   - `Planned`

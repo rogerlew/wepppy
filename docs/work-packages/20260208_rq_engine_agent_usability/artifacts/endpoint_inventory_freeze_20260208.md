@@ -9,6 +9,13 @@ Snapshot summary:
 - Classification counts: **agent-facing 79**, **internal 17**, **ui-only 6**
 - Canonical owner counts: **rq-engine 99**, **Flask wrapper 3**
 
+Cutover reconciliation note (2026-04-10):
+- Row-8 contract cutover package
+  `20260410_rq_controller_state_contract_cutover` verified this inventory as
+  the frozen parity baseline for controller-state rollout closure.
+- No route-count or ownership changes were required for cutover closure; guard
+  checks continue to enforce this table as source-of-truth.
+
 ## Inventory Table
 
 | Method | Path | Module | Function | Classification | Owner | Auth | Scope | Mutates | Notes |

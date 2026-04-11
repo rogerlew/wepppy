@@ -1,7 +1,7 @@
 # RQ-Engine Agent API Contract
 > Canonical contract for agent clients using the WEPPcloud rq-engine.
 > **Status:** Canonical path under `docs/schemas/` as of 2026-04-10 (moved from `docs/dev-notes/`).
-> **See also:** `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/correlation-id-debugging.md`, `docs/schemas/rq-controller-state-contract.md` (draft), `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`, and user-facing `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`.
+> **See also:** `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`, `docs/schemas/weppcloud-csrf-contract.md`, `docs/dev-notes/correlation-id-debugging.md`, `docs/schemas/rq-controller-state-contract.md`, `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`, and user-facing `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`.
 
 ## Purpose
 This document defines how agents should call rq-engine safely and predictably.
@@ -62,7 +62,7 @@ Core scopes used by agent-facing routes:
 | Scope | Used for |
 |---|---|
 | `rq:status` | Job polling (`jobstatus`, `jobinfo`) and `canceljob`; also bearer path for session-token issuance and setup-discovery compatibility (`/api/configs`, `/api/endpoints*`). |
-| `rq:read` | Read-only setup/controller-state metadata surfaces (`/api/configs`, `/api/endpoints*`, and planned run-scoped controller-state reads). |
+| `rq:read` | Read-only setup/controller-state metadata surfaces (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers*`, `/api/runs/{runid}/{config}/endpoints*`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`). |
 | `rq:enqueue` | Most run mutations that enqueue background jobs or perform run mutations under rq-engine routes. |
 | `rq:export` | Export artifact endpoints under `/runs/{runid}/{config}/export/*`. |
 | `bootstrap:enable` | Bootstrap enable endpoint. |
@@ -73,18 +73,17 @@ Core scopes used by agent-facing routes:
 | `culvert:batch:retry` | Culvert batch retry endpoint. |
 
 Bootstrap routes do not accept `rq:enqueue` as a substitute for `bootstrap:*`.
-- Setup-discovery endpoints implemented in package
-  `20260410_rq_controller_state_setup_discovery` accept `rq:status` and
-  `rq:read` during rollout compatibility.
-- During the additive controller-state rollout, bearer flows that currently rely
-  on `rq:status` for read access MUST remain backward-compatible until package
-  `20260410_rq_controller_state_auth_concurrency` completes.
-- `rq:status` compatibility during that rollout MUST be bounded to the
-  read-only controller-state endpoints proposed in
-  `docs/schemas/rq-controller-state-contract.md` and MUST NOT broaden access to
-  mutation/export/admin/bootstrap-control endpoint families.
-- Sunset requirement: remove `rq:status` aliasing only after explicit auth-scope
-  parity checks verify `rq:read` coverage for all affected read-only endpoints.
+- Controller-state cutover package
+  `20260410_rq_controller_state_contract_cutover` closed on 2026-04-10 with
+  auth-scope parity evidence and keeps `rq:status` + `rq:read` compatibility
+  for read-only controller-state routes in the frozen baseline.
+- `rq:status` compatibility is bounded to read-only controller-state endpoints
+  and MUST NOT broaden access to mutation/export/admin/bootstrap-control
+  endpoint families.
+- Explicit cutover policy decision: session-token minting continues to accept
+  bearer `rq:status` and mint broader run-scoped session scopes for
+  compatibility. Treat this as an accepted residual/design risk until a
+  follow-on policy package updates route + descriptor + contract together.
 
 ## Response Contract
 rq-engine responses must follow `docs/schemas/rq-response-contract.md`.
@@ -222,16 +221,21 @@ reasons:
   - guard tests
   - this document when behavior changes for clients
 
-## Planned Additive Contract
-- Controller-state/schema/orchestration endpoints for agent clients are tracked
-  in `docs/schemas/rq-controller-state-contract.md`.
-- Implemented subset:
-  - setup discovery surfaces (`/api/configs`, `/api/endpoints*`) shipped in
-    `20260410_rq_controller_state_setup_discovery`.
-- Remaining planned scope:
-  - run-scoped controller state/schema/hints/templates
-  - run-scoped endpoint-level schema/default discovery
-  - config/mod-aware `pipeline` DAG and `readiness` surfaces
-- Foundation freeze requirements (identifier model, descriptor invariants, and
-  dependency ordering) remain tracked in
-  `20260410_rq_controller_state_foundation`.
+## Controller-State Contract Status
+- Controller-state/schema/orchestration contract for agent clients is tracked in
+  `docs/schemas/rq-controller-state-contract.md`.
+- Roadmap cutover row 8 (`20260410_rq_controller_state_contract_cutover`)
+  completed on 2026-04-10 with freeze/checklist/OpenAPI/doc parity evidence.
+- Implemented additive subset includes:
+  - setup discovery: `/api/configs`, `/api/endpoints*`
+  - orchestration reads: `/api/runs/{runid}/{config}/pipeline`,
+    `/api/runs/{runid}/{config}/readiness`
+  - schema/default discovery:
+    `/api/runs/{runid}/{config}/controllers*`,
+    `/api/runs/{runid}/{config}/endpoints*`
+  - geospatial/output metadata:
+    `/api/runs/{runid}/{config}/geospatial-metadata`,
+    `/api/runs/{runid}/{config}/outputs`
+- Remaining additive scope stays planned in
+  `docs/schemas/rq-controller-state-contract.md` and must follow the same
+  freeze/checklist/OpenAPI guard workflow.
