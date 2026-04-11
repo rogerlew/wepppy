@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-11  
-**Active Packages**: 1  
+**Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -175,7 +175,29 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 1 package
+**Current WIP Count**: 2 packages
+
+---
+
+### RQ Operator Experience Hardening
+**Started**: 2026-04-11  
+**Status**: Discovery/Planning (kickoff complete, implementation pending)  
+**Size**: Large (2-4 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260411_rq_operator_experience_hardening/](docs/work-packages/20260411_rq_operator_experience_hardening/)  
+**Description**: Hardens rq-engine API operator experience with machine-safe token bootstrap semantics, revision-domain coherence (`run_state_domain`/`run_state_vector`), strict snapshot freshness semantics, and deterministic operator smoke evidence rules.
+
+**Current Status**:
+- Contract and package scaffolding complete.
+- Active ExecPlan created:
+  `docs/work-packages/20260411_rq_operator_experience_hardening/prompts/active/rq_operator_experience_hardening_execplan.md`
+- Security artifact scaffold created:
+  `docs/work-packages/20260411_rq_operator_experience_hardening/artifacts/2026-04-11_security_review.md`
+
+**Next Steps**:
+1. Implement Milestone 1 machine-safe bootstrap route/contract.
+2. Implement revision/freshness metadata rollout and route/openapi tests.
+3. Execute maintainer preflight + API-only operator acceptance gates.
 
 ---
 
