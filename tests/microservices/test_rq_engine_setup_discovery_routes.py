@@ -169,6 +169,7 @@ def test_setup_catalog_includes_create_and_expected_ids(monkeypatch: pytest.Monk
 
     create_operation = next(operation for operation in operations if operation["operation_id"] == "rq_engine_create")
     assert create_operation["config_catalog_url"] == "/api/configs"
+    assert create_operation["path_aliases"] == ["/api/create/"]
     assert set(create_operation["accepted_auth"]) == {
         "rq_token",
         "bearer_jwt",

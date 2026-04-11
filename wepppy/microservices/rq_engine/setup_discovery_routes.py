@@ -337,6 +337,7 @@ def _setup_operation_registry() -> dict[str, dict[str, Any]]:
         "run_scoped": False,
         "method": "POST",
         "path": "/create/",
+        "path_aliases": ["/api/create/"],
         "config_catalog_url": config_catalog_url,
         "accepted_auth": ["rq_token", "bearer_jwt", "session_cookie_same_origin", "captcha"],
         "auth_requirements": {

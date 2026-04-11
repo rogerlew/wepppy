@@ -122,6 +122,27 @@ def test_create_accepts_valid_cap_token(create_client, monkeypatch: pytest.Monke
     assert captured["cfg"] == f"{CONFIG}.cfg"
 
 
+def test_create_api_alias_accepts_valid_cap_token(create_client, monkeypatch: pytest.MonkeyPatch):
+    client, captured = create_client
+
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda request, token: {"success": True},
+    )
+
+    response = client.post(
+        "/api/create/",
+        data={"config": CONFIG, "cap_token": "good-token"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    location = response.headers["Location"].rstrip("/")
+    assert location.endswith(f"/weppcloud/runs/{RUN_ID}/{CONFIG}")
+    assert captured["cfg"] == f"{CONFIG}.cfg"
+
+
 def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch):
     client, captured = create_client
 

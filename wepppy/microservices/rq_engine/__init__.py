@@ -74,6 +74,13 @@ async def forwarded_prefix_middleware(request: Request, call_next):
     return await call_next(request)
 
 
+@app.middleware("http")
+async def create_path_alias_middleware(request: Request, call_next):
+    if request.scope.get("path") in {"/api/create", "/api/create/"}:
+        request.scope["path"] = "/create/"
+    return await call_next(request)
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {

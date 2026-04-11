@@ -271,8 +271,8 @@
 - For proposed routes that are not yet in OpenAPI, the `operation_id` values in
   this contract are reserved IDs and MUST be used unchanged when those routes
   are implemented.
-- Path exceptions (for example `POST /create/` without an `/api` prefix) do not
-  change `operation_id` naming requirements.
+- Path exceptions (for example canonical `POST /create/` with runtime alias
+  `/api/create/`) do not change `operation_id` naming requirements.
 - `step_id` is a stable workflow-node key in the pipeline DAG.
 - A pipeline step MUST carry both:
   - `step_id` (workflow node identity)

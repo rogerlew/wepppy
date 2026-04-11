@@ -33,6 +33,9 @@ Quick setup pointers:
   - `POST /weppcloud/api/auth/rq-engine-operator-token`
   - Bearer-auth only, scope-constrained minting (`requested_scopes`),
     rate-limited, and audited.
+  - Request only scopes present on the source bearer token. Example:
+    source bearer with `rq:status` only + `requested_scopes=["rq:read"]` returns
+    `403`; use `requested_scopes=["rq:status"]`.
   - Source bearer token must include `jti`; revoked tokens are rejected.
   - Revocation backend unavailability returns `503` (retryable).
   - Use this path for non-browser/operator flows when a pre-issued
@@ -41,6 +44,8 @@ Quick setup pointers:
   - existing run URL (`/runs/{runid}/{config}`), or
   - create/fork flow described in
     `docs/schemas/rq-controller-state-contract.md` (`## Supported End-to-End Workflows`).
+  - create route path is canonical `POST /create/`; runtime alias
+    `POST /api/create/` is also accepted for operator compatibility.
 
 ## Phase A: Maintainer Contract/Route Preflight
 

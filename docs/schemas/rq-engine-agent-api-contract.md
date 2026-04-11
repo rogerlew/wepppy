@@ -192,8 +192,13 @@ Shipped machine-safe bootstrap surface:
   - no silent scope expansion;
   - unknown requested scopes return `400`;
   - unauthorized requested scopes return `403`.
+  - example: if caller bearer has only `rq:status`, then
+    `{"requested_scopes":["rq:read"]}` returns `403`; request
+    `{"requested_scopes":["rq:status"]}` instead.
 - Defaults and guardrails:
   - defaults to read-oriented scope when request body omits `requested_scopes`;
+  - callers SHOULD send explicit `requested_scopes` that are a subset of source
+    bearer scopes to avoid avoidable `403` responses;
   - short-lived token default (`900s`, env-tunable);
   - rate limited and audit logged;
   - revocation backend unavailability returns `503` with retry guidance (`Retry-After`);
@@ -252,7 +257,7 @@ table below is the practical family map used by agent clients.
 | Archive/fork | `/api/runs/{runid}/{config}/archive`, `/restore-archive`, `/delete-archive`, `/fork` | Mostly async enqueue; some sync mutation paths | `rq:enqueue` |
 | External TS | `/api/runs/{runid}/{config}/acquire-openet-ts`, `/acquire-rap-ts` | Async enqueue | `rq:enqueue` |
 | Culvert batch | `/api/culverts-wepp-batch/`, `/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` | Async enqueue | `culvert:batch:*` |
-| Project create | `/create/` | Sync redirect (`303`) plus resource creation | `rq:enqueue` token path or CAPTCHA |
+| Project create | `/create/` (alias `/api/create/`) | Sync redirect (`303`) plus resource creation | `rq:enqueue` token path or CAPTCHA |
 
 Watershed map-input normalization (`fetch-dem-and-build-channels`):
 - For `set_extent_mode` `0`/`1`, agents may submit `map_bounds` without
