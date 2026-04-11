@@ -424,6 +424,24 @@ services:
     ports:
       - "8041:8041"
 
+  shape-converter:
+    <<: *wepppy-service
+    container_name: wepppy-shape-converter
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    command:
+      - uvicorn
+      - wepppy.microservices.shape_converter:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8060"
+      - --reload
+    ports:
+      - "8060:8060"
+
   rq-engine:
     <<: *wepppy-service
     container_name: wepppy-rq-engine
@@ -793,6 +811,7 @@ services:
       - rq-dashboard
       - profile-playback
       - fcgiwrap
+      - shape-converter
 
   fcgiwrap:
     build:

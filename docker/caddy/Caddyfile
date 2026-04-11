@@ -75,6 +75,17 @@ http://:8080 {
         }
     }
 
+    @shape_converter_exact path /utils/shape-converter
+    redir @shape_converter_exact /utils/shape-converter/ 308
+
+    handle_path /utils/shape-converter/* {
+        reverse_proxy shape-converter:8060 {
+            header_up X-Forwarded-Prefix /utils/shape-converter
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+        }
+    }
+
     handle_path /query-engine* {
         reverse_proxy query-engine:8041 {
             header_up X-Forwarded-Prefix /query-engine

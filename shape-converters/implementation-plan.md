@@ -70,7 +70,7 @@ Required evidence:
 | WP | Title | Depends On | State | Code Gate | Unit Gate | QA Gate | Security Gate | Evidence / Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | WP-00 | Repo scaffold and orchestration setup | none | done | pass | pass | pass | pass | This plan + specification moved under `shape-converter/` |
-| WP-01 | Service scaffold and container wiring | WP-00 | not_started | pending | pending | pending | pending | Create `shape-converter` app skeleton, Dockerfile, compose service, Caddy route |
+| WP-01 | Service scaffold and container wiring | WP-00 | done | pass | pass | pass | pass | Completed 2026-04-11. Evidence: `/workdir/wepppy/shape-converters/work-packages/wp-01_service_scaffold_container_wiring.md` (unit gate: 6/6 pass, Caddy smoke pass, negative namespace probe not proxied). |
 | WP-02 | Inspect endpoint + ZIP/shapefile validation | WP-01 | not_started | pending | pending | pending | pending | Implement `/utils/shape-converter/v1/inspect` and risk controls |
 | WP-03 | Convert endpoint + CRS and format pipeline | WP-02 | not_started | pending | pending | pending | pending | Implement `/utils/shape-converter/v1/convert`, GeoJSON/GeoParquet behavior |
 | WP-04 | Cleanup lifecycle and failure-path guarantees | WP-02, WP-03 | not_started | pending | pending | pending | pending | Enforce request-scoped delete on success/failure/timeout/disconnect |
