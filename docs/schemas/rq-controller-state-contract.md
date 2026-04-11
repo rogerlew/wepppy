@@ -417,6 +417,20 @@ For the exhaustive current run-scoped inventory baseline, use:
   checklist, this section SHOULD be reviewed and updated when needed to keep
   orchestration-relevant subset coverage accurate.
 
+### Watershed Map Input Normalization
+
+For `POST /api/runs/{runid}/{config}/fetch-dem-and-build-channels`:
+- `set_extent_mode` `0` and `1` MUST accept `map_bounds` as the only required
+  map geometry field.
+- When `map_center` is omitted, the backend MUST derive it as bbox midpoint:
+  `[(left+right)/2, (bottom+top)/2]`.
+- When `map_zoom` is omitted, the backend MUST derive a fit zoom from
+  `map_bounds` using the canonical map extent zoom helper.
+- When `map_center` and/or `map_zoom` are provided, explicit values MUST take
+  precedence over derived values.
+- `set_extent_mode` `2` (`map_object`) and `3` (uploaded DEM mode) semantics
+  remain unchanged.
+
 ## Step Execution Semantics
 - Each pipeline step SHOULD include:
   - `execution_mode`: `sync` or `async`

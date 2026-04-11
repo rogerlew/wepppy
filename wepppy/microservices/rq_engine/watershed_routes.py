@@ -170,7 +170,7 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             if zoom_raw not in (None, ""):
                 zoom = _as_float(zoom_raw, "zoom")
         else:
-            if center_raw is None or zoom_raw is None or bounds_raw is None:
+            if bounds_raw in (None, ""):
                 return (
                     error_response(
                         "Expecting center, zoom, bounds, mcl, and csa",
@@ -178,9 +178,15 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
                     ),
                     None,
                 )
-            center = _as_float_sequence(center_raw, 2, "center")
             extent = _as_float_sequence(bounds_raw, 4, "bounds")
-            zoom = _as_float(zoom_raw, "zoom")
+            if center_raw in (None, ""):
+                center = [(extent[0] + extent[2]) / 2.0, (extent[1] + extent[3]) / 2.0]
+            else:
+                center = _as_float_sequence(center_raw, 2, "center")
+            if zoom_raw in (None, ""):
+                zoom = Map.zoom_for_extent(extent)
+            else:
+                zoom = _as_float(zoom_raw, "zoom")
 
         if mcl_raw is None or csa_raw is None:
             return (

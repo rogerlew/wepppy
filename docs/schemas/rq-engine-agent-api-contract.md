@@ -254,6 +254,13 @@ table below is the practical family map used by agent clients.
 | Culvert batch | `/api/culverts-wepp-batch/`, `/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` | Async enqueue | `culvert:batch:*` |
 | Project create | `/create/` | Sync redirect (`303`) plus resource creation | `rq:enqueue` token path or CAPTCHA |
 
+Watershed map-input normalization (`fetch-dem-and-build-channels`):
+- For `set_extent_mode` `0`/`1`, agents may submit `map_bounds` without
+  `map_center`/`map_zoom`.
+- The backend derives missing `map_center` (bbox midpoint) and missing
+  `map_zoom` (fit zoom from bounds).
+- Explicitly supplied `map_center`/`map_zoom` still override derived values.
+
 ## Internal Admin Debug Endpoints
 These routes are intentionally **internal/admin** and are not part of the
 frozen 79-route agent-facing checklist.

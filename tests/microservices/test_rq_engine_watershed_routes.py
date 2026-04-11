@@ -61,6 +61,86 @@ def test_fetch_dem_missing_payload_returns_400(monkeypatch: pytest.MonkeyPatch) 
     assert payload["error"]["message"] == "Expecting center, zoom, bounds, mcl, and csa"
 
 
+def test_parse_map_change_derives_center_and_zoom_from_bounds_when_missing() -> None:
+    payload = {
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+    }
+
+    error, args = watershed_routes._parse_map_change(payload)
+
+    assert error is None
+    assert args is not None
+    extent, center, zoom, *_ = args
+    assert extent == [-118.0, 46.5, -117.0, 47.0]
+    assert center == [-117.5, 46.75]
+    assert zoom == pytest.approx(watershed_routes.Map.zoom_for_extent(extent))
+
+
+def test_fetch_dem_bounds_only_derives_center_and_zoom(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    enqueue = {"called": False, "func": None, "args": None}
+
+    class DummyJob:
+        id = "job-bounds-only"
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, func, args, **kwargs):
+            enqueue["called"] = True
+            enqueue["func"] = func
+            enqueue["args"] = args
+            return DummyJob()
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = "default"
+        delineation_backend_is_wbt = False
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    bounds = [-118.0, 46.5, -117.0, 47.0]
+    payload = {
+        "map_bounds": bounds,
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/fetch-dem-and-build-channels", json=payload)
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-bounds-only"
+    assert enqueue["called"] is True
+    assert enqueue["func"] is watershed_routes.fetch_dem_and_build_channels_rq
+    call_args = enqueue["args"]
+    assert call_args is not None
+    assert call_args[0] == "run-1"
+    assert call_args[1] == bounds
+    assert call_args[2] == [-117.5, 46.75]
+    assert call_args[3] == pytest.approx(watershed_routes.Map.zoom_for_extent(bounds))
+
+
 def test_fetch_dem_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-42")
