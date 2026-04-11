@@ -7,7 +7,7 @@
 **Timezone**: UTC  
 **Started**: 2026-04-10 23:35 UTC  
 **Current phase**: Complete  
-**Last updated**: 2026-04-11 00:18 UTC  
+**Last updated**: 2026-04-11 01:56 UTC  
 **Next milestone**: None (package closed).  
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
@@ -32,6 +32,7 @@
 - [x] Completed phased independent reviews (`reviewer` -> `qa_reviewer` -> `security_reviewer`).
 - [x] Dispositioned all findings; no unresolved medium/high findings remain.
 - [x] Completed security artifact, docs gate, ExecPlan archival/outcome note, and `PROJECT_TRACKER.md` lifecycle update.
+- [x] Added end-to-end smoke runbook and re-ran consolidated pre-smoke contract/route suites after full-package review.
 
 ## Timeline
 
@@ -48,6 +49,7 @@
 - **2026-04-11 00:14 UTC** - Post-remediation `reviewer` re-review: clean signoff, no unresolved medium/high findings.
 - **2026-04-11 00:16 UTC** - Post-remediation `qa_reviewer` re-review: clean signoff, reproducibility evidence verified.
 - **2026-04-11 00:18 UTC** - Post-remediation `security_reviewer` re-review: gate `PASS`, no unresolved medium/high security findings; package closeout confirmed.
+- **2026-04-11 01:56 UTC** - Post-close full-package review follow-up completed: route-count/date doc drift fixed, canonical smoke runbook added, and consolidated pre-smoke suite re-run passed.
 
 ## Decisions Log
 
@@ -193,6 +195,11 @@ Disposition:
 - `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py --maxfail=1` -> `2 passed, 2 warnings in 8.27s`
 - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/package.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/tracker.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/prompts/active/rq_controller_state_contract_cutover_execplan.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md` -> `8 files validated, 0 errors, 0 warnings`
 - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/package.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/tracker.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/prompts/completed/rq_controller_state_contract_cutover_execplan.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/prompts/completed/rq_controller_state_contract_cutover_execplan_outcome.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/artifacts/2026-04-10_security_review.md --path PROJECT_TRACKER.md` -> `9 files validated, 0 errors, 0 warnings`
+- `wctl run-pytest tests/microservices/test_rq_engine_setup_discovery_routes.py tests/microservices/test_rq_engine_orchestration_read_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py tests/microservices/test_rq_engine_upload_climate_routes.py tests/microservices/test_rq_engine_upload_disturbed_routes.py tests/microservices/test_rq_engine_watershed_routes.py tests/microservices/test_rq_engine_errors_progress_outputs_routes.py tests/microservices/test_rq_engine_auth_concurrency_routes.py tests/microservices/test_rq_engine_auth.py tests/microservices/test_rq_engine_session_routes.py tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `248 passed, 9 warnings in 17.50s`
+- `python tools/check_endpoint_inventory.py` -> `Endpoint inventory check passed`
+- `python tools/check_route_contract_checklist.py` -> `Route contract checklist check passed`
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py --maxfail=1` -> `2 passed, 2 warnings in 8.51s`
+- `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md --path docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/package.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/tracker.md --path docs/work-packages/20260410_rq_controller_state_contract_cutover/artifacts/2026-04-11_rq_controller_state_e2e_smoke_runbook.md --path PROJECT_TRACKER.md` -> `9 files validated, 0 errors, 0 warnings`
 
 ## Watch List
 

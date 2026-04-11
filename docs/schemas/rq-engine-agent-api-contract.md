@@ -74,7 +74,7 @@ Core scopes used by agent-facing routes:
 
 Bootstrap routes do not accept `rq:enqueue` as a substitute for `bootstrap:*`.
 - Controller-state cutover package
-  `20260410_rq_controller_state_contract_cutover` closed on 2026-04-10 with
+  `20260410_rq_controller_state_contract_cutover` closed on 2026-04-11 with
   auth-scope parity evidence and keeps `rq:status` + `rq:read` compatibility
   for read-only controller-state routes in the frozen baseline.
 - `rq:status` compatibility is bounded to read-only controller-state endpoints
@@ -171,7 +171,7 @@ Notes:
   `docs/schemas/weppcloud-csrf-contract.md`.
 
 ## Endpoint Families (Agent-Facing)
-For the exact frozen route list (currently 67 routes), use the contract
+For the exact frozen route list (currently 79 routes), use the contract
 checklist artifact. The
 table below is the practical family map used by agent clients.
 
@@ -191,7 +191,7 @@ table below is the practical family map used by agent clients.
 
 ## Internal Admin Debug Endpoints
 These routes are intentionally **internal/admin** and are not part of the
-frozen 67-route agent-facing checklist.
+frozen 79-route agent-facing checklist.
 
 | Method | Path | Purpose | Auth |
 |---|---|---|---|
@@ -225,7 +225,7 @@ reasons:
 - Controller-state/schema/orchestration contract for agent clients is tracked in
   `docs/schemas/rq-controller-state-contract.md`.
 - Roadmap cutover row 8 (`20260410_rq_controller_state_contract_cutover`)
-  completed on 2026-04-10 with freeze/checklist/OpenAPI/doc parity evidence.
+  completed on 2026-04-11 with freeze/checklist/OpenAPI/doc parity evidence.
 - Implemented additive subset includes:
   - setup discovery: `/api/configs`, `/api/endpoints*`
   - orchestration reads: `/api/runs/{runid}/{config}/pipeline`,
@@ -239,3 +239,11 @@ reasons:
 - Remaining additive scope stays planned in
   `docs/schemas/rq-controller-state-contract.md` and must follow the same
   freeze/checklist/OpenAPI guard workflow.
+
+## End-to-End Smoke Runbook
+- Canonical smoke runbook for the row-8 frozen baseline:
+  `docs/work-packages/20260410_rq_controller_state_contract_cutover/artifacts/2026-04-11_rq_controller_state_e2e_smoke_runbook.md`
+- Use this runbook for:
+  - deterministic pre-smoke contract/guard regression checks,
+  - manual end-to-end API surface smoke sequence (`/api/configs` through
+    run-scoped controller-state endpoints and outputs).

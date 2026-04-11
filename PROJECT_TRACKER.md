@@ -231,7 +231,7 @@ Recently completed work packages. Archived immediately upon completion.
 ### RQ Controller State Contract Cutover (2026-04-11)
 **Status**: ✅ **COMPLETE**  
 **Link**: [docs/work-packages/20260410_rq_controller_state_contract_cutover/](docs/work-packages/20260410_rq_controller_state_contract_cutover/)  
-**Summary**: Completed row-8 contract freeze/cutover reconciliation across schema/pointer docs, frozen inventory/checklist parity notes, and package lifecycle evidence. Required code gates passed, phased `reviewer` -> `qa_reviewer` -> `security_reviewer` reviews were dispositioned with no unresolved medium/high findings, and one explicit accepted residual/design risk (session-token scope bridge compatibility) was formally documented with owner and follow-up trigger.
+**Summary**: Completed row-8 contract freeze/cutover reconciliation across schema/pointer docs, frozen inventory/checklist parity notes, and package lifecycle evidence. Required code gates passed, phased `reviewer` -> `qa_reviewer` -> `security_reviewer` reviews were dispositioned with no unresolved medium/high findings, and one explicit accepted residual/design risk (session-token scope bridge compatibility) was formally documented with owner and follow-up trigger. Post-close readiness hardening added a canonical end-to-end smoke runbook and reran a consolidated 248-test rq-engine smoke baseline plus guard checks.
 
 ### RQ Controller State Auth and Concurrency (2026-04-10)
 **Status**: ✅ **COMPLETE**  

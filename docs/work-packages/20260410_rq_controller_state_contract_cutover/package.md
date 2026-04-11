@@ -117,6 +117,7 @@ This package delivers final cutover reconciliation and evidence hardening only; 
 - `docs/schemas/rq-controller-state-contract.md`
 - `docs/schemas/rq-engine-agent-api-contract.md`
 - `docs/dev-notes/rq-engine-agent-api.md`
+- `docs/work-packages/20260410_rq_controller_state_contract_cutover/artifacts/2026-04-11_rq_controller_state_e2e_smoke_runbook.md`
 - `docs/work-packages/README.md`
 - `docs/prompt_templates/codex_exec_plans.md`
 - `docs/prompt_templates/security_review_template.md`
@@ -127,6 +128,8 @@ This package delivers final cutover reconciliation and evidence hardening only; 
 - Updated freeze/checklist artifacts and guard/test parity for cutover state.
 - Updated package lifecycle docs and archived ExecPlan on closure.
 - Completed security review artifact and phased review dispositions.
+- End-to-end smoke runbook and pre-smoke command sequence for frozen
+  controller-state surfaces.
 
 ## Kickoff Prompt
 - Archived ExecPlan: `docs/work-packages/20260410_rq_controller_state_contract_cutover/prompts/completed/rq_controller_state_contract_cutover_execplan.md`

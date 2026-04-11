@@ -1,6 +1,6 @@
 # RQ Controller State Contract (Draft)
 > Proposed additive contract for agent-friendly controller state, parameter metadata, and run orchestration signals.
-> **Status:** Draft target profile with row-8 cutover reconciliation completed on 2026-04-10; setup discovery, orchestration-read, schema/default metadata, geospatial/upload metadata, and errors/progress/outputs surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults|errors}`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`); remaining additive controller-state surfaces are planned.
+> **Status:** Draft target profile with row-8 cutover reconciliation completed on 2026-04-11; setup discovery, orchestration-read, schema/default metadata, geospatial/upload metadata, and errors/progress/outputs surfaces are implemented (`/api/configs`, `/api/endpoints*`, `/api/runs/{runid}/{config}/pipeline`, `/api/runs/{runid}/{config}/readiness`, `/api/runs/{runid}/{config}/controllers`, `/api/runs/{runid}/{config}/controllers/{controller}/{schema|hints|templates}`, `/api/runs/{runid}/{config}/endpoints`, `/api/runs/{runid}/{config}/endpoints/{operation_id}/{schema|defaults|errors}`, `/api/runs/{runid}/{config}/geospatial-metadata`, `/api/runs/{runid}/{config}/outputs`); remaining additive controller-state surfaces are planned.
 > **See also:** `docs/schemas/rq-engine-agent-api-contract.md`, `docs/schemas/rq-response-contract.md`, `docs/dev-notes/auth-token.spec.md`
 
 ## Purpose
@@ -250,7 +250,7 @@
   descriptors MUST preserve checklist semantics for auth mode, required scope,
   execution class, and required success status codes.
 - Post-cutover baseline (`20260410_rq_controller_state_contract_cutover`,
-  closed 2026-04-10): mutating-vs-read-only classification is sourced from the
+  closed 2026-04-11): mutating-vs-read-only classification is sourced from the
   frozen checklist artifact and enforced by descriptor/OpenAPI parity tests.
 
 ## Pipeline Step Identity
@@ -384,7 +384,7 @@ For the exhaustive current run-scoped inventory baseline, use:
 
 This section specifies the cutover baseline for controller-state mutation
 result behavior. Roadmap row 8
-(`20260410_rq_controller_state_contract_cutover`) closed on 2026-04-10.
+(`20260410_rq_controller_state_contract_cutover`) closed on 2026-04-11.
 Legacy success payload variants documented in the 2026-02-08 freeze artifacts
 remain historical references and are not the normative target profile.
 
@@ -1755,6 +1755,8 @@ When a package is closed, its active ExecPlan SHOULD be archived to
   - focused rq-engine route tests touched by the package
   - `wctl doc-lint --path docs/schemas/rq-controller-state-contract.md`
     (and related schema docs when changed)
+  - end-to-end smoke runbook:
+    `docs/work-packages/20260410_rq_controller_state_contract_cutover/artifacts/2026-04-11_rq_controller_state_e2e_smoke_runbook.md`
 
 ## Supported End-to-End Workflows
 1. Existing run re-run (`runid/config` already exists).
