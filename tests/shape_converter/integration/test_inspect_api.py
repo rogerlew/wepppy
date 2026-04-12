@@ -8,6 +8,7 @@ from starlette.testclient import TestClient
 
 from tests.shape_converter.helpers.archive_builder import build_minimal_point_dataset, build_zip_bytes
 from wepppy.microservices.shape_converter import app
+from wepppy.microservices.shape_converter import create_app
 
 
 pytestmark = [pytest.mark.integration, pytest.mark.microservice]
@@ -64,3 +65,32 @@ def test_inspect_endpoint_returns_canonical_error_for_invalid_archive() -> None:
     payload = response.json()
     assert payload["error"]["code"] == "archive_path_traversal"
     assert payload["error"]["details"]
+
+
+def test_inspect_cleanup_success_leaves_no_request_artifacts(tmp_path) -> None:  # noqa: ANN001
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="cleanup-success"))
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("cleanup-success.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 200
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_inspect_cleanup_failure_leaves_no_request_artifacts(tmp_path) -> None:  # noqa: ANN001
+    archive_bytes = build_zip_bytes({"broken.shp": b"x", "broken.shx": b"y"})
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("cleanup-failure.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "missing_required_sidecar"
+    assert list(tmp_path.iterdir()) == []

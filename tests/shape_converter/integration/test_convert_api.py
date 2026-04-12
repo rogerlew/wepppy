@@ -13,6 +13,7 @@ from tests.shape_converter.helpers.archive_builder import (
     build_zip_bytes,
 )
 from wepppy.microservices.shape_converter import app
+from wepppy.microservices.shape_converter import create_app
 
 
 pytestmark = [pytest.mark.integration, pytest.mark.microservice]
@@ -153,3 +154,34 @@ def test_convert_endpoint_reuses_archive_path_traversal_control() -> None:
 
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "archive_path_traversal"
+
+
+def test_convert_cleanup_success_leaves_no_request_artifacts(tmp_path) -> None:  # noqa: ANN001
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="cleanup-success"))
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("cleanup-success.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 200
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_convert_cleanup_failure_leaves_no_request_artifacts(tmp_path) -> None:  # noqa: ANN001
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="cleanup-failure", include_prj=False))
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("cleanup-failure.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "unknown_source_crs"
+    assert list(tmp_path.iterdir()) == []

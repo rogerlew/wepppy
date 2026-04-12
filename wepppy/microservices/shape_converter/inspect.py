@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 import struct
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,6 +17,7 @@ from .archive_validation import (
     shp_xml_sidecar_warning_message,
     validate_and_extract_zip_archive,
 )
+from .cleanup import RequestScratchLayout
 from .errors import ShapeConverterError
 
 _SHAPE_TYPE_NAMES = {
@@ -59,7 +59,7 @@ class ShapefileDataset:
 async def inspect_uploaded_archive(
     *,
     archive: UploadFile,
-    scratch_root: Path,
+    scratch: RequestScratchLayout,
     request_id: str,
 ) -> dict[str, object]:
     archive_name = archive.filename or "upload.zip"
@@ -75,24 +75,32 @@ async def inspect_uploaded_archive(
             details="Uploaded archive contained zero bytes.",
         )
 
-    with tempfile.TemporaryDirectory(dir=scratch_root, prefix=f"inspect-{request_id[:8]}-") as tmp_dir:
-        extraction_root = Path(tmp_dir) / "extract"
-        extracted_archive = validate_and_extract_zip_archive(
-            archive_name=archive_name,
-            archive_bytes=archive_bytes,
-            extraction_root=extraction_root,
-        )
+    try:
+        scratch.upload_archive_path.write_bytes(archive_bytes)
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="invalid_archive",
+            message="Unable to persist uploaded archive.",
+            details=str(exc),
+            status_code=500,
+        ) from exc
 
-        dataset = select_single_shapefile_dataset(extracted_archive)
-        sidecar_warning = shp_xml_sidecar_warning_message(
-            removed_sidecars=extracted_archive.removed_shp_xml_sidecars
-        )
-        additional_warnings: tuple[str, ...] = (sidecar_warning,) if sidecar_warning else ()
-        return _build_inspect_payload(
-            dataset=dataset,
-            request_id=request_id,
-            additional_warnings=additional_warnings,
-        )
+    extracted_archive = validate_and_extract_zip_archive(
+        archive_name=archive_name,
+        archive_bytes=archive_bytes,
+        extraction_root=scratch.extraction_root,
+    )
+
+    dataset = select_single_shapefile_dataset(extracted_archive)
+    sidecar_warning = shp_xml_sidecar_warning_message(
+        removed_sidecars=extracted_archive.removed_shp_xml_sidecars
+    )
+    additional_warnings: tuple[str, ...] = (sidecar_warning,) if sidecar_warning else ()
+    return _build_inspect_payload(
+        dataset=dataset,
+        request_id=request_id,
+        additional_warnings=additional_warnings,
+    )
 
 
 def select_single_shapefile_dataset(extracted_archive: ExtractedArchive) -> ShapefileDataset:

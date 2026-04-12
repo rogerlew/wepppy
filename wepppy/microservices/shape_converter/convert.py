@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import collections.abc as cabc
 import os
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -22,6 +21,7 @@ from .archive_validation import (
     shp_xml_sidecar_warning_message,
     validate_and_extract_zip_archive,
 )
+from .cleanup import RequestScratchLayout
 from .crs import (
     TARGET_CRS_OPTIONS,
     ResolvedTargetCrs,
@@ -64,7 +64,7 @@ class ConvertedArtifact:
 async def convert_uploaded_archive(
     *,
     archive: UploadFile,
-    scratch_root: Path,
+    scratch: RequestScratchLayout,
     request_id: str,
     output_format: str,
     target_crs: str,
@@ -104,70 +104,89 @@ async def convert_uploaded_archive(
             details="Uploaded archive contained zero bytes.",
         )
 
-    with tempfile.TemporaryDirectory(dir=scratch_root, prefix=f"convert-{request_id[:8]}-") as tmp_dir:
-        extraction_root = Path(tmp_dir) / "extract"
-        extracted_archive = validate_and_extract_zip_archive(
-            archive_name=archive_name,
-            archive_bytes=archive_bytes,
-            extraction_root=extraction_root,
-        )
-        sidecar_warning = shp_xml_sidecar_warning_message(
-            removed_sidecars=extracted_archive.removed_shp_xml_sidecars
-        )
-        dataset = select_single_shapefile_dataset(extracted_archive)
+    try:
+        scratch.upload_archive_path.write_bytes(archive_bytes)
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="invalid_archive",
+            message="Unable to persist uploaded archive.",
+            details=str(exc),
+            status_code=500,
+        ) from exc
 
-        loaded = _load_shapefile(dataset.prefix_path.with_suffix(".shp"))
-        crs_plan = resolve_target_crs(
-            target_crs_token=target_crs,
-            source_crs=loaded.source_crs,
-            source_bounds=loaded.source_bounds,
-        )
-        conversion_warnings = list(crs_plan.warnings)
-        if sidecar_warning:
-            conversion_warnings.append(sidecar_warning)
+    extracted_archive = validate_and_extract_zip_archive(
+        archive_name=archive_name,
+        archive_bytes=archive_bytes,
+        extraction_root=scratch.extraction_root,
+    )
+    sidecar_warning = shp_xml_sidecar_warning_message(
+        removed_sidecars=extracted_archive.removed_shp_xml_sidecars
+    )
+    dataset = select_single_shapefile_dataset(extracted_archive)
 
-        transformed_geometries = reproject_geometries(
-            geometries=loaded.geometries,
-            source_crs=crs_plan.source_crs,
+    loaded = _load_shapefile(dataset.prefix_path.with_suffix(".shp"))
+    crs_plan = resolve_target_crs(
+        target_crs_token=target_crs,
+        source_crs=loaded.source_crs,
+        source_bounds=loaded.source_bounds,
+    )
+    conversion_warnings = list(crs_plan.warnings)
+    if sidecar_warning:
+        conversion_warnings.append(sidecar_warning)
+
+    transformed_geometries = reproject_geometries(
+        geometries=loaded.geometries,
+        source_crs=crs_plan.source_crs,
+        target_crs=crs_plan.target_crs,
+    )
+
+    if output_format == "geojson":
+        serialized = serialize_geojson(
+            properties=loaded.properties,
+            geometries=transformed_geometries,
             target_crs=crs_plan.target_crs,
+            rfc7946_compliant=crs_plan.rfc7946_compliant_geojson,
+            warnings=tuple(conversion_warnings),
+        )
+    else:
+        serialized = serialize_geoparquet(
+            properties=loaded.properties,
+            geometries=transformed_geometries,
+            target_crs=crs_plan.target_crs,
+            warnings=tuple(conversion_warnings),
         )
 
-        if output_format == "geojson":
-            serialized = serialize_geojson(
-                properties=loaded.properties,
-                geometries=transformed_geometries,
-                target_crs=crs_plan.target_crs,
-                rfc7946_compliant=crs_plan.rfc7946_compliant_geojson,
-                warnings=tuple(conversion_warnings),
-            )
-        else:
-            serialized = serialize_geoparquet(
-                properties=loaded.properties,
-                geometries=transformed_geometries,
-                target_crs=crs_plan.target_crs,
-                warnings=tuple(conversion_warnings),
-            )
+    metadata = _build_convert_metadata(
+        request_id=request_id,
+        output_format=output_format,
+        target_crs=target_crs,
+        crs_plan=crs_plan,
+        transformed_geometries=transformed_geometries,
+        feature_count=len(loaded.properties),
+        warnings=serialized.warnings,
+    )
 
-        metadata = _build_convert_metadata(
-            request_id=request_id,
-            output_format=output_format,
-            target_crs=target_crs,
-            crs_plan=crs_plan,
-            transformed_geometries=transformed_geometries,
-            feature_count=len(loaded.properties),
-            warnings=serialized.warnings,
-        )
+    prefix_name = dataset.prefix_path.name
+    filename = f"{prefix_name}_{target_crs}.{serialized.extension}"
+    output_path = scratch.output_root / filename
+    try:
+        scratch.output_root.mkdir(parents=True, exist_ok=True)
+        output_path.write_bytes(serialized.content)
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="reprojection_failed",
+            message="Unable to persist converted output artifact.",
+            details=str(exc),
+            status_code=500,
+        ) from exc
 
-        prefix_name = dataset.prefix_path.name
-        filename = f"{prefix_name}_{target_crs}.{serialized.extension}"
-
-        return ConvertedArtifact(
-            request_id=request_id,
-            filename=filename,
-            content_type=serialized.content_type,
-            content=serialized.content,
-            metadata=metadata,
-        )
+    return ConvertedArtifact(
+        request_id=request_id,
+        filename=filename,
+        content_type=serialized.content_type,
+        content=serialized.content,
+        metadata=metadata,
+    )
 
 
 def _load_shapefile(shp_path: Path) -> LoadedShapefile:

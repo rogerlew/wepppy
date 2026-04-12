@@ -1,6 +1,6 @@
 # Shape Converter Implementation Plan
 Status: Active
-Last Updated: 2026-04-11
+Last Updated: 2026-04-12
 Owner: Platform / WEPPpy
 Primary Spec: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/specification.md`
 
@@ -75,7 +75,7 @@ Required evidence:
 | WP-01 | Service scaffold and container wiring | WP-00 | done | pass | pass | pass | pass | Completed 2026-04-11. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-01_service_scaffold_container_wiring.md` (unit gate: 6/6 pass, Caddy smoke pass, negative namespace probe not proxied). |
 | WP-02 | Inspect endpoint + ZIP/shapefile validation | WP-01 | done | pass | pass | pass | pass | Completed 2026-04-11. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-02_inspect_endpoint_zip_shapefile_validation.md` (unit gate pass, integration gate pass, proxied inspect smoke pass, traversal/symlink/encrypted/nested/quota controls verified). |
 | WP-03 | Convert endpoint + CRS and format pipeline | WP-02 | done | pass | pass | pass | pass | Completed 2026-04-11. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-03_convert_endpoint_crs_format_pipeline.md` (convert endpoint implemented, CRS modes + GeoJSON/GeoParquet outputs covered, unit/integration gates pass, proxied convert smoke pass for success/canonical errors, security checks recorded). |
-| WP-04 | Cleanup lifecycle and failure-path guarantees | WP-02, WP-03 | not_started | pending | pending | pending | pending | Enforce request-scoped delete on success/failure/timeout/disconnect |
+| WP-04 | Cleanup lifecycle and failure-path guarantees | WP-02, WP-03 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-04_cleanup_lifecycle_and_failure_path_guarantees.md` (request-scoped cleanup enforced on success/failure/timeout/cancel paths; stale-dir janitor constrained to owned directories; focused/full unit + integration gates pass; proxied Caddy cleanup smoke pass; code/QA/security review dispositions closed). |
 | WP-05 | Public abuse controls and edge trust model | WP-01 | not_started | pending | pending | pending | pending | Rate limits, trusted forwarding headers, slowloris and timeout controls |
 | WP-06 | UI implementation and metadata rendering | WP-02, WP-03 | not_started | pending | pending | pending | pending | Upload, schema table, projection panel, warnings, download UX |
 | WP-06B | Browser relay mode support (`json_body`) | WP-03, WP-06 | not_started | pending | pending | pending | pending | Add relay-friendly convert response mode and browser payload handoff pattern; no WEPPcloud route edits in this plan |
