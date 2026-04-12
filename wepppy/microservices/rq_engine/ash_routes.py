@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -11,7 +10,6 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
 from starlette.datastructures import FormData, UploadFile
-from werkzeug.utils import secure_filename
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.ash_transport import Ash, AshSpatialMode
@@ -25,6 +23,7 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from .upload_helpers import UploadError, save_upload_file
 
 logger = logging.getLogger(__name__)
 
@@ -69,74 +68,6 @@ def _extract_upload(form: FormData, key: str) -> UploadFile | None:
     return None
 
 
-def _normalize_extensions(allowed_extensions: tuple[str, ...]) -> set[str]:
-    normalized: set[str] = set()
-    for ext in allowed_extensions:
-        if not ext:
-            continue
-        cleaned = ext.lower().lstrip(".")
-        if cleaned:
-            normalized.add(cleaned)
-    return normalized
-
-
-def _validate_upload_filename(upload: UploadFile) -> str:
-    raw_name = upload.filename or ""
-    if raw_name.strip() == "":
-        raise ValueError("no filename specified")
-    safe_name = secure_filename(raw_name)
-    if not safe_name:
-        raise ValueError("Invalid filename")
-    safe_name = safe_name.lower().strip()
-    if not safe_name:
-        raise ValueError("Invalid filename")
-    return safe_name
-
-
-def _enforce_extension(filename: str, allowed_extensions: set[str]) -> None:
-    if not allowed_extensions:
-        return
-    ext = Path(filename).suffix.lower().lstrip(".")
-    if ext not in allowed_extensions:
-        allowed_list = ", ".join(sorted(f".{ext}" for ext in allowed_extensions))
-        raise ValueError(f"Invalid file extension. Allowed: {allowed_list}")
-
-
-def _enforce_max_bytes(upload: UploadFile, max_bytes: int | None) -> None:
-    if max_bytes is None:
-        return
-    upload.file.seek(0, os.SEEK_END)
-    size = upload.file.tell()
-    upload.file.seek(0)
-    if size > max_bytes:
-        raise ValueError("File exceeds maximum allowed size")
-
-
-def _save_upload(
-    upload: UploadFile,
-    *,
-    destination_dir: Path,
-    allowed_extensions: set[str],
-    max_bytes: int | None,
-    overwrite: bool,
-) -> Path:
-    filename = _validate_upload_filename(upload)
-    _enforce_extension(filename, allowed_extensions)
-    _enforce_max_bytes(upload, max_bytes)
-
-    destination_dir.mkdir(parents=True, exist_ok=True)
-    destination = destination_dir / filename
-    if destination.exists():
-        if not overwrite:
-            raise ValueError("File already exists")
-        destination.unlink()
-
-    with destination.open("wb") as dest:
-        shutil.copyfileobj(upload.file, dest)
-
-    return destination
-
-
 def _task_upload_ash_map(
     *,
     runid: str,
@@ -151,16 +82,24 @@ def _task_upload_ash_map(
             raise ValueError(f"Missing file for {file_input_id}")
         return None
 
-    allowed_extensions = _normalize_extensions(ASH_ALLOWED_EXTENSIONS)
     destination_dir = Path(get_wd(runid)) / "ash"
-    saved_path = _save_upload(
+    saved_path = save_upload_file(
         upload,
-        destination_dir=destination_dir,
-        allowed_extensions=allowed_extensions,
+        allowed_extensions=ASH_ALLOWED_EXTENSIONS,
+        dest_dir=destination_dir,
         max_bytes=ASH_MAX_BYTES,
         overwrite=overwrite,
     )
     return saved_path.name
+
+
+def _upload_status(exc: UploadError | ValueError) -> int:
+    if isinstance(exc, UploadError):
+        if getattr(exc, "status_code", 400) == 413:
+            return 413
+    if "maximum allowed size" in str(exc).lower():
+        return 413
+    return 400
 
 
 def _first_value(value: Any) -> Any:
@@ -298,8 +237,10 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
                         required=True,
                         overwrite=True,
                     )
+                except UploadError as exc:
+                    return error_response(str(exc), status_code=_upload_status(exc))
                 except ValueError as exc:
-                    return error_response(str(exc), status_code=400)
+                    return error_response(str(exc), status_code=_upload_status(exc))
 
                 try:
                     ash._ash_type_map_fn = _task_upload_ash_map(
@@ -309,8 +250,10 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
                         required=False,
                         overwrite=True,
                     )
+                except UploadError as exc:
+                    return error_response(str(exc), status_code=_upload_status(exc))
                 except ValueError as exc:
-                    return error_response(str(exc), status_code=400)
+                    return error_response(str(exc), status_code=_upload_status(exc))
 
             if ash.ash_load_fn is None:
                 return error_response("Expecting ashload map", status_code=400)

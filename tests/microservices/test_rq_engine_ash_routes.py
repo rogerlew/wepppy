@@ -278,6 +278,59 @@ def test_run_ash_batch_multipart_returns_input_message_without_enqueue(
     assert queue_called["called"] is False
 
 
+def test_run_ash_rejects_invalid_upload_extension(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_ash(monkeypatch)
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: str(tmp_path / "run"))
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-ash",
+            data={"ash_depth_mode": "2"},
+            files={
+                "input_upload_ash_load": (
+                    "ash-load.exe",
+                    b"fake-bytes",
+                    "application/octet-stream",
+                )
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"].startswith("Invalid file extension.")
+
+
+def test_run_ash_rejects_oversize_upload_with_413(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_ash(monkeypatch)
+    monkeypatch.setattr(ash_routes, "ASH_MAX_BYTES", 4)
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: str(tmp_path / "run"))
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-ash",
+            data={"ash_depth_mode": "2"},
+            files={
+                "input_upload_ash_load": (
+                    "ash-load.tif",
+                    b"abcdef",
+                    "image/tiff",
+                )
+            },
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "File exceeds maximum allowed size"
+
+
 @pytest.mark.parametrize(
     ("http_status", "code"),
     [

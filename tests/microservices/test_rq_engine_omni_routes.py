@@ -360,6 +360,33 @@ def test_run_omni_requires_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["error"]["message"] == "Missing scenarios data"
 
 
+def test_run_omni_rejects_oversize_sbs_upload_with_413(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "SBS_MAX_BYTES", 4)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(tmp_path / "run"))
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            data={"scenarios": '[{\"type\":\"sbs_map\"}]'},
+            files={
+                "scenarios[0][sbs_file]": (
+                    "severity.tif",
+                    b"abcdef",
+                    "image/tiff",
+                )
+            },
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "Invalid SBS file for scenario 0: File exceeds maximum allowed size"
+
+
 def test_run_omni_invalid_json_returns_400(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_omni(monkeypatch)
@@ -672,7 +699,11 @@ def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.Monke
             captured["build"] = kwargs
 
     monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
-    monkeypatch.setattr(omni_routes, "_save_upload", lambda *args, **kwargs: "/tmp/uploaded.geojson")
+    monkeypatch.setattr(
+        omni_routes,
+        "save_upload_file",
+        lambda *args, **kwargs: Path("/tmp/uploaded.geojson"),
+    )
     pairs_payload = json.dumps(
         [
             {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
@@ -704,6 +735,32 @@ def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.Monke
     assert captured["build"]["contrast_pairs"] == [
         {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
     ]
+
+
+def test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "GEOJSON_MAX_BYTES", 4)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(tmp_path / "run"))
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            data={
+                "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_contrast_pairs": '[{\"control_scenario\":\"uniform_low\",\"contrast_scenario\":\"mulch\"}]',
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+            files={"omni_contrast_geojson": ("areas.geojson", b"abcdef", "application/geo+json")},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "Invalid GeoJSON upload: File exceeds maximum allowed size"
 
 
 def test_run_omni_contrasts_batch_returns_input_message_without_enqueue(

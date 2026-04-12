@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import shutil
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -13,7 +12,6 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
 from starlette.datastructures import FormData, UploadFile
-from werkzeug.utils import secure_filename
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
@@ -33,6 +31,7 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from .upload_helpers import UploadError, save_upload_file
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +44,12 @@ SBS_MAX_BYTES = 100 * 1024 * 1024
 GEOJSON_ALLOWED_EXTENSIONS = ("geojson", "json")
 GEOJSON_MAX_BYTES = 100 * 1024 * 1024
 CONTRAST_SELECTION_MODE_DEFAULT = "cumulative"
+
+
+class _OmniUploadError(ValueError):
+    def __init__(self, message: str, *, status_code: int = 400) -> None:
+        super().__init__(message)
+        self.status_code = status_code
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -75,71 +80,6 @@ def _is_base_project_context(runid: str, config: str) -> bool:
     runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
     config_token = str(config).strip().lower() if config is not None else ""
     return runid_leaf == "_base" or config_token == "_base"
-
-
-def _normalize_extensions(allowed_extensions: tuple[str, ...]) -> set[str]:
-    normalized: set[str] = set()
-    for ext in allowed_extensions:
-        if not ext:
-            continue
-        cleaned = ext.lower().lstrip(".")
-        if cleaned:
-            normalized.add(cleaned)
-    return normalized
-
-
-def _validate_upload_filename(upload: UploadFile) -> str:
-    raw_name = upload.filename or ""
-    if raw_name.strip() == "":
-        raise ValueError("no filename specified")
-    safe_name = secure_filename(raw_name)
-    if not safe_name:
-        raise ValueError("Invalid filename")
-    safe_name = safe_name.lower().strip()
-    if not safe_name:
-        raise ValueError("Invalid filename")
-    return safe_name
-
-
-def _enforce_extension(filename: str, allowed_extensions: set[str]) -> None:
-    if not allowed_extensions:
-        return
-    ext = Path(filename).suffix.lower().lstrip(".")
-    if ext not in allowed_extensions:
-        allowed_list = ", ".join(sorted(f".{ext}" for ext in allowed_extensions))
-        raise ValueError(f"Invalid file extension. Allowed: {allowed_list}")
-
-
-def _enforce_max_bytes(upload: UploadFile, max_bytes: int | None) -> None:
-    if max_bytes is None:
-        return
-    upload.file.seek(0, os.SEEK_END)
-    size = upload.file.tell()
-    upload.file.seek(0)
-    if size > max_bytes:
-        raise ValueError("File exceeds maximum allowed size")
-
-
-def _save_upload(
-    upload: UploadFile,
-    *,
-    destination_dir: Path,
-    allowed_extensions: set[str],
-    max_bytes: int | None,
-) -> Path:
-    filename = _validate_upload_filename(upload)
-    _enforce_extension(filename, allowed_extensions)
-    _enforce_max_bytes(upload, max_bytes)
-
-    destination_dir.mkdir(parents=True, exist_ok=True)
-    destination = destination_dir / filename
-    if destination.exists():
-        destination.unlink()
-
-    with destination.open("wb") as dest:
-        shutil.copyfileobj(upload.file, dest)
-
-    return destination
 
 
 def _coerce_omni_scenario_list(payload: dict[str, Any], raw_json: Any) -> list[dict[str, Any]] | None:
@@ -222,6 +162,14 @@ def _extract_upload(form: FormData, key: str) -> UploadFile | None:
     if isinstance(upload, UploadFile):
         return upload
     return None
+
+
+def _upload_status(exc: _OmniUploadError | ValueError) -> int:
+    if isinstance(exc, _OmniUploadError):
+        return int(getattr(exc, "status_code", 400))
+    if "maximum allowed size" in str(exc).lower():
+        return 413
+    return 400
 
 
 def _normalize_contrast_selection_mode(value: Any) -> str:
@@ -335,7 +283,6 @@ def _prepare_omni_scenarios(
     limbo_dir = Path(wd) / "omni" / "_limbo"
     limbo_dir.mkdir(parents=True, exist_ok=True)
 
-    allowed_extensions = _normalize_extensions(SBS_ALLOWED_EXTENSIONS)
     parsed_inputs: list[tuple[OmniScenario, dict[str, Any]]] = []
     for idx, scenario in enumerate(scenarios_payload):
         if not isinstance(scenario, dict):
@@ -354,14 +301,18 @@ def _prepare_omni_scenarios(
             upload = _extract_upload(form, file_key)
             if upload and upload.filename:
                 try:
-                    upload_path = _save_upload(
+                    upload_path = save_upload_file(
                         upload,
-                        destination_dir=limbo_dir / f"{idx:02d}",
-                        allowed_extensions=allowed_extensions,
+                        allowed_extensions=SBS_ALLOWED_EXTENSIONS,
+                        dest_dir=limbo_dir / f"{idx:02d}",
                         max_bytes=SBS_MAX_BYTES,
+                        overwrite=True,
                     )
-                except ValueError as exc:
-                    raise ValueError(f"Invalid SBS file for scenario {idx}: {exc}") from exc
+                except UploadError as exc:
+                    raise _OmniUploadError(
+                        f"Invalid SBS file for scenario {idx}: {exc}",
+                        status_code=exc.status_code,
+                    ) from exc
                 scenario_params["sbs_file_path"] = str(upload_path)
             elif scenario_params.get("sbs_file_path"):
                 scenario_params["sbs_file_path"] = str(scenario_params["sbs_file_path"])
@@ -470,19 +421,22 @@ def _prepare_omni_contrasts(
     geojson_path = payload.get("omni_contrast_geojson_path")
     upload = _extract_upload(form, "omni_contrast_geojson")
     if upload and upload.filename:
-        allowed_extensions = _normalize_extensions(GEOJSON_ALLOWED_EXTENSIONS)
         uploads_dir = Path(wd) / "_pups" / "omni" / "contrasts" / "_uploads" / uuid4().hex
         try:
             geojson_path = str(
-                _save_upload(
+                save_upload_file(
                     upload,
-                    destination_dir=uploads_dir,
-                    allowed_extensions=allowed_extensions,
+                    allowed_extensions=GEOJSON_ALLOWED_EXTENSIONS,
+                    dest_dir=uploads_dir,
                     max_bytes=GEOJSON_MAX_BYTES,
+                    overwrite=True,
                 )
             )
-        except ValueError as exc:
-            raise ValueError(f"Invalid GeoJSON upload: {exc}") from exc
+        except UploadError as exc:
+            raise _OmniUploadError(
+                f"Invalid GeoJSON upload: {exc}",
+                status_code=exc.status_code,
+            ) from exc
     if selection_mode == "user_defined_areas" and not geojson_path:
         raise ValueError("GeoJSON upload or path is required for user-defined contrasts.")
 
@@ -556,8 +510,10 @@ async def _run_omni(
             wd=wd,
         )
         omni.parse_scenarios(parsed_inputs)
+    except _OmniUploadError as exc:
+        return error_response(str(exc), status_code=_upload_status(exc))
     except ValueError as exc:
-        return error_response(str(exc), status_code=400)
+        return error_response(str(exc), status_code=_upload_status(exc))
     except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception("rq-engine run-omni scenario parse failed", extra={"runid": runid, "config": config})
@@ -611,8 +567,10 @@ async def _run_omni_contrasts(
             config=config,
             wd=wd,
         )
+    except _OmniUploadError as exc:
+        return error_response(str(exc), status_code=_upload_status(exc))
     except ValueError as exc:
-        return error_response(str(exc), status_code=400)
+        return error_response(str(exc), status_code=_upload_status(exc))
     except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception(
@@ -733,8 +691,10 @@ async def _dry_run_omni_contrasts(
             config=config,
             wd=wd,
         )
+    except _OmniUploadError as exc:
+        return error_response(str(exc), status_code=_upload_status(exc))
     except ValueError as exc:
-        return error_response(str(exc), status_code=400)
+        return error_response(str(exc), status_code=_upload_status(exc))
     except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception("rq-engine dry-run-omni-contrasts input parse failed", extra={"runid": runid, "config": config})

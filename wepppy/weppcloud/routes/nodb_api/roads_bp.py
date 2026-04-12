@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import time
+from pathlib import Path
 from typing import Any, Dict
 
 import redis
@@ -11,6 +12,7 @@ from flask import Response, jsonify, render_template
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.microservices.upload_boundary import UploadBoundaryError, write_stream_to_destination
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.roads import Roads
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -68,25 +70,16 @@ def _roads_upload_size_error(max_bytes: int) -> str:
 def _save_roads_upload_with_limit(uploaded, destination: str, *, max_bytes: int) -> int:
     stream = getattr(uploaded, "stream", None)
     if stream is None:
-        raise ValueError("Uploaded file stream is unavailable.")
+        raise UploadBoundaryError("Uploaded file stream is unavailable.")
 
-    bytes_written = 0
-    try:
-        stream.seek(0)
-    except (AttributeError, OSError):
-        pass
-
-    with open(destination, "wb") as handle:
-        while True:
-            chunk = stream.read(_UPLOAD_CHUNK_BYTES)
-            if not chunk:
-                break
-            bytes_written += len(chunk)
-            if bytes_written > max_bytes:
-                raise ValueError(_roads_upload_size_error(max_bytes))
-            handle.write(chunk)
-
-    return bytes_written
+    return write_stream_to_destination(
+        stream,
+        Path(destination),
+        overwrite=True,
+        max_bytes=max_bytes,
+        chunk_bytes=_UPLOAD_CHUNK_BYTES,
+        size_error_message=_roads_upload_size_error(max_bytes),
+    )
 
 
 def _roads_run_results_report_links(
@@ -306,13 +299,9 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
             source_path,
             max_bytes=ROADS_UPLOAD_GEOJSON_MAX_BYTES,
         )
-    except ValueError as exc:
-        try:
-            os.remove(source_path)
-        except OSError:
-            pass
+    except UploadBoundaryError as exc:
         response = error_factory(str(exc))
-        if "maximum size" in str(exc).lower():
+        if getattr(exc, "status_code", 400) == 413 or "maximum size" in str(exc).lower():
             response.status_code = 413
         else:
             response.status_code = 400

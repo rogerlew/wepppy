@@ -16,6 +16,14 @@
 - Culvert semantic payload validation remains in:
   - `wepppy/microservices/culvert_payload_validator.py`
 
+## Canonical Helper Ownership
+- Canonical non-ZIP upload boundary helpers live in:
+  - `wepppy/microservices/upload_boundary.py`
+- rq-engine route call sites should consume the compatibility wrapper:
+  - `wepppy/microservices/rq_engine/upload_helpers.py`
+- Canonical ZIP helper authority remains in:
+  - `wepppy/microservices/shape_converter/archive_validation.py`
+
 ## Route Prefix Notes
 - FastAPI routes below are served under the rq-engine API prefix (`/rq-engine/api/...`).
 - Flask Roads routes are listed as defined in the blueprint and are mounted by WEPPcloud route registration.

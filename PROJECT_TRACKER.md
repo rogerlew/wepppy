@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 2 packages ✅ **Within target range**
+**Current WIP**: 1 package ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -226,6 +226,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Upload Boundary Helpers Unification (2026-04-12)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260412_upload_boundary_helpers_unification/](docs/work-packages/20260412_upload_boundary_helpers_unification/)  
+**Summary**: Unified non-ZIP upload boundary logic behind canonical helpers in `wepppy/microservices/upload_boundary.py` and migrated duplicated helper stacks out of `wepppy/microservices/rq_engine/ash_routes.py`, `wepppy/microservices/rq_engine/omni_routes.py`, and `wepppy/weppcloud/routes/nodb_api/roads_bp.py` via `upload_helpers.py` compatibility paths. Preserved per-endpoint caps/allowlists and status semantics (including explicit `413` oversize mapping), added helper and route parity regressions for extension/size behavior, and documented helper ownership in `docs/schemas/upload-endpoint-contract.md`. ZIP canonical controls remained anchored to `wepppy/microservices/shape_converter/archive_validation.py`; culvert semantic validation ownership remained in `wepppy/microservices/culvert_payload_validator.py`. Validation gates passed (`137` targeted tests; full suite `3511 passed`, `36 skipped`) and the dedicated security artifact closed with no unresolved medium/high findings.
 
 ### Upload Endpoints Hardening (2026-04-12)
 **Status**: ✅ **COMPLETE**  
