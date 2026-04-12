@@ -96,6 +96,39 @@ def test_convert_geojson_wgs84_explicit_download_mode_is_backward_compatible() -
     assert metadata["target_crs"] == "wgs84"
 
 
+def test_convert_download_content_disposition_uses_rfc5987_filename_encoding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads-special-name"))
+
+    async def _fake_convert_uploaded_archive(**kwargs):  # noqa: ANN003
+        return shape_converter_convert_module.ConvertedArtifact(
+            request_id=str(kwargs["request_id"]),
+            filename='roads "ß".geojson',
+            content_type="application/geo+json",
+            content=b'{"type":"FeatureCollection","features":[]}',
+            metadata={"output_format": "geojson", "target_crs": "wgs84", "warnings": []},
+        )
+
+    monkeypatch.setattr(shape_converter_app_module, "convert_uploaded_archive", _fake_convert_uploaded_archive)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("roads-special-name.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 200
+    content_disposition = response.headers["content-disposition"]
+    assert "attachment;" in content_disposition
+    assert "filename*=" in content_disposition
+    assert "UTF-8''" in content_disposition
+    assert "%C3%9F" in content_disposition
+    assert "\n" not in content_disposition
+    assert "\r" not in content_disposition
+
+
 def test_convert_accepts_shp_xml_sidecar_and_warns_user() -> None:
     entries = build_minimal_point_dataset(prefix="roads")
     entries["roads.shp.xml"] = (
@@ -128,7 +161,7 @@ def test_convert_shp_xml_privacy_does_not_expose_sidecar_content(
     entries = build_minimal_point_dataset(prefix="roads")
     entries["roads.shp.xml"] = build_sensitive_metadata_payload(include_xml_shell=True)
     archive_bytes = build_zip_bytes(entries)
-    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.cleanup")
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.app")
 
     with TestClient(create_app()) as client:
         response = client.post(
@@ -182,7 +215,7 @@ def test_convert_qmd_privacy_does_not_expose_sidecar_content(
     entries = build_minimal_point_dataset(prefix="roads")
     entries["roads.qmd"] = build_sensitive_metadata_payload(include_xml_shell=False)
     archive_bytes = build_zip_bytes(entries)
-    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.cleanup")
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.app")
 
     with TestClient(create_app()) as client:
         response = client.post(
@@ -512,6 +545,63 @@ def test_convert_rejects_oversize_geoparquet_output(monkeypatch: pytest.MonkeyPa
 
     assert response.status_code == 413
     assert response.json()["error"]["code"] == "archive_quota_exceeded"
+
+
+def test_convert_parser_worker_uses_minimal_environment(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:  # noqa: ANN001
+    observed_env: dict[str, str] = {}
+
+    class _Process:
+        pid = 1234
+        returncode = 0
+
+        def communicate(self, timeout=None):  # noqa: ANN001
+            return "", ""
+
+    def _fake_popen(*args, **kwargs):  # noqa: ANN002, ANN003
+        observed_env.update(dict(kwargs["env"]))
+        return _Process()
+
+    monkeypatch.setenv("PATH", "/usr/bin")
+    monkeypatch.setenv("PYTHONPATH", "/workdir/wepppy")
+    monkeypatch.setenv("SHAPE_CONVERTER_TEST_SECRET", "do-not-leak")
+    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", _fake_popen)
+
+    worker_stdout, worker_stderr = shape_converter_convert_module._run_parser_worker(
+        shp_path=tmp_path / "roads.shp",
+        output_path=tmp_path / "payload.pickle",
+        scratch=SimpleNamespace(request_dir=tmp_path),
+    )
+
+    assert worker_stdout == ""
+    assert worker_stderr == ""
+    assert observed_env["PATH"] == "/usr/bin"
+    assert observed_env["PYTHONPATH"] == "/workdir/wepppy"
+    assert observed_env["LC_ALL"] == "C"
+    assert observed_env["LANG"] == "C"
+    assert "SHAPE_CONVERTER_TEST_SECRET" not in observed_env
+
+
+def test_convert_rejects_oversize_parser_worker_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:  # noqa: ANN001
+    payload_path = tmp_path / "parser_worker_payload.pickle"
+    payload_path.write_bytes(b"0123456789")
+    monkeypatch.setattr(shape_converter_convert_module, "_MAX_PARSER_PAYLOAD_BYTES", 4)
+
+    with pytest.raises(shape_converter_convert_module.ShapeConverterError) as exc_info:
+        shape_converter_convert_module._read_parser_payload(
+            payload_path=payload_path,
+            worker_stdout="",
+            worker_stderr="",
+        )
+
+    error = exc_info.value
+    assert error.code == "invalid_shapefile"
+    assert "exceeds limit" in error.details
 
 
 def test_convert_metadata_path_honors_forwarded_prefix() -> None:

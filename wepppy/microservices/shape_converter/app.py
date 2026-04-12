@@ -14,6 +14,7 @@ from collections import OrderedDict
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import quote
 
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
@@ -40,7 +41,7 @@ SERVICE_SCOPE = "shape-converter"
 DEFAULT_SCRATCH_ROOT = Path("/tmp/shape-converter")
 _UI_DIR = Path(__file__).resolve().parent / "ui"
 _UI_INDEX_FILE = _UI_DIR / "index.html"
-_LOGGER = logging.getLogger("wepppy.microservices.shape_converter.cleanup")
+_LOGGER = logging.getLogger("wepppy.microservices.shape_converter.app")
 _CONVERT_ALLOWED_FIELDS = frozenset({"archive", "output_format", "target_crs", "response_mode"})
 _CONVERT_REQUIRED_FIELDS = frozenset({"archive", "output_format", "target_crs"})
 _CONVERT_METADATA_MAX_ENTRIES = int(os.getenv("SHAPE_CONVERTER_METADATA_MAX_ENTRIES", "256"))
@@ -459,13 +460,12 @@ async def inspect_archive(request: Request) -> JSONResponse:
         cleanup_reason = "cancelled"
         raise
     finally:
-        cleanup_request_scratch_dir(
+        _cleanup_request_scratch(
+            request=request,
             layout=scratch_layout,
             request_id=request_id,
             request_scope=request_scope,
             cleanup_reason=cleanup_reason,
-            registry=_active_scratch_registry(request.app),
-            logger=_LOGGER,
         )
 
 
@@ -539,6 +539,53 @@ def _request_forwarded_prefix(request: Request) -> str:
     if not normalized.startswith("/"):
         return ""
     return normalized
+
+
+def _ascii_download_filename_fallback(filename: str) -> str:
+    fallback_chars: list[str] = []
+    for char in filename:
+        if char.isascii() and (char.isalnum() or char in "._-"):
+            fallback_chars.append(char)
+        else:
+            fallback_chars.append("_")
+
+    fallback = "".join(fallback_chars).strip("._")
+    return fallback or "download"
+
+
+def _content_disposition_attachment(filename: str) -> str:
+    ascii_fallback = _ascii_download_filename_fallback(filename)
+    encoded_filename = quote(filename, safe="!#$&+-.^_`|~")
+    return (
+        f"attachment; filename=\"{ascii_fallback}\"; "
+        f"filename*=UTF-8''{encoded_filename}"
+    )
+
+
+def _cleanup_request_scratch(
+    *,
+    request: Request,
+    layout: RequestScratchLayout,
+    request_id: str,
+    request_scope: str,
+    cleanup_reason: str,
+) -> None:
+    cleaned = cleanup_request_scratch_dir(
+        layout=layout,
+        request_id=request_id,
+        request_scope=request_scope,
+        cleanup_reason=cleanup_reason,
+        registry=_active_scratch_registry(request.app),
+        logger=_LOGGER,
+    )
+    if not cleaned and cleanup_reason == "success":
+        _log_structured_event(
+            level=logging.ERROR,
+            event="request_scratch_cleanup_failed_after_success_response",
+            request_id=request_id,
+            request_scope=request_scope,
+            cleanup_reason=cleanup_reason,
+        )
 
 
 def _prune_convert_metadata_store(
@@ -707,7 +754,7 @@ async def convert_archive(request: Request) -> Response:
         _prune_convert_metadata_store(metadata_store, now_monotonic=now_monotonic)
 
         headers = {
-            "Content-Disposition": f'attachment; filename="{converted.filename}"',
+            "Content-Disposition": _content_disposition_attachment(converted.filename),
             "X-Shape-Converter-Request-Id": request_id,
             "X-Shape-Converter-Metadata-Path": metadata_path,
         }
@@ -728,13 +775,12 @@ async def convert_archive(request: Request) -> Response:
         cleanup_reason = "cancelled"
         raise
     finally:
-        cleanup_request_scratch_dir(
+        _cleanup_request_scratch(
+            request=request,
             layout=scratch_layout,
             request_id=request_id,
             request_scope=request_scope,
             cleanup_reason=cleanup_reason,
-            registry=_active_scratch_registry(request.app),
-            logger=_LOGGER,
         )
 
 

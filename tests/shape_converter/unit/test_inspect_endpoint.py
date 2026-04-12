@@ -73,7 +73,7 @@ def test_inspect_shp_xml_privacy_does_not_expose_sidecar_content(
     entries = build_minimal_point_dataset(prefix="roads")
     entries["roads.shp.xml"] = build_sensitive_metadata_payload(include_xml_shell=True)
     archive_bytes = build_zip_bytes(entries)
-    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.cleanup")
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.app")
 
     with TestClient(create_app()) as client:
         response = client.post(
@@ -114,7 +114,7 @@ def test_inspect_qmd_privacy_does_not_expose_sidecar_content(
     entries = build_minimal_point_dataset(prefix="roads")
     entries["roads.qmd"] = build_sensitive_metadata_payload(include_xml_shell=False)
     archive_bytes = build_zip_bytes(entries)
-    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.cleanup")
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.app")
 
     with TestClient(create_app()) as client:
         response = client.post(

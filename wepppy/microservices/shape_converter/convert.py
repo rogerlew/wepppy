@@ -39,6 +39,10 @@ from .serialization import serialize_geojson, serialize_geoparquet
 OUTPUT_FORMAT_OPTIONS = frozenset({"geojson", "geoparquet"})
 _MAX_UPLOAD_COMPRESSED_BYTES = ArchiveLimits().max_compressed_bytes
 _MAX_CONVERT_FEATURES = int(os.getenv("SHAPE_CONVERTER_MAX_CONVERT_FEATURES", "1000000"))
+_MAX_PARSER_PAYLOAD_BYTES = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES", str(256 * 1024 * 1024))),
+)
 _PARSER_SUBPROCESS_TIMEOUT_SECONDS = max(
     1,
     int(os.getenv("SHAPE_CONVERTER_PARSER_TIMEOUT_SECONDS", "90")),
@@ -48,6 +52,21 @@ _PARSER_SUBPROCESS_KILL_GRACE_SECONDS = max(
     int(os.getenv("SHAPE_CONVERTER_PARSER_KILL_GRACE_SECONDS", "5")),
 )
 _PARSER_WORKER_MODULE = "wepppy.microservices.shape_converter.convert_parser_worker"
+_PARSER_WORKER_ENV_ALLOWLIST = frozenset(
+    {
+        "PATH",
+        "PYTHONPATH",
+        "PYTHONHOME",
+        "PYTHONNOUSERSITE",
+        "PYTHONHASHSEED",
+        "LD_LIBRARY_PATH",
+        "GDAL_DATA",
+        "PROJ_LIB",
+        "SSL_CERT_FILE",
+        "SSL_CERT_DIR",
+        "TZ",
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -219,6 +238,18 @@ def _load_shapefile(*, shp_path: Path, scratch: RequestScratchLayout) -> LoadedS
     return _loaded_shapefile_from_payload(worker_payload)
 
 
+def _build_parser_worker_env() -> dict[str, str]:
+    worker_env: dict[str, str] = {
+        "LC_ALL": "C",
+        "LANG": "C",
+    }
+    for env_var in _PARSER_WORKER_ENV_ALLOWLIST:
+        env_value = os.environ.get(env_var)
+        if env_value:
+            worker_env[env_var] = env_value
+    return worker_env
+
+
 def _run_parser_worker(
     *,
     shp_path: Path,
@@ -236,9 +267,7 @@ def _run_parser_worker(
         "--max-features",
         str(_MAX_CONVERT_FEATURES),
     ]
-    worker_env = os.environ.copy()
-    worker_env.setdefault("LC_ALL", "C")
-    worker_env.setdefault("LANG", "C")
+    worker_env = _build_parser_worker_env()
 
     try:
         process = subprocess.Popen(
@@ -334,6 +363,25 @@ def _read_parser_payload(
             code="invalid_shapefile",
             message="Unable to parse shapefile content for conversion.",
             details=details,
+        )
+
+    try:
+        payload_size = payload_path.stat().st_size
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details=f"Parser payload stat failed: {exc}",
+        ) from exc
+
+    if payload_size > _MAX_PARSER_PAYLOAD_BYTES:
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details=(
+                f"Parser payload size {payload_size} bytes exceeds limit "
+                f"{_MAX_PARSER_PAYLOAD_BYTES} bytes."
+            ),
         )
 
     try:

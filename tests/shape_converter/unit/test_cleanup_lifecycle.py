@@ -159,6 +159,36 @@ def test_convert_success_path_cleans_scratch(tmp_path: Path) -> None:
     assert _scratch_children(tmp_path) == []
 
 
+def test_convert_success_path_cleanup_failure_emits_error_signal(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="convert-success-log-signal"))
+    original_cleanup = shape_converter_app_module.cleanup_request_scratch_dir
+
+    def _cleanup_reports_failure(**kwargs):  # noqa: ANN003
+        original_cleanup(**kwargs)
+        return False
+
+    monkeypatch.setattr(shape_converter_app_module, "cleanup_request_scratch_dir", _cleanup_reports_failure)
+    caplog.set_level(logging.ERROR, logger="wepppy.microservices.shape_converter.app")
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("convert-success-log-signal.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 200
+    assert any(
+        "request_scratch_cleanup_failed_after_success_response" in record.message
+        for record in caplog.records
+    )
+
+
 def test_inspect_timeout_path_cleans_scratch(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="timeout"))
 
