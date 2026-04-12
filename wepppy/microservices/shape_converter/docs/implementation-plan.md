@@ -1,5 +1,5 @@
 # Shape Converter Implementation Plan
-Status: Active
+Status: Complete
 Last Updated: 2026-04-12
 Owner: Platform / WEPPpy
 Primary Spec: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/specification.md`
@@ -80,7 +80,7 @@ Required evidence:
 | WP-06 | UI implementation and metadata rendering | WP-02, WP-03 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-06_ui_implementation_and_metadata_rendering.md` (UI route + static assets under `/utils/shape-converter/`, metadata panels + warning callouts implemented, explicit `response_mode=download`/WP-06B defer messaging, focused/full unit + integration gates pass, proxied Caddy smoke verifies inspect/convert warning UX and abuse-control `429`/`503` guidance, code/QA/security dispositions closed). |
 | WP-06B | Browser relay mode support (`json_body`) | WP-03, WP-06 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-06b_browser_relay_mode_json_body.md` (`response_mode=json_body` implemented for `output_format=geojson` with relay payload `{request_id, geojson, metadata}`; unsupported relay combinations return canonical `400 invalid_request`; `response_mode=download` compatibility preserved; focused/full unit + integration gates pass; proxied Caddy smoke verifies relay success + invalid-combination + download compatibility; code/QA/security dispositions closed). |
 | WP-07 | Runtime hardening and sandbox enforcement | WP-01 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-07_runtime_hardening_and_sandbox_enforcement.md` (compose hardening enforced: rootless `10001`, `read_only`, `no-new-privileges`, `cap_drop=ALL`, pids/mem/cpu limits, hardened `tmpfs`; readiness now enforces required sandbox mode signaling + toolchain presence; dedicated internal `shape-converter-sandbox` network blocks outbound egress and limits east-west reachability; focused/full unit + hardening integration gates pass; proxied ready/inspect/convert smoke pass under hardened container; code/QA/security review dispositions closed). |
-| WP-08 | Test suite completion and gate automation | WP-02, WP-03, WP-04, WP-05, WP-06, WP-06B, WP-07 | not_started | pending | pending | pending | pending | Add full unit/integration/security/perf gates and CI wiring |
+| WP-08 | Test suite completion and gate automation | WP-02, WP-03, WP-04, WP-05, WP-06, WP-06B, WP-07 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-08_test_suite_completion_and_gate_automation.md` (added parser-abuse regressions for XML entity-expansion classes and parser-stall timeout/cancellation, added `.shp.xml`/`.qmd` metadata-privacy non-leak assertions, added dedicated blocking shape-converter CI gate workflow, and passed focused/full unit+integration gates plus proxied Caddy smoke). |
 | WP-09 | Final QA + security closeout + release readiness | WP-08 | done | pass | pass | pass | pass | Completed 2026-04-12 with **GO** decision and residual-risk tracking. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09_final_qa_security_closeout_release_readiness.md`. Local focused/full unit + integration gates, workflow build/check, and proxied Caddy smoke all pass. Hosted shape-converter gate evidence captured: `Shape-Converter Gates` run `24298655324` success on `master` (`88b07b47ccda96c5ee836ca4af82db26ae727148`). Deferred WP-09 residual risks are now closed by WP-09B. |
 | WP-09B | Parser containment + GDAL CVE remediation | WP-09 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09b_parser_containment_and_gdal_cve_remediation.md`. Parser subprocess process-group timeout/kill semantics are implemented in convert runtime path and validated by new unit/integration tests. Runtime CVE disposition evidence captured: Fiona parser path now links system GDAL (`fiona.__gdal_version__=3.10.3`), proxied smoke and focused/full gates pass, and hosted `Shape-Converter Gates` run `24299367284` succeeded on remediation SHA `caa8edd8f92126c7570ea51cf1ab978f47c789d8`. |
 
@@ -211,9 +211,9 @@ Required evidence:
 - Do not mark a work-package `done` unless all required gates are `pass` or formally waived.
 
 ## Rollup Checklist
-- [ ] WP-01 through WP-09B complete (including WP-06B)
-- [ ] Code gates all pass
-- [ ] Shape-converter unit-test gates all pass
-- [ ] QA gates all pass
-- [ ] Security review gates all pass
-- [ ] Release readiness approved
+- [x] WP-01 through WP-09B complete (including WP-06B)
+- [x] Code gates all pass
+- [x] Shape-converter unit-test gates all pass
+- [x] QA gates all pass
+- [x] Security review gates all pass
+- [x] Release readiness approved
