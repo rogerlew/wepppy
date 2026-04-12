@@ -16,6 +16,12 @@ WGS84_PRJ_TEXT = (
     'AUTHORITY["EPSG","4326"]]'
 )
 
+SENSITIVE_METADATA_MARKERS = (
+    "alice.private@example.test",
+    "/Users/alice/private/workspace",
+    "+1-555-0109",
+)
+
 
 def build_minimal_point_dataset(
     prefix: str = "sample",
@@ -99,6 +105,42 @@ def build_zip_bytes(entries: dict[str, bytes]) -> bytes:
         for arcname, content in entries.items():
             archive.writestr(arcname, content)
     return buffer.getvalue()
+
+
+def build_xml_entity_expansion_payload(*, root_tag: str = "metadata") -> bytes:
+    """Return an XML payload representative of entity-expansion abuse input."""
+
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE {root_tag} [
+  <!ENTITY a "aaaaaaaaaaaaaaaa">
+  <!ENTITY b "&a;&a;&a;&a;">
+  <!ENTITY c "&b;&b;&b;&b;">
+]>
+<{root_tag}>
+  <creator>&c;</creator>
+  <notes>&c;</notes>
+</{root_tag}>
+""".encode("utf-8")
+
+
+def build_sensitive_metadata_payload(*, include_xml_shell: bool = True) -> bytes:
+    """Return sidecar metadata bytes containing deterministic PII-like markers."""
+
+    body = (
+        f"contact={SENSITIVE_METADATA_MARKERS[0]}\n"
+        f"path={SENSITIVE_METADATA_MARKERS[1]}\n"
+        f"phone={SENSITIVE_METADATA_MARKERS[2]}\n"
+    )
+    if not include_xml_shell:
+        return body.encode("utf-8")
+    return (
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<metadata>\n"
+        f"  <contact>{SENSITIVE_METADATA_MARKERS[0]}</contact>\n"
+        f"  <path>{SENSITIVE_METADATA_MARKERS[1]}</path>\n"
+        f"  <phone>{SENSITIVE_METADATA_MARKERS[2]}</phone>\n"
+        "</metadata>\n"
+    ).encode("utf-8")
 
 
 def write_zip_file(path: Path, entries: dict[str, bytes]) -> Path:

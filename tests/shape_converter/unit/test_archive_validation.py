@@ -7,7 +7,10 @@ import zipfile
 import pytest
 
 from tests.shape_converter.helpers.archive_builder import (
+    SENSITIVE_METADATA_MARKERS,
     build_minimal_point_dataset,
+    build_sensitive_metadata_payload,
+    build_xml_entity_expansion_payload,
     build_zip_bytes,
     mark_zip_as_encrypted,
 )
@@ -79,6 +82,43 @@ def test_validate_and_extract_zip_archive_rejects_generic_xml_sidecar(tmp_path) 
 
     assert exc_info.value.code == "invalid_archive"
     assert "unsupported file extension" in exc_info.value.message.lower()
+
+
+@pytest.mark.parametrize("suffix", [".xml", ".gml"])
+def test_validate_and_extract_zip_archive_rejects_entity_expansion_sidecars(
+    tmp_path,
+    suffix: str,
+) -> None:
+    entries = build_minimal_point_dataset(prefix="parcel")
+    entries[f"parcel{suffix}"] = build_xml_entity_expansion_payload(root_tag="dataset")
+    archive_bytes = build_zip_bytes(entries)
+
+    with pytest.raises(ShapeConverterError) as exc_info:
+        validate_and_extract_zip_archive(
+            archive_name="parcel.zip",
+            archive_bytes=archive_bytes,
+            extraction_root=tmp_path / "extract",
+        )
+
+    assert exc_info.value.code == "invalid_archive"
+    assert "unsupported file extension" in exc_info.value.message.lower()
+    assert all(marker not in str(exc_info.value) for marker in SENSITIVE_METADATA_MARKERS)
+
+
+def test_validate_and_extract_zip_archive_strips_shp_xml_entity_sidecar_content(tmp_path) -> None:
+    entries = build_minimal_point_dataset(prefix="parcel")
+    entries["parcel.shp.xml"] = build_sensitive_metadata_payload(include_xml_shell=True)
+    archive_bytes = build_zip_bytes(entries)
+
+    extracted = validate_and_extract_zip_archive(
+        archive_name="parcel.zip",
+        archive_bytes=archive_bytes,
+        extraction_root=tmp_path / "extract",
+    )
+
+    assert extracted.removed_shp_xml_sidecars == ("parcel.shp.xml",)
+    assert not (extracted.extraction_root / "parcel.shp.xml").exists()
+    assert all(marker not in sidecar for sidecar in extracted.removed_shp_xml_sidecars for marker in SENSITIVE_METADATA_MARKERS)
 
 
 def test_validate_and_extract_zip_archive_rejects_non_zip_signature(tmp_path) -> None:

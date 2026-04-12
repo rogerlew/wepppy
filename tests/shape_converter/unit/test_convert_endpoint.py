@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import importlib
+import json
+import logging
 
 import pytest
 from pyproj import CRS
@@ -9,7 +12,13 @@ pytest.importorskip("starlette")
 
 from starlette.testclient import TestClient
 
-from tests.shape_converter.helpers.archive_builder import build_minimal_point_dataset, build_zip_bytes
+from tests.shape_converter.helpers.archive_builder import (
+    SENSITIVE_METADATA_MARKERS,
+    build_minimal_point_dataset,
+    build_sensitive_metadata_payload,
+    build_xml_entity_expansion_payload,
+    build_zip_bytes,
+)
 from wepppy.microservices.shape_converter import create_app
 
 
@@ -102,6 +111,36 @@ def test_convert_accepts_shp_xml_sidecar_and_warns_user() -> None:
     assert any("generally not advisable" in warning.lower() for warning in metadata["warnings"])
 
 
+def test_convert_shp_xml_privacy_does_not_expose_sidecar_content(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    entries = build_minimal_point_dataset(prefix="roads")
+    entries["roads.shp.xml"] = build_sensitive_metadata_payload(include_xml_shell=True)
+    archive_bytes = build_zip_bytes(entries)
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.cleanup")
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+            },
+        )
+
+        metadata_path = response.headers["x-shape-converter-metadata-path"]
+        metadata_response = client.get(metadata_path)
+
+    assert response.status_code == 200
+    metadata_payload = metadata_response.json()
+    payload_text = json.dumps(metadata_payload, sort_keys=True)
+    assert any(".shp.xml" in warning for warning in metadata_payload["warnings"])
+    for marker in SENSITIVE_METADATA_MARKERS:
+        assert marker not in payload_text
+        assert marker not in caplog.text
+
+
 def test_convert_accepts_qmd_sidecar_and_unlinks_it() -> None:
     entries = build_minimal_point_dataset(prefix="roads")
     entries["roads.qmd"] = b"qmd metadata should be stripped"
@@ -124,6 +163,35 @@ def test_convert_accepts_qmd_sidecar_and_unlinks_it() -> None:
     metadata = metadata_response.json()
     assert metadata["target_crs"] == "wgs84"
     assert not any(".qmd" in warning.lower() for warning in metadata["warnings"])
+
+
+def test_convert_qmd_privacy_does_not_expose_sidecar_content(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    entries = build_minimal_point_dataset(prefix="roads")
+    entries["roads.qmd"] = build_sensitive_metadata_payload(include_xml_shell=False)
+    archive_bytes = build_zip_bytes(entries)
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.cleanup")
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+            },
+        )
+
+        metadata_path = response.headers["x-shape-converter-metadata-path"]
+        metadata_response = client.get(metadata_path)
+
+    assert response.status_code == 200
+    metadata_payload = metadata_response.json()
+    payload_text = json.dumps(metadata_payload, sort_keys=True)
+    for marker in SENSITIVE_METADATA_MARKERS:
+        assert marker not in payload_text
+        assert marker not in caplog.text
 
 
 def test_convert_json_body_returns_relay_payload_for_geojson_output() -> None:
@@ -289,6 +357,25 @@ def test_convert_returns_archive_path_traversal_for_zip_slip_input() -> None:
 
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "archive_path_traversal"
+
+
+@pytest.mark.parametrize("suffix", [".xml", ".gml"])
+def test_convert_rejects_entity_expansion_sidecars(suffix: str) -> None:
+    entries = build_minimal_point_dataset(prefix="roads")
+    entries[f"roads{suffix}"] = build_xml_entity_expansion_payload(root_tag="metadata")
+    archive_bytes = build_zip_bytes(entries)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_archive"
+    assert "unsupported file extension" in payload["error"]["message"].lower()
 
 
 def test_convert_returns_missing_required_sidecar_error() -> None:
@@ -513,6 +600,41 @@ def test_convert_returns_timeout_when_body_read_stalls(monkeypatch: pytest.Monke
     payload = response.json()
     assert payload["error"]["code"] == "request_timeout"
     assert "body" in payload["error"]["message"].lower()
+
+
+def test_convert_parser_loop_timeout_cancels_processing_and_cleans_scratch(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:  # noqa: ANN001
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="timeout-parser"))
+    observed_cancel = {"value": False}
+
+    async def _stalled_convert(**kwargs):  # noqa: ANN003
+        scratch = kwargs["scratch"]
+        scratch.extraction_root.mkdir(parents=True, exist_ok=True)
+        (scratch.extraction_root / "parser-loop.tmp").write_text("partial", encoding="utf-8")
+        try:
+            await asyncio.sleep(1.0)
+        except asyncio.CancelledError:
+            observed_cancel["value"] = True
+            raise
+
+    monkeypatch.setattr(shape_converter_app_module, "_CONVERT_TIMEOUT_SECONDS", 0.1)
+    monkeypatch.setattr(shape_converter_app_module, "convert_uploaded_archive", _stalled_convert)
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("timeout-parser.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 408
+    payload = response.json()
+    assert payload["error"]["code"] == "request_timeout"
+    assert observed_cancel["value"] is True
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_load_shapefile_applies_parser_egress_guards(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:  # noqa: ANN001

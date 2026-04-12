@@ -82,6 +82,7 @@ Required evidence:
 | WP-07 | Runtime hardening and sandbox enforcement | WP-01 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-07_runtime_hardening_and_sandbox_enforcement.md` (compose hardening enforced: rootless `10001`, `read_only`, `no-new-privileges`, `cap_drop=ALL`, pids/mem/cpu limits, hardened `tmpfs`; readiness now enforces required sandbox mode signaling + toolchain presence; dedicated internal `shape-converter-sandbox` network blocks outbound egress and limits east-west reachability; focused/full unit + hardening integration gates pass; proxied ready/inspect/convert smoke pass under hardened container; code/QA/security review dispositions closed). |
 | WP-08 | Test suite completion and gate automation | WP-02, WP-03, WP-04, WP-05, WP-06, WP-06B, WP-07 | not_started | pending | pending | pending | pending | Add full unit/integration/security/perf gates and CI wiring |
 | WP-09 | Final QA + security closeout + release readiness | WP-08 | done | pass | pass | pass | pass | Completed 2026-04-12 with **GO** decision and residual-risk tracking. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09_final_qa_security_closeout_release_readiness.md`. Local focused/full unit + integration gates, workflow build/check, and proxied Caddy smoke all pass. Hosted shape-converter gate evidence captured: `Shape-Converter Gates` run `24298655324` success on `master` (`88b07b47ccda96c5ee836ca4af82db26ae727148`). Security closeout: parser CVE watchlist refreshed; parser process-group kill semantics deferred with explicit owner/date follow-up risk acceptance. |
+| WP-09B | Parser containment + GDAL CVE remediation | WP-09 | not_started | pending | pending | pending | pending | Follow-up package to close WP-09 residual risks: implement parser subprocess process-group kill semantics and remediate `CVE-2026-4738` uncertainty in shape-converter runtime. Evidence package: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09b_parser_containment_and_gdal_cve_remediation.md`. |
 
 ## Work-Package Details
 ## WP-01 Service scaffold and container wiring
@@ -191,6 +192,18 @@ Required evidence:
 - Release readiness signed by engineering + security.
 - Residual-risk register explicitly records parser-CVE watchlist status and metadata-privacy posture.
 
+## WP-09B Parser containment and GDAL CVE remediation
+### Scope
+- Implement explicit parser subprocess process-group timeout/cancel kill semantics in shape-converter runtime path.
+- Remediate `CVE-2026-4738` risk for shape-converter GDAL runtime via upgrade or equivalent patch backport with verifiable evidence.
+- Re-run full code/unit/QA/security gates and capture hosted CI evidence after remediation.
+
+### Exit criteria
+- Parser non-termination containment is implemented in production path and test-validated.
+- Shape-converter runtime includes documented `CVE-2026-4738` mitigation evidence.
+- Code/QA/security review findings are dispositioned (no unresolved High findings).
+- WP-09B board row and evidence references are complete.
+
 ## Cadence and Update Rules
 - Update this file at least once per work-package transition.
 - Any gate failure must update gate state to `fail` with evidence link.
@@ -198,7 +211,7 @@ Required evidence:
 - Do not mark a work-package `done` unless all required gates are `pass` or formally waived.
 
 ## Rollup Checklist
-- [ ] WP-01 through WP-09 complete (including WP-06B)
+- [ ] WP-01 through WP-09B complete (including WP-06B)
 - [ ] Code gates all pass
 - [ ] Shape-converter unit-test gates all pass
 - [ ] QA gates all pass

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib
+import json
+import logging
 import re
 
 import pytest
@@ -9,7 +11,13 @@ pytest.importorskip("starlette")
 
 from starlette.testclient import TestClient
 
-from tests.shape_converter.helpers.archive_builder import build_minimal_point_dataset, build_zip_bytes
+from tests.shape_converter.helpers.archive_builder import (
+    SENSITIVE_METADATA_MARKERS,
+    build_minimal_point_dataset,
+    build_sensitive_metadata_payload,
+    build_xml_entity_expansion_payload,
+    build_zip_bytes,
+)
 from wepppy.microservices.shape_converter import create_app
 
 
@@ -58,6 +66,29 @@ def test_inspect_accepts_shp_xml_sidecar_and_warns_user() -> None:
     assert any("generally not advisable" in warning.lower() for warning in payload["warnings"])
 
 
+def test_inspect_shp_xml_privacy_does_not_expose_sidecar_content(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    entries = build_minimal_point_dataset(prefix="roads")
+    entries["roads.shp.xml"] = build_sensitive_metadata_payload(include_xml_shell=True)
+    archive_bytes = build_zip_bytes(entries)
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.cleanup")
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    payload_text = json.dumps(payload, sort_keys=True)
+    assert any(".shp.xml" in warning for warning in payload["warnings"])
+    for marker in SENSITIVE_METADATA_MARKERS:
+        assert marker not in payload_text
+        assert marker not in caplog.text
+
+
 def test_inspect_accepts_qmd_sidecar_and_unlinks_it() -> None:
     entries = build_minimal_point_dataset(prefix="roads")
     entries["roads.qmd"] = b"qmd metadata should be stripped"
@@ -74,6 +105,27 @@ def test_inspect_accepts_qmd_sidecar_and_unlinks_it() -> None:
     assert payload["feature_count"] == 1
     assert payload["geometry_types"] == ["Point"]
     assert not any(".qmd" in warning.lower() for warning in payload["warnings"])
+
+
+def test_inspect_qmd_privacy_does_not_expose_sidecar_content(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    entries = build_minimal_point_dataset(prefix="roads")
+    entries["roads.qmd"] = build_sensitive_metadata_payload(include_xml_shell=False)
+    archive_bytes = build_zip_bytes(entries)
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.cleanup")
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 200
+    payload_text = json.dumps(response.json(), sort_keys=True)
+    for marker in SENSITIVE_METADATA_MARKERS:
+        assert marker not in payload_text
+        assert marker not in caplog.text
 
 
 def test_inspect_requires_archive_field() -> None:
@@ -142,6 +194,26 @@ def test_inspect_rejects_path_traversal_archive() -> None:
     payload = response.json()
     assert payload["error"]["code"] == "archive_path_traversal"
     assert payload["error"]["details"]
+
+
+@pytest.mark.parametrize("suffix", [".xml", ".gml"])
+def test_inspect_rejects_entity_expansion_sidecars(suffix: str) -> None:
+    entries = build_minimal_point_dataset(prefix="roads")
+    entries[f"roads{suffix}"] = build_xml_entity_expansion_payload(root_tag="metadata")
+    archive_bytes = build_zip_bytes(entries)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_archive"
+    assert "unsupported file extension" in payload["error"]["message"].lower()
+    for marker in SENSITIVE_METADATA_MARKERS:
+        assert marker not in json.dumps(payload, sort_keys=True)
 
 
 def test_inspect_rejects_oversize_projection_file() -> None:

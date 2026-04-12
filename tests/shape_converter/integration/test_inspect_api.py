@@ -1,12 +1,20 @@
 from __future__ import annotations
 
+import json
+
 import pytest
 
 pytest.importorskip("starlette")
 
 from starlette.testclient import TestClient
 
-from tests.shape_converter.helpers.archive_builder import build_minimal_point_dataset, build_zip_bytes
+from tests.shape_converter.helpers.archive_builder import (
+    SENSITIVE_METADATA_MARKERS,
+    build_minimal_point_dataset,
+    build_sensitive_metadata_payload,
+    build_xml_entity_expansion_payload,
+    build_zip_bytes,
+)
 from wepppy.microservices.shape_converter import app
 from wepppy.microservices.shape_converter import create_app
 
@@ -44,6 +52,60 @@ def test_inspect_endpoint_accepts_shp_xml_sidecar_and_returns_warning() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert any(".shp.xml" in warning for warning in payload["warnings"])
+
+
+def test_inspect_endpoint_does_not_expose_shp_xml_sensitive_content() -> None:
+    entries = build_minimal_point_dataset(prefix="integration")
+    entries["integration.shp.xml"] = build_sensitive_metadata_payload(include_xml_shell=True)
+    archive_bytes = build_zip_bytes(entries)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("integration.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 200
+    payload_text = json.dumps(response.json(), sort_keys=True)
+    for marker in SENSITIVE_METADATA_MARKERS:
+        assert marker not in payload_text
+
+
+def test_inspect_endpoint_does_not_expose_qmd_sensitive_content() -> None:
+    entries = build_minimal_point_dataset(prefix="integration")
+    entries["integration.qmd"] = build_sensitive_metadata_payload(include_xml_shell=False)
+    archive_bytes = build_zip_bytes(entries)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("integration.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    payload_text = json.dumps(payload, sort_keys=True)
+    assert not any(".qmd" in warning.lower() for warning in payload["warnings"])
+    for marker in SENSITIVE_METADATA_MARKERS:
+        assert marker not in payload_text
+
+
+@pytest.mark.parametrize("suffix", [".xml", ".gml"])
+def test_inspect_endpoint_rejects_entity_expansion_sidecars(suffix: str) -> None:
+    entries = build_minimal_point_dataset(prefix="integration")
+    entries[f"integration{suffix}"] = build_xml_entity_expansion_payload(root_tag="dataset")
+    archive_bytes = build_zip_bytes(entries)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("integration.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_archive"
+    assert "unsupported file extension" in payload["error"]["message"].lower()
 
 
 def test_inspect_endpoint_returns_canonical_error_for_invalid_archive() -> None:
