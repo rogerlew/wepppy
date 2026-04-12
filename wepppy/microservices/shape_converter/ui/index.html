@@ -37,12 +37,6 @@
             <option value="utm_wepppy_upper_left">UTM (Autodetect)</option>
           </select>
 
-          <label for="response-mode">Response mode</label>
-          <select id="response-mode" name="response_mode">
-            <option value="download">Download Artifact</option>
-            <option value="json_body">Relay JSON Body (GeoJSON only)</option>
-          </select>
-
           <div class="button-row">
             <button id="convert-submit" type="submit" class="button-primary">Convert And Download</button>
             <button id="inspect-submit" type="button" class="button-secondary">Inspect Upload</button>
@@ -50,10 +44,6 @@
         </form>
         <p id="inspect-status" class="status" role="status" aria-live="polite"></p>
         <p id="convert-status" class="status" role="status" aria-live="polite"></p>
-        <p class="deferred-note" id="response-mode-note">
-          Relay mode returns `{ request_id, geojson, metadata }` in the response body and is supported
-          only when output format is GeoJSON.
-        </p>
       </section>
 
       <section id="warnings-panel" class="panel panel-warnings" aria-label="Warnings and advisories" hidden>

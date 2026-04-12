@@ -9,7 +9,6 @@
   const archiveInput = document.getElementById("upload-archive");
   const outputFormatSelect = document.getElementById("output-format");
   const targetCrsSelect = document.getElementById("target-crs");
-  const responseModeSelect = document.getElementById("response-mode");
 
   const inspectStatus = document.getElementById("inspect-status");
   const convertStatus = document.getElementById("convert-status");
@@ -44,13 +43,6 @@
 
   hideMetadataPanels();
   syncWarningsPanelVisibility();
-  syncConvertActionLabel();
-
-  if (responseModeSelect instanceof HTMLSelectElement) {
-    responseModeSelect.addEventListener("change", () => {
-      syncConvertActionLabel();
-    });
-  }
 
   if (inspectSubmit instanceof HTMLButtonElement) {
     inspectSubmit.addEventListener("click", async (event) => {
@@ -107,30 +99,12 @@
       return;
     }
 
-    if (
-      !(outputFormatSelect instanceof HTMLSelectElement) ||
-      !(targetCrsSelect instanceof HTMLSelectElement) ||
-      !(responseModeSelect instanceof HTMLSelectElement)
-    ) {
+    if (!(outputFormatSelect instanceof HTMLSelectElement) || !(targetCrsSelect instanceof HTMLSelectElement)) {
       setStatus(convertStatus, "Convert controls are unavailable.", "error");
       return;
     }
 
-    const selectedResponseMode = String(responseModeSelect.value || "download");
-    if (selectedResponseMode === "json_body" && outputFormatSelect.value !== "geojson") {
-      setStatus(
-        convertStatus,
-        "Relay JSON body mode requires output format GeoJSON. Change output format or switch response mode.",
-        "error"
-      );
-      return;
-    }
-
-    setStatus(
-      convertStatus,
-      selectedResponseMode === "json_body" ? "Relay convert request running..." : "Convert request running...",
-      "neutral"
-    );
+    setStatus(convertStatus, "Convert request running...", "neutral");
     setButtonState(convertSubmit, true);
 
     try {
@@ -138,7 +112,7 @@
       formData.append("archive", archiveFile);
       formData.append("output_format", outputFormatSelect.value);
       formData.append("target_crs", targetCrsSelect.value);
-      formData.append("response_mode", selectedResponseMode);
+      formData.append("response_mode", "download");
 
       const response = await fetch(resolveApiUrl("v1/convert"), {
         method: "POST",
@@ -152,64 +126,38 @@
         return;
       }
 
-      if (selectedResponseMode === "json_body") {
-        const relayPayload = await response.json();
-        if (!relayPayload || typeof relayPayload !== "object") {
-          setStatus(convertStatus, "Relay response payload is invalid.", "error");
-          return;
-        }
+      const contentDisposition = response.headers.get("Content-Disposition") || "";
+      const filename = parseDownloadFilename(contentDisposition) || "shape_converter_output.bin";
+      const blob = await response.blob();
+      triggerDownload(blob, filename);
 
-        const metadataPayload = relayPayload.metadata;
-        const geojsonPayload = relayPayload.geojson;
-        if (!metadataPayload || typeof metadataPayload !== "object") {
-          setStatus(convertStatus, "Relay response metadata is missing.", "error");
-          return;
-        }
-        if (!geojsonPayload || typeof geojsonPayload !== "object") {
-          setStatus(convertStatus, "Relay response GeoJSON payload is missing.", "error");
-          return;
-        }
-
-        renderConvertMetadata(metadataPayload);
+      const metadataPath = response.headers.get("X-Shape-Converter-Metadata-Path");
+      if (!metadataPath) {
         setStatus(
           convertStatus,
-          "Relay payload ready in browser memory. Forward geojson + metadata to the downstream endpoint.",
-          "success"
+          "Convert completed and downloaded, but metadata path header was missing.",
+          "error"
         );
-      } else {
-        const contentDisposition = response.headers.get("Content-Disposition") || "";
-        const filename = parseDownloadFilename(contentDisposition) || "shape_converter_output.bin";
-        const blob = await response.blob();
-        triggerDownload(blob, filename);
-
-        const metadataPath = response.headers.get("X-Shape-Converter-Metadata-Path");
-        if (!metadataPath) {
-          setStatus(
-            convertStatus,
-            "Convert completed and downloaded, but metadata path header was missing.",
-            "error"
-          );
-          return;
-        }
-
-        const metadataResponse = await fetch(resolveMetadataUrl(metadataPath), {
-          method: "GET",
-        });
-        if (!metadataResponse.ok) {
-          const metadataError = await parseApiError(metadataResponse);
-          renderApiError(metadataError, "convert metadata fetch");
-          setStatus(
-            convertStatus,
-            `Download completed, but metadata fetch failed. ${buildUserFacingStatus(metadataError, "convert")}`,
-            "error"
-          );
-          return;
-        }
-
-        const metadataPayload = await metadataResponse.json();
-        renderConvertMetadata(metadataPayload);
-        setStatus(convertStatus, "Convert complete. Download started and metadata panels updated.", "success");
+        return;
       }
+
+      const metadataResponse = await fetch(resolveMetadataUrl(metadataPath), {
+        method: "GET",
+      });
+      if (!metadataResponse.ok) {
+        const metadataError = await parseApiError(metadataResponse);
+        renderApiError(metadataError, "convert metadata fetch");
+        setStatus(
+          convertStatus,
+          `Download completed, but metadata fetch failed. ${buildUserFacingStatus(metadataError, "convert")}`,
+          "error"
+        );
+        return;
+      }
+
+      const metadataPayload = await metadataResponse.json();
+      renderConvertMetadata(metadataPayload);
+      setStatus(convertStatus, "Convert complete. Download started and metadata panels updated.", "success");
     } catch (error) {
       const networkError = buildNetworkApiError(error);
       renderApiError(networkError, "convert");
@@ -225,19 +173,6 @@
     }
 
     return archiveInput.files[0] || null;
-  }
-
-  function syncConvertActionLabel() {
-    if (!(convertSubmit instanceof HTMLButtonElement)) {
-      return;
-    }
-    if (!(responseModeSelect instanceof HTMLSelectElement)) {
-      convertSubmit.textContent = "Convert And Download";
-      return;
-    }
-
-    convertSubmit.textContent =
-      responseModeSelect.value === "json_body" ? "Convert For Relay" : "Convert And Download";
   }
 
   function setButtonState(buttonNode, disabled) {
@@ -763,15 +698,7 @@
     }
 
     if (code === "response_mode_not_supported") {
-      return "This response mode is not supported for this request. Use download mode or choose GeoJSON relay mode.";
-    }
-
-    if (
-      code === "invalid_request" &&
-      detailsLower.includes("response_mode='json_body'") &&
-      detailsLower.includes("output_format='geojson'")
-    ) {
-      return "Relay JSON body mode only supports GeoJSON output. Choose GeoJSON or switch to download mode.";
+      return "This response mode is not supported for this request.";
     }
 
     if (code === "invalid_archive") {

@@ -110,6 +110,8 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Relay validation behavior:
   - Unsupported relay combinations (for example `output_format=geoparquet` + `response_mode=json_body`) fail with canonical `400 invalid_request` and explicit `error.details`.
   - Unknown `response_mode` values fail with canonical `400 invalid_request`.
+- Human-facing converter UI remains download-oriented (`response_mode=download`) and does not expose a relay-mode selector.
+- `json_body` is an API-level mode for programmatic relay clients.
 - Browser client forwards resulting relay payload to WEPPcloud endpoint over authenticated WEPPcloud session/API.
 - Relay mode keeps `.zip` and shapefile sidecars processed/deleted inside shape-converter request scope.
 - Shape-converter does not require WEPPcloud credentials and does not call WEPPcloud directly.
@@ -410,10 +412,8 @@ Error response contract:
     - Nullability note (if inferable)
 - Interaction contract:
   - UI may reuse one selected local archive file for both actions, but each `Inspect`/`Convert` click sends a separate request.
-  - Convert UI exposes a `response_mode` selector with:
-    - `download` path (artifact download + metadata sidecar fetch).
-    - `json_body` path (relay payload returned in response body).
-  - UI enforces/communicates that `json_body` is GeoJSON-only.
+  - Convert UI is download-oriented and submits `response_mode=download`.
+  - Relay `response_mode=json_body` is available via API for programmatic clients and is not presented as a default end-user control.
 - Error UX contract:
   - All API/network errors must be observable by users (no silent failures).
   - `inspect-status` and `convert-status` messages must use plain language with specific next-step guidance.
@@ -487,7 +487,7 @@ Error response contract:
 - UI implements the single `Upload` controls panel (one archive input + output/CRS selectors + primary convert/secondary inspect actions).
 - `Warnings` panel is positioned directly after `Upload` and is hidden until warning/error/advisory content exists.
 - `Projection`, `Geometry Summary`, and `Attribute Schema` remain hidden until successful inspect metadata is available.
-- Convert supports both `response_mode=download` and relay `response_mode=json_body` (GeoJSON-only), with explicit canonical 4xx errors for unsupported combinations.
+- Convert API supports both `response_mode=download` and relay `response_mode=json_body` (GeoJSON-only), with explicit canonical 4xx errors for unsupported combinations; the public UI remains download-oriented.
 - CRS options behave exactly as specified (including WEPPpy UL-corner UTM mode and explicit out-of-domain failures).
 - GeoJSON behavior is explicit: RFC 7946 in WGS84 mode and clearly labeled non-RFC projected mode for UTM/same-CRS output.
 - ZIP and shapefile risk tests are implemented and passing.
