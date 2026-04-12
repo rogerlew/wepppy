@@ -139,6 +139,38 @@ Climate-parse validation contract:
 4. On failure/debug needs, fetch `GET /api/jobinfo/{job_id}`.
 5. Optionally cancel with `POST /api/canceljob/{job_id}`.
 
+## Climate Build Ordering (Operator Replication)
+For API-only replication flows, climate setup is order-sensitive:
+1. Run discovery first and read operation docs from
+   `GET /api/runs/{runid}/{config}/endpoints?include_operation_docs=true`.
+2. Resolve `climate_mode` explicitly before `build-climate`.
+   - If source run mode is known, send that mode as an integer code.
+   - Do not blindly replay `resolved_defaults` when it reports `-1`
+     (`ClimateMode.Undefined`).
+3. If you do not want auto station selection, set station behavior before
+   `build-climate`:
+   - `POST /weppcloud/runs/{runid}/{config}/tasks/set_climatestation_mode/`
+   - `POST /weppcloud/runs/{runid}/{config}/tasks/set_climatestation/`
+4. Send years and scaling parameters in the `build-climate` request payload
+   (not as separate pre-build mutations):
+   - years: `observed_start_year`, `observed_end_year`,
+     `future_start_year`, `future_end_year`
+   - scaling: `precip_scaling_mode`, `precip_scale_factor`,
+     `precip_monthly_scale_factors_0..11`, `precip_scale_reference`,
+     `precip_scale_factor_map`
+5. Submit `POST /api/runs/{runid}/{config}/build-climate` and poll
+   `GET /api/jobstatus/{job_id}` to terminal state.
+
+Notes:
+- `climatestation_mode` is not a documented `build-climate` request field.
+- For deterministic station targeting, persist station selection with
+  `tasks/set_climatestation_mode` + `tasks/set_climatestation` before
+  `build-climate`.
+- `climate_mode` in rq-engine `build-climate` payloads is currently parsed as
+  an integer code (string aliases are not part of this route contract).
+- Advanced climate toggles such as `use_gridmet_wind_when_applicable` and
+  `adjust_mx_pt5` are also pre-build task mutations.
+
 ## Dev-Agent Local Workflow
 - Canonical local account + credential-file convention:
   - `wepppy/weppcloud/static-src/tests/smoke/AGENTS.md`
