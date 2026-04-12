@@ -1,6 +1,6 @@
 # Mini Work Package: Sandboxed Shapefile Conversion Web App Spec
 Status: Draft
-Last Updated: 2026-04-11
+Last Updated: 2026-04-12
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/caddy/Caddyfile`, `wepppy/microservices/*`, `wepppy/all_your_base/geo/geo.py`, `wepppy/weppcloud/*`
 
 ## Objective
@@ -19,7 +19,6 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - New standalone containerized microservice for conversion.
 - Browser UI for upload, CRS option selection, and metadata reporting.
 - Output formats: GeoJSON, GeoParquet.
-- Browser-mediated relay flow for WEPPcloud clients: convert ZIP/shapefile to GeoJSON and forward GeoJSON payload from browser memory to WEPPcloud endpoints.
 - Strict upload validation, extraction controls, parser hardening, and cleanup lifecycle.
 - Comprehensive negative/security test coverage for ZIP and shapefile risks.
 
@@ -28,24 +27,21 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Multi-format archive support beyond ZIP.
 - Persistent dataset storage.
 - Long-running async job queue (v1 should be synchronous with strict timeouts).
+- Browser relay `response_mode=json_body` UX and payload delivery (deferred to WP-06B).
 - WEPPcloud route/controller updates to consume new relay flow (separate scope).
 
 ## User Experience
-1. User opens converter page.
-2. User uploads `.zip` (containing exactly one logical shapefile dataset).
-3. UI immediately returns inspect metadata:
+1. User opens converter page and sees one `Upload` control panel.
+2. User selects `.zip` (containing exactly one logical shapefile dataset) in a single archive input.
+3. User can choose output format (`GeoJSON`/`GeoParquet`) and target CRS (`same_as_shapefile`/`wgs84`/`utm_wepppy_upper_left`) in that same panel.
+4. User clicks `Inspect Upload` (secondary action) to populate metadata panels:
    - Projection status (detected CRS / unknown).
    - Geometry summary (feature count, geometry types, bounds).
    - Attribute schema table (field name, type, width/precision where available).
    - Warnings (lossy/null/geometry/CRS caveats).
-4. User chooses output format (`GeoJSON` or `GeoParquet`).
-5. User chooses output CRS option:
-   - `same_as_shapefile`
-   - `wgs84`
-   - `utm_wepppy_upper_left`
-6. User uploads the same archive to convert with selected options (no server-side staging between endpoints).
-7. User either downloads converted artifact or relays GeoJSON directly to WEPPcloud from browser memory.
-8. Service deletes all artifacts created by each request.
+5. User clicks `Convert And Download` (primary action) to run conversion and download the artifact.
+6. `inspect` and `convert` remain independent request-scoped uploads by backend contract; the browser may reuse the same selected local file, but each action sends its own multipart request and no server-side cross-request staging is allowed.
+7. Service deletes all artifacts created by each request.
 
 ## Functional Requirements
 ### Upload and input requirements
@@ -106,16 +102,15 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
   - `bbox`
   - `warnings` array (for example: lossy-field mapping, null-value caveats, CRS/extent caveats)
 
-### WEPPcloud browser relay mode
-- `convert` supports relay-friendly GeoJSON responses for browser clients:
-  - `output_format=geojson`
-  - `response_mode=json_body` (new optional parameter; default remains `download`)
-- In `json_body` mode, response includes:
-  - GeoJSON payload
-  - conversion metadata
-  - projection/schema warnings
-- Relay mode is designed so `.zip` and shapefile sidecars are processed and deleted entirely inside shape-converter request scope.
-- Browser client forwards resulting GeoJSON payload to WEPPcloud endpoint over authenticated WEPPcloud session/API.
+### WEPPcloud browser relay mode (Deferred to WP-06B)
+- Current behavior:
+  - Convert flow is explicit `response_mode=download`.
+  - `response_mode=json_body` is not available yet and must return explicit `response_mode_not_supported`.
+- Planned WP-06B behavior:
+  - `output_format=geojson` + `response_mode=json_body`.
+  - Response includes GeoJSON payload plus conversion metadata/warnings.
+  - Browser client forwards resulting GeoJSON payload to WEPPcloud endpoint over authenticated WEPPcloud session/API.
+- Relay mode keeps `.zip` and shapefile sidecars processed/deleted inside shape-converter request scope.
 - Shape-converter does not require WEPPcloud credentials and does not call WEPPcloud directly.
 
 ## Non-Functional Requirements
@@ -294,12 +289,12 @@ Request:
 - `archive` (ZIP)
 - `output_format` = `geojson|geoparquet`
 - `target_crs` = `same_as_shapefile|wgs84|utm_wepppy_upper_left`
-- `response_mode` = `download|json_body` (optional, default `download`; `json_body` allowed only when `output_format=geojson`)
+- `response_mode` currently supports `download` only (default `download`); `json_body` is reserved for WP-06B and currently rejected with `response_mode_not_supported`
 - No auth credentials required.
 
 Response 200:
 - `response_mode=download`: streamed artifact download + metadata sidecar JSON endpoint keyed by `request_id`
-- `response_mode=json_body`: JSON response containing GeoJSON payload plus conversion metadata/warnings
+- `response_mode=json_body`: deferred to WP-06B (not available in current implementation)
 
 Error response contract:
 - Follow canonical WEPPpy error payload style (`error.code`, `error.message`, `error.details` required).
@@ -312,6 +307,7 @@ Error response contract:
   - `unknown_source_crs`
   - `reprojection_failed`
   - `utm_not_supported_for_extent`
+  - `response_mode_not_supported`
 - Error status mapping (minimum):
   - `400`: validation/input errors.
   - `404`: metadata sidecar `request_id` not found.
@@ -376,22 +372,45 @@ Error response contract:
   5. Reproject all features.
 
 ## UI Requirements
-- Required visible sections:
-  - Upload state + validation errors.
+- Layout and control contract:
+  - One controls panel titled `Upload` with:
+    - one archive file input
+    - output format selector
+    - target CRS selector
+    - primary `Convert And Download` button
+    - secondary `Inspect Upload` button
+  - `Warnings` panel appears immediately after the `Upload` panel.
+  - `Projection`, `Geometry Summary`, and `Attribute Schema` panels follow warning/error content.
+  - All user-facing panels are the same width in the default layout.
+  - Static asset URLs must resolve correctly behind proxied namespace `/utils/shape-converter/` (no root-relative asset assumptions).
+- Visibility contract:
+  - Initial load:
+    - show `Upload` panel
+    - hide `Warnings`, `Projection`, `Geometry Summary`, and `Attribute Schema`
+  - Show `Projection`, `Geometry Summary`, and `Attribute Schema` only after a successful inspect payload provides content.
+  - Keep `Warnings` hidden until there is warning/error/advisory content to show.
+- Metadata rendering contract:
   - Projection panel:
-    - Detected CRS (EPSG/WKT summary)
+    - Detected CRS (authority or unwrapped WKT when authority is unavailable)
     - Projection status badge (`known`, `unknown`, `invalid`)
-    - Target CRS selector.
+    - Output CRS (after convert metadata is available)
+  - Geometry summary:
+    - Feature count
+    - Geometry types
+    - BBox
   - Attribute schema table:
     - Column name
     - Source type
     - Width/precision
     - Nullability note (if inferable)
-  - Geometry summary:
-    - Feature count
-    - Geometry types
-    - BBox
-  - Conversion/download action + success/failure state.
+- Interaction contract:
+  - UI may reuse one selected local archive file for both actions, but each `Inspect`/`Convert` click sends a separate request.
+  - Convert UI path remains explicit `response_mode=download`.
+  - `response_mode=json_body` UI controls remain deferred to WP-06B and must be explicitly messaged in the UI.
+- Error UX contract:
+  - All API/network errors must be observable by users (no silent failures).
+  - `inspect-status` and `convert-status` messages must use plain language with specific next-step guidance.
+  - `429`/`503` abuse-control states must include clear retry guidance and display `Retry-After` when present.
 - Keep messages explicit; no silent fallback behavior.
 
 ## Security Controls Baseline
@@ -403,7 +422,7 @@ Error response contract:
   - Edge request body size cap.
   - Edge upload/read/write timeouts and minimum upload data rate controls.
   - Edge forwarding-header sanitization and trusted-proxy configuration.
-  - CORS policy explicitly scoped to approved WEPPcloud origins for browser relay use-cases.
+  - CORS policy for browser relay use-cases is required when WP-06B `json_body` mode is enabled.
 - Application-level controls are also required (authoritative when edge lacks native rate-limit module support):
   - Per-IP rate/concurrency controls in service middleware.
   - Per-request scratch quotas and timeout cancellation hooks.
@@ -429,7 +448,7 @@ Error response contract:
 - Valid uploads for point/line/polygon shapefiles.
 - Missing sidecars and invalid `.prj` flows.
 - GeoJSON and GeoParquet output metadata correctness.
-- Browser relay flow correctness (`response_mode=json_body` and downstream re-post contract payload shape).
+- Browser relay flow correctness (`response_mode=json_body` and downstream re-post contract payload shape) is deferred to WP-06B.
 - Cleanup verification: no residual files after request terminal state.
 
 ### Security tests
@@ -458,8 +477,10 @@ Error response contract:
 ## Acceptance Criteria
 - Users can upload ZIP shapefiles and download GeoJSON/GeoParquet reliably.
 - Service is publicly accessible without authentication by design.
-- UI always reports attribute schema and projection status before conversion.
-- WEPPcloud browser clients can consume relay-mode GeoJSON and forward payloads without ZIP/shapefile persistence outside shape-converter request scope.
+- UI implements the single `Upload` controls panel (one archive input + output/CRS selectors + primary convert/secondary inspect actions).
+- `Warnings` panel is positioned directly after `Upload` and is hidden until warning/error/advisory content exists.
+- `Projection`, `Geometry Summary`, and `Attribute Schema` remain hidden until successful inspect metadata is available.
+- Current release keeps convert UX/API explicit to `response_mode=download`; relay-mode `json_body` acceptance is deferred to WP-06B.
 - CRS options behave exactly as specified (including WEPPpy UL-corner UTM mode and explicit out-of-domain failures).
 - GeoJSON behavior is explicit: RFC 7946 in WGS84 mode and clearly labeled non-RFC projected mode for UTM/same-CRS output.
 - ZIP and shapefile risk tests are implemented and passing.
