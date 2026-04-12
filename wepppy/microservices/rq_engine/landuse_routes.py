@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 import os
-import shutil
 from os.path import exists as _exists
 from os.path import join as _join
+from pathlib import Path
 from typing import Any
 
 import redis
@@ -27,7 +27,8 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
-from .responses import error_response, error_response_with_traceback
+from .responses import error_response
+from .upload_helpers import UploadError, save_upload_file
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,8 @@ router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
+LANDUSE_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -81,6 +84,12 @@ def _preflight_landuse_mutation_root(wd: str) -> None:
     _require_directory_root(wd, "landuse")
 
 
+def _upload_status_from_message(message: str) -> int:
+    if "maximum allowed size" in message.lower():
+        return 413
+    return 400
+
+
 @router.post(
     "/runs/{runid}/{config}/build-landuse",
     summary="Build landuse inputs",
@@ -106,7 +115,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine build-landuse auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     try:
         wd = get_wd(runid)
@@ -177,9 +186,18 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                     if not filename:
                         raise ValueError("Could not obtain filename")
 
-                    user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
-                    with open(user_defined_fn, "wb") as dest:
-                        shutil.copyfileobj(upload.file, dest)
+                    try:
+                        saved_path = save_upload_file(
+                            upload,
+                            allowed_extensions=LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS,
+                            dest_dir=Path(landuse.lc_dir),
+                            filename_transform=lambda _value: f"_{filename}",
+                            overwrite=True,
+                            max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES,
+                        )
+                    except UploadError as exc:
+                        raise ValueError(str(exc)) from exc
+                    user_defined_fn = str(saved_path)
                 else:
                     filename = landuse.user_defined_landcover_fn
                     if filename:
@@ -202,7 +220,10 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                     purpose="rq-build-landuse-user-defined",
                 )
             except ValueError as exc:
-                return error_response(str(exc), status_code=400)
+                return error_response(
+                    str(exc),
+                    status_code=_upload_status_from_message(str(exc)),
+                )
             except FileNotFoundError as exc:
                 return error_response(str(exc), status_code=400)
             except RuntimeError as exc:
@@ -230,7 +251,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         if nodir_response is not None:
             return nodir_response
         logger.exception("rq-engine build-landuse enqueue failed")
-        return error_response_with_traceback("Building Landuse Failed")
+        return error_response("Building Landuse Failed", status_code=500)
 
 
 __all__ = ["router"]

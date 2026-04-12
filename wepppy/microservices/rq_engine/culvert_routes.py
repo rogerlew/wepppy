@@ -6,7 +6,6 @@ import logging
 import os
 import shutil
 import uuid
-import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -23,8 +22,13 @@ from wepppy.microservices.culvert_payload_validator import (
     ValidationIssue,
     format_validation_errors,
     validate_payload_root,
-    validate_zip_members,
 )
+from wepppy.microservices.shape_converter.archive_validation import (
+    ArchiveLimits,
+    read_upload_bytes_with_limit,
+    validate_and_extract_zip_archive,
+)
+from wepppy.microservices.shape_converter.errors import ShapeConverterError
 from wepppy.rq.culvert_rq import TIMEOUT as CULVERT_BATCH_TIMEOUT
 from wepppy.rq.culvert_rq import (
     run_culvert_batch_finalize_rq,
@@ -35,7 +39,7 @@ from wepppy.weppcloud.utils import auth_tokens
 
 from .auth import AuthError, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
-from .responses import error_response, error_response_with_traceback, validation_error_response
+from .responses import error_response, validation_error_response
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +48,11 @@ router = APIRouter()
 MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
 CULVERT_BROWSE_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
 CULVERT_BATCH_RQ_JOB_KEY = "run_culvert_batch_rq"
+CULVERT_ARCHIVE_LIMITS = ArchiveLimits(
+    max_compressed_bytes=MAX_PAYLOAD_BYTES,
+    max_uncompressed_bytes=6 * 1024 * 1024 * 1024,
+    max_member_count=1200,
+)
 
 
 def _mint_culvert_browse_token(batch_uuid: str, *, subject: str) -> dict[str, Any]:
@@ -87,7 +96,7 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine culvert batch auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     culverts_root = _resolve_culverts_root()
     culvert_batch_uuid, batch_root = _reserve_batch_root(culverts_root)
@@ -131,18 +140,39 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
                     ]
                     return validation_error_response(format_validation_errors(issues))
 
-        payload_sha256, payload_bytes = await _save_upload_file(upload, payload_zip_path)
+        archive_name = _resolve_archive_name(upload)
+        try:
+            archive_bytes = await read_upload_bytes_with_limit(
+                upload=upload,
+                max_bytes=MAX_PAYLOAD_BYTES,
+            )
+        except ShapeConverterError as exc:
+            shutil.rmtree(batch_root, ignore_errors=True)
+            return _archive_error_response(exc)
 
-        zip_member_errors = _validate_zip_archive(payload_zip_path)
+        payload_zip_path.write_bytes(archive_bytes)
+        payload_sha256 = hashlib.sha256(archive_bytes).hexdigest()
+        payload_bytes = len(archive_bytes)
+
         size_errors = _validate_payload_size(
             zip_sha256, total_bytes, payload_sha256, payload_bytes
         )
-        if zip_member_errors or size_errors:
+        if size_errors:
             shutil.rmtree(batch_root, ignore_errors=True)
-            errors = format_validation_errors(zip_member_errors + size_errors)
-            return validation_error_response(errors)
+            return validation_error_response(format_validation_errors(size_errors))
 
-        _extract_zip(payload_zip_path, batch_root)
+        try:
+            validate_and_extract_zip_archive(
+                archive_name=archive_name,
+                archive_bytes=archive_bytes,
+                extraction_root=batch_root,
+                limits=CULVERT_ARCHIVE_LIMITS,
+                member_policy=_allow_culvert_member,
+                sanitize_metadata_sidecars=False,
+            )
+        except ShapeConverterError as exc:
+            shutil.rmtree(batch_root, ignore_errors=True)
+            return _archive_error_response(exc)
 
         payload_issues = validate_payload_root(batch_root)
         if payload_issues:
@@ -189,7 +219,7 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
     except Exception:
         shutil.rmtree(batch_root, ignore_errors=True)
         logger.exception("rq-engine culvert batch ingestion failed")
-        return error_response_with_traceback("Failed to ingest culvert batch payload")
+        return error_response("Failed to ingest culvert batch payload", status_code=500)
 
 
 @router.post(
@@ -220,7 +250,7 @@ async def culverts_retry_run(
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine culvert retry auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     culverts_root = _resolve_culverts_root()
     batch_root = culverts_root / batch_uuid
@@ -309,7 +339,7 @@ async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResp
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine culvert finalize auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     culverts_root = _resolve_culverts_root()
     batch_root = culverts_root / batch_uuid
@@ -404,34 +434,36 @@ def _string_or_none(value: Any) -> Optional[str]:
     return text or None
 
 
-async def _save_upload_file(upload: UploadFile, dest: Path) -> tuple[str, int]:
-    hasher = hashlib.sha256()
-    total_bytes = 0
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    with dest.open("wb") as handle:
-        while True:
-            chunk = await upload.read(1024 * 1024)
-            if not chunk:
-                break
-            handle.write(chunk)
-            hasher.update(chunk)
-            total_bytes += len(chunk)
-    await upload.close()
-    return hasher.hexdigest(), total_bytes
+def _resolve_archive_name(upload: UploadFile) -> str:
+    filename = _string_or_none(getattr(upload, "filename", None))
+    if filename is None:
+        return "payload.zip"
+    return filename
 
 
-def _validate_zip_archive(zip_path: Path) -> list[ValidationIssue]:
-    if not zipfile.is_zipfile(zip_path):
-        return [
-            ValidationIssue(
-                code="invalid_zip",
-                message="Uploaded file is not a zip archive.",
-                path="payload.zip",
-            )
-        ]
-    with zipfile.ZipFile(zip_path) as archive:
-        members = [member.filename for member in archive.infolist()]
-    return validate_zip_members(members)
+def _allow_culvert_member(_member: Any, _normalized_path: Any) -> None:
+    # Archive safety checks run in the shared validator; payload semantics remain in
+    # culvert_payload_validator.validate_payload_root().
+    return
+
+
+def _archive_error_response(exc: ShapeConverterError) -> JSONResponse:
+    if exc.status_code == 413:
+        return error_response(
+            exc.message,
+            status_code=exc.status_code,
+            code=exc.code,
+            details=exc.details,
+        )
+
+    issue_detail = {"details": exc.details} if exc.details else None
+    issue = ValidationIssue(
+        code=exc.code,
+        message=exc.message,
+        path="payload.zip",
+        detail=issue_detail,
+    )
+    return validation_error_response(format_validation_errors([issue]))
 
 
 def _validate_payload_size(
@@ -492,18 +524,6 @@ def _validate_payload_size(
         )
 
     return issues
-
-
-def _extract_zip(zip_path: Path, dest: Path) -> None:
-    with zipfile.ZipFile(zip_path) as archive:
-        dest_root = dest.resolve()
-        for member in archive.infolist():
-            target = (dest_root / member.filename).resolve()
-            try:
-                target.relative_to(dest_root)
-            except ValueError as exc:
-                raise ValueError("Zip member is outside extraction root.") from exc
-        archive.extractall(dest)
 
 
 def _write_batch_metadata(

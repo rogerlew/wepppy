@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 import os
-import shutil
 from copy import deepcopy
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Request
@@ -18,7 +18,8 @@ from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap, sbs_map_sanity_ch
 from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
 
 from .auth import AuthError, require_jwt, require_roles
-from .responses import error_response, error_response_with_traceback
+from .responses import error_response
+from .upload_helpers import UploadError, save_upload_file
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,8 @@ router = APIRouter()
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
 GEOJSON_MAX_BYTES = 10 * 1024 * 1024
+SBS_MAP_MAX_BYTES = 100 * 1024 * 1024
+SBS_MAP_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
 
 
 def _geojson_max_bytes() -> int:
@@ -117,6 +120,12 @@ def _extract_upload(form, key: str) -> UploadFile | None:
     return None
 
 
+def _upload_error_status(exc: UploadError) -> int:
+    if "maximum allowed size" in str(exc).lower():
+        return 413
+    return 400
+
+
 def _safe_unlink(path: str) -> None:
     try:
         os.remove(path)
@@ -133,7 +142,7 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine upload-geojson auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     if not _batch_runner_feature_enabled():
         return error_response("Batch Runner is currently disabled.", status_code=403)
@@ -144,7 +153,7 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
         return error_response(str(exc), status_code=404)
     except Exception:
         logger.exception("rq-engine upload-geojson failed to load batch runner")
-        return error_response_with_traceback("Failed to load batch runner", status_code=500)
+        return error_response("Failed to load batch runner", status_code=500)
 
     form = await request.form()
     upload = _extract_upload(form, "geojson_file") or _extract_upload(form, "file")
@@ -168,18 +177,20 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
     dest_path = os.path.join(resources_dir, safe_name)
     replaced = os.path.exists(dest_path)
     try:
-        try:
-            upload.file.seek(0)
-        except Exception:
-            # Boundary catch: preserve contract behavior while logging unexpected failures.
-            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_batch_runner_routes.py:171", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-            pass
-        with open(dest_path, "wb") as dest:
-            shutil.copyfileobj(upload.file, dest)
+        save_upload_file(
+            upload,
+            allowed_extensions=("geojson", "json"),
+            dest_dir=Path(resources_dir),
+            filename_transform=lambda _value: safe_name,
+            overwrite=True,
+            max_bytes=_geojson_max_bytes(),
+        )
+    except UploadError as exc:
+        return error_response(str(exc), status_code=_upload_error_status(exc))
     except OSError:
         _safe_unlink(dest_path)
         logger.exception("Failed to save GeoJSON upload")
-        return error_response_with_traceback("Failed to save GeoJSON upload.", status_code=500)
+        return error_response("Failed to save GeoJSON upload.", status_code=500)
 
     try:
         size_bytes = os.path.getsize(dest_path)
@@ -194,7 +205,10 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
     if size_bytes and size_bytes > max_bytes:
         _safe_unlink(dest_path)
         limit_mb = max(1, int(max_bytes // (1024 * 1024)))
-        return error_response(f"GeoJSON file exceeds maximum size of {limit_mb} MB.", status_code=400)
+        return error_response(
+            f"GeoJSON file exceeds maximum size of {limit_mb} MB.",
+            status_code=413,
+        )
 
     try:
         watershed_collection = WatershedCollection(dest_path)
@@ -205,7 +219,7 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
     except Exception:
         _safe_unlink(dest_path)
         logger.exception("Failed to ingest GeoJSON upload")
-        return error_response_with_traceback("Failed to process GeoJSON upload.", status_code=500)
+        return error_response("Failed to process GeoJSON upload.", status_code=500)
 
     if analysis_results.get("feature_count", 0) == 0:
         _safe_unlink(dest_path)
@@ -264,7 +278,7 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine upload-sbs-map auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     if not _batch_runner_feature_enabled():
         return error_response("Batch Runner is currently disabled.", status_code=403)
@@ -275,7 +289,7 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
         return error_response(str(exc), status_code=404)
     except Exception:
         logger.exception("rq-engine upload-sbs-map failed to load batch runner")
-        return error_response_with_traceback("Failed to load batch runner", status_code=500)
+        return error_response("Failed to load batch runner", status_code=500)
 
     form = await request.form()
     upload = _extract_upload(form, "sbs_map") or _extract_upload(form, "file")
@@ -298,8 +312,21 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
     os.makedirs(resources_dir, exist_ok=True)
     dest_path = os.path.join(resources_dir, safe_name)
     replaced = os.path.exists(dest_path)
-    with open(dest_path, "wb") as dest:
-        shutil.copyfileobj(upload.file, dest)
+    try:
+        save_upload_file(
+            upload,
+            allowed_extensions=SBS_MAP_ALLOWED_EXTENSIONS,
+            dest_dir=Path(resources_dir),
+            filename_transform=lambda _value: safe_name,
+            overwrite=True,
+            max_bytes=SBS_MAP_MAX_BYTES,
+        )
+    except UploadError as exc:
+        return error_response(str(exc), status_code=_upload_error_status(exc))
+    except OSError:
+        _safe_unlink(dest_path)
+        logger.exception("Failed to save SBS map upload")
+        return error_response("Failed to save SBS map upload.", status_code=500)
 
     try:
         size_bytes = os.path.getsize(dest_path)

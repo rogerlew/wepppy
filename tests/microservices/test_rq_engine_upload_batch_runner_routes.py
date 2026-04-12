@@ -88,6 +88,69 @@ def test_upload_geojson_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     assert payload["message"] == "GeoJSON uploaded successfully."
 
 
+def test_upload_geojson_rejects_oversize_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_geojson_max_bytes", lambda: 4)
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-geojson",
+            files={"geojson_file": ("data.geojson", b"abcdef")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "File exceeds maximum allowed size"
+
+
+def test_upload_geojson_rejects_invalid_extension(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-geojson",
+            files={"geojson_file": ("data.txt", b"{}")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "Only .geojson or .json files are supported."
+
+
 def test_upload_sbs_map_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     batch_runner = DummyBatchRunner(tmp_path)
 
@@ -115,3 +178,94 @@ def test_upload_sbs_map_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     assert response.status_code == 200
     payload = response.json()
     assert payload["message"] == "SBS map uploaded successfully."
+
+
+def test_upload_sbs_map_rejects_oversize_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "SBS_MAP_MAX_BYTES", 4)
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-sbs-map",
+            files={"sbs_map": ("map.tif", b"abcdef")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "File exceeds maximum allowed size"
+
+
+def test_upload_sbs_map_rejects_invalid_extension(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-sbs-map",
+            files={"sbs_map": ("map.exe", b"data")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "Only GeoTIFF/IMG/VRT rasters are supported."
+
+
+def test_upload_geojson_load_error_redacts_traceback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-geojson",
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["error"]["message"] == "Failed to load batch runner"
+    assert payload["error"]["details"] == "Failed to load batch runner"
+    assert "Traceback" not in payload["error"]["details"]

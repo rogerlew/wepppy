@@ -357,9 +357,41 @@ def test_upload_geojson_rejects_json_path_mode(roads_client):
         json={"path": "/tmp/roads.geojson"},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     payload = response.get_json()
     assert "multipart `file`" in payload["error"]["message"]
+
+
+def test_upload_geojson_rejects_invalid_extension(roads_client):
+    client, *_rest = roads_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+        data={"file": (io.BytesIO(b"{}"), "roads.json")},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Roads upload must be a .geojson file."
+
+
+def test_upload_geojson_rejects_oversize_payload(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, *_rest = roads_client
+    monkeypatch.setattr(roads_module, "ROADS_UPLOAD_GEOJSON_MAX_BYTES", 4)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+        data={"file": (io.BytesIO(b"abcdef"), "roads.geojson")},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 413
+    payload = response.get_json()
+    assert "maximum size" in payload["error"]["message"]
 
 
 def test_set_params_updates_controller_state(roads_client):

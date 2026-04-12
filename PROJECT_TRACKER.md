@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-11  
+**Last Updated**: 2026-04-12  
 **Active Packages**: 1  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 1 package ✅ **Within target range**
+**Current WIP**: 2 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -226,6 +226,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Upload Endpoints Hardening (2026-04-12)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260411_upload_endpoints_hardening/](docs/work-packages/20260411_upload_endpoints_hardening/)  
+**Summary**: Completed scoped non-`shape_converter` upload hardening end-to-end. Culvert ZIP ingestion now reuses validated archive controls from `wepppy/microservices/shape_converter/archive_validation.py` (read-with-limit, safe member validation, controlled extraction), while keeping culvert semantic payload checks in `wepppy/microservices/culvert_payload_validator.py`. Added explicit pre-write size/type enforcement for `upload_huc_fire`, batch-runner geojson+sbs uploads, landuse/treatments user-defined uploads, disturbed SBS uploads, and Roads GeoJSON upload route. Upload-facing error payloads for scoped endpoints no longer leak traceback internals and remain canonical. Regression coverage now includes ZIP abuse fixtures (traversal, encrypted, nested archive, unsupported compression, duplicate paths, quota) and endpoint size/type checks. Validation gates passed (`76` targeted tests; full suite `3502 passed`, `36 skipped`), and the dedicated security review artifact closed with no unresolved medium/high findings.
 
 ### RQ Operator Experience Hardening (2026-04-11)
 **Status**: ✅ **COMPLETE**  

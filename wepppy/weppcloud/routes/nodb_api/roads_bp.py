@@ -29,6 +29,8 @@ from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_f
 from .._common import *  # noqa: F401,F403
 
 roads_bp = Blueprint("roads", __name__)
+ROADS_UPLOAD_GEOJSON_MAX_BYTES = 10 * 1024 * 1024
+_UPLOAD_CHUNK_BYTES = 1024 * 1024
 
 
 def _ensure_roads_controller(wd: str, cfg_fn: str) -> Roads:
@@ -56,6 +58,35 @@ def _require_enabled(controller: Roads) -> Response | None:
 def _invalidate_roads_timestamp(wd: str) -> None:
     prep = RedisPrep.getInstance(wd)
     prep.remove_timestamp(TaskEnum.run_roads)
+
+
+def _roads_upload_size_error(max_bytes: int) -> str:
+    limit_mb = max(1, int(max_bytes // (1024 * 1024)))
+    return f"Roads upload exceeds maximum size of {limit_mb} MB."
+
+
+def _save_roads_upload_with_limit(uploaded, destination: str, *, max_bytes: int) -> int:
+    stream = getattr(uploaded, "stream", None)
+    if stream is None:
+        raise ValueError("Uploaded file stream is unavailable.")
+
+    bytes_written = 0
+    try:
+        stream.seek(0)
+    except (AttributeError, OSError):
+        pass
+
+    with open(destination, "wb") as handle:
+        while True:
+            chunk = stream.read(_UPLOAD_CHUNK_BYTES)
+            if not chunk:
+                break
+            bytes_written += len(chunk)
+            if bytes_written > max_bytes:
+                raise ValueError(_roads_upload_size_error(max_bytes))
+            handle.write(chunk)
+
+    return bytes_written
 
 
 def _roads_run_results_report_links(
@@ -258,14 +289,51 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
 
     uploaded = request.files.get("file")
     if uploaded is None or not uploaded.filename:
-        return error_factory("Provide multipart `file` for Roads upload.")
+        response = error_factory("Provide multipart `file` for Roads upload.")
+        response.status_code = 400
+        return response
 
     filename = str(uploaded.filename)
     if not filename.lower().endswith(".geojson"):
-        return error_factory("Roads upload must be a .geojson file.")
+        response = error_factory("Roads upload must be a .geojson file.")
+        response.status_code = 400
+        return response
     os.makedirs(controller.roads_upload_dir, exist_ok=True)
     source_path = os.path.join(controller.roads_upload_dir, "roads.upload.source.geojson")
-    uploaded.save(source_path)
+    try:
+        bytes_written = _save_roads_upload_with_limit(
+            uploaded,
+            source_path,
+            max_bytes=ROADS_UPLOAD_GEOJSON_MAX_BYTES,
+        )
+    except ValueError as exc:
+        try:
+            os.remove(source_path)
+        except OSError:
+            pass
+        response = error_factory(str(exc))
+        if "maximum size" in str(exc).lower():
+            response.status_code = 413
+        else:
+            response.status_code = 400
+        return response
+    except OSError as exc:
+        try:
+            os.remove(source_path)
+        except OSError:
+            pass
+        response = error_factory(f"Failed to save Roads upload: {exc}")
+        response.status_code = 500
+        return response
+
+    if bytes_written <= 0:
+        try:
+            os.remove(source_path)
+        except OSError:
+            pass
+        response = error_factory("Roads upload is empty.")
+        response.status_code = 400
+        return response
 
     try:
         summary = controller.set_uploaded_geojson(str(source_path))
@@ -274,7 +342,9 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
         response.status_code = 404
         return response
     except ValueError as exc:
-        return error_factory(str(exc))
+        response = error_factory(str(exc))
+        response.status_code = 400
+        return response
 
     _invalidate_roads_timestamp(wd)
     return success_factory(summary)

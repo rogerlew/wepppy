@@ -16,7 +16,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
-from .responses import error_response, error_response_with_traceback
+from .responses import error_response
 from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
-UPLOAD_SBS_ALLOWED_EXTENSIONS: tuple[str, ...] = ()
+UPLOAD_SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
 UPLOAD_SBS_MAX_BYTES = 100 * 1024 * 1024
 UPLOAD_COVER_TRANSFORM_ALLOWED_EXTENSIONS = ("csv",)
 UPLOAD_COVER_TRANSFORM_MAX_BYTES = 10 * 1024 * 1024
@@ -35,6 +35,12 @@ def _extract_upload(form, key: str) -> UploadFile | None:
     if isinstance(upload, UploadFile):
         return upload
     return None
+
+
+def _upload_status_from_message(message: str) -> int:
+    if "maximum allowed size" in message.lower():
+        return 413
+    return 400
 
 
 @router.post(
@@ -62,7 +68,7 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-sbs auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     try:
         from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
@@ -102,10 +108,10 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.build_rusle)
         return upload_success(result={"disturbed_fn": baer.disturbed_fn})
     except UploadError as exc:
-        return upload_failure(str(exc))
+        return upload_failure(str(exc), status=_upload_status_from_message(str(exc)))
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-sbs failed")
-        return error_response_with_traceback("Failed validating file", status_code=500)
+        return error_response("Failed validating file", status_code=500)
 
 
 @router.post(
@@ -133,7 +139,7 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cover-transform auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     try:
         from wepppy.nodb.mods.revegetation import Revegetation
@@ -158,10 +164,10 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
         res = reveg.validate_user_defined_cover_transform(saved_path.name)
         return upload_success(result=res)
     except UploadError as exc:
-        return upload_failure(str(exc))
+        return upload_failure(str(exc), status=_upload_status_from_message(str(exc)))
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cover-transform failed")
-        return error_response_with_traceback("Failed validating file", status_code=500)
+        return error_response("Failed validating file", status_code=500)
 
 
 __all__ = ["router"]

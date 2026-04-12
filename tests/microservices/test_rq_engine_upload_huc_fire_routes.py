@@ -21,6 +21,9 @@ def _post_upload_sbs(
     *,
     apply_nodir: bool,
     global_nodir_default: str | None = None,
+    upload_filename: str = "sbs.tif",
+    upload_bytes: bytes = b"data",
+    validate_error: Exception | None = None,
 ) -> tuple[Any, Path]:
     run_dir = tmp_path / "run"
     disturbed_dir = run_dir / "disturbed"
@@ -77,6 +80,8 @@ def _post_upload_sbs(
             self.disturbed_dir = str(base_dir)
 
         def validate(self, filename: str, mode: int = 0) -> None:
+            if validate_error is not None:
+                raise validate_error
             return None
 
     dummy_disturbed = DummyDisturbed(disturbed_dir)
@@ -85,7 +90,7 @@ def _post_upload_sbs(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/huc-fire/tasks/upload-sbs/",
-            files={"input_upload_sbs": ("sbs.tif", b"data")},
+            files={"input_upload_sbs": (upload_filename, upload_bytes)},
             headers={"Authorization": "Bearer token"},
         )
 
@@ -137,3 +142,59 @@ def test_huc_fire_upload_sbs_opt_in_respects_global_nodir_env_gate(
 
     marker_path = run_dir / ".nodir" / "default_archive_roots.json"
     assert not marker_path.exists()
+
+
+def test_huc_fire_upload_sbs_rejects_invalid_extension(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    response, _run_dir = _post_upload_sbs(
+        monkeypatch,
+        tmp_path,
+        apply_nodir=False,
+        upload_filename="bad.exe",
+        upload_bytes=b"data",
+    )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"].startswith("Invalid file extension.")
+
+
+def test_huc_fire_upload_sbs_rejects_oversize_upload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(upload_huc_fire_routes, "UPLOAD_HUC_FIRE_SBS_MAX_BYTES", 4)
+
+    response, _run_dir = _post_upload_sbs(
+        monkeypatch,
+        tmp_path,
+        apply_nodir=False,
+        upload_filename="sbs.tif",
+        upload_bytes=b"abcdef",
+    )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "File exceeds maximum allowed size"
+
+
+def test_huc_fire_upload_sbs_redacts_tracebacks_on_internal_validation_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    response, _run_dir = _post_upload_sbs(
+        monkeypatch,
+        tmp_path,
+        apply_nodir=False,
+        upload_filename="sbs.tif",
+        upload_bytes=b"data",
+        validate_error=RuntimeError("boom"),
+    )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["error"]["message"] == "Failed validating file"
+    assert payload["error"]["details"] == "Failed validating file"
+    assert "Traceback" not in payload["error"]["details"]

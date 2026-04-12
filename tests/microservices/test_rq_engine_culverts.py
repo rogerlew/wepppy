@@ -12,7 +12,9 @@ import wepppy.microservices.rq_engine as rq_engine
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import culvert_routes
+from wepppy.microservices.shape_converter.archive_validation import ArchiveLimits
 from wepppy.weppcloud.utils import auth_tokens
+from tests.shape_converter.helpers.archive_builder import mark_zip_as_encrypted
 
 
 pytestmark = pytest.mark.microservice
@@ -42,6 +44,7 @@ def _auth_headers(
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
     token = _issue_culvert_token(monkeypatch, scopes=scopes)
     return {"Authorization": f"Bearer {token}"}
+
 
 def assert_validation_error(payload: dict[str, Any], code: str) -> None:
     assert payload["error"]["code"] == "validation_error"
@@ -73,6 +76,28 @@ def test_culvert_ingest_rejects_missing_scope(
     assert response.status_code == 403
     payload = response.json()
     assert payload["error"]["code"] == "forbidden"
+
+
+def test_culvert_ingest_auth_internal_error_redacts_traceback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    monkeypatch.setattr(
+        culvert_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/culverts-wepp-batch/")
+
+    assert response.status_code == 401
+    payload = response.json()
+    assert payload["error"]["message"] == "Failed to authorize request"
+    assert payload["error"]["details"] == "Failed to authorize request"
+    assert "Traceback" not in payload["error"]["details"]
 
 
 def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -557,7 +582,135 @@ def test_culvert_ingest_invalid_zip_member_path_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert_validation_error(payload, "invalid_member_path")
+    assert_validation_error(payload, "archive_path_traversal")
+
+
+def test_culvert_ingest_rejects_encrypted_zip_entries(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
+    encrypted_zip = tmp_path / "encrypted.zip"
+    encrypted_zip.write_bytes(mark_zip_as_encrypted(PAYLOAD_ZIP.read_bytes()))
+
+    with encrypted_zip.open("rb") as handle:
+        with TestClient(rq_engine.app) as client:
+            response = client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
+            )
+
+    assert response.status_code == 400
+    assert_validation_error(response.json(), "invalid_archive")
+
+
+def test_culvert_ingest_rejects_nested_archive_member(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
+    bad_zip = _rewrite_payload_zip_with_member(tmp_path, "nested.zip", b"payload")
+
+    with bad_zip.open("rb") as handle:
+        with TestClient(rq_engine.app) as client:
+            response = client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
+            )
+
+    assert response.status_code == 400
+    assert_validation_error(response.json(), "invalid_archive")
+
+
+def test_culvert_ingest_rejects_unsupported_compression(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    unsupported_compression = getattr(zipfile, "ZIP_BZIP2", None)
+    if unsupported_compression is None:
+        pytest.skip("ZIP_BZIP2 is unavailable in this Python runtime")
+
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
+    bad_zip = tmp_path / "unsupported-compression.zip"
+
+    with zipfile.ZipFile(PAYLOAD_ZIP) as src, zipfile.ZipFile(bad_zip, "w") as dst:
+        for info in src.infolist():
+            if info.is_dir():
+                continue
+            data = src.read(info.filename)
+            compress_type = unsupported_compression if info.filename == "metadata.json" else zipfile.ZIP_DEFLATED
+            dst.writestr(info.filename, data, compress_type=compress_type)
+
+    with bad_zip.open("rb") as handle:
+        with TestClient(rq_engine.app) as client:
+            response = client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
+            )
+
+    assert response.status_code == 400
+    assert_validation_error(response.json(), "invalid_archive")
+
+
+def test_culvert_ingest_rejects_duplicate_member_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
+    bad_zip = _rewrite_payload_zip_with_member(tmp_path, "METADATA.JSON", b"{}")
+
+    with bad_zip.open("rb") as handle:
+        with TestClient(rq_engine.app) as client:
+            response = client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
+            )
+
+    assert response.status_code == 400
+    assert_validation_error(response.json(), "invalid_archive")
+
+
+def test_culvert_ingest_rejects_archive_quota_abuse_with_413(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
+    monkeypatch.setattr(
+        culvert_routes,
+        "CULVERT_ARCHIVE_LIMITS",
+        ArchiveLimits(
+            max_compressed_bytes=culvert_routes.MAX_PAYLOAD_BYTES,
+            max_uncompressed_bytes=256,
+            max_member_count=1200,
+        ),
+    )
+
+    with PAYLOAD_ZIP.open("rb") as handle:
+        with TestClient(rq_engine.app) as client:
+            response = client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
+            )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["code"] == "archive_quota_exceeded"
+    assert "exceed" in payload["error"]["details"].lower()
 
 
 def test_culvert_ingest_raster_mismatch_returns_400(

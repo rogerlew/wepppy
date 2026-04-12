@@ -9,6 +9,7 @@ import stat
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+from typing import Callable
 
 from starlette.datastructures import UploadFile
 
@@ -24,6 +25,8 @@ _ALLOWED_ZIP_SIGNATURES = (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
 _ALLOWED_COMPRESSION_METHODS = {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}
 _DRIVE_PATH_RE = re.compile(r"^[A-Za-z]:")
 _UPLOAD_READ_CHUNK_BYTES = 1024 * 1024
+
+ArchiveMemberPolicy = Callable[[zipfile.ZipInfo, PurePosixPath], None]
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,6 +96,8 @@ def validate_and_extract_zip_archive(
     archive_bytes: bytes,
     extraction_root: Path,
     limits: ArchiveLimits | None = None,
+    member_policy: ArchiveMemberPolicy | None = None,
+    sanitize_metadata_sidecars: bool = True,
 ) -> ExtractedArchive:
     """Validate and extract a ZIP archive into ``extraction_root``."""
 
@@ -151,6 +156,7 @@ def validate_and_extract_zip_archive(
                 normalized_paths_seen.add(normalized_key)
 
                 _validate_member_safety(member, normalized_path)
+                _validate_member_policy(member, normalized_path, member_policy)
 
                 total_compressed_bytes += int(member.compress_size)
                 total_uncompressed_bytes += int(member.file_size)
@@ -204,10 +210,14 @@ def validate_and_extract_zip_archive(
             details=str(exc),
         ) from exc
 
-    kept_files, removed_shp_xml_sidecars = _strip_sanitized_sidecars(
-        extracted_files=extracted_files,
-        extraction_root=extraction_root_resolved,
-    )
+    if sanitize_metadata_sidecars:
+        kept_files, removed_shp_xml_sidecars = _strip_sanitized_sidecars(
+            extracted_files=extracted_files,
+            extraction_root=extraction_root_resolved,
+        )
+    else:
+        kept_files = tuple(extracted_files)
+        removed_shp_xml_sidecars = ()
 
     return ExtractedArchive(
         extraction_root=extraction_root_resolved,
@@ -342,9 +352,25 @@ def _validate_member_safety(member: zipfile.ZipInfo, normalized_path: PurePosixP
     if member.is_dir():
         return
 
+def _validate_member_policy(
+    member: zipfile.ZipInfo,
+    normalized_path: PurePosixPath,
+    member_policy: ArchiveMemberPolicy | None,
+) -> None:
+    if member_policy is not None:
+        member_policy(member, normalized_path)
+        return
+    _validate_shapefile_member_policy(member, normalized_path)
+
+
+def _validate_shapefile_member_policy(
+    member: zipfile.ZipInfo,
+    normalized_path: PurePosixPath,
+) -> None:
+    if member.is_dir():
+        return
     if _is_sanitized_sidecar_name(normalized_path.name):
         return
-
     suffix = normalized_path.suffix.lower()
     if suffix not in ALLOWED_SHAPEFILE_EXTENSIONS:
         raise ShapeConverterError(
@@ -429,6 +455,7 @@ def _is_symlink_or_special(member: zipfile.ZipInfo) -> bool:
 
 __all__ = [
     "ALLOWED_SHAPEFILE_EXTENSIONS",
+    "ArchiveMemberPolicy",
     "ArchiveLimits",
     "ExtractedArchive",
     "OPTIONAL_SHAPEFILE_EXTENSIONS",

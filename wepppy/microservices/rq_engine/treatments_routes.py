@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-import shutil
-from os.path import join as _join
+from pathlib import Path
 from typing import Any
 
 import redis
@@ -25,7 +24,8 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
-from .responses import error_response, error_response_with_traceback
+from .responses import error_response
+from .upload_helpers import UploadError, save_upload_file
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,8 @@ router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+TREATMENTS_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
+TREATMENTS_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -67,6 +69,12 @@ def _preflight_treatments_roots(wd: str) -> None:
     _require_directory_root(wd, "soils")
 
 
+def _upload_status_from_message(message: str) -> int:
+    if "maximum allowed size" in message.lower():
+        return 413
+    return 400
+
+
 @router.post(
     "/runs/{runid}/{config}/build-treatments",
     summary="Build treatment inputs",
@@ -92,7 +100,7 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine build-treatments auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     try:
         wd = get_wd(runid)
@@ -140,16 +148,26 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
             if not filename:
                 return error_response("Could not obtain filename", status_code=400)
 
-            user_defined_fn = _join(treatments.treatments_dir, filename)
             try:
-                with open(user_defined_fn, "wb") as dest:
-                    shutil.copyfileobj(upload.file, dest)
+                saved_path = save_upload_file(
+                    upload,
+                    allowed_extensions=TREATMENTS_USER_DEFINED_ALLOWED_EXTENSIONS,
+                    dest_dir=Path(treatments.treatments_dir),
+                    filename_transform=lambda _value: filename,
+                    overwrite=True,
+                    max_bytes=TREATMENTS_USER_DEFINED_MAX_BYTES,
+                )
+            except UploadError as exc:
+                return error_response(
+                    str(exc),
+                    status_code=_upload_status_from_message(str(exc)),
+                )
             except OSError:
                 logger.exception("rq-engine build-treatments failed to save file", extra={"runid": runid, "config": config})
-                return error_response_with_traceback("Could not save file")
+                return error_response("Could not save file", status_code=500)
 
             try:
-                treatments.validate(user_defined_fn)
+                treatments.validate(str(saved_path))
             except ValueError as exc:
                 return error_response(str(exc), status_code=400)
 
@@ -172,7 +190,7 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
         if nodir_response is not None:
             return nodir_response
         logger.exception("rq-engine build-treatments enqueue failed")
-        return error_response_with_traceback("Building Landuse Failed")
+        return error_response("Building Landuse Failed", status_code=500)
 
 
 __all__ = ["router"]

@@ -1,4 +1,5 @@
 import pytest
+from pathlib import Path
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -154,3 +155,68 @@ def test_build_treatments_propagates_nodir_preflight_errors_and_skips_enqueue(
     assert response.status_code == http_status
     assert response.json()["error"]["code"] == code
     assert queue_called["called"] is False
+
+
+def test_build_treatments_user_defined_rejects_invalid_extension(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(treatments_routes, "get_wd", lambda runid: str(tmp_path))
+
+    class DummyTreatments:
+        mode = treatments_routes.TreatmentsMode.UserDefinedMap
+        treatments_dir = str(tmp_path / "treatments")
+
+        def validate(self, _path: str) -> None:
+            return None
+
+    class DummyLanduse:
+        mapping = None
+
+    monkeypatch.setattr(treatments_routes.Treatments, "getInstance", lambda wd: DummyTreatments())
+    monkeypatch.setattr(treatments_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-treatments",
+            data={"landuse_management_mapping_selection": "default"},
+            files={"input_upload_landuse": ("bad.exe", b"data")},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"].startswith("Invalid file extension.")
+
+
+def test_build_treatments_user_defined_rejects_oversize_upload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(treatments_routes, "get_wd", lambda runid: str(tmp_path))
+    monkeypatch.setattr(treatments_routes, "TREATMENTS_USER_DEFINED_MAX_BYTES", 4)
+
+    class DummyTreatments:
+        mode = treatments_routes.TreatmentsMode.UserDefinedMap
+        treatments_dir = str(tmp_path / "treatments")
+
+        def validate(self, _path: str) -> None:
+            return None
+
+    class DummyLanduse:
+        mapping = None
+
+    monkeypatch.setattr(treatments_routes.Treatments, "getInstance", lambda wd: DummyTreatments())
+    monkeypatch.setattr(treatments_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-treatments",
+            data={"landuse_management_mapping_selection": "default"},
+            files={"input_upload_landuse": ("map.tif", b"abcdef")},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "File exceeds maximum allowed size"

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-import shutil
+from pathlib import Path
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -13,14 +13,16 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
 
 from .auth import AuthError, require_jwt
-from .responses import error_response, error_response_with_traceback
-from .upload_helpers import upload_failure
+from .responses import error_response
+from .upload_helpers import UploadError, save_upload_file, upload_failure
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
+UPLOAD_HUC_FIRE_SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
+UPLOAD_HUC_FIRE_SBS_MAX_BYTES = 100 * 1024 * 1024
 
 
 def _extract_upload(form, key: str) -> UploadFile | None:
@@ -78,7 +80,7 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine huc-fire upload auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
     try:
         from wepppy.weppcloud.routes.run_0.run_0_bp import create_run_dir
@@ -117,8 +119,18 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
 
         disturbed = Disturbed.getInstance(wd)
         file_path = os.path.join(disturbed.disturbed_dir, filename)
-        with open(file_path, "wb") as dest:
-            shutil.copyfileobj(upload.file, dest)
+        try:
+            save_upload_file(
+                upload,
+                allowed_extensions=UPLOAD_HUC_FIRE_SBS_ALLOWED_EXTENSIONS,
+                dest_dir=Path(disturbed.disturbed_dir),
+                filename_transform=lambda _value: filename,
+                overwrite=True,
+                max_bytes=UPLOAD_HUC_FIRE_SBS_MAX_BYTES,
+            )
+        except UploadError as exc:
+            status_code = 413 if "maximum allowed size" in str(exc).lower() else 400
+            return upload_failure(str(exc), status=status_code)
 
         try:
             disturbed.validate(filename, mode=0)
@@ -126,12 +138,12 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
             # Boundary catch: preserve contract behavior while logging unexpected failures.
             __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:123", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
             os.remove(file_path)
-            return error_response_with_traceback("Failed validating file", status_code=500)
+            return error_response("Failed validating file", status_code=500)
 
         return JSONResponse({"runid": runid})
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine huc-fire upload failed")
-        return error_response_with_traceback("Could not save file", status_code=500)
+        return error_response("Could not save file", status_code=500)
 
 
 __all__ = ["router"]
