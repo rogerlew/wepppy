@@ -15,6 +15,7 @@ from wepppy.microservices.shape_converter import create_app
 
 pytestmark = [pytest.mark.unit, pytest.mark.microservice]
 shape_converter_app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
+shape_converter_convert_module = importlib.import_module("wepppy.microservices.shape_converter.convert")
 
 
 def test_convert_geojson_wgs84_download_and_metadata_sidecar() -> None:
@@ -416,3 +417,71 @@ def test_convert_metadata_endpoint_returns_404_for_unknown_request_id() -> None:
     payload = response.json()
     assert payload["error"]["code"] == "metadata_not_found"
     assert payload["error"]["details"]
+
+
+def test_convert_returns_timeout_when_body_read_stalls(monkeypatch: pytest.MonkeyPatch) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="timeout-read"))
+
+    async def _raise_body_timeout(_request):  # noqa: ANN001
+        raise TimeoutError()
+
+    monkeypatch.setattr(shape_converter_app_module, "_read_form_with_timeout", _raise_body_timeout)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("timeout-read.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 408
+    payload = response.json()
+    assert payload["error"]["code"] == "request_timeout"
+    assert "body" in payload["error"]["message"].lower()
+
+
+def test_load_shapefile_applies_parser_egress_guards(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:  # noqa: ANN001
+    captured_options: dict[str, str] = {}
+
+    class _FakeEnv:
+        def __init__(self, **kwargs):  # noqa: ANN003
+            captured_options.update({str(key): str(value) for key, value in kwargs.items()})
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):  # noqa: ANN001
+            return False
+
+    class _FakeDataset:
+        bounds = (10.0, 20.0, 10.0, 20.0)
+        crs_wkt = None
+        crs = {}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):  # noqa: ANN001
+            return False
+
+        def __iter__(self):
+            return iter(())
+
+    monkeypatch.setattr(shape_converter_convert_module.fiona, "Env", _FakeEnv)
+    monkeypatch.setattr(
+        shape_converter_convert_module.fiona,
+        "open",
+        lambda _path: _FakeDataset(),  # noqa: ARG005
+    )
+    monkeypatch.setattr(
+        shape_converter_convert_module,
+        "parse_source_crs",
+        lambda **_kwargs: None,
+    )
+
+    loaded = shape_converter_convert_module._load_shapefile(tmp_path / "roads.shp")
+
+    assert loaded.source_bounds == (10.0, 20.0, 10.0, 20.0)
+    assert captured_options["CPL_VSIL_CURL_ALLOWED_EXTENSIONS"] == ""
+    assert captured_options["GDAL_DISABLE_READDIR_ON_OPEN"] == "EMPTY_DIR"
+    assert captured_options["GDAL_HTTP_MAX_RETRY"] == "0"

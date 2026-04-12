@@ -38,6 +38,11 @@ from .serialization import serialize_geojson, serialize_geoparquet
 OUTPUT_FORMAT_OPTIONS = frozenset({"geojson", "geoparquet"})
 _MAX_UPLOAD_COMPRESSED_BYTES = ArchiveLimits().max_compressed_bytes
 _MAX_CONVERT_FEATURES = int(os.getenv("SHAPE_CONVERTER_MAX_CONVERT_FEATURES", "1000000"))
+_PARSER_GDAL_OPTIONS = {
+    "CPL_VSIL_CURL_ALLOWED_EXTENSIONS": "",
+    "GDAL_DISABLE_READDIR_ON_OPEN": "EMPTY_DIR",
+    "GDAL_HTTP_MAX_RETRY": "0",
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,62 +199,63 @@ def _load_shapefile(shp_path: Path) -> LoadedShapefile:
     geometries: list[BaseGeometry | None] = []
 
     try:
-        with fiona.open(shp_path.as_posix()) as dataset:
-            raw_bounds = dataset.bounds
-            source_bounds = (
-                float(raw_bounds[0]),
-                float(raw_bounds[1]),
-                float(raw_bounds[2]),
-                float(raw_bounds[3]),
-            )
-            source_crs = parse_source_crs(
-                crs_wkt=getattr(dataset, "crs_wkt", None),
-                crs_mapping=getattr(dataset, "crs", None),
-            )
+        with fiona.Env(**_PARSER_GDAL_OPTIONS):
+            with fiona.open(shp_path.as_posix()) as dataset:
+                raw_bounds = dataset.bounds
+                source_bounds = (
+                    float(raw_bounds[0]),
+                    float(raw_bounds[1]),
+                    float(raw_bounds[2]),
+                    float(raw_bounds[3]),
+                )
+                source_crs = parse_source_crs(
+                    crs_wkt=getattr(dataset, "crs_wkt", None),
+                    crs_mapping=getattr(dataset, "crs", None),
+                )
 
-            for index, feature in enumerate(dataset):
-                if not isinstance(feature, cabc.Mapping):
-                    raise ShapeConverterError(
-                        code="invalid_shapefile",
-                        message="Shapefile feature payload is invalid.",
-                        details=f"Feature at index {index} is not an object.",
-                    )
+                for index, feature in enumerate(dataset):
+                    if not isinstance(feature, cabc.Mapping):
+                        raise ShapeConverterError(
+                            code="invalid_shapefile",
+                            message="Shapefile feature payload is invalid.",
+                            details=f"Feature at index {index} is not an object.",
+                        )
 
-                raw_properties = feature.get("properties")
-                if raw_properties is None:
-                    normalized_properties: dict[str, object] = {}
-                elif isinstance(raw_properties, cabc.Mapping):
-                    normalized_properties = {str(key): value for key, value in raw_properties.items()}
-                else:
-                    normalized_properties = {
-                        str(key): value
-                        for key, value in dict(raw_properties).items()
-                    }
+                    raw_properties = feature.get("properties")
+                    if raw_properties is None:
+                        normalized_properties: dict[str, object] = {}
+                    elif isinstance(raw_properties, cabc.Mapping):
+                        normalized_properties = {str(key): value for key, value in raw_properties.items()}
+                    else:
+                        normalized_properties = {
+                            str(key): value
+                            for key, value in dict(raw_properties).items()
+                        }
 
-                geometry_payload = feature.get("geometry")
-                if geometry_payload is None:
-                    geometry = None
-                elif isinstance(geometry_payload, cabc.Mapping):
-                    geometry = shape(dict(geometry_payload))
-                else:
-                    raise ShapeConverterError(
-                        code="invalid_shapefile",
-                        message="Shapefile geometry payload is invalid.",
-                        details=f"Feature at index {index} has non-object geometry.",
-                    )
+                    geometry_payload = feature.get("geometry")
+                    if geometry_payload is None:
+                        geometry = None
+                    elif isinstance(geometry_payload, cabc.Mapping):
+                        geometry = shape(dict(geometry_payload))
+                    else:
+                        raise ShapeConverterError(
+                            code="invalid_shapefile",
+                            message="Shapefile geometry payload is invalid.",
+                            details=f"Feature at index {index} has non-object geometry.",
+                        )
 
-                properties.append(normalized_properties)
-                geometries.append(geometry)
+                    properties.append(normalized_properties)
+                    geometries.append(geometry)
 
-                if len(properties) > _MAX_CONVERT_FEATURES:
-                    raise ShapeConverterError(
-                        code="archive_quota_exceeded",
-                        message="Feature count exceeds configured conversion limit.",
-                        details=(
-                            f"Feature count exceeded limit {_MAX_CONVERT_FEATURES} while reading shapefile."
-                        ),
-                        status_code=413,
-                    )
+                    if len(properties) > _MAX_CONVERT_FEATURES:
+                        raise ShapeConverterError(
+                            code="archive_quota_exceeded",
+                            message="Feature count exceeds configured conversion limit.",
+                            details=(
+                                f"Feature count exceeded limit {_MAX_CONVERT_FEATURES} while reading shapefile."
+                            ),
+                            status_code=413,
+                        )
     except ShapeConverterError:
         raise
     except (

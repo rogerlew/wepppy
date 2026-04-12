@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import re
 
 import pytest
@@ -14,6 +15,7 @@ from wepppy.microservices.shape_converter import create_app
 
 pytestmark = [pytest.mark.unit, pytest.mark.microservice]
 _REQUEST_ID_RE = re.compile(r"^[a-f0-9]{32}$")
+shape_converter_app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
 
 
 def test_inspect_success_returns_required_metadata_fields() -> None:
@@ -160,3 +162,23 @@ def test_inspect_rejects_oversize_upload_before_full_buffer(
     assert response.status_code == 413
     payload = response.json()
     assert payload["error"]["code"] == "archive_quota_exceeded"
+
+
+def test_inspect_returns_timeout_when_body_read_stalls(monkeypatch: pytest.MonkeyPatch) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="timeout-read"))
+
+    async def _raise_body_timeout(_request):  # noqa: ANN001
+        raise TimeoutError()
+
+    monkeypatch.setattr(shape_converter_app_module, "_read_form_with_timeout", _raise_body_timeout)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("timeout-read.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 408
+    payload = response.json()
+    assert payload["error"]["code"] == "request_timeout"
+    assert "body" in payload["error"]["message"].lower()

@@ -14,12 +14,14 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from starlette.applications import Starlette
+from starlette.background import BackgroundTask
 from starlette.datastructures import FormData
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
+from .abuse_controls import AbuseControlState, load_abuse_control_config
 from .cleanup import (
     ActiveRequestScratchRegistry,
     RequestScratchLayout,
@@ -40,6 +42,10 @@ _CONVERT_METADATA_MAX_ENTRIES = int(os.getenv("SHAPE_CONVERTER_METADATA_MAX_ENTR
 _CONVERT_METADATA_TTL_SECONDS = int(os.getenv("SHAPE_CONVERTER_METADATA_TTL_SECONDS", "900"))
 _INSPECT_TIMEOUT_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_INSPECT_TIMEOUT_SECONDS", "30")))
 _CONVERT_TIMEOUT_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_CONVERT_TIMEOUT_SECONDS", "120")))
+_BODY_READ_TIMEOUT_SECONDS = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_BODY_READ_TIMEOUT_SECONDS", "15")),
+)
 _JANITOR_STALE_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_JANITOR_STALE_SECONDS", "900")))
 _JANITOR_INTERVAL_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_JANITOR_INTERVAL_SECONDS", "60")))
 
@@ -82,6 +88,16 @@ def _active_scratch_registry(app: Starlette) -> ActiveRequestScratchRegistry:
     return fallback_registry
 
 
+def _abuse_control_state(app: Starlette) -> AbuseControlState:
+    state = getattr(app.state, "abuse_controls", None)
+    if isinstance(state, AbuseControlState):
+        return state
+
+    fallback_state = AbuseControlState(load_abuse_control_config())
+    app.state.abuse_controls = fallback_state
+    return fallback_state
+
+
 def _allocate_request_scratch_layout(
     *,
     request: Request,
@@ -97,6 +113,35 @@ def _allocate_request_scratch_layout(
         registry=registry,
         logger=_LOGGER,
     )
+
+
+async def _read_form_with_timeout(request: Request) -> FormData:
+    async with asyncio.timeout(_BODY_READ_TIMEOUT_SECONDS):
+        return await request.form()
+
+
+def _attach_inflight_release_background(
+    response: Response,
+    *,
+    abuse_controls: AbuseControlState,
+    limiter_key: str,
+) -> None:
+    existing_background = response.background
+
+    async def _release_slot() -> None:
+        await abuse_controls.inflight_limiter.release(limiter_key)
+
+    if existing_background is None:
+        response.background = BackgroundTask(_release_slot)
+        return
+
+    async def _run_existing_and_release() -> None:
+        try:
+            await existing_background()
+        finally:
+            await _release_slot()
+
+    response.background = BackgroundTask(_run_existing_and_release)
 
 
 def _run_janitor_sweep(app: Starlette, *, trigger: str) -> None:
@@ -213,7 +258,21 @@ async def inspect_archive(request: Request) -> JSONResponse:
     try:
         async with asyncio.timeout(_INSPECT_TIMEOUT_SECONDS):
             try:
-                form = await request.form()
+                form = await _read_form_with_timeout(request)
+            except TimeoutError:
+                cleanup_reason = "body_read_timeout"
+                return error_response(
+                    ShapeConverterError(
+                        code="request_timeout",
+                        message="Inspect request body read timed out.",
+                        details=(
+                            f"Reading multipart request body exceeded "
+                            f"{_BODY_READ_TIMEOUT_SECONDS} seconds."
+                        ),
+                        status_code=408,
+                    ),
+                    request_id=request_id,
+                )
             except (RuntimeError, ValueError, TypeError) as exc:
                 cleanup_reason = "invalid_multipart"
                 return error_response(
@@ -399,7 +458,21 @@ async def convert_archive(request: Request) -> Response:
     try:
         async with asyncio.timeout(_CONVERT_TIMEOUT_SECONDS):
             try:
-                form = await request.form()
+                form = await _read_form_with_timeout(request)
+            except TimeoutError:
+                cleanup_reason = "body_read_timeout"
+                return error_response(
+                    ShapeConverterError(
+                        code="request_timeout",
+                        message="Convert request body read timed out.",
+                        details=(
+                            f"Reading multipart request body exceeded "
+                            f"{_BODY_READ_TIMEOUT_SECONDS} seconds."
+                        ),
+                        status_code=408,
+                    ),
+                    request_id=request_id,
+                )
             except (RuntimeError, ValueError, TypeError) as exc:
                 cleanup_reason = "invalid_multipart"
                 return error_response(
@@ -541,6 +614,7 @@ async def app_lifespan(app: Starlette):
     app.state.scratch_root = _resolve_scratch_root()
     app.state.active_request_scratch_registry = ActiveRequestScratchRegistry()
     app.state.convert_metadata = OrderedDict()
+    app.state.abuse_controls = AbuseControlState(load_abuse_control_config())
     app.state.janitor_stop_event = asyncio.Event()
     _run_janitor_sweep(app, trigger="startup")
     app.state.janitor_task = asyncio.create_task(
@@ -578,6 +652,93 @@ def create_app() -> Starlette:
     ]
 
     app = Starlette(debug=False, routes=routes, lifespan=app_lifespan)
+
+    @app.middleware("http")
+    async def abuse_control_middleware(request: Request, call_next):
+        abuse_controls = _abuse_control_state(request.app)
+        if not abuse_controls.protects(request):
+            return await call_next(request)
+
+        identity = abuse_controls.resolve_identity(request)
+
+        rate_limit_decision = await abuse_controls.rate_limiter.check(identity.limiter_key)
+        if not rate_limit_decision.allowed:
+            _log_structured_event(
+                level=logging.WARNING,
+                event="shape_converter_rate_limited",
+                limiter_key=identity.limiter_key,
+                client_ip=identity.client_ip,
+                source=identity.source,
+                retry_after_seconds=rate_limit_decision.retry_after_seconds,
+                path=request.url.path,
+                method=request.method,
+            )
+            limited_response = error_response(
+                ShapeConverterError(
+                    code="rate_limited",
+                    message="Request rate limit exceeded for public endpoint.",
+                    details=(
+                        f"Limiter key '{identity.limiter_key}' exceeded "
+                        f"{abuse_controls.config.rate_limit_count} requests per "
+                        f"{abuse_controls.config.rate_limit_window_seconds} seconds."
+                    ),
+                    status_code=429,
+                )
+            )
+            limited_response.headers["Retry-After"] = str(rate_limit_decision.retry_after_seconds)
+            return limited_response
+
+        inflight_decision = await abuse_controls.inflight_limiter.try_acquire(identity.limiter_key)
+        if not inflight_decision.allowed:
+            if inflight_decision.reason == "global":
+                status_code = 503
+                code = "service_saturated"
+                message = "Service is saturated; retry later."
+                details = (
+                    "Global in-flight request limit reached "
+                    f"({abuse_controls.config.max_inflight_global})."
+                )
+            else:
+                status_code = 429
+                code = "rate_limited"
+                message = "Too many in-flight requests for this client identity."
+                details = (
+                    f"Limiter key '{identity.limiter_key}' reached max in-flight "
+                    f"{abuse_controls.config.max_inflight_per_ip}."
+                )
+
+            _log_structured_event(
+                level=logging.WARNING,
+                event="shape_converter_inflight_rejected",
+                limiter_key=identity.limiter_key,
+                client_ip=identity.client_ip,
+                source=identity.source,
+                reason=inflight_decision.reason,
+                path=request.url.path,
+                method=request.method,
+            )
+            return error_response(
+                ShapeConverterError(
+                    code=code,
+                    message=message,
+                    details=details,
+                    status_code=status_code,
+                )
+            )
+
+        response: Response | None = None
+        try:
+            response = await call_next(request)
+        finally:
+            if response is None:
+                await abuse_controls.inflight_limiter.release(identity.limiter_key)
+
+        _attach_inflight_release_background(
+            response,
+            abuse_controls=abuse_controls,
+            limiter_key=identity.limiter_key,
+        )
+        return response
 
     @app.middleware("http")
     async def forwarded_prefix_middleware(request: Request, call_next):
