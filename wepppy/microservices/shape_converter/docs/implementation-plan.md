@@ -2,7 +2,7 @@
 Status: Active
 Last Updated: 2026-04-11
 Owner: Platform / WEPPpy
-Primary Spec: `/workdir/wepppy/shape-converter/specification.md`
+Primary Spec: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/specification.md`
 
 ## Purpose
 This document is the orchestration board for implementing the shape-converter service via bounded work-packages.
@@ -65,14 +65,16 @@ Required evidence:
 - Security reviewer sign-off for the work-package scope.
 - Abuse-control and sandbox assumptions validated for changed surfaces.
 - No unresolved High findings; Medium findings require explicit disposition.
+- Parser dependency review includes GDAL/OGR vulnerability disposition for the release cut.
+- Metadata-privacy review confirms `.shp.xml`/XML sidecar PII is blocked or sanitized from API/log outputs.
 
 ## Work-Package Board
 | WP | Title | Depends On | State | Code Gate | Unit Gate | QA Gate | Security Gate | Evidence / Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| WP-00 | Repo scaffold and orchestration setup | none | done | pass | pass | pass | pass | This plan + specification moved under `shape-converter/` |
-| WP-01 | Service scaffold and container wiring | WP-00 | done | pass | pass | pass | pass | Completed 2026-04-11. Evidence: `/workdir/wepppy/shape-converters/work-packages/wp-01_service_scaffold_container_wiring.md` (unit gate: 6/6 pass, Caddy smoke pass, negative namespace probe not proxied). |
-| WP-02 | Inspect endpoint + ZIP/shapefile validation | WP-01 | not_started | pending | pending | pending | pending | Implement `/utils/shape-converter/v1/inspect` and risk controls |
-| WP-03 | Convert endpoint + CRS and format pipeline | WP-02 | not_started | pending | pending | pending | pending | Implement `/utils/shape-converter/v1/convert`, GeoJSON/GeoParquet behavior |
+| WP-00 | Repo scaffold and orchestration setup | none | done | pass | pass | pass | pass | This plan + specification moved under `wepppy/microservices/shape_converter/docs/` |
+| WP-01 | Service scaffold and container wiring | WP-00 | done | pass | pass | pass | pass | Completed 2026-04-11. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-01_service_scaffold_container_wiring.md` (unit gate: 6/6 pass, Caddy smoke pass, negative namespace probe not proxied). |
+| WP-02 | Inspect endpoint + ZIP/shapefile validation | WP-01 | done | pass | pass | pass | pass | Completed 2026-04-11. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-02_inspect_endpoint_zip_shapefile_validation.md` (unit gate pass, integration gate pass, proxied inspect smoke pass, traversal/symlink/encrypted/nested/quota controls verified). |
+| WP-03 | Convert endpoint + CRS and format pipeline | WP-02 | done | pass | pass | pass | pass | Completed 2026-04-11. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-03_convert_endpoint_crs_format_pipeline.md` (convert endpoint implemented, CRS modes + GeoJSON/GeoParquet outputs covered, unit/integration gates pass, proxied convert smoke pass for success/canonical errors, security checks recorded). |
 | WP-04 | Cleanup lifecycle and failure-path guarantees | WP-02, WP-03 | not_started | pending | pending | pending | pending | Enforce request-scoped delete on success/failure/timeout/disconnect |
 | WP-05 | Public abuse controls and edge trust model | WP-01 | not_started | pending | pending | pending | pending | Rate limits, trusted forwarding headers, slowloris and timeout controls |
 | WP-06 | UI implementation and metadata rendering | WP-02, WP-03 | not_started | pending | pending | pending | pending | Upload, schema table, projection panel, warnings, download UX |
@@ -127,6 +129,7 @@ Required evidence:
 - Implement public no-auth rate limiting and concurrency controls.
 - Enforce trusted forwarding header model and IP identity policy.
 - Implement upload/read/write timeout protections.
+- Enforce deny-all parser egress posture so conversion requests cannot perform remote fetches.
 
 ### Exit criteria
 - Flood/slowloris tests pass with expected `429`/timeout behavior.
@@ -136,6 +139,7 @@ Required evidence:
 ### Scope
 - Implement UI for inspect and convert flows.
 - Display attribute schema, projection details, warnings, geometry summary.
+- Surface `.shp.xml` removal warnings with explicit advisory text that packing `.shp.xml` in shapefile ZIPs is generally not advisable.
 
 ### Exit criteria
 - UX supports inspect and convert with clear error/warning states.
@@ -157,6 +161,9 @@ Required evidence:
 ### Scope
 - Apply and verify runtime hardening controls.
 - Enforce secondary parser sandbox in production readiness checks.
+- Pin and track parser dependency updates (GDAL/OGR stack) with explicit CVE triage evidence.
+- Maintain parser vulnerability watchlist seeded with known GDAL cases (`CVE-2021-45943`, `CVE-2025-29480`).
+- Enforce parser timeout/kill guarantees for malformed-input non-termination classes.
 
 ### Exit criteria
 - Hardening verification tests pass.
@@ -166,6 +173,8 @@ Required evidence:
 ### Scope
 - Complete shape-converter unit and integration test suites.
 - Add security and performance gate commands to CI.
+- Add parser abuse regression fixtures (XML entity expansion and parser-loop timeout classes).
+- Add metadata-privacy regression fixtures proving `.shp.xml` PII is never surfaced.
 
 ### Exit criteria
 - All gates automated and blocking where required.
@@ -180,6 +189,7 @@ Required evidence:
 - All WP states are `done`.
 - All gates are `pass` or explicitly waived with risk acceptance.
 - Release readiness signed by engineering + security.
+- Residual-risk register explicitly records parser-CVE watchlist status and metadata-privacy posture.
 
 ## Cadence and Update Rules
 - Update this file at least once per work-package transition.

@@ -55,6 +55,9 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Reject nested archives by policy in v1.
 - Require shapefile core sidecars by shared prefix: `.shp`, `.shx`, `.dbf`.
 - Permit optional sidecars: `.prj`, `.cpg`, `.sbn`, `.sbx`, `.qix`.
+- Allow `.shp.xml` metadata sidecars as non-fatal input but immediately unlink them after extraction.
+- Emit an explicit warning when `.shp.xml` is removed that it is generally not advisable to pack `.shp.xml` in shapefile ZIPs because metadata may leak sensitive details.
+- Reject other non-required XML sidecars (`.xml`, `.gml`) in v1.
 - Reject archives containing multiple shapefile prefixes unless user explicitly selects one (v1 default: reject).
 - `inspect` and `convert` are independent uploads by design; no server-side file staging across requests.
 
@@ -123,6 +126,7 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
   - Drop all Linux capabilities except explicit minimum.
   - Seccomp/AppArmor (or SELinux) enabled.
   - Disable outbound network by default.
+  - Treat GDAL/OGR parser execution as hostile-input boundary and run it only in bounded subprocesses with hard timeout + process-group termination.
 - Resource limits (initial defaults, tune with data):
   - Request timeout: 30s metadata scan, 120s conversion hard timeout.
   - Max ZIP upload size: 100 MB.
@@ -354,6 +358,9 @@ Error response contract:
 | Out-of-range coordinates | Projection errors | Validate coordinate ranges by CRS before transform | Extreme-coordinate fixtures fail clearly |
 | Anti-meridian/multi-zone extents | UTM ambiguity | Document UL-corner UTM behavior and emit warning if bbox spans zones | Multi-zone fixture warns, still deterministic |
 | Shapefile size/component limits | Operational failures | Enforce file-size and feature-count caps before full load | Over-limit fixtures rejected early |
+| XML sidecar entity expansion (`.xml`, `.gml`, `.shp.xml`) | CPU/memory DoS via parser | Reject generic XML sidecars; if `.shp.xml` is present, delete it immediately after extraction and enforce parser timeout + memory caps | Generic XML sidecar rejected; `.shp.xml` stripped with warning |
+| Parser-triggered remote fetch (`/vsicurl/`, remote references) | Unwanted network egress/data exfil risk | Keep deny-all egress and disable remote parser sources by policy/config | Fixture attempting remote reference fails without outbound access |
+| Metadata PII leak from `.shp.xml` | Exposure of usernames, contact details, host paths, org/process history | Never parse or return sidecar metadata; sanitize warnings/log fields | Fixture containing PII in sidecar yields no PII in API payloads/logs |
 
 ## CRS Rules and UTM Determination Details
 - Source of truth for UTM mode should mirror existing WEPPpy logic in `wepppy/all_your_base/geo/geo.py`:
@@ -404,6 +411,11 @@ Error response contract:
   - Runtime image digest pinning.
   - SBOM generation for release builds.
   - Vulnerability scan gate that blocks unresolved High/Critical issues in reachable runtime components.
+- Parser dependency controls are required:
+  - Track and triage GDAL/OGR parser vulnerabilities (including memory-corruption and parser-DoS classes) before each release; keep known examples such as `CVE-2021-45943` and `CVE-2025-29480` on the watchlist.
+  - Maintain explicit timeout/kill behavior for parser non-termination classes (for example malformed WKB infinite-loop conditions).
+  - Treat `/vsizip/` as an implementation detail, not a security boundary; archive and contained parser risks still require full validation/sandbox controls.
+  - Maintain metadata-privacy policy that forbids exposing raw `.shp.xml` content in API payloads, logs, or warnings (only advisory removal notices are allowed).
 
 ## Test Plan
 ### Unit tests
@@ -425,6 +437,9 @@ Error response contract:
 - Encrypted ZIP fixtures.
 - Malformed shapefile fuzz corpus.
 - Parser timeout and cancellation behavior.
+- XML sidecar bomb fixtures (`.shp.xml`/`.xml` entity expansion class payloads).
+- Parser non-termination fixtures (malformed WKB parser-loop class).
+- Metadata privacy fixture: `.shp.xml` containing usernames/paths/contact fields is not exposed in responses/logging.
 - Runtime hardening verification:
   - `read_only`, `cap_drop=ALL`, `no-new-privileges`, seccomp/AppArmor/SELinux, pids/mem/cpu limits, deny-all egress.
 - Slowloris and pinned-download resilience:
@@ -447,6 +462,9 @@ Error response contract:
 - CRS options behave exactly as specified (including WEPPpy UL-corner UTM mode and explicit out-of-domain failures).
 - GeoJSON behavior is explicit: RFC 7946 in WGS84 mode and clearly labeled non-RFC projected mode for UTM/same-CRS output.
 - ZIP and shapefile risk tests are implemented and passing.
+- XML sidecar and parser-loop abuse tests are implemented and passing.
+- No sidecar-derived PII (for example `.shp.xml` usernames, contacts, file paths) is exposed by API metadata or logs.
+- When `.shp.xml` is included, API warnings explicitly report removal and advise that packing `.shp.xml` in shapefile ZIPs is generally not advisable.
 - No uploaded or generated artifacts persist after each request terminal response (verified by tests).
 - Service runs in its own hardened container and is reachable through Caddy.
 - CI/security validation proves container hardening and runtime abuse controls are active.
@@ -459,7 +477,9 @@ Error response contract:
 - OWASP File Upload Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html
 - Python `zipfile` docs (extract warnings, traversal notes, decompression pitfalls): https://docs.python.org/3/library/zipfile.html
 - NVD CVE-2024-55587 (archive extraction traversal class example): https://nvd.nist.gov/vuln/detail/CVE-2024-55587
+- GDAL security model for untrusted input: https://gdal.org/en/stable/user/security.html
 - GDAL ESRI Shapefile driver docs: https://gdal.org/en/stable/drivers/vector/shapefile.html
+- GDAL issue #14039 (WKB parser infinite-loop class): https://github.com/OSGeo/gdal/issues/14039
 - ESRI Shapefile Technical Description: https://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
 - ArcGIS shapefile output limitations: https://pro.arcgis.com/en/pro-app/latest/tool-reference/appendices/geoprocessing-considerations-for-shapefile-output.htm
 - GeoParquet 1.1.0 specification: https://geoparquet.org/releases/v1.1.0/

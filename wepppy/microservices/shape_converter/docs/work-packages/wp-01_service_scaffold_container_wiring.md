@@ -2,8 +2,8 @@
 Status: done
 Last Updated: 2026-04-11
 Owner: Fresh Agent (unassigned)
-Parent Plan: `/workdir/wepppy/shape-converters/implementation-plan.md`
-Primary Spec: `/workdir/wepppy/shape-converter/specification.md`
+Parent Plan: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/implementation-plan.md`
+Primary Spec: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/specification.md`
 
 ## Objective
 Deliver WP-01 end-to-end by scaffolding the shape-converter service and wiring it into local runtime (compose + Caddy) under `/utils/shape-converter` with tightened route matching.
@@ -54,7 +54,7 @@ Expected new/modified files for WP-01 (adjust only if justified):
 - `tests/shape_converter/unit/test_health_routes.py`
 
 Optional doc updates if paths differ:
-- `/workdir/wepppy/shape-converters/implementation-plan.md` (update WP-01 notes)
+- `/workdir/wepppy/wepppy/microservices/shape_converter/docs/implementation-plan.md` (update WP-01 notes)
 
 ## Implementation Steps (Execute Sequentially)
 1. Create service package scaffold under `wepppy/microservices/shape_converter`.
@@ -139,4 +139,4 @@ WP-01 is `done` only when:
 - Execute this package end-to-end without pausing unless blocked by external dependency.
 - If blocked, update:
   - this WP file (`Evidence Log` + blocker note), and
-  - `/workdir/wepppy/shape-converters/implementation-plan.md` (WP-01 state -> `blocked` + reason).
+  - `/workdir/wepppy/wepppy/microservices/shape_converter/docs/implementation-plan.md` (WP-01 state -> `blocked` + reason).
