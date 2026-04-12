@@ -23,6 +23,7 @@ def test_ui_route_serves_shape_converter_shell() -> None:
     assert "id=\"upload-form\"" in body
     assert "id=\"upload-archive\"" in body
     assert "id=\"target-crs\"" in body
+    assert "id=\"response-mode\"" in body
     assert "id=\"inspect-submit\"" in body
     assert "id=\"convert-submit\"" in body
     assert "id=\"warnings-panel\"" in body
@@ -33,7 +34,9 @@ def test_ui_route_serves_shape_converter_shell() -> None:
     assert "id=\"projection-panel\" class=\"panel\" aria-label=\"Projection metadata\" hidden" in body
     assert "id=\"geometry-panel\" class=\"panel\" aria-label=\"Geometry summary\" hidden" in body
     assert "id=\"schema-panel\" class=\"panel panel-schema\" aria-label=\"Attribute schema\" hidden" in body
-    assert "response_mode=download" in body
+    assert "Download Artifact" in body
+    assert "Relay JSON Body" in body
+    assert "only when output format is GeoJSON" in body
     assert "json_body" in body
 
 
@@ -71,7 +74,9 @@ def test_ui_script_contains_warning_and_abuse_control_guidance() -> None:
     assert "buildUserFacingStatus" in script
     assert "zip again" in script
     assert "missing required shapefile files" in script
-    assert "response_mode_not_supported" in script
+    assert "Relay JSON body mode only supports GeoJSON output." in script
+    assert "Convert For Relay" in script
+    assert "forward geojson + metadata" in script.lower()
     assert "Inspect could not run." in script
     assert "Convert could not run." in script
     assert "upload-form" in script

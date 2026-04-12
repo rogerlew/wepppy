@@ -50,6 +50,32 @@ def test_convert_geojson_wgs84_download_and_metadata_sidecar() -> None:
     assert metadata["warnings"] == []
 
 
+def test_convert_geojson_wgs84_explicit_download_mode_is_backward_compatible() -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads-explicit-download"))
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("roads-explicit-download.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "download",
+            },
+        )
+
+        metadata_path = response.headers["x-shape-converter-metadata-path"]
+        metadata_response = client.get(metadata_path)
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/geo+json")
+    assert "attachment;" in response.headers["content-disposition"]
+    assert metadata_response.status_code == 200
+    metadata = metadata_response.json()
+    assert metadata["output_format"] == "geojson"
+    assert metadata["target_crs"] == "wgs84"
+
+
 def test_convert_accepts_shp_xml_sidecar_and_warns_user() -> None:
     entries = build_minimal_point_dataset(prefix="roads")
     entries["roads.shp.xml"] = (
@@ -100,7 +126,7 @@ def test_convert_accepts_qmd_sidecar_and_unlinks_it() -> None:
     assert not any(".qmd" in warning.lower() for warning in metadata["warnings"])
 
 
-def test_convert_rejects_response_mode_json_body_until_wp06b() -> None:
+def test_convert_json_body_returns_relay_payload_for_geojson_output() -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
 
     with TestClient(create_app()) as client:
@@ -114,10 +140,35 @@ def test_convert_rejects_response_mode_json_body_until_wp06b() -> None:
             },
         )
 
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/json")
+    assert "x-shape-converter-metadata-path" not in response.headers
+    payload = response.json()
+    assert payload["request_id"]
+    assert payload["geojson"]["type"] == "FeatureCollection"
+    assert payload["metadata"]["output_format"] == "geojson"
+    assert payload["metadata"]["target_crs"] == "wgs84"
+
+
+def test_convert_json_body_rejects_non_geojson_output_format() -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geoparquet",
+                "target_crs": "wgs84",
+                "response_mode": "json_body",
+            },
+        )
+
     assert response.status_code == 400
     payload = response.json()
-    assert payload["error"]["code"] == "response_mode_not_supported"
-    assert "WP-06B" in payload["error"]["details"]
+    assert payload["error"]["code"] == "invalid_request"
+    assert "json_body" in payload["error"]["details"]
+    assert "geojson" in payload["error"]["details"].lower()
 
 
 def test_convert_geoparquet_download_success() -> None:

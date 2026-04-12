@@ -27,7 +27,6 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Multi-format archive support beyond ZIP.
 - Persistent dataset storage.
 - Long-running async job queue (v1 should be synchronous with strict timeouts).
-- Browser relay `response_mode=json_body` UX and payload delivery (deferred to WP-06B).
 - WEPPcloud route/controller updates to consume new relay flow (separate scope).
 
 ## User Experience
@@ -102,14 +101,16 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
   - `bbox`
   - `warnings` array (for example: lossy-field mapping, null-value caveats, CRS/extent caveats)
 
-### WEPPcloud browser relay mode (Deferred to WP-06B)
-- Current behavior:
-  - Convert flow is explicit `response_mode=download`.
-  - `response_mode=json_body` is not available yet and must return explicit `response_mode_not_supported`.
-- Planned WP-06B behavior:
-  - `output_format=geojson` + `response_mode=json_body`.
-  - Response includes GeoJSON payload plus conversion metadata/warnings.
-  - Browser client forwards resulting GeoJSON payload to WEPPcloud endpoint over authenticated WEPPcloud session/API.
+### WEPPcloud browser relay mode (`json_body`)
+- Convert supports:
+  - `response_mode=download` (default; unchanged behavior).
+  - `response_mode=json_body` only when `output_format=geojson`.
+- Relay success behavior:
+  - `200 application/json` response containing `request_id`, `geojson`, and `metadata`.
+- Relay validation behavior:
+  - Unsupported relay combinations (for example `output_format=geoparquet` + `response_mode=json_body`) fail with canonical `400 invalid_request` and explicit `error.details`.
+  - Unknown `response_mode` values fail with canonical `400 invalid_request`.
+- Browser client forwards resulting relay payload to WEPPcloud endpoint over authenticated WEPPcloud session/API.
 - Relay mode keeps `.zip` and shapefile sidecars processed/deleted inside shape-converter request scope.
 - Shape-converter does not require WEPPcloud credentials and does not call WEPPcloud directly.
 
@@ -289,16 +290,21 @@ Request:
 - `archive` (ZIP)
 - `output_format` = `geojson|geoparquet`
 - `target_crs` = `same_as_shapefile|wgs84|utm_wepppy_upper_left`
-- `response_mode` currently supports `download` only (default `download`); `json_body` is reserved for WP-06B and currently rejected with `response_mode_not_supported`
+- `response_mode` supports `download|json_body` (default `download`)
+- `response_mode=json_body` is valid only with `output_format=geojson`
 - No auth credentials required.
 
 Response 200:
 - `response_mode=download`: streamed artifact download + metadata sidecar JSON endpoint keyed by `request_id`
-- `response_mode=json_body`: deferred to WP-06B (not available in current implementation)
+- `response_mode=json_body`: JSON payload with:
+  - `request_id`
+  - `geojson`
+  - `metadata`
 
 Error response contract:
 - Follow canonical WEPPpy error payload style (`error.code`, `error.message`, `error.details` required).
 - Use explicit codes like:
+  - `invalid_request`
   - `invalid_archive`
   - `archive_path_traversal`
   - `archive_quota_exceeded`
@@ -307,7 +313,6 @@ Error response contract:
   - `unknown_source_crs`
   - `reprojection_failed`
   - `utm_not_supported_for_extent`
-  - `response_mode_not_supported`
 - Error status mapping (minimum):
   - `400`: validation/input errors.
   - `404`: metadata sidecar `request_id` not found.
@@ -405,8 +410,10 @@ Error response contract:
     - Nullability note (if inferable)
 - Interaction contract:
   - UI may reuse one selected local archive file for both actions, but each `Inspect`/`Convert` click sends a separate request.
-  - Convert UI path remains explicit `response_mode=download`.
-  - `response_mode=json_body` UI controls remain deferred to WP-06B and must be explicitly messaged in the UI.
+  - Convert UI exposes a `response_mode` selector with:
+    - `download` path (artifact download + metadata sidecar fetch).
+    - `json_body` path (relay payload returned in response body).
+  - UI enforces/communicates that `json_body` is GeoJSON-only.
 - Error UX contract:
   - All API/network errors must be observable by users (no silent failures).
   - `inspect-status` and `convert-status` messages must use plain language with specific next-step guidance.
@@ -422,7 +429,7 @@ Error response contract:
   - Edge request body size cap.
   - Edge upload/read/write timeouts and minimum upload data rate controls.
   - Edge forwarding-header sanitization and trusted-proxy configuration.
-  - CORS policy for browser relay use-cases is required when WP-06B `json_body` mode is enabled.
+  - CORS policy for browser relay use-cases is required for `json_body` mode.
 - Application-level controls are also required (authoritative when edge lacks native rate-limit module support):
   - Per-IP rate/concurrency controls in service middleware.
   - Per-request scratch quotas and timeout cancellation hooks.
@@ -448,7 +455,7 @@ Error response contract:
 - Valid uploads for point/line/polygon shapefiles.
 - Missing sidecars and invalid `.prj` flows.
 - GeoJSON and GeoParquet output metadata correctness.
-- Browser relay flow correctness (`response_mode=json_body` and downstream re-post contract payload shape) is deferred to WP-06B.
+- Browser relay flow correctness (`response_mode=json_body`) including success payload shape and invalid-combination failures.
 - Cleanup verification: no residual files after request terminal state.
 
 ### Security tests
@@ -480,7 +487,7 @@ Error response contract:
 - UI implements the single `Upload` controls panel (one archive input + output/CRS selectors + primary convert/secondary inspect actions).
 - `Warnings` panel is positioned directly after `Upload` and is hidden until warning/error/advisory content exists.
 - `Projection`, `Geometry Summary`, and `Attribute Schema` remain hidden until successful inspect metadata is available.
-- Current release keeps convert UX/API explicit to `response_mode=download`; relay-mode `json_body` acceptance is deferred to WP-06B.
+- Convert supports both `response_mode=download` and relay `response_mode=json_body` (GeoJSON-only), with explicit canonical 4xx errors for unsupported combinations.
 - CRS options behave exactly as specified (including WEPPpy UL-corner UTM mode and explicit out-of-domain failures).
 - GeoJSON behavior is explicit: RFC 7946 in WGS84 mode and clearly labeled non-RFC projected mode for UTM/same-CRS output.
 - ZIP and shapefile risk tests are implemented and passing.

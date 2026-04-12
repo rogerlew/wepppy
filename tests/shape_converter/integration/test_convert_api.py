@@ -89,7 +89,7 @@ def test_convert_endpoint_accepts_shp_xml_sidecar_and_surfaces_warning() -> None
     assert any(".shp.xml" in warning for warning in metadata_payload["warnings"])
 
 
-def test_convert_endpoint_rejects_deferred_json_body_mode() -> None:
+def test_convert_endpoint_returns_json_body_relay_payload_for_geojson_output() -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="sample"))
 
     with TestClient(app) as client:
@@ -103,9 +103,55 @@ def test_convert_endpoint_rejects_deferred_json_body_mode() -> None:
             },
         )
 
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["request_id"]
+    assert payload["geojson"]["type"] == "FeatureCollection"
+    assert payload["metadata"]["output_format"] == "geojson"
+    assert payload["metadata"]["target_crs"] == "wgs84"
+
+
+def test_convert_endpoint_rejects_json_body_for_geoparquet_output() -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="sample"))
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("sample.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geoparquet",
+                "target_crs": "wgs84",
+                "response_mode": "json_body",
+            },
+        )
+
     assert response.status_code == 400
     payload = response.json()
-    assert payload["error"]["code"] == "response_mode_not_supported"
+    assert payload["error"]["code"] == "invalid_request"
+    assert "json_body" in payload["error"]["details"]
+    assert "geojson" in payload["error"]["details"].lower()
+
+
+def test_convert_endpoint_explicit_download_mode_remains_backward_compatible() -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="download-mode"))
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("download-mode.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "download",
+            },
+        )
+        metadata_response = client.get(response.headers["x-shape-converter-metadata-path"])
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/geo+json")
+    assert "attachment;" in response.headers["content-disposition"]
+    assert metadata_response.status_code == 200
+    assert metadata_response.json()["target_crs"] == "wgs84"
 
 
 def test_convert_endpoint_returns_utm_not_supported_for_extent() -> None:

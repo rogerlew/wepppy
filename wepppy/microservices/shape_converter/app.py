@@ -520,25 +520,28 @@ async def convert_archive(request: Request) -> Response:
                 cleanup_reason = f"shape_error:{exc.code}"
                 return error_response(exc, request_id=request_id)
 
-            if response_mode == "json_body":
-                cleanup_reason = "response_mode_not_supported"
-                return error_response(
-                    ShapeConverterError(
-                        code="response_mode_not_supported",
-                        message="response_mode=json_body is not available yet.",
-                        details="json_body mode is deferred to WP-06B; use response_mode=download.",
-                        status_code=400,
-                    ),
-                    request_id=request_id,
-                )
-
-            if response_mode != "download":
+            if response_mode not in {"download", "json_body"}:
                 cleanup_reason = "response_mode_invalid"
                 return error_response(
                     ShapeConverterError(
                         code="invalid_request",
                         message="Unsupported response_mode value.",
                         details=f"response_mode={response_mode!r} is invalid; expected 'download' or 'json_body'.",
+                        status_code=400,
+                    ),
+                    request_id=request_id,
+                )
+
+            if response_mode == "json_body" and output_format != "geojson":
+                cleanup_reason = "response_mode_invalid_combination"
+                return error_response(
+                    ShapeConverterError(
+                        code="invalid_request",
+                        message="Unsupported response_mode/output_format combination.",
+                        details=(
+                            "response_mode='json_body' is supported only when "
+                            f"output_format='geojson'; received output_format={output_format!r}."
+                        ),
                     ),
                     request_id=request_id,
                 )
@@ -567,11 +570,36 @@ async def convert_archive(request: Request) -> Response:
                     request_id=request_id,
                 )
 
+        convert_metadata = dict(converted.metadata)
+        convert_metadata["request_id"] = request_id
+
+        if response_mode == "json_body":
+            try:
+                geojson_payload = json.loads(converted.content.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError) as exc:
+                cleanup_reason = "json_body_payload_decode_failed"
+                return error_response(
+                    ShapeConverterError(
+                        code="reprojection_failed",
+                        message="Converted GeoJSON payload could not be serialized for relay mode.",
+                        details=str(exc),
+                        status_code=500,
+                    ),
+                    request_id=request_id,
+                )
+
+            cleanup_reason = "success"
+            return JSONResponse(
+                {
+                    "request_id": request_id,
+                    "geojson": geojson_payload,
+                    "metadata": convert_metadata,
+                }
+            )
+
         root_path = _request_forwarded_prefix(request)
         metadata_path = _metadata_path_for_request(root_path=root_path, request_id=request_id)
 
-        convert_metadata = dict(converted.metadata)
-        convert_metadata["request_id"] = request_id
         convert_metadata["download_filename"] = converted.filename
         convert_metadata["download_content_type"] = converted.content_type
         convert_metadata["metadata_path"] = metadata_path
