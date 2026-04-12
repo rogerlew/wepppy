@@ -6,11 +6,13 @@ import asyncio
 import json
 import logging
 import os
+import shutil
 import tempfile
 import time
 import uuid
 from collections import OrderedDict
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from pathlib import Path
 
 from starlette.applications import Starlette
@@ -51,6 +53,60 @@ _BODY_READ_TIMEOUT_SECONDS = max(
 )
 _JANITOR_STALE_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_JANITOR_STALE_SECONDS", "900")))
 _JANITOR_INTERVAL_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_JANITOR_INTERVAL_SECONDS", "60")))
+_SANDBOX_MODE_ENV = "SHAPE_CONVERTER_SANDBOX_MODE"
+_REQUIRED_SANDBOX_MODE_ENV = "SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE"
+_DEFAULT_SANDBOX_MODE = "container"
+_DEFAULT_REQUIRED_SANDBOX_MODE = "container"
+_ALLOWED_SANDBOX_MODES = frozenset({"container", "gvisor", "kata", "nsjail"})
+
+
+@dataclass(frozen=True, slots=True)
+class SandboxModeContract:
+    """Runtime sandbox signaling contract enforced by readiness checks."""
+
+    active_mode: str
+    required_mode: str
+
+    def evaluate(self) -> tuple[bool, str | None]:
+        if not self.required_mode:
+            return False, "sandbox_required_mode_unset"
+        if self.required_mode not in _ALLOWED_SANDBOX_MODES:
+            return False, f"sandbox_required_mode_invalid:{self.required_mode}"
+        if not self.active_mode:
+            return False, "sandbox_mode_unset"
+        if self.active_mode not in _ALLOWED_SANDBOX_MODES:
+            return False, f"sandbox_mode_invalid:{self.active_mode}"
+        if self.active_mode != self.required_mode:
+            return False, (
+                f"sandbox_mode_mismatch:required={self.required_mode}"
+                f":active={self.active_mode}"
+            )
+        return True, None
+
+
+def _normalize_sandbox_mode(value: str) -> str:
+    return value.strip().lower()
+
+
+def _resolve_sandbox_mode_contract() -> SandboxModeContract:
+    return SandboxModeContract(
+        active_mode=_normalize_sandbox_mode(
+            os.getenv(_SANDBOX_MODE_ENV, _DEFAULT_SANDBOX_MODE)
+        ),
+        required_mode=_normalize_sandbox_mode(
+            os.getenv(_REQUIRED_SANDBOX_MODE_ENV, _DEFAULT_REQUIRED_SANDBOX_MODE)
+        ),
+    )
+
+
+def _sandbox_mode_contract(app: Starlette) -> SandboxModeContract:
+    contract = getattr(app.state, "sandbox_mode_contract", None)
+    if isinstance(contract, SandboxModeContract):
+        return contract
+
+    fallback_contract = _resolve_sandbox_mode_contract()
+    app.state.sandbox_mode_contract = fallback_contract
+    return fallback_contract
 
 
 def _resolve_scratch_root() -> Path:
@@ -73,6 +129,13 @@ def _is_scratch_root_writable(scratch_root: Path) -> tuple[bool, str | None]:
     except OSError as exc:
         return False, f"scratch_root_not_writable: {exc}"
 
+    return True, None
+
+
+def _is_toolchain_available() -> tuple[bool, str | None]:
+    ogr2ogr_path = shutil.which("ogr2ogr")
+    if ogr2ogr_path is None:
+        return False, "ogr2ogr_not_found"
     return True, None
 
 
@@ -216,6 +279,9 @@ async def health_ready(request: Request) -> JSONResponse:
     bootstrapped = bool(getattr(request.app.state, "bootstrapped", False))
     scratch_root = getattr(request.app.state, "scratch_root", _resolve_scratch_root())
     writable, failure_reason = _is_scratch_root_writable(scratch_root)
+    sandbox_contract = _sandbox_mode_contract(request.app)
+    sandbox_ready, sandbox_failure_reason = sandbox_contract.evaluate()
+    toolchain_ready, toolchain_failure_reason = _is_toolchain_available()
 
     if not bootstrapped:
         return JSONResponse(
@@ -228,6 +294,32 @@ async def health_ready(request: Request) -> JSONResponse:
             status_code=503,
         )
 
+    if not sandbox_ready:
+        return JSONResponse(
+            {
+                "status": "not_ready",
+                "scope": SERVICE_SCOPE,
+                "check": "ready",
+                "reason": sandbox_failure_reason,
+                "sandbox_mode": sandbox_contract.active_mode,
+                "required_sandbox_mode": sandbox_contract.required_mode,
+            },
+            status_code=503,
+        )
+
+    if not toolchain_ready:
+        return JSONResponse(
+            {
+                "status": "not_ready",
+                "scope": SERVICE_SCOPE,
+                "check": "ready",
+                "reason": toolchain_failure_reason,
+                "sandbox_mode": sandbox_contract.active_mode,
+                "required_sandbox_mode": sandbox_contract.required_mode,
+            },
+            status_code=503,
+        )
+
     if not writable:
         return JSONResponse(
             {
@@ -236,6 +328,8 @@ async def health_ready(request: Request) -> JSONResponse:
                 "check": "ready",
                 "reason": failure_reason,
                 "scratch_root": str(scratch_root),
+                "sandbox_mode": sandbox_contract.active_mode,
+                "required_sandbox_mode": sandbox_contract.required_mode,
             },
             status_code=503,
         )
@@ -246,6 +340,8 @@ async def health_ready(request: Request) -> JSONResponse:
             "scope": SERVICE_SCOPE,
             "check": "ready",
             "scratch_root": str(scratch_root),
+            "sandbox_mode": sandbox_contract.active_mode,
+            "required_sandbox_mode": sandbox_contract.required_mode,
         }
     )
 
@@ -670,6 +766,7 @@ async def convert_metadata(request: Request) -> JSONResponse:
 @asynccontextmanager
 async def app_lifespan(app: Starlette):
     app.state.scratch_root = _resolve_scratch_root()
+    app.state.sandbox_mode_contract = _resolve_sandbox_mode_contract()
     app.state.active_request_scratch_registry = ActiveRequestScratchRegistry()
     app.state.convert_metadata = OrderedDict()
     app.state.abuse_controls = AbuseControlState(load_abuse_control_config())

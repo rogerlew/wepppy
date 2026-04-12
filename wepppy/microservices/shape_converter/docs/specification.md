@@ -192,6 +192,10 @@ handle_path /utils/shape-converter/* {
 #### Health and lifecycle
 - `GET /utils/shape-converter/health/live` for liveness.
 - `GET /utils/shape-converter/health/ready` for readiness (checks temp dir writability, toolchain availability, and required runtime sandbox mode).
+- Sandbox mode signaling contract for readiness:
+  - `SHAPE_CONVERTER_SANDBOX_MODE` declares active runtime sandbox mode (`container|gvisor|kata|nsjail`).
+  - `SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE` declares required runtime sandbox mode (`container|gvisor|kata|nsjail`).
+  - Readiness returns `503 not_ready` when required mode is unset/invalid, active mode is unset/invalid, or active/required modes mismatch.
 - Graceful shutdown:
   - Stop accepting new work.
   - Wait for in-flight conversions up to shutdown timeout.
