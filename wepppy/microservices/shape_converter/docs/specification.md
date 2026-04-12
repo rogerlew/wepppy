@@ -56,6 +56,7 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Require shapefile core sidecars by shared prefix: `.shp`, `.shx`, `.dbf`.
 - Permit optional sidecars: `.prj`, `.cpg`, `.sbn`, `.sbx`, `.qix`.
 - Allow `.shp.xml` metadata sidecars as non-fatal input but immediately unlink them after extraction.
+- Allow `.qmd` metadata sidecars as non-fatal input but immediately unlink them after extraction.
 - Emit an explicit warning when `.shp.xml` is removed that it is generally not advisable to pack `.shp.xml` in shapefile ZIPs because metadata may leak sensitive details.
 - Reject other non-required XML sidecars (`.xml`, `.gml`) in v1.
 - Reject archives containing multiple shapefile prefixes unless user explicitly selects one (v1 default: reject).
@@ -333,7 +334,7 @@ Error response contract:
 | Unsupported compression methods | Parser exceptions/DoS | Allowlist supported compression methods only | Unsupported compression method returns validation error |
 | Corrupt CRC/central directory | Crash/undefined behavior | Validate archive integrity before extraction | Truncated/corrupt ZIP rejected |
 | Oversize filenames/path depth | FS/path handling failures | Enforce max filename length and max path depth | Very deep path archive rejected |
-| Hidden/system files in archive | Ambiguous behavior | Allowlist required extensions and optional sidecars only | `.exe`, `.dll`, `.py` members rejected |
+| Hidden/system files in archive | Ambiguous behavior | Allowlist required extensions and optional sidecars only; sanitize known metadata sidecars (`.shp.xml`, `.qmd`) by immediate unlink | `.exe`, `.dll`, `.py` members rejected |
 | Null-byte or control-char filenames | Sanitization bypass | Reject non-printable/control chars and null bytes | Crafted control-char names rejected |
 | ZIP metadata trust issues | Spoofed types | Validate extension + signature + entry policy | Mismatched extension/signature rejected |
 | Archive parser dependency CVEs | Parser compromise risk | Keep libraries patched, run in sandbox, pin versions | Dependency audit gate + CVE regression check |
@@ -360,7 +361,7 @@ Error response contract:
 | Shapefile size/component limits | Operational failures | Enforce file-size and feature-count caps before full load | Over-limit fixtures rejected early |
 | XML sidecar entity expansion (`.xml`, `.gml`, `.shp.xml`) | CPU/memory DoS via parser | Reject generic XML sidecars; if `.shp.xml` is present, delete it immediately after extraction and enforce parser timeout + memory caps | Generic XML sidecar rejected; `.shp.xml` stripped with warning |
 | Parser-triggered remote fetch (`/vsicurl/`, remote references) | Unwanted network egress/data exfil risk | Keep deny-all egress and disable remote parser sources by policy/config | Fixture attempting remote reference fails without outbound access |
-| Metadata PII leak from `.shp.xml` | Exposure of usernames, contact details, host paths, org/process history | Never parse or return sidecar metadata; sanitize warnings/log fields | Fixture containing PII in sidecar yields no PII in API payloads/logs |
+| Metadata PII leak from metadata sidecars (`.shp.xml`, `.qmd`) | Exposure of usernames, contact details, host paths, org/process history | Never parse or return sidecar metadata; sanitize by immediate unlink; keep warnings/log fields free of raw sidecar content | Fixture containing PII in sidecar yields no PII in API payloads/logs |
 
 ## CRS Rules and UTM Determination Details
 - Source of truth for UTM mode should mirror existing WEPPpy logic in `wepppy/all_your_base/geo/geo.py`:
@@ -439,7 +440,7 @@ Error response contract:
 - Parser timeout and cancellation behavior.
 - XML sidecar bomb fixtures (`.shp.xml`/`.xml` entity expansion class payloads).
 - Parser non-termination fixtures (malformed WKB parser-loop class).
-- Metadata privacy fixture: `.shp.xml` containing usernames/paths/contact fields is not exposed in responses/logging.
+- Metadata privacy fixtures: `.shp.xml` and `.qmd` containing usernames/paths/contact fields are not exposed in responses/logging.
 - Runtime hardening verification:
   - `read_only`, `cap_drop=ALL`, `no-new-privileges`, seccomp/AppArmor/SELinux, pids/mem/cpu limits, deny-all egress.
 - Slowloris and pinned-download resilience:
@@ -463,8 +464,9 @@ Error response contract:
 - GeoJSON behavior is explicit: RFC 7946 in WGS84 mode and clearly labeled non-RFC projected mode for UTM/same-CRS output.
 - ZIP and shapefile risk tests are implemented and passing.
 - XML sidecar and parser-loop abuse tests are implemented and passing.
-- No sidecar-derived PII (for example `.shp.xml` usernames, contacts, file paths) is exposed by API metadata or logs.
+- No sidecar-derived PII (for example `.shp.xml`/`.qmd` usernames, contacts, file paths) is exposed by API metadata or logs.
 - When `.shp.xml` is included, API warnings explicitly report removal and advise that packing `.shp.xml` in shapefile ZIPs is generally not advisable.
+- When `.qmd` is included, it is sanitized via immediate unlink and never parsed or surfaced in API metadata.
 - No uploaded or generated artifacts persist after each request terminal response (verified by tests).
 - Service runs in its own hardened container and is reachable through Caddy.
 - CI/security validation proves container hardening and runtime abuse controls are active.

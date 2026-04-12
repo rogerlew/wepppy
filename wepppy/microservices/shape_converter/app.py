@@ -18,8 +18,9 @@ from starlette.background import BackgroundTask
 from starlette.datastructures import FormData
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import FileResponse, JSONResponse, Response
 from starlette.routing import Route
+from starlette.staticfiles import StaticFiles
 
 from .abuse_controls import AbuseControlState, load_abuse_control_config
 from .cleanup import (
@@ -35,6 +36,8 @@ from .inspect import inspect_uploaded_archive
 
 SERVICE_SCOPE = "shape-converter"
 DEFAULT_SCRATCH_ROOT = Path("/tmp/shape-converter")
+_UI_DIR = Path(__file__).resolve().parent / "ui"
+_UI_INDEX_FILE = _UI_DIR / "index.html"
 _LOGGER = logging.getLogger("wepppy.microservices.shape_converter.cleanup")
 _CONVERT_ALLOWED_FIELDS = frozenset({"archive", "output_format", "target_crs", "response_mode"})
 _CONVERT_REQUIRED_FIELDS = frozenset({"archive", "output_format", "target_crs"})
@@ -175,12 +178,26 @@ async def _run_janitor_loop(app: Starlette, stop_event: asyncio.Event) -> None:
             continue
 
 
-async def homepage(_: Request) -> JSONResponse:
+async def homepage(_: Request) -> Response:
+    if not _UI_INDEX_FILE.is_file():
+        return error_response(
+            ShapeConverterError(
+                code="ui_unavailable",
+                message="Shape-converter UI is not available.",
+                details=f"Missing UI index file at '{_UI_INDEX_FILE}'.",
+                status_code=500,
+            )
+        )
+
+    return FileResponse(_UI_INDEX_FILE, media_type="text/html; charset=utf-8")
+
+
+async def service_info(_: Request) -> JSONResponse:
     return JSONResponse(
         {
             "service": SERVICE_SCOPE,
             "status": "ok",
-            "message": "shape-converter service scaffold",
+            "message": "shape-converter service API",
         }
     )
 
@@ -415,6 +432,19 @@ def _metadata_path_for_request(*, root_path: str, request_id: str) -> str:
     return f"{normalized_root}/v1/convert/metadata/{request_id}" if normalized_root else f"/v1/convert/metadata/{request_id}"
 
 
+def _request_forwarded_prefix(request: Request) -> str:
+    prefix = str(request.headers.get("X-Forwarded-Prefix") or "").strip()
+    if not prefix:
+        return ""
+
+    normalized = prefix.rstrip("/")
+    if not normalized:
+        return ""
+    if not normalized.startswith("/"):
+        return ""
+    return normalized
+
+
 def _prune_convert_metadata_store(
     store: OrderedDict[str, tuple[float, dict[str, object]]],
     *,
@@ -537,7 +567,7 @@ async def convert_archive(request: Request) -> Response:
                     request_id=request_id,
                 )
 
-        root_path = str(request.scope.get("root_path") or "")
+        root_path = _request_forwarded_prefix(request)
         metadata_path = _metadata_path_for_request(root_path=root_path, request_id=request_id)
 
         convert_metadata = dict(converted.metadata)
@@ -644,6 +674,7 @@ async def app_lifespan(app: Starlette):
 def create_app() -> Starlette:
     routes = [
         Route("/", homepage),
+        Route("/service-info", service_info),
         Route("/health/live", health_live),
         Route("/health/ready", health_ready),
         Route("/v1/inspect", inspect_archive, methods=["POST"]),
@@ -652,6 +683,7 @@ def create_app() -> Starlette:
     ]
 
     app = Starlette(debug=False, routes=routes, lifespan=app_lifespan)
+    app.mount("/assets", StaticFiles(directory=str(_UI_DIR)), name="ui-assets")
 
     @app.middleware("http")
     async def abuse_control_middleware(request: Request, call_next):
@@ -739,14 +771,6 @@ def create_app() -> Starlette:
             limiter_key=identity.limiter_key,
         )
         return response
-
-    @app.middleware("http")
-    async def forwarded_prefix_middleware(request: Request, call_next):
-        prefix = request.headers.get("X-Forwarded-Prefix")
-        if prefix:
-            normalized = prefix.rstrip("/")
-            request.scope["root_path"] = normalized if normalized else ""
-        return await call_next(request)
 
     return app
 

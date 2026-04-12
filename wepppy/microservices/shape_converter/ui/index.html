@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shape Converter</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb bg-orb-a" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb-b" aria-hidden="true"></div>
+    <main class="layout">
+      <header class="hero">
+        <p class="kicker">Utility Service</p>
+        <h1>Shape Converter</h1>
+        <p class="subtitle">
+          Upload ZIP archives for inspect and convert as independent requests. The service never
+          stages archives between calls.
+        </p>
+      </header>
+
+      <section class="panel panel-actions" aria-label="Conversion actions">
+        <h2>1) Inspect Upload</h2>
+        <form id="inspect-form" novalidate>
+          <label for="inspect-archive">Inspect archive (.zip)</label>
+          <input id="inspect-archive" name="archive" type="file" accept=".zip" required />
+          <button id="inspect-submit" type="submit">Inspect Archive</button>
+        </form>
+        <p id="inspect-status" class="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel panel-actions" aria-label="Conversion controls">
+        <h2>2) Convert Upload</h2>
+        <form id="convert-form" novalidate>
+          <label for="convert-archive">Convert archive (.zip)</label>
+          <input id="convert-archive" name="archive" type="file" accept=".zip" required />
+
+          <label for="output-format">Output format</label>
+          <select id="output-format" name="output_format">
+            <option value="geojson">GeoJSON</option>
+            <option value="geoparquet">GeoParquet</option>
+          </select>
+
+          <button id="convert-submit" type="submit">Convert And Download</button>
+        </form>
+        <p id="convert-status" class="status" role="status" aria-live="polite"></p>
+        <p class="deferred-note" id="response-mode-note">
+          `response_mode=download` is used explicitly. `response_mode=json_body` is deferred to
+          WP-06B and is not available in this UI yet.
+        </p>
+      </section>
+
+      <section class="panel" aria-label="Projection metadata">
+        <h2>Projection</h2>
+        <dl class="projection-grid">
+          <dt>Projection status</dt>
+          <dd id="projection-status">Not inspected yet</dd>
+          <dt>Detected CRS</dt>
+          <dd id="detected-crs">Not inspected yet</dd>
+          <dt>Output CRS</dt>
+          <dd id="output-crs">Not converted yet</dd>
+        </dl>
+
+        <label for="target-crs">Target CRS (used for convert)</label>
+        <select id="target-crs" name="target_crs" form="convert-form">
+          <option value="same_as_shapefile">same_as_shapefile</option>
+          <option value="wgs84">wgs84</option>
+          <option value="utm_wepppy_upper_left">utm_wepppy_upper_left</option>
+        </select>
+      </section>
+
+      <section class="panel" aria-label="Geometry summary">
+        <h2>Geometry Summary</h2>
+        <dl class="geometry-grid" id="geometry-summary">
+          <dt>Feature count</dt>
+          <dd id="feature-count">Not inspected yet</dd>
+          <dt>Geometry types</dt>
+          <dd id="geometry-types">Not inspected yet</dd>
+          <dt>Bounding box</dt>
+          <dd id="bbox">Not inspected yet</dd>
+        </dl>
+      </section>
+
+      <section class="panel panel-schema" aria-label="Attribute schema">
+        <h2>Attribute Schema</h2>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Field</th>
+              <th scope="col">Type</th>
+              <th scope="col">Width</th>
+              <th scope="col">Precision</th>
+            </tr>
+          </thead>
+          <tbody id="schema-table-body">
+            <tr>
+              <td colspan="4">Inspect an archive to populate schema metadata.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel panel-warnings" aria-label="Warnings and advisories">
+        <h2>Warnings</h2>
+        <ul id="warnings-list" class="warnings-list">
+          <li>No warnings yet.</li>
+        </ul>
+
+        <div id="advisory-list" class="advisory-list" aria-live="polite"></div>
+
+        <div id="error-panel" class="error-panel" role="alert" aria-live="assertive" hidden>
+          <h3 id="error-title">Request failed</h3>
+          <p id="error-message"></p>
+          <p id="error-guidance" class="error-guidance"></p>
+          <p id="error-details" class="error-details"></p>
+        </div>
+      </section>
+    </main>
+
+    <script src="assets/app.js" defer></script>
+  </body>
+</html>

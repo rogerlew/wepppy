@@ -76,6 +76,30 @@ def test_convert_accepts_shp_xml_sidecar_and_warns_user() -> None:
     assert any("generally not advisable" in warning.lower() for warning in metadata["warnings"])
 
 
+def test_convert_accepts_qmd_sidecar_and_unlinks_it() -> None:
+    entries = build_minimal_point_dataset(prefix="roads")
+    entries["roads.qmd"] = b"qmd metadata should be stripped"
+    archive_bytes = build_zip_bytes(entries)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+            },
+        )
+
+        metadata_path = response.headers["x-shape-converter-metadata-path"]
+        metadata_response = client.get(metadata_path)
+
+    assert response.status_code == 200
+    metadata = metadata_response.json()
+    assert metadata["target_crs"] == "wgs84"
+    assert not any(".qmd" in warning.lower() for warning in metadata["warnings"])
+
+
 def test_convert_rejects_response_mode_json_body_until_wp06b() -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
 

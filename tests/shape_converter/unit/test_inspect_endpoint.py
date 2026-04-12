@@ -58,6 +58,24 @@ def test_inspect_accepts_shp_xml_sidecar_and_warns_user() -> None:
     assert any("generally not advisable" in warning.lower() for warning in payload["warnings"])
 
 
+def test_inspect_accepts_qmd_sidecar_and_unlinks_it() -> None:
+    entries = build_minimal_point_dataset(prefix="roads")
+    entries["roads.qmd"] = b"qmd metadata should be stripped"
+    archive_bytes = build_zip_bytes(entries)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("roads.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["feature_count"] == 1
+    assert payload["geometry_types"] == ["Point"]
+    assert not any(".qmd" in warning.lower() for warning in payload["warnings"])
+
+
 def test_inspect_requires_archive_field() -> None:
     with TestClient(create_app()) as client:
         response = client.post("/v1/inspect", data={"wrong": "field"})

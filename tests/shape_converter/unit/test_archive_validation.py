@@ -48,6 +48,23 @@ def test_validate_and_extract_zip_archive_removes_shp_xml_sidecar(tmp_path) -> N
     assert not (extracted.extraction_root / "parcel.shp.xml").exists()
 
 
+def test_validate_and_extract_zip_archive_removes_qmd_sidecar(tmp_path) -> None:
+    entries = build_minimal_point_dataset(prefix="parcel")
+    entries["parcel.qmd"] = b"metadata"
+    archive_bytes = build_zip_bytes(entries)
+
+    extracted = validate_and_extract_zip_archive(
+        archive_name="parcel.zip",
+        archive_bytes=archive_bytes,
+        extraction_root=tmp_path / "extract",
+    )
+
+    extracted_names = sorted(path.name for path in extracted.extracted_files)
+    assert extracted_names == ["parcel.dbf", "parcel.prj", "parcel.shp", "parcel.shx"]
+    assert extracted.removed_shp_xml_sidecars == ()
+    assert not (extracted.extraction_root / "parcel.qmd").exists()
+
+
 def test_validate_and_extract_zip_archive_rejects_generic_xml_sidecar(tmp_path) -> None:
     entries = build_minimal_point_dataset(prefix="parcel")
     entries["parcel.xml"] = b"<metadata/>"

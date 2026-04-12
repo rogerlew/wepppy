@@ -18,6 +18,7 @@ REQUIRED_SHAPEFILE_EXTENSIONS = frozenset({".shp", ".shx", ".dbf"})
 OPTIONAL_SHAPEFILE_EXTENSIONS = frozenset({".prj", ".cpg", ".sbn", ".sbx", ".qix"})
 ALLOWED_SHAPEFILE_EXTENSIONS = REQUIRED_SHAPEFILE_EXTENSIONS | OPTIONAL_SHAPEFILE_EXTENSIONS
 _SHP_XML_SIDECAR_SUFFIX = ".shp.xml"
+_QMD_SIDECAR_SUFFIX = ".qmd"
 
 _ALLOWED_ZIP_SIGNATURES = (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
 _ALLOWED_COMPRESSION_METHODS = {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}
@@ -203,7 +204,7 @@ def validate_and_extract_zip_archive(
             details=str(exc),
         ) from exc
 
-    kept_files, removed_shp_xml_sidecars = _strip_shp_xml_sidecars(
+    kept_files, removed_shp_xml_sidecars = _strip_sanitized_sidecars(
         extracted_files=extracted_files,
         extraction_root=extraction_root_resolved,
     )
@@ -341,7 +342,7 @@ def _validate_member_safety(member: zipfile.ZipInfo, normalized_path: PurePosixP
     if member.is_dir():
         return
 
-    if _is_shp_xml_sidecar_name(normalized_path.name):
+    if _is_sanitized_sidecar_name(normalized_path.name):
         return
 
     suffix = normalized_path.suffix.lower()
@@ -356,7 +357,7 @@ def _validate_member_safety(member: zipfile.ZipInfo, normalized_path: PurePosixP
         )
 
 
-def _strip_shp_xml_sidecars(
+def _strip_sanitized_sidecars(
     *,
     extracted_files: list[Path],
     extraction_root: Path,
@@ -365,7 +366,7 @@ def _strip_shp_xml_sidecars(
     removed_sidecars: list[str] = []
 
     for extracted_file in extracted_files:
-        if _is_shp_xml_sidecar_name(extracted_file.name):
+        if _is_sanitized_sidecar_name(extracted_file.name):
             try:
                 extracted_file.unlink(missing_ok=True)
             except OSError as exc:
@@ -373,13 +374,14 @@ def _strip_shp_xml_sidecars(
                     code="invalid_archive",
                     message="Failed to sanitize extracted metadata sidecar.",
                     details=(
-                        f"Unable to delete '.shp.xml' sidecar "
+                        f"Unable to delete sanitized sidecar "
                         f"'{extracted_file.relative_to(extraction_root).as_posix()}': {exc}"
                     ),
                     status_code=500,
                 ) from exc
 
-            removed_sidecars.append(extracted_file.relative_to(extraction_root).as_posix())
+            if _is_shp_xml_sidecar_name(extracted_file.name):
+                removed_sidecars.append(extracted_file.relative_to(extraction_root).as_posix())
             continue
 
         kept_files.append(extracted_file)
@@ -389,6 +391,14 @@ def _strip_shp_xml_sidecars(
 
 def _is_shp_xml_sidecar_name(name: str) -> bool:
     return name.lower().endswith(_SHP_XML_SIDECAR_SUFFIX)
+
+
+def _is_qmd_sidecar_name(name: str) -> bool:
+    return name.lower().endswith(_QMD_SIDECAR_SUFFIX)
+
+
+def _is_sanitized_sidecar_name(name: str) -> bool:
+    return _is_shp_xml_sidecar_name(name) or _is_qmd_sidecar_name(name)
 
 
 def shp_xml_sidecar_warning_message(*, removed_sidecars: tuple[str, ...]) -> str | None:

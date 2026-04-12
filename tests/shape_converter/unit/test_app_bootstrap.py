@@ -23,11 +23,13 @@ def test_shape_converter_routes_registered() -> None:
     route_paths = {route.path for route in app.routes if hasattr(route, "path")}
 
     assert "/" in route_paths
+    assert "/service-info" in route_paths
     assert "/health/live" in route_paths
     assert "/health/ready" in route_paths
     assert "/v1/inspect" in route_paths
     assert "/v1/convert" in route_paths
     assert "/v1/convert/metadata/{request_id}" in route_paths
+    assert "/assets" in route_paths
 
 
 def test_module_level_app_bootstraps() -> None:
@@ -35,5 +37,5 @@ def test_module_level_app_bootstraps() -> None:
         response = client.get("/")
 
     assert response.status_code == 200
-    payload = response.json()
-    assert payload["service"] == "shape-converter"
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Shape Converter" in response.text
