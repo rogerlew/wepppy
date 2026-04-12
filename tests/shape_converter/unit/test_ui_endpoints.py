@@ -19,9 +19,20 @@ def test_ui_route_serves_shape_converter_shell() -> None:
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
     body = response.text
-    assert "Shape Converter" in body
-    assert "inspect-form" in body
-    assert "convert-form" in body
+    assert "Shapefile Converter" in body
+    assert "id=\"upload-form\"" in body
+    assert "id=\"upload-archive\"" in body
+    assert "id=\"target-crs\"" in body
+    assert "id=\"inspect-submit\"" in body
+    assert "id=\"convert-submit\"" in body
+    assert "id=\"warnings-panel\"" in body
+    assert "id=\"projection-panel\"" in body
+    assert "id=\"geometry-panel\"" in body
+    assert "id=\"schema-panel\"" in body
+    assert "id=\"warnings-panel\" class=\"panel panel-warnings\" aria-label=\"Warnings and advisories\" hidden" in body
+    assert "id=\"projection-panel\" class=\"panel\" aria-label=\"Projection metadata\" hidden" in body
+    assert "id=\"geometry-panel\" class=\"panel\" aria-label=\"Geometry summary\" hidden" in body
+    assert "id=\"schema-panel\" class=\"panel panel-schema\" aria-label=\"Attribute schema\" hidden" in body
     assert "response_mode=download" in body
     assert "json_body" in body
 
@@ -63,6 +74,10 @@ def test_ui_script_contains_warning_and_abuse_control_guidance() -> None:
     assert "response_mode_not_supported" in script
     assert "Inspect could not run." in script
     assert "Convert could not run." in script
+    assert "upload-form" in script
+    assert "hideMetadataPanels" in script
+    assert "syncWarningsPanelVisibility" in script
+    assert "unwrapWktForDisplay" in script
 
 
 def test_ui_assets_still_serve_when_forwarded_prefix_header_is_present() -> None:

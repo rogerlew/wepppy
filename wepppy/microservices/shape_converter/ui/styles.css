@@ -57,15 +57,14 @@ body {
 .layout {
   position: relative;
   z-index: 1;
-  width: min(1120px, calc(100% - 2rem));
+  width: min(900px, calc(100% - 2rem));
   margin: 1.6rem auto 2.2rem;
   display: grid;
   gap: 0.95rem;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .hero {
-  grid-column: 1 / -1;
   padding: 1.25rem 1.25rem 0.9rem;
 }
 
@@ -106,20 +105,12 @@ body {
   font-weight: 650;
 }
 
-.panel-actions {
-  grid-column: span 6;
+.panel[hidden] {
+  display: none;
 }
 
-.panel:not(.panel-actions):not(.panel-schema):not(.panel-warnings) {
-  grid-column: span 4;
-}
-
-.panel-schema {
-  grid-column: span 8;
-}
-
-.panel-warnings {
-  grid-column: span 4;
+.panel-controls form {
+  margin-bottom: 0.2rem;
 }
 
 form {
@@ -172,6 +163,32 @@ button:disabled {
   box-shadow: none;
 }
 
+.button-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.button-row button {
+  flex: 1 1 220px;
+}
+
+.button-primary {
+  order: 1;
+}
+
+.button-secondary {
+  order: 2;
+  color: var(--accent-strong);
+  border: 1px solid rgba(10, 74, 99, 0.5);
+  background: #f4fbff;
+}
+
+.button-secondary:hover,
+.button-secondary:focus-visible {
+  box-shadow: 0 8px 16px rgba(10, 74, 99, 0.24);
+}
+
 .status {
   min-height: 1.25rem;
   margin: 0.55rem 0 0;
@@ -215,6 +232,11 @@ button:disabled {
   margin: 0;
   font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
   font-size: 0.84rem;
+}
+
+.projection-grid dd {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 table {
@@ -292,12 +314,9 @@ tbody td {
   white-space: pre-wrap;
 }
 
-@media (max-width: 1024px) {
-  .panel-actions,
-  .panel:not(.panel-actions):not(.panel-schema):not(.panel-warnings),
-  .panel-schema,
-  .panel-warnings {
-    grid-column: span 12;
+@media (max-width: 700px) {
+  .button-row {
+    flex-direction: column;
   }
 }
 

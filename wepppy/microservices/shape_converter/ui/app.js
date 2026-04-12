@@ -1,19 +1,22 @@
 "use strict";
 
 (function bootstrapShapeConverterUi() {
-  const inspectForm = document.getElementById("inspect-form");
-  const convertForm = document.getElementById("convert-form");
-  if (!(inspectForm instanceof HTMLFormElement) || !(convertForm instanceof HTMLFormElement)) {
+  const uploadForm = document.getElementById("upload-form");
+  if (!(uploadForm instanceof HTMLFormElement)) {
     return;
   }
 
-  const inspectArchiveInput = document.getElementById("inspect-archive");
-  const convertArchiveInput = document.getElementById("convert-archive");
+  const archiveInput = document.getElementById("upload-archive");
   const outputFormatSelect = document.getElementById("output-format");
   const targetCrsSelect = document.getElementById("target-crs");
 
   const inspectStatus = document.getElementById("inspect-status");
   const convertStatus = document.getElementById("convert-status");
+
+  const projectionPanel = document.getElementById("projection-panel");
+  const geometryPanel = document.getElementById("geometry-panel");
+  const schemaPanel = document.getElementById("schema-panel");
+  const warningsPanel = document.getElementById("warnings-panel");
 
   const projectionStatus = document.getElementById("projection-status");
   const detectedCrs = document.getElementById("detected-crs");
@@ -36,55 +39,62 @@
   const inspectSubmit = document.getElementById("inspect-submit");
   const convertSubmit = document.getElementById("convert-submit");
 
-  inspectForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    clearErrorPanel();
+  let hasInspectPayload = false;
 
-    if (!(inspectArchiveInput instanceof HTMLInputElement) || !inspectArchiveInput.files || inspectArchiveInput.files.length === 0) {
-      setStatus(inspectStatus, "Select a ZIP file before inspect.", "error");
-      return;
-    }
+  hideMetadataPanels();
+  syncWarningsPanelVisibility();
 
-    setStatus(inspectStatus, "Inspect request running...", "neutral");
-    setButtonState(inspectSubmit, true);
+  if (inspectSubmit instanceof HTMLButtonElement) {
+    inspectSubmit.addEventListener("click", async (event) => {
+      event.preventDefault();
+      clearErrorPanel();
 
-    try {
-      const formData = new FormData();
-      formData.append("archive", inspectArchiveInput.files[0]);
-
-      const response = await fetch(resolveApiUrl("v1/inspect"), {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const apiError = await parseApiError(response);
-        renderApiError(apiError, "inspect");
-        setStatus(inspectStatus, buildUserFacingStatus(apiError, "inspect"), "error");
+      const archiveFile = selectedArchiveFile();
+      if (!archiveFile) {
+        setStatus(inspectStatus, "Select a ZIP file before inspect.", "error");
         return;
       }
 
-      const payload = await response.json();
-      renderInspectMetadata(payload);
-      setStatus(
-        inspectStatus,
-        "Inspect complete. Metadata panels updated.",
-        "success"
-      );
-    } catch (error) {
-      const networkError = buildNetworkApiError(error);
-      renderApiError(networkError, "inspect");
-      setStatus(inspectStatus, buildUserFacingStatus(networkError, "inspect"), "error");
-    } finally {
-      setButtonState(inspectSubmit, false);
-    }
-  });
+      setStatus(inspectStatus, "Inspect request running...", "neutral");
+      setButtonState(inspectSubmit, true);
 
-  convertForm.addEventListener("submit", async (event) => {
+      try {
+        const formData = new FormData();
+        formData.append("archive", archiveFile);
+
+        const response = await fetch(resolveApiUrl("v1/inspect"), {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const apiError = await parseApiError(response);
+          renderApiError(apiError, "inspect");
+          setStatus(inspectStatus, buildUserFacingStatus(apiError, "inspect"), "error");
+          return;
+        }
+
+        const payload = await response.json();
+        renderInspectMetadata(payload);
+        hasInspectPayload = true;
+        revealInspectPanels(payload);
+        setStatus(inspectStatus, "Inspect complete. Metadata panels updated.", "success");
+      } catch (error) {
+        const networkError = buildNetworkApiError(error);
+        renderApiError(networkError, "inspect");
+        setStatus(inspectStatus, buildUserFacingStatus(networkError, "inspect"), "error");
+      } finally {
+        setButtonState(inspectSubmit, false);
+      }
+    });
+  }
+
+  uploadForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     clearErrorPanel();
 
-    if (!(convertArchiveInput instanceof HTMLInputElement) || !convertArchiveInput.files || convertArchiveInput.files.length === 0) {
+    const archiveFile = selectedArchiveFile();
+    if (!archiveFile) {
       setStatus(convertStatus, "Select a ZIP file before convert.", "error");
       return;
     }
@@ -99,7 +109,7 @@
 
     try {
       const formData = new FormData();
-      formData.append("archive", convertArchiveInput.files[0]);
+      formData.append("archive", archiveFile);
       formData.append("output_format", outputFormatSelect.value);
       formData.append("target_crs", targetCrsSelect.value);
       formData.append("response_mode", "download");
@@ -147,11 +157,7 @@
 
       const metadataPayload = await metadataResponse.json();
       renderConvertMetadata(metadataPayload);
-      setStatus(
-        convertStatus,
-        "Convert complete. Download started and metadata panels updated.",
-        "success"
-      );
+      setStatus(convertStatus, "Convert complete. Download started and metadata panels updated.", "success");
     } catch (error) {
       const networkError = buildNetworkApiError(error);
       renderApiError(networkError, "convert");
@@ -160,6 +166,14 @@
       setButtonState(convertSubmit, false);
     }
   });
+
+  function selectedArchiveFile() {
+    if (!(archiveInput instanceof HTMLInputElement) || !archiveInput.files || archiveInput.files.length === 0) {
+      return null;
+    }
+
+    return archiveInput.files[0] || null;
+  }
 
   function setButtonState(buttonNode, disabled) {
     if (buttonNode instanceof HTMLButtonElement) {
@@ -179,6 +193,43 @@
     }
     if (type === "error") {
       node.classList.add("error");
+    }
+  }
+
+  function hideMetadataPanels() {
+    if (projectionPanel instanceof HTMLElement) {
+      projectionPanel.hidden = true;
+    }
+    if (geometryPanel instanceof HTMLElement) {
+      geometryPanel.hidden = true;
+    }
+    if (schemaPanel instanceof HTMLElement) {
+      schemaPanel.hidden = true;
+    }
+  }
+
+  function revealInspectPanels(payload) {
+    if (!(payload && typeof payload === "object")) {
+      hideMetadataPanels();
+      return;
+    }
+
+    if (!hasInspectPayload) {
+      hideMetadataPanels();
+      return;
+    }
+
+    if (projectionPanel instanceof HTMLElement) {
+      projectionPanel.hidden = false;
+    }
+
+    if (geometryPanel instanceof HTMLElement) {
+      geometryPanel.hidden = false;
+    }
+
+    if (schemaPanel instanceof HTMLElement) {
+      const schemaRows = Array.isArray(payload.attribute_schema) ? payload.attribute_schema : [];
+      schemaPanel.hidden = schemaRows.length === 0;
     }
   }
 
@@ -204,7 +255,7 @@
     return new URL(value, window.location.href).toString();
   }
 
-  function formatCrs(crsPayload) {
+  function formatCrs(crsPayload, unwrapWkt) {
     if (!crsPayload || typeof crsPayload !== "object") {
       return "unknown";
     }
@@ -219,11 +270,59 @@
       return "known (identifier unavailable)";
     }
 
+    if (unwrapWkt) {
+      return unwrapWktForDisplay(wkt);
+    }
+
     if (wkt.length > 120) {
       return `${wkt.slice(0, 117)}...`;
     }
 
     return wkt;
+  }
+
+  function unwrapWktForDisplay(wktText) {
+    const normalized = String(wktText || "").replace(/\s+/g, " ").trim();
+    if (!normalized) {
+      return "known (identifier unavailable)";
+    }
+
+    let output = "";
+    let depth = 0;
+    let inQuote = false;
+
+    for (const char of normalized) {
+      if (char === "\"") {
+        inQuote = !inQuote;
+        output += char;
+        continue;
+      }
+
+      if (!inQuote && char === "[") {
+        depth += 1;
+        output += "[\n";
+        output += "  ".repeat(depth);
+        continue;
+      }
+
+      if (!inQuote && char === ",") {
+        output += ",\n";
+        output += "  ".repeat(depth);
+        continue;
+      }
+
+      if (!inQuote && char === "]") {
+        depth = Math.max(0, depth - 1);
+        output += "\n";
+        output += "  ".repeat(depth);
+        output += "]";
+        continue;
+      }
+
+      output += char;
+    }
+
+    return output;
   }
 
   function formatBbox(bboxPayload) {
@@ -248,7 +347,7 @@
       projectionStatus.textContent = String(payload.projection_status || "unknown");
     }
     if (detectedCrs instanceof HTMLElement) {
-      detectedCrs.textContent = formatCrs(payload.detected_crs);
+      detectedCrs.textContent = formatCrs(payload.detected_crs, true);
     }
     if (outputCrs instanceof HTMLElement) {
       outputCrs.textContent = "pending convert request";
@@ -280,10 +379,10 @@
       projectionStatus.textContent = sourceCrs ? "known" : "unknown";
     }
     if (detectedCrs instanceof HTMLElement) {
-      detectedCrs.textContent = formatCrs(sourceCrs);
+      detectedCrs.textContent = formatCrs(sourceCrs, true);
     }
     if (outputCrs instanceof HTMLElement) {
-      outputCrs.textContent = formatCrs(targetCrs);
+      outputCrs.textContent = formatCrs(targetCrs, false);
     }
 
     if (featureCount instanceof HTMLElement) {
@@ -297,7 +396,25 @@
       bbox.textContent = formatBbox(payload.bbox);
     }
 
+    if (hasInspectPayload) {
+      revealInspectPanels({ attribute_schema: schemaRowsForVisibility() });
+    }
+
     renderWarnings(payload.warnings);
+  }
+
+  function schemaRowsForVisibility() {
+    if (!(schemaTableBody instanceof HTMLElement)) {
+      return [];
+    }
+
+    const schemaRows = [];
+    for (const row of schemaTableBody.querySelectorAll("tr")) {
+      if (row.children.length >= 4) {
+        schemaRows.push(row);
+      }
+    }
+    return schemaRows;
   }
 
   function renderSchema(schemaPayload) {
@@ -309,7 +426,6 @@
     schemaTableBody.textContent = "";
 
     if (schemaRows.length === 0) {
-      schemaTableBody.appendChild(buildSchemaPlaceholderRow("No attribute schema available from this response."));
       return;
     }
 
@@ -321,15 +437,6 @@
       tr.appendChild(buildCell(asDisplayString(row && row.precision)));
       schemaTableBody.appendChild(tr);
     }
-  }
-
-  function buildSchemaPlaceholderRow(text) {
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-    td.colSpan = 4;
-    td.textContent = text;
-    tr.appendChild(td);
-    return tr;
   }
 
   function buildCell(value) {
@@ -352,20 +459,15 @@
 
     if (warningsList instanceof HTMLElement) {
       warningsList.textContent = "";
-      if (warnings.length === 0) {
-        const empty = document.createElement("li");
-        empty.textContent = "No warnings reported.";
-        warningsList.appendChild(empty);
-      } else {
-        for (const warning of warnings) {
-          const item = document.createElement("li");
-          item.textContent = warning;
-          warningsList.appendChild(item);
-        }
+      for (const warning of warnings) {
+        const item = document.createElement("li");
+        item.textContent = warning;
+        warningsList.appendChild(item);
       }
     }
 
     renderAdvisories(warnings);
+    syncWarningsPanelVisibility();
   }
 
   function renderAdvisories(warnings) {
@@ -414,6 +516,26 @@
     return wrapper;
   }
 
+  function warningItemsVisible() {
+    return warningsList instanceof HTMLElement && warningsList.children.length > 0;
+  }
+
+  function advisoryItemsVisible() {
+    return advisoryList instanceof HTMLElement && advisoryList.children.length > 0;
+  }
+
+  function errorVisible() {
+    return errorPanel instanceof HTMLElement && !errorPanel.hidden;
+  }
+
+  function syncWarningsPanelVisibility() {
+    if (!(warningsPanel instanceof HTMLElement)) {
+      return;
+    }
+
+    warningsPanel.hidden = !(warningItemsVisible() || advisoryItemsVisible() || errorVisible());
+  }
+
   function clearErrorPanel() {
     if (errorPanel instanceof HTMLElement) {
       errorPanel.hidden = true;
@@ -430,6 +552,8 @@
     if (errorDetails instanceof HTMLElement) {
       errorDetails.textContent = "";
     }
+
+    syncWarningsPanelVisibility();
   }
 
   function renderApiError(apiError, contextLabel) {
@@ -453,6 +577,8 @@
     if (errorDetails instanceof HTMLElement) {
       errorDetails.textContent = buildErrorDetails(apiError);
     }
+
+    syncWarningsPanelVisibility();
     errorPanel.scrollIntoView({ block: "start", behavior: "smooth" });
   }
 

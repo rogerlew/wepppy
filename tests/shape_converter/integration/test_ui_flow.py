@@ -23,7 +23,9 @@ def test_ui_route_and_assets_are_reachable() -> None:
 
     assert root_response.status_code == 200
     assert root_response.headers["content-type"].startswith("text/html")
-    assert "Shape Converter" in root_response.text
+    assert "Shapefile Converter" in root_response.text
+    assert "id=\"upload-form\"" in root_response.text
+    assert "id=\"warnings-panel\"" in root_response.text
     assert css_response.status_code == 200
     assert "css" in css_response.headers["content-type"]
     assert js_response.status_code == 200
