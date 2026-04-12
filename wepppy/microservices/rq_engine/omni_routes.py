@@ -167,8 +167,6 @@ def _extract_upload(form: FormData, key: str) -> UploadFile | None:
 def _upload_status(exc: _OmniUploadError | ValueError) -> int:
     if isinstance(exc, _OmniUploadError):
         return int(getattr(exc, "status_code", 400))
-    if "maximum allowed size" in str(exc).lower():
-        return 413
     return 400
 
 

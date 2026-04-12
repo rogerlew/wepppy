@@ -60,6 +60,19 @@ These routes combine non-file params with optional/conditional upload parts.
 - Server faults must return canonical 5xx responses without exposing traceback text to upload-facing clients.
 - Size-limit failures should return `413` where implemented (for example, culvert ZIP and explicit max-size checks).
 
+## New Upload Route Requirements
+- Define explicit upload field names, allowed extensions/types, and max-size caps in route code.
+- Use canonical helper ownership rules:
+  - Non-ZIP routes use `wepppy/microservices/upload_boundary.py` (rq-engine routes use `wepppy/microservices/rq_engine/upload_helpers.py` as compatibility wrapper).
+  - ZIP routes reuse `wepppy/microservices/shape_converter/archive_validation.py`; do not introduce ad-hoc ZIP validators.
+- Preserve canonical error payload shape and avoid traceback leakage in upload-facing responses.
+- Preserve explicit status behavior: use `413` for enforced size-limit failures and `400` for validation/type failures.
+- Add regression tests for each new upload route:
+  - accepted upload path,
+  - rejected extension/type path,
+  - oversize upload path.
+- Update this contract in the same change when adding or modifying upload routes.
+
 ## Maintenance Rules
 - If any upload cap, extension allowlist, or upload field name changes in code, update this contract in the same change.
 - If a new upload endpoint is added, add it to this document before merge.

@@ -7,7 +7,7 @@
 - **Package**: `docs/work-packages/20260412_upload_boundary_helpers_unification/`
 - **Reviewer**: Codex
 - **Date**: 2026-04-12
-- **Last updated**: 2026-04-12 16:39 UTC
+- **Last updated**: 2026-04-12 16:49 UTC
 - **Scope reviewed**:
   - `wepppy/microservices/upload_boundary.py`
   - `wepppy/microservices/rq_engine/upload_helpers.py`
@@ -103,6 +103,7 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
 
 - Automated checks run:
   - `wctl run-pytest tests/microservices/test_upload_boundary_helpers.py tests/microservices/test_rq_engine_upload_disturbed_routes.py tests/microservices/test_rq_engine_upload_huc_fire_routes.py tests/microservices/test_rq_engine_upload_batch_runner_routes.py tests/microservices/test_rq_engine_landuse_routes.py tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_culverts.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` -> `137 passed`.
+  - `wctl run-pytest tests/microservices/test_upload_boundary_helpers.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` -> `81 passed`.
   - `wctl run-pytest tests --maxfail=1` -> `3511 passed`, `36 skipped`.
 - Manual checks run:
   - Verified canonical ZIP controls remain in `wepppy/microservices/shape_converter/archive_validation.py`.
@@ -112,11 +113,11 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
 ## Residual Risk
 
 - **Accepted residual risks**:
-  - Low: some route-level fallback logic still supports legacy `ValueError` message checks for `413` mapping; primary path now uses explicit `status_code`.
+  - None.
 - **Follow-up packages/issues**:
-  - Optional future cleanup package can remove message-based fallback once all upload call sites emit typed upload boundary errors only.
+  - 2026-04-12 16:49 UTC: message-based `413` fallback checks removed from `ash_routes.py`, `omni_routes.py`, and `roads_bp.py`; status mapping now relies on typed upload boundary error status.
 
 ## Sign-off
 
-- **Security reviewer**: Codex, 2026-04-12 16:39 UTC
+- **Security reviewer**: Codex, 2026-04-12 16:49 UTC
 - **Package owner**: Pending human acknowledgment

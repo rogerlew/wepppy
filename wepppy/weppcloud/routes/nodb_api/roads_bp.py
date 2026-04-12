@@ -301,7 +301,7 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
         )
     except UploadBoundaryError as exc:
         response = error_factory(str(exc))
-        if getattr(exc, "status_code", 400) == 413 or "maximum size" in str(exc).lower():
+        if getattr(exc, "status_code", 400) == 413:
             response.status_code = 413
         else:
             response.status_code = 400

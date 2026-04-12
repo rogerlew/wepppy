@@ -95,10 +95,7 @@ def _task_upload_ash_map(
 
 def _upload_status(exc: UploadError | ValueError) -> int:
     if isinstance(exc, UploadError):
-        if getattr(exc, "status_code", 400) == 413:
-            return 413
-    if "maximum allowed size" in str(exc).lower():
-        return 413
+        return int(getattr(exc, "status_code", 400))
     return 400
 
 
