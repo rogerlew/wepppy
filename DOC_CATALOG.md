@@ -37,12 +37,10 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/mini-work-packages/completed/20251103_test_tooling_spec.md](docs/mini-work-packages/completed/20251103_test_tooling_spec.md)
 - [docs/dev-notes/totalwatsed-interchange.spec.md](docs/dev-notes/totalwatsed-interchange.spec.md)
 - [docs/dev-notes/upgrade_to_2016_3_format.spec.md](docs/dev-notes/upgrade_to_2016_3_format.spec.md)
-- [docs/dev-notes/uploads-standard.md](docs/dev-notes/uploads-standard.md)
 - [docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md](docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md)
 - [docs/dev-notes/wepp_interchange.spec.md](docs/dev-notes/wepp_interchange.spec.md)
 - [docs/mini-work-packages/completed/20251016_weppcloudr_interchange_migration.md](docs/mini-work-packages/completed/20251016_weppcloudr_interchange_migration.md)
 - [docs/god-tier-prompting-strategy.md](docs/god-tier-prompting-strategy.md)
-- [docs/mini-work-packages/README.md](docs/mini-work-packages/README.md)
 - [docs/mini-work-packages/completed/nodb_mods_doc_typing.md](docs/mini-work-packages/completed/nodb_mods_doc_typing.md)
 - [docs/mini-work-packages/completed/trigger-refactor.md](docs/mini-work-packages/completed/trigger-refactor.md)
 - [docs/oauth_spec.md](docs/oauth_spec.md)
@@ -54,7 +52,6 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/prompt_templates/readme_authoring_template.md](docs/prompt_templates/readme_authoring_template.md)
 - [docs/prompt_templates/tracker_template.md](docs/prompt_templates/tracker_template.md)
 - [docs/ui-docs/README.md](docs/ui-docs/README.md)
-- [docs/ui-docs/ash-control-plan.md](docs/ui-docs/ash-control-plan.md)
 - [docs/ui-docs/control-ui-styling/1-controller-ui-roadmap.md](docs/ui-docs/control-ui-styling/1-controller-ui-roadmap.md)
 - [docs/ui-docs/control-ui-styling/4-control-ui-restyling-roadmap.md](docs/ui-docs/control-ui-styling/4-control-ui-restyling-roadmap.md)
 - [docs/ui-docs/control-ui-styling/AGENTS.md](docs/ui-docs/control-ui-styling/AGENTS.md)
@@ -62,7 +59,6 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/ui-docs/control-ui-styling/control-inventory.md](docs/ui-docs/control-ui-styling/control-inventory.md)
 - [docs/ui-docs/control-ui-styling/sbs_controls_behavior.md](docs/ui-docs/control-ui-styling/sbs_controls_behavior.md)
 - [docs/ui-docs/control-ui-styling/unitizer-developer-guide.md](docs/ui-docs/control-ui-styling/unitizer-developer-guide.md)
-- [docs/ui-docs/omni-control-plan.md](docs/ui-docs/omni-control-plan.md)
 - [docs/ui-docs/report-ui-conventions.md](docs/ui-docs/report-ui-conventions.md)
 - [docs/ui-docs/ui-style-guide.md](docs/ui-docs/ui-style-guide.md)
 - [docs/ui-docs/weppcloud-project-archiving.md](docs/ui-docs/weppcloud-project-archiving.md)
@@ -748,21 +744,6 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 ---
 
-## docs/dev-notes/uploads-standard.md
-
-- [Upload Handling Standard](#upload-handling-standard)
-  - [Goals](#goals)
-  - [Scope](#scope)
-  - [Shared Helper (uploads.py)](#shared-helper-uploadspy)
-  - [Error Handling](#error-handling)
-  - [Security & Limits](#security-limits)
-  - [Telemetry](#telemetry)
-  - [Testing](#testing)
-  - [Migration Plan](#migration-plan)
-  - [Notes & Future Enhancements](#notes-future-enhancements)
-
----
-
 ## docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md
 
 - [WEPPcloud Auth Stack on forest.bearhive.internal](#weppcloud-auth-stack-on-forestbearhiveinternal)
@@ -895,12 +876,6 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
     - [Results](#results)
     - [Key Learnings](#key-learnings)
   - [Appendix B: Controllers Modernization Checklist](#appendix-b-controllers-modernization-checklist)
-
----
-
-## docs/mini-work-packages/README.md
-
-- [Mini Work Packages](#mini-work-packages)
 
 ---
 
@@ -1118,23 +1093,6 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [UI Documentation](#ui-documentation)
   - [Contents](#contents)
   - [Usage Guidelines](#usage-guidelines)
-
----
-
-## docs/ui-docs/ash-control-plan.md
-
-- [Ash Control Implementation Plan](#ash-control-implementation-plan)
-  - [Why Now](#why-now)
-  - [UI Inventory (wepppy/weppcloud/templates/controls/ash.htm)](#ui-inventory-wepppyweppcloudtemplatescontrolsashhtm)
-  - [JavaScript Behavior (wepppy/weppcloud/controllers_js/ash.js)](#javascript-behavior-wepppyweppcloudcontrollersjsashjs)
-  - [Backend Mapping](#backend-mapping)
-  - [Locale & Mod Coverage](#locale-mod-coverage)
-  - [Upload Workflow (Legacy vs uploads.py)](#upload-workflow-legacy-vs-uploadspy)
-  - [Pain Points & TODOs](#pain-points-todos)
-  - [Proposed Migration Steps (Pure stack)](#proposed-migration-steps-pure-stack)
-  - [Open Questions / Follow-Ups](#open-questions-follow-ups)
-  - [Decisions & Action Items (2025-10-20)](#decisions-action-items-2025-10-20)
-  - [References](#references)
 
 ---
 
@@ -1356,27 +1314,6 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
     - [Code Review Checklist](#code-review-checklist)
   - [References](#references)
   - [Changelog](#changelog)
-
----
-
-## docs/ui-docs/omni-control-plan.md
-
-- [Omni Control Migration Plan](#omni-control-migration-plan)
-  - [Why Now](#why-now)
-  - [Scope & Objectives](#scope-objectives)
-  - [Phase 0 – Discovery Closeout](#phase-0-discovery-closeout)
-  - [UI Inventory](#ui-inventory)
-    - [Scenario Runner (wepppy/weppcloud/templates/controls/omni/omni_scenarios.htm)](#scenario-runner-wepppyweppcloudtemplatescontrolsomniomniscenarioshtm)
-    - [Inline Scenario Builder Script (same template)](#inline-scenario-builder-script-same-template)
-    - [Contrast Definition Panel (wepppy/weppcloud/templates/controls/omni/omni_contrasts_definition.htm)](#contrast-definition-panel-wepppyweppcloudtemplatescontrolsomniomnicontrastsdefinitionhtm)
-    - [Other Touch Points](#other-touch-points)
-  - [JavaScript Behaviour (wepppy/weppcloud/controllers_js/omni.js + inline helpers)](#javascript-behaviour-wepppyweppcloudcontrollersjsomnijs-inline-helpers)
-  - [Backend Mapping](#backend-mapping)
-  - [Uploads & External Dependencies](#uploads-external-dependencies)
-  - [Pain Points](#pain-points)
-  - [Migration Blueprint](#migration-blueprint)
-  - [Open Questions / Assumptions](#open-questions-assumptions)
-  - [Summary](#summary)
 
 ---
 
