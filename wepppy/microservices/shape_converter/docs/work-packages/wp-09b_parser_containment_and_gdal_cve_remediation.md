@@ -224,19 +224,19 @@ Expected:
 ## Evidence Log (Fill During Execution)
 | Item | Evidence |
 | --- | --- |
-| Commit SHA(s) | Pending final commit/push for this WP-09B execution update. |
+| Commit SHA(s) | `caa8edd8f92126c7570ea51cf1ab978f47c789d8` |
 | Parser containment implementation evidence | Runtime convert path moved to parser subprocess boundary in `wepppy/microservices/shape_converter/convert.py` (`_run_parser_worker`, `_terminate_process_group`, `_read_parser_payload`, `_loaded_shapefile_from_payload`) plus new worker module `wepppy/microservices/shape_converter/convert_parser_worker.py`. Timeout path enforces SIGTERM -> SIGKILL against parser process group and returns canonical `408 request_timeout`. |
 | GDAL CVE remediation evidence | Runtime container evidence: `ogr2ogr --version` => `GDAL 3.10.3`; `/opt/venv/bin/python -c "import fiona, pyproj; ..."` => `fiona=1.10.1 gdal=3.10.3 pyproj=3.7.1 proj=9.5.1` after Dockerfile changes forcing source Fiona build against system GDAL. Additional runtime proof: `ldd /usr/lib/x86_64-linux-gnu/libgdal.so.36` links `libz.so.1`; `nm -D /usr/lib/x86_64-linux-gnu/libgdal.so.36 | grep -E 'inflateBack9|inftree9|inflate_table9'` returns no symbols for the CVE class. Debian tracker reference for CVE scope: `https://security-tracker.debian.org/tracker/CVE-2026-4738`. |
 | Unit gate output | `wctl run-pytest tests/shape_converter/unit -k "archive or inspect or convert or cleanup or abuse or hardening or ui or health or crs or serialization" --maxfail=1` => **102 passed**, 0 failed (63 warnings). `wctl run-pytest tests/shape_converter/unit` => **102 passed**, 0 failed (63 warnings). |
 | Integration gate output | `wctl run-pytest tests/shape_converter/integration -k "inspect or convert or abuse or hardening or ui" --maxfail=1` => **37 passed**, 0 failed (19 warnings). `wctl run-pytest tests/shape_converter/integration` => **37 passed**, 0 failed (19 warnings). |
 | Workflow generation output | `scripts/build_forest_workflows.py` => PASS (workflow set regenerated); warning only: `Dev Server Nightly Profile Tests section not found in readme.md; skipping profile-table sync.` `scripts/build_forest_workflows.py --check` => PASS (same warning). |
-| Hosted CI evidence | Pending push: capture `Shape-Converter Gates` hosted run URL/status for the remediation commit via `gh run list --workflow "Shape-Converter Gates" ...`. |
+| Hosted CI evidence | Hosted `Shape-Converter Gates` run succeeded for remediation SHA `caa8edd8f92126c7570ea51cf1ab978f47c789d8`: run `24299367284` (status `completed`, conclusion `success`, created `2026-04-12T05:16:49Z`, updated `2026-04-12T05:20:01Z`) at `https://github.com/rogerlew/wepppy/actions/runs/24299367284`. |
 | QA smoke output | Proxied smoke on `127.0.0.1:8080` with generated fixtures: inspect success => `200 application/json`; convert success => `200 application/geo+json` with attachment `smoke-valid_wgs84.geojson`; canonical convert error (`zip` without `.prj`) => `400 application/json` with `error.code=unknown_source_crs`. |
 | Code review reference | 2026-04-12 code review pass over parser subprocess orchestration, process-group termination, canonical error propagation, Dockerfile runtime-linkage changes, and regression tests. |
 | QA review reference | 2026-04-12 QA review of focused/full shape-converter gates and proxied smoke matrix; no regressions found. |
 | Security review reference | 2026-04-12 security review of parser containment semantics, runtime dependency linkage, CVE watchlist disposition evidence, and broad-exception enforcement pass (`python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` => PASS). |
 | Disposition ledger summary | 3 findings total; 1 High closed, 2 Medium closed; no unresolved High/Medium findings. |
-| Final go/no-go decision | **GO** for WP-09B closeout pending hosted CI run capture on pushed remediation commit. |
+| Final go/no-go decision | **GO** for WP-09B closeout. |
 | Residual risks register | No unresolved High/Medium risks. Low residual monitoring item: Debian tracker state for `CVE-2026-4738` remains `check`; continue routine tracker monitoring while runtime mitigation evidence above remains intact. Owner: Platform/Security. Target follow-up check: 2026-04-30. |
 
 ## Completion Criteria
