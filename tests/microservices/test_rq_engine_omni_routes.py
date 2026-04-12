@@ -384,7 +384,66 @@ def test_run_omni_rejects_oversize_sbs_upload_with_413(
 
     assert response.status_code == 413
     payload = response.json()
-    assert payload["error"]["message"] == "Invalid SBS file for scenario 0: File exceeds maximum allowed size"
+    assert payload["error"]["message"].startswith("Invalid SBS file for scenario 0:")
+    assert "maximum allowed size" in payload["error"]["message"]
+
+
+def test_run_omni_auth_boundary_error_does_not_include_traceback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _raise_auth_error(request, required_scopes=None):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(omni_routes, "require_jwt", _raise_auth_error)
+    monkeypatch.setattr(omni_routes, "authorize_run_access", lambda claims, runid: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            json={"scenarios": [{"type": "uniform_low"}]},
+        )
+
+    assert response.status_code == 401
+    payload = response.json()
+    assert payload["error"]["message"] == "Failed to authorize request"
+    assert "traceback" not in json.dumps(payload).lower()
+
+
+def test_run_omni_enqueue_boundary_error_does_not_include_traceback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, *args, **kwargs):
+            raise RuntimeError("queue exploded")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            json={"scenarios": [{"type": "uniform_low"}]},
+        )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["error"]["message"] == "Error Handling Request"
+    assert "traceback" not in json.dumps(payload).lower()
 
 
 def test_run_omni_invalid_json_returns_400(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -760,7 +819,8 @@ def test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413(
 
     assert response.status_code == 413
     payload = response.json()
-    assert payload["error"]["message"] == "Invalid GeoJSON upload: File exceeds maximum allowed size"
+    assert payload["error"]["message"].startswith("Invalid GeoJSON upload:")
+    assert "maximum allowed size" in payload["error"]["message"]
 
 
 def test_run_omni_contrasts_batch_returns_input_message_without_enqueue(

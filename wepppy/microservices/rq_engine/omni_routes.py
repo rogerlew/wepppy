@@ -46,12 +46,6 @@ GEOJSON_MAX_BYTES = 100 * 1024 * 1024
 CONTRAST_SELECTION_MODE_DEFAULT = "cumulative"
 
 
-class _OmniUploadError(ValueError):
-    def __init__(self, message: str, *, status_code: int = 400) -> None:
-        super().__init__(message)
-        self.status_code = status_code
-
-
 def _maybe_nodir_error_response(exc: Exception):
     if isinstance(exc, NoDirError):
         return error_response(exc.message, status_code=exc.http_status, code=exc.code)
@@ -164,8 +158,8 @@ def _extract_upload(form: FormData, key: str) -> UploadFile | None:
     return None
 
 
-def _upload_status(exc: _OmniUploadError | ValueError) -> int:
-    if isinstance(exc, _OmniUploadError):
+def _upload_status(exc: UploadError | ValueError) -> int:
+    if isinstance(exc, UploadError):
         return int(getattr(exc, "status_code", 400))
     return 400
 
@@ -307,7 +301,7 @@ def _prepare_omni_scenarios(
                         overwrite=True,
                     )
                 except UploadError as exc:
-                    raise _OmniUploadError(
+                    raise UploadError(
                         f"Invalid SBS file for scenario {idx}: {exc}",
                         status_code=exc.status_code,
                     ) from exc
@@ -431,7 +425,7 @@ def _prepare_omni_contrasts(
                 )
             )
         except UploadError as exc:
-            raise _OmniUploadError(
+            raise UploadError(
                 f"Invalid GeoJSON upload: {exc}",
                 status_code=exc.status_code,
             ) from exc
@@ -508,14 +502,14 @@ async def _run_omni(
             wd=wd,
         )
         omni.parse_scenarios(parsed_inputs)
-    except _OmniUploadError as exc:
+    except UploadError as exc:
         return error_response(str(exc), status_code=_upload_status(exc))
     except ValueError as exc:
         return error_response(str(exc), status_code=_upload_status(exc))
     except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception("rq-engine run-omni scenario parse failed", extra={"runid": runid, "config": config})
-        return error_response_with_traceback(f"Error parsing omni inputs: {exc}")
+        return error_response("Error parsing omni inputs", status_code=500)
 
     if is_batch_run:
         return JSONResponse({"message": "Set omni inputs for batch processing"})
@@ -531,7 +525,7 @@ async def _run_omni(
             prep.set_rq_job_id("run_omni_rq", job.id)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni enqueue failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
     status_url = f"/rq-engine/api/jobstatus/{job.id}"
     return JSONResponse(
@@ -565,7 +559,7 @@ async def _run_omni_contrasts(
             config=config,
             wd=wd,
         )
-    except _OmniUploadError as exc:
+    except UploadError as exc:
         return error_response(str(exc), status_code=_upload_status(exc))
     except ValueError as exc:
         return error_response(str(exc), status_code=_upload_status(exc))
@@ -575,7 +569,7 @@ async def _run_omni_contrasts(
             "rq-engine run-omni-contrasts input parse failed",
             extra={"runid": runid, "config": config},
         )
-        return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
+        return error_response("Error parsing omni contrast inputs", status_code=500)
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
     if selection_mode not in {
@@ -642,7 +636,7 @@ async def _run_omni_contrasts(
     except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected build failures into canonical error payload.
         logger.exception("rq-engine run-omni-contrasts build failed", extra={"runid": runid, "config": config})
-        return error_response_with_traceback(f"Error building omni contrasts: {exc}")
+        return error_response("Error building omni contrasts", status_code=500)
 
     try:
         prep = RedisPrep.getInstance(wd)
@@ -655,7 +649,7 @@ async def _run_omni_contrasts(
             prep.set_rq_job_id("run_omni_contrasts_rq", job.id)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni-contrasts enqueue failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
     status_url = f"/rq-engine/api/jobstatus/{job.id}"
     return JSONResponse(
@@ -689,14 +683,14 @@ async def _dry_run_omni_contrasts(
             config=config,
             wd=wd,
         )
-    except _OmniUploadError as exc:
+    except UploadError as exc:
         return error_response(str(exc), status_code=_upload_status(exc))
     except ValueError as exc:
         return error_response(str(exc), status_code=_upload_status(exc))
     except Exception as exc:  # broad-except: boundary contract
         # API boundary: translate unexpected parse failures into canonical error payload.
         logger.exception("rq-engine dry-run-omni-contrasts input parse failed", extra={"runid": runid, "config": config})
-        return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
+        return error_response("Error parsing omni contrast inputs", status_code=500)
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
     if selection_mode not in {
@@ -761,7 +755,7 @@ async def _dry_run_omni_contrasts(
             "rq-engine dry-run-omni-contrasts report build failed",
             extra={"runid": runid, "config": config},
         )
-        return error_response_with_traceback(f"Error building omni contrast dry-run: {exc}")
+        return error_response("Error building omni contrast dry-run", status_code=500)
 
     report = dict(report)
     report["runid"] = runid
@@ -829,7 +823,7 @@ async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         return await _run_omni(runid, config, request)
@@ -838,7 +832,7 @@ async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
         if nodir_response is not None:
             return nodir_response
         logger.exception("rq-engine run-omni failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.post(
@@ -870,7 +864,7 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni-contrasts auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         return await _run_omni_contrasts(runid, config, request)
@@ -879,7 +873,7 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
         if nodir_response is not None:
             return nodir_response
         logger.exception("rq-engine run-omni-contrasts failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.post(
@@ -907,7 +901,7 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni-contrasts-dry-run auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         return await _dry_run_omni_contrasts(runid, config, request)
@@ -916,7 +910,7 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
         if nodir_response is not None:
             return nodir_response
         logger.exception("rq-engine run-omni-contrasts-dry-run failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.post(

@@ -22,7 +22,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
-from .responses import error_response, error_response_with_traceback
+from .responses import error_response
 from .upload_helpers import UploadError, save_upload_file
 
 logger = logging.getLogger(__name__)
@@ -140,7 +140,7 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-ash auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         wd = get_wd(runid)
@@ -284,7 +284,7 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
         if nodir_response is not None:
             return nodir_response
         logger.exception("rq-engine run-ash enqueue failed")
-        return error_response_with_traceback("Error Running Ash Transport")
+        return error_response("Error Running Ash Transport", status_code=500)
 
 
 __all__ = ["router"]

@@ -7,7 +7,7 @@
 - **Package**: `docs/work-packages/20260412_upload_boundary_helpers_unification/`
 - **Reviewer**: Codex
 - **Date**: 2026-04-12
-- **Last updated**: 2026-04-12 16:49 UTC
+- **Last updated**: 2026-04-12 17:12 UTC
 - **Scope reviewed**:
   - `wepppy/microservices/upload_boundary.py`
   - `wepppy/microservices/rq_engine/upload_helpers.py`
@@ -42,6 +42,7 @@
 
 - **SEC-01 closure**: Implemented canonical non-ZIP helper layer in `wepppy/microservices/upload_boundary.py`; migrated `upload_helpers.py`, `ash_routes.py`, `omni_routes.py`, and `roads_bp.py` to shared helpers.
 - **SEC-02 closure**: Added helper-level and route-level parity tests including invalid extension and oversize upload paths with explicit `413` checks for migrated routes.
+- **SEC-02 follow-up (2026-04-12 17:12 UTC)**: upload-facing `ash`/`omni` auth/enqueue broad-except boundaries now return canonical non-traceback payloads, while upload validation messages retain specific user-visible reasons.
 - **SEC-03 closure**: No changes were made to ZIP validator ownership/behavior; culvert ZIP ingestion remains on `archive_validation.py` + `culvert_payload_validator.py`.
 
 Risk acceptance authority: `Accepted-risk` requires security reviewer recommendation plus explicit package owner acknowledgment in Sign-off.
@@ -104,6 +105,7 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
 - Automated checks run:
   - `wctl run-pytest tests/microservices/test_upload_boundary_helpers.py tests/microservices/test_rq_engine_upload_disturbed_routes.py tests/microservices/test_rq_engine_upload_huc_fire_routes.py tests/microservices/test_rq_engine_upload_batch_runner_routes.py tests/microservices/test_rq_engine_landuse_routes.py tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_culverts.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` -> `137 passed`.
   - `wctl run-pytest tests/microservices/test_upload_boundary_helpers.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` -> `81 passed`.
+  - `wctl run-pytest tests/microservices/test_upload_boundary_helpers.py tests/microservices/test_rq_engine_ash_routes.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` -> `85 passed`.
   - `wctl run-pytest tests --maxfail=1` -> `3511 passed`, `36 skipped`.
 - Manual checks run:
   - Verified canonical ZIP controls remain in `wepppy/microservices/shape_converter/archive_validation.py`.
@@ -116,8 +118,9 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
   - None.
 - **Follow-up packages/issues**:
   - 2026-04-12 16:49 UTC: message-based `413` fallback checks removed from `ash_routes.py`, `omni_routes.py`, and `roads_bp.py`; status mapping now relies on typed upload boundary error status.
+  - 2026-04-12 17:12 UTC: replaced omni-specific upload exception wrapper with canonical `UploadError` and added route tests confirming auth/enqueue boundary responses do not expose traceback payloads.
 
 ## Sign-off
 
-- **Security reviewer**: Codex, 2026-04-12 16:49 UTC
+- **Security reviewer**: Codex, 2026-04-12 17:12 UTC
 - **Package owner**: Pending human acknowledgment
