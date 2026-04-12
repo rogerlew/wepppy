@@ -29,6 +29,10 @@ from wepppy.microservices.shape_converter import create_app
 pytestmark = [pytest.mark.unit, pytest.mark.microservice]
 shape_converter_app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
 shape_converter_convert_module = importlib.import_module("wepppy.microservices.shape_converter.convert")
+shape_converter_crs_module = importlib.import_module("wepppy.microservices.shape_converter.crs")
+shape_converter_serialization_module = importlib.import_module(
+    "wepppy.microservices.shape_converter.serialization"
+)
 shape_converter_parser_worker_module = importlib.import_module(
     "wepppy.microservices.shape_converter.convert_parser_worker"
 )
@@ -450,10 +454,7 @@ def test_convert_returns_reprojection_failed_when_transformer_init_fails(
     def _raise_runtime_error(*_args, **_kwargs):
         raise RuntimeError("boom")
 
-    monkeypatch.setattr(
-        "wepppy.microservices.shape_converter.crs.Transformer.from_crs",
-        _raise_runtime_error,
-    )
+    monkeypatch.setattr(shape_converter_crs_module.Transformer, "from_crs", _raise_runtime_error)
 
     with TestClient(create_app()) as client:
         response = client.post(
@@ -470,7 +471,7 @@ def test_convert_returns_reprojection_failed_when_transformer_init_fails(
 
 def test_convert_rejects_oversize_upload_before_full_buffer(monkeypatch: pytest.MonkeyPatch) -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
-    monkeypatch.setattr("wepppy.microservices.shape_converter.convert._MAX_UPLOAD_COMPRESSED_BYTES", 8)
+    monkeypatch.setattr(shape_converter_convert_module, "_MAX_UPLOAD_COMPRESSED_BYTES", 8)
 
     with TestClient(create_app()) as client:
         response = client.post(
@@ -485,7 +486,7 @@ def test_convert_rejects_oversize_upload_before_full_buffer(monkeypatch: pytest.
 
 def test_convert_rejects_oversize_geojson_output(monkeypatch: pytest.MonkeyPatch) -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
-    monkeypatch.setattr("wepppy.microservices.shape_converter.serialization._MAX_GEOJSON_OUTPUT_BYTES", 10)
+    monkeypatch.setattr(shape_converter_serialization_module, "_MAX_GEOJSON_OUTPUT_BYTES", 10)
 
     with TestClient(create_app()) as client:
         response = client.post(
@@ -500,7 +501,7 @@ def test_convert_rejects_oversize_geojson_output(monkeypatch: pytest.MonkeyPatch
 
 def test_convert_rejects_oversize_geoparquet_output(monkeypatch: pytest.MonkeyPatch) -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
-    monkeypatch.setattr("wepppy.microservices.shape_converter.serialization._MAX_GEOPARQUET_OUTPUT_BYTES", 10)
+    monkeypatch.setattr(shape_converter_serialization_module, "_MAX_GEOPARQUET_OUTPUT_BYTES", 10)
 
     with TestClient(create_app()) as client:
         response = client.post(

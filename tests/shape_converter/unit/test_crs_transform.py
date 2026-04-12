@@ -4,6 +4,7 @@ import pytest
 from pyproj import CRS
 from shapely.geometry import Point
 
+from wepppy.microservices.shape_converter import crs as shape_converter_crs_module
 from wepppy.microservices.shape_converter.crs import parse_source_crs, reproject_geometries, resolve_target_crs
 from wepppy.microservices.shape_converter.errors import ShapeConverterError
 
@@ -84,10 +85,7 @@ def test_reproject_geometries_surfaces_reprojection_failed(monkeypatch: pytest.M
     def _raise_transformer_error(*args, **kwargs):
         raise RuntimeError("boom")
 
-    monkeypatch.setattr(
-        "wepppy.microservices.shape_converter.crs.Transformer.from_crs",
-        _raise_transformer_error,
-    )
+    monkeypatch.setattr(shape_converter_crs_module.Transformer, "from_crs", _raise_transformer_error)
 
     with pytest.raises(ShapeConverterError) as exc_info:
         reproject_geometries(

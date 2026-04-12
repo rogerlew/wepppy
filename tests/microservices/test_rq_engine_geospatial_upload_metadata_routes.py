@@ -178,7 +178,7 @@ def test_geospatial_metadata_payload_contract(monkeypatch: pytest.MonkeyPatch) -
     assert payload["recommended_defaults"]["map_zoom"] == 11
     assert payload["recommended_defaults"]["csa"] == 12.0
     assert payload["recommended_defaults"]["mcl"] == 88.0
-    assert payload["dynamic_constraints"]["climate_mode"]["enum_available"] == [0, 2, 6, 11]
+    assert payload["dynamic_constraints"]["climate_mode"]["enum_available"] == [0, 2, 5, 6, 11]
     assert payload["field_availability"]["map_bounds"]["state"] == "available"
     assert payload["field_availability"]["station_catalog"]["state"] == "available"
     assert payload["computed_at"] == payload["updated_at"]
@@ -217,14 +217,14 @@ def test_geospatial_metadata_fallbacks_when_run_resolved_fields_are_missing(
     assert payload["field_availability"]["mcl"]["state"] == "pending"
     assert payload["field_availability"]["station_catalog"]["state"] == "pending"
     assert payload["field_availability"]["station_catalog"]["reason_code"] == "awaiting_dem_fetch"
-    assert payload["dynamic_constraints"]["climate_mode"]["enum_available"] == [0, 6, 11]
+    assert payload["dynamic_constraints"]["climate_mode"]["enum_available"] == [0, 5, 6, 11]
 
 
 @pytest.mark.parametrize(
     "climate_has_station,expected_modes",
     (
-        (True, [0, 2, 6, 11]),
-        (False, [0, 6, 11]),
+        (True, [0, 2, 5, 6, 11]),
+        (False, [0, 5, 6, 11]),
     ),
 )
 def test_geospatial_climate_mode_constraints_match_climate_schema(
