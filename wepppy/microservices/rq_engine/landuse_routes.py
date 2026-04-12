@@ -203,7 +203,9 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                     if filename:
                         user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
                     if not filename or not user_defined_fn or not _exists(user_defined_fn):
-                        raise FileNotFoundError("Could not find file")
+                        raise FileNotFoundError(
+                            "input_upload_landuse is required when no existing user-defined landuse file is available."
+                        )
 
                 raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
 

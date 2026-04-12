@@ -8,6 +8,8 @@ from starlette.datastructures import UploadFile
 
 from wepppy.microservices.upload_boundary import UploadBoundaryError, save_upload_from_stream
 
+from .responses import error_response
+
 
 class UploadError(UploadBoundaryError):
     """Raised when an upload validation or post-save check fails."""
@@ -55,11 +57,27 @@ def upload_success(
 
 
 def upload_failure(error: str, status: int = 400, **extras: Any) -> JSONResponse:
-    error_payload: dict[str, Any] = {"message": error}
+    details: Any
+    if "details" in extras:
+        details = extras.pop("details")
+    elif extras:
+        details = extras
+    else:
+        details = error
+    code = extras.pop("code", None)
+    errors = extras.pop("errors", None)
     if extras:
-        error_payload["details"] = extras
-    payload: dict[str, Any] = {"error": error_payload}
-    return JSONResponse(payload, status_code=status)
+        if isinstance(details, dict):
+            details = {**details, **extras}
+        else:
+            details = {"details": details, **extras}
+    return error_response(
+        error,
+        status_code=status,
+        code=code,
+        details=details,
+        errors=errors,
+    )
 
 
 __all__ = [

@@ -32,6 +32,13 @@ def _extract_upload(form, key: str) -> UploadFile | None:
     return None
 
 
+def _validation_reason(exc: Exception) -> str:
+    detail = str(exc).strip()
+    if detail:
+        return detail
+    return exc.__class__.__name__
+
+
 def _resolve_user_from_claims(claims: dict[str, object]) -> tuple[object | None, object | None, object | None]:
     from wepppy.weppcloud.utils.helpers import get_user_models
     from wepppy.weppcloud.app import app as flask_app
@@ -88,7 +95,7 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         form = await request.form()
         upload = _extract_upload(form, "input_upload_sbs")
         if upload is None:
-            return upload_failure("Could not find file")
+            return upload_failure("input_upload_sbs must be provided")
         if not upload.filename:
             return upload_failure("no filename specified")
 
@@ -129,21 +136,22 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
                 max_bytes=UPLOAD_HUC_FIRE_SBS_MAX_BYTES,
             )
         except UploadError as exc:
-            status_code = 413 if "maximum allowed size" in str(exc).lower() else 400
+            status_code = int(getattr(exc, "status_code", 400))
             return upload_failure(str(exc), status=status_code)
 
         try:
             disturbed.validate(filename, mode=0)
-        except Exception:  # broad-except: boundary contract
-            # Boundary catch: preserve contract behavior while logging unexpected failures.
-            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:123", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        except Exception as exc:  # broad-except: validation boundary
+            logger.exception("rq-engine huc-fire disturbed validation failed")
             os.remove(file_path)
-            return error_response("Failed validating file", status_code=500)
+            reason = _validation_reason(exc)
+            return error_response(f"SBS validation failed: {reason}", status_code=400)
 
         return JSONResponse({"runid": runid})
-    except Exception:  # broad-except: boundary contract
+    except Exception as exc:  # broad-except: boundary contract
         logger.exception("rq-engine huc-fire upload failed")
-        return error_response("Could not save file", status_code=500)
+        reason = _validation_reason(exc)
+        return error_response(f"Could not save file: {reason}", status_code=500)
 
 
 __all__ = ["router"]

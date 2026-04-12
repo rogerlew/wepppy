@@ -589,7 +589,7 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         )
         return upload_success(result=result)
     except UploadError as exc:
-        return upload_failure(str(exc))
+        return upload_failure(str(exc), status=int(getattr(exc, "status_code", 400)))
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-dem failed")
         return error_response_with_traceback("Failed validating DEM", status_code=500)

@@ -7,7 +7,7 @@
 **Timezone**: UTC
 **Started**: 2026-04-12 06:06 UTC
 **Current phase**: Complete (handoff ready)
-**Last updated**: 2026-04-12 06:37 UTC
+**Last updated**: 2026-04-12 19:06 UTC
 **Next milestone**: None (package complete)
 **Security impact**: `high`
 **Dedicated security review**: `yes`
@@ -37,6 +37,12 @@
 - [x] Full closure suite passed (`3502 passed`, `36 skipped`) (2026-04-12 06:34 UTC).
 - [x] Updated security review artifact with findings disposition and pass verdict (2026-04-12 06:34 UTC).
 - [x] Doc lint gate passed for package docs + `PROJECT_TRACKER.md` (`5 files validated, 0 errors, 0 warnings`) (2026-04-12 06:37 UTC).
+- [x] Follow-up: hardened canonical upload error envelope to always include `error.message`, `error.details`, `error.code`, and top-level `error_id` on upload-facing failures (2026-04-12 18:32 UTC).
+- [x] Follow-up: correlated server-side traceback logging with returned `error_id` via shared rq-engine/weppcloud helper paths (2026-04-12 18:35 UTC).
+- [x] Follow-up: replaced residual generic missing-file messages with field-specific guidance in landuse/treatments upload paths (2026-04-12 18:37 UTC).
+- [x] Follow-up targeted suites passed (`120 passed`) (2026-04-12 18:53 UTC).
+- [x] Follow-up full closure suite passed (`3524 passed`, `36 skipped`) (2026-04-12 19:01 UTC).
+- [x] Follow-up docs lint gate passed for package + schema artifacts (`6 files validated, 0 errors, 0 warnings`) (2026-04-12 19:06 UTC).
 
 ## Timeline
 
@@ -45,6 +51,10 @@
 - **2026-04-12 06:27 UTC** - Scoped upload endpoints hardened with explicit pre-write size/type constraints and traceback-redacted error responses.
 - **2026-04-12 06:34 UTC** - Full test suite gate passed and security findings marked resolved pending doc-lint closeout.
 - **2026-04-12 06:37 UTC** - Doc-lint gate passed and package marked complete.
+- **2026-04-12 18:32 UTC** - Follow-up package execution started to close upload error-contract findings A-E (error envelope parity, `error_id`, and observability correlation).
+- **2026-04-12 18:53 UTC** - Upload-focused regression suites passed with new envelope + correlation assertions.
+- **2026-04-12 19:01 UTC** - Full suite gate re-run passed after helper-level error contract hardening.
+- **2026-04-12 19:06 UTC** - Follow-up doc-lint gate passed for package + schema contract docs.
 
 ## Decisions Log
 
@@ -73,13 +83,26 @@
 
 **Impact**: Adds explicit by-surface threat checks and formal finding disposition before closeout.
 
+---
+
+### 2026-04-12 18:34 UTC: Use shared helper-level envelope/correlation controls over route-by-route payload assembly
+**Context**: Follow-up findings A-C and B required consistent `error.code`/`error_id`/`error.details` plus traceback correlation across many upload paths.
+
+**Options considered**:
+1. Patch each upload route ad hoc.
+2. Harden shared response/upload helper boundaries and adjust only route outliers.
+
+**Decision**: Option 2.
+
+**Impact**: Reduced divergence across upload surfaces and ensured consistent contract behavior with minimal endpoint-specific branching.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
 | ZIP hardening reuse introduces behavior drift for culvert payload-specific required files | High | Medium | Kept culvert semantics in `culvert_payload_validator.py`; added culvert abuse + semantic regression tests | Mitigated |
 | Upload limits break existing large-user workflows unexpectedly | Medium | Medium | Applied explicit per-endpoint limits with regression coverage for size boundaries; residual workflow-size tuning can be handled in follow-up if needed | Mitigated |
-| Error contract hardening accidentally regresses existing API clients | Medium | Low | Added targeted redaction regressions and ran full `tests --maxfail=1` suite | Mitigated |
+| Error contract hardening accidentally regresses existing API clients | Medium | Low | Added targeted envelope/correlation regressions and reran full `tests --maxfail=1` suite | Mitigated |
 | Partial rollout leaves one or more upload routes unbounded | High | Medium | Completed scoped endpoint inventory and validated route-by-route tests | Closed |
 
 ## Verification Checklist
@@ -88,7 +111,8 @@
 - [x] Culvert ZIP ingest path no longer uses direct `extractall` without member-by-member safety controls.
 - [x] All scoped upload routes enforce explicit max-byte controls before disk write.
 - [x] Extension/type allowlists are explicit and regression-tested.
-- [x] Upload error payloads are canonical and redact traceback internals.
+- [x] Upload error payloads are canonical and include `error.message`, `error.details`, `error.code`, and `error_id`.
+- [x] Exception-driven upload failures log full traceback server-side with matching `error_id`.
 
 ### Security
 - [x] Security impact triage documented and kept current.
@@ -175,6 +199,27 @@
 
 **Test results**:
 - `wctl doc-lint --path docs/work-packages/20260411_upload_endpoints_hardening/package.md --path docs/work-packages/20260411_upload_endpoints_hardening/tracker.md --path docs/work-packages/20260411_upload_endpoints_hardening/prompts/active/upload_endpoints_hardening_execplan.md --path docs/work-packages/20260411_upload_endpoints_hardening/artifacts/2026-04-12_security_review.md --path PROJECT_TRACKER.md` (`5 files validated, 0 errors, 0 warnings`)
+
+### 2026-04-12 19:02 UTC: Follow-up upload error-contract closure completed
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Hardened `rq_engine/responses.py` + `rq_engine/upload_helpers.py` to emit stable `error.code` + `error_id` with always-populated `error.details`.
+- Added error-id-correlated traceback logging for exception-driven upload failures.
+- Updated roads upload route to use dedicated upload error helpers in `weppcloud/utils/helpers.py`.
+- Replaced remaining generic missing-file responses in `landuse_routes.py` and `treatments_routes.py` with field-specific messages.
+- Added regression tests for envelope fields and traceback/error-id log correlation.
+
+**Blockers encountered**:
+- Full-suite run initially failed on one exact-equality assertion that omitted new `error_id`; updated the test to assert required fields instead of strict payload equality.
+
+**Next steps**:
+- Final handoff summary.
+
+**Test results**:
+- `wctl run-pytest tests/microservices/test_rq_engine_upload_climate_routes.py tests/microservices/test_rq_engine_upload_disturbed_routes.py tests/microservices/test_rq_engine_upload_huc_fire_routes.py tests/microservices/test_rq_engine_upload_batch_runner_routes.py tests/microservices/test_rq_engine_landuse_routes.py tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_watershed_routes.py tests/microservices/test_rq_engine_culverts.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` (`120 passed`)
+- `wctl run-pytest tests --maxfail=1` (`3524 passed`, `36 skipped`)
+- `wctl doc-lint --path docs/work-packages/20260411_upload_endpoints_hardening/package.md --path docs/work-packages/20260411_upload_endpoints_hardening/tracker.md --path docs/work-packages/20260411_upload_endpoints_hardening/prompts/active/upload_endpoints_hardening_execplan.md --path docs/work-packages/20260411_upload_endpoints_hardening/artifacts/2026-04-12_security_review.md --path docs/schemas/upload-endpoint-contract.md --path docs/schemas/rq-response-contract.md` (`6 files validated`, `0 errors`, `0 warnings`)
 
 ## Watch List
 

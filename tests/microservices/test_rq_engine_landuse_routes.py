@@ -261,6 +261,9 @@ def test_build_landuse_user_defined_rejects_invalid_extension(
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["message"].startswith("Invalid file extension.")
+    assert payload["error"]["details"].startswith("Invalid file extension.")
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error_id"]
 
 
 def test_build_landuse_user_defined_rejects_oversize_upload(
@@ -308,3 +311,57 @@ def test_build_landuse_user_defined_rejects_oversize_upload(
     assert response.status_code == 413
     payload = response.json()
     assert payload["error"]["message"] == "File exceeds maximum allowed size"
+    assert payload["error"]["details"] == "File exceeds maximum allowed size"
+    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error_id"]
+
+
+def test_build_landuse_user_defined_requires_upload_when_no_existing_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: str(tmp_path))
+
+    class DummyLanduse:
+        run_group = "batch"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.UserDefined
+        lc_dir = str(tmp_path / "landuse")
+        lc_fn = str(tmp_path / "landuse" / "lc.tif")
+        mapping = None
+        user_defined_landcover_fn = None
+
+        def parse_inputs(self, payload) -> None:
+            return None
+
+    class DummyWatershed:
+        subwta = str(tmp_path / "subwta.tif")
+
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+    monkeypatch.setattr(landuse_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(landuse_routes, "mutate_root", lambda wd, root, callback, purpose="x": callback())
+
+    import wepppy.all_your_base.geo as geo_module
+
+    monkeypatch.setattr(
+        geo_module,
+        "raster_stacker",
+        lambda _src, _subwta, out: Path(out).write_bytes(b"lc"),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            data={"landuse_management_mapping_selection": "default"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert (
+        payload["error"]["message"]
+        == "input_upload_landuse is required when no existing user-defined landuse file is available."
+    )
+    assert payload["error"]["details"] == payload["error"]["message"]
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error_id"]

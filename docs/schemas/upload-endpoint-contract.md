@@ -7,7 +7,7 @@
   - `wepppy/microservices/rq_engine/*_routes.py`
   - `wepppy/weppcloud/routes/nodb_api/roads_bp.py`
 - Defines canonical per-endpoint caps, extension allowlists, and core validators.
-- Documents upload-facing error expectations (canonical error shape; no traceback leakage in client payloads).
+- Documents upload-facing error expectations (canonical error shape; informative user-visible reasons for validation failures).
 
 ## Explicit Exclusions
 - `shape_converter` endpoint behavior is out of scope for this contract.
@@ -56,9 +56,13 @@ These routes combine non-file params with optional/conditional upload parts.
 | `/api/runs/{runid}/{config}/run-omni-contrasts-dry-run` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json` | `100 * 1024 * 1024` (100 MB) | Same upload rules as `run-omni-contrasts` |
 
 ## Error Contract Requirements
-- Upload validation failures must return canonical 4xx responses (`error.message`, optional `error.code`, `error.details`) consistent with `docs/schemas/rq-response-contract.md`.
+- Upload validation failures must return canonical 4xx responses with `error.message`, `error.details`, `error.code`, and top-level `error_id` consistent with `docs/schemas/rq-response-contract.md`.
+- MUST return specific user-visible failure reasons (`error.message`) for validation/business failures.
+- MUST include stable `error.code` + `error_id` in API responses.
+- MUST log full traceback server-side with that `error_id` for exception-driven failures.
 - Upload validation failures **MUST** include a specific, user-visible reason in `error.message` (for example: unsupported extension/type, missing required upload field, or size limit exceeded). Generic-only messages like `Invalid upload` are not acceptable.
-- Server faults must return canonical 5xx responses without exposing traceback text to upload-facing clients.
+- Server faults must return canonical 5xx responses.
+- API payloads MAY include traceback details; response/log correlation through `error_id` is required.
 - Size-limit failures should return `413` where implemented (for example, culvert ZIP and explicit max-size checks).
 
 ## New Upload Route Requirements
@@ -66,7 +70,7 @@ These routes combine non-file params with optional/conditional upload parts.
 - Use canonical helper ownership rules:
   - Non-ZIP routes use `wepppy/microservices/upload_boundary.py` (rq-engine routes use `wepppy/microservices/rq_engine/upload_helpers.py` as compatibility wrapper).
   - ZIP routes reuse `wepppy/microservices/shape_converter/archive_validation.py`; do not introduce ad-hoc ZIP validators.
-- Preserve canonical error payload shape and avoid traceback leakage in upload-facing responses.
+- Preserve canonical error payload shape.
 - Do not blind users on validation errors: route-level `error.message` values must state exactly why the upload was rejected.
 - Preserve explicit status behavior: use `413` for enforced size-limit failures and `400` for validation/type failures.
 - Preserve `post_save` boundary semantics: if `post_save` raises, the destination file is cleaned up and the exception `status_code` (when present) propagates through route error mapping.

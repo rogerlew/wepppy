@@ -12,11 +12,15 @@
   - `wepppy/microservices/culvert_payload_validator.py`
   - `wepppy/microservices/rq_engine/upload_huc_fire_routes.py`
   - `wepppy/microservices/rq_engine/upload_batch_runner_routes.py`
+  - `wepppy/microservices/rq_engine/upload_climate_routes.py`
   - `wepppy/microservices/rq_engine/landuse_routes.py`
   - `wepppy/microservices/rq_engine/treatments_routes.py`
   - `wepppy/microservices/rq_engine/upload_disturbed_routes.py`
+  - `wepppy/microservices/rq_engine/watershed_routes.py`
   - `wepppy/weppcloud/routes/nodb_api/roads_bp.py`
   - `wepppy/microservices/rq_engine/responses.py`
+  - `wepppy/microservices/rq_engine/upload_helpers.py`
+  - `wepppy/weppcloud/utils/helpers.py`
 - **Commit/branch context**: local working tree (post-implementation validation complete)
 - **Related artifacts**:
   - Work package tracker: `docs/work-packages/20260411_upload_endpoints_hardening/tracker.md`
@@ -37,9 +41,13 @@
 | ID | Severity | Surface | Description | Evidence | Required action | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | SEC-01 | High | Archive extraction | Culvert ZIP ingest used insufficient member-policy validation and `extractall` path, leaving archive abuse gaps. | Implemented shared validated archive controls in `wepppy/microservices/shape_converter/archive_validation.py` and adopted them in `wepppy/microservices/rq_engine/culvert_routes.py`; validated by `tests/microservices/test_rq_engine_culverts.py` abuse fixtures. | Reuse/adapt `shape_converter` archive validation/extraction controls and add abuse fixture tests. | Resolved (2026-04-12 06:27 UTC) |
-| SEC-02 | High | Upload quotas | Multiple upload routes accepted unbounded payload writes before validation. | Added explicit pre-write max-byte guards in `upload_huc_fire_routes.py`, `upload_batch_runner_routes.py`, `landuse_routes.py`, `treatments_routes.py`, and `weppcloud/routes/nodb_api/roads_bp.py`; verified by route-level size regression tests. | Enforce explicit pre-write max-byte caps and route-level regression tests. | Resolved (2026-04-12 06:27 UTC) |
-| SEC-03 | Medium | Input allowlists | Disturbed SBS upload allowed arbitrary extensions due empty allowlist. | Updated `UPLOAD_SBS_ALLOWED_EXTENSIONS` to explicit raster extensions in `upload_disturbed_routes.py`; validated by `tests/microservices/test_rq_engine_upload_disturbed_routes.py`. | Require explicit extension allowlist and verify behavior in tests. | Resolved (2026-04-12 06:27 UTC) |
-| SEC-04 | Medium | Error disclosure | Upload-facing failures exposed traceback internals in API responses. | Scoped upload endpoints now return canonical non-traceback error payloads (`culvert_routes.py`, `upload_huc_fire_routes.py`, `upload_batch_runner_routes.py`, `landuse_routes.py`, `treatments_routes.py`, `upload_disturbed_routes.py`); redaction regressions added in upload route tests. | Remove traceback disclosure for external responses while preserving canonical error schema. | Resolved (2026-04-12 06:27 UTC) |
+| SEC-02 | High | Upload quotas | Multiple upload routes accepted unbounded payload writes before validation. | Added explicit pre-write max-byte guards in upload routes; verified by route-level size regression tests. | Enforce explicit pre-write max-byte caps and route-level regression tests. | Resolved (2026-04-12 06:27 UTC) |
+| SEC-03 | Medium | Input allowlists | Disturbed SBS upload allowed arbitrary extensions due empty allowlist. | Updated `UPLOAD_SBS_ALLOWED_EXTENSIONS` to explicit raster extensions in `upload_disturbed_routes.py`; validated by upload-route tests. | Require explicit extension allowlist and verify behavior in tests. | Resolved (2026-04-12 06:27 UTC) |
+| SEC-04A | High | Upload error envelope | Upload-facing error payloads did not consistently include required `error.code` and top-level `error_id`. | Hardened `rq_engine/responses.py`, `rq_engine/upload_helpers.py`, roads upload helper path (`weppcloud/utils/helpers.py`) and roads upload route to emit canonical fields for upload failures; regression assertions added in upload tests. | Enforce required upload envelope fields on all scoped upload failures. | Resolved (2026-04-12 18:35 UTC) |
+| SEC-04B | High | Observability correlation | Server-side traceback logging for exception-driven upload failures was not consistently correlated with returned `error_id`. | Added helper-level traceback/error-id correlation logging and regression tests proving response `error_id` matches log context (`test_rq_engine_upload_climate_routes.py`, `test_roads_bp.py`). | Ensure exception-driven failures log full traceback with matching `error_id`. | Resolved (2026-04-12 18:53 UTC) |
+| SEC-04C | Medium | Upload error detail completeness | Some upload error responses omitted `error.details`. | Shared helper hardening now always populates `error.details`; route tests assert `error.details` presence/value for representative failures. | Ensure `error.details` is always populated on upload-facing failures. | Resolved (2026-04-12 18:35 UTC) |
+| SEC-04D | Medium | Contract documentation alignment | Package docs still asserted strict traceback redaction despite contract allowing traceback payloads (`MAY include traceback`). | Updated package/tracker/ExecPlan/security artifact language to observability-first policy and contract-compliant traceback stance. | Align docs with current contract and logging expectations. | Resolved (2026-04-12 19:02 UTC) |
+| SEC-04E | Low | Validation messaging | Residual generic missing-file messages remained in landuse/treatments upload paths. | Replaced with field-specific messages in `landuse_routes.py` and `treatments_routes.py`; added regression coverage in corresponding route tests. | Preserve specific, field-level validation reasons. | Resolved (2026-04-12 18:37 UTC) |
 
 Risk acceptance authority: `Accepted-risk` requires security reviewer recommendation plus explicit package owner acknowledgment in Sign-off.
 
@@ -95,13 +103,16 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
 
 ### 10) Logging, Monitoring, and Incident Readiness
 
-- [x] Error payload hardening verified to avoid traceback disclosure while preserving actionable logs server-side.
+- [x] Upload error responses include `error_id` and stable codes.
+- [x] Exception-driven upload failures log full traceback server-side with matching `error_id`.
+- [x] Traceback payload behavior is contract-compliant (`MAY include traceback`); observability correlation is required.
 
 ## Validation Evidence
 
 - Automated checks run:
-  - `wctl run-pytest tests/microservices/test_rq_engine_culverts.py tests/microservices/test_rq_engine_upload_huc_fire_routes.py tests/microservices/test_rq_engine_upload_batch_runner_routes.py tests/microservices/test_rq_engine_landuse_routes.py tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_upload_disturbed_routes.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` (`76 passed`)
-  - `wctl run-pytest tests --maxfail=1` (`3502 passed`, `36 skipped`)
+  - `wctl run-pytest tests/microservices/test_rq_engine_upload_climate_routes.py tests/microservices/test_rq_engine_upload_disturbed_routes.py tests/microservices/test_rq_engine_upload_huc_fire_routes.py tests/microservices/test_rq_engine_upload_batch_runner_routes.py tests/microservices/test_rq_engine_landuse_routes.py tests/microservices/test_rq_engine_treatments_routes.py tests/microservices/test_rq_engine_watershed_routes.py tests/microservices/test_rq_engine_culverts.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` (`120 passed`)
+  - `wctl run-pytest tests --maxfail=1` (`3524 passed`, `36 skipped`)
+  - `wctl doc-lint --path docs/work-packages/20260411_upload_endpoints_hardening/package.md --path docs/work-packages/20260411_upload_endpoints_hardening/tracker.md --path docs/work-packages/20260411_upload_endpoints_hardening/prompts/active/upload_endpoints_hardening_execplan.md --path docs/work-packages/20260411_upload_endpoints_hardening/artifacts/2026-04-12_security_review.md --path docs/schemas/upload-endpoint-contract.md --path docs/schemas/rq-response-contract.md` (`6 files validated`, `0 errors`, `0 warnings`)
 - Manual checks run:
   - Reviewed scoped endpoint inventory against package scope and confirmed no `shape_converter` endpoint behavior changes were introduced.
 
@@ -114,5 +125,5 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
 
 ## Sign-off
 
-- **Security reviewer**: Codex (2026-04-12 06:34 UTC)
+- **Security reviewer**: Codex (2026-04-12 19:06 UTC)
 - **Package owner**: pending human acknowledgment

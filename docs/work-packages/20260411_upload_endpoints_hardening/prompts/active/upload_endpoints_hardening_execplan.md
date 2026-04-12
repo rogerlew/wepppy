@@ -6,12 +6,12 @@ This plan follows `docs/prompt_templates/codex_exec_plans.md`.
 
 ## Purpose / Big Picture
 
-After this change, non-`shape_converter` upload endpoints in WEPPpy will reject dangerous or oversized uploads before they are written/extracted, and culvert ZIP ingestion will use the same hardened archive controls already validated in `shape_converter`. Operators will get deterministic, contract-compliant validation errors without traceback leakage.
+After this change, non-`shape_converter` upload endpoints in WEPPpy will reject dangerous or oversized uploads before they are written/extracted, and culvert ZIP ingestion will use the same hardened archive controls already validated in `shape_converter`. Operators will get deterministic, contract-compliant validation errors with stable `error.code` + `error_id`, and exception-driven failures will be correlated to server-side traceback logs by the same `error_id`.
 
 Observable behavior changes:
 - Culvert ZIP uploads reject traversal/symlink/encrypted/nested/unsupported-compression abuse fixtures before extraction.
 - Upload endpoints that currently allow unbounded writes enforce explicit size caps and extension allowlists.
-- Upload failures return canonical error payloads without internal traceback details.
+- Upload failures return canonical error payloads with specific `error.message`, populated `error.details`, stable `error.code`, and `error_id` (traceback payloads MAY be present per contract).
 
 ## Progress
 
@@ -23,6 +23,11 @@ Observable behavior changes:
 - [x] (2026-04-12 06:27Z) Added regression tests for archive abuse fixtures and endpoint-specific upload limits.
 - [x] (2026-04-12 06:34Z) Completed security review artifact and closure validation gates.
 - [x] (2026-04-12 06:37Z) Completed doc-lint closure gate and final package documentation updates.
+- [x] (2026-04-12 18:32Z) Executed follow-up findings A-E closure across rq-engine + roads upload surfaces.
+- [x] (2026-04-12 18:35Z) Hardened shared upload response/helpers so upload-facing failures consistently emit `error.message`, `error.details`, `error.code`, and `error_id`.
+- [x] (2026-04-12 18:53Z) Added regression checks for `error_id`/code/details envelope fields and traceback/error-id log correlation.
+- [x] (2026-04-12 19:01Z) Re-ran full suite gate after helper updates (`3524 passed`, `36 skipped`).
+- [x] (2026-04-12 19:06Z) Re-ran docs lint on package/security/schema artifacts after follow-up edits (`6 files validated`, `0 errors`, `0 warnings`).
 
 ## Surprises & Discoveries
 
@@ -34,6 +39,8 @@ Observable behavior changes:
   Evidence: `wepppy/microservices/shape_converter/archive_validation.py` and culvert route integration diff.
 - Observation: Roads upload validation helpers returned HTTP 200 by default for validation failures via `error_factory` unless status was explicitly set.
   Evidence: `wepppy/weppcloud/routes/nodb_api/roads_bp.py` upload route behavior before hardening.
+- Observation: Enforcing top-level `error_id` in shared rq-engine error helpers exposed one brittle exact-equality test in fork routes that assumed no additional top-level keys.
+  Evidence: initial full-suite failure in `tests/microservices/test_rq_engine_fork_archive_routes.py::test_fork_rejects_non_string_target_runid`, then fixed by asserting contract fields explicitly.
 
 ## Decision Log
 
@@ -49,18 +56,22 @@ Observable behavior changes:
 - Decision: Return explicit `413` for size/quota violations and `400` for type/validation failures across hardened upload endpoints.
   Rationale: Preserves canonical response shape while improving error-class clarity for clients and operators.
   Date/Author: 2026-04-12 / Codex.
+- Decision: Implement upload error envelope + traceback correlation at shared helper boundaries (`responses.py`, `upload_helpers.py`, `weppcloud/utils/helpers.py`) and patch only route outliers.
+  Rationale: Ensures consistency across upload surfaces while minimizing route-by-route drift.
+  Date/Author: 2026-04-12 / Codex.
 
 ## Outcomes & Retrospective
 
 - Completed all scoped hardening milestones and security findings closure.
 - Culvert ZIP ingestion now uses shared validated archive controls (read with limit, safe member validation, controlled extraction) and no longer calls `extractall`.
 - Scoped non-shape_converter upload endpoints now enforce explicit pre-write max-byte controls and extension/type allowlists.
-- Upload-facing error payloads for scoped endpoints now return canonical non-traceback responses.
+- Upload-facing error payloads for scoped endpoints now return canonical envelopes with required upload contract fields (`error.message`, `error.details`, `error.code`, `error_id`).
+- Exception-driven upload failures now emit server-side traceback logs correlated to API responses via matching `error_id`.
 - Regression coverage now includes culvert ZIP abuse fixtures (traversal, encrypted, nested, unsupported compression, duplicate path, quota) plus per-endpoint size/type validations.
 - Validation gates completed:
-  - Targeted scoped suites: `76 passed`
-  - Full closure suite: `3502 passed`, `36 skipped`
-  - Docs lint closure gate: `5 files validated`, `0 errors`, `0 warnings`
+  - Targeted scoped suites: `120 passed`
+  - Full closure suite: `3524 passed`, `36 skipped`
+  - Docs lint closure gate: `6 files validated`, `0 errors`, `0 warnings`
 
 ## Context and Orientation
 
@@ -88,7 +99,7 @@ Key finding classes to close:
 - Archive abuse and extraction safety gaps.
 - Unbounded upload write paths.
 - Missing/empty extension allowlists.
-- Traceback leakage in upload-facing error payloads.
+- Inconsistent upload error envelope fields (`error.code`, `error.details`, `error_id`) and missing traceback/error-id observability correlation.
 
 ## Plan of Work
 
@@ -102,8 +113,9 @@ Milestone 2 (Non-archive upload boundary hardening):
 - Add explicit type/extension allowlists for endpoints currently accepting arbitrary files (including disturbed SBS route policy).
 
 Milestone 3 (Error contract hardening):
-- Remove traceback disclosure from upload-facing error payloads while retaining canonical error structure and status behavior.
-- Add/adjust tests to verify error payload shape and that tracebacks are not exposed.
+- Enforce canonical upload error envelope requirements (`error.message`, `error.details`, `error.code`, `error_id`) while preserving specific user-visible reasons.
+- Ensure exception-driven upload failures log full traceback server-side with matching `error_id`; payload traceback inclusion remains optional (`MAY include traceback`) per contract.
+- Add/adjust tests to verify envelope fields and traceback/error-id log correlation.
 
 Milestone 4 (Validation and security closure):
 - Add archive abuse regression fixtures and endpoint-specific size/extension tests.
@@ -134,7 +146,8 @@ Acceptance is satisfied when:
 - Culvert ZIP ingestion rejects traversal, encrypted, nested archive, unsupported compression, symlink/special entry, duplicate-path, and archive quota abuse fixtures.
 - No scoped endpoint writes unbounded upload payloads.
 - Extension/type policy is explicit and test-covered for each scoped route.
-- Upload-facing error payloads are canonical and do not include traceback internals.
+- Upload-facing error payloads are canonical and include required contract fields (`error.message`, `error.details`, `error.code`, `error_id`).
+- Exception-driven upload failures emit traceback logs with a matching response `error_id`.
 - Targeted tests and `wctl run-pytest tests --maxfail=1` pass.
 - Security artifact reports no unresolved medium/high findings.
 
@@ -154,7 +167,7 @@ Acceptance is satisfied when:
 Interfaces expected after implementation:
 - Culvert ZIP ingest path calls a hardened archive validator/extractor derived from `shape_converter` controls.
 - Upload routes expose explicit max-byte and extension validation behavior with canonical error responses.
-- Error response boundary preserves contract shape without traceback disclosure.
+- Error response boundary preserves canonical upload contract shape and emits traceback/error-id correlation for exception-driven failures.
 
 Dependencies:
 - Existing tests under `tests/microservices/` and `tests/weppcloud/routes/`.
@@ -162,3 +175,5 @@ Dependencies:
 
 ---
 Revision Note (2026-04-12 / Codex): Initial active ExecPlan authored at package kickoff, explicitly aligned to upload vulnerability findings and the directive to reuse validated `shape_converter` ZIP controls.
+Revision Note (2026-04-12 19:02Z / Codex): Updated the living plan for follow-up findings A-E closure, including helper-level envelope/correlation hardening, new regression evidence, and updated validation counts.
+Revision Note (2026-04-12 19:06Z / Codex): Recorded final follow-up docs-lint evidence for package + schema artifacts.

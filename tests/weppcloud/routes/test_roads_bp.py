@@ -360,6 +360,9 @@ def test_upload_geojson_rejects_json_path_mode(roads_client):
     assert response.status_code == 400
     payload = response.get_json()
     assert "multipart `file`" in payload["error"]["message"]
+    assert payload["error"]["details"] == payload["error"]["message"]
+    assert payload["error"]["code"] == "missing_upload_file"
+    assert payload["error_id"]
 
 
 def test_upload_geojson_rejects_invalid_extension(roads_client):
@@ -374,6 +377,9 @@ def test_upload_geojson_rejects_invalid_extension(roads_client):
     assert response.status_code == 400
     payload = response.get_json()
     assert payload["error"]["message"] == "Roads upload must be a .geojson file."
+    assert payload["error"]["details"] == "Roads upload must be a .geojson file."
+    assert payload["error"]["code"] == "invalid_upload_extension"
+    assert payload["error_id"]
 
 
 def test_upload_geojson_rejects_oversize_payload(
@@ -392,6 +398,44 @@ def test_upload_geojson_rejects_oversize_payload(
     assert response.status_code == 413
     payload = response.get_json()
     assert "maximum size" in payload["error"]["message"]
+    assert payload["error"]["details"] == payload["error"]["message"]
+    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error_id"]
+
+
+def test_upload_geojson_server_fault_logs_error_id_correlation(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+):
+    client, *_rest = roads_client
+
+    def _raise_os_error(*_args, **_kwargs):
+        raise OSError("filesystem quota exceeded")
+
+    monkeypatch.setattr(roads_module, "_save_roads_upload_with_limit", _raise_os_error)
+    caplog.set_level("ERROR", logger="wepppy.weppcloud.utils.helpers")
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+        data={"file": (io.BytesIO(b"{}"), "roads.geojson")},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Failed to save Roads upload: filesystem quota exceeded"
+    assert payload["error"]["details"] == payload["error"]["message"]
+    assert payload["error"]["code"] == "internal_error"
+    assert payload["error_id"]
+
+    correlated_records = [
+        record
+        for record in caplog.records
+        if getattr(record, "error_id", None) == payload["error_id"]
+    ]
+    assert correlated_records
+    assert any("OSError: filesystem quota exceeded" in record.getMessage() for record in correlated_records)
 
 
 def test_set_params_updates_controller_state(roads_client):

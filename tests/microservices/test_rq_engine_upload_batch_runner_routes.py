@@ -118,6 +118,9 @@ def test_upload_geojson_rejects_oversize_payload(
     assert response.status_code == 413
     payload = response.json()
     assert payload["error"]["message"] == "File exceeds maximum allowed size"
+    assert payload["error"]["details"] == "File exceeds maximum allowed size"
+    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error_id"]
 
 
 def test_upload_geojson_rejects_invalid_extension(
@@ -149,6 +152,9 @@ def test_upload_geojson_rejects_invalid_extension(
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["message"] == "Only .geojson or .json files are supported."
+    assert payload["error"]["details"] == "Only .geojson or .json files are supported."
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error_id"]
 
 
 def test_upload_sbs_map_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -210,6 +216,9 @@ def test_upload_sbs_map_rejects_oversize_payload(
     assert response.status_code == 413
     payload = response.json()
     assert payload["error"]["message"] == "File exceeds maximum allowed size"
+    assert payload["error"]["details"] == "File exceeds maximum allowed size"
+    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error_id"]
 
 
 def test_upload_sbs_map_rejects_invalid_extension(
@@ -268,4 +277,6 @@ def test_upload_geojson_load_error_redacts_traceback(
     payload = response.json()
     assert payload["error"]["message"] == "Failed to load batch runner"
     assert payload["error"]["details"] == "Failed to load batch runner"
+    assert payload["error"]["code"] == "internal_error"
+    assert payload["error_id"]
     assert "Traceback" not in payload["error"]["details"]

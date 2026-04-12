@@ -187,6 +187,9 @@ def test_build_treatments_user_defined_rejects_invalid_extension(
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["message"].startswith("Invalid file extension.")
+    assert payload["error"]["details"].startswith("Invalid file extension.")
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error_id"]
 
 
 def test_build_treatments_user_defined_rejects_oversize_upload(
@@ -220,3 +223,42 @@ def test_build_treatments_user_defined_rejects_oversize_upload(
     assert response.status_code == 413
     payload = response.json()
     assert payload["error"]["message"] == "File exceeds maximum allowed size"
+    assert payload["error"]["details"] == "File exceeds maximum allowed size"
+    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error_id"]
+
+
+def test_build_treatments_user_defined_requires_upload_field(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(treatments_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyTreatments:
+        mode = treatments_routes.TreatmentsMode.UserDefinedMap
+        treatments_dir = "/tmp/treatments"
+
+        def validate(self, _path: str) -> None:
+            return None
+
+    class DummyLanduse:
+        mapping = None
+
+    monkeypatch.setattr(treatments_routes.Treatments, "getInstance", lambda wd: DummyTreatments())
+    monkeypatch.setattr(treatments_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-treatments",
+            data={"landuse_management_mapping_selection": "default"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert (
+        payload["error"]["message"]
+        == "input_upload_landuse must be provided when treatments_mode is UserDefinedMap."
+    )
+    assert payload["error"]["details"] == payload["error"]["message"]
+    assert payload["error"]["code"] == "missing_upload_file"
+    assert payload["error_id"]

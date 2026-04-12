@@ -78,10 +78,12 @@ Example (sync update):
     "message": "Human-readable summary",
     "code": "optional_code",
     "details": "Stacktrace string or error details"
-  }
+  },
+  "error_id": "optional-correlation-id"
 }
 ```
 - `error.details` is required for error responses; include a stacktrace (string) for exception-driven failures and a human-readable summary for validation errors (structured details belong in `errors`).
+- `error_id` is optional for generic rq-engine surfaces but **required** for upload-facing errors (see `docs/schemas/upload-endpoint-contract.md`) and should be used to correlate API responses to server logs.
 - Job polling not-found:
   - `/rq-engine/api/jobstatus/<job_id>` and `/rq-engine/api/jobinfo/<job_id>` return HTTP 404 with the canonical error payload and `error.code="not_found"`.
 - Validation error list:

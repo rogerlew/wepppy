@@ -161,13 +161,11 @@ def test_fork_rejects_non_string_target_runid(monkeypatch: pytest.MonkeyPatch, t
         )
 
     assert response.status_code == 400
-    assert response.json() == {
-        "error": {
-            "message": "Invalid target_runid",
-            "code": "validation_error",
-            "details": "Invalid target_runid",
-        }
-    }
+    payload = response.json()
+    assert payload["error"]["message"] == "Invalid target_runid"
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error"]["details"] == "Invalid target_runid"
+    assert payload["error_id"]
 
 
 def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:

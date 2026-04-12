@@ -192,5 +192,95 @@ def test_upload_cli_rejects_oversize_file(
             headers={"Authorization": "Bearer token"},
         )
 
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "File exceeds maximum allowed size"
+    assert payload["error"]["details"] == "File exceeds maximum allowed size"
+    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error_id"]
+
+
+def test_upload_cli_requires_file_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    cli_dir = run_dir / "cli"
+    cli_dir.mkdir(parents=True)
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(upload_climate_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(upload_climate_routes.Ron, "getInstance", lambda wd: object())
+    monkeypatch.setattr(
+        upload_climate_routes,
+        "mutate_root",
+        lambda wd, root, callback, purpose="rq-upload": callback(),
+    )
+
+    class DummyClimate:
+        def __init__(self, cli_dir: Path) -> None:
+            self.cli_dir = str(cli_dir)
+
+    climate = DummyClimate(cli_dir)
+    monkeypatch.setattr(upload_climate_routes.Climate, "getInstance", lambda wd: climate)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-cli/",
+            headers={"Authorization": "Bearer token"},
+        )
+
     assert response.status_code == 400
-    assert response.json()["error"]["message"] == "File exceeds maximum allowed size"
+    payload = response.json()
+    assert payload["error"]["message"] == "input_upload_cli must be provided"
+    assert payload["error"]["details"] == "input_upload_cli must be provided"
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error_id"]
+
+
+def test_upload_cli_500_logs_traceback_with_response_error_id(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    run_dir = tmp_path / "run"
+    cli_dir = run_dir / "cli"
+    cli_dir.mkdir(parents=True)
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(upload_climate_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(upload_climate_routes.Ron, "getInstance", lambda wd: object())
+
+    class DummyClimate:
+        def __init__(self, source_dir: Path) -> None:
+            self.cli_dir = str(source_dir)
+
+    monkeypatch.setattr(upload_climate_routes.Climate, "getInstance", lambda wd: DummyClimate(cli_dir))
+
+    def _raise_failure(wd, root, callback, purpose="rq-upload"):
+        raise RuntimeError("disk write exploded")
+
+    monkeypatch.setattr(upload_climate_routes, "mutate_root", _raise_failure)
+    caplog.set_level("ERROR", logger="wepppy.microservices.rq_engine.responses")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-cli/",
+            files={"input_upload_cli": ("demo.cli", b"data")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["error"]["message"] == "Could not save file"
+    assert payload["error"]["code"] == "internal_error"
+    assert payload["error"]["details"]
+    assert payload["error_id"]
+
+    correlated_records = [
+        record
+        for record in caplog.records
+        if getattr(record, "error_id", None) == payload["error_id"]
+    ]
+    assert correlated_records
+    assert any("RuntimeError: disk write exploded" in record.getMessage() for record in correlated_records)

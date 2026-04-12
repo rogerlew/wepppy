@@ -475,6 +475,9 @@ def test_upload_dem_requires_file(monkeypatch: pytest.MonkeyPatch, tmp_path) -> 
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["message"] == "input_upload_dem must be provided"
+    assert payload["error"]["details"] == "input_upload_dem must be provided"
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error_id"]
 
 
 def test_upload_dem_success(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
@@ -531,8 +534,12 @@ def test_upload_dem_rejects_oversize_file(monkeypatch: pytest.MonkeyPatch, tmp_p
             files={"input_upload_dem": ("sample.tif", b"abcdef", "image/tiff")},
         )
 
-    assert response.status_code == 400
-    assert response.json()["error"]["message"] == "File exceeds maximum allowed size"
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["message"] == "File exceeds maximum allowed size"
+    assert payload["error"]["details"] == "File exceeds maximum allowed size"
+    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error_id"]
 
 
 def test_validate_dem_dimensions_accepts_limit() -> None:

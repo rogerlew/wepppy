@@ -137,7 +137,11 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
             form = await request.form()
             upload = _extract_upload(form, "input_upload_landuse")
             if upload is None:
-                return error_response("Could not find file", status_code=400)
+                return error_response(
+                    "input_upload_landuse must be provided when treatments_mode is UserDefinedMap.",
+                    status_code=400,
+                    code="missing_upload_file",
+                )
             if not upload.filename:
                 return error_response("no filename specified", status_code=400)
 

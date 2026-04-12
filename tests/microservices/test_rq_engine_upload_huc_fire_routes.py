@@ -24,6 +24,7 @@ def _post_upload_sbs(
     upload_filename: str = "sbs.tif",
     upload_bytes: bytes = b"data",
     validate_error: Exception | None = None,
+    include_upload: bool = True,
 ) -> tuple[Any, Path]:
     run_dir = tmp_path / "run"
     disturbed_dir = run_dir / "disturbed"
@@ -87,12 +88,20 @@ def _post_upload_sbs(
     dummy_disturbed = DummyDisturbed(disturbed_dir)
     monkeypatch.setattr(upload_huc_fire_routes.Disturbed, "getInstance", lambda wd: dummy_disturbed)
 
+    files = {"input_upload_sbs": (upload_filename, upload_bytes)} if include_upload else None
+
     with TestClient(rq_engine.app) as client:
-        response = client.post(
-            "/api/huc-fire/tasks/upload-sbs/",
-            files={"input_upload_sbs": (upload_filename, upload_bytes)},
-            headers={"Authorization": "Bearer token"},
-        )
+        if files is None:
+            response = client.post(
+                "/api/huc-fire/tasks/upload-sbs/",
+                headers={"Authorization": "Bearer token"},
+            )
+        else:
+            response = client.post(
+                "/api/huc-fire/tasks/upload-sbs/",
+                files=files,
+                headers={"Authorization": "Bearer token"},
+            )
 
     return response, run_dir
 
@@ -178,9 +187,12 @@ def test_huc_fire_upload_sbs_rejects_oversize_upload(
     assert response.status_code == 413
     payload = response.json()
     assert payload["error"]["message"] == "File exceeds maximum allowed size"
+    assert payload["error"]["details"] == "File exceeds maximum allowed size"
+    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error_id"]
 
 
-def test_huc_fire_upload_sbs_redacts_tracebacks_on_internal_validation_errors(
+def test_huc_fire_upload_sbs_validation_errors_include_specific_reason(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -193,8 +205,28 @@ def test_huc_fire_upload_sbs_redacts_tracebacks_on_internal_validation_errors(
         validate_error=RuntimeError("boom"),
     )
 
-    assert response.status_code == 500
+    assert response.status_code == 400
     payload = response.json()
-    assert payload["error"]["message"] == "Failed validating file"
-    assert payload["error"]["details"] == "Failed validating file"
-    assert "Traceback" not in payload["error"]["details"]
+    assert payload["error"]["message"] == "SBS validation failed: boom"
+    assert payload["error"]["details"] == "SBS validation failed: boom"
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error_id"]
+
+
+def test_huc_fire_upload_sbs_requires_file_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    response, _run_dir = _post_upload_sbs(
+        monkeypatch,
+        tmp_path,
+        apply_nodir=False,
+        include_upload=False,
+    )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "input_upload_sbs must be provided"
+    assert payload["error"]["details"] == "input_upload_sbs must be provided"
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["error_id"]

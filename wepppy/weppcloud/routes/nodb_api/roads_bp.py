@@ -26,7 +26,11 @@ from wepppy.rq.roads_rq import (
     run_roads_rq,
 )
 from wepppy.weppcloud.utils.cap_guard import requires_cap
-from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.helpers import (
+    authorize_and_handle_with_exception_factory,
+    upload_error_factory,
+    upload_exception_factory,
+)
 
 from .._common import *  # noqa: F401,F403
 
@@ -276,21 +280,28 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
-    disabled_response = _require_enabled(controller)
-    if disabled_response is not None:
-        return disabled_response
+    if not controller.enabled:
+        return upload_error_factory(
+            "Roads module is not enabled for this run.",
+            status_code=400,
+            code="validation_error",
+        )
 
     uploaded = request.files.get("file")
     if uploaded is None or not uploaded.filename:
-        response = error_factory("Provide multipart `file` for Roads upload.")
-        response.status_code = 400
-        return response
+        return upload_error_factory(
+            "Provide multipart `file` for Roads upload.",
+            status_code=400,
+            code="missing_upload_file",
+        )
 
     filename = str(uploaded.filename)
     if not filename.lower().endswith(".geojson"):
-        response = error_factory("Roads upload must be a .geojson file.")
-        response.status_code = 400
-        return response
+        return upload_error_factory(
+            "Roads upload must be a .geojson file.",
+            status_code=400,
+            code="invalid_upload_extension",
+        )
     os.makedirs(controller.roads_upload_dir, exist_ok=True)
     source_path = os.path.join(controller.roads_upload_dir, "roads.upload.source.geojson")
     try:
@@ -300,40 +311,38 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
             max_bytes=ROADS_UPLOAD_GEOJSON_MAX_BYTES,
         )
     except UploadBoundaryError as exc:
-        response = error_factory(str(exc))
-        if getattr(exc, "status_code", 400) == 413:
-            response.status_code = 413
-        else:
-            response.status_code = 400
-        return response
+        status_code = 413 if getattr(exc, "status_code", 400) == 413 else 400
+        code = "payload_too_large" if status_code == 413 else "validation_error"
+        return upload_error_factory(str(exc), status_code=status_code, code=code)
     except OSError as exc:
         try:
             os.remove(source_path)
         except OSError:
             pass
-        response = error_factory(f"Failed to save Roads upload: {exc}")
-        response.status_code = 500
-        return response
+        return upload_exception_factory(
+            f"Failed to save Roads upload: {exc}",
+            status_code=500,
+            code="internal_error",
+            details=f"Failed to save Roads upload: {exc}",
+        )
 
     if bytes_written <= 0:
         try:
             os.remove(source_path)
         except OSError:
             pass
-        response = error_factory("Roads upload is empty.")
-        response.status_code = 400
-        return response
+        return upload_error_factory(
+            "Roads upload is empty.",
+            status_code=400,
+            code="empty_upload",
+        )
 
     try:
         summary = controller.set_uploaded_geojson(str(source_path))
     except FileNotFoundError as exc:
-        response = error_factory(str(exc))
-        response.status_code = 404
-        return response
+        return upload_error_factory(str(exc), status_code=404, code="not_found")
     except ValueError as exc:
-        response = error_factory(str(exc))
-        response.status_code = 400
-        return response
+        return upload_error_factory(str(exc), status_code=400, code="validation_error")
 
     _invalidate_roads_timestamp(wd)
     return success_factory(summary)

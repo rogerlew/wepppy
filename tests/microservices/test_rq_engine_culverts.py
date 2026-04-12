@@ -61,6 +61,8 @@ def test_culvert_ingest_requires_auth(tmp_path: Path, monkeypatch: pytest.Monkey
     assert response.status_code == 401
     payload = response.json()
     assert payload["error"]["code"] == "unauthorized"
+    assert payload["error"]["details"]
+    assert payload["error_id"]
 
 
 def test_culvert_ingest_rejects_missing_scope(
@@ -76,6 +78,8 @@ def test_culvert_ingest_rejects_missing_scope(
     assert response.status_code == 403
     payload = response.json()
     assert payload["error"]["code"] == "forbidden"
+    assert payload["error"]["details"]
+    assert payload["error_id"]
 
 
 def test_culvert_ingest_auth_internal_error_redacts_traceback(
@@ -97,6 +101,8 @@ def test_culvert_ingest_auth_internal_error_redacts_traceback(
     payload = response.json()
     assert payload["error"]["message"] == "Failed to authorize request"
     assert payload["error"]["details"] == "Failed to authorize request"
+    assert payload["error"]["code"] == "unauthorized"
+    assert payload["error_id"]
     assert "Traceback" not in payload["error"]["details"]
 
 

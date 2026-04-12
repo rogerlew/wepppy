@@ -110,7 +110,7 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         form = await request.form()
         upload = _extract_upload(form, "input_upload_cli")
         if upload is None:
-            return upload_failure("Could not find file")
+            return upload_failure("input_upload_cli must be provided")
 
         saved_path = mutate_root(
             wd,
@@ -126,7 +126,7 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
             purpose="rq-upload-cli-save",
         )
     except UploadError as exc:
-        return upload_failure(str(exc))
+        return upload_failure(str(exc), status=int(getattr(exc, "status_code", 400)))
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -145,7 +145,7 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
             prep.set_rq_job_id("upload_cli_rq", job.id)
         return upload_success(job_id=job.id)
     except UploadError as exc:
-        return upload_failure(str(exc))
+        return upload_failure(str(exc), status=int(getattr(exc, "status_code", 400)))
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cli enqueue failed")
         return error_response_with_traceback("Failed validating file", status_code=500)

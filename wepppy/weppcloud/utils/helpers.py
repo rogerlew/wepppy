@@ -10,6 +10,7 @@ import logging
 import os
 import socket
 import traceback
+import uuid
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
@@ -31,6 +32,22 @@ P = ParamSpec("P")
 ResponseValue = TypeVar("ResponseValue")
 
 logger = logging.getLogger(__name__)
+
+_DEFAULT_ERROR_CODE_BY_STATUS: dict[int, str] = {
+    400: "validation_error",
+    401: "unauthorized",
+    403: "forbidden",
+    404: "not_found",
+    409: "conflict",
+    413: "payload_too_large",
+    415: "unsupported_media_type",
+    422: "validation_error",
+    429: "rate_limited",
+    500: "internal_error",
+    502: "bad_gateway",
+    503: "service_unavailable",
+    504: "gateway_timeout",
+}
 
 redis_wd_cache_client: Optional[redis.Redis] = None
 REDIS_HOST = redis_host()
@@ -528,6 +545,83 @@ def error_factory(
     if status_code is not None:
         response.status_code = status_code
     return response
+
+
+def _default_error_code(status_code: int) -> str:
+    if status_code in _DEFAULT_ERROR_CODE_BY_STATUS:
+        return _DEFAULT_ERROR_CODE_BY_STATUS[status_code]
+    if 400 <= status_code < 500:
+        return "validation_error"
+    if status_code >= 500:
+        return "internal_error"
+    return "error"
+
+
+def upload_error_factory(
+    msg: str = "Upload request failed",
+    *,
+    status_code: int = 400,
+    code: Optional[str] = None,
+    details: Any | None = None,
+    errors: Optional[list[Any]] = None,
+    error_id: Optional[str] = None,
+) -> Response:
+    """Return canonical upload error payloads with stable code + error_id."""
+    message = _ensure_text(msg)
+    resolved_error_id = error_id or uuid.uuid4().hex
+    resolved_code = code or _default_error_code(status_code)
+    resolved_details = message if details is None else details
+
+    payload: dict[str, Any] = {
+        "error": {
+            "message": message,
+            "details": resolved_details,
+            "code": resolved_code,
+        },
+        "error_id": resolved_error_id,
+    }
+    if errors is not None:
+        payload["errors"] = errors
+    response = jsonify(payload)
+    response.status_code = status_code
+    return response
+
+
+def upload_exception_factory(
+    msg: BaseException | str = "Upload request failed",
+    *,
+    status_code: int = 500,
+    code: Optional[str] = None,
+    details: Any | None = None,
+    errors: Optional[list[Any]] = None,
+) -> Response:
+    """Log traceback with error_id and return canonical upload error payload."""
+    message = _format_error_message(msg)
+    resolved_error_id = uuid.uuid4().hex
+    resolved_code = code or _default_error_code(status_code)
+    stacktrace = traceback.format_exc()
+    logger.error(
+        "Upload exception response emitted [error_id=%s code=%s status=%s]: %s\n%s",
+        resolved_error_id,
+        resolved_code,
+        status_code,
+        message,
+        stacktrace,
+        extra={
+            "error_id": resolved_error_id,
+            "error_code": resolved_code,
+            "status_code": status_code,
+        },
+    )
+    resolved_details = message if details is None else details
+    return upload_error_factory(
+        message,
+        status_code=status_code,
+        code=resolved_code,
+        details=resolved_details,
+        errors=errors,
+        error_id=resolved_error_id,
+    )
 
 
 def _ensure_text(value: Any) -> str:

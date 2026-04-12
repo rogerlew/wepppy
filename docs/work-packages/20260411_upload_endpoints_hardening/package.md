@@ -1,6 +1,6 @@
 # Upload Endpoints Hardening
 
-**Status**: Complete (2026-04-12 06:34 UTC)
+**Status**: Complete (2026-04-12 19:06 UTC)
 **Timezone**: UTC (all timestamps in this package use UTC)
 
 ## Overview
@@ -10,7 +10,8 @@ This package hardens non-`shape_converter` upload endpoints in WEPPpy so archive
 - Reuse the validated ZIP validation/extraction implementation from `wepppy/microservices/shape_converter/archive_validation.py` for culvert ZIP ingestion.
 - Eliminate unbounded upload writes in non-archive endpoints by enforcing explicit size caps before disk write.
 - Enforce extension/type allowlists consistently across upload endpoints.
-- Remove traceback leakage from upload-facing error responses while preserving canonical error contracts.
+- Enforce canonical upload error envelopes (`error.message`, `error.details`, `error.code`, `error_id`) with specific user-visible reasons.
+- Correlate exception-driven traceback logging to API responses via shared `error_id`, while keeping traceback payload behavior contract-compliant (`MAY` include traceback).
 - Add regression coverage for traversal, archive abuse cases, and per-endpoint upload limits.
 
 ## Scope
@@ -20,13 +21,15 @@ This package covers upload boundary hardening for rq-engine and WEPPcloud upload
 - `wepppy/microservices/rq_engine/culvert_routes.py` ZIP ingest hardening.
 - Extraction/reuse of archive validation logic from `wepppy/microservices/shape_converter/archive_validation.py` and `read_upload_bytes_with_limit` semantics.
 - Endpoint hardening for:
+  - `wepppy/microservices/rq_engine/upload_climate_routes.py`
   - `wepppy/microservices/rq_engine/upload_huc_fire_routes.py`
   - `wepppy/microservices/rq_engine/upload_batch_runner_routes.py`
   - `wepppy/microservices/rq_engine/landuse_routes.py`
   - `wepppy/microservices/rq_engine/treatments_routes.py`
   - `wepppy/microservices/rq_engine/upload_disturbed_routes.py`
+  - `wepppy/microservices/rq_engine/watershed_routes.py` (`upload-dem`)
   - `wepppy/weppcloud/routes/nodb_api/roads_bp.py`
-- Upload error contract hardening in `wepppy/microservices/rq_engine/responses.py` (or equivalent boundary path) to avoid traceback disclosure.
+- Upload error contract hardening in `wepppy/microservices/rq_engine/responses.py`, `wepppy/microservices/rq_engine/upload_helpers.py`, and `wepppy/weppcloud/utils/helpers.py`.
 - Targeted and suite-level tests under `tests/microservices/` and `tests/weppcloud/routes/`.
 - Documentation updates for upload limits and validation behavior where contracts are user-visible.
 
@@ -46,7 +49,8 @@ This package covers upload boundary hardening for rq-engine and WEPPcloud upload
 - [x] ZIP traversal, encrypted-entry, nested-archive, unsupported-compression, duplicate-path, and quota abuse fixtures are rejected with explicit contract-compliant errors.
 - [x] `upload_huc_fire`, batch SBS upload, landuse/treatments user-defined uploads, and Roads upload enforce explicit pre-write max-byte controls.
 - [x] Disturbed SBS upload no longer allows arbitrary file extensions.
-- [x] Upload-facing 500 payloads no longer expose Python tracebacks.
+- [x] Upload-facing error payloads include specific `error.message`, populated `error.details`, stable `error.code`, and `error_id`.
+- [x] Exception-driven upload failures log full traceback server-side with the same `error_id` returned to callers.
 - [x] Targeted microservice/web route tests and `wctl run-pytest tests --maxfail=1` pass for merged changes.
 - [x] Dedicated security review artifact is complete with no unresolved medium/high findings.
 
@@ -82,7 +86,8 @@ This package covers upload boundary hardening for rq-engine and WEPPcloud upload
 - Verify per-endpoint extension allowlists and max-byte constraints are enforced before write/extract.
 
 ### Contract/Error Gate
-- Verify upload rejection responses remain canonical and do not include traceback internals.
+- Verify upload rejection responses remain canonical (`error.message`, `error.details`, `error.code`, `error_id`) with specific reasons.
+- Verify exception-driven upload failures emit traceback logs correlated by `error_id`.
 - Verify status codes are explicit for validation/quota errors.
 
 ### Maintainer Gate

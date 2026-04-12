@@ -43,6 +43,13 @@ def _upload_status_from_message(message: str) -> int:
     return 400
 
 
+def _validation_reason(exc: Exception) -> str:
+    detail = str(exc).strip()
+    if detail:
+        return detail
+    return exc.__class__.__name__
+
+
 @router.post(
     "/runs/{runid}/{config}/tasks/upload-sbs/",
     summary="Upload SBS disturbed map",
@@ -104,14 +111,20 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         ret, description = sbs_map_sanity_check(str(saved_path))
         if ret != 0:
             return error_response(description, status_code=400)
-        baer.validate(filename, mode=0)
+        try:
+            baer.validate(filename, mode=0)
+        except Exception as exc:  # broad-except: validation boundary
+            logger.exception("rq-engine upload-sbs validation failed")
+            reason = _validation_reason(exc)
+            return error_response(f"SBS validation failed: {reason}", status_code=400)
         RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.build_rusle)
         return upload_success(result={"disturbed_fn": baer.disturbed_fn})
     except UploadError as exc:
         return upload_failure(str(exc), status=_upload_status_from_message(str(exc)))
-    except Exception:  # broad-except: boundary contract
+    except Exception as exc:  # broad-except: boundary contract
         logger.exception("rq-engine upload-sbs failed")
-        return error_response("Failed validating file", status_code=500)
+        reason = _validation_reason(exc)
+        return error_response(f"Upload failed: {reason}", status_code=500)
 
 
 @router.post(
@@ -145,12 +158,12 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
         from wepppy.nodb.mods.revegetation import Revegetation
 
         wd = get_wd(runid)
-        reveg = Revegetation.getInstance(wd)
-
         form = await request.form()
         upload = _extract_upload(form, "input_upload_cover_transform")
         if upload is None:
-            return upload_failure("Could not find file")
+            return upload_failure("input_upload_cover_transform must be provided")
+
+        reveg = Revegetation.getInstance(wd)
 
         saved_path = save_upload_file(
             upload,
@@ -161,13 +174,19 @@ async def upload_cover_transform(runid: str, config: str, request: Request) -> J
             max_bytes=UPLOAD_COVER_TRANSFORM_MAX_BYTES,
         )
 
-        res = reveg.validate_user_defined_cover_transform(saved_path.name)
+        try:
+            res = reveg.validate_user_defined_cover_transform(saved_path.name)
+        except Exception as exc:  # broad-except: validation boundary
+            logger.exception("rq-engine upload-cover-transform validation failed")
+            reason = _validation_reason(exc)
+            return error_response(f"Cover transform validation failed: {reason}", status_code=400)
         return upload_success(result=res)
     except UploadError as exc:
         return upload_failure(str(exc), status=_upload_status_from_message(str(exc)))
-    except Exception:  # broad-except: boundary contract
+    except Exception as exc:  # broad-except: boundary contract
         logger.exception("rq-engine upload-cover-transform failed")
-        return error_response("Failed validating file", status_code=500)
+        reason = _validation_reason(exc)
+        return error_response(f"Upload failed: {reason}", status_code=500)
 
 
 __all__ = ["router"]
