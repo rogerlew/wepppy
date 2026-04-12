@@ -222,7 +222,11 @@ def _update_readme_table(entries: List[Dict[str, Any]], check: bool) -> bool:
     table_text = _generate_profile_table(entries)
     readme_path = REPO_ROOT / "readme.md"
     readme_text = readme_path.read_text(encoding="utf-8")
-    current_section = _extract_readme_section(readme_text)
+    try:
+        current_section = _extract_readme_section(readme_text)
+    except RuntimeError as exc:
+        print(f"{exc}; skipping profile-table sync.", file=sys.stderr)
+        return True
     normalized_current = "\n".join(line.rstrip() for line in current_section.splitlines()).strip()
     normalized_new = "\n".join(line.rstrip() for line in table_text.splitlines()).strip()
     if normalized_current == normalized_new:
