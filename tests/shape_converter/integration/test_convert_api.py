@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import importlib
 import json
+import subprocess
 
 import pytest
 
@@ -25,6 +26,7 @@ from wepppy.microservices.shape_converter import create_app
 
 pytestmark = [pytest.mark.integration, pytest.mark.microservice]
 shape_converter_app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
+shape_converter_convert_module = importlib.import_module("wepppy.microservices.shape_converter.convert")
 
 
 @pytest.mark.parametrize(
@@ -341,4 +343,46 @@ def test_convert_parser_loop_timeout_returns_canonical_timeout_and_cleans_scratc
     payload = response.json()
     assert payload["error"]["code"] == "request_timeout"
     assert observed_cancel["value"] is True
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_convert_parser_subprocess_timeout_returns_canonical_timeout_and_cleans_scratch(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:  # noqa: ANN001
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="timeout-subprocess"))
+
+    class _TimeoutProcess:
+        pid = 44001
+        returncode = None
+
+        def __init__(self):
+            self._communicate_calls = 0
+
+        def communicate(self, timeout=None):  # noqa: ANN001
+            self._communicate_calls += 1
+            if self._communicate_calls == 1:
+                raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
+            return "", ""
+
+        def poll(self):
+            return None
+
+        def wait(self, timeout=None):  # noqa: ANN001
+            raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
+
+    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", lambda *a, **k: _TimeoutProcess())  # noqa: ANN002, ANN003
+    monkeypatch.setattr(shape_converter_convert_module.os, "killpg", lambda *_args: None)
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("timeout-subprocess.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 408
+    payload = response.json()
+    assert payload["error"]["code"] == "request_timeout"
     assert list(tmp_path.iterdir()) == []

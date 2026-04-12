@@ -84,7 +84,11 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 COPY docker/requirements-uv.txt /tmp/requirements-uv.txt
 RUN uv venv /opt/venv && \
     source /opt/venv/bin/activate && \
-    uv pip install --requirement /tmp/requirements-uv.txt
+    uv pip install --requirement /tmp/requirements-uv.txt && \
+    GDAL_CONFIG=/usr/bin/gdal-config uv pip install \
+        --no-binary fiona \
+        --reinstall-package fiona \
+        fiona==1.10.1
 
 # Install and load DuckDB's spatial extension using the venv's python.
 RUN /opt/venv/bin/python -c "import duckdb; \

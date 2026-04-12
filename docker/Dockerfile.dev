@@ -85,6 +85,10 @@ COPY docker/requirements-uv.txt docker/requirements-stubs-uv.txt ./
 RUN uv venv /opt/venv && \
     . /opt/venv/bin/activate && \
     uv pip install --requirement requirements-uv.txt && \
+    GDAL_CONFIG=/usr/bin/gdal-config uv pip install \
+        --no-binary fiona \
+        --reinstall-package fiona \
+        fiona==1.10.1 && \
     uv pip install --requirement requirements-stubs-uv.txt
 
 # Install and load DuckDB's spatial extension using the venv's python.

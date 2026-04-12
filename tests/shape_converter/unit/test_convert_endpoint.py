@@ -4,6 +4,10 @@ import asyncio
 import importlib
 import json
 import logging
+import pickle
+import signal
+import subprocess
+from types import SimpleNamespace
 
 import pytest
 from pyproj import CRS
@@ -25,6 +29,9 @@ from wepppy.microservices.shape_converter import create_app
 pytestmark = [pytest.mark.unit, pytest.mark.microservice]
 shape_converter_app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
 shape_converter_convert_module = importlib.import_module("wepppy.microservices.shape_converter.convert")
+shape_converter_parser_worker_module = importlib.import_module(
+    "wepppy.microservices.shape_converter.convert_parser_worker"
+)
 
 
 def test_convert_geojson_wgs84_download_and_metadata_sidecar() -> None:
@@ -637,8 +644,12 @@ def test_convert_parser_loop_timeout_cancels_processing_and_cleans_scratch(
     assert list(tmp_path.iterdir()) == []
 
 
-def test_load_shapefile_applies_parser_egress_guards(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:  # noqa: ANN001
+def test_parser_worker_applies_parser_egress_guards_and_driver_allowlist(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:  # noqa: ANN001
     captured_options: dict[str, str] = {}
+    captured_open: dict[str, object] = {}
 
     class _FakeEnv:
         def __init__(self, **kwargs):  # noqa: ANN003
@@ -664,21 +675,120 @@ def test_load_shapefile_applies_parser_egress_guards(monkeypatch: pytest.MonkeyP
         def __iter__(self):
             return iter(())
 
-    monkeypatch.setattr(shape_converter_convert_module.fiona, "Env", _FakeEnv)
+    monkeypatch.setattr(shape_converter_parser_worker_module.fiona, "Env", _FakeEnv)
+
+    def _fake_open(path: str, *, enabled_drivers: list[str] | None = None):  # noqa: ANN001
+        captured_open["path"] = path
+        captured_open["enabled_drivers"] = enabled_drivers
+        return _FakeDataset()
+
+    monkeypatch.setattr(shape_converter_parser_worker_module.fiona, "open", _fake_open)
     monkeypatch.setattr(
-        shape_converter_convert_module.fiona,
-        "open",
-        lambda _path: _FakeDataset(),  # noqa: ARG005
-    )
-    monkeypatch.setattr(
-        shape_converter_convert_module,
+        shape_converter_parser_worker_module,
         "parse_source_crs",
         lambda **_kwargs: None,
     )
 
-    loaded = shape_converter_convert_module._load_shapefile(tmp_path / "roads.shp")
+    payload = shape_converter_parser_worker_module._load_shapefile_payload(
+        shp_path=tmp_path / "roads.shp",
+        max_features=10,
+    )
 
-    assert loaded.source_bounds == (10.0, 20.0, 10.0, 20.0)
+    assert payload["source_bounds"] == (10.0, 20.0, 10.0, 20.0)
+    assert captured_open["enabled_drivers"] == ["ESRI Shapefile"]
     assert captured_options["CPL_VSIL_CURL_ALLOWED_EXTENSIONS"] == ""
     assert captured_options["GDAL_DISABLE_READDIR_ON_OPEN"] == "EMPTY_DIR"
     assert captured_options["GDAL_HTTP_MAX_RETRY"] == "0"
+
+
+def test_load_shapefile_invokes_worker_subprocess_with_new_session(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    captured_popen_kwargs: dict[str, object] = {}
+    payload_path = tmp_path / "parser_worker_payload.pickle"
+    expected_payload = {
+        "properties": [{"NAME": "roads"}],
+        "geometries": [{"type": "Point", "coordinates": [10.0, 20.0]}],
+        "source_bounds": [10.0, 20.0, 10.0, 20.0],
+        "source_crs_wkt": CRS.from_epsg(4326).to_wkt(),
+    }
+
+    class _FakeProcess:
+        pid = 99123
+        returncode = 0
+
+        def communicate(self, timeout=None):  # noqa: ANN001
+            payload_path.write_bytes(pickle.dumps(expected_payload, protocol=pickle.HIGHEST_PROTOCOL))
+            return "", ""
+
+        def poll(self):
+            return self.returncode
+
+        def wait(self, timeout=None):  # noqa: ANN001
+            return self.returncode
+
+    def _fake_popen(*args, **kwargs):  # noqa: ANN002, ANN003
+        captured_popen_kwargs.update(kwargs)
+        return _FakeProcess()
+
+    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", _fake_popen)
+    scratch = SimpleNamespace(request_dir=tmp_path)
+
+    loaded = shape_converter_convert_module._load_shapefile(
+        shp_path=tmp_path / "roads.shp",
+        scratch=scratch,
+    )
+
+    assert loaded.source_bounds == (10.0, 20.0, 10.0, 20.0)
+    assert loaded.source_crs is not None
+    assert loaded.source_crs.to_epsg() == 4326
+    assert captured_popen_kwargs["start_new_session"] is True
+    assert captured_popen_kwargs["cwd"] == tmp_path.as_posix()
+    assert captured_popen_kwargs["text"] is True
+
+
+def test_load_shapefile_timeout_kills_worker_process_group(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    signals_sent: list[int] = []
+
+    class _TimeoutProcess:
+        pid = 55223
+        returncode = None
+
+        def __init__(self):
+            self._communicate_calls = 0
+
+        def communicate(self, timeout=None):  # noqa: ANN001
+            self._communicate_calls += 1
+            if self._communicate_calls == 1:
+                raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
+            return "", ""
+
+        def poll(self):
+            return None
+
+        def wait(self, timeout=None):  # noqa: ANN001
+            raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
+
+    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", lambda *a, **k: _TimeoutProcess())  # noqa: ANN002, ANN003
+    monkeypatch.setattr(
+        shape_converter_convert_module.os,
+        "killpg",
+        lambda _pid, sig: signals_sent.append(sig),
+    )
+    scratch = SimpleNamespace(request_dir=tmp_path)
+
+    with pytest.raises(shape_converter_convert_module.ShapeConverterError) as exc_info:
+        shape_converter_convert_module._load_shapefile(
+            shp_path=tmp_path / "roads.shp",
+            scratch=scratch,
+        )
+
+    exc = exc_info.value
+    assert exc.code == "request_timeout"
+    assert exc.status_code == 408
+    assert signal.SIGTERM in signals_sent
+    assert signal.SIGKILL in signals_sent

@@ -76,9 +76,9 @@ Disposition ledger (fill during execution):
 | --- | --- | --- | --- | --- | --- | --- |
 | CR-01 | code | High | Hosted shape-converter CI success evidence was initially missing for this release cut. | Closed | Hosted workflow now present and successful: `Shape-Converter Gates` run `24298655324` (event `push`, branch `master`, SHA `88b07b47ccda96c5ee836ca4af82db26ae727148`) at `https://github.com/rogerlew/wepppy/actions/runs/24298655324`. Earlier fallback `Pytest Coverage Nightly` failure (`24298466314`) remains unrelated historical noise. | Platform / WEPPpy release owner |
 | QA-01 | qa | Low | Final focused/full integration and proxied Caddy smoke matrix show no API/UX regressions for inspect/convert success and canonical convert error handling. | Closed | `wctl run-pytest tests/shape_converter/integration -k "inspect or convert or abuse or hardening or ui" --maxfail=1` => 36 passed; `wctl run-pytest tests/shape_converter/integration` => 36 passed; proxied smoke on `127.0.0.1:8080` returned inspect 200, convert success 200, convert error 400 `unknown_source_crs`. | Codex |
-| SEC-01 | security | Medium | Production parser non-termination containment still relies on request timeout/cancellation around in-process Fiona/GDAL parsing; explicit subprocess process-group kill semantics are not implemented in runtime path. | Deferred with explicit risk acceptance required | Runtime path evidence: `wepppy/microservices/shape_converter/convert.py` uses `fiona.open(...)` in-process (`_load_shapefile`) with no subprocess group lifecycle controls; local timeout/cancel regression tests remain passing from WP-08/WP-09. | Platform / WEPPpy security owner |
+| SEC-01 | security | Medium | Production parser non-termination containment still relied on request timeout/cancellation around in-process Fiona/GDAL parsing at WP-09 close. | Deferred at WP-09 close, then closed by WP-09B | Closure evidence now recorded in `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09b_parser_containment_and_gdal_cve_remediation.md`: parser subprocess process-group kill semantics implemented and validated in runtime/tests; runtime GDAL linkage evidence refreshed. | Platform / WEPPpy security owner |
 
-Medium/High disposition status: **0 High open, 1 Medium deferred (SEC-01 with owner/date follow-up).**
+Medium/High disposition status: **0 High open, 0 Medium open** (WP-09 deferred item closed by WP-09B).
 
 ## Target File Plan
 Expected new/modified files for WP-09 (adjust only if justified):
@@ -209,7 +209,7 @@ Expected:
 | Security review reference | 2026-04-12 review of parser stack/CVE watchlist dispositions, metadata-privacy regressions from WP-08, local broad-exception guard pass, and hosted `Broad Exception Guards` run `24298506189` (success). |
 | Disposition ledger summary | 3 findings total: CR-01 High closed, QA-01 Low closed, SEC-01 Medium deferred with owner/date follow-up. |
 | Final go/no-go decision | **GO** for release cut with residual risks accepted and tracked below. |
-| Residual risks register | 1) Parser non-termination containment remains timeout/cancellation-based in-process Fiona path; explicit subprocess process-group kill semantics deferred to WP-09B (`/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09b_parser_containment_and_gdal_cve_remediation.md`). Owner: Platform/Security. Target follow-up: 2026-04-30. 2) Debian triage for `CVE-2026-4738` on trixie GDAL `3.10.3` still pending (`check`); monitor tracker and patch/backport decision before release sign-off (tracked in WP-09B). Owner: Platform/Security. Target follow-up: 2026-04-19. |
+| Residual risks register | Historical WP-09 residual risks were tracked as deferred and are now closed by WP-09B (`/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09b_parser_containment_and_gdal_cve_remediation.md`). |
 
 ## Completion Criteria
 WP-09 is `done` only when:

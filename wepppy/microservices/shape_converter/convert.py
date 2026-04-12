@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import collections.abc as cabc
+import pickle
 import os
+import signal
+import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import fiona
-import fiona.errors as fiona_errors
 from pyproj import CRS
 from shapely.errors import GEOSException
 from shapely.geometry import shape
@@ -27,7 +29,6 @@ from .crs import (
     ResolvedTargetCrs,
     crs_identifier,
     crs_to_response_payload,
-    parse_source_crs,
     reproject_geometries,
     resolve_target_crs,
 )
@@ -38,11 +39,15 @@ from .serialization import serialize_geojson, serialize_geoparquet
 OUTPUT_FORMAT_OPTIONS = frozenset({"geojson", "geoparquet"})
 _MAX_UPLOAD_COMPRESSED_BYTES = ArchiveLimits().max_compressed_bytes
 _MAX_CONVERT_FEATURES = int(os.getenv("SHAPE_CONVERTER_MAX_CONVERT_FEATURES", "1000000"))
-_PARSER_GDAL_OPTIONS = {
-    "CPL_VSIL_CURL_ALLOWED_EXTENSIONS": "",
-    "GDAL_DISABLE_READDIR_ON_OPEN": "EMPTY_DIR",
-    "GDAL_HTTP_MAX_RETRY": "0",
-}
+_PARSER_SUBPROCESS_TIMEOUT_SECONDS = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_PARSER_TIMEOUT_SECONDS", "90")),
+)
+_PARSER_SUBPROCESS_KILL_GRACE_SECONDS = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_PARSER_KILL_GRACE_SECONDS", "5")),
+)
+_PARSER_WORKER_MODULE = "wepppy.microservices.shape_converter.convert_parser_worker"
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,7 +134,10 @@ async def convert_uploaded_archive(
     )
     dataset = select_single_shapefile_dataset(extracted_archive)
 
-    loaded = _load_shapefile(dataset.prefix_path.with_suffix(".shp"))
+    loaded = _load_shapefile(
+        shp_path=dataset.prefix_path.with_suffix(".shp"),
+        scratch=scratch,
+    )
     crs_plan = resolve_target_crs(
         target_crs_token=target_crs,
         source_crs=loaded.source_crs,
@@ -194,83 +202,248 @@ async def convert_uploaded_archive(
     )
 
 
-def _load_shapefile(shp_path: Path) -> LoadedShapefile:
-    properties: list[dict[str, object]] = []
-    geometries: list[BaseGeometry | None] = []
+def _load_shapefile(*, shp_path: Path, scratch: RequestScratchLayout) -> LoadedShapefile:
+    parser_output_path = scratch.request_dir / "parser_worker_payload.pickle"
+    worker_stdout, worker_stderr = _run_parser_worker(
+        shp_path=shp_path,
+        output_path=parser_output_path,
+        scratch=scratch,
+    )
+
+    worker_payload = _read_parser_payload(
+        payload_path=parser_output_path,
+        worker_stdout=worker_stdout,
+        worker_stderr=worker_stderr,
+    )
+
+    return _loaded_shapefile_from_payload(worker_payload)
+
+
+def _run_parser_worker(
+    *,
+    shp_path: Path,
+    output_path: Path,
+    scratch: RequestScratchLayout,
+) -> tuple[str, str]:
+    worker_command = [
+        sys.executable,
+        "-m",
+        _PARSER_WORKER_MODULE,
+        "--shp-path",
+        shp_path.as_posix(),
+        "--output-path",
+        output_path.as_posix(),
+        "--max-features",
+        str(_MAX_CONVERT_FEATURES),
+    ]
+    worker_env = os.environ.copy()
+    worker_env.setdefault("LC_ALL", "C")
+    worker_env.setdefault("LANG", "C")
 
     try:
-        with fiona.Env(**_PARSER_GDAL_OPTIONS):
-            with fiona.open(shp_path.as_posix()) as dataset:
-                raw_bounds = dataset.bounds
-                source_bounds = (
-                    float(raw_bounds[0]),
-                    float(raw_bounds[1]),
-                    float(raw_bounds[2]),
-                    float(raw_bounds[3]),
-                )
-                source_crs = parse_source_crs(
-                    crs_wkt=getattr(dataset, "crs_wkt", None),
-                    crs_mapping=getattr(dataset, "crs", None),
-                )
+        process = subprocess.Popen(
+            worker_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=scratch.request_dir.as_posix(),
+            env=worker_env,
+            start_new_session=True,
+        )
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="reprojection_failed",
+            message="Unable to start parser subprocess.",
+            details=str(exc),
+            status_code=500,
+        ) from exc
 
-                for index, feature in enumerate(dataset):
-                    if not isinstance(feature, cabc.Mapping):
-                        raise ShapeConverterError(
-                            code="invalid_shapefile",
-                            message="Shapefile feature payload is invalid.",
-                            details=f"Feature at index {index} is not an object.",
-                        )
+    try:
+        worker_stdout, worker_stderr = process.communicate(timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired as exc:
+        _terminate_process_group(process)
+        try:
+            worker_stdout, worker_stderr = process.communicate(timeout=1)
+        except (subprocess.TimeoutExpired, OSError):
+            worker_stdout, worker_stderr = "", ""
+        raise ShapeConverterError(
+            code="request_timeout",
+            message="Convert parser exceeded timeout and was terminated.",
+            details=(
+                "Shapefile parser subprocess exceeded "
+                f"{_PARSER_SUBPROCESS_TIMEOUT_SECONDS} seconds and the process group was terminated."
+            ),
+            status_code=408,
+        ) from exc
 
-                    raw_properties = feature.get("properties")
-                    if raw_properties is None:
-                        normalized_properties: dict[str, object] = {}
-                    elif isinstance(raw_properties, cabc.Mapping):
-                        normalized_properties = {str(key): value for key, value in raw_properties.items()}
-                    else:
-                        normalized_properties = {
-                            str(key): value
-                            for key, value in dict(raw_properties).items()
-                        }
-
-                    geometry_payload = feature.get("geometry")
-                    if geometry_payload is None:
-                        geometry = None
-                    elif isinstance(geometry_payload, cabc.Mapping):
-                        geometry = shape(dict(geometry_payload))
-                    else:
-                        raise ShapeConverterError(
-                            code="invalid_shapefile",
-                            message="Shapefile geometry payload is invalid.",
-                            details=f"Feature at index {index} has non-object geometry.",
-                        )
-
-                    properties.append(normalized_properties)
-                    geometries.append(geometry)
-
-                    if len(properties) > _MAX_CONVERT_FEATURES:
-                        raise ShapeConverterError(
-                            code="archive_quota_exceeded",
-                            message="Feature count exceeds configured conversion limit.",
-                            details=(
-                                f"Feature count exceeded limit {_MAX_CONVERT_FEATURES} while reading shapefile."
-                            ),
-                            status_code=413,
-                        )
-    except ShapeConverterError:
-        raise
-    except (
-        fiona_errors.FionaError,
-        GEOSException,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
-    ) as exc:
+    if process.returncode != 0:
+        details = worker_stderr.strip() or worker_stdout.strip() or f"Parser subprocess exited with code {process.returncode}."
         raise ShapeConverterError(
             code="invalid_shapefile",
             message="Unable to parse shapefile content for conversion.",
-            details=str(exc),
+            details=details,
+        )
+
+    return worker_stdout, worker_stderr
+
+
+def _terminate_process_group(process: subprocess.Popen[str]) -> None:
+    if process.poll() is not None:
+        return
+
+    pid = process.pid
+    if pid is None:
+        process.kill()
+        return
+
+    try:
+        os.killpg(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return
+
+    try:
+        process.wait(timeout=_PARSER_SUBPROCESS_KILL_GRACE_SECONDS)
+        return
+    except subprocess.TimeoutExpired:
+        pass
+
+    try:
+        os.killpg(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        return
+
+    try:
+        process.wait(timeout=1)
+    except subprocess.TimeoutExpired:
+        pass
+
+
+def _read_parser_payload(
+    *,
+    payload_path: Path,
+    worker_stdout: str,
+    worker_stderr: str,
+) -> dict[str, object]:
+    if not payload_path.is_file():
+        details = (
+            worker_stderr.strip()
+            or worker_stdout.strip()
+            or f"Parser subprocess did not emit payload at '{payload_path}'."
+        )
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details=details,
+        )
+
+    try:
+        with payload_path.open("rb") as handle:
+            payload = pickle.load(handle)
+    except (OSError, pickle.PickleError, EOFError, ValueError, TypeError, AttributeError) as exc:
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details=f"Parser payload decode failed: {exc}",
         ) from exc
+
+    if not isinstance(payload, dict):
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details="Parser payload was not a mapping.",
+        )
+
+    return payload
+
+
+def _loaded_shapefile_from_payload(payload: dict[str, object]) -> LoadedShapefile:
+    raw_bounds = payload.get("source_bounds")
+    if (
+        not isinstance(raw_bounds, (list, tuple))
+        or len(raw_bounds) != 4
+    ):
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details="Parser payload missing valid source bounds.",
+        )
+    source_bounds = (
+        float(raw_bounds[0]),
+        float(raw_bounds[1]),
+        float(raw_bounds[2]),
+        float(raw_bounds[3]),
+    )
+
+    source_crs_wkt = payload.get("source_crs_wkt")
+    source_crs: CRS | None
+    if source_crs_wkt is None:
+        source_crs = None
+    elif isinstance(source_crs_wkt, str):
+        try:
+            source_crs = CRS.from_wkt(source_crs_wkt)
+        except (ValueError, TypeError) as exc:
+            raise ShapeConverterError(
+                code="invalid_shapefile",
+                message="Unable to parse shapefile content for conversion.",
+                details=f"Invalid source CRS in parser payload: {exc}",
+            ) from exc
+    else:
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details="Parser payload source CRS field is invalid.",
+        )
+
+    raw_properties = payload.get("properties")
+    raw_geometries = payload.get("geometries")
+    if not isinstance(raw_properties, list) or not isinstance(raw_geometries, list):
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details="Parser payload properties/geometries fields are invalid.",
+        )
+    if len(raw_properties) != len(raw_geometries):
+        raise ShapeConverterError(
+            code="invalid_shapefile",
+            message="Unable to parse shapefile content for conversion.",
+            details="Parser payload properties/geometries lengths do not match.",
+        )
+
+    properties: list[dict[str, object]] = []
+    geometries: list[BaseGeometry | None] = []
+    for index, feature_properties in enumerate(raw_properties):
+        if isinstance(feature_properties, cabc.Mapping):
+            normalized_properties = {str(key): value for key, value in feature_properties.items()}
+        elif feature_properties is None:
+            normalized_properties = {}
+        else:
+            raise ShapeConverterError(
+                code="invalid_shapefile",
+                message="Unable to parse shapefile content for conversion.",
+                details=f"Parser payload properties at index {index} is not an object.",
+            )
+
+        geometry_payload = raw_geometries[index]
+        if geometry_payload is None:
+            geometry = None
+        elif isinstance(geometry_payload, cabc.Mapping):
+            try:
+                geometry = shape(dict(geometry_payload))
+            except (GEOSException, ValueError, TypeError) as exc:
+                raise ShapeConverterError(
+                    code="invalid_shapefile",
+                    message="Unable to parse shapefile content for conversion.",
+                    details=f"Invalid geometry at index {index}: {exc}",
+                ) from exc
+        else:
+            raise ShapeConverterError(
+                code="invalid_shapefile",
+                message="Unable to parse shapefile content for conversion.",
+                details=f"Parser payload geometry at index {index} is not an object.",
+            )
+
+        properties.append(normalized_properties)
+        geometries.append(geometry)
 
     return LoadedShapefile(
         properties=tuple(properties),

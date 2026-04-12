@@ -1,7 +1,7 @@
 # WP-09B Work Package: Parser Containment and GDAL CVE-2026-4738 Remediation
-Status: not_started
+Status: done
 Last Updated: 2026-04-12
-Owner: Codex (WP-09B authoring)
+Owner: Codex (WP-09B execution)
 Parent Plan: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/implementation-plan.md`
 Primary Spec: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/specification.md`
 
@@ -83,11 +83,11 @@ Disposition policy:
 Disposition ledger (fill during execution):
 | Finding ID | Reviewer Track | Severity | Summary | Disposition | Evidence | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| CR-01 | code | TBD | TBD | Open | TBD | TBD |
-| QA-01 | qa | TBD | TBD | Open | TBD | TBD |
-| SEC-01 | security | TBD | TBD | Open | TBD | TBD |
+| CR-01 | code | High | Parser non-termination containment in production convert path was timeout/cancel-only without explicit parser process-group kill semantics. | Closed | `wepppy/microservices/shape_converter/convert.py` now executes parser work in subprocess module `wepppy.microservices.shape_converter.convert_parser_worker` with `start_new_session=True`; timeout path sends SIGTERM then SIGKILL via `os.killpg` and returns canonical `408 request_timeout`; unit/integration regressions cover timeout+cleanup contracts. | Platform / WEPPpy |
+| QA-01 | qa | Medium | Parser timeout handling risked regression in canonical API behavior and scratch cleanup during conversion failures. | Closed | Focused/full integration gates pass (37/37), including explicit API timeout path `test_convert_parser_subprocess_timeout_returns_canonical_timeout_and_cleans_scratch`; manual proxied Caddy smoke confirms inspect 200, convert success 200, convert canonical error 400 `unknown_source_crs`, with no scratch leak. | Platform QA |
+| SEC-01 | security | Medium | Parser runtime initially used Fiona wheel GDAL line (`fiona.__gdal_version__=3.9.2`) creating release-cut ambiguity for `CVE-2026-4738`. | Closed | `docker/Dockerfile.dev` and `docker/Dockerfile` now force Fiona source rebuild with `GDAL_CONFIG=/usr/bin/gdal-config`; runtime evidence now reports `ogr2ogr GDAL 3.10.3` and `fiona.__gdal_version__=3.10.3`; `ldd` shows system `libz.so.1` linkage and `nm` shows no `infback9` symbols in `libgdal.so.36` (mitigating the CVE’s internal `frmts/zlib/contrib/infback9` class). | Platform Security |
 
-Medium/High disposition status: **TBD**.
+Medium/High disposition status: **0 High open, 0 Medium open**.
 
 ## Target File Plan
 Expected new/modified files for WP-09B (adjust only if justified):
@@ -203,41 +203,41 @@ Expected:
 
 ## Gate Checklist
 ## Code gate
-- [ ] WP-09B implementation scope complete.
-- [ ] Code review completed and findings dispositioned.
-- [ ] Lint/static checks for touched files pass.
+- [x] WP-09B implementation scope complete.
+- [x] Code review completed and findings dispositioned.
+- [x] Lint/static checks for touched files pass.
 
 ## Shape-converter unit-test gate
-- [ ] Focused unit iteration command passes.
-- [ ] `wctl run-pytest tests/shape_converter/unit` passes.
+- [x] Focused unit iteration command passes.
+- [x] `wctl run-pytest tests/shape_converter/unit` passes.
 
 ## QA gate
-- [ ] Focused/full integration commands pass.
-- [ ] Manual proxied smoke checklist completed.
-- [ ] QA review findings dispositioned.
+- [x] Focused/full integration commands pass.
+- [x] Manual proxied smoke checklist completed.
+- [x] QA review findings dispositioned.
 
 ## Security review gate
-- [ ] Parser subprocess process-group timeout/kill semantics are implemented and validated.
-- [ ] GDAL `CVE-2026-4738` remediation evidence is captured and dispositioned.
-- [ ] Security review findings dispositioned (no unresolved High findings).
+- [x] Parser subprocess process-group timeout/kill semantics are implemented and validated.
+- [x] GDAL `CVE-2026-4738` remediation evidence is captured and dispositioned.
+- [x] Security review findings dispositioned (no unresolved High findings).
 
 ## Evidence Log (Fill During Execution)
 | Item | Evidence |
 | --- | --- |
-| Commit SHA(s) | TBD |
-| Parser containment implementation evidence | TBD |
-| GDAL CVE remediation evidence | TBD |
-| Unit gate output | TBD |
-| Integration gate output | TBD |
-| Workflow generation output | TBD |
-| Hosted CI evidence | TBD |
-| QA smoke output | TBD |
-| Code review reference | TBD |
-| QA review reference | TBD |
-| Security review reference | TBD |
-| Disposition ledger summary | TBD |
-| Final go/no-go decision | TBD |
-| Residual risks register | TBD |
+| Commit SHA(s) | Pending final commit/push for this WP-09B execution update. |
+| Parser containment implementation evidence | Runtime convert path moved to parser subprocess boundary in `wepppy/microservices/shape_converter/convert.py` (`_run_parser_worker`, `_terminate_process_group`, `_read_parser_payload`, `_loaded_shapefile_from_payload`) plus new worker module `wepppy/microservices/shape_converter/convert_parser_worker.py`. Timeout path enforces SIGTERM -> SIGKILL against parser process group and returns canonical `408 request_timeout`. |
+| GDAL CVE remediation evidence | Runtime container evidence: `ogr2ogr --version` => `GDAL 3.10.3`; `/opt/venv/bin/python -c "import fiona, pyproj; ..."` => `fiona=1.10.1 gdal=3.10.3 pyproj=3.7.1 proj=9.5.1` after Dockerfile changes forcing source Fiona build against system GDAL. Additional runtime proof: `ldd /usr/lib/x86_64-linux-gnu/libgdal.so.36` links `libz.so.1`; `nm -D /usr/lib/x86_64-linux-gnu/libgdal.so.36 | grep -E 'inflateBack9|inftree9|inflate_table9'` returns no symbols for the CVE class. Debian tracker reference for CVE scope: `https://security-tracker.debian.org/tracker/CVE-2026-4738`. |
+| Unit gate output | `wctl run-pytest tests/shape_converter/unit -k "archive or inspect or convert or cleanup or abuse or hardening or ui or health or crs or serialization" --maxfail=1` => **102 passed**, 0 failed (63 warnings). `wctl run-pytest tests/shape_converter/unit` => **102 passed**, 0 failed (63 warnings). |
+| Integration gate output | `wctl run-pytest tests/shape_converter/integration -k "inspect or convert or abuse or hardening or ui" --maxfail=1` => **37 passed**, 0 failed (19 warnings). `wctl run-pytest tests/shape_converter/integration` => **37 passed**, 0 failed (19 warnings). |
+| Workflow generation output | `scripts/build_forest_workflows.py` => PASS (workflow set regenerated); warning only: `Dev Server Nightly Profile Tests section not found in readme.md; skipping profile-table sync.` `scripts/build_forest_workflows.py --check` => PASS (same warning). |
+| Hosted CI evidence | Pending push: capture `Shape-Converter Gates` hosted run URL/status for the remediation commit via `gh run list --workflow "Shape-Converter Gates" ...`. |
+| QA smoke output | Proxied smoke on `127.0.0.1:8080` with generated fixtures: inspect success => `200 application/json`; convert success => `200 application/geo+json` with attachment `smoke-valid_wgs84.geojson`; canonical convert error (`zip` without `.prj`) => `400 application/json` with `error.code=unknown_source_crs`. |
+| Code review reference | 2026-04-12 code review pass over parser subprocess orchestration, process-group termination, canonical error propagation, Dockerfile runtime-linkage changes, and regression tests. |
+| QA review reference | 2026-04-12 QA review of focused/full shape-converter gates and proxied smoke matrix; no regressions found. |
+| Security review reference | 2026-04-12 security review of parser containment semantics, runtime dependency linkage, CVE watchlist disposition evidence, and broad-exception enforcement pass (`python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` => PASS). |
+| Disposition ledger summary | 3 findings total; 1 High closed, 2 Medium closed; no unresolved High/Medium findings. |
+| Final go/no-go decision | **GO** for WP-09B closeout pending hosted CI run capture on pushed remediation commit. |
+| Residual risks register | No unresolved High/Medium risks. Low residual monitoring item: Debian tracker state for `CVE-2026-4738` remains `check`; continue routine tracker monitoring while runtime mitigation evidence above remains intact. Owner: Platform/Security. Target follow-up check: 2026-04-30. |
 
 ## Completion Criteria
 WP-09B is `done` only when:
