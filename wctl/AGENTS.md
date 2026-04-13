@@ -51,7 +51,7 @@ The legacy man page has been retired; Typer help (`wctl --help`) is now the cano
      wctl doc-refs README.md --path docs
      wctl doc-bench --path docs --warmup 0 --iterations 1
      ```
-     For `doc-mv`, the repository currently blocks traversal of `.docker-data/redis`; use a docs subdirectory (for example files under `tests/tmp/`) or temporarily prepend a mock `markdown-doc` binary to `PATH` to validate the dry-run/prompt behavior.
+     For `doc-mv`, keep `.markdown-doc-ignore` aligned with restricted Docker volumes (`.docker-data` and `.docker-data/**`) so scans do not traverse root-owned data directories.
 
 6. **Backward compatibility**
    - When removing or renaming a command, note the change in `wctl/README.md` or release notes and provide Typer-friendly migration guidance (`wctl <command> --help`).
@@ -72,7 +72,7 @@ The legacy man page has been retired; Typer help (`wctl --help`) is now the cano
 ## markdown-doc Wrapper Notes
 
 - `doc-lint` injects `--staged --format json` when no arguments are provided and prints the effective command to stderr so stdout stays JSON-only.
-- `doc-catalog`, `doc-refs`, and `doc-bench` forward flags directly to the underlying binaries; prefer adding `--path docs` during local smoke tests until `.docker-data/redis` ignores land.
+- `doc-catalog`, `doc-refs`, and `doc-bench` forward flags directly to the underlying binaries; prefer adding `--path docs` during local smoke tests for faster runs.
 - `doc-toc` converts positional Markdown paths to repeated `--path` flags before invoking `markdown-doc toc`, ensuring at least one target is supplied.
 - `doc-mv` always performs a dry-run first, prompts on `/dev/tty`, then applies the move unless `--dry-run-only` (skip apply) or `--force` (skip prompt) is used. The confirmation helper lives in `doc_mv_confirm()`.
 - To exercise the prompt flow in non-interactive harnesses, temporarily prepend a mock `markdown-doc` binary (for example under `/tmp/mock-md`) so the command can complete without scanning the full repository.

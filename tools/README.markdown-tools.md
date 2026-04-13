@@ -68,7 +68,7 @@ The `wctl` wrappers keep `markdown-doc` ergonomics consistent and run inside the
 **Workflow notes**
 
 - `.github/workflows/docs-quality.yml` runs `wctl doc-lint`/`doc-bench` on every PR using the `MARKDOWN_DOC_WORKSPACE` secret so cargo `fmt/clippy/test` execute inside the markdown-doc workspace. Keep that secret pointing at the active checkout (currently `/workdir/markdown-extract`).
-- `.markdown-doc-ignore` tracks content we intentionally skip (for example `.docker-data/**`). Update this file alongside any large restructures so lint stays quiet.
+- `.markdown-doc-ignore` tracks content we intentionally skip (for example `.docker-data` plus `.docker-data/**`). Update this file alongside any large restructures so lint stays quiet.
 - For local or ad-hoc checks, pipe the JSON from `wctl doc-lint` into `jq` or attach SARIF to PRs: `wctl doc-lint --path docs --format sarif > docs-lint.sarif`.
 
 ### Telemetry
@@ -373,7 +373,7 @@ Key features:
 - Operations scoped to headings: `replace`, `delete`, `append-to`, `prepend-to`, `insert-after`, `insert-before`.
 - Payload sources via `--with <path>` (or `-` for stdin) and `--with-string "escaped\ntext"`.
 - Safety-first by default: dry-run diffs (`--dry-run`), duplicate guards (`--allow-duplicate` to opt out), atomic writes with optional backups (`--backup` / `--no-backup`).
-- Validation aligned with the [markdown-edit specification](./markdown-edit.spec.md): heading-level enforcement, single-section payloads, and friendly exit codes for automation.
+- Validation aligned with the markdown-edit specification: heading-level enforcement, single-section payloads, and friendly exit codes for automation.
 
 Example workflow:
 
@@ -688,6 +688,7 @@ The `.markdown-doc-ignore` file (in repository root) uses gitignore-style patter
 
 ```plaintext
 # Ignore docker-managed volumes that collide with lint/catalog scans
+.docker-data
 .docker-data/**
 
 # Ignore build artifacts
