@@ -1,6 +1,6 @@
 # Iterative First-Order Link Prune WP-01 Tool Scaffolding
 
-**Status**: Open (2026-04-13)
+**Status**: Closed (2026-04-13)
 **Timezone**: UTC
 
 ## Overview
@@ -37,12 +37,12 @@ This package is limited to WP-01 in `weppcloud-wbt`.
 - **Informed**: WEPPpy maintainers coordinating IFOLP rollout sequencing.
 
 ## Success Criteria
-- [ ] Tool skeleton exists at the specified WBT path and compiles.
-- [ ] Tool is registered and discoverable via WBT command listing/help.
-- [ ] Required argument parsing and help metadata are implemented per spec contract.
-- [ ] Parser/default/required-arg tests pass for WP-01 scope.
-- [ ] `cargo check -p whitebox_tools` passes with WP-01 changes.
-- [ ] WP-01 row in WBT implementation plan is updated to `done` with review/test gates complete.
+- [x] Tool skeleton exists at the specified WBT path and compiles.
+- [x] Tool is registered and discoverable via WBT command listing/help.
+- [x] Required argument parsing and help metadata are implemented per spec contract.
+- [x] Parser/default/required-arg tests pass for WP-01 scope.
+- [x] `cargo check -p whitebox_tools` passes with WP-01 changes.
+- [x] WP-01 row in WBT implementation plan is updated to `done` with review/test gates complete.
 
 ## Dependencies
 
@@ -81,11 +81,19 @@ This package is limited to WP-01 in `weppcloud-wbt`.
 ## Deliverables
 - `docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/package.md`
 - `docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/tracker.md`
-- `docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/prompts/active/ifolp_wp01_tool_scaffolding_execplan.md`
+- `docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/prompts/completed/ifolp_wp01_tool_scaffolding_execplan.md`
 - WBT WP-01 scaffolding code and tests (in `/workdir/weppcloud-wbt`).
 
 ## Follow-up Work
 - Begin WP-02 topology kernel once WP-01 scaffolding is merged and stable.
 
-## Kickoff Prompt
-- Active ExecPlan: `docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/prompts/active/ifolp_wp01_tool_scaffolding_execplan.md`
+## Closure Notes
+**Closed**: 2026-04-13
+
+**Summary**: WP-01 completed with tool scaffolding, registration wiring, parser/default/help contract implementation, and targeted parser/registration coverage. The parser test suite was split into a companion file (`iterative_first_order_link_prune_parser_tests.rs`) to preserve maintainability and avoid monolithic source growth.
+
+**Lessons Learned**:
+- Early parser-contract hardening prevented subtle CLI edge-case drift.
+- Keeping tests in companion modules improved readability and review velocity.
+
+**Archive Status**: ExecPlan retained under `prompts/completed/` for historical traceability.

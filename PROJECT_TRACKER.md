@@ -179,28 +179,28 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### Iterative First-Order Link Prune WP-01 Tool Scaffolding
+### Iterative First-Order Link Prune WP-02 Topology Kernel
 **Started**: 2026-04-13  
-**Status**: Ready for Execution (WP-01 prep complete; run pending)  
-**Size**: Medium (1-2 sessions for WP-01 execution)  
+**Status**: Ready for Execution (WP-02 prep complete; run pending)  
+**Size**: Medium-High (1-3 sessions for WP-02 execution)  
 **Owner**: Codex (scaffold + ExecPlan), execution agent TBD  
-**Link**: [docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/](docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/)  
-**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-01 (tool scaffolding and registration) for Iterative First-Order Link Prune. Includes an active ExecPlan with explicit file targets, registration wiring tasks, parser/help contract checks, and validation gates before WP-02 starts.
+**Link**: [docs/work-packages/20260412_ifolp_wp02_topology_kernel/](docs/work-packages/20260412_ifolp_wp02_topology_kernel/)  
+**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-02 (core deterministic topology kernel) for Iterative First-Order Link Prune. Includes an active ExecPlan with module organization strategy, pointer-mode decode/traversal scope, deterministic discovery-order tests, and stale-candidate validation gates.
 
 **Scope**:
-- Execute WP-01 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
-- Add tool skeleton and wiring for `iterative_first_order_link_prune`.
-- Add CLI argument/help/metadata scaffolding and parser tests for required-arg/default behavior.
+- Execute WP-02 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
+- Implement pointer decoding/traversal, topology classification, and deterministic first-order-link discovery primitives.
+- Add synthetic-grid tests for inflow counts, state classification, ordering determinism, epsilon-tie handling, and stale-candidate checks.
 
 **Dependencies**:
-- WP-00 completion artifacts in `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/wp-00/`.
+- WP-01 completed tool scaffold and parser contract.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/specification.md`.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
 
 **Next Steps**:
 1. Dispatch execution agent using active ExecPlan in this package.
-2. Complete WP-01 end-to-end with review/test evidence.
-3. Update WBT WP-01 orchestration row to `done`.
+2. Complete WP-02 end-to-end with review/test evidence.
+3. Update WBT WP-02 orchestration row to `done`.
 
 ---
 
@@ -251,6 +251,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Iterative First-Order Link Prune WP-01 Tool Scaffolding (2026-04-13)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/](docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/)  
+**Summary**: Completed WP-01 tool scaffolding in `/workdir/weppcloud-wbt` with IFOLP command creation, registry wiring (`stream_network_analysis/mod.rs`, `tools/mod.rs`), parser/default/help contract implementation, and targeted parser/registration/placeholder tests (`13 passed`). Parser tests were split into companion module `iterative_first_order_link_prune_parser_tests.rs` to keep tool source maintainable and non-monolithic.
 
 ### Iterative First-Order Link Prune WP-00 Parity Harness (2026-04-13)
 **Status**: ✅ **COMPLETE**  
