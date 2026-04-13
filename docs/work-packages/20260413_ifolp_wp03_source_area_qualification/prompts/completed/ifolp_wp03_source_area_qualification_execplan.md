@@ -11,32 +11,60 @@ After this plan is executed, IFOLP Phase A source-area qualification behavior is
 ## Progress
 
 - [x] (2026-04-13 06:05Z) ExecPlan authored and activated.
-- [ ] Implement provisional stream mask generation from minimum active CSA.
-- [ ] Implement Phase A source walk qualification with row-major inline mutation.
-- [ ] Implement receiver handling for junction collapse and terminal recheck semantics.
-- [ ] Implement topology reclassification after qualification stabilization.
-- [ ] Add and pass targeted WP-03 tests.
-- [ ] Complete code-review findings and disposition with no unresolved high/medium issues.
-- [ ] Run validation gates and update WBT WP-03 row to `done`.
-- [ ] Move ExecPlan to `prompts/completed/` with closure outcomes.
+- [x] (2026-04-13 07:04Z) Implemented provisional stream mask generation from minimum active CSA.
+- [x] (2026-04-13 07:07Z) Implemented Phase A source walk qualification with row-major inline mutation.
+- [x] (2026-04-13 07:10Z) Implemented receiver handling for junction collapse and terminal recheck semantics.
+- [x] (2026-04-13 07:11Z) Implemented topology reclassification after qualification stabilization.
+- [x] (2026-04-13 07:16Z) Added and passed targeted WP-03 tests.
+- [x] (2026-04-13 07:17Z) Completed code-review findings/disposition with no unresolved high/medium issues.
+- [x] (2026-04-13 07:28Z) Ran validation gates and updated WBT WP-03 row to `done`.
+- [x] (2026-04-13 07:28Z) Archived ExecPlan to `prompts/completed/` with closure outcomes.
 
 ## Surprises & Discoveries
 
 - Observation: WP-02 delivered deterministic topology primitives and companion tests; WP-03 should consume those helpers rather than duplicating topology logic.
   Evidence: `iterative_first_order_link_prune_topology.rs` and companion tests exist from WP-02.
+- Observation: Once Phase A was wired into the tool run-path, parser test expectations changed because run now attempts real raster I/O before hitting the Phase B placeholder.
+  Evidence: initial WP-03 test run returned `NotFound` for synthetic parser test paths.
+- Observation: `cargo fmt --all` could not be used as a safe closure step because unrelated pre-existing trailing whitespace caused rustfmt failure and partial unrelated edits.
+  Evidence: rustfmt error in `whitebox-tools-app/src/tools/math_stat_analysis/principal_component_analysis.rs` and temporary unrelated file modifications, which were restored.
 
 ## Decision Log
 
 - Decision: Keep WP-03 strictly Phase A qualification behavior; no first-order-link pruning decisions in this package.
   Rationale: Preserve WP boundary clarity and isolate regressions to qualification semantics.
   Date/Author: 2026-04-13 / Codex.
+- Decision: Keep Phase B as explicit unsupported placeholder after successful Phase A execution in WP-03.
+  Rationale: Avoid ambiguous partial tool behavior before WP-04 pruning semantics are implemented.
+  Date/Author: 2026-04-13 / Codex.
 
 ## Outcomes & Retrospective
 
-Pending execution. At closure summarize:
-- implementation outcomes,
-- review findings and dispositions,
-- remaining risks before WP-04.
+Implementation outcomes:
+- Added non-monolithic Phase A companion module:
+  - `whitebox-tools-app/src/tools/stream_network_analysis/iterative_first_order_link_prune_phase_a.rs`
+- Implemented:
+  - provisional mask from minimum active CSA,
+  - row-major source scanning with inline mutation,
+  - receiver transitions (junction collapse + terminal recheck),
+  - stabilization cadence with topology reclassification.
+- Wired Phase A execution from IFOLP entry orchestration in:
+  - `whitebox-tools-app/src/tools/stream_network_analysis/iterative_first_order_link_prune.rs`
+- Added targeted WP-03 tests in:
+  - `whitebox-tools-app/src/tools/stream_network_analysis/iterative_first_order_link_prune_phase_a_tests.rs`
+
+Review findings and disposition:
+- `M1` (fixed): parser run-path test failed (`NotFound` vs `Unsupported`) after Phase A I/O wiring; fixed by asserting Phase B placeholder contract directly in parser tests.
+- `M2` (fixed): terminal receiver transition removal path lacked explicit regression coverage; fixed by adding dedicated terminal recheck-removal test.
+- `L1` (accepted): workspace-wide `cargo fmt --all` remains blocked by unrelated pre-existing trailing whitespace outside WP-03 scope.
+- Closure status: no unresolved high/medium findings.
+
+Validation outcomes:
+- `cargo check -p whitebox_tools` -> pass.
+- `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` -> pass (`33 passed`, `0 failed`).
+
+Remaining risks before WP-04:
+- Phase B pruning semantics are still intentionally unimplemented; WP-04 must define and validate pruning-pass behavior against the existing Phase A baseline.
 
 ## Context and Orientation
 

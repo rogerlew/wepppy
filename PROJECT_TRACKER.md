@@ -179,28 +179,28 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### Iterative First-Order Link Prune WP-03 Source-Area Qualification
+### Iterative First-Order Link Prune WP-04 First-Order-Link Pruning
 **Started**: 2026-04-13  
-**Status**: Ready for Execution (WP-03 prep complete; run pending)  
-**Size**: High (1-3 sessions for WP-03 execution)  
+**Status**: Ready for Execution (WP-04 prep complete; run pending)  
+**Size**: High (1-3 sessions for WP-04 execution)  
 **Owner**: Codex (scaffold + ExecPlan), execution agent TBD  
-**Link**: [docs/work-packages/20260413_ifolp_wp03_source_area_qualification/](docs/work-packages/20260413_ifolp_wp03_source_area_qualification/)  
-**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-03 (Phase A source-area qualification). Includes active ExecPlan with row-major inline mutation semantics, receiver transition handling requirements, targeted qualification tests, and a mandatory review-findings disposition gate before closure.
+**Link**: [docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/](docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/)  
+**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-04 (Phase B first-order-link pruning). Includes active ExecPlan covering deterministic receiver-group shortest-link selection, immediate prune mutation semantics, degeneration-triggered repass behavior, parity guard handling, targeted pruning tests, and a mandatory review-findings disposition gate before closure.
 
 **Scope**:
-- Execute WP-03 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
-- Implement Phase A qualification behavior (provisional mask, source walk, receiver transitions, reclassification).
-- Add targeted WP-03 tests and close with explicit review findings disposition.
+- Execute WP-04 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
+- Implement Phase B pruning behavior (receiver-group shortest-link selection, immediate mutation, degeneration cadence, parity guard).
+- Add targeted WP-04 tests and close with explicit review findings disposition.
 
 **Dependencies**:
-- WP-02 deterministic topology kernel completion.
+- WP-03 source-area qualification completion.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/specification.md`.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
 
 **Next Steps**:
 1. Dispatch execution agent using active ExecPlan in this package.
-2. Complete WP-03 end-to-end with tests + review disposition evidence.
-3. Update WBT WP-03 orchestration row to `done`.
+2. Complete WP-04 end-to-end with tests + review disposition evidence.
+3. Update WBT WP-04 orchestration row to `done`.
 
 ---
 
@@ -251,6 +251,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Iterative First-Order Link Prune WP-03 Source-Area Qualification (2026-04-13)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260413_ifolp_wp03_source_area_qualification/](docs/work-packages/20260413_ifolp_wp03_source_area_qualification/)  
+**Summary**: Completed WP-03 end-to-end in `/workdir/weppcloud-wbt` with Phase A source-area qualification behavior in companion module `iterative_first_order_link_prune_phase_a.rs`. Implemented minimum-CSA provisional masking, row-major inline source-walk mutation, receiver transitions (junction collapse and terminal receiver recheck), and stabilization reclassification, then wired Phase A into tool orchestration while keeping the WP-04 Phase B boundary explicit via unsupported placeholder. Required gates passed: `cargo check -p whitebox_tools`; `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`33 passed; 0 failed`). Review findings were dispositioned with no unresolved high/medium issues; ExecPlan archived under `prompts/completed/`.
 
 ### Iterative First-Order Link Prune WP-02 Topology Kernel (2026-04-13)
 **Status**: ✅ **COMPLETE**  

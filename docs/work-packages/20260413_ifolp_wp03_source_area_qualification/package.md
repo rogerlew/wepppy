@@ -1,10 +1,17 @@
 # Iterative First-Order Link Prune WP-03 Source-Area Qualification
 
-**Status**: Open (2026-04-13)
+**Status**: Closed (2026-04-13 07:28 UTC)
 **Timezone**: UTC
 
 ## Overview
 This package governs execution of WP-03 for Iterative First-Order Link Prune in `/workdir/weppcloud-wbt`. WP-03 implements Phase A source-area qualification semantics on top of the WP-02 topology kernel, including row-major inline mutation behavior, receiver-role transitions, and topology reclassification after stabilization.
+
+## Closure Summary
+- WP-03 implementation completed in `/workdir/weppcloud-wbt` with Phase A qualification behavior in `iterative_first_order_link_prune_phase_a.rs`.
+- Tool orchestration now runs Phase A and then exits through an explicit WP-04 Phase B unsupported placeholder.
+- Targeted WP-03 tests were added and passing (`cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` -> `33 passed`).
+- Review findings were dispositioned with no unresolved high/medium issues.
+- WBT implementation-plan WP-03 row is `done` and ExecPlan is archived under `prompts/completed/`.
 
 ## Objectives
 - Implement Phase A source-area qualification per IFOLP specification.
@@ -36,13 +43,13 @@ This package is limited to WP-03 in `weppcloud-wbt`.
 - **Informed**: WEPPpy maintainers coordinating IFOLP rollout.
 
 ## Success Criteria
-- [ ] Phase A qualification logic is implemented and compiles.
-- [ ] Row-major inline mutation traversal behavior is covered by tests.
-- [ ] Receiver transition behaviors (junction collapse, terminal recheck) are covered by tests.
-- [ ] Topology reclassification after stabilization is implemented and tested.
-- [ ] Code-review findings are dispositioned with no unresolved high/medium issues.
-- [ ] `cargo check -p whitebox_tools` and targeted IFOLP tests pass.
-- [ ] WP-03 row in WBT implementation plan is updated to `done` with review/test gates complete.
+- [x] Phase A qualification logic is implemented and compiles.
+- [x] Row-major inline mutation traversal behavior is covered by tests.
+- [x] Receiver transition behaviors (junction collapse, terminal recheck) are covered by tests.
+- [x] Topology reclassification after stabilization is implemented and tested.
+- [x] Code-review findings are dispositioned with no unresolved high/medium issues.
+- [x] `cargo check -p whitebox_tools` and targeted IFOLP tests pass.
+- [x] WP-03 row in WBT implementation plan is updated to `done` with review/test gates complete.
 
 ## Dependencies
 
@@ -81,11 +88,11 @@ This package is limited to WP-03 in `weppcloud-wbt`.
 ## Deliverables
 - `docs/work-packages/20260413_ifolp_wp03_source_area_qualification/package.md`
 - `docs/work-packages/20260413_ifolp_wp03_source_area_qualification/tracker.md`
-- `docs/work-packages/20260413_ifolp_wp03_source_area_qualification/prompts/active/ifolp_wp03_source_area_qualification_execplan.md`
+- `docs/work-packages/20260413_ifolp_wp03_source_area_qualification/prompts/completed/ifolp_wp03_source_area_qualification_execplan.md`
 - WP-03 WBT implementation + tests + review-disposition evidence.
 
 ## Follow-up Work
 - Start WP-04 first-order-link pruning path after WP-03 closeout.
 
-## Kickoff Prompt
-- Active ExecPlan: `docs/work-packages/20260413_ifolp_wp03_source_area_qualification/prompts/active/ifolp_wp03_source_area_qualification_execplan.md`
+## ExecPlan Archive
+- Completed ExecPlan: `docs/work-packages/20260413_ifolp_wp03_source_area_qualification/prompts/completed/ifolp_wp03_source_area_qualification_execplan.md`
