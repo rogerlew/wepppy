@@ -1,10 +1,16 @@
 # Iterative First-Order Link Prune WP-02 Topology Kernel
 
-**Status**: Open (2026-04-13)
+**Status**: Closed (2026-04-13 07:03 UTC)
 **Timezone**: UTC
 
 ## Overview
 This package governs execution of WP-02 for Iterative First-Order Link Prune in `/workdir/weppcloud-wbt`. WP-02 implements the deterministic topology kernel used by later phase logic, including pointer decoding, topology classification primitives, deterministic first-order-link discovery ordering, and stale-candidate validity checks.
+
+## Closure Summary
+- WP-02 implementation is complete in `/workdir/weppcloud-wbt` with deterministic topology-kernel primitives and companion modules/tests.
+- Review findings were dispositioned with code + regression coverage updates.
+- Required gates passed and WP-02 row in the WBT implementation plan is `done` with review/test fields complete.
+- ExecPlan moved from `prompts/active/` to `prompts/completed/` with closure outcomes.
 
 ## Objectives
 - Implement deterministic topology primitives required by both pruning phases.
@@ -35,12 +41,12 @@ This package is limited to WP-02 in `weppcloud-wbt`.
 - **Informed**: WEPPpy maintainers coordinating IFOLP rollout.
 
 ## Success Criteria
-- [ ] Deterministic topology kernel helpers are implemented and compile.
-- [ ] Whitebox + ESRI pointer decoding support exists in the kernel path.
-- [ ] Row-major deterministic link-discovery behavior is covered by tests.
-- [ ] Epsilon tie behavior and stale-candidate skip checks are covered by tests.
-- [ ] `cargo check -p whitebox_tools` and targeted WP-02 tests pass.
-- [ ] WP-02 row in WBT implementation plan is updated to `done` with review/test gates complete.
+- [x] Deterministic topology kernel helpers are implemented and compile.
+- [x] Whitebox + ESRI pointer decoding support exists in the kernel path.
+- [x] Row-major deterministic link-discovery behavior is covered by tests.
+- [x] Epsilon tie behavior and stale-candidate skip checks are covered by tests.
+- [x] `cargo check -p whitebox_tools` and targeted WP-02 tests pass.
+- [x] WP-02 row in WBT implementation plan is updated to `done` with review/test gates complete.
 
 ## Dependencies
 
@@ -79,11 +85,11 @@ This package is limited to WP-02 in `weppcloud-wbt`.
 ## Deliverables
 - `docs/work-packages/20260412_ifolp_wp02_topology_kernel/package.md`
 - `docs/work-packages/20260412_ifolp_wp02_topology_kernel/tracker.md`
-- `docs/work-packages/20260412_ifolp_wp02_topology_kernel/prompts/active/ifolp_wp02_topology_kernel_execplan.md`
+- `docs/work-packages/20260412_ifolp_wp02_topology_kernel/prompts/completed/ifolp_wp02_topology_kernel_execplan.md`
 - WP-02 WBT kernel code/tests and WP-02 row completion in WBT implementation plan.
 
 ## Follow-up Work
 - Start WP-03 with topology kernel as dependency.
 
-## Kickoff Prompt
-- Active ExecPlan: `docs/work-packages/20260412_ifolp_wp02_topology_kernel/prompts/active/ifolp_wp02_topology_kernel_execplan.md`
+## ExecPlan Archive
+- Completed ExecPlan: `docs/work-packages/20260412_ifolp_wp02_topology_kernel/prompts/completed/ifolp_wp02_topology_kernel_execplan.md`

@@ -179,28 +179,28 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### Iterative First-Order Link Prune WP-02 Topology Kernel
+### Iterative First-Order Link Prune WP-03 Source-Area Qualification
 **Started**: 2026-04-13  
-**Status**: Ready for Execution (WP-02 prep complete; run pending)  
-**Size**: Medium-High (1-3 sessions for WP-02 execution)  
+**Status**: Ready for Execution (WP-03 prep complete; run pending)  
+**Size**: High (1-3 sessions for WP-03 execution)  
 **Owner**: Codex (scaffold + ExecPlan), execution agent TBD  
-**Link**: [docs/work-packages/20260412_ifolp_wp02_topology_kernel/](docs/work-packages/20260412_ifolp_wp02_topology_kernel/)  
-**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-02 (core deterministic topology kernel) for Iterative First-Order Link Prune. Includes an active ExecPlan with module organization strategy, pointer-mode decode/traversal scope, deterministic discovery-order tests, and stale-candidate validation gates.
+**Link**: [docs/work-packages/20260413_ifolp_wp03_source_area_qualification/](docs/work-packages/20260413_ifolp_wp03_source_area_qualification/)  
+**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-03 (Phase A source-area qualification). Includes active ExecPlan with row-major inline mutation semantics, receiver transition handling requirements, targeted qualification tests, and a mandatory review-findings disposition gate before closure.
 
 **Scope**:
-- Execute WP-02 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
-- Implement pointer decoding/traversal, topology classification, and deterministic first-order-link discovery primitives.
-- Add synthetic-grid tests for inflow counts, state classification, ordering determinism, epsilon-tie handling, and stale-candidate checks.
+- Execute WP-03 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
+- Implement Phase A qualification behavior (provisional mask, source walk, receiver transitions, reclassification).
+- Add targeted WP-03 tests and close with explicit review findings disposition.
 
 **Dependencies**:
-- WP-01 completed tool scaffold and parser contract.
+- WP-02 deterministic topology kernel completion.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/specification.md`.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
 
 **Next Steps**:
 1. Dispatch execution agent using active ExecPlan in this package.
-2. Complete WP-02 end-to-end with review/test evidence.
-3. Update WBT WP-02 orchestration row to `done`.
+2. Complete WP-03 end-to-end with tests + review disposition evidence.
+3. Update WBT WP-03 orchestration row to `done`.
 
 ---
 
@@ -251,6 +251,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Iterative First-Order Link Prune WP-02 Topology Kernel (2026-04-13)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260412_ifolp_wp02_topology_kernel/](docs/work-packages/20260412_ifolp_wp02_topology_kernel/)  
+**Summary**: Completed WP-02 end-to-end in `/workdir/weppcloud-wbt` with deterministic topology-kernel primitives and companion tests. Implemented Whitebox/ESRI pointer decode + neighbor traversal, topology classification + receiver detection, deterministic first-order-link discovery order, and stale-candidate validity checks. Dispositioned review findings (terminal-head half-cell behavior, stream-mask geometry validation for inflow counts, non-negative epsilon clamp + parser rejection of negative epsilon) and expanded synthetic-grid coverage for inflow/state/order/tie/stale behavior. Required gates passed: `cargo check -p whitebox_tools`; `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`28 passed; 0 failed`). WP-02 row in WBT implementation plan marked `done` with review/test fields complete; ExecPlan archived under `prompts/completed/`.
 
 ### Iterative First-Order Link Prune WP-01 Tool Scaffolding (2026-04-13)
 **Status**: ✅ **COMPLETE**  

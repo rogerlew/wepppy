@@ -11,32 +11,45 @@ After this plan is executed, IFOLP has a deterministic topology kernel in `/work
 ## Progress
 
 - [x] (2026-04-13 05:35Z) ExecPlan authored and activated.
-- [ ] Implement pointer decode + traversal primitives.
-- [ ] Implement topology-state classification + receiver detection primitives.
-- [ ] Implement deterministic first-order-link discovery ordering kernel.
-- [ ] Implement stale-candidate validity checks.
-- [ ] Add and pass synthetic-grid determinism tests.
-- [ ] Run WP-02 validation gates and update WBT orchestration row to `done`.
-- [ ] Move ExecPlan to `prompts/completed/` with closure summary.
+- [x] (2026-04-13 06:15Z) Implemented pointer decode + traversal primitives.
+- [x] (2026-04-13 06:15Z) Implemented topology-state classification + receiver detection primitives.
+- [x] (2026-04-13 06:15Z) Implemented deterministic first-order-link discovery ordering kernel.
+- [x] (2026-04-13 06:15Z) Implemented stale-candidate validity checks.
+- [x] (2026-04-13 06:15Z) Added and passed synthetic-grid determinism tests.
+- [x] (2026-04-13 06:15Z) Ran WP-02 validation gates and updated WBT orchestration row to `done`.
+- [x] (2026-04-13 06:15Z) Prepared ExecPlan closure summary and archival move to `prompts/completed/`.
 
 ## Surprises & Discoveries
 
 - Observation: WP-01 completed with companion parser tests split into a dedicated file, establishing a non-monolithic pattern for WP-02.
   Evidence: `iterative_first_order_link_prune_parser_tests.rs` exists and is referenced in WP-01 notes.
+- Observation: Rust submodule resolution from `iterative_first_order_link_prune.rs` required explicit `#[path = "..."]` to locate sibling companion files instead of nested directory defaults.
+  Evidence: compile failure `E0583` resolved by path-qualified module declarations in `iterative_first_order_link_prune.rs`.
 
 ## Decision Log
 
 - Decision: Keep WP-02 strictly primitive-focused; no source-area qualification decisions and no pruning/degeneration decisions in this package.
   Rationale: Preserve package boundaries and make WP-03/WP-04 behavior reviews independent.
   Date/Author: 2026-04-13 / Codex.
+- Decision: Keep new topology kernel in dedicated companion source/tests and leave run-path placeholders unchanged.
+  Rationale: Satisfies non-monolithic requirement while avoiding scope creep into WP-03/04 phase execution behavior.
+  Date/Author: 2026-04-13 / Codex.
 
 ## Outcomes & Retrospective
 
-Pending execution. At closure summarize:
-- code structure choices,
-- deterministic test evidence,
-- findings/fixes,
-- gaps before WP-03.
+- Code structure choices:
+  - Added `iterative_first_order_link_prune_topology.rs` for deterministic kernel primitives.
+  - Added `iterative_first_order_link_prune_topology_tests.rs` for synthetic topology behavior tests.
+  - Kept parser tests and run placeholders in existing files to preserve WP boundaries.
+- Deterministic test evidence:
+  - `cargo check -p whitebox_tools` passed.
+  - `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` passed with `28 passed; 0 failed`.
+  - New tests cover Whitebox/ESRI decode/traversal, inflow/state classification, deterministic source/receiver order, epsilon tie behavior, and stale-candidate validity checks.
+- Findings/fixes:
+  - Fixed Rust submodule path discovery using explicit `#[path = "..."]` annotations.
+  - Scoped `#[allow(dead_code)]` to the new topology module import because WP-03/04 will consume the primitives while WP-02 keeps run-path placeholders.
+- Gaps before WP-03:
+  - Phase A source-area qualification and receiver mutation semantics remain intentionally unimplemented in this package.
 
 ## Context and Orientation
 
@@ -142,3 +155,4 @@ This ExecPlan is accepted when all of the following are true:
 
 ---
 Revision Note (2026-04-13 / Codex): Initial WP-02 ExecPlan authored for execution-agent handoff.
+Revision Note (2026-04-13 / Codex): WP-02 execution completed; deterministic topology kernel delivered with passing gates and documentation updates.
