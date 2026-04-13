@@ -1,6 +1,6 @@
 # Iterative First-Order Link Prune WP-04 First-Order-Link Pruning
 
-**Status**: Open (2026-04-13)
+**Status**: Closed (2026-04-13)
 **Timezone**: UTC
 
 ## Overview
@@ -36,13 +36,13 @@ This package is limited to WP-04 in `weppcloud-wbt`.
 - **Informed**: WEPPpy maintainers coordinating IFOLP rollout.
 
 ## Success Criteria
-- [ ] Phase B pruning logic is implemented and compiles.
-- [ ] Receiver-group shortest-link selection is deterministic and tested.
-- [ ] Immediate prune mutation, degeneration cadence, and termination behavior are covered by tests.
-- [ ] Parity guard behavior is implemented and covered by regression tests.
-- [ ] Code-review findings are dispositioned with no unresolved high/medium issues.
-- [ ] `cargo check -p whitebox_tools` and targeted IFOLP tests pass.
-- [ ] WP-04 row in WBT implementation plan is updated to `done` with review/test gates complete.
+- [x] Phase B pruning logic is implemented and compiles.
+- [x] Receiver-group shortest-link selection is deterministic and tested.
+- [x] Immediate prune mutation, degeneration cadence, and termination behavior are covered by tests.
+- [x] Parity guard behavior is implemented and covered by regression tests.
+- [x] Code-review findings are dispositioned with no unresolved high/medium issues.
+- [x] `cargo check -p whitebox_tools` and targeted IFOLP tests pass.
+- [x] WP-04 row in WBT implementation plan is updated to `done` with review/test gates complete.
 
 ## Dependencies
 
@@ -82,11 +82,11 @@ This package is limited to WP-04 in `weppcloud-wbt`.
 ## Deliverables
 - `docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/package.md`
 - `docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/tracker.md`
-- `docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/prompts/active/ifolp_wp04_first_order_link_pruning_execplan.md`
+- `docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/prompts/completed/ifolp_wp04_first_order_link_pruning_execplan.md`
 - WP-04 WBT implementation + tests + review-disposition evidence.
 
 ## Follow-up Work
 - Start WP-05 parity validation package after WP-04 closeout.
 
-## Kickoff Prompt
-- Active ExecPlan: `docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/prompts/active/ifolp_wp04_first_order_link_pruning_execplan.md`
+## ExecPlan Archive
+- Completed ExecPlan: `docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/prompts/completed/ifolp_wp04_first_order_link_pruning_execplan.md`

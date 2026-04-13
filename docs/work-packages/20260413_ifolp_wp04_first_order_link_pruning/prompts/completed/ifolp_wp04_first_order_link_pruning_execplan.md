@@ -11,21 +11,23 @@ After this plan is executed, IFOLP Phase B pruning behavior is implemented in `/
 ## Progress
 
 - [x] (2026-04-13 07:34Z) ExecPlan authored and activated.
-- [ ] Implement receiver-group shortest-link selection with strict epsilon-improvement semantics.
-- [ ] Implement immediate prune mutation path, including receiver-preserving normal case and self-receiver terminal special case.
-- [ ] Implement degeneration-flag-driven repass cadence and stable termination behavior.
-- [ ] Implement parity guard behavior for single-link prune outcomes.
-- [ ] Add and pass targeted WP-04 tests.
-- [ ] Complete code-review findings/disposition with no unresolved high/medium issues.
-- [ ] Run validation gates and update WBT WP-04 row to `done`.
-- [ ] Archive ExecPlan to `prompts/completed/` with closure outcomes.
+- [x] (2026-04-13 07:41Z) Implemented receiver-group shortest-link selection with strict epsilon-improvement semantics in `iterative_first_order_link_prune_phase_b.rs`.
+- [x] (2026-04-13 07:42Z) Implemented immediate prune mutation path, including receiver-preserving normal case and self-receiver terminal special case.
+- [x] (2026-04-13 07:42Z) Implemented degeneration-flag repass cadence with deterministic termination (repass only when degeneration occurs).
+- [x] (2026-04-13 07:42Z) Implemented single-link parity guard behavior with explicit failure contract.
+- [x] (2026-04-13 07:46Z) Added and passed targeted WP-04 companion tests in `iterative_first_order_link_prune_phase_b_tests.rs`.
+- [x] (2026-04-13 07:47Z) Completed code-review findings/disposition with no unresolved high/medium issues.
+- [x] (2026-04-13 07:48Z) Ran validation gates and updated WBT WP-04 row to `done` with review/test notes.
+- [x] (2026-04-13 07:48Z) Updated tracker and prepared ExecPlan archival to `prompts/completed/` with closure outcomes.
 
 ## Surprises & Discoveries
 
-- Observation: WP-03 now executes real raster I/O before entering the WP-04 placeholder path; run-path tests must remain explicit about this boundary.
-  Evidence: `iterative_first_order_link_prune_parser_tests.rs` now asserts Phase B placeholder behavior directly.
 - Observation: Deterministic topology and Phase A helper modules already exist and should be reused rather than duplicated.
   Evidence: companion modules `iterative_first_order_link_prune_topology.rs` and `iterative_first_order_link_prune_phase_a.rs` are present with targeted tests.
+- Observation: Tool orchestration required a run-path pivot from WP-04 placeholder behavior to full output emission once Phase B was implemented.
+  Evidence: `iterative_first_order_link_prune.rs` now prepares shared inputs, runs Phase A/Phase B, and writes final binary raster output with metadata.
+- Observation: Threshold-table `mscl_m` values were parsed but not previously propagated into execution inputs.
+  Evidence: `ThresholdTableEntry` now carries `mscl_m`, and preparation populates `local_mscl_m` for Phase B threshold lookup.
 
 ## Decision Log
 
@@ -35,10 +37,28 @@ After this plan is executed, IFOLP Phase B pruning behavior is implemented in `/
 - Decision: Require explicit findings severity/disposition as a closure gate (fixed/accepted/deferred, no unresolved high/medium).
   Rationale: Pruning cadence and mutation rules are regression-prone and parity-critical.
   Date/Author: 2026-04-13 / Codex.
+- Decision: Treat post-prune empty-network state as explicit pruning-stage failure (no silent empty output fallback).
+  Rationale: Matches IFOLP error contract expectation for no-network pruning states and prevents silent parity drift.
+  Date/Author: 2026-04-13 / Codex.
 
 ## Outcomes & Retrospective
 
-- Pending execution.
+- WP-04 Phase B is implemented and wired end-to-end in `/workdir/weppcloud-wbt`.
+- Added companion module/tests:
+  - `whitebox-tools-app/src/tools/stream_network_analysis/iterative_first_order_link_prune_phase_b.rs`
+  - `whitebox-tools-app/src/tools/stream_network_analysis/iterative_first_order_link_prune_phase_b_tests.rs`
+- Tool orchestration now executes:
+  - Phase A qualification
+  - Phase B pruning semantics
+  - final binary stream-mask write + metadata
+- Mandatory review findings/disposition:
+  - Medium: threshold-table `mscl_m` was not propagated into Phase B local thresholds. Disposition: fixed by filling `local_mscl_m` during input preparation.
+  - Medium: no explicit failure when pruning emptied the network mid-pass. Disposition: fixed with hard-fail no-channel checks at pruning stage.
+  - Low: parser test still asserted Phase B placeholder boundary. Disposition: fixed by replacing with parser-focused boolean-flag coverage.
+  - Closure status: no unresolved high/medium findings.
+- Gate results:
+  - `cargo check -p whitebox_tools` -> pass
+  - `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` -> pass (`39 passed`)
 
 ## Context and Orientation
 
@@ -150,3 +170,4 @@ This ExecPlan is accepted when all of the following are true:
 
 ---
 Revision Note (2026-04-13 / Codex): Initial WP-04 ExecPlan authored with mandatory code-review/disposition closure gate.
+Revision Note (2026-04-13 / Codex): WP-04 executed end-to-end; Phase B implementation/tests completed, gates passed, findings dispositioned, and plan archived.

@@ -179,28 +179,28 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### Iterative First-Order Link Prune WP-04 First-Order-Link Pruning
+### Iterative First-Order Link Prune WP-05 TopAZ Parity Validation
 **Started**: 2026-04-13  
-**Status**: Ready for Execution (WP-04 prep complete; run pending)  
-**Size**: High (1-3 sessions for WP-04 execution)  
+**Status**: Ready for Execution (WP-05 prep complete; run pending)  
+**Size**: High (1-3 sessions for WP-05 execution)  
 **Owner**: Codex (scaffold + ExecPlan), execution agent TBD  
-**Link**: [docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/](docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/)  
-**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-04 (Phase B first-order-link pruning). Includes active ExecPlan covering deterministic receiver-group shortest-link selection, immediate prune mutation semantics, degeneration-triggered repass behavior, parity guard handling, targeted pruning tests, and a mandatory review-findings disposition gate before closure.
+**Link**: [docs/work-packages/20260413_ifolp_wp05_topaz_parity_validation/](docs/work-packages/20260413_ifolp_wp05_topaz_parity_validation/)  
+**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-05 TopAZ parity validation. Includes active ExecPlan for fixture staging, TopAZ-oracle capture verification, candidate IFOLP output generation, metric comparison via WP-00 harness, deterministic reruns, mismatch triage/disposition, and a mandatory review-findings disposition gate before closure.
 
 **Scope**:
-- Execute WP-04 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
-- Implement Phase B pruning behavior (receiver-group shortest-link selection, immediate mutation, degeneration cadence, parity guard).
-- Add targeted WP-04 tests and close with explicit review findings disposition.
+- Execute WP-05 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
+- Run parity campaign against fixture manifest including `/wc1/runs/cl/clueless-aftertaste/dem/wbt`.
+- Produce canonical parity reports, categorize mismatches, and disposition findings with reproducible evidence.
 
 **Dependencies**:
-- WP-03 source-area qualification completion.
+- WP-04 first-order-link pruning completion.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/specification.md`.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
 
 **Next Steps**:
 1. Dispatch execution agent using active ExecPlan in this package.
-2. Complete WP-04 end-to-end with tests + review disposition evidence.
-3. Update WBT WP-04 orchestration row to `done`.
+2. Complete WP-05 parity run package with mismatch triage and review disposition evidence.
+3. Update WBT WP-05 orchestration row to `done`.
 
 ---
 
@@ -251,6 +251,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Iterative First-Order Link Prune WP-04 First-Order-Link Pruning (2026-04-13)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/](docs/work-packages/20260413_ifolp_wp04_first_order_link_pruning/)  
+**Summary**: Completed WP-04 end-to-end in `/workdir/weppcloud-wbt` with Phase B pruning behavior in companion module `iterative_first_order_link_prune_phase_b.rs`. Implemented deterministic receiver-group shortest-link selection with strict epsilon improvement, immediate prune mutation (receiver-preserving normal case + self-receiver terminal special case), stale-candidate skip, degeneration-driven repass cadence with deterministic termination, and single-link parity guard behavior. Tool orchestration now executes Phase A -> Phase B and writes final binary output raster + metadata. Required gates passed: `cargo check -p whitebox_tools`; `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`39 passed; 0 failed`). Review findings were dispositioned with no unresolved high/medium issues; ExecPlan archived under `prompts/completed/`.
 
 ### Iterative First-Order Link Prune WP-03 Source-Area Qualification (2026-04-13)
 **Status**: ✅ **COMPLETE**  
