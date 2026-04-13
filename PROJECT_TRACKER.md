@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-12  
-**Active Packages**: 1  
+**Last Updated**: 2026-04-13  
+**Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 1 package ✅ **Within target range**
+**Current WIP**: 2 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -175,7 +175,32 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 1 package
+**Current WIP Count**: 2 packages
+
+---
+
+### Iterative First-Order Link Prune WP-01 Tool Scaffolding
+**Started**: 2026-04-13  
+**Status**: Ready for Execution (WP-01 prep complete; run pending)  
+**Size**: Medium (1-2 sessions for WP-01 execution)  
+**Owner**: Codex (scaffold + ExecPlan), execution agent TBD  
+**Link**: [docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/](docs/work-packages/20260412_ifolp_wp01_tool_scaffolding/)  
+**Description**: Work-package-governed execution setup for `weppcloud-wbt` WP-01 (tool scaffolding and registration) for Iterative First-Order Link Prune. Includes an active ExecPlan with explicit file targets, registration wiring tasks, parser/help contract checks, and validation gates before WP-02 starts.
+
+**Scope**:
+- Execute WP-01 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
+- Add tool skeleton and wiring for `iterative_first_order_link_prune`.
+- Add CLI argument/help/metadata scaffolding and parser tests for required-arg/default behavior.
+
+**Dependencies**:
+- WP-00 completion artifacts in `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/wp-00/`.
+- `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/specification.md`.
+- `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
+
+**Next Steps**:
+1. Dispatch execution agent using active ExecPlan in this package.
+2. Complete WP-01 end-to-end with review/test evidence.
+3. Update WBT WP-01 orchestration row to `done`.
 
 ---
 
@@ -226,6 +251,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Iterative First-Order Link Prune WP-00 Parity Harness (2026-04-13)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260412_ifolp_wp00_parity_harness/](docs/work-packages/20260412_ifolp_wp00_parity_harness/)  
+**Summary**: Completed WP-00 end-to-end for IFOLP in `/workdir/weppcloud-wbt`. Delivered checksum-pinned fixture catalog and oracle manifest, parity metric specification, deterministic rerun report, and reusable harness utilities (`ifolp_wp00_prepare_fixtures.py`, `ifolp_wp00_run_topaz_oracle.sh`, `ifolp_wp00_compare_outputs.py`). Required anchor fixture `/wc1/runs/cl/clueless-aftertaste/dem/wbt` was included. WP-00 orchestration row in WBT implementation plan is `done` with review/test/parity gates complete; deterministic canonical hash matched across reruns.
 
 ### Upload Boundary Helpers Unification (2026-04-12)
 **Status**: ✅ **COMPLETE**  
