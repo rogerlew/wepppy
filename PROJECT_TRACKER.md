@@ -179,29 +179,29 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ---
 
-### Iterative First-Order Link Prune WP-06 Error Contract + Robustness Hardening
+### Iterative First-Order Link Prune WP-07 Optimization Pass
 **Started**: 2026-04-13  
 **Status**: Ready for Execution (package + ExecPlan prepared)  
-**Size**: High (2-4 sessions)  
+**Size**: High (2-5 sessions)  
 **Owner**: Codex (package governance + active ExecPlan), execution agent TBD  
-**Link**: [docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/](docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/)  
-**Description**: Post-WP-05 hardening package for IFOLP error contracts and robustness behavior, including strict negative-path handling, deterministic retries, and mandatory review/disposition closure.
+**Link**: [docs/work-packages/20260413_ifolp_wp07_optimization_pass/](docs/work-packages/20260413_ifolp_wp07_optimization_pass/)  
+**Description**: IFOLP optimization package for throughput and scalability improvements (multithreading and related optimizations) while preserving WP-05/WP-06 retained behavior via mandatory parity-regression checks and formal review/disposition closure.
 
 **Scope**:
-- Execute WP-06 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
-- Harden IFOLP error contracts and robustness paths without changing retained parity semantics.
-- Use the retained WP-05 IFOLP algorithm as the parity baseline for all follow-on comparisons.
-- Run targeted robustness and regression tests plus code review/disposition before closure.
+- Execute WP-07 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
+- Implement bounded performance optimizations (including multithreading where justified) without changing retained pruning semantics.
+- Run parity-regression checks against the retained IFOLP baseline and performance benchmarks.
+- Require mandatory code review and findings disposition before package close.
 
 **Dependencies**:
-- WP-05 parity closure state and retained IFOLP behavior baseline.
+- WP-05 parity closure state and WP-06 hardened contract baseline.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/specification.md`.
 - `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
 
 **Next Steps**:
-1. Dispatch execution agent using `prompts/active/ifolp_wp06_error_contract_robustness_hardening_execplan.md`.
-2. Execute bounded hardening changes with tests and parity-regression checks against retained IFOLP baseline.
-3. Run post-test code review/disposition and close WP-06 gates.
+1. Dispatch execution agent using `prompts/active/ifolp_wp07_optimization_pass_execplan.md`.
+2. Execute bounded optimization changes with benchmark + parity-regression evidence.
+3. Run post-test code review/disposition and close WP-07 gates.
 
 ---
 
@@ -253,10 +253,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Iterative First-Order Link Prune WP-06 Error Contract + Robustness Hardening (2026-04-13)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/](docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/)  
+**Summary**: Closed WP-06 with bounded hardening only (no pruning-semantic changes). Added explicit non-finite numeric rejection in parser and threshold-table values, duplicate threshold-code detection, and finite/non-negative boundary guards across Phase A/Phase B/topology inputs. Required gates passed: `cargo check -p whitebox_tools`; `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`50 passed; 0 failed`). Parity-regression reruns on `/tmp/ifolp_wp05_remediate/run1` and `run2` produced stable canonical hash `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83` and were byte-identical to retained `parity-report.final_effective.canonical.json` artifacts (no retained-state drift). No unresolved high/medium findings.
+
 ### Iterative First-Order Link Prune WP-05 TopAZ Parity Validation (2026-04-14)
 **Status**: ✅ **COMPLETE**  
 **Link**: [docs/work-packages/20260413_ifolp_wp05_topaz_parity_validation/](docs/work-packages/20260413_ifolp_wp05_topaz_parity_validation/)  
-**Summary**: Closed WP-05 with stakeholder-accepted effective parity equivalence. Retained IFOLP state includes H-002 + H-009 + H-010 + H-011; anchor fixture reached exact parity and non-anchor residuals were accepted low-severity after provenance-aligned probe evidence. Deterministic basin-masked retained-state canonical hash is `07e351537eb91525d85cf922f41c89bcc8ee12dc415ad2d078e159f27db93dc1` (run1/run2 stable). Final gates passed: `cargo check -p whitebox_tools`; `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`43 passed; 0 failed`). Remaining parity work must treat this retained IFOLP state as the baseline unless a new work package explicitly revises the baseline.
+**Summary**: Closed WP-05 with stakeholder-accepted effective parity equivalence. Retained IFOLP state includes H-002 + H-009 + H-010 + H-011; anchor fixture reached exact parity and non-anchor residuals were accepted low-severity after provenance-aligned probe evidence. Current retained artifact canonical hash is `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83` (run1/run2 stable; historical governance token `07e351...` retained in older WP-05 records). Final gates passed: `cargo check -p whitebox_tools`; `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`43 passed; 0 failed`). Remaining parity work must treat this retained IFOLP state as the baseline unless a new work package explicitly revises the baseline.
 
 ### Iterative First-Order Link Prune WP-04 First-Order-Link Pruning (2026-04-13)
 **Status**: ✅ **COMPLETE**  

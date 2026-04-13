@@ -11,16 +11,18 @@ After this plan is executed, IFOLP failure behavior is hardened for invalid and 
 ## Progress
 
 - [x] (2026-04-13 16:40Z) ExecPlan authored and activated.
-- [ ] Identify and classify targeted error-contract/robustness gaps (parser, input prep, Phase A, Phase B).
-- [ ] Implement bounded hardening changes and companion tests.
-- [ ] Run parity-regression checks against retained WP-05 baseline.
-- [ ] Execute mandatory code review and disposition findings by severity.
-- [ ] Run final gates and update WBT/WEPPpy status artifacts.
-- [ ] Archive this ExecPlan to `prompts/completed/` with closure outcomes.
+- [x] (2026-04-13 19:10Z) Identified and classified targeted error-contract/robustness gaps (parser numeric finiteness, threshold-table duplicate/non-finite handling, Phase A/B/topology finite numeric guards).
+- [x] (2026-04-13 19:25Z) Implemented bounded hardening changes and companion tests.
+- [x] (2026-04-13 19:48Z) Ran parity-regression checks against retained WP-05 run roots and confirmed no retained-state drift.
+- [x] (2026-04-13 19:50Z) Executed mandatory code review and disposition findings by severity (no unresolved high/medium).
+- [x] (2026-04-13 19:52Z) Ran final gates and updated WBT/WEPPpy status artifacts.
+- [x] (2026-04-13 19:52Z) Archived this ExecPlan to `prompts/completed/` with closure outcomes.
 
 ## Surprises & Discoveries
 
-- Pending.
+- Historical WP-05 governance docs reference retained hash `07e351...`, while current retained run-root canonical artifacts in `/tmp/ifolp_wp05_remediate` hash to `920cc161...`.
+- WP-06 parity reruns were byte-identical to retained `parity-report.final_effective.canonical.json` artifacts in both run roots, confirming no behavioral drift from retained-state artifacts.
+- Hardening scope remained bounded to failure contracts; no pruning decision-path code changes were required.
 
 ## Decision Log
 
@@ -30,7 +32,19 @@ After this plan is executed, IFOLP failure behavior is hardened for invalid and 
 
 ## Outcomes & Retrospective
 
-- Pending.
+- Hardened IFOLP error contracts without pruning-semantic changes:
+  - parser-level finite numeric contract enforcement,
+  - threshold-table duplicate-code and non-finite row rejection,
+  - finite epsilon/cell-size validation in Phase A/Phase B/topology boundaries.
+- Added targeted companion tests across parser/Phase A/Phase B/topology modules.
+- Required gates passed:
+  - `cargo check -p whitebox_tools`
+  - `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`50 passed`).
+- Parity-regression evidence:
+  - `/tmp/ifolp_wp05_remediate/run1/reports/parity-report.wp06.canonical.json` hash `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83`
+  - `/tmp/ifolp_wp05_remediate/run2/reports/parity-report.wp06.canonical.json` hash `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83`
+  - both equal retained `parity-report.final_effective.canonical.json` artifacts (no retained-state drift).
+- Code review/disposition closure: no unresolved high/medium findings.
 
 ## Context and Orientation
 

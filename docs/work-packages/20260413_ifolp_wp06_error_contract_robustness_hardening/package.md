@@ -1,6 +1,6 @@
 # Iterative First-Order Link Prune WP-06 Error Contract + Robustness Hardening
 
-**Status**: Open (2026-04-13)
+**Status**: Closed (2026-04-13)
 **Timezone**: UTC
 
 ## Overview
@@ -38,17 +38,17 @@ This package is limited to WP-06 hardening work in `weppcloud-wbt`.
 All WP-06 parity checks must use the retained WP-05 IFOLP algorithm as baseline unless an explicit superseding package changes this rule.
 
 Retained baseline evidence:
-- Deterministic basin-masked canonical hash: `07e351537eb91525d85cf922f41c89bcc8ee12dc415ad2d078e159f27db93dc1`.
+- Deterministic basin-masked canonical hash (current retained artifacts): `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83`.
 - Retained code state: H-002 + H-009 + H-010 + H-011.
 
 ## Success Criteria
-- [ ] Error-contract behaviors are explicitly defined and implemented for all targeted negative paths.
-- [ ] Robustness changes preserve retained WP-05 parity baseline semantics.
-- [ ] Targeted IFOLP tests include new negative-path and regression cases.
-- [ ] Parity-regression evidence confirms no unintended drift from retained baseline.
-- [ ] Code-review findings are dispositioned with no unresolved high/medium issues.
-- [ ] `cargo check -p whitebox_tools` and targeted IFOLP tests pass.
-- [ ] WP-06 row in WBT implementation plan is updated with review/test/parity gate states.
+- [x] Error-contract behaviors are explicitly defined and implemented for all targeted negative paths.
+- [x] Robustness changes preserve retained WP-05 parity baseline semantics.
+- [x] Targeted IFOLP tests include new negative-path and regression cases.
+- [x] Parity-regression evidence confirms no unintended drift from retained baseline.
+- [x] Code-review findings are dispositioned with no unresolved high/medium issues.
+- [x] `cargo check -p whitebox_tools` and targeted IFOLP tests pass.
+- [x] WP-06 row in WBT implementation plan is updated with review/test/parity gate states.
 
 ## Dependencies
 
@@ -89,11 +89,11 @@ Retained baseline evidence:
 ## Deliverables
 - `docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/package.md`
 - `docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/tracker.md`
-- `docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/prompts/active/ifolp_wp06_error_contract_robustness_hardening_execplan.md`
+- `docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/prompts/completed/ifolp_wp06_error_contract_robustness_hardening_execplan.md`
 - WP-06 hardening code/tests + review/disposition evidence.
 
 ## Follow-up Work
 - Start WP-07 optimization after WP-06 hardening outcomes are accepted.
 
 ## Kickoff Prompt
-- Active ExecPlan: `docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/prompts/active/ifolp_wp06_error_contract_robustness_hardening_execplan.md`
+- Completed ExecPlan: `docs/work-packages/20260413_ifolp_wp06_error_contract_robustness_hardening/prompts/completed/ifolp_wp06_error_contract_robustness_hardening_execplan.md`
