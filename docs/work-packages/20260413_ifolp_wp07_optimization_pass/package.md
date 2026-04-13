@@ -1,6 +1,6 @@
 # Iterative First-Order Link Prune WP-07 Optimization Pass
 
-**Status**: Open (2026-04-13)
+**Status**: Closed (2026-04-13)
 **Timezone**: UTC
 
 ## Overview
@@ -42,13 +42,13 @@ Retained baseline evidence:
 - Retained code state: WP-05 retained semantics + WP-06 hardening guards.
 
 ## Success Criteria
-- [ ] Baseline performance measurements are captured with reproducible commands.
-- [ ] Optimization changes produce measurable improvement on target fixtures.
-- [ ] Parity-regression evidence confirms no retained-state drift.
-- [ ] Determinism and targeted IFOLP test coverage remain passing.
-- [ ] Code-review findings are dispositioned with no unresolved high/medium issues.
-- [ ] `cargo check -p whitebox_tools` and targeted IFOLP tests pass.
-- [ ] WP-07 row in WBT implementation plan is updated with review/test/parity/perf gate states.
+- [x] Baseline performance measurements are captured with reproducible commands.
+- [x] Optimization changes produce measurable improvement on target fixtures.
+- [x] Parity-regression evidence confirms no retained-state drift.
+- [x] Determinism and targeted IFOLP test coverage remain passing.
+- [x] Code-review findings are dispositioned with no unresolved high/medium issues.
+- [x] `cargo check -p whitebox_tools` and targeted IFOLP tests pass.
+- [x] WP-07 row in WBT implementation plan is updated with review/test/parity/perf gate states.
 
 ## Dependencies
 
@@ -88,11 +88,13 @@ Retained baseline evidence:
 ## Deliverables
 - `docs/work-packages/20260413_ifolp_wp07_optimization_pass/package.md`
 - `docs/work-packages/20260413_ifolp_wp07_optimization_pass/tracker.md`
-- `docs/work-packages/20260413_ifolp_wp07_optimization_pass/prompts/active/ifolp_wp07_optimization_pass_execplan.md`
+- `docs/work-packages/20260413_ifolp_wp07_optimization_pass/benchmarks/{baseline_timings.tsv,post_timings.tsv,baseline_summary.tsv,post_summary.tsv,benchmark_comparison.tsv}`
+- `docs/work-packages/20260413_ifolp_wp07_optimization_pass/review_disposition.md`
+- `docs/work-packages/20260413_ifolp_wp07_optimization_pass/prompts/completed/ifolp_wp07_optimization_pass_execplan.md`
 - WP-07 optimization code/tests + benchmark/parity/review evidence.
 
 ## Follow-up Work
 - Start WP-08 release readiness after WP-07 optimization outcomes are accepted.
 
 ## Kickoff Prompt
-- Active ExecPlan: `docs/work-packages/20260413_ifolp_wp07_optimization_pass/prompts/active/ifolp_wp07_optimization_pass_execplan.md`
+- Completed ExecPlan: `docs/work-packages/20260413_ifolp_wp07_optimization_pass/prompts/completed/ifolp_wp07_optimization_pass_execplan.md`

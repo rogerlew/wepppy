@@ -11,26 +11,34 @@ After this plan is executed, IFOLP runs faster on representative fixtures throug
 ## Progress
 
 - [x] (2026-04-13 17:05Z) ExecPlan authored and activated.
-- [ ] Capture baseline benchmark and parity evidence for retained implementation.
-- [ ] Implement bounded optimization changes and targeted tests.
-- [ ] Capture post-change benchmark and parity-regression evidence.
-- [ ] Execute mandatory code review and disposition findings by severity.
-- [ ] Run final gates and update WBT/WEPPpy status artifacts.
-- [ ] Archive this ExecPlan to `prompts/completed/` with closure outcomes.
+- [x] (2026-04-13 20:06Z) Captured baseline benchmark and parity evidence for retained implementation.
+- [x] (2026-04-13 20:15Z) Implemented bounded optimization changes and targeted tests.
+- [x] (2026-04-13 20:24Z) Captured post-change benchmark and parity-regression evidence.
+- [x] (2026-04-13 20:24Z) Executed mandatory code review and disposition findings by severity.
+- [x] (2026-04-13 20:24Z) Ran final gates and updated WBT/WEPPpy status artifacts.
+- [x] (2026-04-13 20:24Z) Archived this ExecPlan to `prompts/completed/` with closure outcomes.
 
 ## Surprises & Discoveries
 
-- Pending.
+- Initial threaded inflow-count activation improved large fixture throughput but regressed small fixtures due thread overhead.
+- Applying threaded inflow counting only on large grids (`rows >= 1024`) preserved small-fixture performance while retaining measurable improvement on `gatecreek_10m_30_2`.
 
 ## Decision Log
 
 - Decision: Preserve retained WP-05/WP-06 parity baseline as non-negotiable optimization guard.
   Rationale: WP-07 scope is performance only.
   Date/Author: 2026-04-13 / Codex.
+- Decision: Limit threaded inflow counting to large grids only (`rows >= 1024`).
+  Rationale: Prevent overhead regressions on smaller fixtures while preserving throughput gains on large fixtures.
+  Date/Author: 2026-04-13 / Codex.
 
 ## Outcomes & Retrospective
 
-- Pending.
+- Optimization-only scope was preserved; no pruning-semantic redesign was introduced.
+- Benchmark evidence (run1 fixtures, 5 repeats): `blackwood_60_5` improved from `0.046s` to `0.042s` mean (`-8.70%`), `clueless_aftertaste_anchor_10_100` held at `0.020s` mean (0.00%), and `gatecreek_10m_30_2` improved from `0.750s` to `0.706s` mean (`-5.87%`).
+- Parity regression remained stable: run1 and run2 canonical hash `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83`, byte-identical to retained `parity-report.final_effective.canonical.json` artifacts.
+- Required gates passed: `cargo check -p whitebox_tools` and `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`51 passed`).
+- Mandatory review/disposition completed with no unresolved high/medium findings.
 
 ## Context and Orientation
 

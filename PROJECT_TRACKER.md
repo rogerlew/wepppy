@@ -175,33 +175,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 2 packages
-
----
-
-### Iterative First-Order Link Prune WP-07 Optimization Pass
-**Started**: 2026-04-13  
-**Status**: Ready for Execution (package + ExecPlan prepared)  
-**Size**: High (2-5 sessions)  
-**Owner**: Codex (package governance + active ExecPlan), execution agent TBD  
-**Link**: [docs/work-packages/20260413_ifolp_wp07_optimization_pass/](docs/work-packages/20260413_ifolp_wp07_optimization_pass/)  
-**Description**: IFOLP optimization package for throughput and scalability improvements (multithreading and related optimizations) while preserving WP-05/WP-06 retained behavior via mandatory parity-regression checks and formal review/disposition closure.
-
-**Scope**:
-- Execute WP-07 against `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
-- Implement bounded performance optimizations (including multithreading where justified) without changing retained pruning semantics.
-- Run parity-regression checks against the retained IFOLP baseline and performance benchmarks.
-- Require mandatory code review and findings disposition before package close.
-
-**Dependencies**:
-- WP-05 parity closure state and WP-06 hardened contract baseline.
-- `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/specification.md`.
-- `/workdir/weppcloud-wbt/docs/iterative-first-order-link-prune/implementation-plan.md`.
-
-**Next Steps**:
-1. Dispatch execution agent using `prompts/active/ifolp_wp07_optimization_pass_execplan.md`.
-2. Execute bounded optimization changes with benchmark + parity-regression evidence.
-3. Run post-test code review/disposition and close WP-07 gates.
+**Current WIP Count**: 1 package
 
 ---
 
@@ -252,6 +226,16 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Iterative First-Order Link Prune WP-08 WBT Wrapper Exposure + Release Readiness (2026-04-13)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260413_ifolp_wp08_wrapper_release_readiness/](docs/work-packages/20260413_ifolp_wp08_wrapper_release_readiness/)  
+**Summary**: Closed WP-08 with wrapper-surface release readiness and retained-baseline parity stability. Added `iterative_first_order_link_prune` to both Python wrapper surfaces (`whitebox_tools.py`, `WBT/whitebox_tools.py`), validated CLI/wrapper contract checks (`--listtools`, `--toolhelp=IterativeFirstOrderLinkPrune`, missing required args, threshold-pair validation), and passed required gates (`cargo check -p whitebox_tools`, targeted IFOLP tests `51 passed`, `0 failed`, wrapper `py_compile`). Parity spot checks on `/tmp/ifolp_wp05_remediate/run1` and `run2` produced canonical hash `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83`, byte-identical to retained `parity-report.final_effective.canonical.json` artifacts. Review disposition closed with no unresolved high/medium findings.
+
+### Iterative First-Order Link Prune WP-07 Optimization Pass (2026-04-13)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260413_ifolp_wp07_optimization_pass/](docs/work-packages/20260413_ifolp_wp07_optimization_pass/)  
+**Summary**: Closed WP-07 with bounded topology optimization and preserved retained behavior. Performance deltas (5 repeats, run1 fixtures): `blackwood_60_5` `0.046s -> 0.042s` (-8.70%), `clueless_aftertaste_anchor_10_100` `0.020s -> 0.020s` (0.00%), `gatecreek_10m_30_2` `0.750s -> 0.706s` (-5.87%). Parity-regression canonical hash remained `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83` on run1/run2 and matched retained baseline artifacts. Required gates passed: `cargo check -p whitebox_tools`; targeted IFOLP suite passed (`51 passed`, `0 failed`). Review disposition recorded no unresolved high/medium findings.
 
 ### Iterative First-Order Link Prune WP-06 Error Contract + Robustness Hardening (2026-04-13)
 **Status**: ✅ **COMPLETE**  

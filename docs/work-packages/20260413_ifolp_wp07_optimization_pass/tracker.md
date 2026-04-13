@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-13 17:05 UTC  
-**Current phase**: Ready for Execution  
-**Last updated**: 2026-04-13 17:05 UTC  
-**Next milestone**: Execute WP-07 active ExecPlan with benchmark + parity + review gates  
+**Current phase**: Closed  
+**Last updated**: 2026-04-13 20:24 UTC  
+**Next milestone**: Hand off WP-07 closure evidence to WP-08 planning  
 **Security impact**: `none`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`
@@ -16,10 +16,7 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Capture baseline performance measurements on approved fixtures.
-- [ ] Implement bounded optimization changes (multithreading and related improvements).
-- [ ] Run parity-regression checks against retained baseline artifacts.
-- [ ] Complete mandatory code-review findings/disposition and close gates.
+- [ ] None.
 
 ### In Progress
 - [ ] None.
@@ -31,12 +28,26 @@
 - [x] Created WP-07 package scaffold (`package.md`, `tracker.md`, `prompts/active`, `prompts/completed`) (2026-04-13 17:05 UTC).
 - [x] Authored active WP-07 ExecPlan with explicit benchmark/parity/review closure gates (2026-04-13 17:05 UTC).
 - [x] Updated tracker linkage (`PROJECT_TRACKER.md` and WBT implementation-plan row) for WP-07 preparation state (2026-04-13 17:05 UTC).
+- [x] Captured baseline benchmark evidence (`benchmarks/baseline_*.tsv`) before optimization edits (2026-04-13 20:06 UTC).
+- [x] Captured baseline parity evidence against retained baseline (`parity-report.wp07_baseline*.json`) with canonical hash `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83` on run1/run2 (2026-04-13 20:07 UTC).
+- [x] Implemented bounded optimization cluster in IFOLP topology module with targeted concurrency-sensitive tests (2026-04-13 20:15 UTC).
+- [x] Ran required gates: `cargo check -p whitebox_tools` and `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (2026-04-13 20:23 UTC).
+- [x] Captured post-change benchmark evidence (`benchmarks/post_*.tsv`, `benchmarks/benchmark_comparison.tsv`) (2026-04-13 20:23 UTC).
+- [x] Captured post-change parity-regression evidence (`parity-report.wp07_post*.json`) with canonical hash unchanged at `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83` and byte-identical to retained baseline artifacts (2026-04-13 20:24 UTC).
+- [x] Completed mandatory code-review findings disposition (`review_disposition.md`) with no unresolved high/medium findings (2026-04-13 20:24 UTC).
+- [x] Updated WBT implementation-plan WP-07 row to `done` with test/parity/perf/review evidence (2026-04-13 20:24 UTC).
+- [x] Archived ExecPlan to `prompts/completed/ifolp_wp07_optimization_pass_execplan.md` (2026-04-13 20:24 UTC).
 
 ## Timeline
 
 - **2026-04-13 17:05 UTC** - Package created and scoped.
 - **2026-04-13 17:05 UTC** - Active WP-07 ExecPlan authored.
-- **2026-04-13 17:05 UTC** - Linkage updated in top-level tracker and WBT implementation plan.
+- **2026-04-13 20:06 UTC** - Baseline benchmark sweep completed (run1 fixtures, 5 repeats each).
+- **2026-04-13 20:07 UTC** - Baseline parity capture completed on `/tmp/ifolp_wp05_remediate/run1,run2`.
+- **2026-04-13 20:15 UTC** - Optimization code/tests implemented in topology module.
+- **2026-04-13 20:23 UTC** - Required cargo gates passed; post-change benchmark sweep completed.
+- **2026-04-13 20:24 UTC** - Post-change parity regression confirmed retained baseline hash stability.
+- **2026-04-13 20:24 UTC** - Review disposition completed; WP-07 docs/rows updated; ExecPlan archived.
 
 ## Decisions Log
 
@@ -47,53 +58,78 @@
 
 **Impact**: Controls risk while enabling measurable runtime improvements.
 
-### 2026-04-13 17:05 UTC: Require formal review/disposition as closure gate
-**Context**: concurrency/performance edits can introduce subtle correctness regressions.
+### 2026-04-13 20:16 UTC: Limit threaded inflow counting to large grids
+**Context**: Initial threaded inflow-count activation improved large fixture performance but added overhead on small fixtures.
 
-**Decision**: Enforce no unresolved high/medium findings before close.
+**Decision**: Apply threaded inflow counting only when `rows >= 1024`; keep smaller grids on serial path.
 
-**Impact**: Ensures optimization changes remain safe and maintainable.
+**Impact**: Preserves small-fixture latency while retaining measurable gains on large workloads.
 
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Multithreading introduces race-induced semantic drift | High | Medium | Enforce parity-regression and deterministic reruns for retained baseline fixtures | Open |
-| Benchmark signal is noisy and not reproducible | Medium | Medium | Pin fixture set, threads, and command variants; capture repeated runs | Open |
-| Performance gains in one fixture regress others | Medium | Medium | Require fixture-level benchmark comparison and acceptance thresholds | Open |
-| Review before parity evidence may miss regressions | Medium | Low | Preserve strict order: optimize -> benchmark/parity -> review/disposition | Mitigated |
+| Multithreading introduces race-induced semantic drift | High | Medium | Parity-regression reruns on retained run roots; canonical hash equality checks against retained artifacts | Mitigated |
+| Benchmark signal is noisy and not reproducible | Medium | Medium | Fixed fixture set, fixed command path, five repeats per fixture, baseline/post tables versioned in package artifacts | Mitigated |
+| Performance gains in one fixture regress others | Medium | Medium | Threading threshold tuned to large grids; benchmark table tracks per-fixture deltas | Mitigated |
+| Review before parity evidence may miss regressions | Medium | Low | Enforced required order: baseline -> optimization -> post benchmark/parity -> review disposition | Mitigated |
 
 ## Verification Checklist
 
 ### Package Governance
 - [x] Package scaffold follows `docs/work-packages/README.md` layout.
-- [x] Active ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
-- [x] Tracker/linkage updated for execution handoff.
+- [x] Active ExecPlan followed `docs/prompt_templates/codex_exec_plans.md`.
+- [x] Tracker/linkage updated for closure handoff.
 
 ### WP-07 Completion
-- [ ] Baseline and post-change benchmark evidence captured.
-- [ ] Parity-regression checks confirm no retained-state drift.
-- [ ] Targeted IFOLP tests remain passing.
-- [ ] Code-review findings dispositioned (no unresolved high/medium).
-- [ ] `cargo check -p whitebox_tools` passes.
-- [ ] WBT WP-07 orchestration row marked `done`.
+- [x] Baseline and post-change benchmark evidence captured.
+- [x] Parity-regression checks confirm retained-baseline behavior.
+- [x] Targeted IFOLP tests remain passing.
+- [x] Code-review findings dispositioned (no unresolved high/medium).
+- [x] `cargo check -p whitebox_tools` passes.
+- [x] WBT WP-07 orchestration row marked `done`.
 
 ## Progress Notes
 
-### 2026-04-13 17:05 UTC: WP-07 package and prompt setup
+### 2026-04-13 20:24 UTC: WP-07 closure execution
 **Agent/Contributor**: Codex
 
 **Work completed**:
-- Created WP-07 package scaffold in `docs/work-packages/20260413_ifolp_wp07_optimization_pass/`.
-- Authored active WP-07 ExecPlan for execution-agent handoff.
-- Updated project tracker lifecycle alignment and WBT WP-07 orchestration note.
+- Captured baseline benchmarks and baseline parity evidence before any optimization edits.
+- Implemented bounded optimization-only changes in `iterative_first_order_link_prune_topology.rs`:
+  - allocation reduction for inflow counting (`inflow_count` no longer allocates neighbor vectors),
+  - multithreaded inflow counting for large grids with deterministic row writeback,
+  - classification micro-optimization that avoids redundant stream-mask validation calls.
+- Added targeted concurrency-sensitive regression test:
+  - `iterative_first_order_link_prune_topology_parallel_inflow_counts_match_manual_reference`.
+- Re-ran required gates and captured post-change benchmark/parity evidence.
+- Completed mandatory review disposition and updated WP-07 docs/rows.
+
+**Benchmark evidence** (mean over 5 repeats, run1 fixtures):
+- `blackwood_60_5`: `0.046s -> 0.042s` (`-8.70%`)
+- `clueless_aftertaste_anchor_10_100`: `0.020s -> 0.020s` (`0.00%`)
+- `gatecreek_10m_30_2`: `0.750s -> 0.706s` (`-5.87%`)
+- Source artifact: `benchmarks/benchmark_comparison.tsv`.
+
+**Parity-regression evidence**:
+- `run1` canonical hash (`parity-report.wp07_post.canonical.json`): `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83`
+- `run2` canonical hash (`parity-report.wp07_post.canonical.json`): `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83`
+- Both byte-identical to:
+  - `parity-report.wp07_baseline.canonical.json`
+  - retained `parity-report.final_effective.canonical.json`
+- Result: no retained-state drift.
+
+**Code-review findings disposition**:
+- Recorded in `review_disposition.md`.
+- No unresolved high/medium findings.
+
+**Test results**:
+- `cargo check -p whitebox_tools`: pass.
+- `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture`: pass (`51 passed`, `0 failed`).
 
 **Blockers encountered**:
 - None.
 
-**Next steps**:
-- Dispatch execution agent with active WP-07 ExecPlan.
-- Execute optimization package end-to-end in `/workdir/weppcloud-wbt`.
-
-**Test results**:
-- Package-setup session; no WP-07 code gates run in this step.
+**Closure artifact updates**:
+- Updated WBT WP-07 orchestration row to `done` with evidence summary.
+- Archived ExecPlan to `prompts/completed/ifolp_wp07_optimization_pass_execplan.md`.
