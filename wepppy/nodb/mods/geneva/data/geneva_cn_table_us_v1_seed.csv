@@ -1,0 +1,145 @@
+nlcd_class,nlcd_label,hsg,burn_severity,hydrophobic,cn_arc_ii,source,notes
+11,Open Water,A,unburned,false,100,NEH_TR55_seed,
+11,Open Water,B,unburned,false,100,NEH_TR55_seed,
+11,Open Water,C,unburned,false,100,NEH_TR55_seed,
+11,Open Water,D,unburned,false,100,NEH_TR55_seed,
+12,Perennial Ice/Snow,A,unburned,false,100,NEH_TR55_seed,
+12,Perennial Ice/Snow,B,unburned,false,100,NEH_TR55_seed,
+12,Perennial Ice/Snow,C,unburned,false,100,NEH_TR55_seed,
+12,Perennial Ice/Snow,D,unburned,false,100,NEH_TR55_seed,
+21,"Developed, Open Space",A,unburned,false,59,NEH_TR55_seed,
+21,"Developed, Open Space",B,unburned,false,75,NEH_TR55_seed,
+21,"Developed, Open Space",C,unburned,false,83,NEH_TR55_seed,
+21,"Developed, Open Space",D,unburned,false,87,NEH_TR55_seed,
+22,"Developed, Low Intensity",A,unburned,false,68,NEH_TR55_seed,
+22,"Developed, Low Intensity",B,unburned,false,80,NEH_TR55_seed,
+22,"Developed, Low Intensity",C,unburned,false,86,NEH_TR55_seed,
+22,"Developed, Low Intensity",D,unburned,false,89,NEH_TR55_seed,
+23,"Developed, Medium Intensity",A,unburned,false,81,NEH_TR55_seed,
+23,"Developed, Medium Intensity",B,unburned,false,88,NEH_TR55_seed,
+23,"Developed, Medium Intensity",C,unburned,false,91,NEH_TR55_seed,
+23,"Developed, Medium Intensity",D,unburned,false,93,NEH_TR55_seed,
+24,"Developed, High Intensity",A,unburned,false,91,NEH_TR55_seed,
+24,"Developed, High Intensity",B,unburned,false,94,NEH_TR55_seed,
+24,"Developed, High Intensity",C,unburned,false,95,NEH_TR55_seed,
+24,"Developed, High Intensity",D,unburned,false,96,NEH_TR55_seed,
+31,Barren Land,A,unburned,false,77,NEH_TR55_seed,
+31,Barren Land,B,unburned,false,86,NEH_TR55_seed,
+31,Barren Land,C,unburned,false,91,NEH_TR55_seed,
+31,Barren Land,D,unburned,false,94,NEH_TR55_seed,
+41,Deciduous Forest,A,high,false,70,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,A,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+41,Deciduous Forest,A,low,false,59,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,A,moderate,false,65,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,A,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+41,Deciduous Forest,A,unburned,false,55,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,B,high,false,71,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,B,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+41,Deciduous Forest,B,low,false,60,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,B,moderate,false,65,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,B,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+41,Deciduous Forest,B,unburned,false,55,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,C,high,false,83,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,C,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+41,Deciduous Forest,C,low,false,78,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,C,moderate,false,80,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,C,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+41,Deciduous Forest,C,unburned,false,75,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,D,high,false,87,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,D,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+41,Deciduous Forest,D,low,false,82,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,D,moderate,false,85,RMRS_GTR_334_Table_4_14,
+41,Deciduous Forest,D,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+41,Deciduous Forest,D,unburned,false,80,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,A,high,false,60,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,A,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+42,Evergreen Forest,A,low,false,49,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,A,moderate,false,55,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,A,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+42,Evergreen Forest,A,unburned,false,45,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,B,high,false,82,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,B,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+42,Evergreen Forest,B,low,false,71,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,B,moderate,false,76,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,B,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+42,Evergreen Forest,B,unburned,false,66,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,C,high,false,85,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,C,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+42,Evergreen Forest,C,low,false,80,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,C,moderate,false,82,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,C,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+42,Evergreen Forest,C,unburned,false,77,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,D,high,false,90,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,D,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+42,Evergreen Forest,D,low,false,85,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,D,moderate,false,88,RMRS_GTR_334_Table_4_14,
+42,Evergreen Forest,D,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+42,Evergreen Forest,D,unburned,false,83,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,A,high,false,70,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,A,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+43,Mixed Forest,A,low,false,59,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,A,moderate,false,65,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,A,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+43,Mixed Forest,A,unburned,false,55,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,B,high,false,71,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,B,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+43,Mixed Forest,B,low,false,60,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,B,moderate,false,65,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,B,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+43,Mixed Forest,B,unburned,false,55,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,C,high,false,83,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,C,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+43,Mixed Forest,C,low,false,78,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,C,moderate,false,80,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,C,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+43,Mixed Forest,C,unburned,false,75,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,D,high,false,87,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,D,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+43,Mixed Forest,D,low,false,82,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,D,moderate,false,85,RMRS_GTR_334_Table_4_14,
+43,Mixed Forest,D,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+43,Mixed Forest,D,unburned,false,80,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,A,high,false,73,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,A,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+52,Shrub/Scrub,A,low,false,65,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,A,moderate,false,68,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,A,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+52,Shrub/Scrub,A,unburned,false,63,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,B,high,false,88,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,B,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+52,Shrub/Scrub,B,low,false,79,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,B,moderate,false,82,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,B,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+52,Shrub/Scrub,B,unburned,false,77,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,C,high,false,91,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,C,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+52,Shrub/Scrub,C,low,false,86,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,C,moderate,false,88,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,C,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+52,Shrub/Scrub,C,unburned,false,85,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,D,high,false,91,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,D,high,true,95,RMRS_GTR_334_Table_4_06_seed,Seed CN for high burn with water repellency; user calibration expected.
+52,Shrub/Scrub,D,low,false,89,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,D,moderate,false,90,RMRS_GTR_334_Table_4_14,
+52,Shrub/Scrub,D,moderate,true,90,RMRS_GTR_334_Table_4_06_seed,Seed CN for moderate burn with water repellency; user calibration expected.
+52,Shrub/Scrub,D,unburned,false,88,RMRS_GTR_334_Table_4_14,
+71,Grassland/Herbaceous,A,unburned,false,30,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+71,Grassland/Herbaceous,B,unburned,false,58,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+71,Grassland/Herbaceous,C,unburned,false,71,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+71,Grassland/Herbaceous,D,unburned,false,78,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+81,Pasture/Hay,A,unburned,false,39,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+81,Pasture/Hay,B,unburned,false,61,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+81,Pasture/Hay,C,unburned,false,74,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+81,Pasture/Hay,D,unburned,false,80,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+82,Cultivated Crops,A,unburned,false,67,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+82,Cultivated Crops,B,unburned,false,78,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+82,Cultivated Crops,C,unburned,false,85,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+82,Cultivated Crops,D,unburned,false,89,NEH_TR55_seed,No burn-severity adjustment in v1 seed table.
+90,Woody Wetlands,A,unburned,false,30,NEH_TR55_seed,
+90,Woody Wetlands,B,unburned,false,30,NEH_TR55_seed,
+90,Woody Wetlands,C,unburned,false,30,NEH_TR55_seed,
+90,Woody Wetlands,D,unburned,false,30,NEH_TR55_seed,
+95,Emergent Herbaceous Wetlands,A,unburned,false,30,NEH_TR55_seed,
+95,Emergent Herbaceous Wetlands,B,unburned,false,30,NEH_TR55_seed,
+95,Emergent Herbaceous Wetlands,C,unburned,false,30,NEH_TR55_seed,
+95,Emergent Herbaceous Wetlands,D,unburned,false,30,NEH_TR55_seed,
