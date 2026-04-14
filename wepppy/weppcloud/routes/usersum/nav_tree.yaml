@@ -193,6 +193,12 @@ roots:
                 doc_id: usersum.input_file_specifications.climate_file_spec
               - key: usersum.db.climate_file_parameters
                 doc_id: usersum.db.climate_file_parameters
+      - key: usersum.technical_reference.weppcloud_wbt
+        title: WEPPcloud-WBT
+        collapsible: true
+        children:
+          - key: usersum.technical_reference.weppcloud_wbt.iterative_first_order_link_prune_enduser
+            doc_id: vendor.weppcloud_wbt.iterative_first_order_link_prune_enduser
 
   - key: usersum.advanced_operations
     title: Advanced and Operations

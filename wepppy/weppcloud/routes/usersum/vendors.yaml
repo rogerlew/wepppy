@@ -5,6 +5,7 @@ vendors:
     source_ref: main
     include_globs:
       - docs/hydroenforcement/culvert-web-app-hydroenforcement.md
+      - docs/iterative_first_order_link_prune.ENDUSER.md
       - whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md
     exclude_globs:
       - "**/node_modules/**"

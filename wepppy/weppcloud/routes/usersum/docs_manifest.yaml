@@ -597,3 +597,13 @@ docs:
     audience_tags: [operator, developer]
     status: active
     nav_key: vendor.weppcloud_wbt.hydro_analysis.hillslopes_topaz_spec
+  - doc_id: vendor.weppcloud_wbt.iterative_first_order_link_prune_enduser
+    source: vendor
+    vendor_id: weppcloud-wbt
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt/docs/iterative_first_order_link_prune.ENDUSER.md
+    title: Iterative First-Order Link Prune
+    min_role: user
+    category: vendor-weppcloud-wbt
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.technical_reference.weppcloud_wbt.iterative_first_order_link_prune_enduser
