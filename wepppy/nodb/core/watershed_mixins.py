@@ -230,6 +230,7 @@ class WatershedOperationsMixin:
             wbt.delineate_channels(
                 csa=self.csa,
                 mcl=self.mcl,
+                stream_pruning_method=self.stream_pruning_method,
                 fill_or_breach=self.wbt_fill_or_breach,
                 blc_dist=self.wbt_blc_dist,
                 logger=self.logger,

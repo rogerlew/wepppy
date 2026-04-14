@@ -102,6 +102,7 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
     bounds_raw = payload.get("map_bounds")
     mcl_raw = payload.get("mcl")
     csa_raw = payload.get("csa")
+    stream_pruning_method_raw = payload.get("stream_pruning_method", "ifolp")
     wbt_fill_or_breach_raw = payload.get("wbt_fill_or_breach")
     wbt_blc_dist_raw = payload.get("wbt_blc_dist")
     set_extent_mode_raw = payload.get("set_extent_mode", 0)
@@ -212,6 +213,20 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
         else:
             wbt_fill_or_breach = str(wbt_fill_or_breach_raw)
 
+        if isinstance(stream_pruning_method_raw, (list, tuple)):
+            stream_pruning_method = next(
+                (str(item).strip().lower() for item in stream_pruning_method_raw if item not in (None, "")),
+                "ifolp",
+            )
+        elif stream_pruning_method_raw in (None, ""):
+            stream_pruning_method = "ifolp"
+        else:
+            stream_pruning_method = str(stream_pruning_method_raw).strip().lower()
+        if stream_pruning_method not in {"ifolp", "remove_short_streams"}:
+            raise ValueError(
+                "stream_pruning_method must be one of: ifolp, remove_short_streams."
+            )
+
         if wbt_blc_dist_raw in (None, "", []):
             wbt_blc_dist = None
         elif isinstance(wbt_blc_dist_raw, (list, tuple)):
@@ -241,6 +256,7 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             zoom,
             mcl,
             csa,
+            stream_pruning_method,
             wbt_fill_or_breach,
             wbt_blc_dist,
             set_extent_mode,
@@ -636,6 +652,7 @@ async def fetch_dem_and_build_channels(
             zoom,
             mcl,
             csa,
+            stream_pruning_method,
             wbt_fill_or_breach,
             wbt_blc_dist,
             set_extent_mode,
@@ -668,6 +685,7 @@ async def fetch_dem_and_build_channels(
                 watershed._set_extent_mode = int(set_extent_mode)
                 watershed._map_bounds_text = map_bounds_text
                 if watershed.delineation_backend_is_wbt:
+                    watershed._stream_pruning_method = stream_pruning_method
                     if wbt_fill_or_breach is not None:
                         watershed._wbt_fill_or_breach = wbt_fill_or_breach
                     if wbt_blc_dist is not None:
@@ -696,6 +714,7 @@ async def fetch_dem_and_build_channels(
                     zoom,
                     csa,
                     mcl,
+                    stream_pruning_method,
                     wbt_fill_or_breach,
                     wbt_blc_dist,
                     set_extent_mode,

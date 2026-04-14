@@ -199,6 +199,11 @@ def process_subcatchment(args: Tuple[WatershedAbstraction, int, bool, float, int
 
 
 TRANSIENT_FIELDS = ["_sub_area_lookup", "_sub_length_lookup", "_sub_centroid_lookup"]
+DEFAULT_STREAM_PRUNING_METHOD = "ifolp"
+SUPPORTED_STREAM_PRUNING_METHODS = (
+    DEFAULT_STREAM_PRUNING_METHOD,
+    "remove_short_streams",
+)
 
 
 class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
@@ -275,6 +280,15 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
                 self._wbt_blc_dist = self.config_get_int(
                     "watershed.wbt", "blc_dist", 1000
                 )
+                stream_pruning_method = self.config_get_str(
+                    "watershed.wbt",
+                    "stream_pruning_method",
+                    DEFAULT_STREAM_PRUNING_METHOD,
+                )
+                stream_pruning_method = str(stream_pruning_method).strip().lower()
+                if stream_pruning_method not in SUPPORTED_STREAM_PRUNING_METHODS:
+                    stream_pruning_method = DEFAULT_STREAM_PRUNING_METHOD
+                self._stream_pruning_method = stream_pruning_method
                 self._wbt: Optional[WhiteboxToolsTopazEmulator] = None
                 self._flovec_netful_relief_chnjnt_are_vrt = False
 
@@ -473,6 +487,29 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
     @nodb_setter
     def wbt_blc_dist(self, value: int) -> None:
         self._wbt_blc_dist = value
+
+    @property
+    def stream_pruning_method(self) -> str:
+        method = str(
+            getattr(
+                self,
+                "_stream_pruning_method",
+                DEFAULT_STREAM_PRUNING_METHOD,
+            )
+        ).strip().lower()
+        if method not in SUPPORTED_STREAM_PRUNING_METHODS:
+            return DEFAULT_STREAM_PRUNING_METHOD
+        return method
+
+    @stream_pruning_method.setter
+    @nodb_setter
+    def stream_pruning_method(self, value: str) -> None:
+        method = str(value).strip().lower()
+        assert method in SUPPORTED_STREAM_PRUNING_METHODS, (
+            f"Invalid stream_pruning_method value: {value}. "
+            f"Supported values: {', '.join(SUPPORTED_STREAM_PRUNING_METHODS)}"
+        )
+        self._stream_pruning_method = method
 
     @property
     def max_points(self) -> int:

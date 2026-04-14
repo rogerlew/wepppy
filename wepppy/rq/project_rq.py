@@ -614,6 +614,7 @@ def build_channels_rq(
     runid: str,
     csa: float,
     mcl: float,
+    stream_pruning_method: Optional[str],
     wbt_fill_or_breach: Optional[str],
     wbt_blc_dist: Optional[int],
 ) -> None:
@@ -623,6 +624,7 @@ def build_channels_rq(
         runid: Identifier used to locate the working directory.
         csa: Contributing source area threshold.
         mcl: Minimum channel length threshold.
+        stream_pruning_method: Optional stream-pruning selection (`ifolp` or `remove_short_streams`).
         wbt_fill_or_breach: Optional override for Whitebox fill/breach strategy.
         wbt_blc_dist: Optional breaching distance when Whitebox backend is used.
 
@@ -638,6 +640,12 @@ def build_channels_rq(
         def _mutate_watershed() -> None:
             watershed = Watershed.getInstance(wd)
             if watershed.delineation_backend_is_wbt:
+                if stream_pruning_method is not None:
+                    StatusMessenger.publish(
+                        status_channel,
+                        f"Setting stream_pruning_method to {stream_pruning_method}",
+                    )
+                    watershed.stream_pruning_method = stream_pruning_method
                 if wbt_fill_or_breach is not None:
                     StatusMessenger.publish(status_channel, f'Setting wbt_fill_or_breach to {wbt_fill_or_breach}')
                     watershed.wbt_fill_or_breach = wbt_fill_or_breach
@@ -673,6 +681,7 @@ def fetch_dem_and_build_channels_rq(
     zoom: Optional[int],
     csa: float,
     mcl: float,
+    stream_pruning_method: Optional[str],
     wbt_fill_or_breach: Optional[str],
     wbt_blc_dist: Optional[int],
     set_extent_mode: int,
@@ -689,6 +698,7 @@ def fetch_dem_and_build_channels_rq(
         zoom: Optional zoom level.
         csa: Contributing source area threshold.
         mcl: Minimum channel length threshold.
+        stream_pruning_method: Optional stream-pruning selection (`ifolp` or `remove_short_streams`).
         wbt_fill_or_breach: Optional Whitebox fill/breach directive.
         wbt_blc_dist: Optional breaching distance for Whitebox runs.
         set_extent_mode: Serialized extent mode persisted on the watershed.
@@ -714,7 +724,14 @@ def fetch_dem_and_build_channels_rq(
             if int(set_extent_mode) == 3:
                 bjob = q.enqueue_call(
                     build_channels_rq,
-                    (runid, csa, mcl, wbt_fill_or_breach, wbt_blc_dist),
+                    (
+                        runid,
+                        csa,
+                        mcl,
+                        stream_pruning_method,
+                        wbt_fill_or_breach,
+                        wbt_blc_dist,
+                    ),
                 )
                 job.meta['jobs:0,func:build_channels_rq'] = bjob.id
                 job.save()
@@ -725,7 +742,14 @@ def fetch_dem_and_build_channels_rq(
 
                 bjob = q.enqueue_call(
                     build_channels_rq,
-                    (runid, csa, mcl, wbt_fill_or_breach, wbt_blc_dist),
+                    (
+                        runid,
+                        csa,
+                        mcl,
+                        stream_pruning_method,
+                        wbt_fill_or_breach,
+                        wbt_blc_dist,
+                    ),
                     depends_on=ajob,
                 )
                 job.meta['jobs:1,func:build_channels_rq'] = bjob.id

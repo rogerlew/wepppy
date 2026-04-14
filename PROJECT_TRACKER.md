@@ -227,6 +227,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Iterative First-Order Link Prune WP-10 WEPPpy E2E Cutover (2026-04-14)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260414_ifolp_wp10_wepppy_e2e_cutover/](docs/work-packages/20260414_ifolp_wp10_wepppy_e2e_cutover/)  
+**Summary**: Closed WP-10 end-to-end with WEPPpy IFOLP cutover behavior: default stream-pruning method is `ifolp`, explicit legacy mode `remove_short_streams` remains selectable, and IFOLP call-site explicitly passes `max_junctions=3`. Completed watershed/rq-engine/UI method plumbing (state defaults, payload validation, schema-default reporting, controller/template propagation), added method-matrix assertions for both pruning paths, and executed required gates: `wctl run-pytest tests/microservices/test_rq_engine_watershed_routes.py` (`36 passed`), `wctl run-pytest tests/rq/test_project_rq_mutation_guards.py` (`11 passed`), `wctl run-pytest tests/topo/test_terrain_processor_wbt_integration.py` (`4 passed`), `wctl run-pytest tests/culverts/test_culvert_batch_rq.py` (`4 passed`), `wctl run-npm lint`, `wctl run-npm test` (`76 suites`, `509 tests`). Review disposition closed with no unresolved high/medium findings; ExecPlan archived under `prompts/completed/`.
+
 ### Iterative First-Order Link Prune WP-09 Max Junctions Support (2026-04-14)
 **Status**: ✅ **COMPLETE**  
 **Link**: [docs/work-packages/20260414_ifolp_wp09_max_junctions_support/](docs/work-packages/20260414_ifolp_wp09_max_junctions_support/)  

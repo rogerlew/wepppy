@@ -79,6 +79,56 @@ def test_parse_map_change_derives_center_and_zoom_from_bounds_when_missing() -> 
     assert zoom == pytest.approx(watershed_routes.Map.zoom_for_extent(extent))
 
 
+def test_parse_map_change_defaults_stream_pruning_method_to_ifolp() -> None:
+    payload = {
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+    }
+
+    error, args = watershed_routes._parse_map_change(payload)
+
+    assert error is None
+    assert args is not None
+    stream_pruning_method = args[5]
+    assert stream_pruning_method == "ifolp"
+
+
+def test_parse_map_change_accepts_legacy_stream_pruning_method() -> None:
+    payload = {
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+        "stream_pruning_method": "remove_short_streams",
+    }
+
+    error, args = watershed_routes._parse_map_change(payload)
+
+    assert error is None
+    assert args is not None
+    stream_pruning_method = args[5]
+    assert stream_pruning_method == "remove_short_streams"
+
+
+def test_parse_map_change_rejects_unknown_stream_pruning_method() -> None:
+    payload = {
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+        "stream_pruning_method": "not_a_method",
+    }
+
+    error, args = watershed_routes._parse_map_change(payload)
+
+    assert error is not None
+    assert args is None
+    body = error.body.decode("utf-8")
+    assert "stream_pruning_method must be one of" in body
+
+
 def test_fetch_dem_bounds_only_derives_center_and_zoom(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_prep(monkeypatch)
@@ -139,6 +189,7 @@ def test_fetch_dem_bounds_only_derives_center_and_zoom(monkeypatch: pytest.Monke
     assert call_args[1] == bounds
     assert call_args[2] == [-117.5, 46.75]
     assert call_args[3] == pytest.approx(watershed_routes.Map.zoom_for_extent(bounds))
+    assert call_args[6] == "ifolp"
 
 
 def test_fetch_dem_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:

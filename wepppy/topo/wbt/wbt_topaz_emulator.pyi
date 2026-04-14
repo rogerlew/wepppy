@@ -8,6 +8,9 @@ from wepppy.nodb.core.watershed import Outlet
 _outlet_template_geojson: str
 _multi_outlet_template_geojson: str
 _point_template_geojson: str
+DEFAULT_STREAM_PRUNING_METHOD: str
+SUPPORTED_STREAM_PRUNING_METHODS: tuple[str, str]
+DEFAULT_STREAM_PRUNING_MAX_JUNCTIONS: int
 
 
 def isfloat(value: Any) -> bool: ...
@@ -22,6 +25,7 @@ class WhiteboxToolsTopazEmulator:
     verbose: bool
     mcl: Optional[float]
     csa: Optional[float]
+    stream_pruning_method: str
     cellsize: float
     num_cols: int
     num_rows: int
@@ -165,6 +169,7 @@ class WhiteboxToolsTopazEmulator:
         self,
         csa: float = ...,
         mcl: float = ...,
+        stream_pruning_method: str = ...,
         fill_or_breach: str = ...,
         blc_dist: Optional[int] = ...,
         logger: Optional[logging.Logger] = None,

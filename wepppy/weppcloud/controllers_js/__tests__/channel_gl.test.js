@@ -50,6 +50,11 @@ describe("ChannelDelineation GL controller", () => {
                 <input type="radio" id="set_extent_mode_map_object" name="set_extent_mode" value="2" data-channel-role="extent-mode">
                 <input type="radio" id="set_extent_mode_upload_dem" name="set_extent_mode" value="3" data-channel-role="extent-mode">
 
+                <select id="stream_pruning_method" name="stream_pruning_method" data-channel-role="stream-pruning-method">
+                    <option value="ifolp" selected>Iterative First-Order Link Prune (IFOLP)</option>
+                    <option value="remove_short_streams">Remove Short Streams (Legacy)</option>
+                </select>
+
                 <select id="input_wbt_fill_or_breach" name="wbt_fill_or_breach" data-channel-role="wbt-fill">
                     <option value="fill">Fill</option>
                     <option value="breach" selected>Breach</option>
@@ -299,6 +304,7 @@ describe("ChannelDelineation GL controller", () => {
         expect(jsonPayload.map_bounds).toEqual([-118.0, 46.5, -117.0, 47.0]);
         expect(jsonPayload.mcl).toBe(60);
         expect(jsonPayload.csa).toBe(5);
+        expect(jsonPayload.stream_pruning_method).toBe("ifolp");
         expect(jsonPayload.set_extent_mode).toBe(0);
         expect(jsonPayload.map_object).toBeNull();
 

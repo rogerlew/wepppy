@@ -1281,6 +1281,7 @@ var ChannelDelineation = (function () {
             var distance = toFloat(raw.map_distance);
             var mcl = coalesceNumeric(raw, ["mcl", "input_mcl"]);
             var csa = coalesceNumeric(raw, ["csa", "input_csa"]);
+            var streamPruningMethod = raw.stream_pruning_method || "ifolp";
             var wbtFill = raw.wbt_fill_or_breach || null;
             var wbtBreachDistance = toInteger(raw.wbt_blc_dist);
             var mapBoundsText = raw.map_bounds_text || "";
@@ -1340,6 +1341,7 @@ var ChannelDelineation = (function () {
                 map_distance: distance,
                 mcl: mcl,
                 csa: csa,
+                stream_pruning_method: streamPruningMethod,
                 wbt_fill_or_breach: wbtFill,
                 wbt_blc_dist: wbtBreachDistance,
                 set_extent_mode: setExtentMode,

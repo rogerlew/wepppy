@@ -8,7 +8,10 @@ import pytest
 
 from wepppy.topo.wbt.terrain_processor import TerrainConfig, TerrainProcessor
 from wepppy.topo.wbt.terrain_processor_helpers import derive_flow_stack
-from wepppy.topo.wbt.wbt_topaz_emulator import WhiteboxToolsTopazEmulator
+from wepppy.topo.wbt.wbt_topaz_emulator import (
+    DEFAULT_STREAM_PRUNING_MAX_JUNCTIONS,
+    WhiteboxToolsTopazEmulator,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -63,6 +66,80 @@ def _write_dem(path: Path) -> None:
 
 
 
+def test_extract_streams_ifolp_path_passes_max_junctions(tmp_path: Path) -> None:
+    class DummyWbt:
+        def __init__(self) -> None:
+            self.ifolp_kwargs: dict[str, object] | None = None
+            self.remove_short_streams_called = False
+
+        def extract_streams(self, _floaccum: str, output: str, threshold: float) -> None:
+            assert threshold > 0
+            Path(output).touch()
+
+        def iterative_first_order_link_prune(self, **kwargs) -> None:
+            self.ifolp_kwargs = kwargs
+            Path(str(kwargs["output"])).touch()
+
+        def remove_short_streams(self, **kwargs) -> None:
+            self.remove_short_streams_called = True
+            Path(str(kwargs["output"])).touch()
+
+    emulator = WhiteboxToolsTopazEmulator(wbt_wd=str(tmp_path))
+    emulator.cellsize = 1.0
+    emulator.csa = 5.0
+    emulator.mcl = 60.0
+    emulator.stream_pruning_method = "ifolp"
+    Path(emulator.floaccum).touch()
+    dummy_wbt = DummyWbt()
+    emulator._wbt_runner = dummy_wbt
+
+    emulator._extract_streams()
+
+    assert dummy_wbt.ifolp_kwargs is not None
+    assert dummy_wbt.ifolp_kwargs["max_junctions"] == DEFAULT_STREAM_PRUNING_MAX_JUNCTIONS
+    assert dummy_wbt.ifolp_kwargs["mscl"] == 60.0
+    assert dummy_wbt.ifolp_kwargs["csa"] == 5.0
+    assert dummy_wbt.remove_short_streams_called is False
+
+
+def test_extract_streams_legacy_path_uses_remove_short_streams(tmp_path: Path) -> None:
+    class DummyWbt:
+        def __init__(self) -> None:
+            self.remove_short_streams_kwargs: dict[str, object] | None = None
+            self.ifolp_called = False
+
+        def extract_streams(self, _floaccum: str, output: str, threshold: float) -> None:
+            assert threshold > 0
+            Path(output).touch()
+
+        def remove_short_streams(self, **kwargs) -> None:
+            self.remove_short_streams_kwargs = kwargs
+            Path(str(kwargs["output"])).touch()
+
+        def iterative_first_order_link_prune(self, **kwargs) -> None:
+            self.ifolp_called = True
+            Path(str(kwargs["output"])).touch()
+
+    emulator = WhiteboxToolsTopazEmulator(wbt_wd=str(tmp_path))
+    emulator.cellsize = 1.0
+    emulator.csa = 5.0
+    emulator.mcl = 60.0
+    emulator.stream_pruning_method = "remove_short_streams"
+    Path(emulator.floaccum).touch()
+    dummy_wbt = DummyWbt()
+    emulator._wbt_runner = dummy_wbt
+
+    emulator._extract_streams()
+
+    assert dummy_wbt.remove_short_streams_kwargs is not None
+    assert (
+        dummy_wbt.remove_short_streams_kwargs["max_junctions"]
+        == DEFAULT_STREAM_PRUNING_MAX_JUNCTIONS
+    )
+    assert dummy_wbt.remove_short_streams_kwargs["min_length"] == 60.0
+    assert dummy_wbt.ifolp_called is False
+
+
 def test_derive_flow_stack_with_real_wbt_supports_blc_controls(
     tmp_path: Path,
     pytestconfig: pytest.Config,
@@ -76,6 +153,7 @@ def test_derive_flow_stack_with_real_wbt_supports_blc_controls(
         wbt_wd=str(tmp_path / "wbt"),
         dem_fn=str(dem_path),
     )
+    emulator.stream_pruning_method = "remove_short_streams"
 
     artifacts = derive_flow_stack(
         emulator,
@@ -104,6 +182,12 @@ def test_terrain_processor_phase2_with_real_wbt_generates_flow_stack(
     dem_path = tmp_path / "dem.tif"
     _write_dem(dem_path)
 
+    emulator = WhiteboxToolsTopazEmulator(
+        wbt_wd=str(tmp_path / "terrain_runtime"),
+        dem_fn=str(dem_path),
+    )
+    emulator.stream_pruning_method = "remove_short_streams"
+
     processor = TerrainProcessor(
         wbt_wd=str(tmp_path / "terrain_runtime"),
         dem_path=str(dem_path),
@@ -116,6 +200,7 @@ def test_terrain_processor_phase2_with_real_wbt_generates_flow_stack(
             mcl=1.0,
             outlet_mode="auto",
         ),
+        emulator=emulator,
     )
 
     processor._run_phase1_dem_preparation(())

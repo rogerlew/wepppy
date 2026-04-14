@@ -331,6 +331,15 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
     except (TypeError, ValueError):
         watershed_mcl = None
 
+    watershed_stream_pruning_method_raw = getattr(
+        watershed, "stream_pruning_method", None
+    )
+    watershed_stream_pruning_method = str(
+        watershed_stream_pruning_method_raw or "ifolp"
+    ).strip().lower()
+    if watershed_stream_pruning_method not in {"ifolp", "remove_short_streams"}:
+        watershed_stream_pruning_method = "ifolp"
+
     delineation_backend: str | None = None
     backend_value = getattr(watershed, "delineation_backend", None)
     if backend_value is not None:
@@ -359,6 +368,7 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "watershed_subcatchment_count": int(getattr(watershed, "sub_n", 0) or 0),
         "watershed_csa": watershed_csa,
         "watershed_mcl": watershed_mcl,
+        "watershed_stream_pruning_method": watershed_stream_pruning_method,
         "delineation_backend": delineation_backend,
         "climate_built": bool(getattr(climate, "has_climate", False)),
         "climate_mode_code": _enum_int(getattr(climate, "climate_mode", None)),
@@ -1611,12 +1621,23 @@ def _disturbed_sol_ver_options(runtime: RuntimeState) -> list[float]:
     return options
 
 
-def _resolved_watershed_defaults(runtime: RuntimeState) -> dict[str, float]:
+def _resolved_watershed_defaults(runtime: RuntimeState) -> dict[str, Any]:
     csa_value = runtime.states.get("watershed_csa")
     mcl_value = runtime.states.get("watershed_mcl")
+    stream_pruning_method_value = runtime.states.get("watershed_stream_pruning_method")
     csa = float(csa_value) if isinstance(csa_value, (int, float)) else 10.0
     mcl = float(mcl_value) if isinstance(mcl_value, (int, float)) else 75.0
-    return {"csa": csa, "mcl": mcl}
+    if isinstance(stream_pruning_method_value, str):
+        stream_pruning_method = stream_pruning_method_value.strip().lower()
+    else:
+        stream_pruning_method = "ifolp"
+    if stream_pruning_method not in {"ifolp", "remove_short_streams"}:
+        stream_pruning_method = "ifolp"
+    return {
+        "csa": csa,
+        "mcl": mcl,
+        "stream_pruning_method": stream_pruning_method,
+    }
 
 
 def _float_list(value: Any, *, expected_len: int) -> list[float] | None:
@@ -1651,9 +1672,11 @@ def _geospatial_payload(runtime: RuntimeState) -> dict[str, Any]:
 
     csa_value = runtime.states.get("watershed_csa")
     mcl_value = runtime.states.get("watershed_mcl")
+    stream_pruning_method_value = runtime.states.get("watershed_stream_pruning_method")
     watershed_defaults = _resolved_watershed_defaults(runtime)
     csa = watershed_defaults["csa"]
     mcl = watershed_defaults["mcl"]
+    stream_pruning_method = watershed_defaults["stream_pruning_method"]
 
     climate_modes = _available_climate_modes(runtime)
 
@@ -1665,6 +1688,7 @@ def _geospatial_payload(runtime: RuntimeState) -> dict[str, Any]:
     map_bounds_available = map_bounds_is_run_resolved
     csa_available = isinstance(csa_value, (int, float))
     mcl_available = isinstance(mcl_value, (int, float))
+    stream_pruning_method_available = isinstance(stream_pruning_method_value, str)
     station_catalog_available = bool(runtime.states.get("has_dem", False) or map_bounds_is_run_resolved)
 
     field_availability: dict[str, dict[str, Any]] = {
@@ -1686,6 +1710,14 @@ def _geospatial_payload(runtime: RuntimeState) -> dict[str, Any]:
         "mcl": {
             "state": "available" if mcl_available else "pending",
             **({} if mcl_available else {"reason_code": "awaiting_watershed_defaults"}),
+        },
+        "stream_pruning_method": {
+            "state": "available" if stream_pruning_method_available else "pending",
+            **(
+                {}
+                if stream_pruning_method_available
+                else {"reason_code": "awaiting_watershed_defaults"}
+            ),
         },
         "station_catalog": {
             "state": "available" if station_catalog_available else "pending",
@@ -1718,6 +1750,7 @@ def _geospatial_payload(runtime: RuntimeState) -> dict[str, Any]:
             "map_zoom_resolution_m_per_px": zoom_resolution,
             "csa": csa,
             "mcl": mcl,
+            "stream_pruning_method": stream_pruning_method,
         },
         "dynamic_constraints": {
             "climate_mode": {
@@ -2273,6 +2306,11 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "type": "string",
                             "constraint_mode": "static",
                         },
+                        "stream_pruning_method": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                            "enum": ["ifolp", "remove_short_streams"],
+                        },
                         "wbt_blc_dist": {
                             "type": "integer",
                             "constraint_mode": "static",
@@ -2294,6 +2332,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                     "map_zoom": map_zoom_default,
                     "csa": watershed_defaults["csa"],
                     "mcl": watershed_defaults["mcl"],
+                    "stream_pruning_method": watershed_defaults["stream_pruning_method"],
                     "set_extent_mode": 0,
                 },
                 "defaults_context": {

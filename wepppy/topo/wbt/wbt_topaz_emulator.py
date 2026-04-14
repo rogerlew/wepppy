@@ -114,6 +114,14 @@ def build_step(step_name: Optional[str] = None) -> Callable[[Callable[..., Any]]
     return decorator
 
 
+DEFAULT_STREAM_PRUNING_METHOD = "ifolp"
+SUPPORTED_STREAM_PRUNING_METHODS = (
+    DEFAULT_STREAM_PRUNING_METHOD,
+    "remove_short_streams",
+)
+DEFAULT_STREAM_PRUNING_MAX_JUNCTIONS = 3
+
+
 class WhiteboxToolsTopazEmulator:
     def __init__(
         self,
@@ -154,6 +162,7 @@ class WhiteboxToolsTopazEmulator:
 
         self.mcl: Optional[float] = None  # Minimum Channel Length
         self.csa: Optional[float] = None  # Channel Source Area
+        self.stream_pruning_method: str = DEFAULT_STREAM_PRUNING_METHOD
         self._wbt_runner: Optional[WhiteboxTools] = None
         self._raise_on_error: bool = raise_on_error
         self._flovec_netful_relief_are_vrt: bool = False
@@ -679,7 +688,11 @@ class WhiteboxToolsTopazEmulator:
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(
-                f"WhiteBoxToolsTopazEmulator.{func_name}(csa={self.csa}, mcl={self.mcl})"
+                "WhiteBoxToolsTopazEmulator.%s(csa=%s, mcl=%s, stream_pruning_method=%s)",
+                func_name,
+                self.csa,
+                self.mcl,
+                self.stream_pruning_method,
             )
 
         floaccum_fn = self.floaccum
@@ -704,15 +717,35 @@ class WhiteboxToolsTopazEmulator:
         if self.verbose:
             print(f"Stream network file 0 created successfully: {netful0_fn}")
 
+        stream_pruning_method = str(self.stream_pruning_method).strip().lower()
+        if stream_pruning_method not in SUPPORTED_STREAM_PRUNING_METHODS:
+            raise ValueError(
+                "stream_pruning_method must be one of "
+                f"{', '.join(SUPPORTED_STREAM_PRUNING_METHODS)}; "
+                f"received '{self.stream_pruning_method}'"
+            )
+
         netful_fn = self.netful
         remove_if_exists(netful_fn)
-        self.wbt.remove_short_streams(
-            d8_pntr=self.flovec,
-            streams=netful0_fn,
-            output=netful_fn,
-            min_length=self.mcl,
-            esri_pntr=False,
-        )
+        if stream_pruning_method == "remove_short_streams":
+            self.wbt.remove_short_streams(
+                d8_pntr=self.flovec,
+                streams=netful0_fn,
+                output=netful_fn,
+                min_length=self.mcl,
+                esri_pntr=False,
+                max_junctions=DEFAULT_STREAM_PRUNING_MAX_JUNCTIONS,
+            )
+        else:
+            self.wbt.iterative_first_order_link_prune(
+                d8_pntr=self.flovec,
+                upstream_area=floaccum_fn,
+                output=netful_fn,
+                csa=self.csa,
+                mscl=self.mcl,
+                esri_pntr=False,
+                max_junctions=DEFAULT_STREAM_PRUNING_MAX_JUNCTIONS,
+            )
 
     @build_step("identify_stream_junctions")
     def _identify_stream_junctions(self, logger: Optional[logging.Logger] = None) -> None:
@@ -748,6 +781,7 @@ class WhiteboxToolsTopazEmulator:
         self,
         csa: float = 5.0,
         mcl: float = 60.0,
+        stream_pruning_method: str = DEFAULT_STREAM_PRUNING_METHOD,
         fill_or_breach: str = "fill",
         blc_dist: Optional[int] = None,
         logger: Optional[logging.Logger] = None,
@@ -757,17 +791,32 @@ class WhiteboxToolsTopazEmulator:
         Args:
             csa: Channel source area threshold expressed in hectares.
             mcl: Minimum channel length in meters.
+            stream_pruning_method: Stream pruning method (`ifolp` or `remove_short_streams`).
             fill_or_breach: Conditioning strategy used when creating relief.
             blc_dist: Optional distance parameter for ``breach_least_cost`` in meters.
             logger: Optional logger used for debug messages.
         """
+        stream_pruning_method = str(stream_pruning_method).strip().lower()
+        if stream_pruning_method not in SUPPORTED_STREAM_PRUNING_METHODS:
+            raise ValueError(
+                "stream_pruning_method must be one of "
+                f"{', '.join(SUPPORTED_STREAM_PRUNING_METHODS)}; "
+                f"received '{stream_pruning_method}'"
+            )
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(
-                f"WhiteBoxToolsTopazEmulator.{func_name}(csa={csa}, mcl={mcl}, fill_or_breach={fill_or_breach}, blc_dist={blc_dist})"
+                "WhiteBoxToolsTopazEmulator.%s(csa=%s, mcl=%s, stream_pruning_method=%s, fill_or_breach=%s, blc_dist=%s)",
+                func_name,
+                csa,
+                mcl,
+                stream_pruning_method,
+                fill_or_breach,
+                blc_dist,
             )
         self.mcl = mcl
         self.csa = csa
+        self.stream_pruning_method = stream_pruning_method
 
         bound_fn = self.bound
         if _exists(bound_fn):

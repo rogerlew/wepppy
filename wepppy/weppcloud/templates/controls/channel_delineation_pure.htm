@@ -223,6 +223,19 @@
   {% if watershed.delineation_backend_is_wbt %}
   <div class="wc-stack">
     {{ ui.select_field(
+         "stream_pruning_method",
+         "Stream Pruning Method",
+         [
+           ("ifolp", "Iterative First-Order Link Prune (IFOLP)"),
+           ("remove_short_streams", "Remove Short Streams (Legacy)")
+         ],
+         selected=watershed.stream_pruning_method,
+         help="Choose the channel-pruning algorithm used after stream qualification.",
+         attrs={"data-channel-role": "stream-pruning-method"},
+         extra_control_class="disable-readonly"
+    ) }}
+
+    {{ ui.select_field(
          "input_wbt_fill_or_breach",
          "Depression smoothing algorithm",
          [

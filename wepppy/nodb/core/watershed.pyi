@@ -48,6 +48,8 @@ def process_subcatchment(args: Tuple[WatershedAbstraction, int, bool, float, int
 
 
 TRANSIENT_FIELDS: List[str]
+DEFAULT_STREAM_PRUNING_METHOD: str
+SUPPORTED_STREAM_PRUNING_METHODS: tuple[str, str]
 
 
 class Outlet:
@@ -88,6 +90,10 @@ class Watershed(NoDbBase):
     def wbt_blc_dist(self) -> int: ...
     @wbt_blc_dist.setter
     def wbt_blc_dist(self, value: int) -> None: ...
+    @property
+    def stream_pruning_method(self) -> str: ...
+    @stream_pruning_method.setter
+    def stream_pruning_method(self, value: str) -> None: ...
     @property
     def max_points(self) -> int: ...
     @property

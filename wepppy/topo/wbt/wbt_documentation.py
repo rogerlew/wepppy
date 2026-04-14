@@ -64,10 +64,14 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
     ResourceDefinition(
         filename="netful.tif",
         summary="Stream network mask (filtered).",
-        description="Binary channel raster after removing reaches shorter than the minimum channel length.",
+        description=(
+            "Binary channel raster after stream pruning. "
+            "Default method is Iterative First-Order Link Prune (IFOLP); "
+            "legacy RemoveShortStreams remains selectable."
+        ),
         units="1 for channel cell, 0 elsewhere",
-        tool="WhiteboxTools `remove_short_streams`.",
-        inputs=("netful0.tif", "flovec.tif"),
+        tool="WhiteboxTools `iterative_first_order_link_prune` or `remove_short_streams`.",
+        inputs=("netful0.tif", "floaccum.tif", "flovec.tif"),
     ),
     ResourceDefinition(
         filename="chnjnt.tif",

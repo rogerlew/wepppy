@@ -55,7 +55,14 @@ def test_build_channels_rq_rejects_archive_form_root(
     )
 
     with pytest.raises(NoDirError) as exc_info:
-        project_rq.build_channels_rq("demo", csa=10.0, mcl=50.0, wbt_fill_or_breach=None, wbt_blc_dist=None)
+        project_rq.build_channels_rq(
+            "demo",
+            csa=10.0,
+            mcl=50.0,
+            stream_pruning_method=None,
+            wbt_fill_or_breach=None,
+            wbt_blc_dist=None,
+        )
 
     assert exc_info.value.code == "NODIR_ARCHIVE_RETIRED"
     assert call_roots == ["watershed"]
