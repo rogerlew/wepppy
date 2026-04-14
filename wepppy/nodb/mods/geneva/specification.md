@@ -720,6 +720,110 @@ Suggested artifacts under run working dir:
 - `geneva/batch_summary.json`
 - `geneva/README.md`
 
+### 13.1 Runtime Split (Required)
+
+Geneva v1 is split into:
+
+- Rust compute kernel in `wepppyo3` for numerically heavy loops (batch storm execution, CN excess time-stepping, UH transform, hydrograph assembly).
+- Python orchestration in `wepppy` for NoDb state, routing, artifact wiring, validation, and report/query payload shaping.
+
+Hard rule:
+
+- Per-HRU/per-timestep/per-storm nested loops must not run in pure Python in production path.
+- Raster alignment + HRU keying + HRU area aggregation + minimum-HRU collapse must run in Rust kernel code, not Python.
+
+### 13.2 `wepppyo3` Architecture and File Structure (v1)
+
+`wepppyo3` must avoid adding more monolith logic to `cli_revision/src/lib.rs`.
+Use a pure-kernel crate plus a thin PyO3 adapter.
+
+Workspace additions:
+
+- `/workdir/wepppyo3/geneva_core/`
+- `/workdir/wepppyo3/cli_revision/src/geneva/`
+
+`geneva_core` (no PyO3; deterministic kernels + tests):
+
+- `src/lib.rs` (public module wiring only)
+- `src/types.rs` (`HruRow`, `StormEvent`, `RunConfig`, `StormResult`, `BatchResult`)
+- `src/hru.rs` (grid alignment checks, cell-wise HRU keying, area aggregation, deterministic `min_hru_area` collapse)
+- `src/cn.rs` (`S`, `Ia`, `Q(P)`, `lambda 0.20/0.05`, cumulative-to-incremental excess)
+- `src/hyetograph.rs` (`neh4_type_b` scaling and timestep interpolation using pinned ordinates)
+- `src/uh.rs` (`scs_triangular`, `scs_curvilinear`, mass-closure checks)
+- `src/convolution.rs` (excess-to-hydrograph convolution kernels)
+- `src/frequency_panel.rs` (matrix materialization from CLIGEN/NOAA frequency inputs)
+- `src/error.rs` (typed kernel errors; no stringly-typed panic flow)
+
+`cli_revision` PyO3 adapter:
+
+- `src/geneva/mod.rs` (Python-callable entrypoints only)
+- `src/geneva/convert.rs` (Py<->Rust data conversion helpers)
+- `src/lib.rs` (register wrapper functions; no algorithm bodies)
+
+Initial PyO3 entrypoints:
+
+- `geneva_prepare_hrus(...)`
+- `geneva_build_frequency_panel(...)`
+- `geneva_run_batch(...)`
+- `geneva_validate_uh(...)`
+
+### 13.3 `wepppy` Architecture and File Structure (v1)
+
+Keep NoDb facade small and collaborator-based per NoDb standard.
+
+- `/workdir/wepppy/wepppy/nodb/mods/geneva/geneva.py` (NoDb facade only)
+- `/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/`
+- `/workdir/wepppy/wepppy/nodb/mods/geneva/schemas/`
+
+Planned collaborators:
+
+- `config_service.py` (load/save Geneva config + defaults)
+- `hru_preparation_service.py` (prepare kernel inputs, invoke Rust HRU kernel, persist HRU artifacts/diagnostics)
+- `hsg_assignment_service.py` (`hydgrpdcd` mapping + dominant-soil fallback)
+- `cn_table_service.py` (run-scoped `cn_table.csv` init/edit/reset/audit parity)
+- `frequency_panel_service.py` (read climate artifacts, call Rust panel builder)
+- `batch_run_service.py` (prepare Rust inputs, invoke Rust run, persist artifacts)
+- `results_service.py` (aggregate status/results payloads)
+- `report_payload_service.py` (chart/table payload for Geneva report page)
+- `artifact_io.py` (stable read/write schemas for parquet/json artifacts)
+
+Schema module files:
+
+- `schemas/config_schema.py`
+- `schemas/frequency_panel_schema.py`
+- `schemas/run_batch_schema.py`
+- `schemas/results_schema.py`
+
+### 13.4 Route/Task Package Layout (v1)
+
+Route handlers should be split by concern to avoid giant files:
+
+- `/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/geneva/__init__.py`
+- `/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/geneva/config_routes.py`
+- `/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/geneva/cn_table_routes.py`
+- `/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/geneva/task_routes.py`
+- `/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/geneva/query_routes.py`
+- `/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/geneva/report_routes.py`
+
+### 13.5 Shared Data Boundary (`wepppy` <-> `wepppyo3`)
+
+Rust input contract should be stable, versioned, and file-path based:
+
+- Input parquet/json assembled under `<runid>/geneva/inputs/`
+- Rust returns per-storm outputs under `<runid>/geneva/storms/<storm_id>/`
+- Boundary schema version recorded as `kernel_schema_version`.
+- HRU preparation uses the same boundary pattern:
+  - raster refs + config input under `<runid>/geneva/inputs/hru_*`,
+  - Rust output `geneva/hru_table.parquet` plus `geneva/hru_prepare_summary.json` (and optional `geneva/hru_id_map.tif` for diagnostics).
+
+Contract requirements:
+
+- Deterministic storm ordering (`datasource_id`, `duration_minutes`, `ari_years`, `storm_id`).
+- Explicit unit fields in boundary payloads (`mm`, `hr`, `km2`, `m3/s`, `cfs`).
+- No implicit defaulting inside Rust for missing required fields; fail with typed diagnostics.
+- Reuse existing climate artifacts (`wepp_cli_pds_mean_metric.csv`, `atlas14_intensity_pds_mean_metric.csv`) as source-of-truth frequency inputs; no duplicate climate parsing stack in Python loops.
+- Reuse existing `wepppyo3` geotiff/raster capability for HRU preprocessing; avoid duplicate raster scan loops in Python.
+
 ## 14. API/Task Sketch
 
 Expected route family (patterned after existing NoDb mods):
