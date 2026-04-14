@@ -62,18 +62,22 @@ Conformance posture:
 - Where RMRS gives multiple options, this spec defines a default and explicitly names optional alternatives.
 - Any divergence must be logged in a `Conformance Deviations` section before implementation.
 
-### 3.2 Conformance Deviations
+### 3.1 Conformance Deviations
 
 Use this table for any deliberate departure from RMRS-GTR-334 workflow/math.
 
 | Deviation ID | Spec Section | RMRS Reference | Deviation Description | Justification | Approval |
 | --- | --- | --- | --- | --- | --- |
-| DEV-001 | `7.1` | RMRS Ch. 4 workflow | Enforce minimum HRU area (`2 ha`) with deterministic collapse | Reduce raster speckle/noise while preserving watershed area closure | Pending |
-| DEV-002 | `8.3` | RMRS Tables 4-10 to 4-14 | Keep non-forest/non-shrub burn CN values static by default in seed table | Conservative v1 default; user-editable run-scoped CN table retained | Pending |
-| DEV-003 | `10.1` | RMRS storm options | Disable duration interpolation for frequency-panel materialization | Prevent synthetic storm generation without explicit evidence module | Pending |
-| DEV-004 | `10` | RMRS climate sourcing | Use dual-source panel strategy (always CLIGEN; NOAA14 when available) | Avoid single-source oracle behavior and preserve analyst comparability | Pending |
+| DEV-001 | `7.1` | RMRS Ch. 4 workflow | Enforce minimum HRU area (`2 ha`) with deterministic collapse | Reduce raster speckle/noise while preserving watershed area closure | Approved (2026-04-14) |
+| DEV-002 | `8.3` | RMRS Tables 4-10 to 4-14 | Keep non-forest/non-shrub burn CN values static by default in seed table | Conservative v1 default; user-editable run-scoped CN table retained | Approved (2026-04-14) |
+| DEV-003 | `10.1` | RMRS storm options | Disable duration interpolation for frequency-panel materialization | Prevent synthetic storm generation without explicit evidence module | Approved (2026-04-14) |
+| DEV-004 | `10` | RMRS climate sourcing | Use dual-source panel strategy (always CLIGEN; NOAA14 when available) | Avoid single-source oracle behavior and preserve analyst comparability | Approved (2026-04-14) |
 
-### 3.1 Wildcat5 Source Artifacts and Legal Posture
+Execution gate:
+
+- Before WP-01 implementation starts, WP-00 must record conformance-deviation disposition evidence in `implementation-plan.md`.
+
+### 3.2 Wildcat5 Source Artifacts and Legal Posture
 
 Wildcat5 source artifacts are staged under:
 
@@ -184,6 +188,7 @@ Initial schema (v1):
 - `burn_severity` (`unburned|low|moderate|high`)
 - `hydrophobic` (`true|false`)
 - `cn_arc_ii`
+- `antecedent_condition_source` (`arc_ii_seed|user_override`)
 - `source`
 - `notes`
 
@@ -202,7 +207,6 @@ Priority:
 1. `wmesque2:ssurgo/hydgrpdcd` mapped through the pinned v1 codebook (`coded_lookup`).
 2. Alternate NRCS-derived direct HSG attributes (when explicitly provided and mappable).
 3. Watershed-default HSG fallback for any still-unresolved cells.
-4. User override.
 
 ### 6.1 `hydgrpdcd` Codebook Domain (US v1)
 
@@ -232,8 +236,10 @@ Rules:
 
 - Do not assume integer HSG code meaning without a dataset codebook/version reference.
 - `coded_lookup` means HSG values derived from a versioned, dataset-specific codebook (for example, the mapped `ssurgo/hydgrpdcd` domain), with the codebook provenance persisted.
-- Record `hsg_source` per HRU (`coded_lookup`, `nrcs_direct`, `default_hsg_fallback`, `user_override`).
+- Record `hsg_source` per HRU (`coded_lookup`, `nrcs_direct`, `default_hsg_fallback`).
 - Emit warnings for any fallback HSG assignment and include fallback area fraction.
+- Per-cell HSG override maps are out of scope in v1; any such payloads must be rejected with explicit diagnostics.
+- Cell-level HSG mapping + fallback assignment execute in the `wepppyo3` `geneva_prepare_hrus(...)` kernel; Python NoDb collaborators handle orchestration/provenance only.
 - Unknown/unrated `hydgrpdcd` handling must run through fallback chain first (`default_hsg_code`), and only then apply unresolved-cell policy:
   - `error` (default): fail with actionable diagnostics when cells remain unresolved after fallback chain.
   - `assume_d`: coerce remaining unresolved cells to `D` and emit warning counts + area affected.
@@ -339,6 +345,7 @@ HRU table minimum fields:
 - `cn_arc_ii`
 - `cn_lambda_020`
 - `cn_lambda_005` (derived when needed)
+- `antecedent_condition_source` (`arc_ii_seed|user_override`)
 - `cn_source`
 - `hsg_source`
 - `collapsed_from_hru_ids` (nullable array)
@@ -779,7 +786,7 @@ Planned collaborators:
 
 - `config_service.py` (load/save Geneva config + defaults)
 - `hru_preparation_service.py` (prepare kernel inputs, invoke Rust HRU kernel, persist HRU artifacts/diagnostics)
-- `hsg_assignment_service.py` (`hydgrpdcd` mapping + dominant-soil fallback)
+- `hsg_assignment_service.py` (NoDb-side HSG provenance assembly; no cell-level mapping loops)
 - `cn_table_service.py` (run-scoped `cn_table.csv` init/edit/reset/audit parity)
 - `frequency_panel_service.py` (read climate artifacts, call Rust panel builder)
 - `batch_run_service.py` (prepare Rust inputs, invoke Rust run, persist artifacts)
@@ -859,6 +866,9 @@ Datasource IDs:
 Distribution IDs:
 
 - `neh4_type_b`
+
+Reserved (not accepted in v1 request payloads):
+
 - `uniform`
 - `custom_breakpoint`
 
@@ -1045,7 +1055,6 @@ Contract:
   "runoff_model": {
     "lambda_mode": "0.20|0.05",
     "uh_method": "scs_triangular|scs_curvilinear",
-    "tc_hours": null,
     "timing_method": "kirpich|kent|simas"
   }
 }
@@ -1054,7 +1063,9 @@ Contract:
 Rule:
 
 - `event_filter` operates only on generated frequency-panel events; user-defined storm payloads are out of scope in v1.
-- Exactly one of `runoff_model.tc_hours` or `runoff_model.timing_method` must be provided.
+- `hyetograph.distribution_type` must be `neh4_type_b` in v1.
+- Reserved distribution IDs (`uniform`, `custom_breakpoint`) must return `400` with explicit unsupported-in-v1 diagnostics.
+- Exactly one of `runoff_model.tc_hours` or `runoff_model.timing_method` must be provided and non-null.
 
 `GET /api/geneva/status` response:
 
@@ -1169,7 +1180,7 @@ Invariants:
 - `geneva/batch_summary.json`:
   - aggregate counts, extrema, failed storm IDs, warnings/errors, and per-source completion summary.
 - `geneva/hru_table.parquet` fields include:
-  - `hru_id`, `area_m2`, `area_ac`, `area_fraction`, `landuse_class`, `hsg_group`, `burn_severity_class`, `hydrophobic_class`, `cn_arc_ii`, `cn_lambda_020`, `cn_lambda_005`, `cn_source`, `hsg_source`, `collapsed_from_hru_ids`, `warnings`.
+  - `hru_id`, `area_m2`, `area_ac`, `area_fraction`, `landuse_class`, `hsg_group`, `burn_severity_class`, `hydrophobic_class`, `cn_arc_ii`, `cn_lambda_020`, `cn_lambda_005`, `antecedent_condition_source`, `cn_source`, `hsg_source`, `collapsed_from_hru_ids`, `warnings`.
 - `geneva/storms/<storm_id>/hyetograph.parquet` fields include:
   - `t_minutes`, `p_cum_mm`, `p_inc_mm`, `intensity_mm_per_hr`.
 - `geneva/storms/<storm_id>/excess_hyetograph.parquet` fields include:
@@ -1208,6 +1219,10 @@ Invariants:
    - Geneva summary report exposes datasource/ARI/measure filters with marker-to-event-table linkage.
 14. Minimum HRU Area Enforcement:
    - HRUs below `2 ha` are collapsed per deterministic compatibility/selection rules, with area conservation and collapse provenance persisted.
+   - For default `allow_cross_hsg_merge=false`, collapsed-vs-uncollapsed reference-case deltas must satisfy:
+     - `runoff_depth` relative difference `<= 2%`,
+     - `runoff_volume` relative difference `<= 2%`,
+     - `peak_discharge` relative difference `<= 5%`.
    - If `allow_cross_hsg_merge=true`, collapsed-vs-uncollapsed reference-case runoff depth difference is `<= 2%`.
 15. API/Schema Consistency:
    - Geneva task/query/report endpoints implement canonical payload schemas, canonical enum IDs, and canonical RQ/error contracts.
@@ -1231,6 +1246,9 @@ Unit tests:
 - SCS UH regression tests for both `scs_triangular` and `scs_curvilinear`.
 - UH unit-system parity checks (`HF` constants and peak equation provenance).
 - Area-weighted excess and hydrograph aggregation math.
+- Guardrail negative tests in NoDb path for:
+  - non-WBT runs (expected hard failure),
+  - non-US/non-NLCD-HSG-compatible inputs (expected `unsupported_domain` failure).
 - API schema validation for task/query/report payloads and canonical enum IDs.
 
 Integration tests:
@@ -1244,6 +1262,10 @@ Integration tests:
 - Frequency-panel runs over `5m..24h` x `1..100` with partial availability handling.
 - `ssurgo/hydgrpdcd` runs with unrated/unknown cells trigger `default_hsg_code` fallback as specified.
 - `ssurgo/hydgrpdcd` speckle/noise cases produce no sub-`2 ha` HRUs after collapse.
+- Default-collapse sensitivity test (`allow_cross_hsg_merge=false`) confirms:
+  - runoff-depth delta `<= 2%`,
+  - runoff-volume delta `<= 2%`,
+  - peak-discharge delta `<= 5%` versus no-collapse reference cases.
 - Cross-HSG merge sensitivity test (`allow_cross_hsg_merge=true`) confirms runoff-depth delta `<= 2%` on reference basins.
 - Status lifecycle includes `completed_with_gaps` for partial-availability batches.
 - Watershed-size warning (warning/severe/extreme thresholds) behavior.

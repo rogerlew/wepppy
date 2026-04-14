@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "dataset": "geneva",
+  "fixtures": [
+    {
+      "fixture_id": "synthetic_small_watershed_v1",
+      "status": "placeholder",
+      "description": "Synthetic small watershed fixture placeholder for WP-00 bootstrap.",
+      "inputs": {
+        "bound_tif": null,
+        "landuse_tif": null,
+        "hydgrpdcd_tif": null,
+        "burn_severity_tif": null
+      },
+      "expected": {
+        "hru_rows_min": 1
+      }
+    }
+  ]
+}
