@@ -9,6 +9,7 @@ and publish progress updates so the UI can reflect job status in real time.
 """
 
 import inspect
+import logging
 import socket
 import sys
 from glob import glob
@@ -18,6 +19,14 @@ from subprocess import call
 
 import redis
 from rq import Queue, get_current_job
+from rq.exceptions import (
+    AbandonedJobError,
+    DeserializationError,
+    InvalidJobOperationError,
+    NoSuchJobError,
+    ShutDownImminentException,
+    TimeoutFormatError,
+)
 from rq.job import Job
 from wepppy.config.redis_settings import (
     RedisDB,
@@ -94,6 +103,15 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
+WEPP_RQ_JOB_KEYS: tuple[str, ...] = (
+    "run_wepp_rq",
+    "run_wepp_watershed_rq",
+    "prep_wepp_watershed_rq",
+    "run_wepp_noprep_rq",
+    "run_wepp_watershed_noprep_rq",
+)
+ACTIVE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "deferred", "scheduled"})
+WEPP_SUBMIT_LOCK_TTL_SECONDS: int = 30
 
 _cleanup_dss_export_dir = _dss_helpers._cleanup_dss_export_dir
 _copy_dss_readme = _dss_helpers._copy_dss_readme
@@ -104,6 +122,118 @@ _write_dss_channel_geojson = _dss_helpers._write_dss_channel_geojson
 
 _SINGLE_STORM_DEPRECATED_MESSAGE = _stage_helpers.SINGLE_STORM_DEPRECATED_MESSAGE
 _NODIR_RECOVERY_ROOTS = _stage_helpers.NODIR_RECOVERY_ROOTS
+
+
+class WeppSingleFlightConflict(RuntimeError):
+    """Raised when another WEPP task is already active for the run."""
+
+
+class _WeppRunLockedError(RuntimeError):
+    """Raised when the run lock prevents starting a new WEPP workflow."""
+
+
+_WEPP_RQ_BOUNDARY_EXCEPTIONS: tuple[type[Exception], ...] = (
+    # Deliberate worker boundary catch: all task failures must publish
+    # an EXCEPTION status before re-raising.
+    Exception,
+    AssertionError,
+    AttributeError,
+    ImportError,
+    LookupError,
+    OSError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+    redis.exceptions.RedisError,
+    AbandonedJobError,
+    DeserializationError,
+    InvalidJobOperationError,
+    NoSuchJobError,
+    ShutDownImminentException,
+    TimeoutFormatError,
+)
+
+
+def _publish_boundary_exception(
+    *,
+    runid: str,
+    status_channel: str,
+    job_id: str,
+    operation: str,
+) -> None:
+    logging.getLogger(__name__).exception(
+        "Boundary exception in wepppy.rq.wepp_rq",
+        extra={"runid": runid, "job_id": job_id, "operation": operation},
+    )
+    StatusMessenger.publish(status_channel, f"rq:{job_id} EXCEPTION {operation}")
+
+
+def _wepp_lock_key(runid: str, *, domain: str) -> str:
+    return f"wepp:{domain}:{runid}"
+
+
+def _normalize_redis_value(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value)
+
+
+def acquire_wepp_submit_lock(runid: str, owner: str) -> bool:
+    with redis.Redis(**redis_connection_kwargs(RedisDB.LOCK)) as redis_conn:
+        return bool(
+            redis_conn.set(
+                _wepp_lock_key(runid, domain="submit_lock"),
+                owner,
+                nx=True,
+                ex=WEPP_SUBMIT_LOCK_TTL_SECONDS,
+            )
+        )
+
+
+def release_wepp_submit_lock(runid: str, owner: str) -> None:
+    key = _wepp_lock_key(runid, domain="submit_lock")
+    with redis.Redis(**redis_connection_kwargs(RedisDB.LOCK)) as redis_conn:
+        existing_owner = _normalize_redis_value(redis_conn.get(key))
+        if existing_owner is None:
+            return
+        if existing_owner != owner:
+            return
+        redis_conn.delete(key)
+
+
+def get_active_wepp_job(prep: RedisPrep | None, redis_conn: redis.Redis) -> dict[str, str] | None:
+    if prep is None:
+        return None
+
+    for key in WEPP_RQ_JOB_KEYS:
+        job_id = prep.get_rq_job_id(key)
+        if not job_id:
+            continue
+        try:
+            job = Job.fetch(job_id, connection=redis_conn)
+        except NoSuchJobError:
+            continue
+
+        status = str(job.get_status(refresh=False) or "").lower()
+        if status in ACTIVE_RQ_JOB_STATUSES:
+            return {
+                "key": key,
+                "job_id": str(job_id),
+                "status": status,
+            }
+    return None
+
+
+def ensure_no_active_wepp_job(runid: str, prep: RedisPrep | None, redis_conn: redis.Redis) -> None:
+    active_job = get_active_wepp_job(prep, redis_conn)
+    if active_job is None:
+        return
+    raise WeppSingleFlightConflict(
+        "WEPP job already active for this run "
+        f"(key={active_job['key']}, job_id={active_job['job_id']}, status={active_job['status']})."
+    )
 
 
 def _sync_stage_helpers_compat() -> None:
@@ -227,20 +357,32 @@ def run_ss_batch_hillslope_rq(
     Raises:
         Exception: Propagates any failure produced by the underlying WEPP runner.
     """
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})"
+
     try:
-        job = get_current_job()
         wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        runs_dir = _join(wd, 'wepp/runs')
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
-        status, _, duration = run_ss_batch_hillslope(wepp_id, runs_dir, wepp_bin=wepp_bin, ss_batch_id=ss_batch_id, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id}) -> ({status}, {duration})')
+        runs_dir = _join(wd, "wepp/runs")
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
+        status, _, duration = run_ss_batch_hillslope(
+            wepp_id,
+            runs_dir,
+            wepp_bin=wepp_bin,
+            ss_batch_id=ss_batch_id,
+            status_channel=status_channel,
+        )
+        StatusMessenger.publish(status_channel, f"rq:{job_id} COMPLETED {operation} -> ({status}, {duration})")
         return status, duration
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:242", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
 @with_exception_logging
@@ -258,20 +400,31 @@ def run_hillslope_rq(runid: str, wepp_id: int, wepp_bin: str | None = None) -> t
     Raises:
         Exception: Propagates any failure produced by the underlying WEPP runner.
     """
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin})"
+
     try:
-        job = get_current_job()
         wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        runs_dir = _join(wd, 'wepp/runs')
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin})')
-        status, _, duration = run_hillslope(wepp_id, runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}) -> ({status}, {duration})')
+        runs_dir = _join(wd, "wepp/runs")
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
+        status, _, duration = run_hillslope(
+            wepp_id,
+            runs_dir,
+            wepp_bin=wepp_bin,
+            status_channel=status_channel,
+        )
+        StatusMessenger.publish(status_channel, f"rq:{job_id} COMPLETED {operation} -> ({status}, {duration})")
         return status, duration
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:271", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
 @with_exception_logging
@@ -288,20 +441,26 @@ def run_watershed_rq(runid: str, wepp_bin: str | None = None) -> tuple[bool, flo
     Raises:
         Exception: Propagates any failure produced by the underlying WEPP runner.
     """
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid}, wepp_bin={wepp_bin})"
+
     try:
-        job = get_current_job()
         wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        runs_dir = _join(wd, 'wepp/runs')
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, wepp_bin={wepp_bin})')
+        runs_dir = _join(wd, "wepp/runs")
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
         status, duration = run_watershed(runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_bin={wepp_bin}) -> ({status}, {duration})')
+        StatusMessenger.publish(status_channel, f"rq:{job_id} COMPLETED {operation} -> ({status}, {duration})")
         return status, duration
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:328", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_bin={wepp_bin})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
 @with_exception_logging
@@ -323,20 +482,31 @@ def run_ss_batch_watershed_rq(
     Raises:
         Exception: Propagates any failure produced by the underlying WEPP runner.
     """
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})"
+
     try:
-        job = get_current_job()
         wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        runs_dir = _join(wd, 'wepp/runs')
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
-        status, duration = run_ss_batch_watershed(runs_dir, wepp_bin=wepp_bin, ss_batch_id=ss_batch_id, status_channel=status_channel)
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id}) -> ({status}, {duration})')
+        runs_dir = _join(wd, "wepp/runs")
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
+        status, duration = run_ss_batch_watershed(
+            runs_dir,
+            wepp_bin=wepp_bin,
+            ss_batch_id=ss_batch_id,
+            status_channel=status_channel,
+        )
+        StatusMessenger.publish(status_channel, f"rq:{job_id} COMPLETED {operation} -> ({status}, {duration})")
         return status, duration
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:361", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
 
@@ -359,10 +529,13 @@ def bootstrap_enable_rq(runid: str, actor: str | None = None, lock_token: str | 
 
         StatusMessenger.publish(status_channel, f"rq:{job_id} COMPLETED bootstrap_enable_rq({runid})")
         return {"enabled": True, "runid": runid}
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:385", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f"rq:{job_id} EXCEPTION bootstrap_enable_rq({runid})")
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=f"bootstrap_enable_rq({runid})",
+        )
         raise
     finally:
         conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
@@ -393,11 +566,14 @@ def run_wepp_rq(runid: str) -> Job:
     Raises:
         Exception: If the run is currently locked or any prep step fails.
     """
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid})"
+
     try:
-        job = get_current_job()
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
@@ -410,15 +586,15 @@ def run_wepp_rq(runid: str) -> Job:
             StatusMessenger.publish(status_channel, recovery_msg)
 
         if wepp.islocked():
-            raise Exception(f'{runid} is locked')
+            raise _WeppRunLockedError(f"{runid} is locked")
 
         wepp.ensure_bootstrap_main()
 
         # send feedback to user
-        wepp.logger.info('Running Wepp\n')
+        wepp.logger.info("Running Wepp\n")
 
         wepp.clean()
-        
+
         # quick prep operations that require locking
         wepp._check_and_set_baseflow_map()
         wepp._check_and_set_phosphorus_map()
@@ -426,9 +602,9 @@ def run_wepp_rq(runid: str) -> Job:
         climate = Climate.getInstance(wd)
         _assert_supported_climate(climate)
 
-        wepp.logger.info('    wepp_bin:{}'.format(wepp.wepp_bin))
+        wepp.logger.info("    wepp_bin:{}".format(wepp.wepp_bin))
         if not wepp.run_wepp_watershed:
-            wepp.logger.info('Skipping WEPP watershed run (wepp.run_wepp_watershed=False)')
+            wepp.logger.info("Skipping WEPP watershed run (wepp.run_wepp_watershed=False)")
 
         # everything below here is asynchronous, performed by workers
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
@@ -443,16 +619,19 @@ def run_wepp_rq(runid: str) -> Job:
                 tasks=sys.modules[__name__],
                 timeout=TIMEOUT,
             )
-         
+
         StatusMessenger.publish(
             status_channel,
-            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job6_finalfinal.id}',
+            f"rq:{job_id} ENQUEUED {operation} -> awaiting final job {job6_finalfinal.id}",
         )
 
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:473", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
     return job6_finalfinal
@@ -461,11 +640,14 @@ def run_wepp_rq(runid: str) -> Job:
 @with_exception_logging
 def run_wepp_noprep_rq(runid: str) -> Job:
     """Enqueue WEPP execution using existing inputs (no prep)."""
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid})"
+
     try:
-        job = get_current_job()
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
@@ -478,14 +660,14 @@ def run_wepp_noprep_rq(runid: str) -> Job:
             StatusMessenger.publish(status_channel, recovery_msg)
 
         if wepp.islocked():
-            raise Exception(f'{runid} is locked')
+            raise _WeppRunLockedError(f"{runid} is locked")
 
-        wepp.logger.info('Running Wepp (no-prep)\n')
+        wepp.logger.info("Running Wepp (no-prep)\n")
 
         climate = Climate.getInstance(wd)
         _assert_supported_climate(climate)
         if not wepp.run_wepp_watershed:
-            wepp.logger.info('Skipping WEPP watershed run (wepp.run_wepp_watershed=False)')
+            wepp.logger.info("Skipping WEPP watershed run (wepp.run_wepp_watershed=False)")
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
@@ -505,13 +687,16 @@ def run_wepp_noprep_rq(runid: str) -> Job:
 
         StatusMessenger.publish(
             status_channel,
-            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job6_finalfinal.id}',
+            f"rq:{job_id} ENQUEUED {operation} -> awaiting final job {job6_finalfinal.id}",
         )
 
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:527", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
     return job6_finalfinal
@@ -535,11 +720,14 @@ def run_wepp_watershed_rq(runid: str) -> Job:
     Raises:
         Exception: If the run is currently locked or any prep step fails.
     """
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid})"
+
     try:
-        job = get_current_job()
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
@@ -552,12 +740,12 @@ def run_wepp_watershed_rq(runid: str) -> Job:
             StatusMessenger.publish(status_channel, recovery_msg)
 
         if wepp.islocked():
-            raise Exception(f'{runid} is locked')
+            raise _WeppRunLockedError(f"{runid} is locked")
 
         wepp.ensure_bootstrap_main()
 
         if not wepp.run_wepp_watershed:
-            wepp.logger.info('Skipping WEPP watershed run (wepp.run_wepp_watershed=False)')
+            wepp.logger.info("Skipping WEPP watershed run (wepp.run_wepp_watershed=False)")
             conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
             with redis.Redis(**conn_kwargs) as redis_conn:
                 q = Queue(connection=redis_conn)
@@ -574,7 +762,7 @@ def run_wepp_watershed_rq(runid: str) -> Job:
             return job6_finalfinal
 
         # send feedback to user
-        wepp.logger.info('Running Wepp Watershed\n')
+        wepp.logger.info("Running Wepp Watershed\n")
 
         # quick prep operations that require locking
         wepp._check_and_set_baseflow_map()
@@ -582,13 +770,13 @@ def run_wepp_watershed_rq(runid: str) -> Job:
 
         climate = Climate.getInstance(wd)
         _assert_supported_climate(climate)
-        wepp.logger.info('    wepp_bin:{}'.format(wepp.wepp_bin))
+        wepp.logger.info("    wepp_bin:{}".format(wepp.wepp_bin))
 
         # everything below here is asynchronous, performed by workers
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            wepp.logger.info(f'Running Watershed wepp_bin:{wepp.wepp_bin}... ')
+            wepp.logger.info(f"Running Watershed wepp_bin:{wepp.wepp_bin}... ")
             has_hillslope_outputs = bool(glob(_join(wepp.output_dir, "H*")))
             job6_finalfinal = _pipeline.enqueue_watershed_pipeline(
                 q,
@@ -601,16 +789,19 @@ def run_wepp_watershed_rq(runid: str) -> Job:
                 has_hillslope_outputs=has_hillslope_outputs,
                 publish_status=lambda message: StatusMessenger.publish(status_channel, message),
             )
-         
+
         StatusMessenger.publish(
             status_channel,
-            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job6_finalfinal.id}',
+            f"rq:{job_id} ENQUEUED {operation} -> awaiting final job {job6_finalfinal.id}",
         )
 
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:624", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
     return job6_finalfinal
@@ -619,11 +810,14 @@ def run_wepp_watershed_rq(runid: str) -> Job:
 @with_exception_logging
 def prep_wepp_watershed_rq(runid: str) -> Job:
     """Enqueue prep-only WEPP input generation for hillslopes + watershed."""
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid})"
+
     try:
-        job = get_current_job()
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
@@ -636,11 +830,11 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
             StatusMessenger.publish(status_channel, recovery_msg)
 
         if wepp.islocked():
-            raise Exception(f'{runid} is locked')
+            raise _WeppRunLockedError(f"{runid} is locked")
 
         wepp.ensure_bootstrap_main()
 
-        wepp.logger.info('Preparing WEPP inputs only\n')
+        wepp.logger.info("Preparing WEPP inputs only\n")
 
         # quick prep operations that require locking
         wepp._check_and_set_baseflow_map()
@@ -649,7 +843,7 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
         climate = Climate.getInstance(wd)
         _assert_supported_climate(climate)
 
-        wepp.logger.info('    wepp_bin:{}'.format(wepp.wepp_bin))
+        wepp.logger.info("    wepp_bin:{}".format(wepp.wepp_bin))
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
@@ -665,13 +859,16 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
 
         StatusMessenger.publish(
             status_channel,
-            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job6_finalfinal.id}',
+            f"rq:{job_id} ENQUEUED {operation} -> awaiting final job {job6_finalfinal.id}",
         )
 
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:744", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
     return job6_finalfinal
@@ -680,20 +877,23 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
 @with_exception_logging
 def run_wepp_watershed_noprep_rq(runid: str) -> Job:
     """Enqueue watershed-only WEPP execution using existing inputs (no prep)."""
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:wepp"
+    operation = f"{func_name}({runid})"
+
     try:
-        job = get_current_job()
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
 
         if wepp.islocked():
-            raise Exception(f'{runid} is locked')
+            raise _WeppRunLockedError(f"{runid} is locked")
 
         if not wepp.run_wepp_watershed:
-            wepp.logger.info('Skipping WEPP watershed run (wepp.run_wepp_watershed=False)')
+            wepp.logger.info("Skipping WEPP watershed run (wepp.run_wepp_watershed=False)")
             conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
             with redis.Redis(**conn_kwargs) as redis_conn:
                 q = Queue(connection=redis_conn)
@@ -705,7 +905,7 @@ def run_wepp_watershed_noprep_rq(runid: str) -> Job:
                 )
             return job6_finalfinal
 
-        wepp.logger.info('Running Wepp Watershed (no-prep)\n')
+        wepp.logger.info("Running Wepp Watershed (no-prep)\n")
 
         climate = Climate.getInstance(wd)
         _assert_supported_climate(climate)
@@ -730,13 +930,16 @@ def run_wepp_watershed_noprep_rq(runid: str) -> Job:
 
         StatusMessenger.publish(
             status_channel,
-            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job6_finalfinal.id}',
+            f"rq:{job_id} ENQUEUED {operation} -> awaiting final job {job6_finalfinal.id}",
         )
 
-    except Exception:
-        # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq.py:685", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+    except _WEPP_RQ_BOUNDARY_EXCEPTIONS:
+        _publish_boundary_exception(
+            runid=runid,
+            status_channel=status_channel,
+            job_id=job_id,
+            operation=operation,
+        )
         raise
 
     return job6_finalfinal

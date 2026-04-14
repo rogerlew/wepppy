@@ -36,6 +36,9 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
 
     monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
     monkeypatch.setattr(wepp_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(wepp_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
+    monkeypatch.setattr(wepp_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
+    monkeypatch.setattr(wepp_routes, "ensure_no_active_wepp_job", lambda _runid, _prep, _redis_conn: None)
 
 
 def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -474,6 +477,116 @@ def test_prep_wepp_watershed_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> No
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-99"
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp",
+        "/api/runs/run-1/cfg/run-wepp-watershed",
+        "/api/runs/run-1/cfg/prep-wepp-watershed",
+    ],
+)
+def test_wepp_endpoints_return_409_when_singleflight_conflict(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
+    monkeypatch.setattr(wepp_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
+    monkeypatch.setattr(
+        wepp_routes,
+        "ensure_no_active_wepp_job",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            wepp_routes.WeppSingleFlightConflict("WEPP job already active for this run.")
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert "already active" in payload["error"]["message"]
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp",
+        "/api/runs/run-1/cfg/run-wepp-watershed",
+        "/api/runs/run-1/cfg/prep-wepp-watershed",
+    ],
+)
+def test_wepp_endpoints_return_409_when_submit_lock_is_busy(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: False)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert "enqueue already in progress" in payload["error"]["message"]
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp",
+        "/api/runs/run-1/cfg/run-wepp-watershed",
+        "/api/runs/run-1/cfg/prep-wepp-watershed",
+    ],
+)
+def test_wepp_endpoints_map_auth_runtime_errors_to_canonical_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    monkeypatch.setattr(
+        wepp_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: (_ for _ in ()).throw(RuntimeError("auth backend unavailable")),
+    )
+    monkeypatch.setattr(wepp_routes, "authorize_run_access", lambda claims, runid: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 401
+    payload = response.json()
+    assert payload["error"]["message"] == "Failed to authorize request"
+
+
+def test_run_wepp_release_lock_failure_after_enqueue_returns_job_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-keep")
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        wepp_routes,
+        "release_wepp_submit_lock",
+        lambda _runid, _owner: (_ for _ in ()).throw(RuntimeError("release failed")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-wepp", json={})
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-keep"}
 
 
 def test_run_wepp_batch_returns_input_message_without_enqueue(monkeypatch: pytest.MonkeyPatch) -> None:

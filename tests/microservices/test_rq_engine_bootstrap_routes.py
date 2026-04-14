@@ -59,6 +59,9 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-1") -> No
 
     monkeypatch.setattr(bootstrap_routes, "Queue", DummyQueue)
     monkeypatch.setattr(bootstrap_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(bootstrap_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
+    monkeypatch.setattr(bootstrap_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
+    monkeypatch.setattr(bootstrap_routes, "ensure_no_active_wepp_job", lambda _runid, _prep, _redis_conn: None)
 
 
 def _stub_prep(monkeypatch: pytest.MonkeyPatch, tasks: list[TaskEnum]) -> None:
@@ -228,6 +231,49 @@ def test_bootstrap_enable_rejects_revoked_token(monkeypatch: pytest.MonkeyPatch)
     payload = response.json()
     assert payload["error"]["code"] == "forbidden"
     assert payload["error"]["message"] == "Token has been revoked"
+
+
+def test_bootstrap_enable_maps_auth_runtime_error_to_canonical_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        bootstrap_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: (_ for _ in ()).throw(RuntimeError("auth backend unavailable")),
+    )
+    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/bootstrap/enable")
+
+    assert response.status_code == 401
+    assert response.json()["error"]["message"] == "Failed to authorize request"
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp-npprep",
+        "/api/runs/run-1/cfg/run-wepp-watershed-no-prep",
+        "/api/runs/run-1/cfg/run-swat-noprep",
+    ],
+)
+def test_bootstrap_noprep_endpoints_map_auth_runtime_error_to_canonical_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    monkeypatch.setattr(
+        bootstrap_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: (_ for _ in ()).throw(RuntimeError("auth backend unavailable")),
+    )
+    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 401
+    assert response.json()["error"]["message"] == "Failed to authorize request"
 
 
 def test_bootstrap_enable_rejects_when_lock_busy(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -474,3 +520,93 @@ def test_bootstrap_run_swat_noprep_rejects_when_disabled(monkeypatch: pytest.Mon
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["message"] == "Bootstrap is not enabled for this run"
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp-npprep",
+        "/api/runs/run-1/cfg/run-wepp-watershed-no-prep",
+    ],
+)
+def test_bootstrap_wepp_noprep_returns_409_when_singleflight_conflict(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-409")
+
+    tasks: list[TaskEnum] = []
+    _stub_prep(monkeypatch, tasks)
+
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": True})())
+    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(bootstrap_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
+    monkeypatch.setattr(bootstrap_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
+    monkeypatch.setattr(
+        bootstrap_routes,
+        "ensure_no_active_wepp_job",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            bootstrap_routes.WeppSingleFlightConflict("WEPP job already active for this run.")
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert "already active" in payload["error"]["message"]
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp-npprep",
+        "/api/runs/run-1/cfg/run-wepp-watershed-no-prep",
+    ],
+)
+def test_bootstrap_wepp_noprep_returns_409_when_submit_lock_busy(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-lock")
+
+    tasks: list[TaskEnum] = []
+    _stub_prep(monkeypatch, tasks)
+
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": True})())
+    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(bootstrap_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: False)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert "enqueue already in progress" in payload["error"]["message"]
+
+
+def test_bootstrap_noprep_release_lock_failure_after_enqueue_returns_job_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-release")
+
+    tasks: list[TaskEnum] = []
+    _stub_prep(monkeypatch, tasks)
+
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": True})())
+    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(
+        bootstrap_routes,
+        "release_wepp_submit_lock",
+        lambda _runid, _owner: (_ for _ in ()).throw(RuntimeError("release failed")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-wepp-npprep", json={})
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-release"}

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
+import time
+import uuid
 
 import redis
 from fastapi import APIRouter, Request
@@ -11,7 +13,15 @@ from rq import Queue
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron, Soils, Watershed, Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.rq.wepp_rq import prep_wepp_watershed_rq, run_wepp_rq, run_wepp_watershed_rq
+from wepppy.rq.wepp_rq import (
+    WeppSingleFlightConflict,
+    acquire_wepp_submit_lock,
+    ensure_no_active_wepp_job,
+    prep_wepp_watershed_rq,
+    release_wepp_submit_lock,
+    run_wepp_rq,
+    run_wepp_watershed_rq,
+)
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -48,49 +58,69 @@ async def _handle_run_wepp_request(
 ) -> JSONResponse:
     try:
         wd = get_wd(runid)
-        payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
 
-        try:
-            wepp = apply_wepp_run_payload(
-                wd,
-                payload,
-                wepp_cls=Wepp,
-                soils_cls=Soils,
-                watershed_cls=Watershed,
-                ron_cls=Ron,
-            )
-        except WeppRunPayloadValidationError as exc:
-            return error_response(
-                str(exc),
-                status_code=400,
-                code=exc.code,
-                details=exc.details,
-            )
-        except ValueError as exc:
-            return error_response(str(exc), status_code=400)
-        except Exception as exc:
-            logger.exception("rq-engine run-wepp parse failed")
-            return error_response_with_traceback("Error preparing WEPP run request")
-    except Exception:
-        logger.exception("rq-engine run-wepp request preparation failed")
+    payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
+    try:
+        wepp = apply_wepp_run_payload(
+            wd,
+            payload,
+            wepp_cls=Wepp,
+            soils_cls=Soils,
+            watershed_cls=Watershed,
+            ron_cls=Ron,
+        )
+    except WeppRunPayloadValidationError as exc:
+        return error_response(
+            str(exc),
+            status_code=400,
+            code=exc.code,
+            details=exc.details,
+        )
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except RuntimeError:
+        logger.exception("rq-engine run-wepp parse failed")
         return error_response_with_traceback("Error preparing WEPP run request")
+
     if getattr(wepp, "run_group", "") == "batch" or _is_base_project_context(runid, config):
         return JSONResponse({"message": "Set wepp inputs for batch processing"})
 
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
-        prep.remove_timestamp(TaskEnum.run_wepp_watershed)
-        prep.remove_timestamp(TaskEnum.run_omni_scenarios)
-        prep.remove_timestamp(TaskEnum.run_path_cost_effective)
+        submit_owner = f"{job_key}:{int(time.time() * 1000)}:{uuid.uuid4().hex}"
+        if not acquire_wepp_submit_lock(runid, submit_owner):
+            raise WeppSingleFlightConflict("WEPP enqueue already in progress for this run.")
 
+        job = None
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-        with redis.Redis(**conn_kwargs) as redis_conn:
-            q = Queue(connection=redis_conn)
-            job = q.enqueue_call(job_fn, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id(job_key, job.id)
+        try:
+            with redis.Redis(**conn_kwargs) as redis_conn:
+                ensure_no_active_wepp_job(runid, prep, redis_conn)
+                prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
+                prep.remove_timestamp(TaskEnum.run_wepp_watershed)
+                prep.remove_timestamp(TaskEnum.run_omni_scenarios)
+                prep.remove_timestamp(TaskEnum.run_path_cost_effective)
+                q = Queue(connection=redis_conn)
+                job = q.enqueue_call(job_fn, (runid,), timeout=RQ_TIMEOUT)
+                prep.set_rq_job_id(job_key, job.id)
+        finally:
+            try:
+                release_wepp_submit_lock(runid, submit_owner)
+            except (redis.RedisError, RuntimeError):
+                if job is None:
+                    raise
+                logger.exception("rq-engine run-wepp submit-lock release failed after enqueue")
+        if job is None:
+            raise RuntimeError("WEPP enqueue returned no job object")
         return JSONResponse({"job_id": job.id})
-    except Exception:
+    except WeppSingleFlightConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except redis.RedisError:
+        logger.exception("rq-engine run-wepp enqueue failed")
+        return error_response_with_traceback("Error Handling Request")
+    except RuntimeError:
         logger.exception("rq-engine run-wepp enqueue failed")
         return error_response_with_traceback("Error Handling Request")
 
@@ -110,6 +140,7 @@ async def _handle_run_wepp_request(
         success_description="WEPP inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
+            409: "WEPP single-flight lock contention; another WEPP job is already active.",
         },
     ),
 )
@@ -119,7 +150,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except (redis.RedisError, RuntimeError):
         logger.exception("rq-engine run-wepp auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -149,6 +180,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         ),
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
+            409: "WEPP single-flight lock contention; another WEPP job is already active.",
         },
     ),
 )
@@ -158,7 +190,7 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except (redis.RedisError, RuntimeError):
         logger.exception("rq-engine run-wepp-watershed auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -188,6 +220,7 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         ),
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
+            409: "WEPP single-flight lock contention; another WEPP job is already active.",
         },
     ),
 )
@@ -197,7 +230,7 @@ async def prep_wepp_watershed(runid: str, config: str, request: Request) -> JSON
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except (redis.RedisError, RuntimeError):
         logger.exception("rq-engine prep-wepp-watershed auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 

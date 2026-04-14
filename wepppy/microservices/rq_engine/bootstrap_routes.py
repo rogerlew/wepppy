@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
+import time
+import uuid
 from collections.abc import Sequence
 from typing import Any, Mapping
 
@@ -14,7 +16,14 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.swat_rq import run_swat_noprep_rq
-from wepppy.rq.wepp_rq import run_wepp_noprep_rq, run_wepp_watershed_noprep_rq
+from wepppy.rq.wepp_rq import (
+    WeppSingleFlightConflict,
+    acquire_wepp_submit_lock,
+    ensure_no_active_wepp_job,
+    release_wepp_submit_lock,
+    run_wepp_noprep_rq,
+    run_wepp_watershed_noprep_rq,
+)
 from wepppy.weppcloud.bootstrap.api_shared import (
     BootstrapOperationError,
     bootstrap_checkout_operation,
@@ -82,9 +91,15 @@ def _require_bootstrap_claims(request: Request, *, required_scope: str) -> Mappi
 
 
 def _authorize_bootstrap_request(request: Request, *, runid: str, required_scope: str) -> Mapping[str, Any]:
-    claims = _require_bootstrap_claims(request, required_scope=required_scope)
-    authorize_run_access(claims, runid)
-    return claims
+    try:
+        claims = _require_bootstrap_claims(request, required_scope=required_scope)
+        authorize_run_access(claims, runid)
+        return claims
+    except AuthError:
+        raise
+    except (redis.RedisError, RuntimeError) as exc:
+        logger.exception("rq-engine bootstrap auth failed")
+        raise AuthError("Failed to authorize request", status_code=401) from exc
 
 
 def _ensure_bootstrap_enabled(wepp: Wepp) -> None:
@@ -122,6 +137,7 @@ def _enqueue_no_prep_job(
     job_fn,
     job_key: str,
     reset_tasks: list[TaskEnum],
+    enforce_wepp_singleflight: bool = False,
     wd: str | None = None,
     wepp: Wepp | None = None,
 ) -> JSONResponse:
@@ -134,14 +150,31 @@ def _enqueue_no_prep_job(
     _ensure_bootstrap_enabled(resolved_wepp)
 
     prep = RedisPrep.getInstance(resolved_wd)
-    for task in reset_tasks:
-        prep.remove_timestamp(task)
+    submit_owner = f"{job_key}:{int(time.time() * 1000)}:{uuid.uuid4().hex}"
+    if enforce_wepp_singleflight and not acquire_wepp_submit_lock(runid, submit_owner):
+        raise WeppSingleFlightConflict("WEPP enqueue already in progress for this run.")
 
+    job = None
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-    with redis.Redis(**conn_kwargs) as redis_conn:
-        q = Queue(connection=redis_conn)
-        job = q.enqueue_call(job_fn, (runid,), timeout=RQ_TIMEOUT)
-        prep.set_rq_job_id(job_key, job.id)
+    try:
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            if enforce_wepp_singleflight:
+                ensure_no_active_wepp_job(runid, prep, redis_conn)
+            for task in reset_tasks:
+                prep.remove_timestamp(task)
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(job_fn, (runid,), timeout=RQ_TIMEOUT)
+            prep.set_rq_job_id(job_key, job.id)
+    finally:
+        if enforce_wepp_singleflight:
+            try:
+                release_wepp_submit_lock(runid, submit_owner)
+            except (redis.RedisError, RuntimeError):
+                if job is None:
+                    raise
+                logger.exception("rq-engine bootstrap submit-lock release failed after enqueue")
+    if job is None:
+        raise RuntimeError("No-prep enqueue returned no job object")
     return JSONResponse({"job_id": job.id})
 
 
@@ -169,9 +202,6 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
         claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_ENABLE_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
-        logger.exception("rq-engine bootstrap-enable auth failed")
-        return error_response("Failed to authorize request", status_code=401)
 
     try:
         result = enable_bootstrap_operation(
@@ -181,7 +211,10 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except redis.RedisError:
+        logger.exception("rq-engine bootstrap-enable enqueue failed")
+        return error_response("Error Handling Request", status_code=500)
+    except RuntimeError:
         logger.exception("rq-engine bootstrap-enable enqueue failed")
         return error_response("Error Handling Request", status_code=500)
 
@@ -208,9 +241,6 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_TOKEN_MINT_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
-        logger.exception("rq-engine bootstrap mint-token auth failed")
-        return error_response("Failed to authorize request", status_code=401)
 
     try:
         result = mint_bootstrap_token_operation(
@@ -221,7 +251,10 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except redis.RedisError:
+        logger.exception("rq-engine bootstrap mint-token failed")
+        return error_response("Error Handling Request", status_code=500)
+    except RuntimeError:
         logger.exception("rq-engine bootstrap mint-token failed")
         return error_response("Error Handling Request", status_code=500)
 
@@ -248,16 +281,16 @@ async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONRe
         _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_READ_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
-        logger.exception("rq-engine bootstrap commits auth failed")
-        return error_response("Failed to authorize request", status_code=401)
 
     try:
         result = bootstrap_commits_operation(runid)
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except redis.RedisError:
+        logger.exception("rq-engine bootstrap commits failed")
+        return error_response("Error Handling Request", status_code=500)
+    except RuntimeError:
         logger.exception("rq-engine bootstrap commits failed")
         return error_response("Error Handling Request", status_code=500)
 
@@ -284,16 +317,16 @@ async def bootstrap_current_ref(runid: str, config: str, request: Request) -> JS
         _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_READ_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
-        logger.exception("rq-engine bootstrap current-ref auth failed")
-        return error_response("Failed to authorize request", status_code=401)
 
     try:
         result = bootstrap_current_ref_operation(runid)
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except redis.RedisError:
+        logger.exception("rq-engine bootstrap current-ref failed")
+        return error_response("Error Handling Request", status_code=500)
+    except RuntimeError:
         logger.exception("rq-engine bootstrap current-ref failed")
         return error_response("Error Handling Request", status_code=500)
 
@@ -321,9 +354,6 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_CHECKOUT_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
-        logger.exception("rq-engine bootstrap checkout auth failed")
-        return error_response("Failed to authorize request", status_code=401)
 
     payload = await _safe_json(request)
     try:
@@ -335,7 +365,10 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except redis.RedisError:
+        logger.exception("rq-engine bootstrap checkout failed")
+        return error_response("Error Handling Request", status_code=500)
+    except RuntimeError:
         logger.exception("rq-engine bootstrap checkout failed")
         return error_response("Error Handling Request", status_code=500)
 
@@ -354,6 +387,7 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         success_description="No-prep WEPP job accepted and `job_id` returned.",
         extra={
             400: "Bootstrap preconditions failed (for example bootstrap disabled). Returns the canonical error payload.",
+            409: "WEPP single-flight lock contention; another WEPP job is already active.",
         },
     ),
 )
@@ -363,7 +397,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except (redis.RedisError, RuntimeError):
         logger.exception("rq-engine run-wepp-npprep auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -373,7 +407,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         _ensure_bootstrap_enabled(wepp)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception:
+    except RuntimeError:
         logger.exception("rq-engine run-wepp-npprep bootstrap precheck failed")
         return error_response("Error preparing WEPP no-prep request", status_code=500)
 
@@ -388,7 +422,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception:
+    except RuntimeError:
         logger.exception("rq-engine run-wepp-npprep payload apply failed")
         return error_response("Error preparing WEPP no-prep request", status_code=500)
 
@@ -403,12 +437,18 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
                 TaskEnum.run_omni_scenarios,
                 TaskEnum.run_path_cost_effective,
             ],
+            enforce_wepp_singleflight=True,
             wd=wd,
             wepp=wepp,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception:
+    except WeppSingleFlightConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except redis.RedisError:
+        logger.exception("rq-engine run-wepp-npprep enqueue failed")
+        return error_response("Error Handling Request", status_code=500)
+    except RuntimeError:
         logger.exception("rq-engine run-wepp-npprep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
 
@@ -427,6 +467,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         success_description="No-prep watershed WEPP job accepted and `job_id` returned.",
         extra={
             400: "Bootstrap preconditions failed (for example bootstrap disabled). Returns the canonical error payload.",
+            409: "WEPP single-flight lock contention; another WEPP job is already active.",
         },
     ),
 )
@@ -436,7 +477,7 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except (redis.RedisError, RuntimeError):
         logger.exception("rq-engine run-wepp-watershed-no-prep auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -446,7 +487,7 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         _ensure_bootstrap_enabled(wepp)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception:
+    except RuntimeError:
         logger.exception("rq-engine run-wepp-watershed-no-prep bootstrap precheck failed")
         return error_response("Error preparing WEPP no-prep request", status_code=500)
 
@@ -461,7 +502,7 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception:
+    except RuntimeError:
         logger.exception("rq-engine run-wepp-watershed-no-prep payload apply failed")
         return error_response("Error preparing WEPP no-prep request", status_code=500)
 
@@ -471,12 +512,18 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
             job_fn=run_wepp_watershed_noprep_rq,
             job_key="run_wepp_watershed_noprep_rq",
             reset_tasks=[TaskEnum.run_wepp_watershed],
+            enforce_wepp_singleflight=True,
             wd=wd,
             wepp=wepp,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception:
+    except WeppSingleFlightConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except redis.RedisError:
+        logger.exception("rq-engine run-wepp-watershed-no-prep enqueue failed")
+        return error_response("Error Handling Request", status_code=500)
+    except RuntimeError:
         logger.exception("rq-engine run-wepp-watershed-no-prep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
 
@@ -504,7 +551,7 @@ async def run_swat_noprep(runid: str, config: str, request: Request) -> JSONResp
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except (redis.RedisError, RuntimeError):
         logger.exception("rq-engine run-swat-noprep auth failed")
         return error_response("Failed to authorize request", status_code=401)
 
@@ -517,7 +564,10 @@ async def run_swat_noprep(runid: str, config: str, request: Request) -> JSONResp
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception:
+    except redis.RedisError:
+        logger.exception("rq-engine run-swat-noprep enqueue failed")
+        return error_response("Error Handling Request", status_code=500)
+    except RuntimeError:
         logger.exception("rq-engine run-swat-noprep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
 

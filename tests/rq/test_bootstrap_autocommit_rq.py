@@ -377,6 +377,37 @@ def test_noprep_watershed_enqueue_keeps_autocommit_disabled(monkeypatch: pytest.
     assert calls[0]["kwargs"] is None
 
 
+def test_run_wepp_rq_locked_run_publishes_exception_status(monkeypatch: pytest.MonkeyPatch) -> None:
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
+    monkeypatch.setattr(
+        wepp_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((str(channel), str(message))),
+    )
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_rq, "_recover_mixed_nodir_roots", lambda _wd: ())
+    monkeypatch.setattr(
+        wepp_rq.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            islocked=lambda: True,
+            logger=SimpleNamespace(
+                info=lambda *args, **kwargs: None,
+                warning=lambda *args, **kwargs: None,
+            ),
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="ab-run is locked"):
+        wepp_rq.run_wepp_rq("ab-run")
+
+    assert any(
+        channel == "ab-run:wepp" and "EXCEPTION run_wepp_rq(ab-run)" in message
+        for channel, message in published
+    )
+
+
 def test_build_swat_inputs_autocommits(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(swat_rq.StatusMessenger, "publish", lambda channel, message: None)
     monkeypatch.setattr(swat_rq, "get_current_job", lambda: SimpleNamespace(id="job-2"))
