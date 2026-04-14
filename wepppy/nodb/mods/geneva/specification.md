@@ -110,13 +110,15 @@ Required inputs:
 
 - Watershed boundary raster: `bound.tif` aligned to run DEM grid.
 - Landuse raster aligned to watershed grid (US NLCD classes for v1).
-- Soil/HSG source aligned to watershed grid or mappable to it.
+- Soil/HSG source from `wmesque2` layer `ssurgo/hydgrpdcd` (primary for v1), aligned to watershed grid or mappable to it.
+- WEPPcloud 4-class simple soil-texture raster aligned to watershed grid.
 - One or more storm definitions.
 
 Optional inputs:
 
 - Burn severity raster (SBS-like classes). If absent, HRUs are based on landuse + HSG only.
-- User HRU merge threshold (minimum HRU area fraction).
+- Hydrophobic/water-repellency raster (boolean or class-mapped). If absent, `hydrophobic=false` for all HRUs.
+- User HRU merge threshold (optional override, but not allowed below `2 ha`).
 - User overrides for CN lookup rows.
 
 Required run metadata:
@@ -124,6 +126,8 @@ Required run metadata:
 - CRS, cellsize, nodata policy for each source raster.
 - Watershed area (`wsarea`) in SI and English units.
 - Data provenance for all lookup tables used.
+- Soil-texture coverage diagnostics (in-bound cell count, classified cell count, unclassified/nodata cell count).
+- HSG-source diagnostics for `ssurgo/hydgrpdcd` (coded cell count, unrated/unknown count, fallback-assigned count).
 
 ### 5.1 Run-Scoped CN Table Initialization
 
@@ -164,18 +168,54 @@ HSG assignment must be explicit, source-aware, and auditable.
 
 Priority:
 
-1. NRCS-derived HSG attributes (when available and mappable).
-2. Dataset-specific hydrologic group codebooks (when integer-coded rasters are used and codebook is present).
-3. Texture-based fallback (TR-55 style) only when no direct HSG is available.
+1. `wmesque2:ssurgo/hydgrpdcd` mapped through a validated, versioned codebook (`coded_lookup`).
+2. Alternate NRCS-derived direct HSG attributes (when explicitly provided and mappable).
+3. WEPPcloud 4-class simple-texture fallback when direct/coded HSG is unavailable for a cell.
+4. Watershed-dominant-soil fallback for any still-unresolved cells.
+5. User override.
+
+4-class texture requirement (hard):
+
+- Geneva assumes WEPPcloud can produce watershed-wide simple textures for all in-bound cells using:
+  - `clay loam`
+  - `loam`
+  - `sand loam`
+  - `silt loam`
+- Any in-bound cell lacking one of those four classes is an initialization error by default.
+- No silent coercion of missing texture classes is allowed.
 
 Rules:
 
 - Do not assume integer HSG code meaning without a dataset codebook/version reference.
-- Record `hsg_source` per HRU (`nrcs_direct`, `coded_lookup`, `texture_fallback`, `user_override`).
-- Emit warnings for any fallback HSG assignment.
-- Unknown/unrated HSG handling policy must be configurable:
-  - `error` (default): fail with actionable diagnostics.
-  - `assume_d`: coerce unknown cells to `D` and emit warning counts + area affected.
+- `coded_lookup` means HSG values derived from a versioned, dataset-specific codebook (for example, the mapped `ssurgo/hydgrpdcd` domain), with the codebook provenance persisted.
+- Record `hsg_source` per HRU (`coded_lookup`, `nrcs_direct`, `texture_fallback`, `watershed_dominant_fallback`, `user_override`).
+- Record `texture_class` and `texture_source` per HRU.
+- Emit warnings for any fallback HSG assignment and include fallback area fraction.
+- Unknown/unrated `hydgrpdcd` handling must run through fallback chain first (texture, then watershed-dominant), and only then apply unresolved-cell policy:
+  - `error` (default): fail with actionable diagnostics when cells remain unresolved after fallback chain.
+  - `assume_d`: coerce remaining unresolved cells to `D` and emit warning counts + area affected.
+
+Default texture-to-HSG fallback map (US v1):
+
+- `sand loam -> B`
+- `loam -> B`
+- `silt loam -> C`
+- `clay loam -> D`
+
+Default mapping seed file:
+
+- `wepppy/nodb/mods/geneva/data/geneva_hsg_texture_fallback_us_v1.csv`
+
+Watershed-dominant-soil fallback (required in v1):
+
+- Determine dominant simple-texture class from in-bound watershed cells with valid texture classification.
+- Map dominant texture to dominant HSG via `geneva_hsg_texture_fallback_us_v1.csv`.
+- Assign that dominant HSG to any cells unresolved after `coded_lookup` and per-cell texture fallback.
+- Persist diagnostics:
+  - dominant texture and dominant HSG selected,
+  - cell count/area assigned by dominant fallback,
+  - unresolved remainder before/after dominant fallback.
+- Emit explicit warning whenever dominant fallback is used (non-zero area).
 
 Water handling:
 
@@ -186,8 +226,10 @@ Water handling:
 
 HRUs are raster-derived unique combinations over in-bounds cells:
 
-- key = `(landuse_class, hsg_group, burn_severity_class?)`
+- key = `(landuse_class, hsg_group, burn_severity_class?, hydrophobic_class?)`
 - burn severity dimension is included only when the burn raster is provided/enabled.
+- hydrophobic dimension is included when hydrophobic raster input is provided; otherwise `hydrophobic_class=false` deterministically for all HRUs.
+- Minimum HRU area is enforced at `2 ha` (`20,000 m2`) to suppress `hydgrpdcd`-driven speckle/noise in v1 outputs.
 
 Processing:
 
@@ -195,7 +237,33 @@ Processing:
 2. Align to a common analysis grid.
 3. Compute cell counts and area fractions for each unique key.
 4. Attach CN from canonical lookup tables.
-5. Apply optional HRU collapsing (merge below minimum area threshold into nearest compatible class).
+5. Apply required HRU collapsing for HRUs below minimum area threshold.
+
+### 7.1 Minimum HRU Area Enforcement (Hard Requirement)
+
+Default threshold:
+
+- `min_hru_area_ha = 2.0` (`20,000 m2`)
+
+Rules:
+
+- HRUs with `area_m2 < 20,000` are donor HRUs and must be merged.
+- Compatible recipient HRUs must match:
+  - `landuse_class`
+  - `burn_severity_class`
+  - `hydrophobic_class`
+  - `hsg_group` may differ.
+- Recipient selection order:
+  1. smallest `abs(cn_arc_ii_recipient - cn_arc_ii_donor)`,
+  2. largest recipient `area_m2`,
+  3. lexical `hru_id` tie-break.
+- Water HRUs are protected and are never merged into non-water HRUs.
+- Area conservation is mandatory; total in-bound area must remain unchanged after collapse (within float tolerance).
+- If no compatible recipient exists for a donor HRU, fail with explicit diagnostics by default.
+
+Override policy:
+
+- Users may set a larger threshold (for example `3 ha`, `5 ha`) but may not set below `2 ha`.
 
 HRU table minimum fields:
 
@@ -203,12 +271,16 @@ HRU table minimum fields:
 - `area_m2`, `area_ac`, `area_fraction`
 - `landuse_class`
 - `hsg_group`
+- `texture_class`
+- `texture_source`
 - `burn_severity_class` (nullable)
+- `hydrophobic_class` (`true|false`)
 - `cn_arc_ii`
 - `cn_lambda_020`
 - `cn_lambda_005` (derived when needed)
 - `cn_source`
 - `hsg_source`
+- `collapsed_from_hru_ids` (nullable array)
 - `warnings` (array or count summary)
 
 ## 8. CN and Rainfall Excess Contract
@@ -227,7 +299,7 @@ Resolution rules:
 
 1. Exact row match required for forest/shrub burn rows in v1.
 2. If burn severity is absent, use `burn_severity = unburned`.
-3. If hydrophobic flag is false/unknown, use `hydrophobic = false`.
+3. If hydrophobic input is absent, set `hydrophobic=false` for all HRUs; if present, use mapped/overridden HRU hydrophobic values.
 4. Missing row policy defaults to explicit error with a diagnostic listing missing keys and affected area.
 
 ### 8.1 CN Equations
@@ -287,6 +359,25 @@ Batch support:
 - Execution produces per-storm artifacts and one batch summary.
 - Failures are isolated per storm when possible; batch result must report per-storm status.
 
+### 9.1 Frequency-Panel Storm Template (v1 Default)
+
+Default storm-panel request for frequency workflows:
+
+- durations: `5m`, `10m`, `30m`, `1h`, `2h`, `3h`, `6h`, `12h`, `24h`
+- return periods (`ari_years`): `1`, `2`, `5`, `10`, `25`, `50`, `100`
+- distribution default: `neh4b` unless user overrides
+
+Panel behavior by datasource:
+
+- `noaa14_pds`: request the full duration x return-period panel above, then materialize available combinations from NOAA responses.
+- `cligen`: request the same panel shape, then materialize only combinations present in CLIGEN-derived frequency artifacts.
+
+Contract:
+
+- Missing combinations are never silently filled with synthetic values.
+- Unavailable combinations must be recorded in batch metadata with reason (`duration_unavailable`, `ari_unavailable`, `source_missing`).
+- Batch run status may be `completed_with_gaps` when at least one requested combination is unavailable.
+
 ## 10. Storm Depth/Frequency Source Priority
 
 When user selects frequency-derived storms:
@@ -299,6 +390,61 @@ Rules:
 - Store source provenance per storm (`source`, `version`, `lat/lon`, timestamp).
 - If NOAA is unavailable, fallback to CLIGEN and emit clear warning.
 - If neither source is available, fail with actionable message.
+- Storm records sourced from frequency data must persist both:
+  - `depth_mm` (primary)
+  - `intensity_mm_per_hr` (derived or source-provided, unit-normalized)
+
+### 10.0 Requested vs Available Matrix Handling
+
+Geneva must treat frequency storm generation as a matrix resolution problem:
+
+1. Build a requested matrix from user-selected durations x return periods.
+2. Query selected datasource and resolve an available matrix.
+3. Materialize one storm record per available matrix cell.
+4. Persist a machine-readable missing-cells list and show clear warnings in UI/report.
+
+This prevents hidden extrapolation and keeps BAER-facing results auditable.
+
+### 10.1 NOAA Atlas 14 PDS Intensity/Duration Crosswalk (v1)
+
+Purpose:
+
+- Standardize NOAA frequency values to Geneva storm records across multiple durations.
+
+Core rule:
+
+- Geneva treats storm depth as primary and derives intensity from depth and duration.
+
+Formulas (unit-consistent):
+
+- `depth = intensity * duration`
+- `intensity = depth / duration`
+- where duration is converted to hours before calculation (`minutes/60`, `days*24`).
+
+Frequency-series consistency:
+
+- For PDS workflows, query NOAA with `series=pds` and keep ARI basis consistent across durations.
+- Do not mix AMS (`aep`) and PDS (`ari`) values within a storm set unless explicit conversion metadata is provided.
+- Never use `ARI = 1/AEP` as a conversion shortcut in code.
+
+Duration handling:
+
+- Use durations available from the NOAA endpoint as canonical for the selected product.
+- If a requested model duration is not present, interpolate on depth vs log-duration between bracketing durations, then recompute intensity from interpolated depth.
+- Interpolation must be tagged in provenance (`interpolated=true`, source durations listed).
+
+Hyetograph construction tie-in:
+
+- Total depth from the crosswalk is distributed by the selected storm pattern (`neh4b`, `uniform`, `custom_breakpoint`, etc.).
+- NOAA temporal distributions are optional supplementary inputs and do not replace Geneva's configured storm-distribution contract.
+
+### 10.2 CLIGEN Frequency Subset Contract (v1)
+
+For `cligen` datasource mode:
+
+- Geneva reads only explicitly available duration/frequency products from CLIGEN frequency artifacts.
+- Geneva must not infer unavailable short durations (for example `5m` or `10m`) unless a future, explicitly versioned interpolation module is enabled.
+- Output/report must clearly label each event as `NOAA14_PDS` or `CLIGEN_FREQ`.
 
 ## 11. Hydrograph Contract
 
@@ -317,6 +463,35 @@ Unit hydrograph requirement:
 - Use a supported UH method (default simple triangular UH).
 - Keep UH settings explicit in artifacts and API payloads.
 - Include timing parameter source (user provided or computed method) in run metadata.
+
+### 11.1 Geneva Report Page Contract (Interactive)
+
+Geneva report page must provide interactive exploration of batch storms.
+
+Required selectors:
+
+- `Climate Frequency Datasource`: `NOAA14_PDS | CLIGEN_FREQ`
+- `Return Period Interval (ARI years)`: available values from generated batch (`1`, `2`, `5`, `10`, `25`, `50`, `100` subset)
+- `Measure of Interest`: `peak_discharge | runoff_depth`
+
+Chart contract (storm-event-analyzer style):
+
+- x-axis: storm intensity (`mm/hr`), computed as `depth/duration` on normalized units
+- y-axis: selected measure (`peak_discharge` or `runoff_depth`)
+- series: separate lines by return period
+- markers: event points keyed by duration (`5m`, `10m`, `30m`, `1h`, `2h`, `3h`, `6h`, `12h`, `24h` as available)
+
+Marker interaction:
+
+- Selecting a marker opens/focuses an Event Table row for that storm.
+
+Event Table required columns:
+
+- storm event parameters (`storm_id`, datasource, duration, depth, intensity, distribution type, ARI years)
+- `peak_discharge`
+- `time_to_peak`
+- `runoff_volume`
+- `runoff_depth`
 
 ## 12. Watershed Size Warnings and Guardrails
 
@@ -376,6 +551,7 @@ Expected route family (patterned after existing NoDb mods):
 - `GET|POST /runs/<runid>/<config>/api/geneva/config`
 - `POST /runs/<runid>/<config>/tasks/geneva/prepare_hrus`
 - `POST /runs/<runid>/<config>/tasks/geneva/run_batch`
+- `POST /runs/<runid>/<config>/tasks/geneva/build_frequency_panel`
 - `GET /runs/<runid>/<config>/modify_geneva_cn_table` (renders `controls/edit_csv.htm`)
 - `POST /runs/<runid>/<config>/tasks/modify_geneva_cn_table`
 - `GET /runs/<runid>/<config>/api/geneva/cn_table_meta`
@@ -383,6 +559,7 @@ Expected route family (patterned after existing NoDb mods):
 - `POST /runs/<runid>/<config>/tasks/reset_geneva_cn_table`
 - `GET /runs/<runid>/<config>/api/geneva/status`
 - `GET /runs/<runid>/<config>/api/geneva/results`
+- `GET /runs/<runid>/<config>/api/geneva/frequency_panel`
 - `GET /runs/<runid>/<config>/query/geneva/summary`
 - `GET /runs/<runid>/<config>/report/geneva/summary`
 
@@ -403,6 +580,7 @@ Execution mode:
    - Both are produced and persisted for each storm.
 5. Batch Storm Support:
    - Multi-storm runs execute with per-storm summaries.
+   - Frequency-panel matrix generation tracks available and unavailable storm cells explicitly.
 6. Data Source Priority:
    - NOAA PDS preference with CLIGEN fallback works and is logged.
 7. WBT-Only Guard:
@@ -413,12 +591,20 @@ Execution mode:
    - Non-US or non-NLCD/HSG-compatible runs are rejected with explicit diagnostics.
 10. Run-Scoped CN Editing:
    - `<runid>/geneva/data/cn_table.csv` is created at init, editable through `edit_csv.htm` flow, and consumed by CN resolution.
+11. Texture Coverage + Fallback:
+   - Watershed in-bound cells have complete WEPPcloud 4-class texture coverage, HSG fallback is derived from the texture map when direct HSG is missing, and unresolved cells use watershed-dominant-soil fallback with explicit warnings/provenance.
+12. Interactive Report Usability:
+   - Geneva summary report exposes datasource/ARI/measure filters with marker-to-event-table linkage.
+13. Minimum HRU Area Enforcement:
+   - HRUs below `2 ha` are collapsed per deterministic compatibility/selection rules, with area conservation and collapse provenance persisted.
 
 ## 16. Testing and Validation Plan (Initial)
 
 Unit tests:
 
 - HSG assignment and fallback policy behavior.
+- Watershed-dominant-soil fallback determinism and provenance fields.
+- Minimum-HRU collapse logic with deterministic recipient selection and strict area conservation.
 - HRU stacking/aggregation correctness.
 - CN runoff equation parity checks for both lambda options.
 - NEH4B distribution generator regression tests.
@@ -432,6 +618,9 @@ Integration tests:
   - NOAA available,
   - NOAA unavailable (CLIGEN fallback).
 - Batch storms with mixed durations/return periods.
+- Frequency-panel runs over `5m..24h` x `1..100` with partial availability handling.
+- `ssurgo/hydgrpdcd` runs with unrated/unknown cells trigger texture then watershed-dominant fallback as specified.
+- `ssurgo/hydgrpdcd` speckle/noise cases produce no sub-`2 ha` HRUs after collapse.
 - Watershed-size warning and hard-limit enforcement.
 
 Acceptance reference case:
@@ -443,7 +632,8 @@ Acceptance reference case:
 - Whether v1.1 should promote automatic grass burn augmentation from user-optional to default-on behavior.
 - Dual-HSG drainage policy (`A/D`, `B/D`, `C/D`) when drainage state is unknown.
 - Whether reservoir routing enters v2 or remains external.
-- UI defaults for storm batch templates (for example 2-, 5-, 10-, 25-, 50-, 100-year sets by duration).
+- Whether v1.1 should add preset templates beyond the canonical full panel (`5m..24h` x `1..100`) for faster BAER workflows.
+- Whether v1.0 report should include `runoff_volume` as a third chart `Measure of Interest` option or reserve it for table/detail only.
 
 ## 18. References
 
