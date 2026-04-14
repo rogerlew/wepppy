@@ -1466,7 +1466,19 @@ def fetch_and_analyze_openet_ts_rq(runid: str, payload: Mapping[str, Any] | None
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   openet_ts OPENET_TS_TASK_COMPLETED')
 
-    except Exception:
+    except (
+        AssertionError,
+        FileNotFoundError,
+        PermissionError,
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+        AttributeError,
+        redis.RedisError,
+        NoDirError,
+    ):
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1270", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

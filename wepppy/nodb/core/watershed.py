@@ -78,6 +78,7 @@ import multiprocessing
 
 from osgeo import gdal, osr
 from osgeo.gdalconst import *
+from whitebox_tools import WhiteboxAppError, WhiteboxToolsRunningError
 
 from deprecated import deprecated
 
@@ -1022,7 +1023,7 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
                 watershed=self.target_watershed_path,
                 output=wbt.outlet_geojson
             )
-        except Exception as e:
+        except (WhiteboxAppError, WhiteboxToolsRunningError, OSError, RuntimeError, ValueError) as e:
             error_msg = str(e)
             # Check for sparse network error from WhiteBox tools
             if "Failed to identify an outlet stream cell" in error_msg:
@@ -1074,7 +1075,7 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
 
             try:
                 update_catalog_entry(self.wd, 'watershed')
-            except Exception as exc:
+            except (FileNotFoundError, PermissionError, ValueError, OSError, json.JSONDecodeError) as exc:
                 self.logger.warning("Failed to refresh catalog for watershed outputs: %s", exc)
 
     @property
@@ -1096,7 +1097,7 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
                     result = con.execute(f"SELECT SUM(area) FROM read_parquet('{hillslopes_parquet}')").fetchone()
                     con.close()
                     sub_area = result[0] if result[0] is not None else 0.0
-                except Exception:
+                except (duckdb.Error, OSError, ValueError, TypeError):
                     pass
 
         return sub_area if sub_area is not None else 0.0
@@ -1120,7 +1121,7 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
                     result = con.execute(f"SELECT SUM(area) FROM read_parquet('{channels_parquet}')").fetchone()
                     con.close()
                     chn_area = result[0] if result[0] is not None else 0.0
-                except Exception:
+                except (duckdb.Error, OSError, ValueError, TypeError):
                     pass
 
         return chn_area if chn_area is not None else 0.0
@@ -1212,7 +1213,7 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
             if structure is not None:
                 try:
                     self._write_structure_json(structure)
-                except Exception as exc:
+                except (OSError, TypeError, ValueError) as exc:
                     self.logger.debug("Failed to persist structure.json: %s", exc)
                 self._structure = structure
             else:

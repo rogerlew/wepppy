@@ -57,6 +57,10 @@ jobs:
         chmod +x wctl/install.sh
         ./wctl/install.sh dev
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+    - name: Ensure weppcloud service is running
+      run: |
+        set -euo pipefail
+        wctl up -d weppcloud
     - name: Run stubtest suite
       run: |
         set -euo pipefail
