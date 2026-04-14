@@ -596,7 +596,7 @@ def test_validate_float_dem_accepts_float64(monkeypatch: pytest.MonkeyPatch, tmp
     watershed_routes._validate_float_dem(dem_path)
 
 
-def test_build_subcatchments_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-77")
     _stub_prep(monkeypatch)
@@ -605,20 +605,26 @@ def test_build_subcatchments_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> No
     class DummyWatershed:
         run_group = "default"
 
+        def __init__(self) -> None:
+            self.mofe_max_ofes = None
+
+    dummy_watershed = DummyWatershed()
+
     monkeypatch.setattr(
         watershed_routes.Watershed,
         "getInstance",
-        lambda wd: DummyWatershed(),
+        lambda wd: dummy_watershed,
     )
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/build-subcatchments-and-abstract-watershed",
-            json={"clip_hillslopes": True},
+            json={"clip_hillslopes": True, "mofe_max_ofes": "42"},
         )
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+    assert dummy_watershed.mofe_max_ofes == 19
 
 
 def test_build_subcatchments_batch_returns_input_message_without_enqueue(

@@ -2422,6 +2422,12 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "type": "number",
                             "constraint_mode": "static",
                         },
+                        "mofe_max_ofes": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 19,
+                            "constraint_mode": "static",
+                        },
                         "bieger2015_widths": {
                             "type": "boolean",
                             "constraint_mode": "static",

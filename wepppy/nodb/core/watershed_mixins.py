@@ -577,7 +577,8 @@ class WatershedOperationsMixin:
                     "No subwta cells found for topaz_id=%s while building MOFE slopes; forcing max_ofes=1",
                     topaz_id,
                 )
-            max_ofes = min(self.mofe_max_ofes, max(1, topaz_cell_count))
+            configured_max_ofes = max(1, min(19, int(self.mofe_max_ofes)))
+            max_ofes = min(configured_max_ofes, max(1, topaz_cell_count))
 
             if isinstance(wat_ss, HillSummary):
                 slp_fn = _join(self.wat_dir, wat_ss.fname)

@@ -58,6 +58,19 @@
           value="{{ watershed.mofe_target_length }}">
       </div>
 
+      <div class="wc-field">
+        <label class="wc-field__label" for="input_mofe_max_ofes">Max OFEs per hillslope</label>
+        <input
+          id="input_mofe_max_ofes"
+          name="mofe_max_ofes"
+          class="wc-field__control disable-readonly"
+          type="number"
+          min="1"
+          max="19"
+          step="1"
+          value="{{ watershed.mofe_max_ofes }}">
+      </div>
+
       <h4>Buffers</h4>
       <div class="wc-field wc-field--checkbox">
         <label class="wc-choice wc-choice--checkbox">

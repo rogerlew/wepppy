@@ -856,6 +856,19 @@ async def build_subcatchments_and_abstract_watershed(
         except (TypeError, ValueError):
             return None
 
+    def _to_int(value: Any) -> int | None:
+        if value is None:
+            return None
+        if isinstance(value, (list, tuple)):
+            return _to_int(value[0] if value else None)
+        if isinstance(value, bool):
+            return None
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            return None
+        return parsed
+
     def _to_bool(value: Any, default: bool | None = None) -> bool | None:
         if value is None:
             return default
@@ -886,6 +899,8 @@ async def build_subcatchments_and_abstract_watershed(
             target.mofe_buffer = bool(updates["mofe_buffer"])
         if "mofe_buffer_length" in updates:
             target.mofe_buffer_length = float(updates["mofe_buffer_length"])
+        if "mofe_max_ofes" in updates:
+            target.mofe_max_ofes = min(19, max(1, int(updates["mofe_max_ofes"])))
         if "bieger2015_widths" in updates:
             target.bieger2015_widths = bool(updates["bieger2015_widths"])
 
@@ -924,6 +939,11 @@ async def build_subcatchments_and_abstract_watershed(
             value = _to_float(payload.get("mofe_buffer_length"))
             if value is not None:
                 updates["mofe_buffer_length"] = value
+
+        if "mofe_max_ofes" in payload:
+            value = _to_int(payload.get("mofe_max_ofes"))
+            if value is not None:
+                updates["mofe_max_ofes"] = value
 
         if "bieger2015_widths" in payload:
             value = _to_bool(payload.get("bieger2015_widths"))
