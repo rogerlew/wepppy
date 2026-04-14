@@ -1,5 +1,5 @@
 # Geneva Implementation Plan
-Status: Active (WP-00 complete; WP-01 in_review)  
+Status: Active (WP-00 and WP-01 complete; WP-02+ not started)  
 Last Updated: 2026-04-14  
 Owner: WEPPpy NoDb hydrology stack  
 Primary Spec: `/workdir/wepppy/wepppy/nodb/mods/geneva/specification.md`
@@ -81,7 +81,7 @@ Kernel repo gates (`/workdir/wepppyo3`):
 | WP | Title | Depends On | Assignee | Target Date | State | Code Gate | Test Gate | QA Gate | Security Gate | Manual Int Gate | Evidence / Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | WP-00 | Orchestration bootstrap and fixtures | none | codex | 2026-04-14 | done | pass | pass | pass | pass | pass | Ready synthetic fixture pack + contract tests completed. Evidence: `work-packages/wp-00_orchestration_bootstrap_and_fixtures.md` (`Execution Checklist`, `QA + Security Checklist Outcomes`, `Validation Executed`). |
-| WP-01 | `wepppyo3` Geneva kernel scaffold | WP-00 | codex | 2026-04-14 | in_review | fail | fail | pass | pass | pass | Evidence: `work-packages/wp-01_wepppyo3_geneva_kernel_scaffold.md`; blockers: workspace clippy debt in `raster/src/raster.rs` and `cli_revision_rust --lib` link failure (undefined `Py*` symbols) in this environment. |
+| WP-01 | `wepppyo3` Geneva kernel scaffold | WP-00 | codex | 2026-04-14 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-01_wepppyo3_geneva_kernel_scaffold.md`; required gates and manual Python integration check completed. |
 | WP-02 | Rust HRU + HSG kernel (`prepare_hrus`) | WP-01 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Raster alignment, keying, fallback, `2 ha` collapse. |
 | WP-03 | Rust CN rainfall-excess kernel | WP-01 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | `lambda 0.20/0.05`, cumulative and incremental excess. |
 | WP-04 | Frequency panel + NEH4 Type B kernel | WP-01 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | CLIGEN always + NOAA when available, no synthetic fill. |
