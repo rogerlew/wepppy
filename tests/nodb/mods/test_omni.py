@@ -2640,6 +2640,8 @@ def test_build_contrasts_stream_order_stale_rebuild_decisions(
 
     whitebox_tools_stub = types.ModuleType("whitebox_tools")
     whitebox_tools_stub.WhiteboxTools = DummyWhiteboxTools
+    whitebox_tools_stub.WhiteboxAppError = RuntimeError
+    whitebox_tools_stub.WhiteboxToolsRunningError = RuntimeError
     monkeypatch.setitem(sys.modules, "whitebox_tools", whitebox_tools_stub)
 
     class DummyPrep:

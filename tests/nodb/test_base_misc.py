@@ -187,6 +187,55 @@ def test_config_get_path_expands_locales_dir():
     assert resolved.endswith("wepppy/locales/tenerife/soils/tf_soil_25.tif")
 
 
+@pytest.mark.parametrize("raw_value", ["19 # requested by team", "19 ; requested by team"])
+def test_config_get_int_ignores_inline_comment_suffix(raw_value):
+    class _StubParser:
+        def get(self, section, option):
+            assert (section, option) == ("watershed", "mofe_max_ofes")
+            return raw_value
+
+    class _StubNoDb:
+        _configparser = _StubParser()
+
+    value = base.NoDbBase.config_get_int(_StubNoDb(), "watershed", "mofe_max_ofes")
+    assert value == 19
+
+
+@pytest.mark.parametrize("raw_value", ["2.5 # calibration", "2.5 ; calibration"])
+def test_config_get_float_ignores_inline_comment_suffix(raw_value):
+    class _StubParser:
+        def get(self, section, option):
+            assert (section, option) == ("climate", "factor")
+            return raw_value
+
+    class _StubNoDb:
+        _configparser = _StubParser()
+
+    value = base.NoDbBase.config_get_float(_StubNoDb(), "climate", "factor")
+    assert value == 2.5
+
+
+@pytest.mark.parametrize("raw_value", ["none # fallback", "null ; fallback"])
+def test_config_get_numeric_respects_default_with_inline_comment(raw_value):
+    class _StubParser:
+        def get(self, section, option):
+            assert (section, option) in {
+                ("watershed", "mofe_max_ofes"),
+                ("climate", "factor"),
+            }
+            return raw_value
+
+    class _StubNoDb:
+        _configparser = _StubParser()
+
+    assert base.NoDbBase.config_get_int(
+        _StubNoDb(), "watershed", "mofe_max_ofes", default=19
+    ) == 19
+    assert base.NoDbBase.config_get_float(
+        _StubNoDb(), "climate", "factor", default=1.25
+    ) == 1.25
+
+
 def test_ensure_redis_lock_client_reconnects_when_unset(monkeypatch):
     class _StubRedisClient:
         def __init__(self, connection_pool):

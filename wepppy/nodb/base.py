@@ -581,6 +581,12 @@ def get_default_config_path() -> str:
     return _default_config
 
 
+def _strip_inline_scalar_comment(value: str) -> str:
+    """Drop trailing inline comments from scalar config values."""
+
+    return re.split(r'\s+[;#]', value, maxsplit=1)[0].strip()
+
+
 class CaseSensitiveRawConfigParser(RawConfigParser):
     """Config parser variant that preserves key casing."""
 
@@ -1629,7 +1635,8 @@ class NoDbBase(object):
         assert default is None or isfloat(default)
 
         try:
-            val = self._configparser.get(section, option).lower()
+            val = self._configparser.get(section, option).lower().strip()
+            val = _strip_inline_scalar_comment(val)
             if val.startswith('none') or val == '' or val.startswith('null'):
                 return default
             return float(val)
@@ -1640,7 +1647,8 @@ class NoDbBase(object):
         assert default is None or isint(default)
 
         try:
-            val = self._configparser.get(section, option).lower()
+            val = self._configparser.get(section, option).lower().strip()
+            val = _strip_inline_scalar_comment(val)
             if val.startswith('none') or val == '' or val.startswith('null'):
                 return default
             return int(val)

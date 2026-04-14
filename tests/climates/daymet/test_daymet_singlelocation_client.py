@@ -112,6 +112,18 @@ if not hasattr(whitebox_module, "WhiteboxTools"):
 
     whitebox_module.WhiteboxTools = _WhiteboxTools
 
+if not hasattr(whitebox_module, "WhiteboxAppError"):
+    class _WhiteboxAppError(RuntimeError):
+        pass
+
+    whitebox_module.WhiteboxAppError = _WhiteboxAppError
+
+if not hasattr(whitebox_module, "WhiteboxToolsRunningError"):
+    class _WhiteboxToolsRunningError(RuntimeError):
+        pass
+
+    whitebox_module.WhiteboxToolsRunningError = _WhiteboxToolsRunningError
+
 try:
     import shapely  # type: ignore  # noqa: F401
     from shapely import geometry as _shapely_geometry  # noqa: F401
