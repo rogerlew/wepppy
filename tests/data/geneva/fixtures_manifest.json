@@ -4,16 +4,40 @@
   "fixtures": [
     {
       "fixture_id": "synthetic_small_watershed_v1",
-      "status": "placeholder",
-      "description": "Synthetic small watershed fixture placeholder for WP-00 bootstrap.",
+      "status": "ready",
+      "description": "4x4 aligned synthetic watershed rasters for Geneva WP-00 bootstrap validation.",
       "inputs": {
-        "bound_tif": null,
-        "landuse_tif": null,
-        "hydgrpdcd_tif": null,
-        "burn_severity_tif": null
+        "bound_tif": "synthetic_small_watershed_v1/bound.tif",
+        "landuse_tif": "synthetic_small_watershed_v1/landuse.tif",
+        "hydgrpdcd_tif": "synthetic_small_watershed_v1/hydgrpdcd.tif",
+        "burn_severity_tif": "synthetic_small_watershed_v1/burn_severity.tif",
+        "metadata_json": "synthetic_small_watershed_v1/fixture_metadata.json"
+      },
+      "metadata": {
+        "synthetic": true,
+        "grid": {
+          "rows": 4,
+          "cols": 4,
+          "cell_size_m": 30
+        },
+        "crs": "EPSG:5070"
       },
       "expected": {
-        "hru_rows_min": 1
+        "hru_rows_min": 1,
+        "hru_rows_max": 16,
+        "required_hru_fields": [
+          "hru_id",
+          "area_m2",
+          "landuse_class",
+          "hsg_group",
+          "burn_severity_class",
+          "hydrophobic_class"
+        ],
+        "required_status_fields": [
+          "phase",
+          "warnings",
+          "artifacts"
+        ]
       }
     }
   ]

@@ -1,0 +1,43 @@
+{
+  "fixture_id": "synthetic_small_watershed_v1",
+  "synthetic": true,
+  "grid": {
+    "rows": 4,
+    "cols": 4,
+    "cell_size_m": 30
+  },
+  "crs": "EPSG:5070",
+  "bounds": {
+    "xmin": 500000.0,
+    "ymin": 4699880.0,
+    "xmax": 500120.0,
+    "ymax": 4700000.0
+  },
+  "unique_values": {
+    "bound": [
+      1
+    ],
+    "landuse": [
+      41,
+      42,
+      43,
+      52,
+      71,
+      81,
+      82
+    ],
+    "hydgrpdcd": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "burn_severity": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "notes": "Tiny deterministic synthetic fixture for WP-00 bootstrap validation."
+}
