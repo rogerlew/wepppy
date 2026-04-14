@@ -32,9 +32,11 @@ References:
   - `cli_revision/Cargo.toml`
   - `cli_revision/src/geneva/convert.rs`
   - `cli_revision/src/geneva/mod.rs`
+  - Commit: `2b7482f5f960d4049d98f1e6d1a9fc88af283396`
 - Repo: `/workdir/wepppy`
   - `wepppy/nodb/mods/geneva/implementation-plan.md`
   - `wepppy/nodb/mods/geneva/work-packages/wp-01_wepppyo3_geneva_kernel_scaffold.md`
+  - Commit: `a76d229d2ade4113a8c07539e68ca1d781376426`
 
 ## 3. Automated Tests Run
 - Commands:
