@@ -19,7 +19,7 @@ walk_flowpaths=true
 mofe_target_length=60
 mofe_buffer=false
 mofe_buffer_length=30
-mofe_max_ofes=3
+mofe_max_ofes=19 # requested by Anurag and Marta 2026-04-13
 abstraction_backend = "peridot"
 
 [nodb]

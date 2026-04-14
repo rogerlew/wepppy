@@ -151,3 +151,35 @@ def test_build_multiple_ofe_caps_configured_max_ofes_at_19(
 
     assert recorded["max_ofes"] == 19
     assert watershed.mofe_nsegments == {"171": 19}
+
+
+@pytest.mark.unit
+def test_build_multiple_ofe_handles_non_finite_configured_max_ofes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    watershed = _DummyWatershed(tmp_path)
+    watershed._mofe_max_ofes = float("inf")
+    subwta = np.full((1, 30), 171, dtype=np.int32)
+    recorded: dict[str, int] = {}
+
+    monkeypatch.setattr(
+        watershed_mixins_module,
+        "read_raster",
+        lambda _path, dtype=np.int32: (subwta, None, None),  # noqa: ARG005
+    )
+
+    class _FakeSlopeFile:
+        def __init__(self, _fname: str) -> None:
+            return None
+
+        def segmented_multiple_ofe(self, **kwargs) -> int:
+            recorded["max_ofes"] = int(kwargs["max_ofes"])
+            return int(kwargs["max_ofes"])
+
+    monkeypatch.setattr(watershed_mixins_module, "SlopeFile", _FakeSlopeFile)
+    monkeypatch.setattr(watershed, "_build_mofe_map", lambda: None)
+
+    watershed._build_multiple_ofe()
+
+    assert recorded["max_ofes"] == 19
+    assert watershed.mofe_nsegments == {"171": 19}

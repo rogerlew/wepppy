@@ -627,6 +627,69 @@ def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: py
     assert dummy_watershed.mofe_max_ofes == 19
 
 
+def test_build_subcatchments_caps_mofe_max_ofes_floor_to_1(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-78")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        run_group = "default"
+
+        def __init__(self) -> None:
+            self.mofe_max_ofes = None
+
+    dummy_watershed = DummyWatershed()
+
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: dummy_watershed,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-subcatchments-and-abstract-watershed",
+            json={"clip_hillslopes": True, "mofe_max_ofes": 0},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-78"
+    assert dummy_watershed.mofe_max_ofes == 1
+
+
+def test_build_subcatchments_ignores_non_finite_mofe_max_ofes(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-79")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        run_group = "default"
+
+        def __init__(self) -> None:
+            self.mofe_max_ofes = 7
+
+    dummy_watershed = DummyWatershed()
+
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: dummy_watershed,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-subcatchments-and-abstract-watershed",
+            content='{"clip_hillslopes": true, "mofe_max_ofes": 1e309}',
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-79"
+    assert dummy_watershed.mofe_max_ofes == 7
+
+
 def test_build_subcatchments_batch_returns_input_message_without_enqueue(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

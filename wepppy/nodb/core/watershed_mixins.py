@@ -577,7 +577,11 @@ class WatershedOperationsMixin:
                     "No subwta cells found for topaz_id=%s while building MOFE slopes; forcing max_ofes=1",
                     topaz_id,
                 )
-            configured_max_ofes = max(1, min(19, int(self.mofe_max_ofes)))
+            try:
+                configured_max_ofes_raw = int(self.mofe_max_ofes)
+            except (TypeError, ValueError, OverflowError):
+                configured_max_ofes_raw = 19
+            configured_max_ofes = max(1, min(19, configured_max_ofes_raw))
             max_ofes = min(configured_max_ofes, max(1, topaz_cell_count))
 
             if isinstance(wat_ss, HillSummary):

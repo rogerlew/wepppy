@@ -863,9 +863,11 @@ async def build_subcatchments_and_abstract_watershed(
             return _to_int(value[0] if value else None)
         if isinstance(value, bool):
             return None
+        if isinstance(value, float) and not math.isfinite(value):
+            return None
         try:
             parsed = int(value)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return None
         return parsed
 
