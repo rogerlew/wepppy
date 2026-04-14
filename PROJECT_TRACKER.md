@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-13  
+**Last Updated**: 2026-04-14  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -226,6 +226,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Iterative First-Order Link Prune WP-09 Max Junctions Support (2026-04-14)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260414_ifolp_wp09_max_junctions_support/](docs/work-packages/20260414_ifolp_wp09_max_junctions_support/)  
+**Summary**: Closed WP-09 end-to-end with IFOLP `--max_junctions` support in `weppcloud-wbt` (Rust tool contract + Phase B behavior + parser/phase tests + both Python wrappers), retained omitted-argument baseline behavior, and deterministic explicit `--max_junctions=3` validation. Required gates passed: `cargo check -p whitebox_tools`; `cargo test -p whitebox_tools iterative_first_order_link_prune -- --nocapture` (`77 passed`, `0 failed`); `python -m py_compile whitebox_tools.py WBT/whitebox_tools.py`. Parity/regression artifacts for omitted and `max_junctions=3` modes on run1/run2 matched retained canonical hash `920cc1612bd677a1f8dab935a521f6270e226bf961fd5f72ca770b32cd134c83`, with no-arg artifacts byte-identical to retained baseline canonicals and `max_junctions=3` deterministic across reruns. WEPPpy integration planning now explicitly requires `max_junctions=3`; review disposition closed with no unresolved high/medium findings; ExecPlan archived under `prompts/completed/`.
 
 ### Iterative First-Order Link Prune WP-08 WBT Wrapper Exposure + Release Readiness (2026-04-13)
 **Status**: ✅ **COMPLETE**  
