@@ -1,0 +1,9 @@
+code,hsg_group,label,notes
+0,,NODATA_OR_UNRESOLVED,NoData or unresolved hydgrpdcd value
+1,A,A,Hydrologic Soil Group A
+2,B,B,Hydrologic Soil Group B
+3,C,C,Hydrologic Soil Group C
+4,D,D,Hydrologic Soil Group D
+5,,INVALID_V1,Not used in current hydgrpdcd build; treat as invalid/unexpected
+6,,INVALID_V1,Not used in current hydgrpdcd build; treat as invalid/unexpected
+7,,INVALID_V1,Not used in current hydgrpdcd build; treat as invalid/unexpected
