@@ -187,7 +187,7 @@ pyproj==3.7.1
 pyproject-hooks==1.2.0
 pyrsistent==0.18.1
 pysocks==1.7.1
-pytest==8.4.2
+pytest==9.0.3
 pytest-cov==7.0.0
 pytest-reportlog==0.4.0
 python-dotenv==1.0.1
