@@ -1058,17 +1058,53 @@ class Soils(NoDbBase):
             d[mukey] = sol_summary.liquid_limit
         return d 
 
+    def _weighted_metric_from_soils_parquet(
+        self,
+        parquet_fn: str,
+        value_column: str,
+        *,
+        ignore_null_values: bool = False,
+    ) -> float:
+        with duckdb.connect() as con:
+            schema_result = con.execute(f"SELECT * FROM read_parquet('{parquet_fn}') LIMIT 0")
+            column_names = {desc[0] for desc in schema_result.description}
+            where_clause = f" WHERE {value_column} IS NOT NULL" if ignore_null_values else ""
+
+            if "area" in column_names:
+                rows = con.execute(
+                    f"SELECT topaz_id, {value_column}, area FROM read_parquet('{parquet_fn}'){where_clause}"
+                ).fetchall()
+                weighted = [
+                    (float(value), float(area))
+                    for _topaz_id, value, area in rows
+                    if value is not None and area is not None
+                ]
+            else:
+                rows = con.execute(
+                    f"SELECT topaz_id, {value_column} FROM read_parquet('{parquet_fn}'){where_clause}"
+                ).fetchall()
+                watershed = self.watershed_instance
+                weighted = [
+                    (float(value), float(watershed.hillslope_area(topaz_id)))
+                    for topaz_id, value in rows
+                    if value is not None
+                ]
+
+        if not weighted:
+            return 0.0
+
+        totalarea = sum(area for _value, area in weighted)
+        if totalarea <= 0.0:
+            return 0.0
+
+        wsum = sum(value * area for value, area in weighted)
+        return wsum / totalarea
+
     @property
     def clay_pct(self):
         parquet_path = pick_existing_parquet_path(self.wd, "soils/soils.parquet")
         if parquet_path is not None:
-            parquet_fn = str(parquet_path)
-            with duckdb.connect() as con:
-                result = con.execute(f"SELECT topaz_id, clay, area FROM read_parquet('{parquet_fn}')").fetchall()
-                totalarea = sum([row[2] for row in result])
-                wsum = sum([row[1] * row[2] for row in result])
-                clay_pct = wsum / totalarea
-                return clay_pct
+            return self._weighted_metric_from_soils_parquet(str(parquet_path), "clay")
 
         return self._deprecated_clay_pct()
     
@@ -1102,14 +1138,11 @@ class Soils(NoDbBase):
         # Try parquet first
         parquet_path = pick_existing_parquet_path(self.wd, "soils/soils.parquet")
         if parquet_path is not None:
-            parquet_fn = str(parquet_path)
-            with duckdb.connect() as con:
-                result = con.execute(f"SELECT topaz_id, ll, area FROM read_parquet('{parquet_fn}') WHERE ll IS NOT NULL").fetchall()
-                if not result:
-                    return 0.0
-                totalarea = sum([row[2] for row in result])
-                wsum = sum([row[1] * row[2] for row in result])
-                return wsum / totalarea if totalarea > 0 else 0.0
+            return self._weighted_metric_from_soils_parquet(
+                str(parquet_path),
+                "ll",
+                ignore_null_values=True,
+            )
 
         # Fall back to deprecated method
         return self._deprecated_liquid_limit()
