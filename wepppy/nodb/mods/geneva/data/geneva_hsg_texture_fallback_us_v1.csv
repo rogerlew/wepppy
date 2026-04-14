@@ -1,0 +1,5 @@
+simple_texture,hsg_default,source,notes
+sand loam,B,WEPPcloud_4class_texture_us_v1,Default US v1 fallback when direct HSG is unavailable.
+loam,B,WEPPcloud_4class_texture_us_v1,Default US v1 fallback when direct HSG is unavailable.
+silt loam,C,WEPPcloud_4class_texture_us_v1,Default US v1 fallback when direct HSG is unavailable.
+clay loam,D,WEPPcloud_4class_texture_us_v1,Default US v1 fallback when direct HSG is unavailable.
