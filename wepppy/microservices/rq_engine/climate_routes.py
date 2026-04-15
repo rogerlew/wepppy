@@ -11,6 +11,7 @@ from rq import Queue
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import (
     Climate,
+    ClimateMode,
     ClimateModeIsUndefinedError,
     NoClimateStationSelectedError,
     WatershedNotAbstractedError,
@@ -32,6 +33,14 @@ router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+_OBSERVED_YEAR_REQUIRED_MODES = frozenset(
+    (
+        ClimateMode.Observed,
+        ClimateMode.ObservedPRISM,
+        ClimateMode.GridMetPRISM,
+        ClimateMode.DepNexrad,
+    )
+)
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -90,6 +99,14 @@ def _build_climate_validation_errors(exc: Exception) -> list[dict[str, str]]:
     ]
 
 
+def _validate_observed_year_bounds_before_enqueue(climate: Climate) -> None:
+    climate_mode = getattr(climate, "climate_mode", None)
+    if climate_mode not in _OBSERVED_YEAR_REQUIRED_MODES:
+        return
+    with climate.locked():
+        climate._require_observed_year_bounds_for_build()
+
+
 @router.post(
     "/runs/{runid}/{config}/build-climate",
     summary="Build climate inputs",
@@ -124,6 +141,7 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
         climate = Climate.getInstance(wd)
         payload = await parse_request_payload(request)
         climate.parse_inputs(payload)
+        _validate_observed_year_bounds_before_enqueue(climate)
     except (AssertionError, KeyError, TypeError, ValueError) as exc:
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

@@ -150,16 +150,26 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
                     return value
             return None
 
+        controllers_gl_build_id = controllers_gl_expected_build_id()
+        controllers_gl_assets = {
+            "js/controllers-gl.js",
+            "js/controllers_gl_stale_check.js",
+        }
+
         def static_url(filename: str):
             params = {"filename": filename}
             if version:
                 params["v"] = version
+            if controllers_gl_build_id and filename in controllers_gl_assets:
+                # Keep controller bundle URLs fresh across local rebuilds even when
+                # git SHA (ASSET_VERSION) is unchanged.
+                params["cg"] = controllers_gl_build_id
             return url_for("static", **params)
 
         return dict(
             asset_version=version,
             static_url=static_url,
-            controllers_gl_expected_build_id=controllers_gl_expected_build_id(),
+            controllers_gl_expected_build_id=controllers_gl_build_id,
         )
         
     @app.context_processor

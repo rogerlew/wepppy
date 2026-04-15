@@ -998,6 +998,61 @@ var Climate = (function () {
                 });
         };
 
+        function normalizePayloadScalar(value) {
+            if (Array.isArray(value)) {
+                for (var i = value.length - 1; i >= 0; i -= 1) {
+                    var candidate = value[i];
+                    if (candidate === undefined || candidate === null) {
+                        continue;
+                    }
+                    var trimmedCandidate = String(candidate).trim();
+                    if (trimmedCandidate !== "") {
+                        return trimmedCandidate;
+                    }
+                }
+                if (value.length > 0 && value[value.length - 1] !== undefined && value[value.length - 1] !== null) {
+                    return String(value[value.length - 1]).trim();
+                }
+                return "";
+            }
+            if (value === undefined || value === null) {
+                return "";
+            }
+            return String(value).trim();
+        }
+
+        function readTrimmedFieldValue(fieldId) {
+            if (!formElement || !fieldId) {
+                return null;
+            }
+            var field = formElement.querySelector("#" + fieldId);
+            if (!field || field.value === undefined || field.value === null) {
+                return null;
+            }
+            return String(field.value).trim();
+        }
+
+        climate.mergeYearBoundsPayload = function (payload) {
+            var normalized = payload && typeof payload === "object" ? payload : {};
+            var yearFields = [
+                "observed_start_year",
+                "observed_end_year",
+                "future_start_year",
+                "future_end_year"
+            ];
+
+            yearFields.forEach(function (fieldName) {
+                var fromDom = readTrimmedFieldValue(fieldName);
+                if (fromDom !== null) {
+                    normalized[fieldName] = fromDom;
+                    return;
+                }
+                normalized[fieldName] = normalizePayloadScalar(normalized[fieldName]);
+            });
+
+            return normalized;
+        };
+
         climate.build = function () {
             if (!climate._statusStreamHandle) {
                 climate.attachStatusStream({ autoConnect: false });
@@ -1008,7 +1063,7 @@ var Climate = (function () {
             var taskMsg = "Building climate";
             climate.reset_panel_state(climate, { taskMessage: taskMsg });
 
-            var payload = forms.serializeForm(formElement, { format: "json" });
+            var payload = climate.mergeYearBoundsPayload(forms.serializeForm(formElement, { format: "json" }));
             climate.events.emit("climate:build:started", { payload: payload });
 
             http.postJsonWithSessionToken(

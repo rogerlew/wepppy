@@ -1,5 +1,7 @@
-import pytest
+import contextlib
 from types import SimpleNamespace
+
+import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -189,3 +191,38 @@ def test_build_climate_runtime_preflight_error_uses_generic_parse_boundary(
 
     assert response.status_code == 400
     assert response.json()["error"]["message"] == "Error parsing climate inputs"
+
+
+def test_build_climate_observed_year_bounds_validation_failure_returns_structured_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyClimate:
+        run_group = "default"
+        climate_mode = climate_routes.ClimateMode.ObservedPRISM
+
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        @contextlib.contextmanager
+        def locked(self):
+            yield
+
+        def _require_observed_year_bounds_for_build(self) -> tuple[int, int]:
+            raise ValueError("observed_start_year must be an integer year, got empty string")
+
+    monkeypatch.setattr(
+        climate_routes.Climate,
+        "getInstance",
+        lambda wd: DummyClimate(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-climate", json={})
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["errors"][0]["code"] == "invalid_request"

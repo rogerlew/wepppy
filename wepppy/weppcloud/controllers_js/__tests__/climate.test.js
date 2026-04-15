@@ -128,6 +128,10 @@ describe("Climate controller", () => {
 
                 <input id="checkbox_use_gridmet_wind_when_applicable" type="checkbox" data-climate-action="gridmet-wind">
                 <input id="checkbox_adjust_mx_pt5" type="checkbox" data-climate-action="adjust-mx-pt5">
+                <input id="observed_start_year" name="observed_start_year" type="text" value="">
+                <input id="observed_end_year" name="observed_end_year" type="text" value="">
+                <input id="future_start_year" name="future_start_year" type="text" value="">
+                <input id="future_end_year" name="future_end_year" type="text" value="">
 
                 <select id="climate_station_selection" name="climate_station_selection" data-climate-action="station-select">
                     <option value="STA-1">Station 1</option>
@@ -340,6 +344,35 @@ describe("Climate controller", () => {
         climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED");
 
         expect(climate.report).toHaveBeenCalledTimes(1);
+    });
+
+    test("build refreshes observed year payload values from live DOM fields", async () => {
+        const serializeSpy = jest.spyOn(window.WCForms, "serializeForm").mockReturnValue({
+            climate_catalog_id: "dataset_a",
+            climate_mode: "5",
+            observed_start_year: "",
+            observed_end_year: ""
+        });
+
+        document.getElementById("observed_start_year").value = "1980";
+        document.getElementById("observed_end_year").value = "2020";
+
+        const buildButton = document.getElementById("btn_build_climate");
+        buildButton.dispatchEvent(new Event("click", { bubbles: true }));
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/build-climate",
+            expect.objectContaining({
+                observed_start_year: "1980",
+                observed_end_year: "2020"
+            }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+
+        serializeSpy.mockRestore();
     });
 
     test("poll failure pushes stacktrace and emits job error", async () => {
