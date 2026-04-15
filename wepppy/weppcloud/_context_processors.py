@@ -189,7 +189,7 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
                 return "{:,}".format(int(v))
             except (TypeError, ValueError, OverflowError):
                 return v
-            except Exception:
+            except Exception:  # broad-except: template helper boundary preserves rendering with telemetry
                 logger.exception("Unexpected error commafying value=%r", v)
                 return v
 
@@ -233,7 +233,7 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
                     wepp and wepp.storm_event_analyzer_ready
                 )
                 ttl_state = ensure_ttl_state(wd, touched_by="context")
-            except Exception:
+            except Exception:  # broad-except: context boundary should not break report rendering
                 storm_event_analyzer_ready = False
                 ttl_state = None
 
@@ -243,7 +243,7 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
                 storm_event_analyzer_ready=storm_event_analyzer_ready,
                 current_ttl=ttl_state,
             )
-        except Exception:
+        except Exception:  # broad-except: run-context lookup boundary for template rendering
             return dict(
                 current_ron=None,
                 current_mods=[],
@@ -282,7 +282,7 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
     def csrf_token_processor():
         try:
             from flask_wtf.csrf import generate_csrf
-        except Exception:
+        except Exception:  # broad-except: optional csrf helper import boundary
             return {}
         return dict(csrf_token=generate_csrf)
 
