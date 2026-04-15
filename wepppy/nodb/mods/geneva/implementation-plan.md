@@ -1,5 +1,5 @@
 # Geneva Implementation Plan
-Status: Active (WP-00/WP-01 complete; WP-02 in review; WP-03 complete; WP-04+ not started)  
+Status: Active (WP-00/WP-01/WP-03/WP-04 complete; WP-02 in review; WP-05+ not started)  
 Last Updated: 2026-04-15  
 Owner: WEPPpy NoDb hydrology stack  
 Primary Spec: `/workdir/wepppy/wepppy/nodb/mods/geneva/specification.md`
@@ -84,7 +84,7 @@ Kernel repo gates (`/workdir/wepppyo3`):
 | WP-01 | `wepppyo3` Geneva kernel scaffold | WP-00 | codex | 2026-04-14 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-01_wepppyo3_geneva_kernel_scaffold.md`; required gates and manual Python integration check completed. |
 | WP-02 | Rust HRU + HSG kernel (`prepare_hrus`) | WP-01 | codex | 2026-04-14 | in_review | pass | pass | pass | fail | pass | Evidence: `work-packages/wp-02_rust_hru_hsg_kernel_prepare_hrus.md`; required broad-exception changed-file gate failed due unrelated pre-existing non-Geneva dirty baseline (`rq_engine` files). |
 | WP-03 | Rust CN rainfall-excess kernel | WP-01 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-03_rust_cn_rainfall_excess_kernel.md`; CN transforms (`lambda 0.20/0.05`), cap behavior, cumulative/incremental excess closure, adapter-path golden-series validation, and post-review validation hardening/disposition updates completed with all required gates passing. |
-| WP-04 | Frequency panel + NEH4 Type B kernel | WP-01 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | CLIGEN always + NOAA when available, no synthetic fill. |
+| WP-04 | Frequency panel + NEH4 Type B kernel | WP-01 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-04_frequency_panel_neh4_type_b_kernel.md`; dual-source frequency matrix kernel, canonical unavailability reason codes, NEH4 Type B interpolation/closure/warning path, adapter integration, and required gate/review/manual checks completed. |
 | WP-05 | SCS UH + hydrograph kernel | WP-03, WP-04 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | `scs_triangular` + `scs_curvilinear`, mass/volume closure. |
 | WP-06 | Geneva NoDb facade + collaborators | WP-02, WP-03, WP-04, WP-05 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Python orchestration and artifact IO. |
 | WP-07 | CN table workflow + edit_csv integration | WP-06 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Run-scoped seed/init/reset/modify/meta/snapshot parity. |
