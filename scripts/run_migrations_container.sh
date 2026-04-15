@@ -43,6 +43,11 @@ Options:
                                Default: docker/defaults.env when present
   --redis-password-file PATH   Optional redis_password file to mount as /run/secrets/redis_password.
                                Default: docker/secrets/redis_password when present
+  --discord-bot-token-file PATH
+                               Optional discord bot token file to mount to
+                               /opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token
+  --redis-host HOST            Optional REDIS_HOST value for the migration container.
+  --redis-url URL              Optional REDIS_URL value for the migration container.
   --archive-before             Pass --archive-before to migration runner.
   --dry-run                    Pass --dry-run to migration runner.
   --force                      Pass --force to migration runner.
@@ -128,6 +133,9 @@ CONTAINER_RUN_ROOT="${CONTAINER_RUN_ROOT:-}"
 
 ENV_FILE="${ENV_FILE:-${PROJECT_DIR}/docker/defaults.env}"
 REDIS_PASSWORD_FILE="${REDIS_PASSWORD_FILE:-${PROJECT_DIR}/docker/secrets/redis_password}"
+DISCORD_BOT_TOKEN_FILE="${DISCORD_BOT_TOKEN_FILE:-${PROJECT_DIR}/docker/secrets/discord_bot_token}"
+REDIS_HOST_VALUE="${REDIS_HOST_VALUE:-}"
+REDIS_URL_VALUE="${REDIS_URL_VALUE:-}"
 
 ARCHIVE_BEFORE=false
 DRY_RUN=false
@@ -197,6 +205,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --redis-password-file)
       REDIS_PASSWORD_FILE="$2"
+      shift 2
+      ;;
+    --discord-bot-token-file)
+      DISCORD_BOT_TOKEN_FILE="$2"
+      shift 2
+      ;;
+    --redis-host)
+      REDIS_HOST_VALUE="$2"
+      shift 2
+      ;;
+    --redis-url)
+      REDIS_URL_VALUE="$2"
       shift 2
       ;;
     --archive-before)
@@ -530,6 +550,9 @@ DATA_MOUNT_SRC=${DATA_MOUNT_SRC}
 DATA_MOUNT_DST=${DATA_MOUNT_DST}
 ENV_FILE=${ENV_FILE}
 REDIS_PASSWORD_FILE=${REDIS_PASSWORD_FILE}
+DISCORD_BOT_TOKEN_FILE=${DISCORD_BOT_TOKEN_FILE}
+REDIS_HOST_VALUE=${REDIS_HOST_VALUE}
+REDIS_URL_VALUE=${REDIS_URL_VALUE}
 STATE_DIR=${RUN_STATE_DIR}
 EOF
 
@@ -563,6 +586,20 @@ if [[ -f "${REDIS_PASSWORD_FILE}" ]]; then
     --volume "${REDIS_PASSWORD_FILE}:/run/secrets/redis_password:ro"
     --env "REDIS_PASSWORD_FILE=/run/secrets/redis_password"
   )
+fi
+
+if [[ -f "${DISCORD_BOT_TOKEN_FILE}" ]]; then
+  docker_args+=(
+    --volume "${DISCORD_BOT_TOKEN_FILE}:/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token:ro"
+  )
+fi
+
+if [[ -n "${REDIS_HOST_VALUE}" ]]; then
+  docker_args+=(--env "REDIS_HOST=${REDIS_HOST_VALUE}")
+fi
+
+if [[ -n "${REDIS_URL_VALUE}" ]]; then
+  docker_args+=(--env "REDIS_URL=${REDIS_URL_VALUE}")
 fi
 
 if [[ "${DETACH}" == "true" ]]; then

@@ -10,6 +10,88 @@ Run migrations on all 799 Lake Tahoe 2020 watershed runs across 11 scenarios.
 - 80 base watersheds (including intervening areas and sub-watersheds)
 - 11 scenario types per watershed
 
+## Migration Container Runbook (wepp1)
+
+Run Tahoe migrations in a standalone Docker container so migration execution is independent of `rq-engine` and resilient to normal `weppcloud` stack deploys/restarts.
+
+### Deployment model
+- Host: `wepp1.tail305ec9.ts.net`
+- Data root: `/geodata/weppcloud_runs`
+- Runner script: `/workdir/wepppy/scripts/run_migrations_container.sh`
+- Checkpoint state root: `/geodata/weppcloud_runs/_migration_state/<token>/`
+  - `all_runs.txt`: immutable target set for the token
+  - `done.txt`: completed runs
+  - `failed.txt`: failed runs to inspect/retry
+  - `runner.log`: append-only execution log
+
+### One-time setup
+1. Build the 799-run target list from this checklist:
+```bash
+mkdir -p /geodata/weppcloud_runs/_migration_state
+awk 'match($0,/^- \[[ xX]\] (lt_202012_[^[:space:]]+)/,a){if(!seen[a[1]]++){print "/geodata/weppcloud_runs/"a[1]}}' \
+  /workdir/wepppy/docs/mini-work-packages/20260115_lake-tahoe-2020-migrations.md \
+  > /geodata/weppcloud_runs/_migration_state/lt_202012_runs_all.txt
+wc -l /geodata/weppcloud_runs/_migration_state/lt_202012_runs_all.txt
+```
+2. Ensure Discord bot token file exists for module imports:
+```bash
+docker exec docker-weppcloud-1 sh -lc \
+  'cat /opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token' \
+  > /workdir/wepppy/docker/secrets/discord_bot_token
+chmod 600 /workdir/wepppy/docker/secrets/discord_bot_token
+```
+
+### Start migrations
+```bash
+cd /workdir/wepppy
+scripts/run_migrations_container.sh \
+  --run-root /geodata/weppcloud_runs \
+  --data-mount-src /geodata \
+  --data-mount-dst /geodata \
+  --run-list /geodata/weppcloud_runs/_migration_state/lt_202012_runs_all.txt \
+  --discord-bot-token-file /workdir/wepppy/docker/secrets/discord_bot_token \
+  --redis-host 10.10.0.1 \
+  --redis-url redis://10.10.0.1:6379/0
+```
+
+The launch output prints a token (example from 2026-04-15: `20260415T152953Z`) and container name (`migrations-<token>`).
+
+### Resume migrations
+Use the same runtime args and the previous token:
+```bash
+cd /workdir/wepppy
+scripts/run_migrations_container.sh \
+  --run-root /geodata/weppcloud_runs \
+  --data-mount-src /geodata \
+  --data-mount-dst /geodata \
+  --resume-token <token> \
+  --discord-bot-token-file /workdir/wepppy/docker/secrets/discord_bot_token \
+  --redis-host 10.10.0.1 \
+  --redis-url redis://10.10.0.1:6379/0
+```
+
+### Monitoring
+Container status:
+```bash
+docker ps --filter name='migrations-' --format 'table {{.Names}}\t{{.Status}}'
+```
+
+Live logs:
+```bash
+docker logs -f migrations-<token>
+```
+
+Checkpoint counters:
+```bash
+state=/geodata/weppcloud_runs/_migration_state/<token>
+printf "done=%s failed=%s\n" "$(wc -l <"$state/done.txt")" "$(wc -l <"$state/failed.txt")"
+```
+
+Tail runner log:
+```bash
+tail -f /geodata/weppcloud_runs/_migration_state/<token>/runner.log
+```
+
 ## Scenarios
 | Scenario | Description |
 |----------|-------------|
