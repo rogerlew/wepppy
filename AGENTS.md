@@ -112,6 +112,7 @@
 - Docker/local secret conventions: `docker/secrets/README.md`
 
 ## Subsystem Maps (Nearest AGENTS Wins)
+- WEPP binary vendoring and observability debugging: `wepp_runner/AGENTS.md`
 - NoDb controllers and module contracts: `wepppy/nodb/AGENTS.md`
 - WEPPcloud app/routes/controllers: `wepppy/weppcloud/AGENTS.md`
 - Controller JS specifics: `wepppy/weppcloud/controllers_js/AGENTS.md`
