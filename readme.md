@@ -57,6 +57,7 @@ See `docs/weppcloud-bootstrap-spec.md` for implementation and deployment details
 - **[docs/schemas/rq-response-contract.md](docs/schemas/rq-response-contract.md)** - RQ and rq-engine response contract (canonical keys and error shape)
 - **[docs/dev-notes/correlation-id-debugging.md](docs/dev-notes/correlation-id-debugging.md)** - End-to-end correlation ID debugging workflow (header echo, logs, enqueue metadata, worker continuity)
 - **[docs/dev-notes/wepp_binary_rebuild_and_vendoring.md](docs/dev-notes/wepp_binary_rebuild_and_vendoring.md)** - Rebuild WEPP with pinned `gfortran`, run host/container fixture validation, and vendor binaries into `wepp_runner/bin`
+- **[docs/dev-notes/weppcloud-wbt-release-cutover.md](docs/dev-notes/weppcloud-wbt-release-cutover.md)** - Verify WEPPpy runtime sees current `weppcloud-wbt` tools and follow the canonical WBT release runbook
 - **[docs/README_AUDIT.md](docs/README_AUDIT.md)** - README.md quality audit and improvement recommendations
 - **[docs/prompt_templates/readme_authoring_template.md](docs/prompt_templates/readme_authoring_template.md)** - Standard template for authoring README.md files
 - **[docs/schemas/](docs/schemas/)** - JSON schemas for data structures
@@ -395,6 +396,11 @@ The WBT delineation backend (`[watershed] delineation_backend = "wbt"`) is requi
 - **Automatic outlet derivation**: `Watershed.find_outlet(...)` (used by batch runs and culvert batches) requires WBT because it runs the Whitebox `FindOutlet`/`find_outlet` tool against `flovec` + `netful` + a watershed mask.
 - **Reusing precomputed channel rasters**: `Watershed.symlink_channels_map(...)` is WBT-only; it wires external `flovec`/`netful`/`chnjnt` rasters into `dem/wbt/` (used by `CulvertsRunner`).
 - **Stream-order pruning + regrouped hillslopes**: Omni “stream order” contrast selection requires WBT because it depends on Strahler order rasters, `PruneStrahlerStreamOrder`, and `HillslopesTopaz` outputs (see `wepppy.nodb.mods.omni` and `wepppy.rq.topo_utils`).
+
+Release/cutover note: use
+[`docs/dev-notes/weppcloud-wbt-release-cutover.md`](docs/dev-notes/weppcloud-wbt-release-cutover.md)
+for the WEPPpy-side verification flow and the canonical
+`weppcloud-wbt` build/install runbook link.
 
 - The watershed abstraction is delegated to [`peridot`](https://github.com/wepp-in-the-woods/peridot), a Rust-powered watershed abstraction engine.
 - Raster-heavy routines (NLCD landcover, soils, RAP) all try `wepppyo3.raster_characteristics` first, using Python fallbacks only when the Rust extension is missing.

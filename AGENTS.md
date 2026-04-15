@@ -109,6 +109,7 @@
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
 - Vulture dead-code gate standard: `docs/standards/vulture-dead-code-gate-standard.md`
+- WBT release cutover reference (includes canonical `weppcloud-wbt` runbook link): `docs/dev-notes/weppcloud-wbt-release-cutover.md`
 - Docker/local secret conventions: `docker/secrets/README.md`
 
 ## Subsystem Maps (Nearest AGENTS Wins)
