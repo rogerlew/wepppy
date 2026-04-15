@@ -397,6 +397,16 @@ docs:
     audience_tags: [user, operator]
     status: active
     nav_key: usersum.weppcloud.wepp_forest_change_log
+  - doc_id: usersum.weppcloud.wepp_forest_compiler_fragility_brief
+    source: vendor
+    vendor_id: wepp-forest
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/wepp-forest/docs/20260414-stakeholder-brief-compiler-fragility.md
+    title: "Stakeholder Brief: Compiler Fragility"
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.wepp_forest_compiler_fragility_brief
   - doc_id: usersum.weppcloud.wepp_run_results
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-run-results.md

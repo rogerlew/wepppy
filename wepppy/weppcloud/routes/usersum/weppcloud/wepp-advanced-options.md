@@ -448,6 +448,7 @@ Controls binary selection and whether watershed/channel execution is included.
 - Reproducibility checks against prior runs.
 - Troubleshooting version-specific behavior.
 - Verifying binary lineage and compiler history using the [WEPP-Forest Change Log](../vendor/wepp-forest/change-log.md).
+- Communicating compiler/toolchain stability context using the [Stakeholder Brief: Compiler Fragility](../vendor/wepp-forest/docs/20260414-stakeholder-brief-compiler-fragility.md).
 
 ### Cautions
 

@@ -17,6 +17,7 @@ vendors:
     source_ref: main
     include_globs:
       - change-log.md
+      - docs/20260414-stakeholder-brief-compiler-fragility.md
     exclude_globs:
       - "**/.git/**"
     target_root: wepppy/weppcloud/routes/usersum/vendor/wepp-forest
