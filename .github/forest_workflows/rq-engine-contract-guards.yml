@@ -40,6 +40,45 @@ jobs:
       - homelab
     timeout-minutes: 20
     steps:
+      - name: Ensure docker secrets exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docker/secrets
+          chmod 700 docker/secrets
+
+          seed_secret() {
+            local name="$1"
+            local fallback="$2"
+            local target="docker/secrets/${name}"
+            if [ -f "${target}" ]; then
+              return 0
+            fi
+            local host_source=""
+            if [ -n "${RUNNER_DOCKER_ENV:-}" ]; then
+              host_source="$(dirname "${RUNNER_DOCKER_ENV}")/secrets/${name}"
+            fi
+            if [ -n "${host_source}" ] && [ -f "${host_source}" ]; then
+              cp "${host_source}" "${target}"
+            else
+              printf "%s\n" "${fallback}" > "${target}"
+            fi
+            chmod 600 "${target}"
+          }
+
+          # Keep Compose secret mounts satisfiable even on fresh runner workspaces.
+          seed_secret redis_password localdev
+          seed_secret postgres_password localdev
+          seed_secret flask_secret_key localdev
+          seed_secret flask_security_password_salt localdev
+          seed_secret wepp_auth_jwt_secrets localdev
+          seed_secret agent_jwt_secret localdev
+          seed_secret cap_secret localdev
+          seed_secret oauth_github_client_secret localdev
+          seed_secret oauth_google_client_secret localdev
+          seed_secret zoho_noreply_email_password localdev
+          seed_secret opentopography_api_key localdev
+          seed_secret climate_engine_api_key localdev
       - name: Ensure weppcloud service is running
         run: |
           set -euo pipefail
