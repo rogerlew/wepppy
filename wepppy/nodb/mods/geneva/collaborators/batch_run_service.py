@@ -4,7 +4,7 @@ import math
 from typing import TYPE_CHECKING, Any, Mapping
 
 from wepppy.nodb.mods.geneva.errors import GenevaNoDbError, GenevaValidationError
-from wepppy.nodb.mods.geneva.schemas import parse_run_batch_request
+from wepppy.nodb.mods.geneva.schemas import GenevaRunBatchRequest, parse_run_batch_request
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
@@ -13,17 +13,32 @@ if TYPE_CHECKING:
 class GenevaBatchRunService:
     """Run Geneva batch storms and persist per-storm artifacts."""
 
+    def validate_request(
+        self,
+        geneva: "Geneva",
+        payload: Mapping[str, Any],
+    ) -> GenevaRunBatchRequest:
+        config = dict(geneva._config)
+        try:
+            return parse_run_batch_request(
+                payload,
+                default_lambda_mode=str(config["lambda_mode"]),
+                default_uh_method=str(config["uh_method"]),
+            )
+        except ValueError as exc:
+            raise GenevaValidationError(
+                str(exc),
+                code="invalid_input",
+                details=str(exc),
+                status_code=400,
+            ) from exc
+
     def run_batch(
         self,
         geneva: "Geneva",
         payload: Mapping[str, Any],
     ) -> dict[str, Any]:
-        config = dict(geneva._config)
-        request = parse_run_batch_request(
-            payload,
-            default_lambda_mode=str(config["lambda_mode"]),
-            default_uh_method=str(config["uh_method"]),
-        )
+        request = self.validate_request(geneva, payload)
 
         artifact_io = geneva.artifact_io
         if not artifact_io.exists(geneva.wd, "frequency_panel.json"):

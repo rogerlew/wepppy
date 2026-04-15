@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from .query_schema import validate_datasource_id
+
 RUN_BATCH_SCHEMA_VERSION = 1
 _ALLOWED_DISTRIBUTION_TYPES = {"neh4_type_b"}
 _ALLOWED_TIMING_METHODS = {"kirpich", "kent", "simas"}
@@ -147,9 +149,7 @@ def _coerce_str_tuple(value: Any) -> tuple[str, ...]:
         raise ValueError("Expected list/tuple of strings")
     out: list[str] = []
     for item in value:
-        text = str(item).strip()
-        if not text:
-            raise ValueError("Expected non-empty strings")
+        text = validate_datasource_id(str(item).strip())
         out.append(text)
     return tuple(out)
 

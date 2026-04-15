@@ -162,8 +162,13 @@
 
 {% set editor_meta_html %}
   {% if runid is defined and runid and config is defined and config %}
+    {% set run_home_href = (
+      url_for_run('run_0.runs0', runid=runid, config=config)
+      if url_for_run is defined
+      else '/runs/' ~ runid ~ '/' ~ config
+    ) %}
     <a class="wc-edit-csv__run-link"
-       href="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}">
+       href="{{ run_home_href }}">
       {{ runid }}
     </a>
   {% endif %}

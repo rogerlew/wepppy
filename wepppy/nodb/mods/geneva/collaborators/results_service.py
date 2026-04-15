@@ -74,9 +74,9 @@ class GenevaResultsService:
             "warnings": warnings,
             "errors": errors,
             "artifacts": {
-                "batch_summary_relpath": "batch_summary.json",
-                "frequency_panel_relpath": "frequency_panel.json",
-                "storm_inputs_relpath": batch_result.get("storm_inputs_relpath", "storm_inputs.json"),
+                "batch_summary_relpath": "geneva/batch_summary.json",
+                "frequency_panel_relpath": "geneva/frequency_panel.json",
+                "storm_inputs_relpath": f"geneva/{batch_result.get('storm_inputs_relpath', 'storm_inputs.json')}",
             },
             "status": status,
         }

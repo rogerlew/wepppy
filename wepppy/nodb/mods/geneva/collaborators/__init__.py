@@ -8,6 +8,7 @@ from .frequency_panel_service import GenevaFrequencyPanelService
 from .hru_preparation_service import GenevaHruPreparationService
 from .hsg_assignment_service import GenevaHsgAssignmentService
 from .kernel_gateway import GenevaKernelGateway
+from .report_payload_service import GenevaReportPayloadService
 from .results_service import GenevaResultsService
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "GenevaHruPreparationService",
     "GenevaHsgAssignmentService",
     "GenevaKernelGateway",
+    "GenevaReportPayloadService",
     "GenevaResultsService",
 ]

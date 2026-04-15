@@ -1,0 +1,31 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}Geneva Summary{% endblock %}
+
+{% block body %}
+<div class="wc-container wc-stack">
+  <header class="wc-stack-sm">
+    <h1 class="wc-heading__title">Geneva Summary</h1>
+    <p class="wc-text-muted">Run: <code>{{ runid }}/{{ config }}</code></p>
+  </header>
+
+  <section class="wc-panel wc-stack-sm">
+    <h2 class="wc-heading__subtitle">Report Filters</h2>
+    <dl>
+      <dt>Datasource</dt>
+      <dd>{{ summary_payload.filters.datasource_id }}</dd>
+      <dt>ARI Years</dt>
+      <dd>{{ summary_payload.filters.ari_years | join(', ') if summary_payload.filters.ari_years else 'none' }}</dd>
+      <dt>Measure</dt>
+      <dd>{{ summary_payload.filters.measure }}</dd>
+    </dl>
+  </section>
+
+  <section class="wc-panel wc-stack-sm">
+    <h2 class="wc-heading__subtitle">Event Count</h2>
+    <p>{{ summary_payload.event_table | length }} storms in current filter selection.</p>
+  </section>
+
+  <script id="geneva-summary-payload" type="application/json">{{ summary_payload | tojson }}</script>
+</div>
+{% endblock %}

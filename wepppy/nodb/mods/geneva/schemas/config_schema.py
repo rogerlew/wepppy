@@ -123,24 +123,17 @@ def merge_config(current: Mapping[str, Any], updates: Mapping[str, Any]) -> Gene
 def _coerce_bool(value: Any, *, field: str) -> bool:
     if isinstance(value, bool):
         return value
-    if isinstance(value, (int, float)):
-        return bool(value)
-    if isinstance(value, str):
-        lowered = value.strip().lower()
-        if lowered in {"1", "true", "yes", "on"}:
-            return True
-        if lowered in {"0", "false", "no", "off"}:
-            return False
     raise ValueError(f"{field} must be boolean")
 
 
 def _coerce_optional_hsg_code(value: Any) -> int | None:
     if value in (None, ""):
         return None
-    try:
-        return int(value)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("default_hsg_code must be an integer when provided") from exc
+    if isinstance(value, bool):
+        raise ValueError("default_hsg_code must be one of 1,2,3,4 when provided")
+    if isinstance(value, int):
+        return value
+    raise ValueError("default_hsg_code must be an integer when provided")
 
 
 def _coerce_float(value: Any, *, field: str) -> float:

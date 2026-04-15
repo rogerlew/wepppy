@@ -170,6 +170,34 @@ def test_geneva_template_renders_editor_entrypoint(jinja_env: Environment) -> No
     assert "url_for_run('geneva.modify_geneva_cn_table', runid=runid, config=config)" in source
 
 
+def test_geneva_summary_report_template_embeds_single_json_payload(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("reports/geneva/summary.htm")
+    summary_payload = {
+        "filters": {
+            "datasource_id": "all",
+            "ari_years": [10],
+            "measure": "peak_discharge",
+        },
+        "assumptions": {
+            "arc_condition": "arc_ii",
+            "storm_distribution_assumption": "neh4_type_b",
+            "uniform_rainfall_assumed": True,
+        },
+        "chart": {"x_axis": "intensity_mm_per_hr", "y_axis": "selected_measure", "series": []},
+        "event_table": [],
+        "warnings": [],
+    }
+    rendered = template.render(
+        runid="run-1",
+        config="cfg",
+        summary_payload=summary_payload,
+    )
+
+    assert rendered.count('id="geneva-summary-payload"') == 1
+    assert 'type="application/json"' in rendered
+    assert '"storm_distribution_assumption": "neh4_type_b"' in rendered
+
+
 def test_roads_summary_report_template_renders_with_base_layout(jinja_env: Environment) -> None:
     template = jinja_env.get_template("reports/roads/summary.htm")
     rendered = template.render(

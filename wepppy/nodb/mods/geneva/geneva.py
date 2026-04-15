@@ -14,6 +14,7 @@ from wepppy.nodb.mods.geneva.collaborators import (
     GenevaHruPreparationService,
     GenevaHsgAssignmentService,
     GenevaKernelGateway,
+    GenevaReportPayloadService,
     GenevaResultsService,
 )
 from wepppy.nodb.mods.geneva.errors import GenevaNoDbError, GenevaValidationError
@@ -37,6 +38,7 @@ _GENEVA_HRU_PREPARATION_SERVICE = GenevaHruPreparationService()
 _GENEVA_FREQUENCY_PANEL_SERVICE = GenevaFrequencyPanelService()
 _GENEVA_BATCH_RUN_SERVICE = GenevaBatchRunService()
 _GENEVA_RESULTS_SERVICE = GenevaResultsService()
+_GENEVA_REPORT_PAYLOAD_SERVICE = GenevaReportPayloadService()
 
 
 class Geneva(NoDbBase):
@@ -71,6 +73,7 @@ class Geneva(NoDbBase):
             self._timestamps = dict(getattr(self, "_timestamps", {}) or {})
 
             self.config_service.initialize_config(self)
+            self._config["enabled"] = bool(self._enabled)
             self.artifact_io.root_dir(self.wd)
             self.cn_table_service.ensure_initialized(self, reason="init")
 
@@ -111,6 +114,10 @@ class Geneva(NoDbBase):
         return _GENEVA_RESULTS_SERVICE
 
     @property
+    def report_payload_service(self) -> GenevaReportPayloadService:
+        return _GENEVA_REPORT_PAYLOAD_SERVICE
+
+    @property
     def enabled(self) -> bool:
         return bool(self._enabled)
 
@@ -123,6 +130,7 @@ class Geneva(NoDbBase):
 
         with self.locked():
             self._enabled = requested
+            self._config["enabled"] = requested
             self._timestamps["enabled"] = int(time.time())
             if requested:
                 self._status_message = "Geneva enabled."
@@ -136,16 +144,30 @@ class Geneva(NoDbBase):
         }
 
     def get_config(self) -> dict[str, Any]:
-        return self.config_service.get_config(self)
+        payload = self.config_service.get_config(self)
+        payload["enabled"] = self.enabled
+        return payload
 
     def update_config(self, payload: Mapping[str, Any]) -> dict[str, Any]:
-        with self.locked():
-            before = dict(self._config)
-            updated = self.config_service.update_config(self, payload)
-            if before != updated:
-                self._status_message = "Configuration updated."
-                if self._status in {"prepared", "running", "completed", "completed_with_gaps", "failed"}:
-                    self._clear_runtime_state_locked()
+        updates = dict(payload)
+        updates.pop("enabled", None)
+        try:
+            with self.locked():
+                before = dict(self._config)
+                updated = self.config_service.update_config(self, updates)
+                updated["enabled"] = self.enabled
+                self._config["enabled"] = self.enabled
+                if before != updated:
+                    self._status_message = "Configuration updated."
+                    if self._status in {"prepared", "running", "completed", "completed_with_gaps", "failed"}:
+                        self._clear_runtime_state_locked()
+        except ValueError as exc:
+            raise GenevaValidationError(
+                str(exc),
+                code="invalid_input",
+                details=str(exc),
+                status_code=400,
+            ) from exc
         return updated
 
     def prepare_hrus(
@@ -199,13 +221,17 @@ class Geneva(NoDbBase):
         self.hsg_assignment_service.enforce_wbt_backend(self)
         self.hsg_assignment_service.enforce_supported_domain(self)
 
-        panel = self.frequency_panel_service.build_frequency_panel(
-            self,
-            durations_minutes=durations_minutes,
-            ari_years=ari_years,
-            rebuild=rebuild,
-            sources=sources,
-        )
+        try:
+            panel = self.frequency_panel_service.build_frequency_panel(
+                self,
+                durations_minutes=durations_minutes,
+                ari_years=ari_years,
+                rebuild=rebuild,
+                sources=sources,
+            )
+        except GenevaNoDbError as exc:
+            self._record_failure(exc)
+            raise
 
         with self.locked():
             self._storm_batch = {
@@ -265,6 +291,54 @@ class Geneva(NoDbBase):
     def results_payload(self) -> dict[str, Any]:
         return self.results_service.build_results_payload(self)
 
+    def frequency_panel_payload(self) -> dict[str, Any]:
+        return self.frequency_panel_service.get_frequency_panel(self)
+
+    def query_summary_payload(
+        self,
+        *,
+        datasource_id: str = "all",
+        ari_years: list[int] | tuple[int, ...] | None = None,
+        measure: str = "peak_discharge",
+    ) -> dict[str, Any]:
+        return self.report_payload_service.build_summary_payload(
+            self,
+            datasource_id=datasource_id,
+            ari_years=ari_years,
+            measure=measure,
+        )
+
+    def assert_task_guardrails(self) -> None:
+        self._require_enabled()
+        self.hsg_assignment_service.enforce_wbt_backend(self)
+        self.hsg_assignment_service.enforce_supported_domain(self)
+
+    def mark_job_queued(self, job_id: str, *, status_message: str) -> None:
+        now = int(time.time())
+        with self.locked():
+            self._active_job_id = job_id
+            self._last_job_id = job_id
+            self._status = "running"
+            self._status_message = status_message
+            self._progress = empty_progress_payload()
+            self._timestamps["running"] = now
+
+    def mark_job_started(self, job_id: str, *, status_message: str) -> None:
+        now = int(time.time())
+        with self.locked():
+            self._active_job_id = job_id
+            self._last_job_id = job_id
+            self._status = "running"
+            self._status_message = status_message
+            self._timestamps["running"] = now
+
+    def mark_job_finished(self, job_id: str) -> None:
+        with self.locked():
+            if self._active_job_id == job_id:
+                self._active_job_id = None
+            self._last_job_id = job_id
+            self._timestamps["last_job_finished"] = int(time.time())
+
     def cn_table_meta(self) -> dict[str, Any]:
         with self.locked():
             return self.cn_table_service.meta(self)
@@ -309,6 +383,7 @@ class Geneva(NoDbBase):
     def _clear_runtime_state_locked(self) -> None:
         self._status = "idle"
         self._progress = empty_progress_payload()
+        self._active_job_id = None
         self._input_refs = {}
         self._storm_batch = {}
         self._hru_summary = {}
