@@ -12,6 +12,8 @@ first), through **07/19/2022**.
 
 | Date | Commit Hash | Compiler | Version | Notes |
 | --- | --- | --- | --- | --- |
+| 04/14/2026 | `a371884` | `gfortran` | `wepp_260414` | Added dated release build workflow (`tools/build_wepp_dated_release.sh`), disabled unsafe `make all` race path in `src/makefile`, added in-repo `delicate_game_pw0` fixture with parity regression tests, and published `release/wepp_260414*` built with `-O2 -finit-local-zero`. |
+| 04/09/2026 | `c982160` | `gfortran` | `wepp_260409` | Fixed lower-bound GLC table lookup handling in `hydchn.for`, rebuilt `wepp`/`wepp_hill` with `/usr/bin/gfortran`, and published `release/wepp_260409*`. |
 | 03/24/2026 | `d6b923b` | `gfortran` | `wepp_260324` | Fixed watershed pass metadata parsing for widened hillslope IDs, added reconciled-condenser regression fixture/manual gate, and corrected watershed banner channel-line alignment. |
 | 03/24/2026 | `41dc020` | `gfortran` | `wepp_260324` | Widened hillslope/channel ID output formatting and rebuilt binaries (`wepp_260324` vendored in `wepppy`). |
 | 03/19/2026 | `be4cf6d` | `gfortran` | `wepp_260319` | Added pinned `gfortran` rebuild workflow and refreshed `wepp_260319` binaries. |
