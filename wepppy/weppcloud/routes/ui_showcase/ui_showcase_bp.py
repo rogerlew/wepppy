@@ -402,6 +402,33 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "wc_jexcel_table",
+            "label": "JSpreadsheet cell state surfaces",
+            "aa_exempt": True,
+            "pairs": [
+                {
+                    "name": "thead_selected_text_vs_background",
+                    "foreground": "#theme_lab_jexcel_header_selected",
+                    "background": "#theme_lab_jexcel_header_selected",
+                },
+                {
+                    "name": "tbody_selected_text_vs_background",
+                    "foreground": "#theme_lab_jexcel_selected_cell",
+                    "background": "#theme_lab_jexcel_selected_cell",
+                },
+                {
+                    "name": "tbody_row_index_text_vs_background",
+                    "foreground": "#theme_lab_jexcel_row_index",
+                    "background": "#theme_lab_jexcel_row_index",
+                },
+                {
+                    "name": "tbody_regular_text_vs_background",
+                    "foreground": "#theme_lab_jexcel_regular_cell",
+                    "background": "#theme_lab_jexcel_regular_cell",
+                },
+            ],
+        },
+        {
             "id": "sub_cmap_radio_default_checked",
             "label": "Subcatchment radio (checked) vs background",
             "threshold": 3.0,

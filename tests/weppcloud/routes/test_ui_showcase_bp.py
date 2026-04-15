@@ -57,3 +57,48 @@ def test_component_gallery_registers_return_period_theme_lab_target(
     assert 'data-contrast-id="wc-return-period-measure"' in template_source
     assert 'id="theme_lab_return_period_measure_header"' in template_source
     assert 'id="theme_lab_return_period_measure_value"' in template_source
+
+
+def test_component_gallery_registers_jexcel_theme_lab_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_render_template(template_name: str, **context: object) -> str:
+        captured["template_name"] = template_name
+        captured["context"] = context
+        return "rendered"
+
+    monkeypatch.setattr(ui_showcase_module, "render_template", fake_render_template)
+
+    app = Flask(__name__)
+    app.config["CAP_BASE_URL"] = "/cap"
+    app.config["CAP_SITE_KEY"] = "demo"
+
+    with app.app_context():
+        result = ui_showcase_module.component_gallery()
+
+    assert result == "rendered"
+    assert captured["template_name"] == "ui_showcase/component_gallery.htm"
+
+    context = captured["context"]
+    assert isinstance(context, dict)
+    theme_targets = context["theme_contrast_targets"]
+    assert isinstance(theme_targets, list)
+
+    target = next((entry for entry in theme_targets if entry.get("id") == "wc_jexcel_table"), None)
+    assert target is not None
+    assert target.get("aa_exempt") is True
+    assert {pair["name"] for pair in target["pairs"]} == {
+        "thead_selected_text_vs_background",
+        "tbody_selected_text_vs_background",
+        "tbody_row_index_text_vs_background",
+        "tbody_regular_text_vs_background",
+    }
+
+    template_source = COMPONENT_GALLERY_TEMPLATE.read_text(encoding="utf-8")
+    assert 'data-contrast-id="wc-jexcel-table"' in template_source
+    assert 'id="theme_lab_jexcel_header_selected"' in template_source
+    assert 'id="theme_lab_jexcel_selected_cell"' in template_source
+    assert 'id="theme_lab_jexcel_row_index"' in template_source
+    assert 'id="theme_lab_jexcel_regular_cell"' in template_source

@@ -42,6 +42,7 @@ from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.debris_flow import DebrisFlow
 from wepppy.nodb.mods.roads import Roads
+from wepppy.nodb.mods.geneva import Geneva
 from wepppy.nodb.mods.rusle import Rusle
 from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.swat.print_prt import mask_to_tokens
@@ -190,6 +191,12 @@ MOD_UI_DEFINITIONS = OrderedDict([
         'section_id': 'roads',
         'section_class': 'wc-stack',
         'template': 'controls/roads_pure.htm',
+    }),
+    ('geneva', {
+        'label': 'Geneva',
+        'section_id': 'geneva',
+        'section_class': 'wc-stack',
+        'template': 'controls/geneva_pure.htm',
     }),
     ('features_export', {
         'label': 'Features Export',
@@ -1656,6 +1663,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     redis_prep = RedisPrep.tryGetInstance(wd)
     debris_flow = DebrisFlow.tryGetInstance(wd) if 'debris_flow' in ron.mods else None
     roads = Roads.tryGetInstance(wd) if 'roads' in mods_list else None
+    geneva = Geneva.tryGetInstance(wd) if 'geneva' in mods_list else None
     rusle = Rusle.tryGetInstance(wd) if 'rusle' in mods_list else None
     swat = Swat.tryGetInstance(wd) if 'swat' in ron.mods else None
     swat_print_prt_rows = []
@@ -1731,6 +1739,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     )
     show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
     show_roads = ('roads' in mods_list and roads is not None) or playwright_load_all
+    show_geneva = ('geneva' in mods_list and geneva is not None) or playwright_load_all
     show_features_export = 'features_export' in mods_list or playwright_load_all
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
     show_path_ce = 'path_ce' in mods_list or playwright_load_all
@@ -1758,6 +1767,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         'observed': show_observed,
         'debris_flow': show_debris_flow,
         'roads': show_roads,
+        'geneva': show_geneva,
         'features_export': show_features_export,
         'dss_export': show_dss_export,
         'path_ce': show_path_ce,
@@ -1803,6 +1813,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         treatments=treatments,
         debris_flow=debris_flow,
         roads=roads,
+        geneva=geneva,
         rusle=rusle,
         rusle_rap_year_options=rusle_rap_year_options,
         swat=swat,
@@ -1836,6 +1847,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_observed=show_observed,
         show_debris_flow=show_debris_flow,
         show_roads=show_roads,
+        show_geneva=show_geneva,
         show_features_export=show_features_export,
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,

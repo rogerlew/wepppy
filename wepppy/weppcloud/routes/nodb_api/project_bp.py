@@ -35,6 +35,7 @@ MOD_DISPLAY_NAMES = {
     'observed': 'Observed Data',
     'debris_flow': 'Debris Flow',
     'roads': 'Roads',
+    'geneva': 'Geneva',
     'features_export': 'Features Export',
     'dss_export': 'DSS Export',
     'omni': 'Omni',
@@ -67,6 +68,11 @@ def _rusle_backend_supported(wd: str) -> bool:
 
 
 def _roads_backend_supported(wd: str) -> bool:
+    watershed = Watershed.getInstance(wd)
+    return bool(getattr(watershed, "delineation_backend_is_wbt", False))
+
+
+def _geneva_backend_supported(wd: str) -> bool:
     watershed = Watershed.getInstance(wd)
     return bool(getattr(watershed, "delineation_backend_is_wbt", False))
 
@@ -186,6 +192,9 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
     if enabled and mod_name == "roads":
         if not _roads_backend_supported(wd):
             raise ValueError("Roads requires the WBT delineation backend; TOPAZ runs are not supported.")
+    if enabled and mod_name == "geneva":
+        if not _geneva_backend_supported(wd):
+            raise ValueError("Geneva requires the WBT delineation backend; TOPAZ runs are not supported.")
 
     if enabled:
         changed = _enable_mod_for_run(ron, wd, cfg_fn, mod_name)

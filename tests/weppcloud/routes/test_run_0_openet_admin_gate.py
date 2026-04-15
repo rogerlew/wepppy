@@ -163,6 +163,39 @@ def test_view_mod_section_openet_allows_admin(
     ]
 
 
+def test_view_mod_section_geneva_renders_module_template(
+    run0_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, module = run0_client
+    monkeypatch.setattr(
+        module,
+        "_build_runs0_context",
+        lambda runid, config, playwright_load_all=False: {
+            "mod_visibility": {"geneva": True},
+            "dummy": True,
+        },
+    )
+
+    render_calls: list[str] = []
+
+    def fake_render(template_name: str, **_kwargs) -> str:
+        render_calls.append(template_name)
+        return f"<{template_name}>"
+
+    monkeypatch.setattr(module, "render_template", fake_render)
+
+    response = client.get("/runs/run-1/cfg/view/mod/geneva")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["mod"] == "geneva"
+    assert render_calls == [
+        "controls/geneva_pure.htm",
+        "run_0/mod_section_wrapper.htm",
+    ]
+
+
 def test_run_page_bootstrap_openet_flag_false_for_non_admin(run0_template_app) -> None:
     context = _bootstrap_context(set())
     with run0_template_app.app_context():
@@ -212,6 +245,15 @@ def test_run_page_bootstrap_roads_flag_true_when_enabled(run0_template_app) -> N
         js = render_template("run_page_bootstrap.js.j2", **context)
 
     assert _extract_mod_flag(js, "roads") == "true"
+
+
+def test_run_page_bootstrap_geneva_flag_true_when_enabled(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["geneva"]
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "geneva") == "true"
 
 
 def test_run_page_bootstrap_features_export_flag_true_when_enabled(run0_template_app) -> None:

@@ -16,6 +16,7 @@ RUN_0_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_0" / 
 PURE_TEMPLATES = [
     "controls/path_cost_effective_pure.htm",
     "controls/omni_contrasts_pure.htm",
+    "controls/geneva_pure.htm",
     "controls/features_export_pure.htm",
     "controls/roads_pure.htm",
     "reports/storm_event_analyzer.htm",
@@ -151,6 +152,22 @@ def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environmen
     assert 'id="roads_info"' in rendered
     assert 'id="roads_stacktrace"' in rendered
     assert "pure-u-md-1-2" not in rendered
+
+
+def test_geneva_template_renders_editor_entrypoint(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/geneva_pure.htm")
+    rendered = template.render()
+
+    assert '<form id="geneva_form"' in rendered
+    assert "Geneva CN workflow controls" in rendered
+    assert "Edit Geneva CN Table" in rendered
+    assert 'class="pure-button"' in rendered
+    assert "pure-button-primary" not in rendered
+    assert "wc-button-row--full" in rendered
+
+    source = (TEMPLATE_ROOT / "controls/geneva_pure.htm").read_text(encoding="utf-8")
+    assert "button_row(full_width=True)" in source
+    assert "url_for_run('geneva.modify_geneva_cn_table', runid=runid, config=config)" in source
 
 
 def test_roads_summary_report_template_renders_with_base_layout(jinja_env: Environment) -> None:
@@ -375,6 +392,8 @@ def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> N
     assert "Regenerate the extended table from the current base table values." in rendered
     assert "Modify Base Table" in rendered
     assert "Modify Extended Table" in rendered
+    assert ".disturbed-panel__modify-link {" in rendered
+    assert "width: 100%;" in rendered
     assert 'href="/usersum/view/weppcloud/disturbed-land-soil-lookup.md"' in rendered
     assert "📄 Disturbed Land Soil Lookup Table Guidance" in rendered
 
@@ -618,6 +637,21 @@ def test_runs0_template_places_features_export_between_roads_and_dss() -> None:
     assert roads_section_index < features_section_index < dss_section_index
 
 
+def test_runs0_template_places_geneva_between_roads_and_features_export() -> None:
+    template_path = RUN_0_TEMPLATE_ROOT / "runs0_pure.htm"
+    source = template_path.read_text(encoding="utf-8")
+
+    roads_nav_index = source.index('<a href="#roads" class="nav-link">Roads</a>')
+    geneva_nav_index = source.index('<a href="#geneva" class="nav-link">Geneva</a>')
+    features_nav_index = source.index('<a href="#features-export" class="nav-link">Features Export</a>')
+    assert roads_nav_index < geneva_nav_index < features_nav_index
+
+    roads_section_index = source.index('<div data-mod-section="roads"')
+    geneva_section_index = source.index('<div data-mod-section="geneva"')
+    features_section_index = source.index('<div data-mod-section="features_export"')
+    assert roads_section_index < geneva_section_index < features_section_index
+
+
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
@@ -631,6 +665,21 @@ def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) 
     )
 
     assert 'data-project-mod="features_export"' in rendered
+
+
+def test_run_header_includes_geneva_mod_toggle(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        request=request,
+        current_ron_mods=[],
+    )
+
+    assert 'data-project-mod="geneva"' in rendered
 
 
 def test_features_export_template_exposes_required_dom_contract(jinja_env: Environment) -> None:
@@ -756,9 +805,32 @@ def test_standalone_templates_include_lang_and_iframe_titles() -> None:
 
     assert "<html lang=\"en\">" in huc_fire_source
     assert "<html lang=\"en\">" in edit_csv_source
-    assert "<title>Edit Disturbed Lookup CSV</title>" in edit_csv_source
+    assert "Edit Disturbed Lookup CSV" in edit_csv_source
 
     iframe_count = joh_source.count("<iframe")
     iframe_titles = re.findall(r"<iframe\b[\s\S]*?\btitle=\"[^\"]+\"[\s\S]*?>", joh_source)
     assert iframe_count > 0
     assert len(iframe_titles) == iframe_count
+
+
+def test_edit_csv_template_honors_theme_system_assets() -> None:
+    edit_csv_source = (TEMPLATE_ROOT / "controls/edit_csv.htm").read_text(encoding="utf-8")
+
+    assert 'class="wc-container wc-container--fluid wc-edit-csv"' in edit_csv_source
+    assert "wc-edit-csv__run-link" in edit_csv_source
+    assert "meta=editor_meta_html" in edit_csv_source
+    assert "url_for_run('run_0.runs0', runid=runid, config=config)" in edit_csv_source
+    assert "computeSpreadsheetColumnTargetWidth" in edit_csv_source
+    assert "stretchColumnsToTargetWidth" in edit_csv_source
+    assert "wc-jexcel-theme" in edit_csv_source
+    assert "table.jexcel > thead > tr > td.selected" in edit_csv_source
+    assert "table.jexcel > tbody > tr > td.highlight-selected" in edit_csv_source
+    assert "table.jexcel > tbody > tr > td.jexcel_row" in edit_csv_source
+    assert "table.jexcel > tbody > tr > td {" in edit_csv_source
+    assert "controls/_pure_macros.html" in edit_csv_source
+    assert "shared/console_macros.htm" in edit_csv_source
+    assert "css/ui-foundation.css" in edit_csv_source
+    assert "css/themes/all-themes.css" in edit_csv_source
+    assert "js/theme.js" in edit_csv_source
+    assert 'localStorage.getItem("wc-theme")' in edit_csv_source
+    assert "pure-button pure-button-primary" in edit_csv_source

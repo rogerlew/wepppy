@@ -1,19 +1,133 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+{% macro asset(path) -%}{{ static_url(path) if static_url is defined else '/static/' ~ path }}{%- endmacro %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Edit Disturbed Lookup CSV</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ page_title if page_title is defined else 'Edit Disturbed Lookup CSV' }}</title>
 <meta name="csrf-token" content="{{ csrf_token() if csrf_token is defined else '' }}" />
+<script src="{{ asset('js/csrf_bootstrap.js') }}"></script>
+<script>
+  (function () {
+    try {
+      var theme = localStorage.getItem("wc-theme");
+      if (theme && theme !== "default") {
+        document.documentElement.setAttribute("data-theme", theme);
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+    } catch (_ignore) {}
+  })();
+</script>
+<link rel="stylesheet" href="{{ asset('vendor/purecss/pure-min.css') }}">
+<link rel="stylesheet" href="{{ asset('vendor/purecss/grids-responsive-min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/ui-foundation.css') }}">
+<link rel="stylesheet" href="{{ asset('css/themes/all-themes.css') }}">
 <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
 <link rel="stylesheet" href="https://bossanova.uk/jspreadsheet/v4/jexcel.css" type="text/css" />
 <script src="https://jsuites.net/v4/jsuites.js"></script>
 <link rel="stylesheet" href="https://jsuites.net/v4/jsuites.css" type="text/css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 <style>
+  .wc-edit-csv {
+    padding-block: var(--wc-space-md);
+  }
+
+  .wc-edit-csv .wc-control__meta {
+    order: -1;
+    display: inline-flex;
+    align-items: baseline;
+    margin-right: var(--wc-space-sm);
+  }
+
+  .wc-edit-csv__run-link {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 600;
+    color: var(--wc-color-text-muted);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+
+  .wc-edit-csv__run-link:hover,
+  .wc-edit-csv__run-link:focus-visible {
+    color: var(--wc-color-text);
+    text-decoration: underline;
+  }
+
+  .wc-edit-csv__status {
+    margin-bottom: var(--wc-space-md);
+  }
+
+  .wc-edit-csv__stale-actions {
+    margin-bottom: var(--wc-space-md);
+  }
+
+  .wc-edit-csv__sheet {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--wc-color-border);
+    border-radius: var(--wc-radius-sm);
+    background: var(--wc-color-surface);
+  }
+
   #spreadsheet1 {
     width: 100%;
     overflow: hidden;
+  }
+
+  /* Theme bridge for JSpreadsheet/JExcel table states. */
+  .wc-jexcel-theme .jexcel_container,
+  .wc-jexcel-theme .jexcel_content,
+  .wc-jexcel-theme table.jexcel {
+    background: var(--wc-color-surface);
+    color: var(--wc-color-text);
+  }
+
+  .wc-jexcel-theme .jexcel_content {
+    border-color: var(--wc-color-border);
+  }
+
+  .wc-jexcel-theme table.jexcel > thead > tr > td {
+    background: var(--wc-color-surface);
+    color: var(--wc-color-text-muted);
+    border-color: var(--wc-color-border);
+    font-weight: 600;
+  }
+
+  .wc-jexcel-theme table.jexcel > tbody > tr > td {
+    background: var(--wc-color-surface-alt);
+    color: var(--wc-color-text);
+    border-color: var(--wc-color-border);
+  }
+
+  .wc-jexcel-theme table.jexcel > tbody > tr > td.jexcel_row {
+    background: var(--wc-color-surface);
+    color: var(--wc-color-text-muted);
+    border-color: var(--wc-color-border);
+    font-weight: 600;
+  }
+
+  .wc-jexcel-theme table.jexcel > thead > tr > td.selected {
+    background: var(--wc-color-surface-alt);
+    color: var(--wc-color-text);
+    border-color: var(--wc-color-accent);
+    box-shadow: inset 0 0 0 1px var(--wc-color-accent);
+  }
+
+  .wc-jexcel-theme table.jexcel > tbody > tr > td.highlight-selected,
+  .wc-jexcel-theme table.jexcel > tbody > tr > td.highlight {
+    background: var(--wc-color-surface-alt);
+    color: var(--wc-color-text);
+    box-shadow: inset 0 0 0 1px var(--wc-color-accent);
+  }
+
+  .wc-jexcel-theme table.jexcel > tbody > tr > td.highlight-top,
+  .wc-jexcel-theme table.jexcel > tbody > tr > td.highlight-right,
+  .wc-jexcel-theme table.jexcel > tbody > tr > td.highlight-bottom,
+  .wc-jexcel-theme table.jexcel > tbody > tr > td.highlight-left {
+    border-color: var(--wc-color-accent);
   }
 
   #spreadsheet1 .jexcel_content {
@@ -24,7 +138,9 @@
   }
 </style>
 </head>
-<body>
+<body class="wc-page">
+<main class="wc-page__body">
+<div class="wc-container wc-container--fluid wc-edit-csv">
 <div id="edit-csv-config"
      data-runid="{{ runid }}"
      data-config="{{ config }}"
@@ -33,19 +149,51 @@
      data-lookup-meta-url="{{ lookup_meta_url }}"
      data-lookup-snapshot-url="{{ lookup_snapshot_url }}"
      data-session-token-url="{{ session_token_url }}"
-     data-freeze-columns="{{ freeze_columns if freeze_columns is defined else 4 }}"></div>
-<div class="container-fluid pt-2">
-    <div id="status-banner" class="alert alert-info" role="status" aria-live="polite">
-        Preparing disturbed lookup table...
+     data-freeze-columns="{{ freeze_columns if freeze_columns is defined else 4 }}"
+     data-loading-message="{{ loading_message if loading_message is defined else 'Loading table...' }}"
+     data-ready-message="{{ ready_message if ready_message is defined else 'Table loaded. You can edit values and save.' }}"
+     data-save-success-message="{{ save_success_message if save_success_message is defined else 'Save successful. Please rebuild Landuse and Soils.' }}"></div>
+
+{% set editor_description_html %}
+  <p class="wc-text-muted">
+    {{ editor_description if editor_description is defined else 'Edit this run-scoped table with optimistic concurrency checks.' }}
+  </p>
+{% endset %}
+
+{% set editor_meta_html %}
+  {% if runid is defined and runid and config is defined and config %}
+    <a class="wc-edit-csv__run-link"
+       href="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}">
+      {{ runid }}
+    </a>
+  {% endif %}
+{% endset %}
+
+{% call ui.control_shell(
+     form_id='edit-csv-form',
+     title=editor_title if editor_title is defined else 'Edit Disturbed Lookup CSV',
+     description=editor_description_html,
+     meta=editor_meta_html,
+     collapsible=False,
+     status_panel_override='',
+     summary_panel_override='',
+     stacktrace_panel_override=''
+   ) %}
+    <div id="status-banner" class="wc-alert wc-alert--info wc-edit-csv__status" role="status" aria-live="polite">
+        <p class="wc-alert__body">Preparing table...</p>
     </div>
-    <p class="mb-2">
-        <button id="save" class="btn btn-primary" disabled>Save My Changes</button>
-    </p>
-    <p id="stale-actions" class="mb-2" style="display:none;">
-        <button id="reload-current" class="btn btn-warning btn-sm">Load Current Table</button>
-    </p>
-    <div id="spreadsheet1"></div>
+    {% call button_row() %}
+      <button id="save" type="button" class="pure-button pure-button-primary" disabled>Save My Changes</button>
+    {% endcall %}
+    <div id="stale-actions" class="wc-edit-csv__stale-actions" style="display:none;">
+      {% call button_row() %}
+        <button id="reload-current" type="button" class="pure-button pure-button-secondary">Load Current Table</button>
+      {% endcall %}
+    </div>
+    <div id="spreadsheet1" class="wc-edit-csv__sheet wc-jexcel-theme"></div>
+{% endcall %}
 </div>
+<script src="{{ asset('js/theme.js') }}" defer></script>
 <script>
 var mySpreadsheet = null;
 var stalePollHandle = null;
@@ -79,11 +227,68 @@ function setStatus(level, message) {
     if (allowed.indexOf(normalized) === -1) {
         normalized = "info";
     }
-    banner.className = "alert alert-" + normalized;
+    var levelToClass = {
+        info: "wc-alert--info",
+        success: "wc-alert--success",
+        warning: "wc-alert--warning",
+        danger: "wc-alert--error"
+    };
+    banner.className = "wc-alert wc-edit-csv__status " + levelToClass[normalized];
+    var body = banner.querySelector(".wc-alert__body");
+    if (body) {
+        body.textContent = message;
+        return;
+    }
     banner.textContent = message;
 }
 
-function columnsConfig(headers) {
+function computeSpreadsheetColumnTargetWidth(host, columnCount) {
+    if (!host || columnCount <= 0) {
+        return 0;
+    }
+    var rect = host.getBoundingClientRect();
+    var hostWidth = Math.floor(rect && Number.isFinite(rect.width) ? rect.width : host.clientWidth);
+    if (!Number.isFinite(hostWidth) || hostWidth <= 0) {
+        return 0;
+    }
+    // Reserve room for the row index column and wrapper chrome.
+    var reservedPx = 52;
+    var targetWidth = hostWidth - reservedPx;
+    return targetWidth > 0 ? targetWidth : 0;
+}
+
+function stretchColumnsToTargetWidth(columns, targetWidth) {
+    if (!Array.isArray(columns) || columns.length === 0 || !Number.isFinite(targetWidth) || targetWidth <= 0) {
+        return columns;
+    }
+
+    var baseWidths = columns.map(function (column) {
+        var parsed = Number(column && column.width);
+        if (!Number.isFinite(parsed) || parsed <= 0) {
+            return 100;
+        }
+        return Math.floor(parsed);
+    });
+    var totalBaseWidth = baseWidths.reduce(function (sum, width) {
+        return sum + width;
+    }, 0);
+    if (totalBaseWidth >= targetWidth) {
+        return columns;
+    }
+
+    var deficit = targetWidth - totalBaseWidth;
+    var perColumnBonus = Math.floor(deficit / columns.length);
+    var remainder = deficit % columns.length;
+
+    return columns.map(function (column, index) {
+        var bonus = perColumnBonus + (index < remainder ? 1 : 0);
+        return Object.assign({}, column, {
+            width: baseWidths[index] + bonus
+        });
+    });
+}
+
+function columnsConfig(headers, targetWidth) {
     var cols = [];
     var luseValues = ['bare',
                       'forest',
@@ -149,7 +354,7 @@ function columnsConfig(headers) {
         cols.push({ type: 'text', width: width });
     });
 
-    return cols;
+    return stretchColumnsToTargetWidth(cols, targetWidth);
 }
 
 function parseCsvHeaders(csvText) {
@@ -180,6 +385,17 @@ function readFreezeColumns(configNode) {
 
     var queryColumnsRaw = params.get("freeze_columns");
     return queryColumnsRaw !== null ? parseNonNegativeInt(queryColumnsRaw, defaultColumns) : defaultColumns;
+}
+
+function readEditorMessages(configNode) {
+    var dataset = configNode && configNode.dataset ? configNode.dataset : {};
+    return {
+        loading: String(dataset.loadingMessage || "Loading table..."),
+        ready: String(dataset.readyMessage || "Table loaded. You can edit values and save."),
+        saveSuccess: String(
+            dataset.saveSuccessMessage || "Save successful. Please rebuild Landuse and Soils."
+        )
+    };
 }
 
 function computeSpreadsheetHeightPx(host) {
@@ -494,12 +710,13 @@ function initializeSpreadsheetFromCsv(csvText, freezeColumns) {
     var blobUrl = URL.createObjectURL(blob);
     var headers = parseCsvHeaders(csvText);
     var effectiveFreezeColumns = Math.min(parseNonNegativeInt(freezeColumns, 4), headers.length);
+    var targetColumnWidth = computeSpreadsheetColumnTargetWidth(host, headers.length);
     var tableHeight = computeSpreadsheetHeightPx(host) + "px";
 
     mySpreadsheet = jspreadsheet(host, {
         csv: blobUrl,
         csvHeaders: true,
-        columns: columnsConfig(headers),
+        columns: columnsConfig(headers, targetColumnWidth),
         freezeColumns: effectiveFreezeColumns,
         tableOverflow: true,
         tableWidth: "100%",
@@ -528,7 +745,7 @@ function loadSpreadsheet(config, options) {
     setStatus("info", "Authorizing table access...");
     return requestSessionToken(config)
         .then(function () {
-            setStatus("info", "Loading disturbed lookup table...");
+            setStatus("info", config.messages.loading);
             return fetchLookupSnapshot(config);
         })
         .then(function (snapshot) {
@@ -544,7 +761,7 @@ function loadSpreadsheet(config, options) {
             }
             clearStaleState();
             setSaveEnabled();
-            setStatus("success", "Table loaded. You can edit values and save.");
+            setStatus("success", config.messages.ready);
             startStalePolling(config);
         })
         .catch(function (error) {
@@ -639,7 +856,7 @@ function onSave(config) {
                 return;
             }
             clearStaleState();
-            setStatus("success", "Save successful. Please rebuild Landuse and Soils.");
+            setStatus("success", config.messages.saveSuccess);
         })
         .catch((error) => {
             if (error && (error.status === 409 || error.status === 428)) {
@@ -684,7 +901,8 @@ document.addEventListener("DOMContentLoaded", function () {
         lookupMetaUrl: String(configNode.dataset.lookupMetaUrl || ""),
         lookupSnapshotUrl: String(configNode.dataset.lookupSnapshotUrl || ""),
         sessionTokenUrl: String(configNode.dataset.sessionTokenUrl || ""),
-        freezeColumns: readFreezeColumns(configNode)
+        freezeColumns: readFreezeColumns(configNode),
+        messages: readEditorMessages(configNode)
     };
 
     if (
@@ -722,5 +940,6 @@ window.addEventListener("resize", function () {
 });
 
 </script>
+</main>
 </body>
 </html>

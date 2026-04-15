@@ -1,0 +1,35 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Geneva CN workflow controls for Curve Number lookup review and editing.
+  </p>
+  <p class="wc-text-muted">
+    For model behavior and contract details, see
+    {{ usersum_doc_link('src', 'wepppy/nodb/mods/geneva/specification.md', 'Geneva specification') }}.
+  </p>
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="geneva_form",
+     title="Geneva",
+     collapsible=True,
+     description=description
+   ) %}
+  <section class="wc-stack">
+    <p class="wc-field__help">
+      Open the Geneva CN table editor to review, edit, and reset run-scoped lookup rows.
+    </p>
+    {% call button_row(full_width=True) %}
+      <a
+        class="pure-button"
+        href="{{ url_for_run('geneva.modify_geneva_cn_table', runid=runid, config=config) }}"
+        target="_blank"
+        rel="noopener"
+        data-open-tab-pref>
+        Edit Geneva CN Table
+      </a>
+    {% endcall %}
+  </section>
+{% endcall %}

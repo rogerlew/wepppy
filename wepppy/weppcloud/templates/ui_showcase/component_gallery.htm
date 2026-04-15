@@ -118,6 +118,71 @@
     .wc-cap-widget {
       display: none;
     }
+
+    .wc-theme-lab__jexcel {
+      border: 1px solid var(--wc-color-border);
+      border-radius: var(--wc-radius-sm);
+      background: var(--wc-color-surface);
+      overflow: auto;
+    }
+
+    .wc-theme-lab__jexcel .jexcel_content {
+      border-color: var(--wc-color-border);
+      background: var(--wc-color-surface);
+      color: var(--wc-color-text);
+    }
+
+    .wc-theme-lab__jexcel table.jexcel {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--wc-color-surface);
+      color: var(--wc-color-text);
+    }
+
+    .wc-theme-lab__jexcel table.jexcel td {
+      border: 1px solid var(--wc-color-border);
+      padding: var(--wc-space-xs) var(--wc-space-sm);
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .wc-theme-lab__jexcel table.jexcel > thead > tr > td {
+      background: var(--wc-color-surface);
+      color: var(--wc-color-text-muted);
+      font-weight: 600;
+    }
+
+    .wc-theme-lab__jexcel table.jexcel > tbody > tr > td {
+      background: var(--wc-color-surface-alt);
+      color: var(--wc-color-text);
+    }
+
+    .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.jexcel_row {
+      background: var(--wc-color-surface);
+      color: var(--wc-color-text-muted);
+      font-weight: 600;
+    }
+
+    .wc-theme-lab__jexcel table.jexcel > thead > tr > td.selected {
+      background: var(--wc-color-surface-alt);
+      color: var(--wc-color-text);
+      border-color: var(--wc-color-accent);
+      box-shadow: inset 0 0 0 1px var(--wc-color-accent);
+    }
+
+    .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.highlight-selected,
+    .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.highlight {
+      background: var(--wc-color-surface-alt);
+      color: var(--wc-color-text);
+      box-shadow: inset 0 0 0 1px var(--wc-color-accent);
+    }
+
+    .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.highlight-top,
+    .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.highlight-right,
+    .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.highlight-bottom,
+    .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.highlight-left {
+      border-color: var(--wc-color-accent);
+    }
   </style>
 {% endblock %}
 
@@ -721,6 +786,48 @@
             <button id="theme_lab_disabled_button" type="button" class="pure-button" disabled>
               Acquire RAP Data
             </button>
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-jexcel-table">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">CSV editor table states</h3>
+            <p class="wc-card__description">Theme bridge for selected headers/cells, row index, and regular table cells.</p>
+          </header>
+          <div id="theme_lab_jexcel_surface" class="wc-card__body">
+            <div class="wc-theme-lab__jexcel">
+              <div class="jexcel_content">
+                <table class="jexcel">
+                  <thead>
+                    <tr>
+                      <td class="jexcel_row"></td>
+                      <td data-x="0" title="nlcd_class">nlcd_class</td>
+                      <td data-x="6"
+                          id="theme_lab_jexcel_header_selected"
+                          title="antecedent_condition_source"
+                          class="selected"
+                          style="text-align: center;">
+                        antecedent_condition_source
+                      </td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td data-y="0" id="theme_lab_jexcel_row_index" class="jexcel_row">1</td>
+                      <td data-x="0" data-y="0" id="theme_lab_jexcel_regular_cell" style="text-align: center;">11</td>
+                      <td data-x="6"
+                          data-y="0"
+                          id="theme_lab_jexcel_selected_cell"
+                          class="highlight-selected highlight highlight-top highlight-left highlight-right"
+                          style="text-align: center;">
+                        arc_ii_seed
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </article>
       </div>

@@ -53,15 +53,22 @@
   </header>
 {% endmacro %}
 
-{% macro button_row(form_controls=False) %}
+{% macro button_row(form_controls=False, full_width=False, extra_class='') %}
+  {% set row_classes = 'wc-button-row' %}
+  {% if full_width %}
+    {% set row_classes = row_classes + ' wc-button-row--full' %}
+  {% endif %}
+  {% if extra_class %}
+    {% set row_classes = row_classes + ' ' + extra_class %}
+  {% endif %}
   {% if form_controls %}
     <div class="wc-controls-left">
-      <div class="wc-button-row">
+      <div class="{{ row_classes }}">
         {{ caller() }}
       </div>
     </div>
   {% else %}
-    <div class="wc-button-row">
+    <div class="{{ row_classes }}">
       {{ caller() }}
     </div>
   {% endif %}

@@ -409,6 +409,41 @@ def test_set_mod_roads_allows_when_wbt_backend(project_client):
     assert "roads" in controller.mods
 
 
+def test_set_mod_geneva_requires_wbt_backend(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = []
+    project_module.Watershed.getInstance(run_dir).delineation_backend_is_wbt = False
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "geneva", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "requires the WBT delineation backend" in payload["error"]["message"]
+    assert "geneva" not in controller.mods
+
+
+def test_set_mod_geneva_allows_when_wbt_backend(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = []
+    project_module.Watershed.getInstance(run_dir).delineation_backend_is_wbt = True
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "geneva", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["mod"] == "geneva"
+    assert payload["Content"]["enabled"] is True
+    assert "geneva" in controller.mods
+
+
 def test_set_mod_disables_module_when_no_guards(project_client):
     client, RonStub, _, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)

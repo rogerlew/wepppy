@@ -8,6 +8,7 @@ from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.mods.geneva.collaborators import (
     GenevaArtifactIO,
     GenevaBatchRunService,
+    GenevaCnTableService,
     GenevaConfigService,
     GenevaFrequencyPanelService,
     GenevaHruPreparationService,
@@ -29,6 +30,7 @@ __all__ = [
 
 _GENEVA_ARTIFACT_IO = GenevaArtifactIO()
 _GENEVA_CONFIG_SERVICE = GenevaConfigService()
+_GENEVA_CN_TABLE_SERVICE = GenevaCnTableService()
 _GENEVA_HSG_ASSIGNMENT_SERVICE = GenevaHsgAssignmentService()
 _GENEVA_KERNEL_GATEWAY = GenevaKernelGateway()
 _GENEVA_HRU_PREPARATION_SERVICE = GenevaHruPreparationService()
@@ -70,6 +72,7 @@ class Geneva(NoDbBase):
 
             self.config_service.initialize_config(self)
             self.artifact_io.root_dir(self.wd)
+            self.cn_table_service.ensure_initialized(self, reason="init")
 
     @property
     def artifact_io(self) -> GenevaArtifactIO:
@@ -78,6 +81,10 @@ class Geneva(NoDbBase):
     @property
     def config_service(self) -> GenevaConfigService:
         return _GENEVA_CONFIG_SERVICE
+
+    @property
+    def cn_table_service(self) -> GenevaCnTableService:
+        return _GENEVA_CN_TABLE_SERVICE
 
     @property
     def hsg_assignment_service(self) -> GenevaHsgAssignmentService:
@@ -257,6 +264,31 @@ class Geneva(NoDbBase):
 
     def results_payload(self) -> dict[str, Any]:
         return self.results_service.build_results_payload(self)
+
+    def cn_table_meta(self) -> dict[str, Any]:
+        with self.locked():
+            return self.cn_table_service.meta(self)
+
+    def cn_table_snapshot(self) -> dict[str, Any]:
+        with self.locked():
+            return self.cn_table_service.snapshot(self)
+
+    def modify_cn_table(
+        self,
+        rows: list[Any],
+        *,
+        if_match_sha256: str | None,
+    ) -> dict[str, Any]:
+        with self.locked():
+            return self.cn_table_service.modify(
+                self,
+                rows,
+                if_match_sha256=if_match_sha256,
+            )
+
+    def reset_cn_table(self, *, reason: str = "manual") -> dict[str, Any]:
+        with self.locked():
+            return self.cn_table_service.reset(self, reason=reason)
 
     def _require_enabled(self) -> None:
         if not self.enabled:

@@ -14,6 +14,67 @@ const DEFAULT_ENFORCED_AA_THEMES = [
   'cursor-dark-midnight',
 ];
 
+const JEXCEL_TARGET_ID = 'wc_jexcel_table';
+const JEXCEL_REQUIRED_PAIR_NAMES = [
+  'thead_selected_text_vs_background',
+  'tbody_selected_text_vs_background',
+  'tbody_row_index_text_vs_background',
+  'tbody_regular_text_vs_background',
+];
+
+const KNOWN_LIGHT_THEMES = new Set([
+  'default',
+  'light-high-contrast',
+  'ayu-light',
+  'ayu-light-bordered',
+]);
+
+const KNOWN_DARK_THEMES = new Set([
+  'onedark',
+  'dark-modern',
+  'ayu-dark',
+  'ayu-mirage',
+  'ayu-dark-bordered',
+  'ayu-mirage-bordered',
+  'cursor-dark-anysphere',
+  'cursor-dark-midnight',
+  'cursor-dark-high-contrast',
+]);
+
+function classifyThemeTone(themeId) {
+  if (KNOWN_LIGHT_THEMES.has(themeId)) {
+    return 'light';
+  }
+  if (KNOWN_DARK_THEMES.has(themeId)) {
+    return 'dark';
+  }
+  const normalized = String(themeId || '').toLowerCase();
+  if (normalized.includes('light')) {
+    return 'light';
+  }
+  if (normalized.includes('dark') || normalized.includes('mirage')) {
+    return 'dark';
+  }
+  return null;
+}
+
+function relativeLuminance(color) {
+  if (!color) {
+    return null;
+  }
+  const toLinear = (channel) => {
+    const normalized = Number(channel) / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4;
+  };
+  return (
+    0.2126 * toLinear(color.r)
+    + 0.7152 * toLinear(color.g)
+    + 0.0722 * toLinear(color.b)
+  );
+}
+
 function parseEnforcedThemes() {
   const raw = String(process.env.THEME_METRICS_ENFORCED_THEMES || '').trim();
   if (!raw) {
@@ -142,6 +203,73 @@ test.describe('theme contrast metrics', () => {
             `- [${entry.theme}] ${entry.targetLabel || entry.targetId} :: ${entry.pairName || '(default)'} `
             + `(ratio=${entry.ratio}, threshold=${entry.threshold}, font=${entry.typography?.fontSize || 'n/a'}/${entry.typography?.fontWeight || 'n/a'})`
         )
+        .join('\n')}`
+    ).toEqual([]);
+
+    const jexcelResults = results.filter((entry) => entry.targetId === JEXCEL_TARGET_ID);
+    const missingJexcelPairs = [];
+    const jexcelToneFailures = [];
+    const DARK_MAX_LUMINANCE = 0.5;
+    const LIGHT_MIN_LUMINANCE = 0.5;
+
+    for (const themeId of themeIds) {
+      for (const pairName of JEXCEL_REQUIRED_PAIR_NAMES) {
+        const entry = jexcelResults.find(
+          (item) => item.theme === themeId && item.pairName === pairName
+        );
+        if (!entry) {
+          missingJexcelPairs.push(`${themeId}:${pairName}`);
+          continue;
+        }
+        if (!entry.background || !entry.background.rgba) {
+          jexcelToneFailures.push({
+            theme: themeId,
+            pair: pairName,
+            reason: 'background missing',
+          });
+          continue;
+        }
+
+        const tone = classifyThemeTone(themeId);
+        if (!tone) {
+          continue;
+        }
+        const luminance = relativeLuminance(entry.background.rgba);
+        if (luminance === null) {
+          jexcelToneFailures.push({
+            theme: themeId,
+            pair: pairName,
+            reason: 'luminance unavailable',
+          });
+          continue;
+        }
+
+        if (tone === 'dark' && luminance > DARK_MAX_LUMINANCE) {
+          jexcelToneFailures.push({
+            theme: themeId,
+            pair: pairName,
+            reason: `expected dark background (luminance <= ${DARK_MAX_LUMINANCE}), got ${luminance.toFixed(3)}`,
+          });
+        }
+        if (tone === 'light' && luminance < LIGHT_MIN_LUMINANCE) {
+          jexcelToneFailures.push({
+            theme: themeId,
+            pair: pairName,
+            reason: `expected light background (luminance >= ${LIGHT_MIN_LUMINANCE}), got ${luminance.toFixed(3)}`,
+          });
+        }
+      }
+    }
+
+    expect(
+      missingJexcelPairs,
+      `Missing JSpreadsheet theme-metrics pairs: ${missingJexcelPairs.join(', ')}`
+    ).toEqual([]);
+
+    expect(
+      jexcelToneFailures,
+      `JSpreadsheet theme polarity failures:\n${jexcelToneFailures
+        .map((failure) => `- [${failure.theme}] ${failure.pair}: ${failure.reason}`)
         .join('\n')}`
     ).toEqual([]);
   });

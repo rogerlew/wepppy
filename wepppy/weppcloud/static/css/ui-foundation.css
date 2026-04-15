@@ -2992,8 +2992,18 @@ h5:first-child {
   gap: var(--wc-space-sm);
 }
 
+.wc-button-row--full {
+  display: flex;
+  width: 100%;
+}
+
 .wc-button-row .pure-button {
   margin: 0;
+}
+
+.wc-button-row--full .pure-button {
+  width: 100%;
+  flex: 1 1 auto;
 }
 
 #sbs_mode1_controls {

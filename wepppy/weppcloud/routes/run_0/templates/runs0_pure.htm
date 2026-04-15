@@ -25,6 +25,7 @@
 {% set show_debris_flow = ('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and allow_debris_flow %}
 {% set show_features_export = show_features_export if show_features_export is defined else ('features_export' in mods_list or playwright_load_all) %}
 {% set show_dss_export = 'dss_export' in mods_list or playwright_load_all %}
+{% set show_geneva = show_geneva if show_geneva is defined else ('geneva' in mods_list or playwright_load_all) %}
 {% set rusle_backend_supported = rusle_backend_supported if rusle_backend_supported is defined else (watershed.delineation_backend_is_wbt if watershed is defined and watershed is not none and watershed.delineation_backend_is_wbt is defined else False) %}
 {% set show_rusle = show_rusle if show_rusle is defined else ((('rusle' in mods_list and 'disturbed' in mods_list and rusle_backend_supported) or playwright_load_all)) %}
 {% set show_disturbed_sbs = (('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods) or playwright_load_all %}
@@ -138,6 +139,9 @@
         {% endif %}
         <li data-mod-nav="roads" {% if not show_roads %}hidden{% endif %}>
           <a href="#roads" class="nav-link">Roads</a>
+        </li>
+        <li data-mod-nav="geneva" {% if not show_geneva %}hidden{% endif %}>
+          <a href="#geneva" class="nav-link">Geneva</a>
         </li>
         <li data-mod-nav="features_export" {% if not show_features_export %}hidden{% endif %}>
           <a href="#features-export" class="nav-link">Features Export</a>
@@ -287,6 +291,14 @@
         {% if show_roads %}
         <section id="roads" class="wc-stack">
           {% include 'controls/roads_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
+
+      <div data-mod-section="geneva" {% if not show_geneva %}hidden{% endif %}>
+        {% if show_geneva %}
+        <section id="geneva" class="wc-stack">
+          {% include 'controls/geneva_pure.htm' %}
         </section>
         {% endif %}
       </div>
