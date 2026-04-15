@@ -149,3 +149,29 @@ def test_hru_preparation_service_persists_hru_artifacts(tmp_path: Path) -> None:
     assert summary["artifacts"]["hru_table_relpath"] == "hru_table.parquet"
     assert (tmp_path / "geneva" / "hru_table.parquet").exists()
     assert (tmp_path / "geneva" / "hru_prepare_summary.json").exists()
+
+
+def test_kernel_gateway_falls_back_to_cli_revision_rust_when_nested_module_lacks_api(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _LegacyModule:
+        pass
+
+    class _FallbackModule:
+        @staticmethod
+        def geneva_prepare_hrus(_payload_json: str) -> str:
+            return '{"status":"ok","phase":"prepare_hrus","kernel_schema_version":1}'
+
+    def _import_module(name: str):
+        if name == "wepppyo3.climate.cli_revision_rust":
+            return _LegacyModule
+        if name == "cli_revision_rust":
+            return _FallbackModule
+        raise ImportError(name)
+
+    monkeypatch.setattr("importlib.import_module", _import_module)
+
+    gateway = GenevaKernelGateway()
+    payload = gateway.call_json_api("geneva_prepare_hrus", {"kernel_schema_version": 1})
+    assert payload["status"] == "ok"
+    assert payload["phase"] == "prepare_hrus"

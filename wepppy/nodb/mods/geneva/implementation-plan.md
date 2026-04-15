@@ -1,5 +1,5 @@
 # Geneva Implementation Plan
-Status: Active (WP-00/WP-01/WP-03/WP-04/WP-05/WP-06/WP-07/WP-08 complete; WP-02 in review; WP-09+ not started)  
+Status: Active (WP-00/WP-01/WP-03/WP-04/WP-05/WP-06/WP-07/WP-08/WP-09 complete; WP-02 in review; WP-10 not started)  
 Last Updated: 2026-04-15  
 Owner: WEPPpy NoDb hydrology stack  
 Primary Spec: `/workdir/wepppy/wepppy/nodb/mods/geneva/specification.md`
@@ -89,7 +89,7 @@ Kernel repo gates (`/workdir/wepppyo3`):
 | WP-06 | Geneva NoDb facade + collaborators | WP-02, WP-03, WP-04, WP-05 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-06_geneva_nodb_facade_collaborators.md`; required gates, manual integration checks, and code/QA/security review workflow completed; dependency waiver recorded for WP-02 `in_review` state. |
 | WP-07 | CN table workflow + edit_csv integration | WP-06 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-07_cn_table_workflow_edit_csv_integration.md`; run-scoped CN-table lifecycle/concurrency + Geneva edit_csv integration completed with Mods-menu/header wiring, Roads-parity WBT enable gate, full-width launch controls, runid breadcrumb + fluid-width table stretch, and JSpreadsheet theme-state coverage validated by route tests plus theme-metrics smoke checks. |
 | WP-08 | Routes, tasks, RQ wiring, query/report API | WP-06, WP-07 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-08_routes_tasks_rq_wiring_query_report_api.md`; route family + canonical RQ/error contracts + guard propagation + query/report parity delivered, queue dependency artifacts updated, required gates passing (`tests/nodb/mods/geneva`: `24 passed`; `tests/nodb`: `959 passed, 4 skipped`; `tests`: `3615 passed, 36 skipped`; `doc-lint`: `15 files validated`; broad-exception changed-file gate `PASS`; `wctl check-rq-graph` up to date; `wctl run-npm lint/test` passed). |
-| WP-09 | End-to-end integration and performance validation | WP-08 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Batch runs, dual-source matrix behavior, warning surfaces. |
+| WP-09 | End-to-end integration and performance validation | WP-08 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-09_end_to_end_integration_and_performance_validation.md`; WP-09 scenario-matrix harness, performance baseline probes, collapse sensitivity thresholds, watershed warning-threshold propagation, required gates (`tests/nodb/mods/geneva`: `34 passed`; `tests/nodb`: `969 passed, 4 skipped`; `tests`: `3625 passed, 36 skipped`; `doc-lint`: `17 files validated`; broad-exception changed-file gate `PASS`; `wctl check-rq-graph` up to date), and manual dual-run integration checks (including noisy `hydgrpdcd`) completed. |
 | WP-10 | QA/security closeout and release readiness | WP-09 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Final findings closure and ship decision record. |
 
 ## Parallel Execution Lanes

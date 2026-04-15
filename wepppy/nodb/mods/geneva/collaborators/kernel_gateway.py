@@ -10,7 +10,10 @@ from wepppy.nodb.mods.geneva.errors import GenevaKernelError
 class GenevaKernelGateway:
     """Typed boundary for Geneva Rust kernel entrypoints."""
 
-    _MODULE_NAME = "wepppyo3.climate.cli_revision_rust"
+    _MODULE_NAMES = (
+        "wepppyo3.climate.cli_revision_rust",
+        "cli_revision_rust",
+    )
 
     def call_json_api(self, api_name: str, payload: Mapping[str, Any]) -> dict[str, Any]:
         module = self._load_kernel_module(api_name)
@@ -21,7 +24,7 @@ class GenevaKernelGateway:
             raise GenevaKernelError(
                 f"Geneva kernel API '{api_name}' is unavailable.",
                 code="missing_dependency",
-                details={"module": self._MODULE_NAME, "api": api_name},
+                details={"modules": list(self._MODULE_NAMES), "api": api_name},
                 status_code=500,
             )
 
@@ -56,15 +59,28 @@ class GenevaKernelGateway:
         return parsed
 
     def _load_kernel_module(self, api_name: str):
-        try:
-            return importlib.import_module(self._MODULE_NAME)
-        except ImportError as exc:
-            raise GenevaKernelError(
-                "Geneva kernel bindings are unavailable. Expected wepppyo3.climate.cli_revision_rust.",
-                code="missing_dependency",
-                details={"module": self._MODULE_NAME, "api": api_name},
-                status_code=500,
-            ) from exc
+        errors: dict[str, str] = {}
+        for module_name in self._MODULE_NAMES:
+            try:
+                module = importlib.import_module(module_name)
+            except ImportError as exc:
+                errors[module_name] = str(exc)
+                continue
+            api = getattr(module, api_name, None)
+            if callable(api):
+                return module
+            errors[module_name] = f"missing callable api: {api_name}"
+
+        raise GenevaKernelError(
+            "Geneva kernel bindings are unavailable.",
+            code="missing_dependency",
+            details={
+                "modules": list(self._MODULE_NAMES),
+                "api": api_name,
+                "errors": errors,
+            },
+            status_code=500,
+        )
 
 
 def _parse_kernel_value_error(message: str) -> tuple[str, dict[str, Any]]:

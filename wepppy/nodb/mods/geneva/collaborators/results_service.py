@@ -35,6 +35,8 @@ class GenevaResultsService:
         for entry in completed:
             for warning in entry.get("warnings", []) or []:
                 warnings.append(warning)
+        for warning in batch_result.get("run_warnings", []) or []:
+            warnings.append(warning)
         for cell in unavailable_cells:
             warnings.append(
                 {

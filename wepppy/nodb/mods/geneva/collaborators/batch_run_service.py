@@ -9,6 +9,13 @@ from wepppy.nodb.mods.geneva.schemas import GenevaRunBatchRequest, parse_run_bat
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
 
+WARNING_AREA_KM2 = 25.0
+SEVERE_WARNING_AREA_KM2 = 100.0
+EXTREME_WARNING_AREA_KM2 = 250.0
+
+_M2_TO_ACRES = 0.0002471053814671653
+_KM2_TO_MI2 = 0.3861021585424458
+
 
 class GenevaBatchRunService:
     """Run Geneva batch storms and persist per-storm artifacts."""
@@ -146,6 +153,8 @@ class GenevaBatchRunService:
                     }
                 )
 
+        run_warnings = _watershed_area_warnings(geneva)
+
         return {
             "schema_version": 1,
             "batch_id": request.batch_id,
@@ -154,6 +163,7 @@ class GenevaBatchRunService:
             "available_cells": available_cells,
             "unavailable_cells": unavailable_cells,
             "failed_storm_ids": failed_storm_ids,
+            "run_warnings": run_warnings,
             "completed_storm_ids": [
                 result["storm_id"] for result in storm_results if result.get("status") == "completed"
             ],
@@ -254,6 +264,8 @@ class GenevaBatchRunService:
                 "arc_condition": "arc_ii",
                 "storm_distribution_assumption": "neh4_type_b",
                 "uniform_rainfall_assumed": True,
+                "arf_method": "constant_1.0",
+                "arf_value": 1.0,
             },
             "artifacts": {
                 "hyetograph_relpath": hyetograph_relpath,
@@ -398,6 +410,53 @@ def _intensity_series(time_minutes: list[float], incremental_mm: list[float]) ->
         intensity = (incremental_mm[index] / delta_t) * 60.0
         intensities.append(float(intensity))
     return intensities
+
+
+def _watershed_area_warnings(geneva: "Geneva") -> list[dict[str, Any]]:
+    try:
+        watershed = geneva.watershed_instance
+    except FileNotFoundError:
+        return []
+
+    wsarea_m2 = float(getattr(watershed, "wsarea", 0.0) or 0.0)
+    if wsarea_m2 <= 0.0:
+        return []
+
+    wsarea_km2 = wsarea_m2 / 1_000_000.0
+    if wsarea_km2 > EXTREME_WARNING_AREA_KM2:
+        severity = "extreme"
+        threshold_km2 = EXTREME_WARNING_AREA_KM2
+    elif wsarea_km2 > SEVERE_WARNING_AREA_KM2:
+        severity = "severe"
+        threshold_km2 = SEVERE_WARNING_AREA_KM2
+    elif wsarea_km2 > WARNING_AREA_KM2:
+        severity = "warning"
+        threshold_km2 = WARNING_AREA_KM2
+    else:
+        return []
+
+    wsarea_mi2 = wsarea_km2 * _KM2_TO_MI2
+    wsarea_acres = wsarea_m2 * _M2_TO_ACRES
+
+    return [
+        {
+            "code": "point_rainfall_assumption",
+            "severity": severity,
+            "message": "Point rainfall assumption may under-represent watershed-scale variability.",
+            "wsarea_km2": round(wsarea_km2, 4),
+            "wsarea_mi2": round(wsarea_mi2, 4),
+            "wsarea_acres": round(wsarea_acres, 4),
+            "threshold_km2": threshold_km2,
+            "thresholds_km2": {
+                "warning": WARNING_AREA_KM2,
+                "severe": SEVERE_WARNING_AREA_KM2,
+                "extreme": EXTREME_WARNING_AREA_KM2,
+            },
+            "arf_method": "constant_1.0",
+            "arf_value": 1.0,
+            "uniform_rainfall_assumed": True,
+        }
+    ]
 
 
 __all__ = ["GenevaBatchRunService"]

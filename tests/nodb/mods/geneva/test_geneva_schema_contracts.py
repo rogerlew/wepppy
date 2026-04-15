@@ -7,6 +7,7 @@ from wepppy.nodb.mods.geneva.schemas import (
     normalize_frequency_panel_payload,
     parse_run_batch_request,
 )
+from wepppy.nodb.mods.geneva.collaborators.frequency_panel_service import _normalize_cligen_text_for_kernel
 
 
 pytestmark = pytest.mark.unit
@@ -64,6 +65,29 @@ def test_frequency_panel_schema_enforces_reason_code_invariants() -> None:
                 ],
             }
         )
+
+
+def test_cligen_normalization_maps_precipitation_depth_label_for_kernel() -> None:
+    source_text = (
+        "PRECIPITATION FREQUENCY ESTIMATES\n"
+        "by metric for ARI (years):, 1,2,5\n"
+        "Precipitation depth (mm):, 12.1,15.0,20.2\n"
+        "Storm duration (hours):, 0.5,1.0,2.0\n"
+    )
+    normalized = _normalize_cligen_text_for_kernel(source_text)
+    assert normalized is not None
+    assert "Storm depth (mm):, 12.1,15.0,20.2" in normalized
+    assert "Precipitation depth (mm):" not in normalized
+
+
+def test_cligen_normalization_noops_when_kernel_row_already_present() -> None:
+    source_text = (
+        "PRECIPITATION FREQUENCY ESTIMATES\n"
+        "by metric for ARI (years):, 1,2\n"
+        "Storm depth (mm):, 8.0,10.5\n"
+        "Storm duration (hours):, 0.5,1.0\n"
+    )
+    assert _normalize_cligen_text_for_kernel(source_text) is None
 
     with pytest.raises(ValueError, match='reason_code must be null, not string \"null\"'):
         normalize_frequency_panel_payload(

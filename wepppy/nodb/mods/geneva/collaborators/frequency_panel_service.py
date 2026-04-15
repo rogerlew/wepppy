@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
 from wepppy.nodb.mods.geneva.errors import GenevaKernelError, GenevaValidationError
@@ -12,6 +13,7 @@ _DEFAULT_DURATIONS = (5, 10, 30, 60, 120, 180, 360, 720, 1440)
 _DEFAULT_ARI = (1, 2, 5, 10, 25, 50, 100)
 _DEFAULT_CLIGEN_PATH = "climate/wepp_cli_pds_mean_metric.csv"
 _DEFAULT_NOAA_PATH = "climate/atlas14_intensity_pds_mean_metric.csv"
+_NORMALIZED_CLIGEN_RELPATH = "normalized_sources/wepp_cli_pds_mean_metric_kernel.csv"
 
 
 class GenevaFrequencyPanelService:
@@ -159,6 +161,11 @@ class GenevaFrequencyPanelService:
             if key in payload_sources:
                 payload_sources[key] = None if value in (None, "") else str(value)
 
+        payload_sources["cligen_freq"] = self._normalize_cligen_source_for_kernel(
+            geneva,
+            payload_sources["cligen_freq"],
+        )
+
         payload: dict[str, Any] = {
             "kernel_schema_version": 1,
             "durations_minutes": [int(value) for value in (durations_minutes or _DEFAULT_DURATIONS)],
@@ -195,6 +202,70 @@ class GenevaFrequencyPanelService:
             )
         payload = artifact_io.read_json(geneva.wd, "frequency_panel.json")
         return normalize_frequency_panel_payload(payload)
+
+    def _normalize_cligen_source_for_kernel(
+        self,
+        geneva: "Geneva",
+        source_path: str | None,
+    ) -> str | None:
+        if source_path in (None, ""):
+            return None
+
+        raw_source = str(source_path)
+        resolved = Path(raw_source)
+        if not resolved.is_absolute():
+            resolved = Path(geneva.wd) / resolved
+        if not resolved.exists():
+            return raw_source
+
+        normalized_text = _normalize_cligen_text_for_kernel(resolved.read_text(encoding="utf-8"))
+        if normalized_text is None:
+            return raw_source
+
+        artifact_io = geneva.artifact_io
+        artifact_path = artifact_io.resolve_path(geneva.wd, _NORMALIZED_CLIGEN_RELPATH)
+        artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        if not artifact_path.exists() or artifact_path.read_text(encoding="utf-8") != normalized_text:
+            artifact_io.write_text(geneva.wd, _NORMALIZED_CLIGEN_RELPATH, normalized_text)
+        return str(artifact_path)
+
+
+def _normalize_cligen_text_for_kernel(text: str) -> str | None:
+    ari_values: list[str] = []
+    storm_depth_values: list[str] = []
+    duration_values: list[str] = []
+    has_storm_depth_row = False
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        lower = line.lower()
+        if lower.startswith("by metric for ari (years):"):
+            ari_values = _extract_row_values(line)
+        elif lower.startswith("storm depth (mm):"):
+            has_storm_depth_row = True
+        elif lower.startswith("precipitation depth (mm):"):
+            storm_depth_values = _extract_row_values(line)
+        elif lower.startswith("storm duration (hours):"):
+            duration_values = _extract_row_values(line)
+
+    if has_storm_depth_row:
+        return None
+    if not ari_values or not storm_depth_values or not duration_values:
+        return None
+
+    return (
+        "PRECIPITATION FREQUENCY ESTIMATES\n"
+        f"by metric for ARI (years):, {','.join(ari_values)}\n"
+        f"Storm depth (mm):, {','.join(storm_depth_values)}\n"
+        f"Storm duration (hours):, {','.join(duration_values)}\n"
+    )
+
+
+def _extract_row_values(line: str) -> list[str]:
+    values = [value.strip() for value in line.split(",")[1:]]
+    return [value for value in values if value]
 
 
 __all__ = ["GenevaFrequencyPanelService"]
