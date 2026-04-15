@@ -59,6 +59,45 @@ tools/smoke_wepp_binary_in_container.sh wepp_runner/bin/wepp_<tag>
 tools/smoke_wepp_binary_in_container.sh wepp_runner/bin/wepp_<tag>_hill
 ```
 
+## Watershed Stall Debugging (Observability)
+Use these steps when a watershed run appears stuck or hits RQ timeout.
+
+1. Enable phase logging in the run directory:
+```bash
+touch /wc1/runs/<project>/<scenario>/wepp/runs/wepp_observe.on
+```
+2. Re-run the watershed binary from that run directory.
+3. Inspect `wepp_observe.log` for the last completed phase marker.
+4. Remove the flag for normal/parity timing runs:
+```bash
+rm -f /wc1/runs/<project>/<scenario>/wepp/runs/wepp_observe.on
+```
+
+Notes:
+- `wepp_observe.on` is an opt-in runtime flag; no flag means no phase log.
+- Logging adds overhead; keep it off for performance or parity timing checks.
+
+## Debug/Parity Tools
+Use these tools from `/workdir/wepp-forest` when triaging binary behavior:
+
+- Progress/stall observer (run cwd + PID aware):
+```bash
+python3 tools/observe_wepp_progress.py --run-dir /wc1/runs/<project>/<scenario>/wepp/runs --stall-seconds 180
+```
+- Host smoke gate for candidate binaries:
+```bash
+tools/smoke_wepp_binary_host.sh /workdir/wepp-forest/src/wepp
+tools/smoke_wepp_binary_host.sh /workdir/wepp-forest/src/wepp_hill
+```
+- Raw output parity compare (baseline vs candidate outputs):
+```bash
+python3 /workdir/wepp-forest/tools/compare_wepp_raw_outputs.py \
+  --baseline /tmp/wepp-parity-baseline \
+  --candidate /tmp/wepp-parity-candidate \
+  --json-out /tmp/wepp_parity_raw.json \
+  --abs-tol 1e-6 --rel-tol 0
+```
+
 ## Implementation Notes
 - `wepp_runner.wepp_runner.get_linux_wepp_bin_opts()` auto-discovers `wepp_*` files in `wepp_runner/bin`.
 - `_hill` variants are invoked automatically for hillslope/flowpath runs when present.
