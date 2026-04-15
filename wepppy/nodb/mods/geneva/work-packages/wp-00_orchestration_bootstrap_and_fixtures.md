@@ -1,6 +1,6 @@
 # WP-00 Evidence: Orchestration Bootstrap and Fixtures
 Status: done  
-Last Updated: 2026-04-14  
+Last Updated: 2026-04-15  
 Work-Package: `WP-00`
 
 References:
@@ -9,8 +9,9 @@ References:
 
 ## Scope Target
 - Create work-package evidence scaffold.
+- Replace placeholder fixture catalog entries with ready synthetic fixtures.
 - Create initial Geneva fixture manifest for tests.
-- Add a schema/manifest test under `tests/nodb/mods/geneva/`.
+- Add/extend schema and contract tests under `tests/nodb/mods/geneva/`.
 - Record conformance-deviation disposition evidence (`DEV-001..DEV-004`).
 
 ## Bootstrap Artifacts Created
@@ -33,6 +34,7 @@ References:
 
 ## Execution Checklist
 - [x] Add at least one small synthetic fixture case and expected outputs.
+- [x] Ensure Geneva fixture manifest entries are `status: "ready"` (no `placeholder` statuses remain).
 - [x] Run focused Geneva fixture tests via `wctl run-pytest`.
 - [x] Update WP-00 board row state and evidence links.
 - [x] Complete QA + security checklist items from implementation plan.
@@ -43,10 +45,6 @@ References:
 - Manual integration gate: pass. Fixture inputs are stored as repository-relative paths in `fixtures_manifest.json` and validated by `tests/nodb/mods/geneva/test_fixture_manifest.py::test_geneva_fixture_inputs_exist`.
 
 ## Validation Executed
-- `wctl doc-lint --path wepppy/nodb/mods/geneva/specification.md` (pass)
-- `wctl doc-lint --path wepppy/nodb/mods/geneva/implementation-plan.md` (pass)
-- `wctl doc-lint --path wepppy/nodb/mods/geneva/work-packages/wp-00_orchestration_bootstrap_and_fixtures.md` (pass)
-- `wctl run-pytest tests/nodb/mods/geneva/test_fixture_manifest.py --maxfail=1` (pass)
-- `wctl run-pytest tests/nodb/mods/geneva --maxfail=1` (pass; `4 passed, 2 warnings`)
-- `wctl doc-lint --path wepppy/nodb/mods/geneva` (pass; `6 files validated, 0 errors, 0 warnings`)
+- `wctl run-pytest tests/nodb/mods/geneva --maxfail=1` (pass; `5 passed, 2 warnings`; includes readiness/placeholder guard in `test_geneva_fixture_catalog_has_ready_synthetic_fixture`)
+- `wctl doc-lint --path wepppy/nodb/mods/geneva` (pass; `9 files validated, 0 errors, 0 warnings`)
 - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` (pass; `Changed Python files scanned: 0`, `Net delta: +0`)

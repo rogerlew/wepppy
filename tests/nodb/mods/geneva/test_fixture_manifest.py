@@ -34,6 +34,7 @@ REQUIRED_HRU_FIELDS = {
 }
 
 REQUIRED_STATUS_FIELDS = {"phase", "warnings", "artifacts"}
+PLACEHOLDER_STATUS = "placeholder"
 
 
 def _data_root() -> Path:
@@ -68,6 +69,26 @@ def test_geneva_fixture_manifest_schema() -> None:
         assert isinstance(fixture["inputs"], dict)
         assert isinstance(fixture["metadata"], dict)
         assert isinstance(fixture["expected"], dict)
+
+
+def test_geneva_fixture_catalog_has_ready_synthetic_fixture() -> None:
+    payload = _load_manifest()
+    fixtures = payload["fixtures"]
+
+    fixture_ids = [fixture["fixture_id"] for fixture in fixtures]
+    assert len(set(fixture_ids)) == len(fixture_ids), "fixture_id values must be unique"
+
+    for fixture in fixtures:
+        assert fixture["status"] != PLACEHOLDER_STATUS, (
+            f"{fixture['fixture_id']} still marked as placeholder"
+        )
+
+    ready_synthetic = [
+        fixture
+        for fixture in fixtures
+        if fixture["status"] == "ready" and fixture["metadata"].get("synthetic") is True
+    ]
+    assert ready_synthetic, "at least one ready synthetic Geneva fixture is required"
 
 
 def test_geneva_fixture_inputs_exist() -> None:
@@ -120,8 +141,18 @@ def test_geneva_fixture_expected_contract_fields() -> None:
         assert isinstance(hru_rows_min, int) and hru_rows_min >= 1
         assert isinstance(hru_rows_max, int) and hru_rows_max >= hru_rows_min
 
-        required_hru_fields = set(expected["required_hru_fields"])
+        required_hru_fields_values = expected["required_hru_fields"]
+        assert isinstance(required_hru_fields_values, list) and required_hru_fields_values
+        assert all(
+            isinstance(field, str) and field for field in required_hru_fields_values
+        )
+        required_hru_fields = set(required_hru_fields_values)
         assert REQUIRED_HRU_FIELDS.issubset(required_hru_fields)
 
-        required_status_fields = set(expected["required_status_fields"])
+        required_status_fields_values = expected["required_status_fields"]
+        assert isinstance(required_status_fields_values, list) and required_status_fields_values
+        assert all(
+            isinstance(field, str) and field for field in required_status_fields_values
+        )
+        required_status_fields = set(required_status_fields_values)
         assert REQUIRED_STATUS_FIELDS.issubset(required_status_fields)
