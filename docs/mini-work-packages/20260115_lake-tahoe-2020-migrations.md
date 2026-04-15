@@ -29,7 +29,7 @@ Run migrations on all 799 Lake Tahoe 2020 watershed runs across 11 scenarios.
 
 ### 0 - Near Burton Creek
 - [x] lt_202012_0_Near_Burton_Creek_CurCond
-- [x] lt_202012_0_Near_Burton_Creek_HighSev b97471d0-6f6d-4733-b209-75755d65d598
+- [x] lt_202012_0_Near_Burton_Creek_HighSev
 - [x] lt_202012_0_Near_Burton_Creek_LowSev
 - [x] lt_202012_0_Near_Burton_Creek_ModSev
 - [ ] lt_202012_0_Near_Burton_Creek_PrescFire
