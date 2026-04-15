@@ -1,5 +1,5 @@
 # Geneva Implementation Plan
-Status: Active (WP-00/WP-01/WP-03/WP-04/WP-05 complete; WP-02 in review; WP-06+ not started)  
+Status: Active (WP-00/WP-01/WP-03/WP-04/WP-05/WP-06 complete; WP-02 in review; WP-07+ not started)  
 Last Updated: 2026-04-15  
 Owner: WEPPpy NoDb hydrology stack  
 Primary Spec: `/workdir/wepppy/wepppy/nodb/mods/geneva/specification.md`
@@ -86,7 +86,7 @@ Kernel repo gates (`/workdir/wepppyo3`):
 | WP-03 | Rust CN rainfall-excess kernel | WP-01 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-03_rust_cn_rainfall_excess_kernel.md`; CN transforms (`lambda 0.20/0.05`), cap behavior, cumulative/incremental excess closure, adapter-path golden-series validation, and post-review validation hardening/disposition updates completed with all required gates passing. |
 | WP-04 | Frequency panel + NEH4 Type B kernel | WP-01 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-04_frequency_panel_neh4_type_b_kernel.md`; dual-source frequency matrix kernel, canonical unavailability reason codes, NEH4 Type B interpolation/closure/warning path, adapter integration, and required gate/review/manual checks completed. |
 | WP-05 | SCS UH + hydrograph kernel | WP-03, WP-04 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-05_scs_uh_hydrograph_kernel.md`; `scs_triangular`/`scs_curvilinear` UH kernels, excess-to-hydrograph convolution, summary metrics/provenance fields, closure enforcement, adapter-path manual integration, and required review/gate workflow completed. |
-| WP-06 | Geneva NoDb facade + collaborators | WP-02, WP-03, WP-04, WP-05 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Python orchestration and artifact IO. |
+| WP-06 | Geneva NoDb facade + collaborators | WP-02, WP-03, WP-04, WP-05 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-06_geneva_nodb_facade_collaborators.md`; required gates, manual integration checks, and code/QA/security review workflow completed; dependency waiver recorded for WP-02 `in_review` state. |
 | WP-07 | CN table workflow + edit_csv integration | WP-06 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Run-scoped seed/init/reset/modify/meta/snapshot parity. |
 | WP-08 | Routes, tasks, RQ wiring, query/report API | WP-06, WP-07 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Full endpoint family and payload schema conformance. |
 | WP-09 | End-to-end integration and performance validation | WP-08 | unassigned | tbd | not_started | pending | pending | pending | pending | pending | Batch runs, dual-source matrix behavior, warning surfaces. |
