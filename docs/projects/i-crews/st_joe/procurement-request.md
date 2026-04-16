@@ -1,9 +1,13 @@
 # Server Procurement Request: WEPPcloud Compute Infrastructure for the St. Joe Basin Project
 
 **Date:** March 2026
+
 **Project:** I-CREWS / St. Joe River Basin Watershed Modeling
+
 **Requested by:** WEPPcloud Development Team
+
 **Funding Source:** I-CREWS Grant
+
 **Total Cost:** $42,783.00 (two servers at $21,391.50 each)
 
 ---
@@ -99,6 +103,12 @@ The combinatorial nature of this analysis — multiple management treatments cro
 ---
 
 ## Why Dedicated Servers Are Necessary
+
+### Platform Topology and AI-Driven Workflow
+
+WEPPcloud is a persistent containerized service platform, not a single executable that can be submitted to a scheduler and forgotten. The production topology includes the `weppcloud` web application, `rq-engine` for operational job control, `query-engine` and `browse` for analytics and file access, Redis-backed job queues, and stateless RQ worker pools operating against shared run state and local model outputs. Human users and AI agents both authenticate into this stack and drive the same APIs. For the full topology diagram and service description, see [weppcloud-architecture-overview.md](weppcloud-architecture-overview.md).
+
+That service topology exists to support an AI-driven calibration workflow rather than one-shot batch execution. The St. Joe loop is: inspect basin outputs, form a calibration hypothesis, adjust parameters, submit another full-basin run, query the resulting diagnostics, and repeat. That requires always-on services, immediate queue dispatch, persistent run state, and low-latency access to very large numbers of small WEPP files over hours-long working sessions. Dedicated servers match that operating model. Shared infrastructure and HPC-style scheduling are optimized for queued batch jobs; the St. Joe effort requires an interactive modeling platform that can remain online while continuously feeding new work to the worker pool.
 
 ### NFS Storage Is a Proven Bottleneck
 
