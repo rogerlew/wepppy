@@ -13,7 +13,7 @@ This document answers one question:
 
 The answer is a multi-domain program touching software architecture, DevOps, cluster operations, security, networking, data management, and support ownership.
 
-Decision headline: estimated engineering cost is approximately 9-18x the ~$42k hardware procurement, plus about 7-10 months of delivery delay before production hardening.
+Decision headline: estimated engineering cost is approximately 9-18x the ~$42k hardware procurement. Baseline schedule is approximately 30-42 weeks (about 7-10 months) through production hardening.
 
 ## 2. Baseline Assumptions from Current WEPPcloud Architecture
 
@@ -59,6 +59,7 @@ No engineering should start until these are approved in writing.
 | P5 | Decision on internet-restricted compute model for external APIs | I-CREWS + RCDS + security | Some task types fail without controlled egress |
 | P6 | Named operations owner for 24x7 worker incidents | RCDS + WEPPcloud | No owner means no production service |
 | P7 | Written Slurm/cgroup + Linux limits contract for worker jobs (`cpus-per-task`, cgroup enforcement, `ulimit` profile) | Lemhi ops + security | Nested worker fanout cannot be sized or stabilized safely without explicit limits |
+| P8 | Funded procurement and logistics plan for high-performance 3-2-1 storage (hot run tier + replica + offsite immutable copy) | I-CREWS leadership + RCDS operations | Lustre is non-viable for this workload; no funded 3-2-1 storage means no production-safe Lemhi path |
 
 ## 5. Target Reference Architecture
 
@@ -82,6 +83,10 @@ No engineering should start until these are approved in writing.
 2. Add node-local scratch staging for hot intermediate files.
 3. Implement async flush/promote policy for scratch -> persistent storage.
 4. Define inode, quota, cleanup, retention, and backup policy for run artifacts.
+5. Implement explicit 3-2-1 data durability:
+   - Copy 1: high-performance primary run tier for active workload
+   - Copy 2: replicated secondary copy on separate storage node/media class
+   - Copy 3: offsite immutable backup copy with defined retention and restore tests
 
 ### 5.4 Connectivity for External Data Calls
 
@@ -318,6 +323,37 @@ Exit criteria:
 1. Throughput is within acceptable envelope against WEPPcloud baseline.
 2. No data integrity regressions under concurrent worker pressure.
 
+#### 6.4.4 Mandatory high-performance 3-2-1 storage procurement and integration
+
+Lustre non-viability means a separate high-performance 3-2-1 storage program is mandatory for any production-safe Lemhi path.
+
+Procurement cost anchors from `docs/projects/i-crews/st_joe/procurement-request.md`:
+
+1. SuperServer 621P-TR (fully configured): `$21,391.50` per server.
+2. Two-server total: `$42,783.00`.
+
+Required 3-2-1 architecture (minimum practical baseline):
+
+1. Copy 1 (primary): high-performance run tier for active WEPP small-file I/O.
+2. Copy 2 (secondary): replicated copy on separate node/media class with snapshot/promotion controls.
+3. Copy 3 (backup): offsite immutable backup copy with tested restore path.
+
+Costed implementation scenarios:
+
+| Scenario | Storage design | Procurement CAPEX | Integration labor | Logistics/non-labor | Delivery delta |
+|---|---|---:|---:|---:|---|
+| S-321A (recommended baseline) | Two high-performance storage servers (`$21,391.50 x 2`) + institutional offsite immutable backup service | $42,783.00 | 3-6 PM ($45k-$132k) | $8k-$18k | +6 to +12 weeks |
+| S-321B (fully self-hosted copy-3) | S-321A plus one additional server for dedicated backup tier (`$21,391.50 x 3`) | $64,174.50 | 4-8 PM ($60k-$176k) | $12k-$24k | +8 to +16 weeks |
+
+Logistics scope includes shipping/receiving, rack/power/network turn-up, rails/cabling/transceivers, datacenter installation windows, and acceptance burn-in.
+
+Exit criteria:
+
+1. 3 copies are verified for each run artifact class with documented retention policy.
+2. Copy 3 is immutable/offsite and restore drills pass within agreed RTO/RPO.
+3. Storage throughput and metadata performance meet WEPP baseline acceptance thresholds under representative load.
+4. Procurement, logistics, and ownership runbooks are signed by operations owners before pilot expansion.
+
 ### 6.5 Blocker E: Shared filesystem contract between Lemhi workers and WEPPcloud services
 
 Problem statement:
@@ -429,13 +465,51 @@ Deliverables:
 | Runtime limit guards | Add startup checks for CPU/cgroup/`ulimit` contract compliance | Prevent unstable fanout due to unknown scheduler/runtime limits |
 | Observability | Add worker/dispatch health metrics and structured events | Operability and incident response |
 
+### 8.1 Software Backlog Accounting (Included in Baseline)
+
+Accounting assumptions:
+
+1. Baseline program envelope from Sections 10-11 is `25-35 PM`.
+2. Phase-duration allocation for software-heavy phases:
+   - Phase 1 (8 weeks): `5.0-7.0 PM`
+   - Phase 2 (12 weeks): `7.5-10.5 PM`
+3. Section 8 rows map to Section 16.2/16.3 execution units; mapped PM rows overlap and are not additive.
+
+| Backlog item | Mapped execution units | Included in baseline | PM range | Timeline window |
+|---|---|---|---:|---|
+| Queue routing | E2-1 + S2-01..S2-05 | Yes | 2.3-3.2 | Jul 27-Sep 25, 2026 |
+| Worker bootstrap | Phase 1 guardrails + S2-09 + S2-13 | Yes | 1.8-2.5 | Jun 22-Sep 11, 2026 |
+| Dispatch integration | Phase 1 broker/adapter + E2-4 | Yes | 3.3-4.6 | Jun 8-Sep 18, 2026 |
+| Task contracts | S2-08 + S2-12 | Yes | 0.7-1.0 | Aug 24-Sep 18, 2026 |
+| Path resolution | E2-3 (S2-09..S2-12) | Yes | 1.8-2.5 | Aug 31-Sep 18, 2026 |
+| Docker-coupled tasks | E2-2 (S2-06..S2-08) | Yes | 1.0-1.4 | Jul 27-Sep 4, 2026 |
+| Runtime limit guards | Phase 1 guardrails | Yes | 0.9-1.3 | Jun 22-Jul 3, 2026 |
+| Observability | Phase 1 integration/drills + S2-05 + S2-15 | Yes | 1.6-2.3 | Jul 6-Sep 25, 2026 |
+
+Software-core subtotal (phase allocation basis, not row-sum): `12.5-17.5 PM` in baseline scope.
+
+### 8.2 Software Backlog Addendum (Currently Under-Accounted)
+
+The following software work is required for reliable delivery but is not explicitly PM-accounted in the current baseline narrative:
+
+| Addendum software item | Why needed | Additional PM | Suggested window |
+|---|---|---:|---|
+| Deployment lifecycle controller implementation (`drain/start/rollback`) | Required by Section 6.3.2 controls | 1.2-1.8 | Phase 1 W5-W8 + Phase 3 prep |
+| CI/CD and supply-chain controls for broker/supervisor artifacts (signing/SBOM/vuln gates) | New boundary services need release hardening | 0.8-1.2 | Phase 1 W2-W8 |
+| Enqueue-site classification backfill ledger + owner sign-off | Prevents long-tail unclassified routing drift | 0.6-0.9 | Phase 2 W1-W6 |
+| Canonical hard-error contract conformance test pack | Needed for unsupported profile/filesystem contract paths | 0.7-1.0 | Phase 2 W6-W10 |
+| Capacity/performance harness (routing/reconciliation/churn) | Repeated evidence needed for gate decisions | 0.8-1.1 | Phase 2 W8-W11 |
+| Dashboards and runbooks as code for new metrics/events | Operational readiness for new control plane | 0.7-1.0 | Phase 2 W8-W12 |
+
+Addendum software delta if fully scoped separately: `+4.8-7.0 PM` and approximately `+6-12 weeks` elapsed (with partial parallelization).
+
 ## 9. Program Phases, Timeline, and Gate Reviews
 
 Estimated duration assumes prerequisites are approved quickly.
 
 | Phase | Duration | Primary owners | Exit gate |
 |---|---|---|---|
-| Phase 0: Preconditions | 4-6 weeks | Governance + security + network + Lemhi ops | P1-P7 signed off |
+| Phase 0: Preconditions | 4-6 weeks | Governance + security + network + Lemhi ops | P1-P8 signed off |
 | Phase 1: Platform plumbing | 6-8 weeks | DevOps + sysadmin | Dispatch broker, runtime, and supervisor MVP works in non-prod |
 | Phase 2: Software adaptation | 10-14 weeks | SWE + DevOps | Queue routing and blocker guardrails merged and tested |
 | Phase 3: Pilot operations | 6-8 weeks | SRE + SWE + Lemhi ops | Sustained pilot with defined SLO pass |
@@ -444,6 +518,9 @@ Estimated duration assumes prerequisites are approved quickly.
 Total: approximately 7-10 months under active cross-team staffing.
 
 Detailed execution specs with explicit decisions, weekly milestones, gate criteria, and complexity scoring are provided in Section 16.
+
+Accounting note: this baseline timeline is the same baseline scope used for the `25-35 PM` labor envelope and includes the Section 8 software backlog plus Section 16 phase execution work.
+Staffing assumption note: the `30-42 week` baseline and `26-36 week` pilot-ready path assume approximately `3.4-4.0` concurrent FTE from the role mix in Section 10.
 
 ## 10. Staffing Model (Minimum Practical Team)
 
@@ -468,6 +545,50 @@ Using typical fully-loaded engineering rates, 25-35 person-months yields an appr
 
 This excludes opportunity cost from diverted WEPPcloud roadmap and support work.
 
+### 11.1 Cost/Timeline Accounting Coverage (Included vs Additional)
+
+| Bucket | Scope | Timeline | PM | Labor cost | Included in baseline `25-35 PM`? |
+|---|---|---|---:|---:|---|
+| Baseline program | Path A Phases 0-4, including Section 8 software backlog and Section 16 phase execution | 30-42 weeks | 25-35 | $375k-$770k | Yes |
+| Conditional adders | Section 17.10 triggered scope (`P1` denial path, callback constraints, `D3/E3` acceleration, PII controls, `F3` acceleration) | Trigger-dependent | +3 to +18 each trigger | +$45k-$396k each trigger | No |
+| Long-term modernization | Section 18 post-Path-A program (`A4 + B1 + C1 + D3 + E3 + F3`) | +9-15 months | +20-30 delta from Path A stabilization | +$300k-$660k delta | No |
+| Software addendum under-accounted work | Section 8.2 items | +6-12 weeks (partially parallel) | +4.8-7.0 | +$72k-$154k | No (currently implicit/partial) |
+| Mandatory 3-2-1 storage program | Section 6.4.4 S-321A/S-321B storage procurement and integration path | +6 to +16 weeks | +3 to +8 (partially overlapping with D/E) | +$45k-$176k labor | No (CAPEX/logistics are additional cash spend) |
+
+### 11.2 Under-Accounted Non-Software Items
+
+These items are partially represented in workstream text but not explicitly line-itemed in baseline PM/time math.
+
+| Non-software item | Additional timeline | Additional PM | Additional labor cost | Notes |
+|---|---:|---:|---:|---|
+| Program management + cross-org governance cadence | +2 to +6 weeks | +4 to +8 | +$60k-$176k | No explicit PM role in staffing table |
+| CAB/change-management/release coordination overhead | +2 to +6 weeks | +1 to +3 | +$15k-$66k | Required by lifecycle controls but not line-itemed |
+| External security assessment + remediation buffer | +4 to +10 weeks | +2 to +5 | +$30k-$110k | Vendor scheduling/remediation often dominate |
+| Compliance evidence package (non-PII baseline) | +4 to +12 weeks | +2 to +6 | +$30k-$132k | PII trigger exists; baseline compliance packaging still under-scoped |
+| 24x7 ops readiness ramp (training/shadow/backfill) | +4 to +8 weeks | +3 to +7 | +$45k-$154k | Ownership is required, ramp is not explicitly costed |
+| Post-cutover hypercare stabilization | +4 to +8 weeks | +2 to +4 | +$30k-$88k | No dedicated hypercare phase currently |
+| Observability/SIEM retention run-rate implementation overhead | +2 to +6 weeks | +1 to +3 | +$15k-$66k | Labor only; tool OPEX excluded from labor totals |
+| PKI/secrets lifecycle operations overhead | +2 to +8 weeks | +1 to +2.5 | +$15k-$55k | Tooling/service costs are separate OPEX |
+| Procurement/vendor lead-time management overhead | +6 to +20 weeks | +0.5 to +2 | +$7.5k-$44k | Lead time can affect critical path even when labor is low |
+| Hybrid cloud run-rate planning and capacity management | +1 to +3 weeks | +0.5 to +2 | +$7.5k-$44k | Recurring cloud OPEX excluded from labor totals |
+
+Important: Section 11.2 rows are risk adders and not fully additive with each other.
+
+### 11.3 Mandatory 3-2-1 Storage CAPEX and Logistics (Lustre replacement path)
+
+This section captures required non-labor storage cash exposure using the procurement-request hardware estimate (`$21,391.50` per server).
+
+| Scenario | Server basis | Hardware CAPEX | Logistics/non-labor | Total non-labor spend | Notes |
+|---|---|---:|---:|---:|---|
+| S-321A (recommended baseline) | 2 servers (`$21,391.50 x 2`) | $42,783.00 | $8k-$18k | $50,783-$60,783 | Copy 3 provided by institutional offsite immutable backup service |
+| S-321B (self-hosted copy-3) | 3 servers (`$21,391.50 x 3`) | $64,174.50 | $12k-$24k | $76,174.50-$88,174.50 | Dedicated third server for backup tier |
+
+Combined first-year cash exposure for Path A (labor + storage non-labor):
+
+1. Path A labor: `$375k-$770k`.
+2. Path A + S-321A storage non-labor: `$425,783-$830,783` (plus offsite backup service OPEX).
+3. Path A + S-321B storage non-labor: `$451,174.50-$858,174.50`.
+
 ## 12. Validation and Acceptance Criteria
 
 A Lemhi worker deployment should not be considered first-class until all criteria pass:
@@ -490,7 +611,7 @@ High risks:
 
 Stop conditions:
 
-1. If P1-P7 are not approved by end of Phase 0, stop project.
+1. If P1-P8 are not approved by end of Phase 0, stop project.
 2. If pilot cannot achieve minimum availability/latency envelope, stop productionization.
 3. If security controls cannot meet institutional requirements, stop deployment.
 
@@ -655,19 +776,19 @@ Planning baseline in this section:
    - Phase 2: 12 weeks (with 2-week contingency to reach 14)
    - Phase 3: 8 weeks
    - Phase 4: 6 weeks
-3. Aligns to the Section 9 7-10 month envelope (40-42 weeks with contingency).
+3. This section is the conservative reference schedule (40-42 weeks with contingency), which sits in the upper half of the Section 9 `30-42 week` baseline envelope.
 
 ### 16.1 Phase 0: Preconditions (6 Weeks, Apr 20-May 29, 2026)
 
 #### Objective
 
-Convert `P1-P7` into signed operating contracts so engineering starts only after governance/security/network/storage/operations decisions are explicit.
+Convert `P1-P8` into signed operating contracts so engineering starts only after governance/security/network/storage/operations decisions are explicit.
 
 #### Scope boundaries
 
 In scope:
 
-1. Governance, security, network, scheduler, storage, and operations decisions required for `P1-P7`.
+1. Governance, security, network, scheduler, storage, and operations decisions required for `P1-P8`.
 2. Written contracts for Slurm/cgroup/`ulimit`, secure dispatch/API boundary pattern, and run-path/storage model.
 3. Phase 1 readiness packet with approved non-production deployment constraints.
 
@@ -688,22 +809,23 @@ Out of scope:
 | D0-5 / P4 | Approve storage class and path compatibility approach for `/wc1` and `/geodata` contract | Storage admin lead | End of Week 4 (May 15, 2026) |
 | D0-6 / P5 | Select internet-restricted operating policy (default target: `hybrid`) | I-CREWS sponsor + RCDS ops + security | End of Week 4 (May 15, 2026) |
 | D0-7 / P6 | Assign 24x7 incident ownership and escalation chain | RCDS operations manager | End of Week 5 (May 22, 2026) |
-| D0-8 | Approve Phase 1 non-production guardrails and go/no-go | Joint gate board | End of Week 6 (May 29, 2026) |
+| D0-8 / P8 | Approve funded 3-2-1 storage procurement/integration path (`S-321A` or `S-321B`) | I-CREWS sponsor + RCDS operations manager | End of Week 5 (May 22, 2026) |
+| D0-9 | Approve Phase 1 non-production guardrails and go/no-go | Joint gate board | End of Week 6 (May 29, 2026) |
 
 #### Weekly plan
 
 | Week | Dates | Tasks | Deliverables |
 |---|---|---|---|
-| W1 | Apr 20-24 | Kickoff, owner assignment, `P1-P7` evidence template, decision calendar | Decision register template, RACI, meeting cadence |
+| W1 | Apr 20-24 | Kickoff, owner assignment, `P1-P8` evidence template, decision calendar | Decision register template, RACI, meeting cadence |
 | W2 | Apr 27-May 1 | Resolve `P1` + `P7` policy and limits discovery plan | Signed/denied `P1`, draft `P7` limits contract |
 | W3 | May 4-8 | Resolve `P2` + `P3` network/dispatch security boundary | Network and security decision records |
 | W4 | May 11-15 | Resolve `P4` + `P5` storage contract and hybrid policy | Storage contract memo, hybrid policy memo |
-| W5 | May 18-22 | Resolve `P6` operations ownership and escalation | Ops ownership charter, escalation matrix |
+| W5 | May 18-22 | Resolve `P6` operations ownership and `P8` storage funding/procurement decision | Ops ownership charter, escalation matrix, funded storage decision record |
 | W6 | May 25-29 | Gate review and publish signed precondition packet | Phase 0 gate packet, Phase 1 go/no-go record |
 
 #### Acceptance criteria
 
-1. All `P1-P7` are signed with explicit constraints and owners.
+1. All `P1-P8` are signed with explicit constraints and owners.
 2. `hybrid` policy defines task boundaries (`lemhi-safe` vs rerouted).
 3. Non-production security/network/storage controls are approved for Phase 1 start.
 
@@ -713,6 +835,7 @@ Out of scope:
 |---|---|---|
 | `P1` persistent Slurm policy decision | 4 | Cross-organization governance with operational risk |
 | `P7` scheduler/cgroup/`ulimit` contract | 4 | Requires policy plus empirical runtime verification |
+| `P8` funded 3-2-1 storage plan | 5 | Hard funding/logistics dependency for non-Lustre path |
 | `P2` + `P3` secure connectivity decisions | 5 | Security-critical multi-team network boundary |
 | `P4` storage/path contract | 4 | High correctness and performance impact |
 | `P5` hybrid policy boundary | 3 | Policy-heavy but implementation deferred |
@@ -790,7 +913,7 @@ Implement contract-safe hybrid execution so Lemhi workers run only HPC-compatibl
 #### Entry criteria
 
 1. Phase 1 dispatch/runtime/supervisor plumbing is operational in non-production.
-2. `P1-P7` remain approved and unchanged.
+2. `P1-P8` remain approved and unchanged.
 3. Filesystem architecture is selected and documented.
 
 #### Queue-routing design decisions
@@ -1081,6 +1204,8 @@ Recommended long-term option: `C1`.
 Recommended near-term option: `D2` with `D1` as immediate prerequisite.  
 Recommended long-term option: `D3`.
 
+Cost note: Section 17.4 and 17.5 cost rows are labor estimates; mandatory storage CAPEX/logistics for the 3-2-1 path are accounted separately in Section 11.3.
+
 ### 17.5 Blocker E: Shared filesystem contract across Lemhi and WEPPcloud services
 
 | Option | Timeline (weeks) | PM | Cost | Complexity | Software | DevOps | Sysadmin | Viability |
@@ -1114,11 +1239,14 @@ Recommended long-term option: `F3`.
 Path A: Near-term St. Joe viable path (recommended)
 
 1. `A3 + B1 + C4 + D1/D2 + E2 + F1`
-2. Time to pilot-ready bounded St. Joe execution (through Phase 3): approximately 24-34 weeks.
+2. Time to pilot-ready bounded St. Joe execution (through Phase 3): approximately 26-36 weeks.
 3. Time to first-class hardened service (through Phase 4): approximately 30-42 weeks.
 4. Raw blocker-sum effort: approximately 35-53 PM (`D1 + D2` included as the recommended pair).
 5. Integrated program effort after overlap: approximately 25-35 PM (aligns to Sections 10 and 11).
 6. Integrated labor cost: approximately $375k-$770k.
+7. Timeline assumption: durations above assume approximately `3.4-4.0` concurrent FTE staffing.
+8. Mandatory 3-2-1 storage non-labor spend (S-321A baseline using procurement-request server estimate): approximately $50,783-$60,783.
+9. Combined Path A first-year cash exposure (labor + S-321A non-labor storage): approximately $425,783-$830,783 (plus offsite backup service OPEX).
 
 Path B: Long-term durable Lemhi-first path (post-St. Joe horizon)
 
@@ -1127,6 +1255,7 @@ Path B: Long-term durable Lemhi-first path (post-St. Joe horizon)
 3. Raw blocker-sum effort: approximately 53-78 PM.
 4. Indicative labor cost: approximately $795k-$1.716M.
 5. Planning delta from stabilized Path A to Path B: approximately +20-30 PM and +$300k-$660k (migration and revalidation heavy).
+6. Storage note: if moving to self-hosted copy-3 backup tier (`S-321B`), add approximately $76,174.50-$88,174.50 non-labor storage spend.
 
 ### 17.8 Options not viable for near-term St. Joe delivery
 
@@ -1140,7 +1269,7 @@ Path B: Long-term durable Lemhi-first path (post-St. Joe horizon)
 
 Global hard stops (all rows):
 
-1. `P1-P7` unsigned by end of Phase 0 -> stop.
+1. `P1-P8` unsigned by end of Phase 0 -> stop.
 2. Pilot SLO floor miss -> stop expansion.
 3. Institutional security-control failure at boundary controls -> stop.
 
@@ -1148,8 +1277,8 @@ Global hard stops (all rows):
 |---|---|---|---|---|---|
 | `A3` Hybrid routing | `P2/P3/P5` approved; routing boundary in place; full capability inventory | 100% task classification, CI guard for unclassified tasks, deterministic misroute errors | Classification drift and hidden dependencies | GO (conditional) | Best near-term containment of internet-dependent task risk |
 | `C4` Hybrid persistent model | `P1/P7` signed; lifecycle thresholds defined; `P6` on-call owner named | Drain-first lifecycle controller, no uncontrolled active-job interruption, rollback drill under load | Shared-HPC policy churn and emergency outage events | Scope-reduce | Pilot-only GO; production no-go until repeated evidence |
-| `D2` Node-local scratch + promote (with `D1`) | `D1` benchmark evidence; `P4` approved; scratch quota/cleanup policy | Atomic promote + checksums, freshness guard, integrity load tests | Promote backlog and scratch pressure | GO (conditional) | Practical small-file mitigation while preserving rollback path |
-| `E2` Staged replication | `D2` data path available; consistency and freshness SLO approved | Promotion marker only after full sync verification, idempotent retry, audit trail | Replication lag and operator error | GO (conditional) | Better integrity containment than live two-way mount for near-term path |
+| `D2` Node-local scratch + promote (with `D1`) | `D1` benchmark evidence; `P4` and `P8` approved; scratch quota/cleanup policy | Atomic promote + checksums, freshness guard, integrity load tests | Promote backlog and scratch pressure | GO (conditional) | Practical small-file mitigation while preserving rollback path |
+| `E2` Staged replication | `D2` data path available; consistency and freshness SLO approved; `P8` funded | Promotion marker only after full sync verification, idempotent retry, audit trail | Replication lag and operator error | GO (conditional) | Better integrity containment than live two-way mount for near-term path |
 | `F1` Reroute Docker-coupled tasks | Docker-coupled task inventory complete; cloud worker capacity planned | Hard routing to cloud profile, explicit contract errors on Lemhi, queue latency monitoring | Cloud queue saturation if under-capacity | GO (conditional) | Fastest way to remove unsupported runtime assumptions from Lemhi nodes |
 
 ### 17.10 Conditional Scope Adders (Decision-Dependent Work)
@@ -1160,6 +1289,7 @@ These are not in the baseline 25-35 PM estimate. Triggering any row adds scope, 
 |---|---|---:|---:|---:|---|
 | `P1` denies no-preempt/service-like scheduling guarantees | Shift from non-interruption model to recovery-SLA model (`C2/C3` style), add stronger checkpoint/restart and user-facing SLA contract changes | +8-16 weeks | +6-10 PM | +$90k-$220k | Lemhi governance + I-CREWS sponsor |
 | Security disallows inbound callbacks from Lemhi boundary | Implement pull-based state reconciliation with signed polling windows, replay protection, and dead-letter recovery | +4-8 weeks | +3-5 PM | +$45k-$110k | Security + network + platform leads |
+| Institutional offsite immutable backup service is unavailable (`P8` gap) | Procure and integrate dedicated copy-3 backup tier (`S-321B`) with immutability controls and restore drills | +4-8 weeks | +1.5-3 PM | +$22.5k-$66k labor + $25,391.50-$33,391.50 capex/logistics | I-CREWS sponsor + RCDS operations |
 | `D2/E2` cannot meet artifact freshness/integrity SLOs under load | Accelerate `D3` and/or `E3` migration, including compatibility adapters and dual-run validation | +12-24 weeks | +10-18 PM | +$150k-$396k | Storage admin + SWE lead + SRE lead |
 | PII/regulated data is introduced into Lemhi worker flows | Data classification, encryption key lifecycle, tighter access controls, audit expansion, and compliance evidence pack | +6-12 weeks | +4-8 PM | +$60k-$176k | Security/compliance + data owner |
 | `F1` reroute causes sustained cloud-queue saturation | Implement `F3` service-offload pattern with capacity controls and retry semantics | +6-10 weeks | +3-5 PM | +$45k-$110k | SWE + DevOps + operations |
