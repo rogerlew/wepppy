@@ -110,6 +110,21 @@ WEPPcloud is a persistent containerized service platform, not a single executabl
 
 That service topology exists to support an AI-driven calibration workflow rather than one-shot batch execution. The St. Joe loop is: inspect basin outputs, form a calibration hypothesis, adjust parameters, submit another full-basin run, query the resulting diagnostics, and repeat. That requires always-on services, immediate queue dispatch, persistent run state, and low-latency access to very large numbers of small WEPP files over hours-long working sessions. Dedicated servers match that operating model. Shared infrastructure and HPC-style scheduling are optimized for queued batch jobs; the St. Joe effort requires an interactive modeling platform that can remain online while continuously feeding new work to the worker pool.
 
+### Stack Compute Optimizations Already in Place
+
+This procurement request is not an attempt to compensate for inefficient software. WEPPcloud is an approximately eight-year-old production stack that has already been repeatedly optimized to fit within a modest on-prem server footprint. The current bottleneck is basin scale, not a lack of engineering effort.
+
+Over that time, the team has moved multiple hot paths out of Python and into owned Rust components designed specifically for WEPPcloud workloads. The current stack includes `wepppyo3` for climate and raster acceleration, `peridot` for watershed abstraction, and the custom `weppcloud-wbt` fork for terrain and TOPAZ processing. Documented examples already in use include:
+
+- Rust `make_rhem_storm_file` in `wepppyo3`, which delivered a documented **400x speedup** for RHEM storm-file generation
+- `peridot` watershed abstraction, documented in the codebase as **3x to 10x faster than Python**, with representative-flowpath mode reducing hillslope abstraction time by **10x to 100x** for large batch workflows
+- `weppcloud-wbt` VRT/windowed GeoTIFF support, which avoids full in-memory raster loads for cropped DEM inputs and reduces memory pressure during terrain preprocessing
+- WEPP interchange plus the DuckDB-backed query stack, which converts large raw WEPP text outputs into compressed Parquet tables, supports cleanup of selected raw text artifacts after successful conversion to reduce disk footprint and inode pressure, and enables interactive real-time querying of multi-GB Parquet datasets
+
+Memory footprint has also been explicitly optimized in the core WEPP executable path. Since October 2025, the build system has produced both the full watershed `wepp` binary and a hillslope-optimized `wepp_hill` variant. The hillslope build compiles against reduced-dimension include files specifically for hillslope work, shrinking key static limits from `mxhill 45000 -> 45`, `mxplan 15000 -> 15`, `mxelem 60000 -> 85`, and `ntype 15000 -> 15`. In the currently vendored binaries (`wepp_260414` versus `wepp_260414_hill`), that cuts the compiled `.bss` static array footprint from approximately **14.0 GB** to **2.0 MB** — about a **7000x reduction** in reserved global-array space for hillslope runs.
+
+These optimizations are the reason WEPPcloud remains usable on constrained hardware today. They also strengthen the procurement case: even after aggressive software and memory optimization, the St. Joe basin still requires dedicated compute and local storage because the workload itself is inherently large.
+
 ### NFS Storage Is a Proven Bottleneck
 
 The current production server (wepp1) stores all modeling data on a network-attached storage (NAS) device accessed via NFS. Benchmarking (compared to development ZFS NFS share) has quantified the performance penalty this imposes on WEPPcloud's metadata-heavy workload:
@@ -151,6 +166,8 @@ For the full first-class `rq-worker` integration thought experiment (requirement
 
 Using Lemhi as a direct replacement for WEPPcloud production worker hosts is **not currently viable**. Lemhi is a shared high-performance computing (HPC) system for scheduled research jobs, but WEPPcloud's production worker architecture is designed around always-on service containers, continuously connected queue workers, and run-directory mounts that behave like dedicated infrastructure.
 
+Simple batching of jobs is also problematic. Many WEPPcloud RQ tasks are hierarchical: a parent job dynamically enqueues child jobs, records the child ids in job metadata, and uses Redis-backed `depends_on` edges to build multi-stage execution trees for prep, hillslopes, watershed routing, post-processing, interchange, export, and finalization. Running an RQ task function as a standalone Slurm job is therefore not equivalent to running the workflow. The parent task still needs live RQ/Redis access in order to enqueue its descendants, publish status, support cancellation, and advance the job tree.
+
 ### Plain-Language Architecture Comparison
 
 | WEPPcloud production worker model | Lemhi (C3+3) operating model |
@@ -164,6 +181,8 @@ Using Lemhi as a direct replacement for WEPPcloud production worker hosts is **n
 
 1. **RQ service model mismatch**
 WEPPcloud workers are designed as persistent services that stay online and attached to the queue. Lemhi is designed for scheduled jobs with time limits and queue fairness, not for always-on daemon pools as primary infrastructure.
+
+Even if a communication workaround were created, the child jobs themselves are enqueued with explicit RQ timeout assumptions for the always-on WEPPcloud queues (typically 12-hour timeouts on the default and batch queues). Those timeouts assume immediate pickup by persistent workers, not scheduler latency, queue wait time, or nested allocation delays inside Slurm.
 
 2. **Required WEPPcloud mount contracts (`/wc1`, `/geodata`)**
 The WEPPcloud worker deployment contract requires shared mounts at canonical paths with stable permissions and ownership semantics. This is a hard requirement for run-directory discovery, NoDb state, and output write paths. Recreating that contract on a shared HPC filesystem would require non-trivial storage and permission exceptions.
