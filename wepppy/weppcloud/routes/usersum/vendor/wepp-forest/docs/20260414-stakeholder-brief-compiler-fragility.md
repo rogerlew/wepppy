@@ -29,6 +29,18 @@ When moving to newer toolchains, these hidden assumptions surface as:
 - path divergence at condition boundaries,
 - changed outputs even when source edits are minimal.
 
+### Cross-Compiler Gotchas in Plain Language
+
+These are not abstract compiler trivia. They are concrete ways a legacy numerical codebase can behave differently even when the scientific equations were not intentionally changed.
+
+| Gotcha | What it means in practice | Typical symptom |
+| --- | --- | --- |
+| Accidental zero-start behavior | A routine forgets to initialize a local scalar or work array. One compiler/runtime may happen to present zeros on entry, while another exposes leftover stack data. | Different first-event behavior, unstable counters/flags, or output drift that looks random but is actually implementation-dependent. |
+| Accidental "sticky" local state | A routine implicitly depends on a local variable behaving as if it were `SAVE`d between calls. A different compiler/storage model may reset that state, reuse old memory differently, or reorder where it lives. | Different solver history, changed event sequencing, or results that depend on call order rather than model intent. |
+| Silent arithmetic versus fail-fast traps | One toolchain may let divide-by-zero, overflow, underflow, or invalid operations continue long enough to produce plausible-looking outputs or delayed corruption. Another traps immediately. | A legacy run "finishes" but carries hidden bad state, while a newer run fails early and points closer to the real defect. |
+| Floating-point model and convergence sensitivity | Small differences in rounding, denormal handling, optimization, or IEEE behavior can change whether an iterative numerical loop converges. | One compiler completes while another stalls or spins. A documented example in this repo is the Hangman Creek case, where the `ifx` build hung in erosion routing for a narrow wet-soil scenario that the `gfortran` build completed. |
+| Threshold-driven branch divergence | Tiny numeric differences at a comparison boundary can send execution down a different branch, for example at tolerance checks, rain/snow partition logic, or routing thresholds. | Two runs with the same inputs both complete, but they follow different paths and diverge in outputs even though the source edit was minimal or nonexistent. |
+
 ## Why "Old Results" Are Not Automatically "Correct Results"
 
 Historical consistency is important, but it is not proof of correctness.
