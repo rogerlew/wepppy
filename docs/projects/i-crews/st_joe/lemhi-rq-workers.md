@@ -61,6 +61,12 @@ No engineering should start until these are approved in writing.
 | P7 | Written Slurm/cgroup + Linux limits contract for worker jobs (`cpus-per-task`, cgroup enforcement, `ulimit` profile) | Lemhi ops + security | Nested worker fanout cannot be sized or stabilized safely without explicit limits |
 | P8 | Funded procurement and logistics plan for high-performance 3-2-1 storage (hot run tier + replica + offsite immutable copy) | I-CREWS leadership + RCDS operations | Lustre is non-viable for this workload; no funded 3-2-1 storage means no production-safe Lemhi path |
 
+`P2 + P3` hard requirement clarification:
+
+1. Lemhi must provide a non-tunneled routed path from Slurm compute jobs to the WEPPcloud Redis endpoint that supports mTLS session establishment and long-lived worker/pubsub connections.
+2. If that routed mTLS path is not approved and operational, Lemhi cannot be treated as first-class persistent RQ worker infrastructure.
+3. In that case, first-class scope stops and only non-first-class fallback models (`B1`) remain in scope.
+
 ## 5. Target Reference Architecture
 
 ### 5.1 Control Plane (WEPPcloud side)
@@ -122,6 +128,8 @@ Exit criteria:
 
 Required actions:
 
+0. Treat `P2/P3` as hard gates, not soft risks:
+   - no routed mTLS path from Lemhi Slurm jobs to WEPPcloud Redis means no first-class Lemhi worker program.
 1. Adopt non-tunneled private routed Redis connectivity as the primary first-class pattern:
    - Lemhi compute nodes establish direct TLS Redis sessions to WEPPcloud Redis endpoint.
    - No SSH/stunnel bridge layer is permitted.
@@ -566,13 +574,14 @@ This excludes opportunity cost from diverted WEPPcloud roadmap and support work.
 
 ### 11.1 Cost/Timeline Accounting Coverage (Included vs Additional)
 
-| Bucket | Scope | Timeline | PM | Labor cost | Included in baseline `25-35 PM`? |
-|---|---|---|---:|---:|---|
-| Baseline program | Path A Phases 0-4, including Section 8 software backlog and Section 16 phase execution | 30-42 weeks | 25-35 | $375k-$770k | Yes |
-| Conditional adders | Section 17.10 triggered scope (`P1` denial path, direct-Redis denial fallback, `D3/E3` acceleration, PII controls, `F3` acceleration) | Trigger-dependent | +3 to +18 each trigger | +$45k-$396k each trigger | No |
-| Long-term modernization | Section 18 post-Path-A program (`A4 + B4 + C1 + D3 + E3 + F3`) | +9-15 months | +20-30 delta from Path A stabilization | +$300k-$660k delta | No |
-| Software addendum under-accounted work | Section 8.2 items | +6-12 weeks (partially parallel) | +4.8-7.0 | +$72k-$154k | No (currently implicit/partial) |
-| Mandatory 3-2-1 storage program | Section 6.4.4 S-321A/S-321B storage procurement and integration path | +6 to +16 weeks | +3 to +8 (partially overlapping with D/E) | +$45k-$176k labor | No (CAPEX/logistics are additional cash spend) |
+| Bucket | Scope | Timeline | PM | Labor cost | Primary dependency gates | Included in baseline `25-35 PM`? |
+|---|---|---|---:|---:|---|---|
+| Baseline program | Path A Phases 0-4, including Section 8 software backlog and Section 16 phase execution | 30-42 weeks | 25-35 | $375k-$770k | `P1-P8` signed; `P2/P3` routed mTLS path approved/operational by Phase 1 gate | Yes |
+| Routed mTLS connectivity package | Section 11.4 `P2/P3` network/security/PKI work package | 4-7 weeks (partially parallel) | 2.6-4.4 | $39k-$96.8k | Lemhi network/security approval, routed path provisioning, PKI availability | Yes (within baseline/`B4`) |
+| Conditional adders | Section 17.10 triggered scope (`P1` denial path, direct-Redis denial fallback, `D3/E3` acceleration, PII controls, `F3` acceleration) | Trigger-dependent | +3 to +18 each trigger | +$45k-$396k each trigger | Specific trigger condition realized in execution | No |
+| Long-term modernization | Section 18 post-Path-A program (`A4 + B4 + C1 + D3 + E3 + F3`) | +9-15 months | +20-30 delta from Path A stabilization | +$300k-$660k delta | Path A stabilized; sustained `P2/P3`; long-term `C1/D3/E3/F3` approvals/funding | No |
+| Software addendum under-accounted work | Section 8.2 items | +6-12 weeks (partially parallel) | +4.8-7.0 | +$72k-$154k | Phase 1-2 staffing availability and CI/CD ownership in place | No (currently implicit/partial) |
+| Mandatory 3-2-1 storage program | Section 6.4.4 S-321A/S-321B storage procurement and integration path | +6 to +16 weeks | +3 to +8 (partially overlapping with D/E) | +$45k-$176k labor | `P8` funding + procurement/logistics windows + operations ownership | No (CAPEX/logistics are additional cash spend) |
 
 ### 11.2 Under-Accounted Non-Software Items
 
@@ -608,6 +617,33 @@ Combined first-year cash exposure for Path A (labor + storage non-labor):
 2. Path A + S-321A storage non-labor: `$425,783-$830,783` (plus offsite backup service OPEX).
 3. Path A + S-321B storage non-labor: `$451,174.50-$858,174.50`.
 
+### 11.4 Routed mTLS Connectivity Work Package (`P2/P3`) Budget and Timeline
+
+This is the explicit estimate for Lemhi-provided routed mTLS connectivity from Slurm compute jobs to WEPPcloud Redis.
+
+| Work item | Timeline (weeks) | PM | Labor cost | Notes |
+|---|---:|---:|---:|---|
+| Network/routing/security design + approvals | 1-2 | 0.6-1.0 | $9k-$22k | ACL boundaries, route domains, failure domains |
+| Firewall/allowlist and routed-path implementation | 1-2 | 0.5-0.9 | $7.5k-$19.8k | Non-tunneled path from Lemhi compute to Redis TLS endpoint |
+| PKI and mTLS credential lifecycle implementation | 1-2 | 0.8-1.3 | $12k-$28.6k | Issuance, rotation, revocation, service principal mapping |
+| Validation and failure drills | 1-2 | 0.7-1.2 | $10.5k-$26.4k | Auth-rotation, route outage, reconnect behavior, telemetry viability |
+| **Total (`P2/P3`)** | **4-7 elapsed (partially parallel)** | **2.6-4.4** | **$39k-$96.8k** | Hard requirement for first-class designation |
+
+Planning note:
+
+1. This `P2/P3` work package is included in baseline program estimates and within `B4` scope; it is not additive unless schedule slips force sequential execution.
+2. If `P2/P3` is delayed or denied, first-class Lemhi scope cannot proceed.
+
+### 11.5 Budget Dependency Matrix and Re-Baseline Rules
+
+| Dependency state | Budget implication | Timeline implication | Program action |
+|---|---|---|---|
+| `P1-P8` signed and `P2/P3` operational by Phase 1 gate | Keep Path A baseline (`$375k-$770k` labor) plus selected storage non-labor scenario | Keep baseline `30-42 weeks` | Proceed as first-class path (`A3 + B4 + C4 + D1/D2 + E2 + F1`) |
+| `P2/P3` delayed or denied | First-class budget model is invalid; apply Section 17.10 direct-Redis denial fallback delta (`+3-6 PM`, `+$45k-$132k`) and re-scope | Add `+4-8 weeks` and re-sequence dependent Phase 1/2 work | Drop first-class designation; re-baseline to fallback-only (`B1`) or stop |
+| `P8` not funded/approved | Storage-backed production budget is invalid until resolved | Add procurement/logistics delay (`+6-20 weeks` typical lead-time range in Section 11.2) | Stop production path or approve alternate funded copy-3 path (`S-321B`) |
+| `P1` denied (no persistent-like Slurm policy) | Add Section 17.10 `P1` denial delta (`+6-10 PM`, `+$90k-$220k`) for recovery-SLA architecture shift | Add `+8-16 weeks` | Re-baseline from non-interruption model to recovery model (`C2/C3`) |
+| Multiple dependency failures occur together | Additive estimate is unreliable; row-level sums will understate integration overhead | Schedule compression assumptions become invalid | Run full re-estimation and publish a new baseline envelope before continuing |
+
 ## 12. Validation and Acceptance Criteria
 
 A Lemhi worker deployment should not be considered first-class until all criteria pass:
@@ -634,6 +670,7 @@ Stop conditions:
 1. If P1-P8 are not approved by end of Phase 0, stop project.
 2. If pilot cannot achieve minimum availability/latency envelope, stop productionization.
 3. If security controls cannot meet institutional requirements, stop deployment.
+4. If routed mTLS connectivity (`P2/P3`) is not approved and operational by the Phase 1 integration gate, stop first-class scope and explicitly re-baseline as fallback-only.
 
 ## 14. Practical Decision Framing
 
