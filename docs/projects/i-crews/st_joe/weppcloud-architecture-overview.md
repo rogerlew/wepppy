@@ -28,7 +28,7 @@ WEPPcloud is a containerized web-application and modeling platform. This figure 
  DATA BUS LEGEND
  ---------------
  ···  Postgres
- ooo  Redis
+ ═══  Redis
  ───  Local Storage
 
 
@@ -36,49 +36,49 @@ WEPPcloud is a containerized web-application and modeling platform. This figure 
  ───────────────            ─────────────────────────                    ─────────────────────
                                                           DATA BUSES
  ┌─────────────┐            ┌───────────────────────┐                    ┌───────────────────┐
- │    Human    │            │   weppcloud (Flask)   ├───▶ | o▶ o    ·····│     Postgres      │
- │ Web Browser │──http────▶ │   UI · Auth · NoDb    │···· | ·· o ·▶ :    │   users · runs    │
- └─────────────┘  /jwt      └───────────┬───────────┘     |    o    :    └───────────────────┘
-                    │                   │                 |    o    :
-                    │       ┌───────────┴───────────┐     |    o    :    ┌───────────────────┐
-                    ├─────▶ │  rq-engine (FastAPI)  ├───▶ | o▶ oooo : ooo│       Redis       |
-                    │       │  tasks · state · jobs │···· | ·· o ·▶ :    │  rq · job status  |
-                    │       └───────────┬───────────┘     |    o    :    │ nodb locks/cache  |
-                    │                   │                 |    o    :    └───────────────────┘
-                    │       ┌───────────┴───────────┐     |    o    :           
-                    │       |    rq-worker pool     ├───▶ |    o    :
-                    │       |  data acquisition /   │oooo | o▶ o    :
-                    │       |  processing (Rust)    │···· | ·· o ·▶ :
-                    |       |  subprocess (WEPP)    |     |    o    :
-                    |       └──┬────┬───────────────┘     |    o    :
-                    │          |   http                   |    o    :
-                    |      docker   |                     |    o    :
-                    |        exec   └-▶ EXTERNAL APIS     |    o    :
-                    |          |                          |    o    :
-                    |          └-▶ SERVICE CONTAINERS     |    o    :    ┌───────────────────┐
+ │    Human    │            │   weppcloud (Flask)   ├───▶ | ═▶ ‖    ·····│     Postgres      │
+ │ Web Browser │──http────▶ │   UI · Auth · NoDb    │···· | ·· ‖ ·▶ :    │   users · runs    │
+ └─────────────┘  /jwt      └───────────┬───────────┘     |    ‖    :    └───────────────────┘
+                    │                   │                 |    ‖    :
+                    │       ┌───────────┴───────────┐     |    ‖    :    ┌───────────────────┐
+                    ├─────▶ │  rq-engine (FastAPI)  ├───▶ | ═▶ ‖═══ : ═══│       Redis       |
+                    │       │  tasks · state · jobs │···· | ·· ‖ ·▶ :    │  rq · job status  |
+                    │       └───────────┬───────────┘     |    ‖    :    │ nodb locks/cache  |
+                    │                   │                 |    ‖    :    └───────────────────┘
+                    │       ┌───────────┴───────────┐     |    ‖    :           
+                    │       |    rq-worker pool     ├───▶ |    ‖    :
+                    │       |  data acquisition /   │oooo | ═▶ ‖    :
+                    │       |  processing (Rust)    │···· | ·· ‖ ·▶ :
+                    |       |  subprocess (WEPP)    |     |    ‖    :
+                    |       └──┬────┬───────────────┘     |    ‖    :
+                    │          |   http                   |    ‖    :
+                    |      docker   |                     |    ‖    :
+                    |        exec   └-▶ EXTERNAL APIS     |    ‖    :
+                    |          |                          |    ‖    :
+                    |          └-▶ SERVICE CONTAINERS     |    ‖    :    ┌───────────────────┐
                     │                                     ├──────────────│  Local Storage    │
-                    │       ┌───────────────────────┐     |    o    :    │  Run Data         │
-                    ├─────▶ │  query-engine         ├───▶ |    o    :    │  ├ *.nodb         │
-                    │       │  Analytics · MCP API  │oooo | o▶ o    :    │  ├ **.parquet     │
-                    │       └───────────────────────┘     |    o    :    │  ├ wepp           │
-                    │                                     |    o    :    │  ├ ...            │
-                    │       ┌───────────────────────┐     |    o    :    └───────────────────┘
- ┌─────────────┐    ├─────▶ │  browse (Starlette)   ├───▶ |    o    : 
- │  AI Agent   │    │       │  UI · files API       │oooo | o▶ o    :
- │  OpenClaw   │──http      └───────────────────────┘     |    o    : 
- └─────────────┘  /jwt                                    |    o    : 
-                    │                                     |    o    :
-                    │              WEBSERVICES            |    o    :
-                    │       ─────────────────────────     |    o    :
-                    │       ┌───────────────────────┐     |    o    :
-                    ├─────▶ │         dtale         ├───▶ | o▶ o    :
-                    |       |      (sandboxed)      │···· | ·· o ·▶ :
-                    │       └───────────────────────┘     |    o
-                    │       ┌───────────────────────┐     |    o
-                    ├─wss─▶ │       status (Go)     ├───▶ | o▶ o
-                    │       └───────────────────────┘     |    o
-                    │       ┌───────────────────────┐     |    o
-                    ├─wss─▶ │     preflight  (Go)   ├───▶ | o▶ o
+                    │       ┌───────────────────────┐     |    ‖    :    │  Run Data         │
+                    ├─────▶ │  query-engine         ├───▶ |    ‖    :    │  ├ *.nodb         │
+                    │       │  Analytics · MCP API  │oooo | ═▶ ‖    :    │  ├ **.parquet     │
+                    │       └───────────────────────┘     |    ‖    :    │  ├ wepp           │
+                    │                                     |    ‖    :    │  ├ ...            │
+                    │       ┌───────────────────────┐     |    ‖    :    └───────────────────┘
+ ┌─────────────┐    ├─────▶ │  browse (Starlette)   ├───▶ |    ‖    : 
+ │  AI Agent   │    │       │  UI · files API       │oooo | ═▶ ‖    :
+ │  OpenClaw   │──http      └───────────────────────┘     |    ‖    : 
+ └─────────────┘  /jwt                                    |    ‖    : 
+                    │                                     |    ‖    :
+                    │              WEBSERVICES            |    ‖    :
+                    │       ─────────────────────────     |    ‖    :
+                    │       ┌───────────────────────┐     |    ‖    :
+                    ├─────▶ │         dtale         ├───▶ | ═▶ ‖    :
+                    |       |      (sandboxed)      │···· | ·· ‖ ·▶ :
+                    │       └───────────────────────┘     |    ‖
+                    │       ┌───────────────────────┐     |    ‖
+                    ├─wss─▶ │       status (Go)     ├───▶ | ═▶ ‖
+                    │       └───────────────────────┘     |    ‖
+                    │       ┌───────────────────────┐     |    ‖
+                    ├─wss─▶ │     preflight  (Go)   ├───▶ | ═▶ ‖
                     │       └───────────────────────┘     |    
                     │       ┌───────────────────────┐     |
                     ├─────▶ │  wmesque2 (FastAPI)   ├───▶ | 
