@@ -6,6 +6,20 @@
 
 ---
 
+
+## Why HPC and WEPPcloud are a Poor Match
+
+To understand the friction, we have to look at the difference between how HPC clusters are designed versus how modern web platforms operate.
+
+**Batch Queuing vs. Real-Time Needs**: HPC clusters rely on job schedulers (like Slurm or PBS). A user submits a job, it sits in a queue, and it runs when resources free up. WEPPcloud, conversely, is an on-demand web service utilized by stakeholders—including fire response teams (BAER) and land managers—who require immediate, interactive modeling for time-sensitive environmental conditions. Waiting in a cluster queue during an active wildfire response is a non-starter.
+
+**The "Always-On" Architecture**: WEPPcloud's codebase relies heavily on persistent, "always-on" web technologies: Redis pub/sub networks, Go-based WebSockets, and sub-second latency browser dashboards. HPC compute nodes are strictly locked down; you generally cannot open web ports, expose continuous HTTP traffic to the public, or run persistent daemon services on them.
+
+**Storage I/O Bottlenecks**: The wepppy repository uses a "NoDb" architecture, utilizing file-backed singleton controllers that serialize thousands of small JSON files and cache them in Redis. HPC clusters typically use parallel file systems (like Lustre) designed for massive, sequential data reads/writes. They often perform terribly with the rapid, random I/O required by web applications, which run much better on local NVMe SSDs found in dedicated workstations.
+
+**Dependency Management**: The WEPP system is a complex glue of legacy FORTRAN 77 executables, modern Python web services, and Rust-accelerated tooling. Deploying and maintaining this specific web stack via standard Docker containers on a dedicated Linux box is straightforward. Attempting to shoehorn it into an HPC's strict module system and restrictive container environment (e.g., Apptainer/Singularity) is notoriously difficult and time-consuming.
+
+
 ## WEPPcloud Platform Topology
 
 WEPPcloud is a containerized web-application and modeling platform. This figure illustrates the system's microservices architecture, highlighting how requests from both human users and AI agents are authenticated and routed through the core web stack. It demonstrates the structural separation between the lightweight user-facing web services, the asynchronous worker pool handling the intensive WEPP simulations, and the centralized storage systems (Postgres, Redis, and Local Storage) that maintain run data.
