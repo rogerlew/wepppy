@@ -9,37 +9,75 @@
 ## Runtime Architecture
 
 ```                                                         
-    OPERATORS                  WEPPCLOUD CORE STACK                    STORAGE
- ───────────────            ─────────────────────────           ─────────────────────
+    OPERATORS                  WEPPCLOUD CORE STACK                            STORAGE
+ ───────────────            ─────────────────────────                    ─────────────────────
 
- ┌─────────────┐            ┌───────────────────────┐           ┌───────────────────┐
- │    Human    │            │  weppcloud (Flask)    │───▶ |     │     Postgres      │
- │ Web Browser │──HTTP────▶ │  UI · Auth · NoDb     │·········▶ │   users · runs    │
- └─────────────┘  /JWT      └───────────┬───────────┘     |     └───────────────────┘
-                    │                   │                 |    
-                    │       ┌───────────┴───────────┐     |     ┌───────────────────┐
-                    ├─────▶ │  rq-engine (FastAPI)  │     |     │       Redis       ├───▶ Status (Go) ─WSS─▶
-                    │       │        Job API        │───▶ ├───▶ │  rq · job status  |
-                    │       └───────────┬───────────┘     |     │ nodb locks/cache  ├───▶ Preflight (Go) ─WSS─▶
-                    │                   │                 |     └───────────────────┘
-                    │       ┌───────────┴───────────┐     |               
-                    │       |    rq-worker pool     |     |     ┌───────────────────┐
-                    │       |  data acquisition /   |·········▶ |   External APIs   |
-                    │       |  processing (Rust)    |     |     └───────────────────┘
-                    |       |  subprocess (WEPP)    |     |
-                    |       └───────────────────────┘     |     ┌───────────────────┐
-                    │                                     |     │  Local Storage    │
-                    │       ┌───────────────────────┐     |     │  Run Data         │
-                    ├─────▶ │  query-engine         │───▶ ├───▶ │  ├ *.nodb         │
-                    │       │  Analytics · MCP API  │     |     │  ├ **.parquet     │
-                    │       └───────────────────────┘     |     │  ├ wepp           │
-                    │                                     |     │  ├ ...            │
-                    │       ┌───────────────────────┐     |     └───────────────────┘
- ┌─────────────┐    ├─────▶ │  browse (Starlette)   │     |     
- │  AI Agent   │    │       │  UI · files API       │───▶ | 
- │  OpenClaw   │──HTTP      └───────────────────────┘           
- └─────────────┘  /JWT                                          
-                                                                
+ ┌─────────────┐            ┌───────────────────────┐                    ┌───────────────────┐
+ │    Human    │            │   weppcloud (Flask)   ├───▶ | o▶ o    ···· │     Postgres      │
+ │ Web Browser │──http────▶ │   UI · Auth · NoDb    │···· | ·· o ·▶ :    │   users · runs    │
+ └─────────────┘  /jwt      └───────────┬───────────┘     |    o    :    └───────────────────┘
+                    │                   │                 |    o    :
+                    │       ┌───────────┴───────────┐     |    o    :    ┌───────────────────┐
+                    ├─────▶ │  rq-engine (FastAPI)  ├───▶ | o▶ oooo : oo │       Redis       |
+                    │       │  tasks · state · jobs │···· | ·· o ·▶ :    │  rq · job status  |
+                    │       └───────────┬───────────┘     |    o    :    │ nodb locks/cache  |
+                    │                   │                 |    o    :    └───────────────────┘
+                    │       ┌───────────┴───────────┐     |    o    :           
+                    │       |    rq-worker pool     |     |    o    :
+                    │       |  data acquisition /   ├───▶ |    o    :
+                    │       |  processing (Rust)    |     |    o    :
+                    |       |  subprocess (WEPP)    |     |    o    :
+                    |       └──┬────┬───────────────┘     |    o    :
+                    │          |   http                   |    o    :
+                    |      docker   |                     |    o    :
+                    |        exec   └-▶ external apis     |    o    :
+                    |          |                          |    o    :
+                    |          └-▶ service containers     |    o    :    ┌───────────────────┐
+                    │                                     ├───────────── │  Local Storage    │
+                    │       ┌───────────────────────┐     |    o    :    │  Run Data         │
+                    ├─────▶ │  query-engine         ├───▶ |    o    :    │  ├ *.nodb         │
+                    │       │  Analytics · MCP API  │oooo | o▶ o    :    │  ├ **.parquet     │
+                    │       └───────────────────────┘     |    o    :    │  ├ wepp           │
+                    │                                     |    o    :    │  ├ ...            │
+                    │       ┌───────────────────────┐     |    o    :    └───────────────────┘
+ ┌─────────────┐    ├─────▶ │  browse (Starlette)   ├───▶ |    o    : 
+ │  AI Agent   │    │       │  UI · files API       │oooo | o▶ o    :
+ │  OpenClaw   │──http      └───────────────────────┘     |    o    : 
+ └─────────────┘  /jwt                                    |    o    :
+                    │              WEBSERVICES            |    o    :
+                    │       ─────────────────────────     |    o    :
+                    │       ┌───────────────────────┐     |    o    :
+                    ├─────▶ │         dtale         ├───▶ | o▶ o    :
+                    |       |      (sandboxed)      │···· | ·· o ·▶ :
+                    │       └───────────────────────┘     |    o    
+                    │       ┌───────────────────────┐     |    o
+                    ├─wss─▶ │       status (Go)     ├───▶ | o▶ o
+                    │       └───────────────────────┘     |    o
+                    │       ┌───────────────────────┐     |    o
+                    ├─wss─▶ │     preflight  (Go)   ├───▶ | o▶ o
+                    │       └───────────────────────┘     |    
+                    │       ┌───────────────────────┐     |
+                    ├─────▶ │  wmesque2 (FastAPI)   ├───▶ | 
+                    │       └───────────────────────┘     |
+                    │       ┌───────────────────────┐     |
+                    │─────▶ │    metquery (Flask)   ├───▶ |
+                    │       └───────────────────────┘     
+                    │       ┌───────────────────────┐
+                    └─────▶ |    shape-converter    |
+                            |   (fully sandboxed)   |
+                            └───────────────────────┘    
+
+                                SERVICE CONTAINERS
+                            ─────────────────────────
+                            ┌───────────────────────┐
+                            |     f(ormat)-esri     |
+                            └───────────────────────┘      
+                            ┌───────────────────────┐
+                            |      weppcloudr       |
+                            └───────────────────────┘     
+                            ┌───────────────────────┐
+                            |        cap.js         |
+                            └───────────────────────┘     
 ```
 
 ---
@@ -67,7 +105,7 @@ Workers are stateless. They pull jobs from Redis, execute WEPP FORTRAN binaries 
 
 Calibrating the St. Joe basin (134,033 hillslopes, 56 watersheds) requires iterative full-basin simulation runs. Each parameter adjustment must propagate through the entire channel network to evaluate watershed-scale effects. This is not feasible manually at this scale.
 
-### Why brute-force parameter sweeps don't work
+### Why brute-force parameter sweeps are not feasible
 
 The naive approach to calibration is batch parameter sweeps: generate a grid of parameter combinations, submit them all as independent jobs, and pick the best result. This is the kind of workload that fits naturally on an HPC batch scheduler. It does not work here for two reasons:
 
@@ -77,31 +115,7 @@ The naive approach to calibration is batch parameter sweeps: generate a grid of 
 
 Resolving equifinality requires an agent that can reason about intermediate outputs: Does the seasonal pattern of baseflow match? Are sediment peaks arriving at the right time relative to storm events? Is the snow accumulation/melt timing physically plausible for these elevations? These are diagnostic judgments that inform the next parameter adjustment. They cannot be encoded as a scalar objective function and batch-submitted.
 
-This is why the calibration workflow is iterative and agent-driven rather than batch-submitted:
-
-The calibration workflow:
-
-```mermaid
-flowchart TD
-    Agent["OpenClaw Agent"]
-    S1["1. Examine current calibration state<br/>query-engine: SQL over hillslope/channel outputs<br/>compare to observed data"]
-    S2["2. Formulate parameter adjustment hypothesis<br/>identify soil erodibility, hydraulic conductivity,<br/>or management parameters to modify"]
-    S3["3. Apply parameter changes<br/>MCP tools: edit run configuration files<br/>Batch API: submit modified parameter sets"]
-    S4["4. Execute full-basin simulation<br/>rq-engine: enqueue 134,033 hillslope runs<br/>rq-workers: parallel WEPP execution<br/>status2: real-time progress via WebSocket"]
-    S5["5. Evaluate results<br/>query-engine: compare outputs to observed streamflow<br/>and sediment data<br/>compute objective function: NSE, PBIAS, etc."]
-    Decision{"Objective thresholds met?"}
-    S6["6. Document final parameter set"]
-
-    Agent --> S1 --> S2 --> S3 --> S4 --> S5 --> Decision
-    Decision -->|No| S2
-    Decision -->|Yes| S6
-```
-
-Each iteration requires:
-- **Sub-minute feedback** between the agent and the service stack (parameter submission, job status, result queries)
-- **Persistent service availability** — the agent session runs for hours across many iterations
-- **Live Redis connectivity** — job dispatch, status streaming, and NoDb state all flow through Redis
-- **Local storage I/O** — each iteration reads and writes millions of small files (WEPP input/output per hillslope)
+This is why the calibration workflow is iterative hyothesis driven and orchestrated by AI agents rather than batch-submitted.
 
 ---
 
@@ -116,17 +130,23 @@ The planned agent operator is OpenClaw/Hermes pen-source autonomous AI assistant
 An OpenClaw agent authenticates to the WEPPcloud stack via JWT and interacts with two service APIs:
 
 **rq-engine (FastAPI)** — the operational interface:
-- Submit batch simulation jobs across watersheds
+- Create runs
+- Query run state/parameters
+- Submit tasks (e.g. run WEPP)
 - Poll job status and completion
 - Cancel and re-submit runs with modified parameters
 
-**query-engine (Starlette + MCP API)** — the analytical interface:
+**query-engine (Starlette)** — the analytical interface:
 - Query the dataset catalog for a run (hillslope outputs, channel outputs, climate summaries)
 - Execute DuckDB SQL against Parquet-formatted run results
 - Validate queries before execution
 - Retrieve prompt templates with embedded schema context
 
-The agent uses rq-engine to act and query-engine to observe. The calibration loop is: observe results → formulate hypothesis → modify parameters → submit simulation → observe results → iterate.
+**browse - files (Starlette)** — file access:
+- Designed as a first class OpenAPI interface for agents
+- provide file access
+
+The agent uses rq-engine to act and query-engine/browse to observe. The calibration loop is: observe results → formulate hypothesis → modify parameters → submit simulation → observe results → iterate.
 
 ---
 
@@ -139,7 +159,7 @@ The calibration workflow imposes specific infrastructure constraints that are in
 | **Persistent services** | Flask, rq-engine, query-engine, Redis, and status2 must be running continuously — agents interact with them over hours-long sessions |
 | **Low-latency job dispatch** | Workers pull jobs from Redis immediately; no scheduler allocation delay |
 | **Local storage** | WEPP I/O is millions of small files per basin run; network filesystems (NFS, Lustre) degrade severely under this pattern |
-| **Unrestricted network** | Workers call external data APIs (Climate Engine, OpenTopography, PRISM) during execution |
+| **Unrestricted network** | Workers call external data APIs (AWS, SSurgo, Climate Engine, OpenTopography, PRISM) during execution |
 | **Horizontal scaling** | More cores = more concurrent hillslope simulations = faster iteration cycles |
 
 These are not preferences — they are consequences of a persistent, interactive modeling platform that serves both human operators and AI agents simultaneously.
