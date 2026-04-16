@@ -71,54 +71,87 @@ See `docs/weppcloud-bootstrap-spec.md` for implementation and deployment details
 
 ## Architecture
 
-### System Overview
+
+## WEPPcloud Platform Topology
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      User Request (Web UI / API)                            │
-└────────────────────────────────┬────────────────────────────────────────────┘                                │
-                                 │
-                                 ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│  Flask (weppcloud)                                                         │
-│  ├─→ RQ Job Enqueue ──────────────────────────────────────┐                │
-│  │                                                        │                │
-│  ▼                                                        ▼                │
-│  NoDb Controllers                                   Redis Queue (DB 9)     │
-│  (Watershed, Climate,                                     │                │
-│   Landuse, Soils, etc.)                                   │                │
-└──────────┬────────────────────────────────────────────────┼────────────────┘
-           │                                                │
-           ▼                                                ▼
-┌──────────────────────────┐                    ┌────────────────────────────┐
-│  JSON Serialization      │                    │  RQ Worker Pool            │
-│  ├─→ Disk (.nodb files)  │                    │  Execute Tasks:            │
-│  └─→ Redis Cache         │                    │  • Geospatial preproc      │
-│      (DB 13, 72h TTL)    │                    │  • WEPP simulation         │
-└──────────────────────────┘                    │  • Post-processing         │
-                                                └─────────────┬──────────────┘
-                                                              │
-                                                              ▼
-                                                 ┌────────────────────────────┐
-                                                 │  Update NoDb State         │
-                                                 │  Emit Telemetry            │
-                                                 └────────────┬───────────────┘
-                                                              │
-                                                              ▼
-                                                 ┌────────────────────────────┐
-                                                 │  Redis Pub/Sub (DB 2)      │
-                                                 └────────────┬───────────────┘
-                                                              │
-                                                              ▼
-                                                 ┌────────────────────────────┐
-                                                 │  Go WebSocket Services     │
-                                                 │  (status2, preflight2)     │
-                                                 └────────────┬───────────────┘
-                                                              │
-                                                              ▼
-                                                 ┌────────────────────────────┐
-                                                 │  Browser Real-Time Updates │
-                                                 └────────────────────────────┘
+ DATA BUS LEGEND
+ ---------------
+ ···  Postgres
+ ooo  Redis
+ ───  Local Storage
+
+
+    OPERATORS                  WEPPCLOUD CORE STACK                            STORAGE
+ ───────────────            ─────────────────────────                    ─────────────────────
+                                                          DATA BUSES
+ ┌─────────────┐            ┌───────────────────────┐                    ┌───────────────────┐
+ │    Human    │            │   weppcloud (Flask)   ├───▶ | o▶ o    ·····│     Postgres      │
+ │ Web Browser │──http────▶ │   UI · Auth · NoDb    │···· | ·· o ·▶ :    │   users · runs    │
+ └─────────────┘  /jwt      └───────────┬───────────┘     |    o    :    └───────────────────┘
+                    │                   │                 |    o    :
+                    │       ┌───────────┴───────────┐     |    o    :    ┌───────────────────┐
+                    ├─────▶ │  rq-engine (FastAPI)  ├───▶ | o▶ oooo : ooo│       Redis       |
+                    │       │  tasks · state · jobs │···· | ·· o ·▶ :    │  rq · job status  |
+                    │       └───────────┬───────────┘     |    o    :    │ nodb locks/cache  |
+                    │                   │                 |    o    :    └───────────────────┘
+                    │       ┌───────────┴───────────┐     |    o    :           
+                    │       |    rq-worker pool     ├───▶ |    o    :
+                    │       |  data acquisition /   │oooo | o▶ o    :
+                    │       |  processing (Rust)    │···· | ·· o ·▶ :
+                    |       |  subprocess (WEPP)    |     |    o    :
+                    |       └──┬────┬───────────────┘     |    o    :
+                    │          |   http                   |    o    :
+                    |      docker   |                     |    o    :
+                    |        exec   └-▶ EXTERNAL APIS     |    o    :
+                    |          |                          |    o    :
+                    |          └-▶ SERVICE CONTAINERS     |    o    :    ┌───────────────────┐
+                    │                                     ├──────────────│  Local Storage    │
+                    │       ┌───────────────────────┐     |    o    :    │  Run Data         │
+                    ├─────▶ │  query-engine         ├───▶ |    o    :    │  ├ *.nodb         │
+                    │       │  Analytics · MCP API  │oooo | o▶ o    :    │  ├ **.parquet     │
+                    │       └───────────────────────┘     |    o    :    │  ├ wepp           │
+                    │                                     |    o    :    │  ├ ...            │
+                    │       ┌───────────────────────┐     |    o    :    └───────────────────┘
+ ┌─────────────┐    ├─────▶ │  browse (Starlette)   ├───▶ |    o    : 
+ │  AI Agent   │    │       │  UI · files API       │oooo | o▶ o    :
+ │  OpenClaw   │──http      └───────────────────────┘     |    o    : 
+ |    (WIP)    |  /jwt                                    |    o    : 
+ └─────────────┘    │                                     |    o    :
+                    │              WEBSERVICES            |    o    :
+                    │       ─────────────────────────     |    o    :
+                    │       ┌───────────────────────┐     |    o    :
+                    ├─────▶ │         dtale         ├───▶ | o▶ o    :
+                    |       |      (sandboxed)      │···· | ·· o ·▶ :
+                    │       └───────────────────────┘     |    o
+                    │       ┌───────────────────────┐     |    o
+                    ├─wss─▶ │       status (Go)     ├───▶ | o▶ o
+                    │       └───────────────────────┘     |    o
+                    │       ┌───────────────────────┐     |    o
+                    ├─wss─▶ │     preflight  (Go)   ├───▶ | o▶ o
+                    │       └───────────────────────┘     |    
+                    │       ┌───────────────────────┐     |
+                    ├─────▶ │  wmesque2 (FastAPI)   ├───▶ | 
+                    │       └───────────────────────┘     |
+                    │       ┌───────────────────────┐     |
+                    │─────▶ │    metquery (Flask)   ├───▶ |
+                    │       └───────────────────────┘     
+                    │       ┌───────────────────────┐
+                    └─────▶ |    shape-converter    |
+                            |   (fully sandboxed)   |
+                            └───────────────────────┘    
+
+                                SERVICE CONTAINERS
+                            ─────────────────────────
+                            ┌───────────────────────┐
+                            |     f(ormat)-esri     |
+                            └───────────────────────┘      
+                            ┌───────────────────────┐
+                            |      weppcloudr       |
+                            └───────────────────────┘     
+                            ┌───────────────────────┐
+                            |        cap.js         |
+                            └───────────────────────┘     
 ```
 
 ### Core Components

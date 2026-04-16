@@ -6,12 +6,21 @@
 
 ---
 
-## Runtime Architecture
+## WEPPcloud Platform Topology
 
-```                                                         
+WEPPcloud is a containerized web-application and modeling platform. This figure illustrates the system's microservices architecture, highlighting how requests from both human users and AI agents are authenticated and routed through the core web stack. It demonstrates the structural separation between the lightweight user-facing web services, the asynchronous worker pool handling the intensive WEPP simulations, and the centralized storage systems (Postgres, Redis, and Local Storage) that maintain run data.
+
+```
+ DATA BUS LEGEND
+ ---------------
+ ···  Postgres
+ ooo  Redis
+ ───  Local Storage
+
+
     OPERATORS                  WEPPCLOUD CORE STACK                            STORAGE
  ───────────────            ─────────────────────────                    ─────────────────────
-
+                                                          DATA BUSES
  ┌─────────────┐            ┌───────────────────────┐                    ┌───────────────────┐
  │    Human    │            │   weppcloud (Flask)   ├───▶ | o▶ o    ·····│     Postgres      │
  │ Web Browser │──http────▶ │   UI · Auth · NoDb    │···· | ·· o ·▶ :    │   users · runs    │
