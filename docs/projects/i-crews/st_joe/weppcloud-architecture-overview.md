@@ -8,32 +8,38 @@
 
 ## Runtime Architecture
 
-```
-  OPERATORS                  WEPPCLOUD CONTAINER STACK              COMPUTE / STORAGE
- ─────────────              ───────────────────────────            ───────────────────
+```                                                         
+    OPERATORS                  WEPPCLOUD CORE STACK                    STORAGE
+ ───────────────            ─────────────────────────           ─────────────────────
 
- ┌─────────────┐            ┌───────────────────────┐
- │    Human    │            │  Flask App            │
- │  Web Browser│──HTTP────▶ │  UI · Auth · NoDb     │
- └─────────────┘  /JWT      └───────────┬───────────┘
-                    │                   │
-                    │       ┌───────────┴───────────┐
-                    ├─────▶ │  rq-engine (FastAPI)  │           ┌───────────────────┐
-                    │       │  Job API              │──────────▶│  rq-worker pool   │
-                    │       └───────────────────────┘  Redis    │                   │
-                    │                                  job      │  WEPP Simulation  │
-                    │       ┌───────────────────────┐  dispatch │  Climate · Soils  │
-                    ├─────▶ │  query-engine         │           │  Roads · Batch    │
-                    │       │  Analytics · MCP API  │           └────────┬──────────┘
-                    │       └───────────────────────┘                    │
-                    │                                                    │ read/write
-                    │       ┌───────────────────────┐                    │
- ┌─────────────┐    ├─────▶ │  browse (Starlette)   │           ┌────────┴──────────┐
- │  AI Agent   │    │       │  Run Explorer         │──────────▶│  Local Storage    │
- │  OpenClaw   │──HTTP      └───────────────────────┘           │  Run Data         │
- └─────────────┘  /JWT                                          │  WEPP I/O         │
-                                                                │  /wc1/runs/       │
-                                                                └───────────────────┘
+ ┌─────────────┐            ┌───────────────────────┐           ┌───────────────────┐
+ │    Human    │            │  weppcloud (Flask)    │───▶ |     │     Postgres      │
+ │ Web Browser │──HTTP────▶ │  UI · Auth · NoDb     │·········▶ │   users · runs    │
+ └─────────────┘  /JWT      └───────────┬───────────┘     |     └───────────────────┘
+                    │                   │                 |    
+                    │       ┌───────────┴───────────┐     |     ┌───────────────────┐
+                    ├─────▶ │  rq-engine (FastAPI)  │     |     │       Redis       ├───▶ Status (Go) ─WSS─▶
+                    │       │        Job API        │───▶ ├───▶ │  rq · job status  |
+                    │       └───────────┬───────────┘     |     │ nodb locks/cache  ├───▶ Preflight (Go) ─WSS─▶
+                    │                   │                 |     └───────────────────┘
+                    │       ┌───────────┴───────────┐     |               
+                    │       |    rq-worker pool     |     |     ┌───────────────────┐
+                    │       |  data acquisition /   |·········▶ |   External APIs   |
+                    │       |  processing (Rust)    |     |     └───────────────────┘
+                    |       |  subprocess (WEPP)    |     |
+                    |       └───────────────────────┘     |     ┌───────────────────┐
+                    │                                     |     │  Local Storage    │
+                    │       ┌───────────────────────┐     |     │  Run Data         │
+                    ├─────▶ │  query-engine         │───▶ ├───▶ │  ├ *.nodb         │
+                    │       │  Analytics · MCP API  │     |     │  ├ **.parquet     │
+                    │       └───────────────────────┘     |     │  ├ wepp           │
+                    │                                     |     │  ├ ...            │
+                    │       ┌───────────────────────┐     |     └───────────────────┘
+ ┌─────────────┐    ├─────▶ │  browse (Starlette)   │     |     
+ │  AI Agent   │    │       │  UI · files API       │───▶ | 
+ │  OpenClaw   │──HTTP      └───────────────────────┘           
+ └─────────────┘  /JWT                                          
+                                                                
 ```
 
 ---
