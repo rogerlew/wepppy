@@ -1,7 +1,7 @@
 # Lemhi Integration Plan: First-Class Persistent RQ Workers for WEPPcloud
 
 **Status:** Draft planning document  
-**Date:** 2026-04-15  
+**Date:** 2026-04-16  
 **Audience:** WEPPcloud engineering, I-CREWS leadership, RCDS/Lemhi operations, security/network administrators  
 **Purpose:** Define what is required to make Lemhi support first-class persistent WEPPcloud `rq-worker` capacity.
 
@@ -54,7 +54,7 @@ No engineering should start until these are approved in writing.
 |---|---|---|---|
 | P1 | Policy exception or approved pattern for continuously renewed service-like Slurm jobs | Lemhi governance | Persistent workers cannot exist if long-running job renewal is prohibited |
 | P2 | Approved outbound connectivity path from Lemhi worker jobs to WEPPcloud queue endpoint | Lemhi network + UI security | Workers must maintain durable queue connectivity |
-| P3 | Approved secure tunnel pattern (mTLS or equivalent) for Redis traffic | Security + network | Direct Redis exposure is not acceptable |
+| P3 | Approved secure dispatch/API boundary pattern (mTLS or equivalent) | Security + network | Uncontrolled cross-boundary control-plane connectivity is not acceptable |
 | P4 | Storage class approved for WEPP small-file metadata-heavy I/O | Lemhi storage admins | Lustre defaults can be poor fit for this workload |
 | P5 | Decision on internet-restricted compute model for external APIs | I-CREWS + RCDS + security | Some task types fail without controlled egress |
 | P6 | Named operations owner for 24x7 worker incidents | RCDS + WEPPcloud | No owner means no production service |
@@ -64,18 +64,16 @@ No engineering should start until these are approved in writing.
 
 ### 5.1 Control Plane (WEPPcloud side)
 
-1. Keep authoritative Redis and rq-engine control plane in WEPPcloud environment.
-2. Add `rq-link-gateway` service in a controlled network segment.
-3. Enforce mTLS + ACL-limited Redis credentials + source allowlists.
-4. Export queue health metrics and tunnel session metrics.
+1. Keep authoritative WEPPcloud orchestration and API control plane in WEPPcloud environment.
+2. Add `hpc-dispatch-broker` service in a controlled network segment.
+3. Enforce mTLS + short-lived identity tokens + source allowlists for brokered dispatch.
+4. Export dispatch health, queue health, and state-reconciliation metrics.
 
 ### 5.2 Worker Plane (Lemhi side)
 
 1. Add `rq-slurm-supervisor` (service process) that continuously maintains target worker count by submitting/renewing Slurm jobs.
-2. Each Slurm job launches:
-   - `rq-worker` process in approved runtime (Apptainer/OCI-compatible path).
-   - `rq-link-agent` user-space tunnel client to the WEPPcloud `rq-link-gateway`.
-3. Worker process points to local tunnel endpoint (localhost) instead of direct external Redis endpoint.
+2. Preferred near-term execution path: Slurm jobs are dispatched via brokered HTTPS/API contracts, not direct cross-site Redis connectivity.
+3. If a persistent-worker variant is explored, queue/control state must remain local to Lemhi and synchronize through explicit API/state contracts.
 4. Worker process writes run data to approved mounted path that preserves WEPP path contract.
 
 ### 5.3 Storage Plane
@@ -115,35 +113,36 @@ Exit criteria:
 2. All blocked call sites produce deterministic errors with remediation hints.
 3. Required workflows still complete end-to-end under selected model.
 
-### 6.2 Blocker B: Secure tunneling to Redis server
+### 6.2 Blocker B: Cross-site Redis tunneling is non-viable (replace with brokered dispatch)
 
 Required actions:
 
-1. Build `rq-link-gateway` with mTLS termination and strict upstream mapping to Redis.
-2. Issue short-lived client certs/tokens for Lemhi jobs (no long-lived static secrets in job scripts).
-3. Deploy `rq-link-agent` sidecar in each worker job:
-   - outbound-only connection to gateway (for firewall friendliness)
-   - local bind endpoint for worker (`localhost:<port>`)
-4. Implement automatic tunnel health checks and reconnect logic.
-5. Add security controls:
-   - cert rotation
-   - revocation
-   - source IP allowlist
-   - per-client ACL and rate limits
-6. Map and validate all required Redis database contracts through the tunnel:
-   - DB 0 (locks/metadata)
-   - DB 2 (status pub/sub)
-   - DB 9 (RQ queues/jobs)
-   - DB 11 (sessions/markers)
-   - DB 13 (NoDb cache)
-   - DB 15 (log-level controls)
-7. Measure and enforce latency budgets for high-frequency lock/state operations. `NoDb locked()/dump_and_unlock()` patterns crossing a Lemhi->Moscow boundary introduce additional RTT and can degrade throughput if not explicitly budgeted.
+1. Adopt brokered Slurm dispatch as the primary alternative:
+   - WEPPcloud submits jobs by API contract (`submit/status/cancel`) to HPC dispatch boundary.
+   - Lemhi compute nodes do not maintain direct Redis connectivity to WEPPcloud.
+2. Implement `hpc-dispatch-broker` with:
+   - authenticated dispatch requests (mTLS/JWT or equivalent short-lived identity)
+   - idempotency keys
+   - explicit state mapping (`queued`, `running`, `succeeded`, `failed`, `cancelled`)
+3. Implement result and event reconciliation contracts:
+   - ordered event callbacks/polling
+   - duplicate suppression
+   - retry-safe status synchronization
+4. Enforce artifact integrity contracts:
+   - immutable output manifests
+   - checksum verification
+   - promotion marker only after full sync
+5. Explicitly consider and reject SSH tunnel/stunnel patterns for production control-plane connectivity:
+   - no `ssh -L/-R/-D`, `autossh`, or `stunnel` persistent control-plane channels
+   - no bastion-mediated Redis exposure as production architecture
+6. If a local Lemhi queue island is evaluated as secondary option, it must synchronize by API/event contract only and preserve canonical WEPPcloud error/response contracts.
 
 Exit criteria:
 
-1. Redis is never directly exposed to Lemhi nodes.
-2. Tunnel compromise blast radius is limited by ACL scope and credential TTL.
-3. Tunnel outage surfaces as alerts within SLA window.
+1. Lemhi compute nodes have no direct connectivity path to WEPPcloud Redis.
+2. Brokered dispatch path passes submit/status/cancel/reconciliation tests with deterministic failure semantics.
+3. SSH/stunnel tunnel options are explicitly documented as considered and rejected for production.
+4. Broker/API outage and recovery drills surface alerts within SLA windows.
 
 ### 6.3 Blocker C: Slurm scheduler model versus persistent workers
 
@@ -198,7 +197,7 @@ Required controls:
    - update workers in bounded batches (for example canary then rolling wave)
    - enforce minimum healthy capacity per queue during rollout
 4. Start and readiness gating:
-   - new worker must pass tunnel, Redis auth, storage mount, and queue-heartbeat checks before accepting jobs
+   - new worker must pass dispatch/auth contract checks, storage mount checks, and queue-heartbeat checks before accepting jobs
    - failed readiness must auto-remove worker from service
 5. Rollback controls:
    - one-command rollback to previous worker image/runtime profile
@@ -312,7 +311,7 @@ Required actions:
 2. Add local scratch for high-churn small files and configurable promote policy.
 3. Validate lock semantics and path safety under shared filesystem behavior.
 4. Establish cleanup and archival processes to avoid inode exhaustion.
-5. Explicitly validate read/write latency impacts from Redis RTT and filesystem metadata latency together; both affect end-to-end worker throughput.
+5. Explicitly validate read/write latency impacts from control-plane RTT (dispatch/API; and Redis RTT only if `B2` is selected) and filesystem metadata latency together; both affect end-to-end worker throughput.
 
 Exit criteria:
 
@@ -395,7 +394,7 @@ Deliverables:
 
 1. Service accounts, group permissions, and least-privilege model.
 2. Storage provisioning, quota policy, and mount contracts.
-3. Firewall and ACL rules for tunnel egress.
+3. Firewall and ACL rules for broker/API egress and callback paths.
 4. PKI/certificate lifecycle for mTLS.
 5. Incident runbooks and escalation matrix.
 
@@ -403,10 +402,10 @@ Deliverables:
 
 Deliverables:
 
-1. Threat model and control mapping for tunnel and secret distribution.
+1. Threat model and control mapping for broker/API boundary, secrets, and identity controls.
 2. Credential rotation and revocation procedures.
 3. Audit logging requirements and retention policy.
-4. Penetration test or focused red-team review of queue tunnel boundary.
+4. Penetration test or focused red-team review of the dispatch boundary and callback ingestion path.
 
 ### 7.5 Operations/SRE Workstream
 
@@ -414,7 +413,7 @@ Deliverables:
 
 1. SLOs/SLIs for worker availability, queue lag, and job completion latency.
 2. Alerting, dashboards, and paging thresholds.
-3. Failure drills: tunnel loss, Redis failover, storage outage, preemption storm.
+3. Failure drills: dispatch API outage, reconciliation lag, storage outage, preemption storm.
 4. On-call ownership and handoff documentation.
 
 ## 8. Required Software Backlog (Concrete)
@@ -422,12 +421,13 @@ Deliverables:
 | Area | Required change | Reason |
 |---|---|---|
 | Queue routing | Add queue execution profiles and task capability routing | Prevent internet-required tasks from failing on offline workers |
-| Worker bootstrap | Add Lemhi bootstrap mode with tunnel sidecar launch checks | Ensure deterministic secure startup |
+| Worker bootstrap | Add Lemhi bootstrap mode with broker/auth contract checks | Ensure deterministic secure startup |
+| Dispatch integration | Add `rq -> slurm` broker adapter and state reconciliation contracts | Remove blocked cross-site Redis dependency |
 | Task contracts | Add explicit errors for disallowed task contexts | Avoid hidden partial failures |
 | Path resolution | Parameterize or map run roots while preserving `/wc1` contracts | Maintain compatibility with `get_wd` assumptions |
 | Docker-coupled tasks | Replace or route around Docker CLI dependencies in HPC jobs | Docker daemon assumptions do not hold on shared HPC compute nodes |
 | Runtime limit guards | Add startup checks for CPU/cgroup/`ulimit` contract compliance | Prevent unstable fanout due to unknown scheduler/runtime limits |
-| Observability | Add worker/tunnel health metrics and structured events | Operability and incident response |
+| Observability | Add worker/dispatch health metrics and structured events | Operability and incident response |
 
 ## 9. Program Phases, Timeline, and Gate Reviews
 
@@ -436,7 +436,7 @@ Estimated duration assumes prerequisites are approved quickly.
 | Phase | Duration | Primary owners | Exit gate |
 |---|---|---|---|
 | Phase 0: Preconditions | 4-6 weeks | Governance + security + network + Lemhi ops | P1-P7 signed off |
-| Phase 1: Platform plumbing | 6-8 weeks | DevOps + sysadmin | Tunnel, runtime, and supervisor MVP works in non-prod |
+| Phase 1: Platform plumbing | 6-8 weeks | DevOps + sysadmin | Dispatch broker, runtime, and supervisor MVP works in non-prod |
 | Phase 2: Software adaptation | 10-14 weeks | SWE + DevOps | Queue routing and blocker guardrails merged and tested |
 | Phase 3: Pilot operations | 6-8 weeks | SRE + SWE + Lemhi ops | Sustained pilot with defined SLO pass |
 | Phase 4: Production hardening | 4-6 weeks | SRE + security + platform | Runbooks, alerts, drills, and rollback plan approved |
@@ -452,7 +452,7 @@ Detailed execution specs with explicit decisions, weekly milestones, gate criter
 | Senior SWE / architecture lead | 0.8-1.0 | Queue/task contract refactor and integration decisions |
 | DevOps/platform engineer | 1.0 | Runtime packaging, CI/CD, supervisor, deployment |
 | Lemhi systems engineer | 0.5 | Scheduler/storage/network integration |
-| Security/network engineer | 0.3-0.5 | Tunnel controls, PKI, firewall, audit |
+| Security/network engineer | 0.3-0.5 | Dispatch-boundary controls, PKI, firewall, audit |
 | SRE/operations engineer | 0.5 | SLOs, dashboards, alerts, runbooks, drills |
 | QA/integration engineer | 0.3-0.5 | End-to-end validation and regression coverage |
 
@@ -473,10 +473,10 @@ This excludes opportunity cost from diverted WEPPcloud roadmap and support work.
 A Lemhi worker deployment should not be considered first-class until all criteria pass:
 
 1. 30-day pilot with automated worker self-healing and no manual daily intervention.
-2. Queue connectivity survives tunnel rotation, node churn, and scheduler preemption.
+2. Dispatch connectivity survives auth rotation, node churn, and scheduler preemption.
 3. End-to-end run workflows pass with deterministic behavior and contract-compliant errors.
 4. Storage integrity checks pass under concurrent high-volume run load.
-5. Security review signs off on tunnel, secret handling, and audit trails.
+5. Security review signs off on dispatch boundary, secret handling, and audit trails.
 6. On-call team accepts ownership with documented runbooks and escalation paths.
 
 ## 13. Risks and Stop Conditions
@@ -484,7 +484,7 @@ A Lemhi worker deployment should not be considered first-class until all criteri
 High risks:
 
 1. Policy denial of persistent-like scheduler usage model.
-2. Inability to approve secure egress/tunnel pattern.
+2. Inability to approve secure dispatch/API boundary pattern.
 3. Small-file metadata performance on shared storage remains unacceptable.
 4. Understaffed cross-team ownership leads to unstable operations.
 
@@ -574,21 +574,38 @@ The St. Joe basin workload (~1.34 million small files per full-basin run, tens o
 
 ### 15.5 Security Precedent: HPC SSH Tunnels Have Been Weaponized
 
-The tunneling architecture described in Section 6.2 creates exactly the kind of persistent outbound connection from compute nodes that has been exploited at scale.
+Security posture conclusion for this plan:
 
-1. **2020 European HPC compromise** — 11+ European supercomputers compromised via stolen SSH credentials. Attackers used SSH tunneling to create proxy chains between HPC centers. 12+ German HPC centers went offline for weeks. Researchers had reused SSH keys across institutions without passphrase protection; attackers then used compute nodes as Tor and tunneling hosts.
-   - References:
-     - <https://www.welivesecurity.com/2020/05/18/european-supercomputers-hacked-mine-cryptocurrency/>
-     - <https://www.educv.de/blog/post-2021-02-17-analyzing-a-compromised-hpc-cluster/>
-     - <https://www.theregister.com/2020/05/19/supercomputers_mining_bitcoin/>
+1. Persistent SSH/stunnel cross-boundary control-plane channels are a **NO-GO** for production.
+2. Viable path is brokered, identity-aware API dispatch with explicit authz/audit contracts.
 
-2. **NIST SP 800-223 (HPC Security Architecture)** — the federal HPC security standard defines a four-zone architecture in which *"compute nodes are not routable from outside the HPC cluster making compute nodes only available from within the cluster itself."* Establishing persistent outbound tunnels from compute nodes to external Redis violates this architecture.
-   - Reference: <https://csrc.nist.gov/pubs/sp/800/223/final>
-   - Reference: <https://aws.amazon.com/blogs/hpc/building-a-secure-and-compliant-hpc-environment-on-aws-following-nist-sp-800-223/>
+Evidence and rationale:
 
-3. **WEPPcloud Redis posture** — a single shared password across all services, no per-service Redis ACLs (as documented in `CLAUDE.md`). A compromised Lemhi worker with an active tunnel would have full read/write access to all Redis databases including session data (DB 11), locks (DB 0), and job queues (DB 9).
+1. **Protocol tunneling is a recognized adversary technique** (ATT&CK T1572, command-and-control tactic), including SSH-based tunnels and proxy chaining.
+   - Reference: <https://attack.mitre.org/techniques/T1572/>
 
-This is not a hypothetical risk. It is the specific attack class that took down more than a dozen European HPC centers in 2020.
+2. **Recent CISA/FBI/CNMF incident guidance** documents threat actors using encrypted SSH tunnels for command-and-control and data movement.
+   - Reference: <https://www.cisa.gov/sites/default/files/2023-09/aa23-250a.pdf>
+
+3. **NIST firewall guidance** warns that tunneled/encrypted traffic can bypass boundary inspection/policy if not terminated and governed correctly.
+   - Reference: <https://doi.org/10.6028/NIST.SP.800-41r1>
+
+4. **NIST SSH key-management guidance** highlights unmanaged SSH trust relationships as a pivot and persistence risk when lifecycle governance is weak.
+   - Reference: <https://doi.org/10.6028/NIST.IR.7966>
+
+5. **OpenSSH server documentation** explicitly notes forwarding controls are not a complete security boundary if shell access exists.
+   - Reference: <https://man.openbsd.org/sshd_config>
+
+6. **Zero Trust guidance** requires per-session/per-request identity and authorization controls rather than implicit trust by network location or static tunnel adjacency.
+   - Reference: <https://doi.org/10.6028/NIST.SP.800-207>
+
+7. **Real vulnerability pressure on SSH endpoints** (for example CVE-2024-6387) reinforces that long-lived exposed tunnel endpoints are high-value targets.
+   - Reference: <https://nvd.nist.gov/vuln/detail/CVE-2024-6387>
+
+Explicit architectural decision:
+
+1. `ssh -L/-R/-D`, `autossh`, and `stunnel` were considered for Section 6.2 and rejected for production.
+2. Section 6.2 therefore uses a non-tunnel brokered dispatch model as the viable alternative.
 
 ### 15.6 Industry Has Moved Toward Ephemeral Workers, Not Persistent Ones
 
@@ -651,12 +668,12 @@ Convert `P1-P7` into signed operating contracts so engineering starts only after
 In scope:
 
 1. Governance, security, network, scheduler, storage, and operations decisions required for `P1-P7`.
-2. Written contracts for Slurm/cgroup/`ulimit`, secure tunnel pattern, and run-path/storage model.
+2. Written contracts for Slurm/cgroup/`ulimit`, secure dispatch/API boundary pattern, and run-path/storage model.
 3. Phase 1 readiness packet with approved non-production deployment constraints.
 
 Out of scope:
 
-1. Building `rq-link-gateway` or `rq-slurm-supervisor`.
+1. Building `hpc-dispatch-broker` or `rq-slurm-supervisor`.
 2. Queue-routing code changes and task rewrites (Phase 2+).
 3. Production cutover or pilot operations.
 
@@ -667,7 +684,7 @@ Out of scope:
 | D0-1 / P1 | Approve service-like persistent Slurm job pattern (or deny) | Lemhi governance lead | End of Week 2 (May 1, 2026) |
 | D0-2 / P7 | Approve written Slurm/cgroup/`ulimit` runtime limits contract | Lemhi ops lead | End of Week 2 (May 1, 2026) |
 | D0-3 / P2 | Approve outbound connectivity path from Lemhi workers to WEPPcloud queue boundary | Lemhi network lead | End of Week 3 (May 8, 2026) |
-| D0-4 / P3 | Approve secure tunnel pattern (`rq-link-agent` -> `rq-link-gateway`) with mTLS and ACL model | Security architect | End of Week 3 (May 8, 2026) |
+| D0-4 / P3 | Approve secure dispatch/API boundary pattern with mTLS and ACL model | Security architect | End of Week 3 (May 8, 2026) |
 | D0-5 / P4 | Approve storage class and path compatibility approach for `/wc1` and `/geodata` contract | Storage admin lead | End of Week 4 (May 15, 2026) |
 | D0-6 / P5 | Select internet-restricted operating policy (default target: `hybrid`) | I-CREWS sponsor + RCDS ops + security | End of Week 4 (May 15, 2026) |
 | D0-7 / P6 | Assign 24x7 incident ownership and escalation chain | RCDS operations manager | End of Week 5 (May 22, 2026) |
@@ -679,7 +696,7 @@ Out of scope:
 |---|---|---|---|
 | W1 | Apr 20-24 | Kickoff, owner assignment, `P1-P7` evidence template, decision calendar | Decision register template, RACI, meeting cadence |
 | W2 | Apr 27-May 1 | Resolve `P1` + `P7` policy and limits discovery plan | Signed/denied `P1`, draft `P7` limits contract |
-| W3 | May 4-8 | Resolve `P2` + `P3` network/tunnel security boundary | Network and security decision records |
+| W3 | May 4-8 | Resolve `P2` + `P3` network/dispatch security boundary | Network and security decision records |
 | W4 | May 11-15 | Resolve `P4` + `P5` storage contract and hybrid policy | Storage contract memo, hybrid policy memo |
 | W5 | May 18-22 | Resolve `P6` operations ownership and escalation | Ops ownership charter, escalation matrix |
 | W6 | May 25-29 | Gate review and publish signed precondition packet | Phase 0 gate packet, Phase 1 go/no-go record |
@@ -705,17 +722,17 @@ Out of scope:
 
 #### Objective
 
-Deliver non-production platform plumbing (`rq-link-gateway`, `rq-link-agent`, `rq-slurm-supervisor`, startup guardrails) that is contract-aligned and operationally testable.
+Deliver non-production platform plumbing (`hpc-dispatch-broker`, Slurm dispatch adapter, `rq-slurm-supervisor`, startup guardrails) that is contract-aligned and operationally testable.
 
 #### Scope boundaries
 
 In scope:
 
-1. `rq-link-gateway` MVP with mTLS, ACL boundary, and metrics.
-2. `rq-link-agent` MVP with local bind endpoint and reconnect behavior.
-3. `rq-slurm-supervisor` MVP with desired worker cardinality, heartbeat, and restart controls.
-4. Worker startup guardrails (limits, mounts, tunnel readiness).
-5. Non-production failure drills for tunnel loss, cert rotation, and scheduler churn.
+1. `hpc-dispatch-broker` MVP with mTLS/JWT auth, ACL boundary, and metrics.
+2. Slurm dispatch adapter MVP with submit/status/cancel and reconciliation behavior.
+3. `rq-slurm-supervisor` MVP with desired worker cardinality, heartbeat, and restart controls (scope-reduced persistent-worker path).
+4. Worker startup guardrails (limits, mounts, dispatch/auth readiness).
+5. Non-production failure drills for dispatch outage, auth rotation, and scheduler churn.
 
 Out of scope:
 
@@ -727,8 +744,8 @@ Out of scope:
 
 | Decision ID | Decision | Owner | Deadline |
 |---|---|---|---|
-| D1-1 | Final `rq-link-gateway` placement/failover topology | DevOps lead + network lead | End of Week 1 (Jun 5, 2026) |
-| D1-2 | Cert issuance and rotation workflow for `rq-link-agent` | Security lead | End of Week 2 (Jun 12, 2026) |
+| D1-1 | Final `hpc-dispatch-broker` placement/failover topology | DevOps lead + network lead | End of Week 1 (Jun 5, 2026) |
+| D1-2 | Cert/token issuance and rotation workflow for dispatch clients | Security lead | End of Week 2 (Jun 12, 2026) |
 | D1-3 | Worker runtime packaging standard (OCI -> Apptainer profile) | DevOps lead + Lemhi ops lead | End of Week 3 (Jun 19, 2026) |
 | D1-4 | Supervisor lease/heartbeat/drain thresholds | SWE lead + SRE lead | End of Week 4 (Jun 26, 2026) |
 | D1-5 | MVP queue profile boundary for hybrid non-production tests | SWE lead + product owner | End of Week 5 (Jul 3, 2026) |
@@ -739,27 +756,27 @@ Out of scope:
 | Week | Dates | Tasks | Deliverables |
 |---|---|---|---|
 | W1 | Jun 1-5 | Finalize topology and metrics/event schema | Topology diagram, deployment skeleton |
-| W2 | Jun 8-12 | Implement `rq-link-gateway` MVP and ACL policy | Gateway config, health endpoints |
-| W3 | Jun 15-19 | Implement `rq-link-agent` MVP and reconnect logic | Agent profile, reconnect test evidence |
-| W4 | Jun 22-26 | Add worker guardrails for limits/mount/tunnel | Startup checks, Slurm templates |
+| W2 | Jun 8-12 | Implement `hpc-dispatch-broker` MVP and ACL policy | Broker config, health endpoints |
+| W3 | Jun 15-19 | Implement Slurm dispatch adapter and reconciliation logic | Adapter profile, reconciliation test evidence |
+| W4 | Jun 22-26 | Add worker guardrails for limits/mount/dispatch-auth | Startup checks, Slurm templates |
 | W5 | Jun 29-Jul 3 | Implement `rq-slurm-supervisor` MVP | Supervisor service and lease model |
 | W6 | Jul 6-10 | End-to-end non-production integration under hybrid model | Integration report and handshake evidence |
-| W7 | Jul 13-17 | Failure drills (tunnel/cert/preemption/restart storm) | Drill reports and control updates |
+| W7 | Jul 13-17 | Failure drills (dispatch outage/auth rotation/preemption/restart storm) | Drill reports and control updates |
 | W8 | Jul 20-24 | Gate review and Phase 2 handoff | Phase 1 gate packet and risk register |
 
 #### Acceptance criteria
 
-1. Gateway enforces authenticated mTLS clients with ACL-limited Redis access.
+1. Dispatch boundary enforces authenticated clients with ACL-limited API access.
 2. Supervisor restores target worker count after cancellation/preemption in non-production.
-3. Worker startup fails fast when limits/mount/tunnel contracts are violated.
+3. Worker startup fails fast when limits/mount/dispatch-auth contracts are violated.
 4. Failure drills demonstrate deterministic recovery with observable metrics.
 
 #### Complexity (1-5)
 
 | Major task | Score | Rationale |
 |---|---|---|
-| `rq-link-gateway` MVP | 5 | Security boundary + observability + correctness |
-| `rq-link-agent` reconnect behavior | 4 | Stateful networking under scheduler churn |
+| `hpc-dispatch-broker` MVP | 5 | Security boundary + observability + correctness |
+| Slurm dispatch/reconciliation adapter | 4 | Stateful orchestration under scheduler churn |
 | Worker startup guardrails | 4 | Cross-layer contract checks |
 | `rq-slurm-supervisor` control loop | 5 | Desired-state reliability under churn |
 | End-to-end integration and drills | 4 | Multi-component coupling |
@@ -772,7 +789,7 @@ Implement contract-safe hybrid execution so Lemhi workers run only HPC-compatibl
 
 #### Entry criteria
 
-1. Phase 1 tunnel/runtime/supervisor plumbing is operational in non-production.
+1. Phase 1 dispatch/runtime/supervisor plumbing is operational in non-production.
 2. `P1-P7` remain approved and unchanged.
 3. Filesystem architecture is selected and documented.
 
@@ -793,7 +810,7 @@ Implement contract-safe hybrid execution so Lemhi workers run only HPC-compatibl
 | E2-1 | Profile-based routing substrate | SWE lead + SWE | 5 | Cross-cutting enqueue refactor |
 | E2-2 | Docker-coupled task strategy | SWE + DevOps | 3 | Reroute-first policy |
 | E2-3 | Filesystem contract adaptation | SWE + Lemhi sysadmin | 4 | Preserve `/wc1` compatibility |
-| E2-4 | Redis/tunnel contract hardening | DevOps + SWE + security | 4 | Multi-DB latency and resilience |
+| E2-4 | Dispatch/reconciliation contract hardening | DevOps + SWE + security | 4 | API latency, ordering, and resilience |
 | E2-5 | Validation/rollout/gates | QA + SRE + SWE | 3 | Broad test and readiness burden |
 
 #### Story backlog (execution units)
@@ -812,9 +829,9 @@ Implement contract-safe hybrid execution so Lemhi workers run only HPC-compatibl
 | S2-10 | Run-root adapter preserving `get_wd` contract | Explicit mapping logic | S2-09 | 4 |
 | S2-11 | Freshness guard for Lemhi-produced artifacts | Prevent stale browse/export reads | S2-10 | 4 |
 | S2-12 | Filesystem violation hard errors | `filesystem_contract_violation` path | S2-11 | 3 |
-| S2-13 | Redis DB preflight (`0/2/9/11/13/15`) | DB health/reachability checks | None | 3 |
-| S2-14 | Retry/timeout budgets for tunnel Redis clients | Bounded failure behavior | S2-13 | 4 |
-| S2-15 | Lock/pubsub/queue RTT observability | Metrics and alert thresholds | S2-14 | 3 |
+| S2-13 | Dispatch API preflight and auth validation | API health/reachability checks | None | 3 |
+| S2-14 | Retry/timeout budgets for dispatch and callback flows | Bounded failure behavior | S2-13 | 4 |
+| S2-15 | Dispatch latency and reconciliation observability | Metrics and alert thresholds | S2-14 | 3 |
 | S2-16 | Routing/contract regression suite | Targeted tests | S2-03..S2-15 | 3 |
 | S2-17 | Canary rollout with mixed worker pools | Controlled rollout evidence | S2-16 | 3 |
 | S2-18 | Failure drills + rollback rehearsal | Verified rollback under load | S2-17 | 4 |
@@ -829,8 +846,8 @@ Implement contract-safe hybrid execution so Lemhi workers run only HPC-compatibl
 | 4 | Pipeline enqueue migration | Batch/pipeline paths classified |
 | 5 | Docker reroute complete | Docker tasks forced to cloud profile |
 | 6 | Filesystem preflight + contract errors merged | Lemhi startup fail-fast active |
-| 7 | Redis DB preflight + retry budgets | `0/2/9/11/13/15` checks passing |
-| 8 | Routing/tunnel/lock RTT observability | Dashboards + alert thresholds |
+| 7 | Dispatch preflight + retry budgets | Dispatch and callback checks passing |
+| 8 | Routing/dispatch/reconciliation observability | Dashboards + alert thresholds |
 | 9 | Full targeted regressions stable | Required validation commands pass |
 | 10 | Canary rollout with small Lemhi slice | No critical regressions under load |
 | 11 | Soak + chaos drills + rollback rehearsal | Drill reports closed |
@@ -854,10 +871,10 @@ Contingency:
 Rollback triggers:
 
 1. Persistent misrouting above threshold for two consecutive business days.
-2. Tunnel-related failure rates above agreed baseline.
+2. Dispatch/reconciliation failure rates above agreed baseline.
 3. Lock/pubsub latency causing repeatable failures or starvation.
 4. Filesystem freshness/consistency violations in browse/export/readiness.
-5. Security control regression in tunnel/auth path.
+5. Security control regression in dispatch/auth path.
 
 Rollback actions:
 
@@ -890,8 +907,8 @@ Prove Lemhi persistent workers can run bounded production-adjacent workloads wit
 |---|---|---|---|
 | 72-hour steady soak | 3 | Stable queue and success ratio | Queue lag > 15 min for 30 min |
 | 7-day mixed soak | 5 | Stable throughput without babysitting | More than 2 Sev2 incidents/week |
-| Tunnel flap drill | 4 | Auto-reconnect and bounded retry | Worker crash loop > 10 min |
-| Redis transient outage drill | 4 | Graceful retry/recovery without lock corruption | Lock-timeout error rate > 1% |
+| Dispatch broker outage drill | 4 | Fail-closed routing + bounded retry/recovery behavior | Unbounded queue growth > 30 min |
+| Callback/reconciliation delay drill | 4 | Deterministic eventual state reconciliation | Reconciliation lag > 15 min or terminal-state mismatch > 0.5% |
 | Slurm preemption storm | 6 | Supervisor replaces workers and drains safely | Recovery > 20 min or job loss |
 | Storage latency spike | 6 | Alerts fire and no corrupt outputs | Any output integrity failure |
 | Cert rotation drill | 7 | Successful reconnect without manual SSH | Unplanned downtime > 10 min |
@@ -913,7 +930,7 @@ Prove Lemhi persistent workers can run bounded production-adjacent workloads wit
 | Dimension | Score | Rationale |
 |---|---|---|
 | Cross-team coordination | 5 | Weekly synchronous decisions across SWE/SRE/ops/security |
-| Technical uncertainty | 4 | Scheduler, tunnel, storage behavior still partly unknown |
+| Technical uncertainty | 4 | Scheduler, dispatch boundary, and storage behavior still partly unknown |
 | Operational blast radius | 4 | Pilot impacts production-adjacent queues |
 | Verification burden | 5 | Continuous SLO monitoring and repeated chaos drills |
 | Compliance/security dependency | 4 | mTLS/ACL/audit evidence required before expansion |
@@ -1005,25 +1022,34 @@ Estimation notes for this section:
 Recommended near-term option: `A3`.  
 Recommended long-term option: `A4`.
 
-### 17.2 Blocker B: Secure tunneling to Redis
+### 17.2 Blocker B: Cross-site Redis tunnel alternatives (SSH/stunnel explicitly rejected)
 
 | Option | Timeline (weeks) | PM | Cost | Complexity | Software | DevOps | Sysadmin | Viability |
 |---|---:|---:|---:|---:|---|---|---|---|
-| B1 `rq-link-agent` + `rq-link-gateway` (mTLS) | 8-12 | 6-9 | $90k-$198k | 4 | H | H | M | High |
-| B2 Envoy sidecar + egress gateway | 12-18 | 9-13 | $135k-$286k | 5 | M | H | H | Medium near-term / High long-term |
-| B3 WireGuard overlay + direct Redis | 6-10 | 4-7 | $60k-$154k | 4 | L-M | M | H | Medium-Low |
-| B4 Bastion SSH/stunnel bridge (interim) | 2-5 | 2-4 | $30k-$88k | 2 | M | L-M | M | Low (stopgap only) |
+| B1 Slurm-native dispatch broker (no cross-site Redis from Lemhi nodes) | 12-18 | 9-13 | $135k-$286k | 4 | H | H | M-H | High |
+| B2 Federated RQ island (local Lemhi Redis + API/event bridge) | 14-22 | 11-16 | $165k-$352k | 4 | H | H | H | Medium-High |
+| B3 SSH/autossh/stunnel persistent tunnel pattern | 2-5 | 2-4 | $30k-$88k | 2 | M | L-M | M | No-Go (rejected) |
 
-Required contract coverage for all viable options: Redis DB `0/2/9/11/13/15` with explicit ACL and observability.
+Explicit consideration and rejection of SSH tunnel/stunnel:
 
-NoDb lock/unlock latency implication:
+1. `ssh -L/-R/-D`, `autossh`, and `stunnel` were considered for persistent control-plane connectivity and rejected for production.
+2. Rejection rationale:
+   - opaque tunnel channels weaken boundary inspection and policy enforcement
+   - weak per-request identity/authorization and audit granularity relative to API boundary controls
+   - operational fragility under Slurm churn and higher single-point-of-failure risk
+   - inconsistent with zero-trust and least-privilege boundary posture for shared HPC environments
 
-1. `locked() ... dump_and_unlock()` patterns perform about 7 Redis round trips in the happy path.
-2. Added cross-site RTT cost is approximately `7 * RTT` per lock cycle (before retries/contention).
-3. At 12 ms RTT this is about 84 ms additional lock-cycle latency; at 25 ms RTT this is about 175 ms.
+Security and best-practice references used for this decision:
+
+1. NIST SP 800-207 (Zero Trust): <https://doi.org/10.6028/NIST.SP.800-207>
+2. NIST SP 800-41r1 (firewall/tunnel boundary concerns): <https://doi.org/10.6028/NIST.SP.800-41r1>
+3. NIST IR 7966 (SSH key-management and trust-sprawl risk): <https://doi.org/10.6028/NIST.IR.7966>
+4. ATT&CK T1572 (protocol tunneling as C2 technique): <https://attack.mitre.org/techniques/T1572/>
+5. CISA/FBI/CNMF AA23-250A (encrypted SSH tunnel abuse): <https://www.cisa.gov/sites/default/files/2023-09/aa23-250a.pdf>
+6. OpenSSH `sshd_config` forwarding limitations: <https://man.openbsd.org/sshd_config>
 
 Recommended near-term option: `B1`.  
-Recommended long-term option: `B2`.
+Recommended long-term option: `B1` hardened (treat `B2` as secondary fallback if local queue island is mandated).
 
 ### 17.3 Blocker C: Slurm scheduler model versus persistent workers
 
@@ -1088,17 +1114,19 @@ Recommended long-term option: `F3`.
 Path A: Near-term St. Joe viable path (recommended)
 
 1. `A3 + B1 + C4 + D1/D2 + E2 + F1`
-2. Critical path duration: approximately 16-24 weeks when sequenced with dependencies from Section 16.
-3. Raw blocker-sum effort: approximately 32-49 PM.
-4. Integrated program effort after overlap: approximately 25-35 PM (aligns to Sections 10 and 11).
-5. Integrated labor cost: approximately $375k-$770k.
+2. Time to pilot-ready bounded St. Joe execution (through Phase 3): approximately 24-34 weeks.
+3. Time to first-class hardened service (through Phase 4): approximately 30-42 weeks.
+4. Raw blocker-sum effort: approximately 35-53 PM (`D1 + D2` included as the recommended pair).
+5. Integrated program effort after overlap: approximately 25-35 PM (aligns to Sections 10 and 11).
+6. Integrated labor cost: approximately $375k-$770k.
 
 Path B: Long-term durable Lemhi-first path (post-St. Joe horizon)
 
-1. `A4 + B2 + C1 + D3 + E3 + F3`
+1. `A4 + B1 + C1 + D3 + E3 + F3`
 2. Additional modernization duration: approximately 9-15 months beyond Path A stabilization.
 3. Raw blocker-sum effort: approximately 53-78 PM.
 4. Indicative labor cost: approximately $795k-$1.716M.
+5. Planning delta from stabilized Path A to Path B: approximately +20-30 PM and +$300k-$660k (migration and revalidation heavy).
 
 ### 17.8 Options not viable for near-term St. Joe delivery
 
@@ -1106,15 +1134,60 @@ Path B: Long-term durable Lemhi-first path (post-St. Joe horizon)
 2. `C3` preemptible persistent workers with checkpoint-recovery as primary model (does not satisfy non-interruption requirement).
 3. `D4` and `E3` as immediate baseline (high-refactor migration risk).
 4. `F2` as immediate baseline (runtime parity and validation burden too high for near-term schedule).
+5. `B3` SSH/autossh/stunnel persistent control-plane tunnels (explicit security no-go).
+
+### 17.9 Security and Best-Practice-Backed Go/No-Go Decisions (Recommended Blockers)
+
+Global hard stops (all rows):
+
+1. `P1-P7` unsigned by end of Phase 0 -> stop.
+2. Pilot SLO floor miss -> stop expansion.
+3. Institutional security-control failure at boundary controls -> stop.
+
+| Recommended blocker path | Prerequisites | Control requirements | Residual risk | Go/No-Go | Rationale |
+|---|---|---|---|---|---|
+| `A3` Hybrid routing | `P2/P3/P5` approved; routing boundary in place; full capability inventory | 100% task classification, CI guard for unclassified tasks, deterministic misroute errors | Classification drift and hidden dependencies | GO (conditional) | Best near-term containment of internet-dependent task risk |
+| `C4` Hybrid persistent model | `P1/P7` signed; lifecycle thresholds defined; `P6` on-call owner named | Drain-first lifecycle controller, no uncontrolled active-job interruption, rollback drill under load | Shared-HPC policy churn and emergency outage events | Scope-reduce | Pilot-only GO; production no-go until repeated evidence |
+| `D2` Node-local scratch + promote (with `D1`) | `D1` benchmark evidence; `P4` approved; scratch quota/cleanup policy | Atomic promote + checksums, freshness guard, integrity load tests | Promote backlog and scratch pressure | GO (conditional) | Practical small-file mitigation while preserving rollback path |
+| `E2` Staged replication | `D2` data path available; consistency and freshness SLO approved | Promotion marker only after full sync verification, idempotent retry, audit trail | Replication lag and operator error | GO (conditional) | Better integrity containment than live two-way mount for near-term path |
+| `F1` Reroute Docker-coupled tasks | Docker-coupled task inventory complete; cloud worker capacity planned | Hard routing to cloud profile, explicit contract errors on Lemhi, queue latency monitoring | Cloud queue saturation if under-capacity | GO (conditional) | Fastest way to remove unsupported runtime assumptions from Lemhi nodes |
+
+### 17.10 Conditional Scope Adders (Decision-Dependent Work)
+
+These are not in the baseline 25-35 PM estimate. Triggering any row adds scope, time, and cost.
+
+| Conditional trigger | Additional required work | Timeline delta | PM delta | Cost delta | Decision owner(s) |
+|---|---|---:|---:|---:|---|
+| `P1` denies no-preempt/service-like scheduling guarantees | Shift from non-interruption model to recovery-SLA model (`C2/C3` style), add stronger checkpoint/restart and user-facing SLA contract changes | +8-16 weeks | +6-10 PM | +$90k-$220k | Lemhi governance + I-CREWS sponsor |
+| Security disallows inbound callbacks from Lemhi boundary | Implement pull-based state reconciliation with signed polling windows, replay protection, and dead-letter recovery | +4-8 weeks | +3-5 PM | +$45k-$110k | Security + network + platform leads |
+| `D2/E2` cannot meet artifact freshness/integrity SLOs under load | Accelerate `D3` and/or `E3` migration, including compatibility adapters and dual-run validation | +12-24 weeks | +10-18 PM | +$150k-$396k | Storage admin + SWE lead + SRE lead |
+| PII/regulated data is introduced into Lemhi worker flows | Data classification, encryption key lifecycle, tighter access controls, audit expansion, and compliance evidence pack | +6-12 weeks | +4-8 PM | +$60k-$176k | Security/compliance + data owner |
+| `F1` reroute causes sustained cloud-queue saturation | Implement `F3` service-offload pattern with capacity controls and retry semantics | +6-10 weeks | +3-5 PM | +$45k-$110k | SWE + DevOps + operations |
 
 ## 18. End Note: Long-Term Lemhi-First Modernization Path
 
 The long-term Lemhi-first modernization path remains:
 
-1. `A4 + B2 + C1 + D3 + E3 + F3`
+1. `A4 + B1 + C1 + D3 + E3 + F3`
 2. Additional modernization duration: approximately 9-15 months beyond Path A stabilization.
 3. Raw blocker-sum effort: approximately 53-78 PM.
 4. Indicative labor cost: approximately $795k-$1.716M.
+
+### 18.1 Long-Term Work Packages (Post-Path A)
+
+| Work package | Scope | Duration | PM | Cost |
+|---|---|---:|---:|---:|
+| `LT1` Control-plane hardening | Strengthen dispatch identity, policy automation, and audit depth; close pilot-era security debt | 8-12 weeks | 4-7 | $60k-$154k |
+| `LT2` Storage modernization | Move from staged replication constraints toward durable `D3/E3` architecture with compatibility adapters | 16-28 weeks | 16-24 | $240k-$528k |
+| `LT3` Scheduler hardening | Progress from `C4` bounded model toward `C1` dedicated service partition guarantees | 10-16 weeks | 6-9 | $90k-$198k |
+| `LT4` Runtime modernization | Convert rerouted Docker-coupled paths (`F1`) to service-offload (`F3`) for reduced cloud dependency | 6-10 weeks | 3-5 | $45k-$110k |
+
+### 18.2 Conditional Governance for Long-Term Work
+
+1. Start `LT2` only after two consecutive quarters of passing artifact freshness and integrity SLOs on current path.
+2. Start `LT3` only with a signed Lemhi governance policy guaranteeing non-preempt service partition behavior.
+3. Start `LT4` only after cloud-reroute utilization exceeds agreed saturation threshold for two consecutive reporting windows.
+4. Keep dual-run rollback capability until each long-term package passes soak, chaos, and rollback drills.
 
 Estimate caveat:
 
