@@ -13,27 +13,27 @@
  ───────────────            ─────────────────────────                    ─────────────────────
 
  ┌─────────────┐            ┌───────────────────────┐                    ┌───────────────────┐
- │    Human    │            │   weppcloud (Flask)   ├───▶ | o▶ o    ···· │     Postgres      │
+ │    Human    │            │   weppcloud (Flask)   ├───▶ | o▶ o    ·····│     Postgres      │
  │ Web Browser │──http────▶ │   UI · Auth · NoDb    │···· | ·· o ·▶ :    │   users · runs    │
  └─────────────┘  /jwt      └───────────┬───────────┘     |    o    :    └───────────────────┘
                     │                   │                 |    o    :
                     │       ┌───────────┴───────────┐     |    o    :    ┌───────────────────┐
-                    ├─────▶ │  rq-engine (FastAPI)  ├───▶ | o▶ oooo : oo │       Redis       |
+                    ├─────▶ │  rq-engine (FastAPI)  ├───▶ | o▶ oooo : ooo│       Redis       |
                     │       │  tasks · state · jobs │···· | ·· o ·▶ :    │  rq · job status  |
                     │       └───────────┬───────────┘     |    o    :    │ nodb locks/cache  |
                     │                   │                 |    o    :    └───────────────────┘
                     │       ┌───────────┴───────────┐     |    o    :           
-                    │       |    rq-worker pool     |     |    o    :
-                    │       |  data acquisition /   ├───▶ |    o    :
-                    │       |  processing (Rust)    |     |    o    :
+                    │       |    rq-worker pool     ├───▶ |    o    :
+                    │       |  data acquisition /   │oooo | o▶ o    :
+                    │       |  processing (Rust)    │···· | ·· o ·▶ :
                     |       |  subprocess (WEPP)    |     |    o    :
                     |       └──┬────┬───────────────┘     |    o    :
                     │          |   http                   |    o    :
                     |      docker   |                     |    o    :
-                    |        exec   └-▶ external apis     |    o    :
+                    |        exec   └-▶ EXTERNAL APIS     |    o    :
                     |          |                          |    o    :
-                    |          └-▶ service containers     |    o    :    ┌───────────────────┐
-                    │                                     ├───────────── │  Local Storage    │
+                    |          └-▶ SERVICE CONTAINERS     |    o    :    ┌───────────────────┐
+                    │                                     ├──────────────│  Local Storage    │
                     │       ┌───────────────────────┐     |    o    :    │  Run Data         │
                     ├─────▶ │  query-engine         ├───▶ |    o    :    │  ├ *.nodb         │
                     │       │  Analytics · MCP API  │oooo | o▶ o    :    │  ├ **.parquet     │
@@ -43,13 +43,14 @@
  ┌─────────────┐    ├─────▶ │  browse (Starlette)   ├───▶ |    o    : 
  │  AI Agent   │    │       │  UI · files API       │oooo | o▶ o    :
  │  OpenClaw   │──http      └───────────────────────┘     |    o    : 
- └─────────────┘  /jwt                                    |    o    :
+ |    (WIP)    |  /jwt                                    |    o    : 
+ └─────────────┘    │                                     |    o    :
                     │              WEBSERVICES            |    o    :
                     │       ─────────────────────────     |    o    :
                     │       ┌───────────────────────┐     |    o    :
                     ├─────▶ │         dtale         ├───▶ | o▶ o    :
                     |       |      (sandboxed)      │···· | ·· o ·▶ :
-                    │       └───────────────────────┘     |    o    
+                    │       └───────────────────────┘     |    o
                     │       ┌───────────────────────┐     |    o
                     ├─wss─▶ │       status (Go)     ├───▶ | o▶ o
                     │       └───────────────────────┘     |    o
