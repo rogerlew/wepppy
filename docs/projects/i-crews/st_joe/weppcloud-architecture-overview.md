@@ -66,8 +66,8 @@ WEPPcloud is a containerized web-application and modeling platform. This figure 
  ┌─────────────┐    ├─────▶ │  browse (Starlette)   ├───▶ |    o    : 
  │  AI Agent   │    │       │  UI · files API       │oooo | o▶ o    :
  │  OpenClaw   │──http      └───────────────────────┘     |    o    : 
- |    (WIP)    |  /jwt                                    |    o    : 
- └─────────────┘    │                                     |    o    :
+ └─────────────┘  /jwt                                    |    o    : 
+                    │                                     |    o    :
                     │              WEBSERVICES            |    o    :
                     │       ─────────────────────────     |    o    :
                     │       ┌───────────────────────┐     |    o    :
@@ -139,13 +139,33 @@ The naive approach to calibration is batch parameter sweeps: generate a grid of 
 
 Resolving equifinality requires an agent that can reason about intermediate outputs: Does the seasonal pattern of baseflow match? Are sediment peaks arriving at the right time relative to storm events? Is the snow accumulation/melt timing physically plausible for these elevations? These are diagnostic judgments that inform the next parameter adjustment. They cannot be encoded as a scalar objective function and batch-submitted.
 
-This is why the calibration workflow is iterative hyothesis driven and orchestrated by AI agents rather than batch-submitted.
+This is why the calibration workflow is iterative hyothesis driven and orchestrated by humans and AI agents rather than batch-submitted. WEPPcloud provides interactive reports and visualizations for humans to understand hydrological processes and APIs for agents to access information.
 
 ---
 
 ## AI Agent Integration
 
+We are quickly moving towards a vision of autonomous AI agents as first-class WEPPcloud operators.
+
 WEPPcloud is designed to be operated by both human users and autonomous AI agents. AI agents are first-class operators — they authenticate with scoped JWT tokens and interact with the same service APIs that human users do.
+
+Agents can currently:
+- Agents can replicate runs using the `rq-engine` API
+- Agents can autonomously troubleshoot, diagnose, and fix errors in programatic flows
+- Agents can implement complex hydrological analyses of complex watershed dynamics from human expert prompts using the public WEPPcloud APIs
+  - [Palisades 2024 Fire - Shrubs Hydrographs](https://github.com/rogerlew/palisades-fire-2024-shrub-hydrographs/blob/main/report_upset_reckoning_hydroshape.pdf)
+- Agents can perform hypothesis driven ablation testing to resolve non-parity differences in WEPP-forest outputs across compilation targets
+  - Agents can interpret model code to understand how physical processes are modeled
+  - Ablation testing uses subgent workflows to compile and run parity tests on Windows and Linux through SSH
+- Agents can autonomously follow multi-hour procedural workflows with subagents, decision points, and gates
+  - weppcloud development extensively uses ExecPlan work-packages that are carried out end-to-end by agents
+
+A near term goal (Summer 2026) is have autonomous AI agents capable of calibrating WEPPcloud watersheds to observed streamflow and sediment delivery.
+
+Known missing architectural components:
+- Knowledge database for agents to form academically sound hypotheses
+- Operational guidance on calibration workflows and gates
+- Multi-agent communication and orchestration layer (Discord channel shared by Openclaw agents)
 
 The planned agent operator is OpenClaw/Hermes pen-source autonomous AI assistant. Agent runs external to weppcloud on their own development box with sandboxed tool execution (bash, file I/O, HTTP), a skills system for domain-specific workflows, and multi-agent session routing. It connects to external services via HTTP and drives autonomous workflows without human intervention.
 
@@ -162,8 +182,8 @@ An OpenClaw agent authenticates to the WEPPcloud stack via JWT and interacts wit
 
 **query-engine (Starlette)** — the analytical interface:
 - Query the dataset catalog for a run (hillslope outputs, channel outputs, climate summaries)
-- Execute DuckDB SQL against Parquet-formatted run results
-- Validate queries before execution
+- Execute validated declarative JSON queries against Parquet-formatted run results
+- Validate query payloads before execution
 - Retrieve prompt templates with embedded schema context
 
 **browse - files (Starlette)** — file access:
