@@ -58,7 +58,7 @@ No engineering should start until these are approved in writing.
 | P4 | Storage class approved for WEPP small-file metadata-heavy I/O | Lemhi storage admins | Lustre defaults can be poor fit for this workload |
 | P5 | Decision on internet-restricted compute model for external APIs | I-CREWS + RCDS + security | Some task types fail without controlled egress |
 | P6 | Named operations owner for 24x7 worker incidents | RCDS + WEPPcloud | No owner means no production service |
-| P7 | Written Slurm/cgroup + Linux limits contract for worker jobs (`cpus-per-task`, cgroup enforcement, `ulimit` profile) | Lemhi ops + security | Nested worker fanout cannot be sized or stabilized safely without explicit limits |
+| P7 | Written Slurm/cgroup + Linux limits contract for worker jobs (`cpus-per-task`, explicit memory floor by workload profile, cgroup enforcement, `ulimit` profile) | Lemhi ops + security | Slurm default memory and nested worker fanout cannot be sized or stabilized safely without explicit limits |
 | P8 | Funded procurement and logistics plan for high-performance 3-2-1 storage (hot run tier + replica + offsite immutable copy) | I-CREWS leadership + RCDS operations | Lustre is non-viable for this workload; no funded 3-2-1 storage means no production-safe Lemhi path |
 
 `P2 + P3` hard requirement clarification:
@@ -250,6 +250,7 @@ Current known facts from public C3+3 docs:
 
 1. Standard Lemhi nodes are documented as 40 cores and 192 GB RAM.
 2. Slurm default memory allocation is documented as 3 GB per job unless explicitly requested otherwise.
+3. WEPP watershed executable footprint is approximately 12 GB memory for a single watershed process before adding Python worker overhead, process/thread fanout overhead, and OS headroom.
 
 Known unknowns for WEPPcloud persistent-worker viability:
 
@@ -269,15 +270,17 @@ Required actions:
    - map `rq worker-pool -n`
    - map nested `ThreadPoolExecutor`/`ProcessPoolExecutor` fanout
    - map `WEPPPY_NCPU` and `PERIDOT_CPU`
+   - define per-job memory minimums that account for the ~12 GB watershed executable footprint plus orchestration/runtime headroom
 4. Enforce startup guardrails:
    - worker startup fails fast if observed limits are below required profile
-   - submission templates require explicit `--cpus-per-task` and memory requests
+   - submission templates require explicit `--cpus-per-task` and memory requests (`--mem` or `--mem-per-cpu`), never Slurm defaults
 
 Exit criteria:
 
 1. Signed CPU/limits contract exists for all partitions/QOS used by Lemhi workers.
 2. Soak tests show no FD exhaustion, PID exhaustion, or cgroup throttle/kill events under representative load.
 3. Worker throughput and failure rate are stable across repeated runs.
+4. No cgroup OOM kills occur for representative watershed workloads under approved queue profiles.
 
 ### 6.4 Blocker D: Filesystem and small-file I/O mismatch
 
@@ -373,6 +376,11 @@ Costed implementation scenarios:
 | S-321B (fully self-hosted copy-3) | S-321A plus one additional server for dedicated backup tier (`$21,391.50 x 3`) | $64,174.50 | 4-8 PM ($60k-$176k) | $12k-$24k | +8 to +16 weeks |
 
 Logistics scope includes shipping/receiving, rack/power/network turn-up, rails/cabling/transceivers, datacenter installation windows, and acceptance burn-in.
+
+Critical-path dependency note:
+
+1. If storage procurement decision, purchase order issuance, and installation window are not locked by end of Phase 0 Week 5, the baseline schedule assumes Phase 2 filesystem adaptation and Phase 3 pilot will slip.
+2. In that state, near-term Path A must either absorb schedule delay or reduce scope until storage readiness is available.
 
 Exit criteria:
 
@@ -640,7 +648,8 @@ Planning note:
 |---|---|---|---|
 | `P1-P8` signed and `P2/P3` operational by Phase 1 gate | Keep Path A baseline (`$375k-$770k` labor) plus selected storage non-labor scenario | Keep baseline `30-42 weeks` | Proceed as first-class path (`A3 + B4 + C4 + D1/D2 + E2 + F1`) |
 | `P2/P3` delayed or denied | First-class budget model is invalid; apply Section 17.10 direct-Redis denial fallback delta (`+3-6 PM`, `+$45k-$132k`) and re-scope | Add `+4-8 weeks` and re-sequence dependent Phase 1/2 work | Drop first-class designation; re-baseline to fallback-only (`B1`) or stop |
-| `P8` not funded/approved | Storage-backed production budget is invalid until resolved | Add procurement/logistics delay (`+6-20 weeks` typical lead-time range in Section 11.2) | Stop production path or approve alternate funded copy-3 path (`S-321B`) |
+| `P7` limits contract unresolved (memory/CPU defaults retained) | Capacity assumptions in baseline are invalid; add guardrail and profile work before scale-up | Add `+2-6 weeks` to complete limits contract and load validation | Hold scale-out until explicit `--mem/--cpus-per-task` profile is approved; no reliance on Slurm default 3 GB/job |
+| `P8` not funded/approved, or PO/ETA/install window not locked by Phase 0 Week 5 | Storage-backed production budget is invalid until resolved | Add procurement/logistics delay (`+6-20 weeks` typical lead-time range in Section 11.2) and re-sequence Phase 2/3 storage-dependent work | Stop production path or approve alternate funded copy-3 path (`S-321B`) |
 | `P1` denied (no persistent-like Slurm policy) | Add Section 17.10 `P1` denial delta (`+6-10 PM`, `+$90k-$220k`) for recovery-SLA architecture shift | Add `+8-16 weeks` | Re-baseline from non-interruption model to recovery model (`C2/C3`) |
 | Multiple dependency failures occur together | Additive estimate is unreliable; row-level sums will understate integration overhead | Schedule compression assumptions become invalid | Run full re-estimation and publish a new baseline envelope before continuing |
 
@@ -785,7 +794,21 @@ Explicit architectural decision:
 1. `ssh -L/-R/-D`, `autossh`, and `stunnel` were considered for Section 6.2 and rejected for production.
 2. Section 6.2 therefore requires a non-tunneled direct secure Redis model for first-class workers; brokered dispatch remains a non-first-class fallback.
 
-### 15.6 Industry Has Moved Toward Ephemeral Workers, Not Persistent Ones
+### 15.6 Direct Database Connections Across HPC Perimeters Are Generally Prohibited
+
+While direct secure Redis (Option B4) is the only acceptable first-class architectural pattern once SSH tunneling is rejected, obtaining firewall exceptions for direct database access (e.g., TCP 6379) across HPC perimeter boundaries is historically very contentious. Institutional security and network administrators frequently deny these requests by policy.
+
+1. **Default-Deny HPC Perimeters**: Most research and university HPC clusters place compute nodes on strictly private, unroutable subnets with default-deny egress policies. While API polling (HTTPS 443) via a NAT gateway might be permitted, arbitrary stateful TCP protocols are intentionally blocked. The industry standard **ESnet Science DMZ** architecture explicitly separates external data-facing nodes from general-purpose compute to aggressively control perimeter risk.
+   - Reference: <https://fasterdata.es.net/science-dmz/>
+
+2. **Databases Are Targeted Assets**: Redis, even when wrapped in mTLS and ACLs, is a raw database protocol. Security teams are deeply reluctant to open firewall holes for distributed databases crossing institutional boundaries due to the history of database-targeting ransomware and data exfiltration.
+   - Reference: CISA alerts regularly highlight threat actors targeting exposed databases and message brokers: <https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-011a>
+
+3. **L7 Inspection Limitations**: In zero-trust networks, establishing a direct, non-HTTP stateful persistent connection between an external WEPPcloud environment and an internal Lemhi compute node violates least-privilege network segmentation. Brokered HTTPS API dispatch (Option B1) is the standard way to cross these security domains precisely because web application firewalls (WAFs) and Layer-7 gateways can inspect and terminate HTTPS API requests, whereas raw Redis TCP streams cannot be transparently inspected.
+
+This friction reinforces why Option B4 is classified as a high-risk institutional dependency in Phase 0. If institutional security denies the direct Redis route, the project is forced back to Option B1 (brokered dispatch), which permanently drops the "first-class worker" designation and requires rewriting the task-dispatch architecture.
+
+### 15.7 Industry Has Moved Toward Ephemeral Workers, Not Persistent Ones
 
 Even on cloud infrastructure (where persistent workers are architecturally supported), industry guidance has moved away from the persistent-worker model. AWS's recommended pattern for Celery on batch compute is *ephemeral* workers that scale to zero when the queue is empty — not persistent long-lived daemons.
 
@@ -794,7 +817,7 @@ Even on cloud infrastructure (where persistent workers are architecturally suppo
 
 The Lemhi proposal moves in the opposite direction: it tries to force persistent workers onto infrastructure that is *even less* suited to them than cloud batch services, while the cloud community has already abandoned the persistent pattern where it *is* supported.
 
-### 15.7 The Architectures That Do Work on HPC
+### 15.8 The Architectures That Do Work on HPC
 
 For completeness: there are patterns that *do* work for dispatching compute to HPC from web applications. None of them preserve WEPPcloud's current architecture.
 
@@ -810,7 +833,7 @@ For completeness: there are patterns that *do* work for dispatching compute to H
 
 All three patterns require re-architecting WEPPcloud to submit batch jobs rather than feed persistent workers. None of them is a drop-in reuse of existing code. Each is its own multi-month engineering program, equivalent in cost to the Lemhi RQ-worker effort this plan describes — and still does not solve the shared-filesystem or internet-access problems.
 
-### 15.8 Synthesis: What the Evidence Demands
+### 15.9 Synthesis: What the Evidence Demands
 
 The consensus is unanimous across three independent axes:
 
@@ -866,7 +889,7 @@ Out of scope:
 | D0-5 / P4 | Approve storage class and path compatibility approach for `/wc1` and `/geodata` contract | Storage admin lead | End of Week 4 (May 15, 2026) |
 | D0-6 / P5 | Select internet-restricted operating policy (default target: `hybrid`) | I-CREWS sponsor + RCDS ops + security | End of Week 4 (May 15, 2026) |
 | D0-7 / P6 | Assign 24x7 incident ownership and escalation chain | RCDS operations manager | End of Week 5 (May 22, 2026) |
-| D0-8 / P8 | Approve funded 3-2-1 storage procurement/integration path (`S-321A` or `S-321B`) | I-CREWS sponsor + RCDS operations manager | End of Week 5 (May 22, 2026) |
+| D0-8 / P8 | Approve funded 3-2-1 storage procurement/integration path (`S-321A` or `S-321B`) and lock PO/ETA/install window | I-CREWS sponsor + RCDS operations manager | End of Week 5 (May 22, 2026) |
 | D0-9 | Approve Phase 1 non-production guardrails and go/no-go | Joint gate board | End of Week 6 (May 29, 2026) |
 
 #### Weekly plan
@@ -877,7 +900,7 @@ Out of scope:
 | W2 | Apr 27-May 1 | Resolve `P1` + `P7` policy and limits discovery plan | Signed/denied `P1`, draft `P7` limits contract |
 | W3 | May 4-8 | Resolve `P2` + `P3` network/Redis security boundary | Network and security decision records |
 | W4 | May 11-15 | Resolve `P4` + `P5` storage contract and hybrid policy | Storage contract memo, hybrid policy memo |
-| W5 | May 18-22 | Resolve `P6` operations ownership and `P8` storage funding/procurement decision | Ops ownership charter, escalation matrix, funded storage decision record |
+| W5 | May 18-22 | Resolve `P6` operations ownership and `P8` storage funding/procurement decision | Ops ownership charter, escalation matrix, funded storage decision record, PO/ETA/install window record |
 | W6 | May 25-29 | Gate review and publish signed precondition packet | Phase 0 gate packet, Phase 1 go/no-go record |
 
 #### Acceptance criteria
@@ -885,6 +908,7 @@ Out of scope:
 1. All `P1-P8` are signed with explicit constraints and owners.
 2. `hybrid` policy defines task boundaries (`lemhi-safe` vs rerouted).
 3. Non-production security/network/storage controls are approved for Phase 1 start.
+4. `P8` includes explicit PO issuance status, vendor ETA, and installation/acceptance windows.
 
 #### Complexity (1-5)
 
@@ -949,8 +973,9 @@ Out of scope:
 1. Direct Redis boundary enforces TLS, authenticated clients, and ACL-limited access.
 2. Supervisor restores target worker count after cancellation/preemption in non-production.
 3. Worker startup fails fast when limits/mount/Redis-auth contracts are violated.
-4. Status2/preflight2 show Lemhi-originated updates with no contract regressions.
-5. Failure drills demonstrate deterministic recovery with observable metrics.
+4. Phase 1 worker profiles use explicit Slurm memory requests that account for the ~12 GB watershed executable footprint plus runtime headroom (no 3 GB default reliance).
+5. Status2/preflight2 show Lemhi-originated updates with no contract regressions.
+6. Failure drills demonstrate deterministic recovery with observable metrics.
 
 #### Complexity (1-5)
 
