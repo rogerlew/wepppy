@@ -135,6 +135,8 @@ For the St. Joe project, this two-node architecture enables parallel modeling: o
 
 ## Lemhi (C3+3) Feasibility Assessment
 
+For the full first-class `rq-worker` integration thought experiment (requirements, blockers, timelines, and costs), see [lemhi-rq-workers.md](lemhi-rq-workers.md).
+
 ### Summary Conclusion
 
 Using Lemhi as a direct replacement for WEPPcloud production worker hosts is **not currently viable**. Lemhi is a shared high-performance computing (HPC) system for scheduled research jobs, but WEPPcloud's production worker architecture is designed around always-on service containers, continuously connected queue workers, and run-directory mounts that behave like dedicated infrastructure.
