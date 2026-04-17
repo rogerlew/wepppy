@@ -383,6 +383,21 @@ Because WEPPcloud is fully containerized and environment-agnostic, transitioning
 
 ---
 
+## Institutional Support and Partnership Context
+
+WEPPcloud's compute operations are not a one-off arrangement. Over the entire life of `wepp.cloud` (8+ years), the platform has benefited from RCDS operations, maintenance, and hosting support. This procurement extends an established operating model rather than creating a new institutional dependency.
+
+At the university level, this support path is aligned with the Office of Research and Economic Development (ORED) through the Institute for Interdisciplinary Data Sciences (IIDS), which houses RCDS and positions research computing as core university research infrastructure. RCDS's statewide HPC collaboration (including jointly operated supercomputing resources) and on-campus computing/data-center operations provide the institutional foundation for long-lived, compute-intensive research platforms like WEPPcloud.
+
+### University of Idaho Context References
+
+- IIDS (within ORED; includes RCDS): <https://iids.uidaho.edu/>
+- ORED and IIDS context in U of I catalog: <https://catalog.uidaho.edu/university/research/>
+- U of I Newsroom (Lemhi statewide HPC collaboration): <https://www.uidaho.edu/newsroom/lemhi-supercomputer>
+- RCDS facilities/resources snapshot (statewide and on-prem HPC): <https://www.iids.uidaho.edu/docs/RCDS-Facilities-Resources-2025.pdf>
+
+---
+
 ## Cost Summary
 
 | Item | Unit Cost | Qty | Total |
