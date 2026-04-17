@@ -16,15 +16,16 @@
 - **Amount:** **$42,783.00** total.
 - **Why now:** The St. Joe basin is already delineated and ready to model; the project is blocked on compute capacity, not software readiness.
 - **Why not Lemhi/HPC:** The Lemhi alternative is not a near-term substitute. The companion analysis estimates approximately **30-42 weeks with 3-4 FTE** and **10x** in engineering labor to make that path production-safe.
+- **Federal cost basis:** This request is framed as a direct I-CREWS cost under [`2 CFR § 200.403`](https://www.ecfr.gov/current/title-2/section-200.403) and [`2 CFR § 200.405`](https://www.ecfr.gov/current/title-2/section-200.405), with equipment treatment and any required approval/documentation to be handled consistent with [`2 CFR § 200.407`](https://www.ecfr.gov/current/title-2/section-200.407) and [`2 CFR § 200.439`](https://www.ecfr.gov/current/title-2/section-200.439).
 - **Operational model:** RCDS already supports this class of WEPPcloud infrastructure and is expected to absorb ongoing operations, maintenance, and hosting support.
-- **If approved:** I-CREWS gains dedicated local-storage-backed compute for immediate basin calibration, scenario analysis, and isolated batch throughput without degrading public WEPPcloud service.
+- **If approved:** I-CREWS gains a dedicated local-storage-backed WEPPcloud deployment for St. Joe calibration, scenario analysis, and access by other I-CREWS sites, participants, and partners.
 - **Long-term value:** After I-CREWS, the same hardware can remain as WEPPcloud production compute or transition into general RCDS research infrastructure.
 
 ---
 
 ## Executive Summary
 
-We request the procurement of two Supermicro SuperServer 621P-TR rack servers to serve as dedicated compute infrastructure for the I-CREWS St. Joe River Basin modeling initiative. During the scope of the I-CREWS project, these servers will be dedicated to I-CREWS sites and primarily the St. Joe basin calibration, scenario analysis, and WEPP simulation workloads. They will provide approximately 4x the compute capacity of the current infrastructure, include dedicated local storage to eliminate the NFS bottlenecks that currently constrain modeling throughput, and establish quality-of-service that supports time-critical Burned Area Emergency Response (BAER) operations during fire season.
+We request the procurement of two Supermicro SuperServer 621P-TR rack servers to serve as dedicated compute infrastructure for an independent I-CREWS deployment of WEPPcloud. During the scope of the I-CREWS project, these servers will be dedicated to I-CREWS sites and primarily the St. Joe basin calibration, scenario analysis, alternative-futures modeling, and WEPP simulation workloads. They will provide approximately 4x the raw compute capacity of the current infrastructure, include dedicated local storage to eliminate the NFS bottlenecks that currently constrain modeling throughput, and, because they are dedicated to I-CREWS rather than shared with unrelated operations, provide roughly 40x more project-usable compute capacity than the status quo.
 
 Upon completion of the I-CREWS project, these servers will transition into the university's broader research computing infrastructure — either as permanent WEPPcloud production nodes (replacing or augmenting the aging current hardware) or as general-purpose compute within RCDS (Research Computing and Data Services), as institutional need dictates. The containerized, portable architecture of WEPPcloud makes this transition seamless.
 
@@ -32,7 +33,41 @@ The WEPPcloud software platform is ready for production use. The entire St. Joe 
 
 ---
 
-## WEPPcloud and Its Mission-Critical Role
+## Federal Award Allowability and Allocability Basis
+
+This request is written to align with the Uniform Guidance cost principles as reflected in the current eCFR. Under [`2 CFR § 200.403(a)`](https://www.ecfr.gov/current/title-2/section-200.403), allowable costs must be necessary and reasonable for the performance of the Federal award; [`§ 200.403(b)`](https://www.ecfr.gov/current/title-2/section-200.403) requires conformity with the Federal award; and [`§ 200.403(g)`](https://www.ecfr.gov/current/title-2/section-200.403) requires adequate documentation.
+
+Under [`2 CFR § 200.405(a)(1)`](https://www.ecfr.gov/current/title-2/section-200.405), a cost is allocable when it is incurred specifically for the Federal award. Accordingly, the requested servers are justified here as dedicated I-CREWS infrastructure for St. Joe calibration, alternative-futures modeling, and access by I-CREWS sites, participants, and partners, not as relief for unrelated WEPPcloud operating demand.
+
+That distinction matters because [`2 CFR § 200.405(c)`](https://www.ecfr.gov/current/title-2/section-200.405) generally prohibits charging a cost allocable to one Federal award to another Federal award. The same subsection also clarifies that this does not preclude shifting costs that are allowable under two or more Federal awards in accordance with governing statutes, regulations, or award terms. If mixed benefit must later be recognized because of the interrelationship of the work, [`2 CFR § 200.405(d)`](https://www.ecfr.gov/current/title-2/section-200.405) requires proportional allocation when those proportions can be determined and otherwise allows allocation on a reasonable documented basis. That subsection also states that where equipment is specifically authorized under a Federal award, the costs remain assignable to that award even when the equipment is no longer needed for the original purpose.
+
+Because this procurement is server equipment, approval and documentation should be handled consistent with [`2 CFR § 200.407`](https://www.ecfr.gov/current/title-2/section-200.407) and [`2 CFR § 200.439`](https://www.ecfr.gov/current/title-2/section-200.439), recognizing that prior approval affects allowability only where specifically required and that treatment depends on whether the asset is `general purpose equipment` or `special purpose equipment` as defined in [`2 CFR § 200.1`](https://www.ecfr.gov/current/title-2/section-200.1).
+
+Capacity building is relevant here, but as a supporting program-fit argument rather than the primary cost basis. NSF's EPSCoR RII Track-1 program describes awards as supporting research-driven improvements to physical and cyber infrastructure and human capital development, and states that requested infrastructure investments should complement the proposed research activities and clearly benefit jurisdictional R&D capacity. This request fits that framing because the servers create durable I-CREWS modeling capacity shared across sites and partners while directly enabling the St. Joe research scope. See the official NSF [RII Track-1 program page](https://www.nsf.gov/funding/opportunities/rii-track-1-epscor-research-infrastructure-improvement-program-track-1) and current Track-1 [solicitation](https://www.nsf.gov/funding/opportunities/rii-track-1-epscor-research-infrastructure-improvement-program-track-1/503429/nsf23-582/solicitation).
+
+---
+
+## Asset Classification and Approval Path
+
+For award-planning purposes, the proposed servers should be treated as `general purpose equipment` under [`2 CFR § 200.1`](https://www.ecfr.gov/current/title-2/section-200.1), unless the pass-through entity or institutional grants office directs otherwise. The most defensible reading is `general purpose` because the assets are standard rackmount servers and `information technology equipment and systems` are expressly listed in the definition of general purpose equipment. The current draft also contemplates later transition to `RCDS general-purpose compute`, which cuts against representing these servers as assets used only for research or other similar technical activities.
+
+Dedicated use during the award period supports allocability under [`2 CFR § 200.405(a)(1)`](https://www.ecfr.gov/current/title-2/section-200.405), but dedicated use does not by itself convert standard IT servers into `special purpose equipment`. Under [`2 CFR § 200.439(b)(1)`](https://www.ecfr.gov/current/title-2/section-200.439), capital expenditures for general purpose equipment are allowable as direct costs only with prior written approval of the Federal agency or pass-through entity. As a practical matter, each server's unit cost (`$21,391.50`) is high enough that prior written approval should be documented explicitly in the award file regardless of any alternative classification argument.
+
+The approval package and retained award file should explicitly document the following:
+
+| Documentation item | What the file should say |
+|---|---|
+| Necessity and reasonableness | State that the St. Joe basin is already delineated and ready to model; that full-basin calibration and alternative-futures analysis are blocked by compute/storage rather than software readiness; that the full-basin scope was added later at the request of the Coeur d'Alene Tribe, an I-CREWS partner; and that the dedicated deployment is necessary to execute the approved project scope. Cite this request, the technical scale of the basin, the Lemhi infeasibility analysis, and the NFS bottleneck evidence as supporting attachments. |
+| Direct charge to I-CREWS | State that the servers will host an independent WEPPcloud deployment dedicated during the award period to St. Joe calibration, scenario analysis, alternative-futures modeling, and access by I-CREWS sites, participants, and partners. Make clear that the charge is not justified as relief for unrelated WEPPcloud demand. |
+| Prior written approval | Retain the written approval from the Federal agency or pass-through entity identifying the servers as direct-charged equipment, including quantity (`2`), unit cost (`$21,391.50`), total cost (`$42,783.00`), working classification (`general purpose equipment` unless otherwise directed), and approved project use. If approval is conveyed through a budget revision, award amendment, or formal email, keep that document in the grant file. |
+| During-award dedicated use | Retain deployment records showing that the servers are assigned to the I-CREWS deployment during the award period. Appropriate evidence can include host/deployment names, queue configuration, access policy, project operations notes, and run-accounting or administrative records demonstrating that the servers are being used for the approved I-CREWS modeling scope. |
+| Post-award reassignment after original purpose is complete | If the servers are later moved to WEPPcloud production or RCDS general-purpose compute, retain a short transition memo stating that the equipment is no longer needed for the purpose for which it was originally required, the date of transition, and the new role of the hardware. That record should explicitly tie the reassignment to [`2 CFR § 200.405(d)`](https://www.ecfr.gov/current/title-2/section-200.405). |
+
+This section is intended to make the approval path concrete. It does not replace sponsor-specific terms and conditions; if the pass-through entity or NSF award terms impose additional approval or property-management requirements, those should control.
+
+---
+
+## WEPPcloud Platform Context
 
 ### What WEPPcloud Does
 
@@ -42,17 +77,9 @@ WEPPcloud is fully containerized using Docker and Docker Compose, making it port
 
 WEPPcloud also supports batch processing of watersheds through its API and task pipeline, enabling automated runs across collections of watersheds with different parameter sets, climate scenarios, or management treatments. This capability is essential for the St. Joe project, where calibration and scenario analysis require systematic runs across all 56 tributary watersheds.
 
-### Supporting BAER Teams During Fire Season
+### Existing Operating Context
 
-Each wildfire season, Burned Area Emergency Response (BAER) teams are deployed to assess post-fire erosion risk and recommend emergency stabilization treatments. These teams operate under extreme time pressure — assessments must be completed within days of fire containment to inform decisions about road closures, culvert upgrades, seeding, and erosion barriers before the first significant rainfall.
-
-WEPPcloud is a primary tool used by BAER teams to model post-fire erosion scenarios. The platform's "disturbed" configuration mode allows teams to apply fire-severity burn maps to watersheds and simulate how different soil burn severities affect runoff and sediment delivery. During peak fire season (June through November), multiple BAER teams may be running concurrent simulations across different fire perimeters, each requiring thousands of individual hillslope WEPP runs.
-
-Service reliability during fire season is not optional. When a BAER team is in the field with a 7-day assessment window, server downtime or slow processing directly impacts their ability to deliver actionable recommendations. A second deployment provides the redundancy necessary to maintain service availability during this critical period.
-
-### Public Use for Land Management and Research
-
-Beyond BAER response, WEPPcloud serves a broad user base:
+Outside I-CREWS, WEPPcloud already serves a broad operational and research user base:
 
 - **Federal land managers** (USFS, BLM, NRCS) use the platform for watershed assessment, forest management planning, and environmental impact analysis
 - **State agencies** model erosion risk for road construction, timber harvest, and post-fire rehabilitation projects
@@ -60,7 +87,7 @@ Beyond BAER response, WEPPcloud serves a broad user base:
 - **Educators** use WEPPcloud for classroom exercises in hydrology and erosion science, as well as practitioner training for land management professionals
 - **International users** apply the platform to watersheds worldwide for erosion prediction and land management planning
 
-The platform currently serves users across multiple time zones and use cases simultaneously. As the user base grows and project scope expands (particularly with the St. Joe basin initiative), the current infrastructure cannot sustain acceptable response times for all users.
+This operating context matters because it explains why St. Joe cannot be run opportunistically on the shared service. During wildfire season, BAER teams have highest prioritization for using the platform for time-sensitive post-fire assessments. At other times, the same infrastructure supports agencies, researchers, and training users. That makes WEPPcloud mature and operationally proven, but it also means only a limited fraction of the existing footprint can be devoted to sustained I-CREWS basin calibration without displacing unrelated work.
 
 ---
 
@@ -80,6 +107,12 @@ The entire St. Joe River Basin has been delineated and is ready for WEPP simulat
 
 Each of these 134,033 hillslopes requires an individual WEPP simulation. A single WEPP hillslope run executes a FORTRAN binary that reads soil, climate, and management input files, performs daily water balance and erosion calculations over the simulation period, and writes output files. At the watershed scale, an additional WEPP run routes water and sediment through the 151,121 channel segments. The 120 TB of storage is anticipated to provide a roughly 20x capacity factor for calibration runs.
 
+### Why This Request Emerged After Proposal Submission
+
+When the original I-CREWS proposal was written, and even a year ago, WEPPcloud did not yet have an owned basin-scale delineation workflow capable of preparing the full St. Joe basin for WEPP. Since then, the team has implemented ground-up hydrological delineation routines in Rust on top of WhiteboxTools (https://github.com/rogerlew/weppcloud-wbt), turning full-basin preparation into an operational workflow.
+
+Full-basin St. Joe execution was also not part of the initial project scope. That basin-scale modeling requirement was added later at the request of the Coeur d'Alene Tribe, an I-CREWS partner. This is therefore a material change in both technical readiness and project scope, not simply a request for faster hardware. For context, the Miles project (2013-2018) modeled Fernan Watershed at roughly 3,800 hectares. The St. Joe effort now in scope is more than 100x larger in area (411,200 ha) and far larger in hillslope and channel count. The procurement is emerging now because the software stack can finally prepare the basin, and compute plus storage have become the limiting resource.
+
 ### Why Basin-Level Calibration Requires Full-Basin Runs
 
 Calibrating the St. Joe basin model is not a matter of tuning individual tributaries in isolation. Upstream flow volume and sediment load directly affect downstream delivery timing and magnitude. A change in hillslope erodibility in an upper tributary alters the sediment supply to every downstream channel segment and ultimately the basin outlet. This means that each calibration iteration requires running the entire basin — all 134,033 hillslopes and 151,121 channels — to evaluate the effect of parameter adjustments on watershed-scale outputs. On current hardware, a single full-basin run is prohibitively slow due to running in a deprioritized batch queue. With the proposed servers, iterative calibration becomes feasible.
@@ -87,6 +120,8 @@ Calibrating the St. Joe basin model is not a matter of tuning individual tributa
 ### Compute Estimate
 
 On current hardware, a single WEPP hillslope run takes on the order of seconds, but 134,033 hillslopes running through multi-year climate sequences accumulate to hours or days of wall time depending on parallelism. The proposed servers would reduce this by roughly 4x in aggregate throughput and 20% per individual simulation (single-thread improvement), making iterative calibration and scenario analysis practical within research timelines.
+
+In raw hardware terms, the proposed servers are about a 4x increase over current WEPPcloud compute. In project-usable terms, the gain is much larger. Because the existing production deployment is a shared service, only about 10% of the current footprint can be responsibly devoted to I-CREWS work without commandeering unrelated operations. A dedicated I-CREWS deployment therefore yields on the order of 40x more compute capacity available to this award than the status quo.
 
 The RQ worker pool architecture is well-suited to this workload. Hillslope simulations are embarrassingly parallel — each is independent and can be dispatched to any available worker. With 256 cores across two servers (versus 88 today), the worker pool can sustain far higher job concurrency. Combined with WEPPcloud's batch processing capability, which automates the submission and tracking of multi-watershed runs, the proposed infrastructure enables systematic parameter sweeps and scenario comparisons across the full St. Joe basin without manual intervention.
 
@@ -118,13 +153,13 @@ The combinatorial nature of this analysis — multiple management treatments cro
 
 WEPPcloud is a persistent containerized service platform, not a single executable that can be submitted to a scheduler and forgotten. The production topology includes the `weppcloud` web application, `rq-engine` for operational job control, `query-engine` and `browse` for analytics and file access, Redis-backed job queues, and stateless RQ worker pools operating against shared run state and local model outputs. Human users and AI agents both authenticate into this stack and drive the same APIs. For the full topology diagram and service description, see [weppcloud-architecture-overview.md](weppcloud-architecture-overview.md).
 
-That service topology exists to support an AI-driven calibration workflow rather than one-shot batch execution. The St. Joe loop is: inspect basin outputs, form a calibration hypothesis, adjust parameters, submit another full-basin run, query the resulting diagnostics, and repeat. That requires always-on services, immediate queue dispatch, persistent run state, and low-latency access to very large numbers of small WEPP files over hours-long working sessions. Dedicated servers match that operating model. Shared infrastructure and HPC-style scheduling are optimized for queued batch jobs; the St. Joe effort requires an interactive modeling platform that can remain online while continuously feeding new work to the worker pool.
+During the award period, the intended use is an independent WEPPcloud deployment dedicated to St. Joe calibration, alternative-futures analysis, and access for I-CREWS sites, participants, and partners. That service topology exists to support an AI-driven calibration workflow rather than one-shot batch execution. The St. Joe loop is: inspect basin outputs, form a calibration hypothesis, adjust parameters, submit another full-basin run, query the resulting diagnostics, and repeat. That requires always-on services, immediate queue dispatch, persistent run state, and low-latency access to very large numbers of small WEPP files over hours-long working sessions. Dedicated servers match that operating model. Shared infrastructure and HPC-style scheduling are optimized for queued batch jobs; the St. Joe effort requires an interactive modeling platform that can remain online while continuously feeding new work to the worker pool.
 
 ### Why Two Servers Are Needed
 
 - RAID 6 arrays on each server provide resilient local storage for active run data before calibration outputs are archived to DataHub.
-- Two hosts provide enough compute for an independent WEPPcloud deployment dedicated to I-CREWS workloads; because that workload is bounded, frontend worker counts and RQ parallelism can be tuned aggressively for throughput without risking public quality-of-service regressions.
-- Dedicated I-CREWS capacity isolates large St. Joe calibration/scenario runs from BAER and public WEPPcloud traffic, preventing cross-project resource contention and user-facing slowdowns.
+- Two hosts provide enough compute for an independent WEPPcloud deployment dedicated to I-CREWS workloads; because that workload is bounded to the award, frontend worker counts and RQ parallelism can be tuned aggressively for project throughput and partner access.
+- Dedicated I-CREWS capacity keeps the project on a clean accounting boundary that is separable from unrelated WEPPcloud operations, consistent with the allocability constraints in [`2 CFR § 200.405(c)`](https://www.ecfr.gov/current/title-2/section-200.405).
 - The two-node layout supports split-mode operations: one server can prioritize interactive/operational traffic while the other executes long-running calibration and scenario batches, then both can be pooled when maximum throughput is required.
 - Planned maintenance and unplanned faults become survivable events: one server can be patched, rebooted, or repaired while the other continues serving the stack and draining queued work.
 - In the post-I-CREWS transition path, these same servers can be reassigned as additional production `rq-worker` nodes, extending WEPPcloud compute throughput without redesigning the application architecture.
@@ -163,17 +198,17 @@ The proposed servers include 176 TB of local SAS storage per server (8 x 22 TB d
 
 Additionally, the production NAS is approaching inode capacity (60% consumed at 149 million of 250 million inodes), further motivating the transition to local storage for active modeling workloads.
 
-### Shared Infrastructure Degrades User Experience
+### Shared Infrastructure Cannot Supply Enough Project-Usable Compute
 
-The current production server is a shared resource. When a large modeling job (such as a BAER team's fire assessment or a research user's climate scenario batch) consumes available CPU cores, all other users experience degraded response times — slower map rendering, delayed watershed delineation, and queued simulation jobs. The St. Joe basin project, with its 134,033 hillslopes, would monopolize the current server during calibration runs, effectively locking out other users.
+The current production deployment is a shared resource. From an I-CREWS accounting perspective, that means only a small fraction of existing compute can be practically and responsibly devoted to St. Joe work. For planning purposes, approximately 10% of the current WEPPcloud footprint is available to I-CREWS on the shared system without commandeering unrelated operations.
 
-During the I-CREWS project, dedicating these servers to St. Joe basin work allows calibration and scenario runs to proceed at full throughput without impacting the public-facing WEPPcloud service on the existing infrastructure. During fire season, the containerized architecture allows compute to be temporarily reallocated to prioritize BAER team requests, then returned to I-CREWS workloads once the immediate response period ends.
+That is why the raw hardware comparison understates the project benefit. The proposed servers are roughly 4x the current WEPPcloud compute footprint in absolute terms, but because they are dedicated to I-CREWS during the award period they represent roughly 40x more compute capacity available to this award than the status quo. This is the difference between occasional opportunistic runs and a sustained basin calibration plus scenario-analysis program. A secondary operational benefit is that this separation also avoids cross-project contention on the public deployment.
 
 ### Redundancy for Service Continuity
 
-WEPPcloud currently runs on a single production server (wepp1) with a partial VM on a second machine (wepp2) providing limited overflow capacity. There is no failover capability — if wepp1 goes down during fire season, BAER teams lose access to the platform entirely.
+An independent I-CREWS deployment still needs service continuity. If one server fails in the middle of a calibration campaign, partner workshop, or scenario production run, the project should not stall entirely.
 
-The second proposed server establishes true redundancy. Because WEPPcloud is containerized, the full application stack — web frontend, API, task queue, and worker pool — can be deployed identically on either server. Either server can independently run the complete WEPPcloud service, so hardware failure, maintenance windows, or OS upgrades do not result in service outages. In normal operation, both servers contribute RQ workers to a shared job queue, effectively doubling simulation throughput. If one server goes offline, the remaining server continues processing without manual intervention — jobs simply take longer as the worker pool is reduced.
+The second proposed server establishes true redundancy. Because WEPPcloud is containerized, the full application stack — web frontend, API, task queue, and worker pool — can be deployed identically on either server. Either server can independently run the complete I-CREWS WEPPcloud service, so hardware failure, maintenance windows, or OS upgrades do not result in project outages. In normal operation, both servers contribute RQ workers to a shared job queue, effectively doubling simulation throughput. If one server goes offline, the remaining server continues processing without manual intervention — jobs simply take longer as the worker pool is reduced.
 
 For the St. Joe project, this two-node architecture enables parallel modeling: one server can run calibration batch jobs while the other serves interactive users, or both can be pooled together for maximum throughput during intensive calibration cycles.
 
@@ -262,7 +297,7 @@ Lemhi may still be useful for specific, tightly scoped research workflows that a
 | RAM | — | 512 GB total | — |
 | Local storage | NFS only | 352 TB raw SAS + RAID | Eliminates NFS bottleneck |
 
-The 3.9x aggregate compute improvement, combined with the elimination of NFS I/O penalties (up to 8x on small-file writes), translates to an effective throughput improvement well in excess of 4x for WEPPcloud's modeling workload.
+The 3.9x aggregate compute improvement, combined with the elimination of NFS I/O penalties (up to 8x on small-file writes), translates to an effective throughput improvement well in excess of 4x for WEPPcloud's modeling workload. Because the shared production service can only spare about 10% of its current compute to St. Joe work, the dedicated two-server deployment yields roughly 40x more project-usable compute than the status quo available to I-CREWS.
 
 ---
 
@@ -315,9 +350,9 @@ These estimates are conservative for cloud spend because they do **not** include
 
 ## Asset Lifecycle: I-CREWS and Beyond
 
-During the I-CREWS project period, both servers will be dedicated to St. Joe basin modeling — calibration runs, scenario analysis, and batch simulation workloads that require sustained, high-throughput compute with local storage.
+During the I-CREWS project period, both servers will be dedicated to St. Joe basin modeling — calibration runs, scenario analysis, and batch simulation workloads that require sustained, high-throughput compute with local storage. That direct project dedication is the primary allocability basis under [`2 CFR § 200.405(a)(1)`](https://www.ecfr.gov/current/title-2/section-200.405).
 
-Upon completion of the I-CREWS project, the servers retain full value to the university through two natural transition paths:
+Upon completion of the I-CREWS project, the servers retain full value to the university through two natural transition paths. That later lifecycle value is secondary to the project-specific justification above and is consistent with [`2 CFR § 200.405(d)`](https://www.ecfr.gov/current/title-2/section-200.405), which states that when equipment is specifically authorized under a Federal award, the costs remain assignable to the award even when the equipment is no longer needed for the original purpose.
 
 - **WEPPcloud production infrastructure.** The current production servers (wepp1, wepp2) are aging Xeon 5120-class hardware. The new servers are a direct upgrade path, capable of replacing the existing production fleet and serving the growing WEPPcloud user base — BAER teams, federal agencies, researchers, and students — with significantly improved capacity and redundancy.
 - **RCDS general-purpose compute.** If WEPPcloud's production needs are met through other means, the servers are standard 2U rackmount hardware with no specialized components. They can be redeployed as general-purpose research computing nodes within the university's Research Computing and Data Services infrastructure.
@@ -418,11 +453,21 @@ This infrastructure is also directly strengthening the university's core capacit
 
 ---
 
+## Federal Regulation References
+
+- [`2 CFR § 200.403`](https://www.ecfr.gov/current/title-2/section-200.403) — Factors affecting allowability of costs
+- [`2 CFR § 200.405`](https://www.ecfr.gov/current/title-2/section-200.405) — Allocable costs
+- [`2 CFR § 200.407`](https://www.ecfr.gov/current/title-2/section-200.407) — Prior written approval
+- [`2 CFR § 200.439`](https://www.ecfr.gov/current/title-2/section-200.439) — Equipment and other capital expenditures
+
+---
+
 ## Summary
 
-- **The software is ready.** WEPPcloud is a mature, containerized, production platform actively used by BAER teams, federal agencies, researchers, and the public. Its worker-pool architecture scales horizontally — adding servers increases simulation throughput with no code changes.
-- **The data is ready.** The entire St. Joe River Basin has been delineated: 56 watersheds, 134,033 hillslopes, 151,121 channels, covering over 411,000 hectares. Modeling is blocked solely on compute capacity.
+- **The software is ready.** WEPPcloud is a mature, containerized, production platform with a horizontally scalable worker-pool architecture. Adding servers increases simulation throughput with no code changes.
+- **The data is ready.** The entire St. Joe River Basin has been delineated: 56 watersheds, 134,033 hillslopes, 151,121 channels, covering over 411,000 hectares. That basin-scale readiness only became possible after the recent Rust-on-WhiteboxTools delineation work; modeling is now blocked on compute capacity.
 - **Current infrastructure is insufficient.** The existing servers provide ~47,000 Passmark of compute behind an NFS bottleneck that adds up to 8x overhead on the small-file I/O that dominates WEPP modeling workloads.
+- **The project-specific gain is much larger than the raw hardware delta.** The purchase is about 4x current WEPPcloud compute in absolute terms, but because only about 10% of the shared service can be practically devoted to I-CREWS work today, the proposed deployment provides roughly 40x more project-usable compute to this award.
 - **Dedicated local storage is essential.** Benchmarked NFS penalties make basin-scale calibration (which requires full-basin runs for every parameter iteration) impractical on current infrastructure.
-- **Redundancy protects mission-critical operations.** BAER teams depend on WEPPcloud during fire season. A single point of failure is unacceptable for a service supporting emergency response.
-- **The investment extends beyond I-CREWS.** For $42,783, the project gains approximately 4x the compute throughput, eliminates the storage bottleneck, and establishes redundancy — enabling the St. Joe basin calibration now, with a clear transition path to WEPPcloud production or RCDS general-purpose compute after the project concludes. The hardware serves I-CREWS today and the university's broader research mission long-term.
+- **The federal cost basis is documented.** The request is framed as a direct, award-specific cost under [`2 CFR § 200.403`](https://www.ecfr.gov/current/title-2/section-200.403) and [`2 CFR § 200.405`](https://www.ecfr.gov/current/title-2/section-200.405), with equipment treatment and any required approval/documentation aligned to [`2 CFR § 200.407`](https://www.ecfr.gov/current/title-2/section-200.407) and [`2 CFR § 200.439`](https://www.ecfr.gov/current/title-2/section-200.439).
+- **The investment extends beyond I-CREWS, but that is secondary.** For $42,783, the project gains approximately 4x raw compute throughput, roughly 40x project-usable compute, eliminates the storage bottleneck, and establishes continuity for an independent I-CREWS deployment now, with a clear transition path to WEPPcloud production or RCDS general-purpose compute after the project concludes.
