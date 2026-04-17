@@ -127,7 +127,7 @@ Workers are stateless. They pull jobs from Redis, execute WEPP FORTRAN binaries 
 
 ## AI-Driven Calibration Workflow
 
-Calibrating the St. Joe basin (134,033 hillslopes, 56 watersheds) requires iterative full-basin simulation runs. Each parameter adjustment must propagate through the entire channel network to evaluate watershed-scale effects. This is not feasible manually at this scale.
+Calibrating the St. Joe basin (134,033 hillslopes, 56 watersheds) requires iterative full-basin simulation runs. Each parameter adjustment must propagate through the entire channel network to evaluate watershed-scale effects.
 
 ### Why brute-force parameter sweeps are not feasible
 
@@ -160,14 +160,14 @@ Agents can currently:
 - Agents can autonomously follow multi-hour procedural workflows with subagents, decision points, and gates
   - weppcloud development extensively uses ExecPlan work-packages that are carried out end-to-end by agents
 
-A near term goal (Summer 2026) is have autonomous AI agents capable of calibrating WEPPcloud watersheds to observed streamflow and sediment delivery.
+A near term goal (Summer 2026) is have autonomous AI agents infrastrucuture capable of calibrating WEPPcloud watersheds to observed streamflow and sediment delivery. Agents are not expected to be fully autonomous in the 2-month timeframe. But will have the infrastructure to become autonomous through close interaction with humans to develop ablation testing calibraion protocols. We will start with smaller watershed that we have previous calibrated before pursuing the larger St. Joe Basin.
 
 Known missing architectural components:
-- Knowledge database for agents to form academically sound hypotheses
-- Operational guidance on calibration workflows and gates
-- Multi-agent communication and orchestration layer (Discord channel shared by Openclaw agents)
+- Knowledge database for agents to form academically sound hypotheses (2 weeks)
+- Operational guidance on calibration workflows and gates (2 weeks)
+- Multi-agent infra on surplus thin clients (obtained) with communication and orchestration layer (Discord channel shared by Openclaw agents, 2 weeks)
 
-The planned agent operator is OpenClaw/Hermes pen-source autonomous AI assistant. Agent runs external to weppcloud on their own development box with sandboxed tool execution (bash, file I/O, HTTP), a skills system for domain-specific workflows, and multi-agent session routing. It connects to external services via HTTP and drives autonomous workflows without human intervention.
+**Important** The planned agent operator is OpenClaw/Hermes pen-source autonomous AI assistant. Agent runs external to weppcloud on their own development box with sandboxed tool execution (bash, file I/O, HTTP), a skills system for domain-specific workflows, and multi-agent session routing. It connects to external services via HTTP and drives autonomous workflows without human intervention.
 
 ### How an OpenClaw agent operates WEPPcloud
 
