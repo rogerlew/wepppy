@@ -59,6 +59,17 @@ If you are uploading an SBS raster, the safest input is a single-band integer Ge
 | Disturbed land-soil lookup table | The per-project table of disturbed soil and vegetation parameters | User-editable CSV | Controls erodibility, effective hydraulic conductivity, hydrophobicity, and plant parameters, and also serves as a global calibration harness |
 | Hydrophobicity | Water repellency after fire, represented through lookup-table soil parameters | Usually strongest in high-severity fire classes | Stronger hydrophobicity generally means less infiltration and more surface runoff |
 
+## Lookup Table Schemes (Base vs Extended)
+
+The disturbed workflow can operate on either a base lookup table or an extended lookup table. The base table is the standard calibration surface; the extended table is a generated merge that includes management-file fields.
+
+| Lookup variant | Runtime file | Row identity fields | Plant scalar fields |
+| --- | --- | --- | --- |
+| Base | `disturbed/disturbed_land_soil_lookup.csv` | `luse`, `stext` | `rdmax`, `xmxlai` |
+| Extended | `disturbed/disturbed_land_soil_lookup_extended.csv` | `disturbed_class`, `stext` (plus helper fields `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` |
+
+When the extended table is generated, WEPPcloud normalizes the scalar plant keys from base (`rdmax`, `xmxlai`) into extended namespaced fields (`plant.data.rdmax`, `plant.data.xmxlai`).
+
 ## Steps
 
 1. Start the project in a WEPPcloud `(Un)Disturbed` interface.

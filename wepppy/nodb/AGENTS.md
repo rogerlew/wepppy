@@ -27,6 +27,21 @@ harnesses) stay consistent across agents.
 * For shared fixtures, markers, and stub isolation expectations, read
   `tests/AGENTS.md`.
 
+## Project Data / Schema Mutations (Required)
+
+* Applies to lookup-table headers, NoDb keys, route payload contracts, and
+  generated artifact schemas.
+* Before edits, write a short downstream-impact and backward-compatibility plan.
+  If operator intent is unclear, ask before mutating schemas.
+* Prefer additive compatibility. Do not rename/remove user-visible columns or
+  keys unless explicitly approved by the operator.
+* Validation must include both:
+  * regression tests for the mutated path, and
+  * propagation evidence that mutations reach expected generated outputs (for
+    disturbed flows, this includes `wepp/runs/*` artifacts when applicable).
+* Update related docs in the same change set (`README`, `ENDUSER`, usersum/API
+  docs as relevant).
+
 ## Locking & TTL Overrides
 
 * Every NoDb controller serializes state to `<wd>/<controller>.nodb` and keeps a

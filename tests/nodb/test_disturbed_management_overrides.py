@@ -2,6 +2,7 @@ import pytest
 
 from wepppy.nodb.core.management_overrides import (
     apply_disturbed_management_overrides,
+    resolve_disturbed_scalar_replacements,
 )
 
 
@@ -58,3 +59,55 @@ def test_static_overrides_set_plant_decay_drop_factors() -> None:
 
     assert management.plant_data["decfct"] == 1.0
     assert management.plant_data["dropfc"] == 1.0
+
+
+@pytest.mark.unit
+def test_resolve_disturbed_scalar_replacements_accepts_extended_keys() -> None:
+    rdmax, xmxlai = resolve_disturbed_scalar_replacements(
+        disturbed_class="forest moderate sev fire",
+        disturbed_class_str="forest moderate sev fire",
+        replacements={
+            "plant.data.rdmax": "0.77",
+            "plant.data.xmxlai": "6.5",
+        },
+        cancov_override=None,
+    )
+
+    assert rdmax == "0.77"
+    assert xmxlai == "6.5"
+
+
+@pytest.mark.unit
+def test_resolve_disturbed_scalar_replacements_prefers_legacy_keys_when_both_exist() -> None:
+    rdmax, xmxlai = resolve_disturbed_scalar_replacements(
+        disturbed_class="forest moderate sev fire",
+        disturbed_class_str="forest moderate sev fire",
+        replacements={
+            "rdmax": "0.41",
+            "xmxlai": "2.7",
+            "plant.data.rdmax": "0.88",
+            "plant.data.xmxlai": "7.3",
+        },
+        cancov_override=None,
+    )
+
+    assert rdmax == "0.41"
+    assert xmxlai == "2.7"
+
+
+@pytest.mark.unit
+def test_resolve_disturbed_scalar_replacements_falls_back_when_legacy_values_blank() -> None:
+    rdmax, xmxlai = resolve_disturbed_scalar_replacements(
+        disturbed_class="forest moderate sev fire",
+        disturbed_class_str="forest moderate sev fire",
+        replacements={
+            "rdmax": " ",
+            "xmxlai": "",
+            "plant.data.rdmax": "0.55",
+            "plant.data.xmxlai": "4.9",
+        },
+        cancov_override=None,
+    )
+
+    assert rdmax == "0.55"
+    assert xmxlai == "4.9"

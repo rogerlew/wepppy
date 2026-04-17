@@ -1,31 +1,42 @@
 # Disturbed Land Soil Lookup Table (PowerUser Panel → Modify Disturbed Parameters)
 
-The disturbed land soil table in WEPPcloud contains parameters that define soil properties for various land use categories and soil textures. These parameters are essential for modeling erosion and hydrology in disturbed lands using the WEPP (Water Erosion Prediction Project) model. The table includes data for combinations of land use (e.g., agriculture crops, forest, bare) and soil texture (clay loam, loam, sand loam, silt loam).
+The disturbed lookup surface in WEPPcloud has two run-scoped table schemes: a base table and an extended table. Both represent disturbed class and soil texture effects for WEPP, but they use different column contracts.
 
-Each project has its own disturbed land-soil-lookup table that can be modified through the PowerUser Panel.
+Each project has its own lookup files under the run's `disturbed/` folder and can be edited through the PowerUser panel.
 
 This page is the parameter reference. For the recommended calibration order, what to calibrate first, and how to think about undisturbed versus post-fire tuning, see [WEPPcloud Calibration Guidance](./weppcloud-calibration-guidance.md).
 
-### Table of Parameters
+### Table Schemes
 
-| Parameter     | Description                                                              | Units        |
-|---------------|--------------------------------------------------------------------------|--------------|
-| luse          | Land use category (disturbed class from the land use map)                | -            |
-| stext         | Soil texture (clay loam, loam, sand loam, silt loam)                     | -            |
-| ki            | Interrill erodibility                                                    | kg·s/m⁴      |
-| kr            | Rill erodibility                                                         | s/m          |
-| shcrit        | Critical shear stress (τc)                                               | N/m² or Pa   |
-| avke          | Effective hydraulic conductivity                                         | mm/h         |
-| ksflag        | Flag to use internal hydraulic conductivity adjustments (0: no, 1: yes)  | {0,1}        |
-| ksatadj       | Adjustment factor for saturated hydraulic conductivity                   | -            |
-| ksatfac       | ignore - will be removed                                                 | -            |
-| ksatrec       | ignore - will be removed                                                 | -            |
-| pmet_kcb      | Basal crop coefficient (Kcb)                                             | -            |
-| pmet_rawp     | Parameter for readily available water                                    | -            |
-| rdmax         | Maximum root depth                                                       | m            |
-| xmxlai        | Maximum leaf area index                                                  | frac         |
-| keffflag      | Flag for lower limit of effective conductivity (lkeff; 0: no, 1: yes)    | {0,1}        |
-| lkeff         | Lower limit of effective conductivity (-9999 indicates no adjustment)    | mm/h         |
+| Lookup variant | Runtime file | Row identity fields | Intended use |
+| --- | --- | --- | --- |
+| Base | `disturbed_land_soil_lookup.csv` | `luse`, `stext` | Canonical disturbed calibration table (soil + PMET + scalar plant controls). |
+| Extended | `disturbed_land_soil_lookup_extended.csv` | `disturbed_class`, `stext` (plus helper fields `landuse`, `sev_enum`) | Generated merged table with management fields (`ini.data.*`, `plant.data.*`) plus disturbed lookup values. |
+
+### Base Table Schema
+
+Current base-table header contract:
+
+`luse,stext,ki,kr,shcrit,avke,bd,ksflag,ksatadj,ksatfac,ksatrec,pmet_kcb,pmet_rawp,rdmax,xmxlai,keffflag,lkeff,plant.data.decfct,plant.data.dropfc`
+
+### Extended Table Schema
+
+Current generated extended table includes:
+
+- Identity and categorization fields: `sev_enum`, `landuse`, `disturbed_class`, `stext`.
+- Disturbed soil and PMET fields: `ki`, `kr`, `shcrit`, `avke`, `ksflag`, `ksatadj`, `ksatfac`, `ksatrec`, `pmet_kcb`, `pmet_rawp`, `keffflag`, `lkeff`.
+- Management metadata fields: `key`, `desc`, `man`.
+- Initialization fields: `ini.data.*`.
+- Plant fields: `plant.data.*`, including normalized scalar keys `plant.data.rdmax` and `plant.data.xmxlai`.
+
+Historical runs may have older extended files with fewer passthrough fields. Use `Sync base to extended` to regenerate against the current schema.
+
+### Scalar Name Mapping (Base vs Extended)
+
+| Physical meaning | Base table column | Extended table column |
+| --- | --- | --- |
+| Maximum rooting depth | `rdmax` | `plant.data.rdmax` |
+| Maximum leaf area index | `xmxlai` | `plant.data.xmxlai` |
 
 ## Additional Notes and Other Parameters of Interest
 

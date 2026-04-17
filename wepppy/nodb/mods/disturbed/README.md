@@ -36,9 +36,21 @@ The module reprojects the raster to match the watershed DEM, classifies pixels i
 
 ### Disturbed Land Soil Lookup Table
 
-A CSV (`disturbed/disturbed_land_soil_lookup.csv`) that maps every combination of disturbed land-use class and soil texture to WEPP parameters. Each project gets its own copy that can be edited through the PowerUser panel.
+A CSV lookup that maps disturbed class and soil texture to WEPP parameters. Each project gets a run-scoped copy that can be edited through the PowerUser panel.
 
-Key parameters in the lookup:
+The Disturbed module supports two lookup table schemes:
+
+| Lookup variant | Runtime file | Key columns | Scalar plant keys | Notes |
+|-----------|-----------|-----------|-----------|-----------|
+| Base lookup | `disturbed/disturbed_land_soil_lookup.csv` | `luse`, `stext` | `rdmax`, `xmxlai` | Canonical calibration table for soil and PMET values. Also carries static override fields like `plant.data.decfct` and `plant.data.dropfc`. |
+| Extended lookup | `disturbed/disturbed_land_soil_lookup_extended.csv` | `disturbed_class`, `stext` (plus `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` | Derived table that merges base lookup values with management-file fields (`ini.data.*`, `plant.data.*`). |
+
+Scalar normalization contract:
+
+- `build_extended_land_soil_lookup()` always normalizes base scalar keys `rdmax` and `xmxlai` into `plant.data.rdmax` and `plant.data.xmxlai` in the extended table.
+- Treat `rdmax` and `xmxlai` as base-table keys only. Treat `plant.data.rdmax` and `plant.data.xmxlai` as extended-table keys only.
+
+Key parameters in the base lookup:
 
 | Parameter | What It Controls | Units |
 |-----------|-----------------|-------|
@@ -186,7 +198,7 @@ The disturbed parameterization feeds directly into the WEPP-forest Fortran kerne
 
 - **Hydraulic conductivity** (`avke`, `lkeff`) controls infiltration capacity. The `lkeff` lower bound simulates hydrophobic layers — waxy residues from burned organic matter that repel water. When `ksatadj=1`, WEPP dynamically adjusts conductivity based on soil saturation, allowing recovery as cumulative precipitation breaks down the hydrophobic layer.
 
-- **Plant parameters** (`rdmax`, `xmxlai`, `hmax`) control vegetation recovery. Burned hillslopes start with reduced root depth, leaf area, and canopy height, which limits transpiration and interception.
+- **Plant parameters** (`rdmax`, `xmxlai`, `hmax`) control vegetation recovery. In extended lookup exports, these scalars are represented as `plant.data.rdmax` and `plant.data.xmxlai`. Burned hillslopes start with reduced root depth, leaf area, and canopy height, which limits transpiration and interception.
 
 The parameterization is **directionally correct at the regime level**: burned conditions produce more runoff and sediment than undisturbed across seasonal and annual totals. Individual storm events may occasionally show the opposite due to antecedent moisture state — a dry burned soil can still infiltrate more than a saturated undisturbed soil. This is expected WEPP hydrology behavior; compare distributions and totals rather than individual events.
 
@@ -220,7 +232,7 @@ disturbed.modify_soils()
 - If a management entry defines `SoilFile`/`sol_path`, the controller copies that soil directly instead of regenerating from the lookup table.
 - For treatment suffixes (`-mulch_15`, `-thinning`, etc.), `lookup_disturbed_class()` strips the suffix so soils are keyed by burn severity, not treatment type.
 - For MOFE runs, each OFE gets its own disturbed soil file, reassembled into a `.mofe.sol` via `SoilMultipleOfeSynth`.
-- `build_extended_land_soil_lookup()` exports a merged lookup (management + soil parameters); it is not part of the default run workflow.
+- `build_extended_land_soil_lookup()` exports the extended scheme (management + soil parameters) and normalizes scalar plant keys to `plant.data.rdmax` / `plant.data.xmxlai`; it is not part of the default run workflow.
 - All mutations must occur inside `with disturbed.locked():` blocks to respect Redis-backed locking.
 
 ## Validation Results (48-Simulation Matrix)

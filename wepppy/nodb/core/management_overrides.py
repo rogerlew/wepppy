@@ -11,6 +11,14 @@ __all__ = [
 ]
 
 
+def _is_blank_lookup_value(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str) and value.strip() == "":
+        return True
+    return False
+
+
 def apply_disturbed_management_overrides(
     management: Any,
     replacements: Dict[str, Any],
@@ -59,7 +67,11 @@ def resolve_disturbed_scalar_replacements(
     replacements: Dict[str, Any] | None,
     cancov_override: float | None,
 ) -> tuple[Any, Any]:
-    """Resolve rdmax/xmxlai replacements following WEPP prep semantics."""
+    """Resolve rdmax/xmxlai replacements following WEPP prep semantics.
+
+    Supports both legacy lookup keys (``rdmax`` / ``xmxlai``) and extended
+    table keys (``plant.data.rdmax`` / ``plant.data.xmxlai``).
+    """
     if disturbed_class is None or disturbed_class == "" or ("developed" in disturbed_class_str):
         return None, None
 
@@ -67,8 +79,12 @@ def resolve_disturbed_scalar_replacements(
         return None, None
 
     rdmax = replacements.get("rdmax", None)
+    if _is_blank_lookup_value(rdmax):
+        rdmax = replacements.get("plant.data.rdmax", None)
     if cancov_override is None:
         xmxlai = replacements.get("xmxlai", None)
+        if _is_blank_lookup_value(xmxlai):
+            xmxlai = replacements.get("plant.data.xmxlai", None)
     else:
         rdmax = None
         xmxlai = None

@@ -92,6 +92,10 @@ from wepppy.nodb.duckdb_agents import (
 from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.core.management_overrides import (
+    apply_disturbed_management_overrides,
+    resolve_disturbed_scalar_replacements,
+)
 
 from wepppy.landcover.rap import RAP_Band
 
@@ -1089,6 +1093,13 @@ class Landuse(NoDbBase):
                     rdmax = None
                     xmxlai = None
                 else:
+                    replacements = None
+                    if _land_soil_replacements_d is not None:
+                        replacements = _land_soil_replacements_d.get((texid, disturbed_class))
+
+                    if replacements is not None:
+                        apply_disturbed_management_overrides(management, replacements)
+
                     if rap is not None:
                         _tree_cov = rap.mofe_data[RAP_Band.TREE][topaz_id][mofe_id] / 100.0
                         _shrub_cov = rap.mofe_data[RAP_Band.SHRUB][topaz_id][mofe_id] / 100.0
@@ -1104,9 +1115,12 @@ class Landuse(NoDbBase):
 
                         management.set_cancov(cancov_d[topaz_id][mofe_id])
 
-                    if (texid, disturbed_class) in _land_soil_replacements_d:
-                        rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
-                        xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
+                    rdmax, xmxlai = resolve_disturbed_scalar_replacements(
+                        disturbed_class=disturbed_class,
+                        disturbed_class_str=disturbed_class,
+                        replacements=replacements,
+                        cancov_override=None,
+                    )
 
                 if rdmax is not None:
                     if isfloat(rdmax):
