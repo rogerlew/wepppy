@@ -166,7 +166,7 @@ For the full first-class `rq-worker` integration thought experiment (requirement
 
 Using Lemhi as a direct replacement for WEPPcloud production worker hosts is **not currently viable**. Lemhi is a shared high-performance computing (HPC) system for scheduled research jobs, but WEPPcloud's production worker architecture is designed around always-on service containers, continuously connected queue workers, and run-directory mounts that behave like dedicated infrastructure.
 
-Simple batching of jobs is also problematic. Many WEPPcloud RQ tasks are hierarchical: a parent job dynamically enqueues child jobs, records the child ids in job metadata, and uses Redis-backed `depends_on` edges to build multi-stage execution trees for prep, hillslopes, watershed routing, post-processing, interchange, export, and finalization. Running an RQ task function as a standalone Slurm job is therefore not equivalent to running the workflow. The parent task still needs live RQ/Redis access in order to enqueue its descendants, publish status, support cancellation, and advance the job tree.
+**Simple batching of jobs is also problematic.** Many WEPPcloud RQ tasks are hierarchical: a parent job dynamically enqueues child jobs, records the child ids in job metadata, and uses Redis-backed `depends_on` edges to build multi-stage execution trees for prep, hillslopes, watershed routing, post-processing, interchange, export, and finalization. Running an RQ task function as a standalone Slurm job is therefore not equivalent to running the workflow. The parent task still needs live RQ/Redis access in order to enqueue its descendants, publish status, support cancellation, and advance the job tree.
 
 ### Plain-Language Architecture Comparison
 
