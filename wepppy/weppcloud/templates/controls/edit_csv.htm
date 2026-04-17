@@ -895,6 +895,30 @@ function onSave(config) {
         });
 }
 
+function isSaveShortcut(event) {
+    var key = String(event && event.key ? event.key : "").toLowerCase();
+    if (key !== "s") {
+        return false;
+    }
+    if (!(event.metaKey || event.ctrlKey)) {
+        return false;
+    }
+    if (event.altKey || event.shiftKey) {
+        return false;
+    }
+    return true;
+}
+
+function registerSaveKeyboardShortcut(config) {
+    document.addEventListener("keydown", function (event) {
+        if (!isSaveShortcut(event) || event.repeat) {
+            return;
+        }
+        event.preventDefault();
+        onSave(config);
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     var configNode = document.getElementById("edit-csv-config");
     if (!configNode) {
@@ -926,6 +950,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("reload-current").addEventListener("click", function () {
         loadSpreadsheet(config, { recoveryAttempt: true });
     });
+    registerSaveKeyboardShortcut(config);
 
     setSaveEnabled();
     loadSpreadsheet(config);
