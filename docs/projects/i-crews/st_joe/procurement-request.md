@@ -28,7 +28,7 @@ We request the procurement of two Supermicro SuperServer 621P-TR rack servers to
 
 Upon completion of the I-CREWS project, these servers will transition into the university's broader research computing infrastructure — either as permanent WEPPcloud production nodes (replacing or augmenting the aging current hardware) or as general-purpose compute within RCDS (Research Computing and Data Services), as institutional need dictates. The containerized, portable architecture of WEPPcloud makes this transition seamless.
 
-The WEPPcloud software platform is ready for production use. The entire St. Joe basin has already been delineated into 56 tributary watersheds comprising 134,033 hillslopes and 151,121 channel segments. Modeling is waiting on compute capacity.
+The WEPPcloud software platform is ready for production use. The entire St. Joe basin has already been delineated into 56 tributary watersheds comprising 134,033 hillslopes and 151,121 channel segments. Modeling is waiting on compute capacity. Running all 56 tributaries is feasible in a 1-month turnaround from availability of the servers.
 
 ---
 
