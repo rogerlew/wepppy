@@ -10,6 +10,16 @@
 
 **Total Cost:** $42,783.00 (two servers at $21,391.50 each)
 
+## Approval Snapshot
+
+- **Request:** Approve procurement of two dedicated compute servers for St. Joe basin calibration and scenario modeling.
+- **Amount:** **$42,783.00** total.
+- **Why now:** The St. Joe basin is already delineated and ready to model; the project is blocked on compute capacity, not software readiness.
+- **Why not Lemhi/HPC:** The Lemhi alternative is not a near-term substitute. The companion analysis estimates approximately **30-42 weeks with 3-4 FTE** and **10x** in engineering labor to make that path production-safe.
+- **Operational model:** RCDS already supports this class of WEPPcloud infrastructure and is expected to absorb ongoing operations, maintenance, and hosting support.
+- **If approved:** I-CREWS gains dedicated local-storage-backed compute for immediate basin calibration, scenario analysis, and isolated batch throughput without degrading public WEPPcloud service.
+- **Long-term value:** After I-CREWS, the same hardware can remain as WEPPcloud production compute or transition into general RCDS research infrastructure.
+
 ---
 
 ## Executive Summary
