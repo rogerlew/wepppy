@@ -110,11 +110,22 @@ WEPPcloud is a persistent containerized service platform, not a single executabl
 
 That service topology exists to support an AI-driven calibration workflow rather than one-shot batch execution. The St. Joe loop is: inspect basin outputs, form a calibration hypothesis, adjust parameters, submit another full-basin run, query the resulting diagnostics, and repeat. That requires always-on services, immediate queue dispatch, persistent run state, and low-latency access to very large numbers of small WEPP files over hours-long working sessions. Dedicated servers match that operating model. Shared infrastructure and HPC-style scheduling are optimized for queued batch jobs; the St. Joe effort requires an interactive modeling platform that can remain online while continuously feeding new work to the worker pool.
 
+### Why Two Servers Are Needed
+
+- RAID 6 arrays on each server provide resilient local storage for active run data before calibration outputs are archived to DataHub.
+- Two hosts provide enough compute for an independent WEPPcloud deployment dedicated to I-CREWS workloads; because that workload is bounded, frontend worker counts and RQ parallelism can be tuned aggressively for throughput without risking public quality-of-service regressions.
+- Dedicated I-CREWS capacity isolates large St. Joe calibration/scenario runs from BAER and public WEPPcloud traffic, preventing cross-project resource contention and user-facing slowdowns.
+- The two-node layout supports split-mode operations: one server can prioritize interactive/operational traffic while the other executes long-running calibration and scenario batches, then both can be pooled when maximum throughput is required.
+- Planned maintenance and unplanned faults become survivable events: one server can be patched, rebooted, or repaired while the other continues serving the stack and draining queued work.
+- In the post-I-CREWS transition path, these same servers can be reassigned as additional production `rq-worker` nodes, extending WEPPcloud compute throughput without redesigning the application architecture.
+
 ### Stack Compute Optimizations Already in Place
 
 This procurement request is not an attempt to compensate for inefficient software. WEPPcloud is an approximately eight-year-old production stack that has already been repeatedly optimized to fit within a modest on-prem server footprint. The current bottleneck is basin scale, not a lack of engineering effort.
 
 Over that time, the team has moved multiple hot paths out of Python and into owned Rust components designed specifically for WEPPcloud workloads. The current stack includes `wepppyo3` for climate and raster acceleration, `peridot` for watershed abstraction, and the custom `weppcloud-wbt` fork for terrain and TOPAZ processing. Documented examples already in use include:
+
+- A production microservices topology split across Starlette services (`query-engine`, `browse`), FastAPI services (`rq-engine`), and Go services (`status2`, `preflight2`), with tunable Gunicorn/Uvicorn process counts and RQ worker-pool sizing to absorb interactive and batch load spikes
 
 - Rust `make_rhem_storm_file` in `wepppyo3`, which delivered a documented **400x speedup** for RHEM storm-file generation
 - `peridot` watershed abstraction, documented in the codebase as **3x to 10x faster than Python**, with representative-flowpath mode reducing hillslope abstraction time by **10x to 100x** for large batch workflows
@@ -245,6 +256,53 @@ The 3.9x aggregate compute improvement, combined with the elimination of NFS I/O
 
 ---
 
+## Cloud Compute Equivalency and Break-Even (AWS Snapshot)
+
+### Pricing Snapshot Date
+
+April 16, 2026
+
+### Equivalency Assumptions
+
+- **Purchase baseline:** two servers for **$42,783.00** total.
+- **Project accounting boundary:** ongoing operational and maintenance costs are assumed to be covered by RCDS (not charged to I-CREWS), so break-even is calculated against project-visible spend.
+- **Compute parity target:** two AWS `c6i.32xlarge` Linux instances in US West (Oregon), yielding **256 vCPU** and **512 GiB RAM** (matching the proposed two-server aggregate).
+- **Storage parity targets:**
+  - **Full local parity:** 264 TB usable RAID6 equivalent (`2 x (8 - 2) x 22 TB`).
+  - **Planned active working set parity:** 120 TB.
+- **Container footprint reserve:** 1 TB additional gp3 block storage to account for OS + Docker images + writable layers + deployment rollback headroom. Local images are already multi-GB (for example `wepppy:latest` ~6.8 GB, `wepppy-dev:latest` ~4.5 GB, `docker-fcgiwrap:latest` ~4.4 GB, `weppcloudr-dev:latest` ~3.0 GB).
+- **Cloud rates used (US West/Oregon):**
+  - `c6i.32xlarge` Linux On-Demand: **$5.44/hour**.
+  - EBS gp3 storage: **$0.08/GB-month**.
+  - Sensitivity case for discounted compute: 3-year Reserved Instance effective rate for `c6i.32xlarge` (standard, all upfront): **$2.0846/hour**.
+
+### Break-Even Method
+
+`break_even_months = server_purchase_cost / equivalent_cloud_monthly_cost`
+
+### Results
+
+| Scenario | Equivalent Cloud Monthly Cost | Break-Even vs $42,783 Purchase |
+|---|---:|---:|
+| Compute only (2x `c6i.32xlarge`, no storage parity) | $7,942.40 | 5.39 months |
+| Compute + 120 TB gp3 + 1 TB container reserve | $17,854.72 | 2.40 months |
+| Compute + 264 TB gp3 + 1 TB container reserve | $29,651.20 | 1.44 months |
+| 3-year RI compute + 120 TB gp3 + 1 TB reserve | $12,955.76 | 3.30 months |
+| 3-year RI compute + 264 TB gp3 + 1 TB reserve | $24,752.24 | 1.73 months |
+
+### Interpretation
+
+With compute-and-storage equivalency, the hardware purchase breaks even quickly (roughly **1.4 to 3.3 months** in the scenarios above). Storage parity dominates total cloud cost for this workload profile; container footprint reserve changes the result only marginally but is included for realism.
+
+These estimates are conservative for cloud spend because they do **not** include additional cloud-side costs such as data egress, request charges, snapshots/backups, extra gp3 IOPS/throughput provisioning, or managed service overheads.
+
+### AWS Price Sources
+
+- AWS EC2 price index (US West/Oregon): <https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-west-2/index.json>
+- AWS S3 price index (US West/Oregon): <https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-west-2/index.json>
+
+---
+
 ## Asset Lifecycle: I-CREWS and Beyond
 
 During the I-CREWS project period, both servers will be dedicated to St. Joe basin modeling — calibration runs, scenario analysis, and batch simulation workloads that require sustained, high-throughput compute with local storage.
@@ -255,6 +313,73 @@ Upon completion of the I-CREWS project, the servers retain full value to the uni
 - **RCDS general-purpose compute.** If WEPPcloud's production needs are met through other means, the servers are standard 2U rackmount hardware with no specialized components. They can be redeployed as general-purpose research computing nodes within the university's Research Computing and Data Services infrastructure.
 
 Because WEPPcloud is fully containerized and environment-agnostic, transitioning the servers between these roles requires only configuration changes — no hardware modifications or software rewrites. The same Docker Compose stack that runs St. Joe calibration today can serve public WEPPcloud traffic tomorrow.
+
+---
+
+## Backup and Restore Plan
+
+### Design Goals
+
+- Keep active WEPP run execution on local storage with no NFS dependency in the hot path.
+- Maintain a nearline on-prem backup copy on the second server for rapid recovery.
+- Promote only high-value finalized outputs to DataHub for long-term retention.
+- Keep calibration and parameterization definitions versioned in Git repositories with GitHub remotes.
+
+### Storage Topology
+
+- **Server A (primary run host):** primary WEPPcloud run execution storage on local RAID6 ZFS.
+- **Server B (backup host):** backup target storage on local RAID6 ZFS.
+- **Cross-mounting:** each server mounts the peer ZFS dataset read/write for replication operations and read-only for recovery validation where appropriate.
+- **Role model:** one server is active for run generation; the other is backup-first. Roles can be swapped during maintenance or failover.
+
+### Data Classes and Protection Strategy
+
+| Data Class | Typical Size | System of Record | Protection Method |
+|---|---|---|---|
+| Run inputs (watershed extent, outlet, ~100 parameters, configs) | Small | Git repositories + run metadata | Git commits + GitHub remote replication; included in run manifests |
+| Active run working data/results | Very large | Primary ZFS on active host | Frequent ZFS snapshots + cross-host ZFS replication |
+| Milestone/final run outputs worth preserving | Large | DataHub archive | Curated export from run storage to DataHub with manifest/checksum |
+| Calibration/parameterization code and scripts | Small to moderate | Git repositories | Branch/tag/release discipline with GitHub remote backup |
+
+### Backup Workflow
+
+1. **Local snapshot cadence**
+   - Create frequent immutable ZFS snapshots on the active run dataset during calibration windows.
+   - Keep shorter retention for high-frequency snapshots and longer retention for daily/weekly checkpoints.
+2. **Cross-host replication**
+   - Replicate snapshots from Server A to Server B using incremental ZFS send/receive.
+   - Run replication continuously or on a short schedule so backup lag remains low.
+3. **Archive promotion**
+   - After calibration milestones or accepted scenario sets, export selected results to DataHub.
+   - Record archive manifests with run identifiers, parameter hashes, and checksums.
+4. **Git-backed reproducibility**
+   - Commit calibration/parameterization changes with run-linked commit references.
+   - Push all authoritative repositories to GitHub remote as off-site backup.
+
+### Restore Procedures
+
+1. **Single-run or partial restore**
+   - Locate snapshot by run ID and timestamp.
+   - Restore only the required run subtree from Server B to Server A.
+   - Re-run verification queries against restored outputs.
+2. **Primary host storage failure**
+   - Promote Server B dataset as the active run store.
+   - Repoint WEPPcloud worker and service mounts to Server B paths.
+   - Resume queue processing; rebuild Server A and re-establish reverse replication.
+3. **Corruption discovered after milestone**
+   - Recover from DataHub archived package for finalized results.
+   - Reconstruct working state from Git-tracked inputs and parameterization commits when necessary.
+
+### Recovery Objectives
+
+- **RPO (run storage):** bounded by snapshot/replication interval (target: low-hour or better).
+- **RTO (host failure):** bounded by service remount and worker restart time on the backup host.
+- **Reproducibility objective:** any archived milestone run can be regenerated from Git-tracked inputs/parameters plus recorded run manifests.
+
+### Operational Notes
+
+- The run-generation footprint is input-light but output-heavy; backup policy prioritizes fast protection of large run outputs and durable versioning of small control inputs.
+- This plan assumes ongoing infrastructure operations are covered by RCDS and can be integrated with existing RCDS monitoring, backup scheduling, and incident response practices.
 
 ---
 
