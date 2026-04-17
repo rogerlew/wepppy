@@ -291,6 +291,9 @@ class Geneva(NoDbBase):
     def results_payload(self) -> dict[str, Any]:
         return self.results_service.build_results_payload(self)
 
+    def state_payload(self) -> dict[str, Any]:
+        return self.results_service.build_state_payload(self)
+
     def frequency_panel_payload(self) -> dict[str, Any]:
         return self.frequency_panel_service.get_frequency_panel(self)
 

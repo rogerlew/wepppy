@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Mapping
 
 from wepppy.nodb.mods.geneva.schemas import (
@@ -108,8 +109,54 @@ class GenevaResultsService:
             "errors": list(getattr(geneva, "_errors", []) or []),
         }
 
+    def build_state_payload(self, geneva: "Geneva") -> dict[str, Any]:
+        results = self.build_results_payload(geneva)
+        status = self.build_status_payload(geneva)
+        config_snapshot = dict(geneva.get_config())
+        updated_at = self._state_updated_at(geneva, status)
+
+        return {
+            "state_version": 1,
+            "enabled": bool(getattr(geneva, "_enabled", False)),
+            "config_snapshot": config_snapshot,
+            "status": status["status"],
+            "status_message": status["status_message"],
+            "progress": status["progress"],
+            "active_job_id": status["active_job_id"],
+            "last_job_id": status["last_job_id"],
+            "last_prepare_summary": results["last_prepare_summary"],
+            "last_run_summary": results["last_run_summary"],
+            "warnings": results["warnings"],
+            "errors": results["errors"],
+            "artifacts": {
+                "hru_table_ready": bool(geneva.artifact_io.exists(geneva.wd, "hru_table.parquet")),
+                "frequency_panel_ready": bool(geneva.artifact_io.exists(geneva.wd, "frequency_panel.json")),
+                "batch_summary_ready": bool(geneva.artifact_io.exists(geneva.wd, "batch_summary.json")),
+            },
+            "updated_at": updated_at,
+        }
+
     def progress_for_batch(self, *, completed: int, total: int) -> dict[str, Any]:
         return build_progress_payload(completed=completed, total=total, unit="storms")
+
+    def _state_updated_at(self, geneva: "Geneva", status_payload: Mapping[str, Any]) -> str:
+        progress = status_payload.get("progress")
+        if isinstance(progress, Mapping):
+            updated_at = progress.get("updated_at")
+            if isinstance(updated_at, str) and updated_at.strip():
+                return updated_at.strip()
+
+        timestamps = getattr(geneva, "_timestamps", {}) or {}
+        numeric_timestamps = [
+            int(value)
+            for value in timestamps.values()
+            if isinstance(value, (int, float)) and int(value) > 0
+        ]
+        if numeric_timestamps:
+            last_updated = max(numeric_timestamps)
+            return datetime.fromtimestamp(last_updated, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        return "2000-01-01T00:00:00Z"
 
 
 __all__ = ["GenevaResultsService"]

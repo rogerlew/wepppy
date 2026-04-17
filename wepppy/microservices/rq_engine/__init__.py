@@ -19,6 +19,7 @@ from .dss_export_routes import router as dss_export_router
 from .debug_routes import router as debug_router
 from .export_routes import router as export_router
 from .fork_archive_routes import router as fork_archive_router
+from .geneva_routes import router as geneva_router
 from .job_routes import router as job_router
 from .admin_job_routes import router as admin_job_router
 from .landuse_routes import router as landuse_router
@@ -120,6 +121,7 @@ app.include_router(omni_router, prefix="/api")
 app.include_router(ash_router, prefix="/api")
 app.include_router(export_router, prefix="/api")
 app.include_router(fork_archive_router, prefix="/api")
+app.include_router(geneva_router, prefix="/api")
 app.include_router(run_sync_router, prefix="/api")
 app.include_router(upload_climate_router, prefix="/api")
 app.include_router(upload_disturbed_router, prefix="/api")

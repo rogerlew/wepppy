@@ -176,7 +176,8 @@
             "outlet": {},
             "disturbed": {"mode": disturbed_mode, "uniformSeverity": disturbed_uniform},
             "baer": {"mode": baer_mode, "uniformSeverity": baer_uniform},
-            "omni": {"hasRanScenarios": omni_has_ran_scenarios, "hasRanContrasts": omni_has_ran_contrasts}
+            "omni": {"hasRanScenarios": omni_has_ran_scenarios, "hasRanContrasts": omni_has_ran_contrasts},
+            "geneva": {"stateAuthority": "rq_engine"}
         },
         "ui": {
             "tocTaskEmojis": toc_task_emojis,
@@ -305,6 +306,9 @@
         }
         if (modFlags.rhem) {
             add("rhem", typeof Rhem !== "undefined" ? Rhem : null);
+        }
+        if (modFlags.geneva) {
+            add("geneva", typeof Geneva !== "undefined" ? Geneva : null);
         }
         if (modFlags.ash) {
             add("ash", typeof Ash !== "undefined" ? Ash : null);

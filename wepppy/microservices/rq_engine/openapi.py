@@ -2,21 +2,13 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-CANONICAL_ERROR_PAYLOAD = (
-    "Canonical error payload: {'error': {'message': '...', 'code': 'optional', 'details': '...'}}."
-)
+CANONICAL_ERROR_PAYLOAD = "Canonical error payload."
 
-UNAUTHORIZED_DESCRIPTION = (
-    "Unauthorized authentication state. Returns the canonical error payload."
-)
+UNAUTHORIZED_DESCRIPTION = "Unauthorized. Returns the canonical error payload."
 
-FORBIDDEN_DESCRIPTION = (
-    "Forbidden for missing scope or failed run access checks. Returns the canonical error payload."
-)
+FORBIDDEN_DESCRIPTION = "Forbidden. Returns the canonical error payload."
 
-SERVER_ERROR_DESCRIPTION = (
-    "Unexpected server failure. Returns the canonical error payload."
-)
+SERVER_ERROR_DESCRIPTION = "Server error. Returns the canonical error payload."
 
 
 def rq_operation_id(name: str) -> str:

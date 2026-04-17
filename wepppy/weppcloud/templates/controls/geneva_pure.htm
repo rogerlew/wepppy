@@ -1,9 +1,32 @@
 {% import "controls/_pure_macros.html" as ui %}
 {% from "shared/console_macros.htm" import button_row %}
 
+{% set run_base = site_prefix ~ "/runs/" ~ (runid | urlencode) ~ "/" ~ (config | urlencode) %}
+{% set rq_base = site_prefix ~ "/rq-engine/api/runs/" ~ (runid | urlencode) ~ "/" ~ (config | urlencode) %}
+{% set geneva_controller_config = {
+  "config_url": run_base ~ "/api/geneva/config",
+  "state_url": rq_base ~ "/geneva/state",
+  "prepare_url": rq_base ~ "/geneva/prepare-hrus",
+  "build_panel_url": rq_base ~ "/geneva/build-frequency-panel",
+  "run_batch_url": rq_base ~ "/geneva/run-batch",
+  "frequency_panel_url": run_base ~ "/api/geneva/frequency_panel",
+  "results_url": run_base ~ "/api/geneva/results",
+  "query_summary_url": run_base ~ "/query/geneva/summary",
+  "report_summary_url": run_base ~ "/report/geneva/summary",
+  "cn_table_url": run_base ~ "/modify_geneva_cn_table"
+} %}
+{% set lambda_mode_options = [("0.20", "0.20"), ("0.05", "0.05")] %}
+{% set uh_method_options = [("scs_triangular", "SCS triangular"), ("scs_curvilinear", "SCS curvilinear")] %}
+{% set unresolved_policy_options = [("error", "Error"), ("assume_d", "Assume HSG D")] %}
+{% set hsg_options = [("", "Auto / From source"), ("1", "A"), ("2", "B"), ("3", "C"), ("4", "D")] %}
+{% set timing_method_options = [("kirpich", "Kirpich"), ("kent", "Kent"), ("simas", "Simas")] %}
+{% set override_lambda_options = [("", "Use saved config"), ("0.20", "0.20"), ("0.05", "0.05")] %}
+{% set override_uh_options = [("", "Use saved config"), ("scs_triangular", "SCS triangular"), ("scs_curvilinear", "SCS curvilinear")] %}
+
 {% set description %}
   <p class="wc-text-muted">
-    Geneva CN workflow controls for Curve Number lookup review and editing.
+    Configure Geneva runoff parameters, prepare HRUs, build the frequency panel, and queue batch runs
+    from the run page. Runtime status is reconciled against rq-engine Geneva state.
   </p>
   <p class="wc-text-muted">
     For model behavior and contract details, see
@@ -15,21 +38,353 @@
      form_id="geneva_form",
      title="Geneva",
      collapsible=True,
-     description=description
+     description=description,
+     form_attrs={"data-controller": "geneva"},
+     status_panel_options={"id": "geneva_status_panel"},
+     summary_panel_options={"panel_id": "geneva_summary_panel", "summary_id": "info", "title": "Snapshot"},
+     stacktrace_panel_options={"panel_id": "geneva_stacktrace_panel", "body_id": "stacktrace"}
    ) %}
+  <script type="application/json" id="geneva_controller_data" data-geneva-config>{{ geneva_controller_config | tojson }}</script>
+
   <section class="wc-stack">
-    <p class="wc-field__help">
-      Open the Geneva CN table editor to review, edit, and reset run-scoped lookup rows.
-    </p>
-    {% call button_row(full_width=True) %}
+    {% call ui.fieldset("Configuration", "Saved Geneva mod settings persist through the existing Flask config route and hydrate from rq-engine Geneva state.") %}
+      {{ ui.checkbox_field(
+           "geneva_enabled",
+           "Enable Geneva",
+           checked=False,
+           help="Geneva queue actions remain unavailable until the mod is enabled.",
+           attrs={"data-geneva-field": "enabled"},
+           max_width=None
+         ) }}
+      {{ ui.select_field(
+           "geneva_lambda_mode",
+           "Lambda mode",
+           lambda_mode_options,
+           selected="0.20",
+           help="Controls CN lambda assumptions used by HRU preparation and default batch runs.",
+           attrs={"data-geneva-field": "lambda_mode"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.select_field(
+           "geneva_uh_method",
+           "Unit hydrograph method",
+           uh_method_options,
+           selected="scs_triangular",
+           help="Default unit-hydrograph family for Geneva runs.",
+           attrs={"data-geneva-field": "uh_method"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.select_field(
+           "geneva_default_hsg_code",
+           "Default HSG code",
+           hsg_options,
+           selected="",
+           help="Used only when unresolved HSG policy allows fallback.",
+           attrs={"data-geneva-field": "default_hsg_code"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.select_field(
+           "geneva_unresolved_hsg_policy",
+           "Unresolved HSG policy",
+           unresolved_policy_options,
+           selected="error",
+           help="Choose whether unresolved cells stop processing or default to HSG D.",
+           attrs={"data-geneva-field": "unresolved_hsg_policy"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.numeric_field(
+           "geneva_min_hru_area_ha",
+           "Minimum HRU area",
+           value="2.0",
+           unit_label="ha",
+           precision="0.1",
+           min="2.0",
+           help="Cells below this area are merged during HRU preparation.",
+           attrs={"data-geneva-field": "min_hru_area_ha"},
+           extra_control_class="disable-readonly",
+           max_width="22rem"
+         ) }}
+      {{ ui.checkbox_field(
+           "geneva_strict_burn_nodata",
+           "Strict burn nodata handling",
+           checked=False,
+           help="Reject burn-severity nodata cells instead of applying fallback treatment.",
+           attrs={"data-geneva-field": "strict_burn_nodata"},
+           max_width=None
+         ) }}
+      {{ ui.checkbox_field(
+           "geneva_allow_cross_hsg_merge",
+           "Allow cross-HSG merge",
+           checked=False,
+           help="Permits HRU merge fallback across differing HSG classes when needed.",
+           attrs={"data-geneva-field": "allow_cross_hsg_merge"},
+           max_width=None
+         ) }}
+      {{ ui.checkbox_field(
+           "geneva_hydrophobic_forest_high",
+           "Hydrophobic forest high severity",
+           checked=True,
+           help="Apply hydrophobic CN adjustment to forest/high severity cells.",
+           attrs={"data-geneva-field": "hydrophobic_forest_high"},
+           max_width=None
+         ) }}
+      {{ ui.checkbox_field(
+           "geneva_hydrophobic_forest_moderate",
+           "Hydrophobic forest moderate severity",
+           checked=False,
+           help="Apply hydrophobic CN adjustment to forest/moderate severity cells.",
+           attrs={"data-geneva-field": "hydrophobic_forest_moderate"},
+           max_width=None
+         ) }}
+      {{ ui.checkbox_field(
+           "geneva_hydrophobic_shrub_high",
+           "Hydrophobic shrub high severity",
+           checked=True,
+           help="Apply hydrophobic CN adjustment to shrub/high severity cells.",
+           attrs={"data-geneva-field": "hydrophobic_shrub_high"},
+           max_width=None
+         ) }}
+      {{ ui.checkbox_field(
+           "geneva_hydrophobic_shrub_moderate",
+           "Hydrophobic shrub moderate severity",
+           checked=False,
+           help="Apply hydrophobic CN adjustment to shrub/moderate severity cells.",
+           attrs={"data-geneva-field": "hydrophobic_shrub_moderate"},
+           max_width=None
+         ) }}
+      {% call button_row() %}
+        <button
+          id="geneva_save_config"
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly"
+          data-geneva-action="save-config">
+          Save Geneva Settings
+        </button>
+        <button
+          id="geneva_refresh_state"
+          type="button"
+          class="pure-button disable-readonly"
+          data-geneva-action="refresh-state">
+          Refresh State
+        </button>
+      {% endcall %}
+      <p id="geneva_config_message" class="wc-field__help" aria-live="polite"></p>
+    {% endcall %}
+
+    {% call ui.fieldset("Prepare HRUs", "Queue the Geneva HRU preparation pass before building the frequency panel or running batch storms.") %}
+      {{ ui.checkbox_field(
+           "geneva_prepare_force_rebuild",
+           "Force rebuild existing HRU artifacts",
+           checked=False,
+           help="When enabled, Geneva discards existing HRU artifacts and rebuilds them from source inputs.",
+           attrs={"data-geneva-field": "prepare_force_rebuild"},
+           max_width=None
+         ) }}
+      {% call button_row() %}
+        <button
+          id="geneva_prepare_hrus"
+          type="button"
+          class="pure-button pure-button-primary disable-readonly"
+          data-geneva-action="prepare">
+          Prepare Geneva HRUs
+        </button>
+      {% endcall %}
+    {% endcall %}
+
+    {% call ui.fieldset("Frequency Panel", "Define the duration and ARI matrix used to build Geneva storm-frequency inputs.") %}
+      {{ ui.text_field(
+           "geneva_panel_durations_minutes",
+           "Durations (minutes)",
+           value="5, 10, 30, 60, 120, 180, 360, 720, 1440",
+           help="Comma-separated positive integers.",
+           attrs={"data-geneva-field": "panel_durations_minutes"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.text_field(
+           "geneva_panel_ari_years",
+           "ARI years",
+           value="1, 2, 5, 10, 25, 50, 100",
+           help="Comma-separated positive integers.",
+           attrs={"data-geneva-field": "panel_ari_years"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.checkbox_field(
+           "geneva_panel_rebuild",
+           "Force rebuild frequency panel artifact",
+           checked=False,
+           help="Recompute the panel even when a cached artifact exists.",
+           attrs={"data-geneva-field": "panel_rebuild"},
+           max_width=None
+         ) }}
+      {{ ui.text_field(
+           "geneva_panel_source_cligen",
+           "CLIGEN source override",
+           value="",
+           help="Optional run-relative or absolute path override for CLIGEN precipitation frequency input.",
+           attrs={"data-geneva-field": "panel_source_cligen"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.text_field(
+           "geneva_panel_source_noaa14",
+           "NOAA Atlas 14 source override",
+           value="",
+           help="Optional run-relative or absolute path override for NOAA Atlas 14 precipitation frequency input.",
+           attrs={"data-geneva-field": "panel_source_noaa14"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {% call button_row() %}
+        <button
+          id="geneva_build_frequency_panel"
+          type="button"
+          class="pure-button pure-button-primary disable-readonly"
+          data-geneva-action="build-panel">
+          Build Frequency Panel
+        </button>
+      {% endcall %}
+    {% endcall %}
+
+    {% call ui.fieldset("Run Batch", "Queue Geneva event runs against the prepared HRU table and built frequency panel.") %}
+      {{ ui.text_field(
+           "geneva_run_batch_id",
+           "Batch identifier",
+           value="",
+           help="Optional client-provided batch label stored in Geneva summaries.",
+           attrs={"data-geneva-field": "run_batch_id"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.text_field(
+           "geneva_run_datasource_ids",
+           "Datasource IDs",
+           value="cligen_freq, noaa14_pds",
+           help="Comma-separated datasource ids. Leave both defaults to run the full v1 panel.",
+           attrs={"data-geneva-field": "run_datasource_ids"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.text_field(
+           "geneva_run_durations_minutes",
+           "Durations (minutes)",
+           value="5, 10, 30, 60, 120, 180, 360, 720, 1440",
+           help="Comma-separated positive integers used to filter panel events.",
+           attrs={"data-geneva-field": "run_durations_minutes"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.text_field(
+           "geneva_run_ari_years",
+           "ARI years",
+           value="1, 2, 5, 10, 25, 50, 100",
+           help="Comma-separated positive integers used to filter panel events.",
+           attrs={"data-geneva-field": "run_ari_years"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.numeric_field(
+           "geneva_run_time_step_minutes",
+           "Hyetograph time step",
+           value="1.0",
+           unit_label="minutes",
+           precision="0.1",
+           min="0.1",
+           help="Time-step used when expanding the NEH-4 Type B hyetograph.",
+           attrs={"data-geneva-field": "run_time_step_minutes"},
+           extra_control_class="disable-readonly",
+           max_width="22rem"
+         ) }}
+      {{ ui.select_field(
+           "geneva_run_lambda_mode",
+           "Lambda mode override",
+           override_lambda_options,
+           selected="",
+           help="Leave unset to use the saved Geneva configuration.",
+           attrs={"data-geneva-field": "run_lambda_mode"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.select_field(
+           "geneva_run_uh_method",
+           "Unit hydrograph override",
+           override_uh_options,
+           selected="",
+           help="Leave unset to use the saved Geneva configuration.",
+           attrs={"data-geneva-field": "run_uh_method"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.select_field(
+           "geneva_run_timing_method",
+           "Timing method",
+           timing_method_options,
+           selected="kirpich",
+           help="Choose a timing method or provide a tc_hours override below.",
+           attrs={"data-geneva-field": "run_timing_method"},
+           extra_control_class="disable-readonly",
+           max_width=None
+         ) }}
+      {{ ui.numeric_field(
+           "geneva_run_tc_hours",
+           "tc override",
+           value="",
+           unit_label="hours",
+           precision="0.1",
+           min="0.1",
+           nullable=True,
+           help="Optional concentration-time override. When populated, controller omits the timing-method selector from the request payload.",
+           attrs={"data-geneva-field": "run_tc_hours"},
+           extra_control_class="disable-readonly",
+           max_width="22rem"
+         ) }}
+      {% call button_row() %}
+        <button
+          id="geneva_run_batch"
+          type="button"
+          class="pure-button pure-button-primary disable-readonly"
+          data-geneva-action="run-batch">
+          Run Geneva Batch
+        </button>
+      {% endcall %}
+    {% endcall %}
+
+    {% call button_row() %}
       <a
-        class="pure-button"
-        href="{{ url_for_run('geneva.modify_geneva_cn_table', runid=runid, config=config) }}"
+        class="pure-button disable-readonly"
+        href="{{ run_base ~ '/modify_geneva_cn_table' }}"
         target="_blank"
         rel="noopener"
-        data-open-tab-pref>
+        data-open-tab-pref
+        data-geneva-link="cn-table">
         Edit Geneva CN Table
       </a>
+      <a
+        class="pure-button disable-readonly"
+        href="{{ run_base ~ '/query/geneva/summary' }}"
+        target="_blank"
+        rel="noopener"
+        data-open-tab-pref
+        data-geneva-link="query-summary">
+        Query Geneva Summary
+      </a>
+      <a
+        class="pure-button disable-readonly"
+        href="{{ run_base ~ '/report/geneva/summary' }}"
+        target="_blank"
+        rel="noopener"
+        data-open-tab-pref
+        data-geneva-link="report-summary">
+        View Geneva Report
+      </a>
     {% endcall %}
+
+    {{ ui.job_hint("hint_run_geneva", extra_class="wc-field__help") }}
+    <div id="geneva-results" class="wc-stack-sm" aria-live="polite"></div>
   </section>
 {% endcall %}

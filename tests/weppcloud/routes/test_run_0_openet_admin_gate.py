@@ -254,6 +254,10 @@ def test_run_page_bootstrap_geneva_flag_true_when_enabled(run0_template_app) -> 
         js = render_template("run_page_bootstrap.js.j2", **context)
 
     assert _extract_mod_flag(js, "geneva") == "true"
+    assert re.search(
+        r'"geneva"\s*:\s*\{\s*"stateAuthority"\s*:\s*"rq_engine"\s*\}',
+        js,
+    )
 
 
 def test_run_page_bootstrap_features_export_flag_true_when_enabled(run0_template_app) -> None:

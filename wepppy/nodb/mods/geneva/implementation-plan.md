@@ -1,6 +1,6 @@
 # Geneva Implementation Plan
-Status: Complete (WP-00..WP-10 complete)  
-Last Updated: 2026-04-15  
+Status: Active (WP-00..WP-10 complete; WP-11 not_started)  
+Last Updated: 2026-04-16  
 Owner: WEPPpy NoDb hydrology stack  
 Primary Spec: `/workdir/wepppy/wepppy/nodb/mods/geneva/specification.md`
 
@@ -91,6 +91,7 @@ Kernel repo gates (`/workdir/wepppyo3`):
 | WP-08 | Routes, tasks, RQ wiring, query/report API | WP-06, WP-07 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-08_routes_tasks_rq_wiring_query_report_api.md`; route family + canonical RQ/error contracts + guard propagation + query/report parity delivered, queue dependency artifacts updated, required gates passing (`tests/nodb/mods/geneva`: `24 passed`; `tests/nodb`: `959 passed, 4 skipped`; `tests`: `3615 passed, 36 skipped`; `doc-lint`: `15 files validated`; broad-exception changed-file gate `PASS`; `wctl check-rq-graph` up to date; `wctl run-npm lint/test` passed). |
 | WP-09 | End-to-end integration and performance validation | WP-08 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-09_end_to_end_integration_and_performance_validation.md`; WP-09 scenario-matrix harness, performance baseline probes, collapse sensitivity thresholds, watershed warning-threshold propagation, required gates (`tests/nodb/mods/geneva`: `34 passed`; `tests/nodb`: `969 passed, 4 skipped`; `tests`: `3625 passed, 36 skipped`; `doc-lint`: `17 files validated`; broad-exception changed-file gate `PASS`; `wctl check-rq-graph` up to date), and manual dual-run integration checks (including noisy `hydgrpdcd`) completed. |
 | WP-10 | QA/security closeout and release readiness | WP-09 | codex | 2026-04-15 | done | pass | pass | pass | pass | pass | Evidence: `work-packages/wp-10_qa_security_closeout_and_release_readiness.md`; consolidated WP-00..WP-09 risks, resolved WP-02 in-review blocker, passed required release gates (`tests/nodb/mods/geneva`: `34 passed`; `tests/nodb`: `969 passed, 4 skipped`; `tests`: `3625 passed, 36 skipped`; `doc-lint`: `19 files validated`; broad-exception gate `PASS`; kernel gates `geneva_core`/`cli_revision_rust` + `fmt` + `clippy` passed), and recorded final manual release-candidate results/query/report smoke checks + GO recommendation. |
+| WP-11 | Geneva UI parameterization + rq-engine state integration | WP-10 | codex | 2026-04-27 | not_started | pending | pending | pending | pending | pending | Planned follow-on package for missing Geneva control behavior: parameterized prepare/panel/run UI, non-full-width CN-table button convention alignment, rq-engine Geneva enqueue/state interfaces, and migration from run-page `.j2` bootstrap hints to rq-engine state-backed controller initialization. Backlog/cost/timeline are defined in WP-11 Sections 3-4. Evidence: `work-packages/wp-11_geneva_ui_rq_engine_state_integration.md`. |
 
 ## Parallel Execution Lanes
 Lane A (kernel foundation):
@@ -108,6 +109,9 @@ Lane C (NoDb and API integration):
 Lane D (validation and closeout):
 - WP-09 after WP-08
 - WP-10 after WP-09
+
+Lane E (post-closeout UI + state integration):
+- WP-11 after WP-10
 
 ## Work-Package Details
 ## WP-00 Orchestration bootstrap and fixtures
@@ -390,6 +394,59 @@ Manual integration checks:
 
 Exit criteria:
 - All WPs `done`, required gates `pass` (or formal waiver recorded), and release readiness note committed.
+
+## WP-11 Geneva UI parameterization + rq-engine state integration
+Scope:
+- Implement a dedicated Geneva controller and UI controls for:
+  - parameterized `prepare_hrus`,
+  - parameterized `build_frequency_panel`,
+  - parameterized `run_batch`.
+- Replace full-width `Edit Geneva CN Table` button row with standard control-button row sizing.
+- Add rq-engine Geneva enqueue/state endpoints and integrate them with WEPPcloud Geneva control flows.
+- Migrate Geneva control bootstrap/reconciliation away from run-page `.j2` `jobIds` hints to rq-engine state reads.
+
+Required tests:
+- Route contracts:
+  - `tests/weppcloud/routes/test_geneva_bp.py`
+  - `tests/weppcloud/routes/test_geneva_wp08_routes.py`
+  - new rq-engine Geneva route tests under `tests/microservices/test_rq_engine_geneva_routes.py`.
+- Controller coverage:
+  - new Geneva controller Jest tests under `wepppy/weppcloud/controllers_js/__tests__/geneva.test.js`.
+- Template rendering coverage:
+  - update `tests/weppcloud/routes/test_pure_controls_render.py`.
+
+Required gates:
+- `wctl run-pytest tests/weppcloud/routes/test_geneva_bp.py tests/weppcloud/routes/test_geneva_wp08_routes.py --maxfail=1`
+- `wctl run-pytest tests/microservices/test_rq_engine_geneva_routes.py --maxfail=1`
+- `wctl run-pytest tests --maxfail=1`
+- `wctl run-npm lint`
+- `wctl run-npm test`
+- `python3 wepppy/weppcloud/controllers_js/build_controllers_js.py`
+- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master`
+- `wctl check-rq-graph` (only if queue dependency edges change)
+
+QA review checklist:
+- Geneva control follows existing UI conventions (button sizing/layout, status panel usage).
+- Parameterized inputs persist and hydrate deterministically across reloads.
+- Controller lifecycle reconciles active job/status from rq-engine state, not bootstrap hints.
+
+Security review checklist:
+- rq-engine Geneva routes enforce `require_jwt` + `authorize_run_access`.
+- Request payloads parse through canonical normalization and typed validation.
+- Error payloads conform to canonical RQ response contract without leaking internal traces.
+
+Manual integration checks:
+- In run page Geneva control:
+  - set parameters -> queue prepare -> queue panel build -> queue run.
+- Validate live status/job transitions via rq-engine endpoints and status stream.
+- Confirm report/query surface consistency after run completion.
+- Confirm CN-table link button renders at convention-aligned width.
+
+Exit criteria:
+- Geneva UI supports parameterized prepare/panel/run in run page.
+- Geneva control obtains runtime state from rq-engine interface and no longer depends on `.j2` bootstrap-only job hints.
+- rq-engine Geneva endpoints are covered by tests and docs/contracts.
+- Required gates pass and WP-11 evidence is committed.
 
 ## Cadence and Board Hygiene
 - Update this board for every state transition.

@@ -154,20 +154,32 @@ def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environmen
     assert "pure-u-md-1-2" not in rendered
 
 
-def test_geneva_template_renders_editor_entrypoint(jinja_env: Environment) -> None:
+def test_geneva_template_renders_parameterized_controls_and_standard_button_row(
+    jinja_env: Environment,
+) -> None:
     template = jinja_env.get_template("controls/geneva_pure.htm")
     rendered = template.render()
 
     assert '<form id="geneva_form"' in rendered
-    assert "Geneva CN workflow controls" in rendered
+    assert "Configure Geneva runoff parameters" in rendered
+    assert 'id="geneva_controller_data"' in rendered
+    assert 'data-geneva-config' in rendered
+    assert 'id="geneva_save_config"' in rendered
+    assert 'id="geneva_prepare_hrus"' in rendered
+    assert 'id="geneva_build_frequency_panel"' in rendered
+    assert 'id="geneva_run_batch"' in rendered
+    assert 'id="geneva_results"' not in rendered
+    assert 'id="geneva-results"' in rendered
     assert "Edit Geneva CN Table" in rendered
-    assert 'class="pure-button"' in rendered
-    assert "pure-button-primary" not in rendered
-    assert "wc-button-row--full" in rendered
+    assert "Query Geneva Summary" in rendered
+    assert "View Geneva Report" in rendered
+    assert "pure-button-primary" in rendered
+    assert "wc-button-row--full" not in rendered
 
     source = (TEMPLATE_ROOT / "controls/geneva_pure.htm").read_text(encoding="utf-8")
-    assert "button_row(full_width=True)" in source
-    assert "url_for_run('geneva.modify_geneva_cn_table', runid=runid, config=config)" in source
+    assert "button_row(full_width=True)" not in source
+    assert '"state_url": rq_base ~ "/geneva/state"' in source
+    assert 'data-geneva-action="prepare"' in source
 
 
 def test_geneva_summary_report_template_embeds_single_json_payload(jinja_env: Environment) -> None:

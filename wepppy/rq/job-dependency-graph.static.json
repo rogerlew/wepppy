@@ -151,6 +151,16 @@
   },
   {
     "depends_on": [],
+    "enqueue_target": "func",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_geneva_job",
+    "source_lineno": 137,
+    "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
+  },
+  {
+    "depends_on": [],
     "enqueue_target": "build_landuse_rq",
     "job_meta_stage": null,
     "notes": [],
