@@ -2623,6 +2623,54 @@ def test_materialize_layer_attributes_collapses_benign_duplicate_source_keys() -
     assert merged.iloc[0]["runoff_mm"] == pytest.approx(5.0)
 
 
+def test_wepp_summary_channels_catalog_joins_internal_sources_on_wepp_id() -> None:
+    catalog = load_layer_catalog()
+    catalog_layer = catalog.get_layer("wepp.summary.channels")
+    assert catalog_layer is not None
+
+    join_contract = dict(catalog_layer.raw["join"])
+    assert join_contract["primary_key"] == "wepp_id"
+    assert join_contract["source_key_map"]["wepp_channel_attributes"][0] == "wepp_id"
+
+    merged, _ = materialize_layer_attributes(
+        layer_id="wepp.summary.channels",
+        carrier_layer="chan_map-channels",
+        join_contract=join_contract,
+        sources=(
+            DiscoveredSourceFrame(
+                source_id="wepp_loss_channel",
+                source_kind="parquet",
+                required=True,
+                dataframe=pd.DataFrame(
+                    {
+                        "wepp_id": [1743, 1744],
+                        "chn_enum": [1, 2],
+                        "Soil Loss": [84.2, 12.5],
+                    }
+                ),
+                units_by_column={"Soil Loss": "kg"},
+            ),
+            DiscoveredSourceFrame(
+                source_id="wepp_channel_attributes",
+                source_kind="parquet",
+                required=False,
+                dataframe=pd.DataFrame(
+                    {
+                        "topaz_id": [24, 34],
+                        "wepp_id": [1743, 1744],
+                        "order": [6, 1],
+                    }
+                ),
+                units_by_column={},
+            ),
+        ),
+    )
+
+    assert merged[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["1743", "1744"]
+    assert merged["topaz_id"].tolist() == [24, 34]
+    assert merged["Soil Loss"].tolist() == pytest.approx([84.2, 12.5])
+
+
 def test_execute_features_export_writes_spatial_geopackage_layers(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

@@ -389,18 +389,20 @@ layers:
         - "channel_id"
         - "TopazID"
     join:
-      primary_key: "chn_id"
+      primary_key: "wepp_id"
       fallback_keys:
+        - "topaz_id"
         - "channel_id"
         - "TopazID"
       source_key_map:
         wepp_loss_channel:
+          - "wepp_id"
           - "chn_id"
           - "channel_id"
-          - "id"
         wepp_channel_attributes:
-          - "chn_id"
-          - "channel_id"
+          - "wepp_id"
+          - "topaz_id"
+          - "TopazID"
     sources:
       - source_id: "wepp_loss_channel"
         kind: "parquet"

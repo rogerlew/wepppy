@@ -81,6 +81,9 @@ You can also use **Specify Export from Profile** to paste `profile.yml` content 
 
 The catalog currently exposes 27 dataset layer IDs. Availability of any dataset depends on run outputs and module state.
 
+Channel summary note:
+`wepp.summary.channels` resolves its internal source join on `wepp_id` so `loss_pw0.chn.parquet` metrics align with `watershed/channels.parquet` attributes before the consolidated channel carrier retargets to the geometry-facing channel identity.
+
 | Family | Layer ID | Dataset label |
 | --- | --- | --- |
 | Watershed | `watershed.subcatchments` | `hillslopes.parquet` |
@@ -110,4 +113,3 @@ The catalog currently exposes 27 dataset layer IDs. Availability of any dataset 
 | AgFields Spatial | `ag_fields.fields` | `fields.WGS.geojson` |
 | AgFields Metrics | `ag_fields.metrics.subfields` | `H.pass.parquet` |
 | AgFields Metrics | `ag_fields.metrics.fields` | `H.pass.parquet` |
-

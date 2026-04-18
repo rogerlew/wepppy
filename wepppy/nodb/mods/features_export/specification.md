@@ -169,6 +169,8 @@ Carrier materialization contract (normative):
   - Subcatchments carrier: `topaz_id` preferred, `wepp_id` fallback.
   - Channels carrier: `chn_id` preferred, `topaz_id` fallback.
   - Catalog `join.source_key_map` overrides remain authoritative for source-specific key resolution.
+- Contract clarification:
+  - `wepp.summary.channels` must materialize its internal metrics-plus-attributes join on `wepp_id` because `loss_pw0.chn.parquet` is keyed by WEPP channel id while the canonical channel geometry carrier remains topaz-facing.
 - Each source dataset must be reduced to one row per effective carrier key before joining into Phase A output (via deterministic temporal filtering, deterministic projection, and deterministic dedupe/aggregation rules when needed).
 - Unresolved many-to-many key joins on a carrier hot path are contract violations and must fail explicitly with `materialization_error`; silent Cartesian growth is forbidden.
 - Legacy non-carrier source merges must resolve identity keys from explicit join contract candidates (`join.primary_key`, `join.fallback_keys`, `geometry.feature_id_keys`). If no candidate resolves, fail with `materialization_error`; arbitrary first-column fallback is non-compliant.
