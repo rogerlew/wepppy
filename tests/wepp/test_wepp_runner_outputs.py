@@ -29,6 +29,7 @@ def test_make_watershed_omni_contrasts_run_output_options(tmp_path):
     run_path = runs_dir / "pw0.run"
     lines = [line.strip() for line in run_path.read_text(encoding="ascii").splitlines()]
 
+    assert "" not in lines
     assert _line_before(lines, "../output/loss_pw0.txt") == "1"
     assert _line_before(lines, "../output/chnwb.txt") == "Yes"
     assert _line_before(lines, "../output/plot_pw0.txt") == "Yes"

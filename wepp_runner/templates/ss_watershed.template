@@ -4,7 +4,6 @@ Yes                             # Y: Batch mode, N: Shell mode
 2                               # 1: hilslope version, 2: hillslope/watershed, 3: watershed
 ../output/pass_pw0.txt          # master watershed pass file
 {sub_n}{hillslopes_block}       # number of hillslopes, English or Metric, Y: Use existing pass file, name of pass file
-
 Yes                             # Do you wish to model impoundments on the watershed
 ../output/loss_pw0.txt
 No
