@@ -179,21 +179,25 @@ class SlopeFile(object):
                 _distance_p.append(dend)
 
             _slopes = self.interp_slope(_distance_p)
-
-            _npts = len(_slopes)
             _length = (dend - d0) * length
+            _distance_p = (_distance_p - d0) / (dend - d0)
+            _profile = []
+            for _d, _s in zip(_distance_p, _slopes):
+                _d_fmt = f'{_d:.4f}'
+                _s_fmt = f'{_s:.4f}'
+                if _profile and _profile[-1][0] == _d_fmt:
+                    # Keep the downstream point for this rounded-distance bucket.
+                    # This avoids stretching the upstream slope across the segment
+                    # when adjacent raw points collapse to the same x after formatting.
+                    _profile[-1] = (_d_fmt, _s_fmt)
+                    continue
+                _profile.append((_d_fmt, _s_fmt))
+
+            _npts = len(_profile)
             s.append(f'{_npts} {_length:.2f}')
 #            s.append('# ' + ' '.join(f'{_d:.4f}, {_s:.4f}' for _d, _s in zip(_distance_p, _slopes)))
 
-            _distance_p = (_distance_p - d0) / (dend - d0)
-            _profile = []
-            _d_old = -1.0
-            for _d, _s in zip(_distance_p, _slopes):
-                assert _d > _d_old, (_d, _d_old, _distance_p, _slopes)
-                _d_old = _d
-                _profile.append(f'{_d:.4f}, {_s:.4f}')
-
-            s.append('  ' + ' '.join(_profile))
+            s.append('  ' + ' '.join(f'{_d}, {_s}' for _d, _s in _profile))
 
         s = ['97.5',
              str(n_mofes),
