@@ -919,6 +919,24 @@ function controlBase() {
         return String(errorParts.statusCode).trim() === "502";
     }
 
+    function usersumDocUrl(docId) {
+        const normalizedDocId = String(docId || "").trim();
+        if (!normalizedDocId) {
+            return "/usersum/";
+        }
+
+        const routePath = `usersum/doc/${normalizedDocId}`;
+        if (typeof window !== "undefined" && typeof window.url_for_run === "function") {
+            return window.url_for_run(routePath, { runId: "", config: "" });
+        }
+
+        let sitePrefix = "";
+        if (typeof window !== "undefined" && typeof window.site_prefix === "string" && window.site_prefix) {
+            sitePrefix = window.site_prefix.replace(/\/+$/, "");
+        }
+        return `${sitePrefix}/${routePath}`;
+    }
+
     return {
         command_btn_id: null,
         rq_job_id: null,
@@ -958,7 +976,7 @@ function controlBase() {
                 if (lines.some(function (value) { return typeof value === "string" && value.includes("lock() called on an already locked nodb"); })) {
                     appendHtml(
                         self.stacktrace,
-                        '<a href="/usersum/doc/usersum.weppcloud.clearing_locks">Clearing Locks</a>'
+                        `<a href="${escapeHtml(usersumDocUrl("usersum.weppcloud.clearing_locks"))}">Clearing Locks</a>`
                     );
                 }
             }

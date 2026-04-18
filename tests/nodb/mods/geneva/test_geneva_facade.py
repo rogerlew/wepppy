@@ -206,6 +206,24 @@ class _FailingPrepareKernelGateway(_FakeKernelGateway):
         return super().call_json_api(api_name, payload)
 
 
+def test_geneva_auto_enables_on_first_initialization(tmp_path: Path) -> None:
+    geneva = Geneva(str(tmp_path), "0.cfg")
+
+    assert geneva.enabled is True
+    assert geneva.get_config()["enabled"] is True
+    assert "enabled" in geneva._timestamps
+
+
+def test_geneva_reenables_on_reload_when_mod_is_present(tmp_path: Path) -> None:
+    geneva = Geneva(str(tmp_path), "0.cfg")
+    geneva.set_enabled(False)
+
+    Geneva.cleanup_all_instances()
+    reloaded = Geneva.getInstance(str(tmp_path))
+    assert reloaded.enabled is True
+    assert reloaded.get_config()["enabled"] is True
+
+
 def test_prepare_hrus_facade_delegates_to_collaborator(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

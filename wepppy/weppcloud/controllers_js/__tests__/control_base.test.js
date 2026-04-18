@@ -34,6 +34,8 @@ describe("controlBase job status error handling", () => {
 
     afterEach(() => {
         delete window.controlBase;
+        delete window.url_for_run;
+        delete window.site_prefix;
         document.body.innerHTML = "";
         jest.clearAllMocks();
     });
@@ -139,6 +141,24 @@ describe("controlBase job status error handling", () => {
         );
         expect(document.getElementById("stacktrace").textContent).toContain(
             "wepppy.soils.ssurgo.ssurgo.SsurgoRequestError"
+        );
+    });
+
+    test("pushResponseStacktrace links clearing-lock docs with site prefix from url_for_run", () => {
+        const urlForRun = jest.fn(() => "/weppcloud/usersum/doc/usersum.weppcloud.clearing_locks");
+        window.url_for_run = urlForRun;
+
+        base.pushResponseStacktrace(base, {
+            error: { message: "Job failed." },
+            stacktrace: [
+                "Traceback (most recent call last):",
+                "lock() called on an already locked nodb"
+            ]
+        });
+
+        expect(urlForRun).toHaveBeenCalledWith("usersum/doc/usersum.weppcloud.clearing_locks", { runId: "", config: "" });
+        expect(document.getElementById("stacktrace").innerHTML).toContain(
+            'href="/weppcloud/usersum/doc/usersum.weppcloud.clearing_locks"'
         );
     });
 });

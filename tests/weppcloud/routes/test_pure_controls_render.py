@@ -164,22 +164,28 @@ def test_geneva_template_renders_parameterized_controls_and_standard_button_row(
     assert "Configure Geneva runoff parameters" in rendered
     assert 'id="geneva_controller_data"' in rendered
     assert 'data-geneva-config' in rendered
-    assert 'id="geneva_save_config"' in rendered
-    assert 'id="geneva_prepare_hrus"' in rendered
-    assert 'id="geneva_build_frequency_panel"' in rendered
+    assert 'id="geneva_save_config"' not in rendered
+    assert 'id="geneva_refresh_state"' not in rendered
+    assert 'id="geneva_prepare_hrus"' not in rendered
+    assert 'id="geneva_build_frequency_panel"' not in rendered
     assert 'id="geneva_run_batch"' in rendered
+    assert 'id="hint_run_geneva_run_workflow"' in rendered
+    assert 'id="hint_run_geneva"' in rendered
     assert 'id="geneva_results"' not in rendered
     assert 'id="geneva-results"' in rendered
     assert "Edit Geneva CN Table" in rendered
     assert "Query Geneva Summary" in rendered
     assert "View Geneva Report" in rendered
+    assert "Geneva enabled" not in rendered
     assert "pure-button-primary" in rendered
     assert "wc-button-row--full" not in rendered
 
     source = (TEMPLATE_ROOT / "controls/geneva_pure.htm").read_text(encoding="utf-8")
     assert "button_row(full_width=True)" not in source
     assert '"state_url": rq_base ~ "/geneva/state"' in source
-    assert 'data-geneva-action="prepare"' in source
+    assert '"run_workflow_url": rq_base ~ "/geneva/run-workflow"' in source
+    assert '{% set rq_base = "/rq-engine/api/runs/" ~ (runid | urlencode) ~ "/" ~ (config | urlencode) %}' in source
+    assert 'data-geneva-action="run-workflow"' in source
 
 
 def test_geneva_summary_report_template_embeds_single_json_payload(jinja_env: Environment) -> None:

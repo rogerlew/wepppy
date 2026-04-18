@@ -17,7 +17,7 @@ class GenevaConfig:
     lambda_mode: str = "0.20"
     uh_method: str = "scs_triangular"
     default_hsg_code: int | None = None
-    unresolved_hsg_policy: str = "error"
+    unresolved_hsg_policy: str = "assume_d"
     strict_burn_nodata: bool = False
     allow_cross_hsg_merge: bool = False
     hydrophobic_forest_high: bool = True

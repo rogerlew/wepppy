@@ -11,6 +11,7 @@ from wepppy.nodb.mods.geneva.collaborators.config_service import GenevaConfigSer
 from wepppy.nodb.mods.geneva.collaborators.hru_preparation_service import GenevaHruPreparationService
 from wepppy.nodb.mods.geneva.collaborators.kernel_gateway import GenevaKernelGateway
 from wepppy.nodb.mods.geneva.errors import GenevaKernelError
+from wepppy.nodb.mods.geneva.schemas import default_geneva_config
 
 
 pytestmark = pytest.mark.unit
@@ -33,11 +34,34 @@ def test_config_service_initializes_defaults_and_merges_updates() -> None:
     initialized = service.initialize_config(geneva)
     assert initialized["schema_version"] == 1
     assert initialized["lambda_mode"] == "0.20"
+    assert initialized["unresolved_hsg_policy"] == "assume_d"
     assert initialized["min_hru_area_ha"] == 2.0
 
     updated = service.update_config(geneva, {"lambda_mode": "0.05", "enabled": True})
     assert updated["lambda_mode"] == "0.05"
     assert updated["enabled"] is True
+
+
+def test_config_service_migrates_legacy_unresolved_hsg_default_for_unedited_runs() -> None:
+    service = GenevaConfigService()
+    legacy = default_geneva_config().to_payload()
+    legacy["unresolved_hsg_policy"] = "error"
+    geneva = SimpleNamespace(_config=legacy, _config_user_modified=False)
+
+    initialized = service.initialize_config(geneva)
+
+    assert initialized["unresolved_hsg_policy"] == "assume_d"
+
+
+def test_config_service_preserves_legacy_unresolved_hsg_when_user_modified() -> None:
+    service = GenevaConfigService()
+    legacy = default_geneva_config().to_payload()
+    legacy["unresolved_hsg_policy"] = "error"
+    geneva = SimpleNamespace(_config=legacy, _config_user_modified=True)
+
+    initialized = service.initialize_config(geneva)
+
+    assert initialized["unresolved_hsg_policy"] == "error"
 
 
 def test_artifact_io_writes_and_reads_json_and_parquet(tmp_path: Path) -> None:

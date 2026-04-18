@@ -123,6 +123,79 @@ def _normalize_prepare_request(payload: Mapping[str, Any]) -> dict[str, Any]:
     return normalized_payload
 
 
+def _normalize_workflow_request(geneva: Geneva, payload: Mapping[str, Any]) -> dict[str, Any]:
+    try:
+        schema_version = int(payload.get("schema_version", 1))
+    except (TypeError, ValueError) as exc:
+        raise GenevaValidationError(
+            "schema_version must equal 1",
+            code="invalid_input",
+            details="schema_version must equal 1",
+            status_code=400,
+        ) from exc
+    if schema_version != 1:
+        raise GenevaValidationError(
+            "schema_version must equal 1",
+            code="invalid_input",
+            details="schema_version must equal 1",
+            status_code=400,
+        )
+
+    prepare_raw = payload.get("prepare", {})
+    panel_raw = payload.get("panel", {})
+    has_run_batch_payload = "run_batch" in payload
+    run_batch_raw = payload.get("run_batch", {})
+
+    if not isinstance(prepare_raw, Mapping):
+        raise GenevaValidationError(
+            "prepare must be an object when provided",
+            code="invalid_input",
+            details="prepare must be an object when provided",
+            status_code=400,
+        )
+    if not isinstance(panel_raw, Mapping):
+        raise GenevaValidationError(
+            "panel must be an object when provided",
+            code="invalid_input",
+            details="panel must be an object when provided",
+            status_code=400,
+        )
+
+    if has_run_batch_payload and not isinstance(run_batch_raw, Mapping):
+        raise GenevaValidationError(
+            "run_batch must be an object",
+            code="invalid_input",
+            details="run_batch must be an object",
+            status_code=400,
+        )
+
+    # Backward-compatible fallback: treat top-level run-batch envelope as run_batch.
+    if not has_run_batch_payload:
+        run_payload_keys = ("batch_id", "event_filter", "hyetograph", "runoff_model")
+        if any(key in payload for key in run_payload_keys):
+            run_batch_raw = {key: payload[key] for key in run_payload_keys if key in payload}
+
+    normalized_prepare = _normalize_prepare_request(dict(prepare_raw))
+    normalized_prepare["force_rebuild"] = True
+
+    panel_payload = dict(panel_raw)
+    panel_payload["schema_version"] = 1
+    panel_payload["rebuild"] = True
+    normalized_panel = geneva.frequency_panel_service.normalize_request(panel_payload)
+    normalized_panel["rebuild"] = True
+
+    normalized_run_batch = dict(run_batch_raw)
+    normalized_run_batch.setdefault("schema_version", 1)
+    geneva.batch_run_service.validate_request(geneva, normalized_run_batch)
+
+    return {
+        "schema_version": 1,
+        "prepare": normalized_prepare,
+        "panel": normalized_panel,
+        "run_batch": normalized_run_batch,
+    }
+
+
 def _enqueue_geneva_job(
     *,
     runid: str,
@@ -146,6 +219,59 @@ def _enqueue_geneva_job(
         "job_id": job_id,
         "status_url": f"/rq-engine/api/jobstatus/{job_id}",
         "message": "Job enqueued.",
+    }
+
+
+def _enqueue_geneva_workflow_jobs(
+    *,
+    runid: str,
+    config: str,
+    payload: Mapping[str, Any],
+    geneva: Geneva,
+) -> dict[str, Any]:
+    prepare_payload = dict(payload.get("prepare", {}))
+    panel_payload = dict(payload.get("panel", {}))
+    run_batch_payload = dict(payload.get("run_batch", {}))
+
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+        queue = Queue(connection=redis_conn)
+        prepare_job = queue.enqueue_call(
+            func=run_geneva_prepare_hrus_rq,
+            args=(runid, config, prepare_payload),
+            timeout=GENEVA_RQ_TIMEOUT,
+        )
+        panel_job = queue.enqueue_call(
+            func=run_geneva_build_frequency_panel_rq,
+            args=(runid, config, panel_payload),
+            timeout=GENEVA_RQ_TIMEOUT,
+            depends_on=prepare_job,
+        )
+        run_batch_job = queue.enqueue_call(
+            func=run_geneva_run_batch_rq,
+            args=(runid, config, run_batch_payload),
+            timeout=GENEVA_RQ_TIMEOUT,
+            depends_on=panel_job,
+        )
+
+    prepare_job_id = str(prepare_job.id)
+    panel_job_id = str(panel_job.id)
+    run_batch_job_id = str(run_batch_job.id)
+    geneva.mark_job_queued(
+        prepare_job_id,
+        status_message=(
+            "Geneva workflow queued. Preparing HRUs, building frequency panel, "
+            "then running Geneva batch."
+        ),
+    )
+    return {
+        "job_id": prepare_job_id,
+        "job_ids": {
+            "prepare_hrus": prepare_job_id,
+            "build_frequency_panel": panel_job_id,
+            "run_batch": run_batch_job_id,
+        },
+        "status_url": f"/rq-engine/api/jobstatus/{prepare_job_id}",
+        "message": "Workflow enqueued.",
     }
 
 
@@ -385,6 +511,60 @@ async def run_batch(runid: str, config: str, request: Request) -> JSONResponse:
         return _internal_error_response(
             "Error running Geneva batch",
             details="Unexpected server error while running the Geneva batch.",
+        )
+
+
+@router.post(
+    "/runs/{runid}/{config}/geneva/run-workflow",
+    summary="Run Geneva workflow (prepare -> panel -> batch)",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` plus run access. "
+        "Validates and enqueues the chained Geneva workflow."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("geneva_run_workflow"),
+    responses=agent_route_responses(
+        success_code=202,
+        success_description="Accepted and chained `job_id` / `job_ids` returned.",
+        extra={
+            400: "Validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
+async def run_workflow(runid: str, config: str, request: Request) -> JSONResponse:
+    try:
+        claims = require_jwt(request, required_scopes=GENEVA_ENQUEUE_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: boundary auth contract
+        logger.exception("rq-engine Geneva run-workflow auth failed", extra={"runid": runid, "config": config})
+        return error_response(
+            "Failed to authorize request",
+            status_code=401,
+            code="unauthorized",
+            details="Failed to authorize request",
+        )
+
+    try:
+        payload = await parse_request_payload(request)
+        geneva = _ensure_geneva_controller(runid, config)
+        normalized_payload = _normalize_workflow_request(geneva, payload)
+        geneva.assert_task_guardrails()
+        submission = _enqueue_geneva_workflow_jobs(
+            runid=runid,
+            config=config,
+            payload=normalized_payload,
+            geneva=geneva,
+        )
+        return JSONResponse(submission, status_code=202)
+    except GenevaNoDbError as exc:
+        return _geneva_error_response(exc)
+    except Exception:  # broad-except: boundary contract with sanitized response
+        logger.exception("rq-engine Geneva run-workflow enqueue failed", extra={"runid": runid, "config": config})
+        return _internal_error_response(
+            "Error running Geneva workflow",
+            details="Unexpected server error while running the Geneva workflow.",
         )
 
 

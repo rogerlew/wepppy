@@ -10,9 +10,7 @@ var Geneva = (function () {
     var EVENT_NAMES = [
         "geneva:state:loaded",
         "geneva:config:saved",
-        "geneva:prepare:queued",
-        "geneva:panel:queued",
-        "geneva:run:queued",
+        "geneva:workflow:queued",
         "geneva:state:error"
     ];
 
@@ -26,7 +24,9 @@ var Geneva = (function () {
         status: "#status",
         stacktrace: "#stacktrace",
         rqJob: "#rq_job",
-        hint: "#hint_run_geneva",
+        hintRunWorkflow: "#hint_run_geneva_run_workflow",
+        hintRunBatch: "#hint_run_geneva_run_batch",
+        hintLegacy: "#hint_run_geneva",
         results: "#geneva-results",
         configMessage: "#geneva_config_message",
         configNode: "#geneva_controller_data",
@@ -35,11 +35,26 @@ var Geneva = (function () {
     };
 
     var ACTIONS = {
-        saveConfig: '[data-geneva-action="save-config"]',
-        refreshState: '[data-geneva-action="refresh-state"]',
-        prepare: '[data-geneva-action="prepare"]',
-        buildPanel: '[data-geneva-action="build-panel"]',
-        runBatch: '[data-geneva-action="run-batch"]'
+        runWorkflow: '[data-geneva-action="run-workflow"]'
+    };
+    var CONFIG_FIELD_MAP = {
+        lambda_mode: "geneva_lambda_mode",
+        uh_method: "geneva_uh_method",
+        default_hsg_code: "geneva_default_hsg_code",
+        unresolved_hsg_policy: "geneva_unresolved_hsg_policy",
+        strict_burn_nodata: "geneva_strict_burn_nodata",
+        allow_cross_hsg_merge: "geneva_allow_cross_hsg_merge",
+        hydrophobic_forest_high: "geneva_hydrophobic_forest_high",
+        hydrophobic_forest_moderate: "geneva_hydrophobic_forest_moderate",
+        hydrophobic_shrub_high: "geneva_hydrophobic_shrub_high",
+        hydrophobic_shrub_moderate: "geneva_hydrophobic_shrub_moderate",
+        min_hru_area_ha: "geneva_min_hru_area_ha"
+    };
+    var UNSAVED_CONFIG_MESSAGE = "Unsaved Geneva settings detected. Settings will be auto-saved when you submit a Geneva job.";
+    var LINK_FIELDS = {
+        "cn-table": "cn_table_url",
+        "query-summary": "query_summary_url",
+        "report-summary": "report_summary_url"
     };
 
     function ensureHelpers() {
@@ -151,14 +166,71 @@ var Geneva = (function () {
         }
     }
 
+    function escapeHtml(value) {
+        return String(value === undefined || value === null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function hasValidRunContext(candidate) {
+        if (!candidate) {
+            return false;
+        }
+
+        var pathname;
+        try {
+            pathname = new URL(String(candidate), window.location.origin).pathname || "";
+        } catch (_error) {
+            pathname = String(candidate);
+        }
+
+        if (pathname.indexOf("/runs/") === -1) {
+            return true;
+        }
+        return /\/runs\/[^/]+\/[^/]+(?:\/|$)/.test(pathname);
+    }
+
+    function normalizeUrlCandidate(candidate, fallback) {
+        var text = typeof candidate === "string" ? candidate.trim() : "";
+        if (!text) {
+            return fallback || "";
+        }
+        if (!hasValidRunContext(text) && fallback) {
+            return fallback;
+        }
+        return text;
+    }
+
+    function jobStatusUrl(jobId) {
+        if (!jobId) {
+            return "";
+        }
+        return "/rq-engine/api/jobstatus/" + encodeURIComponent(String(jobId));
+    }
+
+    function jobIdAnchor(jobId) {
+        if (!jobId) {
+            return "none";
+        }
+        var normalized = String(jobId);
+        return (
+            '<a href="' +
+            jobStatusUrl(normalized) +
+            '" target="_blank" rel="noopener">' +
+            escapeHtml(normalized) +
+            "</a>"
+        );
+    }
+
     function fallbackUrls() {
         if (typeof url_for_run === "function") {
             return {
                 config_url: url_for_run("api/geneva/config"),
                 state_url: url_for_run("geneva/state", { prefix: "/rq-engine/api" }),
-                prepare_url: url_for_run("geneva/prepare-hrus", { prefix: "/rq-engine/api" }),
-                build_panel_url: url_for_run("geneva/build-frequency-panel", { prefix: "/rq-engine/api" }),
-                run_batch_url: url_for_run("geneva/run-batch", { prefix: "/rq-engine/api" }),
+                run_workflow_url: url_for_run("geneva/run-workflow", { prefix: "/rq-engine/api" }),
                 results_url: url_for_run("api/geneva/results"),
                 frequency_panel_url: url_for_run("api/geneva/frequency_panel"),
                 query_summary_url: url_for_run("query/geneva/summary"),
@@ -170,7 +242,12 @@ var Geneva = (function () {
     }
 
     function normalizeConfig(controller) {
-        return Object.assign({}, fallbackUrls(), controller.configNodeData || {});
+        var fallback = fallbackUrls();
+        var merged = Object.assign({}, fallback, controller.configNodeData || {});
+        Object.keys(fallback).forEach(function (key) {
+            merged[key] = normalizeUrlCandidate(merged[key], fallback[key]);
+        });
+        return merged;
     }
 
     function parseList(value, parser) {
@@ -300,6 +377,8 @@ var Geneva = (function () {
             stacktrace: createLegacyAdapter(null),
             rq_job: createLegacyAdapter(null),
             hint: createLegacyAdapter(null),
+            hintTargets: {},
+            activeHintKey: "run",
             resultsEl: null,
             configMessageEl: null,
             statusPanelEl: null,
@@ -307,16 +386,45 @@ var Geneva = (function () {
             statusSpinnerEl: null,
             configNodeEl: null,
             configNodeData: {},
-            command_btn_id: [
-                "geneva_prepare_hrus",
-                "geneva_build_frequency_panel",
-                "geneva_run_batch"
-            ],
+            command_btn_id: ["geneva_run_batch"],
             state: {
                 snapshot: null
             },
+            savedConfigComparable: null,
             _delegates: []
         });
+
+        controller.resolveHintKeyForSnapshot = function () {
+            return "run";
+        };
+
+        controller.setActiveHint = function (hintKey) {
+            var key = String(hintKey || "").trim().toLowerCase();
+            if (key !== "run") {
+                key = "run";
+            }
+
+            var targets = controller.hintTargets || {};
+            var nextTarget = targets[key] || targets.run || createLegacyAdapter(null);
+            controller.activeHintKey = key;
+            controller.hint = nextTarget;
+
+            Object.keys(targets).forEach(function (targetKey) {
+                if (targetKey === key) {
+                    return;
+                }
+                var target = targets[targetKey];
+                if (!target) {
+                    return;
+                }
+                if (typeof target.html === "function") {
+                    target.html("");
+                }
+                if (typeof target.hide === "function") {
+                    target.hide();
+                }
+            });
+        };
 
         controller.appendStatus = function (message, meta) {
             if (!message) {
@@ -350,7 +458,93 @@ var Geneva = (function () {
             }
         };
 
+        controller.hasFormField = function (name) {
+            if (!controller.form || !controller.form.elements || !name) {
+                return false;
+            }
+            return Boolean(controller.form.elements.namedItem(name));
+        };
+
+        controller.normalizeConfigComparable = function (payload) {
+            var source = payload || {};
+            var defaultHsgRaw = source.default_hsg_code;
+            var minAreaRaw = source.min_hru_area_ha;
+            var defaultHsg = null;
+            var minArea = parseFloat(minAreaRaw);
+
+            if (!(defaultHsgRaw === "" || defaultHsgRaw === null || defaultHsgRaw === undefined)) {
+                defaultHsg = parseInt(String(defaultHsgRaw), 10);
+                if (Number.isNaN(defaultHsg)) {
+                    defaultHsg = null;
+                }
+            }
+            if (Number.isNaN(minArea)) {
+                minArea = 2.0;
+            }
+
+            return {
+                lambda_mode: source.lambda_mode || "0.20",
+                uh_method: source.uh_method || "scs_triangular",
+                default_hsg_code: defaultHsg,
+                unresolved_hsg_policy: source.unresolved_hsg_policy || "assume_d",
+                strict_burn_nodata: Boolean(source.strict_burn_nodata),
+                allow_cross_hsg_merge: Boolean(source.allow_cross_hsg_merge),
+                hydrophobic_forest_high: Boolean(source.hydrophobic_forest_high),
+                hydrophobic_forest_moderate: Boolean(source.hydrophobic_forest_moderate),
+                hydrophobic_shrub_high: Boolean(source.hydrophobic_shrub_high),
+                hydrophobic_shrub_moderate: Boolean(source.hydrophobic_shrub_moderate),
+                min_hru_area_ha: minArea
+            };
+        };
+
+        controller.currentConfigComparable = function () {
+            var payload = controller.buildConfigPayload();
+            delete payload.schema_version;
+            return controller.normalizeConfigComparable(payload);
+        };
+
+        controller.hasUnsavedConfigChanges = function () {
+            if (!controller.savedConfigComparable) {
+                return false;
+            }
+            var current = controller.currentConfigComparable();
+            var keys = Object.keys(CONFIG_FIELD_MAP);
+
+            for (var idx = 0; idx < keys.length; idx += 1) {
+                var key = keys[idx];
+                var formFieldName = CONFIG_FIELD_MAP[key];
+                if (!controller.hasFormField(formFieldName)) {
+                    continue;
+                }
+                if (current[key] !== controller.savedConfigComparable[key]) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        controller.updateUnsavedConfigMessage = function () {
+            if (!controller.configMessageEl) {
+                return;
+            }
+
+            var dirty = controller.hasUnsavedConfigChanges();
+            var kind = controller.configMessageEl.dataset.messageKind || "";
+
+            if (dirty) {
+                if (kind !== "pending") {
+                    controller.setMessage(UNSAVED_CONFIG_MESSAGE, "warning");
+                }
+                return;
+            }
+
+            if (kind === "warning") {
+                controller.setMessage("", "");
+            }
+        };
+
         controller.renderSummary = function (snapshot) {
+            var config = normalizeConfig(controller);
             if (!snapshot) {
                 controller.info.html("");
                 if (controller.resultsEl) {
@@ -368,8 +562,8 @@ var Geneva = (function () {
                 "<div class='wc-stack-sm'>",
                 "<p><strong>Status:</strong> " + String(snapshot.status || "idle") + "</p>",
                 "<p><strong>Message:</strong> " + String(snapshot.status_message || "") + "</p>",
-                "<p><strong>Active job:</strong> " + String(snapshot.active_job_id || "none") + "</p>",
-                "<p><strong>Last job:</strong> " + String(snapshot.last_job_id || "none") + "</p>",
+                "<p><strong>Active job:</strong> " + jobIdAnchor(snapshot.active_job_id) + "</p>",
+                "<p><strong>Last job:</strong> " + jobIdAnchor(snapshot.last_job_id) + "</p>",
                 "<p><strong>Progress:</strong> " + String(progress.completed || 0) + " / " + String(progress.total || 0) + " " + String(progress.unit || "storms") + "</p>",
                 "<p><strong>Artifacts:</strong> HRUs " + (artifacts.hru_table_ready ? "ready" : "missing") + ", panel " + (artifacts.frequency_panel_ready ? "ready" : "missing") + ", batch " + (artifacts.batch_summary_ready ? "ready" : "missing") + "</p>",
                 "<p><strong>Warnings:</strong> " + String(warnings) + " | <strong>Errors:</strong> " + String(errors) + "</p>",
@@ -390,10 +584,42 @@ var Geneva = (function () {
                     String(lastRun.storm_count_total || 0) +
                     " total storms.</p>"
                 );
+                if (config.query_summary_url && config.report_summary_url) {
+                    resultLines.push(
+                        "<p><strong>Links:</strong> " +
+                        '<a href="' + escapeHtml(config.query_summary_url) + '" target="_blank" rel="noopener">Query summary</a>' +
+                        " · " +
+                        '<a href="' + escapeHtml(config.report_summary_url) + '" target="_blank" rel="noopener">Report summary</a>' +
+                        "</p>"
+                    );
+                }
             } else {
                 resultLines.push("<p class='wc-field__help'>No Geneva batch summary is available yet.</p>");
             }
             controller.resultsEl.innerHTML = resultLines.join("");
+        };
+
+        controller.syncPanelLinks = function () {
+            if (!controller.form) {
+                return;
+            }
+            var config = normalizeConfig(controller);
+            var anchors = controller.form.querySelectorAll("[data-geneva-link]");
+            Array.prototype.forEach.call(anchors, function (anchor) {
+                if (!anchor || typeof anchor.getAttribute !== "function") {
+                    return;
+                }
+                var key = String(anchor.getAttribute("data-geneva-link") || "").trim();
+                var configField = LINK_FIELDS[key];
+                if (!configField) {
+                    return;
+                }
+                var href = config[configField];
+                if (!href) {
+                    return;
+                }
+                anchor.setAttribute("href", href);
+            });
         };
 
         controller.updateActionAvailability = function (snapshot) {
@@ -401,26 +627,10 @@ var Geneva = (function () {
                 return;
             }
 
-            var prepareButton = controller.form.querySelector("#geneva_prepare_hrus");
-            var panelButton = controller.form.querySelector("#geneva_build_frequency_panel");
             var runButton = controller.form.querySelector("#geneva_run_batch");
             var disabled = !snapshot || snapshot.enabled === false;
-            var activeJob = snapshot && snapshot.active_job_id;
-            var artifacts = snapshot && snapshot.artifacts ? snapshot.artifacts : {};
-
-            if (prepareButton) {
-                prepareButton.disabled = Boolean(disabled || activeJob);
-            }
-            if (panelButton) {
-                panelButton.disabled = Boolean(disabled || activeJob);
-            }
             if (runButton) {
-                runButton.disabled = Boolean(
-                    disabled ||
-                    activeJob ||
-                    !artifacts.hru_table_ready ||
-                    !artifacts.frequency_panel_ready
-                );
+                runButton.disabled = Boolean(disabled);
             }
         };
 
@@ -428,7 +638,6 @@ var Geneva = (function () {
             if (!controller.form || !configSnapshot) {
                 return;
             }
-            setFieldValue(controller.form, "geneva_enabled", configSnapshot.enabled);
             setFieldValue(controller.form, "geneva_lambda_mode", configSnapshot.lambda_mode);
             setFieldValue(controller.form, "geneva_uh_method", configSnapshot.uh_method);
             setFieldValue(controller.form, "geneva_default_hsg_code", configSnapshot.default_hsg_code);
@@ -452,15 +661,20 @@ var Geneva = (function () {
             if (!payload) {
                 controller.renderSummary(null);
                 controller.updateActionAvailability(null);
+                controller.setActiveHint("run");
                 controller.set_rq_job_id(controller, null);
                 return;
             }
 
             controller.hydrateConfigFields(payload.config_snapshot || {});
+            controller.savedConfigComparable = controller.normalizeConfigComparable(payload.config_snapshot || {});
+            controller.syncPanelLinks();
             controller.renderSummary(payload);
             controller.updateActionAvailability(payload);
+            controller.updateUnsavedConfigMessage();
             controller.poll_completion_event = COMPLETION_EVENT;
-            controller.set_rq_job_id(controller, payload.active_job_id || null);
+            controller.setActiveHint(controller.resolveHintKeyForSnapshot(payload));
+            controller.set_rq_job_id(controller, payload.active_job_id || payload.last_job_id || null);
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("geneva:state:loaded", {
                     revision: payload.run_state_revision || null,
@@ -509,14 +723,19 @@ var Geneva = (function () {
         controller.buildConfigPayload = function () {
             var raw = readFormSnapshot(controller);
             var defaultHsg = raw.geneva_default_hsg_code;
+            var stateConfig = controller.state.snapshot && controller.state.snapshot.config_snapshot
+                ? controller.state.snapshot.config_snapshot
+                : {};
+            var strictBurnNodata = controller.hasFormField("geneva_strict_burn_nodata")
+                ? Boolean(raw.geneva_strict_burn_nodata)
+                : Boolean(stateConfig.strict_burn_nodata);
             return {
                 schema_version: 1,
-                enabled: Boolean(raw.geneva_enabled),
                 lambda_mode: raw.geneva_lambda_mode || "0.20",
                 uh_method: raw.geneva_uh_method || "scs_triangular",
                 default_hsg_code: defaultHsg === "" || defaultHsg === null ? null : parseInt(defaultHsg, 10),
-                unresolved_hsg_policy: raw.geneva_unresolved_hsg_policy || "error",
-                strict_burn_nodata: Boolean(raw.geneva_strict_burn_nodata),
+                unresolved_hsg_policy: raw.geneva_unresolved_hsg_policy || "assume_d",
+                strict_burn_nodata: strictBurnNodata,
                 allow_cross_hsg_merge: Boolean(raw.geneva_allow_cross_hsg_merge),
                 hydrophobic_forest_high: Boolean(raw.geneva_hydrophobic_forest_high),
                 hydrophobic_forest_moderate: Boolean(raw.geneva_hydrophobic_forest_moderate),
@@ -526,18 +745,25 @@ var Geneva = (function () {
             };
         };
 
-        controller.saveConfig = function () {
+        controller.saveConfig = function (options) {
+            var opts = options || {};
             var config = normalizeConfig(controller);
             if (!config.config_url || !controller.form) {
                 return Promise.resolve(null);
             }
 
             controller.clearTransientUi();
-            controller.setMessage("Saving Geneva settings…", "pending");
+            controller.setMessage(
+                opts.autosave ? "Auto-saving Geneva settings…" : "Saving Geneva settings…",
+                "pending",
+            );
             return controller.http.postJson(config.config_url, controller.buildConfigPayload(), { form: controller.form })
                 .then(function (response) {
                     normalizeResponseBody(response);
-                    controller.setMessage("Geneva settings saved.", "success");
+                    controller.setMessage(
+                        opts.autosave ? "Geneva settings auto-saved." : "Geneva settings saved.",
+                        "success",
+                    );
                     if (controller.events && typeof controller.events.emit === "function") {
                         controller.events.emit("geneva:config:saved", {});
                     }
@@ -548,11 +774,17 @@ var Geneva = (function () {
                 });
         };
 
+        controller.ensureConfigSyncedBeforeQueue = function () {
+            if (!controller.hasUnsavedConfigChanges()) {
+                return Promise.resolve(null);
+            }
+            return controller.saveConfig({ autosave: true });
+        };
+
         controller.buildPreparePayload = function () {
-            var raw = readFormSnapshot(controller);
             return {
                 schema_version: 1,
-                force_rebuild: Boolean(raw.geneva_prepare_force_rebuild)
+                force_rebuild: true
             };
         };
 
@@ -562,7 +794,7 @@ var Geneva = (function () {
                 schema_version: 1,
                 durations_minutes: parsePositiveIntegers(raw.geneva_panel_durations_minutes),
                 ari_years: parsePositiveIntegers(raw.geneva_panel_ari_years),
-                rebuild: Boolean(raw.geneva_panel_rebuild)
+                rebuild: true
             };
             var sources = {};
             if (raw.geneva_panel_source_cligen) {
@@ -610,6 +842,15 @@ var Geneva = (function () {
             };
         };
 
+        controller.buildWorkflowPayload = function () {
+            return {
+                schema_version: 1,
+                prepare: controller.buildPreparePayload(),
+                panel: controller.buildPanelPayload(),
+                run_batch: controller.buildRunPayload()
+            };
+        };
+
         controller.handleQueuedSubmission = function (taskLabel, eventName, response) {
             var payload = normalizeResponseBody(response);
             if (!payload || !payload.job_id) {
@@ -632,60 +873,25 @@ var Geneva = (function () {
             return payload;
         };
 
-        controller.submitPrepare = function () {
+        controller.submitRunWorkflow = function () {
             var config = normalizeConfig(controller);
-            if (!config.prepare_url || !controller.form) {
+            if (!config.run_workflow_url || !controller.form) {
                 return Promise.resolve(null);
             }
-            controller.clearTransientUi();
-            controller.appendStatus("Submitting Geneva HRU preparation…", { phase: "pending" });
-            return controller.http.postJsonWithSessionToken(
-                config.prepare_url,
-                controller.buildPreparePayload(),
-                { form: controller.form }
-            ).then(function (response) {
-                return controller.handleQueuedSubmission("Geneva HRU preparation", "geneva:prepare:queued", response);
-            }).catch(function (error) {
-                controller.handleFailure(error, "geneva:state:error");
-                throw error;
-            });
-        };
-
-        controller.submitPanelBuild = function () {
-            var config = normalizeConfig(controller);
-            if (!config.build_panel_url || !controller.form) {
-                return Promise.resolve(null);
-            }
-            controller.clearTransientUi();
-            controller.appendStatus("Submitting Geneva frequency panel build…", { phase: "pending" });
-            return controller.http.postJsonWithSessionToken(
-                config.build_panel_url,
-                controller.buildPanelPayload(),
-                { form: controller.form }
-            ).then(function (response) {
-                return controller.handleQueuedSubmission("Geneva frequency panel build", "geneva:panel:queued", response);
-            }).catch(function (error) {
-                controller.handleFailure(error, "geneva:state:error");
-                throw error;
-            });
-        };
-
-        controller.submitRunBatch = function () {
-            var config = normalizeConfig(controller);
-            if (!config.run_batch_url || !controller.form) {
-                return Promise.resolve(null);
-            }
-            controller.clearTransientUi();
-            controller.appendStatus("Submitting Geneva batch run…", { phase: "pending" });
-            return controller.http.postJsonWithSessionToken(
-                config.run_batch_url,
-                controller.buildRunPayload(),
-                { form: controller.form }
-            ).then(function (response) {
-                return controller.handleQueuedSubmission("Geneva batch run", "geneva:run:queued", response);
-            }).catch(function (error) {
-                controller.handleFailure(error, "geneva:state:error");
-                throw error;
+            controller.setActiveHint("run");
+            return controller.ensureConfigSyncedBeforeQueue().then(function () {
+                controller.clearTransientUi();
+                controller.appendStatus("Submitting Geneva workflow…", { phase: "pending" });
+                return controller.http.postJsonWithSessionToken(
+                    config.run_workflow_url,
+                    controller.buildWorkflowPayload(),
+                    { form: controller.form }
+                ).then(function (response) {
+                    return controller.handleQueuedSubmission("Geneva workflow", "geneva:workflow:queued", response);
+                }).catch(function (error) {
+                    controller.handleFailure(error, "geneva:state:error");
+                    throw error;
+                });
             });
         };
 
@@ -699,7 +905,13 @@ var Geneva = (function () {
             controller.status = createLegacyAdapter(dom.qs(SELECTORS.status, controller.form));
             controller.stacktrace = createLegacyAdapter(dom.qs(SELECTORS.stacktrace, controller.form));
             controller.rq_job = createLegacyAdapter(dom.qs(SELECTORS.rqJob, controller.form));
-            controller.hint = createLegacyAdapter(dom.qs(SELECTORS.hint));
+            var workflowHintElement = dom.qs(SELECTORS.hintRunWorkflow, controller.form) || dom.qs(SELECTORS.hintRunWorkflow);
+            var runHintElement = dom.qs(SELECTORS.hintRunBatch, controller.form) || dom.qs(SELECTORS.hintRunBatch);
+            var legacyHintElement = dom.qs(SELECTORS.hintLegacy, controller.form) || dom.qs(SELECTORS.hintLegacy);
+            controller.hintTargets = {
+                run: createLegacyAdapter(workflowHintElement || runHintElement || legacyHintElement)
+            };
+            controller.setActiveHint(controller.activeHintKey || "run");
             controller.resultsEl = dom.qs(SELECTORS.results);
             controller.configMessageEl = dom.qs(SELECTORS.configMessage, controller.form);
             controller.configNodeEl = dom.qs(SELECTORS.configNode, controller.form) || dom.qs(SELECTORS.configNode);
@@ -707,6 +919,7 @@ var Geneva = (function () {
             controller.statusPanelEl = dom.qs(SELECTORS.statusPanel);
             controller.stacktracePanelEl = dom.qs(SELECTORS.stacktracePanel);
             controller.statusSpinnerEl = controller.statusPanelEl ? controller.statusPanelEl.querySelector("#braille") : null;
+            controller.syncPanelLinks();
 
             controller.detach_status_stream(controller);
             controller.attach_status_stream(controller, {
@@ -723,25 +936,18 @@ var Geneva = (function () {
                 return;
             }
 
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.saveConfig, function (event) {
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.runWorkflow, function (event) {
                 event.preventDefault();
-                controller.saveConfig();
+                controller.submitRunWorkflow();
             }));
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.refreshState, function (event) {
-                event.preventDefault();
-                controller.refreshState();
-            }));
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.prepare, function (event) {
-                event.preventDefault();
-                controller.submitPrepare();
-            }));
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.buildPanel, function (event) {
-                event.preventDefault();
-                controller.submitPanelBuild();
-            }));
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.runBatch, function (event) {
-                event.preventDefault();
-                controller.submitRunBatch();
+            controller._delegates.push(dom.delegate(controller.form, "change", "[data-geneva-field]", function (event) {
+                if (!event || !event.target || !event.target.name) {
+                    return;
+                }
+                if (!Object.values(CONFIG_FIELD_MAP).includes(String(event.target.name))) {
+                    return;
+                }
+                controller.updateUnsavedConfigMessage();
             }));
         };
 

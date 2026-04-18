@@ -449,6 +449,12 @@ For `POST /api/runs/{runid}/{config}/fetch-dem-and-build-channels`:
   - `completed`, `failed`, `canceled`, `skipped`
 - For `async` steps in `running` state, payload SHOULD include `active_job_id`.
 - For `sync` steps, `active_job_id` MUST be absent.
+- `active_job_id` is advisory metadata, not an authoritative lock signal.
+- Clients/UI MUST NOT disable controls solely because `active_job_id` is
+  non-null.
+- Disable/run-gating decisions MUST use canonical step/job status semantics
+  (`status`, `can_run_now`, preconditions, and terminal job outcomes), because
+  `active_job_id` can be transiently stale under distributed lock/retry races.
 - If `last_attempt.outcome` is present, it MUST be one of:
   - `finished`
   - `failed`

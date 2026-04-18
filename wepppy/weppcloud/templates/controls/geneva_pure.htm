@@ -2,13 +2,11 @@
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set run_base = site_prefix ~ "/runs/" ~ (runid | urlencode) ~ "/" ~ (config | urlencode) %}
-{% set rq_base = site_prefix ~ "/rq-engine/api/runs/" ~ (runid | urlencode) ~ "/" ~ (config | urlencode) %}
+{% set rq_base = "/rq-engine/api/runs/" ~ (runid | urlencode) ~ "/" ~ (config | urlencode) %}
 {% set geneva_controller_config = {
   "config_url": run_base ~ "/api/geneva/config",
   "state_url": rq_base ~ "/geneva/state",
-  "prepare_url": rq_base ~ "/geneva/prepare-hrus",
-  "build_panel_url": rq_base ~ "/geneva/build-frequency-panel",
-  "run_batch_url": rq_base ~ "/geneva/run-batch",
+  "run_workflow_url": rq_base ~ "/geneva/run-workflow",
   "frequency_panel_url": run_base ~ "/api/geneva/frequency_panel",
   "results_url": run_base ~ "/api/geneva/results",
   "query_summary_url": run_base ~ "/query/geneva/summary",
@@ -25,12 +23,15 @@
 
 {% set description %}
   <p class="wc-text-muted">
-    Configure Geneva runoff parameters, prepare HRUs, build the frequency panel, and queue batch runs
-    from the run page. Runtime status is reconciled against rq-engine Geneva state.
+    Experimental Event runoff hydrograph modeling for BAER-style post-fire workflows using
+    RMRS-GTR-334-aligned Curve Number (CN) + unit hydrograph methods.
   </p>
   <p class="wc-text-muted">
     For model behavior and contract details, see
     {{ usersum_doc_link('src', 'wepppy/nodb/mods/geneva/specification.md', 'Geneva specification') }}.
+  </p>
+  <p class="wc-text-muted">
+    Configure Geneva runoff parameters, prepare HRUs, build the frequency panel, and queue batch runs.
   </p>
 {% endset %}
 
@@ -47,15 +48,7 @@
   <script type="application/json" id="geneva_controller_data" data-geneva-config>{{ geneva_controller_config | tojson }}</script>
 
   <section class="wc-stack">
-    {% call ui.fieldset("Configuration", "Saved Geneva mod settings persist through the existing Flask config route and hydrate from rq-engine Geneva state.") %}
-      {{ ui.checkbox_field(
-           "geneva_enabled",
-           "Enable Geneva",
-           checked=False,
-           help="Geneva queue actions remain unavailable until the mod is enabled.",
-           attrs={"data-geneva-field": "enabled"},
-           max_width=None
-         ) }}
+    {% call ui.fieldset("Configuration", "Saved Geneva runoff settings persist through the existing Flask config route and hydrate from rq-engine Geneva state.") %}
       {{ ui.select_field(
            "geneva_lambda_mode",
            "Lambda mode",
@@ -90,7 +83,7 @@
            "geneva_unresolved_hsg_policy",
            "Unresolved HSG policy",
            unresolved_policy_options,
-           selected="error",
+           selected="assume_d",
            help="Choose whether unresolved cells stop processing or default to HSG D.",
            attrs={"data-geneva-field": "unresolved_hsg_policy"},
            extra_control_class="disable-readonly",
@@ -107,14 +100,6 @@
            attrs={"data-geneva-field": "min_hru_area_ha"},
            extra_control_class="disable-readonly",
            max_width="22rem"
-         ) }}
-      {{ ui.checkbox_field(
-           "geneva_strict_burn_nodata",
-           "Strict burn nodata handling",
-           checked=False,
-           help="Reject burn-severity nodata cells instead of applying fallback treatment.",
-           attrs={"data-geneva-field": "strict_burn_nodata"},
-           max_width=None
          ) }}
       {{ ui.checkbox_field(
            "geneva_allow_cross_hsg_merge",
@@ -156,46 +141,10 @@
            attrs={"data-geneva-field": "hydrophobic_shrub_moderate"},
            max_width=None
          ) }}
-      {% call button_row() %}
-        <button
-          id="geneva_save_config"
-          type="button"
-          class="pure-button pure-button-secondary disable-readonly"
-          data-geneva-action="save-config">
-          Save Geneva Settings
-        </button>
-        <button
-          id="geneva_refresh_state"
-          type="button"
-          class="pure-button disable-readonly"
-          data-geneva-action="refresh-state">
-          Refresh State
-        </button>
-      {% endcall %}
       <p id="geneva_config_message" class="wc-field__help" aria-live="polite"></p>
     {% endcall %}
 
-    {% call ui.fieldset("Prepare HRUs", "Queue the Geneva HRU preparation pass before building the frequency panel or running batch storms.") %}
-      {{ ui.checkbox_field(
-           "geneva_prepare_force_rebuild",
-           "Force rebuild existing HRU artifacts",
-           checked=False,
-           help="When enabled, Geneva discards existing HRU artifacts and rebuilds them from source inputs.",
-           attrs={"data-geneva-field": "prepare_force_rebuild"},
-           max_width=None
-         ) }}
-      {% call button_row() %}
-        <button
-          id="geneva_prepare_hrus"
-          type="button"
-          class="pure-button pure-button-primary disable-readonly"
-          data-geneva-action="prepare">
-          Prepare Geneva HRUs
-        </button>
-      {% endcall %}
-    {% endcall %}
-
-    {% call ui.fieldset("Frequency Panel", "Define the duration and ARI matrix used to build Geneva storm-frequency inputs.") %}
+    {% call ui.fieldset("Frequency Panel", "Define the duration and ARI matrix used by the single-submit Geneva workflow.") %}
       {{ ui.text_field(
            "geneva_panel_durations_minutes",
            "Durations (minutes)",
@@ -212,14 +161,6 @@
            help="Comma-separated positive integers.",
            attrs={"data-geneva-field": "panel_ari_years"},
            extra_control_class="disable-readonly",
-           max_width=None
-         ) }}
-      {{ ui.checkbox_field(
-           "geneva_panel_rebuild",
-           "Force rebuild frequency panel artifact",
-           checked=False,
-           help="Recompute the panel even when a cached artifact exists.",
-           attrs={"data-geneva-field": "panel_rebuild"},
            max_width=None
          ) }}
       {{ ui.text_field(
@@ -240,18 +181,9 @@
            extra_control_class="disable-readonly",
            max_width=None
          ) }}
-      {% call button_row() %}
-        <button
-          id="geneva_build_frequency_panel"
-          type="button"
-          class="pure-button pure-button-primary disable-readonly"
-          data-geneva-action="build-panel">
-          Build Frequency Panel
-        </button>
-      {% endcall %}
     {% endcall %}
 
-    {% call ui.fieldset("Run Batch", "Queue Geneva event runs against the prepared HRU table and built frequency panel.") %}
+    {% call ui.fieldset("Run Geneva", "Submit one Geneva workflow job that always force-rebuilds HRUs and frequency panel before running the batch.") %}
       {{ ui.text_field(
            "geneva_run_batch_id",
            "Batch identifier",
@@ -348,10 +280,13 @@
           id="geneva_run_batch"
           type="button"
           class="pure-button pure-button-primary disable-readonly"
-          data-geneva-action="run-batch">
-          Run Geneva Batch
+          data-geneva-action="run-workflow">
+          Run Geneva Workflow
         </button>
       {% endcall %}
+      {{ ui.job_hint("hint_run_geneva_run_workflow", extra_class="wc-field__help") }}
+      {{ ui.job_hint("hint_run_geneva_run_batch", extra_class="wc-field__help", attrs={"hidden": true, "data-geneva-legacy-hint": true}) }}
+      {{ ui.job_hint("hint_run_geneva", extra_class="wc-field__help", attrs={"hidden": true, "data-geneva-legacy-hint": true}) }}
     {% endcall %}
 
     {% call button_row() %}
@@ -384,7 +319,6 @@
       </a>
     {% endcall %}
 
-    {{ ui.job_hint("hint_run_geneva", extra_class="wc-field__help") }}
     <div id="geneva-results" class="wc-stack-sm" aria-live="polite"></div>
   </section>
 {% endcall %}

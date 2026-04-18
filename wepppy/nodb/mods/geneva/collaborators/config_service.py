@@ -16,6 +16,14 @@ class GenevaConfigService:
             geneva._config = default_geneva_config().to_payload()
         else:
             geneva._config = config_from_mapping(geneva._config).to_payload()
+        # Migrate legacy default behavior for untouched runs so first HRU prep does
+        # not fail on unresolved HSG cells.
+        if (
+            not bool(getattr(geneva, "_config_user_modified", False))
+            and geneva._config.get("unresolved_hsg_policy") == "error"
+            and geneva._config.get("default_hsg_code") in (None, "")
+        ):
+            geneva._config["unresolved_hsg_policy"] = "assume_d"
         return dict(geneva._config)
 
     def get_config(self, geneva: "Geneva") -> dict[str, Any]:

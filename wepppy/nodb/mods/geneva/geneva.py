@@ -71,9 +71,11 @@ class Geneva(NoDbBase):
             self._warnings = list(getattr(self, "_warnings", []) or [])
             self._errors = list(getattr(self, "_errors", []) or [])
             self._timestamps = dict(getattr(self, "_timestamps", {}) or {})
+            self._config_user_modified = bool(getattr(self, "_config_user_modified", False))
 
             self.config_service.initialize_config(self)
             self._config["enabled"] = bool(self._enabled)
+            self._apply_default_enabled_state_locked()
             self.artifact_io.root_dir(self.wd)
             self.cn_table_service.ensure_initialized(self, reason="init")
 
@@ -129,17 +131,17 @@ class Geneva(NoDbBase):
             self.artifact_io.root_dir(self.wd)
 
         with self.locked():
-            self._enabled = requested
-            self._config["enabled"] = requested
+            effective_enabled = True
+            self._enabled = effective_enabled
+            self._config["enabled"] = effective_enabled
             self._timestamps["enabled"] = int(time.time())
             if requested:
                 self._status_message = "Geneva enabled."
             else:
-                self._status_message = "Geneva disabled."
-                self._clear_runtime_state_locked()
+                self._status_message = "Geneva enablement follows mod membership."
 
         return {
-            "enabled": requested,
+            "enabled": effective_enabled,
             "status": self._status,
         }
 
@@ -157,6 +159,7 @@ class Geneva(NoDbBase):
                 updated = self.config_service.update_config(self, updates)
                 updated["enabled"] = self.enabled
                 self._config["enabled"] = self.enabled
+                self._config_user_modified = True
                 if before != updated:
                     self._status_message = "Configuration updated."
                     if self._status in {"prepared", "running", "completed", "completed_with_gaps", "failed"}:
@@ -374,6 +377,18 @@ class Geneva(NoDbBase):
                 code="mod_disabled",
                 details="Enable Geneva before running this action.",
             )
+
+    def _apply_default_enabled_state_locked(self) -> None:
+        """Geneva enablement follows mod membership; keep active whenever mod is present."""
+        if self._enabled:
+            self._config["enabled"] = True
+            return
+
+        self._enabled = True
+        self._config["enabled"] = True
+        self._status_message = "Geneva enabled."
+        if "enabled" not in self._timestamps:
+            self._timestamps["enabled"] = int(time.time())
 
     def _record_failure(self, error: GenevaNoDbError) -> None:
         payload = error.to_error_payload()["error"]

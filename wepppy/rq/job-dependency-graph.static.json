@@ -156,7 +156,41 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_job",
-    "source_lineno": 137,
+    "source_lineno": 210,
+    "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "run_geneva_prepare_hrus_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_geneva_workflow_jobs",
+    "source_lineno": 238,
+    "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
+  },
+  {
+    "depends_on": [
+      "run_geneva_prepare_hrus_rq"
+    ],
+    "enqueue_target": "run_geneva_build_frequency_panel_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_geneva_workflow_jobs",
+    "source_lineno": 243,
+    "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
+  },
+  {
+    "depends_on": [
+      "run_geneva_build_frequency_panel_rq"
+    ],
+    "enqueue_target": "run_geneva_run_batch_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_geneva_workflow_jobs",
+    "source_lineno": 249,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
