@@ -12,6 +12,7 @@ first), through **07/19/2022**.
 
 | Date | Commit Hash | Compiler | Version | Notes |
 | --- | --- | --- | --- | --- |
+| 04/18/2026 | `9e09730` | `gfortran` | `wepp_260418` | Released `wepp_260418` and `wepp_260418_hill` using `/usr/bin/gfortran` via `tools/build_wepp_dated_release.sh`; validated host smoke gates, full pytest suite, and reconciled-condenser watershed replay success marker. |
 | 04/17/2026 | `eb88c57` | `gfortran` | `wepp_260417` | Released `wepp_260417` and `wepp_260417_hill` from the peak-flow multi-OFE saturation-excess runoff correction in `src/irs.for` (contour/non-contour scaling parity fix). |
 | 04/14/2026 | `a371884` | `gfortran` | `wepp_260414` | Added dated release build workflow (`tools/build_wepp_dated_release.sh`), disabled unsafe `make all` race path in `src/makefile`, added in-repo `delicate_game_pw0` fixture with parity regression tests, and published `release/wepp_260414*` built with `-O2 -finit-local-zero`. |
 | 04/09/2026 | `c982160` | `gfortran` | `wepp_260409` | Fixed lower-bound GLC table lookup handling in `hydchn.for`, rebuilt `wepp`/`wepp_hill` with `/usr/bin/gfortran`, and published `release/wepp_260409*`. |
