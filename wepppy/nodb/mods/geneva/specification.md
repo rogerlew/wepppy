@@ -1,7 +1,7 @@
 # Geneva NoDb Mod Specification
 
 Status: Draft (Greenfield, implementation not started)  
-Last Updated: 2026-04-14  
+Last Updated: 2026-04-18  
 Owner: WEPPpy NoDb hydrology stack  
 Scope: Event runoff hydrograph modeling for BAER-style post-fire workflows using RMRS-GTR-334-aligned Curve Number (CN) + unit hydrograph methods.
 
@@ -650,32 +650,65 @@ Unit hydrograph requirement:
 
 ### 11.2 Geneva Report Page Contract (Interactive)
 
-Geneva report page must provide interactive exploration of batch storms.
+Geneva summary report is not a static narrative page. It is an interactive storm-panel explorer that helps users identify governing storms across the full frequency panel.
 
-Required selectors:
+Required controls (top-of-page):
 
-- `Climate Frequency Datasource`: `noaa14_pds | cligen_freq | all`
-- `Return Period Interval (ARI years)`: multi-select from available values (`1`, `2`, `5`, `10`, `25`, `50`, `100` subset), default `all`
-- `Measure of Interest`: `peak_discharge | runoff_depth | runoff_volume`
+- `Climate Frequency Datasource` selector:
+  - options: `all`, `cligen_freq`, `noaa14_pds`
+  - default: `all`
+  - behavior: if NOAA panel is unavailable, `noaa14_pds` is disabled with a visible availability note.
+- `Return Period Interval (ARI years)` selector:
+  - options derived from available storm panel (`1`, `2`, `5`, `10`, `25`, `50`, `100` subset)
+  - default: `all`
+  - contract: UI may implement single-select + `all`, but query payload normalizes selected values as an array (`ari_years`).
+- `Measure of Interest` selector:
+  - options: `peak_discharge`, `runoff_depth`, `runoff_volume`
+  - default: `peak_discharge`
 
 Chart contract (storm-event-analyzer style):
 
-- x-axis: storm intensity (`mm/hr`), computed as `depth/duration` on normalized units
-- y-axis: selected measure (`peak_discharge`, `runoff_depth`, or `runoff_volume`)
-- series: separate lines by return period for selected ARIs
-- markers: event points keyed by duration (`5m`, `10m`, `30m`, `1h`, `2h`, `3h`, `6h`, `12h`, `24h` as available)
+- x-axis: `intensity_mm_per_hr` (derived from `depth_mm` and `duration_minutes`)
+- y-axis: selected measure
+- series grouping: one line per `ari_years` value in filter scope
+- markers: one marker per storm event point, with marker glyph/label keyed to `duration_minutes`
+- canonical duration marker domain: `5m`, `10m`, `30m`, `1h`, `2h`, `3h`, `6h`, `12h`, `24h` (available subset per datasource)
+- each plotted point must carry `storm_id` so marker selection can drive table focus.
 
-Marker interaction:
+Marker/table interaction contract:
 
-- Selecting a marker opens/focuses an Event Table row for that storm.
+- Selecting a chart marker sets `selected_storm_id`.
+- When `selected_storm_id` is set:
+  - corresponding event table row is focused/highlighted,
+  - chart point state updates to selected styling,
+  - selection metadata persists in payload (`selected_storm_id`).
 
 Event Table required columns:
 
-- storm event parameters (`storm_id`, `datasource_id`, `duration_minutes`, `depth_mm`, `intensity_mm_per_hr`, `distribution_type`, `ari_years`)
-- `peak_discharge`
-- `time_to_peak`
-- `runoff_volume`
-- `runoff_depth`
+- Storm event parameters:
+  - `storm_id`
+  - `datasource_id`
+  - `duration_minutes`
+  - `ari_years`
+  - `depth_mm`
+  - `intensity_mm_per_hr`
+  - `distribution_type`
+- Hydrologic outputs:
+  - `peak_discharge`
+  - `time_to_peak_minutes`
+  - `runoff_volume`
+  - `runoff_depth`
+- Execution state:
+  - `status` (`completed|failed|unavailable`)
+  - `warning_count`
+  - `error_count`
+
+### 11.3 Rationale (Interactive Report and Full-Panel Strategy)
+
+- BAER storm selection in practice is often structured heuristic judgment informed by local precedent and consequences, not a single universally standardized design-storm rule.
+- A full panel (`5m..24h` x `1..100`, available subset per source) avoids hard-coding one "appropriate storm" and instead surfaces governing cases transparently.
+- Plotting measure-vs-intensity with return-period lines and duration markers makes dominant storm regimes interpretable without hiding duration effects.
+- Keeping CLIGEN and NOAA14 as selectable datasources exposes source sensitivity directly, which is better decision support than forcing a single-source oracle.
 
 ## 12. Watershed Size Warnings
 
@@ -1145,10 +1178,17 @@ Invariants:
 
 ```json
 {
+  "schema_version": 1,
   "filters": {
     "datasource_id": "noaa14_pds|cligen_freq|all",
     "ari_years": [10, 25, 50],
     "measure": "peak_discharge|runoff_depth|runoff_volume"
+  },
+  "filter_options": {
+    "datasource_ids": ["all", "cligen_freq", "noaa14_pds"],
+    "ari_years": [1, 2, 5, 10, 25, 50, 100],
+    "measures": ["peak_discharge", "runoff_depth", "runoff_volume"],
+    "duration_minutes": [5, 10, 30, 60, 120, 180, 360, 720, 1440]
   },
   "assumptions": {
     "arc_condition": "arc_ii",
@@ -1158,9 +1198,45 @@ Invariants:
   "chart": {
     "x_axis": "intensity_mm_per_hr",
     "y_axis": "selected_measure",
-    "series": []
+    "series_grouping": "ari_years",
+    "marker_grouping": "duration_minutes",
+    "series": [
+      {
+        "series_id": "ari_10",
+        "series_label": "ARI 10-year",
+        "ari_years": 10,
+        "points": [
+          {
+            "storm_id": "noaa14_30m_10y",
+            "datasource_id": "noaa14_pds",
+            "duration_minutes": 30,
+            "intensity_mm_per_hr": 82.4,
+            "measure_value": 12.7,
+            "marker_label": "30m"
+          }
+        ]
+      }
+    ]
   },
-  "event_table": [],
+  "selected_storm_id": "noaa14_30m_10y|null",
+  "event_table": [
+    {
+      "storm_id": "noaa14_30m_10y",
+      "status": "completed|failed|unavailable",
+      "datasource_id": "noaa14_pds",
+      "duration_minutes": 30,
+      "ari_years": 10,
+      "depth_mm": 41.2,
+      "intensity_mm_per_hr": 82.4,
+      "distribution_type": "neh4_type_b",
+      "peak_discharge": {"value": 12.7, "unit": "m3_s"},
+      "time_to_peak_minutes": 24.0,
+      "runoff_volume": {"value": 15300.0, "unit": "m3"},
+      "runoff_depth": {"value": 18.3, "unit": "mm"},
+      "warning_count": 0,
+      "error_count": 0
+    }
+  ],
   "warnings": []
 }
 ```
@@ -1168,6 +1244,11 @@ Invariants:
 `GET /report/geneva/summary` contract:
 
 - Rendered HTML must embed one JSON payload with the same shape as `GET /query/geneva/summary`.
+- Embedded payload node requirements:
+  - `id="geneva-summary-payload"`
+  - `type="application/json"`
+  - exactly one payload node in rendered HTML.
+- A report page that omits `filter_options`, `chart.series`, and populated `event_table` for available completed storms is non-conformant (scaffold-only output is not accepted).
 
 ### 14.3 Artifact Schemas (v1)
 
@@ -1217,6 +1298,7 @@ Invariants:
    - Unresolved HSG handling follows `unresolved_hsg_policy`; fallback assignment uses `default_hsg_code` derived from dominant soil (or explicit override), with explicit warnings/provenance.
 13. Interactive Report Usability:
    - Geneva summary report exposes datasource/ARI/measure filters with marker-to-event-table linkage.
+   - Report payload includes concrete `filter_options`, non-empty chart series when completed storms exist, and marker-driven `selected_storm_id` semantics.
 14. Minimum HRU Area Enforcement:
    - HRUs below `2 ha` are collapsed per deterministic compatibility/selection rules, with area conservation and collapse provenance persisted.
    - For default `allow_cross_hsg_merge=false`, collapsed-vs-uncollapsed reference-case deltas must satisfy:
@@ -1230,6 +1312,8 @@ Invariants:
    - Per-storm and batch outputs persist assumptions metadata needed for interpretation (ARC, distribution, rainfall uniformity, hydrophobic rule flags).
 17. Unit-Safe UH Implementation:
    - UH implementation persists unit system and HF constant provenance, with SI/English parity tests passing.
+18. Interactive Report Completion:
+   - `/report/geneva/summary` and `/query/geneva/summary` are not scaffold-only and satisfy Section `11.2` + Section `14.2` payload/interaction requirements.
 
 ## 16. Testing and Validation Plan (Initial)
 

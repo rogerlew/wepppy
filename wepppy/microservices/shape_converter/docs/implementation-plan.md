@@ -1,6 +1,6 @@
 # Shape Converter Implementation Plan
-Status: Complete
-Last Updated: 2026-04-12
+Status: In Progress
+Last Updated: 2026-04-18
 Owner: Platform / WEPPpy
 Primary Spec: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/specification.md`
 
@@ -83,6 +83,7 @@ Required evidence:
 | WP-08 | Test suite completion and gate automation | WP-02, WP-03, WP-04, WP-05, WP-06, WP-06B, WP-07 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-08_test_suite_completion_and_gate_automation.md` (added parser-abuse regressions for XML entity-expansion classes and parser-stall timeout/cancellation, added `.shp.xml`/`.qmd` metadata-privacy non-leak assertions, added dedicated blocking shape-converter CI gate workflow, and passed focused/full unit+integration gates plus proxied Caddy smoke). |
 | WP-09 | Final QA + security closeout + release readiness | WP-08 | done | pass | pass | pass | pass | Completed 2026-04-12 with **GO** decision and residual-risk tracking. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09_final_qa_security_closeout_release_readiness.md`. Local focused/full unit + integration gates, workflow build/check, and proxied Caddy smoke all pass. Hosted shape-converter gate evidence captured: `Shape-Converter Gates` run `24298655324` success on `master` (`88b07b47ccda96c5ee836ca4af82db26ae727148`). Deferred WP-09 residual risks are now closed by WP-09B. |
 | WP-09B | Parser containment + GDAL CVE remediation | WP-09 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09b_parser_containment_and_gdal_cve_remediation.md`. Parser subprocess process-group timeout/kill semantics are implemented in convert runtime path and validated by new unit/integration tests. Runtime CVE disposition evidence captured: Fiona parser path now links system GDAL (`fiona.__gdal_version__=3.10.3`), proxied smoke and focused/full gates pass, and hosted `Shape-Converter Gates` run `24299367284` succeeded on remediation SHA `caa8edd8f92126c7570ea51cf1ab978f47c789d8`. |
+| WP-10 | Specification gap closeout and production alignment | WP-09B | not_started | pending | pending | pending | pending | Opened 2026-04-18 to close post-delivery spec-review findings (prod hardening parity, edge policy parity, CORS for relay mode, convert metadata contract completion, UI schema nullability note, strict invalid `.prj` behavior, missing guardrails/quotas, parse/convert duration observability). Planned evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-10_spec_gap_closeout_and_production_alignment.md`. |
 
 ## Work-Package Details
 ## WP-01 Service scaffold and container wiring
@@ -204,6 +205,19 @@ Required evidence:
 - Code/QA/security review findings are dispositioned (no unresolved High findings).
 - WP-09B board row and evidence references are complete.
 
+## WP-10 Specification gap closeout and production alignment
+### Scope
+- Close post-delivery specification-review findings that prevent promoting `specification.md` from `Draft`.
+- Bring production deployment/runtime policy (`docker-compose.prod.yml`, `docker-compose.prod.wepp1.yml`, `docker/caddy/Caddyfile.wepp1`) to parity with required hardening/edge contracts where applicable.
+- Implement missing API/UI contract fields and guardrails identified in review (convert metadata parity, UI schema nullability note, strict invalid-source-CRS handling, multipart/scratch/vertex guardrails, parse/convert duration observability).
+- Add/extend tests and CI evidence so each closed finding is enforced by gates.
+
+### Exit criteria
+- All WP-10 findings are closed or formally waived with documented risk acceptance.
+- WP-10 code/unit/QA/security gates are `pass`.
+- `wepppy/microservices/shape_converter/docs/specification.md` status is updated from `Draft` only if all required gaps are closed.
+- Implementation-plan board and WP-10 evidence are complete and auditable.
+
 ## Cadence and Update Rules
 - Update this file at least once per work-package transition.
 - Any gate failure must update gate state to `fail` with evidence link.
@@ -212,8 +226,9 @@ Required evidence:
 
 ## Rollup Checklist
 - [x] WP-01 through WP-09B complete (including WP-06B)
-- [x] Code gates all pass
-- [x] Shape-converter unit-test gates all pass
-- [x] QA gates all pass
-- [x] Security review gates all pass
-- [x] Release readiness approved
+- [ ] WP-10 complete
+- [ ] WP-10 code gate passes
+- [ ] WP-10 shape-converter unit-test gate passes
+- [ ] WP-10 QA gate passes
+- [ ] WP-10 security review gate passes
+- [ ] Specification status updated from `Draft` after WP-10 closeout
