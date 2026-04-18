@@ -14,6 +14,7 @@ provisioning and credential-file conventions (`dev-agent` is the canonical
 account for authenticated CAP bypass and rq-engine token mint flows).
 
 ## Task Start: Route or Blueprint Changes
+- If your route renders a template that extends `reports/_base_report.htm`, read `docs/dev-notes/weppcloud-base-report-shell.md` first so required shell context (`ron`, `current_ron`, `unitizer_nodb`, `precisions`) is always provided.
 - First-hop files:
   - `wepppy/weppcloud/routes/__init__.py`
   - `wepppy/weppcloud/routes/_blueprints_context.py`
